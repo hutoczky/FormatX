@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  statuses: write
 jobs:
   diagnose:
     runs-on: ubuntu-latest
@@ -71,3 +72,12 @@ jobs:
             await ctx.close();await browser.close();
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
+      - name: Publish diagnostic status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Mobile control motion diagnostic completed'; else state=failure; description='Mobile control motion diagnostic failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile control motion diagnostic' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
