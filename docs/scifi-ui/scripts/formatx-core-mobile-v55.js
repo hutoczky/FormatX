@@ -5,11 +5,11 @@
   if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreMobileV55 = 'audit-skip'; return; }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v69';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'reference-modern-crystal-native-webgl-r317-native-soft-rim-r321-controls-r320';
+  root.dataset.fxCoreMobileAwardRevision = 'reference-modern-crystal-native-webgl-r317-native-soft-rim-r321-biolume-r323-controls-r320';
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r317.js?v=20260824-r321-native-soft-rim';
   const LEGACY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99&rev=20260824-r304-soft-fallback';
-  const SOFTLIGHT_TUNER = '/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js?v=20260824-r321-native-source-owner';
+  const SOFTLIGHT_TUNER = '/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js?v=20260824-r323-deep-water-biolume';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-r321-stable-hit-geometry';
 
   function loadStableControls() {
