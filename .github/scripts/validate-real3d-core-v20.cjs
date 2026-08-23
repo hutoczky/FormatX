@@ -4,6 +4,7 @@ const root=path.resolve(__dirname,'../..'),read=f=>fs.readFileSync(path.join(roo
 const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
 const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js');
+const softlight=read('docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js');
 const legacyRenderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const layoutCss=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
@@ -24,6 +25,7 @@ assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
 assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260821-r285-pure-webgl3d/);
 assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260823-r317-modern-crystal/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
+assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260823-r318-softer-rim-glow/);
 assert.match(wrapper,/modern-r317-primary/);
 assert.match(wrapper,/legacy-r99-fallback/);
 
@@ -49,6 +51,20 @@ for(const token of [
 ]) assert.ok(renderer.includes(token),`missing r317 WebGL quality contract: ${token}`);
 assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
 assert.ok(legacyRenderer.includes('reference-luminous-crystal-webgl-r99-prismatic-r120'));
+
+for(const token of [
+  'fxCoreSoftlightR318',
+  'narrower-softer-fresnel',
+  'reduced-mobile-perimeter',
+  '3.15',
+  'smoothstep(0.014,0.072,bary)',
+  'smoothstep(0.018,0.068,abs(1.0-r))',
+  '0.20+0.22*fres',
+  '0.07*outer'
+]) assert.ok(softlight.includes(token),`missing r318 soft-light contract: ${token}`);
+assert.match(softlight,/WebGLRenderingContext/);
+assert.match(softlight,/WebGL2RenderingContext/);
+assert.doesNotMatch(softlight,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
 
 for(const source of [detail,liveMotion,heartbeat,energy]){
   assert.doesNotMatch(source,/getContext\(['"]2d['"]|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|radial-gradient|conic-gradient|linear-gradient/i);
@@ -80,5 +96,5 @@ assert.equal(quality.mag_image_backed,false);
 assert.equal(quality.mag_webgl_context_count,1);
 assert.equal(quality.mag_paused_outside_hero,true);
 
-for(const source of [bootstrap,wrapper,renderer,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
-console.log('PASS: r317 modern flat-normal/Fresnel native WebGL MAG, r99 fallback, zero 2D MAG overlays and production contract passed.');
+for(const source of [bootstrap,wrapper,renderer,softlight,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
+console.log('PASS: r317 modern native WebGL MAG with r318 softer mobile rim/glow tuning, r99 fallback and zero 2D MAG overlays passed.');
