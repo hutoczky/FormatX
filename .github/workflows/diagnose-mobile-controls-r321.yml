@@ -1,0 +1,73 @@
+name: Diagnose mobile control motion r321
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-control-owner-r268.js'
+      - 'docs/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
+      - '.github/workflows/diagnose-mobile-controls-r321.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Chromium runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/control-motion" && cd "$RUNNER_TEMP/control-motion"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Measure control geometry across frames
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/control-motion-server.log" 2>&1 &
+          server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          cd "$RUNNER_TEMP/control-motion"
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          const round=v=>Math.round(v*1000)/1000;
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await ctx.newPage();
+            await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileR317==='ready-v69'&&document.querySelector('.fx-three-sound'),null,{timeout:45000});
+            await page.waitForTimeout(1200);
+            await page.touchscreen.tap(195,330);
+            await page.waitForTimeout(360);
+            const frames=await page.evaluate(async()=>{
+              const snap=()=>{
+                const get=s=>document.querySelector(s);
+                const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,top:r.top,bottom:r.bottom,left:r.left,right:r.right}};
+                const style=e=>{if(!e)return null;const s=getComputedStyle(e);return{position:s.position,display:s.display,visibility:s.visibility,opacity:s.opacity,transform:s.transform,translate:s.translate,marginTop:s.marginTop,marginBottom:s.marginBottom,width:s.width,height:s.height,animation:s.animationName,transition:s.transitionProperty}};
+                const sound=get('.fx-three-sound');
+                const controls=get('#hero .fx-reference-controls-r204');
+                const rail=get('#hero .fx-reference-rail');
+                const grid=get('#hero > .hero-grid');
+                const space=get('#hero .hero-space');
+                const hero=get('#hero');
+                return{scrollY,visualOffset:visualViewport?.offsetTop||0,sound:{r:rect(sound),s:style(sound),parent:sound?.parentElement?.className||''},controls:{r:rect(controls),s:style(controls),parent:controls?.parentElement?.className||''},rail:{r:rect(rail),s:style(rail)},grid:{r:rect(grid),s:style(grid)},space:{r:rect(space),s:style(space)},hero:{r:rect(hero),s:style(hero)},datasets:{layout:document.documentElement.dataset.fxReferenceControlLayout||'',owner:document.documentElement.dataset.fxControlOwnerR268||'',stability:document.documentElement.dataset.fxControlStabilityR321||'',mobileLayout:document.documentElement.dataset.fxMobileReferenceLayout||'',proofOwner:document.documentElement.dataset.fxMobileProofControls||'',r207:document.documentElement.dataset.fxMobileLayoutOwner||'',scrollMode:document.documentElement.dataset.fxMobileScrollMode||''}};
+              };
+              const out=[];
+              for(let i=0;i<30;i++){
+                await new Promise(resolve=>requestAnimationFrame(()=>resolve()));
+                out.push(snap());
+              }
+              return out;
+            });
+            console.log('CONTROL_MOTION_BEGIN');
+            frames.forEach((f,i)=>console.log(JSON.stringify({i,scrollY:round(f.scrollY),visualOffset:round(f.visualOffset),sound:f.sound.r&&Object.fromEntries(Object.entries(f.sound.r).map(([k,v])=>[k,round(v)])),controls:f.controls.r&&Object.fromEntries(Object.entries(f.controls.r).map(([k,v])=>[k,round(v)])),grid:f.grid.r&&Object.fromEntries(Object.entries(f.grid.r).map(([k,v])=>[k,round(v)])),space:f.space.r&&Object.fromEntries(Object.entries(f.space.r).map(([k,v])=>[k,round(v)])),soundStyle:f.sound.s,controlsStyle:f.controls.s,datasets:f.datasets})));
+            console.log('CONTROL_MOTION_END');
+            const ys=frames.map(f=>f.sound.r?.y).filter(Number.isFinite),xs=frames.map(f=>f.sound.r?.x).filter(Number.isFinite),ws=frames.map(f=>f.sound.r?.w).filter(Number.isFinite),hs=frames.map(f=>f.sound.r?.h).filter(Number.isFinite);
+            const span=a=>a.length?Math.max(...a)-Math.min(...a):Infinity;
+            console.log('CONTROL_MOTION_SUMMARY',JSON.stringify({xSpan:span(xs),ySpan:span(ys),wSpan:span(ws),hSpan:span(hs)}));
+            await ctx.close();await browser.close();
+          })().catch(error=>{console.error(error);process.exit(1);});
+          NODE
