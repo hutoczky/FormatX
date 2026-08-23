@@ -3,7 +3,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const root=path.resolve(__dirname,'../..'),read=f=>fs.readFileSync(path.join(root,f),'utf8');
 const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
-const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js');
+const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js');
+const legacyRenderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const css=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
 const proofControlsCss=read('docs/scifi-ui/styles/formatx-mobile-proof-controls-r204.css');
@@ -23,9 +24,29 @@ assert.match(bootstrap,/single-webgl-luminous-crystal-r99/);
 assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
 assert.match(bootstrap,/loading-v69/);
 assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260818-r204-proof-controls/);
+assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260823-r317-modern-crystal/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
-for(const token of ['reference-luminous-crystal-webgl-r99','webgl2','webgl','TRIANGLE_STRIP','gl.drawArrays(gl.TRIANGLES','formatx:coreinteraction','formatx:real3dready','touchstart','touchmove','touchend','ResizeObserver','IntersectionObserver','visible-native-3d-r99','fxCoreFrameMs','fxCoreRenderMs','corePosition','single-webgl-luminous-crystal-r99'])assert.ok(renderer.includes(token),`missing r285 startup contract: ${token}`);
+for(const token of [
+  'reference-crystal-webgl-r317-modern-flat-normal-fresnel',
+  'modern-flat-normal-fresnel-microfacet',
+  "getContext('webgl2'",
+  "getContext('webgl'",
+  'aNormal',
+  'gl.drawArrays(gl.TRIANGLES',
+  'formatx:coreinteraction',
+  'formatx:real3dready',
+  'pointerdown',
+  'ResizeObserver',
+  'IntersectionObserver',
+  'visible-native-3d-r99',
+  'fxCoreFrameMs',
+  'fxCoreRenderMs',
+  'corePosition',
+  'single-webgl-luminous-crystal-r99',
+  'bounded-interaction-bursts-no-idle-raf'
+])assert.ok(renderer.includes(token),`missing r317 startup contract: ${token}`);
 assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
+assert.ok(legacyRenderer.includes('reference-luminous-crystal-webgl-r99-prismatic-r120'));
 assert.ok(pureCss.includes('.fx-core-detail-r122'));
 assert.ok(pureCss.includes('.fx-core-live-r147-layer'));
 assert.ok(pureCss.includes('content: none !important'));
@@ -48,11 +69,9 @@ for(const token of ['repairProof','PUBLIC PROOF LAYER','Bizonyíték a látvány
 assert.doesNotMatch(layout,/layoutObserver/);
 assert.match(layout,/space\.after\(heading\)/);
 assert.match(layout,/heading\.after\(card\)/);
-
 for(const token of ['ensureControlZone','fx-reference-controls-r204','.fx-three-sound','.fx-reference-rail','r260-r207-grid-owner'])assert.ok(layout.includes(token),`missing r260 control-zone contract: ${token}`);
 assert.match(layout,/ensureControlZone\(hero,grid,rail\)/);
 assert.doesNotMatch(layout,/space\.after\(rail\)/);
-
 assert.match(css,/\.fx-reference-heading/);
 assert.match(css,/\.fx-reference-proof/);
 for(const token of ['#hero .fx-reference-proof','#hero .fx-reference-controls-r204','.fx-three-sound','.fx-reference-rail','height: auto !important','min-height: 0 !important'])assert.ok(proofControlsCss.includes(token),`missing r204 authoritative CSS contract: ${token}`);
@@ -67,5 +86,5 @@ assert.match(loader,/ready-v20\|ready-v69/);
 assert.match(stability,/ready-v20\|ready-v69/);
 assert.match(interactionStability,/booting-v69/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
-for(const source of [bootstrap,wrapper,renderer,layout,premium,loader,stability,interactionStability])new Function(source);
-console.log('PASS: r285 mobile startup keeps pure native WebGL MAG plus event-driven proof/control ownership.');
+for(const source of [bootstrap,wrapper,renderer,legacyRenderer,layout,premium,loader,stability,interactionStability])new Function(source);
+console.log('PASS: r317 mobile startup keeps modern native WebGL MAG plus r99 fallback and event-driven proof/control ownership.');
