@@ -28,7 +28,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Validate current r317 r318 source contracts
+      - name: Validate current r317 r319 source contracts
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
@@ -44,7 +44,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify r317 r318 WebGL interaction controls and WebGL1 fallback
+      - name: Verify r317 r319 WebGL interaction controls and WebGL1 fallback
         shell: bash
         run: |
           set -euo pipefail
@@ -63,7 +63,7 @@ jobs:
               const d=document.documentElement.dataset;
               return d.fxCoreMobileR317==='ready-v69'
                 && d.fxCoreRendererSelection==='modern-r317-primary'
-                && d.fxCoreSoftlightR318==='shader-tuned'
+                && d.fxCoreSoftlightR318==='shader-tuned-r319'
                 && d.fxMobileReferenceLayout==='ready-v1'
                 && window.FormatXCoreMobileV69?.version==='reference-crystal-webgl-r317-modern-flat-normal-fresnel';
             },null,{timeout:45000});
@@ -104,9 +104,9 @@ jobs:
             assert.equal(state.quality,'modern-flat-normal-fresnel-microfacet-r317');
             assert.equal(state.scheduler,'bounded-interaction-bursts-no-idle-raf');
             assert.equal(state.selection,'modern-r317-primary');
-            assert.equal(state.softlight,'shader-tuned');
-            assert.equal(state.rim,'narrower-softer-fresnel');
-            assert.equal(state.glow,'reduced-mobile-perimeter');
+            assert.equal(state.softlight,'shader-tuned-r319');
+            assert.equal(state.rim,'broader-softer-low-intensity-fresnel');
+            assert.equal(state.glow,'balanced-mobile-perimeter-and-core');
             assert.equal(state.r317,'ready-v69');assert.equal(state.layout,'ready-v1');
             assert.equal(state.stageCount,1);assert.equal(state.canvasCount,1);assert.equal(state.gl,true);assert.equal(state.glError,0);
             assert.equal(state.webgl2,!blockWebGL2);
@@ -128,7 +128,7 @@ jobs:
             assert.equal(await pause.getAttribute('data-paused'),'false');
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r318 softer rim/glow tuning, actionable controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r319 balanced softer rim/glow tuning, actionable controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish responsive runtime status
         if: always()
@@ -137,5 +137,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r317/r318 mobile MAG runtime and render budget passed'; else state=failure; description='r317/r318 responsive runtime failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r317/r319 mobile MAG runtime and render budget passed'; else state=failure; description='r317/r319 responsive runtime failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v69 responsive runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
