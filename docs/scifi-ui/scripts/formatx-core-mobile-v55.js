@@ -6,6 +6,7 @@
   root.dataset.fxCoreMobileV55 = 'booting-reference-v69';
   root.dataset.fxCoreRendererMode = 'mobile';
   root.dataset.fxCoreMobileAwardRevision = 'reference-modern-crystal-native-webgl-r317-softlight-r319';
+  // r319 measurement marker: validate the balanced soft-edge MAG unchanged across all production gates.
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r317.js?v=20260823-r317-modern-crystal';
   const LEGACY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99&rev=20260815-prismatic-organic-r120';
