@@ -1,15 +1,18 @@
 (function () {
   'use strict';
 
-  // r263 stability/control pass.
-  // CSS owns the visual language; this runtime owns only deterministic DOM
-  // placement and the final control geometry. Never reorder stylesheets after
-  // first paint and never let desktop/mobile runtimes fight over control nodes.
+  // r304 stability/performance pass.
+  // CSS owns the visual language; this runtime owns deterministic DOM placement
+  // and installs physical geometry only when the viewport or owned nodes change.
   const root = document.documentElement;
   const VERSION = 'r244-reference-frame';
   let queued = false;
   let bootObserver = null;
   let bootTimer = 0;
+  let layoutReady = false;
+  let lastMobile = null;
+  let lastStage = null;
+  let lastControls = null;
 
   const isMobile = () => matchMedia('(max-width: 900px)').matches;
   const copy = () => root.lang === 'en' ? {
@@ -43,12 +46,17 @@
   function ensureStyleLast() {}
 
   function clearInlineLayout(node) {
-    if (!(node instanceof HTMLElement)) return;
-    for (const property of LAYOUT_PROPERTIES) node.style.removeProperty(property);
+    if (!(node instanceof HTMLElement) || node.style.length === 0) return;
+    for (const property of LAYOUT_PROPERTIES) {
+      if (node.style.getPropertyValue(property)) node.style.removeProperty(property);
+    }
   }
 
   function important(node, property, value) {
-    if (node instanceof HTMLElement) node.style.setProperty(property, value, 'important');
+    if (!(node instanceof HTMLElement)) return;
+    if (node.style.getPropertyValue(property) === value
+      && node.style.getPropertyPriority(property) === 'important') return;
+    node.style.setProperty(property, value, 'important');
   }
 
   function importantMany(node, declarations) {
@@ -177,9 +185,6 @@
       controls.setAttribute('aria-label', root.lang === 'en' ? 'Hero controls' : 'Hero vezérlők');
     }
 
-    // One physical control group on every viewport: SOUND | ASK | PAUSE.
-    // Older r244 code deliberately ejected SOUND to <body>, which made it
-    // disappear on desktop and allowed the mobile fallback to become vertical.
     const sound = document.querySelector('.fx-three-sound');
     if (sound instanceof HTMLElement && sound.parentElement !== controls) controls.prepend(sound);
     if (rail.parentElement !== controls) controls.appendChild(rail);
@@ -389,6 +394,7 @@
     ensureStyleLast();
 
     const mobile = isMobile();
+    let geometryPass = !layoutReady || lastMobile !== mobile;
     const canonicalMobileOwner = mobile
       && document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement;
 
@@ -413,28 +419,40 @@
     const detailCanvas = stage?.querySelector('.fx-core-detail-r122');
     const liveLayer = stage?.querySelector('.fx-core-live-r147-layer');
 
-    [
-      header.bar, brand, header.mag, header.language, header.menu,
-      hero, grid, space, heroCopy, download,
-      nodes.heading, nodes.proof, nodes.live, nodes.rail, nodes.controls, nodes.sound,
-      stage, mainCanvas, detailCanvas, liveLayer
-    ].forEach(clearInlineLayout);
-
-    if (mobile) {
-      if (nodes.controls.parentElement !== grid) grid.appendChild(nodes.controls);
-      important(stage, 'transform', 'scaleY(.97)');
-      important(stage, 'transform-origin', '50% 0');
-    } else if (nodes.controls.parentElement !== space) {
-      space.appendChild(nodes.controls);
+    const expectedControlOwner = mobile ? grid : space;
+    if (nodes.controls.parentElement !== expectedControlOwner) {
+      expectedControlOwner.appendChild(nodes.controls);
+      geometryPass = true;
     }
+    if (stage !== lastStage || nodes.controls !== lastControls) geometryPass = true;
 
-    applyHeaderTapTargets(header, mobile);
-    applyControlLayout(nodes, mobile);
+    if (geometryPass) {
+      [
+        header.bar, brand, header.mag, header.language, header.menu,
+        hero, grid, space, heroCopy, download,
+        nodes.heading, nodes.proof, nodes.live, nodes.rail, nodes.controls, nodes.sound,
+        stage, mainCanvas, detailCanvas, liveLayer
+      ].forEach(clearInlineLayout);
+
+      if (mobile) {
+        important(stage, 'transform', 'scaleY(.97)');
+        important(stage, 'transform-origin', '50% 0');
+      }
+
+      applyHeaderTapTargets(header, mobile);
+      applyControlLayout(nodes, mobile);
+      layoutReady = true;
+      lastMobile = mobile;
+      lastStage = stage;
+      lastControls = nodes.controls;
+      root.dataset.fxReferenceGeometrySchedulerR304 = 'install-once-reconcile-semantics';
+    }
 
     if (brandTagline && brandTagline.textContent !== 'LIVING SYSTEM') brandTagline.textContent = 'LIVING SYSTEM';
 
     if (header.mag instanceof HTMLButtonElement) {
-      header.mag.textContent = root.lang === 'en' ? 'CORE' : 'MAG';
+      const magText = root.lang === 'en' ? 'CORE' : 'MAG';
+      if (header.mag.textContent !== magText) header.mag.textContent = magText;
       header.mag.setAttribute('aria-label', root.lang === 'en' ? 'Focus the living core' : 'Az élő mag fókuszálása');
     }
 
