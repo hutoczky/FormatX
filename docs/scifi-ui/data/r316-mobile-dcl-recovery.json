@@ -1,0 +1,7 @@
+{
+  "revision": "r316",
+  "purpose": "mobile DOMContentLoaded recovery",
+  "cause": "formatx-infinite-scroll mobilelayoutready to synthetic resize feedback into formatx-mobile-layout-r207",
+  "fix": "dedicated formatx:loopgeometryrefresh event; no synthetic resize from mobile loop geometry refresh",
+  "status": "deploy-candidate"
+}
