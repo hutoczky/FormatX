@@ -1,7 +1,8 @@
-/* FormatX r320 — stable mobile hero interaction geometry.
+/* FormatX r320/r321 — stable mobile hero interaction geometry.
    The canonical controls are interactive UI, not decorative motion. Keep their
-   layout boxes stationary so touch/click hit testing cannot race legacy motion
-   transitions while the WebGL MAG remains independently animated. */
+   layout boxes stationary and physically visible so touch/click hit testing
+   cannot race late audio/control ownership changes while the WebGL MAG remains
+   independently animated. */
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r264,
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-reference-rail-r264,
@@ -13,13 +14,36 @@
     will-change: auto !important;
   }
 
+  html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r264 {
+    display: grid !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+  }
+
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
   html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
   html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
+    display: grid !important;
+    place-items: center !important;
     transform: none !important;
     translate: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
     touch-action: manipulation !important;
     pointer-events: auto !important;
+    z-index: 3 !important;
+  }
+
+  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
   }
 
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound:active,
