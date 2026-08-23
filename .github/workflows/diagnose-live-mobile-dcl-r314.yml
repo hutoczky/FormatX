@@ -21,7 +21,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Isolate mobile DOMContentLoaded blocker
+      - name: Split mobile DOMContentLoaded blocker by resource class
         shell: bash
         run: |
           set -euo pipefail
@@ -29,46 +29,56 @@ jobs:
           node <<'NODE'
           const { chromium } = require('playwright');
           const origin = 'https://formatxsuite.com';
-          const candidates = [
-            'formatx-deferred-reduced-style-r232.js',
-            'formatx-event-horizon.js',
-            'formatx-apex.js',
-            'living-architecture.js',
-            'formatx-category-positioning.js',
-            'formatx-content-runtime-loader-r241.js',
-            'formatx-motion-runtime-loader-r239.js',
-            'formatx-reference-production-r244.js'
-          ];
 
-          async function run(browser, label, blocked) {
-            const context = await browser.newContext({
+          function mobileContext(browser) {
+            return browser.newContext({
               viewport: { width: 390, height: 844 },
               deviceScaleFactor: 2,
               isMobile: true,
               hasTouch: true,
               locale: 'hu-HU'
             });
+          }
+
+          async function run(browser, label, options = {}) {
+            const context = await mobileContext(browser);
             const page = await context.newPage();
+            const requested = { script: [], stylesheet: [], document: [], other: [] };
             const failures = [];
-            page.on('pageerror', e => failures.push('pageerror:' + e.message));
-            page.on('requestfailed', r => {
-              const url = r.url();
-              if (!url.includes('cloudflareinsights')) failures.push('request:' + url + ':' + (r.failure()?.errorText || ''));
+            page.on('request', request => {
+              const type = request.resourceType();
+              const bucket = requested[type] || requested.other;
+              if (bucket.length < 80) bucket.push(request.url());
             });
-            if (blocked.length) {
-              await page.route('**/*', async route => {
-                const url = route.request().url();
-                if (blocked.some(name => url.includes('/scripts/' + name))) return route.abort('blockedbyclient');
-                return route.continue();
-              });
-            }
+            page.on('requestfailed', request => {
+              const url = request.url();
+              if (!url.includes('cloudflareinsights')) failures.push(`${request.resourceType()}:${url}:${request.failure()?.errorText || ''}`);
+            });
+            page.on('pageerror', error => failures.push('pageerror:' + error.message));
+
+            await page.route('**/*', async route => {
+              const request = route.request();
+              const type = request.resourceType();
+              if (options.stripDocumentResources && type === 'document') {
+                const response = await route.fetch();
+                let html = await response.text();
+                html = html
+                  .replace(/<script\b[^>]*\bsrc\s*=\s*["'][^"']+["'][^>]*>\s*<\/script>/gi, '')
+                  .replace(/<link\b[^>]*\brel\s*=\s*["']stylesheet["'][^>]*>/gi, '');
+                return route.fulfill({ response, body: html });
+              }
+              if (options.blockScripts && type === 'script') return route.abort('blockedbyclient');
+              if (options.blockStyles && type === 'stylesheet') return route.abort('blockedbyclient');
+              return route.continue();
+            });
+
             const started = Date.now();
             let ok = false;
             let error = '';
             try {
-              await page.goto(`${origin}/?dcl_r314=${encodeURIComponent(label)}-${Date.now()}`, {
+              await page.goto(`${origin}/?dcl_split=${encodeURIComponent(label)}-${Date.now()}`, {
                 waitUntil: 'domcontentloaded',
-                timeout: 8000
+                timeout: 9000
               });
               ok = true;
             } catch (e) {
@@ -79,16 +89,40 @@ jobs:
             if (ok) {
               state = await page.evaluate(() => ({
                 readyState: document.readyState,
+                bodyChildren: document.body?.children.length || 0,
+                stylesheets: document.styleSheets.length,
+                scripts: document.scripts.length,
                 intro: document.documentElement.dataset.fxIntro || '',
                 motion: document.documentElement.dataset.fxMotionRuntimeR239 || '',
-                mobileCore: document.documentElement.dataset.fxMotionRuntimeMobileCoreR313 || '',
-                reference: document.documentElement.dataset.fxReferenceProductionR244 || '',
-                layout: document.documentElement.dataset.fxMobileReferenceLayout || ''
+                reference: document.documentElement.dataset.fxReferenceProductionR244 || ''
               })).catch(() => ({}));
             }
-            console.log('DCL_CASE', JSON.stringify({ label, blocked, ok, elapsed, error, state, failures: failures.slice(0, 6) }));
+            const compact = Object.fromEntries(Object.entries(requested).map(([key, values]) => [key, values.map(url => url.replace(origin, '')).slice(0, 30)]));
+            console.log('DCL_SPLIT', JSON.stringify({ label, options, ok, elapsed, error, state, requested: compact, failures: failures.slice(0, 12) }));
             await context.close();
-            return { label, blocked, ok, elapsed };
+            return { label, ok, elapsed };
+          }
+
+          async function cdpStopCase(browser) {
+            const context = await mobileContext(browser);
+            const page = await context.newPage();
+            const session = await context.newCDPSession(page);
+            let committed = false, dcl = false, error = '';
+            const started = Date.now();
+            try {
+              await page.goto(`${origin}/?dcl_split=cdp-stop-${Date.now()}`, { waitUntil: 'commit', timeout: 9000 });
+              committed = true;
+              await new Promise(resolve => setTimeout(resolve, 1800));
+              await session.send('Page.stopLoading');
+              await page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+              dcl = true;
+            } catch (e) {
+              error = String(e.message || e).split('\n')[0];
+            }
+            const elapsed = Date.now() - started;
+            console.log('DCL_SPLIT', JSON.stringify({ label: 'cdp-stop-loading', committed, dcl, elapsed, error }));
+            await context.close();
+            return { label: 'cdp-stop-loading', ok: dcl, elapsed };
           }
 
           (async () => {
@@ -98,13 +132,14 @@ jobs:
             });
             try {
               const results = [];
-              results.push(await run(browser, 'baseline', []));
-              for (const candidate of candidates) results.push(await run(browser, 'block-' + candidate, [candidate]));
-              results.push(await run(browser, 'block-group-a', candidates.slice(0, 4)));
-              results.push(await run(browser, 'block-group-b', candidates.slice(4)));
-              results.push(await run(browser, 'block-all-bootstrap', candidates));
-              console.log('DCL_SUMMARY', JSON.stringify(results));
-              if (!results.some(result => result.ok)) throw new Error('No diagnostic case reached DOMContentLoaded');
+              results.push(await run(browser, 'baseline'));
+              results.push(await run(browser, 'block-all-scripts', { blockScripts: true }));
+              results.push(await run(browser, 'block-all-styles', { blockStyles: true }));
+              results.push(await run(browser, 'block-scripts-and-styles', { blockScripts: true, blockStyles: true }));
+              results.push(await run(browser, 'strip-external-resources-from-html', { stripDocumentResources: true }));
+              results.push(await cdpStopCase(browser));
+              console.log('DCL_SPLIT_SUMMARY', JSON.stringify(results));
+              if (!results.some(result => result.ok)) throw new Error('Even stripped live HTML did not reach DOMContentLoaded');
             } finally {
               await browser.close();
             }
@@ -117,5 +152,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Mobile DCL isolation completed'; else state=failure; description='Mobile DCL isolation failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Mobile DCL resource split completed'; else state=failure; description='Mobile DCL resource split failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile DCL diagnostic r314' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
