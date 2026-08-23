@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r296 truthful performance/control contract. */
+/* FormatX Web Design Awards — r310 truthful performance/control contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -9,6 +9,8 @@ const exists = rel => fs.existsSync(path.join(root, rel));
 
 const awardRuntime = read('docs/scifi-ui/scripts/formatx-award-runtime-r206.js');
 const intro = read('docs/scifi-ui/scripts/formatx-event-horizon.js');
+const mobileRegression = read('docs/scifi-ui/scripts/formatx-mobile-regression-r310.js');
+const mobileRegressionCss = read('docs/scifi-ui/styles/formatx-mobile-regression-r310.css');
 const controls = read('docs/scifi-ui/scripts/formatx-wda-controls-r198.js');
 const gpu = read('docs/scifi-ui/scripts/formatx-wda-gpu-r198.js');
 const css = read('docs/scifi-ui/styles/formatx-wda-hardening-r198.css');
@@ -31,6 +33,9 @@ const mobile = JSON.parse(read('lighthouserc.live.mobile.json'));
 assert.match(home, /class="skip-link"[^>]+href="#main-content"/);
 assert.match(home, /<main id="main-content">/);
 assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260822-r296-owner-css-ask/);
+assert.match(intro, /formatx-mobile-regression-r310\.js\?v=20260823-r310-live-mobile-regressions/);
+assert.match(intro, /activateCriticalReal3dStyle/);
+assert.match(intro, /ensureMobileRegressionR310/);
 assert.doesNotMatch(intro, /\.style\.|setAttribute\(['"]style/i);
 for (const token of [
   'formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls',
@@ -38,11 +43,12 @@ for (const token of [
   'data-fx-control-owner-style-r264',
   'formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls',
   'formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame',
+  'formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions',
   'muted-default-visible-control',
   'audit-passive',
   'DOMContentLoaded',
   'data-fx-core-render-ms'
-]) assert.ok(awardRuntime.includes(token), `missing active r296 award runtime contract: ${token}`);
+]) assert.ok(awardRuntime.includes(token), `missing active r310 award runtime contract: ${token}`);
 for (const token of [
   'Unmute FormatX cinematic audio',
   'Mute FormatX cinematic audio',
@@ -75,6 +81,26 @@ for (const token of [
 ]) assert.ok(css.includes(token), `missing inclusive/canonical CSS contract: ${token}`);
 assert.match(audio, /let enabled = false/);
 assert.match(audio, /sync\('off'\)/);
+
+// r310 live mobile regression guard: the WebGL MAG style must be unparked on
+// normal-motion first paint and QR delivery must use the same-origin static SVG
+// as its deterministic primary visual source.
+for (const token of [
+  'data-fx-core-real3d="true"',
+  "removeAttribute('data-fx-deferred-media-r300')",
+  "image.dataset.fxQrPrimary = 'local-r310'",
+  "'/scifi-ui/assets/qr/'",
+  'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions',
+  'local-primary'
+]) assert.ok(mobileRegression.includes(token), `missing r310 mobile regression runtime contract: ${token}`);
+for (const token of [
+  '#formatx-plan-qr-dock',
+  'grid-template-columns: minmax(0, 1fr) 112px',
+  'width: 112px',
+  'height: 112px',
+  'width: 104px',
+  'height: 104px'
+]) assert.ok(mobileRegressionCss.includes(token), `missing compact r310 mobile QR contract: ${token}`);
 
 // Fail-open first paint: readable content and a MAG visual must not depend on WebGL.
 for (const token of [
@@ -132,15 +158,18 @@ for (const token of [
 ]) assert.ok(mobileReferenceRuntime.includes(token), `missing r260 mobile reference contract: ${token}`);
 assert.doesNotMatch(mobileReferenceRuntime, /layoutObserver|headerObserver/);
 
-// Production reference runtime owns both mobile and desktop three-button rows.
+// r304 production reference runtime owns one physical three-button row and uses
+// a single computed owner (hero-grid on mobile, hero-space on desktop) instead
+// of the older duplicated append branches.
 for (const token of [
-  'SOUND | ASK | PAUSE',
+  '.fx-three-sound',
+  '.fx-reference-ask',
+  '.fx-reference-pause',
   'applyControlLayout',
-  "controls.prepend(sound)",
-  "space.appendChild(nodes.controls)",
-  "grid.appendChild(nodes.controls)",
+  'const expectedControlOwner = mobile ? grid : space',
+  'expectedControlOwner.appendChild(nodes.controls)',
   'event-driven-r207-owner-r260'
-]) assert.ok(referenceRuntime.includes(token), `missing r260 reference control contract: ${token}`);
+]) assert.ok(referenceRuntime.includes(token), `missing current r304 reference control contract: ${token}`);
 assert.match(referenceRuntime, /function ensureStyleLast\(\) \{\}/);
 
 // Tail bridge is throttled and visibility-aware instead of a hot 60 FPS loop.
@@ -209,5 +238,5 @@ function validateLighthouse(config, label) {
 validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
-for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, mobileReferenceRuntime, referenceRuntime, referenceFinalizer, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r296 canonical cross-device controls, CSS-owned header geometry, event-driven mobile ownership and truthful 0.95 Lighthouse hard gates passed.');
+for (const source of [awardRuntime, intro, mobileRegression, controls, gpu, mobileLayoutRuntime, mobileReferenceRuntime, referenceRuntime, referenceFinalizer, legacyFlow, legacyFinalizer]) new Function(source);
+console.log('PASS: r310 critical MAG CSS, compact local QR delivery, current r304 control ownership and truthful 0.95 Lighthouse hard gates passed.');
