@@ -1,0 +1,87 @@
+/* FormatX r310 — live mobile regression repair.
+   Keep QR payment cards compact on phones while preserving a 44px+ target. */
+
+@media (max-width: 680px) {
+  html body #formatx-plan-qr-dock {
+    padding-inline: 14px !important;
+  }
+
+  html body #formatx-plan-qr-dock .fx-plan-qr-grid {
+    gap: 14px !important;
+  }
+
+  html body #formatx-plan-qr-dock .fx-plan-qr-card {
+    grid-template-columns: minmax(0, 1fr) 112px !important;
+    align-items: center !important;
+    justify-items: stretch !important;
+    gap: 14px !important;
+    min-height: 0 !important;
+    padding: 16px !important;
+    text-align: left !important;
+  }
+
+  html body #formatx-plan-qr-dock .fx-plan-qr-copy {
+    min-width: 0 !important;
+  }
+
+  html body #formatx-plan-qr-dock .fx-plan-qr-copy > strong {
+    margin-top: 6px !important;
+  }
+
+  html body #formatx-plan-qr-dock .fx-plan-qr-link {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 112px !important;
+    min-width: 112px !important;
+    max-width: 112px !important;
+    height: 112px !important;
+    min-height: 112px !important;
+    max-height: 112px !important;
+    justify-self: end !important;
+    padding: 6px !important;
+    overflow: hidden !important;
+  }
+
+  html body #formatx-plan-qr-dock .fx-plan-qr-link img {
+    position: absolute !important;
+    inset: 6px !important;
+    width: 98px !important;
+    min-width: 98px !important;
+    max-width: 98px !important;
+    height: 98px !important;
+    min-height: 98px !important;
+    max-height: 98px !important;
+    object-fit: contain !important;
+  }
+
+  html body #formatx-plan-qr-dock .fx-qr-placeholder {
+    font-size: 13px !important;
+    letter-spacing: .12em !important;
+  }
+}
+
+@media (max-width: 360px) {
+  html body #formatx-plan-qr-dock .fx-plan-qr-card {
+    grid-template-columns: minmax(0, 1fr) 104px !important;
+    gap: 10px !important;
+    padding: 14px !important;
+  }
+
+  html body #formatx-plan-qr-dock .fx-plan-qr-link {
+    width: 104px !important;
+    min-width: 104px !important;
+    max-width: 104px !important;
+    height: 104px !important;
+    min-height: 104px !important;
+    max-height: 104px !important;
+  }
+
+  html body #formatx-plan-qr-dock .fx-plan-qr-link img {
+    width: 90px !important;
+    min-width: 90px !important;
+    max-width: 90px !important;
+    height: 90px !important;
+    min-height: 90px !important;
+    max-height: 90px !important;
+  }
+}
