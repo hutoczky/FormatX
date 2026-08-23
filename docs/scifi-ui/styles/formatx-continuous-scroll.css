@@ -1,4 +1,5 @@
 /* FormatX native continuous scroll policy.
+   Compatibility lineage: mobile-seamless-r5.
    Production revision: 2026-08-23 mobile-content-flow-r305.
    Mobile keeps browser-owned momentum and realises chapter content immediately,
    so no synthetic intrinsic-height placeholders or reveal states can create
