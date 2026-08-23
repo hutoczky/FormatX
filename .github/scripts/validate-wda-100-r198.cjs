@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r310 truthful performance/control contract. */
+/* FormatX Web Design Awards — r312 truthful startup/performance/control contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -11,6 +11,7 @@ const awardRuntime = read('docs/scifi-ui/scripts/formatx-award-runtime-r206.js')
 const intro = read('docs/scifi-ui/scripts/formatx-event-horizon.js');
 const mobileRegression = read('docs/scifi-ui/scripts/formatx-mobile-regression-r310.js');
 const mobileRegressionCss = read('docs/scifi-ui/styles/formatx-mobile-regression-r310.css');
+const pulseCss = read('docs/scifi-ui/styles/formatx-core-pulse-r312.css');
 const controls = read('docs/scifi-ui/scripts/formatx-wda-controls-r198.js');
 const gpu = read('docs/scifi-ui/scripts/formatx-wda-gpu-r198.js');
 const css = read('docs/scifi-ui/styles/formatx-wda-hardening-r198.css');
@@ -32,10 +33,14 @@ const mobile = JSON.parse(read('lighthouserc.live.mobile.json'));
 // UX / accessibility / explicit audio consent.
 assert.match(home, /class="skip-link"[^>]+href="#main-content"/);
 assert.match(home, /<main id="main-content">/);
-assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260822-r296-owner-css-ask/);
-assert.match(intro, /formatx-mobile-regression-r310\.js\?v=20260823-r310-live-mobile-regressions/);
+assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260823-r312-postdom-pulse/);
+assert.match(intro, /formatx-mobile-regression-r310\.js\?v=20260823-r312-postdom/);
+assert.match(intro, /formatx-core-pulse-r312\.css\?v=20260823-r312-living-pulse/);
+assert.match(intro, /queuePostDomEnhancements/);
+assert.match(intro, /postdom-real3d-and-pulse/);
 assert.match(intro, /activateCriticalReal3dStyle/);
 assert.match(intro, /ensureMobileRegressionR310/);
+assert.doesNotMatch(intro, /activateCriticalReal3dStyle\(\);\s*ensureMobileRegressionR310\(\);\s*ensureAwardRuntime\(\);\s*if\(AUDIT_MODE/);
 assert.doesNotMatch(intro, /\.style\.|setAttribute\(['"]style/i);
 for (const token of [
   'formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls',
@@ -82,9 +87,21 @@ for (const token of [
 assert.match(audio, /let enabled = false/);
 assert.match(audio, /sync\('off'\)/);
 
-// r310 live mobile regression guard: the WebGL MAG style must be unparked on
-// normal-motion first paint and QR delivery must use the same-origin static SVG
-// as its deterministic primary visual source.
+// r312 startup guard: mobile must reach DOMContentLoaded before the heavy Real3D
+// enhancement CSS is activated. The living pulse is compositor-only and cannot
+// contribute to layout geometry.
+for (const token of [
+  '@keyframes fx-core-pulse-r312',
+  'scale: 1.018 1.026',
+  'animation: fx-core-pulse-r312 1.55s',
+  'will-change: scale',
+  'prefers-reduced-motion: reduce',
+  'animation-play-state: paused'
+]) assert.ok(pulseCss.includes(token), `missing r312 living MAG pulse contract: ${token}`);
+assert.doesNotMatch(pulseCss, /width\s*:|height\s*:|margin\s*:|padding\s*:/);
+
+// r310 live mobile regression guard: QR delivery remains deterministic and the
+// Real3D CSS activator is retained, but r312 calls it only after DOMContentLoaded.
 for (const token of [
   'data-fx-core-real3d="true"',
   "removeAttribute('data-fx-deferred-media-r300')",
@@ -147,8 +164,6 @@ assert.doesNotMatch(mobileLayoutRuntime, /placeAfter\(/);
 assert.doesNotMatch(mobileLayoutRuntime, /document\.head\.appendChild\(link\)|appendChild\(link\)/);
 assert.doesNotMatch(mobileLayoutRuntime, /setTimeout\([^\n]*(?:450|1400)/);
 
-// The mobile reference owner must keep SOUND | ASK | PAUSE under hero-grid and
-// must not install steady-state document-wide layout/header observers.
 for (const token of [
   'r260-r207-grid-owner',
   'ensureControlZone(hero,grid,rail)',
@@ -158,9 +173,6 @@ for (const token of [
 ]) assert.ok(mobileReferenceRuntime.includes(token), `missing r260 mobile reference contract: ${token}`);
 assert.doesNotMatch(mobileReferenceRuntime, /layoutObserver|headerObserver/);
 
-// r304 production reference runtime owns one physical three-button row and uses
-// a single computed owner (hero-grid on mobile, hero-space on desktop) instead
-// of the older duplicated append branches.
 for (const token of [
   '.fx-three-sound',
   '.fx-reference-ask',
@@ -172,14 +184,11 @@ for (const token of [
 ]) assert.ok(referenceRuntime.includes(token), `missing current r304 reference control contract: ${token}`);
 assert.match(referenceRuntime, /function ensureStyleLast\(\) \{\}/);
 
-// Tail bridge is throttled and visibility-aware instead of a hot 60 FPS loop.
 for (const token of ['FRAME_INTERVAL=1000/24', 'document.hidden', 'visibilitychange', 'retryBoot', 'ready-r252']) {
   assert.ok(referenceFinalizer.includes(token), `missing throttled reference finalizer contract: ${token}`);
 }
 assert.doesNotMatch(referenceFinalizer, /if\(\+\+bootTries<420\)schedule\(\)/);
 
-// Legacy mobile engines may remain for compatibility, but the canonical r207
-// owner makes them no-op and prevents CSS ↔ inline !important ping-pong.
 for (const token of ['canonicalOwner', 'delegated-r208', 'fxFlowFirstConflict', 'disabled-r208']) {
   assert.ok(legacyFlow.includes(token), `legacy flow is not delegated under canonical owner: ${token}`);
 }
@@ -189,7 +198,6 @@ for (const token of ['canonicalOwner', 'delegated-r208', 'disabled-r208-no-ping-
 assert.match(legacyFlow, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 assert.match(legacyFinalizer, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 
-// Current production Worker bootstrap/canonical ownership.
 assert.match(production, /formatx-first-paint-r206\.css\?v=20260818-r206-stable-hero/);
 assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260820-r248-reference-owner/);
 assert.match(production, /formatx-mobile-layout-r207\.css\?v=20260818-r208-flicker-free/);
@@ -200,16 +208,12 @@ assert.match(production, /X-FormatX-Recovery', 'r243-language-canonical/);
 assert.match(production, /fx_startup_r208=1/);
 assert.match(production, /r208-one-shot-cleared/);
 
-// Mobile performance: measured 60fps target, adaptive backing resolution and bounded scale.
 for (const token of ['fxWdaTargetFps', '16.67', 'scale = 0.86', 'scale > 0.58', 'frameMs > 19.5', 'frameMs < 16.2', 'fxWdaRenderScale', 'drawingBufferWidth']) {
   assert.ok(gpu.includes(token), `missing adaptive GPU contract: ${token}`);
 }
 assert.doesNotMatch(gpu, /\.style\.|setAttribute\(['"]style/i);
-
-// Stable production ownership: never re-enable the broken aggressive homepage optimizer.
 assert.equal(wrangler.main, 'src/production-content-entry.js');
 
-// Strategy/content proof stays public and crawlable.
 for (const rel of [
   'docs/scifi-ui/method.html',
   'docs/scifi-ui/verification.html',
@@ -239,4 +243,4 @@ validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
 for (const source of [awardRuntime, intro, mobileRegression, controls, gpu, mobileLayoutRuntime, mobileReferenceRuntime, referenceRuntime, referenceFinalizer, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r310 critical MAG CSS, compact local QR delivery, current r304 control ownership and truthful 0.95 Lighthouse hard gates passed.');
+console.log('PASS: r312 post-DOM mobile Real3D startup, compositor MAG pulse, compact local QR delivery, current r304 control ownership and truthful 0.95 Lighthouse hard gates passed.');
