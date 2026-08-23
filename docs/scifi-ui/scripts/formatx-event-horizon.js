@@ -2,10 +2,6 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  // r260: publish the final reference layout mode in the earliest normal-motion
-  // bootstrap. The r244 stylesheet is render-blocking and can now resolve its
-  // mobile/desktop geometry on first paint instead of switching after the hero
-  // has already been painted, which removes the dominant CLS transition.
   const EARLY_REFERENCE_MOBILE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   if (!ROOT.dataset.fxReferenceProductionR244) {
     ROOT.dataset.fxReferenceProductionR244 = EARLY_REFERENCE_MOBILE ? 'ready' : 'desktop';
@@ -14,9 +10,6 @@
     ? 'reference-frame-r244'
     : 'desktop-reference-r244';
 
-  // r293: the two historical joined-sentence defects no longer exist in static
-  // content. Mark the copy guard complete before the living-system runtime so it
-  // does not TreeWalk the full document during the first-load critical window.
   ROOT.dataset.fxLivingCopyGuard = 'ready';
   ROOT.dataset.fxLivingCopyGuardPolicyR293 = 'static-content-normalized-no-document-scan';
 
@@ -26,32 +19,51 @@
   const MOBILE_DIRECT_QUERY = matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)');
   const REDUCE_QUERY = matchMedia('(prefers-reduced-motion: reduce)');
   const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260822-r296-owner-css-ask';
-  const MOBILE_REGRESSION_URL = './scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
+  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260823-r312-postdom-pulse';
+  const MOBILE_REGRESSION_URL = './scripts/formatx-mobile-regression-r310.js?v=20260823-r312-postdom';
+  const PULSE_STYLE_URL = './styles/formatx-core-pulse-r312.css?v=20260823-r312-living-pulse';
 
-  // r310: the real WebGL MAG stylesheet is critical on the mobile direct path.
-  // r308 temporarily parked it behind media="not all", which can leave the first
-  // mobile viewport as a black empty hero while the renderer itself is running.
-  function activateCriticalReal3dStyle(){
-    if(REDUCE_QUERY.matches){ROOT.dataset.fxCoreReal3dCssR310='reduced-motion-skip';return}
-    const link=document.querySelector('link[data-fx-core-real3d="true"]');
-    if(!(link instanceof HTMLLinkElement)){ROOT.dataset.fxCoreReal3dCssR310='missing';return}
+  function activateCriticalReal3dStyle() {
+    if (REDUCE_QUERY.matches) {
+      ROOT.dataset.fxCoreReal3dCssR310 = 'reduced-motion-skip';
+      return;
+    }
+    const link = document.querySelector('link[data-fx-core-real3d="true"]');
+    if (!(link instanceof HTMLLinkElement)) {
+      ROOT.dataset.fxCoreReal3dCssR310 = 'missing';
+      return;
+    }
     link.removeAttribute('data-fx-deferred-media-r300');
-    link.media='(prefers-reduced-motion: no-preference)';
-    ROOT.dataset.fxCoreReal3dCssR310=link.sheet?'active':'activating';
-    if(link.dataset.fxR310LoadBound!=='true'){
-      link.dataset.fxR310LoadBound='true';
-      link.addEventListener('load',()=>{ROOT.dataset.fxCoreReal3dCssR310='active'},{once:true});
-      link.addEventListener('error',()=>{ROOT.dataset.fxCoreReal3dCssR310='failed'},{once:true});
+    link.media = '(prefers-reduced-motion: no-preference)';
+    ROOT.dataset.fxCoreReal3dCssR310 = link.sheet ? 'active' : 'activating-postdom-r312';
+    if (link.dataset.fxR310LoadBound !== 'true') {
+      link.dataset.fxR310LoadBound = 'true';
+      link.addEventListener('load', () => { ROOT.dataset.fxCoreReal3dCssR310 = 'active'; }, { once: true });
+      link.addEventListener('error', () => { ROOT.dataset.fxCoreReal3dCssR310 = 'failed'; }, { once: true });
     }
   }
 
-  function ensureMobileRegressionR310(){
-    if(document.querySelector('script[data-fx-mobile-regression-r310]'))return;
-    const script=document.createElement('script');
-    script.src=MOBILE_REGRESSION_URL;
-    script.async=false;
-    script.dataset.fxMobileRegressionR310='true';
+  function ensureCorePulseStyle() {
+    if (REDUCE_QUERY.matches) {
+      ROOT.dataset.fxCorePulseR312 = 'reduced-motion-static';
+      return;
+    }
+    if (document.querySelector('link[data-fx-core-pulse-r312]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = PULSE_STYLE_URL;
+    link.dataset.fxCorePulseR312 = 'true';
+    link.addEventListener('load', () => { ROOT.dataset.fxCorePulseR312 = 'compositor-lub-dub'; }, { once: true });
+    link.addEventListener('error', () => { ROOT.dataset.fxCorePulseR312 = 'style-load-failed'; }, { once: true });
+    document.head.appendChild(link);
+  }
+
+  function ensureMobileRegressionR310() {
+    if (document.querySelector('script[data-fx-mobile-regression-r310]')) return;
+    const script = document.createElement('script');
+    script.src = MOBILE_REGRESSION_URL;
+    script.async = true;
+    script.dataset.fxMobileRegressionR310 = 'true';
     document.head.appendChild(script);
   }
 
@@ -64,21 +76,33 @@
   let timelineDuration=2400,exitDuration=280,hardDeadline=3780;
   const language=()=>ROOT.lang==='en'?'en':'hu';
 
-  function ensureAwardRuntime(){
-    if(AUDIT_MODE||document.querySelector('script[data-fx-award-runtime-r206]'))return;
-    const script=document.createElement('script');
-    script.src=AWARD_RUNTIME_URL;
-    script.defer=true;
-    script.dataset.fxAwardRuntimeR206='true';
+  function ensureAwardRuntime() {
+    if (AUDIT_MODE || document.querySelector('script[data-fx-award-runtime-r206]')) return;
+    const script = document.createElement('script');
+    script.src = AWARD_RUNTIME_URL;
+    script.async = true;
+    script.dataset.fxAwardRuntimeR206 = 'true';
     document.head.appendChild(script);
+  }
+
+  function queuePostDomEnhancements(includeMobileReal3d) {
+    const run = () => setTimeout(() => {
+      ensureCorePulseStyle();
+      if (includeMobileReal3d) {
+        activateCriticalReal3dStyle();
+        ensureMobileRegressionR310();
+      }
+      ensureAwardRuntime();
+      ROOT.dataset.fxMobileBootstrapR312 = includeMobileReal3d
+        ? 'postdom-real3d-and-pulse'
+        : 'postdom-pulse';
+    }, 0);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
+    else run();
   }
 
   function seen(){try{return localStorage.getItem(VISIT_KEY)==='1'}catch(_){return false}}
   function remember(){try{return localStorage.setItem(VISIT_KEY,'1')}catch(_){}}
-  // r311: keep the desktop cinematic entrance, but never let the decorative
-  // overlay monopolize the LCP window. Mobile already takes the direct path.
-  // A first desktop visit now resolves in roughly half a second including exit,
-  // while returning visits remain shorter still.
   function configure(returning){timelineDuration=REDUCE_QUERY.matches?180:(returning?(MOBILE_QUERY.matches?620:260):(MOBILE_QUERY.matches?2100:420));exitDuration=REDUCE_QUERY.matches?60:(returning?80:90);hardDeadline=timelineDuration+exitDuration+800}
   function cancelTimers(){cancelAnimationFrame(progressFrame);clearTimeout(hardTimer);clearTimeout(exitTimer);progressFrame=hardTimer=exitTimer=0}
   function cancelAnimations(o){if(!o)return;try{o.getAnimations({subtree:true}).forEach(a=>a.cancel())}catch(_){}}
@@ -106,11 +130,17 @@
   function start(){const o=document.getElementById(OVERLAY_ID);if(!o)return release(null,'overlay-missing');const returning=seen();configure(returning);cancelTimers();cancelAnimations(o);running=true;finishing=false;runToken++;const token=runToken;controls(o);o.hidden=false;o.setAttribute('aria-hidden','false');setProgress(o,0);ROOT.classList.remove('fx-intro-complete','fx-intro-reveal');ROOT.classList.add('fx-intro-managed','fx-intro-pending','fx-intro-running');ROOT.dataset.fxIntro=returning?'timeline-returning':'timeline-first-visit';ROOT.dataset.fxIntroVisit=returning?'returning':'first';visuals(o,returning);progress(o,token);hardTimer=setTimeout(()=>{if(token===runToken)release(o,'hard-deadline')},hardDeadline)}
   function failOpen(source){if(running)fastRelease(source)}
 
-  activateCriticalReal3dStyle();
-  ensureMobileRegressionR310();
-  ensureAwardRuntime();
   if(AUDIT_MODE){ROOT.classList.add('fx-audit-mode');fastRelease('audit-skip');return}
-  if(MOBILE_DIRECT_QUERY.matches){ROOT.dataset.fxIntroStrategy='mobile-direct';fastRelease('mobile-direct-v1',true);return}
+
+  if(MOBILE_DIRECT_QUERY.matches){
+    ROOT.dataset.fxIntroStrategy='mobile-direct';
+    fastRelease('mobile-direct-v1',true);
+    queuePostDomEnhancements(true);
+    return;
+  }
+
+  ensureAwardRuntime();
+  queuePostDomEnhancements(false);
   addEventListener('pageshow',e=>{if(e.persisted)fastRelease('bfcache-restore')});
   addEventListener('error',()=>failOpen('runtime-error'));
   addEventListener('unhandledrejection',()=>failOpen('promise-error'));
