@@ -1,0 +1,148 @@
+name: One-shot r304 final performance pass
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/r304-final-performance-pass.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-final-performance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Remove measured late main-thread churn
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          def replace_once(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f'missing expected source block: {label}')
+              return text.replace(old, new, 1)
+
+          # r244 is already the correct visual result, but it was clearing and
+          # rewriting dozens of inline geometry properties again whenever late
+          # startup events fired. Lighthouse measured one such pass at ~131 ms.
+          r244 = Path('docs/scifi-ui/scripts/formatx-reference-production-r244.js')
+          text = r244.read_text(encoding='utf-8')
+          text = replace_once(
+              text,
+              "  let bootTimer = 0;\n\n  const isMobile = () => matchMedia('(max-width: 900px)').matches;",
+              "  let bootTimer = 0;\n  let layoutReady = false;\n  let lastMobile = null;\n  let lastStage = null;\n  let lastControls = null;\n\n  const isMobile = () => matchMedia('(max-width: 900px)').matches;",
+              'r244 state cache'
+          )
+          text = replace_once(
+              text,
+              "  function clearInlineLayout(node) {\n    if (!(node instanceof HTMLElement)) return;\n    for (const property of LAYOUT_PROPERTIES) node.style.removeProperty(property);\n  }\n\n  function important(node, property, value) {\n    if (node instanceof HTMLElement) node.style.setProperty(property, value, 'important');\n  }",
+              "  function clearInlineLayout(node) {\n    if (!(node instanceof HTMLElement) || node.style.length === 0) return;\n    for (const property of LAYOUT_PROPERTIES) {\n      if (node.style.getPropertyValue(property)) node.style.removeProperty(property);\n    }\n  }\n\n  function important(node, property, value) {\n    if (!(node instanceof HTMLElement)) return;\n    if (node.style.getPropertyValue(property) === value\n      && node.style.getPropertyPriority(property) === 'important') return;\n    node.style.setProperty(property, value, 'important');\n  }",
+              'r244 idempotent style writes'
+          )
+          text = replace_once(
+              text,
+              "    const mobile = isMobile();\n    const canonicalMobileOwner = mobile",
+              "    const mobile = isMobile();\n    let geometryPass = !layoutReady || lastMobile !== mobile;\n    const canonicalMobileOwner = mobile",
+              'r244 geometry pass state'
+          )
+          old_block = """    [
+      header.bar, brand, header.mag, header.language, header.menu,
+      hero, grid, space, heroCopy, download,
+      nodes.heading, nodes.proof, nodes.live, nodes.rail, nodes.controls, nodes.sound,
+      stage, mainCanvas, detailCanvas, liveLayer
+    ].forEach(clearInlineLayout);
+
+    if (mobile) {
+      if (nodes.controls.parentElement !== grid) grid.appendChild(nodes.controls);
+      important(stage, 'transform', 'scaleY(.97)');
+      important(stage, 'transform-origin', '50% 0');
+    } else if (nodes.controls.parentElement !== space) {
+      space.appendChild(nodes.controls);
+    }
+
+    applyHeaderTapTargets(header, mobile);
+    applyControlLayout(nodes, mobile);
+"""
+          new_block = """    const expectedControlOwner = mobile ? grid : space;
+    if (nodes.controls.parentElement !== expectedControlOwner) {
+      expectedControlOwner.appendChild(nodes.controls);
+      geometryPass = true;
+    }
+    if (stage !== lastStage || nodes.controls !== lastControls) geometryPass = true;
+
+    // r304: once the final geometry is installed, late real3d/detail/organism
+    // readiness events only need semantic reconciliation. Do not tear down and
+    // rebuild the same inline geometry on every event; that was the measured
+    // 100+ ms late task on throttled mobile hardware.
+    if (geometryPass) {
+      [
+        header.bar, brand, header.mag, header.language, header.menu,
+        hero, grid, space, heroCopy, download,
+        nodes.heading, nodes.proof, nodes.live, nodes.rail, nodes.controls, nodes.sound,
+        stage, mainCanvas, detailCanvas, liveLayer
+      ].forEach(clearInlineLayout);
+
+      if (mobile) {
+        important(stage, 'transform', 'scaleY(.97)');
+        important(stage, 'transform-origin', '50% 0');
+      }
+
+      applyHeaderTapTargets(header, mobile);
+      applyControlLayout(nodes, mobile);
+      layoutReady = true;
+      lastMobile = mobile;
+      lastStage = stage;
+      lastControls = nodes.controls;
+      root.dataset.fxReferenceGeometrySchedulerR304 = 'install-once-reconcile-semantics';
+    }
+"""
+          text = replace_once(text, old_block, new_block, 'r244 late geometry rewrite')
+          r244.write_text(text, encoding='utf-8')
+
+          # The hero-stability layer had already completed boot, but two late
+          # readiness events ran the full proof/download pass again (~63 ms in
+          # the mobile trace). Boot observer covers initial construction; after
+          # that only actual language/release/page or viewport-class changes matter.
+          hero = Path('docs/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js')
+          text = hero.read_text(encoding='utf-8')
+          text = replace_once(
+              text,
+              "for(const eventName of ['formatx:languagechange','formatx:releasemetadataready','formatx:mobilelayoutready','formatx:controlownerready','pageshow'])addEventListener(eventName,queue,{passive:true});\naddEventListener('resize',queue,{passive:true});\naddEventListener('orientationchange',queue,{passive:true});\nmobileQuery.addEventListener?.('change',queue);",
+              "for(const eventName of ['formatx:languagechange','formatx:releasemetadataready','pageshow'])addEventListener(eventName,queue,{passive:true});\nfunction queueViewportClassChange(){if(lastMobile!==isMobile())queue();}\naddEventListener('resize',queueViewportClassChange,{passive:true});\naddEventListener('orientationchange',queueViewportClassChange,{passive:true});\nmobileQuery.addEventListener?.('change',queue);\nroot.dataset.fxMobileHeroSchedulerR304='boot-once-semantic-events-only';",
+              'mobile hero late listeners'
+          )
+          hero.write_text(text, encoding='utf-8')
+
+          # The intro progress indicator does not need a DOM/query/update on every
+          # animation frame. Keep WAAPI visuals smooth and update only the textual
+          # progress UI at 20 Hz; final 100% is still written synchronously.
+          event = Path('docs/scifi-ui/scripts/formatx-event-horizon.js')
+          text = event.read_text(encoding='utf-8')
+          old = "  function progress(o,token){const start=performance.now();function frame(now){if(token!==runToken||!running||finishing)return;const linear=Math.min(1,Math.max(0,now-start)/timelineDuration),eased=1-Math.pow(1-linear,2.35);setProgress(o,eased*100);if(linear>=1)return exit(o,token,'timeline-complete');progressFrame=requestAnimationFrame(frame)}progressFrame=requestAnimationFrame(frame)}"
+          new = "  function progress(o,token){const start=performance.now();let lastUi=-Infinity;function frame(now){if(token!==runToken||!running||finishing)return;const linear=Math.min(1,Math.max(0,now-start)/timelineDuration),eased=1-Math.pow(1-linear,2.35);if(linear>=1||now-lastUi>=50){lastUi=now;setProgress(o,eased*100)}if(linear>=1)return exit(o,token,'timeline-complete');progressFrame=requestAnimationFrame(frame)}progressFrame=requestAnimationFrame(frame)}"
+          text = replace_once(text, old, new, 'intro progress throttle')
+          event.write_text(text, encoding='utf-8')
+
+          Path('.github/workflows/r304-final-performance-pass.yml').unlink()
+          PY
+
+          node --check docs/scifi-ui/scripts/formatx-reference-production-r244.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          git diff --check
+
+          git config user.name 'FormatX performance patch bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-reference-production-r244.js \
+                  docs/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js \
+                  docs/scifi-ui/scripts/formatx-event-horizon.js \
+                  .github/workflows/r304-final-performance-pass.yml
+          git commit -m 'Eliminate late hero geometry and intro DOM churn'
+          git push origin HEAD:master
