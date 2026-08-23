@@ -82,5 +82,6 @@
 
   // Deep links are explicit navigation intent and need their enhancement layer
   // immediately at the destination.
+  addEventListener('formatx:immersiveactivate', start, { passive: true });
   if (location.hash && location.hash !== '#top' && location.hash !== '#hero') start();
 }());
