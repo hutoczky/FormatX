@@ -14,20 +14,39 @@ async function prepare(page) {
   });
   await page.goto(TEST_URL + '?lang=hu&scroll-test=platform-v2', { waitUntil: 'domcontentloaded' });
 
-  if (!await page.locator('link[data-fx-continuous-scroll-test]').count()) {
-    await page.evaluate(origin => {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = origin + '/scifi-ui/styles/formatx-continuous-scroll.css?v=platform-v2-browser-test';
-      link.dataset.fxContinuousScrollTest = 'true';
-      document.head.appendChild(link);
-    }, new URL(TEST_URL).origin);
-  }
+  // Production injects the continuous-scroll stylesheet before the seamless
+  // runtime. The static fixture can already have started its runtime by the time
+  // this validator adds the production stylesheet, so explicitly await CSS load
+  // and then request the same geometry refresh a real viewport/layout change
+  // would produce. This validates production ordering instead of a test-only race.
+  await page.evaluate(origin => new Promise(resolve => {
+    let link = document.querySelector('link[href*="formatx-continuous-scroll.css"]');
+    const finish = () => resolve(true);
+    if (link) {
+      if (link.sheet) return finish();
+      link.addEventListener('load', finish, { once: true });
+      link.addEventListener('error', finish, { once: true });
+      return;
+    }
+    link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = origin + '/scifi-ui/styles/formatx-continuous-scroll.css?v=platform-v2-browser-test';
+    link.dataset.fxContinuousScrollTest = 'true';
+    link.addEventListener('load', finish, { once: true });
+    link.addEventListener('error', finish, { once: true });
+    document.head.appendChild(link);
+  }), new URL(TEST_URL).origin);
 
   if (!await page.locator('script[src*="formatx-infinite-scroll.js"]').count()) {
     const runtimeUrl = await page.evaluate(() => new URL('./scripts/formatx-infinite-scroll.js?v=platform-v2-browser-test', document.baseURI).href);
     await page.addScriptTag({ url: runtimeUrl });
   }
+
+  await page.evaluate(async () => {
+    try { await document.fonts?.ready; } catch (_) {}
+    dispatchEvent(new Event('resize'));
+  });
+  await page.waitForTimeout(220);
 }
 
 async function snapshot(page) {
@@ -67,6 +86,49 @@ async function snapshot(page) {
   });
 }
 
+async function mobileContentFlowSnapshot(page) {
+  return page.evaluate(() => {
+    const inspect = (sectionSelector, contentSelector) => {
+      const section = document.querySelector(sectionSelector);
+      const heading = section?.querySelector(':scope > .section-heading');
+      const content = section?.querySelector(contentSelector);
+      if (!(section instanceof HTMLElement) || !(heading instanceof HTMLElement) || !(content instanceof HTMLElement)) {
+        return { sectionSelector, exists: false };
+      }
+      const sectionStyle = getComputedStyle(section);
+      const contentStyle = getComputedStyle(content);
+      const headingRect = heading.getBoundingClientRect();
+      const contentRect = content.getBoundingClientRect();
+      return {
+        sectionSelector,
+        exists: true,
+        gap: contentRect.top - headingRect.bottom,
+        sectionMinHeight: sectionStyle.minHeight,
+        sectionHeight: sectionStyle.height,
+        contentVisibility: contentStyle.contentVisibility,
+        contentDisplay: contentStyle.display,
+        contentOpacity: Number(contentStyle.opacity || 1),
+        contentHeight: contentRect.height,
+        firstRevealVisible: (() => {
+          const node = content.querySelector('[data-reveal]');
+          if (!(node instanceof HTMLElement)) return true;
+          const style = getComputedStyle(node);
+          const rect = node.getBoundingClientRect();
+          return style.display !== 'none'
+            && style.visibility !== 'hidden'
+            && Number(style.opacity || 1) > .02
+            && rect.height > 0;
+        })()
+      };
+    };
+    return [
+      inspect('#capabilities', ':scope > .cards'),
+      inspect('#pricing', ':scope > .pricing'),
+      inspect('#system', ':scope > .system-grid')
+    ];
+  });
+}
+
 async function waitForSeamless(page) {
   await page.waitForFunction(() => (
     document.documentElement.dataset.fxInfiniteController === 'seamless-v7'
@@ -75,6 +137,7 @@ async function waitForSeamless(page) {
   await page.evaluate(() => {
     document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
     document.body.style.setProperty('scroll-behavior', 'auto', 'important');
+    dispatchEvent(new Event('resize'));
   });
   await page.waitForTimeout(2500);
 }
@@ -112,6 +175,15 @@ async function verifyMobile(browser) {
   assert(initial.snapRoot === 'none' && initial.snapBody === 'none', 'mobile scroll snapping is active: ' + JSON.stringify(initial));
   assert(initial.overflow <= 2, 'mobile horizontal overflow: ' + JSON.stringify(initial));
 
+  const flow = await mobileContentFlowSnapshot(page);
+  for (const chapter of flow) {
+    assert(chapter.exists, 'mobile content-flow section missing: ' + JSON.stringify(chapter));
+    assert(chapter.gap >= -2 && chapter.gap <= 180, 'mobile phantom section gap detected: ' + JSON.stringify(chapter));
+    assert(chapter.contentVisibility === 'visible', 'mobile chapter still uses synthetic content visibility: ' + JSON.stringify(chapter));
+    assert(chapter.contentDisplay !== 'none' && chapter.contentOpacity > .02 && chapter.contentHeight > 40, 'mobile chapter content is not physically rendered: ' + JSON.stringify(chapter));
+    assert(chapter.firstRevealVisible, 'mobile reveal content occupies layout while remaining hidden: ' + JSON.stringify(chapter));
+  }
+
   const threshold = Math.max(36, Math.min(initial.viewportHeight * .18, 180));
   const relative = Math.min(Math.max(threshold + 84, 220), Math.max(220, initial.sourceHeight - 36));
 
@@ -145,7 +217,7 @@ async function verifyMobile(browser) {
 
   const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
   assert(!meaningful.length, 'mobile browser errors: ' + meaningful.join(' | '));
-  console.log('PASS mobile seamless-v7', JSON.stringify({ relative, loopBefore: initial.loopCount, loopAfter: second.loopCount, landing: second.scrollY }));
+  console.log('PASS mobile seamless-v7 + r305 content flow', JSON.stringify({ flow, relative, loopBefore: initial.loopCount, loopAfter: second.loopCount, landing: second.scrollY }));
   await context.close();
 }
 
