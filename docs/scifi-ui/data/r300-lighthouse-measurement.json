@@ -1,0 +1,9 @@
+{
+  "revision": "r300",
+  "purpose": "stable real-experience desktop and mobile Lighthouse/browser measurement",
+  "qualityGatesUnchanged": true,
+  "desktopRuns": 3,
+  "mobileRuns": 3,
+  "auditOnlyMode": false,
+  "reducedMotionForced": false
+}
