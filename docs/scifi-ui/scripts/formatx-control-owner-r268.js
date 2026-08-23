@@ -11,6 +11,9 @@ let menu=null;
 let queued=false;
 let bootObserver=null;
 let bootTimer=0;
+let controlObserver=null;
+let controlObserverTarget=null;
+let audioObserver=null;
 let lastMobile=null;
 let applying=false;
 const language=()=>root.lang==='en'?'en':'hu';
@@ -168,13 +171,19 @@ function canonicalControls(hero){
   let controls=hero.querySelector('.fx-reference-controls-r204');
   if(!(controls instanceof HTMLElement)){controls=document.createElement('div');controls.className='fx-reference-controls-r204';}
   controls.classList.add('fx-reference-controls-r264');
+  controls.hidden=false;
+  controls.removeAttribute('aria-hidden');
   controls.setAttribute('aria-label',language()==='en'?'Hero controls':'Hero vezérlők');
   let rail=controls.querySelector(':scope > .fx-reference-rail')||hero.querySelector('.fx-reference-rail');
   if(!(rail instanceof HTMLElement)){rail=document.createElement('div');rail.className='fx-reference-rail';}
   rail.classList.add('fx-reference-rail-r264');
   const ask=ensureAsk(rail),pause=ensurePause(rail),sound=document.querySelector('.fx-three-sound');
   if(sound instanceof HTMLButtonElement){
-    sound.classList.add('fx-control-owner-r264');sound.hidden=false;sound.removeAttribute('aria-hidden');
+    sound.type='button';
+    sound.classList.add('fx-control-owner-r264');
+    sound.hidden=false;
+    sound.removeAttribute('aria-hidden');
+    sound.removeAttribute('tabindex');
     if(sound.parentElement!==controls)controls.prepend(sound);
   }
   if(rail.parentElement!==controls)controls.appendChild(rail);
@@ -183,6 +192,11 @@ function canonicalControls(hero){
   for(const node of [controls,rail,sound,ask,pause,ask.querySelector('span')])stripInline(node);
   root.dataset.fxReferenceControlLayout=isMobile()?'r264-mobile-three-cell':'r264-desktop-three-cell';
   return sound instanceof HTMLButtonElement;
+}
+function visibleControl(node){
+  if(!(node instanceof HTMLElement)||node.hidden||node.getAttribute('aria-hidden')==='true')return false;
+  const style=getComputedStyle(node),rect=node.getBoundingClientRect();
+  return style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity||1)>.02&&rect.width>=40&&rect.height>=40;
 }
 function healthy(hero,mobile){
   const topbar=document.querySelector('.topbar');
@@ -199,9 +213,35 @@ function healthy(hero,mobile){
     &&currentMenu.parentElement===topbar
     &&controls instanceof HTMLElement
     &&controls.parentElement===(mobile?grid:space)
-    &&sound instanceof HTMLButtonElement
-    &&ask instanceof HTMLButtonElement
-    &&pause instanceof HTMLButtonElement;
+    &&visibleControl(sound)
+    &&visibleControl(ask)
+    &&visibleControl(pause);
+}
+function bindControlObserver(hero){
+  const controls=hero.querySelector('.fx-reference-controls-r204.fx-reference-controls-r264');
+  if(!(controls instanceof HTMLElement))return;
+  if(controlObserverTarget===controls&&controlObserver)return;
+  controlObserver?.disconnect();
+  controlObserverTarget=controls;
+  controlObserver=new MutationObserver(()=>{
+    if(!applying)schedule(true);
+  });
+  controlObserver.observe(controls,{
+    subtree:true,
+    childList:true,
+    attributes:true,
+    attributeFilter:['hidden','aria-hidden','style','class']
+  });
+  root.dataset.fxControlStabilityR321='targeted-controls-observer';
+}
+function bindAudioObserver(){
+  if(audioObserver)return;
+  audioObserver=new MutationObserver(()=>schedule(true));
+  audioObserver.observe(root,{
+    attributes:true,
+    attributeFilter:['data-fx-audio-owner','data-fx-audio-state','data-fx-audio-level']
+  });
+  root.dataset.fxAudioControlHandoffR321='observed';
 }
 function reconcile(force=false){
   queued=false;if(applying)return false;
@@ -218,9 +258,10 @@ function reconcile(force=false){
       lastMobile=mobile;
       root.dataset.fxControlOwnerR264='ready';
       root.dataset.fxControlOwnerR268='ready';
+      bindControlObserver(hero);
       bootObserver?.disconnect();bootObserver=null;
       if(bootTimer)clearTimeout(bootTimer);bootTimer=0;
-      dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r280'}}));
+      dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r321'}}));
       return true;
     }
     return false;
@@ -231,6 +272,7 @@ function schedule(force=false){
   requestAnimationFrame(()=>reconcile(force));
 }
 function boot(){
+  bindAudioObserver();
   if(reconcile(true))return;
   if(bootObserver)return;
   const target=document.body||document.documentElement;
@@ -260,5 +302,6 @@ for(const eventName of ['formatx:languagechange','formatx:real3dready','formatx:
 addEventListener('formatx:immersiveactivate',()=>schedule(true),{passive:true});
 addEventListener('resize',()=>schedule(true),{passive:true});
 addEventListener('orientationchange',()=>schedule(true),{passive:true});
+for(const delay of [250,900,2200,5000])setTimeout(()=>schedule(true),delay);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 }());
