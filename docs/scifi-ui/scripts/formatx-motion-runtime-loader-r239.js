@@ -1,7 +1,7 @@
-/* FormatX r284 — first-frame core now, cinematic enhancement on intent.
-   The native MAG and recovery path remain immediate. Continuity, heartbeat,
-   narrative and seamless-carrier modules start only after a real navigation or
-   interaction boundary, keeping the idle landing page measurable and responsive. */
+/* FormatX r313 — first-frame shell before mobile cinematic enhancement.
+   Desktop keeps its proven immediate native-core path. Mobile deliberately
+   reaches DOMContentLoaded before mounting the Real3D/recovery/signature chain,
+   preventing dynamic script/style work from starving the navigation lifecycle. */
 (function () {
   'use strict';
 
@@ -51,6 +51,7 @@
 
   const mounted = new Set();
   const deferred = [];
+  const mobilePostDomCore = [];
   const passive = { passive: true };
   const intentListeners = [
     ['pointerdown', passive],
@@ -60,6 +61,8 @@
     ['keydown', false]
   ];
   let enhancementsStarted = false;
+  let enhancementIntentQueued = false;
+  let mobileCoreScheduled = false;
 
   function srcOf(spec) {
     return String(spec.getAttribute('src') || '');
@@ -103,9 +106,10 @@
     for (const [type, options] of intentListeners) removeEventListener(type, startEnhancements, options);
   }
 
-  function startEnhancements() {
+  function mountEnhancements() {
     if (enhancementsStarted) return;
     enhancementsStarted = true;
+    enhancementIntentQueued = false;
     disarmIntent();
     let requested = 0;
     for (const spec of deferred) if (mount(spec)) requested += 1;
@@ -113,7 +117,45 @@
     root.dataset.fxMotionRuntimeR239 = 'enhanced-r284-user-intent';
   }
 
-  ensureStaticMotionCss();
+  function startEnhancements() {
+    if (enhancementsStarted) return;
+    if (mobile.matches && document.readyState === 'loading') {
+      if (enhancementIntentQueued) return;
+      enhancementIntentQueued = true;
+      root.dataset.fxMotionRuntimeIntentR313 = 'held-until-postdom';
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(mountEnhancements, 0);
+      }, { once: true });
+      return;
+    }
+    mountEnhancements();
+  }
+
+  function mountMobileCorePostDom() {
+    if (!mobile.matches || mobileCoreScheduled) return;
+    mobileCoreScheduled = true;
+    root.dataset.fxMotionRuntimeMobileCoreR313 = 'waiting-domcontentloaded';
+
+    const mountAfterDom = () => setTimeout(() => {
+      ensureStaticMotionCss();
+      let requested = 0;
+      for (const spec of mobilePostDomCore) if (mount(spec)) requested += 1;
+      root.dataset.fxMotionRuntimeRequestedR271 = String(requested);
+      root.dataset.fxMotionRuntimeMobileCoreR313 = 'postdom-mounted';
+      root.dataset.fxMotionRuntimeR239 = 'core-ready-r284-mobile-idle-safe';
+    }, 0);
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', mountAfterDom, { once: true });
+    } else {
+      mountAfterDom();
+    }
+  }
+
+  // Desktop can establish its native visual layer immediately. On mobile even
+  // the static enhancement stylesheet waits until after DOMContentLoaded so the
+  // parser/defer lifecycle has no dynamically inserted style dependency.
+  if (!mobile.matches) ensureStaticMotionCss();
 
   let immediateRequested = 0;
   let skippedMobileEnergy = 0;
@@ -125,7 +167,11 @@
     }
 
     if (isImmediateCore(spec)) {
-      if (mount(spec)) immediateRequested += 1;
+      if (mobile.matches) {
+        mobilePostDomCore.push(spec);
+      } else if (mount(spec)) {
+        immediateRequested += 1;
+      }
       continue;
     }
 
@@ -135,9 +181,12 @@
   root.dataset.fxMotionRuntimeRequestedR271 = String(immediateRequested);
   root.dataset.fxMotionRuntimeMobileEnergySkippedR271 = String(skippedMobileEnergy);
   root.dataset.fxMotionRuntimeDeferredCountR284 = String(deferred.length);
+  root.dataset.fxMotionRuntimeMobileCoreCountR313 = String(mobilePostDomCore.length);
   root.dataset.fxMotionRuntimeR239 = mobile.matches
     ? 'core-ready-r284-mobile-idle-safe'
     : 'core-ready-r284-desktop-idle-safe';
+
+  if (mobilePostDomCore.length) mountMobileCorePostDom();
 
   if (deferred.length) {
     for (const [type, options] of intentListeners) addEventListener(type, startEnhancements, options);
