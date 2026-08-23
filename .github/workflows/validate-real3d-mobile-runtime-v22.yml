@@ -6,6 +6,8 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
@@ -13,6 +15,7 @@ on:
       - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
       - 'docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'
+      - '.github/scripts/validate-real3d-core-v20.cjs'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/workflows/validate-real3d-mobile-runtime-v22.yml'
   workflow_dispatch:
@@ -25,10 +28,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Validate current r99 source contracts
+      - name: Validate current r317 r318 source contracts
         run: |
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          node .github/scripts/validate-real3d-core-v20.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Install Chromium runtime
         shell: bash
@@ -38,7 +44,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify native r99 WebGL animation interaction layout performance and WebGL1 fallback
+      - name: Verify r317 r318 WebGL interaction controls and WebGL1 fallback
         shell: bash
         run: |
           set -euo pipefail
@@ -53,27 +59,77 @@ jobs:
             const page=await ctx.newPage();
             if(blockWebGL2)await page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,attrs){if(type==='webgl2')return null;return original.call(this,type,attrs);};});
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileR99==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:45000});
-            await page.waitForTimeout(1200);
-            const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])]}));
+            await page.waitForFunction(()=>{
+              const d=document.documentElement.dataset;
+              return d.fxCoreMobileR317==='ready-v69'
+                && d.fxCoreRendererSelection==='modern-r317-primary'
+                && d.fxCoreSoftlightR318==='shader-tuned'
+                && d.fxMobileReferenceLayout==='ready-v1'
+                && window.FormatXCoreMobileV69?.version==='reference-crystal-webgl-r317-modern-flat-normal-fresnel';
+            },null,{timeout:45000});
+            await page.waitForTimeout(800);
+            const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0)}));
             await page.touchscreen.tap(195,330);await page.waitForTimeout(360);
-            const state=await page.evaluate(()=>{const root=document.documentElement,canvas=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),box=canvas?.getBoundingClientRect(),genome=document.querySelector('.fx-genome-launcher'),sound=document.querySelector('.fx-three-sound'),soundBox=sound?.getBoundingClientRect(),soundStyle=sound?getComputedStyle(sound):null,pause=document.querySelector('.fx-reference-pause'),pauseBox=pause?.getBoundingClientRect(),gl2=canvas?.getContext('webgl2'),gl=gl2||canvas?.getContext('webgl'),soundHit=soundBox?document.elementFromPoint(soundBox.x+soundBox.width/2,soundBox.y+soundBox.height/2):null;return{renderer:root.dataset.fxCoreRenderer,geometry:root.dataset.fxCoreReferenceGeometry,material:root.dataset.fxCoreReferenceMaterial,interaction:root.dataset.fxCoreInteractionVisual,verified:root.dataset.fxCoreFrameVerified,gpu:root.dataset.fxGpuCapability,v55:root.dataset.fxCoreMobileV55,v69:root.dataset.fxCoreMobileV69,r99:root.dataset.fxCoreMobileR99,layout:root.dataset.fxMobileReferenceLayout,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,legacyStages:document.querySelectorAll('.fx-core-mesh3d-stage,.fx-core-fracture3d-stage,.fx-transcend-shell[data-fx-native-apex="true"]').length,width:box?.width||0,height:box?.height||0,vw:innerWidth,vh:innerHeight,gl:Boolean(gl),glError:gl?.getError(),energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])],renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),heading:Boolean(document.querySelector('.fx-reference-heading')),proof:Boolean(document.querySelector('.fx-reference-proof')),rail:Boolean(document.querySelector('.fx-reference-rail')),genomeDisplay:genome?getComputedStyle(genome).display:'absent',soundDisplay:soundStyle?.display||'absent',soundVisibility:soundStyle?.visibility||'absent',soundOpacity:Number(soundStyle?.opacity||0),soundWidth:soundBox?.width||0,soundHeight:soundBox?.height||0,soundTopMost:Boolean(sound&&soundHit&&sound.contains(soundHit)),pauseTopMost:pauseBox?document.elementFromPoint(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2)===pause:false};});
-            assert.equal(state.renderer,'single-webgl-luminous-crystal-r99');
-            assert.equal(state.geometry,'reference-deep-concave-four-point-size-lock-r99');
-            assert.equal(state.material,'luminous-faceted-iceglass-caustic-r99');
-            assert.equal(state.interaction,'touch-pointer-breathing-spectral-refraction-r99');
-            assert.equal(state.verified,'visible-native-3d-r99');
-            assert.equal(state.gpu,blockWebGL2?'webgl1':'webgl2');
-            assert.equal(state.v55,'ready-v55');assert.equal(state.v69,'ready-v69');assert.equal(state.r99,'ready-v69');assert.equal(state.layout,'ready-v1');
-            assert.equal(state.canvases,1);assert.equal(state.legacyStages,0);assert.equal(state.gl,true);assert.equal(state.glError,0);
+            const state=await page.evaluate(()=>{
+              const root=document.documentElement;
+              const api=window.FormatXCoreMobileV69;
+              const stage=document.querySelector('#hero .fx-core-r317-stage');
+              const canvas=stage?.querySelector('.fx-core-r317-canvas');
+              const box=canvas?.getBoundingClientRect();
+              const genome=document.querySelector('.fx-genome-launcher');
+              const sound=document.querySelector('.fx-three-sound');
+              const soundBox=sound?.getBoundingClientRect();
+              const soundStyle=sound?getComputedStyle(sound):null;
+              const pause=document.querySelector('.fx-reference-pause');
+              const pauseBox=pause?.getBoundingClientRect();
+              const gl2=canvas?.getContext('webgl2');
+              const gl=gl2||canvas?.getContext('webgl');
+              const soundHit=soundBox?document.elementFromPoint(soundBox.x+soundBox.width/2,soundBox.y+soundBox.height/2):null;
+              return{
+                version:api?.version||'',quality:api?.quality||'',scheduler:api?.scheduler||'',
+                selection:root.dataset.fxCoreRendererSelection||'',softlight:root.dataset.fxCoreSoftlightR318||'',
+                rim:root.dataset.fxCoreRimProfileR318||'',glow:root.dataset.fxCoreGlowProfileR318||'',
+                r317:root.dataset.fxCoreMobileR317||'',layout:root.dataset.fxMobileReferenceLayout||'',
+                stageCount:document.querySelectorAll('#hero .fx-core-r317-stage').length,
+                canvasCount:document.querySelectorAll('#hero .fx-core-r317-canvas').length,
+                width:box?.width||0,height:box?.height||0,vw:innerWidth,vh:innerHeight,
+                gl:Boolean(gl),webgl2:Boolean(gl2),glError:gl?.getError(),
+                energy:Number(api?.energy||0),renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),
+                heading:Boolean(document.querySelector('.fx-reference-heading')),
+                proof:Boolean(document.querySelector('.fx-reference-proof')),
+                rail:Boolean(document.querySelector('.fx-reference-rail')),
+                genomeDisplay:genome?getComputedStyle(genome).display:'absent',
+                soundDisplay:soundStyle?.display||'absent',soundVisibility:soundStyle?.visibility||'absent',
+                soundOpacity:Number(soundStyle?.opacity||0),soundWidth:soundBox?.width||0,soundHeight:soundBox?.height||0,
+                soundTopMost:Boolean(sound&&soundHit&&sound.contains(soundHit)),
+                pauseTopMost:pauseBox?document.elementFromPoint(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2)===pause:false
+              };
+            });
+            assert.equal(state.version,'reference-crystal-webgl-r317-modern-flat-normal-fresnel');
+            assert.equal(state.quality,'modern-flat-normal-fresnel-microfacet-r317');
+            assert.equal(state.scheduler,'bounded-interaction-bursts-no-idle-raf');
+            assert.equal(state.selection,'modern-r317-primary');
+            assert.equal(state.softlight,'shader-tuned');
+            assert.equal(state.rim,'narrower-softer-fresnel');
+            assert.equal(state.glow,'reduced-mobile-perimeter');
+            assert.equal(state.r317,'ready-v69');assert.equal(state.layout,'ready-v1');
+            assert.equal(state.stageCount,1);assert.equal(state.canvasCount,1);assert.equal(state.gl,true);assert.equal(state.glError,0);
+            assert.equal(state.webgl2,!blockWebGL2);
             assert.equal(state.heading,true);assert.equal(state.proof,true);assert.equal(state.rail,true);
             assert.ok(state.width<=state.vw+1&&state.height<=state.vh+1,JSON.stringify(state));
-            assert.ok(state.energy>=before.energy,JSON.stringify({before,after:state}));assert.equal(state.position.length,3);assert.notDeepEqual(state.position,before.position);
-            assert.ok(state.renderMs<16.67,JSON.stringify(state));assert.ok(['none','absent'].includes(state.genomeDisplay));assert.notEqual(state.soundDisplay,'none');assert.notEqual(state.soundVisibility,'hidden');assert.ok(state.soundOpacity>.02);assert.ok(state.soundWidth>=44&&state.soundHeight>=44,JSON.stringify(state));assert.equal(state.soundTopMost,true);assert.equal(state.pauseTopMost,true);
-            const pauseBox=await page.locator('.fx-reference-pause').first().boundingBox();assert.ok(pauseBox);await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(80);const pausedFrom=await page.evaluate(()=>[document.querySelector('.fx-reference-pause')?.dataset.paused,[...(window.FormatXCoreCinematic?.corePosition||[])]]);await page.waitForTimeout(360);const pausedTo=await page.evaluate(()=>[document.querySelector('.fx-reference-pause')?.dataset.paused,[...(window.FormatXCoreCinematic?.corePosition||[])]]);assert.equal(pausedFrom[0],'true');assert.equal(pausedTo[0],'true');assert.deepEqual(pausedTo[1],pausedFrom[1]);await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(80);assert.equal(await page.locator('.fx-reference-pause').first().getAttribute('data-paused'),'false');
+            assert.ok(state.energy>=before.energy,JSON.stringify({before,after:state}));
+            assert.ok(state.renderMs<16.67,JSON.stringify(state));
+            assert.ok(['none','absent'].includes(state.genomeDisplay));
+            assert.notEqual(state.soundDisplay,'none');assert.notEqual(state.soundVisibility,'hidden');assert.ok(state.soundOpacity>.02);
+            assert.ok(state.soundWidth>=44&&state.soundHeight>=44,JSON.stringify(state));assert.equal(state.soundTopMost,true);assert.equal(state.pauseTopMost,true);
+            const pauseBox=await page.locator('.fx-reference-pause').first().boundingBox();assert.ok(pauseBox);
+            await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(100);
+            assert.equal(await page.locator('.fx-reference-pause').first().getAttribute('data-paused'),'true');
+            await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(100);
+            assert.equal(await page.locator('.fx-reference-pause').first().getAttribute('data-paused'),'false');
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: current r99 native WebGL layout, animation, interaction, visible SOUND control, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r318 softer rim/glow tuning, controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish responsive runtime status
         if: always()
@@ -82,5 +138,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Current r99 native WebGL runtime and render budget passed'; else state=failure; description='Current r99 responsive runtime failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r317/r318 mobile MAG runtime and render budget passed'; else state=failure; description='r317/r318 responsive runtime failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v69 responsive runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
