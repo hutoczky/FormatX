@@ -1,5 +1,5 @@
 name: Verify live responsive true 3D MAG
-run-name: Validate production r312 WebGL MAG and living pulse on desktop and mobile
+run-name: Validate production r317/r323 WebGL MAG and living pulse on desktop and mobile
 on:
   push:
     branches: [master]
@@ -28,7 +28,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Validate live r312 MAG startup pulse visuals interaction and information integrity
+      - name: Validate live current MAG startup pulse visuals interaction and information integrity
         shell: bash
         run: |
           set -euo pipefail
@@ -79,7 +79,7 @@ jobs:
             diagnostics(page, name);
 
             const started = Date.now();
-            await page.goto(`${origin}/?live_mag_r312=${name}-${Date.now()}`, {
+            await page.goto(`${origin}/?live_mag_current=${name}-${Date.now()}`, {
               waitUntil: 'domcontentloaded',
               timeout: 30000
             });
@@ -90,6 +90,7 @@ jobs:
             await page.waitForFunction(expectedLayout => {
               const root = document.documentElement;
               return root.dataset.fxCoreMobileV69 === 'ready-v69'
+                && root.dataset.fxCoreMobileR317 === 'ready-v69'
                 && root.dataset.fxMobileReferenceLayout === expectedLayout
                 && root.dataset.fxCoreRenderer === 'single-webgl-luminous-crystal-r99';
             }, expected, { timeout: 60000 });
@@ -100,7 +101,7 @@ jobs:
             await page.waitForTimeout(220);
             const pulseAfter = await pulseState(page);
 
-            assert.equal(pulseBefore.marker, 'compositor-lub-dub', `${name}: r312 pulse stylesheet marker missing`);
+            assert.equal(pulseBefore.marker, 'compositor-lub-dub', `${name}: compositor pulse stylesheet marker missing`);
             assert.equal(pulseBefore.exists, true, `${name}: MAG stage missing for pulse`);
             assert.match(pulseBefore.animationName, /fx-core-pulse-r312/, `${name}: living MAG animation not applied`);
             assert.equal(pulseBefore.playState, 'running', `${name}: living MAG pulse is not running`);
@@ -122,6 +123,7 @@ jobs:
 
             const state = await page.evaluate(() => {
               const root = document.documentElement;
+              const stage = document.querySelector('#hero .fx-core-r317-stage');
               const canvas = document.querySelector('#hero .fx-core-mobile-v55-canvas');
               const box = canvas?.getBoundingClientRect();
               const gl = canvas?.getContext('webgl2') || canvas?.getContext('webgl');
@@ -163,9 +165,12 @@ jobs:
               const live = refProof?.querySelector('.fx-reference-liveos');
               return {
                 renderer: root.dataset.fxCoreRenderer,
-                geometry: root.dataset.fxCoreReferenceGeometry,
-                material: root.dataset.fxCoreReferenceMaterial,
-                interaction: root.dataset.fxCoreInteractionVisual,
+                stageRenderer: stage?.dataset.renderer || '',
+                r317: root.dataset.fxCoreMobileR317 || '',
+                quality: root.dataset.fxCoreQualityR317 || '',
+                scheduler: root.dataset.fxCoreSchedulerR317 || '',
+                biolume: root.dataset.fxCoreBiolumeR323 || '',
+                biolumeProfile: root.dataset.fxCoreBiolumeProfileR323 || '',
                 v69: root.dataset.fxCoreMobileV69,
                 layout: root.dataset.fxMobileReferenceLayout,
                 composition: root.dataset.fxReferenceComposition,
@@ -190,12 +195,13 @@ jobs:
             });
 
             console.log(name.toUpperCase(), JSON.stringify({ domReadyMs, pulseBefore, pulseAfter, before, state }));
-            await page.screenshot({ path: `${name}-r312.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
+            await page.screenshot({ path: `${name}-current.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
 
             assert.equal(state.renderer, 'single-webgl-luminous-crystal-r99');
-            assert.equal(state.geometry, 'reference-deep-concave-four-point-size-lock-r99');
-            assert.equal(state.material, 'luminous-faceted-iceglass-caustic-r99');
-            assert.equal(state.interaction, 'touch-pointer-breathing-spectral-refraction-r99');
+            assert.equal(state.stageRenderer, 'reference-r317-modern-crystal');
+            assert.equal(state.r317, 'ready-v69');
+            assert.equal(state.quality, 'modern-flat-normal-fresnel-microfacet');
+            assert.equal(state.scheduler, 'bounded-interaction-bursts-no-idle-raf');
             assert.equal(state.v69, 'ready-v69');
             assert.equal(state.layout, expected);
             assert.equal(state.pulse, 'compositor-lub-dub');
@@ -207,6 +213,8 @@ jobs:
             assert.equal(state.proofOverlap, false);
 
             if (mobile) {
+              assert.equal(state.biोलume || state.biolume, 'ready');
+              assert.equal(state.biolumeProfile, 'deep-water-iridescent-traveling-rim');
               assert.equal(state.bootstrap, 'postdom-real3d-and-pulse');
               assert.equal(state.paused, 'false');
               assert.equal(state.narrowProof, 'ready');
@@ -215,6 +223,7 @@ jobs:
               assert.ok(state.referenceVisible >= 3);
               assert.equal(state.liveTextOverlap, false, JSON.stringify(state));
             } else {
+              assert.ok(['desktop-skip',''].includes(state.biolume), JSON.stringify(state));
               assert.equal(state.composition, 'desktop-reference-r244');
               assert.ok(state.referenceVisible >= 2, JSON.stringify(state));
               assert.equal(state.heroCopyVisible, true);
@@ -234,18 +243,18 @@ jobs:
             } finally {
               await browser.close();
             }
-            for (const file of ['desktop-r312.png','mobile-r312.png']) assert.ok(fs.statSync(file).size > 10000, file);
-            console.log('PASS: live r312 desktop/mobile startup, WebGL MAG, continuous compositor pulse, interaction and information integrity passed.');
+            for (const file of ['desktop-current.png','mobile-current.png']) assert.ok(fs.statSync(file).size > 10000, file);
+            console.log('PASS: live current r317/r323 desktop/mobile WebGL MAG, compositor pulse, interaction and information integrity passed.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
       - name: Upload live MAG captures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-mag-r312-${{ github.run_id }}
+          name: live-mag-current-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-live/desktop-r312.png
-            ${{ runner.temp }}/mag-live/mobile-r312.png
+            ${{ runner.temp }}/mag-live/desktop-current.png
+            ${{ runner.temp }}/mag-live/mobile-current.png
           if-no-files-found: warn
           retention-days: 14
       - name: Publish live MAG status
@@ -256,5 +265,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live r312 desktop/mobile startup, MAG and pulse passed'; else state=failure; description='Live r312 desktop/mobile MAG/pulse diagnostic failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live current r317/r323 desktop/mobile MAG and pulse passed'; else state=failure; description='Live current desktop/mobile MAG/pulse diagnostic failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG r312' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
