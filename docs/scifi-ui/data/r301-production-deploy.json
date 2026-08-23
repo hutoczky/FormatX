@@ -1,0 +1,6 @@
+{
+  "revision": "r301",
+  "validatedCommit": "3347bf992f4278fdd64f80c8ad19765ec786c457",
+  "qualityGates": "green",
+  "purpose": "deploy validated r301 production candidate"
+}
