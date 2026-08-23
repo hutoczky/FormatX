@@ -49,20 +49,20 @@ for (const token of [
 
 assert.doesNotMatch(renderer, /new\s+Image\s*\(|drawImage\s*\(|three\.js|\bTHREE\./i);
 
-// r298 is deliberately state-only. It publishes the mobile/desktop reference
-// mode before later runtimes start, but it must not recreate any retired DOM
-// overlay, legacy 2D optics or layout geometry.
+// r298 is deliberately state-only. It may inspect canonical ownership markers
+// and publish data attributes, but it must never recreate retired overlay DOM or
+// perform inline geometry writes during startup.
 for (const token of [
-  'fxFlowFirstR298',
-  'pure-webgl3d-state-only',
-  'pure-webgl3d-no-dom-optics',
-  'gpu-surface-r285',
-  'none-pure-webgl3d',
-  'formatx:flowfirstchange'
+  'r298-state-only-no-layout-writes',
+  'compatibility-dormant-r298',
+  'delegated-r208',
+  'fxFlowFirstScheduling',
+  'fxFlowFirstConflict',
+  'canonicalOwner'
 ]) {
   assert.ok(flow.includes(token), `missing current r298 flow-first contract: ${token}`);
 }
-assert.doesNotMatch(flow, /award-reference-overlay-r139|desktop-native-content-r139|createElement\s*\(|querySelector\s*\(|appendChild\s*\(|insertBefore\s*\(|innerHTML|style\.setProperty/);
+assert.doesNotMatch(flow, /award-reference-overlay-r139|desktop-native-content-r139|createElement\s*\(|appendChild\s*\(|insertBefore\s*\(|innerHTML|style\.setProperty|\.style\./);
 
 assert.match(layout, /mobileViewport=.*max-width:900px/);
 assert.match(layout, /restoreDesktopMenu/);
@@ -75,4 +75,4 @@ assert.match(entry, /formatx-reference-core-v26\.js/);
 
 for (const source of [selector, bootstrap, wrapper, renderer, flow, layout]) new Function(source);
 
-console.log('PASS: r298 state-only flow + r285 pure native WebGL3D bootstrap + r99 luminous faceted touch-interactive crystal MAG are the production reference authority.');
+console.log('PASS: actual r298 state-only flow + r285 pure native WebGL3D bootstrap + r99 luminous faceted touch-interactive crystal MAG are the production reference authority.');
