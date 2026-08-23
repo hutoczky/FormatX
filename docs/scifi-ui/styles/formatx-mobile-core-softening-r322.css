@@ -1,7 +1,6 @@
-/* FormatX r323 — mobile MAG optical balance + bioluminescent perimeter.
-   Overrides the legacy r109 high-contrast/drop-shadow stack only on mobile,
-   preserving the r317 geometry while giving the outer contour a softer,
-   living deep-water iridescence. */
+/* FormatX r324 — mobile MAG balanced glow + softened bioluminescent perimeter.
+   Keeps the r317 crystal geometry and r323 living rim, but reduces the outer
+   bloom and hard contour emphasis on small screens for a calmer glass depth. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage {
@@ -9,21 +8,21 @@
   }
 
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .91 !important;
+    opacity: .90 !important;
     filter:
-      brightness(.86)
-      contrast(1.06)
-      saturate(1.16)
-      blur(.24px)
-      drop-shadow(0 0 1.5px rgba(124,245,255,.34))
-      drop-shadow(0 0 7px rgba(32,142,255,.18)) !important;
+      brightness(.85)
+      contrast(1.02)
+      saturate(1.11)
+      blur(.32px)
+      drop-shadow(0 0 1.4px rgba(124,245,255,.27))
+      drop-shadow(0 0 5.5px rgba(32,142,255,.13)) !important;
     -webkit-filter:
-      brightness(.86)
-      contrast(1.06)
-      saturate(1.16)
-      blur(.24px)
-      drop-shadow(0 0 1.5px rgba(124,245,255,.34))
-      drop-shadow(0 0 7px rgba(32,142,255,.18)) !important;
+      brightness(.85)
+      contrast(1.02)
+      saturate(1.11)
+      blur(.32px)
+      drop-shadow(0 0 1.4px rgba(124,245,255,.27))
+      drop-shadow(0 0 5.5px rgba(32,142,255,.13)) !important;
   }
 
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
@@ -35,7 +34,7 @@
     overflow: visible;
     pointer-events: none;
     mix-blend-mode: screen;
-    opacity: .82;
+    opacity: .72;
   }
 
   #hero .fx-core-biolume-r323 path {
@@ -46,38 +45,38 @@
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke: rgba(67,202,255,.30);
-    stroke-width: 1.45;
-    filter: blur(2.4px);
-    opacity: .42;
+    stroke: rgba(67,202,255,.26);
+    stroke-width: 1.30;
+    filter: blur(2.8px);
+    opacity: .35;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
     stroke: url(#fx-biolume-gradient-r323);
-    stroke-width: .54;
-    opacity: .62;
-    filter: blur(.18px);
+    stroke-width: .50;
+    opacity: .50;
+    filter: blur(.24px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .72;
+    stroke-width: .64;
     stroke-dasharray: 4.5 15 2 21;
     animation: fx-biolume-travel-r323 11.5s linear infinite;
-    filter: drop-shadow(0 0 1.6px currentColor) blur(.08px);
+    filter: drop-shadow(0 0 1.2px currentColor) blur(.12px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a {
     stroke: #75f7ff;
     color: #75f7ff;
-    opacity: .82;
+    opacity: .72;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b {
     stroke: #8a78ff;
     color: #8a78ff;
-    opacity: .66;
+    opacity: .56;
     stroke-dasharray: 2.5 20 5.5 17;
     animation-duration: 15.5s;
     animation-direction: reverse;
@@ -86,7 +85,7 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     stroke: #71ffd0;
     color: #71ffd0;
-    opacity: .44;
+    opacity: .38;
     stroke-dasharray: 1.5 27 3.5 23;
     animation-duration: 19s;
   }
@@ -94,25 +93,25 @@
 
 @media (max-width: 430px) {
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .90 !important;
+    opacity: .89 !important;
     filter:
-      brightness(.84)
-      contrast(1.03)
-      saturate(1.13)
-      blur(.31px)
-      drop-shadow(0 0 1.5px rgba(126,247,255,.30))
-      drop-shadow(0 0 6px rgba(37,137,255,.15)) !important;
+      brightness(.83)
+      contrast(1)
+      saturate(1.09)
+      blur(.38px)
+      drop-shadow(0 0 1.3px rgba(126,247,255,.24))
+      drop-shadow(0 0 4.8px rgba(37,137,255,.11)) !important;
     -webkit-filter:
-      brightness(.84)
-      contrast(1.03)
-      saturate(1.13)
-      blur(.31px)
-      drop-shadow(0 0 1.5px rgba(126,247,255,.30))
-      drop-shadow(0 0 6px rgba(37,137,255,.15)) !important;
+      brightness(.83)
+      contrast(1)
+      saturate(1.09)
+      blur(.38px)
+      drop-shadow(0 0 1.3px rgba(126,247,255,.24))
+      drop-shadow(0 0 4.8px rgba(37,137,255,.11)) !important;
   }
 
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .76;
+    opacity: .68;
   }
 }
 
@@ -126,6 +125,6 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     animation: none !important;
-    opacity: .34;
+    opacity: .30;
   }
 }
