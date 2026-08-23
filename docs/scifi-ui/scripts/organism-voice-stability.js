@@ -2,8 +2,8 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxOrganismVoiceStability === 'ready-v3') return;
-  ROOT.dataset.fxOrganismVoiceStability = 'loading-v3';
+  if (ROOT.dataset.fxOrganismVoiceStability === 'ready-v4') return;
+  ROOT.dataset.fxOrganismVoiceStability = 'loading-v4';
 
   const MOBILE = matchMedia('(max-width: 820px), (pointer: coarse)');
   let shell = null;
@@ -74,12 +74,10 @@
     viewportFrame = 0;
     if (!(shell instanceof HTMLElement)) return;
 
-    const bubble = shell.querySelector('.fx-organism-thought');
     if (!MOBILE.matches) {
-      shell.style.removeProperty('bottom');
-      shell.style.removeProperty('max-height');
-      bubble?.style.removeProperty('max-height');
+      shell.removeAttribute('data-fx-mobile-viewport');
       ROOT.dataset.fxOrganismViewport = 'desktop-css';
+      ROOT.dataset.fxOrganismKeyboardInset = '0';
       return;
     }
 
@@ -87,17 +85,14 @@
     const visibleHeight = Math.max(220, viewport?.height || innerHeight);
     const visibleBottom = (viewport?.offsetTop || 0) + visibleHeight;
     const keyboardInset = Math.max(0, innerHeight - visibleBottom);
-    const bottomInset = Math.max(72, Math.round(keyboardInset + 12));
-    const shellHeight = Math.max(180, Math.floor(visibleHeight - 24));
-    const bubbleHeight = Math.max(150, Math.floor(visibleHeight - 104));
 
-    shell.style.bottom = bottomInset + 'px';
-    shell.style.maxHeight = shellHeight + 'px';
-    if (bubble instanceof HTMLElement) bubble.style.maxHeight = bubbleHeight + 'px';
-
-    ROOT.dataset.fxOrganismViewport = 'visual-viewport-v1';
+    /* CSP-safe r318: viewport geometry is owned by external CSS using svh/dvh.
+       JavaScript publishes only semantic state; it never writes style attributes
+       or custom properties, so strict style-src remains fully enforceable. */
+    shell.dataset.fxMobileViewport = keyboardInset > 24 ? 'keyboard' : 'full';
+    ROOT.dataset.fxOrganismViewport = 'css-dynamic-viewport-v2';
     ROOT.dataset.fxOrganismKeyboardInset = String(Math.round(keyboardInset));
-    ROOT.style.setProperty('--fx-organism-visible-height', visibleHeight.toFixed(1) + 'px');
+    ROOT.dataset.fxOrganismVisibleHeight = String(Math.round(visibleHeight));
   }
 
   function scheduleViewportSync() {
@@ -130,7 +125,7 @@
 
     shell = candidates[candidates.length - 1];
     candidates.slice(0, -1).forEach(node => node.remove());
-    shell.dataset.fxVoiceStability = 'ready-v3';
+    shell.dataset.fxVoiceStability = 'ready-v4';
     repairAccessibility(shell);
     suspendForOverlay();
     scheduleViewportSync();
@@ -150,7 +145,7 @@
       bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     }
 
-    ROOT.dataset.fxOrganismVoiceStability = 'ready-v3';
+    ROOT.dataset.fxOrganismVoiceStability = 'ready-v4';
     dispatchEvent(new CustomEvent('formatx:organismvoicestabilityready', {
       detail: {
         duplicateGuard: true,
@@ -158,7 +153,8 @@
         liveRegion: 'response-only',
         mobileVisualViewportGuard: true,
         panelDialogueHandoff: true,
-        explicitOpenVisibilityGuard: true
+        explicitOpenVisibilityGuard: true,
+        cspSafeViewportOwnership: true
       }
     }));
     return true;
