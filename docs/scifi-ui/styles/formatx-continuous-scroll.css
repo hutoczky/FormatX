@@ -1,7 +1,8 @@
 /* FormatX native continuous scroll policy.
-   Production revision: 2026-08-12 mobile-seamless-r5.
-   Mobile keeps browser-owned momentum and uses the seamless visual bridge only
-   after touch/momentum ownership has ended. */
+   Production revision: 2026-08-23 mobile-content-flow-r305.
+   Mobile keeps browser-owned momentum and realises chapter content immediately,
+   so no synthetic intrinsic-height placeholders or reveal states can create
+   empty screens between the visible section heading and its real content. */
 
 html,
 body,
@@ -58,10 +59,101 @@ body {
   .fx-category-deck,
   .fx-static-live-os,
   .fx-award-proof,
+  .fx-origin-proof,
+  .fx-product-showcase,
   #user-feedback {
     scroll-snap-align: none !important;
     scroll-snap-stop: normal !important;
     touch-action: pan-y pinch-zoom !important;
+  }
+
+  /* r305: mobile chapter geometry is content-sized from first paint onward.
+     Do not wait for the seamless controller marker before removing the legacy
+     cinematic 104/118svh scene reserve. That late-state dependency was the
+     source of the large black gaps visible on real Android Chrome. */
+  main#main-content > .scene:not(#hero),
+  .fx-organism-chapter {
+    min-height: 0 !important;
+    height: auto !important;
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    contain: none !important;
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+    overflow-anchor: none !important;
+  }
+
+  .fx-organism-chapter-trigger {
+    min-height: 0 !important;
+    height: auto !important;
+    transform: none !important;
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    overflow-anchor: none !important;
+  }
+
+  /* r305: realise every real mobile content block unconditionally. The balanced
+     performance layer can reserve 900px for inactive desktop chapters, but a
+     touch document must never expose that synthetic placeholder to the user. */
+  :is(
+    main#main-content > .scene:not(#hero) > .flow,
+    main#main-content > .scene:not(#hero) > .cards,
+    main#main-content > .scene:not(#hero) > .pricing,
+    main#main-content > .scene:not(#hero) > .payment,
+    main#main-content > .scene:not(#hero) > .payment-console,
+    main#main-content > .scene:not(#hero) > #formatx-plan-qr-dock,
+    main#main-content > .scene:not(#hero) > .system-grid,
+    main#main-content > .scene:not(#hero) > .release-layout,
+    .fx-category-deck,
+    .fx-static-live-os,
+    .fx-award-proof,
+    .fx-origin-proof,
+    .fx-product-showcase,
+    #user-feedback
+  ) {
+    content-visibility: visible !important;
+    contain: none !important;
+    contain-intrinsic-size: none !important;
+    overflow-anchor: none !important;
+  }
+
+  /* The legacy reveal animation is decorative. On mobile, content visibility is
+     a correctness requirement: cards/pricing/proof must never occupy layout
+     while remaining transparent because an observer or enhancement runtime was
+     late, cancelled or interrupted by momentum scrolling. */
+  main#main-content > .scene:not(#hero) [data-reveal],
+  .fx-category-deck [data-reveal],
+  .fx-static-live-os [data-reveal],
+  .fx-award-proof [data-reveal],
+  .fx-origin-proof [data-reveal],
+  .fx-product-showcase [data-reveal],
+  #user-feedback [data-reveal] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    transform: none !important;
+    translate: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+
+  /* Keep the immediate child after every section heading close enough that a
+     phone cannot show a viewport-sized dead zone even if older cinematic CSS is
+     still present later in the cascade. */
+  main#main-content > .scene:not(#hero) > .section-heading {
+    margin-bottom: clamp(24px, 7vw, 38px) !important;
+  }
+
+  main#main-content > .scene:not(#hero) > :is(
+    .flow,
+    .cards,
+    .pricing,
+    .payment,
+    .system-grid,
+    .release-layout
+  ) {
+    margin-top: 0 !important;
   }
 
   /* Hard native momentum policy. It applies both while the shared seamless
@@ -79,53 +171,6 @@ body {
     right: 0 !important;
     left: 0 !important;
     transform: none !important;
-  }
-
-  /* Old Organism chapter CSS reserves 104svh per scene and 62svh per trigger.
-     That desktop presentation is intentionally removed on touch devices. */
-  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) main > .scene:not(#hero),
-  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) .fx-organism-chapter {
-    min-height: 0 !important;
-    height: auto !important;
-    scroll-snap-align: none !important;
-    scroll-snap-stop: normal !important;
-    contain: none !important;
-    content-visibility: visible !important;
-    contain-intrinsic-size: none !important;
-    overflow-anchor: none !important;
-  }
-
-  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) .fx-organism-chapter-trigger {
-    min-height: 0 !important;
-    height: auto !important;
-    transform: none !important;
-    scroll-snap-align: none !important;
-    scroll-snap-stop: normal !important;
-    overflow-anchor: none !important;
-  }
-
-  /* content-visibility:auto with a 900px synthetic intrinsic height can cause
-     a visible hitch when a phone crosses a chapter boundary. Realise the mobile
-     document normally so momentum never waits for a section activation. */
-  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) :is(
-    .flow,
-    .cards,
-    .pricing,
-    .payment,
-    .payment-console,
-    #formatx-plan-qr-dock,
-    .system-grid,
-    .release-layout,
-    .fx-category-deck,
-    .fx-static-live-os,
-    .fx-award-proof,
-    .fx-origin-proof,
-    #user-feedback
-  ) {
-    content-visibility: visible !important;
-    contain: none !important;
-    contain-intrinsic-size: none !important;
-    overflow-anchor: none !important;
   }
 
   /* The 3D stage remains visually untouched, but it never owns a touch gesture. */
