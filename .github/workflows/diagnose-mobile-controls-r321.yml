@@ -24,7 +24,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Measure control geometry across frames
+      - name: Measure control geometry and actionability
         shell: bash
         run: |
           set -euo pipefail
@@ -47,14 +47,16 @@ jobs:
               const snap=()=>{
                 const get=s=>document.querySelector(s);
                 const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,top:r.top,bottom:r.bottom,left:r.left,right:r.right}};
-                const style=e=>{if(!e)return null;const s=getComputedStyle(e);return{position:s.position,display:s.display,visibility:s.visibility,opacity:s.opacity,transform:s.transform,translate:s.translate,marginTop:s.marginTop,marginBottom:s.marginBottom,width:s.width,height:s.height,animation:s.animationName,transition:s.transitionProperty}};
+                const style=e=>{if(!e)return null;const s=getComputedStyle(e);return{position:s.position,display:s.display,visibility:s.visibility,opacity:s.opacity,pointerEvents:s.pointerEvents,transform:s.transform,translate:s.translate,marginTop:s.marginTop,marginBottom:s.marginBottom,width:s.width,height:s.height,animation:s.animationName,transition:s.transitionProperty}};
                 const sound=get('.fx-three-sound');
                 const controls=get('#hero .fx-reference-controls-r204');
                 const rail=get('#hero .fx-reference-rail');
                 const grid=get('#hero > .hero-grid');
                 const space=get('#hero .hero-space');
                 const hero=get('#hero');
-                return{scrollY,visualOffset:visualViewport?.offsetTop||0,sound:{r:rect(sound),s:style(sound),parent:sound?.parentElement?.className||''},controls:{r:rect(controls),s:style(controls),parent:controls?.parentElement?.className||''},rail:{r:rect(rail),s:style(rail)},grid:{r:rect(grid),s:style(grid)},space:{r:rect(space),s:style(space)},hero:{r:rect(hero),s:style(hero)},datasets:{layout:document.documentElement.dataset.fxReferenceControlLayout||'',owner:document.documentElement.dataset.fxControlOwnerR268||'',stability:document.documentElement.dataset.fxControlStabilityR321||'',mobileLayout:document.documentElement.dataset.fxMobileReferenceLayout||'',proofOwner:document.documentElement.dataset.fxMobileProofControls||'',r207:document.documentElement.dataset.fxMobileLayoutOwner||'',scrollMode:document.documentElement.dataset.fxMobileScrollMode||''}};
+                const sr=sound?.getBoundingClientRect();
+                const hit=sr?document.elementFromPoint(sr.left+sr.width/2,sr.top+sr.height/2):null;
+                return{scrollY,visualOffset:visualViewport?.offsetTop||0,sound:{r:rect(sound),s:style(sound),parent:sound?.parentElement?.className||'',disabled:Boolean(sound?.disabled),matchesDisabled:Boolean(sound?.matches?.(':disabled')),connected:Boolean(sound?.isConnected),inertSelf:Boolean(sound?.inert),inertAncestor:sound?.closest?.('[inert]')?.className||sound?.closest?.('[inert]')?.id||'',hitTag:hit?.tagName||'',hitClass:typeof hit?.className==='string'?hit.className:'',hitInside:Boolean(sound&&hit&&sound.contains(hit))},controls:{r:rect(controls),s:style(controls),parent:controls?.parentElement?.className||'',inertAncestor:controls?.closest?.('[inert]')?.className||controls?.closest?.('[inert]')?.id||''},rail:{r:rect(rail),s:style(rail)},grid:{r:rect(grid),s:style(grid)},space:{r:rect(space),s:style(space)},hero:{r:rect(hero),s:style(hero)},datasets:{layout:document.documentElement.dataset.fxReferenceControlLayout||'',owner:document.documentElement.dataset.fxControlOwnerR268||'',stability:document.documentElement.dataset.fxControlStabilityR321||'',mobileLayout:document.documentElement.dataset.fxMobileReferenceLayout||'',proofOwner:document.documentElement.dataset.fxMobileProofControls||'',r207:document.documentElement.dataset.fxMobileLayoutOwner||'',scrollMode:document.documentElement.dataset.fxMobileScrollMode||'',audioOwner:document.documentElement.dataset.fxAudioOwner||'',audioState:document.documentElement.dataset.fxAudioState||'',intro:document.documentElement.dataset.fxIntro||''}};
               };
               const out=[];
               for(let i=0;i<30;i++){
@@ -64,11 +66,25 @@ jobs:
               return out;
             });
             console.log('CONTROL_MOTION_BEGIN');
-            frames.forEach((f,i)=>console.log(JSON.stringify({i,scrollY:round(f.scrollY),visualOffset:round(f.visualOffset),sound:f.sound.r&&Object.fromEntries(Object.entries(f.sound.r).map(([k,v])=>[k,round(v)])),controls:f.controls.r&&Object.fromEntries(Object.entries(f.controls.r).map(([k,v])=>[k,round(v)])),grid:f.grid.r&&Object.fromEntries(Object.entries(f.grid.r).map(([k,v])=>[k,round(v)])),space:f.space.r&&Object.fromEntries(Object.entries(f.space.r).map(([k,v])=>[k,round(v)])),soundStyle:f.sound.s,controlsStyle:f.controls.s,datasets:f.datasets})));
+            frames.forEach((f,i)=>console.log(JSON.stringify({i,scrollY:round(f.scrollY),visualOffset:round(f.visualOffset),sound:f.sound,controls:f.controls.r&&Object.fromEntries(Object.entries(f.controls.r).map(([k,v])=>[k,round(v)])),grid:f.grid.r&&Object.fromEntries(Object.entries(f.grid.r).map(([k,v])=>[k,round(v)])),space:f.space.r&&Object.fromEntries(Object.entries(f.space.r).map(([k,v])=>[k,round(v)])),datasets:f.datasets})));
             console.log('CONTROL_MOTION_END');
             const ys=frames.map(f=>f.sound.r?.y).filter(Number.isFinite),xs=frames.map(f=>f.sound.r?.x).filter(Number.isFinite),ws=frames.map(f=>f.sound.r?.w).filter(Number.isFinite),hs=frames.map(f=>f.sound.r?.h).filter(Number.isFinite);
             const span=a=>a.length?Math.max(...a)-Math.min(...a):Infinity;
             console.log('CONTROL_MOTION_SUMMARY',JSON.stringify({xSpan:span(xs),ySpan:span(ys),wSpan:span(ws),hSpan:span(hs)}));
+            const sound=page.locator('.fx-three-sound:visible').first();
+            try{
+              await sound.click({trial:true,timeout:2500});
+              console.log('SOUND_TRIAL_CLICK','PASS');
+            }catch(error){
+              console.log('SOUND_TRIAL_CLICK','FAIL',String(error.message||error));
+              const state=await page.evaluate(()=>{
+                const s=document.querySelector('.fx-three-sound');
+                const r=s?.getBoundingClientRect();
+                const hit=r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
+                return{disabled:Boolean(s?.disabled),matchesDisabled:Boolean(s?.matches?.(':disabled')),connected:Boolean(s?.isConnected),hidden:Boolean(s?.hidden),ariaHidden:s?.getAttribute('aria-hidden'),inertSelf:Boolean(s?.inert),inertAncestor:s?.closest?.('[inert]')?.outerHTML?.slice(0,240)||'',pointerEvents:s?getComputedStyle(s).pointerEvents:'',hit:hit?.outerHTML?.slice(0,300)||'',hitInside:Boolean(s&&hit&&s.contains(hit)),rect:r?{x:r.x,y:r.y,w:r.width,h:r.height}:null};
+              });
+              console.log('SOUND_ACTION_STATE',JSON.stringify(state));
+            }
             await ctx.close();await browser.close();
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
@@ -79,5 +95,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Mobile control motion diagnostic completed'; else state=failure; description='Mobile control motion diagnostic failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Mobile control actionability diagnostic completed'; else state=failure; description='Mobile control actionability diagnostic failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile control motion diagnostic' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
