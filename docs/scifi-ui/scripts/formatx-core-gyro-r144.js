@@ -1,8 +1,9 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-// r292 keeps the established r267 source contract while the scheduler itself
-// is bounded and event-driven. No sensor permission starts an idle RAF loop.
+// r303 preserves the established r267 interaction contract while keeping the
+// sensor path permissions-policy safe and the scheduler event-driven. No denied
+// feature is subscribed and no sensor permission can start an idle RAF loop.
 const VERSION='mobile-gyro-parallax-r267-idle-safe';
 if(root.dataset.fxCoreGyroR144===VERSION&&root.dataset.fxCoreGyroRuntimeR292==='event-driven-bounded-no-idle-raf')return;
 root.dataset.fxCoreGyroR144=VERSION;
@@ -11,6 +12,21 @@ const mobile=matchMedia('(max-width:900px),(pointer:coarse)').matches;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 if(!mobile){root.dataset.fxCoreGyroState='desktop-skip';return;}
 if(reduced.matches){root.dataset.fxCoreGyroState='reduced-motion-skip';return;}
+
+function policyAllows(feature){
+  try{
+    const policy=document.permissionsPolicy||document.featurePolicy;
+    return !policy||typeof policy.allowsFeature!=='function'||policy.allowsFeature(feature);
+  }catch(_){return true;}
+}
+if(!policyAllows('accelerometer')||!policyAllows('gyroscope')){
+  root.dataset.fxCoreGyroState='permissions-policy-skip';
+  root.dataset.fxCoreGyroPermission='policy-disabled';
+  root.dataset.fxCoreGyroScheduler='policy-disabled-no-sensor-subscription';
+  root.dataset.fxCoreMotionR144='breathing-pointer-touch';
+  root.dataset.fxCoreGyroRuntimeR292='event-driven-bounded-no-idle-raf';
+  return;
+}
 if(typeof DeviceOrientationEvent==='undefined'){root.dataset.fxCoreGyroState='unsupported';return;}
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
