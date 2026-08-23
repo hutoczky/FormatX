@@ -112,7 +112,8 @@ function canonicalHeader(hero){
     mag=document.createElement('button');mag.type='button';mag.className='fx-reference-mag-button';topbar.appendChild(mag);
   }
   mag.classList.add('fx-control-owner-r264');
-  mag.textContent=language()==='en'?'CORE':'MAG';
+  const magText=language()==='en'?'CORE':'MAG';
+  if(mag.textContent!==magText)mag.textContent=magText;
   mag.setAttribute('aria-label',language()==='en'?'Focus the living core':'Az élő mag fókuszálása');
   mag.hidden=false;mag.removeAttribute('aria-hidden');stripInline(mag);
   if(mag.parentElement!==topbar)topbar.appendChild(mag);
@@ -141,7 +142,8 @@ function ensureAsk(rail){
   if(!ask.querySelector('i'))ask.prepend(document.createElement('i'));
   let label=ask.querySelector('span');
   if(!(label instanceof HTMLElement)){label=document.createElement('span');ask.appendChild(label);}
-  label.textContent=language()==='en'?'ASK':'KÉRDEZZ';
+  const askText=language()==='en'?'ASK':'KÉRDEZZ';
+  if(label.textContent!==askText)label.textContent=askText;
   ask.setAttribute('aria-label',language()==='en'?'Ask FormatX':'Kérdezz a FormatX-től');
   if(ask.dataset.fxControlAskBoundR268!=='true'){
     const clean=ask.cloneNode(true);clean.dataset.fxControlAskBoundR268='true';ask.replaceWith(clean);ask=clean;
@@ -223,16 +225,13 @@ function bindControlObserver(hero){
   if(controlObserverTarget===controls&&controlObserver)return;
   controlObserver?.disconnect();
   controlObserverTarget=controls;
-  controlObserver=new MutationObserver(()=>{
-    if(!applying)schedule(true);
+  controlObserver=new MutationObserver(records=>{
+    if(applying)return;
+    const structural=records.some(record=>record.type==='childList');
+    if(structural)schedule(true);
   });
-  controlObserver.observe(controls,{
-    subtree:true,
-    childList:true,
-    attributes:true,
-    attributeFilter:['hidden','aria-hidden','style','class']
-  });
-  root.dataset.fxControlStabilityR321='targeted-controls-observer';
+  controlObserver.observe(controls,{childList:true});
+  root.dataset.fxControlStabilityR321='direct-structure-observer-no-feedback';
 }
 function bindAudioObserver(){
   if(audioObserver)return;
