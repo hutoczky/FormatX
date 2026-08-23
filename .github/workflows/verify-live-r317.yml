@@ -1,0 +1,86 @@
+name: Verify live r317 MAG final
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/verify-live-r317.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  live-r317:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install browser tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/r317" && cd "$RUNNER_TEMP/r317"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0 pngjs@7
+          npx playwright install --with-deps chromium
+      - name: Check live mobile renderer and pixels
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/r317"
+          node <<'NODE'
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          const {PNG}=require('pngjs');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await context.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            const t0=Date.now();
+            await page.goto('https://formatxsuite.com/?r317_final='+Date.now(),{waitUntil:'domcontentloaded',timeout:8000});
+            const dclMs=Date.now()-t0;
+            if(dclMs>4500)throw new Error('DCL too slow: '+dclMs+'ms');
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileR317==='ready-v69',null,{timeout:8000});
+            await page.waitForTimeout(700);
+            const state=await page.evaluate(()=>{
+              const d=document.documentElement.dataset;
+              const stage=document.querySelector('#hero .fx-core-r317-stage');
+              const canvas=stage?.querySelector('canvas');
+              const r=stage?.getBoundingClientRect();
+              return {selection:d.fxCoreRendererSelection||'',r317:d.fxCoreMobileR317||'',real3d:d.fxCoreReal3d||'',visual:d.fxCoreVisualGenerationR317||'',triangles:Number(d.fxCoreTriangleCountR317||0),resolution:d.fxCoreReal3dResolution||'',renderMs:Number(d.fxCoreRenderMs||0),stage:r?{w:r.width,h:r.height}:null,canvas:canvas?{w:canvas.width,h:canvas.height}:null};
+            });
+            if(state.selection!=='modern-r317-primary')throw new Error('Not primary r317: '+JSON.stringify(state));
+            if(state.r317!=='ready-v69'||state.real3d!=='visible-native-3d-r99')throw new Error('Renderer not ready: '+JSON.stringify(state));
+            if(state.visual!=='modern-crystal-not-retro-wireframe')throw new Error('Modern visual marker missing');
+            if(state.triangles<5000)throw new Error('Mesh too coarse: '+state.triangles);
+            if(!state.canvas||state.canvas.w<550||state.canvas.h<600)throw new Error('Canvas resolution too low: '+JSON.stringify(state.canvas));
+            if(!state.stage||state.stage.w<300||state.stage.h<340)throw new Error('Stage collapsed: '+JSON.stringify(state.stage));
+            const stage=page.locator('#hero .fx-core-r317-stage');
+            await stage.screenshot({path:'mag-r317-mobile.png'});
+            const png=PNG.sync.read(fs.readFileSync('mag-r317-mobile.png'));
+            let n=0,sum=0,sum2=0,lit=0,cyan=0;const bins=new Set();
+            for(let y=0;y<png.height;y+=4)for(let x=0;x<png.width;x+=4){const i=(y*png.width+x)*4,r=png.data[i],g=png.data[i+1],b=png.data[i+2],l=.2126*r+.7152*g+.0722*b;bins.add(`${r>>4}:${g>>4}:${b>>4}`);n++;sum+=l;sum2+=l*l;if(l>48)lit++;if(b>70&&g>45&&b>r*1.25)cyan++;}
+            const mean=sum/n,stdev=Math.sqrt(Math.max(0,sum2/n-mean*mean));
+            const visual={w:png.width,h:png.height,bins:bins.size,lumaStdev:+stdev.toFixed(2),litRatio:lit/n,cyanRatio:cyan/n};
+            if(visual.bins<32||visual.lumaStdev<9||visual.litRatio<.006||visual.cyanRatio<.002)throw new Error('Visual richness too low: '+JSON.stringify(visual));
+            console.log('R317_FINAL',JSON.stringify({dclMs,state,visual,errors}));
+            await context.close();await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r317-final-mobile-mag
+          path: ${{ runner.temp }}/r317/mag-r317-mobile.png
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Publish status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live mobile r317 renderer and pixels verified'; else state=failure; description='Live mobile r317 final verification failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX live r317 final' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
