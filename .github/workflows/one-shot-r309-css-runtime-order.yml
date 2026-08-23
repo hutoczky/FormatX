@@ -1,4 +1,4 @@
-name: One-shot r309 CSS runtime ordering fix
+name: One-shot r309 deterministic CSS owner fix
 
 on:
   push:
@@ -10,13 +10,13 @@ permissions:
   contents: write
 
 jobs:
-  fix-order:
+  migrate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Align immediate and deferred visual owners
+      - name: Restore immediate WebGL CSS and contain deferred Signature
         shell: bash
         run: |
           set -euo pipefail
@@ -25,159 +25,22 @@ jobs:
           import re
 
           index_path=Path('docs/scifi-ui/index.html')
-          content_loader_path=Path('docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js')
-          motion_loader_path=Path('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
-          signature_css_path=Path('docs/scifi-ui/styles/formatx-critical-signature-r227.css')
-
+          signature_path=Path('docs/scifi-ui/styles/formatx-critical-signature-r227.css')
           index=index_path.read_text(encoding='utf-8')
-          content=content_loader_path.read_text(encoding='utf-8')
-          motion=motion_loader_path.read_text(encoding='utf-8')
-          signature=signature_css_path.read_text(encoding='utf-8')
+          signature=signature_path.read_text(encoding='utf-8')
 
-          # Native WebGL starts immediately, therefore its visual stylesheet must
-          # also be immediate. Keep Signature + desktop enhancement layers deferred.
-          pat=re.compile(r'<link\s+([^>]*data-fx-core-real3d="true"[^>]*)>',re.I)
-          m=pat.search(index)
-          if not m: raise SystemExit('core-real3d link missing')
-          tag=m.group(0)
+          match=re.search(r'<link\s+[^>]*data-fx-core-real3d="true"[^>]*>',index,re.I)
+          if not match:
+              raise SystemExit('core-real3d link missing')
+          tag=match.group(0)
           tag=re.sub(r'\s+data-fx-deferred-media-r300="[^"]*"','',tag)
           tag=re.sub(r'\s+media="[^"]*"','',tag)
           tag=tag[:-1]+' media="(prefers-reduced-motion: no-preference)">'
-          index=index[:m.start()]+tag+index[m.end():]
+          index=index[:match.start()]+tag+index[match.end():]
           index_path.write_text(index,encoding='utf-8')
 
-          # Signature is no longer an immediate-core script. It is mounted only
-          # after its CSS (and the other matching enhancement CSS) is ready.
-          old=r"return /\/(?:formatx-mobile-recovery|formatx-premium-finish|formatx-core-real3d-v20|formatx-signature-system-r185)\.js(?:\?|$)/.test(srcOf(spec));"
-          new=r"return /\/(?:formatx-mobile-recovery|formatx-premium-finish|formatx-core-real3d-v20)\.js(?:\?|$)/.test(srcOf(spec));"
-          if old not in motion: raise SystemExit('immediate-core regex not found')
-          motion=motion.replace(old,new)
-
-          if 'let enhancementsStarted = false;' not in motion:
-              raise SystemExit('enhancementsStarted anchor missing')
-          motion=motion.replace('let enhancementsStarted = false;','let enhancementsStarted = false;\n  let enhancementsPending = false;',1)
-
-          old_start="""  function startEnhancements() {
-    if (enhancementsStarted) return;
-    enhancementsStarted = true;
-    disarmIntent();
-    let requested = 0;
-    for (const spec of deferred) if (mount(spec)) requested += 1;
-    root.dataset.fxMotionRuntimeDeferredRequestedR284 = String(requested);
-    root.dataset.fxMotionRuntimeR239 = 'enhanced-r284-user-intent';
-  }
-"""
-          new_start="""  function mountEnhancementsAfterStyles() {
-    if (enhancementsStarted) return;
-    enhancementsStarted = true;
-    enhancementsPending = false;
-    disarmIntent();
-    let requested = 0;
-    for (const spec of deferred) if (mount(spec)) requested += 1;
-    root.dataset.fxMotionRuntimeDeferredRequestedR284 = String(requested);
-    root.dataset.fxMotionRuntimeR239 = 'enhanced-r309-css-ready';
-  }
-
-  function startEnhancements() {
-    if (enhancementsStarted) return;
-    if (root.dataset.fxDeferredVisualStylesR309 !== 'ready') {
-      enhancementsPending = true;
-      root.dataset.fxMotionRuntimeR239 = 'waiting-for-deferred-css-r309';
-      dispatchEvent(new CustomEvent('formatx:requestdeferredvisualstyles', { detail: { source: 'motion-r309' } }));
-      return;
-    }
-    mountEnhancementsAfterStyles();
-  }
-"""
-          if old_start not in motion: raise SystemExit('startEnhancements block missing')
-          motion=motion.replace(old_start,new_start,1)
-
-          anchor="""  if (deferred.length) {
-    for (const [type, options] of intentListeners) addEventListener(type, startEnhancements, options);
-    if (location.hash && location.hash !== '#top' && location.hash !== '#hero') startEnhancements();
-  }
-"""
-          replacement="""  if (deferred.length) {
-    addEventListener('formatx:deferredvisualstylesready', () => {
-      if (enhancementsPending) mountEnhancementsAfterStyles();
-    }, { passive: true });
-    for (const [type, options] of intentListeners) addEventListener(type, startEnhancements, options);
-    if (location.hash && location.hash !== '#top' && location.hash !== '#hero') startEnhancements();
-  }
-"""
-          if anchor not in motion: raise SystemExit('deferred listener anchor missing')
-          motion=motion.replace(anchor,replacement,1)
-          motion_loader_path.write_text(motion,encoding='utf-8')
-
-          # Content loader owns CSS activation and publishes a deterministic
-          # readiness event only after matching styles are actually available.
-          if 'let started = false;' not in content: raise SystemExit('content started anchor missing')
-          content=content.replace('let started = false;','let started = false;\n  let stylePromise = null;',1)
-
-          old_block="""  function start() {
-    if (started) return;
-    started = true;
-    disarm();
-    for (const link of deferredStyleLinks) {
-      const media = link.dataset.fxDeferredMediaR300 || 'all';
-      if (link.media !== media) link.media = media;
-    }
-    specs.forEach(mount);
-    root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'active-user-intent' : 'none';
-    root.dataset.fxContentRuntimeR241 = 'requested-r301-user-intent';
-  }
-"""
-          new_block="""  function activateDeferredStyles() {
-    if (stylePromise) return stylePromise;
-    const waits = deferredStyleLinks.map(link => new Promise(resolve => {
-      const media = link.dataset.fxDeferredMediaR300 || 'all';
-      const matches = media === 'all' || matchMedia(media).matches;
-      const done = () => resolve();
-      if (!matches) {
-        if (link.media !== media) link.media = media;
-        resolve();
-        return;
-      }
-      if (link.sheet) {
-        if (link.media !== media) link.media = media;
-        resolve();
-        return;
-      }
-      link.addEventListener('load', done, { once: true });
-      link.addEventListener('error', done, { once: true });
-      if (link.media !== media) link.media = media;
-    }));
-    stylePromise = Promise.all(waits).then(() => {
-      root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'active-user-intent' : 'none';
-      root.dataset.fxDeferredVisualStylesR309 = 'ready';
-      dispatchEvent(new CustomEvent('formatx:deferredvisualstylesready', { detail: { count: deferredStyleLinks.length } }));
-    });
-    return stylePromise;
-  }
-
-  function start() {
-    if (started) return;
-    started = true;
-    disarm();
-    activateDeferredStyles();
-    specs.forEach(mount);
-    root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'activating-user-intent-r309' : 'none';
-    root.dataset.fxContentRuntimeR241 = 'requested-r309-user-intent';
-  }
-"""
-          if old_block not in content: raise SystemExit('content start block missing')
-          content=content.replace(old_block,new_block,1)
-
-          immersive="  addEventListener('formatx:immersiveactivate', start, { passive: true });"
-          if immersive not in content: raise SystemExit('immersive activation hook missing')
-          request_hook="  addEventListener('formatx:requestdeferredvisualstyles', start, { passive: true });\n"
-          if request_hook.strip() not in content:
-              content=content.replace(immersive,request_hook+immersive,1)
-          content_loader_path.write_text(content,encoding='utf-8')
-
-          # Real-user 320px guard for the deferred Signature architecture.
-          guard="""
-/* r309 — mobile Signature overlay is always contained by the viewport. */
+          guard='''
+/* r309 — deferred Signature remains fully contained on narrow viewports. */
 @media (max-width:900px),(pointer:coarse){
   .fx-signature-map{
     box-sizing:border-box!important;
@@ -185,44 +48,38 @@ jobs:
     max-width:100vw!important;
     min-width:0!important;
   }
-  .fx-signature-node{min-width:0!important;max-width:100%!important;}
+  .fx-signature-node{
+    box-sizing:border-box!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
 }
-"""
-          if 'r309 — mobile Signature overlay is always contained' not in signature:
-              signature=signature.rstrip()+guard+'\n'
-              signature_css_path.write_text(signature,encoding='utf-8')
+'''
+          if 'r309 — deferred Signature remains fully contained' not in signature:
+              signature=signature.rstrip()+'\n'+guard
+              signature_path.write_text(signature,encoding='utf-8')
 
-          # Structural contracts.
-          final_index=index_path.read_text(encoding='utf-8')
-          core_tag=re.search(r'<link\s+[^>]*data-fx-core-real3d="true"[^>]*>',final_index).group(0)
-          sig_tag=re.search(r'<link\s+[^>]*data-fx-critical-signature-r227="true"[^>]*>',final_index).group(0)
-          if 'media="not all"' in core_tag or 'data-fx-deferred-media-r300' in core_tag:
-              raise SystemExit('core-real3d must be immediate')
-          if 'media="not all"' not in sig_tag or 'data-fx-deferred-media-r300' not in sig_tag:
-              raise SystemExit('signature must remain deferred')
-          if 'formatx-signature-system-r185' in re.search(r'function isImmediateCore\(spec\).*?\n  \}',motion,re.S).group(0):
-              raise SystemExit('signature is still immediate')
-          print('PASS r309 CSS/runtime ordering contracts')
+          final=index_path.read_text(encoding='utf-8')
+          core=re.search(r'<link\s+[^>]*data-fx-core-real3d="true"[^>]*>',final,re.I).group(0)
+          signature_link=re.search(r'<link\s+[^>]*data-fx-critical-signature-r227="true"[^>]*>',final,re.I).group(0)
+          assert 'media="not all"' not in core
+          assert 'data-fx-deferred-media-r300' not in core
+          assert 'media="(prefers-reduced-motion: no-preference)"' in core
+          assert 'media="not all"' in signature_link
+          assert 'data-fx-deferred-media-r300' in signature_link
+          print('PASS r309 deterministic CSS ownership patch')
           PY
-
-          node --check docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
-          node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
           git diff --check
           git diff --stat
 
-      - name: Commit r309 ordering fix
+      - name: Commit deterministic CSS ownership
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html \
-                  docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js \
-                  docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js \
-                  docs/scifi-ui/styles/formatx-critical-signature-r227.css
-          if git diff --cached --quiet; then
-            echo 'No r309 changes required.'
-            exit 0
-          fi
-          git commit -m 'Synchronize deferred visual CSS before enhancement runtimes'
+          git add docs/scifi-ui/index.html docs/scifi-ui/styles/formatx-critical-signature-r227.css
+          git rm -f .github/workflows/one-shot-r309-css-runtime-order.yml
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Restore immediate WebGL CSS and contain deferred Signature'
           git push origin HEAD:master
