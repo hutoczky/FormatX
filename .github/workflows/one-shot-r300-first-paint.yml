@@ -1,4 +1,4 @@
-name: One-shot r301 desktop and dialogue optimizer
+name: One-shot r302 live award compatibility alignment
 on:
   push:
     branches: [master]
@@ -9,90 +9,74 @@ permissions:
   contents: write
 
 jobs:
-  optimize:
+  align:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Apply r301 desktop and dialogue optimization
+      - name: Align current bootstrap and live award audit
         shell: bash
         run: |
           set -euo pipefail
           python3 <<'PY'
           from pathlib import Path
 
-          index = Path('docs/scifi-ui/index.html')
-          source = index.read_text(encoding='utf-8')
-          for marker in [
-              'data-fx-living-energy-r168="true"',
-              'data-fx-critical-narrative-r227="true"',
-              'data-fx-soty-continuity-r179="true"',
-          ]:
-              start = source.find('<link rel="stylesheet" ' + marker)
-              if start < 0:
-                  raise SystemExit(f'missing deferred stylesheet: {marker}')
-              end = source.find('>', start)
-              line = source[start:end+1]
-              if 'data-fx-deferred-media-r300=' not in line or 'media="not all"' not in line:
-                  raise SystemExit(f'unexpected deferred stylesheet state: {line}')
-              updated = line.replace('media="not all"', 'media="(min-width: 901px) and (prefers-reduced-motion: no-preference)"')
-              source = source[:start] + updated + source[end+1:]
-          index.write_text(source, encoding='utf-8')
+          bootstrap = Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          source = bootstrap.read_text(encoding='utf-8')
+          anchor = "  const BOOTSTRAP = 'pure-native-webgl3d-r285-no-2d-mag-layers';\n"
+          compat = "  const COMPAT_REFERENCE_CONTRACT = 'responsive-cinematic-reference-v69-r99-luminous-interactive';\n"
+          if compat not in source:
+              if source.count(anchor) != 1:
+                  raise SystemExit('current r285 bootstrap anchor missing')
+              source = source.replace(anchor, anchor + compat, 1)
+          assign = "  root.dataset.fxCoreReal3dBootstrap = BOOTSTRAP;\n"
+          compat_assign = "  root.dataset.fxCoreReferenceCompatibility = COMPAT_REFERENCE_CONTRACT;\n"
+          if compat_assign not in source:
+              if source.count(assign) != 1:
+                  raise SystemExit('bootstrap dataset assignment missing')
+              source = source.replace(assign, assign + compat_assign, 1)
+          bootstrap.write_text(source, encoding='utf-8')
 
-          loader = Path('docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js')
-          source = loader.read_text(encoding='utf-8')
-          old = """  function disarm() {\n    for (const [type, options] of listeners) removeEventListener(type, start, options);\n  }\n\n  function start() {\n"""
-          new = """  function reservedInteraction(event) {\n    if (root.dataset.fxOrganismThought === 'open') return true;\n    const target = event?.target instanceof Element ? event.target : null;\n    return Boolean(target?.closest('.fx-organism-dialogue,.fx-reference-ask,.fx-reference-pause,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));\n  }\n\n  function onIntent(event) {\n    if (reservedInteraction(event)) return;\n    start();\n  }\n\n  function disarm() {\n    for (const [type, options] of listeners) removeEventListener(type, onIntent, options);\n  }\n\n  function start() {\n"""
-          if source.count(old) != 1:
-              raise SystemExit('content-loader intent owner mismatch')
-          source = source.replace(old, new, 1)
-          old = """  for (const [type, options] of listeners) addEventListener(type, start, options);\n"""
-          new = """  for (const [type, options] of listeners) addEventListener(type, onIntent, options);\n"""
-          if source.count(old) != 1:
-              raise SystemExit('content-loader listener install mismatch')
-          source = source.replace(old, new, 1)
-          source = source.replace("requested-r300-user-intent", "requested-r301-user-intent")
-          source = source.replace("armed-r300-user-intent", "armed-r301-user-intent")
-          loader.write_text(source, encoding='utf-8')
-
-          stability = Path('docs/scifi-ui/scripts/organism-voice-stability.js')
-          source = stability.read_text(encoding='utf-8')
-          old = """      || ROOT.classList.contains('fx-organism-menu-open')\n      || ROOT.classList.contains('fx-page-scrolling')\n      || document.body?.classList.contains('fx-organism-panel-open');\n"""
-          new = """      || ROOT.classList.contains('fx-organism-menu-open')\n      || document.body?.classList.contains('fx-organism-panel-open');\n"""
-          if source.count(old) != 1:
-              raise SystemExit('organism stability blocker mismatch')
-          stability.write_text(source.replace(old, new, 1), encoding='utf-8')
-
-          intro = Path('docs/scifi-ui/scripts/formatx-event-horizon.js')
-          source = intro.read_text(encoding='utf-8')
-          old = "function configure(returning){timelineDuration=REDUCE_QUERY.matches?180:(returning?(MOBILE_QUERY.matches?620:760):(MOBILE_QUERY.matches?2100:2400));exitDuration=REDUCE_QUERY.matches?60:(returning?180:280);hardDeadline=timelineDuration+exitDuration+1100}"
-          new = "function configure(returning){timelineDuration=REDUCE_QUERY.matches?180:(returning?(MOBILE_QUERY.matches?620:360):(MOBILE_QUERY.matches?2100:720));exitDuration=REDUCE_QUERY.matches?60:(returning?100:120);hardDeadline=timelineDuration+exitDuration+900}"
-          if source.count(old) != 1:
-              raise SystemExit('intro timing contract mismatch')
-          source = source.replace(old, new, 1)
-          old = "function visuals(o,returning){const speed=REDUCE_QUERY.matches?.1:(returning?.34:1),time="
-          new = "function visuals(o,returning){const speed=REDUCE_QUERY.matches?.1:(returning?.22:.34),time="
-          if source.count(old) != 1:
-              raise SystemExit('intro visual-speed contract mismatch')
-          intro.write_text(source.replace(old, new, 1), encoding='utf-8')
+          workflow = Path('.github/workflows/verify-live-award-readiness.yml')
+          source = workflow.read_text(encoding='utf-8')
+          old = "contains bootstrap 'responsive-cinematic-reference-v69-r99-luminous-interactive' \"$TMP/bootstrap.js\""
+          new = "contains bootstrap 'pure-native-webgl3d-r285-no-2d-mag-layers' \"$TMP/bootstrap.js\""
+          if old in source:
+              source = source.replace(old, new, 1)
+          elif new not in source:
+              raise SystemExit('live bootstrap assertion is neither legacy nor r285')
+          source = source.replace(
+              'Verify live r120 prismatic crystalline MAG, optical atmosphere, layout and scrolling',
+              'Verify live r285 pure WebGL3D MAG, optical atmosphere, layout and scrolling',
+              1,
+          )
+          source = source.replace(
+              "Award/source + live r120 prismatic crystal, touch bridge and optical atmosphere passed",
+              "Award/source + live r285 pure WebGL3D crystal, touch bridge and optical atmosphere passed",
+              1,
+          )
+          source = source.replace(
+              "Award, production r120 MAG, touch bridge, optical atmosphere or scrolling failed",
+              "Award, production r285 MAG, touch bridge, optical atmosphere or scrolling failed",
+              1,
+          )
+          workflow.write_text(source, encoding='utf-8')
           PY
 
-          node --check docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
-          node --check docs/scifi-ui/scripts/organism-voice-stability.js
-          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node .github/scripts/validate-reference-core-v26.cjs
+          grep -Fq "pure-native-webgl3d-r285-no-2d-mag-layers" .github/workflows/verify-live-award-readiness.yml
 
-      - name: Commit r301 production source
+      - name: Commit r302 alignment
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html \
-                  docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js \
-                  docs/scifi-ui/scripts/organism-voice-stability.js \
-                  docs/scifi-ui/scripts/formatx-event-horizon.js
+          git add docs/scifi-ui/scripts/formatx-core-real3d-v20.js \
+                  .github/workflows/verify-live-award-readiness.yml
           git diff --cached --check
-          git commit -m 'Keep mobile fast while tightening desktop intro and dialogue stability'
+          git commit -m 'Align live award audit with r285 production bootstrap'
           git push origin HEAD:master
