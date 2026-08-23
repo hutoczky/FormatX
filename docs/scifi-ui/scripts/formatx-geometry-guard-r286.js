@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   if (root.dataset.fxGeometryGuardR286 === 'ready') return;
-  root.dataset.fxGeometryGuardR286 = 'booting';
+  root.dataset.fxGeometryGuardR286 = 'booting-r320';
 
   const SELECTORS = [
     '.topbar .fx-reference-mag-button',
@@ -17,50 +17,21 @@
     '#hero .fx-reference-controls-r204 .fx-reference-ask span'
   ];
 
-  const GEOMETRY = [
-    'position', 'inset', 'top', 'right', 'bottom', 'left',
-    'display', 'grid-template-columns', 'grid-template-rows', 'grid-column', 'grid-row',
-    'flex', 'flex-basis', 'flex-direction', 'flex-wrap', 'align-items', 'align-self',
-    'justify-content', 'justify-items', 'order',
-    'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height',
-    'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
-    'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
-    'overflow', 'clip', 'clip-path', 'white-space',
-    'transform', 'translate', 'visibility', 'opacity', 'pointer-events', 'z-index'
-  ];
-
-  const observed = new WeakSet();
-  const observers = new WeakMap();
   let bootObserver = null;
   let bootTimer = 0;
   let scheduled = false;
 
-  function stripGeometry(node) {
+  /* r320: the external canonical stylesheets are the only geometry owner.
+     Older revisions used CSSStyleDeclaration.removeProperty() from permanent
+     per-control MutationObservers. Besides creating avoidable mutation churn,
+     CSSOM writes are not compatible with the site's strict style-src policy.
+     A bounded pass now removes stale legacy style attributes atomically and
+     then gets out of the render path. */
+  function sanitize(node) {
     if (!(node instanceof HTMLElement)) return;
-    let changed = false;
-    for (const property of GEOMETRY) {
-      if (!node.style.getPropertyValue(property)) continue;
-      node.style.removeProperty(property);
-      changed = true;
-    }
-    if (changed) root.dataset.fxGeometryGuardR286LastRepair = node.className || node.id || node.tagName;
-  }
-
-  function bind(node) {
-    if (!(node instanceof HTMLElement) || observed.has(node)) return;
-    observed.add(node);
-    stripGeometry(node);
-    let repairing = false;
-    const observer = new MutationObserver(() => {
-      if (repairing) return;
-      repairing = true;
-      queueMicrotask(() => {
-        stripGeometry(node);
-        repairing = false;
-      });
-    });
-    observer.observe(node, { attributes: true, attributeFilter: ['style'] });
-    observers.set(node, observer);
+    if (!node.hasAttribute('style')) return;
+    node.removeAttribute('style');
+    root.dataset.fxGeometryGuardR286LastRepair = node.className || node.id || node.tagName;
   }
 
   function scan() {
@@ -69,10 +40,14 @@
     for (const selector of SELECTORS) {
       document.querySelectorAll(selector).forEach(node => {
         found += 1;
-        bind(node);
+        sanitize(node);
       });
     }
-    if (found >= 6) root.dataset.fxGeometryGuardR286 = 'ready';
+    if (found >= 6) {
+      root.dataset.fxGeometryGuardR286 = 'ready';
+      root.dataset.fxGeometryGuardPolicyR320 = 'bounded-attribute-cleanup-no-cssom-observer';
+      stopBootObserver();
+    }
     return found;
   }
 
@@ -90,7 +65,7 @@
   }
 
   function boot() {
-    scan();
+    if (scan() >= 6) return;
     const target = document.body || document.documentElement;
     bootObserver = new MutationObserver(schedule);
     bootObserver.observe(target, { childList: true, subtree: true });
@@ -98,7 +73,8 @@
       stopBootObserver();
       scan();
       root.dataset.fxGeometryGuardR286 = 'ready';
-    }, 5000);
+      root.dataset.fxGeometryGuardPolicyR320 = 'bounded-attribute-cleanup-no-cssom-observer';
+    }, 4000);
   }
 
   for (const eventName of [
@@ -112,7 +88,7 @@
   addEventListener('resize', schedule, { passive: true });
   addEventListener('orientationchange', schedule, { passive: true });
 
-  for (const delay of [0, 120, 420, 1100, 2400]) setTimeout(schedule, delay);
+  for (const delay of [0, 120, 420, 1100]) setTimeout(schedule, delay);
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
