@@ -8,7 +8,17 @@
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
   const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r328-soft-mobile-mag';
+  const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r329-query-authority';
   let qrGeneration = 0;
+
+  function ensureLanguageOwner() {
+    if (document.querySelector('script[data-fx-language-query-owner-r329]')) return;
+    const script = document.createElement('script');
+    script.src = LANGUAGE_OWNER_URL;
+    script.async = true;
+    script.dataset.fxLanguageQueryOwnerR329 = 'true';
+    document.head.appendChild(script);
+  }
 
   function activateCoreCss() {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -132,6 +142,7 @@
   }
 
   function boot() {
+    ensureLanguageOwner();
     activateCoreCss();
     ensureStyle();
     ensureOpticsStyle();
@@ -139,6 +150,7 @@
     root.dataset.fxMobileRegressionR310 = 'ready';
   }
 
+  ensureLanguageOwner();
   activateCoreCss();
   ensureStyle();
   ensureOpticsStyle();
