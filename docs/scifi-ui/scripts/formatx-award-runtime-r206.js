@@ -2,8 +2,9 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r327') return;
-  root.dataset.fxAwardRuntime = 'r327';
+  if (root.dataset.fxAwardRuntime === 'r333') return;
+  root.dataset.fxAwardRuntime = 'r333';
+  root.dataset.fxFinalValidationR333 = 'mobile-optics-language-first-paint';
 
   const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
 
