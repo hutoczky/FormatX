@@ -78,7 +78,6 @@
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = OPTICS_STYLE_URL;
-    link.dataset.fxMobileRegressionR310 = 'true';
     link.dataset.fxMobileCoreOpticsR328 = 'true';
     document.head.appendChild(link);
     root.dataset.fxCoreMobileOpticsR328 = 'soft-short-bloom';
