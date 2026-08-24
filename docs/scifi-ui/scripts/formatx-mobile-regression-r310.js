@@ -6,7 +6,7 @@
   root.dataset.fxMobileRegressionR310 = 'booting';
 
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
-  const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions';
+  const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
   let qrGeneration = 0;
 
   function activateCoreCss() {
@@ -37,12 +37,18 @@
   }
 
   function ensureStyle() {
-    if (document.querySelector('link[data-fx-mobile-regression-r310]')) return;
+    const existing = document.querySelector('link[data-fx-mobile-regression-r310]');
+    if (existing instanceof HTMLLinkElement) {
+      if (!existing.href.includes('r327-organic-core-morph')) existing.href = STYLE_URL;
+      root.dataset.fxCoreMorphR327 = 'cross-device-organic-silhouette';
+      return;
+    }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = STYLE_URL;
     link.dataset.fxMobileRegressionR310 = 'true';
     document.head.appendChild(link);
+    root.dataset.fxCoreMorphR327 = 'cross-device-organic-silhouette';
   }
 
   function selectedCurrency() {
