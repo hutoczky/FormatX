@@ -53,6 +53,26 @@
   opacity: .58;
 }
 
+/* r3 CSP-safe palette. Dynamic SVG geometry publishes only a data-tone index;
+   all paint remains in this external stylesheet so strict style-src never needs
+   unsafe-inline or runtime style/presentation attributes. */
+.fx-thought-genome-node[data-tone='0'] .fx-thought-genome-orbit { stroke: hsl(168 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='0'] .fx-thought-genome-star { fill: hsl(168 88% 72%); }
+.fx-thought-genome-node[data-tone='1'] .fx-thought-genome-orbit { stroke: hsl(192 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='1'] .fx-thought-genome-star { fill: hsl(192 88% 72%); }
+.fx-thought-genome-node[data-tone='2'] .fx-thought-genome-orbit { stroke: hsl(216 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='2'] .fx-thought-genome-star { fill: hsl(216 88% 72%); }
+.fx-thought-genome-node[data-tone='3'] .fx-thought-genome-orbit { stroke: hsl(240 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='3'] .fx-thought-genome-star { fill: hsl(240 88% 72%); }
+.fx-thought-genome-node[data-tone='4'] .fx-thought-genome-orbit { stroke: hsl(264 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='4'] .fx-thought-genome-star { fill: hsl(264 88% 72%); }
+.fx-thought-genome-node[data-tone='5'] .fx-thought-genome-orbit { stroke: hsl(288 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='5'] .fx-thought-genome-star { fill: hsl(288 88% 72%); }
+.fx-thought-genome-node[data-tone='6'] .fx-thought-genome-orbit { stroke: hsl(312 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='6'] .fx-thought-genome-star { fill: hsl(312 88% 72%); }
+.fx-thought-genome-node[data-tone='7'] .fx-thought-genome-orbit { stroke: hsl(336 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='7'] .fx-thought-genome-star { fill: hsl(336 88% 72%); }
+
 .fx-thought-genome-node.is-new .fx-thought-genome-star,
 .fx-thought-genome-layer.is-replaying .fx-thought-genome-star {
   animation: fx-thought-star-arrive .72s cubic-bezier(.16, .82, .2, 1) both;
