@@ -12,9 +12,12 @@ on:
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/scripts/formatx-control-owner-r268.js'
       - 'docs/scifi-ui/scripts/formatx-signature-system-r185.js'
+      - 'docs/scifi-ui/scripts/organism-core-interaction.js'
+      - 'docs/scifi-ui/scripts/organism-voice.js'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
+      - 'docs/scifi-ui/styles/organism-core-interaction.css'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
       - 'docs/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
       - 'docs/scifi-ui/styles/formatx-signature-explicit-r320.css'
@@ -32,7 +35,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Validate current r317 r321 r325 source contracts
+      - name: Validate current r317 r321 r325 r326 source contracts
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
@@ -40,6 +43,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           node --check docs/scifi-ui/scripts/formatx-control-owner-r268.js
           node --check docs/scifi-ui/scripts/formatx-signature-system-r185.js
+          node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node .github/scripts/validate-real3d-core-v20.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Install Chromium runtime
@@ -50,7 +54,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify r317 r321 WebGL interaction controls and WebGL1 fallback
+      - name: Verify r317 MAG r325 architecture r326 ASK ownership and WebGL1 fallback
         shell: bash
         run: |
           set -euo pipefail
@@ -74,11 +78,21 @@ jobs:
                 && d.fxMobileReferenceLayout==='ready-v1'
                 && d.fxSignatureSystem==='r325-inert-hidden-architecture'
                 && d.fxSignatureTrigger==='retired-r320-no-core-hitlayer'
+                && d.fxOrganismDialogueOwner==='ask-only-r326'
                 && window.FormatXCoreMobileV69?.version==='reference-crystal-webgl-r317-modern-flat-normal-fresnel';
             },null,{timeout:45000});
             await page.waitForTimeout(800);
             const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0)}));
             await page.touchscreen.tap(195,330);await page.waitForTimeout(360);
+            const afterCoreTap=await page.evaluate(()=>({
+              thoughtOpen:document.documentElement.dataset.fxOrganismThought==='open'||document.querySelector('.fx-organism-thought')?.hidden===false,
+              activation:document.documentElement.dataset.fxOrganismCoreActivation||'',
+              owner:document.documentElement.dataset.fxOrganismDialogueOwner||''
+            }));
+            assert.equal(afterCoreTap.owner,'ask-only-r326');
+            assert.equal(afterCoreTap.thoughtOpen,false,JSON.stringify(afterCoreTap));
+            assert.equal(afterCoreTap.activation,'native-core-no-dialogue-r326');
+
             await page.evaluate(()=>document.querySelector('#hero .fx-reference-controls-r204')?.scrollIntoView({block:'center',behavior:'auto'}));
             await page.waitForTimeout(280);
             const state=await page.evaluate(()=>{
@@ -89,12 +103,14 @@ jobs:
               const box=canvas?.getBoundingClientRect();
               const genome=document.querySelector('.fx-genome-launcher');
               const sound=document.querySelector('.fx-three-sound');
+              const ask=document.querySelector('.fx-reference-ask');
               const pause=document.querySelector('.fx-reference-pause');
               const soundBox=sound?.getBoundingClientRect();
+              const askBox=ask?.getBoundingClientRect();
               const pauseBox=pause?.getBoundingClientRect();
               const soundStyle=sound?getComputedStyle(sound):null;
-              const soundHit=soundBox?document.elementFromPoint(soundBox.left+soundBox.width/2,soundBox.top+soundBox.height/2):null;
-              const pauseHit=pauseBox?document.elementFromPoint(pauseBox.left+pauseBox.width/2,pauseBox.top+pauseBox.height/2):null;
+              const hit=(node,r)=>r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
+              const soundHit=hit(sound,soundBox),askHit=hit(ask,askBox),pauseHit=hit(pause,pauseBox);
               const gl2=canvas?.getContext('webgl2');
               const gl=gl2||canvas?.getContext('webgl');
               const architecture=document.querySelector('.fx-signature-architecture');
@@ -103,67 +119,59 @@ jobs:
                 version:api?.version||'',quality:api?.quality||'',scheduler:api?.scheduler||'',
                 selection:root.dataset.fxCoreRendererSelection||'',softlight:root.dataset.fxCoreSoftlightR318||'',
                 rim:root.dataset.fxCoreRimProfileR318||'',glow:root.dataset.fxCoreGlowProfileR318||'',
-                softlightOwner:root.dataset.fxCoreSoftlightOwnershipR321||'',
-                controlStability:root.dataset.fxControlStabilityR321||'',
+                softlightOwner:root.dataset.fxCoreSoftlightOwnershipR321||'',controlStability:root.dataset.fxControlStabilityR321||'',
+                dialogueOwner:root.dataset.fxOrganismDialogueOwner||'',thoughtOpen:root.dataset.fxOrganismThought==='open'||document.querySelector('.fx-organism-thought')?.hidden===false,
                 r317:root.dataset.fxCoreMobileR317||'',layout:root.dataset.fxMobileReferenceLayout||'',
                 signature:root.dataset.fxSignatureSystem||'',signatureTrigger:root.dataset.fxSignatureTrigger||'',
                 signatureUsability:root.dataset.fxSignatureUsability||'',signatureCsp:root.dataset.fxSignatureCsp||'',
                 signatureOpen:root.classList.contains('fx-signature-open'),signatureHitLayers:document.querySelectorAll('.fx-signature-core-trigger').length,
                 signatureInert:architecture?.hasAttribute('inert')||false,signatureHidden:architecture?.getAttribute('aria-hidden')||'',
-                stageCount:document.querySelectorAll('#hero .fx-core-r317-stage').length,
-                canvasCount:document.querySelectorAll('#hero .fx-core-r317-canvas').length,
-                width:box?.width||0,height:box?.height||0,vw:innerWidth,vh:innerHeight,
-                gl:Boolean(gl),webgl2:Boolean(gl2),glError:gl?.getError(),
-                energy:Number(api?.energy||0),renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),
-                heading:Boolean(document.querySelector('.fx-reference-heading')),
-                proof:Boolean(document.querySelector('.fx-reference-proof')),
-                rail:Boolean(document.querySelector('.fx-reference-rail')),
-                genomeDisplay:genome?getComputedStyle(genome).display:'absent',
-                soundDisplay:soundStyle?.display||'absent',soundVisibility:soundStyle?.visibility||'absent',
+                stageCount:document.querySelectorAll('#hero .fx-core-r317-stage').length,canvasCount:document.querySelectorAll('#hero .fx-core-r317-canvas').length,
+                width:box?.width||0,height:box?.height||0,vw:innerWidth,vh:innerHeight,gl:Boolean(gl),webgl2:Boolean(gl2),glError:gl?.getError(),
+                energy:Number(api?.energy||0),renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),heading:Boolean(document.querySelector('.fx-reference-heading')),
+                proof:Boolean(document.querySelector('.fx-reference-proof')),rail:Boolean(document.querySelector('.fx-reference-rail')),
+                genomeDisplay:genome?getComputedStyle(genome).display:'absent',soundDisplay:soundStyle?.display||'absent',soundVisibility:soundStyle?.visibility||'absent',
                 soundOpacity:Number(soundStyle?.opacity||0),soundWidth:soundBox?.width||0,soundHeight:soundBox?.height||0,
-                soundTop:soundBox?.top??null,soundBottom:soundBox?.bottom??null,pauseTop:pauseBox?.top??null,pauseBottom:pauseBox?.bottom??null,
-                soundTopMost:Boolean(sound&&soundHit&&sound.contains(soundHit)),pauseTopMost:Boolean(pause&&pauseHit&&pause.contains(pauseHit)),
-                soundHit:hitInfo(soundHit),pauseHit:hitInfo(pauseHit)
+                soundTop:soundBox?.top??null,soundBottom:soundBox?.bottom??null,askTop:askBox?.top??null,askBottom:askBox?.bottom??null,pauseTop:pauseBox?.top??null,pauseBottom:pauseBox?.bottom??null,
+                soundTopMost:Boolean(sound&&soundHit&&sound.contains(soundHit)),askTopMost:Boolean(ask&&askHit&&ask.contains(askHit)),pauseTopMost:Boolean(pause&&pauseHit&&pause.contains(pauseHit)),
+                soundHit:hitInfo(soundHit),askHit:hitInfo(askHit),pauseHit:hitInfo(pauseHit)
               };
             });
             assert.equal(state.version,'reference-crystal-webgl-r317-modern-flat-normal-fresnel');
             assert.equal(state.quality,'modern-flat-normal-fresnel-microfacet-r317');
             assert.equal(state.scheduler,'bounded-interaction-bursts-no-idle-raf');
-            assert.equal(state.selection,'modern-r317-primary');
-            assert.equal(state.softlight,'shader-tuned-r319');
-            assert.equal(state.rim,'broader-softer-low-intensity-fresnel');
-            assert.equal(state.glow,'balanced-mobile-perimeter-and-core');
-            assert.equal(state.softlightOwner,'native-r317-source-no-prototype-patch');
-            assert.equal(state.controlStability,'direct-structure-observer-no-feedback');
+            assert.equal(state.selection,'modern-r317-primary');assert.equal(state.softlight,'shader-tuned-r319');
+            assert.equal(state.rim,'broader-softer-low-intensity-fresnel');assert.equal(state.glow,'balanced-mobile-perimeter-and-core');
+            assert.equal(state.softlightOwner,'native-r317-source-no-prototype-patch');assert.equal(state.controlStability,'direct-structure-observer-no-feedback');
+            assert.equal(state.dialogueOwner,'ask-only-r326');assert.equal(state.thoughtOpen,false,JSON.stringify(state));
             assert.equal(state.r317,'ready-v69');assert.equal(state.layout,'ready-v1');
-            assert.equal(state.signature,'r325-inert-hidden-architecture');
-            assert.equal(state.signatureTrigger,'retired-r320-no-core-hitlayer');
-            assert.equal(state.signatureUsability,'explicit-disclosure-focus-inert-r325');
-            assert.equal(state.signatureCsp,'external-css-no-inline-style-r325');
-            assert.equal(state.signatureOpen,false);assert.equal(state.signatureHitLayers,0);
-            assert.equal(state.signatureInert,true);assert.equal(state.signatureHidden,'true');
-            assert.equal(state.stageCount,1);assert.equal(state.canvasCount,1);assert.equal(state.gl,true);assert.equal(state.glError,0);
-            assert.equal(state.webgl2,!blockWebGL2);
+            assert.equal(state.signature,'r325-inert-hidden-architecture');assert.equal(state.signatureTrigger,'retired-r320-no-core-hitlayer');
+            assert.equal(state.signatureUsability,'explicit-disclosure-focus-inert-r325');assert.equal(state.signatureCsp,'external-css-no-inline-style-r325');
+            assert.equal(state.signatureOpen,false);assert.equal(state.signatureHitLayers,0);assert.equal(state.signatureInert,true);assert.equal(state.signatureHidden,'true');
+            assert.equal(state.stageCount,1);assert.equal(state.canvasCount,1);assert.equal(state.gl,true);assert.equal(state.glError,0);assert.equal(state.webgl2,!blockWebGL2);
             assert.equal(state.heading,true);assert.equal(state.proof,true);assert.equal(state.rail,true);
-            assert.ok(state.width<=state.vw+1&&state.height<=state.vh+1,JSON.stringify(state));
-            assert.ok(state.energy>=before.energy,JSON.stringify({before,after:state}));
-            assert.ok(state.renderMs<16.67,JSON.stringify(state));
-            assert.ok(['none','absent'].includes(state.genomeDisplay));
-            assert.notEqual(state.soundDisplay,'none');assert.notEqual(state.soundVisibility,'hidden');assert.ok(state.soundOpacity>.02);
-            assert.ok(state.soundWidth>=44&&state.soundHeight>=44,JSON.stringify(state));
-            assert.ok(state.soundTop>=0&&state.soundBottom<=state.vh,JSON.stringify(state));
-            assert.ok(state.pauseTop>=0&&state.pauseBottom<=state.vh,JSON.stringify(state));
-            assert.equal(state.soundTopMost,true,JSON.stringify(state));
-            assert.equal(state.pauseTopMost,true,JSON.stringify(state));
+            assert.ok(state.width<=state.vw+1&&state.height<=state.vh+1,JSON.stringify(state));assert.ok(state.energy>=before.energy,JSON.stringify({before,after:state}));
+            assert.ok(state.renderMs<16.67,JSON.stringify(state));assert.ok(['none','absent'].includes(state.genomeDisplay));
+            assert.notEqual(state.soundDisplay,'none');assert.notEqual(state.soundVisibility,'hidden');assert.ok(state.soundOpacity>.02);assert.ok(state.soundWidth>=44&&state.soundHeight>=44,JSON.stringify(state));
+            for(const [top,bottom] of [[state.soundTop,state.soundBottom],[state.askTop,state.askBottom],[state.pauseTop,state.pauseBottom]])assert.ok(top>=0&&bottom<=state.vh,JSON.stringify(state));
+            assert.equal(state.soundTopMost,true,JSON.stringify(state));assert.equal(state.askTopMost,true,JSON.stringify(state));assert.equal(state.pauseTopMost,true,JSON.stringify(state));
+
             const pause=page.locator('.fx-reference-pause:visible').first();
             const pauseBox=await pause.boundingBox();assert.ok(pauseBox);
             await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(100);
             assert.equal(await pause.getAttribute('data-paused'),'true');
             await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(100);
             assert.equal(await pause.getAttribute('data-paused'),'false');
+
+            const ask=page.locator('.fx-reference-ask:visible').first();
+            const askBox=await ask.boundingBox();assert.ok(askBox);
+            await page.touchscreen.tap(askBox.x+askBox.width/2,askBox.y+askBox.height/2);
+            await page.waitForFunction(()=>document.documentElement.dataset.fxOrganismThought==='open'&&document.querySelector('.fx-organism-thought')?.hidden===false,null,{timeout:5000});
+            await page.evaluate(()=>window.FormatXOrganismVoice?.close?.());
+            await page.waitForFunction(()=>document.querySelector('.fx-organism-thought')?.hidden!==false,null,{timeout:5000});
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r321 source-owned softer rim/glow, r325 inert architecture, viewport hit-tested controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 WebGL MAG, r321 soft rim/glow, r325 inert architecture and r326 ASK-only dialogue ownership passed with WebGL1 fallback.');})().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish responsive runtime status
         if: always()
@@ -172,5 +180,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r317/r321/r325 mobile MAG runtime and controls passed'; else state=failure; description='r317/r321/r325 responsive runtime failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r317/r321/r325/r326 mobile MAG and ASK ownership passed'; else state=failure; description='r317/r321/r325/r326 responsive runtime failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v69 responsive runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
