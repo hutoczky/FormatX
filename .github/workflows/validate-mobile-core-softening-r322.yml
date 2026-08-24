@@ -46,7 +46,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify softer mobile bloom perimeter and desktop isolation
+      - name: Verify final r327+r330 mobile optical cascade and desktop isolation
         shell: bash
         run: |
           set -euo pipefail
@@ -93,24 +93,24 @@ jobs:
                 animation:runnerStyle?.animationName||'',dasharray:runnerStyle?.strokeDasharray||''
               };
             });
-            console.log('R327_MOBILE_OPTICS',JSON.stringify(state));
+            console.log('R327_EFFECTIVE_MOBILE_OPTICS',JSON.stringify(state));
             assert.equal(state.marker,'r327-restrained-bloom-soft-edge');
             assert.equal(state.biolume,'ready');
             assert.equal(state.profile,'deep-water-iridescent-traveling-rim');
             assert.equal(state.link,true);
             assert.match(state.href,/r327-soft-mobile-core/);
-            assert.ok(state.opacity<=0.86&&state.opacity>=0.82,JSON.stringify(state));
-            assert.match(state.filter,/brightness\(0\.78\)/);
-            assert.match(state.filter,/contrast\(0\.94\)/);
-            assert.match(state.filter,/saturate\(1\.02\)/);
-            assert.match(state.filter,/blur\(0\.56px\)/);
+            assert.ok(state.opacity<=0.87&&state.opacity>=0.83,JSON.stringify(state));
+            assert.match(state.filter,/brightness\(0\.77\)/);
+            assert.match(state.filter,/contrast\(0\.96\)/);
+            assert.match(state.filter,/saturate\(1\.03\)/);
+            assert.match(state.filter,/blur\(0\.68px\)/);
             assert.equal(state.rimPaths,5,JSON.stringify(state));
-            assert.ok(state.rimOpacity>=0.53&&state.rimOpacity<=0.57,JSON.stringify(state));
-            assert.ok(state.haloOpacity>=0.08&&state.haloOpacity<=0.12,JSON.stringify(state));
-            assert.match(state.haloFilter,/blur\(4\.45px\)/);
-            assert.ok(state.baseOpacity>=0.19&&state.baseOpacity<=0.23,JSON.stringify(state));
-            assert.ok(state.runnerOpacity>=0.33&&state.runnerOpacity<=0.37,JSON.stringify(state));
-            assert.match(state.runnerStrokeWidth,/0\.36px|\.36px/);
+            assert.ok(state.rimOpacity>=0.20&&state.rimOpacity<=0.24,JSON.stringify(state));
+            assert.ok(state.haloOpacity>=0.025&&state.haloOpacity<=0.045,JSON.stringify(state));
+            assert.match(state.haloFilter,/blur\(5\.8px\)/);
+            assert.ok(state.baseOpacity>=0.07&&state.baseOpacity<=0.11,JSON.stringify(state));
+            assert.ok(state.runnerOpacity>=0.49&&state.runnerOpacity<=0.55,JSON.stringify(state));
+            assert.match(state.runnerStrokeWidth,/0\.23px|\.23px/);
             assert.match(state.animation,/fx-biolume-travel-r323/);
             assert.ok(state.width>0&&state.height>0,JSON.stringify(state));
             try {
@@ -137,7 +137,7 @@ jobs:
             assert.equal(state.marker,'',JSON.stringify(state));
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await mobile(browser);await desktop(browser);await browser.close();console.log('PASS: r327 mobile MAG has softer restrained bloom and perimeter with desktop isolation.');})().catch(error=>{console.error(error);process.exit(1)});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await mobile(browser);await desktop(browser);await browser.close();console.log('PASS: effective r327+r330 mobile MAG optics are restrained and soft with desktop isolation.');})().catch(error=>{console.error(error);process.exit(1)});
           NODE
       - name: Upload mobile optical proof
         if: always()
@@ -154,5 +154,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r327 softer mobile MAG bloom and perimeter passed'; else state=failure; description='r327 mobile MAG optical validation failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Effective r327+r330 mobile MAG soft optics passed'; else state=failure; description='r327 mobile MAG optical validation failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile core optics' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
