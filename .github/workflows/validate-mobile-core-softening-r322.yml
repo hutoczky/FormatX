@@ -30,8 +30,8 @@ jobs:
           set -euo pipefail
           grep -Fq 'formatx-mobile-core-softening-r322.css?v=20260824-r327-soft-mobile-core' docs/scifi-ui/scripts/formatx-award-runtime-r206.js
           grep -Fq "fxMobileCoreOpticsR322 = 'r327-restrained-bloom-soft-edge'" docs/scifi-ui/scripts/formatx-award-runtime-r206.js
-          grep -Fq 'r339-restrained-flare-soft-edges' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
-          grep -Fq "r339-restrained-flare-soft-edge-owner" docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          grep -Fq 'r343-balanced-detail-soft-edge' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          grep -Fq "r343-balanced-detail-soft-edge-owner" docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
           grep -Fq 'FormatX r343' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
           grep -Fq 'opacity: .72' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
           grep -Fq 'brightness(.66)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
@@ -89,7 +89,7 @@ jobs:
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForFunction(()=>{
               const d=document.documentElement.dataset;
-              return d.fxCoreMobileOpticsR328==='r339-restrained-flare-soft-edge-owner'
+              return d.fxCoreMobileOpticsR328==='r343-balanced-detail-soft-edge-owner'
                 && d.fxCoreBiolumeR323==='ready'
                 && d.fxQuantumParticlesR335==='ready'
                 && d.fxQuantumParticleInput==='capture-pointer-touch-deduplicated'
@@ -132,7 +132,7 @@ jobs:
               };
             });
             console.log('R343_EFFECTIVE_MOBILE_OPTICS',JSON.stringify(state));
-            assert.equal(state.opticsMarker,'r339-restrained-flare-soft-edge-owner');
+            assert.equal(state.opticsMarker,'r343-balanced-detail-soft-edge-owner');
             assert.equal(state.biolume,'ready');
             assert.equal(state.profile,'deep-water-iridescent-traveling-rim');
             assert.equal(state.quantum,'ready');
@@ -141,7 +141,7 @@ jobs:
             assert.equal(state.quantumScheduler,'event-driven-no-idle-raf');
             assert.equal(state.quantumInput,'capture-pointer-touch-deduplicated');
             assert.equal(state.opticsLink,true);
-            assert.match(state.opticsHref,/r339-restrained-flare-soft-edges/);
+            assert.match(state.opticsHref,/r343-balanced-detail-soft-edge/);
             assert.ok(state.opacity<=0.70&&state.opacity>=0.68,JSON.stringify(state));
             assert.match(state.filter,/brightness\(0\.63\)/);
             assert.match(state.filter,/contrast\(0\.77\)/);
