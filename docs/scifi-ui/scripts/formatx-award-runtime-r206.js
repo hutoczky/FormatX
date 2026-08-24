@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r322') return;
-  root.dataset.fxAwardRuntime = 'r322';
+  if (root.dataset.fxAwardRuntime === 'r326') return;
+  root.dataset.fxAwardRuntime = 'r326';
 
   const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
 
@@ -41,7 +41,8 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
-  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260824-r324-balanced-optics';
+  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260824-r326-softer-perimeter';
+  const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260822-r296-canonical-header';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
@@ -115,13 +116,33 @@
 
   function ensureCoreSoftening() {
     if (!matchMedia('(max-width: 900px)').matches) return;
-    if (document.querySelector('link[data-fx-mobile-core-softening-r322]')) return;
+    const existing = document.querySelector('link[data-fx-mobile-core-softening-r322]');
+    if (existing instanceof HTMLLinkElement) {
+      if (!existing.href.includes('r326-softer-perimeter')) existing.href = CORE_SOFTEN_STYLE_URL;
+      root.dataset.fxMobileCoreOpticsR322 = 'r326-restrained-bloom-soft-edge';
+      return;
+    }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = CORE_SOFTEN_STYLE_URL;
     link.dataset.fxMobileCoreSofteningR322 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxMobileCoreOpticsR322 = 'soft-glow-soft-edge';
+    root.dataset.fxMobileCoreOpticsR322 = 'r326-restrained-bloom-soft-edge';
+  }
+
+  function ensureOrganismCoreOwner() {
+    if (root.dataset.fxOrganismDialogueOwner === 'ask-only-r326') return;
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', ensureOrganismCoreOwner, { once: true });
+      return;
+    }
+    const existing = document.querySelector('script[data-fx-organism-core-r326]');
+    if (existing) return;
+    const script = document.createElement('script');
+    script.src = ORGANISM_CORE_URL;
+    script.async = false;
+    script.dataset.fxOrganismCoreR326 = 'true';
+    document.head.appendChild(script);
   }
 
   function ensureOwnerStyle() {
@@ -243,6 +264,7 @@
   ensureReferenceAskOwner();
   ensureStyle();
   ensureCoreSoftening();
+  ensureOrganismCoreOwner();
   ensureOwnerStyle();
   ensureDialogueSurface();
   ensureGeometryGuard();
@@ -251,6 +273,7 @@
 
   addEventListener('resize', ensureCoreSoftening, { passive: true });
   addEventListener('orientationchange', ensureCoreSoftening, { passive: true });
+  addEventListener('formatx:organismvoiceready', ensureOrganismCoreOwner, { passive: true });
 
   if (!ensureGpu()) {
     const observer = new MutationObserver(() => {
