@@ -7,6 +7,7 @@
 
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
+  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r328-soft-mobile-mag';
   let qrGeneration = 0;
 
   function activateCoreCss() {
@@ -49,6 +50,21 @@
     link.dataset.fxMobileRegressionR310 = 'true';
     document.head.appendChild(link);
     root.dataset.fxCoreMorphR327 = 'cross-device-organic-silhouette';
+  }
+
+  function ensureOpticsStyle() {
+    const existing = document.querySelector('link[data-fx-mobile-core-optics-r328]');
+    if (existing instanceof HTMLLinkElement) {
+      if (!existing.href.includes('r328-soft-mobile-mag')) existing.href = OPTICS_STYLE_URL;
+      root.dataset.fxCoreMobileOpticsR328 = 'soft-short-bloom';
+      return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = OPTICS_STYLE_URL;
+    link.dataset.fxMobileCoreOpticsR328 = 'true';
+    document.head.appendChild(link);
+    root.dataset.fxCoreMobileOpticsR328 = 'soft-short-bloom';
   }
 
   function selectedCurrency() {
@@ -118,12 +134,14 @@
   function boot() {
     activateCoreCss();
     ensureStyle();
+    ensureOpticsStyle();
     syncQr();
     root.dataset.fxMobileRegressionR310 = 'ready';
   }
 
   activateCoreCss();
   ensureStyle();
+  ensureOpticsStyle();
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot, { once: true });

@@ -1,0 +1,92 @@
+/* FormatX r328 — mobile-only MAG optical restraint.
+   The r317 WebGL crystal stays native and interactive; this last compositor
+   layer only shortens the perceived bloom, softens the razor-like perimeter
+   and slightly relaxes the vertically stretched mobile silhouette. Desktop is
+   intentionally untouched. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
+    opacity: .83 !important;
+    filter:
+      brightness(.74)
+      contrast(.94)
+      saturate(1.01)
+      blur(.82px)
+      drop-shadow(0 0 .38px rgba(132, 246, 255, .070))
+      drop-shadow(0 0 1.15px rgba(44, 134, 255, .020)) !important;
+    -webkit-filter:
+      brightness(.74)
+      contrast(.94)
+      saturate(1.01)
+      blur(.82px)
+      drop-shadow(0 0 .38px rgba(132, 246, 255, .070))
+      drop-shadow(0 0 1.15px rgba(44, 134, 255, .020)) !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
+    opacity: .40 !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-halo {
+    stroke-width: .68 !important;
+    opacity: .075 !important;
+    filter: blur(4.8px) !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-base {
+    stroke-width: .23 !important;
+    opacity: .15 !important;
+    filter: blur(.88px) !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a, .fx-biolume-runner-b, .fx-biolume-runner-c) {
+    stroke-width: .29 !important;
+    opacity: .72 !important;
+    filter: drop-shadow(0 0 .20px currentColor) blur(.54px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (max-width: 900px),
+       (prefers-reduced-motion: no-preference) and (pointer: coarse) {
+  html body.living-architecture #hero .fx-core-r317-stage > .fx-core-r317-canvas {
+    animation-name: fx-core-organic-form-mobile-r328 !important;
+    animation-duration: 16.4s !important;
+  }
+}
+
+@keyframes fx-core-organic-form-mobile-r328 {
+  0%   { scale: 1 .982; rotate: 0deg; }
+  22%  { scale: .994 .988; rotate: -.035deg; }
+  46%  { scale: 1.006 .981; rotate: .042deg; }
+  70%  { scale: .996 .986; rotate: -.028deg; }
+  100% { scale: 1.004 .982; rotate: .032deg; }
+}
+
+@media (max-width: 430px) {
+  html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
+    opacity: .81 !important;
+    filter:
+      brightness(.72)
+      contrast(.93)
+      saturate(1.00)
+      blur(.92px)
+      drop-shadow(0 0 .30px rgba(134, 248, 255, .060))
+      drop-shadow(0 0 .90px rgba(48, 130, 255, .016)) !important;
+    -webkit-filter:
+      brightness(.72)
+      contrast(.93)
+      saturate(1.00)
+      blur(.92px)
+      drop-shadow(0 0 .30px rgba(134, 248, 255, .060))
+      drop-shadow(0 0 .90px rgba(48, 130, 255, .016)) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 900px),
+       (prefers-reduced-motion: reduce) and (pointer: coarse) {
+  html body.living-architecture #hero .fx-core-r317-stage > .fx-core-r317-canvas {
+    animation: none !important;
+    scale: 1 .982 !important;
+    rotate: 0deg !important;
+  }
+}
