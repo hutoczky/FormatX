@@ -1,13 +1,9 @@
-/* FormatX r328 — mobile-only MAG optical restraint.
-   The r317 WebGL crystal stays native and interactive; this last compositor
-   layer only shortens the perceived bloom, softens the razor-like perimeter
-   and slightly relaxes the vertically stretched mobile silhouette. Desktop is
-   intentionally untouched. */
+/* FormatX r330 — mobile-only MAG optical restraint.
+   The r317 WebGL crystal stays native and interactive. This final compositor
+   pass keeps the internal glass volume, but shortens the bloom, softens the
+   perimeter and removes the over-sharp mobile neon edge. Desktop is untouched. */
 
 @media (max-width: 900px), (pointer: coarse) {
-  /* The living/Thought layers can widen the hero carrier by a few subpixels.
-     Keep the decorative WebGL/SVG stack inside the physical viewport so its
-     softened bloom can never create horizontal document overflow. */
   html:root:root body.living-architecture #hero .hero-space {
     box-sizing: border-box !important;
     max-width: 100vw !important;
@@ -25,43 +21,43 @@
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
-    opacity: .83 !important;
+    opacity: .78 !important;
     filter:
-      brightness(.74)
-      contrast(.94)
-      saturate(1.01)
-      blur(.82px)
-      drop-shadow(0 0 .38px rgba(132, 246, 255, .070))
-      drop-shadow(0 0 1.15px rgba(44, 134, 255, .020)) !important;
+      brightness(.68)
+      contrast(.86)
+      saturate(.96)
+      blur(1.15px)
+      drop-shadow(0 0 .18px rgba(132, 246, 255, .030))
+      drop-shadow(0 0 .65px rgba(44, 134, 255, .008)) !important;
     -webkit-filter:
-      brightness(.74)
-      contrast(.94)
-      saturate(1.01)
-      blur(.82px)
-      drop-shadow(0 0 .38px rgba(132, 246, 255, .070))
-      drop-shadow(0 0 1.15px rgba(44, 134, 255, .020)) !important;
+      brightness(.68)
+      contrast(.86)
+      saturate(.96)
+      blur(1.15px)
+      drop-shadow(0 0 .18px rgba(132, 246, 255, .030))
+      drop-shadow(0 0 .65px rgba(44, 134, 255, .008)) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .40 !important;
+    opacity: .26 !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .68 !important;
-    opacity: .075 !important;
-    filter: blur(4.8px) !important;
+    stroke-width: .54 !important;
+    opacity: .035 !important;
+    filter: blur(5.8px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .23 !important;
-    opacity: .15 !important;
-    filter: blur(.88px) !important;
+    stroke-width: .18 !important;
+    opacity: .09 !important;
+    filter: blur(1.15px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a, .fx-biolume-runner-b, .fx-biolume-runner-c) {
-    stroke-width: .29 !important;
-    opacity: .72 !important;
-    filter: drop-shadow(0 0 .20px currentColor) blur(.54px) !important;
+    stroke-width: .23 !important;
+    opacity: .52 !important;
+    filter: drop-shadow(0 0 .10px currentColor) blur(.72px) !important;
   }
 }
 
@@ -83,21 +79,25 @@
 
 @media (max-width: 430px) {
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
-    opacity: .81 !important;
+    opacity: .76 !important;
     filter:
-      brightness(.72)
-      contrast(.93)
-      saturate(1.00)
-      blur(.92px)
-      drop-shadow(0 0 .30px rgba(134, 248, 255, .060))
-      drop-shadow(0 0 .90px rgba(48, 130, 255, .016)) !important;
+      brightness(.65)
+      contrast(.84)
+      saturate(.94)
+      blur(1.32px)
+      drop-shadow(0 0 .12px rgba(134, 248, 255, .022))
+      drop-shadow(0 0 .45px rgba(48, 130, 255, .006)) !important;
     -webkit-filter:
-      brightness(.72)
-      contrast(.93)
-      saturate(1.00)
-      blur(.92px)
-      drop-shadow(0 0 .30px rgba(134, 248, 255, .060))
-      drop-shadow(0 0 .90px rgba(48, 130, 255, .016)) !important;
+      brightness(.65)
+      contrast(.84)
+      saturate(.94)
+      blur(1.32px)
+      drop-shadow(0 0 .12px rgba(134, 248, 255, .022))
+      drop-shadow(0 0 .45px rgba(48, 130, 255, .006)) !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
+    opacity: .22 !important;
   }
 }
 
