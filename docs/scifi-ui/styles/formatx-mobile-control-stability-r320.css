@@ -1,14 +1,15 @@
-/* FormatX r320/r346 — stable mobile hero interaction geometry.
+/* FormatX r320/r347 — stable mobile hero interaction geometry.
    The canonical controls are interactive UI, not decorative motion. Keep their
    layout boxes stationary and physically visible so touch/click hit testing
    cannot race late audio/control ownership changes while the WebGL MAG remains
    independently animated.
 
-   r346 also makes the classless visual <i> inside ASK a strictly bounded icon.
-   Several retired visual generations still contain broad rules for anonymous
-   <i> elements; without a final geometry contract those rules can turn this
-   17px glyph into a transformed ~268px absolute decoration and widen the mobile
-   body. The text label remains outside this containment and stays visible. */
+   r347 also retires the legacy Transcend aurora lens on the mobile r317 WebGL
+   path. That old full-screen 2D layer contains 58vw x 24vh anonymous <i>
+   elements animated with rotate/skew transforms; their transformed bounding
+   boxes can widen document.body even though the current MAG no longer needs
+   that lens. Removing the obsolete lens from the mobile render tree eliminates
+   the overflow source and avoids redundant compositing work. */
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r264,
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-reference-rail-r264,
@@ -52,8 +53,8 @@
     max-height: 50px !important;
   }
 
-  /* r346: authoritative geometry for ASK's visual glyph. Do not clip the ASK
-     button itself because its KÉRDEZZ/ASK caption intentionally sits below it. */
+  /* Keep ASK's own visual glyph bounded. Its KÉRDEZZ/ASK caption intentionally
+     sits below the circular button and therefore the button itself is not clipped. */
   html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask > i {
     position: relative !important;
     inset: auto !important;
@@ -82,6 +83,28 @@
     overflow: visible !important;
     contain: layout paint !important;
     pointer-events: none !important;
+  }
+
+  /* r347: r317 is the only mobile MAG renderer. The old Transcend aurora lens
+     is decorative legacy output and must not contribute paint or scroll bounds. */
+  html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] body .fx-transcend-lens,
+  html[data-fx-core-mobile-r99="ready-v69"] body .fx-transcend-lens,
+  html[data-fx-core-real3d="ready-v69"] body .fx-transcend-lens {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    animation: none !important;
+    transform: none !important;
+    overflow: clip !important;
+  }
+
+  html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] body .fx-transcend-lens > i,
+  html[data-fx-core-mobile-r99="ready-v69"] body .fx-transcend-lens > i,
+  html[data-fx-core-real3d="ready-v69"] body .fx-transcend-lens > i {
+    display: none !important;
+    animation: none !important;
+    transform: none !important;
   }
 
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound:active,
