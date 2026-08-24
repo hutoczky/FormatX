@@ -87,8 +87,12 @@ jobs:
               const box=canvas?.getBoundingClientRect();
               const genome=document.querySelector('.fx-genome-launcher');
               const sound=document.querySelector('.fx-three-sound');
+              const pause=document.querySelector('.fx-reference-pause');
               const soundBox=sound?.getBoundingClientRect();
+              const pauseBox=pause?.getBoundingClientRect();
               const soundStyle=sound?getComputedStyle(sound):null;
+              const soundHit=soundBox?document.elementFromPoint(soundBox.left+soundBox.width/2,soundBox.top+soundBox.height/2):null;
+              const pauseHit=pauseBox?document.elementFromPoint(pauseBox.left+pauseBox.width/2,pauseBox.top+pauseBox.height/2):null;
               const gl2=canvas?.getContext('webgl2');
               const gl=gl2||canvas?.getContext('webgl');
               const architecture=document.querySelector('.fx-signature-architecture');
@@ -113,7 +117,9 @@ jobs:
                 rail:Boolean(document.querySelector('.fx-reference-rail')),
                 genomeDisplay:genome?getComputedStyle(genome).display:'absent',
                 soundDisplay:soundStyle?.display||'absent',soundVisibility:soundStyle?.visibility||'absent',
-                soundOpacity:Number(soundStyle?.opacity||0),soundWidth:soundBox?.width||0,soundHeight:soundBox?.height||0
+                soundOpacity:Number(soundStyle?.opacity||0),soundWidth:soundBox?.width||0,soundHeight:soundBox?.height||0,
+                soundTopMost:Boolean(sound&&soundHit&&sound.contains(soundHit)),
+                pauseTopMost:Boolean(pause&&pauseHit&&pause.contains(pauseHit))
               };
             });
             assert.equal(state.version,'reference-crystal-webgl-r317-modern-flat-normal-fresnel');
@@ -141,10 +147,9 @@ jobs:
             assert.ok(['none','absent'].includes(state.genomeDisplay));
             assert.notEqual(state.soundDisplay,'none');assert.notEqual(state.soundVisibility,'hidden');assert.ok(state.soundOpacity>.02);
             assert.ok(state.soundWidth>=44&&state.soundHeight>=44,JSON.stringify(state));
-            const sound=page.locator('.fx-three-sound:visible').first();
+            assert.equal(state.soundTopMost,true,JSON.stringify(state));
+            assert.equal(state.pauseTopMost,true,JSON.stringify(state));
             const pause=page.locator('.fx-reference-pause:visible').first();
-            await sound.click({trial:true,timeout:5000});
-            await pause.click({trial:true,timeout:5000});
             const pauseBox=await pause.boundingBox();assert.ok(pauseBox);
             await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(100);
             assert.equal(await pause.getAttribute('data-paused'),'true');
@@ -152,7 +157,7 @@ jobs:
             assert.equal(await pause.getAttribute('data-paused'),'false');
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r321 source-owned softer rim/glow, r325 inert architecture, stable actionable controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r321 source-owned softer rim/glow, r325 inert architecture, hit-tested controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish responsive runtime status
         if: always()
