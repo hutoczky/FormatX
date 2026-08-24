@@ -43,10 +43,11 @@ assert.match(intro, /ensureMobileRegressionR310/);
 assert.doesNotMatch(intro, /activateCriticalReal3dStyle\(\);\s*ensureMobileRegressionR310\(\);\s*ensureAwardRuntime\(\);\s*if\(AUDIT_MODE/);
 assert.doesNotMatch(intro, /\.style\.|setAttribute\(['"]style/i);
 for (const token of [
-  'formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls',
-  'formatx-control-owner-r264.css?v=20260822-r296-canonical-header',
+  'formatx-wda-hardening-r198.css?v=20260824-native-orb-r250',
+  'formatx-control-owner-r264.css?v=20260824-native-orb-r250',
   'data-fx-control-owner-style-r264',
-  'formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls',
+  'formatx-wda-controls-r198.js?v=20260824-native-orb-r250',
+  'formatx-control-owner-r268.js?v=20260824-instant-award-r251',
   'formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame',
   'formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions',
   'muted-default-visible-control',
@@ -145,9 +146,9 @@ for (const token of [
 ]) assert.ok(mobileLayoutCss.includes(token), `missing mobile CSS contract: ${token}`);
 for (const token of [
   'fxMobileLayoutOwner',
-  'r207-normal-flow',
+  'r250-reference-stage',
   'fx-reference-controls-r204',
-  'zone.parentElement !== grid',
+  'zone.parentElement !== space',
   'fxMobileLayoutConflict',
   'none-r207',
   'r255-event-driven-inline-shield',
@@ -165,9 +166,9 @@ assert.doesNotMatch(mobileLayoutRuntime, /document\.head\.appendChild\(link\)|ap
 assert.doesNotMatch(mobileLayoutRuntime, /setTimeout\([^\n]*(?:450|1400)/);
 
 for (const token of [
-  'r260-r207-grid-owner',
-  'ensureControlZone(hero,grid,rail)',
-  'zone.parentElement!==grid',
+  'r250-reference-stage-owner',
+  'ensureControlZone(hero,space,rail)',
+  'zone.parentElement!==space',
   'syncPauseButtons',
   'bootObserver'
 ]) assert.ok(mobileReferenceRuntime.includes(token), `missing r260 mobile reference contract: ${token}`);
@@ -178,7 +179,7 @@ for (const token of [
   '.fx-reference-ask',
   '.fx-reference-pause',
   'applyControlLayout',
-  'const expectedControlOwner = mobile ? grid : space',
+  'const expectedControlOwner = space',
   'expectedControlOwner.appendChild(nodes.controls)',
   'event-driven-r207-owner-r260'
 ]) assert.ok(referenceRuntime.includes(token), `missing current r304 reference control contract: ${token}`);
@@ -199,9 +200,9 @@ assert.match(legacyFlow, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 assert.match(legacyFinalizer, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 
 assert.match(production, /formatx-first-paint-r206\.css\?v=20260818-r206-stable-hero/);
-assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260820-r248-reference-owner/);
-assert.match(production, /formatx-mobile-layout-r207\.css\?v=20260818-r208-flicker-free/);
-assert.match(production, /formatx-mobile-layout-r207\.js\?v=20260818-r208-flicker-free/);
+assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260824-native-orb-r250/);
+assert.match(production, /formatx-mobile-layout-r207\.css\?v=20260824-native-orb-r250/);
+assert.match(production, /formatx-mobile-layout-r207\.js\?v=20260824-native-orb-r250/);
 assert.match(production, /STARTUP_REVISION = '20260818-r208-flicker-free-owner'/);
 assert.match(production, /X-FormatX-Client-Revision', 'r208-flicker-free-owner/);
 assert.match(production, /X-FormatX-Recovery', 'r243-language-canonical/);
