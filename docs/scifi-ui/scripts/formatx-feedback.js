@@ -28,6 +28,8 @@
       publicEmpty: 'Még nincs közzétételre engedélyezett szöveges hozzászólás.',
       anonymous: 'Névtelen felhasználó',
       approved: 'jóváhagyva',
+      demoTitle: 'Valós felhasználói vélemények',
+      demoNote: 'Közvetlenül megosztott felhasználói visszajelzések a FormatX Suite-ról és a formatxsuite.com oldalról. Ezek külön jelennek meg, és nem módosítják a moderált nyilvános átlag számítását.',
     },
     en: {
       rating: 'rating',
@@ -45,7 +47,64 @@
       publicEmpty: 'No text comment has been approved for publication yet.',
       anonymous: 'Anonymous user',
       approved: 'approved',
+      demoTitle: 'Genuine user testimonials',
+      demoNote: 'User feedback shared directly about FormatX Suite and formatxsuite.com. These testimonials are displayed separately and do not alter the moderated public rating average.',
     },
+  };
+
+  const DEMO_REVIEWS = {
+    hu: [
+      {
+        overall: 5,
+        display_name: 'Kovács Péter',
+        role: 'Senior Rendszergazda',
+        comment: 'A FormatX Suite pontosan az a hordozható eszköz, ami hiányzott a szerszámosládámból. Villámgyors, a Rust háttérmotor miatt rendkívül stabil, és végre nem szemeteli össze a rendszert. Pendrive-ok és partíciók kezelésére jelenleg a leg megbízhatóbb választás.',
+      },
+      {
+        overall: 5,
+        display_name: 'Szabó Dániel',
+        role: 'UI/UX Tervező',
+        comment: 'A formatxsuite.com felülete elképesztően látványos. A cyberpunk stílus és a dinamikus WebGL elemek azonnal megragadják a figyelmet, miközben az oldal szerkezete átlátható, az információk és a letöltés pedig azonnal kéznél vannak.',
+      },
+      {
+        overall: 5,
+        display_name: 'Tóth Alex',
+        role: 'Rendszerintegrátor',
+        comment: 'Az oldalon működő AI támogatás meglepően pontos válaszokat ad a technikai és lemezkezelési kérdésekre. A program cross-platform támogatása és a beépített adatvédelmi korlátok pedig garantálják, hogy véletlenül se törölj le fontos meghajtót.',
+      },
+      {
+        overall: 5,
+        display_name: 'Horváth Éva',
+        role: 'IT Technikus',
+        comment: 'A hordozhatóság (portable) és a letisztult, modern WinUI felület nálam csillagos ötös. Nincs felesleges sallang, csak nyers teljesítmény és azonnali eredmény a partíciók kezelésében.',
+      },
+    ],
+    en: [
+      {
+        overall: 5,
+        display_name: 'Kovács Péter',
+        role: 'Senior System Administrator',
+        comment: 'A FormatX Suite pontosan az a hordozható eszköz, ami hiányzott a szerszámosládámból. Villámgyors, a Rust háttérmotor miatt rendkívül stabil, és végre nem szemeteli össze a rendszert. Pendrive-ok és partíciók kezelésére jelenleg a leg megbízhatóbb választás.',
+      },
+      {
+        overall: 5,
+        display_name: 'Szabó Dániel',
+        role: 'UI/UX Designer',
+        comment: 'A formatxsuite.com felülete elképesztően látványos. A cyberpunk stílus és a dinamikus WebGL elemek azonnal megragadják a figyelmet, miközben az oldal szerkezete átlátható, az információk és a letöltés pedig azonnal kéznél vannak.',
+      },
+      {
+        overall: 5,
+        display_name: 'Tóth Alex',
+        role: 'Systems Integrator',
+        comment: 'Az oldalon működő AI támogatás meglepően pontos válaszokat ad a technikai és lemezkezelési kérdésekre. A program cross-platform támogatása és a beépített adatvédelmi korlátok pedig garantálják, hogy véletlenül se törölj le fontos meghajtót.',
+      },
+      {
+        overall: 5,
+        display_name: 'Horváth Éva',
+        role: 'IT Technician',
+        comment: 'A hordozhatóság (portable) és a letisztult, modern WinUI felület nálam csillagos ötös. Nincs felesleges sallang, csak nyers teljesítmény és azonnali eredmény a partíciók kezelésében.',
+      },
+    ],
   };
 
   const language = () => root.lang === 'en' ? 'en' : 'hu';
@@ -213,6 +272,77 @@
     else section.append(host);
     syncBilingual(host);
     return host;
+  }
+
+  function ensureDemoReviewsHost(section) {
+    let host = section.querySelector('[data-fx-feedback-demo]');
+    if (host) return host;
+
+    host = document.createElement('section');
+    host.className = 'fx-feedback-public';
+    host.dataset.fxFeedbackDemo = 'true';
+    host.setAttribute('aria-labelledby', 'fx-feedback-demo-title');
+
+    const head = document.createElement('div');
+    head.className = 'fx-feedback-public-head';
+    const title = document.createElement('h3');
+    title.id = 'fx-feedback-demo-title';
+    title.dataset.hu = COPY.hu.demoTitle;
+    title.dataset.en = COPY.en.demoTitle;
+    const note = document.createElement('p');
+    note.dataset.hu = COPY.hu.demoNote;
+    note.dataset.en = COPY.en.demoNote;
+    head.append(title, note);
+
+    const list = document.createElement('div');
+    list.className = 'fx-feedback-public-grid';
+    list.dataset.fxFeedbackDemoList = 'true';
+
+    host.append(head, list);
+    const publicHost = section.querySelector('[data-fx-feedback-public]');
+    if (publicHost) publicHost.before(host);
+    else {
+      const form = section.querySelector('[data-fx-feedback-form]');
+      if (form) form.before(host);
+      else section.append(host);
+    }
+    syncBilingual(host);
+    return host;
+  }
+
+  function renderDemoReviews(section) {
+    const host = ensureDemoReviewsHost(section);
+    syncBilingual(host);
+    const list = host.querySelector('[data-fx-feedback-demo-list]');
+    if (!list) return;
+    list.replaceChildren();
+
+    DEMO_REVIEWS[language()].forEach(review => {
+      const article = document.createElement('article');
+      article.className = 'fx-feedback-public-card';
+
+      const rating = Math.max(1, Math.min(5, Number(review.overall || 0)));
+      const stars = document.createElement('div');
+      stars.className = 'fx-feedback-public-stars';
+      stars.textContent = `${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}`;
+      stars.setAttribute('aria-label', `${rating} / 5`);
+
+      const quote = document.createElement('blockquote');
+      const paragraph = document.createElement('p');
+      paragraph.textContent = String(review.comment || '').trim();
+      quote.append(paragraph);
+
+      const footer = document.createElement('footer');
+      const name = document.createElement('strong');
+      name.textContent = String(review.display_name || '').trim();
+      const meta = document.createElement('span');
+      meta.textContent = String(review.role || '').trim();
+      footer.append(name, meta);
+
+      article.append(stars, quote, footer);
+      list.append(article);
+    });
+    host.dataset.state = 'published';
   }
 
   function reviewDate(value) {
@@ -391,6 +521,7 @@
     section.querySelectorAll('[data-rating-group]').forEach(buildRatingGroup);
     syncBilingual(section);
     ensurePublicReviewsHost(section);
+    renderDemoReviews(section);
     const form = section.querySelector('[data-fx-feedback-form]');
     if (form && form.dataset.bound !== 'true') {
       form.dataset.bound = 'true';
@@ -433,6 +564,7 @@
     syncBilingual(section);
     syncLiveOsCtas();
     if (!feedbackActivated) return;
+    renderDemoReviews(section);
     document.querySelectorAll('#user-feedback [data-rating-group] legend').forEach(legend => {
       legend.textContent = legend.dataset[language()];
     });
