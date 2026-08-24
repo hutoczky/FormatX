@@ -1,7 +1,7 @@
-/* FormatX r339 — restrained mobile MAG bloom and softer crystal edge finish.
+/* FormatX r340 — calmer mobile MAG flare and gentler crystal edge finish.
    The r317 WebGL crystal remains native and interactive. This late mobile-only
-   optics owner lowers the central flare, smooths the perimeter highlight and
-   reduces travelling rim intensity without changing the MAG silhouette or desktop. */
+   optics owner trims the central hotspot, lowers perimeter contrast and feathers
+   the outer highlight without changing the MAG silhouette or desktop rendering. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html:root:root body.living-architecture #hero .hero-space {
@@ -29,50 +29,50 @@
     display: block !important;
     pointer-events: none !important;
     background:
-      radial-gradient(circle at 50% 50%, rgba(0, 4, 13, .16) 0 4%, rgba(0, 4, 13, .08) 8%, transparent 18%),
-      radial-gradient(ellipse at 50% 50%, transparent 0 63%, rgba(0, 4, 13, .04) 78%, rgba(0, 4, 13, .10) 100%) !important;
-    -webkit-backdrop-filter: blur(1.2px) brightness(.88) !important;
-    backdrop-filter: blur(1.2px) brightness(.88) !important;
+      radial-gradient(circle at 50% 50%, rgba(0, 4, 13, .21) 0 4.5%, rgba(0, 4, 13, .11) 9%, transparent 21%),
+      radial-gradient(ellipse at 50% 50%, transparent 0 60%, rgba(0, 4, 13, .055) 76%, rgba(0, 4, 13, .125) 100%) !important;
+    -webkit-backdrop-filter: blur(1.55px) brightness(.84) !important;
+    backdrop-filter: blur(1.55px) brightness(.84) !important;
   }
 
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .68 !important;
+    opacity: .63 !important;
     filter:
-      brightness(.56)
-      contrast(.70)
-      saturate(.88)
-      blur(2.15px)
-      drop-shadow(0 0 .08px rgba(132, 246, 255, .010))
-      drop-shadow(0 0 .22px rgba(44, 134, 255, .002)) !important;
+      brightness(.51)
+      contrast(.64)
+      saturate(.84)
+      blur(2.65px)
+      drop-shadow(0 0 .05px rgba(132, 246, 255, .007))
+      drop-shadow(0 0 .16px rgba(44, 134, 255, .0015)) !important;
     -webkit-filter:
-      brightness(.56)
-      contrast(.70)
-      saturate(.88)
-      blur(2.15px)
-      drop-shadow(0 0 .08px rgba(132, 246, 255, .010))
-      drop-shadow(0 0 .22px rgba(44, 134, 255, .002)) !important;
+      brightness(.51)
+      contrast(.64)
+      saturate(.84)
+      blur(2.65px)
+      drop-shadow(0 0 .05px rgba(132, 246, 255, .007))
+      drop-shadow(0 0 .16px rgba(44, 134, 255, .0015)) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .10 !important;
+    opacity: .065 !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .36 !important;
-    opacity: .012 !important;
-    filter: blur(9px) !important;
+    stroke-width: .31 !important;
+    opacity: .008 !important;
+    filter: blur(10.5px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .12 !important;
-    opacity: .035 !important;
-    filter: blur(2.3px) !important;
+    stroke-width: .10 !important;
+    opacity: .025 !important;
+    filter: blur(2.8px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a, .fx-biolume-runner-b, .fx-biolume-runner-c) {
-    stroke-width: .15 !important;
-    opacity: .18 !important;
-    filter: blur(1.7px) !important;
+    stroke-width: .13 !important;
+    opacity: .12 !important;
+    filter: blur(2.1px) !important;
   }
 }
 
@@ -95,32 +95,32 @@
 @media (max-width: 430px) {
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage::after {
     background:
-      radial-gradient(circle at 50% 50%, rgba(0, 4, 13, .20) 0 4.2%, rgba(0, 4, 13, .10) 8.5%, transparent 19%),
-      radial-gradient(ellipse at 50% 50%, transparent 0 61%, rgba(0, 4, 13, .05) 77%, rgba(0, 4, 13, .12) 100%) !important;
-    -webkit-backdrop-filter: blur(1.45px) brightness(.85) !important;
-    backdrop-filter: blur(1.45px) brightness(.85) !important;
+      radial-gradient(circle at 50% 50%, rgba(0, 4, 13, .26) 0 4.8%, rgba(0, 4, 13, .14) 9.5%, transparent 22%),
+      radial-gradient(ellipse at 50% 50%, transparent 0 58%, rgba(0, 4, 13, .07) 75%, rgba(0, 4, 13, .145) 100%) !important;
+    -webkit-backdrop-filter: blur(1.9px) brightness(.80) !important;
+    backdrop-filter: blur(1.9px) brightness(.80) !important;
   }
 
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .66 !important;
+    opacity: .60 !important;
     filter:
-      brightness(.54)
-      contrast(.68)
-      saturate(.86)
-      blur(2.35px)
-      drop-shadow(0 0 .06px rgba(134, 248, 255, .008))
-      drop-shadow(0 0 .18px rgba(48, 130, 255, .001)) !important;
+      brightness(.48)
+      contrast(.62)
+      saturate(.82)
+      blur(2.90px)
+      drop-shadow(0 0 .04px rgba(134, 248, 255, .005))
+      drop-shadow(0 0 .12px rgba(48, 130, 255, .001)) !important;
     -webkit-filter:
-      brightness(.54)
-      contrast(.68)
-      saturate(.86)
-      blur(2.35px)
-      drop-shadow(0 0 .06px rgba(134, 248, 255, .008))
-      drop-shadow(0 0 .18px rgba(48, 130, 255, .001)) !important;
+      brightness(.48)
+      contrast(.62)
+      saturate(.82)
+      blur(2.90px)
+      drop-shadow(0 0 .04px rgba(134, 248, 255, .005))
+      drop-shadow(0 0 .12px rgba(48, 130, 255, .001)) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .08 !important;
+    opacity: .05 !important;
   }
 }
 
