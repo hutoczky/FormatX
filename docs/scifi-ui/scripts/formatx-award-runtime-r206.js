@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r326') return;
-  root.dataset.fxAwardRuntime = 'r326';
+  if (root.dataset.fxAwardRuntime === 'r327') return;
+  root.dataset.fxAwardRuntime = 'r327';
 
   const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
 
@@ -41,7 +41,7 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
-  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260824-r326-softer-perimeter';
+  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260824-r327-soft-mobile-core';
   const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260822-r296-canonical-header';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
@@ -118,8 +118,8 @@
     if (!matchMedia('(max-width: 900px)').matches) return;
     const existing = document.querySelector('link[data-fx-mobile-core-softening-r322]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r326-softer-perimeter')) existing.href = CORE_SOFTEN_STYLE_URL;
-      root.dataset.fxMobileCoreOpticsR322 = 'r326-restrained-bloom-soft-edge';
+      if (!existing.href.includes('r327-soft-mobile-core')) existing.href = CORE_SOFTEN_STYLE_URL;
+      root.dataset.fxMobileCoreOpticsR322 = 'r327-restrained-bloom-soft-edge';
       return;
     }
     const link = document.createElement('link');
@@ -127,7 +127,7 @@
     link.href = CORE_SOFTEN_STYLE_URL;
     link.dataset.fxMobileCoreSofteningR322 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxMobileCoreOpticsR322 = 'r326-restrained-bloom-soft-edge';
+    root.dataset.fxMobileCoreOpticsR322 = 'r327-restrained-bloom-soft-edge';
   }
 
   function ensureOrganismCoreOwner() {
