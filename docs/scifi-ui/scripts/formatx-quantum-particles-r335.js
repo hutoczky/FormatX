@@ -12,6 +12,7 @@ root.dataset.fxQuantumParticlesR335='booting';
 root.dataset.fxQuantumParticleModel='probability-shells-entangled-pairs-collapse-tunneling';
 root.dataset.fxQuantumParticleScheduler='event-driven-no-idle-raf';
 root.dataset.fxQuantumParticleInput='capture-pointer-touch-deduplicated';
+root.dataset.fxQuantumParticleHitPolicy='coordinate-authoritative-r344';
 root.dataset.fxQuantumParticleMeasurements=root.dataset.fxQuantumParticleMeasurements||'0';
 root.dataset.fxQuantumParticleTunnels=root.dataset.fxQuantumParticleTunnels||'0';
 
@@ -182,7 +183,7 @@ function mount(stage){
       setParticle(p,x,y,shell,1.05+p.seed*.62,reduced?1:145);
     }
 
-    dispatchEvent(new CustomEvent('formatx:quantummeasurement',{detail:{revision:'r337',source:inputSource,measurements:Number(root.dataset.fxQuantumParticleMeasurements)}}));
+    dispatchEvent(new CustomEvent('formatx:quantummeasurement',{detail:{revision:'r344',source:inputSource,measurements:Number(root.dataset.fxQuantumParticleMeasurements)}}));
     clearTimeout(relaxTimer);
     relaxTimer=window.setTimeout(()=>tunnel(px,py),reduced?20:190);
     return true;
@@ -201,13 +202,13 @@ function mount(stage){
         setParticle(p,x,y,p.shell,.82+p.seed*.66,reduced?1:165);
       }
     }
-    dispatchEvent(new CustomEvent('formatx:quantumtunnel',{detail:{revision:'r337',tunnels:Number(root.dataset.fxQuantumParticleTunnels)}}));
+    dispatchEvent(new CustomEvent('formatx:quantumtunnel',{detail:{revision:'r344',tunnels:Number(root.dataset.fxQuantumParticleTunnels)}}));
     clearTimeout(relaxTimer);
     relaxTimer=window.setTimeout(()=>superpose('decoherence'),reduced?30:260);
   }
 
   function pointerInteraction(event){
-    if(field.dataset.active==='false'||!contains(event.clientX,event.clientY,30))return;
+    if(!contains(event.clientX,event.clientY,30))return;
     const r=field.getBoundingClientRect();
     const x=event.clientX-r.left-r.width*.5;
     const y=event.clientY-r.top-r.height*.5;
@@ -219,15 +220,19 @@ function mount(stage){
     dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{source:'quantum-r335',energy:.82,mode:'measurement-collapse',input:inputSource}}));
   }
 
+  // r344: a real pointer/touch coordinate inside the physical field is the
+  // authoritative hit condition. IntersectionObserver remains a compositor/
+  // visibility hint only; a stale observer sample must never discard a tap.
   const onPointerMove=e=>pointerInteraction(e);
   const onPointerDown=e=>{
-    if(field.dataset.active==='false'||!contains(e.clientX,e.clientY))return;
+    if(!contains(e.clientX,e.clientY))return;
+    field.dataset.active='true';
     if(measure(e.clientX,e.clientY,e.pointerType||'pointer'))emitCoreInteraction(e.pointerType||'pointer');
   };
   const onTouchStart=e=>{
-    if(field.dataset.active==='false')return;
     const touch=e.changedTouches&&e.changedTouches[0];
     if(!touch||!contains(touch.clientX,touch.clientY))return;
+    field.dataset.active='true';
     if(measure(touch.clientX,touch.clientY,'touch'))emitCoreInteraction('touch');
   };
   const onCoreInteraction=e=>{
@@ -256,7 +261,7 @@ function mount(stage){
 
   superpose('initial');
   root.dataset.fxQuantumParticlesR335='ready';
-  dispatchEvent(new CustomEvent('formatx:quantumparticlesready',{detail:{revision:'r337',count,model:root.dataset.fxQuantumParticleModel}}));
+  dispatchEvent(new CustomEvent('formatx:quantumparticlesready',{detail:{revision:'r344',count,model:root.dataset.fxQuantumParticleModel}}));
 
   window.FormatXQuantumParticlesR335={
     version:VERSION,
