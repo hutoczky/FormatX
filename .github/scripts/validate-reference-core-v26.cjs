@@ -26,7 +26,7 @@ for (const token of [
   'formatx-pure-3d-r285.css?v=20260821-r285'
 ]) assert.ok(bootstrap.includes(token), `missing current r250 bootstrap contract: ${token}`);
 
-assert.match(wrapper, /formatx-core-mechanical-orb-r250\.js\?v=20260824-native-mechanical-orb-r250/);
+assert.match(wrapper, /formatx-core-mechanical-orb-r250\.js\?v=20260824-native-mechanical-orb-r251-performance/);
 assert.match(wrapper, /formatx-core-mobile-reference-r317\.js\?v=20260824-r321-native-soft-rim/);
 
 for (const token of [

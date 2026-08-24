@@ -21,7 +21,7 @@ for (const token of [
   'native-mechanical-orb-r250-no-2d-mag-layers',
   'native-mechanical-orb-r250-no-2d-overlays',
   'single-webgl-mechanical-orb-r250',
-  'formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r250',
+  'formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r251-performance',
   'formatx-mobile-reference-layout-v1.js?v=20260824-native-orb-r250'
 ]) assert.ok(bootstrap.includes(token), `missing r250 bootstrap token: ${token}`);
 

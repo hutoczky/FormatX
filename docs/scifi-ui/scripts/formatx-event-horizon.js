@@ -132,17 +132,20 @@
 
   if(AUDIT_MODE){ROOT.classList.add('fx-audit-mode');fastRelease('audit-skip');return}
 
-  if(MOBILE_DIRECT_QUERY.matches){
-    ROOT.dataset.fxIntroStrategy='mobile-direct';
-    fastRelease('mobile-direct-v1',true);
-    queuePostDomEnhancements(true);
-    return;
-  }
-
-  ensureAwardRuntime();
-  queuePostDomEnhancements(false);
-  addEventListener('pageshow',e=>{if(e.persisted)fastRelease('bfcache-restore')});
-  addEventListener('error',()=>failOpen('runtime-error'));
-  addEventListener('unhandledrejection',()=>failOpen('promise-error'));
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
+  /* r251: award-performance direct entry. The former cinematic gate could
+     finish its counter while a throttled tab delayed the exit callback,
+     leaving real content and WebGL hidden behind a 100% overlay. The overlay
+     now starts hidden in HTML and this controller only releases the runtime
+     hooks. This improves first input, LCP and reliability without replacing
+     any of the native WebGL scene or its interaction. */
+  ROOT.dataset.fxIntroStrategy = EARLY_REFERENCE_MOBILE
+    ? 'mobile-direct-award-r251'
+    : 'desktop-direct-award-r251';
+  fastRelease('instant-award-r251', true);
+  queuePostDomEnhancements(EARLY_REFERENCE_MOBILE);
+  addEventListener('pageshow', event => {
+    if (event.persisted) fastRelease('bfcache-restore');
+  });
+  addEventListener('error', () => fastRelease('runtime-error'));
+  addEventListener('unhandledrejection', () => fastRelease('promise-error'));
 }());

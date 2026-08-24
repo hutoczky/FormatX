@@ -8,7 +8,7 @@
   root.dataset.fxCoreMobileAwardRevision = 'native-mechanical-energy-orb-r250';
   root.dataset.fxCoreMechanicalOrbRevision = 'r250-depth-buffered-metal-plasma-orbitals';
 
-  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js?v=20260824-native-mechanical-orb-r250';
+  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js?v=20260824-native-mechanical-orb-r251-performance';
   const LEGACY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r317.js?v=20260824-r321-native-soft-rim';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
 

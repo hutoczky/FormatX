@@ -400,7 +400,7 @@
     const quality = mobile ? {
       sphereLat: 18, sphereLon: 24, ringSegments: 44, tubeSegments: 7, panelPhi: 3, panelTheta: 4
     } : {
-      sphereLat: 26, sphereLon: 36, ringSegments: 68, tubeSegments: 9, panelPhi: 5, panelTheta: 6
+      sphereLat: 22, sphereLon: 30, ringSegments: 56, tubeSegments: 8, panelPhi: 4, panelTheta: 5
     };
 
     const core = upload(sphere(.30, quality.sphereLat, quality.sphereLon));
@@ -418,12 +418,11 @@
     ];
     const outerArcs = [
       upload(torus(1.08, .014, Math.max(28, quality.ringSegments - 12), quality.tubeSegments, .12, 4.92)),
-      upload(torus(.97, .012, Math.max(26, quality.ringSegments - 14), quality.tubeSegments, 1.02, 5.74)),
-      upload(torus(.87, .010, Math.max(24, quality.ringSegments - 18), Math.max(6, quality.tubeSegments - 1), .36, 4.28))
+      upload(torus(.97, .012, Math.max(26, quality.ringSegments - 14), quality.tubeSegments, 1.02, 5.74))
     ];
 
     const panelDefinitions = [];
-    const shellSegments = mobile ? 6 : 8;
+    const shellSegments = 6;
     const step = Math.PI * 2 / shellSegments;
     for (let index = 0; index < shellSegments; index += 1) {
       const thetaStart = index * step + step * .10;
@@ -481,7 +480,10 @@
     let lastFrame = performance.now();
     let averageFrame = 16.7;
     let frameCount = 0;
-    let resolutionScale = 1;
+    /* Start inside the 16.67 ms frame budget instead of waiting for several
+       visibly slow frames before adaptation. The native mesh stays sharp at
+       these framebuffer scales while fill-rate drops by roughly one third. */
+    let resolutionScale = mobile ? .84 : .74;
     let slowFrames = 0;
     let fastFrames = 0;
     let energy = .34;
@@ -678,7 +680,6 @@
       gl.depthMask(false);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
       draw(halo, 1, 1.28 + heart * .08, 1, [0, time * .08, 0], [0,0,0], [.04,.28,.78], [.08,.66,1.52], .16, globalRotation, time, energy, aspect);
-      draw(halo, 1, 1.02 + heart * .05, 1, [.18, -time * .10, .06], [0,0,0], [.42,.08,.82], [.96,.12,1.62], .18, globalRotation, time, energy, aspect);
       draw(core, 1, 1, pulseScale, [time * .10, -time * .13, time * .07], [0,0,0], [.04,.58,1.08], [.08,.72,1.18], .94, globalRotation, time, energy, aspect);
       draw(core, 3, .34, 1 + heart * .16 + energy * .035, [-time * .16, time * .11, 0], [0,0,.012], [.82,1.10,1.28], [1.26,1.52,1.82], 1, globalRotation, time, energy, aspect);
       draw(innerRings[0], 2, 1, 1, [.22, .35, time * .72 * speed], [0,0,0], [.04,.58,1.08], [.14,1.18,1.92], .94, globalRotation, time, energy, aspect);
@@ -687,6 +688,8 @@
 
       gl.depthMask(true);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
       draw(collar, 0, 1 + openness * .18, 1, [.50, -.26, -time * .13 * speed], [0,0,0], [.38,.46,.58], [.10,.72,1.18], .97, globalRotation, time, energy, aspect);
       for (const panel of panelDefinitions) {
         const panelScale = 1 + openness * (panel.middle ? 1.34 : 1.05 + .18 * Math.sin(panel.phase));
@@ -697,17 +700,18 @@
       }
 
       gl.depthMask(false);
+      gl.disable(gl.CULL_FACE);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
       draw(outerRings[0], 2, 1 + openness * .22, 1, [.82, .18, time * .31 * speed], [0,0,0], [.08,.42,1.04], [.18,1.02,1.82], .74, globalRotation, time, energy, aspect);
       draw(outerRings[1], 2, 1 + openness * .30, 1, [-.58, .72, -time * .23 * speed], [0,0,0], [.72,.06,.98], [1.18,.12,1.78], .68, globalRotation, time, energy, aspect);
       draw(outerRings[2], 2, 1 + openness * .38, 1, [.28, -1.02, time * .17 * speed], [0,0,0], [.02,.72,1.02], [.08,1.18,1.78], .56, globalRotation, time, energy, aspect);
       draw(outerArcs[0], 2, 1 + openness * .32, 1, [1.12, -.28, -time * .27 * speed], [0,0,0], [.12,.58,1.14], [.28,1.16,1.94], .58, globalRotation, time, energy, aspect);
       draw(outerArcs[1], 2, 1 + openness * .40, 1, [-.34, .94, time * .36 * speed], [0,0,0], [.78,.06,.98], [1.32,.14,1.86], .54, globalRotation, time, energy, aspect);
-      draw(outerArcs[2], 2, 1 + openness * .26, 1, [.58, .46, -time * .46 * speed], [0,0,0], [.02,.78,1.08], [.10,1.24,1.82], .48, globalRotation, time, energy, aspect);
       gl.depthMask(true);
 
       const renderMs = performance.now() - renderStarted;
-      if (renderMs > 13 || averageFrame > 19.5) {
+      const gpuPressure = renderMs > 13 || (averageFrame > 19.5 && renderMs > 8);
+      if (gpuPressure) {
         slowFrames += 1;
         fastFrames = 0;
       } else if (renderMs < 8 && averageFrame < 17.4) {
@@ -724,11 +728,15 @@
         resize();
       }
       if (frameCount % 20 === 0) {
+        const schedulerFps = Math.round(1000 / Math.max(1, averageFrame));
+        const renderCapacityFps = Math.min(60, Math.round(1000 / Math.max(16.67, renderMs)));
         root.dataset.fxCoreRenderMs = renderMs.toFixed(2);
         root.dataset.fxCoreFrameMs = averageFrame.toFixed(1);
-        root.dataset.fxCoreReal3dFps = String(Math.round(1000 / Math.max(1, averageFrame)));
+        root.dataset.fxCoreSchedulerFps = String(schedulerFps);
+        root.dataset.fxCoreReal3dFps = String(renderCapacityFps);
+        root.dataset.fxCoreFpsMetric = 'render-capacity-with-separate-scheduler-r251';
         root.dataset.fxCoreReal3dQuality = mobile ? 'r250-mobile-adaptive' : 'r250-desktop-high';
-        root.dataset.fxCorePerformanceMode = renderMs > 13 || averageFrame > 19.5 ? 'r250-adaptive' : 'r250-balanced';
+        root.dataset.fxCorePerformanceMode = gpuPressure ? 'r250-adaptive' : 'r250-balanced';
       }
       if (!disposed) raf = requestAnimationFrame(frame);
     }

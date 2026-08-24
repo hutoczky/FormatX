@@ -22,8 +22,8 @@ const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.js
 assert.match(bootstrap, /native-mechanical-orb-r250-no-2d-mag-layers/);
 assert.match(bootstrap, /native-mechanical-orb-r250-no-2d-overlays/);
 assert.match(bootstrap, /single-webgl-mechanical-orb-r250/);
-assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260824-native-mechanical-orb-r250/);
-assert.match(wrapper, /formatx-core-mechanical-orb-r250\.js\?v=20260824-native-mechanical-orb-r250/);
+assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260824-native-mechanical-orb-r251-performance/);
+assert.match(wrapper, /formatx-core-mechanical-orb-r250\.js\?v=20260824-native-mechanical-orb-r251-performance/);
 assert.match(wrapper, /formatx-core-mobile-reference-r317\.js\?v=20260824-r321-native-soft-rim/);
 assert.match(wrapper, /native-mechanical-orb-r250-primary/);
 assert.match(wrapper, /modern-r317-fallback/);

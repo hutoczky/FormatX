@@ -23,7 +23,7 @@ const home = read('docs/scifi-ui/index.html');
 assert.match(bootstrap, /native-mechanical-orb-r250-no-2d-mag-layers/);
 assert.match(bootstrap, /single-webgl-mechanical-orb-r250/);
 assert.match(bootstrap, /loading-v69/);
-assert.match(wrapper, /formatx-core-mechanical-orb-r250\.js\?v=20260824-native-mechanical-orb-r250/);
+assert.match(wrapper, /formatx-core-mechanical-orb-r250\.js\?v=20260824-native-mechanical-orb-r251-performance/);
 assert.match(wrapper, /formatx-core-mobile-reference-r317\.js\?v=20260824-r321-native-soft-rim/);
 assert.doesNotMatch(wrapper, /formatx-core-mobile-softlight-r318|formatx-quantum-particles-r335/);
 

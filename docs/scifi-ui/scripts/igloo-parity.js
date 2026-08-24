@@ -222,7 +222,7 @@
     './scripts/platform-status.js?v=20260807-full-release-1',
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
-    './scripts/organism-core-controller.js?v=20260729-core-ui-2',
+    './scripts/organism-core-controller.js?v=20260824-menu-race-r251',
     './scripts/organism-voice.js?v=20260730-organism-voice-4',
     './scripts/organism-voice-stability.js?v=20260808-mobile-visual-viewport-1',
     './scripts/organism-master-sync.js?v=20260802-master-sync-1',
