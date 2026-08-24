@@ -6,10 +6,18 @@
   root.dataset.fxLanguageQueryOwnerR329 = 'booting';
 
   const supported = new Set(['hu', 'en']);
+  const initialQuery = (() => {
+    const value = new URLSearchParams(location.search).get('lang');
+    return supported.has(value) ? value : null;
+  })();
   let queued = false;
   let correcting = false;
+  let userOverride = false;
+
+  if (initialQuery) root.dataset.fxInitialLanguageQueryR329 = initialQuery;
 
   function selectedLanguage() {
+    if (initialQuery && !userOverride) return initialQuery;
     const value = new URLSearchParams(location.search).get('lang');
     return supported.has(value) ? value : null;
   }
@@ -47,6 +55,18 @@
   const observer = new MutationObserver(() => schedule('root-lang-mutation'));
   observer.observe(root, { attributes: true, attributeFilter: ['lang'] });
 
+  document.addEventListener('click', event => {
+    const target = event.target instanceof Element ? event.target.closest('.fx-language-toggle') : null;
+    if (!(target instanceof HTMLButtonElement)) return;
+    userOverride = true;
+    root.dataset.fxLanguageQueryUserOverrideR329 = 'true';
+  }, true);
+
+  addEventListener('formatx:languagechange', event => {
+    if (event.detail?.source === 'query-owner-r329') return;
+    schedule('languagechange');
+  }, { passive: true });
+
   for (const eventName of [
     'pageshow',
     'formatx:organisminterfaceready',
@@ -62,7 +82,7 @@
     enforce('immediate');
   }
 
-  for (const delay of [50, 250, 1000]) {
-    setTimeout(() => enforce('bounded-late-pass'), delay);
+  for (const delay of [50, 250, 1000, 2500, 5000]) {
+    setTimeout(() => enforce('bounded-startup-pass'), delay);
   }
 }());
