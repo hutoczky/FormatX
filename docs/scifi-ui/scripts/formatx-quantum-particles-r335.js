@@ -2,7 +2,7 @@
 'use strict';
 
 const root=document.documentElement;
-const VERSION='r335-quantum-inspired-interactive-particles';
+const VERSION='r337-quantum-inspired-capture-touch-particles';
 if(root.dataset.fxQuantumParticlesR335==='ready'||root.dataset.fxQuantumParticlesR335==='booting')return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
   root.dataset.fxQuantumParticlesR335='audit-skip';
@@ -11,6 +11,9 @@ if(new URLSearchParams(location.search).get('lighthouse')==='1'){
 root.dataset.fxQuantumParticlesR335='booting';
 root.dataset.fxQuantumParticleModel='probability-shells-entangled-pairs-collapse-tunneling';
 root.dataset.fxQuantumParticleScheduler='event-driven-no-idle-raf';
+root.dataset.fxQuantumParticleInput='capture-pointer-touch-deduplicated';
+root.dataset.fxQuantumParticleMeasurements=root.dataset.fxQuantumParticleMeasurements||'0';
+root.dataset.fxQuantumParticleTunnels=root.dataset.fxQuantumParticleTunnels||'0';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)').matches;
@@ -64,6 +67,7 @@ function mount(stage){
 
   const count=24;
   const particles=[];
+  let lastMeasurementAt=-Infinity;
   for(let i=0;i<count;i++){
     const node=document.createElement('i');
     node.className='fx-quantum-particle-r335';
@@ -96,6 +100,11 @@ function mount(stage){
       cx:r.width*.5,
       cy:r.height*.5
     };
+  }
+
+  function contains(clientX,clientY,padding=0){
+    const r=field.getBoundingClientRect();
+    return clientX>=r.left-padding&&clientX<=r.right+padding&&clientY>=r.top-padding&&clientY<=r.bottom+padding;
   }
 
   function shellRadius(shell){
@@ -150,13 +159,18 @@ function mount(stage){
     root.dataset.fxQuantumParticleLastState=reason;
   }
 
-  function measure(clientX,clientY){
+  function measure(clientX,clientY,inputSource='pointer',force=false){
+    const now=performance.now();
+    if(!force&&now-lastMeasurementAt<90)return false;
+    lastMeasurementAt=now;
     const b=bounds();
     const px=clamp(clientX-b.rect.left-b.cx,-b.rx*.82,b.rx*.82);
     const py=clamp(clientY-b.rect.top-b.cy,-b.ry*.78,b.ry*.78);
     interactionSerial++;
     field.dataset.state='measured';
     root.dataset.fxQuantumParticleLastState='measurement-collapse';
+    root.dataset.fxQuantumParticleInputSource=inputSource;
+    root.dataset.fxQuantumParticleMeasurements=String((Number(root.dataset.fxQuantumParticleMeasurements)||0)+1);
 
     for(const p of particles){
       const pairBand=(p.pair%3)-1;
@@ -168,15 +182,17 @@ function mount(stage){
       setParticle(p,x,y,shell,1.05+p.seed*.62,reduced?1:145);
     }
 
+    dispatchEvent(new CustomEvent('formatx:quantummeasurement',{detail:{revision:'r337',source:inputSource,measurements:Number(root.dataset.fxQuantumParticleMeasurements)}}));
     clearTimeout(relaxTimer);
     relaxTimer=window.setTimeout(()=>tunnel(px,py),reduced?20:190);
+    return true;
   }
 
   function tunnel(px,py){
-    const b=bounds();
     interactionSerial++;
     field.dataset.state='tunneling';
     root.dataset.fxQuantumParticleLastState='probability-tunnel';
+    root.dataset.fxQuantumParticleTunnels=String((Number(root.dataset.fxQuantumParticleTunnels)||0)+1);
     for(const p of particles){
       if(hash(p.index+interactionSerial*19.7)<.38){
         const x=-p.x*.92+px*.08;
@@ -185,26 +201,34 @@ function mount(stage){
         setParticle(p,x,y,p.shell,.82+p.seed*.66,reduced?1:165);
       }
     }
+    dispatchEvent(new CustomEvent('formatx:quantumtunnel',{detail:{revision:'r337',tunnels:Number(root.dataset.fxQuantumParticleTunnels)}}));
     clearTimeout(relaxTimer);
     relaxTimer=window.setTimeout(()=>superpose('decoherence'),reduced?30:260);
   }
 
   function pointerInteraction(event){
-    if(field.dataset.active==='false')return;
+    if(field.dataset.active==='false'||!contains(event.clientX,event.clientY,30))return;
     const r=field.getBoundingClientRect();
-    if(event.clientX<r.left-30||event.clientX>r.right+30||event.clientY<r.top-30||event.clientY>r.bottom+30)return;
     const x=event.clientX-r.left-r.width*.5;
     const y=event.clientY-r.top-r.height*.5;
     clearTimeout(pointerTimer);
     pointerTimer=window.setTimeout(()=>superpose('pointer',{x,y}),42);
   }
 
+  function emitCoreInteraction(inputSource){
+    dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{source:'quantum-r335',energy:.82,mode:'measurement-collapse',input:inputSource}}));
+  }
+
   const onPointerMove=e=>pointerInteraction(e);
   const onPointerDown=e=>{
-    const r=field.getBoundingClientRect();
-    if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)return;
-    measure(e.clientX,e.clientY);
-    dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{source:'quantum-r335',energy:.82,mode:'measurement-collapse'}}));
+    if(field.dataset.active==='false'||!contains(e.clientX,e.clientY))return;
+    if(measure(e.clientX,e.clientY,e.pointerType||'pointer'))emitCoreInteraction(e.pointerType||'pointer');
+  };
+  const onTouchStart=e=>{
+    if(field.dataset.active==='false')return;
+    const touch=e.changedTouches&&e.changedTouches[0];
+    if(!touch||!contains(touch.clientX,touch.clientY))return;
+    if(measure(touch.clientX,touch.clientY,'touch'))emitCoreInteraction('touch');
   };
   const onCoreInteraction=e=>{
     if(e.detail?.source==='quantum-r335')return;
@@ -214,8 +238,9 @@ function mount(stage){
     superpose('external-interaction',{x,y});
   };
 
-  host.addEventListener('pointermove',onPointerMove,{passive:true});
-  host.addEventListener('pointerdown',onPointerDown,{passive:true});
+  document.addEventListener('pointermove',onPointerMove,{passive:true,capture:true});
+  document.addEventListener('pointerdown',onPointerDown,{passive:true,capture:true});
+  document.addEventListener('touchstart',onTouchStart,{passive:true,capture:true});
   addEventListener('formatx:coreinteraction',onCoreInteraction,{passive:true});
 
   const io='IntersectionObserver' in window?new IntersectionObserver(entries=>{
@@ -231,17 +256,18 @@ function mount(stage){
 
   superpose('initial');
   root.dataset.fxQuantumParticlesR335='ready';
-  dispatchEvent(new CustomEvent('formatx:quantumparticlesready',{detail:{revision:'r335',count,model:root.dataset.fxQuantumParticleModel}}));
+  dispatchEvent(new CustomEvent('formatx:quantumparticlesready',{detail:{revision:'r337',count,model:root.dataset.fxQuantumParticleModel}}));
 
   window.FormatXQuantumParticlesR335={
     version:VERSION,
-    measureAt(clientX,clientY){measure(clientX,clientY);},
+    measureAt(clientX,clientY){measure(clientX,clientY,'api',true);},
     excite(){superpose('external-excite');},
     destroy(){
       disposed=true;
       clearTimeout(bootTimer);clearTimeout(relaxTimer);clearTimeout(pointerTimer);
-      host.removeEventListener('pointermove',onPointerMove);
-      host.removeEventListener('pointerdown',onPointerDown);
+      document.removeEventListener('pointermove',onPointerMove,true);
+      document.removeEventListener('pointerdown',onPointerDown,true);
+      document.removeEventListener('touchstart',onTouchStart,true);
       removeEventListener('formatx:coreinteraction',onCoreInteraction);
       io?.disconnect();ro?.disconnect();field.remove();
       root.dataset.fxQuantumParticlesR335='destroyed';

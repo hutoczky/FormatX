@@ -28,7 +28,7 @@ assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260821-r285-pure-webgl3
 assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260824-r321-native-soft-rim/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
 assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260824-r323-deep-water-biolume/);
-assert.match(wrapper,/formatx-quantum-particles-r335\.js\?v=20260824-r335-interactive-quantum-field/);
+assert.match(wrapper,/formatx-quantum-particles-r335\.js\?v=20260824-r337-capture-touch/);
 assert.match(wrapper,/formatx-quantum-particles-r335\.css\?v=20260824-r335-interactive-quantum-field/);
 assert.match(wrapper,/modern-r317-primary/);
 assert.match(wrapper,/legacy-r99-fallback/);
@@ -76,17 +76,24 @@ assert.doesNotMatch(softlight,/shaderSource\s*\(|WebGLRenderingContext|WebGL2Ren
 assert.doesNotMatch(softlight,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
 
 for(const token of [
-  'r335-quantum-inspired-interactive-particles',
+  'r337-quantum-inspired-capture-touch-particles',
   'probability-shells-entangled-pairs-collapse-tunneling',
   'event-driven-no-idle-raf',
+  'capture-pointer-touch-deduplicated',
+  'fxQuantumParticleMeasurements',
+  'fxQuantumParticleTunnels',
   'measurement-collapse',
   'probability-tunnel',
+  'formatx:quantummeasurement',
+  'formatx:quantumtunnel',
   'formatx:coreinteraction',
   'IntersectionObserver',
   'ResizeObserver',
-  'pointermove',
-  'pointerdown'
-]) assert.ok(quantum.includes(token),`missing r335 quantum interaction contract: ${token}`);
+  "document.addEventListener('pointermove'",
+  "document.addEventListener('pointerdown'",
+  "document.addEventListener('touchstart'",
+  'capture:true'
+]) assert.ok(quantum.includes(token),`missing r337 quantum interaction contract: ${token}`);
 assert.match(quantumCss,/fx-quantum-field-r335/);
 assert.match(quantumCss,/fx-quantum-phase-r335/);
 assert.doesNotMatch(quantum,/requestAnimationFrame\s*\(|setInterval\s*\(|getContext\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
@@ -123,4 +130,4 @@ assert.equal(quality.mag_webgl_context_count,1);
 assert.equal(quality.mag_paused_outside_hero,true);
 
 for(const source of [bootstrap,wrapper,renderer,softlight,quantum,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
-console.log('PASS: r317 single-WebGL MAG keeps the r334 soft optics and adds r335 event-driven quantum-inspired interactive particles without a second canvas/context or idle JS animation loop.');
+console.log('PASS: r317 single-WebGL MAG keeps r336 soft optics and adds r337 capture-phase touch/pointer quantum-inspired interaction without a second canvas/context or idle JS animation loop.');
