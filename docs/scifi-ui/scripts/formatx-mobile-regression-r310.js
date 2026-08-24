@@ -7,7 +7,7 @@
 
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
-  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r348-balanced-soft-glass-edge';
+  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r349-restrained-glow-soft-edge';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
   // Historical WDA lineage marker: the r310 QR/style contract remains the
   // compatibility baseline, while the active style revision above carries the
@@ -78,8 +78,8 @@
   function ensureOpticsStyle() {
     const existing = document.querySelector('link[data-fx-mobile-core-optics-r328]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r348-balanced-soft-glass-edge')) existing.href = OPTICS_STYLE_URL;
-      root.dataset.fxCoreMobileOpticsR328 = 'r348-balanced-soft-glass-edge-owner';
+      if (!existing.href.includes('r349-restrained-glow-soft-edge')) existing.href = OPTICS_STYLE_URL;
+      root.dataset.fxCoreMobileOpticsR328 = 'r349-restrained-glow-soft-edge-owner';
       return;
     }
     const link = document.createElement('link');
@@ -87,7 +87,7 @@
     link.href = OPTICS_STYLE_URL;
     link.dataset.fxMobileCoreOpticsR328 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxCoreMobileOpticsR328 = 'r348-balanced-soft-glass-edge-owner';
+    root.dataset.fxCoreMobileOpticsR328 = 'r349-restrained-glow-soft-edge-owner';
   }
 
   function selectedCurrency() {
