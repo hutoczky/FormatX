@@ -11,7 +11,13 @@
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r329-query-authority';
   let qrGeneration = 0;
 
+  function explicitLanguageQuery() {
+    const value = new URLSearchParams(location.search).get('lang');
+    return value === 'hu' || value === 'en' ? value : null;
+  }
+
   function ensureLanguageOwner() {
+    if (!explicitLanguageQuery()) return;
     if (document.querySelector('script[data-fx-language-query-owner-r329]')) return;
     const script = document.createElement('script');
     script.src = LANGUAGE_OWNER_URL;
@@ -72,6 +78,7 @@
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = OPTICS_STYLE_URL;
+    link.dataset.fxMobileRegressionR310 = 'true';
     link.dataset.fxMobileCoreOpticsR328 = 'true';
     document.head.appendChild(link);
     root.dataset.fxCoreMobileOpticsR328 = 'soft-short-bloom';
