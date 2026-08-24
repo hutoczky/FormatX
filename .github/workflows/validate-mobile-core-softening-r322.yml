@@ -5,6 +5,7 @@ on:
     paths:
       - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
       - 'docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-regression-r310.css'
       - 'docs/scifi-ui/styles/formatx-quantum-particles-r335.css'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
