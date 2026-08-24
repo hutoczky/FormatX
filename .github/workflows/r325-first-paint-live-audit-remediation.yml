@@ -6,6 +6,9 @@ on:
       - '.github/workflows/r325-first-paint-live-audit-remediation.yml'
 permissions:
   contents: write
+concurrency:
+  group: r325-first-paint-remediation
+  cancel-in-progress: true
 jobs:
   remediate:
     runs-on: ubuntu-latest
@@ -35,11 +38,12 @@ jobs:
           )
 
           bootstrap = '''  <link rel="stylesheet" data-fx-award-readiness-style="true" href="./styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-reference-layout-style="true" href="./styles/formatx-mobile-reference-layout-v1.css?v=20260818-r207-preloaded">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-flow-first-r74="true" href="./styles/formatx-flow-first-r74.css?v=20260818-r207-preloaded">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-responsive-text-guard="true" href="./styles/formatx-responsive-text-guard-r72.css?v=20260818-r207-preloaded">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="./styles/formatx-mobile-proof-controls-r204.css?v=20260818-r207-preloaded">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-layout-r207="true" href="./styles/formatx-mobile-layout-r207.css?v=20260818-r208-flicker-free">\n  <link rel="stylesheet" data-fx-first-paint-r206="true" href="./styles/formatx-first-paint-r206.css?v=20260824-r325-static-first-paint">\n  <script defer data-fx-mobile-reference-layout="true" src="./scripts/formatx-mobile-reference-layout-v1.js?v=20260820-r248-reference-owner"></script>\n  <script defer data-fx-flow-first-r75="true" src="./scripts/formatx-flow-first-r75.js?v=20260820-r248-reference-owner"></script>\n  <script defer data-fx-mobile-layout-r207="true" src="./scripts/formatx-mobile-layout-r207.js?v=20260818-r208-flicker-free"></script>\n'''
-          anchor = '  <link rel="stylesheet" data-fx-reference-production-r244="true" href="./styles/formatx-reference-production-r244.css?v=20260820-r247">'
           if 'data-fx-first-paint-r206="true"' not in html:
-              if anchor not in html:
-                  raise SystemExit('r244 static anchor not found')
-              html = html.replace(anchor, bootstrap + anchor, 1)
+              head_close = '</head>'
+              if head_close not in html:
+                  raise SystemExit('head close not found')
+              # Must be last in the static cascade, matching production Worker injection.
+              html = html.replace(head_close, bootstrap + head_close, 1)
           index.write_text(html)
 
           prod = Path('billing-worker/src/production-entry.js')
