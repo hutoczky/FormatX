@@ -5,6 +5,8 @@ const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
 const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js');
 const softlight=read('docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js');
+const quantum=read('docs/scifi-ui/scripts/formatx-quantum-particles-r335.js');
+const quantumCss=read('docs/scifi-ui/styles/formatx-quantum-particles-r335.css');
 const legacyRenderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const layoutCss=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
@@ -26,6 +28,8 @@ assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260821-r285-pure-webgl3
 assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260824-r321-native-soft-rim/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
 assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260824-r323-deep-water-biolume/);
+assert.match(wrapper,/formatx-quantum-particles-r335\.js\?v=20260824-r335-interactive-quantum-field/);
+assert.match(wrapper,/formatx-quantum-particles-r335\.css\?v=20260824-r335-interactive-quantum-field/);
 assert.match(wrapper,/modern-r317-primary/);
 assert.match(wrapper,/legacy-r99-fallback/);
 assert.match(wrapper,/r323-deep-water-biolume/);
@@ -71,6 +75,23 @@ for(const token of [
 assert.doesNotMatch(softlight,/shaderSource\s*\(|WebGLRenderingContext|WebGL2RenderingContext|prototype\.shaderSource/);
 assert.doesNotMatch(softlight,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
 
+for(const token of [
+  'r335-quantum-inspired-interactive-particles',
+  'probability-shells-entangled-pairs-collapse-tunneling',
+  'event-driven-no-idle-raf',
+  'measurement-collapse',
+  'probability-tunnel',
+  'formatx:coreinteraction',
+  'IntersectionObserver',
+  'ResizeObserver',
+  'pointermove',
+  'pointerdown'
+]) assert.ok(quantum.includes(token),`missing r335 quantum interaction contract: ${token}`);
+assert.match(quantumCss,/fx-quantum-field-r335/);
+assert.match(quantumCss,/fx-quantum-phase-r335/);
+assert.doesNotMatch(quantum,/requestAnimationFrame\s*\(|setInterval\s*\(|getContext\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
+assert.doesNotMatch(quantumCss,/radial-gradient|conic-gradient|linear-gradient/i);
+
 for(const source of [detail,liveMotion,heartbeat,energy]){
   assert.doesNotMatch(source,/getContext\(['"]2d['"]|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|radial-gradient|conic-gradient|linear-gradient/i);
 }
@@ -101,5 +122,5 @@ assert.equal(quality.mag_image_backed,false);
 assert.equal(quality.mag_webgl_context_count,1);
 assert.equal(quality.mag_paused_outside_hero,true);
 
-for(const source of [bootstrap,wrapper,renderer,softlight,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
-console.log('PASS: current r317 native WebGL MAG uses the r323 source-owned soft-light/biolume tuner, r99 fallback and zero 2D MAG overlays.');
+for(const source of [bootstrap,wrapper,renderer,softlight,quantum,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
+console.log('PASS: r317 single-WebGL MAG keeps the r334 soft optics and adds r335 event-driven quantum-inspired interactive particles without a second canvas/context or idle JS animation loop.');

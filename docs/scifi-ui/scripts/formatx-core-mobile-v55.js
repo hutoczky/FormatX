@@ -5,12 +5,14 @@
   if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreMobileV55 = 'audit-skip'; return; }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v69';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'reference-modern-crystal-native-webgl-r317-native-soft-rim-r321-biolume-r323-controls-r320';
+  root.dataset.fxCoreMobileAwardRevision = 'reference-modern-crystal-native-webgl-r317-native-soft-rim-r334-quantum-particles-r335';
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r317.js?v=20260824-r321-native-soft-rim';
   const LEGACY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99&rev=20260824-r304-soft-fallback';
   const SOFTLIGHT_TUNER = '/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js?v=20260824-r323-deep-water-biolume';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-r321-stable-hit-geometry';
+  const QUANTUM_STYLE = '/scifi-ui/styles/formatx-quantum-particles-r335.css?v=20260824-r335-interactive-quantum-field';
+  const QUANTUM_RUNTIME = '/scifi-ui/scripts/formatx-quantum-particles-r335.js?v=20260824-r335-interactive-quantum-field';
 
   function loadStableControls() {
     if (document.querySelector('link[data-fx-mobile-control-stability-r320]')) return;
@@ -47,6 +49,23 @@
     document.head.appendChild(script);
   }
 
+  function loadQuantumField() {
+    if (!document.querySelector('link[data-fx-quantum-particles-r335]')) {
+      const style=document.createElement('link');
+      style.rel='stylesheet';
+      style.href=QUANTUM_STYLE;
+      style.dataset.fxQuantumParticlesR335='true';
+      document.head.appendChild(style);
+    }
+    if (document.querySelector('script[data-fx-quantum-particles-r335]') || root.dataset.fxQuantumParticlesR335 === 'ready') return;
+    const script=document.createElement('script');
+    script.src=QUANTUM_RUNTIME;
+    script.async=false;
+    script.dataset.fxQuantumParticlesR335='true';
+    script.addEventListener('error',()=>{root.dataset.fxQuantumParticlesR335='load-failed';},{once:true});
+    document.head.appendChild(script);
+  }
+
   function loadRenderer(src, fallback) {
     const renderer=document.createElement('script');
     renderer.src=src;
@@ -61,6 +80,7 @@
     renderer.addEventListener('load',()=>{
       root.dataset.fxCoreReferenceLockLoad=fallback?'ready-v69-r120-fallback':'ready-v69-r317';
       root.dataset.fxCoreRendererSelection=fallback?'legacy-r99-fallback':'modern-r317-primary';
+      if (!fallback) loadQuantumField();
     },{once:true});
 
     renderer.addEventListener('error',()=>{
