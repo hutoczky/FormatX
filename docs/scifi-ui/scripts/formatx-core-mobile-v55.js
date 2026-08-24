@@ -12,8 +12,8 @@
   const SOFTLIGHT_TUNER = '/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js?v=20260824-r323-deep-water-biolume';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-r321-stable-hit-geometry';
   const QUANTUM_STYLE = '/scifi-ui/styles/formatx-quantum-particles-r335.css?v=20260824-r335-interactive-quantum-field';
-  // r337-capture-touch lineage is preserved; r344 makes physical coordinates authoritative.
-  const QUANTUM_RUNTIME = '/scifi-ui/scripts/formatx-quantum-particles-r335.js?v=20260824-r344-coordinate-touch';
+  // r337-capture-touch contract is retained; the suffix forces delivery of the r344 hit-policy fix.
+  const QUANTUM_RUNTIME = '/scifi-ui/scripts/formatx-quantum-particles-r335.js?v=20260824-r337-capture-touch-r344-coordinate-authoritative';
 
   function loadStableControls() {
     if (document.querySelector('link[data-fx-mobile-control-stability-r320]')) return;
