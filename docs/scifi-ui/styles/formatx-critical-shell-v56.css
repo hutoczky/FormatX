@@ -380,3 +380,25 @@ main { position: relative; z-index: 2; }
     max-height: 490px;
   }
 }
+
+/* r332 — desktop LCP/CLS first-paint lock. The readable hero is content, not
+   an entrance effect: publish it at its final paint state before enhancement
+   runtimes arrive, and reserve the measured lead height so late control/core
+   startup cannot move the largest text block. */
+@media (min-width: 901px) {
+  body.living-architecture #hero .hero-copy,
+  body.living-architecture #hero .hero-copy > * {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  body.living-architecture #hero .hero-copy > .hero-lead {
+    display: block !important;
+    min-block-size: 78px !important;
+    content-visibility: visible !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
