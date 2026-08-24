@@ -1,0 +1,112 @@
+name: One-shot r325 first-paint and live audit remediation
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/r325-first-paint-live-audit-remediation.yml'
+permissions:
+  contents: write
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Align static first paint, live CSP, robots and cache revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          index = Path('docs/scifi-ui/index.html')
+          html = index.read_text()
+
+          old_meta = "script-src 'self';style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com;"
+          new_meta = "script-src 'self' https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com;"
+          if old_meta not in html:
+              raise SystemExit('index CSP meta contract not found')
+          html = html.replace(old_meta, new_meta, 1)
+
+          html = html.replace(
+              './scripts/formatx-signature-system-r185.js?v=20260816-iconic-mag-r185b-hitlayer',
+              './scripts/formatx-signature-system-r185.js?v=20260824-r325-inert-hidden-architecture'
+          )
+
+          bootstrap = '''  <link rel="stylesheet" data-fx-award-readiness-style="true" href="./styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-reference-layout-style="true" href="./styles/formatx-mobile-reference-layout-v1.css?v=20260818-r207-preloaded">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-flow-first-r74="true" href="./styles/formatx-flow-first-r74.css?v=20260818-r207-preloaded">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-responsive-text-guard="true" href="./styles/formatx-responsive-text-guard-r72.css?v=20260818-r207-preloaded">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="./styles/formatx-mobile-proof-controls-r204.css?v=20260818-r207-preloaded">\n  <link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-layout-r207="true" href="./styles/formatx-mobile-layout-r207.css?v=20260818-r208-flicker-free">\n  <link rel="stylesheet" data-fx-first-paint-r206="true" href="./styles/formatx-first-paint-r206.css?v=20260824-r325-static-first-paint">\n  <script defer data-fx-mobile-reference-layout="true" src="./scripts/formatx-mobile-reference-layout-v1.js?v=20260820-r248-reference-owner"></script>\n  <script defer data-fx-flow-first-r75="true" src="./scripts/formatx-flow-first-r75.js?v=20260820-r248-reference-owner"></script>\n  <script defer data-fx-mobile-layout-r207="true" src="./scripts/formatx-mobile-layout-r207.js?v=20260818-r208-flicker-free"></script>\n'''
+          anchor = '  <link rel="stylesheet" data-fx-reference-production-r244="true" href="./styles/formatx-reference-production-r244.css?v=20260820-r247">'
+          if 'data-fx-first-paint-r206="true"' not in html:
+              if anchor not in html:
+                  raise SystemExit('r244 static anchor not found')
+              html = html.replace(anchor, bootstrap + anchor, 1)
+          index.write_text(html)
+
+          prod = Path('billing-worker/src/production-entry.js')
+          source = prod.read_text()
+
+          fetch_anchor = "    const isRead = request.method === 'GET' || request.method === 'HEAD';\n"
+          robots_route = """    const isRead = request.method === 'GET' || request.method === 'HEAD';\n\n    if (isRead && url.hostname === 'formatxsuite.com' && url.pathname === '/robots.txt') {\n      return canonicalRobots(request.method === 'HEAD');\n    }\n"""
+          if "url.pathname === '/robots.txt'" not in source:
+              if fetch_anchor not in source:
+                  raise SystemExit('production fetch anchor not found')
+              source = source.replace(fetch_anchor, robots_route, 1)
+
+          csp_old = """  const csp = headers.get('Content-Security-Policy');\n  if (csp && !csp.includes(INLINE_CRITICAL_STYLE_HASH)) {\n    headers.set('Content-Security-Policy', csp.replace(\"style-src 'self'\", `style-src 'self' ${INLINE_CRITICAL_STYLE_HASH}`));\n  }\n"""
+          csp_new = """  let csp = headers.get('Content-Security-Policy');\n  if (csp) {\n    if (!csp.includes(INLINE_CRITICAL_STYLE_HASH)) {\n      csp = csp.replace(\"style-src 'self'\", `style-src 'self' ${INLINE_CRITICAL_STYLE_HASH}`);\n    }\n    if (!csp.includes('https://static.cloudflareinsights.com')) {\n      csp = csp.replace(\"script-src 'self'\", \"script-src 'self' https://static.cloudflareinsights.com\");\n    }\n    if (!csp.includes('https://cloudflareinsights.com')) {\n      csp = csp.replace(\"connect-src 'self'\", \"connect-src 'self' https://cloudflareinsights.com\");\n    }\n    headers.set('Content-Security-Policy', csp);\n  }\n"""
+          if csp_old in source:
+              source = source.replace(csp_old, csp_new, 1)
+          elif 'https://static.cloudflareinsights.com' not in source:
+              raise SystemExit('production CSP block not found')
+
+          robots_fn = """
+const CANONICAL_ROBOTS = `User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /scifi-ui/payment/
+
+Sitemap: https://formatxsuite.com/sitemap.xml
+`;
+
+function canonicalRobots(headOnly = false) {
+  const headers = new Headers({
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Cache-Control': 'no-store, max-age=0, no-transform',
+    'X-Robots-Tag': 'index, follow',
+  });
+  return new Response(headOnly ? null : CANONICAL_ROBOTS, { status: 200, headers });
+}
+
+"""
+          fn_anchor = 'async function canonicaliseApexResponse(request, url, response) {'
+          if 'const CANONICAL_ROBOTS' not in source:
+              if fn_anchor not in source:
+                  raise SystemExit('canonical response function anchor not found')
+              source = source.replace(fn_anchor, robots_fn + fn_anchor, 1)
+          prod.write_text(source)
+
+          live = Path('.github/workflows/verify-live-core-mesh3d-visual.yml')
+          live_text = live.read_text().replace("state.biोलume || state.biolume", "state.biolume")
+          live.write_text(live_text)
+
+          self_path = Path('.github/workflows/r325-first-paint-live-audit-remediation.yml')
+          self_path.unlink()
+          PY
+
+          node --check billing-worker/src/production-entry.js
+          node --check docs/scifi-ui/scripts/formatx-signature-system-r185.js
+          grep -Fq 'data-fx-first-paint-r206="true"' docs/scifi-ui/index.html
+          grep -Fq 'formatx-mobile-layout-r207.css?v=20260818-r208-flicker-free' docs/scifi-ui/index.html
+          grep -Fq '20260824-r325-inert-hidden-architecture' docs/scifi-ui/index.html
+          grep -Fq 'https://static.cloudflareinsights.com' billing-worker/src/production-entry.js
+          grep -Fq 'CANONICAL_ROBOTS' billing-worker/src/production-entry.js
+          grep -Fq "assert.equal(state.biolume, 'ready')" .github/workflows/verify-live-core-mesh3d-visual.yml
+      - name: Commit remediation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Stabilize r325 first paint and live audit contracts'
+          git push origin HEAD:master
