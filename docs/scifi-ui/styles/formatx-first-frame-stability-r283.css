@@ -190,14 +190,125 @@
     grid-area: copy !important;
     position: relative !important;
     inset: auto !important;
+    z-index: 12 !important;
+    display: block !important;
     align-self: center !important;
     box-sizing: border-box !important;
     width: 100% !important;
     min-width: 0 !important;
     max-width: 580px !important;
+    min-height: 505px !important;
     margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
     transform: none !important;
+    translate: none !important;
   }
+
+  /* r334: mirror the settled r244 copy metrics in the render-blocking frame.
+     Previously only the parent grid was reserved; the initial APEX typography
+     was therefore painted and then replaced by the reference typography. */
+  html body.living-architecture #hero .hero-copy .kicker {
+    margin: 0 0 14px !important;
+    font: 700 10px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    letter-spacing: .28em !important;
+  }
+  html body.living-architecture #hero .fx-category-definition {
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    min-height: 62px !important;
+    margin: 0 0 24px !important;
+    padding: 12px 14px !important;
+    font: 400 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+  html body.living-architecture #hero .fx-category-definition strong {
+    display: block !important;
+    margin: 0 0 4px !important;
+    font: 750 10px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    letter-spacing: .08em !important;
+  }
+  html body.living-architecture #hero #hero-title {
+    display: grid !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    white-space: normal !important;
+  }
+  html body.living-architecture #hero .hero-title-main {
+    display: block !important;
+    max-width: 100% !important;
+    font-size: clamp(64px, 6.25vw, 92px) !important;
+    line-height: .88 !important;
+    letter-spacing: -.075em !important;
+    white-space: nowrap !important;
+  }
+  html body.living-architecture #hero .hero-title-sub {
+    justify-self: end !important;
+    margin: 7px 2px 0 0 !important;
+    font-size: clamp(27px, 2.7vw, 40px) !important;
+    line-height: 1 !important;
+    letter-spacing: .12em !important;
+    white-space: nowrap !important;
+  }
+  html body.living-architecture #hero .hero-lead {
+    display: block !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    min-block-size: 78px !important;
+    margin: 24px 0 0 !important;
+    font: 400 clamp(16px, 1.25vw, 18px)/1.55 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+  html body.living-architecture #hero .fx-method-inline {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    min-height: 16px !important;
+    margin: 14px 0 0 !important;
+    padding: 0 !important;
+    gap: 7px 18px !important;
+    list-style: none !important;
+    font: 500 11px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  }
+  html body.living-architecture #hero .hero-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    min-height: 106px !important;
+    margin: 22px 0 0 !important;
+    gap: 10px !important;
+  }
+  html body.living-architecture #hero .hero-actions .button {
+    box-sizing: border-box !important;
+    min-height: 48px !important;
+    max-width: 100% !important;
+    padding: 0 18px !important;
+    white-space: normal !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+  }
+  html body.living-architecture #hero .hero-actions #hero-download {
+    flex: 1 1 250px !important;
+  }
+  html body.living-architecture #hero .hero-actions .button:not(#hero-download) {
+    flex: 1 1 180px !important;
+  }
+  html body.living-architecture #hero .hero-facts {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
   html body.living-architecture #hero .hero-grid > .hero-space {
     grid-area: space !important;
     position: relative !important;
@@ -219,6 +330,96 @@
   html body.living-architecture #hero .fx-reference-proof {
     grid-area: proof !important;
     min-height: 258px !important;
+  }
+
+  /* r334: newly attached controls receive their final WDA geometry immediately
+     instead of appearing in the legacy vertical r244 rail and moving later. */
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
+  html body.living-architecture #hero .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: auto auto 28px 50% !important;
+    z-index: 12040 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 54px) !important;
+    grid-template-rows: auto !important;
+    align-items: start !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    box-sizing: border-box !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 82px !important;
+    margin: 0 !important;
+    padding: 0 8px 24px !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail {
+    display: contents !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* r334: header controls are born at their final desktop coordinates. */
+  html body.living-architecture .topbar .fx-reference-menu-button {
+    top: 12px !important;
+    right: 22px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+  }
+  html body.living-architecture .topbar .fx-language-toggle {
+    top: 13px !important;
+    right: 88px !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+  }
+  html body.living-architecture .topbar .fx-reference-mag-button {
+    top: 13px !important;
+    right: 148px !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    height: 48px !important;
+    min-height: 48px !important;
   }
 
   html[data-fx-reference-production-r244="desktop"] body.living-architecture #main-nav.main-nav.open,
