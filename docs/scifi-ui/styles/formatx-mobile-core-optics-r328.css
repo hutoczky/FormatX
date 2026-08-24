@@ -1,7 +1,7 @@
-/* FormatX r330 — mobile-only MAG optical restraint.
+/* FormatX r334 — mobile-only MAG optical restraint.
    The r317 WebGL crystal stays native and interactive. This final compositor
-   pass keeps the internal glass volume, but shortens the bloom, softens the
-   perimeter and removes the over-sharp mobile neon edge. Desktop is untouched. */
+   pass keeps the internal glass volume while reducing bloom reach, lowering
+   edge contrast and feathering the perimeter more naturally. Desktop untouched. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html:root:root body.living-architecture #hero .hero-space {
@@ -21,43 +21,43 @@
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
-    opacity: .78 !important;
+    opacity: .74 !important;
     filter:
-      brightness(.68)
-      contrast(.86)
-      saturate(.96)
-      blur(1.15px)
-      drop-shadow(0 0 .18px rgba(132, 246, 255, .030))
-      drop-shadow(0 0 .65px rgba(44, 134, 255, .008)) !important;
+      brightness(.62)
+      contrast(.79)
+      saturate(.92)
+      blur(1.55px)
+      drop-shadow(0 0 .10px rgba(132, 246, 255, .018))
+      drop-shadow(0 0 .35px rgba(44, 134, 255, .004)) !important;
     -webkit-filter:
-      brightness(.68)
-      contrast(.86)
-      saturate(.96)
-      blur(1.15px)
-      drop-shadow(0 0 .18px rgba(132, 246, 255, .030))
-      drop-shadow(0 0 .65px rgba(44, 134, 255, .008)) !important;
+      brightness(.62)
+      contrast(.79)
+      saturate(.92)
+      blur(1.55px)
+      drop-shadow(0 0 .10px rgba(132, 246, 255, .018))
+      drop-shadow(0 0 .35px rgba(44, 134, 255, .004)) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .26 !important;
+    opacity: .16 !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .54 !important;
-    opacity: .035 !important;
-    filter: blur(5.8px) !important;
+    stroke-width: .42 !important;
+    opacity: .018 !important;
+    filter: blur(7px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .18 !important;
-    opacity: .09 !important;
-    filter: blur(1.15px) !important;
+    stroke-width: .14 !important;
+    opacity: .055 !important;
+    filter: blur(1.65px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a, .fx-biolume-runner-b, .fx-biolume-runner-c) {
-    stroke-width: .23 !important;
-    opacity: .52 !important;
-    filter: drop-shadow(0 0 .10px currentColor) blur(.72px) !important;
+    stroke-width: .18 !important;
+    opacity: .32 !important;
+    filter: blur(1.05px) !important;
   }
 }
 
@@ -79,25 +79,25 @@
 
 @media (max-width: 430px) {
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
-    opacity: .76 !important;
+    opacity: .72 !important;
     filter:
-      brightness(.65)
-      contrast(.84)
-      saturate(.94)
-      blur(1.32px)
-      drop-shadow(0 0 .12px rgba(134, 248, 255, .022))
-      drop-shadow(0 0 .45px rgba(48, 130, 255, .006)) !important;
+      brightness(.60)
+      contrast(.77)
+      saturate(.90)
+      blur(1.75px)
+      drop-shadow(0 0 .08px rgba(134, 248, 255, .014))
+      drop-shadow(0 0 .28px rgba(48, 130, 255, .003)) !important;
     -webkit-filter:
-      brightness(.65)
-      contrast(.84)
-      saturate(.94)
-      blur(1.32px)
-      drop-shadow(0 0 .12px rgba(134, 248, 255, .022))
-      drop-shadow(0 0 .45px rgba(48, 130, 255, .006)) !important;
+      brightness(.60)
+      contrast(.77)
+      saturate(.90)
+      blur(1.75px)
+      drop-shadow(0 0 .08px rgba(134, 248, 255, .014))
+      drop-shadow(0 0 .28px rgba(48, 130, 255, .003)) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .22 !important;
+    opacity: .13 !important;
   }
 }
 
