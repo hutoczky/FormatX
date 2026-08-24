@@ -1,8 +1,14 @@
-/* FormatX r320/r321 — stable mobile hero interaction geometry.
+/* FormatX r320/r346 — stable mobile hero interaction geometry.
    The canonical controls are interactive UI, not decorative motion. Keep their
    layout boxes stationary and physically visible so touch/click hit testing
    cannot race late audio/control ownership changes while the WebGL MAG remains
-   independently animated. */
+   independently animated.
+
+   r346 also makes the classless visual <i> inside ASK a strictly bounded icon.
+   Several retired visual generations still contain broad rules for anonymous
+   <i> elements; without a final geometry contract those rules can turn this
+   17px glyph into a transformed ~268px absolute decoration and widen the mobile
+   body. The text label remains outside this containment and stays visible. */
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r264,
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-reference-rail-r264,
@@ -44,6 +50,38 @@
     height: 50px !important;
     min-height: 50px !important;
     max-height: 50px !important;
+  }
+
+  /* r346: authoritative geometry for ASK's visual glyph. Do not clip the ASK
+     button itself because its KÉRDEZZ/ASK caption intentionally sits below it. */
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask > i {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    flex: 0 0 17px !important;
+    width: 17px !important;
+    min-width: 17px !important;
+    max-width: 17px !important;
+    height: 17px !important;
+    min-height: 17px !important;
+    max-height: 17px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+    rotate: none !important;
+    scale: none !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+    overflow: visible !important;
+    contain: layout paint !important;
+    pointer-events: none !important;
   }
 
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound:active,
