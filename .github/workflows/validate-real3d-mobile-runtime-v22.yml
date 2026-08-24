@@ -79,6 +79,8 @@ jobs:
             await page.waitForTimeout(800);
             const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0)}));
             await page.touchscreen.tap(195,330);await page.waitForTimeout(360);
+            await page.evaluate(()=>document.querySelector('#hero .fx-reference-controls-r204')?.scrollIntoView({block:'center',behavior:'auto'}));
+            await page.waitForTimeout(280);
             const state=await page.evaluate(()=>{
               const root=document.documentElement;
               const api=window.FormatXCoreMobileV69;
@@ -96,6 +98,7 @@ jobs:
               const gl2=canvas?.getContext('webgl2');
               const gl=gl2||canvas?.getContext('webgl');
               const architecture=document.querySelector('.fx-signature-architecture');
+              const hitInfo=node=>node?{tag:node.tagName,id:node.id||'',className:typeof node.className==='string'?node.className:''}:null;
               return{
                 version:api?.version||'',quality:api?.quality||'',scheduler:api?.scheduler||'',
                 selection:root.dataset.fxCoreRendererSelection||'',softlight:root.dataset.fxCoreSoftlightR318||'',
@@ -118,8 +121,9 @@ jobs:
                 genomeDisplay:genome?getComputedStyle(genome).display:'absent',
                 soundDisplay:soundStyle?.display||'absent',soundVisibility:soundStyle?.visibility||'absent',
                 soundOpacity:Number(soundStyle?.opacity||0),soundWidth:soundBox?.width||0,soundHeight:soundBox?.height||0,
-                soundTopMost:Boolean(sound&&soundHit&&sound.contains(soundHit)),
-                pauseTopMost:Boolean(pause&&pauseHit&&pause.contains(pauseHit))
+                soundTop:soundBox?.top??null,soundBottom:soundBox?.bottom??null,pauseTop:pauseBox?.top??null,pauseBottom:pauseBox?.bottom??null,
+                soundTopMost:Boolean(sound&&soundHit&&sound.contains(soundHit)),pauseTopMost:Boolean(pause&&pauseHit&&pause.contains(pauseHit)),
+                soundHit:hitInfo(soundHit),pauseHit:hitInfo(pauseHit)
               };
             });
             assert.equal(state.version,'reference-crystal-webgl-r317-modern-flat-normal-fresnel');
@@ -147,6 +151,8 @@ jobs:
             assert.ok(['none','absent'].includes(state.genomeDisplay));
             assert.notEqual(state.soundDisplay,'none');assert.notEqual(state.soundVisibility,'hidden');assert.ok(state.soundOpacity>.02);
             assert.ok(state.soundWidth>=44&&state.soundHeight>=44,JSON.stringify(state));
+            assert.ok(state.soundTop>=0&&state.soundBottom<=state.vh,JSON.stringify(state));
+            assert.ok(state.pauseTop>=0&&state.pauseBottom<=state.vh,JSON.stringify(state));
             assert.equal(state.soundTopMost,true,JSON.stringify(state));
             assert.equal(state.pauseTopMost,true,JSON.stringify(state));
             const pause=page.locator('.fx-reference-pause:visible').first();
@@ -157,7 +163,7 @@ jobs:
             assert.equal(await pause.getAttribute('data-paused'),'false');
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r321 source-owned softer rim/glow, r325 inert architecture, hit-tested controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r321 source-owned softer rim/glow, r325 inert architecture, viewport hit-tested controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish responsive runtime status
         if: always()
