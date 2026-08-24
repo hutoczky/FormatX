@@ -1,11 +1,15 @@
-name: Validate mobile MAG optics r327
+name: Validate mobile MAG optics r336
 on:
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
+      - 'docs/scifi-ui/styles/formatx-quantum-particles-r335.css'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
+      - 'docs/scifi-ui/scripts/formatx-quantum-particles-r335.js'
       - 'docs/scifi-ui/scripts/formatx-award-runtime-r206.js'
       - '.github/workflows/validate-mobile-core-softening-r322.yml'
   workflow_dispatch:
@@ -18,41 +22,46 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Validate r327 source contract
+      - name: Validate r336 source contract
         shell: bash
         run: |
           set -euo pipefail
           grep -Fq 'formatx-mobile-core-softening-r322.css?v=20260824-r327-soft-mobile-core' docs/scifi-ui/scripts/formatx-award-runtime-r206.js
           grep -Fq "fxMobileCoreOpticsR322 = 'r327-restrained-bloom-soft-edge'" docs/scifi-ui/scripts/formatx-award-runtime-r206.js
-          grep -Fq 'brightness(.78)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'contrast(.94)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'saturate(1.02)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'blur(.56px)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'drop-shadow(0 0 .58px rgba(126,247,255,.08))' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'opacity: .55' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'stroke-width: .84' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'opacity: .10' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'fx-biolume-travel-r323' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'deep-water-iridescent-traveling-rim' docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
-          grep -Fq 'r323-deep-water-biolume' docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          grep -Fq 'r336-effective-soft-mobile-mag' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          grep -Fq "r336-effective-soft-edge-owner" docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          grep -Fq 'opacity: .72' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'brightness(.60)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'contrast(.77)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'saturate(.90)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'blur(1.75px)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'opacity: .13' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'stroke-width: .42' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'opacity: .018' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'r335-interactive-quantum-field' docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          grep -Fq 'probability-shells-entangled-pairs-collapse-tunneling' docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
+          grep -Fq 'event-driven-no-idle-raf' docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
+          ! grep -Eq 'requestAnimationFrame\s*\(|setInterval\s*\(|getContext\s*\(' docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          node --check docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
           node --check docs/scifi-ui/scripts/formatx-award-runtime-r206.js
       - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/r327-optics" && cd "$RUNNER_TEMP/r327-optics"
+          mkdir -p "$RUNNER_TEMP/r336-optics" && cd "$RUNNER_TEMP/r336-optics"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify final r327+r330 mobile optical cascade and desktop isolation
+      - name: Verify effective r336 optics and r335 quantum interaction
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r327-http.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r336-http.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/r327-optics"
+          cd "$RUNNER_TEMP/r336-optics"
           node <<'NODE'
           const assert=require('node:assert/strict');
           const {chromium}=require('playwright');
@@ -63,16 +72,19 @@ jobs:
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForFunction(()=>{
               const d=document.documentElement.dataset;
-              return d.fxMobileCoreOpticsR322==='r327-restrained-bloom-soft-edge'
+              return d.fxCoreMobileOpticsR328==='r336-effective-soft-edge-owner'
                 && d.fxCoreBiolumeR323==='ready'
+                && d.fxQuantumParticlesR335==='ready'
                 && document.querySelector('.fx-core-r317-canvas')
-                && document.querySelector('.fx-core-biolume-r323');
+                && document.querySelector('.fx-core-biolume-r323')
+                && document.querySelectorAll('.fx-quantum-particle-r335').length===24;
             },null,{timeout:45000});
-            await page.waitForTimeout(500);
+            await page.waitForTimeout(400);
             const state=await page.evaluate(()=>{
               const canvas=document.querySelector('.fx-core-r317-canvas');
               const style=canvas?getComputedStyle(canvas):null;
-              const link=document.querySelector('link[data-fx-mobile-core-softening-r322]');
+              const optics=document.querySelector('link[data-fx-mobile-core-optics-r328]');
+              const quantum=document.querySelector('.fx-quantum-field-r335');
               const rim=document.querySelector('.fx-core-biolume-r323');
               const halo=rim?.querySelector('.fx-biolume-halo');
               const base=rim?.querySelector('.fx-biolume-base');
@@ -81,43 +93,65 @@ jobs:
               const baseStyle=base?getComputedStyle(base):null;
               const runnerStyle=runner?getComputedStyle(runner):null;
               return{
-                marker:document.documentElement.dataset.fxMobileCoreOpticsR322||'',
+                opticsMarker:document.documentElement.dataset.fxCoreMobileOpticsR328||'',
                 biolume:document.documentElement.dataset.fxCoreBiolumeR323||'',
                 profile:document.documentElement.dataset.fxCoreBiolumeProfileR323||'',
-                link:Boolean(link),href:link?.getAttribute('href')||'',
+                quantum:document.documentElement.dataset.fxQuantumParticlesR335||'',
+                quantumModel:document.documentElement.dataset.fxQuantumParticleModel||'',
+                quantumScheduler:document.documentElement.dataset.fxQuantumParticleScheduler||'',
+                quantumCount:document.querySelectorAll('.fx-quantum-particle-r335').length,
+                quantumState:quantum?.dataset.state||'',
+                opticsLink:Boolean(optics),opticsHref:optics?.getAttribute('href')||'',
                 opacity:Number(style?.opacity||1),filter:style?.filter||'',
                 width:canvas?.getBoundingClientRect().width||0,height:canvas?.getBoundingClientRect().height||0,
                 rimPaths:rim?.querySelectorAll('path').length||0,rimOpacity:Number(rim?getComputedStyle(rim).opacity:0),
                 haloOpacity:Number(haloStyle?.opacity||0),haloFilter:haloStyle?.filter||'',haloStrokeWidth:haloStyle?.strokeWidth||'',
                 baseOpacity:Number(baseStyle?.opacity||0),runnerOpacity:Number(runnerStyle?.opacity||0),runnerStrokeWidth:runnerStyle?.strokeWidth||'',
-                animation:runnerStyle?.animationName||'',dasharray:runnerStyle?.strokeDasharray||''
+                animation:runnerStyle?.animationName||''
               };
             });
-            console.log('R327_EFFECTIVE_MOBILE_OPTICS',JSON.stringify(state));
-            assert.equal(state.marker,'r327-restrained-bloom-soft-edge');
+            console.log('R336_EFFECTIVE_MOBILE_OPTICS',JSON.stringify(state));
+            assert.equal(state.opticsMarker,'r336-effective-soft-edge-owner');
             assert.equal(state.biolume,'ready');
             assert.equal(state.profile,'deep-water-iridescent-traveling-rim');
-            assert.equal(state.link,true);
-            assert.match(state.href,/r327-soft-mobile-core/);
-            assert.ok(state.opacity<=0.87&&state.opacity>=0.83,JSON.stringify(state));
-            assert.match(state.filter,/brightness\(0\.77\)/);
-            assert.match(state.filter,/contrast\(0\.96\)/);
-            assert.match(state.filter,/saturate\(1\.03\)/);
-            assert.match(state.filter,/blur\(0\.68px\)/);
+            assert.equal(state.quantum,'ready');
+            assert.equal(state.quantumCount,24);
+            assert.equal(state.quantumModel,'probability-shells-entangled-pairs-collapse-tunneling');
+            assert.equal(state.quantumScheduler,'event-driven-no-idle-raf');
+            assert.equal(state.opticsLink,true);
+            assert.match(state.opticsHref,/r336-effective-soft-mobile-mag/);
+            assert.ok(state.opacity<=0.73&&state.opacity>=0.71,JSON.stringify(state));
+            assert.match(state.filter,/brightness\(0\.6\)/);
+            assert.match(state.filter,/contrast\(0\.77\)/);
+            assert.match(state.filter,/saturate\(0\.9\)/);
+            assert.match(state.filter,/blur\(1\.75px\)/);
             assert.equal(state.rimPaths,5,JSON.stringify(state));
-            assert.ok(state.rimOpacity>=0.20&&state.rimOpacity<=0.24,JSON.stringify(state));
-            assert.ok(state.haloOpacity>=0.025&&state.haloOpacity<=0.045,JSON.stringify(state));
-            assert.match(state.haloFilter,/blur\(5\.8px\)/);
-            assert.ok(state.baseOpacity>=0.07&&state.baseOpacity<=0.11,JSON.stringify(state));
-            assert.ok(state.runnerOpacity>=0.49&&state.runnerOpacity<=0.55,JSON.stringify(state));
-            assert.match(state.runnerStrokeWidth,/0\.23px|\.23px/);
+            assert.ok(state.rimOpacity>=0.12&&state.rimOpacity<=0.14,JSON.stringify(state));
+            assert.ok(state.haloOpacity>=0.017&&state.haloOpacity<=0.019,JSON.stringify(state));
+            assert.match(state.haloFilter,/blur\(7px\)/);
+            assert.ok(state.baseOpacity>=0.05&&state.baseOpacity<=0.06,JSON.stringify(state));
+            assert.ok(state.runnerOpacity>=0.31&&state.runnerOpacity<=0.33,JSON.stringify(state));
+            assert.match(state.runnerStrokeWidth,/0\.18px|\.18px/);
             assert.match(state.animation,/fx-biolume-travel-r323/);
             assert.ok(state.width>0&&state.height>0,JSON.stringify(state));
+
+            const box=await page.locator('.fx-quantum-field-r335').boundingBox();
+            assert.ok(box&&box.width>0&&box.height>0,JSON.stringify(box));
+            await page.mouse.click(box.x+box.width*.55,box.y+box.height*.48);
+            await page.waitForFunction(()=>document.documentElement.dataset.fxQuantumParticleLastState==='measurement-collapse',null,{timeout:3000});
+            const measured=await page.evaluate(()=>({
+              state:document.querySelector('.fx-quantum-field-r335')?.dataset.state||'',
+              last:document.documentElement.dataset.fxQuantumParticleLastState||''
+            }));
+            assert.equal(measured.state,'measured');
+            assert.equal(measured.last,'measurement-collapse');
+            await page.waitForFunction(()=>['probability-tunnel','decoherence'].includes(document.documentElement.dataset.fxQuantumParticleLastState),null,{timeout:3000});
+
             try {
               await page.addStyleTag({content:'*{animation-play-state:paused!important}'});
-              await page.screenshot({path:'mobile-r327.png',fullPage:false,animations:'disabled',timeout:8000});
+              await page.screenshot({path:'mobile-r336.png',fullPage:false,animations:'disabled',timeout:8000});
             } catch (error) {
-              console.log('R327_SCREENSHOT_OPTIONAL',String(error.message||error));
+              console.log('R336_SCREENSHOT_OPTIONAL',String(error.message||error));
             }
             await ctx.close();
           }
@@ -128,23 +162,22 @@ jobs:
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForTimeout(1800);
             const state=await page.evaluate(()=>({
-              link:Boolean(document.querySelector('link[data-fx-mobile-core-softening-r322]')),
-              rim:Boolean(document.querySelector('.fx-core-biolume-r323')),
-              marker:document.documentElement.dataset.fxMobileCoreOpticsR322||''
+              optics:Boolean(document.querySelector('link[data-fx-mobile-core-optics-r328]')),
+              quantum:Boolean(document.querySelector('.fx-quantum-field-r335')),
+              quantumMarker:document.documentElement.dataset.fxQuantumParticlesR335||''
             }));
-            assert.equal(state.link,false,JSON.stringify(state));
-            assert.equal(state.rim,false,JSON.stringify(state));
-            assert.equal(state.marker,'',JSON.stringify(state));
+            assert.equal(state.quantum,false,JSON.stringify(state));
+            assert.ok(state.quantumMarker===''||state.quantumMarker==='desktop-bypass',JSON.stringify(state));
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await mobile(browser);await desktop(browser);await browser.close();console.log('PASS: effective r327+r330 mobile MAG optics are restrained and soft with desktop isolation.');})().catch(error=>{console.error(error);process.exit(1)});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await mobile(browser);await desktop(browser);await browser.close();console.log('PASS: r336 effective soft mobile MAG optics and r335 quantum-inspired interaction validated.');})().catch(error=>{console.error(error);process.exit(1)});
           NODE
       - name: Upload mobile optical proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: formatx-mobile-core-r327
-          path: ${{ runner.temp }}/r327-optics/mobile-r327.png
+          name: formatx-mobile-core-r336
+          path: ${{ runner.temp }}/r336-optics/mobile-r336.png
           if-no-files-found: ignore
           retention-days: 14
       - name: Publish mobile optics status
@@ -154,5 +187,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Effective r327+r330 mobile MAG soft optics passed'; else state=failure; description='r327 mobile MAG optical validation failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r336 soft MAG optics + r335 quantum interaction passed'; else state=failure; description='r336 mobile MAG optics/quantum validation failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile core optics' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

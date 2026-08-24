@@ -1,7 +1,7 @@
-/* FormatX r334 — mobile-only MAG optical restraint.
-   The r317 WebGL crystal stays native and interactive. This final compositor
-   pass keeps the internal glass volume while reducing bloom reach, lowering
-   edge contrast and feathering the perimeter more naturally. Desktop untouched. */
+/* FormatX r336 — effective mobile MAG optical restraint.
+   The r317 WebGL crystal stays native and interactive. This owner deliberately
+   outranks the older r327 compositor so the softer bloom/edge treatment is
+   actually effective on production mobile. Desktop remains untouched. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html:root:root body.living-architecture #hero .hero-space {
@@ -10,7 +10,7 @@
     overflow-x: clip !important;
   }
 
-  html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage {
+  html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage {
     box-sizing: border-box !important;
     left: 50% !important;
     right: auto !important;
@@ -18,9 +18,10 @@
     max-width: calc(100vw - 8px) !important;
     translate: -50% 0 !important;
     overflow-x: clip !important;
+    filter: none !important;
   }
 
-  html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
+  html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
     opacity: .74 !important;
     filter:
       brightness(.62)
@@ -78,7 +79,7 @@
 }
 
 @media (max-width: 430px) {
-  html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
+  html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
     opacity: .72 !important;
     filter:
       brightness(.60)
