@@ -1,0 +1,235 @@
+/* FormatX r328 — desktop first-paint geometry owner.
+   This stylesheet is intentionally render-blocking. It mirrors the final r244
+   desktop reference frame before enhancement runtimes mount, preventing the
+   hero copy, MAG stage and controls from changing layout after first paint. */
+
+@media (min-width: 901px) {
+  html body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+  }
+
+  html body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    height: auto !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+
+  html body.living-architecture #hero .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 12 !important;
+    display: block !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .hero-grid > .hero-space {
+    grid-area: space !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(520px, 42vw, 620px) !important;
+    min-height: 520px !important;
+    max-height: 620px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .fx-reference-heading {
+    grid-area: heading !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .fx-reference-proof {
+    grid-area: proof !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: start !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 258px !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .hero-title-main {
+    font-size: clamp(64px, 6.25vw, 92px) !important;
+    line-height: .88 !important;
+    letter-spacing: -.075em !important;
+    white-space: nowrap !important;
+  }
+
+  html body.living-architecture #hero .hero-title-sub {
+    margin: 7px 2px 0 0 !important;
+    font-size: clamp(27px, 2.7vw, 40px) !important;
+    line-height: 1 !important;
+    letter-spacing: .12em !important;
+    white-space: nowrap !important;
+  }
+
+  html body.living-architecture #hero .hero-facts {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Reserve the final r264/r268 three-cell control geometry whether the boot
+     owner has already moved the controls into .hero-space or they are still a
+     direct grid child during the first paint. */
+  html body.living-architecture #hero .fx-reference-controls-r204 {
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 54px) !important;
+    grid-template-rows: auto !important;
+    align-items: start !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    width: 206px !important;
+    min-width: 206px !important;
+    max-width: 206px !important;
+    height: 82px !important;
+    min-height: 82px !important;
+    max-height: 82px !important;
+    margin: 0 !important;
+    padding: 0 8px 24px !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    isolation: isolate !important;
+    z-index: 12040 !important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: auto auto 28px 50% !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204 {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: end !important;
+    justify-self: center !important;
+    margin-bottom: 28px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail,
+  html body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-r264 {
+    display: contents !important;
+    position: static !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #main-content > .fx-category-deck--standalone {
+    position: relative !important;
+    inset: auto !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    margin: 0 auto 90px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1120px) {
+  html body.living-architecture #hero > .hero-grid {
+    width: calc(100% - 48px) !important;
+    grid-template-columns: minmax(0, .82fr) minmax(430px, 1.18fr) !important;
+    gap: 26px 30px !important;
+  }
+}
