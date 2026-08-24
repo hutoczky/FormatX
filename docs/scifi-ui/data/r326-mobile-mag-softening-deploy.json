@@ -1,0 +1,20 @@
+{
+  "revision": "r326",
+  "purpose": "mobile-mag-softening-and-ask-only-dialogue-ownership",
+  "mobileMag": {
+    "perimeter": "softer",
+    "bloom": "restrained",
+    "desktopIsolation": true
+  },
+  "interaction": {
+    "coreOpensDialogue": false,
+    "dialogueOwner": "canonical-ask-only"
+  },
+  "validation": {
+    "mobileOptics": "passed",
+    "lighthouse": "passed-on-optical-change",
+    "production": "passed",
+    "publicIntegrity": "passed",
+    "responsiveWebglAndAskOwnership": "passed"
+  }
+}
