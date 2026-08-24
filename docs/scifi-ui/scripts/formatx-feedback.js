@@ -28,6 +28,9 @@
       publicEmpty: 'Még nincs közzétételre engedélyezett szöveges hozzászólás.',
       anonymous: 'Névtelen felhasználó',
       approved: 'jóváhagyva',
+      demoTitle: 'Minta / demo vélemények',
+      demoNote: 'Bemutató szövegek az oldal megjelenésének teszteléséhez. Nem valódi felhasználói értékelések, és nem számítanak bele a nyilvános átlagba.',
+      demoBadge: 'MINTA · NEM FELHASZNÁLÓI ÉRTÉKELÉS',
     },
     en: {
       rating: 'rating',
@@ -45,7 +48,47 @@
       publicEmpty: 'No text comment has been approved for publication yet.',
       anonymous: 'Anonymous user',
       approved: 'approved',
+      demoTitle: 'Sample / demo reviews',
+      demoNote: 'Demonstration copy used to test the review presentation. These are not genuine user reviews and never affect the public rating average.',
+      demoBadge: 'SAMPLE · NOT A USER REVIEW',
     },
+  };
+
+  const DEMO_REVIEWS = {
+    hu: [
+      {
+        overall: 5,
+        display_name: 'FormatX bemutató',
+        comment: 'Nagyon igényes és modern weboldal. Az információk jól áttekinthetők, a vizuális megjelenés pedig egyértelműen megkülönbözteti a FormatX-et egy átlagos szoftveroldaltól.',
+      },
+      {
+        overall: 5,
+        display_name: 'FormatX bemutató',
+        comment: 'A FormatX Suite felépítése logikus és könnyen követhető. Sok funkciót fog össze úgy, hogy közben a kezelőfelület nem válik kaotikussá.',
+      },
+      {
+        overall: 5,
+        display_name: 'FormatX bemutató',
+        comment: 'Kifejezetten tetszik, hogy az oldal nemcsak bemutatja a programot, hanem technikai információkat és ellenőrizhető részleteket is ad. Ettől az egész projekt sokkal kidolgozottabbnak hat.',
+      },
+    ],
+    en: [
+      {
+        overall: 5,
+        display_name: 'FormatX demo',
+        comment: 'A polished and modern website. Information is easy to scan, while the visual presentation gives FormatX a distinct identity instead of feeling like a generic software page.',
+      },
+      {
+        overall: 5,
+        display_name: 'FormatX demo',
+        comment: 'FormatX Suite is structured in a logical and approachable way. It brings many functions together without making the interface feel chaotic.',
+      },
+      {
+        overall: 5,
+        display_name: 'FormatX demo',
+        comment: 'I especially like that the site does more than advertise the program: it also exposes technical information and verifiable details, which makes the whole project feel substantially more complete.',
+      },
+    ],
   };
 
   const language = () => root.lang === 'en' ? 'en' : 'hu';
@@ -213,6 +256,77 @@
     else section.append(host);
     syncBilingual(host);
     return host;
+  }
+
+  function ensureDemoReviewsHost(section) {
+    let host = section.querySelector('[data-fx-feedback-demo]');
+    if (host) return host;
+
+    host = document.createElement('section');
+    host.className = 'fx-feedback-public';
+    host.dataset.fxFeedbackDemo = 'true';
+    host.setAttribute('aria-labelledby', 'fx-feedback-demo-title');
+
+    const head = document.createElement('div');
+    head.className = 'fx-feedback-public-head';
+    const title = document.createElement('h3');
+    title.id = 'fx-feedback-demo-title';
+    title.dataset.hu = COPY.hu.demoTitle;
+    title.dataset.en = COPY.en.demoTitle;
+    const note = document.createElement('p');
+    note.dataset.hu = COPY.hu.demoNote;
+    note.dataset.en = COPY.en.demoNote;
+    head.append(title, note);
+
+    const list = document.createElement('div');
+    list.className = 'fx-feedback-public-grid';
+    list.dataset.fxFeedbackDemoList = 'true';
+
+    host.append(head, list);
+    const publicHost = section.querySelector('[data-fx-feedback-public]');
+    if (publicHost) publicHost.before(host);
+    else {
+      const form = section.querySelector('[data-fx-feedback-form]');
+      if (form) form.before(host);
+      else section.append(host);
+    }
+    syncBilingual(host);
+    return host;
+  }
+
+  function renderDemoReviews(section) {
+    const host = ensureDemoReviewsHost(section);
+    syncBilingual(host);
+    const list = host.querySelector('[data-fx-feedback-demo-list]');
+    if (!list) return;
+    list.replaceChildren();
+
+    DEMO_REVIEWS[language()].forEach(review => {
+      const article = document.createElement('article');
+      article.className = 'fx-feedback-public-card';
+
+      const rating = Math.max(1, Math.min(5, Number(review.overall || 0)));
+      const stars = document.createElement('div');
+      stars.className = 'fx-feedback-public-stars';
+      stars.textContent = `${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}`;
+      stars.setAttribute('aria-label', `${rating} / 5`);
+
+      const quote = document.createElement('blockquote');
+      const paragraph = document.createElement('p');
+      paragraph.textContent = String(review.comment || '').trim();
+      quote.append(paragraph);
+
+      const footer = document.createElement('footer');
+      const name = document.createElement('strong');
+      name.textContent = String(review.display_name || '').trim();
+      const meta = document.createElement('span');
+      meta.textContent = copy().demoBadge;
+      footer.append(name, meta);
+
+      article.append(stars, quote, footer);
+      list.append(article);
+    });
+    host.dataset.state = 'demo';
   }
 
   function reviewDate(value) {
@@ -391,6 +505,7 @@
     section.querySelectorAll('[data-rating-group]').forEach(buildRatingGroup);
     syncBilingual(section);
     ensurePublicReviewsHost(section);
+    renderDemoReviews(section);
     const form = section.querySelector('[data-fx-feedback-form]');
     if (form && form.dataset.bound !== 'true') {
       form.dataset.bound = 'true';
@@ -433,6 +548,7 @@
     syncBilingual(section);
     syncLiveOsCtas();
     if (!feedbackActivated) return;
+    renderDemoReviews(section);
     document.querySelectorAll('#user-feedback [data-rating-group] legend').forEach(legend => {
       legend.textContent = legend.dataset[language()];
     });
