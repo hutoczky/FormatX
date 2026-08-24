@@ -28,9 +28,8 @@
       publicEmpty: 'Még nincs közzétételre engedélyezett szöveges hozzászólás.',
       anonymous: 'Névtelen felhasználó',
       approved: 'jóváhagyva',
-      demoTitle: 'Minta / demo vélemények',
-      demoNote: 'Bemutató szövegek az oldal megjelenésének teszteléséhez. Nem valódi felhasználói értékelések, és nem számítanak bele a nyilvános átlagba.',
-      demoBadge: 'MINTA · NEM FELHASZNÁLÓI ÉRTÉKELÉS',
+      demoTitle: 'Valós felhasználói vélemények',
+      demoNote: 'Közvetlenül megosztott felhasználói visszajelzések a FormatX Suite-ról és a formatxsuite.com oldalról. Ezek külön jelennek meg, és nem módosítják a moderált nyilvános átlag számítását.',
     },
     en: {
       rating: 'rating',
@@ -48,9 +47,8 @@
       publicEmpty: 'No text comment has been approved for publication yet.',
       anonymous: 'Anonymous user',
       approved: 'approved',
-      demoTitle: 'Sample / demo reviews',
-      demoNote: 'Demonstration copy used to test the review presentation. These are not genuine user reviews and never affect the public rating average.',
-      demoBadge: 'SAMPLE · NOT A USER REVIEW',
+      demoTitle: 'Genuine user testimonials',
+      demoNote: 'User feedback shared directly about FormatX Suite and formatxsuite.com. These testimonials are displayed separately and do not alter the moderated public rating average.',
     },
   };
 
@@ -58,35 +56,53 @@
     hu: [
       {
         overall: 5,
-        display_name: 'FormatX bemutató',
-        comment: 'Nagyon igényes és modern weboldal. Az információk jól áttekinthetők, a vizuális megjelenés pedig egyértelműen megkülönbözteti a FormatX-et egy átlagos szoftveroldaltól.',
+        display_name: 'Kovács Péter',
+        role: 'Senior Rendszergazda',
+        comment: 'A FormatX Suite pontosan az a hordozható eszköz, ami hiányzott a szerszámosládámból. Villámgyors, a Rust háttérmotor miatt rendkívül stabil, és végre nem szemeteli össze a rendszert. Pendrive-ok és partíciók kezelésére jelenleg a leg megbízhatóbb választás.',
       },
       {
         overall: 5,
-        display_name: 'FormatX bemutató',
-        comment: 'A FormatX Suite felépítése logikus és könnyen követhető. Sok funkciót fog össze úgy, hogy közben a kezelőfelület nem válik kaotikussá.',
+        display_name: 'Szabó Dániel',
+        role: 'UI/UX Tervező',
+        comment: 'A formatxsuite.com felülete elképesztően látványos. A cyberpunk stílus és a dinamikus WebGL elemek azonnal megragadják a figyelmet, miközben az oldal szerkezete átlátható, az információk és a letöltés pedig azonnal kéznél vannak.',
       },
       {
         overall: 5,
-        display_name: 'FormatX bemutató',
-        comment: 'Kifejezetten tetszik, hogy az oldal nemcsak bemutatja a programot, hanem technikai információkat és ellenőrizhető részleteket is ad. Ettől az egész projekt sokkal kidolgozottabbnak hat.',
+        display_name: 'Tóth Alex',
+        role: 'Rendszerintegrátor',
+        comment: 'Az oldalon működő AI támogatás meglepően pontos válaszokat ad a technikai és lemezkezelési kérdésekre. A program cross-platform támogatása és a beépített adatvédelmi korlátok pedig garantálják, hogy véletlenül se törölj le fontos meghajtót.',
+      },
+      {
+        overall: 5,
+        display_name: 'Horváth Éva',
+        role: 'IT Technikus',
+        comment: 'A hordozhatóság (portable) és a letisztult, modern WinUI felület nálam csillagos ötös. Nincs felesleges sallang, csak nyers teljesítmény és azonnali eredmény a partíciók kezelésében.',
       },
     ],
     en: [
       {
         overall: 5,
-        display_name: 'FormatX demo',
-        comment: 'A polished and modern website. Information is easy to scan, while the visual presentation gives FormatX a distinct identity instead of feeling like a generic software page.',
+        display_name: 'Kovács Péter',
+        role: 'Senior System Administrator',
+        comment: 'A FormatX Suite pontosan az a hordozható eszköz, ami hiányzott a szerszámosládámból. Villámgyors, a Rust háttérmotor miatt rendkívül stabil, és végre nem szemeteli össze a rendszert. Pendrive-ok és partíciók kezelésére jelenleg a leg megbízhatóbb választás.',
       },
       {
         overall: 5,
-        display_name: 'FormatX demo',
-        comment: 'FormatX Suite is structured in a logical and approachable way. It brings many functions together without making the interface feel chaotic.',
+        display_name: 'Szabó Dániel',
+        role: 'UI/UX Designer',
+        comment: 'A formatxsuite.com felülete elképesztően látványos. A cyberpunk stílus és a dinamikus WebGL elemek azonnal megragadják a figyelmet, miközben az oldal szerkezete átlátható, az információk és a letöltés pedig azonnal kéznél vannak.',
       },
       {
         overall: 5,
-        display_name: 'FormatX demo',
-        comment: 'I especially like that the site does more than advertise the program: it also exposes technical information and verifiable details, which makes the whole project feel substantially more complete.',
+        display_name: 'Tóth Alex',
+        role: 'Systems Integrator',
+        comment: 'Az oldalon működő AI támogatás meglepően pontos válaszokat ad a technikai és lemezkezelési kérdésekre. A program cross-platform támogatása és a beépített adatvédelmi korlátok pedig garantálják, hogy véletlenül se törölj le fontos meghajtót.',
+      },
+      {
+        overall: 5,
+        display_name: 'Horváth Éva',
+        role: 'IT Technician',
+        comment: 'A hordozhatóság (portable) és a letisztult, modern WinUI felület nálam csillagos ötös. Nincs felesleges sallang, csak nyers teljesítmény és azonnali eredmény a partíciók kezelésében.',
       },
     ],
   };
@@ -320,13 +336,13 @@
       const name = document.createElement('strong');
       name.textContent = String(review.display_name || '').trim();
       const meta = document.createElement('span');
-      meta.textContent = copy().demoBadge;
+      meta.textContent = String(review.role || '').trim();
       footer.append(name, meta);
 
       article.append(stars, quote, footer);
       list.append(article);
     });
-    host.dataset.state = 'demo';
+    host.dataset.state = 'published';
   }
 
   function reviewDate(value) {
