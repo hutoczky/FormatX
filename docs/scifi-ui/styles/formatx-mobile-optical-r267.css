@@ -1,0 +1,46 @@
+/* FormatX r267 — mobile MAG optical softening.
+   Keeps the native WebGL geometry intact while reducing the over-bright outer
+   halo and the hard cut-out edge visible on high-density mobile displays. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-core-r120-stage {
+    filter: none !important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-core-r120-stage > .fx-core-mobile-v55-canvas.fx-core-r120-canvas {
+    opacity: .95 !important;
+    filter: brightness(.89) saturate(.87) contrast(.93) blur(.24px) !important;
+  }
+
+  /* The stage background is only atmospheric support; the WebGL crystal must
+     remain the focal light source. Lowering these two radial fields removes the
+     doubled halo without flattening the internal faceting. */
+  html[data-fx-core-mobile-v55="booting-v55"] body.living-architecture #hero .hero-space,
+  html[data-fx-core-mobile-v55="ready-v55"] body.living-architecture #hero .hero-space {
+    background:
+      radial-gradient(circle at 50% 46%, rgba(61, 218, 255, .095) 0, rgba(24, 129, 214, .045) 22%, transparent 43%),
+      radial-gradient(circle at 55% 49%, rgba(157, 76, 255, .052) 0, transparent 42%),
+      linear-gradient(180deg, rgba(1, 7, 17, .02) 0%, rgba(1, 8, 20, .07) 58%, rgba(2, 16, 34, .27) 100%) !important;
+    box-shadow:
+      inset 0 -52px 74px rgba(0, 7, 18, .66),
+      inset 0 1px 0 rgba(67, 211, 255, .022) !important;
+  }
+
+  /* Keep the star/horizon layer present but less competitive with the crystal
+     silhouette. This is deliberately opacity-only and therefore layout-free. */
+  html[data-fx-core-mobile-v55="booting-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::before,
+  html[data-fx-core-mobile-v55="ready-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::before {
+    opacity: .72 !important;
+  }
+
+  html[data-fx-core-mobile-v55="booting-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::after,
+  html[data-fx-core-mobile-v55="ready-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::after {
+    opacity: .40 !important;
+  }
+}
+
+@media (max-width: 430px) {
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-core-r120-stage > .fx-core-mobile-v55-canvas.fx-core-r120-canvas {
+    filter: brightness(.87) saturate(.85) contrast(.92) blur(.28px) !important;
+  }
+}
