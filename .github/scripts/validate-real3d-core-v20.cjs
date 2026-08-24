@@ -80,6 +80,7 @@ for(const token of [
   'probability-shells-entangled-pairs-collapse-tunneling',
   'event-driven-no-idle-raf',
   'capture-pointer-touch-deduplicated',
+  'window-capture-coordinate-r345',
   'fxQuantumParticleMeasurements',
   'fxQuantumParticleTunnels',
   'measurement-collapse',
@@ -89,11 +90,11 @@ for(const token of [
   'formatx:coreinteraction',
   'IntersectionObserver',
   'ResizeObserver',
-  "document.addEventListener('pointermove'",
-  "document.addEventListener('pointerdown'",
-  "document.addEventListener('touchstart'",
+  "addEventListener('pointermove'",
+  "addEventListener('pointerdown'",
+  "addEventListener('touchstart'",
   'capture:true'
-]) assert.ok(quantum.includes(token),`missing r337 quantum interaction contract: ${token}`);
+]) assert.ok(quantum.includes(token),`missing current quantum interaction contract: ${token}`);
 assert.match(quantumCss,/fx-quantum-field-r335/);
 assert.match(quantumCss,/fx-quantum-phase-r335/);
 assert.doesNotMatch(quantum,/requestAnimationFrame\s*\(|setInterval\s*\(|getContext\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
@@ -130,4 +131,4 @@ assert.equal(quality.mag_webgl_context_count,1);
 assert.equal(quality.mag_paused_outside_hero,true);
 
 for(const source of [bootstrap,wrapper,renderer,softlight,quantum,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
-console.log('PASS: r317 single-WebGL MAG keeps r336 soft optics and adds r337 capture-phase touch/pointer quantum-inspired interaction without a second canvas/context or idle JS animation loop.');
+console.log('PASS: r317 single-WebGL MAG keeps the current soft optics and window-capture quantum touch/pointer interaction without a second canvas/context or idle JS animation loop.');
