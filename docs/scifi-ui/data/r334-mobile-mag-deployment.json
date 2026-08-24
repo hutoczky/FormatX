@@ -1,0 +1,9 @@
+{
+  "revision": "r334",
+  "surface": "mobile-mag-optics",
+  "intent": "softer-short-bloom-feathered-perimeter",
+  "desktop_unchanged": true,
+  "source_css": "/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r334-softer-mobile-mag",
+  "source_runtime": "/scifi-ui/scripts/formatx-mobile-regression-r310.js",
+  "validated_source_commit": "4b503d8cd169fd2510b8d04f501ca5bcac1bb515"
+}
