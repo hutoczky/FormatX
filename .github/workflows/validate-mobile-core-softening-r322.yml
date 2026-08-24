@@ -1,4 +1,4 @@
-name: Validate mobile MAG optics r326
+name: Validate mobile MAG optics r327
 on:
   push:
     branches: [master]
@@ -18,20 +18,20 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Validate r326 source contract
+      - name: Validate r327 source contract
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'formatx-mobile-core-softening-r322.css?v=20260824-r326-softer-perimeter' docs/scifi-ui/scripts/formatx-award-runtime-r206.js
-          grep -Fq "fxMobileCoreOpticsR322 = 'r326-restrained-bloom-soft-edge'" docs/scifi-ui/scripts/formatx-award-runtime-r206.js
-          grep -Fq 'brightness(.83)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'contrast(1)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'saturate(1.09)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'blur(.38px)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'drop-shadow(0 0 .75px rgba(126,247,255,.13))' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'opacity: .68' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'stroke-width: .92' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'opacity: .16' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'formatx-mobile-core-softening-r322.css?v=20260824-r327-soft-mobile-core' docs/scifi-ui/scripts/formatx-award-runtime-r206.js
+          grep -Fq "fxMobileCoreOpticsR322 = 'r327-restrained-bloom-soft-edge'" docs/scifi-ui/scripts/formatx-award-runtime-r206.js
+          grep -Fq 'brightness(.78)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'contrast(.94)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'saturate(1.02)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'blur(.56px)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'drop-shadow(0 0 .58px rgba(126,247,255,.08))' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'opacity: .55' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'stroke-width: .84' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'opacity: .10' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
           grep -Fq 'fx-biolume-travel-r323' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
           grep -Fq 'deep-water-iridescent-traveling-rim' docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
           grep -Fq 'r323-deep-water-biolume' docs/scifi-ui/scripts/formatx-core-mobile-v55.js
@@ -42,17 +42,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/r326-optics" && cd "$RUNNER_TEMP/r326-optics"
+          mkdir -p "$RUNNER_TEMP/r327-optics" && cd "$RUNNER_TEMP/r327-optics"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify restrained mobile softening biolume and desktop isolation
+      - name: Verify softer mobile bloom perimeter and desktop isolation
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r326-http.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r327-http.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/r326-optics"
+          cd "$RUNNER_TEMP/r327-optics"
           node <<'NODE'
           const assert=require('node:assert/strict');
           const {chromium}=require('playwright');
@@ -63,7 +63,7 @@ jobs:
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForFunction(()=>{
               const d=document.documentElement.dataset;
-              return d.fxMobileCoreOpticsR322==='r326-restrained-bloom-soft-edge'
+              return d.fxMobileCoreOpticsR322==='r327-restrained-bloom-soft-edge'
                 && d.fxCoreBiolumeR323==='ready'
                 && document.querySelector('.fx-core-r317-canvas')
                 && document.querySelector('.fx-core-biolume-r323');
@@ -93,30 +93,31 @@ jobs:
                 animation:runnerStyle?.animationName||'',dasharray:runnerStyle?.strokeDasharray||''
               };
             });
-            console.log('R326_MOBILE_OPTICS',JSON.stringify(state));
-            assert.equal(state.marker,'r326-restrained-bloom-soft-edge');
+            console.log('R327_MOBILE_OPTICS',JSON.stringify(state));
+            assert.equal(state.marker,'r327-restrained-bloom-soft-edge');
             assert.equal(state.biolume,'ready');
             assert.equal(state.profile,'deep-water-iridescent-traveling-rim');
             assert.equal(state.link,true);
-            assert.match(state.href,/r326-softer-perimeter/);
-            assert.ok(state.opacity<=0.90&&state.opacity>=0.88,JSON.stringify(state));
-            assert.match(state.filter,/brightness\(0\.83\)/);
-            assert.match(state.filter,/contrast\(1\)/);
-            assert.match(state.filter,/saturate\(1\.09\)/);
-            assert.match(state.filter,/blur\(0\.38px\)/);
+            assert.match(state.href,/r327-soft-mobile-core/);
+            assert.ok(state.opacity<=0.86&&state.opacity>=0.82,JSON.stringify(state));
+            assert.match(state.filter,/brightness\(0\.78\)/);
+            assert.match(state.filter,/contrast\(0\.94\)/);
+            assert.match(state.filter,/saturate\(1\.02\)/);
+            assert.match(state.filter,/blur\(0\.56px\)/);
             assert.equal(state.rimPaths,5,JSON.stringify(state));
-            assert.ok(state.rimOpacity>=0.66&&state.rimOpacity<=0.70,JSON.stringify(state));
-            assert.ok(state.haloOpacity>=0.14&&state.haloOpacity<=0.18,JSON.stringify(state));
-            assert.match(state.haloFilter,/blur\(3\.8px\)/);
-            assert.ok(state.baseOpacity>=0.25&&state.baseOpacity<=0.29,JSON.stringify(state));
-            assert.ok(state.runnerOpacity>=0.40&&state.runnerOpacity<=0.46,JSON.stringify(state));
+            assert.ok(state.rimOpacity>=0.53&&state.rimOpacity<=0.57,JSON.stringify(state));
+            assert.ok(state.haloOpacity>=0.08&&state.haloOpacity<=0.12,JSON.stringify(state));
+            assert.match(state.haloFilter,/blur\(4\.45px\)/);
+            assert.ok(state.baseOpacity>=0.19&&state.baseOpacity<=0.23,JSON.stringify(state));
+            assert.ok(state.runnerOpacity>=0.33&&state.runnerOpacity<=0.37,JSON.stringify(state));
+            assert.match(state.runnerStrokeWidth,/0\.36px|\.36px/);
             assert.match(state.animation,/fx-biolume-travel-r323/);
             assert.ok(state.width>0&&state.height>0,JSON.stringify(state));
             try {
               await page.addStyleTag({content:'*{animation-play-state:paused!important}'});
-              await page.screenshot({path:'mobile-r326.png',fullPage:false,animations:'disabled',timeout:8000});
+              await page.screenshot({path:'mobile-r327.png',fullPage:false,animations:'disabled',timeout:8000});
             } catch (error) {
-              console.log('R326_SCREENSHOT_OPTIONAL',String(error.message||error));
+              console.log('R327_SCREENSHOT_OPTIONAL',String(error.message||error));
             }
             await ctx.close();
           }
@@ -136,14 +137,14 @@ jobs:
             assert.equal(state.marker,'',JSON.stringify(state));
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await mobile(browser);await desktop(browser);await browser.close();console.log('PASS: r326 mobile MAG has restrained bloom, softer living perimeter and desktop isolation.');})().catch(error=>{console.error(error);process.exit(1)});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await mobile(browser);await desktop(browser);await browser.close();console.log('PASS: r327 mobile MAG has softer restrained bloom and perimeter with desktop isolation.');})().catch(error=>{console.error(error);process.exit(1)});
           NODE
       - name: Upload mobile optical proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: formatx-mobile-core-r326
-          path: ${{ runner.temp }}/r326-optics/mobile-r326.png
+          name: formatx-mobile-core-r327
+          path: ${{ runner.temp }}/r327-optics/mobile-r327.png
           if-no-files-found: ignore
           retention-days: 14
       - name: Publish mobile optics status
@@ -153,5 +154,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r326 restrained mobile MAG bloom and soft edge passed'; else state=failure; description='r326 mobile MAG optical validation failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r327 softer mobile MAG bloom and perimeter passed'; else state=failure; description='r327 mobile MAG optical validation failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile core optics' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
