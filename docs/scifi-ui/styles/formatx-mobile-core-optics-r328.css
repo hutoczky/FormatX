@@ -1,7 +1,7 @@
-/* FormatX r348 — balanced mobile MAG bloom + soft glass perimeter.
+/* FormatX r349 — restrained mobile MAG glow + soft glass perimeter.
    Mobile-only final compositing pass. Keep the validated crystal geometry and
-   internal facets, but trim the remaining phone bloom and soften the silhouette
-   on high-density displays. Desktop remains untouched. */
+   internal facets, but reduce centre bloom, trim long-range spill and soften
+   the silhouette on high-density phone displays. Desktop remains untouched. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html:root:root body.living-architecture #hero .hero-space {
@@ -22,31 +22,31 @@
     isolation: isolate !important;
   }
 
-  /* Safe fallback while the final renderer marker settles. */
+  /* Safe fallback while the renderer marker settles. */
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
-    opacity: .72 !important;
-    filter: brightness(.70) contrast(.78) saturate(.84) blur(.95px) !important;
-    -webkit-filter: brightness(.70) contrast(.78) saturate(.84) blur(.95px) !important;
+    opacity: .67 !important;
+    filter: brightness(.63) contrast(.71) saturate(.78) blur(1.25px) !important;
+    -webkit-filter: brightness(.63) contrast(.71) saturate(.78) blur(1.25px) !important;
   }
 
-  /* r348 final owner: retain internal facet readability while removing the
-     electric cut-out appearance from the outer glass edge. */
+  /* r349 final owner: lower the electric bloom and use enough optical blur to
+     turn the hard raster cut-out into a glass edge without erasing the facets. */
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .65 !important;
+    opacity: .60 !important;
     filter:
-      brightness(.57)
-      contrast(.70)
-      saturate(.76)
-      blur(1.55px) !important;
+      brightness(.52)
+      contrast(.64)
+      saturate(.72)
+      blur(1.95px) !important;
     -webkit-filter:
-      brightness(.57)
-      contrast(.70)
-      saturate(.76)
-      blur(1.55px) !important;
+      brightness(.52)
+      contrast(.64)
+      saturate(.72)
+      blur(1.95px) !important;
   }
 
-  /* The veil attenuates the hot centre and long-range spill. It is intentionally
-     shallow through the mid-body so the actual 3D facet structure stays visible. */
+  /* Attenuate the hot centre and the outer spill while leaving the middle body
+     shallow enough for the internal 3D facet structure to remain readable. */
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage::after {
     content: "" !important;
     position: absolute !important;
@@ -55,31 +55,31 @@
     display: block !important;
     pointer-events: none !important;
     background:
-      radial-gradient(circle at 50% 50%, rgba(0,4,13,.21) 0 4.8%, rgba(0,4,13,.12) 10%, rgba(0,4,13,.035) 18%, transparent 26%),
-      radial-gradient(ellipse at 50% 50%, transparent 0 42%, rgba(0,4,13,.026) 52%, rgba(0,4,13,.075) 63%, rgba(0,4,13,.18) 78%, rgba(0,4,13,.30) 100%) !important;
+      radial-gradient(circle at 50% 50%, rgba(0,4,13,.28) 0 5.2%, rgba(0,4,13,.17) 10.8%, rgba(0,4,13,.052) 19.5%, transparent 28%),
+      radial-gradient(ellipse at 50% 50%, transparent 0 39%, rgba(0,4,13,.038) 50%, rgba(0,4,13,.095) 62%, rgba(0,4,13,.22) 77%, rgba(0,4,13,.36) 100%) !important;
   }
 
-  /* Auxiliary bioluminescence is atmosphere only, never a second hard outline. */
+  /* Auxiliary bioluminescence is atmosphere only, never a second outline. */
   html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .012 !important;
+    opacity: .008 !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .18 !important;
-    opacity: .003 !important;
-    filter: blur(10px) !important;
+    stroke-width: .14 !important;
+    opacity: .002 !important;
+    filter: blur(12px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .055 !important;
-    opacity: .009 !important;
-    filter: blur(3.8px) !important;
+    stroke-width: .045 !important;
+    opacity: .006 !important;
+    filter: blur(4.6px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a,.fx-biolume-runner-b,.fx-biolume-runner-c) {
-    stroke-width: .08 !important;
-    opacity: .035 !important;
-    filter: blur(3.1px) !important;
+    stroke-width: .065 !important;
+    opacity: .022 !important;
+    filter: blur(4px) !important;
   }
 }
 
@@ -101,25 +101,25 @@
 
 @media (max-width: 430px) {
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
-    opacity: .67 !important;
-    filter: brightness(.64) contrast(.74) saturate(.80) blur(1.08px) !important;
-    -webkit-filter: brightness(.64) contrast(.74) saturate(.80) blur(1.08px) !important;
+    opacity: .62 !important;
+    filter: brightness(.58) contrast(.67) saturate(.74) blur(1.48px) !important;
+    -webkit-filter: brightness(.58) contrast(.67) saturate(.74) blur(1.48px) !important;
   }
 
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .60 !important;
-    filter: brightness(.53) contrast(.68) saturate(.73) blur(1.78px) !important;
-    -webkit-filter: brightness(.53) contrast(.68) saturate(.73) blur(1.78px) !important;
+    opacity: .56 !important;
+    filter: brightness(.48) contrast(.61) saturate(.68) blur(2.25px) !important;
+    -webkit-filter: brightness(.48) contrast(.61) saturate(.68) blur(2.25px) !important;
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage::after {
     background:
-      radial-gradient(circle at 50% 50%, rgba(0,4,13,.23) 0 4.9%, rgba(0,4,13,.14) 10.5%, rgba(0,4,13,.044) 18.5%, transparent 26.5%),
-      radial-gradient(ellipse at 50% 50%, transparent 0 40%, rgba(0,4,13,.034) 50%, rgba(0,4,13,.088) 62%, rgba(0,4,13,.21) 77%, rgba(0,4,13,.34) 100%) !important;
+      radial-gradient(circle at 50% 50%, rgba(0,4,13,.31) 0 5.4%, rgba(0,4,13,.19) 11.2%, rgba(0,4,13,.062) 20%, transparent 28.5%),
+      radial-gradient(ellipse at 50% 50%, transparent 0 37%, rgba(0,4,13,.046) 48%, rgba(0,4,13,.11) 60%, rgba(0,4,13,.25) 76%, rgba(0,4,13,.40) 100%) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .010 !important;
+    opacity: .006 !important;
   }
 }
 
