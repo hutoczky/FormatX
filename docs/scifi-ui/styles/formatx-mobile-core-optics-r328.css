@@ -1,4 +1,4 @@
-/* FormatX r336 — effective mobile MAG optical restraint.
+/* FormatX r338 — mobile MAG flare and edge restraint.
    The r317 WebGL crystal stays native and interactive. This owner deliberately
    outranks the older r327 compositor so the softer bloom/edge treatment is
    actually effective on production mobile. Desktop remains untouched. */
@@ -19,6 +19,20 @@
     translate: -50% 0 !important;
     overflow-x: clip !important;
     filter: none !important;
+  }
+
+  html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 40 !important;
+    display: block !important;
+    pointer-events: none !important;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(0, 4, 13, .10) 0 3.5%, rgba(0, 4, 13, .045) 7%, transparent 15%),
+      radial-gradient(ellipse at 50% 50%, transparent 0 66%, rgba(0, 4, 13, .025) 80%, rgba(0, 4, 13, .075) 100%) !important;
+    -webkit-backdrop-filter: blur(.72px) brightness(.93) !important;
+    backdrop-filter: blur(.72px) brightness(.93) !important;
   }
 
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
@@ -79,6 +93,14 @@
 }
 
 @media (max-width: 430px) {
+  html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage::after {
+    background:
+      radial-gradient(circle at 50% 50%, rgba(0, 4, 13, .13) 0 3.8%, rgba(0, 4, 13, .055) 7.5%, transparent 16%),
+      radial-gradient(ellipse at 50% 50%, transparent 0 64%, rgba(0, 4, 13, .035) 79%, rgba(0, 4, 13, .095) 100%) !important;
+    -webkit-backdrop-filter: blur(1px) brightness(.90) !important;
+    backdrop-filter: blur(1px) brightness(.90) !important;
+  }
+
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
     opacity: .72 !important;
     filter:
