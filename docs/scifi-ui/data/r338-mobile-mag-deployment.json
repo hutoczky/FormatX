@@ -1,0 +1,9 @@
+{
+  "revision": "r338",
+  "surface": "mobile-mag-optics",
+  "intent": "restrained-center-flare-softened-edge-finish",
+  "desktop_unchanged": true,
+  "source_css": "/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r336-effective-soft-mobile-mag-r338-mobile-flare-edge-veil",
+  "source_runtime": "/scifi-ui/scripts/formatx-mobile-regression-r310.js",
+  "validated_source_commit": "7f3fb8a1855f444ad29f8d65108416fc0e42450a"
+}
