@@ -179,7 +179,9 @@
   100% { scale: .986 1.019; rotate: -.10deg; }
 }
 
-/* Mobile morph stays restrained so the four tips never become blade-like. */
+/* Mobile morph stays restrained so the four tips never become blade-like.
+   Optical exposure, rim light and edge softness are owned exclusively by
+   formatx-mobile-core-optics-r328.css r343 to prevent late cascade conflicts. */
 @media (prefers-reduced-motion: no-preference) and (max-width: 900px),
        (prefers-reduced-motion: no-preference) and (pointer: coarse) {
   html body.living-architecture #hero .fx-core-r317-stage > .fx-core-r317-canvas {
@@ -194,70 +196,6 @@
   46%  { scale: 1.008 .993; rotate: .055deg; }
   70%  { scale: .995 1.006; rotate: -.035deg; }
   100% { scale: 1.006 .995; rotate: .040deg; }
-}
-
-/* r327 mobile optical restraint: stronger selector than the older r326 layer.
-   Lower exposure, broader sub-pixel blur and much smaller bloom soften the
-   perimeter while preserving the internal faceted detail. */
-@media (max-width: 900px), (pointer: coarse) {
-  html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .87 !important;
-    filter:
-      brightness(.79)
-      contrast(.98)
-      saturate(1.05)
-      blur(.55px)
-      drop-shadow(0 0 .65px rgba(124,245,255,.11))
-      drop-shadow(0 0 2.1px rgba(32,142,255,.040)) !important;
-    -webkit-filter:
-      brightness(.79)
-      contrast(.98)
-      saturate(1.05)
-      blur(.55px)
-      drop-shadow(0 0 .65px rgba(124,245,255,.11))
-      drop-shadow(0 0 2.1px rgba(32,142,255,.040)) !important;
-  }
-
-  html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .48 !important;
-  }
-
-  html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .82 !important;
-    filter: blur(4.2px) !important;
-    opacity: .12 !important;
-  }
-
-  html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .27 !important;
-    opacity: .20 !important;
-    filter: blur(.68px) !important;
-  }
-
-  html:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a, .fx-biolume-runner-b, .fx-biolume-runner-c) {
-    stroke-width: .34 !important;
-    filter: drop-shadow(0 0 .35px currentColor) blur(.38px) !important;
-  }
-}
-
-@media (max-width: 430px) {
-  html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .85 !important;
-    filter:
-      brightness(.77)
-      contrast(.96)
-      saturate(1.03)
-      blur(.68px)
-      drop-shadow(0 0 .52px rgba(126,247,255,.09))
-      drop-shadow(0 0 1.7px rgba(37,137,255,.030)) !important;
-    -webkit-filter:
-      brightness(.77)
-      contrast(.96)
-      saturate(1.03)
-      blur(.68px)
-      drop-shadow(0 0 .52px rgba(126,247,255,.09))
-      drop-shadow(0 0 1.7px rgba(37,137,255,.030)) !important;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
