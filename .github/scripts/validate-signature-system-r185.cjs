@@ -29,16 +29,17 @@ assert.doesNotMatch(css,/scroll-snap-type\s*:/i,'signature layer must not force 
 for(const token of [
   '#hero > .fx-signature-core-trigger','display: none !important','pointer-events: none !important',
   'html.fx-signature-open body','.fx-signature-architecture[aria-hidden="true"]'
-]) assert.ok(explicitCss.includes(token),`missing r320 explicit-disclosure CSS token: ${token}`);
+]) assert.ok(explicitCss.includes(token),`missing explicit-disclosure CSS token: ${token}`);
 
 for(const token of [
-  'r320-explicit-architecture-no-core-hitlayer',
+  "const VERSION='r325-inert-hidden-architecture'",
   "{id:'hero'","{id:'experience'","{id:'capabilities'","{id:'pricing'","{id:'system'","{id:'resources'",
   'aria-modal','formatx:signatureunfold','Escape','focusables()','scrollIntoView','IntersectionObserver',
   'retired-r320-no-core-hitlayer','native-webgl-owner-r317','formatx:signature-open-request',
-  'FormatXSignatureArchitecture','explicit-disclosure-focus-reduced-motion-r320',
-  'external-css-no-inline-style-r320','formatx-signature-explicit-r320.css?v=20260824-r320-explicit-architecture'
-]) assert.ok(js.includes(token),`missing r320 signature JS token: ${token}`);
+  'FormatXSignatureArchitecture','explicit-disclosure-focus-inert-r325',
+  'external-css-no-inline-style-r325','formatx-signature-explicit-r320.css?v=20260824-r320-explicit-architecture',
+  "overlay.setAttribute('inert','')","overlay.removeAttribute('inert')","hiddenInert:true"
+]) assert.ok(js.includes(token),`missing r325 signature JS token: ${token}`);
 assert.equal((js.match(/id:'/g)||[]).length,6,'architecture must expose exactly six system scenes');
 assert.doesNotMatch(js,/hero\.appendChild\(trigger\)|document\.elementFromPoint|signature-pointer-r185b|signature-press-r185b/,'hidden MAG hit-layer ownership must be retired');
 assert.doesNotMatch(js,/\.style\b|style\.setProperty|document\.body\.style/,'signature runtime must not write inline styles under strict CSP');
@@ -58,4 +59,4 @@ assert.match(appMag,/window\.Activated[\s\S]*_mag\.SetActive/,'MAG must follow w
 assert.match(appMag,/window\.Closed[\s\S]*MagOperation\.ShuttingDown/,'MAG must enter shutdown state when the window closes');
 assert.match(appMag,/new ContentDialog[\s\S]*new SystemCorePanel\(\)/,'MAG core control must open the system core panel');
 
-console.log('PASS: r320 explicit CSP-safe web architecture disclosure and current product MAG runtime/state contract are present.');
+console.log('PASS: r325 inert CSP-safe explicit web architecture disclosure and current product MAG runtime/state contract are present.');
