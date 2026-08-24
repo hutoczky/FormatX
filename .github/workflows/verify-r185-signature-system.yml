@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - name: Validate r320 explicit architecture source contract
+      - name: Validate r325 inert explicit architecture source contract
         run: |
           node --check docs/scifi-ui/scripts/formatx-signature-system-r185.js
           node .github/scripts/validate-signature-system-r185.cjs
@@ -61,19 +61,19 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Verify native MAG interaction and explicit architecture disclosure
+      - name: Verify native MAG interaction and inert explicit architecture disclosure
         run: |
-          cat > verify-r320.cjs <<'JS'
+          cat > verify-r325.cjs <<'JS'
           const {chromium}=require('playwright');
           const assert=require('node:assert/strict');
           const origin='https://formatxsuite.com';
 
           async function inspect(page,label){
             page.setDefaultTimeout(120000);
-            await page.goto(`${origin}/?verify=r320-${label}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.goto(`${origin}/?verify=r325-${label}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
             await page.waitForFunction(()=>{
               const d=document.documentElement.dataset;
-              return d.fxSignatureSystem==='r320-explicit-architecture-no-core-hitlayer'
+              return d.fxSignatureSystem==='r325-inert-hidden-architecture'
                 && d.fxSignatureTrigger==='retired-r320-no-core-hitlayer'
                 && Boolean(window.FormatXSignatureArchitecture);
             },null,{timeout:90000});
@@ -85,22 +85,27 @@ jobs:
               const canvas=stage?.querySelector('canvas')||document.querySelector('#hero canvas');
               const r=canvas?.getBoundingClientRect();
               const controls=[...document.querySelectorAll('#hero .fx-reference-controls-r204 .fx-three-sound,#hero .fx-reference-controls-r204 .fx-reference-ask,#hero .fx-reference-controls-r204 .fx-reference-pause')];
+              const architecture=document.querySelector('.fx-signature-architecture');
               return{
                 triggerCount:document.querySelectorAll('#hero>.fx-signature-core-trigger,.fx-signature-core-trigger').length,
                 triggerState:root.dataset.fxSignatureTrigger||'',
+                usability:root.dataset.fxSignatureUsability||'',
                 csp:root.dataset.fxSignatureCsp||'',
                 canvas:r?[r.left,r.top,r.width,r.height]:null,
                 controls:controls.map(node=>{const b=node.getBoundingClientRect();return{cls:node.className,width:b.width,height:b.height,visible:getComputedStyle(node).visibility,display:getComputedStyle(node).display}}),
                 open:root.classList.contains('fx-signature-open'),
-                overlayHidden:document.querySelector('.fx-signature-architecture')?.getAttribute('aria-hidden')
+                overlayHidden:architecture?.getAttribute('aria-hidden'),
+                overlayInert:architecture?.hasAttribute('inert')||false
               };
             });
             assert.equal(base.triggerCount,0,'hidden MAG hit layer must not exist');
             assert.equal(base.triggerState,'retired-r320-no-core-hitlayer');
-            assert.equal(base.csp,'external-css-no-inline-style-r320');
+            assert.equal(base.usability,'explicit-disclosure-focus-inert-r325');
+            assert.equal(base.csp,'external-css-no-inline-style-r325');
             assert.ok(base.canvas&&base.canvas[2]>40&&base.canvas[3]>40,'native MAG canvas missing');
             assert.equal(base.open,false);
             assert.equal(base.overlayHidden,'true');
+            assert.equal(base.overlayInert,true,'closed architecture must be inert');
             assert.equal(base.controls.length,3,'hero control trio missing');
             assert.ok(base.controls.every(item=>item.width>=44&&item.height>=44&&item.display!=='none'&&item.visible!=='hidden'));
 
@@ -118,28 +123,31 @@ jobs:
               const opener=document.createElement('button');
               opener.type='button';
               opener.dataset.fxSignatureOpen='true';
-              opener.id='fx-r320-explicit-test-opener';
+              opener.id='fx-r325-explicit-test-opener';
               opener.textContent='Architecture';
               document.body.appendChild(opener);
             });
-            const opener=page.locator('#fx-r320-explicit-test-opener');
+            const opener=page.locator('#fx-r325-explicit-test-opener');
             await opener.focus();
             await opener.click();
             await page.waitForFunction(()=>document.documentElement.classList.contains('fx-signature-open'));
             const opened=await page.evaluate(()=>({
               hidden:document.querySelector('.fx-signature-architecture')?.getAttribute('aria-hidden'),
+              inert:document.querySelector('.fx-signature-architecture')?.hasAttribute('inert')||false,
               nodes:document.querySelectorAll('.fx-signature-node').length,
               source:document.documentElement.dataset.fxSignatureOpenSource||'',
               moment:document.documentElement.dataset.fxSignatureMoment||''
             }));
             assert.equal(opened.hidden,'false');
+            assert.equal(opened.inert,false,'open architecture must be interactive');
             assert.equal(opened.nodes,6);
             assert.equal(opened.source,'explicit-control');
-            assert.equal(opened.moment,'unfolded-explicit-r320');
+            assert.equal(opened.moment,'unfolded-explicit-r325');
             await page.keyboard.press('Escape');
             await page.waitForFunction(()=>!document.documentElement.classList.contains('fx-signature-open'));
             await page.waitForTimeout(120);
-            assert.equal(await page.evaluate(()=>document.activeElement?.id),'fx-r320-explicit-test-opener','focus must return to explicit opener');
+            assert.equal(await page.evaluate(()=>document.activeElement?.id),'fx-r325-explicit-test-opener','focus must return to explicit opener');
+            assert.equal(await page.evaluate(()=>document.querySelector('.fx-signature-architecture')?.hasAttribute('inert')),true,'closed architecture must return to inert state');
             return{base,opened};
           }
 
@@ -152,10 +160,10 @@ jobs:
               const mobileContext=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
               const mobile=await inspect(await mobileContext.newPage(),'mobile');
               await mobileContext.close();
-              console.log('R320 DESKTOP',JSON.stringify(desktop,null,2));
-              console.log('R320 MOBILE',JSON.stringify(mobile,null,2));
+              console.log('R325 DESKTOP',JSON.stringify(desktop,null,2));
+              console.log('R325 MOBILE',JSON.stringify(mobile,null,2));
             }finally{await browser.close();}
-            console.log('PASS: native MAG interaction stays modal-free and architecture disclosure is explicit, focus-safe and usable.');
+            console.log('PASS: native MAG interaction stays modal-free and r325 architecture disclosure is explicit, inert when hidden, focus-safe and usable.');
           })().catch(error=>{console.error(error);process.exit(1)});
           JS
-          node verify-r320.cjs
+          node verify-r325.cjs
