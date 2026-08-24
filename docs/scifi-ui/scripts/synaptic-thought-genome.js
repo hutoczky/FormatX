@@ -150,7 +150,7 @@
     if (document.querySelector('link[data-fx-thought-genome-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/synaptic-thought-genome.css?v=20260812-csp-safe-r2';
+    link.href = './styles/synaptic-thought-genome.css?v=20260824-csp-safe-r3';
     link.dataset.fxThoughtGenomeStyle = 'true';
     document.head.appendChild(link);
   }
@@ -192,7 +192,7 @@
     layer.setAttribute('viewBox', '0 0 1000 1000');
     layer.setAttribute('preserveAspectRatio', 'none');
     layer.setAttribute('aria-hidden', 'true');
-    layer.dataset.fxThoughtGenomeLayer = 'ready-v2';
+    layer.dataset.fxThoughtGenomeLayer = 'ready-v3';
 
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
@@ -240,6 +240,10 @@
     };
   }
 
+  function toneForHue(hue) {
+    return Math.max(0, Math.min(7, Math.floor((Number(hue) - 168) / 24)));
+  }
+
   function renderLayer(activeFingerprint) {
     if (!ensureLayer()) return;
     layer.classList.toggle('is-disabled', !enabled);
@@ -261,20 +265,19 @@
       if (entry.fingerprint === activeFingerprint) group.classList.add('is-new');
       group.dataset.scene = String(entry.scene);
       group.dataset.fingerprint = String(entry.fingerprint);
+      group.dataset.tone = String(toneForHue(point.hue));
 
       const orbit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       orbit.setAttribute('cx', point.x);
       orbit.setAttribute('cy', point.y);
       orbit.setAttribute('r', String(point.r * 2.6));
       orbit.classList.add('fx-thought-genome-orbit');
-      orbit.setAttribute('stroke', `hsl(${point.hue} 84% 67% / .34)`);
 
       const star = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       star.setAttribute('cx', point.x);
       star.setAttribute('cy', point.y);
       star.setAttribute('r', String(point.r));
       star.classList.add('fx-thought-genome-star');
-      star.setAttribute('fill', `hsl(${point.hue} 88% 72%)`);
 
       group.append(orbit, star);
       nodes.appendChild(group);
@@ -512,13 +515,15 @@
     ROOT.dataset.fxThoughtGenomeEnabled = String(enabled);
     ROOT.dataset.fxThoughtGenomePrivacy = 'fingerprint-only';
     ROOT.dataset.fxThoughtGenomeForms = '6';
+    ROOT.dataset.fxThoughtGenomePaint = 'external-css-tone-r3';
     dispatchEvent(new CustomEvent('formatx:thoughtgenomeready', {
       detail: {
         enabled,
         forms: 6,
         history: history.length,
         questionStored: false,
-        localOnly: true
+        localOnly: true,
+        cspSafePaint: true
       }
     }));
   }
