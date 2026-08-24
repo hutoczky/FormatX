@@ -13,11 +13,12 @@ const R206_BOOTSTRAP = [
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-flow-first-r74="true" href="/scifi-ui/styles/formatx-flow-first-r74.css?v=20260818-r207-preloaded">',
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-responsive-text-guard="true" href="/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260818-r207-preloaded">',
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="/scifi-ui/styles/formatx-mobile-proof-controls-r204.css?v=20260818-r207-preloaded">',
-  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-layout-r207="true" href="/scifi-ui/styles/formatx-mobile-layout-r207.css?v=20260818-r208-flicker-free">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-layout-r207="true" href="/scifi-ui/styles/formatx-mobile-layout-r207.css?v=20260824-native-orb-r250">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-native-orb-reference-r250="true" href="/scifi-ui/styles/formatx-native-orb-reference-r250.css?v=20260824-native-orb-r250">',
   '<link rel="stylesheet" data-fx-first-paint-r206="true" href="/scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero">',
-  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260820-r248-reference-owner"></script>',
+  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260824-native-orb-r250"></script>',
   '<script defer data-fx-flow-first-r75="true" src="/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260820-r248-reference-owner"></script>',
-  '<script defer data-fx-mobile-layout-r207="true" src="/scifi-ui/scripts/formatx-mobile-layout-r207.js?v=20260818-r208-flicker-free"></script>',
+  '<script defer data-fx-mobile-layout-r207="true" src="/scifi-ui/scripts/formatx-mobile-layout-r207.js?v=20260824-native-orb-r250"></script>',
 ].join('\n  ');
 const STARTUP_REVISION = '20260818-r208-flicker-free-owner';
 const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r208=1(?:;|$)/;

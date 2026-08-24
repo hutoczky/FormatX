@@ -2,6 +2,7 @@
 'use strict';
 
 const root=document.documentElement;
+const REFERENCE_STYLE='/scifi-ui/styles/formatx-native-orb-reference-r250.css?v=20260824-native-orb-r250';
 if(root.dataset.fxControlOwnerR268==='ready')return;
 root.dataset.fxControlOwnerR268='booting';
 root.dataset.fxControlOwnerR264='booting';
@@ -18,6 +19,18 @@ let lastMobile=null;
 let applying=false;
 const language=()=>root.lang==='en'?'en':'hu';
 const isMobile=()=>mobileQuery.matches;
+
+function ensureReferenceStyle(){
+  let link=document.querySelector('link[data-fx-native-orb-reference-r250]');
+  if(!(link instanceof HTMLLinkElement)){
+    link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href=REFERENCE_STYLE;
+    link.dataset.fxNativeOrbReferenceR250='true';
+  }
+  if(link.parentElement!==document.head||link!==document.head.lastElementChild)document.head.appendChild(link);
+  root.dataset.fxNativeOrbReferenceStyleR250='ready';
+}
 
 function stripInline(node){
   if(node instanceof HTMLElement&&node.hasAttribute('style'))node.removeAttribute('style');
@@ -189,10 +202,10 @@ function canonicalControls(hero){
     if(sound.parentElement!==controls)controls.prepend(sound);
   }
   if(rail.parentElement!==controls)controls.appendChild(rail);
-  const owner=isMobile()?grid:space;
+  const owner=space;
   if(controls.parentElement!==owner)owner.appendChild(controls);
   for(const node of [controls,rail,sound,ask,pause,ask.querySelector('span')])stripInline(node);
-  root.dataset.fxReferenceControlLayout=isMobile()?'r264-mobile-three-cell':'r264-desktop-three-cell';
+  root.dataset.fxReferenceControlLayout=isMobile()?'r250-mobile-reference-rail':'r264-desktop-three-cell';
   return sound instanceof HTMLButtonElement;
 }
 function visibleControl(node){
@@ -214,8 +227,8 @@ function healthy(hero,mobile){
     &&currentMenu.classList.contains('fx-reference-menu-button')
     &&currentMenu.parentElement===topbar
     &&controls instanceof HTMLElement
-    &&controls.parentElement===(mobile?grid:space)
-    &&visibleControl(sound)
+    &&controls.parentElement===space
+    &&(mobile||visibleControl(sound))
     &&visibleControl(ask)
     &&visibleControl(pause);
 }
@@ -245,6 +258,7 @@ function bindAudioObserver(){
 function reconcile(force=false){
   queued=false;if(applying)return false;
   const hero=document.getElementById('hero');if(!(hero instanceof HTMLElement))return false;
+  ensureReferenceStyle();
   const mobile=isMobile();
   if(!force&&root.dataset.fxControlOwnerR268==='ready'&&mobile===lastMobile&&healthy(hero,mobile)){
     retireLegacyMenus();

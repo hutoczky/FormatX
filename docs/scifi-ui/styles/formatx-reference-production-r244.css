@@ -239,8 +239,15 @@
   }
 
   html[data-fx-reference-production-r244="ready"] body.living-architecture #hero :is(.fx-core-mobile-v55-canvas, .fx-core-r112-canvas) {
-    opacity: .10 !important;
-    filter: brightness(.82) contrast(1.32) saturate(1.03) !important;
+    opacity: .99 !important;
+    filter: brightness(1.04) contrast(1.12) saturate(1.16) drop-shadow(0 0 10px rgba(47, 223, 255, .18)) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero :is(.fx-core-biolume-r323, .fx-quantum-field-r335) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 
   html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-core-detail-r122 {
@@ -391,7 +398,7 @@
     max-width: 680px !important;
     height: 20px !important;
     min-height: 20px !important;
-    margin: -47px 0 25px var(--fx-r244-edge-left) !important;
+    margin: 12px 0 25px var(--fx-r244-edge-left) !important;
     padding: 0 !important;
     color: rgba(224, 233, 239, .88) !important;
     font: 500 clamp(14px, 3.85vw, 16.5px)/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;

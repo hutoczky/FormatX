@@ -5,6 +5,7 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js'
       - 'docs/scifi-ui/styles/formatx-award-material-r99.css'
@@ -12,6 +13,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
       - 'docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
+      - 'docs/scifi-ui/styles/formatx-native-orb-reference-r250.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
       - 'billing-worker/src/production-entry.js'
       - '.github/scripts/validate-real3d-core-v20.cjs'
@@ -41,8 +43,8 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js
+          node --check docs/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
           node --check billing-worker/src/production-entry.js
@@ -55,5 +57,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Responsive cinematic r99 source/layout/animation/native-touch gates passed'; else state=failure; description='FormatX production crystal validation failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX production crystal' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Native r250 mechanical orb and interaction gates passed'; else state=failure; description='FormatX r250 native WebGL validation failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX native mechanical orb' -f description="$description" -f target_url="$TARGET_URL"

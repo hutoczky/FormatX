@@ -1,7 +1,65 @@
 'use strict';
-const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
-const root=path.resolve(__dirname,'../..'),read=file=>fs.readFileSync(path.join(root,file),'utf8');
-const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js');const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');const flowCss=read('docs/scifi-ui/styles/formatx-flow-first-r74.css');const rayCss=read('docs/scifi-ui/styles/formatx-award-material-r91.css');
-assert.match(bootstrap,/pure-native-webgl3d-r285-no-2d-mag-layers/);assert.match(bootstrap,/pure-webgl3d-no-2d-overlays/);assert.match(bootstrap,/single-webgl-luminous-crystal-r99/);assert.match(bootstrap,/formatx-award-material-r91\.css\?v=20260814-rayglass-r95/);assert.match(bootstrap,/formatx-flow-first-r75\.js\?v=20260816-mobile-ui-r180c/);assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260818-r204-proof-controls/);assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
-for(const token of ['reference-luminous-crystal-webgl-r99-prismatic-r120','webgl2','webgl','TRIANGLE_STRIP','ResizeObserver','IntersectionObserver','formatx:coreinteraction','formatx:real3dready','touchstart','touchmove','touchend','visible-native-3d-r99','single-webgl-luminous-crystal-r99','fxCoreRenderMs','corePosition','reference-deep-concave-four-point-size-lock-r99','luminous-faceted-iceglass-caustic-r99','touch-pointer-breathing-spectral-refraction-r99','frac','caustic','rings','prismatic-organic-glass'])assert.ok(renderer.includes(token),`missing r120 release contract: ${token}`);
-assert.match(renderer,/720000/);assert.doesNotMatch(renderer,/new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);assert.match(rayCss,/fx-core-rayglass-r91-stage/);assert.match(rayCss,/fx-core-rayglass-r91-canvas/);assert.match(layout,/mag-first-normal-flow-r74/);assert.match(layout,/fx-reference-controls-r204/);assert.match(layout,/space\.after\(heading\)/);assert.match(layout,/heading\.after\(card\)/);assert.match(layout,/mobileViewport=.*max-width:900px/);assert.match(layout,/restoreDesktopMenu/);for(const token of ['position:relative!important','flex-direction:column!important','order:0!important','order:1!important','order:2!important','order:3!important','order:4!important','#fx-reference-legacy-menu','display:grid!important'])assert.ok(flowCss.includes(token),`missing r74 flow contract: ${token}`);assert.doesNotMatch(flowCss,/position:sticky!important/);for(const source of [bootstrap,wrapper,renderer,layout])new Function(source);console.log('PASS: release validates r285 pure native WebGL authority with current r180c/r204 mobile flow ownership and r120 prismatic organic glass MAG contract.');
+
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = path.resolve(__dirname, '../..');
+const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+
+const bootstrap = read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
+const wrapper = read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
+const renderer = read('docs/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js');
+const layout = read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
+const referenceCss = read('docs/scifi-ui/styles/formatx-native-orb-reference-r250.css');
+
+for (const token of [
+  'native-mechanical-orb-r250-no-2d-mag-layers',
+  'native-mechanical-orb-r250-no-2d-overlays',
+  'single-webgl-mechanical-orb-r250',
+  'formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r250',
+  'formatx-mobile-reference-layout-v1.js?v=20260824-native-orb-r250'
+]) assert.ok(bootstrap.includes(token), `missing r250 release bootstrap contract: ${token}`);
+
+for (const token of [
+  'formatx-core-mechanical-orb-r250.js?v=20260824-native-mechanical-orb-r250',
+  'formatx-core-mobile-reference-r317.js?v=20260824-r321-native-soft-rim',
+  'native-webgl-only-no-svg-or-canvas2d-overlay',
+  'native-mechanical-orb-r250-primary'
+]) assert.ok(wrapper.includes(token), `missing r250 renderer-selection contract: ${token}`);
+
+for (const token of [
+  "getContext('webgl2'",
+  "getContext('webgl'",
+  'gl.drawElements(gl.TRIANGLES',
+  'gl.enable(gl.DEPTH_TEST)',
+  'gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)',
+  'sphere(.30',
+  'torus(.79',
+  'sphericalPanel(.72',
+  'segmented-spherical-mechanical-shell-r250',
+  'metal-plasma-orbital-r250',
+  'pointer-touch-shell-open-ring-acceleration-r250',
+  'ResizeObserver',
+  'IntersectionObserver',
+  'formatx:coreinteraction',
+  'formatx:real3dready',
+  'pointerdown',
+  'pointermove',
+  'pointerup',
+  'fxCoreRenderMs',
+  'fxCoreReal3dTargetFps',
+  '60-plus-adaptive',
+  '720000',
+  '1280000'
+]) assert.ok(renderer.includes(token), `missing native r250 engine contract: ${token}`);
+
+assert.doesNotMatch(renderer, /getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
+assert.doesNotMatch(wrapper, /formatx-quantum-particles-r335|formatx-core-mobile-softlight-r318/);
+assert.match(layout, /mobileViewport=.*max-width:900px/);
+assert.match(layout, /restoreDesktopMenu/);
+assert.match(referenceCss, /\.hero-space > \.fx-reference-controls-r204/);
+assert.match(referenceCss, /\.fx-reference-proof/);
+
+for (const source of [bootstrap, wrapper, renderer, layout]) new Function(source);
+console.log('PASS: release validates the r250 native WebGL mechanical shell, plasma core, six orbital systems, interaction and adaptive 60+ FPS contract.');

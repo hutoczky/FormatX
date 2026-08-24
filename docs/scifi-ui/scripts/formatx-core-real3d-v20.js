@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  const BOOTSTRAP = 'pure-native-webgl3d-r285-no-2d-mag-layers';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260821-r285-pure-webgl3d';
+  const BOOTSTRAP = 'native-mechanical-orb-r250-no-2d-mag-layers';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r250';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260821-r285-pure-webgl3d';
   const PURE_STYLE = '/scifi-ui/styles/formatx-pure-3d-r285.css?v=20260821-r285';
   const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260814-pixel-aspect-r80';
@@ -27,7 +27,7 @@
   const TAIL_FINALIZER_SCRIPT = '/scifi-ui/scripts/formatx-reference-finalizer-r143.js?v=20260815-tail-bridge-r143&rev=20260819-r210-geometry-cache';
   const GYRO_SCRIPT = '/scifi-ui/scripts/formatx-core-gyro-r144.js?v=20260821-r285-webgl-input-only';
   const MOBILE_HERO_STABILITY_SCRIPT = '/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js?v=20260815-r156-proof-first';
-  const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r204-proof-controls';
+  const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260824-native-orb-r250';
   const FLOW_SCRIPT = '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260816-mobile-ui-r180c';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260814-wake-safe-r98';
   const TOUCH_SCRIPT = '/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99';
@@ -35,7 +35,7 @@
 
   if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;
   root.dataset.fxCoreReal3dBootstrap = BOOTSTRAP;
-  root.dataset.fxCoreCompositionR285 = 'pure-webgl3d-no-2d-overlays';
+  root.dataset.fxCoreCompositionR285 = 'native-mechanical-orb-r250-no-2d-overlays';
 
   if (new URLSearchParams(location.search).get('lighthouse') === '1') {
     root.dataset.fxCoreReal3d = 'audit-skip';
@@ -49,7 +49,7 @@
   }
 
   root.dataset.fxCoreReal3d = 'loading-v69';
-  root.dataset.fxCoreRenderer = 'single-webgl-luminous-crystal-r99';
+  root.dataset.fxCoreRenderer = 'single-webgl-mechanical-orb-r250';
   root.dataset.fxCoreReferenceLock = 'loading-v69';
 
   function addStyle(href, attr, ready) {
@@ -75,6 +75,8 @@
       '#hero .fx-r155-heartbeat-wave',
       '#hero [class^="fx-r168-"]',
       '#hero [class*=" fx-r168-"]',
+      '#hero .fx-core-biolume-r323',
+      '#hero .fx-quantum-field-r335',
       '#hero .fx-r181-apex-meta'
     ]) {
       document.querySelectorAll(selector).forEach(node => node.remove());
@@ -212,7 +214,7 @@
     script.async = false;
     script.dataset.fxCoreMobileV55Script = 'true';
     script.addEventListener('load', () => {
-      root.dataset.fxCoreReferenceLockLoad = 'ready-v69-r285';
+      root.dataset.fxCoreReferenceLockLoad = 'ready-v69-r250';
       cleanupLegacy2d();
       addPureStyle();
     }, { once: true });
@@ -273,6 +275,6 @@
   addEventListener('formatx:real3dready', () => {
     cleanupLegacy2d();
     addPureStyle();
-    root.dataset.fxCoreCompositionR285 = 'pure-webgl3d-no-2d-overlays';
+    root.dataset.fxCoreCompositionR285 = 'native-mechanical-orb-r250-no-2d-overlays';
   }, { passive: true });
 }());

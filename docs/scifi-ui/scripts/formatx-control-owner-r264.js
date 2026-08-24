@@ -250,12 +250,12 @@
     }
     if (rail.parentElement !== controls) controls.appendChild(rail);
 
-    const owner = isMobile() ? grid : space;
+    const owner = space;
     if (controls.parentElement !== owner) owner.appendChild(controls);
 
     for (const node of [controls, rail, sound, ask, pause, ask.querySelector('span')]) clearLegacyStyle(node);
 
-    root.dataset.fxReferenceControlLayout = isMobile() ? 'r264-mobile-three-cell' : 'r264-desktop-three-cell';
+    root.dataset.fxReferenceControlLayout = isMobile() ? 'r250-mobile-reference-rail' : 'r264-desktop-three-cell';
     return sound instanceof HTMLButtonElement;
   }
 

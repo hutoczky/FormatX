@@ -225,34 +225,29 @@
 
   function applyControlLayout(nodes, mobile) {
     const size = mobile ? '50px' : '54px';
-    const gap = mobile ? '10px' : '14px';
+    const gap = mobile ? '34px' : '14px';
 
     if (mobile) {
       importantMany(nodes.controls, {
-        order: '1',
-        position: 'relative',
-        inset: 'auto',
-        top: 'auto',
-        right: 'auto',
+        position: 'absolute',
+        inset: '18px 16px auto auto',
+        top: '18px',
+        right: '16px',
         bottom: 'auto',
         left: 'auto',
-        display: 'flex',
-        'flex-direction': 'row',
-        'align-items': 'flex-start',
-        'justify-content': 'center',
-        'flex-wrap': 'nowrap',
-        width: 'calc(100% - 24px)',
-        'max-width': '680px',
+        display: 'block',
+        width: size,
+        'max-width': size,
         height: 'auto',
-        'min-height': '76px',
-        margin: '14px auto 20px',
-        padding: '0 6px 20px',
-        gap,
+        'min-height': '0',
+        margin: '0',
+        padding: '0',
         'pointer-events': 'auto',
         transform: 'none',
         translate: 'none',
         opacity: '1',
-        visibility: 'visible'
+        visibility: 'visible',
+        'z-index': '10030'
       });
     } else {
       importantMany(nodes.controls, {
@@ -288,7 +283,7 @@
       bottom: 'auto',
       left: 'auto',
       display: 'flex',
-      'flex-direction': 'row',
+      'flex-direction': mobile ? 'column' : 'row',
       'align-items': 'flex-start',
       'justify-content': 'center',
       width: 'auto',
@@ -307,7 +302,12 @@
     });
 
     if (nodes.sound instanceof HTMLElement) {
-      importantMany(nodes.sound, {
+      importantMany(nodes.sound, mobile ? {
+        display: 'none',
+        visibility: 'hidden',
+        opacity: '0',
+        'pointer-events': 'none'
+      } : {
         position: 'relative',
         inset: 'auto',
         top: 'auto',
@@ -419,7 +419,7 @@
     const detailCanvas = stage?.querySelector('.fx-core-detail-r122');
     const liveLayer = stage?.querySelector('.fx-core-live-r147-layer');
 
-    const expectedControlOwner = mobile ? grid : space;
+    const expectedControlOwner = space;
     if (nodes.controls.parentElement !== expectedControlOwner) {
       expectedControlOwner.appendChild(nodes.controls);
       geometryPass = true;

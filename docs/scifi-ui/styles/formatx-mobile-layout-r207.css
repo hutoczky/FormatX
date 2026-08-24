@@ -290,6 +290,117 @@
   }
 }
 
+/* r250 — the supplied reference is the authoritative mobile composition.
+   Controls belong to the WebGL stage, not to document flow. The long desktop
+   sales copy remains accessible but does not create a phantom mobile panel. */
+@media (max-width: 900px), (pointer: coarse) {
+  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space {
+    position: relative !important;
+    isolation: isolate !important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: 18px 16px auto auto !important;
+    z-index: 10030 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-three-sound,
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-rail {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 34px !important;
+    transform: none !important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 :is(.fx-reference-ask,.fx-reference-pause) {
+    position: relative !important;
+    inset: auto !important;
+    flex: 0 0 50px !important;
+    box-sizing: border-box !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-ask span {
+    top: 55px !important;
+    left: 50% !important;
+    width: max-content !important;
+    max-width: 84px !important;
+    transform: translateX(-50%) !important;
+    white-space: nowrap !important;
+  }
+
+  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
+    order: 99 !important;
+    position: absolute !important;
+    inset: auto !important;
+    width: 1px !important;
+    min-width: 0 !important;
+    max-width: 1px !important;
+    height: 1px !important;
+    min-height: 0 !important;
+    max-height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-heading {
+    order: 1 !important;
+    width: calc(100% - 32px) !important;
+    margin: 12px auto 22px !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-proof {
+    order: 2 !important;
+    width: calc(100% - 32px) !important;
+    margin: 0 auto 34px !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-mobile-download-r151 {
+    order: 3 !important;
+  }
+}
+
 /* r207 marker: canonical normal-flow mobile hero ownership. */
 
 /* r211 — text/control foreground ownership + page-field anti-flicker.

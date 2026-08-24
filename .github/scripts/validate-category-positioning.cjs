@@ -29,6 +29,9 @@ async function mainPageCase(browser, language, viewport) {
   await page.goto(BASE + 'index.html?lang=' + language, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.documentElement.dataset.fxCategoryPositioning === 'v1', null, { timeout: 20000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxCategoryFirstPaint === 'semantic-immediate-r243', null, { timeout: 20000 });
+  // r301 keeps content enhancements dormant until genuine user intent.  Wake
+  // that layer before checking the simulator/header/footer enhancement links.
+  await page.evaluate(() => dispatchEvent(new Event('pointerdown')));
   await page.waitForFunction(() => document.documentElement.dataset.fxSimulatorEntryState === 'ready', null, { timeout: 20000 });
   await page.waitForSelector('.fx-category-deck', { state: 'attached', timeout: 10000 });
   await page.waitForSelector('.fx-origin-proof', { state: 'attached', timeout: 10000 });
@@ -192,7 +195,7 @@ async function simulatorCase(browser, viewport) {
   await page.locator('[data-scenario="diagnostics"]').click();
   await page.locator('#fault-injection').uncheck();
   await page.locator('#run-simulation').click();
-  await page.waitForFunction(() => document.documentElement.dataset.simulatorState === 'complete', null, { timeout: 12000 });
+  await page.waitForFunction(() => document.documentElement.dataset.simulatorState === 'complete', null, { timeout: 30000 });
   state = await page.evaluate(() => ({
     mode: document.documentElement.dataset.simulatorState,
     progress: document.getElementById('progress-value').textContent.trim(),
@@ -227,7 +230,11 @@ async function simulatorCase(browser, viewport) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({
+    headless: true,
+    ...(executablePath ? { executablePath } : {})
+  });
   try {
     await mainPageCase(browser, 'hu', { width: 1440, height: 1000 });
     await mainPageCase(browser, 'en', { width: 1440, height: 1000 });

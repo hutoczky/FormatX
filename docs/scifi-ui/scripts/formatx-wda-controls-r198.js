@@ -127,7 +127,7 @@
     if (rail.parentElement !== controls) controls.appendChild(rail);
 
     const mobile = mobileViewport();
-    const owner = mobile ? grid : space;
+    const owner = space;
     if (controls.parentElement !== owner) owner.appendChild(controls);
 
     // r244 and older mobile generations may have left inline !important flex,
@@ -148,7 +148,7 @@
     if (topbar instanceof HTMLElement && mag instanceof HTMLElement && mag.parentElement !== topbar) topbar.appendChild(mag);
     if (topbar instanceof HTMLElement && menu instanceof HTMLElement && menu.parentElement !== topbar) topbar.appendChild(menu);
 
-    root.dataset.fxReferenceControlLayout = mobile ? 'r263-mobile-three-cell' : 'r263-desktop-three-cell';
+    root.dataset.fxReferenceControlLayout = mobile ? 'r250-mobile-reference-rail' : 'r263-desktop-three-cell';
     root.dataset.fxReferenceHeaderLayout = mag instanceof HTMLElement ? 'r263-fixed-no-overlap' : 'r263-header-pending';
     return true;
   }

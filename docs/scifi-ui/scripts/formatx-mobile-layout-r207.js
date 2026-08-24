@@ -48,8 +48,9 @@
     if (sound instanceof HTMLElement && sound.parentElement !== zone) zone.prepend(sound);
     if (rail instanceof HTMLElement && rail.parentElement !== zone) zone.appendChild(rail);
 
-    // hero-grid is the single physical owner. CSS/r244 owns visual order.
-    if (zone.parentElement !== grid) grid.appendChild(zone);
+    // r250: controls belong to the 3D stage. This keeps the reference rail
+    // interactive without increasing the document's mobile flow height.
+    if (zone.parentElement !== space) space.appendChild(zone);
 
     const copy = grid.querySelector(':scope > .hero-copy');
     const heading = unique('.fx-reference-heading', hero);
@@ -67,14 +68,14 @@
       [hero, grid, space, zone, rail, copy, heading, proof, live].forEach(clearLegacyInline);
     }
 
-    root.dataset.fxMobileLayoutOwner = 'r207-normal-flow';
+    root.dataset.fxMobileLayoutOwner = 'r250-reference-stage';
     root.dataset.fxMobileLayoutConflict = 'none-r207';
     root.dataset.fxMobileLayoutStability = delegated
       ? 'r255-event-driven-inline-shield-r262-delegated-r244'
       : 'r255-event-driven-inline-shield-r262-standalone';
 
     dispatchEvent(new CustomEvent('formatx:mobilelayoutready', {
-      detail: { owner: 'r207-normal-flow', geometry: delegated ? 'r244' : 'r207' }
+      detail: { owner: 'r250-reference-stage', geometry: delegated ? 'r244' : 'r250' }
     }));
     return true;
   }

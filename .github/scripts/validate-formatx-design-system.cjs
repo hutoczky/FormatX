@@ -193,7 +193,11 @@ async function inspect(browser, config, viewport) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({
+    headless: true,
+    ...(executablePath ? { executablePath } : {})
+  });
   try {
     for (const config of CASES) {
       await inspect(browser, config, { width: 1440, height: 1000 });

@@ -58,6 +58,8 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/formatx-apex-scene-stability.js',
   '/scifi-ui/scripts/formatx-apex-native.js',
   '/scifi-ui/scripts/formatx-core-real3d-v20.js',
+  '/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js',
+  '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
   '/scifi-ui/scripts/formatx-reference-lock-v30.js',
   '/scifi-ui/styles/formatx-reference-lock-v30.css',
   '/scifi-ui/scripts/formatx-three-host-safe.js',

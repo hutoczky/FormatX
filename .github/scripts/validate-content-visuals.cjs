@@ -47,7 +47,9 @@ async function injectProductionLikeContent(page) {
     '/scifi-ui/styles/formatx-mobile-unified.css',
     '/scifi-ui/styles/formatx-mobile-hero-flow.css',
     '/scifi-ui/styles/formatx-mobile-production-r5.css',
-    '/scifi-ui/styles/formatx-mobile-layout-r207.css'
+    '/scifi-ui/styles/formatx-mobile-layout-r207.css',
+    '/scifi-ui/styles/formatx-reference-production-r244.css',
+    '/scifi-ui/styles/formatx-native-orb-reference-r250.css'
   ]) {
     await page.addStyleTag({ url: origin + href });
   }
@@ -60,12 +62,15 @@ async function injectProductionLikeContent(page) {
     '/scifi-ui/scripts/formatx-platform-surface-finalizer.js',
     '/scifi-ui/scripts/formatx-organism-semantic-state.js',
     '/scifi-ui/scripts/formatx-mobile-unified.js',
-    '/scifi-ui/scripts/formatx-mobile-layout-r207.js'
+    '/scifi-ui/scripts/formatx-mobile-layout-r207.js',
+    '/scifi-ui/scripts/formatx-reference-production-r244.js',
+    '/scifi-ui/scripts/formatx-control-owner-r268.js'
   ]) {
     await page.addScriptTag({ url: origin + src });
   }
 
   await page.waitForFunction(() => document.documentElement.dataset.fxSingleLanguageToggle === 'ready', null, { timeout: 8000 });
+  await page.evaluate(() => dispatchEvent(new CustomEvent('formatx:languagechange', { detail: { source: 'visual-validator' } })));
   await page.waitForTimeout(900);
 }
 
@@ -93,9 +98,10 @@ async function waitForStableHero(page, mobile) {
       if (isMobile) {
         return visible('#hero .hero-space')
           && visible('#hero .fx-reference-controls-r204')
-          && visible('#hero .fx-reference-controls-r204 .fx-three-sound')
           && visible('#hero .fx-reference-controls-r204 .fx-reference-ask')
           && visible('#hero .fx-reference-controls-r204 .fx-reference-pause')
+          && visible('#hero .fx-reference-heading')
+          && visible('#hero .fx-reference-proof')
           && visible('#menu-toggle');
       }
       return visible('#hero-title') && visible('#hero .hero-lead') && visible('#hero-download');
@@ -175,10 +181,14 @@ async function commonAssertions(page, mobile) {
     const title = await box(page, '#hero-title');
     const lead = await box(page, '#hero .hero-lead');
     const cta = await box(page, '#hero-download');
+    const copy = await box(page, '#hero .hero-copy');
+    const space = await box(page, '#hero .hero-space', false);
     assert(title.width > 100 && title.height > 20, 'Hero title is too small');
     assert(lead.text.length > 80 && lead.height > 20, 'Hero product definition is missing');
     assert(/teljes|full|multiplatform/i.test(cta.text) && !/public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not describe the full release');
     assert(!overlap(lead, cta), 'Primary CTA overlaps hero copy');
+    if (space) assert(copy.right <= space.left + 4, 'Desktop hero copy intrudes into the native 3D stage: ' + JSON.stringify({ copy, space }));
+    assert(lead.right <= copy.right + 1 && lead.height >= 42, 'Desktop hero lead is not wrapping inside its column: ' + JSON.stringify({ lead, copy }));
   }
 
   const overflowState = await horizontalOverflowDiagnostics(page);
@@ -208,25 +218,37 @@ async function commonAssertions(page, mobile) {
     const menu = await box(page, '#menu-toggle');
     assert(menu.width >= 40 && menu.height >= 40, 'Mobile menu target is too small');
 
-    const heroCopy = await box(page, '#hero .hero-copy', false);
     const heroSpace = await box(page, '#hero .hero-space');
     const controls = await box(page, '#hero .fx-reference-controls-r204');
-    const sound = await box(page, '#hero .fx-reference-controls-r204 .fx-three-sound');
+    const sound = await box(page, '#hero .fx-reference-controls-r204 .fx-three-sound', false);
     const ask = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-ask');
     const pause = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-pause');
     const heading = await box(page, '#hero .fx-reference-heading');
+    const referenceProof = await box(page, '#hero .fx-reference-proof');
     const category = await box(page, '.fx-category-deck--standalone, .fx-category-deck');
 
-    assert(sound.width >= 44 && sound.height >= 44, 'Mobile sound target is too small: ' + JSON.stringify(sound));
+    assert(sound === null, 'Mobile reference must not show the extra sound control: ' + JSON.stringify(sound));
     assert(ask.width >= 44 && ask.height >= 44, 'Mobile ASK target is too small: ' + JSON.stringify(ask));
     assert(pause.width >= 44 && pause.height >= 44, 'Mobile pause target is too small: ' + JSON.stringify(pause));
-    assert(!overlap(sound, ask, 2), 'Mobile sound and ASK controls overlap: ' + JSON.stringify({ sound, ask, controls }));
     assert(!overlap(ask, pause, 2), 'Mobile ASK and pause controls overlap: ' + JSON.stringify({ ask, pause, controls }));
-    assert(Math.abs(sound.top - ask.top) <= 8 && Math.abs(ask.top - pause.top) <= 8, 'Mobile hero controls are not one horizontal row: ' + JSON.stringify({ sound, ask, pause, controls }));
-    assert(controls.top >= heroSpace.bottom - 2, 'Mobile hero controls must follow the MAG in normal flow: ' + JSON.stringify({ heroSpace, controls }));
-    if (heroCopy) assert(heroCopy.top >= controls.bottom - 2, 'Mobile hero copy must follow the controls: ' + JSON.stringify({ controls, heroCopy }));
-    assert(heading.top >= (heroCopy?.bottom || controls.bottom) - 2, 'Mobile proof heading must follow hero content: ' + JSON.stringify({ heroCopy, controls, heading }));
-    assert(category.top >= heading.bottom - 2, 'Mobile next section must follow the hero reference content: ' + JSON.stringify({ heading, category }));
+    assert(ask.top < pause.top, 'Mobile ASK and pause controls must form the vertical reference rail: ' + JSON.stringify({ ask, pause, controls }));
+    assert(controls.left >= heroSpace.left && controls.right <= heroSpace.right + 1, 'Mobile controls escaped the 3D stage horizontally: ' + JSON.stringify({ heroSpace, controls }));
+    assert(controls.top >= heroSpace.top && controls.bottom <= heroSpace.bottom + 1, 'Mobile controls escaped the 3D stage vertically: ' + JSON.stringify({ heroSpace, controls }));
+    const ownership = await page.locator('#hero .fx-reference-controls-r204').evaluate(node => node.parentElement?.classList.contains('hero-space'));
+    assert(ownership, 'Mobile controls are not owned by the native 3D stage');
+    const heroCopyState = await page.locator('#hero .hero-copy').evaluate(element => {
+      const style = getComputedStyle(element), rect = element.getBoundingClientRect();
+      return { width: rect.width, height: rect.height, clipPath: style.clipPath, overflow: style.overflow };
+    });
+    assert(heroCopyState.width <= 1.5 && heroCopyState.height <= 1.5 && heroCopyState.overflow === 'hidden', 'Mobile legacy hero copy still creates a blank region: ' + JSON.stringify(heroCopyState));
+    assert(heading.top >= heroSpace.bottom - 2, 'Mobile proof heading must directly follow the 3D stage: ' + JSON.stringify({ heroSpace, heading }));
+    assert(referenceProof.top >= heading.bottom - 2, 'Mobile proof card overlaps its heading: ' + JSON.stringify({ heading, referenceProof }));
+    assert(category.top >= referenceProof.bottom - 2, 'Mobile next section must follow the proof card: ' + JSON.stringify({ referenceProof, category }));
+    const proofText = await page.locator('#hero .fx-reference-proof p').evaluate(element => {
+      const rect = element.getBoundingClientRect(), parent = element.parentElement.getBoundingClientRect();
+      return { right: rect.right, parentRight: parent.right, height: rect.height, scrollWidth: element.scrollWidth, clientWidth: element.clientWidth };
+    });
+    assert(proofText.right <= proofText.parentRight + 1 && proofText.scrollWidth <= proofText.clientWidth + 1 && proofText.height >= 60, 'Mobile proof text does not wrap inside the card: ' + JSON.stringify(proofText));
 
     const proofGrid = page.locator('.fx-award-proof__grid').first();
     if (await proofGrid.count()) {
@@ -310,7 +332,8 @@ async function publicPage(browser, name, pathname, selector, viewport = { width:
 
 (async () => {
   await fs.mkdir(out, { recursive: true });
-  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'], ...(executablePath ? { executablePath } : {}) });
   const english = new URL(base);
   english.searchParams.set('lang', 'en');
   try {

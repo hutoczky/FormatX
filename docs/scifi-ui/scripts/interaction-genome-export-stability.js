@@ -51,7 +51,7 @@
     if (!matchMedia('(max-width: 900px), (pointer: coarse)').matches) return;
 
     const canonicalOwner = root.dataset.fxMobileLayoutOwner === 'r207-normal-flow'
-      || root.dataset.fxMobileProofControls === 'r260-r207-grid-owner'
+      || root.dataset.fxMobileProofControls === 'r250-reference-stage-owner'
       || document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement;
 
     // r260: when the canonical hero owner exists, this legacy public-state layer

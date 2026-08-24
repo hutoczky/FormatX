@@ -1,0 +1,139 @@
+/* FormatX r250 — authoritative supplied-reference composition.
+   Loaded last by the canonical control owner so legacy grid geometry cannot
+   move the controls out of the native WebGL stage. */
+html:root:root body.living-architecture .topbar .fx-language-toggle {
+  font-size: 10px !important;
+  line-height: 1 !important;
+  letter-spacing: .05em !important;
+}
+
+html:root:root body.living-architecture .topbar .fx-language-toggle::before {
+  display: none !important;
+  content: none !important;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-space {
+    position: relative !important;
+    isolation: isolate !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: 18px 16px auto auto !important;
+    z-index: 12040 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    grid-template: none !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    translate: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 > .fx-three-sound {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 > .fx-reference-rail {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 34px !important;
+    overflow: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 :is(.fx-reference-ask,.fx-reference-pause) {
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    place-items: center !important;
+    flex: 0 0 50px !important;
+    box-sizing: border-box !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-ask span {
+    top: 55px !important;
+    left: 50% !important;
+    width: max-content !important;
+    max-width: 84px !important;
+    transform: translateX(-50%) !important;
+    white-space: nowrap !important;
+  }
+
+  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content #hero > .hero-grid > .hero-copy {
+    order: 99 !important;
+    position: absolute !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    width: 1px !important;
+    min-width: 0 !important;
+    max-width: 1px !important;
+    height: 1px !important;
+    min-height: 0 !important;
+    max-height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+  }
+
+  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-reference-heading {
+    order: 1 !important;
+    margin-top: 12px !important;
+  }
+
+  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-reference-proof {
+    order: 2 !important;
+  }
+
+  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-mobile-download-r151 {
+    order: 3 !important;
+  }
+}
+
+@media (max-width: 370px) {
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+    right: 10px !important;
+  }
+}

@@ -115,6 +115,8 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/scripts/formatx-premium-finish.js',
   '/scifi-ui/scripts/formatx-event-horizon.js',
   '/scifi-ui/scripts/formatx-core-real3d-v20.js',
+  '/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js',
+  '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
   '/scifi-ui/scripts/formatx-core-v51.js',
   '/scifi-ui/styles/formatx-core-v51.css',
   '/scifi-ui/scripts/formatx-core-mobile-compat-v52.js',

@@ -78,12 +78,12 @@ async function runCase(browser, { width, height, language }) {
   assert.deepEqual(runtimeErrors, [], `runtime errors: ${runtimeErrors.join(' | ')}`);
   assert.equal(state.lang, language, `language mismatch: ${JSON.stringify(state)}`);
   assert.equal(state.categoryRuntime, 'v1', `category runtime missing: ${JSON.stringify(state)}`);
-  assert.match(
+  assert.equal(
     state.contentGate,
-    /^(?:reduced-motion-semantic-(?:r243|r265|r273|r274|r283)|requested-(?:r243|r265|r273|r274|r283))$/,
-    `semantic gate did not hydrate before interaction: ${JSON.stringify(state)}`,
+    'armed-r301-user-intent',
+    `semantic enhancement gate was not dormant before interaction: ${JSON.stringify(state)}`,
   );
-  assert.ok(['ready', 'loading'].includes(state.stability), `r283 stability guard missing: ${JSON.stringify(state)}`);
+  assert.equal(state.stability, 'critical-only-r300', `critical first-frame stability marker missing: ${JSON.stringify(state)}`);
   assert.ok(state.deckTitle.length > 0, `empty category title: ${JSON.stringify(state)}`);
   assert.equal(state.deckCards, 4, `category cards missing: ${JSON.stringify(state)}`);
   assert.ok(state.proofTitle.length > 0, `proof title missing: ${JSON.stringify(state)}`);
@@ -127,7 +127,11 @@ async function recoveryCase(browser, language) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({
+    headless: true,
+    ...(executablePath ? { executablePath } : {})
+  });
   try {
     await runCase(browser, { width: 1440, height: 900, language: 'hu' });
     await runCase(browser, { width: 1440, height: 900, language: 'en' });
