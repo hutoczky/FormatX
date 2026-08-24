@@ -1,4 +1,4 @@
-/* FormatX r285 — pure 3D MAG contract.
+/* FormatX r304 — pure 3D MAG contract with restrained mobile optics.
    The MAG body is rendered only by the native WebGL mesh canvas. Legacy
    bitmap/canvas overlays, CSS pseudo optics, DOM rings, flares, caustics and
    decorative carrier layers are forbidden inside the MAG visual host. */
@@ -79,4 +79,27 @@ html:root:root body.living-architecture #hero .fx-organism-map {
   background-image: none !important;
   box-shadow: none !important;
   filter: none !important;
+}
+
+/* r304 mobile optical restraint.
+   Keep the native WebGL crystal and geometry intact, but reduce the perceived
+   cyan/violet spill and lower perimeter contrast. A sub-pixel blur only softens
+   the harsh raster edge; it is intentionally tiny so the MAG does not become
+   foggy or grow visually beyond its current footprint. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r112-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r120-canvas {
+    opacity: .94 !important;
+    filter: blur(.16px) saturate(.92) brightness(.94) contrast(.91) !important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r112-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r120-canvas {
+    opacity: .92 !important;
+    filter: blur(.18px) saturate(.90) brightness(.93) contrast(.89) !important;
+  }
 }
