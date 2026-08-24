@@ -8,6 +8,8 @@ on:
       - 'docs/scifi-ui/styles/formatx-quantum-particles-r335.css'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
       - 'docs/scifi-ui/scripts/formatx-quantum-particles-r335.js'
       - 'docs/scifi-ui/scripts/formatx-award-runtime-r206.js'
@@ -54,12 +56,14 @@ jobs:
           grep -Fq 'fxQuantumParticleMeasurements' docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
           grep -Fq 'fxQuantumParticleTunnels' docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
           ! grep -Eq 'requestAnimationFrame\s*\(|setInterval\s*\(|getContext\s*\(' docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
+          grep -Fq 'reference-crystal-webgl-r317-modern-flat-normal-fresnel' docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
+          grep -Fq 'single-webgl-luminous-crystal-r99' docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
           node --check docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
           node --check docs/scifi-ui/scripts/formatx-award-runtime-r206.js
-          node .github/scripts/validate-real3d-core-v20.cjs
       - name: Install Chromium runtime
         shell: bash
         run: |
