@@ -2,13 +2,13 @@
 'use strict';
 
 const root=document.documentElement;
-const VERSION='r320-explicit-architecture-no-core-hitlayer';
+const VERSION='r325-inert-hidden-architecture';
 if(root.dataset.fxSignatureSystem===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
   root.dataset.fxSignatureSystem='audit-skip';
   return;
 }
-root.dataset.fxSignatureSystem='booting-r320';
+root.dataset.fxSignatureSystem='booting-r325';
 root.dataset.fxSignatureSchedulerR277='event-driven-no-idle-scan';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -71,6 +71,13 @@ function setText(){
   if(closeButton)closeButton.setAttribute('aria-label',t('Rendszerarchitektúra bezárása','Close system architecture'));
 }
 
+function setOverlayInteractive(next){
+  if(!(overlay instanceof HTMLElement))return;
+  overlay.setAttribute('aria-hidden',String(!next));
+  if(next)overlay.removeAttribute('inert');
+  else overlay.setAttribute('inert','');
+}
+
 function buildOverlay(){
   document.querySelectorAll('.fx-signature-architecture').forEach(node=>node.remove());
   overlay=document.createElement('div');
@@ -79,6 +86,7 @@ function buildOverlay(){
   overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label','FormatX system architecture');
   overlay.setAttribute('aria-hidden','true');
+  overlay.setAttribute('inert','');
   overlay.innerHTML='<div class="fx-signature-caption"><strong></strong><span></span></div><button class="fx-signature-close" type="button">×</button><div class="fx-signature-map"><i class="fx-signature-map-core" aria-hidden="true"></i></div>';
   const map=overlay.querySelector('.fx-signature-map');
   closeButton=overlay.querySelector('.fx-signature-close');
@@ -146,7 +154,7 @@ function premiumSections(){
 
 function pulseCore(){
   try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}
-  try{dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{x:0,y:0,energy:1.08,source:'signature-explicit-r320'}}))}catch(_){}
+  try{dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{x:0,y:0,energy:1.08,source:'signature-explicit-r325'}}))}catch(_){}
 }
 
 function openArchitecture(source='explicit-api'){
@@ -154,9 +162,9 @@ function openArchitecture(source='explicit-api'){
   open=true;
   lastFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
   root.classList.add('fx-signature-open');
-  root.dataset.fxSignatureMoment='unfolded-explicit-r320';
+  root.dataset.fxSignatureMoment='unfolded-explicit-r325';
   root.dataset.fxSignatureOpenSource=String(source).slice(0,64);
-  overlay.setAttribute('aria-hidden','false');
+  setOverlayInteractive(true);
   pulseCore();
   updateCurrentScene();
   setTimeout(()=>closeButton?.focus({preventScroll:true}),reduced.matches?0:120);
@@ -169,7 +177,7 @@ function closeArchitecture(returnFocus=true){
   open=false;
   root.classList.remove('fx-signature-open');
   root.dataset.fxSignatureMoment='core';
-  overlay?.setAttribute('aria-hidden','true');
+  setOverlayInteractive(false);
   pulseCore();
   if(returnFocus&&lastFocus?.isConnected)setTimeout(()=>lastFocus.focus({preventScroll:true}),reduced.matches?0:80);
   dispatchEvent(new CustomEvent('formatx:signatureunfold',{detail:{open:false,version:VERSION}}));
@@ -242,9 +250,9 @@ function boot(){
   });
 
   root.dataset.fxSignatureSystem=VERSION;
-  root.dataset.fxSignatureUsability='explicit-disclosure-focus-reduced-motion-r320';
-  root.dataset.fxSignatureCsp='external-css-no-inline-style-r320';
-  dispatchEvent(new CustomEvent('formatx:signatureready',{detail:{version:VERSION,trigger:'explicit-only'}}));
+  root.dataset.fxSignatureUsability='explicit-disclosure-focus-inert-r325';
+  root.dataset.fxSignatureCsp='external-css-no-inline-style-r325';
+  dispatchEvent(new CustomEvent('formatx:signatureready',{detail:{version:VERSION,trigger:'explicit-only',hiddenInert:true}}));
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
