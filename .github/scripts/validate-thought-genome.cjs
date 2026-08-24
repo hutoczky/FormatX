@@ -93,8 +93,23 @@ async function verify(viewport, mobile) {
 
       window.__fxThoughtGenomeEvents = [];
       window.__fxOrganismShapeEvents = [];
+      window.__fxCspViolations = [];
       addEventListener('formatx:thoughtgenome', event => window.__fxThoughtGenomeEvents.push(event.detail));
       addEventListener('formatx:organismshape', event => window.__fxOrganismShapeEvents.push(event.detail));
+      document.addEventListener('securitypolicyviolation', event => {
+        window.__fxCspViolations.push({
+          blockedURI: event.blockedURI || '',
+          columnNumber: event.columnNumber || 0,
+          disposition: event.disposition || '',
+          documentURI: event.documentURI || '',
+          effectiveDirective: event.effectiveDirective || '',
+          lineNumber: event.lineNumber || 0,
+          sample: event.sample || '',
+          sourceFile: event.sourceFile || '',
+          statusCode: event.statusCode || 0,
+          violatedDirective: event.violatedDirective || ''
+        });
+      });
     });
 
     const page = await context.newPage();
@@ -232,10 +247,11 @@ async function verify(viewport, mobile) {
     });
 
     const finalOverflow = layout.overflow > 1 ? await overflowDiagnostics(page) : null;
+    const cspViolations = await page.evaluate(() => Array.isArray(window.__fxCspViolations) ? window.__fxCspViolations : []);
     assert(layout.controlsInside, 'genome controls escape the thought dialogue');
     assert(layout.overflow <= 1, `genome controls introduced horizontal overflow (${mobile ? 'mobile' : 'desktop'}): ${JSON.stringify(finalOverflow)}`);
     assert(layout.history.length === 1, 'disabling the genome unexpectedly destroyed local fingerprint history');
-    assert(!errors.length, 'browser diagnostics: ' + errors.join(' | '));
+    assert(!errors.length, 'browser diagnostics: ' + errors.join(' | ') + ' | CSP=' + JSON.stringify(cspViolations));
     await context.close();
   } finally {
     await browser.close();
