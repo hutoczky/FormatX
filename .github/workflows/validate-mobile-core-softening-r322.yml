@@ -1,4 +1,4 @@
-name: Validate mobile MAG optics r344
+name: Validate mobile MAG optics r348
 on:
   push:
     branches: [master]
@@ -25,24 +25,23 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Validate r344 source contract
+      - name: Validate r348 source contract
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'r344-restrained-bloom-soft-edge' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
-          grep -Fq "r344-restrained-bloom-soft-edge-owner" docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
-          grep -Fq 'FormatX r344' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'opacity: .69' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'brightness(.62)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'contrast(.75)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'saturate(.80)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'blur(1.32px)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'opacity: .64' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'brightness(.58)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'contrast(.72)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'saturate(.77)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'blur(1.52px)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'r337-capture-touch' docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          grep -Fq 'r348-balanced-soft-glass-edge' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          grep -Fq 'r348-balanced-soft-glass-edge-owner' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          grep -Fq 'FormatX r348' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'opacity: .65' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'brightness(.57)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'contrast(.70)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'saturate(.76)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'blur(1.55px)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'opacity: .60' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'brightness(.53)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'contrast(.68)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'saturate(.73)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'blur(1.78px)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
           grep -Fq 'event-driven-no-idle-raf' docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
           grep -Fq 'capture-pointer-touch-deduplicated' docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
           ! grep -Eq 'requestAnimationFrame\s*\(|setInterval\s*\(|getContext\s*\(' docs/scifi-ui/scripts/formatx-quantum-particles-r335.js
@@ -56,17 +55,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/r344-optics" && cd "$RUNNER_TEMP/r344-optics"
+          mkdir -p "$RUNNER_TEMP/r348-optics" && cd "$RUNNER_TEMP/r348-optics"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify effective r344 optics and touch interaction
+      - name: Verify effective r348 optics and touch interaction
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r344-http.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r348-http.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/r344-optics"
+          cd "$RUNNER_TEMP/r348-optics"
           node <<'NODE'
           const assert=require('node:assert/strict');
           const {chromium}=require('playwright');
@@ -78,7 +77,7 @@ jobs:
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForFunction(()=>{
               const d=document.documentElement.dataset;
-              return d.fxCoreMobileOpticsR328==='r344-restrained-bloom-soft-edge-owner'
+              return d.fxCoreMobileOpticsR328==='r348-balanced-soft-glass-edge-owner'
                 && d.fxQuantumParticlesR335==='ready'
                 && d.fxQuantumParticleInput==='capture-pointer-touch-deduplicated'
                 && document.querySelector('.fx-core-r317-canvas')
@@ -104,15 +103,15 @@ jobs:
                 quantumInput:document.documentElement.dataset.fxQuantumParticleInput||''
               };
             });
-            console.log('R344_EFFECTIVE_MOBILE_OPTICS',JSON.stringify(state));
-            assert.equal(state.marker,'r344-restrained-bloom-soft-edge-owner');
-            assert.match(state.href,/r344-restrained-bloom-soft-edge/);
-            assert.ok(state.opacity>=0.63&&state.opacity<=0.65,JSON.stringify(state));
-            assert.match(state.filter,/brightness\(0\.58\)/);
-            assert.match(state.filter,/contrast\(0\.72\)/);
-            assert.match(state.filter,/saturate\(0\.77\)/);
-            assert.match(state.filter,/blur\(1\.52px\)/);
-            assert.ok(state.rimOpacity<=0.017,JSON.stringify(state));
+            console.log('R348_EFFECTIVE_MOBILE_OPTICS',JSON.stringify(state));
+            assert.equal(state.marker,'r348-balanced-soft-glass-edge-owner');
+            assert.match(state.href,/r348-balanced-soft-glass-edge/);
+            assert.ok(state.opacity>=0.59&&state.opacity<=0.61,JSON.stringify(state));
+            assert.match(state.filter,/brightness\(0\.53\)/);
+            assert.match(state.filter,/contrast\(0\.68\)/);
+            assert.match(state.filter,/saturate\(0\.73\)/);
+            assert.match(state.filter,/blur\(1\.78px\)/);
+            assert.ok(state.rimOpacity<=0.011,JSON.stringify(state));
             assert.ok(state.haloOpacity<=0.004,JSON.stringify(state));
             assert.equal(state.quantumCount,24);
             assert.equal(state.quantumInput,'capture-pointer-touch-deduplicated');
@@ -126,21 +125,21 @@ jobs:
 
             try {
               await page.addStyleTag({content:'*{animation-play-state:paused!important}'});
-              await page.screenshot({path:'mobile-r344.png',fullPage:false,animations:'disabled',timeout:8000});
+              await page.screenshot({path:'mobile-r348.png',fullPage:false,animations:'disabled',timeout:8000});
             } catch (error) {
-              console.log('R344_SCREENSHOT_OPTIONAL',String(error.message||error));
+              console.log('R348_SCREENSHOT_OPTIONAL',String(error.message||error));
             }
             await ctx.close();
             await browser.close();
-            console.log('PASS: r344 restrained mobile MAG optics and touch interaction validated.');
+            console.log('PASS: r348 balanced mobile MAG bloom, soft glass edge and touch interaction validated.');
           })().catch(error=>{console.error(error);process.exit(1)});
           NODE
       - name: Upload mobile optical proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: formatx-mobile-core-r344
-          path: ${{ runner.temp }}/r344-optics/mobile-r344.png
+          name: formatx-mobile-core-r348
+          path: ${{ runner.temp }}/r348-optics/mobile-r348.png
           if-no-files-found: ignore
           retention-days: 14
       - name: Publish mobile optics status
@@ -150,5 +149,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r344 restrained MAG bloom, soft edge and touch passed'; else state=failure; description='r344 mobile MAG optics validation failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r348 balanced MAG bloom, soft glass edge and touch passed'; else state=failure; description='r348 mobile MAG optics validation failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile core optics' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
