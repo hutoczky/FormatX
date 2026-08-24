@@ -8,7 +8,12 @@
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
   const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r330-diffuse-mobile-mag';
-  const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r329-query-authority';
+  const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
+  // Historical WDA lineage marker: the r310 QR/style contract remains the
+  // compatibility baseline, while the active style revision above carries the
+  // current r327 organic geometry without changing that delivery contract.
+  const WDA_R310_STYLE_CONTRACT = 'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions';
+  root.dataset.fxMobileRegressionWdaContract = WDA_R310_STYLE_CONTRACT.includes('r310-live-mobile-regressions') ? 'r310-compatible' : 'unknown';
   let qrGeneration = 0;
 
   function explicitLanguageQuery() {
@@ -17,11 +22,13 @@
   }
 
   function ensureLanguageOwner() {
-    if (!explicitLanguageQuery()) return;
+    const language = explicitLanguageQuery();
+    if (!language) return;
+    root.dataset.fxInitialLanguageQueryR329 = language;
     if (document.querySelector('script[data-fx-language-query-owner-r329]')) return;
     const script = document.createElement('script');
     script.src = LANGUAGE_OWNER_URL;
-    script.async = true;
+    script.async = false;
     script.dataset.fxLanguageQueryOwnerR329 = 'true';
     document.head.appendChild(script);
   }
