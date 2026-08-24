@@ -7,7 +7,7 @@
 
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
-  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r328-soft-mobile-mag';
+  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r330-diffuse-mobile-mag';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r329-query-authority';
   let qrGeneration = 0;
 
@@ -71,8 +71,8 @@
   function ensureOpticsStyle() {
     const existing = document.querySelector('link[data-fx-mobile-core-optics-r328]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r328-soft-mobile-mag')) existing.href = OPTICS_STYLE_URL;
-      root.dataset.fxCoreMobileOpticsR328 = 'soft-short-bloom';
+      if (!existing.href.includes('r330-diffuse-mobile-mag')) existing.href = OPTICS_STYLE_URL;
+      root.dataset.fxCoreMobileOpticsR328 = 'r330-diffuse-short-bloom';
       return;
     }
     const link = document.createElement('link');
@@ -80,7 +80,7 @@
     link.href = OPTICS_STYLE_URL;
     link.dataset.fxMobileCoreOpticsR328 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxCoreMobileOpticsR328 = 'soft-short-bloom';
+    root.dataset.fxCoreMobileOpticsR328 = 'r330-diffuse-short-bloom';
   }
 
   function selectedCurrency() {
