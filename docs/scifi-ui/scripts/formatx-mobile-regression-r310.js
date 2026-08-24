@@ -7,7 +7,7 @@
 
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
-  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r336-effective-soft-mobile-mag';
+  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r336-effective-soft-mobile-mag-r338-mobile-flare-edge-veil';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
   // Historical WDA lineage marker: the r310 QR/style contract remains the
   // compatibility baseline, while the active style revision above carries the
@@ -78,7 +78,7 @@
   function ensureOpticsStyle() {
     const existing = document.querySelector('link[data-fx-mobile-core-optics-r328]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r336-effective-soft-mobile-mag')) existing.href = OPTICS_STYLE_URL;
+      if (!existing.href.includes('r338-mobile-flare-edge-veil')) existing.href = OPTICS_STYLE_URL;
       root.dataset.fxCoreMobileOpticsR328 = 'r336-effective-soft-edge-owner';
       return;
     }
