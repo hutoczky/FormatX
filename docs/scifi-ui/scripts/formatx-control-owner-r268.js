@@ -3,6 +3,7 @@
 
 const root=document.documentElement;
 const REFERENCE_STYLE='/scifi-ui/styles/formatx-native-orb-reference-r250.css?v=20260824-native-orb-r250';
+const SHAPESHIFTER_URL='/scifi-ui/scripts/formatx-core-shapeshifter-r337.js?v=20260825-r337-shapeshifter';
 if(root.dataset.fxControlOwnerR268==='ready')return;
 root.dataset.fxControlOwnerR268='booting';
 root.dataset.fxControlOwnerR264='booting';
@@ -30,6 +31,14 @@ function ensureReferenceStyle(){
   }
   if(link.parentElement!==document.head||link!==document.head.lastElementChild)document.head.appendChild(link);
   root.dataset.fxNativeOrbReferenceStyleR250='ready';
+}
+function ensureShapeshifter(){
+  if(root.dataset.fxCoreShapeshifterR337==='ready'||document.querySelector('script[data-fx-core-shapeshifter-r337]'))return;
+  const script=document.createElement('script');
+  script.src=SHAPESHIFTER_URL;
+  script.async=true;
+  script.dataset.fxCoreShapeshifterR337='true';
+  document.head.appendChild(script);
 }
 
 function stripInline(node){
@@ -127,13 +136,16 @@ function canonicalHeader(hero){
   mag.classList.add('fx-control-owner-r264');
   const magText=language()==='en'?'CORE':'MAG';
   if(mag.textContent!==magText)mag.textContent=magText;
-  mag.setAttribute('aria-label',language()==='en'?'Focus the living core':'Az élő mag fókuszálása');
+  mag.setAttribute('aria-label',language()==='en'?'Change the living core shape':'Az élő MAG alakjának váltása');
   mag.hidden=false;mag.removeAttribute('aria-hidden');stripInline(mag);
   if(mag.parentElement!==topbar)topbar.appendChild(mag);
   if(mag.dataset.fxControlMagBoundR268!=='true'){
     mag.dataset.fxControlMagBoundR268='true';
     mag.addEventListener('click',()=>{
-      hero.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+      if(typeof window.FormatXCoreShapeR337?.next==='function'){
+        window.FormatXCoreShapeR337.next();
+        return;
+      }
       window.FormatXCoreMobileV69?.pulse?.();
     });
   }
@@ -259,6 +271,7 @@ function reconcile(force=false){
   queued=false;if(applying)return false;
   const hero=document.getElementById('hero');if(!(hero instanceof HTMLElement))return false;
   ensureReferenceStyle();
+  ensureShapeshifter();
   const mobile=isMobile();
   if(!force&&root.dataset.fxControlOwnerR268==='ready'&&mobile===lastMobile&&healthy(hero,mobile)){
     retireLegacyMenus();
@@ -274,7 +287,7 @@ function reconcile(force=false){
       bindControlObserver(hero);
       bootObserver?.disconnect();bootObserver=null;
       if(bootTimer)clearTimeout(bootTimer);bootTimer=0;
-      dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r321'}}));
+      dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r337'}}));
       return true;
     }
     return false;
@@ -285,6 +298,7 @@ function schedule(force=false){
   requestAnimationFrame(()=>reconcile(force));
 }
 function boot(){
+  ensureShapeshifter();
   bindAudioObserver();
   if(reconcile(true))return;
   if(bootObserver)return;
