@@ -4,7 +4,7 @@
   const root = document.documentElement;
   const VERSION = 'heart-core-r252';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260825-r252';
+  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260825-r252-controls';
   const LOOP_OVERSHOOT = 28;
   let touchActive = false;
   let idleTimer = 0;
@@ -119,16 +119,27 @@
     return true;
   }
 
+  function pruneMobileReferenceMirror() {
+    if (!MOBILE_QUERY.matches) return;
+    const bridge = document.querySelector('.fx-loop-bridge');
+    if (!(bridge instanceof HTMLElement)) return;
+    bridge.dataset.fxHeartLoopR252 = 'true';
+    bridge.querySelectorAll(':scope > .fx-loop-reference-mirror, :scope > [data-fx-loop-mirror]').forEach(node => node.remove());
+    root.dataset.fxLoopMirrorMode = 'none-mobile-r252';
+  }
+
   function scheduleBinding() {
     if (bindingFrame) return;
     bindingFrame = requestAnimationFrame(() => {
       bindingFrame = 0;
       installHeartHitTarget();
+      pruneMobileReferenceMirror();
     });
   }
 
   function mobileLoopBoundary() {
     if (!MOBILE_QUERY.matches) return null;
+    pruneMobileReferenceMirror();
     const footer = document.querySelector('body > .site-footer');
     const bridge = document.querySelector('.fx-loop-bridge');
     const hero = document.querySelector('#main-content > #hero');
@@ -151,9 +162,15 @@
     if (!boundary || boundary.overshoot < LOOP_OVERSHOOT) return false;
 
     const target = Math.max(0, boundary.hero.offsetTop);
+    const nextLoopCount = Number(root.dataset.fxLoopCount || 0) + 1;
     root.classList.add('fx-seamless-loop-transfer');
     root.dataset.fxHeartLoopTransfer = source;
     root.dataset.fxInfiniteInput = 'heart-core-transfer';
+    root.dataset.fxLoopCount = String(nextLoopCount);
+    root.dataset.fxLoopSource = `heart-core-${source}`;
+    root.dataset.fxLoopLanding = String(Math.round(target));
+    root.dataset.fxLoopLandingState = 'heart-core-stabilising';
+
     window.scrollTo({ top: target, left: 0, behavior: 'auto' });
     requestAnimationFrame(() => {
       window.scrollTo({ top: target, left: 0, behavior: 'auto' });
@@ -163,7 +180,7 @@
         root.dataset.fxLoopLandingState = 'heart-core-settled';
         window.FormatXCoreMobileV69?.pulse?.({ phase: 'loop-return', source });
         dispatchEvent(new CustomEvent('formatx:loop', {
-          detail: { source: `heart-core-${source}`, relative: 0, revision: VERSION }
+          detail: { count: nextLoopCount, source: `heart-core-${source}`, relative: 0, revision: VERSION }
         }));
       });
     });
@@ -193,6 +210,7 @@
     root.dataset.fxHeartCoreR252 = 'ready';
     root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
     installHeartHitTarget();
+    pruneMobileReferenceMirror();
 
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('scrollend', () => transferToRealCore('scrollend'), { passive: true });
@@ -205,6 +223,7 @@
       'formatx:controlownerready',
       'formatx:mobilelayoutready',
       'formatx:languagechange',
+      'formatx:loopgeometryrefresh',
       'pageshow'
     ]) addEventListener(eventName, scheduleBinding, { passive: true });
 
@@ -212,7 +231,7 @@
     observer.observe(document.body, { childList: true, subtree: true });
     setTimeout(() => observer.disconnect(), 6500);
 
-    for (const delay of [120, 420, 1100, 2600]) setTimeout(scheduleBinding, delay);
+    for (const delay of [0, 80, 220, 520, 1100, 2600]) setTimeout(scheduleBinding, delay);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
