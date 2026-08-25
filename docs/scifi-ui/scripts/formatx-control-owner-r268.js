@@ -28,9 +28,11 @@ function ensureReferenceStyle(){
     link.rel='stylesheet';
     link.href=REFERENCE_STYLE;
     link.dataset.fxNativeOrbReferenceR250='true';
+    document.head.appendChild(link);
+  }else if(link.parentElement!==document.head){
+    document.head.appendChild(link);
   }
-  if(link.parentElement!==document.head||link!==document.head.lastElementChild)document.head.appendChild(link);
-  root.dataset.fxNativeOrbReferenceStyleR250='ready';
+  root.dataset.fxNativeOrbReferenceStyleR250='ready-static-order-r340';
 }
 function ensureShapeshifter(){
   if(root.dataset.fxCoreShapeshifterR337==='ready'||document.querySelector('script[data-fx-core-shapeshifter-r337]'))return;
@@ -260,23 +262,25 @@ function bindControlObserver(hero){
 }
 function bindAudioObserver(){
   if(audioObserver)return;
-  audioObserver=new MutationObserver(()=>schedule(true));
+  audioObserver=new MutationObserver(records=>{
+    if(records.some(record=>record.attributeName==='data-fx-audio-owner'||record.attributeName==='data-fx-audio-state'))schedule(true);
+  });
   audioObserver.observe(root,{
     attributes:true,
-    attributeFilter:['data-fx-audio-owner','data-fx-audio-state','data-fx-audio-level']
+    attributeFilter:['data-fx-audio-owner','data-fx-audio-state']
   });
-  root.dataset.fxAudioControlHandoffR321='observed';
+  root.dataset.fxAudioControlHandoffR321='state-only-no-level-feedback-r340';
 }
 function reconcile(force=false){
   queued=false;if(applying)return false;
   const hero=document.getElementById('hero');if(!(hero instanceof HTMLElement))return false;
-  ensureReferenceStyle();
-  ensureShapeshifter();
   const mobile=isMobile();
   if(!force&&root.dataset.fxControlOwnerR268==='ready'&&mobile===lastMobile&&healthy(hero,mobile)){
     retireLegacyMenus();
     return true;
   }
+  ensureReferenceStyle();
+  ensureShapeshifter();
   applying=true;
   try{
     const headerReady=canonicalHeader(hero),controlsReady=canonicalControls(hero);
@@ -287,7 +291,7 @@ function reconcile(force=false){
       bindControlObserver(hero);
       bootObserver?.disconnect();bootObserver=null;
       if(bootTimer)clearTimeout(bootTimer);bootTimer=0;
-      dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r337'}}));
+      dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r340'}}));
       return true;
     }
     return false;
@@ -329,6 +333,8 @@ for(const eventName of ['formatx:languagechange','formatx:real3dready','formatx:
 addEventListener('formatx:immersiveactivate',()=>schedule(true),{passive:true});
 addEventListener('resize',()=>schedule(true),{passive:true});
 addEventListener('orientationchange',()=>schedule(true),{passive:true});
-for(const delay of [250,900,2200,5000])setTimeout(()=>schedule(true),delay);
+for(const delay of [250,900,2200,5000])setTimeout(()=>{
+  if(root.dataset.fxControlOwnerR268!=='ready')schedule(true);
+},delay);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 }());
