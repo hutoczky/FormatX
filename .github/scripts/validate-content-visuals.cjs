@@ -38,8 +38,8 @@ async function box(page, selector, required = true) {
 }
 
 async function injectProductionLikeContent(page) {
-  // Keep this order aligned with the production Worker. r320/r348 is the final
-  // mobile control geometry owner after the legacy r250 reference layer.
+  // Keep this order aligned with the production Worker. r320/r348 remains the
+  // final interaction owner; r355 now gives r250 the same geometry before FCP.
   for (const href of [
     '/scifi-ui/styles/formatx-content-standard.css',
     '/scifi-ui/styles/formatx-mobile-readability.css',
@@ -101,6 +101,8 @@ async function waitForStableHero(page, mobile) {
           && visible('#hero .fx-reference-controls-r204 .fx-three-sound')
           && visible('#hero .fx-reference-controls-r204 .fx-reference-ask')
           && visible('#hero .fx-reference-controls-r204 .fx-reference-pause')
+          && visible('#hero .hero-copy')
+          && visible('#hero .hero-lead')
           && visible('#hero .fx-reference-heading')
           && visible('#hero .fx-reference-proof')
           && visible('#menu-toggle');
@@ -134,9 +136,10 @@ async function waitForStableHero(page, mobile) {
         '#hero .fx-reference-controls-r204 .fx-three-sound',
         '#hero .fx-reference-controls-r204 .fx-reference-ask',
         '#hero .fx-reference-controls-r204 .fx-reference-pause',
+        '#hero .hero-copy',
+        '#hero .hero-lead',
         '#menu-toggle',
         '#hero-title',
-        '#hero .hero-lead',
         '#hero-download'
       ].map(inspect);
     });
@@ -224,6 +227,8 @@ async function commonAssertions(page, mobile) {
     const sound = await box(page, '#hero .fx-reference-controls-r204 .fx-three-sound');
     const ask = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-ask');
     const pause = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-pause');
+    const heroCopy = await box(page, '#hero .hero-copy');
+    const heroLead = await box(page, '#hero .hero-lead');
     const heading = await box(page, '#hero .fx-reference-heading');
     const referenceProof = await box(page, '#hero .fx-reference-proof');
     const category = await box(page, '.fx-category-deck--standalone, .fx-category-deck');
@@ -241,17 +246,29 @@ async function commonAssertions(page, mobile) {
     assert(controls.top >= heroSpace.top && controls.bottom <= heroSpace.bottom + 1, 'Mobile controls escaped the 3D stage vertically: ' + JSON.stringify({ heroSpace, controls }));
     const ownership = await page.locator('#hero .fx-reference-controls-r204').evaluate(node => node.parentElement?.classList.contains('hero-space'));
     assert(ownership, 'Mobile controls are not owned by the native 3D stage');
-    // Physical hit testing belongs to the dedicated r326 control-motion gate.
-    // This production-like visual composition intentionally layers synthetic
-    // validator surfaces that are not present in the native interaction test.
+
     const heroCopyState = await page.locator('#hero .hero-copy').evaluate(element => {
       const style = getComputedStyle(element), rect = element.getBoundingClientRect();
-      return { width: rect.width, height: rect.height, clipPath: style.clipPath, overflow: style.overflow };
+      return {
+        width: rect.width,
+        height: rect.height,
+        clipPath: style.clipPath,
+        overflow: style.overflow,
+        position: style.position,
+        textLength: (element.textContent || '').trim().length
+      };
     });
-    assert(heroCopyState.width <= 1.5 && heroCopyState.height <= 1.5 && heroCopyState.overflow === 'hidden', 'Mobile legacy hero copy still creates a blank region: ' + JSON.stringify(heroCopyState));
-    assert(heading.top >= heroSpace.bottom - 2, 'Mobile proof heading must directly follow the 3D stage: ' + JSON.stringify({ heroSpace, heading }));
+    assert(heroCopyState.width >= 280 && heroCopyState.height >= 240 && heroCopyState.clipPath === 'none' && heroCopyState.textLength > 180,
+      'Mobile hero information card is not physically visible and stable: ' + JSON.stringify(heroCopyState));
+    assert(heroLead.right <= heroCopy.right + 1 && heroLead.height >= 70,
+      'Mobile hero lead does not wrap inside the visible information card: ' + JSON.stringify({ heroLead, heroCopy }));
+    assert(heroCopy.top >= heroSpace.bottom - 2,
+      'Mobile hero information card must follow the MAG stage in normal flow: ' + JSON.stringify({ heroSpace, heroCopy }));
+    assert(heading.top >= heroCopy.bottom - 2,
+      'Mobile proof heading must follow the visible hero information card: ' + JSON.stringify({ heroCopy, heading }));
     assert(referenceProof.top >= heading.bottom - 2, 'Mobile proof card overlaps its heading: ' + JSON.stringify({ heading, referenceProof }));
     assert(category.top >= referenceProof.bottom - 2, 'Mobile next section must follow the proof card: ' + JSON.stringify({ referenceProof, category }));
+
     const proofText = await page.locator('#hero .fx-reference-proof p').evaluate(element => {
       const rect = element.getBoundingClientRect(), parent = element.parentElement.getBoundingClientRect();
       return { right: rect.right, parentRight: parent.right, height: rect.height, scrollWidth: element.scrollWidth, clientWidth: element.clientWidth };
