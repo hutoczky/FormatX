@@ -1,0 +1,11 @@
+{
+  "revision": "r338",
+  "scope": "mobile-only",
+  "target": "r326-living-crystal-organism",
+  "correction": {
+    "centreBloom": "restrained",
+    "perimeter": "softer",
+    "contrast": "reduced",
+    "desktopIsolation": true
+  }
+}
