@@ -15,6 +15,8 @@
   const WDA_R310_STYLE_CONTRACT = 'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions';
   root.dataset.fxMobileRegressionWdaContract = WDA_R310_STYLE_CONTRACT.includes('r310-live-mobile-regressions') ? 'r310-compatible' : 'unknown';
   let qrGeneration = 0;
+  let askRetryTimer = 0;
+  let askRetryDeadline = 0;
 
   function explicitLanguageQuery() {
     const value = new URLSearchParams(location.search).get('lang');
@@ -88,6 +90,60 @@
     link.dataset.fxMobileCoreOpticsR328 = 'true';
     document.head.appendChild(link);
     root.dataset.fxCoreMobileOpticsR328 = 'r349-restrained-glow-soft-edge-owner';
+  }
+
+  function closeAskBlockers() {
+    root.classList.remove('fx-organism-menu-open', 'fx-page-scrolling');
+    document.body?.classList.remove('fx-organism-panel-open');
+
+    const nav = document.getElementById('main-nav');
+    nav?.classList.remove('open');
+    nav?.removeAttribute('aria-hidden');
+
+    const menu = document.getElementById('menu-toggle');
+    menu?.classList.remove('open');
+    menu?.setAttribute('aria-expanded', 'false');
+
+    const consoleRoot = document.getElementById('fx-organism-console');
+    if (consoleRoot instanceof HTMLElement) {
+      consoleRoot.hidden = true;
+      consoleRoot.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function tryOpenReferenceAsk() {
+    closeAskBlockers();
+    if (typeof window.FormatXOrganismVoice?.open === 'function') {
+      window.FormatXOrganismVoice.open();
+      window.FormatXCoreMobileV69?.pulse?.();
+      root.dataset.fxReferenceAskEarlyOwnerR334 = 'opened';
+      if (askRetryTimer) clearTimeout(askRetryTimer);
+      askRetryTimer = 0;
+      return true;
+    }
+    return false;
+  }
+
+  function queueReferenceAskOpen() {
+    if (tryOpenReferenceAsk()) return;
+
+    if (root.dataset.fxImmersive !== 'active') {
+      root.dataset.fxImmersive = 'active';
+      root.dataset.fxImmersiveSource = 'reference-ask-early-r334';
+      dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
+        detail: { source: 'reference-ask-early-r334' }
+      }));
+    }
+
+    askRetryDeadline = performance.now() + 1600;
+    if (askRetryTimer) clearTimeout(askRetryTimer);
+    const retry = () => {
+      askRetryTimer = 0;
+      if (tryOpenReferenceAsk() || performance.now() >= askRetryDeadline) return;
+      askRetryTimer = setTimeout(retry, 45);
+    };
+    askRetryTimer = setTimeout(retry, 0);
+    root.dataset.fxReferenceAskEarlyOwnerR334 = 'waiting-for-dialogue-runtime';
   }
 
   function selectedCurrency() {
@@ -178,8 +234,31 @@
     addEventListener(eventName, syncQr, { passive: true });
   }
 
+  addEventListener('formatx:organismvoiceready', () => {
+    if (root.dataset.fxReferenceAskEarlyOwnerR334 === 'waiting-for-dialogue-runtime') tryOpenReferenceAsk();
+  }, { passive: true });
+
+  // The reference ASK can become visible before the deferred Organism voice
+  // runtime has finished installing. Pointerdown is deliberately earlier than
+  // the later click owners: a control that is visibly tappable is immediately
+  // actionable, while later click handlers remain idempotent because they call
+  // the public open() API rather than toggling the dialogue.
+  document.addEventListener('pointerdown', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target?.closest('.fx-reference-ask')) return;
+    queueReferenceAskOpen();
+  }, true);
+
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target?.closest('.fx-reference-ask')) return;
+    queueReferenceAskOpen();
+  }, true);
+
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('.fx-reference-ask')) queueReferenceAskOpen();
     if (!target?.closest('[data-currency]')) return;
     queueMicrotask(syncQr);
   }, true);
