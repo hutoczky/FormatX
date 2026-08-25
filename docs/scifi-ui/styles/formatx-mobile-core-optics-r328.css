@@ -1,29 +1,56 @@
-/* FormatX r352 — balanced cross-device MAG scale + translucent glass body.
-   The live r326 WebGL crystal stays faceted and dimensional on desktop and
-   mobile, without the oversized dark diamond or razor-hard silhouette. */
+/* FormatX r353 — soft luminous cross-device MAG material.
+   The r326 WebGL crystal remains the sole renderer. This finishing pass keeps
+   the four-direction identity while reducing the dark slab look, hard V-facets
+   and overlong visual footprint without returning to a blown-out neon bloom. */
 
-/* Desktop/fine-pointer optical owner. Keep the r337 material morph transforms,
-   but compound them with a restrained base scale and a brighter glass pass. */
+/* Shared living-core glow. This is a soft internal optical lift, not a second
+   silhouette or outline. */
+html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+  isolation: isolate !important;
+}
+
+html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 3 !important;
+  left: 50% !important;
+  top: 48% !important;
+  width: 58% !important;
+  height: 58% !important;
+  translate: -50% -50% !important;
+  pointer-events: none !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(147,238,255,.18) 0 5%, rgba(91,196,255,.12) 13%, rgba(95,126,255,.065) 30%, rgba(30,76,144,.025) 46%, transparent 66%) !important;
+  mix-blend-mode: screen !important;
+  filter: blur(18px) !important;
+  opacity: .72 !important;
+}
+
+/* Desktop/fine pointer: compact and brighter than r352, but deliberately low
+   contrast so the facet seams read as glass depth instead of black cuts. */
 @media (min-width: 901px) and (pointer: fine) {
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .96 !important;
+    opacity: .91 !important;
     mix-blend-mode: normal !important;
-    scale: .86 .89 !important;
+    scale: .82 .85 !important;
     transform-origin: 50% 48% !important;
     image-rendering: auto !important;
     filter:
-      brightness(1.08)
-      contrast(.87)
-      saturate(.96)
-      blur(.34px)
-      drop-shadow(0 0 9px rgba(92,207,255,.060)) !important;
+      brightness(1.24)
+      contrast(.72)
+      saturate(1.02)
+      blur(.56px)
+      drop-shadow(0 0 8px rgba(92,207,255,.070))
+      drop-shadow(0 0 20px rgba(85,118,255,.035)) !important;
     -webkit-filter:
-      brightness(1.08)
-      contrast(.87)
-      saturate(.96)
-      blur(.34px)
-      drop-shadow(0 0 9px rgba(92,207,255,.060)) !important;
+      brightness(1.24)
+      contrast(.72)
+      saturate(1.02)
+      blur(.56px)
+      drop-shadow(0 0 8px rgba(92,207,255,.070))
+      drop-shadow(0 0 20px rgba(85,118,255,.035)) !important;
   }
 }
 
@@ -68,41 +95,36 @@
       blur(1.95px) !important;
   }
 
-  /* Mobile r326 owner. Keep the actual WebGL facets, restore ice/glass
-     luminance, soften only the raster edge, and shorten the apparent tips. */
+  /* Mobile r326 owner. The footprint is intentionally narrower than r352 so
+     the controls remain visually independent of the crystal. */
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .95 !important;
+    opacity: .90 !important;
     mix-blend-mode: normal !important;
-    scale: .88 .91 !important;
+    scale: .78 .83 !important;
     transform-origin: 50% 48% !important;
     image-rendering: auto !important;
     filter:
-      brightness(1.05)
-      contrast(.88)
-      saturate(.94)
-      blur(.40px)
-      drop-shadow(0 0 7px rgba(92,207,255,.055)) !important;
+      brightness(1.20)
+      contrast(.70)
+      saturate(1.00)
+      blur(.64px)
+      drop-shadow(0 0 7px rgba(92,207,255,.068))
+      drop-shadow(0 0 16px rgba(85,118,255,.030)) !important;
     -webkit-filter:
-      brightness(1.05)
-      contrast(.88)
-      saturate(.94)
-      blur(.40px)
-      drop-shadow(0 0 7px rgba(92,207,255,.055)) !important;
+      brightness(1.20)
+      contrast(.70)
+      saturate(1.00)
+      blur(.64px)
+      drop-shadow(0 0 7px rgba(92,207,255,.068))
+      drop-shadow(0 0 16px rgba(85,118,255,.030)) !important;
   }
 
-  /* Attenuate the hot centre and the outer spill while leaving the middle body
-     shallow enough for the internal 3D facet structure to remain readable. */
-  html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage::after {
-    content: "" !important;
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 40 !important;
-    display: block !important;
-    pointer-events: none !important;
-    background:
-      radial-gradient(circle at 50% 50%, rgba(0,4,13,.28) 0 5.2%, rgba(0,4,13,.17) 10.8%, rgba(0,4,13,.052) 19.5%, transparent 28%),
-      radial-gradient(ellipse at 50% 50%, transparent 0 39%, rgba(0,4,13,.038) 50%, rgba(0,4,13,.095) 62%, rgba(0,4,13,.22) 77%, rgba(0,4,13,.36) 100%) !important;
+  /* The crystal cue duplicates the visible control affordance on phones and was
+     physically sitting underneath SOUND / ASK / PAUSE. Keep the interaction
+     surface, remove only the decorative cue from the compact composition. */
+  #hero .hero-space > .fx-crystal-cue-r318 {
+    display: none !important;
   }
 
   /* Auxiliary bioluminescence is atmosphere only, never a second outline. */
@@ -129,70 +151,37 @@
   }
 }
 
-@media (prefers-reduced-motion: no-preference) and (max-width: 900px),
-       (prefers-reduced-motion: no-preference) and (pointer: coarse) {
-  html body.living-architecture #hero .fx-core-r317-stage > .fx-core-r317-canvas {
-    animation-name: fx-core-organic-form-mobile-r328 !important;
-    animation-duration: 16.4s !important;
-  }
-}
-
-@keyframes fx-core-organic-form-mobile-r328 {
-  0%   { scale: 1 .982; rotate: 0deg; }
-  22%  { scale: .994 .988; rotate: -.035deg; }
-  46%  { scale: 1.006 .981; rotate: .042deg; }
-  70%  { scale: .996 .986; rotate: -.028deg; }
-  100% { scale: 1.004 .982; rotate: .032deg; }
-}
-
 @media (max-width: 430px) {
-  html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
-    opacity: .62 !important;
-    filter: brightness(.58) contrast(.67) saturate(.74) blur(1.48px) !important;
-    -webkit-filter: brightness(.58) contrast(.67) saturate(.74) blur(1.48px) !important;
-  }
-
-  html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .56 !important;
-    filter: brightness(.48) contrast(.61) saturate(.68) blur(2.25px) !important;
-    -webkit-filter: brightness(.48) contrast(.61) saturate(.68) blur(2.25px) !important;
-  }
-
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .94 !important;
-    scale: .84 .88 !important;
-    transform-origin: 50% 48% !important;
+    opacity: .89 !important;
+    scale: .74 .80 !important;
     filter:
-      brightness(1.03)
-      contrast(.86)
-      saturate(.92)
-      blur(.46px)
-      drop-shadow(0 0 6px rgba(92,207,255,.050)) !important;
+      brightness(1.18)
+      contrast(.68)
+      saturate(.99)
+      blur(.70px)
+      drop-shadow(0 0 6px rgba(92,207,255,.065))
+      drop-shadow(0 0 14px rgba(85,118,255,.028)) !important;
     -webkit-filter:
-      brightness(1.03)
-      contrast(.86)
-      saturate(.92)
-      blur(.46px)
-      drop-shadow(0 0 6px rgba(92,207,255,.050)) !important;
+      brightness(1.18)
+      contrast(.68)
+      saturate(.99)
+      blur(.70px)
+      drop-shadow(0 0 6px rgba(92,207,255,.065))
+      drop-shadow(0 0 14px rgba(85,118,255,.028)) !important;
   }
 
-  html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage::after {
-    background:
-      radial-gradient(circle at 50% 50%, rgba(0,4,13,.31) 0 5.4%, rgba(0,4,13,.19) 11.2%, rgba(0,4,13,.062) 20%, transparent 28.5%),
-      radial-gradient(ellipse at 50% 50%, transparent 0 37%, rgba(0,4,13,.046) 48%, rgba(0,4,13,.11) 60%, rgba(0,4,13,.25) 76%, rgba(0,4,13,.40) 100%) !important;
-  }
-
-  html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .006 !important;
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
+    width: 54% !important;
+    height: 54% !important;
+    filter: blur(16px) !important;
+    opacity: .66 !important;
   }
 }
 
-@media (prefers-reduced-motion: reduce) and (max-width: 900px),
-       (prefers-reduced-motion: reduce) and (pointer: coarse) {
-  html body.living-architecture #hero .fx-core-r317-stage > .fx-core-r317-canvas {
-    animation: none !important;
-    scale: 1 .982 !important;
-    rotate: 0deg !important;
+@media (prefers-reduced-motion: reduce) {
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
+    opacity: .58 !important;
   }
 }
