@@ -22,6 +22,300 @@
   const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260823-r312-postdom-pulse';
   const MOBILE_REGRESSION_URL = './scripts/formatx-mobile-regression-r310.js?v=20260823-r312-postdom';
   const PULSE_STYLE_URL = './styles/formatx-core-pulse-r312.css?v=20260823-r312-living-pulse';
+  const FIRST_PAINT_STYLE_URL = './styles/formatx-first-paint-r206.css?v=20260825-r306-static-production-parity';
+  const FIRST_FRAME_STYLE_URL = './styles/formatx-first-frame-geometry-r274.css?v=20260825-r306-static-production-parity';
+
+  function ensureEarlyStyle(selector, attribute, href) {
+    if (document.querySelector(selector)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.setAttribute(attribute, 'true');
+    link.fetchPriority = 'high';
+    document.head.appendChild(link);
+  }
+
+  function important(node, property, value) {
+    if (!(node instanceof HTMLElement)) return;
+    node.style.setProperty(property, value, 'important');
+  }
+
+  function stabilizeReferenceFirstPaint() {
+    ensureEarlyStyle('link[data-fx-first-paint-r206]', 'data-fx-first-paint-r206', FIRST_PAINT_STYLE_URL);
+    ensureEarlyStyle('link[data-fx-first-frame-geometry-r306]', 'data-fx-first-frame-geometry-r306', FIRST_FRAME_STYLE_URL);
+
+    const hero = document.getElementById('hero');
+    const grid = hero?.querySelector(':scope > .hero-grid');
+    const space = grid?.querySelector(':scope > .hero-space');
+    const copy = grid?.querySelector(':scope > .hero-copy');
+    if (!(hero instanceof HTMLElement)
+      || !(grid instanceof HTMLElement)
+      || !(space instanceof HTMLElement)
+      || !(copy instanceof HTMLElement)) return false;
+
+    const strings = ROOT.lang === 'en' ? {
+      heading: 'DISCOVER HOW IT WORKS',
+      title: 'Proof behind the visual.',
+      body: 'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',
+      ask: 'ASK',
+      askAria: 'Ask FormatX',
+      controls: 'Hero controls'
+    } : {
+      heading: 'A MŰKÖDÉS MEGISMERÉSE',
+      title: 'Bizonyíték a látvány mögött.',
+      body: 'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',
+      ask: 'KÉRDEZZ',
+      askAria: 'Kérdezz a FormatX-től',
+      controls: 'Hero vezérlők'
+    };
+
+    let controls = hero.querySelector('.fx-reference-controls-r204');
+    if (!(controls instanceof HTMLElement)) {
+      controls = document.createElement('div');
+      controls.className = 'fx-reference-controls-r204 fx-reference-controls-r264';
+      controls.setAttribute('aria-label', strings.controls);
+    }
+    controls.classList.add('fx-reference-controls-r264');
+
+    let sound = controls.querySelector(':scope > .fx-three-sound') || document.querySelector('.fx-three-sound');
+    if (!(sound instanceof HTMLButtonElement)) {
+      sound = document.createElement('button');
+      sound.type = 'button';
+      sound.className = 'fx-three-sound fx-wda-sound-toggle fx-control-owner-r264';
+      sound.dataset.fxAudioState = 'off';
+      sound.setAttribute('aria-pressed', 'false');
+      sound.setAttribute('aria-label', ROOT.lang === 'en' ? 'Unmute FormatX cinematic audio' : 'FormatX filmes hang bekapcsolása');
+      sound.innerHTML = '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';
+    }
+    sound.classList.add('fx-wda-sound-toggle', 'fx-control-owner-r264');
+    if (sound.parentElement !== controls) controls.prepend(sound);
+
+    let rail = controls.querySelector(':scope > .fx-reference-rail') || hero.querySelector('.fx-reference-rail');
+    if (!(rail instanceof HTMLElement)) {
+      rail = document.createElement('div');
+      rail.className = 'fx-reference-rail fx-reference-rail-r264';
+    }
+    rail.classList.add('fx-reference-rail-r264');
+
+    let ask = rail.querySelector('.fx-reference-ask');
+    if (!(ask instanceof HTMLButtonElement)) {
+      ask = document.createElement('button');
+      ask.type = 'button';
+      ask.className = 'fx-reference-ask';
+      ask.innerHTML = '<i aria-hidden="true"></i><span></span>';
+    }
+    ask.setAttribute('aria-label', strings.askAria);
+    let askLabel = ask.querySelector('span');
+    if (!(askLabel instanceof HTMLElement)) {
+      askLabel = document.createElement('span');
+      ask.appendChild(askLabel);
+    }
+    askLabel.textContent = strings.ask;
+
+    let pause = rail.querySelector('.fx-reference-pause');
+    if (!(pause instanceof HTMLButtonElement)) {
+      pause = document.createElement('button');
+      pause.type = 'button';
+      pause.className = 'fx-reference-pause';
+      pause.textContent = 'Ⅱ';
+      pause.dataset.paused = 'false';
+      pause.setAttribute('aria-label', ROOT.lang === 'en' ? 'Pause animation' : 'Animáció szüneteltetése');
+    }
+    if (ask.parentElement !== rail) rail.prepend(ask);
+    if (pause.parentElement !== rail) rail.appendChild(pause);
+    if (rail.parentElement !== controls) controls.appendChild(rail);
+
+    let heading = hero.querySelector('.fx-reference-heading');
+    if (!(heading instanceof HTMLElement)) {
+      heading = document.createElement('div');
+      heading.className = 'fx-reference-heading';
+    }
+    heading.textContent = strings.heading;
+
+    let proof = hero.querySelector('.fx-reference-proof');
+    if (!(proof instanceof HTMLElement)) {
+      proof = document.createElement('article');
+      proof.className = 'fx-reference-proof';
+      proof.innerHTML = '<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2></h2><p></p><a class="fx-reference-liveos" href="#experience">Live OS</a>';
+    }
+    const proofTitle = proof.querySelector('h2');
+    const proofBody = proof.querySelector('p');
+    if (proofTitle) proofTitle.textContent = strings.title;
+    if (proofBody) proofBody.textContent = strings.body;
+    const live = proof.querySelector('.fx-reference-liveos');
+    if (live instanceof HTMLAnchorElement) {
+      live.href = '#experience';
+      live.setAttribute('aria-label', ROOT.lang === 'en' ? 'Open Live OS' : 'Live OS megnyitása');
+    }
+
+    if (EARLY_REFERENCE_MOBILE) {
+      if (space.nextElementSibling !== controls) space.after(controls);
+      if (controls.nextElementSibling !== copy) controls.after(copy);
+      if (copy.nextElementSibling !== heading) copy.after(heading);
+      if (heading.nextElementSibling !== proof) heading.after(proof);
+
+      important(grid, 'display', 'flex');
+      important(grid, 'flex-direction', 'column');
+      important(grid, 'align-items', 'stretch');
+      important(grid, 'gap', '0');
+
+      important(space, 'order', '0');
+      important(space, 'flex', '0 0 auto');
+      important(space, 'width', '100%');
+      important(space, 'margin', '0');
+
+      important(controls, 'order', '1');
+      important(controls, 'position', 'relative');
+      important(controls, 'inset', 'auto');
+      important(controls, 'display', 'grid');
+      important(controls, 'grid-template-columns', 'repeat(3, 50px)');
+      important(controls, 'align-items', 'start');
+      important(controls, 'justify-content', 'center');
+      important(controls, 'gap', '12px');
+      important(controls, 'width', 'max-content');
+      important(controls, 'min-height', '76px');
+      important(controls, 'margin', '14px auto 20px');
+      important(controls, 'padding', '0 4px 20px');
+      important(controls, 'opacity', '1');
+      important(controls, 'visibility', 'visible');
+      important(controls, 'pointer-events', 'auto');
+      important(controls, 'transform', 'none');
+      important(controls, 'z-index', '12040');
+
+      important(rail, 'display', 'contents');
+      important(rail, 'position', 'static');
+
+      for (const button of [sound, ask, pause]) {
+        important(button, 'position', 'relative');
+        important(button, 'inset', 'auto');
+        important(button, 'display', 'grid');
+        important(button, 'place-items', 'center');
+        important(button, 'box-sizing', 'border-box');
+        important(button, 'width', '50px');
+        important(button, 'min-width', '50px');
+        important(button, 'max-width', '50px');
+        important(button, 'height', '50px');
+        important(button, 'min-height', '50px');
+        important(button, 'max-height', '50px');
+        important(button, 'margin', '0');
+        important(button, 'padding', '0');
+        important(button, 'border-radius', '50%');
+        important(button, 'opacity', '1');
+        important(button, 'visibility', 'visible');
+        important(button, 'pointer-events', 'auto');
+        important(button, 'transform', 'none');
+      }
+      important(askLabel, 'position', 'absolute');
+      important(askLabel, 'top', '55px');
+      important(askLabel, 'left', '50%');
+      important(askLabel, 'width', 'max-content');
+      important(askLabel, 'max-width', '92px');
+      important(askLabel, 'transform', 'translateX(-50%)');
+      important(askLabel, 'white-space', 'nowrap');
+
+      important(copy, 'order', '2');
+      important(copy, 'position', 'relative');
+      important(copy, 'inset', 'auto');
+      important(copy, 'display', 'grid');
+      important(copy, 'box-sizing', 'border-box');
+      important(copy, 'align-self', 'center');
+      important(copy, 'width', 'calc(100% - 24px)');
+      important(copy, 'max-width', '680px');
+      important(copy, 'min-width', '0');
+      important(copy, 'height', 'auto');
+      important(copy, 'min-height', '1px');
+      important(copy, 'margin', '0 auto 26px');
+      important(copy, 'padding', '18px clamp(16px, 4.8vw, 24px) 20px');
+      important(copy, 'overflow', 'hidden');
+      important(copy, 'clip', 'auto');
+      important(copy, 'clip-path', 'none');
+      important(copy, 'white-space', 'normal');
+      important(copy, 'opacity', '1');
+      important(copy, 'visibility', 'visible');
+      important(copy, 'transform', 'none');
+
+      important(heading, 'order', '3');
+      important(heading, 'position', 'relative');
+      important(heading, 'width', 'calc(100% - 32px)');
+      important(heading, 'max-width', '680px');
+      important(heading, 'min-height', '20px');
+      important(heading, 'margin', '10px auto 22px');
+      important(heading, 'opacity', '1');
+      important(heading, 'visibility', 'visible');
+      important(heading, 'transform', 'none');
+
+      important(proof, 'order', '4');
+      important(proof, 'position', 'relative');
+      important(proof, 'display', 'block');
+      important(proof, 'box-sizing', 'border-box');
+      important(proof, 'width', 'calc(100% - 32px)');
+      important(proof, 'max-width', '680px');
+      important(proof, 'min-height', '258px');
+      important(proof, 'margin', '0 auto 34px');
+      important(proof, 'padding', '20px 19px 24px');
+      important(proof, 'overflow', 'hidden');
+      important(proof, 'opacity', '1');
+      important(proof, 'visibility', 'visible');
+      important(proof, 'transform', 'none');
+    } else {
+      if (controls.parentElement !== space) space.appendChild(controls);
+      if (heading.parentElement !== grid) grid.appendChild(heading);
+      if (proof.parentElement !== grid) grid.appendChild(proof);
+
+      important(controls, 'position', 'absolute');
+      important(controls, 'inset', 'auto auto 28px 50%');
+      important(controls, 'display', 'grid');
+      important(controls, 'grid-template-columns', 'repeat(3, 54px)');
+      important(controls, 'align-items', 'start');
+      important(controls, 'justify-content', 'center');
+      important(controls, 'gap', '14px');
+      important(controls, 'width', 'max-content');
+      important(controls, 'min-height', '82px');
+      important(controls, 'margin', '0');
+      important(controls, 'padding', '0 8px 24px');
+      important(controls, 'opacity', '1');
+      important(controls, 'visibility', 'visible');
+      important(controls, 'pointer-events', 'auto');
+      important(controls, 'transform', 'translateX(-50%)');
+      important(controls, 'z-index', '12040');
+      important(rail, 'display', 'contents');
+      important(rail, 'position', 'static');
+
+      for (const button of [sound, ask, pause]) {
+        important(button, 'position', 'relative');
+        important(button, 'inset', 'auto');
+        important(button, 'display', 'grid');
+        important(button, 'place-items', 'center');
+        important(button, 'box-sizing', 'border-box');
+        important(button, 'width', '54px');
+        important(button, 'min-width', '54px');
+        important(button, 'max-width', '54px');
+        important(button, 'height', '54px');
+        important(button, 'min-height', '54px');
+        important(button, 'max-height', '54px');
+        important(button, 'margin', '0');
+        important(button, 'padding', '0');
+        important(button, 'border-radius', '50%');
+        important(button, 'opacity', '1');
+        important(button, 'visibility', 'visible');
+        important(button, 'pointer-events', 'auto');
+        important(button, 'transform', 'none');
+      }
+      important(askLabel, 'position', 'absolute');
+      important(askLabel, 'top', '61px');
+      important(askLabel, 'left', '50%');
+      important(askLabel, 'width', 'max-content');
+      important(askLabel, 'transform', 'translateX(-50%)');
+
+      important(heading, 'min-height', '24px');
+      important(proof, 'min-height', '258px');
+    }
+
+    ROOT.dataset.fxFirstPaintControlsR306 = EARLY_REFERENCE_MOBILE
+      ? 'mobile-final-geometry-prepaint'
+      : 'desktop-final-geometry-prepaint';
+    return true;
+  }
 
   function activateCriticalReal3dStyle() {
     if (REDUCE_QUERY.matches) {
@@ -129,6 +423,8 @@
   function progress(o,token){const start=performance.now();let lastUi=-Infinity;function frame(now){if(token!==runToken||!running||finishing)return;const linear=Math.min(1,Math.max(0,now-start)/timelineDuration),eased=1-Math.pow(1-linear,2.35);if(linear>=1||now-lastUi>=50){lastUi=now;setProgress(o,eased*100)}if(linear>=1)return exit(o,token,'timeline-complete');progressFrame=requestAnimationFrame(frame)}progressFrame=requestAnimationFrame(frame)}
   function start(){const o=document.getElementById(OVERLAY_ID);if(!o)return release(null,'overlay-missing');const returning=seen();configure(returning);cancelTimers();cancelAnimations(o);running=true;finishing=false;runToken++;const token=runToken;controls(o);o.hidden=false;o.setAttribute('aria-hidden','false');setProgress(o,0);ROOT.classList.remove('fx-intro-complete','fx-intro-reveal');ROOT.classList.add('fx-intro-managed','fx-intro-pending','fx-intro-running');ROOT.dataset.fxIntro=returning?'timeline-returning':'timeline-first-visit';ROOT.dataset.fxIntroVisit=returning?'returning':'first';visuals(o,returning);progress(o,token);hardTimer=setTimeout(()=>{if(token===runToken)release(o,'hard-deadline')},hardDeadline)}
   function failOpen(source){if(running)fastRelease(source)}
+
+  stabilizeReferenceFirstPaint();
 
   if(AUDIT_MODE){ROOT.classList.add('fx-audit-mode');fastRelease('audit-skip');return}
 
