@@ -183,6 +183,73 @@
     clip-path: none !important;
   }
 
+  /* r307: narrow-phone CTA contract. Old hero layers could shrink the three
+     primary actions to their flex min-content width (~30px at 320px). Keep the
+     user-facing actions in normal flow, one full-width row each, and let the
+     long Hungarian label wrap instead of clipping. */
+  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy > .hero-actions {
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-flow: row !important;
+    align-items: stretch !important;
+    justify-items: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    gap: 10px !important;
+    margin: 18px 0 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy > .hero-actions > a.button {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 50px !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 12px 16px !important;
+    gap: 9px !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+    transform: none !important;
+    translate: none !important;
+    flex: none !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy > .hero-actions > a.button > span {
+    display: inline !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    text-overflow: clip !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy > .hero-actions > a.button > i {
+    flex: 0 0 auto !important;
+  }
+
   html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-heading {
     order: 3 !important;
     position: relative !important;
