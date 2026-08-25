@@ -3,13 +3,13 @@
   const root = document.documentElement;
   if (root.dataset.fxCoreMobileV55 === 'ready-v55' || root.dataset.fxCoreMobileV55 === 'booting-reference-v69') return;
   if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreMobileV55 = 'audit-skip'; return; }
+
   root.dataset.fxCoreMobileV55 = 'booting-reference-v69';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'modern-crystal-r317-soft-rim';
-  root.dataset.fxCoreCrystalRevision = 'r317-flat-normal-fresnel-bounded-bursts';
+  root.dataset.fxCoreMobileAwardRevision = 'new-crystal-organism-r326';
+  root.dataset.fxCoreCrystalRevision = 'r326-four-direction-living-facet-organism';
 
-  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r317.js?v=20260825-r317-primary-soft-rim-performance';
-  const LEGACY_RENDERER = '/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js?v=20260824-native-mechanical-orb-r251-performance';
+  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260825-r326-new-organism';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
 
   function loadStableControls() {
@@ -47,47 +47,35 @@
     document.head.appendChild(script);
   }
 
-  function loadRenderer(src, fallback) {
+  function loadPrimaryRenderer() {
+    if (document.querySelector('script[data-fx-crystal-organism-r326],script[src*="formatx-crystal-organism-r326.js"]')) return;
     const renderer=document.createElement('script');
-    renderer.src=src;
+    renderer.src=PRIMARY_RENDERER;
     renderer.async=false;
-    renderer.dataset.fxCoreMobileReferenceV69='true';
+    renderer.dataset.fxCrystalOrganismR326='true';
     renderer.dataset.fxCoreTrueMeshR112='true';
-    if (!fallback) renderer.dataset.fxCoreModernCrystalR317='true';
-    else renderer.dataset.fxCoreMechanicalFallbackR250='true';
 
     renderer.addEventListener('load',()=>{
-      root.dataset.fxCoreReferenceLockLoad=fallback?'ready-v69-r250-fallback':'ready-v69-r317';
-      root.dataset.fxCoreRendererSelection=fallback?'mechanical-r250-fallback':'modern-r317-crystal-primary';
-      if (!fallback) {
-        root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';
-        root.dataset.fxCoreCompositionRevisionR317='modern-crystal-r317-no-2d-overlays';
-      }
+      root.dataset.fxCoreReferenceLockLoad='ready-v69-r326';
+      root.dataset.fxCoreRendererSelection='new-crystal-organism-r326-primary';
+      root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';
+      root.dataset.fxCoreCompositionRevisionR326='new-organism-no-legacy-visual-fallback';
     },{once:true});
 
     renderer.addEventListener('error',()=>{
       renderer.remove();
-      if (!fallback) {
-        root.dataset.fxCoreRendererSelection='r317-load-failed-trying-r250';
-        loadRenderer(LEGACY_RENDERER,true);
-        return;
-      }
       root.dataset.fxCoreMobileV55='load-failed-v55';
       root.dataset.fxCoreMobileV69='load-failed-v69';
       root.dataset.fxCoreReferenceLock='load-failed-v69';
       root.dataset.fxCoreReal3d='context-unavailable';
-      dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'native-webgl-renderer-load-failed',reference:'r317+r250'}}));
+      root.dataset.fxCoreRendererSelection='r326-load-failed-no-legacy-fallback';
+      dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'r326-renderer-load-failed',fallback:'none'}}));
     },{once:true});
 
     document.head.appendChild(renderer);
   }
 
-  function loadPrimaryRenderer() {
-    root.dataset.fxCoreOverlayPolicyR250='native-webgl-only-no-svg-or-canvas2d-overlay';
-    root.dataset.fxCoreOverlayPolicyR317='native-webgl-crystal-only-no-2d-overlay';
-    loadRenderer(PRIMARY_RENDERER,false);
-  }
-
+  root.dataset.fxCoreOverlayPolicyR326='new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual';
   loadStableControls();
   loadReferenceLayout();
   loadPrimaryRenderer();
