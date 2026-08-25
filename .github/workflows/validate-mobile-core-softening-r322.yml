@@ -1,10 +1,9 @@
-name: Validate mobile r317 crystal performance
+name: Validate new r326 crystal organism
 on:
   push:
     branches: [master]
     paths:
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/styles/formatx-three-host.css'
       - '.github/scripts/validate-mechanical-orb-r250-browser.cjs'
@@ -15,16 +14,15 @@ on:
 permissions:
   contents: read
 jobs:
-  mobile-core-performance:
+  crystal-organism:
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
-      - name: Validate r317 primary crystal source contracts
+      - name: Validate r326 source contracts
         run: |
           set -euo pipefail
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
-          node --check docs/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check .github/scripts/validate-mechanical-orb-r250-browser.cjs
           node .github/scripts/validate-real3d-core-v20.cjs
@@ -32,16 +30,16 @@ jobs:
       - name: Install Chromium runtime
         run: |
           set -euo pipefail
-          npm install --prefix "$RUNNER_TEMP/r317-browser" --no-audit --no-fund playwright@1.62.0
-          "$RUNNER_TEMP/r317-browser/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Verify soft rim idle scheduler interaction and WebGL1 fallback
+          npm install --prefix "$RUNNER_TEMP/r326-browser" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/r326-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify new organism no legacy renderer idle and interaction
         env:
-          NODE_PATH: ${{ runner.temp }}/r317-browser/node_modules
+          NODE_PATH: ${{ runner.temp }}/r326-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
-          FORMATX_VISUAL_DIR: artifacts/crystal-r317
+          FORMATX_VISUAL_DIR: artifacts/crystal-organism-r326
         run: |
           set -euo pipefail
-          python3 -m http.server 4178 --directory docs >"$RUNNER_TEMP/r317-http.log" 2>&1 &
+          python3 -m http.server 4178 --directory docs >"$RUNNER_TEMP/r326-http.log" 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 60); do
@@ -52,7 +50,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r317-soft-crystal-${{ github.run_id }}
-          path: artifacts/crystal-r317
+          name: r326-crystal-organism-${{ github.run_id }}
+          path: artifacts/crystal-organism-r326
           if-no-files-found: ignore
           retention-days: 14
