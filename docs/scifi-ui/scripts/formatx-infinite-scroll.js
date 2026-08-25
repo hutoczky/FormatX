@@ -6,7 +6,7 @@
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260823-r316-dcl-safe-geometry';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
-  const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260825-r252';
+  const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260825-r252-core2';
   let mobileGeometryTimer = 0;
   let desktopGeometryTimer = 0;
 
