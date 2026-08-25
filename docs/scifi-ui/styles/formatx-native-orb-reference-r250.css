@@ -1,7 +1,8 @@
-/* FormatX r335 — authoritative supplied-reference composition.
-   Loaded last by the canonical control owner so legacy grid geometry cannot
-   move the controls out of the native WebGL stage. r335 keeps the approved
-   composition while making language and pause affordances self-explanatory. */
+/* FormatX r336 — authoritative supplied-reference composition.
+   Mobile keeps the native WebGL MAG, premium localized controls and the product
+   explanation in normal document flow. No late visually-hidden hero rewrite:
+   that caused the dominant mobile layout shift and made the composition feel
+   incomplete after the crystal. */
 html:root:root body.living-architecture .topbar .fx-language-toggle {
   flex-direction: column !important;
   align-items: center !important;
@@ -170,42 +171,72 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     content: 'PAUSE' !important;
   }
 
+  /* r336: preserve the product explanation after the MAG instead of clipping
+     it to a 1px accessibility box after first paint. Keeping this block in the
+     same physical flow as the initial mobile layout removes the dominant CLS
+     source and restores the premium information card visible in the reference. */
   html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content #hero > .hero-grid > .hero-copy {
-    order: 99 !important;
-    position: absolute !important;
+    order: 1 !important;
+    position: relative !important;
     inset: auto !important;
+    display: block !important;
     box-sizing: border-box !important;
-    width: 1px !important;
+    width: calc(100% - 32px) !important;
     min-width: 0 !important;
-    max-width: 1px !important;
-    height: 1px !important;
+    max-width: 700px !important;
+    height: auto !important;
     min-height: 0 !important;
-    max-height: 1px !important;
-    margin: -1px !important;
-    padding: 0 !important;
-    border: 0 !important;
-    overflow: hidden !important;
-    clip: rect(0 0 0 0) !important;
-    clip-path: inset(50%) !important;
-    white-space: nowrap !important;
+    max-height: none !important;
+    margin: 18px auto 16px !important;
+    padding: clamp(24px, 6vw, 34px) clamp(20px, 5.5vw, 30px) clamp(26px, 6.5vw, 38px) !important;
+    border: 1px solid rgba(118,221,255,.17) !important;
+    border-radius: 28px !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    color: #eefaff !important;
+    background:
+      radial-gradient(circle at 88% 8%, rgba(69,205,255,.075), transparent 34%),
+      linear-gradient(148deg, rgba(5,27,42,.92), rgba(2,15,27,.94) 64%, rgba(3,12,23,.96)) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.035),
+      inset 0 0 34px rgba(59,199,255,.025),
+      0 22px 70px rgba(0,0,0,.26) !important;
+    backdrop-filter: blur(14px) saturate(118%) !important;
+    transform: none !important;
+    translate: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content #hero > .hero-grid > .hero-copy > * {
+    max-width: 100% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-reference-heading {
-    order: 1 !important;
-    margin-top: 12px !important;
+    order: 2 !important;
+    margin-top: 18px !important;
   }
 
   html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-reference-proof {
-    order: 2 !important;
+    order: 3 !important;
   }
 
   html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-mobile-download-r151 {
-    order: 3 !important;
+    order: 4 !important;
   }
 }
 
 @media (max-width: 370px) {
   html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
     right: 10px !important;
+  }
+
+  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content #hero > .hero-grid > .hero-copy {
+    width: calc(100% - 24px) !important;
+    border-radius: 24px !important;
   }
 }
