@@ -2,6 +2,19 @@
    The WebGL organism remains the renderer; this layer only changes its final
    silhouette/composite and keeps the mobile optics restrained. */
 
+/* r326 listens on #hero, not on the canvas itself. Keep the physical WebGL
+   surface decorative for hit testing so SOUND / ASK / PAUSE always own their
+   visible circles even when the crystal stage overlaps the same coordinates. */
+html[data-fx-core-shape-r337] #hero .hero-space > .fx-crystal-organism-r326-stage,
+html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
+  pointer-events: none !important;
+}
+
+html[data-fx-core-shape-r337] #hero .fx-reference-controls-r204,
+html[data-fx-core-shape-r337] #hero .fx-reference-controls-r204 :is(button,.fx-three-sound,.fx-reference-ask,.fx-reference-pause) {
+  pointer-events: auto !important;
+}
+
 html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
   transform-origin: 50% 50% !important;
   transition:
