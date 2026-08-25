@@ -38,9 +38,8 @@ async function box(page, selector, required = true) {
 }
 
 async function injectProductionLikeContent(page) {
-  // Keep this order aligned with the production Worker. r207 must be the final
-  // mobile geometry owner after legacy/proof layers, otherwise the static test
-  // measures a layout that can never be served by formatxsuite.com.
+  // Keep this order aligned with the production Worker. r320/r348 is the final
+  // mobile control geometry owner after the legacy r250 reference layer.
   for (const href of [
     '/scifi-ui/styles/formatx-content-standard.css',
     '/scifi-ui/styles/formatx-mobile-readability.css',
@@ -49,7 +48,8 @@ async function injectProductionLikeContent(page) {
     '/scifi-ui/styles/formatx-mobile-production-r5.css',
     '/scifi-ui/styles/formatx-mobile-layout-r207.css',
     '/scifi-ui/styles/formatx-reference-production-r244.css',
-    '/scifi-ui/styles/formatx-native-orb-reference-r250.css'
+    '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
+    '/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
   ]) {
     await page.addStyleTag({ url: origin + href });
   }
@@ -98,6 +98,7 @@ async function waitForStableHero(page, mobile) {
       if (isMobile) {
         return visible('#hero .hero-space')
           && visible('#hero .fx-reference-controls-r204')
+          && visible('#hero .fx-reference-controls-r204 .fx-three-sound')
           && visible('#hero .fx-reference-controls-r204 .fx-reference-ask')
           && visible('#hero .fx-reference-controls-r204 .fx-reference-pause')
           && visible('#hero .fx-reference-heading')
@@ -220,22 +221,41 @@ async function commonAssertions(page, mobile) {
 
     const heroSpace = await box(page, '#hero .hero-space');
     const controls = await box(page, '#hero .fx-reference-controls-r204');
-    const sound = await box(page, '#hero .fx-reference-controls-r204 .fx-three-sound', false);
+    const sound = await box(page, '#hero .fx-reference-controls-r204 .fx-three-sound');
     const ask = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-ask');
     const pause = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-pause');
     const heading = await box(page, '#hero .fx-reference-heading');
     const referenceProof = await box(page, '#hero .fx-reference-proof');
     const category = await box(page, '.fx-category-deck--standalone, .fx-category-deck');
 
-    assert(sound === null, 'Mobile reference must not show the extra sound control: ' + JSON.stringify(sound));
+    assert(sound.width >= 44 && sound.height >= 44, 'Mobile SOUND target is too small: ' + JSON.stringify(sound));
     assert(ask.width >= 44 && ask.height >= 44, 'Mobile ASK target is too small: ' + JSON.stringify(ask));
     assert(pause.width >= 44 && pause.height >= 44, 'Mobile pause target is too small: ' + JSON.stringify(pause));
+    assert(!overlap(sound, ask, 2), 'Mobile SOUND and ASK controls overlap: ' + JSON.stringify({ sound, ask, controls }));
     assert(!overlap(ask, pause, 2), 'Mobile ASK and pause controls overlap: ' + JSON.stringify({ ask, pause, controls }));
-    assert(ask.top < pause.top, 'Mobile ASK and pause controls must form the vertical reference rail: ' + JSON.stringify({ ask, pause, controls }));
+    assert(Math.abs(sound.top - ask.top) <= 2 && Math.abs(ask.top - pause.top) <= 2,
+      'Mobile SOUND, ASK and pause controls must form one horizontal row: ' + JSON.stringify({ sound, ask, pause, controls }));
+    assert(sound.left < ask.left && ask.left < pause.left,
+      'Mobile controls are not ordered SOUND → ASK → PAUSE: ' + JSON.stringify({ sound, ask, pause, controls }));
     assert(controls.left >= heroSpace.left && controls.right <= heroSpace.right + 1, 'Mobile controls escaped the 3D stage horizontally: ' + JSON.stringify({ heroSpace, controls }));
     assert(controls.top >= heroSpace.top && controls.bottom <= heroSpace.bottom + 1, 'Mobile controls escaped the 3D stage vertically: ' + JSON.stringify({ heroSpace, controls }));
     const ownership = await page.locator('#hero .fx-reference-controls-r204').evaluate(node => node.parentElement?.classList.contains('hero-space'));
     assert(ownership, 'Mobile controls are not owned by the native 3D stage');
+    const hitState = await page.evaluate(() => {
+      const inspect = selector => {
+        const element = document.querySelector(selector);
+        if (!(element instanceof HTMLElement)) return false;
+        const rect = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        return Boolean(hit && element.contains(hit));
+      };
+      return {
+        sound: inspect('#hero .fx-reference-controls-r204 .fx-three-sound'),
+        ask: inspect('#hero .fx-reference-controls-r204 .fx-reference-ask'),
+        pause: inspect('#hero .fx-reference-controls-r204 .fx-reference-pause')
+      };
+    });
+    assert(hitState.sound && hitState.ask && hitState.pause, 'Mobile hero controls are not topmost/actionable: ' + JSON.stringify(hitState));
     const heroCopyState = await page.locator('#hero .hero-copy').evaluate(element => {
       const style = getComputedStyle(element), rect = element.getBoundingClientRect();
       return { width: rect.width, height: rect.height, clipPath: style.clipPath, overflow: style.overflow };
