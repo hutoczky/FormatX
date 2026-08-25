@@ -1,7 +1,31 @@
-/* FormatX r351 — balanced mobile MAG scale + translucent glass body.
-   Mobile-only final compositing pass. The live r326 crystal stays faceted and
-   readable, but no longer fills the hero with a dark hard-edged diamond.
-   Desktop remains untouched. */
+/* FormatX r352 — balanced cross-device MAG scale + translucent glass body.
+   The live r326 WebGL crystal stays faceted and dimensional on desktop and
+   mobile, without the oversized dark diamond or razor-hard silhouette. */
+
+/* Desktop/fine-pointer optical owner. Keep the r337 material morph transforms,
+   but compound them with a restrained base scale and a brighter glass pass. */
+@media (min-width: 901px) and (pointer: fine) {
+  html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: .96 !important;
+    mix-blend-mode: normal !important;
+    scale: .86 .89 !important;
+    transform-origin: 50% 48% !important;
+    image-rendering: auto !important;
+    filter:
+      brightness(1.08)
+      contrast(.87)
+      saturate(.96)
+      blur(.34px)
+      drop-shadow(0 0 9px rgba(92,207,255,.060)) !important;
+    -webkit-filter:
+      brightness(1.08)
+      contrast(.87)
+      saturate(.96)
+      blur(.34px)
+      drop-shadow(0 0 9px rgba(92,207,255,.060)) !important;
+  }
+}
 
 @media (max-width: 900px), (pointer: coarse) {
   html:root:root body.living-architecture #hero .hero-space {
@@ -44,9 +68,8 @@
       blur(1.95px) !important;
   }
 
-  /* r351 live r326 owner. Keep the real WebGL facets, restore enough luminance
-     for an ice/glass body, soften only the raster edge, and pull the silhouette
-     inward so the four tips no longer dominate the mobile hero. */
+  /* Mobile r326 owner. Keep the actual WebGL facets, restore ice/glass
+     luminance, soften only the raster edge, and shorten the apparent tips. */
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: .95 !important;
