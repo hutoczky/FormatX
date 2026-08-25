@@ -58,16 +58,14 @@
   }
 
   function buildOrganismGeometry() {
-    // A brand-new four-direction organism: the eight perimeter nodes stay
-    // inside a diamond silhouette while the front/back spines create true 3D facets.
     const p = [
-      [ 0.00,  1.09,  0.00], // top
+      [ 0.00,  1.09,  0.00],
       [ 0.39,  0.58,  0.05],
-      [ 0.86,  0.00,  0.00], // right
+      [ 0.86,  0.00,  0.00],
       [ 0.34, -0.49,  0.04],
-      [ 0.00, -0.96,  0.00], // bottom
+      [ 0.00, -0.96,  0.00],
       [-0.34, -0.49,  0.04],
-      [-0.86,  0.00,  0.00], // left
+      [-0.86,  0.00,  0.00],
       [-0.39,  0.58,  0.05]
     ];
     const front = [0.00, 0.045, 0.62];
@@ -218,7 +216,6 @@
         glass+=vec3(.09,.43,.70)*sideLight*.22;
         glass+=vec3(.18,.72,1.00)*fresnel*(.16+.12*uEnergy);
         glass+=vec3(.22,.62,.82)*veins*(.035+.060*uBreath);
-        // Keep the centre readable: no white flare, no razor rim.
         glass+=vec3(.20,.54,.68)*heart*(.055+.08*uEnergy);
         float alpha=.56+.17*ndl+.08*fresnel;
         ${webgl2?'outColor':'gl_FragColor'}=vec4(max(glass,vec3(0.)),clamp(alpha,.48,.86));
@@ -378,8 +375,8 @@
     function pulse(detail){
       if(Number.isFinite(detail?.x))tx=clamp(detail.x,-1,1);
       if(Number.isFinite(detail?.y))ty=clamp(detail.y,-1,1);
-      targetEnergy=Math.max(targetEnergy,detail?.phase==='drag'?.58:.84);
-      targetBreath=Math.max(targetBreath,detail?.phase==='drag'?.62:.94);
+      targetEnergy=Math.max(targetEnergy,detail?.phase==='drag' ? .58 : .84);
+      targetBreath=Math.max(targetBreath,detail?.phase==='drag' ? .62 : .94);
       schedule(detail?.phase==='drag'?10:16);
     }
     function onCoreInteraction(event){pulse(event.detail||{});}
