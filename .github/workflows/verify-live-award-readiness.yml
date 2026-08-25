@@ -29,14 +29,16 @@ jobs:
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
           node .github/scripts/validate-real3d-core.cjs
           node .github/scripts/validate-reference-core-v26.cjs
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
-          test -s docs/scifi-ui/styles/formatx-award-material-r99.css
-          grep -Fq 'single-webgl-luminous-crystal-r99' docs/scifi-ui/styles/formatx-award-material-r99.css
-          ! grep -Fq 'repeating-conic-gradient' docs/scifi-ui/styles/formatx-award-material-r99.css
+          test -s docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'FormatX r354' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'single-webgl-crystal-organism-r326' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
 
-      - name: Verify live r285 pure WebGL3D MAG, optical atmosphere, layout and scrolling
+      - name: Verify live r326 WebGL crystal, r354 soft optics, layout and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -49,12 +51,11 @@ jobs:
           fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-r99.js"
+          fetch "/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=${GITHUB_RUN_ID}" "$TMP/crystal-r326.js"
+          fetch "/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r354.css"
           fetch "/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=${GITHUB_RUN_ID}" "$TMP/touch-r99.js"
-          fetch "/scifi-ui/styles/formatx-award-material-r99.css?v=${GITHUB_RUN_ID}" "$TMP/material-r99.css"
           fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
           fetch "/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=${GITHUB_RUN_ID}" "$TMP/layout.css"
-          fetch "/scifi-ui/styles/formatx-award-material-r91.css?v=${GITHUB_RUN_ID}" "$TMP/material.css"
           fetch "/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=${GITHUB_RUN_ID}" "$TMP/text-guard.css"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
@@ -62,51 +63,56 @@ jobs:
 
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
           contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
-          contains bootstrap 'pure-native-webgl3d-r285-no-2d-mag-layers' "$TMP/bootstrap.js"
-          contains bootstrap-composition 'pure-webgl3d-no-2d-overlays' "$TMP/bootstrap.js"
-          contains bootstrap-renderer 'single-webgl-luminous-crystal-r99' "$TMP/bootstrap.js"
-          contains pure-3d-loader 'formatx-pure-3d-r285.css?v=20260821-r285' "$TMP/bootstrap.js"
-          contains optical-loader 'formatx-award-material-r99.css?v=20260814-cinematic-atmosphere-r99' "$TMP/bootstrap.js"
-          contains touch-loader 'formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99' "$TMP/bootstrap.js"
-          contains wrapper 'formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99' "$TMP/mobile-wrapper.js"
-          contains renderer-version 'reference-luminous-crystal-webgl-r99-prismatic-r120' "$TMP/mobile-r99.js"
-          contains renderer 'single-webgl-luminous-crystal-r99' "$TMP/mobile-r99.js"
-          contains geometry 'reference-deep-concave-four-point-size-lock-r99' "$TMP/mobile-r99.js"
-          contains material 'luminous-faceted-iceglass-caustic-r99' "$TMP/mobile-r99.js"
-          contains interaction 'touch-pointer-breathing-spectral-refraction-r99' "$TMP/mobile-r99.js"
-          contains interaction-event 'formatx:coreinteraction' "$TMP/mobile-r99.js"
-          contains pointer-move 'pointermove' "$TMP/mobile-r99.js"
-          contains pointer-down 'pointerdown' "$TMP/mobile-r99.js"
-          contains touch-start 'touchstart' "$TMP/mobile-r99.js"
-          contains touch-move 'touchmove' "$TMP/mobile-r99.js"
-          contains touch-end 'touchend' "$TMP/mobile-r99.js"
+
+          # Bootstrap must hand off to the current mobile wrapper and remove old
+          # decorative 2D layers around the native renderer.
+          contains bootstrap 'native-mechanical-orb-r250-no-2d-mag-layers' "$TMP/bootstrap.js"
+          contains bootstrap-wrapper 'formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r251-performance' "$TMP/bootstrap.js"
+          contains bootstrap-cleanup 'cleanupLegacy2d' "$TMP/bootstrap.js"
+
+          # r326 is the sole production MAG renderer. No legacy visual fallback
+          # may be selected by the mobile wrapper.
+          contains wrapper-award-revision 'new-crystal-organism-r326' "$TMP/mobile-wrapper.js"
+          contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' "$TMP/mobile-wrapper.js"
+          contains wrapper-primary 'formatx-crystal-organism-r326.js?v=20260825-r326-new-organism' "$TMP/mobile-wrapper.js"
+          contains wrapper-selection 'new-crystal-organism-r326-primary' "$TMP/mobile-wrapper.js"
+          contains wrapper-composition 'new-organism-no-legacy-visual-fallback' "$TMP/mobile-wrapper.js"
+          contains wrapper-overlay-policy 'new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual' "$TMP/mobile-wrapper.js"
+          ! grep -Eq 'formatx-core-mobile-reference-r99\.js|formatx-core-mechanical-orb-r250\.js|formatx-core-r317\.js' "$TMP/mobile-wrapper.js"
+
+          contains renderer-version "const VERSION = 'crystal-organism-r326'" "$TMP/crystal-r326.js"
+          contains renderer 'single-webgl-crystal-organism-r326' "$TMP/crystal-r326.js"
+          contains webgl2 "getContext('webgl2'" "$TMP/crystal-r326.js"
+          contains webgl-fallback "getContext('webgl'" "$TMP/crystal-r326.js"
+          contains geometry 'buildOrganismGeometry' "$TMP/crystal-r326.js"
+          contains triangles 'gl.TRIANGLES' "$TMP/crystal-r326.js"
+          contains interaction-event 'formatx:coreinteraction' "$TMP/crystal-r326.js"
+          contains pointer-move 'pointermove' "$TMP/crystal-r326.js"
+          contains pointer-down 'pointerdown' "$TMP/crystal-r326.js"
+          contains native-ready 'ready-v69' "$TMP/crystal-r326.js"
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/crystal-r326.js"
+
+          # This is the user-visible r354 correction: lower edge contrast,
+          # reduced bloom, softer mobile blur and an even gentler <=430px pass.
+          contains optics-version 'FormatX r354' "$TMP/optics-r354.css"
+          contains optics-scope 'single-webgl-crystal-organism-r326' "$TMP/optics-r354.css"
+          contains mobile-highlight 'brightness(1.09)' "$TMP/optics-r354.css"
+          contains mobile-contrast 'contrast(.60)' "$TMP/optics-r354.css"
+          contains mobile-blur 'blur(.94px)' "$TMP/optics-r354.css"
+          contains mobile-aura 'opacity: .44 !important' "$TMP/optics-r354.css"
+          contains narrow-query '@media (max-width: 430px)' "$TMP/optics-r354.css"
+          contains narrow-highlight 'brightness(1.07)' "$TMP/optics-r354.css"
+          contains narrow-contrast 'contrast(.58)' "$TMP/optics-r354.css"
+          contains narrow-blur 'blur(1.02px)' "$TMP/optics-r354.css"
+          ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' "$TMP/optics-r354.css"
+
           contains touch-wake 'formatx:referencepause' "$TMP/touch-r99.js"
           contains touch-pulse 'FormatXCoreMobileV69?.pulse' "$TMP/touch-r99.js"
-          contains webgl2 "getContext('webgl2'" "$TMP/mobile-r99.js"
-          contains webgl-fallback "getContext('webgl'" "$TMP/mobile-r99.js"
-          contains draw 'TRIANGLE_STRIP' "$TMP/mobile-r99.js"
-          contains visible-frame-gate 'visible-native-3d-r99' "$TMP/mobile-r99.js"
-          contains pixel-budget '720000' "$TMP/mobile-r99.js"
-          contains crystal-fracture 'frac' "$TMP/mobile-r99.js"
-          contains crystal-caustics 'caustic' "$TMP/mobile-r99.js"
-          contains reactor-rings 'rings' "$TMP/mobile-r99.js"
-          contains r120-material-lock 'prismatic-organic-glass' "$TMP/mobile-r99.js"
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/mobile-r99.js"
-
-          contains optical-scope 'single-webgl-luminous-crystal-r99' "$TMP/material-r99.css"
-          contains optical-highlight 'brightness(1.09)' "$TMP/material-r99.css"
-          contains optical-saturation 'saturate(1.72)' "$TMP/material-r99.css"
-          contains optical-violet 'drop-shadow(0 0 38px rgba(158,58,255,.22))' "$TMP/material-r99.css"
-          ! grep -Fq 'repeating-conic-gradient' "$TMP/material-r99.css"
-
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
-          contains mobile-unpaused 'let paused=mobileViewport()?false:' "$TMP/layout.js"
           contains proof-style '.fx-reference-proof' "$TMP/layout.css"
-          contains crystal-style 'fx-core-rayglass-r91-stage' "$TMP/material.css"
           contains hero-wrap 'max-width: 620px !important' "$TMP/text-guard.css"
           contains normal-wrap 'white-space: normal !important' "$TMP/text-guard.css"
-          contains proof-reserve 'padding-right: clamp(88px, 24vw, 104px) !important' "$TMP/text-guard.css"
 
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
           ! grep -Fq 'preventDefault' "$TMP/scroll.js"
@@ -140,10 +146,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Award/source + live r285 pure WebGL3D crystal, touch bridge and optical atmosphere passed'
+            description='Award/source + live r326 WebGL crystal, r354 soft optics and scrolling passed'
           else
             state=failure
-            description='Award, production r285 MAG, touch bridge, optical atmosphere or scrolling failed'
+            description='Award, live r326 MAG, r354 optics, interaction or scrolling failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
