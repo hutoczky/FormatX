@@ -1,0 +1,116 @@
+/* FormatX r252 — MAG as the living heart of the page.
+   This layer owns only the MAG interaction hit-area and the mobile loop handoff.
+   It never paints a second fake hero after the footer. */
+
+.fx-mag-heart-hit-r252 {
+  position: absolute;
+  z-index: 12024;
+  left: 50%;
+  top: 50%;
+  width: min(36vw, 430px);
+  height: min(36vw, 430px);
+  min-width: 180px;
+  min-height: 180px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  touch-action: pan-y pinch-zoom;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fx-mag-heart-hit-r252::before {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(.9);
+  transition: opacity .22s ease, transform .28s ease, border-color .22s ease, box-shadow .28s ease;
+  pointer-events: none;
+}
+
+.fx-mag-heart-hit-r252:hover::before,
+.fx-mag-heart-hit-r252:focus-visible::before,
+.fx-mag-heart-hit-r252[data-fx-heart-active='true']::before {
+  opacity: .88;
+  transform: scale(1);
+  border-color: rgba(103, 232, 249, .44);
+  box-shadow: 0 0 34px rgba(34, 211, 238, .18), inset 0 0 28px rgba(129, 92, 246, .10);
+}
+
+.fx-mag-heart-hit-r252:focus-visible {
+  outline: 2px solid rgba(103, 232, 249, .9);
+  outline-offset: 4px;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  .fx-mag-heart-hit-r252 {
+    width: min(72vw, 330px);
+    height: min(72vw, 330px);
+    min-width: 210px;
+    min-height: 210px;
+  }
+
+  /* r252: the footer is the last real content. The loop bridge is only a short
+     visual runway used to transfer native touch momentum back to the real hero.
+     The old full-screen reference mirror is deliberately never shown on mobile. */
+  html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge,
+  html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: max(96px, 14svh) !important;
+    min-height: max(96px, 14svh) !important;
+    max-height: max(96px, 14svh) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(25, 118, 188, .16), transparent 62%),
+      linear-gradient(180deg, #02070d 0%, #020b14 58%, #01050b 100%) !important;
+  }
+
+  html[data-fx-heart-core-r252='ready'] .fx-loop-bridge > .fx-loop-reference-mirror,
+  html[data-fx-heart-core-r252='ready'] .fx-loop-bridge > [data-fx-loop-mirror],
+  html[data-fx-heart-core-r252='ready'] .fx-loop-reference-heading,
+  html[data-fx-heart-core-r252='ready'] .fx-loop-reference-proof,
+  html[data-fx-heart-core-r252='ready'] .fx-loop-reference-controls {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  html[data-fx-heart-core-r252='ready'] .fx-loop-bridge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    height: auto;
+    background:
+      radial-gradient(circle at 50% 14%, rgba(103, 232, 249, .13), transparent 18%),
+      linear-gradient(180deg, rgba(2, 7, 13, 0), rgba(2, 12, 22, .72));
+    pointer-events: none;
+  }
+
+  html[data-fx-heart-core-r252='ready'] .fx-loop-bridge::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 18px;
+    width: 42px;
+    height: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, rgba(103, 232, 249, .82), transparent);
+    box-shadow: 0 0 12px rgba(103, 232, 249, .34);
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-mag-heart-hit-r252::before { transition: none !important; }
+}
