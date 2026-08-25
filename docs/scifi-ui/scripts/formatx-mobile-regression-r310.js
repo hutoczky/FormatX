@@ -7,13 +7,16 @@
 
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
-  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r349-restrained-glow-soft-edge';
+  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260826-r350-r326-soft-glass';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
   const WDA_R310_STYLE_CONTRACT = 'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions';
+  const DESKTOP_LOOP_QUERY = matchMedia('(min-width: 901px) and (pointer: fine)');
   root.dataset.fxMobileRegressionWdaContract = WDA_R310_STYLE_CONTRACT.includes('r310-live-mobile-regressions') ? 'r310-compatible' : 'unknown';
   let qrGeneration = 0;
   let askRetryTimer = 0;
   let askRetryDeadline = 0;
+  let desktopLoopTimer = 0;
+  let desktopLoopRefreshTimer = 0;
 
   function explicitLanguageQuery() {
     const value = new URLSearchParams(location.search).get('lang');
@@ -77,8 +80,8 @@
   function ensureOpticsStyle() {
     const existing = document.querySelector('link[data-fx-mobile-core-optics-r328]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r349-restrained-glow-soft-edge')) existing.href = OPTICS_STYLE_URL;
-      root.dataset.fxCoreMobileOpticsR328 = 'r349-restrained-glow-soft-edge-owner';
+      if (!existing.href.includes('r350-r326-soft-glass')) existing.href = OPTICS_STYLE_URL;
+      root.dataset.fxCoreMobileOpticsR328 = 'r350-r326-soft-glass-owner';
       return;
     }
     const link = document.createElement('link');
@@ -86,7 +89,91 @@
     link.href = OPTICS_STYLE_URL;
     link.dataset.fxMobileCoreOpticsR328 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxCoreMobileOpticsR328 = 'r349-restrained-glow-soft-edge-owner';
+    root.dataset.fxCoreMobileOpticsR328 = 'r350-r326-soft-glass-owner';
+  }
+
+  function desktopLoopBlocked() {
+    return document.body?.classList.contains('fx-organism-panel-open')
+      || root.classList.contains('fx-organism-menu-open')
+      || root.classList.contains('fx-intro-running');
+  }
+
+  function desktopLoopLiveState() {
+    if (!DESKTOP_LOOP_QUERY.matches || desktopLoopBlocked()) return null;
+    if (root.dataset.fxInfiniteController !== 'seamless-v7') return null;
+
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+    const hero = document.querySelector('#main-content > #hero');
+    if (!(bridge instanceof HTMLElement) || !(hero instanceof HTMLElement)) return null;
+
+    const viewportHeight = innerHeight;
+    const bridgeTop = bridge.offsetTop;
+    const sourceTop = hero.offsetTop;
+    const sourceHeight = hero.offsetHeight;
+    const maximum = Math.max(0, root.scrollHeight - viewportHeight);
+    const threshold = bridgeTop + Math.max(36, Math.min(viewportHeight * .18, 180));
+    if (scrollY < threshold || scrollY > maximum + 2) return null;
+
+    return {
+      bridgeTop,
+      sourceTop,
+      sourceHeight,
+      maximum,
+      relative: Math.max(0, Math.min(scrollY - bridgeTop, Math.max(0, sourceHeight - 2)))
+    };
+  }
+
+  function forceDesktopLoopGeometryRecheck(source, expectedLoopCount) {
+    if (!desktopLoopLiveState()) return;
+    if (Number(root.dataset.fxLoopCount || 0) > expectedLoopCount) return;
+
+    root.dataset.fxDesktopLoopIdleGeometryR350 = 'refresh-requested';
+    root.dataset.fxDesktopLoopIdleSourceR350 = source;
+
+    // seamless-v7 already owns the transfer and loop counter. Ask that runtime
+    // to refresh its cached geometry through its normal resize path, then feed
+    // it one synthetic scroll signal. This preserves its own landing/loop state
+    // instead of introducing a second transfer implementation.
+    dispatchEvent(new Event('resize'));
+    clearTimeout(desktopLoopRefreshTimer);
+    desktopLoopRefreshTimer = setTimeout(() => {
+      if (Number(root.dataset.fxLoopCount || 0) > expectedLoopCount) {
+        root.dataset.fxDesktopLoopIdleGeometryR350 = 'native-transfer-won';
+        return;
+      }
+      if (!desktopLoopLiveState()) {
+        root.dataset.fxDesktopLoopIdleGeometryR350 = 'no-longer-at-boundary';
+        return;
+      }
+      root.dataset.fxDesktopLoopIdleGeometryR350 = 'live-recheck-dispatched';
+      dispatchEvent(new Event('scroll'));
+    }, 110);
+  }
+
+  function scheduleDesktopLoopCheck(event, delay = 280) {
+    if (!DESKTOP_LOOP_QUERY.matches) return;
+    if (event && event.isTrusted === false) return;
+    clearTimeout(desktopLoopTimer);
+    const expectedLoopCount = Number(root.dataset.fxLoopCount || 0);
+    desktopLoopTimer = setTimeout(() => {
+      desktopLoopTimer = 0;
+      if (Number(root.dataset.fxLoopCount || 0) > expectedLoopCount) return;
+      if (!desktopLoopLiveState()) return;
+      forceDesktopLoopGeometryRecheck('desktop-physical-end-idle', expectedLoopCount);
+    }, delay);
+  }
+
+  function installDesktopLoopGuard() {
+    if (!DESKTOP_LOOP_QUERY.matches) {
+      root.dataset.fxDesktopLoopIdleGeometryR350 = 'desktop-fine-pointer-skip';
+      return;
+    }
+    if (root.dataset.fxDesktopLoopIdleGeometryR350 === 'armed') return;
+
+    root.dataset.fxDesktopLoopIdleGeometryR350 = 'armed';
+    addEventListener('scroll', event => scheduleDesktopLoopCheck(event, 280), { passive: true });
+    addEventListener('scrollend', event => scheduleDesktopLoopCheck(event, 220), { passive: true });
+    addEventListener('pageshow', () => scheduleDesktopLoopCheck(null, 380), { passive: true });
   }
 
   function closeAskBlockers() {
@@ -229,6 +316,7 @@
     activateCoreCss();
     ensureStyle();
     ensureOpticsStyle();
+    installDesktopLoopGuard();
     syncQr();
     root.dataset.fxMobileRegressionR310 = 'ready';
   }
@@ -237,6 +325,7 @@
   activateCoreCss();
   ensureStyle();
   ensureOpticsStyle();
+  installDesktopLoopGuard();
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot, { once: true });
@@ -279,4 +368,10 @@
   }, true);
 
   for (const delay of [250, 900, 2200]) setTimeout(syncQr, delay);
+
+  addEventListener('pagehide', () => {
+    clearTimeout(askRetryTimer);
+    clearTimeout(desktopLoopTimer);
+    clearTimeout(desktopLoopRefreshTimer);
+  }, { once: true });
 }());
