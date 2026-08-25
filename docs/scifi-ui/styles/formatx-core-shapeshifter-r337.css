@@ -70,6 +70,29 @@ html[data-fx-core-shape-r337="facet"] #hero .fx-crystal-organism-r326-canvas {
       drop-shadow(0 0 1.2px rgba(66,123,255,.008)) !important;
   }
 
+  /* r339 — the header MAG button is an interaction target, not part of the
+     breathing crystal animation. Freeze its physical box so real taps and
+     automated pointer checks see the same stable 50x48 target every frame. */
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button {
+    position: fixed !important;
+    top: 11px !important;
+    right: 122px !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    translate: none !important;
+    will-change: auto !important;
+  }
+
   html[data-fx-core-shape-r337="crystal"] #hero .fx-crystal-organism-r326-canvas {
     transform: scaleX(.945) scaleY(.955) !important;
   }
