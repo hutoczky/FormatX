@@ -4,7 +4,9 @@
 
 .fx-mag-heart-hit-r252 {
   position: absolute;
-  z-index: 12024;
+  /* The WebGL stage is z=3. Keep the heart hit-area directly above the MAG,
+     while canonical ASK / pause / navigation controls remain above it. */
+  z-index: 4;
   left: 50%;
   top: 50%;
   width: min(36vw, 430px);
