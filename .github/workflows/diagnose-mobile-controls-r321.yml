@@ -82,22 +82,29 @@ jobs:
             const badHits=frames.filter(frame=>!(frame.sound.r&&frame.sound.r.w>=44&&frame.sound.r.h>=44&&frame.sound.hitInside));
             if(badHits.length)console.log('SOUND_HIT_STACK',JSON.stringify(badHits[0].sound));
 
-            const mag=page.locator('.fx-reference-mag-button:visible').first();
             const canvas=page.locator('.fx-crystal-organism-r326-canvas:visible').first();
-            assert(await mag.count()===1,'MAG button missing');
             assert(await canvas.count()===1,'r326 crystal canvas missing');
             const seen=[];
             for(let i=0;i<4;i++){
               const before=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
               seen.push(before);
-              await mag.click({timeout:3000});
+              const magTap=await page.evaluate(()=>{
+                const mag=document.querySelector('.fx-reference-mag-button');
+                if(!(mag instanceof HTMLButtonElement))return null;
+                const r=mag.getBoundingClientRect();
+                const x=r.left+r.width/2,y=r.top+r.height/2;
+                const hit=document.elementFromPoint(x,y);
+                return{x,y,w:r.width,h:r.height,hitInside:Boolean(hit&&mag.contains(hit)),hitClass:hit instanceof Element?String(hit.className||''):''};
+              });
+              assert(magTap&&magTap.w>=44&&magTap.h>=44&&magTap.hitInside,'MAG physical target invalid: '+JSON.stringify(magTap));
+              await page.touchscreen.tap(magTap.x,magTap.y);
               await page.waitForFunction(previous=>document.documentElement.dataset.fxCoreShapeR337&&document.documentElement.dataset.fxCoreShapeR337!==previous,before,{timeout:3000});
               assert(await canvas.isVisible(),'crystal canvas disappeared during shape shift');
             }
             const finalShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
             assert(new Set(seen).size===4,'MAG did not cycle through four unique shapes: '+JSON.stringify(seen));
             assert(finalShape===seen[0],'MAG four-step cycle did not return to the starting shape: '+JSON.stringify({seen,finalShape}));
-            console.log('MAG_SHAPE_SHIFT','PASS',JSON.stringify({seen,finalShape}));
+            console.log('MAG_PHYSICAL_SHAPE_SHIFT','PASS',JSON.stringify({seen,finalShape}));
 
             const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
             assert(overflow<=2,'shape shift introduced horizontal overflow: '+overflow);
