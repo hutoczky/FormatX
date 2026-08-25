@@ -48,25 +48,26 @@ html[data-fx-core-shape-r337="facet"] #hero .fx-crystal-organism-r326-canvas {
 }
 
 @media (max-width: 900px), (pointer: coarse) {
-  /* User-reference correction: reduce the blown-out halo and soften the hard
-     perimeter while preserving the cyan living centre. */
+  /* r338 — mobile reference correction: retain the translucent living crystal
+     while preventing centre emission and perimeter Fresnel from reading as a
+     clipped neon silhouette. Desktop remains untouched. */
   html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .93 !important;
+    opacity: .92 !important;
     filter:
-      brightness(.91)
-      contrast(.87)
-      saturate(.89)
-      blur(.30px)
-      drop-shadow(0 0 .42px rgba(126,239,255,.040))
-      drop-shadow(0 0 1.05px rgba(66,123,255,.014)) !important;
+      brightness(.89)
+      contrast(.82)
+      saturate(.87)
+      blur(.42px)
+      drop-shadow(0 0 .45px rgba(126,239,255,.025))
+      drop-shadow(0 0 1.2px rgba(66,123,255,.008)) !important;
     -webkit-filter:
-      brightness(.91)
-      contrast(.87)
-      saturate(.89)
-      blur(.30px)
-      drop-shadow(0 0 .42px rgba(126,239,255,.040))
-      drop-shadow(0 0 1.05px rgba(66,123,255,.014)) !important;
+      brightness(.89)
+      contrast(.82)
+      saturate(.87)
+      blur(.42px)
+      drop-shadow(0 0 .45px rgba(126,239,255,.025))
+      drop-shadow(0 0 1.2px rgba(66,123,255,.008)) !important;
   }
 
   html[data-fx-core-shape-r337="crystal"] #hero .fx-crystal-organism-r326-canvas {
