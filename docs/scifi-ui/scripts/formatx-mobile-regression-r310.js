@@ -7,7 +7,7 @@
 
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
-  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260826-r350-r326-soft-glass';
+  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260826-r351-balanced-mobile-glass';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
   const WDA_R310_STYLE_CONTRACT = 'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions';
   const DESKTOP_LOOP_QUERY = matchMedia('(min-width: 901px) and (pointer: fine)');
@@ -80,8 +80,8 @@
   function ensureOpticsStyle() {
     const existing = document.querySelector('link[data-fx-mobile-core-optics-r328]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r350-r326-soft-glass')) existing.href = OPTICS_STYLE_URL;
-      root.dataset.fxCoreMobileOpticsR328 = 'r350-r326-soft-glass-owner';
+      if (!existing.href.includes('r351-balanced-mobile-glass')) existing.href = OPTICS_STYLE_URL;
+      root.dataset.fxCoreMobileOpticsR328 = 'r351-balanced-mobile-glass-owner';
       return;
     }
     const link = document.createElement('link');
@@ -89,7 +89,7 @@
     link.href = OPTICS_STYLE_URL;
     link.dataset.fxMobileCoreOpticsR328 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxCoreMobileOpticsR328 = 'r350-r326-soft-glass-owner';
+    root.dataset.fxCoreMobileOpticsR328 = 'r351-balanced-mobile-glass-owner';
   }
 
   function desktopLoopBlocked() {
@@ -130,10 +130,6 @@
     root.dataset.fxDesktopLoopIdleGeometryR350 = 'refresh-requested';
     root.dataset.fxDesktopLoopIdleSourceR350 = source;
 
-    // seamless-v7 already owns the transfer and loop counter. Ask that runtime
-    // to refresh its cached geometry through its normal resize path, then feed
-    // it one synthetic scroll signal. This preserves its own landing/loop state
-    // instead of introducing a second transfer implementation.
     dispatchEvent(new Event('resize'));
     clearTimeout(desktopLoopRefreshTimer);
     desktopLoopRefreshTimer = setTimeout(() => {
@@ -358,9 +354,6 @@
     const target = event.target instanceof Element ? event.target : null;
     if (target?.closest('.fx-reference-ask')) {
       queueReferenceAskOpen();
-      // Run once after the complete click dispatch as well. This makes ASK an
-      // explicit open command even when a late legacy listener from the same
-      // event task transiently restores a closed state.
       setTimeout(queueReferenceAskOpen, 0);
     }
     if (!target?.closest('[data-currency]')) return;
