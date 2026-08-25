@@ -2,38 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r333') return;
-  root.dataset.fxAwardRuntime = 'r333';
-  root.dataset.fxFinalValidationR333 = 'mobile-optics-language-first-paint';
-
-  const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
-
-  function activateCriticalReal3dStyle() {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      root.dataset.fxCoreReal3dCssR310 = 'reduced-motion-skip';
-      return;
-    }
-    const link = document.querySelector('link[data-fx-core-real3d="true"]');
-    if (!(link instanceof HTMLLinkElement)) {
-      root.dataset.fxCoreReal3dCssR310 = 'missing';
-      return;
-    }
-    link.removeAttribute('data-fx-deferred-media-r300');
-    link.media = '(prefers-reduced-motion: no-preference)';
-    root.dataset.fxCoreReal3dCssR310 = link.sheet ? 'active' : 'activating';
-  }
-
-  function ensureMobileRegressionR310() {
-    activateCriticalReal3dStyle();
-    if (document.querySelector('script[data-fx-mobile-regression-r310]')) return;
-    const script = document.createElement('script');
-    script.src = REGRESSION_URL;
-    script.async = false;
-    script.dataset.fxMobileRegressionR310 = 'true';
-    document.head.appendChild(script);
-  }
-
-  ensureMobileRegressionR310();
+  if (root.dataset.fxAwardRuntime === 'r318') return;
+  root.dataset.fxAwardRuntime = 'r318';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -41,70 +11,15 @@
     return;
   }
 
-  const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260824-native-orb-r250';
-  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260824-r327-soft-mobile-core';
-  const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
-  const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
-  const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
-  const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260824-native-orb-r250';
-  const CONTROL_OWNER_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260824-instant-award-r251';
-  const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260822-r291-nav-state';
-  const DIALOGUE_STYLE_URL = '/scifi-ui/styles/formatx-dialogue-open-r287.css?v=20260822-r287-open-state';
-  const DIALOGUE_OWNER_URL = '/scifi-ui/scripts/formatx-dialogue-render-owner-r273.js?v=20260822-r287-open-state';
+  const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
+  const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
+  const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260821-r264-single-owner';
+  const OWNER_SCRIPT_URL = '/scifi-ui/scripts/formatx-control-owner-r264.js?v=20260821-r264-single-owner';
+  const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260821-r265-nav-state-owner';
+  const CRYSTAL_STYLE_URL = '/scifi-ui/styles/formatx-crystal-portal-r318.css?v=20260825-r318-crystal-site-core';
+  const CRYSTAL_SCRIPT_URL = '/scifi-ui/scripts/formatx-crystal-portal-r318.js?v=20260825-r318-crystal-site-core';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
-
-  function openReferenceDialogue() {
-    const trigger = document.querySelector('.fx-organism-thought-trigger');
-
-    if (root.dataset.fxOrganismDialogueEnabled === 'false' && trigger instanceof HTMLButtonElement) {
-      trigger.click();
-      window.FormatXCoreMobileV69?.pulse?.();
-      root.dataset.fxReferenceAskActionR293 = 'reenabled-through-organism-owner';
-      return true;
-    }
-
-    if (typeof window.FormatXOrganismVoice?.open === 'function') {
-      window.FormatXOrganismVoice.open();
-      window.FormatXCoreMobileV69?.pulse?.();
-      root.dataset.fxReferenceAskActionR293 = 'opened-through-public-api';
-      return true;
-    }
-
-    if (trigger instanceof HTMLButtonElement) {
-      trigger.click();
-      window.FormatXCoreMobileV69?.pulse?.();
-      root.dataset.fxReferenceAskActionR293 = 'opened-through-organism-owner';
-      return true;
-    }
-    return false;
-  }
-
-  function ensureReferenceAskOwner() {
-    if (root.dataset.fxReferenceAskOwnerR284 === 'ready') return;
-    root.dataset.fxReferenceAskOwnerR284 = 'ready';
-
-    document.addEventListener('click', event => {
-      const target = event.target instanceof Element ? event.target.closest('.fx-reference-ask') : null;
-      if (!(target instanceof HTMLButtonElement)) return;
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      if (openReferenceDialogue()) return;
-
-      if (root.dataset.fxImmersive !== 'active') {
-        root.dataset.fxImmersive = 'active';
-        root.dataset.fxImmersiveSource = 'reference-ask-r284';
-        dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
-          detail: { source: 'reference-ask-r284' }
-        }));
-      }
-
-      queueMicrotask(openReferenceDialogue);
-      setTimeout(openReferenceDialogue, 140);
-    }, true);
-  }
 
   function ensureStyle() {
     if (document.querySelector('link[data-fx-award-runtime-style-r206]')) return;
@@ -113,37 +28,6 @@
     link.href = STYLE_URL;
     link.dataset.fxAwardRuntimeStyleR206 = 'true';
     document.head.appendChild(link);
-  }
-
-  function ensureCoreSoftening() {
-    if (!matchMedia('(max-width: 900px)').matches) return;
-    const existing = document.querySelector('link[data-fx-mobile-core-softening-r322]');
-    if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r327-soft-mobile-core')) existing.href = CORE_SOFTEN_STYLE_URL;
-      root.dataset.fxMobileCoreOpticsR322 = 'r327-restrained-bloom-soft-edge';
-      return;
-    }
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = CORE_SOFTEN_STYLE_URL;
-    link.dataset.fxMobileCoreSofteningR322 = 'true';
-    document.head.appendChild(link);
-    root.dataset.fxMobileCoreOpticsR322 = 'r327-restrained-bloom-soft-edge';
-  }
-
-  function ensureOrganismCoreOwner() {
-    if (root.dataset.fxOrganismDialogueOwner === 'ask-only-r326') return;
-    if (!document.body) {
-      document.addEventListener('DOMContentLoaded', ensureOrganismCoreOwner, { once: true });
-      return;
-    }
-    const existing = document.querySelector('script[data-fx-organism-core-r326]');
-    if (existing) return;
-    const script = document.createElement('script');
-    script.src = ORGANISM_CORE_URL;
-    script.async = false;
-    script.dataset.fxOrganismCoreR326 = 'true';
-    document.head.appendChild(script);
   }
 
   function ensureOwnerStyle() {
@@ -155,37 +39,26 @@
     document.head.appendChild(link);
   }
 
-  function ensureDialogueSurface() {
-    if (!document.querySelector('link[data-fx-dialogue-open-r287]')) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = DIALOGUE_STYLE_URL;
-      link.dataset.fxDialogueOpenR287 = 'true';
-      document.head.appendChild(link);
-    }
-
-    if (!document.body) {
-      document.addEventListener('DOMContentLoaded', ensureDialogueSurface, { once: true });
-      return;
-    }
-    if (document.querySelector('script[data-fx-dialogue-render-owner-r287]')) return;
-    const script = document.createElement('script');
-    script.src = DIALOGUE_OWNER_URL;
-    script.async = true;
-    script.dataset.fxDialogueRenderOwnerR287 = 'true';
-    document.head.appendChild(script);
+  function ensureCrystalStyle() {
+    if (document.querySelector('link[data-fx-crystal-style-r318]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = CRYSTAL_STYLE_URL;
+    link.dataset.fxCrystalStyleR318 = 'true';
+    document.head.appendChild(link);
   }
 
-  function ensureGeometryGuard() {
+  function ensureCrystal() {
     if (!document.body) {
-      document.addEventListener('DOMContentLoaded', ensureGeometryGuard, { once: true });
+      document.addEventListener('DOMContentLoaded', ensureCrystal, { once: true });
       return;
     }
-    if (document.querySelector('script[data-fx-geometry-guard-r286]')) return;
+    ensureCrystalStyle();
+    if (document.querySelector('script[data-fx-crystal-portal-r318]')) return;
     const script = document.createElement('script');
-    script.src = GUARD_URL;
+    script.src = CRYSTAL_SCRIPT_URL;
     script.async = true;
-    script.dataset.fxGeometryGuardR286 = 'true';
+    script.dataset.fxCrystalPortalR318 = 'true';
     document.head.appendChild(script);
   }
 
@@ -202,41 +75,45 @@
     document.head.appendChild(script);
   }
 
-  function ensureControlOwner() {
-    ensureOwnerStyle();
+  function ensureOwner() {
     if (!document.body) {
-      document.addEventListener('DOMContentLoaded', ensureControlOwner, { once: true });
+      document.addEventListener('DOMContentLoaded', ensureOwner, { once: true });
       return;
     }
-    if (document.querySelector('script[data-fx-control-owner-r268]')) {
+    ensureOwnerStyle();
+    const existing = document.querySelector('script[data-fx-control-owner-r264]');
+    if (existing) {
       ensureNavOwner();
+      ensureCrystal();
       return;
     }
     const script = document.createElement('script');
-    script.src = CONTROL_OWNER_URL;
+    script.src = OWNER_SCRIPT_URL;
     script.async = true;
-    script.dataset.fxControlOwnerR268 = 'true';
-    script.addEventListener('load', ensureNavOwner, { once: true });
-    script.addEventListener('error', ensureNavOwner, { once: true });
+    script.dataset.fxControlOwnerR264 = 'true';
+    script.addEventListener('load', () => { ensureNavOwner(); ensureCrystal(); }, { once: true });
+    script.addEventListener('error', () => { ensureNavOwner(); ensureCrystal(); }, { once: true });
     document.head.appendChild(script);
   }
 
   function ensureControls() {
-    ensureOwnerStyle();
     if (!document.body) {
       document.addEventListener('DOMContentLoaded', ensureControls, { once: true });
       return;
     }
-    if (document.querySelector('script[data-fx-award-runtime-controls-r206]')) {
-      ensureControlOwner();
+    ensureOwnerStyle();
+    ensureCrystalStyle();
+    const existing = document.querySelector('script[data-fx-award-runtime-controls-r206]');
+    if (existing) {
+      ensureOwner();
       return;
     }
     const script = document.createElement('script');
     script.src = CONTROLS_URL;
     script.async = true;
     script.dataset.fxAwardRuntimeControlsR206 = 'true';
-    script.addEventListener('load', ensureControlOwner, { once: true });
-    script.addEventListener('error', ensureControlOwner, { once: true });
+    script.addEventListener('load', ensureOwner, { once: true });
+    script.addEventListener('error', ensureOwner, { once: true });
     document.head.appendChild(script);
   }
 
@@ -262,19 +139,12 @@
     return true;
   }
 
-  ensureReferenceAskOwner();
   ensureStyle();
-  ensureCoreSoftening();
-  ensureOrganismCoreOwner();
   ensureOwnerStyle();
-  ensureDialogueSurface();
-  ensureGeometryGuard();
+  ensureCrystalStyle();
   ensureControls();
   root.dataset.fxAwardSound = 'muted-default-visible-control';
-
-  addEventListener('resize', ensureCoreSoftening, { passive: true });
-  addEventListener('orientationchange', ensureCoreSoftening, { passive: true });
-  addEventListener('formatx:organismvoiceready', ensureOrganismCoreOwner, { passive: true });
+  root.dataset.fxAwardCrystal = 'interactive-site-core-r318';
 
   if (!ensureGpu()) {
     const observer = new MutationObserver(() => {
