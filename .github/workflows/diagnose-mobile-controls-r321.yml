@@ -55,17 +55,17 @@ jobs:
             await page.waitForTimeout(800);
 
             const frames=await page.evaluate(async()=>{
+              const describe=e=>e?{tag:e.tagName,id:e.id||'',cls:typeof e.className==='string'?e.className.slice(0,180):'',pointerEvents:getComputedStyle(e).pointerEvents,z:getComputedStyle(e).zIndex,position:getComputedStyle(e).position}:null;
               const snap=()=>{
                 const get=s=>document.querySelector(s);
                 const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,top:r.top,bottom:r.bottom,left:r.left,right:r.right}};
-                const style=e=>{if(!e)return null;const s=getComputedStyle(e);return{position:s.position,display:s.display,visibility:s.visibility,opacity:s.opacity,pointerEvents:s.pointerEvents,transform:s.transform,translate:s.translate,width:s.width,height:s.height}};
                 const sound=get('.fx-three-sound');
                 const controls=get('#hero .fx-reference-controls-r204');
-                const grid=get('#hero > .hero-grid');
-                const space=get('#hero .hero-space');
                 const sr=sound?.getBoundingClientRect();
-                const hit=sr?document.elementFromPoint(sr.left+sr.width/2,sr.top+sr.height/2):null;
-                return{sound:{r:rect(sound),s:style(sound),hitInside:Boolean(sound&&hit&&sound.contains(hit))},controls:{r:rect(controls),s:style(controls)},grid:{r:rect(grid)},space:{r:rect(space)},datasets:{layout:document.documentElement.dataset.fxReferenceControlLayout||'',owner:document.documentElement.dataset.fxControlOwnerR268||'',shape:document.documentElement.dataset.fxCoreShapeR337||'',renderer:document.documentElement.dataset.fxCrystalOrganismR326||''}};
+                const x=sr?sr.left+sr.width/2:0,y=sr?sr.top+sr.height/2:0;
+                const stack=sr?document.elementsFromPoint(x,y).slice(0,8).map(describe):[];
+                const hit=sr?document.elementFromPoint(x,y):null;
+                return{sound:{r:rect(sound),hitInside:Boolean(sound&&hit&&sound.contains(hit)),hit:describe(hit),stack},controls:{r:rect(controls)},datasets:{layout:document.documentElement.dataset.fxReferenceControlLayout||'',owner:document.documentElement.dataset.fxControlOwnerR268||'',shape:document.documentElement.dataset.fxCoreShapeR337||'',renderer:document.documentElement.dataset.fxCrystalOrganismR326||''}};
               };
               const out=[];
               for(let i=0;i<24;i++){
@@ -79,11 +79,8 @@ jobs:
             const motion={xSpan:span(xs),ySpan:span(ys),wSpan:span(ws),hSpan:span(hs)};
             console.log('CONTROL_MOTION_SUMMARY',JSON.stringify(Object.fromEntries(Object.entries(motion).map(([k,v])=>[k,round(v)]))));
             assert(motion.xSpan<=1.5&&motion.ySpan<=1.5&&motion.wSpan<=1.5&&motion.hSpan<=1.5,'mobile controls are not geometrically stable: '+JSON.stringify(motion));
-            assert(frames.every(frame=>frame.sound.r&&frame.sound.r.w>=44&&frame.sound.r.h>=44&&frame.sound.hitInside),'SOUND control is not continuously actionable');
-
-            const sound=page.locator('.fx-three-sound:visible').first();
-            await sound.click({trial:true,timeout:3000});
-            console.log('SOUND_TRIAL_CLICK','PASS');
+            const badHits=frames.filter(frame=>!(frame.sound.r&&frame.sound.r.w>=44&&frame.sound.r.h>=44&&frame.sound.hitInside));
+            if(badHits.length)console.log('SOUND_HIT_STACK',JSON.stringify(badHits[0].sound));
 
             const mag=page.locator('.fx-reference-mag-button:visible').first();
             const canvas=page.locator('.fx-crystal-organism-r326-canvas:visible').first();
@@ -104,6 +101,10 @@ jobs:
 
             const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
             assert(overflow<=2,'shape shift introduced horizontal overflow: '+overflow);
+            assert(badHits.length===0,'SOUND control is not continuously actionable: '+JSON.stringify(badHits[0]?.sound||{}));
+            const sound=page.locator('.fx-three-sound:visible').first();
+            await sound.click({trial:true,timeout:3000});
+            console.log('SOUND_TRIAL_CLICK','PASS');
             await ctx.close();await browser.close();
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
