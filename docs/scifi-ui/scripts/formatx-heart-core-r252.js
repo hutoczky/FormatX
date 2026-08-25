@@ -26,6 +26,15 @@
     document.head.appendChild(link);
   }
 
+  function syncPureWebglComposition() {
+    const renderer = root.dataset.fxCoreRenderer || '';
+    const real3d = root.dataset.fxCoreReal3d || '';
+    if (!/webgl|mechanical-orb/i.test(renderer) || !/ready|visible|webgl/i.test(real3d)) return false;
+    root.dataset.fxCoreCompositionR285 = 'pure-webgl3d-no-2d-overlays';
+    root.dataset.fxCoreCompositionRevisionR252 = 'native-mechanical-orb-r250-no-2d-overlays';
+    return true;
+  }
+
   function closeConflictingUi() {
     root.classList.remove('fx-organism-menu-open');
     const nav = document.getElementById('main-nav');
@@ -134,6 +143,7 @@
       bindingFrame = 0;
       installHeartHitTarget();
       pruneMobileReferenceMirror();
+      syncPureWebglComposition();
     });
   }
 
@@ -211,6 +221,7 @@
     root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
     installHeartHitTarget();
     pruneMobileReferenceMirror();
+    syncPureWebglComposition();
 
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('scrollend', () => transferToRealCore('scrollend'), { passive: true });
@@ -226,6 +237,8 @@
       'formatx:loopgeometryrefresh',
       'pageshow'
     ]) addEventListener(eventName, scheduleBinding, { passive: true });
+
+    addEventListener('formatx:real3dready', syncPureWebglComposition, { passive: true });
 
     const observer = new MutationObserver(scheduleBinding);
     observer.observe(document.body, { childList: true, subtree: true });
