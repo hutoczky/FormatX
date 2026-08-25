@@ -1,40 +1,89 @@
-/* FormatX r320/r347 — stable mobile hero interaction geometry.
-   The canonical controls are interactive UI, not decorative motion. Keep their
-   layout boxes stationary and physically visible so touch/click hit testing
-   cannot race late audio/control ownership changes while the WebGL MAG remains
-   independently animated.
+/* FormatX r320/r348 — stable mobile hero interaction geometry.
+   r268 mounts the canonical controls inside .hero-space. This file is the final
+   mobile interaction owner: SOUND / ASK / PAUSE stay visible, stationary and
+   horizontally centred below the living r326 MAG.
 
-   r347 also retires the legacy Transcend aurora lens on the mobile r317 WebGL
-   path. That old full-screen 2D layer contains 58vw x 24vh anonymous <i>
-   elements animated with rotate/skew transforms; their transformed bounding
-   boxes can widen document.body even though the current MAG no longer needs
-   that lens. Removing the obsolete lens from the mobile render tree eliminates
-   the overflow source and avoids redundant compositing work. */
+   r347 also retires the legacy Transcend aurora lens on the mobile WebGL path.
+   The old full-screen 2D layer is decorative legacy output and must not affect
+   paint bounds, hit testing or compositor cost. */
 @media (max-width: 900px), (pointer: coarse) {
-  html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r264,
-  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-reference-rail-r264,
-  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
+  /* Beat the older r250 vertical-rail rules by matching the real r268 parent
+     and the canonical r264 class. This is deliberately geometry-only. */
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
+    position: absolute !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: clamp(22px, 3.2svh, 34px) !important;
+    left: 50% !important;
+    inset: auto auto clamp(22px, 3.2svh, 34px) 50% !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-rows: 50px !important;
+    align-items: center !important;
+    justify-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    box-sizing: border-box !important;
+    width: max-content !important;
+    min-width: 178px !important;
+    max-width: calc(100vw - 24px) !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+    z-index: 12040 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
     animation: none !important;
     transition: none !important;
     will-change: auto !important;
   }
 
-  html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r264 {
-    display: grid !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail-r264,
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail {
+    display: contents !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
     overflow: visible !important;
-    isolation: isolate !important;
+    transform: none !important;
+    translate: none !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
   }
 
-  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause {
+    position: relative !important;
+    inset: auto !important;
     display: grid !important;
     place-items: center !important;
+    box-sizing: border-box !important;
+    flex: 0 0 50px !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     transform: none !important;
     translate: none !important;
     opacity: 1 !important;
@@ -42,26 +91,26 @@
     touch-action: manipulation !important;
     pointer-events: auto !important;
     z-index: 3 !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
   }
 
-  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound {
-    width: 50px !important;
-    min-width: 50px !important;
-    max-width: 50px !important;
-    height: 50px !important;
-    min-height: 50px !important;
-    max-height: 50px !important;
+  /* r250 explicitly hid SOUND on mobile. r348 restores the user-facing
+     three-control contract and gives the sound toggle a real hit rectangle. */
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound.fx-control-owner-r264,
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
   /* Keep ASK's own visual glyph bounded. Its KÉRDEZZ/ASK caption intentionally
-     sits below the circular button and therefore the button itself is not clipped. */
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask > i {
+     sits below the circular button and must not affect the 50px hit target. */
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask > i {
     position: relative !important;
     inset: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
     display: block !important;
     box-sizing: border-box !important;
     flex: 0 0 17px !important;
@@ -85,8 +134,21 @@
     pointer-events: none !important;
   }
 
-  /* r347: r317 is the only mobile MAG renderer. The old Transcend aurora lens
-     is decorative legacy output and must not contribute paint or scroll bounds. */
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask > span {
+    top: 56px !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    display: block !important;
+    width: max-content !important;
+    max-width: 92px !important;
+    pointer-events: none !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+  }
+
+  /* r347: the old Transcend aurora lens must not contribute paint, hit testing
+     or scroll bounds once the native WebGL MAG is active. */
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] body .fx-transcend-lens,
   html[data-fx-core-mobile-r99="ready-v69"] body .fx-transcend-lens,
   html[data-fx-core-real3d="ready-v69"] body .fx-transcend-lens {
@@ -107,10 +169,29 @@
     transform: none !important;
   }
 
-  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound:active,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask:active,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause:active {
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound:active,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask:active,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause:active {
     transform: none !important;
     translate: none !important;
+  }
+}
+
+@media (max-width: 370px) {
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
+    grid-template-columns: repeat(3, 48px) !important;
+    gap: 12px !important;
+    min-width: 168px !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
   }
 }
