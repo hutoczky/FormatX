@@ -1,4 +1,4 @@
-/* FormatX r349 — restrained mobile MAG glow + soft glass perimeter.
+/* FormatX r350 — restrained mobile MAG glow + soft glass perimeter.
    Mobile-only final compositing pass. Keep the validated crystal geometry and
    internal facets, but reduce centre bloom, trim long-range spill and soften
    the silhouette on high-density phone displays. Desktop remains untouched. */
@@ -22,15 +22,14 @@
     isolation: isolate !important;
   }
 
-  /* Safe fallback while the renderer marker settles. */
+  /* Safe fallback while an older renderer marker settles. */
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
     opacity: .67 !important;
     filter: brightness(.63) contrast(.71) saturate(.78) blur(1.25px) !important;
     -webkit-filter: brightness(.63) contrast(.71) saturate(.78) blur(1.25px) !important;
   }
 
-  /* r349 final owner: lower the electric bloom and use enough optical blur to
-     turn the hard raster cut-out into a glass edge without erasing the facets. */
+  /* Legacy r99 final owner. */
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
     opacity: .60 !important;
     filter:
@@ -43,6 +42,29 @@
       contrast(.64)
       saturate(.72)
       blur(1.95px) !important;
+  }
+
+  /* r350 current r326 owner. The previous r349 pass only targeted the retired
+     r317/r99 canvas, so the live r326 crystal could still render with a hot
+     centre and a hard Fresnel silhouette. Keep its facets readable, but lower
+     contrast/energy and spread the edge over sub-pixel glass instead of a neon
+     line. */
+  html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: .88 !important;
+    mix-blend-mode: normal !important;
+    filter:
+      brightness(.85)
+      contrast(.74)
+      saturate(.84)
+      blur(.68px)
+      drop-shadow(0 0 .32px rgba(118,228,255,.018)) !important;
+    -webkit-filter:
+      brightness(.85)
+      contrast(.74)
+      saturate(.84)
+      blur(.68px)
+      drop-shadow(0 0 .32px rgba(118,228,255,.018)) !important;
   }
 
   /* Attenuate the hot centre and the outer spill while leaving the middle body
@@ -110,6 +132,23 @@
     opacity: .56 !important;
     filter: brightness(.48) contrast(.61) saturate(.68) blur(2.25px) !important;
     -webkit-filter: brightness(.48) contrast(.61) saturate(.68) blur(2.25px) !important;
+  }
+
+  html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: .86 !important;
+    filter:
+      brightness(.83)
+      contrast(.71)
+      saturate(.82)
+      blur(.80px)
+      drop-shadow(0 0 .28px rgba(118,228,255,.014)) !important;
+    -webkit-filter:
+      brightness(.83)
+      contrast(.71)
+      saturate(.82)
+      blur(.80px)
+      drop-shadow(0 0 .28px rgba(118,228,255,.014)) !important;
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage::after {
