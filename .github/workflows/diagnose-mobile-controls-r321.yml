@@ -102,9 +102,24 @@ jobs:
             const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
             assert(overflow<=2,'shape shift introduced horizontal overflow: '+overflow);
             assert(badHits.length===0,'SOUND control is not continuously actionable: '+JSON.stringify(badHits[0]?.sound||{}));
-            const sound=page.locator('.fx-three-sound:visible').first();
-            await sound.click({trial:true,timeout:3000});
-            console.log('SOUND_TRIAL_CLICK','PASS');
+
+            // Use the same physical input path as a phone instead of Playwright's
+            // locator.click() auto-scroll path. The geometric check above already
+            // proves the SOUND circle is visible/top-most on every sampled frame;
+            // this tap additionally proves Chromium dispatches a real click to it.
+            const soundTap=await page.evaluate(()=>{
+              const sound=document.querySelector('.fx-three-sound');
+              if(!(sound instanceof HTMLButtonElement))return null;
+              const r=sound.getBoundingClientRect();
+              window.__fxSoundPhysicalTapCount=0;
+              sound.addEventListener('click',()=>{window.__fxSoundPhysicalTapCount+=1;},{once:true});
+              return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height};
+            });
+            assert(soundTap&&soundTap.w>=44&&soundTap.h>=44,'SOUND physical tap target missing or too small: '+JSON.stringify(soundTap));
+            await page.touchscreen.tap(soundTap.x,soundTap.y);
+            await page.waitForFunction(()=>window.__fxSoundPhysicalTapCount===1,null,{timeout:3000});
+            console.log('SOUND_PHYSICAL_TAP','PASS');
+
             await ctx.close();await browser.close();
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
