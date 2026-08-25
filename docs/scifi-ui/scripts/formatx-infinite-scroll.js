@@ -6,12 +6,13 @@
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260823-r316-dcl-safe-geometry';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
+  const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260825-r252';
   let mobileGeometryTimer = 0;
   let desktopGeometryTimer = 0;
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r316-dcl-safe';
+  root.dataset.fxScrollBootstrapRevision = 'r252-heart-core-r316-dcl-safe';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
@@ -20,6 +21,15 @@
     link.href = MOBILE_LOOP_STYLE;
     link.dataset.fxMobileLoopBridgeOverride = 'true';
     document.head.appendChild(link);
+  }
+
+  function ensureHeartCoreRuntime() {
+    if (document.querySelector('script[data-fx-heart-core-r252]')) return;
+    const script = document.createElement('script');
+    script.src = HEART_CORE_RUNTIME;
+    script.async = false;
+    script.dataset.fxHeartCoreR252 = 'true';
+    document.head.appendChild(script);
   }
 
   function requestLoopGeometryRefresh(source) {
@@ -148,6 +158,7 @@
     document.head.appendChild(script);
   }
 
+  ensureHeartCoreRuntime();
   if (MOBILE_QUERY.matches) installSeamlessRuntime('mobile');
   else installSeamlessRuntime('desktop');
 }());
