@@ -9,9 +9,6 @@
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
   const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r349-restrained-glow-soft-edge';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
-  // Historical WDA lineage marker: the r310 QR/style contract remains the
-  // compatibility baseline, while the active style revision above carries the
-  // current r327 organic geometry without changing that delivery contract.
   const WDA_R310_STYLE_CONTRACT = 'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions';
   root.dataset.fxMobileRegressionWdaContract = WDA_R310_STYLE_CONTRACT.includes('r310-live-mobile-regressions') ? 'r310-compatible' : 'unknown';
   let qrGeneration = 0;
@@ -111,22 +108,33 @@
     }
   }
 
+  function dialogueIsOpen() {
+    const bubble = document.querySelector('.fx-organism-thought');
+    return root.dataset.fxOrganismThought === 'open'
+      && bubble instanceof HTMLElement
+      && bubble.hidden === false
+      && bubble.getAttribute('aria-hidden') !== 'true';
+  }
+
   function tryOpenReferenceAsk() {
     closeAskBlockers();
-    if (typeof window.FormatXOrganismVoice?.open === 'function') {
-      window.FormatXOrganismVoice.open();
-      window.FormatXCoreMobileV69?.pulse?.();
-      root.dataset.fxReferenceAskEarlyOwnerR334 = 'opened';
-      if (askRetryTimer) clearTimeout(askRetryTimer);
-      askRetryTimer = 0;
-      return true;
+    const api = window.FormatXOrganismVoice;
+    if (typeof api?.open !== 'function') return false;
+
+    if (root.dataset.fxOrganismDialogueEnabled === 'false' && typeof api.setEnabled === 'function') {
+      api.setEnabled(true);
+      root.dataset.fxReferenceAskEarlyOwnerR334 = 'reenabled';
     }
-    return false;
+
+    api.open();
+    window.FormatXCoreMobileV69?.pulse?.();
+    if (!dialogueIsOpen()) return false;
+
+    root.dataset.fxReferenceAskEarlyOwnerR334 = 'opened-stable';
+    return true;
   }
 
   function queueReferenceAskOpen() {
-    if (tryOpenReferenceAsk()) return;
-
     if (root.dataset.fxImmersive !== 'active') {
       root.dataset.fxImmersive = 'active';
       root.dataset.fxImmersiveSource = 'reference-ask-early-r334';
@@ -137,13 +145,19 @@
 
     askRetryDeadline = performance.now() + 1600;
     if (askRetryTimer) clearTimeout(askRetryTimer);
+
     const retry = () => {
       askRetryTimer = 0;
-      if (tryOpenReferenceAsk() || performance.now() >= askRetryDeadline) return;
+      if (tryOpenReferenceAsk()) return;
+      if (performance.now() >= askRetryDeadline) {
+        root.dataset.fxReferenceAskEarlyOwnerR334 = 'open-timeout';
+        return;
+      }
       askRetryTimer = setTimeout(retry, 45);
     };
-    askRetryTimer = setTimeout(retry, 0);
-    root.dataset.fxReferenceAskEarlyOwnerR334 = 'waiting-for-dialogue-runtime';
+
+    retry();
+    if (!dialogueIsOpen()) root.dataset.fxReferenceAskEarlyOwnerR334 = 'waiting-for-dialogue-runtime';
   }
 
   function selectedCurrency() {
@@ -235,14 +249,9 @@
   }
 
   addEventListener('formatx:organismvoiceready', () => {
-    if (root.dataset.fxReferenceAskEarlyOwnerR334 === 'waiting-for-dialogue-runtime') tryOpenReferenceAsk();
+    if (root.dataset.fxReferenceAskEarlyOwnerR334 === 'waiting-for-dialogue-runtime') queueReferenceAskOpen();
   }, { passive: true });
 
-  // The reference ASK can become visible before the deferred Organism voice
-  // runtime has finished installing. Pointerdown is deliberately earlier than
-  // the later click owners: a control that is visibly tappable is immediately
-  // actionable, while later click handlers remain idempotent because they call
-  // the public open() API rather than toggling the dialogue.
   document.addEventListener('pointerdown', event => {
     const target = event.target instanceof Element ? event.target : null;
     if (!target?.closest('.fx-reference-ask')) return;
@@ -258,7 +267,13 @@
 
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
-    if (target?.closest('.fx-reference-ask')) queueReferenceAskOpen();
+    if (target?.closest('.fx-reference-ask')) {
+      queueReferenceAskOpen();
+      // Run once after the complete click dispatch as well. This makes ASK an
+      // explicit open command even when a late legacy listener from the same
+      // event task transiently restores a closed state.
+      setTimeout(queueReferenceAskOpen, 0);
+    }
     if (!target?.closest('[data-currency]')) return;
     queueMicrotask(syncQr);
   }, true);
