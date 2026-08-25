@@ -1,0 +1,90 @@
+name: Validate r352 cross-device MAG render
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
+      - 'docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
+      - '.github/workflows/validate-r352-cross-device-mag.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/r352" && cd "$RUNNER_TEMP/r352"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Render desktop and mobile MAG
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r352-server.log" 2>&1 &
+          server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          cd "$RUNNER_TEMP/r352"
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const out = path.join(process.env.GITHUB_WORKSPACE, 'r352-render');
+          fs.mkdirSync(out, {recursive:true});
+          const assert=(v,m)=>{if(!v)throw new Error(m)};
+
+          async function run(profile){
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({
+              viewport:profile.viewport,
+              deviceScaleFactor:profile.mobile?2:1,
+              isMobile:profile.mobile,
+              hasTouch:profile.mobile,
+              locale:'hu-HU',
+              colorScheme:'dark'
+            });
+            const page=await context.newPage();
+            await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready' && document.querySelector('.fx-crystal-organism-r326-canvas'),null,{timeout:45000});
+            await page.waitForTimeout(1200);
+            const state=await page.evaluate(()=>{
+              const c=document.querySelector('.fx-crystal-organism-r326-canvas');
+              const s=getComputedStyle(c);
+              const r=c.getBoundingClientRect();
+              return {
+                renderer:document.documentElement.dataset.fxCoreRenderer||'',
+                optics:document.documentElement.dataset.fxCoreMobileOpticsR328||'',
+                width:r.width,height:r.height,
+                scale:s.scale,transform:s.transform,filter:s.filter,opacity:s.opacity,
+                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
+              };
+            });
+            console.log(profile.name, JSON.stringify(state));
+            assert(state.width>100 && state.height>100, profile.name+' MAG canvas too small or missing');
+            assert(state.overflow<=2, profile.name+' horizontal overflow: '+state.overflow);
+            assert(state.filter.includes('blur('), profile.name+' r352 soft edge filter missing');
+            assert(state.optics.includes('r352-cross-device-glass'), profile.name+' r352 optics owner missing: '+state.optics);
+            await page.locator('#hero').screenshot({path:path.join(out,profile.name+'.png')});
+            await context.close();
+            await browser.close();
+          }
+
+          (async()=>{
+            await run({name:'desktop-1440x900',viewport:{width:1440,height:900},mobile:false});
+            await run({name:'mobile-390x844',viewport:{width:390,height:844},mobile:true});
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r352-cross-device-mag-render
+          path: r352-render/
+          retention-days: 14
