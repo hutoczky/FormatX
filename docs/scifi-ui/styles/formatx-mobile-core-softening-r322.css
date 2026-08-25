@@ -1,9 +1,6 @@
-/* FormatX r335 — VIP mobile MAG optical finishing.
-   Preserve the validated r317 geometry and WebGL material, but move the final
-   composite away from hard polygon edges and overdriven bloom. The result is a
-   quieter premium ice-glass core: lower contrast, restrained centre energy,
-   feathered silhouette and very subtle bioluminescent travel. Desktop is left
-   untouched. */
+/* FormatX r336 — VIP mobile MAG optical finishing and viewport containment.
+   Preserve the current r326 WebGL organism geometry, soften only the final
+   composite and guarantee that the physical stage never widens the document. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage {
@@ -95,6 +92,31 @@
 }
 
 @media (max-width: 430px) {
+  /* r336: r244 owns only the Y transform. Position and width remain CSS-owned,
+     so center the r326 stage against the viewport mathematically instead of
+     using translateX. This survives the inline scaleY(.97) owner and removes
+     the measured ~3px horizontal document expansion at 390px. */
+  html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage {
+    left: calc((100% - 100vw) / 2) !important;
+    right: auto !important;
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage > .fx-core-mobile-v55-canvas.fx-crystal-organism-r326-canvas {
+    inset: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
     opacity: .86 !important;
     filter:
