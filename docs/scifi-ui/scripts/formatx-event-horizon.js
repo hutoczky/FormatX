@@ -24,25 +24,27 @@
   const PULSE_STYLE_URL = './styles/formatx-core-pulse-r312.css?v=20260823-r312-living-pulse';
   const FIRST_PAINT_STYLE_URL = './styles/formatx-first-paint-r206.css?v=20260825-r306-static-production-parity';
   const FIRST_FRAME_STYLE_URL = './styles/formatx-first-frame-geometry-r274.css?v=20260825-r306-static-production-parity';
+  const FIRST_CONTROL_STYLE_URL = './styles/formatx-first-paint-controls-r306.css?v=20260825-r306-prepaint-final-geometry';
+  const MOBILE_LAYOUT_STYLE_URL = './styles/formatx-mobile-layout-r207.css?v=20260824-native-orb-r250';
 
-  function ensureEarlyStyle(selector, attribute, href) {
+  function ensureEarlyStyle(selector, attribute, href, media) {
     if (document.querySelector(selector)) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = href;
+    if (media) link.media = media;
     link.setAttribute(attribute, 'true');
     link.fetchPriority = 'high';
     document.head.appendChild(link);
   }
 
-  function important(node, property, value) {
-    if (!(node instanceof HTMLElement)) return;
-    node.style.setProperty(property, value, 'important');
-  }
-
   function stabilizeReferenceFirstPaint() {
     ensureEarlyStyle('link[data-fx-first-paint-r206]', 'data-fx-first-paint-r206', FIRST_PAINT_STYLE_URL);
     ensureEarlyStyle('link[data-fx-first-frame-geometry-r306]', 'data-fx-first-frame-geometry-r306', FIRST_FRAME_STYLE_URL);
+    ensureEarlyStyle('link[data-fx-first-paint-controls-r306]', 'data-fx-first-paint-controls-r306', FIRST_CONTROL_STYLE_URL);
+    if (EARLY_REFERENCE_MOBILE) {
+      ensureEarlyStyle('link[data-fx-mobile-layout-r207]', 'data-fx-mobile-layout-r207', MOBILE_LAYOUT_STYLE_URL, '(max-width: 900px)');
+    }
 
     const hero = document.getElementById('hero');
     const grid = hero?.querySelector(':scope > .hero-grid');
@@ -73,9 +75,9 @@
     if (!(controls instanceof HTMLElement)) {
       controls = document.createElement('div');
       controls.className = 'fx-reference-controls-r204 fx-reference-controls-r264';
-      controls.setAttribute('aria-label', strings.controls);
     }
     controls.classList.add('fx-reference-controls-r264');
+    controls.setAttribute('aria-label', strings.controls);
 
     let sound = controls.querySelector(':scope > .fx-three-sound') || document.querySelector('.fx-three-sound');
     if (!(sound instanceof HTMLButtonElement)) {
@@ -119,8 +121,8 @@
       pause.className = 'fx-reference-pause';
       pause.textContent = 'Ⅱ';
       pause.dataset.paused = 'false';
-      pause.setAttribute('aria-label', ROOT.lang === 'en' ? 'Pause animation' : 'Animáció szüneteltetése');
     }
+    pause.setAttribute('aria-label', ROOT.lang === 'en' ? 'Pause animation' : 'Animáció szüneteltetése');
     if (ask.parentElement !== rail) rail.prepend(ask);
     if (pause.parentElement !== rail) rail.appendChild(pause);
     if (rail.parentElement !== controls) controls.appendChild(rail);
@@ -153,167 +155,15 @@
       if (controls.nextElementSibling !== copy) controls.after(copy);
       if (copy.nextElementSibling !== heading) copy.after(heading);
       if (heading.nextElementSibling !== proof) heading.after(proof);
-
-      important(grid, 'display', 'flex');
-      important(grid, 'flex-direction', 'column');
-      important(grid, 'align-items', 'stretch');
-      important(grid, 'gap', '0');
-
-      important(space, 'order', '0');
-      important(space, 'flex', '0 0 auto');
-      important(space, 'width', '100%');
-      important(space, 'margin', '0');
-
-      important(controls, 'order', '1');
-      important(controls, 'position', 'relative');
-      important(controls, 'inset', 'auto');
-      important(controls, 'display', 'grid');
-      important(controls, 'grid-template-columns', 'repeat(3, 50px)');
-      important(controls, 'align-items', 'start');
-      important(controls, 'justify-content', 'center');
-      important(controls, 'gap', '12px');
-      important(controls, 'width', 'max-content');
-      important(controls, 'min-height', '76px');
-      important(controls, 'margin', '14px auto 20px');
-      important(controls, 'padding', '0 4px 20px');
-      important(controls, 'opacity', '1');
-      important(controls, 'visibility', 'visible');
-      important(controls, 'pointer-events', 'auto');
-      important(controls, 'transform', 'none');
-      important(controls, 'z-index', '12040');
-
-      important(rail, 'display', 'contents');
-      important(rail, 'position', 'static');
-
-      for (const button of [sound, ask, pause]) {
-        important(button, 'position', 'relative');
-        important(button, 'inset', 'auto');
-        important(button, 'display', 'grid');
-        important(button, 'place-items', 'center');
-        important(button, 'box-sizing', 'border-box');
-        important(button, 'width', '50px');
-        important(button, 'min-width', '50px');
-        important(button, 'max-width', '50px');
-        important(button, 'height', '50px');
-        important(button, 'min-height', '50px');
-        important(button, 'max-height', '50px');
-        important(button, 'margin', '0');
-        important(button, 'padding', '0');
-        important(button, 'border-radius', '50%');
-        important(button, 'opacity', '1');
-        important(button, 'visibility', 'visible');
-        important(button, 'pointer-events', 'auto');
-        important(button, 'transform', 'none');
-      }
-      important(askLabel, 'position', 'absolute');
-      important(askLabel, 'top', '55px');
-      important(askLabel, 'left', '50%');
-      important(askLabel, 'width', 'max-content');
-      important(askLabel, 'max-width', '92px');
-      important(askLabel, 'transform', 'translateX(-50%)');
-      important(askLabel, 'white-space', 'nowrap');
-
-      important(copy, 'order', '2');
-      important(copy, 'position', 'relative');
-      important(copy, 'inset', 'auto');
-      important(copy, 'display', 'grid');
-      important(copy, 'box-sizing', 'border-box');
-      important(copy, 'align-self', 'center');
-      important(copy, 'width', 'calc(100% - 24px)');
-      important(copy, 'max-width', '680px');
-      important(copy, 'min-width', '0');
-      important(copy, 'height', 'auto');
-      important(copy, 'min-height', '1px');
-      important(copy, 'margin', '0 auto 26px');
-      important(copy, 'padding', '18px clamp(16px, 4.8vw, 24px) 20px');
-      important(copy, 'overflow', 'hidden');
-      important(copy, 'clip', 'auto');
-      important(copy, 'clip-path', 'none');
-      important(copy, 'white-space', 'normal');
-      important(copy, 'opacity', '1');
-      important(copy, 'visibility', 'visible');
-      important(copy, 'transform', 'none');
-
-      important(heading, 'order', '3');
-      important(heading, 'position', 'relative');
-      important(heading, 'width', 'calc(100% - 32px)');
-      important(heading, 'max-width', '680px');
-      important(heading, 'min-height', '20px');
-      important(heading, 'margin', '10px auto 22px');
-      important(heading, 'opacity', '1');
-      important(heading, 'visibility', 'visible');
-      important(heading, 'transform', 'none');
-
-      important(proof, 'order', '4');
-      important(proof, 'position', 'relative');
-      important(proof, 'display', 'block');
-      important(proof, 'box-sizing', 'border-box');
-      important(proof, 'width', 'calc(100% - 32px)');
-      important(proof, 'max-width', '680px');
-      important(proof, 'min-height', '258px');
-      important(proof, 'margin', '0 auto 34px');
-      important(proof, 'padding', '20px 19px 24px');
-      important(proof, 'overflow', 'hidden');
-      important(proof, 'opacity', '1');
-      important(proof, 'visibility', 'visible');
-      important(proof, 'transform', 'none');
     } else {
       if (controls.parentElement !== space) space.appendChild(controls);
       if (heading.parentElement !== grid) grid.appendChild(heading);
       if (proof.parentElement !== grid) grid.appendChild(proof);
-
-      important(controls, 'position', 'absolute');
-      important(controls, 'inset', 'auto auto 28px 50%');
-      important(controls, 'display', 'grid');
-      important(controls, 'grid-template-columns', 'repeat(3, 54px)');
-      important(controls, 'align-items', 'start');
-      important(controls, 'justify-content', 'center');
-      important(controls, 'gap', '14px');
-      important(controls, 'width', 'max-content');
-      important(controls, 'min-height', '82px');
-      important(controls, 'margin', '0');
-      important(controls, 'padding', '0 8px 24px');
-      important(controls, 'opacity', '1');
-      important(controls, 'visibility', 'visible');
-      important(controls, 'pointer-events', 'auto');
-      important(controls, 'transform', 'translateX(-50%)');
-      important(controls, 'z-index', '12040');
-      important(rail, 'display', 'contents');
-      important(rail, 'position', 'static');
-
-      for (const button of [sound, ask, pause]) {
-        important(button, 'position', 'relative');
-        important(button, 'inset', 'auto');
-        important(button, 'display', 'grid');
-        important(button, 'place-items', 'center');
-        important(button, 'box-sizing', 'border-box');
-        important(button, 'width', '54px');
-        important(button, 'min-width', '54px');
-        important(button, 'max-width', '54px');
-        important(button, 'height', '54px');
-        important(button, 'min-height', '54px');
-        important(button, 'max-height', '54px');
-        important(button, 'margin', '0');
-        important(button, 'padding', '0');
-        important(button, 'border-radius', '50%');
-        important(button, 'opacity', '1');
-        important(button, 'visibility', 'visible');
-        important(button, 'pointer-events', 'auto');
-        important(button, 'transform', 'none');
-      }
-      important(askLabel, 'position', 'absolute');
-      important(askLabel, 'top', '61px');
-      important(askLabel, 'left', '50%');
-      important(askLabel, 'width', 'max-content');
-      important(askLabel, 'transform', 'translateX(-50%)');
-
-      important(heading, 'min-height', '24px');
-      important(proof, 'min-height', '258px');
     }
 
     ROOT.dataset.fxFirstPaintControlsR306 = EARLY_REFERENCE_MOBILE
-      ? 'mobile-final-geometry-prepaint'
-      : 'desktop-final-geometry-prepaint';
+      ? 'mobile-final-geometry-prepaint-css'
+      : 'desktop-final-geometry-prepaint-css';
     return true;
   }
 
