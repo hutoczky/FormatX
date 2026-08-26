@@ -1,7 +1,7 @@
-/* FormatX r357 — refined mobile MAG light spill and edge profile.
+/* FormatX r358 — mobile MAG bloom/edge softening from live-device feedback.
    The r326 WebGL crystal remains the sole renderer. Desktop keeps the validated
-   r354 optics; mobile trims the outer aura further and softens the raster edge
-   without changing the crystal geometry or flattening its internal depth. */
+   r354 optics; mobile lowers light spill and softens the visible raster contour
+   without changing crystal geometry, scale, controls or internal 3D depth. */
 
 /* Shared living-core glow. This is a soft internal optical lift, not a second
    silhouette or outline. */
@@ -94,40 +94,41 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
       blur(2.22px) !important;
   }
 
-  /* r357 mobile r326 owner: preserve geometry and internal refraction, but lower
-     the cyan-white energy at the silhouette so the edge reads as soft glass. */
+  /* r358 mobile r326 owner: keep the same geometry and scale, but reduce the
+     overdriven perimeter energy and blend the four pointed tips into softer
+     optical glass. The luminous centre remains intentionally legible. */
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .80 !important;
+    opacity: .76 !important;
     mix-blend-mode: normal !important;
     scale: .78 .83 !important;
     transform-origin: 50% 48% !important;
     image-rendering: auto !important;
     filter:
-      brightness(.98)
-      contrast(.47)
-      saturate(.87)
-      blur(1.44px)
-      drop-shadow(0 0 4px rgba(92,207,255,.018))
-      drop-shadow(0 0 10px rgba(85,118,255,.008)) !important;
+      brightness(.92)
+      contrast(.42)
+      saturate(.84)
+      blur(1.72px)
+      drop-shadow(0 0 4px rgba(92,207,255,.012))
+      drop-shadow(0 0 10px rgba(85,118,255,.004)) !important;
     -webkit-filter:
-      brightness(.98)
-      contrast(.47)
-      saturate(.87)
-      blur(1.44px)
-      drop-shadow(0 0 4px rgba(92,207,255,.018))
-      drop-shadow(0 0 10px rgba(85,118,255,.008)) !important;
+      brightness(.92)
+      contrast(.42)
+      saturate(.84)
+      blur(1.72px)
+      drop-shadow(0 0 4px rgba(92,207,255,.012))
+      drop-shadow(0 0 10px rgba(85,118,255,.004)) !important;
   }
 
-  /* r357 mobile aura: visibly smaller and calmer than r356. The centre stays
-     luminous, but there is no second glowing silhouette around the diamond. */
+  /* r358 mobile aura: tighter and quieter than r357. It supports the centre
+     rather than tracing a second glowing silhouette around the crystal. */
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 42% !important;
-    height: 42% !important;
+    width: 39% !important;
+    height: 39% !important;
     background:
-      radial-gradient(circle at 50% 50%, rgba(147,238,255,.078) 0 4%, rgba(91,196,255,.040) 14%, rgba(95,126,255,.018) 31%, rgba(30,76,144,.007) 47%, transparent 69%) !important;
-    filter: blur(31px) !important;
-    opacity: .24 !important;
+      radial-gradient(circle at 50% 50%, rgba(147,238,255,.060) 0 4%, rgba(91,196,255,.029) 14%, rgba(95,126,255,.010) 31%, rgba(30,76,144,.004) 47%, transparent 69%) !important;
+    filter: blur(34px) !important;
+    opacity: .19 !important;
   }
 
   /* The crystal cue duplicates the visible control affordance on phones and was
@@ -164,34 +165,34 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
 @media (max-width: 430px) {
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .78 !important;
+    opacity: .74 !important;
     scale: .74 .80 !important;
     filter:
-      brightness(.96)
-      contrast(.45)
-      saturate(.85)
-      blur(1.56px)
-      drop-shadow(0 0 3px rgba(92,207,255,.016))
-      drop-shadow(0 0 8px rgba(85,118,255,.006)) !important;
+      brightness(.90)
+      contrast(.40)
+      saturate(.82)
+      blur(1.82px)
+      drop-shadow(0 0 3px rgba(92,207,255,.010))
+      drop-shadow(0 0 8px rgba(85,118,255,.003)) !important;
     -webkit-filter:
-      brightness(.96)
-      contrast(.45)
-      saturate(.85)
-      blur(1.56px)
-      drop-shadow(0 0 3px rgba(92,207,255,.016))
-      drop-shadow(0 0 8px rgba(85,118,255,.006)) !important;
+      brightness(.90)
+      contrast(.40)
+      saturate(.82)
+      blur(1.82px)
+      drop-shadow(0 0 3px rgba(92,207,255,.010))
+      drop-shadow(0 0 8px rgba(85,118,255,.003)) !important;
   }
 
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 39% !important;
-    height: 39% !important;
-    filter: blur(33px) !important;
-    opacity: .20 !important;
+    width: 36% !important;
+    height: 36% !important;
+    filter: blur(35px) !important;
+    opacity: .15 !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    opacity: .20 !important;
+    opacity: .15 !important;
   }
 }
