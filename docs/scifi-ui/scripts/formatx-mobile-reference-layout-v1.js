@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-// r264: deterministic/event-driven mobile reference owner. No document-wide
+// r360: deterministic/event-driven mobile reference owner. No document-wide
 // steady-state MutationObserver loops; the hero control group stays inside the
 // canonical 3D stage so ASK | PAUSE remain beside the core without adding flow.
 // The reference menu is mounted here but its click action has one owner only:
@@ -15,6 +15,13 @@ let paused=mobileViewport()?false:root.dataset.fxReferenceMotionPaused==='true';
 if(root.dataset.fxMobileReferenceLayout==='booting-r74'||root.dataset.fxMobileReferenceLayout==='ready-v1')return;
 root.dataset.fxMobileReferenceLayout='booting-r74';
 
+function promoteRegressionStyle(){
+ if(!mobileViewport())return;
+ const style=document.querySelector('link[data-fx-mobile-regression-r310],link[href*="formatx-mobile-regression-r310.css"]');
+ if(!(style instanceof HTMLLinkElement)||style.parentElement!==document.head)return;
+ if(style!==document.head.lastElementChild)document.head.appendChild(style);
+ root.dataset.fxMobileRegressionCascadeR360='final-after-layout';
+}
 function loadStyles(){
  if(!document.querySelector('link[data-fx-mobile-reference-layout-style]')){const l=document.createElement('link');l.rel='stylesheet';l.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260816-mobile-only-r177';l.dataset.fxMobileReferenceLayoutStyle='true';document.head.appendChild(l)}
  const existingFlow=document.querySelector('link[data-fx-flow-first-r74]');if(mobileViewport()){if(!existingFlow){const f=document.createElement('link');f.rel='stylesheet';f.href='/scifi-ui/styles/formatx-flow-first-r74.css?v=20260816-mobile-only-r178';f.dataset.fxFlowFirstR74='true';document.head.appendChild(f)}}else existingFlow?.remove();
@@ -59,9 +66,9 @@ function ensureFlowContent(hero,grid,space){
  ensureControlZone(hero,space,rail);syncPauseButtons()
 }
 function cleanupDesktopFlow(hero){if(root.dataset.fxReferenceProductionR244==='desktop'){root.dataset.fxReferenceComposition='desktop-reference-r244';return}const zone=hero.querySelector('.fx-reference-controls-r204');const sound=zone?.querySelector('.fx-three-sound');if(sound instanceof HTMLElement)document.body.appendChild(sound);zone?.remove();hero.querySelectorAll('.fx-reference-heading,.fx-reference-proof,.fx-reference-rail').forEach(node=>node.remove());delete root.dataset.fxMobileProofControls;root.dataset.fxReferenceComposition='desktop-native-r177'}
-function create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement))return false;ensureHeader(hero);if(mobileViewport())ensureFlowContent(hero,grid,space);else cleanupDesktopFlow(hero);lastMobile=mobileViewport();root.dataset.fxMobileReferenceLayout='ready-v1';if(root.dataset.fxReferenceProductionR244==='ready')root.dataset.fxReferenceComposition='reference-frame-r244';else if(root.dataset.fxReferenceProductionR244==='desktop')root.dataset.fxReferenceComposition='desktop-reference-r244';else root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r177';return true}
+function create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement))return false;ensureHeader(hero);if(mobileViewport())ensureFlowContent(hero,grid,space);else cleanupDesktopFlow(hero);lastMobile=mobileViewport();root.dataset.fxMobileReferenceLayout='ready-v1';if(root.dataset.fxReferenceProductionR244==='ready')root.dataset.fxReferenceComposition='reference-frame-r244';else if(root.dataset.fxReferenceProductionR244==='desktop')root.dataset.fxReferenceComposition='desktop-reference-r244';else root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r177';queueMicrotask(promoteRegressionStyle);return true}
 function boot(){if(create())return;if(bootObserver)return;const target=document.body||document.documentElement;bootObserver=new MutationObserver(()=>{if(create()){bootObserver.disconnect();bootObserver=null}});bootObserver.observe(target,{subtree:true,childList:true});setTimeout(()=>{if(bootObserver){bootObserver.disconnect();bootObserver=null;create()}},5000)}
-function scheduleResize(){if(resizeRaf)return;resizeRaf=requestAnimationFrame(()=>{resizeRaf=0;const nowMobile=mobileViewport();if(nowMobile!==lastMobile){loadStyles();create();return}const hero=document.getElementById('hero');if(hero)ensureHeader(hero)})}
+function scheduleResize(){if(resizeRaf)return;resizeRaf=requestAnimationFrame(()=>{resizeRaf=0;const nowMobile=mobileViewport();if(nowMobile!==lastMobile){loadStyles();create();return}const hero=document.getElementById('hero');if(hero)ensureHeader(hero);promoteRegressionStyle()})}
 
 loadStyles();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
@@ -69,6 +76,6 @@ const nav=document.getElementById('main-nav');if(nav)new MutationObserver(syncMe
 addEventListener('keydown',event=>{if(event.key==='Escape')queueMicrotask(syncMenuState)});
 let lastPausePointerUp=-Infinity;function handlePauseActivation(event){const button=event.target instanceof Element?event.target.closest('.fx-reference-pause'):null;if(!(button instanceof HTMLButtonElement))return;if(event.type==='click'&&performance.now()-lastPausePointerUp<700){event.preventDefault();return}if(event.type==='pointerup'){if(event.button!==0)return;lastPausePointerUp=performance.now()}event.preventDefault();setPaused(!paused)}document.addEventListener('pointerup',handlePauseActivation,true);document.addEventListener('click',handlePauseActivation,true);
 addEventListener('resize',scheduleResize,{passive:true});addEventListener('orientationchange',scheduleResize,{passive:true});
-for(const eventName of ['formatx:real3dready','formatx:coredetailready','formatx:organisminterfaceready'])addEventListener(eventName,()=>{if(mobileViewport())create()},{passive:true});
-addEventListener('formatx:languagechange',()=>{const h=document.querySelector('.fx-reference-heading'),c=document.querySelector('.fx-reference-proof'),ask=document.querySelector('.fx-reference-ask span'),mag=document.querySelector('.fx-reference-mag-button'),menu=document.querySelector('.fx-reference-menu-button'),copy=proofCopy();if(h&&h.textContent!==copy.heading)h.textContent=copy.heading;if(c)repairProof(c);if(ask)ask.textContent=root.lang==='en'?'ASK':'KÉRDEZZ';if(mag)mag.textContent=root.lang==='en'?'CORE':'MAG';if(menu)menu.setAttribute('aria-label',root.lang==='en'?'Menu':'Menü');syncPauseButtons()});
+for(const eventName of ['formatx:real3dready','formatx:coredetailready','formatx:organisminterfaceready','formatx:mobilelayoutready'])addEventListener(eventName,()=>{if(mobileViewport()){create();promoteRegressionStyle()}},{passive:true});
+addEventListener('formatx:languagechange',()=>{promoteRegressionStyle();const h=document.querySelector('.fx-reference-heading'),c=document.querySelector('.fx-reference-proof'),ask=document.querySelector('.fx-reference-ask span'),mag=document.querySelector('.fx-reference-mag-button'),menu=document.querySelector('.fx-reference-menu-button'),copy=proofCopy();if(h&&h.textContent!==copy.heading)h.textContent=copy.heading;if(c)repairProof(c);if(ask)ask.textContent=root.lang==='en'?'ASK':'KÉRDEZZ';if(mag)mag.textContent=root.lang==='en'?'CORE':'MAG';if(menu)menu.setAttribute('aria-label',root.lang==='en'?'Menu':'Menü');syncPauseButtons()});
 }());
