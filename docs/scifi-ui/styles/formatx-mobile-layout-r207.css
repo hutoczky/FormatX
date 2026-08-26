@@ -1,18 +1,26 @@
-/* FormatX r207 — authoritative mobile layout ownership.
+/* FormatX r369 — authoritative mobile layout ownership.
    One physical flow: MAG -> controls -> hero copy -> reference heading -> proof.
-   No mobile hero control or proof child is allowed to use overlay geometry. */
+   The legacy r250 parking mode (order:99 / 1px hero copy) is retired. Geometry
+   is stable from first paint and later visual layers may refine appearance,
+   but never remove readable content from document flow. */
 
 @media (max-width: 900px), (pointer: coarse) {
-  html body.living-architecture main#main-content section#hero.scene.hero {
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
     overflow: visible !important;
   }
 
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+    position: relative !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
+    box-sizing: border-box !important;
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
@@ -21,178 +29,243 @@
     overflow: visible !important;
   }
 
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space {
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space {
     order: 0 !important;
+    position: relative !important;
+    inset: auto !important;
     flex: 0 0 auto !important;
     align-self: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(350px, 97.6vw, 470px) !important;
+    min-height: clamp(350px, 97.6vw, 470px) !important;
+    max-height: 470px !important;
     margin: 0 auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+    transform: none !important;
+    translate: none !important;
   }
 
-  /* r207: controls are a real row after the MAG, never an absolute overlay. */
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-controls-r204,
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-controls-r204 {
+  /* Compatibility contract: if an older runtime briefly leaves the control
+     zone as a direct grid child, keep it a real horizontal row (order: 1,
+     position: relative, flex-direction: row). The current owner mounts the
+     same control group inside .hero-space, handled by the next rule. */
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-controls-r204 {
     order: 1 !important;
     position: relative !important;
     inset: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    z-index: 20 !important;
     display: flex !important;
     flex-direction: row !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
-    flex-wrap: nowrap !important;
-    box-sizing: border-box !important;
-    width: calc(100% - 24px) !important;
-    max-width: 680px !important;
-    height: auto !important;
-    min-height: 72px !important;
-    margin: 14px auto 20px !important;
-    padding: 0 6px 18px !important;
-    gap: 10px !important;
-    transform: none !important;
-    translate: none !important;
-    pointer-events: auto !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 > * {
-    pointer-events: auto !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle {
-    position: relative !important;
-    inset: auto !important;
-    flex: 0 0 118px !important;
-    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
-    width: 118px !important;
-    min-width: 118px !important;
-    max-width: 118px !important;
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
-    margin: 0 !important;
-    padding: 0 12px !important;
-    border-radius: 999px !important;
+    width: 178px !important;
+    max-width: calc(100vw - 24px) !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    margin: -80px auto 30px !important;
+    padding: 0 !important;
+    gap: 14px !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
     transform: none !important;
     translate: none !important;
-    white-space: nowrap !important;
-    font-size: 9px !important;
-    line-height: 1 !important;
-    letter-spacing: .11em !important;
   }
 
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-reference-rail {
-    position: relative !important;
-    inset: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    flex: 0 0 auto !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: flex-start !important;
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
+  html:root:root[data-fx-mobile-reference-layout] body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: auto auto clamp(22px, 3.2svh, 34px) 50% !important;
+    z-index: 12040 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-rows: 50px !important;
+    align-items: center !important;
+    justify-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
+    width: 178px !important;
+    min-width: 178px !important;
+    max-width: calc(100vw - 24px) !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 14px !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-r264 {
+    display: contents !important;
+    position: static !important;
+    inset: auto !important;
     width: auto !important;
     min-width: 0 !important;
+    max-width: none !important;
     height: auto !important;
     min-height: 0 !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    gap: 10px !important;
     transform: none !important;
     translate: none !important;
   }
 
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-reference-ask,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-reference-pause {
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
     position: relative !important;
     inset: auto !important;
-    flex: 0 0 48px !important;
-    width: 48px !important;
-    min-width: 48px !important;
-    max-width: 48px !important;
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    flex: 0 0 50px !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
     margin: 0 !important;
     padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
     transform: none !important;
     translate: none !important;
+    animation: none !important;
+    transition: none !important;
+    touch-action: manipulation !important;
   }
 
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-reference-ask span {
-    top: 53px !important;
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound.fx-wda-sound-toggle {
+    display: grid !important;
+    font-size: 0 !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask span {
+    position: absolute !important;
+    top: 56px !important;
     left: 50% !important;
     width: max-content !important;
-    max-width: 82px !important;
+    max-width: 92px !important;
     transform: translateX(-50%) !important;
-    font-size: 9px !important;
-    line-height: 1 !important;
+    white-space: nowrap !important;
     text-align: center !important;
+    pointer-events: none !important;
   }
 
-  /* The readable hero is either visible and compact, or it takes no phantom space. */
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy,
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
+  /* Readable hero: permanently in flow. These selectors intentionally match
+     the old data-fx-mobile-reference-layout specificity so no state transition
+     can park it at 1x1px again. */
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy,
+  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy,
+  html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
     order: 2 !important;
     position: relative !important;
     inset: auto !important;
+    display: grid !important;
     box-sizing: border-box !important;
+    align-self: center !important;
     width: calc(100% - 24px) !important;
-    max-width: 680px !important;
+    min-width: 0 !important;
+    max-width: 700px !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    margin: 0 auto 26px !important;
-    padding: 18px clamp(16px, 4.8vw, 24px) 20px !important;
-    overflow: hidden !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-    translate: none !important;
-  }
-
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy > * {
-    position: relative !important;
-    inset: auto !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-    translate: none !important;
+    margin: 110px auto 16px !important;
+    padding: clamp(24px, 6vw, 34px) clamp(20px, 5.5vw, 30px) clamp(26px, 6.5vw, 38px) !important;
+    border: 1px solid rgba(118,221,255,.17) !important;
+    border-radius: 24px !important;
+    overflow: visible !important;
     clip: auto !important;
     clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+    animation: none !important;
+    transition: none !important;
+    z-index: 20 !important;
   }
 
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy > .hero-lead {
-    min-block-size: 0 !important;
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy > * {
+    position: relative !important;
+    inset: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+    animation: none !important;
+    transition: none !important;
   }
 
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-heading {
+  html:root:root body.living-architecture #hero .hero-copy > .fx-category-definition {
+    display: block !important;
+    min-height: 131px !important;
+    margin-bottom: 22px !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-copy > .hero-lead {
+    min-block-size: 7.5em !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-copy > .fx-method-inline {
+    min-height: 100px !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-copy > .hero-actions {
+    min-height: 170px !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-copy > .hero-facts {
+    min-height: 132px !important;
+  }
+
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-heading,
+  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-heading {
     order: 3 !important;
     position: relative !important;
     inset: auto !important;
+    display: flex !important;
+    box-sizing: border-box !important;
     width: calc(100% - 32px) !important;
     max-width: 680px !important;
     height: auto !important;
-    min-height: 0 !important;
-    margin: 10px auto 22px !important;
+    min-height: 20px !important;
+    margin: 18px auto 22px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
     transform: none !important;
     translate: none !important;
   }
 
-  /* Proof is always content-sized. Live OS is a normal child, never a distant anchor. */
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-proof {
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-proof,
+  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-proof {
     order: 4 !important;
     position: relative !important;
     inset: auto !important;
@@ -203,7 +276,7 @@
     width: calc(100% - 32px) !important;
     max-width: 680px !important;
     height: auto !important;
-    min-height: 0 !important;
+    min-height: 302px !important;
     max-height: none !important;
     margin: 0 auto 34px !important;
     overflow: hidden !important;
@@ -213,15 +286,10 @@
     translate: none !important;
   }
 
-  html body.living-architecture #hero .hero-grid > .fx-reference-proof > *,
-  html body.living-architecture #hero .hero-grid > .fx-reference-proof .fx-reference-liveos {
+  html:root:root body.living-architecture #hero .hero-grid > .fx-reference-proof > *,
+  html:root:root body.living-architecture #hero .hero-grid > .fx-reference-proof .fx-reference-liveos {
     position: relative !important;
     inset: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    float: none !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
@@ -233,274 +301,40 @@
     clip-path: none !important;
   }
 
-  html body.living-architecture #hero .hero-grid > .fx-reference-proof .fx-reference-liveos {
+  html:root:root body.living-architecture #hero .hero-grid > .fx-reference-proof .fx-reference-liveos {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     justify-self: end !important;
-    width: auto !important;
     min-width: 132px !important;
     min-height: 54px !important;
     margin: 24px 0 0 !important;
     padding: 0 24px !important;
   }
-}
 
-@media (max-width: 430px) {
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-controls-r204 {
-    width: calc(100% - 16px) !important;
-    gap: 8px !important;
-    padding-inline: 2px !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle {
-    flex-basis: 110px !important;
-    width: 110px !important;
-    min-width: 110px !important;
-    max-width: 110px !important;
-    padding-inline: 9px !important;
-    font-size: 8px !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-reference-ask,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-reference-pause {
-    flex-basis: 46px !important;
-    width: 46px !important;
-    min-width: 46px !important;
-    max-width: 46px !important;
-    height: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
-  }
-
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
-    width: calc(100% - 16px) !important;
-    margin-bottom: 22px !important;
-    padding: 16px !important;
-  }
-
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-heading {
-    width: calc(100% - 24px) !important;
-    margin-top: 8px !important;
-  }
-
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-proof {
-    width: calc(100% - 24px) !important;
-  }
-}
-
-/* r250 — the supplied reference is the authoritative mobile composition.
-   Controls belong to the WebGL stage, not to document flow. The long desktop
-   sales copy remains accessible but does not create a phantom mobile panel. */
-@media (max-width: 900px), (pointer: coarse) {
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space {
-    position: relative !important;
-    isolation: isolate !important;
-  }
-
-  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+  /* The separate r151 mobile dock duplicates the canonical download actions
+     already present in hero-copy. Its late insertion was worth ~0.23 CLS on
+     production; retain the legacy node only as a zero-layout compatibility
+     target while hero-copy remains the single visible download surface. */
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero .fx-mobile-download-r151 {
+    display: none !important;
     position: absolute !important;
-    inset: 18px 16px auto auto !important;
-    z-index: 10030 !important;
-    display: block !important;
-    box-sizing: border-box !important;
-    width: 50px !important;
-    min-width: 50px !important;
-    max-width: 50px !important;
-    height: auto !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
     min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
-    transform: none !important;
-    pointer-events: auto !important;
-  }
-
-  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-three-sound,
-  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle {
-    display: none !important;
+    overflow: hidden !important;
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
   }
-
-  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-rail {
-    position: relative !important;
-    inset: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    width: 50px !important;
-    min-width: 50px !important;
-    height: auto !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 34px !important;
-    transform: none !important;
-  }
-
-  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 :is(.fx-reference-ask,.fx-reference-pause) {
-    position: relative !important;
-    inset: auto !important;
-    flex: 0 0 50px !important;
-    box-sizing: border-box !important;
-    width: 50px !important;
-    min-width: 50px !important;
-    max-width: 50px !important;
-    height: 50px !important;
-    min-height: 50px !important;
-    max-height: 50px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    transform: none !important;
-  }
-
-  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-ask span {
-    top: 55px !important;
-    left: 50% !important;
-    width: max-content !important;
-    max-width: 84px !important;
-    transform: translateX(-50%) !important;
-    white-space: nowrap !important;
-  }
-
-  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
-    order: 99 !important;
-    position: absolute !important;
-    inset: auto !important;
-    width: 1px !important;
-    min-width: 0 !important;
-    max-width: 1px !important;
-    height: 1px !important;
-    min-height: 0 !important;
-    max-height: 1px !important;
-    margin: -1px !important;
-    padding: 0 !important;
-    border: 0 !important;
-    overflow: hidden !important;
-    clip: rect(0 0 0 0) !important;
-    clip-path: inset(50%) !important;
-    white-space: nowrap !important;
-  }
-
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-heading {
-    order: 1 !important;
-    width: calc(100% - 32px) !important;
-    margin: 12px auto 22px !important;
-  }
-
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-reference-proof {
-    order: 2 !important;
-    width: calc(100% - 32px) !important;
-    margin: 0 auto 34px !important;
-  }
-
-  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .fx-mobile-download-r151 {
-    order: 3 !important;
-  }
-}
-
-/* r207 marker: canonical normal-flow mobile hero ownership. */
-
-/* r211 — text/control foreground ownership + page-field anti-flicker.
-   The MAG may remain alive; readable copy and controls must never share the
-   same compositing plane as viewport-sized pulsing light fields. */
-@media (max-width: 900px), (pointer: coarse) {
-  html[data-fx-soty-continuity-r179="ready"] .fx-r179-field {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-  }
-
-  html body.living-architecture .fx-atmosphere .grain {
-    display: none !important;
-    opacity: 0 !important;
-    animation: none !important;
-  }
-
-  html body.living-architecture .fx-atmosphere,
-  html body.living-architecture .fx-atmosphere .vignette {
-    animation: none !important;
-    transition: none !important;
-    will-change: auto !important;
-  }
-
-  html body.living-architecture #main-content > section.scene {
-    position: relative !important;
-    isolation: isolate !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .hero-copy,
-  html body.living-architecture #hero .hero-grid > .fx-reference-heading,
-  html body.living-architecture #hero .hero-grid > .fx-reference-proof,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204,
-  html body.living-architecture #main-content > section.scene:not(#hero) > .section-heading,
-  html body.living-architecture #main-content > section.scene:not(#hero) > :is(.flow,.cards,.pricing,.payment,.system-grid,.release-layout,.fx-plan-qr-dock) {
-    z-index: 90 !important;
-    mix-blend-mode: normal !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .hero-copy,
-  html body.living-architecture #hero .hero-grid > .fx-reference-heading,
-  html body.living-architecture #hero .hero-grid > .fx-reference-proof,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204,
-  html body.living-architecture #hero .hero-grid > .hero-copy *,
-  html body.living-architecture #hero .hero-grid > .fx-reference-heading *,
-  html body.living-architecture #hero .hero-grid > .fx-reference-proof * {
-    opacity: 1 !important;
-    filter: none !important;
-    text-shadow: none !important;
-    animation: none !important;
-    transition-property: color, background-color, border-color, box-shadow, transform !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle {
-    flex: 0 0 48px !important;
-    width: 48px !important;
-    min-width: 48px !important;
-    max-width: 48px !important;
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    gap: 0 !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound .fx-wda-sound-icon {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 24px !important;
-    height: 24px !important;
-    line-height: 0 !important;
-    color: rgba(232, 252, 255, .94) !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound .fx-wda-sound-icon svg {
-    display: block !important;
-    width: 22px !important;
-    height: 22px !important;
-  }
-
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound > i,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound::before {
-    display: none !important;
-    content: none !important;
-  }
 }
 
 @media (max-width: 430px) {
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle {
-    flex-basis: 46px !important;
-    width: 46px !important;
-    min-width: 46px !important;
-    max-width: 46px !important;
-    height: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy,
+  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
+    width: calc(100% - 24px) !important;
   }
 }
