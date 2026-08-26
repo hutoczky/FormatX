@@ -1,9 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-18T15:07:00+02:00
-source_master=76d1c14f4f0234e92722ee61389e893b293fef2e
-purpose=revalidate and deploy r205 compact mobile control polish after aligning the real3D validator with the current r204 control-zone ownership model
-signature=preserve the current native WebGL MAG, compact r205 hero controls, restored mini MAG, proof card ownership and current mobile layout
-interaction=preserve native WebGL pointer/touch/gyro, heartbeat/orbit/caustic motion, MUTE/UNMUTE, ASK/pause controls and accessibility semantics
-visual=no new visual tuning in this commit; validator/deployment recovery only
-performance=retain current r205 runtime; mobile Lighthouse remains an independent quality gate and must not be misreported as passing
-validation=production candidate; public/runtime/security contracts; JavaScript syntax; Worker tests; production build; custom-domain deploy; canonical smoke; post-deploy mobile/live gates
+requested_at=2026-08-26T16:16:00+02:00
+source_master=6efc969b96644aa537a6300476c42cdc60fa2553
+purpose=publish the current r357 mobile MAG optics and latest master to the production custom domains
+signature=preserve the single native WebGL crystal, current mobile header controls, SOUND/ASK/PAUSE row and current desktop composition
+visual=r357 reduces mobile outer aura, lowers edge luminance/contrast and softens the crystal silhouette while preserving internal depth
+interaction=preserve current pointer/touch/gyro, audio, ASK, pause, language and menu interactions
+performance=deploy current validated candidate; Lighthouse optimisation remains an independent gate and must not be misreported as passing
+validation=production candidate; public/runtime/security contracts; JavaScript syntax; Worker tests; production build; custom-domain deploy; canonical smoke
