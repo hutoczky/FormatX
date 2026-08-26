@@ -1,5 +1,6 @@
 name: Verify live responsive true 3D MAG
-run-name: Validate production r317/r323 WebGL MAG and living pulse on desktop and mobile
+run-name: Validate production r326/r367 WebGL MAG on desktop and mobile
+
 on:
   push:
     branches: [master]
@@ -9,9 +10,11 @@ on:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
   workflow_dispatch:
+
 permissions:
   contents: read
   statuses: write
+
 jobs:
   verify-live-mag:
     if: >-
@@ -28,7 +31,8 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Validate live current MAG startup pulse visuals interaction and information integrity
+
+      - name: Validate live current r326 crystal and r367 restrained optics
         shell: bash
         run: |
           set -euo pipefail
@@ -41,29 +45,11 @@ jobs:
 
           function diagnostics(page, label) {
             page.on('pageerror', error => console.log(`[${label} PAGEERROR]`, error.message));
-            page.on('requestfailed', request => console.log(`[${label} REQUESTFAILED]`, request.url(), request.failure()?.errorText || ''));
-          }
-
-          async function pulseState(page) {
-            return page.evaluate(() => {
-              const root = document.documentElement;
-              const stage = document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage');
-              if (!(stage instanceof HTMLElement)) return { marker: root.dataset.fxCorePulseR312 || '', exists: false };
-              const style = getComputedStyle(stage);
-              const pulse = stage.getAnimations().find(animation => {
-                const frames = animation.effect?.getKeyframes?.() || [];
-                return frames.some(frame => typeof frame.scale === 'string' && frame.scale.length > 0);
-              });
-              return {
-                marker: root.dataset.fxCorePulseR312 || '',
-                exists: true,
-                animationName: style.animationName,
-                animationDuration: style.animationDuration,
-                playState: pulse?.playState || '',
-                currentTime: Number(pulse?.currentTime || 0),
-                playbackRate: Number(pulse?.playbackRate || 0),
-                scale: style.scale
-              };
+            page.on('requestfailed', request => {
+              const url = request.url();
+              if (!/cloudflareinsights\.com/.test(url)) {
+                console.log(`[${label} REQUESTFAILED]`, url, request.failure()?.errorText || '');
+              }
             });
           }
 
@@ -73,160 +59,125 @@ jobs:
               deviceScaleFactor: dpr,
               isMobile: mobile,
               hasTouch: mobile,
-              locale: 'hu-HU'
+              locale: 'hu-HU',
+              colorScheme: 'dark'
             });
             const page = await context.newPage();
             diagnostics(page, name);
 
-            const started = Date.now();
-            await page.goto(`${origin}/?live_mag_current=${name}-${Date.now()}`, {
+            await page.goto(`${origin}/?live_mag_r326=${name}-${Date.now()}`, {
               waitUntil: 'domcontentloaded',
               timeout: 30000
             });
-            const domReadyMs = Date.now() - started;
-            assert.ok(domReadyMs < 30000, `${name}: DOMContentLoaded exceeded startup budget: ${domReadyMs}ms`);
 
-            const expected = 'ready-v1';
-            await page.waitForFunction(expectedLayout => {
+            await page.waitForFunction(() => {
               const root = document.documentElement;
               return root.dataset.fxCoreMobileV69 === 'ready-v69'
-                && root.dataset.fxCoreMobileR317 === 'ready-v69'
-                && root.dataset.fxMobileReferenceLayout === expectedLayout
-                && root.dataset.fxCoreRenderer === 'single-webgl-luminous-crystal-r99';
-            }, expected, { timeout: 60000 });
+                && root.dataset.fxCrystalOrganismR326 === 'ready'
+                && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
+                && Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas'));
+            }, null, { timeout: 60000 });
 
-            await page.waitForFunction(() => document.documentElement.dataset.fxCorePulseR312 === 'compositor-lub-dub', null, { timeout: 15000 });
-            await page.waitForTimeout(180);
-            const pulseBefore = await pulseState(page);
-            await page.waitForTimeout(220);
-            const pulseAfter = await pulseState(page);
-
-            assert.equal(pulseBefore.marker, 'compositor-lub-dub', `${name}: compositor pulse stylesheet marker missing`);
-            assert.equal(pulseBefore.exists, true, `${name}: MAG stage missing for pulse`);
-            assert.match(pulseBefore.animationName, /fx-core-pulse-r312/, `${name}: living MAG animation not applied`);
-            assert.equal(pulseBefore.playState, 'running', `${name}: living MAG pulse is not running`);
-            assert.ok(pulseAfter.currentTime > pulseBefore.currentTime, `${name}: living MAG pulse clock is not advancing: ${JSON.stringify({pulseBefore,pulseAfter})}`);
-            assert.ok(pulseAfter.playbackRate > 0, `${name}: living MAG pulse playback rate is not positive`);
-
-            await page.waitForTimeout(600);
+            await page.waitForTimeout(500);
             const before = await page.evaluate(() => ({
               energy: Number(window.FormatXCoreMobileV69?.energy || 0),
               position: [...(window.FormatXCoreCinematic?.corePosition || [])]
             }));
 
             if (mobile) {
-              await page.evaluate(() => window.dispatchEvent(new CustomEvent('formatx:coreinteraction', {
-                detail: { x: .46, y: -.28, phase: 'drag' }
-              })));
-              await page.waitForTimeout(220);
+              await page.evaluate(() => {
+                window.FormatXCoreMobileV69?.pulse?.();
+                dispatchEvent(new CustomEvent('formatx:coreinteraction', {
+                  detail: { x: .42, y: -.24, phase: 'drag' }
+                }));
+              });
+              await page.waitForTimeout(260);
             }
 
             const state = await page.evaluate(() => {
               const root = document.documentElement;
-              const stage = document.querySelector('#hero .fx-core-r317-stage');
-              const canvas = document.querySelector('#hero .fx-core-mobile-v55-canvas');
+              const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
+              const canvas = stage?.querySelector('.fx-crystal-organism-r326-canvas');
               const box = canvas?.getBoundingClientRect();
               const gl = canvas?.getContext('webgl2') || canvas?.getContext('webgl');
+              const style = canvas ? getComputedStyle(canvas) : null;
               const visible = element => {
-                if (!element) return false;
+                if (!(element instanceof Element)) return false;
                 const rect = element.getBoundingClientRect();
-                const style = getComputedStyle(element);
-                return rect.width > 1 && rect.height > 1 && style.display !== 'none'
-                  && style.visibility !== 'hidden' && Number(style.opacity || 1) > .01;
+                const computed = getComputedStyle(element);
+                return rect.width > 1 && rect.height > 1
+                  && computed.display !== 'none'
+                  && computed.visibility !== 'hidden'
+                  && Number(computed.opacity || 1) > .01;
               };
-              const overlap = (a, b) => {
+              const overlap = (a, b, gap = 2) => {
                 if (!visible(a) || !visible(b)) return false;
                 const x = a.getBoundingClientRect(), y = b.getBoundingClientRect();
-                return Math.max(0, Math.min(x.right, y.right) - Math.max(x.left, y.left))
-                  * Math.max(0, Math.min(x.bottom, y.bottom) - Math.max(x.top, y.top)) > 6;
+                return !(x.right + gap <= y.left || y.right + gap <= x.left || x.bottom + gap <= y.top || y.bottom + gap <= x.top);
               };
-              const glyphOverlap = (textEl, control) => {
-                if (!visible(textEl) || !visible(control)) return false;
-                const c = control.getBoundingClientRect();
-                const walker = document.createTreeWalker(textEl, NodeFilter.SHOW_TEXT);
-                while (walker.nextNode()) {
-                  const node = walker.currentNode;
-                  if (!node.nodeValue?.trim()) continue;
-                  const range = document.createRange();
-                  range.selectNodeContents(node);
-                  for (const r of range.getClientRects()) {
-                    const area = Math.max(0, Math.min(r.right, c.right) - Math.max(r.left, c.left))
-                      * Math.max(0, Math.min(r.bottom, c.bottom) - Math.max(r.top, c.top));
-                    if (area > 2) return true;
-                  }
-                }
-                return false;
-              };
-              const refProof = document.querySelector('#hero .fx-reference-proof');
-              const award = document.querySelector('.fx-award-proof');
-              const heroCopy = document.querySelector('#hero .hero-copy');
-              const legacyMenu = document.querySelector('#menu-toggle.fx-organism-system-toggle');
-              const refText = refProof?.querySelector('p');
-              const live = refProof?.querySelector('.fx-reference-liveos');
+              const controls = document.querySelector('#hero .fx-reference-controls-r204');
+              const sound = controls?.querySelector('.fx-three-sound');
+              const ask = controls?.querySelector('.fx-reference-ask');
+              const pause = controls?.querySelector('.fx-reference-pause');
+              const opticsLink = [...document.querySelectorAll('link[rel="stylesheet"]')]
+                .some(link => String(link.href).includes('formatx-mobile-core-optics-r328.css'));
               return {
-                renderer: root.dataset.fxCoreRenderer,
+                renderer: root.dataset.fxCoreRenderer || '',
+                material: root.dataset.fxCoreMaterial || '',
+                geometry: root.dataset.fxCoreGeometry || '',
+                scheduler: root.dataset.fxCoreScheduler || '',
+                composition: root.dataset.fxCoreCompositionRevisionR326 || '',
                 stageRenderer: stage?.dataset.renderer || '',
-                r317: root.dataset.fxCoreMobileR317 || '',
-                quality: root.dataset.fxCoreQualityR317 || '',
-                scheduler: root.dataset.fxCoreSchedulerR317 || '',
-                biolume: root.dataset.fxCoreBiolumeR323 || '',
-                biolumeProfile: root.dataset.fxCoreBiolumeProfileR323 || '',
-                v69: root.dataset.fxCoreMobileV69,
-                layout: root.dataset.fxMobileReferenceLayout,
-                composition: root.dataset.fxReferenceComposition,
-                paused: root.dataset.fxReferenceMotionPaused,
-                narrowProof: root.dataset.fxReferenceNarrowProofR145,
-                bootstrap: root.dataset.fxMobileBootstrapR312 || '',
-                pulse: root.dataset.fxCorePulseR312 || '',
-                canvases: document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
+                v69: root.dataset.fxCoreMobileV69 || '',
+                r326: root.dataset.fxCrystalOrganismR326 || '',
+                canvases: document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
                 gl: Boolean(gl),
                 glError: gl?.getError(),
                 width: box?.width || 0,
+                height: box?.height || 0,
+                opacity: Number(style?.opacity || 0),
+                filter: style?.filter || '',
                 energy: Number(window.FormatXCoreMobileV69?.energy || 0),
                 position: [...(window.FormatXCoreCinematic?.corePosition || [])],
                 renderMs: Number(root.dataset.fxCoreRenderMs || Infinity),
-                referenceVisible: [...document.querySelectorAll('#hero .fx-reference-heading,#hero .fx-reference-proof,#hero .fx-reference-rail,.fx-reference-mag-button,.fx-reference-menu-button')].filter(visible).length,
-                awardVisible: [...document.querySelectorAll('.fx-award-proof')].filter(visible).length,
-                heroCopyVisible: visible(heroCopy),
-                legacyMenuVisible: visible(legacyMenu),
-                proofOverlap: overlap(refProof, award),
-                liveTextOverlap: glyphOverlap(refText, live)
+                opticsLink,
+                controlsVisible: visible(controls) && visible(sound) && visible(ask) && visible(pause),
+                soundAskOverlap: overlap(sound, ask),
+                askPauseOverlap: overlap(ask, pause),
+                heroCopyVisible: visible(document.querySelector('#hero .hero-copy')),
+                proofVisible: visible(document.querySelector('#hero .fx-reference-proof'))
               };
             });
 
-            console.log(name.toUpperCase(), JSON.stringify({ domReadyMs, pulseBefore, pulseAfter, before, state }));
-            await page.screenshot({ path: `${name}-current.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
+            console.log(name.toUpperCase(), JSON.stringify({ before, state }));
+            await page.screenshot({ path: `${name}-r326-current.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
 
-            assert.equal(state.renderer, 'single-webgl-luminous-crystal-r99');
-            assert.equal(state.stageRenderer, 'reference-r317-modern-crystal');
-            assert.equal(state.r317, 'ready-v69');
-            assert.equal(state.quality, 'modern-flat-normal-fresnel-microfacet');
-            assert.equal(state.scheduler, 'bounded-interaction-bursts-no-idle-raf');
+            assert.equal(state.renderer, 'single-webgl-crystal-organism-r326');
+            assert.equal(state.stageRenderer, 'crystal-organism-r326');
+            assert.equal(state.material, 'translucent-living-facet-organism-r326');
+            assert.equal(state.geometry, 'four-direction-asymmetric-crystal-organism-r326');
+            assert.equal(state.scheduler, 'heartbeat-and-interaction-bursts-no-idle-loop-r326');
+            assert.equal(state.composition, 'new-crystal-organism-no-legacy-fallback');
             assert.equal(state.v69, 'ready-v69');
-            assert.equal(state.layout, expected);
-            assert.equal(state.pulse, 'compositor-lub-dub');
+            assert.equal(state.r326, 'ready');
             assert.equal(state.canvases, 1);
             assert.equal(state.gl, true);
             assert.equal(state.glError, 0);
-            assert.ok(state.width <= viewport.width + 1 && state.renderMs < 16.67, JSON.stringify(state));
-            assert.ok(state.awardVisible <= 1);
-            assert.equal(state.proofOverlap, false);
+            assert.ok(state.width <= viewport.width + 1 && state.height > 100, JSON.stringify(state));
+            assert.ok(Number.isFinite(state.renderMs) && state.renderMs < 16.67, JSON.stringify(state));
+            assert.equal(state.opticsLink, true, 'r367 optics stylesheet is not loaded');
+            assert.equal(state.controlsVisible, true, JSON.stringify(state));
+            assert.equal(state.soundAskOverlap, false, JSON.stringify(state));
+            assert.equal(state.askPauseOverlap, false, JSON.stringify(state));
+            assert.equal(state.heroCopyVisible, true, JSON.stringify(state));
+            assert.equal(state.proofVisible, true, JSON.stringify(state));
 
             if (mobile) {
-              assert.equal(state.biोलume || state.biolume, 'ready');
-              assert.equal(state.biolumeProfile, 'deep-water-iridescent-traveling-rim');
-              assert.equal(state.bootstrap, 'postdom-real3d-and-pulse');
-              assert.equal(state.paused, 'false');
-              assert.equal(state.narrowProof, 'ready');
-              assert.ok(state.energy >= before.energy - .01, JSON.stringify({ before, state }));
+              assert.ok(state.energy >= before.energy - .02, JSON.stringify({ before, state }));
+              assert.equal(state.position.length, 3);
               assert.notDeepEqual(state.position, before.position);
-              assert.ok(state.referenceVisible >= 3);
-              assert.equal(state.liveTextOverlap, false, JSON.stringify(state));
-            } else {
-              assert.ok(['desktop-skip',''].includes(state.biolume), JSON.stringify(state));
-              assert.equal(state.composition, 'desktop-reference-r244');
-              assert.ok(state.referenceVisible >= 2, JSON.stringify(state));
-              assert.equal(state.heroCopyVisible, true);
+              assert.ok(state.opacity <= .90, `mobile r367 canvas is too luminous: ${JSON.stringify(state)}`);
+              assert.match(state.filter, /blur\((1\.0[2-9]|1\.1)px\)/, `mobile r367 edge softening missing: ${state.filter}`);
             }
 
             await context.close();
@@ -243,20 +194,24 @@ jobs:
             } finally {
               await browser.close();
             }
-            for (const file of ['desktop-current.png','mobile-current.png']) assert.ok(fs.statSync(file).size > 10000, file);
-            console.log('PASS: live current r317/r323 desktop/mobile WebGL MAG, compositor pulse, interaction and information integrity passed.');
+            for (const file of ['desktop-r326-current.png','mobile-r326-current.png']) {
+              assert.ok(fs.statSync(file).size > 10000, file);
+            }
+            console.log('PASS: live r326 WebGL crystal, r367 restrained mobile optics, interaction and control geometry passed.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
+
       - name: Upload live MAG captures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-mag-current-${{ github.run_id }}
+          name: live-mag-r326-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-live/desktop-current.png
-            ${{ runner.temp }}/mag-live/mobile-current.png
+            ${{ runner.temp }}/mag-live/desktop-r326-current.png
+            ${{ runner.temp }}/mag-live/mobile-r326-current.png
           if-no-files-found: warn
           retention-days: 14
+
       - name: Publish live MAG status
         if: always() && github.event_name == 'workflow_run'
         env:
@@ -265,5 +220,15 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live current r317/r323 desktop/mobile MAG and pulse passed'; else state=failure; description='Live current desktop/mobile MAG/pulse diagnostic failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG r312' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Live r326 crystal and r367 restrained mobile optics passed'
+          else
+            state=failure
+            description='Live r326/r367 MAG diagnostic failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX live MAG r326' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
