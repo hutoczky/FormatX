@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-// r360: deterministic/event-driven mobile reference owner. No document-wide
+// r362: deterministic/event-driven mobile reference owner. No document-wide
 // steady-state MutationObserver loops; the hero control group stays inside the
 // canonical 3D stage so ASK | PAUSE remain beside the core without adding flow.
 // The reference menu is mounted here but its click action has one owner only:
@@ -9,6 +9,7 @@ const root=document.documentElement;
 let legacyMenu=null;
 let bootObserver=null;
 let resizeRaf=0;
+let flowRaf=0;
 let lastMobile=null;
 const mobileViewport=()=>matchMedia('(max-width:900px)').matches;
 let paused=mobileViewport()?false:root.dataset.fxReferenceMotionPaused==='true';
@@ -58,17 +59,35 @@ function proofCopy(){return root.lang==='en'?{heading:'DISCOVER HOW IT WORKS',ti
 function bindLiveOs(card){const live=card.querySelector('.fx-reference-liveos');if(!(live instanceof HTMLAnchorElement)||live.dataset.fxR204Bound==='true')return;live.dataset.fxR204Bound='true';live.addEventListener('click',event=>{event.preventDefault();pulse();const launcher=document.querySelector('[data-fx-live-os-launcher]');if(launcher instanceof HTMLButtonElement)launcher.click();else dispatchEvent(new CustomEvent('formatx:open-live-os'))})}
 function repairProof(card){const copy=proofCopy();const valid=card.querySelector('.fx-reference-proof-kicker')&&card.querySelector('h2')&&card.querySelector('p')&&card.querySelector('.fx-reference-liveos');if(!valid)card.innerHTML='<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2></h2><p></p><a class="fx-reference-liveos" href="#experience" aria-label="Live OS megnyitása">Live OS</a>';const kicker=card.querySelector('.fx-reference-proof-kicker'),title=card.querySelector('h2'),body=card.querySelector('p'),live=card.querySelector('.fx-reference-liveos');if(kicker&&kicker.textContent!=='PUBLIC PROOF LAYER')kicker.textContent='PUBLIC PROOF LAYER';if(title&&title.textContent!==copy.title)title.textContent=copy.title;if(body&&body.textContent!==copy.body)body.textContent=copy.body;if(live){if(live.textContent!=='Live OS')live.textContent='Live OS';live.setAttribute('href','#experience');live.setAttribute('aria-label',root.lang==='en'?'Open Live OS':'Live OS megnyitása')}bindLiveOs(card)}
 function ensureControlZone(hero,space,rail){if(!mobileViewport())return;let zone=hero.querySelector('.fx-reference-controls-r204');if(!zone){zone=document.createElement('div');zone.className='fx-reference-controls-r204';zone.setAttribute('aria-label',root.lang==='en'?'Hero controls':'Hero vezérlők')}const sound=document.querySelector('.fx-three-sound');if(sound instanceof HTMLElement&&sound.parentElement!==zone)zone.prepend(sound);if(rail instanceof HTMLElement&&rail.parentElement!==zone)zone.appendChild(rail);if(zone.parentElement!==space)space.appendChild(zone);root.dataset.fxMobileProofControls='r250-reference-stage-owner'}
+function repairMobileFlowOrder(){
+ if(!mobileViewport())return false;
+ const hero=document.getElementById('hero'),grid=hero?.querySelector(':scope > .hero-grid'),space=grid?.querySelector(':scope > .hero-space'),heroCopy=grid?.querySelector(':scope > .hero-copy'),heading=grid?.querySelector(':scope > .fx-reference-heading'),proof=grid?.querySelector(':scope > .fx-reference-proof');
+ if(!(grid instanceof HTMLElement)||!(space instanceof HTMLElement)||!(heroCopy instanceof HTMLElement)||!(heading instanceof HTMLElement)||!(proof instanceof HTMLElement))return false;
+ if(space.nextElementSibling!==heroCopy)space.after(heroCopy);
+ if(heroCopy.nextElementSibling!==heading)heroCopy.after(heading);
+ if(heading.nextElementSibling!==proof)heading.after(proof);
+ root.dataset.fxMobileHeroFlowR362='stage-card-heading-proof';
+ return true;
+}
+function scheduleFlowRepair(){
+ if(!mobileViewport())return;
+ queueMicrotask(()=>{
+  repairMobileFlowOrder();
+  if(flowRaf)return;
+  flowRaf=requestAnimationFrame(()=>{flowRaf=0;repairMobileFlowOrder()});
+ });
+}
 function ensureFlowContent(hero,grid,space){
  const copy=proofCopy();let heading=hero.querySelector('.fx-reference-heading');if(!(heading instanceof HTMLElement)){heading=document.createElement('div');heading.className='fx-reference-heading'}if(heading.textContent!==copy.heading)heading.textContent=copy.heading;if(heading.parentElement!==grid)grid.appendChild(heading);
  let card=hero.querySelector('.fx-reference-proof');if(!(card instanceof HTMLElement)){card=document.createElement('article');card.className='fx-reference-proof'}repairProof(card);if(card.parentElement!==grid)grid.appendChild(card);
- if(space.nextElementSibling!==heading)space.after(heading);if(heading.nextElementSibling!==card)heading.after(card);
+ const heroCopy=grid.querySelector(':scope > .hero-copy');if(heroCopy instanceof HTMLElement){if(space.nextElementSibling!==heroCopy)space.after(heroCopy);if(heroCopy.nextElementSibling!==heading)heroCopy.after(heading)}else if(space.nextElementSibling!==heading)space.after(heading);if(heading.nextElementSibling!==card)heading.after(card);
  let rail=hero.querySelector('.fx-reference-rail');if(!(rail instanceof HTMLElement)){rail=document.createElement('div');rail.className='fx-reference-rail';rail.innerHTML='<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i></i><span>KÉRDEZZ</span></button><button class="fx-reference-pause" type="button" aria-label="Animáció szüneteltetése" data-paused="false">Ⅱ</button>';rail.querySelector('.fx-reference-ask')?.addEventListener('click',()=>{if(window.FormatXOrganismVoice?.open)window.FormatXOrganismVoice.open();else document.querySelector('.fx-organism-thought-trigger')?.click();pulse()})}
- ensureControlZone(hero,space,rail);syncPauseButtons()
+ ensureControlZone(hero,space,rail);syncPauseButtons();scheduleFlowRepair()
 }
 function cleanupDesktopFlow(hero){if(root.dataset.fxReferenceProductionR244==='desktop'){root.dataset.fxReferenceComposition='desktop-reference-r244';return}const zone=hero.querySelector('.fx-reference-controls-r204');const sound=zone?.querySelector('.fx-three-sound');if(sound instanceof HTMLElement)document.body.appendChild(sound);zone?.remove();hero.querySelectorAll('.fx-reference-heading,.fx-reference-proof,.fx-reference-rail').forEach(node=>node.remove());delete root.dataset.fxMobileProofControls;root.dataset.fxReferenceComposition='desktop-native-r177'}
-function create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement))return false;ensureHeader(hero);if(mobileViewport())ensureFlowContent(hero,grid,space);else cleanupDesktopFlow(hero);lastMobile=mobileViewport();root.dataset.fxMobileReferenceLayout='ready-v1';if(root.dataset.fxReferenceProductionR244==='ready')root.dataset.fxReferenceComposition='reference-frame-r244';else if(root.dataset.fxReferenceProductionR244==='desktop')root.dataset.fxReferenceComposition='desktop-reference-r244';else root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r177';queueMicrotask(promoteRegressionStyle);return true}
+function create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement))return false;ensureHeader(hero);if(mobileViewport())ensureFlowContent(hero,grid,space);else cleanupDesktopFlow(hero);lastMobile=mobileViewport();root.dataset.fxMobileReferenceLayout='ready-v1';if(root.dataset.fxReferenceProductionR244==='ready')root.dataset.fxReferenceComposition='reference-frame-r244';else if(root.dataset.fxReferenceProductionR244==='desktop')root.dataset.fxReferenceComposition='desktop-reference-r244';else root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r177';queueMicrotask(promoteRegressionStyle);scheduleFlowRepair();return true}
 function boot(){if(create())return;if(bootObserver)return;const target=document.body||document.documentElement;bootObserver=new MutationObserver(()=>{if(create()){bootObserver.disconnect();bootObserver=null}});bootObserver.observe(target,{subtree:true,childList:true});setTimeout(()=>{if(bootObserver){bootObserver.disconnect();bootObserver=null;create()}},5000)}
-function scheduleResize(){if(resizeRaf)return;resizeRaf=requestAnimationFrame(()=>{resizeRaf=0;const nowMobile=mobileViewport();if(nowMobile!==lastMobile){loadStyles();create();return}const hero=document.getElementById('hero');if(hero)ensureHeader(hero);promoteRegressionStyle()})}
+function scheduleResize(){if(resizeRaf)return;resizeRaf=requestAnimationFrame(()=>{resizeRaf=0;const nowMobile=mobileViewport();if(nowMobile!==lastMobile){loadStyles();create();return}const hero=document.getElementById('hero');if(hero)ensureHeader(hero);promoteRegressionStyle();scheduleFlowRepair()})}
 
 loadStyles();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
@@ -76,6 +95,7 @@ const nav=document.getElementById('main-nav');if(nav)new MutationObserver(syncMe
 addEventListener('keydown',event=>{if(event.key==='Escape')queueMicrotask(syncMenuState)});
 let lastPausePointerUp=-Infinity;function handlePauseActivation(event){const button=event.target instanceof Element?event.target.closest('.fx-reference-pause'):null;if(!(button instanceof HTMLButtonElement))return;if(event.type==='click'&&performance.now()-lastPausePointerUp<700){event.preventDefault();return}if(event.type==='pointerup'){if(event.button!==0)return;lastPausePointerUp=performance.now()}event.preventDefault();setPaused(!paused)}document.addEventListener('pointerup',handlePauseActivation,true);document.addEventListener('click',handlePauseActivation,true);
 addEventListener('resize',scheduleResize,{passive:true});addEventListener('orientationchange',scheduleResize,{passive:true});
-for(const eventName of ['formatx:real3dready','formatx:coredetailready','formatx:organisminterfaceready','formatx:mobilelayoutready'])addEventListener(eventName,()=>{if(mobileViewport()){create();promoteRegressionStyle()}},{passive:true});
-addEventListener('formatx:languagechange',()=>{promoteRegressionStyle();const h=document.querySelector('.fx-reference-heading'),c=document.querySelector('.fx-reference-proof'),ask=document.querySelector('.fx-reference-ask span'),mag=document.querySelector('.fx-reference-mag-button'),menu=document.querySelector('.fx-reference-menu-button'),copy=proofCopy();if(h&&h.textContent!==copy.heading)h.textContent=copy.heading;if(c)repairProof(c);if(ask)ask.textContent=root.lang==='en'?'ASK':'KÉRDEZZ';if(mag)mag.textContent=root.lang==='en'?'CORE':'MAG';if(menu)menu.setAttribute('aria-label',root.lang==='en'?'Menu':'Menü');syncPauseButtons()});
+for(const eventName of ['formatx:real3dready','formatx:coredetailready','formatx:organisminterfaceready','formatx:mobilelayoutready'])addEventListener(eventName,()=>{if(mobileViewport()){create();promoteRegressionStyle();scheduleFlowRepair()}},{passive:true});
+addEventListener('formatx:languagechange',()=>{promoteRegressionStyle();const h=document.querySelector('.fx-reference-heading'),c=document.querySelector('.fx-reference-proof'),ask=document.querySelector('.fx-reference-ask span'),mag=document.querySelector('.fx-reference-mag-button'),menu=document.querySelector('.fx-reference-menu-button'),copy=proofCopy();if(h&&h.textContent!==copy.heading)h.textContent=copy.heading;if(c)repairProof(c);if(ask)ask.textContent=root.lang==='en'?'ASK':'KÉRDEZZ';if(mag)mag.textContent=root.lang==='en'?'CORE':'MAG';if(menu)menu.setAttribute('aria-label',root.lang==='en'?'Menu':'Menü');syncPauseButtons();scheduleFlowRepair()});
+for(const delay of [0,180,650,1600])setTimeout(scheduleFlowRepair,delay);
 }());
