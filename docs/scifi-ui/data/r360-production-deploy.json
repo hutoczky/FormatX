@@ -1,0 +1,10 @@
+{
+  "revision": "r360",
+  "scope": "mobile-mag-optics",
+  "source_commit": "15059ec82d642df0da39c90a5c568bb1ea9bdbd8",
+  "changes": [
+    "reduce mobile MAG light spill",
+    "soften crystal perimeter and pointed tips",
+    "preserve r326 WebGL geometry and controls"
+  ]
+}
