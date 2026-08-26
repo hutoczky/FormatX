@@ -1,0 +1,205 @@
+name: Diagnose live mobile CLS r368
+run-name: Trace production mobile layout shifts and late hero mutations
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/diagnose-live-cls-r368.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trace-mobile-cls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cls-r368" && cd "$RUNNER_TEMP/cls-r368"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Trace layout shifts on canonical production
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/cls-r368"
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('node:fs');
+
+          const rect = r => r ? ({
+            x: Math.round(r.x * 10) / 10,
+            y: Math.round(r.y * 10) / 10,
+            width: Math.round(r.width * 10) / 10,
+            height: Math.round(r.height * 10) / 10
+          }) : null;
+
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']
+            });
+            const context = await browser.newContext({
+              viewport: { width: 412, height: 915 },
+              deviceScaleFactor: 2,
+              isMobile: true,
+              hasTouch: true,
+              locale: 'hu-HU',
+              colorScheme: 'dark'
+            });
+            const page = await context.newPage();
+            const cdp = await context.newCDPSession(page);
+            await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+            await cdp.send('Network.enable');
+            await cdp.send('Network.emulateNetworkConditions', {
+              offline: false,
+              latency: 150,
+              downloadThroughput: 1.6 * 1024 * 1024 / 8,
+              uploadThroughput: 750 * 1024 / 8,
+              connectionType: 'cellular3g'
+            });
+
+            await page.addInitScript(() => {
+              window.__fxR368Shifts = [];
+              window.__fxR368Paints = [];
+              window.__fxR368LongTasks = [];
+              const selector = node => {
+                if (!(node instanceof Element)) return '';
+                if (node.id) return `#${node.id}`;
+                return `${node.tagName.toLowerCase()}${node.classList.length ? '.' + [...node.classList].slice(0,3).join('.') : ''}`;
+              };
+              new PerformanceObserver(list => {
+                for (const entry of list.getEntries()) {
+                  if (entry.hadRecentInput) continue;
+                  window.__fxR368Shifts.push({
+                    time: Math.round(entry.startTime),
+                    value: entry.value,
+                    sources: (entry.sources || []).map(source => ({
+                      node: selector(source.node),
+                      previous: source.previousRect ? {
+                        x: source.previousRect.x, y: source.previousRect.y,
+                        width: source.previousRect.width, height: source.previousRect.height
+                      } : null,
+                      current: source.currentRect ? {
+                        x: source.currentRect.x, y: source.currentRect.y,
+                        width: source.currentRect.width, height: source.currentRect.height
+                      } : null
+                    }))
+                  });
+                }
+              }).observe({ type: 'layout-shift', buffered: true });
+              new PerformanceObserver(list => {
+                for (const entry of list.getEntries()) window.__fxR368Paints.push({ name: entry.name, time: Math.round(entry.startTime) });
+              }).observe({ type: 'paint', buffered: true });
+              try {
+                new PerformanceObserver(list => {
+                  for (const entry of list.getEntries()) window.__fxR368LongTasks.push({ time: Math.round(entry.startTime), duration: Math.round(entry.duration) });
+                }).observe({ type: 'longtask', buffered: true });
+              } catch (_) {}
+            });
+
+            const errors = [];
+            page.on('pageerror', error => errors.push(error.message));
+            page.on('console', message => {
+              if (message.type() === 'error' && !/cloudflareinsights|favicon|WebGL|WebGPU|GPU/i.test(message.text())) errors.push(message.text());
+            });
+
+            const started = Date.now();
+            await page.goto(`https://formatxsuite.com/?cls_r368=${Date.now()}`, {
+              waitUntil: 'domcontentloaded',
+              timeout: 45000
+            });
+
+            async function sample(label) {
+              const state = await page.evaluate(label => {
+                const box = selector => {
+                  const element = document.querySelector(selector);
+                  if (!element) return null;
+                  const r = element.getBoundingClientRect();
+                  const s = getComputedStyle(element);
+                  return {
+                    x: r.x, y: r.y, width: r.width, height: r.height,
+                    display: s.display, visibility: s.visibility, opacity: s.opacity,
+                    order: s.order, position: s.position
+                  };
+                };
+                const heroCopy = document.querySelector('#hero .hero-copy');
+                return {
+                  label,
+                  now: Math.round(performance.now()),
+                  root: {
+                    mobileReference: document.documentElement.dataset.fxMobileReferenceLayout || '',
+                    controlOwner: document.documentElement.dataset.fxControlOwnerR268 || '',
+                    content: document.documentElement.dataset.fxContentStandard || '',
+                    firstPaint: document.documentElement.dataset.fxMobileFirstPaintR358 || '',
+                    core: document.documentElement.dataset.fxCrystalOrganismR326 || '',
+                    renderer: document.documentElement.dataset.fxCoreRenderer || ''
+                  },
+                  hero: box('#hero'),
+                  grid: box('#hero > .hero-grid'),
+                  space: box('#hero .hero-space'),
+                  controls: box('#hero .fx-reference-controls-r204'),
+                  copy: box('#hero .hero-copy'),
+                  category: box('#hero .fx-category-definition'),
+                  title: box('#hero-title'),
+                  lead: box('#hero .hero-lead'),
+                  method: box('#hero .fx-method-inline'),
+                  actions: box('#hero .hero-actions'),
+                  facts: box('#hero .hero-facts'),
+                  heading: box('#hero .fx-reference-heading'),
+                  proof: box('#hero .fx-reference-proof'),
+                  download: box('#hero .fx-mobile-download-r151'),
+                  next: box('.fx-category-deck--standalone'),
+                  copyChildren: heroCopy ? [...heroCopy.children].map(node => `${node.tagName.toLowerCase()}.${node.className || node.id || ''}`) : [],
+                  styleLinks: [...document.querySelectorAll('link[rel="stylesheet"]')].filter(link => {
+                    const href = String(link.href);
+                    return /mobile-first-paint|native-orb-reference|mobile-reference-layout|mobile-layout-r207|reference-production-r244/.test(href);
+                  }).map(link => ({ href: link.href, media: link.media, disabled: link.disabled, sheet: Boolean(link.sheet) })),
+                  shifts: window.__fxR368Shifts.slice(),
+                  paints: window.__fxR368Paints.slice(),
+                  longTasks: window.__fxR368LongTasks.slice()
+                };
+              }, label);
+              console.log('SAMPLE', JSON.stringify(state));
+              return state;
+            }
+
+            await sample('domcontentloaded');
+            for (const [label, delay] of [['500ms',500],['1s',500],['2s',1000],['4s',2000],['8s',4000],['12s',4000],['18s',6000]]) {
+              await page.waitForTimeout(delay);
+              await sample(label);
+            }
+
+            const final = await page.evaluate(() => ({
+              shifts: window.__fxR368Shifts,
+              paints: window.__fxR368Paints,
+              longTasks: window.__fxR368LongTasks,
+              cls: window.__fxR368Shifts.reduce((sum, entry) => sum + entry.value, 0)
+            }));
+            console.log('FINAL_R368', JSON.stringify(final));
+            console.log('BROWSER_ERRORS', JSON.stringify(errors));
+            console.log('ELAPSED_MS', Date.now() - started);
+            fs.writeFileSync('cls-r368.json', JSON.stringify(final, null, 2));
+            await page.screenshot({ path: 'cls-r368-final.png', fullPage: true, timeout: 120000, animations: 'disabled', caret: 'hide' });
+            await context.close();
+            await browser.close();
+          })().catch(error => { console.error(error); process.exit(1); });
+          NODE
+
+      - name: Upload CLS trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-cls-r368-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/cls-r368/cls-r368.json
+            ${{ runner.temp }}/cls-r368/cls-r368-final.png
+          if-no-files-found: warn
+          retention-days: 7
