@@ -11,6 +11,9 @@
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260825-r326-new-organism';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
+  const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 1700 : 1100;
+  let rendererRequested = false;
+  let rendererTimer = 0;
 
   function loadStableControls() {
     if (document.querySelector('link[data-fx-mobile-control-stability-r320]')) return;
@@ -47,11 +50,16 @@
     document.head.appendChild(script);
   }
 
-  function loadPrimaryRenderer() {
+  function loadPrimaryRenderer(source='scheduled') {
+    if (rendererRequested) return;
+    rendererRequested = true;
+    if (rendererTimer) clearTimeout(rendererTimer);
+    rendererTimer = 0;
     if (document.querySelector('script[data-fx-crystal-organism-r326],script[src*="formatx-crystal-organism-r326.js"]')) return;
+    root.dataset.fxCoreRendererStartupR346 = source;
     const renderer=document.createElement('script');
     renderer.src=PRIMARY_RENDERER;
-    renderer.async=false;
+    renderer.async=true;
     renderer.dataset.fxCrystalOrganismR326='true';
     renderer.dataset.fxCoreTrueMeshR112='true';
 
@@ -75,8 +83,27 @@
     document.head.appendChild(renderer);
   }
 
+  function schedulePrimaryRenderer() {
+    if (rendererRequested || rendererTimer) return;
+    root.dataset.fxCoreRendererStartupR346='critical-content-first';
+    const schedule = () => {
+      if (rendererRequested || rendererTimer) return;
+      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-critical-first-paint'), START_DELAY);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
+    else schedule();
+
+    const startFromGesture = event => {
+      if (!event.isTrusted || rendererRequested) return;
+      loadPrimaryRenderer('trusted-user-gesture');
+    };
+    addEventListener('pointerdown', startFromGesture, { capture: true, passive: true, once: true });
+    addEventListener('touchstart', startFromGesture, { capture: true, passive: true, once: true });
+    addEventListener('keydown', startFromGesture, { capture: true, once: true });
+  }
+
   root.dataset.fxCoreOverlayPolicyR326='new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual';
   loadStableControls();
   loadReferenceLayout();
-  loadPrimaryRenderer();
+  schedulePrimaryRenderer();
 }());
