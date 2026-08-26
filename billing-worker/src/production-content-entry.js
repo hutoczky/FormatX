@@ -7,6 +7,13 @@ import productionBase from './production-content-entry-r369-base.js';
   these exact capabilities:
   formatx-public-shell.js
   formatx-content-standard.css
+  formatx-content-standard.js
+  formatx-seo.js
+  formatx-content-finalizer.js
+  formatx-platform-surface-finalizer.js
+  formatx-organism-trust.js
+  formatx-organism-semantic-state.js
+  single-language-toggle.js
   release-metadata.js
   cleanLegacyReleaseCopy
   Cache-Control', 'no-store
