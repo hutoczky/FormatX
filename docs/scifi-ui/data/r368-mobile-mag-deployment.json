@@ -1,0 +1,34 @@
+{
+  "revision": "r368",
+  "surface": "mobile-mag-optics",
+  "intent": "restrained-centre-highlight-softer-oled-perimeter-preserved-crystal-geometry",
+  "desktop_unchanged": true,
+  "source_css": "/scifi-ui/styles/formatx-mobile-core-optics-r328.css",
+  "runtime_owner": "/scifi-ui/scripts/formatx-mobile-regression-r310.js",
+  "cache_revision": "20260827-r368-mobile-soft-edge",
+  "owner_marker": "r368-mobile-soft-edge-owner",
+  "style_commit": "62c5cdf39491e568b8641cdccd647a78c11522c2",
+  "cache_commit": "2838b5508c8e33f2ba1a691d07c447dfec6e6ead",
+  "award_verifier_commit": "091cf726975ecad4d01c9b735262b00711bf0a1b",
+  "live_mag_verifier_commit": "ddc50ddc5319e4f9b0eb25042eb685416e68d725",
+  "changes": {
+    "mobile_canvas_opacity": 0.84,
+    "phone_canvas_opacity": 0.82,
+    "mobile_brightness": 0.90,
+    "phone_brightness": 0.88,
+    "mobile_contrast": 0.51,
+    "phone_contrast": 0.49,
+    "mobile_blur_px": 1.16,
+    "phone_blur_px": 1.22,
+    "centre_glow_width_percent": 25,
+    "phone_centre_glow_width_percent": 24,
+    "centre_glow_opacity": 0.055,
+    "phone_centre_glow_opacity": 0.045
+  },
+  "validated": {
+    "production_validation": true,
+    "public_site_integrity": true,
+    "desktop_mobile_playwright_visual_contracts": true,
+    "production_mag_and_thought_contracts": true
+  }
+}
