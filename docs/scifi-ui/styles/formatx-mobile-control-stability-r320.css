@@ -1,14 +1,77 @@
-/* FormatX r320/r348 — stable mobile hero interaction geometry.
+/* FormatX r320/r359 — stable mobile hero interaction + information geometry.
    r268 mounts the canonical controls inside .hero-space. This file is the final
    mobile interaction owner: SOUND / ASK / PAUSE stay visible, stationary and
-   horizontally centred below the living r326 MAG.
+   horizontally centred below the living r326 MAG, and the readable hero card
+   cannot be collapsed by older late-loading visual layers.
 
    r347 also retires the legacy Transcend aurora lens on the mobile WebGL path.
    The old full-screen 2D layer is decorative legacy output and must not affect
    paint bounds, hit testing or compositor cost. */
 @media (max-width: 900px), (pointer: coarse) {
+  /* r359: r147 predates the readable reference composition and can still arrive
+     late with a 1x1 visually-hidden hero-copy rule. This final mobile owner is
+     deliberately independent of DOM ownership and runtime data attributes so
+     the information card remains physically readable before and after r268. */
+  html:root:root body.living-architecture main#main-content #hero .hero-copy {
+    order: 1 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: calc(100% - 32px) !important;
+    min-width: 0 !important;
+    max-width: 700px !important;
+    height: auto !important;
+    min-height: 240px !important;
+    max-height: none !important;
+    margin: 18px auto 16px !important;
+    padding: clamp(24px, 6vw, 34px) clamp(20px, 5.5vw, 30px) clamp(26px, 6.5vw, 38px) !important;
+    border: 1px solid rgba(118,221,255,.17) !important;
+    border-radius: 28px !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    color: #eefaff !important;
+    background: radial-gradient(circle at 88% 8%,rgba(69,205,255,.075),transparent 34%),linear-gradient(148deg,rgba(5,27,42,.92),rgba(2,15,27,.94) 64%,rgba(3,12,23,.96)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035),inset 0 0 34px rgba(59,199,255,.025),0 22px 70px rgba(0,0,0,.26) !important;
+    backdrop-filter: blur(14px) saturate(118%) !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 8 !important;
+  }
+
+  html:root:root body.living-architecture main#main-content #hero .hero-copy > * {
+    position: relative !important;
+    inset: auto !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root body.living-architecture main#main-content #hero .hero-copy > .hero-lead {
+    width: 100% !important;
+    min-block-size: 7.5em !important;
+    line-height: 1.56 !important;
+    overflow-wrap: anywhere !important;
+  }
+
   /* Beat the older r250 vertical-rail rules by matching the real r268 parent
-     and the canonical r264 class. This is deliberately geometry-only. */
+     and the canonical r264 class. */
   html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
     top: auto !important;
@@ -174,6 +237,13 @@
   html:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause:active {
     transform: none !important;
     translate: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  html:root:root body.living-architecture main#main-content #hero .hero-copy {
+    width: calc(100% - 24px) !important;
+    border-radius: 24px !important;
   }
 }
 
