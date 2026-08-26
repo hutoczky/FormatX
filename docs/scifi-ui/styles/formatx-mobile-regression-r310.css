@@ -217,6 +217,18 @@
     line-height: 1.56 !important;
     overflow-wrap: anywhere !important;
   }
+
+  /* r360 — the readable information card is the second mobile flow surface;
+     reference proof content follows it deterministically. DOM timing may place
+     the heading earlier, so own the visual order explicitly instead of relying
+     on async insertion order. */
+  html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .fx-reference-heading {
+    order: 3 !important;
+  }
+
+  html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .fx-reference-proof {
+    order: 4 !important;
+  }
 }
 
 /* r327 — the living MAG now changes silhouette on both desktop and mobile.
