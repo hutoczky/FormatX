@@ -158,14 +158,26 @@
   }
 }
 
-/* r359 — keep the readable mobile hero card authoritative after every late
-   visual runtime. r147 predates the reference composition and still contains
-   a 1px visually-hidden fallback. On a slow/CI load that late stylesheet can
-   win after r207, making the information card disappear after first paint.
-   The current production contract is MAG -> controls -> readable hero card. */
+/* r361 — keep the readable mobile hero card authoritative after every late
+   visual runtime. Older layers alternate between grid and flex placement and
+   can leave explicit grid rows on the reference elements. Own the parent flow
+   as one vertical flex column, then give every information/proof surface one
+   deterministic order: MAG stage -> information card -> heading -> proof. */
 @media (max-width: 900px), (pointer: coarse) {
+  html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+  }
+
   html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-copy {
     order: 2 !important;
+    grid-area: auto !important;
+    grid-row: auto !important;
+    grid-column: auto !important;
     position: relative !important;
     inset: auto !important;
     display: grid !important;
@@ -218,16 +230,22 @@
     overflow-wrap: anywhere !important;
   }
 
-  /* r360 — the readable information card is the second mobile flow surface;
-     reference proof content follows it deterministically. DOM timing may place
-     the heading earlier, so own the visual order explicitly instead of relying
-     on async insertion order. */
   html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .fx-reference-heading {
     order: 3 !important;
+    grid-area: auto !important;
+    grid-row: auto !important;
+    grid-column: auto !important;
+    position: relative !important;
+    inset: auto !important;
   }
 
   html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .fx-reference-proof {
     order: 4 !important;
+    grid-area: auto !important;
+    grid-row: auto !important;
+    grid-column: auto !important;
+    position: relative !important;
+    inset: auto !important;
   }
 }
 
@@ -254,7 +272,7 @@
 
 /* Mobile morph stays restrained so the four tips never become blade-like.
    Optical exposure, rim light and edge softness are owned exclusively by
-   formatx-mobile-core-optics-r328.css r343 to prevent late cascade conflicts. */
+   formatx-mobile-core-optics-r328.css to prevent late cascade conflicts. */
 @media (prefers-reduced-motion: no-preference) and (max-width: 900px),
        (prefers-reduced-motion: no-preference) and (pointer: coarse) {
   html body.living-architecture #hero .fx-core-r317-stage > .fx-core-r317-canvas {
