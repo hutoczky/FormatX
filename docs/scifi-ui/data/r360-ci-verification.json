@@ -1,0 +1,5 @@
+{
+  "revision": "r360",
+  "purpose": "CI verification for final mobile MAG optics",
+  "base_commit": "70f29732e6843f3aca54a49772550617548c793b"
+}
