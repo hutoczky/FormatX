@@ -158,6 +158,67 @@
   }
 }
 
+/* r359 — keep the readable mobile hero card authoritative after every late
+   visual runtime. r147 predates the reference composition and still contains
+   a 1px visually-hidden fallback. On a slow/CI load that late stylesheet can
+   win after r207, making the information card disappear after first paint.
+   The current production contract is MAG -> controls -> readable hero card. */
+@media (max-width: 900px), (pointer: coarse) {
+  html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    row-gap: 12px !important;
+    box-sizing: border-box !important;
+    width: calc(100% - 24px) !important;
+    min-width: 0 !important;
+    max-width: 680px !important;
+    height: auto !important;
+    min-height: 240px !important;
+    max-height: none !important;
+    margin: 0 auto 26px !important;
+    padding: 18px clamp(16px, 4.8vw, 24px) 20px !important;
+    overflow: hidden !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 8 !important;
+  }
+
+  html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-copy > * {
+    position: relative !important;
+    inset: auto !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-copy > .hero-lead {
+    width: 100% !important;
+    min-block-size: 0 !important;
+    line-height: 1.56 !important;
+    overflow-wrap: anywhere !important;
+  }
+}
+
 /* r327 — the living MAG now changes silhouette on both desktop and mobile.
    This is deliberately composited with the individual scale/rotate properties
    instead of adding another JavaScript/WebGL render loop. The native r317
