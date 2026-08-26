@@ -7,7 +7,7 @@
 
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
-  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260826-r356-soft-edge-aura';
+  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260826-r357-refined-soft-edge';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
   const WDA_R310_STYLE_CONTRACT = 'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions';
   const DESKTOP_LOOP_QUERY = matchMedia('(min-width: 901px) and (pointer: fine)');
@@ -80,8 +80,8 @@
   function ensureOpticsStyle() {
     const existing = document.querySelector('link[data-fx-mobile-core-optics-r328]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r356-soft-edge-aura')) existing.href = OPTICS_STYLE_URL;
-      root.dataset.fxCoreMobileOpticsR328 = 'r356-soft-edge-aura-owner';
+      if (!existing.href.includes('r357-refined-soft-edge')) existing.href = OPTICS_STYLE_URL;
+      root.dataset.fxCoreMobileOpticsR328 = 'r357-refined-soft-edge-owner';
       return;
     }
     const link = document.createElement('link');
@@ -89,7 +89,7 @@
     link.href = OPTICS_STYLE_URL;
     link.dataset.fxMobileCoreOpticsR328 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxCoreMobileOpticsR328 = 'r356-soft-edge-aura-owner';
+    root.dataset.fxCoreMobileOpticsR328 = 'r357-refined-soft-edge-owner';
   }
 
   function desktopLoopBlocked() {
