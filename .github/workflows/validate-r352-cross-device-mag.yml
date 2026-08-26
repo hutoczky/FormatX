@@ -1,4 +1,4 @@
-name: Validate r353 cross-device MAG render
+name: Validate r356 cross-device MAG render
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/r353" && cd "$RUNNER_TEMP/r353"
+          mkdir -p "$RUNNER_TEMP/r356" && cd "$RUNNER_TEMP/r356"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
@@ -30,14 +30,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r353-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r356-server.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/r353"
+          cd "$RUNNER_TEMP/r356"
           node <<'NODE'
           const { chromium } = require('playwright');
           const fs = require('fs');
           const path = require('path');
-          const out = path.join(process.env.GITHUB_WORKSPACE, 'r353-render');
+          const out = path.join(process.env.GITHUB_WORKSPACE, 'r356-render');
           fs.mkdirSync(out, {recursive:true});
           const assert=(v,m)=>{if(!v)throw new Error(m)};
 
@@ -57,14 +57,19 @@ jobs:
             await page.waitForTimeout(1200);
             const state=await page.evaluate(()=>{
               const c=document.querySelector('.fx-crystal-organism-r326-canvas');
+              const stage=document.querySelector('.fx-crystal-organism-r326-stage');
               const cue=document.querySelector('.fx-crystal-cue-r318');
               const s=getComputedStyle(c);
+              const aura=stage?getComputedStyle(stage,'::after'):null;
               const r=c.getBoundingClientRect();
               return {
                 renderer:document.documentElement.dataset.fxCoreRenderer||'',
                 optics:document.documentElement.dataset.fxCoreMobileOpticsR328||'',
                 width:r.width,height:r.height,
-                scale:s.scale,transform:s.transform,filter:s.filter,opacity:s.opacity,
+                scale:s.scale,transform:s.transform,filter:s.filter,opacity:Number(s.opacity),
+                auraOpacity:Number(aura?.opacity||0),
+                auraWidth:aura?.width||'',
+                auraFilter:aura?.filter||'',
                 cueDisplay:cue?getComputedStyle(cue).display:'missing',
                 overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
               };
@@ -72,9 +77,14 @@ jobs:
             console.log(profile.name, JSON.stringify(state));
             assert(state.width>100 && state.height>100, profile.name+' MAG canvas too small or missing');
             assert(state.overflow<=2, profile.name+' horizontal overflow: '+state.overflow);
-            assert(state.filter.includes('blur('), profile.name+' r353 soft edge filter missing');
-            assert(state.optics.includes('r353-soft-luminous-glass'), profile.name+' r353 optics owner missing: '+state.optics);
-            if(profile.mobile) assert(state.cueDisplay==='none', 'mobile decorative cue still overlaps controls');
+            assert(state.filter.includes('blur('), profile.name+' soft edge filter missing');
+            assert(state.optics.includes('r356-soft-edge-aura'), profile.name+' r356 optics owner missing: '+state.optics);
+            if(profile.mobile){
+              assert(state.cueDisplay==='none', 'mobile decorative cue still overlaps controls');
+              assert(state.opacity<=0.84, 'mobile MAG canvas is too luminous: '+state.opacity);
+              assert(state.auraOpacity<=0.34, 'mobile MAG aura is too strong: '+state.auraOpacity);
+              assert(state.auraFilter.includes('blur('), 'mobile MAG aura is not diffuse');
+            }
             await page.locator('#hero').screenshot({path:path.join(out,profile.name+'.png')});
             await context.close();
             await browser.close();
@@ -88,6 +98,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r353-cross-device-mag-render
-          path: r353-render/
+          name: r356-cross-device-mag-render
+          path: r356-render/
           retention-days: 14
