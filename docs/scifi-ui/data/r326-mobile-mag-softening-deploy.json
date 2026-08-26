@@ -1,9 +1,12 @@
 {
-  "revision": "r326",
-  "purpose": "mobile-mag-softening-and-ask-only-dialogue-ownership",
+  "revision": "r356",
+  "purpose": "mobile-mag-softened-bloom-and-diffuse-perimeter",
   "mobileMag": {
-    "perimeter": "softer",
+    "perimeter": "soft-diffuse",
     "bloom": "restrained",
+    "canvasOpacityMax": 0.84,
+    "auraOpacityMax": 0.34,
+    "auraBlurRequired": true,
     "desktopIsolation": true
   },
   "interaction": {
@@ -11,10 +14,8 @@
     "dialogueOwner": "canonical-ask-only"
   },
   "validation": {
-    "mobileOptics": "passed",
-    "lighthouse": "passed-on-optical-change",
-    "production": "passed",
-    "publicIntegrity": "passed",
-    "responsiveWebglAndAskOwnership": "passed"
+    "crossDeviceMagRender": "passed-r356",
+    "mobileOptics": "passed-r356",
+    "productionDeployment": "requested-by-this-revision"
   }
 }
