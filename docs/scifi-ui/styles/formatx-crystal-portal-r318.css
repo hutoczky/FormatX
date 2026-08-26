@@ -1,7 +1,7 @@
-/* FormatX r339 — the crystal remains the interactive site core, with the
-   mobile composite deliberately softer and darker than desktop. Interaction
-   geometry is unchanged; only final optical contrast and decorative facets are
-   restrained so the MAG reads as luminous glass instead of a hard cut-out. */
+/* FormatX r371 — restrained cross-device MAG glow and softer crystal contour.
+   The WebGL geometry and interaction surface stay unchanged. Desktop and mobile
+   now share the same optical direction: less centre flare, gentler facet
+   contrast and a softer luminous edge instead of a hard cut-out. */
 
 #hero .hero-space {
   --fx-crystal-r318-width: min(70%, 650px);
@@ -11,7 +11,9 @@
 html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
 html body.living-architecture #hero .hero-space > .fx-core-r112-stage > .fx-core-r112-canvas,
 html body.living-architecture #hero .hero-space > .fx-core-r120-stage > .fx-core-r120-canvas {
-  filter: brightness(.82) saturate(.86) contrast(.84) blur(.20px) !important;
+  opacity: .93 !important;
+  filter: brightness(.76) saturate(.82) contrast(.72) blur(.55px) !important;
+  -webkit-filter: brightness(.76) saturate(.82) contrast(.72) blur(.55px) !important;
   transition: filter .22s ease, opacity .22s ease !important;
 }
 
@@ -30,15 +32,15 @@ html body.living-architecture #hero .hero-space > .fx-core-r120-stage > .fx-core
 .fx-crystal-facets-r318 {
   z-index: 7;
   pointer-events: none;
-  opacity: .055;
+  opacity: .040;
   background:
-    linear-gradient(31deg, transparent 49.55%, rgba(207, 248, 255, .070) 49.9%, transparent 50.35%),
-    linear-gradient(-36deg, transparent 49.55%, rgba(146, 219, 255, .056) 49.9%, transparent 50.35%),
-    linear-gradient(90deg, transparent 49.62%, rgba(212, 242, 255, .036) 49.94%, transparent 50.30%),
-    linear-gradient(0deg, transparent 49.62%, rgba(129, 151, 255, .030) 49.94%, transparent 50.30%),
-    conic-gradient(from 45deg at 50% 50%, rgba(92, 209, 255, .028), rgba(118, 100, 255, .024), rgba(188, 242, 255, .018), rgba(92, 209, 255, .028));
+    linear-gradient(31deg, transparent 49.55%, rgba(207, 248, 255, .052) 49.9%, transparent 50.35%),
+    linear-gradient(-36deg, transparent 49.55%, rgba(146, 219, 255, .042) 49.9%, transparent 50.35%),
+    linear-gradient(90deg, transparent 49.62%, rgba(212, 242, 255, .027) 49.94%, transparent 50.30%),
+    linear-gradient(0deg, transparent 49.62%, rgba(129, 151, 255, .022) 49.94%, transparent 50.30%),
+    conic-gradient(from 45deg at 50% 50%, rgba(92, 209, 255, .021), rgba(118, 100, 255, .018), rgba(188, 242, 255, .014), rgba(92, 209, 255, .021));
   mix-blend-mode: screen;
-  filter: blur(.32px);
+  filter: blur(.48px);
   transition: opacity .22s ease, filter .22s ease;
 }
 
@@ -71,9 +73,9 @@ html body.living-architecture #hero .hero-space > .fx-core-r120-stage > .fx-core
   inset: 7%;
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
   background:
-    linear-gradient(31deg, transparent 49.35%, rgba(193, 243, 255, .070) 49.8%, transparent 50.25%),
-    linear-gradient(-36deg, transparent 49.35%, rgba(154, 177, 255, .052) 49.8%, transparent 50.25%);
-  filter: blur(.42px);
+    linear-gradient(31deg, transparent 49.35%, rgba(193, 243, 255, .052) 49.8%, transparent 50.25%),
+    linear-gradient(-36deg, transparent 49.35%, rgba(154, 177, 255, .038) 49.8%, transparent 50.25%);
+  filter: blur(.62px);
 }
 
 .fx-crystal-portal-r318::after {
@@ -82,7 +84,7 @@ html body.living-architecture #hero .hero-space > .fx-core-r120-stage > .fx-core
   width: 66px;
   height: 66px;
   margin: -33px 0 0 -33px;
-  border: 1px solid rgba(143, 229, 255, .13);
+  border: 1px solid rgba(143, 229, 255, .09);
   border-radius: 50%;
   transform: scale(.76);
 }
@@ -90,13 +92,13 @@ html body.living-architecture #hero .hero-space > .fx-core-r120-stage > .fx-core
 .fx-crystal-portal-r318:hover::before,
 .fx-crystal-portal-r318:focus-visible::before,
 html.fx-crystal-press-r318 .fx-crystal-portal-r318::before {
-  opacity: .22;
+  opacity: .15;
 }
 
 .fx-crystal-portal-r318:hover::after,
 .fx-crystal-portal-r318:focus-visible::after,
 html.fx-crystal-press-r318 .fx-crystal-portal-r318::after {
-  opacity: .16;
+  opacity: .10;
   transform: scale(1);
 }
 
@@ -145,17 +147,19 @@ html.fx-crystal-press-r318 .fx-crystal-portal-r318::after {
 
 html.fx-crystal-hover-r318 .fx-crystal-facets-r318,
 html.fx-crystal-focus-r318 .fx-crystal-facets-r318 {
-  opacity: .085;
+  opacity: .060;
 }
 
 html.fx-crystal-site-active-r318 .fx-crystal-facets-r318 {
-  opacity: .072;
+  opacity: .050;
 }
 
 html.fx-crystal-site-active-r318 body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
 html.fx-crystal-site-active-r318 body.living-architecture #hero .hero-space > .fx-core-r112-stage > .fx-core-r112-canvas,
 html.fx-crystal-site-active-r318 body.living-architecture #hero .hero-space > .fx-core-r120-stage > .fx-core-r120-canvas {
-  filter: brightness(.84) saturate(.88) contrast(.85) blur(.18px) !important;
+  opacity: .94 !important;
+  filter: brightness(.78) saturate(.84) contrast(.73) blur(.50px) !important;
+  -webkit-filter: brightness(.78) saturate(.84) contrast(.73) blur(.50px) !important;
 }
 
 html.fx-crystal-site-active-r318 .fx-crystal-cue-r318 {
@@ -169,23 +173,23 @@ html.fx-crystal-site-active-r318 .fx-crystal-cue-r318 {
     --fx-crystal-r318-height: 82%;
   }
 
-  /* r339 is deliberately the final mobile canvas filter. It is darker than the
-     previous r335 layer, has lower contrast and a wider sub-pixel feather so the
-     four-point contour no longer reads as razor sharp. */
+  /* Phone/tablet optics are deliberately softer than desktop. The extra
+     sub-pixel feather mainly tames the four-point rim and centre star while
+     leaving the actual WebGL silhouette and interaction geometry untouched. */
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-r112-stage > .fx-core-r112-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-r120-stage > .fx-core-r120-canvas {
-    opacity: .86 !important;
-    filter: brightness(.70) saturate(.80) contrast(.72) blur(.68px) !important;
-    -webkit-filter: brightness(.70) saturate(.80) contrast(.72) blur(.68px) !important;
+    opacity: .84 !important;
+    filter: brightness(.66) saturate(.77) contrast(.65) blur(.86px) !important;
+    -webkit-filter: brightness(.66) saturate(.77) contrast(.65) blur(.86px) !important;
   }
 
   html.fx-crystal-site-active-r318 body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html.fx-crystal-site-active-r318 body.living-architecture #hero .hero-space > .fx-core-r112-stage > .fx-core-r112-canvas,
   html.fx-crystal-site-active-r318 body.living-architecture #hero .hero-space > .fx-core-r120-stage > .fx-core-r120-canvas {
-    opacity: .88 !important;
-    filter: brightness(.73) saturate(.82) contrast(.74) blur(.62px) !important;
-    -webkit-filter: brightness(.73) saturate(.82) contrast(.74) blur(.62px) !important;
+    opacity: .85 !important;
+    filter: brightness(.68) saturate(.78) contrast(.66) blur(.82px) !important;
+    -webkit-filter: brightness(.68) saturate(.78) contrast(.66) blur(.82px) !important;
   }
 
   .fx-crystal-facets-r318,
@@ -194,18 +198,30 @@ html.fx-crystal-site-active-r318 .fx-crystal-cue-r318 {
   }
 
   .fx-crystal-facets-r318 {
-    opacity: .030;
-    filter: blur(.52px);
+    opacity: .022;
+    filter: blur(.66px);
   }
 
   html.fx-crystal-hover-r318 .fx-crystal-facets-r318,
   html.fx-crystal-focus-r318 .fx-crystal-facets-r318,
   html.fx-crystal-site-active-r318 .fx-crystal-facets-r318 {
-    opacity: .044;
+    opacity: .032;
   }
 
   .fx-crystal-portal-r318::before {
-    filter: blur(.62px);
+    filter: blur(.80px);
+  }
+
+  .fx-crystal-portal-r318:hover::before,
+  .fx-crystal-portal-r318:focus-visible::before,
+  html.fx-crystal-press-r318 .fx-crystal-portal-r318::before {
+    opacity: .10;
+  }
+
+  .fx-crystal-portal-r318:hover::after,
+  .fx-crystal-portal-r318:focus-visible::after,
+  html.fx-crystal-press-r318 .fx-crystal-portal-r318::after {
+    opacity: .07;
   }
 
   .fx-crystal-cue-r318 {
@@ -225,15 +241,15 @@ html.fx-crystal-site-active-r318 .fx-crystal-cue-r318 {
 
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html.fx-crystal-site-active-r318 body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas {
-    opacity: .83 !important;
-    filter: brightness(.68) saturate(.78) contrast(.69) blur(.78px) !important;
-    -webkit-filter: brightness(.68) saturate(.78) contrast(.69) blur(.78px) !important;
+    opacity: .82 !important;
+    filter: brightness(.64) saturate(.75) contrast(.63) blur(.95px) !important;
+    -webkit-filter: brightness(.64) saturate(.75) contrast(.63) blur(.95px) !important;
   }
 
   .fx-crystal-facets-r318,
   html.fx-crystal-site-active-r318 .fx-crystal-facets-r318 {
-    opacity: .026;
-    filter: blur(.60px);
+    opacity: .018;
+    filter: blur(.72px);
   }
 }
 
