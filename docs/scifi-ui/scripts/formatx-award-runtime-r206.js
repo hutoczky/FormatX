@@ -42,7 +42,7 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260824-native-orb-r250';
-  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260824-r327-soft-mobile-core';
+  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260826-r342-balanced-mobile-core';
   const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
@@ -121,7 +121,7 @@
     if (!matchMedia('(max-width: 900px)').matches) return;
     const existing = document.querySelector('link[data-fx-mobile-core-softening-r322]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r327-soft-mobile-core')) existing.href = CORE_SOFTEN_STYLE_URL;
+      if (!existing.href.includes('r342-balanced-mobile-core')) existing.href = CORE_SOFTEN_STYLE_URL;
       root.dataset.fxMobileCoreOpticsR322 = 'r327-restrained-bloom-soft-edge';
       return;
     }
