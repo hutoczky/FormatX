@@ -1,5 +1,5 @@
 name: Verify live responsive true 3D MAG
-run-name: Validate production r326/r367 WebGL MAG on desktop and mobile
+run-name: Validate production r326/r368 WebGL MAG on desktop and mobile
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Validate live current r326 crystal and r367 restrained optics
+      - name: Validate live current r326 crystal and r368 softer optics
         shell: bash
         run: |
           set -euo pipefail
@@ -120,7 +120,7 @@ jobs:
               const ask = controls?.querySelector('.fx-reference-ask');
               const pause = controls?.querySelector('.fx-reference-pause');
               const opticsLink = [...document.querySelectorAll('link[rel="stylesheet"]')]
-                .some(link => String(link.href).includes('formatx-mobile-core-optics-r328.css'));
+                .find(link => String(link.href).includes('formatx-mobile-core-optics-r328.css'));
               return {
                 renderer: root.dataset.fxCoreRenderer || '',
                 material: root.dataset.fxCoreMaterial || '',
@@ -130,6 +130,8 @@ jobs:
                 stageRenderer: stage?.dataset.renderer || '',
                 v69: root.dataset.fxCoreMobileV69 || '',
                 r326: root.dataset.fxCrystalOrganismR326 || '',
+                opticsOwner: root.dataset.fxCoreMobileOpticsR328 || '',
+                opticsHref: opticsLink?.href || '',
                 canvases: document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
                 gl: Boolean(gl),
                 glError: gl?.getError(),
@@ -140,7 +142,6 @@ jobs:
                 energy: Number(window.FormatXCoreMobileV69?.energy || 0),
                 position: [...(window.FormatXCoreCinematic?.corePosition || [])],
                 renderMs: Number(root.dataset.fxCoreRenderMs || Infinity),
-                opticsLink,
                 controlsVisible: visible(controls) && visible(sound) && visible(ask) && visible(pause),
                 soundAskOverlap: overlap(sound, ask),
                 askPauseOverlap: overlap(ask, pause),
@@ -165,7 +166,7 @@ jobs:
             assert.equal(state.glError, 0);
             assert.ok(state.width <= viewport.width + 1 && state.height > 100, JSON.stringify(state));
             assert.ok(Number.isFinite(state.renderMs) && state.renderMs < 16.67, JSON.stringify(state));
-            assert.equal(state.opticsLink, true, 'r367 optics stylesheet is not loaded');
+            assert.ok(state.opticsHref.includes('formatx-mobile-core-optics-r328.css'), 'r368 optics stylesheet is not loaded');
             assert.equal(state.controlsVisible, true, JSON.stringify(state));
             assert.equal(state.soundAskOverlap, false, JSON.stringify(state));
             assert.equal(state.askPauseOverlap, false, JSON.stringify(state));
@@ -176,8 +177,10 @@ jobs:
               assert.ok(state.energy >= before.energy - .02, JSON.stringify({ before, state }));
               assert.equal(state.position.length, 3);
               assert.notDeepEqual(state.position, before.position);
-              assert.ok(state.opacity <= .90, `mobile r367 canvas is too luminous: ${JSON.stringify(state)}`);
-              assert.match(state.filter, /blur\((1\.0[2-9]|1\.1)px\)/, `mobile r367 edge softening missing: ${state.filter}`);
+              assert.equal(state.opticsOwner, 'r368-mobile-soft-edge-owner');
+              assert.ok(state.opticsHref.includes('20260827-r368-mobile-soft-edge'), state.opticsHref);
+              assert.ok(state.opacity <= .84, `mobile r368 canvas is too luminous: ${JSON.stringify(state)}`);
+              assert.match(state.filter, /blur\(1\.22px\)/, `mobile r368 edge softening missing: ${state.filter}`);
             }
 
             await context.close();
@@ -197,7 +200,7 @@ jobs:
             for (const file of ['desktop-r326-current.png','mobile-r326-current.png']) {
               assert.ok(fs.statSync(file).size > 10000, file);
             }
-            console.log('PASS: live r326 WebGL crystal, r367 restrained mobile optics, interaction and control geometry passed.');
+            console.log('PASS: live r326 WebGL crystal, r368 softer mobile optics, interaction and control geometry passed.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
@@ -222,10 +225,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r326 crystal and r367 restrained mobile optics passed'
+            description='Live r326 crystal and r368 softer mobile optics passed'
           else
             state=failure
-            description='Live r326/r367 MAG diagnostic failed'
+            description='Live r326/r368 MAG diagnostic failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
