@@ -158,7 +158,7 @@ jobs:
             assert.equal(state.material, 'translucent-living-facet-organism-r326');
             assert.equal(state.geometry, 'four-direction-asymmetric-crystal-organism-r326');
             assert.equal(state.scheduler, 'heartbeat-and-interaction-bursts-no-idle-loop-r326');
-            assert.equal(state.composition, 'new-crystal-organism-no-legacy-fallback');
+            assert.equal(state.composition, 'new-organism-no-legacy-visual-fallback');
             assert.equal(state.v69, 'ready-v69');
             assert.equal(state.r326, 'ready');
             assert.equal(state.canvases, 1);
