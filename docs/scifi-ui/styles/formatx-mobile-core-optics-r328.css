@@ -1,7 +1,7 @@
-/* FormatX r356 — softer mobile MAG light spill and edge profile.
+/* FormatX r357 — refined mobile MAG light spill and edge profile.
    The r326 WebGL crystal remains the sole renderer. Desktop keeps the validated
-   r354 optics; mobile trims the outer aura and softens the raster silhouette so
-   the glass remains dimensional without a hard neon edge. */
+   r354 optics; mobile trims the outer aura further and softens the raster edge
+   without changing the crystal geometry or flattening its internal depth. */
 
 /* Shared living-core glow. This is a soft internal optical lift, not a second
    silhouette or outline. */
@@ -74,60 +74,60 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
 
   /* Safe fallback while an older renderer marker settles. */
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
-    opacity: .64 !important;
-    filter: brightness(.60) contrast(.66) saturate(.74) blur(1.42px) !important;
-    -webkit-filter: brightness(.60) contrast(.66) saturate(.74) blur(1.42px) !important;
+    opacity: .62 !important;
+    filter: brightness(.58) contrast(.63) saturate(.70) blur(1.58px) !important;
+    -webkit-filter: brightness(.58) contrast(.63) saturate(.70) blur(1.58px) !important;
   }
 
   /* Legacy r99 final owner. */
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .57 !important;
+    opacity: .55 !important;
     filter:
-      brightness(.49)
-      contrast(.59)
-      saturate(.68)
-      blur(2.10px) !important;
+      brightness(.47)
+      contrast(.56)
+      saturate(.64)
+      blur(2.22px) !important;
     -webkit-filter:
-      brightness(.49)
-      contrast(.59)
-      saturate(.68)
-      blur(2.10px) !important;
+      brightness(.47)
+      contrast(.56)
+      saturate(.64)
+      blur(2.22px) !important;
   }
 
-  /* Mobile r326 owner: keep the same geometry, reduce only hard edge energy and
-     excess luminance so the crystal reads as translucent ice rather than a cutout. */
+  /* r357 mobile r326 owner: preserve geometry and internal refraction, but lower
+     the cyan-white energy at the silhouette so the edge reads as soft glass. */
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .84 !important;
+    opacity: .80 !important;
     mix-blend-mode: normal !important;
     scale: .78 .83 !important;
     transform-origin: 50% 48% !important;
     image-rendering: auto !important;
     filter:
-      brightness(1.04)
-      contrast(.53)
-      saturate(.94)
-      blur(1.16px)
-      drop-shadow(0 0 5px rgba(92,207,255,.028))
-      drop-shadow(0 0 12px rgba(85,118,255,.012)) !important;
+      brightness(.98)
+      contrast(.47)
+      saturate(.87)
+      blur(1.44px)
+      drop-shadow(0 0 4px rgba(92,207,255,.018))
+      drop-shadow(0 0 10px rgba(85,118,255,.008)) !important;
     -webkit-filter:
-      brightness(1.04)
-      contrast(.53)
-      saturate(.94)
-      blur(1.16px)
-      drop-shadow(0 0 5px rgba(92,207,255,.028))
-      drop-shadow(0 0 12px rgba(85,118,255,.012)) !important;
+      brightness(.98)
+      contrast(.47)
+      saturate(.87)
+      blur(1.44px)
+      drop-shadow(0 0 4px rgba(92,207,255,.018))
+      drop-shadow(0 0 10px rgba(85,118,255,.008)) !important;
   }
 
-  /* r356 mobile aura: smaller, dimmer and more diffuse. The centre remains alive
-     while the glow stops before it reads as a second oversized silhouette. */
+  /* r357 mobile aura: visibly smaller and calmer than r356. The centre stays
+     luminous, but there is no second glowing silhouette around the diamond. */
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 46% !important;
-    height: 46% !important;
+    width: 42% !important;
+    height: 42% !important;
     background:
-      radial-gradient(circle at 50% 50%, rgba(147,238,255,.105) 0 4%, rgba(91,196,255,.056) 14%, rgba(95,126,255,.027) 31%, rgba(30,76,144,.010) 47%, transparent 68%) !important;
-    filter: blur(27px) !important;
-    opacity: .34 !important;
+      radial-gradient(circle at 50% 50%, rgba(147,238,255,.078) 0 4%, rgba(91,196,255,.040) 14%, rgba(95,126,255,.018) 31%, rgba(30,76,144,.007) 47%, transparent 69%) !important;
+    filter: blur(31px) !important;
+    opacity: .24 !important;
   }
 
   /* The crystal cue duplicates the visible control affordance on phones and was
@@ -139,59 +139,59 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
 
   /* Auxiliary bioluminescence is atmosphere only, never a second outline. */
   html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .006 !important;
+    opacity: .004 !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .12 !important;
-    opacity: .0015 !important;
-    filter: blur(13px) !important;
+    stroke-width: .10 !important;
+    opacity: .0010 !important;
+    filter: blur(14px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .04 !important;
-    opacity: .0045 !important;
-    filter: blur(5px) !important;
+    stroke-width: .035 !important;
+    opacity: .0035 !important;
+    filter: blur(5.5px) !important;
   }
 
   html:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a,.fx-biolume-runner-b,.fx-biolume-runner-c) {
-    stroke-width: .055 !important;
-    opacity: .016 !important;
-    filter: blur(4.5px) !important;
+    stroke-width: .05 !important;
+    opacity: .012 !important;
+    filter: blur(5px) !important;
   }
 }
 
 @media (max-width: 430px) {
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .82 !important;
+    opacity: .78 !important;
     scale: .74 .80 !important;
     filter:
-      brightness(1.02)
-      contrast(.50)
-      saturate(.92)
-      blur(1.28px)
-      drop-shadow(0 0 4px rgba(92,207,255,.024))
-      drop-shadow(0 0 10px rgba(85,118,255,.010)) !important;
+      brightness(.96)
+      contrast(.45)
+      saturate(.85)
+      blur(1.56px)
+      drop-shadow(0 0 3px rgba(92,207,255,.016))
+      drop-shadow(0 0 8px rgba(85,118,255,.006)) !important;
     -webkit-filter:
-      brightness(1.02)
-      contrast(.50)
-      saturate(.92)
-      blur(1.28px)
-      drop-shadow(0 0 4px rgba(92,207,255,.024))
-      drop-shadow(0 0 10px rgba(85,118,255,.010)) !important;
+      brightness(.96)
+      contrast(.45)
+      saturate(.85)
+      blur(1.56px)
+      drop-shadow(0 0 3px rgba(92,207,255,.016))
+      drop-shadow(0 0 8px rgba(85,118,255,.006)) !important;
   }
 
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 43% !important;
-    height: 43% !important;
-    filter: blur(29px) !important;
-    opacity: .29 !important;
+    width: 39% !important;
+    height: 39% !important;
+    filter: blur(33px) !important;
+    opacity: .20 !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    opacity: .28 !important;
+    opacity: .20 !important;
   }
 }
