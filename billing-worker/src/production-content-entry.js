@@ -14,13 +14,13 @@ import productionBase from './production-content-entry-r369-base.js';
   formatx-mobile-reference-layout-v1.js?v=20260824-native-orb-r250
   formatx-mobile-layout-r207.css?v=20260824-native-orb-r250
   formatx-mobile-layout-r207.js?v=20260824-native-orb-r250
-  STARTUP_REVISION = '20260818-r208-flicker-free-owner'
   X-FormatX-Client-Revision', 'r208-flicker-free-owner
   X-FormatX-Recovery', 'r243-language-canonical
   fx_startup_r208=1
   r208-one-shot-cleared
 */
 
+const STARTUP_REVISION = '20260818-r208-flicker-free-owner';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r370-render-blocking">';
@@ -90,7 +90,7 @@ async function stabilizePublicResponse(request, url, response) {
 
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', 'r370-render-blocking-first-paint');
+  headers.set('X-FormatX-Edge-Stability', `r370-render-blocking-first-paint:${STARTUP_REVISION}`);
 
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
