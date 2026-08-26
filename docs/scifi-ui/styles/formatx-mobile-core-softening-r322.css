@@ -1,6 +1,6 @@
-/* FormatX r336 — VIP mobile MAG optical finishing and viewport containment.
-   Preserve the current r326 WebGL organism geometry, soften only the final
-   composite and guarantee that the physical stage never widens the document. */
+/* FormatX r337 — restrained mobile MAG bloom and softened crystal contour.
+   Preserve the current r326 WebGL organism geometry, reduce only the final
+   composite glare/edge contrast and keep the physical stage viewport-safe. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage {
@@ -8,21 +8,21 @@
   }
 
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .88 !important;
+    opacity: .83 !important;
     filter:
-      brightness(.80)
-      contrast(.84)
-      saturate(.90)
-      blur(.38px)
-      drop-shadow(0 0 .46px rgba(132,242,255,.050))
-      drop-shadow(0 0 1.25px rgba(47,132,255,.018)) !important;
+      brightness(.74)
+      contrast(.76)
+      saturate(.84)
+      blur(.62px)
+      drop-shadow(0 0 .36px rgba(132,242,255,.026))
+      drop-shadow(0 0 .92px rgba(47,132,255,.008)) !important;
     -webkit-filter:
-      brightness(.80)
-      contrast(.84)
-      saturate(.90)
-      blur(.38px)
-      drop-shadow(0 0 .46px rgba(132,242,255,.050))
-      drop-shadow(0 0 1.25px rgba(47,132,255,.018)) !important;
+      brightness(.74)
+      contrast(.76)
+      saturate(.84)
+      blur(.62px)
+      drop-shadow(0 0 .36px rgba(132,242,255,.026))
+      drop-shadow(0 0 .92px rgba(47,132,255,.008)) !important;
   }
 
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
@@ -34,7 +34,7 @@
     overflow: visible;
     pointer-events: none;
     mix-blend-mode: screen;
-    opacity: .30;
+    opacity: .20;
   }
 
   #hero .fx-core-biolume-r323 path {
@@ -45,38 +45,38 @@
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke: rgba(67,202,255,.075);
-    stroke-width: .72;
-    filter: blur(5.2px);
-    opacity: .050;
+    stroke: rgba(67,202,255,.060);
+    stroke-width: .68;
+    filter: blur(5.8px);
+    opacity: .026;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
     stroke: url(#fx-biolume-gradient-r323);
-    stroke-width: .22;
-    opacity: .105;
-    filter: blur(.86px);
+    stroke-width: .20;
+    opacity: .064;
+    filter: blur(1.02px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .27;
+    stroke-width: .24;
     stroke-dasharray: 4.5 18 2 24;
     animation: fx-biolume-travel-r323 14s linear infinite;
-    filter: drop-shadow(0 0 .24px currentColor) blur(.52px);
+    filter: drop-shadow(0 0 .16px currentColor) blur(.68px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a {
     stroke: #75f7ff;
     color: #75f7ff;
-    opacity: .16;
+    opacity: .10;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b {
     stroke: #8a78ff;
     color: #8a78ff;
-    opacity: .115;
+    opacity: .070;
     stroke-dasharray: 2.5 22 5.5 20;
     animation-duration: 18s;
     animation-direction: reverse;
@@ -85,17 +85,14 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     stroke: #71ffd0;
     color: #71ffd0;
-    opacity: .065;
+    opacity: .040;
     stroke-dasharray: 1.5 30 3.5 26;
     animation-duration: 22s;
   }
 }
 
 @media (max-width: 430px) {
-  /* r336: r244 owns only the Y transform. Position and width remain CSS-owned,
-     so center the r326 stage against the viewport mathematically instead of
-     using translateX. This survives the inline scaleY(.97) owner and removes
-     the measured ~3px horizontal document expansion at 390px. */
+  /* Keep the r326 stage mathematically centred while r244 owns only Y scale. */
   html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage {
     left: calc((100% - 100vw) / 2) !important;
     right: auto !important;
@@ -118,44 +115,44 @@
   }
 
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .86 !important;
+    opacity: .80 !important;
     filter:
-      brightness(.78)
-      contrast(.82)
-      saturate(.88)
-      blur(.46px)
-      drop-shadow(0 0 .38px rgba(132,242,255,.042))
-      drop-shadow(0 0 1.05px rgba(47,132,255,.015)) !important;
+      brightness(.72)
+      contrast(.74)
+      saturate(.82)
+      blur(.72px)
+      drop-shadow(0 0 .30px rgba(132,242,255,.022))
+      drop-shadow(0 0 .78px rgba(47,132,255,.006)) !important;
     -webkit-filter:
-      brightness(.78)
-      contrast(.82)
-      saturate(.88)
-      blur(.46px)
-      drop-shadow(0 0 .38px rgba(132,242,255,.042))
-      drop-shadow(0 0 1.05px rgba(47,132,255,.015)) !important;
+      brightness(.72)
+      contrast(.74)
+      saturate(.82)
+      blur(.72px)
+      drop-shadow(0 0 .30px rgba(132,242,255,.022))
+      drop-shadow(0 0 .78px rgba(47,132,255,.006)) !important;
   }
 
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .24;
+    opacity: .16;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .68;
-    filter: blur(5.5px);
-    opacity: .038;
+    stroke-width: .62;
+    filter: blur(6.2px);
+    opacity: .020;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .20;
-    opacity: .085;
-    filter: blur(.92px);
+    stroke-width: .18;
+    opacity: .050;
+    filter: blur(1.10px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .25;
-    filter: drop-shadow(0 0 .20px currentColor) blur(.56px);
+    stroke-width: .22;
+    filter: drop-shadow(0 0 .12px currentColor) blur(.74px);
   }
 }
 
@@ -169,6 +166,6 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     animation: none !important;
-    opacity: .08;
+    opacity: .05;
   }
 }
