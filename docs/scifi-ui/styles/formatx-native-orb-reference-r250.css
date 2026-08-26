@@ -1,8 +1,8 @@
-/* FormatX r355 — authoritative first-paint reference composition.
-   The first rendered frame now uses the same physical geometry as the settled
-   r320/r348 mobile experience. This prevents the old r244 1x1 hero-copy state,
-   the vertical ASK/PAUSE rail and the hidden SOUND control from becoming visible
-   intermediate layouts and producing large Lighthouse CLS. */
+/* FormatX r356 — authoritative mobile first-paint geometry.
+   This stylesheet is the final render-blocking mobile layer in <head>. It must
+   therefore match the settled r320/r348/r360 composition before any deferred
+   runtime can repaint the hero. The legacy r147/r244 1x1 hero-copy contract is
+   explicitly neutralised here without changing the r326 WebGL MAG geometry. */
 
 html:root:root body.living-architecture .topbar .fx-language-toggle {
   flex-direction: column !important;
@@ -14,45 +14,40 @@ html:root:root body.living-architecture .topbar .fx-language-toggle {
   line-height: 1 !important;
   letter-spacing: .05em !important;
 }
-
 html:root:root body.living-architecture .topbar .fx-language-toggle::before {
   display: block !important;
   content: '🇭🇺' !important;
-  flex: 0 0 auto !important;
   width: auto !important;
   height: auto !important;
   margin: 0 !important;
   border: 0 !important;
   background: none !important;
   box-shadow: none !important;
-  font: 16px/1 system-ui, sans-serif !important;
+  font: 16px/1 system-ui,sans-serif !important;
   letter-spacing: 0 !important;
   transform: none !important;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,.34)) !important;
 }
-
-html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::before {
-  content: '🇬🇧' !important;
-}
+html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::before { content: '🇬🇧' !important; }
 
 @media (max-width: 900px), (pointer: coarse) {
-  /* Stable first-frame carrier. r244 used 100vw/500px while the later first-paint
-     layer used 97.6vw/470px, creating a vertical hand-off. Use the settled size
-     immediately so WebGL, controls and copy never move when later CSS arrives. */
+  html:root:root body.living-architecture main#main-content #hero,
+  html:root:root body.living-architecture main#main-content #hero > .hero-grid {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
   html:root:root body.living-architecture main#main-content #hero > .hero-grid {
     position: relative !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
     gap: 0 !important;
-    overflow: visible !important;
   }
-
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .hero-space {
+  html:root:root body.living-architecture main#main-content #hero .hero-space {
     order: 0 !important;
     position: relative !important;
     inset: auto !important;
@@ -61,8 +56,8 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     align-self: stretch !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: clamp(350px, 97.6vw, 470px) !important;
-    min-height: clamp(350px, 97.6vw, 470px) !important;
+    height: clamp(350px,97.6vw,470px) !important;
+    min-height: clamp(350px,97.6vw,470px) !important;
     max-height: 470px !important;
     margin: 0 auto !important;
     padding: 0 !important;
@@ -72,27 +67,24 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     translate: none !important;
   }
 
-  /* Both temporary bootstrap ownership (hero-grid child) and settled ownership
-     (hero-space child) render at the exact same coordinates. The temporary node
-     is absolute and therefore never changes document flow when r207/r268 moves it. */
-  html:root:root body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204,
-  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
-  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
+  /* One physical SOUND | ASK | PAUSE row, at the settled stage-bottom position.
+     The selector deliberately covers both bootstrap ownership under .hero-grid
+     and final ownership under .hero-space. */
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 {
     position: absolute !important;
     top: auto !important;
     right: auto !important;
-    bottom: clamp(22px, 3.2svh, 34px) !important;
+    bottom: clamp(22px,3.2svh,34px) !important;
     left: 50% !important;
-    inset: auto auto clamp(22px, 3.2svh, 34px) 50% !important;
     z-index: 12040 !important;
     display: grid !important;
-    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-columns: repeat(3,50px) !important;
     grid-template-rows: 50px !important;
     align-items: center !important;
     justify-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
-    width: max-content !important;
+    width: 178px !important;
     min-width: 178px !important;
     max-width: calc(100vw - 24px) !important;
     height: 50px !important;
@@ -112,16 +104,10 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     transition: none !important;
     will-change: auto !important;
   }
-
-  /* A grid-level bootstrap copy cannot use bottom because its containing block
-     includes the copy below the stage. Pin it to the mathematically equivalent
-     stage-bottom coordinate until ownership moves into .hero-space. */
   html:root:root body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204 {
-    top: calc(clamp(350px, 97.6vw, 470px) - clamp(22px, 3.2svh, 34px) - 50px) !important;
+    top: calc(clamp(350px,97.6vw,470px) - clamp(22px,3.2svh,34px) - 50px) !important;
     bottom: auto !important;
-    inset: calc(clamp(350px, 97.6vw, 470px) - clamp(22px, 3.2svh, 34px) - 50px) auto auto 50% !important;
   }
-
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail,
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-r264 {
     display: contents !important;
@@ -135,12 +121,10 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    gap: 0 !important;
     overflow: visible !important;
     transform: none !important;
     translate: none !important;
   }
-
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
@@ -168,7 +152,6 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     will-change: auto !important;
     touch-action: manipulation !important;
   }
-
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound.fx-control-owner-r264,
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound.fx-wda-sound-toggle {
@@ -177,7 +160,6 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     opacity: 1 !important;
     pointer-events: auto !important;
   }
-
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask > i {
     position: relative !important;
     inset: auto !important;
@@ -196,36 +178,29 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     overflow: visible !important;
     pointer-events: none !important;
   }
-
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask > span {
     position: absolute !important;
     top: 56px !important;
     left: 50% !important;
-    right: auto !important;
-    bottom: auto !important;
     display: block !important;
     width: max-content !important;
     max-width: 92px !important;
     color: rgba(236,244,250,.92) !important;
-    font: 760 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    font: 760 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace !important;
     letter-spacing: .06em !important;
     text-align: center !important;
     white-space: nowrap !important;
     text-transform: uppercase !important;
     pointer-events: none !important;
     transform: translateX(-50%) !important;
-    translate: none !important;
     opacity: 1 !important;
     visibility: visible !important;
   }
-
-  /* Conventional pause icon + explicit localized caption. */
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
     overflow: visible !important;
     font-size: 0 !important;
     color: #75e4ff !important;
   }
-
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause::before {
     content: '' !important;
     display: block !important;
@@ -241,7 +216,6 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     transform: translateX(-50%) !important;
     opacity: .94 !important;
   }
-
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause::after {
     content: 'SZÜNET' !important;
     position: absolute !important;
@@ -249,32 +223,27 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     left: 50% !important;
     display: block !important;
     width: max-content !important;
-    max-width: 82px !important;
     color: rgba(236,244,250,.90) !important;
-    font: 760 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    font: 760 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace !important;
     letter-spacing: .065em !important;
-    text-align: center !important;
     white-space: nowrap !important;
     text-transform: uppercase !important;
     pointer-events: none !important;
     transform: translateX(-50%) !important;
     opacity: 1 !important;
   }
+  html:root:root[lang="en"] body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause::after { content: 'PAUSE' !important; }
 
-  html:root:root[lang="en"] body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause::after {
-    content: 'PAUSE' !important;
-  }
-
-  /* r355: the information card is never a 1x1 accessibility box. This selector
-     intentionally does not depend on a runtime data attribute, so it wins before
-     FCP and stays identical after mobile-reference/r268 readiness is published. */
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .hero-copy,
-  html:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content #hero > .hero-grid > .hero-copy {
+  /* r356: broad selector on purpose. Legacy r147 hides #hero .hero-copy even if
+     another runtime changes its direct parent. The final first-paint owner must
+     keep the information card visible regardless of such DOM ownership changes. */
+  html:root:root body.living-architecture main#main-content #hero .hero-copy {
     order: 1 !important;
     position: relative !important;
     inset: auto !important;
     display: block !important;
     box-sizing: border-box !important;
+    align-self: center !important;
     width: calc(100% - 32px) !important;
     min-width: 0 !important;
     max-width: 700px !important;
@@ -282,7 +251,7 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     min-height: 0 !important;
     max-height: none !important;
     margin: 18px auto 16px !important;
-    padding: clamp(24px, 6vw, 34px) clamp(20px, 5.5vw, 30px) clamp(26px, 6.5vw, 38px) !important;
+    padding: clamp(24px,6vw,34px) clamp(20px,5.5vw,30px) clamp(26px,6.5vw,38px) !important;
     border: 1px solid rgba(118,221,255,.17) !important;
     border-radius: 28px !important;
     overflow: visible !important;
@@ -297,12 +266,17 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     translate: none !important;
     opacity: 1 !important;
     visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 20 !important;
   }
-
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .hero-copy > * {
+  html:root:root body.living-architecture main#main-content #hero .hero-copy > * {
     position: relative !important;
     inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
     max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
     max-height: none !important;
     clip: auto !important;
     clip-path: none !important;
@@ -311,14 +285,18 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     transform: none !important;
     translate: none !important;
   }
-
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .hero-copy > .hero-lead {
+  html:root:root body.living-architecture main#main-content #hero .hero-copy > .hero-lead {
+    display: block !important;
     min-block-size: 7.5em !important;
   }
+  html:root:root body.living-architecture main#main-content #hero .hero-copy > #hero-title {
+    display: grid !important;
+  }
+  html:root:root body.living-architecture main#main-content #hero .hero-copy > .hero-actions {
+    display: flex !important;
+  }
 
-  /* Stable post-copy reference blocks. Reserve the settled minimum geometry from
-     first paint so their text cannot push the following category deck later. */
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-reference-heading {
+  html:root:root body.living-architecture main#main-content #hero .fx-reference-heading {
     order: 2 !important;
     position: relative !important;
     inset: auto !important;
@@ -332,8 +310,7 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     transform: none !important;
     translate: none !important;
   }
-
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-reference-proof {
+  html:root:root body.living-architecture main#main-content #hero .fx-reference-proof {
     order: 3 !important;
     position: relative !important;
     inset: auto !important;
@@ -354,9 +331,8 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     transform: none !important;
     translate: none !important;
   }
-
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-reference-proof > *,
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-reference-proof .fx-reference-liveos {
+  html:root:root body.living-architecture main#main-content #hero .fx-reference-proof > *,
+  html:root:root body.living-architecture main#main-content #hero .fx-reference-proof .fx-reference-liveos {
     position: relative !important;
     inset: auto !important;
     max-height: none !important;
@@ -367,35 +343,29 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     transform: none !important;
     translate: none !important;
   }
-
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .fx-mobile-download-r151 {
-    order: 4 !important;
-  }
 }
 
 @media (max-width: 430px) {
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .hero-copy {
+  html:root:root body.living-architecture main#main-content #hero .hero-copy {
     width: calc(100% - 24px) !important;
     border-radius: 24px !important;
   }
 }
 
 @media (max-width: 370px) {
-  html:root:root body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204,
-  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 {
     grid-template-columns: repeat(3,48px) !important;
     grid-template-rows: 48px !important;
     gap: 12px !important;
+    width: 168px !important;
     min-width: 168px !important;
     height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
   }
-
   html:root:root body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204 {
-    top: calc(clamp(350px, 97.6vw, 470px) - clamp(22px, 3.2svh, 34px) - 48px) !important;
+    top: calc(clamp(350px,97.6vw,470px) - clamp(22px,3.2svh,34px) - 48px) !important;
   }
-
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
@@ -405,10 +375,5 @@ html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::
     height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
-  }
-
-  html:root:root body.living-architecture main#main-content #hero > .hero-grid > .hero-copy {
-    width: calc(100% - 24px) !important;
-    border-radius: 24px !important;
   }
 }
