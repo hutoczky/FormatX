@@ -5,6 +5,7 @@
   "desktop_unchanged": true,
   "source_css": "/scifi-ui/styles/formatx-mobile-core-optics-r328.css",
   "style_commit": "e5b1fd9495524f97a544961d3c041af77286f73e",
+  "verifier_commit": "3d0d21811249815ec0b18e19f5eae510d5cd2830",
   "changes": {
     "mobile_canvas_opacity": 0.87,
     "phone_canvas_opacity": 0.85,
