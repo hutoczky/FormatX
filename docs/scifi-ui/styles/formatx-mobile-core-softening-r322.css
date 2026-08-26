@@ -1,6 +1,6 @@
-/* FormatX r342 — balanced mobile MAG bloom and soft crystal contour.
+/* FormatX r343 — restrained mobile MAG glow and softer crystal contour.
    Keep the current WebGL geometry and interaction surface intact. This layer
-   reduces the harsh rim without crushing the glass luminance or facet detail. */
+   only tones down the over-bright centre/rim and removes the too-hard edge. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
@@ -8,29 +8,26 @@
     filter: none !important;
   }
 
-  /* One restrained final composite for both current mobile renderers. The
-     previous r341 values were too aggressive (0.72 brightness / 0.72px blur),
-     which made the crystal look grey and foggy. Keep a small optical softening
-     while restoring the internal cyan/violet glass energy. */
+  /* Preserve the glass colour but reduce the bloom/contrast that made the
+     silhouette look neon-sharp on OLED phones. */
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .95 !important;
+    opacity: .92 !important;
     filter:
-      brightness(.90)
-      contrast(.88)
-      saturate(.95)
-      blur(.32px)
-      drop-shadow(0 0 .55px rgba(132,242,255,.032)) !important;
+      brightness(.85)
+      contrast(.82)
+      saturate(.90)
+      blur(.48px)
+      drop-shadow(0 0 .32px rgba(132,242,255,.018)) !important;
     -webkit-filter:
-      brightness(.90)
-      contrast(.88)
-      saturate(.95)
-      blur(.32px)
-      drop-shadow(0 0 .55px rgba(132,242,255,.032)) !important;
+      brightness(.85)
+      contrast(.82)
+      saturate(.90)
+      blur(.48px)
+      drop-shadow(0 0 .32px rgba(132,242,255,.018)) !important;
   }
 
-  /* Decorative edge light remains subordinate to the actual WebGL surface: it
-     softens the silhouette instead of drawing a second bright outline. */
+  /* Decorative edge light is now only a soft atmosphere, never a second rim. */
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
     position: absolute;
     inset: 0;
@@ -40,7 +37,7 @@
     overflow: visible;
     pointer-events: none;
     mix-blend-mode: screen;
-    opacity: .13;
+    opacity: .080;
   }
 
   #hero .fx-core-biolume-r323 path {
@@ -51,38 +48,38 @@
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke: rgba(67,202,255,.042);
-    stroke-width: .56;
-    filter: blur(6.4px);
-    opacity: .018;
+    stroke: rgba(67,202,255,.030);
+    stroke-width: .48;
+    filter: blur(7.2px);
+    opacity: .010;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
     stroke: url(#fx-biolume-gradient-r323);
-    stroke-width: .16;
-    opacity: .040;
-    filter: blur(1.08px);
+    stroke-width: .13;
+    opacity: .024;
+    filter: blur(1.35px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .18;
+    stroke-width: .14;
     stroke-dasharray: 4.5 18 2 24;
     animation: fx-biolume-travel-r323 17s linear infinite;
-    filter: drop-shadow(0 0 .13px currentColor) blur(.72px);
+    filter: drop-shadow(0 0 .08px currentColor) blur(.92px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a {
     stroke: #75f7ff;
     color: #75f7ff;
-    opacity: .062;
+    opacity: .038;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b {
     stroke: #8a78ff;
     color: #8a78ff;
-    opacity: .041;
+    opacity: .026;
     stroke-dasharray: 2.5 22 5.5 20;
     animation-duration: 21s;
     animation-direction: reverse;
@@ -91,7 +88,7 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     stroke: #71ffd0;
     color: #71ffd0;
-    opacity: .024;
+    opacity: .016;
     stroke-dasharray: 1.5 30 3.5 26;
     animation-duration: 25s;
   }
@@ -120,46 +117,46 @@
     box-sizing: border-box !important;
   }
 
-  /* Phone-specific midpoint: clearly dimmer/softer than the over-lit state, but
-     substantially brighter and sharper than r341. */
+  /* Phone-specific final tuning: slightly dimmer and softer than r342, while
+     retaining the cyan/violet internal facets. */
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .94 !important;
+    opacity: .91 !important;
     filter:
-      brightness(.88)
-      contrast(.86)
-      saturate(.93)
-      blur(.38px)
-      drop-shadow(0 0 .48px rgba(132,242,255,.028)) !important;
+      brightness(.83)
+      contrast(.80)
+      saturate(.89)
+      blur(.54px)
+      drop-shadow(0 0 .26px rgba(132,242,255,.014)) !important;
     -webkit-filter:
-      brightness(.88)
-      contrast(.86)
-      saturate(.93)
-      blur(.38px)
-      drop-shadow(0 0 .48px rgba(132,242,255,.028)) !important;
+      brightness(.83)
+      contrast(.80)
+      saturate(.89)
+      blur(.54px)
+      drop-shadow(0 0 .26px rgba(132,242,255,.014)) !important;
   }
 
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .095;
+    opacity: .060;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .50;
-    filter: blur(6.8px);
-    opacity: .014;
+    stroke-width: .44;
+    filter: blur(7.8px);
+    opacity: .008;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .14;
-    opacity: .031;
-    filter: blur(1.16px);
+    stroke-width: .12;
+    opacity: .019;
+    filter: blur(1.45px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .16;
-    filter: drop-shadow(0 0 .10px currentColor) blur(.78px);
+    stroke-width: .13;
+    filter: drop-shadow(0 0 .06px currentColor) blur(1px);
   }
 }
 
@@ -173,6 +170,6 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     animation: none !important;
-    opacity: .025;
+    opacity: .018;
   }
 }
