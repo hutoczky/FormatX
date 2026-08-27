@@ -1,4 +1,4 @@
-/* FormatX r413 — earliest mobile first-paint lock + final-layout preload + interaction-gated reduced-motion stylesheet. */
+/* FormatX r358 — earliest mobile first-paint lock + interaction-gated reduced-motion stylesheet. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -6,7 +6,6 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const stub=document.querySelector('link[data-fx-critical-reduced-r228]');
 const FULL_URL='./styles/formatx-critical-reduced-full-r298.css?v=20260822-r299-reduced-only';
 const MOBILE_FIRST_PAINT_URL='./styles/formatx-mobile-first-paint-r358.css?v=20260826-r358-critical-first-paint';
-const MOBILE_FINAL_LAYOUT_URL='./styles/formatx-mobile-layout-r207.css?v=20260824-native-orb-r250';
 
 if(!reduced.matches){
   const mobileDirect=matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;
@@ -27,23 +26,6 @@ if(!reduced.matches){
       root.dataset.fxMobileFirstPaintR358='loading';
     }else{
       root.dataset.fxMobileFirstPaintR358=firstPaint.sheet?'ready':'loading';
-    }
-
-    /* r413: r207 is the final mobile geometry owner. Warm its exact stylesheet
-       URL before the later event-horizon bootstrap creates the real stylesheet
-       link. The preload itself is non-render-blocking; when r207 is applied it
-       reuses this response and can immediately outrank earlier transient layers. */
-    if(!document.querySelector('link[data-fx-mobile-final-layout-preload-r413]')){
-      const preload=document.createElement('link');
-      preload.rel='preload';
-      preload.as='style';
-      preload.href=MOBILE_FINAL_LAYOUT_URL;
-      preload.fetchPriority='high';
-      preload.dataset.fxMobileFinalLayoutPreloadR413='true';
-      preload.addEventListener('load',()=>{root.dataset.fxMobileFinalLayoutPreloadR413='ready';},{once:true});
-      preload.addEventListener('error',()=>{root.dataset.fxMobileFinalLayoutPreloadR413='load-failed';},{once:true});
-      document.head.appendChild(preload);
-      root.dataset.fxMobileFinalLayoutPreloadR413='loading';
     }
 
     const overlay=document.getElementById('formatx-event-horizon');
