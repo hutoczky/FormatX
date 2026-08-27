@@ -25,6 +25,15 @@
     if (element.textContent !== next) element.textContent = next;
   }
 
+  function updateHeroLeadForLanguageChange() {
+    const lead = document.querySelector('#hero .hero-copy .hero-lead');
+    setBilingual(
+      lead,
+      'A FormatX Suite Pro független fejlesztésű technikusi szoftver. Valós rendszerállapotot tár fel, műveleti tervet készít, csak kontrollált megerősítés után hajt végre, majd visszaellenőrzi az eredményt.',
+      'FormatX Suite Pro is independently developed technician software. It discovers real system state, builds an operation plan, executes only after controlled confirmation, then verifies the result.'
+    );
+  }
+
   function ensureCategoryDefinition() {
     const heroCopy = document.querySelector('#hero .hero-copy');
     if (!heroCopy) return;
@@ -44,11 +53,7 @@
     if (block.innerHTML !== definition) block.innerHTML = definition;
 
     const lead = heroCopy.querySelector('.hero-lead');
-    setBilingual(
-      lead,
-      'A FormatX Suite Pro független fejlesztésű technikusi szoftver. Valós rendszerállapotot tár fel, műveleti tervet készít, csak kontrollált megerősítés után hajt végre, majd visszaellenőrzi az eredményt.',
-      'FormatX Suite Pro is independently developed technician software. It discovers real system state, builds an operation plan, executes only after controlled confirmation, then verifies the result.'
-    );
+    if (lead) lead.dataset.fxFirstPaintCopyR411 = 'static-canonical-no-first-load-rewrite';
 
     let method = heroCopy.querySelector('.fx-method-inline');
     if (!method) {
@@ -308,12 +313,16 @@
     updateHeroTelemetry();
   }
 
-  // This script is deferred. The hero already exists when it executes, so apply
-  // all LCP-visible copy synchronously instead of waiting for three JSON fetches.
-  // Only telemetry depends on those responses and hydrates after first paint.
+  // The hero's canonical first-load copy is already present in index.html.
+  // Do not rewrite the LCP-visible lead during the deferred bootstrap; only
+  // telemetry hydrates after first paint. Language changes remain explicit
+  // user interactions and may synchronize the richer bilingual lead then.
   applyStatic();
   hydrateData();
 
-  addEventListener('formatx:languagechange', apply);
+  addEventListener('formatx:languagechange', () => {
+    updateHeroLeadForLanguageChange();
+    apply();
+  });
   addEventListener('formatx:releasemetadataready', updateReleaseTelemetry);
 }());
