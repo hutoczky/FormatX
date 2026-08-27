@@ -1,0 +1,148 @@
+name: Diagnose local mobile CLS r373
+run-name: Trace current source mobile layout shifts and hero ownership
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/diagnose-local-cls-r373.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trace-local-cls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cls-r373"
+          cd "$RUNNER_TEMP/cls-r373"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Serve current source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE/docs"
+          nohup python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/cls-r373/server.log" 2>&1 &
+          echo $! >"$RUNNER_TEMP/cls-r373/server.pid"
+          for i in {1..40}; do
+            if curl -fsS http://127.0.0.1:4173/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/cls-r373/server.log" || true
+          exit 1
+
+      - name: Trace first five seconds
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/cls-r373"
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('node:fs');
+
+          (async () => {
+            const browser = await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context = await browser.newContext({
+              viewport:{width:412,height:915}, deviceScaleFactor:2,
+              isMobile:true, hasTouch:true, locale:'hu-HU', colorScheme:'dark'
+            });
+            const page = await context.newPage();
+            const cdp = await context.newCDPSession(page);
+            await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+            await cdp.send('Network.enable');
+            await cdp.send('Network.emulateNetworkConditions',{
+              offline:false, latency:150,
+              downloadThroughput:1.6*1024*1024/8,
+              uploadThroughput:750*1024/8,
+              connectionType:'cellular3g'
+            });
+
+            await page.addInitScript(() => {
+              window.__fxShifts=[];
+              window.__fxMutations=[];
+              const sel=node=>{
+                if(!(node instanceof Element)) return '';
+                if(node.id) return '#'+node.id;
+                return node.tagName.toLowerCase()+([...node.classList].length?'.'+[...node.classList].slice(0,4).join('.'):'');
+              };
+              new PerformanceObserver(list=>{
+                for(const entry of list.getEntries()){
+                  if(entry.hadRecentInput) continue;
+                  window.__fxShifts.push({
+                    t:Math.round(entry.startTime),v:entry.value,
+                    sources:(entry.sources||[]).map(s=>({node:sel(s.node),previous:s.previousRect,current:s.currentRect}))
+                  });
+                }
+              }).observe({type:'layout-shift',buffered:true});
+              const start=performance.now();
+              new MutationObserver(records=>{
+                if(performance.now()-start>6000) return;
+                for(const r of records){
+                  const target=r.target instanceof Element?sel(r.target):String(r.target?.nodeName||'');
+                  window.__fxMutations.push({t:Math.round(performance.now()),type:r.type,target,attr:r.attributeName||'',added:r.addedNodes?.length||0,removed:r.removedNodes?.length||0});
+                }
+              }).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden','data-fx-reference-production-r244','data-fx-control-owner-r268','data-fx-mobile-reference-layout','data-fx-mobile-first-paint-r358']});
+            });
+
+            const samples=[];
+            async function sample(label){
+              samples.push(await page.evaluate(label=>{
+                const box=q=>{
+                  const e=document.querySelector(q); if(!e) return null;
+                  const r=e.getBoundingClientRect(),s=getComputedStyle(e);
+                  return {x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),display:s.display,position:s.position,order:s.order,margin:s.margin,padding:s.padding,opacity:s.opacity,visibility:s.visibility,transform:s.transform};
+                };
+                return {
+                  label,t:Math.round(performance.now()),
+                  root:{
+                    reference:document.documentElement.dataset.fxReferenceProductionR244||'',
+                    owner:document.documentElement.dataset.fxControlOwnerR268||'',
+                    mobile:document.documentElement.dataset.fxMobileReferenceLayout||'',
+                    first:document.documentElement.dataset.fxMobileFirstPaintR358||'',
+                    award:document.documentElement.dataset.fxAwardRuntimeR206||'',
+                    renderer:document.documentElement.dataset.fxCoreRenderer||''
+                  },
+                  hero:box('#hero'),grid:box('#hero>.hero-grid'),space:box('#hero .hero-space'),copy:box('#hero .hero-copy'),
+                  controls:box('#hero .fx-reference-controls-r204'),sound:box('#hero .fx-three-sound'),ask:box('#hero .fx-reference-ask'),pause:box('#hero .fx-reference-pause'),
+                  mag:box('.fx-reference-mag-button'),lang:box('.fx-language-toggle'),menu:box('#menu-toggle'),
+                  styles:[...document.querySelectorAll('link[rel=stylesheet]')].filter(l=>/native-orb-reference|reference-production-r244|first-paint-controls|mobile-first-paint|mobile-layout-r207|wda-hardening/.test(l.href)).map(l=>({href:l.href,media:l.media,sheet:!!l.sheet}))
+                };
+              },label));
+            }
+
+            await page.goto('http://127.0.0.1:4173/scifi-ui/index.html?cls_r373='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
+            await sample('dcl');
+            let elapsed=0;
+            for(const delay of [100,150,250,250,250,500,500,1000,2000]){
+              await page.waitForTimeout(delay); elapsed+=delay; await sample(elapsed+'ms');
+            }
+            const final=await page.evaluate(()=>({shifts:window.__fxShifts,mutations:window.__fxMutations,cls:window.__fxShifts.reduce((n,e)=>n+e.v,0)}));
+            const out={samples,...final};
+            fs.writeFileSync('cls-r373.json',JSON.stringify(out,null,2));
+            console.log('CLS_R373',JSON.stringify(out));
+            await page.screenshot({path:'cls-r373-final.png',fullPage:true,animations:'disabled',caret:'hide'});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Upload trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-cls-r373-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/cls-r373/cls-r373.json
+            ${{ runner.temp }}/cls-r373/cls-r373-final.png
+            ${{ runner.temp }}/cls-r373/server.log
+          retention-days: 7
