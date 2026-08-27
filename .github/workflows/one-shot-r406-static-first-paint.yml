@@ -1,5 +1,4 @@
-# Triggered after workflow registration on master.
-name: One-shot r407 static first-paint parity
+name: One-shot r407 static first-paint index parity
 
 on:
   push:
@@ -13,6 +12,7 @@ permissions:
 jobs:
   repair:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -31,38 +31,22 @@ jobs:
           marker = 'data-fx-production-first-paint-r370="true"'
           link = '  <link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">\n'
           anchor = '  <link rel="stylesheet" data-fx-critical-core-r227="true"'
+
           if marker not in text:
               if anchor not in text:
                   raise SystemExit('critical-core anchor missing from index.html')
-              text = text.replace(anchor, link + anchor, 1)
-              index.write_text(text, encoding='utf-8')
-
-          workflow = Path('.github/workflows/validate-mobile-intro-recovery.yml')
-          body = workflow.read_text(encoding='utf-8')
-          old = "          grep -Fq '20260811-mobile-intro-direct-r1' docs/scifi-ui/index.html\n"
-          new = (
-              "          grep -Fq 'data-fx-intro=' docs/scifi-ui/index.html\n"
-              "          grep -Fq 'formatx-event-horizon.js' docs/scifi-ui/index.html\n"
-              "          grep -Fq 'data-fx-production-first-paint-r370=\"true\"' docs/scifi-ui/index.html\n"
-          )
-          if old in body:
-              body = body.replace(old, new, 1)
-          elif "grep -Fq 'data-fx-production-first-paint-r370=\"true\"' docs/scifi-ui/index.html" not in body:
-              raise SystemExit('mobile intro validator is neither legacy nor r407 current')
-          workflow.write_text(body, encoding='utf-8')
-
-          Path('.github/workflows/one-shot-r406-static-first-paint.yml').unlink()
+              index.write_text(text.replace(anchor, link + anchor, 1), encoding='utf-8')
           PY
 
-      - name: Commit repair
+      - name: Commit index repair
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'FormatX CI'
           git config user.email 'actions@users.noreply.github.com'
-          git add docs/scifi-ui/index.html .github/workflows/validate-mobile-intro-recovery.yml .github/workflows/one-shot-r406-static-first-paint.yml
+          git add docs/scifi-ui/index.html
           if git diff --cached --quiet; then
-            echo 'No changes required.'
+            echo 'Static first-paint parity already present.'
             exit 0
           fi
           git commit -m 'Lock r407 static mobile first paint to production geometry'
