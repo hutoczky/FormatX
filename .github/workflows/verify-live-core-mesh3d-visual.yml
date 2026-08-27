@@ -1,5 +1,5 @@
 name: Verify live responsive true 3D MAG
-run-name: Validate production r326/r369 WebGL MAG on desktop and mobile
+run-name: Validate production r326/r371 WebGL MAG on desktop and mobile
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Validate live current r326 crystal and r369 balanced optics
+      - name: Validate live current r326 crystal and r371 feathered optics
         shell: bash
         run: |
           set -euo pipefail
@@ -166,7 +166,7 @@ jobs:
             assert.equal(state.glError, 0);
             assert.ok(state.width <= viewport.width + 1 && state.height > 100, JSON.stringify(state));
             assert.ok(Number.isFinite(state.renderMs) && state.renderMs < 16.67, JSON.stringify(state));
-            assert.ok(state.opticsHref.includes('formatx-mobile-core-optics-r328.css'), 'r369 optics stylesheet is not loaded');
+            assert.ok(state.opticsHref.includes('formatx-mobile-core-optics-r328.css'), 'r371 optics stylesheet is not loaded');
             assert.equal(state.controlsVisible, true, JSON.stringify(state));
             assert.equal(state.soundAskOverlap, false, JSON.stringify(state));
             assert.equal(state.askPauseOverlap, false, JSON.stringify(state));
@@ -177,10 +177,12 @@ jobs:
               assert.ok(state.energy >= before.energy - .02, JSON.stringify({ before, state }));
               assert.equal(state.position.length, 3);
               assert.notDeepEqual(state.position, before.position);
-              assert.equal(state.opticsOwner, 'r369-balanced-mobile-optics-owner');
-              assert.ok(state.opticsHref.includes('20260827-r369-balanced-mobile-optics'), state.opticsHref);
-              assert.ok(state.opacity <= .8451 && state.opacity >= .844, `mobile r369 canvas opacity mismatch: ${JSON.stringify(state)}`);
-              assert.match(state.filter, /blur\(1\.12px\)/, `mobile r369 edge softening missing: ${state.filter}`);
+              assert.equal(state.opticsOwner, 'r371-feathered-mobile-optics-owner');
+              assert.ok(state.opticsHref.includes('20260827-r371-feathered-mobile-optics'), state.opticsHref);
+              assert.ok(state.opacity <= .791 && state.opacity >= .789, `mobile r371 canvas opacity mismatch: ${JSON.stringify(state)}`);
+              assert.match(state.filter, /brightness\(0\.84\)/, `mobile r371 luminance restraint missing: ${state.filter}`);
+              assert.match(state.filter, /contrast\(0\.43\)/, `mobile r371 edge contrast restraint missing: ${state.filter}`);
+              assert.match(state.filter, /blur\(1\.46px\)/, `mobile r371 feathered perimeter missing: ${state.filter}`);
             }
 
             await context.close();
@@ -200,7 +202,7 @@ jobs:
             for (const file of ['desktop-r326-current.png','mobile-r326-current.png']) {
               assert.ok(fs.statSync(file).size > 10000, file);
             }
-            console.log('PASS: live r326 WebGL crystal, r369 balanced mobile optics, interaction and control geometry passed.');
+            console.log('PASS: live r326 WebGL crystal, r371 feathered mobile optics, interaction and control geometry passed.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
@@ -225,10 +227,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r326 crystal and r369 balanced mobile optics passed'
+            description='Live r326 crystal and r371 feathered mobile optics passed'
           else
             state=failure
-            description='Live r326/r369 MAG diagnostic failed'
+            description='Live r326/r371 MAG diagnostic failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
