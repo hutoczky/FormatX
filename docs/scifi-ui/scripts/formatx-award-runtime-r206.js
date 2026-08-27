@@ -4,8 +4,9 @@
   const root = document.documentElement;
   if (root.dataset.fxAwardRuntime === 'r334') return;
   root.dataset.fxAwardRuntime = 'r334';
-  root.dataset.fxFinalValidationR334 = 'mobile-optics-r410-v51-cachebust';
+  root.dataset.fxFinalValidationR334 = 'mobile-optics-r412-balanced-soft-glass';
   root.dataset.fxMobileMagLineageR410 = 'approved-v51-reference-crystal';
+  root.dataset.fxMobileMagFinishR412 = 'balanced-soft-glass';
 
   const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
 
@@ -43,7 +44,7 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260824-native-orb-r250';
-  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260827-r410-v51-approved-detail';
+  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260827-r412-balanced-soft-glass';
   const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
@@ -122,8 +123,8 @@
     if (!matchMedia('(max-width: 900px)').matches) return;
     const existing = document.querySelector('link[data-fx-mobile-core-softening-r322]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r410-v51-approved-detail')) existing.href = CORE_SOFTEN_STYLE_URL;
-      root.dataset.fxMobileCoreOpticsR322 = 'r410-v51-approved-detail';
+      if (!existing.href.includes('r412-balanced-soft-glass')) existing.href = CORE_SOFTEN_STYLE_URL;
+      root.dataset.fxMobileCoreOpticsR322 = 'r412-balanced-soft-glass';
       return;
     }
     const link = document.createElement('link');
@@ -131,7 +132,7 @@
     link.href = CORE_SOFTEN_STYLE_URL;
     link.dataset.fxMobileCoreSofteningR322 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxMobileCoreOpticsR322 = 'r410-v51-approved-detail';
+    root.dataset.fxMobileCoreOpticsR322 = 'r412-balanced-soft-glass';
   }
 
   function ensureOrganismCoreOwner() {
@@ -178,6 +179,7 @@
     document.head.appendChild(script);
     root.dataset.fxAwardCrystal = 'interactive-site-core-r318';
   }
+
   function ensureDialogueSurface() {
     if (!document.querySelector('link[data-fx-dialogue-open-r287]')) {
       const link = document.createElement('link');
