@@ -1,0 +1,24 @@
+{
+  "revision": "r376",
+  "scope": "mobile-only",
+  "purpose": "Softer MAG light energy and feathered crystal perimeter from real-device feedback",
+  "preserves": [
+    "desktop optics",
+    "four-point MAG geometry",
+    "SOUND ASK PAUSE control geometry",
+    "interaction ownership"
+  ],
+  "target": {
+    "canvasOpacity": 0.72,
+    "phoneCanvasOpacity": 0.69,
+    "brightness": 0.76,
+    "phoneBrightness": 0.74,
+    "contrast": 0.34,
+    "phoneContrast": 0.32,
+    "blurPx": 2.05,
+    "phoneBlurPx": 2.15,
+    "centerBloomOpacity": 0.005,
+    "phoneCenterBloomOpacity": 0.0035
+  },
+  "status": "source-prepared"
+}
