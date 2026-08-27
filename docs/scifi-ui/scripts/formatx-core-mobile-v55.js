@@ -11,7 +11,10 @@
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260825-r326-new-organism';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
-  const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 1700 : 1100;
+  // r408: the text/content layer wins the critical rendering path. On phones the
+  // WebGL crystal starts after the 2.5s LCP budget rather than competing with the
+  // first readable card. Any trusted gesture still starts it immediately.
+  const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 3000 : 1100;
   let rendererRequested = false;
   let rendererTimer = 0;
 
@@ -85,10 +88,10 @@
 
   function schedulePrimaryRenderer() {
     if (rendererRequested || rendererTimer) return;
-    root.dataset.fxCoreRendererStartupR346='critical-content-first';
+    root.dataset.fxCoreRendererStartupR346='critical-content-first-r408';
     const schedule = () => {
       if (rendererRequested || rendererTimer) return;
-      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-critical-first-paint'), START_DELAY);
+      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-content-lcp-r408'), START_DELAY);
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
     else schedule();
