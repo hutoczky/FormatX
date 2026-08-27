@@ -1,258 +1,175 @@
-/* FormatX r372 — final mobile MAG optical + control ownership.
-   This layer deliberately outranks r371 and older mobile owners so real devices
-   cannot race between different crystal filters or control geometries.
-   Desktop is untouched. */
+/* FormatX r371 emergency recovery — restrained mobile MAG glow and softer crystal contour.
+   Restore the last known-visible mobile optical layer. Keep geometry and
+   interaction ownership outside this optics-only stylesheet. */
 
 @media (max-width: 900px), (pointer: coarse) {
-  /* One stable crystal silhouette. Keep the glass readable, but remove the
-     piercing centre flare and razor-like cyan/violet perimeter. The extra :root
-     specificity is intentional: this is the final mobile optical authority. */
-  html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
-  html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .88 !important;
-    mix-blend-mode: normal !important;
-    scale: .82 .86 !important;
-    transform-origin: 50% 48% !important;
-    image-rendering: auto !important;
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
+  html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage {
+    filter: none !important;
+  }
+
+  /* Preserve the glass colour while keeping the centre flare and perimeter
+     restrained on high-density phone displays. */
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
+  html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
+    opacity: .90 !important;
     filter:
-      brightness(.92)
-      contrast(.56)
-      saturate(.87)
-      blur(1.18px) !important;
+      brightness(.82)
+      contrast(.78)
+      saturate(.88)
+      blur(.60px)
+      drop-shadow(0 0 .24px rgba(132,242,255,.012)) !important;
     -webkit-filter:
-      brightness(.92)
-      contrast(.56)
-      saturate(.87)
-      blur(1.18px) !important;
+      brightness(.82)
+      contrast(.78)
+      saturate(.88)
+      blur(.60px)
+      drop-shadow(0 0 .24px rgba(132,242,255,.012)) !important;
   }
 
-  /* Legacy/fallback canvases use the same optical direction so the MAG does not
-     visibly jump between bright/sharp and dark/flat while the renderer boots. */
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas,
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-core-r112-stage > .fx-core-r112-canvas,
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-core-r120-stage > .fx-core-r120-canvas {
-    opacity: .86 !important;
-    mix-blend-mode: normal !important;
-    filter: brightness(.89) contrast(.57) saturate(.85) blur(1.10px) !important;
-    -webkit-filter: brightness(.89) contrast(.57) saturate(.85) blur(1.10px) !important;
+  /* Decorative edge light is only a soft atmosphere, never a second rim. */
+  #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: .065;
   }
 
-  /* No second luminous rim. Only a restrained soft atmosphere remains around
-     the real WebGL body. */
-  html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 31% !important;
-    height: 31% !important;
-    top: 48% !important;
-    background:
-      radial-gradient(circle at 50% 50%, rgba(132,232,255,.040) 0 5%, rgba(91,177,255,.017) 18%, rgba(110,92,255,.007) 38%, transparent 70%) !important;
-    mix-blend-mode: screen !important;
-    filter: blur(36px) !important;
-    opacity: .070 !important;
+  #hero .fx-core-biolume-r323 path {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  html:root:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .003 !important;
-    pointer-events: none !important;
+  #hero .fx-core-biolume-r323 .fx-biolume-halo {
+    stroke: rgba(67,202,255,.026);
+    stroke-width: .46;
+    filter: blur(7.6px);
+    opacity: .008;
   }
 
-  html:root:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-halo,.fx-biolume-base,.fx-biolume-runner-a,.fx-biolume-runner-b,.fx-biolume-runner-c) {
-    opacity: .002 !important;
-    filter: blur(8px) !important;
-    animation: none !important;
+  #hero .fx-core-biolume-r323 .fx-biolume-base {
+    stroke: url(#fx-biolume-gradient-r323);
+    stroke-width: .12;
+    opacity: .020;
+    filter: blur(1.50px);
   }
 
-  /* Decorative facet/interaction overlays are not allowed to redraw a hard
-     diamond edge over the softened WebGL crystal on touch devices. */
-  html:root:root:root body.living-architecture #hero .fx-crystal-facets-r318 {
-    opacity: .010 !important;
-    filter: blur(.95px) !important;
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
+    stroke-width: .13;
+    stroke-dasharray: 4.5 18 2 24;
+    animation: fx-biolume-travel-r323 17s linear infinite;
+    filter: drop-shadow(0 0 .06px currentColor) blur(1.05px);
   }
 
-  html:root:root:root.fx-crystal-hover-r318 body.living-architecture #hero .fx-crystal-facets-r318,
-  html:root:root:root.fx-crystal-focus-r318 body.living-architecture #hero .fx-crystal-facets-r318,
-  html:root:root:root.fx-crystal-site-active-r318 body.living-architecture #hero .fx-crystal-facets-r318 {
-    opacity: .014 !important;
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-a {
+    stroke: #75f7ff;
+    color: #75f7ff;
+    opacity: .030;
   }
 
-  html:root:root:root body.living-architecture #hero .fx-crystal-portal-r318::before,
-  html:root:root:root body.living-architecture #hero .fx-crystal-portal-r318::after {
-    content: none !important;
-    display: none !important;
-    opacity: 0 !important;
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-b {
+    stroke: #8a78ff;
+    color: #8a78ff;
+    opacity: .021;
+    stroke-dasharray: 2.5 22 5.5 20;
+    animation-duration: 21s;
+    animation-direction: reverse;
   }
 
-  /* The old TOUCH THE CRYSTAL pill was intermittently ending up underneath the
-     hero controls. The MAG itself remains the interaction surface; the extra
-     instruction is removed on phones/tablets. */
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-cue-r318 {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-
-  /* FINAL MOBILE CONTROL GEOMETRY — always one centred horizontal row below
-     the MAG. This explicitly defeats old fixed/side-rail owners. */
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
-    position: absolute !important;
-    inset: auto auto 18px 50% !important;
-    left: 50% !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: 18px !important;
-    display: grid !important;
-    grid-template-columns: repeat(3, 52px) !important;
-    grid-template-rows: 52px 20px !important;
-    align-items: start !important;
-    justify-items: center !important;
-    justify-content: center !important;
-    column-gap: 24px !important;
-    row-gap: 0 !important;
-    width: max-content !important;
-    min-width: 0 !important;
-    max-width: calc(100vw - 28px) !important;
-    height: 76px !important;
-    min-height: 76px !important;
-    max-height: 76px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    transform: translateX(-50%) !important;
-    translate: none !important;
-    z-index: 80 !important;
-    isolation: isolate !important;
-  }
-
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail,
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail-r264 {
-    display: contents !important;
-    position: static !important;
-    inset: auto !important;
-    width: auto !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    transform: none !important;
-    translate: none !important;
-  }
-
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
-    position: relative !important;
-    inset: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    display: grid !important;
-    place-items: center !important;
-    box-sizing: border-box !important;
-    width: 52px !important;
-    min-width: 52px !important;
-    max-width: 52px !important;
-    height: 52px !important;
-    min-height: 52px !important;
-    max-height: 52px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    transform: none !important;
-    translate: none !important;
-    z-index: 1 !important;
-  }
-
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-  }
-
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-  }
-
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
-    grid-column: 3 !important;
-    grid-row: 1 !important;
-  }
-
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask > span {
-    position: absolute !important;
-    top: 59px !important;
-    left: 50% !important;
-    right: auto !important;
-    bottom: auto !important;
-    display: block !important;
-    width: max-content !important;
-    max-width: 92px !important;
-    margin: 0 !important;
-    color: rgba(239,246,250,.94) !important;
-    font: 760 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace !important;
-    letter-spacing: .055em !important;
-    white-space: nowrap !important;
-    text-align: center !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: none !important;
-    transform: translateX(-50%) !important;
-    translate: none !important;
-  }
-
-  /* Retire any orphan direct-child rail left behind by an older mobile owner. */
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-rail {
-    display: none !important;
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
+    stroke: #71ffd0;
+    color: #71ffd0;
+    opacity: .013;
+    stroke-dasharray: 1.5 30 3.5 26;
+    animation-duration: 25s;
   }
 }
 
 @media (max-width: 430px) {
-  html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
-  html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .86 !important;
-    scale: .80 .84 !important;
-    filter: brightness(.90) contrast(.54) saturate(.85) blur(1.28px) !important;
-    -webkit-filter: brightness(.90) contrast(.54) saturate(.85) blur(1.28px) !important;
+  /* Keep the r326 stage mathematically centred while the layout owner controls Y. */
+  html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage {
+    left: calc((100% - 100vw) / 2) !important;
+    right: auto !important;
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
-  html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 29% !important;
-    height: 29% !important;
-    filter: blur(39px) !important;
-    opacity: .060 !important;
+  html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage > .fx-core-mobile-v55-canvas.fx-crystal-organism-r326-canvas {
+    inset: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
-    grid-template-columns: repeat(3, 50px) !important;
-    column-gap: 22px !important;
-    bottom: 16px !important;
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
+  html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
+    opacity: .89 !important;
+    filter:
+      brightness(.80)
+      contrast(.76)
+      saturate(.87)
+      blur(.70px)
+      drop-shadow(0 0 .20px rgba(132,242,255,.010)) !important;
+    -webkit-filter:
+      brightness(.80)
+      contrast(.76)
+      saturate(.87)
+      blur(.70px)
+      drop-shadow(0 0 .20px rgba(132,242,255,.010)) !important;
   }
 
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
-    width: 50px !important;
-    min-width: 50px !important;
-    max-width: 50px !important;
-    height: 50px !important;
-    min-height: 50px !important;
-    max-height: 50px !important;
+  #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
+    opacity: .045;
   }
 
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask > span {
-    top: 57px !important;
+  #hero .fx-core-biolume-r323 .fx-biolume-halo {
+    stroke-width: .42;
+    filter: blur(8.2px);
+    opacity: .006;
   }
+
+  #hero .fx-core-biolume-r323 .fx-biolume-base {
+    stroke-width: .11;
+    opacity: .015;
+    filter: blur(1.62px);
+  }
+
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
+    stroke-width: .12;
+    filter: drop-shadow(0 0 .04px currentColor) blur(1.12px);
+  }
+}
+
+@keyframes fx-biolume-travel-r323 {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -100; }
 }
 
 @media (prefers-reduced-motion: reduce) and (max-width: 900px) {
-  html:root:root:root body.living-architecture #hero .fx-core-biolume-r323 * {
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     animation: none !important;
+    opacity: .014;
   }
 }
 
-/* production-deploy-r372 */
+/* production-deploy-r373-emergency-visibility-recovery */
