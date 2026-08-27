@@ -8,16 +8,22 @@
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lighting = mobile ? Object.freeze({
-    fresnelPower: '2.0',
-    innerHeartBase: '.15',
-    innerHeartBreath: '.27',
-    innerHeartAlpha: '.14',
-    innerAlphaMax: '.52',
-    rimBase: '.10',
-    rimEnergy: '.07',
-    rimAlpha: '.035',
-    outerHeartBase: '.040',
-    outerHeartEnergy: '.055'
+    fresnelPower: '1.8',
+    innerHeartBase: '.105',
+    innerHeartBreath: '.18',
+    innerHeartAlpha: '.09',
+    innerAlphaMax: '.46',
+    rimBase: '.058',
+    rimEnergy: '.038',
+    rimAlpha: '.018',
+    outerHeartBase: '.026',
+    outerHeartEnergy: '.034',
+    facetStrength: '.13',
+    sideStrength: '.16',
+    outerAlphaBase: '.46',
+    outerAlphaKey: '.13',
+    outerAlphaMin: '.39',
+    outerAlphaMax: '.76'
   }) : Object.freeze({
     fresnelPower: '2.7',
     innerHeartBase: '.24',
@@ -28,7 +34,13 @@
     rimEnergy: '.12',
     rimAlpha: '.08',
     outerHeartBase: '.055',
-    outerHeartEnergy: '.08'
+    outerHeartEnergy: '.08',
+    facetStrength: '.17',
+    sideStrength: '.22',
+    outerAlphaBase: '.56',
+    outerAlphaKey: '.17',
+    outerAlphaMin: '.48',
+    outerAlphaMax: '.86'
   });
 
   if (root.dataset.fxCrystalOrganismR326 === 'ready' || root.dataset.fxCrystalOrganismR326 === 'booting') return;
@@ -235,13 +247,13 @@
 
         vec3 deep=vec3(.045,.16,.25);
         vec3 ice=vec3(.24,.66,.82);
-        vec3 glass=mix(deep,ice,.20+.48*ndl+.17*facetPulse);
-        glass+=vec3(.09,.43,.70)*sideLight*.22;
+        vec3 glass=mix(deep,ice,.20+.48*ndl+${lighting.facetStrength}*facetPulse);
+        glass+=vec3(.09,.43,.70)*sideLight*${lighting.sideStrength};
         glass+=vec3(.18,.72,1.00)*fresnel*(${lighting.rimBase}+${lighting.rimEnergy}*uEnergy);
         glass+=vec3(.22,.62,.82)*veins*(.035+.060*uBreath);
         glass+=vec3(.20,.54,.68)*heart*(${lighting.outerHeartBase}+${lighting.outerHeartEnergy}*uEnergy);
-        float alpha=.56+.17*ndl+${lighting.rimAlpha}*fresnel;
-        ${webgl2?'outColor':'gl_FragColor'}=vec4(max(glass,vec3(0.)),clamp(alpha,.48,.86));
+        float alpha=${lighting.outerAlphaBase}+${lighting.outerAlphaKey}*ndl+${lighting.rimAlpha}*fresnel;
+        ${webgl2?'outColor':'gl_FragColor'}=vec4(max(glass,vec3(0.)),clamp(alpha,${lighting.outerAlphaMin},${lighting.outerAlphaMax}));
       }
     `;
 
@@ -463,7 +475,7 @@
     root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';
     root.dataset.fxCoreCompositionRevisionR326='new-crystal-organism-no-legacy-fallback';
     root.dataset.fxCoreMobileVisualR326=mobile?'soft-translucent-organic-rim':'desktop-translucent-organic-rim';
-    root.dataset.fxCoreMobileLightingR374=mobile?'feathered-heart-fresnel-r374':'desktop-r326-unchanged';
+    root.dataset.fxCoreMobileLightingR375=mobile?'balanced-heart-feathered-facets-r375':'desktop-r326-unchanged';
     root.dataset.fxGpuCapability=webgl2?'webgl2':'webgl1';
     root.dataset.fxCoreReal3dTargetFps='interaction-60-heartbeat-burst-idle-zero';
     root.dataset.fxCoreRenderMs='0';
