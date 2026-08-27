@@ -1,6 +1,7 @@
-/* FormatX r371 emergency recovery — restrained mobile MAG glow and softer crystal contour.
-   Restore the last known-visible mobile optical layer. Keep geometry and
-   interaction ownership outside this optics-only stylesheet. */
+/* FormatX r374 — visible mobile MAG recovery with restrained lighting finish.
+   Preserve the proven r373 geometry/visibility recovery while reducing only the
+   decorative perimeter energy. WebGL heart + Fresnel lighting is tuned in r326.
+   Control geometry remains owned elsewhere. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
@@ -8,8 +9,8 @@
     filter: none !important;
   }
 
-  /* Preserve the glass colour while keeping the centre flare and perimeter
-     restrained on high-density phone displays. */
+  /* Keep the recovered glass body visible. The selective centre/rim reduction
+     now happens inside the WebGL shader, so this finishing filter stays mild. */
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
     opacity: .90 !important;
@@ -18,16 +19,17 @@
       contrast(.78)
       saturate(.88)
       blur(.60px)
-      drop-shadow(0 0 .24px rgba(132,242,255,.012)) !important;
+      drop-shadow(0 0 .16px rgba(132,242,255,.008)) !important;
     -webkit-filter:
       brightness(.82)
       contrast(.78)
       saturate(.88)
       blur(.60px)
-      drop-shadow(0 0 .24px rgba(132,242,255,.012)) !important;
+      drop-shadow(0 0 .16px rgba(132,242,255,.008)) !important;
   }
 
-  /* Decorative edge light is only a soft atmosphere, never a second rim. */
+  /* Decorative edge light is atmosphere only; it must never redraw a second
+     sharp cyan/violet silhouette over the softened WebGL Fresnel edge. */
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
     position: absolute;
     inset: 0;
@@ -37,7 +39,7 @@
     overflow: visible;
     pointer-events: none;
     mix-blend-mode: screen;
-    opacity: .065;
+    opacity: .040;
   }
 
   #hero .fx-core-biolume-r323 path {
@@ -48,38 +50,38 @@
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke: rgba(67,202,255,.026);
-    stroke-width: .46;
-    filter: blur(7.6px);
-    opacity: .008;
+    stroke: rgba(67,202,255,.020);
+    stroke-width: .40;
+    filter: blur(8.6px);
+    opacity: .005;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
     stroke: url(#fx-biolume-gradient-r323);
-    stroke-width: .12;
-    opacity: .020;
-    filter: blur(1.50px);
+    stroke-width: .10;
+    opacity: .012;
+    filter: blur(1.80px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .13;
+    stroke-width: .10;
     stroke-dasharray: 4.5 18 2 24;
     animation: fx-biolume-travel-r323 17s linear infinite;
-    filter: drop-shadow(0 0 .06px currentColor) blur(1.05px);
+    filter: drop-shadow(0 0 .035px currentColor) blur(1.32px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a {
     stroke: #75f7ff;
     color: #75f7ff;
-    opacity: .030;
+    opacity: .018;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b {
     stroke: #8a78ff;
     color: #8a78ff;
-    opacity: .021;
+    opacity: .013;
     stroke-dasharray: 2.5 22 5.5 20;
     animation-duration: 21s;
     animation-direction: reverse;
@@ -88,14 +90,14 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     stroke: #71ffd0;
     color: #71ffd0;
-    opacity: .013;
+    opacity: .008;
     stroke-dasharray: 1.5 30 3.5 26;
     animation-duration: 25s;
   }
 }
 
 @media (max-width: 430px) {
-  /* Keep the r326 stage mathematically centred while the layout owner controls Y. */
+  /* Keep the proven r373 stage centring exactly as-is. */
   html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage {
     left: calc((100% - 100vw) / 2) !important;
     right: auto !important;
@@ -125,36 +127,36 @@
       contrast(.76)
       saturate(.87)
       blur(.70px)
-      drop-shadow(0 0 .20px rgba(132,242,255,.010)) !important;
+      drop-shadow(0 0 .12px rgba(132,242,255,.006)) !important;
     -webkit-filter:
       brightness(.80)
       contrast(.76)
       saturate(.87)
       blur(.70px)
-      drop-shadow(0 0 .20px rgba(132,242,255,.010)) !important;
+      drop-shadow(0 0 .12px rgba(132,242,255,.006)) !important;
   }
 
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .045;
+    opacity: .028;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .42;
-    filter: blur(8.2px);
-    opacity: .006;
+    stroke-width: .36;
+    filter: blur(9.4px);
+    opacity: .004;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .11;
-    opacity: .015;
-    filter: blur(1.62px);
+    stroke-width: .09;
+    opacity: .009;
+    filter: blur(1.94px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .12;
-    filter: drop-shadow(0 0 .04px currentColor) blur(1.12px);
+    stroke-width: .09;
+    filter: drop-shadow(0 0 .025px currentColor) blur(1.42px);
   }
 }
 
@@ -168,8 +170,8 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     animation: none !important;
-    opacity: .014;
+    opacity: .008;
   }
 }
 
-/* production-deploy-r373-emergency-visibility-recovery */
+/* production-deploy-r374-feathered-mobile-lighting */
