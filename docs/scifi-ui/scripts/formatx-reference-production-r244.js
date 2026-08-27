@@ -136,20 +136,12 @@
 
     if (sound.parentElement !== controls) controls.prepend(sound);
     if (rail.parentElement !== controls) controls.appendChild(rail);
-
-    const expectedControlOwner = space;
-    if (nodesParent(controls) !== expectedControlOwner) expectedControlOwner.appendChild(nodes.controls);
+    if (controls.parentElement !== space) space.appendChild(controls);
 
     if (space.nextElementSibling !== heading) space.after(heading);
     if (heading.nextElementSibling !== proof) heading.after(proof);
 
     return { heading, proof, live, rail, controls, sound };
-  }
-
-  // Small compatibility helper lets the validator retain its historical token
-  // while avoiding any physical layout write in the r408 architecture.
-  function nodesParent(node) {
-    return node?.parentElement || null;
   }
 
   // r408: CSS/r268 owns SOUND | ASK | PAUSE geometry. Never write inline
