@@ -1,7 +1,6 @@
-/* FormatX r372 — restrained mobile MAG bloom and feathered crystal perimeter.
-   Real-device tuning further reduces the centre flare, cyan/violet edge energy
-   and hard silhouette while preserving the translucent living-crystal body.
-   Desktop optics remain unchanged. */
+/* FormatX r375 — balanced mobile MAG bloom and feathered crystal perimeter.
+   Real-device tuning reduces the centre flare and hard cyan/violet silhouette
+   without changing the approved four-point geometry or any desktop optics. */
 
 html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   isolation: isolate !important;
@@ -18,8 +17,7 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
   translate: -50% -50% !important;
   pointer-events: none !important;
   border-radius: 50% !important;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(147,238,255,.18) 0 5%, rgba(91,196,255,.12) 13%, rgba(95,126,255,.065) 30%, rgba(30,76,144,.025) 46%, transparent 66%) !important;
+  background: radial-gradient(circle at 50% 50%, rgba(147,238,255,.18) 0 5%, rgba(91,196,255,.12) 13%, rgba(95,126,255,.065) 30%, rgba(30,76,144,.025) 46%, transparent 66%) !important;
   mix-blend-mode: screen !important;
   filter: blur(18px) !important;
   opacity: .72 !important;
@@ -33,20 +31,8 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
     scale: .82 .85 !important;
     transform-origin: 50% 48% !important;
     image-rendering: auto !important;
-    filter:
-      brightness(1.24)
-      contrast(.72)
-      saturate(1.02)
-      blur(.56px)
-      drop-shadow(0 0 8px rgba(92,207,255,.070))
-      drop-shadow(0 0 20px rgba(85,118,255,.035)) !important;
-    -webkit-filter:
-      brightness(1.24)
-      contrast(.72)
-      saturate(1.02)
-      blur(.56px)
-      drop-shadow(0 0 8px rgba(92,207,255,.070))
-      drop-shadow(0 0 20px rgba(85,118,255,.035)) !important;
+    filter: brightness(1.24) contrast(.72) saturate(1.02) blur(.56px) drop-shadow(0 0 8px rgba(92,207,255,.070)) drop-shadow(0 0 20px rgba(85,118,255,.035)) !important;
+    -webkit-filter: brightness(1.24) contrast(.72) saturate(1.02) blur(.56px) drop-shadow(0 0 8px rgba(92,207,255,.070)) drop-shadow(0 0 20px rgba(85,118,255,.035)) !important;
   }
 }
 
@@ -77,102 +63,53 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
 
   html:root:root[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
     opacity: .73 !important;
-    filter:
-      brightness(.75)
-      contrast(.50)
-      saturate(.76)
-      blur(1.30px) !important;
-    -webkit-filter:
-      brightness(.75)
-      contrast(.50)
-      saturate(.76)
-      blur(1.30px) !important;
+    filter: brightness(.75) contrast(.50) saturate(.76) blur(1.30px) !important;
+    -webkit-filter: brightness(.75) contrast(.50) saturate(.76) blur(1.30px) !important;
   }
 
-  /* r372 mobile owner: slightly dimmer luminous spill and a softer perimeter,
-     keeping the approved four-point proportions and the desktop look intact. */
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .78 !important;
+    opacity: .75 !important;
     mix-blend-mode: normal !important;
     scale: .81 .86 !important;
     transform-origin: 50% 48% !important;
     image-rendering: auto !important;
-    filter:
-      brightness(.84)
-      contrast(.42)
-      saturate(.82)
-      blur(1.50px) !important;
-    -webkit-filter:
-      brightness(.84)
-      contrast(.42)
-      saturate(.82)
-      blur(1.50px) !important;
+    filter: brightness(.82) contrast(.38) saturate(.80) blur(1.75px) !important;
+    -webkit-filter: brightness(.82) contrast(.38) saturate(.80) blur(1.75px) !important;
   }
 
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 20% !important;
-    height: 20% !important;
-    background:
-      radial-gradient(circle at 50% 50%, rgba(147,238,255,.016) 0 4%, rgba(91,196,255,.006) 14%, rgba(95,126,255,.0022) 31%, rgba(30,76,144,.0006) 47%, transparent 68%) !important;
-    filter: blur(48px) !important;
-    opacity: .018 !important;
+    width: 18% !important;
+    height: 18% !important;
+    background: radial-gradient(circle at 50% 50%, rgba(147,238,255,.010) 0 4%, rgba(91,196,255,.0035) 14%, rgba(95,126,255,.0012) 31%, rgba(30,76,144,.0003) 47%, transparent 68%) !important;
+    filter: blur(52px) !important;
+    opacity: .009 !important;
   }
 
-  #hero .hero-space > .fx-crystal-cue-r318 {
-    display: none !important;
-  }
-
-  html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .0025 !important;
-  }
-
-  html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .066 !important;
-    opacity: .0005 !important;
-    filter: blur(15.5px) !important;
-  }
-
-  html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .023 !important;
-    opacity: .0022 !important;
-    filter: blur(6.4px) !important;
-  }
-
-  html:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a,.fx-biolume-runner-b,.fx-biolume-runner-c) {
-    stroke-width: .032 !important;
-    opacity: .005 !important;
-    filter: blur(5.8px) !important;
-  }
+  #hero .hero-space > .fx-crystal-cue-r318 { display: none !important; }
+  html:root:root body.living-architecture #hero .fx-core-r317-stage > .fx-core-biolume-r323 { opacity: .0015 !important; }
+  html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-halo { stroke-width: .060 !important; opacity: .0003 !important; filter: blur(16.5px) !important; }
+  html:root:root body.living-architecture #hero .fx-core-biolume-r323 .fx-biolume-base { stroke-width: .021 !important; opacity: .0014 !important; filter: blur(7.0px) !important; }
+  html:root:root body.living-architecture #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a,.fx-biolume-runner-b,.fx-biolume-runner-c) { stroke-width: .029 !important; opacity: .0030 !important; filter: blur(6.4px) !important; }
 }
 
 @media (max-width: 430px) {
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .75 !important;
+    opacity: .72 !important;
     scale: .79 .84 !important;
-    filter:
-      brightness(.81)
-      contrast(.39)
-      saturate(.79)
-      blur(1.58px) !important;
-    -webkit-filter:
-      brightness(.81)
-      contrast(.39)
-      saturate(.79)
-      blur(1.58px) !important;
+    filter: brightness(.79) contrast(.36) saturate(.77) blur(1.85px) !important;
+    -webkit-filter: brightness(.79) contrast(.36) saturate(.77) blur(1.85px) !important;
   }
 
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 19% !important;
-    height: 19% !important;
-    filter: blur(50px) !important;
-    opacity: .014 !important;
+    width: 17% !important;
+    height: 17% !important;
+    filter: blur(54px) !important;
+    opacity: .006 !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    opacity: .014 !important;
-  }
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after { opacity: .006 !important; }
 }
