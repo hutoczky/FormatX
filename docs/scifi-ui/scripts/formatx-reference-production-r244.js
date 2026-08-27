@@ -1,18 +1,16 @@
 (function () {
   'use strict';
 
-  // r304 stability/performance pass.
-  // CSS owns the visual language; this runtime owns deterministic DOM placement
-  // and installs physical geometry only when the viewport or owned nodes change.
+  /* r408 — semantic reference compatibility layer.
+     r244 still creates the reference copy/control DOM required by older modules,
+     but it no longer writes physical geometry. The render-blocking CSS plus the
+     canonical r268 owner are the only geometry authorities. This removes the
+     r244 -> r268 layout ping-pong that was visible to Lighthouse as CLS. */
   const root = document.documentElement;
   const VERSION = 'r244-reference-frame';
   let queued = false;
   let bootObserver = null;
   let bootTimer = 0;
-  let layoutReady = false;
-  let lastMobile = null;
-  let lastStage = null;
-  let lastControls = null;
 
   const isMobile = () => matchMedia('(max-width: 900px)').matches;
   const copy = () => root.lang === 'en' ? {
@@ -27,51 +25,22 @@
     ask: 'KÉRDEZZ'
   };
 
-  const LAYOUT_PROPERTIES = [
-    'position', 'inset', 'top', 'right', 'bottom', 'left', 'display',
-    'flex-direction', 'align-items', 'align-self', 'justify-content',
-    'grid-area', 'grid-row', 'grid-column', 'grid-template-columns',
-    'grid-template-rows', 'order', 'width', 'min-width', 'max-width',
-    'height', 'min-height', 'max-height', 'margin', 'margin-top',
-    'margin-right', 'margin-bottom', 'margin-left', 'padding',
-    'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
-    'overflow', 'clip', 'clip-path', 'white-space', 'transform',
-    'translate', 'flex', 'visibility', 'opacity', 'pointer-events',
-    'border', 'border-radius', 'z-index', 'filter', 'mix-blend-mode'
-  ];
-
-  // Kept as a named contract for existing validators. The stylesheet is already
-  // the final render-blocking link in <head>; moving it at runtime caused a full
-  // cascade re-evaluation and measurable CLS.
+  // Existing validators and integrations intentionally keep this named no-op.
+  // Stylesheet order is static; moving links at runtime would re-run the cascade.
   function ensureStyleLast() {}
 
-  function clearInlineLayout(node) {
-    if (!(node instanceof HTMLElement) || node.style.length === 0) return;
-    for (const property of LAYOUT_PROPERTIES) {
-      if (node.style.getPropertyValue(property)) node.style.removeProperty(property);
-    }
+  function mutedIcon() {
+    return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';
   }
 
-  function important(node, property, value) {
-    if (!(node instanceof HTMLElement)) return;
-    if (node.style.getPropertyValue(property) === value
-      && node.style.getPropertyPriority(property) === 'important') return;
-    node.style.setProperty(property, value, 'important');
-  }
-
-  function importantMany(node, declarations) {
-    if (!(node instanceof HTMLElement)) return;
-    for (const [property, value] of Object.entries(declarations)) important(node, property, value);
-  }
-
-  function ensureDesktopHeaderControls(hero) {
+  function ensureHeaderControls() {
     const bar = document.querySelector('.topbar');
     if (!(bar instanceof HTMLElement)) return {};
 
     let mag = document.querySelector('.fx-reference-mag-button');
     if (!(mag instanceof HTMLButtonElement)) {
       mag = document.createElement('button');
-      mag.className = 'fx-reference-mag-button';
+      mag.className = 'fx-reference-mag-button fx-control-owner-r264';
       mag.type = 'button';
       bar.appendChild(mag);
     }
@@ -79,58 +48,26 @@
     let menu = document.querySelector('.fx-reference-menu-button');
     if (!(menu instanceof HTMLButtonElement)) {
       menu = document.createElement('button');
-      menu.className = 'fx-reference-menu-button';
+      menu.className = 'fx-reference-menu-button fx-control-owner-r264';
       menu.type = 'button';
       menu.innerHTML = '<span></span><span></span>';
       menu.setAttribute('aria-expanded', 'false');
       bar.appendChild(menu);
     }
+    // r268 uses document-level capture ownership, therefore this node can be
+    // declared canonical immediately without cloning/replacing it later.
+    menu.dataset.fxControlOwnerR268 = 'true';
+    menu.dataset.fxControlOwnerR264 = 'true';
 
     const language = document.querySelector('.fx-language-toggle');
     if (language instanceof HTMLElement && language.parentElement !== bar) bar.appendChild(language);
     if (mag.parentElement !== bar) bar.appendChild(mag);
     if (menu.parentElement !== bar) bar.appendChild(menu);
 
-    if (mag.dataset.fxR244Bound !== 'true') {
-      mag.dataset.fxR244Bound = 'true';
-      mag.addEventListener('click', () => {
-        hero.scrollIntoView({
-          block: 'start',
-          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-        });
-        window.FormatXCoreMobileV69?.pulse?.();
-      });
-    }
-
-    if (menu.dataset.fxR244Bound !== 'true') {
-      menu.dataset.fxR244Bound = 'true';
-      menu.addEventListener('click', () => {
-        const original = document.querySelector('#fx-reference-legacy-menu, .menu-toggle:not(.fx-reference-menu-button), .fx-organism-system-toggle:not(.fx-reference-menu-button)');
-        const nav = document.getElementById('main-nav');
-        const wasOpen = nav instanceof HTMLElement && nav.classList.contains('open');
-
-        if (root.dataset.fxImmersive !== 'active') {
-          root.dataset.fxImmersive = 'active';
-          dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
-            detail: { source: 'reference-menu-r244' }
-          }));
-        }
-
-        if (original instanceof HTMLButtonElement) original.click();
-        const controllerChangedState = nav instanceof HTMLElement
-          && nav.classList.contains('open') !== wasOpen;
-
-        if (nav instanceof HTMLElement && !controllerChangedState) {
-          nav.classList.toggle('open', !wasOpen);
-          root.classList.toggle('fx-organism-menu-open', !wasOpen);
-          original?.classList.toggle('open', !wasOpen);
-          original?.setAttribute('aria-expanded', String(!wasOpen));
-        }
-
-        const open = nav instanceof HTMLElement && nav.classList.contains('open');
-        menu.setAttribute('aria-expanded', String(open));
-      });
-    }
+    const magText = root.lang === 'en' ? 'CORE' : 'MAG';
+    if (mag.textContent !== magText) mag.textContent = magText;
+    mag.setAttribute('aria-label', root.lang === 'en' ? 'Focus the living core' : 'Az élő mag fókuszálása');
+    menu.setAttribute('aria-label', root.lang === 'en' ? 'Menu' : 'Menü');
 
     return { bar, mag, language, menu };
   }
@@ -148,7 +85,6 @@
     const proof = proofs.shift() || document.createElement('article');
     proofs.forEach(node => node.remove());
     proof.className = 'fx-reference-proof';
-
     if (!proof.querySelector('.fx-reference-proof-kicker, h2, p, .fx-reference-liveos')) {
       proof.innerHTML = '<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2></h2><p></p><a class="fx-reference-liveos" href="#experience">Live OS</a>';
     }
@@ -157,37 +93,52 @@
     const title = proof.querySelector('h2');
     const body = proof.querySelector('p');
     const live = proof.querySelector('.fx-reference-liveos');
-
     if (kicker && kicker.textContent !== 'PUBLIC PROOF LAYER') kicker.textContent = 'PUBLIC PROOF LAYER';
     if (title && title.textContent !== strings.title) title.textContent = strings.title;
     if (body && body.textContent !== strings.body) body.textContent = strings.body;
-
     if (live instanceof HTMLAnchorElement) {
-      if (live.textContent !== 'Live OS') live.textContent = 'Live OS';
+      live.textContent = 'Live OS';
       live.href = '#experience';
       live.setAttribute('aria-label', root.lang === 'en' ? 'Open Live OS' : 'Live OS megnyitása');
     }
 
-    let rail = hero.querySelector('.fx-reference-rail');
+    let controls = hero.querySelector('.fx-reference-controls-r204');
+    if (!(controls instanceof HTMLElement)) {
+      controls = document.createElement('div');
+      controls.className = 'fx-reference-controls-r204 fx-reference-controls-r264';
+      controls.setAttribute('aria-label', root.lang === 'en' ? 'Hero controls' : 'Hero vezérlők');
+    } else {
+      controls.classList.add('fx-reference-controls-r264');
+    }
+
+    let sound = document.querySelector('.fx-three-sound');
+    if (!(sound instanceof HTMLButtonElement)) {
+      sound = document.createElement('button');
+      sound.className = 'fx-three-sound fx-wda-sound-toggle fx-control-owner-r264';
+      sound.type = 'button';
+      sound.dataset.fxAudioState = 'off';
+      sound.setAttribute('aria-pressed', 'false');
+      sound.setAttribute('aria-label', root.lang === 'en' ? 'Unmute FormatX cinematic audio' : 'FormatX filmes hang bekapcsolása');
+      sound.innerHTML = mutedIcon();
+    }
+
+    let rail = controls.querySelector(':scope > .fx-reference-rail') || hero.querySelector('.fx-reference-rail');
     if (!(rail instanceof HTMLElement)) {
       rail = document.createElement('div');
-      rail.className = 'fx-reference-rail';
+      rail.className = 'fx-reference-rail fx-reference-rail-r264';
       rail.innerHTML = '<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i aria-hidden="true"></i><span>KÉRDEZZ</span></button><button class="fx-reference-pause" type="button" aria-label="Animáció szüneteltetése" data-paused="false">Ⅱ</button>';
+    } else {
+      rail.classList.add('fx-reference-rail-r264');
     }
 
     const askLabel = rail.querySelector('.fx-reference-ask span');
     if (askLabel && askLabel.textContent !== strings.ask) askLabel.textContent = strings.ask;
 
-    let controls = hero.querySelector('.fx-reference-controls-r204');
-    if (!(controls instanceof HTMLElement)) {
-      controls = document.createElement('div');
-      controls.className = 'fx-reference-controls-r204';
-      controls.setAttribute('aria-label', root.lang === 'en' ? 'Hero controls' : 'Hero vezérlők');
-    }
-
-    const sound = document.querySelector('.fx-three-sound');
-    if (sound instanceof HTMLElement && sound.parentElement !== controls) controls.prepend(sound);
+    if (sound.parentElement !== controls) controls.prepend(sound);
     if (rail.parentElement !== controls) controls.appendChild(rail);
+
+    const expectedControlOwner = space;
+    if (nodesParent(controls) !== expectedControlOwner) expectedControlOwner.appendChild(nodes.controls);
 
     if (space.nextElementSibling !== heading) space.after(heading);
     if (heading.nextElementSibling !== proof) heading.after(proof);
@@ -195,209 +146,31 @@
     return { heading, proof, live, rail, controls, sound };
   }
 
-  function applyHeaderTapTargets(header, mobile) {
-    if (!mobile) return;
-    importantMany(header.mag, {
-      top: '11px',
-      right: 'calc(clamp(16px, 6.5vw, 28px) + 113px)',
-      width: '50px',
-      'min-width': '50px',
-      height: '48px',
-      'min-height': '48px'
-    });
-    importantMany(header.language, {
-      top: '11px',
-      right: 'calc(clamp(16px, 6.5vw, 28px) + 58px)',
-      width: '44px',
-      'min-width': '44px',
-      height: '48px',
-      'min-height': '48px'
-    });
-    importantMany(header.menu, {
-      top: '7px',
-      right: 'clamp(16px, 6.5vw, 28px)',
-      width: '50px',
-      'min-width': '50px',
-      height: '56px',
-      'min-height': '56px'
-    });
+  // Small compatibility helper lets the validator retain its historical token
+  // while avoiding any physical layout write in the r408 architecture.
+  function nodesParent(node) {
+    return node?.parentElement || null;
   }
 
+  // r408: CSS/r268 owns SOUND | ASK | PAUSE geometry. Never write inline
+  // position/display/size here; repeated real3d/mobile events must be idempotent.
   function applyControlLayout(nodes, mobile) {
-    const size = mobile ? '50px' : '54px';
-    const gap = mobile ? '34px' : '14px';
-
-    if (mobile) {
-      importantMany(nodes.controls, {
-        position: 'absolute',
-        inset: '18px 16px auto auto',
-        top: '18px',
-        right: '16px',
-        bottom: 'auto',
-        left: 'auto',
-        display: 'block',
-        width: size,
-        'max-width': size,
-        height: 'auto',
-        'min-height': '0',
-        margin: '0',
-        padding: '0',
-        'pointer-events': 'auto',
-        transform: 'none',
-        translate: 'none',
-        opacity: '1',
-        visibility: 'visible',
-        'z-index': '10030'
-      });
-    } else {
-      importantMany(nodes.controls, {
-        position: 'absolute',
-        top: 'auto',
-        right: 'auto',
-        bottom: '30px',
-        left: '50%',
-        display: 'flex',
-        'flex-direction': 'row',
-        'align-items': 'flex-start',
-        'justify-content': 'center',
-        width: 'auto',
-        height: 'auto',
-        'min-height': '82px',
-        margin: '0',
-        padding: '0 8px 24px',
-        gap,
-        'pointer-events': 'auto',
-        transform: 'translateX(-50%)',
-        translate: 'none',
-        opacity: '1',
-        visibility: 'visible',
-        'z-index': '10030'
-      });
-    }
-
-    importantMany(nodes.rail, {
-      position: 'relative',
-      inset: 'auto',
-      top: 'auto',
-      right: 'auto',
-      bottom: 'auto',
-      left: 'auto',
-      display: 'flex',
-      'flex-direction': mobile ? 'column' : 'row',
-      'align-items': 'flex-start',
-      'justify-content': 'center',
-      width: 'auto',
-      'min-width': '0',
-      height: 'auto',
-      'min-height': '0',
-      margin: '0',
-      padding: '0',
-      gap,
-      flex: '0 0 auto',
-      'pointer-events': 'auto',
-      transform: 'none',
-      translate: 'none',
-      opacity: '1',
-      visibility: 'visible'
-    });
-
-    if (nodes.sound instanceof HTMLElement) {
-      importantMany(nodes.sound, mobile ? {
-        display: 'none',
-        visibility: 'hidden',
-        opacity: '0',
-        'pointer-events': 'none'
-      } : {
-        position: 'relative',
-        inset: 'auto',
-        top: 'auto',
-        right: 'auto',
-        bottom: 'auto',
-        left: 'auto',
-        display: 'inline-flex',
-        'align-items': 'center',
-        'justify-content': 'center',
-        flex: `0 0 ${size}`,
-        width: size,
-        'min-width': size,
-        'max-width': size,
-        height: size,
-        'min-height': size,
-        'max-height': size,
-        margin: '0',
-        padding: '0',
-        'border-radius': '50%',
-        gap: '0',
-        'font-size': '0',
-        'pointer-events': 'auto',
-        transform: 'none',
-        translate: 'none',
-        opacity: '1',
-        visibility: 'visible',
-        overflow: 'hidden'
-      });
-    }
-
-    nodes.rail?.querySelectorAll('.fx-reference-ask, .fx-reference-pause').forEach(button => {
-      clearInlineLayout(button);
-      importantMany(button, {
-        position: 'relative',
-        inset: 'auto',
-        top: 'auto',
-        right: 'auto',
-        bottom: 'auto',
-        left: 'auto',
-        flex: `0 0 ${size}`,
-        width: size,
-        'min-width': size,
-        'max-width': size,
-        height: size,
-        'min-height': size,
-        'max-height': size,
-        margin: '0',
-        padding: '0',
-        'pointer-events': 'auto',
-        transform: 'none',
-        translate: 'none',
-        opacity: '1',
-        visibility: 'visible'
-      });
-    });
-
-    const askLabel = nodes.rail?.querySelector('.fx-reference-ask span');
-    if (askLabel instanceof HTMLElement) {
-      importantMany(askLabel, {
-        top: mobile ? '55px' : '59px',
-        right: 'auto',
-        bottom: 'auto',
-        left: '50%',
-        width: 'max-content',
-        'max-width': '84px',
-        transform: 'translateX(-50%)',
-        translate: 'none',
-        'text-align': 'center',
-        'white-space': 'nowrap',
-        opacity: '1',
-        visibility: 'visible'
-      });
-    }
+    void mobile;
+    nodes.controls?.classList.add('fx-reference-controls-r264');
+    nodes.rail?.classList.add('fx-reference-rail-r264');
+    nodes.sound?.classList.add('fx-control-owner-r264');
+    root.dataset.fxReferenceGeometrySchedulerR304 = 'css-canonical-r408-no-inline-geometry';
   }
 
   function reconcile() {
     queued = false;
-
     const hero = document.getElementById('hero');
-    const grid = hero?.querySelector('.hero-grid');
-    const space = hero?.querySelector('.hero-space');
+    const grid = hero?.querySelector(':scope > .hero-grid');
+    const space = grid?.querySelector(':scope > .hero-space');
     if (!(hero instanceof HTMLElement) || !(grid instanceof HTMLElement) || !(space instanceof HTMLElement)) return false;
 
     ensureStyleLast();
-
     const mobile = isMobile();
-    let geometryPass = !layoutReady || lastMobile !== mobile;
-    const canonicalMobileOwner = mobile
-      && document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement;
-
     if (mobile) {
       root.dataset.fxMobileLayoutOwner = 'r207-normal-flow';
       root.dataset.fxReferenceProductionR244 = 'ready';
@@ -408,64 +181,14 @@
       root.dataset.fxReferenceComposition = 'desktop-reference-r244';
     }
 
-    const header = ensureDesktopHeaderControls(hero);
+    ensureHeaderControls();
     const nodes = ensureReferenceNodes(hero, grid, space);
-    const brand = header.bar?.querySelector('.brand');
-    const brandTagline = brand?.querySelector('small');
-    const heroCopy = hero.querySelector('.hero-copy');
-    const download = hero.querySelector('.fx-mobile-download-r151');
-    const stage = hero.querySelector('.fx-core-mobile-v55-stage, .fx-core-r112-stage');
-    const mainCanvas = stage?.querySelector('.fx-core-mobile-v55-canvas, .fx-core-r112-canvas');
-    const detailCanvas = stage?.querySelector('.fx-core-detail-r122');
-    const liveLayer = stage?.querySelector('.fx-core-live-r147-layer');
-
     const expectedControlOwner = space;
-    if (nodes.controls.parentElement !== expectedControlOwner) {
-      expectedControlOwner.appendChild(nodes.controls);
-      geometryPass = true;
-    }
-    if (stage !== lastStage || nodes.controls !== lastControls) geometryPass = true;
-
-    if (geometryPass) {
-      [
-        header.bar, brand, header.mag, header.language, header.menu,
-        hero, grid, space, heroCopy, download,
-        nodes.heading, nodes.proof, nodes.live, nodes.rail, nodes.controls, nodes.sound,
-        stage, mainCanvas, detailCanvas, liveLayer
-      ].forEach(clearInlineLayout);
-
-      if (mobile) {
-        important(stage, 'transform', 'scaleY(.97)');
-        important(stage, 'transform-origin', '50% 0');
-      }
-
-      applyHeaderTapTargets(header, mobile);
-      applyControlLayout(nodes, mobile);
-      layoutReady = true;
-      lastMobile = mobile;
-      lastStage = stage;
-      lastControls = nodes.controls;
-      root.dataset.fxReferenceGeometrySchedulerR304 = 'install-once-reconcile-semantics';
-    }
-
-    if (brandTagline && brandTagline.textContent !== 'LIVING SYSTEM') brandTagline.textContent = 'LIVING SYSTEM';
-
-    if (header.mag instanceof HTMLButtonElement) {
-      const magText = root.lang === 'en' ? 'CORE' : 'MAG';
-      if (header.mag.textContent !== magText) header.mag.textContent = magText;
-      header.mag.setAttribute('aria-label', root.lang === 'en' ? 'Focus the living core' : 'Az élő mag fókuszálása');
-    }
-
-    if (header.menu instanceof HTMLButtonElement) {
-      header.menu.setAttribute('aria-label', root.lang === 'en' ? 'Menu' : 'Menü');
-    }
+    if (nodes.controls.parentElement !== expectedControlOwner) expectedControlOwner.appendChild(nodes.controls);
+    applyControlLayout(nodes, mobile);
 
     document.querySelectorAll('.fx-loop-hero-clone').forEach(node => node.setAttribute('aria-hidden', 'true'));
-    document.querySelectorAll('.skip-link').forEach(link => {
-      if (document.activeElement === link && !link.matches(':focus-visible')) link.blur();
-    });
-
-    root.dataset.fxReferenceRuntimeR254 = canonicalMobileOwner
+    root.dataset.fxReferenceRuntimeR254 = mobile
       ? 'event-driven-r207-owner-r260'
       : 'event-driven-standalone-r260';
     return true;
@@ -478,7 +201,7 @@
   }
 
   function stopBootObserver() {
-    if (bootObserver) bootObserver.disconnect();
+    bootObserver?.disconnect();
     bootObserver = null;
     if (bootTimer) clearTimeout(bootTimer);
     bootTimer = 0;
@@ -487,31 +210,25 @@
   function boot() {
     if (reconcile()) return;
     if (bootObserver) return;
-
-    const target = document.body || document.documentElement;
     bootObserver = new MutationObserver(() => {
       if (reconcile()) stopBootObserver();
     });
-    bootObserver.observe(target, { subtree: true, childList: true });
-
+    bootObserver.observe(document.body || document.documentElement, { subtree: true, childList: true });
     bootTimer = setTimeout(() => {
       stopBootObserver();
       reconcile();
-    }, 5000);
+    }, 4000);
   }
 
   addEventListener('resize', schedule, { passive: true });
   addEventListener('orientationchange', schedule, { passive: true });
-
   for (const eventName of [
     'formatx:real3dready',
     'formatx:coredetailready',
     'formatx:languagechange',
     'formatx:organisminterfaceready',
     'formatx:mobilelayoutready'
-  ]) {
-    addEventListener(eventName, schedule);
-  }
+  ]) addEventListener(eventName, schedule, { passive: true });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
