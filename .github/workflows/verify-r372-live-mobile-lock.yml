@@ -1,9 +1,10 @@
-name: Verify r373 live mobile visibility recovery
+name: Verify r374 live mobile MAG lighting
 
 on:
   push:
     branches: [master]
     paths:
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
       - '.github/workflows/verify-r372-live-mobile-lock.yml'
   workflow_dispatch:
@@ -13,55 +14,74 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r373-live:
+  verify-r374-live:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r373 recovery source contract
+      - name: Validate r374 mobile lighting source contract
         shell: bash
         run: |
           set -euo pipefail
           CSS='docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
-          grep -Fq 'FormatX r371 emergency recovery' "$CSS"
-          grep -Fq 'brightness(.82)' "$CSS"
-          grep -Fq 'contrast(.78)' "$CSS"
-          grep -Fq 'blur(.60px)' "$CSS"
-          grep -Fq 'brightness(.80)' "$CSS"
-          grep -Fq 'contrast(.76)' "$CSS"
-          grep -Fq 'blur(.70px)' "$CSS"
-          grep -Fq 'production-deploy-r373-emergency-visibility-recovery' "$CSS"
+          SHADER='docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+
+          node --check "$SHADER"
+
+          grep -Fq 'FormatX r374' "$CSS"
+          grep -Fq 'production-deploy-r374-feathered-mobile-lighting' "$CSS"
+          grep -Fq 'opacity: .040' "$CSS"
+          grep -Fq 'opacity: .028' "$CSS"
           ! grep -Fq 'html:root:root:root' "$CSS"
           ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$CSS"
 
-      - name: Verify production serves r373 visibility recovery
+          grep -Fq "fresnelPower: '2.0'" "$SHADER"
+          grep -Fq "innerHeartBase: '.15'" "$SHADER"
+          grep -Fq "innerHeartBreath: '.27'" "$SHADER"
+          grep -Fq "rimBase: '.10'" "$SHADER"
+          grep -Fq "rimAlpha: '.035'" "$SHADER"
+          grep -Fq "fresnelPower: '2.7'" "$SHADER"
+          grep -Fq "innerHeartBase: '.24'" "$SHADER"
+          grep -Fq "rimBase: '.16'" "$SHADER"
+          grep -Fq 'fxCoreMobileLightingR374' "$SHADER"
+          grep -Fq "desktop-r326-unchanged" "$SHADER"
+
+      - name: Verify production serves r374 feathered lighting
         shell: bash
         run: |
           set -euo pipefail
-          URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
-          TMP="$RUNNER_TEMP/r373-live.css"
+          CSS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+          JS_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+          CSS_TMP="$RUNNER_TEMP/r374-live.css"
+          JS_TMP="$RUNNER_TEMP/r374-live.js"
           ok=0
-          for attempt in $(seq 1 24); do
-            echo "r373 live verification $attempt/24"
-            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${URL}?r373_live=${GITHUB_RUN_ID}_${attempt}" -o "$TMP"; then
-              if grep -Fq 'FormatX r371 emergency recovery' "$TMP" \
-                && grep -Fq 'brightness(.82)' "$TMP" \
-                && grep -Fq 'contrast(.78)' "$TMP" \
-                && grep -Fq 'blur(.60px)' "$TMP" \
-                && grep -Fq 'production-deploy-r373-emergency-visibility-recovery' "$TMP" \
-                && ! grep -Fq 'html:root:root:root' "$TMP"; then
+
+          for attempt in $(seq 1 30); do
+            echo "r374 live verification $attempt/30"
+            suffix="r374_live=${GITHUB_RUN_ID}_${attempt}"
+            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP"; then
+              if grep -Fq 'FormatX r374' "$CSS_TMP" \
+                && grep -Fq 'production-deploy-r374-feathered-mobile-lighting' "$CSS_TMP" \
+                && grep -Fq "fresnelPower: '2.0'" "$JS_TMP" \
+                && grep -Fq "innerHeartBase: '.15'" "$JS_TMP" \
+                && grep -Fq "rimBase: '.10'" "$JS_TMP" \
+                && grep -Fq 'fxCoreMobileLightingR374' "$JS_TMP" \
+                && grep -Fq "desktop-r326-unchanged" "$JS_TMP" \
+                && ! grep -Fq 'html:root:root:root' "$CSS_TMP"; then
                 ok=1
                 break
               fi
             fi
             sleep 5
           done
-          test "$ok" = 1
-          echo 'PASS: production serves r373 visible mobile MAG optics without the r372 final-owner override.'
 
-      - name: Publish r373 live status
+          test "$ok" = 1
+          echo 'PASS: production serves r374 mobile-only feathered heart/Fresnel lighting while preserving the visible recovery geometry.'
+
+      - name: Publish r374 live status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -70,13 +90,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r373 visible mobile MAG recovery passed'
+            description='Live r374 feathered mobile MAG lighting passed'
           else
             state=failure
-            description='Live r373 mobile visibility recovery verification failed'
+            description='Live r374 mobile MAG lighting verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r373 live mobile recovery' \
+            -f context='FormatX r374 live mobile lighting' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
