@@ -1,6 +1,6 @@
-/* FormatX r374 — visible mobile MAG recovery with restrained lighting finish.
-   Preserve the proven r373 geometry/visibility recovery while reducing only the
-   decorative perimeter energy. WebGL heart + Fresnel lighting is tuned in r326.
+/* FormatX r407 — restrained mobile MAG luminance and feathered crystal edges.
+   Preserve the proven r373/r374 geometry and visibility recovery while reducing
+   the centre glare, hard Fresnel contour and decorative perimeter energy.
    Control geometry remains owned elsewhere. */
 
 @media (max-width: 900px), (pointer: coarse) {
@@ -9,23 +9,23 @@
     filter: none !important;
   }
 
-  /* Keep the recovered glass body visible. The selective centre/rim reduction
-     now happens inside the WebGL shader, so this finishing filter stays mild. */
+  /* r407: keep the glass body luminous, but lower the centre flare and soften
+     the shader edge after compositing. Geometry and WebGL interaction stay intact. */
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .90 !important;
+    opacity: .88 !important;
     filter:
-      brightness(.82)
-      contrast(.78)
-      saturate(.88)
-      blur(.60px)
-      drop-shadow(0 0 .16px rgba(132,242,255,.008)) !important;
+      brightness(.78)
+      contrast(.74)
+      saturate(.86)
+      blur(.82px)
+      drop-shadow(0 0 .10px rgba(132,242,255,.004)) !important;
     -webkit-filter:
-      brightness(.82)
-      contrast(.78)
-      saturate(.88)
-      blur(.60px)
-      drop-shadow(0 0 .16px rgba(132,242,255,.008)) !important;
+      brightness(.78)
+      contrast(.74)
+      saturate(.86)
+      blur(.82px)
+      drop-shadow(0 0 .10px rgba(132,242,255,.004)) !important;
   }
 
   /* Decorative edge light is atmosphere only; it must never redraw a second
@@ -39,7 +39,7 @@
     overflow: visible;
     pointer-events: none;
     mix-blend-mode: screen;
-    opacity: .040;
+    opacity: .024;
   }
 
   #hero .fx-core-biolume-r323 path {
@@ -50,49 +50,49 @@
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke: rgba(67,202,255,.020);
-    stroke-width: .40;
-    filter: blur(8.6px);
-    opacity: .005;
+    stroke: rgba(67,202,255,.014);
+    stroke-width: .34;
+    filter: blur(10.2px);
+    opacity: .003;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
     stroke: url(#fx-biolume-gradient-r323);
-    stroke-width: .10;
-    opacity: .012;
-    filter: blur(1.80px);
+    stroke-width: .08;
+    opacity: .007;
+    filter: blur(2.15px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .10;
+    stroke-width: .08;
     stroke-dasharray: 4.5 18 2 24;
-    animation: fx-biolume-travel-r323 17s linear infinite;
-    filter: drop-shadow(0 0 .035px currentColor) blur(1.32px);
+    animation: fx-biolume-travel-r323 19s linear infinite;
+    filter: drop-shadow(0 0 .02px currentColor) blur(1.62px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a {
     stroke: #75f7ff;
     color: #75f7ff;
-    opacity: .018;
+    opacity: .010;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b {
     stroke: #8a78ff;
     color: #8a78ff;
-    opacity: .013;
+    opacity: .007;
     stroke-dasharray: 2.5 22 5.5 20;
-    animation-duration: 21s;
+    animation-duration: 23s;
     animation-direction: reverse;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     stroke: #71ffd0;
     color: #71ffd0;
-    opacity: .008;
+    opacity: .004;
     stroke-dasharray: 1.5 30 3.5 26;
-    animation-duration: 25s;
+    animation-duration: 27s;
   }
 }
 
@@ -119,44 +119,46 @@
     box-sizing: border-box !important;
   }
 
+  /* Phone-size pass: one additional feathering step for the high-density canvas
+     where the previous centre flare and silhouette looked harshest. */
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .89 !important;
+    opacity: .87 !important;
     filter:
-      brightness(.80)
-      contrast(.76)
-      saturate(.87)
-      blur(.70px)
-      drop-shadow(0 0 .12px rgba(132,242,255,.006)) !important;
+      brightness(.77)
+      contrast(.72)
+      saturate(.85)
+      blur(.90px)
+      drop-shadow(0 0 .08px rgba(132,242,255,.003)) !important;
     -webkit-filter:
-      brightness(.80)
-      contrast(.76)
-      saturate(.87)
-      blur(.70px)
-      drop-shadow(0 0 .12px rgba(132,242,255,.006)) !important;
+      brightness(.77)
+      contrast(.72)
+      saturate(.85)
+      blur(.90px)
+      drop-shadow(0 0 .08px rgba(132,242,255,.003)) !important;
   }
 
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .028;
+    opacity: .018;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .36;
-    filter: blur(9.4px);
-    opacity: .004;
+    stroke-width: .30;
+    filter: blur(11px);
+    opacity: .0025;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .09;
-    opacity: .009;
-    filter: blur(1.94px);
+    stroke-width: .07;
+    opacity: .006;
+    filter: blur(2.28px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .09;
-    filter: drop-shadow(0 0 .025px currentColor) blur(1.42px);
+    stroke-width: .07;
+    filter: drop-shadow(0 0 .015px currentColor) blur(1.74px);
   }
 }
 
@@ -170,8 +172,9 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     animation: none !important;
-    opacity: .008;
+    opacity: .006;
   }
 }
 
 /* production-deploy-r374-feathered-mobile-lighting */
+/* production-deploy-r407-soft-mobile-crystal */
