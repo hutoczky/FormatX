@@ -1,4 +1,4 @@
-name: Verify r374 live mobile MAG lighting
+name: Verify r407 live mobile MAG lighting
 
 on:
   push:
@@ -14,14 +14,14 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r374-live:
+  verify-r407-live:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r374 mobile lighting source contract
+      - name: Validate r407 mobile lighting source contract
         shell: bash
         run: |
           set -euo pipefail
@@ -30,13 +30,21 @@ jobs:
 
           node --check "$SHADER"
 
-          grep -Fq 'FormatX r374' "$CSS"
-          grep -Fq 'production-deploy-r374-feathered-mobile-lighting' "$CSS"
-          grep -Fq 'opacity: .040' "$CSS"
-          grep -Fq 'opacity: .028' "$CSS"
+          grep -Fq 'FormatX r407' "$CSS"
+          grep -Fq 'production-deploy-r407-soft-mobile-crystal' "$CSS"
+          grep -Fq 'opacity: .024' "$CSS"
+          grep -Fq 'opacity: .018' "$CSS"
+          grep -Fq 'brightness(.78)' "$CSS"
+          grep -Fq 'contrast(.74)' "$CSS"
+          grep -Fq 'blur(.82px)' "$CSS"
+          grep -Fq 'brightness(.77)' "$CSS"
+          grep -Fq 'contrast(.72)' "$CSS"
+          grep -Fq 'blur(.90px)' "$CSS"
           ! grep -Fq 'html:root:root:root' "$CSS"
           ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$CSS"
 
+          # r407 deliberately changes only composite mobile presentation.
+          # The proven WebGL geometry/material contract remains the r374 shader.
           grep -Fq "fresnelPower: '2.0'" "$SHADER"
           grep -Fq "innerHeartBase: '.15'" "$SHADER"
           grep -Fq "innerHeartBreath: '.27'" "$SHADER"
@@ -48,23 +56,27 @@ jobs:
           grep -Fq 'fxCoreMobileLightingR374' "$SHADER"
           grep -Fq "desktop-r326-unchanged" "$SHADER"
 
-      - name: Verify production serves r374 feathered lighting
+      - name: Verify production serves r407 softened lighting
         shell: bash
         run: |
           set -euo pipefail
           CSS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
           JS_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js'
-          CSS_TMP="$RUNNER_TEMP/r374-live.css"
-          JS_TMP="$RUNNER_TEMP/r374-live.js"
+          CSS_TMP="$RUNNER_TEMP/r407-live.css"
+          JS_TMP="$RUNNER_TEMP/r407-live.js"
           ok=0
 
           for attempt in $(seq 1 30); do
-            echo "r374 live verification $attempt/30"
-            suffix="r374_live=${GITHUB_RUN_ID}_${attempt}"
+            echo "r407 live verification $attempt/30"
+            suffix="r407_live=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP"; then
-              if grep -Fq 'FormatX r374' "$CSS_TMP" \
-                && grep -Fq 'production-deploy-r374-feathered-mobile-lighting' "$CSS_TMP" \
+              if grep -Fq 'FormatX r407' "$CSS_TMP" \
+                && grep -Fq 'production-deploy-r407-soft-mobile-crystal' "$CSS_TMP" \
+                && grep -Fq 'opacity: .024' "$CSS_TMP" \
+                && grep -Fq 'opacity: .018' "$CSS_TMP" \
+                && grep -Fq 'brightness(.78)' "$CSS_TMP" \
+                && grep -Fq 'blur(.82px)' "$CSS_TMP" \
                 && grep -Fq "fresnelPower: '2.0'" "$JS_TMP" \
                 && grep -Fq "innerHeartBase: '.15'" "$JS_TMP" \
                 && grep -Fq "rimBase: '.10'" "$JS_TMP" \
@@ -79,9 +91,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r374 mobile-only feathered heart/Fresnel lighting while preserving the visible recovery geometry.'
+          echo 'PASS: production serves r407 softened mobile MAG compositing while preserving the proven WebGL geometry/material contract.'
 
-      - name: Publish r374 live status
+      - name: Publish r407 live status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -90,13 +102,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r374 feathered mobile MAG lighting passed'
+            description='Live r407 softened mobile MAG lighting passed'
           else
             state=failure
-            description='Live r374 mobile MAG lighting verification failed'
+            description='Live r407 mobile MAG lighting verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r374 live mobile lighting' \
+            -f context='FormatX r407 live mobile lighting' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
