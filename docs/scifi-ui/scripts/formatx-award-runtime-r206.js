@@ -4,7 +4,7 @@
   const root = document.documentElement;
   if (root.dataset.fxAwardRuntime === 'r334') return;
   root.dataset.fxAwardRuntime = 'r334';
-  root.dataset.fxFinalValidationR334 = 'mobile-optics-r405-cachebust';
+  root.dataset.fxFinalValidationR334 = 'mobile-optics-r409-cachebust';
 
   const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
 
@@ -42,7 +42,7 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260824-native-orb-r250';
-  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260827-r405-mobile-core-softening';
+  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260827-r409-softer-mobile-crystal';
   const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
@@ -121,8 +121,8 @@
     if (!matchMedia('(max-width: 900px)').matches) return;
     const existing = document.querySelector('link[data-fx-mobile-core-softening-r322]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r405-mobile-core-softening')) existing.href = CORE_SOFTEN_STYLE_URL;
-      root.dataset.fxMobileCoreOpticsR322 = 'r405-mobile-core-softening';
+      if (!existing.href.includes('r409-softer-mobile-crystal')) existing.href = CORE_SOFTEN_STYLE_URL;
+      root.dataset.fxMobileCoreOpticsR322 = 'r409-softer-mobile-crystal';
       return;
     }
     const link = document.createElement('link');
@@ -130,7 +130,7 @@
     link.href = CORE_SOFTEN_STYLE_URL;
     link.dataset.fxMobileCoreSofteningR322 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxMobileCoreOpticsR322 = 'r405-mobile-core-softening';
+    root.dataset.fxMobileCoreOpticsR322 = 'r409-softer-mobile-crystal';
   }
 
   function ensureOrganismCoreOwner() {
@@ -177,7 +177,6 @@
     document.head.appendChild(script);
     root.dataset.fxAwardCrystal = 'interactive-site-core-r318';
   }
-
   function ensureDialogueSurface() {
     if (!document.querySelector('link[data-fx-dialogue-open-r287]')) {
       const link = document.createElement('link');
