@@ -102,7 +102,7 @@ require("legacy mobile bridge hide remains scoped for compatibility", ".fx-loop-
 require("mobile proof layout is single-column", ".fx-award-proof__grid" in mobile_css and "grid-template-columns: 1fr !important" in mobile_css)
 
 require("intro remains fail-open", "runtime-error" in intro and "promise-error" in intro)
-require("intro stores returning state", "formatx:intro-seen-v1" in intro)
+require("intro keeps r411 static hero LCP ownership", "fxHeroLcpOwnerR411" in intro and "static-html-no-reparent" in intro)
 require("voice is off by default", "let speechEnabled = false" in voice)
 require("voice remains local", network_free(voice))
 require("voice stability guard exists", "function interfaceBlocked()" in voice_stability and "function stopSpeech()" in voice_stability)
