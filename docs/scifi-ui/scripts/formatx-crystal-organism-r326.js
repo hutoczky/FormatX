@@ -7,6 +7,29 @@
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lighting = mobile ? Object.freeze({
+    fresnelPower: '2.0',
+    innerHeartBase: '.15',
+    innerHeartBreath: '.27',
+    innerHeartAlpha: '.14',
+    innerAlphaMax: '.52',
+    rimBase: '.10',
+    rimEnergy: '.07',
+    rimAlpha: '.035',
+    outerHeartBase: '.040',
+    outerHeartEnergy: '.055'
+  }) : Object.freeze({
+    fresnelPower: '2.7',
+    innerHeartBase: '.24',
+    innerHeartBreath: '.42',
+    innerHeartAlpha: '.22',
+    innerAlphaMax: '.62',
+    rimBase: '.16',
+    rimEnergy: '.12',
+    rimAlpha: '.08',
+    outerHeartBase: '.055',
+    outerHeartEnergy: '.08'
+  });
 
   if (root.dataset.fxCrystalOrganismR326 === 'ready' || root.dataset.fxCrystalOrganismR326 === 'booting') return;
   root.dataset.fxCrystalOrganismR326 = 'booting';
@@ -192,7 +215,7 @@
         vec3 side=normalize(vec3(.72,-.18,.66));
         float ndl=max(dot(n,key),0.);
         float sideLight=max(dot(n,side),0.);
-        float fresnel=pow(1.0-sat(dot(n,view)),2.7);
+        float fresnel=pow(1.0-sat(dot(n,view)),${lighting.fresnelPower});
         float facetPulse=.5+.5*sin(vFacet*23.0+uTime*.42);
         float veinA=abs(sin(vLocal.y*17.0+vLocal.x*11.0+vFacet*7.0));
         float veinB=abs(sin(vLocal.y*9.0-vLocal.x*19.0-vFacet*13.0));
@@ -204,9 +227,9 @@
           vec3 alive=vec3(.14,.78,1.06);
           vec3 organ=mix(cold,alive,.45+.35*uEnergy);
           organ+=vec3(.22,.08,.48)*facetPulse*.24;
-          organ+=vec3(.74,1.08,1.28)*heart*(.24+.42*uBreath);
-          float alpha=.18+.22*heart+.11*uEnergy;
-          ${webgl2?'outColor':'gl_FragColor'}=vec4(max(organ,vec3(0.)),clamp(alpha,0.,.62));
+          organ+=vec3(.74,1.08,1.28)*heart*(${lighting.innerHeartBase}+${lighting.innerHeartBreath}*uBreath);
+          float alpha=.18+${lighting.innerHeartAlpha}*heart+.11*uEnergy;
+          ${webgl2?'outColor':'gl_FragColor'}=vec4(max(organ,vec3(0.)),clamp(alpha,0.,${lighting.innerAlphaMax}));
           return;
         }
 
@@ -214,10 +237,10 @@
         vec3 ice=vec3(.24,.66,.82);
         vec3 glass=mix(deep,ice,.20+.48*ndl+.17*facetPulse);
         glass+=vec3(.09,.43,.70)*sideLight*.22;
-        glass+=vec3(.18,.72,1.00)*fresnel*(.16+.12*uEnergy);
+        glass+=vec3(.18,.72,1.00)*fresnel*(${lighting.rimBase}+${lighting.rimEnergy}*uEnergy);
         glass+=vec3(.22,.62,.82)*veins*(.035+.060*uBreath);
-        glass+=vec3(.20,.54,.68)*heart*(.055+.08*uEnergy);
-        float alpha=.56+.17*ndl+.08*fresnel;
+        glass+=vec3(.20,.54,.68)*heart*(${lighting.outerHeartBase}+${lighting.outerHeartEnergy}*uEnergy);
+        float alpha=.56+.17*ndl+${lighting.rimAlpha}*fresnel;
         ${webgl2?'outColor':'gl_FragColor'}=vec4(max(glass,vec3(0.)),clamp(alpha,.48,.86));
       }
     `;
@@ -440,6 +463,7 @@
     root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';
     root.dataset.fxCoreCompositionRevisionR326='new-crystal-organism-no-legacy-fallback';
     root.dataset.fxCoreMobileVisualR326=mobile?'soft-translucent-organic-rim':'desktop-translucent-organic-rim';
+    root.dataset.fxCoreMobileLightingR374=mobile?'feathered-heart-fresnel-r374':'desktop-r326-unchanged';
     root.dataset.fxGpuCapability=webgl2?'webgl2':'webgl1';
     root.dataset.fxCoreReal3dTargetFps='interaction-60-heartbeat-burst-idle-zero';
     root.dataset.fxCoreRenderMs='0';
