@@ -1,4 +1,4 @@
-name: Verify r412 balanced mobile MAG finish
+name: Verify r375 balanced mobile MAG finish
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-award-runtime-r206.js'
       - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
       - '.github/workflows/verify-r372-live-mobile-lock.yml'
   workflow_dispatch:
 
@@ -15,91 +16,99 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r412-live:
+  verify-r375-live:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r412 balanced mobile finish source contract
+      - name: Validate r375 balanced mobile finish source contract
         shell: bash
         run: |
           set -euo pipefail
           CSS='docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+          OPTICS='docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
           SHADER='docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
           AWARD='docs/scifi-ui/scripts/formatx-award-runtime-r206.js'
 
           node --check "$SHADER"
           node --check "$AWARD"
 
-          grep -Fq 'FormatX r412' "$CSS"
-          grep -Fq 'balanced mobile MAG light and softer glass silhouette' "$CSS"
-          grep -Fq 'production-deploy-r412-balanced-mobile-glass' "$CSS"
-          grep -Fq 'opacity: .006' "$CSS"
-          grep -Fq 'opacity: .0035' "$CSS"
-          grep -Fq 'brightness(.70)' "$CSS"
-          grep -Fq 'contrast(.73)' "$CSS"
-          grep -Fq 'blur(.72px)' "$CSS"
+          grep -Fq 'FormatX r375' "$CSS"
+          grep -Fq 'balanced mobile MAG heart light and feathered glass silhouette' "$CSS"
+          grep -Fq 'production-deploy-r375-balanced-heart-feathering' "$CSS"
+          grep -Fq 'opacity: .82' "$CSS"
+          grep -Fq 'opacity: .80' "$CSS"
           grep -Fq 'brightness(.69)' "$CSS"
-          grep -Fq 'contrast(.71)' "$CSS"
-          grep -Fq 'blur(.82px)' "$CSS"
-          grep -Fq 'r412-balanced-soft-glass' "$AWARD"
-          grep -Fq 'mobile-optics-r412-balanced-soft-glass' "$AWARD"
-          grep -Fq 'fxMobileMagFinishR412' "$AWARD"
+          grep -Fq 'contrast(.63)' "$CSS"
+          grep -Fq 'blur(1.08px)' "$CSS"
+          grep -Fq 'brightness(.68)' "$CSS"
+          grep -Fq 'contrast(.60)' "$CSS"
+          grep -Fq 'blur(1.18px)' "$CSS"
+
+          grep -Fq 'FormatX r375' "$OPTICS"
+          grep -Fq 'opacity: .75' "$OPTICS"
+          grep -Fq 'opacity: .72' "$OPTICS"
+          grep -Fq 'contrast(.38)' "$OPTICS"
+          grep -Fq 'blur(1.75px)' "$OPTICS"
+          grep -Fq 'blur(1.85px)' "$OPTICS"
+
           ! grep -Fq 'html:root:root:root' "$CSS"
           ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$CSS"
 
-          # r412 changes only the mobile presentation finish. The event-driven
-          # current WebGL renderer and its proven mobile/desktop lighting contract
-          # remain authoritative while the approved v51 facet lineage is preserved.
-          grep -Fq "fresnelPower: '2.0'" "$SHADER"
-          grep -Fq "innerHeartBase: '.15'" "$SHADER"
-          grep -Fq "innerHeartBreath: '.27'" "$SHADER"
-          grep -Fq "rimBase: '.10'" "$SHADER"
-          grep -Fq "rimAlpha: '.035'" "$SHADER"
+          # r375 deliberately changes mobile-only WebGL light energy and alpha.
+          # Desktop r326 values remain locked to the established visual contract.
+          grep -Fq "fresnelPower: '1.8'" "$SHADER"
+          grep -Fq "innerHeartBase: '.105'" "$SHADER"
+          grep -Fq "innerHeartBreath: '.18'" "$SHADER"
+          grep -Fq "rimBase: '.058'" "$SHADER"
+          grep -Fq "rimAlpha: '.018'" "$SHADER"
+          grep -Fq "outerAlphaMin: '.39'" "$SHADER"
+          grep -Fq "outerAlphaMax: '.76'" "$SHADER"
+          grep -Fq "facetStrength: '.13'" "$SHADER"
+          grep -Fq "sideStrength: '.16'" "$SHADER"
           grep -Fq "fresnelPower: '2.7'" "$SHADER"
           grep -Fq "innerHeartBase: '.24'" "$SHADER"
           grep -Fq "rimBase: '.16'" "$SHADER"
-          grep -Fq 'fxCoreMobileLightingR374' "$SHADER"
+          grep -Fq "outerAlphaMin: '.48'" "$SHADER"
+          grep -Fq "outerAlphaMax: '.86'" "$SHADER"
+          grep -Fq 'fxCoreMobileLightingR375' "$SHADER"
+          grep -Fq 'balanced-heart-feathered-facets-r375' "$SHADER"
           grep -Fq "desktop-r326-unchanged" "$SHADER"
 
-      - name: Verify production serves r412 balanced mobile finish
+      - name: Verify production serves r375 balanced mobile finish
         shell: bash
         run: |
           set -euo pipefail
           CSS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+          OPTICS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
           JS_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js'
-          AWARD_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-award-runtime-r206.js'
-          CSS_TMP="$RUNNER_TEMP/r412-live.css"
-          JS_TMP="$RUNNER_TEMP/r412-live.js"
-          AWARD_TMP="$RUNNER_TEMP/r412-award-live.js"
+          CSS_TMP="$RUNNER_TEMP/r375-live.css"
+          OPTICS_TMP="$RUNNER_TEMP/r375-optics-live.css"
+          JS_TMP="$RUNNER_TEMP/r375-live.js"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "r412 live verification $attempt/45"
-            suffix="r412_live=${GITHUB_RUN_ID}_${attempt}"
+            echo "r375 live verification $attempt/45"
+            suffix="r375_live=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${AWARD_URL}?${suffix}" -o "$AWARD_TMP"; then
-              if grep -Fq 'FormatX r412' "$CSS_TMP" \
-                && grep -Fq 'balanced mobile MAG light and softer glass silhouette' "$CSS_TMP" \
-                && grep -Fq 'production-deploy-r412-balanced-mobile-glass' "$CSS_TMP" \
-                && grep -Fq 'opacity: .006' "$CSS_TMP" \
-                && grep -Fq 'opacity: .0035' "$CSS_TMP" \
-                && grep -Fq 'brightness(.70)' "$CSS_TMP" \
-                && grep -Fq 'contrast(.73)' "$CSS_TMP" \
-                && grep -Fq 'blur(.72px)' "$CSS_TMP" \
-                && grep -Fq 'brightness(.69)' "$CSS_TMP" \
-                && grep -Fq 'contrast(.71)' "$CSS_TMP" \
-                && grep -Fq 'blur(.82px)' "$CSS_TMP" \
-                && grep -Fq 'r412-balanced-soft-glass' "$AWARD_TMP" \
-                && grep -Fq 'mobile-optics-r412-balanced-soft-glass' "$AWARD_TMP" \
-                && grep -Fq 'fxMobileMagFinishR412' "$AWARD_TMP" \
-                && grep -Fq "fresnelPower: '2.0'" "$JS_TMP" \
-                && grep -Fq "innerHeartBase: '.15'" "$JS_TMP" \
-                && grep -Fq "rimBase: '.10'" "$JS_TMP" \
-                && grep -Fq 'fxCoreMobileLightingR374' "$JS_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${OPTICS_URL}?${suffix}" -o "$OPTICS_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP"; then
+              if grep -Fq 'FormatX r375' "$CSS_TMP" \
+                && grep -Fq 'production-deploy-r375-balanced-heart-feathering' "$CSS_TMP" \
+                && grep -Fq 'opacity: .82' "$CSS_TMP" \
+                && grep -Fq 'opacity: .80' "$CSS_TMP" \
+                && grep -Fq 'contrast(.63)' "$CSS_TMP" \
+                && grep -Fq 'blur(1.08px)' "$CSS_TMP" \
+                && grep -Fq 'blur(1.18px)' "$CSS_TMP" \
+                && grep -Fq 'FormatX r375' "$OPTICS_TMP" \
+                && grep -Fq 'blur(1.75px)' "$OPTICS_TMP" \
+                && grep -Fq "fresnelPower: '1.8'" "$JS_TMP" \
+                && grep -Fq "innerHeartBase: '.105'" "$JS_TMP" \
+                && grep -Fq "rimBase: '.058'" "$JS_TMP" \
+                && grep -Fq "outerAlphaMin: '.39'" "$JS_TMP" \
+                && grep -Fq 'fxCoreMobileLightingR375' "$JS_TMP" \
                 && grep -Fq "desktop-r326-unchanged" "$JS_TMP" \
                 && ! grep -Fq 'html:root:root:root' "$CSS_TMP"; then
                 ok=1
@@ -110,9 +119,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r412 balanced mobile MAG finish with softer contour and restrained light while preserving the current WebGL runtime.'
+          echo 'PASS: production serves r375 balanced mobile MAG finish with reduced centre energy and a feathered glass perimeter while desktop optics stay unchanged.'
 
-      - name: Publish r412 live status
+      - name: Publish r375 live status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -121,13 +130,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r412 balanced mobile MAG finish passed'
+            description='Live r375 balanced mobile MAG finish passed'
           else
             state=failure
-            description='Live r412 balanced mobile MAG verification failed'
+            description='Live r375 balanced mobile MAG verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r412 live mobile MAG finish' \
+            -f context='FormatX r375 live mobile MAG finish' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
