@@ -1,3 +1,4 @@
+# r373 diagnostic execution marker
 name: Diagnose local mobile CLS r373
 run-name: Trace current source mobile layout shifts and hero ownership
 
