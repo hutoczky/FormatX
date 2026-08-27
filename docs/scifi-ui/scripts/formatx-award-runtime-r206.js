@@ -4,7 +4,8 @@
   const root = document.documentElement;
   if (root.dataset.fxAwardRuntime === 'r334') return;
   root.dataset.fxAwardRuntime = 'r334';
-  root.dataset.fxFinalValidationR334 = 'mobile-optics-r409-cachebust';
+  root.dataset.fxFinalValidationR334 = 'mobile-optics-r410-v51-cachebust';
+  root.dataset.fxMobileMagLineageR410 = 'approved-v51-reference-crystal';
 
   const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
 
@@ -42,7 +43,7 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260824-native-orb-r250';
-  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260827-r409-softer-mobile-crystal';
+  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260827-r410-v51-approved-detail';
   const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
@@ -121,8 +122,8 @@
     if (!matchMedia('(max-width: 900px)').matches) return;
     const existing = document.querySelector('link[data-fx-mobile-core-softening-r322]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r409-softer-mobile-crystal')) existing.href = CORE_SOFTEN_STYLE_URL;
-      root.dataset.fxMobileCoreOpticsR322 = 'r409-softer-mobile-crystal';
+      if (!existing.href.includes('r410-v51-approved-detail')) existing.href = CORE_SOFTEN_STYLE_URL;
+      root.dataset.fxMobileCoreOpticsR322 = 'r410-v51-approved-detail';
       return;
     }
     const link = document.createElement('link');
@@ -130,7 +131,7 @@
     link.href = CORE_SOFTEN_STYLE_URL;
     link.dataset.fxMobileCoreSofteningR322 = 'true';
     document.head.appendChild(link);
-    root.dataset.fxMobileCoreOpticsR322 = 'r409-softer-mobile-crystal';
+    root.dataset.fxMobileCoreOpticsR322 = 'r410-v51-approved-detail';
   }
 
   function ensureOrganismCoreOwner() {
