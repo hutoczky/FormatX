@@ -1,0 +1,84 @@
+name: Verify r372 live mobile MAG lock
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+      - '.github/workflows/verify-r372-live-mobile-lock.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  verify-r372-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Validate r372 final-owner source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          CSS='docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+          grep -Fq 'FormatX r372' "$CSS"
+          grep -Fq 'html:root:root:root' "$CSS"
+          grep -Fq 'brightness(.92)' "$CSS"
+          grep -Fq 'contrast(.56)' "$CSS"
+          grep -Fq 'blur(1.18px)' "$CSS"
+          grep -Fq 'grid-template-columns: repeat(3, 52px)' "$CSS"
+          grep -Fq 'grid-template-columns: repeat(3, 50px)' "$CSS"
+          grep -Fq 'fx-crystal-cue-r318' "$CSS"
+          grep -Fq 'display: none !important' "$CSS"
+          grep -Fq 'production-deploy-r372' "$CSS"
+
+      - name: Verify production serves r372 mobile lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+          TMP="$RUNNER_TEMP/r372-live.css"
+          ok=0
+          for attempt in $(seq 1 24); do
+            echo "r372 live verification $attempt/24"
+            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${URL}?r372_live=${GITHUB_RUN_ID}_${attempt}" -o "$TMP"; then
+              if grep -Fq 'FormatX r372' "$TMP" \
+                && grep -Fq 'html:root:root:root' "$TMP" \
+                && grep -Fq 'brightness(.92)' "$TMP" \
+                && grep -Fq 'contrast(.56)' "$TMP" \
+                && grep -Fq 'blur(1.18px)' "$TMP" \
+                && grep -Fq 'grid-template-columns: repeat(3, 52px)' "$TMP" \
+                && grep -Fq 'grid-template-columns: repeat(3, 50px)' "$TMP" \
+                && grep -Fq 'production-deploy-r372' "$TMP"; then
+                ok=1
+                break
+              fi
+            fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo 'PASS: production serves r372 final mobile MAG optics and centred three-control lock.'
+
+      - name: Publish r372 live status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Live r372 soft MAG optics and centred three-control lock passed'
+          else
+            state=failure
+            description='Live r372 mobile MAG/control lock verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX r372 live mobile lock' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
