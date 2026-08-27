@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  /* FormatX r411 — first-paint-stable bootstrap.
-     The static HTML is the LCP owner. This runtime may create semantic controls
-     and reference proof nodes, but it never reparents the existing hero copy. */
+  /* FormatX r412 — first-paint-stable bootstrap.
+     The static HTML is the LCP owner. Mobile r358 already owns the complete
+     first-frame geometry, so legacy late first-paint styles must not repaint it. */
   const ROOT = document.documentElement;
   const EARLY_REFERENCE_MOBILE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   const REDUCE_QUERY = matchMedia('(prefers-reduced-motion: reduce)');
@@ -18,7 +18,7 @@
     : 'desktop-reference-r244';
   ROOT.dataset.fxLivingCopyGuard = 'ready';
   ROOT.dataset.fxLivingCopyGuardPolicyR293 = 'static-content-normalized-no-document-scan';
-  ROOT.dataset.fxHeroLcpOwnerR411 = 'static-html-no-reparent';
+  ROOT.dataset.fxHeroLcpOwnerR412 = 'static-html-r358-no-late-geometry-repaint';
 
   const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260823-r312-postdom-pulse';
   const MOBILE_REGRESSION_URL = './scripts/formatx-mobile-regression-r310.js?v=20260823-r312-postdom';
@@ -146,9 +146,20 @@
   }
 
   function stabilizeReferenceFirstPaint() {
-    ensureEarlyStyle('link[data-fx-first-paint-r206]', 'data-fx-first-paint-r206', FIRST_PAINT_STYLE_URL);
-    ensureEarlyStyle('link[data-fx-first-frame-geometry-r306]', 'data-fx-first-frame-geometry-r306', FIRST_FRAME_STYLE_URL);
-    ensureEarlyStyle('link[data-fx-first-paint-controls-r306]', 'data-fx-first-paint-controls-r306', FIRST_CONTROL_STYLE_URL);
+    /* r412: the render-blocking r358 stylesheet already contains the final
+       mobile hero/control geometry. Loading r206/r274/r306 after DOMContentLoaded
+       briefly changed hero-copy geometry before r207 restored it, producing a
+       second paint and a ~2.52 s text LCP. Keep those legacy first-paint layers
+       only on desktop, where the measured path already passes Lighthouse. */
+    if (!EARLY_REFERENCE_MOBILE) {
+      ensureEarlyStyle('link[data-fx-first-paint-r206]', 'data-fx-first-paint-r206', FIRST_PAINT_STYLE_URL);
+      ensureEarlyStyle('link[data-fx-first-frame-geometry-r306]', 'data-fx-first-frame-geometry-r306', FIRST_FRAME_STYLE_URL);
+      ensureEarlyStyle('link[data-fx-first-paint-controls-r306]', 'data-fx-first-paint-controls-r306', FIRST_CONTROL_STYLE_URL);
+      ROOT.dataset.fxLegacyFirstPaintLayersR412 = 'desktop-only';
+    } else {
+      ROOT.dataset.fxLegacyFirstPaintLayersR412 = 'mobile-skipped-static-r358-owner';
+    }
+
     if (EARLY_REFERENCE_MOBILE) {
       ensureEarlyStyle('link[data-fx-mobile-layout-r207]', 'data-fx-mobile-layout-r207', MOBILE_LAYOUT_STYLE_URL, '(max-width: 900px)');
     }
@@ -166,11 +177,9 @@
     ensureControlZone(hero, space, strings);
     ensureReferenceProof(hero, grid, strings);
 
-    /* r411: do not call space.after(...), controls.after(heroCopy) or any other
-       reparent operation on the LCP-visible hero copy. CSS order is authoritative. */
-    ROOT.dataset.fxHeroCopyPlacementR411 = 'static-dom-css-order';
+    ROOT.dataset.fxHeroCopyPlacementR412 = 'static-dom-css-order-no-mobile-repaint';
     ROOT.dataset.fxFirstPaintControlsR306 = EARLY_REFERENCE_MOBILE
-      ? 'mobile-final-geometry-prepaint-css'
+      ? 'mobile-r358-final-geometry'
       : 'desktop-final-geometry-prepaint-css';
     return true;
   }
@@ -247,7 +256,7 @@
       ROOT.dataset.fxMobileBootstrapR312 = includeMobileReal3d
         ? 'postdom-real3d-and-pulse'
         : 'postdom-pulse';
-      ROOT.dataset.fxPostDomScheduleR411 = 'two-raf-idle-timeout-650';
+      ROOT.dataset.fxPostDomScheduleR412 = 'two-raf-idle-timeout-650';
     });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
     else run();
