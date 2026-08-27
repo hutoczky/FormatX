@@ -1,10 +1,11 @@
-name: Verify r407 live mobile MAG lighting
+name: Verify r409 live mobile MAG lighting
 
 on:
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-award-runtime-r206.js'
       - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
       - '.github/workflows/verify-r372-live-mobile-lock.yml'
   workflow_dispatch:
@@ -14,37 +15,41 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r407-live:
+  verify-r409-live:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r407 mobile lighting source contract
+      - name: Validate r409 mobile lighting source contract
         shell: bash
         run: |
           set -euo pipefail
           CSS='docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
           SHADER='docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+          AWARD='docs/scifi-ui/scripts/formatx-award-runtime-r206.js'
 
           node --check "$SHADER"
+          node --check "$AWARD"
 
-          grep -Fq 'FormatX r407' "$CSS"
-          grep -Fq 'production-deploy-r407-soft-mobile-crystal' "$CSS"
-          grep -Fq 'opacity: .024' "$CSS"
+          grep -Fq 'FormatX r409' "$CSS"
+          grep -Fq 'production-deploy-r409-softer-mobile-crystal' "$CSS"
           grep -Fq 'opacity: .018' "$CSS"
-          grep -Fq 'brightness(.78)' "$CSS"
-          grep -Fq 'contrast(.74)' "$CSS"
-          grep -Fq 'blur(.82px)' "$CSS"
-          grep -Fq 'brightness(.77)' "$CSS"
-          grep -Fq 'contrast(.72)' "$CSS"
-          grep -Fq 'blur(.90px)' "$CSS"
+          grep -Fq 'opacity: .012' "$CSS"
+          grep -Fq 'brightness(.76)' "$CSS"
+          grep -Fq 'contrast(.71)' "$CSS"
+          grep -Fq 'blur(.98px)' "$CSS"
+          grep -Fq 'brightness(.75)' "$CSS"
+          grep -Fq 'contrast(.69)' "$CSS"
+          grep -Fq 'blur(1.06px)' "$CSS"
+          grep -Fq 'r409-softer-mobile-crystal' "$AWARD"
+          grep -Fq 'mobile-optics-r409-cachebust' "$AWARD"
           ! grep -Fq 'html:root:root:root' "$CSS"
           ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$CSS"
 
-          # r407 deliberately changes only composite mobile presentation.
-          # The proven WebGL geometry/material contract remains the r374 shader.
+          # r409 changes only composite mobile presentation. The proven WebGL
+          # geometry/material contract remains the r374 shader.
           grep -Fq "fresnelPower: '2.0'" "$SHADER"
           grep -Fq "innerHeartBase: '.15'" "$SHADER"
           grep -Fq "innerHeartBreath: '.27'" "$SHADER"
@@ -56,27 +61,36 @@ jobs:
           grep -Fq 'fxCoreMobileLightingR374' "$SHADER"
           grep -Fq "desktop-r326-unchanged" "$SHADER"
 
-      - name: Verify production serves r407 softened lighting
+      - name: Verify production serves r409 softened lighting
         shell: bash
         run: |
           set -euo pipefail
           CSS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
           JS_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js'
-          CSS_TMP="$RUNNER_TEMP/r407-live.css"
-          JS_TMP="$RUNNER_TEMP/r407-live.js"
+          AWARD_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-award-runtime-r206.js'
+          CSS_TMP="$RUNNER_TEMP/r409-live.css"
+          JS_TMP="$RUNNER_TEMP/r409-live.js"
+          AWARD_TMP="$RUNNER_TEMP/r409-award-live.js"
           ok=0
 
-          for attempt in $(seq 1 30); do
-            echo "r407 live verification $attempt/30"
-            suffix="r407_live=${GITHUB_RUN_ID}_${attempt}"
+          for attempt in $(seq 1 45); do
+            echo "r409 live verification $attempt/45"
+            suffix="r409_live=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP"; then
-              if grep -Fq 'FormatX r407' "$CSS_TMP" \
-                && grep -Fq 'production-deploy-r407-soft-mobile-crystal' "$CSS_TMP" \
-                && grep -Fq 'opacity: .024' "$CSS_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${AWARD_URL}?${suffix}" -o "$AWARD_TMP"; then
+              if grep -Fq 'FormatX r409' "$CSS_TMP" \
+                && grep -Fq 'production-deploy-r409-softer-mobile-crystal' "$CSS_TMP" \
                 && grep -Fq 'opacity: .018' "$CSS_TMP" \
-                && grep -Fq 'brightness(.78)' "$CSS_TMP" \
-                && grep -Fq 'blur(.82px)' "$CSS_TMP" \
+                && grep -Fq 'opacity: .012' "$CSS_TMP" \
+                && grep -Fq 'brightness(.76)' "$CSS_TMP" \
+                && grep -Fq 'contrast(.71)' "$CSS_TMP" \
+                && grep -Fq 'blur(.98px)' "$CSS_TMP" \
+                && grep -Fq 'brightness(.75)' "$CSS_TMP" \
+                && grep -Fq 'contrast(.69)' "$CSS_TMP" \
+                && grep -Fq 'blur(1.06px)' "$CSS_TMP" \
+                && grep -Fq 'r409-softer-mobile-crystal' "$AWARD_TMP" \
+                && grep -Fq 'mobile-optics-r409-cachebust' "$AWARD_TMP" \
                 && grep -Fq "fresnelPower: '2.0'" "$JS_TMP" \
                 && grep -Fq "innerHeartBase: '.15'" "$JS_TMP" \
                 && grep -Fq "rimBase: '.10'" "$JS_TMP" \
@@ -87,13 +101,13 @@ jobs:
                 break
               fi
             fi
-            sleep 5
+            sleep 6
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r407 softened mobile MAG compositing while preserving the proven WebGL geometry/material contract.'
+          echo 'PASS: production serves r409 softer mobile MAG compositing and the r409 cache-busted runtime while preserving proven WebGL geometry/material.'
 
-      - name: Publish r407 live status
+      - name: Publish r409 live status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -102,13 +116,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r407 softened mobile MAG lighting passed'
+            description='Live r409 softer mobile MAG lighting passed'
           else
             state=failure
-            description='Live r407 mobile MAG lighting verification failed'
+            description='Live r409 mobile MAG lighting verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r407 live mobile lighting' \
+            -f context='FormatX r409 live mobile lighting' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
