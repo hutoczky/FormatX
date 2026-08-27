@@ -1,0 +1,7 @@
+{
+  "revision": "r407",
+  "purpose": "final mobile and desktop browser, Lighthouse and production validation after static first-paint parity",
+  "visual_change": "softened mobile MAG centre light and feathered crystal edges",
+  "first_paint": "static-production-parity",
+  "thresholds_unchanged": true
+}
