@@ -1,3 +1,4 @@
+# Triggered after workflow registration on master.
 name: One-shot r406 static first-paint parity
 
 on:
