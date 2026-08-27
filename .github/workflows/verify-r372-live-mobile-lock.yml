@@ -1,4 +1,4 @@
-name: Verify r372 live mobile MAG lock
+name: Verify r373 live mobile visibility recovery
 
 on:
   push:
@@ -13,47 +13,45 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r372-live:
+  verify-r373-live:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r372 final-owner source contract
+      - name: Validate r373 recovery source contract
         shell: bash
         run: |
           set -euo pipefail
           CSS='docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
-          grep -Fq 'FormatX r372' "$CSS"
-          grep -Fq 'html:root:root:root' "$CSS"
-          grep -Fq 'brightness(.92)' "$CSS"
-          grep -Fq 'contrast(.56)' "$CSS"
-          grep -Fq 'blur(1.18px)' "$CSS"
-          grep -Fq 'grid-template-columns: repeat(3, 52px)' "$CSS"
-          grep -Fq 'grid-template-columns: repeat(3, 50px)' "$CSS"
-          grep -Fq 'fx-crystal-cue-r318' "$CSS"
-          grep -Fq 'display: none !important' "$CSS"
-          grep -Fq 'production-deploy-r372' "$CSS"
+          grep -Fq 'FormatX r371 emergency recovery' "$CSS"
+          grep -Fq 'brightness(.82)' "$CSS"
+          grep -Fq 'contrast(.78)' "$CSS"
+          grep -Fq 'blur(.60px)' "$CSS"
+          grep -Fq 'brightness(.80)' "$CSS"
+          grep -Fq 'contrast(.76)' "$CSS"
+          grep -Fq 'blur(.70px)' "$CSS"
+          grep -Fq 'production-deploy-r373-emergency-visibility-recovery' "$CSS"
+          ! grep -Fq 'html:root:root:root' "$CSS"
+          ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$CSS"
 
-      - name: Verify production serves r372 mobile lock
+      - name: Verify production serves r373 visibility recovery
         shell: bash
         run: |
           set -euo pipefail
           URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
-          TMP="$RUNNER_TEMP/r372-live.css"
+          TMP="$RUNNER_TEMP/r373-live.css"
           ok=0
           for attempt in $(seq 1 24); do
-            echo "r372 live verification $attempt/24"
-            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${URL}?r372_live=${GITHUB_RUN_ID}_${attempt}" -o "$TMP"; then
-              if grep -Fq 'FormatX r372' "$TMP" \
-                && grep -Fq 'html:root:root:root' "$TMP" \
-                && grep -Fq 'brightness(.92)' "$TMP" \
-                && grep -Fq 'contrast(.56)' "$TMP" \
-                && grep -Fq 'blur(1.18px)' "$TMP" \
-                && grep -Fq 'grid-template-columns: repeat(3, 52px)' "$TMP" \
-                && grep -Fq 'grid-template-columns: repeat(3, 50px)' "$TMP" \
-                && grep -Fq 'production-deploy-r372' "$TMP"; then
+            echo "r373 live verification $attempt/24"
+            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${URL}?r373_live=${GITHUB_RUN_ID}_${attempt}" -o "$TMP"; then
+              if grep -Fq 'FormatX r371 emergency recovery' "$TMP" \
+                && grep -Fq 'brightness(.82)' "$TMP" \
+                && grep -Fq 'contrast(.78)' "$TMP" \
+                && grep -Fq 'blur(.60px)' "$TMP" \
+                && grep -Fq 'production-deploy-r373-emergency-visibility-recovery' "$TMP" \
+                && ! grep -Fq 'html:root:root:root' "$TMP"; then
                 ok=1
                 break
               fi
@@ -61,9 +59,9 @@ jobs:
             sleep 5
           done
           test "$ok" = 1
-          echo 'PASS: production serves r372 final mobile MAG optics and centred three-control lock.'
+          echo 'PASS: production serves r373 visible mobile MAG optics without the r372 final-owner override.'
 
-      - name: Publish r372 live status
+      - name: Publish r373 live status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -72,13 +70,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r372 soft MAG optics and centred three-control lock passed'
+            description='Live r373 visible mobile MAG recovery passed'
           else
             state=failure
-            description='Live r372 mobile MAG/control lock verification failed'
+            description='Live r373 mobile visibility recovery verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r372 live mobile lock' \
+            -f context='FormatX r373 live mobile recovery' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
