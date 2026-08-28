@@ -93,8 +93,8 @@ function remember(detail,{sustain=true}={}){
 
   const cinematic=window.FormatXCoreCinematic;
   if(cinematic){
-    const z=Math.max(.006,Number(cinematic.energy||.3)*(ambient?.010:.018));
-    cinematic.corePosition=[lastDetail.x*(ambient?.032:.055),-lastDetail.y*(ambient?.028:.045),z];
+    const z=Math.max(.006,Number(cinematic.energy||.3)*(ambient ? .010 : .018));
+    cinematic.corePosition=[lastDetail.x*(ambient ? .032 : .055),-lastDetail.y*(ambient ? .028 : .045),z];
   }
 
   if(!api()&&!sustainTimer&&sustain)sustainTimer=setTimeout(pump,100);
