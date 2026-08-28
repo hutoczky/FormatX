@@ -1,9 +1,9 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='touch-pulse-r384-true3d';
-if(root.dataset.fxCoreTouchPulseR99==='ready-r384')return;
-root.dataset.fxCoreTouchPulseR99='booting-r384';
+const VERSION='touch-pulse-r417-ui-safe';
+if(root.dataset.fxCoreTouchPulseR99==='ready-r417')return;
+root.dataset.fxCoreTouchPulseR99='booting-r417';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let activePointer=null;
@@ -12,6 +12,18 @@ let lastTime=0;
 let vx=0,vy=0;
 let moveStamp=0;
 let inertiaRaf=0;
+
+const UI_SELECTOR=[
+  'button','a','input','select','textarea','summary','label','[role="button"]','[role="link"]','[contenteditable="true"]','[tabindex]',
+  '.fx-reference-controls-r204','.fx-reference-rail','.fx-three-sound','.fx-reference-ask','.fx-reference-pause',
+  '.fx-reference-mag-button','.fx-language-toggle','.fx-reference-menu-button','#menu-toggle','#main-nav',
+  '.fx-organism-dialogue','.fx-organism-thought','.fx-organism-console','.fx-plan-qr-link'
+].join(',');
+
+function isInteractiveTarget(target){
+  if(!(target instanceof Element))return false;
+  return Boolean(target.closest(UI_SELECTOR));
+}
 
 function stageAndRect(){
   const stage=document.querySelector('#hero .fx-core-mobile-v55-stage');
@@ -70,6 +82,10 @@ function startInertia(point){
 
 function onPointerDown(event){
   if(event.pointerType!=='touch'&&event.pointerType!=='pen')return;
+  if(isInteractiveTarget(event.target)){
+    root.dataset.fxCoreTouchUiGuardR417='interactive-target-bypassed';
+    return;
+  }
   const point=stagePoint(event.clientX,event.clientY);
   if(!point)return;
   stopInertia();
@@ -102,6 +118,8 @@ function onPointerMove(event){
 function finishPointer(event,phase){
   if(activePointer!==event.pointerId)return;
   const point=stagePoint(event.clientX,event.clientY,true)||lastPoint;
+  const {target}=stageAndRect();
+  try{target?.releasePointerCapture?.(event.pointerId);}catch(_){ }
   if(point)wake(point,phase,event.pointerType||'touch');
   activePointer=null;
   startInertia(point);
@@ -109,16 +127,24 @@ function finishPointer(event,phase){
 
 function installFallbackTouch(){
   addEventListener('touchstart',event=>{
+    if(isInteractiveTarget(event.target)){
+      root.dataset.fxCoreTouchUiGuardR417='interactive-target-bypassed';
+      return;
+    }
     const touch=event.touches?.[0]||event.changedTouches?.[0];
     const point=touch&&stagePoint(touch.clientX,touch.clientY);
     if(point){lastPoint=point;lastTime=performance.now();wake(point,'press','touch');}
   },{passive:true,capture:true});
   addEventListener('touchmove',event=>{
+    if(isInteractiveTarget(event.target))return;
     const touch=event.touches?.[0]||event.changedTouches?.[0];
     const point=touch&&stagePoint(touch.clientX,touch.clientY,true);
     if(point){lastPoint=point;wake(point,'drag','touch');}
   },{passive:true,capture:true});
-  addEventListener('touchend',()=>{if(lastPoint)wake(lastPoint,'release','touch');},{passive:true,capture:true});
+  addEventListener('touchend',event=>{
+    if(isInteractiveTarget(event.target))return;
+    if(lastPoint)wake(lastPoint,'release','touch');
+  },{passive:true,capture:true});
 }
 
 if('PointerEvent'in window){
@@ -131,6 +157,7 @@ if('PointerEvent'in window){
 }
 
 addEventListener('pagehide',stopInertia,{once:true});
-root.dataset.fxCoreTouchPulseR99='ready-r384';
-root.dataset.fxCoreTouchInteractionR384='drag-inertia-webgl';
+root.dataset.fxCoreTouchPulseR99='ready-r417';
+root.dataset.fxCoreTouchInteractionR384='drag-inertia-webgl-ui-guard-r417';
+root.dataset.fxCoreTouchUiGuardR417='ready';
 }());
