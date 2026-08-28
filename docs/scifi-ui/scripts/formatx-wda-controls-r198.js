@@ -243,17 +243,20 @@
     document.head.appendChild(script);
   }
 
+  // r418: do not replace/load the SOUND runtime between pointerdown and the
+  // browser's synthesized click. That DOM handoff used to cancel the physical
+  // tap on Android/Playwright. Arm the gesture here; load after click delivery.
   document.addEventListener('pointerdown', event => {
     const target = event.target instanceof Element ? event.target.closest(SELECTOR) : null;
     if (!target || root.dataset.fxAudioOwner === 'professional-v6') return;
-    requestProfessionalAudio();
+    root.dataset.fxWdaSoundTouchR418 = 'gesture-armed';
   }, { capture: true, passive: true });
 
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target.closest(SELECTOR) : null;
     if (!target || root.dataset.fxAudioOwner === 'professional-v6') return;
     event.preventDefault();
-    event.stopImmediatePropagation();
+    root.dataset.fxWdaSoundTouchR418 = 'click-received';
     requestProfessionalAudio();
     const button = ensureButton();
     button.dataset.fxAudioState = 'blocked';
