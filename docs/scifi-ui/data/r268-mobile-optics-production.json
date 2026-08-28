@@ -1,0 +1,7 @@
+{
+  "revision": "r268-mobile-optics",
+  "source_commit": "21d56a00faa6c74171eccb5c1f38553577714b33",
+  "purpose": "Deploy the validated softened mobile MAG optical profile to the FormatX custom domains.",
+  "cache_revision": "20260829-r268-softened-mobile-optics",
+  "status": "production-deploy-requested"
+}
