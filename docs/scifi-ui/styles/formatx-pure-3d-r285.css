@@ -1,4 +1,4 @@
-/* FormatX r383 — pure 3D MAG contract with restrained mobile glow and softened perimeter.
+/* FormatX r384 — pure, directly interactive 3D MAG contract.
    The MAG body is rendered only by the native WebGL mesh canvas. Legacy
    bitmap/canvas overlays, CSS pseudo optics, DOM rings, flares, caustics and
    decorative carrier layers are forbidden inside the MAG visual host. */
@@ -45,7 +45,8 @@ html:root:root body.living-architecture #hero .fx-core-r120-stage {
   mix-blend-mode: normal !important;
 }
 
-/* Only the WebGL surface is allowed to paint the MAG body. */
+/* The visible surface is the native WebGL surface itself: no CSS blur,
+   brightness, contrast or post-composited fake-glass treatment. */
 html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
 html:root:root body.living-architecture #hero .fx-core-r112-canvas,
 html:root:root body.living-architecture #hero .fx-core-r120-canvas {
@@ -56,6 +57,29 @@ html:root:root body.living-architecture #hero .fx-core-r120-canvas {
   filter: none !important;
   mix-blend-mode: normal !important;
   box-shadow: none !important;
+}
+
+/* Direct manipulation reaches the WebGL renderer. Vertical touch scrolling is
+   preserved; horizontal/diagonal movement can still rotate the 3D organism. */
+html:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
+html:root:root body.living-architecture #hero .hero-space > .fx-core-r112-stage,
+html:root:root body.living-architecture #hero .hero-space > .fx-core-r120-stage,
+html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
+html:root:root body.living-architecture #hero .fx-core-r112-canvas,
+html:root:root body.living-architecture #hero .fx-core-r120-canvas {
+  pointer-events: auto !important;
+  touch-action: pan-y !important;
+}
+
+@media (pointer:fine) {
+  html:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas {
+    cursor: grab !important;
+  }
+  html:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage:active,
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas:active {
+    cursor: grabbing !important;
+  }
 }
 
 /* Legacy 2D MAG material layers are never allowed to become visible again. */
@@ -79,26 +103,4 @@ html:root:root body.living-architecture #hero .fx-organism-map {
   background-image: none !important;
   box-shadow: none !important;
   filter: none !important;
-}
-
-/* r383 mobile optical restraint.
-   The live shader keeps its depth and facets, while the composited canvas gets
-   a softer perimeter and lower luminance so the cyan/violet light no longer
-   blooms into the surrounding black field. */
-@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
-  html:root:root body.living-architecture #hero .fx-core-r112-canvas,
-  html:root:root body.living-architecture #hero .fx-core-r120-canvas {
-    opacity: .94 !important;
-    filter: blur(.55px) saturate(.94) brightness(.92) contrast(.80) !important;
-  }
-}
-
-@media (max-width:430px) {
-  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
-  html:root:root body.living-architecture #hero .fx-core-r112-canvas,
-  html:root:root body.living-architecture #hero .fx-core-r120-canvas {
-    opacity: .92 !important;
-    filter: blur(.66px) saturate(.91) brightness(.90) contrast(.77) !important;
-  }
 }
