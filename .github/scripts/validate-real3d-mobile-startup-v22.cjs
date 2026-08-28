@@ -59,7 +59,13 @@ for(const token of [
   "fxCrystalRendererRequest='closed-volume-r267'",
   "renderer:'closed-volume-r267'"
 ])assert.ok(portal.includes(token),`missing r267 mobile portal ownership: ${token}`);
-for(const token of ['.fx-core-r267-volume-canvas','opacity: 1 !important','contrast(.93)','blur(.14px)','contrast(.92)','blur(.16px)'])assert.ok(volumeCss.includes(token),`missing r267 mobile optics contract: ${token}`);
+for(const token of [
+  '.fx-core-r267-volume-canvas',
+  'opacity: .985 !important','brightness(.94)','contrast(.87)','saturate(.96)','blur(.26px)',
+  'opacity: .98 !important','brightness(.92)','contrast(.85)','saturate(.95)','blur(.32px)',
+  'r268-mobile-optics-softened-bloom-and-rim'
+])assert.ok(volumeCss.includes(token),`missing restrained r268 mobile optics contract: ${token}`);
+assert.doesNotMatch(volumeCss,/blur\((?:[1-9]|[1-9][0-9])(?:\.\d+)?px\)/);
 
 for(const token of [
   'production-r418-attached-header-restrained-mag',
@@ -95,4 +101,4 @@ assert.match(loader,/ready-v20\|ready-v69/);
 assert.match(stability,/ready-v20\|ready-v69/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 for(const source of [bootstrap,wrapper,bootstrapRenderer,volumeRenderer,portal,layout,bridge,premium,loader,stability])new Function(source);
-console.log('PASS: mobile startup uses r267 closed-volume WebGL MAG, balanced optics, non-occluding r418 header, controls/text flow and r416 bidirectional site↔MAG semantics.');
+console.log('PASS: mobile startup uses r267 closed-volume WebGL MAG, restrained r268 optics, non-occluding r418 header, controls/text flow and r416 bidirectional site↔MAG semantics.');
