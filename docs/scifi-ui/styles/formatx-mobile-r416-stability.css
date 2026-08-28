@@ -1,17 +1,33 @@
-/* FormatX r416 — phone first-frame + MAG optical stability.
+/* FormatX r417 — phone MAG optical + physical-stage stability.
    The crystal is the visual heart of the website; the website is the larger MAG.
-   Keep the final geometry from the first paint, tame perimeter bloom without
-   smearing the silhouette, and keep mobile controls/links accessible. */
+   Final content geometry is render-blocked by r358; this late layer owns only
+   WebGL optics and exact stage containment after the renderer appears. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  /* r411 reserved an obsolete 110px gap for controls that now live inside the
-     MAG stage. The final runtime already uses zero gap, so match that geometry
-     before FCP to prevent the hero-copy jump that became the mobile LCP/CLS. */
-  html body.living-architecture #hero .hero-copy {
-    margin:0 auto 16px !important;
+  /* The native stage previously inherited a tiny -2/+2 overscan from older
+     visual generations. Keep the WebGL canvas free to render internally, but
+     make its physical owner exactly the hero-space width. */
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage {
+    position:absolute !important;
+    inset:0 !important;
+    top:0 !important;
+    right:0 !important;
+    bottom:0 !important;
+    left:0 !important;
+    box-sizing:border-box !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    height:100% !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:hidden !important;
+    transform:none !important;
+    translate:none !important;
   }
 
-  /* r416 optical pass: lower energy and edge contrast, but use much less blur
+  /* r417 optical pass: lower energy and edge contrast, but use much less blur
      than r415 so light does not spread into a large halo around the crystal. */
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
@@ -28,35 +44,45 @@
     opacity:0 !important;
   }
 
-  /* Lighthouse/accessibility contract: use opaque dark surfaces for text whose
-     earlier translucent ancestry could be sampled as white on mobile. */
+  /* Duplicate the critical accessibility ownership after the renderer loads so
+     legacy late styles cannot reintroduce low-contrast surfaces. */
   html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
     color:#e8fbff !important;
     background:#020b14 !important;
     border-radius:10px !important;
     padding:5px 8px !important;
   }
-
-  html body.living-architecture #pricing .price-card {
+  html body.living-architecture #pricing .payment,
+  html body.living-architecture #pricing .payment-console,
+  html body.living-architecture #pricing .price-card,
+  html body.living-architecture #resources .release-card,
+  html body.living-architecture footer.site-footer {
     color:#eefaff !important;
     background:#06131f !important;
   }
-  html body.living-architecture #pricing .price-card .button-line {
+  html body.living-architecture #pricing #preview-checkout-link.button-solid {
+    color:#041019 !important;
+    background:#c8f4ff !important;
+    border-color:#c8f4ff !important;
+  }
+  html body.living-architecture #resources #release-page-link.button-line {
     color:#f4fbff !important;
     background:#071521 !important;
     border-color:rgba(163,229,255,.44) !important;
   }
-  html body.living-architecture #pricing .price-card .button-solid {
-    color:#041019 !important;
-    background:#c8f4ff !important;
-    border-color:#c8f4ff !important;
+  html body.living-architecture footer.site-footer .brand strong,
+  html body.living-architecture footer.site-footer .brand small,
+  html body.living-architecture footer.site-footer nav a,
+  html body.living-architecture footer.site-footer .footer-bottom,
+  html body.living-architecture footer.site-footer .footer-bottom > a {
+    color:#f1faff !important;
+    background:#06131f !important;
   }
 
   html body.living-architecture .fx-plan-qr-link {
     min-width:44px !important;
     min-height:44px !important;
   }
-
   html body.living-architecture footer.site-footer nav {
     display:flex !important;
     flex-wrap:wrap !important;
@@ -76,7 +102,7 @@
     padding:8px 10px !important;
     margin:0 !important;
     line-height:1.25 !important;
-    text-decoration:none;
+    text-decoration:none !important;
   }
 }
 
@@ -89,4 +115,4 @@
   }
 }
 
-/* production-r416-site-is-mag-soft-optics-first-frame */
+/* production-r417-site-is-mag-soft-optics-exact-stage */
