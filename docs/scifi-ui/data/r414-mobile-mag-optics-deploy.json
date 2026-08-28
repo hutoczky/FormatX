@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "revision": "r414-soft-rim-low-facet-glow",
+  "renderer": "formatx-crystal-organism-r326",
+  "scope": "mobile",
+  "desktop_unchanged": true,
+  "visual_contract": {
+    "fresnel_power": 2.15,
+    "rim_alpha": 0.007,
+    "facet_strength": 0.075,
+    "side_strength": 0.09,
+    "outer_alpha_max": 0.62
+  },
+  "purpose": "Soften the mobile MAG rim, facet edges and outer glow while preserving WebGL depth and interaction."
+}
