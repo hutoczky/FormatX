@@ -74,15 +74,24 @@ for(const token of [
   "renderer:'closed-volume-r267'"
 ])assert.ok(crystalPortal.includes(token),`missing r267 portal ownership contract: ${token}`);
 
+/* The mobile optical finish is intentionally restrained: the true-volume
+   renderer stays fully authoritative, while phone-sized canvases get lower
+   brightness/contrast and a sub-pixel blur to soften bloom and the hard rim. */
 for(const token of [
   '.fx-core-r267-volume-stage',
   '.fx-core-r267-volume-canvas',
-  'opacity: 1 !important',
-  'contrast(.93)',
-  'blur(.14px)',
-  'contrast(.92)',
-  'blur(.16px)'
-])assert.ok(volumeCss.includes(token),`missing true-volume optical finish: ${token}`);
+  'opacity: .985 !important',
+  'brightness(.94)',
+  'contrast(.87)',
+  'saturate(.96)',
+  'blur(.26px)',
+  'opacity: .98 !important',
+  'brightness(.92)',
+  'contrast(.85)',
+  'saturate(.95)',
+  'blur(.32px)',
+  'r268-mobile-optics-softened-bloom-and-rim'
+])assert.ok(volumeCss.includes(token),`missing restrained true-volume optical finish: ${token}`);
 assert.doesNotMatch(volumeCss,/blur\((?:[1-9]|[1-9][0-9])(?:\.\d+)?px\)/);
 
 /* Older stability CSS may still contain sticky geometry, but the loaded-last
@@ -128,4 +137,4 @@ assert.equal(contract.quality_contract.mag_image_backed,false);
 assert.equal(contract.quality_contract.mag_webgl_context_count,1);
 assert.equal(contract.quality_contract.mag_paused_outside_hero,true);
 for(const source of [bootstrap,wrapper,legacyRenderer,volumeRenderer,crystalPortal,layout,bridge])new Function(source);
-console.log('PASS: r267 closed-volume WebGL MAG, softened optical finish, non-occluding r418 header and r416 bidirectional site↔MAG coupling are authoritative; 2D/image fallback is forbidden.');
+console.log('PASS: r267 closed-volume WebGL MAG, restrained r268 mobile optical finish, non-occluding r418 header and r416 bidirectional site↔MAG coupling are authoritative; 2D/image fallback is forbidden.');
