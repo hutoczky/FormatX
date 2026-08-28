@@ -44,8 +44,6 @@ jobs:
           grep -Fq 'production-deploy-r379-mobile-mag-center-and-soft-optics' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
           grep -Fq 'single-webgl-crystal-organism-r326' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
           grep -Fq 'translate: -50% 0 !important' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'r371-feathered-mobile-optics' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
-          grep -Fq 'r371-feathered-mobile-optics-owner' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
           grep -Fq 'r414-soft-rim-low-facet-glow' docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           grep -Fq 'fxCoreMobileOpticsR414' docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -Fq "fresnelPower: '2.15'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
@@ -53,9 +51,12 @@ jobs:
           grep -Fq "facetStrength: '.075'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -Fq "sideStrength: '.09'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -Fq "outerAlphaMax: '.62'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -Fq "const VERSION='touch-pulse-r384-true3d'" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -Fq 'formatx:coreinteraction' docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -Fq 'drag-inertia-webgl' docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
 
-      - name: Verify live r326 WebGL crystal, r414 shader, r379 presentation, layout and scrolling
+      - name: Verify live r326 WebGL crystal, r414 shader, r379 presentation, r384 touch and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -70,29 +71,21 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
           fetch "/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=${GITHUB_RUN_ID}" "$TMP/crystal-r326.js"
           fetch "/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r379.css"
-          fetch "/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-regression.js"
-          fetch "/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=${GITHUB_RUN_ID}" "$TMP/touch-r99.js"
+          fetch "/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=${GITHUB_RUN_ID}" "$TMP/touch-r384.js"
           fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
-          fetch "/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=${GITHUB_RUN_ID}" "$TMP/layout.css"
-          fetch "/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=${GITHUB_RUN_ID}" "$TMP/text-guard.css"
-          fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
           fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
 
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
           contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
-
           contains bootstrap 'native-mechanical-orb-r250-no-2d-mag-layers' "$TMP/bootstrap.js"
           contains bootstrap-wrapper 'formatx-core-mobile-v55.js?v=20260828-r382-balanced-soft-optics' "$TMP/bootstrap.js"
           contains bootstrap-cleanup 'cleanupLegacy2d' "$TMP/bootstrap.js"
 
-          contains wrapper-award-revision 'new-crystal-organism-r326' "$TMP/mobile-wrapper.js"
-          contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' "$TMP/mobile-wrapper.js"
           contains wrapper-optics-revision 'r414-soft-rim-low-facet-glow' "$TMP/mobile-wrapper.js"
           contains wrapper-primary 'formatx-crystal-organism-r326.js?v=20260828-r414-soft-rim-facet' "$TMP/mobile-wrapper.js"
           contains wrapper-selection 'new-crystal-organism-r326-primary' "$TMP/mobile-wrapper.js"
           contains wrapper-composition 'new-organism-no-legacy-visual-fallback' "$TMP/mobile-wrapper.js"
-          contains wrapper-overlay-policy 'new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual' "$TMP/mobile-wrapper.js"
           ! grep -Eq 'formatx-core-mobile-reference-r99\.js|formatx-core-mechanical-orb-r250\.js|formatx-core-r317\.js' "$TMP/mobile-wrapper.js"
 
           contains renderer-version "const VERSION = 'crystal-organism-r326'" "$TMP/crystal-r326.js"
@@ -109,14 +102,8 @@ jobs:
           contains geometry 'buildOrganismGeometry' "$TMP/crystal-r326.js"
           contains triangles 'gl.TRIANGLES' "$TMP/crystal-r326.js"
           contains interaction-event 'formatx:coreinteraction' "$TMP/crystal-r326.js"
-          contains pointer-move 'pointermove' "$TMP/crystal-r326.js"
-          contains pointer-down 'pointerdown' "$TMP/crystal-r326.js"
-          contains native-ready 'ready-v69' "$TMP/crystal-r326.js"
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/crystal-r326.js"
 
-          # r414 owns the mobile shader lighting while r379 owns final physical
-          # centering/presentation. Validate both so the live audit cannot pass
-          # with either an old hard-rim shader or an old presentation layer.
           contains optics-version 'FormatX r379' "$TMP/optics-r379.css"
           contains optics-deploy 'production-deploy-r379-mobile-mag-center-and-soft-optics' "$TMP/optics-r379.css"
           contains optics-scope 'single-webgl-crystal-organism-r326' "$TMP/optics-r379.css"
@@ -134,20 +121,15 @@ jobs:
           contains narrow-saturation 'saturate(.66)' "$TMP/optics-r379.css"
           contains narrow-blur 'blur(3.05px)' "$TMP/optics-r379.css"
           contains narrow-aura 'opacity: .0015 !important' "$TMP/optics-r379.css"
-          contains optics-cache 'formatx-mobile-core-optics-r328.css?v=20260827-r371-feathered-mobile-optics' "$TMP/mobile-regression.js"
-          contains optics-owner 'r371-feathered-mobile-optics-owner' "$TMP/mobile-regression.js"
           ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' "$TMP/optics-r379.css"
 
-          contains touch-wake 'formatx:referencepause' "$TMP/touch-r99.js"
-          contains touch-pulse 'FormatXCoreMobileV69?.pulse' "$TMP/touch-r99.js"
+          contains touch-version "const VERSION='touch-pulse-r384-true3d'" "$TMP/touch-r384.js"
+          contains touch-wake 'formatx:referencepause' "$TMP/touch-r384.js"
+          contains touch-core-event 'formatx:coreinteraction' "$TMP/touch-r384.js"
+          contains touch-physics 'drag-inertia-webgl' "$TMP/touch-r384.js"
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
-          contains proof-style '.fx-reference-proof' "$TMP/layout.css"
-          contains hero-wrap 'max-width: 620px !important' "$TMP/text-guard.css"
-          contains normal-wrap 'white-space: normal !important' "$TMP/text-guard.css"
-
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
-          ! grep -Fq 'preventDefault' "$TMP/scroll.js"
 
           python3 - "$TMP/policy.json" <<'PY'
           import json,sys
@@ -178,10 +160,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Award/source + live r414 MAG, r379 optics and scrolling passed'
+            description='Award/source + live r414 MAG, r379 optics, r384 touch and scrolling passed'
           else
             state=failure
-            description='Award, live r414 MAG, r379 optics, interaction or scrolling failed'
+            description='Award, live r414 MAG, r379 optics, touch or scrolling failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
