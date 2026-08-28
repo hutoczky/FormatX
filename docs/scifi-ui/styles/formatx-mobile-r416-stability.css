@@ -1,21 +1,22 @@
-/* FormatX r417 — mobile header + MAG optical repair.
-   Preserve r416 first-frame geometry, but keep the crystal visibly alive without
-   the former hard perimeter bloom. Also force one compact mobile header row. */
+/* FormatX r418 — attached mobile header + restrained MAG finish.
+   Keep the r326 crystal alive, but reduce perimeter glare and razor-edge contrast.
+   Header controls stay inside the branded topbar coordinate system. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html body.living-architecture #hero .hero-copy {
     margin:0 auto 16px !important;
   }
 
-  /* Balanced midpoint between the over-bright/sharp r413 finish and the
-     over-dark r416 pass. Keep facets readable, soften only the perimeter. */
+  /* Slightly calmer than r417: preserve facet depth while reducing the hard
+     cyan perimeter and central flare. This is intentionally well above the dark
+     r416 pass so the crystal does not look switched off. */
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.86 !important;
+    opacity:.82 !important;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
-    filter:brightness(.86) contrast(.62) saturate(.80) blur(.72px) !important;
-    -webkit-filter:brightness(.86) contrast(.62) saturate(.80) blur(.72px) !important;
+    filter:brightness(.80) contrast(.50) saturate(.74) blur(1.05px) !important;
+    -webkit-filter:brightness(.80) contrast(.50) saturate(.74) blur(1.05px) !important;
   }
 
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
@@ -24,8 +25,6 @@
     opacity:0 !important;
   }
 
-  /* Never let the accessibility skip link become part of the mobile layout.
-     It remains available to keyboard users only while focus-visible is active. */
   html body .skip-link {
     position:fixed !important;
     top:-160px !important;
@@ -35,6 +34,7 @@
     height:auto !important;
     margin:0 !important;
     transform:none !important;
+    translate:none !important;
     z-index:2147483600 !important;
   }
   html body .skip-link:not(:focus-visible),
@@ -45,25 +45,15 @@
     top:max(12px,env(safe-area-inset-top)) !important;
   }
 
-  /* One physical mobile header row. If a legacy empty .topbar survives,
-     collapse only its own box; fixed controls remain visible while the branded
-     topbar is the single 72px layout carrier. */
-  html body.living-architecture .topbar:not(:has(.brand)) {
-    display:contents !important;
-    min-height:0 !important;
-    height:0 !important;
-    margin:0 !important;
-    padding:0 !important;
-    border:0 !important;
-  }
-
-  html body.living-architecture .topbar:has(.brand) {
+  /* Match the render-blocking r418 header contract exactly. */
+  html body.living-architecture .topbar {
     position:sticky !important;
     top:0 !important;
     right:auto !important;
     bottom:auto !important;
     left:auto !important;
     display:block !important;
+    box-sizing:border-box !important;
     width:100% !important;
     min-width:0 !important;
     max-width:100% !important;
@@ -78,7 +68,7 @@
     z-index:12060 !important;
   }
 
-  html body.living-architecture .topbar:has(.brand) > .brand {
+  html body.living-architecture .topbar > .brand {
     position:absolute !important;
     top:10px !important;
     left:14px !important;
@@ -86,6 +76,7 @@
     bottom:auto !important;
     display:inline-flex !important;
     align-items:center !important;
+    gap:9px !important;
     width:auto !important;
     max-width:118px !important;
     height:52px !important;
@@ -95,10 +86,10 @@
     overflow:hidden !important;
   }
 
-  html body.living-architecture .fx-reference-mag-button,
-  html body.living-architecture .fx-language-toggle,
-  html body.living-architecture .fx-reference-menu-button {
-    position:fixed !important;
+  html body.living-architecture .topbar .fx-reference-mag-button,
+  html body.living-architecture .topbar .fx-language-toggle,
+  html body.living-architecture .topbar .fx-reference-menu-button {
+    position:absolute !important;
     bottom:auto !important;
     left:auto !important;
     margin:0 !important;
@@ -107,21 +98,19 @@
     z-index:12070 !important;
   }
 
-  html body.living-architecture .fx-reference-mag-button {
-    top:max(11px,env(safe-area-inset-top)) !important;
+  html body.living-architecture .topbar .fx-reference-mag-button {
+    top:11px !important;
     right:122px !important;
   }
-  html body.living-architecture .fx-language-toggle {
-    top:max(11px,env(safe-area-inset-top)) !important;
+  html body.living-architecture .topbar .fx-language-toggle {
+    top:11px !important;
     right:70px !important;
   }
-  html body.living-architecture .fx-reference-menu-button {
-    top:max(8px,env(safe-area-inset-top)) !important;
+  html body.living-architecture .topbar .fx-reference-menu-button {
+    top:8px !important;
     right:12px !important;
   }
 
-  /* Lighthouse/accessibility contract: opaque dark surfaces for text whose
-     older translucent ancestry could be sampled as white on mobile. */
   html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
     color:#e8fbff !important;
     background:#020b14 !important;
@@ -175,17 +164,17 @@
 @media (max-width:430px) {
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.84 !important;
-    filter:brightness(.83) contrast(.59) saturate(.78) blur(.80px) !important;
-    -webkit-filter:brightness(.83) contrast(.59) saturate(.78) blur(.80px) !important;
+    opacity:.80 !important;
+    filter:brightness(.77) contrast(.47) saturate(.72) blur(1.15px) !important;
+    -webkit-filter:brightness(.77) contrast(.47) saturate(.72) blur(1.15px) !important;
   }
 
-  html body.living-architecture .topbar:has(.brand) > .brand {
+  html body.living-architecture .topbar > .brand {
     max-width:112px !important;
   }
-  html body.living-architecture .topbar:has(.brand) > .brand small {
+  html body.living-architecture .topbar > .brand small {
     display:none !important;
   }
 }
 
-/* production-r417-mobile-header-and-balanced-mag-optics */
+/* production-r418-attached-header-restrained-mag */
