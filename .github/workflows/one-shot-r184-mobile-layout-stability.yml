@@ -1,4 +1,4 @@
-name: One-shot final pass bridge
+name: One-shot r382 final source pass
 
 on:
   push:
@@ -11,8 +11,142 @@ permissions:
   contents: write
 
 jobs:
-  verify-bridge:
+  migrate:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify bridge
-        run: echo r382-bridge-ready
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Apply balanced optics critical-path and validator pass
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          shader_path=Path('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js')
+          shader=shader_path.read_text(encoding='utf-8')
+          values={
+            "    innerHeartBase: '.072',":"    innerHeartBase: '.095',",
+            "    innerHeartBreath: '.105',":"    innerHeartBreath: '.14',",
+            "    innerHeartAlpha: '.055',":"    innerHeartAlpha: '.075',",
+            "    innerAlphaMax: '.34',":"    innerAlphaMax: '.40',",
+            "    rimBase: '.032',":"    rimBase: '.045',",
+            "    rimEnergy: '.018',":"    rimEnergy: '.025',",
+            "    rimAlpha: '.010',":"    rimAlpha: '.014',",
+            "    outerHeartBase: '.018',":"    outerHeartBase: '.022',",
+            "    outerHeartEnergy: '.016',":"    outerHeartEnergy: '.024',",
+            "    facetStrength: '.095',":"    facetStrength: '.115',",
+            "    sideStrength: '.105',":"    sideStrength: '.13',",
+            "    outerAlphaBase: '.42',":"    outerAlphaBase: '.46',",
+            "    outerAlphaKey: '.09',":"    outerAlphaKey: '.10',",
+            "    outerAlphaMin: '.35',":"    outerAlphaMin: '.39',",
+            "    outerAlphaMax: '.66'":"    outerAlphaMax: '.72'",
+          }
+          for old,new in values.items():
+            if shader.count(old)!=1:
+              raise SystemExit(f'Expected one shader token: {old!r}; found {shader.count(old)}')
+            shader=shader.replace(old,new,1)
+          if 'mobile?gl.ONE_MINUS_SRC_ALPHA:gl.ONE' not in shader:
+            raise SystemExit('mobile normal-alpha blend missing')
+          shader_path.write_text(shader,encoding='utf-8')
+
+          optics_path=Path('docs/scifi-ui/styles/formatx-pure-3d-r285.css')
+          optics=optics_path.read_text(encoding='utf-8')
+          for old,new in {
+            'opacity: .89 !important;\n    filter: blur(.42px) saturate(.82) brightness(.86) contrast(.80) !important;':'opacity: .97 !important;\n    filter: blur(.30px) saturate(1.03) brightness(.98) contrast(.88) !important;',
+            'opacity: .86 !important;\n    filter: blur(.55px) saturate(.78) brightness(.84) contrast(.76) !important;':'opacity: .95 !important;\n    filter: blur(.36px) saturate(.98) brightness(.95) contrast(.85) !important;'
+          }.items():
+            if old not in optics: raise SystemExit('expected r380 optics token missing')
+            optics=optics.replace(old,new,1)
+          optics=optics.replace('/* FormatX r380 — pure 3D MAG contract with softer mobile optics.','/* FormatX r382 — pure 3D MAG contract with balanced soft mobile optics.',1)
+          optics_path.write_text(optics,encoding='utf-8')
+
+          wrapper_path=Path('docs/scifi-ui/scripts/formatx-core-mobile-v55.js')
+          wrapper=wrapper_path.read_text(encoding='utf-8')
+          wrapper=wrapper.replace("root.dataset.fxCoreMobileOpticsRevision = 'r381-soft-light-no-additive-center';","root.dataset.fxCoreMobileOpticsRevision = 'r382-balanced-soft-crystal';")
+          wrapper=wrapper.replace('formatx-crystal-organism-r326.js?v=20260828-r381b-mobile-soft-optics','formatx-crystal-organism-r326.js?v=20260828-r382-balanced-soft-optics')
+          if 'r382-balanced-soft-crystal' not in wrapper or 'r382-balanced-soft-optics' not in wrapper:
+            raise SystemExit('mobile wrapper r382 update failed')
+          wrapper_path.write_text(wrapper,encoding='utf-8')
+
+          bootstrap_path=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          bootstrap=bootstrap_path.read_text(encoding='utf-8')
+          bootstrap=bootstrap.replace('formatx-core-mobile-v55.js?v=20260828-r381-mobile-soft-optics','formatx-core-mobile-v55.js?v=20260828-r382-balanced-soft-optics')
+          bootstrap=bootstrap.replace('formatx-pure-3d-r285.css?v=20260828-r380-mobile-soft-optics','formatx-pure-3d-r285.css?v=20260828-r382-balanced-soft-optics')
+          if bootstrap.count('r382-balanced-soft-optics') < 2:
+            raise SystemExit('bootstrap r382 cache-bust update failed')
+          bootstrap_path.write_text(bootstrap,encoding='utf-8')
+
+          index_path=Path('docs/scifi-ui/index.html')
+          index=index_path.read_text(encoding='utf-8')
+          def replace_link(text,marker,mutate):
+            m=re.search(r'<link\s+[^>]*'+re.escape(marker)+r'[^>]*>',text,re.I)
+            if not m: raise SystemExit('missing link '+marker)
+            return text[:m.start()]+mutate(m.group(0))+text[m.end():]
+          def set_attr(tag,name,value):
+            tag=re.sub(r'\s+'+re.escape(name)+r'="[^"]*"','',tag)
+            return tag[:-1]+f' {name}="{value}">'
+          def critical(tag):
+            tag=set_attr(tag,'data-fx-deferred-media-r300','(prefers-reduced-motion: no-preference)')
+            return set_attr(tag,'media','(prefers-reduced-motion: no-preference) and (min-width: 901px)')
+          def reference(tag):
+            tag=set_attr(tag,'data-fx-deferred-media-r300','all')
+            return set_attr(tag,'media','(min-width: 901px)')
+          def mobile_orb(tag):
+            tag=set_attr(tag,'data-fx-deferred-media-r300','(max-width: 900px)')
+            return set_attr(tag,'media','not all')
+          index=replace_link(index,'data-fx-critical-core-r227="true"',critical)
+          index=replace_link(index,'data-fx-reference-production-r244="true"',reference)
+          index=replace_link(index,'data-fx-native-orb-reference-r250="true"',mobile_orb)
+          index_path.write_text(index,encoding='utf-8')
+
+          old='20260825-r326-new-organism'
+          new='20260828-r382-balanced-soft-optics'
+          for filename in [
+            '.github/scripts/validate-real3d-core-v20.cjs',
+            '.github/scripts/validate-real3d-core-v21-release.cjs',
+            '.github/scripts/validate-reference-core-v26.cjs',
+            '.github/scripts/validate-real3d-mobile-startup-v22.cjs',
+          ]:
+            path=Path(filename); data=path.read_text(encoding='utf-8')
+            if old not in data: raise SystemExit('stale revision missing in '+filename)
+            path.write_text(data.replace(old,new),encoding='utf-8')
+
+          live_path=Path('.github/workflows/verify-live-award-readiness.yml')
+          live=live_path.read_text(encoding='utf-8')
+          live=live.replace('formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r251-performance','formatx-core-mobile-v55.js?v=20260828-r382-balanced-soft-optics')
+          live=live.replace('formatx-crystal-organism-r326.js?v=20260825-r326-new-organism','formatx-crystal-organism-r326.js?v=20260828-r382-balanced-soft-optics')
+          anchor="contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' \"$TMP/mobile-wrapper.js\""
+          marker="contains wrapper-optics-revision 'r382-balanced-soft-crystal' \"$TMP/mobile-wrapper.js\""
+          if marker not in live:
+            if anchor not in live: raise SystemExit('live validator anchor missing')
+            live=live.replace(anchor,anchor+'\n          '+marker,1)
+          live_path.write_text(live,encoding='utf-8')
+
+          Path('.github/workflows/one-shot-r184-mobile-layout-stability.yml').unlink(missing_ok=True)
+          Path('.github/workflows/one-shot-r309-css-runtime-order.yml').unlink(missing_ok=True)
+          PY
+
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node .github/scripts/validate-real3d-core-v20.cjs
+          node .github/scripts/validate-real3d-core-v21-release.cjs
+          node .github/scripts/validate-reference-core-v26.cjs
+          node .github/scripts/validate-real3d-mobile-startup-v22.cjs
+          git diff --check
+
+      - name: Commit source pass
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Balance mobile MAG optics and unblock first paint'
+          git push origin HEAD:master
