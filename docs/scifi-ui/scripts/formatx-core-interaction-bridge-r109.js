@@ -1,10 +1,11 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='interaction-bridge-r384-site-is-core';
-const SITE_CORE='/scifi-ui/scripts/formatx-site-core-webgl-r384.js?v=20260828-r384-site-is-core';
-if(root.dataset.fxCoreInteractionBridgeR109==='ready-r384-site')return;
-root.dataset.fxCoreInteractionBridgeR109='booting-r384-site';
+const VERSION='interaction-bridge-r385-site-is-core';
+const SITE_CORE='/scifi-ui/scripts/formatx-site-core-webgl-r384.js?v=20260828-r385-site-is-core-deferred';
+const mobile=matchMedia('(max-width:900px),(pointer:coarse)').matches;
+if(root.dataset.fxCoreInteractionBridgeR109==='ready-r385-site')return;
+root.dataset.fxCoreInteractionBridgeR109='booting-r385-site';
 root.dataset.fxMagDefinitionR384='site-is-mag-crystal-is-visual-heart';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -14,17 +15,43 @@ let lastDetail=null;
 let scrollRaf=0;
 let lastScrollY=scrollY;
 let lastScrollPulse=0;
+let siteCoreTimer=0;
+let siteCoreRequested=false;
 
-function ensureSiteCore(){
+function ensureSiteCore(source='scheduled'){
+  if(siteCoreRequested)return;
   if(root.dataset.fxSiteCoreWebglR384==='ready'||root.dataset.fxSiteCoreWebglR384==='booting')return;
   if(document.querySelector('script[data-fx-site-core-webgl-r384],script[src*="formatx-site-core-webgl-r384.js"]'))return;
+  siteCoreRequested=true;
+  if(siteCoreTimer){clearTimeout(siteCoreTimer);siteCoreTimer=0;}
+  root.dataset.fxSiteCoreStartupR385=source;
   const script=document.createElement('script');
   script.src=SITE_CORE;
   script.async=true;
   script.dataset.fxSiteCoreWebglR384='true';
   script.addEventListener('load',()=>{root.dataset.fxSiteCoreLoadR384='ready';},{once:true});
-  script.addEventListener('error',()=>{root.dataset.fxSiteCoreLoadR384='failed';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxSiteCoreLoadR384='failed';siteCoreRequested=false;},{once:true});
   document.head.appendChild(script);
+}
+
+function scheduleSiteCore(){
+  if(siteCoreRequested||siteCoreTimer)return;
+  root.dataset.fxSiteCoreStartupR385='content-first-deferred';
+  const arm=()=>{
+    if(siteCoreRequested||siteCoreTimer)return;
+    const delay=mobile?3200:1300;
+    siteCoreTimer=setTimeout(()=>ensureSiteCore('post-lcp-delay'),delay);
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arm,{once:true});
+  else arm();
+
+  const fromGesture=event=>{
+    if(!event.isTrusted||siteCoreRequested)return;
+    ensureSiteCore('trusted-user-gesture');
+  };
+  addEventListener('pointerdown',fromGesture,{capture:true,passive:true,once:true});
+  addEventListener('touchstart',fromGesture,{capture:true,passive:true,once:true});
+  addEventListener('keydown',fromGesture,{capture:true,once:true});
 }
 
 function api(){return window.FormatXCoreMobileV69;}
@@ -79,8 +106,6 @@ function onScrollFrame(){
   if(Math.abs(delta)<2||now-lastScrollPulse<38)return;
   lastScrollPulse=now;
 
-  /* SITE = MAG: scrolling always feeds the whole-site WebGL environment. The
-     centre crystal receives the same impulse only while its hero is visible. */
   window.FormatXSiteCoreR384?.requestRender?.(6);
   root.dataset.fxCorePageCouplingR384='whole-site-scroll-webgl-active';
   if(!core||typeof core.pulse!=='function'||rect.bottom<0||rect.top>vh)return;
@@ -100,20 +125,20 @@ function onScroll(){
 function onReady(){
   const host=hero();
   const stage=api()?.stage||host?.querySelector('.fx-core-mobile-v55-stage');
-  if(stage instanceof HTMLElement)stage.dataset.fxTrue3dInteractive='r384';
+  if(stage instanceof HTMLElement)stage.dataset.fxTrue3dInteractive='r385';
   root.dataset.fxCoreTrue3dInteractionR384='ready';
   root.dataset.fxSiteIsCoreR384='true';
   if(lastDetail){try{api()?.pulse?.(lastDetail);}catch(_){ }}
 }
 
-ensureSiteCore();
+scheduleSiteCore();
 addEventListener('formatx:coreinteraction',onCoreInteraction,{capture:true,passive:true});
 addEventListener('formatx:real3dready',onReady,{passive:true});
 addEventListener('formatx:sitecoreready',()=>{root.dataset.fxSiteCoreCouplingR384='ready';},{passive:true});
 addEventListener('scroll',onScroll,{passive:true});
-addEventListener('pageshow',()=>{lastScrollY=scrollY;ensureSiteCore();onReady();},{passive:true});
+addEventListener('pageshow',()=>{lastScrollY=scrollY;scheduleSiteCore();onReady();},{passive:true});
 
-root.dataset.fxCoreInteractionBridgeR109='ready-r384-site';
+root.dataset.fxCoreInteractionBridgeR109='ready-r385-site';
 root.dataset.fxCoreInteractionPhysicsR384='pointer-touch-scroll-webgl';
 root.dataset.fxSiteCoreSemanticsR384='site-equals-mag';
 }());
