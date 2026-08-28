@@ -1,4 +1,4 @@
-/* FormatX r380 — pure 3D MAG contract with softer mobile optics.
+/* FormatX r382 — pure 3D MAG contract with balanced soft mobile optics.
    The MAG body is rendered only by the native WebGL mesh canvas. Legacy
    bitmap/canvas overlays, CSS pseudo optics, DOM rings, flares, caustics and
    decorative carrier layers are forbidden inside the MAG visual host. */
@@ -89,8 +89,8 @@ html:root:root body.living-architecture #hero .fx-organism-map {
   html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
   html:root:root body.living-architecture #hero .fx-core-r112-canvas,
   html:root:root body.living-architecture #hero .fx-core-r120-canvas {
-    opacity: .89 !important;
-    filter: blur(.42px) saturate(.82) brightness(.86) contrast(.80) !important;
+    opacity: .97 !important;
+    filter: blur(.30px) saturate(1.03) brightness(.98) contrast(.88) !important;
   }
 }
 
@@ -98,7 +98,7 @@ html:root:root body.living-architecture #hero .fx-organism-map {
   html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
   html:root:root body.living-architecture #hero .fx-core-r112-canvas,
   html:root:root body.living-architecture #hero .fx-core-r120-canvas {
-    opacity: .86 !important;
-    filter: blur(.55px) saturate(.78) brightness(.84) contrast(.76) !important;
+    opacity: .95 !important;
+    filter: blur(.36px) saturate(.98) brightness(.95) contrast(.85) !important;
   }
 }

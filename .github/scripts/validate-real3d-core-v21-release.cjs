@@ -11,7 +11,7 @@ const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
-assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260825-r326-new-organism/);
+assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r382-balanced-soft-optics/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.match(wrapper,/new-organism-no-legacy-visual-fallback/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);

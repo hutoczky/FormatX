@@ -17,7 +17,7 @@ const entry=read('billing-worker/src/production-entry.js');
 
 assert.match(selector,/const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/);
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
-assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260825-r326-new-organism/);
+assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r382-balanced-soft-optics/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 for(const token of [

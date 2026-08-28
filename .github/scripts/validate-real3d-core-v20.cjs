@@ -16,7 +16,7 @@ const contract=JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json
 
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
 assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
-assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260825-r326-new-organism/);
+assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r382-balanced-soft-optics/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.match(wrapper,/no-legacy-visual-fallback/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
