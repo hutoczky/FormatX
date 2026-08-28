@@ -1,8 +1,113 @@
-/* FormatX r411 — render-blocking mobile first-paint lock.
-   The first frame now matches the authoritative r369 flow exactly enough that
-   later semantic/runtime owners never move the LCP-visible hero copy.
-   Physical order: MAG -> in-stage controls -> hero copy -> heading -> proof. */
+/* FormatX r418 — render-blocking mobile first-paint lock.
+   The first frame owns the phone header, skip-link hiding and hero geometry so
+   late runtimes cannot create a detached MAG button or a second header row.
+   Physical order: header -> MAG -> in-stage controls -> hero copy -> proof. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  /* Accessibility stays intact, but the skip link must never consume normal
+     touch-layout space. It appears only for a real focus-visible keyboard path. */
+  html body .skip-link {
+    position:fixed!important;
+    top:-160px!important;
+    left:max(12px,env(safe-area-inset-left))!important;
+    right:auto!important;
+    width:auto!important;
+    height:auto!important;
+    margin:0!important;
+    transform:none!important;
+    translate:none!important;
+    z-index:2147483600!important;
+  }
+  html body .skip-link:not(:focus-visible),
+  html body .skip-link:focus:not(:focus-visible) {
+    top:-160px!important;
+  }
+  html body .skip-link:focus-visible {
+    top:max(12px,env(safe-area-inset-top))!important;
+  }
+
+  /* One deterministic mobile header from the very first paint. Controls are
+     absolute children of this carrier, never viewport-fixed detached siblings. */
+  html body.living-architecture .topbar {
+    position:sticky!important;
+    top:0!important;
+    right:auto!important;
+    bottom:auto!important;
+    left:auto!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    min-height:72px!important;
+    height:72px!important;
+    max-height:72px!important;
+    margin:0!important;
+    padding:0!important;
+    border-bottom:1px solid rgba(116,206,242,.18)!important;
+    overflow:visible!important;
+    background:linear-gradient(180deg,rgba(2,14,24,.985),rgba(2,11,20,.965))!important;
+    box-shadow:0 10px 34px rgba(0,0,0,.26)!important;
+    transform:none!important;
+    translate:none!important;
+    z-index:12060!important;
+  }
+  html body.living-architecture .topbar>.brand {
+    position:absolute!important;
+    top:10px!important;
+    left:14px!important;
+    right:auto!important;
+    bottom:auto!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    gap:9px!important;
+    box-sizing:border-box!important;
+    width:auto!important;
+    max-width:118px!important;
+    height:52px!important;
+    margin:0!important;
+    overflow:hidden!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html body.living-architecture .topbar>.brand img {
+    width:38px!important;
+    min-width:38px!important;
+    max-width:38px!important;
+    height:38px!important;
+    min-height:38px!important;
+    max-height:38px!important;
+    flex:0 0 38px!important;
+  }
+  html body.living-architecture .topbar>.brand small {
+    display:none!important;
+  }
+  html body.living-architecture .topbar .fx-reference-mag-button,
+  html body.living-architecture .topbar .fx-language-toggle,
+  html body.living-architecture .topbar .fx-reference-menu-button {
+    position:absolute!important;
+    bottom:auto!important;
+    left:auto!important;
+    margin:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+    z-index:12070!important;
+  }
+  html body.living-architecture .topbar .fx-reference-mag-button {
+    top:11px!important;
+    right:122px!important;
+  }
+  html body.living-architecture .topbar .fx-language-toggle {
+    top:11px!important;
+    right:70px!important;
+  }
+  html body.living-architecture .topbar .fx-reference-menu-button {
+    top:8px!important;
+    right:12px!important;
+  }
+
   html body.living-architecture #hero .fx-immersive-launch,
   html body.living-architecture #hero .fx-organism-map,
   html body.living-architecture #hero .hero-ring,
@@ -75,7 +180,7 @@
     height:auto!important;
     min-height:0!important;
     max-height:none!important;
-    margin:110px auto 16px!important;
+    margin:0 auto 16px!important;
     padding:clamp(24px,6vw,34px) clamp(20px,5.5vw,30px) clamp(26px,6.5vw,38px)!important;
     border:1px solid rgba(118,221,255,.17)!important;
     border-radius:24px!important;
@@ -179,8 +284,6 @@
     margin:20px 0 0!important;
   }
 
-  /* The canonical controls ultimately live inside .hero-space. The fallback
-     selector below also keeps a legacy direct-child mount visually identical. */
   html body.living-architecture #hero .fx-reference-controls-r204 {
     position:absolute!important;
     inset:auto auto clamp(22px,3.2svh,34px) 50%!important;
@@ -252,4 +355,9 @@
   html body.living-architecture #hero .hero-copy {
     width:calc(100% - 24px)!important;
   }
+  html body.living-architecture .topbar>.brand {
+    max-width:112px!important;
+  }
 }
+
+/* production-r418-mobile-first-paint-header-lock */
