@@ -28,8 +28,16 @@ assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\
 assert.doesNotMatch(renderer,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 for(const token of ['.fx-core-detail-r122','.fx-core-live-r147-layer','content: none !important'])assert.ok(pureCss.includes(token),`pure WebGL guard missing: ${token}`);
 assert.doesNotMatch(mobileCss,/radial-gradient|conic-gradient|repeating-linear-gradient/i);
-for(const token of ['mobile-gyro-parallax-r267-idle-safe','sensor-burst-no-idle-raf'])assert.ok(gyro.includes(token),`gyro regression: ${token}`);
+for(const token of [
+  'mobile-gyro-parallax-r379-explicit-touch-center-lock',
+  'dormant-until-core-touch-no-raf',
+  'sensor-burst-no-idle-raf',
+  'requestPermissionFromGesture',
+  'event.isTrusted',
+  'event-driven-bounded-no-idle-raf'
+])assert.ok(gyro.includes(token),`gyro regression: ${token}`);
+assert.doesNotMatch(gyro,/permissionState='not-required';\s*enableSensor\(\)/, 'gyro must not auto-enable before an explicit trusted crystal touch');
 assert.match(layout,/mobileViewport=.*max-width:900px/);
 assert.ok(index.includes('formatx-core-real3d-v20.js'));
 for(const source of [bootstrap,wrapper,renderer,gyro,layout])new Function(source);
-console.log('PASS: r326 living crystal organism is the sole native WebGL MAG renderer; legacy r317/r250 loading is forbidden.');
+console.log('PASS: r326 living crystal organism is the sole native WebGL MAG renderer; r379 gyro stays dormant until trusted crystal interaction and uses bounded no-idle rendering.');
