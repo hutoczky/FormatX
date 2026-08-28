@@ -20,8 +20,8 @@ const entry=read('billing-worker/src/production-entry.js');
 assert.match(selector,/const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/);
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
 assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r416-site-coupled-soft-optics/);
-assert.match(wrapper,/formatx-mobile-r416-stability\.css\?v=20260828-r416-site-is-mag-soft-optics-first-frame/);
-assert.match(wrapper,/r416-site-is-mag-soft-optics-first-frame/);
+assert.match(wrapper,/formatx-mobile-r416-stability\.css\?v=20260828-r417-balanced-soft-mag-header-repair/);
+assert.match(wrapper,/r417-balanced-soft-mag-header-repair/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 for(const token of [
@@ -36,7 +36,16 @@ assert.match(renderer,/sideStrength:\s*'\.09'/);
 assert.match(renderer,/outerAlphaMax:\s*'\.62'/);
 assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 assert.doesNotMatch(renderer,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
-for(const token of ['production-r416-site-is-mag-soft-optics-first-frame','margin:0 auto 16px !important','brightness(.58) contrast(.30) saturate(.60) blur(1.35px)'])assert.ok(stabilityCss.includes(token),`missing r416 reference presentation contract: ${token}`);
+for(const token of [
+  'production-r417-mobile-header-and-balanced-mag-optics',
+  'margin:0 auto 16px !important',
+  'opacity:.86 !important',
+  'brightness(.86) contrast(.62) saturate(.80) blur(.72px)',
+  '.topbar:not(:has(.brand))',
+  '.topbar:has(.brand)',
+  'top:-160px !important'
+])assert.ok(stabilityCss.includes(token),`missing r417 reference presentation contract: ${token}`);
+assert.doesNotMatch(stabilityCss,/brightness\(\.5[0-9]\) contrast\(\.2[0-9]\)/);
 for(const token of ['interaction-bridge-r416-site-is-mag','site-is-mag-crystal-is-visual-heart','site-equals-mag-bidirectional','fxMagSiteBidirectionalR416'])assert.ok(bridge.includes(token),`missing r416 site↔MAG authority: ${token}`);
 for(const token of ['r298-state-only-no-layout-writes','compatibility-dormant-r298','delegated-r208','fxFlowFirstScheduling','fxFlowFirstConflict','canonicalOwner'])assert.ok(flow.includes(token),`missing current r298 flow-first contract: ${token}`);
 assert.doesNotMatch(flow,/award-reference-overlay-r139|desktop-native-content-r139|createElement\s*\(|appendChild\s*\(|insertBefore\s*\(|innerHTML|style\.setProperty|\.style\./);
@@ -48,4 +57,4 @@ assert.match(webgl,/canvas\.getContext\('webgl2'/);
 assert.match(webgl,/gl\.drawElements\(gl\.TRIANGLES/);
 assert.match(entry,/formatx-reference-core-v26\.js/);
 for(const source of [selector,bootstrap,wrapper,renderer,bridge,flow,layout])new Function(source);
-console.log('PASS: r326 WebGL crystal with r416 stable presentation and bidirectional site↔MAG coupling is the production reference authority; legacy MAG renderers are not allowed.');
+console.log('PASS: r326 WebGL crystal with r417 balanced mobile presentation/header repair and r416 bidirectional site↔MAG coupling is the production reference authority; legacy MAG renderers are not allowed.');
