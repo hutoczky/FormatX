@@ -8,28 +8,27 @@
   root.dataset.fxCoreRendererMode = 'mobile';
   root.dataset.fxCoreMobileAwardRevision = 'new-crystal-organism-r326';
   root.dataset.fxCoreCrystalRevision = 'r326-four-direction-living-facet-organism';
-  root.dataset.fxCoreMobileOpticsRevision = 'r415-controlled-mobile-mag-bloom';
+  root.dataset.fxCoreMobileOpticsRevision = 'r416-site-is-mag-soft-optics-first-frame';
 
-  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260828-r414-soft-rim-facet';
+  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260828-r416-site-coupled-soft-optics';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
-  const OPTICS_TUNE_STYLE = '/scifi-ui/styles/formatx-mobile-core-optics-r415.css?v=20260828-r415-controlled-mobile-mag-bloom';
-  // r408: the text/content layer wins the critical rendering path. On phones the
-  // WebGL crystal starts after the 2.5s LCP budget rather than competing with the
-  // first readable card. Any trusted gesture still starts it immediately.
+  const OPTICS_TUNE_STYLE = '/scifi-ui/styles/formatx-mobile-r416-stability.css?v=20260828-r416-site-is-mag-soft-optics-first-frame';
+  // Content wins the critical path. The physical hero slot and r416 CSS are
+  // stable immediately; WebGL may arrive after LCP without moving the page.
   const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 3000 : 1100;
   let rendererRequested = false;
   let rendererTimer = 0;
 
   function loadOpticsTune() {
-    if (document.querySelector('link[data-fx-mobile-core-optics-r415]')) return;
+    if (document.querySelector('link[data-fx-mobile-r416-stability]')) return;
     const link=document.createElement('link');
     link.rel='stylesheet';
     link.href=OPTICS_TUNE_STYLE;
-    link.dataset.fxMobileCoreOpticsR415='true';
+    link.dataset.fxMobileR416Stability='true';
     document.head.appendChild(link);
-    root.dataset.fxCoreMobileOpticsR415='requested';
-    link.addEventListener('load',()=>{root.dataset.fxCoreMobileOpticsR415='ready';},{once:true});
-    link.addEventListener('error',()=>{root.dataset.fxCoreMobileOpticsR415='load-failed';},{once:true});
+    root.dataset.fxCoreMobileOpticsR416='requested';
+    link.addEventListener('load',()=>{root.dataset.fxCoreMobileOpticsR416='ready';},{once:true});
+    link.addEventListener('error',()=>{root.dataset.fxCoreMobileOpticsR416='load-failed';},{once:true});
   }
 
   function loadStableControls() {
@@ -102,10 +101,10 @@
 
   function schedulePrimaryRenderer() {
     if (rendererRequested || rendererTimer) return;
-    root.dataset.fxCoreRendererStartupR346='critical-content-first-r408';
+    root.dataset.fxCoreRendererStartupR346='critical-content-first-r416';
     const schedule = () => {
       if (rendererRequested || rendererTimer) return;
-      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-content-lcp-r408'), START_DELAY);
+      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-content-lcp-r416'), START_DELAY);
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
     else schedule();
