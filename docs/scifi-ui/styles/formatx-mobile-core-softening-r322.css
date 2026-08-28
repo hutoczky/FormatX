@@ -1,6 +1,6 @@
-/* FormatX r379 — restrained mobile MAG light, feathered glass silhouette and
-   deterministic phone carrier centering. The active r326 WebGL geometry stays
-   intact; this late finish layer may not sharpen or displace it. */
+/* FormatX r413 — balanced mobile MAG finish + deterministic mobile header.
+   Keep the r326 WebGL geometry intact. This late layer only softens the glass
+   enough to avoid razor edges without crushing luminance or hiding facets. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
@@ -10,20 +10,22 @@
 
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .70 !important;
+    opacity: .96 !important;
     image-rendering: auto !important;
     filter:
-      brightness(.70)
-      contrast(.28)
-      saturate(.72)
-      blur(2.50px) !important;
+      brightness(.97)
+      contrast(.80)
+      saturate(.92)
+      blur(.40px) !important;
     -webkit-filter:
-      brightness(.70)
-      contrast(.28)
-      saturate(.72)
-      blur(2.50px) !important;
+      brightness(.97)
+      contrast(.80)
+      saturate(.92)
+      blur(.40px) !important;
   }
 
+  /* Keep the ambient energy soft. The WebGL crystal supplies the actual
+     luminance; these traces must never create a second hard silhouette. */
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
     position: absolute;
     inset: 0;
@@ -33,7 +35,7 @@
     overflow: visible;
     pointer-events: none;
     mix-blend-mode: screen;
-    opacity: .0008;
+    opacity: .10;
   }
 
   #hero .fx-core-biolume-r323 path {
@@ -44,17 +46,17 @@
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke: rgba(67,202,255,.003);
+    stroke: rgba(67,202,255,.15);
     stroke-width: .050;
-    filter: blur(19px);
-    opacity: .00014;
+    filter: blur(13px);
+    opacity: .16;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
     stroke: url(#fx-biolume-gradient-r323);
     stroke-width: .017;
-    opacity: .0007;
-    filter: blur(8.8px);
+    opacity: .10;
+    filter: blur(5.5px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
@@ -63,13 +65,78 @@
     stroke-width: .023;
     stroke-dasharray: 4.5 18 2 24;
     animation: fx-biolume-travel-r323 31s linear infinite;
-    filter: blur(8px);
-    opacity: .0016;
+    filter: blur(5px);
+    opacity: .12;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a { stroke: #75f7ff; color: #75f7ff; }
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b { stroke: #8a78ff; color: #8a78ff; animation-direction: reverse; }
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c { stroke: #71ffd0; color: #71ffd0; animation-duration: 35s; }
+
+  /* The skip link must not consume mobile layout space. It remains fully
+     accessible and appears only for an actual keyboard focus-visible state. */
+  html body .skip-link {
+    position: fixed !important;
+    top: -120px !important;
+    left: max(12px, env(safe-area-inset-left)) !important;
+    right: auto !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    z-index: 2147483600 !important;
+    transform: none !important;
+  }
+
+  html body .skip-link:focus:not(:focus-visible) {
+    top: -120px !important;
+  }
+
+  html body .skip-link:focus-visible {
+    top: max(12px, env(safe-area-inset-top)) !important;
+  }
+
+  /* One header coordinate system on phones. Older owners may still declare
+     viewport-fixed buttons; converting them back to absolute children prevents
+     MAG/HU/menu from detaching when the topbar participates in document flow. */
+  html body.living-architecture .topbar {
+    position: sticky !important;
+    top: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    min-height: 72px !important;
+    height: 72px !important;
+    margin: 0 !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 12060 !important;
+    overflow: visible !important;
+  }
+
+  html body.living-architecture .topbar .fx-reference-mag-button,
+  html body.living-architecture .topbar .fx-language-toggle,
+  html body.living-architecture .topbar .fx-reference-menu-button {
+    position: absolute !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture .topbar .fx-reference-mag-button {
+    top: 11px !important;
+    right: 122px !important;
+  }
+
+  html body.living-architecture .topbar .fx-language-toggle {
+    top: 11px !important;
+    right: 72px !important;
+  }
+
+  html body.living-architecture .topbar .fx-reference-menu-button {
+    top: 8px !important;
+    right: 14px !important;
+  }
 }
 
 @media (max-width: 430px) {
@@ -94,23 +161,23 @@
     max-width: 100% !important;
     height: 100% !important;
     box-sizing: border-box !important;
-    opacity: .68 !important;
+    opacity: .95 !important;
     filter:
-      brightness(.64)
-      contrast(.22)
-      saturate(.66)
-      blur(3.05px) !important;
+      brightness(.95)
+      contrast(.77)
+      saturate(.90)
+      blur(.46px) !important;
     -webkit-filter:
-      brightness(.64)
-      contrast(.22)
-      saturate(.66)
-      blur(3.05px) !important;
+      brightness(.95)
+      contrast(.77)
+      saturate(.90)
+      blur(.46px) !important;
   }
 
-  #hero .fx-core-r317-stage > .fx-core-biolume-r323 { opacity: .00055; }
-  #hero .fx-core-biolume-r323 .fx-biolume-halo { stroke-width: .045; filter: blur(21px); opacity: .00010; }
-  #hero .fx-core-biolume-r323 .fx-biolume-base { stroke-width: .015; opacity: .0005; filter: blur(10px); }
-  #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a,.fx-biolume-runner-b,.fx-biolume-runner-c) { stroke-width: .020; filter: blur(9px); opacity: .0011; }
+  #hero .fx-core-r317-stage > .fx-core-biolume-r323 { opacity: .085; }
+  #hero .fx-core-biolume-r323 .fx-biolume-halo { filter: blur(14px); opacity: .13; }
+  #hero .fx-core-biolume-r323 .fx-biolume-base { opacity: .085; filter: blur(6px); }
+  #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a,.fx-biolume-runner-b,.fx-biolume-runner-c) { filter: blur(5.5px); opacity: .10; }
 }
 
 @keyframes fx-biolume-travel-r323 {
@@ -119,12 +186,19 @@
 }
 
 @media (prefers-reduced-motion: reduce) and (max-width: 900px) {
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
+  html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
+    opacity: .95 !important;
+    filter: brightness(.95) contrast(.77) saturate(.90) blur(.46px) !important;
+    -webkit-filter: brightness(.95) contrast(.77) saturate(.90) blur(.46px) !important;
+  }
+
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     animation: none !important;
-    opacity: .0008;
+    opacity: .08;
   }
 }
 
-/* production-deploy-r379-centered-soft-mobile-mag */
+/* production-deploy-r413-balanced-soft-mobile-mag-header-lock */
