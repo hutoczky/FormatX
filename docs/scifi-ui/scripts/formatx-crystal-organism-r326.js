@@ -9,21 +9,21 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lighting = mobile ? Object.freeze({
     fresnelPower: '1.8',
-    innerHeartBase: '.105',
-    innerHeartBreath: '.18',
-    innerHeartAlpha: '.09',
-    innerAlphaMax: '.46',
-    rimBase: '.058',
-    rimEnergy: '.038',
-    rimAlpha: '.018',
-    outerHeartBase: '.026',
-    outerHeartEnergy: '.034',
-    facetStrength: '.13',
-    sideStrength: '.16',
-    outerAlphaBase: '.46',
-    outerAlphaKey: '.13',
-    outerAlphaMin: '.39',
-    outerAlphaMax: '.76'
+    innerHeartBase: '.072',
+    innerHeartBreath: '.105',
+    innerHeartAlpha: '.055',
+    innerAlphaMax: '.34',
+    rimBase: '.032',
+    rimEnergy: '.018',
+    rimAlpha: '.010',
+    outerHeartBase: '.018',
+    outerHeartEnergy: '.016',
+    facetStrength: '.095',
+    sideStrength: '.105',
+    outerAlphaBase: '.42',
+    outerAlphaKey: '.09',
+    outerAlphaMin: '.35',
+    outerAlphaMax: '.66'
   }) : Object.freeze({
     fresnelPower: '2.7',
     innerHeartBase: '.24',
@@ -375,7 +375,7 @@
       gl.uniform1f(uniforms.uAspect,width/Math.max(1,height));
 
       gl.depthMask(false);
-      gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+      gl.blendFunc(gl.SRC_ALPHA,mobile?gl.ONE_MINUS_SRC_ALPHA:gl.ONE);
       gl.uniform1f(uniforms.uLayer,1);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       gl.depthMask(true);
