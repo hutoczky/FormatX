@@ -11,6 +11,8 @@ const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const textGuard=read('docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css');
 const stabilityCss=read('docs/scifi-ui/styles/formatx-mobile-r416-stability.css');
+const finalHeaderCss=read('docs/scifi-ui/styles/formatx-mobile-header-final-r418.css');
+const firstPaintCss=read('docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css');
 const bridge=read('docs/scifi-ui/scripts/formatx-core-interaction-bridge-r109.js');
 const premium=read('docs/scifi-ui/scripts/formatx-premium-finish.js');
 const loader=read('docs/scifi-ui/scripts/igloo-parity.js');
@@ -19,8 +21,10 @@ const home=read('docs/scifi-ui/index.html');
 
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
 assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r416-site-coupled-soft-optics/);
-assert.match(wrapper,/formatx-mobile-r416-stability\.css/);
-assert.match(wrapper,/r417-balanced-soft-mag-header-repair/);
+assert.match(wrapper,/formatx-mobile-r416-stability\.css\?v=20260828-r418-restrained-soft-mag-attached-header/);
+assert.match(wrapper,/formatx-mobile-header-final-r418\.css\?v=20260828-r418-final-owner/);
+assert.match(wrapper,/r418-restrained-soft-mag-attached-header/);
+assert.match(wrapper,/fxMobileHeaderFinalR418/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 for(const token of [
@@ -37,15 +41,30 @@ assert.match(renderer,/sideStrength:\s*'\.09'/);
 assert.match(renderer,/outerAlphaMax:\s*'\.62'/);
 assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 for(const token of [
-  'production-r417-mobile-header-and-balanced-mag-optics',
+  'production-r418-attached-header-restrained-mag',
   'margin:0 auto 16px !important',
-  'opacity:.86 !important',
-  'brightness(.86) contrast(.62) saturate(.80) blur(.72px)',
+  'opacity:.82 !important',
+  'brightness(.80) contrast(.50) saturate(.74) blur(1.05px)',
+  'opacity:.80 !important',
+  'brightness(.77) contrast(.47) saturate(.72) blur(1.15px)',
   'top:-160px !important',
-  '.topbar:has(.brand)',
-  'min-height:44px !important'
-])assert.ok(stabilityCss.includes(token),`missing r417 first-frame mobile contract: ${token}`);
+  'min-height:72px !important'
+])assert.ok(stabilityCss.includes(token),`missing r418 restrained mobile contract: ${token}`);
 assert.doesNotMatch(stabilityCss,/brightness\(\.5[0-9]\) contrast\(\.2[0-9]\)/);
+for(const token of [
+  'production-r418-final-mobile-header-owner',
+  'position:sticky!important',
+  'position:absolute!important',
+  'right:122px!important',
+  'right:70px!important',
+  'right:12px!important'
+])assert.ok(finalHeaderCss.includes(token),`missing r418 final mobile header contract: ${token}`);
+for(const token of [
+  'production-r418-mobile-first-paint-header-lock',
+  'html body > #fx-apex-canvas',
+  'position:fixed!important',
+  'top:-160px!important'
+])assert.ok(firstPaintCss.includes(token),`missing r418 first-paint anti-spacer contract: ${token}`);
 for(const token of ['interaction-bridge-r416-site-is-mag','site-equals-mag-bidirectional','pointer-touch-gentle-scroll-scene-webgl'])assert.ok(bridge.includes(token),`missing r416 site↔MAG startup contract: ${token}`);
 assert.match(layout,/setPaused/);
 assert.match(layout,/syncMenuState/);
@@ -57,4 +76,4 @@ assert.match(loader,/ready-v20\|ready-v69/);
 assert.match(stability,/ready-v20\|ready-v69/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 for(const source of [bootstrap,wrapper,renderer,layout,bridge,premium,loader,stability])new Function(source);
-console.log('PASS: mobile startup uses r326 with r417 balanced first-frame optics/header repair, controls/text flow and r416 bidirectional site↔MAG semantics.');
+console.log('PASS: mobile startup uses r326 with r418 restrained optics, first-paint anti-spacer/final header ownership, controls/text flow and r416 bidirectional site↔MAG semantics.');
