@@ -1,7 +1,8 @@
-/* FormatX r375 — balanced mobile MAG heart light and feathered glass silhouette.
+/* FormatX r375/r378 — balanced mobile MAG heart light and feathered glass silhouette.
    Preserve the approved v51 faceted character while reducing the centre bloom,
-   facet contrast and hard perimeter on high-density phones. Geometry, controls
-   and interaction ownership remain unchanged. */
+   facet contrast and hard perimeter on high-density phones. r378 aligns the
+   narrow-phone carrier with the r377 centering owner so equal-specificity
+   finish layers cannot pull the active r326 MAG half a viewport to the left. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
@@ -98,15 +99,19 @@
 }
 
 @media (max-width: 430px) {
-  /* Preserve the proven r373 centring and current touch/control geometry. */
+  /* r378: r377 owns the independent -50% translation, while the current
+     shapeshifter owns transform. Keep the carrier anchor at 50% here as well;
+     the previous zero-left override combined with r377 translate(-50%) and
+     moved the whole crystal exactly half a viewport to the left. */
   html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage {
-    left: calc((100% - 100vw) / 2) !important;
+    left: 50% !important;
     right: auto !important;
     width: 100vw !important;
     min-width: 0 !important;
     max-width: 100vw !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+    translate: -50% 0 !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
   }
@@ -183,3 +188,4 @@
 /* production-deploy-r410-v51-approved-detail-finish */
 /* production-deploy-r412-balanced-mobile-glass */
 /* production-deploy-r375-balanced-heart-feathering */
+/* production-deploy-r378-cascade-center-lock */
