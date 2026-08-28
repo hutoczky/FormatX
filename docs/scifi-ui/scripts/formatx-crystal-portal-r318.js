@@ -2,6 +2,7 @@
 'use strict';
 const root=document.documentElement;
 const VERSION='r318-crystal-is-site-core';
+const TRUE_VOLUME_URL='/scifi-ui/scripts/formatx-core-true-volume-r267.js?v=20260828-r267-closed-volume-soft-glass';
 if(root.dataset.fxCrystalPortalR318===VERSION)return;
 root.dataset.fxCrystalPortalR318='booting';
 
@@ -17,6 +18,16 @@ const copy=()=>root.lang==='en'?{
 };
 
 let portal=null,facets=null,cue=null,host=null,observer=null,bootTimer=0;
+
+function ensureTrueVolume(){
+  if(document.querySelector('script[data-fx-core-true-volume-r267]'))return;
+  const script=document.createElement('script');
+  script.src=TRUE_VOLUME_URL;
+  script.async=true;
+  script.dataset.fxCoreTrueVolumeR267='true';
+  document.head.appendChild(script);
+  root.dataset.fxCrystalRendererRequest='closed-volume-r267';
+}
 
 function pulse(){
   try{window.FormatXCoreMobileV69?.pulse?.();}catch(_){}
@@ -67,6 +78,7 @@ function install(){
   const nextHost=hero?.querySelector('.hero-space');
   if(!(hero instanceof HTMLElement)||!(nextHost instanceof HTMLElement))return false;
   host=nextHost;
+  ensureTrueVolume();
 
   facets=host.querySelector(':scope > .fx-crystal-facets-r318');
   if(!(facets instanceof HTMLElement)){
@@ -98,7 +110,7 @@ function install(){
   root.dataset.fxCrystalPortalR318=VERSION;
   root.dataset.fxCrystalPortalReady='true';
   root.dataset.fxCrystalMeaning='site-core-interaction-surface';
-  dispatchEvent(new CustomEvent('formatx:crystalportalready',{detail:{version:VERSION,role:'site-core'}}));
+  dispatchEvent(new CustomEvent('formatx:crystalportalready',{detail:{version:VERSION,role:'site-core',renderer:'closed-volume-r267'}}));
   return true;
 }
 
