@@ -3,6 +3,34 @@
    late runtimes cannot create a detached MAG button or a second header row.
    Physical order: header -> MAG -> in-stage controls -> hero copy -> proof. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  /* Browser defaults must not create a 150px canvas spacer before CSS/runtime
+     ownership arrives. The atmosphere/canvas are viewport layers from frame 1. */
+  html,
+  html body {
+    margin:0!important;
+    border:0!important;
+  }
+  html body > #fx-apex-canvas,
+  html body > .fx-atmosphere {
+    position:fixed!important;
+    inset:0!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    width:100vw!important;
+    max-width:100vw!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    margin:0!important;
+    padding:0!important;
+    pointer-events:none!important;
+  }
+  html body > #fx-apex-canvas {
+    z-index:-10!important;
+  }
+  html body > .fx-atmosphere {
+    z-index:-9!important;
+  }
+
   /* Accessibility stays intact, but the skip link must never consume normal
      touch-layout space. It appears only for a real focus-visible keyboard path. */
   html body .skip-link {
