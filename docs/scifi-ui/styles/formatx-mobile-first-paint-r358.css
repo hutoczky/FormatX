@@ -1,6 +1,6 @@
-/* FormatX r411 — render-blocking mobile first-paint lock.
-   The first frame now matches the authoritative r369 flow exactly enough that
-   later semantic/runtime owners never move the LCP-visible hero copy.
+/* FormatX r417 — render-blocking mobile first-paint lock.
+   The first frame must already match the final r416/r417 flow so semantic,
+   WebGL and interaction runtimes never move the LCP-visible hero content.
    Physical order: MAG -> in-stage controls -> hero copy -> heading -> proof. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html body.living-architecture #hero .fx-immersive-launch,
@@ -62,6 +62,10 @@
     translate:none!important;
   }
 
+  /* r417: r411 reserved an obsolete 110px gap beneath the MAG even though the
+     canonical SOUND | ASK | PAUSE row now lives inside hero-space. Keeping that
+     gap until runtime caused the LCP paragraph to repaint ~6.5s into Lighthouse.
+     The final geometry starts at zero from the render-blocking stylesheet. */
   html body.living-architecture #hero .hero-copy {
     order:2!important;
     position:relative!important;
@@ -75,7 +79,7 @@
     height:auto!important;
     min-height:0!important;
     max-height:none!important;
-    margin:110px auto 16px!important;
+    margin:0 auto 16px!important;
     padding:clamp(24px,6vw,34px) clamp(20px,5.5vw,30px) clamp(26px,6.5vw,38px)!important;
     border:1px solid rgba(118,221,255,.17)!important;
     border-radius:24px!important;
@@ -221,6 +225,10 @@
     max-width:680px!important;
     min-height:20px!important;
     margin:18px auto 22px!important;
+    padding:5px 8px!important;
+    color:#e8fbff!important;
+    background:#020b14!important;
+    border-radius:10px!important;
     opacity:1!important;
     visibility:visible!important;
     transform:none!important;
@@ -246,6 +254,61 @@
     transform:none!important;
     translate:none!important;
   }
+
+  /* r417 accessibility is first-paint state too. Opaque surfaces prevent the
+     later organism/background effects from being sampled as a white backdrop. */
+  html body.living-architecture #pricing .payment,
+  html body.living-architecture #pricing .payment-console,
+  html body.living-architecture #pricing .price-card,
+  html body.living-architecture #resources .release-card,
+  html body.living-architecture footer.site-footer {
+    color:#eefaff!important;
+    background:#06131f!important;
+  }
+  html body.living-architecture #pricing #preview-checkout-link.button-solid {
+    color:#041019!important;
+    background:#c8f4ff!important;
+    border-color:#c8f4ff!important;
+  }
+  html body.living-architecture #resources #release-page-link.button-line {
+    color:#f4fbff!important;
+    background:#071521!important;
+    border-color:rgba(163,229,255,.44)!important;
+  }
+  html body.living-architecture footer.site-footer .brand strong,
+  html body.living-architecture footer.site-footer .brand small,
+  html body.living-architecture footer.site-footer nav a,
+  html body.living-architecture footer.site-footer .footer-bottom,
+  html body.living-architecture footer.site-footer .footer-bottom>a {
+    color:#f1faff!important;
+    background:#06131f!important;
+  }
+
+  html body.living-architecture .fx-plan-qr-link {
+    min-width:44px!important;
+    min-height:44px!important;
+  }
+  html body.living-architecture footer.site-footer nav {
+    display:flex!important;
+    flex-wrap:wrap!important;
+    align-items:center!important;
+    gap:8px 10px!important;
+  }
+  html body.living-architecture footer.site-footer nav+nav {
+    margin-top:8px!important;
+  }
+  html body.living-architecture footer.site-footer nav a,
+  html body.living-architecture footer.site-footer .footer-bottom>a {
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-width:44px!important;
+    min-height:44px!important;
+    padding:8px 10px!important;
+    margin:0!important;
+    line-height:1.25!important;
+    text-decoration:none!important;
+  }
 }
 
 @media (max-width:430px) {
@@ -253,3 +316,5 @@
     width:calc(100% - 24px)!important;
   }
 }
+
+/* production-r417-final-mobile-geometry-at-first-paint */
