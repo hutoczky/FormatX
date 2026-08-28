@@ -148,7 +148,10 @@
       if (note) note.textContent = words.note;
       if (link) {
         link.href = checkout;
-        link.setAttribute('aria-label', words.open + ' ' + plan.name);
+        // The visual label is supplied by CSS as "QR ↗". Keeping the same
+        // visible phrase in the accessible name satisfies the label-in-name
+        // contract while still announcing the selected plan and action.
+        link.setAttribute('aria-label', 'QR ↗ — ' + words.open + ' ' + plan.name);
       }
       if (image) {
         image.alt = words.alt + ' — ' + plan.name;
