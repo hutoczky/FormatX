@@ -1,7 +1,6 @@
 /* FormatX r376 — softer mobile MAG light and feathered crystal perimeter.
-   Real-device tuning reduces the centre flare and cyan/violet edge definition
-   one measured step further while preserving the approved four-point geometry,
-   controls, interaction ownership and every desktop optical value. */
+   r377 adds a deterministic physical centering lock for the active r326 stage
+   and a phone-size edge feathering pass. Desktop optics remain unchanged. */
 
 html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   isolation: isolate !important;
@@ -56,6 +55,38 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
     isolation: isolate !important;
   }
 
+  /* r377: the active r326 crystal must own the same deterministic horizontal
+     carrier center as the retired r317 fallback. Older mobile layers may set
+     left/inset/translate values on this shared stage; this final owner removes
+     that cross-generation x drift without touching the WebGL shape transform. */
+  html:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    box-sizing: border-box !important;
+    left: 50% !important;
+    right: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    translate: -50% 0 !important;
+    transform-origin: 50% 50% !important;
+    overflow: clip !important;
+    filter: none !important;
+    isolation: isolate !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    position: absolute !important;
+    inset: 0 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    translate: none !important;
+  }
+
   html:root:root body.living-architecture #hero .hero-space > .fx-core-r317-stage > .fx-core-r317-canvas {
     opacity: .72 !important;
     filter: brightness(.74) contrast(.46) saturate(.75) blur(1.48px) !important;
@@ -97,22 +128,23 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
 @media (max-width: 430px) {
   html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .69 !important;
+    opacity: .72 !important;
     scale: .79 .84 !important;
-    filter: brightness(.74) contrast(.32) saturate(.74) blur(2.15px) !important;
-    -webkit-filter: brightness(.74) contrast(.32) saturate(.74) blur(2.15px) !important;
+    filter: brightness(.70) contrast(.28) saturate(.70) blur(2.35px) !important;
+    -webkit-filter: brightness(.70) contrast(.28) saturate(.70) blur(2.35px) !important;
   }
 
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
     width: 15% !important;
     height: 15% !important;
-    filter: blur(58px) !important;
-    opacity: .0035 !important;
+    filter: blur(60px) !important;
+    opacity: .003 !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after { opacity: .0035 !important; }
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after { opacity: .003 !important; }
 }
 
 /* production-deploy-r376-softer-mobile-light-and-edge */
+/* production-deploy-r377-mobile-mag-center-lock */
