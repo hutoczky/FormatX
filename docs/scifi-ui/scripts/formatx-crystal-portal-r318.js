@@ -3,6 +3,7 @@
 const root=document.documentElement;
 const VERSION='r318-crystal-is-site-core';
 const TRUE_VOLUME_URL='/scifi-ui/scripts/formatx-core-true-volume-r267.js?v=20260828-r267-closed-volume-soft-glass';
+const TRUE_VOLUME_STYLE_URL='/scifi-ui/styles/formatx-core-true-volume-r267.css?v=20260828-r267-balanced-volume-optics';
 if(root.dataset.fxCrystalPortalR318===VERSION)return;
 root.dataset.fxCrystalPortalR318='booting';
 
@@ -20,6 +21,13 @@ const copy=()=>root.lang==='en'?{
 let portal=null,facets=null,cue=null,host=null,observer=null,bootTimer=0;
 
 function ensureTrueVolume(){
+  if(!document.querySelector('link[data-fx-core-true-volume-style-r267]')){
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href=TRUE_VOLUME_STYLE_URL;
+    link.dataset.fxCoreTrueVolumeStyleR267='true';
+    document.head.appendChild(link);
+  }
   if(document.querySelector('script[data-fx-core-true-volume-r267]'))return;
   const script=document.createElement('script');
   script.src=TRUE_VOLUME_URL;
