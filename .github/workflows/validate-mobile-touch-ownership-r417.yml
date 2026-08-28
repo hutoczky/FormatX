@@ -1,0 +1,117 @@
+name: Validate r417 mobile touch ownership
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js'
+      - 'docs/scifi-ui/scripts/formatx-control-owner-r268.js'
+      - 'docs/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
+      - '.github/workflows/validate-mobile-touch-ownership-r417.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  mobile-touch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate touch owner source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -q "touch-pulse-r417-ui-safe" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -q "interactive-target-bypassed" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -q "setPointerCapture" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -q "releasePointerCapture" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+      - name: Install Chromium runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/mobile-touch" && cd "$RUNNER_TEMP/mobile-touch"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Verify physical SOUND tap and direct MAG touch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/mobile-touch-server.log" 2>&1 &
+          server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          cd "$RUNNER_TEMP/mobile-touch"
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          const assert=(value,message)=>{if(!value)throw new Error(message);};
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await ctx.newPage();
+            await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
+            await page.waitForFunction(()=>{
+              const root=document.documentElement;
+              return root.dataset.fxCrystalOrganismR326==='ready'
+                && root.dataset.fxControlOwnerR268==='ready'
+                && root.dataset.fxCoreTouchPulseR99==='ready-r417'
+                && Boolean(document.querySelector('.fx-three-sound'))
+                && Boolean(document.querySelector('#hero .fx-core-mobile-v55-stage'));
+            },null,{timeout:45000});
+            await page.waitForTimeout(500);
+
+            const soundTap=await page.evaluate(()=>{
+              const sound=document.querySelector('.fx-three-sound');
+              if(!(sound instanceof HTMLButtonElement))return null;
+              const r=sound.getBoundingClientRect();
+              window.__fxSoundPhysicalTapCount=0;
+              window.__fxSoundTouchTrace=[];
+              const desc=node=>node instanceof Element?`${node.tagName.toLowerCase()}#${node.id||''}.${String(node.className||'').replace(/\s+/g,'.').slice(0,120)}`:String(node?.nodeName||'');
+              for(const type of ['pointerdown','touchstart','pointerup','touchend','click']){
+                document.addEventListener(type,event=>window.__fxSoundTouchTrace.push({type,target:desc(event.target)}),{capture:true,passive:true});
+              }
+              sound.addEventListener('click',()=>{window.__fxSoundPhysicalTapCount+=1;},{once:true});
+              return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height};
+            });
+            assert(soundTap&&soundTap.w>=44&&soundTap.h>=44,'SOUND target missing or too small: '+JSON.stringify(soundTap));
+            await page.touchscreen.tap(soundTap.x,soundTap.y);
+            await page.waitForTimeout(450);
+            const delivery=await page.evaluate(()=>({
+              count:window.__fxSoundPhysicalTapCount||0,
+              trace:window.__fxSoundTouchTrace||[],
+              guard:document.documentElement.dataset.fxCoreTouchUiGuardR417||''
+            }));
+            console.log('R417_SOUND_TOUCH',JSON.stringify(delivery));
+            assert(delivery.count===1,'SOUND physical tap must synthesize exactly one click: '+JSON.stringify(delivery));
+            assert(delivery.guard==='interactive-target-bypassed','MAG touch owner did not bypass interactive SOUND target: '+JSON.stringify(delivery));
+            const pointerUp=delivery.trace.find(item=>item.type==='pointerup');
+            assert(pointerUp&&/fx-three-sound|fx-wda-sound-icon/.test(pointerUp.target),'SOUND pointerup escaped to the MAG stage: '+JSON.stringify(delivery));
+
+            const coreTap=await page.evaluate(()=>{
+              const stage=document.querySelector('#hero .fx-core-mobile-v55-stage');
+              if(!(stage instanceof HTMLElement))return null;
+              const r=stage.getBoundingClientRect();
+              window.__fxCoreTouchEvents=[];
+              addEventListener('formatx:coreinteraction',event=>window.__fxCoreTouchEvents.push(event.detail),{passive:true});
+              return{x:r.left+r.width*.5,y:r.top+r.height*.42,w:r.width,h:r.height};
+            });
+            assert(coreTap&&coreTap.w>100&&coreTap.h>100,'MAG stage missing: '+JSON.stringify(coreTap));
+            await page.touchscreen.tap(coreTap.x,coreTap.y);
+            await page.waitForTimeout(300);
+            const coreEvents=await page.evaluate(()=>window.__fxCoreTouchEvents||[]);
+            console.log('R417_MAG_TOUCH',JSON.stringify(coreEvents));
+            assert(coreEvents.some(event=>event?.phase==='press'),'direct MAG touch no longer reaches the 3D interaction owner');
+            assert(coreEvents.some(event=>event?.phase==='release'),'direct MAG touch does not release cleanly');
+
+            await ctx.close();await browser.close();
+            console.log('PASS: r417 physical SOUND tap stays UI-owned while direct MAG touch stays WebGL-owned.');
+          })().catch(error=>{console.error(error);process.exit(1);});
+          NODE
+      - name: Publish r417 mobile touch status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r417 physical UI and MAG touch ownership passed'; else state=failure; description='r417 mobile touch ownership failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX r417 mobile touch ownership' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
