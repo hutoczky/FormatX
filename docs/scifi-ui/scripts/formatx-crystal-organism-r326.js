@@ -8,22 +8,22 @@
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lighting = mobile ? Object.freeze({
-    fresnelPower: '1.8',
-    innerHeartBase: '.095',
-    innerHeartBreath: '.14',
-    innerHeartAlpha: '.075',
-    innerAlphaMax: '.40',
-    rimBase: '.045',
-    rimEnergy: '.025',
-    rimAlpha: '.014',
-    outerHeartBase: '.022',
-    outerHeartEnergy: '.024',
-    facetStrength: '.115',
-    sideStrength: '.13',
-    outerAlphaBase: '.46',
-    outerAlphaKey: '.10',
-    outerAlphaMin: '.39',
-    outerAlphaMax: '.72'
+    fresnelPower: '2.15',
+    innerHeartBase: '.075',
+    innerHeartBreath: '.10',
+    innerHeartAlpha: '.062',
+    innerAlphaMax: '.36',
+    rimBase: '.030',
+    rimEnergy: '.016',
+    rimAlpha: '.007',
+    outerHeartBase: '.018',
+    outerHeartEnergy: '.018',
+    facetStrength: '.075',
+    sideStrength: '.09',
+    outerAlphaBase: '.40',
+    outerAlphaKey: '.08',
+    outerAlphaMin: '.34',
+    outerAlphaMax: '.62'
   }) : Object.freeze({
     fresnelPower: '2.7',
     innerHeartBase: '.24',
@@ -476,6 +476,7 @@
     root.dataset.fxCoreCompositionRevisionR326='new-crystal-organism-no-legacy-fallback';
     root.dataset.fxCoreMobileVisualR326=mobile?'soft-translucent-organic-rim':'desktop-translucent-organic-rim';
     root.dataset.fxCoreMobileLightingR375=mobile?'balanced-heart-feathered-facets-r375':'desktop-r326-unchanged';
+    root.dataset.fxCoreMobileOpticsR414=mobile?'soft-rim-low-facet-glow-r414':'desktop-r326-unchanged';
     root.dataset.fxGpuCapability=webgl2?'webgl2':'webgl1';
     root.dataset.fxCoreReal3dTargetFps='interaction-60-heartbeat-burst-idle-zero';
     root.dataset.fxCoreRenderMs='0';
