@@ -1,4 +1,4 @@
-/* FormatX r385 — pure, directly interactive 3D MAG contract.
+/* FormatX r386 — pure, directly interactive 3D MAG contract.
    The visible MAG heart remains a native WebGL mesh. The whole website is the
    MAG system; the crystal is only its visual heart. No bitmap/SVG/canvas2D
    substitute is allowed. */
@@ -69,15 +69,15 @@ html:root:root body.living-architecture #hero .fx-core-r120-canvas {
   touch-action: pan-y !important;
 }
 
-/* Mobile optical finish is only a sub-pixel compositing pass over the real
-   WebGL output. It reduces the hard raster perimeter and excessive bloom
-   without replacing or flattening the 3D geometry. */
+/* r386 mobile finish: pull the cyan bloom back and feather the raster perimeter
+   more aggressively. The blur remains sub-pixel, so the WebGL facets stay
+   readable while the four-point silhouette no longer looks knife-sharp. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
   html:root:root body.living-architecture #hero .fx-core-r112-canvas,
   html:root:root body.living-architecture #hero .fx-core-r120-canvas {
-    opacity: .95 !important;
-    filter: blur(.28px) saturate(.94) brightness(.93) contrast(.84) !important;
+    opacity: .92 !important;
+    filter: blur(.48px) saturate(.90) brightness(.88) contrast(.76) !important;
   }
 }
 
@@ -85,8 +85,8 @@ html:root:root body.living-architecture #hero .fx-core-r120-canvas {
   html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
   html:root:root body.living-architecture #hero .fx-core-r112-canvas,
   html:root:root body.living-architecture #hero .fx-core-r120-canvas {
-    opacity: .94 !important;
-    filter: blur(.32px) saturate(.92) brightness(.91) contrast(.81) !important;
+    opacity: .91 !important;
+    filter: blur(.56px) saturate(.88) brightness(.86) contrast(.73) !important;
   }
 }
 
