@@ -49,7 +49,7 @@ assert.doesNotMatch(volumeRenderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|draw
 
 for(const token of [
   'formatx-core-true-volume-r267.js?v=20260828-r267-closed-volume-soft-glass',
-  'formatx-core-true-volume-r267.css?v=20260828-r267-balanced-volume-optics',
+  'formatx-core-true-volume-r267.css?v=20260829-r268-softened-mobile-optics',
   "fxCrystalRendererRequest='closed-volume-r267'",
   "renderer:'closed-volume-r267'"
 ])assert.ok(portal.includes(token),`missing r267 portal release ownership: ${token}`);
