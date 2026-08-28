@@ -1,10 +1,11 @@
 /* FormatX r418 — final mobile header owner.
    Loaded after legacy WDA/control-owner layers. One branded 72px carrier owns
-   MAG, language and menu; no viewport-fixed header controls are permitted. */
+   MAG, language and menu; on mobile the carrier remains in normal document
+   flow so it can never cover readable content while the page is scrolled. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root body.living-architecture .topbar {
-    position:sticky!important;
-    top:0!important;
+    position:relative!important;
+    top:auto!important;
     right:auto!important;
     bottom:auto!important;
     left:auto!important;
@@ -98,4 +99,19 @@
   }
 }
 
-/* production-r418-final-mobile-header-owner */
+/* The architecture overlay is a user-opened interaction surface. Keeping its
+   close button in the render tree while the surface is closed creates a ghost
+   fixed control that can sit under the header and be reported as information.
+   Remove the closed surface from layout/paint entirely; restore it only for the
+   explicit open state. */
+html:not(.fx-signature-open) body.living-architecture .fx-signature-architecture {
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+html.fx-signature-open body.living-architecture .fx-signature-architecture {
+  display:grid!important;
+  visibility:visible!important;
+}
+
+/* production-r418-final-mobile-header-owner-non-occluding */
