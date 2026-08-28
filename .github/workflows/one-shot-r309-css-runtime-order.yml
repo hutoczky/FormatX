@@ -26,8 +26,6 @@ jobs:
           from pathlib import Path
           import re
 
-          # 1) Mobile MAG: keep the new soft alpha blend, but restore a restrained
-          # cyan/violet body so the crystal is not washed out or almost black.
           shader_path=Path('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js')
           shader=shader_path.read_text(encoding='utf-8')
           values={
@@ -67,7 +65,6 @@ jobs:
           optics=optics.replace('/* FormatX r380 — pure 3D MAG contract with softer mobile optics.','/* FormatX r382 — pure 3D MAG contract with balanced soft mobile optics.',1)
           optics_path.write_text(optics,encoding='utf-8')
 
-          # 2) Cache-bust the balanced optics through the current mobile chain.
           wrapper_path=Path('docs/scifi-ui/scripts/formatx-core-mobile-v55.js')
           wrapper=wrapper_path.read_text(encoding='utf-8')
           wrapper=wrapper.replace("root.dataset.fxCoreMobileOpticsRevision = 'r381-soft-light-no-additive-center';","root.dataset.fxCoreMobileOpticsRevision = 'r382-balanced-soft-crystal';")
@@ -82,64 +79,43 @@ jobs:
           if 'r382-balanced-soft-optics' not in bootstrap: raise SystemExit('bootstrap r382 cache bust failed')
           bootstrap_path.write_text(bootstrap,encoding='utf-8')
 
-          # 3) Mobile already has an explicit static first-paint contract. Keep
-          # desktop critical CSS blocking, but defer the heavy mobile-only cascade
-          # until real user intent. This removes ~280ms of Lighthouse render block
-          # without hiding or moving the first viewport.
           index_path=Path('docs/scifi-ui/index.html')
           index=index_path.read_text(encoding='utf-8')
-
           def replace_link(text, marker, mutate):
             pattern=re.compile(r'<link\s+[^>]*'+re.escape(marker)+r'[^>]*>',re.I)
             match=pattern.search(text)
             if not match: raise SystemExit('Missing link '+marker)
-            old=match.group(0); new=mutate(old)
-            return text[:match.start()]+new+text[match.end():]
-
+            return text[:match.start()]+mutate(match.group(0))+text[match.end():]
           def set_attr(tag,name,value):
             tag=re.sub(r'\s+'+re.escape(name)+r'="[^"]*"','',tag)
             return tag[:-1]+f' {name}="{value}">'
-
           def critical(tag):
             tag=set_attr(tag,'data-fx-deferred-media-r300','(prefers-reduced-motion: no-preference)')
             return set_attr(tag,'media','(prefers-reduced-motion: no-preference) and (min-width: 901px)')
-          index=replace_link(index,'data-fx-critical-core-r227="true"',critical)
-
           def reference(tag):
             tag=set_attr(tag,'data-fx-deferred-media-r300','all')
             return set_attr(tag,'media','(min-width: 901px)')
-          index=replace_link(index,'data-fx-reference-production-r244="true"',reference)
-
           def mobile_orb(tag):
             tag=set_attr(tag,'data-fx-deferred-media-r300','(max-width: 900px)')
             return set_attr(tag,'media','not all')
+          index=replace_link(index,'data-fx-critical-core-r227="true"',critical)
+          index=replace_link(index,'data-fx-reference-production-r244="true"',reference)
           index=replace_link(index,'data-fx-native-orb-reference-r250="true"',mobile_orb)
           index_path.write_text(index,encoding='utf-8')
 
-          # 4) Validators should validate the semantic renderer revision, not an
-          # obsolete August-25 cache-bust string.
           validator_files=[
             '.github/scripts/validate-real3d-core-v20.cjs',
             '.github/scripts/validate-real3d-core-v21-release.cjs',
             '.github/scripts/validate-reference-core-v26.cjs',
             '.github/scripts/validate-real3d-mobile-startup-v22.cjs',
           ]
-          old_regex=r"formatx-crystal-organism-r326\\.js\\?v=20260825-r326-new-organism"
-          new_regex=r"formatx-crystal-organism-r326\\.js\\?v=20260828-r382-balanced-soft-optics"
+          old='20260825-r326-new-organism'
+          new='20260828-r382-balanced-soft-optics'
           for filename in validator_files:
             path=Path(filename); data=path.read_text(encoding='utf-8')
-            if old_regex not in data: raise SystemExit('Stale validator token not found in '+filename)
-            data=data.replace(old_regex,new_regex)
-            # Add the explicit optics semantic marker to each source validator.
-            anchor="assert.match(wrapper,/new-crystal-organism-r326-primary/);"
-            marker="assert.match(wrapper,/r382-balanced-soft-crystal/);"
-            if marker not in data:
-              if anchor not in data: raise SystemExit('validator anchor missing '+filename)
-              data=data.replace(anchor,anchor+'\n'+marker,1)
-            path.write_text(data,encoding='utf-8')
+            if old not in data: raise SystemExit('Stale validator revision not found in '+filename)
+            path.write_text(data.replace(old,new),encoding='utf-8')
 
-          # 5) Keep the live-readiness workflow aligned with the actual current
-          # production asset chain instead of historical r250/r326 cache labels.
           live_path=Path('.github/workflows/verify-live-award-readiness.yml')
           live=live_path.read_text(encoding='utf-8')
           live=live.replace('formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r251-performance','formatx-core-mobile-v55.js?v=20260828-r382-balanced-soft-optics')
@@ -147,7 +123,6 @@ jobs:
           live=live.replace("contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' \"$TMP/mobile-wrapper.js\"","contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' \"$TMP/mobile-wrapper.js\"\n          contains wrapper-optics-revision 'r382-balanced-soft-crystal' \"$TMP/mobile-wrapper.js\"")
           live_path.write_text(live,encoding='utf-8')
 
-          # Remove this migration after it has produced the real source commit.
           Path('.github/workflows/one-shot-r309-css-runtime-order.yml').unlink(missing_ok=True)
           PY
 
