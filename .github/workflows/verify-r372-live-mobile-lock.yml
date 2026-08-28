@@ -1,4 +1,4 @@
-name: Verify r377 centered softer mobile MAG finish
+name: Verify r413 balanced mobile MAG and header lock
 
 on:
   push:
@@ -16,14 +16,14 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r377-live:
+  verify-r413-live:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r377 centered mobile finish source contract
+      - name: Validate r413 mobile MAG and header source contract
         shell: bash
         run: |
           set -euo pipefail
@@ -35,33 +35,49 @@ jobs:
           node --check "$SHADER"
           node --check "$AWARD"
 
-          grep -Fq 'FormatX r375' "$CSS"
-          grep -Fq 'production-deploy-r375-balanced-heart-feathering' "$CSS"
+          # r413 is the late mobile finish owner. It restores visible glass
+          # luminance/facets without returning to the earlier hard-edged glow.
+          grep -Fq 'FormatX r413' "$CSS"
+          grep -Fq 'production-deploy-r413-balanced-soft-mobile-mag-header-lock' "$CSS"
+          grep -Fq 'opacity: .96 !important' "$CSS"
+          grep -Fq 'brightness(.97)' "$CSS"
+          grep -Fq 'contrast(.80)' "$CSS"
+          grep -Fq 'saturate(.92)' "$CSS"
+          grep -Fq 'blur(.40px)' "$CSS"
+          grep -Fq 'opacity: .95 !important' "$CSS"
+          grep -Fq 'brightness(.95)' "$CSS"
+          grep -Fq 'contrast(.77)' "$CSS"
+          grep -Fq 'saturate(.90)' "$CSS"
+          grep -Fq 'blur(.46px)' "$CSS"
 
-          grep -Fq 'FormatX r376' "$OPTICS"
+          # Mobile header is one coordinate system; no detached viewport-fixed
+          # MAG button and no visible skip-link unless focus-visible.
+          grep -Fq 'html body .skip-link {' "$CSS"
+          grep -Fq 'top: -120px !important' "$CSS"
+          grep -Fq 'html body .skip-link:focus-visible {' "$CSS"
+          grep -Fq 'html body.living-architecture .topbar {' "$CSS"
+          grep -Fq 'position: sticky !important' "$CSS"
+          grep -Fq 'min-height: 72px !important' "$CSS"
+          grep -Fq 'height: 72px !important' "$CSS"
+          grep -Fq 'html body.living-architecture .topbar .fx-reference-mag-button,' "$CSS"
+          grep -Fq 'position: absolute !important' "$CSS"
+          grep -Fq 'right: 122px !important' "$CSS"
+          grep -Fq 'right: 72px !important' "$CSS"
+          grep -Fq 'right: 14px !important' "$CSS"
+
+          # The established r377 physical centering and desktop r326 optics stay
+          # intact underneath the new late r413 finish layer.
           grep -Fq 'r377 adds a deterministic physical centering lock' "$OPTICS"
-          grep -Fq 'production-deploy-r376-softer-mobile-light-and-edge' "$OPTICS"
           grep -Fq 'production-deploy-r377-mobile-mag-center-lock' "$OPTICS"
           grep -Fq '.fx-crystal-organism-r326-stage {' "$OPTICS"
           grep -Fq 'left: 50% !important' "$OPTICS"
           grep -Fq 'translate: -50% 0 !important' "$OPTICS"
           grep -Fq 'width: 100% !important' "$OPTICS"
-          grep -Fq 'opacity: .72' "$OPTICS"
-          grep -Fq 'brightness(.76)' "$OPTICS"
-          grep -Fq 'contrast(.34)' "$OPTICS"
-          grep -Fq 'blur(2.05px)' "$OPTICS"
-          grep -Fq 'brightness(.70)' "$OPTICS"
-          grep -Fq 'contrast(.28)' "$OPTICS"
-          grep -Fq 'saturate(.70)' "$OPTICS"
-          grep -Fq 'blur(2.35px)' "$OPTICS"
-          grep -Fq 'opacity: .003' "$OPTICS"
-
-          # Desktop optics stay exactly on the established r326 contract.
           grep -Fq 'opacity: .91' "$OPTICS"
           grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS"
           ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$OPTICS"
 
-          # Shader geometry/lighting stays on the proven r375 mobile contract.
+          # Shader geometry/lighting remains on the proven r375/r326 contract.
           grep -Fq "fresnelPower: '1.8'" "$SHADER"
           grep -Fq "innerHeartBase: '.105'" "$SHADER"
           grep -Fq "innerHeartBreath: '.18'" "$SHADER"
@@ -71,50 +87,51 @@ jobs:
           grep -Fq "outerAlphaMax: '.76'" "$SHADER"
           grep -Fq "facetStrength: '.13'" "$SHADER"
           grep -Fq "sideStrength: '.16'" "$SHADER"
-          grep -Fq "fresnelPower: '2.7'" "$SHADER"
-          grep -Fq "innerHeartBase: '.24'" "$SHADER"
-          grep -Fq "rimBase: '.16'" "$SHADER"
-          grep -Fq "outerAlphaMin: '.48'" "$SHADER"
-          grep -Fq "outerAlphaMax: '.86'" "$SHADER"
           grep -Fq 'fxCoreMobileLightingR375' "$SHADER"
           grep -Fq 'balanced-heart-feathered-facets-r375' "$SHADER"
-          grep -Fq "desktop-r326-unchanged" "$SHADER"
+          grep -Fq 'desktop-r326-unchanged' "$SHADER"
 
-      - name: Verify production serves r377 centered softer mobile finish
+      - name: Verify production serves r413 mobile MAG and header lock
         shell: bash
         run: |
           set -euo pipefail
           CSS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
           OPTICS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
           JS_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js'
-          CSS_TMP="$RUNNER_TEMP/r377-softening-live.css"
-          OPTICS_TMP="$RUNNER_TEMP/r377-optics-live.css"
-          JS_TMP="$RUNNER_TEMP/r377-live.js"
+          CSS_TMP="$RUNNER_TEMP/r413-softening-live.css"
+          OPTICS_TMP="$RUNNER_TEMP/r413-optics-live.css"
+          JS_TMP="$RUNNER_TEMP/r413-live.js"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "r377 live verification $attempt/45"
-            suffix="r377_live=${GITHUB_RUN_ID}_${attempt}"
+            echo "r413 live verification $attempt/45"
+            suffix="r413_live=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${OPTICS_URL}?${suffix}" -o "$OPTICS_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP"; then
-              if grep -Fq 'FormatX r375' "$CSS_TMP" \
+              if grep -Fq 'FormatX r413' "$CSS_TMP" \
+                && grep -Fq 'production-deploy-r413-balanced-soft-mobile-mag-header-lock' "$CSS_TMP" \
+                && grep -Fq 'opacity: .96 !important' "$CSS_TMP" \
+                && grep -Fq 'brightness(.97)' "$CSS_TMP" \
+                && grep -Fq 'contrast(.80)' "$CSS_TMP" \
+                && grep -Fq 'blur(.40px)' "$CSS_TMP" \
+                && grep -Fq 'opacity: .95 !important' "$CSS_TMP" \
+                && grep -Fq 'brightness(.95)' "$CSS_TMP" \
+                && grep -Fq 'contrast(.77)' "$CSS_TMP" \
+                && grep -Fq 'blur(.46px)' "$CSS_TMP" \
+                && grep -Fq 'html body .skip-link:focus-visible {' "$CSS_TMP" \
+                && grep -Fq 'html body.living-architecture .topbar {' "$CSS_TMP" \
+                && grep -Fq 'position: sticky !important' "$CSS_TMP" \
+                && grep -Fq 'right: 122px !important' "$CSS_TMP" \
+                && grep -Fq 'right: 72px !important' "$CSS_TMP" \
+                && grep -Fq 'right: 14px !important' "$CSS_TMP" \
                 && grep -Fq 'r377 adds a deterministic physical centering lock' "$OPTICS_TMP" \
-                && grep -Fq 'production-deploy-r377-mobile-mag-center-lock' "$OPTICS_TMP" \
                 && grep -Fq 'left: 50% !important' "$OPTICS_TMP" \
                 && grep -Fq 'translate: -50% 0 !important' "$OPTICS_TMP" \
-                && grep -Fq 'brightness(.76)' "$OPTICS_TMP" \
-                && grep -Fq 'contrast(.34)' "$OPTICS_TMP" \
-                && grep -Fq 'blur(2.05px)' "$OPTICS_TMP" \
-                && grep -Fq 'brightness(.70)' "$OPTICS_TMP" \
-                && grep -Fq 'contrast(.28)' "$OPTICS_TMP" \
-                && grep -Fq 'saturate(.70)' "$OPTICS_TMP" \
-                && grep -Fq 'blur(2.35px)' "$OPTICS_TMP" \
-                && grep -Fq 'opacity: .003' "$OPTICS_TMP" \
                 && grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS_TMP" \
                 && grep -Fq "fresnelPower: '1.8'" "$JS_TMP" \
                 && grep -Fq 'fxCoreMobileLightingR375' "$JS_TMP" \
-                && grep -Fq "desktop-r326-unchanged" "$JS_TMP"; then
+                && grep -Fq 'desktop-r326-unchanged' "$JS_TMP"; then
                 ok=1
                 break
               fi
@@ -123,9 +140,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r377 with centered mobile r326 MAG, softer phone edges and unchanged desktop optics.'
+          echo 'PASS: production serves r413 balanced mobile MAG, centered geometry, hidden-until-focused skip link and unified mobile header.'
 
-      - name: Publish r377 live status
+      - name: Publish r413 live status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -134,13 +151,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r377 centered softer mobile MAG passed'
+            description='Live r413 mobile MAG and header passed'
           else
             state=failure
-            description='Live r377 mobile MAG verification failed'
+            description='Live r413 mobile MAG/header verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r377 live mobile MAG finish' \
+            -f context='FormatX r413 live mobile MAG + header' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
