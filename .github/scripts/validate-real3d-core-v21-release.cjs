@@ -55,8 +55,11 @@ for(const token of [
 ])assert.ok(portal.includes(token),`missing r267 portal release ownership: ${token}`);
 
 for(const token of [
-  '.fx-core-r267-volume-canvas','opacity: 1 !important','contrast(.93)','blur(.14px)','contrast(.92)','blur(.16px)'
-])assert.ok(volumeCss.includes(token),`missing balanced r267 optical contract: ${token}`);
+  '.fx-core-r267-volume-canvas',
+  'opacity: .985 !important','brightness(.94)','contrast(.87)','saturate(.96)','blur(.26px)',
+  'opacity: .98 !important','brightness(.92)','contrast(.85)','saturate(.95)','blur(.32px)',
+  'r268-mobile-optics-softened-bloom-and-rim'
+])assert.ok(volumeCss.includes(token),`missing restrained r268 optical contract: ${token}`);
 assert.doesNotMatch(volumeCss,/blur\((?:[1-9]|[1-9][0-9])(?:\.\d+)?px\)/);
 
 for(const token of [
@@ -73,4 +76,4 @@ for(const token of ['interaction-bridge-r416-site-is-mag','site-equals-mag-bidir
 assert.match(layout,/mobileViewport=.*max-width:900px/);
 assert.match(layout,/restoreDesktopMenu/);
 for(const source of [bootstrap,wrapper,bootstrapRenderer,volumeRenderer,portal,layout,bridge])new Function(source);
-console.log('PASS: release validates the r267 closed-volume WebGL MAG, balanced soft optics, non-occluding r418 header and bidirectional site↔MAG coupling.');
+console.log('PASS: release validates the r267 closed-volume WebGL MAG, restrained r268 mobile optics, non-occluding r418 header and bidirectional site↔MAG coupling.');
