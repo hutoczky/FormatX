@@ -21,6 +21,82 @@
   let rendererRequested = false;
   let rendererTimer = 0;
 
+  function installSoundTouchRecovery() {
+    if (root.dataset.fxSoundTouchRecoveryR418 === 'ready') return;
+    root.dataset.fxSoundTouchRecoveryR418 = 'ready';
+
+    let gesture = null;
+    let fallbackTimer = 0;
+    let sequence = 0;
+
+    const soundFrom = target => target instanceof Element ? target.closest('.fx-three-sound') : null;
+    const cancelFallback = () => {
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      fallbackTimer = 0;
+    };
+    const clearGesture = () => {
+      cancelFallback();
+      gesture = null;
+    };
+
+    document.addEventListener('pointerdown', event => {
+      const button = soundFrom(event.target);
+      if (!(button instanceof HTMLButtonElement) || event.pointerType === 'mouse') return;
+      cancelFallback();
+      gesture = {
+        sequence: ++sequence,
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY
+      };
+      root.dataset.fxSoundTouchRecoveryStateR418 = 'armed';
+    }, true);
+
+    document.addEventListener('click', event => {
+      const button = soundFrom(event.target);
+      if (!(button instanceof HTMLButtonElement)) return;
+      if (gesture) clearGesture();
+      root.dataset.fxSoundTouchRecoveryStateR418 = event.isTrusted ? 'native-click' : 'fallback-click-delivered';
+    }, true);
+
+    document.addEventListener('pointerup', event => {
+      const button = soundFrom(event.target);
+      const current = gesture;
+      if (!current || current.pointerId !== event.pointerId || !(button instanceof HTMLButtonElement)) {
+        clearGesture();
+        return;
+      }
+
+      current.x = event.clientX;
+      current.y = event.clientY;
+      const token = current.sequence;
+      cancelFallback();
+      // Modern touch UAs synthesize click immediately after pointerup/touchend.
+      // A legacy global preventDefault can suppress that compatibility click;
+      // wait briefly, then deliver exactly one button activation only if the
+      // native click never arrived. pointerdown already gives WebAudio a trusted
+      // activation opportunity, so this fallback does not bypass autoplay rules.
+      fallbackTimer = setTimeout(() => {
+        fallbackTimer = 0;
+        if (!gesture || gesture.sequence !== token) return;
+        const hit = document.elementFromPoint(gesture.x, gesture.y);
+        const live = soundFrom(hit) || (button.isConnected ? button : document.querySelector('.fx-three-sound'));
+        gesture = null;
+        if (!(live instanceof HTMLButtonElement)) {
+          root.dataset.fxSoundTouchRecoveryStateR418 = 'fallback-target-missing';
+          return;
+        }
+        root.dataset.fxSoundTouchRecoveryStateR418 = 'dispatching-fallback-click';
+        live.click();
+        if (root.dataset.fxSoundTouchRecoveryStateR418 === 'dispatching-fallback-click') {
+          root.dataset.fxSoundTouchRecoveryStateR418 = 'fallback-click-delivered';
+        }
+      }, 120);
+    }, true);
+
+    document.addEventListener('pointercancel', clearGesture, true);
+  }
+
   function loadFinalHeaderStyle() {
     if (!matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches) return;
     let link = document.querySelector('link[data-fx-mobile-header-final-r418]');
@@ -146,6 +222,7 @@
   }
 
   root.dataset.fxCoreOverlayPolicyR326='new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual';
+  installSoundTouchRecovery();
   loadOpticsTune();
   loadStableControls();
   loadReferenceLayout();
