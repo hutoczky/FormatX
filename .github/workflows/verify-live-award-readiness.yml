@@ -55,12 +55,13 @@ jobs:
           grep -Fq 'brightness(.92) contrast(.85) saturate(.95) blur(.32px)' docs/scifi-ui/styles/formatx-core-true-volume-r267.css
           grep -Fq 'production-r418-final-mobile-header-owner' docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
           grep -Fq 'production-r418-final-mobile-header-owner-non-occluding' docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
-          grep -Fq "const VERSION='touch-pulse-r384-true3d'" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -Fq "const VERSION='touch-pulse-r417-ui-safe'" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           grep -Fq 'formatx:coreinteraction' docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          grep -Fq 'drag-inertia-webgl' docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -Fq 'drag-inertia-webgl-ui-guard-r417' docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -Fq 'fxCoreTouchUiGuardR417' docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
 
-      - name: Verify live r267 WebGL volume, r268 optics, r418 header, touch and scrolling
+      - name: Verify live r267 WebGL volume, r268 optics, r418 header, r417 touch and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -116,9 +117,10 @@ jobs:
           contains header-nonoccluding 'production-r418-final-mobile-header-owner-non-occluding' "$TMP/header.css"
           ! grep -Eq '\.topbar[[:space:]]*\{[^}]*position:sticky!important' "$TMP/header.css"
 
-          contains touch-version "const VERSION='touch-pulse-r384-true3d'" "$TMP/touch.js"
+          contains touch-version "const VERSION='touch-pulse-r417-ui-safe'" "$TMP/touch.js"
           contains touch-core-event 'formatx:coreinteraction' "$TMP/touch.js"
-          contains touch-physics 'drag-inertia-webgl' "$TMP/touch.js"
+          contains touch-physics 'drag-inertia-webgl-ui-guard-r417' "$TMP/touch.js"
+          contains touch-ui-guard 'fxCoreTouchUiGuardR417' "$TMP/touch.js"
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
@@ -152,7 +154,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Award/source + live r267 volume, r268 optics, r418 header, touch and scrolling passed'
+            description='Award/source + live r267 volume, r268 optics, r418 header, r417 touch and scrolling passed'
           else
             state=failure
             description='Award, live r267/r268 MAG, header, touch or scrolling failed'
