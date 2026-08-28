@@ -1,25 +1,21 @@
-/* FormatX r416 — phone first-frame + MAG optical stability.
-   The crystal is the visual heart of the website; the website is the larger MAG.
-   Keep the final geometry from the first paint, tame perimeter bloom without
-   smearing the silhouette, and keep mobile controls/links accessible. */
+/* FormatX r417 — mobile header + MAG optical repair.
+   Preserve r416 first-frame geometry, but keep the crystal visibly alive without
+   the former hard perimeter bloom. Also force one compact mobile header row. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  /* r411 reserved an obsolete 110px gap for controls that now live inside the
-     MAG stage. The final runtime already uses zero gap, so match that geometry
-     before FCP to prevent the hero-copy jump that became the mobile LCP/CLS. */
   html body.living-architecture #hero .hero-copy {
     margin:0 auto 16px !important;
   }
 
-  /* r416 optical pass: lower energy and edge contrast, but use much less blur
-     than r415 so light does not spread into a large halo around the crystal. */
+  /* Balanced midpoint between the over-bright/sharp r413 finish and the
+     over-dark r416 pass. Keep facets readable, soften only the perimeter. */
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.60 !important;
+    opacity:.86 !important;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
-    filter:brightness(.58) contrast(.30) saturate(.60) blur(1.35px) !important;
-    -webkit-filter:brightness(.58) contrast(.30) saturate(.60) blur(1.35px) !important;
+    filter:brightness(.86) contrast(.62) saturate(.80) blur(.72px) !important;
+    -webkit-filter:brightness(.86) contrast(.62) saturate(.80) blur(.72px) !important;
   }
 
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
@@ -28,8 +24,104 @@
     opacity:0 !important;
   }
 
-  /* Lighthouse/accessibility contract: use opaque dark surfaces for text whose
-     earlier translucent ancestry could be sampled as white on mobile. */
+  /* Never let the accessibility skip link become part of the mobile layout.
+     It remains available to keyboard users only while focus-visible is active. */
+  html body .skip-link {
+    position:fixed !important;
+    top:-160px !important;
+    left:max(12px,env(safe-area-inset-left)) !important;
+    right:auto !important;
+    width:auto !important;
+    height:auto !important;
+    margin:0 !important;
+    transform:none !important;
+    z-index:2147483600 !important;
+  }
+  html body .skip-link:not(:focus-visible),
+  html body .skip-link:focus:not(:focus-visible) {
+    top:-160px !important;
+  }
+  html body .skip-link:focus-visible {
+    top:max(12px,env(safe-area-inset-top)) !important;
+  }
+
+  /* One physical mobile header row. If a legacy empty .topbar survives,
+     collapse only its own box; fixed controls remain visible while the branded
+     topbar is the single 72px layout carrier. */
+  html body.living-architecture .topbar:not(:has(.brand)) {
+    display:contents !important;
+    min-height:0 !important;
+    height:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    border:0 !important;
+  }
+
+  html body.living-architecture .topbar:has(.brand) {
+    position:sticky !important;
+    top:0 !important;
+    right:auto !important;
+    bottom:auto !important;
+    left:auto !important;
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    min-height:72px !important;
+    height:72px !important;
+    max-height:72px !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:visible !important;
+    transform:none !important;
+    translate:none !important;
+    z-index:12060 !important;
+  }
+
+  html body.living-architecture .topbar:has(.brand) > .brand {
+    position:absolute !important;
+    top:10px !important;
+    left:14px !important;
+    right:auto !important;
+    bottom:auto !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    width:auto !important;
+    max-width:118px !important;
+    height:52px !important;
+    margin:0 !important;
+    transform:none !important;
+    translate:none !important;
+    overflow:hidden !important;
+  }
+
+  html body.living-architecture .fx-reference-mag-button,
+  html body.living-architecture .fx-language-toggle,
+  html body.living-architecture .fx-reference-menu-button {
+    position:fixed !important;
+    bottom:auto !important;
+    left:auto !important;
+    margin:0 !important;
+    transform:none !important;
+    translate:none !important;
+    z-index:12070 !important;
+  }
+
+  html body.living-architecture .fx-reference-mag-button {
+    top:max(11px,env(safe-area-inset-top)) !important;
+    right:122px !important;
+  }
+  html body.living-architecture .fx-language-toggle {
+    top:max(11px,env(safe-area-inset-top)) !important;
+    right:70px !important;
+  }
+  html body.living-architecture .fx-reference-menu-button {
+    top:max(8px,env(safe-area-inset-top)) !important;
+    right:12px !important;
+  }
+
+  /* Lighthouse/accessibility contract: opaque dark surfaces for text whose
+     older translucent ancestry could be sampled as white on mobile. */
   html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
     color:#e8fbff !important;
     background:#020b14 !important;
@@ -83,10 +175,17 @@
 @media (max-width:430px) {
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.58 !important;
-    filter:brightness(.54) contrast(.28) saturate(.58) blur(1.55px) !important;
-    -webkit-filter:brightness(.54) contrast(.28) saturate(.58) blur(1.55px) !important;
+    opacity:.84 !important;
+    filter:brightness(.83) contrast(.59) saturate(.78) blur(.80px) !important;
+    -webkit-filter:brightness(.83) contrast(.59) saturate(.78) blur(.80px) !important;
+  }
+
+  html body.living-architecture .topbar:has(.brand) > .brand {
+    max-width:112px !important;
+  }
+  html body.living-architecture .topbar:has(.brand) > .brand small {
+    display:none !important;
   }
 }
 
-/* production-r416-site-is-mag-soft-optics-first-frame */
+/* production-r417-mobile-header-and-balanced-mag-optics */
