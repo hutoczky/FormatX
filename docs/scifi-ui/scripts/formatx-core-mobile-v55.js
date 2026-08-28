@@ -13,11 +13,33 @@
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260828-r416-site-coupled-soft-optics';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
   const OPTICS_TUNE_STYLE = '/scifi-ui/styles/formatx-mobile-r416-stability.css?v=20260828-r418-restrained-soft-mag-attached-header';
+  const FINAL_HEADER_STYLE = '/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
   // Content wins the critical path. The render-blocking r418 stylesheet owns the
-  // first header frame; this later tune only refines the WebGL optics.
+  // first header frame; later layers only refine optics and reassert final header
+  // ownership after legacy WDA/control styles have mounted.
   const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 3000 : 1100;
   let rendererRequested = false;
   let rendererTimer = 0;
+
+  function loadFinalHeaderStyle() {
+    if (!matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches) return;
+    let link = document.querySelector('link[data-fx-mobile-header-final-r418]');
+    if (!(link instanceof HTMLLinkElement)) {
+      link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = FINAL_HEADER_STYLE;
+      link.dataset.fxMobileHeaderFinalR418 = 'true';
+    } else if (!link.href.includes('r418-final-owner')) {
+      link.href = FINAL_HEADER_STYLE;
+    }
+    // Re-appending an existing stylesheet is intentional: r264/r268 legacy owner
+    // styles are still loaded asynchronously. The r418 contract must be the last
+    // header geometry layer after those owners without polling or a hot observer.
+    if (link.parentElement !== document.head || document.head.lastElementChild !== link) {
+      document.head.appendChild(link);
+    }
+    root.dataset.fxMobileHeaderFinalR418 = 'loaded-last';
+  }
 
   function loadOpticsTune() {
     const existing = document.querySelector('link[data-fx-mobile-r416-stability]');
@@ -127,5 +149,14 @@
   loadOpticsTune();
   loadStableControls();
   loadReferenceLayout();
+  loadFinalHeaderStyle();
+
+  for (const eventName of ['formatx:controlownerready','formatx:mobilelayoutready','pageshow','load']) {
+    addEventListener(eventName, loadFinalHeaderStyle, { passive: true });
+  }
+  addEventListener('resize', loadFinalHeaderStyle, { passive: true });
+  addEventListener('orientationchange', loadFinalHeaderStyle, { passive: true });
+  for (const delay of [0, 350, 1400]) setTimeout(loadFinalHeaderStyle, delay);
+
   schedulePrimaryRenderer();
 }());
