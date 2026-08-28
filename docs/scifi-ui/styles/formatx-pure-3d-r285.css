@@ -1,7 +1,7 @@
-/* FormatX r384 — pure, directly interactive 3D MAG contract.
-   The MAG body is rendered only by the native WebGL mesh canvas. Legacy
-   bitmap/canvas overlays, CSS pseudo optics, DOM rings, flares, caustics and
-   decorative carrier layers are forbidden inside the MAG visual host. */
+/* FormatX r385 — pure, directly interactive 3D MAG contract.
+   The visible MAG heart remains a native WebGL mesh. The whole website is the
+   MAG system; the crystal is only its visual heart. No bitmap/SVG/canvas2D
+   substitute is allowed. */
 
 html:root:root body.living-architecture #hero .hero-space {
   background: transparent !important;
@@ -45,8 +45,6 @@ html:root:root body.living-architecture #hero .fx-core-r120-stage {
   mix-blend-mode: normal !important;
 }
 
-/* The visible surface is the native WebGL surface itself: no CSS blur,
-   brightness, contrast or post-composited fake-glass treatment. */
 html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
 html:root:root body.living-architecture #hero .fx-core-r112-canvas,
 html:root:root body.living-architecture #hero .fx-core-r120-canvas {
@@ -59,8 +57,8 @@ html:root:root body.living-architecture #hero .fx-core-r120-canvas {
   box-shadow: none !important;
 }
 
-/* Direct manipulation reaches the WebGL renderer. Vertical touch scrolling is
-   preserved; horizontal/diagonal movement can still rotate the 3D organism. */
+/* Direct manipulation reaches the native WebGL renderer. Vertical touch
+   scrolling stays native while drag/press continues to rotate and energise it. */
 html:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
 html:root:root body.living-architecture #hero .hero-space > .fx-core-r112-stage,
 html:root:root body.living-architecture #hero .hero-space > .fx-core-r120-stage,
@@ -69,6 +67,27 @@ html:root:root body.living-architecture #hero .fx-core-r112-canvas,
 html:root:root body.living-architecture #hero .fx-core-r120-canvas {
   pointer-events: auto !important;
   touch-action: pan-y !important;
+}
+
+/* Mobile optical finish is only a sub-pixel compositing pass over the real
+   WebGL output. It reduces the hard raster perimeter and excessive bloom
+   without replacing or flattening the 3D geometry. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r112-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r120-canvas {
+    opacity: .95 !important;
+    filter: blur(.28px) saturate(.94) brightness(.93) contrast(.84) !important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r112-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r120-canvas {
+    opacity: .94 !important;
+    filter: blur(.32px) saturate(.92) brightness(.91) contrast(.81) !important;
+  }
 }
 
 @media (pointer:fine) {
