@@ -57,23 +57,26 @@ jobs:
               text = text.replace(old, new, 1)
           shader.write_text(text, encoding='utf-8')
 
-          for filename in (
-              'docs/scifi-ui/scripts/formatx-core-real3d-v20.js',
-              'docs/scifi-ui/scripts/formatx-core-mobile-v55.js',
-          ):
-              path = Path(filename)
-              data = path.read_text(encoding='utf-8')
-              old = 'formatx-crystal-organism-r326.js?v=20260828-r326-real-geometry'
-              new = 'formatx-crystal-organism-r326.js?v=20260828-r381-mobile-soft-optics'
-              if old not in data:
-                  raise SystemExit(f'Missing crystal cache key in {filename}')
-              data = data.replace(old, new)
-              if path.name == 'formatx-core-real3d-v20.js':
-                  css_old = 'formatx-pure-3d-r285.css?v=20260821-r285-pure-webgl'
-                  css_new = 'formatx-pure-3d-r285.css?v=20260828-r380-mobile-soft-optics'
-                  if css_old in data:
-                      data = data.replace(css_old, css_new)
-              path.write_text(data, encoding='utf-8')
+          mobile = Path('docs/scifi-ui/scripts/formatx-core-mobile-v55.js')
+          data = mobile.read_text(encoding='utf-8')
+          old = 'formatx-crystal-organism-r326.js?v=20260825-r326-new-organism'
+          new = 'formatx-crystal-organism-r326.js?v=20260828-r381-mobile-soft-optics'
+          if old not in data:
+              raise SystemExit('Missing current r326 renderer cache key')
+          mobile.write_text(data.replace(old, new), encoding='utf-8')
+
+          bootstrap = Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          data = bootstrap.read_text(encoding='utf-8')
+          mobile_old = 'formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r251-performance'
+          mobile_new = 'formatx-core-mobile-v55.js?v=20260828-r381-mobile-soft-optics'
+          style_old = 'formatx-pure-3d-r285.css?v=20260821-r285'
+          style_new = 'formatx-pure-3d-r285.css?v=20260828-r380-mobile-soft-optics'
+          if mobile_old not in data:
+              raise SystemExit('Missing current mobile bootstrap cache key')
+          if style_old not in data:
+              raise SystemExit('Missing current pure-3d style cache key')
+          data = data.replace(mobile_old, mobile_new).replace(style_old, style_new)
+          bootstrap.write_text(data, encoding='utf-8')
 
           for helper in (
               '.github/workflows/apply-r381-mobile-mag-optics.yml',
@@ -84,8 +87,8 @@ jobs:
           PY
 
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
           git diff --check
 
       - name: Commit shader correction
