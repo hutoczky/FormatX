@@ -10,6 +10,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/styles/formatx-mobile-r416-stability.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-header-final-r418.css'
       - '.github/workflows/validate-mobile-touch-ownership-r417.yml'
   workflow_dispatch:
 permissions:
@@ -35,7 +36,9 @@ jobs:
           grep -q "fxWdaSoundTouchR418" docs/scifi-ui/scripts/formatx-wda-controls-r198.js
           grep -q "production-r418-mobile-first-paint-header-lock" docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css
           grep -q "production-r418-attached-header-restrained-mag" docs/scifi-ui/styles/formatx-mobile-r416-stability.css
+          grep -q "production-r418-final-mobile-header-owner" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
           grep -q "r418-restrained-soft-mag-attached-header" docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          grep -q "r418-final-owner" docs/scifi-ui/scripts/formatx-core-mobile-v55.js
       - name: Install Chromium runtime
         shell: bash
         run: |
@@ -79,6 +82,7 @@ jobs:
               return root.dataset.fxCrystalOrganismR326==='ready'
                 && root.dataset.fxControlOwnerR268==='ready'
                 && root.dataset.fxCoreTouchPulseR99==='ready-r417'
+                && root.dataset.fxMobileHeaderFinalR418==='loaded-last'
                 && Boolean(document.querySelector('.fx-three-sound'))
                 && Boolean(document.querySelector('#hero .fx-core-mobile-v55-stage'));
             },null,{timeout:45000});
@@ -94,10 +98,11 @@ jobs:
               const menu=topbar?.querySelector(':scope > .fx-reference-menu-button');
               const canvas=document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas');
               const cs=canvas?getComputedStyle(canvas):null;
-              return {count:bars.length,topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),canvas:box(canvas),filter:cs?.filter||'',canvasOpacity:Number(cs?.opacity||0),headerMarker:document.documentElement.dataset.fxCanonicalTopbarR417||''};
+              return {count:bars.length,topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),canvas:box(canvas),filter:cs?.filter||'',canvasOpacity:Number(cs?.opacity||0),headerMarker:document.documentElement.dataset.fxCanonicalTopbarR417||'',finalOwner:document.documentElement.dataset.fxMobileHeaderFinalR418||''};
             });
             console.log('R418_HEADER_OPTICS',JSON.stringify(header));
             assert(header.count===1,'exactly one visible mobile topbar is required: '+JSON.stringify(header));
+            assert(header.finalOwner==='loaded-last','final r418 header owner is not authoritative: '+JSON.stringify(header));
             for(const key of ['brand','mag','lang','menu'])assert(header[key]&&header[key].top>=header.topbar.top-1&&header[key].bottom<=header.topbar.bottom+1,key+' escaped topbar: '+JSON.stringify(header));
             assert(header.mag.position==='absolute'&&header.lang.position==='absolute'&&header.menu.position==='absolute','header controls must remain attached absolute children: '+JSON.stringify(header));
             assert(!overlaps(header.brand,header.mag,2)&&!overlaps(header.mag,header.lang,2)&&!overlaps(header.lang,header.menu,2),'mobile header controls overlap: '+JSON.stringify(header));
