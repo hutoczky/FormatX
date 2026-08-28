@@ -8,9 +8,9 @@
   root.dataset.fxCoreRendererMode = 'mobile';
   root.dataset.fxCoreMobileAwardRevision = 'new-crystal-organism-r326';
   root.dataset.fxCoreCrystalRevision = 'r326-four-direction-living-facet-organism';
-  root.dataset.fxCoreMobileOpticsRevision = 'r382-balanced-soft-crystal';
+  root.dataset.fxCoreMobileOpticsRevision = 'r414-soft-rim-low-facet-glow';
 
-  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260828-r382-balanced-soft-optics';
+  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260828-r414-soft-rim-facet';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
   // r408: the text/content layer wins the critical rendering path. On phones the
   // WebGL crystal starts after the 2.5s LCP budget rather than competing with the
