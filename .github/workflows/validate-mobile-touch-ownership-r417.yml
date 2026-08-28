@@ -116,18 +116,16 @@ jobs:
               const sound=document.querySelector('.fx-three-sound');
               if(!(sound instanceof HTMLButtonElement))return null;
               const r=sound.getBoundingClientRect();
-              window.__fxSoundPhysicalTapCount=0;
               window.__fxSoundTouchTrace=[];
               const desc=node=>node instanceof Element?`${node.tagName.toLowerCase()}#${node.id||''}.${String(node.className||'').replace(/\s+/g,'.').slice(0,120)}`:String(node?.nodeName||'');
               for(const type of ['pointerdown','touchstart','pointerup','touchend','click'])document.addEventListener(type,event=>window.__fxSoundTouchTrace.push({type,target:desc(event.target),trusted:event.isTrusted}),{capture:true,passive:true});
-              sound.addEventListener('click',()=>{window.__fxSoundPhysicalTapCount+=1;},{once:true});
               return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height};
             });
             assert(soundTap&&soundTap.w>=44&&soundTap.h>=44,'SOUND target missing or too small: '+JSON.stringify(soundTap));
+
             await page.touchscreen.tap(soundTap.x,soundTap.y);
             await page.waitForTimeout(500);
-            const delivery=await page.evaluate(()=>({
-              count:window.__fxSoundPhysicalTapCount||0,
+            const firstDelivery=await page.evaluate(()=>({
               trace:window.__fxSoundTouchTrace||[],
               guard:document.documentElement.dataset.fxCoreTouchUiGuardR417||'',
               wda:document.documentElement.dataset.fxWdaSoundTouchR418||'',
@@ -135,13 +133,27 @@ jobs:
               audioOwner:document.documentElement.dataset.fxAudioOwner||'',
               audioState:document.documentElement.dataset.fxAudioState||''
             }));
-            console.log('R418_SOUND_TOUCH',JSON.stringify(delivery));
-            assert(delivery.count===1,'SOUND physical tap must produce exactly one logical button activation: '+JSON.stringify(delivery));
-            assert(['native-click','fallback-click-delivered'].includes(delivery.recovery),'SOUND touch recovery did not complete: '+JSON.stringify(delivery));
-            assert(delivery.wda==='click-received'||delivery.audioOwner==='professional-v6','neither WDA nor professional audio owner received SOUND activation: '+JSON.stringify(delivery));
-            assert(delivery.guard==='interactive-target-bypassed','MAG touch owner did not bypass interactive SOUND target: '+JSON.stringify(delivery));
-            const pointerUp=delivery.trace.find(item=>item.type==='pointerup');
-            assert(pointerUp&&/svg|fx-three-sound|fx-wda-sound-icon/.test(pointerUp.target),'SOUND pointerup escaped to the MAG stage: '+JSON.stringify(delivery));
+            console.log('R418_SOUND_TOUCH_ON',JSON.stringify(firstDelivery));
+            assert(firstDelivery.audioOwner==='professional-v6','professional audio owner did not receive SOUND activation: '+JSON.stringify(firstDelivery));
+            assert(firstDelivery.audioState==='on','first physical SOUND tap did not switch audio on: '+JSON.stringify(firstDelivery));
+            assert(['native-click','fallback-click-delivered'].includes(firstDelivery.recovery),'SOUND touch recovery did not complete: '+JSON.stringify(firstDelivery));
+            assert(firstDelivery.guard==='interactive-target-bypassed','MAG touch owner did not bypass interactive SOUND target: '+JSON.stringify(firstDelivery));
+            const firstPointerUp=firstDelivery.trace.find(item=>item.type==='pointerup');
+            assert(firstPointerUp&&/svg|fx-three-sound|fx-wda-sound-icon/.test(firstPointerUp.target),'SOUND pointerup escaped to the MAG stage: '+JSON.stringify(firstDelivery));
+
+            await page.touchscreen.tap(soundTap.x,soundTap.y);
+            await page.waitForTimeout(500);
+            const secondDelivery=await page.evaluate(()=>({
+              trace:window.__fxSoundTouchTrace||[],
+              recovery:document.documentElement.dataset.fxSoundTouchRecoveryStateR418||'',
+              audioOwner:document.documentElement.dataset.fxAudioOwner||'',
+              audioState:document.documentElement.dataset.fxAudioState||''
+            }));
+            console.log('R418_SOUND_TOUCH_OFF',JSON.stringify(secondDelivery));
+            assert(secondDelivery.audioOwner==='professional-v6','professional audio owner disappeared after second SOUND tap: '+JSON.stringify(secondDelivery));
+            assert(secondDelivery.audioState==='off','second physical SOUND tap did not switch audio off: '+JSON.stringify(secondDelivery));
+            assert(['native-click','fallback-click-delivered'].includes(secondDelivery.recovery),'second SOUND touch recovery did not complete: '+JSON.stringify(secondDelivery));
+            assert(secondDelivery.trace.filter(item=>item.type==='pointerup').length>=2,'second SOUND pointerup was not delivered: '+JSON.stringify(secondDelivery));
 
             const coreTap=await page.evaluate(()=>{
               const stage=document.querySelector('#hero .fx-core-mobile-v55-stage');if(!(stage instanceof HTMLElement))return null;const r=stage.getBoundingClientRect();window.__fxCoreTouchEvents=[];addEventListener('formatx:coreinteraction',event=>window.__fxCoreTouchEvents.push(event.detail),{passive:true});return{x:r.left+r.width*.5,y:r.top+r.height*.42,w:r.width,h:r.height};
@@ -155,7 +167,7 @@ jobs:
             assert(coreEvents.some(event=>event?.phase==='release'),'direct MAG touch does not release cleanly');
 
             await ctx.close();await browser.close();
-            console.log('PASS: r418 first-paint header, restrained MAG optics, recovered SOUND touch and direct MAG touch passed.');
+            console.log('PASS: r418 first-paint header, restrained MAG optics, SOUND ON/OFF touch transitions and direct MAG touch passed.');
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish r418 mobile visual/touch status
