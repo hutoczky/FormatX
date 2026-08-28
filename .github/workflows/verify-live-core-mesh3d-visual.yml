@@ -1,5 +1,5 @@
 name: Verify live responsive true 3D MAG
-run-name: Validate production r326/r371 WebGL MAG on desktop and mobile
+run-name: Validate production r326/r378 WebGL MAG on desktop and mobile
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Validate live current r326 crystal and r371 feathered optics
+      - name: Validate live current r326 crystal and r378 mobile finish
         shell: bash
         run: |
           set -euo pipefail
@@ -65,7 +65,7 @@ jobs:
             const page = await context.newPage();
             diagnostics(page, name);
 
-            await page.goto(`${origin}/?live_mag_r326=${name}-${Date.now()}`, {
+            await page.goto(`${origin}/?live_mag_r378=${name}-${Date.now()}`, {
               waitUntil: 'domcontentloaded',
               timeout: 30000
             });
@@ -96,11 +96,19 @@ jobs:
 
             const state = await page.evaluate(() => {
               const root = document.documentElement;
+              const host = document.querySelector('#hero .hero-space');
               const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
               const canvas = stage?.querySelector('.fx-crystal-organism-r326-canvas');
               const box = canvas?.getBoundingClientRect();
+              const stageBox = stage?.getBoundingClientRect();
+              const hostBox = host?.getBoundingClientRect();
               const gl = canvas?.getContext('webgl2') || canvas?.getContext('webgl');
               const style = canvas ? getComputedStyle(canvas) : null;
+              const auraStyle = stage ? getComputedStyle(stage, '::after') : null;
+              const centerX = rect => rect ? (rect.left + rect.right) / 2 : NaN;
+              const visibleWidth = box && hostBox
+                ? Math.max(0, Math.min(box.right, hostBox.right) - Math.max(box.left, hostBox.left))
+                : 0;
               const visible = element => {
                 if (!(element instanceof Element)) return false;
                 const rect = element.getBoundingClientRect();
@@ -139,6 +147,15 @@ jobs:
                 height: box?.height || 0,
                 opacity: Number(style?.opacity || 0),
                 filter: style?.filter || '',
+                auraOpacity: Number(auraStyle?.opacity || 0),
+                auraFilter: auraStyle?.filter || '',
+                hostCenterX: centerX(hostBox),
+                stageCenterX: centerX(stageBox),
+                canvasCenterX: centerX(box),
+                stageCenterDelta: Math.abs(centerX(stageBox) - centerX(hostBox)),
+                canvasCenterDelta: Math.abs(centerX(box) - centerX(hostBox)),
+                visibleRatio: visibleWidth / Math.max(1, box?.width || 1),
+                overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
                 energy: Number(window.FormatXCoreMobileV69?.energy || 0),
                 position: [...(window.FormatXCoreCinematic?.corePosition || [])],
                 renderMs: Number(root.dataset.fxCoreRenderMs || Infinity),
@@ -166,12 +183,13 @@ jobs:
             assert.equal(state.glError, 0);
             assert.ok(state.width <= viewport.width + 1 && state.height > 100, JSON.stringify(state));
             assert.ok(Number.isFinite(state.renderMs) && state.renderMs < 16.67, JSON.stringify(state));
-            assert.ok(state.opticsHref.includes('formatx-mobile-core-optics-r328.css'), 'r371 optics stylesheet is not loaded');
+            assert.ok(state.opticsHref.includes('formatx-mobile-core-optics-r328.css'), 'current optics stylesheet is not loaded');
             assert.equal(state.controlsVisible, true, JSON.stringify(state));
             assert.equal(state.soundAskOverlap, false, JSON.stringify(state));
             assert.equal(state.askPauseOverlap, false, JSON.stringify(state));
             assert.equal(state.heroCopyVisible, true, JSON.stringify(state));
             assert.equal(state.proofVisible, true, JSON.stringify(state));
+            assert.ok(state.overflow <= 2, JSON.stringify(state));
 
             if (mobile) {
               assert.ok(state.energy >= before.energy - .02, JSON.stringify({ before, state }));
@@ -179,10 +197,16 @@ jobs:
               assert.notDeepEqual(state.position, before.position);
               assert.equal(state.opticsOwner, 'r371-feathered-mobile-optics-owner');
               assert.ok(state.opticsHref.includes('20260827-r371-feathered-mobile-optics'), state.opticsHref);
-              assert.ok(state.opacity <= .791 && state.opacity >= .789, `mobile r371 canvas opacity mismatch: ${JSON.stringify(state)}`);
-              assert.match(state.filter, /brightness\(0\.84\)/, `mobile r371 luminance restraint missing: ${state.filter}`);
-              assert.match(state.filter, /contrast\(0\.43\)/, `mobile r371 edge contrast restraint missing: ${state.filter}`);
-              assert.match(state.filter, /blur\(1\.46px\)/, `mobile r371 feathered perimeter missing: ${state.filter}`);
+              assert.ok(state.opacity <= .721 && state.opacity >= .719, `mobile r378 canvas opacity mismatch: ${JSON.stringify(state)}`);
+              assert.match(state.filter, /brightness\(0\.7\)/, `mobile r378 luminance restraint missing: ${state.filter}`);
+              assert.match(state.filter, /contrast\(0\.28\)/, `mobile r378 edge contrast restraint missing: ${state.filter}`);
+              assert.match(state.filter, /saturate\(0\.7\)/, `mobile r378 saturation restraint missing: ${state.filter}`);
+              assert.match(state.filter, /blur\(2\.35px\)/, `mobile r378 feathered perimeter missing: ${state.filter}`);
+              assert.ok(state.auraOpacity <= .004, `mobile r378 aura is too strong: ${JSON.stringify(state)}`);
+              assert.match(state.auraFilter, /blur\(60px\)/, `mobile r378 diffuse aura missing: ${state.auraFilter}`);
+              assert.ok(state.stageCenterDelta <= 3, `mobile r378 stage is off-center: ${JSON.stringify(state)}`);
+              assert.ok(state.canvasCenterDelta <= 3, `mobile r378 canvas is off-center: ${JSON.stringify(state)}`);
+              assert.ok(state.visibleRatio >= .98, `mobile r378 crystal is horizontally clipped: ${JSON.stringify(state)}`);
             }
 
             await context.close();
@@ -202,7 +226,7 @@ jobs:
             for (const file of ['desktop-r326-current.png','mobile-r326-current.png']) {
               assert.ok(fs.statSync(file).size > 10000, file);
             }
-            console.log('PASS: live r326 WebGL crystal, r371 feathered mobile optics, interaction and control geometry passed.');
+            console.log('PASS: live r326 WebGL crystal, r378 centered feathered mobile finish, interaction and control geometry passed.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
@@ -227,10 +251,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r326 crystal and r371 feathered mobile optics passed'
+            description='Live r326 crystal and r378 centered mobile finish passed'
           else
             state=failure
-            description='Live r326/r371 MAG diagnostic failed'
+            description='Live r326/r378 MAG diagnostic failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
