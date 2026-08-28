@@ -40,7 +40,6 @@ jobs:
           const out = path.join(process.env.GITHUB_WORKSPACE, 'r377-render');
           fs.mkdirSync(out, {recursive:true});
           const assert=(v,m)=>{if(!v)throw new Error(m)};
-          const centerX=r=>(r.left+r.right)/2;
 
           async function run(profile){
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
@@ -91,7 +90,7 @@ jobs:
             assert(state.width>100 && state.height>100, profile.name+' MAG canvas too small or missing');
             assert(state.overflow<=2, profile.name+' horizontal overflow: '+state.overflow);
             assert(state.filter.includes('blur('), profile.name+' soft edge filter missing');
-            assert(state.optics.includes('r357-refined-soft-edge'), profile.name+' active optics owner missing: '+state.optics);
+            assert(state.optics.includes('r371-feathered-mobile-optics-owner'), profile.name+' current optics owner missing: '+state.optics);
             if(profile.mobile){
               assert(state.cueDisplay==='none', 'mobile decorative cue still overlaps controls');
               assert(state.opacity<=0.84, 'mobile MAG canvas is too luminous: '+state.opacity);
