@@ -260,7 +260,7 @@ function boot(){
     if(!event.isTrusted)return;
     tx=clamp(event.clientX/Math.max(1,innerWidth)*2-1,-1,1);
     ty=clamp(-(event.clientY/Math.max(1,(visualViewport?.height||innerHeight))*2-1),-1,1);
-    targetEnergy=Math.max(targetEnergy,event.type==='pointerdown'?.55:.31);
+    targetEnergy=Math.max(targetEnergy,event.type==='pointerdown' ? 0.55 : 0.31);
     schedule(event.type==='pointerdown'?8:4);
   }
 
@@ -283,7 +283,7 @@ function boot(){
   function onCoreInteraction(event){
     if(Number.isFinite(event.detail?.x))tx=clamp(event.detail.x,-1,1);
     if(Number.isFinite(event.detail?.y))ty=clamp(event.detail.y,-1,1);
-    targetEnergy=Math.max(targetEnergy,event.detail?.phase==='drag'?.50:.70);
+    targetEnergy=Math.max(targetEnergy,event.detail?.phase==='drag' ? 0.50 : 0.70);
     schedule(event.detail?.phase==='drag'?7:10);
   }
 
