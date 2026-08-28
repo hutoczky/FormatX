@@ -3,7 +3,7 @@
 const root=document.documentElement;
 const VERSION='r318-crystal-is-site-core';
 const TRUE_VOLUME_URL='/scifi-ui/scripts/formatx-core-true-volume-r267.js?v=20260828-r267-closed-volume-soft-glass';
-const TRUE_VOLUME_STYLE_URL='/scifi-ui/styles/formatx-core-true-volume-r267.css?v=20260828-r267-balanced-volume-optics';
+const TRUE_VOLUME_STYLE_URL='/scifi-ui/styles/formatx-core-true-volume-r267.css?v=20260829-r268-softened-mobile-optics';
 if(root.dataset.fxCrystalPortalR318===VERSION)return;
 root.dataset.fxCrystalPortalR318='booting';
 
