@@ -1,11 +1,15 @@
-name: Validate r417 mobile touch ownership
+name: Validate r418 mobile visual and touch ownership
 on:
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js'
       - 'docs/scifi-ui/scripts/formatx-control-owner-r268.js'
+      - 'docs/scifi-ui/scripts/formatx-wda-controls-r198.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-r416-stability.css'
       - '.github/workflows/validate-mobile-touch-ownership-r417.yml'
   workflow_dispatch:
 permissions:
@@ -17,15 +21,21 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Validate touch owner source contract
+      - name: Validate r418 source contracts
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          node --check docs/scifi-ui/scripts/formatx-wda-controls-r198.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           grep -q "touch-pulse-r417-ui-safe" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           grep -q "interactive-target-bypassed" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           grep -q "setPointerCapture" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           grep -q "releasePointerCapture" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          grep -q "fxWdaSoundTouchR418" docs/scifi-ui/scripts/formatx-wda-controls-r198.js
+          grep -q "production-r418-mobile-first-paint-header-lock" docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css
+          grep -q "production-r418-attached-header-restrained-mag" docs/scifi-ui/styles/formatx-mobile-r416-stability.css
+          grep -q "r418-restrained-soft-mag-attached-header" docs/scifi-ui/scripts/formatx-core-mobile-v55.js
       - name: Install Chromium runtime
         shell: bash
         run: |
@@ -34,7 +44,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify physical SOUND tap and direct MAG touch
+      - name: Verify first paint header, restrained MAG, SOUND and direct MAG touch
         shell: bash
         run: |
           set -euo pipefail
@@ -44,11 +54,26 @@ jobs:
           node <<'NODE'
           const {chromium}=require('playwright');
           const assert=(value,message)=>{if(!value)throw new Error(message);};
+          const overlaps=(a,b,gap=0)=>!(a.right+gap<=b.left||b.right+gap<=a.left||a.bottom+gap<=b.top||b.bottom+gap<=a.top);
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
             const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
             const page=await ctx.newPage();
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
+
+            const firstPaint=await page.evaluate(()=>{
+              const rect=node=>{const r=node?.getBoundingClientRect();return r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null;};
+              const topbar=document.querySelector('.topbar');
+              const brand=topbar?.querySelector(':scope > .brand');
+              const skip=document.querySelector('.skip-link');
+              const skipStyle=skip?getComputedStyle(skip):null;
+              return {topbar:rect(topbar),brand:rect(brand),skip:rect(skip),skipPosition:skipStyle?.position||'',skipTop:skipStyle?.top||''};
+            });
+            console.log('R418_FIRST_PAINT',JSON.stringify(firstPaint));
+            assert(firstPaint.topbar&&firstPaint.topbar.top<=1&&firstPaint.topbar.height>=68&&firstPaint.topbar.height<=76,'mobile topbar is not the first 72px carrier: '+JSON.stringify(firstPaint));
+            assert(firstPaint.brand&&firstPaint.brand.top>=firstPaint.topbar.top&&firstPaint.brand.bottom<=firstPaint.topbar.bottom+1,'brand escaped the first-paint topbar: '+JSON.stringify(firstPaint));
+            assert(firstPaint.skip&&firstPaint.skip.bottom<0&&firstPaint.skipPosition==='fixed','skip link consumed touch layout space: '+JSON.stringify(firstPaint));
+
             await page.waitForFunction(()=>{
               const root=document.documentElement;
               return root.dataset.fxCrystalOrganismR326==='ready'
@@ -59,6 +84,26 @@ jobs:
             },null,{timeout:45000});
             await page.waitForTimeout(500);
 
+            const header=await page.evaluate(()=>{
+              const box=node=>{if(!node)return null;const r=node.getBoundingClientRect(),s=getComputedStyle(node);return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,position:s.position,display:s.display,visibility:s.visibility,opacity:Number(s.opacity||1)};};
+              const bars=[...document.querySelectorAll('.topbar')].filter(node=>{const s=getComputedStyle(node),r=node.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>.02&&r.width>0&&r.height>0;});
+              const topbar=bars.find(bar=>bar.querySelector(':scope > .brand'))||bars[0];
+              const brand=topbar?.querySelector(':scope > .brand');
+              const mag=topbar?.querySelector(':scope > .fx-reference-mag-button');
+              const lang=topbar?.querySelector(':scope > .fx-language-toggle');
+              const menu=topbar?.querySelector(':scope > .fx-reference-menu-button');
+              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas');
+              const cs=canvas?getComputedStyle(canvas):null;
+              return {count:bars.length,topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),canvas:box(canvas),filter:cs?.filter||'',canvasOpacity:Number(cs?.opacity||0),headerMarker:document.documentElement.dataset.fxCanonicalTopbarR417||''};
+            });
+            console.log('R418_HEADER_OPTICS',JSON.stringify(header));
+            assert(header.count===1,'exactly one visible mobile topbar is required: '+JSON.stringify(header));
+            for(const key of ['brand','mag','lang','menu'])assert(header[key]&&header[key].top>=header.topbar.top-1&&header[key].bottom<=header.topbar.bottom+1,key+' escaped topbar: '+JSON.stringify(header));
+            assert(header.mag.position==='absolute'&&header.lang.position==='absolute'&&header.menu.position==='absolute','header controls must remain attached absolute children: '+JSON.stringify(header));
+            assert(!overlaps(header.brand,header.mag,2)&&!overlaps(header.mag,header.lang,2)&&!overlaps(header.lang,header.menu,2),'mobile header controls overlap: '+JSON.stringify(header));
+            assert(header.canvas&&header.canvasOpacity>=.74&&header.canvasOpacity<=.86,'MAG luminance left restrained target range: '+JSON.stringify(header));
+            assert(/blur\((1(?:\.\d+)?|0\.\d+)px\)/.test(header.filter),'MAG edge softening blur is missing: '+JSON.stringify(header));
+
             const soundTap=await page.evaluate(()=>{
               const sound=document.querySelector('.fx-three-sound');
               if(!(sound instanceof HTMLButtonElement))return null;
@@ -66,52 +111,42 @@ jobs:
               window.__fxSoundPhysicalTapCount=0;
               window.__fxSoundTouchTrace=[];
               const desc=node=>node instanceof Element?`${node.tagName.toLowerCase()}#${node.id||''}.${String(node.className||'').replace(/\s+/g,'.').slice(0,120)}`:String(node?.nodeName||'');
-              for(const type of ['pointerdown','touchstart','pointerup','touchend','click']){
-                document.addEventListener(type,event=>window.__fxSoundTouchTrace.push({type,target:desc(event.target)}),{capture:true,passive:true});
-              }
+              for(const type of ['pointerdown','touchstart','pointerup','touchend','click'])document.addEventListener(type,event=>window.__fxSoundTouchTrace.push({type,target:desc(event.target)}),{capture:true,passive:true});
               sound.addEventListener('click',()=>{window.__fxSoundPhysicalTapCount+=1;},{once:true});
               return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height};
             });
             assert(soundTap&&soundTap.w>=44&&soundTap.h>=44,'SOUND target missing or too small: '+JSON.stringify(soundTap));
             await page.touchscreen.tap(soundTap.x,soundTap.y);
             await page.waitForTimeout(450);
-            const delivery=await page.evaluate(()=>({
-              count:window.__fxSoundPhysicalTapCount||0,
-              trace:window.__fxSoundTouchTrace||[],
-              guard:document.documentElement.dataset.fxCoreTouchUiGuardR417||''
-            }));
-            console.log('R417_SOUND_TOUCH',JSON.stringify(delivery));
+            const delivery=await page.evaluate(()=>({count:window.__fxSoundPhysicalTapCount||0,trace:window.__fxSoundTouchTrace||[],guard:document.documentElement.dataset.fxCoreTouchUiGuardR417||'',wda:document.documentElement.dataset.fxWdaSoundTouchR418||''}));
+            console.log('R418_SOUND_TOUCH',JSON.stringify(delivery));
             assert(delivery.count===1,'SOUND physical tap must synthesize exactly one click: '+JSON.stringify(delivery));
+            assert(delivery.wda==='click-received','WDA SOUND owner did not receive the physical click: '+JSON.stringify(delivery));
             assert(delivery.guard==='interactive-target-bypassed','MAG touch owner did not bypass interactive SOUND target: '+JSON.stringify(delivery));
             const pointerUp=delivery.trace.find(item=>item.type==='pointerup');
-            assert(pointerUp&&/fx-three-sound|fx-wda-sound-icon/.test(pointerUp.target),'SOUND pointerup escaped to the MAG stage: '+JSON.stringify(delivery));
+            assert(pointerUp&&/svg|fx-three-sound|fx-wda-sound-icon/.test(pointerUp.target),'SOUND pointerup escaped to the MAG stage: '+JSON.stringify(delivery));
 
             const coreTap=await page.evaluate(()=>{
-              const stage=document.querySelector('#hero .fx-core-mobile-v55-stage');
-              if(!(stage instanceof HTMLElement))return null;
-              const r=stage.getBoundingClientRect();
-              window.__fxCoreTouchEvents=[];
-              addEventListener('formatx:coreinteraction',event=>window.__fxCoreTouchEvents.push(event.detail),{passive:true});
-              return{x:r.left+r.width*.5,y:r.top+r.height*.42,w:r.width,h:r.height};
+              const stage=document.querySelector('#hero .fx-core-mobile-v55-stage');if(!(stage instanceof HTMLElement))return null;const r=stage.getBoundingClientRect();window.__fxCoreTouchEvents=[];addEventListener('formatx:coreinteraction',event=>window.__fxCoreTouchEvents.push(event.detail),{passive:true});return{x:r.left+r.width*.5,y:r.top+r.height*.42,w:r.width,h:r.height};
             });
             assert(coreTap&&coreTap.w>100&&coreTap.h>100,'MAG stage missing: '+JSON.stringify(coreTap));
             await page.touchscreen.tap(coreTap.x,coreTap.y);
             await page.waitForTimeout(300);
             const coreEvents=await page.evaluate(()=>window.__fxCoreTouchEvents||[]);
-            console.log('R417_MAG_TOUCH',JSON.stringify(coreEvents));
+            console.log('R418_MAG_TOUCH',JSON.stringify(coreEvents));
             assert(coreEvents.some(event=>event?.phase==='press'),'direct MAG touch no longer reaches the 3D interaction owner');
             assert(coreEvents.some(event=>event?.phase==='release'),'direct MAG touch does not release cleanly');
 
             await ctx.close();await browser.close();
-            console.log('PASS: r417 physical SOUND tap stays UI-owned while direct MAG touch stays WebGL-owned.');
+            console.log('PASS: r418 first-paint header, restrained MAG optics, SOUND tap and direct MAG touch passed.');
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
-      - name: Publish r417 mobile touch status
+      - name: Publish r418 mobile visual/touch status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r417 physical UI and MAG touch ownership passed'; else state=failure; description='r417 mobile touch ownership failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX r417 mobile touch ownership' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r418 mobile header optics and touch ownership passed'; else state=failure; description='r418 mobile visual or touch ownership failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX r418 mobile visual and touch' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
