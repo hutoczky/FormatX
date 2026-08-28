@@ -1,5 +1,5 @@
 name: Verify FormatX live award readiness
-run-name: Live award-readiness audit for current r326/r377 production
+run-name: Live award-readiness audit for current r326/r414 production
 
 on:
   push:
@@ -40,16 +40,22 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           test -s docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'FormatX r376' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'r377 adds a deterministic physical centering lock' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
-          grep -Fq 'production-deploy-r377-mobile-mag-center-lock' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'FormatX r379' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
+          grep -Fq 'production-deploy-r379-mobile-mag-center-and-soft-optics' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
           grep -Fq 'single-webgl-crystal-organism-r326' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
           grep -Fq 'translate: -50% 0 !important' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
           grep -Fq 'r371-feathered-mobile-optics' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
           grep -Fq 'r371-feathered-mobile-optics-owner' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          grep -Fq 'r414-soft-rim-low-facet-glow' docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          grep -Fq 'fxCoreMobileOpticsR414' docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -Fq "fresnelPower: '2.15'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -Fq "rimAlpha: '.007'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -Fq "facetStrength: '.075'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -Fq "sideStrength: '.09'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -Fq "outerAlphaMax: '.62'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css
 
-      - name: Verify live r326 WebGL crystal, r377 centered optics, layout and scrolling
+      - name: Verify live r326 WebGL crystal, r414 shader, r379 presentation, layout and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -63,7 +69,7 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
           fetch "/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=${GITHUB_RUN_ID}" "$TMP/crystal-r326.js"
-          fetch "/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r377.css"
+          fetch "/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r379.css"
           fetch "/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-regression.js"
           fetch "/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=${GITHUB_RUN_ID}" "$TMP/touch-r99.js"
           fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
@@ -77,12 +83,13 @@ jobs:
           contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
 
           contains bootstrap 'native-mechanical-orb-r250-no-2d-mag-layers' "$TMP/bootstrap.js"
-          contains bootstrap-wrapper 'formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r251-performance' "$TMP/bootstrap.js"
+          contains bootstrap-wrapper 'formatx-core-mobile-v55.js?v=20260828-r382-balanced-soft-optics' "$TMP/bootstrap.js"
           contains bootstrap-cleanup 'cleanupLegacy2d' "$TMP/bootstrap.js"
 
           contains wrapper-award-revision 'new-crystal-organism-r326' "$TMP/mobile-wrapper.js"
           contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' "$TMP/mobile-wrapper.js"
-          contains wrapper-primary 'formatx-crystal-organism-r326.js?v=20260825-r326-new-organism' "$TMP/mobile-wrapper.js"
+          contains wrapper-optics-revision 'r414-soft-rim-low-facet-glow' "$TMP/mobile-wrapper.js"
+          contains wrapper-primary 'formatx-crystal-organism-r326.js?v=20260828-r414-soft-rim-facet' "$TMP/mobile-wrapper.js"
           contains wrapper-selection 'new-crystal-organism-r326-primary' "$TMP/mobile-wrapper.js"
           contains wrapper-composition 'new-organism-no-legacy-visual-fallback' "$TMP/mobile-wrapper.js"
           contains wrapper-overlay-policy 'new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual' "$TMP/mobile-wrapper.js"
@@ -90,6 +97,13 @@ jobs:
 
           contains renderer-version "const VERSION = 'crystal-organism-r326'" "$TMP/crystal-r326.js"
           contains renderer 'single-webgl-crystal-organism-r326' "$TMP/crystal-r326.js"
+          contains renderer-r414 'fxCoreMobileOpticsR414' "$TMP/crystal-r326.js"
+          contains renderer-r414-mode 'soft-rim-low-facet-glow-r414' "$TMP/crystal-r326.js"
+          contains mobile-fresnel "fresnelPower: '2.15'" "$TMP/crystal-r326.js"
+          contains mobile-rim-alpha "rimAlpha: '.007'" "$TMP/crystal-r326.js"
+          contains mobile-facet-strength "facetStrength: '.075'" "$TMP/crystal-r326.js"
+          contains mobile-side-strength "sideStrength: '.09'" "$TMP/crystal-r326.js"
+          contains mobile-alpha-cap "outerAlphaMax: '.62'" "$TMP/crystal-r326.js"
           contains webgl2 "getContext('webgl2'" "$TMP/crystal-r326.js"
           contains webgl-fallback "getContext('webgl'" "$TMP/crystal-r326.js"
           contains geometry 'buildOrganismGeometry' "$TMP/crystal-r326.js"
@@ -100,28 +114,29 @@ jobs:
           contains native-ready 'ready-v69' "$TMP/crystal-r326.js"
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/crystal-r326.js"
 
-          # r377 is the current live-device optical authority. The r371 runtime
-          # marker still identifies the loader owner, while this stylesheet now
-          # adds deterministic physical centering and softer narrow-phone edges.
-          contains optics-version 'FormatX r376' "$TMP/optics-r377.css"
-          contains optics-r377 'r377 adds a deterministic physical centering lock' "$TMP/optics-r377.css"
-          contains optics-deploy 'production-deploy-r377-mobile-mag-center-lock' "$TMP/optics-r377.css"
-          contains optics-scope 'single-webgl-crystal-organism-r326' "$TMP/optics-r377.css"
-          contains mobile-center 'translate: -50% 0 !important' "$TMP/optics-r377.css"
-          contains mobile-opacity 'opacity: .72 !important' "$TMP/optics-r377.css"
-          contains mobile-highlight 'brightness(.76)' "$TMP/optics-r377.css"
-          contains mobile-contrast 'contrast(.34)' "$TMP/optics-r377.css"
-          contains mobile-blur 'blur(2.05px)' "$TMP/optics-r377.css"
-          contains mobile-aura 'opacity: .005 !important' "$TMP/optics-r377.css"
-          contains narrow-query '@media (max-width: 430px)' "$TMP/optics-r377.css"
-          contains narrow-highlight 'brightness(.70)' "$TMP/optics-r377.css"
-          contains narrow-contrast 'contrast(.28)' "$TMP/optics-r377.css"
-          contains narrow-saturation 'saturate(.70)' "$TMP/optics-r377.css"
-          contains narrow-blur 'blur(2.35px)' "$TMP/optics-r377.css"
-          contains narrow-aura 'opacity: .003 !important' "$TMP/optics-r377.css"
+          # r414 owns the mobile shader lighting while r379 owns final physical
+          # centering/presentation. Validate both so the live audit cannot pass
+          # with either an old hard-rim shader or an old presentation layer.
+          contains optics-version 'FormatX r379' "$TMP/optics-r379.css"
+          contains optics-deploy 'production-deploy-r379-mobile-mag-center-and-soft-optics' "$TMP/optics-r379.css"
+          contains optics-scope 'single-webgl-crystal-organism-r326' "$TMP/optics-r379.css"
+          contains mobile-center 'translate: -50% 0 !important' "$TMP/optics-r379.css"
+          contains mobile-opacity 'opacity: .70 !important' "$TMP/optics-r379.css"
+          contains mobile-highlight 'brightness(.70)' "$TMP/optics-r379.css"
+          contains mobile-contrast 'contrast(.28)' "$TMP/optics-r379.css"
+          contains mobile-saturation 'saturate(.72)' "$TMP/optics-r379.css"
+          contains mobile-blur 'blur(2.50px)' "$TMP/optics-r379.css"
+          contains mobile-aura 'opacity: .002 !important' "$TMP/optics-r379.css"
+          contains narrow-query '@media (max-width: 430px)' "$TMP/optics-r379.css"
+          contains narrow-opacity 'opacity: .68 !important' "$TMP/optics-r379.css"
+          contains narrow-highlight 'brightness(.64)' "$TMP/optics-r379.css"
+          contains narrow-contrast 'contrast(.22)' "$TMP/optics-r379.css"
+          contains narrow-saturation 'saturate(.66)' "$TMP/optics-r379.css"
+          contains narrow-blur 'blur(3.05px)' "$TMP/optics-r379.css"
+          contains narrow-aura 'opacity: .0015 !important' "$TMP/optics-r379.css"
           contains optics-cache 'formatx-mobile-core-optics-r328.css?v=20260827-r371-feathered-mobile-optics' "$TMP/mobile-regression.js"
           contains optics-owner 'r371-feathered-mobile-optics-owner' "$TMP/mobile-regression.js"
-          ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' "$TMP/optics-r377.css"
+          ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' "$TMP/optics-r379.css"
 
           contains touch-wake 'formatx:referencepause' "$TMP/touch-r99.js"
           contains touch-pulse 'FormatXCoreMobileV69?.pulse' "$TMP/touch-r99.js"
@@ -163,10 +178,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Award/source + live r326 WebGL crystal, r377 centered optics and scrolling passed'
+            description='Award/source + live r414 MAG, r379 optics and scrolling passed'
           else
             state=failure
-            description='Award, live r326 MAG, r377 optics, interaction or scrolling failed'
+            description='Award, live r414 MAG, r379 optics, interaction or scrolling failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
