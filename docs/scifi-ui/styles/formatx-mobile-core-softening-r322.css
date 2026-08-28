@@ -1,8 +1,6 @@
-/* FormatX r375/r378 — balanced mobile MAG heart light and feathered glass silhouette.
-   Preserve the approved v51 faceted character while reducing the centre bloom,
-   facet contrast and hard perimeter on high-density phones. r378 aligns the
-   narrow-phone carrier with the r377 centering owner so equal-specificity
-   finish layers cannot pull the active r326 MAG half a viewport to the left. */
+/* FormatX r379 — restrained mobile MAG light, feathered glass silhouette and
+   deterministic phone carrier centering. The active r326 WebGL geometry stays
+   intact; this late finish layer may not sharpen or displace it. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
@@ -10,28 +8,22 @@
     filter: none !important;
   }
 
-  /* r375 final mobile finish: keep facet readability while feathering the
-     rasterised WebGL contour enough to read as translucent glass, not neon. */
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .82 !important;
+    opacity: .70 !important;
     image-rendering: auto !important;
     filter:
-      brightness(.69)
-      contrast(.63)
-      saturate(.80)
-      blur(1.08px)
-      drop-shadow(0 0 .008px rgba(132,242,255,.0005)) !important;
+      brightness(.70)
+      contrast(.28)
+      saturate(.72)
+      blur(2.50px) !important;
     -webkit-filter:
-      brightness(.69)
-      contrast(.63)
-      saturate(.80)
-      blur(1.08px)
-      drop-shadow(0 0 .008px rgba(132,242,255,.0005)) !important;
+      brightness(.70)
+      contrast(.28)
+      saturate(.72)
+      blur(2.50px) !important;
   }
 
-  /* Perimeter bioluminescence is atmosphere only; it must never redraw a
-     second cyan/violet silhouette over the softened WebGL glass edge. */
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
     position: absolute;
     inset: 0;
@@ -41,7 +33,7 @@
     overflow: visible;
     pointer-events: none;
     mix-blend-mode: screen;
-    opacity: .004;
+    opacity: .0008;
   }
 
   #hero .fx-core-biolume-r323 path {
@@ -52,68 +44,47 @@
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke: rgba(67,202,255,.004);
-    stroke-width: .17;
-    filter: blur(15.6px);
-    opacity: .0005;
+    stroke: rgba(67,202,255,.003);
+    stroke-width: .050;
+    filter: blur(19px);
+    opacity: .00014;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-base {
     stroke: url(#fx-biolume-gradient-r323);
-    stroke-width: .04;
-    opacity: .0016;
-    filter: blur(3.8px);
+    stroke-width: .017;
+    opacity: .0007;
+    filter: blur(8.8px);
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .04;
+    stroke-width: .023;
     stroke-dasharray: 4.5 18 2 24;
-    animation: fx-biolume-travel-r323 27s linear infinite;
-    filter: drop-shadow(0 0 .002px currentColor) blur(2.9px);
+    animation: fx-biolume-travel-r323 31s linear infinite;
+    filter: blur(8px);
+    opacity: .0016;
   }
 
-  #hero .fx-core-biolume-r323 .fx-biolume-runner-a {
-    stroke: #75f7ff;
-    color: #75f7ff;
-    opacity: .0022;
-  }
-
-  #hero .fx-core-biolume-r323 .fx-biolume-runner-b {
-    stroke: #8a78ff;
-    color: #8a78ff;
-    opacity: .0013;
-    stroke-dasharray: 2.5 22 5.5 20;
-    animation-duration: 31s;
-    animation-direction: reverse;
-  }
-
-  #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke: #71ffd0;
-    color: #71ffd0;
-    opacity: .0009;
-    stroke-dasharray: 1.5 30 3.5 26;
-    animation-duration: 35s;
-  }
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-a { stroke: #75f7ff; color: #75f7ff; }
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-b { stroke: #8a78ff; color: #8a78ff; animation-direction: reverse; }
+  #hero .fx-core-biolume-r323 .fx-biolume-runner-c { stroke: #71ffd0; color: #71ffd0; animation-duration: 35s; }
 }
 
 @media (max-width: 430px) {
-  /* r378: r377 owns the independent -50% translation, while the current
-     shapeshifter owns transform. Keep the carrier anchor at 50% here as well;
-     the previous zero-left override combined with r377 translate(-50%) and
-     moved the whole crystal exactly half a viewport to the left. */
   html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage {
     left: 50% !important;
     right: auto !important;
-    width: 100vw !important;
+    width: 100% !important;
     min-width: 0 !important;
-    max-width: 100vw !important;
+    max-width: 100% !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     translate: -50% 0 !important;
+    transform: none !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: clip !important;
   }
 
   html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-crystal-organism-r326-stage > .fx-core-mobile-v55-canvas.fx-crystal-organism-r326-canvas {
@@ -123,49 +94,23 @@
     max-width: 100% !important;
     height: 100% !important;
     box-sizing: border-box !important;
-  }
-
-  /* Phone-density finish: one extra step of feathering and lower contrast while
-     retaining the visible internal planes of the approved four-point crystal. */
-  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
-  html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .80 !important;
+    opacity: .68 !important;
     filter:
-      brightness(.68)
-      contrast(.60)
-      saturate(.78)
-      blur(1.18px)
-      drop-shadow(0 0 .006px rgba(132,242,255,.0004)) !important;
+      brightness(.64)
+      contrast(.22)
+      saturate(.66)
+      blur(3.05px) !important;
     -webkit-filter:
-      brightness(.68)
-      contrast(.60)
-      saturate(.78)
-      blur(1.18px)
-      drop-shadow(0 0 .006px rgba(132,242,255,.0004)) !important;
+      brightness(.64)
+      contrast(.22)
+      saturate(.66)
+      blur(3.05px) !important;
   }
 
-  #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
-    opacity: .0025;
-  }
-
-  #hero .fx-core-biolume-r323 .fx-biolume-halo {
-    stroke-width: .15;
-    filter: blur(16.4px);
-    opacity: .0004;
-  }
-
-  #hero .fx-core-biolume-r323 .fx-biolume-base {
-    stroke-width: .035;
-    opacity: .0013;
-    filter: blur(4.0px);
-  }
-
-  #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
-  #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
-  #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
-    stroke-width: .035;
-    filter: drop-shadow(0 0 .0015px currentColor) blur(3.1px);
-  }
+  #hero .fx-core-r317-stage > .fx-core-biolume-r323 { opacity: .00055; }
+  #hero .fx-core-biolume-r323 .fx-biolume-halo { stroke-width: .045; filter: blur(21px); opacity: .00010; }
+  #hero .fx-core-biolume-r323 .fx-biolume-base { stroke-width: .015; opacity: .0005; filter: blur(10px); }
+  #hero .fx-core-biolume-r323 :is(.fx-biolume-runner-a,.fx-biolume-runner-b,.fx-biolume-runner-c) { stroke-width: .020; filter: blur(9px); opacity: .0011; }
 }
 
 @keyframes fx-biolume-travel-r323 {
@@ -178,14 +123,8 @@
   #hero .fx-core-biolume-r323 .fx-biolume-runner-b,
   #hero .fx-core-biolume-r323 .fx-biolume-runner-c {
     animation: none !important;
-    opacity: .0012;
+    opacity: .0008;
   }
 }
 
-/* production-deploy-r374-feathered-mobile-lighting */
-/* production-deploy-r407-soft-mobile-crystal */
-/* production-deploy-r409-softer-mobile-crystal */
-/* production-deploy-r410-v51-approved-detail-finish */
-/* production-deploy-r412-balanced-mobile-glass */
-/* production-deploy-r375-balanced-heart-feathering */
-/* production-deploy-r378-cascade-center-lock */
+/* production-deploy-r379-centered-soft-mobile-mag */
