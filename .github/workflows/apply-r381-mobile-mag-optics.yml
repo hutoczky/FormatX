@@ -1,0 +1,95 @@
+name: Apply targeted mobile MAG shader softening
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/apply-r381-mobile-mag-optics.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Soften mobile crystal shader without changing desktop geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          shader = Path('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js')
+          text = shader.read_text(encoding='utf-8')
+
+          replacements = [
+              ("    innerHeartBase: '.105',", "    innerHeartBase: '.072',"),
+              ("    innerHeartBreath: '.18',", "    innerHeartBreath: '.105',"),
+              ("    innerHeartAlpha: '.09',", "    innerHeartAlpha: '.055',"),
+              ("    innerAlphaMax: '.46',", "    innerAlphaMax: '.34',"),
+              ("    rimBase: '.058',", "    rimBase: '.032',"),
+              ("    rimEnergy: '.038',", "    rimEnergy: '.018',"),
+              ("    rimAlpha: '.018',", "    rimAlpha: '.010',"),
+              ("    outerHeartBase: '.026',", "    outerHeartBase: '.018',"),
+              ("    outerHeartEnergy: '.034',", "    outerHeartEnergy: '.016',"),
+              ("    facetStrength: '.13',", "    facetStrength: '.095',"),
+              ("    sideStrength: '.16',", "    sideStrength: '.105',"),
+              ("    outerAlphaBase: '.46',", "    outerAlphaBase: '.42',"),
+              ("    outerAlphaKey: '.13',", "    outerAlphaKey: '.09',"),
+              ("    outerAlphaMin: '.39',", "    outerAlphaMin: '.35',"),
+              ("    outerAlphaMax: '.76'", "    outerAlphaMax: '.66'"),
+              (
+                  "      gl.blendFunc(gl.SRC_ALPHA,gl.ONE);\n      gl.uniform1f(uniforms.uLayer,1);",
+                  "      gl.blendFunc(gl.SRC_ALPHA,mobile?gl.ONE_MINUS_SRC_ALPHA:gl.ONE);\n      gl.uniform1f(uniforms.uLayer,1);"
+              ),
+          ]
+
+          for old, new in replacements:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'Expected exactly one shader match for {old!r}, found {count}')
+              text = text.replace(old, new, 1)
+
+          shader.write_text(text, encoding='utf-8')
+
+          for filename in [
+              'docs/scifi-ui/scripts/formatx-core-real3d-v20.js',
+              'docs/scifi-ui/scripts/formatx-core-mobile-v55.js',
+          ]:
+              path = Path(filename)
+              data = path.read_text(encoding='utf-8')
+              old = 'formatx-crystal-organism-r326.js?v=20260828-r326-real-geometry'
+              new = 'formatx-crystal-organism-r326.js?v=20260828-r381-mobile-soft-optics'
+              if old not in data:
+                  raise SystemExit(f'Missing expected crystal cache key in {filename}')
+              data = data.replace(old, new)
+              if filename.endswith('formatx-core-real3d-v20.js'):
+                  data = data.replace(
+                      'formatx-pure-3d-r285.css?v=20260821-r285-pure-webgl',
+                      'formatx-pure-3d-r285.css?v=20260828-r380-mobile-soft-optics'
+                  )
+              path.write_text(data, encoding='utf-8')
+          PY
+
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+
+      - name: Commit one-shot patch and remove helper workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          rm -f .github/workflows/apply-r381-mobile-mag-optics.yml
+          git add -A
+          git diff --cached --check
+          git commit -m 'Tune mobile MAG shader for softer crystal optics'
+          git push origin HEAD:master
