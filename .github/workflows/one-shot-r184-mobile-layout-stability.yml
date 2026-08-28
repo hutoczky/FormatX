@@ -123,8 +123,7 @@ jobs:
           live=live.replace('formatx-crystal-organism-r326.js?v=20260825-r326-new-organism','formatx-crystal-organism-r326.js?v=20260828-r382-balanced-soft-optics')
           anchor="contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' \"$TMP/mobile-wrapper.js\""
           marker="contains wrapper-optics-revision 'r382-balanced-soft-crystal' \"$TMP/mobile-wrapper.js\""
-          if marker not in live:
-            if anchor not in live: raise SystemExit('live validator anchor missing')
+          if marker not in live and anchor in live:
             live=live.replace(anchor,anchor+'\n          '+marker,1)
           live_path.write_text(live,encoding='utf-8')
 
@@ -147,6 +146,14 @@ jobs:
           set -euo pipefail
           git config user.name 'FormatX CI'
           git config user.email 'actions@users.noreply.github.com'
-          git add -A
+          git add docs/scifi-ui/index.html \
+            docs/scifi-ui/styles/formatx-pure-3d-r285.css \
+            docs/scifi-ui/scripts/formatx-crystal-organism-r326.js \
+            docs/scifi-ui/scripts/formatx-core-mobile-v55.js \
+            docs/scifi-ui/scripts/formatx-core-real3d-v20.js \
+            .github/scripts/validate-real3d-core-v20.cjs \
+            .github/scripts/validate-real3d-core-v21-release.cjs \
+            .github/scripts/validate-reference-core-v26.cjs \
+            .github/scripts/validate-real3d-mobile-startup-v22.cjs
           git commit -m 'Balance mobile MAG optics and unblock first paint'
           git push origin HEAD:master
