@@ -1,10 +1,11 @@
-name: Validate r377 cross-device MAG render
+name: Validate r378 cross-device MAG render
 
 on:
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
       - 'docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
       - '.github/workflows/validate-r352-cross-device-mag.yml'
   workflow_dispatch:
@@ -22,7 +23,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/r377" && cd "$RUNNER_TEMP/r377"
+          mkdir -p "$RUNNER_TEMP/r378" && cd "$RUNNER_TEMP/r378"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
@@ -30,14 +31,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r377-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r378-server.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/r377"
+          cd "$RUNNER_TEMP/r378"
           node <<'NODE'
           const { chromium } = require('playwright');
           const fs = require('fs');
           const path = require('path');
-          const out = path.join(process.env.GITHUB_WORKSPACE, 'r377-render');
+          const out = path.join(process.env.GITHUB_WORKSPACE, 'r378-render');
           fs.mkdirSync(out, {recursive:true});
           const assert=(v,m)=>{if(!v)throw new Error(m)};
 
@@ -65,6 +66,7 @@ jobs:
               const r=c.getBoundingClientRect();
               const sr=stage.getBoundingClientRect();
               const hr=host.getBoundingClientRect();
+              const stageStyle=getComputedStyle(stage);
               const cx=x=>(x.left+x.right)/2;
               const visibleWidth=Math.max(0,Math.min(r.right,hr.right)-Math.max(r.left,hr.left));
               return {
@@ -72,6 +74,7 @@ jobs:
                 optics:document.documentElement.dataset.fxCoreMobileOpticsR328||'',
                 width:r.width,height:r.height,
                 scale:s.scale,transform:s.transform,filter:s.filter,opacity:Number(s.opacity),
+                stageLeftStyle:stageStyle.left,stageRightStyle:stageStyle.right,stageTranslate:stageStyle.translate,
                 auraOpacity:Number(aura?.opacity||0),
                 auraWidth:aura?.width||'',
                 auraFilter:aura?.filter||'',
@@ -116,6 +119,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r377-cross-device-mag-render
-          path: r377-render/
+          name: r378-cross-device-mag-render
+          path: r378-render/
           retention-days: 14
