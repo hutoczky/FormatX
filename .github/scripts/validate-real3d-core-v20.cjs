@@ -19,8 +19,8 @@ const contract=JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
 assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
 assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r416-site-coupled-soft-optics/);
-assert.match(wrapper,/formatx-mobile-r416-stability\.css\?v=20260828-r416-site-is-mag-soft-optics-first-frame/);
-assert.match(wrapper,/r416-site-is-mag-soft-optics-first-frame/);
+assert.match(wrapper,/formatx-mobile-r416-stability\.css\?v=20260828-r417-balanced-soft-mag-header-repair/);
+assert.match(wrapper,/r417-balanced-soft-mag-header-repair/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.match(wrapper,/no-legacy-visual-fallback/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
@@ -50,11 +50,17 @@ assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\
 assert.doesNotMatch(renderer,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 
 for(const token of [
-  'production-r416-site-is-mag-soft-optics-first-frame',
+  'production-r417-mobile-header-and-balanced-mag-optics',
   'margin:0 auto 16px !important',
-  'brightness(.58) contrast(.30) saturate(.60) blur(1.35px)',
+  'opacity:.86 !important',
+  'brightness(.86) contrast(.62) saturate(.80) blur(.72px)',
+  'top:-160px !important',
+  '.topbar:not(:has(.brand))',
+  '.topbar:has(.brand)',
+  'min-height:72px !important',
   'min-height:44px !important'
-])assert.ok(stabilityCss.includes(token),`missing r416 mobile stability contract: ${token}`);
+])assert.ok(stabilityCss.includes(token),`missing r417 mobile stability contract: ${token}`);
+assert.doesNotMatch(stabilityCss,/brightness\(\.5[0-9]\) contrast\(\.2[0-9]\)/);
 for(const token of [
   "interaction-bridge-r416-site-is-mag",
   'site-is-mag-crystal-is-visual-heart',
@@ -74,4 +80,4 @@ assert.equal(contract.quality_contract.mag_image_backed,false);
 assert.equal(contract.quality_contract.mag_webgl_context_count,1);
 assert.equal(contract.quality_contract.mag_paused_outside_hero,true);
 for(const source of [bootstrap,wrapper,renderer,layout,bridge])new Function(source);
-console.log('PASS: r326 WebGL crystal + r416 first-frame optics and bidirectional site↔MAG coupling are authoritative; legacy visual fallback is forbidden.');
+console.log('PASS: r326 WebGL crystal + r417 mobile header/optics repair and r416 bidirectional site↔MAG coupling are authoritative; legacy visual fallback is forbidden.');
