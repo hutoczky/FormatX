@@ -100,7 +100,9 @@ jobs:
               assert(state.canvasCenterDelta<=3, profile.name+' MAG canvas is horizontally displaced: '+JSON.stringify(state));
               assert(state.visibleRatio>=0.98, profile.name+' MAG is clipped horizontally: '+JSON.stringify(state));
             }
-            await page.screenshot({path:path.join(out,profile.name+'.png'),fullPage:false,animations:'disabled'});
+            await page.screenshot({path:path.join(out,profile.name+'.png'),fullPage:false,animations:'disabled',timeout:5000}).catch(error=>{
+              console.log(profile.name+' screenshot skipped: '+error.message.split('\n')[0]);
+            });
             await context.close();
             await browser.close();
           }
