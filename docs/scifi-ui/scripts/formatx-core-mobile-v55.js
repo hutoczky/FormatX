@@ -8,13 +8,13 @@
   root.dataset.fxCoreRendererMode = 'mobile';
   root.dataset.fxCoreMobileAwardRevision = 'new-crystal-organism-r326';
   root.dataset.fxCoreCrystalRevision = 'r326-four-direction-living-facet-organism';
-  root.dataset.fxCoreMobileOpticsRevision = 'r417-balanced-soft-mag-header-repair';
+  root.dataset.fxCoreMobileOpticsRevision = 'r418-restrained-soft-mag-attached-header';
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260828-r416-site-coupled-soft-optics';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
-  const OPTICS_TUNE_STYLE = '/scifi-ui/styles/formatx-mobile-r416-stability.css?v=20260828-r417-balanced-soft-mag-header-repair';
-  // Content wins the critical path. The physical hero slot and final mobile CSS
-  // are stable immediately; WebGL may arrive after LCP without moving the page.
+  const OPTICS_TUNE_STYLE = '/scifi-ui/styles/formatx-mobile-r416-stability.css?v=20260828-r418-restrained-soft-mag-attached-header';
+  // Content wins the critical path. The render-blocking r418 stylesheet owns the
+  // first header frame; this later tune only refines the WebGL optics.
   const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 3000 : 1100;
   let rendererRequested = false;
   let rendererTimer = 0;
@@ -22,8 +22,8 @@
   function loadOpticsTune() {
     const existing = document.querySelector('link[data-fx-mobile-r416-stability]');
     if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r417-balanced-soft-mag-header-repair')) existing.href = OPTICS_TUNE_STYLE;
-      root.dataset.fxCoreMobileOpticsR416='ready-r417-repair';
+      if (!existing.href.includes('r418-restrained-soft-mag-attached-header')) existing.href = OPTICS_TUNE_STYLE;
+      root.dataset.fxCoreMobileOpticsR416='ready-r418-restrained';
       return;
     }
     const link=document.createElement('link');
@@ -31,8 +31,8 @@
     link.href=OPTICS_TUNE_STYLE;
     link.dataset.fxMobileR416Stability='true';
     document.head.appendChild(link);
-    root.dataset.fxCoreMobileOpticsR416='requested-r417-repair';
-    link.addEventListener('load',()=>{root.dataset.fxCoreMobileOpticsR416='ready-r417-repair';},{once:true});
+    root.dataset.fxCoreMobileOpticsR416='requested-r418-restrained';
+    link.addEventListener('load',()=>{root.dataset.fxCoreMobileOpticsR416='ready-r418-restrained';},{once:true});
     link.addEventListener('error',()=>{root.dataset.fxCoreMobileOpticsR416='load-failed';},{once:true});
   }
 
@@ -106,10 +106,10 @@
 
   function schedulePrimaryRenderer() {
     if (rendererRequested || rendererTimer) return;
-    root.dataset.fxCoreRendererStartupR346='critical-content-first-r417';
+    root.dataset.fxCoreRendererStartupR346='critical-content-first-r418';
     const schedule = () => {
       if (rendererRequested || rendererTimer) return;
-      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-content-lcp-r417'), START_DELAY);
+      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-content-lcp-r418'), START_DELAY);
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
     else schedule();
