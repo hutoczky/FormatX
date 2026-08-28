@@ -1,4 +1,4 @@
-name: Verify r376 softer mobile MAG finish
+name: Verify r377 centered softer mobile MAG finish
 
 on:
   push:
@@ -16,14 +16,14 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r376-live:
+  verify-r377-live:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r376 softer mobile finish source contract
+      - name: Validate r377 centered mobile finish source contract
         shell: bash
         run: |
           set -euo pipefail
@@ -35,32 +35,33 @@ jobs:
           node --check "$SHADER"
           node --check "$AWARD"
 
-          # The r375 softening layer remains compatible and still owns the older
-          # fallback surface. r376 is the final active current-crystal optics owner.
           grep -Fq 'FormatX r375' "$CSS"
           grep -Fq 'production-deploy-r375-balanced-heart-feathering' "$CSS"
 
           grep -Fq 'FormatX r376' "$OPTICS"
+          grep -Fq 'r377 adds a deterministic physical centering lock' "$OPTICS"
           grep -Fq 'production-deploy-r376-softer-mobile-light-and-edge' "$OPTICS"
+          grep -Fq 'production-deploy-r377-mobile-mag-center-lock' "$OPTICS"
+          grep -Fq '.fx-crystal-organism-r326-stage {' "$OPTICS"
+          grep -Fq 'left: 50% !important' "$OPTICS"
+          grep -Fq 'translate: -50% 0 !important' "$OPTICS"
+          grep -Fq 'width: 100% !important' "$OPTICS"
           grep -Fq 'opacity: .72' "$OPTICS"
-          grep -Fq 'opacity: .69' "$OPTICS"
           grep -Fq 'brightness(.76)' "$OPTICS"
           grep -Fq 'contrast(.34)' "$OPTICS"
           grep -Fq 'blur(2.05px)' "$OPTICS"
-          grep -Fq 'brightness(.74)' "$OPTICS"
-          grep -Fq 'contrast(.32)' "$OPTICS"
-          grep -Fq 'blur(2.15px)' "$OPTICS"
-          grep -Fq 'opacity: .005' "$OPTICS"
-          grep -Fq 'opacity: .0035' "$OPTICS"
+          grep -Fq 'brightness(.70)' "$OPTICS"
+          grep -Fq 'contrast(.28)' "$OPTICS"
+          grep -Fq 'saturate(.70)' "$OPTICS"
+          grep -Fq 'blur(2.35px)' "$OPTICS"
+          grep -Fq 'opacity: .003' "$OPTICS"
 
-          # Desktop optics must remain exactly on the established r326 contract.
+          # Desktop optics stay exactly on the established r326 contract.
           grep -Fq 'opacity: .91' "$OPTICS"
           grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS"
-
           ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$OPTICS"
 
-          # r376 is an optics-only mobile finish. Shader geometry and the proven
-          # r375 mobile lighting contract remain unchanged, as does desktop r326.
+          # Shader geometry/lighting stays on the proven r375 mobile contract.
           grep -Fq "fresnelPower: '1.8'" "$SHADER"
           grep -Fq "innerHeartBase: '.105'" "$SHADER"
           grep -Fq "innerHeartBreath: '.18'" "$SHADER"
@@ -79,36 +80,37 @@ jobs:
           grep -Fq 'balanced-heart-feathered-facets-r375' "$SHADER"
           grep -Fq "desktop-r326-unchanged" "$SHADER"
 
-      - name: Verify production serves r376 softer mobile finish
+      - name: Verify production serves r377 centered softer mobile finish
         shell: bash
         run: |
           set -euo pipefail
           CSS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
           OPTICS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
           JS_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js'
-          CSS_TMP="$RUNNER_TEMP/r376-softening-live.css"
-          OPTICS_TMP="$RUNNER_TEMP/r376-optics-live.css"
-          JS_TMP="$RUNNER_TEMP/r376-live.js"
+          CSS_TMP="$RUNNER_TEMP/r377-softening-live.css"
+          OPTICS_TMP="$RUNNER_TEMP/r377-optics-live.css"
+          JS_TMP="$RUNNER_TEMP/r377-live.js"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "r376 live verification $attempt/45"
-            suffix="r376_live=${GITHUB_RUN_ID}_${attempt}"
+            echo "r377 live verification $attempt/45"
+            suffix="r377_live=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${OPTICS_URL}?${suffix}" -o "$OPTICS_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP"; then
               if grep -Fq 'FormatX r375' "$CSS_TMP" \
-                && grep -Fq 'FormatX r376' "$OPTICS_TMP" \
-                && grep -Fq 'production-deploy-r376-softer-mobile-light-and-edge' "$OPTICS_TMP" \
-                && grep -Fq 'opacity: .69' "$OPTICS_TMP" \
+                && grep -Fq 'r377 adds a deterministic physical centering lock' "$OPTICS_TMP" \
+                && grep -Fq 'production-deploy-r377-mobile-mag-center-lock' "$OPTICS_TMP" \
+                && grep -Fq 'left: 50% !important' "$OPTICS_TMP" \
+                && grep -Fq 'translate: -50% 0 !important' "$OPTICS_TMP" \
                 && grep -Fq 'brightness(.76)' "$OPTICS_TMP" \
                 && grep -Fq 'contrast(.34)' "$OPTICS_TMP" \
                 && grep -Fq 'blur(2.05px)' "$OPTICS_TMP" \
-                && grep -Fq 'brightness(.74)' "$OPTICS_TMP" \
-                && grep -Fq 'contrast(.32)' "$OPTICS_TMP" \
-                && grep -Fq 'blur(2.15px)' "$OPTICS_TMP" \
-                && grep -Fq 'opacity: .005' "$OPTICS_TMP" \
-                && grep -Fq 'opacity: .0035' "$OPTICS_TMP" \
+                && grep -Fq 'brightness(.70)' "$OPTICS_TMP" \
+                && grep -Fq 'contrast(.28)' "$OPTICS_TMP" \
+                && grep -Fq 'saturate(.70)' "$OPTICS_TMP" \
+                && grep -Fq 'blur(2.35px)' "$OPTICS_TMP" \
+                && grep -Fq 'opacity: .003' "$OPTICS_TMP" \
                 && grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS_TMP" \
                 && grep -Fq "fresnelPower: '1.8'" "$JS_TMP" \
                 && grep -Fq 'fxCoreMobileLightingR375' "$JS_TMP" \
@@ -121,9 +123,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r376 with reduced mobile MAG light energy and softer perimeter while desktop optics, geometry and controls remain unchanged.'
+          echo 'PASS: production serves r377 with centered mobile r326 MAG, softer phone edges and unchanged desktop optics.'
 
-      - name: Publish r376 live status
+      - name: Publish r377 live status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -132,13 +134,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r376 softer mobile MAG finish passed'
+            description='Live r377 centered softer mobile MAG passed'
           else
             state=failure
-            description='Live r376 softer mobile MAG verification failed'
+            description='Live r377 mobile MAG verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r376 live mobile MAG finish' \
+            -f context='FormatX r377 live mobile MAG finish' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
