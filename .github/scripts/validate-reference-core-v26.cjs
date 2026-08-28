@@ -17,14 +17,20 @@ const entry=read('billing-worker/src/production-entry.js');
 
 assert.match(selector,/const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/);
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
-assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r382-balanced-soft-optics/);
+assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r414-soft-rim-facet/);
+assert.match(wrapper,/r414-soft-rim-low-facet-glow/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 for(const token of [
   "getContext('webgl2'","getContext('webgl'",'gl.drawArrays(gl.TRIANGLES','crystal-organism-r326',
   'four-direction-asymmetric-crystal-organism-r326','translucent-living-facet-organism-r326',
-  'heartbeat-and-interaction-bursts-no-idle-loop-r326','soft-translucent-organic-rim'
-])assert.ok(renderer.includes(token),`missing current r326 reference contract: ${token}`);
+  'heartbeat-and-interaction-bursts-no-idle-loop-r326','soft-translucent-organic-rim','fxCoreMobileOpticsR414'
+])assert.ok(renderer.includes(token),`missing current r326/r414 reference contract: ${token}`);
+assert.match(renderer,/fresnelPower:\s*'2\.15'/);
+assert.match(renderer,/rimAlpha:\s*'\.007'/);
+assert.match(renderer,/facetStrength:\s*'\.075'/);
+assert.match(renderer,/sideStrength:\s*'\.09'/);
+assert.match(renderer,/outerAlphaMax:\s*'\.62'/);
 assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 assert.doesNotMatch(renderer,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 for(const token of ['r298-state-only-no-layout-writes','compatibility-dormant-r298','delegated-r208','fxFlowFirstScheduling','fxFlowFirstConflict','canonicalOwner'])assert.ok(flow.includes(token),`missing current r298 flow-first contract: ${token}`);
@@ -37,4 +43,4 @@ assert.match(webgl,/canvas\.getContext\('webgl2'/);
 assert.match(webgl,/gl\.drawElements\(gl\.TRIANGLES/);
 assert.match(entry,/formatx-reference-core-v26\.js/);
 for(const source of [selector,bootstrap,wrapper,renderer,flow,layout])new Function(source);
-console.log('PASS: r326 new crystal organism is the production reference authority; legacy MAG renderers are not allowed.');
+console.log('PASS: r326 crystal organism with r414 softened mobile optics is the production reference authority; legacy MAG renderers are not allowed.');
