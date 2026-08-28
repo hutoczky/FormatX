@@ -1,0 +1,101 @@
+/* FormatX r418 — final mobile header owner.
+   Loaded after legacy WDA/control-owner layers. One branded 72px carrier owns
+   MAG, language and menu; no viewport-fixed header controls are permitted. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root body.living-architecture .topbar {
+    position:sticky!important;
+    top:0!important;
+    right:auto!important;
+    bottom:auto!important;
+    left:auto!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    min-height:72px!important;
+    height:72px!important;
+    max-height:72px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    transform:none!important;
+    translate:none!important;
+    z-index:12060!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .brand {
+    position:absolute!important;
+    top:10px!important;
+    left:14px!important;
+    right:auto!important;
+    bottom:auto!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    gap:9px!important;
+    box-sizing:border-box!important;
+    width:auto!important;
+    max-width:118px!important;
+    height:52px!important;
+    margin:0!important;
+    overflow:hidden!important;
+    transform:none!important;
+    translate:none!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-language-toggle.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button,
+  html:root:root body.living-architecture .topbar .fx-language-toggle,
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button {
+    position:absolute!important;
+    bottom:auto!important;
+    left:auto!important;
+    margin:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+    z-index:12070!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button {
+    top:11px!important;
+    right:122px!important;
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:48px!important;
+    min-height:48px!important;
+    max-height:48px!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-language-toggle.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-language-toggle {
+    top:11px!important;
+    right:70px!important;
+    width:44px!important;
+    min-width:44px!important;
+    max-width:44px!important;
+    height:48px!important;
+    min-height:48px!important;
+    max-height:48px!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button {
+    top:8px!important;
+    right:12px!important;
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+  }
+}
+
+/* production-r418-final-mobile-header-owner */
