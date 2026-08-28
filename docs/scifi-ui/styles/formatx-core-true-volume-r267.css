@@ -1,7 +1,8 @@
 /* FormatX r267 — final optical owner for the closed-volume MAG.
    The shader provides the actual 3D normals, depth and Fresnel response. These
-   selectors deliberately outrank older generic mobile-canvas softening layers,
-   which otherwise reduce the new volume renderer to ~95% opacity. */
+   selectors deliberately outrank older generic mobile-canvas softening layers.
+   r268 tuning keeps the true volume intact while reducing mobile bloom and
+   softening the silhouette/central highlight seen on high-DPI phones. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html:root:root:root:root[data-fx-core-true-volume-r267="ready"] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-core-r267-volume-stage {
@@ -13,33 +14,33 @@
   }
 
   html:root:root:root:root[data-fx-core-true-volume-r267="ready"] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-core-r267-volume-stage > .fx-core-mobile-v55-canvas.fx-core-r267-volume-canvas {
-    opacity: 1 !important;
+    opacity: .985 !important;
     visibility: visible !important;
     image-rendering: auto !important;
     mix-blend-mode: normal !important;
-    filter: brightness(1.035) contrast(.93) saturate(1.025) blur(.14px) !important;
-    -webkit-filter: brightness(1.035) contrast(.93) saturate(1.025) blur(.14px) !important;
+    filter: brightness(.94) contrast(.87) saturate(.96) blur(.26px) !important;
+    -webkit-filter: brightness(.94) contrast(.87) saturate(.96) blur(.26px) !important;
   }
 }
 
 @media (max-width: 430px) {
   html:root:root:root:root[data-fx-core-true-volume-r267="ready"] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-core-r267-volume-stage > .fx-core-mobile-v55-canvas.fx-core-r267-volume-canvas {
-    opacity: 1 !important;
+    opacity: .98 !important;
     visibility: visible !important;
     mix-blend-mode: normal !important;
-    filter: brightness(1.045) contrast(.92) saturate(1.03) blur(.16px) !important;
-    -webkit-filter: brightness(1.045) contrast(.92) saturate(1.03) blur(.16px) !important;
+    filter: brightness(.92) contrast(.85) saturate(.95) blur(.32px) !important;
+    -webkit-filter: brightness(.92) contrast(.85) saturate(.95) blur(.32px) !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) and (max-width: 900px) {
   html:root:root:root:root[data-fx-core-true-volume-r267="ready"] body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage.fx-core-r267-volume-stage > .fx-core-mobile-v55-canvas.fx-core-r267-volume-canvas {
-    opacity: 1 !important;
+    opacity: .985 !important;
     visibility: visible !important;
     mix-blend-mode: normal !important;
-    filter: brightness(1.025) contrast(.92) saturate(1.01) blur(.14px) !important;
-    -webkit-filter: brightness(1.025) contrast(.92) saturate(1.01) blur(.14px) !important;
+    filter: brightness(.93) contrast(.86) saturate(.94) blur(.28px) !important;
+    -webkit-filter: brightness(.93) contrast(.86) saturate(.94) blur(.28px) !important;
   }
 }
 
-/* r267-final-mobile-optics-owner-full-opacity */
+/* r268-mobile-optics-softened-bloom-and-rim */
