@@ -77,19 +77,21 @@ jobs:
           grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS"
           ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$OPTICS"
 
-          # Shader geometry/lighting remains on the proven r375/r326 contract.
+          # Current r326 mobile lighting contract. Geometry remains the single
+          # crystal organism renderer; these values are the active phone tuning.
+          grep -Fq "const VERSION = 'crystal-organism-r326'" "$SHADER"
           grep -Fq "fresnelPower: '1.8'" "$SHADER"
-          grep -Fq "innerHeartBase: '.105'" "$SHADER"
-          grep -Fq "innerHeartBreath: '.18'" "$SHADER"
-          grep -Fq "rimBase: '.058'" "$SHADER"
-          grep -Fq "rimAlpha: '.018'" "$SHADER"
+          grep -Fq "innerHeartBase: '.095'" "$SHADER"
+          grep -Fq "innerHeartBreath: '.14'" "$SHADER"
+          grep -Fq "rimBase: '.045'" "$SHADER"
+          grep -Fq "rimAlpha: '.014'" "$SHADER"
           grep -Fq "outerAlphaMin: '.39'" "$SHADER"
-          grep -Fq "outerAlphaMax: '.76'" "$SHADER"
-          grep -Fq "facetStrength: '.13'" "$SHADER"
-          grep -Fq "sideStrength: '.16'" "$SHADER"
-          grep -Fq 'fxCoreMobileLightingR375' "$SHADER"
-          grep -Fq 'balanced-heart-feathered-facets-r375' "$SHADER"
-          grep -Fq 'desktop-r326-unchanged' "$SHADER"
+          grep -Fq "outerAlphaMax: '.72'" "$SHADER"
+          grep -Fq "facetStrength: '.115'" "$SHADER"
+          grep -Fq "sideStrength: '.13'" "$SHADER"
+          grep -Fq "fresnelPower: '2.7'" "$SHADER"
+          grep -Fq "innerHeartBase: '.24'" "$SHADER"
+          grep -Fq "outerAlphaMax: '.86'" "$SHADER"
 
       - name: Verify production serves r413 mobile MAG and header lock
         shell: bash
@@ -130,9 +132,10 @@ jobs:
                 && grep -Fq 'left: 50% !important' "$OPTICS_TMP" \
                 && grep -Fq 'translate: -50% 0 !important' "$OPTICS_TMP" \
                 && grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS_TMP" \
-                && grep -Fq "fresnelPower: '1.8'" "$JS_TMP" \
-                && grep -Fq 'fxCoreMobileLightingR375' "$JS_TMP" \
-                && grep -Fq 'desktop-r326-unchanged' "$JS_TMP"; then
+                && grep -Fq "const VERSION = 'crystal-organism-r326'" "$JS_TMP" \
+                && grep -Fq "innerHeartBase: '.095'" "$JS_TMP" \
+                && grep -Fq "rimBase: '.045'" "$JS_TMP" \
+                && grep -Fq "outerAlphaMax: '.72'" "$JS_TMP"; then
                 ok=1
                 break
               fi
@@ -141,7 +144,7 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r413 balanced mobile MAG, r379-centered geometry, hidden-until-focused skip link and unified mobile header.'
+          echo 'PASS: production serves r413 balanced mobile MAG, r379-centered geometry, current r326 lighting, hidden-until-focused skip link and unified mobile header.'
 
       - name: Publish r413 live status
         if: always()
