@@ -7,7 +7,10 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 
 const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
-const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const bootstrapRenderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const volumeRenderer=read('docs/scifi-ui/scripts/formatx-core-true-volume-r267.js');
+const portal=read('docs/scifi-ui/scripts/formatx-crystal-portal-r318.js');
+const volumeCss=read('docs/scifi-ui/styles/formatx-core-true-volume-r267.css');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const textGuard=read('docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css');
 const stabilityCss=read('docs/scifi-ui/styles/formatx-mobile-r416-stability.css');
@@ -23,42 +26,58 @@ assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
 assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r416-site-coupled-soft-optics/);
 assert.match(wrapper,/formatx-mobile-r416-stability\.css\?v=20260828-r418-restrained-soft-mag-attached-header/);
 assert.match(wrapper,/formatx-mobile-header-final-r418\.css\?v=20260828-r418-final-owner/);
-assert.match(wrapper,/r418-restrained-soft-mag-attached-header/);
 assert.match(wrapper,/fxMobileHeaderFinalR418/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
+
 for(const token of [
-  'crystal-organism-r326',
-  'four-direction-asymmetric-crystal-organism-r326',
-  'heartbeat-and-interaction-bursts-no-idle-loop-r326',
-  'pointerdown','pointermove','formatx:coreinteraction','formatx:real3dready',
-  'ResizeObserver','IntersectionObserver','soft-translucent-organic-rim','fxCoreMobileOpticsR414'
-])assert.ok(renderer.includes(token),`missing r326 shader mobile startup contract: ${token}`);
-assert.match(renderer,/fresnelPower:\s*'2\.15'/);
-assert.match(renderer,/rimAlpha:\s*'\.007'/);
-assert.match(renderer,/facetStrength:\s*'\.075'/);
-assert.match(renderer,/sideStrength:\s*'\.09'/);
-assert.match(renderer,/outerAlphaMax:\s*'\.62'/);
-assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
+  'crystal-organism-r326',"getContext('webgl2'","getContext('webgl'",
+  'gl.drawArrays(gl.TRIANGLES','ResizeObserver','IntersectionObserver'
+])assert.ok(bootstrapRenderer.includes(token),`missing bootstrap r326 startup contract: ${token}`);
+assert.doesNotMatch(bootstrapRenderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
+
+for(const token of [
+  "VERSION='r267-closed-volume-crystal'",
+  'frontCenter=[0,.015,.58]','backCenter=[0,-.008,-.36]',
+  'innerFront','outerFront','innerBack','outerBack',
+  'add(outerFront[i],outerBack[i],outerBack[j]',
+  'add(outerFront[i],outerBack[j],outerFront[j]',
+  "getContext('webgl2'","getContext('webgl'",
+  'gl.enable(gl.DEPTH_TEST)','gl.depthFunc(gl.LEQUAL)',
+  'gl.drawArrays(gl.TRIANGLES,0,mesh.count)',
+  'closed-front-back-sidewalls','physical-z-depth-r267',
+  'normal-based-two-light-soft-fresnel','event-driven-no-idle-raf',
+  'pointerdown','pointermove','ResizeObserver','IntersectionObserver',
+  'formatx:real3dready'
+])assert.ok(volumeRenderer.includes(token),`missing r267 true-volume mobile startup contract: ${token}`);
+assert.match(volumeRenderer,/gl_Position=vec4\(q,clamp\(-p\.z\*\.42,-\.82,\.82\),1\.\)/);
+assert.doesNotMatch(volumeRenderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
+
+for(const token of [
+  'formatx-core-true-volume-r267.js?v=20260828-r267-closed-volume-soft-glass',
+  'formatx-core-true-volume-r267.css?v=20260828-r267-balanced-volume-optics',
+  "fxCrystalRendererRequest='closed-volume-r267'",
+  "renderer:'closed-volume-r267'"
+])assert.ok(portal.includes(token),`missing r267 mobile portal ownership: ${token}`);
+for(const token of ['.fx-core-r267-volume-canvas','opacity: 1 !important','contrast(.93)','blur(.14px)','contrast(.92)','blur(.16px)'])assert.ok(volumeCss.includes(token),`missing r267 mobile optics contract: ${token}`);
+
 for(const token of [
   'production-r418-attached-header-restrained-mag',
   'margin:0 auto 16px !important',
-  'opacity:.82 !important',
-  'brightness(.80) contrast(.50) saturate(.74) blur(1.05px)',
-  'opacity:.80 !important',
-  'brightness(.77) contrast(.47) saturate(.72) blur(1.15px)',
   'top:-160px !important',
   'min-height:72px !important'
-])assert.ok(stabilityCss.includes(token),`missing r418 restrained mobile contract: ${token}`);
+])assert.ok(stabilityCss.includes(token),`missing r418 compatibility mobile contract: ${token}`);
 assert.doesNotMatch(stabilityCss,/brightness\(\.5[0-9]\) contrast\(\.2[0-9]\)/);
+
 for(const token of [
   'production-r418-final-mobile-header-owner',
-  'position:sticky!important',
-  'position:absolute!important',
-  'right:122px!important',
-  'right:70px!important',
-  'right:12px!important'
-])assert.ok(finalHeaderCss.includes(token),`missing r418 final mobile header contract: ${token}`);
+  'production-r418-final-mobile-header-owner-non-occluding',
+  'position:relative!important','top:auto!important','position:absolute!important',
+  'right:122px!important','right:70px!important','right:12px!important',
+  'html:not(.fx-signature-open)','display:none!important'
+])assert.ok(finalHeaderCss.includes(token),`missing non-occluding r418 final mobile header contract: ${token}`);
+assert.doesNotMatch(finalHeaderCss,/\.topbar\s*\{[^}]*position:sticky!important/is);
+
 for(const token of [
   'production-r418-mobile-first-paint-header-lock',
   'html body > #fx-apex-canvas',
@@ -75,5 +94,5 @@ assert.match(premium,/ready-v20\|ready-v69/);
 assert.match(loader,/ready-v20\|ready-v69/);
 assert.match(stability,/ready-v20\|ready-v69/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
-for(const source of [bootstrap,wrapper,renderer,layout,bridge,premium,loader,stability])new Function(source);
-console.log('PASS: mobile startup uses r326 with r418 restrained optics, first-paint anti-spacer/final header ownership, controls/text flow and r416 bidirectional site↔MAG semantics.');
+for(const source of [bootstrap,wrapper,bootstrapRenderer,volumeRenderer,portal,layout,bridge,premium,loader,stability])new Function(source);
+console.log('PASS: mobile startup uses r267 closed-volume WebGL MAG, balanced optics, non-occluding r418 header, controls/text flow and r416 bidirectional site↔MAG semantics.');
