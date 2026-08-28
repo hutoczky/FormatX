@@ -65,10 +65,10 @@ jobs:
           grep -Fq 'right: 72px !important' "$CSS"
           grep -Fq 'right: 14px !important' "$CSS"
 
-          # The established r377 physical centering and desktop r326 optics stay
-          # intact underneath the new late r413 finish layer.
-          grep -Fq 'r377 adds a deterministic physical centering lock' "$OPTICS"
-          grep -Fq 'production-deploy-r377-mobile-mag-center-lock' "$OPTICS"
+          # r379 owns the centered carrier and unchanged desktop r326 optics;
+          # r413 intentionally overrides only the late mobile finish values.
+          grep -Fq 'FormatX r379' "$OPTICS"
+          grep -Fq 'production-deploy-r379-mobile-mag-center-and-soft-optics' "$OPTICS"
           grep -Fq '.fx-crystal-organism-r326-stage {' "$OPTICS"
           grep -Fq 'left: 50% !important' "$OPTICS"
           grep -Fq 'translate: -50% 0 !important' "$OPTICS"
@@ -125,7 +125,8 @@ jobs:
                 && grep -Fq 'right: 122px !important' "$CSS_TMP" \
                 && grep -Fq 'right: 72px !important' "$CSS_TMP" \
                 && grep -Fq 'right: 14px !important' "$CSS_TMP" \
-                && grep -Fq 'r377 adds a deterministic physical centering lock' "$OPTICS_TMP" \
+                && grep -Fq 'FormatX r379' "$OPTICS_TMP" \
+                && grep -Fq 'production-deploy-r379-mobile-mag-center-and-soft-optics' "$OPTICS_TMP" \
                 && grep -Fq 'left: 50% !important' "$OPTICS_TMP" \
                 && grep -Fq 'translate: -50% 0 !important' "$OPTICS_TMP" \
                 && grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS_TMP" \
@@ -140,7 +141,7 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r413 balanced mobile MAG, centered geometry, hidden-until-focused skip link and unified mobile header.'
+          echo 'PASS: production serves r413 balanced mobile MAG, r379-centered geometry, hidden-until-focused skip link and unified mobile header.'
 
       - name: Publish r413 live status
         if: always()
