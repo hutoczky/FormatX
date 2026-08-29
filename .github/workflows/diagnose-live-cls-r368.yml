@@ -1,3 +1,4 @@
+# r425 diagnostic trigger: sample the current production hero after the r424 optics and public-header ownership fixes.
 name: Diagnose live mobile CLS r368
 run-name: Trace production mobile layout shifts and late hero mutations
 
