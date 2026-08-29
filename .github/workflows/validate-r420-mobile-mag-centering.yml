@@ -7,6 +7,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-mobile-optics-r419.css'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-crystal-portal-r318.js'
       - '.github/workflows/validate-r420-mobile-mag-centering.yml'
   workflow_dispatch:
 
@@ -64,14 +65,18 @@ jobs:
                 horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
                 visibleRatio: visibleWidth / Math.max(1, cr.width),
                 renderer: document.documentElement.dataset.fxCoreRenderer || '',
-                optics: document.documentElement.dataset.fxCoreMobileOpticsR419 || ''
+                optics: document.documentElement.dataset.fxCoreMobileOpticsR419 || '',
+                ownership: document.documentElement.dataset.fxCrystalRendererOwnershipR420 || '',
+                r267Loaded: Boolean(document.querySelector('script[data-fx-core-true-volume-r267], .fx-core-r267-volume-stage'))
               };
             });
           }
 
           function verify(state, name) {
             assert(state, name + ': MAG state missing');
-            assert(state.renderer === 'single-webgl-crystal-organism-r326', name + ': wrong renderer ' + state.renderer);
+            assert(state.renderer === 'single-webgl-crystal-organism-r326', name + ': wrong renderer ' + JSON.stringify(state));
+            assert(state.ownership === 'r326-exclusive-primary', name + ': r326 ownership marker missing ' + JSON.stringify(state));
+            assert(state.r267Loaded === false, name + ': legacy r267 renderer was loaded ' + JSON.stringify(state));
             assert(state.horizontalOverflow <= 2, name + ': horizontal overflow ' + JSON.stringify(state));
             assert(state.stage.width > 280, name + ': stage too small ' + JSON.stringify(state));
             assert(Math.abs(state.stage.center - state.host.center) <= 2, name + ': stage not centered in host ' + JSON.stringify(state));
