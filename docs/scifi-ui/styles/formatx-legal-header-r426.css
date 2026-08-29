@@ -1,0 +1,65 @@
+/* FormatX r426 — legal header four-control grid.
+   Legal pages gain a language control at runtime, so reserve its own column
+   before the control is mounted. This prevents Back/Home from intercepting the
+   language button on desktop and mobile. */
+.legal-header-inner {
+  grid-template-columns:auto minmax(0,1fr) auto auto !important;
+  gap:16px !important;
+}
+.legal-header-inner > .brand {
+  grid-column:1 !important;
+  min-width:0 !important;
+}
+.legal-header-inner > .legal-home-link {
+  grid-column:2 !important;
+  justify-self:end !important;
+  align-self:center !important;
+  min-height:32px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  position:relative !important;
+  z-index:1 !important;
+}
+.legal-header-inner > .language-switch,
+.legal-header-inner > .language-control {
+  grid-column:3 !important;
+  justify-self:end !important;
+  align-self:center !important;
+  margin-left:0 !important;
+  position:relative !important;
+  z-index:2 !important;
+}
+.legal-header-inner > .theme-control {
+  grid-column:4 !important;
+  align-self:center !important;
+  margin-left:0 !important;
+}
+
+@media (max-width:720px) {
+  .legal-header-inner {
+    grid-template-columns:minmax(0,1fr) auto !important;
+    grid-template-rows:auto auto !important;
+    gap:6px 12px !important;
+    padding-block:8px !important;
+  }
+  .legal-header-inner > .brand {
+    grid-column:1 !important;
+    grid-row:1 !important;
+    max-width:calc(100vw - 90px) !important;
+  }
+  .legal-header-inner > .language-switch,
+  .legal-header-inner > .language-control {
+    grid-column:2 !important;
+    grid-row:1 !important;
+    justify-self:end !important;
+  }
+  .legal-header-inner > .legal-home-link {
+    grid-column:1 / -1 !important;
+    grid-row:2 !important;
+    justify-self:end !important;
+    min-height:36px !important;
+  }
+  .legal-header-inner > .theme-control {
+    display:none !important;
+  }
+}
