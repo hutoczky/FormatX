@@ -1,19 +1,17 @@
-/* FormatX r422 — direct current MAG loader.
-   r326 is the production renderer. Load it directly with the compact r422
-   geometry/optics layer instead of replaying retired award-material generations.
-   The result keeps the exact visible crystal and touch semantics while allowing
-   the static hero copy to reach LCP without a multi-second late cascade. */
+/* FormatX r423 — direct current MAG loader.
+   r326 is the production renderer. Request its compact style and WebGL runtime
+   together so the already-reserved mobile hero does not become a late LCP. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r421-r422';
+const VERSION='direct-r326-r423-parallel';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 if(matchMedia('(prefers-reduced-motion:reduce)').matches){root.dataset.fxCurrentMagRuntimeR422='reduced-skip';return;}
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260829-r422-direct-r326-lcp';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r422-direct-r326-lcp';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r423-parallel-r326-lcp';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
@@ -92,21 +90,23 @@ async function start(){
   repairAccessibleNames();installSoundTouchRecovery();
   const styles=[addStyle(STYLE,'data-fx-current-mag-r422')];
   if(mobile)styles.push(addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418'));
-  await Promise.all(styles);
-  if(mobile)root.dataset.fxMobileHeaderFinalR418='loaded-last';
-  await addScript(RENDERER,'data-fx-current-r326-r422');
+  const rendererReady=addScript(RENDERER,'data-fx-current-r326-r422');
+  Promise.all(styles).then(()=>{
+    if(mobile)root.dataset.fxMobileHeaderFinalR418='loaded-last';
+    root.dataset.fxCurrentMagStylesR423='ready';
+  });
+  await rendererReady;
   if(root.dataset.fxCrystalOrganismR326==='ready'){
-    await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
-    root.dataset.fxCoreRendererSelection='r326-direct-r422-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r422';
+    addScript(TOUCH,'data-fx-core-touch-pulse-r99');
+    root.dataset.fxCoreRendererSelection='r326-direct-r423-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r423';
   }
   root.dataset.fxCurrentMagRuntimeR422='ready';
-  root.dataset.fxCoreCriticalPathR422='direct-r326-no-legacy-material-chain';
+  root.dataset.fxCoreCriticalPathR422='direct-r326-r423-parallel-no-legacy-material-chain';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile}}));
 }
 
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});
 addEventListener('pageshow',repairAccessibleNames,{passive:true});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,0),{once:true});
-else setTimeout(start,0);
+start();
 }());
