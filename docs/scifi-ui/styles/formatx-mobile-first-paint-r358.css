@@ -388,4 +388,59 @@
   }
 }
 
+/* r426 — authoritative first-paint parity lock.
+   These selectors deliberately outrank late r206/r274/r207 compatibility
+   sheets. They keep the geometry already painted by r418 instead of allowing
+   a transient 12px hero inset / 110px control spacer / alternate card padding
+   and then snapping back when the current r416/r423 layers arrive. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root body.living-architecture .topbar {
+    position:sticky!important;
+    top:0!important;
+    height:72px!important;
+    min-height:72px!important;
+    max-height:72px!important;
+    padding:0!important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero {
+    height:auto!important;
+    min-height:0!important;
+    padding:0 0 56px!important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+    margin:0!important;
+    padding:0!important;
+    gap:0!important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space,
+  html:root:root:root[data-fx-reference-production-r244="ready"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space {
+    height:clamp(350px,97.6vw,470px)!important;
+    min-height:clamp(350px,97.6vw,470px)!important;
+    max-height:470px!important;
+    margin:0 auto!important;
+    padding:0!important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid:not(:has(> .fx-reference-controls-r204)) > .hero-space {
+    margin-bottom:0!important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy,
+  html:root:root:root[data-fx-mobile-reference-layout] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy,
+  html:root:root:root[data-fx-reference-production-r244="ready"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
+    width:calc(100% - 24px)!important;
+    max-width:700px!important;
+    min-height:0!important;
+    margin:0 auto 16px!important;
+    padding:clamp(24px,6vw,34px) clamp(20px,5.5vw,30px) clamp(26px,6.5vw,38px)!important;
+    overflow:visible!important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .fx-reference-heading {
+    margin:18px auto 22px!important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .fx-reference-proof {
+    min-height:302px!important;
+    margin:0 auto 34px!important;
+  }
+}
+
 /* production-r418-mobile-first-paint-header-lock */
+/* production-r426-mobile-first-paint-parity-lock */
