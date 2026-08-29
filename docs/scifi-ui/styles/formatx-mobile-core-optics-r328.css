@@ -1,6 +1,7 @@
-/* FormatX r379 — stable centered mobile MAG with softer optics.
-   The active r326 WebGL renderer remains unchanged; this final presentation
-   owner removes cross-generation carrier drift and feathers phone-size edges. */
+/* FormatX r423 — stable centered mobile MAG with restrained soft optics.
+   The active r326 WebGL renderer remains unchanged; this presentation owner
+   now matches the approved phone target directly so no later optical race can
+   restore the older bright, razor-edged appearance. */
 
 html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   isolation: isolate !important;
@@ -103,16 +104,17 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
     scale: .80 .85 !important;
     transform-origin: 50% 48% !important;
     image-rendering: auto !important;
-    filter: brightness(.70) contrast(.28) saturate(.72) blur(2.50px) !important;
-    -webkit-filter: brightness(.70) contrast(.28) saturate(.72) blur(2.50px) !important;
+    filter: brightness(.66) contrast(.36) saturate(.58) blur(.96px) !important;
+    -webkit-filter: brightness(.66) contrast(.36) saturate(.58) blur(.96px) !important;
   }
 
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 14% !important;
-    height: 14% !important;
-    background: radial-gradient(circle at 50% 50%, rgba(147,238,255,.004) 0 4%, rgba(91,196,255,.0015) 14%, rgba(95,126,255,.0005) 31%, rgba(30,76,144,.0001) 47%, transparent 70%) !important;
-    filter: blur(64px) !important;
-    opacity: .002 !important;
+    content: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    filter: none !important;
+    opacity: 0 !important;
   }
 
   #hero .hero-space > .fx-crystal-cue-r318 { display: none !important; }
@@ -127,20 +129,22 @@ html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #
   html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: .68 !important;
     scale: .78 .83 !important;
-    filter: brightness(.64) contrast(.22) saturate(.66) blur(3.05px) !important;
-    -webkit-filter: brightness(.64) contrast(.22) saturate(.66) blur(3.05px) !important;
+    filter: brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
+    -webkit-filter: brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
   }
+}
 
-  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
-    width: 13% !important;
-    height: 13% !important;
-    filter: blur(70px) !important;
-    opacity: .0015 !important;
+@media (max-width: 370px) {
+  html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: .68 !important;
+    filter: brightness(.65) contrast(.35) saturate(.55) blur(.99px) !important;
+    -webkit-filter: brightness(.65) contrast(.35) saturate(.55) blur(.99px) !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after { opacity: .0015 !important; }
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after { opacity: 0 !important; }
 }
 
-/* production-deploy-r379-mobile-mag-center-and-soft-optics */
+/* production-deploy-r423-mobile-mag-restrained-soft-optics */
