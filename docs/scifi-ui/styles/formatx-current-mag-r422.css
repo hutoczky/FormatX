@@ -1,8 +1,6 @@
-/* FormatX r422 — current MAG critical runtime.
-   This stylesheet contains only the physical r326 stage, the approved r421
-   cross-device optical restraint and high-contrast public controls. It is loaded
-   immediately after DOMContentLoaded, before the WebGL renderer, so no legacy
-   visual stylesheet chain can repaint the hero several seconds later. */
+/* FormatX r423 — current MAG critical runtime.
+   This stylesheet contains only the physical r326 stage, restrained optics and
+   deterministic public mobile accessibility/touch contracts. */
 
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   position:absolute !important;
@@ -56,15 +54,29 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
     -webkit-filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
   }
 
+  /* Lighthouse and real low-contrast displays need an explicit opaque surface;
+     translucent gradients otherwise make the computed contrast ambiguous. */
+  html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
+    color:#dff7ff !important;
+    background-color:#02111f !important;
+  }
+
+  html body.living-architecture #pricing .price-card .button.button-line {
+    color:#f4fbff !important;
+    background-color:#071521 !important;
+    border-color:rgba(163,229,255,.44) !important;
+  }
+
+  html body.living-architecture #pricing .price-card .button.button-solid,
   html body.living-architecture #pricing #preview-checkout-link.button.button-solid {
     color:#041019 !important;
-    background:#c8f4ff !important;
+    background-color:#c8f4ff !important;
     border-color:#c8f4ff !important;
   }
 
   html body.living-architecture #resources #release-page-link.button.button-line {
     color:#f4fbff !important;
-    background:#071521 !important;
+    background-color:#071521 !important;
     border-color:rgba(163,229,255,.44) !important;
   }
 
@@ -81,12 +93,33 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
     color:#cfe5ef !important;
   }
 
+  html body.living-architecture footer.site-footer nav {
+    display:flex !important;
+    flex-wrap:wrap !important;
+    align-items:center !important;
+    gap:8px 10px !important;
+  }
+
+  html body.living-architecture footer.site-footer nav + nav {
+    margin-top:8px !important;
+  }
+
   html body.living-architecture footer.site-footer nav a,
   html body.living-architecture footer.site-footer .footer-bottom > a {
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    box-sizing:border-box !important;
+    min-width:44px !important;
+    min-height:44px !important;
+    padding:8px 10px !important;
+    margin:0 !important;
+    line-height:1.25 !important;
     color:#f4fbff !important;
     background:#071521 !important;
     border:1px solid rgba(163,229,255,.20) !important;
     border-radius:12px !important;
+    text-decoration:none !important;
   }
 }
 
@@ -113,4 +146,4 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   }
 }
 
-/* production-r422-direct-r326-r421-optics-a11y */
+/* production-r423-direct-r326-optics-a11y-touch */
