@@ -29,8 +29,9 @@ assert.match(wrapper,/fxMobileHeaderFinalR418/);
 assert.match(wrapper,/no-legacy-visual-fallback/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 
-/* r326 remains a bootstrap-compatible WebGL stage, but the crystal portal must
-   replace it with r267, which is the authoritative closed-volume renderer. */
+/* r326 is the current authoritative WebGL MAG. r267 remains validated as a
+   legacy fallback, but the crystal portal must never replace a ready/configured
+   r326 stage. This prevents late renderer ownership from moving the mobile MAG. */
 for(const token of [
   'crystal-organism-r326',
   "getContext('webgl2'",
@@ -39,9 +40,11 @@ for(const token of [
   'ResizeObserver',
   'IntersectionObserver',
   "fallback:'none'"
-])assert.ok(legacyRenderer.includes(token),`missing r326 bootstrap WebGL contract: ${token}`);
+])assert.ok(legacyRenderer.includes(token),`missing r326 primary WebGL contract: ${token}`);
 assert.doesNotMatch(legacyRenderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 
+/* Keep the old closed-volume implementation healthy for genuine fallback use;
+   it must not be the production owner when the r326 primary is configured. */
 for(const token of [
   "VERSION='r267-closed-volume-crystal'",
   'frontCenter=[0,.015,.58]',
@@ -63,20 +66,26 @@ for(const token of [
   'event-driven-no-idle-raf',
   'ResizeObserver',
   'IntersectionObserver'
-])assert.ok(volumeRenderer.includes(token),`missing authoritative r267 true-volume contract: ${token}`);
+])assert.ok(volumeRenderer.includes(token),`missing r267 fallback true-volume contract: ${token}`);
 assert.match(volumeRenderer,/gl_Position=vec4\(q,clamp\(-p\.z\*\.42,-\.82,\.82\),1\.\)/);
 assert.doesNotMatch(volumeRenderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 
 for(const token of [
+  'function r326Primary()',
+  "fxCoreMobileAwardRevision==='new-crystal-organism-r326'",
+  "fxCoreCrystalRevision==='r326-four-direction-living-facet-organism'",
+  "fxCrystalRendererRequest='r326-primary-preserved'",
+  "fxCrystalRendererOwnershipR420='r326-exclusive-primary'",
+  "renderer:'single-webgl-crystal-organism-r326'",
   'formatx-core-true-volume-r267.js?v=20260828-r267-closed-volume-soft-glass',
   'formatx-core-true-volume-r267.css?v=20260829-r268-softened-mobile-optics',
-  "fxCrystalRendererRequest='closed-volume-r267'",
-  "renderer:'closed-volume-r267'"
-])assert.ok(crystalPortal.includes(token),`missing r267 portal ownership contract: ${token}`);
+  "fxCrystalRendererRequest='closed-volume-r267-fallback'",
+  "fxCrystalRendererOwnershipR420='r267-legacy-fallback'"
+])assert.ok(crystalPortal.includes(token),`missing r326-primary / r267-fallback portal ownership contract: ${token}`);
 
-/* The mobile optical finish is intentionally restrained: the true-volume
-   renderer stays fully authoritative, while phone-sized canvases get lower
-   brightness/contrast and a sub-pixel blur to soften bloom and the hard rim. */
+/* r267's fallback optical finish remains restrained if that fallback is ever
+   required. The active r326 production optics are validated separately by the
+   r420 phone-viewport gate. */
 for(const token of [
   '.fx-core-r267-volume-stage',
   '.fx-core-r267-volume-canvas',
@@ -91,7 +100,7 @@ for(const token of [
   'saturate(.95)',
   'blur(.32px)',
   'r268-mobile-optics-softened-bloom-and-rim'
-])assert.ok(volumeCss.includes(token),`missing restrained true-volume optical finish: ${token}`);
+])assert.ok(volumeCss.includes(token),`missing restrained r267 fallback optical finish: ${token}`);
 assert.doesNotMatch(volumeCss,/blur\((?:[1-9]|[1-9][0-9])(?:\.\d+)?px\)/);
 
 /* Older stability CSS may still contain sticky geometry, but the loaded-last
@@ -137,4 +146,4 @@ assert.equal(contract.quality_contract.mag_image_backed,false);
 assert.equal(contract.quality_contract.mag_webgl_context_count,1);
 assert.equal(contract.quality_contract.mag_paused_outside_hero,true);
 for(const source of [bootstrap,wrapper,legacyRenderer,volumeRenderer,crystalPortal,layout,bridge])new Function(source);
-console.log('PASS: r267 closed-volume WebGL MAG, restrained r268 mobile optical finish, non-occluding r418 header and r416 bidirectional site↔MAG coupling are authoritative; 2D/image fallback is forbidden.');
+console.log('PASS: r326 is the authoritative production WebGL MAG; r267 is fallback-only, restrained optics and non-occluding mobile ownership remain valid, and 2D/image fallback is forbidden.');
