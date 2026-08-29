@@ -161,26 +161,25 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
-/* r428 — softer phone optics without CSS blur.
-   The pure native-3D gate forbids blur on the WebGL canvas, so perceived edge
-   softness comes from lower post-composite contrast, saturation and restrained
-   low-alpha shadows while the r326 mesh and antialiasing stay untouched. */
+/* r430 — restrained phone optics from the live mobile review.
+   Keep the pure native WebGL silhouette and antialiasing, but reduce perceived
+   bloom/edge hardness by lowering the final mobile composite contrast and glow. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.955 !important;
+    opacity:.94 !important;
     filter:
-      brightness(.975)
-      contrast(1.015)
-      saturate(1.13)
-      drop-shadow(0 0 2px rgba(126,239,255,.020))
-      drop-shadow(0 0 8px rgba(82,91,255,.008)) !important;
+      brightness(.955)
+      contrast(.98)
+      saturate(1.08)
+      drop-shadow(0 0 1px rgba(126,239,255,.014))
+      drop-shadow(0 0 6px rgba(82,91,255,.005)) !important;
     -webkit-filter:
-      brightness(.975)
-      contrast(1.015)
-      saturate(1.13)
-      drop-shadow(0 0 2px rgba(126,239,255,.020))
-      drop-shadow(0 0 8px rgba(82,91,255,.008)) !important;
+      brightness(.955)
+      contrast(.98)
+      saturate(1.08)
+      drop-shadow(0 0 1px rgba(126,239,255,.014))
+      drop-shadow(0 0 6px rgba(82,91,255,.005)) !important;
   }
 }
 
-/* production-r428-direct-r326-soft-mobile-optics-pure-native-3d-a11y-touch */
+/* production-r430-direct-r326-restrained-mobile-optics-pure-native-3d-a11y-touch */
