@@ -10,6 +10,7 @@ const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
 const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const stabilityCss=read('docs/scifi-ui/styles/formatx-mobile-r416-stability.css');
+const finalOpticsCss=read('docs/scifi-ui/styles/formatx-mobile-optics-r423.css');
 const bridge=read('docs/scifi-ui/scripts/formatx-core-interaction-bridge-r109.js');
 const flow=read('docs/scifi-ui/scripts/formatx-flow-first-r75.js');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
@@ -21,7 +22,8 @@ assert.match(selector,/const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/);
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
 assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r416-site-coupled-soft-optics/);
 assert.match(wrapper,/formatx-mobile-r416-stability\.css\?v=20260828-r418-restrained-soft-mag-attached-header/);
-assert.match(wrapper,/r418-restrained-soft-mag-attached-header/);
+assert.match(wrapper,/formatx-mobile-optics-r423\.css\?v=20260829-r423-final-mobile-mag-optics/);
+assert.match(wrapper,/r423-final-restrained-soft-edge/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 for(const token of [
@@ -36,17 +38,27 @@ assert.match(renderer,/sideStrength:\s*'\.09'/);
 assert.match(renderer,/outerAlphaMax:\s*'\.62'/);
 assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 assert.doesNotMatch(renderer,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
+
+// r418 still owns attached-header/layout stability. Final visible phone optics are
+// intentionally owned by the later r423 layer, so do not require obsolete r418
+// brightness/opacity values here.
 for(const token of [
   'production-r418-attached-header-restrained-mag',
   'margin:0 auto 16px !important',
-  'opacity:.82 !important',
-  'brightness(.80) contrast(.50) saturate(.74) blur(1.05px)',
-  'opacity:.80 !important',
-  'brightness(.77) contrast(.47) saturate(.72) blur(1.15px)',
   'min-height:72px !important',
   'top:-160px !important'
-])assert.ok(stabilityCss.includes(token),`missing r418 reference presentation contract: ${token}`);
-assert.doesNotMatch(stabilityCss,/brightness\(\.5[0-9]\) contrast\(\.2[0-9]\)/);
+])assert.ok(stabilityCss.includes(token),`missing r418 reference layout contract: ${token}`);
+
+for(const token of [
+  'production-r423-final-mobile-mag-restrained-soft-edge',
+  'opacity:.70 !important',
+  'brightness(.66) contrast(.36) saturate(.58) blur(.96px)',
+  'opacity:.68 !important',
+  'brightness(.65) contrast(.35) saturate(.56) blur(.99px)',
+  'content:none !important'
+])assert.ok(finalOpticsCss.includes(token),`missing r423 final softened mobile optics contract: ${token}`);
+assert.doesNotMatch(finalOpticsCss,/brightness\(1\.[0-9]+\)|contrast\([1-9]\.[0-9]+\)|drop-shadow\(/);
+
 for(const token of ['interaction-bridge-r416-site-is-mag','site-is-mag-crystal-is-visual-heart','site-equals-mag-bidirectional','fxMagSiteBidirectionalR416'])assert.ok(bridge.includes(token),`missing r416 site↔MAG authority: ${token}`);
 for(const token of ['r298-state-only-no-layout-writes','compatibility-dormant-r298','delegated-r208','fxFlowFirstScheduling','fxFlowFirstConflict','canonicalOwner'])assert.ok(flow.includes(token),`missing current r298 flow-first contract: ${token}`);
 assert.doesNotMatch(flow,/award-reference-overlay-r139|desktop-native-content-r139|createElement\s*\(|appendChild\s*\(|insertBefore\s*\(|innerHTML|style\.setProperty|\.style\./);
@@ -58,4 +70,4 @@ assert.match(webgl,/canvas\.getContext\('webgl2'/);
 assert.match(webgl,/gl\.drawElements\(gl\.TRIANGLES/);
 assert.match(entry,/formatx-reference-core-v26\.js/);
 for(const source of [selector,bootstrap,wrapper,renderer,bridge,flow,layout])new Function(source);
-console.log('PASS: r326 WebGL bootstrap crystal with r418 restrained mobile presentation/header repair and r416 bidirectional site↔MAG coupling is the production reference authority; legacy MAG renderers are not allowed.');
+console.log('PASS: r326 WebGL crystal with r423 final softened mobile optics, r418 non-occluding header/layout and r416 bidirectional site↔MAG coupling is the production reference authority; legacy MAG renderers are not allowed.');
