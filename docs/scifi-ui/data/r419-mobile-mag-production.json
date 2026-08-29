@@ -1,0 +1,18 @@
+{
+  "revision": "r419-mobile-mag-soft-perimeter",
+  "purpose": "Production deployment marker for the validated mobile-only MAG optical refinement.",
+  "scope": "mobile",
+  "changes": {
+    "centre_glow": "restrained",
+    "perimeter": "softened",
+    "desktop_optics": "unchanged"
+  },
+  "validated_contracts": [
+    "production-validation",
+    "public-site-integrity",
+    "public-website-standards",
+    "r418-mobile-visual-touch"
+  ],
+  "source_css": "/scifi-ui/styles/formatx-mobile-optics-r419.css",
+  "source_loader": "/scifi-ui/scripts/formatx-core-mobile-v55.js"
+}
