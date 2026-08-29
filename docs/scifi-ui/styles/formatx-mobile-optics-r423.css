@@ -1,23 +1,20 @@
-/* FormatX r425 — balanced phone MAG optics owner.
-   Keep the r326 crystal geometry intact. The phone treatment restores the
-   crystal's cyan/blue inner light while keeping the perimeter feathered and
-   below the previous over-bloomed presentation. */
+/* FormatX r426 — softer phone MAG optics owner.
+   Keep the r326 crystal geometry intact while reducing the over-driven centre
+   bloom and hard perimeter contrast visible on high-density phone displays. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.90 !important;
+    opacity:.84 !important;
     mix-blend-mode:normal !important;
     scale:.80 .85 !important;
     transform-origin:50% 48% !important;
     image-rendering:auto !important;
-    filter:brightness(1.06) contrast(.86) saturate(1.06) blur(.38px) drop-shadow(0 0 15px rgba(74,196,255,.16)) !important;
-    -webkit-filter:brightness(1.06) contrast(.86) saturate(1.06) blur(.38px) drop-shadow(0 0 15px rgba(74,196,255,.16)) !important;
+    filter:brightness(.98) contrast(.72) saturate(.96) blur(.68px) drop-shadow(0 0 11px rgba(74,196,255,.10)) !important;
+    -webkit-filter:brightness(.98) contrast(.72) saturate(.96) blur(.68px) drop-shadow(0 0 11px rgba(74,196,255,.10)) !important;
   }
 
-  /* Do not revive the old full-stage pseudo bloom. The WebGL body plus one
-     restrained shape-following drop shadow gives the crystal depth without
-     creating the oversized cyan halo that prompted the previous correction. */
+  /* The WebGL crystal remains the only bloom source on phones. */
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
     content:none !important;
     display:none !important;
@@ -28,20 +25,20 @@
 @media (max-width:430px) {
   html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.89 !important;
+    opacity:.82 !important;
     scale:.78 .83 !important;
-    filter:brightness(1.05) contrast(.84) saturate(1.04) blur(.42px) drop-shadow(0 0 14px rgba(74,196,255,.15)) !important;
-    -webkit-filter:brightness(1.05) contrast(.84) saturate(1.04) blur(.42px) drop-shadow(0 0 14px rgba(74,196,255,.15)) !important;
+    filter:brightness(.96) contrast(.68) saturate(.92) blur(.78px) drop-shadow(0 0 10px rgba(74,196,255,.09)) !important;
+    -webkit-filter:brightness(.96) contrast(.68) saturate(.92) blur(.78px) drop-shadow(0 0 10px rgba(74,196,255,.09)) !important;
   }
 }
 
 @media (max-width:370px) {
   html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.88 !important;
-    filter:brightness(1.04) contrast(.83) saturate(1.03) blur(.44px) drop-shadow(0 0 13px rgba(74,196,255,.14)) !important;
-    -webkit-filter:brightness(1.04) contrast(.83) saturate(1.03) blur(.44px) drop-shadow(0 0 13px rgba(74,196,255,.14)) !important;
+    opacity:.80 !important;
+    filter:brightness(.95) contrast(.66) saturate(.90) blur(.82px) drop-shadow(0 0 9px rgba(74,196,255,.08)) !important;
+    -webkit-filter:brightness(.95) contrast(.66) saturate(.90) blur(.82px) drop-shadow(0 0 9px rgba(74,196,255,.08)) !important;
   }
 }
 
-/* production-r425-balanced-mobile-mag-inner-light-soft-perimeter */
+/* production-r426-softer-mobile-mag-centre-and-perimeter */
