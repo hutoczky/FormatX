@@ -1,7 +1,7 @@
-/* FormatX r418 — final mobile header owner.
-   Loaded after legacy WDA/control-owner layers. One branded 72px carrier owns
-   MAG, language and menu; on mobile the carrier remains in normal document
-   flow so it can never cover readable content while the page is scrolled. */
+/* FormatX r428 — final cross-device header owner.
+   Mobile keeps one branded 72px carrier for MAG, language and menu. Desktop
+   receives an explicit language slot so legacy header layers cannot hide or
+   reparent the canonical selector. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root body.living-architecture .topbar {
     position:relative!important;
@@ -78,6 +78,9 @@
   html:root:root body.living-architecture .topbar .fx-language-toggle {
     top:11px!important;
     right:70px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
     width:44px!important;
     min-width:44px!important;
     max-width:44px!important;
@@ -99,6 +102,43 @@
   }
 }
 
+/* r428 desktop slot: the reference/control runtime expects the language button
+   to be a direct child of the branded topbar. Lock only that button here; MAG
+   and menu keep their existing desktop geometry. */
+@media (min-width:901px) and (pointer:fine) {
+  html:root:root body.living-architecture .topbar {
+    position:relative!important;
+    overflow:visible!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .fx-language-toggle,
+  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
+    position:absolute!important;
+    top:14px!important;
+    right:78px!important;
+    bottom:auto!important;
+    left:auto!important;
+    z-index:12070!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:44px!important;
+    min-width:44px!important;
+    max-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+  }
+}
+
 /* The architecture overlay is a user-opened interaction surface. Keeping its
    close button in the render tree while the surface is closed creates a ghost
    fixed control that can sit under the header and be reported as information.
@@ -114,4 +154,4 @@ html.fx-signature-open body.living-architecture .fx-signature-architecture {
   visibility:visible!important;
 }
 
-/* production-r418-final-mobile-header-owner-non-occluding */
+/* production-r428-final-cross-device-header-owner-language-visible-non-occluding */
