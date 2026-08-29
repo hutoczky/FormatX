@@ -4,7 +4,7 @@
   const ROOT = document.documentElement;
   const STORAGE_KEY = 'formatx-language';
   const SUPPORTED = new Set(['hu', 'en']);
-  const VERSION = '4';
+  const VERSION = '5';
   if (ROOT.dataset.fxSingleLanguageToggle === 'ready' && ROOT.dataset.fxSingleLanguageToggleVersion === VERSION) return;
   ROOT.dataset.fxSingleLanguageToggle = 'loading';
   ROOT.dataset.fxSingleLanguageToggleVersion = VERSION;
@@ -126,8 +126,12 @@
     history.replaceState({}, '', url.pathname + url.search + url.hash);
   }
 
+  function publicPageMode() {
+    return Boolean(document.body?.dataset.fxPublicPage || document.querySelector('header.fx-public-header'));
+  }
+
   function mobileMode() {
-    return matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+    return !publicPageMode() && matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   }
 
   function activeTopbar() {
@@ -157,10 +161,13 @@
       container.style.setProperty('opacity', '1', 'important');
       container.style.setProperty('pointer-events', 'none', 'important');
     } else {
+      container.style.removeProperty('display');
       container.style.removeProperty('position');
       container.style.removeProperty('top');
       container.style.removeProperty('right');
       container.style.removeProperty('z-index');
+      container.style.removeProperty('visibility');
+      container.style.removeProperty('opacity');
       container.style.removeProperty('pointer-events');
     }
   }
@@ -182,7 +189,12 @@
     }
     toggle.classList.remove('fx-control-owner-r264');
     if (toggle.parentElement !== container) container.appendChild(toggle);
-    ROOT.dataset.fxReferenceLanguageLayout = 'desktop-semantic-container';
+    toggle.style.removeProperty('display');
+    toggle.style.removeProperty('visibility');
+    toggle.style.removeProperty('opacity');
+    ROOT.dataset.fxReferenceLanguageLayout = publicPageMode()
+      ? 'r425-public-header-normal-flow'
+      : 'desktop-semantic-container';
   }
 
   function createContainer() {
@@ -243,7 +255,7 @@
 
   function publishLanguageChange(language) {
     dispatchEvent(new CustomEvent('formatx:languagechange', {
-      detail: { language, source: 'single-language-toggle-v4-r423' }
+      detail: { language, source: 'single-language-toggle-v5-public-flow' }
     }));
   }
 
