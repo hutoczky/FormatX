@@ -161,4 +161,24 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
+/* r425 — direct-path mobile balance. This later rule intentionally preserves
+   all r424 source contracts while replacing the visible phone compositing. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.975 !important;
+    filter:
+      brightness(1.045)
+      contrast(1.09)
+      saturate(1.24)
+      drop-shadow(0 0 3px rgba(126,239,255,.045))
+      drop-shadow(0 0 10px rgba(82,91,255,.022)) !important;
+    -webkit-filter:
+      brightness(1.045)
+      contrast(1.09)
+      saturate(1.24)
+      drop-shadow(0 0 3px rgba(126,239,255,.045))
+      drop-shadow(0 0 10px rgba(82,91,255,.022)) !important;
+  }
+}
+
 /* production-r424-direct-r326-sharp-native-webgl-optics-a11y-touch */
