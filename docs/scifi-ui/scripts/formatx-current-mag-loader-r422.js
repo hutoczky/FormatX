@@ -1,18 +1,18 @@
-/* FormatX r426 — direct current MAG loader.
-   r326 remains the production renderer. Mobile adds a post-ready governor that
-   freezes idle WebGL work after the startup paint and reopens bounded bursts for
-   real interaction, preserving the exact native geometry and r427 softer optics. */
+/* FormatX r428 — direct current MAG loader.
+   r326 remains the production renderer. The final header owner now loads on
+   every viewport so the canonical language selector cannot disappear on PC.
+   Mobile still adds the post-ready idle WebGL governor. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r426-mobile-idle-governor';
+const VERSION='direct-r326-r428-cross-device-header';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260829-r422-direct-r326-lcp&rev=20260830-r427-soft-mobile-optics';
-const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
+const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r424-sharp-organic-core';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99';
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260829-r426-idle-zero-frame';
@@ -91,24 +91,26 @@ function installSoundTouchRecovery(){
 async function start(){
   if(started)return;started=true;
   repairAccessibleNames();installSoundTouchRecovery();
-  const styles=[addStyle(STYLE,'data-fx-current-mag-r422')];
-  if(mobile)styles.push(addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418'));
+  const styles=[
+    addStyle(STYLE,'data-fx-current-mag-r422'),
+    addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')
+  ];
   const rendererReady=addScript(RENDERER,'data-fx-current-r326-r422');
   Promise.all(styles).then(()=>{
-    if(mobile)root.dataset.fxMobileHeaderFinalR418='loaded-last';
+    root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
     root.dataset.fxCurrentMagStylesR423='ready';
   });
   await rendererReady;
   if(root.dataset.fxCrystalOrganismR326==='ready'){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
     addScript(TOUCH,'data-fx-core-touch-pulse-r99');
-    root.dataset.fxCoreRendererSelection='r326-direct-r426-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r426';
+    root.dataset.fxCoreRendererSelection='r326-direct-r428-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r428';
   }
   root.dataset.fxCurrentMagRuntimeR422='ready';
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r426-idle-zero-frame-no-legacy-material-chain'
-    :'direct-r326-r424-sharp-no-legacy-material-chain';
+    ?'direct-r326-r428-idle-zero-frame-cross-device-header'
+    :'direct-r326-r428-sharp-cross-device-header';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile}}));
 }
 
