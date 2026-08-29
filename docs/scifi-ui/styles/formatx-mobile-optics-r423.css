@@ -1,20 +1,23 @@
-/* FormatX r424 — final phone MAG optics owner.
-   The r326 crystal geometry stays intact. Phone presentation deliberately uses
-   lower luminance/contrast and a slightly wider optical feather so the luminous
-   body reads as glass rather than a hard neon cut-out. */
+/* FormatX r425 — balanced phone MAG optics owner.
+   Keep the r326 crystal geometry intact. The phone treatment restores the
+   crystal's cyan/blue inner light while keeping the perimeter feathered and
+   below the previous over-bloomed presentation. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.64 !important;
+    opacity:.90 !important;
     mix-blend-mode:normal !important;
     scale:.80 .85 !important;
     transform-origin:50% 48% !important;
     image-rendering:auto !important;
-    filter:brightness(.60) contrast(.30) saturate(.54) blur(1.30px) !important;
-    -webkit-filter:brightness(.60) contrast(.30) saturate(.54) blur(1.30px) !important;
+    filter:brightness(1.06) contrast(.86) saturate(1.06) blur(.38px) drop-shadow(0 0 15px rgba(74,196,255,.16)) !important;
+    -webkit-filter:brightness(1.06) contrast(.86) saturate(1.06) blur(.38px) drop-shadow(0 0 15px rgba(74,196,255,.16)) !important;
   }
 
+  /* Do not revive the old full-stage pseudo bloom. The WebGL body plus one
+     restrained shape-following drop shadow gives the crystal depth without
+     creating the oversized cyan halo that prompted the previous correction. */
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
     content:none !important;
     display:none !important;
@@ -25,20 +28,20 @@
 @media (max-width:430px) {
   html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.62 !important;
+    opacity:.89 !important;
     scale:.78 .83 !important;
-    filter:brightness(.59) contrast(.29) saturate(.52) blur(1.35px) !important;
-    -webkit-filter:brightness(.59) contrast(.29) saturate(.52) blur(1.35px) !important;
+    filter:brightness(1.05) contrast(.84) saturate(1.04) blur(.42px) drop-shadow(0 0 14px rgba(74,196,255,.15)) !important;
+    -webkit-filter:brightness(1.05) contrast(.84) saturate(1.04) blur(.42px) drop-shadow(0 0 14px rgba(74,196,255,.15)) !important;
   }
 }
 
 @media (max-width:370px) {
   html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.61 !important;
-    filter:brightness(.58) contrast(.28) saturate(.50) blur(1.38px) !important;
-    -webkit-filter:brightness(.58) contrast(.28) saturate(.50) blur(1.38px) !important;
+    opacity:.88 !important;
+    filter:brightness(1.04) contrast(.83) saturate(1.03) blur(.44px) drop-shadow(0 0 13px rgba(74,196,255,.14)) !important;
+    -webkit-filter:brightness(1.04) contrast(.83) saturate(1.03) blur(.44px) drop-shadow(0 0 13px rgba(74,196,255,.14)) !important;
   }
 }
 
-/* production-r424-final-mobile-mag-softer-perimeter-lower-bloom */
+/* production-r425-balanced-mobile-mag-inner-light-soft-perimeter */
