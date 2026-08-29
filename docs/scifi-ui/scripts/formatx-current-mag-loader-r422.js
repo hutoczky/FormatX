@@ -1,7 +1,7 @@
 /* FormatX r426 — direct current MAG loader.
    r326 remains the production renderer. Mobile adds a post-ready governor that
    freezes idle WebGL work after the startup paint and reopens bounded bursts for
-   real interaction, preserving the exact native geometry and r425 optics. */
+   real interaction, preserving the exact native geometry and r427 softer optics. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -11,7 +11,7 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
-const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260829-r422-direct-r326-lcp&rev=20260829-r425-balanced-mobile-optics';
+const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260829-r422-direct-r326-lcp&rev=20260830-r427-soft-mobile-optics';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r424-sharp-organic-core';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99';
