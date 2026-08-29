@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r312 truthful startup/performance/control contract. */
+/* FormatX Web Design Awards — r414 truthful startup/performance/control contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -13,6 +13,7 @@ const mobileRegression = read('docs/scifi-ui/scripts/formatx-mobile-regression-r
 const mobileRegressionCss = read('docs/scifi-ui/styles/formatx-mobile-regression-r310.css');
 const pulseCss = read('docs/scifi-ui/styles/formatx-core-pulse-r312.css');
 const controls = read('docs/scifi-ui/scripts/formatx-wda-controls-r198.js');
+const controlOwner = read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
 const gpu = read('docs/scifi-ui/scripts/formatx-wda-gpu-r198.js');
 const css = read('docs/scifi-ui/styles/formatx-wda-hardening-r198.css');
 const firstPaint = read('docs/scifi-ui/styles/formatx-first-paint-r206.css');
@@ -48,13 +49,15 @@ for (const token of [
   'data-fx-control-owner-style-r264',
   'formatx-wda-controls-r198.js?v=20260824-native-orb-r250',
   'formatx-control-owner-r268.js?v=20260824-instant-award-r251',
+  'formatx-mobile-core-softening-r322.css?v=20260829-r414-restrained-mobile-mag-optics',
+  'r414-restrained-mobile-mag-optics',
   'formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame',
   'formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions',
   'muted-default-visible-control',
   'audit-passive',
   'DOMContentLoaded',
   'data-fx-core-render-ms'
-]) assert.ok(awardRuntime.includes(token), `missing active r310 award runtime contract: ${token}`);
+]) assert.ok(awardRuntime.includes(token), `missing active r414 award runtime contract: ${token}`);
 for (const token of [
   'Unmute FormatX cinematic audio',
   'Mute FormatX cinematic audio',
@@ -174,16 +177,25 @@ for (const token of [
 ]) assert.ok(mobileReferenceRuntime.includes(token), `missing r260 mobile reference contract: ${token}`);
 assert.doesNotMatch(mobileReferenceRuntime, /layoutObserver|headerObserver/);
 
+// r408 reference runtime is semantic/compatibility only; r268 owns the actual
+// SOUND | ASK | PAUSE nodes and their physical interaction contract.
 for (const token of [
   '.fx-three-sound',
   '.fx-reference-ask',
-  '.fx-reference-pause',
   'applyControlLayout',
   'const expectedControlOwner = space',
   'expectedControlOwner.appendChild(nodes.controls)',
   'event-driven-r207-owner-r260'
-]) assert.ok(referenceRuntime.includes(token), `missing current r304 reference control contract: ${token}`);
+]) assert.ok(referenceRuntime.includes(token), `missing current r408 reference compatibility contract: ${token}`);
 assert.match(referenceRuntime, /function ensureStyleLast\(\) \{\}/);
+for (const token of [
+  'function ensurePause',
+  '.fx-reference-pause',
+  'canonicalControls(hero)',
+  'fx-reference-controls-r204',
+  'visibleControl(pause)',
+  'fxControlOwnerR268'
+]) assert.ok(controlOwner.includes(token), `missing canonical r268 hero-control contract: ${token}`);
 
 for (const token of ['FRAME_INTERVAL=1000/24', 'document.hidden', 'visibilitychange', 'retryBoot', 'ready-r252']) {
   assert.ok(referenceFinalizer.includes(token), `missing throttled reference finalizer contract: ${token}`);
@@ -243,5 +255,5 @@ function validateLighthouse(config, label) {
 validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
-for (const source of [awardRuntime, intro, mobileRegression, controls, gpu, mobileLayoutRuntime, mobileReferenceRuntime, referenceRuntime, referenceFinalizer, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r312 post-DOM mobile Real3D startup, compositor MAG pulse, compact local QR delivery, current r304 control ownership and truthful 0.95 Lighthouse hard gates passed.');
+for (const source of [awardRuntime, intro, mobileRegression, controls, controlOwner, gpu, mobileLayoutRuntime, mobileReferenceRuntime, referenceRuntime, referenceFinalizer, legacyFlow, legacyFinalizer]) new Function(source);
+console.log('PASS: r414 restrained mobile MAG optics, post-DOM Real3D startup, compact local QR delivery, canonical r268 control ownership and truthful 0.95 Lighthouse hard gates passed.');
