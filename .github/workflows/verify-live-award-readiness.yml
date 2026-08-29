@@ -1,5 +1,5 @@
 name: Verify FormatX live award readiness
-run-name: Live award-readiness audit for current r267/r268/r418 production
+run-name: Live award-readiness audit for current r424 sharp 3D production
 
 on:
   push:
@@ -33,35 +33,21 @@ jobs:
           set -euo pipefail
           node .github/scripts/validate-award-readiness.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-          node .github/scripts/validate-real3d-core-v20.cjs
           node .github/scripts/validate-real3d-core.cjs
           node .github/scripts/validate-reference-core-v26.cjs
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-crystal-portal-r318.js
-          node --check docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
-          test -s docs/scifi-ui/styles/formatx-core-true-volume-r267.css
-          test -s docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
-          grep -Fq 'formatx-core-true-volume-r267.css?v=20260829-r268-softened-mobile-optics' docs/scifi-ui/scripts/formatx-crystal-portal-r318.js
-          grep -Fq "renderer:'closed-volume-r267'" docs/scifi-ui/scripts/formatx-crystal-portal-r318.js
-          grep -Fq "VERSION='r267-closed-volume-crystal'" docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
-          grep -Fq 'closed-front-back-sidewalls' docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
-          grep -Fq 'physical-z-depth-r267' docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
-          grep -Fq 'gl.enable(gl.DEPTH_TEST)' docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
-          grep -Fq 'gl.depthFunc(gl.LEQUAL)' docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
-          grep -Fq 'r268-mobile-optics-softened-bloom-and-rim' docs/scifi-ui/styles/formatx-core-true-volume-r267.css
-          grep -Fq 'brightness(.94) contrast(.87) saturate(.96) blur(.26px)' docs/scifi-ui/styles/formatx-core-true-volume-r267.css
-          grep -Fq 'brightness(.92) contrast(.85) saturate(.95) blur(.32px)' docs/scifi-ui/styles/formatx-core-true-volume-r267.css
-          grep -Fq 'production-r418-final-mobile-header-owner' docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
-          grep -Fq 'production-r418-final-mobile-header-owner-non-occluding' docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
-          grep -Fq "const VERSION='touch-pulse-r417-ui-safe'" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          grep -Fq 'formatx:coreinteraction' docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          grep -Fq 'drag-inertia-webgl-ui-guard-r417' docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          grep -Fq 'fxCoreTouchUiGuardR417' docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
+          test -s docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'r424 sharp optics' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'brightness(1.12)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'contrast(1.22)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          ! grep -Fq 'blur(' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'retired-r424-native-shader-optics' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          grep -Fq 'formatx-core-shapeshifter-r337-css' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
 
-      - name: Verify live r267 WebGL volume, r268 optics, r418 header, r417 touch and scrolling
+      - name: Verify live r424 WebGL crystal, sharp native optics, layout and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -74,56 +60,69 @@ jobs:
           fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
-          fetch "/scifi-ui/scripts/formatx-crystal-portal-r318.js?v=${GITHUB_RUN_ID}" "$TMP/portal.js"
-          fetch "/scifi-ui/scripts/formatx-core-true-volume-r267.js?v=${GITHUB_RUN_ID}" "$TMP/volume.js"
-          fetch "/scifi-ui/styles/formatx-core-true-volume-r267.css?v=${GITHUB_RUN_ID}" "$TMP/volume.css"
-          fetch "/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=${GITHUB_RUN_ID}" "$TMP/header.css"
-          fetch "/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=${GITHUB_RUN_ID}" "$TMP/touch.js"
+          fetch "/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=${GITHUB_RUN_ID}" "$TMP/crystal-r326.js"
+          fetch "/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r424.css"
+          fetch "/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-regression.js"
+          fetch "/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=${GITHUB_RUN_ID}" "$TMP/touch-r99.js"
           fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
+          fetch "/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=${GITHUB_RUN_ID}" "$TMP/layout.css"
+          fetch "/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=${GITHUB_RUN_ID}" "$TMP/text-guard.css"
+          fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
           fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
 
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
           contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
+
           contains bootstrap 'native-mechanical-orb-r250-no-2d-mag-layers' "$TMP/bootstrap.js"
-          contains bootstrap-wrapper 'formatx-core-mobile-v55.js?v=20260828-r382-balanced-soft-optics' "$TMP/bootstrap.js"
+          contains bootstrap-wrapper 'formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r251-performance' "$TMP/bootstrap.js"
           contains bootstrap-cleanup 'cleanupLegacy2d' "$TMP/bootstrap.js"
 
-          contains wrapper-primary 'formatx-crystal-organism-r326.js?v=20260828-r416-site-coupled-soft-optics' "$TMP/mobile-wrapper.js"
-          contains wrapper-optics-revision 'r418-restrained-soft-mag-attached-header' "$TMP/mobile-wrapper.js"
-          contains wrapper-header 'formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner' "$TMP/mobile-wrapper.js"
+          contains wrapper-award-revision 'new-crystal-organism-r326' "$TMP/mobile-wrapper.js"
+          contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' "$TMP/mobile-wrapper.js"
+          contains wrapper-primary 'formatx-crystal-organism-r326.js?v=20260825-r326-new-organism' "$TMP/mobile-wrapper.js"
           contains wrapper-selection 'new-crystal-organism-r326-primary' "$TMP/mobile-wrapper.js"
           contains wrapper-composition 'new-organism-no-legacy-visual-fallback' "$TMP/mobile-wrapper.js"
+          contains wrapper-overlay-policy 'new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual' "$TMP/mobile-wrapper.js"
+          ! grep -Eq 'formatx-core-mobile-reference-r99\.js|formatx-core-mechanical-orb-r250\.js|formatx-core-r317\.js' "$TMP/mobile-wrapper.js"
 
-          contains portal-style 'formatx-core-true-volume-r267.css?v=20260829-r268-softened-mobile-optics' "$TMP/portal.js"
-          contains portal-renderer "renderer:'closed-volume-r267'" "$TMP/portal.js"
-          contains portal-request "fxCrystalRendererRequest='closed-volume-r267'" "$TMP/portal.js"
+          contains renderer-version "const VERSION = 'crystal-organism-r326'" "$TMP/crystal-r326.js"
+          contains renderer 'single-webgl-crystal-organism-r326' "$TMP/crystal-r326.js"
+          contains webgl2 "getContext('webgl2'" "$TMP/crystal-r326.js"
+          contains webgl-fallback "getContext('webgl'" "$TMP/crystal-r326.js"
+          contains geometry 'buildOrganismGeometry' "$TMP/crystal-r326.js"
+          contains triangles 'gl.TRIANGLES' "$TMP/crystal-r326.js"
+          contains interaction-event 'formatx:coreinteraction' "$TMP/crystal-r326.js"
+          contains pointer-move 'pointermove' "$TMP/crystal-r326.js"
+          contains pointer-down 'pointerdown' "$TMP/crystal-r326.js"
+          contains native-ready 'ready-v69' "$TMP/crystal-r326.js"
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/crystal-r326.js"
 
-          contains volume-version "VERSION='r267-closed-volume-crystal'" "$TMP/volume.js"
-          contains volume-geometry 'closed-front-back-sidewalls' "$TMP/volume.js"
-          contains volume-depth 'physical-z-depth-r267' "$TMP/volume.js"
-          contains volume-depth-test 'gl.enable(gl.DEPTH_TEST)' "$TMP/volume.js"
-          contains volume-depth-func 'gl.depthFunc(gl.LEQUAL)' "$TMP/volume.js"
-          contains volume-triangles 'gl.drawArrays(gl.TRIANGLES,0,mesh.count)' "$TMP/volume.js"
-          contains volume-scheduler 'event-driven-no-idle-raf' "$TMP/volume.js"
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/volume.js"
+          # r424 is the live optical authority. The shader draws the volume and
+          # caustics; CSS restores contrast only and cannot blur or redraw MAG.
+          contains optics-version 'r424 sharp optics' "$TMP/optics-r424.css"
+          contains optics-scope 'single-webgl-crystal-organism-r326' "$TMP/optics-r424.css"
+          contains mobile-opacity 'opacity: .99 !important' "$TMP/optics-r424.css"
+          contains mobile-highlight 'brightness(1.12)' "$TMP/optics-r424.css"
+          contains mobile-contrast 'contrast(1.22)' "$TMP/optics-r424.css"
+          contains mobile-colour 'saturate(1.38)' "$TMP/optics-r424.css"
+          ! grep -Fq 'blur(' "$TMP/optics-r424.css"
+          contains optics-retired 'retired-r424-native-shader-optics' "$TMP/mobile-regression.js"
+          contains optics-owner 'formatx-core-shapeshifter-r337-css' "$TMP/mobile-regression.js"
+          contains renderer-optics 'fxCoreOpticsR424' "$TMP/crystal-r326.js"
+          contains renderer-density 'dpr-cap-1.75-pixel-budget-980k' "$TMP/crystal-r326.js"
+          ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' "$TMP/optics-r424.css"
 
-          contains optics-version 'r268-mobile-optics-softened-bloom-and-rim' "$TMP/volume.css"
-          contains optics-mobile 'brightness(.94) contrast(.87) saturate(.96) blur(.26px)' "$TMP/volume.css"
-          contains optics-narrow 'brightness(.92) contrast(.85) saturate(.95) blur(.32px)' "$TMP/volume.css"
-          contains optics-narrow-query '@media (max-width: 430px)' "$TMP/volume.css"
-
-          contains header-owner 'production-r418-final-mobile-header-owner' "$TMP/header.css"
-          contains header-nonoccluding 'production-r418-final-mobile-header-owner-non-occluding' "$TMP/header.css"
-          ! grep -Eq '\.topbar[[:space:]]*\{[^}]*position:sticky!important' "$TMP/header.css"
-
-          contains touch-version "const VERSION='touch-pulse-r417-ui-safe'" "$TMP/touch.js"
-          contains touch-core-event 'formatx:coreinteraction' "$TMP/touch.js"
-          contains touch-physics 'drag-inertia-webgl-ui-guard-r417' "$TMP/touch.js"
-          contains touch-ui-guard 'fxCoreTouchUiGuardR417' "$TMP/touch.js"
+          contains touch-wake 'formatx:referencepause' "$TMP/touch-r99.js"
+          contains touch-pulse 'FormatXCoreMobileV69?.pulse' "$TMP/touch-r99.js"
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
+          contains proof-style '.fx-reference-proof' "$TMP/layout.css"
+          contains hero-wrap 'max-width: 620px !important' "$TMP/text-guard.css"
+          contains normal-wrap 'white-space: normal !important' "$TMP/text-guard.css"
+
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
+          ! grep -Fq 'preventDefault' "$TMP/scroll.js"
 
           python3 - "$TMP/policy.json" <<'PY'
           import json,sys
@@ -154,10 +153,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Award/source + live r267 volume, r268 optics, r418 header, r417 touch and scrolling passed'
+            description='Award/source + live r424 sharp WebGL crystal and scrolling passed'
           else
             state=failure
-            description='Award, live r267/r268 MAG, header, touch or scrolling failed'
+            description='Award, live r424 MAG, native optics, interaction or scrolling failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \

@@ -78,10 +78,7 @@
   }
 
   function activateCoreCss() {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      root.dataset.fxCoreReal3dCssR310 = 'reduced-motion-skip';
-      return;
-    }
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const link = document.querySelector('link[data-fx-core-real3d="true"]');
     if (!(link instanceof HTMLLinkElement)) {
@@ -90,8 +87,10 @@
     }
 
     link.removeAttribute('data-fx-deferred-media-r300');
-    link.media = CORE_MEDIA;
-    root.dataset.fxCoreReal3dCssR310 = link.sheet ? 'active' : 'activating';
+    link.media = reducedMotion ? 'all' : CORE_MEDIA;
+    root.dataset.fxCoreReal3dCssR310 = reducedMotion
+      ? 'active-static-r413'
+      : link.sheet ? 'active' : 'activating';
 
     if (link.dataset.fxR310LoadBound !== 'true') {
       link.dataset.fxR310LoadBound = 'true';
@@ -121,6 +120,15 @@
 
   function ensureOpticsStyle() {
     const existing = document.querySelector('link[data-fx-mobile-core-optics-r328]');
+    const sharpNativeCore = Boolean(document.querySelector(
+      'script[data-fx-control-owner-r268="true"][src*="r424-sharp-organic-core"],script[data-fx-core-real3d="true"][src*="r424-sharp-organic-core"],script[src*="formatx-crystal-organism-r326.js"][src*="r424-sharp-organic-core"]'
+    ));
+    if (sharpNativeCore) {
+      existing?.remove();
+      root.dataset.fxCoreMobileOpticsR328 = 'retired-r424-native-shader-optics';
+      root.dataset.fxCoreMobileOpticsOwnerR424 = 'formatx-core-shapeshifter-r337-css';
+      return;
+    }
     if (existing instanceof HTMLLinkElement) {
       if (!existing.href.includes('r371-feathered-mobile-optics')) existing.href = OPTICS_STYLE_URL;
       root.dataset.fxCoreMobileOpticsR328 = 'r371-feathered-mobile-optics-owner';

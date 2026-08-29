@@ -1,5 +1,5 @@
 (function(){'use strict';
-const root=document.documentElement;if(!document.body||root.dataset.fxCoreMesh3d==='ready-v11')return;if(!window.WebGL2RenderingContext){root.dataset.fxCoreMesh3d='webgl2-unavailable';return;}
+const root=document.documentElement;if(document.querySelector('script[data-fx-motion-runtime-loader-r239],script[src*="formatx-core-real3d-v20.js"],script[src*="formatx-crystal-organism-r326.js"]')){root.dataset.fxCoreMesh3d='retired-r413-single-mag-owner';return}if(!document.body||root.dataset.fxCoreMesh3d==='ready-v11')return;if(!window.WebGL2RenderingContext){root.dataset.fxCoreMesh3d='webgl2-unavailable';return;}
 document.querySelectorAll('.fx-core-mesh3d-stage[data-fx-core-mesh3d]').forEach(n=>n.remove());
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),coarse=matchMedia('(max-width:820px),(pointer:coarse)');
 const stage=document.createElement('div');stage.className='fx-core-mesh3d-stage';stage.dataset.fxCoreMesh3d='v11';stage.dataset.active='false';stage.setAttribute('aria-hidden','true');const canvas=document.createElement('canvas');canvas.className='fx-core-mesh3d-canvas';stage.appendChild(canvas);document.body.appendChild(stage);

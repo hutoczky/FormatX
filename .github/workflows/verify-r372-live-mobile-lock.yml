@@ -1,4 +1,4 @@
-name: Verify r414 restrained mobile MAG and header lock
+name: Verify r424 sharp mobile MAG finish
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-award-runtime-r206.js'
-      - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
+      - 'docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
+      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
       - '.github/workflows/verify-r372-live-mobile-lock.yml'
   workflow_dispatch:
 
@@ -16,131 +16,78 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r414-live:
+  verify-r424-live:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r414 mobile MAG and header source contract
+      - name: Validate r424 native sharp optics source contract
         shell: bash
         run: |
           set -euo pipefail
-          CSS='docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
-          OPTICS='docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
+          CSS='docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
           SHADER='docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
           AWARD='docs/scifi-ui/scripts/formatx-award-runtime-r206.js'
+          REGRESSION='docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
 
           node --check "$SHADER"
           node --check "$AWARD"
+          node --check "$REGRESSION"
 
-          # r414 is the late mobile finish owner. It deliberately restrains the
-          # halo and edge contrast while preserving the r326 crystal geometry.
-          grep -Fq 'FormatX r414' "$CSS"
-          grep -Fq 'production-deploy-r414-restrained-mobile-mag-optics' "$CSS"
-          grep -Fq 'opacity: .94 !important' "$CSS"
-          grep -Fq 'brightness(.94)' "$CSS"
-          grep -Fq 'contrast(.76)' "$CSS"
-          grep -Fq 'saturate(.88)' "$CSS"
-          grep -Fq 'blur(.56px)' "$CSS"
-          grep -Fq 'opacity: .93 !important' "$CSS"
-          grep -Fq 'brightness(.92)' "$CSS"
-          grep -Fq 'contrast(.73)' "$CSS"
-          grep -Fq 'saturate(.86)' "$CSS"
-          grep -Fq 'blur(.64px)' "$CSS"
-          grep -Fq 'opacity: .105' "$CSS"
-          grep -Fq 'filter: blur(16px)' "$CSS"
-          grep -Fq 'r414-restrained-mobile-mag-optics' "$AWARD"
+          grep -Fq 'r424 sharp optics' "$CSS"
+          grep -Fq 'brightness(1.12)' "$CSS"
+          grep -Fq 'contrast(1.22)' "$CSS"
+          grep -Fq 'saturate(1.38)' "$CSS"
+          ! grep -Fq 'blur(' "$CSS"
 
-          # Mobile header is one coordinate system; no detached viewport-fixed
-          # MAG button and no visible skip-link unless focus-visible.
-          grep -Fq 'html body .skip-link {' "$CSS"
-          grep -Fq 'top: -120px !important' "$CSS"
-          grep -Fq 'html body .skip-link:focus-visible {' "$CSS"
-          grep -Fq 'html body.living-architecture .topbar {' "$CSS"
-          grep -Fq 'position: sticky !important' "$CSS"
-          grep -Fq 'min-height: 72px !important' "$CSS"
-          grep -Fq 'height: 72px !important' "$CSS"
-          grep -Fq 'html body.living-architecture .topbar .fx-reference-mag-button,' "$CSS"
-          grep -Fq 'position: absolute !important' "$CSS"
-          grep -Fq 'right: 122px !important' "$CSS"
-          grep -Fq 'right: 72px !important' "$CSS"
-          grep -Fq 'right: 14px !important' "$CSS"
+          grep -Fq 'const IDLE_ENERGY = mobile ? .36 : .32' "$SHADER"
+          grep -Fq 'mobile?1.75:1.55' "$SHADER"
+          grep -Fq 'mobile?980000:1050000' "$SHADER"
+          grep -Fq 'vec3 filmic' "$SHADER"
+          grep -Fq 'float irisBand' "$SHADER"
+          grep -Fq 'float axisV' "$SHADER"
+          grep -Fq 'fxCoreOpticsR424' "$SHADER"
+          grep -Fq 'dpr-cap-1.75-pixel-budget-980k' "$SHADER"
+          ! grep -Eq "getContext\\(['\"]2d['\"]|drawImage\\s*\\(|new[[:space:]]+Image\\s*\\(" "$SHADER"
 
-          # r379 still owns the centered carrier and desktop optics. r414 only
-          # overrides the late mobile finish values.
-          grep -Fq 'FormatX r379' "$OPTICS"
-          grep -Fq 'production-deploy-r379-mobile-mag-center-and-soft-optics' "$OPTICS"
-          grep -Fq '.fx-crystal-organism-r326-stage {' "$OPTICS"
-          grep -Fq 'left: 50% !important' "$OPTICS"
-          grep -Fq 'translate: -50% 0 !important' "$OPTICS"
-          grep -Fq 'width: 100% !important' "$OPTICS"
-          grep -Fq 'opacity: .91' "$OPTICS"
-          grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS"
-          ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$OPTICS"
+          grep -Fq 'fxFinalValidationR424' "$AWARD"
+          grep -Fq 'retired-r424-native-shader-optics' "$AWARD"
+          grep -Fq 'retired-r424-native-shader-optics' "$REGRESSION"
+          grep -Fq 'formatx-core-shapeshifter-r337-css' "$REGRESSION"
 
-          # Current r326 phone lighting is already deliberately restrained. The
-          # late r414 CSS softening must complement, never revert, these values.
-          grep -Fq "const VERSION = 'crystal-organism-r326'" "$SHADER"
-          grep -Fq "fresnelPower: '2.15'" "$SHADER"
-          grep -Fq "innerHeartBase: '.075'" "$SHADER"
-          grep -Fq "innerHeartBreath: '.10'" "$SHADER"
-          grep -Fq "rimBase: '.030'" "$SHADER"
-          grep -Fq "rimAlpha: '.007'" "$SHADER"
-          grep -Fq "outerAlphaMin: '.34'" "$SHADER"
-          grep -Fq "outerAlphaMax: '.62'" "$SHADER"
-          grep -Fq "facetStrength: '.075'" "$SHADER"
-          grep -Fq "sideStrength: '.09'" "$SHADER"
-          grep -Fq "fresnelPower: '2.7'" "$SHADER"
-          grep -Fq "innerHeartBase: '.24'" "$SHADER"
-          grep -Fq "outerAlphaMax: '.86'" "$SHADER"
-
-      - name: Verify production serves r414 mobile MAG and header lock
+      - name: Verify production serves r424 sharp mobile MAG
         shell: bash
         run: |
           set -euo pipefail
-          CSS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
-          OPTICS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
+          CSS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
           JS_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js'
-          CSS_TMP="$RUNNER_TEMP/r414-softening-live.css"
-          OPTICS_TMP="$RUNNER_TEMP/r414-optics-live.css"
-          JS_TMP="$RUNNER_TEMP/r414-live.js"
+          AWARD_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-award-runtime-r206.js'
+          REGRESSION_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-mobile-regression-r310.js'
+          CSS_TMP="$RUNNER_TEMP/r424-live.css"
+          JS_TMP="$RUNNER_TEMP/r424-live.js"
+          AWARD_TMP="$RUNNER_TEMP/r424-award-live.js"
+          REGRESSION_TMP="$RUNNER_TEMP/r424-regression-live.js"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "r414 live verification $attempt/45"
-            suffix="r414_live=${GITHUB_RUN_ID}_${attempt}"
+            echo "r424 live verification $attempt/45"
+            suffix="r424_live=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${OPTICS_URL}?${suffix}" -o "$OPTICS_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP"; then
-              if grep -Fq 'FormatX r414' "$CSS_TMP" \
-                && grep -Fq 'production-deploy-r414-restrained-mobile-mag-optics' "$CSS_TMP" \
-                && grep -Fq 'opacity: .94 !important' "$CSS_TMP" \
-                && grep -Fq 'brightness(.94)' "$CSS_TMP" \
-                && grep -Fq 'contrast(.76)' "$CSS_TMP" \
-                && grep -Fq 'blur(.56px)' "$CSS_TMP" \
-                && grep -Fq 'opacity: .93 !important' "$CSS_TMP" \
-                && grep -Fq 'brightness(.92)' "$CSS_TMP" \
-                && grep -Fq 'contrast(.73)' "$CSS_TMP" \
-                && grep -Fq 'blur(.64px)' "$CSS_TMP" \
-                && grep -Fq 'html body .skip-link:focus-visible {' "$CSS_TMP" \
-                && grep -Fq 'html body.living-architecture .topbar {' "$CSS_TMP" \
-                && grep -Fq 'position: sticky !important' "$CSS_TMP" \
-                && grep -Fq 'right: 122px !important' "$CSS_TMP" \
-                && grep -Fq 'right: 72px !important' "$CSS_TMP" \
-                && grep -Fq 'right: 14px !important' "$CSS_TMP" \
-                && grep -Fq 'FormatX r379' "$OPTICS_TMP" \
-                && grep -Fq 'production-deploy-r379-mobile-mag-center-and-soft-optics' "$OPTICS_TMP" \
-                && grep -Fq 'left: 50% !important' "$OPTICS_TMP" \
-                && grep -Fq 'translate: -50% 0 !important' "$OPTICS_TMP" \
-                && grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS_TMP" \
-                && grep -Fq "const VERSION = 'crystal-organism-r326'" "$JS_TMP" \
-                && grep -Fq "fresnelPower: '2.15'" "$JS_TMP" \
-                && grep -Fq "innerHeartBase: '.075'" "$JS_TMP" \
-                && grep -Fq "rimBase: '.030'" "$JS_TMP" \
-                && grep -Fq "rimAlpha: '.007'" "$JS_TMP" \
-                && grep -Fq "outerAlphaMax: '.62'" "$JS_TMP"; then
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${AWARD_URL}?${suffix}" -o "$AWARD_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${REGRESSION_URL}?${suffix}" -o "$REGRESSION_TMP"; then
+              if grep -Fq 'r424 sharp optics' "$CSS_TMP" \
+                && grep -Fq 'brightness(1.12)' "$CSS_TMP" \
+                && grep -Fq 'contrast(1.22)' "$CSS_TMP" \
+                && ! grep -Fq 'blur(' "$CSS_TMP" \
+                && grep -Fq 'const IDLE_ENERGY = mobile ? .36 : .32' "$JS_TMP" \
+                && grep -Fq 'mobile?1.75:1.55' "$JS_TMP" \
+                && grep -Fq 'mobile?980000:1050000' "$JS_TMP" \
+                && grep -Fq 'fxCoreOpticsR424' "$JS_TMP" \
+                && grep -Fq 'fxFinalValidationR424' "$AWARD_TMP" \
+                && grep -Fq 'retired-r424-native-shader-optics' "$REGRESSION_TMP"; then
                 ok=1
                 break
               fi
@@ -149,9 +96,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r414 restrained mobile MAG, r379-centered geometry, current softened r326 lighting, hidden-until-focused skip link and unified mobile header.'
+          echo 'PASS: production serves r424 sharp native WebGL optics without legacy blur or image-backed MAG layers.'
 
-      - name: Publish r414 live status
+      - name: Publish r424 live status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -160,13 +107,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r414 mobile MAG and header passed'
+            description='Live r424 sharp native MAG finish passed'
           else
             state=failure
-            description='Live r414 mobile MAG/header verification failed'
+            description='Live r424 sharp native MAG verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r414 live mobile MAG + header' \
+            -f context='FormatX r424 live mobile MAG finish' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

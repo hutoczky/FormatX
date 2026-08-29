@@ -5,25 +5,26 @@
   if (root.dataset.fxAwardRuntime === 'r334') return;
   root.dataset.fxAwardRuntime = 'r334';
   root.dataset.fxFinalValidationR334 = 'mobile-optics-r414-restrained-glow';
+  root.dataset.fxFinalValidationR424 = 'native-webgl-sharp-organic-core';
   root.dataset.fxMobileMagLineageR410 = 'approved-v51-reference-crystal';
   root.dataset.fxMobileMagFinishR412 = 'r414-restrained-glow';
   root.dataset.fxMobileMagFinishR414 = 'restrained-glow-soft-edge';
+  root.dataset.fxMobileMagFinishR424 = 'sharp-native-webgl-caustics';
 
-  const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
+  const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions&rev=20260829-r424-sharp-organic-core';
 
   function activateCriticalReal3dStyle() {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      root.dataset.fxCoreReal3dCssR310 = 'reduced-motion-skip';
-      return;
-    }
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const link = document.querySelector('link[data-fx-core-real3d="true"]');
     if (!(link instanceof HTMLLinkElement)) {
       root.dataset.fxCoreReal3dCssR310 = 'missing';
       return;
     }
     link.removeAttribute('data-fx-deferred-media-r300');
-    link.media = '(prefers-reduced-motion: no-preference)';
-    root.dataset.fxCoreReal3dCssR310 = link.sheet ? 'active' : 'activating';
+    link.media = reducedMotion ? 'all' : '(prefers-reduced-motion: no-preference)';
+    root.dataset.fxCoreReal3dCssR310 = reducedMotion
+      ? 'active-static-r413'
+      : link.sheet ? 'active' : 'activating';
   }
 
   function ensureMobileRegressionR310() {
@@ -50,7 +51,7 @@
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260824-native-orb-r250';
-  const CONTROL_OWNER_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260824-instant-award-r251';
+  const CONTROL_OWNER_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260824-instant-award-r251&rev=20260829-r424-sharp-organic-core';
   const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260822-r291-nav-state';
   const DIALOGUE_STYLE_URL = '/scifi-ui/styles/formatx-dialogue-open-r287.css?v=20260822-r287-open-state';
   const DIALOGUE_OWNER_URL = '/scifi-ui/scripts/formatx-dialogue-render-owner-r273.js?v=20260822-r287-open-state';
@@ -120,9 +121,21 @@
     document.head.appendChild(link);
   }
 
+  function sharpNativeCoreRequested() {
+    return Boolean(document.querySelector(
+      'script[data-fx-control-owner-r268="true"][src*="r424-sharp-organic-core"],script[data-fx-core-real3d="true"][src*="r424-sharp-organic-core"],script[src*="formatx-crystal-organism-r326.js"][src*="r424-sharp-organic-core"]'
+    ));
+  }
+
   function ensureCoreSoftening() {
     if (!matchMedia('(max-width: 900px)').matches) return;
     const existing = document.querySelector('link[data-fx-mobile-core-softening-r322]');
+    if (sharpNativeCoreRequested()) {
+      existing?.remove();
+      root.dataset.fxMobileCoreOpticsR322 = 'retired-r424-native-shader-optics';
+      root.dataset.fxMobileMagFinishR424 = 'sharp-native-webgl-caustics';
+      return;
+    }
     if (existing instanceof HTMLLinkElement) {
       if (!existing.href.includes('r414-restrained-mobile-mag-optics')) existing.href = CORE_SOFTEN_STYLE_URL;
       root.dataset.fxMobileCoreOpticsR322 = 'r414-restrained-mobile-mag-optics';

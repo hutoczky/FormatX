@@ -4,11 +4,11 @@ const root=document.documentElement;
 if(root.dataset.fxCoreShapeshifterR337==='ready')return;
 root.dataset.fxCoreShapeshifterR337='booting';
 
-const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260825-r337-shapeshifter';
-const SHAPES=['crystal','spire','prism','facet'];
+const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260825-r337-shapeshifter&rev=20260829-r424-sharp-organic-core';
+const SHAPES=['crystal','sphere'];
 const LABELS={
-  hu:{crystal:'kristály',spire:'torony',prism:'prizma',facet:'forgatott fazetta'},
-  en:{crystal:'crystal',spire:'spire',prism:'prism',facet:'rotated facet'}
+  hu:{crystal:'kristály',sphere:'gömb'},
+  en:{crystal:'crystal',sphere:'sphere'}
 };
 let index=0;
 
@@ -38,10 +38,12 @@ function apply(nextIndex,source){
   index=(nextIndex+SHAPES.length)%SHAPES.length;
   const shape=SHAPES[index];
   root.dataset.fxCoreShapeR337=shape;
+  root.dataset.fxCoreShapeModeR413='native-webgl-closed-geometry-morph';
   root.dataset.fxCoreShapeshifterR337='ready';
   syncButton();
-  window.FormatXCoreMobileV69?.pulse?.();
-  dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{shape,index,source:source||'api',revision:'r337'}}));
+  const core=window.FormatXCoreMobileV69;
+  if(typeof core?.setShape==='function')core.setShape(shape,source||'shape-controller-r413');
+  else core?.pulse?.();
   return shape;
 }
 function next(source){return apply(index+1,source||'mag-button');}
@@ -63,9 +65,15 @@ document.addEventListener('click',event=>{
   try{sessionStorage.setItem('formatx-core-shape-r337',shape);}catch(_){}
 },true);
 
-for(const name of ['formatx:languagechange','formatx:controlownerready','formatx:real3dready','pageshow']){
-  addEventListener(name,syncButton,{passive:true});
-}
+addEventListener('formatx:coreshapechange',event=>{
+  const nextIndex=SHAPES.indexOf(event.detail?.shape||'');
+  if(nextIndex<0)return;
+  index=nextIndex;
+  root.dataset.fxCoreShapeR337=SHAPES[index];
+  syncButton();
+},{passive:true});
+for(const name of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(name,syncButton,{passive:true});
+addEventListener('formatx:real3dready',()=>apply(index,'renderer-ready-r413'),{passive:true});
 
 window.FormatXCoreShapeR337={
   next:()=>next('api'),

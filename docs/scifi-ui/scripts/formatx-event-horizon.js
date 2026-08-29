@@ -20,8 +20,8 @@
   ROOT.dataset.fxLivingCopyGuardPolicyR293 = 'static-content-normalized-no-document-scan';
   ROOT.dataset.fxHeroLcpOwnerR411 = 'static-html-no-reparent';
 
-  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260823-r312-postdom-pulse';
-  const MOBILE_REGRESSION_URL = './scripts/formatx-mobile-regression-r310.js?v=20260823-r312-postdom';
+  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260823-r312-postdom-pulse&rev=20260829-r424-sharp-organic-core';
+  const MOBILE_REGRESSION_URL = './scripts/formatx-mobile-regression-r310.js?v=20260823-r312-postdom&rev=20260827-r413-static-3d';
   const PULSE_STYLE_URL = './styles/formatx-core-pulse-r312.css?v=20260823-r312-living-pulse';
   const FIRST_PAINT_STYLE_URL = './styles/formatx-first-paint-r206.css?v=20260825-r306-static-production-parity';
   const FIRST_FRAME_STYLE_URL = './styles/formatx-first-frame-geometry-r274.css?v=20260825-r306-static-production-parity';
@@ -176,18 +176,16 @@
   }
 
   function activateCriticalReal3dStyle() {
-    if (REDUCE_QUERY.matches) {
-      ROOT.dataset.fxCoreReal3dCssR310 = 'reduced-motion-skip';
-      return;
-    }
     const link = document.querySelector('link[data-fx-core-real3d="true"]');
     if (!(link instanceof HTMLLinkElement)) {
       ROOT.dataset.fxCoreReal3dCssR310 = 'missing';
       return;
     }
     link.removeAttribute('data-fx-deferred-media-r300');
-    link.media = '(prefers-reduced-motion: no-preference)';
-    ROOT.dataset.fxCoreReal3dCssR310 = link.sheet ? 'active' : 'activating-postdom-r312';
+    link.media = REDUCE_QUERY.matches ? 'all' : '(prefers-reduced-motion: no-preference)';
+    ROOT.dataset.fxCoreReal3dCssR310 = REDUCE_QUERY.matches
+      ? 'active-static-r413'
+      : link.sheet ? 'active' : 'activating-postdom-r312';
     if (link.dataset.fxR310LoadBound !== 'true') {
       link.dataset.fxR310LoadBound = 'true';
       link.addEventListener('load', () => { ROOT.dataset.fxCoreReal3dCssR310 = 'active'; }, { once: true });

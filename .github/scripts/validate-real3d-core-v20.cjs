@@ -15,6 +15,8 @@ const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js')
 const pureCss=read('docs/scifi-ui/styles/formatx-pure-3d-r285.css');
 const mobileCss=read('docs/scifi-ui/styles/formatx-core-mobile-v55.css');
 const stabilityCss=read('docs/scifi-ui/styles/formatx-mobile-r416-stability.css');
+const currentMagCss=read('docs/scifi-ui/styles/formatx-current-mag-r422.css');
+const sharpOpticsCss=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
 const finalHeaderCss=read('docs/scifi-ui/styles/formatx-mobile-header-final-r418.css');
 const bridge=read('docs/scifi-ui/scripts/formatx-core-interaction-bridge-r109.js');
 const home=read('docs/scifi-ui/index.html');
@@ -22,11 +24,14 @@ const contract=JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json
 
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
 assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
-assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r416-site-coupled-soft-optics/);
+assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260825-r326-new-organism&rev=20260829-r424-sharp-organic-core/);
 assert.match(wrapper,/formatx-mobile-r416-stability\.css\?v=20260828-r418-restrained-soft-mag-attached-header/);
 assert.match(wrapper,/formatx-mobile-header-final-r418\.css\?v=20260828-r418-final-owner/);
 assert.match(wrapper,/fxMobileHeaderFinalR418/);
 assert.match(wrapper,/no-legacy-visual-fallback/);
+assert.match(wrapper,/r424-sharp-native-webgl/);
+assert.match(wrapper,/retired-r424-native-shader-optics/);
+assert.doesNotMatch(wrapper,/formatx-mobile-optics-r423\.css/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 
 /* r326 is the current authoritative WebGL MAG. r267 remains validated as a
@@ -41,6 +46,9 @@ for(const token of [
   'IntersectionObserver',
   "fallback:'none'"
 ])assert.ok(legacyRenderer.includes(token),`missing r326 primary WebGL contract: ${token}`);
+for(const token of ['const IDLE_ENERGY = mobile ? .36 : .32','vec3 filmic','float irisBand','fxCoreOpticsR424','dpr-cap-1.75-pixel-budget-980k']){
+  assert.ok(legacyRenderer.includes(token),`missing r424 sharp WebGL contract: ${token}`);
+}
 assert.doesNotMatch(legacyRenderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 
 /* Keep the old closed-volume implementation healthy for genuine fallback use;
@@ -140,6 +148,13 @@ for(const token of [
 assert.ok(pureCss.includes('.fx-core-detail-r122'));
 assert.ok(pureCss.includes('content: none !important'));
 assert.doesNotMatch(mobileCss,/radial-gradient|conic-gradient|repeating-linear-gradient/i);
+for(const css of [currentMagCss,sharpOpticsCss]){
+  const compact=css.replace(/\s+/g,'');
+  for(const token of ['opacity:.99!important','scale:1!important','brightness(1.12)','contrast(1.22)','saturate(1.38)']){
+    assert.ok(compact.includes(token),`missing r424 sharp mobile CSS contract: ${token}`);
+  }
+  assert.doesNotMatch(css,/blur\(/);
+}
 assert.match(layout,/mobileViewport=.*max-width:900px/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 assert.equal(contract.quality_contract.mag_image_backed,false);

@@ -1,17 +1,18 @@
-/* FormatX r423 — direct current MAG loader.
+/* FormatX r424 — direct current MAG loader.
    r326 is the production renderer. Request its compact style and WebGL runtime
    together so the already-reserved mobile hero does not become a late LCP. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r423-parallel';
+const VERSION='direct-r326-r424-sharp-native';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
-if(matchMedia('(prefers-reduced-motion:reduce)').matches){root.dataset.fxCurrentMagRuntimeR422='reduced-skip';return;}
+const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
-const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260829-r422-direct-r326-lcp';
+const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260829-r422-direct-r326-lcp&rev=20260829-r424-sharp-organic-core';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r423-parallel-r326-lcp';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r424-sharp-organic-core';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
@@ -98,11 +99,11 @@ async function start(){
   await rendererReady;
   if(root.dataset.fxCrystalOrganismR326==='ready'){
     addScript(TOUCH,'data-fx-core-touch-pulse-r99');
-    root.dataset.fxCoreRendererSelection='r326-direct-r423-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r423';
+    root.dataset.fxCoreRendererSelection='r326-direct-r424-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r424';
   }
   root.dataset.fxCurrentMagRuntimeR422='ready';
-  root.dataset.fxCoreCriticalPathR422='direct-r326-r423-parallel-no-legacy-material-chain';
+  root.dataset.fxCoreCriticalPathR422='direct-r326-r424-sharp-no-legacy-material-chain';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile}}));
 }
 

@@ -11,15 +11,20 @@ const bootstrapRenderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r32
 const volumeRenderer=read('docs/scifi-ui/scripts/formatx-core-true-volume-r267.js');
 const portal=read('docs/scifi-ui/scripts/formatx-crystal-portal-r318.js');
 const volumeCss=read('docs/scifi-ui/styles/formatx-core-true-volume-r267.css');
+const currentMagCss=read('docs/scifi-ui/styles/formatx-current-mag-r422.css');
+const sharpOpticsCss=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
 const finalHeaderCss=read('docs/scifi-ui/styles/formatx-mobile-header-final-r418.css');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const bridge=read('docs/scifi-ui/scripts/formatx-core-interaction-bridge-r109.js');
 
 assert.match(bootstrap,/formatx-core-mobile-v55\.js/);
-assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260828-r416-site-coupled-soft-optics/);
+assert.match(wrapper,/formatx-crystal-organism-r326\.js\?v=20260825-r326-new-organism&rev=20260829-r424-sharp-organic-core/);
 assert.match(wrapper,/formatx-mobile-header-final-r418\.css\?v=20260828-r418-final-owner/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.match(wrapper,/new-organism-no-legacy-visual-fallback/);
+assert.match(wrapper,/r424-sharp-native-webgl/);
+assert.match(wrapper,/retired-r424-native-shader-optics/);
+assert.doesNotMatch(wrapper,/formatx-mobile-optics-r423\.css/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 
 /* r326 is the user-visible canonical production MAG. The portal must preserve
@@ -29,6 +34,9 @@ for(const token of [
   'crystal-organism-r326',"getContext('webgl2'","getContext('webgl'",
   'gl.drawArrays(gl.TRIANGLES','ResizeObserver','IntersectionObserver',"fallback:'none'"
 ])assert.ok(bootstrapRenderer.includes(token),`missing primary r326 WebGL release contract: ${token}`);
+for(const token of ['const IDLE_ENERGY = mobile ? .36 : .32','vec3 filmic','float irisBand','fxCoreOpticsR424','dpr-cap-1.75-pixel-budget-980k']){
+  assert.ok(bootstrapRenderer.includes(token),`missing r424 sharp WebGL release contract: ${token}`);
+}
 assert.doesNotMatch(bootstrapRenderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
 
 for(const token of [
@@ -78,6 +86,13 @@ for(const token of [
 ])assert.ok(finalHeaderCss.includes(token),`missing non-occluding r418 release presentation contract: ${token}`);
 assert.doesNotMatch(finalHeaderCss,/\.topbar\s*\{[^}]*position:sticky!important/is);
 assert.doesNotMatch(finalHeaderCss,/fx-reference-mag-button[^}]*position:fixed/i);
+for(const css of [currentMagCss,sharpOpticsCss]){
+  const compact=css.replace(/\s+/g,'');
+  for(const token of ['opacity:.99!important','scale:1!important','brightness(1.12)','contrast(1.22)','saturate(1.38)']){
+    assert.ok(compact.includes(token),`missing r424 sharp release CSS contract: ${token}`);
+  }
+  assert.doesNotMatch(css,/blur\(/);
+}
 
 for(const token of ['interaction-bridge-r416-site-is-mag','site-equals-mag-bidirectional','fxMagSiteBidirectionalR416'])assert.ok(bridge.includes(token),`missing r416 site coupling: ${token}`);
 assert.match(layout,/mobileViewport=.*max-width:900px/);

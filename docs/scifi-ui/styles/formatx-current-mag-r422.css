@@ -1,5 +1,5 @@
 /* FormatX r424 — current MAG critical runtime.
-   This stylesheet contains only the physical r326 stage, restrained optics and
+   This stylesheet contains only the physical r326 stage, sharp native optics and
    deterministic public mobile accessibility/touch contracts. */
 
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
@@ -65,10 +65,10 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.75 !important;
-    scale:.80 .85 !important;
-    filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
-    -webkit-filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
+    opacity:.99 !important;
+    scale:1 !important;
+    filter:brightness(1.12) contrast(1.22) saturate(1.38) !important;
+    -webkit-filter:brightness(1.12) contrast(1.22) saturate(1.38) !important;
   }
 
   html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
@@ -145,20 +145,20 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.73 !important;
-    scale:.78 .83 !important;
-    filter:brightness(.67) contrast(.37) saturate(.62) blur(.94px) !important;
-    -webkit-filter:brightness(.67) contrast(.37) saturate(.62) blur(.94px) !important;
+    opacity:.99 !important;
+    scale:1 !important;
+    filter:brightness(1.12) contrast(1.22) saturate(1.38) !important;
+    -webkit-filter:brightness(1.12) contrast(1.22) saturate(1.38) !important;
   }
 }
 
 @media (min-width:901px) and (pointer:fine) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.91 !important;
+    opacity:.99 !important;
     scale:1 !important;
-    filter:brightness(.86) contrast(.68) saturate(.82) blur(.28px) !important;
-    -webkit-filter:brightness(.86) contrast(.68) saturate(.82) blur(.28px) !important;
+    filter:brightness(1.10) contrast(1.18) saturate(1.34) !important;
+    -webkit-filter:brightness(1.10) contrast(1.18) saturate(1.34) !important;
   }
 }
 
-/* production-r424-direct-r326-pure-webgl-optics-a11y-touch */
+/* production-r424-direct-r326-sharp-native-webgl-optics-a11y-touch */

@@ -1,4 +1,4 @@
-name: Validate r420 mobile MAG centering
+name: Validate r424 mobile MAG centering and sharpness
 
 on:
   push:
@@ -86,7 +86,8 @@ jobs:
             assert(Math.abs(state.canvas.center - state.host.center) <= 2, name + ': canvas not centered in host ' + JSON.stringify(state));
             assert(state.stage.left >= -1 && state.stage.right <= state.viewport + 1, name + ': stage leaves viewport ' + JSON.stringify(state));
             assert(state.visibleRatio >= .98, name + ': canvas clipped horizontally ' + JSON.stringify(state));
-            assert(state.canvasFilter.includes('blur('), name + ': softened mobile edge filter missing ' + JSON.stringify(state));
+            assert(!state.canvasFilter.includes('blur('), name + ': legacy blur still owns the native canvas ' + JSON.stringify(state));
+            assert(state.canvasScale === '1' || state.canvasScale === 'none', name + ': legacy canvas downscale still active ' + JSON.stringify(state));
           }
 
           async function run(browser, name, viewport) {

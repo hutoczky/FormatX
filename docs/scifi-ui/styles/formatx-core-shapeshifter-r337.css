@@ -1,6 +1,6 @@
-/* FormatX r337 — MAG/CORE shape-shifter finishing.
-   The WebGL organism remains the renderer; this layer only changes its final
-   silhouette/composite and keeps the mobile optics restrained. */
+/* FormatX r413 — MAG/CORE interaction finishing.
+   Geometry morphing is owned entirely by the single native WebGL renderer.
+   CSS may tune optics and hit targets, but never changes the silhouette. */
 
 /* r326 listens on #hero, not on the canvas itself. Keep the physical WebGL
    surface decorative for hit testing so SOUND / ASK / PAUSE always own their
@@ -18,56 +18,72 @@ html[data-fx-core-shape-r337] #hero .fx-reference-controls-r204 :is(button,.fx-t
 html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
   transform-origin: 50% 50% !important;
   transition:
-    transform .52s cubic-bezier(.18,.78,.18,1),
     filter .42s ease,
     opacity .42s ease !important;
-  will-change: transform;
+  transform: none !important;
+  will-change: filter, opacity;
 }
 
-html[data-fx-core-shape-r337="crystal"] #hero .fx-crystal-organism-r326-canvas {
-  transform: scaleX(.96) scaleY(.97) !important;
+html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"] body.living-architecture
+#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  transform: none !important;
+  translate: none !important;
+  rotate: none !important;
+  scale: 1 !important;
+  transform-origin: 50% 50% !important;
 }
 
-html[data-fx-core-shape-r337="spire"] #hero .fx-crystal-organism-r326-canvas {
-  transform: scaleX(.78) scaleY(1.055) !important;
+/* r424 sharp optics: the native fragment shader owns the light. CSS only
+   restores display contrast after canvas compositing; it never draws a core. */
+html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
+#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  opacity: .99 !important;
+  mix-blend-mode: normal !important;
+  filter:
+    brightness(1.10)
+    contrast(1.18)
+    saturate(1.34)
+    drop-shadow(0 0 2px rgba(106, 236, 255, .10))
+    drop-shadow(0 0 9px rgba(99, 72, 255, .05)) !important;
+  -webkit-filter:
+    brightness(1.10)
+    contrast(1.18)
+    saturate(1.34)
+    drop-shadow(0 0 2px rgba(106, 236, 255, .10))
+    drop-shadow(0 0 9px rgba(99, 72, 255, .05)) !important;
+  transition: none !important;
+  will-change: auto !important;
 }
 
-html[data-fx-core-shape-r337="prism"] #hero .fx-crystal-organism-r326-canvas {
-  transform: scaleX(1.075) scaleY(.885) !important;
-}
-
-html[data-fx-core-shape-r337="facet"] #hero .fx-crystal-organism-r326-canvas {
-  transform: rotate(45deg) scale(.79) !important;
-}
-
-/* The shape change should read as a material morph, not a hard CSS jump. */
-html[data-fx-core-shape-r337="spire"] #hero .fx-crystal-organism-r326-canvas,
-html[data-fx-core-shape-r337="prism"] #hero .fx-crystal-organism-r326-canvas,
-html[data-fx-core-shape-r337="facet"] #hero .fx-crystal-organism-r326-canvas {
-  opacity: .94 !important;
+html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
+#hero .hero-space > .fx-crystal-organism-r326-stage::before,
+html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
+#hero .hero-space > .fx-crystal-organism-r326-stage::after {
+  content: none !important;
+  display: none !important;
 }
 
 @media (max-width: 900px), (pointer: coarse) {
-  /* r338 — mobile reference correction: retain the translucent living crystal
-     while preventing centre emission and perimeter Fresnel from reading as a
-     clipped neon silhouette. Desktop remains untouched. */
-  html[data-fx-core-mobile-v55] body.living-architecture #hero .hero-space >
+  /* r424 — preserve subpixel caustic edges on dense phone displays without
+     turning the translucent volume into a CSS-bloom silhouette. */
+  html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .92 !important;
+    opacity: .99 !important;
+    scale: 1 !important;
+    transform: none !important;
+    translate: none !important;
     filter:
-      brightness(.89)
-      contrast(.82)
-      saturate(.87)
-      blur(.42px)
-      drop-shadow(0 0 .45px rgba(126,239,255,.025))
-      drop-shadow(0 0 1.2px rgba(66,123,255,.008)) !important;
+      brightness(1.12)
+      contrast(1.22)
+      saturate(1.38)
+      drop-shadow(0 0 1px rgba(126,239,255,.085))
+      drop-shadow(0 0 3px rgba(82,91,255,.04)) !important;
     -webkit-filter:
-      brightness(.89)
-      contrast(.82)
-      saturate(.87)
-      blur(.42px)
-      drop-shadow(0 0 .45px rgba(126,239,255,.025))
-      drop-shadow(0 0 1.2px rgba(66,123,255,.008)) !important;
+      brightness(1.12)
+      contrast(1.22)
+      saturate(1.38)
+      drop-shadow(0 0 1px rgba(126,239,255,.085))
+      drop-shadow(0 0 3px rgba(82,91,255,.04)) !important;
   }
 
   /* r339 — the header MAG button is an interaction target, not part of the
@@ -93,25 +109,27 @@ html[data-fx-core-shape-r337="facet"] #hero .fx-crystal-organism-r326-canvas {
     will-change: auto !important;
   }
 
-  html[data-fx-core-shape-r337="crystal"] #hero .fx-crystal-organism-r326-canvas {
-    transform: scaleX(.945) scaleY(.955) !important;
-  }
-
-  html[data-fx-core-shape-r337="spire"] #hero .fx-crystal-organism-r326-canvas {
-    transform: scaleX(.76) scaleY(1.02) !important;
-  }
-
-  html[data-fx-core-shape-r337="prism"] #hero .fx-crystal-organism-r326-canvas {
-    transform: scaleX(1.045) scaleY(.86) !important;
-  }
-
-  html[data-fx-core-shape-r337="facet"] #hero .fx-crystal-organism-r326-canvas {
-    transform: rotate(45deg) scale(.765) !important;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
+  body.living-architecture #hero .hero-grid > .hero-space {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
+  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
+  body.living-architecture #hero .fx-reference-controls-r204 {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
   html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
+    animation: none !important;
     transition: none !important;
   }
 }

@@ -1,11 +1,12 @@
-name: Validate r378 cross-device MAG render
+name: Validate r424 sharp cross-device MAG render
 
 on:
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
       - '.github/workflows/validate-r352-cross-device-mag.yml'
   workflow_dispatch:
@@ -23,22 +24,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/r378" && cd "$RUNNER_TEMP/r378"
+          mkdir -p "$RUNNER_TEMP/r424" && cd "$RUNNER_TEMP/r424"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Render desktop and mobile MAG
+      - name: Render sharp desktop and mobile MAG
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r378-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r424-server.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/r378"
+          cd "$RUNNER_TEMP/r424"
           node <<'NODE'
           const { chromium } = require('playwright');
           const fs = require('fs');
           const path = require('path');
-          const out = path.join(process.env.GITHUB_WORKSPACE, 'r378-render');
+          const out = path.join(process.env.GITHUB_WORKSPACE, 'r424-render');
           fs.mkdirSync(out, {recursive:true});
           const assert=(v,m)=>{if(!v)throw new Error(m)};
 
@@ -57,55 +58,40 @@ jobs:
             await page.waitForFunction(()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready' && document.querySelector('.fx-crystal-organism-r326-canvas'),null,{timeout:45000});
             await page.waitForTimeout(1200);
             const state=await page.evaluate(()=>{
-              const host=document.querySelector('#hero .hero-space');
               const c=document.querySelector('.fx-crystal-organism-r326-canvas');
               const stage=document.querySelector('.fx-crystal-organism-r326-stage');
               const cue=document.querySelector('.fx-crystal-cue-r318');
               const s=getComputedStyle(c);
               const aura=stage?getComputedStyle(stage,'::after'):null;
               const r=c.getBoundingClientRect();
-              const sr=stage.getBoundingClientRect();
-              const hr=host.getBoundingClientRect();
-              const stageStyle=getComputedStyle(stage);
-              const cx=x=>(x.left+x.right)/2;
-              const visibleWidth=Math.max(0,Math.min(r.right,hr.right)-Math.max(r.left,hr.left));
               return {
                 renderer:document.documentElement.dataset.fxCoreRenderer||'',
                 optics:document.documentElement.dataset.fxCoreMobileOpticsR328||'',
                 width:r.width,height:r.height,
                 scale:s.scale,transform:s.transform,filter:s.filter,opacity:Number(s.opacity),
-                stageLeftStyle:stageStyle.left,stageRightStyle:stageStyle.right,stageTranslate:stageStyle.translate,
-                auraOpacity:Number(aura?.opacity||0),
-                auraWidth:aura?.width||'',
-                auraFilter:aura?.filter||'',
+                auraContent:aura?.content||'',
                 cueDisplay:cue?getComputedStyle(cue).display:'missing',
                 overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
-                hostLeft:hr.left,hostRight:hr.right,
-                stageLeft:sr.left,stageRight:sr.right,
-                canvasLeft:r.left,canvasRight:r.right,
-                hostCenterX:cx(hr),stageCenterX:cx(sr),canvasCenterX:cx(r),
-                stageCenterDelta:Math.abs(cx(sr)-cx(hr)),
-                canvasCenterDelta:Math.abs(cx(r)-cx(hr)),
-                visibleRatio:visibleWidth/Math.max(1,r.width)
+                opticsR424:document.documentElement.dataset.fxCoreOpticsR424||'',
+                resolutionR424:document.documentElement.dataset.fxCoreMobileResolutionR424||''
               };
             });
             console.log(profile.name, JSON.stringify(state));
             assert(state.width>100 && state.height>100, profile.name+' MAG canvas too small or missing');
             assert(state.overflow<=2, profile.name+' horizontal overflow: '+state.overflow);
-            assert(state.filter.includes('blur('), profile.name+' soft edge filter missing');
-            assert(state.optics.includes('r371-feathered-mobile-optics-owner'), profile.name+' current optics owner missing: '+state.optics);
+            assert(!state.filter.includes('blur('), profile.name+' legacy blur still owns the native canvas: '+state.filter);
+            assert(state.optics.includes('retired-r424-native-shader-optics'), profile.name+' r424 optics retirement missing: '+state.optics);
+            assert(state.opticsR424.includes('native-webgl-filmic-caustics'), profile.name+' native r424 optics marker missing');
             if(profile.mobile){
               assert(state.cueDisplay==='none', 'mobile decorative cue still overlaps controls');
-              assert(state.opacity<=0.84, 'mobile MAG canvas is too luminous: '+state.opacity);
-              assert(state.auraOpacity<=0.34, 'mobile MAG aura is too strong: '+state.auraOpacity);
-              assert(state.auraFilter.includes('blur('), 'mobile MAG aura is not diffuse');
-              assert(state.stageCenterDelta<=3, profile.name+' MAG stage is horizontally displaced: '+JSON.stringify(state));
-              assert(state.canvasCenterDelta<=3, profile.name+' MAG canvas is horizontally displaced: '+JSON.stringify(state));
-              assert(state.visibleRatio>=0.98, profile.name+' MAG is clipped horizontally: '+JSON.stringify(state));
+              assert(state.opacity>=0.98, 'mobile native MAG canvas is unexpectedly dim: '+state.opacity);
+              assert(state.filter.includes('brightness(1.12)'), 'mobile r424 brightness contract missing: '+state.filter);
+              assert(state.filter.includes('contrast(1.22)'), 'mobile r424 edge contrast missing: '+state.filter);
+              assert(state.filter.includes('saturate(1.38)'), 'mobile r424 spectral colour missing: '+state.filter);
+              assert(state.auraContent==='none' || state.auraContent==='normal', 'legacy CSS aura still draws a second core: '+state.auraContent);
+              assert(state.resolutionR424.includes('dpr-cap-1.75'), 'mobile r424 density contract missing');
             }
-            await page.screenshot({path:path.join(out,profile.name+'.png'),fullPage:false,animations:'disabled',timeout:5000}).catch(error=>{
-              console.log(profile.name+' screenshot skipped: '+error.message.split('\n')[0]);
-            });
+            await page.locator('#hero').screenshot({path:path.join(out,profile.name+'.png')});
             await context.close();
             await browser.close();
           }
@@ -113,12 +99,11 @@ jobs:
           (async()=>{
             await run({name:'desktop-1440x900',viewport:{width:1440,height:900},mobile:false});
             await run({name:'mobile-390x844',viewport:{width:390,height:844},mobile:true});
-            await run({name:'mobile-430x932',viewport:{width:430,height:932},mobile:true});
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r378-cross-device-mag-render
-          path: r378-render/
+          name: r424-sharp-cross-device-mag-render
+          path: r424-render/
           retention-days: 14

@@ -232,7 +232,7 @@
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
     './scripts/formatx-mobile-unified.js?v=20260820-reference-loop-r246',
     './scripts/formatx-infinite-scroll.js?v=20260820-reference-loop-r246',
-    './scripts/formatx-apex-scene-stability.js?v=20260808-core-scene-1',
+    './scripts/formatx-apex-scene-stability.js?v=20260808-core-scene-1&rev=20260827-r413-single-mag-owner',
     './scripts/formatx-apex-native.js?v=20260808-native-apex-1',
     './scripts/formatx-three-host-safe.js?v=20260808-native-apex-fallback-1',
     './scripts/formatx-render-visibility.js?v=20260805-immersive-visibility-3',

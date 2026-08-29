@@ -117,7 +117,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260820-reference-loop-r246';
+      script.src = './scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20260827-r413-single-mag-owner';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);

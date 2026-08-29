@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const BOOTSTRAP = 'native-mechanical-orb-r250-no-2d-mag-layers';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260828-r382-balanced-soft-optics';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r251-performance&rev=20260829-r424-sharp-organic-core';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260821-r285-pure-webgl3d';
   const PURE_STYLE = '/scifi-ui/styles/formatx-pure-3d-r285.css?v=20260828-r382-balanced-soft-optics';
   const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260814-pixel-aspect-r80';
@@ -42,10 +42,15 @@
     root.dataset.fxCoreReferenceLock = 'audit-skip';
     return;
   }
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    root.dataset.fxCoreReal3d = 'reduced-skip';
-    root.dataset.fxCoreReferenceLock = 'reduced-skip';
-    return;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) {
+    const coreStyle = document.querySelector('link[data-fx-core-real3d="true"]');
+    if (coreStyle instanceof HTMLLinkElement) {
+      coreStyle.removeAttribute('data-fx-deferred-media-r300');
+      coreStyle.media = 'all';
+    }
+    root.dataset.fxCoreReducedMotionR413 = 'static-render-explicit-interaction';
+    root.dataset.fxCoreReal3dCssR310 = 'active-static-r413';
   }
 
   root.dataset.fxCoreReal3d = 'loading-v69';

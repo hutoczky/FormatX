@@ -85,9 +85,11 @@ jobs:
             const canvas=page.locator('.fx-crystal-organism-r326-canvas:visible').first();
             assert(await canvas.count()===1,'r326 crystal canvas missing');
             const seen=[];
-            for(let i=0;i<4;i++){
+            const morphSamples=[];
+            for(let i=0;i<2;i++){
               const before=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
               seen.push(before);
+              const morphBefore=await page.evaluate(()=>Number(window.FormatXCoreMobileV69?.morph));
               const magTap=await page.evaluate(()=>{
                 const mag=document.querySelector('.fx-reference-mag-button');
                 if(!(mag instanceof HTMLButtonElement))return null;
@@ -99,12 +101,16 @@ jobs:
               assert(magTap&&magTap.w>=44&&magTap.h>=44&&magTap.hitInside,'MAG physical target invalid: '+JSON.stringify(magTap));
               await page.touchscreen.tap(magTap.x,magTap.y);
               await page.waitForFunction(previous=>document.documentElement.dataset.fxCoreShapeR337&&document.documentElement.dataset.fxCoreShapeR337!==previous,before,{timeout:3000});
+              await page.waitForTimeout(420);
+              const morphAfter=await page.evaluate(()=>Number(window.FormatXCoreMobileV69?.morph));
+              morphSamples.push({before:morphBefore,after:morphAfter});
               assert(await canvas.isVisible(),'crystal canvas disappeared during shape shift');
             }
             const finalShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
-            assert(new Set(seen).size===4,'MAG did not cycle through four unique shapes: '+JSON.stringify(seen));
-            assert(finalShape===seen[0],'MAG four-step cycle did not return to the starting shape: '+JSON.stringify({seen,finalShape}));
-            console.log('MAG_PHYSICAL_SHAPE_SHIFT','PASS',JSON.stringify({seen,finalShape}));
+            assert(new Set(seen).size===2,'MAG did not cycle through crystal and sphere: '+JSON.stringify(seen));
+            assert(finalShape===seen[0],'MAG two-step cycle did not return to the starting shape: '+JSON.stringify({seen,finalShape}));
+            assert(morphSamples.every(sample=>Number.isFinite(sample.before)&&Number.isFinite(sample.after)&&Math.abs(sample.after-sample.before)>.12),'WebGL geometry morph did not advance: '+JSON.stringify(morphSamples));
+            console.log('MAG_NATIVE_WEBGL_SHAPE_SHIFT','PASS',JSON.stringify({seen,finalShape,morphSamples}));
 
             const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
             assert(overflow<=2,'shape shift introduced horizontal overflow: '+overflow);
