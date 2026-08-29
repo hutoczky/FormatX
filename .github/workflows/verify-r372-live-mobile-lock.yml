@@ -80,17 +80,18 @@ jobs:
           grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS"
           ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$OPTICS"
 
-          # Current r326 mobile lighting contract remains the actual renderer.
+          # Current r326 phone lighting is already deliberately restrained. The
+          # late r414 CSS softening must complement, never revert, these values.
           grep -Fq "const VERSION = 'crystal-organism-r326'" "$SHADER"
-          grep -Fq "fresnelPower: '1.8'" "$SHADER"
-          grep -Fq "innerHeartBase: '.095'" "$SHADER"
-          grep -Fq "innerHeartBreath: '.14'" "$SHADER"
-          grep -Fq "rimBase: '.045'" "$SHADER"
-          grep -Fq "rimAlpha: '.014'" "$SHADER"
-          grep -Fq "outerAlphaMin: '.39'" "$SHADER"
-          grep -Fq "outerAlphaMax: '.72'" "$SHADER"
-          grep -Fq "facetStrength: '.115'" "$SHADER"
-          grep -Fq "sideStrength: '.13'" "$SHADER"
+          grep -Fq "fresnelPower: '2.15'" "$SHADER"
+          grep -Fq "innerHeartBase: '.075'" "$SHADER"
+          grep -Fq "innerHeartBreath: '.10'" "$SHADER"
+          grep -Fq "rimBase: '.030'" "$SHADER"
+          grep -Fq "rimAlpha: '.007'" "$SHADER"
+          grep -Fq "outerAlphaMin: '.34'" "$SHADER"
+          grep -Fq "outerAlphaMax: '.62'" "$SHADER"
+          grep -Fq "facetStrength: '.075'" "$SHADER"
+          grep -Fq "sideStrength: '.09'" "$SHADER"
           grep -Fq "fresnelPower: '2.7'" "$SHADER"
           grep -Fq "innerHeartBase: '.24'" "$SHADER"
           grep -Fq "outerAlphaMax: '.86'" "$SHADER"
@@ -135,9 +136,11 @@ jobs:
                 && grep -Fq 'translate: -50% 0 !important' "$OPTICS_TMP" \
                 && grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS_TMP" \
                 && grep -Fq "const VERSION = 'crystal-organism-r326'" "$JS_TMP" \
-                && grep -Fq "innerHeartBase: '.095'" "$JS_TMP" \
-                && grep -Fq "rimBase: '.045'" "$JS_TMP" \
-                && grep -Fq "outerAlphaMax: '.72'" "$JS_TMP"; then
+                && grep -Fq "fresnelPower: '2.15'" "$JS_TMP" \
+                && grep -Fq "innerHeartBase: '.075'" "$JS_TMP" \
+                && grep -Fq "rimBase: '.030'" "$JS_TMP" \
+                && grep -Fq "rimAlpha: '.007'" "$JS_TMP" \
+                && grep -Fq "outerAlphaMax: '.62'" "$JS_TMP"; then
                 ok=1
                 break
               fi
@@ -146,7 +149,7 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r414 restrained mobile MAG, r379-centered geometry, current r326 lighting, hidden-until-focused skip link and unified mobile header.'
+          echo 'PASS: production serves r414 restrained mobile MAG, r379-centered geometry, current softened r326 lighting, hidden-until-focused skip link and unified mobile header.'
 
       - name: Publish r414 live status
         if: always()
