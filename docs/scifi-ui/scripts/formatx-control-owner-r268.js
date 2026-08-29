@@ -76,6 +76,36 @@ function canonicalMenu(topbar){
   for(const duplicate of Array.from(document.querySelectorAll('#menu-toggle')))if(duplicate!==current)retireLegacyMenu(duplicate);
   current.id='menu-toggle';current.type='button';current.classList.add('fx-reference-menu-button','fx-control-owner-r264');current.dataset.fxR244Bound='true';current.dataset.fxControlMenuBoundR264='capture-owner';current.hidden=false;current.removeAttribute('aria-hidden');current.removeAttribute('tabindex');current.setAttribute('aria-controls','main-nav');current.setAttribute('aria-label',language()==='en'?'Menu':'Menü');if(!current.hasAttribute('aria-expanded'))current.setAttribute('aria-expanded','false');stripInline(current);if(current.parentElement!==topbar)topbar.appendChild(current);menu=current;return current;
 }
+function ensureLanguageToggle(topbar){
+  let lang=document.querySelector('.fx-language-toggle');
+  if(!(lang instanceof HTMLButtonElement)){
+    lang=document.createElement('button');
+    lang.type='button';
+    lang.className='fx-language-toggle';
+    lang.dataset.fxControlLanguageFallbackR423='true';
+    lang.addEventListener('click',()=>{
+      const next=language()==='en'?'hu':'en';
+      const url=new URL(location.href);
+      url.searchParams.set('lang',next);
+      try{localStorage.setItem('formatx-language',next);}catch(_){}
+      location.assign(url.href);
+    });
+    topbar.appendChild(lang);
+  }
+  lang.classList.add('fx-control-owner-r264');
+  lang.hidden=false;
+  lang.removeAttribute('aria-hidden');
+  lang.removeAttribute('tabindex');
+  stripInline(lang);
+  const current=language();
+  if(lang.textContent!==current.toUpperCase())lang.textContent=current.toUpperCase();
+  lang.lang=current;
+  lang.setAttribute('aria-label',current==='en'?'Switch to Hungarian':'Váltás angol nyelvre');
+  lang.setAttribute('title',current==='en'?'Switch to Hungarian':'Váltás angol nyelvre');
+  if(lang.parentElement!==topbar)topbar.appendChild(lang);
+  root.dataset.fxReferenceLanguageLayout='r423-direct-topbar-child';
+  return lang;
+}
 function canonicalHeader(hero){
   const topbar=canonicalTopbar();if(!(topbar instanceof HTMLElement))return false;
   topbar.hidden=false;topbar.removeAttribute('aria-hidden');topbar.style.removeProperty('display');
@@ -85,10 +115,9 @@ function canonicalHeader(hero){
   if(mag.dataset.fxControlMagBoundR268!=='true'){
     mag.dataset.fxControlMagBoundR268='true';mag.addEventListener('click',()=>{if(typeof window.FormatXCoreShapeR337?.next==='function'){window.FormatXCoreShapeR337.next();return;}window.FormatXCoreMobileV69?.pulse?.();});
   }
-  const lang=document.querySelector('.fx-language-toggle');
-  if(lang instanceof HTMLButtonElement){lang.classList.add('fx-control-owner-r264');lang.hidden=false;lang.removeAttribute('aria-hidden');stripInline(lang);if(lang.parentElement!==topbar)topbar.appendChild(lang);}
+  ensureLanguageToggle(topbar);
   canonicalMenu(topbar);retireLegacyMenus();retireLegacyTopbars(topbar);
-  root.dataset.fxReferenceHeaderLayout=isMobile()?'r417-mobile-branded-single-row':'r264-desktop-three-control';
+  root.dataset.fxReferenceHeaderLayout=isMobile()?'r423-mobile-branded-language-owned':'r264-desktop-three-control';
   return true;
 }
 function ensureAsk(rail){
@@ -111,8 +140,8 @@ function canonicalControls(hero){
 }
 function visibleControl(node){if(!(node instanceof HTMLElement)||node.hidden||node.getAttribute('aria-hidden')==='true')return false;const style=getComputedStyle(node),rect=node.getBoundingClientRect();return style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity||1)>.02&&rect.width>=40&&rect.height>=40;}
 function healthy(hero,mobile){
-  const topbar=canonicalTopbar(),currentMenu=document.getElementById('menu-toggle'),controls=hero.querySelector('.fx-reference-controls-r204.fx-reference-controls-r264'),grid=hero.querySelector(':scope > .hero-grid'),space=grid?.querySelector(':scope > .hero-space'),sound=controls?.querySelector(':scope > .fx-three-sound'),ask=controls?.querySelector('.fx-reference-ask'),pause=controls?.querySelector('.fx-reference-pause');
-  return topbar instanceof HTMLElement&&Boolean(topbar.querySelector('.brand'))&&currentMenu instanceof HTMLButtonElement&&currentMenu.classList.contains('fx-reference-menu-button')&&currentMenu.parentElement===topbar&&controls instanceof HTMLElement&&controls.parentElement===space&&(mobile||visibleControl(sound))&&visibleControl(ask)&&visibleControl(pause);
+  const topbar=canonicalTopbar(),currentMenu=document.getElementById('menu-toggle'),lang=topbar?.querySelector(':scope > .fx-language-toggle'),controls=hero.querySelector('.fx-reference-controls-r204.fx-reference-controls-r264'),grid=hero.querySelector(':scope > .hero-grid'),space=grid?.querySelector(':scope > .hero-space'),sound=controls?.querySelector(':scope > .fx-three-sound'),ask=controls?.querySelector('.fx-reference-ask'),pause=controls?.querySelector('.fx-reference-pause');
+  return topbar instanceof HTMLElement&&Boolean(topbar.querySelector('.brand'))&&lang instanceof HTMLButtonElement&&lang.parentElement===topbar&&visibleControl(lang)&&currentMenu instanceof HTMLButtonElement&&currentMenu.classList.contains('fx-reference-menu-button')&&currentMenu.parentElement===topbar&&controls instanceof HTMLElement&&controls.parentElement===space&&(mobile||visibleControl(sound))&&visibleControl(ask)&&visibleControl(pause);
 }
 function bindControlObserver(hero){
   const controls=hero.querySelector('.fx-reference-controls-r204.fx-reference-controls-r264');if(!(controls instanceof HTMLElement)||controlObserverTarget===controls&&controlObserver)return;controlObserver?.disconnect();controlObserverTarget=controls;controlObserver=new MutationObserver(records=>{if(applying)return;if(records.some(record=>record.type==='childList'))schedule(true);});controlObserver.observe(controls,{childList:true});root.dataset.fxControlStabilityR321='direct-structure-observer-no-feedback';
@@ -126,7 +155,7 @@ function reconcile(force=false){
   ensureReferenceStyle();ensureShapeshifter();applying=true;
   try{
     const headerReady=canonicalHeader(hero),controlsReady=canonicalControls(hero);
-    if(headerReady&&controlsReady){lastMobile=mobile;root.dataset.fxControlOwnerR264='ready';root.dataset.fxControlOwnerR268='ready';bindControlObserver(hero);bootObserver?.disconnect();bootObserver=null;if(bootTimer)clearTimeout(bootTimer);bootTimer=0;dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r417-branded-header'}}));return true;}
+    if(headerReady&&controlsReady&&healthy(hero,mobile)){lastMobile=mobile;root.dataset.fxControlOwnerR264='ready';root.dataset.fxControlOwnerR268='ready';bindControlObserver(hero);bootObserver?.disconnect();bootObserver=null;if(bootTimer)clearTimeout(bootTimer);bootTimer=0;dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r423-branded-header-language-owned'}}));return true;}
     return false;
   }finally{applying=false;}
 }
