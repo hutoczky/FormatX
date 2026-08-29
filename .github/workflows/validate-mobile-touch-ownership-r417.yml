@@ -1,4 +1,4 @@
-name: Validate r418 mobile visual and touch ownership
+name: Validate current mobile visual and touch ownership
 on:
   push:
     branches: [master]
@@ -7,12 +7,11 @@ on:
       - 'docs/scifi-ui/scripts/formatx-control-owner-r268.js'
       - 'docs/scifi-ui/scripts/formatx-wda-controls-r198.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-      - 'docs/scifi-ui/scripts/formatx-core-true-volume-r267.js'
-      - 'docs/scifi-ui/scripts/formatx-crystal-portal-r318.js'
-      - 'docs/scifi-ui/styles/formatx-core-true-volume-r267.css'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/styles/formatx-mobile-r416-stability.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-optics-r419.css'
       - 'docs/scifi-ui/styles/formatx-mobile-header-final-r418.css'
       - '.github/workflows/validate-mobile-touch-ownership-r417.yml'
   workflow_dispatch:
@@ -25,14 +24,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Validate r418 and true-volume source contracts
+      - name: Validate current r326 and r421 source contracts
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-wda-controls-r198.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -q "touch-pulse-r417-ui-safe" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           grep -q "interactive-target-bypassed" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           grep -q "setPointerCapture" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
@@ -42,12 +41,14 @@ jobs:
           grep -q "fallback-click-delivered" docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           grep -q "production-r418-mobile-first-paint-header-lock" docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css
           grep -q "production-r418-attached-header-restrained-mag" docs/scifi-ui/styles/formatx-mobile-r416-stability.css
+          grep -q "production-r421-cross-device-restrained-mag" docs/scifi-ui/styles/formatx-mobile-r416-stability.css
+          grep -q "production-r421-mobile-mag-centered-softer-flare-and-facets" docs/scifi-ui/styles/formatx-mobile-optics-r419.css
           grep -q "production-r418-final-mobile-header-owner" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
-          grep -q "closed-front-back-sidewalls" docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
-          grep -q "physical-z-depth-r267" docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
-          grep -q "normal-based-two-light-soft-fresnel" docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
-          grep -q "event-driven-no-idle-raf" docs/scifi-ui/scripts/formatx-core-true-volume-r267.js
-          grep -q "balanced-volume-optics" docs/scifi-ui/scripts/formatx-crystal-portal-r318.js
+          grep -q "single-webgl-crystal-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -q "four-direction-asymmetric-crystal-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -q "translucent-living-facet-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -q "heartbeat-and-interaction-bursts-no-idle-loop-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -q "pure-webgl3d-no-2d-overlays" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
       - name: Install Chromium runtime
         shell: bash
         run: |
@@ -56,7 +57,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify header, true-volume MAG optics, SOUND and direct MAG touch
+      - name: Verify header, r326 MAG optics, SOUND and direct MAG touch
         shell: bash
         run: |
           set -euo pipefail
@@ -81,27 +82,29 @@ jobs:
               const skipStyle=skip?getComputedStyle(skip):null;
               return {topbar:rect(topbar),brand:rect(brand),skip:rect(skip),skipPosition:skipStyle?.position||'',skipTop:skipStyle?.top||''};
             });
-            console.log('R418_FIRST_PAINT',JSON.stringify(firstPaint));
+            console.log('R421_FIRST_PAINT',JSON.stringify(firstPaint));
             assert(firstPaint.topbar&&firstPaint.topbar.top<=1&&firstPaint.topbar.height>=68&&firstPaint.topbar.height<=76,'mobile topbar is not the first 72px carrier: '+JSON.stringify(firstPaint));
             assert(firstPaint.brand&&firstPaint.brand.top>=firstPaint.topbar.top&&firstPaint.brand.bottom<=firstPaint.topbar.bottom+1,'brand escaped the first-paint topbar: '+JSON.stringify(firstPaint));
             assert(firstPaint.skip&&firstPaint.skip.bottom<0&&firstPaint.skipPosition==='fixed','skip link consumed touch layout space: '+JSON.stringify(firstPaint));
 
             await page.waitForFunction(()=>{
               const root=document.documentElement;
-              return root.dataset.fxCoreTrueVolumeR267==='ready'
-                && root.dataset.fxCoreVolumeTopology==='closed-front-back-sidewalls'
-                && root.dataset.fxCoreVolumeDepth==='physical-z-depth-r267'
-                && root.dataset.fxCoreVolumeLighting==='normal-based-two-light-soft-fresnel'
+              return root.dataset.fxCrystalOrganismR326==='ready'
+                && root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+                && root.dataset.fxCoreGeometry==='four-direction-asymmetric-crystal-organism-r326'
+                && root.dataset.fxCoreMaterial==='translucent-living-facet-organism-r326'
+                && root.dataset.fxCoreScheduler==='heartbeat-and-interaction-bursts-no-idle-loop-r326'
+                && root.dataset.fxCoreCompositionR285==='pure-webgl3d-no-2d-overlays'
                 && root.dataset.fxControlOwnerR268==='ready'
                 && root.dataset.fxCoreTouchPulseR99==='ready-r417'
                 && root.dataset.fxMobileHeaderFinalR418==='loaded-last'
                 && root.dataset.fxSoundTouchRecoveryR418==='ready'
                 && Boolean(document.querySelector('.fx-three-sound'))
-                && Boolean(document.querySelector('#hero .fx-core-r267-volume-stage > .fx-core-r267-volume-canvas'));
+                && Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas'));
             },null,{timeout:45000});
             await page.waitForTimeout(500);
 
-            const header=await page.evaluate(()=>{
+            const state=await page.evaluate(()=>{
               const box=node=>{if(!node)return null;const r=node.getBoundingClientRect(),s=getComputedStyle(node);return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,position:s.position,display:s.display,visibility:s.visibility,opacity:Number(s.opacity||1)};};
               const bars=[...document.querySelectorAll('.topbar')].filter(node=>{const s=getComputedStyle(node),r=node.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>.02&&r.width>0&&r.height>0;});
               const topbar=bars.find(bar=>bar.querySelector(':scope > .brand'))||bars[0];
@@ -109,24 +112,31 @@ jobs:
               const mag=topbar?.querySelector(':scope > .fx-reference-mag-button');
               const lang=topbar?.querySelector(':scope > .fx-language-toggle');
               const menu=topbar?.querySelector(':scope > .fx-reference-menu-button');
-              const canvas=document.querySelector('#hero .fx-core-r267-volume-stage > .fx-core-r267-volume-canvas');
+              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas');
               const cs=canvas?getComputedStyle(canvas):null;
               let gl=false,glError=null;
               if(canvas instanceof HTMLCanvasElement){const context=canvas.getContext('webgl2')||canvas.getContext('webgl');gl=Boolean(context);glError=context?.getError?.()??null;}
               const r=document.documentElement.dataset;
-              return {count:bars.length,topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),canvas:box(canvas),filter:cs?.filter||'',canvasOpacity:Number(cs?.opacity||0),gl,glError,headerMarker:r.fxCanonicalTopbarR417||'',finalOwner:r.fxMobileHeaderFinalR418||'',trueVolume:r.fxCoreTrueVolumeR267||'',topology:r.fxCoreVolumeTopology||'',depth:r.fxCoreVolumeDepth||'',lighting:r.fxCoreVolumeLighting||'',scheduler:r.fxCoreSchedulerR267||''};
+              return {count:bars.length,topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),canvas:box(canvas),filter:cs?.filter||'',canvasOpacity:Number(cs?.opacity||0),gl,glError,finalOwner:r.fxMobileHeaderFinalR418||'',renderer:r.fxCoreRenderer||'',geometry:r.fxCoreGeometry||'',material:r.fxCoreMaterial||'',scheduler:r.fxCoreScheduler||'',composition:r.fxCoreCompositionR285||'',visual:r.fxCoreMobileVisualR326||'',gpu:r.fxGpuCapability||''};
             });
-            console.log('R418_TRUE_VOLUME_OPTICS',JSON.stringify(header));
-            assert(header.count===1,'exactly one visible mobile topbar is required: '+JSON.stringify(header));
-            assert(header.finalOwner==='loaded-last','final r418 header owner is not authoritative: '+JSON.stringify(header));
-            for(const key of ['brand','mag','lang','menu'])assert(header[key]&&header[key].top>=header.topbar.top-1&&header[key].bottom<=header.topbar.bottom+1,key+' escaped topbar: '+JSON.stringify(header));
-            assert(header.mag.position==='absolute'&&header.lang.position==='absolute'&&header.menu.position==='absolute','header controls must remain attached absolute children: '+JSON.stringify(header));
-            assert(!overlaps(header.brand,header.mag,2)&&!overlaps(header.mag,header.lang,2)&&!overlaps(header.lang,header.menu,2),'mobile header controls overlap: '+JSON.stringify(header));
-            assert(header.canvas&&header.canvasOpacity>=.98&&header.canvasOpacity<=1.01,'true-volume MAG canvas must remain fully visible: '+JSON.stringify(header));
-            assert(/blur\(0\.(1[0-9]|2[0-9]|3[0-9])px\)/.test(header.filter),'true-volume MAG soft edge finish is missing or too strong: '+JSON.stringify(header));
-            assert(header.gl&&header.glError===0,'true-volume MAG has no healthy WebGL context: '+JSON.stringify(header));
-            assert(header.trueVolume==='ready'&&header.topology==='closed-front-back-sidewalls'&&header.depth==='physical-z-depth-r267'&&header.lighting==='normal-based-two-light-soft-fresnel','true-volume 3D contract missing: '+JSON.stringify(header));
-            assert(header.scheduler==='event-driven-no-idle-raf','true-volume MAG regressed to idle animation loop: '+JSON.stringify(header));
+            console.log('R421_R326_OPTICS',JSON.stringify(state));
+            assert(state.count===1,'exactly one visible mobile topbar is required: '+JSON.stringify(state));
+            assert(state.finalOwner==='loaded-last','final r418 header owner is not authoritative: '+JSON.stringify(state));
+            for(const key of ['brand','mag','lang','menu'])assert(state[key]&&state[key].top>=state.topbar.top-1&&state[key].bottom<=state.topbar.bottom+1,key+' escaped topbar: '+JSON.stringify(state));
+            assert(state.mag.position==='absolute'&&state.lang.position==='absolute'&&state.menu.position==='absolute','header controls must remain attached absolute children: '+JSON.stringify(state));
+            assert(!overlaps(state.brand,state.mag,2)&&!overlaps(state.mag,state.lang,2)&&!overlaps(state.lang,state.menu,2),'mobile header controls overlap: '+JSON.stringify(state));
+            assert(state.canvas&&state.canvas.width>100&&state.canvas.height>100,'r326 MAG canvas is missing or collapsed: '+JSON.stringify(state));
+            assert(state.canvasOpacity>=.68&&state.canvasOpacity<=.80,'r421 mobile MAG opacity restraint is missing: '+JSON.stringify(state));
+            assert(/brightness\(0\.(6[5-9]|7[0-2])\)/.test(state.filter),'r421 mobile MAG brightness restraint is missing: '+JSON.stringify(state));
+            assert(/contrast\(0\.(3[5-9]|4[0-2])\)/.test(state.filter),'r421 mobile MAG edge softening is missing: '+JSON.stringify(state));
+            assert(/blur\(0\.(8[0-9]|9[0-9])px\)/.test(state.filter),'r421 mobile MAG blur is outside the restrained range: '+JSON.stringify(state));
+            assert(state.gl&&state.glError===0,'r326 MAG has no healthy WebGL context: '+JSON.stringify(state));
+            assert(state.renderer==='single-webgl-crystal-organism-r326','wrong production MAG renderer: '+JSON.stringify(state));
+            assert(state.geometry==='four-direction-asymmetric-crystal-organism-r326','r326 geometry contract missing: '+JSON.stringify(state));
+            assert(state.material==='translucent-living-facet-organism-r326','r326 material contract missing: '+JSON.stringify(state));
+            assert(state.scheduler==='heartbeat-and-interaction-bursts-no-idle-loop-r326','r326 MAG regressed to an idle RAF loop: '+JSON.stringify(state));
+            assert(state.composition==='pure-webgl3d-no-2d-overlays','r326 MAG is no longer pure WebGL 3D: '+JSON.stringify(state));
+            assert(['webgl2','webgl1'].includes(state.gpu),'r326 GPU capability marker missing: '+JSON.stringify(state));
 
             const soundTap=await page.evaluate(()=>{
               const sound=document.querySelector('.fx-three-sound');
@@ -149,7 +159,7 @@ jobs:
               audioOwner:document.documentElement.dataset.fxAudioOwner||'',
               audioState:document.documentElement.dataset.fxAudioState||''
             }));
-            console.log('R418_SOUND_TOUCH_ON',JSON.stringify(firstDelivery));
+            console.log('R421_SOUND_TOUCH_ON',JSON.stringify(firstDelivery));
             assert(firstDelivery.audioOwner==='professional-v6','professional audio owner did not receive SOUND activation: '+JSON.stringify(firstDelivery));
             assert(firstDelivery.audioState==='on','first physical SOUND tap did not switch audio on: '+JSON.stringify(firstDelivery));
             assert(['native-click','fallback-click-delivered'].includes(firstDelivery.recovery),'SOUND touch recovery did not complete: '+JSON.stringify(firstDelivery));
@@ -165,33 +175,38 @@ jobs:
               audioOwner:document.documentElement.dataset.fxAudioOwner||'',
               audioState:document.documentElement.dataset.fxAudioState||''
             }));
-            console.log('R418_SOUND_TOUCH_OFF',JSON.stringify(secondDelivery));
+            console.log('R421_SOUND_TOUCH_OFF',JSON.stringify(secondDelivery));
             assert(secondDelivery.audioOwner==='professional-v6','professional audio owner disappeared after second SOUND tap: '+JSON.stringify(secondDelivery));
             assert(secondDelivery.audioState==='off','second physical SOUND tap did not switch audio off: '+JSON.stringify(secondDelivery));
             assert(['native-click','fallback-click-delivered'].includes(secondDelivery.recovery),'second SOUND touch recovery did not complete: '+JSON.stringify(secondDelivery));
             assert(secondDelivery.trace.filter(item=>item.type==='pointerup').length>=2,'second SOUND pointerup was not delivered: '+JSON.stringify(secondDelivery));
 
             const coreTap=await page.evaluate(()=>{
-              const stage=document.querySelector('#hero .fx-core-r267-volume-stage');if(!(stage instanceof HTMLElement))return null;const r=stage.getBoundingClientRect();window.__fxCoreTouchEvents=[];addEventListener('formatx:coreinteraction',event=>window.__fxCoreTouchEvents.push(event.detail),{passive:true});return{x:r.left+r.width*.5,y:r.top+r.height*.42,w:r.width,h:r.height};
+              const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+              if(!(stage instanceof HTMLElement))return null;
+              const r=stage.getBoundingClientRect();
+              window.__fxCoreTouchEvents=[];
+              addEventListener('formatx:coreinteraction',event=>window.__fxCoreTouchEvents.push(event.detail),{passive:true});
+              return{x:r.left+r.width*.5,y:r.top+r.height*.42,w:r.width,h:r.height};
             });
-            assert(coreTap&&coreTap.w>100&&coreTap.h>100,'true-volume MAG stage missing: '+JSON.stringify(coreTap));
+            assert(coreTap&&coreTap.w>100&&coreTap.h>100,'r326 MAG stage missing: '+JSON.stringify(coreTap));
             await page.touchscreen.tap(coreTap.x,coreTap.y);
             await page.waitForTimeout(300);
             const coreEvents=await page.evaluate(()=>window.__fxCoreTouchEvents||[]);
-            console.log('R418_MAG_TOUCH',JSON.stringify(coreEvents));
-            assert(coreEvents.some(event=>event?.phase==='press'),'direct MAG touch no longer reaches the 3D interaction owner');
+            console.log('R421_MAG_TOUCH',JSON.stringify(coreEvents));
+            assert(coreEvents.some(event=>event?.phase==='press'),'direct MAG touch no longer reaches the r326 interaction owner');
             assert(coreEvents.some(event=>event?.phase==='release'),'direct MAG touch does not release cleanly');
 
             await ctx.close();await browser.close();
-            console.log('PASS: r418 header, closed-volume WebGL MAG optics, SOUND ON/OFF touch transitions and direct MAG touch passed.');
+            console.log('PASS: current r326 WebGL MAG, r421 restrained optics, header, SOUND ON/OFF and direct MAG touch passed.');
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
-      - name: Publish r418 mobile visual/touch status
+      - name: Publish current mobile visual/touch status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r418 header, true-volume MAG optics and touch ownership passed'; else state=failure; description='r418 mobile visual or touch ownership failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r326 MAG, r421 optics, header and touch ownership passed'; else state=failure; description='Current mobile visual or touch ownership failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX r418 mobile visual and touch' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
