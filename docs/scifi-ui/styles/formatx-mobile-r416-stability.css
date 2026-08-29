@@ -1,15 +1,15 @@
-/* FormatX r418 — attached mobile header + restrained MAG finish.
+/* FormatX r421 — attached mobile header + restrained cross-device MAG finish.
    Keep the r326 crystal alive, but reduce perimeter glare and razor-edge contrast.
-   Header controls stay inside the branded topbar coordinate system. */
+   Mobile header controls stay inside the branded topbar coordinate system; the
+   desktop rule only refines the final WebGL composite and does not own layout. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html body.living-architecture #hero .hero-copy {
     margin:0 auto 16px !important;
   }
 
-  /* Slightly calmer than r417: preserve facet depth while reducing the hard
-     cyan perimeter and central flare. This is intentionally well above the dark
-     r416 pass so the crystal does not look switched off. */
+  /* Base mobile restraint. r421 final optics loads after this and performs the
+     last phone-specific reduction without changing the crystal geometry. */
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:.82 !important;
@@ -177,4 +177,18 @@
   }
 }
 
-/* production-r418-attached-header-restrained-mag */
+/* Desktop keeps more micro-contrast than mobile, but the centre flare and
+   perimeter facets no longer read as a neon cut-out. A sub-pixel blur merely
+   blends the hottest single-pixel transitions; it does not flatten the mesh. */
+@media (min-width:901px) and (pointer:fine) {
+  html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.91 !important;
+    mix-blend-mode:normal !important;
+    image-rendering:auto !important;
+    filter:brightness(.86) contrast(.68) saturate(.82) blur(.28px) !important;
+    -webkit-filter:brightness(.86) contrast(.68) saturate(.82) blur(.28px) !important;
+  }
+}
+
+/* production-r421-cross-device-restrained-mag */
