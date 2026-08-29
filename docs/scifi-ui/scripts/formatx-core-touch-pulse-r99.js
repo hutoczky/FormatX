@@ -25,17 +25,33 @@ function isInteractiveTarget(target){
   return Boolean(target.closest(UI_SELECTOR));
 }
 
+function usableRect(node){
+  if(!(node instanceof HTMLElement))return null;
+  const style=getComputedStyle(node);
+  if(style.display==='none'||style.visibility==='hidden'||Number(style.opacity||1)<=.02)return null;
+  const rect=node.getBoundingClientRect();
+  return rect.width>=2&&rect.height>=2?rect:null;
+}
+
+/* r432: the production MAG is the r326 crystal-organism stage. Older v55
+   stages can remain in the DOM as retired compatibility nodes, so never let a
+   hidden legacy stage win geometry/pointer capture over the visible r326 MAG. */
 function stageAndRect(){
-  const stage=document.querySelector('#hero .fx-core-mobile-v55-stage');
-  const host=document.querySelector('#hero .hero-space');
-  const target=stage||host;
-  const rect=target?.getBoundingClientRect();
-  return{stage,target,rect};
+  const candidates=[
+    document.querySelector('#hero .fx-crystal-organism-r326-stage'),
+    document.querySelector('#hero .fx-core-mobile-v55-stage'),
+    document.querySelector('#hero .hero-space')
+  ];
+  for(const candidate of candidates){
+    const rect=usableRect(candidate);
+    if(rect)return{stage:candidate,target:candidate,rect};
+  }
+  return{stage:null,target:null,rect:null};
 }
 
 function stagePoint(clientX,clientY,allowOutside=false){
   const {rect}=stageAndRect();
-  if(!rect||rect.width<2||rect.height<2)return null;
+  if(!rect)return null;
   if(!allowOutside&&(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom))return null;
   return{
     x:clamp(((clientX-rect.left)/rect.width-.5)*2,-1,1),
@@ -54,6 +70,7 @@ function wake(point,phase='press',pointerType='touch'){
   dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail}));
   dispatchEvent(new CustomEvent('formatx:organismcoreactivate',{detail}));
   root.dataset.fxCoreTouchPhysicsR384=phase;
+  root.dataset.fxCoreTouchStageR432='current-r326-visible-stage';
   return true;
 }
 
@@ -160,4 +177,5 @@ addEventListener('pagehide',stopInertia,{once:true});
 root.dataset.fxCoreTouchPulseR99='ready-r417';
 root.dataset.fxCoreTouchInteractionR384='drag-inertia-webgl-ui-guard-r417';
 root.dataset.fxCoreTouchUiGuardR417='ready';
+root.dataset.fxCoreTouchGeometryR432='current-r326-first-visible-stage';
 }());

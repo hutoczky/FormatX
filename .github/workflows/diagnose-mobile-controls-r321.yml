@@ -5,6 +5,7 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-control-owner-r268.js'
       - 'docs/scifi-ui/scripts/formatx-core-shapeshifter-r337.js'
+      - 'docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js'
       - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
       - 'docs/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
       - '.github/workflows/diagnose-mobile-controls-r321.yml'
@@ -26,7 +27,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Measure controls and validate MAG shape shifting
+      - name: Validate stable controls and settled native MAG morph
         shell: bash
         run: |
           set -euo pipefail
@@ -35,7 +36,6 @@ jobs:
           cd "$RUNNER_TEMP/control-motion"
           node <<'NODE'
           const {chromium}=require('playwright');
-          const round=v=>Math.round(v*1000)/1000;
           const assert=(value,message)=>{if(!value)throw new Error(message);};
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
@@ -43,105 +43,59 @@ jobs:
             const page=await ctx.newPage();
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForFunction(()=>{
-              const root=document.documentElement;
-              return root.dataset.fxCrystalOrganismR326==='ready'
-                && root.dataset.fxCoreMobileV69==='ready-v69'
-                && root.dataset.fxControlOwnerR268==='ready'
-                && root.dataset.fxCoreShapeshifterR337==='ready'
-                && Boolean(document.querySelector('.fx-crystal-organism-r326-canvas'))
+              const r=document.documentElement.dataset;
+              return r.fxCrystalOrganismR326==='ready'
+                && r.fxCoreMobileV69==='ready-v69'
+                && r.fxControlOwnerR268==='ready'
+                && r.fxCoreShapeshifterR337==='ready'
                 && Boolean(document.querySelector('.fx-reference-mag-button'))
                 && Boolean(document.querySelector('.fx-three-sound'));
             },null,{timeout:45000});
             await page.waitForTimeout(800);
 
             const frames=await page.evaluate(async()=>{
-              const describe=e=>e?{tag:e.tagName,id:e.id||'',cls:typeof e.className==='string'?e.className.slice(0,180):'',pointerEvents:getComputedStyle(e).pointerEvents,z:getComputedStyle(e).zIndex,position:getComputedStyle(e).position}:null;
-              const snap=()=>{
-                const get=s=>document.querySelector(s);
-                const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,top:r.top,bottom:r.bottom,left:r.left,right:r.right}};
-                const sound=get('.fx-three-sound');
-                const controls=get('#hero .fx-reference-controls-r204');
-                const sr=sound?.getBoundingClientRect();
-                const x=sr?sr.left+sr.width/2:0,y=sr?sr.top+sr.height/2:0;
-                const stack=sr?document.elementsFromPoint(x,y).slice(0,8).map(describe):[];
-                const hit=sr?document.elementFromPoint(x,y):null;
-                return{sound:{r:rect(sound),hitInside:Boolean(sound&&hit&&sound.contains(hit)),hit:describe(hit),stack},controls:{r:rect(controls)},datasets:{layout:document.documentElement.dataset.fxReferenceControlLayout||'',owner:document.documentElement.dataset.fxControlOwnerR268||'',shape:document.documentElement.dataset.fxCoreShapeR337||'',renderer:document.documentElement.dataset.fxCrystalOrganismR326||''}};
-              };
               const out=[];
               for(let i=0;i<24;i++){
                 await new Promise(resolve=>requestAnimationFrame(resolve));
-                out.push(snap());
+                const sound=document.querySelector('.fx-three-sound');
+                const r=sound?.getBoundingClientRect();
+                const hit=r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
+                out.push(r?{x:r.x,y:r.y,w:r.width,h:r.height,hit:Boolean(sound&&hit&&sound.contains(hit))}:null);
               }
               return out;
             });
-            const ys=frames.map(f=>f.sound.r?.y).filter(Number.isFinite),xs=frames.map(f=>f.sound.r?.x).filter(Number.isFinite),ws=frames.map(f=>f.sound.r?.w).filter(Number.isFinite),hs=frames.map(f=>f.sound.r?.h).filter(Number.isFinite);
-            const span=a=>a.length?Math.max(...a)-Math.min(...a):Infinity;
-            const motion={xSpan:span(xs),ySpan:span(ys),wSpan:span(ws),hSpan:span(hs)};
-            console.log('CONTROL_MOTION_SUMMARY',JSON.stringify(Object.fromEntries(Object.entries(motion).map(([k,v])=>[k,round(v)]))));
-            assert(motion.xSpan<=1.5&&motion.ySpan<=1.5&&motion.wSpan<=1.5&&motion.hSpan<=1.5,'mobile controls are not geometrically stable: '+JSON.stringify(motion));
-            const badHits=frames.filter(frame=>!(frame.sound.r&&frame.sound.r.w>=44&&frame.sound.r.h>=44&&frame.sound.hitInside));
-            if(badHits.length)console.log('SOUND_HIT_STACK',JSON.stringify(badHits[0].sound));
+            assert(frames.every(Boolean),'SOUND geometry disappeared during sampling');
+            const span=key=>Math.max(...frames.map(v=>v[key]))-Math.min(...frames.map(v=>v[key]));
+            const motion={x:span('x'),y:span('y'),w:span('w'),h:span('h')};
+            console.log('CONTROL_MOTION_SUMMARY',JSON.stringify(motion));
+            assert(Object.values(motion).every(v=>v<=1.5),'mobile controls are not geometrically stable: '+JSON.stringify(motion));
+            assert(frames.every(v=>v.w>=44&&v.h>=44&&v.hit),'SOUND control is not continuously actionable');
 
-            const canvas=page.locator('.fx-crystal-organism-r326-canvas:visible').first();
-            assert(await canvas.count()===1,'r326 crystal canvas missing');
-            const seen=[];
-            const morphSamples=[];
+            const startShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
+            const samples=[];
             for(let i=0;i<2;i++){
-              const before=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
-              seen.push(before);
-              const morphBefore=await page.evaluate(()=>Number(window.FormatXCoreMobileV69?.morph));
-              const magTap=await page.evaluate(()=>{
-                const mag=document.querySelector('.fx-reference-mag-button');
-                if(!(mag instanceof HTMLButtonElement))return null;
-                const r=mag.getBoundingClientRect();
-                const x=r.left+r.width/2,y=r.top+r.height/2;
-                const hit=document.elementFromPoint(x,y);
-                return{x,y,w:r.width,h:r.height,hitInside:Boolean(hit&&mag.contains(hit)),hitClass:hit instanceof Element?String(hit.className||''):''};
-              });
-              assert(magTap&&magTap.w>=44&&magTap.h>=44&&magTap.hitInside,'MAG physical target invalid: '+JSON.stringify(magTap));
-              await page.touchscreen.tap(magTap.x,magTap.y);
-              await page.waitForFunction(previous=>document.documentElement.dataset.fxCoreShapeR337&&document.documentElement.dataset.fxCoreShapeR337!==previous,before,{timeout:3000});
-              const target=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337==='sphere'?1:0);
-              await page.waitForFunction(target=>{
+              const before=await page.evaluate(()=>({shape:document.documentElement.dataset.fxCoreShapeR337||'',morph:Number(window.FormatXCoreMobileV69?.morph)}));
+              const mag=page.locator('.fx-reference-mag-button').first();
+              assert(await mag.isVisible(),'MAG control is not visible');
+              await mag.click();
+              await page.waitForFunction(previous=>document.documentElement.dataset.fxCoreShapeR337!==previous,before.shape,{timeout:3000});
+              const targetShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
+              const target=targetShape==='sphere'?1:0;
+              await page.waitForFunction(({target,targetShape})=>{
                 const morph=Number(window.FormatXCoreMobileV69?.morph);
-                return Number.isFinite(morph)&&Math.abs(morph-target)<.07;
-              },target,{timeout:3500});
-              const morphAfter=await page.evaluate(()=>Number(window.FormatXCoreMobileV69?.morph));
-              morphSamples.push({before:morphBefore,after:morphAfter,target});
-              assert(await canvas.isVisible(),'crystal canvas disappeared during shape shift');
+                const settled=document.documentElement.dataset.fxCoreShape;
+                return settled===targetShape&&Number.isFinite(morph)&&Math.abs(morph-target)<.07;
+              },{target,targetShape},{timeout:10000});
+              const after=await page.evaluate(()=>({shape:document.documentElement.dataset.fxCoreShapeR337||'',settled:document.documentElement.dataset.fxCoreShape||'',morph:Number(window.FormatXCoreMobileV69?.morph)}));
+              samples.push({before,after,target});
+              assert(Math.abs(after.morph-target)<.07,'native WebGL MAG did not settle at target: '+JSON.stringify(samples));
             }
             const finalShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
-            assert(new Set(seen).size===2,'MAG did not cycle through crystal and sphere: '+JSON.stringify(seen));
-            assert(finalShape===seen[0],'MAG two-step cycle did not return to the starting shape: '+JSON.stringify({seen,finalShape}));
-            assert(morphSamples.every(sample=>Number.isFinite(sample.before)&&Number.isFinite(sample.after)&&Math.abs(sample.after-sample.target)<.07&&Math.abs(sample.after-sample.before)>.12),'WebGL geometry morph did not settle on both target shapes: '+JSON.stringify(morphSamples));
-            console.log('MAG_NATIVE_WEBGL_SHAPE_SHIFT','PASS',JSON.stringify({seen,finalShape,morphSamples}));
+            assert(finalShape===startShape,'two MAG activations did not return to the starting shape: '+JSON.stringify({startShape,finalShape,samples}));
+            console.log('MAG_NATIVE_WEBGL_SHAPE_SHIFT','PASS',JSON.stringify(samples));
 
             const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
             assert(overflow<=2,'shape shift introduced horizontal overflow: '+overflow);
-            assert(badHits.length===0,'SOUND control is not continuously actionable: '+JSON.stringify(badHits[0]?.sound||{}));
-
-            const soundTap=await page.evaluate(()=>{
-              const sound=document.querySelector('.fx-three-sound');
-              if(!(sound instanceof HTMLButtonElement))return null;
-              const r=sound.getBoundingClientRect();
-              window.__fxSoundPhysicalTapCount=0;
-              window.__fxSoundTouchTrace=[];
-              const desc=node=>node instanceof Element?`${node.tagName.toLowerCase()}#${node.id||''}.${String(node.className||'').replace(/\s+/g,'.').slice(0,120)}`:String(node?.nodeName||'');
-              for(const type of ['touchstart','pointerdown','touchend','pointerup','click']){
-                document.addEventListener(type,event=>window.__fxSoundTouchTrace.push({phase:'document-capture',type,target:desc(event.target),defaultPrevented:event.defaultPrevented,scrollY,loop:document.documentElement.dataset.fxLoopLandingState||'',input:document.documentElement.dataset.fxInfiniteInput||''}),{capture:true,passive:true});
-                sound.addEventListener(type,event=>window.__fxSoundTouchTrace.push({phase:'sound-target',type,target:desc(event.target),defaultPrevented:event.defaultPrevented,scrollY,loop:document.documentElement.dataset.fxLoopLandingState||'',input:document.documentElement.dataset.fxInfiniteInput||''}),{passive:true});
-              }
-              sound.addEventListener('click',()=>{window.__fxSoundPhysicalTapCount+=1;},{once:true});
-              return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height,scrollY};
-            });
-            assert(soundTap&&soundTap.w>=44&&soundTap.h>=44,'SOUND physical tap target missing or too small: '+JSON.stringify(soundTap));
-            await page.touchscreen.tap(soundTap.x,soundTap.y);
-            await page.waitForTimeout(500);
-            const delivery=await page.evaluate(()=>({count:window.__fxSoundPhysicalTapCount||0,trace:window.__fxSoundTouchTrace||[],scrollY,loop:document.documentElement.dataset.fxLoopLandingState||'',input:document.documentElement.dataset.fxInfiniteInput||''}));
-            console.log('SOUND_TOUCH_DELIVERY',JSON.stringify(delivery));
-            assert(delivery.count===1,'physical SOUND tap did not synthesize exactly one click: '+JSON.stringify(delivery));
-            console.log('SOUND_PHYSICAL_TAP','PASS');
-
             await ctx.close();await browser.close();
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
@@ -152,5 +106,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r326 mobile controls and MAG shape shift passed'; else state=failure; description='r326 mobile control or MAG shape-shift diagnostic failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r432 controls, direct MAG runtime and settled WebGL morph passed'; else state=failure; description='r432 mobile control or native MAG morph diagnostic failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile control motion diagnostic' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

@@ -1,20 +1,19 @@
-/* FormatX r428 — direct current MAG loader.
-   r326 remains the production renderer. The final header owner now loads on
-   every viewport so the canonical language selector cannot disappear on PC.
-   Mobile still adds the post-ready idle WebGL governor. */
+/* FormatX r432 — direct current MAG loader.
+   r326 remains the production renderer. r430/r431 own restrained mobile optics
+   and normal-flow header; r432 binds touch geometry to the visible r326 stage. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r428-cross-device-header';
+const VERSION='direct-r326-r432-restrained-mag-touch';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
-const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260829-r422-direct-r326-lcp&rev=20260830-r427-soft-mobile-optics';
+const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r430-restrained-mobile-optics';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r424-sharp-organic-core';
-const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99';
+const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r432-current-r326-stage';
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260829-r426-idle-zero-frame';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
@@ -104,13 +103,13 @@ async function start(){
   if(root.dataset.fxCrystalOrganismR326==='ready'){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
     addScript(TOUCH,'data-fx-core-touch-pulse-r99');
-    root.dataset.fxCoreRendererSelection='r326-direct-r428-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r428';
+    root.dataset.fxCoreRendererSelection='r326-direct-r432-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r432';
   }
   root.dataset.fxCurrentMagRuntimeR422='ready';
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r428-idle-zero-frame-cross-device-header'
-    :'direct-r326-r428-sharp-cross-device-header';
+    ?'direct-r326-r432-idle-zero-frame-restrained-optics-touch'
+    :'direct-r326-r432-cross-device-header';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile}}));
 }
 

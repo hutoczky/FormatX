@@ -4,7 +4,7 @@ const root=document.documentElement;
 if(root.dataset.fxCoreShapeshifterR337==='ready')return;
 root.dataset.fxCoreShapeshifterR337='booting';
 
-const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260825-r337-shapeshifter&rev=20260829-r425-balanced-mobile-optics';
+const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r432-restrained-mobile-mag';
 const SHAPES=['crystal','sphere'];
 const LABELS={
   hu:{crystal:'kristály',sphere:'gömb'},
@@ -20,7 +20,7 @@ function ensureStyle(){
   link.href=STYLE_URL;
   link.dataset.fxCoreShapeshifterR337='true';
   document.head.appendChild(link);
-  root.dataset.fxCoreMobileOpticsRevision='r425-balanced-mobile';
+  root.dataset.fxCoreMobileOpticsRevision='r432-restrained-mobile-mag';
 }
 function button(){return document.querySelector('.fx-reference-mag-button');}
 function syncButton(){
