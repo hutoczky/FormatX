@@ -101,15 +101,19 @@ jobs:
               assert(magTap&&magTap.w>=44&&magTap.h>=44&&magTap.hitInside,'MAG physical target invalid: '+JSON.stringify(magTap));
               await page.touchscreen.tap(magTap.x,magTap.y);
               await page.waitForFunction(previous=>document.documentElement.dataset.fxCoreShapeR337&&document.documentElement.dataset.fxCoreShapeR337!==previous,before,{timeout:3000});
-              await page.waitForTimeout(420);
+              const target=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337==='sphere'?1:0);
+              await page.waitForFunction(target=>{
+                const morph=Number(window.FormatXCoreMobileV69?.morph);
+                return Number.isFinite(morph)&&Math.abs(morph-target)<.07;
+              },target,{timeout:3500});
               const morphAfter=await page.evaluate(()=>Number(window.FormatXCoreMobileV69?.morph));
-              morphSamples.push({before:morphBefore,after:morphAfter});
+              morphSamples.push({before:morphBefore,after:morphAfter,target});
               assert(await canvas.isVisible(),'crystal canvas disappeared during shape shift');
             }
             const finalShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
             assert(new Set(seen).size===2,'MAG did not cycle through crystal and sphere: '+JSON.stringify(seen));
             assert(finalShape===seen[0],'MAG two-step cycle did not return to the starting shape: '+JSON.stringify({seen,finalShape}));
-            assert(morphSamples.every(sample=>Number.isFinite(sample.before)&&Number.isFinite(sample.after)&&Math.abs(sample.after-sample.before)>.12),'WebGL geometry morph did not advance: '+JSON.stringify(morphSamples));
+            assert(morphSamples.every(sample=>Number.isFinite(sample.before)&&Number.isFinite(sample.after)&&Math.abs(sample.after-sample.target)<.07&&Math.abs(sample.after-sample.before)>.12),'WebGL geometry morph did not settle on both target shapes: '+JSON.stringify(morphSamples));
             console.log('MAG_NATIVE_WEBGL_SHAPE_SHIFT','PASS',JSON.stringify({seen,finalShape,morphSamples}));
 
             const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);

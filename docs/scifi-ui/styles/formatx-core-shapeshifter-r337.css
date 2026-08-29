@@ -2,10 +2,12 @@
    Geometry morphing is owned entirely by the single native WebGL renderer.
    CSS may tune optics and hit targets, but never changes the silhouette. */
 
-/* r326 listens on #hero, not on the canvas itself. Keep the physical WebGL
-   surface decorative for hit testing so SOUND / ASK / PAUSE always own their
-   visible circles even when the crystal stage overlaps the same coordinates. */
-html[data-fx-core-shape-r337] #hero .hero-space > .fx-crystal-organism-r326-stage,
+/* r431 — the physical stage is the direct MAG touch surface. The canvas stays
+   decorative, while the high-z-index SOUND / ASK / PAUSE controls remain the
+   authoritative interactive circles above it. */
+html[data-fx-core-shape-r337] #hero .hero-space > .fx-crystal-organism-r326-stage {
+  pointer-events: auto !important;
+}
 html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
   pointer-events: none !important;
 }
@@ -142,9 +144,23 @@ html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-m
    reducing post-composite luminance/contrast/saturation and keeping only tiny,
    low-alpha shadows. No CSS blur or second silhouette is introduced. */
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  /* r431: outrank the older render-blocking r426 sticky carrier after runtime
+     ownership is ready. Relative positioning keeps the 72px header in normal
+     flow and prevents it from covering the hero title at 320px. */
+  html:root:root:root body.living-architecture .topbar {
+    position: relative !important;
+    top: auto !important;
+  }
+
+  html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
+  .fx-crystal-organism-r326-stage {
+    pointer-events: auto !important;
+  }
+
   html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: .94 !important;
+    pointer-events: none !important;
     filter:
       brightness(.955)
       contrast(.98)
@@ -161,3 +177,4 @@ html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-m
 }
 
 /* production-r430-final-mobile-mag-optics-owner */
+/* production-r431-direct-mag-touch-and-normal-flow-header */
