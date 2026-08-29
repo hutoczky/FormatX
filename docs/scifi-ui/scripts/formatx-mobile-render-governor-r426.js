@@ -10,6 +10,8 @@ let settleTimer=0;
 let scrollFrame=0;
 let armed=false;
 const activeWindowMs=560;
+const shapeProbeMs=90;
+const shapeSettleDeadlineMs=6500;
 
 function renderer(){return window.FormatXCoreMobileV69;}
 function userPaused(){return document.querySelector('.fx-reference-pause')?.dataset.paused==='true';}
@@ -23,25 +25,78 @@ function idle(source='idle-r426'){
   root.dataset.fxMobileRenderGovernorR426='idle-zero-frame';
   root.dataset.fxCoreMobileIdlePolicyR426='event-burst-no-heartbeat-render';
 }
-function active(source='interaction-r426',frames=12,delay=activeWindowMs){
+function shapeState(){
+  const core=renderer();
+  const target=root.dataset.fxCoreTargetShape||root.dataset.fxCoreShapeR337||core?.shape||'';
+  const settled=root.dataset.fxCoreShape||'';
+  const morph=Number(core?.morph);
+  const targetMorph=target==='sphere'?1:target==='crystal'?0:NaN;
+  return{
+    core,
+    target,
+    settled,
+    morph,
+    targetMorph,
+    ready:Boolean(core)&&Number.isFinite(morph)&&Number.isFinite(targetMorph)
+      && settled===target&&Math.abs(morph-targetMorph)<.015
+  };
+}
+function settleShape(source='shape-change-r433'){
+  clearSettle();
+  const started=performance.now();
+  root.dataset.fxMobileRenderGovernorSettleR433='waiting-shape';
+  const probe=()=>{
+    settleTimer=0;
+    if(userPaused()){
+      root.dataset.fxMobileRenderGovernorSettleR433='user-paused';
+      return;
+    }
+    const state=shapeState();
+    if(state.ready){
+      root.dataset.fxMobileRenderGovernorSettleR433=`settled-${state.target}`;
+      idle('shape-settled-r433');
+      return;
+    }
+    if(performance.now()-started>=shapeSettleDeadlineMs){
+      root.dataset.fxMobileRenderGovernorSettleR433='deadline-idle';
+      root.dataset.fxMobileRenderGovernorSettleDetailR433=`${state.target}:${Number.isFinite(state.morph)?state.morph.toFixed(3):'nan'}:${state.settled}`;
+      idle('shape-deadline-r433');
+      return;
+    }
+    emitPaused(false,source);
+    state.core?.requestRender?.(20);
+    settleTimer=setTimeout(probe,shapeProbeMs);
+  };
+  settleTimer=setTimeout(probe,shapeProbeMs);
+}
+function active(source='interaction-r426',frames=12,delay=activeWindowMs,waitForShape=false){
   if(userPaused())return;
   clearSettle();
   emitPaused(false,source);
   renderer()?.requestRender?.(frames);
   root.dataset.fxMobileRenderGovernorR426='interaction-burst';
+  if(waitForShape){
+    settleShape(source);
+    return;
+  }
   settleTimer=setTimeout(()=>idle('settled-r426'),delay);
 }
 function arm(){
   if(armed)return;armed=true;
   root.dataset.fxMobileRenderGovernorR426='ready';
   root.dataset.fxCoreMobileIdlePolicyR426='event-burst-no-heartbeat-render';
+  root.dataset.fxMobileRenderGovernorRevisionR433='settle-after-native-morph';
   // Let the native renderer paint two startup frames, then keep the WebGL
   // surface static until a real interaction asks for a bounded animation burst.
   requestAnimationFrame(()=>requestAnimationFrame(()=>idle('startup-settled-r426')));
 }
 
 addEventListener('formatx:real3dready',arm,{passive:true});
-addEventListener('formatx:coreshapechange',()=>active('shape-change-r426',20,760),{passive:true});
+// r433: a shape transition is not a fixed-duration effect. Keep the renderer
+// active until the native r326 morph reports its actual target shape and morph
+// endpoint, then return to zero-frame idle. This prevents slow GPUs/SwiftShader
+// from being frozen halfway through crystal <-> sphere interpolation.
+addEventListener('formatx:coreshapechange',()=>active('shape-change-r433',52,0,true),{passive:true});
 addEventListener('formatx:coreinteraction',()=>active('core-interaction-r426',18,720),{passive:true});
 addEventListener('formatx:menustatechange',()=>active('menu-state-r426',6,280),{passive:true});
 addEventListener('formatx:languagechange',()=>active('language-r426',5,260),{passive:true});
