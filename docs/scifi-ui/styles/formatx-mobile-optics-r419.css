@@ -1,0 +1,25 @@
+/* FormatX r419 — final mobile MAG optical restraint.
+   Keeps the r326 crystal luminous and dimensional while reducing the oversized
+   centre flare and the razor-hard perimeter reported on narrow mobile screens. */
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.79 !important;
+    mix-blend-mode:normal !important;
+    image-rendering:auto !important;
+    filter:brightness(.75) contrast(.44) saturate(.69) blur(1.34px) !important;
+    -webkit-filter:brightness(.75) contrast(.44) saturate(.69) blur(1.34px) !important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.77 !important;
+    filter:brightness(.72) contrast(.41) saturate(.67) blur(1.46px) !important;
+    -webkit-filter:brightness(.72) contrast(.41) saturate(.67) blur(1.46px) !important;
+  }
+}
+
+/* production-r419-mobile-mag-soft-perimeter */
