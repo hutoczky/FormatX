@@ -1,5 +1,5 @@
 name: Verify live responsive true 3D MAG
-run-name: Validate production r326/r378 WebGL MAG on desktop and mobile
+run-name: Validate production r326/r420 WebGL MAG on desktop and mobile
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Validate live current r326 crystal and r378 mobile finish
+      - name: Validate live current r326 crystal and r420 centered mobile finish
         shell: bash
         run: |
           set -euo pipefail
@@ -65,17 +65,18 @@ jobs:
             const page = await context.newPage();
             diagnostics(page, name);
 
-            await page.goto(`${origin}/?live_mag_r378=${name}-${Date.now()}`, {
+            await page.goto(`${origin}/?live_mag_r420=${name}-${Date.now()}`, {
               waitUntil: 'domcontentloaded',
               timeout: 30000
             });
 
             await page.waitForFunction(() => {
               const root = document.documentElement;
+              const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
               return root.dataset.fxCoreMobileV69 === 'ready-v69'
                 && root.dataset.fxCrystalOrganismR326 === 'ready'
-                && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
-                && Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas'));
+                && stage?.dataset.renderer === 'crystal-organism-r326'
+                && Boolean(stage.querySelector('.fx-crystal-organism-r326-canvas'));
             }, null, { timeout: 60000 });
 
             await page.waitForTimeout(500);
@@ -106,8 +107,8 @@ jobs:
               const style = canvas ? getComputedStyle(canvas) : null;
               const auraStyle = stage ? getComputedStyle(stage, '::after') : null;
               const centerX = rect => rect ? (rect.left + rect.right) / 2 : NaN;
-              const visibleWidth = box && hostBox
-                ? Math.max(0, Math.min(box.right, hostBox.right) - Math.max(box.left, hostBox.left))
+              const visibleWidth = box
+                ? Math.max(0, Math.min(box.right, innerWidth) - Math.max(box.left, 0))
                 : 0;
               const visible = element => {
                 if (!(element instanceof Element)) return false;
@@ -127,10 +128,11 @@ jobs:
               const sound = controls?.querySelector('.fx-three-sound');
               const ask = controls?.querySelector('.fx-reference-ask');
               const pause = controls?.querySelector('.fx-reference-pause');
-              const opticsLink = [...document.querySelectorAll('link[rel="stylesheet"]')]
-                .find(link => String(link.href).includes('formatx-mobile-core-optics-r328.css'));
+              const styles = [...document.querySelectorAll('link[rel="stylesheet"]')].map(link => String(link.href));
+              const legacyOpticsHref = styles.find(href => href.includes('formatx-mobile-core-optics-r328.css')) || '';
+              const finalOpticsHref = styles.find(href => href.includes('formatx-mobile-optics-r419.css')) || '';
               return {
-                renderer: root.dataset.fxCoreRenderer || '',
+                rendererTelemetry: root.dataset.fxCoreRenderer || '',
                 material: root.dataset.fxCoreMaterial || '',
                 geometry: root.dataset.fxCoreGeometry || '',
                 scheduler: root.dataset.fxCoreScheduler || '',
@@ -138,8 +140,11 @@ jobs:
                 stageRenderer: stage?.dataset.renderer || '',
                 v69: root.dataset.fxCoreMobileV69 || '',
                 r326: root.dataset.fxCrystalOrganismR326 || '',
-                opticsOwner: root.dataset.fxCoreMobileOpticsR328 || '',
-                opticsHref: opticsLink?.href || '',
+                rendererOwnership: root.dataset.fxCrystalRendererOwnershipR420 || '',
+                legacyOpticsOwner: root.dataset.fxCoreMobileOpticsR328 || '',
+                legacyOpticsHref,
+                finalOpticsHref,
+                r267Loaded: Boolean(document.querySelector('script[data-fx-core-true-volume-r267], .fx-core-r267-volume-stage')),
                 canvases: document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
                 gl: Boolean(gl),
                 glError: gl?.getError(),
@@ -154,6 +159,8 @@ jobs:
                 canvasCenterX: centerX(box),
                 stageCenterDelta: Math.abs(centerX(stageBox) - centerX(hostBox)),
                 canvasCenterDelta: Math.abs(centerX(box) - centerX(hostBox)),
+                stageLeft: stageBox?.left ?? NaN,
+                stageRight: stageBox?.right ?? NaN,
                 visibleRatio: visibleWidth / Math.max(1, box?.width || 1),
                 overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
                 energy: Number(window.FormatXCoreMobileV69?.energy || 0),
@@ -170,7 +177,6 @@ jobs:
             console.log(name.toUpperCase(), JSON.stringify({ before, state }));
             await page.screenshot({ path: `${name}-r326-current.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
 
-            assert.equal(state.renderer, 'single-webgl-crystal-organism-r326');
             assert.equal(state.stageRenderer, 'crystal-organism-r326');
             assert.equal(state.material, 'translucent-living-facet-organism-r326');
             assert.equal(state.geometry, 'four-direction-asymmetric-crystal-organism-r326');
@@ -183,7 +189,6 @@ jobs:
             assert.equal(state.glError, 0);
             assert.ok(state.width <= viewport.width + 1 && state.height > 100, JSON.stringify(state));
             assert.ok(Number.isFinite(state.renderMs) && state.renderMs < 16.67, JSON.stringify(state));
-            assert.ok(state.opticsHref.includes('formatx-mobile-core-optics-r328.css'), 'current optics stylesheet is not loaded');
             assert.equal(state.controlsVisible, true, JSON.stringify(state));
             assert.equal(state.soundAskOverlap, false, JSON.stringify(state));
             assert.equal(state.askPauseOverlap, false, JSON.stringify(state));
@@ -195,18 +200,20 @@ jobs:
               assert.ok(state.energy >= before.energy - .02, JSON.stringify({ before, state }));
               assert.equal(state.position.length, 3);
               assert.notDeepEqual(state.position, before.position);
-              assert.equal(state.opticsOwner, 'r371-feathered-mobile-optics-owner');
-              assert.ok(state.opticsHref.includes('20260827-r371-feathered-mobile-optics'), state.opticsHref);
-              assert.ok(state.opacity <= .721 && state.opacity >= .719, `mobile r378 canvas opacity mismatch: ${JSON.stringify(state)}`);
-              assert.match(state.filter, /brightness\(0\.7\)/, `mobile r378 luminance restraint missing: ${state.filter}`);
-              assert.match(state.filter, /contrast\(0\.28\)/, `mobile r378 edge contrast restraint missing: ${state.filter}`);
-              assert.match(state.filter, /saturate\(0\.7\)/, `mobile r378 saturation restraint missing: ${state.filter}`);
-              assert.match(state.filter, /blur\(2\.35px\)/, `mobile r378 feathered perimeter missing: ${state.filter}`);
-              assert.ok(state.auraOpacity <= .004, `mobile r378 aura is too strong: ${JSON.stringify(state)}`);
-              assert.match(state.auraFilter, /blur\(60px\)/, `mobile r378 diffuse aura missing: ${state.auraFilter}`);
-              assert.ok(state.stageCenterDelta <= 3, `mobile r378 stage is off-center: ${JSON.stringify(state)}`);
-              assert.ok(state.canvasCenterDelta <= 3, `mobile r378 canvas is off-center: ${JSON.stringify(state)}`);
-              assert.ok(state.visibleRatio >= .98, `mobile r378 crystal is horizontally clipped: ${JSON.stringify(state)}`);
+              assert.equal(state.rendererOwnership, 'r326-exclusive-primary', JSON.stringify(state));
+              assert.equal(state.r267Loaded, false, JSON.stringify(state));
+              assert.ok(state.finalOpticsHref.includes('formatx-mobile-optics-r419.css'), `r420 final optics stylesheet is not loaded: ${JSON.stringify(state)}`);
+              assert.ok(state.opacity <= .771 && state.opacity >= .769, `mobile r420 canvas opacity mismatch: ${JSON.stringify(state)}`);
+              assert.match(state.filter, /brightness\(0\.72\)/, `mobile r420 luminance restraint missing: ${state.filter}`);
+              assert.match(state.filter, /contrast\(0\.41\)/, `mobile r420 edge contrast restraint missing: ${state.filter}`);
+              assert.match(state.filter, /saturate\(0\.67\)/, `mobile r420 saturation restraint missing: ${state.filter}`);
+              assert.match(state.filter, /blur\(1\.46px\)/, `mobile r420 softened perimeter missing: ${state.filter}`);
+              assert.ok(state.auraOpacity <= .004, `mobile r420 aura is too strong: ${JSON.stringify(state)}`);
+              assert.match(state.auraFilter, /blur\(70px\)/, `mobile r420 diffuse aura missing: ${state.auraFilter}`);
+              assert.ok(state.stageCenterDelta <= 2, `mobile r420 stage is off-center: ${JSON.stringify(state)}`);
+              assert.ok(state.canvasCenterDelta <= 2, `mobile r420 canvas is off-center: ${JSON.stringify(state)}`);
+              assert.ok(state.stageLeft >= -1 && state.stageRight <= viewport.width + 1, `mobile r420 stage leaves viewport: ${JSON.stringify(state)}`);
+              assert.ok(state.visibleRatio >= .98, `mobile r420 crystal is horizontally clipped: ${JSON.stringify(state)}`);
             }
 
             await context.close();
@@ -219,14 +226,15 @@ jobs:
             });
             try {
               await verify(browser, 'desktop', { width: 1440, height: 960 }, false, 1);
-              await verify(browser, 'mobile', { width: 390, height: 844 }, true, 2);
+              await verify(browser, 'mobile-390', { width: 390, height: 844 }, true, 2);
+              await verify(browser, 'mobile-430', { width: 430, height: 932 }, true, 2);
             } finally {
               await browser.close();
             }
-            for (const file of ['desktop-r326-current.png','mobile-r326-current.png']) {
+            for (const file of ['desktop-r326-current.png','mobile-390-r326-current.png','mobile-430-r326-current.png']) {
               assert.ok(fs.statSync(file).size > 10000, file);
             }
-            console.log('PASS: live r326 WebGL crystal, r378 centered feathered mobile finish, interaction and control geometry passed.');
+            console.log('PASS: live r326 WebGL crystal, r420 centered softened mobile finish, interaction and control geometry passed on 390px and 430px phones.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
@@ -237,7 +245,8 @@ jobs:
           name: live-mag-r326-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/mag-live/desktop-r326-current.png
-            ${{ runner.temp }}/mag-live/mobile-r326-current.png
+            ${{ runner.temp }}/mag-live/mobile-390-r326-current.png
+            ${{ runner.temp }}/mag-live/mobile-430-r326-current.png
           if-no-files-found: warn
           retention-days: 14
 
@@ -251,10 +260,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r326 crystal and r378 centered mobile finish passed'
+            description='Live r326 crystal and r420 centered mobile finish passed'
           else
             state=failure
-            description='Live r326/r378 MAG diagnostic failed'
+            description='Live r326/r420 MAG diagnostic failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
