@@ -1,0 +1,68 @@
+name: Verify live r423 mobile MAG optics
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/verify-live-mobile-optics-r423.yml'
+      - 'docs/scifi-ui/styles/formatx-mobile-optics-r423.css'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  verify-live-r423-optics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Verify live r326 wrapper and r423 final phone optics
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORIGIN='https://formatxsuite.com'
+          TMP="$RUNNER_TEMP/r423-live"
+          mkdir -p "$TMP"
+          curl -fsSL --retry 4 --retry-delay 1 -H 'Cache-Control: no-cache' \
+            "$ORIGIN/scifi-ui/scripts/formatx-core-mobile-v55.js?audit=${GITHUB_RUN_ID}" \
+            -o "$TMP/wrapper.js"
+          curl -fsSL --retry 4 --retry-delay 1 -H 'Cache-Control: no-cache' \
+            "$ORIGIN/scifi-ui/styles/formatx-mobile-optics-r423.css?audit=${GITHUB_RUN_ID}" \
+            -o "$TMP/optics.css"
+
+          grep -Fq 'formatx-crystal-organism-r326.js?v=20260828-r416-site-coupled-soft-optics' "$TMP/wrapper.js"
+          grep -Fq 'formatx-mobile-optics-r423.css?v=20260829-r423-final-mobile-mag-optics' "$TMP/wrapper.js"
+          grep -Fq "fxCoreMobileOpticsRevision = 'r423-final-restrained-soft-edge'" "$TMP/wrapper.js"
+          grep -Fq "fxCoreMobileOpticsR423 = 'final-restrained-soft-edge'" "$TMP/wrapper.js"
+
+          grep -Fq 'production-r423-final-mobile-mag-restrained-soft-edge' "$TMP/optics.css"
+          grep -Fq 'opacity:.70 !important' "$TMP/optics.css"
+          grep -Fq 'brightness(.66) contrast(.36) saturate(.58) blur(.96px)' "$TMP/optics.css"
+          grep -Fq 'opacity:.68 !important' "$TMP/optics.css"
+          grep -Fq 'brightness(.65) contrast(.35) saturate(.56) blur(.99px)' "$TMP/optics.css"
+          grep -Fq 'content:none !important' "$TMP/optics.css"
+          ! grep -Eq 'drop-shadow\(|brightness\(1\.[0-9]+\)|contrast\([1-9]\.[0-9]+' "$TMP/optics.css"
+
+          echo 'PASS: live production serves r326 with r423 restrained phone optics.'
+
+      - name: Publish live r423 optics status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Live r326 MAG serves restrained r423 phone optics'
+          else
+            state=failure
+            description='Live r423 phone optics verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX live r423 mobile optics' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
