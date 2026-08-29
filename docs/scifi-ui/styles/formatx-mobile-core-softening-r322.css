@@ -1,6 +1,7 @@
-/* FormatX r414 — restrained mobile MAG glow + deterministic mobile header.
-   Keep the r326 WebGL geometry intact. This late layer reduces the overdriven
-   mobile halo and edge contrast while preserving the crystalline facets. */
+/* FormatX r423 — restrained mobile MAG glow + deterministic mobile header.
+   Keep the r326 WebGL geometry intact. This late layer now agrees with the
+   final phone optics target instead of restoring the older bright hard-edged
+   presentation after the newer r423 layers have already loaded. */
 
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
@@ -10,22 +11,22 @@
 
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .94 !important;
+    opacity: .70 !important;
     image-rendering: auto !important;
     filter:
-      brightness(.94)
-      contrast(.76)
-      saturate(.88)
-      blur(.56px) !important;
+      brightness(.66)
+      contrast(.36)
+      saturate(.58)
+      blur(.96px) !important;
     -webkit-filter:
-      brightness(.94)
-      contrast(.76)
-      saturate(.88)
-      blur(.56px) !important;
+      brightness(.66)
+      contrast(.36)
+      saturate(.58)
+      blur(.96px) !important;
   }
 
-  /* Ambient energy is intentionally dimmer than the WebGL crystal itself.
-     Keep it broad and soft so it never creates a second hard silhouette. */
+  /* Ambient energy stays dimmer than the WebGL crystal itself so it never
+     recreates a second hard silhouette around the softened r326 mesh. */
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 {
     position: absolute;
     inset: 0;
@@ -161,17 +162,17 @@
     max-width: 100% !important;
     height: 100% !important;
     box-sizing: border-box !important;
-    opacity: .93 !important;
+    opacity: .68 !important;
     filter:
-      brightness(.92)
-      contrast(.73)
-      saturate(.86)
-      blur(.64px) !important;
+      brightness(.65)
+      contrast(.35)
+      saturate(.56)
+      blur(.99px) !important;
     -webkit-filter:
-      brightness(.92)
-      contrast(.73)
-      saturate(.86)
-      blur(.64px) !important;
+      brightness(.65)
+      contrast(.35)
+      saturate(.56)
+      blur(.99px) !important;
   }
 
   #hero .fx-core-r317-stage > .fx-core-biolume-r323 { opacity: .060; }
@@ -188,9 +189,9 @@
 @media (prefers-reduced-motion: reduce) and (max-width: 900px) {
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas,
   html body.living-architecture #hero .hero-space > .fx-core-rayglass-r91-stage.fx-core-r317-stage > .fx-core-rayglass-r91-canvas.fx-core-r317-canvas {
-    opacity: .93 !important;
-    filter: brightness(.92) contrast(.73) saturate(.86) blur(.64px) !important;
-    -webkit-filter: brightness(.92) contrast(.73) saturate(.86) blur(.64px) !important;
+    opacity: .68 !important;
+    filter: brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
+    -webkit-filter: brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
   }
 
   #hero .fx-core-biolume-r323 .fx-biolume-runner-a,
@@ -202,3 +203,4 @@
 }
 
 /* production-deploy-r414-restrained-mobile-mag-optics */
+/* production-deploy-r423-final-restrained-mobile-mag-optics */
