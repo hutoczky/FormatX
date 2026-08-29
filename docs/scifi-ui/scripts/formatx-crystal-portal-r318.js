@@ -4,6 +4,7 @@ const root=document.documentElement;
 const VERSION='r318-crystal-is-site-core';
 const TRUE_VOLUME_URL='/scifi-ui/scripts/formatx-core-true-volume-r267.js?v=20260828-r267-closed-volume-soft-glass';
 const TRUE_VOLUME_STYLE_URL='/scifi-ui/styles/formatx-core-true-volume-r267.css?v=20260829-r268-softened-mobile-optics';
+const OPTICS_PROFILE='balanced-volume-optics-r268-softened-mobile';
 if(root.dataset.fxCrystalPortalR318===VERSION)return;
 root.dataset.fxCrystalPortalR318='booting';
 
@@ -35,6 +36,7 @@ function ensureTrueVolume(){
   script.dataset.fxCoreTrueVolumeR267='true';
   document.head.appendChild(script);
   root.dataset.fxCrystalRendererRequest='closed-volume-r267';
+  root.dataset.fxCrystalVolumeOptics=OPTICS_PROFILE;
 }
 
 function pulse(){
@@ -118,7 +120,8 @@ function install(){
   root.dataset.fxCrystalPortalR318=VERSION;
   root.dataset.fxCrystalPortalReady='true';
   root.dataset.fxCrystalMeaning='site-core-interaction-surface';
-  dispatchEvent(new CustomEvent('formatx:crystalportalready',{detail:{version:VERSION,role:'site-core',renderer:'closed-volume-r267'}}));
+  root.dataset.fxCrystalVolumeOptics=OPTICS_PROFILE;
+  dispatchEvent(new CustomEvent('formatx:crystalportalready',{detail:{version:VERSION,role:'site-core',renderer:'closed-volume-r267',optics:OPTICS_PROFILE}}));
   return true;
 }
 
