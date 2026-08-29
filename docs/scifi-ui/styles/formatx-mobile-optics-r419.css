@@ -1,10 +1,45 @@
-/* FormatX r419 — final mobile MAG optical restraint.
-   Keeps the r326 crystal luminous and dimensional while reducing the oversized
-   centre flare and the razor-hard perimeter reported on narrow mobile screens. */
+/* FormatX r420 — final mobile MAG centering + optical restraint.
+   The r326 crystal stays luminous and dimensional, but its final presentation
+   owner now also hard-locks the WebGL carrier to the viewport centre. This
+   prevents older mobile geometry layers from pushing the MAG off either edge. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root body.living-architecture #hero .hero-space {
+    box-sizing:border-box !important;
+    width:100% !important;
+    max-width:100vw !important;
+    overflow-x:clip !important;
+  }
+
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    position:absolute !important;
+    left:50% !important;
+    right:auto !important;
+    width:calc(100vw - 16px) !important;
+    max-width:calc(100vw - 16px) !important;
+    margin-left:0 !important;
+    margin-right:0 !important;
+    translate:-50% 0 !important;
+    transform:none !important;
+    transform-origin:50% 50% !important;
+    overflow:clip !important;
+    box-sizing:border-box !important;
+  }
+
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    position:absolute !important;
+    inset:0 !important;
+    display:block !important;
+    box-sizing:border-box !important;
+    width:100% !important;
+    max-width:100% !important;
+    height:100% !important;
+    max-height:100% !important;
+    margin:0 !important;
+    translate:none !important;
+    scale:.80 .85 !important;
+    transform-origin:50% 48% !important;
     opacity:.79 !important;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
@@ -14,12 +49,18 @@
 }
 
 @media (max-width:430px) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    width:calc(100vw - 20px) !important;
+    max-width:calc(100vw - 20px) !important;
+  }
+
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:.77 !important;
+    scale:.78 .83 !important;
     filter:brightness(.72) contrast(.41) saturate(.67) blur(1.46px) !important;
     -webkit-filter:brightness(.72) contrast(.41) saturate(.67) blur(1.46px) !important;
   }
 }
 
-/* production-r419-mobile-mag-soft-perimeter */
+/* production-r420-mobile-mag-centered-soft-perimeter */
