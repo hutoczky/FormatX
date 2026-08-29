@@ -4,7 +4,7 @@
   const ROOT = document.documentElement;
   const STORAGE_KEY = 'formatx-language';
   const SUPPORTED = new Set(['hu', 'en']);
-  const VERSION = '3';
+  const VERSION = '4';
   if (ROOT.dataset.fxSingleLanguageToggle === 'ready' && ROOT.dataset.fxSingleLanguageToggleVersion === VERSION) return;
   ROOT.dataset.fxSingleLanguageToggle = 'loading';
   ROOT.dataset.fxSingleLanguageToggleVersion = VERSION;
@@ -130,6 +130,16 @@
     return matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   }
 
+  function activeTopbar() {
+    const bars = Array.from(document.querySelectorAll('.topbar')).filter(bar => {
+      if (!(bar instanceof HTMLElement) || bar.hidden) return false;
+      const style = getComputedStyle(bar);
+      const rect = bar.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
+    });
+    return bars.find(bar => bar.querySelector(':scope > .brand')) || bars[0] || null;
+  }
+
   function placeContainer(container) {
     if (!(container instanceof HTMLElement)) return;
     if (mobileMode() && document.body && container.parentElement !== document.body) {
@@ -145,7 +155,34 @@
       container.style.setProperty('z-index', '10040', 'important');
       container.style.setProperty('visibility', 'visible', 'important');
       container.style.setProperty('opacity', '1', 'important');
+      container.style.setProperty('pointer-events', 'none', 'important');
+    } else {
+      container.style.removeProperty('position');
+      container.style.removeProperty('top');
+      container.style.removeProperty('right');
+      container.style.removeProperty('z-index');
+      container.style.removeProperty('pointer-events');
     }
+  }
+
+  function placeToggle(container, toggle) {
+    if (!(toggle instanceof HTMLButtonElement)) return;
+    if (mobileMode()) {
+      const bar = activeTopbar();
+      if (bar instanceof HTMLElement && toggle.parentElement !== bar) bar.appendChild(toggle);
+      toggle.classList.add('fx-control-owner-r264');
+      toggle.hidden = false;
+      toggle.removeAttribute('aria-hidden');
+      toggle.removeAttribute('tabindex');
+      toggle.style.setProperty('display', 'inline-flex', 'important');
+      toggle.style.setProperty('visibility', 'visible', 'important');
+      toggle.style.setProperty('opacity', '1', 'important');
+      ROOT.dataset.fxReferenceLanguageLayout = 'r423-direct-topbar-child';
+      return;
+    }
+    toggle.classList.remove('fx-control-owner-r264');
+    if (toggle.parentElement !== container) container.appendChild(toggle);
+    ROOT.dataset.fxReferenceLanguageLayout = 'desktop-semantic-container';
   }
 
   function createContainer() {
@@ -206,7 +243,7 @@
 
   function publishLanguageChange(language) {
     dispatchEvent(new CustomEvent('formatx:languagechange', {
-      detail: { language, source: 'single-language-toggle-v3-r210' }
+      detail: { language, source: 'single-language-toggle-v4-r423' }
     }));
   }
 
@@ -236,6 +273,7 @@
       }
       applyBilingualCopy(language);
       updateToggle(toggle, language);
+      placeToggle(container, toggle);
     });
   }
 
@@ -251,7 +289,7 @@
     container.dataset.i18nControl = 'true';
     hideLegacyControls(container);
 
-    container.querySelectorAll('.fx-language-toggle').forEach(button => button.remove());
+    document.querySelectorAll('.fx-language-toggle').forEach(button => button.remove());
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'fx-language-toggle';
@@ -270,11 +308,14 @@
     });
 
     container.appendChild(toggle);
+    placeToggle(container, toggle);
+
     addEventListener('formatx:languagechange', event => {
       const language = event.detail?.language;
       if (SUPPORTED.has(language)) {
         applyBilingualCopy(language);
         updateToggle(toggle, language);
+        placeToggle(container, toggle);
       }
     });
 
@@ -284,6 +325,7 @@
       applyFixedCopy(language);
       updateToggle(toggle, language);
       hideLegacyControls(container);
+      placeToggle(container, toggle);
     });
     languageObserver.observe(ROOT, { attributes: true, attributeFilter: ['lang'] });
 
@@ -291,17 +333,28 @@
     const duplicateObserver = new MutationObserver(records => {
       placeContainer(container);
       hideLegacyControls(container);
+      placeToggle(container, toggle);
       if (!records.some(record => record.addedNodes.length || record.removedNodes.length) || copyQueued) return;
       copyQueued = true;
       queueMicrotask(() => {
         copyQueued = false;
         const language = SUPPORTED.has(ROOT.lang) ? ROOT.lang : storedLanguage();
         applyFixedCopy(language);
+        placeToggle(container, toggle);
       });
     });
     duplicateObserver.observe(document.documentElement, { subtree: true, childList: true });
 
-    addEventListener('resize', () => placeContainer(container), { passive: true });
+    const repairPlacement = () => {
+      placeContainer(container);
+      placeToggle(container, toggle);
+    };
+    addEventListener('resize', repairPlacement, { passive: true });
+    addEventListener('orientationchange', repairPlacement, { passive: true });
+    for (const eventName of ['formatx:controlownerready', 'formatx:mobilelayoutready', 'pageshow']) {
+      addEventListener(eventName, repairPlacement, { passive: true });
+    }
+
     ROOT.dataset.fxSingleLanguageToggle = 'ready';
     ROOT.dataset.fxSingleLanguageToggleVersion = VERSION;
     return true;
