@@ -1,8 +1,8 @@
-/* FormatX r422 — direct-current-core startup.
+/* FormatX r423 — direct-current-core startup with critical-path warming.
    The static shell and r326 MAG are the only first-load visual owners. Retired
    recovery/material/signature generations remain available, but mount only after
-   explicit user intent. This removes the serialized late CSS/JS cascade that
-   repainted the mobile hero and delayed LCP without changing the current MAG. */
+   explicit user intent. The current MAG assets are warmed as soon as this loader
+   executes so slow mobile networks do not turn the renderer into a late LCP. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -11,7 +11,10 @@ if(root.dataset.fxMotionRuntimeR239)return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260829-r422-direct-r326-lcp';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260829-r423-parallel-r326-lcp';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r423-parallel-r326-lcp';
+const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260829-r422-direct-r326-lcp';
+const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 if(reduced.matches){root.dataset.fxMotionRuntimeR239='reduced-motion-skipped';return;}
@@ -37,6 +40,28 @@ function mount(spec){
   script.src=raw;document.head.appendChild(script);return true;
 }
 
+function warmAsset(href,as){
+  const absolute=new URL(href,document.baseURI).href;
+  const existing=Array.from(document.querySelectorAll('link[rel="preload"]')).find(link=>link.href===absolute&&link.as===as);
+  if(existing)return;
+  const preload=document.createElement('link');
+  preload.rel='preload';
+  preload.as=as;
+  preload.href=href;
+  preload.fetchPriority='high';
+  preload.dataset.fxR423CriticalWarm='true';
+  document.head.appendChild(preload);
+}
+
+function warmCurrentMag(){
+  if(root.dataset.fxCurrentMagWarmR423==='ready')return;
+  root.dataset.fxCurrentMagWarmR423='ready';
+  warmAsset(CURRENT_MAG,'script');
+  warmAsset(CURRENT_RENDERER,'script');
+  warmAsset(CURRENT_STYLE,'style');
+  if(mobile.matches)warmAsset(FINAL_HEADER,'style');
+}
+
 function ensureStaticMotionCss(){
   if(document.getElementById('fx-r170-mobile-seam-override'))return;
   const stylesheet=document.createElement('link');stylesheet.id='fx-r170-mobile-seam-override';stylesheet.rel='stylesheet';stylesheet.href='./styles/formatx-runtime-static-r243.css?v=20260819-r243-csp';stylesheet.dataset.fxRuntimeStaticR243='true';document.head.appendChild(stylesheet);
@@ -44,9 +69,9 @@ function ensureStaticMotionCss(){
 }
 
 function markMobileStaticEnergy(){
-  root.dataset.fxLivingEnergyR168='mobile-static-r422';
-  root.dataset.fxLivingEnergyClockR168='event-driven-static-r422';
-  root.dataset.fxLivingEnergyEffectModeR168='r326-native-heartbeat-r422';
+  root.dataset.fxLivingEnergyR168='mobile-static-r423';
+  root.dataset.fxLivingEnergyClockR168='event-driven-static-r423';
+  root.dataset.fxLivingEnergyEffectModeR168='r326-native-heartbeat-r423';
   root.dataset.fxLivingEnergyInteractionR168='idle-living';
   root.dataset.fxMobileEnergyPolicyR271='no-idle-js-raf';
 }
@@ -55,13 +80,16 @@ function ensureCurrentMag(){
   if(currentRequested||document.querySelector('script[data-fx-current-mag-loader-r422]'))return;
   currentRequested=true;
   const script=document.createElement('script');script.src=CURRENT_MAG;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
-  root.dataset.fxMotionRuntimeMobileCoreR313='direct-r326-r422';
+  root.dataset.fxMotionRuntimeMobileCoreR313='direct-r326-r423-prewarmed';
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
 
 function scheduleCurrentMag(){
-  const request=()=>setTimeout(ensureCurrentMag,0);
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',request,{once:true});else request();
+  warmCurrentMag();
+  // This module is already deferred by the page shell. Waiting for another
+  // DOMContentLoaded task added one full slow-network RTT before the r326 request.
+  // Mount now; the renderer itself only touches the already-reserved hero-space.
+  ensureCurrentMag();
 }
 
 function reservedInteraction(event){
@@ -74,7 +102,7 @@ function mountEnhancements(){
   if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
-  root.dataset.fxMotionRuntimeR239='enhanced-r422-user-intent';
+  root.dataset.fxMotionRuntimeR239='enhanced-r423-user-intent';
 }
 function onIntent(event){if(reservedInteraction(event))return;mountEnhancements();}
 
@@ -89,8 +117,8 @@ root.dataset.fxMotionRuntimeRequestedR271='0';
 root.dataset.fxMotionRuntimeMobileEnergySkippedR271=String(skippedEnergy);
 root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
 root.dataset.fxMotionRuntimeRetiredCoreSkippedR422=String(retiredCore);
-root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r422-mobile-direct-r326':'core-ready-r422-desktop-direct-r326';
-root.dataset.fxCoreCriticalPathR422='armed-direct-r326-no-legacy-material-chain';
+root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r423-mobile-prewarmed-r326':'core-ready-r423-desktop-prewarmed-r326';
+root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r423-prewarmed';
 scheduleCurrentMag();
 
 if(deferred.length){
