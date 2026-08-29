@@ -1,10 +1,11 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r318-crystal-is-site-core';
+const VERSION='r420-crystal-is-site-core-r326-primary';
 const TRUE_VOLUME_URL='/scifi-ui/scripts/formatx-core-true-volume-r267.js?v=20260828-r267-closed-volume-soft-glass';
 const TRUE_VOLUME_STYLE_URL='/scifi-ui/styles/formatx-core-true-volume-r267.css?v=20260829-r268-softened-mobile-optics';
-const OPTICS_PROFILE='balanced-volume-optics-r268-softened-mobile';
+const LEGACY_OPTICS_PROFILE='balanced-volume-optics-r268-softened-mobile';
+const R326_OPTICS_PROFILE='r326-primary-centered-soft-perimeter-r420';
 if(root.dataset.fxCrystalPortalR318===VERSION)return;
 root.dataset.fxCrystalPortalR318='booting';
 
@@ -21,7 +22,37 @@ const copy=()=>root.lang==='en'?{
 
 let portal=null,facets=null,cue=null,host=null,observer=null,bootTimer=0;
 
+function r326Primary(){
+  return root.dataset.fxCoreMobileAwardRevision==='new-crystal-organism-r326'
+    || root.dataset.fxCoreCrystalRevision==='r326-four-direction-living-facet-organism'
+    || root.dataset.fxCrystalOrganismR326==='booting'
+    || root.dataset.fxCrystalOrganismR326==='ready'
+    || root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+    || Boolean(document.querySelector('script[data-fx-crystal-organism-r326],script[src*="formatx-crystal-organism-r326.js"]'));
+}
+
+function rendererProfile(){
+  return r326Primary()?{
+    renderer:'single-webgl-crystal-organism-r326',
+    optics:R326_OPTICS_PROFILE
+  }:{
+    renderer:'closed-volume-r267',
+    optics:LEGACY_OPTICS_PROFILE
+  };
+}
+
 function ensureTrueVolume(){
+  if(r326Primary()){
+    // r326 is the current production renderer. The old r267 enhancer used to
+    // observe r326's ready marker, destroy it, then install a second renderer.
+    // That late ownership hand-off physically moved the mobile MAG. Preserve the
+    // configured primary renderer and keep r267 strictly as a legacy fallback.
+    root.dataset.fxCrystalRendererRequest='r326-primary-preserved';
+    root.dataset.fxCrystalVolumeOptics=R326_OPTICS_PROFILE;
+    root.dataset.fxCrystalRendererOwnershipR420='r326-exclusive-primary';
+    return;
+  }
+
   if(!document.querySelector('link[data-fx-core-true-volume-style-r267]')){
     const link=document.createElement('link');
     link.rel='stylesheet';
@@ -35,8 +66,9 @@ function ensureTrueVolume(){
   script.async=true;
   script.dataset.fxCoreTrueVolumeR267='true';
   document.head.appendChild(script);
-  root.dataset.fxCrystalRendererRequest='closed-volume-r267';
-  root.dataset.fxCrystalVolumeOptics=OPTICS_PROFILE;
+  root.dataset.fxCrystalRendererRequest='closed-volume-r267-fallback';
+  root.dataset.fxCrystalVolumeOptics=LEGACY_OPTICS_PROFILE;
+  root.dataset.fxCrystalRendererOwnershipR420='r267-legacy-fallback';
 }
 
 function pulse(){
@@ -117,11 +149,12 @@ function install(){
 
   bind(portal);
   setCue(root.classList.contains('fx-crystal-site-active-r318'));
+  const profile=rendererProfile();
   root.dataset.fxCrystalPortalR318=VERSION;
   root.dataset.fxCrystalPortalReady='true';
   root.dataset.fxCrystalMeaning='site-core-interaction-surface';
-  root.dataset.fxCrystalVolumeOptics=OPTICS_PROFILE;
-  dispatchEvent(new CustomEvent('formatx:crystalportalready',{detail:{version:VERSION,role:'site-core',renderer:'closed-volume-r267',optics:OPTICS_PROFILE}}));
+  root.dataset.fxCrystalVolumeOptics=profile.optics;
+  dispatchEvent(new CustomEvent('formatx:crystalportalready',{detail:{version:VERSION,role:'site-core',renderer:profile.renderer,optics:profile.optics}}));
   return true;
 }
 
