@@ -1,8 +1,7 @@
-/* FormatX r421 — final mobile MAG centering + softer optical restraint.
-   Keep the r326 crystal dimensional while reducing the remaining centre flare,
-   cyan perimeter glare and razor-sharp four-tip read seen on real phones.
-   The final pass deliberately uses less blur than r420 so the GPU composite is
-   cheaper while brightness/contrast do the optical softening. */
+/* FormatX r422 — restrained mobile MAG luminance + softer crystalline perimeter.
+   Preserve the four-direction living crystal and its depth while reducing the
+   centre flare, cyan spill and razor-like silhouette reported on real phones.
+   This pass changes optics only: geometry and the working hero controls stay put. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root body.living-architecture #hero .hero-space {
@@ -41,11 +40,11 @@
     translate:none !important;
     scale:.80 .85 !important;
     transform-origin:50% 48% !important;
-    opacity:.75 !important;
+    opacity:.72 !important;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
-    filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
-    -webkit-filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
+    filter:brightness(.66) contrast(.35) saturate(.60) blur(1.08px) !important;
+    -webkit-filter:brightness(.66) contrast(.35) saturate(.60) blur(1.08px) !important;
   }
 }
 
@@ -57,11 +56,20 @@
 
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.73 !important;
+    opacity:.70 !important;
     scale:.78 .83 !important;
-    filter:brightness(.67) contrast(.37) saturate(.62) blur(.94px) !important;
-    -webkit-filter:brightness(.67) contrast(.37) saturate(.62) blur(.94px) !important;
+    filter:brightness(.64) contrast(.33) saturate(.58) blur(1.18px) !important;
+    -webkit-filter:brightness(.64) contrast(.33) saturate(.58) blur(1.18px) !important;
   }
 }
 
-/* production-r421-mobile-mag-centered-softer-flare-and-facets */
+@media (max-width:370px) {
+  html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.68 !important;
+    filter:brightness(.62) contrast(.31) saturate(.56) blur(1.24px) !important;
+    -webkit-filter:brightness(.62) contrast(.31) saturate(.56) blur(1.24px) !important;
+  }
+}
+
+/* production-r422-mobile-mag-restrained-light-soft-perimeter */
