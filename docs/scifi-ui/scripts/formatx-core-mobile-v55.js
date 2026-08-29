@@ -8,11 +8,12 @@
   root.dataset.fxCoreRendererMode = 'mobile';
   root.dataset.fxCoreMobileAwardRevision = 'new-crystal-organism-r326';
   root.dataset.fxCoreCrystalRevision = 'r326-four-direction-living-facet-organism';
-  root.dataset.fxCoreMobileOpticsRevision = 'r418-restrained-soft-mag-attached-header';
+  root.dataset.fxCoreMobileOpticsRevision = 'r419-soft-perimeter-restrained-glow';
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260828-r416-site-coupled-soft-optics';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
   const OPTICS_TUNE_STYLE = '/scifi-ui/styles/formatx-mobile-r416-stability.css?v=20260828-r418-restrained-soft-mag-attached-header';
+  const FINAL_OPTICS_STYLE = '/scifi-ui/styles/formatx-mobile-optics-r419.css?v=20260829-r419-mobile-mag-soft-perimeter';
   const FINAL_HEADER_STYLE = '/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
   // Content wins the critical path. The render-blocking r418 stylesheet owns the
   // first header frame; later layers only refine optics and reassert final header
@@ -134,6 +135,23 @@
     link.addEventListener('error',()=>{root.dataset.fxCoreMobileOpticsR416='load-failed';},{once:true});
   }
 
+  function loadFinalOptics() {
+    if (!matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches) return;
+    let link = document.querySelector('link[data-fx-mobile-optics-r419]');
+    if (!(link instanceof HTMLLinkElement)) {
+      link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = FINAL_OPTICS_STYLE;
+      link.dataset.fxMobileOpticsR419 = 'true';
+    } else if (!link.href.includes('r419-mobile-mag-soft-perimeter')) {
+      link.href = FINAL_OPTICS_STYLE;
+    }
+    if (link.parentElement !== document.head || document.head.lastElementChild !== link) {
+      document.head.appendChild(link);
+    }
+    root.dataset.fxCoreMobileOpticsR419 = 'soft-perimeter-restrained-glow';
+  }
+
   function loadStableControls() {
     if (document.querySelector('link[data-fx-mobile-control-stability-r320]')) return;
     const link=document.createElement('link');
@@ -187,6 +205,7 @@
       root.dataset.fxCoreRendererSelection='new-crystal-organism-r326-primary';
       root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';
       root.dataset.fxCoreCompositionRevisionR326='new-organism-no-legacy-visual-fallback';
+      loadFinalOptics();
     },{once:true});
 
     renderer.addEventListener('error',()=>{
@@ -204,10 +223,10 @@
 
   function schedulePrimaryRenderer() {
     if (rendererRequested || rendererTimer) return;
-    root.dataset.fxCoreRendererStartupR346='critical-content-first-r418';
+    root.dataset.fxCoreRendererStartupR346='critical-content-first-r419';
     const schedule = () => {
       if (rendererRequested || rendererTimer) return;
-      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-content-lcp-r418'), START_DELAY);
+      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-content-lcp-r419'), START_DELAY);
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
     else schedule();
@@ -224,16 +243,29 @@
   root.dataset.fxCoreOverlayPolicyR326='new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual';
   installSoundTouchRecovery();
   loadOpticsTune();
+  loadFinalOptics();
   loadStableControls();
   loadReferenceLayout();
   loadFinalHeaderStyle();
 
-  for (const eventName of ['formatx:controlownerready','formatx:mobilelayoutready','pageshow','load']) {
-    addEventListener(eventName, loadFinalHeaderStyle, { passive: true });
+  for (const eventName of ['formatx:controlownerready','formatx:mobilelayoutready','formatx:real3dready','pageshow','load']) {
+    addEventListener(eventName, () => {
+      loadFinalHeaderStyle();
+      loadFinalOptics();
+    }, { passive: true });
   }
-  addEventListener('resize', loadFinalHeaderStyle, { passive: true });
-  addEventListener('orientationchange', loadFinalHeaderStyle, { passive: true });
-  for (const delay of [0, 350, 1400]) setTimeout(loadFinalHeaderStyle, delay);
+  addEventListener('resize', () => {
+    loadFinalHeaderStyle();
+    loadFinalOptics();
+  }, { passive: true });
+  addEventListener('orientationchange', () => {
+    loadFinalHeaderStyle();
+    loadFinalOptics();
+  }, { passive: true });
+  for (const delay of [0, 350, 1400]) setTimeout(() => {
+    loadFinalHeaderStyle();
+    loadFinalOptics();
+  }, delay);
 
   schedulePrimaryRenderer();
 }());
