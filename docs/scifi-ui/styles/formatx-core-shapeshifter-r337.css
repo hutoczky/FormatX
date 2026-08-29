@@ -133,3 +133,27 @@ html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-m
     transition: none !important;
   }
 }
+
+/* r425 — user-feedback-balanced phone optics.
+   Keep the native WebGL geometry and internal caustics intact, but remove the
+   over-driven post-composite sharpening seen on dense mobile displays. The
+   wider, lower-alpha shadows soften the perceived edge without introducing a
+   blur filter or a second silhouette. */
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
+  .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: .975 !important;
+    filter:
+      brightness(1.045)
+      contrast(1.09)
+      saturate(1.24)
+      drop-shadow(0 0 3px rgba(126,239,255,.045))
+      drop-shadow(0 0 10px rgba(82,91,255,.022)) !important;
+    -webkit-filter:
+      brightness(1.045)
+      contrast(1.09)
+      saturate(1.24)
+      drop-shadow(0 0 3px rgba(126,239,255,.045))
+      drop-shadow(0 0 10px rgba(82,91,255,.022)) !important;
+  }
+}
