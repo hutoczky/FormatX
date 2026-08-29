@@ -161,24 +161,27 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
-/* r425 — direct-path mobile balance. This later rule intentionally preserves
-   all r424 source contracts while replacing the visible phone compositing. */
+/* r427 — softer phone optics from the live-reference review.
+   Preserve the native r326 geometry, but pull the bloom inward and round the
+   perceived edge with a sub-pixel optical soften instead of changing the mesh. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.975 !important;
+    opacity:.955 !important;
     filter:
-      brightness(1.045)
-      contrast(1.09)
-      saturate(1.24)
-      drop-shadow(0 0 3px rgba(126,239,255,.045))
-      drop-shadow(0 0 10px rgba(82,91,255,.022)) !important;
+      brightness(.985)
+      contrast(1.025)
+      saturate(1.16)
+      blur(.28px)
+      drop-shadow(0 0 2px rgba(126,239,255,.026))
+      drop-shadow(0 0 7px rgba(82,91,255,.010)) !important;
     -webkit-filter:
-      brightness(1.045)
-      contrast(1.09)
-      saturate(1.24)
-      drop-shadow(0 0 3px rgba(126,239,255,.045))
-      drop-shadow(0 0 10px rgba(82,91,255,.022)) !important;
+      brightness(.985)
+      contrast(1.025)
+      saturate(1.16)
+      blur(.28px)
+      drop-shadow(0 0 2px rgba(126,239,255,.026))
+      drop-shadow(0 0 7px rgba(82,91,255,.010)) !important;
   }
 }
 
-/* production-r424-direct-r326-sharp-native-webgl-optics-a11y-touch */
+/* production-r427-direct-r326-soft-mobile-optics-a11y-touch */
