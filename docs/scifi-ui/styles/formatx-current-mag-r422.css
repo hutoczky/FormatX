@@ -1,0 +1,116 @@
+/* FormatX r422 — current MAG critical runtime.
+   This stylesheet contains only the physical r326 stage, the approved r421
+   cross-device optical restraint and high-contrast public controls. It is loaded
+   immediately after DOMContentLoaded, before the WebGL renderer, so no legacy
+   visual stylesheet chain can repaint the hero several seconds later. */
+
+html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+  position:absolute !important;
+  inset:0 !important;
+  z-index:3 !important;
+  display:block !important;
+  box-sizing:border-box !important;
+  width:100% !important;
+  height:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:clip !important;
+  background:transparent !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+  transform:none !important;
+  transform-origin:50% 50% !important;
+}
+
+html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  position:absolute !important;
+  inset:0 !important;
+  display:block !important;
+  box-sizing:border-box !important;
+  width:100% !important;
+  max-width:100% !important;
+  height:100% !important;
+  max-height:100% !important;
+  margin:0 !important;
+  background:transparent !important;
+  image-rendering:auto !important;
+  mix-blend-mode:normal !important;
+  visibility:visible !important;
+  pointer-events:none !important;
+  transform-origin:50% 48% !important;
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    inset:0 auto 0 50% !important;
+    width:calc(100vw - 16px) !important;
+    max-width:calc(100vw - 16px) !important;
+    translate:-50% 0 !important;
+  }
+
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.75 !important;
+    scale:.80 .85 !important;
+    filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
+    -webkit-filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
+  }
+
+  html body.living-architecture #pricing #preview-checkout-link.button.button-solid {
+    color:#041019 !important;
+    background:#c8f4ff !important;
+    border-color:#c8f4ff !important;
+  }
+
+  html body.living-architecture #resources #release-page-link.button.button-line {
+    color:#f4fbff !important;
+    background:#071521 !important;
+    border-color:rgba(163,229,255,.44) !important;
+  }
+
+  html body.living-architecture footer.site-footer {
+    color:#eaf7ff !important;
+    background:#020811 !important;
+  }
+
+  html body.living-architecture footer.site-footer .footer-brand .brand strong {
+    color:#f7fdff !important;
+  }
+
+  html body.living-architecture footer.site-footer .footer-brand .brand small {
+    color:#cfe5ef !important;
+  }
+
+  html body.living-architecture footer.site-footer nav a,
+  html body.living-architecture footer.site-footer .footer-bottom > a {
+    color:#f4fbff !important;
+    background:#071521 !important;
+    border:1px solid rgba(163,229,255,.20) !important;
+    border-radius:12px !important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    width:calc(100vw - 20px) !important;
+    max-width:calc(100vw - 20px) !important;
+  }
+
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.73 !important;
+    scale:.78 .83 !important;
+    filter:brightness(.67) contrast(.37) saturate(.62) blur(.94px) !important;
+    -webkit-filter:brightness(.67) contrast(.37) saturate(.62) blur(.94px) !important;
+  }
+}
+
+@media (min-width:901px) and (pointer:fine) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.91 !important;
+    scale:1 !important;
+    filter:brightness(.86) contrast(.68) saturate(.82) blur(.28px) !important;
+    -webkit-filter:brightness(.86) contrast(.68) saturate(.82) blur(.28px) !important;
+  }
+}
+
+/* production-r422-direct-r326-r421-optics-a11y */
