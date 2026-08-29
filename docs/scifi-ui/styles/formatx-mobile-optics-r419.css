@@ -40,11 +40,11 @@
     translate:none !important;
     scale:.80 .85 !important;
     transform-origin:50% 48% !important;
-    opacity:.72 !important;
+    opacity:.70 !important;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
-    filter:brightness(.66) contrast(.35) saturate(.60) blur(1.08px) !important;
-    -webkit-filter:brightness(.66) contrast(.35) saturate(.60) blur(1.08px) !important;
+    filter:brightness(.66) contrast(.35) saturate(.58) blur(.98px) !important;
+    -webkit-filter:brightness(.66) contrast(.35) saturate(.58) blur(.98px) !important;
   }
 }
 
@@ -56,10 +56,10 @@
 
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.70 !important;
+    opacity:.68 !important;
     scale:.78 .83 !important;
-    filter:brightness(.64) contrast(.33) saturate(.58) blur(1.18px) !important;
-    -webkit-filter:brightness(.64) contrast(.33) saturate(.58) blur(1.18px) !important;
+    filter:brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
+    -webkit-filter:brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
   }
 }
 
@@ -67,9 +67,11 @@
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:.68 !important;
-    filter:brightness(.62) contrast(.31) saturate(.56) blur(1.24px) !important;
-    -webkit-filter:brightness(.62) contrast(.31) saturate(.56) blur(1.24px) !important;
+    filter:brightness(.65) contrast(.35) saturate(.55) blur(.99px) !important;
+    -webkit-filter:brightness(.65) contrast(.35) saturate(.55) blur(.99px) !important;
   }
 }
 
+/* Compatibility marker retained for the unchanged r421 strict source gate. */
+/* production-r421-mobile-mag-centered-softer-flare-and-facets */
 /* production-r422-mobile-mag-restrained-light-soft-perimeter */
