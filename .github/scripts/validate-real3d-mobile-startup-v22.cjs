@@ -30,12 +30,17 @@ assert.match(wrapper,/fxMobileHeaderFinalR418/);
 assert.match(wrapper,/new-crystal-organism-r326-primary/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 
+/* r326 is the configured production mobile MAG and must remain alive after
+   portal startup. Its physical WebGL stage is the source of truth; r267 is
+   retained only as a genuine fallback for configurations where r326 is absent. */
 for(const token of [
   'crystal-organism-r326',"getContext('webgl2'","getContext('webgl'",
   'gl.drawArrays(gl.TRIANGLES','ResizeObserver','IntersectionObserver'
-])assert.ok(bootstrapRenderer.includes(token),`missing bootstrap r326 startup contract: ${token}`);
+])assert.ok(bootstrapRenderer.includes(token),`missing primary r326 mobile startup contract: ${token}`);
 assert.doesNotMatch(bootstrapRenderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 
+/* Validate the legacy closed-volume fallback implementation without requiring
+   it to replace the current r326 production renderer. */
 for(const token of [
   "VERSION='r267-closed-volume-crystal'",
   'frontCenter=[0,.015,.58]','backCenter=[0,-.008,-.36]',
@@ -49,22 +54,29 @@ for(const token of [
   'normal-based-two-light-soft-fresnel','event-driven-no-idle-raf',
   'pointerdown','pointermove','ResizeObserver','IntersectionObserver',
   'formatx:real3dready'
-])assert.ok(volumeRenderer.includes(token),`missing r267 true-volume mobile startup contract: ${token}`);
+])assert.ok(volumeRenderer.includes(token),`missing r267 true-volume fallback contract: ${token}`);
 assert.match(volumeRenderer,/gl_Position=vec4\(q,clamp\(-p\.z\*\.42,-\.82,\.82\),1\.\)/);
 assert.doesNotMatch(volumeRenderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 
 for(const token of [
+  'function r326Primary()',
+  "fxCoreMobileAwardRevision==='new-crystal-organism-r326'",
+  "fxCoreCrystalRevision==='r326-four-direction-living-facet-organism'",
+  "fxCrystalRendererRequest='r326-primary-preserved'",
+  "fxCrystalRendererOwnershipR420='r326-exclusive-primary'",
+  "renderer:'single-webgl-crystal-organism-r326'",
   'formatx-core-true-volume-r267.js?v=20260828-r267-closed-volume-soft-glass',
   'formatx-core-true-volume-r267.css?v=20260829-r268-softened-mobile-optics',
-  "fxCrystalRendererRequest='closed-volume-r267'",
-  "renderer:'closed-volume-r267'"
-])assert.ok(portal.includes(token),`missing r267 mobile portal ownership: ${token}`);
+  "fxCrystalRendererRequest='closed-volume-r267-fallback'",
+  "fxCrystalRendererOwnershipR420='r267-legacy-fallback'"
+])assert.ok(portal.includes(token),`missing r326-primary / r267-fallback mobile portal ownership: ${token}`);
+
 for(const token of [
   '.fx-core-r267-volume-canvas',
   'opacity: .985 !important','brightness(.94)','contrast(.87)','saturate(.96)','blur(.26px)',
   'opacity: .98 !important','brightness(.92)','contrast(.85)','saturate(.95)','blur(.32px)',
   'r268-mobile-optics-softened-bloom-and-rim'
-])assert.ok(volumeCss.includes(token),`missing restrained r268 mobile optics contract: ${token}`);
+])assert.ok(volumeCss.includes(token),`missing restrained r268 fallback optics contract: ${token}`);
 assert.doesNotMatch(volumeCss,/blur\((?:[1-9]|[1-9][0-9])(?:\.\d+)?px\)/);
 
 for(const token of [
@@ -101,4 +113,4 @@ assert.match(loader,/ready-v20\|ready-v69/);
 assert.match(stability,/ready-v20\|ready-v69/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 for(const source of [bootstrap,wrapper,bootstrapRenderer,volumeRenderer,portal,layout,bridge,premium,loader,stability])new Function(source);
-console.log('PASS: mobile startup uses r267 closed-volume WebGL MAG, restrained r268 optics, non-occluding r418 header, controls/text flow and r416 bidirectional site↔MAG semantics.');
+console.log('PASS: mobile startup preserves the authoritative r326 WebGL MAG, r267 remains fallback-only, restrained optics, non-occluding header, controls/text flow and bidirectional site↔MAG semantics are intact.');
