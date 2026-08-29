@@ -8,13 +8,14 @@
   root.dataset.fxCoreRendererMode = 'mobile';
   root.dataset.fxCoreMobileAwardRevision = 'new-crystal-organism-r326';
   root.dataset.fxCoreCrystalRevision = 'r326-four-direction-living-facet-organism';
-  root.dataset.fxCoreMobileOpticsRevision = 'r419-soft-perimeter-restrained-glow';
+  root.dataset.fxCoreMobileOpticsRevision = 'r423-final-restrained-soft-edge';
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260828-r416-site-coupled-soft-optics';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
   const OPTICS_TUNE_STYLE = '/scifi-ui/styles/formatx-mobile-r416-stability.css?v=20260828-r418-restrained-soft-mag-attached-header';
-  const FINAL_OPTICS_STYLE = '/scifi-ui/styles/formatx-mobile-optics-r419.css?v=20260829-r419-mobile-mag-soft-perimeter';
+  const FINAL_OPTICS_STYLE = '/scifi-ui/styles/formatx-mobile-optics-r423.css?v=20260829-r423-final-mobile-mag-optics';
   const FINAL_HEADER_STYLE = '/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
+  const LANGUAGE_OWNER_SCRIPT = '/scifi-ui/scripts/formatx-mobile-language-owner-r423.js?v=20260829-r423-direct-topbar-language';
   // Content wins the critical path. The render-blocking r418 stylesheet owns the
   // first header frame; later layers only refine optics and reassert final header
   // ownership after legacy WDA/control styles have mounted.
@@ -98,6 +99,16 @@
     document.addEventListener('pointercancel', clearGesture, true);
   }
 
+  function loadLanguageOwner() {
+    if (!matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches) return;
+    if (document.querySelector('script[data-fx-mobile-language-owner-r423]')) return;
+    const script = document.createElement('script');
+    script.src = LANGUAGE_OWNER_SCRIPT;
+    script.async = true;
+    script.dataset.fxMobileLanguageOwnerR423 = 'true';
+    document.head.appendChild(script);
+  }
+
   function loadFinalHeaderStyle() {
     if (!matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches) return;
     let link = document.querySelector('link[data-fx-mobile-header-final-r418]');
@@ -137,19 +148,19 @@
 
   function loadFinalOptics() {
     if (!matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches) return;
-    let link = document.querySelector('link[data-fx-mobile-optics-r419]');
+    let link = document.querySelector('link[data-fx-mobile-optics-r423]');
     if (!(link instanceof HTMLLinkElement)) {
       link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = FINAL_OPTICS_STYLE;
-      link.dataset.fxMobileOpticsR419 = 'true';
-    } else if (!link.href.includes('r419-mobile-mag-soft-perimeter')) {
+      link.dataset.fxMobileOpticsR423 = 'true';
+    } else if (!link.href.includes('r423-final-mobile-mag-optics')) {
       link.href = FINAL_OPTICS_STYLE;
     }
     if (link.parentElement !== document.head || document.head.lastElementChild !== link) {
       document.head.appendChild(link);
     }
-    root.dataset.fxCoreMobileOpticsR419 = 'soft-perimeter-restrained-glow';
+    root.dataset.fxCoreMobileOpticsR423 = 'final-restrained-soft-edge';
   }
 
   function loadStableControls() {
@@ -206,6 +217,7 @@
       root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';
       root.dataset.fxCoreCompositionRevisionR326='new-organism-no-legacy-visual-fallback';
       loadFinalOptics();
+      loadLanguageOwner();
     },{once:true});
 
     renderer.addEventListener('error',()=>{
@@ -223,10 +235,10 @@
 
   function schedulePrimaryRenderer() {
     if (rendererRequested || rendererTimer) return;
-    root.dataset.fxCoreRendererStartupR346='critical-content-first-r419';
+    root.dataset.fxCoreRendererStartupR346='critical-content-first-r423';
     const schedule = () => {
       if (rendererRequested || rendererTimer) return;
-      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-content-lcp-r419'), START_DELAY);
+      rendererTimer = setTimeout(() => loadPrimaryRenderer('post-content-lcp-r423'), START_DELAY);
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
     else schedule();
@@ -246,25 +258,30 @@
   loadFinalOptics();
   loadStableControls();
   loadReferenceLayout();
+  loadLanguageOwner();
   loadFinalHeaderStyle();
 
-  for (const eventName of ['formatx:controlownerready','formatx:mobilelayoutready','formatx:real3dready','pageshow','load']) {
+  for (const eventName of ['formatx:controlownerready','formatx:mobilelayoutready','formatx:real3dready','formatx:languagechange','pageshow','load']) {
     addEventListener(eventName, () => {
       loadFinalHeaderStyle();
       loadFinalOptics();
+      loadLanguageOwner();
     }, { passive: true });
   }
   addEventListener('resize', () => {
     loadFinalHeaderStyle();
     loadFinalOptics();
+    loadLanguageOwner();
   }, { passive: true });
   addEventListener('orientationchange', () => {
     loadFinalHeaderStyle();
     loadFinalOptics();
+    loadLanguageOwner();
   }, { passive: true });
-  for (const delay of [0, 350, 1400]) setTimeout(() => {
+  for (const delay of [0, 350, 1400, 3200]) setTimeout(() => {
     loadFinalHeaderStyle();
     loadFinalOptics();
+    loadLanguageOwner();
   }, delay);
 
   schedulePrimaryRenderer();
