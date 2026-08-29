@@ -4,7 +4,7 @@
   const ROOT = document.documentElement;
   const STORAGE_KEY = 'formatx-language';
   const SUPPORTED = new Set(['hu', 'en']);
-  const VERSION = '5';
+  const VERSION = '6';
   if (ROOT.dataset.fxSingleLanguageToggle === 'ready' && ROOT.dataset.fxSingleLanguageToggleVersion === VERSION) return;
   ROOT.dataset.fxSingleLanguageToggle = 'loading';
   ROOT.dataset.fxSingleLanguageToggleVersion = VERSION;
@@ -74,7 +74,7 @@
     if (document.querySelector('link[data-fx-single-language-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = assetUrl('../styles/single-language-toggle.css?v=20260729-single-language-3');
+    link.href = assetUrl('../styles/single-language-toggle.css?v=20260830-r428-cross-device-header');
     link.dataset.fxSingleLanguageStyle = 'true';
     document.head.appendChild(link);
   }
@@ -174,7 +174,12 @@
 
   function placeToggle(container, toggle) {
     if (!(toggle instanceof HTMLButtonElement)) return;
-    if (mobileMode()) {
+
+    /* r428: the landing page has one canonical branded topbar on every
+       viewport. Keep the language button as its direct child on desktop and
+       mobile so control-owner reconciliation cannot move it into a hidden
+       legacy/header-actions container. Public/legal pages retain normal flow. */
+    if (!publicPageMode()) {
       const bar = activeTopbar();
       if (bar instanceof HTMLElement && toggle.parentElement !== bar) bar.appendChild(toggle);
       toggle.classList.add('fx-control-owner-r264');
@@ -184,17 +189,20 @@
       toggle.style.setProperty('display', 'inline-flex', 'important');
       toggle.style.setProperty('visibility', 'visible', 'important');
       toggle.style.setProperty('opacity', '1', 'important');
-      ROOT.dataset.fxReferenceLanguageLayout = 'r423-direct-topbar-child';
+      toggle.style.setProperty('pointer-events', 'auto', 'important');
+      ROOT.dataset.fxReferenceLanguageLayout = mobileMode()
+        ? 'r428-mobile-direct-topbar-child'
+        : 'r428-desktop-direct-topbar-child';
       return;
     }
+
     toggle.classList.remove('fx-control-owner-r264');
     if (toggle.parentElement !== container) container.appendChild(toggle);
     toggle.style.removeProperty('display');
     toggle.style.removeProperty('visibility');
     toggle.style.removeProperty('opacity');
-    ROOT.dataset.fxReferenceLanguageLayout = publicPageMode()
-      ? 'r425-public-header-normal-flow'
-      : 'desktop-semantic-container';
+    toggle.style.removeProperty('pointer-events');
+    ROOT.dataset.fxReferenceLanguageLayout = 'r428-public-header-normal-flow';
   }
 
   function createContainer() {
@@ -245,17 +253,19 @@
     toggle.lang = language;
     toggle.setAttribute('aria-label', language === 'hu' ? 'Váltás angol nyelvre' : 'Switch to Hungarian');
     toggle.title = language === 'hu' ? 'Váltás angol nyelvre' : 'Switch to Hungarian';
-    if (mobileMode()) {
+    if (!publicPageMode()) {
       toggle.hidden = false;
+      toggle.removeAttribute('aria-hidden');
       toggle.style.setProperty('display', 'inline-flex', 'important');
       toggle.style.setProperty('visibility', 'visible', 'important');
       toggle.style.setProperty('opacity', '1', 'important');
+      toggle.style.setProperty('pointer-events', 'auto', 'important');
     }
   }
 
   function publishLanguageChange(language) {
     dispatchEvent(new CustomEvent('formatx:languagechange', {
-      detail: { language, source: 'single-language-toggle-v5-public-flow' }
+      detail: { language, source: 'single-language-toggle-v6-cross-device-header' }
     }));
   }
 
@@ -315,9 +325,11 @@
       const current = SUPPORTED.has(ROOT.lang) ? ROOT.lang : storedLanguage();
       setLanguage(current === 'hu' ? 'en' : 'hu', true, container, toggle);
     });
-    container.addEventListener('click', event => {
-      if (event.target === container) toggle.click();
-    });
+    if (publicPageMode()) {
+      container.addEventListener('click', event => {
+        if (event.target === container) toggle.click();
+      });
+    }
 
     container.appendChild(toggle);
     placeToggle(container, toggle);
