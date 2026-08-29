@@ -44,9 +44,14 @@
     top:max(12px,env(safe-area-inset-top)) !important;
   }
 
+  /* r430: mobile header participates in normal document flow. A 72px sticky
+     carrier covered up to 85% of the hero title at 320px during ordinary
+     section positioning. The final r428 header owner already specifies a
+     relative carrier, so this older stability layer must not reintroduce
+     sticky occlusion later in the cascade. */
   html body.living-architecture .topbar {
-    position:sticky !important;
-    top:0 !important;
+    position:relative !important;
+    top:auto !important;
     right:auto !important;
     bottom:auto !important;
     left:auto !important;
@@ -190,3 +195,4 @@
 /* production-r418-attached-header-restrained-mag */
 /* production-r421-cross-device-restrained-mag */
 /* production-r423-unified-mobile-mag-optics */
+/* production-r430-mobile-header-normal-flow-no-information-occlusion */

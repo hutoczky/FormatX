@@ -134,26 +134,30 @@ html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-m
   }
 }
 
-/* r425 — user-feedback-balanced phone optics.
-   Keep the native WebGL geometry and internal caustics intact, but remove the
-   over-driven post-composite sharpening seen on dense mobile displays. The
-   wider, lower-alpha shadows soften the perceived edge without introducing a
-   blur filter or a second silhouette. */
+/* r425 — user-feedback-balanced phone optics. Compatibility marker retained
+   for older source guards; r430 below is the authoritative mobile finish. */
+/* r430 — restrained live-phone MAG optics.
+   The r326 geometry and internal caustics stay native WebGL. The final mobile
+   composite now removes the over-driven bloom and razor-edge impression by
+   reducing post-composite luminance/contrast/saturation and keeping only tiny,
+   low-alpha shadows. No CSS blur or second silhouette is introduced. */
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .975 !important;
+    opacity: .94 !important;
     filter:
-      brightness(1.045)
-      contrast(1.09)
-      saturate(1.24)
-      drop-shadow(0 0 3px rgba(126,239,255,.045))
-      drop-shadow(0 0 10px rgba(82,91,255,.022)) !important;
+      brightness(.955)
+      contrast(.98)
+      saturate(1.08)
+      drop-shadow(0 0 1px rgba(126,239,255,.014))
+      drop-shadow(0 0 6px rgba(82,91,255,.005)) !important;
     -webkit-filter:
-      brightness(1.045)
-      contrast(1.09)
-      saturate(1.24)
-      drop-shadow(0 0 3px rgba(126,239,255,.045))
-      drop-shadow(0 0 10px rgba(82,91,255,.022)) !important;
+      brightness(.955)
+      contrast(.98)
+      saturate(1.08)
+      drop-shadow(0 0 1px rgba(126,239,255,.014))
+      drop-shadow(0 0 6px rgba(82,91,255,.005)) !important;
   }
 }
+
+/* production-r430-final-mobile-mag-optics-owner */
