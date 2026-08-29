@@ -1,0 +1,44 @@
+/* FormatX r423 — final phone MAG optics owner.
+   One restrained presentation contract wins over the older r328/r416 layers:
+   less centre/perimeter glare, lower edge contrast and a subtle sub-pixel blur,
+   without changing r326 geometry or the working hero controls. */
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.70 !important;
+    mix-blend-mode:normal !important;
+    scale:.80 .85 !important;
+    transform-origin:50% 48% !important;
+    image-rendering:auto !important;
+    filter:brightness(.66) contrast(.36) saturate(.58) blur(.96px) !important;
+    -webkit-filter:brightness(.66) contrast(.36) saturate(.58) blur(.96px) !important;
+  }
+
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
+    content:none !important;
+    display:none !important;
+    opacity:0 !important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.68 !important;
+    scale:.78 .83 !important;
+    filter:brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
+    -webkit-filter:brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
+  }
+}
+
+@media (max-width:370px) {
+  html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.68 !important;
+    filter:brightness(.65) contrast(.35) saturate(.55) blur(.99px) !important;
+    -webkit-filter:brightness(.65) contrast(.35) saturate(.55) blur(.99px) !important;
+  }
+}
+
+/* production-r423-final-mobile-mag-restrained-soft-edge */
