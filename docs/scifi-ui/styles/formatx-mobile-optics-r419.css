@@ -1,7 +1,8 @@
-/* FormatX r420 — final mobile MAG centering + optical restraint.
-   The r326 crystal stays luminous and dimensional, but its final presentation
-   owner now also hard-locks the WebGL carrier to the viewport centre. This
-   prevents older mobile geometry layers from pushing the MAG off either edge. */
+/* FormatX r421 — final mobile MAG centering + softer optical restraint.
+   Keep the r326 crystal dimensional while reducing the remaining centre flare,
+   cyan perimeter glare and razor-sharp four-tip read seen on real phones.
+   The final pass deliberately uses less blur than r420 so the GPU composite is
+   cheaper while brightness/contrast do the optical softening. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root body.living-architecture #hero .hero-space {
@@ -40,11 +41,11 @@
     translate:none !important;
     scale:.80 .85 !important;
     transform-origin:50% 48% !important;
-    opacity:.79 !important;
+    opacity:.75 !important;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
-    filter:brightness(.75) contrast(.44) saturate(.69) blur(1.34px) !important;
-    -webkit-filter:brightness(.75) contrast(.44) saturate(.69) blur(1.34px) !important;
+    filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
+    -webkit-filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
   }
 }
 
@@ -56,11 +57,11 @@
 
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.77 !important;
+    opacity:.73 !important;
     scale:.78 .83 !important;
-    filter:brightness(.72) contrast(.41) saturate(.67) blur(1.46px) !important;
-    -webkit-filter:brightness(.72) contrast(.41) saturate(.67) blur(1.46px) !important;
+    filter:brightness(.67) contrast(.37) saturate(.62) blur(.94px) !important;
+    -webkit-filter:brightness(.67) contrast(.37) saturate(.62) blur(.94px) !important;
   }
 }
 
-/* production-r420-mobile-mag-centered-soft-perimeter */
+/* production-r421-mobile-mag-centered-softer-flare-and-facets */
