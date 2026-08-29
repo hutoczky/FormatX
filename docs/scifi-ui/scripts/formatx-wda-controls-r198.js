@@ -27,7 +27,7 @@
   }
 
   const SELECTOR = '.fx-three-sound';
-  const AUDIO_SRC = '/scifi-ui/scripts/formatx-audio-repair.js?v=20260817-r198-wda-sound';
+  const AUDIO_SRC = '/scifi-ui/scripts/formatx-audio-repair.js?v=20260829-r423-first-tap-handoff';
   const ICONS = Object.freeze({
     muted: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg>',
     sound: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M15 9.2c1.2 1.5 1.2 4.1 0 5.6"/><path d="M18 6.8c2.8 2.9 2.8 7.5 0 10.4"/></svg>',
@@ -40,6 +40,7 @@
   let layoutQueued = false;
   let bootObserver = null;
   let bootTimer = 0;
+  let pendingToggleAfterLoad = false;
 
   const language = () => root.lang === 'en' ? 'en' : 'hu';
   const mobileViewport = () => matchMedia('(max-width: 900px), (pointer: coarse)').matches;
@@ -215,8 +216,27 @@
     return button;
   }
 
+  function replayPendingToggle() {
+    if (!pendingToggleAfterLoad || root.dataset.fxAudioOwner !== 'professional-v6') return false;
+    const button = pickButton();
+    if (!(button instanceof HTMLButtonElement)) return false;
+    pendingToggleAfterLoad = false;
+    root.dataset.fxWdaSoundTouchR418 = 'engine-ready-replay';
+    queueMicrotask(() => {
+      const live = pickButton();
+      if (!(live instanceof HTMLButtonElement)) return;
+      root.dataset.fxWdaSoundTouchR418 = 'first-click-replayed';
+      live.click();
+    });
+    return true;
+  }
+
   function requestProfessionalAudio() {
-    if (root.dataset.fxAudioOwner === 'professional-v6' || loadingAudio) return;
+    if (root.dataset.fxAudioOwner === 'professional-v6') {
+      replayPendingToggle();
+      return;
+    }
+    if (loadingAudio) return;
     if (document.querySelector('script[src*="formatx-audio-repair.js"]')) return;
     loadingAudio = true;
     root.dataset.fxWdaSound = 'loading-engine';
@@ -230,10 +250,12 @@
         const button = ensureButton();
         sync(button);
         scheduleLayout();
+        replayPendingToggle();
       });
     }, { once: true });
     script.addEventListener('error', () => {
       loadingAudio = false;
+      pendingToggleAfterLoad = false;
       root.dataset.fxWdaSound = 'engine-load-failed';
       const button = ensureButton();
       button.dataset.fxAudioState = 'blocked';
@@ -243,9 +265,9 @@
     document.head.appendChild(script);
   }
 
-  // r418: do not replace/load the SOUND runtime between pointerdown and the
-  // browser's synthesized click. That DOM handoff used to cancel the physical
-  // tap on Android/Playwright. Arm the gesture here; load after click delivery.
+  // r423: the physical pointer sequence stays on the same SOUND element. The
+  // professional engine may be installed asynchronously after the trusted click;
+  // preserve that first toggle intent and replay it exactly once after handoff.
   document.addEventListener('pointerdown', event => {
     const target = event.target instanceof Element ? event.target.closest(SELECTOR) : null;
     if (!target || root.dataset.fxAudioOwner === 'professional-v6') return;
@@ -257,10 +279,11 @@
     if (!target || root.dataset.fxAudioOwner === 'professional-v6') return;
     event.preventDefault();
     root.dataset.fxWdaSoundTouchR418 = 'click-received';
-    requestProfessionalAudio();
+    pendingToggleAfterLoad = true;
     const button = ensureButton();
-    button.dataset.fxAudioState = 'blocked';
+    button.dataset.fxAudioState = 'pending';
     sync(button);
+    requestProfessionalAudio();
     scheduleLayout();
   }, true);
 
