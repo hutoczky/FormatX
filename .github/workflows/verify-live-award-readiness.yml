@@ -1,5 +1,5 @@
 name: Verify FormatX live award readiness
-run-name: Live award-readiness audit for current r424 sharp 3D production
+run-name: Live award-readiness audit for r424 native shader + r425 balanced mobile optics
 
 on:
   push:
@@ -38,16 +38,19 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           test -s docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           grep -Fq 'r424 sharp optics' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'brightness(1.12)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'contrast(1.22)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'r425 — user-feedback-balanced phone optics' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'brightness(1.045)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'contrast(1.09)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'saturate(1.24)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           ! grep -Fq 'blur(' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           grep -Fq 'retired-r424-native-shader-optics' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
           grep -Fq 'formatx-core-shapeshifter-r337-css' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
 
-      - name: Verify live r424 WebGL crystal, sharp native optics, layout and scrolling
+      - name: Verify live native WebGL crystal, balanced mobile optics, interaction and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -61,9 +64,10 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
           fetch "/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=${GITHUB_RUN_ID}" "$TMP/crystal-r326.js"
-          fetch "/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r424.css"
+          fetch "/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r425.css"
           fetch "/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-regression.js"
           fetch "/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=${GITHUB_RUN_ID}" "$TMP/touch-r99.js"
+          fetch "/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=${GITHUB_RUN_ID}" "$TMP/governor-r426.js"
           fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
           fetch "/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=${GITHUB_RUN_ID}" "$TMP/layout.css"
           fetch "/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=${GITHUB_RUN_ID}" "$TMP/text-guard.css"
@@ -98,23 +102,28 @@ jobs:
           contains native-ready 'ready-v69' "$TMP/crystal-r326.js"
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/crystal-r326.js"
 
-          # r424 is the live optical authority. The shader draws the volume and
-          # caustics; CSS restores contrast only and cannot blur or redraw MAG.
-          contains optics-version 'r424 sharp optics' "$TMP/optics-r424.css"
-          contains optics-scope 'single-webgl-crystal-organism-r326' "$TMP/optics-r424.css"
-          contains mobile-opacity 'opacity: .99 !important' "$TMP/optics-r424.css"
-          contains mobile-highlight 'brightness(1.12)' "$TMP/optics-r424.css"
-          contains mobile-contrast 'contrast(1.22)' "$TMP/optics-r424.css"
-          contains mobile-colour 'saturate(1.38)' "$TMP/optics-r424.css"
-          ! grep -Fq 'blur(' "$TMP/optics-r424.css"
+          # The r424 shader still owns the native volume. r425 only softens the
+          # final mobile composite after user feedback; it never blurs/redraws it.
+          contains optics-base 'r424 sharp optics' "$TMP/optics-r425.css"
+          contains optics-r425 'r425 — user-feedback-balanced phone optics' "$TMP/optics-r425.css"
+          contains optics-scope 'single-webgl-crystal-organism-r326' "$TMP/optics-r425.css"
+          contains mobile-opacity 'opacity: .975 !important' "$TMP/optics-r425.css"
+          contains mobile-highlight 'brightness(1.045)' "$TMP/optics-r425.css"
+          contains mobile-contrast 'contrast(1.09)' "$TMP/optics-r425.css"
+          contains mobile-colour 'saturate(1.24)' "$TMP/optics-r425.css"
+          ! grep -Fq 'blur(' "$TMP/optics-r425.css"
           contains optics-retired 'retired-r424-native-shader-optics' "$TMP/mobile-regression.js"
           contains optics-owner 'formatx-core-shapeshifter-r337-css' "$TMP/mobile-regression.js"
           contains renderer-optics 'fxCoreOpticsR424' "$TMP/crystal-r326.js"
           contains renderer-density 'dpr-cap-1.75-pixel-budget-980k' "$TMP/crystal-r326.js"
-          ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' "$TMP/optics-r424.css"
+          ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' "$TMP/optics-r425.css"
 
           contains touch-wake 'formatx:referencepause' "$TMP/touch-r99.js"
-          contains touch-pulse 'FormatXCoreMobileV69?.pulse' "$TMP/touch-r99.js"
+          contains touch-coreinteraction 'formatx:coreinteraction' "$TMP/touch-r99.js"
+          contains touch-activate 'formatx:organismcoreactivate' "$TMP/touch-r99.js"
+          contains touch-ui-guard 'interactive-target-bypassed' "$TMP/touch-r99.js"
+          contains governor-policy 'event-burst-no-heartbeat-render' "$TMP/governor-r426.js"
+          contains governor-idle 'startup-settled-r426' "$TMP/governor-r426.js"
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
           contains proof-style '.fx-reference-proof' "$TMP/layout.css"
@@ -153,10 +162,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Award/source + live r424 sharp WebGL crystal and scrolling passed'
+            description='Live r424 WebGL + r425 optics + r426 idle governor passed'
           else
             state=failure
-            description='Award, live r424 MAG, native optics, interaction or scrolling failed'
+            description='Award, live MAG optics, interaction, idle policy or scrolling failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
