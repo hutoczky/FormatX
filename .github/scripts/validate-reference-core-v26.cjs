@@ -40,8 +40,8 @@ assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\
 assert.doesNotMatch(renderer,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 
 // r418 still owns attached-header/layout stability. Final visible phone optics are
-// intentionally owned by the later r423 layer, so do not require obsolete r418
-// brightness/opacity values here.
+// intentionally owned by the later r424 presentation layer, so do not require
+// obsolete r418 or r423 brightness/opacity values here.
 for(const token of [
   'production-r418-attached-header-restrained-mag',
   'margin:0 auto 16px !important',
@@ -50,13 +50,15 @@ for(const token of [
 ])assert.ok(stabilityCss.includes(token),`missing r418 reference layout contract: ${token}`);
 
 for(const token of [
-  'production-r423-final-mobile-mag-restrained-soft-edge',
-  'opacity:.70 !important',
-  'brightness(.66) contrast(.36) saturate(.58) blur(.96px)',
-  'opacity:.68 !important',
-  'brightness(.65) contrast(.35) saturate(.56) blur(.99px)',
+  'production-r424-final-mobile-mag-softer-perimeter-lower-bloom',
+  'opacity:.64 !important',
+  'brightness(.60) contrast(.30) saturate(.54) blur(1.30px)',
+  'opacity:.62 !important',
+  'brightness(.59) contrast(.29) saturate(.52) blur(1.35px)',
+  'opacity:.61 !important',
+  'brightness(.58) contrast(.28) saturate(.50) blur(1.38px)',
   'content:none !important'
-])assert.ok(finalOpticsCss.includes(token),`missing r423 final softened mobile optics contract: ${token}`);
+])assert.ok(finalOpticsCss.includes(token),`missing r424 final softened mobile optics contract: ${token}`);
 assert.doesNotMatch(finalOpticsCss,/brightness\(1\.[0-9]+\)|contrast\([1-9]\.[0-9]+\)|drop-shadow\(/);
 
 for(const token of ['interaction-bridge-r416-site-is-mag','site-is-mag-crystal-is-visual-heart','site-equals-mag-bidirectional','fxMagSiteBidirectionalR416'])assert.ok(bridge.includes(token),`missing r416 site↔MAG authority: ${token}`);
@@ -70,4 +72,4 @@ assert.match(webgl,/canvas\.getContext\('webgl2'/);
 assert.match(webgl,/gl\.drawElements\(gl\.TRIANGLES/);
 assert.match(entry,/formatx-reference-core-v26\.js/);
 for(const source of [selector,bootstrap,wrapper,renderer,bridge,flow,layout])new Function(source);
-console.log('PASS: r326 WebGL crystal with r423 final softened mobile optics, r418 non-occluding header/layout and r416 bidirectional site↔MAG coupling is the production reference authority; legacy MAG renderers are not allowed.');
+console.log('PASS: r326 WebGL crystal with r424 final softened mobile optics, r418 non-occluding header/layout and r416 bidirectional site↔MAG coupling is the production reference authority; legacy MAG renderers are not allowed.');
