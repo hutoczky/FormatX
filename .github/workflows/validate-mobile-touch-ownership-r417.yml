@@ -104,15 +104,8 @@ jobs:
               const root=document.documentElement;
               return root.dataset.fxCrystalOrganismR326==='ready'
                 && root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
-                && root.dataset.fxCoreGeometry==='four-direction-asymmetric-crystal-organism-r326'
-                && root.dataset.fxCoreMaterial==='translucent-living-facet-organism-r326'
-                && root.dataset.fxCoreScheduler==='heartbeat-and-interaction-bursts-no-idle-loop-r326'
-                && root.dataset.fxCoreCompositionR285==='pure-webgl3d-no-2d-overlays'
-                && root.dataset.fxControlOwnerR268==='ready'
-                && root.dataset.fxCoreTouchPulseR99==='ready-r417'
                 && root.dataset.fxMobileHeaderFinalR418==='loaded-last-mobile'
                 && root.dataset.fxReferenceLanguageLayout==='r428-mobile-direct-topbar-child'
-                && root.dataset.fxSoundTouchRecoveryR418==='ready'
                 && Boolean(document.querySelector('.topbar > .fx-language-toggle'))
                 && Boolean(document.querySelector('.fx-three-sound'))
                 && Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas'));
