@@ -1,4 +1,4 @@
-/* FormatX r423 — current MAG critical runtime.
+/* FormatX r424 — current MAG critical runtime.
    This stylesheet contains only the physical r326 stage, restrained optics and
    deterministic public mobile accessibility/touch contracts. */
 
@@ -39,6 +39,23 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   transform-origin:50% 48% !important;
 }
 
+/* The CSS crystal is only a fail-open first-paint placeholder. Once the native
+   r326 renderer announces readiness it must leave zero painted pseudo content;
+   otherwise the user sees a sharpened double silhouette behind the WebGL MAG. */
+html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
+html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
+html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::after,
+html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::after {
+  content:none !important;
+  display:none !important;
+  background:none !important;
+  background-image:none !important;
+  box-shadow:none !important;
+  filter:none !important;
+  opacity:0 !important;
+  animation:none !important;
+}
+
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
     inset:0 auto 0 50% !important;
@@ -54,8 +71,6 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
     -webkit-filter:brightness(.69) contrast(.39) saturate(.64) blur(.88px) !important;
   }
 
-  /* Lighthouse and real low-contrast displays need an explicit opaque surface;
-     translucent gradients otherwise make the computed contrast ambiguous. */
   html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
     color:#dff7ff !important;
     background-color:#02111f !important;
@@ -146,4 +161,4 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   }
 }
 
-/* production-r423-direct-r326-optics-a11y-touch */
+/* production-r424-direct-r326-pure-webgl-optics-a11y-touch */
