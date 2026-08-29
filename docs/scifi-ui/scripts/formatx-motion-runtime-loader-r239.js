@@ -1,8 +1,6 @@
-/* FormatX r423 — direct-current-core startup with critical-path warming.
-   The static shell and r326 MAG are the only first-load visual owners. Retired
-   recovery/material/signature generations remain available, but mount only after
-   explicit user intent. The current MAG assets are warmed as soon as this loader
-   executes so slow mobile networks do not turn the renderer into a late LCP. */
+/* FormatX r429 — direct current-core + language startup with critical-path warming.
+   The static shell, canonical HU/EN selector and r326 MAG are first-load owners.
+   Retired recovery/material/signature generations remain user-intent only. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -11,20 +9,21 @@ if(root.dataset.fxMotionRuntimeR239)return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260829-r426-mobile-idle-governor&rev=20260829-r425-balanced-mobile-optics';
+const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r429-initial-cross-device-header';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r428-cross-device-header&rev=20260830-r428-soft-mobile-optics';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r424-sharp-organic-core';
-const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260829-r422-direct-r326-lcp&rev=20260829-r425-balanced-mobile-optics';
-const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
+const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r428-pure-native-3d&rev=20260830-r428-soft-mobile-optics';
+const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
-if(reduced.matches)root.dataset.fxMotionRuntimeR239='reduced-motion-static-core-r424';
+if(reduced.matches)root.dataset.fxMotionRuntimeR239='reduced-motion-static-core-r429';
 
 const specs=Array.from(template.content.querySelectorAll('script[src]'));
 const deferred=[];
 const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false;
+let enhancementsStarted=false,currentRequested=false,languageRequested=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function isLegacyLivingEnergy(spec){return /\/formatx-living-energy-r168\.js(?:\?|$)/.test(srcOf(spec));}
@@ -53,13 +52,36 @@ function warmAsset(href,as){
   document.head.appendChild(preload);
 }
 
-function warmCurrentMag(){
+function warmCriticalOwners(){
   if(root.dataset.fxCurrentMagWarmR423==='ready')return;
   root.dataset.fxCurrentMagWarmR423='ready';
+  warmAsset(LANGUAGE_TOGGLE,'script');
   warmAsset(CURRENT_MAG,'script');
   warmAsset(CURRENT_RENDERER,'script');
   warmAsset(CURRENT_STYLE,'style');
-  if(mobile.matches)warmAsset(FINAL_HEADER,'style');
+  warmAsset(FINAL_HEADER,'style');
+  root.dataset.fxLanguageCriticalWarmR429='ready';
+}
+
+function ensureLanguageToggle(){
+  if(root.dataset.fxSingleLanguageToggle==='ready'&&root.dataset.fxSingleLanguageToggleVersion==='6'){
+    root.dataset.fxLanguageCriticalPathR429='already-ready';
+    return;
+  }
+  if(languageRequested||document.querySelector('script[data-fx-critical-language-r429]'))return;
+  languageRequested=true;
+  const script=document.createElement('script');
+  script.src=LANGUAGE_TOGGLE;
+  script.async=false;
+  script.dataset.fxCriticalLanguageR429='true';
+  script.addEventListener('load',()=>{
+    root.dataset.fxLanguageCriticalPathR429=root.dataset.fxSingleLanguageToggle==='ready'
+      ?'ready-initial-shell'
+      :'loaded-awaiting-install';
+  },{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxLanguageCriticalPathR429='failed';},{once:true});
+  document.head.appendChild(script);
+  root.dataset.fxLanguageCriticalPathR429='requested-initial-shell';
 }
 
 function ensureStaticMotionCss(){
@@ -80,15 +102,16 @@ function ensureCurrentMag(){
   if(currentRequested||document.querySelector('script[data-fx-current-mag-loader-r422]'))return;
   currentRequested=true;
   const script=document.createElement('script');script.src=CURRENT_MAG;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
-  root.dataset.fxMotionRuntimeMobileCoreR313='direct-r326-r423-prewarmed';
+  root.dataset.fxMotionRuntimeMobileCoreR313='direct-r326-r429-prewarmed';
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
 
-function scheduleCurrentMag(){
-  warmCurrentMag();
-  // This module is already deferred by the page shell. Waiting for another
-  // DOMContentLoaded task added one full slow-network RTT before the r326 request.
-  // Mount now; the renderer itself only touches the already-reserved hero-space.
+function scheduleCriticalOwners(){
+  warmCriticalOwners();
+  // This module is already deferred by the page shell. Both controls can mount
+  // immediately against the parsed topbar/hero instead of waiting for immersive
+  // activation or another DOMContentLoaded task.
+  ensureLanguageToggle();
   ensureCurrentMag();
 }
 
@@ -102,7 +125,7 @@ function mountEnhancements(){
   if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
-  root.dataset.fxMotionRuntimeR239='enhanced-r423-user-intent';
+  root.dataset.fxMotionRuntimeR239='enhanced-r429-user-intent';
 }
 function onIntent(event){if(reservedInteraction(event))return;mountEnhancements();}
 
@@ -117,9 +140,9 @@ root.dataset.fxMotionRuntimeRequestedR271='0';
 root.dataset.fxMotionRuntimeMobileEnergySkippedR271=String(skippedEnergy);
 root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
 root.dataset.fxMotionRuntimeRetiredCoreSkippedR422=String(retiredCore);
-root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r423-mobile-prewarmed-r326':'core-ready-r423-desktop-prewarmed-r326';
-root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r423-prewarmed';
-scheduleCurrentMag();
+root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r429-mobile-prewarmed-r326':'core-ready-r429-desktop-prewarmed-r326';
+root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r429-prewarmed';
+scheduleCriticalOwners();
 
 if(deferred.length){
   for(const [type,options] of intentListeners)addEventListener(type,onIntent,options);
