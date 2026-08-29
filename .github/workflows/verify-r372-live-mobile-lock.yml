@@ -1,4 +1,4 @@
-name: Verify r413 balanced mobile MAG and header lock
+name: Verify r414 restrained mobile MAG and header lock
 
 on:
   push:
@@ -16,14 +16,14 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r413-live:
+  verify-r414-live:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r413 mobile MAG and header source contract
+      - name: Validate r414 mobile MAG and header source contract
         shell: bash
         run: |
           set -euo pipefail
@@ -35,20 +35,23 @@ jobs:
           node --check "$SHADER"
           node --check "$AWARD"
 
-          # r413 is the late mobile finish owner. It restores visible glass
-          # luminance/facets without returning to the earlier hard-edged glow.
-          grep -Fq 'FormatX r413' "$CSS"
-          grep -Fq 'production-deploy-r413-balanced-soft-mobile-mag-header-lock' "$CSS"
-          grep -Fq 'opacity: .96 !important' "$CSS"
-          grep -Fq 'brightness(.97)' "$CSS"
-          grep -Fq 'contrast(.80)' "$CSS"
-          grep -Fq 'saturate(.92)' "$CSS"
-          grep -Fq 'blur(.40px)' "$CSS"
-          grep -Fq 'opacity: .95 !important' "$CSS"
-          grep -Fq 'brightness(.95)' "$CSS"
-          grep -Fq 'contrast(.77)' "$CSS"
-          grep -Fq 'saturate(.90)' "$CSS"
-          grep -Fq 'blur(.46px)' "$CSS"
+          # r414 is the late mobile finish owner. It deliberately restrains the
+          # halo and edge contrast while preserving the r326 crystal geometry.
+          grep -Fq 'FormatX r414' "$CSS"
+          grep -Fq 'production-deploy-r414-restrained-mobile-mag-optics' "$CSS"
+          grep -Fq 'opacity: .94 !important' "$CSS"
+          grep -Fq 'brightness(.94)' "$CSS"
+          grep -Fq 'contrast(.76)' "$CSS"
+          grep -Fq 'saturate(.88)' "$CSS"
+          grep -Fq 'blur(.56px)' "$CSS"
+          grep -Fq 'opacity: .93 !important' "$CSS"
+          grep -Fq 'brightness(.92)' "$CSS"
+          grep -Fq 'contrast(.73)' "$CSS"
+          grep -Fq 'saturate(.86)' "$CSS"
+          grep -Fq 'blur(.64px)' "$CSS"
+          grep -Fq 'opacity: .105' "$CSS"
+          grep -Fq 'filter: blur(16px)' "$CSS"
+          grep -Fq 'r414-restrained-mobile-mag-optics' "$AWARD"
 
           # Mobile header is one coordinate system; no detached viewport-fixed
           # MAG button and no visible skip-link unless focus-visible.
@@ -65,8 +68,8 @@ jobs:
           grep -Fq 'right: 72px !important' "$CSS"
           grep -Fq 'right: 14px !important' "$CSS"
 
-          # r379 owns the centered carrier and unchanged desktop r326 optics;
-          # r413 intentionally overrides only the late mobile finish values.
+          # r379 still owns the centered carrier and desktop optics. r414 only
+          # overrides the late mobile finish values.
           grep -Fq 'FormatX r379' "$OPTICS"
           grep -Fq 'production-deploy-r379-mobile-mag-center-and-soft-optics' "$OPTICS"
           grep -Fq '.fx-crystal-organism-r326-stage {' "$OPTICS"
@@ -77,8 +80,7 @@ jobs:
           grep -Fq 'brightness(1.24) contrast(.72) saturate(1.02) blur(.56px)' "$OPTICS"
           ! grep -Fq 'FINAL MOBILE CONTROL GEOMETRY' "$OPTICS"
 
-          # Current r326 mobile lighting contract. Geometry remains the single
-          # crystal organism renderer; these values are the active phone tuning.
+          # Current r326 mobile lighting contract remains the actual renderer.
           grep -Fq "const VERSION = 'crystal-organism-r326'" "$SHADER"
           grep -Fq "fresnelPower: '1.8'" "$SHADER"
           grep -Fq "innerHeartBase: '.095'" "$SHADER"
@@ -93,34 +95,34 @@ jobs:
           grep -Fq "innerHeartBase: '.24'" "$SHADER"
           grep -Fq "outerAlphaMax: '.86'" "$SHADER"
 
-      - name: Verify production serves r413 mobile MAG and header lock
+      - name: Verify production serves r414 mobile MAG and header lock
         shell: bash
         run: |
           set -euo pipefail
           CSS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
           OPTICS_URL='https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-core-optics-r328.css'
           JS_URL='https://www.formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js'
-          CSS_TMP="$RUNNER_TEMP/r413-softening-live.css"
-          OPTICS_TMP="$RUNNER_TEMP/r413-optics-live.css"
-          JS_TMP="$RUNNER_TEMP/r413-live.js"
+          CSS_TMP="$RUNNER_TEMP/r414-softening-live.css"
+          OPTICS_TMP="$RUNNER_TEMP/r414-optics-live.css"
+          JS_TMP="$RUNNER_TEMP/r414-live.js"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "r413 live verification $attempt/45"
-            suffix="r413_live=${GITHUB_RUN_ID}_${attempt}"
+            echo "r414 live verification $attempt/45"
+            suffix="r414_live=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${OPTICS_URL}?${suffix}" -o "$OPTICS_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP"; then
-              if grep -Fq 'FormatX r413' "$CSS_TMP" \
-                && grep -Fq 'production-deploy-r413-balanced-soft-mobile-mag-header-lock' "$CSS_TMP" \
-                && grep -Fq 'opacity: .96 !important' "$CSS_TMP" \
-                && grep -Fq 'brightness(.97)' "$CSS_TMP" \
-                && grep -Fq 'contrast(.80)' "$CSS_TMP" \
-                && grep -Fq 'blur(.40px)' "$CSS_TMP" \
-                && grep -Fq 'opacity: .95 !important' "$CSS_TMP" \
-                && grep -Fq 'brightness(.95)' "$CSS_TMP" \
-                && grep -Fq 'contrast(.77)' "$CSS_TMP" \
-                && grep -Fq 'blur(.46px)' "$CSS_TMP" \
+              if grep -Fq 'FormatX r414' "$CSS_TMP" \
+                && grep -Fq 'production-deploy-r414-restrained-mobile-mag-optics' "$CSS_TMP" \
+                && grep -Fq 'opacity: .94 !important' "$CSS_TMP" \
+                && grep -Fq 'brightness(.94)' "$CSS_TMP" \
+                && grep -Fq 'contrast(.76)' "$CSS_TMP" \
+                && grep -Fq 'blur(.56px)' "$CSS_TMP" \
+                && grep -Fq 'opacity: .93 !important' "$CSS_TMP" \
+                && grep -Fq 'brightness(.92)' "$CSS_TMP" \
+                && grep -Fq 'contrast(.73)' "$CSS_TMP" \
+                && grep -Fq 'blur(.64px)' "$CSS_TMP" \
                 && grep -Fq 'html body .skip-link:focus-visible {' "$CSS_TMP" \
                 && grep -Fq 'html body.living-architecture .topbar {' "$CSS_TMP" \
                 && grep -Fq 'position: sticky !important' "$CSS_TMP" \
@@ -144,9 +146,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r413 balanced mobile MAG, r379-centered geometry, current r326 lighting, hidden-until-focused skip link and unified mobile header.'
+          echo 'PASS: production serves r414 restrained mobile MAG, r379-centered geometry, current r326 lighting, hidden-until-focused skip link and unified mobile header.'
 
-      - name: Publish r413 live status
+      - name: Publish r414 live status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -155,13 +157,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r413 mobile MAG and header passed'
+            description='Live r414 mobile MAG and header passed'
           else
             state=failure
-            description='Live r413 mobile MAG/header verification failed'
+            description='Live r414 mobile MAG/header verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r413 live mobile MAG + header' \
+            -f context='FormatX r414 live mobile MAG + header' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
