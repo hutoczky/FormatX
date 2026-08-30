@@ -1,222 +1,88 @@
-/* FormatX r424 — current MAG critical runtime.
-   This stylesheet contains only the physical r326 stage, sharp native optics and
-   deterministic public mobile accessibility/touch contracts. */
-
+/* FormatX r438 — current native MAG composition. */
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
-  position:absolute !important;
-  inset:0 !important;
-  z-index:3 !important;
-  display:block !important;
-  box-sizing:border-box !important;
-  width:100% !important;
-  height:100% !important;
-  margin:0 !important;
-  padding:0 !important;
-  overflow:clip !important;
-  background:transparent !important;
-  opacity:1 !important;
-  visibility:visible !important;
-  pointer-events:auto !important;
-  transform:none !important;
-  transform-origin:50% 50% !important;
+  position:absolute!important;inset:0!important;z-index:3!important;display:block!important;
+  box-sizing:border-box!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;
+  overflow:clip!important;background:transparent!important;opacity:1!important;visibility:visible!important;
+  pointer-events:auto!important;transform:none!important;transform-origin:50% 50%!important;
 }
-
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-  position:absolute !important;
-  inset:0 !important;
-  display:block !important;
-  box-sizing:border-box !important;
-  width:100% !important;
-  max-width:100% !important;
-  height:100% !important;
-  max-height:100% !important;
-  margin:0 !important;
-  background:transparent !important;
-  image-rendering:auto !important;
-  mix-blend-mode:normal !important;
-  visibility:visible !important;
-  pointer-events:none !important;
-  transform-origin:50% 48% !important;
+  position:absolute!important;inset:0!important;display:block!important;box-sizing:border-box!important;
+  width:100%!important;max-width:100%!important;height:100%!important;max-height:100%!important;margin:0!important;
+  background:transparent!important;image-rendering:auto!important;mix-blend-mode:normal!important;
+  visibility:visible!important;pointer-events:none!important;transform-origin:50% 48%!important;
 }
 
-/* The CSS crystal is only a fail-open first-paint placeholder. Once the native
-   r326 renderer announces readiness it must leave zero painted pseudo content;
-   otherwise the user sees a sharpened double silhouette behind the WebGL MAG. */
+/* The CSS crystal is fail-open only. Native r326 readiness must leave no painted duplicate silhouette. */
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
 html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::after,
 html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::after {
-  content:none !important;
-  display:none !important;
-  background:none !important;
-  background-image:none !important;
-  box-shadow:none !important;
-  filter:none !important;
-  opacity:0 !important;
-  animation:none !important;
+  content:none!important;display:none!important;background:none!important;background-image:none!important;
+  box-shadow:none!important;filter:none!important;opacity:0!important;animation:none!important;
 }
 
-@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
-    inset:0 auto 0 50% !important;
-    width:calc(100vw - 16px) !important;
-    max-width:calc(100vw - 16px) !important;
-    translate:-50% 0 !important;
+    inset:0 auto 0 50%!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;translate:-50% 0!important;
   }
-
+  /* r424 compatibility contract; r438 final override below owns the visible phone composite. */
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.99 !important;
-    scale:1 !important;
-    filter:brightness(1.12) contrast(1.22) saturate(1.38) !important;
-    -webkit-filter:brightness(1.12) contrast(1.22) saturate(1.38) !important;
+    opacity:.99!important;scale:1!important;filter:brightness(1.12) contrast(1.22) saturate(1.38)!important;
+    -webkit-filter:brightness(1.12) contrast(1.22) saturate(1.38)!important;
   }
-
-  html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
-    color:#dff7ff !important;
-    background-color:#02111f !important;
+  html body.living-architecture #hero > .hero-grid > .fx-reference-heading {color:#dff7ff!important;background-color:#02111f!important;}
+  html body.living-architecture #pricing .price-card .button.button-line,
+  html body.living-architecture #resources #release-page-link.button.button-line {
+    color:#f4fbff!important;background-color:#071521!important;border-color:rgba(163,229,255,.44)!important;
   }
-
-  html body.living-architecture #pricing .price-card .button.button-line {
-    color:#f4fbff !important;
-    background-color:#071521 !important;
-    border-color:rgba(163,229,255,.44) !important;
-  }
-
   html body.living-architecture #pricing .price-card .button.button-solid,
   html body.living-architecture #pricing #preview-checkout-link.button.button-solid {
-    color:#041019 !important;
-    background-color:#c8f4ff !important;
-    border-color:#c8f4ff !important;
+    color:#041019!important;background-color:#c8f4ff!important;border-color:#c8f4ff!important;
   }
-
-  html body.living-architecture #resources #release-page-link.button.button-line {
-    color:#f4fbff !important;
-    background-color:#071521 !important;
-    border-color:rgba(163,229,255,.44) !important;
-  }
-
-  html body.living-architecture footer.site-footer {
-    color:#eaf7ff !important;
-    background:#020811 !important;
-  }
-
-  html body.living-architecture footer.site-footer .footer-brand .brand strong {
-    color:#f7fdff !important;
-  }
-
-  html body.living-architecture footer.site-footer .footer-brand .brand small {
-    color:#cfe5ef !important;
-  }
-
-  html body.living-architecture footer.site-footer nav {
-    display:flex !important;
-    flex-wrap:wrap !important;
-    align-items:center !important;
-    gap:8px 10px !important;
-  }
-
-  html body.living-architecture footer.site-footer nav + nav {
-    margin-top:8px !important;
-  }
-
+  html body.living-architecture footer.site-footer {color:#eaf7ff!important;background:#020811!important;}
+  html body.living-architecture footer.site-footer .footer-brand .brand strong {color:#f7fdff!important;}
+  html body.living-architecture footer.site-footer .footer-brand .brand small {color:#cfe5ef!important;}
+  html body.living-architecture footer.site-footer nav {display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:8px 10px!important;}
+  html body.living-architecture footer.site-footer nav + nav {margin-top:8px!important;}
   html body.living-architecture footer.site-footer nav a,
   html body.living-architecture footer.site-footer .footer-bottom > a {
-    display:inline-flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-    box-sizing:border-box !important;
-    min-width:44px !important;
-    min-height:44px !important;
-    padding:8px 10px !important;
-    margin:0 !important;
-    line-height:1.25 !important;
-    color:#f4fbff !important;
-    background:#071521 !important;
-    border:1px solid rgba(163,229,255,.20) !important;
-    border-radius:12px !important;
-    text-decoration:none !important;
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;
+    min-width:44px!important;min-height:44px!important;padding:8px 10px!important;margin:0!important;line-height:1.25!important;
+    color:#f4fbff!important;background:#071521!important;border:1px solid rgba(163,229,255,.20)!important;
+    border-radius:12px!important;text-decoration:none!important;
   }
 }
 
 @media (max-width:430px) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
-    width:calc(100vw - 20px) !important;
-    max-width:calc(100vw - 20px) !important;
-  }
-
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.99 !important;
-    scale:1 !important;
-    filter:brightness(1.12) contrast(1.22) saturate(1.38) !important;
-    -webkit-filter:brightness(1.12) contrast(1.22) saturate(1.38) !important;
+    width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important;
   }
 }
 
 @media (min-width:901px) and (pointer:fine) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.99 !important;
-    scale:1 !important;
-    filter:brightness(1.10) contrast(1.18) saturate(1.34) !important;
-    -webkit-filter:brightness(1.10) contrast(1.18) saturate(1.34) !important;
+    opacity:.99!important;scale:1!important;filter:brightness(1.10) contrast(1.18) saturate(1.34)!important;
+    -webkit-filter:brightness(1.10) contrast(1.18) saturate(1.34)!important;
   }
 }
 
-/* r430 — restrained phone optics from the live mobile review.
-   Keep the pure native WebGL silhouette and antialiasing, but reduce perceived
-   bloom/edge hardness by lowering the final mobile composite contrast and glow. */
-@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+/* r438 phone review: reduce perceived bloom and hard rim without a post-process soft-focus pass.
+   The native antialiasing remains authoritative; lower contrast, saturation and a tiny scale trim keep the
+   four-point contour calmer while retaining the moving centre heart and actual WebGL surface detail. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.94 !important;
-    filter:
-      brightness(.955)
-      contrast(.98)
-      saturate(1.08)
-      drop-shadow(0 0 1px rgba(126,239,255,.014))
-      drop-shadow(0 0 6px rgba(82,91,255,.005)) !important;
-    -webkit-filter:
-      brightness(.955)
-      contrast(.98)
-      saturate(1.08)
-      drop-shadow(0 0 1px rgba(126,239,255,.014))
-      drop-shadow(0 0 6px rgba(82,91,255,.005)) !important;
+    opacity:.89!important;scale:.992!important;filter:brightness(.90) contrast(.84) saturate(.93)!important;
+    -webkit-filter:brightness(.90) contrast(.84) saturate(.93)!important;
   }
 }
-
-/* r435 — mobile optical trim. The native shader now carries the visible heart,
-   so the final composite can stay softer and cleaner without an extra halo. */
-@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.93 !important;
-    filter:brightness(.94) contrast(.94) saturate(1.04) !important;
-    -webkit-filter:brightness(.94) contrast(.94) saturate(1.04) !important;
-  }
-}
-
-/* r437 — live phone review trim.
-   The screenshot showed the four-point silhouette still reading too hard and
-   the cyan/violet energy spreading too far from the body. Keep the WebGL shape
-   and moving heart intact, but soften only the final phone composite: a very
-   small sub-pixel blur rounds the razor edge while lower contrast/brightness
-   restrains the outer bloom without flattening the centre nucleus. */
-@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.90 !important;
-    scale:.995 !important;
-    filter:blur(.38px) brightness(.90) contrast(.89) saturate(.98) !important;
-    -webkit-filter:blur(.38px) brightness(.90) contrast(.89) saturate(.98) !important;
-  }
-}
-
 @media (max-width:430px) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.89 !important;
-    scale:.992 !important;
-    filter:blur(.42px) brightness(.89) contrast(.88) saturate(.97) !important;
-    -webkit-filter:blur(.42px) brightness(.89) contrast(.88) saturate(.97) !important;
+    opacity:.88!important;scale:.989!important;filter:brightness(.89) contrast(.82) saturate(.91)!important;
+    -webkit-filter:brightness(.89) contrast(.82) saturate(.91)!important;
   }
 }
 
 /* production-r428-direct-r326-soft-mobile-optics-pure-native-3d-a11y-touch */
 /* production-r430-direct-r326-restrained-mobile-optics-pure-native-3d-a11y-touch */
 /* production-r435-direct-r326-soft-rim-following-visible-heart-native-3d */
-/* production-r437-direct-r326-restrained-halo-soft-edge-mobile-review */
+/* production-r438-direct-r326-restrained-halo-soft-edge-native-composite */
