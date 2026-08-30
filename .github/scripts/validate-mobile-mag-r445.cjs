@@ -30,10 +30,12 @@ for (const token of [
 ]) assert.ok(compact.includes(token.replace(/\s+/g, '')), `missing r448/r450 mobile MAG correction token: ${token}`);
 
 assert.match(loader, /formatx-mobile-mag-balance-r448\.css\?v=20260830-r450-restrained-halo-soft-natural-perimeter/);
-assert.match(loader, /data-fx-mobile-mag-balance-r450/);
-assert.match(loader, /fxMobileMagBalanceR450/);
-assert.match(loader, /data-fx-mobile-mag-balance-r448/);
-assert.match(loader, /fxMobileMagBalanceR448/);
+// JS dataset properties serialize to data-fx-mobile-mag-balance-r450/r448 in the DOM.
+// Validate the actual source contract instead of requiring a literal HTML attribute string.
+assert.match(loader, /root\.dataset\.fxMobileMagBalanceR450=state/);
+assert.match(loader, /link\.dataset\.fxMobileMagBalanceR450='true'/);
+assert.match(loader, /root\.dataset\.fxMobileMagBalanceR448=state/);
+assert.match(loader, /link\.dataset\.fxMobileMagBalanceR448='true'/);
 assert.match(loader, /superseded-r448/);
 assert.match(loader, /formatx-mobile-mag-balance-r447\.css\?v=20260830-r447-gentle-glow-soft-perimeter/);
 assert.doesNotMatch(optics, /scale:\s*\.99/i, 'r448/r450 must preserve the compact mobile MAG scale');
