@@ -1,6 +1,6 @@
 /* FormatX r439 — bounded mobile MAG surface sheen.
    The highlight is dormant between short passes so the hero keeps its idle-zero-frame behaviour.
-   r445 mounts the brighter phone-reviewed visibility balance as the final external CSS owner. */
+   r446 mounts the phone-reviewed compact, balanced soft-perimeter optics owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -10,30 +10,30 @@ root.dataset.fxMagSurfaceSheenR439='booting';
 
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
-const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge';
-/* r444 remains named here only as a compatibility breadcrumb for older source
-   gates and cached DOM aliases. It is never mounted by this revision. */
-const LEGACY_OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r444.css?v=20260830-r444-readable-midlight-soft-edge';
+const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r446.css?v=20260830-r446-compact-balanced-soft-perimeter';
+const LEGACY_OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge';
 void LEGACY_OPTICS_STYLE;
 let stage=null,visible=false,nextTimer=0,clearTimer=0,observer=null,bootObserver=null,disposed=false;
 
 function publishOpticsState(state){
-  root.dataset.fxMobileMagBalanceR445=state;
-  root.dataset.fxMobileMagBalanceR444='superseded-r445';
+  root.dataset.fxMobileMagBalanceR446=state;
+  root.dataset.fxMobileMagBalanceR445='superseded-r446';
+  root.dataset.fxMobileMagBalanceR444='superseded-r446';
 }
 function ensureOpticsStyle(){
   if(!mobile.matches)return;
-  let link=document.querySelector('link[data-fx-mobile-mag-balance-r445]');
+  let link=document.querySelector('link[data-fx-mobile-mag-balance-r446]');
   if(link instanceof HTMLLinkElement){
     publishOpticsState(link.sheet?'ready':'requested');
     return;
   }
-  document.querySelectorAll('link[data-fx-mobile-mag-balance-r444]').forEach(node=>node.remove());
+  document.querySelectorAll('link[data-fx-mobile-mag-balance-r444],link[data-fx-mobile-mag-balance-r445]').forEach(node=>node.remove());
   link=document.createElement('link');
   link.rel='stylesheet';
   link.href=OPTICS_STYLE;
-  link.dataset.fxMobileMagBalanceR445='true';
-  link.dataset.fxMobileMagBalanceR444='superseded-r445';
+  link.dataset.fxMobileMagBalanceR446='true';
+  link.dataset.fxMobileMagBalanceR445='superseded-r446';
+  link.dataset.fxMobileMagBalanceR444='superseded-r446';
   link.addEventListener('load',()=>{publishOpticsState('ready');},{once:true});
   link.addEventListener('error',()=>{publishOpticsState('load-failed');},{once:true});
   document.head.appendChild(link);
