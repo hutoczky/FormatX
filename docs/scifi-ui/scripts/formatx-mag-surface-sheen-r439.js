@@ -1,6 +1,6 @@
 /* FormatX r439 — bounded mobile MAG surface sheen.
    The highlight is dormant between short passes so the hero keeps its idle-zero-frame behaviour.
-   r448/r449 mounts the phone-reviewed midlight, soft-perimeter mobile MAG optics owner. */
+   r448/r450 mounts the phone-reviewed restrained-halo, soft-perimeter mobile MAG optics owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -10,7 +10,7 @@ root.dataset.fxMagSurfaceSheenR439='booting';
 
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
-const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r448.css?v=20260830-r448-visible-balanced-soft-defined-r449-midlight';
+const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r448.css?v=20260830-r450-restrained-halo-soft-natural-perimeter';
 /* Compatibility breadcrumbs only: older source/live gates may inspect these
    exact strings, but the legacy stylesheets/states are not mounted by r448. */
 const LEGACY_OPTICS_STYLE_R447='/scifi-ui/styles/formatx-mobile-mag-balance-r447.css?v=20260830-r447-gentle-glow-soft-perimeter';
@@ -26,6 +26,7 @@ void LEGACY_STATE_BREADCRUMB_R447;
 let stage=null,visible=false,nextTimer=0,clearTimer=0,observer=null,bootObserver=null,disposed=false;
 
 function publishOpticsState(state){
+  root.dataset.fxMobileMagBalanceR450=state;
   root.dataset.fxMobileMagBalanceR448=state;
   root.dataset.fxMobileMagBalanceR447='superseded-r448';
   root.dataset.fxMobileMagBalanceR446='superseded-r448';
@@ -43,6 +44,7 @@ function ensureOpticsStyle(){
   link=document.createElement('link');
   link.rel='stylesheet';
   link.href=OPTICS_STYLE;
+  link.dataset.fxMobileMagBalanceR450='true';
   link.dataset.fxMobileMagBalanceR448='true';
   link.dataset.fxMobileMagBalanceR447='superseded-r448';
   link.dataset.fxMobileMagBalanceR446='superseded-r448';
