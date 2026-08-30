@@ -43,14 +43,14 @@ for(const token of ['formatx-award-runtime-r206.js','formatx-mobile-regression-r
 
 has(motion,[
   'single-language-toggle.js?v=20260830-r462-semantic-owner',
-  'formatx-current-mag-loader-r422.js?v=20260830-r463-award-mobile-optics-strict-tbt',
+  'formatx-current-mag-loader-r422.js?v=20260830-r464-explicit-interaction-mobile-tbt',
   'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim',
   "fxSingleLanguageToggleVersion==='7'",
   "fxLegacyMagRuntimeCleanupR460='static-html-clean-r461'",
-  'armed-direct-r326-r463-award-mobile-optics-strict-tbt'
-],'R463 compact current loader');
+  'armed-direct-r326-r463-optics-r464-explicit-interaction-tbt'
+],'R464 compact current loader');
 for(const token of ['isRetiredMagRuntime','formatx-premium-finish','formatx-live-heartbeat-r155','formatx-signature-system-r185','formatx-seamless-enforcer-r159'])assert.ok(!motion.includes(token),`dead runtime filter remains: ${token}`);
 
 has(language,[
@@ -60,13 +60,13 @@ has(language,[
 assert.ok(!language.includes('new MutationObserver'),'language owner must remain observer-free');
 
 has(current,[
-  'direct-r326-r463-award-mobile-optics-strict-tbt','cleanupLegacyMagRuntime','r326-only',
+  'direct-r326-r463-optics-r464-explicit-interaction-tbt','cleanupLegacyMagRuntime','r326-only',
   'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics',
   'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe',
-  'formatx-mobile-render-governor-r426.js?v=20260830-r463-short-burst-strict-tbt',
-  'narrow-fresnel-soft-edge-restrained-bloom',
+  'formatx-mobile-render-governor-r426.js?v=20260830-r464-explicit-interaction-only-strict-tbt',
+  'narrow-fresnel-soft-edge-restrained-bloom','explicit-mag-interaction-only-zero-idle',
   'formatx-mini-mag-assistant-r459.js'
-],'R463 primary MAG loader');
+],'R464 primary MAG loader');
 
 has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','uSurfacePulse',
@@ -86,11 +86,14 @@ has(solidGlass,[
 has(optics,['production-r460-single-native-webgl-optics-owner-soft-mobile-rim','contrast(.86)','blur(.90px)'],'R460 soft mobile rim');
 
 has(governor,[
-  'const activeWindowMs=360','const shapeProbeMs=120','const shapeSettleDeadlineMs=3600',
-  'state.core?.requestRender?.(6)','heroVisible()',
-  "fxMobileRenderGovernorRevisionR433='r463-short-burst-strict-tbt'",
-  "active('scroll-r463',1,90)"
-],'R463 strict mobile TBT governor');
+  'const activeWindowMs=260','const shapeProbeMs=150','const shapeSettleDeadlineMs=2600',
+  'state.core?.requestRender?.(3)','userShapeSource(source)','guardPassiveState(source)',
+  'passive-formatx:languagechange-r464',
+  "fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle'",
+  "fxMobileRenderGovernorRevisionR433='r464-explicit-interaction-only-strict-tbt'"
+],'R464 explicit-interaction mobile TBT governor');
+assert.ok(!governor.includes("active('scroll-r463'"),'mobile scroll must not wake WebGL');
+assert.ok(!governor.includes("active('resize-r463'"),'mobile resize must not wake WebGL');
 
 has(nativeTouch,['native-r326-touch-r460-controller-tap','formatx:heromagcontrollerrequest','fxHeroMagControllerR460'],'R460 native touch controller');
 has(mini,['formatx:heromagcontrollerrequest','window.FormatXMiniMagR459={','formatx:minimagready'],'R459 persistent controller');
@@ -103,4 +106,4 @@ has(quality,[
 ],'R462 measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: R463 clean active path uses one R326 hero renderer, restrained award mobile optics, strict event-burst TBT budget, stable semantic controls/language and no retired first-load stack.');
+console.log('PASS: R464 clean active path uses one R326 hero renderer, restrained R463 mobile optics, explicit-interaction-only zero-idle WebGL, stable semantic controls/language and no retired first-load stack.');
