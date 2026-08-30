@@ -1,28 +1,28 @@
-/* FormatX r448 — phone-reviewed visible MAG with controlled edge definition.
-   r446 was slightly over-lit and too crisp at the perimeter, while r447 pushed
-   the body too far into the black background. r448 keeps the compact geometry,
-   restores readable glass/facet luminance, and sharpens only enough to recover
-   the silhouette without returning to a razor-cut neon edge. */
+/* FormatX r448/r449 — phone-reviewed midlight MAG balance.
+   The bright pass made the crystal too luminous and the perimeter too crisp;
+   the following pass pushed the body too far into the black background.
+   This tune restores readable centre/body light while retaining the compact
+   geometry and a visibly softer WebGL perimeter. */
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
   html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.94!important;
+    opacity:.965!important;
     scale:.80 .84!important;
     transform-origin:50% 48%!important;
     image-rendering:auto!important;
     filter:
-      brightness(1.10)
-      contrast(.75)
-      saturate(1.01)
-      blur(.54px)
-      drop-shadow(0 0 3px rgba(112,222,255,.017))
-      drop-shadow(0 0 10px rgba(92,88,255,.007))!important;
+      brightness(1.16)
+      contrast(.78)
+      saturate(1.02)
+      blur(.56px)
+      drop-shadow(0 0 3px rgba(112,222,255,.020))
+      drop-shadow(0 0 10px rgba(92,88,255,.008))!important;
     -webkit-filter:
-      brightness(1.10)
-      contrast(.75)
-      saturate(1.01)
-      blur(.54px)
-      drop-shadow(0 0 3px rgba(112,222,255,.017))
-      drop-shadow(0 0 10px rgba(92,88,255,.007))!important;
+      brightness(1.16)
+      contrast(.78)
+      saturate(1.02)
+      blur(.56px)
+      drop-shadow(0 0 3px rgba(112,222,255,.020))
+      drop-shadow(0 0 10px rgba(92,88,255,.008))!important;
   }
 
   html:root:root:root body.living-architecture #hero#hero .hero-space > .fx-crystal-cue-r318 {
@@ -57,24 +57,24 @@
 
 @media (max-width:430px) {
   html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.95!important;
+    opacity:.97!important;
     scale:.78 .82!important;
     transform-origin:50% 48%!important;
     filter:
-      brightness(1.11)
-      contrast(.74)
-      saturate(1.015)
-      blur(.58px)
-      drop-shadow(0 0 3px rgba(112,222,255,.016))
-      drop-shadow(0 0 9px rgba(92,88,255,.006))!important;
+      brightness(1.18)
+      contrast(.76)
+      saturate(1.025)
+      blur(.60px)
+      drop-shadow(0 0 3px rgba(112,222,255,.019))
+      drop-shadow(0 0 9px rgba(92,88,255,.007))!important;
     -webkit-filter:
-      brightness(1.11)
-      contrast(.74)
-      saturate(1.015)
-      blur(.58px)
-      drop-shadow(0 0 3px rgba(112,222,255,.016))
-      drop-shadow(0 0 9px rgba(92,88,255,.006))!important;
+      brightness(1.18)
+      contrast(.76)
+      saturate(1.025)
+      blur(.60px)
+      drop-shadow(0 0 3px rgba(112,222,255,.019))
+      drop-shadow(0 0 9px rgba(92,88,255,.007))!important;
   }
 }
 
-/* production-r448-mobile-mag-visible-balanced-soft-defined-perimeter */
+/* production-r448-r449-mobile-mag-midlight-visible-soft-perimeter */
