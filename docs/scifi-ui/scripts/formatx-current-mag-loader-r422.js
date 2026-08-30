@@ -15,7 +15,7 @@ const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r435-soft-
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
-const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r434-direct-r326-stage';
+const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r435-startup-race-fixed';
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
@@ -42,6 +42,29 @@ function addScript(src,attr){
     script.addEventListener('load',()=>resolve(script),{once:true});
     script.addEventListener('error',()=>resolve(script),{once:true});
     document.head.appendChild(script);
+  });
+}
+
+function waitForRendererReady(timeout=8000){
+  if(root.dataset.fxCrystalOrganismR326==='ready')return Promise.resolve(true);
+  return new Promise(resolve=>{
+    let settled=false,timer=0,observer=null;
+    const finish=ready=>{
+      if(settled)return;settled=true;
+      if(timer)clearTimeout(timer);
+      observer?.disconnect();
+      removeEventListener('formatx:real3dready',onReady);
+      resolve(Boolean(ready));
+    };
+    const onReady=()=>{
+      if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);
+    };
+    addEventListener('formatx:real3dready',onReady,{passive:true});
+    observer=new MutationObserver(()=>{
+      if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);
+    });
+    observer.observe(root,{attributes:true,attributeFilter:['data-fx-crystal-organism-r326']});
+    timer=setTimeout(()=>finish(root.dataset.fxCrystalOrganismR326==='ready'),timeout);
   });
 }
 
@@ -99,24 +122,34 @@ async function start(){
     addStyle(STYLE,'data-fx-current-mag-r422'),
     addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')
   ];
-  const rendererReady=addScript(RENDERER,'data-fx-current-r326-r422');
+  const rendererScript=addScript(RENDERER,'data-fx-current-r326-r422');
   Promise.all(styles).then(()=>{
     root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
     root.dataset.fxCurrentMagStylesR423='ready';
   });
-  await rendererReady;
-  if(root.dataset.fxCrystalOrganismR326==='ready'){
+
+  /* The native touch owner resolves the current r326 stage on every gesture, so
+     it can be installed as soon as the renderer script has executed. Waiting
+     for fxCrystalOrganismR326=ready here created a race: script load fires while
+     r326 is still booting, causing the touch owner to be skipped permanently. */
+  await rendererScript;
+  await addScript(NATIVE_TOUCH,'data-fx-native-mag-touch-r434');
+  await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
+  root.dataset.fxCurrentMagTouchBootstrapR435='native-owner-installed-before-ready-check';
+
+  const rendererReady=await waitForRendererReady();
+  if(rendererReady){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-    await addScript(NATIVE_TOUCH,'data-fx-native-mag-touch-r434');
-    addScript(TOUCH,'data-fx-core-touch-pulse-r99');
     root.dataset.fxCoreRendererSelection='r326-direct-r435-primary';
     root.dataset.fxCoreReferenceLockLoad='ready-v69-r435';
+    root.dataset.fxCurrentMagRuntimeR422='ready';
+  }else{
+    root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
   }
-  root.dataset.fxCurrentMagRuntimeR422='ready';
   root.dataset.fxCoreCriticalPathR422=mobile
     ?'direct-r326-r435-idle-zero-frame-soft-rim-following-heart-native-touch'
     :'direct-r326-r435-cross-device-header';
-  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile}}));
+  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady}}));
 }
 
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});
