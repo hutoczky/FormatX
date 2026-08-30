@@ -11,6 +11,10 @@ root.dataset.fxMagSurfaceSheenR439='booting';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge';
+/* r444 remains named here only as a compatibility breadcrumb for older source
+   gates and cached DOM aliases. It is never mounted by this revision. */
+const LEGACY_OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r444.css?v=20260830-r444-readable-midlight-soft-edge';
+void LEGACY_OPTICS_STYLE;
 let stage=null,visible=false,nextTimer=0,clearTimer=0,observer=null,bootObserver=null,disposed=false;
 
 function publishOpticsState(state){
@@ -29,6 +33,7 @@ function ensureOpticsStyle(){
   link.rel='stylesheet';
   link.href=OPTICS_STYLE;
   link.dataset.fxMobileMagBalanceR445='true';
+  link.dataset.fxMobileMagBalanceR444='superseded-r445';
   link.addEventListener('load',()=>{publishOpticsState('ready');},{once:true});
   link.addEventListener('error',()=>{publishOpticsState('load-failed');},{once:true});
   document.head.appendChild(link);
