@@ -182,5 +182,16 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
+/* r435 — mobile optical trim. The native shader now carries the visible heart,
+   so the final composite can stay softer and cleaner without an extra halo. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.93 !important;
+    filter:brightness(.94) contrast(.94) saturate(1.04) !important;
+    -webkit-filter:brightness(.94) contrast(.94) saturate(1.04) !important;
+  }
+}
+
 /* production-r428-direct-r326-soft-mobile-optics-pure-native-3d-a11y-touch */
 /* production-r430-direct-r326-restrained-mobile-optics-pure-native-3d-a11y-touch */
+/* production-r435-direct-r326-soft-rim-following-visible-heart-native-3d */
