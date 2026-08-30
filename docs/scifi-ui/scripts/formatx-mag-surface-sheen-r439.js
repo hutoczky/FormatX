@@ -1,6 +1,6 @@
 /* FormatX r439 — bounded mobile MAG surface sheen.
    The highlight is dormant between short passes so the hero keeps its idle-zero-frame behaviour.
-   r448/r450 mounts the phone-reviewed restrained-halo, soft-perimeter mobile MAG optics owner. */
+   r448/r451 mounts the phone-reviewed balanced-body, restrained-halo, soft-edge mobile MAG optics owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -10,28 +10,29 @@ root.dataset.fxMagSurfaceSheenR439='booting';
 
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
-const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r448.css?v=20260830-r450-restrained-halo-soft-natural-perimeter';
+const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r448.css?v=20260830-r451-balanced-body-restrained-halo-soft-edge';
 /* Compatibility breadcrumbs only: older source/live gates may inspect these
-   exact strings, but the legacy stylesheets/states are not mounted by r448. */
+   exact strings, but the legacy stylesheets/states are not mounted by r451. */
+const LEGACY_OPTICS_STYLE_R450='/scifi-ui/styles/formatx-mobile-mag-balance-r448.css?v=20260830-r450-restrained-halo-soft-natural-perimeter';
 const LEGACY_OPTICS_STYLE_R447='/scifi-ui/styles/formatx-mobile-mag-balance-r447.css?v=20260830-r447-gentle-glow-soft-perimeter';
 const LEGACY_OPTICS_STYLE_R446='/scifi-ui/styles/formatx-mobile-mag-balance-r446.css?v=20260830-r446-compact-balanced-soft-perimeter';
 const LEGACY_OPTICS_STYLE_R445='/scifi-ui/styles/formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge';
 const LEGACY_OPTICS_STYLE_R444='/scifi-ui/styles/formatx-mobile-mag-balance-r444.css?v=20260830-r444-readable-midlight-soft-edge';
-const LEGACY_STATE_BREADCRUMB_R447="fxMobileMagBalanceR446='superseded-r447'";
+void LEGACY_OPTICS_STYLE_R450;
 void LEGACY_OPTICS_STYLE_R447;
 void LEGACY_OPTICS_STYLE_R446;
 void LEGACY_OPTICS_STYLE_R445;
 void LEGACY_OPTICS_STYLE_R444;
-void LEGACY_STATE_BREADCRUMB_R447;
 let stage=null,visible=false,nextTimer=0,clearTimer=0,observer=null,bootObserver=null,disposed=false;
 
 function publishOpticsState(state){
-  root.dataset.fxMobileMagBalanceR450=state;
+  root.dataset.fxMobileMagBalanceR451=state;
+  root.dataset.fxMobileMagBalanceR450='superseded-r451';
   root.dataset.fxMobileMagBalanceR448=state;
-  root.dataset.fxMobileMagBalanceR447='superseded-r448';
-  root.dataset.fxMobileMagBalanceR446='superseded-r448';
-  root.dataset.fxMobileMagBalanceR445='superseded-r448';
-  root.dataset.fxMobileMagBalanceR444='superseded-r448';
+  root.dataset.fxMobileMagBalanceR447='superseded-r451';
+  root.dataset.fxMobileMagBalanceR446='superseded-r451';
+  root.dataset.fxMobileMagBalanceR445='superseded-r451';
+  root.dataset.fxMobileMagBalanceR444='superseded-r451';
 }
 function ensureOpticsStyle(){
   if(!mobile.matches)return;
@@ -40,16 +41,17 @@ function ensureOpticsStyle(){
     publishOpticsState(link.sheet?'ready':'requested');
     return;
   }
-  document.querySelectorAll('link[data-fx-mobile-mag-balance-r444],link[data-fx-mobile-mag-balance-r445],link[data-fx-mobile-mag-balance-r446],link[data-fx-mobile-mag-balance-r447]').forEach(node=>node.remove());
+  document.querySelectorAll('link[data-fx-mobile-mag-balance-r444],link[data-fx-mobile-mag-balance-r445],link[data-fx-mobile-mag-balance-r446],link[data-fx-mobile-mag-balance-r447],link[data-fx-mobile-mag-balance-r450]').forEach(node=>node.remove());
   link=document.createElement('link');
   link.rel='stylesheet';
   link.href=OPTICS_STYLE;
-  link.dataset.fxMobileMagBalanceR450='true';
+  link.dataset.fxMobileMagBalanceR451='true';
+  link.dataset.fxMobileMagBalanceR450='superseded-r451';
   link.dataset.fxMobileMagBalanceR448='true';
-  link.dataset.fxMobileMagBalanceR447='superseded-r448';
-  link.dataset.fxMobileMagBalanceR446='superseded-r448';
-  link.dataset.fxMobileMagBalanceR445='superseded-r448';
-  link.dataset.fxMobileMagBalanceR444='superseded-r448';
+  link.dataset.fxMobileMagBalanceR447='superseded-r451';
+  link.dataset.fxMobileMagBalanceR446='superseded-r451';
+  link.dataset.fxMobileMagBalanceR445='superseded-r451';
+  link.dataset.fxMobileMagBalanceR444='superseded-r451';
   link.addEventListener('load',()=>{publishOpticsState('ready');},{once:true});
   link.addEventListener('error',()=>{publishOpticsState('load-failed');},{once:true});
   document.head.appendChild(link);
