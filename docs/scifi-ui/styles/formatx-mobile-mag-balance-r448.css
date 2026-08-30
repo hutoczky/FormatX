@@ -1,45 +1,44 @@
-/* FormatX r448/r451 — phone-reviewed balanced-light MAG optics.
-   r449 was too luminous and halo-heavy; r450 over-corrected and buried the
-   crystal body in the black hero. r451 restores readable inner facets without
-   restoring the broad cyan/violet aura: the periodic sheen stays narrow and
-   weak, drop shadows stay minimal, while a slightly stronger body exposure and
-   a wider sub-pixel blur keep the silhouette natural instead of cut-out. */
+/* FormatX r448/r452 — phone-reviewed softer mobile MAG optics.
+   r451 still reads too luminous on real phones: the centre flare is too hot and
+   the outer silhouette is too crisp. r452 deliberately lowers post-composite
+   exposure and contrast, removes almost all external drop glow and uses a wider
+   sub-pixel blur so the crystal keeps readable facets without a cut-out edge. */
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
   html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.95!important;
+    opacity:.915!important;
     scale:.80 .84!important;
     transform-origin:50% 48%!important;
     image-rendering:auto!important;
     filter:
-      brightness(1.13)
-      contrast(.72)
-      saturate(1.00)
-      blur(.62px)
-      drop-shadow(0 0 2px rgba(112,222,255,.010))
-      drop-shadow(0 0 7px rgba(92,88,255,.004))!important;
+      brightness(1.015)
+      contrast(.61)
+      saturate(.955)
+      blur(.94px)
+      drop-shadow(0 0 2px rgba(112,222,255,.003))
+      drop-shadow(0 0 5px rgba(92,88,255,.0015))!important;
     -webkit-filter:
-      brightness(1.13)
-      contrast(.72)
-      saturate(1.00)
-      blur(.62px)
-      drop-shadow(0 0 2px rgba(112,222,255,.010))
-      drop-shadow(0 0 7px rgba(92,88,255,.004))!important;
+      brightness(1.015)
+      contrast(.61)
+      saturate(.955)
+      blur(.94px)
+      drop-shadow(0 0 2px rgba(112,222,255,.003))
+      drop-shadow(0 0 5px rgba(92,88,255,.0015))!important;
   }
 
-  /* Keep the r450 halo reduction. Body readability is restored on the canvas,
-     not by expanding this luminous overlay back around the crystal. */
+  /* The periodic sheen remains, but the phone-visible white core is capped so
+     it cannot re-create the bright central star or a luminous perimeter. */
   html:root:root:root body.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage.fx-mag-sheen-r439::after {
-    inset:14% 11% 12%!important;
+    inset:16% 13% 14%!important;
     background-image:linear-gradient(108deg,
-      transparent 0%,transparent 44%,
-      rgba(116,207,255,.006) 47%,
-      rgba(193,242,255,.022) 49%,
-      rgba(245,253,255,.070) 50%,
-      rgba(151,222,255,.026) 52%,
-      rgba(149,125,255,.008) 54%,
-      transparent 57%,transparent 100%)!important;
-    background-size:24% 92%!important;
-    filter:blur(.30px)!important;
+      transparent 0%,transparent 45%,
+      rgba(116,207,255,.003) 47%,
+      rgba(193,242,255,.010) 49%,
+      rgba(245,253,255,.026) 50%,
+      rgba(151,222,255,.011) 52%,
+      rgba(149,125,255,.004) 54%,
+      transparent 56%,transparent 100%)!important;
+    background-size:20% 86%!important;
+    filter:blur(.68px)!important;
   }
 
   html:root:root:root body.living-architecture #hero#hero .hero-space > .fx-crystal-cue-r318 {
@@ -74,30 +73,30 @@
 
 @media (max-width:430px) {
   html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.96!important;
+    opacity:.92!important;
     scale:.78 .82!important;
     transform-origin:50% 48%!important;
     filter:
-      brightness(1.15)
-      contrast(.71)
-      saturate(1.005)
-      blur(.66px)
-      drop-shadow(0 0 2px rgba(112,222,255,.009))
-      drop-shadow(0 0 7px rgba(92,88,255,.0035))!important;
+      brightness(1.025)
+      contrast(.59)
+      saturate(.96)
+      blur(1.02px)
+      drop-shadow(0 0 2px rgba(112,222,255,.0025))
+      drop-shadow(0 0 5px rgba(92,88,255,.0012))!important;
     -webkit-filter:
-      brightness(1.15)
-      contrast(.71)
-      saturate(1.005)
-      blur(.66px)
-      drop-shadow(0 0 2px rgba(112,222,255,.009))
-      drop-shadow(0 0 7px rgba(92,88,255,.0035))!important;
+      brightness(1.025)
+      contrast(.59)
+      saturate(.96)
+      blur(1.02px)
+      drop-shadow(0 0 2px rgba(112,222,255,.0025))
+      drop-shadow(0 0 5px rgba(92,88,255,.0012))!important;
   }
 
   html:root:root:root body.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage.fx-mag-sheen-r439::after {
-    inset:16% 12% 14%!important;
-    background-size:22% 88%!important;
-    filter:blur(.34px)!important;
+    inset:18% 14% 16%!important;
+    background-size:18% 82%!important;
+    filter:blur(.76px)!important;
   }
 }
 
-/* production-r448-r451-mobile-mag-balanced-body-restrained-halo-soft-edge */
+/* production-r448-r452-mobile-mag-softer-light-natural-edge */
