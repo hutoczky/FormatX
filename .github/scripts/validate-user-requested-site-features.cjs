@@ -43,7 +43,17 @@ assert.ok(!loader.includes('organism-voice-foreground.js'), 'conflicting foregro
 
 assert.ok(includesAll(menu, ['function setOpen(toggle, nav, open)', 'aria-expanded', 'fx-organism-menu-open']), 'menu state contract missing');
 assert.ok(includesAll(consoleState, ['forceClosed', 'is-authorised-open', 'shell.hidden = true']), 'panel closed-state contract missing');
-assert.ok(includesAll(language, ["toggle.className = 'fx-language-toggle'", 'localStorage.setItem', 'localStorage.getItem']), 'single language toggle contract missing');
+assert.ok(includesAll(language, [
+  "const VERSION='7'",
+  "button.className='fx-language-toggle'",
+  'localStorage.setItem',
+  'localStorage.getItem',
+  'HU – váltás angol nyelvre',
+  'EN – switch to Hungarian',
+  "fxSingleLanguageToggle='ready'",
+  'event-driven-no-document-mutation-observer'
+]), 'single language toggle contract missing');
+assert.ok(!language.includes('new MutationObserver'), 'single language toggle must remain event-driven and observer-free');
 
 assert.equal(scrollPolicy.mobile.controller, 'seamless-v7', 'mobile seamless-v7 policy missing');
 assert.equal(scrollPolicy.mobile.automatic_loop, true, 'mobile automatic loop must stay enabled');
@@ -127,4 +137,4 @@ assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes(
 // same production gate as scrolling, downloads and the public operating surface.
 require('./validate-signature-system-r185.cjs');
 require('./validate-igloo-floor.cjs');
-console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
+console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, current semantic language owner, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
