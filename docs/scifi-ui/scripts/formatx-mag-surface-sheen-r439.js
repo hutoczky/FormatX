@@ -1,5 +1,6 @@
 /* FormatX r439 — bounded mobile MAG surface sheen.
-   The highlight is dormant between short passes so the hero keeps its idle-zero-frame behaviour. */
+   The highlight is dormant between short passes so the hero keeps its idle-zero-frame behaviour.
+   r444 also mounts the phone-reviewed visibility balance as a final external CSS owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -9,8 +10,25 @@ root.dataset.fxMagSurfaceSheenR439='booting';
 
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
+const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r444.css?v=20260830-r444-readable-midlight-soft-edge';
 let stage=null,visible=false,nextTimer=0,clearTimer=0,observer=null,bootObserver=null,disposed=false;
 
+function ensureOpticsStyle(){
+  if(!mobile.matches)return;
+  let link=document.querySelector('link[data-fx-mobile-mag-balance-r444]');
+  if(link instanceof HTMLLinkElement){
+    root.dataset.fxMobileMagBalanceR444=link.sheet?'ready':'requested';
+    return;
+  }
+  link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href=OPTICS_STYLE;
+  link.dataset.fxMobileMagBalanceR444='true';
+  link.addEventListener('load',()=>{root.dataset.fxMobileMagBalanceR444='ready';},{once:true});
+  link.addEventListener('error',()=>{root.dataset.fxMobileMagBalanceR444='load-failed';},{once:true});
+  document.head.appendChild(link);
+  root.dataset.fxMobileMagBalanceR444='requested';
+}
 function clearTimers(){
   if(nextTimer)clearTimeout(nextTimer);
   if(clearTimer)clearTimeout(clearTimer);
@@ -71,6 +89,7 @@ function refresh(){
     root.dataset.fxMagSurfaceSheenR439=reduced.matches?'reduced-motion-skip':'desktop-skip';
     return;
   }
+  ensureOpticsStyle();
   if(bind()&&!nextTimer)scheduleNext(2200);
 }
 function destroy(){
@@ -78,6 +97,7 @@ function destroy(){
 }
 
 if(!mobile.matches){root.dataset.fxMagSurfaceSheenR439='desktop-skip';return;}
+ensureOpticsStyle();
 if(reduced.matches){root.dataset.fxMagSurfaceSheenR439='reduced-motion-skip';return;}
 
 refresh();
