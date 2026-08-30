@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — r461 current production architecture. */
+/* FormatX award-quality gate — r462 current production architecture. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -16,7 +16,6 @@ const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 const desktop=JSON.parse(read('lighthouserc.json'));
 const mobile=JSON.parse(read('lighthouserc.mobile.json'));
 
-// Current first-load architecture: static LCP + one R326/R460 MAG path.
 for(const token of [
   'fxHeroLcpOwnerR411','static-html-no-reparent','single-current-runtime-no-postdom-repair-stack',
   'fx-reference-controls-r204','fx-reference-ask','fx-reference-pause','formatx:referencepause',
@@ -27,27 +26,43 @@ for(const retired of [
 ])assert.ok(!intro.includes(retired),`retired first-load repair stack returned: ${retired}`);
 
 for(const token of [
-  'formatx-current-mag-loader-r422.js','formatx-crystal-organism-r326.js','formatx-mobile-solid-glass-r456.js',
-  'formatx-core-shapeshifter-r337.css','formatx-mini-mag-assistant-r459.js'
+  'formatx-current-mag-loader-r422.js','formatx-crystal-organism-r326.js',
+  'formatx-mobile-solid-glass-r456.js','formatx-core-shapeshifter-r337.css'
 ])assert.ok(motion.includes(token),`missing current R460 motion owner: ${token}`);
 assert.ok(motion.includes('single-language-toggle.js?v=20260830-r461-static-owner'),'motion loader must request R461 language owner');
 assert.ok(motion.includes("fxSingleLanguageToggleVersion==='7'"),'motion loader must require language owner v7');
+assert.ok(!motion.includes('isRetiredMagRuntime'),'compact R461 loader must not contain retired-runtime filtering');
 
-// One language control, stable from first paint, no document-wide mutation loop.
-for(const token of ["const VERSION='7'",'fx-language-toggle','HU – váltás angol nyelvre','EN – switch to Hungarian','event-driven-no-document-mutation-observer'])assert.ok(language.includes(token),`missing R461 language contract: ${token}`);
+for(const token of [
+  "const VERSION='7'",'fx-language-toggle','HU – váltás angol nyelvre',
+  'EN – switch to Hungarian','event-driven-no-document-mutation-observer',
+  "fxSingleLanguageToggle='ready-v3'"
+])assert.ok(language.includes(token),`missing R462 language contract: ${token}`);
 assert.ok(!language.includes('new MutationObserver'),'R461 language owner must not install mutation observers');
 
-// Accessibility / mobile target cleanup and immediate LCP visibility.
-for(const token of ['content-visibility: visible','fx-reference-liveos','.scroll-cue > span','.topbar > .header-actions','> .fx-rail','contain: layout paint'])assert.ok(quality.includes(token),`missing R461 quality CSS: ${token}`);
+for(const token of [
+  'content-visibility: visible','fx-reference-liveos','.scroll-cue > span',
+  '.topbar > .header-actions','> .fx-rail','contain: layout paint',
+  '.fx-qr-placeholder','#main-nav:not(.open)','fx-reference-controls-r204.fx-reference-controls-r264'
+])assert.ok(quality.includes(token),`missing R462 quality CSS: ${token}`);
 assert.match(home,/formatx-quality-r461\.css\?v=20260830-r461/);
 assert.match(home,/class="fx-language-toggle"/);
+assert.match(home,/data-fx-single-language-toggle="ready-v3"/);
 assert.doesNotMatch(home,/data-fx-living-energy-r168="true" href="\.\/styles\/formatx-living-energy-r168\.css/);
 assert.doesNotMatch(home,/data-fx-desktop-apex-r181="true" href="\.\/styles\/formatx-desktop-apex-r181\.css/);
-for(const retired of ['data-fx-premium-finish','data-fx-live-heartbeat-r155','data-fx-signature-system-r185','data-fx-seamless-enforcer-r159','data-fx-living-energy-r168="true" src=','data-fx-desktop-apex-r181-loader'])assert.ok(!home.includes(retired),`retired runtime remains active in index: ${retired}`);
+for(const retired of [
+  'data-fx-premium-finish','data-fx-live-heartbeat-r155','data-fx-signature-system-r185',
+  'data-fx-seamless-enforcer-r159','data-fx-living-energy-r168="true" src=','data-fx-desktop-apex-r181-loader'
+])assert.ok(!home.includes(retired),`retired runtime remains active in index: ${retired}`);
 
-// R460 renderer cleanup remains authoritative.
-for(const token of ['r326-only','cleanupLegacyMagRuntime','r460-soft-mobile-optics','r460-primary-controller-clean-runtime'])assert.ok(currentMag.includes(token),`missing R460 current MAG contract: ${token}`);
-for(const token of ['canonicalControls(hero)','fx-reference-controls-r204','visibleControl(pause)','fxControlOwnerR268'])assert.ok(controls.includes(token),`missing canonical control contract: ${token}`);
+for(const token of [
+  'r326-only','cleanupLegacyMagRuntime','r460-soft-mobile-optics',
+  'r460-primary-controller-clean-runtime','formatx-mini-mag-assistant-r459.js'
+])assert.ok(currentMag.includes(token),`missing R460 current MAG contract: ${token}`);
+for(const token of [
+  'canonicalControls(hero)','fx-reference-controls-r204','visibleControl(pause)',
+  'fxControlOwnerR268','HU – váltás angol nyelvre','EN – switch to Hungarian'
+])assert.ok(controls.includes(token),`missing canonical control contract: ${token}`);
 
 function validateLighthouse(config,label){
   const collect=config.ci.collect;
@@ -70,4 +85,4 @@ validateLighthouse(desktop,'desktop');
 validateLighthouse(mobile,'mobile');
 
 for(const source of [intro,motion,language,currentMag,controls])new Function(source);
-console.log('PASS: R461 single-path first paint, R460/R326 MAG, stable language control, accessibility cleanup and truthful Lighthouse budgets are structurally valid.');
+console.log('PASS: R462 single-path first paint, R460/R326 MAG, stable language semantics, mobile accessibility/tap-target cleanup and truthful Lighthouse budgets are structurally valid.');
