@@ -1,26 +1,28 @@
-/* FormatX r438 — direct current MAG loader.
-   r326 remains the production renderer. r438 keeps r436 protected native touch
-   and applies the reviewed phone composite without post-process soft-focus. */
+/* FormatX r439 — direct current MAG loader.
+   r326 remains the production renderer. r439 keeps the restrained native rim,
+   restores readable mobile facet contrast and adds a bounded periodic surface sheen. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r438-native-soft-edge-restrained-halo-protected-touch';
+const VERSION='direct-r326-r439-clear-facets-periodic-sheen-protected-touch';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
-const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r438-native-soft-edge-restrained-halo';
+const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r439-clear-facets-periodic-sheen';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r436-protected-ui-touch-fallback';
+const SHEEN='/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js?v=20260830-r439-bounded-surface-sheen';
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
 
-// Compatibility marker retained for the r428 cross-device source contract.
+// Compatibility markers retained for the r428/r438 cross-device source contracts.
 // direct-r326-r428-cross-device-header
+// direct-r326-r438-native-soft-edge-restrained-halo-protected-touch
 
 function addStyle(href,attr){
   return new Promise(resolve=>{
@@ -126,18 +128,22 @@ async function start(){
   root.dataset.fxCurrentMagTouchBootstrapR435='native-owner-installed-before-ready-check';
   root.dataset.fxCurrentMagTouchBootstrapR436='protected-owner-and-touch-fallback-installed';
   root.dataset.fxCurrentMagOpticsR438='restrained-halo-soft-edge-native-composite';
+  root.dataset.fxCurrentMagOpticsR439='clearer-facets-bounded-periodic-surface-sheen';
 
   const rendererReady=await waitForRendererReady();
   if(rendererReady){
-    if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-    root.dataset.fxCoreRendererSelection='r326-direct-r438-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r438';
+    if(mobile){
+      await addScript(SHEEN,'data-fx-mag-surface-sheen-r439');
+      await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
+    }
+    root.dataset.fxCoreRendererSelection='r326-direct-r439-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r439';
     root.dataset.fxCurrentMagRuntimeR422='ready';
   }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
 
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r438-idle-zero-frame-restrained-halo-soft-edge-protected-native-touch'
-    :'direct-r326-r438-cross-device-header';
+    ?'direct-r326-r439-idle-zero-frame-clear-facets-periodic-sheen-protected-native-touch'
+    :'direct-r326-r439-cross-device-header';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady}}));
 }
 
