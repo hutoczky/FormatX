@@ -1,4 +1,4 @@
-/* FormatX r461 — compact current-path loader.
+/* FormatX r463 — compact current-path loader.
    The active HTML contains only current deferred enhancements, so no legacy
    renderer/effect filtering or stylesheet deletion is needed at runtime. */
 (function(){
@@ -10,8 +10,8 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r460-primary-controller-clean-runtime';
-const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r463-award-mobile-optics-strict-tbt';
+const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim';
@@ -79,7 +79,7 @@ function mountEnhancements(){
   if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
-  root.dataset.fxMotionRuntimeR239='enhanced-r461-user-intent';
+  root.dataset.fxMotionRuntimeR239='enhanced-r463-user-intent';
 }
 function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
 
@@ -88,8 +88,8 @@ root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
 root.dataset.fxLegacyMagRuntimeCleanupR460='static-html-clean-r461';
 root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
-root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r461':mobile.matches?'core-ready-r461-mobile-r326-controller':'core-ready-r461-desktop-r326-controller';
-root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r460-primary-controller-clean';
+root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r463':mobile.matches?'core-ready-r463-mobile-r326-controller':'core-ready-r463-desktop-r326-controller';
+root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r463-award-mobile-optics-strict-tbt';
 warmCriticalOwners();
 ensureLanguageToggle();
 ensureCurrentMag();
