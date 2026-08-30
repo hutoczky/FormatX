@@ -1,19 +1,19 @@
-/* FormatX r434 — direct current MAG loader.
-   r326 remains the production renderer. r430/r431 own restrained mobile optics
-   and normal-flow header; r433 keeps native morph rendering alive to endpoint;
-   r434 gives the visible r326 stage its own UI-safe touch owner. */
+/* FormatX r435 — direct current MAG loader.
+   r326 remains the production renderer. r435 softens the mobile native rim,
+   keeps the centre light visibly attached to pointer/touch motion, and r434
+   remains the UI-safe native touch owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r434-restrained-mag-native-touch-settled-morph';
+const VERSION='direct-r326-r435-soft-rim-following-heart-native-touch';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
-const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r430-restrained-mobile-optics';
+const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r435-soft-rim-following-heart';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r424-sharp-organic-core';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r434-direct-r326-stage';
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph';
@@ -109,13 +109,13 @@ async function start(){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
     await addScript(NATIVE_TOUCH,'data-fx-native-mag-touch-r434');
     addScript(TOUCH,'data-fx-core-touch-pulse-r99');
-    root.dataset.fxCoreRendererSelection='r326-direct-r434-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r434';
+    root.dataset.fxCoreRendererSelection='r326-direct-r435-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r435';
   }
   root.dataset.fxCurrentMagRuntimeR422='ready';
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r434-idle-zero-frame-restrained-optics-native-touch-settled-morph'
-    :'direct-r326-r434-cross-device-header';
+    ?'direct-r326-r435-idle-zero-frame-soft-rim-following-heart-native-touch'
+    :'direct-r326-r435-cross-device-header';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile}}));
 }
 
