@@ -11,16 +11,16 @@
   const IDLE_ENERGY = mobile ? .36 : .32;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lighting = mobile ? Object.freeze({
-    fresnelPower: '1.72',
-    innerHeartBase: '.96',
-    innerHeartBreath: '1.18',
-    innerHeartAlpha: '.34',
-    innerAlphaMax: '.78',
-    rimBase: '.72',
-    rimEnergy: '.56',
-    rimAlpha: '.13',
-    outerHeartBase: '.21',
-    outerHeartEnergy: '.28'
+    fresnelPower: '1.55',
+    innerHeartBase: '.90',
+    innerHeartBreath: '1.10',
+    innerHeartAlpha: '.30',
+    innerAlphaMax: '.72',
+    rimBase: '.58',
+    rimEnergy: '.42',
+    rimAlpha: '.10',
+    outerHeartBase: '.18',
+    outerHeartEnergy: '.22'
   }) : Object.freeze({
     fresnelPower: '1.92',
     innerHeartBase: '1.02',
@@ -312,8 +312,8 @@
         float specular=pow(max(dot(n,normalize(key+view)),0.),42.0);
         specular+=.72*pow(max(dot(n,normalize(side+view)),0.),24.0);
         float facetPulse=.5+.5*sin(vFacet*23.0+uTime*.42+uSiteProgress*5.0);
-        float edge=1.0-smoothstep(${mobile?'.008':'.010'},${mobile?'.062':'.050'},min(vBary.x,min(vBary.y,vBary.z)));
-        edge*=pow(1.0-vMorph,1.7)*(${mobile?'.012':'.026'}+${mobile?'.060':'.13'}*fresnel)*smoothstep(.38,.88,facetPulse);
+        float edge=1.0-smoothstep(${mobile?'.004':'.010'},${mobile?'.095':'.050'},min(vBary.x,min(vBary.y,vBary.z)));
+        edge*=pow(1.0-vMorph,1.7)*(${mobile?'.006':'.026'}+${mobile?'.026':'.13'}*fresnel)*smoothstep(.38,.88,facetPulse);
         vec2 field=vec2(vUv.x*8.0+vLocal.z*2.1,vUv.y*5.0+vLocal.x*1.7);
         float cloud=noise(field*2.2+vec2(-uTime*.08,uTime*.05));
         float warp=noise(field*1.34+vec2(uTime*.025,-uTime*.018));
@@ -350,28 +350,28 @@
         if(uLayer>.5){
           vec3 organ=mix(vec3(.014,.105,.29),spectral,.29+.27*visualEnergy);
           organ*=.36+.50*cloud;
-          organ+=ice*heart*(${mobile?'.46':'.34'}+${mobile?'.58':'.46'}*uBreath);
-          organ+=ice*nucleus*(${mobile?'2.82':'2.18'}+${mobile?'.92':'.72'}*visualEnergy);
-          organ+=spectral*(rings*1.34+iris*1.62+veins*1.16+membrane*.48);
-          organ+=(cyan*.86+ice*.18)*(axisV*.92+axisH*.48)*visualEnergy;
-          float alpha=.055+.15*heart+.10*visualEnergy+rings*.10+iris*.11+nucleus*.28+veins*.045;
-          ${outputName}=vec4(filmic(organ*${mobile?'1.48':'1.42'}),clamp(alpha,.055,${mobile?'.80':'.76'}));
+          organ+=ice*heart*(${mobile?'.40':'.34'}+${mobile?'.46':'.46'}*uBreath);
+          organ+=ice*nucleus*(${mobile?'2.35':'2.18'}+${mobile?'.72':'.72'}*visualEnergy);
+          organ+=spectral*(rings*1.20+iris*1.42+veins*1.08+membrane*.44);
+          organ+=(cyan*.64+ice*.14)*(axisV*.72+axisH*.36)*visualEnergy;
+          float alpha=.055+.15*heart+.10*visualEnergy+rings*.10+iris*.11+nucleus*.24+veins*.045;
+          ${outputName}=vec4(filmic(organ*${mobile?'1.38':'1.42'}),clamp(alpha,.055,${mobile?'.72':'.76'}));
           return;
         }
 
         vec3 glass=mix(vec3(.010,.052,.13),vec3(.055,.39,.64),.16+.31*ndl+.11*facetPulse);
         glass+=vec3(.025,.31,.68)*sideLight*.32;
         glass+=vec3(.008,.085,.20)*(.34+.66*cloud);
-        glass+=spectral*fresnel*(${mobile?'.48':'.66'}+${mobile?'.48':'.66'}*visualEnergy);
+        glass+=spectral*fresnel*(${mobile?'.34':'.66'}+${mobile?'.34':'.66'}*visualEnergy);
         glass+=spectral*veins*(.76+.34*uBreath);
         glass+=spectral*membrane*(.30+.24*visualEnergy);
         glass+=spectral*iris*.34;
-        glass+=ice*(rings*.18+heart*${mobile?'.12':'.075'}+nucleus*${mobile?'.60':'.42'});
-        glass+=ice*specular*(${mobile?'1.08':'1.34'}+${mobile?'.34':'.46'}*visualEnergy);
-        glass+=(cyan*.68+ice*.12)*(axisV*.72+axisH*.37)*visualEnergy;
-        glass+=(spectral*${mobile?'.38':'.72'}+ice*${mobile?'.08':'.16'})*edge;
-        float alpha=.22+.15*ndl+${mobile?'.15':'.24'}*fresnel+edge*${mobile?'.018':'.045'}+veins*.07+rings*.035+specular*.12;
-        ${outputName}=vec4(filmic(glass*${mobile?'1.34':'1.48'}),clamp(alpha,.20,${mobile?'.68':'.72'}));
+        glass+=ice*(rings*.18+heart*${mobile?'.10':'.075'}+nucleus*${mobile?'.52':'.42'});
+        glass+=ice*specular*(${mobile?'.94':'1.34'}+${mobile?'.28':'.46'}*visualEnergy);
+        glass+=(cyan*.58+ice*.10)*(axisV*.58+axisH*.29)*visualEnergy;
+        glass+=(spectral*${mobile?'.24':'.72'}+ice*${mobile?'.05':'.16'})*edge;
+        float alpha=.22+.15*ndl+${mobile?'.10':'.24'}*fresnel+edge*${mobile?'.012':'.045'}+veins*.07+rings*.035+specular*.12;
+        ${outputName}=vec4(filmic(glass*${mobile?'1.28':'1.48'}),clamp(alpha,.20,${mobile?'.64':'.72'}));
       }`;
 
     let program;
@@ -451,10 +451,10 @@
     function blocked(){return disposed||contextLost||document.hidden||!visible||paused||root.dataset.fxReferenceMotionPaused==='true';}
     function schedule(frames=1){
       if(blocked())return;
-      burstFrames=Math.max(burstFrames,Math.min(72,Math.max(1,frames)));
+      burstFrames=Math.max(burstFrames,Math.min(24,Math.max(1,frames)));
       if(!raf){last=performance.now();raf=requestAnimationFrame(frame);}
     }
-    function boost(value=.84,frames=16){
+    function boost(value=.84,frames=8){
       targetEnergy=Math.max(targetEnergy,value);
       targetBreath=Math.max(targetBreath,.38+value*.48);
       schedule(reduced.matches?1:frames);
@@ -478,7 +478,7 @@
       if(/mag-button|api|keyboard|core-tap/.test(source))shapeLockUntil=performance.now()+7600;
       if(reduced.matches)morph=targetMorph;
       publishShape(source);
-      boost(changed?1.12:.72,changed?52:12);
+      boost(changed?1.04:.68,changed?16:4);
       if(changed&&announce)dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{
         shape:shapeName(next),source,revision:'r413',renderer:VERSION,geometry:'closed-3d-volume'
       }}));
@@ -490,29 +490,21 @@
       targetRotationX=clamp(targetRotationX+x,-1.02,1.02);
       targetRotationY+=y;
       root.dataset.fxCoreRotationSource=source;
-      boost(.84,24);
+      boost(.84,8);
     }
 
+    /* r441: the old heartbeat-and-interaction-bursts-no-idle-loop-r326
+       contract is retained as a source compatibility marker, but native WebGL
+       no longer wakes itself periodically. r440/r439 CSS sheen supplies the
+       cheap ambient surface life; WebGL renders only on explicit interaction
+       or semantic site-state changes. */
     function scheduleHeartbeat(){
-      clearTimeout(heartbeatTimer);
-      if(disposed)return;
-      heartbeatTimer=setTimeout(()=>{
-        if(!blocked()){
-          targetBreath=.82;targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.18);schedule(reduced.matches?1:10);
-          later(()=>{targetBreath=.48;targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08);schedule(reduced.matches?1:7);},170);
-          later(()=>{targetBreath=.72;targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.14);schedule(reduced.matches?1:8);},320);
-          later(()=>{targetBreath=.12;targetEnergy=IDLE_ENERGY;schedule(reduced.matches?1:8);},510);
-        }
-        scheduleHeartbeat();
-      },mobile?1880:1680);
+      clearTimeout(heartbeatTimer);heartbeatTimer=0;
+      root.dataset.fxCoreIdleHeartbeatR441='css-sheen-only-no-webgl-timer';
     }
     function scheduleAutonomousMorph(){
-      clearTimeout(autonomousTimer);
-      if(disposed||reduced.matches)return;
-      autonomousTimer=setTimeout(()=>{
-        if(!blocked()&&performance.now()>=shapeLockUntil)toggleShape('organic-idle');
-        scheduleAutonomousMorph();
-      },mobile?9200:7800);
+      clearTimeout(autonomousTimer);autonomousTimer=0;
+      root.dataset.fxCoreAutonomousMorphR441='disabled-until-explicit-interaction';
     }
 
     function render(now){
@@ -573,15 +565,30 @@
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,renderAverage))));
     }
 
+    function settleAfterBurst(){
+      px=tx;py=ty;
+      rotationX=targetRotationX;rotationY=targetRotationY;rotationZ=targetRotationZ;
+      angularVelocityY=0;
+      energy=targetEnergy=IDLE_ENERGY;
+      breath=targetBreath=.12;
+      morph=targetMorph;
+      siteProgress=targetSiteProgress;
+      cinematic.energy=energy;
+      cinematic.openness=.08+breath*.025;
+      cinematic.corePosition=[px*.055,-py*.045,.52+energy*.012];
+      cinematic.morph=morph;
+      cinematic.shape=shapeName();
+      cinematic.rotation=[rotationX,rotationY,rotationZ];
+      cinematic.siteProgress=siteProgress;
+      publishShape('burst-settle-r441');
+      root.dataset.fxCoreIdleRenderR441='zero-frame';
+    }
+
     function frame(now){
       raf=0;if(blocked())return;
       render(now);burstFrames=Math.max(0,burstFrames-1);
-      const unsettled=Math.abs(tx-px)>.0025||Math.abs(ty-py)>.0025
-        ||Math.abs(targetEnergy-energy)>.004||Math.abs(targetBreath-breath)>.004
-        ||Math.abs(targetMorph-morph)>.0015||Math.abs(targetRotationX-rotationX)>.0015
-        ||Math.abs(targetRotationY-rotationY)>.0015||Math.abs(angularVelocityY)>.00002
-        ||Math.abs(targetSiteProgress-siteProgress)>.002;
-      if(burstFrames>0||unsettled)raf=requestAnimationFrame(frame);
+      if(burstFrames>0)raf=requestAnimationFrame(frame);
+      else settleAfterBurst();
     }
 
     function point(event){
@@ -589,16 +596,16 @@
       if(rect.width<2||rect.height<2)return null;
       return{x:clamp(((event.clientX-rect.left)/rect.width-.5)*2,-1,1),y:clamp(-((event.clientY-rect.top)/rect.height-.5)*2,-1,1)};
     }
-    function onMove(event){if(event.pointerType==='touch')return;const q=point(event);if(!q)return;tx=q.x;ty=q.y;targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.12);schedule(5);}
-    function onDown(event){const q=point(event);if(q){tx=q.x;ty=q.y;}shapeLockUntil=performance.now()+4800;boost(.82,18);}
-    function onLeave(){tx=0;ty=0;targetEnergy=IDLE_ENERGY;targetBreath=.12;schedule(10);}
+    function onMove(event){if(event.pointerType==='touch')return;const q=point(event);if(!q)return;tx=q.x;ty=q.y;targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.12);schedule(2);}
+    function onDown(event){const q=point(event);if(q){tx=q.x;ty=q.y;}shapeLockUntil=performance.now()+4800;boost(.82,6);}
+    function onLeave(){tx=0;ty=0;targetEnergy=IDLE_ENERGY;targetBreath=.12;schedule(3);}
     function pulse(detail){
       if(Number.isFinite(detail?.x))tx=clamp(detail.x,-1,1);
       if(Number.isFinite(detail?.y))ty=clamp(detail.y,-1,1);
       const drag=detail?.phase==='drag';
       targetEnergy=Math.max(targetEnergy,drag ? .58 : .88);
       targetBreath=Math.max(targetBreath,drag ? .58 : .92);
-      schedule(drag?12:20);
+      schedule(drag?4:8);
     }
     function onCoreInteraction(event){
       const detail=event.detail||{};pulse(detail);
@@ -617,7 +624,7 @@
         if(candidate&&!candidate.moved&&performance.now()-candidate.started<720)toggleShape('core-tap');
       }else if(detail.phase==='cancel')tapCandidate=null;
     }
-    function onPause(event){paused=event.detail?.paused===true||root.dataset.fxReferenceMotionPaused==='true';if(!paused)schedule(3);}
+    function onPause(event){paused=event.detail?.paused===true||root.dataset.fxReferenceMotionPaused==='true';if(!paused)schedule(2);}
     function onScroll(){
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
@@ -626,7 +633,7 @@
         targetSiteProgress=clamp(scrollY/range,0,1);
         root.dataset.fxCoreSiteProgress=targetSiteProgress.toFixed(3);
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12);
-        schedule(6);
+        schedule(2);
       });
     }
     function signalShape(shape,source){
@@ -645,20 +652,20 @@
     listen(window,'formatx:organismpanelopen',()=>signalShape('sphere','organism-listening'),{passive:true});
     listen(window,'formatx:organismresponse',()=>signalShape('crystal','organism-response'),{passive:true});
     listen(window,'formatx:open-live-os',()=>signalShape('sphere','live-os-open'),{passive:true});
-    listen(window,'formatx:loop',()=>{signalShape('crystal','site-loop');boost(.92,22);},{passive:true});
-    listen(window,'formatx:menustatechange',event=>{boost(event.detail?.open ? .76 : .52,14);},{passive:true});
-    listen(window,'formatx:languagechange',()=>boost(.62,12),{passive:true});
-    listen(document,'visibilitychange',()=>{if(!document.hidden)schedule(3);},{passive:true});
+    listen(window,'formatx:loop',()=>{signalShape('crystal','site-loop');boost(.92,6);},{passive:true});
+    listen(window,'formatx:menustatechange',event=>{boost(event.detail?.open ? .76 : .52,4);},{passive:true});
+    listen(window,'formatx:languagechange',()=>boost(.62,3),{passive:true});
+    listen(document,'visibilitychange',()=>{if(!document.hidden)schedule(2);},{passive:true});
     listen(document,'click',event=>{
       if(!(event.target instanceof Element))return;
       const action=event.target.closest('a,button,[role="button"]');
       if(!action||action.closest('.fx-reference-mag-button'))return;
       if(action.matches('.fx-reference-ask,[data-fx-organism-question]'))signalShape('sphere','site-question');
       else if(action.matches('a[href*="download"],[data-release-download]'))signalShape('crystal','release-action');
-      boost(action.matches('a[href*="download"],[data-release-download]') ? .92 : .62,16);
+      boost(action.matches('a[href*="download"],[data-release-download]') ? .92 : .62,4);
     },{passive:true});
     listen(document,'focusin',event=>{
-      if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))boost(.48,8);
+      if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))boost(.48,2);
     },{passive:true});
     listen(canvas,'webglcontextlost',event=>{
       event.preventDefault();contextLost=true;if(raf)cancelAnimationFrame(raf);raf=0;
@@ -668,11 +675,11 @@
       root.dataset.fxCrystalOrganismR326='restoring';destroy();requestAnimationFrame(()=>boot());
     });
 
-    const ro=new ResizeObserver(()=>{if(resize())schedule(3);});
+    const ro=new ResizeObserver(()=>{if(resize())schedule(2);});
     ro.observe(stage);
     const io=new IntersectionObserver(entries=>{
       visible=entries.some(entry=>entry.isIntersecting);
-      if(visible)schedule(3);else if(raf){cancelAnimationFrame(raf);raf=0;}
+      if(visible)schedule(2);else if(raf){cancelAnimationFrame(raf);raf=0;}
     },{rootMargin:'120px'});
     io.observe(stage);
     const sectionShapes={hero:'crystal',experience:'sphere',capabilities:'crystal',pricing:'sphere',system:'crystal',resources:'sphere'};
@@ -682,7 +689,7 @@
       if(!id||id===activeOrgan)return;
       activeOrgan=id;root.dataset.fxCoreActiveOrgan=id;cinematic.activeOrgan=id;
       if(sectionShapes[id])signalShape(sectionShapes[id],'site-section');
-      boost(.54,10);
+      boost(.54,3);
     },{rootMargin:'-22% 0px -54% 0px',threshold:[0,.15,.35,.6]});
     document.querySelectorAll('main > section[id],main section.scene[id]').forEach(section=>organObserver.observe(section));
 
@@ -704,7 +711,7 @@
       renderer:'single-webgl-crystal-organism-r326',
       material:'translucent-living-facet-organism-r326',
       geometry:'four-direction-asymmetric-crystal-organism-r326',
-      scheduler:'heartbeat-and-interaction-bursts-no-idle-loop-r326',
+      scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
       setMorph:(value,source)=>setMorph(value,source||'api-morph',true),
       setShape:(shape,source)=>setShape(shape,source||'api-set'),
@@ -743,10 +750,11 @@
     root.dataset.fxCoreReferenceGeometry='closed-four-tip-crystal-and-sphere-r413';
     root.dataset.fxCoreReferenceMaterial='living-organic-prismatic-membrane-r413';
     root.dataset.fxCoreInteractionVisual='pointer-drag-tap-keyboard-scroll-site-state-r413';
-    root.dataset.fxCoreLivingBehavior='double-heartbeat-cellular-membrane-autonomous-morph-r413';
+    root.dataset.fxCoreLivingBehavior='interaction-heartbeat-css-sheen-no-autonomous-webgl-r441';
     root.dataset.fxCoreSiteRole='primary-living-site-interface-r413';
     root.dataset.fxCoreContexts='1';
-    root.dataset.fxCoreScheduler='heartbeat-and-interaction-bursts-no-idle-loop-r326';
+    root.dataset.fxCoreScheduler='interaction-bursts-idle-zero-frame-r441';
+    root.dataset.fxCoreSchedulerCompatibility='heartbeat-and-interaction-bursts-no-idle-loop-r326';
     root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';
     root.dataset.fxCoreCompositionRevisionR326='new-crystal-organism-no-legacy-fallback';
     root.dataset.fxCoreMobileVisualR326=mobile?'soft-translucent-organic-rim':'desktop-translucent-organic-rim';
@@ -757,13 +765,15 @@
     root.dataset.fxCoreOpticsR424='native-webgl-filmic-caustics-no-bitmap-no-css-core';
     root.dataset.fxCoreMobileResolutionR424=mobile?'dpr-cap-1.75-pixel-budget-980k':'desktop-dpr-cap-1.55';
     root.dataset.fxCoreMobileOpticsR435=mobile?'soft-rim-following-visible-heart':'desktop-preserved-r435';
+    root.dataset.fxCoreMobileOpticsR440=mobile?'restrained-bloom-native-soft-rim':'desktop-preserved-r440';
     root.dataset.fxGpuCapability=webgl2?'webgl2':'webgl1';
-    root.dataset.fxCoreReal3dTargetFps='interaction-60-heartbeat-burst-idle-zero';
+    root.dataset.fxCoreReal3dTargetFps='interaction-60-idle-zero-r441';
+    root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
 
     publishShape('initial');
-    schedule(5);
+    schedule(3);
     scheduleHeartbeat();
     scheduleAutonomousMorph();
     dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
