@@ -1,17 +1,16 @@
-/* FormatX r437 — direct current MAG loader.
-   r326 remains the production renderer. r437 keeps r436 protected native touch
-   while applying the reviewed mobile composite with a tighter glow and softer
-   four-point silhouette. */
+/* FormatX r438 — direct current MAG loader.
+   r326 remains the production renderer. r438 keeps r436 protected native touch
+   and applies the reviewed phone composite without post-process soft-focus. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r437-restrained-halo-soft-edge-protected-native-touch';
+const VERSION='direct-r326-r438-native-soft-edge-restrained-halo-protected-touch';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
-const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r437-restrained-halo-soft-edge';
+const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r438-native-soft-edge-restrained-halo';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
@@ -56,13 +55,9 @@ function waitForRendererReady(timeout=8000){
       removeEventListener('formatx:real3dready',onReady);
       resolve(Boolean(ready));
     };
-    const onReady=()=>{
-      if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);
-    };
+    const onReady=()=>{if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);};
     addEventListener('formatx:real3dready',onReady,{passive:true});
-    observer=new MutationObserver(()=>{
-      if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);
-    });
+    observer=new MutationObserver(()=>{if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);});
     observer.observe(root,{attributes:true,attributeFilter:['data-fx-crystal-organism-r326']});
     timer=setTimeout(()=>finish(root.dataset.fxCrystalOrganismR326==='ready'),timeout);
   });
@@ -118,10 +113,7 @@ function installSoundTouchRecovery(){
 async function start(){
   if(started)return;started=true;
   repairAccessibleNames();installSoundTouchRecovery();
-  const styles=[
-    addStyle(STYLE,'data-fx-current-mag-r422'),
-    addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')
-  ];
+  const styles=[addStyle(STYLE,'data-fx-current-mag-r422'),addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')];
   const rendererScript=addScript(RENDERER,'data-fx-current-r326-r422');
   Promise.all(styles).then(()=>{
     root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
@@ -133,20 +125,19 @@ async function start(){
   await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
   root.dataset.fxCurrentMagTouchBootstrapR435='native-owner-installed-before-ready-check';
   root.dataset.fxCurrentMagTouchBootstrapR436='protected-owner-and-touch-fallback-installed';
-  root.dataset.fxCurrentMagOpticsR437='restrained-halo-soft-edge-mobile-review';
+  root.dataset.fxCurrentMagOpticsR438='restrained-halo-soft-edge-native-composite';
 
   const rendererReady=await waitForRendererReady();
   if(rendererReady){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-    root.dataset.fxCoreRendererSelection='r326-direct-r437-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r437';
+    root.dataset.fxCoreRendererSelection='r326-direct-r438-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r438';
     root.dataset.fxCurrentMagRuntimeR422='ready';
-  }else{
-    root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
-  }
+  }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
+
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r437-idle-zero-frame-restrained-halo-soft-edge-protected-native-touch'
-    :'direct-r326-r437-cross-device-header';
+    ?'direct-r326-r438-idle-zero-frame-restrained-halo-soft-edge-protected-native-touch'
+    :'direct-r326-r438-cross-device-header';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady}}));
 }
 
