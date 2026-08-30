@@ -13,6 +13,7 @@ const has = (source, tokens, label) => {
 
 const home = read('docs/scifi-ui/index.html');
 const renderer = read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const solidGlass = read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js');
 const directLoader = read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const motionLoader = read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
 const mobileLoader = read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
@@ -51,26 +52,46 @@ assert.match(renderer, /surfacePulseStart=-Infinity/);
 assert.match(renderer, /gl\.uniform1f\(uniforms\.uSurfacePulse,surfacePulse\)/);
 assert.doesNotMatch(renderer, /new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
 
+has(solidGlass, [
+  "const VERSION='r456-solid-volume-smooth-normal-no-triangle-edges'",
+  "const vertexNeedle='vec3 normal=normalize(mix(aCrystalNormal,aSphereNormal,morph));'",
+  'crystalSmoothNormal',
+  'mix(aCrystalNormal,crystalSmoothNormal,.97)',
+  "edgePattern=/float edge=1\\.0-smoothstep",
+  "edgePattern,'float edge=0.0;'",
+  '28.0',
+  '18.0',
+  "fxCoreMobileTriangleEdgesR456='disabled'",
+  "fxCoreMobileNormalR456='continuous-volume-97-percent-smooth'",
+  "fxCoreMobileShaderHookR456='released-after-r326-compile'"
+], 'R456 solid-volume mobile shader correction');
+assert.doesNotMatch(solidGlass, /drawImage|createImageBitmap|new\s+Image|canvas\.style|style\.setProperty/);
+
 has(directLoader, [
   'formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag',
   'formatx-core-shapeshifter-r337.css?v=20260830-r455-soft-mobile-optics',
+  'formatx-mobile-solid-glass-r456.js?v=20260830-r456-solid-volume-no-mesh',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-native-mag-touch-r434.js?v=20260830-r436-protected-ui-touch-fallback',
   'formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph',
-  'direct-r326-r454-style-first-visible-electric-idle-zero',
-  'styles-ready-before-renderer'
-], 'direct R454 renderer + R455 optics chain');
+  'direct-r326-r456-solid-mobile-glass-idle-zero',
+  "if(mobile)await addScript(SOLID_GLASS,'data-fx-mobile-solid-glass-r456')",
+  'styles-ready-before-renderer',
+  'solid-volume-smooth-normal-no-triangle-edges'
+], 'direct R454 renderer + R456 solid mobile glass chain');
 assert.doesNotMatch(directLoader, /formatx-mag-surface-sheen-r439|\bSHEEN\b/);
 
 has(motionLoader, [
   'single-language-toggle.js?v=20260830-r429-initial-cross-device-header',
-  'formatx-current-mag-loader-r422.js?v=20260830-r455-soft-mobile-optics',
+  'formatx-current-mag-loader-r422.js?v=20260830-r456-solid-mobile-glass',
+  'formatx-mobile-solid-glass-r456.js?v=20260830-r456-solid-volume-no-mesh',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch',
   'formatx-core-shapeshifter-r337.css?v=20260830-r455-soft-mobile-optics',
-  'armed-direct-r326-r454-prewarmed',
+  "if(mobile.matches)warmAsset(CURRENT_SOLID_GLASS,'script')",
+  'armed-direct-r326-r456-solid-glass-prewarmed',
   'scheduleCriticalOwners()'
-], 'prewarmed R454 renderer + R455 optics chain');
+], 'prewarmed R454 renderer + R456 solid mobile glass chain');
 
 assert.match(mobileLoader, /r454-visible-electric-native-webgl/);
 assert.doesNotMatch(mobileLoader, /formatx-mobile-core-softening-r322\.css|formatx-mobile-core-optics-r328\.css|formatx-mobile-optics-r423\.css/);
@@ -134,4 +155,4 @@ assert.doesNotMatch(worker, /formatx-mobile-recovery\.js|formatx-core-mechanical
 assert.doesNotMatch(awardRuntime, /formatx-crystal-portal-r318|ensureCrystalSurface|formatx-mag-surface-sheen-r439/);
 assert.doesNotMatch(regression, /fx-core-r317|fx-core-organic-form-r327/);
 
-console.log('PASS: R454 native WebGL MAG with R455 balanced mobile optics, intermittent electric surface energy and legacy cleanup source contracts passed.');
+console.log('PASS: R454 native WebGL MAG with R456 solid mobile glass normals, no triangle-edge paint, R455 soft phone optics and intermittent electric surface energy passed.');
