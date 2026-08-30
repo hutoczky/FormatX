@@ -1,0 +1,14 @@
+{
+  "revision": "r460",
+  "candidate_parent": "66073ed2d00f2a3cc67fb682356170b47b04b0f5",
+  "purpose": "Deploy the R460 primary MAG runtime to production after source validation.",
+  "requested_contract": {
+    "primary_mag": "single R326 native WebGL renderer",
+    "mobile_optics": "softened nucleus, Fresnel, specular and rim",
+    "hero_mag_tap": "opens or toggles the R459 site controller",
+    "hero_mag_drag": "remains native crystal interaction and does not trigger controller tap",
+    "protected_controls": "SOUND, ASK, PAUSE and header controls remain independent",
+    "legacy_runtime": "superseded MAG runtimes are retired from the active production path"
+  },
+  "verification": "pending production deployment and live browser gates"
+}
