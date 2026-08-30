@@ -1,4 +1,10 @@
-/* FormatX r440 — current native MAG composition with restrained mobile optics. */
+/* FormatX r443 — current native MAG composition + cross-device overflow guard. */
+html,
+body {
+  max-width: 100% !important;
+  overflow-x: clip !important;
+}
+
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   position:absolute!important;inset:0!important;z-index:3!important;display:block!important;
   box-sizing:border-box!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;
@@ -170,3 +176,4 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
 /* production-r438-direct-r326-restrained-halo-soft-edge-native-composite */
 /* production-r439-direct-r326-clearer-facets-bounded-periodic-surface-sheen */
 /* production-r440-direct-r326-restrained-bloom-native-soft-edge-mobile-review */
+/* production-r443-cross-device-decorative-overflow-clipped-no-information-loss */
