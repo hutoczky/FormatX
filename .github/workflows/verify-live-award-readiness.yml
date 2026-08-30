@@ -1,5 +1,5 @@
 name: Verify FormatX live award readiness
-run-name: Live award-readiness audit for r424 native shader + r430 restrained mobile optics
+run-name: Live award-readiness audit for r326 + r442 budget + r445 bright soft-edge mobile optics
 
 on:
   push:
@@ -28,31 +28,46 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Validate current award/source contracts
+      - name: Validate current award and r445 source contracts
+        shell: bash
         run: |
           set -euo pipefail
           node .github/scripts/validate-award-readiness.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
           node .github/scripts/validate-real3d-core.cjs
           node .github/scripts/validate-reference-core-v26.cjs
+          node .github/scripts/validate-mobile-mag-r445.cjs
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          node --check docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
+
           test -s docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'r424 sharp optics' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'r425 — user-feedback-balanced phone optics' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'r430 — restrained live-phone MAG optics' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'production-r430-final-mobile-mag-optics-owner' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'brightness(.955)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'contrast(.98)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'saturate(1.08)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'production-r442-final-mobile-mag-optics-owner-restrained-native-no-blur' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'brightness(.90)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'contrast(.89)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -Fq 'saturate(.95)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           ! grep -Fq 'blur(' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+
+          test -s docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
+          grep -Fq 'production-r445-mobile-mag-readable-bright-midtones-soft-edge-no-blur' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
+          grep -Fq 'brightness(1.20)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
+          grep -Fq 'contrast(.92)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
+          grep -Fq 'saturate(1.085)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
+          grep -Fq 'brightness(1.24)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
+          grep -Fq 'contrast(.91)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
+          grep -Fq 'saturate(1.10)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
+          ! grep -Fq 'blur(' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
+
+          grep -Fq 'formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge' docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
+          grep -Fq 'data-fx-mobile-mag-balance-r445' docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
+          grep -Fq 'superseded-r445' docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
           grep -Fq 'retired-r424-native-shader-optics' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
           grep -Fq 'formatx-core-shapeshifter-r337-css' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
 
-      - name: Verify live native WebGL crystal, restrained mobile optics, interaction and scrolling
+      - name: Verify live r326 crystal, r445 optics, interaction and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -66,7 +81,9 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
           fetch "/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=${GITHUB_RUN_ID}" "$TMP/crystal-r326.js"
-          fetch "/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r430.css"
+          fetch "/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r442.css"
+          fetch "/scifi-ui/styles/formatx-mobile-mag-balance-r445.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r445.css"
+          fetch "/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js?v=${GITHUB_RUN_ID}" "$TMP/sheen-r439.js"
           fetch "/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-regression.js"
           fetch "/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=${GITHUB_RUN_ID}" "$TMP/touch-r99.js"
           fetch "/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=${GITHUB_RUN_ID}" "$TMP/governor-r426.js"
@@ -80,16 +97,11 @@ jobs:
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
           contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
 
-          contains bootstrap 'native-mechanical-orb-r250-no-2d-mag-layers' "$TMP/bootstrap.js"
-          contains bootstrap-wrapper 'formatx-core-mobile-v55.js?v=20260824-native-mechanical-orb-r251-performance' "$TMP/bootstrap.js"
-          contains bootstrap-cleanup 'cleanupLegacy2d' "$TMP/bootstrap.js"
-
           contains wrapper-award-revision 'new-crystal-organism-r326' "$TMP/mobile-wrapper.js"
           contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' "$TMP/mobile-wrapper.js"
           contains wrapper-primary 'formatx-crystal-organism-r326.js?v=20260825-r326-new-organism' "$TMP/mobile-wrapper.js"
           contains wrapper-selection 'new-crystal-organism-r326-primary' "$TMP/mobile-wrapper.js"
           contains wrapper-composition 'new-organism-no-legacy-visual-fallback' "$TMP/mobile-wrapper.js"
-          contains wrapper-overlay-policy 'new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual' "$TMP/mobile-wrapper.js"
           ! grep -Eq 'formatx-core-mobile-reference-r99\.js|formatx-core-mechanical-orb-r250\.js|formatx-core-r317\.js' "$TMP/mobile-wrapper.js"
 
           contains renderer-version "const VERSION = 'crystal-organism-r326'" "$TMP/crystal-r326.js"
@@ -99,28 +111,30 @@ jobs:
           contains geometry 'buildOrganismGeometry' "$TMP/crystal-r326.js"
           contains triangles 'gl.TRIANGLES' "$TMP/crystal-r326.js"
           contains interaction-event 'formatx:coreinteraction' "$TMP/crystal-r326.js"
-          contains pointer-move 'pointermove' "$TMP/crystal-r326.js"
-          contains pointer-down 'pointerdown' "$TMP/crystal-r326.js"
-          contains native-ready 'ready-v69' "$TMP/crystal-r326.js"
+          contains renderer-budget 'dpr-cap-1.45-pixel-budget-720k' "$TMP/crystal-r326.js"
+          contains renderer-idle-zero "fxCoreIdleRenderR441='zero-frame'" "$TMP/crystal-r326.js"
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/crystal-r326.js"
 
-          # The r424 shader still owns the native volume. r430 only softens the
-          # final mobile composite after live phone feedback; it never blurs or
-          # redraws the native WebGL crystal.
-          contains optics-base 'r424 sharp optics' "$TMP/optics-r430.css"
-          contains optics-r430 'r430 — restrained live-phone MAG optics' "$TMP/optics-r430.css"
-          contains optics-owner 'production-r430-final-mobile-mag-optics-owner' "$TMP/optics-r430.css"
-          contains optics-scope 'single-webgl-crystal-organism-r326' "$TMP/optics-r430.css"
-          contains mobile-opacity 'opacity: .94 !important' "$TMP/optics-r430.css"
-          contains mobile-highlight 'brightness(.955)' "$TMP/optics-r430.css"
-          contains mobile-contrast 'contrast(.98)' "$TMP/optics-r430.css"
-          contains mobile-colour 'saturate(1.08)' "$TMP/optics-r430.css"
-          ! grep -Fq 'blur(' "$TMP/optics-r430.css"
+          contains optics-base-owner 'production-r442-final-mobile-mag-optics-owner-restrained-native-no-blur' "$TMP/optics-r442.css"
+          contains optics-base-brightness 'brightness(.90)' "$TMP/optics-r442.css"
+          contains optics-base-contrast 'contrast(.89)' "$TMP/optics-r442.css"
+          contains optics-base-colour 'saturate(.95)' "$TMP/optics-r442.css"
+          ! grep -Fq 'blur(' "$TMP/optics-r442.css"
+
+          contains optics-r445-owner 'production-r445-mobile-mag-readable-bright-midtones-soft-edge-no-blur' "$TMP/optics-r445.css"
+          contains optics-r445-brightness 'brightness(1.20)' "$TMP/optics-r445.css"
+          contains optics-r445-contrast 'contrast(.92)' "$TMP/optics-r445.css"
+          contains optics-r445-colour 'saturate(1.085)' "$TMP/optics-r445.css"
+          contains optics-r445-small-brightness 'brightness(1.24)' "$TMP/optics-r445.css"
+          contains optics-r445-small-contrast 'contrast(.91)' "$TMP/optics-r445.css"
+          contains optics-r445-small-colour 'saturate(1.10)' "$TMP/optics-r445.css"
+          ! grep -Eq 'blur\(|radial-gradient|conic-gradient' "$TMP/optics-r445.css"
+
+          contains sheen-r445-url 'formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge' "$TMP/sheen-r439.js"
+          contains sheen-r445-dataset 'data-fx-mobile-mag-balance-r445' "$TMP/sheen-r439.js"
+          contains sheen-r445-compat 'superseded-r445' "$TMP/sheen-r439.js"
           contains optics-retired 'retired-r424-native-shader-optics' "$TMP/mobile-regression.js"
           contains optics-owner-runtime 'formatx-core-shapeshifter-r337-css' "$TMP/mobile-regression.js"
-          contains renderer-optics 'fxCoreOpticsR424' "$TMP/crystal-r326.js"
-          contains renderer-density 'dpr-cap-1.75-pixel-budget-980k' "$TMP/crystal-r326.js"
-          ! grep -Eq 'repeating-conic-gradient|url\([^)]*\.(png|jpe?g|webp)' "$TMP/optics-r430.css"
 
           contains touch-wake 'formatx:referencepause' "$TMP/touch-r99.js"
           contains touch-coreinteraction 'formatx:coreinteraction' "$TMP/touch-r99.js"
@@ -166,10 +180,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r424 WebGL + r430 restrained optics + r426 idle governor passed'
+            description='Live r326 + r442 budget + r445 bright soft-edge optics passed'
           else
             state=failure
-            description='Award, live MAG optics, interaction, idle policy or scrolling failed'
+            description='Award, live r445 MAG optics, interaction, idle policy or scrolling failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
