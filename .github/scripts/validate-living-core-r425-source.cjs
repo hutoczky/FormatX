@@ -21,10 +21,11 @@ const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 
 has(home,[
   'formatx-event-horizon.js?v=20260830-r461-clean-first-load',
-  'formatx-motion-runtime-loader-r239.js?v=20260830-r461-clean-active-path',
-  'formatx-quality-r461.css?v=20260830-r461',
+  'formatx-motion-runtime-loader-r239.js?v=20260830-r462-compact-active-path',
+  'formatx-quality-r461.css?v=20260830-r462-mobile-a11y',
+  'data-fx-single-language-toggle="ready-v3"',
   'class="fx-language-toggle"'
-],'R461 static entry path');
+],'R462 static entry path');
 for(const token of [
   'data-fx-premium-finish','data-fx-live-heartbeat-r155','data-fx-signature-system-r185',
   'data-fx-seamless-enforcer-r159','data-fx-living-energy-r168="true" src=',
@@ -40,7 +41,7 @@ has(intro,[
 for(const token of ['formatx-award-runtime-r206.js','formatx-mobile-regression-r310.js','activateCriticalReal3dStyle','queuePostDomEnhancements'])assert.ok(!intro.includes(token),`retired post-DOM stack returned: ${token}`);
 
 has(motion,[
-  'single-language-toggle.js?v=20260830-r461-static-owner',
+  'single-language-toggle.js?v=20260830-r462-semantic-owner',
   'formatx-current-mag-loader-r422.js?v=20260830-r460-primary-controller-clean-runtime',
   'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
@@ -48,17 +49,21 @@ has(motion,[
   "fxSingleLanguageToggleVersion==='7'",
   "fxLegacyMagRuntimeCleanupR460='static-html-clean-r461'",
   'armed-direct-r326-r460-primary-controller-clean'
-],'R461 compact current loader');
+],'R462 compact current loader');
 for(const token of ['isRetiredMagRuntime','formatx-premium-finish','formatx-live-heartbeat-r155','formatx-signature-system-r185','formatx-seamless-enforcer-r159'])assert.ok(!motion.includes(token),`dead runtime filter remains: ${token}`);
 
-has(language,["const VERSION='7'",'HU – váltás angol nyelvre','EN – switch to Hungarian','event-driven-no-document-mutation-observer'],'R461 stable language owner');
+has(language,[
+  "const VERSION='7'",'HU – váltás angol nyelvre','EN – switch to Hungarian',
+  'event-driven-no-document-mutation-observer',"fxSingleLanguageToggle='ready-v3'"
+],'R462 stable language owner');
 assert.ok(!language.includes('new MutationObserver'),'language owner must remain observer-free');
 
 has(current,[
   'direct-r326-r460-primary-controller-clean-runtime','cleanupLegacyMagRuntime','r326-only',
   'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics',
   'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe',
-  'formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph'
+  'formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph',
+  'formatx-mini-mag-assistant-r459.js'
 ],'R460 primary MAG loader');
 
 has(renderer,[
@@ -78,7 +83,11 @@ has(nativeTouch,['native-r326-touch-r460-controller-tap','formatx:heromagcontrol
 has(mini,['formatx:heromagcontrollerrequest','window.FormatXMiniMagR459={','formatx:minimagready'],'R459 persistent controller');
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 
-has(quality,['content-visibility: visible','.topbar > .header-actions','> .fx-rail','fx-reference-liveos','.scroll-cue > span','contain: layout paint'],'R461 measurable quality CSS');
+has(quality,[
+  'content-visibility: visible','.topbar > .header-actions','> .fx-rail','fx-reference-liveos',
+  '.scroll-cue > span','contain: layout paint','.fx-qr-placeholder','#main-nav:not(.open)',
+  'fx-reference-controls-r204.fx-reference-controls-r264'
+],'R462 measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,nativeTouch,mini])new Function(source);
-console.log('PASS: R461 clean active path uses one R326/R460 hero renderer, soft mobile optics, stable controls/language and no retired first-load stack.');
+console.log('PASS: R462 clean active path uses one R326/R460 hero renderer, soft mobile optics, stable semantic controls/language and no retired first-load stack.');
