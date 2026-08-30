@@ -17,6 +17,8 @@ const mobileCss=read('docs/scifi-ui/styles/formatx-core-mobile-v55.css');
 const stabilityCss=read('docs/scifi-ui/styles/formatx-mobile-r416-stability.css');
 const currentMagCss=read('docs/scifi-ui/styles/formatx-current-mag-r422.css');
 const finalOpticsCss=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
+const mobileBalanceCss=read('docs/scifi-ui/styles/formatx-mobile-mag-balance-r444.css');
+const surfaceSheen=read('docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js');
 const finalHeaderCss=read('docs/scifi-ui/styles/formatx-mobile-header-final-r418.css');
 const bridge=read('docs/scifi-ui/scripts/formatx-core-interaction-bridge-r109.js');
 const currentLoader=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
@@ -35,7 +37,7 @@ assert.match(wrapper,/retired-r424-native-shader-optics/);
 assert.doesNotMatch(wrapper,/formatx-mobile-optics-r423\.css/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 
-/* r326 remains the single authoritative WebGL MAG. r442 tightens the mobile
+/* r326 remains the single authoritative WebGL MAG. r442 tightened the mobile
    render budget without changing that ownership: lower native mesh density,
    two draw passes, style-first startup and an idle-zero scheduler are required. */
 for(const token of [
@@ -59,7 +61,23 @@ for(const token of [
   'if(!mobile){',
   'schedule(1)'
 ])assert.ok(legacyRenderer.includes(token),`missing r442 primary WebGL contract: ${token}`);
-assert.doesNotMatch(legacyRenderer,/setInterval\s*\(|requestAnimationFrame\(frame\)[\s\S]*requestAnimationFrame\(frame\)[\s\S]*heartbeat/i);
+
+/* Validate the actual bounded scheduler instead of a cross-file-style greedy
+   regex. requestAnimationFrame(frame) is allowed only at the explicit burst
+   entry point and the burstFrames>0 continuation. No timer may wake WebGL. */
+assert.doesNotMatch(legacyRenderer,/setInterval\s*\(/);
+for(const token of [
+  'function schedule(frames=1)',
+  'if(!raf){last=performance.now();raf=requestAnimationFrame(frame);}',
+  'function frame(now)',
+  'if(burstFrames>0)raf=requestAnimationFrame(frame);',
+  'else settleAfterBurst();',
+  "fxCoreIdleRenderR441='zero-frame'",
+  "fxCoreIdleHeartbeatR441='css-sheen-only-no-webgl-timer'",
+  "fxCoreAutonomousMorphR441='disabled-until-explicit-interaction'"
+])assert.ok(legacyRenderer.includes(token),`missing bounded idle-zero scheduler contract: ${token}`);
+assert.equal((legacyRenderer.match(/requestAnimationFrame\(frame\)/g)||[]).length,2,'r326 must have exactly one burst entry and one bounded frame continuation');
+assert.doesNotMatch(legacyRenderer,/heartbeatTimer\s*=\s*setTimeout|autonomousTimer\s*=\s*setTimeout/);
 assert.doesNotMatch(legacyRenderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
 
 /* The active loader must establish geometry-owning styles before it creates the
@@ -171,8 +189,9 @@ assert.ok(pureCss.includes('.fx-core-detail-r122'));
 assert.ok(pureCss.includes('content: none !important'));
 assert.doesNotMatch(mobileCss,/radial-gradient|conic-gradient|repeating-linear-gradient/i);
 
-/* Historical r424 values remain present only as compatibility layers. The last
-   mobile owner must be the restrained r442 phone-reviewed finish, blur-free. */
+/* r440/r442 remain restrained compatibility layers. r444 is now the final
+   phone-reviewed composite: readable mid-light, sub-neutral contrast to soften
+   the rim, no CSS blur, no duplicate silhouette and no extra WebGL context. */
 const currentCompact=currentMagCss.replace(/\s+/g,'');
 for(const token of [
   'production-r440-direct-r326-restrained-bloom-native-soft-edge-mobile-review',
@@ -190,13 +209,32 @@ for(const token of [
   'saturate(.95)',
   'opacity:.89!important',
   'brightness(.89)contrast(.88)saturate(.94)'
-])assert.ok(opticsCompact.includes(token.replace(/\s+/g,'')),`missing r442 restrained final optics contract: ${token}`);
+])assert.ok(opticsCompact.includes(token.replace(/\s+/g,'')),`missing r442 restrained base optics contract: ${token}`);
 assert.doesNotMatch(finalOpticsCss,/blur\(/);
+
+const balanceCompact=mobileBalanceCss.replace(/\s+/g,'');
+for(const token of [
+  'production-r444-mobile-mag-readable-midlight-soft-edge-no-blur',
+  'opacity:.965!important',
+  'brightness(1.055)',
+  'contrast(.955)',
+  'saturate(1.075)',
+  'opacity:.97!important',
+  'brightness(1.07)contrast(.95)saturate(1.08)'
+])assert.ok(balanceCompact.includes(token.replace(/\s+/g,'')),`missing r444 balanced final optics contract: ${token}`);
+assert.doesNotMatch(mobileBalanceCss,/blur\(/);
+assert.doesNotMatch(mobileBalanceCss,/background-image\s*:|radial-gradient|conic-gradient/i);
+for(const token of [
+  'formatx-mobile-mag-balance-r444.css?v=20260830-r444-readable-midlight-soft-edge',
+  'function ensureOpticsStyle()',
+  "data-fx-mobile-mag-balance-r444",
+  'ensureOpticsStyle();'
+])assert.ok(surfaceSheen.includes(token),`missing r444 final optics mount contract: ${token}`);
 
 assert.match(layout,/mobileViewport=.*max-width:900px/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 assert.equal(contract.quality_contract.mag_image_backed,false);
 assert.equal(contract.quality_contract.mag_webgl_context_count,1);
 assert.equal(contract.quality_contract.mag_paused_outside_hero,true);
-for(const source of [bootstrap,wrapper,legacyRenderer,volumeRenderer,crystalPortal,layout,bridge,currentLoader])new Function(source);
-console.log('PASS: r326 remains the single production WebGL MAG; r442 enforces style-first startup, 18x36 two-pass mobile budget, idle-zero scheduling, restrained blur-free optics, r267 fallback isolation and non-occluding cross-device ownership.');
+for(const source of [bootstrap,wrapper,legacyRenderer,volumeRenderer,crystalPortal,layout,bridge,currentLoader,surfaceSheen])new Function(source);
+console.log('PASS: r326 remains the single production WebGL MAG; r442 keeps style-first 18x36 two-pass idle-zero rendering and r444 adds a readable soft-edge mobile composite without blur, duplicate silhouettes or extra WebGL contexts.');
