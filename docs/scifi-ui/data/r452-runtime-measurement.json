@@ -1,0 +1,12 @@
+{
+  "revision": "r452",
+  "purpose": "stable browser and Lighthouse measurement after mobile MAG optics and validator synchronization",
+  "checks": [
+    "desktop-browser",
+    "mobile-browser-390x844",
+    "mobile-browser-430x932",
+    "desktop-lighthouse",
+    "mobile-lighthouse"
+  ],
+  "source_gate": "FormatX r448-r452 mobile MAG optics"
+}
