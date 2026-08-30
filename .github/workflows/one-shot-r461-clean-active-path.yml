@@ -1,0 +1,123 @@
+name: One-shot R461 clean active landing path
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r461-clean-active-path.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Remove retired first-load layers and seed canonical header
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          index = Path('docs/scifi-ui/index.html')
+          text = index.read_text(encoding='utf-8')
+
+          # One compact quality layer is render-blocking because it owns the
+          # measurable first-paint/a11y geometry, not because it repairs old CSS.
+          quality = '  <link rel="stylesheet" fetchpriority="high" data-fx-quality-r461="true" href="./styles/formatx-quality-r461.css?v=20260830-r461">\n'
+          if 'data-fx-quality-r461="true"' not in text:
+              pattern = r'(^\s*<link[^\n>]+data-fx-production-first-paint-r370="true"[^\n>]*>\n)'
+              text, count = re.subn(pattern, lambda m: m.group(1) + quality, text, count=1, flags=re.M)
+              if count != 1:
+                  raise SystemExit('R461: mobile first-paint anchor missing')
+
+          # These styles were already explicitly retired by the R460 runtime;
+          # removing the tags prevents the browser from requesting them at all.
+          for attr in ('data-fx-living-energy-r168', 'data-fx-desktop-apex-r181'):
+              text = re.sub(rf'^\s*<link[^\n>]+{attr}="true"[^\n>]*>\n', '', text, flags=re.M)
+
+          # Retired MAG/effect scripts must not remain as dormant template cargo.
+          retired_attrs = (
+              'data-fx-premium-finish',
+              'data-fx-live-heartbeat-r155',
+              'data-fx-signature-system-r185',
+              'data-fx-seamless-enforcer-r159',
+              'data-fx-living-energy-r168',
+              'data-fx-desktop-apex-r181-loader',
+          )
+          for attr in retired_attrs:
+              text = re.sub(rf'^\s*<script[^\n>]+{attr}(?:="[^"]*")?[^\n>]*></script>\n', '', text, flags=re.M)
+
+          # Replace the old two-button language switch with the one canonical
+          # first-paint button. R461 adopts this node instead of deleting it.
+          language_pattern = re.compile(
+              r'<div class="header-actions"><div class="language-switch"[^>]*>'
+              r'.*?</div>(<a class="header-support".*?</a><a class="button button-solid header-buy".*?</a>)</div>'
+          )
+          replacement = (
+              '<button type="button" class="fx-language-toggle" data-language-toggle="true" '
+              'lang="hu" aria-label="HU – váltás angol nyelvre">HU</button>'
+              '<div class="header-actions">\\1</div>'
+          )
+          text, count = language_pattern.subn(replacement, text, count=1)
+          if count != 1 and 'class="fx-language-toggle"' not in text:
+              raise SystemExit('R461: canonical header language migration failed')
+
+          text = re.sub(
+              r'<script defer src="\.\/scripts\/formatx-event-horizon\.js\?[^\"]+"></script>',
+              '<script defer src="./scripts/formatx-event-horizon.js?v=20260830-r461-clean-first-load"></script>',
+              text,
+              count=1,
+          )
+          text = re.sub(
+              r'<script defer data-fx-motion-runtime-loader-r239="true" src="\.\/scripts\/formatx-motion-runtime-loader-r239\.js\?[^\"]+"></script>',
+              '<script defer data-fx-motion-runtime-loader-r239="true" src="./scripts/formatx-motion-runtime-loader-r239.js?v=20260830-r461-clean-active-path"></script>',
+              text,
+              count=1,
+          )
+
+          index.write_text(text, encoding='utf-8')
+
+          motion = Path('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
+          source = motion.read_text(encoding='utf-8')
+          source = source.replace(
+              "const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r429-initial-cross-device-header';",
+              "const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r461-static-owner';",
+          )
+          source = source.replace(
+              "root.dataset.fxSingleLanguageToggleVersion==='6'",
+              "root.dataset.fxSingleLanguageToggleVersion==='7'",
+          )
+          motion.write_text(source, encoding='utf-8')
+          PY
+
+      - name: Validate migration shape
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/single-language-toggle.js
+          node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
+          node .github/scripts/validate-wda-100-r198.cjs
+
+      - name: Commit R461 cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
+          if git diff --cached --quiet; then
+            echo 'R461 active path already clean.'
+            exit 0
+          fi
+          git commit -m 'Clean R461 first-load runtime and static header path'
+          git push origin HEAD:master
