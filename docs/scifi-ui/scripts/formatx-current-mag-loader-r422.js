@@ -1,7 +1,7 @@
-/* FormatX r456 — direct native MAG loader.
-   R326 owns native WebGL geometry and living inner material. R456 is armed on
-   every device before shader compilation so the outer glass shell stays one
-   continuous material without VRAM-like facet/noise breakup. */
+/* FormatX r458 — direct native MAG loader.
+   R326 owns native WebGL geometry and living inner material. R456/R458 is armed
+   before shader compilation so the outer glass remains continuous while mobile
+   nucleus, axis flare and Fresnel rim stay restrained. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -12,9 +12,9 @@ if(reduced)root.dataset.fxCurrentMagMotionR424='r456-static-render-explicit-inte
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
-const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r457-soft-mobile-edge-bloom';
+const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r458-restrained-center-soft-rim';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
-const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact';
+const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r458-restrained-nucleus-fresnel';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r436-protected-ui-touch-fallback';
@@ -28,6 +28,7 @@ let started=false;
 // direct-r326-r439-clear-facets-periodic-sheen-protected-touch
 // direct-r326-r454-visible-electric-surface-style-first-protected-touch
 // direct-r326-r456-uniform-solid-glass-no-vram-artifact
+// direct-r326-r458-restrained-mobile-nucleus-soft-fresnel-rim
 // formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart
 
 function addStyle(href,attr){
@@ -134,7 +135,8 @@ async function start(){
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
   root.dataset.fxCurrentMagStylesR423='ready';
   root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
-  root.dataset.fxCurrentMagOpticsR457='soft-mobile-edge-bloom-css';
+  root.dataset.fxCurrentMagOpticsR457='superseded-by-r458-restrained-mobile-optics';
+  root.dataset.fxCurrentMagOpticsR458=mobile?'restrained-center-soft-fresnel-rim':'desktop-optics-unchanged';
 
   // Arm the uniform-shell hook BEFORE r326 compiles on every device.
   await addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
