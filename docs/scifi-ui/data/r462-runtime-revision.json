@@ -1,0 +1,15 @@
+{
+  "revision": "r462",
+  "purpose": "strict cross-device validation after active-path cleanup",
+  "desktop": "lighthouse-and-browser-required",
+  "mobile": "lighthouse-and-browser-required",
+  "qualityTarget": {
+    "performanceMinimum": 0.95,
+    "accessibility": 1,
+    "bestPractices": 1,
+    "seo": 1
+  },
+  "legacyFirstLoadStack": "retired",
+  "rendererOwner": "r326-r460",
+  "languageOwner": "r462-static-semantic"
+}
