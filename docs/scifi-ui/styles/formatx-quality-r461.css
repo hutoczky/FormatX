@@ -1,8 +1,7 @@
-/* FormatX r461 — compact quality layer for the current R326/R460 experience.
-   This is not a compatibility override stack: it fixes first-paint stability,
-   mobile tap targets and contrast for the one active landing-page runtime. */
+/* FormatX r461/r462 — compact quality layer for the current R326/R460 experience.
+   This owns measurable first-paint stability, accessibility and touch geometry
+   for the one active landing-page runtime. */
 
-/* LCP-visible hero text must be paintable immediately. */
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
 html body.living-architecture #hero #hero-title,
@@ -14,7 +13,6 @@ html body.living-architecture #hero .hero-lead {
   transition: none !important;
 }
 
-/* Public proof / entry affordances: WCAG AA contrast on their actual dark UI. */
 html body.living-architecture .fx-reference-liveos {
   color: #f2fbff !important;
   background: rgba(2, 14, 25, .96) !important;
@@ -30,7 +28,6 @@ html body.living-architecture .scroll-cue > span {
   text-shadow: none !important;
 }
 
-/* The canonical language control is part of the initial header geometry. */
 html body.living-architecture .topbar > .fx-language-toggle {
   box-sizing: border-box !important;
   min-width: 44px !important;
@@ -38,8 +35,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
 }
 
 @media (min-width: 901px) {
-  /* Reserve the final control cell before JS ownership reconciles the header.
-     This removes the remaining desktop language-control layout shift. */
   html body.living-architecture .topbar {
     min-height: 72px !important;
   }
@@ -55,9 +50,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
 }
 
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
-  /* Mobile has one navigation system: MAG + language + menu. Desktop-only
-     support/licence links and the legacy chapter rail must not create tiny,
-     overlapping touch targets behind that header. */
   html body.living-architecture .topbar > .header-actions,
   html body.living-architecture > .fx-rail {
     display: none !important;
@@ -75,11 +67,100 @@ html body.living-architecture .topbar > .fx-language-toggle {
     z-index: 12070 !important;
   }
 
-  /* Keep the current R460 MAG optical carrier clipped to the hero. Glow can be
-     soft, but never spill into following content or create a moving paint box. */
+  /* A closed desktop navigation must not leave tiny invisible anchors behind
+     the mobile header. The open state remains a full-size touch menu. */
+  html body.living-architecture .topbar #main-nav:not(.open),
+  html body.living-architecture #main-nav:not(.open) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  html body.living-architecture #main-nav.open {
+    display: grid !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+  html body.living-architecture #main-nav.open a {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 48px !important;
+    padding: 12px 14px !important;
+  }
+
   html body.living-architecture #hero .hero-space {
     contain: layout paint !important;
     overflow: hidden !important;
+  }
+
+  /* SOUND | ASK | PAUSE are one canonical three-cell touch group. */
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
+    position: absolute !important;
+    inset: auto auto 18px 50% !important;
+    z-index: 12080 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-rows: 72px !important;
+    align-items: start !important;
+    justify-items: center !important;
+    column-gap: 14px !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 24px) !important;
+    min-height: 72px !important;
+    margin: 0 !important;
+    padding: 0 6px 18px !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-reference-rail {
+    display: contents !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask span {
+    position: absolute !important;
+    top: 55px !important;
+    left: 50% !important;
+    width: max-content !important;
+    max-width: 92px !important;
+    white-space: nowrap !important;
+    transform: translateX(-50%) !important;
+    pointer-events: none !important;
   }
 
   html body.living-architecture #hero .fx-category-definition {
@@ -87,6 +168,12 @@ html body.living-architecture .topbar > .fx-language-toggle {
     min-height: 131px !important;
     transform: none !important;
     filter: none !important;
+  }
+
+  /* Lighthouse identified this placeholder on the white QR fallback surface. */
+  html body.living-architecture .fx-plan-qr-card .fx-qr-placeholder {
+    color: #24345f !important;
+    text-shadow: none !important;
   }
 }
 
