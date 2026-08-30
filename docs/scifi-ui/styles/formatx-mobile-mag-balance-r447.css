@@ -1,0 +1,81 @@
+/* FormatX r447 — phone-reviewed gentle-glow MAG refinement.
+   Preserve the proven r446 mobile scale and interaction geometry while taking
+   a small amount of energy out of the outer cyan/violet halo and softening the
+   WebGL perimeter so the crystal reads luminous rather than razor-cut. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
+  html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.91!important;
+    scale:.80 .84!important;
+    transform-origin:50% 48%!important;
+    image-rendering:auto!important;
+    filter:
+      brightness(1.05)
+      contrast(.71)
+      saturate(.98)
+      blur(.60px)
+      drop-shadow(0 0 3px rgba(112,222,255,.012))
+      drop-shadow(0 0 10px rgba(92,88,255,.005))!important;
+    -webkit-filter:
+      brightness(1.05)
+      contrast(.71)
+      saturate(.98)
+      blur(.60px)
+      drop-shadow(0 0 3px rgba(112,222,255,.012))
+      drop-shadow(0 0 10px rgba(92,88,255,.005))!important;
+  }
+
+  /* Keep the interaction cue out of the visible phone control row. */
+  html:root:root:root body.living-architecture #hero#hero .hero-space > .fx-crystal-cue-r318 {
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+
+  /* Preserve the r446 coarse-pointer skip-link safeguard. */
+  html:root:root body .skip-link,
+  html:root:root body .skip-link:focus,
+  html:root:root body .skip-link:focus-visible {
+    position:fixed!important;
+    top:-9999px!important;
+    left:-9999px!important;
+    width:1px!important;
+    height:1px!important;
+    min-width:1px!important;
+    min-height:1px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    clip:rect(0 0 0 0)!important;
+    clip-path:inset(50%)!important;
+    white-space:nowrap!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    transform:none!important;
+    translate:none!important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.92!important;
+    scale:.78 .82!important;
+    transform-origin:50% 48%!important;
+    filter:
+      brightness(1.06)
+      contrast(.69)
+      saturate(.98)
+      blur(.68px)
+      drop-shadow(0 0 3px rgba(112,222,255,.011))
+      drop-shadow(0 0 9px rgba(92,88,255,.004))!important;
+    -webkit-filter:
+      brightness(1.06)
+      contrast(.69)
+      saturate(.98)
+      blur(.68px)
+      drop-shadow(0 0 3px rgba(112,222,255,.011))
+      drop-shadow(0 0 9px rgba(92,88,255,.004))!important;
+  }
+}
+
+/* production-r447-mobile-mag-gentle-glow-soft-perimeter */
