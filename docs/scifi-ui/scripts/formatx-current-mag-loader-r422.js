@@ -1,16 +1,16 @@
-/* FormatX r439 — direct current MAG loader.
-   r326 remains the production renderer. r439 keeps the restrained native rim,
-   restores readable mobile facet contrast and adds a bounded periodic surface sheen. */
+/* FormatX r440 — direct current MAG loader.
+   r326 remains the production renderer. r440 keeps r439 bounded sheen, but the
+   reviewed phone composite now restrains bloom and softens the four-point edge. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r439-clear-facets-periodic-sheen-protected-touch';
+const VERSION='direct-r326-r440-restrained-bloom-soft-edge-protected-touch';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
-const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r439-clear-facets-periodic-sheen';
+const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r440-restrained-bloom-soft-edge';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
@@ -20,9 +20,10 @@ const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
 
-// Compatibility markers retained for the r428/r438 cross-device source contracts.
+// Compatibility markers retained for existing cross-device/source contracts.
 // direct-r326-r428-cross-device-header
 // direct-r326-r438-native-soft-edge-restrained-halo-protected-touch
+// direct-r326-r439-clear-facets-periodic-sheen-protected-touch
 
 function addStyle(href,attr){
   return new Promise(resolve=>{
@@ -129,6 +130,7 @@ async function start(){
   root.dataset.fxCurrentMagTouchBootstrapR436='protected-owner-and-touch-fallback-installed';
   root.dataset.fxCurrentMagOpticsR438='restrained-halo-soft-edge-native-composite';
   root.dataset.fxCurrentMagOpticsR439='clearer-facets-bounded-periodic-surface-sheen';
+  root.dataset.fxCurrentMagOpticsR440='restrained-bloom-subpixel-soft-edge-mobile-review';
 
   const rendererReady=await waitForRendererReady();
   if(rendererReady){
@@ -136,14 +138,14 @@ async function start(){
       await addScript(SHEEN,'data-fx-mag-surface-sheen-r439');
       await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
     }
-    root.dataset.fxCoreRendererSelection='r326-direct-r439-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r439';
+    root.dataset.fxCoreRendererSelection='r326-direct-r440-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r440';
     root.dataset.fxCurrentMagRuntimeR422='ready';
   }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
 
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r439-idle-zero-frame-clear-facets-periodic-sheen-protected-native-touch'
-    :'direct-r326-r439-cross-device-header';
+    ?'direct-r326-r440-idle-zero-frame-restrained-bloom-soft-edge-protected-native-touch'
+    :'direct-r326-r440-cross-device-header';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady}}));
 }
 
