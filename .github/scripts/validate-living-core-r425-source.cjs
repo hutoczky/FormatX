@@ -14,6 +14,7 @@ const language=read('docs/scifi-ui/scripts/single-language-toggle.js');
 const current=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const solidGlass=read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js');
+const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const optics=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
 const nativeTouch=read('docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js');
 const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
@@ -42,14 +43,14 @@ for(const token of ['formatx-award-runtime-r206.js','formatx-mobile-regression-r
 
 has(motion,[
   'single-language-toggle.js?v=20260830-r462-semantic-owner',
-  'formatx-current-mag-loader-r422.js?v=20260830-r460-primary-controller-clean-runtime',
-  'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics',
+  'formatx-current-mag-loader-r422.js?v=20260830-r463-award-mobile-optics-strict-tbt',
+  'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim',
   "fxSingleLanguageToggleVersion==='7'",
   "fxLegacyMagRuntimeCleanupR460='static-html-clean-r461'",
-  'armed-direct-r326-r460-primary-controller-clean'
-],'R462 compact current loader');
+  'armed-direct-r326-r463-award-mobile-optics-strict-tbt'
+],'R463 compact current loader');
 for(const token of ['isRetiredMagRuntime','formatx-premium-finish','formatx-live-heartbeat-r155','formatx-signature-system-r185','formatx-seamless-enforcer-r159'])assert.ok(!motion.includes(token),`dead runtime filter remains: ${token}`);
 
 has(language,[
@@ -59,12 +60,13 @@ has(language,[
 assert.ok(!language.includes('new MutationObserver'),'language owner must remain observer-free');
 
 has(current,[
-  'direct-r326-r460-primary-controller-clean-runtime','cleanupLegacyMagRuntime','r326-only',
-  'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics',
+  'direct-r326-r463-award-mobile-optics-strict-tbt','cleanupLegacyMagRuntime','r326-only',
+  'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics',
   'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe',
-  'formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph',
+  'formatx-mobile-render-governor-r426.js?v=20260830-r463-short-burst-strict-tbt',
+  'narrow-fresnel-soft-edge-restrained-bloom',
   'formatx-mini-mag-assistant-r459.js'
-],'R460 primary MAG loader');
+],'R463 primary MAG loader');
 
 has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','uSurfacePulse',
@@ -73,11 +75,22 @@ has(renderer,[
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
 
 has(solidGlass,[
-  "const VERSION='r460-uniform-solid-glass-soft-mobile-optics'","const smoothWeight=mobile?'.992':'.930'",
-  "const specPowerA=mobile?'26.0':'36.0'","const specGainB=mobile?'.44':'.64'",
-  "fxCoreMobileOpticalBalanceR460=mobile?'soft-nucleus-broad-fresnel-feather':'desktop-material-unchanged'"
-],'R460 softened phone glass');
+  "const VERSION='r463-uniform-solid-glass-restrained-award-mobile-optics'",
+  "const smoothWeight=mobile?'.997':'.930'",
+  "const specPowerA=mobile?'28.0':'36.0'",
+  "const specGainB=mobile?'.34':'.64'",
+  "next=next.replace(fresnelMobile,'float fresnel=pow(1.0-facing,2.12);')",
+  "next=next.replace(edgePattern,'float edge=0.0;')",
+  "fxCoreMobileOpticalBalanceR463=mobile?'narrow-fresnel-soft-edge-restrained-bloom':'desktop-material-unchanged'"
+],'R463 restrained award phone glass');
 has(optics,['production-r460-single-native-webgl-optics-owner-soft-mobile-rim','contrast(.86)','blur(.90px)'],'R460 soft mobile rim');
+
+has(governor,[
+  'const activeWindowMs=360','const shapeProbeMs=120','const shapeSettleDeadlineMs=3600',
+  'state.core?.requestRender?.(6)','heroVisible()',
+  "fxMobileRenderGovernorRevisionR433='r463-short-burst-strict-tbt'",
+  "active('scroll-r463',1,90)"
+],'R463 strict mobile TBT governor');
 
 has(nativeTouch,['native-r326-touch-r460-controller-tap','formatx:heromagcontrollerrequest','fxHeroMagControllerR460'],'R460 native touch controller');
 has(mini,['formatx:heromagcontrollerrequest','window.FormatXMiniMagR459={','formatx:minimagready'],'R459 persistent controller');
@@ -89,5 +102,5 @@ has(quality,[
   'fx-reference-controls-r204.fx-reference-controls-r264'
 ],'R462 measurable quality CSS');
 
-for(const source of [intro,motion,language,current,renderer,solidGlass,nativeTouch,mini])new Function(source);
-console.log('PASS: R462 clean active path uses one R326/R460 hero renderer, soft mobile optics, stable semantic controls/language and no retired first-load stack.');
+for(const source of [intro,motion,language,current,renderer,solidGlass,governor,nativeTouch,mini])new Function(source);
+console.log('PASS: R463 clean active path uses one R326 hero renderer, restrained award mobile optics, strict event-burst TBT budget, stable semantic controls/language and no retired first-load stack.');
