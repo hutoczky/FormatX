@@ -53,24 +53,24 @@ assert.doesNotMatch(renderer, /new\s+Image|drawImage|createImageBitmap|THREE\.|t
 
 has(directLoader, [
   'formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag',
-  'formatx-core-shapeshifter-r337.css?v=20260830-r454-single-visible-native-optics-owner',
+  'formatx-core-shapeshifter-r337.css?v=20260830-r455-soft-mobile-optics',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-native-mag-touch-r434.js?v=20260830-r436-protected-ui-touch-fallback',
   'formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph',
   'direct-r326-r454-style-first-visible-electric-idle-zero',
   'styles-ready-before-renderer'
-], 'direct R454 chain');
+], 'direct R454 renderer + R455 optics chain');
 assert.doesNotMatch(directLoader, /formatx-mag-surface-sheen-r439|\bSHEEN\b/);
 
 has(motionLoader, [
   'single-language-toggle.js?v=20260830-r429-initial-cross-device-header',
-  'formatx-current-mag-loader-r422.js?v=20260830-r454-visible-electric-style-first',
+  'formatx-current-mag-loader-r422.js?v=20260830-r455-soft-mobile-optics',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch',
-  'formatx-core-shapeshifter-r337.css?v=20260830-r454-single-visible-native-optics-owner',
+  'formatx-core-shapeshifter-r337.css?v=20260830-r455-soft-mobile-optics',
   'armed-direct-r326-r454-prewarmed',
   'scheduleCriticalOwners()'
-], 'prewarmed R454 chain');
+], 'prewarmed R454 renderer + R455 optics chain');
 
 assert.match(mobileLoader, /r454-visible-electric-native-webgl/);
 assert.doesNotMatch(mobileLoader, /formatx-mobile-core-softening-r322\.css|formatx-mobile-core-optics-r328\.css|formatx-mobile-optics-r423\.css/);
@@ -78,13 +78,18 @@ assert.match(regression, /retired-r454-no-fallback-stylesheet/);
 assert.match(regression, /r454-formatx-core-shapeshifter-r337-css/);
 
 has(optics, [
-  'brightness(1.52)',
-  'contrast(1.16)',
-  'saturate(1.58)',
+  'brightness(1.30)',
+  'contrast(1.04)',
+  'saturate(1.42)',
+  'blur(.35px)',
   'opacity: 1 !important',
-  'production-r454-single-native-webgl-optics-owner-visible-no-overlay'
-], 'sharp visible phone optics');
-assert.doesNotMatch(optics, /\bblur\(/);
+  'production-r455-single-native-webgl-optics-owner-soft-mobile-balance'
+], 'balanced soft mobile phone optics');
+has(optics, [
+  'brightness(1.36)',
+  'contrast(1.18)',
+  'saturate(1.50)'
+], 'preserved desktop MAG optics');
 has(layout, ['production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer'], 'R454 layout owner');
 assert.doesNotMatch(layout, /fx-mag-sheen|@keyframes[^\{]*r439|formatx-mag-surface-sheen-r439/);
 
@@ -129,4 +134,4 @@ assert.doesNotMatch(worker, /formatx-mobile-recovery\.js|formatx-core-mechanical
 assert.doesNotMatch(awardRuntime, /formatx-crystal-portal-r318|ensureCrystalSurface|formatx-mag-surface-sheen-r439/);
 assert.doesNotMatch(regression, /fx-core-r317|fx-core-organic-form-r327/);
 
-console.log('PASS: R454 visible single WebGL MAG, intermittent electric surface energy and legacy cleanup source contracts passed.');
+console.log('PASS: R454 native WebGL MAG with R455 balanced mobile optics, intermittent electric surface energy and legacy cleanup source contracts passed.');
