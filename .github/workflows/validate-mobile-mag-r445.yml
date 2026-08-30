@@ -1,4 +1,4 @@
-name: Validate r448-r451 mobile MAG optics
+name: Validate r448-r452 mobile MAG optics
 
 on:
   push:
@@ -17,14 +17,14 @@ permissions:
   statuses: write
 
 jobs:
-  validate-r448-r451:
+  validate-r448-r452:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Validate balanced-body restrained-halo soft-edge mobile MAG
+      - name: Validate softer-light natural-edge mobile MAG
         run: node .github/scripts/validate-mobile-mag-r445.cjs
-      - name: Publish r448-r451 status
+      - name: Publish r448-r452 status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -33,13 +33,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='r448-r451 balanced-body restrained-halo soft-edge MAG passed'
+            description='r448-r452 softer-light natural-edge mobile MAG passed'
           else
             state=failure
-            description='r448-r451 mobile MAG optics validation failed'
+            description='r448-r452 mobile MAG optics validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r448-r451 mobile MAG optics' \
+            -f context='FormatX r448-r452 mobile MAG optics' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
