@@ -1,4 +1,4 @@
-/* FormatX r461 — one static language control, no document-wide repair observer. */
+/* FormatX r462 — one static language control, no document-wide repair observer. */
 (function(){
 'use strict';
 const ROOT=document.documentElement;
@@ -56,7 +56,7 @@ function setFixed(language){
     document.querySelectorAll(selector).forEach(node=>{if(node.textContent!==value)node.textContent=value;});
   }
   ROOT.dataset.fxFixedCopyLanguage=language;
-  ROOT.dataset.fxFixedCopyVersion='r461';
+  ROOT.dataset.fxFixedCopyVersion='r462';
 }
 function applyCopy(language){
   ROOT.lang=language;
@@ -74,6 +74,7 @@ function updateButton(button,language){
   button.textContent=code;
   button.lang=language;
   button.dataset.nextLanguage=language==='en'?'hu':'en';
+  button.dataset.fxSingleLanguageToggle='ready-v3';
   const label=language==='en'?'EN – switch to Hungarian':'HU – váltás angol nyelvre';
   button.setAttribute('aria-label',label);
   button.title=label;
@@ -119,7 +120,7 @@ function persist(language){
   history.replaceState({},'',url.pathname+url.search+url.hash);
 }
 function publish(language){
-  dispatchEvent(new CustomEvent('formatx:languagechange',{detail:{language,source:'single-language-toggle-r461'}}));
+  dispatchEvent(new CustomEvent('formatx:languagechange',{detail:{language,source:'single-language-toggle-r462'}}));
 }
 function install(){
   const button=ensureButton();if(!(button instanceof HTMLButtonElement))return false;
@@ -135,7 +136,7 @@ function install(){
     });
   }
   addEventListener('formatx:languagechange',event=>{
-    if(event.detail?.source==='single-language-toggle-r461')return;
+    if(event.detail?.source==='single-language-toggle-r462')return;
     const language=event.detail?.language;
     if(!SUPPORTED.has(language))return;
     applyCopy(language);updateButton(button,language);
