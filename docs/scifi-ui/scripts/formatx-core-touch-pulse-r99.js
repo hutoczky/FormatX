@@ -24,6 +24,7 @@ function isInteractiveTarget(target){
   if(!(target instanceof Element))return false;
   return Boolean(target.closest(UI_SELECTOR));
 }
+function nativeOwnerReady(){return root.dataset.fxNativeMagTouchR434==='ready';}
 
 function usableRect(node){
   if(!(node instanceof HTMLElement))return null;
@@ -80,13 +81,14 @@ function stopInertia(){
 
 function startInertia(point){
   stopInertia();
-  if(!point||Math.hypot(vx,vy)<.0015)return;
+  if(nativeOwnerReady()||!point||Math.hypot(vx,vy)<.0015)return;
   let x=point.x,y=point.y;
   let dx=clamp(vx*16,-.085,.085);
   let dy=clamp(vy*16,-.085,.085);
   let frames=0;
   const step=()=>{
     inertiaRaf=0;
+    if(nativeOwnerReady())return;
     dx*=.84;dy*=.84;
     x=clamp(x+dx,-1,1);
     y=clamp(y+dy,-1,1);
@@ -103,6 +105,7 @@ function onPointerDown(event){
     root.dataset.fxCoreTouchUiGuardR417='interactive-target-bypassed';
     return;
   }
+  if(nativeOwnerReady())return;
   const point=stagePoint(event.clientX,event.clientY);
   if(!point)return;
   stopInertia();
@@ -116,6 +119,7 @@ function onPointerDown(event){
 }
 
 function onPointerMove(event){
+  if(nativeOwnerReady()){activePointer=null;return;}
   if(activePointer!==event.pointerId)return;
   const now=performance.now();
   if(now-moveStamp<20)return;
@@ -133,6 +137,7 @@ function onPointerMove(event){
 }
 
 function finishPointer(event,phase){
+  if(nativeOwnerReady()){activePointer=null;lastPoint=null;return;}
   if(activePointer!==event.pointerId)return;
   const point=stagePoint(event.clientX,event.clientY,true)||lastPoint;
   const {target}=stageAndRect();
@@ -148,18 +153,19 @@ function installFallbackTouch(){
       root.dataset.fxCoreTouchUiGuardR417='interactive-target-bypassed';
       return;
     }
+    if(nativeOwnerReady())return;
     const touch=event.touches?.[0]||event.changedTouches?.[0];
     const point=touch&&stagePoint(touch.clientX,touch.clientY);
     if(point){lastPoint=point;lastTime=performance.now();wake(point,'press','touch');}
   },{passive:true,capture:true});
   addEventListener('touchmove',event=>{
-    if(isInteractiveTarget(event.target))return;
+    if(nativeOwnerReady()||isInteractiveTarget(event.target))return;
     const touch=event.touches?.[0]||event.changedTouches?.[0];
     const point=touch&&stagePoint(touch.clientX,touch.clientY,true);
     if(point){lastPoint=point;wake(point,'drag','touch');}
   },{passive:true,capture:true});
   addEventListener('touchend',event=>{
-    if(isInteractiveTarget(event.target))return;
+    if(nativeOwnerReady()||isInteractiveTarget(event.target))return;
     if(lastPoint)wake(lastPoint,'release','touch');
   },{passive:true,capture:true});
 }
@@ -173,6 +179,7 @@ if('PointerEvent'in window){
   installFallbackTouch();
 }
 
+addEventListener('formatx:nativemagtouchready',()=>{activePointer=null;lastPoint=null;stopInertia();root.dataset.fxCoreTouchDelegateR434='native-r326';},{passive:true});
 addEventListener('pagehide',stopInertia,{once:true});
 root.dataset.fxCoreTouchPulseR99='ready-r417';
 root.dataset.fxCoreTouchInteractionR384='drag-inertia-webgl-ui-guard-r417';
