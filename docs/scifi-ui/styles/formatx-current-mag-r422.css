@@ -1,4 +1,4 @@
-/* FormatX r438 — current native MAG composition. */
+/* FormatX r439 — current native MAG composition with bounded surface sheen. */
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   position:absolute!important;inset:0!important;z-index:3!important;display:block!important;
   box-sizing:border-box!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;
@@ -25,7 +25,7 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
     inset:0 auto 0 50%!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;translate:-50% 0!important;
   }
-  /* r424 compatibility contract; r438 final override below owns the visible phone composite. */
+  /* r424 compatibility contract; r439 final override below owns the visible phone composite. */
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:.99!important;scale:1!important;filter:brightness(1.12) contrast(1.22) saturate(1.38)!important;
     -webkit-filter:brightness(1.12) contrast(1.22) saturate(1.38)!important;
@@ -66,19 +66,61 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
-/* r438 phone review: reduce perceived bloom and hard rim without a post-process soft-focus pass.
-   The native antialiasing remains authoritative; lower contrast, saturation and a tiny scale trim keep the
-   four-point contour calmer while retaining the moving centre heart and actual WebGL surface detail. */
+/* r439 phone review: restore surface definition without restoring the old hard halo.
+   Native WebGL antialiasing remains authoritative; a small local-contrast lift makes facets easier to read,
+   while the renderer's restrained mobile Fresnel/rim values keep the outer contour controlled. */
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.89!important;scale:.992!important;filter:brightness(.90) contrast(.84) saturate(.93)!important;
-    -webkit-filter:brightness(.90) contrast(.84) saturate(.93)!important;
+    opacity:.95!important;scale:.992!important;filter:brightness(.98) contrast(1.06) saturate(1.04)!important;
+    -webkit-filter:brightness(.98) contrast(1.06) saturate(1.04)!important;
+  }
+
+  /* Only exists during the ~1.05 s bounded pass requested by the r439 scheduler.
+     The transparent band is clipped to a four-point surface footprint and never receives input. */
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage.fx-mag-sheen-r439::after {
+    content:''!important;
+    position:absolute!important;
+    inset:8% 5% 7%!important;
+    z-index:4!important;
+    display:block!important;
+    pointer-events:none!important;
+    opacity:0!important;
+    clip-path:polygon(50% 2%,96% 50%,50% 98%,4% 50%)!important;
+    background-image:linear-gradient(108deg,
+      transparent 0%,transparent 39%,
+      rgba(116,207,255,.025) 43%,
+      rgba(193,242,255,.105) 47%,
+      rgba(245,253,255,.285) 50%,
+      rgba(151,222,255,.115) 53%,
+      rgba(149,125,255,.035) 57%,
+      transparent 61%,transparent 100%)!important;
+    background-size:38% 100%!important;
+    background-repeat:no-repeat!important;
+    background-position:-46% 50%!important;
+    mix-blend-mode:screen!important;
+    will-change:background-position,opacity!important;
+    animation:fx-mag-surface-sheen-r439 1050ms cubic-bezier(.22,.68,.24,1) 1 both!important;
   }
 }
 @media (max-width:430px) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.88!important;scale:.989!important;filter:brightness(.89) contrast(.82) saturate(.91)!important;
-    -webkit-filter:brightness(.89) contrast(.82) saturate(.91)!important;
+    opacity:.94!important;scale:.989!important;filter:brightness(.97) contrast(1.05) saturate(1.03)!important;
+    -webkit-filter:brightness(.97) contrast(1.05) saturate(1.03)!important;
+  }
+}
+
+@keyframes fx-mag-surface-sheen-r439 {
+  0% {opacity:0;background-position:-46% 50%;}
+  12% {opacity:.18;}
+  36% {opacity:.72;}
+  72% {opacity:.58;}
+  92% {opacity:.12;}
+  100% {opacity:0;background-position:146% 50%;}
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage.fx-mag-sheen-r439::after {
+    content:none!important;display:none!important;animation:none!important;
   }
 }
 
@@ -86,3 +128,4 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
 /* production-r430-direct-r326-restrained-mobile-optics-pure-native-3d-a11y-touch */
 /* production-r435-direct-r326-soft-rim-following-visible-heart-native-3d */
 /* production-r438-direct-r326-restrained-halo-soft-edge-native-composite */
+/* production-r439-direct-r326-clearer-facets-bounded-periodic-surface-sheen */
