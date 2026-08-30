@@ -1,4 +1,4 @@
-name: Validate r447 mobile MAG optics
+name: Validate r448-r449 mobile MAG optics
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/scifi-ui/styles/formatx-mobile-mag-balance-r446.css'
       - 'docs/scifi-ui/styles/formatx-mobile-mag-balance-r447.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-mag-balance-r448.css'
       - 'docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js'
       - '.github/scripts/validate-mobile-mag-r445.cjs'
       - '.github/workflows/validate-mobile-mag-r445.yml'
@@ -16,14 +17,14 @@ permissions:
   statuses: write
 
 jobs:
-  validate-r447:
+  validate-r448-r449:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Validate gentle-glow soft-perimeter mobile MAG
+      - name: Validate midlight soft-perimeter mobile MAG
         run: node .github/scripts/validate-mobile-mag-r445.cjs
-      - name: Publish r447 status
+      - name: Publish r448-r449 status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -32,13 +33,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='r447 gentle-glow soft-perimeter mobile MAG passed'
+            description='r448-r449 midlight soft-perimeter mobile MAG passed'
           else
             state=failure
-            description='r447 mobile MAG optics validation failed'
+            description='r448-r449 mobile MAG optics validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r447 mobile MAG optics' \
+            -f context='FormatX r448-r449 mobile MAG optics' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

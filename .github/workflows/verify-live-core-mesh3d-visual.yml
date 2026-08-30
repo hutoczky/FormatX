@@ -1,5 +1,5 @@
 name: Verify live responsive soft 3D MAG
-run-name: Validate production r448 native WebGL MAG on desktop and mobile
+run-name: Validate production r448-r449 native WebGL MAG on desktop and mobile
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Validate live r448 visible balanced soft-defined crystal optics
+      - name: Validate live r448-r449 midlight soft-perimeter crystal optics
         shell: bash
         run: |
           set -euo pipefail
@@ -65,7 +65,7 @@ jobs:
             const page = await context.newPage();
             diagnostics(page, name);
 
-            await page.goto(`${origin}/?live_mag_r448=${name}-${Date.now()}`, {
+            await page.goto(`${origin}/?live_mag_r449=${name}-${Date.now()}`, {
               waitUntil: 'domcontentloaded',
               timeout: 30000
             });
@@ -161,7 +161,7 @@ jobs:
             });
 
             console.log(name.toUpperCase(), JSON.stringify({ before, state }));
-            await page.screenshot({ path: `${name}-r448-balanced.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
+            await page.screenshot({ path: `${name}-r449-midlight.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
 
             assert.equal(state.renderer, 'single-webgl-crystal-organism-r326');
             assert.equal(state.stageRenderer, 'crystal-organism-r326');
@@ -187,13 +187,13 @@ jobs:
             if (mobile) {
               assert.equal(state.mobileBalanceR448, 'ready');
               assert.ok(state.r448Href.includes('formatx-mobile-mag-balance-r448.css'), state.r448Href);
-              assert.ok(state.r448Href.includes('20260830-r448-visible-balanced-soft-defined'), state.r448Href);
-              assert.ok(state.opacity >= .949 && state.opacity <= .951, `mobile r448 opacity mismatch: ${JSON.stringify(state)}`);
-              assert.match(state.filter, /brightness\(1\.11\)/, `mobile r448 luminance missing: ${state.filter}`);
-              assert.match(state.filter, /contrast\(0\.74\)/, `mobile r448 edge definition missing: ${state.filter}`);
-              assert.match(state.filter, /saturate\(1\.015\)/, `mobile r448 spectral balance missing: ${state.filter}`);
-              assert.match(state.filter, /blur\(0\.58px\)/, `mobile r448 soft perimeter missing: ${state.filter}`);
-              assert.ok(state.scale === '0.78 0.82' || state.scale === '0.78 0.82 1', `mobile r448 compact scale mismatch: ${state.scale}`);
+              assert.ok(state.r448Href.includes('20260830-r448-visible-balanced-soft-defined-r449-midlight'), state.r448Href);
+              assert.ok(state.opacity >= .969 && state.opacity <= .971, `mobile r448/r449 opacity mismatch: ${JSON.stringify(state)}`);
+              assert.match(state.filter, /brightness\(1\.18\)/, `mobile r448/r449 luminance missing: ${state.filter}`);
+              assert.match(state.filter, /contrast\(0\.76\)/, `mobile r448/r449 edge softness missing: ${state.filter}`);
+              assert.match(state.filter, /saturate\(1\.025\)/, `mobile r448/r449 spectral balance missing: ${state.filter}`);
+              assert.match(state.filter, /blur\(0\.6px\)/, `mobile r448/r449 soft perimeter missing: ${state.filter}`);
+              assert.ok(state.scale === '0.78 0.82' || state.scale === '0.78 0.82 1', `mobile r448/r449 compact scale mismatch: ${state.scale}`);
               assert.ok(state.energy >= before.energy - .02, JSON.stringify({ before, state }));
               assert.equal(state.position.length, 3);
               assert.notDeepEqual(state.position, before.position);
@@ -215,10 +215,10 @@ jobs:
             } finally {
               await browser.close();
             }
-            for (const file of ['desktop-r448-balanced.png','mobile-r448-balanced.png']) {
+            for (const file of ['desktop-r449-midlight.png','mobile-r449-midlight.png']) {
               assert.ok(fs.statSync(file).size > 10000, file);
             }
-            console.log('PASS: live r448 WebGL crystal uses the visible balanced soft-defined phone optics with non-overlapping controls.');
+            console.log('PASS: live r448/r449 WebGL crystal uses the midlight soft-perimeter phone optics with non-overlapping controls.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
@@ -226,10 +226,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-mag-r448-${{ github.run_id }}
+          name: live-mag-r449-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-live/desktop-r448-balanced.png
-            ${{ runner.temp }}/mag-live/mobile-r448-balanced.png
+            ${{ runner.temp }}/mag-live/desktop-r449-midlight.png
+            ${{ runner.temp }}/mag-live/mobile-r449-midlight.png
           if-no-files-found: warn
           retention-days: 14
 
@@ -243,13 +243,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r448 visible balanced soft-defined mobile MAG passed'
+            description='Live r448-r449 midlight soft-perimeter mobile MAG passed'
           else
             state=failure
-            description='Live r448 MAG diagnostic failed'
+            description='Live r448-r449 MAG diagnostic failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
-            -f context='FormatX live MAG r448' \
+            -f context='FormatX live MAG r448-r449' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

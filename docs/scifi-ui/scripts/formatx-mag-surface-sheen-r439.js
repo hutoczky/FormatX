@@ -1,6 +1,6 @@
 /* FormatX r439 — bounded mobile MAG surface sheen.
    The highlight is dormant between short passes so the hero keeps its idle-zero-frame behaviour.
-   r448 mounts the phone-reviewed visible, softly defined mobile MAG optics owner. */
+   r448/r449 mounts the phone-reviewed midlight, soft-perimeter mobile MAG optics owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -10,7 +10,7 @@ root.dataset.fxMagSurfaceSheenR439='booting';
 
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
-const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r448.css?v=20260830-r448-visible-balanced-soft-defined';
+const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r448.css?v=20260830-r448-visible-balanced-soft-defined-r449-midlight';
 /* Compatibility breadcrumbs only: older source/live gates may inspect these
    exact strings, but the legacy stylesheets/states are not mounted by r448. */
 const LEGACY_OPTICS_STYLE_R447='/scifi-ui/styles/formatx-mobile-mag-balance-r447.css?v=20260830-r447-gentle-glow-soft-perimeter';
