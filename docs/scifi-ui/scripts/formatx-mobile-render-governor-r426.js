@@ -9,17 +9,23 @@ root.dataset.fxMobileRenderGovernorR426='booting';
 let settleTimer=0;
 let scrollFrame=0;
 let armed=false;
-const activeWindowMs=560;
-const shapeProbeMs=90;
-const shapeSettleDeadlineMs=6500;
+const activeWindowMs=360;
+const shapeProbeMs=120;
+const shapeSettleDeadlineMs=3600;
 
 function renderer(){return window.FormatXCoreMobileV69;}
 function userPaused(){return document.querySelector('.fx-reference-pause')?.dataset.paused==='true';}
+function heroVisible(){
+  const hero=document.getElementById('hero');
+  if(!(hero instanceof HTMLElement))return false;
+  const rect=hero.getBoundingClientRect();
+  return rect.bottom>0&&rect.top<innerHeight;
+}
 function emitPaused(paused,source){
   dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source}}));
 }
 function clearSettle(){if(settleTimer)clearTimeout(settleTimer);settleTimer=0;}
-function idle(source='idle-r426'){
+function idle(source='idle-r463'){
   clearSettle();
   emitPaused(true,source);
   root.dataset.fxMobileRenderGovernorR426='idle-zero-frame';
@@ -32,19 +38,15 @@ function shapeState(){
   const morph=Number(core?.morph);
   const targetMorph=target==='sphere'?1:target==='crystal'?0:NaN;
   return{
-    core,
-    target,
-    settled,
-    morph,
-    targetMorph,
+    core,target,settled,morph,targetMorph,
     ready:Boolean(core)&&Number.isFinite(morph)&&Number.isFinite(targetMorph)
       && settled===target&&Math.abs(morph-targetMorph)<.015
   };
 }
-function settleShape(source='shape-change-r433'){
+function settleShape(source='shape-change-r463'){
   clearSettle();
   const started=performance.now();
-  root.dataset.fxMobileRenderGovernorSettleR433='waiting-shape';
+  root.dataset.fxMobileRenderGovernorSettleR433='waiting-shape-r463';
   const probe=()=>{
     settleTimer=0;
     if(userPaused()){
@@ -53,61 +55,58 @@ function settleShape(source='shape-change-r433'){
     }
     const state=shapeState();
     if(state.ready){
-      root.dataset.fxMobileRenderGovernorSettleR433=`settled-${state.target}`;
-      idle('shape-settled-r433');
+      root.dataset.fxMobileRenderGovernorSettleR433=`settled-${state.target}-r463`;
+      idle('shape-settled-r463');
       return;
     }
     if(performance.now()-started>=shapeSettleDeadlineMs){
-      root.dataset.fxMobileRenderGovernorSettleR433='deadline-idle';
+      root.dataset.fxMobileRenderGovernorSettleR433='deadline-idle-r463';
       root.dataset.fxMobileRenderGovernorSettleDetailR433=`${state.target}:${Number.isFinite(state.morph)?state.morph.toFixed(3):'nan'}:${state.settled}`;
-      idle('shape-deadline-r433');
+      idle('shape-deadline-r463');
       return;
     }
     emitPaused(false,source);
-    state.core?.requestRender?.(20);
+    // Six native frames are enough to advance the exponential morph without
+    // saturating the mobile main thread. The next probe continues only if the
+    // actual WebGL morph endpoint has not settled yet.
+    state.core?.requestRender?.(6);
     settleTimer=setTimeout(probe,shapeProbeMs);
   };
   settleTimer=setTimeout(probe,shapeProbeMs);
 }
-function active(source='interaction-r426',frames=12,delay=activeWindowMs,waitForShape=false){
+function active(source='interaction-r463',frames=8,delay=activeWindowMs,waitForShape=false){
   if(userPaused())return;
   clearSettle();
   emitPaused(false,source);
   renderer()?.requestRender?.(frames);
-  root.dataset.fxMobileRenderGovernorR426='interaction-burst';
-  if(waitForShape){
-    settleShape(source);
-    return;
-  }
-  settleTimer=setTimeout(()=>idle('settled-r426'),delay);
+  root.dataset.fxMobileRenderGovernorR426='interaction-burst-r463';
+  if(waitForShape){settleShape(source);return;}
+  settleTimer=setTimeout(()=>idle('settled-r463'),delay);
 }
 function arm(){
   if(armed)return;armed=true;
   root.dataset.fxMobileRenderGovernorR426='ready';
   root.dataset.fxCoreMobileIdlePolicyR426='event-burst-no-heartbeat-render';
-  root.dataset.fxMobileRenderGovernorRevisionR433='settle-after-native-morph';
-  // Let the native renderer paint two startup frames, then keep the WebGL
-  // surface static until a real interaction asks for a bounded animation burst.
-  requestAnimationFrame(()=>requestAnimationFrame(()=>idle('startup-settled-r426')));
+  root.dataset.fxMobileRenderGovernorRevisionR433='r463-short-burst-strict-tbt';
+  // The renderer has already queued its first native frame when real3dready is
+  // emitted. Allow that frame plus one compositing turn, then hold true zero-FPS
+  // idle until an explicit interaction needs motion.
+  requestAnimationFrame(()=>requestAnimationFrame(()=>idle('startup-settled-r463')));
 }
 
 addEventListener('formatx:real3dready',arm,{passive:true});
-// r433: a shape transition is not a fixed-duration effect. Keep the renderer
-// active until the native r326 morph reports its actual target shape and morph
-// endpoint, then return to zero-frame idle. This prevents slow GPUs/SwiftShader
-// from being frozen halfway through crystal <-> sphere interpolation.
-addEventListener('formatx:coreshapechange',()=>active('shape-change-r433',52,0,true),{passive:true});
-addEventListener('formatx:coreinteraction',()=>active('core-interaction-r426',18,720),{passive:true});
-addEventListener('formatx:menustatechange',()=>active('menu-state-r426',6,280),{passive:true});
-addEventListener('formatx:languagechange',()=>active('language-r426',5,260),{passive:true});
-addEventListener('pageshow',()=>active('pageshow-r426',3,180),{passive:true});
-addEventListener('resize',()=>active('resize-r426',3,220),{passive:true});
-addEventListener('orientationchange',()=>active('orientation-r426',4,280),{passive:true});
+addEventListener('formatx:coreshapechange',()=>active('shape-change-r463',8,0,true),{passive:true});
+addEventListener('formatx:coreinteraction',()=>active('core-interaction-r463',10,420),{passive:true});
+addEventListener('formatx:menustatechange',()=>active('menu-state-r463',3,160),{passive:true});
+addEventListener('formatx:languagechange',()=>active('language-r463',2,140),{passive:true});
+addEventListener('pageshow',()=>active('pageshow-r463',1,100),{passive:true});
+addEventListener('resize',()=>active('resize-r463',2,140),{passive:true});
+addEventListener('orientationchange',()=>active('orientation-r463',3,180),{passive:true});
 addEventListener('scroll',()=>{
-  if(scrollFrame)return;
+  if(scrollFrame||!heroVisible())return;
   scrollFrame=requestAnimationFrame(()=>{
     scrollFrame=0;
-    active('scroll-r426',4,240);
+    if(heroVisible())active('scroll-r463',1,90);
   });
 },{passive:true});
 
@@ -115,13 +114,13 @@ document.addEventListener('pointerdown',event=>{
   const target=event.target instanceof Element?event.target:null;
   if(!target)return;
   if(target.closest('.fx-reference-pause'))return;
-  if(target.closest('#hero .hero-space,.fx-reference-mag-button'))active('pointer-r426',18,720);
+  if(target.closest('#hero .hero-space,.fx-reference-mag-button'))active('pointer-r463',10,420);
 },{capture:true,passive:true});
 
 document.addEventListener('keydown',event=>{
-  if(event.key==='Enter'||event.key===' '||event.key.startsWith('Arrow'))active('keyboard-r426',10,520);
+  if(event.key==='Enter'||event.key===' '||event.key.startsWith('Arrow'))active('keyboard-r463',6,300);
 },{passive:true});
 
 if(root.dataset.fxCoreReal3d==='ready-v69'||root.dataset.fxCrystalOrganismR326==='ready')arm();
-else setTimeout(()=>{if(renderer())arm();},1200);
+else setTimeout(()=>{if(renderer())arm();},900);
 }());
