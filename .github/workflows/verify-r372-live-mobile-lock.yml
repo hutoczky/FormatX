@@ -1,4 +1,4 @@
-name: Verify r456 uniform MAG shell
+name: Verify R460 primary MAG runtime
 
 on:
   push:
@@ -6,9 +6,10 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js'
-      - 'docs/scifi-ui/scripts/formatx-core-shapeshifter-r337.js'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
       - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
+      - 'docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js'
+      - 'docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js'
       - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
       - '.github/scripts/validate-living-core-r425-source.cjs'
       - '.github/workflows/verify-r372-live-mobile-lock.yml'
@@ -19,14 +20,14 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r456-live:
+  verify-r460:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate uniform shell source contract
+      - name: Validate R460 source contract
         shell: bash
         run: |
           set -euo pipefail
@@ -35,40 +36,52 @@ jobs:
           SOLID='docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js'
           CURRENT='docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
           MOTION='docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
+          TOUCH='docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js'
+          MINI='docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js'
 
           node --check "$SHADER"
           node --check "$SOLID"
           node --check "$CURRENT"
           node --check "$MOTION"
+          node --check "$TOUCH"
+          node --check "$MINI"
           node .github/scripts/validate-living-core-r425-source.cjs
 
-          grep -Fq "const VERSION='r456-uniform-solid-glass-no-vram-artifact'" "$SOLID"
-          grep -Fq "const smoothWeight=mobile?'.985':'.930'" "$SOLID"
-          grep -Fq "edgePattern,'float edge=0.0;'" "$SOLID"
-          grep -Fq "next=next.replace(facetPulse,'float facetPulse=.5;')" "$SOLID"
-          grep -Fq "glass+=vec3(.025,.22,.50)*.42;" "$SOLID"
-          grep -Fq "glass+=spectral*veins*.10*fresnel;" "$SOLID"
-          grep -Fq "glass+=spectral*membrane*.055*fresnel;" "$SOLID"
+          grep -Fq "const VERSION='r460-uniform-solid-glass-soft-mobile-optics'" "$SOLID"
+          grep -Fq "const smoothWeight=mobile?'.992':'.930'" "$SOLID"
+          grep -Fq "glass+=spectral*fresnel*(.76+.48*visualEnergy);" "$SOLID"
+          grep -Fq "organ+=ice*nucleus*(2.02+.62*visualEnergy);" "$SOLID"
+          grep -Fq "fxCoreMobileOpticalBalanceR460=mobile?'soft-nucleus-broad-fresnel-feather':'desktop-material-unchanged'" "$SOLID"
           grep -Fq "fxCoreOuterNoiseR456='disabled-on-glass-shell'" "$SOLID"
-          grep -Fq "fxCoreInnerLifeR456='preserved'" "$SOLID"
           grep -Fq "fxCoreTriangleEdgesR456='disabled'" "$SOLID"
 
-          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$CURRENT"
-          grep -Fq "await addScript(SOLID_GLASS,'data-fx-solid-glass-r456')" "$CURRENT"
-          grep -Fq "fxCurrentMagOpticsR456='uniform-solid-glass-shell-no-vram-artifact'" "$CURRENT"
-          grep -Fq 'r326-direct-r456-uniform-mobile-glass' "$CURRENT"
-          grep -Fq 'r326-direct-r456-uniform-desktop-glass' "$CURRENT"
+          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics' "$CURRENT"
+          grep -Fq 'formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim' "$CURRENT"
+          grep -Fq 'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe' "$CURRENT"
+          grep -Fq "cleanupLegacyMagRuntime()" "$CURRENT"
+          grep -Fq "fxPrimaryMagOwnerR460='r326-only'" "$CURRENT"
 
-          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$MOTION"
-          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$MOTION"
-          grep -Fq "warmAsset(CURRENT_SOLID_GLASS,'script')" "$MOTION"
-          grep -Fq "fxSolidGlassCriticalWarmR456='ready-all-devices'" "$MOTION"
+          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r460-primary-controller-clean-runtime' "$MOTION"
+          grep -Fq 'isRetiredMagRuntime' "$MOTION"
+          grep -Fq "fxLegacyMagRuntimeCleanupR460='ready'" "$MOTION"
+          grep -Fq '.fx-crystal-organism-r326-stage' "$MOTION"
 
-          grep -Fq 'production-r455-single-native-webgl-optics-owner-soft-mobile-balance' "$CSS"
+          grep -Fq "const VERSION='native-r326-touch-r460-controller-tap'" "$TOUCH"
+          grep -Fq 'window.FormatXMiniMagR459' "$TOUCH"
+          grep -Fq 'formatx:heromagcontrollerrequest' "$TOUCH"
+          grep -Fq "fxHeroMagControllerR460='ready'" "$TOUCH"
+          grep -Fq 'formatx:heromagcontrollerrequest' "$MINI"
+          grep -Fq "fxMiniMagHeroBridgeR460='ready'" "$MINI"
+
+          grep -Fq 'brightness(1.01)' "$CSS"
+          grep -Fq 'contrast(.86)' "$CSS"
+          grep -Fq 'blur(.90px)' "$CSS"
+          grep -Fq 'production-r460-single-native-webgl-optics-owner-soft-mobile-rim' "$CSS"
           grep -Fq "const REVISION = 'living-luminous-electric-crystal-r454'" "$SHADER"
           grep -Fq 'single-luminous-webgl-material-owner' "$SHADER"
 
-      - name: Verify production serves uniform shell chain
+      - name: Verify production serves R460 chain
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
         shell: bash
         run: |
           set -euo pipefail
@@ -76,26 +89,32 @@ jobs:
           SOLID_URL="$ORIGIN/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js"
           CURRENT_URL="$ORIGIN/scifi-ui/scripts/formatx-current-mag-loader-r422.js"
           MOTION_URL="$ORIGIN/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js"
-          SHADER_URL="$ORIGIN/scifi-ui/scripts/formatx-crystal-organism-r326.js"
-          SOLID_TMP="$RUNNER_TEMP/r456-solid-live.js"
-          CURRENT_TMP="$RUNNER_TEMP/r456-current-live.js"
-          MOTION_TMP="$RUNNER_TEMP/r456-motion-live.js"
-          SHADER_TMP="$RUNNER_TEMP/r454-shader-live.js"
+          TOUCH_URL="$ORIGIN/scifi-ui/scripts/formatx-native-mag-touch-r434.js"
+          MINI_URL="$ORIGIN/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js"
+          CSS_URL="$ORIGIN/scifi-ui/styles/formatx-core-shapeshifter-r337.css"
+          SOLID_TMP="$RUNNER_TEMP/r460-solid-live.js"
+          CURRENT_TMP="$RUNNER_TEMP/r460-current-live.js"
+          MOTION_TMP="$RUNNER_TEMP/r460-motion-live.js"
+          TOUCH_TMP="$RUNNER_TEMP/r460-touch-live.js"
+          MINI_TMP="$RUNNER_TEMP/r460-mini-live.js"
+          CSS_TMP="$RUNNER_TEMP/r460-optics-live.css"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "r456 uniform live verification $attempt/45"
-            suffix="r456_uniform=${GITHUB_RUN_ID}_${attempt}"
+            echo "R460 live verification $attempt/45"
+            suffix="r460=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${SOLID_URL}?${suffix}" -o "$SOLID_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CURRENT_URL}?${suffix}" -o "$CURRENT_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MOTION_URL}?${suffix}" -o "$MOTION_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${SHADER_URL}?${suffix}" -o "$SHADER_TMP"; then
-              if grep -Fq "const VERSION='r456-uniform-solid-glass-no-vram-artifact'" "$SOLID_TMP" \
-                && grep -Fq "fxCoreOuterNoiseR456='disabled-on-glass-shell'" "$SOLID_TMP" \
-                && grep -Fq "edgePattern,'float edge=0.0;'" "$SOLID_TMP" \
-                && grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$CURRENT_TMP" \
-                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$MOTION_TMP" \
-                && grep -Fq "const REVISION = 'living-luminous-electric-crystal-r454'" "$SHADER_TMP"; then
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${TOUCH_URL}?${suffix}" -o "$TOUCH_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MINI_URL}?${suffix}" -o "$MINI_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP"; then
+              if grep -Fq "const VERSION='r460-uniform-solid-glass-soft-mobile-optics'" "$SOLID_TMP" \
+                && grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics' "$CURRENT_TMP" \
+                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r460-primary-controller-clean-runtime' "$MOTION_TMP" \
+                && grep -Fq "const VERSION='native-r326-touch-r460-controller-tap'" "$TOUCH_TMP" \
+                && grep -Fq 'formatx:heromagcontrollerrequest' "$MINI_TMP" \
+                && grep -Fq 'production-r460-single-native-webgl-optics-owner-soft-mobile-rim' "$CSS_TMP"; then
                 ok=1
                 break
               fi
@@ -104,9 +123,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves r456 uniform outer glass shell with preserved inner living layer and no topology/noise breakup.'
+          echo 'PASS: production serves the R460 soft mobile MAG, hero-controller bridge and clean single-R326 runtime chain.'
 
-      - name: Publish r456 uniform status
+      - name: Publish R460 status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -115,13 +134,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r456 uniform MAG shell passed'
+            description='R460 primary MAG runtime contract passed'
           else
             state=failure
-            description='Live r456 uniform MAG shell verification failed'
+            description='R460 primary MAG runtime verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r456 uniform MAG shell' \
+            -f context='FormatX R460 MAG runtime' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
