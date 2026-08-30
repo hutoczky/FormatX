@@ -192,6 +192,31 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
+/* r437 — live phone review trim.
+   The screenshot showed the four-point silhouette still reading too hard and
+   the cyan/violet energy spreading too far from the body. Keep the WebGL shape
+   and moving heart intact, but soften only the final phone composite: a very
+   small sub-pixel blur rounds the razor edge while lower contrast/brightness
+   restrains the outer bloom without flattening the centre nucleus. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.90 !important;
+    scale:.995 !important;
+    filter:blur(.38px) brightness(.90) contrast(.89) saturate(.98) !important;
+    -webkit-filter:blur(.38px) brightness(.90) contrast(.89) saturate(.98) !important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.89 !important;
+    scale:.992 !important;
+    filter:blur(.42px) brightness(.89) contrast(.88) saturate(.97) !important;
+    -webkit-filter:blur(.42px) brightness(.89) contrast(.88) saturate(.97) !important;
+  }
+}
+
 /* production-r428-direct-r326-soft-mobile-optics-pure-native-3d-a11y-touch */
 /* production-r430-direct-r326-restrained-mobile-optics-pure-native-3d-a11y-touch */
 /* production-r435-direct-r326-soft-rim-following-visible-heart-native-3d */
+/* production-r437-direct-r326-restrained-halo-soft-edge-mobile-review */
