@@ -9,11 +9,13 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/styles/formatx-current-mag-r422.css'
       - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
+      - 'docs/scifi-ui/styles/formatx-mini-mag-assistant-r459.css'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/styles/formatx-mobile-header-final-r418.css'
       - '.github/scripts/validate-living-core-r425-source.cjs'
@@ -28,24 +30,28 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Validate R457 optics, R458 first-paint and touch source contracts
+      - name: Validate R458 optics, R459 Mini MAG and touch source contracts
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          node --check docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           node --check docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
           node .github/scripts/validate-living-core-r425-source.cjs
           grep -q "touch-pulse-r417-ui-safe" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           grep -q "production-r418-mobile-first-paint-header-lock" docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css
           grep -q "production-r428-final-cross-device-header-owner-language-visible-non-occluding" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
-          grep -q "direct-r326-r456-uniform-solid-glass-idle-zero" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
-          grep -q "r457-soft-mobile-edge-bloom" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
-          grep -q "brightness(1.20)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "contrast(.98)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "saturate(1.31)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "blur(.48px)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "direct-r326-r459-persistent-mini-mag" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          grep -q "r458-restrained-center-soft-rim" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          grep -q "formatx-mini-mag-assistant-r459" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          grep -q "brightness(1.08)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "contrast(.92)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "saturate(1.18)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "blur(.62px)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "position: fixed" docs/scifi-ui/styles/formatx-mini-mag-assistant-r459.css
+          grep -q "fxMiniMagPrimaryHeroR459='preserved-native-webgl'" docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js
           grep -q "static-first-paint-owner-no-late-css" docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           grep -q "static-first-paint-owner-no-late-css" docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
       - name: Install Chromium runtime
@@ -56,7 +62,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify R457 phone optics, header, language and touch targets
+      - name: Verify R458 phone optics, persistent Mini MAG, header and touch targets
         shell: bash
         env:
           NODE_PATH: ${{ runner.temp }}/mobile-touch/node_modules
@@ -77,10 +83,12 @@ jobs:
               const r=document.documentElement.dataset;
               return r.fxCrystalOrganismR326==='ready'
                 && r.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+                && r.fxMiniMagAssistantR459==='ready'
                 && r.fxMobileHeaderFinalR418==='loaded-last-mobile'
                 && r.fxMobileReferenceStylePolicyR458==='static-first-paint-owner-no-late-css'
                 && Boolean(document.querySelector('.topbar > .fx-language-toggle'))
-                && Boolean(document.querySelector('.fx-three-sound'));
+                && Boolean(document.querySelector('.fx-three-sound'))
+                && Boolean(document.querySelector('.fx-mini-mag-launcher-r459'));
             },null,{timeout:45000});
             await page.waitForTimeout(250);
             const state=await page.evaluate(()=>{
@@ -92,25 +100,42 @@ jobs:
               const menu=topbar?.querySelector(':scope > .fx-reference-menu-button');
               const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
               const sound=document.querySelector('.fx-three-sound');
+              const mini=document.querySelector('.fx-mini-mag-launcher-r459');
               const cs=canvas?getComputedStyle(canvas):null;
-              return{topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),sound:box(sound),langText:String(lang?.textContent||'').trim(),filter:cs?.filter||'',canvas:box(canvas),renderer:document.documentElement.dataset.fxCoreRenderer||'',policy:document.documentElement.dataset.fxMobileReferenceStylePolicyR458||''};
+              return{topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),sound:box(sound),mini:box(mini),langText:String(lang?.textContent||'').trim(),filter:cs?.filter||'',canvas:box(canvas),canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,renderer:document.documentElement.dataset.fxCoreRenderer||'',policy:document.documentElement.dataset.fxMobileReferenceStylePolicyR458||'',miniOwner:document.documentElement.dataset.fxMiniMagPrimaryHeroR459||''};
             });
-            console.log('R457_MOBILE_STATE',JSON.stringify(state));
-            for(const key of ['topbar','brand','mag','lang','menu','sound','canvas'])assert(state[key],`missing ${key}: `+JSON.stringify(state));
+            console.log('R459_MOBILE_STATE',JSON.stringify(state));
+            for(const key of ['topbar','brand','mag','lang','menu','sound','canvas','mini'])assert(state[key],`missing ${key}: `+JSON.stringify(state));
             assert(state.topbar.top<=1&&state.topbar.height>=68&&state.topbar.height<=76,'topbar geometry changed: '+JSON.stringify(state));
             for(const key of ['brand','mag','lang','menu'])assert(state[key].top>=state.topbar.top-1&&state[key].bottom<=state.topbar.bottom+1,`${key} escaped topbar: `+JSON.stringify(state));
             assert(!overlap(state.brand,state.mag,2)&&!overlap(state.mag,state.lang,2)&&!overlap(state.lang,state.menu,2),'header controls overlap: '+JSON.stringify(state));
-            assert(state.lang.width>=44&&state.lang.height>=44&&state.sound.width>=44&&state.sound.height>=44,'touch target below 44px: '+JSON.stringify(state));
+            assert(state.lang.width>=44&&state.lang.height>=44&&state.sound.width>=44&&state.sound.height>=44&&state.mini.width>=54&&state.mini.height>=54,'touch target below minimum: '+JSON.stringify(state));
+            assert(state.mini.position==='fixed','Mini MAG is not fixed: '+JSON.stringify(state));
+            assert(state.canvasCount===1,'Mini MAG created a second hero renderer: '+JSON.stringify(state));
+            assert(state.miniOwner==='preserved-native-webgl','primary hero preservation marker missing: '+JSON.stringify(state));
             assert(state.langText==='HU','language did not start in HU: '+JSON.stringify(state));
             assert(state.policy==='static-first-paint-owner-no-late-css','late compatibility CSS path became active: '+JSON.stringify(state));
-            assert(/brightness\(1\.2(?:0)?\)/.test(state.filter),'R457 mobile brightness missing: '+state.filter);
-            assert(/contrast\(0?\.98\)/.test(state.filter),'R457 mobile contrast missing: '+state.filter);
-            assert(/saturate\(1\.31\)/.test(state.filter),'R457 mobile saturation missing: '+state.filter);
-            assert(/blur\(0\.48px\)/.test(state.filter),'R457 soft edge missing: '+state.filter);
+            assert(/brightness\(1\.08\)/.test(state.filter),'R458 mobile brightness missing: '+state.filter);
+            assert(/contrast\(0?\.92\)/.test(state.filter),'R458 mobile contrast missing: '+state.filter);
+            assert(/saturate\(1\.18\)/.test(state.filter),'R458 mobile saturation missing: '+state.filter);
+            assert(/blur\(0\.62px\)/.test(state.filter),'R458 soft edge missing: '+state.filter);
             assert(state.renderer==='single-webgl-crystal-organism-r326','wrong renderer: '+JSON.stringify(state));
+
+            const mini=page.locator('.fx-mini-mag-launcher-r459').first();
+            const miniBefore=await mini.boundingBox();assert(miniBefore,'Mini MAG box missing');
+            await mini.tap();
+            await page.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open==='true',null,{timeout:5000});
+            const panel=page.locator('.fx-mini-mag-panel-r459').first();
+            const panelBox=await panel.boundingBox();assert(panelBox&&panelBox.width>200&&panelBox.height>200,'Mini MAG panel did not open');
+            await page.locator('.fx-mini-mag-nav-r459 [data-section="pricing"]').tap();
+            await page.waitForFunction(()=>document.documentElement.dataset.fxMiniMagLastNavigationR459==='pricing',null,{timeout:5000});
+            await page.waitForTimeout(350);
+            const miniAfter=await mini.boundingBox();assert(miniAfter,'Mini MAG disappeared after navigation');
+            assert(Math.abs(miniBefore.x-miniAfter.x)<2&&Math.abs(miniBefore.y-miniAfter.y)<2,'Mini MAG did not remain fixed after navigation');
+
             const lang=page.locator('.topbar > .fx-language-toggle').first();
             await lang.tap();
-            await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.topbar > .fx-language-toggle')?.textContent?.trim()==='EN',null,{timeout:5000});
+            await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.topbar > .fx-language-toggle')?.textContent?.trim()==='EN'&&document.documentElement.dataset.fxMiniMagLanguageR459==='en',null,{timeout:5000});
             const sound=page.locator('.fx-three-sound').first();
             const sb=await sound.boundingBox();assert(sb,'SOUND box missing');
             const topmost=await page.evaluate(({x,y})=>{const el=document.elementFromPoint(x,y);return Boolean(el?.closest?.('.fx-three-sound'));},{x:sb.x+sb.width/2,y:sb.y+sb.height/2});
@@ -120,7 +145,7 @@ jobs:
             const magTopmost=await page.evaluate(({x,y})=>Boolean(document.elementFromPoint(x,y)?.closest?.('.fx-reference-mag-button')),{x:mb.x+mb.width/2,y:mb.y+mb.height/2});
             assert(magTopmost,'MAG is not the topmost touch target');
             await browser.close();
-            console.log('PASS: R457 soft mobile optics, R458 first-paint ownership, HU/EN, MAG and SOUND touch targets passed.');
+            console.log('PASS: R458 restrained optics, R459 persistent Mini MAG, one primary WebGL MAG, HU/EN and touch targets passed.');
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish current mobile visual/touch status
@@ -130,5 +155,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='R457 soft mobile MAG, R458 first paint, language and touch passed'; else state=failure; description='Current cross-device language, visual or touch ownership failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX R454 MAG language and touch' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='R458 optics, R459 Mini MAG, language and touch passed'; else state=failure; description='Current primary/Mini MAG, language or touch ownership failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX R459 MAG language and touch' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
