@@ -28,7 +28,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Validate current r326, r428 header and r430 optics source contracts
+      - name: Validate current r442 optics, r428 header and r326 idle-zero source contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -51,20 +51,23 @@ jobs:
           grep -q "production-r418-final-mobile-header-owner" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
           grep -q "production-r428-final-cross-device-header-owner-language-visible-non-occluding" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
           grep -q "production-r428-direct-r326-soft-mobile-optics-pure-native-3d-a11y-touch" docs/scifi-ui/styles/formatx-current-mag-r422.css
-          grep -q "production-r430-direct-r326-restrained-mobile-optics-pure-native-3d-a11y-touch" docs/scifi-ui/styles/formatx-current-mag-r422.css
-          grep -q "production-r430-final-mobile-mag-optics-owner" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "direct-r326-r428-cross-device-header" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          grep -q "production-r440-direct-r326-restrained-bloom-native-soft-edge-mobile-review" docs/scifi-ui/styles/formatx-current-mag-r422.css
+          grep -q "production-r442-final-mobile-mag-optics-owner-restrained-native-no-blur" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "direct-r326-r442-style-first-idle-zero-mobile-budget" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          grep -q "styles-ready-before-renderer" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
           grep -q "r428-mobile-direct-topbar-child" docs/scifi-ui/scripts/single-language-toggle.js
           grep -q "r428-desktop-direct-topbar-child" docs/scifi-ui/scripts/single-language-toggle.js
           grep -q "single-language-toggle-v6-cross-device-header" docs/scifi-ui/scripts/single-language-toggle.js
           grep -q "single-webgl-crystal-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -q "four-direction-asymmetric-crystal-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -q "translucent-living-facet-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "heartbeat-and-interaction-bursts-no-idle-loop-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -q "interaction-bursts-idle-zero-frame-r441" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -q "18x36-two-pass-single-startup-frame" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -q "pure-webgl3d-no-2d-overlays" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "brightness(.955)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "contrast(.98)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "saturate(1.08)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "brightness(.90)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "contrast(.89)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "saturate(.95)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "brightness(.89) contrast(.88) saturate(.94)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           if grep -q "blur(" docs/scifi-ui/styles/formatx-current-mag-r422.css; then
             echo "Current MAG CSS must remain blur-free for pure native 3D" >&2
             exit 1
@@ -81,7 +84,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify r430 phone optics, r428 language selector, MAG, SOUND and touch
+      - name: Verify r442 phone optics, r428 language selector, MAG, SOUND and touch
         shell: bash
         run: |
           set -euo pipefail
@@ -106,7 +109,7 @@ jobs:
               const skipStyle=skip?getComputedStyle(skip):null;
               return {topbar:rect(topbar),brand:rect(brand),skip:rect(skip),skipPosition:skipStyle?.position||'',skipTop:skipStyle?.top||''};
             });
-            console.log('R430_FIRST_PAINT',JSON.stringify(firstPaint));
+            console.log('R442_FIRST_PAINT',JSON.stringify(firstPaint));
             assert(firstPaint.topbar&&firstPaint.topbar.top<=1&&firstPaint.topbar.height>=68&&firstPaint.topbar.height<=76,'mobile topbar is not the first 72px carrier: '+JSON.stringify(firstPaint));
             assert(firstPaint.brand&&firstPaint.brand.top>=firstPaint.topbar.top&&firstPaint.brand.bottom<=firstPaint.topbar.bottom+1,'brand escaped the first-paint topbar: '+JSON.stringify(firstPaint));
             assert(firstPaint.skip&&firstPaint.skip.bottom<0&&firstPaint.skipPosition==='fixed','skip link consumed touch layout space: '+JSON.stringify(firstPaint));
@@ -117,6 +120,7 @@ jobs:
                 && root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
                 && root.dataset.fxMobileHeaderFinalR418==='loaded-last-mobile'
                 && root.dataset.fxReferenceLanguageLayout==='r428-mobile-direct-topbar-child'
+                && root.dataset.fxCurrentMagStartupR442==='styles-ready-before-renderer'
                 && Boolean(document.querySelector('.topbar > .fx-language-toggle'))
                 && Boolean(document.querySelector('.fx-three-sound'))
                 && Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas'));
@@ -136,9 +140,9 @@ jobs:
               let gl=false,glError=null;
               if(canvas instanceof HTMLCanvasElement){const context=canvas.getContext('webgl2')||canvas.getContext('webgl');gl=Boolean(context);glError=context?.getError?.()??null;}
               const r=document.documentElement.dataset;
-              return {count:bars.length,topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),langText:String(lang?.textContent||'').trim(),menu:box(menu),canvas:box(canvas),filter:cs?.filter||'',canvasOpacity:Number(cs?.opacity||0),gl,glError,finalOwner:r.fxMobileHeaderFinalR418||'',languageLayout:r.fxReferenceLanguageLayout||'',renderer:r.fxCoreRenderer||'',geometry:r.fxCoreGeometry||'',material:r.fxCoreMaterial||'',scheduler:r.fxCoreScheduler||'',composition:r.fxCoreCompositionR285||'',visual:r.fxCoreMobileVisualR326||'',gpu:r.fxGpuCapability||''};
+              return {count:bars.length,topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),langText:String(lang?.textContent||'').trim(),menu:box(menu),canvas:box(canvas),filter:cs?.filter||'',canvasOpacity:Number(cs?.opacity||0),gl,glError,finalOwner:r.fxMobileHeaderFinalR418||'',languageLayout:r.fxReferenceLanguageLayout||'',renderer:r.fxCoreRenderer||'',geometry:r.fxCoreGeometry||'',topology:r.fxCoreGeometryTopology||'',material:r.fxCoreMaterial||'',scheduler:r.fxCoreScheduler||'',schedulerR442:r.fxCoreSchedulerR442||'',startup:r.fxCurrentMagStartupR442||'',composition:r.fxCoreCompositionR285||'',visual:r.fxCoreMobileVisualR326||'',gpu:r.fxGpuCapability||''};
             });
-            console.log('R430_MOBILE_STATE',JSON.stringify(state));
+            console.log('R442_MOBILE_STATE',JSON.stringify(state));
             assert(state.count===1,'exactly one visible mobile topbar is required: '+JSON.stringify(state));
             assert(state.finalOwner==='loaded-last-mobile','final r428 mobile header owner is not authoritative: '+JSON.stringify(state));
             assert(state.languageLayout==='r428-mobile-direct-topbar-child','mobile language selector is not owned by the canonical topbar: '+JSON.stringify(state));
@@ -148,16 +152,19 @@ jobs:
             assert(state.mag.position==='absolute'&&state.lang.position==='absolute'&&state.menu.position==='absolute','header controls must remain attached absolute children: '+JSON.stringify(state));
             assert(!overlaps(state.brand,state.mag,2)&&!overlaps(state.mag,state.lang,2)&&!overlaps(state.lang,state.menu,2),'mobile header controls overlap: '+JSON.stringify(state));
             assert(state.canvas&&state.canvas.width>100&&state.canvas.height>100,'r326 MAG canvas is missing or collapsed: '+JSON.stringify(state));
-            assert(state.canvasOpacity>=.935&&state.canvasOpacity<=.945,'r430 mobile MAG opacity restraint is missing: '+JSON.stringify(state));
-            assert(state.filter.includes('brightness(0.955)'),'r430 mobile MAG brightness restraint is missing: '+JSON.stringify(state));
-            assert(state.filter.includes('contrast(0.98)'),'r430 mobile MAG edge restraint is missing: '+JSON.stringify(state));
-            assert(state.filter.includes('saturate(1.08)'),'r430 mobile MAG saturation restraint is missing: '+JSON.stringify(state));
-            assert(!state.filter.includes('blur('),'r430 pure native-3D MAG must remain blur-free: '+JSON.stringify(state));
+            assert(state.canvasOpacity>=.885&&state.canvasOpacity<=.895,'r442 mobile MAG opacity restraint is missing: '+JSON.stringify(state));
+            assert(state.filter.includes('brightness(0.89)'),'r442 mobile MAG brightness restraint is missing: '+JSON.stringify(state));
+            assert(state.filter.includes('contrast(0.88)'),'r442 mobile MAG edge restraint is missing: '+JSON.stringify(state));
+            assert(state.filter.includes('saturate(0.94)'),'r442 mobile MAG saturation restraint is missing: '+JSON.stringify(state));
+            assert(!state.filter.includes('blur('),'r442 pure native-3D MAG must remain blur-free: '+JSON.stringify(state));
             assert(state.gl&&state.glError===0,'r326 MAG has no healthy WebGL context: '+JSON.stringify(state));
             assert(state.renderer==='single-webgl-crystal-organism-r326','wrong production MAG renderer: '+JSON.stringify(state));
             assert(state.geometry==='four-direction-asymmetric-crystal-organism-r326','r326 geometry contract missing: '+JSON.stringify(state));
+            assert(state.topology==='18x36-closed-uv-surface','r442 mobile geometry budget is not active: '+JSON.stringify(state));
             assert(state.material==='translucent-living-facet-organism-r326','r326 material contract missing: '+JSON.stringify(state));
-            assert(state.scheduler==='heartbeat-and-interaction-bursts-no-idle-loop-r326','r326 MAG regressed to an idle RAF loop: '+JSON.stringify(state));
+            assert(state.scheduler==='interaction-bursts-idle-zero-frame-r441','r442 MAG is not using the idle-zero scheduler: '+JSON.stringify(state));
+            assert(state.schedulerR442==='mobile-two-pass-lower-density-idle-zero','r442 mobile GPU budget marker missing: '+JSON.stringify(state));
+            assert(state.startup==='styles-ready-before-renderer','r442 renderer started before geometry styles: '+JSON.stringify(state));
             assert(state.composition==='pure-webgl3d-no-2d-overlays','r326 MAG is no longer pure WebGL 3D: '+JSON.stringify(state));
             assert(['webgl2','webgl1'].includes(state.gpu),'r326 GPU capability marker missing: '+JSON.stringify(state));
 
@@ -192,7 +199,7 @@ jobs:
               audioOwner:document.documentElement.dataset.fxAudioOwner||'',
               audioState:document.documentElement.dataset.fxAudioState||''
             }));
-            console.log('R430_SOUND_TOUCH_ON',JSON.stringify(firstDelivery));
+            console.log('R442_SOUND_TOUCH_ON',JSON.stringify(firstDelivery));
             assert(firstDelivery.audioOwner==='professional-v6','professional audio owner did not receive SOUND activation: '+JSON.stringify(firstDelivery));
             assert(firstDelivery.audioState==='on','first physical SOUND tap did not switch audio on: '+JSON.stringify(firstDelivery));
             assert(['native-click','fallback-click-delivered'].includes(firstDelivery.recovery),'SOUND touch recovery did not complete: '+JSON.stringify(firstDelivery));
@@ -208,7 +215,7 @@ jobs:
               audioOwner:document.documentElement.dataset.fxAudioOwner||'',
               audioState:document.documentElement.dataset.fxAudioState||''
             }));
-            console.log('R430_SOUND_TOUCH_OFF',JSON.stringify(secondDelivery));
+            console.log('R442_SOUND_TOUCH_OFF',JSON.stringify(secondDelivery));
             assert(secondDelivery.audioOwner==='professional-v6','professional audio owner disappeared after second SOUND tap: '+JSON.stringify(secondDelivery));
             assert(secondDelivery.audioState==='off','second physical SOUND tap did not switch audio off: '+JSON.stringify(secondDelivery));
             assert(['native-click','fallback-click-delivered'].includes(secondDelivery.recovery),'second SOUND touch recovery did not complete: '+JSON.stringify(secondDelivery));
@@ -226,7 +233,7 @@ jobs:
             await page.touchscreen.tap(coreTap.x,coreTap.y);
             await page.waitForTimeout(300);
             const coreEvents=await page.evaluate(()=>window.__fxCoreTouchEvents||[]);
-            console.log('R430_MAG_TOUCH',JSON.stringify(coreEvents));
+            console.log('R442_MAG_TOUCH',JSON.stringify(coreEvents));
             assert(coreEvents.some(event=>event?.phase==='press'),'direct MAG touch no longer reaches the r326 interaction owner');
             assert(coreEvents.some(event=>event?.phase==='release'),'direct MAG touch does not release cleanly');
 
@@ -248,7 +255,7 @@ jobs:
               const r=button?.getBoundingClientRect(),b=bar?.getBoundingClientRect(),s=button?getComputedStyle(button):null;
               return {text:String(button?.textContent||'').trim(),layout:document.documentElement.dataset.fxReferenceLanguageLayout||'',box:r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null,bar:b?{left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width,height:b.height}:null,display:s?.display||'',visibility:s?.visibility||'',opacity:Number(s?.opacity||0)};
             });
-            console.log('R430_DESKTOP_LANGUAGE',JSON.stringify(desktopLanguage));
+            console.log('R442_DESKTOP_LANGUAGE',JSON.stringify(desktopLanguage));
             assert(desktopLanguage.text==='HU','desktop language selector did not start in HU: '+JSON.stringify(desktopLanguage));
             assert(desktopLanguage.layout==='r428-desktop-direct-topbar-child','desktop language selector is not owned by the canonical topbar: '+JSON.stringify(desktopLanguage));
             assert(desktopLanguage.box&&desktopLanguage.box.width>=44&&desktopLanguage.box.height>=44&&desktopLanguage.box.left>=0&&desktopLanguage.box.right<=1440,'desktop HU/EN selector is missing or outside the viewport: '+JSON.stringify(desktopLanguage));
@@ -257,7 +264,7 @@ jobs:
             await desktopCtx.close();
 
             await browser.close();
-            console.log('PASS: r430 mobile optics + r428 mobile/desktop HU/EN selector, r326 pure WebGL MAG, SOUND ON/OFF and direct MAG touch passed.');
+            console.log('PASS: r442 restrained phone optics + style-first startup + idle-zero/two-pass mobile MAG, r428 language, SOUND ON/OFF and direct MAG touch passed.');
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish current mobile visual/touch status
@@ -267,5 +274,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r430 phone optics + r428 language + r326 MAG/touch passed'; else state=failure; description='Current cross-device language, visual or touch ownership failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r442 optics/startup + r428 language + r326 MAG/touch passed'; else state=failure; description='Current cross-device language, visual or touch ownership failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX r428 cross-device language and touch' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
