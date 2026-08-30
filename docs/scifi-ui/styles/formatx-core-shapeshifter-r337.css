@@ -1,4 +1,4 @@
-/* FormatX r454 — the one native WebGL MAG optical owner.
+/* FormatX r455 — the one native WebGL MAG optical owner.
    The shader owns geometry, caustics and the intermittent electric sweep.
    CSS only preserves the touch surface and the final readable display tone. */
 
@@ -59,6 +59,8 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     top: auto !important;
   }
 
+  /* r455 mobile optical balance: keep the crystal luminous and translucent,
+     but remove the blown centre and razor-cut silhouette from physical phones. */
   html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: 1 !important;
@@ -67,17 +69,19 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     translate: none !important;
     rotate: none !important;
     filter:
-      brightness(1.52)
-      contrast(1.16)
-      saturate(1.58)
-      drop-shadow(0 0 1px rgba(126,239,255,.20))
-      drop-shadow(0 0 5px rgba(82,91,255,.10)) !important;
+      brightness(1.30)
+      contrast(1.04)
+      saturate(1.42)
+      blur(.35px)
+      drop-shadow(0 0 1px rgba(126,239,255,.12))
+      drop-shadow(0 0 4px rgba(82,91,255,.07)) !important;
     -webkit-filter:
-      brightness(1.52)
-      contrast(1.16)
-      saturate(1.58)
-      drop-shadow(0 0 1px rgba(126,239,255,.20))
-      drop-shadow(0 0 5px rgba(82,91,255,.10)) !important;
+      brightness(1.30)
+      contrast(1.04)
+      saturate(1.42)
+      blur(.35px)
+      drop-shadow(0 0 1px rgba(126,239,255,.12))
+      drop-shadow(0 0 4px rgba(82,91,255,.07)) !important;
   }
 
   html:root:root body.living-architecture .topbar .fx-reference-mag-button {
@@ -114,4 +118,4 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
   }
 }
 
-/* production-r454-single-native-webgl-optics-owner-visible-no-overlay */
+/* production-r455-single-native-webgl-optics-owner-soft-mobile-balance */
