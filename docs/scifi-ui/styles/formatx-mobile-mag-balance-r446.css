@@ -1,0 +1,87 @@
+/* FormatX r446 — phone-reviewed restrained MAG correction.
+   r445 accidentally replaced the established mobile crystal scale with ~1.0,
+   making the MAG fill the canvas and exposing a hard WebGL perimeter. r446
+   restores the compact reference silhouette, keeps useful body luminance, and
+   applies only a sub-pixel optical softening instead of an overdriven halo. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
+  html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.93!important;
+    scale:.80 .84!important;
+    transform-origin:50% 48%!important;
+    image-rendering:auto!important;
+    filter:
+      brightness(1.11)
+      contrast(.79)
+      saturate(1.02)
+      blur(.42px)
+      drop-shadow(0 0 4px rgba(112,222,255,.024))
+      drop-shadow(0 0 12px rgba(92,88,255,.010))!important;
+    -webkit-filter:
+      brightness(1.11)
+      contrast(.79)
+      saturate(1.02)
+      blur(.42px)
+      drop-shadow(0 0 4px rgba(112,222,255,.024))
+      drop-shadow(0 0 12px rgba(92,88,255,.010))!important;
+  }
+
+  /* The interaction cue belongs to the crystal hit surface, not underneath the
+     visible SOUND / ASK / PAUSE row on phones. It remains available through the
+     portal aria-label while the duplicate visual caption is removed. */
+  html:root:root:root body.living-architecture #hero#hero .hero-space > .fx-crystal-cue-r318 {
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+
+  /* Touch browsers can restore focus to the first anchor after reload, which
+     made the skip link occupy a visible row without keyboard intent. Desktop
+     keyboard accessibility is unchanged; on coarse-pointer phone layouts the
+     link is kept outside the rendered surface. */
+  html:root:root body .skip-link,
+  html:root:root body .skip-link:focus,
+  html:root:root body .skip-link:focus-visible {
+    position:fixed!important;
+    top:-9999px!important;
+    left:-9999px!important;
+    width:1px!important;
+    height:1px!important;
+    min-width:1px!important;
+    min-height:1px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    clip:rect(0 0 0 0)!important;
+    clip-path:inset(50%)!important;
+    white-space:nowrap!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    transform:none!important;
+    translate:none!important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.94!important;
+    scale:.78 .82!important;
+    transform-origin:50% 48%!important;
+    filter:
+      brightness(1.13)
+      contrast(.77)
+      saturate(1.02)
+      blur(.52px)
+      drop-shadow(0 0 4px rgba(112,222,255,.022))
+      drop-shadow(0 0 11px rgba(92,88,255,.009))!important;
+    -webkit-filter:
+      brightness(1.13)
+      contrast(.77)
+      saturate(1.02)
+      blur(.52px)
+      drop-shadow(0 0 4px rgba(112,222,255,.022))
+      drop-shadow(0 0 11px rgba(92,88,255,.009))!important;
+  }
+}
+
+/* production-r446-mobile-mag-compact-balanced-soft-perimeter */
