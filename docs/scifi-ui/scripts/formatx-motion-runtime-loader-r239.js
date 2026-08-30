@@ -1,6 +1,7 @@
-/* FormatX r456 — current language, layout and native WebGL MAG critical path.
+/* FormatX r458 — current language, layout and native WebGL MAG critical path.
    R326 owns the geometry. R456 is prewarmed on every device so the outer glass
-   material compiles without topology/noise breakup before first visible frame. */
+   material compiles without topology/noise breakup before first visible frame.
+   R458 keeps the render-blocking mobile first-paint layer authoritative. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -14,7 +15,7 @@ const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=202608
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
-const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r455-soft-mobile-optics';
+const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r457-soft-mobile-edge-bloom';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
@@ -66,6 +67,7 @@ function warmCriticalOwners(){
   warmAsset(FINAL_HEADER,'style');
   root.dataset.fxLanguageCriticalWarmR429='ready';
   root.dataset.fxSolidGlassCriticalWarmR456='ready-all-devices';
+  root.dataset.fxCurrentMagOpticsWarmR457='ready-soft-mobile-edge-bloom';
 }
 
 function ensureLanguageToggle(){

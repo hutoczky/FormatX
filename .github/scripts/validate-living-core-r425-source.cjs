@@ -17,6 +17,7 @@ const solidGlass = read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.j
 const directLoader = read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const motionLoader = read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
 const mobileLoader = read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
+const mobileReference = read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const regression = read('docs/scifi-ui/scripts/formatx-mobile-regression-r310.js');
 const optics = read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
 const layout = read('docs/scifi-ui/styles/formatx-current-mag-r422.css');
@@ -73,17 +74,18 @@ assert.doesNotMatch(solidGlass, /drawImage|createImageBitmap|new\s+Image|canvas\
 
 has(directLoader, [
   'formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag',
-  'formatx-core-shapeshifter-r337.css?v=20260830-r455-soft-mobile-optics',
+  'formatx-core-shapeshifter-r337.css?v=20260830-r457-soft-mobile-edge-bloom',
   'formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-native-mag-touch-r434.js?v=20260830-r436-protected-ui-touch-fallback',
   'formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph',
   'direct-r326-r456-uniform-solid-glass-idle-zero',
   "await addScript(SOLID_GLASS,'data-fx-solid-glass-r456')",
+  "fxCurrentMagOpticsR457='soft-mobile-edge-bloom-css'",
   'uniform-solid-glass-shell-no-vram-artifact',
   'r326-direct-r456-uniform-mobile-glass',
   'r326-direct-r456-uniform-desktop-glass'
-], 'direct R454 renderer + R456 uniform glass chain');
+], 'direct R454 renderer + R456 uniform glass + R457 mobile optics chain');
 assert.doesNotMatch(directLoader, /formatx-mag-surface-sheen-r439|\bSHEEN\b/);
 
 has(motionLoader, [
@@ -92,26 +94,42 @@ has(motionLoader, [
   'formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch',
-  'formatx-core-shapeshifter-r337.css?v=20260830-r455-soft-mobile-optics',
+  'formatx-core-shapeshifter-r337.css?v=20260830-r457-soft-mobile-edge-bloom',
   "warmAsset(CURRENT_SOLID_GLASS,'script')",
   "fxSolidGlassCriticalWarmR456='ready-all-devices'",
+  "fxCurrentMagOpticsWarmR457='ready-soft-mobile-edge-bloom'",
   'armed-direct-r326-r456-uniform-shell-prewarmed',
   'scheduleCriticalOwners()'
-], 'prewarmed R454 renderer + R456 uniform glass chain');
+], 'prewarmed R454 renderer + R456 uniform glass + R457 optics chain');
 
 assert.match(mobileLoader, /r454-visible-electric-native-webgl/);
 assert.doesNotMatch(mobileLoader, /formatx-mobile-core-softening-r322\.css|formatx-mobile-core-optics-r328\.css|formatx-mobile-optics-r423\.css/);
 assert.match(regression, /retired-r454-no-fallback-stylesheet/);
 assert.match(regression, /r454-formatx-core-shapeshifter-r337-css/);
+has(regression, [
+  'PRODUCTION_FIRST_PAINT_SELECTOR',
+  "fxMobileReferenceStylePolicyR458 = 'static-first-paint-owner-no-late-css'",
+  'reference-semantics-requested-static-first-paint',
+  'formatx-mobile-reference-layout-v1.js?v=20260830-r458-static-first-paint-owner'
+], 'R458 static first-paint mobile bootstrap');
+has(mobileReference, [
+  'productionFirstPaint',
+  "fxMobileReferenceStylePolicyR458='static-first-paint-owner-no-late-css'",
+  'r250-reference-stage-owner',
+  'ensureControlZone(hero,space,rail)',
+  'zone.parentElement!==space'
+], 'R458 semantic-only mobile reference runtime');
 
 has(optics, [
-  'brightness(1.30)',
-  'contrast(1.04)',
-  'saturate(1.42)',
-  'blur(.35px)',
+  'brightness(1.20)',
+  'contrast(.98)',
+  'saturate(1.31)',
+  'blur(.48px)',
+  'drop-shadow(0 0 1px rgba(126,239,255,.07))',
+  'drop-shadow(0 0 4px rgba(82,91,255,.035))',
   'opacity: 1 !important',
   'production-r455-single-native-webgl-optics-owner-soft-mobile-balance'
-], 'balanced soft mobile phone optics');
+], 'R457 softened mobile phone optics');
 has(optics, [
   'brightness(1.36)',
   'contrast(1.18)',
@@ -161,4 +179,4 @@ assert.doesNotMatch(worker, /formatx-mobile-recovery\.js|formatx-core-mechanical
 assert.doesNotMatch(awardRuntime, /formatx-crystal-portal-r318|ensureCrystalSurface|formatx-mag-surface-sheen-r439/);
 assert.doesNotMatch(regression, /fx-core-r317|fx-core-organic-form-r327/);
 
-console.log('PASS: R454 native WebGL MAG with R456 uniform cross-device glass shell, preserved inner life and no topology/noise breakup passed.');
+console.log('PASS: R457 softened mobile MAG optics, R458 static first-paint mobile ownership, R456 uniform glass shell and preserved desktop optics passed.');

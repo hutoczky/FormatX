@@ -8,11 +8,12 @@
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
   const REFERENCE_LAYOUT_STYLE_URL = '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260818-r207-preloaded';
-  const REFERENCE_LAYOUT_SCRIPT_URL = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260824-native-orb-r250';
+  const REFERENCE_LAYOUT_SCRIPT_URL = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260830-r458-static-first-paint-owner';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
   const WDA_R310_STYLE_CONTRACT = 'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions';
   const DESKTOP_LOOP_QUERY = matchMedia('(min-width: 901px) and (pointer: fine)');
   const MOBILE_REFERENCE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
+  const PRODUCTION_FIRST_PAINT_SELECTOR = 'link[data-fx-production-first-paint-r370],link[data-fx-mobile-first-paint-r358]';
   root.dataset.fxMobileRegressionWdaContract = WDA_R310_STYLE_CONTRACT.includes('r310-live-mobile-regressions') ? 'r310-compatible' : 'unknown';
   let qrGeneration = 0;
   let askRetryTimer = 0;
@@ -43,16 +44,22 @@
       return;
     }
 
-    let style = document.querySelector(
-      'link[data-fx-mobile-reference-layout-style="true"], link[href*="formatx-mobile-reference-layout-v1.css"]'
-    );
-    if (!(style instanceof HTMLLinkElement)) {
-      style = document.createElement('link');
-      style.rel = 'stylesheet';
-      style.media = '(max-width: 900px)';
-      style.href = REFERENCE_LAYOUT_STYLE_URL;
-      style.dataset.fxMobileReferenceLayoutStyle = 'true';
-      document.head.appendChild(style);
+    const productionFirstPaint = Boolean(document.querySelector(PRODUCTION_FIRST_PAINT_SELECTOR));
+    if (productionFirstPaint) {
+      root.dataset.fxMobileReferenceStylePolicyR458 = 'static-first-paint-owner-no-late-css';
+    } else {
+      let style = document.querySelector(
+        'link[data-fx-mobile-reference-layout-style="true"], link[href*="formatx-mobile-reference-layout-v1.css"]'
+      );
+      if (!(style instanceof HTMLLinkElement)) {
+        style = document.createElement('link');
+        style.rel = 'stylesheet';
+        style.media = '(max-width: 900px)';
+        style.href = REFERENCE_LAYOUT_STYLE_URL;
+        style.dataset.fxMobileReferenceLayoutStyle = 'true';
+        document.head.appendChild(style);
+      }
+      root.dataset.fxMobileReferenceStylePolicyR458 = 'legacy-reference-css-fallback';
     }
 
     const existingScript = document.querySelector(
@@ -64,15 +71,21 @@
       script.async = false;
       script.dataset.fxMobileReferenceLayout = 'true';
       script.addEventListener('load', () => {
-        root.dataset.fxStaticProductionBootstrapR358 = 'reference-layout-ready';
+        root.dataset.fxStaticProductionBootstrapR358 = productionFirstPaint
+          ? 'reference-semantics-ready-static-first-paint'
+          : 'reference-layout-ready';
       }, { once: true });
       script.addEventListener('error', () => {
         root.dataset.fxStaticProductionBootstrapR358 = 'reference-layout-failed';
       }, { once: true });
       document.head.appendChild(script);
-      root.dataset.fxStaticProductionBootstrapR358 = 'reference-layout-requested';
+      root.dataset.fxStaticProductionBootstrapR358 = productionFirstPaint
+        ? 'reference-semantics-requested-static-first-paint'
+        : 'reference-layout-requested';
     } else {
-      root.dataset.fxStaticProductionBootstrapR358 = 'reference-layout-present';
+      root.dataset.fxStaticProductionBootstrapR358 = productionFirstPaint
+        ? 'reference-semantics-present-static-first-paint'
+        : 'reference-layout-present';
     }
   }
 
