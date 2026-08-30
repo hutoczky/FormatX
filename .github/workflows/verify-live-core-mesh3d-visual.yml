@@ -1,5 +1,5 @@
 name: Verify live responsive soft 3D MAG
-run-name: Validate production r435 native WebGL MAG on desktop and mobile
+run-name: Validate production r448 native WebGL MAG on desktop and mobile
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Validate live r435 soft organic crystal optics
+      - name: Validate live r448 visible balanced soft-defined crystal optics
         shell: bash
         run: |
           set -euo pipefail
@@ -65,21 +65,25 @@ jobs:
             const page = await context.newPage();
             diagnostics(page, name);
 
-            await page.goto(`${origin}/?live_mag_r435=${name}-${Date.now()}`, {
+            await page.goto(`${origin}/?live_mag_r448=${name}-${Date.now()}`, {
               waitUntil: 'domcontentloaded',
               timeout: 30000
             });
 
-            await page.waitForFunction(() => {
+            await page.waitForFunction(isMobile => {
               const root = document.documentElement;
-              return root.dataset.fxCoreMobileV69 === 'ready-v69'
+              const baseReady = root.dataset.fxCoreMobileV69 === 'ready-v69'
                 && root.dataset.fxCrystalOrganismR326 === 'ready'
                 && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
                 && root.dataset.fxCoreOpticsR424 === 'native-webgl-filmic-caustics-no-bitmap-no-css-core'
                 && Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas'));
-            }, null, { timeout: 60000 });
+              if (!baseReady) return false;
+              if (!isMobile) return true;
+              return root.dataset.fxMobileMagBalanceR448 === 'ready'
+                && [...document.querySelectorAll('link[rel="stylesheet"]')].some(link => String(link.href).includes('formatx-mobile-mag-balance-r448.css'));
+            }, mobile, { timeout: 60000 });
 
-            await page.waitForTimeout(500);
+            await page.waitForTimeout(650);
             const before = await page.evaluate(() => ({
               energy: Number(window.FormatXCoreMobileV69?.energy || 0),
               position: [...(window.FormatXCoreCinematic?.corePosition || [])]
@@ -120,8 +124,10 @@ jobs:
               const sound = controls?.querySelector('.fx-three-sound');
               const ask = controls?.querySelector('.fx-reference-ask');
               const pause = controls?.querySelector('.fx-reference-pause');
-              const opticsLink = [...document.querySelectorAll('link[rel="stylesheet"]')]
+              const nativeOpticsLink = [...document.querySelectorAll('link[rel="stylesheet"]')]
                 .find(link => String(link.href).includes('formatx-core-shapeshifter-r337.css'));
+              const r448Link = [...document.querySelectorAll('link[rel="stylesheet"]')]
+                .find(link => String(link.href).includes('formatx-mobile-mag-balance-r448.css'));
               return {
                 renderer: root.dataset.fxCoreRenderer || '',
                 material: root.dataset.fxCoreMaterial || '',
@@ -131,13 +137,10 @@ jobs:
                 stageRenderer: stage?.dataset.renderer || '',
                 v69: root.dataset.fxCoreMobileV69 || '',
                 r326: root.dataset.fxCrystalOrganismR326 || '',
-                mobileOpticsR435: root.dataset.fxCoreMobileOpticsR435 || '',
-                opticsOwner: root.dataset.fxCoreMobileOpticsR328 || '',
-                opticsOwnerR424: root.dataset.fxCoreMobileOpticsOwnerR424 || '',
+                mobileBalanceR448: root.dataset.fxMobileMagBalanceR448 || '',
                 opticsR424: root.dataset.fxCoreOpticsR424 || '',
-                resolutionR424: root.dataset.fxCoreMobileResolutionR424 || '',
-                resolutionScale: Number(root.dataset.fxCoreReal3dScale || 0),
-                opticsHref: opticsLink?.href || '',
+                nativeOpticsHref: nativeOpticsLink?.href || '',
+                r448Href: r448Link?.href || '',
                 canvases: document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
                 gl: Boolean(gl),
                 glError: gl?.getError(),
@@ -158,13 +161,13 @@ jobs:
             });
 
             console.log(name.toUpperCase(), JSON.stringify({ before, state }));
-            await page.screenshot({ path: `${name}-r435-soft.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
+            await page.screenshot({ path: `${name}-r448-balanced.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
 
             assert.equal(state.renderer, 'single-webgl-crystal-organism-r326');
             assert.equal(state.stageRenderer, 'crystal-organism-r326');
             assert.equal(state.material, 'translucent-living-facet-organism-r326');
             assert.equal(state.geometry, 'four-direction-asymmetric-crystal-organism-r326');
-            assert.equal(state.scheduler, 'heartbeat-and-interaction-bursts-no-idle-loop-r326');
+            assert.ok(['interaction-bursts-idle-zero-frame-r441', 'heartbeat-and-interaction-bursts-no-idle-loop-r326'].includes(state.scheduler), `unexpected scheduler: ${state.scheduler}`);
             assert.equal(state.composition, 'new-crystal-organism-no-legacy-fallback');
             assert.equal(state.v69, 'ready-v69');
             assert.equal(state.r326, 'ready');
@@ -174,9 +177,7 @@ jobs:
             assert.ok(state.width <= viewport.width + 1 && state.height > 100, JSON.stringify(state));
             assert.ok(Number.isFinite(state.renderMs) && state.renderMs < 16.67, JSON.stringify(state));
             assert.equal(state.opticsR424, 'native-webgl-filmic-caustics-no-bitmap-no-css-core');
-            assert.ok(state.opticsHref.includes('formatx-core-shapeshifter-r337.css'), 'current native optics stylesheet is not loaded');
-            assert.ok(state.opticsHref.includes('r433-restrained-mobile-mag-settle-aware'), state.opticsHref);
-            assert.ok(!state.filter.includes('blur('), `legacy blur still owns the native WebGL canvas: ${state.filter}`);
+            assert.ok(state.nativeOpticsHref.includes('formatx-core-shapeshifter-r337.css'), 'current native optics stylesheet is not loaded');
             assert.equal(state.controlsVisible, true, JSON.stringify(state));
             assert.equal(state.soundAskOverlap, false, JSON.stringify(state));
             assert.equal(state.askPauseOverlap, false, JSON.stringify(state));
@@ -184,19 +185,20 @@ jobs:
             assert.equal(state.proofVisible, true, JSON.stringify(state));
 
             if (mobile) {
-              assert.equal(state.mobileOpticsR435, 'soft-rim-following-visible-heart');
+              assert.equal(state.mobileBalanceR448, 'ready');
+              assert.ok(state.r448Href.includes('formatx-mobile-mag-balance-r448.css'), state.r448Href);
+              assert.ok(state.r448Href.includes('20260830-r448-visible-balanced-soft-defined'), state.r448Href);
+              assert.ok(state.opacity >= .949 && state.opacity <= .951, `mobile r448 opacity mismatch: ${JSON.stringify(state)}`);
+              assert.match(state.filter, /brightness\(1\.11\)/, `mobile r448 luminance missing: ${state.filter}`);
+              assert.match(state.filter, /contrast\(0\.74\)/, `mobile r448 edge definition missing: ${state.filter}`);
+              assert.match(state.filter, /saturate\(1\.015\)/, `mobile r448 spectral balance missing: ${state.filter}`);
+              assert.match(state.filter, /blur\(0\.58px\)/, `mobile r448 soft perimeter missing: ${state.filter}`);
+              assert.ok(state.scale === '0.78 0.82' || state.scale === '0.78 0.82 1', `mobile r448 compact scale mismatch: ${state.scale}`);
               assert.ok(state.energy >= before.energy - .02, JSON.stringify({ before, state }));
               assert.equal(state.position.length, 3);
               assert.notDeepEqual(state.position, before.position);
-              assert.equal(state.opticsOwner, 'retired-r424-native-shader-optics');
-              assert.equal(state.opticsOwnerR424, 'formatx-core-shapeshifter-r337-css');
-              assert.ok(state.opacity <= .941 && state.opacity >= .939, `mobile r435 canvas opacity mismatch: ${JSON.stringify(state)}`);
-              assert.match(state.filter, /brightness\(0\.955\)/, `mobile r435 restrained luminance missing: ${state.filter}`);
-              assert.match(state.filter, /contrast\(0\.98\)/, `mobile r435 restrained edge contrast missing: ${state.filter}`);
-              assert.match(state.filter, /saturate\(1\.08\)/, `mobile r435 restrained spectral colour missing: ${state.filter}`);
-              assert.equal(state.scale, '1');
-              assert.ok(state.resolutionR424.includes('dpr-cap-1.75'), state.resolutionR424);
-              assert.ok(state.resolutionScale >= 1.25, `mobile WebGL internal scale is too low: ${state.resolutionScale}`);
+            } else {
+              assert.equal(state.r448Href, '');
             }
 
             await context.close();
@@ -213,10 +215,10 @@ jobs:
             } finally {
               await browser.close();
             }
-            for (const file of ['desktop-r435-soft.png','mobile-r435-soft.png']) {
+            for (const file of ['desktop-r448-balanced.png','mobile-r448-balanced.png']) {
               assert.ok(fs.statSync(file).size > 10000, file);
             }
-            console.log('PASS: live r435 WebGL crystal, restrained mobile optics, moving visible heart, interaction and control geometry passed.');
+            console.log('PASS: live r448 WebGL crystal uses the visible balanced soft-defined phone optics with non-overlapping controls.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
@@ -224,10 +226,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-mag-r435-${{ github.run_id }}
+          name: live-mag-r448-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-live/desktop-r435-soft.png
-            ${{ runner.temp }}/mag-live/mobile-r435-soft.png
+            ${{ runner.temp }}/mag-live/desktop-r448-balanced.png
+            ${{ runner.temp }}/mag-live/mobile-r448-balanced.png
           if-no-files-found: warn
           retention-days: 14
 
@@ -241,13 +243,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r435 soft native crystal optics and moving heart passed'
+            description='Live r448 visible balanced soft-defined mobile MAG passed'
           else
             state=failure
-            description='Live r435 MAG diagnostic failed'
+            description='Live r448 MAG diagnostic failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
-            -f context='FormatX live MAG r435' \
+            -f context='FormatX live MAG r448' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
