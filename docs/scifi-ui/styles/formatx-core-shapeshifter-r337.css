@@ -1,13 +1,11 @@
-/* FormatX r413 — MAG/CORE interaction finishing.
-   Geometry morphing is owned entirely by the single native WebGL renderer.
-   CSS may tune optics and hit targets, but never changes the silhouette. */
+/* FormatX r454 — the one native WebGL MAG optical owner.
+   The shader owns geometry, caustics and the intermittent electric sweep.
+   CSS only preserves the touch surface and the final readable display tone. */
 
-/* r431 — the physical stage is the direct MAG touch surface. The canvas stays
-   decorative, while the high-z-index SOUND / ASK / PAUSE controls remain the
-   authoritative interactive circles above it. */
 html[data-fx-core-shape-r337] #hero .hero-space > .fx-crystal-organism-r326-stage {
   pointer-events: auto !important;
 }
+
 html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
   pointer-events: none !important;
 }
@@ -17,80 +15,71 @@ html[data-fx-core-shape-r337] #hero .fx-reference-controls-r204 :is(button,.fx-t
   pointer-events: auto !important;
 }
 
-html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
-  transform-origin: 50% 50% !important;
-  transition:
-    filter .42s ease,
-    opacity .42s ease !important;
-  transform: none !important;
-  will-change: filter, opacity;
-}
-
-html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"] body.living-architecture
+html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
 #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  opacity: 1 !important;
+  scale: 1 !important;
   transform: none !important;
   translate: none !important;
   rotate: none !important;
-  scale: 1 !important;
   transform-origin: 50% 50% !important;
-}
-
-/* r424 sharp optics: the native fragment shader owns the light. CSS only
-   restores display contrast after canvas compositing; it never draws a core. */
-html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
-#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-  opacity: .99 !important;
   mix-blend-mode: normal !important;
   filter:
-    brightness(1.10)
+    brightness(1.36)
     contrast(1.18)
-    saturate(1.34)
-    drop-shadow(0 0 2px rgba(106, 236, 255, .10))
-    drop-shadow(0 0 9px rgba(99, 72, 255, .05)) !important;
+    saturate(1.50)
+    drop-shadow(0 0 1px rgba(106,236,255,.18))
+    drop-shadow(0 0 8px rgba(99,72,255,.10)) !important;
   -webkit-filter:
-    brightness(1.10)
+    brightness(1.36)
     contrast(1.18)
-    saturate(1.34)
-    drop-shadow(0 0 2px rgba(106, 236, 255, .10))
-    drop-shadow(0 0 9px rgba(99, 72, 255, .05)) !important;
+    saturate(1.50)
+    drop-shadow(0 0 1px rgba(106,236,255,.18))
+    drop-shadow(0 0 8px rgba(99,72,255,.10)) !important;
+  animation: none !important;
   transition: none !important;
   will-change: auto !important;
 }
 
-html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
+html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture
 #hero .hero-space > .fx-crystal-organism-r326-stage::before,
-html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
+html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture
 #hero .hero-space > .fx-crystal-organism-r326-stage::after {
   content: none !important;
   display: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
 }
 
-@media (max-width: 900px), (pointer: coarse) {
-  /* r424 — preserve subpixel caustic edges on dense phone displays without
-     turning the translucent volume into a CSS-bloom silhouette. */
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root:root body.living-architecture .topbar {
+    position: relative !important;
+    top: auto !important;
+  }
+
   html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .99 !important;
+    opacity: 1 !important;
     scale: 1 !important;
     transform: none !important;
     translate: none !important;
+    rotate: none !important;
     filter:
-      brightness(1.12)
-      contrast(1.22)
-      saturate(1.38)
-      drop-shadow(0 0 1px rgba(126,239,255,.085))
-      drop-shadow(0 0 3px rgba(82,91,255,.04)) !important;
+      brightness(1.52)
+      contrast(1.16)
+      saturate(1.58)
+      drop-shadow(0 0 1px rgba(126,239,255,.20))
+      drop-shadow(0 0 5px rgba(82,91,255,.10)) !important;
     -webkit-filter:
-      brightness(1.12)
-      contrast(1.22)
-      saturate(1.38)
-      drop-shadow(0 0 1px rgba(126,239,255,.085))
-      drop-shadow(0 0 3px rgba(82,91,255,.04)) !important;
+      brightness(1.52)
+      contrast(1.16)
+      saturate(1.58)
+      drop-shadow(0 0 1px rgba(126,239,255,.20))
+      drop-shadow(0 0 5px rgba(82,91,255,.10)) !important;
   }
 
-  /* r339 — the header MAG button is an interaction target, not part of the
-     breathing crystal animation. Freeze its physical box so real taps and
-     automated pointer checks see the same stable 50x48 target every frame. */
   html:root:root body.living-architecture .topbar .fx-reference-mag-button {
     position: fixed !important;
     top: 11px !important;
@@ -110,17 +99,11 @@ html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-m
     translate: none !important;
     will-change: auto !important;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
   html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
-  body.living-architecture #hero .hero-grid > .hero-space {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
+  body.living-architecture #hero .hero-grid > .hero-space,
   html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
   html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
@@ -129,61 +112,6 @@ html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-m
     visibility: visible !important;
     opacity: 1 !important;
   }
-
-  html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
-    animation: none !important;
-    transition: none !important;
-  }
 }
 
-/* r425 — user-feedback-balanced phone optics. Compatibility marker retained
-   for older source guards; r442 below is the authoritative mobile finish. */
-/* r442 — final live-phone MAG optics after physical review.
-   The r326 geometry and internal caustics stay native WebGL. The final mobile
-   composite removes the over-driven bloom and razor-edge impression by lowering
-   luminance/contrast/saturation. No CSS blur and no duplicate silhouette. */
-@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
-  html:root:root:root body.living-architecture .topbar {
-    position: relative !important;
-    top: auto !important;
-  }
-
-  html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
-  .fx-crystal-organism-r326-stage {
-    pointer-events: auto !important;
-  }
-
-  html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
-  .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .90 !important;
-    pointer-events: none !important;
-    filter:
-      brightness(.90)
-      contrast(.89)
-      saturate(.95)
-      drop-shadow(0 0 1px rgba(126,239,255,.008))
-      drop-shadow(0 0 4px rgba(82,91,255,.003)) !important;
-    -webkit-filter:
-      brightness(.90)
-      contrast(.89)
-      saturate(.95)
-      drop-shadow(0 0 1px rgba(126,239,255,.008))
-      drop-shadow(0 0 4px rgba(82,91,255,.003)) !important;
-    transition: none !important;
-    will-change: auto !important;
-  }
-}
-
-@media (max-width: 430px) {
-  html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
-  .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .89 !important;
-    filter: brightness(.89) contrast(.88) saturate(.94) !important;
-    -webkit-filter: brightness(.89) contrast(.88) saturate(.94) !important;
-  }
-}
-
-/* Compatibility audit lineage only: brightness(.955) contrast(.98) saturate(1.08). */
-/* production-r430-final-mobile-mag-optics-owner */
-/* production-r431-direct-mag-touch-and-normal-flow-header */
-/* production-r442-final-mobile-mag-optics-owner-restrained-native-no-blur */
+/* production-r454-single-native-webgl-optics-owner-visible-no-overlay */

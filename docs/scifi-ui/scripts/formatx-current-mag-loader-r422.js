@@ -1,22 +1,21 @@
-/* FormatX r442 — direct current MAG loader.
-   r326 remains the production renderer. r442 makes the critical MAG path
-   style-first so the WebGL stage can never enter normal flow before its final
-   geometry exists, while retaining the r441 idle-zero scheduler. */
+/* FormatX r454 — direct native MAG loader.
+   r326 owns geometry, luminous material and the intermittent electric surface
+   sweep. Final layout and optics finish before the WebGL stage is created. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r442-style-first-idle-zero-mobile-budget';
+const VERSION='direct-r326-r454-style-first-visible-electric-idle-zero';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
-if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
+if(reduced)root.dataset.fxCurrentMagMotionR424='r454-static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
-const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r440-restrained-bloom-soft-edge';
+const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
+const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r454-single-visible-native-optics-owner';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r442-mobile-two-pass-budget';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r436-protected-ui-touch-fallback';
-const SHEEN='/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js?v=20260830-r439-bounded-surface-sheen';
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
@@ -25,7 +24,7 @@ let started=false;
 // direct-r326-r428-cross-device-header
 // direct-r326-r438-native-soft-edge-restrained-halo-protected-touch
 // direct-r326-r439-clear-facets-periodic-sheen-protected-touch
-// direct-r326-r440-restrained-bloom-soft-edge-protected-touch
+// direct-r326-r454-visible-electric-surface-style-first-protected-touch
 // formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart
 
 function addStyle(href,attr){
@@ -124,12 +123,11 @@ function installSoundTouchRecovery(){
 async function start(){
   if(started)return;started=true;
   repairAccessibleNames();installSoundTouchRecovery();
-
-  // r442: never create the WebGL stage until both geometry-owning styles have
-  // loaded. This removes the transient default canvas box that contributed to
-  // the mobile hero-grid/canvas layout shift in Lighthouse.
+  // The stage is created only after its layout and single optical owner exist.
+  // This keeps R442's zero-CLS startup while removing every painted overlay.
   await Promise.all([
     addStyle(STYLE,'data-fx-current-mag-r422'),
+    addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
     addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')
   ]);
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
@@ -141,25 +139,23 @@ async function start(){
   await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
   root.dataset.fxCurrentMagTouchBootstrapR435='native-owner-installed-before-ready-check';
   root.dataset.fxCurrentMagTouchBootstrapR436='protected-owner-and-touch-fallback-installed';
-  root.dataset.fxCurrentMagOpticsR438='restrained-halo-soft-edge-native-composite';
-  root.dataset.fxCurrentMagOpticsR439='clearer-facets-bounded-periodic-surface-sheen';
-  root.dataset.fxCurrentMagOpticsR440='restrained-bloom-native-soft-edge-mobile-review';
+  root.dataset.fxCurrentMagOpticsR438='superseded-by-r454-native-material';
+  root.dataset.fxCurrentMagOpticsR439='retired-no-css-sheen';
+  root.dataset.fxCurrentMagOpticsR440='superseded-by-r454-visible-native-material';
+  root.dataset.fxCurrentMagOpticsR454='single-luminous-native-electric-surface-owner';
   root.dataset.fxCurrentMagSchedulerR441='interaction-bursts-idle-zero-frame';
 
   const rendererReady=await waitForRendererReady();
   if(rendererReady){
-    if(mobile){
-      await addScript(SHEEN,'data-fx-mag-surface-sheen-r439');
-      await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-    }
-    root.dataset.fxCoreRendererSelection='r326-direct-r442-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r442';
+    if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
+    root.dataset.fxCoreRendererSelection='r326-direct-r454-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r454';
     root.dataset.fxCurrentMagRuntimeR422='ready';
   }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
 
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r442-style-first-two-pass-idle-zero-native-touch'
-    :'direct-r326-r442-style-first-idle-zero-desktop';
+    ?'direct-r326-r454-style-first-two-pass-electric-sweep-idle-zero-native-touch'
+    :'direct-r326-r454-style-first-electric-sweep-idle-zero-desktop';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady}}));
 }
 

@@ -52,13 +52,11 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/formatx-cinematic-core-v27.js',
   '/scifi-ui/styles/formatx-cinematic-core-v27.css',
   '/scifi-ui/scripts/formatx-event-horizon.js',
-  '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/igloo-parity.js',
   '/scifi-ui/scripts/formatx-apex-scene-stability.js',
   '/scifi-ui/scripts/formatx-apex-native.js',
   '/scifi-ui/scripts/formatx-core-real3d-v20.js',
-  '/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js',
   '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
   '/scifi-ui/scripts/formatx-reference-lock-v30.js',
   '/scifi-ui/styles/formatx-reference-lock-v30.css',
@@ -121,8 +119,6 @@ const EMBEDDABLE_STAGE_CSP = [
 ].join('; ');
 
 const REPLACEMENTS = [
-  ['formatx-mobile-recovery.js?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
-  ['formatx-mobile-recovery.js?v=20260729-safe-three-gate-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
   ['formatx-mobile-recovery.css?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
   ['formatx-mobile-recovery.css?v=20260729-safe-three-css-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
   ['formatx-mobile-recovery.css?v=20260729-living-core-css-v2', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],

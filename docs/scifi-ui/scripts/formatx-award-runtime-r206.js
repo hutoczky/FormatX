@@ -5,13 +5,13 @@
   if (root.dataset.fxAwardRuntime === 'r334') return;
   root.dataset.fxAwardRuntime = 'r334';
   root.dataset.fxFinalValidationR334 = 'mobile-optics-r414-restrained-glow';
-  root.dataset.fxFinalValidationR424 = 'native-webgl-sharp-organic-core';
+  root.dataset.fxFinalValidationR424 = 'r454-native-webgl-visible-electric-organic-core';
   root.dataset.fxMobileMagLineageR410 = 'approved-v51-reference-crystal';
   root.dataset.fxMobileMagFinishR412 = 'r414-restrained-glow';
   root.dataset.fxMobileMagFinishR414 = 'restrained-glow-soft-edge';
-  root.dataset.fxMobileMagFinishR424 = 'sharp-native-webgl-caustics';
+  root.dataset.fxMobileMagFinishR424 = 'r454-sharp-readable-native-webgl-electric-caustics';
 
-  const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions&rev=20260829-r424-sharp-organic-core';
+  const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260830-r454-single-native-optics-owner';
 
   function activateCriticalReal3dStyle() {
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -46,17 +46,14 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260824-native-orb-r250';
-  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260829-r414-restrained-mobile-mag-optics';
   const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260824-native-orb-r250';
-  const CONTROL_OWNER_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260824-instant-award-r251&rev=20260829-r424-sharp-organic-core';
+  const CONTROL_OWNER_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260830-r454-visible-electric-surface';
   const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260822-r291-nav-state';
   const DIALOGUE_STYLE_URL = '/scifi-ui/styles/formatx-dialogue-open-r287.css?v=20260822-r287-open-state';
   const DIALOGUE_OWNER_URL = '/scifi-ui/scripts/formatx-dialogue-render-owner-r273.js?v=20260822-r287-open-state';
-  const CRYSTAL_STYLE_URL = '/scifi-ui/styles/formatx-crystal-portal-r318.css?v=20260825-r318-crystal-site-core';
-  const CRYSTAL_SCRIPT_URL = '/scifi-ui/scripts/formatx-crystal-portal-r318.js?v=20260825-r318-crystal-site-core';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
 
@@ -121,34 +118,6 @@
     document.head.appendChild(link);
   }
 
-  function sharpNativeCoreRequested() {
-    return Boolean(document.querySelector(
-      'script[data-fx-control-owner-r268="true"][src*="r424-sharp-organic-core"],script[data-fx-core-real3d="true"][src*="r424-sharp-organic-core"],script[src*="formatx-crystal-organism-r326.js"][src*="r424-sharp-organic-core"]'
-    ));
-  }
-
-  function ensureCoreSoftening() {
-    if (!matchMedia('(max-width: 900px)').matches) return;
-    const existing = document.querySelector('link[data-fx-mobile-core-softening-r322]');
-    if (sharpNativeCoreRequested()) {
-      existing?.remove();
-      root.dataset.fxMobileCoreOpticsR322 = 'retired-r424-native-shader-optics';
-      root.dataset.fxMobileMagFinishR424 = 'sharp-native-webgl-caustics';
-      return;
-    }
-    if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r414-restrained-mobile-mag-optics')) existing.href = CORE_SOFTEN_STYLE_URL;
-      root.dataset.fxMobileCoreOpticsR322 = 'r414-restrained-mobile-mag-optics';
-      return;
-    }
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = CORE_SOFTEN_STYLE_URL;
-    link.dataset.fxMobileCoreSofteningR322 = 'true';
-    document.head.appendChild(link);
-    root.dataset.fxMobileCoreOpticsR322 = 'r414-restrained-mobile-mag-optics';
-  }
-
   function ensureOrganismCoreOwner() {
     if (root.dataset.fxOrganismDialogueOwner === 'ask-only-r326') return;
     if (!document.body) {
@@ -171,27 +140,6 @@
     link.href = OWNER_STYLE_URL;
     link.dataset.fxControlOwnerStyleR264 = 'true';
     document.head.appendChild(link);
-  }
-
-  function ensureCrystalSurface() {
-    if (!document.querySelector('link[data-fx-crystal-style-r318]')) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = CRYSTAL_STYLE_URL;
-      link.dataset.fxCrystalStyleR318 = 'true';
-      document.head.appendChild(link);
-    }
-    if (!document.body) {
-      document.addEventListener('DOMContentLoaded', ensureCrystalSurface, { once: true });
-      return;
-    }
-    if (document.querySelector('script[data-fx-crystal-portal-r318]')) return;
-    const script = document.createElement('script');
-    script.src = CRYSTAL_SCRIPT_URL;
-    script.async = true;
-    script.dataset.fxCrystalPortalR318 = 'true';
-    document.head.appendChild(script);
-    root.dataset.fxAwardCrystal = 'interactive-site-core-r318';
   }
 
   function ensureDialogueSurface() {
@@ -303,17 +251,15 @@
 
   ensureReferenceAskOwner();
   ensureStyle();
-  ensureCoreSoftening();
+  document.querySelector('link[data-fx-mobile-core-softening-r322]')?.remove();
+  root.dataset.fxMobileCoreOpticsR322 = 'retired-r454-no-softening-layer';
   ensureOrganismCoreOwner();
   ensureOwnerStyle();
-  ensureCrystalSurface();
   ensureDialogueSurface();
   ensureGeometryGuard();
   ensureControls();
   root.dataset.fxAwardSound = 'muted-default-visible-control';
 
-  addEventListener('resize', ensureCoreSoftening, { passive: true });
-  addEventListener('orientationchange', ensureCoreSoftening, { passive: true });
   addEventListener('formatx:organismvoiceready', ensureOrganismCoreOwner, { passive: true });
 
   if (!ensureGpu()) {

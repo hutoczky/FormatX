@@ -75,7 +75,6 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/data/platform-status.json',
   '/scifi-ui/scripts/platform-status.js',
   '/scifi-ui/styles/platform-status.css',
-  '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/igloo-parity.js',
   '/scifi-ui/scripts/single-language-toggle.js',
@@ -115,7 +114,6 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/scripts/formatx-premium-finish.js',
   '/scifi-ui/scripts/formatx-event-horizon.js',
   '/scifi-ui/scripts/formatx-core-real3d-v20.js',
-  '/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js',
   '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
   '/scifi-ui/scripts/formatx-core-v51.js',
   '/scifi-ui/styles/formatx-core-v51.css',
@@ -124,8 +122,6 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/scripts/formatx-desktop-apex-loader-r224.js',
 ]);
 const REPLACEMENTS = [
-  ['formatx-mobile-recovery.js?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
-  ['formatx-mobile-recovery.js?v=20260729-safe-three-gate-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
   ['formatx-mobile-recovery.css?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
   ['formatx-mobile-recovery.css?v=20260729-safe-three-css-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
   ['formatx-mobile-recovery.css?v=20260729-living-core-css-v2', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],

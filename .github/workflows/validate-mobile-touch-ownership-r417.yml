@@ -28,7 +28,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Validate current r442 optics, r428 header and r326 idle-zero source contracts
+      - name: Validate R454 native MAG, R428 header and touch source contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -50,10 +50,9 @@ jobs:
           grep -q "production-r430-mobile-header-normal-flow-no-information-occlusion" docs/scifi-ui/styles/formatx-mobile-r416-stability.css
           grep -q "production-r418-final-mobile-header-owner" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
           grep -q "production-r428-final-cross-device-header-owner-language-visible-non-occluding" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
-          grep -q "production-r428-direct-r326-soft-mobile-optics-pure-native-3d-a11y-touch" docs/scifi-ui/styles/formatx-current-mag-r422.css
-          grep -q "production-r440-direct-r326-restrained-bloom-native-soft-edge-mobile-review" docs/scifi-ui/styles/formatx-current-mag-r422.css
-          grep -q "production-r442-final-mobile-mag-optics-owner-restrained-native-no-blur" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "direct-r326-r442-style-first-idle-zero-mobile-budget" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          grep -q "production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer" docs/scifi-ui/styles/formatx-current-mag-r422.css
+          grep -q "production-r454-single-native-webgl-optics-owner-visible-no-overlay" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "direct-r326-r454-style-first-visible-electric-idle-zero" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
           grep -q "styles-ready-before-renderer" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
           grep -q "r428-mobile-direct-topbar-child" docs/scifi-ui/scripts/single-language-toggle.js
           grep -q "r428-desktop-direct-topbar-child" docs/scifi-ui/scripts/single-language-toggle.js
@@ -62,12 +61,14 @@ jobs:
           grep -q "four-direction-asymmetric-crystal-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -q "translucent-living-facet-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -q "interaction-bursts-idle-zero-frame-r441" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "18x36-two-pass-single-startup-frame" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -q "18x36-two-pass-intermittent-pulse-idle-zero" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           grep -q "pure-webgl3d-no-2d-overlays" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "brightness(.90)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "contrast(.89)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "saturate(.95)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "brightness(.89) contrast(.88) saturate(.94)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "brightness(1.52)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "contrast(1.16)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "saturate(1.58)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "intermittent-native-electric-filament-every-five-to-six-seconds" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -q "surfaceFilament" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          test ! -e docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
           if grep -q "blur(" docs/scifi-ui/styles/formatx-current-mag-r422.css; then
             echo "Current MAG CSS must remain blur-free for pure native 3D" >&2
             exit 1
@@ -84,7 +85,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify r442 phone optics, r428 language selector, MAG, SOUND and touch
+      - name: Verify R454 phone optics, R428 language selector, MAG, SOUND and touch
         shell: bash
         run: |
           set -euo pipefail
@@ -152,11 +153,11 @@ jobs:
             assert(state.mag.position==='absolute'&&state.lang.position==='absolute'&&state.menu.position==='absolute','header controls must remain attached absolute children: '+JSON.stringify(state));
             assert(!overlaps(state.brand,state.mag,2)&&!overlaps(state.mag,state.lang,2)&&!overlaps(state.lang,state.menu,2),'mobile header controls overlap: '+JSON.stringify(state));
             assert(state.canvas&&state.canvas.width>100&&state.canvas.height>100,'r326 MAG canvas is missing or collapsed: '+JSON.stringify(state));
-            assert(state.canvasOpacity>=.885&&state.canvasOpacity<=.895,'r442 mobile MAG opacity restraint is missing: '+JSON.stringify(state));
-            assert(state.filter.includes('brightness(0.89)'),'r442 mobile MAG brightness restraint is missing: '+JSON.stringify(state));
-            assert(state.filter.includes('contrast(0.88)'),'r442 mobile MAG edge restraint is missing: '+JSON.stringify(state));
-            assert(state.filter.includes('saturate(0.94)'),'r442 mobile MAG saturation restraint is missing: '+JSON.stringify(state));
-            assert(!state.filter.includes('blur('),'r442 pure native-3D MAG must remain blur-free: '+JSON.stringify(state));
+            assert(state.canvasOpacity>=.99,'R454 mobile MAG opacity is too low: '+JSON.stringify(state));
+            assert(state.filter.includes('brightness(1.52)'),'R454 mobile MAG visibility boost is missing: '+JSON.stringify(state));
+            assert(state.filter.includes('contrast(1.16)'),'R454 mobile MAG edge contrast is missing: '+JSON.stringify(state));
+            assert(state.filter.includes('saturate(1.58)'),'R454 mobile MAG spectral color is missing: '+JSON.stringify(state));
+            assert(!state.filter.includes('blur('),'R454 native-3D MAG must remain blur-free: '+JSON.stringify(state));
             assert(state.gl&&state.glError===0,'r326 MAG has no healthy WebGL context: '+JSON.stringify(state));
             assert(state.renderer==='single-webgl-crystal-organism-r326','wrong production MAG renderer: '+JSON.stringify(state));
             assert(state.geometry==='four-direction-asymmetric-crystal-organism-r326','r326 geometry contract missing: '+JSON.stringify(state));
@@ -264,7 +265,7 @@ jobs:
             await desktopCtx.close();
 
             await browser.close();
-            console.log('PASS: r442 restrained phone optics + style-first startup + idle-zero/two-pass mobile MAG, r428 language, SOUND ON/OFF and direct MAG touch passed.');
+            console.log('PASS: R454 visible electric native MAG + R428 mobile/desktop HU/EN selector, SOUND ON/OFF and direct MAG touch passed.');
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish current mobile visual/touch status
@@ -274,5 +275,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r442 optics/startup + r428 language + r326 MAG/touch passed'; else state=failure; description='Current cross-device language, visual or touch ownership failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX r428 cross-device language and touch' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='R454 visible electric native MAG + language + touch passed'; else state=failure; description='Current cross-device language, visual or touch ownership failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX R454 MAG language and touch' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

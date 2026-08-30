@@ -3,35 +3,21 @@
 
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
-  const REVISION = 'living-organic-sphere-crystal-r413';
+  const REVISION = 'living-luminous-electric-crystal-r454';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
-  const IDLE_ENERGY = mobile ? .36 : .32;
+  const IDLE_ENERGY = mobile ? .50 : .43;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const lighting = mobile ? Object.freeze({
-    fresnelPower: '1.55',
-    innerHeartBase: '.90',
-    innerHeartBreath: '1.10',
-    innerHeartAlpha: '.30',
-    innerAlphaMax: '.72',
-    rimBase: '.58',
-    rimEnergy: '.42',
-    rimAlpha: '.10',
-    outerHeartBase: '.18',
-    outerHeartEnergy: '.22'
+  const optics = mobile ? Object.freeze({
+    fresnelPower: '1.56',
+    innerExposure: '2.92',
+    outerExposure: '2.66'
   }) : Object.freeze({
-    fresnelPower: '1.92',
-    innerHeartBase: '1.02',
-    innerHeartBreath: '1.28',
-    innerHeartAlpha: '.38',
-    innerAlphaMax: '.82',
-    rimBase: '.80',
-    rimEnergy: '.62',
-    rimAlpha: '.15',
-    outerHeartBase: '.24',
-    outerHeartEnergy: '.32'
+    fresnelPower: '1.68',
+    innerExposure: '2.62',
+    outerExposure: '2.38'
   });
 
   if (root.dataset.fxCrystalOrganismR326 === 'ready' || root.dataset.fxCrystalOrganismR326 === 'booting') return;
@@ -287,7 +273,7 @@
       }`;
 
     const fragmentSource = `${versionLine}precision highp float;
-      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress;
+      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
       ${fragmentIn} vec3 vNormal;
       ${fragmentIn} vec3 vLocal;
@@ -309,7 +295,7 @@
         float ndl=max(dot(n,key),0.);
         float sideLight=max(dot(n,side),0.);
         float facing=sat(abs(dot(n,view)));
-        float fresnel=pow(1.0-facing,${lighting.fresnelPower});
+        float fresnel=pow(1.0-facing,${optics.fresnelPower});
         float specular=pow(max(dot(n,normalize(key+view)),0.),42.0);
         specular+=.72*pow(max(dot(n,normalize(side+view)),0.),24.0);
         float facetPulse=.5+.5*sin(vFacet*23.0+uTime*.42+uSiteProgress*5.0);
@@ -347,32 +333,57 @@
         vec3 violet=vec3(.98,.16,1.72);
         vec3 ice=vec3(1.08,1.52,1.92);
         vec3 spectral=mix(cyan,violet,.20+.46*hue);
+        float surfaceSweep=0.0;
+        float surfaceFilament=0.0;
+        if(uSurfacePulse>=0.0){
+          float pathWarp=.075*sin(vLocal.y*8.4+vLocal.z*5.7-uTime*5.1)
+            +.038*sin(vLocal.y*17.0-vLocal.z*9.0+uTime*7.3);
+          float mainPath=abs(vLocal.x+pathWarp);
+          float branchPath=abs(vLocal.x*.72-vLocal.z*.30
+            +.11*sin(vLocal.y*13.0+uTime*4.4));
+          float trunk=exp(-pow(mainPath/.032,2.0));
+          float branches=exp(-pow(branchPath/.025,2.0))
+            *smoothstep(.10,.92,abs(vLocal.y))
+            *(.45+.55*ridge(vLocal.y*3.2+vLocal.z*2.1,7.0));
+          float electricFlicker=.78+.22*sin(uTime*46.0+vLocal.y*31.0+vFacet*5.0);
+          surfaceFilament=(trunk+.68*branches)*electricFlicker;
+          float sweepCoordinate=.5+(vLocal.y*.60+vLocal.x*.16+vLocal.z*.24)*.5;
+          float sweepHead=mix(-.18,1.18,sat(uSurfacePulse));
+          float sweepBand=exp(-pow((sweepCoordinate-sweepHead)/.052,2.0));
+          float sweepTail=.30*exp(-pow((sweepCoordinate-(sweepHead-.10))/.095,2.0));
+          surfaceSweep=(sweepBand+sweepTail)
+            *(.28+.72*fresnel)
+            *(.72+.28*facetPulse)
+            *(.44+1.12*surfaceFilament);
+        }
 
         if(uLayer>.5){
-          vec3 organ=mix(vec3(.014,.105,.29),spectral,.29+.27*visualEnergy);
-          organ*=.36+.50*cloud;
-          organ+=ice*heart*(${mobile?'.40':'.34'}+${mobile?'.46':'.46'}*uBreath);
-          organ+=ice*nucleus*(${mobile?'2.35':'2.18'}+${mobile?'.72':'.72'}*visualEnergy);
-          organ+=spectral*(rings*1.20+iris*1.42+veins*1.08+membrane*.44);
-          organ+=(cyan*.64+ice*.14)*(axisV*.72+axisH*.36)*visualEnergy;
-          float alpha=.055+.15*heart+.10*visualEnergy+rings*.10+iris*.11+nucleus*.24+veins*.045;
-          ${outputName}=vec4(filmic(organ*${mobile?'1.38':'1.42'}),clamp(alpha,.055,${mobile?'.72':'.76'}));
+          vec3 organ=mix(vec3(.045,.30,.70),spectral,.38+.32*visualEnergy);
+          organ*=.68+.78*cloud;
+          organ+=ice*heart*(.82+.78*uBreath);
+          organ+=ice*nucleus*(3.18+1.18*visualEnergy);
+          organ+=spectral*(rings*2.08+iris*2.30+veins*1.72+membrane*.74);
+          organ+=(cyan*1.04+ice*.24)*(axisV*1.10+axisH*.62)*visualEnergy;
+          organ+=(ice*1.52+cyan*.80+violet*.28)*surfaceSweep*(1.22+.42*visualEnergy);
+          float alpha=.16+.23*heart+.17*visualEnergy+rings*.18+iris*.17+nucleus*.36+veins*.072+surfaceSweep*.15;
+          ${outputName}=vec4(filmic(organ*${optics.innerExposure}),clamp(alpha,.16,.88));
           return;
         }
 
-        vec3 glass=mix(vec3(.010,.052,.13),vec3(.055,.39,.64),.16+.31*ndl+.11*facetPulse);
-        glass+=vec3(.025,.31,.68)*sideLight*.32;
-        glass+=vec3(.008,.085,.20)*(.34+.66*cloud);
-        glass+=spectral*fresnel*(${mobile?'.34':'.66'}+${mobile?'.34':'.66'}*visualEnergy);
-        glass+=spectral*veins*(.76+.34*uBreath);
-        glass+=spectral*membrane*(.30+.24*visualEnergy);
-        glass+=spectral*iris*.34;
-        glass+=ice*(rings*.18+heart*${mobile?'.10':'.075'}+nucleus*${mobile?'.52':'.42'});
-        glass+=ice*specular*(${mobile?'.94':'1.34'}+${mobile?'.28':'.46'}*visualEnergy);
-        glass+=(cyan*.58+ice*.10)*(axisV*.58+axisH*.29)*visualEnergy;
-        glass+=(spectral*${mobile?'.24':'.72'}+ice*${mobile?'.05':'.16'})*edge;
-        float alpha=.22+.15*ndl+${mobile?'.10':'.24'}*fresnel+edge*${mobile?'.012':'.045'}+veins*.07+rings*.035+specular*.12;
-        ${outputName}=vec4(filmic(glass*${mobile?'1.28':'1.48'}),clamp(alpha,.20,${mobile?'.64':'.72'}));
+        vec3 glass=mix(vec3(.040,.205,.46),vec3(.10,.68,1.08),.28+.38*ndl+.15*facetPulse);
+        glass+=vec3(.045,.55,1.02)*sideLight*.56;
+        glass+=vec3(.025,.22,.50)*(.54+.76*cloud);
+        glass+=spectral*fresnel*(1.22+.94*visualEnergy);
+        glass+=spectral*veins*(1.24+.48*uBreath);
+        glass+=spectral*membrane*(.58+.36*visualEnergy);
+        glass+=spectral*iris*.48;
+        glass+=ice*(rings*.30+heart*.12+nucleus*.64);
+        glass+=ice*specular*(1.76+.62*visualEnergy);
+        glass+=(cyan*.90+ice*.16)*(axisV*.90+axisH*.48)*visualEnergy;
+        glass+=(spectral*1.02+ice*.22)*edge;
+        glass+=(ice*1.28+cyan*.74+spectral*.30)*surfaceSweep*(1.20+.46*fresnel);
+        float alpha=.36+.20*ndl+.32*fresnel+edge*.072+veins*.105+rings*.060+specular*.17+surfaceSweep*.13;
+        ${outputName}=vec4(filmic(glass*${optics.outerExposure}),clamp(alpha,.34,.84));
       }`;
 
     let program;
@@ -390,7 +401,7 @@
     const attributeNames=['aSphere','aCrystal','aSphereNormal','aCrystalNormal','aUv','aBary','aFacet'];
     const attributes=attributeNames.map(name=>gl.getAttribLocation(program,name));
     const uniforms={};
-    ['uTime','uEnergy','uBreath','uLayer','uMorph','uPointer','uAspect','uSiteProgress','uRotation']
+    ['uTime','uEnergy','uBreath','uLayer','uMorph','uPointer','uAspect','uSiteProgress','uSurfacePulse','uRotation']
       .forEach(name=>{uniforms[name]=gl.getUniformLocation(program,name);});
 
     function upload(buffer,data,index,size){
@@ -426,7 +437,8 @@
     let targetRotationX=rotationX,targetRotationY=0,targetRotationZ=0,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0;
-    let heartbeatTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
+    let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
+    let surfacePulseStart=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
     cinematic.version=REVISION;
@@ -435,9 +447,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:mobile?1.45:1.55;
+      const cap=auditMode?1:mobile?1.75:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:mobile?720000:1050000;
+      const budget=auditMode?390000:mobile?920000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -501,7 +513,33 @@
        or semantic site-state changes. */
     function scheduleHeartbeat(){
       clearTimeout(heartbeatTimer);heartbeatTimer=0;
-      root.dataset.fxCoreIdleHeartbeatR441='css-sheen-only-no-webgl-timer';
+      root.dataset.fxCoreIdleHeartbeatR441='disabled-no-continuous-rendering';
+    }
+    function startSurfacePulse(source='autonomous'){
+      if(disposed||reduced.matches||blocked())return false;
+      surfacePulseStart=performance.now();
+      surfacePulseCount+=1;
+      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.24);
+      targetBreath=Math.max(targetBreath,.42);
+      root.dataset.fxCoreSurfacePulseR454=`sweep-${surfacePulseCount}-${source}`;
+      schedule(68);
+      later(()=>{
+        surfacePulseStart=-Infinity;
+        root.dataset.fxCoreSurfacePulseR454='idle';
+        schedule(4);
+      },1160);
+      return true;
+    }
+    function scheduleSurfacePulse(){
+      clearTimeout(surfacePulseTimer);
+      if(disposed||reduced.matches)return;
+      const delay=surfacePulseCount===0
+        ? (mobile?3400:3000)
+        : (mobile?5400:4900)+(surfacePulseCount%3)*520;
+      surfacePulseTimer=setTimeout(()=>{
+        startSurfacePulse('autonomous');
+        scheduleSurfacePulse();
+      },delay);
     }
     function scheduleAutonomousMorph(){
       clearTimeout(autonomousTimer);autonomousTimer=0;
@@ -545,6 +583,9 @@
       gl.uniform3f(uniforms.uRotation,rotationX,rotationY,rotationZ);
       gl.uniform1f(uniforms.uAspect,aspect);
       gl.uniform1f(uniforms.uSiteProgress,siteProgress);
+      const surfacePulseElapsed=(now-surfacePulseStart)/1160;
+      const surfacePulse=surfacePulseElapsed>=0&&surfacePulseElapsed<=1?surfacePulseElapsed:-1;
+      gl.uniform1f(uniforms.uSurfacePulse,surfacePulse);
 
       /* r442 phone budget: desktop keeps the three-pass optical depth. Mobile
          drops the extra front-cull outer-glow pass, which both reduces the bloom
@@ -594,7 +635,8 @@
     function frame(now){
       raf=0;if(blocked())return;
       render(now);burstFrames=Math.max(0,burstFrames-1);
-      if(burstFrames>0)raf=requestAnimationFrame(frame);
+      const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=1160;
+      if(burstFrames>0||surfacePulseActive)raf=requestAnimationFrame(frame);
       else settleAfterBurst();
     }
 
@@ -612,7 +654,11 @@
       const drag=detail?.phase==='drag';
       targetEnergy=Math.max(targetEnergy,drag ? .58 : .88);
       targetBreath=Math.max(targetBreath,drag ? .58 : .92);
-      schedule(drag?(mobile?2:4):(mobile?5:8));
+      cinematic.corePosition=[tx*.055,-ty*.045,.52+targetEnergy*.012];
+      cinematic.interaction=[tx,ty];
+      cinematic.lastInteractionAt=performance.now();
+      root.dataset.fxCoreInteractionStateR454=`${detail?.phase||'pulse'}-synced`;
+      schedule(drag?(mobile?3:5):(mobile?8:14));
     }
     function onCoreInteraction(event){
       const detail=event.detail||{};pulse(detail);
@@ -631,7 +677,21 @@
         if(candidate&&!candidate.moved&&performance.now()-candidate.started<720)toggleShape('core-tap');
       }else if(detail.phase==='cancel')tapCandidate=null;
     }
-    function onPause(event){paused=event.detail?.paused===true||root.dataset.fxReferenceMotionPaused==='true';if(!paused)schedule(1);}
+    function onPause(event){
+      paused=event.detail?.paused===true||root.dataset.fxReferenceMotionPaused==='true';
+      if(paused){
+        surfacePulseStart=-Infinity;
+        root.dataset.fxCoreSurfacePulseR454='idle';
+        if(!disposed&&!contextLost&&resize())render(performance.now());
+      }else schedule(1);
+    }
+    function onReducedMotionChange(){
+      clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
+      surfacePulseStart=-Infinity;
+      root.dataset.fxCoreSurfacePulseR454='idle';
+      if(!reduced.matches)scheduleSurfacePulse();
+      schedule(1);
+    }
     function onScroll(){
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
@@ -653,6 +713,7 @@
     listen(hero,'pointerleave',onLeave,{passive:true});
     listen(window,'formatx:coreinteraction',onCoreInteraction,{passive:true});
     listen(window,'formatx:referencepause',onPause,{passive:true});
+    listen(reduced,'change',onReducedMotionChange,{passive:true});
     listen(window,'scroll',onScroll,{passive:true});
     listen(window,'resize',resize,{passive:true});
     listen(window,'orientationchange',resize,{passive:true});
@@ -702,7 +763,7 @@
 
     function destroy(){
       if(disposed)return;disposed=true;
-      clearTimeout(heartbeatTimer);clearTimeout(autonomousTimer);delayed.forEach(clearTimeout);delayed.clear();
+      clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
       controller.abort();ro.disconnect();io.disconnect();organObserver.disconnect();
       if(!contextLost){buffers.forEach(buffer=>gl.deleteBuffer(buffer));gl.deleteProgram(program);}
@@ -720,6 +781,7 @@
       geometry:'four-direction-asymmetric-crystal-organism-r326',
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
+      surfacePulse:()=>startSurfacePulse('api'),
       setMorph:(value,source)=>setMorph(value,source||'api-morph',true),
       setShape:(shape,source)=>setShape(shape,source||'api-set'),
       toggleShape:source=>toggleShape(source||'api-toggle'),
@@ -740,6 +802,7 @@
 
     root.dataset.fxCrystalOrganismR326='ready';
     root.dataset.fxLivingOrganicCoreR413='ready';
+    root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';
     root.dataset.fxCoreMobileR99=READY;
     root.dataset.fxCoreMobileV69=READY;
     root.dataset.fxCoreMobileV55='ready-v55';
@@ -757,7 +820,7 @@
     root.dataset.fxCoreReferenceGeometry='closed-four-tip-crystal-and-sphere-r413';
     root.dataset.fxCoreReferenceMaterial='living-organic-prismatic-membrane-r413';
     root.dataset.fxCoreInteractionVisual='pointer-drag-tap-keyboard-scroll-site-state-r413';
-    root.dataset.fxCoreLivingBehavior='interaction-heartbeat-css-sheen-no-autonomous-webgl-r441';
+    root.dataset.fxCoreLivingBehavior='interaction-and-intermittent-native-electric-surface-r454';
     root.dataset.fxCoreSiteRole='primary-living-site-interface-r413';
     root.dataset.fxCoreContexts='1';
     root.dataset.fxCoreScheduler='interaction-bursts-idle-zero-frame-r441';
@@ -766,15 +829,19 @@
     root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';
     root.dataset.fxCoreCompositionRevisionR326='new-crystal-organism-no-legacy-fallback';
     root.dataset.fxCoreMobileVisualR326=mobile?'soft-translucent-organic-rim':'desktop-translucent-organic-rim';
-    root.dataset.fxCoreMobileLightingR375=mobile?'superseded-r424-sharp-native-webgl':'desktop-r424-sharp-native-webgl';
-    root.dataset.fxCoreMobileOpticsR414=mobile?'superseded-r424-native-shader-optics':'desktop-r424-native-shader-optics';
-    root.dataset.fxCoreVisualR424=mobile?'sharp-translucent-organic-caustics':'desktop-sharp-organic-caustics';
-    root.dataset.fxCoreMobileLightingR374=mobile?'idle-visible-high-density-r424':'desktop-high-contrast-volume-r424';
+    root.dataset.fxCoreMobileLightingR375=mobile?'superseded-r454-luminous-native-webgl':'desktop-r454-luminous-native-webgl';
+    root.dataset.fxCoreMobileOpticsR414=mobile?'superseded-r454-native-shader-optics':'desktop-r454-native-shader-optics';
+    root.dataset.fxCoreVisualR424=mobile?'r454-luminous-translucent-electric-caustics':'desktop-r454-luminous-electric-caustics';
+    root.dataset.fxCoreVisualR440=mobile?'superseded-by-r454-sharp-readable-living-volume':'desktop-superseded-by-r454';
+    root.dataset.fxCoreMobileLightingR374=mobile?'idle-visible-high-density-r454':'desktop-high-contrast-volume-r454';
     root.dataset.fxCoreOpticsR424='native-webgl-filmic-caustics-no-bitmap-no-css-core';
-    root.dataset.fxCoreMobileResolutionR424=mobile?'dpr-cap-1.45-pixel-budget-720k':'desktop-dpr-cap-1.55';
-    root.dataset.fxCoreMobileOpticsR435=mobile?'soft-rim-following-visible-heart':'desktop-preserved-r435';
-    root.dataset.fxCoreMobileOpticsR440=mobile?'restrained-bloom-native-soft-rim':'desktop-preserved-r440';
-    root.dataset.fxCoreMobilePerformanceR442=mobile?'18x36-two-pass-single-startup-frame':'desktop-three-pass-preserved';
+    root.dataset.fxCoreOpticsR454='single-luminous-webgl-material-owner';
+    root.dataset.fxCoreSurfaceMotionR454='intermittent-native-electric-filament-every-five-to-six-seconds';
+    root.dataset.fxCoreSurfacePulseR454='idle';
+    root.dataset.fxCoreMobileResolutionR424=mobile?'r454-dpr-cap-1.75-pixel-budget-920k':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
+    root.dataset.fxCoreMobileOpticsR435=mobile?'superseded-by-r454-visible-native-surface':'desktop-preserved-r454';
+    root.dataset.fxCoreMobileOpticsR440=mobile?'superseded-by-r454-luminous-electric-surface':'desktop-superseded-by-r454';
+    root.dataset.fxCoreMobilePerformanceR442=mobile?'18x36-two-pass-intermittent-pulse-idle-zero':'desktop-three-pass-intermittent-pulse-idle-zero';
     root.dataset.fxGpuCapability=webgl2?'webgl2':'webgl1';
     root.dataset.fxCoreReal3dTargetFps='interaction-60-idle-zero-r441';
     root.dataset.fxCoreIdleRenderR441='zero-frame';
@@ -784,6 +851,7 @@
     publishShape('initial');
     schedule(1);
     scheduleHeartbeat();
+    scheduleSurfacePulse();
     scheduleAutonomousMorph();
     dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
       version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',

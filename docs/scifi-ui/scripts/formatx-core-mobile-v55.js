@@ -8,16 +8,15 @@
   root.dataset.fxCoreRendererMode = 'mobile';
   root.dataset.fxCoreMobileAwardRevision = 'new-crystal-organism-r326';
   root.dataset.fxCoreCrystalRevision = 'r326-four-direction-living-facet-organism';
-  root.dataset.fxCoreMobileOpticsRevision = 'r424-sharp-native-webgl';
+  root.dataset.fxCoreMobileOpticsRevision = 'r454-visible-electric-native-webgl';
 
-  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260825-r326-new-organism&rev=20260829-r424-sharp-organic-core';
+  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-visible-electric-surface';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
-  const OPTICS_TUNE_STYLE = '/scifi-ui/styles/formatx-mobile-r416-stability.css?v=20260828-r418-restrained-soft-mag-attached-header';
   const FINAL_HEADER_STYLE = '/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
   const LANGUAGE_OWNER_SCRIPT = '/scifi-ui/scripts/formatx-mobile-language-owner-r423.js?v=20260829-r423-direct-topbar-language';
   // Content wins the critical path. The render-blocking r418 stylesheet owns the
   // first header frame; later layers reassert final header ownership after legacy
-  // WDA/control styles have mounted. Native r424 shader optics are never softened.
+  // WDA/control styles have mounted. Native r454 shader optics are never softened.
   const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 3000 : 1100;
   let rendererRequested = false;
   let rendererTimer = 0;
@@ -128,28 +127,12 @@
     root.dataset.fxMobileHeaderFinalR418 = 'loaded-last';
   }
 
-  function loadOpticsTune() {
-    const existing = document.querySelector('link[data-fx-mobile-r416-stability]');
-    if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r418-restrained-soft-mag-attached-header')) existing.href = OPTICS_TUNE_STYLE;
-      root.dataset.fxCoreMobileOpticsR416='ready-r418-restrained';
-      return;
-    }
-    const link=document.createElement('link');
-    link.rel='stylesheet';
-    link.href=OPTICS_TUNE_STYLE;
-    link.dataset.fxMobileR416Stability='true';
-    document.head.appendChild(link);
-    root.dataset.fxCoreMobileOpticsR416='requested-r418-restrained';
-    link.addEventListener('load',()=>{root.dataset.fxCoreMobileOpticsR416='ready-r418-restrained';},{once:true});
-    link.addEventListener('error',()=>{root.dataset.fxCoreMobileOpticsR416='load-failed';},{once:true});
-  }
-
   function loadFinalOptics() {
     if (!matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches) return;
     document.querySelector('link[data-fx-mobile-optics-r423]')?.remove();
-    root.dataset.fxCoreMobileOpticsR423 = 'retired-r424-native-shader-optics';
-    root.dataset.fxCoreMobileOpticsOwnerR424 = 'formatx-core-shapeshifter-r337-css';
+    document.querySelector('link[data-fx-mobile-r416-stability]')?.remove();
+    root.dataset.fxCoreMobileOpticsR423 = 'retired-r454-single-native-shader-optics';
+    root.dataset.fxCoreMobileOpticsOwnerR424 = 'r454-formatx-core-shapeshifter-r337-css';
   }
 
   function loadStableControls() {
@@ -243,7 +226,6 @@
 
   root.dataset.fxCoreOverlayPolicyR326='new-native-webgl-organism-only-no-svg-canvas2d-or-legacy-visual';
   installSoundTouchRecovery();
-  loadOpticsTune();
   loadFinalOptics();
   loadStableControls();
   loadReferenceLayout();

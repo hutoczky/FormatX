@@ -7,7 +7,6 @@
 
   const CORE_MEDIA = '(prefers-reduced-motion: no-preference)';
   const STYLE_URL = '/scifi-ui/styles/formatx-mobile-regression-r310.css?v=20260824-r327-organic-core-morph';
-  const OPTICS_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260827-r371-feathered-mobile-optics';
   const REFERENCE_LAYOUT_STYLE_URL = '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260818-r207-preloaded';
   const REFERENCE_LAYOUT_SCRIPT_URL = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260824-native-orb-r250';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
@@ -118,28 +117,10 @@
     root.dataset.fxCoreMorphR327 = 'cross-device-organic-silhouette';
   }
 
-  function ensureOpticsStyle() {
-    const existing = document.querySelector('link[data-fx-mobile-core-optics-r328]');
-    const sharpNativeCore = Boolean(document.querySelector(
-      'script[data-fx-control-owner-r268="true"][src*="r424-sharp-organic-core"],script[data-fx-core-real3d="true"][src*="r424-sharp-organic-core"],script[src*="formatx-crystal-organism-r326.js"][src*="r424-sharp-organic-core"]'
-    ));
-    if (sharpNativeCore) {
-      existing?.remove();
-      root.dataset.fxCoreMobileOpticsR328 = 'retired-r424-native-shader-optics';
-      root.dataset.fxCoreMobileOpticsOwnerR424 = 'formatx-core-shapeshifter-r337-css';
-      return;
-    }
-    if (existing instanceof HTMLLinkElement) {
-      if (!existing.href.includes('r371-feathered-mobile-optics')) existing.href = OPTICS_STYLE_URL;
-      root.dataset.fxCoreMobileOpticsR328 = 'r371-feathered-mobile-optics-owner';
-      return;
-    }
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = OPTICS_STYLE_URL;
-    link.dataset.fxMobileCoreOpticsR328 = 'true';
-    document.head.appendChild(link);
-    root.dataset.fxCoreMobileOpticsR328 = 'r371-feathered-mobile-optics-owner';
+  function enforceSingleOpticsOwner() {
+    document.querySelector('link[data-fx-mobile-core-optics-r328]')?.remove();
+    root.dataset.fxCoreMobileOpticsR328 = 'retired-r454-no-fallback-stylesheet';
+    root.dataset.fxCoreMobileOpticsOwnerR424 = 'r454-formatx-core-shapeshifter-r337-css';
   }
 
   function desktopLoopBlocked() {
@@ -362,7 +343,7 @@
     ensureReferenceLayoutBootstrap();
     activateCoreCss();
     ensureStyle();
-    ensureOpticsStyle();
+    enforceSingleOpticsOwner();
     installDesktopLoopGuard();
     syncQr();
     root.dataset.fxMobileRegressionR310 = 'ready';
@@ -372,7 +353,7 @@
   ensureReferenceLayoutBootstrap();
   activateCoreCss();
   ensureStyle();
-  ensureOpticsStyle();
+  enforceSingleOpticsOwner();
   installDesktopLoopGuard();
 
   if (document.readyState === 'loading') {

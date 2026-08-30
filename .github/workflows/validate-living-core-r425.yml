@@ -1,0 +1,66 @@
+name: Validate R454 visible living MAG
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
+      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
+      - '.github/scripts/validate-living-core-r425-source.cjs'
+      - '.github/scripts/validate-living-core-r425-browser.cjs'
+      - '.github/workflows/validate-living-core-r425.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-r454:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate the single R454 source owner
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check .github/scripts/validate-living-core-r425-source.cjs
+          node --check .github/scripts/validate-living-core-r425-browser.cjs
+          node .github/scripts/validate-living-core-r425-source.cjs
+
+      - name: Install Chromium
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/r454-browser" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/r454-browser/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Verify idle visibility, sharp highlights and intermittent surface energy
+        env:
+          NODE_PATH: ${{ runner.temp }}/r454-browser/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4173/scifi-ui/
+          FORMATX_CAPTURE_DIR: ${{ runner.temp }}/r454-captures
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r454-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:4173/scifi-ui/ >/dev/null && break
+            sleep .25
+          done
+          node .github/scripts/validate-living-core-r425-browser.cjs
+
+      - name: Upload R454 captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r454-visible-electric-mag-${{ github.run_id }}
+          path: ${{ runner.temp }}/r454-captures/*.png
+          if-no-files-found: warn
+          retention-days: 14

@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r414 truthful startup/performance/control contract. */
+/* FormatX Web Design Awards — r454 truthful startup/performance/control contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -11,7 +11,6 @@ const awardRuntime = read('docs/scifi-ui/scripts/formatx-award-runtime-r206.js')
 const intro = read('docs/scifi-ui/scripts/formatx-event-horizon.js');
 const mobileRegression = read('docs/scifi-ui/scripts/formatx-mobile-regression-r310.js');
 const mobileRegressionCss = read('docs/scifi-ui/styles/formatx-mobile-regression-r310.css');
-const pulseCss = read('docs/scifi-ui/styles/formatx-core-pulse-r312.css');
 const controls = read('docs/scifi-ui/scripts/formatx-wda-controls-r198.js');
 const controlOwner = read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
 const gpu = read('docs/scifi-ui/scripts/formatx-wda-gpu-r198.js');
@@ -34,11 +33,10 @@ const mobile = JSON.parse(read('lighthouserc.live.mobile.json'));
 // UX / accessibility / explicit audio consent.
 assert.match(home, /class="skip-link"[^>]+href="#main-content"/);
 assert.match(home, /<main id="main-content">/);
-assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260823-r312-postdom-pulse/);
-assert.match(intro, /formatx-mobile-regression-r310\.js\?v=20260823-r312-postdom/);
-assert.match(intro, /formatx-core-pulse-r312\.css\?v=20260823-r312-living-pulse/);
+assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260830-r454-visible-electric-surface/);
+assert.match(intro, /formatx-mobile-regression-r310\.js\?v=20260830-r454-single-native-optics-owner/);
 assert.match(intro, /queuePostDomEnhancements/);
-assert.match(intro, /postdom-real3d-and-pulse/);
+assert.match(intro, /postdom-real3d-r454/);
 assert.match(intro, /activateCriticalReal3dStyle/);
 assert.match(intro, /ensureMobileRegressionR310/);
 assert.doesNotMatch(intro, /activateCriticalReal3dStyle\(\);\s*ensureMobileRegressionR310\(\);\s*ensureAwardRuntime\(\);\s*if\(AUDIT_MODE/);
@@ -48,16 +46,16 @@ for (const token of [
   'formatx-control-owner-r264.css?v=20260824-native-orb-r250',
   'data-fx-control-owner-style-r264',
   'formatx-wda-controls-r198.js?v=20260824-native-orb-r250',
-  'formatx-control-owner-r268.js?v=20260824-instant-award-r251',
-  'formatx-mobile-core-softening-r322.css?v=20260829-r414-restrained-mobile-mag-optics',
-  'r414-restrained-mobile-mag-optics',
+  'formatx-control-owner-r268.js?v=20260830-r454-visible-electric-surface',
+  'formatx-mobile-regression-r310.js?v=20260830-r454-single-native-optics-owner',
+  'r454-native-webgl-visible-electric-organic-core',
+  'r454-sharp-readable-native-webgl-electric-caustics',
   'formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame',
-  'formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions',
   'muted-default-visible-control',
   'audit-passive',
   'DOMContentLoaded',
   'data-fx-core-render-ms'
-]) assert.ok(awardRuntime.includes(token), `missing active r414 award runtime contract: ${token}`);
+]) assert.ok(awardRuntime.includes(token), `missing active r454 award runtime contract: ${token}`);
 for (const token of [
   'Unmute FormatX cinematic audio',
   'Mute FormatX cinematic audio',
@@ -91,21 +89,8 @@ for (const token of [
 assert.match(audio, /let enabled = false/);
 assert.match(audio, /sync\('off'\)/);
 
-// r312 startup guard: mobile must reach DOMContentLoaded before the heavy Real3D
-// enhancement CSS is activated. The living pulse is compositor-only and cannot
-// contribute to layout geometry.
-for (const token of [
-  '@keyframes fx-core-pulse-r312',
-  'scale: 1.018 1.026',
-  'animation: fx-core-pulse-r312 1.55s',
-  'will-change: scale',
-  'prefers-reduced-motion: reduce',
-  'animation-play-state: paused'
-]) assert.ok(pulseCss.includes(token), `missing r312 living MAG pulse contract: ${token}`);
-assert.doesNotMatch(pulseCss, /width\s*:|height\s*:|margin\s*:|padding\s*:/);
-
-// r310 live mobile regression guard: QR delivery remains deterministic and the
-// Real3D CSS activator is retained, but r312 calls it only after DOMContentLoaded.
+// R454 startup guard: QR delivery remains deterministic and the Real3D CSS
+// activator is retained, without a separate continuous CSS pulse owner.
 for (const token of [
   'data-fx-core-real3d="true"',
   "removeAttribute('data-fx-deferred-media-r300')",
@@ -256,4 +241,4 @@ validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
 for (const source of [awardRuntime, intro, mobileRegression, controls, controlOwner, gpu, mobileLayoutRuntime, mobileReferenceRuntime, referenceRuntime, referenceFinalizer, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r414 restrained mobile MAG optics, post-DOM Real3D startup, compact local QR delivery, canonical r268 control ownership and truthful 0.95 Lighthouse hard gates passed.');
+console.log('PASS: r454 visible single-owner MAG optics, intermittent electric surface energy, post-DOM Real3D startup, canonical controls and truthful 0.95 Lighthouse gates passed.');

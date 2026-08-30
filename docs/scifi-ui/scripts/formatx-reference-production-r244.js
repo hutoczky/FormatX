@@ -12,6 +12,20 @@
   let bootObserver = null;
   let bootTimer = 0;
 
+  function installKeyboardModality() {
+    if (root.dataset.fxKeyboardNavigationInstalledR425 === 'true') return;
+    root.dataset.fxKeyboardNavigationInstalledR425 = 'true';
+    root.dataset.fxKeyboardNavigationR425 = 'false';
+    addEventListener('keydown', event => {
+      if (event.key === 'Tab') root.dataset.fxKeyboardNavigationR425 = 'true';
+    }, true);
+    addEventListener('pointerdown', () => {
+      root.dataset.fxKeyboardNavigationR425 = 'false';
+      const skip = document.querySelector('.skip-link');
+      if (skip === document.activeElement) skip.blur();
+    }, { capture: true, passive: true });
+  }
+
   const isMobile = () => matchMedia('(max-width: 900px)').matches;
   const copy = () => root.lang === 'en' ? {
     heading: 'DISCOVER HOW IT WORKS',
@@ -222,6 +236,7 @@
     'formatx:mobilelayoutready'
   ]) addEventListener(eventName, schedule, { passive: true });
 
+  installKeyboardModality();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
 }());

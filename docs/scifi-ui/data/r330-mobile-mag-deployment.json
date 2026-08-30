@@ -1,9 +1,0 @@
-{
-  "revision": "r330",
-  "surface": "mobile-mag-optics",
-  "intent": "diffuse-short-bloom-soft-perimeter",
-  "desktop_unchanged": true,
-  "source_css": "/scifi-ui/styles/formatx-mobile-core-optics-r328.css?v=20260824-r330-diffuse-mobile-mag",
-  "source_runtime": "/scifi-ui/scripts/formatx-mobile-regression-r310.js",
-  "validated_source_commit": "972df6611ba6b5bd8ddf12e5738ca0774cf37cab"
-}

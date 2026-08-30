@@ -1,9 +1,19 @@
-name: Verify live responsive soft 3D MAG
-run-name: Validate production r448-r451 native WebGL MAG on desktop and mobile
+name: Verify live R454 native MAG visual
+run-name: R454 native MAG visual proof for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
+      - 'docs/scifi-ui/styles/formatx-current-mag-r422.css'
+      - '.github/scripts/validate-living-core-r425-browser.cjs'
+      - '.github/scripts/validate-living-core-r425-source.cjs'
+      - '.github/workflows/verify-live-core-mesh3d-visual.yml'
   workflow_run:
-    workflows: ["Prepare or deploy FormatX production"]
+    workflows: ['Prepare or deploy FormatX production']
     types: [completed]
   workflow_dispatch:
 
@@ -11,248 +21,83 @@ permissions:
   contents: read
   statuses: write
 
+concurrency:
+  group: r454-native-mag-visual-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: true
+
 jobs:
-  verify-live-mag:
+  visual-proof:
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+    env:
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      FORMATX_CAPTURE_DIR: ${{ github.workspace }}/artifacts/r454-native-mag
     steps:
-      - name: Install Playwright Chromium
+      - name: Check out audited revision
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.AUDITED_SHA }}
+
+      - name: Validate source before browser proof
+        run: node .github/scripts/validate-living-core-r425-source.cjs
+
+      - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/mag-live" && cd "$RUNNER_TEMP/mag-live"
-          npm init -y >/dev/null 2>&1
-          npm install --silent playwright@1.62.0
+          npm install --no-save --no-package-lock playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Validate live r448-r451 balanced-body restrained-halo soft-edge crystal optics
+      - name: Wait for R454 renderer in production
         shell: bash
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP/mag-live"
-          node <<'NODE'
-          const assert = require('node:assert/strict');
-          const fs = require('node:fs');
-          const { chromium } = require('playwright');
-          const origin = 'https://formatxsuite.com';
+          ready=0
+          for attempt in $(seq 1 50); do
+            if curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' \
+              "https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?audit=${GITHUB_RUN_ID}-${attempt}" \
+              | grep -Fq 'living-luminous-electric-crystal-r454'; then
+              ready=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ready" = 1
 
-          function diagnostics(page, label) {
-            page.on('pageerror', error => console.log(`[${label} PAGEERROR]`, error.message));
-            page.on('requestfailed', request => {
-              const url = request.url();
-              if (!/cloudflareinsights\.com/.test(url)) {
-                console.log(`[${label} REQUESTFAILED]`, url, request.failure()?.errorText || '');
-              }
-            });
-          }
+      - name: Capture and measure desktop and phone MAG
+        env:
+          FORMATX_TEST_URL: https://formatxsuite.com/scifi-ui/
+        run: node .github/scripts/validate-living-core-r425-browser.cjs
 
-          async function verify(browser, name, viewport, mobile, dpr) {
-            const context = await browser.newContext({
-              viewport,
-              deviceScaleFactor: dpr,
-              isMobile: mobile,
-              hasTouch: mobile,
-              locale: 'hu-HU',
-              colorScheme: 'dark'
-            });
-            const page = await context.newPage();
-            diagnostics(page, name);
-
-            await page.goto(`${origin}/?live_mag_r451=${name}-${Date.now()}`, {
-              waitUntil: 'domcontentloaded',
-              timeout: 30000
-            });
-
-            await page.waitForFunction(isMobile => {
-              const root = document.documentElement;
-              const baseReady = root.dataset.fxCoreMobileV69 === 'ready-v69'
-                && root.dataset.fxCrystalOrganismR326 === 'ready'
-                && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
-                && root.dataset.fxCoreOpticsR424 === 'native-webgl-filmic-caustics-no-bitmap-no-css-core'
-                && Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas'));
-              if (!baseReady) return false;
-              if (!isMobile) return true;
-              return root.dataset.fxMobileMagBalanceR451 === 'ready'
-                && root.dataset.fxMobileMagBalanceR448 === 'ready'
-                && [...document.querySelectorAll('link[rel="stylesheet"]')].some(link => String(link.href).includes('formatx-mobile-mag-balance-r448.css'));
-            }, mobile, { timeout: 60000 });
-
-            await page.waitForTimeout(650);
-            const before = await page.evaluate(() => ({
-              energy: Number(window.FormatXCoreMobileV69?.energy || 0),
-              position: [...(window.FormatXCoreCinematic?.corePosition || [])]
-            }));
-
-            if (mobile) {
-              await page.evaluate(() => {
-                window.FormatXCoreMobileV69?.pulse?.();
-                dispatchEvent(new CustomEvent('formatx:coreinteraction', {
-                  detail: { x: .42, y: -.24, phase: 'drag' }
-                }));
-              });
-              await page.waitForTimeout(260);
-            }
-
-            const state = await page.evaluate(() => {
-              const root = document.documentElement;
-              const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
-              const canvas = stage?.querySelector('.fx-crystal-organism-r326-canvas');
-              const box = canvas?.getBoundingClientRect();
-              const gl = canvas?.getContext('webgl2') || canvas?.getContext('webgl');
-              const style = canvas ? getComputedStyle(canvas) : null;
-              const visible = element => {
-                if (!(element instanceof Element)) return false;
-                const rect = element.getBoundingClientRect();
-                const computed = getComputedStyle(element);
-                return rect.width > 1 && rect.height > 1
-                  && computed.display !== 'none'
-                  && computed.visibility !== 'hidden'
-                  && Number(computed.opacity || 1) > .01;
-              };
-              const overlap = (a, b, gap = 2) => {
-                if (!visible(a) || !visible(b)) return false;
-                const x = a.getBoundingClientRect(), y = b.getBoundingClientRect();
-                return !(x.right + gap <= y.left || y.right + gap <= x.left || x.bottom + gap <= y.top || y.bottom + gap <= x.top);
-              };
-              const controls = document.querySelector('#hero .fx-reference-controls-r204');
-              const sound = controls?.querySelector('.fx-three-sound');
-              const ask = controls?.querySelector('.fx-reference-ask');
-              const pause = controls?.querySelector('.fx-reference-pause');
-              const nativeOpticsLink = [...document.querySelectorAll('link[rel="stylesheet"]')]
-                .find(link => String(link.href).includes('formatx-core-shapeshifter-r337.css'));
-              const r448Link = [...document.querySelectorAll('link[rel="stylesheet"]')]
-                .find(link => String(link.href).includes('formatx-mobile-mag-balance-r448.css'));
-              return {
-                renderer: root.dataset.fxCoreRenderer || '',
-                material: root.dataset.fxCoreMaterial || '',
-                geometry: root.dataset.fxCoreGeometry || '',
-                scheduler: root.dataset.fxCoreScheduler || '',
-                composition: root.dataset.fxCoreCompositionRevisionR326 || '',
-                stageRenderer: stage?.dataset.renderer || '',
-                v69: root.dataset.fxCoreMobileV69 || '',
-                r326: root.dataset.fxCrystalOrganismR326 || '',
-                mobileBalanceR451: root.dataset.fxMobileMagBalanceR451 || '',
-                mobileBalanceR450: root.dataset.fxMobileMagBalanceR450 || '',
-                mobileBalanceR448: root.dataset.fxMobileMagBalanceR448 || '',
-                opticsR424: root.dataset.fxCoreOpticsR424 || '',
-                nativeOpticsHref: nativeOpticsLink?.href || '',
-                r448Href: r448Link?.href || '',
-                canvases: document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
-                gl: Boolean(gl),
-                glError: gl?.getError(),
-                width: box?.width || 0,
-                height: box?.height || 0,
-                opacity: Number(style?.opacity || 0),
-                filter: style?.filter || '',
-                scale: style?.scale || '',
-                energy: Number(window.FormatXCoreMobileV69?.energy || 0),
-                position: [...(window.FormatXCoreCinematic?.corePosition || [])],
-                renderMs: Number(root.dataset.fxCoreRenderMs || Infinity),
-                controlsVisible: visible(controls) && visible(sound) && visible(ask) && visible(pause),
-                soundAskOverlap: overlap(sound, ask),
-                askPauseOverlap: overlap(ask, pause),
-                heroCopyVisible: visible(document.querySelector('#hero .hero-copy')),
-                proofVisible: visible(document.querySelector('#hero .fx-reference-proof'))
-              };
-            });
-
-            console.log(name.toUpperCase(), JSON.stringify({ before, state }));
-            await page.screenshot({ path: `${name}-r451-balanced.png`, fullPage: false, timeout: 120000, animations: 'disabled', caret: 'hide' });
-
-            assert.equal(state.renderer, 'single-webgl-crystal-organism-r326');
-            assert.equal(state.stageRenderer, 'crystal-organism-r326');
-            assert.equal(state.material, 'translucent-living-facet-organism-r326');
-            assert.equal(state.geometry, 'four-direction-asymmetric-crystal-organism-r326');
-            assert.ok(['interaction-bursts-idle-zero-frame-r441', 'heartbeat-and-interaction-bursts-no-idle-loop-r326'].includes(state.scheduler), `unexpected scheduler: ${state.scheduler}`);
-            assert.equal(state.composition, 'new-crystal-organism-no-legacy-fallback');
-            assert.equal(state.v69, 'ready-v69');
-            assert.equal(state.r326, 'ready');
-            assert.equal(state.canvases, 1);
-            assert.equal(state.gl, true);
-            assert.equal(state.glError, 0);
-            assert.ok(state.width <= viewport.width + 1 && state.height > 100, JSON.stringify(state));
-            assert.ok(Number.isFinite(state.renderMs) && state.renderMs < 16.67, JSON.stringify(state));
-            assert.equal(state.opticsR424, 'native-webgl-filmic-caustics-no-bitmap-no-css-core');
-            assert.ok(state.nativeOpticsHref.includes('formatx-core-shapeshifter-r337.css'), 'current native optics stylesheet is not loaded');
-            assert.equal(state.controlsVisible, true, JSON.stringify(state));
-            assert.equal(state.soundAskOverlap, false, JSON.stringify(state));
-            assert.equal(state.askPauseOverlap, false, JSON.stringify(state));
-            assert.equal(state.heroCopyVisible, true, JSON.stringify(state));
-            assert.equal(state.proofVisible, true, JSON.stringify(state));
-
-            if (mobile) {
-              assert.equal(state.mobileBalanceR451, 'ready');
-              assert.equal(state.mobileBalanceR450, 'superseded-r451');
-              assert.equal(state.mobileBalanceR448, 'ready');
-              assert.ok(state.r448Href.includes('formatx-mobile-mag-balance-r448.css'), state.r448Href);
-              assert.ok(state.r448Href.includes('20260830-r451-balanced-body-restrained-halo-soft-edge'), state.r448Href);
-              assert.ok(state.opacity >= .959 && state.opacity <= .961, `mobile r448/r451 opacity mismatch: ${JSON.stringify(state)}`);
-              assert.match(state.filter, /brightness\(1\.15\)/, `mobile r448/r451 body luminance missing: ${state.filter}`);
-              assert.match(state.filter, /contrast\(0\.71\)/, `mobile r448/r451 edge balance missing: ${state.filter}`);
-              assert.match(state.filter, /saturate\(1\.005\)/, `mobile r448/r451 spectral balance missing: ${state.filter}`);
-              assert.match(state.filter, /blur\(0\.66px\)/, `mobile r448/r451 soft perimeter missing: ${state.filter}`);
-              assert.ok(state.scale === '0.78 0.82' || state.scale === '0.78 0.82 1', `mobile r448/r451 compact scale mismatch: ${state.scale}`);
-              assert.ok(state.energy >= before.energy - .02, JSON.stringify({ before, state }));
-              assert.equal(state.position.length, 3);
-              assert.notDeepEqual(state.position, before.position);
-            } else {
-              assert.equal(state.r448Href, '');
-            }
-
-            await context.close();
-          }
-
-          (async () => {
-            const browser = await chromium.launch({
-              headless: true,
-              args: ['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']
-            });
-            try {
-              await verify(browser, 'desktop', { width: 1440, height: 960 }, false, 1);
-              await verify(browser, 'mobile390', { width: 390, height: 844 }, true, 2);
-              await verify(browser, 'mobile430', { width: 430, height: 932 }, true, 2);
-            } finally {
-              await browser.close();
-            }
-            for (const file of ['desktop-r451-balanced.png','mobile390-r451-balanced.png','mobile430-r451-balanced.png']) {
-              assert.ok(fs.statSync(file).size > 10000, file);
-            }
-            console.log('PASS: live r448/r451 WebGL crystal restores readable body detail while retaining restrained halo and a soft natural edge at 390px and 430px.');
-          })().catch(error => { console.error(error); process.exit(1); });
-          NODE
-
-      - name: Upload live MAG captures
+      - name: Upload R454 screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-mag-r451-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/mag-live/desktop-r451-balanced.png
-            ${{ runner.temp }}/mag-live/mobile390-r451-balanced.png
-            ${{ runner.temp }}/mag-live/mobile430-r451-balanced.png
+          name: r454-native-mag-visual-${{ env.AUDITED_SHA }}
+          path: artifacts/r454-native-mag
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Publish live MAG status
-        if: always() && github.event_name == 'workflow_run'
+      - name: Publish native MAG visual status
+        if: always()
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
-          JOB_STATUS: ${{ job.status }}
+          RESULT: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then
+          state=failure
+          description='R454 native MAG visual proof failed'
+          if [[ "$RESULT" == success ]]; then
             state=success
-            description='Live r448-r451 balanced-body restrained-halo soft-edge mobile MAG passed'
-          else
-            state=failure
-            description='Live r448-r451 MAG diagnostic failed'
+            description='R454 desktop and phone MAG visibility proof passed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
-            -f context='FormatX live MAG r448-r451' \
+            -f context='FormatX R454 native MAG visual' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

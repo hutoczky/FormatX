@@ -64,6 +64,7 @@ jobs:
           node .github/scripts/validate-public-site-integrity.cjs
           node .github/scripts/validate-feedback-moderation.cjs
           node .github/scripts/validate-user-requested-site-features.cjs
+          node .github/scripts/validate-living-core-r425-source.cjs
           node .github/scripts/validate-real3d-core-v20.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
 
@@ -83,7 +84,7 @@ jobs:
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          node --check docs/scifi-ui/scripts/formatx-core-mechanical-orb-r250.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
@@ -96,7 +97,8 @@ jobs:
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-public-site-integrity.cjs
-          node --check .github/scripts/validate-mechanical-orb-r250-browser.cjs
+          node --check .github/scripts/validate-living-core-r425-source.cjs
+          node --check .github/scripts/validate-living-core-r425-browser.cjs
 
       - name: Install dependencies and run Worker tests
         working-directory: billing-worker

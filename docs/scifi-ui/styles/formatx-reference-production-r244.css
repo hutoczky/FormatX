@@ -16,7 +16,7 @@
     background: #01050c !important;
   }
 
-  html[data-fx-reference-production-r244="ready"] body.living-architecture .skip-link:not(:focus-visible) {
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .skip-link {
     position: fixed !important;
     top: -160px !important;
     left: 12px !important;
@@ -25,7 +25,7 @@
     pointer-events: none !important;
   }
 
-  html[data-fx-reference-production-r244="ready"] body.living-architecture .skip-link:focus-visible {
+  html[data-fx-reference-production-r244="ready"][data-fx-keyboard-navigation-r425="true"] body.living-architecture .skip-link:focus-visible {
     top: 10px !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -577,7 +577,7 @@
     background: #01050c !important;
   }
 
-  html[data-fx-reference-production-r244="desktop"] body.living-architecture .skip-link:not(:focus-visible) {
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .skip-link {
     position: fixed !important;
     top: -160px !important;
     left: 14px !important;
@@ -586,7 +586,7 @@
     pointer-events: none !important;
   }
 
-  html[data-fx-reference-production-r244="desktop"] body.living-architecture .skip-link:focus-visible {
+  html[data-fx-reference-production-r244="desktop"][data-fx-keyboard-navigation-r425="true"] body.living-architecture .skip-link:focus-visible {
     top: 12px !important;
     visibility: visible !important;
     opacity: 1 !important;

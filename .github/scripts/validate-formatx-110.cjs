@@ -13,8 +13,8 @@ const webgl = read("docs/scifi-ui/scripts/webgl-fallback-loader.js");
 const webgpu = read("docs/scifi-ui/scripts/experience-entry.js");
 const premium = read("docs/scifi-ui/scripts/formatx-premium-finish.js");
 const premiumCss = read("docs/scifi-ui/styles/formatx-premium-finish.css");
-const mobileRecovery = read("docs/scifi-ui/scripts/formatx-mobile-recovery.js");
 const threeHost = read("docs/scifi-ui/scripts/formatx-three-host-safe.js");
+const livingCore = read("docs/scifi-ui/scripts/formatx-crystal-organism-r326.js");
 const scrollBootstrap = read("docs/scifi-ui/scripts/formatx-infinite-scroll.js");
 const desktopScroll = read("docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js");
 const scrollPolicy = JSON.parse(read("docs/scifi-ui/data/scroll-policy.json"));
@@ -42,7 +42,9 @@ assert.ok(premium.includes("root.dataset.fxImmersive !== 'active'"), "living cor
 assert.ok(premium.includes("formatx:immersiveactivate"), "immersive activation event is missing");
 assert.ok(premium.includes("const scrolling = root.dataset.fxScrollActivity === 'scrolling'"), "Canvas2D renderer does not adapt while scrolling");
 assert.ok(threeHost.includes("if (!immersiveActive() || document.hidden) return;"), "safe Three host renders while inactive");
-assert.ok(mobileRecovery.includes("immersiveActive() && introComplete"), "legacy iframe path is not activation-gated");
+assert.ok(!homepage.includes("formatx-mobile-recovery.js"), "retired iframe recovery renderer returned to the homepage");
+assert.ok(!homepage.includes("formatx-core-real3d-v20.js"), "retired core bootstrap returned to the active motion template");
+assert.ok(livingCore.includes("intermittent-native-electric-filament-every-five-to-six-seconds"), "current intermittent surface energy is missing");
 
 assert.ok(scrollBootstrap.includes("platform-scroll-v2"), "platform scroll bootstrap is missing");
 assert.ok(scrollBootstrap.includes("mobile-seamless-loading-v1"), "mobile seamless-v7 loading controller is missing");

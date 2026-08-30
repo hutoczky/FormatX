@@ -1,6 +1,6 @@
-/* FormatX r429 — direct current-core + language startup with critical-path warming.
-   The static shell, canonical HU/EN selector and r326 MAG are first-load owners.
-   Retired recovery/material/signature generations remain user-intent only. */
+/* FormatX r454 — current language, layout and native WebGL MAG critical path.
+   One shader owns the MAG optics and its intermittent surface caustic. Retired
+   recovery/material generations remain user-intent only. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -10,13 +10,14 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r429-initial-cross-device-header';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r428-cross-device-header&rev=20260830-r428-soft-mobile-optics';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260829-r424-sharp-organic-core';
-const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r428-pure-native-3d&rev=20260830-r428-soft-mobile-optics';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r454-visible-electric-style-first';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
+const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
+const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r454-single-visible-native-optics-owner';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
-if(reduced.matches)root.dataset.fxMotionRuntimeR239='reduced-motion-static-core-r429';
+if(reduced.matches)root.dataset.fxMotionRuntimeR239='reduced-motion-static-core-r454';
 
 const specs=Array.from(template.content.querySelectorAll('script[src]'));
 const deferred=[];
@@ -59,6 +60,7 @@ function warmCriticalOwners(){
   warmAsset(CURRENT_MAG,'script');
   warmAsset(CURRENT_RENDERER,'script');
   warmAsset(CURRENT_STYLE,'style');
+  warmAsset(CURRENT_OPTICS,'style');
   warmAsset(FINAL_HEADER,'style');
   root.dataset.fxLanguageCriticalWarmR429='ready';
 }
@@ -140,8 +142,8 @@ root.dataset.fxMotionRuntimeRequestedR271='0';
 root.dataset.fxMotionRuntimeMobileEnergySkippedR271=String(skippedEnergy);
 root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
 root.dataset.fxMotionRuntimeRetiredCoreSkippedR422=String(retiredCore);
-root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r429-mobile-prewarmed-r326':'core-ready-r429-desktop-prewarmed-r326';
-root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r429-prewarmed';
+root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r454-mobile-prewarmed-r326':'core-ready-r454-desktop-prewarmed-r326';
+root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r454-prewarmed';
 scheduleCriticalOwners();
 
 if(deferred.length){

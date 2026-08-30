@@ -35,7 +35,7 @@
       "/scifi-ui/scripts/formatx-platform-surface-finalizer.js",
       "/scifi-ui/scripts/formatx-organism-trust.js", "/scifi-ui/scripts/formatx-organism-semantic-state.js",
       "/scifi-ui/scripts/public-evidence-pages.js", "/scifi-ui/scripts/formatx-seo.js",
-      "/scifi-ui/scripts/formatx-event-horizon.js", "/scifi-ui/scripts/formatx-mobile-recovery.js",
+      "/scifi-ui/scripts/formatx-event-horizon.js",
       "/scifi-ui/scripts/living-architecture.js", "/scifi-ui/scripts/igloo-parity.js",
       "/scifi-ui/scripts/single-language-toggle.js", "/scifi-ui/scripts/formatx-copy-polish.js",
       "/scifi-ui/scripts/formatx-license-links.js", "/scifi-ui/scripts/license-page.js",

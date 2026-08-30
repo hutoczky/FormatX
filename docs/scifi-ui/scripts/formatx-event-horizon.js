@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  /* FormatX r411 — first-paint-stable bootstrap.
+  /* FormatX r454 — first-paint-stable bootstrap.
      The static HTML is the LCP owner. This runtime may create semantic controls
      and reference proof nodes, but it never reparents the existing hero copy. */
   const ROOT = document.documentElement;
@@ -20,9 +20,8 @@
   ROOT.dataset.fxLivingCopyGuardPolicyR293 = 'static-content-normalized-no-document-scan';
   ROOT.dataset.fxHeroLcpOwnerR411 = 'static-html-no-reparent';
 
-  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260823-r312-postdom-pulse&rev=20260829-r424-sharp-organic-core';
-  const MOBILE_REGRESSION_URL = './scripts/formatx-mobile-regression-r310.js?v=20260823-r312-postdom&rev=20260827-r413-static-3d';
-  const PULSE_STYLE_URL = './styles/formatx-core-pulse-r312.css?v=20260823-r312-living-pulse';
+  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260830-r454-visible-electric-surface';
+  const MOBILE_REGRESSION_URL = './scripts/formatx-mobile-regression-r310.js?v=20260830-r454-single-native-optics-owner';
   const FIRST_PAINT_STYLE_URL = './styles/formatx-first-paint-r206.css?v=20260825-r306-static-production-parity';
   const FIRST_FRAME_STYLE_URL = './styles/formatx-first-frame-geometry-r274.css?v=20260825-r306-static-production-parity';
   const FIRST_CONTROL_STYLE_URL = './styles/formatx-first-paint-controls-r306.css?v=20260825-r306-prepaint-final-geometry';
@@ -193,19 +192,6 @@
     }
   }
 
-  function ensureCorePulseStyle() {
-    if (REDUCE_QUERY.matches) {
-      ROOT.dataset.fxCorePulseR312 = 'reduced-motion-static';
-      return;
-    }
-    if (document.querySelector('link[data-fx-core-pulse-r312]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = PULSE_STYLE_URL;
-    link.dataset.fxCorePulseR312 = 'true';
-    document.head.appendChild(link);
-  }
-
   function ensureMobileRegressionR310() {
     if (document.querySelector('script[data-fx-mobile-regression-r310]')) return;
     const script = document.createElement('script');
@@ -236,15 +222,14 @@
 
   function queuePostDomEnhancements(includeMobileReal3d) {
     const run = () => afterFirstPaint(() => {
-      ensureCorePulseStyle();
       if (includeMobileReal3d) {
         activateCriticalReal3dStyle();
         ensureMobileRegressionR310();
       }
       ensureAwardRuntime();
       ROOT.dataset.fxMobileBootstrapR312 = includeMobileReal3d
-        ? 'postdom-real3d-and-pulse'
-        : 'postdom-pulse';
+        ? 'postdom-real3d-r454'
+        : 'postdom-award-runtime-r454';
       ROOT.dataset.fxPostDomScheduleR411 = 'two-raf-idle-timeout-650';
     });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
