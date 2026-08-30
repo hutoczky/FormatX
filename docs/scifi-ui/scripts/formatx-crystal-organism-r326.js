@@ -287,6 +287,7 @@
 
     const fragmentSource = `${versionLine}precision highp float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress;
+      uniform vec2 uPointer;
       ${fragmentIn} vec3 vNormal;
       ${fragmentIn} vec3 vLocal;
       ${fragmentIn} vec2 vUv;
@@ -311,8 +312,8 @@
         float specular=pow(max(dot(n,normalize(key+view)),0.),42.0);
         specular+=.72*pow(max(dot(n,normalize(side+view)),0.),24.0);
         float facetPulse=.5+.5*sin(vFacet*23.0+uTime*.42+uSiteProgress*5.0);
-        float edge=1.0-smoothstep(.010,.050,min(vBary.x,min(vBary.y,vBary.z)));
-        edge*=pow(1.0-vMorph,1.7)*(.026+.13*fresnel)*smoothstep(.38,.88,facetPulse);
+        float edge=1.0-smoothstep(${mobile?'.008':'.010'},${mobile?'.062':'.050'},min(vBary.x,min(vBary.y,vBary.z)));
+        edge*=pow(1.0-vMorph,1.7)*(${mobile?'.012':'.026'}+${mobile?'.060':'.13'}*fresnel)*smoothstep(.38,.88,facetPulse);
         vec2 field=vec2(vUv.x*8.0+vLocal.z*2.1,vUv.y*5.0+vLocal.x*1.7);
         float cloud=noise(field*2.2+vec2(-uTime*.08,uTime*.05));
         float warp=noise(field*1.34+vec2(uTime*.025,-uTime*.018));
@@ -322,8 +323,10 @@
         float cellField=noise(vec2(vLocal.x*5.1+vLocal.z*2.7,vLocal.y*5.8-vLocal.z*1.9)+vec2(uTime*.045,-uTime*.032));
         float membrane=ridge(cellField*2.2+vLocal.y*1.7-vLocal.x*.8-uTime*.055,10.0);
         membrane*=.24+.76*fresnel;
-        float radial=length(vec2(vLocal.x,vLocal.y*1.025));
-        float angle=atan(vLocal.y,vLocal.x);
+        vec2 heartOffset=vec2(uPointer.x*${mobile?'.070':'.045'},uPointer.y*${mobile?'.058':'.036'});
+        vec2 heartLocal=vec2(vLocal.x,vLocal.y*1.025)-heartOffset;
+        float radial=length(heartLocal);
+        float angle=atan(heartLocal.y,heartLocal.x);
         float visualEnergy=sat(.48+uEnergy*.66);
         float heart=pow(sat(1.0-radial/.39),3.15);
         float nucleus=pow(sat(1.0-radial/.128),4.8);
@@ -336,8 +339,8 @@
         float irisBand=1.0-smoothstep(.012,.042,abs(radial-petalRadius));
         float petals=pow(.5+.5*cos(angle*4.0+warp*1.1-uTime*.15),5.0);
         float iris=irisBand*(.28+.72*petals)*(1.0-smoothstep(.31,.46,radial));
-        float axisV=(1.0-smoothstep(.004,.021,abs(vLocal.x)))*(1.0-smoothstep(.58,.96,abs(vLocal.y)));
-        float axisH=(1.0-smoothstep(.004,.020,abs(vLocal.y)))*(1.0-smoothstep(.54,.91,abs(vLocal.x)));
+        float axisV=(1.0-smoothstep(.004,.021,abs(heartLocal.x)))*(1.0-smoothstep(.58,.96,abs(heartLocal.y)));
+        float axisH=(1.0-smoothstep(.004,.020,abs(heartLocal.y)))*(1.0-smoothstep(.54,.91,abs(heartLocal.x)));
         float hue=.5+.5*sin(vFacet*7.0+uSiteProgress*9.0+uTime*.12);
         vec3 cyan=vec3(.03,1.18,1.72);
         vec3 violet=vec3(.98,.16,1.72);
@@ -347,28 +350,28 @@
         if(uLayer>.5){
           vec3 organ=mix(vec3(.014,.105,.29),spectral,.29+.27*visualEnergy);
           organ*=.36+.50*cloud;
-          organ+=ice*heart*(.34+.46*uBreath);
-          organ+=ice*nucleus*(2.18+.72*visualEnergy);
+          organ+=ice*heart*(${mobile?'.46':'.34'}+${mobile?'.58':'.46'}*uBreath);
+          organ+=ice*nucleus*(${mobile?'2.82':'2.18'}+${mobile?'.92':'.72'}*visualEnergy);
           organ+=spectral*(rings*1.34+iris*1.62+veins*1.16+membrane*.48);
           organ+=(cyan*.86+ice*.18)*(axisV*.92+axisH*.48)*visualEnergy;
           float alpha=.055+.15*heart+.10*visualEnergy+rings*.10+iris*.11+nucleus*.28+veins*.045;
-          ${outputName}=vec4(filmic(organ*1.42),clamp(alpha,.055,.76));
+          ${outputName}=vec4(filmic(organ*${mobile?'1.48':'1.42'}),clamp(alpha,.055,${mobile?'.80':'.76'}));
           return;
         }
 
         vec3 glass=mix(vec3(.010,.052,.13),vec3(.055,.39,.64),.16+.31*ndl+.11*facetPulse);
         glass+=vec3(.025,.31,.68)*sideLight*.32;
         glass+=vec3(.008,.085,.20)*(.34+.66*cloud);
-        glass+=spectral*fresnel*(.66+.66*visualEnergy);
+        glass+=spectral*fresnel*(${mobile?'.48':'.66'}+${mobile?'.48':'.66'}*visualEnergy);
         glass+=spectral*veins*(.76+.34*uBreath);
         glass+=spectral*membrane*(.30+.24*visualEnergy);
         glass+=spectral*iris*.34;
-        glass+=ice*(rings*.18+heart*.075+nucleus*.42);
-        glass+=ice*specular*(1.34+.46*visualEnergy);
+        glass+=ice*(rings*.18+heart*${mobile?'.12':'.075'}+nucleus*${mobile?'.60':'.42'});
+        glass+=ice*specular*(${mobile?'1.08':'1.34'}+${mobile?'.34':'.46'}*visualEnergy);
         glass+=(cyan*.68+ice*.12)*(axisV*.72+axisH*.37)*visualEnergy;
-        glass+=(spectral*.72+ice*.16)*edge;
-        float alpha=.22+.15*ndl+.24*fresnel+edge*.045+veins*.07+rings*.035+specular*.12;
-        ${outputName}=vec4(filmic(glass*1.48),clamp(alpha,.20,.72));
+        glass+=(spectral*${mobile?'.38':'.72'}+ice*${mobile?'.08':'.16'})*edge;
+        float alpha=.22+.15*ndl+${mobile?'.15':'.24'}*fresnel+edge*${mobile?'.018':'.045'}+veins*.07+rings*.035+specular*.12;
+        ${outputName}=vec4(filmic(glass*${mobile?'1.34':'1.48'}),clamp(alpha,.20,${mobile?'.68':'.72'}));
       }`;
 
     let program;
@@ -753,6 +756,7 @@
     root.dataset.fxCoreMobileLightingR374=mobile?'idle-visible-high-density-r424':'desktop-high-contrast-volume-r424';
     root.dataset.fxCoreOpticsR424='native-webgl-filmic-caustics-no-bitmap-no-css-core';
     root.dataset.fxCoreMobileResolutionR424=mobile?'dpr-cap-1.75-pixel-budget-980k':'desktop-dpr-cap-1.55';
+    root.dataset.fxCoreMobileOpticsR435=mobile?'soft-rim-following-visible-heart':'desktop-preserved-r435';
     root.dataset.fxGpuCapability=webgl2?'webgl2':'webgl1';
     root.dataset.fxCoreReal3dTargetFps='interaction-60-heartbeat-burst-idle-zero';
     root.dataset.fxCoreRenderMs='0';
