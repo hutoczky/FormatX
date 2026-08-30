@@ -100,8 +100,8 @@ function ensureLanguageToggle(topbar){
   const current=language();
   if(lang.textContent!==current.toUpperCase())lang.textContent=current.toUpperCase();
   lang.lang=current;
-  lang.setAttribute('aria-label',current==='en'?'Switch to Hungarian':'Váltás angol nyelvre');
-  lang.setAttribute('title',current==='en'?'Switch to Hungarian':'Váltás angol nyelvre');
+  lang.setAttribute('aria-label',current==='en'?'EN – switch to Hungarian':'HU – váltás angol nyelvre');
+  lang.setAttribute('title',current==='en'?'EN – switch to Hungarian':'HU – váltás angol nyelvre');
   if(lang.parentElement!==topbar)topbar.appendChild(lang);
   root.dataset.fxReferenceLanguageLayout='r423-direct-topbar-child';
   return lang;

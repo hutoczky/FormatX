@@ -29,7 +29,7 @@ for(const token of [
   'formatx-current-mag-loader-r422.js','formatx-crystal-organism-r326.js',
   'formatx-mobile-solid-glass-r456.js','formatx-core-shapeshifter-r337.css'
 ])assert.ok(motion.includes(token),`missing current R460 motion owner: ${token}`);
-assert.ok(motion.includes('single-language-toggle.js?v=20260830-r461-static-owner'),'motion loader must request R461 language owner');
+assert.ok(motion.includes('single-language-toggle.js?v=20260830-r462-semantic-owner'),'motion loader must request R461 language owner');
 assert.ok(motion.includes("fxSingleLanguageToggleVersion==='7'"),'motion loader must require language owner v7');
 assert.ok(!motion.includes('isRetiredMagRuntime'),'compact R461 loader must not contain retired-runtime filtering');
 
@@ -45,7 +45,7 @@ for(const token of [
   '.topbar > .header-actions','> .fx-rail','contain: layout paint',
   '.fx-qr-placeholder','#main-nav:not(.open)','fx-reference-controls-r204.fx-reference-controls-r264'
 ])assert.ok(quality.includes(token),`missing R462 quality CSS: ${token}`);
-assert.match(home,/formatx-quality-r461\.css\?v=20260830-r461/);
+assert.match(home,/formatx-quality-r461\.css\?v=20260830-r462-mobile-a11y/);
 assert.match(home,/class="fx-language-toggle"/);
 assert.match(home,/data-fx-single-language-toggle="ready-v3"/);
 assert.doesNotMatch(home,/data-fx-living-energy-r168="true" href="\.\/styles\/formatx-living-energy-r168\.css/);
