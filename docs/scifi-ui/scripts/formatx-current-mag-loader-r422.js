@@ -1,10 +1,11 @@
-/* FormatX r441 — direct current MAG loader.
-   r326 remains the production renderer. r441 keeps the r440 restrained mobile
-   finish and loads the native idle-zero WebGL scheduler. */
+/* FormatX r442 — direct current MAG loader.
+   r326 remains the production renderer. r442 makes the critical MAG path
+   style-first so the WebGL stage can never enter normal flow before its final
+   geometry exists, while retaining the r441 idle-zero scheduler. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r441-idle-zero-restrained-mobile-optics';
+const VERSION='direct-r326-r442-style-first-idle-zero-mobile-budget';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
@@ -12,7 +13,7 @@ root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r440-restrained-bloom-soft-edge';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r441-idle-zero-native-soft-rim';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r442-mobile-two-pass-budget';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r436-protected-ui-touch-fallback';
 const SHEEN='/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js?v=20260830-r439-bounded-surface-sheen';
@@ -30,7 +31,12 @@ let started=false;
 function addStyle(href,attr){
   return new Promise(resolve=>{
     let link=document.querySelector(`link[${attr}]`);
-    if(link instanceof HTMLLinkElement){resolve(link);return;}
+    if(link instanceof HTMLLinkElement){
+      if(link.sheet){resolve(link);return;}
+      link.addEventListener('load',()=>resolve(link),{once:true});
+      link.addEventListener('error',()=>resolve(link),{once:true});
+      return;
+    }
     link=document.createElement('link');link.rel='stylesheet';link.href=href;link.setAttribute(attr,'true');
     link.addEventListener('load',()=>resolve(link),{once:true});
     link.addEventListener('error',()=>resolve(link),{once:true});
@@ -118,14 +124,19 @@ function installSoundTouchRecovery(){
 async function start(){
   if(started)return;started=true;
   repairAccessibleNames();installSoundTouchRecovery();
-  const styles=[addStyle(STYLE,'data-fx-current-mag-r422'),addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')];
-  const rendererScript=addScript(RENDERER,'data-fx-current-r326-r422');
-  Promise.all(styles).then(()=>{
-    root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
-    root.dataset.fxCurrentMagStylesR423='ready';
-  });
 
-  await rendererScript;
+  // r442: never create the WebGL stage until both geometry-owning styles have
+  // loaded. This removes the transient default canvas box that contributed to
+  // the mobile hero-grid/canvas layout shift in Lighthouse.
+  await Promise.all([
+    addStyle(STYLE,'data-fx-current-mag-r422'),
+    addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')
+  ]);
+  root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
+  root.dataset.fxCurrentMagStylesR423='ready';
+  root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
+
+  await addScript(RENDERER,'data-fx-current-r326-r422');
   await addScript(NATIVE_TOUCH,'data-fx-native-mag-touch-r434');
   await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
   root.dataset.fxCurrentMagTouchBootstrapR435='native-owner-installed-before-ready-check';
@@ -141,14 +152,14 @@ async function start(){
       await addScript(SHEEN,'data-fx-mag-surface-sheen-r439');
       await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
     }
-    root.dataset.fxCoreRendererSelection='r326-direct-r441-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r441';
+    root.dataset.fxCoreRendererSelection='r326-direct-r442-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r442';
     root.dataset.fxCurrentMagRuntimeR422='ready';
   }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
 
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r441-idle-zero-frame-restrained-bloom-native-soft-edge-protected-touch'
-    :'direct-r326-r441-idle-zero-frame-cross-device-header';
+    ?'direct-r326-r442-style-first-two-pass-idle-zero-native-touch'
+    :'direct-r326-r442-style-first-idle-zero-desktop';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady}}));
 }
 
