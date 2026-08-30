@@ -1,4 +1,4 @@
-name: One-shot R461 clean active landing path
+name: One-shot R462 final mobile accessibility migration
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Remove retired first-load layers and seed canonical header
+      - name: Apply measured R462 fixes
         shell: bash
         run: |
           set -euo pipefail
@@ -27,97 +27,194 @@ jobs:
           from pathlib import Path
           import re
 
-          index = Path('docs/scifi-ui/index.html')
-          text = index.read_text(encoding='utf-8')
+          # One stable language button: preserve the long-standing semantic
+          # marker used by browser gates and include visible HU/EN in its name.
+          lang_path = Path('docs/scifi-ui/scripts/single-language-toggle.js')
+          lang = lang_path.read_text(encoding='utf-8')
+          if "button.dataset.fxSingleLanguageToggle='ready-v3';" not in lang:
+              needle = "  button.dataset.nextLanguage=language==='en'?'hu':'en';\n"
+              if needle not in lang:
+                  raise SystemExit('R462: language update anchor missing')
+              lang = lang.replace(needle, needle + "  button.dataset.fxSingleLanguageToggle='ready-v3';\n", 1)
+          lang_path.write_text(lang, encoding='utf-8')
 
-          # One compact quality layer is render-blocking because it owns the
-          # measurable first-paint/a11y geometry, not because it repairs old CSS.
-          quality = '  <link rel="stylesheet" fetchpriority="high" data-fx-quality-r461="true" href="./styles/formatx-quality-r461.css?v=20260830-r461">\n'
-          if 'data-fx-quality-r461="true"' not in text:
-              pattern = r'(^\s*<link[^\n>]+data-fx-production-first-paint-r370="true"[^\n>]*>\n)'
-              text, count = re.subn(pattern, lambda m: m.group(1) + quality, text, count=1, flags=re.M)
-              if count != 1:
-                  raise SystemExit('R461: mobile first-paint anchor missing')
+          owner_path = Path('docs/scifi-ui/scripts/formatx-control-owner-r268.js')
+          owner = owner_path.read_text(encoding='utf-8')
+          owner = owner.replace(
+              "lang.setAttribute('aria-label',current==='en'?'Switch to Hungarian':'Váltás angol nyelvre');",
+              "lang.setAttribute('aria-label',current==='en'?'EN – switch to Hungarian':'HU – váltás angol nyelvre');",
+          )
+          owner = owner.replace(
+              "lang.setAttribute('title',current==='en'?'Switch to Hungarian':'Váltás angol nyelvre');",
+              "lang.setAttribute('title',current==='en'?'EN – switch to Hungarian':'HU – váltás angol nyelvre');",
+          )
+          owner_path.write_text(owner, encoding='utf-8')
 
-          # These styles were already explicitly retired by the R460 runtime;
-          # removing the tags prevents the browser from requesting them at all.
-          for attr in ('data-fx-living-energy-r168', 'data-fx-desktop-apex-r181'):
-              text = re.sub(rf'^\s*<link[^\n>]+{attr}="true"[^\n>]*>\n', '', text, flags=re.M)
+          index_path = Path('docs/scifi-ui/index.html')
+          index = index_path.read_text(encoding='utf-8')
+          index = index.replace(
+              'class="fx-language-toggle" data-language-toggle="true" lang="hu"',
+              'class="fx-language-toggle" data-language-toggle="true" data-fx-single-language-toggle="ready-v3" lang="hu"',
+              1,
+          )
+          index = index.replace(
+              'formatx-quality-r461.css?v=20260830-r461',
+              'formatx-quality-r461.css?v=20260830-r462-mobile-a11y',
+              1,
+          )
+          index = index.replace(
+              'formatx-motion-runtime-loader-r239.js?v=20260830-r461-clean-active-path',
+              'formatx-motion-runtime-loader-r239.js?v=20260830-r462-compact-active-path',
+              1,
+          )
+          index = index.replace(
+              'formatx-control-owner-r268.js?v=20260824-instant-award-r251&rev=20260830-r454-visible-electric-surface',
+              'formatx-control-owner-r268.js?v=20260824-instant-award-r251&rev=20260830-r462-language-a11y',
+              1,
+          )
+          index_path.write_text(index, encoding='utf-8')
 
-          # Retired MAG/effect scripts must not remain as dormant template cargo.
-          retired_attrs = (
-              'data-fx-premium-finish',
-              'data-fx-live-heartbeat-r155',
-              'data-fx-signature-system-r185',
-              'data-fx-seamless-enforcer-r159',
-              'data-fx-living-energy-r168',
-              'data-fx-desktop-apex-r181-loader',
+          motion_path = Path('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
+          motion = motion_path.read_text(encoding='utf-8').replace(
+              'single-language-toggle.js?v=20260830-r461-static-owner',
+              'single-language-toggle.js?v=20260830-r462-semantic-owner',
+              1,
           )
-          for attr in retired_attrs:
-              text = re.sub(rf'^\s*<script[^\n>]+{attr}(?:="[^"]*")?[^\n>]*></script>\n', '', text, flags=re.M)
+          motion_path.write_text(motion, encoding='utf-8')
 
-          # Replace the old two-button language switch with the one canonical
-          # first-paint button. R461 adopts this node instead of deleting it.
-          language_pattern = re.compile(
-              r'<div class="header-actions"><div class="language-switch"[^>]*>'
-              r'.*?</div>(<a class="header-support".*?</a><a class="button button-solid header-buy".*?</a>)</div>'
-          )
-          replacement = (
-              '<button type="button" class="fx-language-toggle" data-language-toggle="true" '
-              'lang="hu" aria-label="HU – váltás angol nyelvre">HU</button>'
-              '<div class="header-actions">\\1</div>'
-          )
-          text, count = language_pattern.subn(replacement, text, count=1)
-          if count != 1 and 'class="fx-language-toggle"' not in text:
-              raise SystemExit('R461: canonical header language migration failed')
+          quality_path = Path('docs/scifi-ui/styles/formatx-quality-r461.css')
+          quality = quality_path.read_text(encoding='utf-8')
+          marker = '/* r462 — measured mobile Lighthouse accessibility and tap-target closeout. */'
+          if marker not in quality:
+              quality += r'''
 
-          text = re.sub(
-              r'<script defer src="\.\/scripts\/formatx-event-horizon\.js\?[^\"]+"></script>',
-              '<script defer src="./scripts/formatx-event-horizon.js?v=20260830-r461-clean-first-load"></script>',
-              text,
-              count=1,
-          )
-          text = re.sub(
-              r'<script defer data-fx-motion-runtime-loader-r239="true" src="\.\/scripts\/formatx-motion-runtime-loader-r239\.js\?[^\"]+"></script>',
-              '<script defer data-fx-motion-runtime-loader-r239="true" src="./scripts/formatx-motion-runtime-loader-r239.js?v=20260830-r461-clean-active-path"></script>',
-              text,
-              count=1,
-          )
+/* r462 — measured mobile Lighthouse accessibility and tap-target closeout. */
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  /* Closed desktop navigation must not leave tiny invisible anchors under the
+     mobile header. The open state remains a full-size accessible menu. */
+  html body.living-architecture .topbar #main-nav:not(.open) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  html body.living-architecture #main-nav.open {
+    display: grid !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+  html body.living-architecture #main-nav.open a {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 48px !important;
+    padding: 12px 14px !important;
+  }
 
-          index.write_text(text, encoding='utf-8')
+  /* SOUND | ASK | PAUSE are the only hero tap targets and own one 3-cell grid. */
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
+    position: absolute !important;
+    inset: auto auto 18px 50% !important;
+    z-index: 12080 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-rows: 72px !important;
+    align-items: start !important;
+    justify-items: center !important;
+    gap: 14px !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    min-height: 72px !important;
+    margin: 0 !important;
+    padding: 0 6px 18px !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-reference-rail {
+    display: contents !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound { grid-column: 1 !important; }
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask { grid-column: 2 !important; }
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause { grid-column: 3 !important; }
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask span {
+    position: absolute !important;
+    top: 55px !important;
+    left: 50% !important;
+    width: max-content !important;
+    max-width: 92px !important;
+    white-space: nowrap !important;
+    transform: translateX(-50%) !important;
+    pointer-events: none !important;
+  }
 
-          motion = Path('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
-          source = motion.read_text(encoding='utf-8')
-          source = source.replace(
-              "const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r429-initial-cross-device-header';",
-              "const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r461-static-owner';",
+  /* Placeholder lives on the white generated-QR surface: use AA dark ink. */
+  html body.living-architecture .fx-plan-qr-card .fx-qr-placeholder {
+    color: #24345f !important;
+    text-shadow: none !important;
+  }
+}
+'''
+          quality_path.write_text(quality, encoding='utf-8')
+
+          gate_path = Path('.github/scripts/validate-wda-100-r198.cjs')
+          gate = gate_path.read_text(encoding='utf-8')
+          gate = gate.replace(
+              "formatx-quality-r461\\.css\\?v=20260830-r461",
+              "formatx-quality-r461\\.css\\?v=20260830-r462-mobile-a11y",
           )
-          source = source.replace(
-              "root.dataset.fxSingleLanguageToggleVersion==='6'",
-              "root.dataset.fxSingleLanguageToggleVersion==='7'",
+          gate = gate.replace(
+              'single-language-toggle.js?v=20260830-r461-static-owner',
+              'single-language-toggle.js?v=20260830-r462-semantic-owner',
           )
-          motion.write_text(source, encoding='utf-8')
+          gate_path.write_text(gate, encoding='utf-8')
           PY
 
-      - name: Validate migration shape
+      - name: Validate R462 migration
         shell: bash
         run: |
           set -euo pipefail
-          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
+          node --check docs/scifi-ui/scripts/formatx-control-owner-r268.js
           node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
           node .github/scripts/validate-wda-100-r198.cjs
+          grep -q 'data-fx-single-language-toggle="ready-v3"' docs/scifi-ui/index.html
+          grep -q '#main-nav:not(.open)' docs/scifi-ui/styles/formatx-quality-r461.css
 
-      - name: Commit R461 cleanup
+      - name: Commit and remove one-shot workflow
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'FormatX CI'
           git config user.email 'actions@users.noreply.github.com'
-          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
-          if git diff --cached --quiet; then
-            echo 'R461 active path already clean.'
-            exit 0
-          fi
-          git commit -m 'Clean R461 first-load runtime and static header path'
+          git rm .github/workflows/one-shot-r461-clean-active-path.yml
+          git add docs/scifi-ui/index.html \
+                  docs/scifi-ui/scripts/single-language-toggle.js \
+                  docs/scifi-ui/scripts/formatx-control-owner-r268.js \
+                  docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js \
+                  docs/scifi-ui/styles/formatx-quality-r461.css \
+                  .github/scripts/validate-wda-100-r198.cjs
+          git commit -m 'Close R462 mobile accessibility and remove migration scaffolding'
           git push origin HEAD:master
