@@ -1,4 +1,4 @@
-name: Verify r456 solid-volume mobile MAG finish
+name: Verify r456 uniform MAG shell
 
 on:
   push:
@@ -26,86 +26,76 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate r454 renderer with r456 solid mobile surface
+      - name: Validate uniform shell source contract
         shell: bash
         run: |
           set -euo pipefail
           CSS='docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
           SHADER='docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
           SOLID='docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js'
-          SHAPESHIFTER='docs/scifi-ui/scripts/formatx-core-shapeshifter-r337.js'
           CURRENT='docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
           MOTION='docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
 
           node --check "$SHADER"
           node --check "$SOLID"
-          node --check "$SHAPESHIFTER"
           node --check "$CURRENT"
           node --check "$MOTION"
           node .github/scripts/validate-living-core-r425-source.cjs
 
-          # Mobile CSS keeps the restrained r455 optical envelope.
-          grep -Fq 'production-r455-single-native-webgl-optics-owner-soft-mobile-balance' "$CSS"
-          grep -Fq 'brightness(1.30)' "$CSS"
-          grep -Fq 'contrast(1.04)' "$CSS"
-          grep -Fq 'saturate(1.42)' "$CSS"
-          grep -Fq 'blur(.35px)' "$CSS"
-
-          # R456 corrects the actual shader surface rather than hiding the mesh.
-          grep -Fq "const VERSION='r456-solid-volume-smooth-normal-no-triangle-edges'" "$SOLID"
-          grep -Fq 'mix(aCrystalNormal,crystalSmoothNormal,.97)' "$SOLID"
+          grep -Fq "const VERSION='r456-uniform-solid-glass-no-vram-artifact'" "$SOLID"
+          grep -Fq "const smoothWeight=mobile?'.985':'.930'" "$SOLID"
           grep -Fq "edgePattern,'float edge=0.0;'" "$SOLID"
-          grep -Fq "fxCoreMobileTriangleEdgesR456='disabled'" "$SOLID"
-          grep -Fq "fxCoreMobileNormalR456='continuous-volume-97-percent-smooth'" "$SOLID"
-          ! grep -Eq "getContext\\(['\"]2d['\"]|drawImage\\s*\\(|new[[:space:]]+Image\\s*\\(" "$SOLID"
+          grep -Fq "next=next.replace(facetPulse,'float facetPulse=.5;')" "$SOLID"
+          grep -Fq "glass+=vec3(.025,.22,.50)*.42;" "$SOLID"
+          grep -Fq "glass+=spectral*veins*.10*fresnel;" "$SOLID"
+          grep -Fq "glass+=spectral*membrane*.055*fresnel;" "$SOLID"
+          grep -Fq "fxCoreOuterNoiseR456='disabled-on-glass-shell'" "$SOLID"
+          grep -Fq "fxCoreInnerLifeR456='preserved'" "$SOLID"
+          grep -Fq "fxCoreTriangleEdgesR456='disabled'" "$SOLID"
 
-          # Desktop stays on the approved stronger finish and native r454 body.
-          grep -Fq 'brightness(1.36)' "$CSS"
-          grep -Fq 'contrast(1.18)' "$CSS"
-          grep -Fq 'saturate(1.50)' "$CSS"
+          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$CURRENT"
+          grep -Fq "await addScript(SOLID_GLASS,'data-fx-solid-glass-r456')" "$CURRENT"
+          grep -Fq "fxCurrentMagOpticsR456='uniform-solid-glass-shell-no-vram-artifact'" "$CURRENT"
+          grep -Fq 'r326-direct-r456-uniform-mobile-glass' "$CURRENT"
+          grep -Fq 'r326-direct-r456-uniform-desktop-glass' "$CURRENT"
+
+          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$MOTION"
+          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$MOTION"
+          grep -Fq "warmAsset(CURRENT_SOLID_GLASS,'script')" "$MOTION"
+          grep -Fq "fxSolidGlassCriticalWarmR456='ready-all-devices'" "$MOTION"
+
+          grep -Fq 'production-r455-single-native-webgl-optics-owner-soft-mobile-balance' "$CSS"
           grep -Fq "const REVISION = 'living-luminous-electric-crystal-r454'" "$SHADER"
-          grep -Fq 'uSurfacePulse' "$SHADER"
           grep -Fq 'single-luminous-webgl-material-owner' "$SHADER"
 
-          # Critical chain must arm r456 before the r326 shader compiles.
-          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r456-solid-volume-no-mesh' "$CURRENT"
-          grep -Fq "if(mobile)await addScript(SOLID_GLASS,'data-fx-mobile-solid-glass-r456')" "$CURRENT"
-          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r456-solid-mobile-glass' "$MOTION"
-          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r456-solid-volume-no-mesh' "$MOTION"
-          grep -Fq "if(mobile.matches)warmAsset(CURRENT_SOLID_GLASS,'script')" "$MOTION"
-
-      - name: Verify production serves r456 solid mobile MAG
+      - name: Verify production serves uniform shell chain
         shell: bash
         run: |
           set -euo pipefail
           ORIGIN='https://formatxsuite.com'
-          CSS_URL="$ORIGIN/scifi-ui/styles/formatx-core-shapeshifter-r337.css"
-          JS_URL="$ORIGIN/scifi-ui/scripts/formatx-crystal-organism-r326.js"
           SOLID_URL="$ORIGIN/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js"
           CURRENT_URL="$ORIGIN/scifi-ui/scripts/formatx-current-mag-loader-r422.js"
           MOTION_URL="$ORIGIN/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js"
-          CSS_TMP="$RUNNER_TEMP/r456-live.css"
-          JS_TMP="$RUNNER_TEMP/r456-live.js"
+          SHADER_URL="$ORIGIN/scifi-ui/scripts/formatx-crystal-organism-r326.js"
           SOLID_TMP="$RUNNER_TEMP/r456-solid-live.js"
           CURRENT_TMP="$RUNNER_TEMP/r456-current-live.js"
           MOTION_TMP="$RUNNER_TEMP/r456-motion-live.js"
+          SHADER_TMP="$RUNNER_TEMP/r454-shader-live.js"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "r456 live verification $attempt/45"
-            suffix="r456_live=${GITHUB_RUN_ID}_${attempt}"
-            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${JS_URL}?${suffix}" -o "$JS_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${SOLID_URL}?${suffix}" -o "$SOLID_TMP" \
+            echo "r456 uniform live verification $attempt/45"
+            suffix="r456_uniform=${GITHUB_RUN_ID}_${attempt}"
+            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${SOLID_URL}?${suffix}" -o "$SOLID_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CURRENT_URL}?${suffix}" -o "$CURRENT_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MOTION_URL}?${suffix}" -o "$MOTION_TMP"; then
-              if grep -Fq 'production-r455-single-native-webgl-optics-owner-soft-mobile-balance' "$CSS_TMP" \
-                && grep -Fq "const REVISION = 'living-luminous-electric-crystal-r454'" "$JS_TMP" \
-                && grep -Fq "const VERSION='r456-solid-volume-smooth-normal-no-triangle-edges'" "$SOLID_TMP" \
-                && grep -Fq 'mix(aCrystalNormal,crystalSmoothNormal,.97)' "$SOLID_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MOTION_URL}?${suffix}" -o "$MOTION_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${SHADER_URL}?${suffix}" -o "$SHADER_TMP"; then
+              if grep -Fq "const VERSION='r456-uniform-solid-glass-no-vram-artifact'" "$SOLID_TMP" \
+                && grep -Fq "fxCoreOuterNoiseR456='disabled-on-glass-shell'" "$SOLID_TMP" \
                 && grep -Fq "edgePattern,'float edge=0.0;'" "$SOLID_TMP" \
-                && grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r456-solid-volume-no-mesh' "$CURRENT_TMP" \
-                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r456-solid-mobile-glass' "$MOTION_TMP"; then
+                && grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$CURRENT_TMP" \
+                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r456-uniform-shell-no-vram-artifact' "$MOTION_TMP" \
+                && grep -Fq "const REVISION = 'living-luminous-electric-crystal-r454'" "$SHADER_TMP"; then
                 ok=1
                 break
               fi
@@ -114,9 +104,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves the native R454 WebGL MAG with R456 continuous solid-volume mobile lighting and no painted triangle edges.'
+          echo 'PASS: production serves r456 uniform outer glass shell with preserved inner living layer and no topology/noise breakup.'
 
-      - name: Publish r456 live status
+      - name: Publish r456 uniform status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -125,13 +115,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r456 solid-volume mobile MAG passed'
+            description='Live r456 uniform MAG shell passed'
           else
             state=failure
-            description='Live r456 solid-volume mobile MAG verification failed'
+            description='Live r456 uniform MAG shell verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX r456 live solid mobile MAG' \
+            -f context='FormatX r456 uniform MAG shell' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
