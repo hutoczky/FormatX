@@ -16,9 +16,10 @@ const pureCss=read('docs/scifi-ui/styles/formatx-pure-3d-r285.css');
 const mobileCss=read('docs/scifi-ui/styles/formatx-core-mobile-v55.css');
 const stabilityCss=read('docs/scifi-ui/styles/formatx-mobile-r416-stability.css');
 const currentMagCss=read('docs/scifi-ui/styles/formatx-current-mag-r422.css');
-const sharpOpticsCss=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
+const finalOpticsCss=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
 const finalHeaderCss=read('docs/scifi-ui/styles/formatx-mobile-header-final-r418.css');
 const bridge=read('docs/scifi-ui/scripts/formatx-core-interaction-bridge-r109.js');
+const currentLoader=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const home=read('docs/scifi-ui/index.html');
 const contract=JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
 
@@ -34,9 +35,9 @@ assert.match(wrapper,/retired-r424-native-shader-optics/);
 assert.doesNotMatch(wrapper,/formatx-mobile-optics-r423\.css/);
 assert.doesNotMatch(wrapper,/formatx-core-mobile-reference-r317|formatx-core-mechanical-orb-r250/);
 
-/* r326 is the current authoritative WebGL MAG. r267 remains validated as a
-   legacy fallback, but the crystal portal must never replace a ready/configured
-   r326 stage. This prevents late renderer ownership from moving the mobile MAG. */
+/* r326 remains the single authoritative WebGL MAG. r442 tightens the mobile
+   render budget without changing that ownership: lower native mesh density,
+   two draw passes, style-first startup and an idle-zero scheduler are required. */
 for(const token of [
   'crystal-organism-r326',
   "getContext('webgl2'",
@@ -44,12 +45,36 @@ for(const token of [
   'gl.drawArrays(gl.TRIANGLES',
   'ResizeObserver',
   'IntersectionObserver',
-  "fallback:'none'"
-])assert.ok(legacyRenderer.includes(token),`missing r326 primary WebGL contract: ${token}`);
-for(const token of ['const IDLE_ENERGY = mobile ? .36 : .32','vec3 filmic','float irisBand','fxCoreOpticsR424','dpr-cap-1.75-pixel-budget-980k']){
-  assert.ok(legacyRenderer.includes(token),`missing r424 sharp WebGL contract: ${token}`);
-}
+  "fallback:'none'",
+  'const IDLE_ENERGY = mobile ? .36 : .32',
+  'vec3 filmic',
+  'float irisBand',
+  'fxCoreOpticsR424',
+  'interaction-bursts-idle-zero-frame-r441',
+  'mobile-two-pass-lower-density-idle-zero',
+  '18x36-two-pass-single-startup-frame',
+  'dpr-cap-1.45-pixel-budget-720k',
+  'const latitudeSegments = auditMode ? 18 : mobile ? 18 : 30',
+  'const longitudeSegments = auditMode ? 32 : mobile ? 36 : 56',
+  'if(!mobile){',
+  'schedule(1)'
+])assert.ok(legacyRenderer.includes(token),`missing r442 primary WebGL contract: ${token}`);
+assert.doesNotMatch(legacyRenderer,/setInterval\s*\(|requestAnimationFrame\(frame\)[\s\S]*requestAnimationFrame\(frame\)[\s\S]*heartbeat/i);
 assert.doesNotMatch(legacyRenderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|\bTHREE\./i);
+
+/* The active loader must establish geometry-owning styles before it creates the
+   WebGL stage. This guards the mobile hero/canvas CLS measured by Lighthouse. */
+for(const token of [
+  'direct-r326-r442-style-first-idle-zero-mobile-budget',
+  "addStyle(STYLE,'data-fx-current-mag-r422')",
+  "addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')",
+  "fxCurrentMagStartupR442='styles-ready-before-renderer'",
+  "await addScript(RENDERER,'data-fx-current-r326-r422')",
+  '20260830-r442-mobile-two-pass-budget'
+])assert.ok(currentLoader.includes(token),`missing r442 style-first loader contract: ${token}`);
+const styleReadyIndex=currentLoader.indexOf("fxCurrentMagStartupR442='styles-ready-before-renderer'");
+const rendererLoadIndex=currentLoader.indexOf("await addScript(RENDERER,'data-fx-current-r326-r422')");
+assert.ok(styleReadyIndex>=0&&rendererLoadIndex>styleReadyIndex,'r442 renderer must load only after critical styles are ready');
 
 /* Keep the old closed-volume implementation healthy for genuine fallback use;
    it must not be the production owner when the r326 primary is configured. */
@@ -92,8 +117,7 @@ for(const token of [
 ])assert.ok(crystalPortal.includes(token),`missing r326-primary / r267-fallback portal ownership contract: ${token}`);
 
 /* r267's fallback optical finish remains restrained if that fallback is ever
-   required. The active r326 production optics are validated separately by the
-   r420 phone-viewport gate. */
+   required. */
 for(const token of [
   '.fx-core-r267-volume-stage',
   '.fx-core-r267-volume-canvas',
@@ -111,8 +135,6 @@ for(const token of [
 ])assert.ok(volumeCss.includes(token),`missing restrained r267 fallback optical finish: ${token}`);
 assert.doesNotMatch(volumeCss,/blur\((?:[1-9]|[1-9][0-9])(?:\.\d+)?px\)/);
 
-/* Older stability CSS may still contain sticky geometry, but the loaded-last
-   r418 owner must explicitly replace it with a non-occluding in-flow carrier. */
 for(const token of [
   'production-r418-attached-header-restrained-mag',
   'margin:0 auto 16px !important',
@@ -148,17 +170,33 @@ for(const token of [
 assert.ok(pureCss.includes('.fx-core-detail-r122'));
 assert.ok(pureCss.includes('content: none !important'));
 assert.doesNotMatch(mobileCss,/radial-gradient|conic-gradient|repeating-linear-gradient/i);
-for(const css of [currentMagCss,sharpOpticsCss]){
-  const compact=css.replace(/\s+/g,'');
-  for(const token of ['opacity:.99!important','scale:1!important','brightness(1.12)','contrast(1.22)','saturate(1.38)']){
-    assert.ok(compact.includes(token),`missing r424 sharp mobile CSS contract: ${token}`);
-  }
-  assert.doesNotMatch(css,/blur\(/);
-}
+
+/* Historical r424 values remain present only as compatibility layers. The last
+   mobile owner must be the restrained r442 phone-reviewed finish, blur-free. */
+const currentCompact=currentMagCss.replace(/\s+/g,'');
+for(const token of [
+  'production-r440-direct-r326-restrained-bloom-native-soft-edge-mobile-review',
+  'production-r443-cross-device-decorative-overflow-clipped-no-information-loss',
+  'overflow-x:clip!important'
+])assert.ok(currentCompact.includes(token.replace(/\s+/g,'')),`missing current MAG CSS contract: ${token}`);
+assert.doesNotMatch(currentMagCss,/blur\(/);
+
+const opticsCompact=finalOpticsCss.replace(/\s+/g,'');
+for(const token of [
+  'production-r442-final-mobile-mag-optics-owner-restrained-native-no-blur',
+  'opacity:.90!important',
+  'brightness(.90)',
+  'contrast(.89)',
+  'saturate(.95)',
+  'opacity:.89!important',
+  'brightness(.89)contrast(.88)saturate(.94)'
+])assert.ok(opticsCompact.includes(token.replace(/\s+/g,'')),`missing r442 restrained final optics contract: ${token}`);
+assert.doesNotMatch(finalOpticsCss,/blur\(/);
+
 assert.match(layout,/mobileViewport=.*max-width:900px/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 assert.equal(contract.quality_contract.mag_image_backed,false);
 assert.equal(contract.quality_contract.mag_webgl_context_count,1);
 assert.equal(contract.quality_contract.mag_paused_outside_hero,true);
-for(const source of [bootstrap,wrapper,legacyRenderer,volumeRenderer,crystalPortal,layout,bridge])new Function(source);
-console.log('PASS: r326 is the authoritative production WebGL MAG; r267 is fallback-only, restrained optics and non-occluding mobile ownership remain valid, and 2D/image fallback is forbidden.');
+for(const source of [bootstrap,wrapper,legacyRenderer,volumeRenderer,crystalPortal,layout,bridge,currentLoader])new Function(source);
+console.log('PASS: r326 remains the single production WebGL MAG; r442 enforces style-first startup, 18x36 two-pass mobile budget, idle-zero scheduling, restrained blur-free optics, r267 fallback isolation and non-occluding cross-device ownership.');
