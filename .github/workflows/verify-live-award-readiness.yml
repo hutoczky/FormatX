@@ -1,5 +1,5 @@
-name: Verify live R454 award readiness
-run-name: R454 live award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
+name: Verify live R457-R458 award readiness
+run-name: R457/R458 live award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   push:
@@ -21,7 +21,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: r454-live-award-${{ github.event.workflow_run.head_sha || github.sha }}
+  group: r457-r458-live-award-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -41,7 +41,7 @@ jobs:
         with:
           ref: ${{ env.AUDITED_SHA }}
 
-      - name: Validate R454 source contracts
+      - name: Validate R457-R458 source contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -50,10 +50,12 @@ jobs:
           node .github/scripts/validate-real3d-core.cjs
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
           node --check docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
 
-      - name: Wait for R454 production and verify one native MAG owner
+      - name: Wait for production and verify R457 optics plus R458 first-paint ownership
         shell: bash
         run: |
           set -euo pipefail
@@ -65,12 +67,16 @@ jobs:
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/?audit=$stamp" -o "$tmp/home.html" || true
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-crystal-organism-r326.js?audit=$stamp" -o "$tmp/core.js" || true
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-current-mag-loader-r422.js?audit=$stamp" -o "$tmp/loader.js" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?audit=$stamp" -o "$tmp/reference.js" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-mobile-regression-r310.js?audit=$stamp" -o "$tmp/regression.js" || true
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/styles/formatx-core-shapeshifter-r337.css?audit=$stamp" -o "$tmp/optics.css" || true
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/styles/formatx-current-mag-r422.css?audit=$stamp" -o "$tmp/layout.css" || true
             if grep -Fq 'living-luminous-electric-crystal-r454' "$tmp/core.js" \
               && grep -Fq 'intermittent-native-electric-filament-every-five-to-six-seconds' "$tmp/core.js" \
-              && grep -Fq 'direct-r326-r454-style-first-visible-electric-idle-zero' "$tmp/loader.js" \
-              && grep -Fq 'production-r454-single-native-webgl-optics-owner-visible-no-overlay' "$tmp/optics.css" \
+              && grep -Fq 'direct-r326-r456-uniform-solid-glass-idle-zero' "$tmp/loader.js" \
+              && grep -Fq 'r457-soft-mobile-edge-bloom' "$tmp/loader.js" \
+              && grep -Fq 'static-first-paint-owner-no-late-css' "$tmp/reference.js" \
+              && grep -Fq 'static-first-paint-owner-no-late-css' "$tmp/regression.js" \
               && grep -Fq 'production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer' "$tmp/layout.css"; then
               ready=1
               break
@@ -80,10 +86,11 @@ jobs:
           test "$ready" = 1
           grep -Fq 'uSurfacePulse' "$tmp/core.js"
           grep -Fq 'surfaceFilament' "$tmp/core.js"
-          grep -Fq 'brightness(1.52)' "$tmp/optics.css"
-          grep -Fq 'contrast(1.16)' "$tmp/optics.css"
-          grep -Fq 'saturate(1.58)' "$tmp/optics.css"
-          ! grep -Fq 'blur(' "$tmp/optics.css"
+          grep -Fq 'brightness(1.20)' "$tmp/optics.css"
+          grep -Fq 'contrast(.98)' "$tmp/optics.css"
+          grep -Fq 'saturate(1.31)' "$tmp/optics.css"
+          grep -Fq 'blur(.48px)' "$tmp/optics.css"
+          grep -Fq 'data-fx-production-first-paint-r370' "$tmp/home.html"
           ! grep -Fq 'formatx-mag-surface-sheen-r439.js' "$tmp/home.html"
           ! grep -Fq 'formatx-mag-surface-sheen-r439.js' "$tmp/loader.js"
           ! grep -Eq 'formatx-(crystal-portal-r318|quantum-particles-r335|core-mechanical-orb-r250)' "$tmp/home.html"
@@ -97,10 +104,10 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R454 live award audit failed'
+          description='R457/R458 live award audit failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R454 native MAG, visibility and energy contracts passed'
+            description='R457 soft MAG optics and R458 first-paint ownership passed live'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \

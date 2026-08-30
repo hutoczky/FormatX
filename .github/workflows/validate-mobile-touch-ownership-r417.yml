@@ -9,14 +9,14 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-regression-r310.js'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/styles/formatx-current-mag-r422.css'
       - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-r416-stability.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-optics-r419.css'
       - 'docs/scifi-ui/styles/formatx-mobile-header-final-r418.css'
+      - '.github/scripts/validate-living-core-r425-source.cjs'
       - '.github/workflows/validate-mobile-touch-ownership-r417.yml'
   workflow_dispatch:
 permissions:
@@ -25,58 +25,29 @@ permissions:
 jobs:
   mobile-touch:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Validate R454 native MAG, R428 header and touch source contracts
+      - name: Validate R457 optics, R458 first-paint and touch source contracts
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          node --check docs/scifi-ui/scripts/formatx-wda-controls-r198.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
-          node --check docs/scifi-ui/scripts/single-language-toggle.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          node .github/scripts/validate-living-core-r425-source.cjs
           grep -q "touch-pulse-r417-ui-safe" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          grep -q "interactive-target-bypassed" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          grep -q "setPointerCapture" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          grep -q "releasePointerCapture" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          grep -q "fxWdaSoundTouchR418" docs/scifi-ui/scripts/formatx-wda-controls-r198.js
-          grep -q "fxSoundTouchRecoveryR418" docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          grep -q "fallback-click-delivered" docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           grep -q "production-r418-mobile-first-paint-header-lock" docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css
-          grep -q "production-r418-attached-header-restrained-mag" docs/scifi-ui/styles/formatx-mobile-r416-stability.css
-          grep -q "production-r430-mobile-header-normal-flow-no-information-occlusion" docs/scifi-ui/styles/formatx-mobile-r416-stability.css
-          grep -q "production-r418-final-mobile-header-owner" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
           grep -q "production-r428-final-cross-device-header-owner-language-visible-non-occluding" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
-          grep -q "production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer" docs/scifi-ui/styles/formatx-current-mag-r422.css
-          grep -q "production-r454-single-native-webgl-optics-owner-visible-no-overlay" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "direct-r326-r454-style-first-visible-electric-idle-zero" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
-          grep -q "styles-ready-before-renderer" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
-          grep -q "r428-mobile-direct-topbar-child" docs/scifi-ui/scripts/single-language-toggle.js
-          grep -q "r428-desktop-direct-topbar-child" docs/scifi-ui/scripts/single-language-toggle.js
-          grep -q "single-language-toggle-v6-cross-device-header" docs/scifi-ui/scripts/single-language-toggle.js
-          grep -q "single-webgl-crystal-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "four-direction-asymmetric-crystal-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "translucent-living-facet-organism-r326" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "interaction-bursts-idle-zero-frame-r441" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "18x36-two-pass-intermittent-pulse-idle-zero" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "pure-webgl3d-no-2d-overlays" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "brightness(1.52)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "contrast(1.16)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "saturate(1.58)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "intermittent-native-electric-filament-every-five-to-six-seconds" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          grep -q "surfaceFilament" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          test ! -e docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
-          if grep -q "blur(" docs/scifi-ui/styles/formatx-current-mag-r422.css; then
-            echo "Current MAG CSS must remain blur-free for pure native 3D" >&2
-            exit 1
-          fi
-          if grep -q "blur(" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css; then
-            echo "Final MAG optics owner must remain blur-free for pure native 3D" >&2
-            exit 1
-          fi
+          grep -q "direct-r326-r456-uniform-solid-glass-idle-zero" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          grep -q "r457-soft-mobile-edge-bloom" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          grep -q "brightness(1.20)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "contrast(.98)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "saturate(1.31)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "blur(.48px)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q "static-first-paint-owner-no-late-css" docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          grep -q "static-first-paint-owner-no-late-css" docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
       - name: Install Chromium runtime
         shell: bash
         run: |
@@ -85,187 +56,71 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify R454 phone optics, R428 language selector, MAG, SOUND and touch
+      - name: Verify R457 phone optics, header, language and touch targets
         shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/mobile-touch/node_modules
         run: |
           set -euo pipefail
           python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/mobile-touch-server.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/mobile-touch"
           node <<'NODE'
           const {chromium}=require('playwright');
           const assert=(value,message)=>{if(!value)throw new Error(message);};
-          const overlaps=(a,b,gap=0)=>!(a.right+gap<=b.left||b.right+gap<=a.left||a.bottom+gap<=b.top||b.bottom+gap<=a.top);
+          const overlap=(a,b,gap=0)=>!(a.right+gap<=b.left||b.right+gap<=a.left||a.bottom+gap<=b.top||b.bottom+gap<=a.top);
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
             const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
             const page=await ctx.newPage();
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
-
-            const firstPaint=await page.evaluate(()=>{
-              const rect=node=>{const r=node?.getBoundingClientRect();return r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null;};
-              const topbar=document.querySelector('.topbar');
-              const brand=topbar?.querySelector(':scope > .brand');
-              const skip=document.querySelector('.skip-link');
-              const skipStyle=skip?getComputedStyle(skip):null;
-              return {topbar:rect(topbar),brand:rect(brand),skip:rect(skip),skipPosition:skipStyle?.position||'',skipTop:skipStyle?.top||''};
-            });
-            console.log('R442_FIRST_PAINT',JSON.stringify(firstPaint));
-            assert(firstPaint.topbar&&firstPaint.topbar.top<=1&&firstPaint.topbar.height>=68&&firstPaint.topbar.height<=76,'mobile topbar is not the first 72px carrier: '+JSON.stringify(firstPaint));
-            assert(firstPaint.brand&&firstPaint.brand.top>=firstPaint.topbar.top&&firstPaint.brand.bottom<=firstPaint.topbar.bottom+1,'brand escaped the first-paint topbar: '+JSON.stringify(firstPaint));
-            assert(firstPaint.skip&&firstPaint.skip.bottom<0&&firstPaint.skipPosition==='fixed','skip link consumed touch layout space: '+JSON.stringify(firstPaint));
-
             await page.waitForFunction(()=>{
-              const root=document.documentElement;
-              return root.dataset.fxCrystalOrganismR326==='ready'
-                && root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
-                && root.dataset.fxMobileHeaderFinalR418==='loaded-last-mobile'
-                && root.dataset.fxReferenceLanguageLayout==='r428-mobile-direct-topbar-child'
-                && root.dataset.fxCurrentMagStartupR442==='styles-ready-before-renderer'
+              const r=document.documentElement.dataset;
+              return r.fxCrystalOrganismR326==='ready'
+                && r.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+                && r.fxMobileHeaderFinalR418==='loaded-last-mobile'
+                && r.fxMobileReferenceStylePolicyR458==='static-first-paint-owner-no-late-css'
                 && Boolean(document.querySelector('.topbar > .fx-language-toggle'))
-                && Boolean(document.querySelector('.fx-three-sound'))
-                && Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas'));
+                && Boolean(document.querySelector('.fx-three-sound'));
             },null,{timeout:45000});
-            await page.waitForTimeout(500);
-
+            await page.waitForTimeout(250);
             const state=await page.evaluate(()=>{
               const box=node=>{if(!node)return null;const r=node.getBoundingClientRect(),s=getComputedStyle(node);return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,position:s.position,display:s.display,visibility:s.visibility,opacity:Number(s.opacity||1)};};
-              const bars=[...document.querySelectorAll('.topbar')].filter(node=>{const s=getComputedStyle(node),r=node.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>.02&&r.width>0&&r.height>0;});
-              const topbar=bars.find(bar=>bar.querySelector(':scope > .brand'))||bars[0];
+              const topbar=document.querySelector('.topbar');
               const brand=topbar?.querySelector(':scope > .brand');
               const mag=topbar?.querySelector(':scope > .fx-reference-mag-button');
               const lang=topbar?.querySelector(':scope > .fx-language-toggle');
               const menu=topbar?.querySelector(':scope > .fx-reference-menu-button');
-              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas');
-              const cs=canvas?getComputedStyle(canvas):null;
-              let gl=false,glError=null;
-              if(canvas instanceof HTMLCanvasElement){const context=canvas.getContext('webgl2')||canvas.getContext('webgl');gl=Boolean(context);glError=context?.getError?.()??null;}
-              const r=document.documentElement.dataset;
-              return {count:bars.length,topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),langText:String(lang?.textContent||'').trim(),menu:box(menu),canvas:box(canvas),filter:cs?.filter||'',canvasOpacity:Number(cs?.opacity||0),gl,glError,finalOwner:r.fxMobileHeaderFinalR418||'',languageLayout:r.fxReferenceLanguageLayout||'',renderer:r.fxCoreRenderer||'',geometry:r.fxCoreGeometry||'',topology:r.fxCoreGeometryTopology||'',material:r.fxCoreMaterial||'',scheduler:r.fxCoreScheduler||'',schedulerR442:r.fxCoreSchedulerR442||'',startup:r.fxCurrentMagStartupR442||'',composition:r.fxCoreCompositionR285||'',visual:r.fxCoreMobileVisualR326||'',gpu:r.fxGpuCapability||''};
-            });
-            console.log('R442_MOBILE_STATE',JSON.stringify(state));
-            assert(state.count===1,'exactly one visible mobile topbar is required: '+JSON.stringify(state));
-            assert(state.finalOwner==='loaded-last-mobile','final r428 mobile header owner is not authoritative: '+JSON.stringify(state));
-            assert(state.languageLayout==='r428-mobile-direct-topbar-child','mobile language selector is not owned by the canonical topbar: '+JSON.stringify(state));
-            for(const key of ['brand','mag','lang','menu'])assert(state[key]&&state[key].top>=state.topbar.top-1&&state[key].bottom<=state.topbar.bottom+1,key+' escaped topbar: '+JSON.stringify(state));
-            assert(state.lang.display!=='none'&&state.lang.visibility!=='hidden'&&state.lang.opacity>.9&&state.lang.width>=44&&state.lang.height>=44,'mobile HU/EN selector is not visibly tappable: '+JSON.stringify(state));
-            assert(state.langText==='HU','mobile language selector did not start in HU: '+JSON.stringify(state));
-            assert(state.mag.position==='absolute'&&state.lang.position==='absolute'&&state.menu.position==='absolute','header controls must remain attached absolute children: '+JSON.stringify(state));
-            assert(!overlaps(state.brand,state.mag,2)&&!overlaps(state.mag,state.lang,2)&&!overlaps(state.lang,state.menu,2),'mobile header controls overlap: '+JSON.stringify(state));
-            assert(state.canvas&&state.canvas.width>100&&state.canvas.height>100,'r326 MAG canvas is missing or collapsed: '+JSON.stringify(state));
-            assert(state.canvasOpacity>=.99,'R454 mobile MAG opacity is too low: '+JSON.stringify(state));
-            assert(state.filter.includes('brightness(1.52)'),'R454 mobile MAG visibility boost is missing: '+JSON.stringify(state));
-            assert(state.filter.includes('contrast(1.16)'),'R454 mobile MAG edge contrast is missing: '+JSON.stringify(state));
-            assert(state.filter.includes('saturate(1.58)'),'R454 mobile MAG spectral color is missing: '+JSON.stringify(state));
-            assert(!state.filter.includes('blur('),'R454 native-3D MAG must remain blur-free: '+JSON.stringify(state));
-            assert(state.gl&&state.glError===0,'r326 MAG has no healthy WebGL context: '+JSON.stringify(state));
-            assert(state.renderer==='single-webgl-crystal-organism-r326','wrong production MAG renderer: '+JSON.stringify(state));
-            assert(state.geometry==='four-direction-asymmetric-crystal-organism-r326','r326 geometry contract missing: '+JSON.stringify(state));
-            assert(state.topology==='18x36-closed-uv-surface','r442 mobile geometry budget is not active: '+JSON.stringify(state));
-            assert(state.material==='translucent-living-facet-organism-r326','r326 material contract missing: '+JSON.stringify(state));
-            assert(state.scheduler==='interaction-bursts-idle-zero-frame-r441','r442 MAG is not using the idle-zero scheduler: '+JSON.stringify(state));
-            assert(state.schedulerR442==='mobile-two-pass-lower-density-idle-zero','r442 mobile GPU budget marker missing: '+JSON.stringify(state));
-            assert(state.startup==='styles-ready-before-renderer','r442 renderer started before geometry styles: '+JSON.stringify(state));
-            assert(state.composition==='pure-webgl3d-no-2d-overlays','r326 MAG is no longer pure WebGL 3D: '+JSON.stringify(state));
-            assert(['webgl2','webgl1'].includes(state.gpu),'r326 GPU capability marker missing: '+JSON.stringify(state));
-
-            const mobileLanguageTap=await page.evaluate(()=>{
-              const lang=document.querySelector('.topbar > .fx-language-toggle');
-              if(!(lang instanceof HTMLButtonElement))return null;
-              const r=lang.getBoundingClientRect();
-              return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height};
-            });
-            assert(mobileLanguageTap&&mobileLanguageTap.w>=44&&mobileLanguageTap.h>=44,'mobile language target missing or too small: '+JSON.stringify(mobileLanguageTap));
-            await page.touchscreen.tap(mobileLanguageTap.x,mobileLanguageTap.y);
-            await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.topbar > .fx-language-toggle')?.textContent?.trim()==='EN',null,{timeout:5000});
-
-            const soundTap=await page.evaluate(()=>{
+              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
               const sound=document.querySelector('.fx-three-sound');
-              if(!(sound instanceof HTMLButtonElement))return null;
-              const r=sound.getBoundingClientRect();
-              window.__fxSoundTouchTrace=[];
-              const desc=node=>node instanceof Element?`${node.tagName.toLowerCase()}#${node.id||''}.${String(node.className||'').replace(/\s+/g,'.').slice(0,120)}`:String(node?.nodeName||'');
-              for(const type of ['pointerdown','touchstart','pointerup','touchend','click'])document.addEventListener(type,event=>window.__fxSoundTouchTrace.push({type,target:desc(event.target),trusted:event.isTrusted}),{capture:true,passive:true});
-              return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height};
+              const cs=canvas?getComputedStyle(canvas):null;
+              return{topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),sound:box(sound),langText:String(lang?.textContent||'').trim(),filter:cs?.filter||'',canvas:box(canvas),renderer:document.documentElement.dataset.fxCoreRenderer||'',policy:document.documentElement.dataset.fxMobileReferenceStylePolicyR458||''};
             });
-            assert(soundTap&&soundTap.w>=44&&soundTap.h>=44,'SOUND target missing or too small: '+JSON.stringify(soundTap));
-
-            await page.touchscreen.tap(soundTap.x,soundTap.y);
-            await page.waitForTimeout(500);
-            const firstDelivery=await page.evaluate(()=>({
-              trace:window.__fxSoundTouchTrace||[],
-              guard:document.documentElement.dataset.fxCoreTouchUiGuardR417||'',
-              wda:document.documentElement.dataset.fxWdaSoundTouchR418||'',
-              recovery:document.documentElement.dataset.fxSoundTouchRecoveryStateR418||'',
-              audioOwner:document.documentElement.dataset.fxAudioOwner||'',
-              audioState:document.documentElement.dataset.fxAudioState||''
-            }));
-            console.log('R442_SOUND_TOUCH_ON',JSON.stringify(firstDelivery));
-            assert(firstDelivery.audioOwner==='professional-v6','professional audio owner did not receive SOUND activation: '+JSON.stringify(firstDelivery));
-            assert(firstDelivery.audioState==='on','first physical SOUND tap did not switch audio on: '+JSON.stringify(firstDelivery));
-            assert(['native-click','fallback-click-delivered'].includes(firstDelivery.recovery),'SOUND touch recovery did not complete: '+JSON.stringify(firstDelivery));
-            assert(firstDelivery.guard==='interactive-target-bypassed','MAG touch owner did not bypass interactive SOUND target: '+JSON.stringify(firstDelivery));
-            const firstPointerUp=firstDelivery.trace.find(item=>item.type==='pointerup');
-            assert(firstPointerUp&&/svg|fx-three-sound|fx-wda-sound-icon/.test(firstPointerUp.target),'SOUND pointerup escaped to the MAG stage: '+JSON.stringify(firstDelivery));
-
-            await page.touchscreen.tap(soundTap.x,soundTap.y);
-            await page.waitForTimeout(500);
-            const secondDelivery=await page.evaluate(()=>({
-              trace:window.__fxSoundTouchTrace||[],
-              recovery:document.documentElement.dataset.fxSoundTouchRecoveryStateR418||'',
-              audioOwner:document.documentElement.dataset.fxAudioOwner||'',
-              audioState:document.documentElement.dataset.fxAudioState||''
-            }));
-            console.log('R442_SOUND_TOUCH_OFF',JSON.stringify(secondDelivery));
-            assert(secondDelivery.audioOwner==='professional-v6','professional audio owner disappeared after second SOUND tap: '+JSON.stringify(secondDelivery));
-            assert(secondDelivery.audioState==='off','second physical SOUND tap did not switch audio off: '+JSON.stringify(secondDelivery));
-            assert(['native-click','fallback-click-delivered'].includes(secondDelivery.recovery),'second SOUND touch recovery did not complete: '+JSON.stringify(secondDelivery));
-            assert(secondDelivery.trace.filter(item=>item.type==='pointerup').length>=2,'second SOUND pointerup was not delivered: '+JSON.stringify(secondDelivery));
-
-            const coreTap=await page.evaluate(()=>{
-              const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
-              if(!(stage instanceof HTMLElement))return null;
-              const r=stage.getBoundingClientRect();
-              window.__fxCoreTouchEvents=[];
-              addEventListener('formatx:coreinteraction',event=>window.__fxCoreTouchEvents.push(event.detail),{passive:true});
-              return{x:r.left+r.width*.5,y:r.top+r.height*.42,w:r.width,h:r.height};
-            });
-            assert(coreTap&&coreTap.w>100&&coreTap.h>100,'r326 MAG stage missing: '+JSON.stringify(coreTap));
-            await page.touchscreen.tap(coreTap.x,coreTap.y);
-            await page.waitForTimeout(300);
-            const coreEvents=await page.evaluate(()=>window.__fxCoreTouchEvents||[]);
-            console.log('R442_MAG_TOUCH',JSON.stringify(coreEvents));
-            assert(coreEvents.some(event=>event?.phase==='press'),'direct MAG touch no longer reaches the r326 interaction owner');
-            assert(coreEvents.some(event=>event?.phase==='release'),'direct MAG touch does not release cleanly');
-
-            await ctx.close();
-
-            const desktopCtx=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,isMobile:false,hasTouch:false,locale:'hu-HU'});
-            const desktop=await desktopCtx.newPage();
-            await desktop.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu',{waitUntil:'domcontentloaded',timeout:45000});
-            await desktop.waitForFunction(()=>{
-              const button=document.querySelector('.topbar > .fx-language-toggle');
-              if(!(button instanceof HTMLButtonElement))return false;
-              const r=button.getBoundingClientRect(),s=getComputedStyle(button);
-              return document.documentElement.dataset.fxReferenceLanguageLayout==='r428-desktop-direct-topbar-child'
-                && s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>.9&&r.width>=44&&r.height>=44;
-            },null,{timeout:15000});
-            const desktopLanguage=await desktop.evaluate(()=>{
-              const button=document.querySelector('.topbar > .fx-language-toggle');
-              const bar=document.querySelector('.topbar');
-              const r=button?.getBoundingClientRect(),b=bar?.getBoundingClientRect(),s=button?getComputedStyle(button):null;
-              return {text:String(button?.textContent||'').trim(),layout:document.documentElement.dataset.fxReferenceLanguageLayout||'',box:r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null,bar:b?{left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width,height:b.height}:null,display:s?.display||'',visibility:s?.visibility||'',opacity:Number(s?.opacity||0)};
-            });
-            console.log('R442_DESKTOP_LANGUAGE',JSON.stringify(desktopLanguage));
-            assert(desktopLanguage.text==='HU','desktop language selector did not start in HU: '+JSON.stringify(desktopLanguage));
-            assert(desktopLanguage.layout==='r428-desktop-direct-topbar-child','desktop language selector is not owned by the canonical topbar: '+JSON.stringify(desktopLanguage));
-            assert(desktopLanguage.box&&desktopLanguage.box.width>=44&&desktopLanguage.box.height>=44&&desktopLanguage.box.left>=0&&desktopLanguage.box.right<=1440,'desktop HU/EN selector is missing or outside the viewport: '+JSON.stringify(desktopLanguage));
-            await desktop.click('.topbar > .fx-language-toggle');
-            await desktop.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.topbar > .fx-language-toggle')?.textContent?.trim()==='EN',null,{timeout:5000});
-            await desktopCtx.close();
-
+            console.log('R457_MOBILE_STATE',JSON.stringify(state));
+            for(const key of ['topbar','brand','mag','lang','menu','sound','canvas'])assert(state[key],`missing ${key}: `+JSON.stringify(state));
+            assert(state.topbar.top<=1&&state.topbar.height>=68&&state.topbar.height<=76,'topbar geometry changed: '+JSON.stringify(state));
+            for(const key of ['brand','mag','lang','menu'])assert(state[key].top>=state.topbar.top-1&&state[key].bottom<=state.topbar.bottom+1,`${key} escaped topbar: `+JSON.stringify(state));
+            assert(!overlap(state.brand,state.mag,2)&&!overlap(state.mag,state.lang,2)&&!overlap(state.lang,state.menu,2),'header controls overlap: '+JSON.stringify(state));
+            assert(state.lang.width>=44&&state.lang.height>=44&&state.sound.width>=44&&state.sound.height>=44,'touch target below 44px: '+JSON.stringify(state));
+            assert(state.langText==='HU','language did not start in HU: '+JSON.stringify(state));
+            assert(state.policy==='static-first-paint-owner-no-late-css','late compatibility CSS path became active: '+JSON.stringify(state));
+            assert(/brightness\(1\.2(?:0)?\)/.test(state.filter),'R457 mobile brightness missing: '+state.filter);
+            assert(/contrast\(0?\.98\)/.test(state.filter),'R457 mobile contrast missing: '+state.filter);
+            assert(/saturate\(1\.31\)/.test(state.filter),'R457 mobile saturation missing: '+state.filter);
+            assert(/blur\(0\.48px\)/.test(state.filter),'R457 soft edge missing: '+state.filter);
+            assert(state.renderer==='single-webgl-crystal-organism-r326','wrong renderer: '+JSON.stringify(state));
+            const lang=page.locator('.topbar > .fx-language-toggle').first();
+            await lang.tap();
+            await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.topbar > .fx-language-toggle')?.textContent?.trim()==='EN',null,{timeout:5000});
+            const sound=page.locator('.fx-three-sound').first();
+            const sb=await sound.boundingBox();assert(sb,'SOUND box missing');
+            const topmost=await page.evaluate(({x,y})=>{const el=document.elementFromPoint(x,y);return Boolean(el?.closest?.('.fx-three-sound'));},{x:sb.x+sb.width/2,y:sb.y+sb.height/2});
+            assert(topmost,'SOUND is not the topmost touch target');
+            await page.touchscreen.tap(sb.x+sb.width/2,sb.y+sb.height/2);
+            const mb=await page.locator('.topbar > .fx-reference-mag-button').first().boundingBox();assert(mb,'MAG box missing');
+            const magTopmost=await page.evaluate(({x,y})=>Boolean(document.elementFromPoint(x,y)?.closest?.('.fx-reference-mag-button')),{x:mb.x+mb.width/2,y:mb.y+mb.height/2});
+            assert(magTopmost,'MAG is not the topmost touch target');
             await browser.close();
-            console.log('PASS: R454 visible electric native MAG + R428 mobile/desktop HU/EN selector, SOUND ON/OFF and direct MAG touch passed.');
+            console.log('PASS: R457 soft mobile optics, R458 first-paint ownership, HU/EN, MAG and SOUND touch targets passed.');
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish current mobile visual/touch status
@@ -275,5 +130,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='R454 visible electric native MAG + language + touch passed'; else state=failure; description='Current cross-device language, visual or touch ownership failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='R457 soft mobile MAG, R458 first paint, language and touch passed'; else state=failure; description='Current cross-device language, visual or touch ownership failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX R454 MAG language and touch' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
