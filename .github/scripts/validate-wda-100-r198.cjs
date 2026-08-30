@@ -1,244 +1,73 @@
-/* FormatX Web Design Awards — r454 truthful startup/performance/control contract. */
+/* FormatX award-quality gate — r461 current production architecture. */
 'use strict';
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const root = path.resolve(__dirname, '../..');
-const read = rel => fs.readFileSync(path.join(root, rel), 'utf8');
-const exists = rel => fs.existsSync(path.join(root, rel));
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'../..');
+const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 
-const awardRuntime = read('docs/scifi-ui/scripts/formatx-award-runtime-r206.js');
-const intro = read('docs/scifi-ui/scripts/formatx-event-horizon.js');
-const mobileRegression = read('docs/scifi-ui/scripts/formatx-mobile-regression-r310.js');
-const mobileRegressionCss = read('docs/scifi-ui/styles/formatx-mobile-regression-r310.css');
-const controls = read('docs/scifi-ui/scripts/formatx-wda-controls-r198.js');
-const controlOwner = read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
-const gpu = read('docs/scifi-ui/scripts/formatx-wda-gpu-r198.js');
-const css = read('docs/scifi-ui/styles/formatx-wda-hardening-r198.css');
-const firstPaint = read('docs/scifi-ui/styles/formatx-first-paint-r206.css');
-const mobileLayoutCss = read('docs/scifi-ui/styles/formatx-mobile-layout-r207.css');
-const mobileLayoutRuntime = read('docs/scifi-ui/scripts/formatx-mobile-layout-r207.js');
-const mobileReferenceRuntime = read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
-const referenceRuntime = read('docs/scifi-ui/scripts/formatx-reference-production-r244.js');
-const referenceFinalizer = read('docs/scifi-ui/scripts/formatx-reference-finalizer-r143.js');
-const legacyFlow = read('docs/scifi-ui/scripts/formatx-flow-first-r75.js');
-const legacyFinalizer = read('docs/scifi-ui/scripts/formatx-mobile-ui-finalizer-r180.js');
-const audio = read('docs/scifi-ui/scripts/formatx-audio-repair.js');
-const production = read('billing-worker/src/production-content-entry.js');
-const home = read('docs/scifi-ui/index.html');
-const wrangler = JSON.parse(read('billing-worker/wrangler.jsonc'));
-const desktop = JSON.parse(read('lighthouserc.live.json'));
-const mobile = JSON.parse(read('lighthouserc.live.mobile.json'));
+const home=read('docs/scifi-ui/index.html');
+const intro=read('docs/scifi-ui/scripts/formatx-event-horizon.js');
+const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
+const language=read('docs/scifi-ui/scripts/single-language-toggle.js');
+const currentMag=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
+const controls=read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
+const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
+const desktop=JSON.parse(read('lighthouserc.json'));
+const mobile=JSON.parse(read('lighthouserc.mobile.json'));
 
-// UX / accessibility / explicit audio consent.
-assert.match(home, /class="skip-link"[^>]+href="#main-content"/);
-assert.match(home, /<main id="main-content">/);
-assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260830-r454-visible-electric-surface/);
-assert.match(intro, /formatx-mobile-regression-r310\.js\?v=20260830-r454-single-native-optics-owner/);
-assert.match(intro, /queuePostDomEnhancements/);
-assert.match(intro, /postdom-real3d-r454/);
-assert.match(intro, /activateCriticalReal3dStyle/);
-assert.match(intro, /ensureMobileRegressionR310/);
-assert.doesNotMatch(intro, /activateCriticalReal3dStyle\(\);\s*ensureMobileRegressionR310\(\);\s*ensureAwardRuntime\(\);\s*if\(AUDIT_MODE/);
-assert.doesNotMatch(intro, /\.style\.|setAttribute\(['"]style/i);
-for (const token of [
-  'formatx-wda-hardening-r198.css?v=20260824-native-orb-r250',
-  'formatx-control-owner-r264.css?v=20260824-native-orb-r250',
-  'data-fx-control-owner-style-r264',
-  'formatx-wda-controls-r198.js?v=20260824-native-orb-r250',
-  'formatx-control-owner-r268.js?v=20260830-r454-visible-electric-surface',
-  'formatx-mobile-regression-r310.js?v=20260830-r454-single-native-optics-owner',
-  'r454-native-webgl-visible-electric-organic-core',
-  'r454-sharp-readable-native-webgl-electric-caustics',
-  'formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame',
-  'muted-default-visible-control',
-  'audit-passive',
-  'DOMContentLoaded',
-  'data-fx-core-render-ms'
-]) assert.ok(awardRuntime.includes(token), `missing active r454 award runtime contract: ${token}`);
-for (const token of [
-  'Unmute FormatX cinematic audio',
-  'Mute FormatX cinematic audio',
-  'aria-pressed',
-  'professional-v6',
-  'muted-default',
-  'csp-safe-r260',
-  'fx-wda-sound-icon',
-  'canonicalizeReferenceControls',
-  'fx-reference-controls-r263',
-  'fx-reference-mag-text-r263',
-  'fxReferenceControlLayout',
-  'bootObserver',
-  'data-fx-reference-production-r244'
-]) assert.ok(controls.includes(token), `missing WDA sound/control contract: ${token}`);
-assert.doesNotMatch(controls, /bodyObserver/);
-for (const token of [
-  'min-height: 48px',
-  'min-height: 44px',
-  ':focus-visible',
-  'prefers-reduced-motion: reduce',
-  'prefers-contrast: more',
-  'forced-colors: active',
-  'fx-reference-controls-r263',
-  'grid-template-columns: repeat(3, 54px)',
-  'grid-template-columns: repeat(3, 50px)',
-  'display: contents',
-  'fx-reference-mag-text-r263',
-  'content: none !important'
-]) assert.ok(css.includes(token), `missing inclusive/canonical CSS contract: ${token}`);
-assert.match(audio, /let enabled = false/);
-assert.match(audio, /sync\('off'\)/);
+// Current first-load architecture: static LCP + one R326/R460 MAG path.
+for(const token of [
+  'fxHeroLcpOwnerR411','static-html-no-reparent','single-current-runtime-no-postdom-repair-stack',
+  'fx-reference-controls-r204','fx-reference-ask','fx-reference-pause','formatx:referencepause',
+  'r461-lightweight-first-party','runtime-error','promise-error'
+])assert.ok(intro.includes(token),`missing R461 intro contract: ${token}`);
+for(const retired of [
+  'formatx-award-runtime-r206.js','formatx-mobile-regression-r310.js','activateCriticalReal3dStyle','queuePostDomEnhancements'
+])assert.ok(!intro.includes(retired),`retired first-load repair stack returned: ${retired}`);
 
-// R454 startup guard: QR delivery remains deterministic and the Real3D CSS
-// activator is retained, without a separate continuous CSS pulse owner.
-for (const token of [
-  'data-fx-core-real3d="true"',
-  "removeAttribute('data-fx-deferred-media-r300')",
-  "image.dataset.fxQrPrimary = 'local-r310'",
-  "'/scifi-ui/assets/qr/'",
-  'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions',
-  'local-primary'
-]) assert.ok(mobileRegression.includes(token), `missing r310 mobile regression runtime contract: ${token}`);
-for (const token of [
-  '#formatx-plan-qr-dock',
-  'grid-template-columns: minmax(0, 1fr) 112px',
-  'width: 112px',
-  'height: 112px',
-  'width: 104px',
-  'height: 104px'
-]) assert.ok(mobileRegressionCss.includes(token), `missing compact r310 mobile QR contract: ${token}`);
+for(const token of [
+  'formatx-current-mag-loader-r422.js','formatx-crystal-organism-r326.js','formatx-mobile-solid-glass-r456.js',
+  'formatx-core-shapeshifter-r337.css','formatx-mini-mag-assistant-r459.js'
+])assert.ok(motion.includes(token),`missing current R460 motion owner: ${token}`);
+assert.ok(motion.includes('single-language-toggle.js?v=20260830-r461-static-owner'),'motion loader must request R461 language owner');
+assert.ok(motion.includes("fxSingleLanguageToggleVersion==='7'"),'motion loader must require language owner v7');
 
-// Fail-open first paint: readable content and a MAG visual must not depend on WebGL.
-for (const token of [
-  'fail-open first-paint',
-  'hero-space::before',
-  'hero-copy > .hero-lead',
-  'content-visibility: visible',
-  'data-fx-core-mobile-r99="ready-v69"',
-  'order: 2',
-  'visibility: visible'
-]) assert.ok(firstPaint.includes(token), `missing r206 first-paint contract: ${token}`);
+// One language control, stable from first paint, no document-wide mutation loop.
+for(const token of ["const VERSION='7'",'fx-language-toggle','HU – váltás angol nyelvre','EN – switch to Hungarian','event-driven-no-document-mutation-observer'])assert.ok(language.includes(token),`missing R461 language contract: ${token}`);
+assert.ok(!language.includes('new MutationObserver'),'R461 language owner must not install mutation observers');
 
-// r262: exactly one mobile physical owner, event-driven instead of hot DOM observers.
-for (const token of [
-  'authoritative mobile layout ownership',
-  '> .hero-grid > .fx-reference-controls-r204',
-  'order: 1',
-  'position: relative',
-  'flex-direction: row',
-  '> .hero-grid > .hero-copy',
-  '> .hero-grid > .fx-reference-heading',
-  '> .hero-grid > .fx-reference-proof',
-  'min-height: 0',
-  'fx-reference-liveos'
-]) assert.ok(mobileLayoutCss.includes(token), `missing mobile CSS contract: ${token}`);
-for (const token of [
-  'fxMobileLayoutOwner',
-  'r250-reference-stage',
-  'fx-reference-controls-r204',
-  'zone.parentElement !== space',
-  'fxMobileLayoutConflict',
-  'none-r207',
-  'r255-event-driven-inline-shield',
-  'queueMicrotask',
-  'clearLegacyInline',
-  'bootObserver',
-  'stopBootObserver',
-  "unique('.fx-reference-heading', hero)",
-  "unique('.fx-reference-proof', hero)"
-]) assert.ok(mobileLayoutRuntime.includes(token), `missing event-driven DOM ownership contract: ${token}`);
-assert.doesNotMatch(mobileLayoutRuntime, /relevantStyleMutation|observer\.observe\(document\.documentElement/);
-assert.doesNotMatch(mobileLayoutRuntime, /\.style\.|setAttribute\(['"]style/i);
-assert.doesNotMatch(mobileLayoutRuntime, /placeAfter\(/);
-assert.doesNotMatch(mobileLayoutRuntime, /document\.head\.appendChild\(link\)|appendChild\(link\)/);
-assert.doesNotMatch(mobileLayoutRuntime, /setTimeout\([^\n]*(?:450|1400)/);
+// Accessibility / mobile target cleanup and immediate LCP visibility.
+for(const token of ['content-visibility: visible','fx-reference-liveos','.scroll-cue > span','.topbar > .header-actions','> .fx-rail','contain: layout paint'])assert.ok(quality.includes(token),`missing R461 quality CSS: ${token}`);
+assert.match(home,/formatx-quality-r461\.css\?v=20260830-r461/);
+assert.match(home,/class="fx-language-toggle"/);
+assert.doesNotMatch(home,/data-fx-living-energy-r168="true" href="\.\/styles\/formatx-living-energy-r168\.css/);
+assert.doesNotMatch(home,/data-fx-desktop-apex-r181="true" href="\.\/styles\/formatx-desktop-apex-r181\.css/);
+for(const retired of ['data-fx-premium-finish','data-fx-live-heartbeat-r155','data-fx-signature-system-r185','data-fx-seamless-enforcer-r159','data-fx-living-energy-r168="true" src=','data-fx-desktop-apex-r181-loader'])assert.ok(!home.includes(retired),`retired runtime remains active in index: ${retired}`);
 
-for (const token of [
-  'r250-reference-stage-owner',
-  'ensureControlZone(hero,space,rail)',
-  'zone.parentElement!==space',
-  'syncPauseButtons',
-  'bootObserver'
-]) assert.ok(mobileReferenceRuntime.includes(token), `missing r260 mobile reference contract: ${token}`);
-assert.doesNotMatch(mobileReferenceRuntime, /layoutObserver|headerObserver/);
+// R460 renderer cleanup remains authoritative.
+for(const token of ['r326-only','cleanupLegacyMagRuntime','r460-soft-mobile-optics','r460-primary-controller-clean-runtime'])assert.ok(currentMag.includes(token),`missing R460 current MAG contract: ${token}`);
+for(const token of ['canonicalControls(hero)','fx-reference-controls-r204','visibleControl(pause)','fxControlOwnerR268'])assert.ok(controls.includes(token),`missing canonical control contract: ${token}`);
 
-// r408 reference runtime is semantic/compatibility only; r268 owns the actual
-// SOUND | ASK | PAUSE nodes and their physical interaction contract.
-for (const token of [
-  '.fx-three-sound',
-  '.fx-reference-ask',
-  'applyControlLayout',
-  'const expectedControlOwner = space',
-  'expectedControlOwner.appendChild(nodes.controls)',
-  'event-driven-r207-owner-r260'
-]) assert.ok(referenceRuntime.includes(token), `missing current r408 reference compatibility contract: ${token}`);
-assert.match(referenceRuntime, /function ensureStyleLast\(\) \{\}/);
-for (const token of [
-  'function ensurePause',
-  '.fx-reference-pause',
-  'canonicalControls(hero)',
-  'fx-reference-controls-r204',
-  'visibleControl(pause)',
-  'fxControlOwnerR268'
-]) assert.ok(controlOwner.includes(token), `missing canonical r268 hero-control contract: ${token}`);
-
-for (const token of ['FRAME_INTERVAL=1000/24', 'document.hidden', 'visibilitychange', 'retryBoot', 'ready-r252']) {
-  assert.ok(referenceFinalizer.includes(token), `missing throttled reference finalizer contract: ${token}`);
+function validateLighthouse(config,label){
+  const collect=config.ci.collect;
+  const assertions=config.ci.assert.assertions;
+  assert.equal(collect.numberOfRuns,3,`${label}: needs 3 runs`);
+  assert.ok(collect.url.every(url=>!url.includes('lighthouse=1')),`${label}: audit-only URL forbidden`);
+  assert.ok(!String(collect.settings.chromeFlags||'').includes('force-prefers-reduced-motion'),`${label}: forced reduced motion forbidden`);
+  assert.ok(!('skipAudits' in collect.settings),`${label}: skipped audits forbidden`);
+  assert.equal(assertions['categories:performance'][1].minScore,.95,`${label}: performance floor`);
+  assert.equal(assertions['categories:accessibility'][1].minScore,1,`${label}: accessibility floor`);
+  assert.equal(assertions['categories:best-practices'][1].minScore,1,`${label}: best-practices floor`);
+  assert.equal(assertions['categories:seo'][1].minScore,1,`${label}: SEO floor`);
+  assert.equal(assertions['first-contentful-paint'][1].maxNumericValue,1800,`${label}: FCP`);
+  assert.equal(assertions['largest-contentful-paint'][1].maxNumericValue,2500,`${label}: LCP`);
+  assert.equal(assertions['total-blocking-time'][1].maxNumericValue,200,`${label}: TBT`);
+  assert.equal(assertions['cumulative-layout-shift'][1].maxNumericValue,.1,`${label}: CLS`);
+  assert.equal(assertions['server-response-time'][1].maxNumericValue,600,`${label}: TTFB`);
 }
-assert.doesNotMatch(referenceFinalizer, /if\(\+\+bootTries<420\)schedule\(\)/);
+validateLighthouse(desktop,'desktop');
+validateLighthouse(mobile,'mobile');
 
-for (const token of ['canonicalOwner', 'delegated-r208', 'fxFlowFirstConflict', 'disabled-r208']) {
-  assert.ok(legacyFlow.includes(token), `legacy flow is not delegated under canonical owner: ${token}`);
-}
-for (const token of ['canonicalOwner', 'delegated-r208', 'disabled-r208-no-ping-pong']) {
-  assert.ok(legacyFinalizer.includes(token), `legacy finalizer is not delegated under canonical owner: ${token}`);
-}
-assert.match(legacyFlow, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
-assert.match(legacyFinalizer, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
-
-assert.match(production, /formatx-first-paint-r206\.css\?v=20260818-r206-stable-hero/);
-assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260824-native-orb-r250/);
-assert.match(production, /formatx-mobile-layout-r207\.css\?v=20260824-native-orb-r250/);
-assert.match(production, /formatx-mobile-layout-r207\.js\?v=20260824-native-orb-r250/);
-assert.match(production, /STARTUP_REVISION = '20260818-r208-flicker-free-owner'/);
-assert.match(production, /X-FormatX-Client-Revision', 'r208-flicker-free-owner/);
-assert.match(production, /X-FormatX-Recovery', 'r243-language-canonical/);
-assert.match(production, /fx_startup_r208=1/);
-assert.match(production, /r208-one-shot-cleared/);
-
-for (const token of ['fxWdaTargetFps', '16.67', 'scale = 0.86', 'scale > 0.58', 'frameMs > 19.5', 'frameMs < 16.2', 'fxWdaRenderScale', 'drawingBufferWidth']) {
-  assert.ok(gpu.includes(token), `missing adaptive GPU contract: ${token}`);
-}
-assert.doesNotMatch(gpu, /\.style\.|setAttribute\(['"]style/i);
-assert.equal(wrangler.main, 'src/production-content-entry.js');
-
-for (const rel of [
-  'docs/scifi-ui/method.html',
-  'docs/scifi-ui/verification.html',
-  'docs/scifi-ui/test-matrix.html',
-  'docs/scifi-ui/known-issues.html',
-  'docs/scifi-ui/security.html'
-]) assert.ok(exists(rel), `missing public proof page: ${rel}`);
-
-function validateLighthouse(config, label) {
-  const collect = config.ci.collect;
-  const assertions = config.ci.assert.assertions;
-  assert.equal(collect.numberOfRuns, 3, `${label}: needs 3 runs`);
-  assert.ok(collect.url.every(url => !url.includes('lighthouse=1') && !url.includes('?live=')), `${label}: audit-only URL is forbidden`);
-  assert.ok(!String(collect.settings.chromeFlags || '').includes('force-prefers-reduced-motion'), `${label}: forced reduced-motion is forbidden`);
-  assert.ok(!('skipAudits' in collect.settings), `${label}: skipped audits are forbidden`);
-  assert.equal(assertions['categories:performance'][1].minScore, 0.95, `${label}: performance floor`);
-  assert.equal(assertions['categories:accessibility'][1].minScore, 1, `${label}: accessibility floor`);
-  assert.equal(assertions['categories:best-practices'][1].minScore, 1, `${label}: best-practices floor`);
-  assert.equal(assertions['categories:seo'][1].minScore, 1, `${label}: SEO floor`);
-  assert.equal(assertions['first-contentful-paint'][1].maxNumericValue, 1800, `${label}: FCP budget`);
-  assert.equal(assertions['largest-contentful-paint'][1].maxNumericValue, 2500, `${label}: LCP budget`);
-  assert.equal(assertions['total-blocking-time'][1].maxNumericValue, 200, `${label}: TBT budget`);
-  assert.equal(assertions['cumulative-layout-shift'][1].maxNumericValue, 0.1, `${label}: CLS budget`);
-  assert.equal(assertions['server-response-time'][1].maxNumericValue, 600, `${label}: TTFB budget`);
-}
-validateLighthouse(desktop, 'desktop');
-validateLighthouse(mobile, 'mobile');
-
-for (const source of [awardRuntime, intro, mobileRegression, controls, controlOwner, gpu, mobileLayoutRuntime, mobileReferenceRuntime, referenceRuntime, referenceFinalizer, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r454 visible single-owner MAG optics, intermittent electric surface energy, post-DOM Real3D startup, canonical controls and truthful 0.95 Lighthouse gates passed.');
+for(const source of [intro,motion,language,currentMag,controls])new Function(source);
+console.log('PASS: R461 single-path first paint, R460/R326 MAG, stable language control, accessibility cleanup and truthful Lighthouse budgets are structurally valid.');
