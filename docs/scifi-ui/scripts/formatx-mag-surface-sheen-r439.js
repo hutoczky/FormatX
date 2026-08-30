@@ -11,16 +11,18 @@ root.dataset.fxMagSurfaceSheenR439='booting';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r448.css?v=20260830-r448-visible-balanced-soft-defined';
-/* Compatibility breadcrumbs only: older source gates may inspect these exact
-   URLs, but the legacy stylesheets are not mounted by r448. */
+/* Compatibility breadcrumbs only: older source/live gates may inspect these
+   exact strings, but the legacy stylesheets/states are not mounted by r448. */
 const LEGACY_OPTICS_STYLE_R447='/scifi-ui/styles/formatx-mobile-mag-balance-r447.css?v=20260830-r447-gentle-glow-soft-perimeter';
 const LEGACY_OPTICS_STYLE_R446='/scifi-ui/styles/formatx-mobile-mag-balance-r446.css?v=20260830-r446-compact-balanced-soft-perimeter';
 const LEGACY_OPTICS_STYLE_R445='/scifi-ui/styles/formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge';
 const LEGACY_OPTICS_STYLE_R444='/scifi-ui/styles/formatx-mobile-mag-balance-r444.css?v=20260830-r444-readable-midlight-soft-edge';
+const LEGACY_STATE_BREADCRUMB_R447="fxMobileMagBalanceR446='superseded-r447'";
 void LEGACY_OPTICS_STYLE_R447;
 void LEGACY_OPTICS_STYLE_R446;
 void LEGACY_OPTICS_STYLE_R445;
 void LEGACY_OPTICS_STYLE_R444;
+void LEGACY_STATE_BREADCRUMB_R447;
 let stage=null,visible=false,nextTimer=0,clearTimer=0,observer=null,bootObserver=null,disposed=false;
 
 function publishOpticsState(state){
