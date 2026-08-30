@@ -1,6 +1,6 @@
 /* FormatX r456 — current language, layout and native WebGL MAG critical path.
-   One native shader owns the MAG. Mobile r456 pre-arms continuous volumetric
-   lighting so triangle topology is never presented as painted surface detail. */
+   R326 owns the geometry. R456 is prewarmed on every device so the outer glass
+   material compiles without topology/noise breakup before first visible frame. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -10,8 +10,8 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r429-initial-cross-device-header';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r456-solid-mobile-glass';
-const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r456-solid-volume-no-mesh';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r456-uniform-shell-no-vram-artifact';
+const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r455-soft-mobile-optics';
@@ -59,13 +59,13 @@ function warmCriticalOwners(){
   root.dataset.fxCurrentMagWarmR423='ready';
   warmAsset(LANGUAGE_TOGGLE,'script');
   warmAsset(CURRENT_MAG,'script');
-  if(mobile.matches)warmAsset(CURRENT_SOLID_GLASS,'script');
+  warmAsset(CURRENT_SOLID_GLASS,'script');
   warmAsset(CURRENT_RENDERER,'script');
   warmAsset(CURRENT_STYLE,'style');
   warmAsset(CURRENT_OPTICS,'style');
   warmAsset(FINAL_HEADER,'style');
   root.dataset.fxLanguageCriticalWarmR429='ready';
-  root.dataset.fxSolidGlassCriticalWarmR456=mobile.matches?'ready':'desktop-bypass';
+  root.dataset.fxSolidGlassCriticalWarmR456='ready-all-devices';
 }
 
 function ensureLanguageToggle(){
@@ -107,15 +107,12 @@ function ensureCurrentMag(){
   if(currentRequested||document.querySelector('script[data-fx-current-mag-loader-r422]'))return;
   currentRequested=true;
   const script=document.createElement('script');script.src=CURRENT_MAG;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
-  root.dataset.fxMotionRuntimeMobileCoreR313='direct-r326-r456-solid-glass-prewarmed';
+  root.dataset.fxMotionRuntimeMobileCoreR313='direct-r326-r456-uniform-shell-prewarmed';
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
 
 function scheduleCriticalOwners(){
   warmCriticalOwners();
-  // This module is already deferred by the page shell. Both controls can mount
-  // immediately against the parsed topbar/hero instead of waiting for immersive
-  // activation or another DOMContentLoaded task.
   ensureLanguageToggle();
   ensureCurrentMag();
 }
@@ -145,8 +142,8 @@ root.dataset.fxMotionRuntimeRequestedR271='0';
 root.dataset.fxMotionRuntimeMobileEnergySkippedR271=String(skippedEnergy);
 root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
 root.dataset.fxMotionRuntimeRetiredCoreSkippedR422=String(retiredCore);
-root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r456-mobile-solid-glass-prewarmed':'core-ready-r454-desktop-prewarmed-r326';
-root.dataset.fxCoreCriticalPathR422=mobile.matches?'armed-direct-r326-r456-solid-glass-prewarmed':'armed-direct-r326-r454-prewarmed';
+root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r456-mobile-uniform-shell-prewarmed':'core-ready-r456-desktop-uniform-shell-prewarmed';
+root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r456-uniform-shell-prewarmed';
 scheduleCriticalOwners();
 
 if(deferred.length){
