@@ -59,8 +59,8 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     top: auto !important;
   }
 
-  /* r455 mobile optical balance: keep the crystal luminous and translucent,
-     but remove the blown centre and razor-cut silhouette from physical phones. */
+  /* r457 mobile optical balance: retain the premium cyan/violet core while
+     lowering the outer bloom and feathering the silhouette on physical phones. */
   html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: 1 !important;
@@ -69,19 +69,19 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     translate: none !important;
     rotate: none !important;
     filter:
-      brightness(1.30)
-      contrast(1.04)
-      saturate(1.42)
-      blur(.35px)
-      drop-shadow(0 0 1px rgba(126,239,255,.12))
-      drop-shadow(0 0 4px rgba(82,91,255,.07)) !important;
+      brightness(1.20)
+      contrast(.98)
+      saturate(1.31)
+      blur(.48px)
+      drop-shadow(0 0 1px rgba(126,239,255,.07))
+      drop-shadow(0 0 4px rgba(82,91,255,.035)) !important;
     -webkit-filter:
-      brightness(1.30)
-      contrast(1.04)
-      saturate(1.42)
-      blur(.35px)
-      drop-shadow(0 0 1px rgba(126,239,255,.12))
-      drop-shadow(0 0 4px rgba(82,91,255,.07)) !important;
+      brightness(1.20)
+      contrast(.98)
+      saturate(1.31)
+      blur(.48px)
+      drop-shadow(0 0 1px rgba(126,239,255,.07))
+      drop-shadow(0 0 4px rgba(82,91,255,.035)) !important;
   }
 
   html:root:root body.living-architecture .topbar .fx-reference-mag-button {
