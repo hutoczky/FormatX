@@ -1,11 +1,10 @@
-/* FormatX r458 — direct native MAG loader.
-   R326 owns native WebGL geometry and living inner material. R456/R458 is armed
-   before shader compilation so the outer glass remains continuous while mobile
-   nucleus, axis flare and Fresnel rim stay restrained. */
+/* FormatX r459 — direct native MAG + persistent Mini MAG loader.
+   R326 remains the full-size hero WebGL organism. R459 adds a separate, light
+   site-controller companion without replacing or duplicating the hero renderer. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r456-uniform-solid-glass-idle-zero';
+const VERSION='direct-r326-r459-persistent-mini-mag';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='r456-static-render-explicit-interaction';
@@ -14,6 +13,8 @@ root.dataset.fxCurrentMagRuntimeR422='booting';
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
 const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r458-restrained-center-soft-rim';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
+const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
+const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r459-persistent-site-controller';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r458-restrained-nucleus-fresnel';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
@@ -29,6 +30,7 @@ let started=false;
 // direct-r326-r454-visible-electric-surface-style-first-protected-touch
 // direct-r326-r456-uniform-solid-glass-no-vram-artifact
 // direct-r326-r458-restrained-mobile-nucleus-soft-fresnel-rim
+// direct-r326-r459-persistent-mini-mag-site-controller
 // formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart
 
 function addStyle(href,attr){
@@ -130,13 +132,16 @@ async function start(){
   await Promise.all([
     addStyle(STYLE,'data-fx-current-mag-r422'),
     addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
-    addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')
+    addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418'),
+    addStyle(MINI_STYLE,'data-fx-mini-mag-assistant-r459')
   ]);
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
   root.dataset.fxCurrentMagStylesR423='ready';
   root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
   root.dataset.fxCurrentMagOpticsR457='superseded-by-r458-restrained-mobile-optics';
   root.dataset.fxCurrentMagOpticsR458=mobile?'restrained-center-soft-fresnel-rim':'desktop-optics-unchanged';
+  root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
+  void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
 
   // Arm the uniform-shell hook BEFORE r326 compiles on every device.
   await addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
@@ -161,9 +166,9 @@ async function start(){
   }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
 
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r456-uniform-shell-idle-zero-native-touch'
-    :'direct-r326-r456-uniform-shell-idle-zero-desktop';
-  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady}}));
+    ?'direct-r326-r459-primary-plus-mini-native-touch'
+    :'direct-r326-r459-primary-plus-mini-desktop';
+  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true}}));
 }
 
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});
