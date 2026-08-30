@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "revision": "r446",
+  "target": "production",
+  "scope": "mobile-mag-optics-and-clutter",
+  "contracts": {
+    "compact_mobile_scale": true,
+    "moderate_luminance": true,
+    "soft_perimeter": true,
+    "crystal_cue_clear_of_controls": true,
+    "mobile_skip_link_not_visually_stuck": true
+  },
+  "active_optics": "/scifi-ui/styles/formatx-mobile-mag-balance-r446.css?v=20260830-r446-compact-balanced-soft-perimeter",
+  "supersedes": ["r444", "r445"]
+}
