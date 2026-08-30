@@ -3,7 +3,7 @@
 
 const root=document.documentElement;
 const REFERENCE_STYLE='/scifi-ui/styles/formatx-native-orb-reference-r250.css?v=20260824-native-orb-r250';
-const SHAPESHIFTER_URL='/scifi-ui/scripts/formatx-core-shapeshifter-r337.js?v=20260830-r454-single-visible-native-optics-owner';
+const SHAPESHIFTER_URL='/scifi-ui/scripts/formatx-core-shapeshifter-r337.js?v=20260830-r455-soft-mobile-optics';
 if(root.dataset.fxControlOwnerR268==='ready')return;
 root.dataset.fxControlOwnerR268='booting';
 root.dataset.fxControlOwnerR264='booting';
