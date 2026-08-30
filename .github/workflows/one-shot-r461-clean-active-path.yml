@@ -1,4 +1,4 @@
-name: One-shot R462 semantic cache migration
+name: One-shot R462 semantic cache migration v2
 
 on:
   push:
@@ -56,6 +56,8 @@ jobs:
           )
           if 'data-fx-single-language-toggle="ready-v3"' not in index:
               raise SystemExit('R462: static semantic language marker missing')
+          if 'formatx-quality-r461.css?v=20260830-r462-mobile-a11y' not in index:
+              raise SystemExit('R462: quality cache revision missing')
           index_path.write_text(index, encoding='utf-8')
 
           motion_path = Path('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
