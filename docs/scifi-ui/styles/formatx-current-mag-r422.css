@@ -114,16 +114,15 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   100% {opacity:0;background-position:146% 50%;}
 }
 
-/* r440 phone review: the live S24-class capture showed excessive outer bloom,
-   a too-hot centre flare and razor-like four-point edges. Keep the native r326
-   detail, but lower the final composite energy and use only a sub-pixel optical
-   softening pass. This does not change desktop optics or input geometry. */
+/* r440 phone review: reduce the live mobile bloom and hard visual contrast.
+   Edge softness itself is kept native in the WebGL material; this final CSS
+   composite deliberately contains no post-processing blur. */
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:.91!important;
     scale:.990!important;
-    filter:blur(.20px) brightness(.92) contrast(.96) saturate(.98)!important;
-    -webkit-filter:blur(.20px) brightness(.92) contrast(.96) saturate(.98)!important;
+    filter:brightness(.91) contrast(.90) saturate(.96)!important;
+    -webkit-filter:brightness(.91) contrast(.90) saturate(.96)!important;
   }
 
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage.fx-mag-sheen-r439::after {
@@ -137,8 +136,6 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
       rgba(149,125,255,.020) 56%,
       transparent 59%,transparent 100%)!important;
     background-size:32% 100%!important;
-    filter:blur(.16px)!important;
-    -webkit-filter:blur(.16px)!important;
     animation-name:fx-mag-surface-sheen-r440!important;
   }
 }
@@ -147,8 +144,8 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:.90!important;
     scale:.987!important;
-    filter:blur(.24px) brightness(.91) contrast(.95) saturate(.97)!important;
-    -webkit-filter:blur(.24px) brightness(.91) contrast(.95) saturate(.97)!important;
+    filter:brightness(.90) contrast(.89) saturate(.95)!important;
+    -webkit-filter:brightness(.90) contrast(.89) saturate(.95)!important;
   }
 }
 
@@ -172,4 +169,4 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
 /* production-r435-direct-r326-soft-rim-following-visible-heart-native-3d */
 /* production-r438-direct-r326-restrained-halo-soft-edge-native-composite */
 /* production-r439-direct-r326-clearer-facets-bounded-periodic-surface-sheen */
-/* production-r440-direct-r326-restrained-bloom-subpixel-soft-edge-mobile-review */
+/* production-r440-direct-r326-restrained-bloom-native-soft-edge-mobile-review */
