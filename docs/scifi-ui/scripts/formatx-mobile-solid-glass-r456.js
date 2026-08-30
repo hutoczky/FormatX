@@ -1,8 +1,10 @@
-/* FormatX r456 — native WebGL uniform solid-glass surface correction.
+/* FormatX r458 — native WebGL uniform solid-glass + restrained mobile optics.
    R326 remains the geometry/material owner. This short-lived precompile hook
    removes topology-driven and noise-driven colour breakup from the OUTER glass
    shell while keeping the living/noise structures inside the organism layer.
-   Result: one continuous glass volume instead of VRAM-like patch/facet noise. */
+   On phones it also trims the nucleus/axis flare and Fresnel rim at shader
+   source level so the crystal stays luminous without a burned centre or a
+   knife-sharp neon silhouette. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -28,8 +30,14 @@ const specularA='float specular=pow(max(dot(n,normalize(key+view)),0.),42.0);';
 const specularB='specular+=.72*pow(max(dot(n,normalize(side+view)),0.),24.0);';
 const glassBase='vec3 glass=mix(vec3(.040,.205,.46),vec3(.10,.68,1.08),.28+.38*ndl+.15*facetPulse);';
 const glassCloud='glass+=vec3(.025,.22,.50)*(.54+.76*cloud);';
+const glassFresnel='glass+=spectral*fresnel*(1.22+.94*visualEnergy);';
 const glassVeins='glass+=spectral*veins*(1.24+.48*uBreath);';
 const glassMembrane='glass+=spectral*membrane*(.58+.36*visualEnergy);';
+const innerNucleus='organ+=ice*nucleus*(3.18+1.18*visualEnergy);';
+const innerAxis='organ+=(cyan*1.04+ice*.24)*(axisV*1.10+axisH*.62)*visualEnergy;';
+const outerNucleus='glass+=ice*(rings*.30+heart*.12+nucleus*.64);';
+const outerAxis='glass+=(cyan*.90+ice*.16)*(axisV*.90+axisH*.48)*visualEnergy;';
+const outerAlpha='float alpha=.36+.20*ndl+.32*fresnel+edge*.072+veins*.105+rings*.060+specular*.17+surfaceSweep*.13;';
 
 let vertexPatched=false;
 let fragmentPatched=false;
@@ -53,6 +61,7 @@ function markReady(){
   root.dataset.fxCoreOuterNoiseR456='disabled-on-glass-shell';
   root.dataset.fxCoreInnerLifeR456='preserved';
   root.dataset.fxCoreSpecularR456='continuous-controlled-highlight';
+  root.dataset.fxCoreMobileOpticalBalanceR458=mobile?'restrained-nucleus-soft-fresnel-rim':'desktop-material-unchanged';
 }
 
 function patchSource(source){
@@ -88,6 +97,18 @@ function patchSource(source){
     next=next.replace(glassCloud,'glass+=vec3(.025,.22,.50)*.42;');
     next=next.replace(glassVeins,'glass+=spectral*veins*.10*fresnel;');
     next=next.replace(glassMembrane,'glass+=spectral*membrane*.055*fresnel;');
+
+    // r458: phone output was still being driven into clipping by the nucleus,
+    // cross-axis light and outer Fresnel term. Restrain only the mobile shader;
+    // desktop keeps the established optical balance.
+    if(mobile){
+      next=next.replace(glassFresnel,'glass+=spectral*fresnel*(.92+.62*visualEnergy);');
+      next=next.replace(innerNucleus,'organ+=ice*nucleus*(2.36+.78*visualEnergy);');
+      next=next.replace(innerAxis,'organ+=(cyan*.84+ice*.18)*(axisV*.84+axisH*.46)*visualEnergy;');
+      next=next.replace(outerNucleus,'glass+=ice*(rings*.30+heart*.12+nucleus*.44);');
+      next=next.replace(outerAxis,'glass+=(cyan*.72+ice*.12)*(axisV*.70+axisH*.36)*visualEnergy;');
+      next=next.replace(outerAlpha,'float alpha=.36+.20*ndl+.20*fresnel+edge*.072+veins*.105+rings*.060+specular*.15+surfaceSweep*.11;');
+    }
 
     if(next!==before)fragmentPatched=true;
   }
@@ -131,6 +152,7 @@ root.dataset.fxCoreSurfaceR456='armed-before-r326-compile';
 root.dataset.fxCoreMobileSurfaceR456=root.dataset.fxCoreSurfaceR456;
 root.dataset.fxCoreShaderHookR456=restorers.length?'armed':'unavailable';
 root.dataset.fxCoreMobileShaderHookR456=root.dataset.fxCoreShaderHookR456;
+root.dataset.fxCoreMobileOpticalBalanceR458=mobile?'armed-restrained-mobile-optics':'desktop-no-op';
 addEventListener('formatx:real3dready',()=>setTimeout(restore,0),{once:true,passive:true});
 setTimeout(restore,6000);
 }());
