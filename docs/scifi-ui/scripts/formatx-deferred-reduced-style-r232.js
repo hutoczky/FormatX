@@ -80,3 +80,5 @@ for(const [type,opts] of listeners)addEventListener(type,activate,opts);
 if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')activate();
 else root.dataset.fxReducedStyleR233='armed-no-full-fetch-r299';
 }());
+
+/* deploy-ready-r455-csp-safe-mobile-geometry */
