@@ -1,0 +1,21 @@
+{
+  "revision": "r464",
+  "purpose": "final strict cross-device measurement after R463 restrained MAG optics, R464 explicit-interaction-only mobile WebGL idle policy, and current semantic-language validation",
+  "desktop": "lighthouse-and-browser-required",
+  "mobile": "lighthouse-and-browser-required",
+  "qualityTarget": {
+    "performanceMinimum": 0.95,
+    "accessibility": 1,
+    "bestPractices": 1,
+    "seo": 1,
+    "fcpMaximumMs": 1800,
+    "lcpMaximumMs": 2500,
+    "tbtMaximumMs": 200,
+    "clsMaximum": 0.1,
+    "ttfbMaximumMs": 600
+  },
+  "rendererOwner": "r326-r454",
+  "mobileOptics": "r463-restrained-award-optics",
+  "mobileRenderBudget": "r464-explicit-interaction-only-zero-idle",
+  "externalAwardJuryScore": "not-claimed-by-technical-gate"
+}
