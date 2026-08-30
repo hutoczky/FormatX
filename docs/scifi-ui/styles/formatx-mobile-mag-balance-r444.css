@@ -1,0 +1,32 @@
+/* FormatX r444 — phone-reviewed MAG visibility balance.
+   Keep the native r326 WebGL material visible on dark OLED/LCD phone displays
+   without reintroducing the r424 overdriven bloom or razor-edge contrast. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
+  html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.965!important;
+    scale:.992!important;
+    filter:
+      brightness(1.055)
+      contrast(.955)
+      saturate(1.075)
+      drop-shadow(0 0 2px rgba(116,224,255,.024))
+      drop-shadow(0 0 7px rgba(91,88,255,.010))!important;
+    -webkit-filter:
+      brightness(1.055)
+      contrast(.955)
+      saturate(1.075)
+      drop-shadow(0 0 2px rgba(116,224,255,.024))
+      drop-shadow(0 0 7px rgba(91,88,255,.010))!important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.97!important;
+    scale:.991!important;
+    filter:brightness(1.07) contrast(.95) saturate(1.08)!important;
+    -webkit-filter:brightness(1.07) contrast(.95) saturate(1.08)!important;
+  }
+}
+
+/* production-r444-mobile-mag-readable-midlight-soft-edge-no-blur */
