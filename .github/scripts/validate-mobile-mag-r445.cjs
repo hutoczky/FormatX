@@ -10,34 +10,37 @@ const loader = read('docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js');
 
 const compact = optics.replace(/\s+/g, '');
 for (const token of [
-  'production-r448-r451-mobile-mag-balanced-body-restrained-halo-soft-edge',
-  'opacity:.95!important',
+  'production-r448-r452-mobile-mag-softer-light-natural-edge',
+  'opacity:.915!important',
   'scale:.80.84!important',
-  'brightness(1.13)',
-  'contrast(.72)',
-  'saturate(1.00)',
-  'blur(.62px)',
-  'opacity:.96!important',
+  'brightness(1.015)',
+  'contrast(.61)',
+  'saturate(.955)',
+  'blur(.94px)',
+  'opacity:.92!important',
   'scale:.78.82!important',
-  'brightness(1.15)',
-  'contrast(.71)',
-  'saturate(1.005)',
-  'blur(.66px)',
-  'background-size:24%92%!important',
-  'rgba(245,253,255,.070)',
+  'brightness(1.025)',
+  'contrast(.59)',
+  'saturate(.96)',
+  'blur(1.02px)',
+  'background-size:20%86%!important',
+  'rgba(245,253,255,.026)',
   '.fx-crystal-cue-r318{display:none!important',
   '.skip-link:focus-visible{position:fixed!important'
-]) assert.ok(compact.includes(token.replace(/\s+/g, '')), `missing r448/r451 mobile MAG correction token: ${token}`);
+]) assert.ok(compact.includes(token.replace(/\s+/g, '')), `missing r448/r452 mobile MAG correction token: ${token}`);
 
-assert.match(loader, /formatx-mobile-mag-balance-r448\.css\?v=20260830-r451-balanced-body-restrained-halo-soft-edge/);
-assert.match(loader, /root\.dataset\.fxMobileMagBalanceR451=state/);
-assert.match(loader, /link\.dataset\.fxMobileMagBalanceR451='true'/);
+assert.match(loader, /formatx-mobile-mag-balance-r448\.css\?v=20260830-r452-softer-light-natural-edge/);
+assert.match(loader, /root\.dataset\.fxMobileMagBalanceR452=state/);
+assert.match(loader, /link\.dataset\.fxMobileMagBalanceR452='true'/);
 assert.match(loader, /root\.dataset\.fxMobileMagBalanceR448=state/);
 assert.match(loader, /link\.dataset\.fxMobileMagBalanceR448='true'/);
-assert.match(loader, /fxMobileMagBalanceR450='superseded-r451'/);
-assert.doesNotMatch(optics, /scale:\s*\.99/i, 'r451 must preserve the compact mobile MAG scale');
-assert.doesNotMatch(optics, /brightness\(1\.(?:1[6-9]|[2-9][0-9])\)/i, 'r451 must not return to the over-bright phone optics');
-assert.doesNotMatch(optics, /contrast\((?:\.7[7-9]|\.[89][0-9]|1(?:\.\d+)?)\)/i, 'r451 must stay below the previous hard-edge contrast range');
-assert.doesNotMatch(optics, /rgba\(245,253,255,\.(?:1[0-9]{2}|[2-9][0-9]{2})\)/i, 'r451 surface sheen must stay below broad high-energy highlight levels');
+assert.match(loader, /fxMobileMagBalanceR451='superseded-r452'/);
+assert.match(loader, /currentHref\.includes\('r452-softer-light-natural-edge'\)/, 'r452 loader must reject a stale in-page r451 stylesheet');
+
+assert.doesNotMatch(optics, /brightness\(1\.(?:0[3-9]|[1-9][0-9])\)/i, 'r452 must keep post-composite brightness at or below the softened phone range');
+assert.doesNotMatch(optics, /contrast\((?:\.6[2-9]|\.[7-9][0-9]|1(?:\.\d+)?)\)/i, 'r452 must not restore the hard mobile perimeter contrast');
+assert.doesNotMatch(optics, /rgba\(245,253,255,\.(?:0(?:3[0-9]|[4-9][0-9])|[1-9][0-9]{2})\)/i, 'r452 surface sheen must not restore the hot white centre flare');
+assert.doesNotMatch(optics, /drop-shadow\([^\n]*rgba\([^\)]*,\.(?:01[1-9]|0[2-9]|[1-9][0-9]*)\)\)/i, 'r452 external glow must remain near-zero');
+
 new Function(loader);
-console.log('PASS: r448/r451 restores mobile MAG body readability while retaining restrained halo and a soft natural perimeter.');
+console.log('PASS: r448/r452 materially lowers mobile MAG centre flare and softens the perimeter while preserving compact readable crystal geometry.');
