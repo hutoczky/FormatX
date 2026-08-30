@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "revision": "r445-live-reaudit",
+  "purpose": "final production revalidation marker after live r445 award-readiness gate migration",
+  "renderer": "single-webgl-crystal-organism-r326",
+  "render_budget": "r442-18x36-two-pass-720k-idle-zero",
+  "mobile_optics": "r445-readable-bright-midtones-soft-edge-no-blur",
+  "live_gate": "r326-r442-r445",
+  "expected": {
+    "production_validation": "success",
+    "production_deployment": "success",
+    "public_site_integrity": "success",
+    "live_mobile_apex": "success",
+    "live_award_readiness": "success"
+  }
+}
