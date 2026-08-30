@@ -1,33 +1,33 @@
-/* FormatX r448/r450 — phone-reviewed restrained-halo MAG balance.
-   r449 restored too much luminance on small phones: the cyan/violet Fresnel
-   aura spread too far from the crystal and the silhouette read too cut-out.
-   r450 keeps the compact proven geometry but lowers post-composite energy,
-   reduces halo radius, and softens the perceived perimeter with lower contrast
-   instead of a large blur that would smear the whole body. */
+/* FormatX r448/r451 — phone-reviewed balanced-light MAG optics.
+   r449 was too luminous and halo-heavy; r450 over-corrected and buried the
+   crystal body in the black hero. r451 restores readable inner facets without
+   restoring the broad cyan/violet aura: the periodic sheen stays narrow and
+   weak, drop shadows stay minimal, while a slightly stronger body exposure and
+   a wider sub-pixel blur keep the silhouette natural instead of cut-out. */
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
   html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.925!important;
+    opacity:.95!important;
     scale:.80 .84!important;
     transform-origin:50% 48%!important;
     image-rendering:auto!important;
     filter:
-      brightness(1.08)
-      contrast(.68)
-      saturate(.985)
-      blur(.44px)
-      drop-shadow(0 0 2px rgba(112,222,255,.008))
-      drop-shadow(0 0 6px rgba(92,88,255,.003))!important;
+      brightness(1.13)
+      contrast(.72)
+      saturate(1.00)
+      blur(.62px)
+      drop-shadow(0 0 2px rgba(112,222,255,.010))
+      drop-shadow(0 0 7px rgba(92,88,255,.004))!important;
     -webkit-filter:
-      brightness(1.08)
-      contrast(.68)
-      saturate(.985)
-      blur(.44px)
-      drop-shadow(0 0 2px rgba(112,222,255,.008))
-      drop-shadow(0 0 6px rgba(92,88,255,.003))!important;
+      brightness(1.13)
+      contrast(.72)
+      saturate(1.00)
+      blur(.62px)
+      drop-shadow(0 0 2px rgba(112,222,255,.010))
+      drop-shadow(0 0 7px rgba(92,88,255,.004))!important;
   }
 
-  /* The periodic surface sheen stays alive, but its luminous band is narrower
-     and materially weaker so it cannot recreate the broad r449 phone halo. */
+  /* Keep the r450 halo reduction. Body readability is restored on the canvas,
+     not by expanding this luminous overlay back around the crystal. */
   html:root:root:root body.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage.fx-mag-sheen-r439::after {
     inset:14% 11% 12%!important;
     background-image:linear-gradient(108deg,
@@ -74,23 +74,23 @@
 
 @media (max-width:430px) {
   html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.935!important;
+    opacity:.96!important;
     scale:.78 .82!important;
     transform-origin:50% 48%!important;
     filter:
-      brightness(1.10)
-      contrast(.66)
-      saturate(.99)
-      blur(.48px)
-      drop-shadow(0 0 2px rgba(112,222,255,.007))
-      drop-shadow(0 0 6px rgba(92,88,255,.003))!important;
+      brightness(1.15)
+      contrast(.71)
+      saturate(1.005)
+      blur(.66px)
+      drop-shadow(0 0 2px rgba(112,222,255,.009))
+      drop-shadow(0 0 7px rgba(92,88,255,.0035))!important;
     -webkit-filter:
-      brightness(1.10)
-      contrast(.66)
-      saturate(.99)
-      blur(.48px)
-      drop-shadow(0 0 2px rgba(112,222,255,.007))
-      drop-shadow(0 0 6px rgba(92,88,255,.003))!important;
+      brightness(1.15)
+      contrast(.71)
+      saturate(1.005)
+      blur(.66px)
+      drop-shadow(0 0 2px rgba(112,222,255,.009))
+      drop-shadow(0 0 7px rgba(92,88,255,.0035))!important;
   }
 
   html:root:root:root body.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage.fx-mag-sheen-r439::after {
@@ -100,4 +100,4 @@
   }
 }
 
-/* production-r448-r450-mobile-mag-restrained-halo-soft-natural-perimeter */
+/* production-r448-r451-mobile-mag-balanced-body-restrained-halo-soft-edge */
