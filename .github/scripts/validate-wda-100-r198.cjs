@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — r464 current production architecture. */
+/* FormatX award-quality gate — r465 current production architecture. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -15,6 +15,7 @@ const solidGlass=read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js'
 const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const controls=read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
 const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
+const optics=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
 const desktop=JSON.parse(read('lighthouserc.json'));
 const mobile=JSON.parse(read('lighthouserc.mobile.json'));
 
@@ -28,12 +29,12 @@ for(const retired of [
 ])assert.ok(!intro.includes(retired),`retired first-load repair stack returned: ${retired}`);
 
 for(const token of [
-  'formatx-current-mag-loader-r422.js?v=20260830-r464-explicit-interaction-mobile-tbt',
+  'formatx-current-mag-loader-r422.js?v=20260831-r465-soft-optics-no-idle-redraw',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
-  'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics',
-  'formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim',
-  'armed-direct-r326-r463-optics-r464-explicit-interaction-tbt'
-])assert.ok(motion.includes(token),`missing current R464 motion owner: ${token}`);
+  'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
+  'formatx-core-shapeshifter-r337.css?v=20260831-r465-soft-perimeter-low-bloom',
+  'armed-direct-r326-r465-soft-optics-no-idle-redraw'
+])assert.ok(motion.includes(token),`missing current R465 motion owner: ${token}`);
 assert.ok(motion.includes('single-language-toggle.js?v=20260830-r462-semantic-owner'),'motion loader must request stable language owner');
 assert.ok(motion.includes("fxSingleLanguageToggleVersion==='7'"),'motion loader must require language owner v7');
 assert.ok(!motion.includes('isRetiredMagRuntime'),'compact loader must not contain retired-runtime filtering');
@@ -61,23 +62,28 @@ for(const retired of [
 ])assert.ok(!home.includes(retired),`retired runtime remains active in index: ${retired}`);
 
 for(const token of [
-  'r326-only','cleanupLegacyMagRuntime','r463-restrained-award-optics',
-  'r464-explicit-interaction-only-strict-tbt','explicit-mag-interaction-only-zero-idle',
-  'narrow-fresnel-soft-edge-restrained-bloom','formatx-mini-mag-assistant-r459.js'
-])assert.ok(currentMag.includes(token),`missing R464 current MAG contract: ${token}`);
+  'r326-only','cleanupLegacyMagRuntime','r465-soft-perimeter-low-bloom',
+  'r465-direct-pause-flag-no-redraw','explicit-mag-interaction-only-zero-idle',
+  'soft-perimeter-low-bloom-low-cost-shader','formatx-mini-mag-assistant-r459.js'
+])assert.ok(currentMag.includes(token),`missing R465 current MAG contract: ${token}`);
 for(const token of [
-  "const VERSION='r463-uniform-solid-glass-restrained-award-mobile-optics'",
-  "const smoothWeight=mobile?'.997':'.930'",
-  "float fresnel=pow(1.0-facing,2.12);",
+  "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'",
+  "const smoothWeight=mobile?'.998':'.930'",
+  "float fresnel=pow(1.0-facing,1.92);",
   "float edge=0.0;",
-  'narrow-fresnel-soft-edge-restrained-bloom'
-])assert.ok(solidGlass.includes(token),`missing restrained R463 mobile optics: ${token}`);
+  'surfacePulsePattern','soft-perimeter-low-bloom-low-cost-shader'
+])assert.ok(solidGlass.includes(token),`missing soft R465 mobile optics: ${token}`);
 for(const token of [
-  'const activeWindowMs=260','const shapeProbeMs=150','state.core?.requestRender?.(3)',
+  'production-r465-soft-perimeter-low-bloom-mobile-display','contrast(.82)','blur(1.18px)','saturate(1.04)'
+])assert.ok(optics.includes(token),`missing R465 mobile display tone: ${token}`);
+for(const token of [
+  'const activeWindowMs=240','const shapeProbeMs=150','state.core?.requestRender?.(2)',
   'userShapeSource(source)','guardPassiveState(source)',
   "fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle'",
-  "fxMobileRenderGovernorRevisionR433='r464-explicit-interaction-only-strict-tbt'"
-])assert.ok(governor.includes(token),`missing strict R464 mobile render budget: ${token}`);
+  "fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw'",
+  "root.dataset.fxReferenceMotionPaused=value"
+])assert.ok(governor.includes(token),`missing strict R465 mobile render budget: ${token}`);
+assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepause'"),'governor idle must not synchronously redraw through legacy pause event');
 assert.ok(!governor.includes("active('scroll-r463'"),'mobile scroll must not wake WebGL');
 assert.ok(!governor.includes("active('resize-r463'"),'mobile resize must not wake WebGL');
 for(const token of [
@@ -106,4 +112,4 @@ validateLighthouse(desktop,'desktop');
 validateLighthouse(mobile,'mobile');
 
 for(const source of [intro,motion,language,currentMag,solidGlass,governor,controls])new Function(source);
-console.log('PASS: R464 single-path first paint, restrained R463 mobile MAG optics, explicit-interaction-only zero-idle TBT policy, stable language semantics, accessibility and truthful Lighthouse budgets are structurally valid.');
+console.log('PASS: R465 single-path first paint, soft low-bloom mobile MAG optics, direct-pause zero-idle TBT policy, stable language semantics, accessibility and truthful Lighthouse budgets are structurally valid.');

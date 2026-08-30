@@ -26,7 +26,7 @@ has(home,[
   'formatx-quality-r461.css?v=20260830-r462-mobile-a11y',
   'data-fx-single-language-toggle="ready-v3"',
   'class="fx-language-toggle"'
-],'R462 static entry path');
+],'R465 static entry path');
 for(const token of [
   'data-fx-premium-finish','data-fx-live-heartbeat-r155','data-fx-signature-system-r185',
   'data-fx-seamless-enforcer-r159','data-fx-living-energy-r168="true" src=',
@@ -43,14 +43,14 @@ for(const token of ['formatx-award-runtime-r206.js','formatx-mobile-regression-r
 
 has(motion,[
   'single-language-toggle.js?v=20260830-r462-semantic-owner',
-  'formatx-current-mag-loader-r422.js?v=20260830-r464-explicit-interaction-mobile-tbt',
-  'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics',
+  'formatx-current-mag-loader-r422.js?v=20260831-r465-soft-optics-no-idle-redraw',
+  'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
-  'formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim',
+  'formatx-core-shapeshifter-r337.css?v=20260831-r465-soft-perimeter-low-bloom',
   "fxSingleLanguageToggleVersion==='7'",
   "fxLegacyMagRuntimeCleanupR460='static-html-clean-r461'",
-  'armed-direct-r326-r463-optics-r464-explicit-interaction-tbt'
-],'R464 compact current loader');
+  'armed-direct-r326-r465-soft-optics-no-idle-redraw'
+],'R465 compact current loader');
 for(const token of ['isRetiredMagRuntime','formatx-premium-finish','formatx-live-heartbeat-r155','formatx-signature-system-r185','formatx-seamless-enforcer-r159'])assert.ok(!motion.includes(token),`dead runtime filter remains: ${token}`);
 
 has(language,[
@@ -60,13 +60,13 @@ has(language,[
 assert.ok(!language.includes('new MutationObserver'),'language owner must remain observer-free');
 
 has(current,[
-  'direct-r326-r463-optics-r464-explicit-interaction-tbt','cleanupLegacyMagRuntime','r326-only',
-  'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics',
+  'direct-r326-r465-soft-optics-no-idle-redraw','cleanupLegacyMagRuntime','r326-only',
+  'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
   'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe',
-  'formatx-mobile-render-governor-r426.js?v=20260830-r464-explicit-interaction-only-strict-tbt',
-  'narrow-fresnel-soft-edge-restrained-bloom','explicit-mag-interaction-only-zero-idle',
+  'formatx-mobile-render-governor-r426.js?v=20260831-r465-direct-pause-flag-no-redraw',
+  'soft-perimeter-low-bloom-low-cost-shader','direct-pause-flag-no-idle-redraw',
   'formatx-mini-mag-assistant-r459.js'
-],'R464 primary MAG loader');
+],'R465 primary MAG loader');
 
 has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','uSurfacePulse',
@@ -75,23 +75,29 @@ has(renderer,[
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
 
 has(solidGlass,[
-  "const VERSION='r463-uniform-solid-glass-restrained-award-mobile-optics'",
-  "const smoothWeight=mobile?'.997':'.930'",
-  "const specPowerA=mobile?'28.0':'36.0'",
-  "const specGainB=mobile?'.34':'.64'",
-  "next=next.replace(fresnelMobile,'float fresnel=pow(1.0-facing,2.12);')",
+  "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'",
+  "const smoothWeight=mobile?'.998':'.930'",
+  "const specPowerA=mobile?'22.0':'36.0'",
+  "const specGainB=mobile?'.24':'.64'",
+  "next=next.replace(fresnelMobile,'float fresnel=pow(1.0-facing,1.92);')",
   "next=next.replace(edgePattern,'float edge=0.0;')",
-  "fxCoreMobileOpticalBalanceR463=mobile?'narrow-fresnel-soft-edge-restrained-bloom':'desktop-material-unchanged'"
-],'R463 restrained award phone glass');
-has(optics,['production-r460-single-native-webgl-optics-owner-soft-mobile-rim','contrast(.86)','blur(.90px)'],'R460 soft mobile rim');
+  'surfacePulsePattern',
+  'soft-perimeter-low-bloom-low-cost-shader'
+],'R465 soft award phone glass');
+has(optics,[
+  'production-r465-soft-perimeter-low-bloom-mobile-display',
+  'contrast(.82)','blur(1.18px)','saturate(1.04)'
+],'R465 soft mobile display tone');
 
 has(governor,[
-  'const activeWindowMs=260','const shapeProbeMs=150','const shapeSettleDeadlineMs=2600',
-  'state.core?.requestRender?.(3)','userShapeSource(source)','guardPassiveState(source)',
-  'passive-formatx:languagechange-r464',
+  'const activeWindowMs=240','const shapeProbeMs=150','const shapeSettleDeadlineMs=2400',
+  'state.core?.requestRender?.(2)','userShapeSource(source)','guardPassiveState(source)',
+  'passive-formatx:languagechange-r465',
   "fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle'",
-  "fxMobileRenderGovernorRevisionR433='r464-explicit-interaction-only-strict-tbt'"
-],'R464 explicit-interaction mobile TBT governor');
+  "fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw'",
+  "root.dataset.fxReferenceMotionPaused=value"
+],'R465 direct-flag mobile TBT governor');
+assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepause'"),'internal governor idle must not trigger the legacy synchronous redraw handler');
 assert.ok(!governor.includes("active('scroll-r463'"),'mobile scroll must not wake WebGL');
 assert.ok(!governor.includes("active('resize-r463'"),'mobile resize must not wake WebGL');
 
@@ -106,4 +112,4 @@ has(quality,[
 ],'R462 measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: R464 clean active path uses one R326 hero renderer, restrained R463 mobile optics, explicit-interaction-only zero-idle WebGL, stable semantic controls/language and no retired first-load stack.');
+console.log('PASS: R465 clean active path uses one R326 hero renderer, soft low-bloom mobile optics, direct pause-flag zero-idle WebGL, stable semantic controls/language and no retired first-load stack.');

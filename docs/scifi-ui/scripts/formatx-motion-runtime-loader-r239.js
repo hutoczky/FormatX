@@ -1,7 +1,7 @@
-/* FormatX r464 — compact current-path loader.
-   The active HTML contains only current deferred enhancements. R463 owns the
-   restrained mobile glass; R464 adds the explicit-interaction-only mobile idle
-   budget without changing the desktop rendering path. */
+/* FormatX r465 — compact current-path loader.
+   The active HTML contains only current deferred enhancements. R465 owns the
+   softer low-bloom mobile glass and a pause-flag governor that never redraws
+   merely to become idle. Desktop remains on its proven R326 path. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -11,11 +11,11 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r464-explicit-interaction-mobile-tbt';
-const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260831-r465-soft-optics-no-idle-redraw';
+const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
-const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim';
+const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r465-soft-perimeter-low-bloom';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
@@ -80,7 +80,7 @@ function mountEnhancements(){
   if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
-  root.dataset.fxMotionRuntimeR239='enhanced-r464-user-intent';
+  root.dataset.fxMotionRuntimeR239='enhanced-r465-user-intent';
 }
 function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
 
@@ -89,8 +89,8 @@ root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
 root.dataset.fxLegacyMagRuntimeCleanupR460='static-html-clean-r461';
 root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
-root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r464':mobile.matches?'core-ready-r464-mobile-r326-controller':'core-ready-r464-desktop-r326-controller';
-root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r463-optics-r464-explicit-interaction-tbt';
+root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r465':mobile.matches?'core-ready-r465-mobile-r326-controller':'core-ready-r465-desktop-r326-controller';
+root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r465-soft-optics-no-idle-redraw';
 warmCriticalOwners();
 ensureLanguageToggle();
 ensureCurrentMag();

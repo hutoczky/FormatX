@@ -1,6 +1,7 @@
-/* FormatX r460 — the one native WebGL MAG optical owner.
-   The shader owns geometry, caustics and the intermittent electric sweep.
-   CSS preserves the touch surface and applies only the final display tone. */
+/* FormatX r465 — the one native WebGL MAG optical display owner.
+   The shader owns geometry and living light. CSS preserves the touch surface
+   and applies only final display tone. Mobile deliberately uses a softer,
+   lower-bloom perimeter; desktop remains visually unchanged. */
 
 html[data-fx-core-shape-r337] #hero .hero-space > .fx-crystal-organism-r326-stage {
   pointer-events: auto !important;
@@ -59,30 +60,27 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     top: auto !important;
   }
 
-  /* r460: preserve the translucent internal facets, but stop post-processing
-     from turning the nucleus and perimeter into a neon flare. The slightly
-     wider sub-pixel feather is deliberately optical only; geometry stays R326. */
+  /* r465: lower display exposure and remove post-process drop shadows so the
+     crystal reads as illuminated glass, not a neon cut-out. A controlled 1.18px
+     feather softens the physical phone edge while preserving the internal 3D
+     facets and central nucleus. */
   html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .965 !important;
+    opacity: .945 !important;
     scale: 1 !important;
     transform: none !important;
     translate: none !important;
     rotate: none !important;
     filter:
-      brightness(1.01)
-      contrast(.86)
-      saturate(1.10)
-      blur(.90px)
-      drop-shadow(0 0 1px rgba(126,239,255,.025))
-      drop-shadow(0 0 2px rgba(82,91,255,.012)) !important;
+      brightness(.99)
+      contrast(.82)
+      saturate(1.04)
+      blur(1.18px) !important;
     -webkit-filter:
-      brightness(1.01)
-      contrast(.86)
-      saturate(1.10)
-      blur(.90px)
-      drop-shadow(0 0 1px rgba(126,239,255,.025))
-      drop-shadow(0 0 2px rgba(82,91,255,.012)) !important;
+      brightness(.99)
+      contrast(.82)
+      saturate(1.04)
+      blur(1.18px) !important;
   }
 
   html:root:root body.living-architecture .topbar .fx-reference-mag-button {
@@ -119,4 +117,5 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
   }
 }
 
-/* production-r460-single-native-webgl-optics-owner-soft-mobile-rim · deploy-ready-r460 */
+/* production-r460-single-native-webgl-optics-owner-soft-mobile-rim
+   production-r465-soft-perimeter-low-bloom-mobile-display · deploy-ready-r465 */

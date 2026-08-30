@@ -8,19 +8,23 @@ root.dataset.fxMobileRenderGovernorR426='booting';
 
 let settleTimer=0;
 let armed=false;
-const activeWindowMs=260;
+const activeWindowMs=240;
 const shapeProbeMs=150;
-const shapeSettleDeadlineMs=2600;
+const shapeSettleDeadlineMs=2400;
 
 function renderer(){return window.FormatXCoreMobileV69;}
 function userPaused(){return document.querySelector('.fx-reference-pause')?.dataset.paused==='true';}
-function emitPaused(paused,source){
-  dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source}}));
+function setRendererPaused(paused,source){
+  if(!paused&&userPaused())return false;
+  const value=paused?'true':'false';
+  if(root.dataset.fxReferenceMotionPaused!==value)root.dataset.fxReferenceMotionPaused=value;
+  root.dataset.fxMobileRenderPauseSourceR465=String(source||'governor-r465');
+  return true;
 }
 function clearSettle(){if(settleTimer)clearTimeout(settleTimer);settleTimer=0;}
-function idle(source='idle-r464'){
+function idle(source='idle-r465'){
   clearSettle();
-  emitPaused(true,source);
+  if(root.dataset.fxReferenceMotionPaused!=='true')setRendererPaused(true,source);
   root.dataset.fxMobileRenderGovernorR426='idle-zero-frame';
   root.dataset.fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle';
 }
@@ -39,10 +43,10 @@ function shapeState(){
 function userShapeSource(source){
   return /core-tap|mag-button|controller|keyboard|pointer|touch|user|api-(?:set|morph|toggle|rotate)/i.test(String(source||''));
 }
-function settleShape(source='shape-change-r464'){
+function settleShape(source='shape-change-r465'){
   clearSettle();
   const started=performance.now();
-  root.dataset.fxMobileRenderGovernorSettleR433='waiting-user-shape-r464';
+  root.dataset.fxMobileRenderGovernorSettleR433='waiting-user-shape-r465';
   const probe=()=>{
     settleTimer=0;
     if(userPaused()){
@@ -51,75 +55,79 @@ function settleShape(source='shape-change-r464'){
     }
     const state=shapeState();
     if(state.ready){
-      root.dataset.fxMobileRenderGovernorSettleR433=`settled-${state.target}-r464`;
-      idle('shape-settled-r464');
+      root.dataset.fxMobileRenderGovernorSettleR433=`settled-${state.target}-r465`;
+      idle('shape-settled-r465');
       return;
     }
     if(performance.now()-started>=shapeSettleDeadlineMs){
-      root.dataset.fxMobileRenderGovernorSettleR433='deadline-idle-r464';
-      idle('shape-deadline-r464');
+      root.dataset.fxMobileRenderGovernorSettleR433='deadline-idle-r465';
+      idle('shape-deadline-r465');
       return;
     }
-    emitPaused(false,source);
-    state.core?.requestRender?.(3);
+    setRendererPaused(false,source);
+    state.core?.requestRender?.(2);
     settleTimer=setTimeout(probe,shapeProbeMs);
   };
   settleTimer=setTimeout(probe,shapeProbeMs);
 }
-function active(source='interaction-r464',frames=5,delay=activeWindowMs,waitForShape=false){
+function active(source='interaction-r465',frames=4,delay=activeWindowMs,waitForShape=false){
   if(userPaused())return;
   clearSettle();
-  emitPaused(false,source);
+  setRendererPaused(false,source);
   renderer()?.requestRender?.(frames);
-  root.dataset.fxMobileRenderGovernorR426='explicit-interaction-burst-r464';
+  root.dataset.fxMobileRenderGovernorR426='explicit-interaction-burst-r465';
   if(waitForShape){settleShape(source);return;}
-  settleTimer=setTimeout(()=>idle('settled-r464'),delay);
+  settleTimer=setTimeout(()=>idle('settled-r465'),delay);
 }
 function guardPassiveState(source){
-  if(!armed||userPaused())return;
-  // r326 may queue a frame before this late governor sees scroll, resize,
-  // menu/language or autonomous section-state events. Reasserting pause in the
-  // same task cancels that frame before expensive WebGL work begins and keeps
-  // the autonomous 3.4 s surface sweep from entering Lighthouse/mobile idle.
+  if(!armed||userPaused()||root.dataset.fxReferenceMotionPaused==='true')return;
+  // R465 does not dispatch formatx:referencepause for internal governor state.
+  // R326's legacy pause handler performs a synchronous resize + draw on that
+  // event, which made an idle transition itself a long main-thread task. The
+  // shared motion flag is sufficient: R326 checks it before every scheduled
+  // frame, so pending passive work is cancelled without drawing a new frame.
   idle(source);
 }
 function arm(){
   if(armed)return;armed=true;
   root.dataset.fxMobileRenderGovernorR426='ready';
   root.dataset.fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle';
-  root.dataset.fxMobileRenderGovernorRevisionR433='r464-explicit-interaction-only-strict-tbt';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>idle('startup-settled-r464')));
+  root.dataset.fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw';
+  // R326 registers its first render frame before dispatching real3dready. One
+  // governor frame therefore preserves that initial painted MAG, then freezes
+  // the canvas without a second render or pause-event feedback task.
+  requestAnimationFrame(()=>idle('startup-painted-r465'));
 }
 
 addEventListener('formatx:real3dready',arm,{passive:true});
 addEventListener('formatx:coreshapechange',event=>{
   const source=event.detail?.source||'';
-  if(userShapeSource(source))active(`shape-${source||'user'}-r464`,4,0,true);
-  else guardPassiveState(`passive-shape-${source||'site'}-r464`);
+  if(userShapeSource(source))active(`shape-${source||'user'}-r465`,3,0,true);
+  else guardPassiveState(`passive-shape-${source||'site'}-r465`);
 },{passive:true});
 addEventListener('formatx:coreinteraction',event=>{
   const phase=event.detail?.phase||'interaction';
-  active(`core-${phase}-r464`,phase==='drag'?3:5,phase==='drag'?140:280);
+  active(`core-${phase}-r465`,phase==='drag'?2:4,phase==='drag'?120:240);
 },{passive:true});
 
 for(const eventName of [
   'formatx:menustatechange','formatx:languagechange','pageshow','resize',
   'orientationchange','scroll','formatx:organismpanelopen','formatx:organismresponse',
   'formatx:open-live-os','formatx:loop'
-])addEventListener(eventName,()=>guardPassiveState(`passive-${eventName}-r464`),{passive:true});
+])addEventListener(eventName,()=>guardPassiveState(`passive-${eventName}-r465`),{passive:true});
 
 document.addEventListener('pointerdown',event=>{
   if(!event.isTrusted)return;
   const target=event.target instanceof Element?event.target:null;
   if(!target||target.closest('.fx-reference-pause'))return;
-  if(target.closest('#hero .hero-space,.fx-reference-mag-button'))active('pointer-r464',5,280);
+  if(target.closest('#hero .hero-space,.fx-reference-mag-button'))active('pointer-r465',4,240);
 },{capture:true,passive:true});
 
 document.addEventListener('keydown',event=>{
   if(!event.isTrusted)return;
   const target=event.target instanceof Element?event.target:null;
   const onMag=Boolean(target?.closest?.('#hero .hero-space,.fx-reference-mag-button'));
-  if(onMag&&(event.key==='Enter'||event.key===' '||event.key.startsWith('Arrow')))active('keyboard-r464',4,240);
+  if(onMag&&(event.key==='Enter'||event.key===' '||event.key.startsWith('Arrow')))active('keyboard-r465',3,220);
 },{passive:true});
 
 if(root.dataset.fxCoreReal3d==='ready-v69'||root.dataset.fxCrystalOrganismR326==='ready')arm();
