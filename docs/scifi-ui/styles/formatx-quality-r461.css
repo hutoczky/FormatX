@@ -1,0 +1,99 @@
+/* FormatX r461 — compact quality layer for the current R326/R460 experience.
+   This is not a compatibility override stack: it fixes first-paint stability,
+   mobile tap targets and contrast for the one active landing-page runtime. */
+
+/* LCP-visible hero text must be paintable immediately. */
+html body.living-architecture #hero .hero-copy,
+html body.living-architecture #hero .fx-category-definition,
+html body.living-architecture #hero #hero-title,
+html body.living-architecture #hero .hero-lead {
+  content-visibility: visible !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Public proof / entry affordances: WCAG AA contrast on their actual dark UI. */
+html body.living-architecture .fx-reference-liveos {
+  color: #f2fbff !important;
+  background: rgba(2, 14, 25, .96) !important;
+  border-color: rgba(139, 226, 255, .48) !important;
+  text-shadow: none !important;
+}
+html body.living-architecture .scroll-cue > span {
+  color: #eefaff !important;
+  background: rgba(2, 14, 25, .94) !important;
+  border: 1px solid rgba(139, 226, 255, .28) !important;
+  border-radius: 999px !important;
+  padding: 6px 10px !important;
+  text-shadow: none !important;
+}
+
+/* The canonical language control is part of the initial header geometry. */
+html body.living-architecture .topbar > .fx-language-toggle {
+  box-sizing: border-box !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
+@media (min-width: 901px) {
+  /* Reserve the final control cell before JS ownership reconciles the header.
+     This removes the remaining desktop language-control layout shift. */
+  html body.living-architecture .topbar {
+    min-height: 72px !important;
+  }
+  html body.living-architecture .topbar > .fx-language-toggle {
+    position: absolute !important;
+    top: 13px !important;
+    right: 88px !important;
+    width: 46px !important;
+    height: 48px !important;
+    margin: 0 !important;
+    z-index: 12070 !important;
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  /* Mobile has one navigation system: MAG + language + menu. Desktop-only
+     support/licence links and the legacy chapter rail must not create tiny,
+     overlapping touch targets behind that header. */
+  html body.living-architecture .topbar > .header-actions,
+  html body.living-architecture > .fx-rail {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html body.living-architecture .topbar > .fx-language-toggle {
+    position: absolute !important;
+    top: 11px !important;
+    right: 70px !important;
+    width: 44px !important;
+    height: 48px !important;
+    margin: 0 !important;
+    z-index: 12070 !important;
+  }
+
+  /* Keep the current R460 MAG optical carrier clipped to the hero. Glow can be
+     soft, but never spill into following content or create a moving paint box. */
+  html body.living-architecture #hero .hero-space {
+    contain: layout paint !important;
+    overflow: hidden !important;
+  }
+
+  html body.living-architecture #hero .fx-category-definition {
+    contain: layout style !important;
+    min-height: 131px !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.living-architecture .fx-reference-liveos,
+  html body.living-architecture .scroll-cue > span {
+    transition: none !important;
+    animation: none !important;
+  }
+}
