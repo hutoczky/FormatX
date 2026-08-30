@@ -1,4 +1,4 @@
-/* FormatX r459 — persistent mini MAG site controller.
+/* FormatX r459/r460 — persistent mini MAG site controller + hero bridge.
    The hero MAG remains the primary native WebGL organism. This lightweight
    companion provides persistent site control without creating another renderer. */
 (function(){
@@ -9,6 +9,7 @@ root.dataset.fxMiniMagAssistantR459='booting';
 
 const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
 const SECTION_IDS=['hero','experience','capabilities','pricing','system','resources'];
+let pendingHeroRequest=false;
 const COPY={
   hu:{
     launcher:'Mini MAG vezérlő megnyitása',
@@ -55,7 +56,6 @@ const COPY={
 };
 
 function language(){return root.lang==='en'?'en':'hu';}
-function text(key){return COPY[language()][key];}
 function node(tag,className){const el=document.createElement(tag);if(className)el.className=className;return el;}
 function setPair(button,pair){
   const over=button.querySelector('span');
@@ -124,6 +124,17 @@ function buildNav(id){
   button.append(node('span'),node('b'));
   return button;
 }
+
+addEventListener('formatx:heromagcontrollerrequest',()=>{
+  const api=window.FormatXMiniMagR459;
+  if(typeof api?.toggle==='function'){
+    api.toggle();
+    root.dataset.fxMiniMagHeroBridgeR460='handled-live-request';
+  }else{
+    pendingHeroRequest=true;
+    root.dataset.fxMiniMagHeroBridgeR460='queued-until-ready';
+  }
+},{passive:true});
 
 function install(){
   if(!document.body||document.body.dataset.fxPublicPage){root.dataset.fxMiniMagAssistantR459='public-page-skip';return;}
@@ -221,7 +232,13 @@ function install(){
   };
   root.dataset.fxMiniMagAssistantR459='ready';
   root.dataset.fxMiniMagPrimaryHeroR459='preserved-native-webgl';
-  dispatchEvent(new CustomEvent('formatx:minimagready',{detail:{version:'r459',persistent:true}}));
+  root.dataset.fxMiniMagHeroBridgeR460='ready';
+  if(pendingHeroRequest){
+    pendingHeroRequest=false;
+    setOpen(true,true);
+    root.dataset.fxMiniMagHeroBridgeR460='opened-queued-request';
+  }
+  dispatchEvent(new CustomEvent('formatx:minimagready',{detail:{version:'r459',persistent:true,heroBridge:'r460'}}));
 }
 
 addStyle();
