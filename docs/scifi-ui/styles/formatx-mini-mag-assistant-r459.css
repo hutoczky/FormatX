@@ -1,0 +1,280 @@
+/* FormatX r459 — persistent mini MAG assistant.
+   The full-size native WebGL MAG remains untouched in the hero. This fixed,
+   lightweight companion is only a site-control surface, so it adds no second
+   WebGL renderer and cannot compete with the primary MAG GPU budget. */
+
+.fx-mini-mag-assistant-r459 {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 12040;
+  width: 62px;
+  height: 62px;
+  pointer-events: none;
+  contain: layout style;
+  font-family: "Helvetica Neue", Arial, system-ui, sans-serif;
+}
+
+.fx-mini-mag-launcher-r459 {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 62px;
+  height: 62px;
+  min-width: 62px;
+  min-height: 62px;
+  padding: 0;
+  border: 1px solid rgba(151, 232, 255, .42);
+  border-radius: 22px;
+  color: #ecfbff;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(89, 237, 255, .16), transparent 42%),
+    linear-gradient(145deg, rgba(7, 31, 50, .96), rgba(2, 10, 20, .98));
+  box-shadow:
+    0 14px 42px rgba(0, 0, 0, .46),
+    inset 0 0 0 1px rgba(183, 236, 255, .04);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fx-mini-mag-launcher-r459:hover,
+.fx-mini-mag-launcher-r459:focus-visible,
+.fx-mini-mag-assistant-r459[data-open="true"] .fx-mini-mag-launcher-r459 {
+  border-color: rgba(169, 241, 255, .70);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, .52),
+    0 0 20px rgba(57, 194, 255, .12),
+    inset 0 0 0 1px rgba(199, 247, 255, .08);
+  outline: none;
+}
+
+.fx-mini-mag-glyph-r459 {
+  position: relative;
+  display: block;
+  width: 31px;
+  height: 31px;
+  transform: rotate(45deg);
+  border: 1px solid rgba(162, 244, 255, .72);
+  border-radius: 8px 2px 8px 2px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(228, 255, 255, .90) 0 3%, rgba(78, 224, 255, .54) 6%, transparent 25%),
+    linear-gradient(135deg, rgba(70, 214, 255, .30), rgba(104, 75, 255, .18) 52%, rgba(3, 21, 37, .74));
+  box-shadow:
+    0 0 6px rgba(77, 225, 255, .20),
+    inset 0 0 12px rgba(98, 183, 255, .12);
+}
+
+.fx-mini-mag-glyph-r459::before,
+.fx-mini-mag-glyph-r459::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  background: rgba(159, 244, 255, .52);
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+}
+.fx-mini-mag-glyph-r459::before { width: 19px; height: 1px; }
+.fx-mini-mag-glyph-r459::after { width: 1px; height: 19px; }
+
+.fx-mini-mag-status-r459 {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #04101b;
+  border-radius: 50%;
+  background: #8ff3ff;
+  box-shadow: 0 0 9px rgba(98, 232, 255, .45);
+}
+
+.fx-mini-mag-panel-r459 {
+  position: absolute;
+  right: 0;
+  bottom: 76px;
+  box-sizing: border-box;
+  width: min(370px, calc(100vw - 28px));
+  max-height: min(640px, calc(100vh - 112px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+  border: 1px solid rgba(143, 226, 255, .24);
+  border-radius: 24px;
+  color: #eaf8ff;
+  background: linear-gradient(155deg, rgba(5, 22, 37, .985), rgba(1, 8, 17, .99));
+  box-shadow: 0 22px 70px rgba(0, 0, 0, .58);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px) scale(.985);
+  transform-origin: 100% 100%;
+}
+
+.fx-mini-mag-assistant-r459[data-open="true"] .fx-mini-mag-panel-r459 {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+}
+
+.fx-mini-mag-head-r459 {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.fx-mini-mag-head-r459 strong {
+  display: block;
+  color: #f4fdff;
+  font-size: 15px;
+  letter-spacing: .12em;
+}
+.fx-mini-mag-head-r459 small {
+  display: block;
+  margin-top: 5px;
+  color: #9ec2d1;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.fx-mini-mag-close-r459 {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid rgba(159, 224, 247, .18);
+  border-radius: 14px;
+  color: #eaf8ff;
+  background: rgba(8, 25, 39, .82);
+  cursor: pointer;
+}
+
+.fx-mini-mag-actions-r459,
+.fx-mini-mag-nav-r459 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.fx-mini-mag-actions-r459 { margin-bottom: 16px; }
+
+.fx-mini-mag-section-label-r459 {
+  display: block;
+  margin: 2px 0 9px;
+  color: #85b8ca;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.fx-mini-mag-action-r459,
+.fx-mini-mag-nav-r459 button {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid rgba(143, 225, 255, .16);
+  border-radius: 15px;
+  color: #e8f8ff;
+  background: rgba(6, 25, 40, .76);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.fx-mini-mag-action-r459:hover,
+.fx-mini-mag-action-r459:focus-visible,
+.fx-mini-mag-nav-r459 button:hover,
+.fx-mini-mag-nav-r459 button:focus-visible,
+.fx-mini-mag-close-r459:hover,
+.fx-mini-mag-close-r459:focus-visible {
+  border-color: rgba(156, 235, 255, .48);
+  background: rgba(11, 42, 62, .94);
+  outline: none;
+}
+
+.fx-mini-mag-action-r459 span,
+.fx-mini-mag-nav-r459 button span {
+  display: block;
+  color: #7ecfe7;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.fx-mini-mag-action-r459 b,
+.fx-mini-mag-nav-r459 button b {
+  display: block;
+  margin-top: 4px;
+  color: inherit;
+  font-size: 12px;
+}
+
+.fx-mini-mag-foot-r459 {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(151, 225, 255, .10);
+  color: #789dad;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+@media (max-width: 680px), (pointer: coarse) {
+  .fx-mini-mag-assistant-r459 {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    width: 58px;
+    height: 58px;
+  }
+  .fx-mini-mag-launcher-r459 {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    min-height: 58px;
+    border-radius: 20px;
+  }
+  .fx-mini-mag-glyph-r459 { width: 29px; height: 29px; }
+  .fx-mini-mag-panel-r459 {
+    right: 0;
+    bottom: 70px;
+    width: min(360px, calc(100vw - 24px));
+    max-height: min(620px, calc(100dvh - 96px));
+    padding: 14px;
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 360px) {
+  .fx-mini-mag-actions-r459,
+  .fx-mini-mag-nav-r459 { grid-template-columns: 1fr; }
+  .fx-mini-mag-panel-r459 { width: calc(100vw - 20px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fx-mini-mag-panel-r459 {
+    transition: opacity 140ms ease, transform 140ms ease, visibility 140ms step-end;
+  }
+  .fx-mini-mag-assistant-r459[data-open="true"] .fx-mini-mag-panel-r459 {
+    transition: opacity 140ms ease, transform 140ms ease, visibility 0ms step-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-mini-mag-panel-r459,
+  .fx-mini-mag-launcher-r459 { transition: none !important; animation: none !important; }
+}
