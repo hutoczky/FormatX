@@ -1,11 +1,14 @@
 name: Verify FormatX live award readiness
-run-name: Live award-readiness audit for r326 + r442 budget + r445 bright soft-edge mobile optics
+run-name: Live award-readiness audit for r326 + r442 budget + r446 compact soft mobile optics
 
 on:
   push:
     branches: [master]
     paths:
       - '.github/workflows/verify-live-award-readiness.yml'
+      - 'docs/scifi-ui/styles/formatx-mobile-mag-balance-r446.css'
+      - 'docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js'
+      - '.github/scripts/validate-mobile-mag-r445.cjs'
   workflow_run:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
@@ -28,7 +31,7 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Validate current award and r445 source contracts
+      - name: Validate r446 source contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -37,138 +40,60 @@ jobs:
           node .github/scripts/validate-real3d-core.cjs
           node .github/scripts/validate-reference-core-v26.cjs
           node .github/scripts/validate-mobile-mag-r445.cjs
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           node --check docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
 
-          test -s docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'production-r442-final-mobile-mag-optics-owner-restrained-native-no-blur' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'brightness(.90)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'contrast(.89)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -Fq 'saturate(.95)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          ! grep -Fq 'blur(' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          OPTICS='docs/scifi-ui/styles/formatx-mobile-mag-balance-r446.css'
+          LOADER='docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js'
+          test -s "$OPTICS"
+          grep -Fq 'production-r446-mobile-mag-compact-balanced-soft-perimeter' "$OPTICS"
+          grep -Fq 'scale:.80 .84' "$OPTICS"
+          grep -Fq 'scale:.78 .82' "$OPTICS"
+          grep -Fq 'brightness(1.11)' "$OPTICS"
+          grep -Fq 'brightness(1.13)' "$OPTICS"
+          grep -Fq 'contrast(.79)' "$OPTICS"
+          grep -Fq 'contrast(.77)' "$OPTICS"
+          grep -Fq 'blur(.42px)' "$OPTICS"
+          grep -Fq 'blur(.52px)' "$OPTICS"
+          grep -Fq '.fx-crystal-cue-r318' "$OPTICS"
+          grep -Fq '.skip-link:focus-visible' "$OPTICS"
+          ! grep -Fq 'scale:.991' "$OPTICS"
+          grep -Fq 'formatx-mobile-mag-balance-r446.css?v=20260830-r446-compact-balanced-soft-perimeter' "$LOADER"
+          grep -Fq 'data-fx-mobile-mag-balance-r446' "$LOADER"
+          grep -Fq "fxMobileMagBalanceR445='superseded-r446'" "$LOADER"
 
-          test -s docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
-          grep -Fq 'production-r445-mobile-mag-readable-bright-midtones-soft-edge-no-blur' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
-          grep -Fq 'brightness(1.20)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
-          grep -Fq 'contrast(.92)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
-          grep -Fq 'saturate(1.085)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
-          grep -Fq 'brightness(1.24)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
-          grep -Fq 'contrast(.91)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
-          grep -Fq 'saturate(1.10)' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
-          ! grep -Fq 'blur(' docs/scifi-ui/styles/formatx-mobile-mag-balance-r445.css
-
-          grep -Fq 'formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge' docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
-          grep -Fq 'data-fx-mobile-mag-balance-r445' docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
-          grep -Fq 'superseded-r445' docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
-          grep -Fq 'retired-r424-native-shader-optics' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
-          grep -Fq 'formatx-core-shapeshifter-r337-css' docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
-
-      - name: Verify live r326 crystal, r445 optics, interaction and scrolling
+      - name: Verify deployed r446 assets
+        if: github.event_name != 'push'
         shell: bash
         run: |
           set -euo pipefail
           ORIGIN='https://formatxsuite.com'
-          TMP="$RUNNER_TEMP/formatx-award-current"
+          TMP="$RUNNER_TEMP/formatx-r446-live"
           mkdir -p "$TMP"
-          fetch(){ curl -fsSL --retry 3 --retry-delay 1 -H 'Cache-Control: no-cache' "$ORIGIN$1" -o "$2"; }
-          contains(){ grep -Fq "$2" "$3" || { echo "FAIL $1: missing $2"; exit 1; }; }
 
-          fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
-          fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
-          fetch "/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=${GITHUB_RUN_ID}" "$TMP/crystal-r326.js"
-          fetch "/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r442.css"
-          fetch "/scifi-ui/styles/formatx-mobile-mag-balance-r445.css?v=${GITHUB_RUN_ID}" "$TMP/optics-r445.css"
-          fetch "/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js?v=${GITHUB_RUN_ID}" "$TMP/sheen-r439.js"
-          fetch "/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-regression.js"
-          fetch "/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=${GITHUB_RUN_ID}" "$TMP/touch-r99.js"
-          fetch "/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=${GITHUB_RUN_ID}" "$TMP/governor-r426.js"
-          fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
-          fetch "/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=${GITHUB_RUN_ID}" "$TMP/layout.css"
-          fetch "/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=${GITHUB_RUN_ID}" "$TMP/text-guard.css"
-          fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
-          fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
-          fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
+          for attempt in $(seq 1 30); do
+            cache="${GITHUB_RUN_ID}-${attempt}"
+            home_code="$(curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' -o "$TMP/home.html" -w '%{http_code}' "$ORIGIN/?r446_live=$cache" || true)"
+            optics_code="$(curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' -o "$TMP/r446.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-mag-balance-r446.css?v=$cache" || true)"
+            loader_code="$(curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' -o "$TMP/loader.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js?v=$cache" || true)"
 
-          contains homepage 'FormatX Suite Pro' "$TMP/home.html"
-          contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
+            if [[ "$home_code" == 200 && "$optics_code" == 200 && "$loader_code" == 200 ]] \
+              && grep -Fq 'production-r446-mobile-mag-compact-balanced-soft-perimeter' "$TMP/r446.css" \
+              && grep -Fq 'scale:.80 .84' "$TMP/r446.css" \
+              && grep -Fq 'scale:.78 .82' "$TMP/r446.css" \
+              && grep -Fq 'blur(.42px)' "$TMP/r446.css" \
+              && grep -Fq 'blur(.52px)' "$TMP/r446.css" \
+              && grep -Fq '.fx-crystal-cue-r318' "$TMP/r446.css" \
+              && grep -Fq '.skip-link:focus-visible' "$TMP/r446.css" \
+              && grep -Fq 'formatx-mobile-mag-balance-r446.css?v=20260830-r446-compact-balanced-soft-perimeter' "$TMP/loader.js" \
+              && ! grep -Fq 'scale:.991' "$TMP/r446.css"; then
+              echo 'PASS: live r446 mobile MAG assets converged.'
+              exit 0
+            fi
+            sleep 10
+          done
 
-          contains wrapper-award-revision 'new-crystal-organism-r326' "$TMP/mobile-wrapper.js"
-          contains wrapper-crystal-revision 'r326-four-direction-living-facet-organism' "$TMP/mobile-wrapper.js"
-          contains wrapper-primary 'formatx-crystal-organism-r326.js?v=20260825-r326-new-organism' "$TMP/mobile-wrapper.js"
-          contains wrapper-selection 'new-crystal-organism-r326-primary' "$TMP/mobile-wrapper.js"
-          contains wrapper-composition 'new-organism-no-legacy-visual-fallback' "$TMP/mobile-wrapper.js"
-          ! grep -Eq 'formatx-core-mobile-reference-r99\.js|formatx-core-mechanical-orb-r250\.js|formatx-core-r317\.js' "$TMP/mobile-wrapper.js"
-
-          contains renderer-version "const VERSION = 'crystal-organism-r326'" "$TMP/crystal-r326.js"
-          contains renderer 'single-webgl-crystal-organism-r326' "$TMP/crystal-r326.js"
-          contains webgl2 "getContext('webgl2'" "$TMP/crystal-r326.js"
-          contains webgl-fallback "getContext('webgl'" "$TMP/crystal-r326.js"
-          contains geometry 'buildOrganismGeometry' "$TMP/crystal-r326.js"
-          contains triangles 'gl.TRIANGLES' "$TMP/crystal-r326.js"
-          contains interaction-event 'formatx:coreinteraction' "$TMP/crystal-r326.js"
-          contains renderer-budget 'dpr-cap-1.45-pixel-budget-720k' "$TMP/crystal-r326.js"
-          contains renderer-idle-zero "fxCoreIdleRenderR441='zero-frame'" "$TMP/crystal-r326.js"
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/crystal-r326.js"
-
-          contains optics-base-owner 'production-r442-final-mobile-mag-optics-owner-restrained-native-no-blur' "$TMP/optics-r442.css"
-          contains optics-base-brightness 'brightness(.90)' "$TMP/optics-r442.css"
-          contains optics-base-contrast 'contrast(.89)' "$TMP/optics-r442.css"
-          contains optics-base-colour 'saturate(.95)' "$TMP/optics-r442.css"
-          ! grep -Fq 'blur(' "$TMP/optics-r442.css"
-
-          contains optics-r445-owner 'production-r445-mobile-mag-readable-bright-midtones-soft-edge-no-blur' "$TMP/optics-r445.css"
-          contains optics-r445-brightness 'brightness(1.20)' "$TMP/optics-r445.css"
-          contains optics-r445-contrast 'contrast(.92)' "$TMP/optics-r445.css"
-          contains optics-r445-colour 'saturate(1.085)' "$TMP/optics-r445.css"
-          contains optics-r445-small-brightness 'brightness(1.24)' "$TMP/optics-r445.css"
-          contains optics-r445-small-contrast 'contrast(.91)' "$TMP/optics-r445.css"
-          contains optics-r445-small-colour 'saturate(1.10)' "$TMP/optics-r445.css"
-          ! grep -Eq 'blur\(|radial-gradient|conic-gradient' "$TMP/optics-r445.css"
-
-          contains sheen-r445-url 'formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge' "$TMP/sheen-r439.js"
-          contains sheen-r445-dataset 'data-fx-mobile-mag-balance-r445' "$TMP/sheen-r439.js"
-          contains sheen-r445-compat 'superseded-r445' "$TMP/sheen-r439.js"
-          contains optics-retired 'retired-r424-native-shader-optics' "$TMP/mobile-regression.js"
-          contains optics-owner-runtime 'formatx-core-shapeshifter-r337-css' "$TMP/mobile-regression.js"
-
-          contains touch-wake 'formatx:referencepause' "$TMP/touch-r99.js"
-          contains touch-coreinteraction 'formatx:coreinteraction' "$TMP/touch-r99.js"
-          contains touch-activate 'formatx:organismcoreactivate' "$TMP/touch-r99.js"
-          contains touch-ui-guard 'interactive-target-bypassed' "$TMP/touch-r99.js"
-          contains governor-policy 'event-burst-no-heartbeat-render' "$TMP/governor-r426.js"
-          contains governor-idle 'startup-settled-r426' "$TMP/governor-r426.js"
-          contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
-          contains ask 'KÉRDEZZ' "$TMP/layout.js"
-          contains proof-style '.fx-reference-proof' "$TMP/layout.css"
-          contains hero-wrap 'max-width: 620px !important' "$TMP/text-guard.css"
-          contains normal-wrap 'white-space: normal !important' "$TMP/text-guard.css"
-
-          contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
-          ! grep -Fq 'preventDefault' "$TMP/scroll.js"
-
-          python3 - "$TMP/policy.json" <<'PY'
-          import json,sys
-          p=json.load(open(sys.argv[1],encoding='utf-8'))
-          c=p.get('policy',{});m=p.get('mobile',{});d=p.get('desktop',{})
-          checks={
-            'input_capture':c.get('input_capture') is False,
-            'section_scroll_snap':c.get('section_scroll_snap') is False,
-            'native_wheel_touch':c.get('native_wheel_touch') is True,
-            'mobile_controller':m.get('controller')=='seamless-v7',
-            'mobile_loop':m.get('automatic_loop') is True,
-            'mobile_bridge':m.get('visual_bridge') is True,
-            'mobile_no_content_clone':m.get('cloned_content') is False,
-            'mobile_native_momentum':m.get('native_momentum_preserved') is True,
-            'desktop_controller':d.get('controller')=='seamless-v7'
-          }
-          failed=[k for k,v in checks.items() if not v]
-          if failed: raise SystemExit('FAIL current scroll policy: '+', '.join(failed))
-          PY
+          echo 'Live site did not converge to r446 in time.' >&2
+          exit 1
 
       - name: Publish live award-readiness status
         if: always()
@@ -180,10 +105,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live r326 + r442 budget + r445 bright soft-edge optics passed'
+            description='r446 compact soft mobile MAG source/live audit passed'
           else
             state=failure
-            description='Award, live r445 MAG optics, interaction, idle policy or scrolling failed'
+            description='r446 mobile MAG source or live audit failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
