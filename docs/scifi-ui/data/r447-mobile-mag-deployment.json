@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "revision": "r447",
+  "target": "production",
+  "scope": "mobile-mag-gentle-glow-and-soft-perimeter",
+  "contracts": {
+    "r446_compact_mobile_scale_preserved": true,
+    "outer_glow_reduced": true,
+    "perimeter_softened": true,
+    "mobile_controls_geometry_unchanged": true,
+    "crystal_cue_clear_of_controls": true,
+    "mobile_skip_link_not_visually_stuck": true
+  },
+  "active_optics": "/scifi-ui/styles/formatx-mobile-mag-balance-r447.css?v=20260830-r447-gentle-glow-soft-perimeter",
+  "supersedes": ["r444", "r445", "r446"]
+}
