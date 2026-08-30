@@ -1,12 +1,12 @@
 name: Verify FormatX live award readiness
-run-name: Live award-readiness audit for r326 + r442 budget + r446 compact soft mobile optics
+run-name: Live award-readiness audit for r326 + r442 budget + r447 gentle-glow soft mobile optics
 
 on:
   push:
     branches: [master]
     paths:
       - '.github/workflows/verify-live-award-readiness.yml'
-      - 'docs/scifi-ui/styles/formatx-mobile-mag-balance-r446.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-mag-balance-r447.css'
       - 'docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js'
       - '.github/scripts/validate-mobile-mag-r445.cjs'
   workflow_run:
@@ -22,7 +22,7 @@ jobs:
   verify-live-award-readiness:
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && contains(github.event.head_commit.message, '[verify-live-r446]')) ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[verify-live-r447]')) ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 12
@@ -32,7 +32,7 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Validate r446 source contracts
+      - name: Validate r447 source contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -43,60 +43,60 @@ jobs:
           node .github/scripts/validate-mobile-mag-r445.cjs
           node --check docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js
 
-          OPTICS='docs/scifi-ui/styles/formatx-mobile-mag-balance-r446.css'
+          OPTICS='docs/scifi-ui/styles/formatx-mobile-mag-balance-r447.css'
           LOADER='docs/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js'
           test -s "$OPTICS"
-          grep -Fq 'production-r446-mobile-mag-compact-balanced-soft-perimeter' "$OPTICS"
+          grep -Fq 'production-r447-mobile-mag-gentle-glow-soft-perimeter' "$OPTICS"
           grep -Fq 'scale:.80 .84' "$OPTICS"
           grep -Fq 'scale:.78 .82' "$OPTICS"
-          grep -Fq 'brightness(1.11)' "$OPTICS"
-          grep -Fq 'brightness(1.13)' "$OPTICS"
-          grep -Fq 'contrast(.79)' "$OPTICS"
-          grep -Fq 'contrast(.77)' "$OPTICS"
-          grep -Fq 'blur(.42px)' "$OPTICS"
-          grep -Fq 'blur(.52px)' "$OPTICS"
+          grep -Fq 'brightness(1.05)' "$OPTICS"
+          grep -Fq 'brightness(1.06)' "$OPTICS"
+          grep -Fq 'contrast(.71)' "$OPTICS"
+          grep -Fq 'contrast(.69)' "$OPTICS"
+          grep -Fq 'blur(.60px)' "$OPTICS"
+          grep -Fq 'blur(.68px)' "$OPTICS"
           grep -Fq '.fx-crystal-cue-r318' "$OPTICS"
           grep -Fq '.skip-link:focus-visible' "$OPTICS"
           ! grep -Fq 'scale:.991' "$OPTICS"
-          grep -Fq 'formatx-mobile-mag-balance-r446.css?v=20260830-r446-compact-balanced-soft-perimeter' "$LOADER"
-          grep -Fq 'data-fx-mobile-mag-balance-r446' "$LOADER"
-          grep -Fq "fxMobileMagBalanceR445='superseded-r446'" "$LOADER"
+          grep -Fq 'formatx-mobile-mag-balance-r447.css?v=20260830-r447-gentle-glow-soft-perimeter' "$LOADER"
+          grep -Fq 'data-fx-mobile-mag-balance-r447' "$LOADER"
+          grep -Fq "fxMobileMagBalanceR446='superseded-r447'" "$LOADER"
 
-      - name: Verify deployed r446 assets
+      - name: Verify deployed r447 assets
         if: >-
           github.event_name == 'workflow_dispatch' ||
           github.event_name == 'workflow_run' ||
-          (github.event_name == 'push' && contains(github.event.head_commit.message, '[verify-live-r446]'))
+          (github.event_name == 'push' && contains(github.event.head_commit.message, '[verify-live-r447]'))
         shell: bash
         run: |
           set -euo pipefail
           ORIGIN='https://formatxsuite.com'
-          TMP="$RUNNER_TEMP/formatx-r446-live"
+          TMP="$RUNNER_TEMP/formatx-r447-live"
           mkdir -p "$TMP"
 
           for attempt in $(seq 1 30); do
             cache="${GITHUB_RUN_ID}-${attempt}"
-            home_code="$(curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' -o "$TMP/home.html" -w '%{http_code}' "$ORIGIN/?r446_live=$cache" || true)"
-            optics_code="$(curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' -o "$TMP/r446.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-mag-balance-r446.css?v=$cache" || true)"
+            home_code="$(curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' -o "$TMP/home.html" -w '%{http_code}' "$ORIGIN/?r447_live=$cache" || true)"
+            optics_code="$(curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' -o "$TMP/r447.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-mag-balance-r447.css?v=$cache" || true)"
             loader_code="$(curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' -o "$TMP/loader.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-mag-surface-sheen-r439.js?v=$cache" || true)"
 
             if [[ "$home_code" == 200 && "$optics_code" == 200 && "$loader_code" == 200 ]] \
-              && grep -Fq 'production-r446-mobile-mag-compact-balanced-soft-perimeter' "$TMP/r446.css" \
-              && grep -Fq 'scale:.80 .84' "$TMP/r446.css" \
-              && grep -Fq 'scale:.78 .82' "$TMP/r446.css" \
-              && grep -Fq 'blur(.42px)' "$TMP/r446.css" \
-              && grep -Fq 'blur(.52px)' "$TMP/r446.css" \
-              && grep -Fq '.fx-crystal-cue-r318' "$TMP/r446.css" \
-              && grep -Fq '.skip-link:focus-visible' "$TMP/r446.css" \
-              && grep -Fq 'formatx-mobile-mag-balance-r446.css?v=20260830-r446-compact-balanced-soft-perimeter' "$TMP/loader.js" \
-              && ! grep -Fq 'scale:.991' "$TMP/r446.css"; then
-              echo 'PASS: live r446 mobile MAG assets converged.'
+              && grep -Fq 'production-r447-mobile-mag-gentle-glow-soft-perimeter' "$TMP/r447.css" \
+              && grep -Fq 'scale:.80 .84' "$TMP/r447.css" \
+              && grep -Fq 'scale:.78 .82' "$TMP/r447.css" \
+              && grep -Fq 'blur(.60px)' "$TMP/r447.css" \
+              && grep -Fq 'blur(.68px)' "$TMP/r447.css" \
+              && grep -Fq '.fx-crystal-cue-r318' "$TMP/r447.css" \
+              && grep -Fq '.skip-link:focus-visible' "$TMP/r447.css" \
+              && grep -Fq 'formatx-mobile-mag-balance-r447.css?v=20260830-r447-gentle-glow-soft-perimeter' "$TMP/loader.js" \
+              && ! grep -Fq 'scale:.991' "$TMP/r447.css"; then
+              echo 'PASS: live r447 mobile MAG assets converged.'
               exit 0
             fi
             sleep 10
           done
 
-          echo 'Live site did not converge to r446 in time.' >&2
+          echo 'Live site did not converge to r447 in time.' >&2
           exit 1
 
       - name: Publish live award-readiness status
@@ -109,10 +109,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='r446 compact soft mobile MAG source/live audit passed'
+            description='r447 gentle-glow soft mobile MAG source/live audit passed'
           else
             state=failure
-            description='r446 mobile MAG source or live audit failed'
+            description='r447 mobile MAG source or live audit failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
