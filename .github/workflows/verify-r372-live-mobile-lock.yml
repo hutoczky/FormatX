@@ -1,4 +1,4 @@
-name: Verify R460 primary MAG runtime
+name: Verify R463 primary MAG runtime
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
       - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
       - 'docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js'
@@ -20,20 +21,21 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r460:
+  verify-r463:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate R460 source contract
+      - name: Validate R463 source contract
         shell: bash
         run: |
           set -euo pipefail
           CSS='docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
           SHADER='docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
           SOLID='docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js'
+          GOVERNOR='docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js'
           CURRENT='docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
           MOTION='docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
           TOUCH='docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js'
@@ -41,30 +43,38 @@ jobs:
 
           node --check "$SHADER"
           node --check "$SOLID"
+          node --check "$GOVERNOR"
           node --check "$CURRENT"
           node --check "$MOTION"
           node --check "$TOUCH"
           node --check "$MINI"
           node .github/scripts/validate-living-core-r425-source.cjs
 
-          grep -Fq "const VERSION='r460-uniform-solid-glass-soft-mobile-optics'" "$SOLID"
-          grep -Fq "const smoothWeight=mobile?'.992':'.930'" "$SOLID"
-          grep -Fq "glass+=spectral*fresnel*(.76+.48*visualEnergy);" "$SOLID"
-          grep -Fq "organ+=ice*nucleus*(2.02+.62*visualEnergy);" "$SOLID"
-          grep -Fq "fxCoreMobileOpticalBalanceR460=mobile?'soft-nucleus-broad-fresnel-feather':'desktop-material-unchanged'" "$SOLID"
+          grep -Fq "const VERSION='r463-uniform-solid-glass-restrained-award-mobile-optics'" "$SOLID"
+          grep -Fq "const smoothWeight=mobile?'.997':'.930'" "$SOLID"
+          grep -Fq "float fresnel=pow(1.0-facing,2.12);" "$SOLID"
+          grep -Fq "float edge=0.0;" "$SOLID"
+          grep -Fq "fxCoreMobileOpticalBalanceR463=mobile?'narrow-fresnel-soft-edge-restrained-bloom':'desktop-material-unchanged'" "$SOLID"
           grep -Fq "fxCoreOuterNoiseR456='disabled-on-glass-shell'" "$SOLID"
           grep -Fq "fxCoreTriangleEdgesR456='disabled'" "$SOLID"
 
-          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics' "$CURRENT"
+          grep -Fq 'const activeWindowMs=360' "$GOVERNOR"
+          grep -Fq 'state.core?.requestRender?.(6)' "$GOVERNOR"
+          grep -Fq 'heroVisible()' "$GOVERNOR"
+          grep -Fq "fxMobileRenderGovernorRevisionR433='r463-short-burst-strict-tbt'" "$GOVERNOR"
+
+          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics' "$CURRENT"
           grep -Fq 'formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim' "$CURRENT"
           grep -Fq 'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe' "$CURRENT"
+          grep -Fq 'formatx-mobile-render-governor-r426.js?v=20260830-r463-short-burst-strict-tbt' "$CURRENT"
           grep -Fq "cleanupLegacyMagRuntime()" "$CURRENT"
           grep -Fq "fxPrimaryMagOwnerR460='r326-only'" "$CURRENT"
 
-          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r460-primary-controller-clean-runtime' "$MOTION"
-          grep -Fq 'isRetiredMagRuntime' "$MOTION"
-          grep -Fq "fxLegacyMagRuntimeCleanupR460='ready'" "$MOTION"
-          grep -Fq '.fx-crystal-organism-r326-stage' "$MOTION"
+          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r463-award-mobile-optics-strict-tbt' "$MOTION"
+          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics' "$MOTION"
+          ! grep -Fq 'isRetiredMagRuntime' "$MOTION"
+          grep -Fq "fxLegacyMagRuntimeCleanupR460='static-html-clean-r461'" "$MOTION"
+          grep -Fq "fxCoreCriticalPathR422='armed-direct-r326-r463-award-mobile-optics-strict-tbt'" "$MOTION"
 
           grep -Fq "const VERSION='native-r326-touch-r460-controller-tap'" "$TOUCH"
           grep -Fq 'window.FormatXMiniMagR459' "$TOUCH"
@@ -80,38 +90,42 @@ jobs:
           grep -Fq "const REVISION = 'living-luminous-electric-crystal-r454'" "$SHADER"
           grep -Fq 'single-luminous-webgl-material-owner' "$SHADER"
 
-      - name: Verify production serves R460 chain
+      - name: Verify production serves R463 chain
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
         shell: bash
         run: |
           set -euo pipefail
           ORIGIN='https://formatxsuite.com'
           SOLID_URL="$ORIGIN/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js"
+          GOVERNOR_URL="$ORIGIN/scifi-ui/scripts/formatx-mobile-render-governor-r426.js"
           CURRENT_URL="$ORIGIN/scifi-ui/scripts/formatx-current-mag-loader-r422.js"
           MOTION_URL="$ORIGIN/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js"
           TOUCH_URL="$ORIGIN/scifi-ui/scripts/formatx-native-mag-touch-r434.js"
           MINI_URL="$ORIGIN/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js"
           CSS_URL="$ORIGIN/scifi-ui/styles/formatx-core-shapeshifter-r337.css"
-          SOLID_TMP="$RUNNER_TEMP/r460-solid-live.js"
-          CURRENT_TMP="$RUNNER_TEMP/r460-current-live.js"
-          MOTION_TMP="$RUNNER_TEMP/r460-motion-live.js"
-          TOUCH_TMP="$RUNNER_TEMP/r460-touch-live.js"
-          MINI_TMP="$RUNNER_TEMP/r460-mini-live.js"
-          CSS_TMP="$RUNNER_TEMP/r460-optics-live.css"
+          SOLID_TMP="$RUNNER_TEMP/r463-solid-live.js"
+          GOVERNOR_TMP="$RUNNER_TEMP/r463-governor-live.js"
+          CURRENT_TMP="$RUNNER_TEMP/r463-current-live.js"
+          MOTION_TMP="$RUNNER_TEMP/r463-motion-live.js"
+          TOUCH_TMP="$RUNNER_TEMP/r463-touch-live.js"
+          MINI_TMP="$RUNNER_TEMP/r463-mini-live.js"
+          CSS_TMP="$RUNNER_TEMP/r463-optics-live.css"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "R460 live verification $attempt/45"
-            suffix="r460=${GITHUB_RUN_ID}_${attempt}"
+            echo "R463 live verification $attempt/45"
+            suffix="r463=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${SOLID_URL}?${suffix}" -o "$SOLID_TMP" \
+              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${GOVERNOR_URL}?${suffix}" -o "$GOVERNOR_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CURRENT_URL}?${suffix}" -o "$CURRENT_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MOTION_URL}?${suffix}" -o "$MOTION_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${TOUCH_URL}?${suffix}" -o "$TOUCH_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MINI_URL}?${suffix}" -o "$MINI_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP"; then
-              if grep -Fq "const VERSION='r460-uniform-solid-glass-soft-mobile-optics'" "$SOLID_TMP" \
-                && grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics' "$CURRENT_TMP" \
-                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r460-primary-controller-clean-runtime' "$MOTION_TMP" \
+              if grep -Fq "const VERSION='r463-uniform-solid-glass-restrained-award-mobile-optics'" "$SOLID_TMP" \
+                && grep -Fq "fxMobileRenderGovernorRevisionR433='r463-short-burst-strict-tbt'" "$GOVERNOR_TMP" \
+                && grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260830-r463-restrained-award-optics' "$CURRENT_TMP" \
+                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260830-r463-award-mobile-optics-strict-tbt' "$MOTION_TMP" \
                 && grep -Fq "const VERSION='native-r326-touch-r460-controller-tap'" "$TOUCH_TMP" \
                 && grep -Fq 'formatx:heromagcontrollerrequest' "$MINI_TMP" \
                 && grep -Fq 'production-r460-single-native-webgl-optics-owner-soft-mobile-rim' "$CSS_TMP"; then
@@ -123,9 +137,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves the R460 soft mobile MAG, hero-controller bridge and clean single-R326 runtime chain.'
+          echo 'PASS: production serves the R463 restrained mobile MAG, strict burst governor, hero-controller bridge and clean single-R326 runtime chain.'
 
-      - name: Publish R460 status
+      - name: Publish R463 status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -134,13 +148,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='R460 primary MAG runtime contract passed'
+            description='R463 restrained MAG runtime contract passed'
           else
             state=failure
-            description='R460 primary MAG runtime verification failed'
+            description='R463 primary MAG runtime verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R460 MAG runtime' \
+            -f context='FormatX R463 MAG runtime' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
