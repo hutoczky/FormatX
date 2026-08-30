@@ -1,11 +1,11 @@
 /* FormatX r456 — direct native MAG loader.
-   r326 keeps the native WebGL geometry and living electric material. On phones,
-   r456 smooths only the lighting normal and removes triangle-edge paint before
-   shader compilation so the MAG reads as one solid glass volume, not a mesh. */
+   R326 owns native WebGL geometry and living inner material. R456 is armed on
+   every device before shader compilation so the outer glass shell stays one
+   continuous material without VRAM-like facet/noise breakup. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r456-solid-mobile-glass-idle-zero';
+const VERSION='direct-r326-r456-uniform-solid-glass-idle-zero';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='r456-static-render-explicit-interaction';
@@ -14,7 +14,7 @@ root.dataset.fxCurrentMagRuntimeR422='booting';
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
 const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r455-soft-mobile-optics';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
-const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r456-solid-volume-no-mesh';
+const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r436-protected-ui-touch-fallback';
@@ -27,7 +27,7 @@ let started=false;
 // direct-r326-r438-native-soft-edge-restrained-halo-protected-touch
 // direct-r326-r439-clear-facets-periodic-sheen-protected-touch
 // direct-r326-r454-visible-electric-surface-style-first-protected-touch
-// direct-r326-r456-solid-volume-smooth-normal-no-triangle-edges
+// direct-r326-r456-uniform-solid-glass-no-vram-artifact
 // formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart
 
 function addStyle(href,attr){
@@ -126,8 +126,6 @@ function installSoundTouchRecovery(){
 async function start(){
   if(started)return;started=true;
   repairAccessibleNames();installSoundTouchRecovery();
-  // The stage is created only after its layout and single optical owner exist.
-  // On mobile, arm the short-lived shader correction before r326 compiles.
   await Promise.all([
     addStyle(STYLE,'data-fx-current-mag-r422'),
     addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
@@ -137,7 +135,8 @@ async function start(){
   root.dataset.fxCurrentMagStylesR423='ready';
   root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
 
-  if(mobile)await addScript(SOLID_GLASS,'data-fx-mobile-solid-glass-r456');
+  // Arm the uniform-shell hook BEFORE r326 compiles on every device.
+  await addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
   await addScript(RENDERER,'data-fx-current-r326-r422');
   await addScript(NATIVE_TOUCH,'data-fx-native-mag-touch-r434');
   await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
@@ -147,20 +146,20 @@ async function start(){
   root.dataset.fxCurrentMagOpticsR439='retired-no-css-sheen';
   root.dataset.fxCurrentMagOpticsR440='superseded-by-r454-visible-native-material';
   root.dataset.fxCurrentMagOpticsR454='single-luminous-native-electric-surface-owner';
-  root.dataset.fxCurrentMagOpticsR456=mobile?'solid-volume-smooth-normal-no-triangle-edges':'desktop-r454-unchanged';
+  root.dataset.fxCurrentMagOpticsR456='uniform-solid-glass-shell-no-vram-artifact';
   root.dataset.fxCurrentMagSchedulerR441='interaction-bursts-idle-zero-frame';
 
   const rendererReady=await waitForRendererReady();
   if(rendererReady){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-    root.dataset.fxCoreRendererSelection=mobile?'r326-direct-r456-solid-mobile-glass':'r326-direct-r454-primary';
-    root.dataset.fxCoreReferenceLockLoad=mobile?'ready-v69-r456':'ready-v69-r454';
+    root.dataset.fxCoreRendererSelection=mobile?'r326-direct-r456-uniform-mobile-glass':'r326-direct-r456-uniform-desktop-glass';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r456';
     root.dataset.fxCurrentMagRuntimeR422='ready';
   }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
 
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r456-style-first-solid-volume-no-mesh-idle-zero-native-touch'
-    :'direct-r326-r454-style-first-electric-sweep-idle-zero-desktop';
+    ?'direct-r326-r456-uniform-shell-idle-zero-native-touch'
+    :'direct-r326-r456-uniform-shell-idle-zero-desktop';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady}}));
 }
 
