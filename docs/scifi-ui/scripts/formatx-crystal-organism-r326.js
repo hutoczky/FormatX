@@ -96,11 +96,12 @@
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
   }
 
-  /* One closed topology owns both endpoints. The shader interpolates the
-     actual positions and normals, so no CSS scaling or 2D silhouette is used. */
+  /* One closed topology owns both endpoints. r442 uses a lighter phone mesh:
+     the silhouette and morph remain fully 3D, but the larger native facets need
+     fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 18 : mobile ? 28 : 30;
-    const longitudeSegments = auditMode ? 32 : mobile ? 56 : 56;
+    const latitudeSegments = auditMode ? 18 : mobile ? 18 : 30;
+    const longitudeSegments = auditMode ? 32 : mobile ? 36 : 56;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -434,9 +435,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:mobile?1.75:1.55;
+      const cap=auditMode?1:mobile?1.45:1.55;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:mobile?980000:1050000;
+      const budget=auditMode?390000:mobile?720000:1050000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -451,7 +452,8 @@
     function blocked(){return disposed||contextLost||document.hidden||!visible||paused||root.dataset.fxReferenceMotionPaused==='true';}
     function schedule(frames=1){
       if(blocked())return;
-      burstFrames=Math.max(burstFrames,Math.min(24,Math.max(1,frames)));
+      const frameCap=mobile?8:24;
+      burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       if(!raf){last=performance.now();raf=requestAnimationFrame(frame);}
     }
     function boost(value=.84,frames=8){
@@ -478,7 +480,7 @@
       if(/mag-button|api|keyboard|core-tap/.test(source))shapeLockUntil=performance.now()+7600;
       if(reduced.matches)morph=targetMorph;
       publishShape(source);
-      boost(changed?1.04:.68,changed?16:4);
+      boost(changed?1.04:.68,changed?8:3);
       if(changed&&announce)dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{
         shape:shapeName(next),source,revision:'r413',renderer:VERSION,geometry:'closed-3d-volume'
       }}));
@@ -490,13 +492,12 @@
       targetRotationX=clamp(targetRotationX+x,-1.02,1.02);
       targetRotationY+=y;
       root.dataset.fxCoreRotationSource=source;
-      boost(.84,8);
+      boost(.84,mobile?5:8);
     }
 
-    /* r441: the old heartbeat-and-interaction-bursts-no-idle-loop-r326
-       contract is retained as a source compatibility marker, but native WebGL
-       no longer wakes itself periodically. r440/r439 CSS sheen supplies the
-       cheap ambient surface life; WebGL renders only on explicit interaction
+    /* r441 compatibility marker: heartbeat-and-interaction-bursts-no-idle-loop-r326.
+       Native WebGL does not wake itself periodically. Ambient life is supplied
+       by the cheap bounded CSS sheen; WebGL renders only on explicit interaction
        or semantic site-state changes. */
     function scheduleHeartbeat(){
       clearTimeout(heartbeatTimer);heartbeatTimer=0;
@@ -545,11 +546,17 @@
       gl.uniform1f(uniforms.uAspect,aspect);
       gl.uniform1f(uniforms.uSiteProgress,siteProgress);
 
+      /* r442 phone budget: desktop keeps the three-pass optical depth. Mobile
+         drops the extra front-cull outer-glow pass, which both reduces the bloom
+         seen in the physical phone capture and removes roughly one third of the
+         expensive fragment work per interaction frame. */
       gl.depthMask(false);
-      gl.cullFace(gl.FRONT);
       gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
-      gl.uniform1f(uniforms.uLayer,0);
-      gl.drawArrays(gl.TRIANGLES,0,geometry.count);
+      if(!mobile){
+        gl.cullFace(gl.FRONT);
+        gl.uniform1f(uniforms.uLayer,0);
+        gl.drawArrays(gl.TRIANGLES,0,geometry.count);
+      }
       gl.cullFace(gl.BACK);
       gl.uniform1f(uniforms.uLayer,1);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
@@ -580,7 +587,7 @@
       cinematic.shape=shapeName();
       cinematic.rotation=[rotationX,rotationY,rotationZ];
       cinematic.siteProgress=siteProgress;
-      publishShape('burst-settle-r441');
+      publishShape('burst-settle-r442');
       root.dataset.fxCoreIdleRenderR441='zero-frame';
     }
 
@@ -597,15 +604,15 @@
       return{x:clamp(((event.clientX-rect.left)/rect.width-.5)*2,-1,1),y:clamp(-((event.clientY-rect.top)/rect.height-.5)*2,-1,1)};
     }
     function onMove(event){if(event.pointerType==='touch')return;const q=point(event);if(!q)return;tx=q.x;ty=q.y;targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.12);schedule(2);}
-    function onDown(event){const q=point(event);if(q){tx=q.x;ty=q.y;}shapeLockUntil=performance.now()+4800;boost(.82,6);}
-    function onLeave(){tx=0;ty=0;targetEnergy=IDLE_ENERGY;targetBreath=.12;schedule(3);}
+    function onDown(event){const q=point(event);if(q){tx=q.x;ty=q.y;}shapeLockUntil=performance.now()+4800;boost(.82,mobile?4:6);}
+    function onLeave(){tx=0;ty=0;targetEnergy=IDLE_ENERGY;targetBreath=.12;schedule(2);}
     function pulse(detail){
       if(Number.isFinite(detail?.x))tx=clamp(detail.x,-1,1);
       if(Number.isFinite(detail?.y))ty=clamp(detail.y,-1,1);
       const drag=detail?.phase==='drag';
       targetEnergy=Math.max(targetEnergy,drag ? .58 : .88);
       targetBreath=Math.max(targetBreath,drag ? .58 : .92);
-      schedule(drag?4:8);
+      schedule(drag?(mobile?2:4):(mobile?5:8));
     }
     function onCoreInteraction(event){
       const detail=event.detail||{};pulse(detail);
@@ -624,7 +631,7 @@
         if(candidate&&!candidate.moved&&performance.now()-candidate.started<720)toggleShape('core-tap');
       }else if(detail.phase==='cancel')tapCandidate=null;
     }
-    function onPause(event){paused=event.detail?.paused===true||root.dataset.fxReferenceMotionPaused==='true';if(!paused)schedule(2);}
+    function onPause(event){paused=event.detail?.paused===true||root.dataset.fxReferenceMotionPaused==='true';if(!paused)schedule(1);}
     function onScroll(){
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
@@ -633,7 +640,7 @@
         targetSiteProgress=clamp(scrollY/range,0,1);
         root.dataset.fxCoreSiteProgress=targetSiteProgress.toFixed(3);
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12);
-        schedule(2);
+        schedule(mobile?1:2);
       });
     }
     function signalShape(shape,source){
@@ -652,20 +659,20 @@
     listen(window,'formatx:organismpanelopen',()=>signalShape('sphere','organism-listening'),{passive:true});
     listen(window,'formatx:organismresponse',()=>signalShape('crystal','organism-response'),{passive:true});
     listen(window,'formatx:open-live-os',()=>signalShape('sphere','live-os-open'),{passive:true});
-    listen(window,'formatx:loop',()=>{signalShape('crystal','site-loop');boost(.92,6);},{passive:true});
-    listen(window,'formatx:menustatechange',event=>{boost(event.detail?.open ? .76 : .52,4);},{passive:true});
-    listen(window,'formatx:languagechange',()=>boost(.62,3),{passive:true});
-    listen(document,'visibilitychange',()=>{if(!document.hidden)schedule(2);},{passive:true});
+    listen(window,'formatx:loop',()=>{signalShape('crystal','site-loop');boost(.92,mobile?4:6);},{passive:true});
+    listen(window,'formatx:menustatechange',event=>{boost(event.detail?.open ? .76 : .52,mobile?2:4);},{passive:true});
+    listen(window,'formatx:languagechange',()=>boost(.62,mobile?2:3),{passive:true});
+    listen(document,'visibilitychange',()=>{if(!document.hidden)schedule(1);},{passive:true});
     listen(document,'click',event=>{
       if(!(event.target instanceof Element))return;
       const action=event.target.closest('a,button,[role="button"]');
       if(!action||action.closest('.fx-reference-mag-button'))return;
       if(action.matches('.fx-reference-ask,[data-fx-organism-question]'))signalShape('sphere','site-question');
       else if(action.matches('a[href*="download"],[data-release-download]'))signalShape('crystal','release-action');
-      boost(action.matches('a[href*="download"],[data-release-download]') ? .92 : .62,4);
+      boost(action.matches('a[href*="download"],[data-release-download]') ? .92 : .62,mobile?2:4);
     },{passive:true});
     listen(document,'focusin',event=>{
-      if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))boost(.48,2);
+      if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))boost(.48,mobile?1:2);
     },{passive:true});
     listen(canvas,'webglcontextlost',event=>{
       event.preventDefault();contextLost=true;if(raf)cancelAnimationFrame(raf);raf=0;
@@ -675,11 +682,11 @@
       root.dataset.fxCrystalOrganismR326='restoring';destroy();requestAnimationFrame(()=>boot());
     });
 
-    const ro=new ResizeObserver(()=>{if(resize())schedule(2);});
+    const ro=new ResizeObserver(()=>{if(resize())schedule(1);});
     ro.observe(stage);
     const io=new IntersectionObserver(entries=>{
       visible=entries.some(entry=>entry.isIntersecting);
-      if(visible)schedule(2);else if(raf){cancelAnimationFrame(raf);raf=0;}
+      if(visible)schedule(1);else if(raf){cancelAnimationFrame(raf);raf=0;}
     },{rootMargin:'120px'});
     io.observe(stage);
     const sectionShapes={hero:'crystal',experience:'sphere',capabilities:'crystal',pricing:'sphere',system:'crystal',resources:'sphere'};
@@ -689,7 +696,7 @@
       if(!id||id===activeOrgan)return;
       activeOrgan=id;root.dataset.fxCoreActiveOrgan=id;cinematic.activeOrgan=id;
       if(sectionShapes[id])signalShape(sectionShapes[id],'site-section');
-      boost(.54,3);
+      boost(.54,mobile?2:3);
     },{rootMargin:'-22% 0px -54% 0px',threshold:[0,.15,.35,.6]});
     document.querySelectorAll('main > section[id],main section.scene[id]').forEach(section=>organObserver.observe(section));
 
@@ -755,6 +762,7 @@
     root.dataset.fxCoreContexts='1';
     root.dataset.fxCoreScheduler='interaction-bursts-idle-zero-frame-r441';
     root.dataset.fxCoreSchedulerCompatibility='heartbeat-and-interaction-bursts-no-idle-loop-r326';
+    root.dataset.fxCoreSchedulerR442='mobile-two-pass-lower-density-idle-zero';
     root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';
     root.dataset.fxCoreCompositionRevisionR326='new-crystal-organism-no-legacy-fallback';
     root.dataset.fxCoreMobileVisualR326=mobile?'soft-translucent-organic-rim':'desktop-translucent-organic-rim';
@@ -763,9 +771,10 @@
     root.dataset.fxCoreVisualR424=mobile?'sharp-translucent-organic-caustics':'desktop-sharp-organic-caustics';
     root.dataset.fxCoreMobileLightingR374=mobile?'idle-visible-high-density-r424':'desktop-high-contrast-volume-r424';
     root.dataset.fxCoreOpticsR424='native-webgl-filmic-caustics-no-bitmap-no-css-core';
-    root.dataset.fxCoreMobileResolutionR424=mobile?'dpr-cap-1.75-pixel-budget-980k':'desktop-dpr-cap-1.55';
+    root.dataset.fxCoreMobileResolutionR424=mobile?'dpr-cap-1.45-pixel-budget-720k':'desktop-dpr-cap-1.55';
     root.dataset.fxCoreMobileOpticsR435=mobile?'soft-rim-following-visible-heart':'desktop-preserved-r435';
     root.dataset.fxCoreMobileOpticsR440=mobile?'restrained-bloom-native-soft-rim':'desktop-preserved-r440';
+    root.dataset.fxCoreMobilePerformanceR442=mobile?'18x36-two-pass-single-startup-frame':'desktop-three-pass-preserved';
     root.dataset.fxGpuCapability=webgl2?'webgl2':'webgl1';
     root.dataset.fxCoreReal3dTargetFps='interaction-60-idle-zero-r441';
     root.dataset.fxCoreIdleRenderR441='zero-frame';
@@ -773,7 +782,7 @@
     root.dataset.fxCoreReal3dFps='60';
 
     publishShape('initial');
-    schedule(3);
+    schedule(1);
     scheduleHeartbeat();
     scheduleAutonomousMorph();
     dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
