@@ -1,0 +1,90 @@
+name: Verify R459 Mini MAG live production
+run-name: R459 live Mini MAG verification for ${{ github.sha }}
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js'
+      - 'docs/scifi-ui/styles/formatx-mini-mag-assistant-r459.css'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
+      - '.github/workflows/verify-r459-live-mini-mag.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: r459-live-mini-mag-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-r459:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Verify live Mini MAG assets and primary MAG preservation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          origin='https://formatxsuite.com'
+          mini_js="$origin/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r459-live-proof"
+          mini_css="$origin/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-live-proof"
+          loader_js="$origin/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r459-live-proof"
+          motion_js="$origin/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260830-r459-live-proof"
+
+          for attempt in $(seq 1 36); do
+            echo "R459 live verification attempt $attempt/36"
+            tmp="$(mktemp -d)"
+            js_code="$(curl -sS --max-time 30 -o "$tmp/mini.js" -w '%{http_code}' "$mini_js" || true)"
+            css_code="$(curl -sS --max-time 30 -o "$tmp/mini.css" -w '%{http_code}' "$mini_css" || true)"
+            loader_code="$(curl -sS --max-time 30 -o "$tmp/loader.js" -w '%{http_code}' "$loader_js" || true)"
+            motion_code="$(curl -sS --max-time 30 -o "$tmp/motion.js" -w '%{http_code}' "$motion_js" || true)"
+
+            if [[ "$js_code" == 200 && "$css_code" == 200 && "$loader_code" == 200 && "$motion_code" == 200 ]]; then
+              if grep -q "fxMiniMagPrimaryHeroR459='preserved-native-webgl'" "$tmp/mini.js" \
+                && grep -q 'window.FormatXMiniMagR459' "$tmp/mini.js" \
+                && grep -q "const SECTION_IDS=\['hero','experience','capabilities','pricing','system','resources'\]" "$tmp/mini.js" \
+                && grep -q '.fx-mini-mag-assistant-r459' "$tmp/mini.css" \
+                && grep -q 'position: fixed' "$tmp/mini.css" \
+                && grep -q "const VERSION='direct-r326-r459-persistent-mini-mag'" "$tmp/loader.js" \
+                && grep -q 'formatx-mini-mag-assistant-r459.js?v=20260830-r459-persistent-site-controller' "$tmp/loader.js" \
+                && grep -q 'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface' "$tmp/loader.js" \
+                && grep -q 'formatx-current-mag-loader-r422.js?v=20260830-r459-primary-plus-mini-mag' "$tmp/motion.js" \
+                && grep -q 'formatx-mini-mag-assistant-r459.js?v=20260830-r459-persistent-site-controller' "$tmp/motion.js"; then
+                echo 'PASS: live production serves R459 Mini MAG, fixed companion UI and preserved R326 primary MAG.'
+                rm -rf "$tmp"
+                exit 0
+              fi
+            fi
+
+            echo "codes: mini-js=$js_code mini-css=$css_code loader=$loader_code motion=$motion_code"
+            rm -rf "$tmp"
+            sleep 10
+          done
+
+          echo 'Live production did not converge to R459 Mini MAG within the verification window.' >&2
+          exit 1
+
+      - name: Publish R459 live status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$JOB_STATUS" == success ]]; then
+            state=success
+            description='Live R459 Mini MAG and preserved primary MAG verified'
+          else
+            state=failure
+            description='Live R459 Mini MAG verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX R459 live Mini MAG' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
