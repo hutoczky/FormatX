@@ -79,30 +79,54 @@ jobs:
             assert.ok(!overlap(m,l,2),'MAG header button overlaps language');
             assert.ok(!overlap(l,n,2),'language overlaps menu');
 
-            const runtime=await page.evaluate(()=>({
-              primary:document.documentElement.dataset.fxPrimaryMagOwnerR460,
-              cleanup:document.documentElement.dataset.fxLegacyMagDomCleanupR460,
-              touch:document.documentElement.dataset.fxNativeMagTouchContractR436,
-              bridge:document.documentElement.dataset.fxMiniMagHeroBridgeR460,
-              optics:document.documentElement.dataset.fxCoreMobileOpticalBalanceR460,
-              legacyStages:document.querySelectorAll('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage,#hero .fx-core-mesh3d-stage,#hero .fx-core-fracture3d-stage,#hero .fx-core-reference-v53-stage,#hero .fx-core-mobile-v54-stage,#hero .fx-resilient-core,#hero .fx-premium-core-status,#hero .fx-three-stage-shell,#hero .fx-transcend-shell[data-fx-native-apex="true"]').length,
-              r326Stages:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length
-            }));
-            assert.equal(runtime.primary,'r326-only');
-            assert.equal(runtime.cleanup,'ready');
-            assert.equal(runtime.touch,'direct-r326-stage-protected-ui-controller-tap-drag-safe');
+            const runtime=await page.evaluate(()=>{
+              const legacySelector=[
+                '#hero .fx-core-mobile-v55-stage:not(.fx-crystal-organism-r326-stage)',
+                '#hero .fx-core-r112-stage',
+                '#hero .fx-core-mesh3d-stage',
+                '#hero .fx-core-fracture3d-stage',
+                '#hero .fx-core-reference-v53-stage',
+                '#hero .fx-core-mobile-v54-stage',
+                '#hero .fx-resilient-core',
+                '#hero .fx-premium-core-status',
+                '#hero .fx-three-stage-shell',
+                '#hero .fx-transcend-shell[data-fx-native-apex="true"]'
+              ].join(',');
+              const legacyNodes=[...document.querySelectorAll(legacySelector)].map(node=>({
+                tag:node.tagName,
+                id:node.id||'',
+                className:typeof node.className==='string'?node.className:'',
+                renderer:node.dataset?.renderer||''
+              }));
+              return{
+                primary:document.documentElement.dataset.fxPrimaryMagOwnerR460,
+                cleanup:document.documentElement.dataset.fxLegacyMagDomCleanupR460,
+                touch:document.documentElement.dataset.fxNativeMagTouchContractR436,
+                bridge:document.documentElement.dataset.fxMiniMagHeroBridgeR460,
+                optics:document.documentElement.dataset.fxCoreMobileOpticalBalanceR460,
+                legacyStages:legacyNodes.length,
+                legacyNodes,
+                r326Stages:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
+                r326CompatibilityClasses:[...document.querySelectorAll('#hero .fx-crystal-organism-r326-stage')].map(node=>node.className)
+              };
+            });
+            assert.equal(runtime.primary,'r326-only',JSON.stringify(runtime));
+            assert.equal(runtime.cleanup,'ready',JSON.stringify(runtime));
+            assert.equal(runtime.touch,'direct-r326-stage-protected-ui-controller-tap-drag-safe',JSON.stringify(runtime));
             assert.ok(['ready','handled-live-request','opened-queued-request'].includes(runtime.bridge),JSON.stringify(runtime));
-            assert.equal(runtime.optics,'soft-nucleus-broad-fresnel-feather');
-            assert.equal(runtime.legacyStages,0);
-            assert.equal(runtime.r326Stages,1);
+            assert.equal(runtime.optics,'soft-nucleus-broad-fresnel-feather',JSON.stringify(runtime));
+            assert.equal(runtime.legacyStages,0,'real legacy MAG stages remain: '+JSON.stringify(runtime));
+            assert.equal(runtime.r326Stages,1,'R326 stage ownership is not singular: '+JSON.stringify(runtime));
 
-            // A short tap on the large native MAG must open the persistent site controller.
+            // The current R326 stage intentionally retains the old v55 class as a CSS compatibility alias.
+            // It is not a second renderer and must never be counted as a legacy stage.
+            assert.ok(runtime.r326CompatibilityClasses.every(value=>value.includes('fx-crystal-organism-r326-stage')),JSON.stringify(runtime));
+
             const heroBox=await rect(stage);
             await page.touchscreen.tap(heroBox.cx,heroBox.cy);
             await page.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open==='true',null,{timeout:5000});
             assert.equal(await mini.getAttribute('data-open'),'true','hero MAG tap did not open Mini MAG controller');
 
-            // Close, then drag on the MAG. A drag remains crystal interaction and must not act as a click.
             await page.evaluate(()=>window.FormatXMiniMagR459?.close?.());
             assert.equal(await mini.getAttribute('data-open'),'false');
             const start={x:heroBox.cx-28,y:heroBox.cy};
@@ -113,17 +137,18 @@ jobs:
             await page.waitForTimeout(350);
             assert.equal(await mini.getAttribute('data-open'),'false','MAG drag incorrectly opened site controller');
 
-            // A protected control must remain its own interaction target and not open Mini MAG.
             const pauseBox=await rect(pause);
+            const pausedBefore=await pause.getAttribute('data-paused');
             await page.touchscreen.tap(pauseBox.cx,pauseBox.cy);
             await page.waitForTimeout(180);
             assert.equal(await mini.getAttribute('data-open'),'false','PAUSE tap leaked into hero MAG controller');
-            assert.equal(await pause.getAttribute('data-paused'),'true','PAUSE control did not toggle');
+            const pausedAfter=await pause.getAttribute('data-paused');
+            assert.notEqual(pausedAfter,pausedBefore,'PAUSE control did not toggle');
 
             await page.screenshot({path:'r460-mobile.png',fullPage:false,animations:'allow',timeout:120000});
             await browser.close();
             assert.ok(fs.statSync('r460-mobile.png').size>10000);
-            console.log('PASS: R460 live mobile has one R326 MAG, clean header/controls, softer optics marker, hero tap controller bridge, drag separation and protected controls.');
+            console.log('PASS: R460 live mobile has one R326 MAG, zero real legacy stages, clean header/controls, softer optics marker, hero tap controller bridge, drag separation and protected controls.');
           })().catch(error=>{console.error(error);process.exit(1);});
           JS
           node verify-r460-mobile.cjs
