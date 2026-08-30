@@ -1,17 +1,17 @@
-/* FormatX r436 — direct current MAG loader.
-   r326 remains the production renderer. r435 owns the softer mobile native rim
-   and moving centre light; r436 hardens direct native touch without stealing
-   SOUND, ASK, PAUSE, language or menu interactions. */
+/* FormatX r437 — direct current MAG loader.
+   r326 remains the production renderer. r437 keeps r436 protected native touch
+   while applying the reviewed mobile composite with a tighter glow and softer
+   four-point silhouette. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r436-soft-rim-following-heart-protected-native-touch';
+const VERSION='direct-r326-r437-restrained-halo-soft-edge-protected-native-touch';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
-const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r435-soft-rim-following-heart';
+const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r437-restrained-halo-soft-edge';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r435-following-visible-heart';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
@@ -133,19 +133,20 @@ async function start(){
   await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
   root.dataset.fxCurrentMagTouchBootstrapR435='native-owner-installed-before-ready-check';
   root.dataset.fxCurrentMagTouchBootstrapR436='protected-owner-and-touch-fallback-installed';
+  root.dataset.fxCurrentMagOpticsR437='restrained-halo-soft-edge-mobile-review';
 
   const rendererReady=await waitForRendererReady();
   if(rendererReady){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-    root.dataset.fxCoreRendererSelection='r326-direct-r436-primary';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r436';
+    root.dataset.fxCoreRendererSelection='r326-direct-r437-primary';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r437';
     root.dataset.fxCurrentMagRuntimeR422='ready';
   }else{
     root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
   }
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r436-idle-zero-frame-soft-rim-following-heart-protected-native-touch'
-    :'direct-r326-r436-cross-device-header';
+    ?'direct-r326-r437-idle-zero-frame-restrained-halo-soft-edge-protected-native-touch'
+    :'direct-r326-r437-cross-device-header';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady}}));
 }
 
