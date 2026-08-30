@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "revision": "r448",
+  "target": "production",
+  "scope": "mobile-mag-visible-balanced-soft-defined-perimeter",
+  "contracts": {
+    "compact_mobile_scale_preserved": true,
+    "body_luminance_restored": true,
+    "facet_definition_restored": true,
+    "perimeter_remains_softened": true,
+    "outer_glow_remains_restrained": true,
+    "mobile_controls_geometry_unchanged": true,
+    "crystal_cue_clear_of_controls": true,
+    "mobile_skip_link_not_visually_stuck": true
+  },
+  "active_optics": "/scifi-ui/styles/formatx-mobile-mag-balance-r448.css?v=20260830-r448-visible-balanced-soft-defined",
+  "supersedes": ["r444", "r445", "r446", "r447"]
+}
