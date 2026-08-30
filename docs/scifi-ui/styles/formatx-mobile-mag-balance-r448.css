@@ -1,0 +1,80 @@
+/* FormatX r448 — phone-reviewed visible MAG with controlled edge definition.
+   r446 was slightly over-lit and too crisp at the perimeter, while r447 pushed
+   the body too far into the black background. r448 keeps the compact geometry,
+   restores readable glass/facet luminance, and sharpens only enough to recover
+   the silhouette without returning to a razor-cut neon edge. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
+  html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.94!important;
+    scale:.80 .84!important;
+    transform-origin:50% 48%!important;
+    image-rendering:auto!important;
+    filter:
+      brightness(1.10)
+      contrast(.75)
+      saturate(1.01)
+      blur(.54px)
+      drop-shadow(0 0 3px rgba(112,222,255,.017))
+      drop-shadow(0 0 10px rgba(92,88,255,.007))!important;
+    -webkit-filter:
+      brightness(1.10)
+      contrast(.75)
+      saturate(1.01)
+      blur(.54px)
+      drop-shadow(0 0 3px rgba(112,222,255,.017))
+      drop-shadow(0 0 10px rgba(92,88,255,.007))!important;
+  }
+
+  html:root:root:root body.living-architecture #hero#hero .hero-space > .fx-crystal-cue-r318 {
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+
+  html:root:root body .skip-link,
+  html:root:root body .skip-link:focus,
+  html:root:root body .skip-link:focus-visible {
+    position:fixed!important;
+    top:-9999px!important;
+    left:-9999px!important;
+    width:1px!important;
+    height:1px!important;
+    min-width:1px!important;
+    min-height:1px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    clip:rect(0 0 0 0)!important;
+    clip-path:inset(50%)!important;
+    white-space:nowrap!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    transform:none!important;
+    translate:none!important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture.living-architecture #hero#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.95!important;
+    scale:.78 .82!important;
+    transform-origin:50% 48%!important;
+    filter:
+      brightness(1.11)
+      contrast(.74)
+      saturate(1.015)
+      blur(.58px)
+      drop-shadow(0 0 3px rgba(112,222,255,.016))
+      drop-shadow(0 0 9px rgba(92,88,255,.006))!important;
+    -webkit-filter:
+      brightness(1.11)
+      contrast(.74)
+      saturate(1.015)
+      blur(.58px)
+      drop-shadow(0 0 3px rgba(112,222,255,.016))
+      drop-shadow(0 0 9px rgba(92,88,255,.006))!important;
+  }
+}
+
+/* production-r448-mobile-mag-visible-balanced-soft-defined-perimeter */
