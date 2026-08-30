@@ -66,7 +66,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     if (!baseReady) return false;
     return expectMobile
       ? root.dataset.fxCoreMobileSurfaceR456 === 'r456-solid-volume-smooth-normal-no-triangle-edges'
-      : root.dataset.fxCoreMobileSurfaceR456 === 'desktop-bypass';
+      : !root.dataset.fxCoreMobileSurfaceR456;
   }, isMobile, { timeout: 60000 });
 
   await page.evaluate(() => window.FormatXCoreMobileV69.requestRender(3));
@@ -176,7 +176,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.equal(state.solidScriptCount, 1, JSON.stringify(state));
     assert.match(state.filter, /blur\((?:0\.35|\.35)px\)/, state.filter);
   } else {
-    assert.equal(state.mobileSurface, 'desktop-bypass', JSON.stringify(state));
+    assert.equal(state.mobileSurface, '', JSON.stringify(state));
     assert.equal(state.solidScriptCount, 0, JSON.stringify(state));
     assert.equal(state.loaderOptics, 'desktop-r454-unchanged', JSON.stringify(state));
     assert.equal(state.rendererSelection, 'r326-direct-r454-primary', JSON.stringify(state));
