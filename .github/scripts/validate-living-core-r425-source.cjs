@@ -16,6 +16,7 @@ const renderer = read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const solidGlass = read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js');
 const directLoader = read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const motionLoader = read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
+const nativeTouch = read('docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js');
 const miniAssistant = read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
 const miniStyle = read('docs/scifi-ui/styles/formatx-mini-mag-assistant-r459.css');
 const mobileLoader = read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
@@ -47,7 +48,7 @@ has(renderer, [
   'r454-dpr-cap-1.75-pixel-budget-920k',
   '18x36-two-pass-intermittent-pulse-idle-zero',
   'heartbeat-and-interaction-bursts-no-idle-loop-r326'
-], 'R454 primary hero renderer contract');
+], 'R454/R460 primary hero renderer contract');
 assert.match(renderer, /surfacePulseTimer=setTimeout/);
 assert.match(renderer, /if\(disposed\|\|reduced\.matches\)return/);
 assert.match(renderer, /mobile\?5400:4900/);
@@ -56,66 +57,96 @@ assert.match(renderer, /gl\.uniform1f\(uniforms\.uSurfacePulse,surfacePulse\)/);
 assert.doesNotMatch(renderer, /new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
 
 has(solidGlass, [
-  "const VERSION='r456-uniform-solid-glass-no-vram-artifact'",
-  "const smoothWeight=mobile?'.985':'.930'",
+  "const VERSION='r460-uniform-solid-glass-soft-mobile-optics'",
+  "const smoothWeight=mobile?'.992':'.930'",
+  "const specPowerA=mobile?'26.0':'36.0'",
+  "const specPowerB=mobile?'17.0':'22.0'",
+  "const specGainB=mobile?'.44':'.64'",
   "const vertexNeedle='vec3 normal=normalize(mix(aCrystalNormal,aSphereNormal,morph));'",
   'crystalSmoothNormal',
   'mix(aCrystalNormal,crystalSmoothNormal,${smoothWeight})',
   "edgePattern,'float edge=0.0;'",
   "next=next.replace(facetPulse,'float facetPulse=.5;')",
-  "float hue=.5+.5*sin(vLocal.y*2.10+vLocal.x*1.35+vLocal.z*.85+uSiteProgress*2.0+uTime*.035);",
   "glass+=vec3(.025,.22,.50)*.42;",
   "glass+=spectral*veins*.10*fresnel;",
   "glass+=spectral*membrane*.055*fresnel;",
-  "glass+=spectral*fresnel*(.92+.62*visualEnergy);",
-  "organ+=ice*nucleus*(2.36+.78*visualEnergy);",
-  "glass+=ice*(rings*.30+heart*.12+nucleus*.44);",
-  "fxCoreMobileOpticalBalanceR458=mobile?'restrained-nucleus-soft-fresnel-rim':'desktop-material-unchanged'",
+  "glass+=spectral*fresnel*(.76+.48*visualEnergy);",
+  "organ+=ice*nucleus*(2.02+.62*visualEnergy);",
+  "glass+=ice*(rings*.27+heart*.10+nucleus*.34);",
+  "fxCoreMobileOpticalBalanceR460=mobile?'soft-nucleus-broad-fresnel-feather':'desktop-material-unchanged'",
   "fxCoreOuterNoiseR456='disabled-on-glass-shell'",
   "fxCoreInnerLifeR456='preserved'",
   "fxCoreTriangleEdgesR456='disabled'",
   "fxCoreShaderHookR456='released-after-r326-compile'"
-], 'R456/R458 uniform glass and restrained phone optics');
+], 'R460 uniform glass and softer phone optics');
 assert.doesNotMatch(solidGlass, /drawImage|createImageBitmap|new\s+Image|canvas\.style|style\.setProperty/);
 
 has(directLoader, [
   'formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag',
-  'formatx-core-shapeshifter-r337.css?v=20260830-r458-restrained-center-soft-rim',
+  'formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim',
   'formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller',
-  'formatx-mini-mag-assistant-r459.js?v=20260830-r459-persistent-site-controller',
-  'formatx-mobile-solid-glass-r456.js?v=20260830-r458-restrained-nucleus-fresnel',
+  'formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge',
+  'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
-  'formatx-native-mag-touch-r434.js?v=20260830-r436-protected-ui-touch-fallback',
+  'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe',
   'formatx-mobile-render-governor-r426.js?v=20260830-r433-settle-after-native-morph',
-  'direct-r326-r459-persistent-mini-mag',
+  'direct-r326-r460-primary-controller-clean-runtime',
+  "cleanupLegacyMagRuntime()",
+  "fxLegacyMagDomCleanupR460='ready'",
+  "fxPrimaryMagOwnerR460='r326-only'",
   "addStyle(MINI_STYLE,'data-fx-mini-mag-assistant-r459')",
   "void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459')",
   "await addScript(SOLID_GLASS,'data-fx-solid-glass-r456')",
   "fxMiniMagBootstrapR459='requested-alongside-primary-mag'",
-  'direct-r326-r459-primary-plus-mini-native-touch',
-  'direct-r326-r459-primary-plus-mini-desktop'
-], 'R459 primary MAG plus persistent Mini MAG loader');
+  'direct-r326-r460-primary-controller-native-touch',
+  'direct-r326-r460-primary-controller-desktop'
+], 'R460 primary MAG plus persistent controller loader');
 assert.doesNotMatch(directLoader, /formatx-mag-surface-sheen-r439|\bSHEEN\b/);
 
 has(motionLoader, [
   'single-language-toggle.js?v=20260830-r429-initial-cross-device-header',
-  'formatx-current-mag-loader-r422.js?v=20260830-r459-primary-plus-mini-mag',
-  'formatx-mobile-solid-glass-r456.js?v=20260830-r458-restrained-nucleus-fresnel',
+  'formatx-current-mag-loader-r422.js?v=20260830-r460-primary-controller-clean-runtime',
+  'formatx-mobile-solid-glass-r456.js?v=20260830-r460-soft-mobile-optics',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
-  'formatx-core-shapeshifter-r337.css?v=20260830-r458-restrained-center-soft-rim',
-  'formatx-mini-mag-assistant-r459.js?v=20260830-r459-persistent-site-controller',
+  'formatx-core-shapeshifter-r337.css?v=20260830-r460-soft-mobile-rim',
+  'formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge',
   'formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller',
+  'isRetiredMagRuntime',
+  'formatx-premium-finish',
+  'formatx-live-heartbeat-r155',
+  'formatx-signature-system-r185',
+  'formatx-seamless-enforcer-r159',
+  'formatx-living-energy-r168',
+  'formatx-desktop-apex-loader-r224',
+  "spec.remove()",
+  "fxLegacyMagRuntimeCleanupR460='ready'",
+  "fxLegacyMagStyleCleanupR460='ready'",
+  '.fx-crystal-organism-r326-stage',
   "warmAsset(MINI_ASSISTANT,'script')",
   "warmAsset(MINI_STYLE,'style')",
   "fxMiniMagWarmR459='ready-persistent-site-controller'",
-  'armed-direct-r326-r459-primary-plus-mini-prewarmed',
-  '.fx-mini-mag-assistant-r459',
+  'armed-direct-r326-r460-primary-controller-clean',
   'scheduleCriticalOwners()'
-], 'R459 prewarmed primary + Mini MAG critical path');
+], 'R460 clean prewarmed primary + controller critical path');
+
+has(nativeTouch, [
+  "const VERSION='native-r326-touch-r460-controller-tap'",
+  'const TAP_DISTANCE=14',
+  'const TAP_DURATION=520',
+  'window.FormatXMiniMagR459',
+  "dispatchEvent(new CustomEvent('formatx:heromagcontrollerrequest'",
+  'finishTap(',
+  'clickStage(',
+  "fxHeroMagControllerR460='ready'",
+  'direct-r326-stage-protected-ui-controller-tap-drag-safe'
+], 'R460 full-size MAG site-controller bridge');
 
 has(miniAssistant, [
   "const SECTION_IDS=['hero','experience','capabilities','pricing','system','resources']",
   "const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller'",
+  "addEventListener('formatx:heromagcontrollerrequest'",
+  'pendingHeroRequest',
+  "fxMiniMagHeroBridgeR460='ready'",
   "clickButton('.fx-reference-ask')",
   "clickButton('#menu-toggle,.fx-reference-menu-button')",
   "clickButton('.fx-three-sound')",
@@ -128,7 +159,7 @@ has(miniAssistant, [
   'window.FormatXMiniMagR459={',
   "fxMiniMagPrimaryHeroR459='preserved-native-webgl'",
   "formatx:minimagready"
-], 'R459 persistent site-control actions');
+], 'R459/R460 persistent site-control actions and hero bridge');
 assert.doesNotMatch(miniAssistant, /getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext|requestAnimationFrame\s*\(\s*function/);
 
 has(miniStyle, [
@@ -165,15 +196,15 @@ has(mobileReference, [
 ], 'R458 semantic-only mobile reference runtime');
 
 has(optics, [
-  'brightness(1.08)',
-  'contrast(.92)',
-  'saturate(1.18)',
-  'blur(.62px)',
-  'drop-shadow(0 0 1px rgba(126,239,255,.04))',
-  'drop-shadow(0 0 3px rgba(82,91,255,.02))',
-  'opacity: .98 !important',
-  'production-r458-single-native-webgl-optics-owner-soft-mobile-rim'
-], 'R458 restrained mobile phone optics');
+  'brightness(1.01)',
+  'contrast(.86)',
+  'saturate(1.10)',
+  'blur(.90px)',
+  'drop-shadow(0 0 1px rgba(126,239,255,.025))',
+  'drop-shadow(0 0 2px rgba(82,91,255,.012))',
+  'opacity: .965 !important',
+  'production-r460-single-native-webgl-optics-owner-soft-mobile-rim'
+], 'R460 softer mobile phone optics');
 has(optics, [
   'brightness(1.36)',
   'contrast(1.18)',
@@ -223,4 +254,4 @@ assert.doesNotMatch(worker, /formatx-mobile-recovery\.js|formatx-core-mechanical
 assert.doesNotMatch(awardRuntime, /formatx-crystal-portal-r318|ensureCrystalSurface|formatx-mag-surface-sheen-r439/);
 assert.doesNotMatch(regression, /fx-core-r317|fx-core-organic-form-r327/);
 
-console.log('PASS: R459 persistent Mini MAG controls preserve the R454 hero WebGL MAG, R458 mobile optics remain restrained, and no second renderer is introduced.');
+console.log('PASS: R460 keeps one R326 hero WebGL MAG, softens mobile optics, routes hero taps to the R459 controller and retires superseded MAG runtimes from the active path.');
