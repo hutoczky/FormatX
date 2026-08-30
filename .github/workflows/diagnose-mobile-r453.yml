@@ -1,0 +1,66 @@
+name: Diagnose r453 mobile first frame
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/diagnose-mobile-r453.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/r453" && cd "$RUNNER_TEMP/r453"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Trace deterministic mobile layout shift
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs >"$RUNNER_TEMP/r453-http.log" 2>&1 &
+          server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && break; sleep .25; done
+          cd "$RUNNER_TEMP/r453"
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const compact = r => r ? {x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1)} : null;
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',colorScheme:'dark'});
+            const page=await context.newPage();
+            const cdp=await context.newCDPSession(page);
+            await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+            await page.addInitScript(()=>{
+              window.__r453=[];
+              const label=n=>n instanceof Element?(n.id?`#${n.id}`:`${n.tagName.toLowerCase()}.${[...n.classList].slice(0,4).join('.')}`):'';
+              new PerformanceObserver(list=>{for(const e of list.getEntries()){
+                if(e.hadRecentInput)continue;
+                window.__r453.push({t:Math.round(e.startTime),v:e.value,s:(e.sources||[]).map(x=>({n:label(x.node),p:x.previousRect?{x:x.previousRect.x,y:x.previousRect.y,w:x.previousRect.width,h:x.previousRect.height}:null,c:x.currentRect?{x:x.currentRect.x,y:x.currentRect.y,w:x.currentRect.width,h:x.currentRect.height}:null}))});
+              }}).observe({type:'layout-shift',buffered:true});
+            });
+            await page.goto('http://127.0.0.1:4178/scifi-ui/index.html',{waitUntil:'domcontentloaded',timeout:45000});
+            async function sample(tag){
+              const s=await page.evaluate(tag=>{
+                const b=q=>{const e=document.querySelector(q);if(!e)return null;const r=e.getBoundingClientRect(),c=getComputedStyle(e);return{x:r.x,y:r.y,w:r.width,h:r.height,d:c.display,o:c.opacity,p:c.position,ord:c.order}};
+                return {tag,t:Math.round(performance.now()),root:{first:document.documentElement.dataset.fxMobileFirstPaintR358||'',layout:document.documentElement.dataset.fxMobileReferenceLayout||'',owner:document.documentElement.dataset.fxControlOwnerR268||document.documentElement.dataset.fxControlOwnerR264||'',core:document.documentElement.dataset.fxCrystalOrganismR326||'',renderer:document.documentElement.dataset.fxCoreRenderer||''},grid:b('#hero>.hero-grid'),space:b('#hero .hero-space'),controls:b('#hero .fx-reference-controls-r204'),copy:b('#hero .hero-copy'),category:b('#hero .fx-category-definition'),title:b('#hero-title'),shifts:window.__r453.slice()};
+              },tag);
+              console.log('R453_SAMPLE',JSON.stringify(s));
+            }
+            await sample('dom');
+            for(const [tag,ms] of [['500',500],['1000',500],['1800',800],['2800',1000],['4000',1200],['5200',1200],['7000',1800],['9000',2000]]){await page.waitForTimeout(ms);await sample(tag);}
+            const final=await page.evaluate(()=>({cls:window.__r453.reduce((a,e)=>a+e.v,0),shifts:window.__r453,links:[...document.querySelectorAll('link[rel="stylesheet"]')].map(x=>({href:x.href,media:x.media,sheet:!!x.sheet}))}));
+            console.log('R453_FINAL',JSON.stringify(final));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
