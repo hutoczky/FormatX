@@ -1,7 +1,6 @@
-/* FormatX r458 — current language, layout and native WebGL MAG critical path.
-   R326 owns the geometry. R456 is prewarmed on every device so the outer glass
-   material compiles without topology/noise breakup before first visible frame.
-   R458 keeps the render-blocking mobile first-paint layer authoritative. */
+/* FormatX r459 — current language, primary MAG and persistent Mini MAG path.
+   R326 owns the hero WebGL geometry. R456/R458 preserves the restrained solid
+   glass material, while R459 prewarms a separate lightweight site controller. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -11,15 +10,17 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r429-initial-cross-device-header';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r456-uniform-shell-no-vram-artifact';
-const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r456-uniform-shell-no-vram-artifact';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r459-primary-plus-mini-mag';
+const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260830-r458-restrained-nucleus-fresnel';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
-const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r457-soft-mobile-edge-bloom';
+const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260830-r458-restrained-center-soft-rim';
+const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r459-persistent-site-controller';
+const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
-if(reduced.matches)root.dataset.fxMotionRuntimeR239='reduced-motion-static-core-r456';
+if(reduced.matches)root.dataset.fxMotionRuntimeR239='reduced-motion-static-core-r459';
 
 const specs=Array.from(template.content.querySelectorAll('script[src]'));
 const deferred=[];
@@ -64,10 +65,13 @@ function warmCriticalOwners(){
   warmAsset(CURRENT_RENDERER,'script');
   warmAsset(CURRENT_STYLE,'style');
   warmAsset(CURRENT_OPTICS,'style');
+  warmAsset(MINI_ASSISTANT,'script');
+  warmAsset(MINI_STYLE,'style');
   warmAsset(FINAL_HEADER,'style');
   root.dataset.fxLanguageCriticalWarmR429='ready';
   root.dataset.fxSolidGlassCriticalWarmR456='ready-all-devices';
-  root.dataset.fxCurrentMagOpticsWarmR457='ready-soft-mobile-edge-bloom';
+  root.dataset.fxCurrentMagOpticsWarmR458='ready-restrained-center-soft-rim';
+  root.dataset.fxMiniMagWarmR459='ready-persistent-site-controller';
 }
 
 function ensureLanguageToggle(){
@@ -109,7 +113,7 @@ function ensureCurrentMag(){
   if(currentRequested||document.querySelector('script[data-fx-current-mag-loader-r422]'))return;
   currentRequested=true;
   const script=document.createElement('script');script.src=CURRENT_MAG;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
-  root.dataset.fxMotionRuntimeMobileCoreR313='direct-r326-r456-uniform-shell-prewarmed';
+  root.dataset.fxMotionRuntimeMobileCoreR313='direct-r326-r459-primary-plus-mini-prewarmed';
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
 
@@ -122,14 +126,14 @@ function scheduleCriticalOwners(){
 function reservedInteraction(event){
   if(root.dataset.fxOrganismThought==='open')return true;
   const target=event?.target instanceof Element?event.target:null;
-  return Boolean(target?.closest('.fx-organism-dialogue,.fx-reference-ask,.fx-reference-pause,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));
+  return Boolean(target?.closest('.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-reference-pause,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));
 }
 function disarm(){for(const [type,options] of intentListeners)removeEventListener(type,onIntent,options);}
 function mountEnhancements(){
   if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
-  root.dataset.fxMotionRuntimeR239='enhanced-r456-user-intent';
+  root.dataset.fxMotionRuntimeR239='enhanced-r459-user-intent';
 }
 function onIntent(event){if(reservedInteraction(event))return;mountEnhancements();}
 
@@ -144,8 +148,8 @@ root.dataset.fxMotionRuntimeRequestedR271='0';
 root.dataset.fxMotionRuntimeMobileEnergySkippedR271=String(skippedEnergy);
 root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
 root.dataset.fxMotionRuntimeRetiredCoreSkippedR422=String(retiredCore);
-root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r456-mobile-uniform-shell-prewarmed':'core-ready-r456-desktop-uniform-shell-prewarmed';
-root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r456-uniform-shell-prewarmed';
+root.dataset.fxMotionRuntimeR239=mobile.matches?'core-ready-r459-mobile-primary-plus-mini':'core-ready-r459-desktop-primary-plus-mini';
+root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r459-primary-plus-mini-prewarmed';
 scheduleCriticalOwners();
 
 if(deferred.length){
