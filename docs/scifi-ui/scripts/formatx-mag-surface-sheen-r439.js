@@ -1,6 +1,6 @@
 /* FormatX r439 — bounded mobile MAG surface sheen.
    The highlight is dormant between short passes so the hero keeps its idle-zero-frame behaviour.
-   r444 also mounts the phone-reviewed visibility balance as a final external CSS owner. */
+   r445 mounts the brighter phone-reviewed visibility balance as the final external CSS owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -10,24 +10,29 @@ root.dataset.fxMagSurfaceSheenR439='booting';
 
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
-const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r444.css?v=20260830-r444-readable-midlight-soft-edge';
+const OPTICS_STYLE='/scifi-ui/styles/formatx-mobile-mag-balance-r445.css?v=20260830-r445-readable-bright-midtones-soft-edge';
 let stage=null,visible=false,nextTimer=0,clearTimer=0,observer=null,bootObserver=null,disposed=false;
 
+function publishOpticsState(state){
+  root.dataset.fxMobileMagBalanceR445=state;
+  root.dataset.fxMobileMagBalanceR444='superseded-r445';
+}
 function ensureOpticsStyle(){
   if(!mobile.matches)return;
-  let link=document.querySelector('link[data-fx-mobile-mag-balance-r444]');
+  let link=document.querySelector('link[data-fx-mobile-mag-balance-r445]');
   if(link instanceof HTMLLinkElement){
-    root.dataset.fxMobileMagBalanceR444=link.sheet?'ready':'requested';
+    publishOpticsState(link.sheet?'ready':'requested');
     return;
   }
+  document.querySelectorAll('link[data-fx-mobile-mag-balance-r444]').forEach(node=>node.remove());
   link=document.createElement('link');
   link.rel='stylesheet';
   link.href=OPTICS_STYLE;
-  link.dataset.fxMobileMagBalanceR444='true';
-  link.addEventListener('load',()=>{root.dataset.fxMobileMagBalanceR444='ready';},{once:true});
-  link.addEventListener('error',()=>{root.dataset.fxMobileMagBalanceR444='load-failed';},{once:true});
+  link.dataset.fxMobileMagBalanceR445='true';
+  link.addEventListener('load',()=>{publishOpticsState('ready');},{once:true});
+  link.addEventListener('error',()=>{publishOpticsState('load-failed');},{once:true});
   document.head.appendChild(link);
-  root.dataset.fxMobileMagBalanceR444='requested';
+  publishOpticsState('requested');
 }
 function clearTimers(){
   if(nextTimer)clearTimeout(nextTimer);
