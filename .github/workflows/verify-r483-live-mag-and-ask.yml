@@ -1,11 +1,9 @@
 name: Verify R483 live MAG and ASK crystal
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'
-      - '.github/workflows/verify-r483-live-mag-and-ask.yml'
+  workflow_run:
+    workflows: ['Prepare or deploy FormatX production']
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -18,10 +16,18 @@ concurrency:
 
 jobs:
   verify-live-r483:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.AUDITED_SHA }}
 
       - name: Install Chromium verifier
         shell: bash
@@ -270,7 +276,7 @@ jobs:
             state=failure
             description='R483 live MAG/ASK verification failed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX R483 live MAG and ASK' \
             -f description="$description" \

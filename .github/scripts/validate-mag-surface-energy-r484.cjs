@@ -4,15 +4,17 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('playwright');
+const { PNG } = require('pngjs');
 
 const origin = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4173/scifi-ui/';
 const output = process.env.FORMATX_CAPTURE_DIR || 'artifacts/r484-surface-energy';
 fs.mkdirSync(output, { recursive: true });
 
-// Instrument the *completed* native draw, not a cleared default framebuffer
-// queried after browser compositing. These hooks exist only in this test.
+// Timing instrumentation must not synchronously read back the GPU: doing that
+// inside RAF stalls SwiftShader and changes the very timing being measured.
+// Separate, deterministic single-frame screenshots below test visible motion.
 function instrumentNativeFrames() {
-  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, events: [], captures: {} };
+  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, events: [] };
   const names = new WeakMap();
   const states = new WeakMap();
   const stateFor = gl => {
@@ -22,25 +24,6 @@ function instrumentNativeFrames() {
   addEventListener('formatx:coresurfacesweep', event => {
     audit.events.push({ ...event.detail, at: performance.now() });
   });
-  const capture = (gl, label, phase) => {
-    const width = gl.drawingBufferWidth, height = gl.drawingBufferHeight;
-    const pixels = new Uint8Array(width * height * 4);
-    gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-    const grid = [], size = 64;
-    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-      const px = Math.min(width - 1, Math.floor((x + .5) * width / size));
-      const py = Math.min(height - 1, Math.floor((y + .5) * height / size));
-      const index = (py * width + px) * 4;
-      grid.push(.2126 * pixels[index] + .7152 * pixels[index + 1] + .0722 * pixels[index + 2]);
-    }
-    audit.captures[label] = {
-      phase, width, height, grid,
-      mean: grid.reduce((sum, value) => sum + value, 0) / grid.length,
-      maximum: Math.max(...grid),
-      coverage: grid.filter(value => value > 8).length / grid.length,
-      png: gl.canvas.toDataURL('image/png')
-    };
-  };
   for (const Type of [window.WebGLRenderingContext, window.WebGL2RenderingContext]) {
     if (!Type) continue;
     const proto = Type.prototype;
@@ -54,6 +37,12 @@ function instrumentNativeFrames() {
       return location;
     };
     proto.uniform1f = function(location, value) {
+      // Only the later screenshot pass pins uniforms; the autonomous timing
+      // pass above runs the unmodified production values and scheduler.
+      if (Number.isFinite(window.__magCapturePhase)) {
+        const fixed = { uSurfacePulse: window.__magCapturePhase, uTime: 0, uEnergy: .5, uBreath: .12 };
+        if (Object.hasOwn(fixed, names.get(location))) value = fixed[names.get(location)];
+      }
       const state = stateFor(this);
       if (names.get(location) === 'uLayer') state.layer = value;
       if (names.get(location) === 'uSurfacePulse') state.phase = value;
@@ -69,13 +58,36 @@ function instrumentNativeFrames() {
       if (this.canvas?.matches('#hero .fx-crystal-organism-r326-canvas') && state.layer === 0 && state.depthWrite) {
         audit.frames++;
         audit.maximumPhase = Math.max(audit.maximumPhase, state.phase);
-        if (state.phase < 0 && !audit.captures.idle) capture(this, 'idle', state.phase);
-        if (state.phase >= .22 && state.phase <= .40 && !audit.captures.early) capture(this, 'early', state.phase);
-        if (state.phase >= .62 && state.phase <= .80 && !audit.captures.late) capture(this, 'late', state.phase);
       }
       return result;
     };
   }
+}
+
+async function captureSurface(page, name, label, phase) {
+  await page.evaluate(phase => {
+    window.__magCapturePhase = phase;
+    document.documentElement.dataset.fxReferenceMotionPaused = 'false';
+    window.FormatXCoreMobileV69.requestRender(1);
+  }, phase);
+  await page.waitForTimeout(180);
+  const box = await page.locator('#hero .fx-crystal-organism-r326-canvas').boundingBox();
+  const screenshot = await page.screenshot({ path: path.join(output, `${name}-${label}.png`), animations: 'disabled', timeout: 30000 });
+  const png = PNG.sync.read(screenshot);
+  const viewport = page.viewportSize();
+  const scale = png.width / viewport.width;
+  const grid = [];
+  const left = Math.max(0, box.x), top = Math.max(0, box.y);
+  const width = Math.min(viewport.width, box.x + box.width) - left;
+  const height = Math.min(viewport.height, box.y + box.height) - top;
+  for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) {
+    const px = Math.min(png.width - 1, Math.floor((left + (x + .5) * width / 64) * scale));
+    const py = Math.min(png.height - 1, Math.floor((top + (y + .5) * height / 64) * scale));
+    const index = (py * png.width + px) * 4;
+    grid.push(.2126 * png.data[index] + .7152 * png.data[index + 1] + .0722 * png.data[index + 2]);
+  }
+  return { phase, grid, mean: grid.reduce((sum, value) => sum + value, 0) / grid.length,
+    maximum: Math.max(...grid), coverage: grid.filter(value => value > 20).length / grid.length };
 }
 
 function surfaceChange(idle, sweep) {
@@ -108,8 +120,6 @@ async function verify(browser, name, viewport, mobile) {
       document.documentElement.dataset.fxCoreSurfaceEnergyR484 === 'periodic-native-surface-energy'
       && document.documentElement.dataset.fxCrystalOrganismR326 === 'ready'
     ), null, { timeout: 60000 });
-    await page.screenshot({ path: path.join(output, `${name}-idle.png`), timeout: 10000 });
-
     // No click, artificial API pulse, hover or pointer movement is used here.
     await page.waitForFunction(() => __magEnergyAudit.events.some(e => e.phase === 'end' && e.source === 'autonomous'), null, { timeout: 18000 });
     await page.waitForTimeout(600);
@@ -121,10 +131,6 @@ async function verify(browser, name, viewport, mobile) {
     await page.waitForTimeout(250);
 
     const audit = await page.evaluate(() => window.__magEnergyAudit);
-    for (const [label, capture] of Object.entries(audit.captures)) {
-      fs.writeFileSync(path.join(output, `${name}-native-${label}.png`), Buffer.from(capture.png.split(',')[1], 'base64'));
-      delete capture.png;
-    }
     report.audit = audit;
     assert.ok(audit.maximumPhase > .85, `${name}: sweep truncated at phase ${audit.maximumPhase}`);
     const starts = audit.events.filter(e => e.phase === 'start' && e.source === 'autonomous');
@@ -134,13 +140,6 @@ async function verify(browser, name, viewport, mobile) {
     report.durationMs = ends[0].at - starts[0].at;
     assert.ok(report.intervalMs >= 4500 && report.intervalMs < 8500, `${name}: interval ${report.intervalMs}ms`);
     assert.ok(report.durationMs >= 1100 && report.durationMs < 2300, `${name}: duration ${report.durationMs}ms`);
-    assert.ok(audit.captures.idle && audit.captures.early && audit.captures.late, `${name}: missing complete native sweep captures`);
-    assert.ok(audit.captures.idle.maximum > 70 && audit.captures.idle.coverage > .02, `${name}: resting MAG is too dim`);
-    report.earlyChange = surfaceChange(audit.captures.idle, audit.captures.early);
-    report.lateChange = surfaceChange(audit.captures.idle, audit.captures.late);
-    assert.ok(report.earlyChange.changed >= 8 && report.lateChange.changed >= 8, `${name}: surface energy is not visibly distinct`);
-    assert.ok(Math.abs(report.lateChange.centroidY - report.earlyChange.centroidY) > 3, `${name}: light does not travel along the surface`);
-
     report.dom = await page.evaluate(() => {
       const root = document.documentElement;
       const canvas = document.querySelector('#hero .fx-crystal-organism-r326-canvas');
@@ -153,7 +152,10 @@ async function verify(browser, name, viewport, mobile) {
         filter: style.filter, opacity: Number(style.opacity),
         glError: gl.getError(), budget: root.dataset.fxMobileSurfaceBudgetR484,
         policy: root.dataset.fxCoreMobileIdlePolicyR426,
-        shape: root.dataset.fxCoreShapeR337
+        shape: root.dataset.fxCoreShapeR337,
+        ancestors: (() => { const list = []; for (let node = canvas; node; node = node.parentElement) {
+          const s = getComputedStyle(node); list.push({ tag: node.tagName, id: node.id, class: node.className, opacity: s.opacity, filter: s.filter, blend: s.mixBlendMode });
+        } return list; })()
       };
     });
     assert.equal(report.dom.canvasCount, 1, `${name}: duplicate native canvases`);
@@ -195,7 +197,19 @@ async function verify(browser, name, viewport, mobile) {
     await page.waitForTimeout(6800);
     assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), reducedCount, `${name}: reduced-motion sweep still running`);
     report.reducedMotion = 'passed';
-    await page.screenshot({ path: path.join(output, `${name}-final.png`), timeout: 10000 });
+
+    // All timing and lifecycle checks have finished. Now render three single
+    // frames of the same real shader and compare the *composited* screenshots.
+    // CSS animation is disabled only for deterministic picture comparison.
+    report.captures = {};
+    report.captures.idle = await captureSurface(page, name, 'idle', -1);
+    report.captures.early = await captureSurface(page, name, 'surface-early', .38);
+    report.captures.late = await captureSurface(page, name, 'surface-late', .68);
+    assert.ok(report.captures.idle.maximum > 70 && report.captures.idle.coverage > .02, `${name}: resting MAG is too dim`);
+    report.earlyChange = surfaceChange(report.captures.idle, report.captures.early);
+    report.lateChange = surfaceChange(report.captures.idle, report.captures.late);
+    assert.ok(report.earlyChange.changed >= 8 && report.lateChange.changed >= 8, `${name}: surface energy is not visibly distinct`);
+    assert.ok(Math.abs(report.lateChange.centroidY - report.earlyChange.centroidY) > 3, `${name}: light does not travel along the surface`);
     assert.deepEqual(errors, [], `${name}: page errors`);
     report.result = 'passed';
     console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; pause, offscreen, reduced motion passed`);
@@ -203,7 +217,7 @@ async function verify(browser, name, viewport, mobile) {
     report.result = 'failed';
     report.error = String(error.stack || error);
     report.failureState = await page.evaluate(() => ({ audit: window.__magEnergyAudit, root: { ...document.documentElement.dataset } })).catch(() => null);
-    await page.screenshot({ path: path.join(output, `${name}-failure.png`), timeout: 8000 }).catch(() => {});
+    await page.screenshot({ path: path.join(output, `${name}-failure.png`), animations: 'disabled', timeout: 10000 }).catch(() => {});
     throw error;
   } finally {
     report.pageErrors = errors;

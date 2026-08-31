@@ -114,7 +114,7 @@ jobs:
             assert.equal(runtime.cleanup,'ready',JSON.stringify(runtime));
             assert.equal(runtime.touch,'direct-r326-stage-protected-ui-controller-tap-drag-safe',JSON.stringify(runtime));
             assert.ok(['ready','handled-live-request','opened-queued-request'].includes(runtime.bridge),JSON.stringify(runtime));
-            assert.equal(runtime.optics,'soft-nucleus-broad-fresnel-feather',JSON.stringify(runtime));
+            assert.equal(runtime.optics,'superseded-by-r465-soft-perimeter',JSON.stringify(runtime));
             assert.equal(runtime.legacyStages,0,'real legacy MAG stages remain: '+JSON.stringify(runtime));
             assert.equal(runtime.r326Stages,1,'R326 stage ownership is not singular: '+JSON.stringify(runtime));
 
