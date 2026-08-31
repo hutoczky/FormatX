@@ -1,4 +1,4 @@
-/* FormatX r473 — one static language control, event-driven public-shell handoff. */
+/* FormatX r474 — one static language control, event-driven public/legal handoff. */
 (function(){
 'use strict';
 const ROOT=document.documentElement;
@@ -41,7 +41,7 @@ const FIXED_COPY=[
   ['#hero .fx-method-inline li:nth-child(4)','Visszaellenőrzés','Verification']
 ];
 
-function publicPageMode(){return Boolean(document.body?.dataset.fxPublicPage||document.querySelector('header.fx-public-header'));}
+function publicPageMode(){return Boolean(document.body?.dataset.fxPublicPage||document.querySelector('header.fx-public-header,.legal-header-inner'));}
 function storedLanguage(){
   const query=new URLSearchParams(location.search).get('lang');
   if(SUPPORTED.has(query))return query;
@@ -157,13 +157,13 @@ function install(){
   ROOT.dataset.fxSingleLanguageToggleVersion=VERSION;
   ROOT.dataset.fxLanguageObserverPolicyR461='event-driven-no-document-mutation-observer';
   ROOT.dataset.fxLanguagePublicShellHandoffR473='event-driven';
+  ROOT.dataset.fxLanguageStandaloneLegalR474='recognized';
   return true;
 }
 
-/* Public evidence pages can load this owner before formatx-public-shell.js has
-   created its header/tools host. Re-run only on the shell's explicit ready
-   event; this preserves the observer-free policy and prevents a zero-toggle
-   race on sparse pages such as verification.html. */
+/* Sparse evidence pages can load this owner before formatx-public-shell.js has
+   created its header/tools host, while standalone legal pages already expose a
+   legal-header-inner host. Both paths stay event-driven and observer-free. */
 addEventListener('formatx:publicshellready',install,{passive:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 }());
