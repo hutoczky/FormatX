@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const feedback = read('docs/scifi-ui/scripts/formatx-feedback.js');
+const showcase = read('docs/scifi-ui/scripts/formatx-product-showcase.js');
 const styles = read('docs/scifi-ui/styles/formatx-feedback.css');
 const compatible = read('docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg');
 const schema = read('billing-worker/src/feedback-schema.js');
@@ -20,8 +21,10 @@ assert.match(compatible, /Linux indítófájlt/, 'portable installer visual is m
 assert.match(compatible, /Windows EXE/, 'portable installer visual is missing Windows launcher state');
 assert.match(compatible, /macOS indítófájlt/, 'portable installer visual is missing macOS launcher state');
 
-assert.match(feedback, /portable-installer-compatible\.svg\?v=/, 'mobile compatibility replacement is missing');
-assert.match(feedback, /MutationObserver/, 'dynamically inserted showcase images are not monitored');
+assert.match(feedback, /portable-installer-compatible\.svg\?v=/, 'mobile compatibility fallback replacement is missing');
+assert.match(showcase, /image: 'portable-installer-compatible\.svg'/, 'showcase producer must create the compatible portable installer directly');
+assert.doesNotMatch(showcase, /image: 'portable-installer\.svg'/, 'showcase producer still creates the obsolete portable installer');
+assert.match(feedback, /patchPortableInstallerImages\(\)/, 'legacy/static portable installer fallback patch is missing');
 assert.match(feedback, /FEEDBACK_SUMMARY_URL = '\/api\/feedback\/summary'/, 'feedback summary endpoint is missing');
 assert.match(feedback, /FEEDBACK_SUBMIT_URL = '\/api\/feedback'/, 'feedback submit endpoint is missing');
 assert.match(feedback, /privacy_consent: true/, 'privacy consent is not sent explicitly');
@@ -59,4 +62,4 @@ assert.match(schema, /PRAGMA table_info\(user_feedback\)/, 'D1 feedback schema v
 assert.match(entry, /ensureFeedbackSchemaCompatibility/, 'feedback entry must migrate the D1 schema before handling requests');
 assert.match(workerConfig, /"main": "src\/production-content-entry\.js"/, 'unexpected production Worker entry');
 
-console.log('FormatX mobile showcase, feedback and responsive matrix validation passed.');
+console.log('FormatX mobile showcase, feedback and responsive matrix validation passed with direct compatible asset ownership.');
