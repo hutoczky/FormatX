@@ -48,6 +48,7 @@ jobs:
           const CSS_URL = 'https://formatxsuite.com/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?r483-live-verify=1';
           const CORE = '#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
           const ASK_GLYPH = '#hero .fx-reference-controls-r204 .fx-reference-ask > i';
+          const PAUSE = '#hero .fx-reference-controls-r204 .fx-reference-pause';
 
           const num = value => {
             if (!value || value === 'none') return 1;
@@ -88,6 +89,7 @@ jobs:
                   opacity: Number.parseFloat(style.opacity || '1'),
                   scale: style.scale || 'none',
                   animationName: style.animationName,
+                  animationPlayState: style.animationPlayState,
                   filter: style.filter,
                   width: rect.width,
                   height: rect.height
@@ -96,6 +98,33 @@ jobs:
               await page.waitForTimeout(delay);
             }
             return values;
+          }
+
+          async function verifyPauseControl(page) {
+            const pause = page.locator(PAUSE).first();
+            assert.equal(await pause.count(), 1, 'Mobile PAUSE control is missing');
+            assert.equal(await pause.isVisible(), true, 'Mobile PAUSE control is not visible');
+            assert.notEqual(await pause.getAttribute('data-paused'), 'true', 'Mobile MAG starts user-paused');
+
+            await pause.click();
+            await page.waitForFunction(selector => document.querySelector(selector)?.dataset.paused === 'true', PAUSE, { timeout: 5000 });
+            await page.waitForTimeout(180);
+            const stopped = await page.locator(CORE).evaluate(canvas => {
+              const style = getComputedStyle(canvas);
+              return { animationName: style.animationName, animationPlayState: style.animationPlayState };
+            });
+            assert.doesNotMatch(stopped.animationName, /fx-primary-mag-mobile-heart-r483/, JSON.stringify(stopped));
+
+            await pause.click();
+            await page.waitForFunction(selector => document.querySelector(selector)?.dataset.paused !== 'true', PAUSE, { timeout: 5000 });
+            await page.waitForTimeout(180);
+            const resumed = await page.locator(CORE).evaluate(canvas => {
+              const style = getComputedStyle(canvas);
+              return { animationName: style.animationName, animationPlayState: style.animationPlayState };
+            });
+            assert.match(resumed.animationName, /fx-primary-mag-mobile-heart-r483/, JSON.stringify(resumed));
+            assert.notEqual(resumed.animationPlayState, 'paused', JSON.stringify(resumed));
+            return { stopped, resumed };
           }
 
           (async () => {
@@ -108,13 +137,14 @@ jobs:
               const cssResponse = await request.request.get(CSS_URL, { timeout: 30000 });
               assert.equal(cssResponse.status(), 200, 'R483 CSS is not live');
               const css = await cssResponse.text();
-              assert.match(css, /production-r483-visible-living-mobile-mag-soft-edge-desktop-ask-crystal-deploy/);
+              assert.match(css, /production-r483-visible-living-mobile-mag-soft-edge-desktop-ask-crystal-deploy-zero-idle-split/);
               assert.match(css, /brightness\(\.76\)/);
               assert.match(css, /contrast\(\.69\)/);
               assert.match(css, /blur\(1\.02px\)/);
               assert.match(css, /drop-shadow\(0 0 3px/);
               assert.match(css, /drop-shadow\(0 0 7px/);
               assert.match(css, /fx-primary-mag-mobile-heart-r483/);
+              assert.match(css, /fx-reference-pause\[data-paused="true"\]/);
               await request.close();
 
               const mobile = await prepare(browser, { width: 390, height: 844 }, true);
@@ -126,19 +156,24 @@ jobs:
               const mobileFirst = mobileValues[0];
               const mobileRoot = await mobile.page.evaluate(() => ({
                 life: document.documentElement.dataset.fxPrimaryMagLifeR482 || '',
-                paused: document.documentElement.dataset.fxReferenceMotionPaused || '',
+                rendererPaused: document.documentElement.dataset.fxReferenceMotionPaused || '',
+                userPaused: document.querySelector('.fx-reference-pause')?.dataset.paused || '',
+                idlePolicy: document.documentElement.dataset.fxCoreMobileIdlePolicyR426 || '',
                 renderer: document.documentElement.dataset.fxCoreRenderer || ''
               }));
               assert.equal(mobileRoot.renderer, 'single-webgl-crystal-organism-r326');
               assert.notEqual(mobileRoot.life, 'steady', 'Mobile MAG is unexpectedly in steady mode');
-              assert.notEqual(mobileRoot.paused, 'true', 'Mobile MAG is unexpectedly paused');
-              assert.match(mobileFirst.animationName, /fx-primary-mag-mobile-heart-r483/, JSON.stringify(mobileFirst));
+              assert.notEqual(mobileRoot.userPaused, 'true', 'Mobile MAG is unexpectedly user-paused');
+              assert.match(mobileRoot.idlePolicy, /zero-idle/, JSON.stringify(mobileRoot));
+              assert.match(mobileFirst.animationName, /fx-primary-mag-mobile-heart-r483/, JSON.stringify({ mobileRoot, mobileFirst }));
+              assert.notEqual(mobileFirst.animationPlayState, 'paused', JSON.stringify(mobileFirst));
               assert.match(mobileFirst.filter, /brightness\(0\.76\)/, mobileFirst.filter);
               assert.match(mobileFirst.filter, /contrast\(0\.69\)/, mobileFirst.filter);
               assert.match(mobileFirst.filter, /blur\(1\.02px\)/, mobileFirst.filter);
               assert.ok(Math.min(...mOpacity) >= .88, JSON.stringify({ mOpacity, mScale }));
               assert.ok(mOpacitySpan >= .025 || mScaleSpan >= .010, JSON.stringify({ mOpacitySpan, mScaleSpan, mobileValues }));
               assert.ok(mobileFirst.width > 250 && mobileFirst.height > 300, JSON.stringify(mobileFirst));
+              const pauseContract = await verifyPauseControl(mobile.page);
               await mobile.page.screenshot({ path: 'artifacts/r483-live/mobile-r483.png', fullPage: false });
               await mobile.context.close();
 
@@ -187,8 +222,21 @@ jobs:
 
               console.log(JSON.stringify({
                 pass: true,
-                mobile: { opacitySpan: mOpacitySpan, scaleSpan: mScaleSpan, animation: mobileFirst.animationName },
-                desktop: { opacitySpan: dOpacitySpan, scaleSpan: dScaleSpan, animation: desktopValues[0].animationName, ask }
+                mobile: {
+                  rendererPausedAtIdle: mobileRoot.rendererPaused,
+                  userPausedAtIdle: mobileRoot.userPaused,
+                  idlePolicy: mobileRoot.idlePolicy,
+                  opacitySpan: mOpacitySpan,
+                  scaleSpan: mScaleSpan,
+                  animation: mobileFirst.animationName,
+                  pauseContract
+                },
+                desktop: {
+                  opacitySpan: dOpacitySpan,
+                  scaleSpan: dScaleSpan,
+                  animation: desktopValues[0].animationName,
+                  ask
+                }
               }, null, 2));
             } finally {
               await browser.close();
