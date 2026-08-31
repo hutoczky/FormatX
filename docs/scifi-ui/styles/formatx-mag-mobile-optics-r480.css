@@ -1,0 +1,41 @@
+/* FormatX R480 — restrained mobile MAG glow and feathered crystal edge.
+   The R326 WebGL geometry/material remains the single 3D owner. This late,
+   mobile-only optical trim keeps the faceted body readable while reducing the
+   centre flare, cyan/violet halo and hard silhouette visible on real phones. */
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: .89 !important;
+    filter:
+      brightness(.68)
+      contrast(.70)
+      saturate(1.25)
+      hue-rotate(-2deg)
+      blur(1.55px)
+      drop-shadow(0 0 7px rgba(46,218,255,.12))
+      drop-shadow(0 0 18px rgba(91,71,255,.065)) !important;
+    -webkit-filter:
+      brightness(.68)
+      contrast(.70)
+      saturate(1.25)
+      hue-rotate(-2deg)
+      blur(1.55px)
+      drop-shadow(0 0 7px rgba(46,218,255,.12))
+      drop-shadow(0 0 18px rgba(91,71,255,.065)) !important;
+    mix-blend-mode: normal !important;
+    transform-origin: 50% 50% !important;
+    scale: .997;
+  }
+
+  /* Keep the surrounding optical chamber dark enough that the crystal reads as
+     translucent glass instead of a glowing plate. */
+  html:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space {
+    background:
+      radial-gradient(circle at 50% 47%, rgba(28,178,232,.075) 0, rgba(13,82,151,.040) 31%, transparent 48%),
+      radial-gradient(circle at 58% 51%, rgba(104,66,222,.060) 0, transparent 45%),
+      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.12) 58%, rgba(2,14,31,.34) 100%) !important;
+  }
+}
+
+/* production-r480-restrained-mobile-mag-glow-feathered-edge */
