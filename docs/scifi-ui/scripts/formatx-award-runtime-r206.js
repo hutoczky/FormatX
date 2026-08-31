@@ -6,10 +6,12 @@
   root.dataset.fxAwardRuntime = 'r334';
   root.dataset.fxFinalValidationR334 = 'mobile-optics-r414-restrained-glow';
   root.dataset.fxFinalValidationR424 = 'r454-native-webgl-visible-electric-organic-core';
+  root.dataset.fxFinalValidationR455 = 'native-webgl-micro-life-soft-mobile-optics-energy-sweep';
   root.dataset.fxMobileMagLineageR410 = 'approved-v51-reference-crystal';
   root.dataset.fxMobileMagFinishR412 = 'r414-restrained-glow';
   root.dataset.fxMobileMagFinishR414 = 'restrained-glow-soft-edge';
   root.dataset.fxMobileMagFinishR424 = 'r454-sharp-readable-native-webgl-electric-caustics';
+  root.dataset.fxMobileMagFinishR455 = 'restrained-bloom-soft-edge-living-native-webgl';
 
   const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260830-r454-single-native-optics-owner';
 
@@ -54,6 +56,8 @@
   const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260822-r291-nav-state';
   const DIALOGUE_STYLE_URL = '/scifi-ui/styles/formatx-dialogue-open-r287.css?v=20260822-r287-open-state';
   const DIALOGUE_OWNER_URL = '/scifi-ui/scripts/formatx-dialogue-render-owner-r273.js?v=20260822-r287-open-state';
+  const CORE_LIFE_STYLE_URL = '/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r455-restrained-mobile-optics';
+  const CORE_LIFE_URL = '/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r455-native-webgl-life';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
 
@@ -116,6 +120,27 @@
     link.href = STYLE_URL;
     link.dataset.fxAwardRuntimeStyleR206 = 'true';
     document.head.appendChild(link);
+  }
+
+  function ensureCoreLifeR455() {
+    if (!document.querySelector('link[data-fx-core-life-style-r455]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = CORE_LIFE_STYLE_URL;
+      link.dataset.fxCoreLifeStyleR455 = 'true';
+      document.head.appendChild(link);
+    }
+
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', ensureCoreLifeR455, { once: true });
+      return;
+    }
+    if (document.querySelector('script[data-fx-core-life-r455]')) return;
+    const script = document.createElement('script');
+    script.src = CORE_LIFE_URL;
+    script.async = true;
+    script.dataset.fxCoreLifeR455 = 'true';
+    document.head.appendChild(script);
   }
 
   function ensureOrganismCoreOwner() {
@@ -252,7 +277,8 @@
   ensureReferenceAskOwner();
   ensureStyle();
   document.querySelector('link[data-fx-mobile-core-softening-r322]')?.remove();
-  root.dataset.fxMobileCoreOpticsR322 = 'retired-r454-no-softening-layer';
+  root.dataset.fxMobileCoreOpticsR322 = 'retired-r454-replaced-by-native-r455-optics';
+  ensureCoreLifeR455();
   ensureOrganismCoreOwner();
   ensureOwnerStyle();
   ensureDialogueSurface();
@@ -261,6 +287,7 @@
   root.dataset.fxAwardSound = 'muted-default-visible-control';
 
   addEventListener('formatx:organismvoiceready', ensureOrganismCoreOwner, { passive: true });
+  addEventListener('formatx:real3dready', ensureCoreLifeR455, { passive: true });
 
   if (!ensureGpu()) {
     const observer = new MutationObserver(() => {
