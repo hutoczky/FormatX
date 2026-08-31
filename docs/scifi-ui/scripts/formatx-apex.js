@@ -14,12 +14,6 @@
     return;
   }
 
-  // r294: on phone/coarse-pointer surfaces the current native core, canonical
-  // language control, release metadata runtime and r268 navigation already own
-  // the jobs this legacy APEX controller used to duplicate. Avoid whole-page
-  // language/link scans, reveal observers and scene/flow observers during the
-  // first-load critical window. Publish apexready only after the complete defer
-  // chain has subscribed, so final control owners never miss the event.
   const MOBILE_NATIVE_CORE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   if (MOBILE_NATIVE_CORE) {
     ROOT.dataset.fxApex = 'controller-performance-v2';
@@ -69,6 +63,12 @@
       const stored = localStorage.getItem(LANG_KEY);
       if (stored === 'hu' || stored === 'en') return stored;
     } catch (_) {}
+    /* The server/static document owns first paint. Respect its declared language
+       before navigator.language so hydration never repaints HU as EN (or vice
+       versa) after the hero has already been rendered. Browser locale remains a
+       final fallback only for documents that do not declare a supported lang. */
+    const declared = String(ROOT.lang || '').toLowerCase().split('-')[0];
+    if (declared === 'hu' || declared === 'en') return declared;
     return String(navigator.language || '').toLowerCase().startsWith('hu') ? 'hu' : 'en';
   }
 
