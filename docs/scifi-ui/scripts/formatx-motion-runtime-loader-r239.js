@@ -1,4 +1,4 @@
-/* FormatX r468 — compact current-path loader.
+/* FormatX r469 — compact current-path loader.
    The active HTML contains only current deferred enhancements. Mobile keeps the
    zero-idle R465 render budget while r468 supplies softer display optics and
    explicit-interaction native surface energy. Desktop stays on R326. */
@@ -6,6 +6,7 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxMotionRuntimeR239)return;
+root.dataset.fxMotionCspR239='external-strict-csp';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
