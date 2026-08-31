@@ -131,7 +131,7 @@ function mountEnhancements(){
   if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
-  root.dataset.fxMotionRuntimeR239='enhanced-r477-explicit-user-intent';
+  root.dataset.fxMotionRuntimeR239='enhanced-r468-user-intent';
 }
 function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
 function openPendingCanonicalAsk(){
