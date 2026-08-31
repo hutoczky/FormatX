@@ -229,11 +229,24 @@ async function verify(browser, name, viewport, mobile) {
     await page.waitForFunction(count => __magEnergyAudit.events.filter(e => e.phase === 'start').length > count, pausedCount, { timeout: 10000 });
     report.pauseResume = 'passed';
 
-    // Scroll completely past the MAG: there must be no background pulse timer.
-    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
-    await page.waitForFunction(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484 === 'suspended', null, { timeout: 10000 });
+    // Stay in a middle section. The production desktop intentionally loops
+    // from the footer back to MAG, so scrolling to the bottom is not an
+    // offscreen test. Verify the actual canvas bounds as well as the timer.
+    await page.locator('#pricing').evaluate(section => section.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await page.waitForFunction(() => {
+      const box = document.querySelector('#hero .fx-crystal-organism-r326-canvas').getBoundingClientRect();
+      return (box.bottom <= 0 || box.top >= innerHeight)
+        && document.documentElement.dataset.fxCoreSurfaceSchedulerR484 === 'suspended';
+    }, null, { timeout: 10000 });
     const offscreenCount = await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length);
     await page.waitForTimeout(6800);
+    report.offscreenBounds = await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => {
+      const box = canvas.getBoundingClientRect();
+      return { top: box.top, bottom: box.bottom, viewportHeight: innerHeight };
+    });
+    assert.ok(report.offscreenBounds.bottom <= 0 || report.offscreenBounds.top >= report.offscreenBounds.viewportHeight,
+      `${name}: page returned to MAG during the offscreen test`);
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484), 'suspended');
     assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), offscreenCount, `${name}: offscreen sweep still running`);
     report.offscreen = 'passed';
 
