@@ -124,7 +124,7 @@ function ensureAsk(rail){
   let ask=rail.querySelector('.fx-reference-ask');if(!(ask instanceof HTMLButtonElement)){ask=document.createElement('button');ask.className='fx-reference-ask';ask.type='button';rail.prepend(ask);}if(!ask.querySelector('i'))ask.prepend(document.createElement('i'));
   let label=ask.querySelector('span');if(!(label instanceof HTMLElement)){label=document.createElement('span');ask.appendChild(label);}const askText=language()==='en'?'ASK':'KÉRDEZZ';if(label.textContent!==askText)label.textContent=askText;ask.setAttribute('aria-label',language()==='en'?'Ask FormatX':'Kérdezz a FormatX-től');
   if(ask.dataset.fxControlAskBoundR268!=='true'){
-    const clean=ask.cloneNode(true);clean.dataset.fxControlAskBoundR268='true';ask.replaceWith(clean);ask=clean;ask.addEventListener('click',()=>{closeConflictingPanels();queueMicrotask(()=>{if(window.FormatXOrganismVoice?.open)window.FormatXOrganismVoice.open();else document.querySelector('.fx-organism-thought-trigger')?.click();window.FormatXCoreMobileV69?.pulse?.();});});
+    const clean=ask.cloneNode(true);clean.dataset.fxControlAskBoundR268='true';ask.replaceWith(clean);ask=clean;ask.addEventListener('click',()=>{closeConflictingPanels();queueMicrotask(()=>{const api=window.FormatXOrganismVoice;if(api){if(root.dataset.fxOrganismDialogueEnabled==='false'&&typeof api.setEnabled==='function'){api.setEnabled(true);root.dataset.fxCanonicalAskReenableR478='api-set-enabled';}if(typeof api.open==='function')api.open();}else document.querySelector('.fx-organism-thought-trigger')?.click();window.FormatXCoreMobileV69?.pulse?.();});});
   }
   return ask;
 }
