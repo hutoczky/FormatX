@@ -1,7 +1,7 @@
-/* FormatX R476/R486 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R488 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
-   R486 keeps the synchronized MAG family while the full-size mobile surface
-   uses the calmer-luminance, feathered-silhouette compositor pass. */
+   R488 keeps the synchronized MAG family while the full-size mobile surface
+   uses restrained luminance, a softer silhouette and compositor-safe breathing. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -9,7 +9,7 @@ if(root.dataset.fxMagShapeSyncR476==='ready-r482')return;
 root.dataset.fxMagShapeSyncR476='booting-r482';
 
 const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
-const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260831-r486-calmer-luminance-feathered-edge';
+const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260901-r488-restrained-glow-soft-edge-compositor-pulse';
 const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260831-r482-spectrum-soft-edge';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null;
@@ -33,7 +33,7 @@ function ensureStyle(){
 function ensureMobileOptics(){
   let link=document.querySelector('link[data-fx-mag-mobile-optics-r480]');
   if(link instanceof HTMLLinkElement){
-    if(!link.href.includes('r486-calmer-luminance-feathered-edge'))link.href=MOBILE_OPTICS;
+    if(!link.href.includes('r488-restrained-glow-soft-edge-compositor-pulse'))link.href=MOBILE_OPTICS;
     return link;
   }
   link=document.createElement('link');
@@ -132,6 +132,7 @@ function sync(){
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
   root.dataset.fxPrimaryMagOpticsR486='calmer-luminance-feathered-mobile-silhouette';
+  root.dataset.fxPrimaryMagOpticsR488='restrained-glow-soft-edge-compositor-pulse';
   root.dataset.fxPrimaryMagLifeContractR481='desktop-mobile-compositor-breath-zero-webgl-idle';
   root.dataset.fxPrimaryMagLifeContractR482='large-mini-header-spectrum-breath-zero-webgl-idle';
 }
