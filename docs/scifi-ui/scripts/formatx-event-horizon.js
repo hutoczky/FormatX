@@ -81,11 +81,19 @@ function bindPause(button){
   if(!(button instanceof HTMLButtonElement)||button.dataset.fxPauseR461==='true')return;
   button.dataset.fxPauseR461='true';
   if(!button.dataset.paused)button.dataset.paused='false';
-  button.addEventListener('click',()=>{
+  button.setAttribute('aria-pressed',button.dataset.paused);
+  button.addEventListener('click',event=>{
+    // Cached compatibility code may already have consumed pointerup/click.
+    // Never toggle a second time after that earlier owner handled the event.
+    if(event.defaultPrevented)return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
     const paused=button.dataset.paused!=='true';
     button.dataset.paused=String(paused);
     ROOT.dataset.fxReferenceMotionPaused=String(paused);
     const strings=copy();
+    button.setAttribute('aria-pressed',String(paused));
+    button.textContent=paused?'▶':'Ⅱ';
     button.setAttribute('aria-label',paused?strings.resume:strings.pause);
     dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));
   });

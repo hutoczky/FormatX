@@ -7,6 +7,7 @@ on:
     paths:
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-mag-surface-energy-r484.cjs'
+      - '.github/scripts/validate-mag-pause-owner-r485.cjs'
       - '.github/workflows/verify-mag-surface-energy-r484.yml'
   workflow_run:
     workflows: ['Prepare or deploy FormatX production']
@@ -52,6 +53,7 @@ jobs:
       - name: Validate native surface sources
         run: |
           node .github/scripts/validate-living-core-r425-source.cjs
+          node .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-wda-100-r198.cjs
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js

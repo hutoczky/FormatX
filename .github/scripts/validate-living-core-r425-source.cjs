@@ -24,7 +24,7 @@ const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
 const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 
 has(home,[
-  'formatx-event-horizon.js?v=20260830-r461-clean-first-load',
+  'formatx-event-horizon.js?v=20260831-r485-single-pause-owner',
   'formatx-motion-runtime-loader-r239.js?v=20260831-r484-periodic-native-energy',
   'formatx-quality-r461.css?v=20260830-r462-mobile-a11y',
   'data-fx-single-language-toggle="ready-v3"',
