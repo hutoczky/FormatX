@@ -9,6 +9,11 @@ const origin = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4173/scifi-ui/'
 const output = process.env.FORMATX_CAPTURE_DIR || process.cwd();
 fs.mkdirSync(output, { recursive: true });
 
+const overlap = (a, b, gap = 2) => Boolean(a && b) && !(
+  a.right + gap <= b.left || b.right + gap <= a.left ||
+  a.bottom + gap <= b.top || b.bottom + gap <= a.top
+);
+
 async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   const context = await browser.newContext({
     viewport,
@@ -23,7 +28,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   const pageErrors = [];
   page.on('pageerror', error => pageErrors.push(error.message));
 
-  await page.goto(`${origin}?r466_current_browser=${name}-${Date.now()}&lang=hu`, {
+  await page.goto(`${origin}?r467_current_browser=${name}-${Date.now()}&lang=hu`, {
     waitUntil: 'domcontentloaded',
     timeout: 30000
   });
@@ -67,7 +72,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
     const canvas = stage?.querySelector('.fx-crystal-organism-r326-canvas');
     const gl = canvas?.getContext('webgl2') || canvas?.getContext('webgl');
-    const box = canvas?.getBoundingClientRect();
+    const canvasBox = canvas?.getBoundingClientRect();
     const style = canvas ? getComputedStyle(canvas) : null;
     const controls = document.querySelector('#hero .fx-reference-controls-r204');
     const sound = controls?.querySelector('.fx-three-sound');
@@ -78,8 +83,15 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const menu = document.querySelector('.topbar > .fx-reference-menu-button');
     const brand = document.querySelector('.topbar > .brand');
     const boxes = [sound, ask, pause].map(node => node?.getBoundingClientRect()).filter(Boolean);
-    const overlap = (a, b) => a && b && !(a.right + 2 <= b.left || b.right + 2 <= a.left || a.bottom + 2 <= b.top || b.bottom + 2 <= a.top);
-    const rect = node => node?.getBoundingClientRect() || null;
+    const localOverlap = (a, b, gap = 2) => a && b && !(
+      a.right + gap <= b.left || b.right + gap <= a.left ||
+      a.bottom + gap <= b.top || b.bottom + gap <= a.top
+    );
+    const rect = node => {
+      if (!(node instanceof Element)) return null;
+      const value = node.getBoundingClientRect();
+      return { left:value.left, right:value.right, top:value.top, bottom:value.bottom, width:value.width, height:value.height };
+    };
     return {
       renderer: root.dataset.fxCoreRenderer || '',
       revision: root.dataset.fxCoreRendererVersion || '',
@@ -106,13 +118,14 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       gl: Boolean(gl),
       glError: gl?.getError(),
       renderMs: Number(root.dataset.fxCoreRenderMs || Infinity),
-      width: box?.width || 0,
-      height: box?.height || 0,
+      width: canvasBox?.width || 0,
+      height: canvasBox?.height || 0,
       opacity: Number(style?.opacity || 0),
       filter: style?.filter || '',
       controlsVisible: visible(controls),
       controlsOneRow: boxes.length === 3 && Math.max(...boxes.map(item => item.top)) - Math.min(...boxes.map(item => item.top)) <= 8,
-      controlsOverlap: boxes.length === 3 && (overlap(boxes[0], boxes[1]) || overlap(boxes[1], boxes[2])),
+      controlsOverlap: boxes.length === 3 && (localOverlap(boxes[0], boxes[1]) || localOverlap(boxes[1], boxes[2])),
+      controlBoxes: boxes.map(item => ({left:item.left,right:item.right,top:item.top,bottom:item.bottom,width:item.width,height:item.height})),
       overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
       magText: String(mag?.textContent || '').trim(),
       langText: String(lang?.textContent || '').trim(),
@@ -123,13 +136,13 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   });
 
   const viewportShot = await page.screenshot({
-    path: path.join(output, `${name}-r466-current-viewport.png`),
+    path: path.join(output, `${name}-r467-current-viewport.png`),
     fullPage: false,
     animations: 'disabled',
     caret: 'hide'
   });
   const magShot = await page.locator('#hero .fx-crystal-organism-r326-canvas').screenshot({
-    path: path.join(output, `${name}-r466-current-mag.png`),
+    path: path.join(output, `${name}-r467-current-mag.png`),
     animations: 'disabled',
     caret: 'hide'
   });
@@ -163,6 +176,15 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.equal(state.controlsOverlap, false, JSON.stringify(state));
   assert.ok(state.overflow <= 1, JSON.stringify(state));
 
+  assert.equal(state.magText, 'MAG', JSON.stringify(state));
+  assert.equal(state.langText, 'HU', JSON.stringify(state));
+  assert.equal(state.magBefore, 'none', JSON.stringify(state));
+  assert.equal(state.magAfter, 'none', JSON.stringify(state));
+  assert.ok(state.brandBox && state.magBox && state.langBox && state.menuBox, JSON.stringify(state));
+  assert.equal(overlap(state.brandBox, state.magBox), false, JSON.stringify(state));
+  assert.equal(overlap(state.magBox, state.langBox), false, JSON.stringify(state));
+  assert.equal(overlap(state.langBox, state.menuBox), false, JSON.stringify(state));
+
   if (isMobile) {
     assert.equal(state.normal, 'continuous-volume-99.8-percent-smooth', JSON.stringify(state));
     assert.equal(state.specular, 'soft-broad-low-gain-highlight-r465', JSON.stringify(state));
@@ -174,20 +196,14 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.match(state.filter, /contrast\(0?\.89\)/, state.filter);
     assert.match(state.filter, /saturate\(1\.1(?:0)?\)/, state.filter);
     assert.match(state.filter, /blur\(0\.82px\)/, state.filter);
-    assert.equal(state.magText, 'MAG', JSON.stringify(state));
-    assert.equal(state.langText, 'HU', JSON.stringify(state));
-    assert.equal(state.magBefore, 'none', JSON.stringify(state));
-    assert.equal(state.magAfter, 'none', JSON.stringify(state));
-    assert.ok(state.brandBox && state.magBox && state.langBox && state.menuBox, JSON.stringify(state));
-    assert.equal(overlap(state.brandBox, state.magBox), false, JSON.stringify(state));
-    assert.equal(overlap(state.magBox, state.langBox), false, JSON.stringify(state));
-    assert.equal(overlap(state.langBox, state.menuBox), false, JSON.stringify(state));
   } else {
     assert.equal(state.normal, 'continuous-volume-93-percent-smooth', JSON.stringify(state));
     assert.equal(state.specular, 'continuous-controlled-highlight', JSON.stringify(state));
     assert.equal(state.rendererSelection, 'r326-direct-r460-desktop-glass', JSON.stringify(state));
     assert.ok(state.opacity >= .99, JSON.stringify(state));
     assert.ok(!state.filter.includes('blur('), state.filter);
+    assert.equal(state.controlBoxes.length, 3, JSON.stringify(state));
+    assert.ok(state.controlBoxes.every(item => item.width >= 54 && item.height >= 54), JSON.stringify(state));
   }
 
   assert.deepEqual(pageErrors, [], `${name}: ${pageErrors.join(' | ')}`);
