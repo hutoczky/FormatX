@@ -1,0 +1,100 @@
+name: Normalize Cloudflare robots policy R487
+
+on:
+  workflow_run:
+    workflows: ['Prepare or deploy FormatX production']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-cloudflare-robots-r487
+  cancel-in-progress: true
+
+jobs:
+  normalize-robots:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.FORMATX_CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_WORKERS_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
+    steps:
+      - name: Disable managed robots prepend
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+
+          auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
+          zone_json="$(curl -fsS --retry 2 "${auth[@]}" 'https://api.cloudflare.com/client/v4/zones?name=formatxsuite.com&status=active&per_page=1')"
+          zone_id="$(python3 -c 'import json,sys; p=json.load(sys.stdin); r=p.get("result") or []; print(r[0].get("id","") if r else "")' <<<"$zone_json")"
+          test -n "$zone_id"
+
+          before="$(curl -fsS --retry 2 "${auth[@]}" "https://api.cloudflare.com/client/v4/zones/$zone_id/bot_management")"
+          python3 - <<'PY' <<<"$before"
+          import json,sys
+          p=json.load(sys.stdin)
+          assert p.get('success') is True, p
+          print('Current Cloudflare robots management:', (p.get('result') or {}).get('is_robots_txt_managed'))
+          PY
+
+          update="$(curl -fsS --retry 2 -X PUT "${auth[@]}" \
+            --data '{"is_robots_txt_managed":false,"bot_preference_sync_enabled":false,"cf_robots_variant":"off"}' \
+            "https://api.cloudflare.com/client/v4/zones/$zone_id/bot_management")"
+          python3 - <<'PY' <<<"$update"
+          import json,sys
+          p=json.load(sys.stdin)
+          assert p.get('success') is True, p
+          r=p.get('result') or {}
+          assert r.get('is_robots_txt_managed') is False, r
+          if 'bot_preference_sync_enabled' in r:
+              assert r.get('bot_preference_sync_enabled') is False, r
+          if 'cf_robots_variant' in r:
+              assert r.get('cf_robots_variant') == 'off', r
+          print('PASS: Cloudflare managed robots prepend disabled.')
+          PY
+
+      - name: Verify canonical live robots.txt
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            body="$(curl -fsS -H 'Cache-Control: no-cache' "https://formatxsuite.com/robots.txt?r487=$GITHUB_RUN_ID-$attempt")"
+            if ! grep -Fq 'Content-Signal:' <<<"$body" \
+              && grep -Fq 'User-agent: *' <<<"$body" \
+              && grep -Fq 'Sitemap: https://formatxsuite.com/sitemap.xml' <<<"$body"; then
+              printf '%s\n' "$body"
+              echo 'PASS: canonical live robots.txt has no managed Content-Signal directive.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Cloudflare still prepends Content-Signal after R487 normalization.' >&2
+          exit 1
+
+      - name: Publish robots policy status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Canonical Worker robots.txt is the only live robots policy'
+          else
+            state=failure
+            description='Cloudflare managed robots policy normalization failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state="$state" \
+            -f context='FormatX canonical robots policy' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
