@@ -1,11 +1,13 @@
 {
-  "revision": "R481.1",
-  "status": "production-candidate-r481.1",
+  "revision": "R482",
+  "status": "production-candidate-r482",
   "primary_mag": {
     "desktop": "registered-compositor-breath-visible-zero-webgl-idle",
     "mobile": "registered-compositor-breath-visible-zero-webgl-idle",
-    "mobile_optics": "reduced-centre-flare-reduced-halo-feathered-edge"
+    "mobile_optics": "restrained-spectrum-soft-edge-reduced-halo"
   },
+  "mag_family": "large-mini-header-colour-synchronised",
+  "spectrum": "cyan-cobalt-violet-soft-magenta",
   "renderer": "single-webgl-crystal-organism-r326",
   "performance_contract": "no-continuous-webgl-idle-loop",
   "animation_contract": "registered-numeric-custom-properties-feed-important-opacity-scale",
