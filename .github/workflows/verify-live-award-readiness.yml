@@ -1,5 +1,5 @@
-name: Verify live R457-R458 award readiness
-run-name: R457/R458 live award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
+name: Verify R471 award readiness
+run-name: R471 award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   push:
@@ -20,8 +20,10 @@ permissions:
   contents: read
   statuses: write
 
+# A production-workflow completion must never cancel the source audit that
+# triggered it. Live verification is reserved for an actual deploy candidate.
 concurrency:
-  group: r457-r458-live-award-${{ github.event.workflow_run.head_sha || github.sha }}
+  group: r471-award-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -41,21 +43,28 @@ jobs:
         with:
           ref: ${{ env.AUDITED_SHA }}
 
-      - name: Validate R457-R458 source contracts
+      - name: Validate current R471 source contracts
         shell: bash
         run: |
           set -euo pipefail
           node .github/scripts/validate-award-readiness.cjs
           node .github/scripts/validate-living-core-r425-source.cjs
           node .github/scripts/validate-real3d-core.cjs
+          node .github/scripts/validate-wda-100-r198.cjs
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
+          node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js
           node --check docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
+          node --check docs/scifi-ui/scripts/single-language-toggle.js
 
-      - name: Wait for production and verify R457 optics plus R458 first-paint ownership
+      - name: Verify deployed R471 optics and first-paint ownership
+        if: >-
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]')) ||
+          (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+           contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
         shell: bash
         run: |
           set -euo pipefail
@@ -65,49 +74,54 @@ jobs:
           for attempt in $(seq 1 50); do
             stamp="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}"
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/?audit=$stamp" -o "$tmp/home.html" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?audit=$stamp" -o "$tmp/motion.js" || true
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-crystal-organism-r326.js?audit=$stamp" -o "$tmp/core.js" || true
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-current-mag-loader-r422.js?audit=$stamp" -o "$tmp/loader.js" || true
-            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?audit=$stamp" -o "$tmp/reference.js" || true
-            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-mobile-regression-r310.js?audit=$stamp" -o "$tmp/regression.js" || true
-            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/styles/formatx-core-shapeshifter-r337.css?audit=$stamp" -o "$tmp/optics.css" || true
-            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/styles/formatx-current-mag-r422.css?audit=$stamp" -o "$tmp/layout.css" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?audit=$stamp" -o "$tmp/solid.js" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/styles/formatx-core-life-r455.css?audit=$stamp" -o "$tmp/life.css" || true
             if grep -Fq 'living-luminous-electric-crystal-r454' "$tmp/core.js" \
-              && grep -Fq 'intermittent-native-electric-filament-every-five-to-six-seconds' "$tmp/core.js" \
-              && grep -Fq 'direct-r326-r456-uniform-solid-glass-idle-zero' "$tmp/loader.js" \
-              && grep -Fq 'r457-soft-mobile-edge-bloom' "$tmp/loader.js" \
-              && grep -Fq 'static-first-paint-owner-no-late-css' "$tmp/reference.js" \
-              && grep -Fq 'static-first-paint-owner-no-late-css' "$tmp/regression.js" \
-              && grep -Fq 'production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer' "$tmp/layout.css"; then
+              && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r471-softer-mobile-mag' "$tmp/motion.js" \
+              && grep -Fq "fxFinalVisualRevisionR471='softer-mobile-mag'" "$tmp/motion.js" \
+              && grep -Fq 'formatx-core-life-r455.css?v=20260831-r471-softer-mobile-bloom-feather' "$tmp/loader.js" \
+              && grep -Fq "fxCurrentMagOpticsR471=mobile?'reduced-bloom-feathered-silhouette':'desktop-optics-unchanged'" "$tmp/loader.js" \
+              && grep -Fq "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'" "$tmp/solid.js" \
+              && grep -Fq 'FormatX r471' "$tmp/life.css"; then
               ready=1
               break
             fi
             sleep 10
           done
           test "$ready" = 1
-          grep -Fq 'uSurfacePulse' "$tmp/core.js"
-          grep -Fq 'surfaceFilament' "$tmp/core.js"
-          grep -Fq 'brightness(1.20)' "$tmp/optics.css"
-          grep -Fq 'contrast(.98)' "$tmp/optics.css"
-          grep -Fq 'saturate(1.31)' "$tmp/optics.css"
-          grep -Fq 'blur(.48px)' "$tmp/optics.css"
+          grep -Fq 'single-luminous-webgl-material-owner' "$tmp/core.js"
+          grep -Fq 'explicit-mag-interaction-only-zero-idle' "$tmp/loader.js"
+          grep -Fq 'soft-perimeter-low-bloom-low-cost-shader' "$tmp/solid.js"
+          grep -Fq 'opacity: .93' "$tmp/life.css"
+          grep -Fq 'brightness(.96)' "$tmp/life.css"
+          grep -Fq 'contrast(.80)' "$tmp/life.css"
+          grep -Fq 'saturate(.99)' "$tmp/life.css"
+          grep -Fq 'blur(1.26px)' "$tmp/life.css"
           grep -Fq 'data-fx-production-first-paint-r370' "$tmp/home.html"
-          ! grep -Fq 'formatx-mag-surface-sheen-r439.js' "$tmp/home.html"
-          ! grep -Fq 'formatx-mag-surface-sheen-r439.js' "$tmp/loader.js"
           ! grep -Eq 'formatx-(crystal-portal-r318|quantum-particles-r335|core-mechanical-orb-r250)' "$tmp/home.html"
 
-      - name: Publish live award status
+      - name: Publish award readiness status
         if: always()
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           RESULT: ${{ job.status }}
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_MESSAGE: ${{ github.event.head_commit.message }}
+          WORKFLOW_MESSAGE: ${{ github.event.workflow_run.head_commit.message }}
         shell: bash
         run: |
           state=failure
-          description='R457/R458 live award audit failed'
+          description='R471 award readiness audit failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R457 soft MAG optics and R458 first-paint ownership passed live'
+            description='R471 source award readiness passed'
+            if [[ "$EVENT_NAME" == workflow_dispatch || "$PUSH_MESSAGE" == *'[deploy-production]'* || "$WORKFLOW_MESSAGE" == *'[deploy-production]'* ]]; then
+              description='R471 softer MAG optics and first-paint ownership passed live'
+            fi
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
