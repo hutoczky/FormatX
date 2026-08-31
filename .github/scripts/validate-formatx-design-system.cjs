@@ -79,15 +79,15 @@ async function inspect(browser, config, viewport) {
   }, config.sheet, { timeout: 20000 });
 
   if (config.waitForMotionCss) {
-    // r423+ deliberately keeps non-core motion CSS off the first-load path.
-    // Exercise the production contract with a real, non-reserved user intent,
-    // then require the deferred stylesheet and current state marker to resolve.
+    // R468 deliberately keeps non-core motion CSS off the first-load path.
+    // Exercise the production contract with real non-reserved user intent,
+    // then require the external strict-CSP stylesheet and current runtime state.
     await page.keyboard.press('ArrowDown');
     await page.waitForFunction(() => {
       const link = document.querySelector('link[data-fx-runtime-static-r243="true"]');
       const state = document.documentElement.dataset.fxMotionRuntimeR239 || '';
       return document.documentElement.dataset.fxMotionCssR243 === 'external-strict-csp-user-intent'
-        && state === 'enhanced-r423-user-intent'
+        && state === 'enhanced-r468-user-intent'
         && link && link.sheet;
     }, null, { timeout: 20000 });
   }
@@ -166,7 +166,7 @@ async function inspect(browser, config, viewport) {
   assert.equal(result.designSystem, '2');
   if (config.waitForMotionCss) {
     assert.equal(result.motionCss, 'external-strict-csp-user-intent');
-    assert.equal(result.motionRuntime, 'enhanced-r423-user-intent');
+    assert.equal(result.motionRuntime, 'enhanced-r468-user-intent');
   }
   assert.equal(result.sheetLoaded, true);
   assert.match(result.sheetHref, config.sheetPattern);
