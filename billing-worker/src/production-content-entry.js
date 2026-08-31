@@ -1,7 +1,7 @@
 import productionBase from './production-content-entry-r369-base.js';
 
 /*
-  FormatX r487 — final public edge stabilizer + first-paint scheduler.
+  FormatX r489 — public edge stabilizer + first-paint scheduler + a11y cache owner.
 
   The production base remains the functional owner. This edge layer keeps the
   canonical security/robots contract and, on the homepage only, lets one stable
@@ -10,7 +10,7 @@ import productionBase from './production-content-entry-r369-base.js';
   the first committed frame by formatx-deferred-css-r487.js.
 */
 
-const STARTUP_REVISION = '20260831-r487-first-paint-scheduler';
+const STARTUP_REVISION = '20260901-r489-first-paint-a11y';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
@@ -33,7 +33,7 @@ const HEADER_CSP = [
   'upgrade-insecure-requests',
 ].join('; ');
 const ROBOTS = [
-  '# FormatX canonical robots policy — served by the production Worker r487',
+  '# FormatX canonical robots policy — served by the production Worker r489',
   'User-agent: *',
   'Allow: /',
   'Disallow: /api/',
@@ -43,10 +43,6 @@ const ROBOTS = [
   '',
 ].join('\n');
 
-// These styles are important for the complete experience but none is required
-// to paint the already-static header + hero copy. Keeping them out of the
-// render-blocking set removes the 15-19 stylesheet waterfall measured by the
-// live mobile Lighthouse profile without creating an audit-only experience.
 const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
@@ -77,7 +73,7 @@ function robotsResponse(request) {
     'Content-Type': 'text/plain; charset=utf-8',
     'Cache-Control': 'no-store, max-age=0',
     'X-Content-Type-Options': 'nosniff',
-    'X-FormatX-Robots-Owner': 'worker-r487',
+    'X-FormatX-Robots-Owner': 'worker-r489',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -135,16 +131,16 @@ function injectDeferredCssRuntime(html) {
   return source.replace('</head>', `  ${DEFERRED_CSS_SCRIPT}\n</head>`);
 }
 
-function cacheBustR487CriticalQuality(html) {
+function cacheBustR489CriticalQuality(html) {
   return String(html || '').replace(
     /formatx-quality-r461\.css\?v=[^"']+/g,
-    'formatx-quality-r461.css?v=20260831-r487-live-a11y'
+    'formatx-quality-r461.css?v=20260901-r489-mobile-a11y-contrast'
   );
 }
 
 function optimizeHomepage(html) {
   let source = injectFirstPaint(html);
-  source = cacheBustR487CriticalQuality(source);
+  source = cacheBustR489CriticalQuality(source);
   source = deferNonCriticalStyles(source);
   source = injectDeferredCssRuntime(source);
   return source;
@@ -155,7 +151,7 @@ async function stabilizePublicResponse(request, url, response) {
 
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', `r487-first-paint:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-Edge-Stability', `r489-first-paint:${STARTUP_REVISION}`);
   headers.set('X-FormatX-CSS-Scheduler', 'r487-post-first-paint');
 
   if (request.method === 'HEAD') {
