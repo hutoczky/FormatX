@@ -1,8 +1,10 @@
-/* FormatX r471 — softer mobile display tone for the native WebGL MAG.
-   The renderer remains the only 3D/material owner. This pass responds to the
-   real-phone reference by trimming the centre glow, lowering spectral punch and
-   feathering the silhouette slightly more without blurring the crystal body.
-   WebGL itself remains zero-idle under the R465 governor. */
+/* FormatX r472 — PC-bright mobile core with restrained perimeter bloom.
+   The native WebGL renderer remains the only 3D/material owner. The phone
+   display pass now restores centre visibility to desktop-like luminance while
+   removing the wide blur that made the outer halo look overdriven. Lower
+   contrast feathers the silhouette without turning it into a razor edge, and
+   the idle compositor animation is removed so the zero-idle governor stays
+   physically zero-idle between explicit interactions. */
 
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage,
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
@@ -10,33 +12,29 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   transform-origin: 50% 50%;
 }
 
-@keyframes fx-core-r468-compositor-breathe {
-  0%, 100% { transform: translate3d(0, .35px, 0) scale(.9994); }
-  50% { transform: translate3d(0, -.55px, 0) scale(1.0014); }
-}
-
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage {
     overflow: visible !important;
     filter: none !important;
-    animation: fx-core-r468-compositor-breathe 5.4s cubic-bezier(.45,0,.55,1) infinite !important;
-    will-change: transform;
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
   }
 
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .93 !important;
+    opacity: 1 !important;
     filter:
-      brightness(.96)
-      contrast(.80)
-      saturate(.99)
-      blur(1.26px) !important;
+      brightness(1.15)
+      contrast(.72)
+      saturate(1.00)
+      blur(.48px) !important;
     -webkit-filter:
-      brightness(.96)
-      contrast(.80)
-      saturate(.99)
-      blur(1.26px) !important;
+      brightness(1.15)
+      contrast(.72)
+      saturate(1.00)
+      blur(.48px) !important;
   }
 }
 
