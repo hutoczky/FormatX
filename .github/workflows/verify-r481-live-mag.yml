@@ -137,12 +137,12 @@ jobs:
             assert.ok(state.overflow<=2,JSON.stringify(state));
 
             if(mobile){
-              assert.ok(state.animationName.includes('fx-primary-mag-living-mobile-r482'),state.animationName);
-              assert.match(state.filter,/brightness\(0\.66\)/);
-              assert.match(state.filter,/contrast\(0\.61\)/);
-              assert.match(state.filter,/saturate\(1\.45\)/);
-              assert.match(state.filter,/hue-rotate\(-5deg\)/);
-              assert.match(state.filter,/blur\(1\.28px\)/);
+              assert.ok(state.animationName.includes('fx-primary-mag-mobile-heart-r483'),state.animationName);
+              assert.match(state.filter,/brightness\(1\.02\)/);
+              assert.match(state.filter,/contrast\(0\.98\)/);
+              assert.match(state.filter,/saturate\(1\.28\)/);
+              assert.match(state.filter,/hue-rotate\(-3deg\)/);
+              assert.match(state.filter,/blur\(0\.3px\)/);
             }else{
               assert.ok(state.animationName.includes('fx-primary-mag-living-desktop-r482'),state.animationName);
             }

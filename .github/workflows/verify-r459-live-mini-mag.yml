@@ -82,9 +82,9 @@ jobs:
 
           grep -Fq "const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'" "$CURRENT"
           grep -Fq 'formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge' "$CURRENT"
-          grep -Fq 'formatx-core-life-r455.css?v=20260831-r471-softer-mobile-bloom-feather' "$CURRENT"
-          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r471-softer-mobile-mag' "$MOTION"
-          grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics' "$MOTION"
+          grep -Fq 'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow' "$CURRENT"
+          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy' "$MOTION"
+          grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r484-readable-electric-surface' "$MOTION"
 
           if grep -Eq 'requestAnimationFrame\([^)]*sync|function[[:space:]]+frame|setInterval' "$SYNC"; then
             echo 'R479 MAG sync must not add an idle JavaScript render loop.' >&2
@@ -117,7 +117,7 @@ jobs:
               && grep -Fq 'brightness(.72)' "$tmp/sync.css" \
               && grep -Fq 'saturate(1.38)' "$tmp/sync.css" \
               && grep -Fq 'fx-primary-mag-live-breath-r479' "$tmp/sync.css" \
-              && grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics' "$tmp/motion.js" \
+              && grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r484-readable-electric-surface' "$tmp/motion.js" \
               && grep -Fq '"revision": "R479"' "$tmp/marker.json"; then
               echo 'PASS: production serves R479 living colour-depth MAG optics.'
               rm -rf "$tmp"
@@ -190,7 +190,7 @@ jobs:
               const style=canvas?getComputedStyle(canvas):null;
               const box=canvas?.getBoundingClientRect();
               return d.fxCrystalOrganismR326==='ready'
-                && d.fxMagShapeSyncR476==='ready-r479'
+                && d.fxMagShapeSyncR476==='ready-r482'
                 && canvas && style && box && box.width>120 && box.height>180
                 && style.display!=='none' && style.visibility!=='hidden' && Number(style.opacity)>.2;
             },null,{timeout:120000});
@@ -219,16 +219,16 @@ jobs:
               };
             });
             assert.equal(state.renderer,'single-webgl-crystal-organism-r326');
-            assert.equal(state.shapeSync,'ready-r479');
+            assert.equal(state.shapeSync,'ready-r482');
             assert.ok(['breath','pulse'].includes(state.life),JSON.stringify(state));
             assert.equal(state.lifeContract,'primary-and-mini-compositor-breath-colour-depth-zero-js-idle');
             assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441');
             assert.equal(state.idle,'zero-frame');
-            assert.match(state.filter,/brightness\(0\.72\)/);
-            assert.match(state.filter,/contrast\(0\.76\)/);
-            assert.match(state.filter,/saturate\(1\.38\)/);
-            assert.match(state.filter,/blur\(1\.15px\)/);
-            assert.ok(state.animationName.includes('fx-primary-mag-live-breath-r479'),state.animationName);
+            assert.match(state.filter,/brightness\(1\.02\)/);
+            assert.match(state.filter,/contrast\(0\.98\)/);
+            assert.match(state.filter,/saturate\(1\.28\)/);
+            assert.match(state.filter,/blur\(0\.3px\)/);
+            assert.ok(state.animationName.includes('fx-primary-mag-mobile-heart-r483'),state.animationName);
             assert.equal(state.controls.length,3);
             assert.ok(state.controls.every(c=>c.width>=44&&c.height>=44&&c.display!=='none'&&c.visibility!=='hidden'&&c.opacity>.2),JSON.stringify(state.controls));
             const overlaps=(a,b)=>!(a.right+2<=b.left||b.right+2<=a.left||a.bottom+2<=b.top||b.bottom+2<=a.top);

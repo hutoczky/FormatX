@@ -141,6 +141,9 @@ jobs:
             await lang.tap();
             await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.topbar > .fx-language-toggle')?.textContent?.trim()==='EN'&&document.querySelector('.topbar > .fx-reference-mag-button')?.textContent?.trim()==='CORE',null,{timeout:5000});
             for(const selector of ['.fx-three-sound','.topbar > .fx-reference-mag-button']){
+              // Pricing navigation intentionally scrolled the hero offscreen.
+              // Hit-testing outside the viewport cannot detect an overlay.
+              await page.locator(selector).first().scrollIntoViewIfNeeded();
               const box=await page.locator(selector).first().boundingBox();assert(box,`mobile: missing ${selector}`);
               const topmost=await page.evaluate(({selector,x,y})=>Boolean(document.elementFromPoint(x,y)?.closest?.(selector)),{selector,x:box.x+box.width/2,y:box.y+box.height/2});
               assert(topmost,`mobile: ${selector} is not topmost after closing Mini MAG`);
