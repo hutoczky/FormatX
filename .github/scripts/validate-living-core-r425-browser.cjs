@@ -28,7 +28,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   const pageErrors = [];
   page.on('pageerror', error => pageErrors.push(error.message));
 
-  await page.goto(`${origin}?r467_current_browser=${name}-${Date.now()}&lang=hu`, {
+  await page.goto(`${origin}?r468_current_browser=${name}-${Date.now()}&lang=hu`, {
     waitUntil: 'domcontentloaded',
     timeout: 30000
   });
@@ -44,17 +44,15 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       && root.dataset.fxCoreTriangleEdgesR456 === 'disabled'
       && root.dataset.fxCoreOuterNoiseR456 === 'disabled-on-glass-shell'
       && root.dataset.fxCoreShaderHookR456 === 'released-after-r326-compile'
-      && (!mobile || root.dataset.fxCurrentMagOpticsR465 === 'soft-perimeter-low-bloom-low-cost-shader')
+      && root.dataset.fxCoreLifeR455 === 'ready'
+      && root.dataset.fxCoreEnergyBoltR455 === 'armed-full-surface-explicit-interaction'
+      && (!mobile || root.dataset.fxCurrentMagOpticsR468 === 'soft-bloom-soft-edge-compositor-breathe')
       && typeof window.FormatXCoreMobileV69?.surfacePulse === 'function';
   }, isMobile, { timeout: 60000 });
 
-  await page.evaluate(() => {
-    document.documentElement.dataset.fxReferenceMotionPaused = 'false';
-    window.FormatXCoreMobileV69.requestRender?.(4);
-  });
-  await page.waitForTimeout(160);
-  const pulseStarted = await page.evaluate(() => window.FormatXCoreMobileV69.surfacePulse());
-  assert.equal(pulseStarted, true, `${name}: manual surface energy did not start`);
+  const stageLocator = page.locator('#hero .fx-crystal-organism-r326-stage').first();
+  await stageLocator.click({ position: { x: Math.max(20, Math.floor(viewport.width * .26)), y: 160 } });
+  await page.waitForFunction(() => document.documentElement.dataset.fxCoreEnergyBoltR455?.startsWith('surface-sweep-'));
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreSurfacePulseR454?.startsWith('sweep-'));
   await page.waitForTimeout(260);
 
@@ -74,6 +72,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const gl = canvas?.getContext('webgl2') || canvas?.getContext('webgl');
     const canvasBox = canvas?.getBoundingClientRect();
     const style = canvas ? getComputedStyle(canvas) : null;
+    const stageStyle = stage ? getComputedStyle(stage) : null;
     const controls = document.querySelector('#hero .fx-reference-controls-r204');
     const sound = controls?.querySelector('.fx-three-sound');
     const ask = controls?.querySelector('.fx-reference-ask');
@@ -108,11 +107,16 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       shaderHook: root.dataset.fxCoreShaderHookR456 || '',
       loaderOptics: root.dataset.fxCurrentMagOpticsR456 || '',
       mobileOptics: root.dataset.fxCurrentMagOpticsR465 || '',
+      finalOptics: root.dataset.fxCurrentMagOpticsR468 || '',
       rendererSelection: root.dataset.fxCoreRendererSelection || '',
       governor: root.dataset.fxMobileRenderGovernorRevisionR433 || '',
+      idlePolicy: root.dataset.fxCoreMobileIdlePolicyR426 || root.dataset.fxCoreIdlePolicyR455 || '',
+      life: root.dataset.fxCoreLifeR455 || '',
+      energyBolt: root.dataset.fxCoreEnergyBoltR455 || '',
       stageCount: document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
       canvasCount: document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
       solidScriptCount: [...document.scripts].filter(script => /formatx-mobile-solid-glass-r456\.js/.test(script.src)).length,
+      lifeScriptCount: [...document.scripts].filter(script => /formatx-core-life-r455\.js/.test(script.src)).length,
       legacyFrames: document.querySelectorAll('.fx-three-frame, iframe[src*="three-stage"], [data-renderer*="mechanical-orb"]').length,
       legacyScripts: [...document.scripts].filter(script => /formatx-(mobile-recovery|core-real3d-v20|core-mechanical-orb-r250)\.js/.test(script.src)).length,
       gl: Boolean(gl),
@@ -122,6 +126,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       height: canvasBox?.height || 0,
       opacity: Number(style?.opacity || 0),
       filter: style?.filter || '',
+      stageAnimation: stageStyle?.animationName || '',
       controlsVisible: visible(controls),
       controlsOneRow: boxes.length === 3 && Math.max(...boxes.map(item => item.top)) - Math.min(...boxes.map(item => item.top)) <= 8,
       controlsOverlap: boxes.length === 3 && (localOverlap(boxes[0], boxes[1]) || localOverlap(boxes[1], boxes[2])),
@@ -136,13 +141,13 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   });
 
   const viewportShot = await page.screenshot({
-    path: path.join(output, `${name}-r467-current-viewport.png`),
+    path: path.join(output, `${name}-r468-current-viewport.png`),
     fullPage: false,
     animations: 'disabled',
     caret: 'hide'
   });
   const magShot = await page.locator('#hero .fx-crystal-organism-r326-canvas').screenshot({
-    path: path.join(output, `${name}-r467-current-mag.png`),
+    path: path.join(output, `${name}-r468-current-mag.png`),
     animations: 'disabled',
     caret: 'hide'
   });
@@ -161,9 +166,12 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.equal(state.innerLife, 'preserved-low-cost-mobile-field', JSON.stringify(state));
   assert.equal(state.shaderHook, 'released-after-r326-compile', JSON.stringify(state));
   assert.equal(state.loaderOptics, 'uniform-solid-glass-shell-no-vram-artifact', JSON.stringify(state));
+  assert.equal(state.life, 'ready', JSON.stringify(state));
+  assert.match(state.energyBolt, /^surface-sweep-/, JSON.stringify(state));
   assert.equal(state.stageCount, 1, JSON.stringify(state));
   assert.equal(state.canvasCount, 1, JSON.stringify(state));
   assert.equal(state.solidScriptCount, 1, JSON.stringify(state));
+  assert.equal(state.lifeScriptCount, 1, JSON.stringify(state));
   assert.equal(state.legacyFrames, 0, JSON.stringify(state));
   assert.equal(state.legacyScripts, 0, JSON.stringify(state));
   assert.equal(state.gl, true, JSON.stringify(state));
@@ -189,17 +197,20 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.equal(state.normal, 'continuous-volume-99.8-percent-smooth', JSON.stringify(state));
     assert.equal(state.specular, 'soft-broad-low-gain-highlight-r465', JSON.stringify(state));
     assert.equal(state.mobileOptics, 'soft-perimeter-low-bloom-low-cost-shader', JSON.stringify(state));
-    assert.equal(state.rendererSelection, 'r326-direct-r465-soft-optics-no-idle-redraw', JSON.stringify(state));
+    assert.equal(state.finalOptics, 'soft-bloom-soft-edge-compositor-breathe', JSON.stringify(state));
+    assert.equal(state.rendererSelection, 'r326-direct-r468-soft-optics-live-energy-zero-idle', JSON.stringify(state));
     assert.equal(state.governor, 'r465-direct-pause-flag-no-idle-redraw', JSON.stringify(state));
-    assert.ok(state.opacity >= .96 && state.opacity <= 1, JSON.stringify(state));
-    assert.match(state.filter, /brightness\(1\.065\)/, state.filter);
-    assert.match(state.filter, /contrast\(0?\.89\)/, state.filter);
-    assert.match(state.filter, /saturate\(1\.1(?:0)?\)/, state.filter);
-    assert.match(state.filter, /blur\(0\.82px\)/, state.filter);
+    assert.equal(state.idlePolicy, 'explicit-mag-interaction-only-zero-idle', JSON.stringify(state));
+    assert.ok(state.opacity >= .94 && state.opacity <= .96, JSON.stringify(state));
+    assert.match(state.filter, /brightness\(1\)/, state.filter);
+    assert.match(state.filter, /contrast\(0?\.84\)/, state.filter);
+    assert.match(state.filter, /saturate\(1\.04\)/, state.filter);
+    assert.match(state.filter, /blur\(1\.02px\)/, state.filter);
+    assert.equal(state.stageAnimation, 'fx-core-r468-compositor-breathe', JSON.stringify(state));
   } else {
     assert.equal(state.normal, 'continuous-volume-93-percent-smooth', JSON.stringify(state));
     assert.equal(state.specular, 'continuous-controlled-highlight', JSON.stringify(state));
-    assert.equal(state.rendererSelection, 'r326-direct-r460-desktop-glass', JSON.stringify(state));
+    assert.equal(state.rendererSelection, 'r326-direct-r468-desktop-live-energy', JSON.stringify(state));
     assert.ok(state.opacity >= .99, JSON.stringify(state));
     assert.ok(!state.filter.includes('blur('), state.filter);
     assert.equal(state.controlBoxes.length, 3, JSON.stringify(state));
