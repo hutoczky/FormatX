@@ -1,0 +1,229 @@
+name: P0 VIP Awwwards Quality Gate
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/**'
+      - 'lighthouserc*.json'
+      - '.github/scripts/validate-p0-vip-quality.cjs'
+      - '.github/scripts/summarize-p0-lighthouse.cjs'
+      - '.github/workflows/p0-vip-quality-gate.yml'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'
+  push:
+    branches: [master, p0-vip-awwwards-gate]
+    paths:
+      - 'docs/**'
+      - 'lighthouserc*.json'
+      - '.github/scripts/validate-p0-vip-quality.cjs'
+      - '.github/scripts/summarize-p0-lighthouse.cjs'
+      - '.github/workflows/p0-vip-quality-gate.yml'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: p0-vip-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PLAYWRIGHT_VERSION: '1.62.1'
+  FORMATX_TEST_URL: 'http://127.0.0.1:4178/scifi-ui/index.html'
+
+jobs:
+  browser-p0:
+    name: Browser / responsive / fallback P0
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install pinned Playwright runtime and browsers
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUNTIME="$RUNNER_TEMP/formatx-p0-playwright"
+          mkdir -p "$RUNTIME"
+          cd "$RUNTIME"
+          npm init -y >/dev/null
+          npm install --save-exact "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium firefox webkit
+          npx playwright install chrome msedge
+          echo "NODE_PATH=$RUNTIME/node_modules" >> "$GITHUB_ENV"
+
+      - name: Start deterministic static candidate server
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --bind 127.0.0.1 --directory docs >"$RUNNER_TEMP/formatx-p0-http.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/formatx-p0-http.pid"
+          for attempt in $(seq 1 40); do
+            if curl -fsS --max-time 3 "$FORMATX_TEST_URL" >/dev/null; then
+              echo 'Candidate server ready.'
+              exit 0
+            fi
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-p0-http.log" || true
+          exit 1
+
+      - name: Run premium P0 browser matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p p0-evidence/screenshots
+          node .github/scripts/validate-p0-vip-quality.cjs 2>&1 | tee p0-evidence/p0-browser-console.log
+
+      - name: Capture canonical evidence screenshots
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          mkdir -p p0-evidence/screenshots
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('node:fs');
+          (async()=>{
+            const browser = await chromium.launch({headless:true, channel:'chrome'});
+            try {
+              for (const p of [
+                {name:'desktop-evidence', viewport:{width:1440,height:900}, mobile:false},
+                {name:'mobile-evidence', viewport:{width:390,height:844}, mobile:true}
+              ]) {
+                const c=await browser.newContext({viewport:p.viewport,isMobile:p.mobile,hasTouch:p.mobile,deviceScaleFactor:p.mobile?2:1,locale:'hu-HU'});
+                const page=await c.newPage();
+                await page.goto(process.env.FORMATX_TEST_URL,{waitUntil:'domcontentloaded',timeout:45000});
+                await page.waitForLoadState('networkidle',{timeout:6000}).catch(()=>{});
+                await page.waitForTimeout(900);
+                await page.screenshot({path:`p0-evidence/screenshots/${p.name}.png`,fullPage:false,animations:'disabled'});
+                await c.close();
+              }
+            } finally { await browser.close(); }
+          })().catch(e=>{ console.error(e); process.exitCode=1; });
+          NODE
+          cp "$RUNNER_TEMP/formatx-p0-http.log" p0-evidence/static-server.log 2>/dev/null || true
+
+      - name: Upload browser P0 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-vip-browser-evidence-${{ github.sha }}
+          path: p0-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+
+  lighthouse-p0:
+    name: Lighthouse 100 / 100 / 100 / 100 x3 P0
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: Run desktop and mobile strict Lighthouse gates
+        shell: bash
+        run: |
+          set +e
+          mkdir -p lighthouse-results/desktop lighthouse-results/mobile p0-evidence
+
+          rm -rf .lighthouseci
+          lhci autorun --config=./lighthouserc.json 2>&1 | tee p0-evidence/lighthouse-desktop-output.log
+          desktop_rc=${PIPESTATUS[0]}
+          if [ -d .lighthouseci ]; then cp -a .lighthouseci/. lighthouse-results/desktop/; fi
+
+          rm -rf .lighthouseci
+          lhci autorun --config=./lighthouserc.mobile.json 2>&1 | tee p0-evidence/lighthouse-mobile-output.log
+          mobile_rc=${PIPESTATUS[0]}
+          if [ -d .lighthouseci ]; then cp -a .lighthouseci/. lighthouse-results/mobile/; fi
+
+          node .github/scripts/summarize-p0-lighthouse.cjs lighthouse-results p0-evidence 2>&1 | tee p0-evidence/p0-lighthouse-summary-console.log
+          summary_rc=${PIPESTATUS[0]}
+
+          echo "desktop_rc=$desktop_rc mobile_rc=$mobile_rc summary_rc=$summary_rc"
+          if [ "$desktop_rc" -ne 0 ] || [ "$mobile_rc" -ne 0 ] || [ "$summary_rc" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Upload Lighthouse P0 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-vip-lighthouse-evidence-${{ github.sha }}
+          path: |
+            lighthouse-results/
+            p0-evidence/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 90
+
+  automated-p0:
+    name: Automated P0 VIP release gate
+    if: always()
+    needs: [browser-p0, lighthouse-p0]
+    runs-on: ubuntu-latest
+    env:
+      AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      BROWSER_RESULT: ${{ needs.browser-p0.result }}
+      LIGHTHOUSE_RESULT: ${{ needs.lighthouse-p0.result }}
+    steps:
+      - name: Publish P0 summary
+        shell: bash
+        run: |
+          {
+            echo '## FormatX P0 VIP automated gate'
+            echo
+            echo "- Browser/responsive/fallback matrix: **${BROWSER_RESULT}**"
+            echo "- Lighthouse desktop + mobile, 3 runs, pessimistic: **${LIGHTHOUSE_RESULT}**"
+            echo '- Lighthouse requirement: **100 / 100 / 100 / 100 on every run**'
+            echo '- LCP: **< 2.0 s**'
+            echo '- CLS: **< 0.05**'
+            echo '- TBT lab guardrail: **<= 150 ms**'
+            echo '- Console/page errors: **0**'
+            echo '- Broken loaded assets / HTTP 4xx-5xx: **0**'
+            echo '- Horizontal overflow: **0**'
+            echo '- Keyboard/reduced-motion/no-JS/WebGL fallback: **required**'
+            echo
+            echo '> Final P0 sign-off also requires field INP <= 200 ms and real-device Safari/iPhone evidence. CI emulation is not presented as field/device proof.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish commit status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if [ "$BROWSER_RESULT" = success ] && [ "$LIGHTHOUSE_RESULT" = success ]; then
+            state=success
+            description='Automated P0 VIP gates passed; field INP and real iPhone evidence remain final sign-off inputs'
+          else
+            state=failure
+            description='Automated P0 VIP quality gate failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state="$state" \
+            -f context='FormatX P0 VIP quality gate' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+      - name: Enforce automated P0 result
+        shell: bash
+        run: |
+          test "$BROWSER_RESULT" = success
+          test "$LIGHTHOUSE_RESULT" = success
