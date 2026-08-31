@@ -57,10 +57,12 @@ jobs:
           grep -Fq '.fx-mini-mag-glyph-r459' "$SYNC"
           grep -Fq 'formatx:coreshapechange' "$SYNC"
           grep -Fq 'formatx:minimagready' "$SYNC"
+          grep -Fq 'r477-refined-phone-highlight-edge-softening' "$SYNC"
 
           grep -Fq 'data-fx-core-shape="sphere"' "$SYNC_CSS"
-          grep -Fq 'brightness(.92) contrast(.74) saturate(.94) blur(1.55px)' "$SYNC_CSS"
+          grep -Fq 'brightness(.88) contrast(.68) saturate(.91) blur(1.85px)' "$SYNC_CSS"
           grep -Fq 'production-r476-shape-synchronised-mini-mag-header-icon-soft-phone-optics' "$SYNC_CSS"
+          grep -Fq 'production-r477-refined-phone-highlight-and-edge-softening' "$SYNC_CSS"
 
           grep -Fq "const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'" "$CURRENT"
           grep -Fq 'formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge' "$CURRENT"
@@ -68,7 +70,7 @@ jobs:
           grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r471-softer-mobile-mag' "$MOTION"
           grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics' "$MOTION"
 
-          echo 'PASS: R476 keeps one R326 primary renderer and synchronizes the Mini MAG/header icon to the primary crystal/sphere state without idle rendering.'
+          echo 'PASS: R476 keeps one R326 primary renderer, synchronizes Mini MAG/header state, and enforces the refined R477 softer mobile optic contract.'
 
       - name: Verify production serves R476 when deploying
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
@@ -84,9 +86,10 @@ jobs:
             motion_code="$(curl -sS --max-time 30 -o "$tmp/motion.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?r476=${GITHUB_RUN_ID}_${attempt}" || true)"
             if [[ "$sync_code" == 200 && "$css_code" == 200 && "$motion_code" == 200 ]] \
               && grep -Fq 'fxMiniMagShapeSyncR476' "$tmp/sync.js" \
-              && grep -Fq 'data-fx-core-shape="sphere"' "$tmp/sync.css" \
+              && grep -Fq 'r477-refined-phone-highlight-edge-softening' "$tmp/sync.js" \
+              && grep -Fq 'brightness(.88) contrast(.68) saturate(.91) blur(1.85px)' "$tmp/sync.css" \
               && grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics' "$tmp/motion.js"; then
-              echo 'PASS: production serves R476 synchronized Mini MAG and softer phone optics.'
+              echo 'PASS: production serves R476 synchronized Mini MAG with refined R477 softer phone optics.'
               rm -rf "$tmp"
               exit 0
             fi
@@ -94,7 +97,7 @@ jobs:
             rm -rf "$tmp"
             sleep 10
           done
-          echo 'Production did not converge to R476 within the verification window.' >&2
+          echo 'Production did not converge to R476/R477 within the verification window.' >&2
           exit 1
 
       - name: Publish R476 Mini MAG status
@@ -107,10 +110,10 @@ jobs:
           set -euo pipefail
           if [[ "$JOB_STATUS" == success ]]; then
             state=success
-            description='R476 primary/Mini MAG shape synchronization passed'
+            description='R476 Mini MAG sync + R477 mobile optics passed'
           else
             state=failure
-            description='R476 Mini MAG synchronization verification failed'
+            description='R476/R477 Mini MAG verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
