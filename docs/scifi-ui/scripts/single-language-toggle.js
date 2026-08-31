@@ -1,4 +1,4 @@
-/* FormatX r462 — one static language control, no document-wide repair observer. */
+/* FormatX r471 — one static language control, event-driven public-shell handoff. */
 (function(){
 'use strict';
 const ROOT=document.documentElement;
@@ -8,6 +8,7 @@ const VERSION='7';
 if(ROOT.dataset.fxSingleLanguageToggle==='ready'&&ROOT.dataset.fxSingleLanguageToggleVersion===VERSION)return;
 ROOT.dataset.fxSingleLanguageToggle='loading';
 ROOT.dataset.fxSingleLanguageToggleVersion=VERSION;
+let installed=false;
 
 const FIXED_COPY=[
   ['.topbar .brand small','LIVING SYSTEM','LIVING SYSTEM'],
@@ -56,7 +57,7 @@ function setFixed(language){
     document.querySelectorAll(selector).forEach(node=>{if(node.textContent!==value)node.textContent=value;});
   }
   ROOT.dataset.fxFixedCopyLanguage=language;
-  ROOT.dataset.fxFixedCopyVersion='r462';
+  ROOT.dataset.fxFixedCopyVersion='r471';
 }
 function applyCopy(language){
   ROOT.lang=language;
@@ -122,8 +123,23 @@ function persist(language){
 function publish(language){
   dispatchEvent(new CustomEvent('formatx:languagechange',{detail:{language,source:'single-language-toggle-r462'}}));
 }
+function remountInstalledButton(){
+  if(!installed)return false;
+  const button=document.querySelector('.fx-language-toggle');
+  const host=targetContainer();
+  if(!(button instanceof HTMLButtonElement)||!(host instanceof HTMLElement))return false;
+  if(button.parentElement!==host)host.appendChild(button);
+  hideLegacy(host);
+  updateButton(button,SUPPORTED.has(ROOT.lang)?ROOT.lang:storedLanguage());
+  return true;
+}
 function install(){
-  const button=ensureButton();if(!(button instanceof HTMLButtonElement))return false;
+  if(installed)return remountInstalledButton();
+  const button=ensureButton();
+  if(!(button instanceof HTMLButtonElement)){
+    ROOT.dataset.fxSingleLanguageToggle='waiting-public-shell';
+    return false;
+  }
   const initial=storedLanguage();applyCopy(initial);updateButton(button,initial);
   if(button.dataset.fxLanguageBoundR461!=='true'){
     button.dataset.fxLanguageBoundR461='true';
@@ -144,13 +160,18 @@ function install(){
   },{passive:true});
   for(const eventName of ['formatx:controlownerready','formatx:mobilelayoutready','pageshow'])addEventListener(eventName,()=>{
     const host=targetContainer();if(host instanceof HTMLElement&&button.parentElement!==host)host.appendChild(button);
+    hideLegacy(host);
     updateButton(button,SUPPORTED.has(ROOT.lang)?ROOT.lang:storedLanguage());
   },{passive:true});
+  installed=true;
   ROOT.dataset.fxSingleLanguageToggle='ready';
   ROOT.dataset.fxSingleLanguageToggleVersion=VERSION;
   ROOT.dataset.fxLanguageObserverPolicyR461='event-driven-no-document-mutation-observer';
+  ROOT.dataset.fxLanguagePublicShellHandoffR471=publicPageMode()?'ready':'not-required';
   return true;
 }
+function requestInstall(){install();}
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+addEventListener('formatx:publicshellready',requestInstall,{passive:true});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',requestInstall,{once:true});else requestInstall();
 }());
