@@ -29,7 +29,7 @@ has(home,[
   'formatx-quality-r461.css?v=20260830-r462-mobile-a11y',
   'data-fx-single-language-toggle="ready-v3"',
   'class="fx-language-toggle"'
-],'R473 static entry path');
+],'R474 static entry path');
 for(const token of [
   'data-fx-premium-finish','data-fx-live-heartbeat-r155','data-fx-signature-system-r185',
   'data-fx-seamless-enforcer-r159','data-fx-living-energy-r168="true" src=',
@@ -46,18 +46,19 @@ for(const token of ['formatx-award-runtime-r206.js','formatx-mobile-regression-r
 
 has(motion,[
   'single-language-toggle.js?v=20260830-r462-semantic-owner',
-  'formatx-current-mag-loader-r422.js?v=20260831-r472-pc-bright-low-halo',
+  'formatx-current-mag-loader-r422.js?v=20260831-r474-softer-mobile-glow',
   'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom',
-  'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo',
+  'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
   'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy',
   "fxSingleLanguageToggleVersion==='7'",
   "fxLegacyMagRuntimeCleanupR460='static-html-clean-r461'",
   'armed-direct-r326-r468-soft-optics-live-energy-zero-idle',
-  "fxFinalVisualRevisionR472='pc-bright-low-halo-mobile-mag'",
+  "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'",
+  "fxFullSuiteR474='r474-mobile-mag'",
   "fxCanonicalAskActivationR477='armed'"
-],'R472 loader route carrying R473 final display');
+],'R474 loader route carrying the softer final display');
 for(const token of ['isRetiredMagRuntime','formatx-premium-finish','formatx-live-heartbeat-r155','formatx-signature-system-r185','formatx-seamless-enforcer-r159'])assert.ok(!motion.includes(token),`dead runtime filter remains: ${token}`);
 
 has(language,[
@@ -71,12 +72,12 @@ has(current,[
   'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
   'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe',
   'formatx-mobile-render-governor-r426.js?v=20260831-r465-direct-pause-flag-no-redraw',
-  'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo',
+  'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
   'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy',
   'soft-perimeter-low-bloom-low-cost-shader','direct-pause-flag-no-idle-redraw',
   'explicit-mag-interaction-only-zero-idle','formatx-mini-mag-assistant-r459.js',
-  "fxCurrentMagOpticsR472=mobile?'pc-bright-centre-restrained-perimeter-zero-idle':'desktop-optics-unchanged'"
-],'R472 primary MAG loader carrying R473 display');
+  "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'"
+],'R474 primary MAG loader carrying the softer display');
 
 has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','uSurfacePulse',
@@ -97,12 +98,12 @@ has(optics,[
   'FormatX r467','brightness(1.065)','contrast(.89)','saturate(1.10)','blur(.82px)'
 ],'R467 balanced base mobile display tone');
 has(lifeStyle,[
-  'FormatX r473','balanced mobile crystal detail','opacity: .985','brightness(1.015)','contrast(.895)',
-  'saturate(1.035)','blur(.20px)','image-rendering: auto','animation: none','will-change: auto',
+  'FormatX r474','softer mobile crystal glow','opacity: .970','brightness(.985)','contrast(.855)',
+  'saturate(1.010)','blur(.30px)','image-rendering: auto','animation: none','will-change: auto',
   '.skip-link:not(:focus):not(:focus-visible)','clip-path: inset(50%)','-webkit-tap-highlight-color: transparent',
-  'production-r473-balanced-mobile-facets-subpixel-edge-feather'
-],'R473 final balanced mobile MAG and accessibility display');
-assert.ok(!lifeStyle.includes('fx-core-r468-compositor-breathe'),'R473 mobile display must not keep an idle compositor breathe animation');
+  'production-r474-softer-mobile-glow-feathered-facets'
+],'R474 final softer mobile MAG and accessibility display');
+assert.ok(!lifeStyle.includes('fx-core-r468-compositor-breathe'),'R474 mobile display must not keep an idle compositor breathe animation');
 
 has(life,[
   "const VERSION = 'native-webgl-interaction-life-r466'",'surface-sweep-',
@@ -140,4 +141,4 @@ has(quality,[
 ],'R462 measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: R473 preserves the clean R468 native MAG path, balanced faceted mobile body, restrained centre light, sub-pixel edge feather, hidden non-focused skip link, zero-idle rendering and explicit interaction energy.');
+console.log('PASS: R474 preserves the clean R468 native MAG path, softer mobile glow, feathered facet edges, hidden non-focused skip link, zero-idle rendering and explicit interaction energy.');
