@@ -138,10 +138,15 @@ jobs:
           if (!response.ok) throw new Error(`Status publish failed: ${response.status} ${await response.text()}`);
           NODE
 
+  p0-vip:
+    name: P0 VIP pre-deploy quality gate
+    if: (github.event_name == 'workflow_dispatch' && inputs.deploy == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]'))
+    uses: ./.github/workflows/p0-vip-quality-gate.yml
+
   deploy:
     name: Deploy to FormatX custom domains
     if: (github.event_name == 'workflow_dispatch' && inputs.deploy == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]'))
-    needs: validate
+    needs: [validate, p0-vip]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
