@@ -1,7 +1,8 @@
-/* FormatX r468 — final mobile display tone for the native WebGL MAG.
-   The renderer remains the only 3D/material owner. This last display pass trims
-   phone bloom and razor edges, while the stage gets a tiny compositor-only
-   breathing motion. WebGL itself remains zero-idle under the R465 governor. */
+/* FormatX r471 — softer mobile display tone for the native WebGL MAG.
+   The renderer remains the only 3D/material owner. This pass responds to the
+   real-phone reference by trimming the centre glow, lowering spectral punch and
+   feathering the silhouette slightly more without blurring the crystal body.
+   WebGL itself remains zero-idle under the R465 governor. */
 
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage,
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
@@ -25,17 +26,17 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
 
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .95 !important;
+    opacity: .93 !important;
     filter:
-      brightness(1.00)
-      contrast(.84)
-      saturate(1.04)
-      blur(1.02px) !important;
+      brightness(.96)
+      contrast(.80)
+      saturate(.99)
+      blur(1.26px) !important;
     -webkit-filter:
-      brightness(1.00)
-      contrast(.84)
-      saturate(1.04)
-      blur(1.02px) !important;
+      brightness(.96)
+      contrast(.80)
+      saturate(.99)
+      blur(1.26px) !important;
   }
 }
 
