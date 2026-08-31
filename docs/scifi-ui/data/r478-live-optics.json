@@ -1,0 +1,8 @@
+{
+  "revision": "R478",
+  "purpose": "production deployment marker for softer mobile MAG optics and shared Mini MAG/header life state",
+  "primary_renderer": "single-webgl-crystal-organism-r326",
+  "mobile_optics": "soft-glass-lower-highlight-soft-edge",
+  "mini_mag_life": "primary-energy-sync-compositor-breath-zero-js-idle",
+  "requested_at": "2026-08-31"
+}
