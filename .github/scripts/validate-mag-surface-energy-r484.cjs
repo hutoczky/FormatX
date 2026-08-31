@@ -14,7 +14,7 @@ fs.mkdirSync(output, { recursive: true });
 // inside RAF stalls SwiftShader and changes the very timing being measured.
 // Separate, deterministic single-frame screenshots below test visible motion.
 function instrumentNativeFrames() {
-  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, events: [] };
+  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [] };
   const names = new WeakMap();
   const states = new WeakMap();
   const stateFor = gl => {
@@ -58,6 +58,10 @@ function instrumentNativeFrames() {
       if (this.canvas?.matches('#hero .fx-crystal-organism-r326-canvas') && state.layer === 0 && state.depthWrite) {
         audit.frames++;
         audit.maximumPhase = Math.max(audit.maximumPhase, state.phase);
+        if (state.phase >= 0) {
+          audit.phases.push(state.phase);
+          if (audit.phases.length > 180) audit.phases.shift();
+        }
       }
       return result;
     };
@@ -147,10 +151,21 @@ async function verify(browser, name, viewport, mobile) {
 
     const audit = await page.evaluate(() => window.__magEnergyAudit);
     report.audit = audit;
-    // SwiftShader can sample at 10–15 fps. Permit the last two fade-out frames
-    // to fall between samples, but never a 240ms governor-truncated sweep.
-    // The independent start/end check below still requires the full 1160ms.
-    assert.ok(audit.maximumPhase > .80, `${name}: sweep truncated at phase ${audit.maximumPhase}`);
+    // SwiftShader cadence varies with runner load. Allow one measured frame
+    // interval at the end, not a guessed fixed FPS. A 240ms governor cutoff
+    // still fails both the halfway and full-window coverage checks below.
+    let previousPhase = 0;
+    let maximumPhaseStep = 0;
+    for (const phase of audit.phases) {
+      if (phase < previousPhase) previousPhase = 0; // next autonomous sweep
+      maximumPhaseStep = Math.max(maximumPhaseStep, phase - previousPhase);
+      previousPhase = phase;
+    }
+    report.maximumPhaseStep = maximumPhaseStep;
+    assert.ok(audit.phases.length >= 3 && audit.maximumPhase > .5,
+      `${name}: sweep did not render beyond its midpoint`);
+    assert.ok(audit.maximumPhase + maximumPhaseStep >= .97,
+      `${name}: sweep truncated at phase ${audit.maximumPhase}; measured frame step ${maximumPhaseStep}`);
     const starts = audit.events.filter(e => e.phase === 'start' && e.source === 'autonomous');
     const ends = audit.events.filter(e => e.phase === 'end' && e.source === 'autonomous');
     assert.ok(starts.length >= 2 && ends.length >= 2, `${name}: recurring autonomous sweep missing`);
