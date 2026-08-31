@@ -1,8 +1,9 @@
-/* FormatX r472 — full-suite measurement revision for the R471 phone MAG display.
+/* FormatX r475 — R471 mobile MAG + canonical ASK dialogue surface.
    The active HTML contains only current deferred enhancements. Mobile keeps the
    zero-idle R465 render budget and R468 explicit-interaction energy, while the
    final compositor display uses the R471 reduced-bloom feathered silhouette.
-   Desktop stays on the existing R326 material path. */
+   R475 restores only the explicitly open ASK dialogue above the retired r244
+   floating shell. Desktop stays on the existing R326 material path. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -11,6 +12,7 @@ root.dataset.fxMotionCspR239='external-strict-csp';
 root.dataset.fxFinalValidationR470='r468-live-mag-full-suite';
 root.dataset.fxFinalVisualRevisionR471='softer-mobile-mag';
 root.dataset.fxFullSuiteR472='r471-mobile-mag';
+root.dataset.fxDialogueSurfaceR475='booting';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -24,6 +26,7 @@ const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=2026
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r471-softer-mobile-bloom-feather';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
+const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260831-r475-canonical-ask-surface';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
@@ -59,6 +62,18 @@ function warmCriticalOwners(){
   warmAsset(CURRENT_LIFE_STYLE,'style');
   warmAsset(CURRENT_LIFE,'script');
   warmAsset(FINAL_HEADER,'style');
+  warmAsset(DIALOGUE_STYLE,'style');
+}
+function ensureDialogueSurface(){
+  let link=document.querySelector('link[data-fx-dialogue-surface-r475]');
+  if(link instanceof HTMLLinkElement){root.dataset.fxDialogueSurfaceR475=link.sheet?'ready':'loading';return;}
+  link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href=DIALOGUE_STYLE;
+  link.dataset.fxDialogueSurfaceR475='true';
+  link.addEventListener('load',()=>{root.dataset.fxDialogueSurfaceR475='ready';},{once:true});
+  link.addEventListener('error',()=>{root.dataset.fxDialogueSurfaceR475='load-failed';},{once:true});
+  document.head.appendChild(link);
 }
 function ensureLanguageToggle(){
   if(root.dataset.fxSingleLanguageToggle==='ready'&&root.dataset.fxSingleLanguageToggleVersion==='7')return;
@@ -112,6 +127,7 @@ root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
 root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r468':mobile.matches?'core-ready-r468-mobile-r326-controller':'core-ready-r468-desktop-r326-controller';
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
 warmCriticalOwners();
+ensureDialogueSurface();
 ensureLanguageToggle();
 ensureCurrentMag();
 
