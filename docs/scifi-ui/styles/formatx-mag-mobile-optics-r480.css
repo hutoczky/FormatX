@@ -1,41 +1,174 @@
-/* FormatX R480 — restrained mobile MAG glow and feathered crystal edge.
-   The R326 WebGL geometry/material remains the single 3D owner. This late,
-   mobile-only optical trim keeps the faceted body readable while reducing the
-   centre flare, cyan/violet halo and hard silhouette visible on real phones. */
+/* FormatX R483 — visible living MAG, restrained mobile optics and desktop ASK crystal.
+   R326 remains the single WebGL/material owner. This layer only adjusts final
+   compositor optics and the canonical ASK glyph: no continuous JS/WebGL idle loop. */
 
-@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  html:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
-  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .89 !important;
-    filter:
-      brightness(.68)
-      contrast(.70)
-      saturate(1.25)
-      hue-rotate(-2deg)
-      blur(1.55px)
-      drop-shadow(0 0 7px rgba(46,218,255,.12))
-      drop-shadow(0 0 18px rgba(91,71,255,.065)) !important;
-    -webkit-filter:
-      brightness(.68)
-      contrast(.70)
-      saturate(1.25)
-      hue-rotate(-2deg)
-      blur(1.55px)
-      drop-shadow(0 0 7px rgba(46,218,255,.12))
-      drop-shadow(0 0 18px rgba(91,71,255,.065)) !important;
-    mix-blend-mode: normal !important;
-    transform-origin: 50% 50% !important;
-    scale: .997;
+@property --fx-mag-r483-scale {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: .99;
+}
+
+@property --fx-mag-r483-opacity {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: .91;
+}
+
+@keyframes fx-primary-mag-mobile-heart-r483 {
+  0%,100% {
+    --fx-mag-r483-scale: .988;
+    --fx-mag-r483-opacity: .90;
   }
-
-  /* Keep the surrounding optical chamber dark enough that the crystal reads as
-     translucent glass instead of a glowing plate. */
-  html:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space {
-    background:
-      radial-gradient(circle at 50% 47%, rgba(28,178,232,.075) 0, rgba(13,82,151,.040) 31%, transparent 48%),
-      radial-gradient(circle at 58% 51%, rgba(104,66,222,.060) 0, transparent 45%),
-      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.12) 58%, rgba(2,14,31,.34) 100%) !important;
+  23% {
+    --fx-mag-r483-scale: 1.008;
+    --fx-mag-r483-opacity: .95;
+  }
+  31% {
+    --fx-mag-r483-scale: .998;
+    --fx-mag-r483-opacity: .925;
+  }
+  41% {
+    --fx-mag-r483-scale: 1.018;
+    --fx-mag-r483-opacity: .985;
+  }
+  53% {
+    --fx-mag-r483-scale: 1.006;
+    --fx-mag-r483-opacity: .955;
+  }
+  72% {
+    --fx-mag-r483-scale: .992;
+    --fx-mag-r483-opacity: .915;
   }
 }
 
-/* production-r480-restrained-mobile-mag-glow-feathered-edge */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  /* Higher-specificity final phone optics. The crystal body stays clearly
+     readable like desktop, but bloom radius and edge hardness are deliberately
+     reduced so the silhouette no longer looks cut out or neon-overdriven. */
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    --fx-mag-r483-scale: .99;
+    --fx-mag-r483-opacity: .92;
+    opacity: var(--fx-mag-r483-opacity) !important;
+    filter:
+      brightness(.76)
+      contrast(.69)
+      saturate(1.28)
+      hue-rotate(-3deg)
+      blur(1.02px)
+      drop-shadow(0 0 3px rgba(46,218,255,.038))
+      drop-shadow(0 0 7px rgba(104,69,255,.018)) !important;
+    -webkit-filter:
+      brightness(.76)
+      contrast(.69)
+      saturate(1.28)
+      hue-rotate(-3deg)
+      blur(1.02px)
+      drop-shadow(0 0 3px rgba(46,218,255,.038))
+      drop-shadow(0 0 7px rgba(104,69,255,.018)) !important;
+    mix-blend-mode: normal !important;
+    transform-origin: 50% 50% !important;
+    scale: var(--fx-mag-r483-scale) !important;
+    backface-visibility: hidden !important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space {
+    background:
+      radial-gradient(circle at 47% 45%, rgba(27,192,235,.030) 0, rgba(15,91,161,.017) 27%, transparent 41%),
+      radial-gradient(circle at 60% 51%, rgba(42,92,226,.020) 0, transparent 38%),
+      radial-gradient(circle at 57% 58%, rgba(119,57,217,.014) 0, transparent 39%),
+      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.12) 58%, rgba(2,13,31,.36) 100%) !important;
+  }
+}
+
+@media (prefers-reduced-motion:no-preference) and (max-width:900px),
+       (prefers-reduced-motion:no-preference) and (pointer:coarse),
+       (prefers-reduced-motion:no-preference) and (max-aspect-ratio:27/25) {
+  /* Fail-open compositor life: once the native crystal is ready, a user-facing
+     steady state is the only state that stops the heartbeat. This keeps the MAG
+     visibly alive even while the WebGL renderer correctly idles at zero frames. */
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"]:not([data-fx-primary-mag-life-r482="steady"]):not([data-fx-reference-motion-paused="true"]) body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    animation: fx-primary-mag-mobile-heart-r483 4.15s cubic-bezier(.36,0,.20,1) infinite !important;
+    will-change: scale, opacity !important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    --fx-mag-r483-scale: 1;
+    --fx-mag-r483-opacity: .94;
+    animation: none !important;
+    scale: var(--fx-mag-r483-scale) !important;
+    opacity: var(--fx-mag-r483-opacity) !important;
+    will-change: auto !important;
+  }
+}
+
+/* Desktop canonical ASK crystal. Older desktop layers left the button visible
+   but its <i> glyph visually empty. Keep the existing button/label/interaction
+   owner and restore only the missing luminous violet-white crystal cluster. */
+@media (min-width:901px) {
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask > i {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 3 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    overflow: visible !important;
+    pointer-events: none !important;
+    transform: none !important;
+    background:
+      radial-gradient(circle at 67% 24%, rgba(255,255,255,.98) 0 18%, rgba(232,230,255,.92) 20% 30%, transparent 32%),
+      radial-gradient(circle at 39% 55%, #f7f6ff 0 24%, #ded8ff 27% 47%, #b89dff 50% 67%, rgba(100,76,208,.70) 70% 82%, rgba(75,48,154,.22) 84% 100%) !important;
+    box-shadow:
+      -8px 6px 0 -2px rgba(240,246,255,.96),
+      8px 5px 0 -3px rgba(223,216,255,.96),
+      0 0 8px rgba(210,190,255,.86),
+      0 0 15px rgba(110,220,255,.20) !important;
+    filter: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask > i::before,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask > i::after {
+    content: '' !important;
+    position: absolute !important;
+    display: block !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    background: #f8f7ff !important;
+    box-shadow: 0 0 7px rgba(211,194,255,.78) !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask > i::before {
+    width: 8px !important;
+    height: 8px !important;
+    left: 9px !important;
+    top: -5px !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask > i::after {
+    width: 7px !important;
+    height: 7px !important;
+    left: -5px !important;
+    top: 3px !important;
+  }
+}
+
+/* production-r483-visible-living-mobile-mag-soft-edge-desktop-ask-crystal */
