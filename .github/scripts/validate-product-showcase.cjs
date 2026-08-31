@@ -16,13 +16,15 @@ const rasterProofImages = [
   'diagnostics.svg',
   'usb-creator.svg'
 ];
-const nativeVectorImages = ['portable-installer.svg'];
+const nativeVectorImages = ['portable-installer-compatible.svg'];
 const images = [...rasterProofImages, ...nativeVectorImages];
 
 assert.match(runtime, /const ITEMS = \[/, 'showcase item registry missing');
 assert.match(runtime, /fx-product-showcase__dialog/, 'full-size dialog missing');
 assert.match(runtime, /formatx:languagechange/, 'language refresh missing');
 assert.match(runtime, /loading="lazy"/, 'lazy image loading missing');
+assert.match(runtime, /image: 'portable-installer-compatible\.svg'/, 'showcase producer does not use the compatible portable-installer asset');
+assert.doesNotMatch(runtime, /image: 'portable-installer\.svg'/, 'showcase producer still references the obsolete portable-installer asset');
 assert.match(loader, /formatx-product-showcase\.css\?v=20260806-real-product-1/, 'showcase stylesheet loader missing');
 assert.match(loader, /formatx-product-showcase\.js\?v=20260806-real-product-1/, 'showcase runtime loader missing');
 assert.match(styles, /prefers-reduced-motion: reduce/, 'reduced-motion treatment missing');
@@ -48,4 +50,4 @@ for (const image of nativeVectorImages) {
 }
 
 assert.equal((runtime.match(/image: '/g) || []).length, images.length, 'showcase item count does not match uploaded images');
-console.log(`FormatX product showcase validation passed: ${images.length} real screens.`);
+console.log(`FormatX product showcase validation passed: ${images.length} real screens, compatible portable installer owned at source.`);
