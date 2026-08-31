@@ -535,12 +535,14 @@
       root.dataset.fxCoreSurfacePulseR454=`sweep-${surfacePulseCount}-${source}`;
       root.dataset.fxCoreEnergyBoltR455=`surface-sweep-${source}-${surfacePulseCount}`;
       root.dataset.fxCoreSurfaceCountR484=String(surfacePulseCount);
-      schedule(68);
+      // surfacePulseActive keeps RAF alive for the bounded duration. Do not
+      // leave a second frame quota behind it on slower desktop renderers.
+      schedule(1);
       later(()=>{
         if(pulseId!==surfacePulseCount)return;
         surfacePulseStart=-Infinity;
         root.dataset.fxCoreSurfacePulseR454='idle';
-        schedule(4);
+        schedule(1);
         dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
           detail:{phase:'end',source,duration:SURFACE_PULSE_MS}
         }));
