@@ -132,7 +132,7 @@ async function verify(browser, name, viewport, mobile) {
   const report = { name, viewport, mobile };
   try {
     const url = new URL(origin);
-    url.searchParams.set('r484-energy-check', `${name}-${Date.now()}`);
+    url.searchParams.set('r486-optics-energy-check', `${name}-${Date.now()}`);
     url.searchParams.set('lang', 'hu');
     await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(() => (
@@ -186,6 +186,7 @@ async function verify(browser, name, viewport, mobile) {
         glError: gl.getError(), budget: root.dataset.fxMobileSurfaceBudgetR484,
         policy: root.dataset.fxCoreMobileIdlePolicyR426,
         shape: root.dataset.fxCoreShapeR337,
+        optics: root.dataset.fxPrimaryMagOpticsR486 || '',
         ancestors: (() => { const list = []; for (let node = canvas; node; node = node.parentElement) {
           const s = getComputedStyle(node); list.push({ tag: node.tagName, id: node.id, class: node.className, opacity: s.opacity, filter: s.filter, blend: s.mixBlendMode });
         } return list; })()
@@ -196,9 +197,11 @@ async function verify(browser, name, viewport, mobile) {
     assert.equal(report.dom.glError, 0, `${name}: WebGL error`);
     assert.ok(report.dom.overflow <= 1, `${name}: horizontal overflow`);
     if (mobile) {
-      assert.match(report.dom.filter, /brightness\(1\.02\)/);
-      assert.match(report.dom.filter, /contrast\(0\.98\)/);
-      assert.match(report.dom.filter, /blur\(0\.3px\)/);
+      assert.match(report.dom.filter, /brightness\(0?\.965\)/);
+      assert.match(report.dom.filter, /contrast\(0?\.885\)/);
+      assert.match(report.dom.filter, /saturate\(1\.14\)/);
+      assert.match(report.dom.filter, /blur\(0?\.58px\)/);
+      assert.equal(report.dom.optics, 'calmer-luminance-feathered-mobile-silhouette');
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');
     }
 
@@ -211,7 +214,7 @@ async function verify(browser, name, viewport, mobile) {
     report.captures.late = await captureSurface(page, name, 'surface-late', .68);
     await page.evaluate(() => { delete window.__magCapturePhase; });
     await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => canvas.getAnimations().forEach(animation => animation.play()));
-    assert.ok(report.captures.idle.maximum > 70 && report.captures.idle.coverage > .02, `${name}: resting MAG is too dim`);
+    assert.ok(report.captures.idle.maximum > 60 && report.captures.idle.coverage > .02, `${name}: resting MAG is too dim`);
     report.earlyChange = surfaceChange(report.captures.idle, report.captures.early);
     report.lateChange = surfaceChange(report.captures.idle, report.captures.late);
     assert.ok(report.earlyChange.changed >= 8 && report.lateChange.changed >= 8, `${name}: surface energy is not visibly distinct`);
@@ -261,7 +264,7 @@ async function verify(browser, name, viewport, mobile) {
 
     assert.deepEqual(errors, [], `${name}: page errors`);
     report.result = 'passed';
-    console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; pause, offscreen, reduced motion passed`);
+    console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; R486 mobile optics, pause, offscreen, reduced motion passed`);
   } catch (error) {
     report.result = 'failed';
     report.error = String(error.stack || error);
