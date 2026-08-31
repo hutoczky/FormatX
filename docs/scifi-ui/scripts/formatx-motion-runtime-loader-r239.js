@@ -1,24 +1,26 @@
-/* FormatX r470 — compact current-path loader; final R468 measurement revision.
+/* FormatX r471 — compact current-path loader with softer phone MAG display.
    The active HTML contains only current deferred enhancements. Mobile keeps the
-   zero-idle R465 render budget while r468 supplies softer display optics and
-   explicit-interaction native surface energy. Desktop stays on R326. */
+   zero-idle R465 render budget and R468 explicit-interaction energy, while the
+   final compositor display uses the R471 reduced-bloom feathered silhouette.
+   Desktop stays on the existing R326 material path. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxMotionRuntimeR239)return;
 root.dataset.fxMotionCspR239='external-strict-csp';
 root.dataset.fxFinalValidationR470='r468-live-mag-full-suite';
+root.dataset.fxFinalVisualRevisionR471='softer-mobile-mag';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260831-r468-soft-optics-live-energy-zero-idle';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260831-r471-softer-mobile-mag';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
-const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r468-soft-mobile-bloom-breathe';
+const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r471-softer-mobile-bloom-feather';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 
