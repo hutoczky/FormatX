@@ -16,6 +16,7 @@ const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const solidGlass=read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js');
 const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const optics=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
+const header=read('docs/scifi-ui/styles/formatx-mobile-header-final-r418.css');
 const nativeTouch=read('docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js');
 const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
 const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
@@ -85,9 +86,13 @@ has(solidGlass,[
   'soft-perimeter-low-bloom-low-cost-shader'
 ],'R465 soft award phone glass');
 has(optics,[
-  'production-r465-soft-perimeter-low-bloom-mobile-display',
-  'contrast(.82)','blur(1.18px)','saturate(1.04)'
-],'R465 soft mobile display tone');
+  'production-r466-balanced-mobile-luminance-soft-edge-display',
+  'brightness(1.065)','contrast(.89)','saturate(1.10)','blur(.82px)'
+],'R466 balanced mobile display tone');
+has(header,[
+  'production-r466-mobile-mag-text-lock-no-star-blank-state',
+  '-webkit-text-fill-color:currentColor','background-image:none','content:none'
+],'R466 stable mobile MAG header text lock');
 
 has(governor,[
   'const activeWindowMs=240','const shapeProbeMs=150','const shapeSettleDeadlineMs=2400',
@@ -112,4 +117,4 @@ has(quality,[
 ],'R462 measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: R465 clean active path uses one R326 hero renderer, soft low-bloom mobile optics, direct pause-flag zero-idle WebGL, stable semantic controls/language and no retired first-load stack.');
+console.log('PASS: R466 clean active path uses one R326 hero renderer, balanced low-bloom mobile display tone, stable MAG header text, direct pause-flag zero-idle WebGL, stable semantic controls/language and no retired first-load stack.');
