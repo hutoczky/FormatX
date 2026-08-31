@@ -1,8 +1,8 @@
-/* FormatX r467 — final cross-device header owner.
+/* FormatX r490 — final cross-device header owner.
    Mobile keeps one branded 72px carrier for MAG, language and menu. Desktop
-   now owns all three right-side controls as a non-overlapping cluster instead
-   of leaving MAG/menu geometry to legacy layers. The MAG control is always a
-   stable text control: MAG in Hungarian, CORE in English, never blank/star. */
+   owns all three right-side controls as a non-overlapping cluster. Compact
+   phones intentionally collapse the secondary brand tagline instead of
+   clipping text inside the fixed control cluster. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root body.living-architecture .topbar {
     position:relative!important;
@@ -131,6 +131,22 @@
   }
 }
 
+@media (max-width:430px) {
+  html:root:root body.living-architecture .topbar > .brand {
+    max-width:126px!important;
+    overflow:visible!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand small {
+    display:none!important;
+    visibility:hidden!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand strong {
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+}
+
 @media (min-width:901px) and (pointer:fine) {
   html:root:root body.living-architecture .topbar {
     position:relative!important;
@@ -138,8 +154,6 @@
     overflow:visible!important;
   }
 
-  /* r467 desktop header geometry: 12–14px physical gaps at 1440px and the
-     same right-edge carrier logic at smaller desktop widths. */
   html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
   html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264,
   html:root:root body.living-architecture .topbar > .fx-language-toggle,
@@ -213,11 +227,6 @@
   }
 }
 
-/* The architecture overlay is a user-opened interaction surface. Keeping its
-   close button in the render tree while the surface is closed creates a ghost
-   fixed control that can sit under the header and be reported as information.
-   Remove the closed surface from layout/paint entirely; restore it only for the
-   explicit open state. */
 html:not(.fx-signature-open) body.living-architecture .fx-signature-architecture {
   display:none!important;
   visibility:hidden!important;
@@ -228,9 +237,4 @@ html.fx-signature-open body.living-architecture .fx-signature-architecture {
   visibility:visible!important;
 }
 
-/* production-r418-final-mobile-header-owner */
-/* production-r418-final-mobile-header-owner-non-occluding */
-/* production-r428-final-cross-device-header-owner-language-visible-non-occluding */
-/* production-r466-mobile-mag-text-lock-no-star-blank-state */
-/* production-r467-desktop-header-three-control-no-overlap */
-/* production-r467-release-candidate-20260831 */
+/* production-r490-compact-brand-no-clipping */
