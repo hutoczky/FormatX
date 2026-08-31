@@ -1,0 +1,167 @@
+name: Verify R481 live MAG balance
+run-name: R481 live mobile + desktop MAG verification for ${{ github.sha }}
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/styles/formatx-mag-living-balance-r481.css'
+      - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
+      - 'docs/scifi-ui/data/r481-mag-living-balance.json'
+      - '.github/workflows/verify-r481-live-mag.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: r481-live-mag-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-r481-mag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install Chromium verifier
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "$RUNNER_TEMP/r481-live"
+          cd "$RUNNER_TEMP/r481-live"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium >/dev/null
+
+      - name: Verify live mobile and desktop R481 MAG
+        env:
+          NODE_PATH: ${{ runner.temp }}/r481-live/node_modules
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const assert=require('node:assert/strict');
+          const {chromium}=require('playwright');
+
+          async function verify(browser,name,viewport,mobile){
+            const context=await browser.newContext({
+              viewport,
+              deviceScaleFactor:mobile?2:1,
+              isMobile:mobile,
+              hasTouch:mobile,
+              locale:'hu-HU',
+              reducedMotion:'no-preference',
+              colorScheme:'dark'
+            });
+            const page=await context.newPage();
+            const errors=[];
+            page.on('pageerror',error=>errors.push(String(error)));
+            page.on('console',message=>{
+              const text=message.text();
+              if(message.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(text))errors.push(text);
+            });
+            await page.goto(`https://formatxsuite.com/?verify=r481-${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>{
+              const root=document.documentElement;
+              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+              const link=document.querySelector('link[data-fx-mag-living-balance-r481]');
+              const style=canvas?getComputedStyle(canvas):null;
+              const box=canvas?.getBoundingClientRect();
+              return root.dataset.fxCrystalOrganismR326==='ready'
+                && root.dataset.fxMagShapeSyncR476==='ready-r481'
+                && root.dataset.fxPrimaryMagLifeContractR481==='desktop-mobile-compositor-breath-zero-webgl-idle'
+                && link instanceof HTMLLinkElement
+                && canvas && style && box && box.width>120 && box.height>180
+                && style.display!=='none' && style.visibility!=='hidden' && Number(style.opacity)>.2;
+            },null,{timeout:120000});
+            await page.waitForTimeout(700);
+
+            const state=await page.evaluate(()=>{
+              const root=document.documentElement;
+              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+              const style=getComputedStyle(canvas);
+              const rect=canvas.getBoundingClientRect();
+              return{
+                renderer:root.dataset.fxCoreRenderer,
+                sync:root.dataset.fxMagShapeSyncR476,
+                life:root.dataset.fxPrimaryMagLifeR481,
+                contract:root.dataset.fxPrimaryMagLifeContractR481,
+                optics:root.dataset.fxPrimaryMagOpticsR481,
+                scheduler:root.dataset.fxCoreScheduler,
+                idle:root.dataset.fxCoreIdleRenderR441,
+                animationName:style.animationName,
+                filter:style.filter,
+                opacity:Number(style.opacity),
+                scale:style.scale,
+                rect:{width:rect.width,height:rect.height,left:rect.left,right:rect.right},
+                balanceHref:document.querySelector('link[data-fx-mag-living-balance-r481]')?.href||'',
+                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
+              };
+            });
+
+            assert.equal(state.renderer,'single-webgl-crystal-organism-r326');
+            assert.equal(state.sync,'ready-r481');
+            assert.ok(['breath','pulse'].includes(state.life),JSON.stringify(state));
+            assert.equal(state.contract,'desktop-mobile-compositor-breath-zero-webgl-idle');
+            assert.equal(state.optics,'cross-device-breath-softer-phone-halo-and-edge');
+            assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441');
+            assert.equal(state.idle,'zero-frame');
+            assert.match(state.balanceHref,/formatx-mag-living-balance-r481\.css/);
+            assert.ok(state.overflow<=2,JSON.stringify(state));
+
+            if(mobile){
+              assert.ok(state.animationName.includes('fx-primary-mag-living-mobile-r481'),state.animationName);
+              assert.match(state.filter,/brightness\(0\.64\)/);
+              assert.match(state.filter,/contrast\(0\.66\)/);
+              assert.match(state.filter,/saturate\(1\.1\)/);
+              assert.match(state.filter,/blur\(1\.82px\)/);
+            }else{
+              assert.ok(state.animationName.includes('fx-primary-mag-living-desktop-r481'),state.animationName);
+            }
+
+            const samples=[];
+            for(let i=0;i<4;i++){
+              samples.push(await page.evaluate(()=>{
+                const s=getComputedStyle(document.querySelector('#hero .fx-crystal-organism-r326-canvas'));
+                return{opacity:Number(s.opacity),scale:Number.parseFloat(s.scale)||1};
+              }));
+              await page.waitForTimeout(620);
+            }
+            const opacitySpan=Math.max(...samples.map(s=>s.opacity))-Math.min(...samples.map(s=>s.opacity));
+            const scaleSpan=Math.max(...samples.map(s=>s.scale))-Math.min(...samples.map(s=>s.scale));
+            assert.ok(opacitySpan>.004||scaleSpan>.002,JSON.stringify({name,samples,opacitySpan,scaleSpan}));
+            assert.equal(errors.length,0,errors.join(' | '));
+            console.log(`PASS ${name}`,JSON.stringify({state,samples,opacitySpan,scaleSpan},null,2));
+            await context.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            await verify(browser,'mobile-390x844',{width:390,height:844},true);
+            await verify(browser,'desktop-1440x900',{width:1440,height:900},false);
+            await browser.close();
+            console.log('PASS: live R481 MAG is breathing on mobile and desktop; mobile halo/edge optics are active; WebGL remains zero-idle.');
+          })().catch(error=>{console.error(error);process.exit(1);});
+          NODE
+
+      - name: Publish R481 live MAG status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$JOB_STATUS" == success ]]; then
+            state=success
+            description='R481 live mobile + desktop MAG balance passed'
+          else
+            state=failure
+            description='R481 live MAG balance verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX R481 live MAG' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
