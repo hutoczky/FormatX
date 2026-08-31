@@ -1,14 +1,15 @@
 {
-  "revision": "r283",
-  "date": "2026-08-21",
+  "revision": "r472",
+  "date": "2026-08-31",
   "scope": [
-    "stable r263 SOUND-ASK-PAUSE visual ownership without heavy r264/r268 overrides",
-    "minimal first-frame geometry reservation without redesigning the settled UI",
-    "mobile body-width and legacy 200vw overflow removal",
-    "explicit visible navigation only in the open state",
-    "event-driven living-system rendering without idle telemetry RAF or ambient interval",
-    "idle-safe mobile gyro and bounded seamless startup observation",
-    "bounded core-detail rendering"
+    "R326 single native WebGL MAG renderer preserved across desktop and mobile",
+    "mobile MAG centre luminance raised to PC-like visibility without widening the glow",
+    "mobile perimeter bloom reduced and silhouette edge contrast softened",
+    "R472 final mobile compositor uses 1.15 brightness, 0.72 contrast and 0.48px feather blur",
+    "idle compositor breathe removed so R465 zero-idle rendering remains physically idle",
+    "R468 explicit interaction energy retained without continuous idle redraw",
+    "R477 canonical ASK activation and R476 MAG icon synchronization retained",
+    "strict production, browser and Lighthouse measurement on one deployable revision"
   ],
   "qualityGate": {
     "lighthouseRunsPerViewport": 3,
