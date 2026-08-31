@@ -38,6 +38,15 @@ def require_tokens(source: str, label: str, tokens: list[str]) -> None:
         require(token in source, f"{label} missing contract: {token}")
 
 
+def production_runtime_contract() -> str:
+    """Return the actual R487 production public-content ownership chain."""
+    return "\n".join([
+        read("billing-worker/src/production-content-entry.js"),
+        read("billing-worker/src/production-content-entry-r369-base.js"),
+        read("billing-worker/src/production-content-base.js"),
+    ])
+
+
 def official_release(value: str) -> bool:
     parsed = urlparse(value)
     return (
@@ -86,7 +95,7 @@ def validate_public_shell() -> None:
     shell = read(SCIFI / "scripts/formatx-public-shell.js")
     guard = read(SCIFI / "scripts/formatx-full-release-guard.js")
     css = read(SCIFI / "styles/formatx-content-standard.css")
-    production = read("billing-worker/src/production-content-entry.js")
+    production = production_runtime_contract()
     preview = read("content-preview-entry.js")
     wrangler = read("wrangler.jsonc")
     require_tokens(shell, "Public shell", [
