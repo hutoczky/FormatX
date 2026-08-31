@@ -72,7 +72,17 @@ async function captureSurface(page, name, label, phase) {
   }, phase);
   await page.waitForTimeout(180);
   const box = await page.locator('#hero .fx-crystal-organism-r326-canvas').boundingBox();
-  const screenshot = await page.screenshot({ path: path.join(output, `${name}-${label}.png`), animations: 'disabled', timeout: 30000 });
+  // Capture the actual compositor directly. Playwright's global animation
+  // fast-forward also fires unrelated page animations and can change layout.
+  const session = await page.context().newCDPSession(page);
+  let screenshot;
+  try {
+    const result = await session.send('Page.captureScreenshot', { format: 'png', fromSurface: true, captureBeyondViewport: false });
+    screenshot = Buffer.from(result.data, 'base64');
+  } finally {
+    await session.detach();
+  }
+  fs.writeFileSync(path.join(output, `${name}-${label}.png`), screenshot);
   const png = PNG.sync.read(screenshot);
   const viewport = page.viewportSize();
   const scale = png.width / viewport.width;
@@ -169,6 +179,21 @@ async function verify(browser, name, viewport, mobile) {
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');
     }
 
+    // Timing above used unmodified uniforms. Pin the same native material at
+    // three phases only for this image comparison, keeping the normal layout.
+    await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => canvas.getAnimations().forEach(animation => animation.pause()));
+    report.captures = {};
+    report.captures.idle = await captureSurface(page, name, 'idle', -1);
+    report.captures.early = await captureSurface(page, name, 'surface-early', .38);
+    report.captures.late = await captureSurface(page, name, 'surface-late', .68);
+    await page.evaluate(() => { delete window.__magCapturePhase; });
+    await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => canvas.getAnimations().forEach(animation => animation.play()));
+    assert.ok(report.captures.idle.maximum > 70 && report.captures.idle.coverage > .02, `${name}: resting MAG is too dim`);
+    report.earlyChange = surfaceChange(report.captures.idle, report.captures.early);
+    report.lateChange = surfaceChange(report.captures.idle, report.captures.late);
+    assert.ok(report.earlyChange.changed >= 8 && report.lateChange.changed >= 8, `${name}: surface energy is not visibly distinct`);
+    assert.ok(Math.abs(report.lateChange.centroidY - report.earlyChange.centroidY) > 3, `${name}: light does not travel along the surface`);
+
     const pause = page.locator('#hero .fx-reference-pause').first();
     await pause.click();
     await page.waitForFunction(() => document.querySelector('#hero .fx-reference-pause')?.dataset.paused === 'true');
@@ -198,18 +223,6 @@ async function verify(browser, name, viewport, mobile) {
     assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), reducedCount, `${name}: reduced-motion sweep still running`);
     report.reducedMotion = 'passed';
 
-    // All timing and lifecycle checks have finished. Now render three single
-    // frames of the same real shader and compare the *composited* screenshots.
-    // CSS animation is disabled only for deterministic picture comparison.
-    report.captures = {};
-    report.captures.idle = await captureSurface(page, name, 'idle', -1);
-    report.captures.early = await captureSurface(page, name, 'surface-early', .38);
-    report.captures.late = await captureSurface(page, name, 'surface-late', .68);
-    assert.ok(report.captures.idle.maximum > 70 && report.captures.idle.coverage > .02, `${name}: resting MAG is too dim`);
-    report.earlyChange = surfaceChange(report.captures.idle, report.captures.early);
-    report.lateChange = surfaceChange(report.captures.idle, report.captures.late);
-    assert.ok(report.earlyChange.changed >= 8 && report.lateChange.changed >= 8, `${name}: surface energy is not visibly distinct`);
-    assert.ok(Math.abs(report.lateChange.centroidY - report.earlyChange.centroidY) > 3, `${name}: light does not travel along the surface`);
     assert.deepEqual(errors, [], `${name}: page errors`);
     report.result = 'passed';
     console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; pause, offscreen, reduced motion passed`);
