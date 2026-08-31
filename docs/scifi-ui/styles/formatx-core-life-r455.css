@@ -1,9 +1,8 @@
-/* FormatX r473 — balanced mobile crystal detail with restrained light.
-   R472 over-corrected the phone compositor: the broad contrast reduction and
-   half-pixel blur made the living WebGL body look foggy and too dark. R473 keeps
-   the native faceted material readable, trims the over-bright centre, and uses
-   only a sub-pixel feather on the physical silhouette. The renderer remains the
-   sole 3D/material owner and the zero-idle governor remains unchanged. */
+/* FormatX r474 — softer mobile crystal glow with feathered facet edges.
+   The phone pass keeps the native faceted WebGL body readable but trims the
+   centre/perimeter luminance that looked overdriven on OLED-class mobile
+   displays. A modest compositor feather softens the silhouette without the
+   foggy look of the older half-pixel blur. Desktop rendering is unchanged. */
 
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage,
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
@@ -23,18 +22,18 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
 
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .985 !important;
+    opacity: .970 !important;
     image-rendering: auto !important;
     filter:
-      brightness(1.015)
-      contrast(.895)
-      saturate(1.035)
-      blur(.20px) !important;
+      brightness(.985)
+      contrast(.855)
+      saturate(1.010)
+      blur(.30px) !important;
     -webkit-filter:
-      brightness(1.015)
-      contrast(.895)
-      saturate(1.035)
-      blur(.20px) !important;
+      brightness(.985)
+      contrast(.855)
+      saturate(1.010)
+      blur(.30px) !important;
   }
 
   /* Keep the skip-navigation link fully accessible to keyboard users without
@@ -81,4 +80,4 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   }
 }
 
-/* production-r473-balanced-mobile-facets-subpixel-edge-feather */
+/* production-r474-softer-mobile-glow-feathered-facets */
