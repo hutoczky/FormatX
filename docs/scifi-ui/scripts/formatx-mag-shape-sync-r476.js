@@ -1,14 +1,15 @@
-/* FormatX R476/R479 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R480 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
    R479.1 distinguishes the mobile render governor's zero-frame pause flag from
-   an explicit user PAUSE action, so the compositor breathing remains alive. */
+   an explicit user PAUSE action; R480 adds the final restrained phone optics. */
 (function(){
 'use strict';
 const root=document.documentElement;
-if(root.dataset.fxMagShapeSyncR476==='ready-r479')return;
-root.dataset.fxMagShapeSyncR476='booting-r479';
+if(root.dataset.fxMagShapeSyncR476==='ready-r480')return;
+root.dataset.fxMagShapeSyncR476='booting-r480';
 
 const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
+const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260831-r480-restrained-glow-soft-edge';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null;
 let pulseTimer=0;
@@ -24,6 +25,20 @@ function ensureStyle(){
   link.rel='stylesheet';
   link.href=STYLE;
   link.dataset.fxMagVisualSyncR476='true';
+  document.head.appendChild(link);
+  return link;
+}
+
+function ensureMobileOptics(){
+  let link=document.querySelector('link[data-fx-mag-mobile-optics-r480]');
+  if(link instanceof HTMLLinkElement){
+    if(!link.href.includes('r480-restrained-glow-soft-edge'))link.href=MOBILE_OPTICS;
+    return link;
+  }
+  link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href=MOBILE_OPTICS;
+  link.dataset.fxMagMobileOpticsR480='true';
   document.head.appendChild(link);
   return link;
 }
@@ -90,10 +105,11 @@ function sync(){
   for(const node of lifeNodes())if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();
   root.dataset.fxMiniMagShapeR476=shape;
   root.dataset.fxMiniMagShapeSyncR476=`ready-${shape}`;
-  root.dataset.fxMagShapeSyncR476='ready-r479';
+  root.dataset.fxMagShapeSyncR476='ready-r480';
   root.dataset.fxMiniMagLifeContractR478='primary-energy-sync-compositor-breath-zero-js-idle';
   root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';
   root.dataset.fxPrimaryMagPauseContractR479='user-pause-only-governor-zero-frame-does-not-freeze-compositor-life';
+  root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
 }
 
 function onCoreInteraction(event){
@@ -119,6 +135,7 @@ function inspectRootState(records){
 
 function boot(){
   ensureStyle();
+  ensureMobileOptics();
   sync();
   setLife(steadyLife());
   lastEnergyBolt=String(root.dataset.fxCoreEnergyBoltR455||'');
