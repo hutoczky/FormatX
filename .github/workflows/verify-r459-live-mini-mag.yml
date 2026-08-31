@@ -1,5 +1,5 @@
-name: Verify R459 Mini MAG live production
-run-name: R459 live Mini MAG verification for ${{ github.sha }}
+name: Verify R476 synchronized Mini MAG
+run-name: R476 Mini MAG shape-sync verification for ${{ github.sha }}
 
 on:
   push:
@@ -7,6 +7,8 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js'
       - 'docs/scifi-ui/styles/formatx-mini-mag-assistant-r459.css'
+      - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
+      - 'docs/scifi-ui/styles/formatx-mag-visual-sync-r476.css'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
       - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
       - '.github/workflows/verify-r459-live-mini-mag.yml'
@@ -17,58 +19,85 @@ permissions:
   statuses: write
 
 concurrency:
-  group: r459-live-mini-mag-${{ github.ref }}
+  group: r476-mini-mag-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  live-r459:
+  verify-r476-mini-mag:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - name: Verify live Mini MAG assets and primary MAG preservation
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Validate synchronized Mini MAG source contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          MINI='docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js'
+          MINI_CSS='docs/scifi-ui/styles/formatx-mini-mag-assistant-r459.css'
+          SYNC='docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
+          SYNC_CSS='docs/scifi-ui/styles/formatx-mag-visual-sync-r476.css'
+          CURRENT='docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+          MOTION='docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
+
+          node --check "$MINI"
+          node --check "$SYNC"
+          node --check "$MOTION"
+
+          grep -Fq "fxMiniMagPrimaryHeroR459='preserved-native-webgl'" "$MINI"
+          grep -Fq 'window.FormatXMiniMagR459' "$MINI"
+          grep -Fq "const SECTION_IDS=['hero','experience','capabilities','pricing','system','resources']" "$MINI"
+          grep -Fq '.fx-mini-mag-assistant-r459' "$MINI_CSS"
+          grep -Fq 'position: fixed' "$MINI_CSS"
+
+          grep -Fq "attributeFilter:['data-fx-core-shape-r337']" "$SYNC"
+          grep -Fq 'fxMiniMagShapeSyncR476' "$SYNC"
+          grep -Fq '.fx-mini-mag-launcher-r459' "$SYNC"
+          grep -Fq '.fx-mini-mag-glyph-r459' "$SYNC"
+          grep -Fq 'formatx:coreshapechange' "$SYNC"
+          grep -Fq 'formatx:minimagready' "$SYNC"
+
+          grep -Fq 'data-fx-core-shape="sphere"' "$SYNC_CSS"
+          grep -Fq 'brightness(.92) contrast(.74) saturate(.94) blur(1.55px)' "$SYNC_CSS"
+          grep -Fq 'production-r476-shape-synchronised-mini-mag-header-icon-soft-phone-optics' "$SYNC_CSS"
+
+          grep -Fq "const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'" "$CURRENT"
+          grep -Fq 'formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge' "$CURRENT"
+          grep -Fq 'formatx-core-life-r455.css?v=20260831-r471-softer-mobile-bloom-feather' "$CURRENT"
+          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r471-softer-mobile-mag' "$MOTION"
+          grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics' "$MOTION"
+
+          echo 'PASS: R476 keeps one R326 primary renderer and synchronizes the Mini MAG/header icon to the primary crystal/sphere state without idle rendering.'
+
+      - name: Verify production serves R476 when deploying
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
         shell: bash
         run: |
           set -Eeuo pipefail
           origin='https://formatxsuite.com'
-          mini_js="$origin/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r459-live-proof"
-          mini_css="$origin/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-live-proof"
-          loader_js="$origin/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260830-r459-live-proof"
-          motion_js="$origin/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260830-r459-live-proof"
-
           for attempt in $(seq 1 36); do
-            echo "R459 live verification attempt $attempt/36"
+            echo "R476 live verification attempt $attempt/36"
             tmp="$(mktemp -d)"
-            js_code="$(curl -sS --max-time 30 -o "$tmp/mini.js" -w '%{http_code}' "$mini_js" || true)"
-            css_code="$(curl -sS --max-time 30 -o "$tmp/mini.css" -w '%{http_code}' "$mini_css" || true)"
-            loader_code="$(curl -sS --max-time 30 -o "$tmp/loader.js" -w '%{http_code}' "$loader_js" || true)"
-            motion_code="$(curl -sS --max-time 30 -o "$tmp/motion.js" -w '%{http_code}' "$motion_js" || true)"
-
-            if [[ "$js_code" == 200 && "$css_code" == 200 && "$loader_code" == 200 && "$motion_code" == 200 ]]; then
-              if grep -q "fxMiniMagPrimaryHeroR459='preserved-native-webgl'" "$tmp/mini.js" \
-                && grep -q 'window.FormatXMiniMagR459' "$tmp/mini.js" \
-                && grep -q "const SECTION_IDS=\['hero','experience','capabilities','pricing','system','resources'\]" "$tmp/mini.js" \
-                && grep -q '.fx-mini-mag-assistant-r459' "$tmp/mini.css" \
-                && grep -q 'position: fixed' "$tmp/mini.css" \
-                && grep -q "const VERSION='direct-r326-r459-persistent-mini-mag'" "$tmp/loader.js" \
-                && grep -q 'formatx-mini-mag-assistant-r459.js?v=20260830-r459-persistent-site-controller' "$tmp/loader.js" \
-                && grep -q 'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface' "$tmp/loader.js" \
-                && grep -q 'formatx-current-mag-loader-r422.js?v=20260830-r459-primary-plus-mini-mag' "$tmp/motion.js" \
-                && grep -q 'formatx-mini-mag-assistant-r459.js?v=20260830-r459-persistent-site-controller' "$tmp/motion.js"; then
-                echo 'PASS: live production serves R459 Mini MAG, fixed companion UI and preserved R326 primary MAG.'
-                rm -rf "$tmp"
-                exit 0
-              fi
+            sync_code="$(curl -sS --max-time 30 -o "$tmp/sync.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?r476=${GITHUB_RUN_ID}_${attempt}" || true)"
+            css_code="$(curl -sS --max-time 30 -o "$tmp/sync.css" -w '%{http_code}' "$origin/scifi-ui/styles/formatx-mag-visual-sync-r476.css?r476=${GITHUB_RUN_ID}_${attempt}" || true)"
+            motion_code="$(curl -sS --max-time 30 -o "$tmp/motion.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?r476=${GITHUB_RUN_ID}_${attempt}" || true)"
+            if [[ "$sync_code" == 200 && "$css_code" == 200 && "$motion_code" == 200 ]] \
+              && grep -Fq 'fxMiniMagShapeSyncR476' "$tmp/sync.js" \
+              && grep -Fq 'data-fx-core-shape="sphere"' "$tmp/sync.css" \
+              && grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics' "$tmp/motion.js"; then
+              echo 'PASS: production serves R476 synchronized Mini MAG and softer phone optics.'
+              rm -rf "$tmp"
+              exit 0
             fi
-
-            echo "codes: mini-js=$js_code mini-css=$css_code loader=$loader_code motion=$motion_code"
+            echo "codes: sync-js=$sync_code sync-css=$css_code motion=$motion_code"
             rm -rf "$tmp"
             sleep 10
           done
-
-          echo 'Live production did not converge to R459 Mini MAG within the verification window.' >&2
+          echo 'Production did not converge to R476 within the verification window.' >&2
           exit 1
 
-      - name: Publish R459 live status
+      - name: Publish R476 Mini MAG status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -78,13 +107,13 @@ jobs:
           set -euo pipefail
           if [[ "$JOB_STATUS" == success ]]; then
             state=success
-            description='Live R459 Mini MAG and preserved primary MAG verified'
+            description='R476 primary/Mini MAG shape synchronization passed'
           else
             state=failure
-            description='Live R459 Mini MAG verification failed'
+            description='R476 Mini MAG synchronization verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R459 live Mini MAG' \
+            -f context='FormatX R476 Mini MAG sync' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
