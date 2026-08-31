@@ -1,4 +1,4 @@
-/* FormatX r461/r462 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R487 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
@@ -170,9 +170,11 @@ html body.living-architecture .topbar > .fx-language-toggle {
     filter: none !important;
   }
 
-  /* Lighthouse identified this placeholder on the white QR fallback surface. */
+  /* R487: the QR fallback sits on the dark plan card in the real production
+     composition. Use a high-contrast ice tone rather than the obsolete light-
+     card navy value so the placeholder clears WCAG AA before QR hydration. */
   html body.living-architecture .fx-plan-qr-card .fx-qr-placeholder {
-    color: #24345f !important;
+    color: #e9f8ff !important;
     text-shadow: none !important;
   }
 }
