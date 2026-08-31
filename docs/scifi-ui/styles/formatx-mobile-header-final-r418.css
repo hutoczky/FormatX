@@ -1,8 +1,8 @@
-/* FormatX r466 — final cross-device header owner.
+/* FormatX r467 — final cross-device header owner.
    Mobile keeps one branded 72px carrier for MAG, language and menu. Desktop
-   receives an explicit language slot so legacy header layers cannot hide or
-   reparent the canonical selector. r466 also locks the mobile MAG control to
-   its text label so late legacy/star paint cannot replace or blank it. */
+   now owns all three right-side controls as a non-overlapping cluster instead
+   of leaving MAG/menu geometry to legacy layers. The MAG control is always a
+   stable text control: MAG in Hungarian, CORE in English, never blank/star. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root body.living-architecture .topbar {
     position:relative!important;
@@ -131,33 +131,26 @@
   }
 }
 
-/* r428 desktop slot: the reference/control runtime expects the language button
-   to be a direct child of the branded topbar. Lock only that button here; MAG
-   and menu keep their existing desktop geometry. */
 @media (min-width:901px) and (pointer:fine) {
   html:root:root body.living-architecture .topbar {
     position:relative!important;
+    min-height:72px!important;
     overflow:visible!important;
   }
 
+  /* r467 desktop header geometry: 12–14px physical gaps at 1440px and the
+     same right-edge carrier logic at smaller desktop widths. */
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264,
   html:root:root body.living-architecture .topbar > .fx-language-toggle,
-  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
+  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button.fx-control-owner-r264 {
     position:absolute!important;
-    top:14px!important;
-    right:78px!important;
     bottom:auto!important;
     left:auto!important;
     z-index:12070!important;
-    display:inline-flex!important;
-    align-items:center!important;
-    justify-content:center!important;
     box-sizing:border-box!important;
-    width:44px!important;
-    min-width:44px!important;
-    max-width:44px!important;
-    height:44px!important;
-    min-height:44px!important;
-    max-height:44px!important;
     margin:0!important;
     padding:0!important;
     opacity:1!important;
@@ -165,6 +158,58 @@
     pointer-events:auto!important;
     transform:none!important;
     translate:none!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button.fx-control-owner-r264 {
+    top:8px!important;
+    right:22px!important;
+    width:58px!important;
+    min-width:58px!important;
+    max-width:58px!important;
+    height:56px!important;
+    min-height:56px!important;
+    max-height:56px!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .fx-language-toggle,
+  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
+    top:14px!important;
+    right:92px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:44px!important;
+    min-width:44px!important;
+    max-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264 {
+    top:14px!important;
+    right:150px!important;
+    display:grid!important;
+    place-items:center!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    color:rgba(239,248,253,.96)!important;
+    -webkit-text-fill-color:currentColor!important;
+    background-image:none!important;
+    text-indent:0!important;
+    text-transform:uppercase!important;
+    overflow:hidden!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button::before,
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button::after {
+    content:none!important;
+    display:none!important;
   }
 }
 
@@ -187,4 +232,5 @@ html.fx-signature-open body.living-architecture .fx-signature-architecture {
 /* production-r418-final-mobile-header-owner-non-occluding */
 /* production-r428-final-cross-device-header-owner-language-visible-non-occluding */
 /* production-r466-mobile-mag-text-lock-no-star-blank-state */
-/* production-r466-release-candidate-20260831 */
+/* production-r467-desktop-header-three-control-no-overlap */
+/* production-r467-release-candidate-20260831 */
