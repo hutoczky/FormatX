@@ -32,6 +32,14 @@ function check(id, passed, detail, severity = 'error') {
   if (!result) (severity === 'warning' ? warnings : errors).push(detail);
 }
 
+function productionRuntimeContract() {
+  return [
+    read('billing-worker/src/production-content-entry.js'),
+    read('billing-worker/src/production-content-entry-r369-base.js'),
+    read('billing-worker/src/production-content-base.js'),
+  ].join('\n');
+}
+
 const production = json('billing-worker/wrangler.jsonc');
 const preview = json('wrangler.jsonc');
 const release = json('docs/scifi-ui/data/current-release.json');
@@ -54,7 +62,7 @@ const genome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
 const disclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
 const disclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
 const privacy = read('docs/scifi-ui/privacy.html');
-const productionWrapper = read('billing-worker/src/production-content-entry.js');
+const productionWrapper = productionRuntimeContract();
 const productionEntry = read('billing-worker/src/production-entry.js');
 const previewWrapper = read('content-preview-entry.js');
 const previewWorker = read('worker.js');
