@@ -1,3 +1,4 @@
+# R473 final live award gate after WDA contract synchronization.
 name: Verify R473 award readiness
 run-name: R473 award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
 
@@ -10,6 +11,7 @@ on:
       - 'worker.js'
       - 'wrangler.jsonc'
       - '.github/scripts/validate-living-core-r425-source.cjs'
+      - '.github/scripts/validate-wda-100-r198.cjs'
       - '.github/workflows/verify-live-award-readiness.yml'
   workflow_run:
     workflows: ['Prepare or deploy FormatX production']
