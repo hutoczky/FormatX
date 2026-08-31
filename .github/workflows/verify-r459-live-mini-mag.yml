@@ -1,5 +1,5 @@
-name: Verify R478 synchronized living Mini MAG
-run-name: R478 MAG optics + Mini MAG life verification for ${{ github.sha }}
+name: Verify R479 synchronized living MAG
+run-name: R479 MAG colour/softness + living-state verification for ${{ github.sha }}
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-mini-mag-assistant-r459.css'
       - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
       - 'docs/scifi-ui/styles/formatx-mag-visual-sync-r476.css'
+      - 'docs/scifi-ui/data/r479-primary-mag-optics.json'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
       - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
       - '.github/workflows/verify-r459-live-mini-mag.yml'
@@ -19,18 +20,18 @@ permissions:
   statuses: write
 
 concurrency:
-  group: r478-mini-mag-${{ github.ref }}
+  group: r479-living-mag-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  verify-r478-mini-mag:
+  verify-r479-living-mag:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate synchronized living Mini MAG source contract
+      - name: Validate R479 living MAG source contract
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -38,12 +39,14 @@ jobs:
           MINI_CSS='docs/scifi-ui/styles/formatx-mini-mag-assistant-r459.css'
           SYNC='docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
           SYNC_CSS='docs/scifi-ui/styles/formatx-mag-visual-sync-r476.css'
+          MARKER='docs/scifi-ui/data/r479-primary-mag-optics.json'
           CURRENT='docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
           MOTION='docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
 
           node --check "$MINI"
           node --check "$SYNC"
           node --check "$MOTION"
+          python3 -m json.tool "$MARKER" >/dev/null
 
           grep -Fq "fxMiniMagPrimaryHeroR459='preserved-native-webgl'" "$MINI"
           grep -Fq 'window.FormatXMiniMagR459' "$MINI"
@@ -53,19 +56,29 @@ jobs:
 
           grep -Fq 'data-fx-core-energy-bolt-r455' "$SYNC"
           grep -Fq 'formatx:coreinteraction' "$SYNC"
-          grep -Fq 'fxMiniMagLifeContractR478' "$SYNC"
-          grep -Fq 'primary-energy-sync-compositor-breath-zero-js-idle' "$SYNC"
-          grep -Fq 'r478-softer-mobile-glass-shared-life' "$SYNC"
+          grep -Fq 'fxMiniMagLifeContractR479' "$SYNC"
+          grep -Fq 'primary-and-mini-compositor-breath-colour-depth-zero-js-idle' "$SYNC"
+          grep -Fq 'r479-colour-depth-soft-living-primary' "$SYNC"
           grep -Fq '.fx-mini-mag-launcher-r459' "$SYNC"
           grep -Fq '.fx-mini-mag-glyph-r459' "$SYNC"
           grep -Fq 'formatx:coreshapechange' "$SYNC"
           grep -Fq 'formatx:minimagready' "$SYNC"
 
           grep -Fq 'data-fx-core-shape="sphere"' "$SYNC_CSS"
-          grep -Fq 'brightness(.79) contrast(.56) saturate(.82) blur(2.25px)' "$SYNC_CSS"
-          grep -Fq 'fx-mini-mag-live-breath-r478' "$SYNC_CSS"
+          grep -Fq 'brightness(.72)' "$SYNC_CSS"
+          grep -Fq 'contrast(.76)' "$SYNC_CSS"
+          grep -Fq 'saturate(1.38)' "$SYNC_CSS"
+          grep -Fq 'blur(1.15px)' "$SYNC_CSS"
+          grep -Fq 'drop-shadow(0 0 9px rgba(46,218,255,.18))' "$SYNC_CSS"
+          grep -Fq 'drop-shadow(0 0 22px rgba(91,71,255,.10))' "$SYNC_CSS"
+          grep -Fq 'fx-primary-mag-live-breath-r479' "$SYNC_CSS"
+          grep -Fq 'fx-mini-mag-live-breath-r479' "$SYNC_CSS"
           grep -Fq 'data-fx-mag-life="pulse"' "$SYNC_CSS"
-          grep -Fq 'production-r478-softer-mobile-glass-and-shared-mini-mag-life' "$SYNC_CSS"
+          grep -Fq 'production-r479-colour-depth-soft-alpha-edge-living-primary-mag' "$SYNC_CSS"
+
+          grep -Fq '"revision": "R479"' "$MARKER"
+          grep -Fq 'lower-centre-luminance-cobalt-cyan-violet-soft-alpha-edge' "$MARKER"
+          grep -Fq 'compositor-opacity-scale-breath-zero-js-idle' "$MARKER"
 
           grep -Fq "const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'" "$CURRENT"
           grep -Fq 'formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge' "$CURRENT"
@@ -74,42 +87,50 @@ jobs:
           grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics' "$MOTION"
 
           if grep -Eq 'requestAnimationFrame\([^)]*sync|function[[:space:]]+frame|setInterval' "$SYNC"; then
-            echo 'R478 Mini MAG sync must not add an idle JavaScript render loop.' >&2
+            echo 'R479 MAG sync must not add an idle JavaScript render loop.' >&2
             exit 1
           fi
 
-          echo 'PASS: one R326 primary renderer, softer R478 mobile glass and shared event-driven Mini MAG/header life are source-valid.'
+          if grep -Eq 'animation:[^;]*(filter|brightness|contrast|saturate)' "$SYNC_CSS"; then
+            echo 'R479 primary MAG breath must remain compositor-only; animated filters are forbidden.' >&2
+            exit 1
+          fi
 
-      - name: Verify production serves R478 when deploying
+          echo 'PASS: R479 richer colour depth, lower centre luminance, alpha-aware soft edge and compositor-only primary/Mini MAG life are source-valid.'
+
+      - name: Verify production serves R479 when deploying
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
         shell: bash
         run: |
           set -Eeuo pipefail
           origin='https://formatxsuite.com'
           for attempt in $(seq 1 36); do
-            echo "R478 live verification attempt $attempt/36"
+            echo "R479 live verification attempt $attempt/36"
             tmp="$(mktemp -d)"
-            sync_code="$(curl -sS --max-time 30 -o "$tmp/sync.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?r478=${GITHUB_RUN_ID}_${attempt}" || true)"
-            css_code="$(curl -sS --max-time 30 -o "$tmp/sync.css" -w '%{http_code}' "$origin/scifi-ui/styles/formatx-mag-visual-sync-r476.css?r478=${GITHUB_RUN_ID}_${attempt}" || true)"
-            motion_code="$(curl -sS --max-time 30 -o "$tmp/motion.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?r478=${GITHUB_RUN_ID}_${attempt}" || true)"
-            if [[ "$sync_code" == 200 && "$css_code" == 200 && "$motion_code" == 200 ]] \
-              && grep -Fq 'fxMiniMagLifeContractR478' "$tmp/sync.js" \
-              && grep -Fq 'r478-softer-mobile-glass-shared-life' "$tmp/sync.js" \
-              && grep -Fq 'brightness(.79) contrast(.56) saturate(.82) blur(2.25px)' "$tmp/sync.css" \
-              && grep -Fq 'fx-mini-mag-live-breath-r478' "$tmp/sync.css" \
-              && grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics' "$tmp/motion.js"; then
-              echo 'PASS: production serves R478 softer mobile MAG and shared living Mini MAG state.'
+            sync_code="$(curl -sS --max-time 30 -o "$tmp/sync.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?r479=${GITHUB_RUN_ID}_${attempt}" || true)"
+            css_code="$(curl -sS --max-time 30 -o "$tmp/sync.css" -w '%{http_code}' "$origin/scifi-ui/styles/formatx-mag-visual-sync-r476.css?r479=${GITHUB_RUN_ID}_${attempt}" || true)"
+            motion_code="$(curl -sS --max-time 30 -o "$tmp/motion.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?r479=${GITHUB_RUN_ID}_${attempt}" || true)"
+            marker_code="$(curl -sS --max-time 30 -o "$tmp/marker.json" -w '%{http_code}' "$origin/scifi-ui/data/r479-primary-mag-optics.json?r479=${GITHUB_RUN_ID}_${attempt}" || true)"
+            if [[ "$sync_code" == 200 && "$css_code" == 200 && "$motion_code" == 200 && "$marker_code" == 200 ]] \
+              && grep -Fq 'fxMiniMagLifeContractR479' "$tmp/sync.js" \
+              && grep -Fq 'r479-colour-depth-soft-living-primary' "$tmp/sync.js" \
+              && grep -Fq 'brightness(.72)' "$tmp/sync.css" \
+              && grep -Fq 'saturate(1.38)' "$tmp/sync.css" \
+              && grep -Fq 'fx-primary-mag-live-breath-r479' "$tmp/sync.css" \
+              && grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics' "$tmp/motion.js" \
+              && grep -Fq '"revision": "R479"' "$tmp/marker.json"; then
+              echo 'PASS: production serves R479 living colour-depth MAG optics.'
               rm -rf "$tmp"
               exit 0
             fi
-            echo "codes: sync-js=$sync_code sync-css=$css_code motion=$motion_code"
+            echo "codes: sync-js=$sync_code sync-css=$css_code motion=$motion_code marker=$marker_code"
             rm -rf "$tmp"
             sleep 10
           done
-          echo 'Production did not converge to R478 within the verification window.' >&2
+          echo 'Production did not converge to R479 within the verification window.' >&2
           exit 1
 
-      - name: Publish R478 Mini MAG status
+      - name: Publish R479 living MAG status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -119,13 +140,13 @@ jobs:
           set -euo pipefail
           if [[ "$JOB_STATUS" == success ]]; then
             state=success
-            description='R478 soft MAG + shared Mini MAG life passed'
+            description='R479 colour-depth soft living MAG passed'
           else
             state=failure
-            description='R478 MAG/Mini MAG verification failed'
+            description='R479 living MAG verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R478 living Mini MAG' \
+            -f context='FormatX R479 living MAG' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
