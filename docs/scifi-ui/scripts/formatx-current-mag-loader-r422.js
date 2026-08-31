@@ -1,11 +1,11 @@
-/* FormatX r468 — direct native MAG + persistent Mini MAG loader.
+/* FormatX r471 — direct native MAG + persistent Mini MAG loader.
    R326 remains the only full-size hero WebGL organism. Mobile uses the final
    restrained bloom/soft-edge display pass plus explicit-interaction surface
    energy, while the R465 governor preserves zero-idle WebGL rendering. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle';
+const VERSION='direct-r326-r471-soft-optics-live-energy-zero-idle';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='r468-static-render-explicit-interaction';
@@ -13,7 +13,7 @@ root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
 const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
-const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r468-soft-mobile-bloom-breathe';
+const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r471-final-softening-order';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge';
@@ -160,13 +160,20 @@ async function start(){
   if(started)return;started=true;
   cleanupLegacyMagRuntime();
   repairAccessibleNames();installSoundTouchRecovery();
+
+  /* Base geometry/optics are allowed to arrive in parallel, but the final R468
+     phone display pass is deliberately appended only after OPTICS has loaded.
+     This makes the softer bloom/edge tone deterministic instead of depending on
+     network completion order. */
   await Promise.all([
     addStyle(STYLE,'data-fx-current-mag-r422'),
     addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
     addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418'),
-    addStyle(MINI_STYLE,'data-fx-mini-mag-assistant-r459'),
-    addStyle(LIFE_STYLE,'data-fx-core-life-style-r455')
+    addStyle(MINI_STYLE,'data-fx-mini-mag-assistant-r459')
   ]);
+  await addStyle(LIFE_STYLE,'data-fx-core-life-style-r455');
+  root.dataset.fxCurrentMagStyleOrderR471='base-optics-then-final-softening';
+
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
   root.dataset.fxCurrentMagStylesR423='ready';
   root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
