@@ -1,4 +1,4 @@
-/* FormatX r471 — compact current-path loader with softer phone MAG display.
+/* FormatX r472 — full-suite measurement revision for the R471 phone MAG display.
    The active HTML contains only current deferred enhancements. Mobile keeps the
    zero-idle R465 render budget and R468 explicit-interaction energy, while the
    final compositor display uses the R471 reduced-bloom feathered silhouette.
@@ -10,6 +10,7 @@ if(root.dataset.fxMotionRuntimeR239)return;
 root.dataset.fxMotionCspR239='external-strict-csp';
 root.dataset.fxFinalValidationR470='r468-live-mag-full-suite';
 root.dataset.fxFinalVisualRevisionR471='softer-mobile-mag';
+root.dataset.fxFullSuiteR472='r471-mobile-mag';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
