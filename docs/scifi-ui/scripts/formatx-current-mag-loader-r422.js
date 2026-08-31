@@ -1,6 +1,6 @@
-/* FormatX r474 display refinement on the R468 direct native MAG runtime.
+/* FormatX R484 periodic surface energy on the current native MAG runtime.
    R326 remains the only full-size hero WebGL organism. Mobile keeps the R468
-   explicit-interaction energy and R465 zero-idle governor. The final phone
+   interaction energy and bounded periodic sweeps with zero frames between. The phone
    display now uses a softer R474 compositor pass: reduced glow, feathered
    facet edges and unchanged desktop optics. */
 (function(){
@@ -18,12 +18,12 @@ const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-so
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge';
-const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface';
+const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
-const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260831-r465-direct-pause-flag-no-redraw';
-const LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy';
+const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260831-r484-bounded-surface-window';
+const LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
 
@@ -54,7 +54,6 @@ const LEGACY_STAGE_SELECTOR=[
 // r472-pc-bright-centre-restrained-perimeter-no-idle-compositor
 // r473-balanced-mobile-facets-subpixel-edge-feather
 // r474-softer-mobile-glow-feathered-facets
-// explicit-mag-interaction-only-zero-idle
 
 function cleanupLegacyMagRuntime(){
   let removedStages=0;
@@ -184,7 +183,7 @@ async function start(){
   root.dataset.fxCurrentMagOpticsR472=mobile?'pc-bright-centre-restrained-perimeter-zero-idle':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagSchedulerR465=mobile?'direct-pause-flag-no-idle-redraw':'desktop-native-scheduler';
-  root.dataset.fxCoreMobileIdlePolicyR426=mobile?'explicit-mag-interaction-only-zero-idle':'desktop-native-scheduler';
+  root.dataset.fxCoreMobileIdlePolicyR426=mobile?'periodic-surface-bursts-between-zero-idle':'desktop-native-scheduler';
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
 

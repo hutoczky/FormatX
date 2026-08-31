@@ -45,7 +45,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       && root.dataset.fxCoreOuterNoiseR456 === 'disabled-on-glass-shell'
       && root.dataset.fxCoreShaderHookR456 === 'released-after-r326-compile'
       && root.dataset.fxCoreLifeR455 === 'ready'
-      && root.dataset.fxCoreEnergyBoltR455 === 'armed-full-surface-explicit-interaction'
+      && root.dataset.fxCoreSurfaceEnergyR484 === 'periodic-native-surface-energy'
       && (!mobile || root.dataset.fxCurrentMagOpticsR468 === 'soft-bloom-soft-edge-compositor-breathe')
       && typeof window.FormatXCoreMobileV69?.surfacePulse === 'function';
   }, isMobile, { timeout: 60000 });
@@ -54,7 +54,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const root = document.documentElement;
     const glyph = document.querySelector('.fx-mini-mag-glyph-r459');
     const header = document.querySelector('.topbar > .fx-reference-mag-button');
-    return root.dataset.fxMagShapeSyncR476 === 'ready'
+    return root.dataset.fxMagShapeSyncR476 === 'ready-r482'
       && root.dataset.fxMiniMagShapeSyncR476?.startsWith('ready-')
       && glyph instanceof HTMLElement
       && header instanceof HTMLElement
@@ -249,18 +249,18 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.equal(state.finalOptics, 'soft-bloom-soft-edge-compositor-breathe', JSON.stringify(state));
     assert.equal(state.rendererSelection, 'r326-direct-r468-soft-optics-live-energy-zero-idle', JSON.stringify(state));
     assert.equal(state.governor, 'r465-direct-pause-flag-no-idle-redraw', JSON.stringify(state));
-    assert.equal(state.idlePolicy, 'explicit-mag-interaction-only-zero-idle', JSON.stringify(state));
-    assert.ok(state.opacity >= .88 && state.opacity <= .90, JSON.stringify(state));
-    assert.match(state.filter, /brightness\(0?\.92\)/, state.filter);
-    assert.match(state.filter, /contrast\(0?\.74\)/, state.filter);
-    assert.match(state.filter, /saturate\(0?\.94\)/, state.filter);
-    assert.match(state.filter, /blur\(1\.55px\)/, state.filter);
-    assert.equal(state.stageAnimation, 'fx-core-r468-compositor-breathe', JSON.stringify(state));
+    assert.equal(state.idlePolicy, 'periodic-surface-bursts-between-zero-idle', JSON.stringify(state));
+    assert.ok(state.opacity >= .88 && state.opacity <= 1, JSON.stringify(state));
+    assert.match(state.filter, /brightness\(1\.02\)/, state.filter);
+    assert.match(state.filter, /contrast\(0?\.98\)/, state.filter);
+    assert.match(state.filter, /saturate\(1\.28\)/, state.filter);
+    assert.match(state.filter, /blur\(0?\.3px\)/, state.filter);
+    assert.equal(state.stageAnimation, 'none', JSON.stringify(state));
   } else {
     assert.equal(state.normal, 'continuous-volume-93-percent-smooth', JSON.stringify(state));
     assert.equal(state.specular, 'continuous-controlled-highlight', JSON.stringify(state));
     assert.equal(state.rendererSelection, 'r326-direct-r468-desktop-live-energy', JSON.stringify(state));
-    assert.ok(state.opacity >= .99, JSON.stringify(state));
+    assert.ok(state.opacity >= .90, JSON.stringify(state));
     assert.ok(!state.filter.includes('blur('), state.filter);
     assert.equal(state.controlBoxes.length, 3, JSON.stringify(state));
     assert.ok(state.controlBoxes.every(item => item.width >= 54 && item.height >= 54), JSON.stringify(state));

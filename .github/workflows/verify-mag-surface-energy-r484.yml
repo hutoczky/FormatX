@@ -1,0 +1,106 @@
+name: Verify R484 native surface energy
+run-name: R484 surface energy for ${{ github.event.workflow_run.head_sha || github.sha }}
+
+on:
+  push:
+    branches: [master, agent/r484-periodic-surface-energy]
+    paths:
+      - 'docs/scifi-ui/**'
+      - '.github/scripts/validate-mag-surface-energy-r484.cjs'
+      - '.github/workflows/verify-mag-surface-energy-r484.yml'
+  workflow_run:
+    workflows: ['Prepare or deploy FormatX production']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: r484-surface-energy-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  native-surface-energy:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.AUDITED_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Mark browser verification running
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          context='FormatX R484 native surface energy'
+          if [[ "$EVENT_NAME" == workflow_run ]]; then context='FormatX R484 LIVE surface energy'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state=pending -f context="$context" -f description='Testing actual native frames, periodic timing, pause and reduced motion' \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+      - name: Validate native surface sources
+        run: |
+          node .github/scripts/validate-living-core-r425-source.cjs
+          node .github/scripts/validate-wda-100-r198.cjs
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js
+          node --check .github/scripts/validate-mag-surface-energy-r484.cjs
+      - name: Install browser verifier
+        run: |
+          mkdir -p "$RUNNER_TEMP/r484-browser"
+          cd "$RUNNER_TEMP/r484-browser"
+          npm init -y
+          npm install --no-audit --no-fund playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Verify exact commit locally in Chromium
+        if: github.event_name != 'workflow_run'
+        env:
+          NODE_PATH: ${{ runner.temp }}/r484-browser/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4173/scifi-ui/
+        run: |
+          python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/r484-server.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID"' EXIT
+          node .github/scripts/validate-mag-surface-energy-r484.cjs
+      - name: Verify deployed native surface energy
+        if: github.event_name == 'workflow_run'
+        env:
+          NODE_PATH: ${{ runner.temp }}/r484-browser/node_modules
+          FORMATX_TEST_URL: https://formatxsuite.com/
+        run: node .github/scripts/validate-mag-surface-energy-r484.cjs
+      - name: Upload actual frames and audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r484-surface-energy-${{ github.event_name }}
+          path: artifacts/r484-surface-energy
+          retention-days: 14
+      - name: Publish measured result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ job.status }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          state=failure
+          description='R484 native surface energy verification failed'
+          context='FormatX R484 native surface energy'
+          if [[ "$EVENT_NAME" == workflow_run ]]; then context='FormatX R484 LIVE surface energy'; fi
+          if [[ "$RESULT" == success ]]; then
+            state=success
+            description='Visible periodic 3D sweep; zero idle; pause and reduced motion passed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state="$state" -f context="$context" -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

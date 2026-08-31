@@ -31,12 +31,12 @@ for(const retired of [
 ])assert.ok(!intro.includes(retired),`retired first-load repair stack returned: ${retired}`);
 
 for(const token of [
-  'formatx-current-mag-loader-r422.js?v=20260831-r474-softer-mobile-glow',
-  'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
-  'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
+  'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy',
+  'formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy',
+  'formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments',
   'formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom',
   'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
-  'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy',
+  'formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy',
   'armed-direct-r326-r468-soft-optics-live-energy-zero-idle',
   "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'"
 ])assert.ok(motion.includes(token),`missing current R474-loader/R468 motion owner: ${token}`);
@@ -68,10 +68,10 @@ for(const retired of [
 
 for(const token of [
   'r326-only','cleanupLegacyMagRuntime','direct-r326-r468-soft-optics-live-energy-zero-idle',
-  'r465-direct-pause-flag-no-redraw','explicit-mag-interaction-only-zero-idle',
+  'r484-bounded-surface-window','periodic-surface-bursts-between-zero-idle',
   'soft-perimeter-low-bloom-low-cost-shader','formatx-mini-mag-assistant-r459.js',
   'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
-  'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy',
+  'formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy',
   "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'"
 ])assert.ok(currentMag.includes(token),`missing R474-loader/R468 current MAG contract: ${token}`);
 for(const token of [
@@ -92,8 +92,8 @@ for(const token of [
 ])assert.ok(lifeStyle.includes(token),`missing R474 final softer mobile display: ${token}`);
 assert.ok(!lifeStyle.includes('fx-core-r468-compositor-breathe'),'R474 final display must remain compositor-idle');
 for(const token of [
-  "const VERSION = 'native-webgl-interaction-life-r466'",'surface-sweep-',
-  'armed-full-surface-explicit-interaction','explicit-mag-interaction-only-zero-idle',
+  "const VERSION = 'native-webgl-periodic-and-interaction-life-r484'",'surface-sweep-',
+  'armed-periodic-and-interaction-surface-energy','periodic-surface-bursts-between-zero-idle',
   'formatx:coreinteraction','pointerdown'
 ])assert.ok(life.includes(token),`missing R468 interaction energy contract: ${token}`);
 assert.ok(!life.includes('setInterval('),'R468 MAG life must not install an idle interval');
@@ -101,7 +101,7 @@ assert.ok(!life.includes('requestAnimationFrame('),'R468 MAG life must not insta
 for(const token of [
   'const activeWindowMs=240','const shapeProbeMs=150','state.core?.requestRender?.(2)',
   'userShapeSource(source)','guardPassiveState(source)',
-  "fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle'",
+  "fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'",
   "fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw'",
   "root.dataset.fxReferenceMotionPaused=value"
 ])assert.ok(governor.includes(token),`missing strict R465 mobile render budget: ${token}`);
@@ -134,4 +134,4 @@ validateLighthouse(desktop,'desktop');
 validateLighthouse(mobile,'mobile');
 
 for(const source of [intro,motion,language,currentMag,solidGlass,life,governor,controls])new Function(source);
-console.log('PASS: R468 single-path first paint with R474 softer mobile MAG display, explicit native surface-energy interaction, direct-pause zero-idle TBT policy, stable semantics/accessibility and truthful Lighthouse budgets are structurally valid.');
+console.log('PASS: R484 single native MAG path, bounded periodic energy, zero-idle gaps, stable semantics/accessibility and unchanged Lighthouse budgets are structurally valid.');

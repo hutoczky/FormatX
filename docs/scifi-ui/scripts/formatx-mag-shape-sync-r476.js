@@ -9,7 +9,7 @@ if(root.dataset.fxMagShapeSyncR476==='ready-r482')return;
 root.dataset.fxMagShapeSyncR476='booting-r482';
 
 const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
-const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260831-r480-restrained-glow-soft-edge';
+const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260831-r484-readable-electric-surface';
 const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260831-r482-spectrum-soft-edge';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null;
@@ -33,7 +33,7 @@ function ensureStyle(){
 function ensureMobileOptics(){
   let link=document.querySelector('link[data-fx-mag-mobile-optics-r480]');
   if(link instanceof HTMLLinkElement){
-    if(!link.href.includes('r480-restrained-glow-soft-edge'))link.href=MOBILE_OPTICS;
+    if(!link.href.includes('r484-readable-electric-surface'))link.href=MOBILE_OPTICS;
     return link;
   }
   link=document.createElement('link');

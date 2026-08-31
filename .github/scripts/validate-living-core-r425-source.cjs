@@ -25,7 +25,7 @@ const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 
 has(home,[
   'formatx-event-horizon.js?v=20260830-r461-clean-first-load',
-  'formatx-motion-runtime-loader-r239.js?v=20260830-r462-compact-active-path',
+  'formatx-motion-runtime-loader-r239.js?v=20260831-r484-periodic-native-energy',
   'formatx-quality-r461.css?v=20260830-r462-mobile-a11y',
   'data-fx-single-language-toggle="ready-v3"',
   'class="fx-language-toggle"'
@@ -46,12 +46,12 @@ for(const token of ['formatx-award-runtime-r206.js','formatx-mobile-regression-r
 
 has(motion,[
   'single-language-toggle.js?v=20260830-r462-semantic-owner',
-  'formatx-current-mag-loader-r422.js?v=20260831-r474-softer-mobile-glow',
-  'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
-  'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
+  'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy',
+  'formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments',
+  'formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy',
   'formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom',
   'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
-  'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy',
+  'formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy',
   "fxSingleLanguageToggleVersion==='7'",
   "fxLegacyMagRuntimeCleanupR460='static-html-clean-r461'",
   'armed-direct-r326-r468-soft-optics-live-energy-zero-idle',
@@ -69,19 +69,23 @@ assert.ok(!language.includes('new MutationObserver'),'language owner must remain
 
 has(current,[
   'direct-r326-r468-soft-optics-live-energy-zero-idle','cleanupLegacyMagRuntime','r326-only',
-  'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
+  'formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments',
   'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe',
-  'formatx-mobile-render-governor-r426.js?v=20260831-r465-direct-pause-flag-no-redraw',
+  'formatx-mobile-render-governor-r426.js?v=20260831-r484-bounded-surface-window',
   'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
-  'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy',
+  'formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy',
   'soft-perimeter-low-bloom-low-cost-shader','direct-pause-flag-no-idle-redraw',
-  'explicit-mag-interaction-only-zero-idle','formatx-mini-mag-assistant-r459.js',
+  'periodic-surface-bursts-between-zero-idle','formatx-mini-mag-assistant-r459.js',
   "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'"
 ],'R474 primary MAG loader carrying the softer display');
 
 has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','uSurfacePulse',
-  'single-luminous-webgl-material-owner','heartbeat-and-interaction-bursts-no-idle-loop-r326'
+  'single-luminous-webgl-material-owner','heartbeat-and-interaction-bursts-no-idle-loop-r326',
+  'const SURFACE_PULSE_MS = 1160','periodic-native-surface-energy',
+  "startSurfacePulse('autonomous')",'armed-single-native-timer',
+  'document.hidden||!visible||paused','surfacePulseActive',
+  'listen(reduced,\'change\',onReducedMotionChange'
 ],'R326 native renderer');
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
 
@@ -92,7 +96,8 @@ has(solidGlass,[
   "const specGainB=mobile?'.24':'.64'",
   "next=next.replace(fresnelMobile,'float fresnel=pow(1.0-facing,1.92);')",
   "next=next.replace(edgePattern,'float edge=0.0;')",
-  'surfacePulsePattern','soft-perimeter-low-bloom-low-cost-shader'
+  'surfacePulsePattern','soft-perimeter-low-bloom-low-cost-shader',
+  'surfaceFilament=trunk+.50*branch','sweepCoordinate','surfaceSweep'
 ],'R465 soft award phone glass');
 has(optics,[
   'FormatX r467','brightness(1.065)','contrast(.89)','saturate(1.10)','blur(.82px)'
@@ -106,8 +111,8 @@ has(lifeStyle,[
 assert.ok(!lifeStyle.includes('fx-core-r468-compositor-breathe'),'R474 mobile display must not keep an idle compositor breathe animation');
 
 has(life,[
-  "const VERSION = 'native-webgl-interaction-life-r466'",'surface-sweep-',
-  'armed-full-surface-explicit-interaction','explicit-mag-interaction-only-zero-idle',
+  "const VERSION = 'native-webgl-periodic-and-interaction-life-r484'",'surface-sweep-',
+  'armed-periodic-and-interaction-surface-energy','periodic-surface-bursts-between-zero-idle',
   'formatx:coreinteraction','pointerdown'
 ],'R468 explicit native energy path');
 assert.ok(!life.includes('setInterval('),'R468 life owner must remain interval-free');
@@ -122,9 +127,11 @@ has(governor,[
   'state.core?.requestRender?.(2)','userShapeSource(source)','guardPassiveState(source)',
   "'formatx:menustatechange','formatx:languagechange','pageshow','resize'",
   'passive-${eventName}-r465',
-  "fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle'",
+  "fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'",
   "fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw'",
-  "root.dataset.fxReferenceMotionPaused=value"
+  "root.dataset.fxReferenceMotionPaused=value",
+  "addEventListener('formatx:coresurfacesweep'",'surfaceDeadline-performance.now()',
+  'full-1160ms-sweep-then-zero-idle'
 ],'R465 direct-flag mobile TBT governor');
 assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepause'"),'internal governor idle must not trigger the legacy synchronous redraw handler');
 assert.ok(!governor.includes("active('scroll-r463'"),'mobile scroll must not wake WebGL');
@@ -141,4 +148,4 @@ has(quality,[
 ],'R462 measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: R474 preserves the clean R468 native MAG path, softer mobile glow, feathered facet edges, hidden non-focused skip link, zero-idle rendering and explicit interaction energy.');
+console.log('PASS: R484 keeps one native MAG, visible surface filaments, a full 1160ms periodic sweep, zero frames between sweeps, and pause/reduced-motion guards.');

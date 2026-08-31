@@ -7,6 +7,7 @@ if(root.dataset.fxMobileRenderGovernorR426==='ready')return;
 root.dataset.fxMobileRenderGovernorR426='booting';
 
 let settleTimer=0;
+let surfaceDeadline=0;
 let armed=false;
 const activeWindowMs=240;
 const shapeProbeMs=150;
@@ -24,9 +25,14 @@ function setRendererPaused(paused,source){
 function clearSettle(){if(settleTimer)clearTimeout(settleTimer);settleTimer=0;}
 function idle(source='idle-r465'){
   clearSettle();
+  const remaining=surfaceDeadline-performance.now();
+  if(remaining>0&&!userPaused()){
+    settleTimer=setTimeout(()=>idle('surface-settled-r484'),remaining);
+    return;
+  }
   if(root.dataset.fxReferenceMotionPaused!=='true')setRendererPaused(true,source);
   root.dataset.fxMobileRenderGovernorR426='idle-zero-frame';
-  root.dataset.fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle';
+  root.dataset.fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle';
 }
 function shapeState(){
   const core=renderer();
@@ -91,8 +97,9 @@ function guardPassiveState(source){
 function arm(){
   if(armed)return;armed=true;
   root.dataset.fxMobileRenderGovernorR426='ready';
-  root.dataset.fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle';
+  root.dataset.fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle';
   root.dataset.fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw';
+  root.dataset.fxMobileSurfaceBudgetR484='full-1160ms-sweep-then-zero-idle';
   // R326 registers its first render frame before dispatching real3dready. One
   // governor frame therefore preserves that initial painted MAG, then freezes
   // the canvas without a second render or pause-event feedback task.
@@ -100,6 +107,17 @@ function arm(){
 }
 
 addEventListener('formatx:real3dready',arm,{passive:true});
+addEventListener('formatx:coresurfacesweep',event=>{
+  if(event.detail?.phase!=='start'||userPaused()||document.hidden)return;
+  const duration=Math.min(1600,Math.max(0,Number(event.detail.duration)||0));
+  surfaceDeadline=performance.now()+duration+120;
+  active('surface-energy-r484',1,duration+120);
+},{passive:true});
+addEventListener('formatx:referencepause',event=>{
+  if(!event.detail?.paused)return;
+  surfaceDeadline=0;
+  clearSettle();
+},{passive:true});
 addEventListener('formatx:coreshapechange',event=>{
   const source=event.detail?.source||'';
   if(userShapeSource(source))active(`shape-${source||'user'}-r465`,3,0,true);

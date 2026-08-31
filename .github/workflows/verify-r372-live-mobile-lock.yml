@@ -58,7 +58,7 @@ jobs:
 
           grep -Fq 'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow' "$CURRENT"
           grep -Fq "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'" "$CURRENT"
-          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r474-softer-mobile-glow' "$MOTION"
+          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy' "$MOTION"
           grep -Fq 'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow' "$MOTION"
           grep -Fq "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'" "$MOTION"
 
@@ -78,7 +78,7 @@ jobs:
 
           grep -Fq "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'" "$SOLID"
           grep -Fq 'float edge=0.0;' "$SOLID"
-          grep -Fq "fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle'" "$GOVERNOR"
+          grep -Fq "fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'" "$GOVERNOR"
           ! grep -Fq "active('scroll-r463'" "$GOVERNOR"
           ! grep -Fq "active('resize-r463'" "$GOVERNOR"
           ! grep -Fq 'setInterval(' "$LIFE"
@@ -107,7 +107,7 @@ jobs:
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MOTION_URL}?${suffix}" -o "$MOTION_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${LIFE_CSS_URL}?${suffix}" -o "$LIFE_CSS_TMP"; then
               if grep -Fq 'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow' "$CURRENT_TMP" \
-                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r474-softer-mobile-glow' "$MOTION_TMP" \
+                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy' "$MOTION_TMP" \
                 && grep -Fq 'FormatX r474' "$LIFE_CSS_TMP" \
                 && grep -Fq 'opacity: .970' "$LIFE_CSS_TMP" \
                 && grep -Fq 'brightness(.985)' "$LIFE_CSS_TMP" \

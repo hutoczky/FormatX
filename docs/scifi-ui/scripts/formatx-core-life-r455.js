@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'native-webgl-interaction-life-r466';
+  const VERSION = 'native-webgl-periodic-and-interaction-life-r484';
   if (root.dataset.fxCoreLifeR455 === 'ready' || root.dataset.fxCoreLifeR455 === 'booting') return;
   root.dataset.fxCoreLifeR455 = 'booting';
 
@@ -16,12 +16,11 @@
 
   function fireSurfacePulse(source) {
     if (!api || typeof api.surfacePulse !== 'function' || reduced.matches || document.hidden || !visible) return false;
-    if (root.dataset.fxReferenceMotionPaused === 'true') return false;
+    if (document.querySelector('.fx-reference-pause')?.dataset.paused === 'true') return false;
     const now = performance.now();
     if (now - lastSurfacePulse < 2200) return false;
+    if (!api.surfacePulse(source)) return false;
     lastSurfacePulse = now;
-    api.surfacePulse();
-    root.dataset.fxCoreEnergyBoltR455 = `surface-sweep-${source}`;
     return true;
   }
 
@@ -31,9 +30,8 @@
   }
 
   function onPointerDown() {
-    /* R465's capture-phase render governor unpauses the native renderer first;
-       this bubble-phase hook then launches the real shader sweep on the same
-       trusted interaction. No timer or idle WebGL loop is introduced. */
+    /* The renderer owns the only periodic timer and reserves the full sweep
+       with the governor. This module adds interaction, not a second clock. */
     queueMicrotask(() => fireSurfacePulse('direct-interaction'));
   }
 
@@ -64,9 +62,11 @@
 
     root.dataset.fxCoreLifeR455 = 'ready';
     root.dataset.fxCoreLifeVersionR455 = VERSION;
-    root.dataset.fxCoreLivingBehavior = 'native-webgl-interaction-energy-plus-compositor-breath-r466';
-    root.dataset.fxCoreEnergyBoltR455 = 'armed-full-surface-explicit-interaction';
-    root.dataset.fxCoreIdlePolicyR455 = 'explicit-mag-interaction-only-zero-idle';
+    root.dataset.fxCoreLivingBehavior = 'native-periodic-surface-energy-and-interaction-r484';
+    if (!root.dataset.fxCoreEnergyBoltR455?.startsWith('surface-sweep-')) {
+      root.dataset.fxCoreEnergyBoltR455 = 'armed-periodic-and-interaction-surface-energy';
+    }
+    root.dataset.fxCoreIdlePolicyR455 = 'periodic-surface-bursts-between-zero-idle';
     return true;
   }
 

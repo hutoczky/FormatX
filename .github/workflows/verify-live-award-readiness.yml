@@ -80,7 +80,7 @@ jobs:
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?audit=$stamp" -o "$tmp/solid.js" || true
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/styles/formatx-core-life-r455.css?audit=$stamp" -o "$tmp/life.css" || true
             if grep -Fq 'living-luminous-electric-crystal-r454' "$tmp/core.js" \
-              && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r474-softer-mobile-glow' "$tmp/motion.js" \
+              && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy' "$tmp/motion.js" \
               && grep -Fq "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'" "$tmp/motion.js" \
               && grep -Fq 'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow' "$tmp/loader.js" \
               && grep -Fq "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'" "$tmp/loader.js" \
@@ -93,7 +93,7 @@ jobs:
           done
           test "$ready" = 1
           grep -Fq 'single-luminous-webgl-material-owner' "$tmp/core.js"
-          grep -Fq 'explicit-mag-interaction-only-zero-idle' "$tmp/loader.js"
+          grep -Fq 'periodic-surface-bursts-between-zero-idle' "$tmp/loader.js"
           grep -Fq 'soft-perimeter-low-bloom-low-cost-shader' "$tmp/solid.js"
           grep -Fq 'softer mobile crystal glow' "$tmp/life.css"
           grep -Fq 'opacity: .970' "$tmp/life.css"

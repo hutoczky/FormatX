@@ -137,10 +137,10 @@ jobs:
               const cssResponse = await request.request.get(CSS_URL, { timeout: 30000 });
               assert.equal(cssResponse.status(), 200, 'R483 CSS is not live');
               const css = await cssResponse.text();
-              assert.match(css, /production-r483-visible-living-mobile-mag-soft-edge-desktop-ask-crystal-deploy-zero-idle-split/);
-              assert.match(css, /brightness\(\.76\)/);
-              assert.match(css, /contrast\(\.69\)/);
-              assert.match(css, /blur\(1\.02px\)/);
+              assert.match(css, /production-r484-readable-periodic-native-surface-energy/);
+              assert.match(css, /brightness\(1\.02\)/);
+              assert.match(css, /contrast\(\.98\)/);
+              assert.match(css, /blur\(\.30px\)/);
               assert.match(css, /drop-shadow\(0 0 3px/);
               assert.match(css, /drop-shadow\(0 0 7px/);
               assert.match(css, /fx-primary-mag-mobile-heart-r483/);
@@ -167,9 +167,9 @@ jobs:
               assert.match(mobileRoot.idlePolicy, /zero-idle/, JSON.stringify(mobileRoot));
               assert.match(mobileFirst.animationName, /fx-primary-mag-mobile-heart-r483/, JSON.stringify({ mobileRoot, mobileFirst }));
               assert.notEqual(mobileFirst.animationPlayState, 'paused', JSON.stringify(mobileFirst));
-              assert.match(mobileFirst.filter, /brightness\(0\.76\)/, mobileFirst.filter);
-              assert.match(mobileFirst.filter, /contrast\(0\.69\)/, mobileFirst.filter);
-              assert.match(mobileFirst.filter, /blur\(1\.02px\)/, mobileFirst.filter);
+              assert.match(mobileFirst.filter, /brightness\(1\.02\)/, mobileFirst.filter);
+              assert.match(mobileFirst.filter, /contrast\(0\.98\)/, mobileFirst.filter);
+              assert.match(mobileFirst.filter, /blur\(0\.3px\)/, mobileFirst.filter);
               assert.ok(Math.min(...mOpacity) >= .88, JSON.stringify({ mOpacity, mScale }));
               assert.ok(mOpacitySpan >= .025 || mScaleSpan >= .010, JSON.stringify({ mOpacitySpan, mScaleSpan, mobileValues }));
               assert.ok(mobileFirst.width > 250 && mobileFirst.height > 300, JSON.stringify(mobileFirst));

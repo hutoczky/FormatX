@@ -110,13 +110,27 @@ function patchSource(source){
       next=next.replace(hashFunction,'float hash(vec2 p){return fract(p.x*.1031+p.y*.11369);}');
       next=next.replace(noiseFunction,'float noise(vec2 p){return .5+.5*sin(p.x*1.71+p.y*1.19);}');
       next=next.replace(ridgeFunction,'float ridge(float v,float p){float x=sat(1.-abs(fract(v)-.5)*2.);return x*x*x;}');
+      // R484: a bounded, branching current follows the real curved surface.
+      // Smoothstep + two sine fields avoid expensive noise and strobe flicker.
       next=next.replace(surfacePulsePattern,`float surfaceSweep=0.0;
         float surfaceFilament=0.0;
         if(uSurfacePulse>=0.0){
-          float sweepCoordinate=.5+(vLocal.y*.56+vLocal.x*.12+vLocal.z*.18)*.5;
+          float sweepCoordinate=.5+(vLocal.y*.74+vLocal.x*.22+vLocal.z*.26)*.5;
           float sweepHead=mix(-.12,1.12,sat(uSurfacePulse));
           float sweepDistance=abs(sweepCoordinate-sweepHead);
-          surfaceSweep=sat(1.0-sweepDistance/.085)*(.18+.26*fresnel);
+          float pathWave=.085*sin(vLocal.y*9.0+vLocal.z*4.0)
+            +.035*sin(vLocal.y*21.0-vLocal.z*6.0);
+          float trunk=1.0-smoothstep(.014,.060,abs(vLocal.x+pathWave));
+          float branch=1.0-smoothstep(.010,.038,
+            abs(vLocal.x*.76-vLocal.z*.22+pathWave*1.9));
+          surfaceFilament=trunk+.50*branch;
+          float band=1.0-smoothstep(.018,.070,sweepDistance);
+          float tail=(1.0-smoothstep(.025,.23,sweepHead-sweepCoordinate))
+            *step(0.0,sweepHead-sweepCoordinate);
+          float envelope=smoothstep(0.0,.10,uSurfacePulse)
+            *(1.0-smoothstep(.86,1.0,uSurfacePulse));
+          surfaceSweep=(band+.30*tail)*(.58+.42*fresnel)
+            *(.50+.90*surfaceFilament)*envelope;
         }
 
         if(uLayer>.5){`);
@@ -124,11 +138,11 @@ function patchSource(source){
       next=next.replace(glassFresnel,'glass+=spectral*fresnel*(.34+.18*visualEnergy);');
       next=next.replace(innerNucleus,'organ+=ice*nucleus*(1.48+.34*visualEnergy);');
       next=next.replace(innerAxis,'organ+=(cyan*.46+ice*.09)*(axisV*.46+axisH*.21)*visualEnergy;');
-      next=next.replace(innerSweep,'organ+=(ice*.74+cyan*.30+violet*.08)*surfaceSweep*(.58+.14*visualEnergy);');
+      next=next.replace(innerSweep,'organ+=(ice*.90+cyan*.78+violet*.24)*surfaceSweep*(.82+.20*visualEnergy);');
       next=next.replace(outerNucleus,'glass+=ice*(rings*.16+heart*.06+nucleus*.20);');
       next=next.replace(outerAxis,'glass+=(cyan*.34+ice*.06)*(axisV*.35+axisH*.16)*visualEnergy;');
-      next=next.replace(outerSweep,'glass+=(ice*.60+cyan*.22+spectral*.06)*surfaceSweep*(.48+.10*fresnel);');
-      next=next.replace(outerAlpha,'float alpha=.33+.16*ndl+.055*fresnel+edge*.025+veins*.060+rings*.035+specular*.070+surfaceSweep*.030;');
+      next=next.replace(outerSweep,'glass+=(ice*.72+cyan*.85+spectral*.38)*surfaceSweep*(.88+.24*fresnel);');
+      next=next.replace(outerAlpha,'float alpha=.33+.16*ndl+.055*fresnel+edge*.025+veins*.060+rings*.035+specular*.070+surfaceSweep*.14;');
       next=next.replace('filmic(organ*2.92)','filmic(organ*2.30)');
       next=next.replace('filmic(glass*2.66)','filmic(glass*2.10)');
     }

@@ -9,6 +9,7 @@
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   const IDLE_ENERGY = mobile ? .50 : .43;
+  const SURFACE_PULSE_MS = 1160;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const optics = mobile ? Object.freeze({
     fresnelPower: '1.56',
@@ -438,7 +439,7 @@
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
-    let surfacePulseStart=-Infinity,surfacePulseCount=0;
+    let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
     cinematic.version=REVISION;
@@ -507,36 +508,58 @@
       boost(.84,mobile?5:8);
     }
 
-    /* r441 compatibility marker: heartbeat-and-interaction-bursts-no-idle-loop-r326.
-       Native WebGL does not wake itself periodically. Ambient life is supplied
-       by the cheap bounded CSS sheen; WebGL renders only on explicit interaction
-       or semantic site-state changes. */
+    /* heartbeat-and-interaction-bursts-no-idle-loop-r326.
+       R484 has one bounded native surface sweep every five to six seconds.
+       Its timeout is suspended when hidden, offscreen, user-paused or reduced.
+       Between sweeps the renderer returns to zero idle frames. */
     function scheduleHeartbeat(){
       clearTimeout(heartbeatTimer);heartbeatTimer=0;
       root.dataset.fxCoreIdleHeartbeatR441='disabled-no-continuous-rendering';
     }
     function startSurfacePulse(source='autonomous'){
-      if(disposed||reduced.matches||blocked())return false;
-      surfacePulseStart=performance.now();
+      const now=performance.now();
+      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
+        ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'
+        ||now-lastSurfacePulseAt<2200)return false;
+      // The mobile governor's idle flag is not the user's PAUSE control.
+      // Reserve the full sweep before asking the single renderer to draw it.
+      dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
+        detail:{phase:'start',source,duration:SURFACE_PULSE_MS}
+      }));
+      if(blocked())return false;
+      surfacePulseStart=lastSurfacePulseAt=now;
       surfacePulseCount+=1;
+      const pulseId=surfacePulseCount;
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.24);
       targetBreath=Math.max(targetBreath,.42);
       root.dataset.fxCoreSurfacePulseR454=`sweep-${surfacePulseCount}-${source}`;
+      root.dataset.fxCoreEnergyBoltR455=`surface-sweep-${source}-${surfacePulseCount}`;
+      root.dataset.fxCoreSurfaceCountR484=String(surfacePulseCount);
       schedule(68);
       later(()=>{
+        if(pulseId!==surfacePulseCount)return;
         surfacePulseStart=-Infinity;
         root.dataset.fxCoreSurfacePulseR454='idle';
         schedule(4);
-      },1160);
+        dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
+          detail:{phase:'end',source,duration:SURFACE_PULSE_MS}
+        }));
+      },SURFACE_PULSE_MS);
       return true;
     }
     function scheduleSurfacePulse(){
-      clearTimeout(surfacePulseTimer);
-      if(disposed||reduced.matches)return;
+      clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
+      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
+        ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'){
+        root.dataset.fxCoreSurfaceSchedulerR484='suspended';
+        return;
+      }
       const delay=surfacePulseCount===0
         ? (mobile?3400:3000)
         : (mobile?5400:4900)+(surfacePulseCount%3)*520;
+      root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';
       surfacePulseTimer=setTimeout(()=>{
+        surfacePulseTimer=0;
         startSurfacePulse('autonomous');
         scheduleSurfacePulse();
       },delay);
@@ -583,7 +606,7 @@
       gl.uniform3f(uniforms.uRotation,rotationX,rotationY,rotationZ);
       gl.uniform1f(uniforms.uAspect,aspect);
       gl.uniform1f(uniforms.uSiteProgress,siteProgress);
-      const surfacePulseElapsed=(now-surfacePulseStart)/1160;
+      const surfacePulseElapsed=(now-surfacePulseStart)/SURFACE_PULSE_MS;
       const surfacePulse=surfacePulseElapsed>=0&&surfacePulseElapsed<=1?surfacePulseElapsed:-1;
       gl.uniform1f(uniforms.uSurfacePulse,surfacePulse);
 
@@ -635,7 +658,7 @@
     function frame(now){
       raf=0;if(blocked())return;
       render(now);burstFrames=Math.max(0,burstFrames-1);
-      const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=1160;
+      const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_MS;
       if(burstFrames>0||surfacePulseActive)raf=requestAnimationFrame(frame);
       else settleAfterBurst();
     }
@@ -684,12 +707,13 @@
         root.dataset.fxCoreSurfacePulseR454='idle';
         if(!disposed&&!contextLost&&resize())render(performance.now());
       }else schedule(1);
+      scheduleSurfacePulse();
     }
     function onReducedMotionChange(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
       surfacePulseStart=-Infinity;
       root.dataset.fxCoreSurfacePulseR454='idle';
-      if(!reduced.matches)scheduleSurfacePulse();
+      scheduleSurfacePulse();
       schedule(1);
     }
     function onScroll(){
@@ -723,7 +747,10 @@
     listen(window,'formatx:loop',()=>{signalShape('crystal','site-loop');boost(.92,mobile?4:6);},{passive:true});
     listen(window,'formatx:menustatechange',event=>{boost(event.detail?.open ? .76 : .52,mobile?2:4);},{passive:true});
     listen(window,'formatx:languagechange',()=>boost(.62,mobile?2:3),{passive:true});
-    listen(document,'visibilitychange',()=>{if(!document.hidden)schedule(1);},{passive:true});
+    listen(document,'visibilitychange',()=>{
+      if(!document.hidden)schedule(1);
+      scheduleSurfacePulse();
+    },{passive:true});
     listen(document,'click',event=>{
       if(!(event.target instanceof Element))return;
       const action=event.target.closest('a,button,[role="button"]');
@@ -737,6 +764,7 @@
     },{passive:true});
     listen(canvas,'webglcontextlost',event=>{
       event.preventDefault();contextLost=true;if(raf)cancelAnimationFrame(raf);raf=0;
+      scheduleSurfacePulse();
       root.dataset.fxCoreReal3d='context-lost';root.dataset.fxCrystalOrganismR326='context-lost';
     });
     listen(canvas,'webglcontextrestored',()=>{
@@ -746,9 +774,10 @@
     const ro=new ResizeObserver(()=>{if(resize())schedule(1);});
     ro.observe(stage);
     const io=new IntersectionObserver(entries=>{
-      visible=entries.some(entry=>entry.isIntersecting);
+      visible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.04);
       if(visible)schedule(1);else if(raf){cancelAnimationFrame(raf);raf=0;}
-    },{rootMargin:'120px'});
+      scheduleSurfacePulse();
+    },{threshold:[0,.04]});
     io.observe(stage);
     const sectionShapes={hero:'crystal',experience:'sphere',capabilities:'crystal',pricing:'sphere',system:'crystal',resources:'sphere'};
     const organObserver=new IntersectionObserver(entries=>{
@@ -781,7 +810,8 @@
       geometry:'four-direction-asymmetric-crystal-organism-r326',
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
-      surfacePulse:()=>startSurfacePulse('api'),
+      surfacePulse:source=>startSurfacePulse(typeof source==='string'?source:'api'),
+      surfacePulseDurationMs:SURFACE_PULSE_MS,
       setMorph:(value,source)=>setMorph(value,source||'api-morph',true),
       setShape:(shape,source)=>setShape(shape,source||'api-set'),
       toggleShape:source=>toggleShape(source||'api-toggle'),
@@ -838,6 +868,8 @@
     root.dataset.fxCoreOpticsR454='single-luminous-webgl-material-owner';
     root.dataset.fxCoreSurfaceMotionR454='intermittent-native-electric-filament-every-five-to-six-seconds';
     root.dataset.fxCoreSurfacePulseR454='idle';
+    root.dataset.fxCoreSurfaceEnergyR484='periodic-native-surface-energy';
+    root.dataset.fxCoreSurfaceCountR484='0';
     root.dataset.fxCoreMobileResolutionR424=mobile?'r454-dpr-cap-1.75-pixel-budget-920k':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
     root.dataset.fxCoreMobileOpticsR435=mobile?'superseded-by-r454-visible-native-surface':'desktop-preserved-r454';
     root.dataset.fxCoreMobileOpticsR440=mobile?'superseded-by-r454-luminous-electric-surface':'desktop-superseded-by-r454';

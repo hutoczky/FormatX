@@ -1,4 +1,4 @@
-/* FormatX R483 — visible living MAG, restrained mobile optics and desktop ASK crystal.
+/* FormatX R484 — readable native surface energy and the existing ASK crystal.
    R326 remains the single WebGL/material owner. This layer only adjusts final
    compositor optics and the canonical ASK glyph: no continuous JS/WebGL idle loop. */
 
@@ -51,19 +51,19 @@
     --fx-mag-r483-opacity: .92;
     opacity: var(--fx-mag-r483-opacity) !important;
     filter:
-      brightness(.76)
-      contrast(.69)
+      brightness(1.02)
+      contrast(.98)
       saturate(1.28)
       hue-rotate(-3deg)
-      blur(1.02px)
+      blur(.30px)
       drop-shadow(0 0 3px rgba(46,218,255,.038))
       drop-shadow(0 0 7px rgba(104,69,255,.018)) !important;
     -webkit-filter:
-      brightness(.76)
-      contrast(.69)
+      brightness(1.02)
+      contrast(.98)
       saturate(1.28)
       hue-rotate(-3deg)
-      blur(1.02px)
+      blur(.30px)
       drop-shadow(0 0 3px rgba(46,218,255,.038))
       drop-shadow(0 0 7px rgba(104,69,255,.018)) !important;
     mix-blend-mode: normal !important;
@@ -172,4 +172,4 @@
   }
 }
 
-/* production-r483-visible-living-mobile-mag-soft-edge-desktop-ask-crystal-deploy-zero-idle-split */
+/* production-r484-readable-periodic-native-surface-energy */
