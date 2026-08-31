@@ -1,10 +1,8 @@
-/* FormatX R476 — shape-synchronised MAG iconography and softer phone optics.
-   The primary R326 WebGL MAG remains the only large renderer. The header and
-   Mini MAG reuse its semantic shape state without adding another canvas or an
-   idle animation loop. */
+/* FormatX R476/R478 — shape-synchronised MAG iconography, softer phone optics
+   and shared living-state feedback. The primary R326 WebGL MAG remains the only
+   large renderer; Mini MAG and header MAG mirror its semantic shape and energy
+   without creating a second WebGL surface or JavaScript idle loop. */
 
-/* Header MAG/CORE control: keep the semantic text/aria label in the DOM, but
-   render the current MAG shape as the visual affordance. */
 html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-button {
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
@@ -26,52 +24,102 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='30%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23e9ffff'/%3E%3Cstop offset='.2' stop-color='%237eeaff'/%3E%3Cstop offset='.58' stop-color='%234574c7'/%3E%3Cstop offset='1' stop-color='%2307192c'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='12.5' fill='url(%23g)' stroke='%238ff3ff' stroke-width='1.25'/%3E%3Cellipse cx='12.3' cy='10.8' rx='4.3' ry='2.5' fill='%23ffffff' fill-opacity='.24'/%3E%3C/svg%3E") !important;
 }
 
-/* Mini MAG follows exactly the same crystal/sphere state as the primary MAG. */
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="crystal"],
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459:not([data-fx-core-shape="sphere"]) {
   transform: rotate(45deg) !important;
   border-radius: 8px 2px 8px 2px !important;
-  border-color: rgba(162,244,255,.66) !important;
+  border-color: rgba(162,244,255,.58) !important;
   background:
-    radial-gradient(circle at 50% 50%, rgba(234,255,255,.82) 0 4%, rgba(78,224,255,.40) 8%, transparent 27%),
-    linear-gradient(135deg, rgba(62,190,232,.27), rgba(101,78,221,.16) 52%, rgba(3,21,37,.78)) !important;
-  box-shadow: 0 0 5px rgba(77,225,255,.14), inset 0 0 11px rgba(98,183,255,.09) !important;
+    radial-gradient(circle at 50% 50%, rgba(234,255,255,.74) 0 4%, rgba(78,224,255,.32) 8%, transparent 29%),
+    linear-gradient(135deg, rgba(62,190,232,.22), rgba(101,78,221,.13) 52%, rgba(3,21,37,.82)) !important;
+  box-shadow: 0 0 4px rgba(77,225,255,.10), inset 0 0 10px rgba(98,183,255,.07) !important;
 }
 
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="sphere"] {
   transform: none !important;
   border-radius: 50% !important;
-  border-color: rgba(162,244,255,.62) !important;
+  border-color: rgba(162,244,255,.56) !important;
   background:
-    radial-gradient(circle at 36% 29%, rgba(247,255,255,.82) 0 7%, rgba(116,226,255,.48) 15%, rgba(66,95,192,.40) 48%, rgba(3,18,32,.90) 78%) !important;
-  box-shadow: 0 0 6px rgba(77,225,255,.14), inset -5px -7px 13px rgba(2,8,20,.36) !important;
+    radial-gradient(circle at 36% 29%, rgba(247,255,255,.74) 0 7%, rgba(116,226,255,.39) 15%, rgba(66,95,192,.34) 48%, rgba(3,18,32,.92) 78%) !important;
+  box-shadow: 0 0 5px rgba(77,225,255,.10), inset -5px -7px 13px rgba(2,8,20,.40) !important;
 }
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="sphere"]::before {
   width: 15px !important;
   height: 1px !important;
-  opacity: .34 !important;
+  opacity: .28 !important;
 }
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="sphere"]::after {
   width: 1px !important;
   height: 15px !important;
-  opacity: .22 !important;
+  opacity: .18 !important;
 }
 
-/* R477 phone optics refinement: keep the crystal clearly dimensional, but pull
-   back the blown cyan/violet highlight and soften the silhouette/facet edges.
-   This is mobile-only and does not alter geometry, hit targets, or desktop. */
+/* R478 mobile soft-glass pass. The phone screenshot showed an over-bright centre
+   and knife-sharp silhouette. Lower contrast/saturation and a slightly wider
+   optical feather keep the dimensional crystal while removing the hard neon edge. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .86 !important;
-    filter: brightness(.88) contrast(.68) saturate(.91) blur(1.85px) !important;
-    -webkit-filter: brightness(.88) contrast(.68) saturate(.91) blur(1.85px) !important;
+    opacity: .80 !important;
+    filter: brightness(.79) contrast(.56) saturate(.82) blur(2.25px) !important;
+    -webkit-filter: brightness(.79) contrast(.56) saturate(.82) blur(2.25px) !important;
   }
 }
 
+/* Shared life signal: compositor-only breathing plus short explicit energy pulse.
+   scale is the individual transform property, so it does not overwrite the
+   crystal rotate(45deg) shape state. */
+@media (prefers-reduced-motion: no-preference) {
+  .fx-mini-mag-assistant-r459[data-fx-mag-life="breath"] .fx-mini-mag-glyph-r459 {
+    animation: fx-mini-mag-live-breath-r478 4.8s ease-in-out infinite !important;
+    transform-origin: 50% 50% !important;
+  }
+  .topbar .fx-reference-mag-button[data-fx-mag-life="breath"] {
+    animation: fx-header-mag-live-breath-r478 5.2s ease-in-out infinite !important;
+  }
+  .fx-mini-mag-assistant-r459[data-fx-mag-life="breath"] .fx-mini-mag-status-r459 {
+    animation: fx-mini-mag-status-breath-r478 3.6s ease-in-out infinite !important;
+  }
+}
+
+.fx-mini-mag-assistant-r459[data-fx-mag-life="pulse"] .fx-mini-mag-glyph-r459 {
+  scale: 1.10 !important;
+  opacity: 1 !important;
+  transition: scale 180ms cubic-bezier(.2,.8,.2,1), opacity 180ms ease !important;
+}
+.fx-mini-mag-assistant-r459[data-fx-mag-life="pulse"] .fx-mini-mag-status-r459 {
+  scale: 1.22 !important;
+  opacity: 1 !important;
+}
+.topbar .fx-reference-mag-button[data-fx-mag-life="pulse"] {
+  opacity: 1 !important;
+  scale: 1.045 !important;
+  transition: scale 180ms cubic-bezier(.2,.8,.2,1), opacity 180ms ease !important;
+}
+
+@keyframes fx-mini-mag-live-breath-r478 {
+  0%,100% { scale: .975; opacity: .86; }
+  50% { scale: 1.025; opacity: 1; }
+}
+@keyframes fx-mini-mag-status-breath-r478 {
+  0%,100% { scale: .90; opacity: .58; }
+  50% { scale: 1.08; opacity: 1; }
+}
+@keyframes fx-header-mag-live-breath-r478 {
+  0%,100% { opacity: .84; }
+  50% { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .fx-mini-mag-glyph-r459 { transition: none !important; }
+  .fx-mini-mag-glyph-r459,
+  .fx-mini-mag-status-r459,
+  .topbar .fx-reference-mag-button {
+    animation: none !important;
+    transition: none !important;
+    scale: 1 !important;
+  }
 }
 
 /* production-r476-shape-synchronised-mini-mag-header-icon-soft-phone-optics
-   production-r477-refined-phone-highlight-and-edge-softening */
+   production-r477-refined-phone-highlight-and-edge-softening
+   production-r478-softer-mobile-glass-and-shared-mini-mag-life */
