@@ -1,6 +1,6 @@
-# R473 final live award gate after WDA contract synchronization.
-name: Verify R473 award readiness
-run-name: R473 award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
+# R474 final live award gate after WDA contract synchronization.
+name: Verify R474 award readiness
+run-name: R474 award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   push:
@@ -23,7 +23,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: r473-award-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
+  group: r474-award-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
         with:
           ref: ${{ env.AUDITED_SHA }}
 
-      - name: Validate current R473 source contracts
+      - name: Validate current R474 source contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -59,7 +59,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
 
-      - name: Verify deployed R473 optics and first-paint ownership
+      - name: Verify deployed R474 optics and first-paint ownership
         if: >-
           github.event_name == 'workflow_dispatch' ||
           (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]')) ||
@@ -80,12 +80,12 @@ jobs:
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?audit=$stamp" -o "$tmp/solid.js" || true
             curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/styles/formatx-core-life-r455.css?audit=$stamp" -o "$tmp/life.css" || true
             if grep -Fq 'living-luminous-electric-crystal-r454' "$tmp/core.js" \
-              && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r472-pc-bright-low-halo' "$tmp/motion.js" \
-              && grep -Fq "fxFinalVisualRevisionR472='pc-bright-low-halo-mobile-mag'" "$tmp/motion.js" \
-              && grep -Fq 'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo' "$tmp/loader.js" \
-              && grep -Fq "fxCurrentMagOpticsR472=mobile?'pc-bright-centre-restrained-perimeter-zero-idle':'desktop-optics-unchanged'" "$tmp/loader.js" \
+              && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r474-softer-mobile-glow' "$tmp/motion.js" \
+              && grep -Fq "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'" "$tmp/motion.js" \
+              && grep -Fq 'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow' "$tmp/loader.js" \
+              && grep -Fq "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'" "$tmp/loader.js" \
               && grep -Fq "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'" "$tmp/solid.js" \
-              && grep -Fq 'FormatX r473' "$tmp/life.css"; then
+              && grep -Fq 'FormatX r474' "$tmp/life.css"; then
               ready=1
               break
             fi
@@ -95,15 +95,15 @@ jobs:
           grep -Fq 'single-luminous-webgl-material-owner' "$tmp/core.js"
           grep -Fq 'explicit-mag-interaction-only-zero-idle' "$tmp/loader.js"
           grep -Fq 'soft-perimeter-low-bloom-low-cost-shader' "$tmp/solid.js"
-          grep -Fq 'balanced mobile crystal detail' "$tmp/life.css"
-          grep -Fq 'opacity: .985' "$tmp/life.css"
-          grep -Fq 'brightness(1.015)' "$tmp/life.css"
-          grep -Fq 'contrast(.895)' "$tmp/life.css"
-          grep -Fq 'saturate(1.035)' "$tmp/life.css"
-          grep -Fq 'blur(.20px)' "$tmp/life.css"
+          grep -Fq 'softer mobile crystal glow' "$tmp/life.css"
+          grep -Fq 'opacity: .970' "$tmp/life.css"
+          grep -Fq 'brightness(.985)' "$tmp/life.css"
+          grep -Fq 'contrast(.855)' "$tmp/life.css"
+          grep -Fq 'saturate(1.010)' "$tmp/life.css"
+          grep -Fq 'blur(.30px)' "$tmp/life.css"
           grep -Fq 'image-rendering: auto' "$tmp/life.css"
           grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$tmp/life.css"
-          grep -Fq 'production-r473-balanced-mobile-facets-subpixel-edge-feather' "$tmp/life.css"
+          grep -Fq 'production-r474-softer-mobile-glow-feathered-facets' "$tmp/life.css"
           grep -Fq 'animation: none' "$tmp/life.css"
           ! grep -Fq 'fx-core-r468-compositor-breathe' "$tmp/life.css"
           grep -Fq 'data-fx-production-first-paint-r370' "$tmp/home.html"
@@ -121,12 +121,12 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R473 award readiness audit failed'
+          description='R474 award readiness audit failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R473 source award readiness passed'
+            description='R474 source award readiness passed'
             if [[ "$EVENT_NAME" == workflow_dispatch || "$PUSH_MESSAGE" == *'[deploy-production]'* || "$WORKFLOW_MESSAGE" == *'[deploy-production]'* ]]; then
-              description='R473 balanced mobile MAG and first-paint ownership passed live'
+              description='R474 softer mobile MAG and first-paint ownership passed live'
             fi
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
