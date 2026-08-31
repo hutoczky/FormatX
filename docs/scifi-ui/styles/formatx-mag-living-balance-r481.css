@@ -1,0 +1,85 @@
+/* FormatX R481 — cross-device living MAG balance.
+   Keep R326 as the single WebGL/material owner. The large MAG now gets a
+   compositor-only breathing signal on both desktop and mobile, so it remains
+   visibly alive without restoring an idle WebGL loop. Phone optics are trimmed
+   independently: less centre flare, less cyan/violet halo and a softer alpha
+   edge while preserving the faceted glass body. */
+
+html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage,
+html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
+  transform-origin: 50% 50% !important;
+  backface-visibility: hidden !important;
+}
+
+@keyframes fx-primary-mag-living-desktop-r481 {
+  0%, 100% { scale: .996; opacity: .965; }
+  46% { scale: 1.006; opacity: 1; }
+  63% { scale: 1.002; opacity: .988; }
+}
+
+@keyframes fx-primary-mag-living-mobile-r481 {
+  0%, 100% { scale: .994; opacity: .835; }
+  46% { scale: 1.0065; opacity: .895; }
+  63% { scale: 1.002; opacity: .875; }
+}
+
+@media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"],
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"] {
+    animation: fx-primary-mag-living-desktop-r481 5.7s cubic-bezier(.38,0,.22,1) infinite !important;
+    will-change: scale, opacity !important;
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: .855 !important;
+    filter:
+      brightness(.64)
+      contrast(.66)
+      saturate(1.10)
+      hue-rotate(-2deg)
+      blur(1.82px)
+      drop-shadow(0 0 5px rgba(46,218,255,.075))
+      drop-shadow(0 0 13px rgba(91,71,255,.040)) !important;
+    -webkit-filter:
+      brightness(.64)
+      contrast(.66)
+      saturate(1.10)
+      hue-rotate(-2deg)
+      blur(1.82px)
+      drop-shadow(0 0 5px rgba(46,218,255,.075))
+      drop-shadow(0 0 13px rgba(91,71,255,.040)) !important;
+    mix-blend-mode: normal !important;
+    scale: .996;
+  }
+
+  html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"],
+  html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"] {
+    animation: fx-primary-mag-living-mobile-r481 5.15s cubic-bezier(.38,0,.22,1) infinite !important;
+    will-change: scale, opacity !important;
+  }
+
+  html:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space {
+    background:
+      radial-gradient(circle at 50% 47%, rgba(28,178,232,.055) 0, rgba(13,82,151,.032) 29%, transparent 45%),
+      radial-gradient(circle at 58% 51%, rgba(104,66,222,.042) 0, transparent 42%),
+      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.13) 58%, rgba(2,14,31,.36) 100%) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
+    animation: none !important;
+    transition: none !important;
+    scale: 1 !important;
+    will-change: auto !important;
+  }
+}
+
+/* production-r481-cross-device-living-mag-soft-mobile-optics-zero-webgl-idle */
