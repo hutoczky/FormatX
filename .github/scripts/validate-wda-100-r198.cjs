@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — R468 runtime with R473 balanced mobile display. */
+/* FormatX award-quality gate — R468 runtime with R474 softer mobile display. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -31,15 +31,15 @@ for(const retired of [
 ])assert.ok(!intro.includes(retired),`retired first-load repair stack returned: ${retired}`);
 
 for(const token of [
-  'formatx-current-mag-loader-r422.js?v=20260831-r472-pc-bright-low-halo',
+  'formatx-current-mag-loader-r422.js?v=20260831-r474-softer-mobile-glow',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
   'formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom',
-  'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo',
+  'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
   'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy',
   'armed-direct-r326-r468-soft-optics-live-energy-zero-idle',
-  "fxFinalVisualRevisionR472='pc-bright-low-halo-mobile-mag'"
-])assert.ok(motion.includes(token),`missing current R472-loader/R468 motion owner: ${token}`);
+  "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'"
+])assert.ok(motion.includes(token),`missing current R474-loader/R468 motion owner: ${token}`);
 assert.ok(motion.includes('single-language-toggle.js?v=20260830-r462-semantic-owner'),'motion loader must request stable language owner');
 assert.ok(motion.includes("fxSingleLanguageToggleVersion==='7'"),'motion loader must require language owner v7');
 assert.ok(!motion.includes('isRetiredMagRuntime'),'compact loader must not contain retired-runtime filtering');
@@ -70,10 +70,10 @@ for(const token of [
   'r326-only','cleanupLegacyMagRuntime','direct-r326-r468-soft-optics-live-energy-zero-idle',
   'r465-direct-pause-flag-no-redraw','explicit-mag-interaction-only-zero-idle',
   'soft-perimeter-low-bloom-low-cost-shader','formatx-mini-mag-assistant-r459.js',
-  'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo',
+  'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
   'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy',
-  "fxCurrentMagOpticsR472=mobile?'pc-bright-centre-restrained-perimeter-zero-idle':'desktop-optics-unchanged'"
-])assert.ok(currentMag.includes(token),`missing R472-loader/R468 current MAG contract: ${token}`);
+  "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'"
+])assert.ok(currentMag.includes(token),`missing R474-loader/R468 current MAG contract: ${token}`);
 for(const token of [
   "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'",
   "const smoothWeight=mobile?'.998':'.930'",
@@ -85,12 +85,12 @@ for(const token of [
   'FormatX r467','brightness(1.065)','contrast(.89)','saturate(1.10)','blur(.82px)'
 ])assert.ok(optics.includes(token),`missing R467 base mobile display tone: ${token}`);
 for(const token of [
-  'FormatX r473','balanced mobile crystal detail','opacity: .985','image-rendering: auto',
-  'brightness(1.015)','contrast(.895)','saturate(1.035)','blur(.20px)',
+  'FormatX r474','softer mobile crystal glow','opacity: .970','image-rendering: auto',
+  'brightness(.985)','contrast(.855)','saturate(1.010)','blur(.30px)',
   '.skip-link:not(:focus):not(:focus-visible)','clip-path: inset(50%)',
-  '-webkit-tap-highlight-color: transparent','production-r473-balanced-mobile-facets-subpixel-edge-feather'
-])assert.ok(lifeStyle.includes(token),`missing R473 final balanced mobile display: ${token}`);
-assert.ok(!lifeStyle.includes('fx-core-r468-compositor-breathe'),'R473 final display must remain compositor-idle');
+  '-webkit-tap-highlight-color: transparent','production-r474-softer-mobile-glow-feathered-facets'
+])assert.ok(lifeStyle.includes(token),`missing R474 final softer mobile display: ${token}`);
+assert.ok(!lifeStyle.includes('fx-core-r468-compositor-breathe'),'R474 final display must remain compositor-idle');
 for(const token of [
   "const VERSION = 'native-webgl-interaction-life-r466'",'surface-sweep-',
   'armed-full-surface-explicit-interaction','explicit-mag-interaction-only-zero-idle',
@@ -134,4 +134,4 @@ validateLighthouse(desktop,'desktop');
 validateLighthouse(mobile,'mobile');
 
 for(const source of [intro,motion,language,currentMag,solidGlass,life,governor,controls])new Function(source);
-console.log('PASS: R468 single-path first paint with R473 balanced faceted mobile MAG display, explicit native surface-energy interaction, direct-pause zero-idle TBT policy, stable semantics/accessibility and truthful Lighthouse budgets are structurally valid.');
+console.log('PASS: R468 single-path first paint with R474 softer mobile MAG display, explicit native surface-energy interaction, direct-pause zero-idle TBT policy, stable semantics/accessibility and truthful Lighthouse budgets are structurally valid.');
