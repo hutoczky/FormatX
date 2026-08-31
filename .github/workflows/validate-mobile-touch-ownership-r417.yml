@@ -133,10 +133,8 @@ jobs:
             await page.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open==='true',null,{timeout:5000});
             await page.locator('.fx-mini-mag-nav-r459 [data-section="pricing"]').tap();
             await page.waitForFunction(()=>document.documentElement.dataset.fxMiniMagLastNavigationR459==='pricing',null,{timeout:5000});
-            /* The Mini MAG panel is a deliberate modal interaction surface. Close
-               it before testing the underlying hero/header hit layers; requiring
-               SOUND to be topmost through an open panel tests the wrong state. */
-            await mini.tap();
+            /* Mini MAG navigation closes the panel by design. Assert that closed
+               post-navigation state before testing the underlying hit layers. */
             await page.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open!=='true',null,{timeout:5000});
 
             const lang=page.locator('.topbar > .fx-language-toggle').first();
