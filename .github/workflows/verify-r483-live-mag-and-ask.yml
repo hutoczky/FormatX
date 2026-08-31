@@ -1,0 +1,229 @@
+name: Verify R483 live MAG and ASK crystal
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'
+      - '.github/workflows/verify-r483-live-mag-and-ask.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: verify-r483-live-mag-and-ask-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-live-r483:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Chromium verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/r483-live"
+          cd "$RUNNER_TEMP/r483-live"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Verify live mobile MAG pulse and desktop ASK crystal
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/r483-live/node_modules
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r483-live
+          node <<'NODE'
+          const assert = require('node:assert/strict');
+          const { chromium } = require('playwright');
+
+          const URL = 'https://formatxsuite.com/?r483-live-verify=1';
+          const CSS_URL = 'https://formatxsuite.com/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?r483-live-verify=1';
+          const CORE = '#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
+          const ASK_GLYPH = '#hero .fx-reference-controls-r204 .fx-reference-ask > i';
+
+          const num = value => {
+            if (!value || value === 'none') return 1;
+            const parsed = Number.parseFloat(value);
+            return Number.isFinite(parsed) ? parsed : 1;
+          };
+
+          async function prepare(browser, viewport, mobile) {
+            const context = await browser.newContext({
+              viewport,
+              isMobile: mobile,
+              hasTouch: mobile,
+              deviceScaleFactor: mobile ? 2 : 1,
+              locale: 'hu-HU',
+              colorScheme: 'dark',
+              reducedMotion: 'no-preference'
+            });
+            await context.addInitScript(() => {
+              try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+            });
+            const page = await context.newPage();
+            await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await page.waitForFunction(() => (
+              document.documentElement.dataset.fxCrystalOrganismR326 === 'ready'
+              && document.querySelector('#hero .fx-crystal-organism-r326-canvas')
+            ), null, { timeout: 60000 });
+            await page.waitForTimeout(1100);
+            return { context, page };
+          }
+
+          async function sampleLife(page, samples = 12, delay = 360) {
+            const values = [];
+            for (let index = 0; index < samples; index += 1) {
+              values.push(await page.locator(CORE).evaluate(canvas => {
+                const style = getComputedStyle(canvas);
+                const rect = canvas.getBoundingClientRect();
+                return {
+                  opacity: Number.parseFloat(style.opacity || '1'),
+                  scale: style.scale || 'none',
+                  animationName: style.animationName,
+                  filter: style.filter,
+                  width: rect.width,
+                  height: rect.height
+                };
+              }));
+              await page.waitForTimeout(delay);
+            }
+            return values;
+          }
+
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
+            });
+            try {
+              const request = await browser.newContext();
+              const cssResponse = await request.request.get(CSS_URL, { timeout: 30000 });
+              assert.equal(cssResponse.status(), 200, 'R483 CSS is not live');
+              const css = await cssResponse.text();
+              assert.match(css, /production-r483-visible-living-mobile-mag-soft-edge-desktop-ask-crystal-deploy/);
+              assert.match(css, /brightness\(\.76\)/);
+              assert.match(css, /contrast\(\.69\)/);
+              assert.match(css, /blur\(1\.02px\)/);
+              assert.match(css, /drop-shadow\(0 0 3px/);
+              assert.match(css, /drop-shadow\(0 0 7px/);
+              assert.match(css, /fx-primary-mag-mobile-heart-r483/);
+              await request.close();
+
+              const mobile = await prepare(browser, { width: 390, height: 844 }, true);
+              const mobileValues = await sampleLife(mobile.page);
+              const mOpacity = mobileValues.map(value => value.opacity);
+              const mScale = mobileValues.map(value => num(value.scale));
+              const mOpacitySpan = Math.max(...mOpacity) - Math.min(...mOpacity);
+              const mScaleSpan = Math.max(...mScale) - Math.min(...mScale);
+              const mobileFirst = mobileValues[0];
+              const mobileRoot = await mobile.page.evaluate(() => ({
+                life: document.documentElement.dataset.fxPrimaryMagLifeR482 || '',
+                paused: document.documentElement.dataset.fxReferenceMotionPaused || '',
+                renderer: document.documentElement.dataset.fxCoreRenderer || ''
+              }));
+              assert.equal(mobileRoot.renderer, 'single-webgl-crystal-organism-r326');
+              assert.notEqual(mobileRoot.life, 'steady', 'Mobile MAG is unexpectedly in steady mode');
+              assert.notEqual(mobileRoot.paused, 'true', 'Mobile MAG is unexpectedly paused');
+              assert.match(mobileFirst.animationName, /fx-primary-mag-mobile-heart-r483/, JSON.stringify(mobileFirst));
+              assert.match(mobileFirst.filter, /brightness\(0\.76\)/, mobileFirst.filter);
+              assert.match(mobileFirst.filter, /contrast\(0\.69\)/, mobileFirst.filter);
+              assert.match(mobileFirst.filter, /blur\(1\.02px\)/, mobileFirst.filter);
+              assert.ok(Math.min(...mOpacity) >= .88, JSON.stringify({ mOpacity, mScale }));
+              assert.ok(mOpacitySpan >= .025 || mScaleSpan >= .010, JSON.stringify({ mOpacitySpan, mScaleSpan, mobileValues }));
+              assert.ok(mobileFirst.width > 250 && mobileFirst.height > 300, JSON.stringify(mobileFirst));
+              await mobile.page.screenshot({ path: 'artifacts/r483-live/mobile-r483.png', fullPage: false });
+              await mobile.context.close();
+
+              const desktop = await prepare(browser, { width: 1440, height: 900 }, false);
+              await desktop.page.waitForFunction(selector => {
+                const glyph = document.querySelector(selector);
+                if (!glyph) return false;
+                const style = getComputedStyle(glyph);
+                const rect = glyph.getBoundingClientRect();
+                return style.display !== 'none' && style.visibility !== 'hidden'
+                  && Number(style.opacity || 1) > .02 && rect.width >= 16 && rect.height >= 16;
+              }, ASK_GLYPH, { timeout: 30000 });
+
+              const ask = await desktop.page.locator(ASK_GLYPH).evaluate(glyph => {
+                const style = getComputedStyle(glyph);
+                const rect = glyph.getBoundingClientRect();
+                const button = glyph.closest('.fx-reference-ask');
+                const hit = button ? document.elementFromPoint(
+                  button.getBoundingClientRect().left + button.getBoundingClientRect().width / 2,
+                  button.getBoundingClientRect().top + button.getBoundingClientRect().height / 2
+                ) : null;
+                return {
+                  width: rect.width,
+                  height: rect.height,
+                  opacity: Number.parseFloat(style.opacity || '1'),
+                  backgroundImage: style.backgroundImage,
+                  boxShadow: style.boxShadow,
+                  buttonOwnsHit: Boolean(button && hit && button.contains(hit))
+                };
+              });
+              assert.ok(ask.width >= 16 && ask.height >= 16, JSON.stringify(ask));
+              assert.ok(ask.opacity > .9, JSON.stringify(ask));
+              assert.notEqual(ask.backgroundImage, 'none', JSON.stringify(ask));
+              assert.notEqual(ask.boxShadow, 'none', JSON.stringify(ask));
+              assert.equal(ask.buttonOwnsHit, true, JSON.stringify(ask));
+
+              const desktopValues = await sampleLife(desktop.page, 10, 430);
+              const dOpacity = desktopValues.map(value => value.opacity);
+              const dScale = desktopValues.map(value => num(value.scale));
+              const dOpacitySpan = Math.max(...dOpacity) - Math.min(...dOpacity);
+              const dScaleSpan = Math.max(...dScale) - Math.min(...dScale);
+              assert.match(desktopValues[0].animationName, /fx-primary-mag-living-desktop-r482/, JSON.stringify(desktopValues[0]));
+              assert.ok(dOpacitySpan >= .015 || dScaleSpan >= .008, JSON.stringify({ dOpacitySpan, dScaleSpan, desktopValues }));
+              await desktop.page.screenshot({ path: 'artifacts/r483-live/desktop-r483.png', fullPage: false });
+              await desktop.context.close();
+
+              console.log(JSON.stringify({
+                pass: true,
+                mobile: { opacitySpan: mOpacitySpan, scaleSpan: mScaleSpan, animation: mobileFirst.animationName },
+                desktop: { opacitySpan: dOpacitySpan, scaleSpan: dScaleSpan, animation: desktopValues[0].animationName, ask }
+              }, null, 2));
+            } finally {
+              await browser.close();
+            }
+          })().catch(error => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Upload live visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r483-live-mag-and-ask
+          path: artifacts/r483-live
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Publish R483 live status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Live mobile and desktop MAG pulse plus ASK crystal passed'
+          else
+            state=failure
+            description='R483 live MAG/ASK verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX R483 live MAG and ASK' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
