@@ -1,4 +1,4 @@
-/* FormatX r462 — one static language control, no document-wide repair observer. */
+/* FormatX r473 — one static language control, event-driven public-shell handoff. */
 (function(){
 'use strict';
 const ROOT=document.documentElement;
@@ -96,7 +96,7 @@ function hideLegacy(container){
 }
 function targetContainer(){
   if(!publicPageMode())return document.querySelector('.topbar');
-  return document.querySelector('.language-switch,.language-control,.fx-public-header .header-actions,.legal-header-inner');
+  return document.querySelector('.language-switch,.language-control,.fx-public-tools,.fx-public-header .header-actions,.legal-header-inner');
 }
 function ensureButton(){
   const host=targetContainer();
@@ -123,6 +123,13 @@ function publish(language){
   dispatchEvent(new CustomEvent('formatx:languagechange',{detail:{language,source:'single-language-toggle-r462'}}));
 }
 function install(){
+  if(ROOT.dataset.fxSingleLanguageToggle==='ready'&&ROOT.dataset.fxSingleLanguageToggleVersion===VERSION){
+    const button=document.querySelector('.fx-language-toggle');
+    const host=targetContainer();
+    if(button instanceof HTMLButtonElement&&host instanceof HTMLElement&&button.parentElement!==host)host.appendChild(button);
+    if(button instanceof HTMLButtonElement)updateButton(button,SUPPORTED.has(ROOT.lang)?ROOT.lang:storedLanguage());
+    return button instanceof HTMLButtonElement;
+  }
   const button=ensureButton();if(!(button instanceof HTMLButtonElement))return false;
   const initial=storedLanguage();applyCopy(initial);updateButton(button,initial);
   if(button.dataset.fxLanguageBoundR461!=='true'){
@@ -149,8 +156,14 @@ function install(){
   ROOT.dataset.fxSingleLanguageToggle='ready';
   ROOT.dataset.fxSingleLanguageToggleVersion=VERSION;
   ROOT.dataset.fxLanguageObserverPolicyR461='event-driven-no-document-mutation-observer';
+  ROOT.dataset.fxLanguagePublicShellHandoffR473='event-driven';
   return true;
 }
 
+/* Public evidence pages can load this owner before formatx-public-shell.js has
+   created its header/tools host. Re-run only on the shell's explicit ready
+   event; this preserves the observer-free policy and prevents a zero-toggle
+   race on sparse pages such as verification.html. */
+addEventListener('formatx:publicshellready',install,{passive:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 }());
