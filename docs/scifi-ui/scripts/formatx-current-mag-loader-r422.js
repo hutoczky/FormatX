@@ -1,7 +1,7 @@
-/* FormatX r468 — direct native MAG + persistent Mini MAG loader.
-   R326 remains the only full-size hero WebGL organism. Mobile uses the final
-   restrained bloom/soft-edge display pass plus explicit-interaction surface
-   energy, while the R465 governor preserves zero-idle WebGL rendering. */
+/* FormatX r471 display refinement on the R468 direct native MAG runtime.
+   R326 remains the only full-size hero WebGL organism. Mobile keeps the R468
+   explicit-interaction energy and R465 zero-idle governor, while the final
+   phone display pass now uses the softer R471 bloom/silhouette balance. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -13,7 +13,7 @@ root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
 const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
-const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r468-soft-mobile-bloom-breathe';
+const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r471-softer-mobile-bloom-feather';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge';
@@ -49,6 +49,7 @@ const LEGACY_STAGE_SELECTOR=[
 // direct-r326-r463-optics-r464-explicit-interaction-tbt
 // direct-r326-r465-soft-optics-no-idle-redraw
 // direct-r326-r468-soft-optics-live-energy-zero-idle
+// r471-softer-mobile-bloom-feathered-silhouette
 // explicit-mag-interaction-only-zero-idle
 
 function cleanupLegacyMagRuntime(){
@@ -175,6 +176,7 @@ async function start(){
   root.dataset.fxCurrentMagOpticsR463=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagOpticsR465=mobile?'soft-perimeter-low-bloom-low-cost-shader':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagOpticsR468=mobile?'soft-bloom-soft-edge-compositor-breathe':'desktop-optics-unchanged';
+  root.dataset.fxCurrentMagOpticsR471=mobile?'reduced-bloom-feathered-silhouette':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagSchedulerR465=mobile?'direct-pause-flag-no-idle-redraw':'desktop-native-scheduler';
   root.dataset.fxCoreMobileIdlePolicyR426=mobile?'explicit-mag-interaction-only-zero-idle':'desktop-native-scheduler';
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
