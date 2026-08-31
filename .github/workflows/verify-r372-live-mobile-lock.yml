@@ -1,4 +1,4 @@
-name: Verify R472 mobile MAG optics on R468 runtime
+name: Verify R473 mobile MAG optics on R468 runtime
 
 on:
   push:
@@ -24,14 +24,14 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r472:
+  verify-r473:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate R472 display on R468 source contract
+      - name: Validate R473 display on R468 source contract
         shell: bash
         run: |
           set -euo pipefail
@@ -55,18 +55,24 @@ jobs:
           node --check "$MINI"
           node .github/scripts/validate-living-core-r425-source.cjs
 
+          # R473 is the final display layer carried by the existing R472 loader route.
           grep -Fq 'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo' "$CURRENT"
           grep -Fq "fxCurrentMagOpticsR472=mobile?'pc-bright-centre-restrained-perimeter-zero-idle':'desktop-optics-unchanged'" "$CURRENT"
           grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r472-pc-bright-low-halo' "$MOTION"
           grep -Fq 'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo' "$MOTION"
           grep -Fq "fxFinalVisualRevisionR472='pc-bright-low-halo-mobile-mag'" "$MOTION"
 
-          grep -Fq 'FormatX r472' "$LIFE_CSS"
-          grep -Fq 'opacity: 1' "$LIFE_CSS"
-          grep -Fq 'brightness(1.15)' "$LIFE_CSS"
-          grep -Fq 'contrast(.72)' "$LIFE_CSS"
-          grep -Fq 'saturate(1.00)' "$LIFE_CSS"
-          grep -Fq 'blur(.48px)' "$LIFE_CSS"
+          grep -Fq 'FormatX r473' "$LIFE_CSS"
+          grep -Fq 'balanced mobile crystal detail' "$LIFE_CSS"
+          grep -Fq 'opacity: .985' "$LIFE_CSS"
+          grep -Fq 'brightness(1.015)' "$LIFE_CSS"
+          grep -Fq 'contrast(.895)' "$LIFE_CSS"
+          grep -Fq 'saturate(1.035)' "$LIFE_CSS"
+          grep -Fq 'blur(.20px)' "$LIFE_CSS"
+          grep -Fq 'image-rendering: auto' "$LIFE_CSS"
+          grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$LIFE_CSS"
+          grep -Fq 'clip-path: inset(50%)' "$LIFE_CSS"
+          grep -Fq 'production-r473-balanced-mobile-facets-subpixel-edge-feather' "$LIFE_CSS"
           grep -Fq 'animation: none' "$LIFE_CSS"
           ! grep -Fq 'fx-core-r468-compositor-breathe' "$LIFE_CSS"
 
@@ -80,7 +86,7 @@ jobs:
           grep -Fq "const REVISION = 'living-luminous-electric-crystal-r454'" "$SHADER"
           grep -Fq 'single-luminous-webgl-material-owner' "$SHADER"
 
-      - name: Verify production serves R472 display chain
+      - name: Verify production serves R473 display chain
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
         shell: bash
         run: |
@@ -89,23 +95,26 @@ jobs:
           CURRENT_URL="$ORIGIN/scifi-ui/scripts/formatx-current-mag-loader-r422.js"
           MOTION_URL="$ORIGIN/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js"
           LIFE_CSS_URL="$ORIGIN/scifi-ui/styles/formatx-core-life-r455.css"
-          CURRENT_TMP="$RUNNER_TEMP/r472-current-live.js"
-          MOTION_TMP="$RUNNER_TEMP/r472-motion-live.js"
-          LIFE_CSS_TMP="$RUNNER_TEMP/r472-life-live.css"
+          CURRENT_TMP="$RUNNER_TEMP/r473-current-live.js"
+          MOTION_TMP="$RUNNER_TEMP/r473-motion-live.js"
+          LIFE_CSS_TMP="$RUNNER_TEMP/r473-life-live.css"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "R472 live verification $attempt/45"
-            suffix="r472=${GITHUB_RUN_ID}_${attempt}"
+            echo "R473 live verification $attempt/45"
+            suffix="r473=${GITHUB_RUN_ID}_${attempt}"
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CURRENT_URL}?${suffix}" -o "$CURRENT_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MOTION_URL}?${suffix}" -o "$MOTION_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${LIFE_CSS_URL}?${suffix}" -o "$LIFE_CSS_TMP"; then
               if grep -Fq 'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo' "$CURRENT_TMP" \
                 && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r472-pc-bright-low-halo' "$MOTION_TMP" \
-                && grep -Fq 'FormatX r472' "$LIFE_CSS_TMP" \
-                && grep -Fq 'brightness(1.15)' "$LIFE_CSS_TMP" \
-                && grep -Fq 'contrast(.72)' "$LIFE_CSS_TMP" \
-                && grep -Fq 'blur(.48px)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'FormatX r473' "$LIFE_CSS_TMP" \
+                && grep -Fq 'opacity: .985' "$LIFE_CSS_TMP" \
+                && grep -Fq 'brightness(1.015)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'contrast(.895)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'saturate(1.035)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'blur(.20px)' "$LIFE_CSS_TMP" \
+                && grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$LIFE_CSS_TMP" \
                 && ! grep -Fq 'fx-core-r468-compositor-breathe' "$LIFE_CSS_TMP"; then
                 ok=1
                 break
@@ -115,9 +124,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves the R472 PC-bright low-halo mobile MAG display on the R468 explicit-energy, R465 zero-idle runtime.'
+          echo 'PASS: production serves the R473 balanced faceted mobile MAG display on the R468 explicit-energy, R465 zero-idle runtime.'
 
-      - name: Publish R468 runtime status with R472 display
+      - name: Publish R468 runtime status with R473 display
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -126,10 +135,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='R468 runtime + R472 mobile MAG display passed'
+            description='R468 runtime + R473 mobile MAG display passed'
           else
             state=failure
-            description='R468/R472 primary MAG verification failed'
+            description='R468/R473 primary MAG verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
