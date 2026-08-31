@@ -1,0 +1,26 @@
+/* FormatX r455 — restrained mobile crystal optics without replacing native WebGL. */
+
+html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage,
+html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
+  backface-visibility: hidden;
+  transform-origin: 50% 50%;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage {
+    overflow: visible !important;
+    filter: none !important;
+  }
+
+  html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
+    opacity: .97 !important;
+    filter: brightness(.91) saturate(.90) contrast(.86) blur(.16px) !important;
+    will-change: filter;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
+    filter: brightness(.92) saturate(.90) contrast(.88) !important;
+  }
+}
