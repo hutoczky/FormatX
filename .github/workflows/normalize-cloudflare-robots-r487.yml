@@ -38,28 +38,12 @@ jobs:
           test -n "$zone_id"
 
           before="$(curl -fsS --retry 2 "${auth[@]}" "https://api.cloudflare.com/client/v4/zones/$zone_id/bot_management")"
-          python3 - <<'PY' <<<"$before"
-          import json,sys
-          p=json.load(sys.stdin)
-          assert p.get('success') is True, p
-          print('Current Cloudflare robots management:', (p.get('result') or {}).get('is_robots_txt_managed'))
-          PY
+          python3 -c 'import json,sys; p=json.load(sys.stdin); assert p.get("success") is True, p; print("Current Cloudflare robots management:", (p.get("result") or {}).get("is_robots_txt_managed"))' <<<"$before"
 
           update="$(curl -fsS --retry 2 -X PUT "${auth[@]}" \
             --data '{"is_robots_txt_managed":false,"bot_preference_sync_enabled":false,"cf_robots_variant":"off"}' \
             "https://api.cloudflare.com/client/v4/zones/$zone_id/bot_management")"
-          python3 - <<'PY' <<<"$update"
-          import json,sys
-          p=json.load(sys.stdin)
-          assert p.get('success') is True, p
-          r=p.get('result') or {}
-          assert r.get('is_robots_txt_managed') is False, r
-          if 'bot_preference_sync_enabled' in r:
-              assert r.get('bot_preference_sync_enabled') is False, r
-          if 'cf_robots_variant' in r:
-              assert r.get('cf_robots_variant') == 'off', r
-          print('PASS: Cloudflare managed robots prepend disabled.')
-          PY
+          python3 -c 'import json,sys; p=json.load(sys.stdin); assert p.get("success") is True, p; r=p.get("result") or {}; assert r.get("is_robots_txt_managed") is False, r; assert ("bot_preference_sync_enabled" not in r or r.get("bot_preference_sync_enabled") is False), r; assert ("cf_robots_variant" not in r or r.get("cf_robots_variant") == "off"), r; print("PASS: Cloudflare managed robots prepend disabled.")' <<<"$update"
 
       - name: Verify canonical live robots.txt
         shell: bash
