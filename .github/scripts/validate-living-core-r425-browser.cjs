@@ -28,7 +28,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   const pageErrors = [];
   page.on('pageerror', error => pageErrors.push(error.message));
 
-  await page.goto(`${origin}?r468_current_browser=${name}-${Date.now()}&lang=hu`, {
+  await page.goto(`${origin}?r476_current_browser=${name}-${Date.now()}&lang=hu`, {
     waitUntil: 'domcontentloaded',
     timeout: 30000
   });
@@ -49,6 +49,18 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       && (!mobile || root.dataset.fxCurrentMagOpticsR468 === 'soft-bloom-soft-edge-compositor-breathe')
       && typeof window.FormatXCoreMobileV69?.surfacePulse === 'function';
   }, isMobile, { timeout: 60000 });
+
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const glyph = document.querySelector('.fx-mini-mag-glyph-r459');
+    const header = document.querySelector('.topbar > .fx-reference-mag-button');
+    return root.dataset.fxMagShapeSyncR476 === 'ready'
+      && root.dataset.fxMiniMagShapeSyncR476?.startsWith('ready-')
+      && glyph instanceof HTMLElement
+      && header instanceof HTMLElement
+      && glyph.dataset.fxCoreShape === root.dataset.fxCoreShapeR337
+      && header.dataset.fxCoreShape === root.dataset.fxCoreShapeR337;
+  }, null, { timeout: 30000 });
 
   const stageLocator = page.locator('#hero .fx-crystal-organism-r326-stage').first();
   await stageLocator.click({ position: { x: Math.max(20, Math.floor(viewport.width * .26)), y: 160 } });
@@ -81,6 +93,8 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const lang = document.querySelector('.topbar > .fx-language-toggle');
     const menu = document.querySelector('.topbar > .fx-reference-menu-button');
     const brand = document.querySelector('.topbar > .brand');
+    const miniGlyph = document.querySelector('.fx-mini-mag-glyph-r459');
+    const miniLauncher = document.querySelector('.fx-mini-mag-launcher-r459');
     const boxes = [sound, ask, pause].map(node => node?.getBoundingClientRect()).filter(Boolean);
     const localOverlap = (a, b, gap = 2) => a && b && !(
       a.right + gap <= b.left || b.right + gap <= a.left ||
@@ -136,18 +150,49 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       langText: String(lang?.textContent || '').trim(),
       magBefore: mag ? getComputedStyle(mag, '::before').content : '',
       magAfter: mag ? getComputedStyle(mag, '::after').content : '',
+      magBackgroundImage: mag ? getComputedStyle(mag).backgroundImage : '',
+      magShape: mag?.dataset.fxCoreShape || '',
+      miniShape: miniGlyph?.dataset.fxCoreShape || '',
+      miniLauncherShape: miniLauncher?.dataset.fxCoreShape || '',
+      miniShapeSync: root.dataset.fxMiniMagShapeSyncR476 || '',
       brandBox: rect(brand), magBox: rect(mag), langBox: rect(lang), menuBox: rect(menu)
     };
   });
 
+  const shapeBefore = state.magShape;
+  await page.locator('.topbar > .fx-reference-mag-button').click();
+  await page.waitForFunction(before => {
+    const root = document.documentElement;
+    const next = root.dataset.fxCoreShapeR337 || '';
+    const glyph = document.querySelector('.fx-mini-mag-glyph-r459');
+    const launcher = document.querySelector('.fx-mini-mag-launcher-r459');
+    const header = document.querySelector('.topbar > .fx-reference-mag-button');
+    return next && next !== before
+      && glyph?.dataset.fxCoreShape === next
+      && launcher?.dataset.fxCoreShape === next
+      && header?.dataset.fxCoreShape === next;
+  }, shapeBefore, { timeout: 10000 });
+  const shapeAfter = await page.evaluate(() => ({
+    primary: document.documentElement.dataset.fxCoreShapeR337 || '',
+    mini: document.querySelector('.fx-mini-mag-glyph-r459')?.dataset.fxCoreShape || '',
+    launcher: document.querySelector('.fx-mini-mag-launcher-r459')?.dataset.fxCoreShape || '',
+    header: document.querySelector('.topbar > .fx-reference-mag-button')?.dataset.fxCoreShape || ''
+  }));
+  assert.notEqual(shapeAfter.primary, shapeBefore, JSON.stringify(shapeAfter));
+  assert.equal(shapeAfter.mini, shapeAfter.primary, JSON.stringify(shapeAfter));
+  assert.equal(shapeAfter.launcher, shapeAfter.primary, JSON.stringify(shapeAfter));
+  assert.equal(shapeAfter.header, shapeAfter.primary, JSON.stringify(shapeAfter));
+  await page.locator('.topbar > .fx-reference-mag-button').click();
+  await page.waitForFunction(before => document.documentElement.dataset.fxCoreShapeR337 === before, shapeBefore, { timeout: 10000 });
+
   const viewportShot = await page.screenshot({
-    path: path.join(output, `${name}-r468-current-viewport.png`),
+    path: path.join(output, `${name}-r476-current-viewport.png`),
     fullPage: false,
     animations: 'disabled',
     caret: 'hide'
   });
   const magShot = await page.locator('#hero .fx-crystal-organism-r326-canvas').screenshot({
-    path: path.join(output, `${name}-r468-current-mag.png`),
+    path: path.join(output, `${name}-r476-current-mag.png`),
     animations: 'disabled',
     caret: 'hide'
   });
@@ -188,6 +233,10 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.equal(state.langText, 'HU', JSON.stringify(state));
   assert.equal(state.magBefore, 'none', JSON.stringify(state));
   assert.equal(state.magAfter, 'none', JSON.stringify(state));
+  assert.match(state.magBackgroundImage, /data:image\/svg\+xml/i, state.magBackgroundImage);
+  assert.equal(state.magShape, state.miniShape, JSON.stringify(state));
+  assert.equal(state.magShape, state.miniLauncherShape, JSON.stringify(state));
+  assert.match(state.miniShapeSync, /^ready-(crystal|sphere)$/, JSON.stringify(state));
   assert.ok(state.brandBox && state.magBox && state.langBox && state.menuBox, JSON.stringify(state));
   assert.equal(overlap(state.brandBox, state.magBox), false, JSON.stringify(state));
   assert.equal(overlap(state.magBox, state.langBox), false, JSON.stringify(state));
@@ -201,11 +250,11 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.equal(state.rendererSelection, 'r326-direct-r468-soft-optics-live-energy-zero-idle', JSON.stringify(state));
     assert.equal(state.governor, 'r465-direct-pause-flag-no-idle-redraw', JSON.stringify(state));
     assert.equal(state.idlePolicy, 'explicit-mag-interaction-only-zero-idle', JSON.stringify(state));
-    assert.ok(state.opacity >= .94 && state.opacity <= .96, JSON.stringify(state));
-    assert.match(state.filter, /brightness\(1\)/, state.filter);
-    assert.match(state.filter, /contrast\(0?\.84\)/, state.filter);
-    assert.match(state.filter, /saturate\(1\.04\)/, state.filter);
-    assert.match(state.filter, /blur\(1\.02px\)/, state.filter);
+    assert.ok(state.opacity >= .88 && state.opacity <= .90, JSON.stringify(state));
+    assert.match(state.filter, /brightness\(0?\.92\)/, state.filter);
+    assert.match(state.filter, /contrast\(0?\.74\)/, state.filter);
+    assert.match(state.filter, /saturate\(0?\.94\)/, state.filter);
+    assert.match(state.filter, /blur\(1\.55px\)/, state.filter);
     assert.equal(state.stageAnimation, 'fx-core-r468-compositor-breathe', JSON.stringify(state));
   } else {
     assert.equal(state.normal, 'continuous-volume-93-percent-smooth', JSON.stringify(state));
