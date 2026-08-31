@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/**'
       - 'lighthouserc*.json'
+      - '.github/scripts/serve-p0-candidate.py'
       - '.github/scripts/validate-p0-vip-quality.cjs'
       - '.github/scripts/summarize-p0-lighthouse.cjs'
       - '.github/workflows/p0-vip-quality-gate.yml'
@@ -15,6 +16,7 @@ on:
     paths:
       - 'docs/**'
       - 'lighthouserc*.json'
+      - '.github/scripts/serve-p0-candidate.py'
       - '.github/scripts/validate-p0-vip-quality.cjs'
       - '.github/scripts/summarize-p0-lighthouse.cjs'
       - '.github/workflows/p0-vip-quality-gate.yml'
@@ -61,15 +63,16 @@ jobs:
           npx playwright install chrome msedge
           echo "NODE_PATH=$RUNTIME/node_modules" >> "$GITHUB_ENV"
 
-      - name: Start deterministic static candidate server
+      - name: Start deterministic candidate server with Worker API fixture
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4178 --bind 127.0.0.1 --directory docs >"$RUNNER_TEMP/formatx-p0-http.log" 2>&1 &
+          python3 .github/scripts/serve-p0-candidate.py --port 4178 --root docs >"$RUNNER_TEMP/formatx-p0-http.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/formatx-p0-http.pid"
           for attempt in $(seq 1 40); do
             if curl -fsS --max-time 3 "$FORMATX_TEST_URL" >/dev/null; then
-              echo 'Candidate server ready.'
+              curl -fsS --max-time 3 'http://127.0.0.1:4178/api/checkout-qr?plan=business_pro' >/dev/null
+              echo 'Candidate server and checkout QR fixture ready.'
               exit 0
             fi
             sleep 0.25
