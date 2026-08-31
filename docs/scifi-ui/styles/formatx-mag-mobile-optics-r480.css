@@ -84,10 +84,11 @@
 @media (prefers-reduced-motion:no-preference) and (max-width:900px),
        (prefers-reduced-motion:no-preference) and (pointer:coarse),
        (prefers-reduced-motion:no-preference) and (max-aspect-ratio:27/25) {
-  /* Fail-open compositor life: once the native crystal is ready, a user-facing
-     steady state is the only state that stops the heartbeat. This keeps the MAG
-     visibly alive even while the WebGL renderer correctly idles at zero frames. */
-  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"]:not([data-fx-primary-mag-life-r482="steady"]):not([data-fx-reference-motion-paused="true"]) body.living-architecture
+  /* The mobile render governor intentionally sets data-fx-reference-motion-paused
+     while the WebGL renderer is parked at zero idle frames. That is not a user
+     pause and must not freeze the compositor heartbeat. Only an actual PAUSE
+     button state (or the semantic R482 steady state) stops visible life. */
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"]:not([data-fx-primary-mag-life-r482="steady"]):not(:has(.fx-reference-pause[data-paused="true"])) body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     animation: fx-primary-mag-mobile-heart-r483 4.15s cubic-bezier(.36,0,.20,1) infinite !important;
     will-change: scale, opacity !important;
@@ -171,4 +172,4 @@
   }
 }
 
-/* production-r483-visible-living-mobile-mag-soft-edge-desktop-ask-crystal-deploy */
+/* production-r483-visible-living-mobile-mag-soft-edge-desktop-ask-crystal-deploy-zero-idle-split */
