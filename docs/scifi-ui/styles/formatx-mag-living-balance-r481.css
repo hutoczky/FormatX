@@ -1,9 +1,8 @@
-/* FormatX R482 — restrained spectrum, softer phone edge and living MAG family.
+/* FormatX R482.1 — restrained spectrum, softer phone edge and visibly living MAG family.
    R326 remains the single WebGL/material owner. This late optical layer keeps
    large, mini and header MAG surfaces visually related while preserving the
-   interaction-burst / zero-idle WebGL contract. Phone treatment deliberately
-   reduces bloom radius and edge hardness while restoring cyan/cobalt/violet
-   separation inside the translucent body. */
+   interaction-burst / zero-idle WebGL contract. The living motion is compositor
+   driven: a two-beat heartbeat is visible even while WebGL is completely idle. */
 
 @property --fx-mag-life-scale {
   syntax: '<number>';
@@ -23,41 +22,68 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   backface-visibility: hidden !important;
 }
 
+/* Two-stage heartbeat: small contraction/beat, brief release, stronger second
+   beat, then a slower return. Only scale + opacity change so idle WebGL remains
+   at zero frames and the animation stays compositor-friendly. */
 @keyframes fx-primary-mag-living-desktop-r482 {
   0%, 100% {
-    --fx-mag-life-scale: .996;
-    --fx-mag-life-opacity: .965;
+    --fx-mag-life-scale: .986;
+    --fx-mag-life-opacity: .91;
   }
-  46% {
-    --fx-mag-life-scale: 1.006;
+  25% {
+    --fx-mag-life-scale: 1.009;
+    --fx-mag-life-opacity: .975;
+  }
+  33% {
+    --fx-mag-life-scale: .997;
+    --fx-mag-life-opacity: .945;
+  }
+  42% {
+    --fx-mag-life-scale: 1.018;
     --fx-mag-life-opacity: 1;
   }
-  63% {
-    --fx-mag-life-scale: 1.002;
-    --fx-mag-life-opacity: .988;
+  54% {
+    --fx-mag-life-scale: 1.004;
+    --fx-mag-life-opacity: .975;
+  }
+  72% {
+    --fx-mag-life-scale: .992;
+    --fx-mag-life-opacity: .935;
   }
 }
 
 @keyframes fx-primary-mag-living-mobile-r482 {
   0%, 100% {
-    --fx-mag-life-scale: .994;
-    --fx-mag-life-opacity: .842;
+    --fx-mag-life-scale: .982;
+    --fx-mag-life-opacity: .80;
   }
-  46% {
-    --fx-mag-life-scale: 1.0055;
-    --fx-mag-life-opacity: .902;
+  24% {
+    --fx-mag-life-scale: 1.012;
+    --fx-mag-life-opacity: .91;
   }
-  63% {
-    --fx-mag-life-scale: 1.0015;
-    --fx-mag-life-opacity: .878;
+  32% {
+    --fx-mag-life-scale: .996;
+    --fx-mag-life-opacity: .85;
+  }
+  41% {
+    --fx-mag-life-scale: 1.024;
+    --fx-mag-life-opacity: .98;
+  }
+  53% {
+    --fx-mag-life-scale: 1.005;
+    --fx-mag-life-opacity: .90;
+  }
+  72% {
+    --fx-mag-life-scale: .989;
+    --fx-mag-life-opacity: .83;
   }
 }
 
 @media (min-width: 901px) {
   html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    --fx-mag-life-scale: .996;
-    --fx-mag-life-opacity: .965;
+    --fx-mag-life-scale: .986;
+    --fx-mag-life-opacity: .91;
     opacity: var(--fx-mag-life-opacity) !important;
     scale: var(--fx-mag-life-scale) !important;
   }
@@ -68,7 +94,7 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"],
   html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"] {
-    animation: fx-primary-mag-living-desktop-r482 5.7s cubic-bezier(.38,0,.22,1) infinite !important;
+    animation: fx-primary-mag-living-desktop-r482 4.25s cubic-bezier(.36,0,.20,1) infinite !important;
     will-change: scale, opacity !important;
   }
 }
@@ -111,8 +137,8 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   html:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    --fx-mag-life-scale: .996;
-    --fx-mag-life-opacity: .862;
+    --fx-mag-life-scale: .982;
+    --fx-mag-life-opacity: .80;
     opacity: var(--fx-mag-life-opacity) !important;
     filter:
       brightness(.66)
@@ -138,7 +164,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"],
   html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"] {
-    animation: fx-primary-mag-living-mobile-r482 5.3s cubic-bezier(.38,0,.22,1) infinite !important;
+    animation: fx-primary-mag-living-mobile-r482 3.95s cubic-bezier(.36,0,.20,1) infinite !important;
     will-change: scale, opacity !important;
   }
 
@@ -150,6 +176,47 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
       radial-gradient(circle at 61% 48%, rgba(42,92,226,.032) 0, transparent 38%),
       radial-gradient(circle at 58% 57%, rgba(119,57,217,.026) 0, transparent 39%),
       linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.14) 58%, rgba(2,13,31,.38) 100%) !important;
+  }
+}
+
+/* Override the earlier R479 single-wave life with the same two-beat rhythm so
+   the header and mini MAG visibly belong to the same organism. */
+@keyframes fx-mini-mag-live-breath-r479 {
+  0%,100% { scale:.965; opacity:.80; }
+  25% { scale:1.025; opacity:.96; }
+  33% { scale:.995; opacity:.88; }
+  42% { scale:1.055; opacity:1; }
+  55% { scale:1.012; opacity:.94; }
+  72% { scale:.978; opacity:.84; }
+}
+@keyframes fx-mini-mag-status-breath-r479 {
+  0%,100% { scale:.86; opacity:.50; }
+  25% { scale:1.04; opacity:.86; }
+  33% { scale:.94; opacity:.66; }
+  42% { scale:1.14; opacity:1; }
+  58% { scale:1.00; opacity:.78; }
+}
+@keyframes fx-header-mag-live-breath-r479 {
+  0%,100% { opacity:.82; scale:.982; }
+  25% { opacity:.96; scale:1.018; }
+  33% { opacity:.88; scale:.995; }
+  42% { opacity:1; scale:1.045; }
+  56% { opacity:.94; scale:1.010; }
+  72% { opacity:.85; scale:.988; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fx-mini-mag-assistant-r459[data-fx-mag-life="breath"] .fx-mini-mag-glyph-r459 {
+    animation-duration: 4.05s !important;
+    animation-timing-function: cubic-bezier(.36,0,.20,1) !important;
+  }
+  .fx-mini-mag-assistant-r459[data-fx-mag-life="breath"] .fx-mini-mag-status-r459 {
+    animation-duration: 4.05s !important;
+    animation-timing-function: cubic-bezier(.36,0,.20,1) !important;
+  }
+  .topbar .fx-reference-mag-button[data-fx-mag-life="breath"] {
+    animation-duration: 4.15s !important;
+    animation-timing-function: cubic-bezier(.36,0,.20,1) !important;
   }
 }
 
@@ -165,4 +232,4 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   }
 }
 
-/* production-r482-restrained-spectrum-soft-mobile-edge-colour-synchronised-mag-family */
+/* production-r4821-visible-double-heartbeat-spectrum-soft-mobile-edge-colour-synchronised-mag-family */
