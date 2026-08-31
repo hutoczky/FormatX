@@ -1,7 +1,8 @@
-/* FormatX r428 — final cross-device header owner.
+/* FormatX r466 — final cross-device header owner.
    Mobile keeps one branded 72px carrier for MAG, language and menu. Desktop
    receives an explicit language slot so legacy header layers cannot hide or
-   reparent the canonical selector. */
+   reparent the canonical selector. r466 also locks the mobile MAG control to
+   its text label so late legacy/star paint cannot replace or blank it. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root body.living-architecture .topbar {
     position:relative!important;
@@ -66,12 +67,40 @@
   html:root:root body.living-architecture .topbar .fx-reference-mag-button {
     top:11px!important;
     right:122px!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
     width:50px!important;
     min-width:50px!important;
     max-width:50px!important;
     height:48px!important;
     min-height:48px!important;
     max-height:48px!important;
+    padding:0!important;
+    color:rgba(239,248,253,.96)!important;
+    -webkit-text-fill-color:currentColor!important;
+    border:1px solid rgba(122,199,231,.26)!important;
+    border-radius:14px!important;
+    background:rgba(3,17,29,.90)!important;
+    background-image:none!important;
+    box-shadow:inset 0 0 22px rgba(70,191,236,.045),0 8px 24px rgba(0,0,0,.16)!important;
+    font:760 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace!important;
+    letter-spacing:.06em!important;
+    text-indent:0!important;
+    text-transform:uppercase!important;
+    text-shadow:none!important;
+    overflow:hidden!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264::before,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264::after,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button::before,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button::after {
+    content:none!important;
+    display:none!important;
+    background:none!important;
+    box-shadow:none!important;
+    filter:none!important;
   }
 
   html:root:root body.living-architecture .topbar .fx-language-toggle.fx-control-owner-r264,
@@ -157,4 +186,5 @@ html.fx-signature-open body.living-architecture .fx-signature-architecture {
 /* production-r418-final-mobile-header-owner */
 /* production-r418-final-mobile-header-owner-non-occluding */
 /* production-r428-final-cross-device-header-owner-language-visible-non-occluding */
-/* production-r428-release-candidate-20260830 */
+/* production-r466-mobile-mag-text-lock-no-star-blank-state */
+/* production-r466-release-candidate-20260831 */
