@@ -1,36 +1,20 @@
 import productionBase from './production-content-entry-r369-base.js';
 
 /*
-  FormatX r370 — final public edge stabilizer.
+  FormatX r487 — final public edge stabilizer + first-paint scheduler.
 
-  Compatibility contract markers retained because the production base still owns
-  these exact capabilities:
-  formatx-public-shell.js
-  formatx-content-standard.css
-  formatx-content-standard.js
-  formatx-seo.js
-  formatx-content-finalizer.js
-  formatx-platform-surface-finalizer.js
-  formatx-organism-trust.js
-  formatx-organism-semantic-state.js
-  single-language-toggle.js
-  release-metadata.js
-  cleanLegacyReleaseCopy
-  Cache-Control', 'no-store
-  formatx-first-paint-r206.css?v=20260818-r206-stable-hero
-  formatx-mobile-reference-layout-v1.js?v=20260824-native-orb-r250
-  formatx-mobile-layout-r207.css?v=20260824-native-orb-r250
-  formatx-mobile-layout-r207.js?v=20260824-native-orb-r250
-  X-FormatX-Client-Revision', 'r208-flicker-free-owner
-  X-FormatX-Recovery', 'r243-language-canonical
-  fx_startup_r208=1
-  r208-one-shot-cleared
+  The production base remains the functional owner. This edge layer keeps the
+  canonical security/robots contract and, on the homepage only, lets one stable
+  critical frame paint before non-critical presentation styles join the cascade.
+  No visual feature is removed: deferred styles are restored immediately after
+  the first committed frame by formatx-deferred-css-r487.js.
 */
 
-const STARTUP_REVISION = '20260818-r208-flicker-free-owner';
+const STARTUP_REVISION = '20260831-r487-first-paint-scheduler';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
-const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r370-render-blocking">';
+const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
+const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
 const META_CSP = "default-src 'self';base-uri 'self';object-src 'none';script-src 'self' https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'";
 const HEADER_CSP = [
   "default-src 'self'",
@@ -49,7 +33,7 @@ const HEADER_CSP = [
   'upgrade-insecure-requests',
 ].join('; ');
 const ROBOTS = [
-  '# FormatX canonical robots policy — served by the production Worker r370',
+  '# FormatX canonical robots policy — served by the production Worker r487',
   'User-agent: *',
   'Allow: /',
   'Disallow: /api/',
@@ -58,6 +42,27 @@ const ROBOTS = [
   'Sitemap: https://formatxsuite.com/sitemap.xml',
   '',
 ].join('\n');
+
+// These styles are important for the complete experience but none is required
+// to paint the already-static header + hero copy. Keeping them out of the
+// render-blocking set removes the 15-19 stylesheet waterfall measured by the
+// live mobile Lighthouse profile without creating an audit-only experience.
+const DEFERRED_STYLE_PATHS = new Set([
+  '/scifi-ui/styles/formatx-continuous-scroll.css',
+  '/scifi-ui/styles/formatx-seamless-loop.css',
+  '/scifi-ui/styles/formatx-mobile-apex-composition.css',
+  '/scifi-ui/styles/platform-status.css',
+  '/scifi-ui/styles/formatx-copy-polish.css',
+  '/scifi-ui/styles/formatx-award-readiness.css',
+  '/scifi-ui/styles/formatx-content-standard.css',
+  '/scifi-ui/styles/formatx-feedback.css',
+  '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
+  '/scifi-ui/styles/formatx-flow-first-r74.css',
+  '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
+  '/scifi-ui/styles/formatx-mobile-proof-controls-r204.css',
+  '/scifi-ui/styles/formatx-mobile-layout-r207.css',
+  '/scifi-ui/styles/formatx-first-paint-r206.css',
+]);
 
 function isSafeMethod(request) {
   return request.method === 'GET' || request.method === 'HEAD';
@@ -72,7 +77,7 @@ function robotsResponse(request) {
     'Content-Type': 'text/plain; charset=utf-8',
     'Cache-Control': 'no-store, max-age=0',
     'X-Content-Type-Options': 'nosniff',
-    'X-FormatX-Robots-Owner': 'worker-r370',
+    'X-FormatX-Robots-Owner': 'worker-r487',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -92,12 +97,66 @@ function injectFirstPaint(html) {
   return source.replace('</head>', `  ${FIRST_PAINT_LINK}\n</head>`);
 }
 
+function escapeAttribute(value) {
+  return String(value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+function deferNonCriticalStyles(html) {
+  let awardReadinessSeen = false;
+  return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
+    const hrefMatch = tag.match(/\bhref=(["'])(.*?)\1/i);
+    if (!hrefMatch) return tag;
+
+    let pathname = '';
+    try {
+      pathname = new URL(hrefMatch[2], 'https://formatxsuite.com/scifi-ui/').pathname;
+    } catch (_) {
+      return tag;
+    }
+
+    if (pathname === '/scifi-ui/styles/formatx-award-readiness.css') {
+      if (awardReadinessSeen) return '';
+      awardReadinessSeen = true;
+    }
+    if (!DEFERRED_STYLE_PATHS.has(pathname)) return tag;
+
+    const mediaMatch = tag.match(/\smedia=(["'])(.*?)\1/i);
+    const originalMedia = mediaMatch ? mediaMatch[2] : 'all';
+    let next = mediaMatch ? tag.replace(mediaMatch[0], '') : tag;
+    const close = /\/>$/.test(next) ? '/>' : '>';
+    next = next.replace(/\s*\/?>$/, '');
+    return `${next} data-fx-r487-deferred-style="true" data-fx-r487-media="${escapeAttribute(originalMedia)}" media="print"${close}`;
+  });
+}
+
+function injectDeferredCssRuntime(html) {
+  const source = String(html || '');
+  if (source.includes('data-fx-deferred-css-r487="true"')) return source;
+  return source.replace('</head>', `  ${DEFERRED_CSS_SCRIPT}\n</head>`);
+}
+
+function cacheBustR487CriticalQuality(html) {
+  return String(html || '').replace(
+    /formatx-quality-r461\.css\?v=[^"']+/g,
+    'formatx-quality-r461.css?v=20260831-r487-live-a11y'
+  );
+}
+
+function optimizeHomepage(html) {
+  let source = injectFirstPaint(html);
+  source = cacheBustR487CriticalQuality(source);
+  source = deferNonCriticalStyles(source);
+  source = injectDeferredCssRuntime(source);
+  return source;
+}
+
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
 
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', `r370-render-blocking-first-paint:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-Edge-Stability', `r487-first-paint:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r487-post-first-paint');
 
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
@@ -119,7 +178,7 @@ async function stabilizePublicResponse(request, url, response) {
 
   let html = await response.text();
   html = normalizeMetaCsp(html);
-  if (HOMEPAGE_PATHS.has(url.pathname)) html = injectFirstPaint(html);
+  if (HOMEPAGE_PATHS.has(url.pathname)) html = optimizeHomepage(html);
 
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
