@@ -1,18 +1,19 @@
-/* FormatX r465 — direct native MAG + persistent Mini MAG loader.
-   R326 remains the only full-size hero WebGL organism. R465 softens mobile
-   perimeter/bloom and freezes the painted canvas without pause-event redraws;
-   desktop material/behaviour remains unchanged. */
+/* FormatX r468 — direct native MAG + persistent Mini MAG loader.
+   R326 remains the only full-size hero WebGL organism. Mobile uses the final
+   restrained bloom/soft-edge display pass plus explicit-interaction surface
+   energy, while the R465 governor preserves zero-idle WebGL rendering. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r465-soft-optics-no-idle-redraw';
+const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
-if(reduced)root.dataset.fxCurrentMagMotionR424='r465-static-render-explicit-interaction';
+if(reduced)root.dataset.fxCurrentMagMotionR424='r468-static-render-explicit-interaction';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
-const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r465-soft-perimeter-low-bloom';
+const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
+const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r468-soft-mobile-bloom-breathe';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge';
@@ -21,6 +22,7 @@ const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260830-r4
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260831-r465-direct-pause-flag-no-redraw';
+const LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
 
@@ -46,6 +48,8 @@ const LEGACY_STAGE_SELECTOR=[
 // direct-r326-r463-award-mobile-optics-strict-tbt
 // direct-r326-r463-optics-r464-explicit-interaction-tbt
 // direct-r326-r465-soft-optics-no-idle-redraw
+// direct-r326-r468-soft-optics-live-energy-zero-idle
+// explicit-mag-interaction-only-zero-idle
 
 function cleanupLegacyMagRuntime(){
   let removedStages=0;
@@ -160,16 +164,19 @@ async function start(){
     addStyle(STYLE,'data-fx-current-mag-r422'),
     addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
     addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418'),
-    addStyle(MINI_STYLE,'data-fx-mini-mag-assistant-r459')
+    addStyle(MINI_STYLE,'data-fx-mini-mag-assistant-r459'),
+    addStyle(LIFE_STYLE,'data-fx-core-life-style-r455')
   ]);
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
   root.dataset.fxCurrentMagStylesR423='ready';
   root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
-  root.dataset.fxCurrentMagOpticsR458='superseded-by-r465-soft-perimeter';
-  root.dataset.fxCurrentMagOpticsR460=mobile?'superseded-by-r465-soft-perimeter':'desktop-optics-unchanged';
-  root.dataset.fxCurrentMagOpticsR463=mobile?'superseded-by-r465-soft-perimeter':'desktop-optics-unchanged';
+  root.dataset.fxCurrentMagOpticsR458='superseded-by-r468-soft-mobile-bloom';
+  root.dataset.fxCurrentMagOpticsR460=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
+  root.dataset.fxCurrentMagOpticsR463=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagOpticsR465=mobile?'soft-perimeter-low-bloom-low-cost-shader':'desktop-optics-unchanged';
+  root.dataset.fxCurrentMagOpticsR468=mobile?'soft-bloom-soft-edge-compositor-breathe':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagSchedulerR465=mobile?'direct-pause-flag-no-idle-redraw':'desktop-native-scheduler';
+  root.dataset.fxCoreMobileIdlePolicyR426=mobile?'explicit-mag-interaction-only-zero-idle':'desktop-native-scheduler';
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
 
@@ -186,15 +193,16 @@ async function start(){
   const rendererReady=await waitForRendererReady();
   if(rendererReady){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-    root.dataset.fxCoreRendererSelection=mobile?'r326-direct-r465-soft-optics-no-idle-redraw':'r326-direct-r460-desktop-glass';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r465';
+    await addScript(LIFE,'data-fx-core-life-r455');
+    root.dataset.fxCoreRendererSelection=mobile?'r326-direct-r468-soft-optics-live-energy-zero-idle':'r326-direct-r468-desktop-live-energy';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r468';
     root.dataset.fxCurrentMagRuntimeR422='ready';
   }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
 
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r465-soft-optics-no-idle-redraw-native-touch'
-    :'direct-r326-r460-primary-controller-desktop';
-  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true}}));
+    ?'direct-r326-r468-soft-optics-live-energy-zero-idle-native-touch'
+    :'direct-r326-r468-primary-controller-desktop';
+  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true}}));
 }
 
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});
