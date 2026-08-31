@@ -1,0 +1,9 @@
+{
+  "revision": "R479",
+  "purpose": "mobile primary MAG colour depth, softer alpha-aware edge halo and compositor-only living breath",
+  "primary_renderer": "single-webgl-crystal-organism-r326",
+  "mobile_optics": "lower-centre-luminance-cobalt-cyan-violet-soft-alpha-edge",
+  "primary_mag_life": "compositor-opacity-scale-breath-zero-js-idle",
+  "mini_mag_life": "primary-energy-sync-compositor-breath-zero-js-idle",
+  "requested_at": "2026-08-31"
+}

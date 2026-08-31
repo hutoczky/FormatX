@@ -1,12 +1,12 @@
-/* FormatX R476/R478 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R479 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop. */
 (function(){
 'use strict';
 const root=document.documentElement;
-if(root.dataset.fxMagShapeSyncR476==='ready-r478')return;
-root.dataset.fxMagShapeSyncR476='booting-r478';
+if(root.dataset.fxMagShapeSyncR476==='ready-r479')return;
+root.dataset.fxMagShapeSyncR476='booting-r479';
 
-const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r478-softer-mobile-glass-shared-life';
+const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null;
 let pulseTimer=0;
@@ -15,7 +15,7 @@ let lastEnergyBolt='';
 function ensureStyle(){
   let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');
   if(link instanceof HTMLLinkElement){
-    if(!link.href.includes('r478-softer-mobile-glass-shared-life'))link.href=STYLE;
+    if(!link.href.includes('r479-colour-depth-soft-living-primary'))link.href=STYLE;
     return link;
   }
   link=document.createElement('link');
@@ -48,6 +48,7 @@ function steadyLife(){
 function setLife(state){
   for(const node of lifeNodes())node.dataset.fxMagLife=state;
   root.dataset.fxMiniMagLifeR478=state;
+  root.dataset.fxMiniMagLifeR479=state;
 }
 
 function pulse(source){
@@ -58,6 +59,7 @@ function pulse(source){
   clearTimeout(pulseTimer);
   setLife('pulse');
   root.dataset.fxMiniMagEnergySourceR478=String(source||'primary-mag');
+  root.dataset.fxMiniMagEnergySourceR479=String(source||'primary-mag');
   pulseTimer=setTimeout(()=>setLife(steadyLife()),620);
   return true;
 }
@@ -76,8 +78,9 @@ function sync(){
   }
   root.dataset.fxMiniMagShapeR476=shape;
   root.dataset.fxMiniMagShapeSyncR476=`ready-${shape}`;
-  root.dataset.fxMagShapeSyncR476='ready-r478';
+  root.dataset.fxMagShapeSyncR476='ready-r479';
   root.dataset.fxMiniMagLifeContractR478='primary-energy-sync-compositor-breath-zero-js-idle';
+  root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';
 }
 
 function onCoreInteraction(event){

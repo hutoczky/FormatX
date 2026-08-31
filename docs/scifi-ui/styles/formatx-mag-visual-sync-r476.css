@@ -1,7 +1,7 @@
-/* FormatX R476/R478 — shape-synchronised MAG iconography, softer phone optics
-   and shared living-state feedback. The primary R326 WebGL MAG remains the only
-   large renderer; Mini MAG and header MAG mirror its semantic shape and energy
-   without creating a second WebGL surface or JavaScript idle loop. */
+/* FormatX R476/R479 — shape-synchronised MAG iconography plus a richer,
+   softer and visibly living phone MAG. The R326 WebGL renderer remains the
+   single large renderer; this layer only provides optical finishing and
+   compositor-only life, so no JavaScript idle loop is introduced. */
 
 html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-button {
   color: transparent !important;
@@ -9,7 +9,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   text-indent: -999px !important;
   letter-spacing: 0 !important;
   text-shadow: none !important;
-  background-color: rgba(3,17,29,.90) !important;
+  background-color: rgba(3,17,29,.92) !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
   background-size: 25px 25px !important;
@@ -17,110 +17,156 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 
 html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-button:not([data-fx-core-shape="sphere"]),
 html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-button[data-fx-core-shape="crystal"] {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2.5 29.5 16 16 29.5 2.5 16Z' fill='%23091f34' stroke='%238ff3ff' stroke-width='1.35'/%3E%3Cpath d='M16 4.8v22.4M4.8 16h22.4' stroke='%237edcff' stroke-opacity='.58' stroke-width='.85'/%3E%3Ccircle cx='16' cy='16' r='2.7' fill='%23dffeff'/%3E%3Ccircle cx='16' cy='16' r='6.4' fill='none' stroke='%238d74ff' stroke-opacity='.34'/%3E%3C/svg%3E") !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='c' cx='50%25' cy='48%25' r='62%25'%3E%3Cstop offset='0' stop-color='%23e8ffff'/%3E%3Cstop offset='.18' stop-color='%2354e7ff'/%3E%3Cstop offset='.48' stop-color='%233063cb'/%3E%3Cstop offset='.72' stop-color='%236a4fd8'/%3E%3Cstop offset='1' stop-color='%2307192c'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M16 2.5 29.5 16 16 29.5 2.5 16Z' fill='url(%23c)' stroke='%238ff3ff' stroke-opacity='.78' stroke-width='1.05'/%3E%3Cpath d='M16 5.2v21.6M5.2 16h21.6' stroke='%237edcff' stroke-opacity='.34' stroke-width='.7'/%3E%3Ccircle cx='16' cy='16' r='2.1' fill='%23dffeff' fill-opacity='.88'/%3E%3Ccircle cx='16' cy='16' r='6.8' fill='none' stroke='%23967cff' stroke-opacity='.38'/%3E%3C/svg%3E") !important;
 }
 
 html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-button[data-fx-core-shape="sphere"] {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='30%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23e9ffff'/%3E%3Cstop offset='.2' stop-color='%237eeaff'/%3E%3Cstop offset='.58' stop-color='%234574c7'/%3E%3Cstop offset='1' stop-color='%2307192c'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='12.5' fill='url(%23g)' stroke='%238ff3ff' stroke-width='1.25'/%3E%3Cellipse cx='12.3' cy='10.8' rx='4.3' ry='2.5' fill='%23ffffff' fill-opacity='.24'/%3E%3C/svg%3E") !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='30%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23f1ffff'/%3E%3Cstop offset='.18' stop-color='%237eeaff'/%3E%3Cstop offset='.50' stop-color='%233b78d1'/%3E%3Cstop offset='.72' stop-color='%236348c9'/%3E%3Cstop offset='1' stop-color='%2307192c'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='12.5' fill='url(%23g)' stroke='%238ff3ff' stroke-opacity='.76' stroke-width='1.05'/%3E%3Cellipse cx='12.3' cy='10.8' rx='4.3' ry='2.5' fill='%23ffffff' fill-opacity='.20'/%3E%3C/svg%3E") !important;
 }
 
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="crystal"],
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459:not([data-fx-core-shape="sphere"]) {
   transform: rotate(45deg) !important;
   border-radius: 8px 2px 8px 2px !important;
-  border-color: rgba(162,244,255,.58) !important;
+  border-color: rgba(162,244,255,.54) !important;
   background:
-    radial-gradient(circle at 50% 50%, rgba(234,255,255,.74) 0 4%, rgba(78,224,255,.32) 8%, transparent 29%),
-    linear-gradient(135deg, rgba(62,190,232,.22), rgba(101,78,221,.13) 52%, rgba(3,21,37,.82)) !important;
-  box-shadow: 0 0 4px rgba(77,225,255,.10), inset 0 0 10px rgba(98,183,255,.07) !important;
+    radial-gradient(circle at 48% 46%, rgba(231,255,255,.74) 0 3%, rgba(55,221,255,.32) 8%, transparent 27%),
+    radial-gradient(circle at 35% 30%, rgba(41,204,255,.18), transparent 46%),
+    linear-gradient(135deg, rgba(31,147,215,.34), rgba(84,62,208,.27) 53%, rgba(3,17,34,.91)) !important;
+  box-shadow:
+    0 0 7px rgba(68,220,255,.14),
+    0 0 16px rgba(96,72,255,.07),
+    inset 0 0 12px rgba(94,190,255,.10) !important;
 }
 
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="sphere"] {
   transform: none !important;
   border-radius: 50% !important;
-  border-color: rgba(162,244,255,.56) !important;
+  border-color: rgba(162,244,255,.54) !important;
   background:
-    radial-gradient(circle at 36% 29%, rgba(247,255,255,.74) 0 7%, rgba(116,226,255,.39) 15%, rgba(66,95,192,.34) 48%, rgba(3,18,32,.92) 78%) !important;
-  box-shadow: 0 0 5px rgba(77,225,255,.10), inset -5px -7px 13px rgba(2,8,20,.40) !important;
+    radial-gradient(circle at 34% 27%, rgba(247,255,255,.76) 0 6%, rgba(91,229,255,.44) 14%, rgba(45,105,207,.42) 46%, rgba(91,63,196,.25) 64%, rgba(3,16,32,.94) 82%) !important;
+  box-shadow:
+    0 0 7px rgba(77,225,255,.13),
+    0 0 17px rgba(95,72,255,.07),
+    inset -5px -7px 13px rgba(2,8,20,.42) !important;
 }
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="sphere"]::before {
   width: 15px !important;
   height: 1px !important;
-  opacity: .28 !important;
+  opacity: .25 !important;
 }
 .fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="sphere"]::after {
   width: 1px !important;
   height: 15px !important;
-  opacity: .18 !important;
+  opacity: .16 !important;
 }
 
-/* R478 mobile soft-glass pass. The phone screenshot showed an over-bright centre
-   and knife-sharp silhouette. Lower contrast/saturation and a slightly wider
-   optical feather keep the dimensional crystal while removing the hard neon edge. */
+/* R479 primary mobile MAG optical correction.
+   R478's 2.25px blur + .56 contrast flattened the internal facets while the
+   silhouette still read as a hard polygon. R479 restores colour separation and
+   internal depth, reduces the clipped cyan centre through lower luminance, and
+   moves softness to alpha-aware drop shadows around the actual crystal edge. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .80 !important;
-    filter: brightness(.79) contrast(.56) saturate(.82) blur(2.25px) !important;
-    -webkit-filter: brightness(.79) contrast(.56) saturate(.82) blur(2.25px) !important;
+    opacity: .91 !important;
+    filter:
+      brightness(.72)
+      contrast(.76)
+      saturate(1.38)
+      hue-rotate(-3deg)
+      blur(1.15px)
+      drop-shadow(0 0 9px rgba(46,218,255,.18))
+      drop-shadow(0 0 22px rgba(91,71,255,.10)) !important;
+    -webkit-filter:
+      brightness(.72)
+      contrast(.76)
+      saturate(1.38)
+      hue-rotate(-3deg)
+      blur(1.15px)
+      drop-shadow(0 0 9px rgba(46,218,255,.18))
+      drop-shadow(0 0 22px rgba(91,71,255,.10)) !important;
+    mix-blend-mode: normal !important;
+    transform-origin: 50% 50% !important;
+    scale: .998;
+    will-change: opacity, scale;
+  }
+
+  /* Give the volume a darker optical chamber so cyan/cobalt/violet facets stay
+     legible instead of becoming a pale blue plate on phone OLED/LCD panels. */
+  html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space {
+    background:
+      radial-gradient(circle at 50% 47%, rgba(28,178,232,.10) 0, rgba(13,82,151,.055) 31%, transparent 48%),
+      radial-gradient(circle at 58% 51%, rgba(104,66,222,.085) 0, transparent 45%),
+      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.12) 58%, rgba(2,14,31,.34) 100%) !important;
   }
 }
 
-/* Shared life signal: compositor-only breathing plus short explicit energy pulse.
-   scale is the individual transform property, so it does not overwrite the
-   crystal rotate(45deg) shape state. */
+/* Shared life signal: only opacity/individual scale animate, so the large
+   WebGL renderer can keep its zero-idle-frame scheduler. */
 @media (prefers-reduced-motion: no-preference) {
   .fx-mini-mag-assistant-r459[data-fx-mag-life="breath"] .fx-mini-mag-glyph-r459 {
-    animation: fx-mini-mag-live-breath-r478 4.8s ease-in-out infinite !important;
+    animation: fx-mini-mag-live-breath-r479 4.9s cubic-bezier(.38,0,.22,1) infinite !important;
     transform-origin: 50% 50% !important;
   }
   .topbar .fx-reference-mag-button[data-fx-mag-life="breath"] {
-    animation: fx-header-mag-live-breath-r478 5.2s ease-in-out infinite !important;
+    animation: fx-header-mag-live-breath-r479 5.4s ease-in-out infinite !important;
   }
   .fx-mini-mag-assistant-r459[data-fx-mag-life="breath"] .fx-mini-mag-status-r459 {
-    animation: fx-mini-mag-status-breath-r478 3.6s ease-in-out infinite !important;
+    animation: fx-mini-mag-status-breath-r479 3.8s ease-in-out infinite !important;
+  }
+  @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+    html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .fx-crystal-organism-r326-canvas {
+      animation: fx-primary-mag-live-breath-r479 6.2s cubic-bezier(.38,0,.22,1) infinite !important;
+    }
   }
 }
 
 .fx-mini-mag-assistant-r459[data-fx-mag-life="pulse"] .fx-mini-mag-glyph-r459 {
-  scale: 1.10 !important;
+  scale: 1.09 !important;
   opacity: 1 !important;
   transition: scale 180ms cubic-bezier(.2,.8,.2,1), opacity 180ms ease !important;
 }
 .fx-mini-mag-assistant-r459[data-fx-mag-life="pulse"] .fx-mini-mag-status-r459 {
-  scale: 1.22 !important;
+  scale: 1.20 !important;
   opacity: 1 !important;
 }
 .topbar .fx-reference-mag-button[data-fx-mag-life="pulse"] {
   opacity: 1 !important;
-  scale: 1.045 !important;
+  scale: 1.04 !important;
   transition: scale 180ms cubic-bezier(.2,.8,.2,1), opacity 180ms ease !important;
 }
 
-@keyframes fx-mini-mag-live-breath-r478 {
-  0%,100% { scale: .975; opacity: .86; }
-  50% { scale: 1.025; opacity: 1; }
+@keyframes fx-primary-mag-live-breath-r479 {
+  0%,100% { opacity: .88; scale: .996; }
+  42% { opacity: .93; scale: 1.004; }
+  58% { opacity: .91; scale: 1.001; }
 }
-@keyframes fx-mini-mag-status-breath-r478 {
+@keyframes fx-mini-mag-live-breath-r479 {
+  0%,100% { scale: .978; opacity: .86; }
+  48% { scale: 1.024; opacity: 1; }
+  62% { scale: 1.010; opacity: .95; }
+}
+@keyframes fx-mini-mag-status-breath-r479 {
   0%,100% { scale: .90; opacity: .58; }
-  50% { scale: 1.08; opacity: 1; }
+  50% { scale: 1.07; opacity: 1; }
 }
-@keyframes fx-header-mag-live-breath-r478 {
-  0%,100% { opacity: .84; }
-  50% { opacity: 1; }
+@keyframes fx-header-mag-live-breath-r479 {
+  0%,100% { opacity: .84; scale: .992; }
+  50% { opacity: 1; scale: 1.018; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .fx-mini-mag-glyph-r459,
   .fx-mini-mag-status-r459,
-  .topbar .fx-reference-mag-button {
+  .topbar .fx-reference-mag-button,
+  .fx-crystal-organism-r326-canvas {
     animation: none !important;
     transition: none !important;
     scale: 1 !important;
   }
 }
 
-/* production-r476-shape-synchronised-mini-mag-header-icon-soft-phone-optics
-   production-r477-refined-phone-highlight-and-edge-softening
-   production-r478-softer-mobile-glass-and-shared-mini-mag-life
-   r478-live-production-verification-trigger */
+/* production-r476-shape-synchronised-mini-mag-header-icon
+   production-r478-soft-phone-optics-shared-life
+   production-r479-colour-depth-soft-alpha-edge-living-primary-mag */
