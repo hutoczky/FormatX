@@ -2,75 +2,46 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'native-webgl-micro-life-r455';
+  const VERSION = 'native-webgl-interaction-life-r466';
   if (root.dataset.fxCoreLifeR455 === 'ready' || root.dataset.fxCoreLifeR455 === 'booting') return;
   root.dataset.fxCoreLifeR455 = 'booting';
 
-  const mobile = matchMedia('(max-width:900px),(pointer:coarse)');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let api = null;
   let stage = null;
   let hero = null;
   let visible = false;
-  let stopped = false;
-  let timer = 0;
   let observer = null;
   let lastSurfacePulse = -Infinity;
-  let lastInteraction = -Infinity;
-  let tick = 0;
-
-  function canAnimate() {
-    return !stopped
-      && !document.hidden
-      && visible
-      && !reduced.matches
-      && root.dataset.fxReferenceMotionPaused !== 'true'
-      && api
-      && typeof api.requestRender === 'function';
-  }
-
-  function scheduleNext() {
-    clearTimeout(timer);
-    if (stopped) return;
-    const delay = mobile.matches ? 140 : 110;
-    timer = setTimeout(ambientTick, delay);
-  }
-
-  function ambientTick() {
-    timer = 0;
-    if (canAnimate()) {
-      /* One native WebGL frame at a low ambient cadence keeps uTime-driven
-         membrane, caustic and microscopic yaw motion alive without restoring
-         a hot 60-fps idle loop. Interaction remains full-speed through r326. */
-      api.requestRender(1);
-      tick += 1;
-      root.dataset.fxCoreAmbientFrameR455 = String(tick);
-      root.dataset.fxCoreAmbientCadenceR455 = mobile.matches ? '7fps-visible-only' : '9fps-visible-only';
-    }
-    scheduleNext();
-  }
 
   function fireSurfacePulse(source) {
     if (!api || typeof api.surfacePulse !== 'function' || reduced.matches || document.hidden || !visible) return false;
+    if (root.dataset.fxReferenceMotionPaused === 'true') return false;
     const now = performance.now();
-    if (now - lastSurfacePulse < 2400) return false;
+    if (now - lastSurfacePulse < 2200) return false;
     lastSurfacePulse = now;
     api.surfacePulse();
     root.dataset.fxCoreEnergyBoltR455 = `surface-sweep-${source}`;
     return true;
   }
 
-  function onDirectInteraction() {
-    lastInteraction = performance.now();
-    fireSurfacePulse('direct-interaction');
-  }
-
   function onCoreInteraction(event) {
     const phase = event.detail?.phase || '';
-    if (phase === 'press' || phase === 'release') {
-      lastInteraction = performance.now();
-      fireSurfacePulse(`core-${phase}`);
-    }
+    if (phase === 'press' || phase === 'release') fireSurfacePulse(`core-${phase}`);
+  }
+
+  function onPointerDown() {
+    /* R465's capture-phase render governor unpauses the native renderer first;
+       this bubble-phase hook then launches the real shader sweep on the same
+       trusted interaction. No timer or idle WebGL loop is introduced. */
+    queueMicrotask(() => fireSurfacePulse('direct-interaction'));
+  }
+
+  function onKeyDown(event) {
+    if (!event.isTrusted || !['Enter', ' '].includes(event.key)) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target?.closest('#hero .hero-space,.fx-reference-mag-button')) return;
+    queueMicrotask(() => fireSurfacePulse('keyboard-interaction'));
   }
 
   function bind() {
@@ -84,31 +55,18 @@
       const entry = entries[0];
       visible = Boolean(entry?.isIntersecting && entry.intersectionRatio > .04);
       root.dataset.fxCoreLifeVisibilityR455 = visible ? 'visible' : 'offscreen';
-      if (visible) {
-        api.requestRender?.(2);
-        scheduleNext();
-      }
     }, { threshold: [0, .04, .2, .55] });
     observer.observe(stage);
 
-    stage.addEventListener('pointerdown', onDirectInteraction, { passive: true });
-    stage.addEventListener('touchstart', onDirectInteraction, { passive: true });
+    stage.addEventListener('pointerdown', onPointerDown, { passive: true });
     addEventListener('formatx:coreinteraction', onCoreInteraction, { passive: true });
-
-    /* The renderer already owns its autonomous full-surface electric sweep.
-       r455 adds an early first-impression sweep only after the page has become
-       interactive, so it does not race first paint or create a layout shift. */
-    const firstImpression = () => {
-      if (stopped || reduced.matches || !visible || performance.now() - lastInteraction < 1800) return;
-      if (root.dataset.fxCoreSurfacePulseR454 === 'idle') fireSurfacePulse('first-impression');
-    };
-    if ('requestIdleCallback' in window) requestIdleCallback(firstImpression, { timeout: mobile.matches ? 2600 : 2200 });
-    else setTimeout(firstImpression, mobile.matches ? 2400 : 2000);
+    document.addEventListener('keydown', onKeyDown, { passive: true });
 
     root.dataset.fxCoreLifeR455 = 'ready';
-    root.dataset.fxCoreLivingBehavior = 'native-webgl-visible-micro-life-plus-surface-energy-r455';
-    root.dataset.fxCoreEnergyBoltR455 = 'armed-full-surface';
-    scheduleNext();
+    root.dataset.fxCoreLifeVersionR455 = VERSION;
+    root.dataset.fxCoreLivingBehavior = 'native-webgl-interaction-energy-plus-compositor-breath-r466';
+    root.dataset.fxCoreEnergyBoltR455 = 'armed-full-surface-explicit-interaction';
+    root.dataset.fxCoreIdlePolicyR455 = 'explicit-mag-interaction-only-zero-idle';
     return true;
   }
 
@@ -122,25 +80,10 @@
   }
 
   function stop() {
-    stopped = true;
-    clearTimeout(timer);
-    timer = 0;
     observer?.disconnect();
     root.dataset.fxCoreLifeR455 = 'stopped';
   }
 
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && visible) {
-      api?.requestRender?.(2);
-      scheduleNext();
-    }
-  }, { passive: true });
-  reduced.addEventListener?.('change', () => {
-    if (!reduced.matches) {
-      api?.requestRender?.(2);
-      scheduleNext();
-    }
-  });
   addEventListener('formatx:real3dready', () => {
     if (root.dataset.fxCoreLifeR455 !== 'ready') boot();
   }, { passive: true });
