@@ -1,13 +1,14 @@
 {
-  "revision": "R481",
-  "status": "production-candidate",
+  "revision": "R481.1",
+  "status": "production-candidate-r481.1",
   "primary_mag": {
-    "desktop": "compositor-breath-visible-zero-webgl-idle",
-    "mobile": "compositor-breath-visible-zero-webgl-idle",
+    "desktop": "registered-compositor-breath-visible-zero-webgl-idle",
+    "mobile": "registered-compositor-breath-visible-zero-webgl-idle",
     "mobile_optics": "reduced-centre-flare-reduced-halo-feathered-edge"
   },
   "renderer": "single-webgl-crystal-organism-r326",
   "performance_contract": "no-continuous-webgl-idle-loop",
+  "animation_contract": "registered-numeric-custom-properties-feed-important-opacity-scale",
   "style": "/scifi-ui/styles/formatx-mag-living-balance-r481.css",
   "sync": "/scifi-ui/scripts/formatx-mag-shape-sync-r476.js"
 }
