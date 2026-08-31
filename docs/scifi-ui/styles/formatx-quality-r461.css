@@ -67,8 +67,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
     z-index: 12070 !important;
   }
 
-  /* A closed desktop navigation must not leave tiny invisible anchors behind
-     the mobile header. The open state remains a full-size touch menu. */
   html body.living-architecture .topbar #main-nav:not(.open),
   html body.living-architecture #main-nav:not(.open) {
     display: none !important;
@@ -92,7 +90,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
     overflow: hidden !important;
   }
 
-  /* SOUND | ASK | PAUSE are one canonical three-cell touch group. */
   html body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
     inset: auto auto 18px 50% !important;
@@ -186,3 +183,5 @@ html body.living-architecture .topbar > .fx-language-toggle {
     animation: none !important;
   }
 }
+
+/* deploy-r487-first-paint-a11y */
