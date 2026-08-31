@@ -1,8 +1,9 @@
-/* FormatX r476 — R471 mobile MAG + canonical ASK + synchronized MAG iconography.
+/* FormatX r477 — canonical ASK activation + R476 synchronized MAG iconography.
    The active HTML contains only current deferred enhancements. Mobile keeps the
    zero-idle R465 render budget and R468 explicit-interaction energy, while the
-   final compositor display uses the softer R476 phone tone. R476 also mirrors
-   the primary MAG crystal/sphere state into the header and Mini MAG icons.
+   final compositor display uses the softer R476 phone tone. R476 mirrors the
+   primary MAG crystal/sphere state into the header and Mini MAG icons. R477
+   makes the visible ASK control the explicit deferred Organism activation path.
    Desktop stays on the existing R326 material path. */
 (function(){
 'use strict';
@@ -14,6 +15,7 @@ root.dataset.fxFinalVisualRevisionR471='softer-mobile-mag';
 root.dataset.fxFullSuiteR472='r471-mobile-mag';
 root.dataset.fxDialogueSurfaceR475='booting';
 root.dataset.fxMagShapeSyncR476='booting';
+root.dataset.fxCanonicalAskActivationR477='armed';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -35,7 +37,7 @@ const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false;
+let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function mount(spec){
@@ -129,9 +131,37 @@ function mountEnhancements(){
   if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
-  root.dataset.fxMotionRuntimeR239='enhanced-r468-user-intent';
+  root.dataset.fxMotionRuntimeR239='enhanced-r477-explicit-user-intent';
 }
 function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
+function openPendingCanonicalAsk(){
+  if(!askActivationPending)return false;
+  const api=window.FormatXOrganismVoice;
+  if(!api||typeof api.open!=='function')return false;
+  askActivationPending=false;
+  queueMicrotask(()=>{
+    try{
+      api.open();
+      root.dataset.fxCanonicalAskActivationR477='dialogue-opened';
+    }catch(_){
+      root.dataset.fxCanonicalAskActivationR477='dialogue-open-failed';
+    }
+  });
+  return true;
+}
+function activateCanonicalAsk(event){
+  const target=event.target instanceof Element?event.target.closest('#hero .fx-reference-controls-r204 .fx-reference-ask'):null;
+  if(!(target instanceof HTMLButtonElement))return;
+  if(typeof window.FormatXOrganismVoice?.open==='function')return;
+  askActivationPending=true;
+  root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
+  if(root.dataset.fxImmersive!=='active'){
+    root.dataset.fxImmersive='active';
+    root.dataset.fxImmersiveSource='canonical-ask-r477';
+    dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'canonical-ask-r477'}}));
+  }else mountEnhancements();
+  queueMicrotask(openPendingCanonicalAsk);
+}
 
 root.dataset.fxMotionRuntimeRequestedR271='0';
 root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
@@ -145,6 +175,9 @@ ensureDialogueSurface();
 ensureMagShapeSync();
 ensureLanguageToggle();
 ensureCurrentMag();
+
+document.addEventListener('click',activateCanonicalAsk,true);
+for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
 
 if(deferred.length){
   for(const [type,options] of intentListeners)addEventListener(type,onIntent,options);
