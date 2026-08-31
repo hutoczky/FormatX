@@ -1,10 +1,9 @@
-/* FormatX r472 — PC-bright mobile core with restrained perimeter bloom.
-   The native WebGL renderer remains the only 3D/material owner. The phone
-   display pass now restores centre visibility to desktop-like luminance while
-   removing the wide blur that made the outer halo look overdriven. Lower
-   contrast feathers the silhouette without turning it into a razor edge, and
-   the idle compositor animation is removed so the zero-idle governor stays
-   physically zero-idle between explicit interactions. */
+/* FormatX r473 — balanced mobile crystal detail with restrained light.
+   R472 over-corrected the phone compositor: the broad contrast reduction and
+   half-pixel blur made the living WebGL body look foggy and too dark. R473 keeps
+   the native faceted material readable, trims the over-bright centre, and uses
+   only a sub-pixel feather on the physical silhouette. The renderer remains the
+   sole 3D/material owner and the zero-idle governor remains unchanged. */
 
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage,
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
@@ -24,17 +23,53 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
 
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: 1 !important;
+    opacity: .985 !important;
+    image-rendering: auto !important;
     filter:
-      brightness(1.15)
-      contrast(.72)
-      saturate(1.00)
-      blur(.48px) !important;
+      brightness(1.015)
+      contrast(.895)
+      saturate(1.035)
+      blur(.20px) !important;
     -webkit-filter:
-      brightness(1.15)
-      contrast(.72)
-      saturate(1.00)
-      blur(.48px) !important;
+      brightness(1.015)
+      contrast(.895)
+      saturate(1.035)
+      blur(.20px) !important;
+  }
+
+  /* Keep the skip-navigation link fully accessible to keyboard users without
+     letting legacy mobile layers leave it painted during normal browsing. */
+  html:root:root:root:root body.living-architecture .skip-link:not(:focus):not(:focus-visible) {
+    position: fixed !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+
+  html:root:root:root:root body.living-architecture .skip-link:focus,
+  html:root:root:root:root body.living-architecture .skip-link:focus-visible {
+    width: auto !important;
+    height: auto !important;
+    clip: auto !important;
+    clip-path: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 :is(button,.fx-three-sound) {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 :is(button,.fx-three-sound):focus:not(:focus-visible) {
+    outline: none !important;
   }
 }
 
@@ -45,3 +80,5 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
     will-change: auto !important;
   }
 }
+
+/* production-r473-balanced-mobile-facets-subpixel-edge-feather */
