@@ -6,12 +6,15 @@ const root=document.documentElement;
 if(root.dataset.fxMagShapeSyncR476==='ready')return;
 root.dataset.fxMagShapeSyncR476='booting';
 
-const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r476-shape-sync-soft-phone-optics';
+const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r477-refined-phone-highlight-edge-softening';
 let observer=null;
 
 function ensureStyle(){
   let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');
-  if(link instanceof HTMLLinkElement)return link;
+  if(link instanceof HTMLLinkElement){
+    if(!link.href.includes('r477-refined-phone-highlight-edge-softening'))link.href=STYLE;
+    return link;
+  }
   link=document.createElement('link');
   link.rel='stylesheet';
   link.href=STYLE;
