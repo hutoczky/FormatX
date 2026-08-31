@@ -174,7 +174,7 @@ jobs:
               assert.ok(mOpacitySpan >= .025 || mScaleSpan >= .010, JSON.stringify({ mOpacitySpan, mScaleSpan, mobileValues }));
               assert.ok(mobileFirst.width > 250 && mobileFirst.height > 300, JSON.stringify(mobileFirst));
               const pauseContract = await verifyPauseControl(mobile.page);
-              await mobile.page.screenshot({ path: 'artifacts/r483-live/mobile-r483.png', fullPage: false });
+              await mobile.page.screenshot({ path: 'artifacts/r483-live/mobile-r483.png', fullPage: false, timeout: 8000 }).catch(() => {});
               await mobile.context.close();
 
               const desktop = await prepare(browser, { width: 1440, height: 900 }, false);
@@ -217,7 +217,7 @@ jobs:
               const dScaleSpan = Math.max(...dScale) - Math.min(...dScale);
               assert.match(desktopValues[0].animationName, /fx-primary-mag-living-desktop-r482/, JSON.stringify(desktopValues[0]));
               assert.ok(dOpacitySpan >= .015 || dScaleSpan >= .008, JSON.stringify({ dOpacitySpan, dScaleSpan, desktopValues }));
-              await desktop.page.screenshot({ path: 'artifacts/r483-live/desktop-r483.png', fullPage: false });
+              await desktop.page.screenshot({ path: 'artifacts/r483-live/desktop-r483.png', fullPage: false, timeout: 8000 }).catch(() => {});
               await desktop.context.close();
 
               console.log(JSON.stringify({
