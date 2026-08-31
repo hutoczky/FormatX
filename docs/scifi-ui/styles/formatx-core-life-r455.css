@@ -1,4 +1,7 @@
-/* FormatX r455 — restrained mobile crystal optics without replacing native WebGL. */
+/* FormatX r468 — final mobile display tone for the native WebGL MAG.
+   The renderer remains the only 3D/material owner. This last display pass trims
+   phone bloom and razor edges, while the stage gets a tiny compositor-only
+   breathing motion. WebGL itself remains zero-idle under the R465 governor. */
 
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage,
 html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
@@ -6,21 +9,40 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   transform-origin: 50% 50%;
 }
 
-@media (max-width: 900px), (pointer: coarse) {
-  html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage {
+@keyframes fx-core-r468-compositor-breathe {
+  0%, 100% { transform: translate3d(0, .35px, 0) scale(.9994); }
+  50% { transform: translate3d(0, -.55px, 0) scale(1.0014); }
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage {
     overflow: visible !important;
     filter: none !important;
+    animation: fx-core-r468-compositor-breathe 5.4s cubic-bezier(.45,0,.55,1) infinite !important;
+    will-change: transform;
   }
 
-  html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
-    opacity: .97 !important;
-    filter: brightness(.91) saturate(.90) contrast(.86) blur(.16px) !important;
-    will-change: filter;
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: .95 !important;
+    filter:
+      brightness(1.00)
+      contrast(.84)
+      saturate(1.04)
+      blur(1.02px) !important;
+    -webkit-filter:
+      brightness(1.00)
+      contrast(.84)
+      saturate(1.04)
+      blur(1.02px) !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
-    filter: brightness(.92) saturate(.90) contrast(.88) !important;
+  html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
   }
 }
