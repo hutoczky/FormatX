@@ -1,14 +1,9 @@
-/* FormatX R481.1 — cross-device living MAG balance.
-   Keep R326 as the single WebGL/material owner. The large MAG gets a
-   compositor-only breathing signal on both desktop and mobile, so it remains
-   visibly alive without restoring an idle WebGL loop. Phone optics are trimmed
-   independently: less centre flare, less cyan/violet halo and a softer alpha
-   edge while preserving the faceted glass body.
-
-   R481.1 routes the animated life signal through registered numeric custom
-   properties. Older optical owners intentionally keep opacity/scale !important;
-   the final important declarations below reference the animated variables, so
-   the compositor can interpolate life without fighting the legacy cascade. */
+/* FormatX R482 — restrained spectrum, softer phone edge and living MAG family.
+   R326 remains the single WebGL/material owner. This late optical layer keeps
+   large, mini and header MAG surfaces visually related while preserving the
+   interaction-burst / zero-idle WebGL contract. Phone treatment deliberately
+   reduces bloom radius and edge hardness while restoring cyan/cobalt/violet
+   separation inside the translucent body. */
 
 @property --fx-mag-life-scale {
   syntax: '<number>';
@@ -28,7 +23,7 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   backface-visibility: hidden !important;
 }
 
-@keyframes fx-primary-mag-living-desktop-r481 {
+@keyframes fx-primary-mag-living-desktop-r482 {
   0%, 100% {
     --fx-mag-life-scale: .996;
     --fx-mag-life-opacity: .965;
@@ -43,18 +38,18 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   }
 }
 
-@keyframes fx-primary-mag-living-mobile-r481 {
+@keyframes fx-primary-mag-living-mobile-r482 {
   0%, 100% {
     --fx-mag-life-scale: .994;
-    --fx-mag-life-opacity: .835;
+    --fx-mag-life-opacity: .842;
   }
   46% {
-    --fx-mag-life-scale: 1.0065;
-    --fx-mag-life-opacity: .895;
+    --fx-mag-life-scale: 1.0055;
+    --fx-mag-life-opacity: .902;
   }
   63% {
-    --fx-mag-life-scale: 1.002;
-    --fx-mag-life-opacity: .875;
+    --fx-mag-life-scale: 1.0015;
+    --fx-mag-life-opacity: .878;
   }
 }
 
@@ -73,33 +68,68 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"],
   html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"] {
-    animation: fx-primary-mag-living-desktop-r481 5.7s cubic-bezier(.38,0,.22,1) infinite !important;
+    animation: fx-primary-mag-living-desktop-r482 5.7s cubic-bezier(.38,0,.22,1) infinite !important;
     will-change: scale, opacity !important;
   }
+}
+
+/* Final family colour owner. Keep chroma in the material itself; shadows stay
+   deliberately small so the icon/core does not read as a neon blob. */
+html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-button {
+  border-color: rgba(126,225,255,.30) !important;
+  background-color: rgba(3,16,30,.94) !important;
+  box-shadow:
+    inset 0 0 13px rgba(67,192,255,.070),
+    inset 0 0 22px rgba(102,73,229,.035),
+    0 0 7px rgba(53,210,255,.040) !important;
+}
+
+.fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="crystal"],
+.fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459:not([data-fx-core-shape="sphere"]) {
+  border-color: rgba(150,240,255,.52) !important;
+  background:
+    radial-gradient(circle at 49% 47%, rgba(194,253,255,.60) 0 2.5%, rgba(61,220,255,.28) 8%, transparent 23%),
+    radial-gradient(circle at 31% 27%, rgba(39,196,255,.24), transparent 44%),
+    radial-gradient(circle at 73% 65%, rgba(112,73,240,.22), transparent 47%),
+    linear-gradient(135deg, rgba(20,129,210,.48), rgba(55,76,220,.38) 50%, rgba(119,54,197,.24) 72%, rgba(3,15,32,.93)) !important;
+  box-shadow:
+    0 0 5px rgba(65,218,255,.10),
+    0 0 10px rgba(91,75,244,.045),
+    inset 0 0 12px rgba(87,192,255,.10) !important;
+}
+
+.fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="sphere"] {
+  border-color: rgba(150,240,255,.52) !important;
+  background:
+    radial-gradient(circle at 34% 27%, rgba(230,255,255,.70) 0 5%, rgba(65,220,255,.43) 13%, rgba(39,116,215,.47) 43%, rgba(84,63,211,.34) 63%, rgba(128,54,190,.17) 74%, rgba(3,15,31,.94) 84%) !important;
+  box-shadow:
+    0 0 5px rgba(65,218,255,.09),
+    0 0 10px rgba(91,75,244,.04),
+    inset -5px -7px 13px rgba(2,8,20,.42) !important;
 }
 
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   html:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     --fx-mag-life-scale: .996;
-    --fx-mag-life-opacity: .855;
+    --fx-mag-life-opacity: .862;
     opacity: var(--fx-mag-life-opacity) !important;
     filter:
-      brightness(.64)
-      contrast(.66)
-      saturate(1.10)
-      hue-rotate(-2deg)
-      blur(1.82px)
-      drop-shadow(0 0 5px rgba(46,218,255,.075))
-      drop-shadow(0 0 13px rgba(91,71,255,.040)) !important;
+      brightness(.66)
+      contrast(.61)
+      saturate(1.45)
+      hue-rotate(-5deg)
+      blur(1.28px)
+      drop-shadow(0 0 4px rgba(46,218,255,.050))
+      drop-shadow(0 0 9px rgba(104,69,255,.026)) !important;
     -webkit-filter:
-      brightness(.64)
-      contrast(.66)
-      saturate(1.10)
-      hue-rotate(-2deg)
-      blur(1.82px)
-      drop-shadow(0 0 5px rgba(46,218,255,.075))
-      drop-shadow(0 0 13px rgba(91,71,255,.040)) !important;
+      brightness(.66)
+      contrast(.61)
+      saturate(1.45)
+      hue-rotate(-5deg)
+      blur(1.28px)
+      drop-shadow(0 0 4px rgba(46,218,255,.050))
+      drop-shadow(0 0 9px rgba(104,69,255,.026)) !important;
     mix-blend-mode: normal !important;
     scale: var(--fx-mag-life-scale) !important;
   }
@@ -108,15 +138,18 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"],
   html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"] {
-    animation: fx-primary-mag-living-mobile-r481 5.15s cubic-bezier(.38,0,.22,1) infinite !important;
+    animation: fx-primary-mag-living-mobile-r482 5.3s cubic-bezier(.38,0,.22,1) infinite !important;
     will-change: scale, opacity !important;
   }
 
+  /* Spectral depth without an oversized surrounding glow. These low-alpha
+     chambers colour the black around the crystal rather than whitening it. */
   html:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space {
     background:
-      radial-gradient(circle at 50% 47%, rgba(28,178,232,.055) 0, rgba(13,82,151,.032) 29%, transparent 45%),
-      radial-gradient(circle at 58% 51%, rgba(104,66,222,.042) 0, transparent 42%),
-      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.13) 58%, rgba(2,14,31,.36) 100%) !important;
+      radial-gradient(circle at 43% 43%, rgba(27,192,235,.047) 0, rgba(15,91,161,.026) 27%, transparent 41%),
+      radial-gradient(circle at 61% 48%, rgba(42,92,226,.032) 0, transparent 38%),
+      radial-gradient(circle at 58% 57%, rgba(119,57,217,.026) 0, transparent 39%),
+      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.14) 58%, rgba(2,13,31,.38) 100%) !important;
   }
 }
 
@@ -132,4 +165,4 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   }
 }
 
-/* production-r4811-cross-device-living-mag-soft-mobile-optics-zero-webgl-idle */
+/* production-r482-restrained-spectrum-soft-mobile-edge-colour-synchronised-mag-family */
