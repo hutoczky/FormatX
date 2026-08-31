@@ -1,5 +1,5 @@
-name: Verify R472 award readiness
-run-name: R472 award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
+name: Verify R473 award readiness
+run-name: R473 award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   push:
@@ -21,7 +21,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: r472-award-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
+  group: r473-award-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -41,7 +41,7 @@ jobs:
         with:
           ref: ${{ env.AUDITED_SHA }}
 
-      - name: Validate current R472 source contracts
+      - name: Validate current R473 source contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -57,7 +57,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
 
-      - name: Verify deployed R472 optics and first-paint ownership
+      - name: Verify deployed R473 optics and first-paint ownership
         if: >-
           github.event_name == 'workflow_dispatch' ||
           (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]')) ||
@@ -83,7 +83,7 @@ jobs:
               && grep -Fq 'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo' "$tmp/loader.js" \
               && grep -Fq "fxCurrentMagOpticsR472=mobile?'pc-bright-centre-restrained-perimeter-zero-idle':'desktop-optics-unchanged'" "$tmp/loader.js" \
               && grep -Fq "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'" "$tmp/solid.js" \
-              && grep -Fq 'FormatX r472' "$tmp/life.css"; then
+              && grep -Fq 'FormatX r473' "$tmp/life.css"; then
               ready=1
               break
             fi
@@ -93,11 +93,15 @@ jobs:
           grep -Fq 'single-luminous-webgl-material-owner' "$tmp/core.js"
           grep -Fq 'explicit-mag-interaction-only-zero-idle' "$tmp/loader.js"
           grep -Fq 'soft-perimeter-low-bloom-low-cost-shader' "$tmp/solid.js"
-          grep -Fq 'opacity: 1' "$tmp/life.css"
-          grep -Fq 'brightness(1.15)' "$tmp/life.css"
-          grep -Fq 'contrast(.72)' "$tmp/life.css"
-          grep -Fq 'saturate(1.00)' "$tmp/life.css"
-          grep -Fq 'blur(.48px)' "$tmp/life.css"
+          grep -Fq 'balanced mobile crystal detail' "$tmp/life.css"
+          grep -Fq 'opacity: .985' "$tmp/life.css"
+          grep -Fq 'brightness(1.015)' "$tmp/life.css"
+          grep -Fq 'contrast(.895)' "$tmp/life.css"
+          grep -Fq 'saturate(1.035)' "$tmp/life.css"
+          grep -Fq 'blur(.20px)' "$tmp/life.css"
+          grep -Fq 'image-rendering: auto' "$tmp/life.css"
+          grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$tmp/life.css"
+          grep -Fq 'production-r473-balanced-mobile-facets-subpixel-edge-feather' "$tmp/life.css"
           grep -Fq 'animation: none' "$tmp/life.css"
           ! grep -Fq 'fx-core-r468-compositor-breathe' "$tmp/life.css"
           grep -Fq 'data-fx-production-first-paint-r370' "$tmp/home.html"
@@ -115,12 +119,12 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R472 award readiness audit failed'
+          description='R473 award readiness audit failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R472 source award readiness passed'
+            description='R473 source award readiness passed'
             if [[ "$EVENT_NAME" == workflow_dispatch || "$PUSH_MESSAGE" == *'[deploy-production]'* || "$WORKFLOW_MESSAGE" == *'[deploy-production]'* ]]; then
-              description='R472 PC-bright low-halo MAG and first-paint ownership passed live'
+              description='R473 balanced mobile MAG and first-paint ownership passed live'
             fi
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
