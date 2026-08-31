@@ -76,10 +76,15 @@ async function captureSurface(page, name, label, phase) {
   // fast-forward also fires unrelated page animations and can change layout.
   const session = await page.context().newCDPSession(page);
   let screenshot;
+  let timeout;
   try {
-    const result = await session.send('Page.captureScreenshot', { format: 'png', fromSurface: true, captureBeyondViewport: false });
+    const result = await Promise.race([
+      session.send('Page.captureScreenshot', { format: 'png', fromSurface: true, captureBeyondViewport: false }),
+      new Promise((_, reject) => { timeout = setTimeout(() => reject(new Error(`Compositor capture timeout: ${name}/${label}`)), 30000); })
+    ]);
     screenshot = Buffer.from(result.data, 'base64');
   } finally {
+    clearTimeout(timeout);
     await session.detach();
   }
   fs.writeFileSync(path.join(output, `${name}-${label}.png`), screenshot);
@@ -243,7 +248,7 @@ async function verify(browser, name, viewport, mobile) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true, args: [
+  const browser = await chromium.launch({ headless: process.env.FORMATX_HEADFUL !== '1', args: [
     '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'
   ] });
   try {

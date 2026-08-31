@@ -31,6 +31,7 @@ jobs:
     timeout-minutes: 15
     env:
       AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      FORMATX_HEADFUL: '1'
     steps:
       - uses: actions/checkout@v5
         with:
@@ -72,13 +73,13 @@ jobs:
           python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/r484-server.log" 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID"' EXIT
-          node .github/scripts/validate-mag-surface-energy-r484.cjs
+          xvfb-run -a node .github/scripts/validate-mag-surface-energy-r484.cjs
       - name: Verify deployed native surface energy
         if: github.event_name == 'workflow_run'
         env:
           NODE_PATH: ${{ runner.temp }}/r484-browser/node_modules
           FORMATX_TEST_URL: https://formatxsuite.com/
-        run: node .github/scripts/validate-mag-surface-energy-r484.cjs
+        run: xvfb-run -a node .github/scripts/validate-mag-surface-energy-r484.cjs
       - name: Upload actual frames and audit
         if: always()
         uses: actions/upload-artifact@v4
