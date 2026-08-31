@@ -97,7 +97,8 @@ has(header,[
 has(governor,[
   'const activeWindowMs=240','const shapeProbeMs=150','const shapeSettleDeadlineMs=2400',
   'state.core?.requestRender?.(2)','userShapeSource(source)','guardPassiveState(source)',
-  'passive-formatx:languagechange-r465',
+  "'formatx:menustatechange','formatx:languagechange','pageshow','resize'",
+  'passive-${eventName}-r465',
   "fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle'",
   "fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw'",
   "root.dataset.fxReferenceMotionPaused=value"
