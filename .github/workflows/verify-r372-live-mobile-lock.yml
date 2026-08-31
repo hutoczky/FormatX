@@ -1,3 +1,4 @@
+# R473 final live runtime gate after WDA contract synchronization.
 name: Verify R473 mobile MAG optics on R468 runtime
 
 on:
