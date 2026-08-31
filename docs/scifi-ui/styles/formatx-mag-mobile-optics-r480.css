@@ -1,6 +1,8 @@
-/* FormatX R484 — readable native surface energy and the existing ASK crystal.
-   R326 remains the single WebGL/material owner. This layer only adjusts final
-   compositor optics and the canonical ASK glyph: no continuous JS/WebGL idle loop. */
+/* FormatX R486 — calmer mobile luminance and a softer, feathered silhouette.
+   R326 remains the single WebGL/material owner and R484 keeps the periodic
+   native surface-energy sweep. This late compositor layer only trims the phone
+   highlight peak, lowers spectral density and feathers the outer silhouette;
+   desktop ASK iconography and zero-idle WebGL behaviour remain unchanged. */
 
 @property --fx-mag-r483-scale {
   syntax: '<number>';
@@ -11,61 +13,62 @@
 @property --fx-mag-r483-opacity {
   syntax: '<number>';
   inherits: false;
-  initial-value: .91;
+  initial-value: .89;
 }
 
 @keyframes fx-primary-mag-mobile-heart-r483 {
   0%,100% {
     --fx-mag-r483-scale: .988;
-    --fx-mag-r483-opacity: .90;
+    --fx-mag-r483-opacity: .865;
   }
   23% {
-    --fx-mag-r483-scale: 1.008;
-    --fx-mag-r483-opacity: .95;
+    --fx-mag-r483-scale: 1.006;
+    --fx-mag-r483-opacity: .915;
   }
   31% {
-    --fx-mag-r483-scale: .998;
-    --fx-mag-r483-opacity: .925;
+    --fx-mag-r483-scale: .997;
+    --fx-mag-r483-opacity: .890;
   }
   41% {
-    --fx-mag-r483-scale: 1.018;
-    --fx-mag-r483-opacity: .985;
+    --fx-mag-r483-scale: 1.015;
+    --fx-mag-r483-opacity: .945;
   }
   53% {
-    --fx-mag-r483-scale: 1.006;
-    --fx-mag-r483-opacity: .955;
+    --fx-mag-r483-scale: 1.005;
+    --fx-mag-r483-opacity: .920;
   }
   72% {
-    --fx-mag-r483-scale: .992;
-    --fx-mag-r483-opacity: .915;
+    --fx-mag-r483-scale: .991;
+    --fx-mag-r483-opacity: .880;
   }
 }
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  /* Higher-specificity final phone optics. The crystal body stays clearly
-     readable like desktop, but bloom radius and edge hardness are deliberately
-     reduced so the silhouette no longer looks cut out or neon-overdriven. */
+  /* R486 phone tone: the faceted body remains readable, but the high-energy
+     centre and razor-like perimeter are deliberately restrained. A 0.58px
+     compositor feather is enough to soften OLED-class edges without washing
+     out the internal facets or changing the native WebGL geometry. */
   html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     --fx-mag-r483-scale: .99;
-    --fx-mag-r483-opacity: .92;
+    --fx-mag-r483-opacity: .895;
     opacity: var(--fx-mag-r483-opacity) !important;
     filter:
-      brightness(1.02)
-      contrast(.98)
-      saturate(1.28)
-      hue-rotate(-3deg)
-      blur(.30px)
-      drop-shadow(0 0 3px rgba(46,218,255,.038))
-      drop-shadow(0 0 7px rgba(104,69,255,.018)) !important;
+      brightness(.965)
+      contrast(.885)
+      saturate(1.14)
+      hue-rotate(-2deg)
+      blur(.58px)
+      drop-shadow(0 0 3px rgba(46,218,255,.026))
+      drop-shadow(0 0 7px rgba(104,69,255,.012)) !important;
     -webkit-filter:
-      brightness(1.02)
-      contrast(.98)
-      saturate(1.28)
-      hue-rotate(-3deg)
-      blur(.30px)
-      drop-shadow(0 0 3px rgba(46,218,255,.038))
-      drop-shadow(0 0 7px rgba(104,69,255,.018)) !important;
+      brightness(.965)
+      contrast(.885)
+      saturate(1.14)
+      hue-rotate(-2deg)
+      blur(.58px)
+      drop-shadow(0 0 3px rgba(46,218,255,.026))
+      drop-shadow(0 0 7px rgba(104,69,255,.012)) !important;
     mix-blend-mode: normal !important;
     transform-origin: 50% 50% !important;
     scale: var(--fx-mag-r483-scale) !important;
@@ -74,20 +77,18 @@
 
   html:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space {
     background:
-      radial-gradient(circle at 47% 45%, rgba(27,192,235,.030) 0, rgba(15,91,161,.017) 27%, transparent 41%),
-      radial-gradient(circle at 60% 51%, rgba(42,92,226,.020) 0, transparent 38%),
-      radial-gradient(circle at 57% 58%, rgba(119,57,217,.014) 0, transparent 39%),
-      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.12) 58%, rgba(2,13,31,.36) 100%) !important;
+      radial-gradient(circle at 47% 45%, rgba(27,192,235,.022) 0, rgba(15,91,161,.012) 27%, transparent 41%),
+      radial-gradient(circle at 60% 51%, rgba(42,92,226,.014) 0, transparent 38%),
+      radial-gradient(circle at 57% 58%, rgba(119,57,217,.010) 0, transparent 39%),
+      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.11) 58%, rgba(2,13,31,.34) 100%) !important;
   }
 }
 
 @media (prefers-reduced-motion:no-preference) and (max-width:900px),
        (prefers-reduced-motion:no-preference) and (pointer:coarse),
        (prefers-reduced-motion:no-preference) and (max-aspect-ratio:27/25) {
-  /* The mobile render governor intentionally sets data-fx-reference-motion-paused
-     while the WebGL renderer is parked at zero idle frames. That is not a user
-     pause and must not freeze the compositor heartbeat. Only an actual PAUSE
-     button state (or the semantic R482 steady state) stops visible life. */
+  /* The mobile render governor intentionally parks WebGL at zero idle frames.
+     Only a real user PAUSE or semantic steady state stops the compositor pulse. */
   html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"]:not([data-fx-primary-mag-life-r482="steady"]):not(:has(.fx-reference-pause[data-paused="true"])) body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     animation: fx-primary-mag-mobile-heart-r483 4.15s cubic-bezier(.36,0,.20,1) infinite !important;
@@ -99,7 +100,7 @@
   html:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     --fx-mag-r483-scale: 1;
-    --fx-mag-r483-opacity: .94;
+    --fx-mag-r483-opacity: .91;
     animation: none !important;
     scale: var(--fx-mag-r483-scale) !important;
     opacity: var(--fx-mag-r483-opacity) !important;
@@ -172,4 +173,4 @@
   }
 }
 
-/* production-r484-readable-periodic-native-surface-energy */
+/* production-r486-calmer-mobile-luminance-feathered-silhouette-periodic-native-surface-energy */
