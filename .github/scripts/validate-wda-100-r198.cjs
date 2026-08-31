@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — r465 current production architecture. */
+/* FormatX award-quality gate — r468 current production architecture. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -12,10 +12,12 @@ const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
 const language=read('docs/scifi-ui/scripts/single-language-toggle.js');
 const currentMag=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const solidGlass=read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js');
+const life=read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
 const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const controls=read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
 const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 const optics=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
+const lifeStyle=read('docs/scifi-ui/styles/formatx-core-life-r455.css');
 const desktop=JSON.parse(read('lighthouserc.json'));
 const mobile=JSON.parse(read('lighthouserc.mobile.json'));
 
@@ -29,12 +31,14 @@ for(const retired of [
 ])assert.ok(!intro.includes(retired),`retired first-load repair stack returned: ${retired}`);
 
 for(const token of [
-  'formatx-current-mag-loader-r422.js?v=20260831-r465-soft-optics-no-idle-redraw',
+  'formatx-current-mag-loader-r422.js?v=20260831-r468-soft-optics-live-energy-zero-idle',
   'formatx-crystal-organism-r326.js?v=20260830-r454-luminous-native-electric-surface',
   'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom',
-  'formatx-core-shapeshifter-r337.css?v=20260831-r465-soft-perimeter-low-bloom',
-  'armed-direct-r326-r465-soft-optics-no-idle-redraw'
-])assert.ok(motion.includes(token),`missing current R465 motion owner: ${token}`);
+  'formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom',
+  'formatx-core-life-r455.css?v=20260831-r468-soft-mobile-bloom-breathe',
+  'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy',
+  'armed-direct-r326-r468-soft-optics-live-energy-zero-idle'
+])assert.ok(motion.includes(token),`missing current R468 motion owner: ${token}`);
 assert.ok(motion.includes('single-language-toggle.js?v=20260830-r462-semantic-owner'),'motion loader must request stable language owner');
 assert.ok(motion.includes("fxSingleLanguageToggleVersion==='7'"),'motion loader must require language owner v7');
 assert.ok(!motion.includes('isRetiredMagRuntime'),'compact loader must not contain retired-runtime filtering');
@@ -62,20 +66,33 @@ for(const retired of [
 ])assert.ok(!home.includes(retired),`retired runtime remains active in index: ${retired}`);
 
 for(const token of [
-  'r326-only','cleanupLegacyMagRuntime','r465-soft-perimeter-low-bloom',
+  'r326-only','cleanupLegacyMagRuntime','direct-r326-r468-soft-optics-live-energy-zero-idle',
   'r465-direct-pause-flag-no-redraw','explicit-mag-interaction-only-zero-idle',
-  'soft-perimeter-low-bloom-low-cost-shader','formatx-mini-mag-assistant-r459.js'
-])assert.ok(currentMag.includes(token),`missing R465 current MAG contract: ${token}`);
+  'soft-perimeter-low-bloom-low-cost-shader','formatx-mini-mag-assistant-r459.js',
+  'formatx-core-life-r455.css?v=20260831-r468-soft-mobile-bloom-breathe',
+  'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy'
+])assert.ok(currentMag.includes(token),`missing R468 current MAG contract: ${token}`);
 for(const token of [
   "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'",
   "const smoothWeight=mobile?'.998':'.930'",
   "float fresnel=pow(1.0-facing,1.92);",
   "float edge=0.0;",
   'surfacePulsePattern','soft-perimeter-low-bloom-low-cost-shader'
-])assert.ok(solidGlass.includes(token),`missing soft R465 mobile optics: ${token}`);
+])assert.ok(solidGlass.includes(token),`missing soft R465 mobile shader contract: ${token}`);
 for(const token of [
-  'production-r465-soft-perimeter-low-bloom-mobile-display','contrast(.82)','blur(1.18px)','saturate(1.04)'
-])assert.ok(optics.includes(token),`missing R465 mobile display tone: ${token}`);
+  'FormatX r467','brightness(1.065)','contrast(.89)','saturate(1.10)','blur(.82px)'
+])assert.ok(optics.includes(token),`missing R467 base mobile display tone: ${token}`);
+for(const token of [
+  'FormatX r468','fx-core-r468-compositor-breathe','brightness(1.00)','contrast(.84)',
+  'saturate(1.04)','blur(1.02px)','prefers-reduced-motion: reduce'
+])assert.ok(lifeStyle.includes(token),`missing R468 final mobile soft-life display: ${token}`);
+for(const token of [
+  "const VERSION = 'native-webgl-interaction-life-r466'",'surface-sweep-',
+  'armed-full-surface-explicit-interaction','explicit-mag-interaction-only-zero-idle',
+  'formatx:coreinteraction','pointerdown'
+])assert.ok(life.includes(token),`missing R468 interaction energy contract: ${token}`);
+assert.ok(!life.includes('setInterval('),'R468 MAG life must not install an idle interval');
+assert.ok(!life.includes('requestAnimationFrame('),'R468 MAG life must not install an idle WebGL RAF loop');
 for(const token of [
   'const activeWindowMs=240','const shapeProbeMs=150','state.core?.requestRender?.(2)',
   'userShapeSource(source)','guardPassiveState(source)',
@@ -111,5 +128,5 @@ function validateLighthouse(config,label){
 validateLighthouse(desktop,'desktop');
 validateLighthouse(mobile,'mobile');
 
-for(const source of [intro,motion,language,currentMag,solidGlass,governor,controls])new Function(source);
-console.log('PASS: R465 single-path first paint, soft low-bloom mobile MAG optics, direct-pause zero-idle TBT policy, stable language semantics, accessibility and truthful Lighthouse budgets are structurally valid.');
+for(const source of [intro,motion,language,currentMag,solidGlass,life,governor,controls])new Function(source);
+console.log('PASS: R468 single-path first paint, soft living mobile MAG display, explicit native surface-energy interaction, direct-pause zero-idle TBT policy, stable semantics/accessibility and truthful Lighthouse budgets are structurally valid.');
