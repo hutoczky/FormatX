@@ -1,9 +1,9 @@
-/* FormatX r475 — R471 mobile MAG + canonical ASK dialogue surface.
+/* FormatX r476 — R471 mobile MAG + canonical ASK + synchronized MAG iconography.
    The active HTML contains only current deferred enhancements. Mobile keeps the
    zero-idle R465 render budget and R468 explicit-interaction energy, while the
-   final compositor display uses the R471 reduced-bloom feathered silhouette.
-   R475 restores only the explicitly open ASK dialogue above the retired r244
-   floating shell. Desktop stays on the existing R326 material path. */
+   final compositor display uses the softer R476 phone tone. R476 also mirrors
+   the primary MAG crystal/sphere state into the header and Mini MAG icons.
+   Desktop stays on the existing R326 material path. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -13,6 +13,7 @@ root.dataset.fxFinalValidationR470='r468-live-mag-full-suite';
 root.dataset.fxFinalVisualRevisionR471='softer-mobile-mag';
 root.dataset.fxFullSuiteR472='r471-mobile-mag';
 root.dataset.fxDialogueSurfaceR475='booting';
+root.dataset.fxMagShapeSyncR476='booting';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -27,13 +28,14 @@ const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260831-r475-canonical-ask-surface';
+const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260831-r476-shape-sync-soft-phone-optics';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false,languageRequested=false;
+let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function mount(spec){
@@ -63,6 +65,7 @@ function warmCriticalOwners(){
   warmAsset(CURRENT_LIFE,'script');
   warmAsset(FINAL_HEADER,'style');
   warmAsset(DIALOGUE_STYLE,'style');
+  warmAsset(MAG_SHAPE_SYNC,'script');
 }
 function ensureDialogueSurface(){
   let link=document.querySelector('link[data-fx-dialogue-surface-r475]');
@@ -74,6 +77,17 @@ function ensureDialogueSurface(){
   link.addEventListener('load',()=>{root.dataset.fxDialogueSurfaceR475='ready';},{once:true});
   link.addEventListener('error',()=>{root.dataset.fxDialogueSurfaceR475='load-failed';},{once:true});
   document.head.appendChild(link);
+}
+function ensureMagShapeSync(){
+  if(shapeSyncRequested||document.querySelector('script[data-fx-mag-shape-sync-r476]'))return;
+  shapeSyncRequested=true;
+  const script=document.createElement('script');
+  script.src=MAG_SHAPE_SYNC;
+  script.async=false;
+  script.dataset.fxMagShapeSyncR476='true';
+  script.addEventListener('load',()=>{root.dataset.fxMagShapeSyncBootstrapR476='loaded';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxMagShapeSyncBootstrapR476='failed';},{once:true});
+  document.head.appendChild(script);
 }
 function ensureLanguageToggle(){
   if(root.dataset.fxSingleLanguageToggle==='ready'&&root.dataset.fxSingleLanguageToggleVersion==='7')return;
@@ -128,6 +142,7 @@ root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r46
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
 warmCriticalOwners();
 ensureDialogueSurface();
+ensureMagShapeSync();
 ensureLanguageToggle();
 ensureCurrentMag();
 
