@@ -1,4 +1,4 @@
-name: Verify R471 mobile MAG optics on R468 runtime
+name: Verify R472 mobile MAG optics on R468 runtime
 
 on:
   push:
@@ -24,25 +24,24 @@ permissions:
   statuses: write
 
 jobs:
-  verify-r471:
+  verify-r472:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v5
 
-      - name: Validate R471 display on R468 source contract
+      - name: Validate R472 display on R468 source contract
         shell: bash
         run: |
           set -euo pipefail
-          CSS='docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
-          LIFE_CSS='docs/scifi-ui/styles/formatx-core-life-r455.css'
           SHADER='docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
           SOLID='docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js'
           GOVERNOR='docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js'
           CURRENT='docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
           MOTION='docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
           LIFE='docs/scifi-ui/scripts/formatx-core-life-r455.js'
+          LIFE_CSS='docs/scifi-ui/styles/formatx-core-life-r455.css'
           TOUCH='docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js'
           MINI='docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js'
 
@@ -56,130 +55,58 @@ jobs:
           node --check "$MINI"
           node .github/scripts/validate-living-core-r425-source.cjs
 
-          grep -Fq "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'" "$SOLID"
-          grep -Fq "const smoothWeight=mobile?'.998':'.930'" "$SOLID"
-          grep -Fq "float fresnel=pow(1.0-facing,1.92);" "$SOLID"
-          grep -Fq "float edge=0.0;" "$SOLID"
-          grep -Fq "fxCoreMobileOpticalBalanceR465=mobile?'soft-perimeter-low-bloom-low-cost-shader':'desktop-material-unchanged'" "$SOLID"
-          grep -Fq "fxCoreOuterNoiseR456='disabled-on-glass-shell'" "$SOLID"
-          grep -Fq "fxCoreTriangleEdgesR456='disabled'" "$SOLID"
-          grep -Fq 'surfacePulsePattern' "$SOLID"
+          grep -Fq 'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo' "$CURRENT"
+          grep -Fq "fxCurrentMagOpticsR472=mobile?'pc-bright-centre-restrained-perimeter-zero-idle':'desktop-optics-unchanged'" "$CURRENT"
+          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r472-pc-bright-low-halo' "$MOTION"
+          grep -Fq 'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo' "$MOTION"
+          grep -Fq "fxFinalVisualRevisionR472='pc-bright-low-halo-mobile-mag'" "$MOTION"
 
-          grep -Fq 'const activeWindowMs=240' "$GOVERNOR"
-          grep -Fq 'const shapeProbeMs=150' "$GOVERNOR"
-          grep -Fq 'state.core?.requestRender?.(2)' "$GOVERNOR"
-          grep -Fq 'userShapeSource(source)' "$GOVERNOR"
-          grep -Fq 'guardPassiveState(source)' "$GOVERNOR"
+          grep -Fq 'FormatX r472' "$LIFE_CSS"
+          grep -Fq 'opacity: 1' "$LIFE_CSS"
+          grep -Fq 'brightness(1.15)' "$LIFE_CSS"
+          grep -Fq 'contrast(.72)' "$LIFE_CSS"
+          grep -Fq 'saturate(1.00)' "$LIFE_CSS"
+          grep -Fq 'blur(.48px)' "$LIFE_CSS"
+          grep -Fq 'animation: none' "$LIFE_CSS"
+          ! grep -Fq 'fx-core-r468-compositor-breathe' "$LIFE_CSS"
+
+          grep -Fq "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'" "$SOLID"
+          grep -Fq 'float edge=0.0;' "$SOLID"
           grep -Fq "fxCoreMobileIdlePolicyR426='explicit-mag-interaction-only-zero-idle'" "$GOVERNOR"
-          grep -Fq "fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw'" "$GOVERNOR"
-          grep -Fq 'root.dataset.fxReferenceMotionPaused=value' "$GOVERNOR"
-          ! grep -Fq "dispatchEvent(new CustomEvent('formatx:referencepause'" "$GOVERNOR"
           ! grep -Fq "active('scroll-r463'" "$GOVERNOR"
           ! grep -Fq "active('resize-r463'" "$GOVERNOR"
-
-          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom' "$CURRENT"
-          grep -Fq 'formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom' "$CURRENT"
-          grep -Fq 'formatx-core-life-r455.css?v=20260831-r471-softer-mobile-bloom-feather' "$CURRENT"
-          grep -Fq 'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy' "$CURRENT"
-          grep -Fq 'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe' "$CURRENT"
-          grep -Fq 'formatx-mobile-render-governor-r426.js?v=20260831-r465-direct-pause-flag-no-redraw' "$CURRENT"
-          grep -Fq "cleanupLegacyMagRuntime()" "$CURRENT"
-          grep -Fq "fxPrimaryMagOwnerR460='r326-only'" "$CURRENT"
-          grep -Fq "fxCurrentMagSchedulerR465=mobile?'direct-pause-flag-no-idle-redraw':'desktop-native-scheduler'" "$CURRENT"
-          grep -Fq "fxCurrentMagOpticsR468=mobile?'soft-bloom-soft-edge-compositor-breathe':'desktop-optics-unchanged'" "$CURRENT"
-          grep -Fq "fxCurrentMagOpticsR471=mobile?'reduced-bloom-feathered-silhouette':'desktop-optics-unchanged'" "$CURRENT"
-          grep -Fq 'explicit-mag-interaction-only-zero-idle' "$CURRENT"
-
-          grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r471-softer-mobile-mag' "$MOTION"
-          grep -Fq 'formatx-mobile-solid-glass-r456.js?v=20260831-r465-soft-perimeter-low-bloom' "$MOTION"
-          grep -Fq 'formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom' "$MOTION"
-          grep -Fq 'formatx-core-life-r455.css?v=20260831-r471-softer-mobile-bloom-feather' "$MOTION"
-          grep -Fq 'formatx-core-life-r455.js?v=20260831-r468-explicit-surface-energy' "$MOTION"
-          ! grep -Fq 'isRetiredMagRuntime' "$MOTION"
-          grep -Fq "fxLegacyMagRuntimeCleanupR460='static-html-clean-r461'" "$MOTION"
-          grep -Fq "fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle'" "$MOTION"
-          grep -Fq "fxMotionCspR239='external-strict-csp'" "$MOTION"
-          grep -Fq "fxFinalVisualRevisionR471='softer-mobile-mag'" "$MOTION"
-
-          grep -Fq "const VERSION = 'native-webgl-interaction-life-r466'" "$LIFE"
-          grep -Fq 'armed-full-surface-explicit-interaction' "$LIFE"
-          grep -Fq 'explicit-mag-interaction-only-zero-idle' "$LIFE"
-          grep -Fq 'surface-sweep-' "$LIFE"
-          grep -Fq 'formatx:coreinteraction' "$LIFE"
           ! grep -Fq 'setInterval(' "$LIFE"
           ! grep -Fq 'requestAnimationFrame(' "$LIFE"
-
-          grep -Fq "const VERSION='native-r326-touch-r460-controller-tap'" "$TOUCH"
-          grep -Fq 'window.FormatXMiniMagR459' "$TOUCH"
-          grep -Fq 'formatx:heromagcontrollerrequest' "$TOUCH"
-          grep -Fq "fxHeroMagControllerR460='ready'" "$TOUCH"
-          grep -Fq 'formatx:heromagcontrollerrequest' "$MINI"
-          grep -Fq "fxMiniMagHeroBridgeR460='ready'" "$MINI"
-
-          grep -Fq 'FormatX r467' "$CSS"
-          grep -Fq 'brightness(1.065)' "$CSS"
-          grep -Fq 'contrast(.89)' "$CSS"
-          grep -Fq 'blur(.82px)' "$CSS"
-          grep -Fq 'FormatX r471' "$LIFE_CSS"
-          grep -Fq 'fx-core-r468-compositor-breathe' "$LIFE_CSS"
-          grep -Fq 'opacity: .93' "$LIFE_CSS"
-          grep -Fq 'brightness(.96)' "$LIFE_CSS"
-          grep -Fq 'contrast(.80)' "$LIFE_CSS"
-          grep -Fq 'saturate(.99)' "$LIFE_CSS"
-          grep -Fq 'blur(1.26px)' "$LIFE_CSS"
-          grep -Fq 'prefers-reduced-motion: reduce' "$LIFE_CSS"
           grep -Fq "const REVISION = 'living-luminous-electric-crystal-r454'" "$SHADER"
           grep -Fq 'single-luminous-webgl-material-owner' "$SHADER"
 
-      - name: Verify production serves R471 display chain
+      - name: Verify production serves R472 display chain
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
         shell: bash
         run: |
           set -euo pipefail
           ORIGIN='https://formatxsuite.com'
-          SOLID_URL="$ORIGIN/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js"
-          GOVERNOR_URL="$ORIGIN/scifi-ui/scripts/formatx-mobile-render-governor-r426.js"
           CURRENT_URL="$ORIGIN/scifi-ui/scripts/formatx-current-mag-loader-r422.js"
           MOTION_URL="$ORIGIN/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js"
-          LIFE_URL="$ORIGIN/scifi-ui/scripts/formatx-core-life-r455.js"
-          TOUCH_URL="$ORIGIN/scifi-ui/scripts/formatx-native-mag-touch-r434.js"
-          MINI_URL="$ORIGIN/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js"
-          CSS_URL="$ORIGIN/scifi-ui/styles/formatx-core-shapeshifter-r337.css"
           LIFE_CSS_URL="$ORIGIN/scifi-ui/styles/formatx-core-life-r455.css"
-          SOLID_TMP="$RUNNER_TEMP/r471-solid-live.js"
-          GOVERNOR_TMP="$RUNNER_TEMP/r471-governor-live.js"
-          CURRENT_TMP="$RUNNER_TEMP/r471-current-live.js"
-          MOTION_TMP="$RUNNER_TEMP/r471-motion-live.js"
-          LIFE_TMP="$RUNNER_TEMP/r471-life-live.js"
-          TOUCH_TMP="$RUNNER_TEMP/r471-touch-live.js"
-          MINI_TMP="$RUNNER_TEMP/r471-mini-live.js"
-          CSS_TMP="$RUNNER_TEMP/r471-optics-live.css"
-          LIFE_CSS_TMP="$RUNNER_TEMP/r471-life-live.css"
+          CURRENT_TMP="$RUNNER_TEMP/r472-current-live.js"
+          MOTION_TMP="$RUNNER_TEMP/r472-motion-live.js"
+          LIFE_CSS_TMP="$RUNNER_TEMP/r472-life-live.css"
           ok=0
 
           for attempt in $(seq 1 45); do
-            echo "R471 live verification $attempt/45"
-            suffix="r471=${GITHUB_RUN_ID}_${attempt}"
-            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${SOLID_URL}?${suffix}" -o "$SOLID_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${GOVERNOR_URL}?${suffix}" -o "$GOVERNOR_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CURRENT_URL}?${suffix}" -o "$CURRENT_TMP" \
+            echo "R472 live verification $attempt/45"
+            suffix="r472=${GITHUB_RUN_ID}_${attempt}"
+            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CURRENT_URL}?${suffix}" -o "$CURRENT_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MOTION_URL}?${suffix}" -o "$MOTION_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${LIFE_URL}?${suffix}" -o "$LIFE_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${TOUCH_URL}?${suffix}" -o "$TOUCH_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MINI_URL}?${suffix}" -o "$MINI_TMP" \
-              && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CSS_URL}?${suffix}" -o "$CSS_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${LIFE_CSS_URL}?${suffix}" -o "$LIFE_CSS_TMP"; then
-              if grep -Fq "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'" "$SOLID_TMP" \
-                && grep -Fq "fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw'" "$GOVERNOR_TMP" \
-                && grep -Fq 'formatx-core-life-r455.css?v=20260831-r471-softer-mobile-bloom-feather' "$CURRENT_TMP" \
-                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r471-softer-mobile-mag' "$MOTION_TMP" \
-                && grep -Fq 'armed-full-surface-explicit-interaction' "$LIFE_TMP" \
-                && grep -Fq "const VERSION='native-r326-touch-r460-controller-tap'" "$TOUCH_TMP" \
-                && grep -Fq 'formatx:heromagcontrollerrequest' "$MINI_TMP" \
-                && grep -Fq 'FormatX r467' "$CSS_TMP" \
-                && grep -Fq 'FormatX r471' "$LIFE_CSS_TMP" \
-                && grep -Fq 'brightness(.96)' "$LIFE_CSS_TMP" \
-                && grep -Fq 'blur(1.26px)' "$LIFE_CSS_TMP"; then
+              if grep -Fq 'formatx-core-life-r455.css?v=20260831-r472-pc-bright-low-halo' "$CURRENT_TMP" \
+                && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r472-pc-bright-low-halo' "$MOTION_TMP" \
+                && grep -Fq 'FormatX r472' "$LIFE_CSS_TMP" \
+                && grep -Fq 'brightness(1.15)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'contrast(.72)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'blur(.48px)' "$LIFE_CSS_TMP" \
+                && ! grep -Fq 'fx-core-r468-compositor-breathe' "$LIFE_CSS_TMP"; then
                 ok=1
                 break
               fi
@@ -188,9 +115,9 @@ jobs:
           done
 
           test "$ok" = 1
-          echo 'PASS: production serves the R471 softer mobile MAG display on the R468 explicit-energy runtime with the R465 zero-idle render budget.'
+          echo 'PASS: production serves the R472 PC-bright low-halo mobile MAG display on the R468 explicit-energy, R465 zero-idle runtime.'
 
-      - name: Publish R468 runtime status with R471 display
+      - name: Publish R468 runtime status with R472 display
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -199,10 +126,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='R468 runtime + R471 mobile MAG display passed'
+            description='R468 runtime + R472 mobile MAG display passed'
           else
             state=failure
-            description='R468/R471 primary MAG verification failed'
+            description='R468/R472 primary MAG verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
