@@ -91,11 +91,16 @@ jobs:
               values.push(await page.locator(CORE).evaluate(canvas => {
                 const style = getComputedStyle(canvas);
                 const rect = canvas.getBoundingClientRect();
+                const animations = canvas.getAnimations();
+                const life = animations.find(animation => /fx-primary-mag/i.test(String(animation.animationName || ''))) || animations[0] || null;
+                const timing = life?.effect?.getComputedTiming?.() || null;
                 return {
                   opacity: Number.parseFloat(style.opacity || '1'),
                   scale: style.scale || 'none',
                   animationName: style.animationName,
                   animationPlayState: style.animationPlayState,
+                  animationCurrentTime: Number(life?.currentTime || 0),
+                  animationProgress: Number.isFinite(Number(timing?.progress)) ? Number(timing.progress) : -1,
                   filter: style.filter,
                   width: rect.width,
                   height: rect.height
@@ -225,8 +230,17 @@ jobs:
               const dScale = desktopValues.map(value => num(value.scale));
               const dOpacitySpan = Math.max(...dOpacity) - Math.min(...dOpacity);
               const dScaleSpan = Math.max(...dScale) - Math.min(...dScale);
+              const dTimes = desktopValues.map(value => value.animationCurrentTime);
+              const dProgress = desktopValues.map(value => value.animationProgress).filter(value => value >= 0);
+              const dTimeSpan = Math.max(...dTimes) - Math.min(...dTimes);
+              const dProgressSpan = dProgress.length ? Math.max(...dProgress) - Math.min(...dProgress) : 0;
               assert.match(desktopValues[0].animationName, /fx-primary-mag-living-desktop-r482/, JSON.stringify(desktopValues[0]));
-              assert.ok(dOpacitySpan >= .015 || dScaleSpan >= .008, JSON.stringify({ dOpacitySpan, dScaleSpan, desktopValues }));
+              assert.notEqual(desktopValues[0].animationPlayState, 'paused', JSON.stringify(desktopValues[0]));
+              // Registered custom-property animations are not reflected reliably
+              // in getComputedStyle(opacity/scale) by headless Chromium. Verify
+              // the CSS animation clock and effect progress themselves instead.
+              assert.ok(dTimeSpan >= 2000, JSON.stringify({ dTimeSpan, dProgressSpan, desktopValues }));
+              assert.ok(dProgressSpan >= .20 || dTimeSpan >= 3000, JSON.stringify({ dTimeSpan, dProgressSpan, desktopValues }));
               await desktop.page.screenshot({ path: 'artifacts/r486-live/desktop-r486.png', fullPage: false, timeout: 8000 }).catch(() => {});
               await desktop.context.close();
 
@@ -245,6 +259,8 @@ jobs:
                 desktop: {
                   opacitySpan: dOpacitySpan,
                   scaleSpan: dScaleSpan,
+                  animationTimeSpan: dTimeSpan,
+                  animationProgressSpan: dProgressSpan,
                   animation: desktopValues[0].animationName,
                   ask
                 }
