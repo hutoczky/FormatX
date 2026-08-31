@@ -1,16 +1,16 @@
-/* FormatX R476/R481 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R482 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
-   R481 keeps the primary MAG visibly alive on desktop and mobile through a
-   compositor-only breathing layer while trimming the real-phone halo/edge. */
+   R482 keeps the large, mini and header MAGs on one restrained spectral palette
+   while preserving the user-pause and interaction-burst contracts. */
 (function(){
 'use strict';
 const root=document.documentElement;
-if(root.dataset.fxMagShapeSyncR476==='ready-r481')return;
-root.dataset.fxMagShapeSyncR476='booting-r481';
+if(root.dataset.fxMagShapeSyncR476==='ready-r482')return;
+root.dataset.fxMagShapeSyncR476='booting-r482';
 
 const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
 const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260831-r480-restrained-glow-soft-edge';
-const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260831-r481-cross-device-life-soft-phone-edge';
+const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260831-r482-spectrum-soft-edge';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null;
 let pulseTimer=0;
@@ -47,7 +47,7 @@ function ensureMobileOptics(){
 function ensureLivingBalance(){
   let link=document.querySelector('link[data-fx-mag-living-balance-r481]');
   if(link instanceof HTMLLinkElement){
-    if(!link.href.includes('r481-cross-device-life-soft-phone-edge'))link.href=LIVING_BALANCE;
+    if(!link.href.includes('r482-spectrum-soft-edge'))link.href=LIVING_BALANCE;
     return link;
   }
   link=document.createElement('link');
@@ -91,6 +91,7 @@ function setLife(state){
   root.dataset.fxMiniMagLifeR479=state;
   root.dataset.fxPrimaryMagLifeR479=state;
   root.dataset.fxPrimaryMagLifeR481=state;
+  root.dataset.fxPrimaryMagLifeR482=state;
 }
 
 function pulse(source){
@@ -103,6 +104,7 @@ function pulse(source){
   root.dataset.fxMiniMagEnergySourceR478=String(source||'primary-mag');
   root.dataset.fxMiniMagEnergySourceR479=String(source||'primary-mag');
   root.dataset.fxPrimaryMagEnergySourceR481=String(source||'primary-mag');
+  root.dataset.fxPrimaryMagEnergySourceR482=String(source||'primary-mag');
   pulseTimer=setTimeout(()=>setLife(steadyLife()),620);
   return true;
 }
@@ -122,13 +124,15 @@ function sync(){
   for(const node of lifeNodes())if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();
   root.dataset.fxMiniMagShapeR476=shape;
   root.dataset.fxMiniMagShapeSyncR476=`ready-${shape}`;
-  root.dataset.fxMagShapeSyncR476='ready-r481';
+  root.dataset.fxMagShapeSyncR476='ready-r482';
   root.dataset.fxMiniMagLifeContractR478='primary-energy-sync-compositor-breath-zero-js-idle';
   root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';
   root.dataset.fxPrimaryMagPauseContractR479='user-pause-only-governor-zero-frame-does-not-freeze-compositor-life';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
+  root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
   root.dataset.fxPrimaryMagLifeContractR481='desktop-mobile-compositor-breath-zero-webgl-idle';
+  root.dataset.fxPrimaryMagLifeContractR482='large-mini-header-spectrum-breath-zero-webgl-idle';
 }
 
 function onCoreInteraction(event){
