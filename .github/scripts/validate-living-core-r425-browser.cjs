@@ -23,23 +23,30 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   const pageErrors = [];
   page.on('pageerror', error => pageErrors.push(error.message));
 
-  await page.goto(`${origin}?r456_uniform_browser=${name}-${Date.now()}`, {
+  await page.goto(`${origin}?r466_current_browser=${name}-${Date.now()}&lang=hu`, {
     waitUntil: 'domcontentloaded',
     timeout: 30000
   });
 
-  await page.waitForFunction(() => {
+  await page.waitForFunction(mobile => {
     const root = document.documentElement;
+    const surface = root.dataset.fxCoreSurfaceR456 || '';
     return root.dataset.fxCoreMobileV69 === 'ready-v69'
       && root.dataset.fxCrystalOrganismR326 === 'ready'
+      && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
       && root.dataset.fxCoreOpticsR454 === 'single-luminous-webgl-material-owner'
-      && root.dataset.fxCoreSurfaceR456 === 'r456-uniform-solid-glass-no-vram-artifact'
+      && surface === 'r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'
       && root.dataset.fxCoreTriangleEdgesR456 === 'disabled'
       && root.dataset.fxCoreOuterNoiseR456 === 'disabled-on-glass-shell'
+      && root.dataset.fxCoreShaderHookR456 === 'released-after-r326-compile'
+      && (!mobile || root.dataset.fxCurrentMagOpticsR465 === 'soft-perimeter-low-bloom-low-cost-shader')
       && typeof window.FormatXCoreMobileV69?.surfacePulse === 'function';
-  }, null, { timeout: 60000 });
+  }, isMobile, { timeout: 60000 });
 
-  await page.evaluate(() => window.FormatXCoreMobileV69.requestRender(4));
+  await page.evaluate(() => {
+    document.documentElement.dataset.fxReferenceMotionPaused = 'false';
+    window.FormatXCoreMobileV69.requestRender?.(4);
+  });
   await page.waitForTimeout(160);
   const pulseStarted = await page.evaluate(() => window.FormatXCoreMobileV69.surfacePulse());
   assert.equal(pulseStarted, true, `${name}: manual surface energy did not start`);
@@ -66,8 +73,13 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const sound = controls?.querySelector('.fx-three-sound');
     const ask = controls?.querySelector('.fx-reference-ask');
     const pause = controls?.querySelector('.fx-reference-pause');
+    const mag = document.querySelector('.topbar > .fx-reference-mag-button');
+    const lang = document.querySelector('.topbar > .fx-language-toggle');
+    const menu = document.querySelector('.topbar > .fx-reference-menu-button');
+    const brand = document.querySelector('.topbar > .brand');
     const boxes = [sound, ask, pause].map(node => node?.getBoundingClientRect()).filter(Boolean);
     const overlap = (a, b) => a && b && !(a.right + 2 <= b.left || b.right + 2 <= a.left || a.bottom + 2 <= b.top || b.bottom + 2 <= a.top);
+    const rect = node => node?.getBoundingClientRect() || null;
     return {
       renderer: root.dataset.fxCoreRenderer || '',
       revision: root.dataset.fxCoreRendererVersion || '',
@@ -83,7 +95,9 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       specular: root.dataset.fxCoreSpecularR456 || '',
       shaderHook: root.dataset.fxCoreShaderHookR456 || '',
       loaderOptics: root.dataset.fxCurrentMagOpticsR456 || '',
+      mobileOptics: root.dataset.fxCurrentMagOpticsR465 || '',
       rendererSelection: root.dataset.fxCoreRendererSelection || '',
+      governor: root.dataset.fxMobileRenderGovernorRevisionR433 || '',
       stageCount: document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
       canvasCount: document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
       solidScriptCount: [...document.scripts].filter(script => /formatx-mobile-solid-glass-r456\.js/.test(script.src)).length,
@@ -99,18 +113,23 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       controlsVisible: visible(controls),
       controlsOneRow: boxes.length === 3 && Math.max(...boxes.map(item => item.top)) - Math.min(...boxes.map(item => item.top)) <= 8,
       controlsOverlap: boxes.length === 3 && (overlap(boxes[0], boxes[1]) || overlap(boxes[1], boxes[2])),
-      overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth)
+      overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
+      magText: String(mag?.textContent || '').trim(),
+      langText: String(lang?.textContent || '').trim(),
+      magBefore: mag ? getComputedStyle(mag, '::before').content : '',
+      magAfter: mag ? getComputedStyle(mag, '::after').content : '',
+      brandBox: rect(brand), magBox: rect(mag), langBox: rect(lang), menuBox: rect(menu)
     };
   });
 
   const viewportShot = await page.screenshot({
-    path: path.join(output, `${name}-r456-uniform-glass-viewport.png`),
+    path: path.join(output, `${name}-r466-current-viewport.png`),
     fullPage: false,
     animations: 'disabled',
     caret: 'hide'
   });
   const magShot = await page.locator('#hero .fx-crystal-organism-r326-canvas').screenshot({
-    path: path.join(output, `${name}-r456-uniform-glass-mag.png`),
+    path: path.join(output, `${name}-r466-current-mag.png`),
     animations: 'disabled',
     caret: 'hide'
   });
@@ -123,11 +142,10 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.equal(state.motion, 'intermittent-native-electric-filament-every-five-to-six-seconds', JSON.stringify(state));
   assert.match(state.pulse, /^sweep-/, JSON.stringify(state));
   assert.equal(state.scheduler, 'interaction-bursts-idle-zero-frame-r441', JSON.stringify(state));
-  assert.equal(state.surface, 'r456-uniform-solid-glass-no-vram-artifact', JSON.stringify(state));
+  assert.equal(state.surface, 'r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics', JSON.stringify(state));
   assert.equal(state.triangleEdges, 'disabled', JSON.stringify(state));
   assert.equal(state.outerNoise, 'disabled-on-glass-shell', JSON.stringify(state));
-  assert.equal(state.innerLife, 'preserved', JSON.stringify(state));
-  assert.equal(state.specular, 'continuous-controlled-highlight', JSON.stringify(state));
+  assert.equal(state.innerLife, 'preserved-low-cost-mobile-field', JSON.stringify(state));
   assert.equal(state.shaderHook, 'released-after-r326-compile', JSON.stringify(state));
   assert.equal(state.loaderOptics, 'uniform-solid-glass-shell-no-vram-artifact', JSON.stringify(state));
   assert.equal(state.stageCount, 1, JSON.stringify(state));
@@ -140,24 +158,39 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.ok(state.width > 200 && state.width <= viewport.width + 1, JSON.stringify(state));
   assert.ok(state.height > 200, JSON.stringify(state));
   assert.ok(Number.isFinite(state.renderMs) && state.renderMs < 16.67, JSON.stringify(state));
-  assert.ok(state.opacity >= .98, JSON.stringify(state));
   assert.equal(state.controlsVisible, true, JSON.stringify(state));
   assert.equal(state.controlsOneRow, true, JSON.stringify(state));
   assert.equal(state.controlsOverlap, false, JSON.stringify(state));
   assert.ok(state.overflow <= 1, JSON.stringify(state));
 
   if (isMobile) {
-    assert.equal(state.normal, 'continuous-volume-98.5-percent-smooth', JSON.stringify(state));
-    assert.equal(state.rendererSelection, 'r326-direct-r456-uniform-mobile-glass', JSON.stringify(state));
-    assert.match(state.filter, /blur\((?:0\.35|\.35)px\)/, state.filter);
+    assert.equal(state.normal, 'continuous-volume-99.8-percent-smooth', JSON.stringify(state));
+    assert.equal(state.specular, 'soft-broad-low-gain-highlight-r465', JSON.stringify(state));
+    assert.equal(state.mobileOptics, 'soft-perimeter-low-bloom-low-cost-shader', JSON.stringify(state));
+    assert.equal(state.rendererSelection, 'r326-direct-r465-soft-optics-no-idle-redraw', JSON.stringify(state));
+    assert.equal(state.governor, 'r465-direct-pause-flag-no-idle-redraw', JSON.stringify(state));
+    assert.ok(state.opacity >= .96 && state.opacity <= 1, JSON.stringify(state));
+    assert.match(state.filter, /brightness\(1\.065\)/, state.filter);
+    assert.match(state.filter, /contrast\(0?\.89\)/, state.filter);
+    assert.match(state.filter, /saturate\(1\.1(?:0)?\)/, state.filter);
+    assert.match(state.filter, /blur\(0\.82px\)/, state.filter);
+    assert.equal(state.magText, 'MAG', JSON.stringify(state));
+    assert.equal(state.langText, 'HU', JSON.stringify(state));
+    assert.equal(state.magBefore, 'none', JSON.stringify(state));
+    assert.equal(state.magAfter, 'none', JSON.stringify(state));
+    assert.ok(state.brandBox && state.magBox && state.langBox && state.menuBox, JSON.stringify(state));
+    assert.equal(overlap(state.brandBox, state.magBox), false, JSON.stringify(state));
+    assert.equal(overlap(state.magBox, state.langBox), false, JSON.stringify(state));
+    assert.equal(overlap(state.langBox, state.menuBox), false, JSON.stringify(state));
   } else {
     assert.equal(state.normal, 'continuous-volume-93-percent-smooth', JSON.stringify(state));
-    assert.equal(state.rendererSelection, 'r326-direct-r456-uniform-desktop-glass', JSON.stringify(state));
+    assert.equal(state.specular, 'continuous-controlled-highlight', JSON.stringify(state));
+    assert.equal(state.rendererSelection, 'r326-direct-r460-desktop-glass', JSON.stringify(state));
+    assert.ok(state.opacity >= .99, JSON.stringify(state));
     assert.ok(!state.filter.includes('blur('), state.filter);
   }
 
   assert.deepEqual(pageErrors, [], `${name}: ${pageErrors.join(' | ')}`);
-  await page.waitForFunction(() => document.documentElement.dataset.fxCoreSurfacePulseR454 === 'idle', null, { timeout: 2500 });
   await context.close();
   console.log(`PASS ${name}:`, JSON.stringify(state));
 }
