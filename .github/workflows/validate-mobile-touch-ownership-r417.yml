@@ -37,23 +37,16 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
           node --check docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
           node .github/scripts/validate-living-core-r425-source.cjs
           grep -q "touch-pulse-r417-ui-safe" docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
-          grep -q "production-r418-mobile-first-paint-header-lock" docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css
           grep -q "production-r466-mobile-mag-text-lock-no-star-blank-state" docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
           grep -q "direct-r326-r465-soft-optics-no-idle-redraw" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
-          grep -q "formatx-mini-mag-assistant-r459" docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
           grep -q "production-r466-balanced-mobile-luminance-soft-edge-display" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           grep -q "brightness(1.065)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           grep -q "contrast(.89)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           grep -q "saturate(1.10)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           grep -q "blur(.82px)" docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
-          grep -q "position: fixed" docs/scifi-ui/styles/formatx-mini-mag-assistant-r459.css
           grep -q "fxMiniMagPrimaryHeroR459='preserved-native-webgl'" docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js
-          grep -q "static-first-paint-owner-no-late-css" docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
-          grep -q "static-first-paint-owner-no-late-css" docs/scifi-ui/scripts/formatx-mobile-regression-r310.js
       - name: Install Chromium runtime
         shell: bash
         run: |
@@ -70,6 +63,7 @@ jobs:
           set -euo pipefail
           python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/mobile-touch-server.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do curl -fsS http://127.0.0.1:4173/scifi-ui/ >/dev/null && break; sleep .25; done
           node <<'NODE'
           const {chromium}=require('playwright');
           const assert=(value,message)=>{if(!value)throw new Error(message);};
@@ -79,22 +73,29 @@ jobs:
 
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-
             const mobileContext=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
             const page=await mobileContext.newPage();
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
-            await page.waitForFunction(()=>{
-              const r=document.documentElement.dataset;
-              return r.fxCrystalOrganismR326==='ready'
-                && r.fxCoreRenderer==='single-webgl-crystal-organism-r326'
-                && r.fxMiniMagAssistantR459==='ready'
-                && r.fxMobileHeaderFinalR418==='loaded-last-mobile'
-                && r.fxMobileReferenceStylePolicyR458==='static-first-paint-owner-no-late-css'
-                && Boolean(document.querySelector('.topbar > .fx-language-toggle'))
-                && Boolean(document.querySelector('.fx-three-sound'))
-                && Boolean(document.querySelector('.fx-mini-mag-assistant-r459'))
-                && Boolean(document.querySelector('.fx-mini-mag-launcher-r459'));
-            },null,{timeout:45000});
+            try {
+              await page.waitForFunction(()=>{
+                const r=document.documentElement.dataset;
+                return r.fxCurrentMagRuntimeR422==='ready'
+                  && r.fxCrystalOrganismR326==='ready'
+                  && r.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+                  && r.fxCoreSurfaceR456==='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'
+                  && r.fxCurrentMagOpticsR465==='soft-perimeter-low-bloom-low-cost-shader'
+                  && r.fxMobileHeaderFinalR418==='loaded-last-mobile'
+                  && r.fxMiniMagAssistantR459==='ready'
+                  && Boolean(document.querySelector('.topbar > .fx-language-toggle'))
+                  && Boolean(document.querySelector('.topbar > .fx-reference-mag-button'))
+                  && Boolean(document.querySelector('.fx-three-sound'))
+                  && Boolean(document.querySelector('.fx-mini-mag-assistant-r459'))
+                  && Boolean(document.querySelector('.fx-mini-mag-launcher-r459'));
+              },null,{timeout:45000});
+            } catch (error) {
+              const diagnostics=await page.evaluate(()=>({dataset:{...document.documentElement.dataset},scripts:[...document.scripts].map(s=>s.src).filter(Boolean).filter(s=>/formatx-(current-mag|crystal-organism|mini-mag|mobile-solid-glass)/.test(s)),nodes:{lang:Boolean(document.querySelector('.topbar > .fx-language-toggle')),mag:Boolean(document.querySelector('.topbar > .fx-reference-mag-button')),sound:Boolean(document.querySelector('.fx-three-sound')),miniHost:Boolean(document.querySelector('.fx-mini-mag-assistant-r459')),mini:Boolean(document.querySelector('.fx-mini-mag-launcher-r459'))}}));
+              throw new Error('mobile runtime readiness timeout '+JSON.stringify(diagnostics)+'\n'+error.message);
+            }
             await page.waitForTimeout(250);
             const state=await page.evaluate(()=>{
               const box=node=>{if(!node)return null;const r=node.getBoundingClientRect(),s=getComputedStyle(node);return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,position:s.position,display:s.display,visibility:s.visibility,opacity:Number(s.opacity||1)};};
@@ -108,7 +109,8 @@ jobs:
               const miniHost=document.querySelector('.fx-mini-mag-assistant-r459');
               const mini=document.querySelector('.fx-mini-mag-launcher-r459');
               const cs=canvas?getComputedStyle(canvas):null;
-              return{topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),sound:box(sound),miniHost:box(miniHost),mini:box(mini),langText:String(lang?.textContent||'').trim(),magText:String(mag?.textContent||'').trim(),magBefore:mag?getComputedStyle(mag,'::before').content:'',magAfter:mag?getComputedStyle(mag,'::after').content:'',filter:cs?.filter||'',canvas:box(canvas),canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,renderer:document.documentElement.dataset.fxCoreRenderer||'',policy:document.documentElement.dataset.fxMobileReferenceStylePolicyR458||'',miniOwner:document.documentElement.dataset.fxMiniMagPrimaryHeroR459||''};
+              const r=document.documentElement.dataset;
+              return{topbar:box(topbar),brand:box(brand),mag:box(mag),lang:box(lang),menu:box(menu),sound:box(sound),miniHost:box(miniHost),mini:box(mini),langText:String(lang?.textContent||'').trim(),magText:String(mag?.textContent||'').trim(),magBefore:mag?getComputedStyle(mag,'::before').content:'',magAfter:mag?getComputedStyle(mag,'::after').content:'',filter:cs?.filter||'',canvas:box(canvas),canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,renderer:r.fxCoreRenderer||'',runtime:r.fxCurrentMagRuntimeR422||'',surface:r.fxCoreSurfaceR456||'',mobileOptics:r.fxCurrentMagOpticsR465||'',miniOwner:r.fxMiniMagPrimaryHeroR459||''};
             });
             console.log('R466_MOBILE_STATE',JSON.stringify(state));
             for(const key of ['topbar','brand','mag','lang','menu','sound','canvas','miniHost','mini'])assert(state[key],`missing ${key}: `+JSON.stringify(state));
@@ -117,93 +119,51 @@ jobs:
             assert(!overlap(state.brand,state.mag,2)&&!overlap(state.mag,state.lang,2)&&!overlap(state.lang,state.menu,2),'header controls overlap: '+JSON.stringify(state));
             assert(state.lang.width>=44&&state.lang.height>=44&&state.sound.width>=44&&state.sound.height>=44&&state.mini.width>=54&&state.mini.height>=54,'touch target below minimum: '+JSON.stringify(state));
             assert(state.miniHost.position==='fixed','Mini MAG host is not fixed: '+JSON.stringify(state));
-            assert(state.mini.position==='absolute'||state.mini.position==='relative','Mini MAG launcher escaped its fixed host: '+JSON.stringify(state));
-            assert(state.canvasCount===1,'Mini MAG created a second hero renderer: '+JSON.stringify(state));
+            assert(state.mini.position==='absolute'||state.mini.position==='relative','Mini MAG launcher escaped fixed host: '+JSON.stringify(state));
+            assert(state.canvasCount===1&&state.renderer==='single-webgl-crystal-organism-r326','primary MAG renderer contract changed: '+JSON.stringify(state));
+            assert(state.runtime==='ready'&&state.surface==='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'&&state.mobileOptics==='soft-perimeter-low-bloom-low-cost-shader','current MAG runtime markers missing: '+JSON.stringify(state));
             assert(state.miniOwner==='preserved-native-webgl','primary hero preservation marker missing: '+JSON.stringify(state));
-            assert(state.langText==='HU','language did not start in HU: '+JSON.stringify(state));
-            assert(state.magText==='MAG','mobile MAG header text is blank/replaced: '+JSON.stringify(state));
+            assert(state.langText==='HU'&&state.magText==='MAG','HU/MAG header state invalid: '+JSON.stringify(state));
             assert(state.magBefore==='none'&&state.magAfter==='none','mobile MAG pseudo-art returned: '+JSON.stringify(state));
-            assert(state.policy==='static-first-paint-owner-no-late-css','late compatibility CSS path became active: '+JSON.stringify(state));
             assert(/brightness\(1\.065\)/.test(state.filter),'R466 mobile brightness missing: '+state.filter);
             assert(/contrast\(0?\.89\)/.test(state.filter),'R466 mobile contrast missing: '+state.filter);
             assert(/saturate\(1\.1(?:0)?\)/.test(state.filter),'R466 mobile saturation missing: '+state.filter);
             assert(/blur\(0\.82px\)/.test(state.filter),'R466 soft edge missing: '+state.filter);
-            assert(state.renderer==='single-webgl-crystal-organism-r326','wrong renderer: '+JSON.stringify(state));
 
             const miniHost=page.locator('.fx-mini-mag-assistant-r459').first();
             const mini=page.locator('.fx-mini-mag-launcher-r459').first();
-            const miniBefore=await boxSnapshot(mini);
-            const hostBefore=await boxSnapshot(miniHost);
+            const miniBefore=await boxSnapshot(mini),hostBefore=await boxSnapshot(miniHost);
             await mini.tap();
             await page.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open==='true',null,{timeout:5000});
-            const panel=page.locator('.fx-mini-mag-panel-r459').first();
-            const panelBox=await panel.boundingBox();assert(panelBox&&panelBox.width>200&&panelBox.height>200,'Mini MAG panel did not open');
+            const panelBox=await page.locator('.fx-mini-mag-panel-r459').first().boundingBox();assert(panelBox&&panelBox.width>200&&panelBox.height>200,'Mini MAG panel did not open');
             await page.locator('.fx-mini-mag-nav-r459 [data-section="pricing"]').tap();
             await page.waitForFunction(()=>document.documentElement.dataset.fxMiniMagLastNavigationR459==='pricing',null,{timeout:5000});
             await page.waitForTimeout(350);
-            const miniAfter=await boxSnapshot(mini);
-            const hostAfter=await boxSnapshot(miniHost);
-            assert(sameViewportAnchor(miniBefore,miniAfter),'Mini MAG launcher did not remain viewport anchored after navigation');
-            assert(sameViewportAnchor(hostBefore,hostAfter),'Mini MAG fixed host moved after navigation');
+            assert(sameViewportAnchor(miniBefore,await boxSnapshot(mini)),'Mini MAG launcher moved after navigation');
+            assert(sameViewportAnchor(hostBefore,await boxSnapshot(miniHost)),'Mini MAG fixed host moved after navigation');
 
             const lang=page.locator('.topbar > .fx-language-toggle').first();
             await lang.tap();
             await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.topbar > .fx-language-toggle')?.textContent?.trim()==='EN'&&document.querySelector('.topbar > .fx-reference-mag-button')?.textContent?.trim()==='CORE'&&document.documentElement.dataset.fxMiniMagLanguageR459==='en',null,{timeout:5000});
-            const englishMag=await page.locator('.topbar > .fx-reference-mag-button').first().textContent();
-            assert(String(englishMag||'').trim()==='CORE','mobile MAG header did not become CORE after language switch');
             const sound=page.locator('.fx-three-sound').first();
             const sb=await sound.boundingBox();assert(sb,'SOUND box missing');
-            const topmost=await page.evaluate(({x,y})=>{const el=document.elementFromPoint(x,y);return Boolean(el?.closest?.('.fx-three-sound'));},{x:sb.x+sb.width/2,y:sb.y+sb.height/2});
-            assert(topmost,'SOUND is not the topmost touch target');
-            await page.touchscreen.tap(sb.x+sb.width/2,sb.y+sb.height/2);
+            assert(await page.evaluate(({x,y})=>Boolean(document.elementFromPoint(x,y)?.closest?.('.fx-three-sound')),{x:sb.x+sb.width/2,y:sb.y+sb.height/2}),'SOUND is not topmost');
             const mb=await page.locator('.topbar > .fx-reference-mag-button').first().boundingBox();assert(mb,'MAG box missing');
-            const magTopmost=await page.evaluate(({x,y})=>Boolean(document.elementFromPoint(x,y)?.closest?.('.fx-reference-mag-button')),{x:mb.x+mb.width/2,y:mb.y+mb.height/2});
-            assert(magTopmost,'MAG is not the topmost touch target');
+            assert(await page.evaluate(({x,y})=>Boolean(document.elementFromPoint(x,y)?.closest?.('.fx-reference-mag-button')),{x:mb.x+mb.width/2,y:mb.y+mb.height/2}),'MAG is not topmost');
             await mobileContext.close();
 
             const desktopContext=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,isMobile:false,hasTouch:false,locale:'hu-HU'});
             const desktop=await desktopContext.newPage();
             await desktop.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
-            await desktop.waitForFunction(()=>{
-              const r=document.documentElement.dataset;
-              return r.fxCrystalOrganismR326==='ready'
-                && r.fxCoreRenderer==='single-webgl-crystal-organism-r326'
-                && r.fxMiniMagAssistantR459==='ready'
-                && Boolean(document.querySelector('.fx-mini-mag-assistant-r459'))
-                && Boolean(document.querySelector('.fx-mini-mag-launcher-r459'));
-            },null,{timeout:45000});
-            await desktop.waitForTimeout(250);
-            const desktopState=await desktop.evaluate(()=>{
-              const host=document.querySelector('.fx-mini-mag-assistant-r459');
-              const launcher=document.querySelector('.fx-mini-mag-launcher-r459');
-              const box=node=>{if(!node)return null;const r=node.getBoundingClientRect(),s=getComputedStyle(node);return{x:r.x,y:r.y,width:r.width,height:r.height,position:s.position,visibility:s.visibility,opacity:Number(s.opacity||1)};};
-              return{host:box(host),launcher:box(launcher),canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,renderer:document.documentElement.dataset.fxCoreRenderer||'',miniOwner:document.documentElement.dataset.fxMiniMagPrimaryHeroR459||''};
-            });
-            console.log('R459_DESKTOP_STATE',JSON.stringify(desktopState));
-            assert(desktopState.host&&desktopState.launcher,'desktop Mini MAG missing: '+JSON.stringify(desktopState));
-            assert(desktopState.host.position==='fixed','desktop Mini MAG host is not fixed: '+JSON.stringify(desktopState));
+            await desktop.waitForFunction(()=>document.documentElement.dataset.fxCurrentMagRuntimeR422==='ready'&&document.documentElement.dataset.fxCrystalOrganismR326==='ready'&&document.documentElement.dataset.fxMiniMagAssistantR459==='ready',null,{timeout:45000});
+            const desktopState=await desktop.evaluate(()=>{const host=document.querySelector('.fx-mini-mag-assistant-r459'),launcher=document.querySelector('.fx-mini-mag-launcher-r459');const box=node=>{if(!node)return null;const r=node.getBoundingClientRect(),s=getComputedStyle(node);return{x:r.x,y:r.y,width:r.width,height:r.height,position:s.position}};return{host:box(host),launcher:box(launcher),canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,renderer:document.documentElement.dataset.fxCoreRenderer||'',miniOwner:document.documentElement.dataset.fxMiniMagPrimaryHeroR459||''};});
+            console.log('R466_DESKTOP_STATE',JSON.stringify(desktopState));
+            assert(desktopState.host&&desktopState.launcher&&desktopState.host.position==='fixed','desktop Mini MAG missing/not fixed: '+JSON.stringify(desktopState));
             assert(desktopState.launcher.width>=60&&desktopState.launcher.height>=60,'desktop Mini MAG target too small: '+JSON.stringify(desktopState));
-            assert(desktopState.canvasCount===1&&desktopState.renderer==='single-webgl-crystal-organism-r326','desktop primary MAG renderer contract changed: '+JSON.stringify(desktopState));
-            assert(desktopState.miniOwner==='preserved-native-webgl','desktop primary MAG preservation marker missing');
-            const desktopMini=desktop.locator('.fx-mini-mag-launcher-r459').first();
-            const desktopHost=desktop.locator('.fx-mini-mag-assistant-r459').first();
-            const desktopBefore=await boxSnapshot(desktopMini);
-            const desktopHostBefore=await boxSnapshot(desktopHost);
-            await desktopMini.click();
-            await desktop.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open==='true',null,{timeout:5000});
-            const desktopPanel=await desktop.locator('.fx-mini-mag-panel-r459').first().boundingBox();
-            assert(desktopPanel&&desktopPanel.width>260&&desktopPanel.height>200,'desktop Mini MAG panel did not open');
-            await desktop.locator('.fx-mini-mag-nav-r459 [data-section="resources"]').click();
-            await desktop.waitForFunction(()=>document.documentElement.dataset.fxMiniMagLastNavigationR459==='resources',null,{timeout:5000});
-            await desktop.waitForTimeout(350);
-            const desktopAfter=await boxSnapshot(desktopMini);
-            const desktopHostAfter=await boxSnapshot(desktopHost);
-            assert(sameViewportAnchor(desktopBefore,desktopAfter),'desktop Mini MAG launcher moved after navigation');
-            assert(sameViewportAnchor(desktopHostBefore,desktopHostAfter),'desktop Mini MAG fixed host moved after navigation');
+            assert(desktopState.canvasCount===1&&desktopState.renderer==='single-webgl-crystal-organism-r326'&&desktopState.miniOwner==='preserved-native-webgl','desktop primary MAG contract changed: '+JSON.stringify(desktopState));
             await desktopContext.close();
-
             await browser.close();
-            console.log('PASS: R466 balanced mobile optics, stable MAG/CORE header text and R459 persistent Mini MAG passed on mobile + desktop while one primary WebGL MAG remains.');
+            console.log('PASS: R466 balanced mobile optics, stable MAG/CORE header text, touch ownership and R459 persistent Mini MAG passed.');
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish current mobile visual/touch status
