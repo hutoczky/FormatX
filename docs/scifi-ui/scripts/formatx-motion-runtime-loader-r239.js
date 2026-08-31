@@ -72,8 +72,19 @@ function ensureCurrentMag(){
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
 function ensureStaticMotionCss(){
-  if(document.getElementById('fx-r170-mobile-seam-override'))return;
-  const stylesheet=document.createElement('link');stylesheet.id='fx-r170-mobile-seam-override';stylesheet.rel='stylesheet';stylesheet.href='./styles/formatx-runtime-static-r243.css?v=20260819-r243-csp';stylesheet.dataset.fxRuntimeStaticR243='true';document.head.appendChild(stylesheet);
+  const existing=document.getElementById('fx-r170-mobile-seam-override');
+  if(existing instanceof HTMLLinkElement){
+    if(existing.sheet)root.dataset.fxMotionCssR243='external-strict-csp-user-intent';
+    return;
+  }
+  const stylesheet=document.createElement('link');
+  stylesheet.id='fx-r170-mobile-seam-override';
+  stylesheet.rel='stylesheet';
+  stylesheet.href='./styles/formatx-runtime-static-r243.css?v=20260819-r243-csp';
+  stylesheet.dataset.fxRuntimeStaticR243='true';
+  stylesheet.addEventListener('load',()=>{root.dataset.fxMotionCssR243='external-strict-csp-user-intent';},{once:true});
+  stylesheet.addEventListener('error',()=>{root.dataset.fxMotionCssR243='external-strict-csp-load-failed';},{once:true});
+  document.head.appendChild(stylesheet);
 }
 function reservedInteraction(event){
   if(root.dataset.fxOrganismThought==='open')return true;
