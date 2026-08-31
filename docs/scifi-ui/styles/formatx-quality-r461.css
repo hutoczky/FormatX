@@ -1,4 +1,4 @@
-/* FormatX r461/r462/R487 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R489 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
@@ -167,11 +167,20 @@ html body.living-architecture .topbar > .fx-language-toggle {
     filter: none !important;
   }
 
-  /* R487: the QR fallback sits on the dark plan card in the real production
-     composition. Use a high-contrast ice tone rather than the obsolete light-
-     card navy value so the placeholder clears WCAG AA before QR hydration. */
+  /* R489: QR fallback is independently contrast-safe even when a white QR
+     surface is already present underneath it. Do not rely on the card colour:
+     the label carries its own dark pill so Lighthouse and real users see the
+     same >= AA contrast before hydration. */
   html body.living-architecture .fx-plan-qr-card .fx-qr-placeholder {
-    color: #e9f8ff !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 24px !important;
+    padding: 3px 7px !important;
+    border-radius: 999px !important;
+    color: #f4fbff !important;
+    background: #071722 !important;
+    border: 1px solid rgba(112, 220, 255, .32) !important;
     text-shadow: none !important;
   }
 }
@@ -184,4 +193,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* deploy-r487-first-paint-a11y */
+/* deploy-r489-mobile-a11y-contrast */
