@@ -57,16 +57,15 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   opacity: .22 !important;
 }
 
-/* R476 phone optics: final, explicit owner. The legacy R337 phone rule carries
-   several state attributes and !important declarations, so this selector mirrors
-   that semantic state and adds the R326-ready marker. That makes the intended
-   softer display deterministic without touching geometry or the renderer. */
+/* R477 phone optics refinement: keep the crystal clearly dimensional, but pull
+   back the blown cyan/violet highlight and soften the silhouette/facet edges.
+   This is mobile-only and does not alter geometry, hit targets, or desktop. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .89 !important;
-    filter: brightness(.92) contrast(.74) saturate(.94) blur(1.55px) !important;
-    -webkit-filter: brightness(.92) contrast(.74) saturate(.94) blur(1.55px) !important;
+    opacity: .86 !important;
+    filter: brightness(.88) contrast(.68) saturate(.91) blur(1.85px) !important;
+    -webkit-filter: brightness(.88) contrast(.68) saturate(.91) blur(1.85px) !important;
   }
 }
 
@@ -75,4 +74,4 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 }
 
 /* production-r476-shape-synchronised-mini-mag-header-icon-soft-phone-optics
-   production-r476-final-specificity-phone-optics-owner */
+   production-r477-refined-phone-highlight-and-edge-softening */
