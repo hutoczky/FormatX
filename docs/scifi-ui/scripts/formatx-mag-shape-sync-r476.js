@@ -1,12 +1,14 @@
 /* FormatX R476/R479 — synchronize Mini MAG/header shape and living energy with
-   the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop. */
+   the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
+   R479.1 distinguishes the mobile render governor's zero-frame pause flag from
+   an explicit user PAUSE action, so the compositor breathing remains alive. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxMagShapeSyncR476==='ready-r479')return;
 root.dataset.fxMagShapeSyncR476='booting-r479';
 
-const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary';
+const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null;
 let pulseTimer=0;
@@ -15,7 +17,7 @@ let lastEnergyBolt='';
 function ensureStyle(){
   let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');
   if(link instanceof HTMLLinkElement){
-    if(!link.href.includes('r479-colour-depth-soft-living-primary'))link.href=STYLE;
+    if(!link.href.includes('r4791-user-pause-aware'))link.href=STYLE;
     return link;
   }
   link=document.createElement('link');
@@ -32,27 +34,36 @@ function currentShape(){
   return state==='sphere'?'sphere':'crystal';
 }
 
+function userPaused(){
+  const pause=document.querySelector('.fx-reference-pause');
+  if(!(pause instanceof HTMLButtonElement))return false;
+  return pause.dataset.paused==='true'||pause.getAttribute('aria-pressed')==='true';
+}
+
 function lifeNodes(){
   return [
     document.querySelector('.topbar .fx-reference-mag-button'),
     document.querySelector('.fx-mini-mag-launcher-r459'),
     document.querySelector('.fx-mini-mag-glyph-r459'),
-    document.querySelector('.fx-mini-mag-assistant-r459')
+    document.querySelector('.fx-mini-mag-assistant-r459'),
+    document.querySelector('#hero .fx-crystal-organism-r326-stage'),
+    document.querySelector('#hero .fx-crystal-organism-r326-canvas')
   ].filter(node=>node instanceof HTMLElement);
 }
 
 function steadyLife(){
-  return reduced.matches||root.dataset.fxReferenceMotionPaused==='true'?'steady':'breath';
+  return reduced.matches||userPaused()?'steady':'breath';
 }
 
 function setLife(state){
   for(const node of lifeNodes())node.dataset.fxMagLife=state;
   root.dataset.fxMiniMagLifeR478=state;
   root.dataset.fxMiniMagLifeR479=state;
+  root.dataset.fxPrimaryMagLifeR479=state;
 }
 
 function pulse(source){
-  if(reduced.matches||document.hidden||root.dataset.fxReferenceMotionPaused==='true'){
+  if(reduced.matches||document.hidden||userPaused()){
     setLife('steady');
     return false;
   }
@@ -76,11 +87,13 @@ function sync(){
       if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();
     }
   }
+  for(const node of lifeNodes())if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();
   root.dataset.fxMiniMagShapeR476=shape;
   root.dataset.fxMiniMagShapeSyncR476=`ready-${shape}`;
   root.dataset.fxMagShapeSyncR476='ready-r479';
   root.dataset.fxMiniMagLifeContractR478='primary-energy-sync-compositor-breath-zero-js-idle';
   root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';
+  root.dataset.fxPrimaryMagPauseContractR479='user-pause-only-governor-zero-frame-does-not-freeze-compositor-life';
 }
 
 function onCoreInteraction(event){
@@ -123,10 +136,15 @@ for(const name of [
   'formatx:controlownerready',
   'formatx:minimagready',
   'formatx:currentmagready',
+  'formatx:real3dready',
   'formatx:languagechange',
   'pageshow'
 ])addEventListener(name,()=>{sync();setLife(steadyLife());},{passive:true});
 
+addEventListener('formatx:referencepause',event=>{
+  const paused=event.detail?.paused===true;
+  setLife(reduced.matches||paused?'steady':'breath');
+},{passive:true});
 addEventListener('formatx:coreinteraction',onCoreInteraction,{passive:true});
 addEventListener('formatx:coreshapechange',()=>{sync();pulse('shape-change');},{passive:true});
 addEventListener('visibilitychange',()=>{if(document.hidden)setLife('steady');else setLife(steadyLife());},{passive:true});

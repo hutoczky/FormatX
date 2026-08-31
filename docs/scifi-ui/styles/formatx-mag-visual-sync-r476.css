@@ -89,7 +89,17 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
     mix-blend-mode: normal !important;
     transform-origin: 50% 50% !important;
     scale: .998;
-    will-change: opacity, scale;
+    will-change: scale;
+  }
+
+  /* The zero-frame render governor deliberately sets the shared renderer pause
+     flag while idle. That must not stop the cheap compositor life. R479.1 keys
+     breathing to the explicit user-facing life state written on the canvas. */
+  html:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"],
+  html:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"] {
+    animation: fx-primary-mag-live-breath-r479 6.2s cubic-bezier(.38,0,.22,1) infinite !important;
   }
 
   /* Give the volume a darker optical chamber so cyan/cobalt/violet facets stay
@@ -102,8 +112,8 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   }
 }
 
-/* Shared life signal: only opacity/individual scale animate, so the large
-   WebGL renderer can keep its zero-idle-frame scheduler. */
+/* Shared life signal: only compositor-friendly individual scale is used for the
+   large MAG. The WebGL renderer itself therefore remains zero-idle-frame. */
 @media (prefers-reduced-motion: no-preference) {
   .fx-mini-mag-assistant-r459[data-fx-mag-life="breath"] .fx-mini-mag-glyph-r459 {
     animation: fx-mini-mag-live-breath-r479 4.9s cubic-bezier(.38,0,.22,1) infinite !important;
@@ -114,11 +124,6 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   }
   .fx-mini-mag-assistant-r459[data-fx-mag-life="breath"] .fx-mini-mag-status-r459 {
     animation: fx-mini-mag-status-breath-r479 3.8s ease-in-out infinite !important;
-  }
-  @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-    html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .fx-crystal-organism-r326-canvas {
-      animation: fx-primary-mag-live-breath-r479 6.2s cubic-bezier(.38,0,.22,1) infinite !important;
-    }
   }
 }
 
@@ -138,9 +143,9 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 }
 
 @keyframes fx-primary-mag-live-breath-r479 {
-  0%,100% { opacity: .88; scale: .996; }
-  42% { opacity: .93; scale: 1.004; }
-  58% { opacity: .91; scale: 1.001; }
+  0%,100% { scale: .992; }
+  42% { scale: 1.008; }
+  58% { scale: 1.003; }
 }
 @keyframes fx-mini-mag-live-breath-r479 {
   0%,100% { scale: .978; opacity: .86; }
@@ -169,4 +174,5 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 
 /* production-r476-shape-synchronised-mini-mag-header-icon
    production-r478-soft-phone-optics-shared-life
-   production-r479-colour-depth-soft-alpha-edge-living-primary-mag */
+   production-r479-colour-depth-soft-alpha-edge-living-primary-mag
+   production-r4791-user-pause-aware-compositor-life-zero-webgl-idle */
