@@ -168,17 +168,33 @@ def validate_runtime() -> list[str]:
             sources[label] = path.read_text(encoding="utf-8")
 
     toggle = sources["single language controller"]
+    supported_languages = bool(
+        re.search(
+            r"new\s+Set\(\s*\[\s*['\"]hu['\"]\s*,\s*['\"]en['\"]\s*\]\s*\)",
+            toggle,
+        )
+    )
+    document_language_update = bool(
+        re.search(r"ROOT\.lang\s*=\s*language", toggle)
+    )
+    single_visible_control = (
+        bool(re.search(r"function\s+hideLegacy\s*\(", toggle))
+        and ".fx-language-toggle" in toggle
+        and "button.hidden=true" in toggle
+        and "aria-hidden" in toggle
+    )
+
     requirements = {
-        "supported HU and EN languages": "new Set(['hu', 'en'])" in toggle,
+        "supported HU and EN languages": supported_languages,
         "persistent language preference": "formatx-language" in toggle
         and "localStorage.setItem" in toggle,
         "URL language parameter": "searchParams.set('lang'" in toggle,
-        "document language update": "ROOT.lang = language" in toggle,
+        "document language update": document_language_update,
         "inline text translation": "[data-hu][data-en]" in toggle,
         "inline accessible-label translation": "[data-hu-label][data-en-label]"
         in toggle,
         "language-change event": "formatx:languagechange" in toggle,
-        "single visible language control": "hideLegacyControls" in toggle,
+        "single visible language control": single_visible_control,
         "language focus style": ":focus-visible"
         in sources["language stylesheet"],
         "language reduced-motion support": "prefers-reduced-motion"
