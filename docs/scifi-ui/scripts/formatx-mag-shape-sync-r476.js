@@ -1,18 +1,21 @@
-/* FormatX R476 — synchronize the Mini MAG and header icon with the primary MAG.
-   One semantic shape state, no second renderer, no idle animation loop. */
+/* FormatX R476/R478 — synchronize Mini MAG/header shape and living energy with
+   the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop. */
 (function(){
 'use strict';
 const root=document.documentElement;
-if(root.dataset.fxMagShapeSyncR476==='ready')return;
-root.dataset.fxMagShapeSyncR476='booting';
+if(root.dataset.fxMagShapeSyncR476==='ready-r478')return;
+root.dataset.fxMagShapeSyncR476='booting-r478';
 
-const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r477-refined-phone-highlight-edge-softening';
+const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r478-softer-mobile-glass-shared-life';
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null;
+let pulseTimer=0;
+let lastEnergyBolt='';
 
 function ensureStyle(){
   let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');
   if(link instanceof HTMLLinkElement){
-    if(!link.href.includes('r477-refined-phone-highlight-edge-softening'))link.href=STYLE;
+    if(!link.href.includes('r478-softer-mobile-glass-shared-life'))link.href=STYLE;
     return link;
   }
   link=document.createElement('link');
@@ -29,6 +32,36 @@ function currentShape(){
   return state==='sphere'?'sphere':'crystal';
 }
 
+function lifeNodes(){
+  return [
+    document.querySelector('.topbar .fx-reference-mag-button'),
+    document.querySelector('.fx-mini-mag-launcher-r459'),
+    document.querySelector('.fx-mini-mag-glyph-r459'),
+    document.querySelector('.fx-mini-mag-assistant-r459')
+  ].filter(node=>node instanceof HTMLElement);
+}
+
+function steadyLife(){
+  return reduced.matches||root.dataset.fxReferenceMotionPaused==='true'?'steady':'breath';
+}
+
+function setLife(state){
+  for(const node of lifeNodes())node.dataset.fxMagLife=state;
+  root.dataset.fxMiniMagLifeR478=state;
+}
+
+function pulse(source){
+  if(reduced.matches||document.hidden||root.dataset.fxReferenceMotionPaused==='true'){
+    setLife('steady');
+    return false;
+  }
+  clearTimeout(pulseTimer);
+  setLife('pulse');
+  root.dataset.fxMiniMagEnergySourceR478=String(source||'primary-mag');
+  pulseTimer=setTimeout(()=>setLife(steadyLife()),620);
+  return true;
+}
+
 function sync(){
   const shape=currentShape();
   const header=document.querySelector('.topbar .fx-reference-mag-button');
@@ -36,41 +69,76 @@ function sync(){
   const glyph=document.querySelector('.fx-mini-mag-glyph-r459');
   const host=document.querySelector('.fx-mini-mag-assistant-r459');
   for(const node of [header,launcher,glyph,host]){
-    if(node instanceof HTMLElement)node.dataset.fxCoreShape=shape;
+    if(node instanceof HTMLElement){
+      node.dataset.fxCoreShape=shape;
+      if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();
+    }
   }
   root.dataset.fxMiniMagShapeR476=shape;
   root.dataset.fxMiniMagShapeSyncR476=`ready-${shape}`;
-  root.dataset.fxMagShapeSyncR476='ready';
+  root.dataset.fxMagShapeSyncR476='ready-r478';
+  root.dataset.fxMiniMagLifeContractR478='primary-energy-sync-compositor-breath-zero-js-idle';
+}
+
+function onCoreInteraction(event){
+  const phase=String(event.detail?.phase||'interaction');
+  if(phase==='press'||phase==='release'||phase==='pulse'||phase==='boost'||phase==='interaction')pulse(`core-${phase}`);
+}
+
+function inspectRootState(records){
+  let needsSync=false;
+  for(const record of records){
+    if(record.attributeName==='data-fx-core-shape-r337')needsSync=true;
+    if(record.attributeName==='data-fx-reference-motion-paused')setLife(steadyLife());
+    if(record.attributeName==='data-fx-core-energy-bolt-r455'){
+      const bolt=String(root.dataset.fxCoreEnergyBoltR455||'');
+      if(bolt&&bolt!==lastEnergyBolt){
+        lastEnergyBolt=bolt;
+        if(bolt.startsWith('surface-sweep-'))pulse(bolt);
+      }
+    }
+  }
+  if(needsSync)sync();
 }
 
 function boot(){
   ensureStyle();
   sync();
+  setLife(steadyLife());
+  lastEnergyBolt=String(root.dataset.fxCoreEnergyBoltR455||'');
   if(!observer){
-    observer=new MutationObserver(records=>{
-      if(records.some(record=>record.attributeName==='data-fx-core-shape-r337'))sync();
-    });
-    observer.observe(root,{attributes:true,attributeFilter:['data-fx-core-shape-r337']});
+    observer=new MutationObserver(inspectRootState);
+    observer.observe(root,{attributes:true,attributeFilter:[
+      'data-fx-core-shape-r337',
+      'data-fx-core-energy-bolt-r455',
+      'data-fx-reference-motion-paused'
+    ]});
   }
 }
 
 for(const name of [
-  'formatx:coreshapechange',
   'formatx:controlownerready',
   'formatx:minimagready',
   'formatx:currentmagready',
   'formatx:languagechange',
   'pageshow'
-])addEventListener(name,sync,{passive:true});
+])addEventListener(name,()=>{sync();setLife(steadyLife());},{passive:true});
 
-document.addEventListener('click',event=>{
-  const target=event.target instanceof Element?event.target.closest('.fx-reference-mag-button,[data-action="shape"]'):null;
+addEventListener('formatx:coreinteraction',onCoreInteraction,{passive:true});
+addEventListener('formatx:coreshapechange',()=>{sync();pulse('shape-change');},{passive:true});
+addEventListener('visibilitychange',()=>{if(document.hidden)setLife('steady');else setLife(steadyLife());},{passive:true});
+
+document.addEventListener('pointerdown',event=>{
+  const target=event.target instanceof Element?event.target.closest('#hero .hero-space,.fx-reference-mag-button,.fx-mini-mag-launcher-r459,[data-action="shape"]'):null;
   if(!target)return;
-  queueMicrotask(sync);
-  setTimeout(sync,80);
+  pulse(target.closest('.fx-mini-mag-launcher-r459')?'mini-mag-direct':'primary-mag-direct');
+  if(target.matches('.fx-reference-mag-button,[data-action="shape"]')){
+    queueMicrotask(sync);
+    setTimeout(sync,80);
+  }
 },{passive:true,capture:true});
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
 else boot();
-for(const delay of [120,420,1200])setTimeout(sync,delay);
+for(const delay of [120,420,1200])setTimeout(()=>{sync();setLife(steadyLife());},delay);
 }());
