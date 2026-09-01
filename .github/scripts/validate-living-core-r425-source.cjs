@@ -67,10 +67,14 @@ has(current,[
   'formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments',
   'formatx-mini-mag-assistant-r459.js'
 ],'R491 progressive MAG bootstrap');
+has(quality,[
+  '--fx-mag-first-frame-r493','data:image/svg+xml','deploy-r493-inline-first-frame-cls-lock'
+],'R493 inline first-frame source');
 has(currentStyle,[
-  'FormatX r491','formatx-mag-first-frame-r491.svg','progressive-enhancement layer',
+  'FormatX r491','var(--fx-mag-first-frame-r493)','progressive-enhancement layer',
   'min-height: 0 !important','production-r491-progressive-first-frame-direct-r326-layout-a11y-touch'
-],'R491 first-frame geometry and visual fallback');
+],'R493 inline first-frame geometry and progressive visual fallback');
+assert.ok(!currentStyle.includes('formatx-mag-first-frame-r491.svg'),'current MAG CSS must not reintroduce the separate R491 first-frame request');
 
 has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','uSurfacePulse',
@@ -117,4 +121,4 @@ has(quality,[
 ],'measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: current R491 architecture = one native MAG, premium static first frame, progressive WebGL enhancement, R490 non-clipping header and interaction-only zero-idle mobile rendering.');
+console.log('PASS: current architecture = one native MAG, R493 inline premium first frame, progressive WebGL enhancement, R490 non-clipping header and interaction-only zero-idle mobile rendering.');
