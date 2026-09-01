@@ -95,7 +95,11 @@ assert.ok(includesAll(seamlessScroll, [
 assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(seamlessScroll), 'shared seamless runtime must not capture wheel/touchmove');
 assert.ok(includesAll(loopStyle, ['scroll-snap-type: none !important', 'scroll-snap-align: none !important']), 'seamless loop snap suppression missing');
 assert.ok(includesAll(continuousStyle, ['scroll-snap-type: none !important', 'scroll-snap-align: none !important', 'mobile-seamless-r5']), 'global/mobile snap suppression missing');
-assert.ok(includesAll(mobileLoopStyle, ['display: block !important', 'min-height: calc(100svh + max(320px, 24svh))']), 'mobile seamless bridge runway missing');
+assert.ok(includesAll(mobileLoopStyle, [
+  'display: block !important',
+  '--fx-loop-runway: max(320px, 100svh)',
+  'min-height: calc(var(--fx-loop-source-height, 100svh) + var(--fx-loop-runway))'
+]), 'mobile seamless bridge source-height plus full viewport runway missing');
 assert.ok(includesAll(mobileStyle, ['.fx-award-proof__grid', '.fx-plan-qr-card:not(.is-qr-ready)', '.site-footer nav']), 'mobile production stability layer incomplete');
 
 assert.ok(includesAll(downloads, [
@@ -137,8 +141,6 @@ assert.ok(includesAll(deployWorkflow, [
   'npx wrangler deploy'
 ]), 'production deploy must depend on validation and the P0 VIP quality gate');
 
-// The iconic MAG is a first-class requested feature and therefore part of the
-// same production gate as scrolling, downloads and the public operating surface.
 require('./validate-signature-system-r185.cjs');
 require('./validate-igloo-floor.cjs');
 console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, current semantic language owner, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and validation + P0 VIP production gates.');
