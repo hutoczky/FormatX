@@ -26,7 +26,7 @@ const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r4
 const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy';
-const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
+const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260901-r491-progressive-first-frame';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy';
