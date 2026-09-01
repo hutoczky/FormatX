@@ -9,6 +9,7 @@ on:
       - '.github/scripts/serve-p0-candidate.py'
       - '.github/scripts/validate-p0-vip-quality.cjs'
       - '.github/scripts/summarize-p0-lighthouse.cjs'
+      - '.github/scripts/trace-p0-desktop-cls.cjs'
       - '.github/workflows/p0-vip-quality-gate.yml'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
   push:
@@ -19,6 +20,7 @@ on:
       - '.github/scripts/serve-p0-candidate.py'
       - '.github/scripts/validate-p0-vip-quality.cjs'
       - '.github/scripts/summarize-p0-lighthouse.cjs'
+      - '.github/scripts/trace-p0-desktop-cls.cjs'
       - '.github/workflows/p0-vip-quality-gate.yml'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
   workflow_dispatch:
@@ -79,6 +81,14 @@ jobs:
           done
           cat "$RUNNER_TEMP/formatx-p0-http.log" || true
           exit 1
+
+      - name: Capture desktop CLS transition evidence
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p0-evidence/screenshots
+          node .github/scripts/trace-p0-desktop-cls.cjs 2>&1 | tee p0-evidence/p0-desktop-cls-console.log
 
       - name: Run premium P0 browser matrix
         shell: bash
