@@ -157,11 +157,9 @@ function activateCanonicalAsk(event){
   if(typeof window.FormatXOrganismVoice?.open==='function')return;
   askActivationPending=true;
   root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
-  if(root.dataset.fxImmersive!=='active'){
-    root.dataset.fxImmersive='active';
-    root.dataset.fxImmersiveSource='canonical-ask-r477';
-    dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'canonical-ask-r477'}}));
-  }else mountEnhancements();
+  if(root.dataset.fxImmersive!=='active')root.dataset.fxImmersive='active';
+  root.dataset.fxImmersiveSource='canonical-ask-r477';
+  dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'canonical-ask-r477'}}));
   queueMicrotask(openPendingCanonicalAsk);
 }
 
