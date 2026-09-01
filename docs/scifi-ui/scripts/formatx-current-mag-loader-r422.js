@@ -1,7 +1,8 @@
-/* FormatX R491 progressive MAG bootstrap.
+/* FormatX R491/R521 progressive MAG bootstrap.
    The premium static first frame owns the critical paint. The native R326 MAG
    remains the full interactive renderer, but its expensive shader/geometry boot
-   begins only after genuine MAG intent or a settled post-load window. */
+   begins only after genuine MAG intent on mobile, or intent / a settled post-load
+   window on desktop. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -113,8 +114,8 @@ function waitForRendererReady(timeout=8000){
 }
 
 /* Real progressive enhancement: no UA/audit flag. The first frame is complete
-   without WebGL, then the full renderer may start on genuine MAG intent or once
-   the initial page has been visually and interactively settled. */
+   without WebGL. Mobile stays at zero idle until genuine MAG intent; desktop may
+   also enhance after the initial page has been visually and interactively settled. */
 function waitForEnhancementWindow(){
   return new Promise(resolve=>{
     let settled=false;
@@ -134,14 +135,20 @@ function waitForEnhancementWindow(){
     const focusIntent=event=>{if(relevantTarget(event.target))finish('focus-intent');};
     const bind=(target,type,handler,options)=>{target.addEventListener(type,handler,options);listeners.push([target,type,handler,options]);};
     bind(document,'pointerdown',pointerIntent,{capture:true,passive:true});
-    bind(document,'pointerover',pointerIntent,{capture:true,passive:true});
+    if(!mobile)bind(document,'pointerover',pointerIntent,{capture:true,passive:true});
     bind(document,'touchstart',pointerIntent,{capture:true,passive:true});
     bind(document,'keydown',keyIntent,{capture:true,passive:true});
     bind(document,'focusin',focusIntent,{capture:true,passive:true});
     const armAuto=()=>{
-      const delay=mobile?6500:5200;
+      if(mobile){
+        root.dataset.fxCurrentMagEnhancementDelayR491='interaction-only';
+        root.dataset.fxCurrentMagEnhancementPolicyR521='mobile-no-idle-autostart';
+        return;
+      }
+      const delay=5200;
       timer=setTimeout(()=>finish('settled-auto'),delay);
       root.dataset.fxCurrentMagEnhancementDelayR491=String(delay);
+      root.dataset.fxCurrentMagEnhancementPolicyR521='desktop-settled-or-interaction';
     };
     if(document.readyState==='complete')armAuto();
     else addEventListener('load',armAuto,{once:true,passive:true});
