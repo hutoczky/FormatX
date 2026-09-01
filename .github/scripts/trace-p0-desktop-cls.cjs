@@ -6,6 +6,7 @@ const { chromium } = require('playwright');
 
 const URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT = path.resolve('p0-evidence/p0-desktop-cls.json');
+const MOBILE_OUT = path.resolve('p0-evidence/p0-mobile-overflow.json');
 
 (async () => {
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
@@ -69,7 +70,8 @@ const OUT = path.resolve('p0-evidence/p0-desktop-cls.json');
           'class','style','hidden','lang',
           'data-fx-reference-production-r244','data-fx-reference-composition',
           'data-fx-control-owner-r268','data-fx-current-mag-runtime-r422',
-          'data-fx-current-mag-styles-r423','data-fx-motion-runtime-r239'
+          'data-fx-current-mag-styles-r423','data-fx-motion-runtime-r239',
+          'data-fx-p0-geometry-r496'
         ]
       });
     });
@@ -98,7 +100,8 @@ const OUT = path.resolve('p0-evidence/p0-desktop-cls.json');
             controlOwner:document.documentElement.dataset.fxControlOwnerR268 || '',
             currentMag:document.documentElement.dataset.fxCurrentMagRuntimeR422 || '',
             currentMagStyles:document.documentElement.dataset.fxCurrentMagStylesR423 || '',
-            motion:document.documentElement.dataset.fxMotionRuntimeR239 || ''
+            motion:document.documentElement.dataset.fxMotionRuntimeR239 || '',
+            geometry:document.documentElement.dataset.fxP0GeometryR496 || ''
           },
           hero:box('#hero'),
           grid:box('#hero > .hero-grid'),
@@ -110,6 +113,7 @@ const OUT = path.resolve('p0-evidence/p0-desktop-cls.json');
           actions:box('#hero .hero-actions'),
           download:box('#hero-download'),
           space:box('#hero .hero-space'),
+          controls:box('#hero .fx-reference-controls-r204'),
           brand:box('.topbar .brand'),
           brandSmall:box('.topbar .brand small'),
           mag:box('.topbar .fx-reference-mag-button'),
@@ -139,6 +143,64 @@ const OUT = path.resolve('p0-evidence/p0-desktop-cls.json');
     console.log(`P0 desktop CLS trace: cls=${report.cls.toFixed(9)}, shifts=${report.shifts.length}`);
     for (const shift of report.shifts) console.log(JSON.stringify(shift));
     await context.close();
+
+    const mobileContext = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      isMobile: true,
+      hasTouch: true,
+      locale: 'hu-HU',
+      colorScheme: 'dark'
+    });
+    const mobilePage = await mobileContext.newPage();
+    await mobilePage.goto(`${URL}?p0_overflow_trace=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await mobilePage.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {});
+    await mobilePage.waitForTimeout(1100);
+    const mobileOverflow = await mobilePage.evaluate(() => {
+      const root = document.documentElement;
+      const body = document.body;
+      const vw = root.clientWidth;
+      const offenders = [];
+      for (const el of document.querySelectorAll('*')) {
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        if (cs.display === 'none' || cs.visibility === 'hidden' || r.width < .5 || r.height < .5) continue;
+        const right = r.right - vw;
+        const left = -r.left;
+        const scrollExtra = el.scrollWidth - el.clientWidth;
+        if (right > .5 || left > .5 || (scrollExtra > 1 && cs.overflowX === 'visible')) {
+          offenders.push({
+            tag: el.tagName,
+            id: el.id || '',
+            className: String(el.className || '').slice(0, 160),
+            left: +r.left.toFixed(2),
+            right: +r.right.toFixed(2),
+            width: +r.width.toFixed(2),
+            rightOverflow: +Math.max(0, right).toFixed(2),
+            leftOverflow: +Math.max(0, left).toFixed(2),
+            clientWidth: el.clientWidth,
+            scrollWidth: el.scrollWidth,
+            scrollExtra,
+            position: cs.position,
+            boxSizing: cs.boxSizing,
+            overflowX: cs.overflowX,
+            transform: cs.transform
+          });
+        }
+      }
+      offenders.sort((a,b) => Math.max(b.rightOverflow,b.leftOverflow,b.scrollExtra) - Math.max(a.rightOverflow,a.leftOverflow,a.scrollExtra));
+      return {
+        viewport: innerWidth,
+        clientWidth: vw,
+        rootScrollWidth: root.scrollWidth,
+        bodyScrollWidth: body?.scrollWidth || 0,
+        overflow: Math.max(root.scrollWidth, body?.scrollWidth || 0) - vw,
+        offenders: offenders.slice(0, 60)
+      };
+    });
+    fs.writeFileSync(MOBILE_OUT, JSON.stringify(mobileOverflow, null, 2) + '\n');
+    console.log(`P0 mobile overflow trace: overflow=${mobileOverflow.overflow}px, offenders=${mobileOverflow.offenders.length}`);
+    for (const offender of mobileOverflow.offenders.slice(0, 20)) console.log(`P0 overflow offender ${JSON.stringify(offender)}`);
+    await mobileContext.close();
   } finally {
     await browser.close();
   }
