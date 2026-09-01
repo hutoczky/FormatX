@@ -147,6 +147,9 @@ async function state(page) {
     actionLinks: document.querySelectorAll('.fx-organism-actionbar a').length,
     overlayHidden: document.getElementById('fx-organism-console')?.hidden,
     pricingChildren: document.getElementById('pricing')?.children.length,
+    pricingTriggers: document.querySelectorAll('#pricing > [data-organism-open="pricing"]').length,
+    pricingShellCommerce: document.querySelectorAll('#pricing > [data-plan-id], #pricing > [data-plan-qr], #pricing > .price-grid, #pricing > #formatx-plan-qr-dock').length,
+    pricingSigils: document.querySelectorAll('#pricing > .fx-r179-organ-sigil[aria-hidden="true"]').length,
     pricingCards: document.querySelectorAll('[data-organism-panel="pricing"] [data-plan-id]').length,
     qrCards: document.querySelectorAll('[data-organism-panel="pricing"] [data-plan-qr]').length,
     overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
@@ -171,7 +174,9 @@ async function validateDesktop() {
     assert(current.triggers === 5 && current.panels === 5, 'chapter/panel count: ' + JSON.stringify(current));
     assert(current.actionLinks === 3, 'action bar links: ' + JSON.stringify(current));
     assert(current.overlayHidden === true, 'console must start hidden');
-    assert(current.pricingChildren === 1, 'pricing section should contain only its interactive trigger');
+    assert(current.pricingTriggers === 1, 'pricing chapter must retain exactly one interactive trigger: ' + JSON.stringify(current));
+    assert(current.pricingShellCommerce === 0, 'commerce content leaked back into pricing chapter shell: ' + JSON.stringify(current));
+    assert(current.pricingSigils <= 1, 'duplicate SOTY pricing sigils: ' + JSON.stringify(current));
     assert(current.pricingCards === 3 && current.qrCards === 3, 'commerce content was not moved intact');
     assert(current.footerInResources, 'footer must be inside the release/support console');
     assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
@@ -232,6 +237,8 @@ async function validateMobile() {
     diagnostics(page, errors);
     await enterSite(page, 'mobile', errors);
 
+    const current = await state(page);
+    assert(current.pricingTriggers === 1 && current.pricingShellCommerce === 0, 'mobile pricing chapter shell invariant failed: ' + JSON.stringify(current));
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
     await pricingTrigger.scrollIntoViewIfNeeded();
     const box = await pricingTrigger.boundingBox();
