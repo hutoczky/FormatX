@@ -51,7 +51,7 @@ async function activateAndWaitForInterface(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxOrganismInterface === 'ready'
-      && root.dataset.fxOrganismMenu === 'ready'
+      && root.dataset.fxOrganismMenu === 'delegated-r264'
       && root.dataset.fxOrganismCoreController === 'ready'
       && root.dataset.fxOrganismConsoleState === 'ready'
       && root.dataset.fxInteractionGenomeExport === 'ready'
