@@ -1,0 +1,147 @@
+/* FormatX R496 — deterministic final control geometry.
+   Loaded by the canonical first-paint owner before dynamic hero controls mount.
+   It mirrors r264 final geometry and corrects viewport-width overflow without
+   changing the visual design. */
+
+html,
+html body.living-architecture {
+  max-width: 100% !important;
+  overflow-x: clip !important;
+}
+
+@media (min-width: 901px) {
+  html:root:root:root:root:root body.living-architecture .topbar .fx-reference-menu-button {
+    position: fixed !important;
+    inset: auto !important;
+    top: 12px !important;
+    right: 22px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture .topbar .fx-language-toggle {
+    position: fixed !important;
+    inset: auto !important;
+    top: 13px !important;
+    right: 88px !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture .topbar .fx-reference-mag-button {
+    position: fixed !important;
+    inset: auto !important;
+    top: 13px !important;
+    right: 148px !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: auto auto 28px 50% !important;
+    z-index: 12040 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 54px) !important;
+    grid-template-rows: auto !important;
+    align-items: start !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    box-sizing: border-box !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 82px !important;
+    margin: 0 !important;
+    padding: 0 8px 24px !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-r264 {
+    display: contents !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root:root:root:root body.living-architecture .topbar {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero,
+  html:root:root:root:root:root body.living-architecture #hero > .hero-grid,
+  html:root:root:root:root:root body.living-architecture #hero .hero-space {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+}
+
+/* deploy-r496-deterministic-final-geometry */
