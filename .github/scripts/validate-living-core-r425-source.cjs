@@ -113,10 +113,15 @@ lacks(governor,["dispatchEvent(new CustomEvent('formatx:referencepause'","active
 has(header,[
   'FormatX r490/R497/R498','production-r498-mobile-design-system-floor-and-brand-overflow-owner',
   'max-width:118px','overflow:hidden','--fx-cyan:#7cecff','--fx-violet:#8f72ff',
-  '-webkit-text-fill-color:currentColor','background-image:none','content:none'
-],'R498 cross-device header, design-system floor and compact overflow lock');
+  '-webkit-text-fill-color:currentColor','background-image:none','content:none',
+  'production-r517-webkit-brand-intrinsic-fit'
+],'R517 cross-device header, design-system floor and compact intrinsic-fit lock');
 
-has(nativeTouch,['native-r326-touch-r460-controller-tap','formatx:heromagcontrollerrequest','fxHeroMagControllerR460'],'native MAG touch controller');
+has(nativeTouch,[
+  "const VERSION='native-r326-touch-r515-semantic-hit-owner'",
+  'formatx:heromagcontrollerrequest','fxHeroMagControllerR460',
+  'protectedUi','semantic-mag-surface','pointerdown','touchstart'
+],'R515 semantic native MAG touch controller');
 has(mini,['formatx:heromagcontrollerrequest','window.FormatXMiniMagR459={','formatx:minimagready'],'persistent mini-MAG controller');
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 
@@ -127,4 +132,4 @@ has(quality,[
 ],'measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: current architecture = one native MAG, R504 single first-frame owner, progressive WebGL enhancement, Live OS border-box overflow fix, R498 header/design-system floor, deterministic ASK Organism bootstrap and interaction-only zero-idle mobile rendering.');
+console.log('PASS: current architecture = one native MAG, R504 single first-frame owner, progressive WebGL enhancement, Live OS border-box overflow fix, R517 header/design-system floor, deterministic ASK Organism bootstrap, R515 semantic touch ownership and interaction-only zero-idle mobile rendering.');
