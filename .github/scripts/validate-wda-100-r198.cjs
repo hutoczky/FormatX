@@ -56,7 +56,7 @@ for(const token of [
   'content-visibility: visible','fx-reference-liveos','.scroll-cue > span',
   '.topbar > .header-actions','> .fx-rail','contain: layout paint',
   '.fx-qr-placeholder','#main-nav:not(.open)','fx-reference-controls-r204.fx-reference-controls-r264',
-  '--fx-mag-first-frame-r493','data:image/svg+xml','deploy-r493-inline-first-frame-cls-lock'
+  '--fx-mag-first-frame:','data:image/svg+xml','deploy-r493-inline-first-frame'
 ])assert.ok(quality.includes(token),`missing R493 quality CSS: ${token}`);
 assert.match(home,/formatx-quality-r461\.css\?v=20260830-r462-mobile-a11y/);
 assert.match(home,/class="fx-language-toggle"/);
@@ -78,7 +78,7 @@ for(const token of [
   "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'"
 ])assert.ok(currentMag.includes(token),`missing R491 progressive current MAG contract: ${token}`);
 for(const token of [
-  'var(--fx-mag-first-frame-r493)','progressive-enhancement layer','min-height: 0 !important',
+  'FormatX r493','var(--fx-mag-first-frame)','progressive-enhancement layer','min-height: 0 !important',
   'production-r491-progressive-first-frame-direct-r326-layout-a11y-touch'
 ])assert.ok(currentMagCss.includes(token),`missing R493 first-frame CSS contract: ${token}`);
 assert.ok(!currentMagCss.includes('formatx-mag-first-frame-r491.svg'),'R493 current MAG CSS must not trigger the retired standalone first-frame request');
