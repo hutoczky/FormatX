@@ -3,7 +3,9 @@
 .reference-commerce #formatx-plan-qr-dock {
   position: relative !important;
   z-index: 80 !important;
+  box-sizing: border-box !important;
   width: 100%;
+  max-width: 100%;
   margin: 22px 0 16px !important;
   padding: clamp(18px, 2.4vw, 28px) !important;
   display: block !important;
