@@ -144,4 +144,12 @@ html body.living-architecture {
   }
 }
 
-/* deploy-r507-deterministic-final-geometry-header-gap */
+/* Fullscreen Organism is the active viewport owner while a panel is open.
+   Header controls intentionally live at ~12050, so the console must be above
+   that layer instead of relying on stale pre-r264 z-index values. */
+html:root:root:root:root:root body.living-architecture.fx-organism-panel-open .fx-organism-console,
+html:root:root:root:root:root.fx-organism-interface-ready body.living-architecture .fx-organism-console.is-authorised-open {
+  z-index: 13050 !important;
+}
+
+/* deploy-r507-deterministic-final-geometry-header-gap-organism-layer */
