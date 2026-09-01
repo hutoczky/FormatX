@@ -296,16 +296,6 @@
     });
     observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
 
-    /* R497: ASK is the canonical public user-intent surface. Capture the trusted
-       click before downstream control handlers can stop propagation and start
-       the same production on-demand runtime used by immersive activation. */
-    document.addEventListener('click', event => {
-      const target = event.target instanceof Element ? event.target : null;
-      if (!target?.closest('#hero .fx-reference-ask')) return;
-      ROOT.dataset.fxOrganismActivation = 'trusted-ask-r497';
-      loadThreeExperience();
-    }, true);
-
     document.addEventListener('click', event => {
       if (!event.target.closest('[data-currency], .fx-language-toggle, [data-language], [data-language-choice]')) return;
       setTimeout(() => {
@@ -337,6 +327,7 @@
     prepareQrDock();
     bind();
     ROOT.dataset.fxLivingArchitecture = 'ready-performance-v3';
+    ROOT.dataset.fxOrganismActivationOwner = 'motion-runtime-r499';
     dispatchEvent(new CustomEvent('formatx:livingready'));
   }
 
