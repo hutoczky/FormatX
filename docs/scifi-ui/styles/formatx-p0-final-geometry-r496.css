@@ -125,6 +125,23 @@ html body.living-architecture {
   }
 }
 
+/* R508: at the narrow desktop breakpoint the persistent lower-right launcher
+   overlapped the public Live OS proof link. Keep the same assistant available,
+   but anchor it to the upper visual-only edge; its panel then opens downward. */
+@media (min-width: 901px) and (max-width: 1100px) {
+  html:root:root:root:root:root body.living-architecture .fx-mini-mag-assistant-r459 {
+    top: 88px !important;
+    right: max(18px, env(safe-area-inset-right)) !important;
+    bottom: auto !important;
+  }
+  html:root:root:root:root:root body.living-architecture .fx-mini-mag-assistant-r459 .fx-mini-mag-panel-r459 {
+    top: 76px !important;
+    bottom: auto !important;
+    max-height: calc(100dvh - 182px) !important;
+    transform-origin: 100% 0 !important;
+  }
+}
+
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   html:root:root:root:root:root body.living-architecture .topbar {
     box-sizing: border-box !important;
@@ -142,6 +159,26 @@ html body.living-architecture {
     box-sizing: border-box !important;
     max-width: 100% !important;
   }
+
+  /* The normal-motion landing page intentionally does not ship a global box
+     sizing reset. These two late interactive surfaces both use width:100%
+     together with horizontal padding, so they must own border-box explicitly. */
+  html:root:root:root:root:root body.living-architecture footer.site-footer {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+  }
+  html:root:root:root:root:root body.living-architecture .fx-organism-dialogue,
+  html:root:root:root:root:root body.living-architecture .fx-organism-thought {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  html:root:root:root:root:root body.living-architecture .fx-organism-thought {
+    width: 100% !important;
+  }
 }
 
 /* Fullscreen Organism is the active viewport owner while a panel is open.
@@ -152,4 +189,4 @@ html:root:root:root:root:root.fx-organism-interface-ready body.living-architectu
   z-index: 13050 !important;
 }
 
-/* deploy-r507-deterministic-final-geometry-header-gap-organism-layer */
+/* deploy-r508-deterministic-final-geometry-box-model-mini-mag */
