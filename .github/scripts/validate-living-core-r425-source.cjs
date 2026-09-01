@@ -48,7 +48,8 @@ has(motion,[
   'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy',
   "fxSingleLanguageToggleVersion==='7'",
   "fxLegacyMagRuntimeCleanupR460='static-html-clean-r461'",
-  "fxCanonicalAskActivationR477='armed'"
+  "fxCanonicalAskActivationR477='armed'",
+  'ensureOrganismInterface()','fxOrganismBootstrapR498'
 ],'compact runtime bootstrap');
 lacks(motion,['isRetiredMagRuntime','formatx-premium-finish','formatx-live-heartbeat-r155','formatx-signature-system-r185','formatx-seamless-enforcer-r159'],'dead runtime filtering');
 
@@ -106,9 +107,10 @@ has(governor,[
 lacks(governor,["dispatchEvent(new CustomEvent('formatx:referencepause'","active('scroll-r463'","active('resize-r463'"],'synchronous/passive WebGL wakeup');
 
 has(header,[
-  'FormatX r490','production-r490-compact-brand-no-clipping','max-width:126px',
+  'FormatX r490/R497/R498','production-r498-mobile-design-system-floor-and-brand-overflow-owner',
+  'max-width:118px','overflow:hidden','--fx-cyan:#7cecff','--fx-violet:#8f72ff',
   '-webkit-text-fill-color:currentColor','background-image:none','content:none'
-],'R490 cross-device header and compact brand lock');
+],'R498 cross-device header, design-system floor and compact overflow lock');
 
 has(nativeTouch,['native-r326-touch-r460-controller-tap','formatx:heromagcontrollerrequest','fxHeroMagControllerR460'],'native MAG touch controller');
 has(mini,['formatx:heromagcontrollerrequest','window.FormatXMiniMagR459={','formatx:minimagready'],'persistent mini-MAG controller');
@@ -121,4 +123,4 @@ has(quality,[
 ],'measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: current architecture = one native MAG, R493 inline premium first frame, progressive WebGL enhancement, R490 non-clipping header and interaction-only zero-idle mobile rendering.');
+console.log('PASS: current architecture = one native MAG, R493 inline premium first frame, progressive WebGL enhancement, R498 overflow-safe header/design-system floor, deterministic ASK Organism bootstrap and interaction-only zero-idle mobile rendering.');
