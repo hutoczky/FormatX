@@ -79,7 +79,7 @@ for(const token of [
 ])assert.ok(currentMag.includes(token),`missing R491 progressive current MAG contract: ${token}`);
 for(const token of [
   'FormatX r493','var(--fx-mag-first-frame)','progressive-enhancement layer','min-height: 0 !important',
-  'production-r491-progressive-first-frame-direct-r326-layout-a11y-touch'
+  'production-r493-progressive-first-frame-direct-r326-layout-a11y-touch'
 ])assert.ok(currentMagCss.includes(token),`missing R493 first-frame CSS contract: ${token}`);
 assert.ok(!currentMagCss.includes('formatx-mag-first-frame-r491.svg'),'R493 current MAG CSS must not trigger the retired standalone first-frame request');
 
