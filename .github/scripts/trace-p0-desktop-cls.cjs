@@ -1,0 +1,148 @@
+'use strict';
+
+const fs = require('node:fs');
+const path = require('node:path');
+const { chromium } = require('playwright');
+
+const URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
+const OUT = path.resolve('p0-evidence/p0-desktop-cls.json');
+
+(async () => {
+  fs.mkdirSync(path.dirname(OUT), { recursive: true });
+  const browser = await chromium.launch({ headless: true, channel: 'chrome' });
+  try {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      locale: 'hu-HU',
+      colorScheme: 'dark'
+    });
+    const page = await context.newPage();
+
+    await page.addInitScript(() => {
+      window.__fxP0Shifts = [];
+      window.__fxP0Mutations = [];
+      const selector = node => {
+        if (!(node instanceof Element)) return '';
+        if (node.id) return `#${node.id}`;
+        const classes = [...node.classList].slice(0, 5).join('.');
+        return `${node.tagName.toLowerCase()}${classes ? `.${classes}` : ''}`;
+      };
+      new PerformanceObserver(list => {
+        for (const entry of list.getEntries()) {
+          if (entry.hadRecentInput) continue;
+          window.__fxP0Shifts.push({
+            t: +entry.startTime.toFixed(2),
+            value: entry.value,
+            sources: (entry.sources || []).map(source => ({
+              node: selector(source.node),
+              previous: source.previousRect ? {
+                x: +source.previousRect.x.toFixed(2), y: +source.previousRect.y.toFixed(2),
+                w: +source.previousRect.width.toFixed(2), h: +source.previousRect.height.toFixed(2)
+              } : null,
+              current: source.currentRect ? {
+                x: +source.currentRect.x.toFixed(2), y: +source.currentRect.y.toFixed(2),
+                w: +source.currentRect.width.toFixed(2), h: +source.currentRect.height.toFixed(2)
+              } : null
+            }))
+          });
+        }
+      }).observe({ type: 'layout-shift', buffered: true });
+
+      const started = performance.now();
+      new MutationObserver(records => {
+        if (performance.now() - started > 5000) return;
+        for (const record of records) {
+          window.__fxP0Mutations.push({
+            t: +performance.now().toFixed(2),
+            type: record.type,
+            target: selector(record.target),
+            attr: record.attributeName || '',
+            added: record.addedNodes?.length || 0,
+            removed: record.removedNodes?.length || 0
+          });
+        }
+      }).observe(document.documentElement, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: [
+          'class','style','hidden','lang',
+          'data-fx-reference-production-r244','data-fx-reference-composition',
+          'data-fx-control-owner-r268','data-fx-current-mag-runtime-r422',
+          'data-fx-current-mag-styles-r423','data-fx-motion-runtime-r239'
+        ]
+      });
+    });
+
+    const samples = [];
+    async function sample(label) {
+      samples.push(await page.evaluate(label => {
+        const box = selector => {
+          const element = document.querySelector(selector);
+          if (!element) return null;
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return {
+            x:+rect.x.toFixed(2), y:+rect.y.toFixed(2), w:+rect.width.toFixed(2), h:+rect.height.toFixed(2),
+            minHeight:style.minHeight, height:style.height, display:style.display,
+            position:style.position, margin:style.margin, padding:style.padding,
+            opacity:style.opacity, transform:style.transform
+          };
+        };
+        return {
+          label,
+          t:+performance.now().toFixed(2),
+          root:{
+            reference:document.documentElement.dataset.fxReferenceProductionR244 || '',
+            composition:document.documentElement.dataset.fxReferenceComposition || '',
+            controlOwner:document.documentElement.dataset.fxControlOwnerR268 || '',
+            currentMag:document.documentElement.dataset.fxCurrentMagRuntimeR422 || '',
+            currentMagStyles:document.documentElement.dataset.fxCurrentMagStylesR423 || '',
+            motion:document.documentElement.dataset.fxMotionRuntimeR239 || ''
+          },
+          hero:box('#hero'),
+          grid:box('#hero > .hero-grid'),
+          copy:box('#hero .hero-copy'),
+          category:box('#hero .fx-category-definition'),
+          title:box('#hero-title'),
+          titleMain:box('#hero .hero-title-main'),
+          lead:box('#hero .hero-lead'),
+          actions:box('#hero .hero-actions'),
+          download:box('#hero-download'),
+          space:box('#hero .hero-space'),
+          brand:box('.topbar .brand'),
+          brandSmall:box('.topbar .brand small'),
+          mag:box('.topbar .fx-reference-mag-button'),
+          language:box('.topbar .fx-language-toggle'),
+          menu:box('#menu-toggle')
+        };
+      }, label));
+    }
+
+    await page.goto(`${URL}?p0_cls_trace=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await sample('dcl');
+    let elapsed = 0;
+    for (const delay of [25,25,50,50,100,100,150,250,250,500,500,1000,2000]) {
+      await page.waitForTimeout(delay);
+      elapsed += delay;
+      await sample(`${elapsed}ms`);
+    }
+
+    const final = await page.evaluate(() => ({
+      shifts: window.__fxP0Shifts || [],
+      mutations: window.__fxP0Mutations || [],
+      cls: (window.__fxP0Shifts || []).reduce((sum, entry) => sum + entry.value, 0)
+    }));
+    const report = { generatedAt: new Date().toISOString(), url: URL, samples, ...final };
+    fs.writeFileSync(OUT, JSON.stringify(report, null, 2) + '\n');
+    await page.screenshot({ path: 'p0-evidence/screenshots/desktop-cls-trace.png', fullPage: false, animations: 'disabled', caret: 'hide' });
+    console.log(`P0 desktop CLS trace: cls=${report.cls.toFixed(9)}, shifts=${report.shifts.length}`);
+    for (const shift of report.shifts) console.log(JSON.stringify(shift));
+    await context.close();
+  } finally {
+    await browser.close();
+  }
+})().catch(error => {
+  console.error(error.stack || String(error));
+  process.exit(1);
+});
