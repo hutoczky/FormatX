@@ -70,11 +70,12 @@ has(current,[
 ],'R491 progressive MAG bootstrap');
 has(quality,[
   '--fx-mag-first-frame:','data:image/svg+xml','deploy-r493-inline-first-frame'
-],'R493 inline first-frame source');
+],'critical inline first-frame source');
 has(currentStyle,[
-  'FormatX r493','var(--fx-mag-first-frame)','progressive-enhancement layer',
-  'min-height: 0 !important','production-r493-progressive-first-frame-direct-r326-layout-a11y-touch'
-],'R493 inline first-frame geometry and progressive visual fallback');
+  'FormatX r502','var(--fx-mag-first-frame)','progressive-enhancement layer',
+  'min-height: 0 !important','production-r502-progressive-first-frame-direct-r326-layout-a11y-touch'
+],'R502 filter-free inline first-frame geometry and progressive visual fallback');
+assert.ok(!currentStyle.includes('feGaussianBlur'),'R502 first frame must remain free of SVG Gaussian blur work');
 assert.ok(!currentStyle.includes('formatx-mag-first-frame-r491.svg'),'current MAG CSS must not reintroduce the separate R491 first-frame request');
 
 has(renderer,[
@@ -123,4 +124,4 @@ has(quality,[
 ],'measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: current architecture = one native MAG, R493 inline premium first frame, progressive WebGL enhancement, R498 overflow-safe header/design-system floor, deterministic ASK Organism bootstrap and interaction-only zero-idle mobile rendering.');
+console.log('PASS: current architecture = one native MAG, R502 filter-free inline premium first frame, progressive WebGL enhancement, R498 overflow-safe header/design-system floor, deterministic ASK Organism bootstrap and interaction-only zero-idle mobile rendering.');
