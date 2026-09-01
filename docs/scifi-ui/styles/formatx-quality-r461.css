@@ -2,6 +2,13 @@
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
+/* R525: reserve the classic desktop scrollbar gutter before any content/runtime
+   expansion can make the document scrollable. This prevents the 15px viewport
+   width change from reflowing the entire hero and repainting the title LCP. */
+@media (min-width: 901px) {
+  html { scrollbar-gutter: stable !important; }
+}
+
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
 html body.living-architecture #hero #hero-title,
@@ -243,3 +250,4 @@ html body.living-architecture #hero .hero-space::after {
   filter: none !important;
 }
 /* deploy-r495-filter-free-first-frame */
+/* deploy-r525-stable-desktop-scrollbar-gutter */
