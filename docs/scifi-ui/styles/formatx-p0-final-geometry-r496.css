@@ -1,4 +1,4 @@
-/* FormatX R496/R509 — deterministic final control geometry.
+/* FormatX R496/R509/R510 — deterministic final control geometry.
    Loaded by the canonical first-paint owner before dynamic hero controls mount.
    It mirrors r264 final geometry and corrects viewport-width overflow without
    changing the visual design. */
@@ -124,10 +124,8 @@ html body.living-architecture {
     translate: none !important;
   }
 
-  /* R509 desktop first paint: preserve a crystalline MAG silhouette with
-     compositor-cheap CSS gradients instead of a CSS url(). Background-image
-     URL elements are LCP candidates; pure gradients/clip-path are not. This
-     keeps the premium first frame while allowing static Hero copy to own LCP. */
+  /* Desktop first paint uses a compositor-cheap crystalline silhouette rather
+     than an image URL so static Hero copy can own LCP. */
   html:root:root:root:root:root body.living-architecture #hero .hero-space::before {
     content: "" !important;
     position: absolute !important;
@@ -158,11 +156,23 @@ html body.living-architecture {
     box-shadow: 0 0 72px rgba(55, 183, 255, .075) !important;
     pointer-events: none !important;
   }
+
+  /* Once native R326 WebGL is ready, no CSS/image overlay may remain above it. */
+  html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
+  html:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
+  html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::after,
+  html:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    opacity: 0 !important;
+    animation: none !important;
+  }
 }
 
-/* At the narrow desktop breakpoint the persistent lower-right launcher used to
-   overlap the public Live OS proof link. Keep the assistant available but in
-   the upper visual-only edge; its panel opens downward. */
 @media (min-width: 901px) and (max-width: 1100px) {
   html:root:root:root:root:root body.living-architecture .fx-mini-mag-assistant-r459 {
     top: 88px !important;
@@ -178,7 +188,8 @@ html body.living-architecture {
 }
 
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
-  html:root:root:root:root:root body.living-architecture .topbar {
+  html:root:root:root:root:root body.living-architecture .topbar,
+  html:root:root:root:root:root body.living-architecture footer.site-footer {
     box-sizing: border-box !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -195,13 +206,6 @@ html body.living-architecture {
     max-width: 100% !important;
   }
 
-  html:root:root:root:root:root body.living-architecture footer.site-footer {
-    box-sizing: border-box !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin-inline: 0 !important;
-  }
   html:root:root:root:root:root body.living-architecture .fx-organism-dialogue,
   html:root:root:root:root:root body.living-architecture .fx-organism-thought {
     box-sizing: border-box !important;
@@ -218,4 +222,4 @@ html:root:root:root:root:root.fx-organism-interface-ready body.living-architectu
   z-index: 13050 !important;
 }
 
-/* deploy-r509-deterministic-final-geometry-css-mag-lcp-owner */
+/* deploy-r510-deterministic-final-geometry-pure-webgl-handoff */
