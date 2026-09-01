@@ -546,4 +546,40 @@
   }
 }
 
-/* deploy-r494-p0-desktop-critical-path */
+/* R497 — desktop viewport layers must never participate in normal flow.
+   The mobile first-paint sheet already enforced this. Desktop was still able
+   to briefly treat the canvas/atmosphere as document spacers before the full
+   runtime CSS arrived, shifting the 76px header and hero by ~72px. */
+@media (min-width: 901px) {
+  html,
+  html body.living-architecture {
+    margin: 0 !important;
+    border: 0 !important;
+  }
+  html body.living-architecture > #fx-apex-canvas,
+  html body.living-architecture > .fx-atmosphere {
+    position: fixed !important;
+    inset: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+  html body.living-architecture > #fx-apex-canvas { z-index: -10 !important; }
+  html body.living-architecture > .fx-atmosphere { z-index: -9 !important; }
+  html body.living-architecture > .skip-link {
+    position: fixed !important;
+    top: -160px !important;
+    left: 12px !important;
+    margin: 0 !important;
+  }
+  html body.living-architecture > .skip-link:focus-visible { top: 12px !important; }
+}
+
+/* deploy-r497-p0-desktop-viewport-layer-owner */
