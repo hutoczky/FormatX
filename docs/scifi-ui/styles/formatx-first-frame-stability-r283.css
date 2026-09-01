@@ -9,10 +9,6 @@
     overflow-x: clip !important;
   }
 
-  /* A legacy menu button was translated 200vw while hidden. Some Chromium
-     layouts still included that transformed box in the body paint width,
-     producing an ~808px full-page surface in a 390px viewport. Keep it out of
-     the render tree without moving it outside the viewport. */
   html body.living-architecture #fx-reference-legacy-menu,
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .menu-toggle.fx-organism-system-toggle:not(.fx-reference-menu-button) {
     position: fixed !important;
@@ -563,9 +559,6 @@
   html body.living-architecture > .skip-link:focus-visible { top: 12px !important; }
 }
 
-/* R511 desktop LCP owner: this stylesheet is render-blocking and loads before
-   the quality layer. A high-specificity gradient crystal means the mobile SVG
-   variable is never a computed desktop background/LCP candidate. */
 @media (min-width: 901px) {
   html:root:root:root:root:root body.living-architecture #hero .hero-space::before {
     content: "" !important;
@@ -593,4 +586,25 @@
   }
 }
 
+/* R517: the first-paint title already uses the settled Design System 2.0
+   material, so the later design-system stylesheet does not repaint the LCP. */
+@media (min-width: 901px) {
+  html[data-fx-design-system="2"] body.living-architecture #hero #hero-title,
+  html[data-fx-design-system="2"] body.living-architecture #hero #hero-title .hero-title-main,
+  html[data-fx-design-system="2"] body.living-architecture #hero #hero-title .hero-title-sub {
+    font-family: "Helvetica Neue", Inter, ui-sans-serif, system-ui, sans-serif !important;
+    font-weight: 500 !important;
+    font-synthesis: none !important;
+    text-rendering: optimizeLegibility !important;
+  }
+  html[data-fx-design-system="2"] body.living-architecture #hero #hero-title .hero-title-main {
+    color: transparent !important;
+    background: linear-gradient(115deg, #fff 0%, #c6f6ff 38%, #86caff 62%, #c8bcff 86%, #fff 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+}
+
 /* deploy-r511-desktop-gradient-first-frame-lcp-owner */
+/* deploy-r517-settled-title-first-paint */
