@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — R493 inline first frame + R491 progressive runtime + P0 VIP budgets. */
+/* FormatX award-quality gate — R502 filter-free inline first frame + R491 progressive runtime + P0 VIP budgets. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -57,7 +57,7 @@ for(const token of [
   '.topbar > .header-actions','> .fx-rail','contain: layout paint',
   '.fx-qr-placeholder','#main-nav:not(.open)','fx-reference-controls-r204.fx-reference-controls-r264',
   '--fx-mag-first-frame:','data:image/svg+xml','deploy-r493-inline-first-frame'
-])assert.ok(quality.includes(token),`missing R493 quality CSS: ${token}`);
+])assert.ok(quality.includes(token),`missing critical quality CSS: ${token}`);
 assert.match(home,/formatx-quality-r461\.css\?v=20260830-r462-mobile-a11y/);
 assert.match(home,/class="fx-language-toggle"/);
 assert.match(home,/data-fx-single-language-toggle="ready-v3"/);
@@ -78,10 +78,11 @@ for(const token of [
   "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'"
 ])assert.ok(currentMag.includes(token),`missing R491 progressive current MAG contract: ${token}`);
 for(const token of [
-  'FormatX r493','var(--fx-mag-first-frame)','progressive-enhancement layer','min-height: 0 !important',
-  'production-r493-progressive-first-frame-direct-r326-layout-a11y-touch'
-])assert.ok(currentMagCss.includes(token),`missing R493 first-frame CSS contract: ${token}`);
-assert.ok(!currentMagCss.includes('formatx-mag-first-frame-r491.svg'),'R493 current MAG CSS must not trigger the retired standalone first-frame request');
+  'FormatX r502','var(--fx-mag-first-frame)','progressive-enhancement layer','min-height: 0 !important',
+  'production-r502-progressive-first-frame-direct-r326-layout-a11y-touch'
+])assert.ok(currentMagCss.includes(token),`missing R502 first-frame CSS contract: ${token}`);
+assert.ok(!currentMagCss.includes('feGaussianBlur'),'R502 first frame must remain free of SVG Gaussian blur work');
+assert.ok(!currentMagCss.includes('formatx-mag-first-frame-r491.svg'),'R502 current MAG CSS must not trigger the retired standalone first-frame request');
 
 for(const token of [
   "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'",
@@ -151,4 +152,4 @@ validateLighthouse(desktop,'desktop');
 validateLighthouse(mobile,'mobile');
 
 for(const source of [intro,motion,language,currentMag,solidGlass,life,governor,controls])new Function(source);
-console.log('PASS: R493 inline first frame + R491 progressive native MAG, interaction-only mobile energy, zero-idle policy and P0 VIP 100/100/100/100 budgets are structurally valid.');
+console.log('PASS: R502 filter-free inline first frame + R491 progressive native MAG, interaction-only mobile energy, zero-idle policy and P0 VIP 100/100/100/100 budgets are structurally valid.');
