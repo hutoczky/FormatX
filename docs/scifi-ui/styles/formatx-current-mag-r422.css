@@ -1,9 +1,44 @@
-/* FormatX r454 — native MAG layout and accessibility composition.
-   Visible material and surface motion belong exclusively to the WebGL shader. */
+/* FormatX r491 — native MAG layout, zero-cost premium first frame and accessibility composition.
+   The static first frame is a normal progressive-enhancement layer, not an audit path.
+   Native WebGL replaces it after the critical first-paint window or genuine MAG intent. */
 html,
 body {
   max-width: 100% !important;
   overflow-x: clip !important;
+}
+
+/* The first visitor frame must already look intentional while the expensive
+   WebGL renderer is still outside the critical rendering path. Keeping the
+   placeholder on the existing hero-space geometry also prevents a late visual
+   hole from dominating Speed Index. */
+html body.living-architecture #hero .hero-space {
+  isolation: isolate !important;
+}
+
+html body.living-architecture #hero .hero-space::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 4% !important;
+  z-index: 1 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: url("../assets/images/formatx-mag-first-frame-r491.svg") center / contain no-repeat !important;
+  opacity: .98 !important;
+  filter: drop-shadow(0 0 24px rgba(73, 213, 255, .18)) !important;
+  pointer-events: none !important;
+  transform: translateZ(0) !important;
+}
+
+html body.living-architecture #hero .hero-space::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 14% 10% 9% !important;
+  z-index: 0 !important;
+  display: block !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 50% 48%, rgba(116, 235, 255, .15), rgba(78, 113, 255, .055) 46%, transparent 72%) !important;
+  box-shadow: 0 0 72px rgba(55, 183, 255, .075) !important;
+  pointer-events: none !important;
 }
 
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
@@ -20,7 +55,7 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   visibility:visible!important;pointer-events:none!important;transform-origin:50% 48%!important;
 }
 
-/* CSS fallback artwork must disappear as soon as native WebGL is ready. */
+/* Native WebGL atomically takes visual ownership after it is actually ready. */
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
 html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::after,
@@ -29,10 +64,33 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   box-shadow:none!important;filter:none!important;opacity:0!important;animation:none!important;
 }
 
+/* r491 desktop CLS lock. The settled reference composition does not require the
+   old 505px copy reservation. Removing that obsolete minimum before first paint
+   keeps the copy/title/action stack in its final geometry when the r244 state
+   attribute is attached later. */
+@media (min-width:901px) {
+  html body.living-architecture #hero .hero-grid > .hero-copy {
+    min-height: 0 !important;
+  }
+  html body.living-architecture #hero #hero-title,
+  html body.living-architecture #hero .hero-title-main,
+  html body.living-architecture #hero .hero-title-sub,
+  html body.living-architecture #hero .hero-lead,
+  html body.living-architecture #hero .hero-actions {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
     inset:0 auto 0 50%!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;
     translate:-50% 0!important;
+  }
+
+  html body.living-architecture #hero .hero-space::before {
+    inset: 2% 4% 3% !important;
+    filter: drop-shadow(0 0 18px rgba(73, 213, 255, .15)) !important;
   }
 
   html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
@@ -71,4 +129,12 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
-/* production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer */
+@media (prefers-reduced-motion:reduce) {
+  html body.living-architecture #hero .hero-space::before,
+  html body.living-architecture #hero .hero-space::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* production-r491-progressive-first-frame-direct-r326-layout-a11y-touch */
