@@ -1,4 +1,4 @@
-/* FormatX r504 — native MAG layout, single first-frame owner and overflow-safe Live OS.
+/* FormatX r522 — native MAG layout, single first-frame owner and overflow-safe Live OS.
    The render-blocking quality layer owns the only first-frame image bytes.
    This later progressive stylesheet reuses that variable without replacing it,
    preventing late mobile LCP invalidation while native WebGL enhances on intent. */
@@ -62,9 +62,6 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   box-shadow:none!important;filter:none!important;opacity:0!important;animation:none!important;
 }
 
-/* R504: #live-operating-system becomes 2px wider than the viewport when its
-   content-visibility subtree activates because its border was added outside a
-   100% content-box. Keep the same visual width but include border/padding in it. */
 html body.living-architecture #live-operating-system.fx-live-os {
   box-sizing: border-box !important;
   max-width: 100% !important;
@@ -81,6 +78,17 @@ html body.living-architecture #live-operating-system.fx-live-os {
   html body.living-architecture #hero .hero-actions {
     transition: none !important;
     animation: none !important;
+  }
+
+  /* R522: the previous 65px drop-shadow on the LCP H1 forced an expensive
+     compositor blur. Keep the restrained cyan depth cue without a filter pass. */
+  html body.living-architecture #hero .hero-title-main {
+    filter: none !important;
+    text-shadow: 0 12px 30px rgba(75,170,220,.14) !important;
+  }
+  html body.living-architecture #hero .hero-title-sub {
+    filter: none !important;
+    text-shadow: 0 8px 24px rgba(88,184,226,.10) !important;
   }
 }
 
@@ -139,4 +147,4 @@ html body.living-architecture #live-operating-system.fx-live-os {
   }
 }
 
-/* production-r504-single-first-frame-owner-live-os-border-box */
+/* production-r522-single-first-frame-owner-cheap-desktop-title-glow */
