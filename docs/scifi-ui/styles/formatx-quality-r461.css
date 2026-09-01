@@ -1,4 +1,4 @@
-/* FormatX r461/r462/R489 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R489/R492 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
@@ -11,6 +11,51 @@ html body.living-architecture #hero .hero-lead {
   opacity: 1 !important;
   animation: none !important;
   transition: none !important;
+}
+
+/* R492: keep the settled desktop copy geometry from the parser's first style
+   calculation. The older first-frame layer reserves ~505px and the current MAG
+   stylesheet later releases it; applying the final value here prevents that
+   late collapse from becoming a real layout shift. */
+@media (min-width: 901px) {
+  html body.living-architecture #hero .hero-grid > .hero-copy {
+    min-height: 0 !important;
+  }
+}
+
+/* R492: parser-discoverable MAG first frame. These values intentionally match
+   the dynamically loaded current-MAG stylesheet. The image is therefore
+   requested during the critical CSS path instead of several seconds later,
+   while native WebGL remains a progressive enhancement above this layer. */
+html body.living-architecture #hero .hero-space {
+  position: relative;
+  isolation: isolate !important;
+}
+
+html body.living-architecture #hero .hero-space::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 4% !important;
+  z-index: 1 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: url("../assets/images/formatx-mag-first-frame-r491.svg") center / contain no-repeat !important;
+  opacity: .98 !important;
+  filter: drop-shadow(0 0 24px rgba(73, 213, 255, .18)) !important;
+  pointer-events: none !important;
+  transform: translateZ(0) !important;
+}
+
+html body.living-architecture #hero .hero-space::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 14% 10% 9% !important;
+  z-index: 0 !important;
+  display: block !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 50% 48%, rgba(116, 235, 255, .15), rgba(78, 113, 255, .055) 46%, transparent 72%) !important;
+  box-shadow: 0 0 72px rgba(55, 183, 255, .075) !important;
+  pointer-events: none !important;
 }
 
 html body.living-architecture .fx-reference-liveos {
@@ -88,6 +133,11 @@ html body.living-architecture .topbar > .fx-language-toggle {
   html body.living-architecture #hero .hero-space {
     contain: layout paint !important;
     overflow: hidden !important;
+  }
+
+  html body.living-architecture #hero .hero-space::before {
+    inset: 2% 4% 3% !important;
+    filter: drop-shadow(0 0 18px rgba(73, 213, 255, .15)) !important;
   }
 
   html body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
@@ -187,10 +237,12 @@ html body.living-architecture .topbar > .fx-language-toggle {
 
 @media (prefers-reduced-motion: reduce) {
   html body.living-architecture .fx-reference-liveos,
-  html body.living-architecture .scroll-cue > span {
+  html body.living-architecture .scroll-cue > span,
+  html body.living-architecture #hero .hero-space::before,
+  html body.living-architecture #hero .hero-space::after {
     transition: none !important;
     animation: none !important;
   }
 }
 
-/* deploy-r489-mobile-a11y-contrast */
+/* deploy-r492-parser-first-frame-cls-lock */
