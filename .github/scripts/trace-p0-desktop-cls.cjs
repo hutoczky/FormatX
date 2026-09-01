@@ -155,51 +155,83 @@ const MOBILE_OUT = path.resolve('p0-evidence/p0-mobile-overflow.json');
     await mobilePage.goto(`${URL}?p0_overflow_trace=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
     await mobilePage.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {});
     await mobilePage.waitForTimeout(1100);
-    const mobileOverflow = await mobilePage.evaluate(() => {
-      const root = document.documentElement;
-      const body = document.body;
-      const vw = root.clientWidth;
-      const offenders = [];
-      for (const el of document.querySelectorAll('*')) {
-        const cs = getComputedStyle(el);
-        const r = el.getBoundingClientRect();
-        if (cs.display === 'none' || cs.visibility === 'hidden' || r.width < .5 || r.height < .5) continue;
-        const right = r.right - vw;
-        const left = -r.left;
-        const scrollExtra = el.scrollWidth - el.clientWidth;
-        if (right > .5 || left > .5 || (scrollExtra > 1 && cs.overflowX === 'visible')) {
-          offenders.push({
-            tag: el.tagName,
-            id: el.id || '',
-            className: String(el.className || '').slice(0, 160),
-            left: +r.left.toFixed(2),
-            right: +r.right.toFixed(2),
-            width: +r.width.toFixed(2),
-            rightOverflow: +Math.max(0, right).toFixed(2),
-            leftOverflow: +Math.max(0, left).toFixed(2),
-            clientWidth: el.clientWidth,
-            scrollWidth: el.scrollWidth,
-            scrollExtra,
-            position: cs.position,
-            boxSizing: cs.boxSizing,
-            overflowX: cs.overflowX,
-            transform: cs.transform
-          });
+
+    const overflowSamples = [];
+    async function overflowProbe(label) {
+      overflowSamples.push(await mobilePage.evaluate(label => {
+        const root = document.documentElement;
+        const body = document.body;
+        const vw = root.clientWidth;
+        const offenders = [];
+        for (const el of document.querySelectorAll('*')) {
+          const cs = getComputedStyle(el);
+          const r = el.getBoundingClientRect();
+          if (cs.display === 'none' || cs.visibility === 'hidden' || r.width < .5 || r.height < .5) continue;
+          const right = r.right - vw;
+          const left = -r.left;
+          const scrollExtra = el.scrollWidth - el.clientWidth;
+          if (right > .5 || left > .5 || (scrollExtra > 1 && cs.overflowX === 'visible')) {
+            offenders.push({
+              tag: el.tagName,
+              id: el.id || '',
+              className: String(el.className || '').slice(0, 160),
+              left: +r.left.toFixed(2),
+              right: +r.right.toFixed(2),
+              width: +r.width.toFixed(2),
+              rightOverflow: +Math.max(0, right).toFixed(2),
+              leftOverflow: +Math.max(0, left).toFixed(2),
+              clientWidth: el.clientWidth,
+              scrollWidth: el.scrollWidth,
+              scrollExtra,
+              position: cs.position,
+              boxSizing: cs.boxSizing,
+              overflowX: cs.overflowX,
+              transform: cs.transform
+            });
+          }
         }
-      }
-      offenders.sort((a,b) => Math.max(b.rightOverflow,b.leftOverflow,b.scrollExtra) - Math.max(a.rightOverflow,a.leftOverflow,a.scrollExtra));
-      return {
-        viewport: innerWidth,
-        clientWidth: vw,
-        rootScrollWidth: root.scrollWidth,
-        bodyScrollWidth: body?.scrollWidth || 0,
-        overflow: Math.max(root.scrollWidth, body?.scrollWidth || 0) - vw,
-        offenders: offenders.slice(0, 60)
-      };
-    });
-    fs.writeFileSync(MOBILE_OUT, JSON.stringify(mobileOverflow, null, 2) + '\n');
+        offenders.sort((a,b) => Math.max(b.rightOverflow,b.leftOverflow,b.scrollExtra) - Math.max(a.rightOverflow,a.leftOverflow,a.scrollExtra));
+        return {
+          label,
+          scrollY: +scrollY.toFixed(2),
+          viewport: innerWidth,
+          clientWidth: vw,
+          rootScrollWidth: root.scrollWidth,
+          bodyScrollWidth: body?.scrollWidth || 0,
+          overflow: Math.max(root.scrollWidth, body?.scrollWidth || 0) - vw,
+          offenders: offenders.slice(0, 60)
+        };
+      }, label));
+    }
+
+    await overflowProbe('settled-top');
+    const pageHeight = await mobilePage.evaluate(() => Math.max(document.documentElement.scrollHeight, document.body?.scrollHeight || 0));
+    const innerHeight = await mobilePage.evaluate(() => window.innerHeight);
+    const maxScroll = Math.max(0, pageHeight - innerHeight);
+    for (const ratio of [0.25, 0.5, 0.75, 1]) {
+      await mobilePage.evaluate(y => window.scrollTo(0, y), Math.round(maxScroll * ratio));
+      await mobilePage.waitForTimeout(140);
+      await overflowProbe(`scroll-${Math.round(ratio * 100)}`);
+    }
+    await mobilePage.evaluate(() => window.scrollTo(0, 0));
+    await mobilePage.waitForTimeout(140);
+    await overflowProbe('returned-top');
+
+    const mobileOverflow = overflowSamples[overflowSamples.length - 1];
+    const mobileReport = {
+      generatedAt: new Date().toISOString(),
+      pageHeight,
+      innerHeight,
+      maxScroll,
+      samples: overflowSamples,
+      ...mobileOverflow
+    };
+    fs.writeFileSync(MOBILE_OUT, JSON.stringify(mobileReport, null, 2) + '\n');
     console.log(`P0 mobile overflow trace: overflow=${mobileOverflow.overflow}px, offenders=${mobileOverflow.offenders.length}`);
-    for (const offender of mobileOverflow.offenders.slice(0, 20)) console.log(`P0 overflow offender ${JSON.stringify(offender)}`);
+    for (const sample of overflowSamples) {
+      console.log(`P0 overflow sample ${sample.label}: y=${sample.scrollY} overflow=${sample.overflow}px root=${sample.rootScrollWidth} body=${sample.bodyScrollWidth}`);
+      for (const offender of sample.offenders.slice(0, 12)) console.log(`P0 overflow offender ${sample.label} ${JSON.stringify(offender)}`);
+    }
     await mobileContext.close();
   } finally {
     await browser.close();
