@@ -12,6 +12,7 @@ const intro=read('docs/scifi-ui/scripts/formatx-event-horizon.js');
 const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
 const language=read('docs/scifi-ui/scripts/single-language-toggle.js');
 const current=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
+const currentStyle=read('docs/scifi-ui/styles/formatx-current-mag-r422.css');
 const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const solidGlass=read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js');
 const life=read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
@@ -29,7 +30,7 @@ has(home,[
   'formatx-quality-r461.css?v=20260830-r462-mobile-a11y',
   'data-fx-single-language-toggle="ready-v3"',
   'class="fx-language-toggle"'
-],'R474 static entry path');
+],'R491 static entry path');
 for(const token of [
   'data-fx-premium-finish','data-fx-live-heartbeat-r155','data-fx-signature-system-r185',
   'data-fx-seamless-enforcer-r159','data-fx-living-energy-r168="true" src=',
@@ -58,7 +59,7 @@ has(motion,[
   "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'",
   "fxFullSuiteR474='r474-mobile-mag'",
   "fxCanonicalAskActivationR477='armed'"
-],'R474 loader route carrying the softer final display');
+],'R474 compact loader route retained as the bootstrap owner');
 for(const token of ['isRetiredMagRuntime','formatx-premium-finish','formatx-live-heartbeat-r155','formatx-signature-system-r185','formatx-seamless-enforcer-r159'])assert.ok(!motion.includes(token),`dead runtime filter remains: ${token}`);
 
 has(language,[
@@ -68,16 +69,21 @@ has(language,[
 assert.ok(!language.includes('new MutationObserver'),'language owner must remain observer-free');
 
 has(current,[
-  'direct-r326-r468-soft-optics-live-energy-zero-idle','cleanupLegacyMagRuntime','r326-only',
+  "const VERSION='direct-r326-r491-progressive-interaction-first'",'cleanupLegacyMagRuntime','r326-only',
   'formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments',
   'formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe',
-  'formatx-mobile-render-governor-r426.js?v=20260831-r484-bounded-surface-window',
+  'formatx-mobile-render-governor-r426.js?v=20260901-r491-interaction-only-zero-idle',
   'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
   'formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy',
   'soft-perimeter-low-bloom-low-cost-shader','direct-pause-flag-no-idle-redraw',
-  'periodic-surface-bursts-between-zero-idle','formatx-mini-mag-assistant-r459.js',
+  'interaction-only-bursts-between-zero-idle','formatx-mini-mag-assistant-r459.js',
+  'waitForEnhancementWindow','static-premium-ready','settled-auto',
   "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'"
-],'R474 primary MAG loader carrying the softer display');
+],'R491 progressive primary MAG loader');
+has(currentStyle,[
+  'FormatX r491','formatx-mag-first-frame-r491.svg','progressive-enhancement layer',
+  'min-height: 0 !important','production-r491-progressive-first-frame-direct-r326-layout-a11y-touch'
+],'R491 stable static first-frame layer');
 
 has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','uSurfacePulse',
@@ -114,9 +120,9 @@ has(life,[
   "const VERSION = 'native-webgl-periodic-and-interaction-life-r484'",'surface-sweep-',
   'armed-periodic-and-interaction-surface-energy','periodic-surface-bursts-between-zero-idle',
   'formatx:coreinteraction','pointerdown'
-],'R468 explicit native energy path');
-assert.ok(!life.includes('setInterval('),'R468 life owner must remain interval-free');
-assert.ok(!life.includes('requestAnimationFrame('),'R468 life owner must not add an idle WebGL RAF loop');
+],'underlying R468 explicit native energy path');
+assert.ok(!life.includes('setInterval('),'life owner must remain interval-free');
+assert.ok(!life.includes('requestAnimationFrame('),'life owner must not add an idle WebGL RAF loop');
 has(header,[
   'production-r466-mobile-mag-text-lock-no-star-blank-state',
   '-webkit-text-fill-color:currentColor','background-image:none','content:none'
@@ -126,13 +132,12 @@ has(governor,[
   'const activeWindowMs=240','const shapeProbeMs=150','const shapeSettleDeadlineMs=2400',
   'state.core?.requestRender?.(2)','userShapeSource(source)','guardPassiveState(source)',
   "'formatx:menustatechange','formatx:languagechange','pageshow','resize'",
-  'passive-${eventName}-r465',
-  "fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'",
-  "fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw'",
+  'interaction-only-bursts-between-zero-idle',
+  "fxMobileRenderGovernorRevisionR433='r490-autonomous-sweep-budget-guard'",
+  "fxMobileSurfaceBudgetR484='autonomous-sweeps-suppressed-interaction-sweeps-bounded'",
   "root.dataset.fxReferenceMotionPaused=value",
-  "addEventListener('formatx:coresurfacesweep'",'surfaceDeadline-performance.now()',
-  'full-1160ms-sweep-then-zero-idle'
-],'R465 direct-flag mobile TBT governor');
+  "addEventListener('formatx:coresurfacesweep'",'suppressed-zero-idle'
+],'R491 interaction-only mobile TBT governor');
 assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepause'"),'internal governor idle must not trigger the legacy synchronous redraw handler');
 assert.ok(!governor.includes("active('scroll-r463'"),'mobile scroll must not wake WebGL');
 assert.ok(!governor.includes("active('resize-r463'"),'mobile resize must not wake WebGL');
@@ -148,4 +153,4 @@ has(quality,[
 ],'R462 measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: R484 keeps one native MAG, visible surface filaments, a full 1160ms periodic sweep, zero frames between sweeps, and pause/reduced-motion guards.');
+console.log('PASS: R491 keeps one native MAG, a premium static first frame, progressive WebGL enhancement, interaction-only phone rendering and zero idle frames.');
