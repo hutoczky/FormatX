@@ -57,6 +57,16 @@ async function enterSite(page, label) {
   if (await skip.isVisible().catch(() => false)) {
     await skip.click({ force: true, timeout: 1500 }).catch(() => {});
   }
+
+  /* The production runtime intentionally keeps the Organism interface outside
+     the critical first-paint path. Exercise its real deferred-user-activation
+     contract with an actual Playwright pointer input before asserting readiness. */
+  const interfaceReady = await page.evaluate(() => document.documentElement.dataset.fxOrganismInterface === 'ready');
+  if (!interfaceReady) {
+    await page.mouse.click(8, 220);
+    mark(label + ': deferred-user-activation');
+  }
+
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
