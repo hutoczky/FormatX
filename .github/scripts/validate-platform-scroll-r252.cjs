@@ -13,10 +13,6 @@ async function prepare(page) {
   });
   await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252', { waitUntil: 'domcontentloaded' });
 
-  /* The static docs fixture is intentionally thinner than the Worker-served
-     production entry. Mirror the canonical navigation gate and mount only the
-     real production scroll bootstrap when the static page did not already do
-     so; that bootstrap owns both seamless-v7 and the interaction-only heart. */
   const hasScrollBootstrap = await page.locator('script[src*="formatx-infinite-scroll.js"]').count();
   if (!hasScrollBootstrap) {
     await page.addScriptTag({
@@ -52,6 +48,7 @@ async function state(page) {
       heart: root.dataset.fxHeartCoreR252 || '',
       heartPolicy: root.dataset.fxHeartLoopPolicy || '',
       heartScrollOwner: root.dataset.fxHeartScrollOwner || '',
+      heartPointerOwner: root.dataset.fxHeartPointerOwnerR524 || '',
       bridgeCount: bridge ? 1 : 0,
       mirrorCount: mirror ? 1 : 0,
       mirrorInert: Boolean(mirror?.hasAttribute('inert')),
@@ -86,26 +83,34 @@ async function state(page) {
 async function verifyHeartInteraction(page, label) {
   await page.waitForFunction(() => (
     document.querySelector('#hero .fx-mag-heart-hit-r252')
+    && document.querySelector('#hero .hero-space')
     && (window.FormatXOrganismVoice?.open || document.querySelector('#hero .fx-reference-ask'))
   ), null, { timeout: 15000 });
 
   const hit = page.locator('#hero .fx-mag-heart-hit-r252').first();
-  assert(await hit.count() === 1, `${label} MAG heart hit target missing`);
-  await hit.scrollIntoViewIfNeeded();
-  await hit.click({ position: { x: 20, y: 20 } });
+  assert(await hit.count() === 1, `${label} MAG semantic hit target missing`);
+  const surface = page.locator('#hero .hero-space').first();
+  await surface.scrollIntoViewIfNeeded();
+  const box = await surface.boundingBox();
+  assert(box && box.width > 120 && box.height > 120, `${label} visible MAG surface has no usable pointer geometry: ${JSON.stringify(box)}`);
+  await page.mouse.click(box.x + box.width * .5, box.y + box.height * .5);
 
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
   await page.waitForFunction(() => Boolean(document.documentElement.dataset.fxCoreInteractionTarget), null, { timeout: 5000 });
 
   const interaction = await page.evaluate(() => ({
     mode: document.documentElement.dataset.fxCoreInteractionMode || '',
+    source: document.documentElement.dataset.fxCoreInteractionSource || '',
+    pointerOwner: document.documentElement.dataset.fxHeartPointerOwnerR524 || '',
     target: document.documentElement.dataset.fxCoreInteractionTarget || '',
     thoughtOpen: (() => {
       const bubble = document.querySelector('.fx-organism-thought');
       return Boolean(bubble && bubble.hidden === false);
     })()
   }));
-  assert(interaction.mode === 'active-r252', `${label} MAG did not activate core interaction: ${JSON.stringify(interaction)}`);
+  assert(interaction.mode === 'active-r252', `${label} visible MAG surface did not activate core interaction: ${JSON.stringify(interaction)}`);
+  assert(interaction.source === 'surface' || interaction.source === 'core', `${label} MAG interaction source is not the visible/semantic core surface: ${JSON.stringify(interaction)}`);
+  assert(interaction.pointerOwner === 'visible-mag-surface-plus-semantic-keyboard-target', `${label} R524 pointer owner missing: ${JSON.stringify(interaction)}`);
   assert(/organism-voice|ask-control|thought-trigger/.test(interaction.target), `${label} MAG has no canonical interaction target: ${JSON.stringify(interaction)}`);
 }
 
@@ -155,7 +160,7 @@ async function verifyMobile(browser) {
   assert(initial.mirrorInert && initial.mirrorAriaHidden === 'true' && initial.mirrorFocusable === 0, `mobile reference mirror is not inert: ${JSON.stringify(initial)}`);
   assert(initial.runtime?.inertReferenceMirror === true && initial.runtime?.mirrorContext === 'static-2d-snapshot-no-webgl', `mobile seamless mirror runtime contract missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeDisplay !== 'none' && initial.bridgeHeight > 40, `mobile visual bridge is unavailable: ${JSON.stringify(initial)}`);
-  assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180 && initial.hitLabel.length > 8, `mobile MAG is not a semantic interactive target: ${JSON.stringify(initial)}`);
+  assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180 && initial.hitLabel.length > 8, `mobile MAG semantic keyboard target is missing: ${JSON.stringify(initial)}`);
   assert(initial.snapRoot === 'none' && initial.snapBody === 'none', `mobile scroll snapping active: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
@@ -167,7 +172,7 @@ async function verifyMobile(browser) {
 
   const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
   assert(!meaningful.length, `mobile browser errors: ${meaningful.join(' | ')}`);
-  console.log('PASS r508 mobile seamless-v7 loop ownership + MAG interaction');
+  console.log('PASS r524 mobile seamless-v7 loop ownership + visible MAG interaction');
   await context.close();
 }
 
@@ -179,13 +184,13 @@ async function verifyDesktop(browser) {
   assert(initial.controller === 'seamless-v7', `desktop seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, `desktop inert reference mirror contract changed: ${JSON.stringify(initial)}`);
   assert(initial.mirrorInert && initial.mirrorFocusable === 0, `desktop reference mirror is interactive: ${JSON.stringify(initial)}`);
-  assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG interaction target missing: ${JSON.stringify(initial)}`);
+  assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG semantic keyboard target missing: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
   await page.keyboard.press('Escape').catch(() => {});
   await page.waitForTimeout(240);
   await runLoopCycle(page, 'desktop', 1);
-  console.log('PASS desktop seamless-v7 preserved + MAG interaction');
+  console.log('PASS desktop seamless-v7 preserved + visible MAG interaction');
   await context.close();
 }
 
@@ -194,7 +199,7 @@ async function verifyDesktop(browser) {
   try {
     await verifyMobile(browser);
     await verifyDesktop(browser);
-    console.log('PASS FormatX r508 single-owner platform scroll and living MAG interaction contract');
+    console.log('PASS FormatX r524 single-owner platform scroll and living MAG interaction contract');
   } finally {
     await browser.close();
   }
