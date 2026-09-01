@@ -1,1 +1,142 @@
-PLACEHOLDER
+/* FormatX r504 — native MAG layout, single first-frame owner and overflow-safe Live OS.
+   The render-blocking quality layer owns the only first-frame image bytes.
+   This later progressive stylesheet reuses that variable without replacing it,
+   preventing late mobile LCP invalidation while native WebGL enhances on intent. */
+html,
+body {
+  max-width: 100% !important;
+  overflow-x: clip !important;
+}
+
+html body.living-architecture #hero .hero-space {
+  isolation: isolate !important;
+}
+
+/* Reuse the render-blocking quality-layer asset. Never redefine
+   --fx-mag-first-frame here: a late replacement becomes a new mobile LCP. */
+html body.living-architecture #hero .hero-space::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 4% !important;
+  z-index: 1 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: var(--fx-mag-first-frame) center / contain no-repeat !important;
+  opacity: .98 !important;
+  filter: drop-shadow(0 0 24px rgba(73, 213, 255, .18)) !important;
+  pointer-events: none !important;
+  transform: translateZ(0) !important;
+}
+
+html body.living-architecture #hero .hero-space::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 14% 10% 9% !important;
+  z-index: 0 !important;
+  display: block !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 50% 48%, rgba(116, 235, 255, .15), rgba(78, 113, 255, .055) 46%, transparent 72%) !important;
+  box-shadow: 0 0 72px rgba(55, 183, 255, .075) !important;
+  pointer-events: none !important;
+}
+
+html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+  position:absolute!important;inset:0!important;z-index:3!important;display:block!important;
+  box-sizing:border-box!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;
+  overflow:clip!important;background:transparent!important;opacity:1!important;visibility:visible!important;
+  pointer-events:auto!important;transform:none!important;transform-origin:50% 50%!important;
+}
+
+html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  position:absolute!important;inset:0!important;display:block!important;box-sizing:border-box!important;
+  width:100%!important;max-width:100%!important;height:100%!important;max-height:100%!important;margin:0!important;
+  background:transparent!important;image-rendering:auto!important;mix-blend-mode:normal!important;
+  visibility:visible!important;pointer-events:none!important;transform-origin:50% 48%!important;
+}
+
+html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
+html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
+html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::after,
+html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::after {
+  content:none!important;display:none!important;background:none!important;background-image:none!important;
+  box-shadow:none!important;filter:none!important;opacity:0!important;animation:none!important;
+}
+
+/* R504: #live-operating-system becomes 2px wider than the viewport when its
+   content-visibility subtree activates because its border was added outside a
+   100% content-box. Keep the same visual width but include border/padding in it. */
+html body.living-architecture #live-operating-system.fx-live-os {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+@media (min-width:901px) {
+  html body.living-architecture #hero .hero-grid > .hero-copy {
+    min-height: 0 !important;
+  }
+  html body.living-architecture #hero #hero-title,
+  html body.living-architecture #hero .hero-title-main,
+  html body.living-architecture #hero .hero-title-sub,
+  html body.living-architecture #hero .hero-lead,
+  html body.living-architecture #hero .hero-actions {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    inset:0 auto 0 50%!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;
+    translate:-50% 0!important;
+  }
+
+  html body.living-architecture #hero .hero-space::before {
+    inset: 2% 4% 3% !important;
+    filter: drop-shadow(0 0 18px rgba(73, 213, 255, .15)) !important;
+  }
+
+  html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
+    color:#dff7ff!important;background-color:#02111f!important;
+  }
+
+  html body.living-architecture #pricing .price-card .button.button-line,
+  html body.living-architecture #resources #release-page-link.button.button-line {
+    color:#f4fbff!important;background-color:#071521!important;border-color:rgba(163,229,255,.44)!important;
+  }
+
+  html body.living-architecture #pricing .price-card .button.button-solid,
+  html body.living-architecture #pricing #preview-checkout-link.button.button-solid {
+    color:#041019!important;background-color:#c8f4ff!important;border-color:#c8f4ff!important;
+  }
+
+  html body.living-architecture footer.site-footer {color:#eaf7ff!important;background:#020811!important;}
+  html body.living-architecture footer.site-footer .footer-brand .brand strong {color:#f7fdff!important;}
+  html body.living-architecture footer.site-footer .footer-brand .brand small {color:#cfe5ef!important;}
+  html body.living-architecture footer.site-footer nav {
+    display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:8px 10px!important;
+  }
+  html body.living-architecture footer.site-footer nav + nav {margin-top:8px!important;}
+  html body.living-architecture footer.site-footer nav a,
+  html body.living-architecture footer.site-footer .footer-bottom > a {
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;
+    min-width:44px!important;min-height:44px!important;padding:8px 10px!important;margin:0!important;line-height:1.25!important;
+    color:#f4fbff!important;background:#071521!important;border:1px solid rgba(163,229,255,.20)!important;
+    border-radius:12px!important;text-decoration:none!important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html body.living-architecture #hero .hero-space::before,
+  html body.living-architecture #hero .hero-space::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* production-r504-single-first-frame-owner-live-os-border-box */
