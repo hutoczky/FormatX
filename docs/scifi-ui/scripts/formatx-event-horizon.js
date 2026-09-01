@@ -1,4 +1,4 @@
-/* FormatX r461/R496 — lean first-paint owner for the R460/R326 production path.
+/* FormatX r461/R508 — lean first-paint owner for the R460/R326 production path.
    Static HTML owns LCP. One current MAG runtime owns rendering; no legacy
    award/regression/Real3D repair stack is mounted after first paint. */
 (function(){
@@ -8,8 +8,10 @@ const ROOT=document.documentElement;
 const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 const OVERLAY_ID='formatx-event-horizon';
 const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-score-v6';
+const PROFESSIONAL_AUDIO_URL='./scripts/formatx-audio-repair.js?v=20260901-r508-first-intent-handoff';
 const GEOMETRY_URL='./styles/formatx-p0-final-geometry-r496.css?v=20260901-r496';
 let audio=null;
+let professionalAudioLoad=null;
 
 if(!ROOT.dataset.fxReferenceProductionR244)ROOT.dataset.fxReferenceProductionR244=MOBILE?'ready':'desktop';
 ROOT.dataset.fxReferenceComposition=MOBILE?'reference-frame-r244':'desktop-reference-r244';
@@ -21,6 +23,7 @@ ROOT.dataset.fxAwardRuntimeMode='retired-from-first-load-r461';
 ROOT.dataset.fxMobileRegressionR310='retired-from-first-load-r461';
 ROOT.dataset.fxCoreReal3dCssR310='retired-r461-r326-owner';
 ROOT.dataset.fxP0GeometryR496='loading';
+ROOT.dataset.fxAudioHandoffR508='idle-lazy-professional';
 
 function copy(){
   return ROOT.lang==='en'?{
@@ -48,34 +51,108 @@ function syncSound(button,on){
   button.setAttribute('aria-label',on?strings.soundOn:strings.soundOff);
   button.innerHTML=on?soundIcon():mutedIcon();
   ROOT.dataset.fxAudioState=on?'on':'off';
-  ROOT.dataset.fxAudioOwner='r461-lightweight-first-party';
+  if(ROOT.dataset.fxAudioOwner!=='professional-v6')ROOT.dataset.fxAudioOwner='r461-lightweight-first-party';
 }
+
+function primeProfessionalAudio(){
+  const Context=window.AudioContext||window.webkitAudioContext;
+  let handoff=window.FormatXProfessionalAudioHandoffR508;
+  if(!handoff||!handoff.context||handoff.context.state==='closed'){
+    if(!Context){
+      ROOT.dataset.fxAudioHandoffR508='unsupported';
+      return null;
+    }
+    try{
+      handoff={
+        context:new Context({latencyHint:'interactive'}),
+        enableOnInstall:false,
+        requested:false,
+        source:'r461-first-user-gesture'
+      };
+      window.FormatXProfessionalAudioHandoffR508=handoff;
+    }catch(error){
+      ROOT.dataset.fxAudioHandoffR508='context-error';
+      ROOT.dataset.fxAudioError=String(error?.message||error).slice(0,160);
+      return null;
+    }
+  }
+  try{
+    if(handoff.context.state==='suspended')void handoff.context.resume();
+  }catch(_){}
+  ROOT.dataset.fxAudioHandoffR508='gesture-primed';
+  ROOT.dataset.fxAudioContext=handoff.context.state||'suspended';
+  return handoff;
+}
+
+function fallbackAudio(button){
+  if(!audio){
+    audio=new Audio(AUDIO_URL);
+    audio.loop=true;
+    audio.preload='none';
+    audio.volume=.52;
+  }
+  audio.play().then(()=>{
+    syncSound(button,true);
+    ROOT.dataset.fxAudioOwner='r461-fallback-wav';
+    ROOT.dataset.fxAudioOutput='wav-fallback';
+    ROOT.dataset.fxAudioMusic='fallback-playing';
+    ROOT.dataset.fxAudioLevel='audible';
+  }).catch(()=>{
+    syncSound(button,false);
+    ROOT.dataset.fxAudioState='blocked';
+    ROOT.dataset.fxAudioLevel='blocked';
+  });
+}
+
+function requestProfessionalAudio(button){
+  const handoff=primeProfessionalAudio();
+  if(handoff){
+    handoff.enableOnInstall=true;
+    handoff.requested=true;
+  }
+  ROOT.dataset.fxAudioOwner='professional-loading-r508';
+  ROOT.dataset.fxAudioState='pending';
+  ROOT.dataset.fxAudioLevel='starting';
+  ROOT.dataset.fxAudioHandoffR508=handoff?'script-requested':'script-requested-no-context';
+  button.dataset.fxAudioState='pending';
+  button.setAttribute('aria-pressed','false');
+  button.setAttribute('aria-label',ROOT.lang==='en'?'Starting FormatX cinematic audio':'FormatX filmes hang indítása');
+
+  if(ROOT.dataset.fxAudioRepair==='v6')return;
+  const existing=document.querySelector('script[src*="formatx-audio-repair.js"]');
+  if(existing)return;
+  if(professionalAudioLoad)return;
+
+  professionalAudioLoad=new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src=PROFESSIONAL_AUDIO_URL;
+    script.async=true;
+    script.dataset.fxProfessionalAudioR508='true';
+    script.addEventListener('load',()=>{
+      ROOT.dataset.fxAudioHandoffR508='professional-loaded';
+      resolve(true);
+    },{once:true});
+    script.addEventListener('error',()=>{
+      ROOT.dataset.fxAudioHandoffR508='professional-load-failed';
+      reject(new Error('professional audio script failed'));
+    },{once:true});
+    document.head.appendChild(script);
+  });
+  professionalAudioLoad.catch(()=>fallbackAudio(button));
+}
+
 function bindSound(button){
   if(!(button instanceof HTMLButtonElement)||button.dataset.fxSoundR461==='true')return;
   button.dataset.fxSoundR461='true';
   syncSound(button,false);
-  button.addEventListener('click',async event=>{
+  button.addEventListener('pointerdown',()=>{primeProfessionalAudio();},{passive:true});
+  button.addEventListener('keydown',event=>{
+    if(event.key==='Enter'||event.key===' ')primeProfessionalAudio();
+  },{passive:true});
+  button.addEventListener('click',event=>{
     event.preventDefault();
     event.stopImmediatePropagation();
-    const next=button.getAttribute('aria-pressed')!=='true';
-    if(!audio){
-      audio=new Audio(AUDIO_URL);
-      audio.loop=true;
-      audio.preload='none';
-      audio.volume=.52;
-    }
-    if(next){
-      try{
-        await audio.play();
-        syncSound(button,true);
-      }catch(_){
-        syncSound(button,false);
-        ROOT.dataset.fxAudioState='blocked';
-      }
-    }else{
-      audio.pause();
-      syncSound(button,false);
-    }
+    requestProfessionalAudio(button);
   },true);
 }
 
@@ -259,7 +336,13 @@ geometryReady().then(()=>{
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow']){
   addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
 }
-addEventListener('pagehide',()=>{try{audio?.pause();}catch(_){}},{once:true});
+addEventListener('pagehide',()=>{
+  try{audio?.pause();}catch(_){}
+  const handoff=window.FormatXProfessionalAudioHandoffR508;
+  if(ROOT.dataset.fxAudioOwner!=='professional-v6'&&handoff?.context&&handoff.context.state!=='closed'){
+    try{void handoff.context.close();}catch(_){}
+  }
+},{once:true});
 addEventListener('error',()=>fastRelease('runtime-error'));
 addEventListener('unhandledrejection',()=>fastRelease('promise-error'));
 }());
