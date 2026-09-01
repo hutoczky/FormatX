@@ -247,7 +247,9 @@ jobs:
           assert "addEventListener('wheel'" not in seamless and "addEventListener('touchmove'" not in seamless, 'shared runtime captures native input'
           assert 'scroll-snap-type: none !important' in continuous and 'scroll-snap-align: none !important' in continuous, 'scroll snap suppression missing'
           assert '.fx-award-proof__grid' in mobile and '.fx-plan-qr-card:not(.is-qr-ready)' in mobile, 'mobile production safeguards missing'
-          assert 'display: block !important' in mobile_loop and 'min-height: calc(100svh + max(320px, 24svh))' in mobile_loop, 'mobile seamless bridge runway missing'
+          assert 'display: block !important' in mobile_loop, 'mobile seamless bridge is not visible'
+          assert '--fx-loop-runway: max(320px, 100svh)' in mobile_loop, 'mobile seamless full-viewport runway token missing'
+          assert 'min-height: calc(var(--fx-loop-source-height, 100svh) + var(--fx-loop-runway))' in mobile_loop, 'mobile seamless source-height runway missing'
 
           assert policy['mobile']['controller'] == 'seamless-v7'
           assert policy['mobile']['automatic_loop'] is True
