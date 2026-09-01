@@ -59,15 +59,17 @@ async function assertHeaderAndHeroControls(page,profile){
 }
 
 async function activateNativeMag(page,profile){
-  const hit=page.locator('#hero .fx-mag-heart-hit-r252').first();
-  await hit.waitFor({state:'visible',timeout:10000});
-  await hit.click({timeout:10000});
+  const surface=page.locator('#hero .hero-space').first();
+  await surface.waitFor({state:'visible',timeout:10000});
+  const box=await surface.boundingBox();
+  assert(box&&box.width>80&&box.height>80,`${profile.name} MAG surface has no usable pointer geometry: ${JSON.stringify(box)}`);
+  await page.mouse.click(box.x+box.width*.5,box.y+box.height*.5);
   await page.waitForFunction(()=>{
     const root=document.documentElement;
     const canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r120-canvas,#hero .fx-crystal-organism-r326-canvas');
     return root.dataset.fxCoreCompositionR285==='pure-webgl3d-no-2d-overlays'&&canvas;
   },null,{timeout:15000});
-  console.log(`PASS ${profile.name}: genuine MAG interaction activated native WebGL`);
+  console.log(`PASS ${profile.name}: genuine pointer on visible MAG surface activated native WebGL`);
 }
 
 async function assertPure3d(page,profile){
