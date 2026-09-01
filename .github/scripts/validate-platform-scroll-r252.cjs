@@ -12,6 +12,18 @@ async function prepare(page) {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
   await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252', { waitUntil: 'domcontentloaded' });
+
+  /* The static docs fixture is intentionally thinner than the Worker-served
+     production entry. Mirror the canonical navigation gate and mount only the
+     real production scroll bootstrap when the static page did not already do
+     so; that bootstrap owns both seamless-v7 and the interaction-only heart. */
+  const hasScrollBootstrap = await page.locator('script[src*="formatx-infinite-scroll.js"]').count();
+  if (!hasScrollBootstrap) {
+    await page.addScriptTag({
+      url: new URL('/scifi-ui/scripts/formatx-infinite-scroll.js?v=ci-r508-single-owner', TEST_URL).href
+    });
+  }
+
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxInfiniteController === 'seamless-v7'
