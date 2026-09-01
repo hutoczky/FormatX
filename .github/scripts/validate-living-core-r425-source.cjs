@@ -72,7 +72,7 @@ has(quality,[
 ],'R493 inline first-frame source');
 has(currentStyle,[
   'FormatX r493','var(--fx-mag-first-frame)','progressive-enhancement layer',
-  'min-height: 0 !important','production-r491-progressive-first-frame-direct-r326-layout-a11y-touch'
+  'min-height: 0 !important','production-r493-progressive-first-frame-direct-r326-layout-a11y-touch'
 ],'R493 inline first-frame geometry and progressive visual fallback');
 assert.ok(!currentStyle.includes('formatx-mag-first-frame-r491.svg'),'current MAG CSS must not reintroduce the separate R491 first-frame request');
 
