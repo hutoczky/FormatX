@@ -154,12 +154,16 @@ function openPendingCanonicalAsk(){
 function activateCanonicalAsk(event){
   const target=event.target instanceof Element?event.target.closest('#hero .fx-reference-controls-r204 .fx-reference-ask'):null;
   if(!(target instanceof HTMLButtonElement))return;
-  if(typeof window.FormatXOrganismVoice?.open==='function')return;
-  askActivationPending=true;
-  root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
+  const voiceReady=typeof window.FormatXOrganismVoice?.open==='function';
   if(root.dataset.fxImmersive!=='active')root.dataset.fxImmersive='active';
   root.dataset.fxImmersiveSource='canonical-ask-r477';
   dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'canonical-ask-r477'}}));
+  if(voiceReady){
+    root.dataset.fxCanonicalAskActivationR477='runtime-activated-existing-dialogue';
+    return;
+  }
+  askActivationPending=true;
+  root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
   queueMicrotask(openPendingCanonicalAsk);
 }
 
