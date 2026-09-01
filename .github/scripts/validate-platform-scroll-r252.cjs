@@ -33,6 +33,35 @@ async function prepare(page) {
   await page.waitForTimeout(1200);
 }
 
+async function waitForStableLoopGeometry(page, label) {
+  let previous = null;
+  let stableSamples = 0;
+  let latest = null;
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    latest = await page.evaluate(() => {
+      const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+      const hero = document.querySelector('#main-content > #hero');
+      return {
+        interfaceState: document.documentElement.dataset.fxOrganismInterface || '',
+        panelOpen: document.body.classList.contains('fx-organism-panel-open'),
+        bridgeReady: document.documentElement.dataset.fxLoopBridge || '',
+        bridgeTop: bridge instanceof HTMLElement ? bridge.offsetTop : -1,
+        bridgeHeight: bridge instanceof HTMLElement ? bridge.offsetHeight : -1,
+        heroTop: hero instanceof HTMLElement ? hero.offsetTop : -1,
+        heroHeight: hero instanceof HTMLElement ? hero.offsetHeight : -1,
+        documentHeight: document.documentElement.scrollHeight,
+      };
+    });
+    const key = [latest.bridgeTop, latest.bridgeHeight, latest.heroTop, latest.heroHeight, latest.documentHeight].join('|');
+    if (latest.bridgeReady === 'ready-v3' && !latest.panelOpen && previous === key) stableSamples += 1;
+    else stableSamples = 0;
+    previous = key;
+    if (stableSamples >= 3) return latest;
+    await page.waitForTimeout(100);
+  }
+  throw new Error(`${label} seamless bridge geometry did not settle: ${JSON.stringify(latest)}`);
+}
+
 async function state(page) {
   return page.evaluate(() => {
     const root = document.documentElement;
@@ -103,26 +132,33 @@ async function verifyHeartInteraction(page, label) {
     source: document.documentElement.dataset.fxCoreInteractionSource || '',
     pointerOwner: document.documentElement.dataset.fxHeartPointerOwnerR524 || '',
     target: document.documentElement.dataset.fxCoreInteractionTarget || '',
-    thoughtOpen: (() => {
-      const bubble = document.querySelector('.fx-organism-thought');
-      return Boolean(bubble && bubble.hidden === false);
-    })()
   }));
   assert(interaction.mode === 'active-r252', `${label} visible MAG surface did not activate core interaction: ${JSON.stringify(interaction)}`);
   assert(interaction.source === 'surface' || interaction.source === 'core', `${label} MAG interaction source is not the visible/semantic core surface: ${JSON.stringify(interaction)}`);
   assert(interaction.pointerOwner === 'visible-mag-surface-plus-semantic-keyboard-target', `${label} R524 pointer owner missing: ${JSON.stringify(interaction)}`);
   assert(/organism-voice|ask-control|thought-trigger/.test(interaction.target), `${label} MAG has no canonical interaction target: ${JSON.stringify(interaction)}`);
+
+  /* The ASK fallback bootstraps the Organism interface on demand. That bootstrap
+     intentionally restructures the document and triggers a seamless bridge rebuild.
+     Do not sample a loop target from the transient pre-interface geometry. */
+  if (interaction.target === 'ask-control') {
+    await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 15000 });
+  }
+  await page.keyboard.press('Escape').catch(() => {});
+  await waitForStableLoopGeometry(page, `${label} post-MAG`);
 }
 
 async function runLoopCycle(page, label, cycle) {
+  await waitForStableLoopGeometry(page, `${label} cycle ${cycle}`);
   const before = await state(page);
   const target = await page.evaluate(() => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     const hero = document.querySelector('#main-content > #hero');
     if (!(bridge instanceof HTMLElement) || !(hero instanceof HTMLElement)) return null;
     const relative = Math.max(48, Math.min(innerHeight * .24, Math.max(48, hero.offsetHeight - 12)));
-    window.scrollTo({ top: bridge.offsetTop + relative, left: 0, behavior: 'auto' });
-    return { relative, expectedLanding: hero.offsetTop + relative };
+    const bridgeTop = bridge.offsetTop;
+    window.scrollTo({ top: bridgeTop + relative, left: 0, behavior: 'auto' });
+    return { bridgeTop, relative, expectedLanding: hero.offsetTop + relative };
   });
   assert(target, `${label} cycle ${cycle} has no visual bridge target`);
   await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 7000 });
@@ -137,14 +173,7 @@ async function runLoopCycle(page, label, cycle) {
 }
 
 async function verifyMobile(browser) {
-  const context = await browser.newContext({
-    viewport: { width: 412, height: 915 },
-    locale: 'hu-HU',
-    hasTouch: true,
-    isMobile: true,
-    deviceScaleFactor: 2,
-    colorScheme: 'dark'
-  });
+  const context = await browser.newContext({ viewport: { width: 412, height: 915 }, locale: 'hu-HU', hasTouch: true, isMobile: true, deviceScaleFactor: 2, colorScheme: 'dark' });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(String(error)));
@@ -165,14 +194,12 @@ async function verifyMobile(browser) {
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
   await verifyHeartInteraction(page, 'mobile');
-  await page.keyboard.press('Escape').catch(() => {});
-  await page.waitForTimeout(240);
   await runLoopCycle(page, 'mobile', 1);
   await runLoopCycle(page, 'mobile', 2);
 
   const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
   assert(!meaningful.length, `mobile browser errors: ${meaningful.join(' | ')}`);
-  console.log('PASS r524 mobile seamless-v7 loop ownership + visible MAG interaction');
+  console.log('PASS r526 mobile seamless-v7 loop ownership + stable post-Organism geometry + visible MAG interaction');
   await context.close();
 }
 
@@ -187,10 +214,8 @@ async function verifyDesktop(browser) {
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG semantic keyboard target missing: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
-  await page.keyboard.press('Escape').catch(() => {});
-  await page.waitForTimeout(240);
   await runLoopCycle(page, 'desktop', 1);
-  console.log('PASS desktop seamless-v7 preserved + visible MAG interaction');
+  console.log('PASS desktop seamless-v7 preserved + stable post-Organism geometry + visible MAG interaction');
   await context.close();
 }
 
@@ -199,7 +224,7 @@ async function verifyDesktop(browser) {
   try {
     await verifyMobile(browser);
     await verifyDesktop(browser);
-    console.log('PASS FormatX r524 single-owner platform scroll and living MAG interaction contract');
+    console.log('PASS FormatX r526 single-owner platform scroll, stable bridge geometry and living MAG interaction contract');
   } finally {
     await browser.close();
   }
