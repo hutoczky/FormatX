@@ -8,20 +8,19 @@
   const Context = window.AudioContext || window.webkitAudioContext;
   const OfflineContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
   const fallbackUrl = './assets/audio/formatx-audio-test.wav?v=20260728-professional-score-v6';
-
   const BPM = 72;
   const BEAT = 60 / BPM;
   const BAR = BEAT * 4;
   const CHORD_SECONDS = BAR * 2;
   const CHORDS = [
-    { name: 'D MINOR 9', bass: 73.42, notes: [146.83, 174.61, 220, 261.63, 329.63], motif: [659.25, 523.25, 440] },
-    { name: 'B FLAT MAJOR 9', bass: 58.27, notes: [116.54, 146.83, 174.61, 220, 261.63], motif: [587.33, 523.25, 440] },
-    { name: 'F MAJOR 9', bass: 87.31, notes: [130.81, 174.61, 220, 261.63, 329.63], motif: [659.25, 523.25, 440] },
-    { name: 'C ADD 9', bass: 65.41, notes: [130.81, 164.81, 196, 293.66, 329.63], motif: [587.33, 493.88, 392] },
-    { name: 'G MINOR 9', bass: 98, notes: [146.83, 174.61, 233.08, 293.66, 440], motif: [698.46, 587.33, 523.25] },
-    { name: 'B FLAT MAJOR 7', bass: 58.27, notes: [116.54, 146.83, 174.61, 220, 293.66], motif: [587.33, 440, 349.23] },
-    { name: 'F MAJOR 9 OVER A', bass: 110, notes: [130.81, 174.61, 220, 261.63, 329.63], motif: [659.25, 587.33, 523.25] },
-    { name: 'A SUSPENDED ADD 9', bass: 110, notes: [146.83, 164.81, 220, 246.94, 329.63], motif: [659.25, 493.88, 440] }
+    { name: 'D MINOR 9', notes: [146.83, 174.61, 220, 329.63] },
+    { name: 'B FLAT MAJOR 9', notes: [116.54, 146.83, 174.61, 261.63] },
+    { name: 'F MAJOR 9', notes: [130.81, 174.61, 220, 329.63] },
+    { name: 'C ADD 9', notes: [130.81, 164.81, 196, 293.66] },
+    { name: 'G MINOR 9', notes: [146.83, 174.61, 233.08, 293.66] },
+    { name: 'B FLAT MAJOR 7', notes: [116.54, 146.83, 174.61, 293.66] },
+    { name: 'F MAJOR 9 OVER A', notes: [130.81, 174.61, 220, 261.63] },
+    { name: 'A SUSPENDED ADD 9', notes: [146.83, 164.81, 220, 329.63] }
   ];
 
   async function selfTest() {
@@ -71,26 +70,22 @@
     root.dataset.fxAudioTempo = String(BPM);
     root.dataset.fxAudioMusic = 'ready';
 
-    let ctx;
-    let master;
-    let analyser;
-    let scoreBus;
-    let scoreFilter;
-    let scoreWet;
-    let fxBus;
-    let reverb;
-    let delay;
-    let delayFeedback;
-    let warmWave;
-    let glassWave;
-    let fallback;
-    let enabled = false;
-    let operation = 0;
+    let ctx = null;
+    let master = null;
+    let analyser = null;
+    let scoreBus = null;
+    let scoreFilter = null;
+    let reverb = null;
+    let delay = null;
+    let delayFeedback = null;
+    let warmWave = null;
     let schedulerTimer = 0;
     let signalTimer = 0;
-    let nextChordTime = 0;
     let chordIndex = 0;
-    let lastUi = 0;
+    let nextChordTime = 0;
+    let enabled = false;
+    let operation = 0;
+    let fallback = null;
     const activeSources = new Set();
 
     const language = () => root.lang === 'en' ? 'en' : 'hu';
@@ -123,28 +118,29 @@
         const data = buffer.getChannelData(channel);
         for (let index = 0; index < length; index += 1) {
           const envelope = Math.pow(1 - index / length, decay);
-          const earlyReflection = index < ctx.sampleRate * 0.09 ? 0.32 : 1;
-          data[index] = (Math.random() * 2 - 1) * envelope * earlyReflection;
+          data[index] = (Math.random() * 2 - 1) * envelope;
         }
       }
       return buffer;
     }
 
     function saturationCurve(amount) {
-      const samples = 4096;
-      const curve = new Float32Array(samples);
-      for (let index = 0; index < samples; index += 1) {
-        const x = index * 2 / (samples - 1) - 1;
+      const curve = new Float32Array(4096);
+      for (let index = 0; index < curve.length; index += 1) {
+        const x = index * 2 / (curve.length - 1) - 1;
         curve[index] = Math.tanh(x * amount) / Math.tanh(amount);
       }
       return curve;
     }
 
     function build() {
-      if (ctx) return true;
+      if (ctx && master && scoreBus) return true;
       if (!Context) return false;
       try {
-        ctx = new Context({ latencyHint: 'interactive' });
+        const handoff = window.FormatXProfessionalAudioHandoffR508;
+        const shared = handoff?.context && handoff.context.state !== 'closed' ? handoff.context : null;
+        ctx = shared || new Context({ latencyHint: 'interactive' });
+        root.dataset.fxAudioContextHandoff = shared ? 'reused-r508-first-gesture' : 'native-v6-fallback';
 
         const compressor = ctx.createDynamicsCompressor();
         compressor.threshold.value = -22;
@@ -176,74 +172,36 @@
         scoreFilter.Q.value = 0.32;
         scoreBus.connect(scoreFilter);
 
-        const scoreDry = ctx.createGain();
-        scoreDry.gain.value = 0.74;
-        scoreFilter.connect(scoreDry).connect(saturator);
+        const dry = ctx.createGain();
+        dry.gain.value = 0.76;
+        scoreFilter.connect(dry).connect(saturator);
 
         reverb = ctx.createConvolver();
-        reverb.buffer = impulse(3.2, 2.35);
-        scoreWet = ctx.createGain();
-        scoreWet.gain.value = 0.31;
-        scoreFilter.connect(scoreWet).connect(reverb).connect(saturator);
+        reverb.buffer = impulse(2.8, 2.25);
+        const wet = ctx.createGain();
+        wet.gain.value = 0.28;
+        scoreFilter.connect(wet).connect(reverb).connect(saturator);
 
         delay = ctx.createDelay(2);
         delay.delayTime.value = BEAT * 0.75;
         delayFeedback = ctx.createGain();
-        delayFeedback.gain.value = 0.19;
+        delayFeedback.gain.value = 0.18;
         const delayReturn = ctx.createGain();
-        delayReturn.gain.value = 0.12;
+        delayReturn.gain.value = 0.11;
         scoreFilter.connect(delay);
         delay.connect(delayFeedback).connect(delay);
         delay.connect(delayReturn).connect(saturator);
 
-        fxBus = ctx.createGain();
-        fxBus.gain.value = 0.56;
-        fxBus.connect(saturator);
-        const fxWet = ctx.createGain();
-        fxWet.gain.value = 0.34;
-        fxBus.connect(fxWet).connect(reverb);
-
         warmWave = ctx.createPeriodicWave(
-          new Float32Array([0, 0, 0, 0, 0, 0, 0, 0]),
-          new Float32Array([0, 1, 0.42, 0.19, 0.09, 0.048, 0.025, 0.012]),
-          { disableNormalization: false }
-        );
-        glassWave = ctx.createPeriodicWave(
-          new Float32Array([0, 0, 0, 0, 0, 0, 0, 0]),
-          new Float32Array([0, 1, 0.12, 0.27, 0.045, 0.11, 0.025, 0.055]),
+          new Float32Array([0, 0, 0, 0, 0, 0, 0]),
+          new Float32Array([0, 1, 0.40, 0.18, 0.08, 0.038, 0.016]),
           { disableNormalization: false }
         );
 
-        const air = ctx.createBufferSource();
-        const airBuffer = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
-        const airData = airBuffer.getChannelData(0);
-        let previous = 0;
-        for (let index = 0; index < airData.length; index += 1) {
-          previous = previous * 0.996 + (Math.random() * 2 - 1) * 0.004;
-          airData[index] = previous * 0.34;
-        }
-        air.buffer = airBuffer;
-        air.loop = true;
-        const airFilter = ctx.createBiquadFilter();
-        airFilter.type = 'bandpass';
-        airFilter.frequency.value = 1320;
-        airFilter.Q.value = 0.28;
-        const airGain = ctx.createGain();
-        airGain.gain.value = 0.032;
-        air.connect(airFilter).connect(airGain).connect(scoreBus);
-        air.start();
-
-        const motion = ctx.createOscillator();
-        const motionDepth = ctx.createGain();
-        motion.frequency.value = 0.041;
-        motionDepth.gain.value = 470;
-        motion.connect(motionDepth).connect(scoreFilter.frequency);
-        motion.start();
-
+        root.dataset.fxAudioContext = ctx.state;
         ctx.addEventListener('statechange', () => {
           root.dataset.fxAudioContext = ctx?.state || 'closed';
         });
-        root.dataset.fxAudioContext = ctx.state;
         return true;
       } catch (error) {
         root.dataset.fxAudioContext = 'error';
@@ -255,9 +213,7 @@
     async function ensureRunning() {
       if (!build() || !ctx) return false;
       for (let attempt = 0; attempt < 3 && ctx.state !== 'running'; attempt += 1) {
-        try { await ctx.resume(); } catch (error) {
-          root.dataset.fxAudioError = String(error?.message || error).slice(0, 160);
-        }
+        try { await ctx.resume(); } catch (_) {}
         if (ctx.state !== 'running') await new Promise(resolve => setTimeout(resolve, 35));
       }
       root.dataset.fxAudioContext = ctx.state;
@@ -281,171 +237,48 @@
       }, { once: true });
     }
 
-    function schedulePadNote(frequency, start, duration, volume, pan, detune) {
+    function scheduleNote(frequency, start, duration, volume, pan, detune) {
       const oscillator = ctx.createOscillator();
-      const companion = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
       const gain = ctx.createGain();
-      const companionGain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
       const finish = start + duration;
-      const release = finish - 2.5;
-
       oscillator.setPeriodicWave(warmWave);
       oscillator.frequency.value = frequency;
       oscillator.detune.value = detune;
-      companion.type = 'sine';
-      companion.frequency.value = frequency * 0.5;
-      companion.detune.value = -detune * 0.7;
-      companionGain.gain.value = 0.2;
-
       filter.type = 'lowpass';
-      filter.frequency.value = Math.min(3400, frequency * 8.2);
-      filter.Q.value = 0.38;
+      filter.frequency.value = Math.min(3600, frequency * 9);
+      filter.Q.value = 0.35;
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(volume, start + 1.85);
-      gain.gain.setValueAtTime(volume, release);
-      gain.gain.exponentialRampToValueAtTime(0.0001, finish);
-
-      oscillator.connect(filter);
-      companion.connect(companionGain).connect(filter);
-      filter.connect(gain);
-      const output = panned(gain, pan);
-      output.connect(scoreBus);
-
-      oscillator.start(start);
-      companion.start(start);
-      oscillator.stop(finish + 0.05);
-      companion.stop(finish + 0.05);
-      track(oscillator, () => {
-        try { companion.disconnect(); } catch (_) {}
-        try { companionGain.disconnect(); } catch (_) {}
-        try { filter.disconnect(); } catch (_) {}
-        try { gain.disconnect(); } catch (_) {}
-        if (output !== gain) try { output.disconnect(); } catch (_) {}
-      });
-      track(companion);
-    }
-
-    function scheduleBass(frequency, start, accent) {
-      const oscillator = ctx.createOscillator();
-      const overtone = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-      const overtoneGain = ctx.createGain();
-      const finish = start + BAR * 0.92;
-
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(frequency, start);
-      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.965, finish);
-      overtone.type = 'triangle';
-      overtone.frequency.value = frequency * 2;
-      overtoneGain.gain.value = 0.13;
-      filter.type = 'lowpass';
-      filter.frequency.value = 270;
-      filter.Q.value = 0.65;
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.082 * accent, start + 0.16);
-      gain.gain.exponentialRampToValueAtTime(0.0001, finish);
-
-      oscillator.connect(filter);
-      overtone.connect(overtoneGain).connect(filter);
-      filter.connect(gain).connect(scoreBus);
-      oscillator.start(start);
-      overtone.start(start);
-      oscillator.stop(finish + 0.04);
-      overtone.stop(finish + 0.04);
-      track(oscillator, () => {
-        try { overtone.disconnect(); } catch (_) {}
-        try { overtoneGain.disconnect(); } catch (_) {}
-        try { filter.disconnect(); } catch (_) {}
-        try { gain.disconnect(); } catch (_) {}
-      });
-      track(overtone);
-    }
-
-    function schedulePulse(start, accent) {
-      const oscillator = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const finish = start + 0.72;
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(92, start);
-      oscillator.frequency.exponentialRampToValueAtTime(48, finish);
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.048 * accent, start + 0.028);
-      gain.gain.exponentialRampToValueAtTime(0.0001, finish);
-      oscillator.connect(gain).connect(scoreBus);
-      oscillator.start(start);
-      oscillator.stop(finish + 0.03);
-      track(oscillator, () => { try { gain.disconnect(); } catch (_) {} });
-    }
-
-    function scheduleMotif(frequency, start, pan, volume) {
-      const oscillator = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-      const finish = start + 3.2;
-      oscillator.setPeriodicWave(glassWave);
-      oscillator.frequency.value = frequency;
-      oscillator.detune.value = pan * 5;
-      filter.type = 'lowpass';
-      filter.frequency.value = 2200;
-      filter.Q.value = 0.5;
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(volume, start + 0.045);
+      gain.gain.exponentialRampToValueAtTime(volume, start + 0.45);
+      gain.gain.setValueAtTime(volume, Math.max(start + 0.5, finish - 1.2));
       gain.gain.exponentialRampToValueAtTime(0.0001, finish);
       oscillator.connect(filter).connect(gain);
       const output = panned(gain, pan);
-      const dry = ctx.createGain();
-      const wet = ctx.createGain();
-      dry.gain.value = 0.22;
-      wet.gain.value = 0.88;
-      output.connect(dry).connect(scoreBus);
-      output.connect(wet).connect(reverb);
+      output.connect(scoreBus);
       oscillator.start(start);
-      oscillator.stop(finish + 0.04);
+      oscillator.stop(finish + 0.03);
       track(oscillator, () => {
         try { filter.disconnect(); } catch (_) {}
         try { gain.disconnect(); } catch (_) {}
         if (output !== gain) try { output.disconnect(); } catch (_) {}
-        try { dry.disconnect(); } catch (_) {}
-        try { wet.disconnect(); } catch (_) {}
       });
     }
 
     function scheduleChord(start, chord, index) {
-      const duration = CHORD_SECONDS + 2.8;
+      const duration = CHORD_SECONDS + 1.6;
       chord.notes.forEach((frequency, noteIndex) => {
-        const pan = noteIndex / Math.max(1, chord.notes.length - 1) * 1.34 - 0.67;
-        const volume = noteIndex < 2 ? 0.031 : 0.022;
-        schedulePadNote(frequency, start, duration, volume, pan, noteIndex % 2 ? 5 : -6);
+        const pan = chord.notes.length > 1 ? noteIndex / (chord.notes.length - 1) * 1.2 - 0.6 : 0;
+        scheduleNote(frequency, start, duration, noteIndex < 2 ? 0.034 : 0.024, pan, noteIndex % 2 ? 4 : -5);
       });
-
-      scheduleBass(chord.bass, start + 0.04, 1);
-      scheduleBass(chord.bass * 1.5, start + BAR + 0.04, 0.55);
-      schedulePulse(start + 0.02, 1);
-      schedulePulse(start + BEAT * 2, 0.42);
-      schedulePulse(start + BAR, 0.62);
-      schedulePulse(start + BAR + BEAT * 2, 0.34);
-
-      const motifStart = start + BAR + BEAT * 0.75;
-      chord.motif.forEach((frequency, noteIndex) => {
-        scheduleMotif(
-          frequency,
-          motifStart + noteIndex * BEAT * 0.72,
-          noteIndex === 1 ? 0.28 : -0.3 + noteIndex * 0.16,
-          noteIndex === 0 ? 0.013 : 0.009
-        );
-      });
-
-      window.setTimeout(() => {
-        if (enabled) root.dataset.fxAudioChord = chord.name;
-      }, Math.max(0, (start - ctx.currentTime) * 1000));
+      const bass = chord.notes[0] * 0.5;
+      scheduleNote(bass, start + 0.02, Math.min(3.1, duration), 0.042, 0, -3);
+      root.dataset.fxAudioChord = chord.name;
       root.dataset.fxAudioSection = String(index + 1).padStart(2, '0') + ' / ' + String(CHORDS.length).padStart(2, '0');
     }
 
     function scheduleMusic() {
       if (!enabled || ctx?.state !== 'running') return;
-      const horizon = ctx.currentTime + CHORD_SECONDS * 2.8;
+      const horizon = ctx.currentTime + CHORD_SECONDS * 2.2;
       while (nextChordTime < horizon) {
         const chord = CHORDS[chordIndex];
         scheduleChord(nextChordTime, chord, chordIndex);
@@ -461,47 +294,18 @@
         try { source.stop(); } catch (_) {}
       }
       activeSources.clear();
-      nextChordTime = 0;
       root.dataset.fxAudioChord = '';
       root.dataset.fxAudioSection = '';
+      nextChordTime = 0;
     }
 
     function startScore() {
       stopScore();
       chordIndex = 0;
-      nextChordTime = ctx.currentTime + 0.06;
+      nextChordTime = ctx.currentTime + 0.04;
       scheduleMusic();
-      schedulerTimer = window.setInterval(scheduleMusic, 800);
+      schedulerTimer = window.setInterval(scheduleMusic, 900);
       root.dataset.fxAudioMusic = 'playing';
-    }
-
-    function noiseSwell(duration, volume, frequency, end) {
-      if (!enabled || ctx?.state !== 'running') return false;
-      const source = ctx.createBufferSource();
-      const buffer = ctx.createBuffer(1, Math.round(ctx.sampleRate * duration), ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let index = 0; index < data.length; index += 1) data[index] = Math.random() * 2 - 1;
-      source.buffer = buffer;
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-      const start = ctx.currentTime;
-      const finish = start + duration;
-      filter.type = 'bandpass';
-      filter.Q.value = 0.36;
-      filter.frequency.setValueAtTime(frequency, start);
-      filter.frequency.exponentialRampToValueAtTime(end, finish);
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(volume, start + Math.min(0.12, duration * 0.2));
-      gain.gain.exponentialRampToValueAtTime(0.0001, finish);
-      source.connect(filter).connect(gain).connect(fxBus);
-      source.start(start);
-      source.stop(finish + 0.03);
-      source.addEventListener('ended', () => {
-        try { source.disconnect(); } catch (_) {}
-        try { filter.disconnect(); } catch (_) {}
-        try { gain.disconnect(); } catch (_) {}
-      }, { once: true });
-      return true;
     }
 
     function verifySignal() {
@@ -512,10 +316,13 @@
         analyser.getByteTimeDomainData(data);
         let deviation = 0;
         for (const value of data) deviation = Math.max(deviation, Math.abs(value - 128));
-        root.dataset.fxAudioOutput = deviation >= 1 ? 'signal-verified' : 'no-signal';
         root.style.setProperty('--fx-audio-signal', String(deviation));
-        if (deviation < 1) void playFallback();
-      }, 950);
+        if (deviation >= 1) {
+          root.dataset.fxAudioOutput = 'signal-verified';
+          return;
+        }
+        void playFallback();
+      }, 850);
     }
 
     async function playFallback() {
@@ -530,32 +337,11 @@
         root.dataset.fxAudioOutput = 'wav-fallback';
         root.dataset.fxAudioMusic = 'fallback-playing';
         return true;
-      } catch (error) {
+      } catch (_) {
         root.dataset.fxAudioFallback = 'blocked';
-        root.dataset.fxAudioError = String(error?.message || error).slice(0, 160);
+        root.dataset.fxAudioOutput = 'no-signal';
         return false;
       }
-    }
-
-    function activation() {
-      noiseSwell(1.45, 0.032, 1900, 260);
-      verifySignal();
-    }
-
-    function interfaceCue(primary) {
-      if (performance.now() - lastUi < 110) return;
-      lastUi = performance.now();
-      if (primary) noiseSwell(0.11, 0.018, 1250, 520);
-    }
-
-    function sceneCue() {
-      if (!enabled || ctx?.state !== 'running') return;
-      const scene = Math.max(0, Math.min(5, Math.round(Number(root.dataset.fxThreeScene || root.dataset.fxScene || 0))));
-      const now = ctx.currentTime;
-      scoreFilter.frequency.setTargetAtTime(2500 + scene * 170, now, 0.85);
-      scoreWet.gain.setTargetAtTime(0.27 + scene * 0.015, now, 1.1);
-      delayFeedback.gain.setTargetAtTime(0.16 + scene * 0.012, now, 1.2);
-      root.dataset.fxAudioSceneMix = String(scene);
     }
 
     async function setEnabled(next) {
@@ -570,7 +356,7 @@
           const now = ctx.currentTime;
           scoreBus.gain.cancelScheduledValues(now);
           scoreBus.gain.setValueAtTime(Math.max(0.0001, scoreBus.gain.value), now);
-          scoreBus.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+          scoreBus.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
         }
         root.dataset.fxAudioMusic = 'stopped';
         return;
@@ -591,10 +377,9 @@
       const now = ctx.currentTime;
       scoreBus.gain.cancelScheduledValues(now);
       scoreBus.gain.setValueAtTime(0.0001, now);
-      scoreBus.gain.exponentialRampToValueAtTime(0.34, now + 1.6);
+      scoreBus.gain.exponentialRampToValueAtTime(0.34, now + 0.55);
       sync('on');
-      activation();
-      sceneCue();
+      verifySignal();
     }
 
     sync('off');
@@ -607,27 +392,23 @@
       void setEnabled(!enabled);
     }, true);
 
-    document.addEventListener('pointerdown', event => {
-      if (!enabled) return;
-      if (ctx?.state !== 'running') void ensureRunning();
-      const target = event.target instanceof Element ? event.target.closest('a,button,.button,.header-buy,.fx-plan-qr-link') : null;
-      if (!target || target === button || target.closest('.fx-three-sound')) return;
-      interfaceCue(Boolean(target.closest('.button,.header-buy,.fx-plan-qr-link')));
-    }, true);
-
-    const sceneObserver = new MutationObserver(sceneCue);
-    sceneObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three-scene', 'data-fx-scene'] });
     addEventListener('formatx:languagechange', () => sync(enabled ? 'on' : 'off'));
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && enabled && ctx?.state !== 'running') void ensureRunning();
     });
     addEventListener('pagehide', () => {
-      sceneObserver.disconnect();
       clearTimeout(signalTimer);
       stopScore();
       fallback?.pause();
-      if (ctx) void ctx.close();
+      if (ctx && ctx.state !== 'closed') void ctx.close();
     }, { once: true });
+
+    const handoff = window.FormatXProfessionalAudioHandoffR508;
+    if (handoff?.enableOnInstall) {
+      handoff.enableOnInstall = false;
+      root.dataset.fxAudioHandoffR508 = 'professional-context-adopted';
+      queueMicrotask(() => { void setEnabled(true); });
+    }
   }
 
   void selfTest();
