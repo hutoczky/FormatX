@@ -39,6 +39,12 @@ function diagnostics(page, output) {
       output.push('requestfailed: ' + url + ' — ' + (request.failure()?.errorText || 'unknown'));
     }
   });
+  page.on('response', response => {
+    const url = response.url();
+    if (response.status() >= 400 && /organism|scifi-ui/i.test(url)) {
+      output.push('http-' + response.status() + ': ' + url);
+    }
+  });
 }
 
 function meaningfulDiagnostics(items) {
@@ -50,7 +56,46 @@ function meaningfulDiagnostics(items) {
   });
 }
 
-async function enterSite(page, label) {
+async function organismSnapshot(page, errors) {
+  const runtime = await page.evaluate(() => {
+    const root = document.documentElement;
+    const selectedDataset = {};
+    for (const [key, value] of Object.entries(root.dataset)) {
+      if (/organism|immersive|motion|living|three/i.test(key)) selectedDataset[key] = value;
+    }
+    return {
+      readyState: document.readyState,
+      selectedDataset,
+      organismScripts: Array.from(document.querySelectorAll('script[data-fx-organism-interface-script],script[data-fx-organism-menu-script]'), script => ({
+        src: script.src,
+        async: script.async,
+        defer: script.defer,
+        connected: script.isConnected,
+        interface: script.dataset.fxOrganismInterfaceScript || null,
+        menu: script.dataset.fxOrganismMenuScript || null
+      })),
+      organismStyles: Array.from(document.querySelectorAll('link[data-fx-organism-interface-style],link[data-fx-organism-layering-style]'), link => ({
+        href: link.href,
+        sheet: Boolean(link.sheet)
+      })),
+      interfaceClass: root.classList.contains('fx-organism-interface-ready'),
+      shellClass: document.body.classList.contains('fx-organism-shell'),
+      interfaceDataset: root.dataset.fxOrganismInterface || null,
+      menuDataset: root.dataset.fxOrganismMenu || null,
+      sections: ['experience','capabilities','pricing','system','resources'].map(id => ({
+        id,
+        exists: Boolean(document.getElementById(id)),
+        children: document.getElementById(id)?.children.length ?? null
+      })),
+      consoleExists: Boolean(document.getElementById('fx-organism-console')),
+      actionbarExists: Boolean(document.querySelector('.fx-organism-actionbar'))
+    };
+  });
+  runtime.diagnostics = meaningfulDiagnostics(errors).slice(-40);
+  return runtime;
+}
+
+async function enterSite(page, label, errors) {
   mark(label + ': navigation-start');
   await page.goto(TEST_URL + '?organism-validation=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
   const skip = page.locator('.fx-intro-skip');
@@ -69,10 +114,22 @@ async function enterSite(page, label) {
     mark(label + ': canonical-ask-activation', { selector: '#hero .fx-reference-controls-r204 .fx-reference-ask', box });
     if (label === 'mobile') await ask.tap({ timeout: 5000 });
     else await ask.click({ timeout: 5000 });
+    await page.waitForTimeout(750);
+    mark(label + ': bootstrap-750ms', await organismSnapshot(page, errors));
   }
 
-  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
-  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
+  try {
+    await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
+  } catch (error) {
+    mark(label + ': interface-timeout', await organismSnapshot(page, errors));
+    throw error;
+  }
+  try {
+    await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
+  } catch (error) {
+    mark(label + ': menu-timeout', await organismSnapshot(page, errors));
+    throw error;
+  }
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
   mark(label + ': site-ready');
 }
@@ -102,7 +159,7 @@ async function validateDesktop() {
     page = await context.newPage();
     const errors = [];
     diagnostics(page, errors);
-    await enterSite(page, 'desktop');
+    await enterSite(page, 'desktop', errors);
 
     const current = await state(page);
     mark('desktop: initial-state', current);
@@ -169,7 +226,7 @@ async function validateMobile() {
     page = await context.newPage();
     const errors = [];
     diagnostics(page, errors);
-    await enterSite(page, 'mobile');
+    await enterSite(page, 'mobile', errors);
 
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
     await pricingTrigger.scrollIntoViewIfNeeded();
