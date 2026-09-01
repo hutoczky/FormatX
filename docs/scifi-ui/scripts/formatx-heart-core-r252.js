@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'heart-core-r252';
-  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260825-r252-controls';
+  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260901-r524-visible-surface-owner';
   let bindingFrame = 0;
   let interactionCooldown = false;
 
@@ -82,6 +82,12 @@
     });
   }
 
+  function protectedSurfaceTarget(target) {
+    return target instanceof Element && Boolean(target.closest(
+      '.fx-reference-controls-r204,.fx-reference-mag-button,.fx-language-toggle,#menu-toggle,#main-nav,a[href],input,select,textarea,[contenteditable="true"]'
+    ));
+  }
+
   function installHeartHitTarget() {
     const hero = document.getElementById('hero');
     const space = hero?.querySelector(':scope .hero-space');
@@ -114,13 +120,21 @@
       });
     }
 
+    if (space.dataset.fxHeartSurfaceBoundR524 !== 'true') {
+      space.dataset.fxHeartSurfaceBoundR524 = 'true';
+      space.addEventListener('click', event => {
+        if (!event.isTrusted || protectedSurfaceTarget(event.target)) return;
+        activateCore('surface');
+      });
+    }
+
     const headerMag = document.querySelector('.fx-reference-mag-button');
     if (headerMag instanceof HTMLButtonElement && headerMag.dataset.fxHeartBoundR252 !== 'true') {
       headerMag.dataset.fxHeartBoundR252 = 'true';
       headerMag.addEventListener('click', () => activateCore('header'));
     }
 
-    root.dataset.fxMagHeartHit = 'ready-r252';
+    root.dataset.fxMagHeartHit = 'ready-r524-visible-surface-owner';
     return true;
   }
 
@@ -138,6 +152,7 @@
     root.dataset.fxHeartCoreR252 = 'ready';
     root.dataset.fxHeartLoopPolicy = 'seamless-v7-single-owner-interaction-only';
     root.dataset.fxHeartScrollOwner = 'retired-r508-seamless-v7';
+    root.dataset.fxHeartPointerOwnerR524 = 'visible-mag-surface-plus-semantic-keyboard-target';
     installHeartHitTarget();
     syncPureWebglComposition();
 
