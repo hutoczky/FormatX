@@ -1,4 +1,4 @@
-/* FormatX r490/R497/R498/R505 — final cross-device header owner.
+/* FormatX r490/R497/R498/R505/R517 — final cross-device header owner.
    Mobile keeps one branded 72px carrier for MAG, language and menu. Desktop
    owns all three right-side controls as a non-overlapping cluster. Compact
    phones collapse the secondary brand tagline and retain the canonical design
@@ -166,12 +166,26 @@
     max-width:118px!important;
     overflow:hidden!important;
   }
+  html:root:root body.living-architecture .topbar > .brand > span {
+    display:block!important;
+    box-sizing:border-box!important;
+    width:62px!important;
+    min-width:0!important;
+    max-width:62px!important;
+    overflow:hidden!important;
+  }
   html:root:root body.living-architecture .topbar > .brand small {
     display:none!important;
     visibility:hidden!important;
   }
   html:root:root body.living-architecture .topbar > .brand strong {
-    max-width:68px!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    width:62px!important;
+    min-width:0!important;
+    max-width:62px!important;
+    font-size:11px!important;
+    letter-spacing:.09em!important;
     white-space:nowrap!important;
     overflow:hidden!important;
     text-overflow:clip!important;
@@ -258,9 +272,6 @@
   }
 }
 
-/* Headless/automation environments do not always expose pointer:fine. Keep the
-   same desktop cluster geometry for every >=901px viewport so the production
-   header cannot regress into the language/menu overlap seen at 1024px. */
 @media (min-width:901px) {
   html:root:root body.living-architecture .topbar > .fx-language-toggle,
   html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
@@ -285,3 +296,4 @@ html.fx-signature-open body.living-architecture .fx-signature-architecture {
 /* production-r490-compact-brand-no-clipping */
 /* production-r498-mobile-design-system-floor-and-brand-overflow-owner */
 /* production-r505-desktop-header-control-gap */
+/* production-r517-webkit-brand-intrinsic-fit */
