@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — R468 runtime with R474 softer mobile display. */
+/* FormatX award-quality gate — R491 progressive runtime + P0 VIP budgets. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -11,6 +11,7 @@ const intro=read('docs/scifi-ui/scripts/formatx-event-horizon.js');
 const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
 const language=read('docs/scifi-ui/scripts/single-language-toggle.js');
 const currentMag=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
+const currentMagCss=read('docs/scifi-ui/styles/formatx-current-mag-r422.css');
 const solidGlass=read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js');
 const life=read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
 const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
@@ -39,7 +40,7 @@ for(const token of [
   'formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy',
   'armed-direct-r326-r468-soft-optics-live-energy-zero-idle',
   "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'"
-])assert.ok(motion.includes(token),`missing current R474-loader/R468 motion owner: ${token}`);
+])assert.ok(motion.includes(token),`missing current loader route: ${token}`);
 assert.ok(motion.includes('single-language-toggle.js?v=20260830-r462-semantic-owner'),'motion loader must request stable language owner');
 assert.ok(motion.includes("fxSingleLanguageToggleVersion==='7'"),'motion loader must require language owner v7');
 assert.ok(!motion.includes('isRetiredMagRuntime'),'compact loader must not contain retired-runtime filtering');
@@ -67,13 +68,19 @@ for(const retired of [
 ])assert.ok(!home.includes(retired),`retired runtime remains active in index: ${retired}`);
 
 for(const token of [
-  'r326-only','cleanupLegacyMagRuntime','direct-r326-r468-soft-optics-live-energy-zero-idle',
-  'r484-bounded-surface-window','periodic-surface-bursts-between-zero-idle',
+  "const VERSION='direct-r326-r491-progressive-interaction-first'",'r326-only','cleanupLegacyMagRuntime',
+  'waitForEnhancementWindow','static-premium-ready','progressive-first-frame',
+  'r491-interaction-only-zero-idle','interaction-only-bursts-between-zero-idle',
   'soft-perimeter-low-bloom-low-cost-shader','formatx-mini-mag-assistant-r459.js',
   'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow',
   'formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy',
   "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'"
-])assert.ok(currentMag.includes(token),`missing R474-loader/R468 current MAG contract: ${token}`);
+])assert.ok(currentMag.includes(token),`missing R491 progressive current MAG contract: ${token}`);
+for(const token of [
+  'formatx-mag-first-frame-r491.svg','progressive-enhancement layer','min-height: 0 !important',
+  'production-r491-progressive-first-frame-direct-r326-layout-a11y-touch'
+])assert.ok(currentMagCss.includes(token),`missing R491 first-frame CSS contract: ${token}`);
+
 for(const token of [
   "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'",
   "const smoothWeight=mobile?'.998':'.930'",
@@ -95,19 +102,23 @@ for(const token of [
   "const VERSION = 'native-webgl-periodic-and-interaction-life-r484'",'surface-sweep-',
   'armed-periodic-and-interaction-surface-energy','periodic-surface-bursts-between-zero-idle',
   'formatx:coreinteraction','pointerdown'
-])assert.ok(life.includes(token),`missing R468 interaction energy contract: ${token}`);
-assert.ok(!life.includes('setInterval('),'R468 MAG life must not install an idle interval');
-assert.ok(!life.includes('requestAnimationFrame('),'R468 MAG life must not install an idle WebGL RAF loop');
+])assert.ok(life.includes(token),`missing underlying interaction energy contract: ${token}`);
+assert.ok(!life.includes('setInterval('),'MAG life must not install an idle interval');
+assert.ok(!life.includes('requestAnimationFrame('),'MAG life must not install an idle WebGL RAF loop');
+
 for(const token of [
   'const activeWindowMs=240','const shapeProbeMs=150','state.core?.requestRender?.(2)',
   'userShapeSource(source)','guardPassiveState(source)',
-  "fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'",
-  "fxMobileRenderGovernorRevisionR433='r465-direct-pause-flag-no-idle-redraw'",
+  "fxCoreMobileIdlePolicyR426='interaction-only-bursts-between-zero-idle'",
+  "fxMobileRenderGovernorRevisionR433='r490-autonomous-sweep-budget-guard'",
+  "fxMobileSurfaceBudgetR484='autonomous-sweeps-suppressed-interaction-sweeps-bounded'",
+  "fxMobileAutonomousSurfaceR490='suppressed-zero-idle'",
   "root.dataset.fxReferenceMotionPaused=value"
-])assert.ok(governor.includes(token),`missing strict R465 mobile render budget: ${token}`);
+])assert.ok(governor.includes(token),`missing strict R491 mobile render budget: ${token}`);
 assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepause'"),'governor idle must not synchronously redraw through legacy pause event');
 assert.ok(!governor.includes("active('scroll-r463'"),'mobile scroll must not wake WebGL');
 assert.ok(!governor.includes("active('resize-r463'"),'mobile resize must not wake WebGL');
+
 for(const token of [
   'canonicalControls(hero)','fx-reference-controls-r204','visibleControl(pause)',
   'fxControlOwnerR268','HU – váltás angol nyelvre','EN – switch to Hungarian'
@@ -120,18 +131,22 @@ function validateLighthouse(config,label){
   assert.ok(collect.url.every(url=>!url.includes('lighthouse=1')),`${label}: audit-only URL forbidden`);
   assert.ok(!String(collect.settings.chromeFlags||'').includes('force-prefers-reduced-motion'),`${label}: forced reduced motion forbidden`);
   assert.ok(!('skipAudits' in collect.settings),`${label}: skipped audits forbidden`);
-  assert.equal(assertions['categories:performance'][1].minScore,.95,`${label}: performance floor`);
-  assert.equal(assertions['categories:accessibility'][1].minScore,1,`${label}: accessibility floor`);
-  assert.equal(assertions['categories:best-practices'][1].minScore,1,`${label}: best-practices floor`);
-  assert.equal(assertions['categories:seo'][1].minScore,1,`${label}: SEO floor`);
+  for(const category of ['performance','accessibility','best-practices','seo']){
+    const rule=assertions[`categories:${category}`][1];
+    assert.equal(rule.minScore,1,`${label}: ${category} must be 100`);
+    assert.equal(rule.aggregationMethod,'pessimistic',`${label}: ${category} must use worst-run aggregation`);
+  }
   assert.equal(assertions['first-contentful-paint'][1].maxNumericValue,1800,`${label}: FCP`);
-  assert.equal(assertions['largest-contentful-paint'][1].maxNumericValue,2500,`${label}: LCP`);
-  assert.equal(assertions['total-blocking-time'][1].maxNumericValue,200,`${label}: TBT`);
-  assert.equal(assertions['cumulative-layout-shift'][1].maxNumericValue,.1,`${label}: CLS`);
-  assert.equal(assertions['server-response-time'][1].maxNumericValue,600,`${label}: TTFB`);
+  assert.equal(assertions['largest-contentful-paint'][1].maxNumericValue,1999,`${label}: LCP`);
+  assert.equal(assertions['total-blocking-time'][1].maxNumericValue,150,`${label}: TBT`);
+  assert.equal(assertions['cumulative-layout-shift'][1].maxNumericValue,.049,`${label}: CLS`);
+  assert.equal(assertions['server-response-time'][1].maxNumericValue,500,`${label}: TTFB`);
+  for(const metric of ['first-contentful-paint','largest-contentful-paint','total-blocking-time','cumulative-layout-shift','server-response-time']){
+    assert.equal(assertions[metric][1].aggregationMethod,'pessimistic',`${label}: ${metric} must use worst-run aggregation`);
+  }
 }
 validateLighthouse(desktop,'desktop');
 validateLighthouse(mobile,'mobile');
 
 for(const source of [intro,motion,language,currentMag,solidGlass,life,governor,controls])new Function(source);
-console.log('PASS: R484 single native MAG path, bounded periodic energy, zero-idle gaps, stable semantics/accessibility and unchanged Lighthouse budgets are structurally valid.');
+console.log('PASS: R491 progressive native MAG, interaction-only mobile energy, zero-idle policy and P0 VIP 100/100/100/100 budgets are structurally valid.');
