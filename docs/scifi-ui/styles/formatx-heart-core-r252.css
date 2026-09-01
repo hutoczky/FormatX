@@ -1,13 +1,25 @@
-/* FormatX r252/R515 — MAG as the living heart of the page.
+/* FormatX r252/R515/R518 — MAG as the living heart of the page.
    The semantic hit target owns activation while the native stage remains the
    visual geometry source for the global touch/drag controller. */
 
-/* The R326 stage must never sit above the semantic control in hit testing.
-   Pointer/drag tracking is global and derives coordinates from this stage's
-   bounding rect, so disabling stage hit-testing preserves native interaction. */
+/* Neither the visual stage nor its carrier owns pointer input. The transparent
+   semantic heart button and explicit hero controls are the accessible hit-test
+   owners; the global R515 touch controller still derives drag coordinates from
+   the native stage bounding rectangle. */
+html:root:root:root:root:root body.living-architecture #hero .hero-space {
+  pointer-events: none !important;
+}
 html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
 html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage {
   pointer-events: none !important;
+}
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-mag-heart-hit-r252,
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-immersive-launch,
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-organism-map,
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
+html:root:root:root:root:root body.living-architecture #hero .hero-space button,
+html:root:root:root:root:root body.living-architecture #hero .hero-space a {
+  pointer-events: auto !important;
 }
 
 .fx-mag-heart-hit-r252 {
@@ -65,8 +77,6 @@ html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-c
     min-height: 210px;
   }
 
-  /* Seamless-v7 owns the bridge/runway. Heart-core only suppresses duplicate
-     mirror decoration; it must never shrink or terminate the current runway. */
   html[data-fx-heart-core-r252='ready'] .fx-loop-bridge > .fx-loop-reference-mirror,
   html[data-fx-heart-core-r252='ready'] .fx-loop-bridge > [data-fx-loop-mirror],
   html[data-fx-heart-core-r252='ready'] .fx-loop-reference-heading,
@@ -106,4 +116,4 @@ html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-c
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
 
-/* production-r515-semantic-mag-input-owner-stage-hit-testing-off */
+/* production-r518-semantic-mag-input-owner-carrier-hit-testing-off */
