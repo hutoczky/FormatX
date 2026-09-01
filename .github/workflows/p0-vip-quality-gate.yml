@@ -8,6 +8,7 @@ on:
       - 'lighthouserc*.json'
       - '.github/scripts/serve-p0-candidate.py'
       - '.github/scripts/validate-p0-vip-quality.cjs'
+      - '.github/scripts/validate-p0-required-mobile.cjs'
       - '.github/scripts/summarize-p0-lighthouse.cjs'
       - '.github/scripts/trace-p0-desktop-cls.cjs'
       - '.github/workflows/p0-vip-quality-gate.yml'
@@ -19,6 +20,7 @@ on:
       - 'lighthouserc*.json'
       - '.github/scripts/serve-p0-candidate.py'
       - '.github/scripts/validate-p0-vip-quality.cjs'
+      - '.github/scripts/validate-p0-required-mobile.cjs'
       - '.github/scripts/summarize-p0-lighthouse.cjs'
       - '.github/scripts/trace-p0-desktop-cls.cjs'
       - '.github/workflows/p0-vip-quality-gate.yml'
@@ -96,6 +98,13 @@ jobs:
           set -o pipefail
           mkdir -p p0-evidence/screenshots
           node .github/scripts/validate-p0-vip-quality.cjs 2>&1 | tee p0-evidence/p0-browser-console.log
+
+      - name: Run required 375x812 and Android Chrome matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p p0-evidence/screenshots
+          node .github/scripts/validate-p0-required-mobile.cjs 2>&1 | tee p0-evidence/p0-required-mobile-console.log
 
       - name: Capture canonical evidence screenshots
         if: always()
@@ -212,6 +221,7 @@ jobs:
             echo '- Broken loaded assets / HTTP 4xx-5xx: **0**'
             echo '- Horizontal overflow: **0**'
             echo '- Keyboard/reduced-motion/no-JS/WebGL fallback: **required**'
+            echo '- Required mobile evidence: **375x812 + Android Chrome device profile**'
             echo
             echo '> Final P0 sign-off also requires field INP <= 200 ms and real-device Safari/iPhone evidence. CI emulation is not presented as field/device proof.'
           } >> "$GITHUB_STEP_SUMMARY"
