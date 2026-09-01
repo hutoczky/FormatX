@@ -131,10 +131,14 @@ assert.ok(includesAll(masterSync, ['formatx:organismmastersync', 'speechSynthesi
 assert.ok(mobileEntry.includes('mobile-core-engine-v3.js') && includesAll(morphEngine, ['coreForm', 'neuralForm', 'organForm', 'heartForm', 'skeletonForm', 'beaconForm']), 'morphing organism renderer missing');
 
 assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-interface.js', 'formatx-premium-finish.js']), 'critical production assets missing');
-assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
+assert.ok(includesAll(deployWorkflow, [
+  'uses: ./.github/workflows/p0-vip-quality-gate.yml',
+  'needs: [validate, p0-vip]',
+  'npx wrangler deploy'
+]), 'production deploy must depend on validation and the P0 VIP quality gate');
 
 // The iconic MAG is a first-class requested feature and therefore part of the
 // same production gate as scrolling, downloads and the public operating surface.
 require('./validate-signature-system-r185.cjs');
 require('./validate-igloo-floor.cjs');
-console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, current semantic language owner, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
+console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, current semantic language owner, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and validation + P0 VIP production gates.');
