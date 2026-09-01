@@ -60,11 +60,11 @@ for (const profile of profiles) {
       ttfbMs: metric(lhr, 'server-response-time')
     };
     const reasons = [];
-    for (const [key, target] of Object.entries({ performance: 1, accessibility: 1, 'best-practices': 1, seo: 1 })) {
-      if (categories[key] !== target) reasons.push(`${key}=${categories[key]}`);
+    for (const key of ['performance', 'accessibility', 'best-practices', 'seo']) {
+      if (categories[key] !== required[key]) reasons.push(`${key}=${categories[key]}`);
     }
-    if (!(metrics.lcpMs !== null && metrics.lcpMs < 2000)) reasons.push(`LCP=${metrics.lcpMs}ms`);
-    if (!(metrics.cls !== null && metrics.cls < 0.05)) reasons.push(`CLS=${metrics.cls}`);
+    if (!(metrics.lcpMs !== null && metrics.lcpMs <= required.lcpMs)) reasons.push(`LCP=${metrics.lcpMs}ms`);
+    if (!(metrics.cls !== null && metrics.cls <= required.cls)) reasons.push(`CLS=${metrics.cls}`);
     if (!(metrics.tbtMs !== null && metrics.tbtMs <= required.tbtMs)) reasons.push(`TBT=${metrics.tbtMs}ms`);
     if (!(metrics.fcpMs !== null && metrics.fcpMs <= required.fcpMs)) reasons.push(`FCP=${metrics.fcpMs}ms`);
     if (!(metrics.ttfbMs !== null && metrics.ttfbMs <= required.ttfbMs)) reasons.push(`TTFB=${metrics.ttfbMs}ms`);
@@ -95,10 +95,11 @@ const jsonPath = path.join(outDir, 'p0-lighthouse-summary.json');
 const logPath = path.join(outDir, 'p0-lighthouse-summary.log');
 fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2) + '\n');
 
+const requiredLine = `Required: desktop + mobile ${required.performance * 100}/${required.accessibility * 100}/${required['best-practices'] * 100}/${required.seo * 100}, ${required.runsPerProfile}/${required.runsPerProfile} runs; LCP <= ${required.lcpMs}ms; CLS <= ${required.cls}; TBT <= ${required.tbtMs}ms; FCP <= ${required.fcpMs}ms; TTFB <= ${required.ttfbMs}ms.`;
 const lines = [
   `FormatX P0 VIP Lighthouse: ${report.pass ? 'PASS' : 'FAIL'}`,
   `Generated: ${report.generatedAt}`,
-  'Required: desktop + mobile 100/100/100/100, 3/3 runs; LCP < 2000ms; CLS < 0.05; TBT <= 150ms; FCP <= 1800ms; TTFB <= 500ms.',
+  requiredLine,
   ''
 ];
 for (const profile of profiles) {
