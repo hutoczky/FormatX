@@ -34,17 +34,22 @@ async function state(page) {
     const hit = document.querySelector('#hero .fx-mag-heart-hit-r252');
     const bridgeStyle = bridge ? getComputedStyle(bridge) : null;
     const hitRect = hit?.getBoundingClientRect();
+    const focusable = mirror?.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])').length || 0;
     return {
       controller: root.dataset.fxInfiniteController || '',
       heart: root.dataset.fxHeartCoreR252 || '',
       heartPolicy: root.dataset.fxHeartLoopPolicy || '',
-      mirrorMode: root.dataset.fxLoopMirrorMode || '',
+      heartScrollOwner: root.dataset.fxHeartScrollOwner || '',
       bridgeCount: bridge ? 1 : 0,
       mirrorCount: mirror ? 1 : 0,
+      mirrorInert: Boolean(mirror?.hasAttribute('inert')),
+      mirrorAriaHidden: mirror?.getAttribute('aria-hidden') || '',
+      mirrorFocusable: focusable,
       bridgeHeight: bridge?.offsetHeight || 0,
       bridgeTop: bridge?.offsetTop || 0,
       bridgeDisplay: bridgeStyle?.display || '',
       heroTop: hero?.offsetTop || 0,
+      heroHeight: hero?.offsetHeight || 0,
       viewportHeight: innerHeight,
       maximum: Math.max(0, root.scrollHeight - innerHeight),
       scrollY,
@@ -92,6 +97,28 @@ async function verifyHeartInteraction(page, label) {
   assert(/organism-voice|ask-control|thought-trigger/.test(interaction.target), `${label} MAG has no canonical interaction target: ${JSON.stringify(interaction)}`);
 }
 
+async function runLoopCycle(page, label, cycle) {
+  const before = await state(page);
+  const target = await page.evaluate(() => {
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+    const hero = document.querySelector('#main-content > #hero');
+    if (!(bridge instanceof HTMLElement) || !(hero instanceof HTMLElement)) return null;
+    const relative = Math.max(48, Math.min(innerHeight * .24, Math.max(48, hero.offsetHeight - 12)));
+    window.scrollTo({ top: bridge.offsetTop + relative, left: 0, behavior: 'auto' });
+    return { relative, expectedLanding: hero.offsetTop + relative };
+  });
+  assert(target, `${label} cycle ${cycle} has no visual bridge target`);
+  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 7000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxLoopLandingState === 'settled', null, { timeout: 5000 });
+  await page.waitForTimeout(220);
+  const after = await state(page);
+  assert(after.loopCount === before.loopCount + 1, `${label} cycle ${cycle} did not transfer exactly once: ${JSON.stringify({ before, target, after })}`);
+  assert(/^visual-bridge-/.test(after.loopSource), `${label} cycle ${cycle} did not use seamless-v7 visual bridge: ${JSON.stringify(after)}`);
+  assert(!/^heart-core-/.test(after.loopSource), `${label} cycle ${cycle} was incorrectly routed through retired heart-core scrolling: ${JSON.stringify(after)}`);
+  assert(Math.abs(after.scrollY - target.expectedLanding) <= 12, `${label} cycle ${cycle} did not preserve visual relative landing: ${JSON.stringify({ target, after })}`);
+  assert(Math.abs(after.landing - target.expectedLanding) <= 12, `${label} cycle ${cycle} recorded wrong seamless landing: ${JSON.stringify({ target, after })}`);
+}
+
 async function verifyMobile(browser) {
   const context = await browser.newContext({
     viewport: { width: 412, height: 915 },
@@ -110,35 +137,25 @@ async function verifyMobile(browser) {
   const initial = await state(page);
   assert(initial.controller === 'seamless-v7', `mobile seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.heart === 'ready', `mobile heart core not ready: ${JSON.stringify(initial)}`);
-  assert(initial.heartPolicy === 'footer-to-real-core-no-reference-mirror', `mobile heart loop policy missing: ${JSON.stringify(initial)}`);
-  assert(initial.bridgeCount === 1, `mobile handoff bridge missing: ${JSON.stringify(initial)}`);
-  assert(initial.mirrorCount === 0 && initial.mirrorMode === 'none-mobile-r252', `mobile fake hero mirror still exists: ${JSON.stringify(initial)}`);
-  assert(initial.bridgeDisplay !== 'none', `mobile handoff bridge is hidden: ${JSON.stringify(initial)}`);
-  assert(initial.bridgeHeight >= 80 && initial.bridgeHeight <= Math.max(180, initial.viewportHeight * .24), `mobile bridge is not a short handoff runway: ${JSON.stringify(initial)}`);
+  assert(initial.heartPolicy === 'seamless-v7-single-owner-interaction-only', `mobile heart ownership policy missing: ${JSON.stringify(initial)}`);
+  assert(initial.heartScrollOwner === 'retired-r508-seamless-v7', `legacy heart scroll ownership returned: ${JSON.stringify(initial)}`);
+  assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, `mobile seamless inert mirror missing: ${JSON.stringify(initial)}`);
+  assert(initial.mirrorInert && initial.mirrorAriaHidden === 'true' && initial.mirrorFocusable === 0, `mobile reference mirror is not inert: ${JSON.stringify(initial)}`);
+  assert(initial.runtime?.inertReferenceMirror === true && initial.runtime?.mirrorContext === 'static-2d-snapshot-no-webgl', `mobile seamless mirror runtime contract missing: ${JSON.stringify(initial)}`);
+  assert(initial.bridgeDisplay !== 'none' && initial.bridgeHeight > 40, `mobile visual bridge is unavailable: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180 && initial.hitLabel.length > 8, `mobile MAG is not a semantic interactive target: ${JSON.stringify(initial)}`);
   assert(initial.snapRoot === 'none' && initial.snapBody === 'none', `mobile scroll snapping active: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
   await verifyHeartInteraction(page, 'mobile');
   await page.keyboard.press('Escape').catch(() => {});
-  await page.waitForTimeout(200);
-
-  for (let cycle = 0; cycle < 2; cycle += 1) {
-    const before = await state(page);
-    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, left: 0, behavior: 'auto' }));
-    await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
-    await page.waitForFunction(() => document.documentElement.dataset.fxLoopLandingState === 'heart-core-settled', null, { timeout: 4000 });
-    await page.waitForTimeout(180);
-    const after = await state(page);
-    assert(after.loopCount === before.loopCount + 1, `mobile cycle ${cycle + 1} did not transfer exactly once: ${JSON.stringify({ before, after })}`);
-    assert(/^heart-core-/.test(after.loopSource), `mobile cycle ${cycle + 1} did not use heart-core transfer: ${JSON.stringify(after)}`);
-    assert(Math.abs(after.scrollY - after.heroTop) <= 8, `mobile cycle ${cycle + 1} did not return directly to real MAG: ${JSON.stringify(after)}`);
-    assert(Math.abs(after.landing - after.heroTop) <= 8, `mobile cycle ${cycle + 1} recorded wrong MAG landing: ${JSON.stringify(after)}`);
-  }
+  await page.waitForTimeout(240);
+  await runLoopCycle(page, 'mobile', 1);
+  await runLoopCycle(page, 'mobile', 2);
 
   const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
   assert(!meaningful.length, `mobile browser errors: ${meaningful.join(' | ')}`);
-  console.log('PASS r252 mobile footer → real MAG loop and MAG interaction');
+  console.log('PASS r508 mobile seamless-v7 loop ownership + MAG interaction');
   await context.close();
 }
 
@@ -149,21 +166,13 @@ async function verifyDesktop(browser) {
   const initial = await state(page);
   assert(initial.controller === 'seamless-v7', `desktop seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, `desktop inert reference mirror contract changed: ${JSON.stringify(initial)}`);
+  assert(initial.mirrorInert && initial.mirrorFocusable === 0, `desktop reference mirror is interactive: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG interaction target missing: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
-
-  const before = await state(page);
-  const relative = Math.min(220, Math.max(120, (before.runtime && 180) || 180));
-  await page.evaluate(offset => {
-    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    window.scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'auto' });
-  }, relative);
-  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
-  await page.waitForTimeout(500);
-  const after = await state(page);
-  assert(after.loopCount === before.loopCount + 1, `desktop seamless loop failed: ${JSON.stringify({ before, after })}`);
-  assert(!/^heart-core-/.test(after.loopSource), `desktop was incorrectly routed through mobile heart transfer: ${JSON.stringify(after)}`);
+  await page.keyboard.press('Escape').catch(() => {});
+  await page.waitForTimeout(240);
+  await runLoopCycle(page, 'desktop', 1);
   console.log('PASS desktop seamless-v7 preserved + MAG interaction');
   await context.close();
 }
@@ -173,7 +182,7 @@ async function verifyDesktop(browser) {
   try {
     await verifyMobile(browser);
     await verifyDesktop(browser);
-    console.log('PASS FormatX r252 platform scroll and living MAG interaction contract');
+    console.log('PASS FormatX r508 single-owner platform scroll and living MAG interaction contract');
   } finally {
     await browser.close();
   }
