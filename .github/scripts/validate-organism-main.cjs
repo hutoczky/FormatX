@@ -58,13 +58,17 @@ async function enterSite(page, label) {
     await skip.click({ force: true, timeout: 1500 }).catch(() => {});
   }
 
-  /* The production runtime intentionally keeps the Organism interface outside
-     the critical first-paint path. Exercise its real deferred-user-activation
-     contract with an actual Playwright pointer input before asserting readiness. */
+  /* Production deliberately defers the Organism runtime until explicit user
+     intent. Exercise the canonical visible ASK control with a genuine trusted
+     Playwright click/tap; do not synthesize the immersive event from JS. */
   const interfaceReady = await page.evaluate(() => document.documentElement.dataset.fxOrganismInterface === 'ready');
   if (!interfaceReady) {
-    await page.mouse.click(8, 220);
-    mark(label + ': deferred-user-activation');
+    const ask = page.locator('#hero .fx-reference-controls-r204 .fx-reference-ask').first();
+    await ask.waitFor({ state: 'visible', timeout: 15000 });
+    const box = await ask.boundingBox();
+    mark(label + ': canonical-ask-activation', { selector: '#hero .fx-reference-controls-r204 .fx-reference-ask', box });
+    if (label === 'mobile') await ask.tap({ timeout: 5000 });
+    else await ask.click({ timeout: 5000 });
   }
 
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
