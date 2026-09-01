@@ -69,13 +69,16 @@ has(current,[
   'formatx-mini-mag-assistant-r459.js'
 ],'R491 progressive MAG bootstrap');
 has(quality,[
-  '--fx-mag-first-frame:','data:image/svg+xml','deploy-r493-inline-first-frame'
-],'critical inline first-frame source');
+  '--fx-mag-first-frame:','data:image/svg+xml','deploy-r493-inline-first-frame',
+  'deploy-r495-filter-free-first-frame','filter: none !important'
+],'critical single-owner first-frame source');
 has(currentStyle,[
-  'FormatX r502','var(--fx-mag-first-frame)','progressive-enhancement layer',
-  'min-height: 0 !important','production-r502-progressive-first-frame-direct-r326-layout-a11y-touch'
-],'R502 filter-free inline first-frame geometry and progressive visual fallback');
-assert.ok(!currentStyle.includes('feGaussianBlur'),'R502 first frame must remain free of SVG Gaussian blur work');
+  'FormatX r504','single first-frame owner','var(--fx-mag-first-frame)',
+  'Never redefine','min-height: 0 !important','#live-operating-system.fx-live-os',
+  'box-sizing: border-box !important','production-r504-single-first-frame-owner-live-os-border-box'
+],'R504 progressive MAG geometry, first-frame reuse and Live OS overflow contract');
+assert.ok(!currentStyle.includes('--fx-mag-first-frame:'),'R504 current MAG CSS must never redefine the first-frame asset');
+assert.ok(!currentStyle.includes('feGaussianBlur'),'R504 current MAG layer must remain free of SVG Gaussian blur work');
 assert.ok(!currentStyle.includes('formatx-mag-first-frame-r491.svg'),'current MAG CSS must not reintroduce the separate R491 first-frame request');
 
 has(renderer,[
@@ -124,4 +127,4 @@ has(quality,[
 ],'measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: current architecture = one native MAG, R502 filter-free inline premium first frame, progressive WebGL enhancement, R498 overflow-safe header/design-system floor, deterministic ASK Organism bootstrap and interaction-only zero-idle mobile rendering.');
+console.log('PASS: current architecture = one native MAG, R504 single first-frame owner, progressive WebGL enhancement, Live OS border-box overflow fix, R498 header/design-system floor, deterministic ASK Organism bootstrap and interaction-only zero-idle mobile rendering.');
