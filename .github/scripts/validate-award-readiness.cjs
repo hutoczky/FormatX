@@ -111,6 +111,7 @@ assert.doesNotMatch(scrollBootstrap, /scrollTo\s*\(|scrollIntoView\s*\(|cloneNod
 assert.match(seamlessScroll, /const VERSION = 'seamless-v7'/, 'shared seamless runtime missing');
 assert.match(seamlessScroll, /mobileTransfer: 'scrollend-or-idle'/, 'shared runtime mobile handoff guard missing');
 assert.doesNotMatch(seamlessScroll, /addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/, 'shared seamless runtime must not capture wheel/touch input');
-assert.match(mobileLoopCss, /min-height:\s*calc\(100svh \+ max\(320px, 24svh\)\)/, 'mobile seamless bridge runway missing');
+assert.match(mobileLoopCss, /--fx-loop-runway:\s*max\(320px,\s*100svh\)/, 'mobile seamless bridge runway token missing');
+assert.match(mobileLoopCss, /min-height:\s*calc\(var\(--fx-loop-source-height,\s*100svh\)\s*\+\s*var\(--fx-loop-runway\)\)/, 'mobile seamless bridge must reserve source height plus the full runway');
 
 console.log('FormatX award-readiness SEO, hierarchy, proof, accessibility, first-party delivery, sitemap freshness and shared seamless-v7 mobile/desktop scroll validation passed.');
