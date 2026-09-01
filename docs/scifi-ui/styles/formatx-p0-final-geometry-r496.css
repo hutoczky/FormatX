@@ -31,7 +31,7 @@ html body.living-architecture {
     position: fixed !important;
     inset: auto !important;
     top: 13px !important;
-    right: 88px !important;
+    right: 112px !important;
     width: 46px !important;
     min-width: 46px !important;
     max-width: 46px !important;
@@ -48,7 +48,7 @@ html body.living-architecture {
     position: fixed !important;
     inset: auto !important;
     top: 13px !important;
-    right: 148px !important;
+    right: 174px !important;
     width: 54px !important;
     min-width: 54px !important;
     max-width: 54px !important;
@@ -144,4 +144,4 @@ html body.living-architecture {
   }
 }
 
-/* deploy-r496-deterministic-final-geometry */
+/* deploy-r507-deterministic-final-geometry-header-gap */
