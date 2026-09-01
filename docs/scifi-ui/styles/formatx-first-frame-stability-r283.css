@@ -441,3 +441,109 @@
     transform: none !important;
   }
 }
+
+/* R494 P0 desktop header first-paint lock — exact R244 settled geometry. */
+@media (min-width: 901px) {
+  html:root:root body.living-architecture .topbar {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  html:root:root body.living-architecture .topbar .brand {
+    position: absolute !important;
+    inset: 18px auto auto max(38px, calc((100vw - 1320px) / 2)) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  html:root:root body.living-architecture .topbar .brand img {
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+  }
+  html:root:root body.living-architecture .topbar .brand strong {
+    font: 780 14px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .15em !important;
+  }
+  html:root:root body.living-architecture .topbar .brand small {
+    margin-top: 5px !important;
+    font: 650 7px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .22em !important;
+  }
+  html:root:root body.living-architecture .topbar > .header-actions,
+  html:root:root body.living-architecture .topbar > .main-nav:not(.open) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  html:root:root body.living-architecture .topbar #menu-toggle,
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button {
+    position: absolute !important;
+    inset: 10px 38px auto auto !important;
+    z-index: 8 !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-language-toggle {
+    position: absolute !important;
+    inset: 16px 112px auto auto !important;
+    z-index: 8 !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button {
+    position: absolute !important;
+    inset: 16px 174px auto auto !important;
+    z-index: 8 !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
+/* deploy-r494-p0-desktop-critical-path */
