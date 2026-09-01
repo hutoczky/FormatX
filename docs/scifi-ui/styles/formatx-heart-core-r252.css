@@ -1,12 +1,17 @@
-/* FormatX r252/R513 — MAG as the living heart of the page.
-   This layer owns the semantic MAG interaction hit-area. The seamless-v7 loop
-   remains the only scroll-handoff owner. */
+/* FormatX r252/R515 — MAG as the living heart of the page.
+   The semantic hit target owns activation while the native stage remains the
+   visual geometry source for the global touch/drag controller. */
+
+/* The R326 stage must never sit above the semantic control in hit testing.
+   Pointer/drag tracking is global and derives coordinates from this stage's
+   bounding rect, so disabling stage hit-testing preserves native interaction. */
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage {
+  pointer-events: none !important;
+}
 
 .fx-mag-heart-hit-r252 {
   position: absolute;
-  /* Native MAG stage is visual/input-reactive, while this semantic button owns
-     activation. Keep it below the canonical hero controls (z 12080) but above
-     every WebGL stage so pointer and keyboard activation reach the same path. */
   z-index: 12060 !important;
   left: 50%;
   top: 50%;
@@ -101,4 +106,4 @@
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
 
-/* production-r513-semantic-mag-hit-seamless-single-owner */
+/* production-r515-semantic-mag-input-owner-stage-hit-testing-off */
