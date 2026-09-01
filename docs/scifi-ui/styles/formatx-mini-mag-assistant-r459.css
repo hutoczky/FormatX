@@ -1,7 +1,9 @@
-/* FormatX r459 — persistent mini MAG assistant.
-   The full-size native WebGL MAG remains untouched in the hero. This fixed,
-   lightweight companion is only a site-control surface, so it adds no second
-   WebGL renderer and cannot compete with the primary MAG GPU budget. */
+/* FormatX r459/R497 — persistent mini MAG assistant.
+   The full-size native WebGL MAG remains untouched in the hero. This lightweight
+   companion is only a site-control surface, so it adds no second WebGL renderer
+   and cannot compete with the primary MAG GPU budget. On compact/coarse mobile
+   it is anchored to the initial document viewport instead of staying fixed over
+   scrolled information; the header MAG remains the persistent mobile entry. */
 
 .fx-mini-mag-assistant-r459 {
   position: fixed;
@@ -236,8 +238,11 @@
 
 @media (max-width: 680px), (pointer: coarse) {
   .fx-mini-mag-assistant-r459 {
+    position: absolute;
+    top: max(760px, calc(100svh - 84px));
     right: max(12px, env(safe-area-inset-right));
-    bottom: max(14px, env(safe-area-inset-bottom));
+    bottom: auto;
+    box-sizing: border-box;
     width: 58px;
     height: 58px;
   }
@@ -278,3 +283,5 @@
   .fx-mini-mag-panel-r459,
   .fx-mini-mag-launcher-r459 { transition: none !important; animation: none !important; }
 }
+
+/* production-r497-mobile-non-occluding-mini-mag */
