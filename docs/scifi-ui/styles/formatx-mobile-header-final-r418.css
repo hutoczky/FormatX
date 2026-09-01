@@ -1,9 +1,17 @@
-/* FormatX r490 — final cross-device header owner.
+/* FormatX r490/R497 — final cross-device header owner.
    Mobile keeps one branded 72px carrier for MAG, language and menu. Desktop
    owns all three right-side controls as a non-overlapping cluster. Compact
-   phones intentionally collapse the secondary brand tagline instead of
-   clipping text inside the fixed control cluster. */
+   phones collapse the secondary brand tagline and retain the canonical design
+   tokens even while the heavy desktop critical sheet remains deferred. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root {
+    --fx-cyan:#7cecff;
+    --fx-cyan-rgb:124,236,255;
+    --fx-violet:#8f72ff;
+    --fx-violet-rgb:143,114,255;
+    --fx-radius-lg:30px 7px 30px 7px;
+  }
+
   html:root:root body.living-architecture .topbar {
     position:relative!important;
     top:auto!important;
@@ -20,7 +28,10 @@
     max-height:72px!important;
     margin:0!important;
     padding:0!important;
+    border-bottom:1px solid rgba(116,206,242,.18)!important;
     overflow:visible!important;
+    background:linear-gradient(180deg,rgba(2,14,24,.985),rgba(2,11,20,.965))!important;
+    box-shadow:0 10px 34px rgba(0,0,0,.26)!important;
     transform:none!important;
     translate:none!important;
     z-index:12060!important;
@@ -37,12 +48,17 @@
     gap:9px!important;
     box-sizing:border-box!important;
     width:auto!important;
+    min-width:0!important;
     max-width:118px!important;
     height:52px!important;
     margin:0!important;
     overflow:hidden!important;
     transform:none!important;
     translate:none!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .brand > * {
+    min-width:0!important;
   }
 
   html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264,
@@ -133,16 +149,18 @@
 
 @media (max-width:430px) {
   html:root:root body.living-architecture .topbar > .brand {
-    max-width:126px!important;
-    overflow:visible!important;
+    width:118px!important;
+    max-width:118px!important;
+    overflow:hidden!important;
   }
   html:root:root body.living-architecture .topbar > .brand small {
     display:none!important;
     visibility:hidden!important;
   }
   html:root:root body.living-architecture .topbar > .brand strong {
+    max-width:68px!important;
     white-space:nowrap!important;
-    overflow:visible!important;
+    overflow:hidden!important;
     text-overflow:clip!important;
   }
 }
@@ -237,4 +255,4 @@ html.fx-signature-open body.living-architecture .fx-signature-architecture {
   visibility:visible!important;
 }
 
-/* production-r490-compact-brand-no-clipping */
+/* production-r497-mobile-design-token-and-brand-overflow-owner */
