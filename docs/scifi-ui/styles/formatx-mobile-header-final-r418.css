@@ -1,4 +1,4 @@
-/* FormatX r490/R497/R498 — final cross-device header owner.
+/* FormatX r490/R497/R498/R505 — final cross-device header owner.
    Mobile keeps one branded 72px carrier for MAG, language and menu. Desktop
    owns all three right-side controls as a non-overlapping cluster. Compact
    phones collapse the secondary brand tagline and retain the canonical design
@@ -220,7 +220,7 @@
   html:root:root body.living-architecture .topbar > .fx-language-toggle,
   html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
     top:14px!important;
-    right:92px!important;
+    right:104px!important;
     display:inline-flex!important;
     align-items:center!important;
     justify-content:center!important;
@@ -235,7 +235,7 @@
   html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
   html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264 {
     top:14px!important;
-    right:150px!important;
+    right:162px!important;
     display:grid!important;
     place-items:center!important;
     width:54px!important;
@@ -258,6 +258,20 @@
   }
 }
 
+/* Headless/automation environments do not always expose pointer:fine. Keep the
+   same desktop cluster geometry for every >=901px viewport so the production
+   header cannot regress into the language/menu overlap seen at 1024px. */
+@media (min-width:901px) {
+  html:root:root body.living-architecture .topbar > .fx-language-toggle,
+  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
+    right:104px!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264 {
+    right:162px!important;
+  }
+}
+
 html:not(.fx-signature-open) body.living-architecture .fx-signature-architecture {
   display:none!important;
   visibility:hidden!important;
@@ -270,3 +284,4 @@ html.fx-signature-open body.living-architecture .fx-signature-architecture {
 
 /* production-r490-compact-brand-no-clipping */
 /* production-r498-mobile-design-system-floor-and-brand-overflow-owner */
+/* production-r505-desktop-header-control-gap */
