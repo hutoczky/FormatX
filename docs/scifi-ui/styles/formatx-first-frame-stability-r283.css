@@ -35,7 +35,6 @@
     clip-path: inset(100%) !important;
   }
 
-  /* Reserve the left brand cell so CORE/MAG never collides with FORMATX. */
   html body.living-architecture .topbar .brand {
     box-sizing: border-box !important;
     min-width: 0 !important;
@@ -49,8 +48,6 @@
     white-space: nowrap !important;
   }
 
-  /* Reserve exactly the settled mobile flow before the reference runtime
-     inserts the three hero controls. */
   html body.living-architecture #hero > .hero-grid {
     display: flex !important;
     flex-direction: column !important;
@@ -117,8 +114,6 @@
     translate: none !important;
   }
 
-  /* The canonical r244 stylesheet hides .main-nav as part of the closed
-     header. Only the explicit open state overrides that rule. */
   html[data-fx-reference-production-r244="ready"] body.living-architecture #main-nav.main-nav.open,
   html body.living-architecture #main-nav.open {
     position: fixed !important;
@@ -158,9 +153,6 @@
 }
 
 @media (min-width: 901px) {
-  /* Match the settled r244 desktop two-row composition before late runtime
-     nodes are attached. This is reservation only, so the final appearance is
-     unchanged while CLS is removed. */
   html body.living-architecture main#main-content section#hero.scene.hero {
     position: relative !important;
     box-sizing: border-box !important;
@@ -208,9 +200,6 @@
     translate: none !important;
   }
 
-  /* r334: mirror the settled r244 copy metrics in the render-blocking frame.
-     Previously only the parent grid was reserved; the initial APEX typography
-     was therefore painted and then replaced by the reference typography. */
   html body.living-architecture #hero .hero-copy .kicker {
     margin: 0 0 14px !important;
     font: 700 10px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace !important;
@@ -332,8 +321,6 @@
     min-height: 258px !important;
   }
 
-  /* r334: newly attached controls receive their final WDA geometry immediately
-     instead of appearing in the legacy vertical r244 rail and moving later. */
   html body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
   html body.living-architecture #hero .fx-reference-controls-r204 {
     position: absolute !important;
@@ -396,7 +383,6 @@
     translate: none !important;
   }
 
-  /* r334: header controls are born at their final desktop coordinates. */
   html body.living-architecture .topbar .fx-reference-menu-button {
     top: 12px !important;
     right: 22px !important;
@@ -442,7 +428,6 @@
   }
 }
 
-/* R494 P0 desktop header first-paint lock — exact R244 settled geometry. */
 @media (min-width: 901px) {
   html:root:root body.living-architecture .topbar {
     position: relative !important;
@@ -546,10 +531,6 @@
   }
 }
 
-/* R497 — desktop viewport layers must never participate in normal flow.
-   The mobile first-paint sheet already enforced this. Desktop was still able
-   to briefly treat the canvas/atmosphere as document spacers before the full
-   runtime CSS arrived, shifting the 76px header and hero by ~72px. */
 @media (min-width: 901px) {
   html,
   html body.living-architecture {
@@ -582,4 +563,34 @@
   html body.living-architecture > .skip-link:focus-visible { top: 12px !important; }
 }
 
-/* deploy-r497-p0-desktop-viewport-layer-owner */
+/* R511 desktop LCP owner: this stylesheet is render-blocking and loads before
+   the quality layer. A high-specificity gradient crystal means the mobile SVG
+   variable is never a computed desktop background/LCP candidate. */
+@media (min-width: 901px) {
+  html:root:root:root:root:root body.living-architecture #hero .hero-space::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 10% 14% 12% !important;
+    z-index: 1 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    background:
+      linear-gradient(142deg, rgba(245,254,255,.88) 0 7%, transparent 7% 36%, rgba(104,225,255,.28) 36% 44%, transparent 44% 100%),
+      linear-gradient(28deg, rgba(115,83,255,.34) 0 22%, transparent 22% 53%, rgba(197,249,255,.26) 53% 61%, transparent 61% 100%),
+      conic-gradient(from 214deg at 49% 47%, #18295e 0deg, #347bc8 48deg, #73e8ff 96deg, #d9fcff 132deg, #61c8ef 178deg, #7257e8 226deg, #253870 280deg, #18295e 360deg) !important;
+    clip-path: polygon(50% 0,70% 6%,87% 25%,91% 49%,83% 73%,66% 94%,43% 100%,21% 88%,8% 67%,9% 41%,23% 17%) !important;
+    opacity: .97 !important;
+    filter: none !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+  html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
+  html:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    opacity: 0 !important;
+  }
+}
+
+/* deploy-r511-desktop-gradient-first-frame-lcp-owner */
