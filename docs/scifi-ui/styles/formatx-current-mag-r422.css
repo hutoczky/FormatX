@@ -1,4 +1,4 @@
-/* FormatX r491 — native MAG layout, zero-cost premium first frame and accessibility composition.
+/* FormatX r493 — native MAG layout, zero-cost premium first frame and accessibility composition.
    The static first frame is a normal progressive-enhancement layer, not an audit path.
    Native WebGL replaces it after the critical first-paint window or genuine MAG intent. */
 html,
@@ -7,14 +7,13 @@ body {
   overflow-x: clip !important;
 }
 
-/* The first visitor frame must already look intentional while the expensive
-   WebGL renderer is still outside the critical rendering path. Keeping the
-   placeholder on the existing hero-space geometry also prevents a late visual
-   hole from dominating Speed Index. */
 html body.living-architecture #hero .hero-space {
   isolation: isolate !important;
 }
 
+/* R493: the critical quality layer owns the embedded image bytes. Reusing the
+   same variable prevents a second URL discovery/repaint when this stylesheet
+   becomes active later. */
 html body.living-architecture #hero .hero-space::before {
   content: "" !important;
   position: absolute !important;
@@ -22,7 +21,7 @@ html body.living-architecture #hero .hero-space::before {
   z-index: 1 !important;
   display: block !important;
   box-sizing: border-box !important;
-  background: url("../assets/images/formatx-mag-first-frame-r491.svg") center / contain no-repeat !important;
+  background: var(--fx-mag-first-frame) center / contain no-repeat !important;
   opacity: .98 !important;
   filter: drop-shadow(0 0 24px rgba(73, 213, 255, .18)) !important;
   pointer-events: none !important;
@@ -55,7 +54,6 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   visibility:visible!important;pointer-events:none!important;transform-origin:50% 48%!important;
 }
 
-/* Native WebGL atomically takes visual ownership after it is actually ready. */
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
 html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::after,
@@ -64,10 +62,6 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   box-shadow:none!important;filter:none!important;opacity:0!important;animation:none!important;
 }
 
-/* r491 desktop CLS lock. The settled reference composition does not require the
-   old 505px copy reservation. Removing that obsolete minimum before first paint
-   keeps the copy/title/action stack in its final geometry when the r244 state
-   attribute is attached later. */
 @media (min-width:901px) {
   html body.living-architecture #hero .hero-grid > .hero-copy {
     min-height: 0 !important;
@@ -137,4 +131,4 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
-/* production-r491-progressive-first-frame-direct-r326-layout-a11y-touch */
+/* production-r493-progressive-first-frame-direct-r326-layout-a11y-touch */
