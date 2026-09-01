@@ -1,11 +1,7 @@
-/* FormatX r252/R515/R518 — MAG as the living heart of the page.
+/* FormatX r252/R515/R518/R519 — MAG as the living heart of the page.
    The semantic hit target owns activation while the native stage remains the
    visual geometry source for the global touch/drag controller. */
 
-/* Neither the visual stage nor its carrier owns pointer input. The transparent
-   semantic heart button and explicit hero controls are the accessible hit-test
-   owners; the global R515 touch controller still derives drag coordinates from
-   the native stage bounding rectangle. */
 html:root:root:root:root:root body.living-architecture #hero .hero-space {
   pointer-events: none !important;
 }
@@ -24,7 +20,7 @@ html:root:root:root:root:root body.living-architecture #hero .hero-space a {
 
 .fx-mag-heart-hit-r252 {
   position: absolute;
-  z-index: 12060 !important;
+  z-index: 12020 !important;
   left: 50%;
   top: 50%;
   width: min(36vw, 430px);
@@ -40,6 +36,18 @@ html:root:root:root:root:root body.living-architecture #hero .hero-space a {
   transform: translate(-50%, -50%);
   touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: auto !important;
+}
+
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
+html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 {
+  z-index: 12120 !important;
+  pointer-events: auto !important;
+}
+html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 button,
+html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 a {
+  position: relative !important;
+  z-index: 12121 !important;
   pointer-events: auto !important;
 }
 
@@ -116,4 +124,4 @@ html:root:root:root:root:root body.living-architecture #hero .hero-space a {
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
 
-/* production-r518-semantic-mag-input-owner-carrier-hit-testing-off */
+/* production-r519-semantic-mag-below-explicit-controls */
