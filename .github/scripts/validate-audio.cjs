@@ -81,6 +81,7 @@ async function activationSnapshot(page) {
       music: root.dataset.fxAudioMusic || '',
       fallback: root.dataset.fxAudioFallback || '',
       error: root.dataset.fxAudioError || '',
+      wda: root.dataset.fxWdaHardening || '',
       buttonOwner: button?.dataset.fxAudioOwner || '',
       buttonState: button?.dataset.fxAudioState || '',
       pressed: button?.getAttribute('aria-pressed') || '',
@@ -145,9 +146,13 @@ async function runCase(browser, name, contextOptions) {
   await page.goto(TEST_URL + '?lang=hu&audio-test=1&score=v6', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
 
-  /* Production intentionally lazy-loads the professional engine on the first
-     real SOUND gesture. The gate must exercise that handoff rather than waiting
-     for an engine that is not supposed to exist before user intent. */
+  /* The professional score remains lazy: wait only for the production WDA
+     gesture handoff listener, not for the professional engine itself. The
+     trusted SOUND click below must still perform the engine load and toggle. */
+  await page.waitForFunction(() => document.documentElement.dataset.fxWdaHardening === 'r263', null, { timeout: 15000 });
+  const beforeClick = await activationSnapshot(page);
+  assert(beforeClick.owner !== 'professional-v6', name + ': professional engine must remain lazy before user intent: ' + JSON.stringify(beforeClick));
+
   const button = page.locator('.fx-three-sound');
   await button.waitFor({ state: 'visible', timeout: 15000 });
   assert(await button.count() === 1, name + ': exactly one music button is required');
