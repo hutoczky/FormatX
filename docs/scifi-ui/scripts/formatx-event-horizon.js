@@ -1,4 +1,4 @@
-/* FormatX r461 — lean first-paint owner for the R460/R326 production path.
+/* FormatX r461/R496 — lean first-paint owner for the R460/R326 production path.
    Static HTML owns LCP. One current MAG runtime owns rendering; no legacy
    award/regression/Real3D repair stack is mounted after first paint. */
 (function(){
@@ -8,6 +8,7 @@ const ROOT=document.documentElement;
 const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 const OVERLAY_ID='formatx-event-horizon';
 const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-score-v6';
+const GEOMETRY_URL='./styles/formatx-p0-final-geometry-r496.css?v=20260901-r496';
 let audio=null;
 
 if(!ROOT.dataset.fxReferenceProductionR244)ROOT.dataset.fxReferenceProductionR244=MOBILE?'ready':'desktop';
@@ -19,6 +20,7 @@ ROOT.dataset.fxStartupOwnerR461='single-current-runtime-no-postdom-repair-stack'
 ROOT.dataset.fxAwardRuntimeMode='retired-from-first-load-r461';
 ROOT.dataset.fxMobileRegressionR310='retired-from-first-load-r461';
 ROOT.dataset.fxCoreReal3dCssR310='retired-r461-r326-owner';
+ROOT.dataset.fxP0GeometryR496='loading';
 
 function copy(){
   return ROOT.lang==='en'?{
@@ -83,8 +85,6 @@ function bindPause(button){
   if(!button.dataset.paused)button.dataset.paused='false';
   button.setAttribute('aria-pressed',button.dataset.paused);
   button.addEventListener('click',event=>{
-    // Cached compatibility code may already have consumed pointerup/click.
-    // Never toggle a second time after that earlier owner handled the event.
     if(event.defaultPrevented)return;
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -188,6 +188,50 @@ function fixLanguageAccessibleName(){
   button.setAttribute('aria-label',current==='HU'?'HU – váltás angol nyelvre':'EN – switch to Hungarian');
 }
 
+function headerControls(){
+  return [
+    document.querySelector('.topbar .fx-reference-mag-button'),
+    document.querySelector('.topbar .fx-language-toggle'),
+    document.querySelector('.topbar #menu-toggle, .topbar .fx-reference-menu-button')
+  ].filter(node=>node instanceof HTMLElement);
+}
+
+function prepareHeaderControls(){
+  const nodes=headerControls();
+  for(const node of nodes)node.hidden=true;
+  const mag=document.querySelector('.topbar .fx-reference-mag-button');
+  const language=document.querySelector('.topbar .fx-language-toggle');
+  const menu=document.querySelector('.topbar #menu-toggle, .topbar .fx-reference-menu-button');
+  if(mag instanceof HTMLElement)mag.classList.add('fx-control-owner-r264');
+  if(language instanceof HTMLElement)language.classList.add('fx-control-owner-r264');
+  if(menu instanceof HTMLElement)menu.classList.add('fx-reference-menu-button','fx-control-owner-r264');
+  return nodes;
+}
+
+function geometryReady(){
+  return new Promise((resolve,reject)=>{
+    let link=document.querySelector('link[data-fx-p0-final-geometry-r496="true"]');
+    if(link instanceof HTMLLinkElement && link.sheet){resolve(link);return;}
+    if(!(link instanceof HTMLLinkElement)){
+      link=document.createElement('link');
+      link.rel='stylesheet';
+      link.href=GEOMETRY_URL;
+      link.dataset.fxP0FinalGeometryR496='true';
+      document.head.appendChild(link);
+    }
+    let settled=false;
+    const done=(ok)=>{
+      if(settled)return;
+      settled=true;
+      if(ok){ROOT.dataset.fxP0GeometryR496='ready';resolve(link);}
+      else{ROOT.dataset.fxP0GeometryR496='failed';reject(new Error('R496 geometry stylesheet failed'));}
+    };
+    link.addEventListener('load',()=>done(true),{once:true});
+    link.addEventListener('error',()=>done(false),{once:true});
+    setTimeout(()=>link.sheet?done(true):done(false),1800);
+  });
+}
+
 function complete(source){document.dispatchEvent(new CustomEvent('formatx:introcomplete',{detail:{source}}));}
 function fastRelease(source){
   const overlay=document.getElementById(OVERLAY_ID);
@@ -198,10 +242,19 @@ function fastRelease(source){
   complete(source);
 }
 
-stabilize();
-fixLanguageAccessibleName();
-ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r461-clean':'desktop-direct-r461-clean';
-fastRelease('instant-r461-clean');
+const startupHeaderControls=prepareHeaderControls();
+ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r496-clean':'desktop-direct-r496-clean';
+geometryReady().then(()=>{
+  stabilize();
+  fixLanguageAccessibleName();
+  for(const node of startupHeaderControls)node.hidden=false;
+  fastRelease('instant-r496-clean');
+}).catch(()=>{
+  stabilize();
+  fixLanguageAccessibleName();
+  for(const node of startupHeaderControls)node.hidden=false;
+  fastRelease('geometry-fallback-r496');
+});
 
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow']){
   addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
