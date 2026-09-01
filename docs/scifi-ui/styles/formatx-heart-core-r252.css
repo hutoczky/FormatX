@@ -1,8 +1,9 @@
-/* FormatX r252/R515/R518/R519/R520 — MAG as the living heart of the page.
+/* FormatX r252/R515/R518/R519/R520/R521 — MAG as the living heart of the page.
    The semantic hit target owns activation while the native stage remains the
    visual geometry source for the global touch/drag controller. */
 
-/* The grid and visual MAG carrier are layout/paint owners, never input owners. */
+/* The hero, grid and visual MAG carrier are layout/paint owners, never input owners. */
+html:root:root:root:root:root body.living-architecture #hero,
 html:root:root:root:root:root body.living-architecture #hero .hero-grid,
 html:root:root:root:root:root body.living-architecture #hero .hero-space {
   pointer-events: none !important;
@@ -14,6 +15,7 @@ html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-c
 
 /* Explicit semantic/content controls remain interactive even though their
    layout ancestors are pointer-transparent. */
+html:root:root:root:root:root body.living-architecture #hero :is(a[href],button,input,select,textarea,[role="button"],[role="link"]),
 html:root:root:root:root:root body.living-architecture #hero .hero-grid :is(a[href],button,input,select,textarea,[role="button"],[role="link"]),
 html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-mag-heart-hit-r252,
 html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-immersive-launch,
@@ -130,4 +132,4 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
 
-/* production-r520-hero-grid-layout-only-semantic-input-owner */
+/* production-r521-hero-shell-layout-only-semantic-input-owner */
