@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — R502 filter-free inline first frame + R491 progressive runtime + P0 VIP budgets. */
+/* FormatX award-quality gate — R504 single first-frame owner + R491 progressive runtime + P0 VIP budgets. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -78,11 +78,11 @@ for(const token of [
   "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'"
 ])assert.ok(currentMag.includes(token),`missing R491 progressive current MAG contract: ${token}`);
 for(const token of [
-  'FormatX r502','var(--fx-mag-first-frame)','progressive-enhancement layer','min-height: 0 !important',
-  'production-r502-progressive-first-frame-direct-r326-layout-a11y-touch'
-])assert.ok(currentMagCss.includes(token),`missing R502 first-frame CSS contract: ${token}`);
-assert.ok(!currentMagCss.includes('feGaussianBlur'),'R502 first frame must remain free of SVG Gaussian blur work');
-assert.ok(!currentMagCss.includes('formatx-mag-first-frame-r491.svg'),'R502 current MAG CSS must not trigger the retired standalone first-frame request');
+  'FormatX r504','var(--fx-mag-first-frame)','Never redefine','box-sizing: border-box !important',
+  '#live-operating-system.fx-live-os','production-r504-single-first-frame-owner-live-os-border-box'
+])assert.ok(currentMagCss.includes(token),`missing R504 single-owner/overflow contract: ${token}`);
+assert.ok(!currentMagCss.includes('--fx-mag-first-frame: url('),'R504 late current-MAG CSS must not replace the render-blocking first-frame asset');
+assert.ok(!currentMagCss.includes('formatx-mag-first-frame-r491.svg'),'R504 current MAG CSS must not trigger the retired standalone first-frame request');
 
 for(const token of [
   "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'",
@@ -152,4 +152,4 @@ validateLighthouse(desktop,'desktop');
 validateLighthouse(mobile,'mobile');
 
 for(const source of [intro,motion,language,currentMag,solidGlass,life,governor,controls])new Function(source);
-console.log('PASS: R502 filter-free inline first frame + R491 progressive native MAG, interaction-only mobile energy, zero-idle policy and P0 VIP 100/100/100/100 budgets are structurally valid.');
+console.log('PASS: R504 single render-blocking first-frame owner + R491 progressive native MAG, overflow-safe Live OS, interaction-only mobile energy, zero-idle policy and P0 VIP budgets are structurally valid.');
