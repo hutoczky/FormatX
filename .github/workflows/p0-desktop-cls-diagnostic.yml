@@ -1,3 +1,4 @@
+# temporary P0 desktop CLS diagnostic — remove after root cause is fixed
 name: P0 desktop CLS diagnostic
 
 on:
@@ -5,6 +6,8 @@ on:
     branches: [p0-vip-awwwards-gate]
     paths:
       - '.github/workflows/p0-desktop-cls-diagnostic.yml'
+      - 'docs/scifi-ui/styles/formatx-quality-r461.css'
+      - 'docs/scifi-ui/styles/formatx-current-mag-r422.css'
   workflow_dispatch:
 
 permissions:
@@ -87,12 +90,8 @@ jobs:
                 for(const r of records){
                   if(performance.now()>5000) break;
                   window.__p0Mutations.push({
-                    t:+performance.now().toFixed(2),
-                    type:r.type,
-                    target:sel(r.target),
-                    attr:r.attributeName||'',
-                    added:r.addedNodes?.length||0,
-                    removed:r.removedNodes?.length||0
+                    t:+performance.now().toFixed(2),type:r.type,target:sel(r.target),attr:r.attributeName||'',
+                    added:r.addedNodes?.length||0,removed:r.removedNodes?.length||0
                   });
                 }
               }).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden','data-fx-reference-production-r244','data-fx-control-owner-r268','data-fx-current-mag-runtime-r422','data-fx-current-mag-styles-r423']});
@@ -108,13 +107,7 @@ jobs:
                 };
                 return {
                   label,t:+performance.now().toFixed(2),
-                  root:{
-                    reference:document.documentElement.dataset.fxReferenceProductionR244||'',
-                    controlOwner:document.documentElement.dataset.fxControlOwnerR268||'',
-                    currentMag:document.documentElement.dataset.fxCurrentMagRuntimeR422||'',
-                    currentMagStyles:document.documentElement.dataset.fxCurrentMagStylesR423||'',
-                    motion:document.documentElement.dataset.fxMotionRuntimeR239||''
-                  },
+                  root:{reference:document.documentElement.dataset.fxReferenceProductionR244||'',controlOwner:document.documentElement.dataset.fxControlOwnerR268||'',currentMag:document.documentElement.dataset.fxCurrentMagRuntimeR422||'',currentMagStyles:document.documentElement.dataset.fxCurrentMagStylesR423||'',motion:document.documentElement.dataset.fxMotionRuntimeR239||''},
                   copy:box('#hero .hero-copy'),title:box('#hero-title'),download:box('#hero-download'),space:box('#hero .hero-space'),mag:box('.fx-reference-mag-button'),lang:box('.fx-language-toggle'),menu:box('#menu-toggle'),
                   styles:[...document.querySelectorAll('link[rel=stylesheet],link[rel=preload][as=style]')].filter(l=>/first-frame|current-mag|quality|reference-production|mobile-header/.test(l.href)).map(l=>({href:l.href,rel:l.rel,media:l.media,sheet:!!l.sheet}))
                 };
