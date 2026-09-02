@@ -22,6 +22,7 @@ const fallback = new Button();
 const root = { lang: 'hu', dataset: {} };
 const events = [];
 const legacyToggles = [];
+const canonicalAnimationSync = [];
 const scope = {
   Element, HTMLButtonElement: Button, ROOT: root, root, button,
   copy: () => ({ pause: 'Pause', resume: 'Resume' }),
@@ -29,7 +30,8 @@ const scope = {
   dispatchEvent: event => events.push(event),
   document: { querySelectorAll: () => [button, fallback] },
   performance: { now: () => 1000 },
-  setPaused: value => legacyToggles.push(value)
+  setPaused: value => legacyToggles.push(value),
+  syncCanonicalMagAnimations: value => canonicalAnimationSync.push(Boolean(value))
 };
 const canonicalFunction = canonical.slice(canonical.indexOf('function bindPause('), canonical.indexOf('\nfunction ensureControls('));
 const legacySync = legacy.split('\n').find(line => line.startsWith('function syncPauseButtons()'));
@@ -54,6 +56,7 @@ assert.equal(button.dataset.paused, 'true');
 assert.equal(root.dataset.fxReferenceMotionPaused, 'true');
 assert.equal(button.attributes['aria-pressed'], 'true');
 assert.equal(events.length, 1, 'A physical click must emit exactly one pause event');
+assert.deepEqual(canonicalAnimationSync, [true], 'Canonical PAUSE must synchronously pause the MAG animation owner');
 vm.runInContext('syncPauseButtons();', scope);
 assert.equal(button.dataset.paused, 'true', 'Legacy reconciliation must not unpause the canonical control');
 assert.equal(fallback.dataset.paused, 'false', 'Legacy-only pages keep their fallback control');
@@ -63,6 +66,7 @@ button.listeners[0](event('click'));
 assert.equal(button.dataset.paused, 'false');
 assert.equal(button.attributes['aria-pressed'], 'false');
 assert.equal(events.length, 2);
+assert.deepEqual(canonicalAnimationSync, [true, false], 'Canonical RESUME must synchronously resume the same MAG animation owner');
 
 // An older cached compatibility script already consumed this click. The new
 // canonical owner must not reverse its pause result a second time.
@@ -71,4 +75,5 @@ root.dataset.fxReferenceMotionPaused = 'true';
 button.listeners[0](event('click', true));
 assert.equal(button.dataset.paused, 'true');
 assert.equal(events.length, 2);
-console.log('PASS: one PAUSE owner; physical, keyboard and cached-legacy events toggle exactly once.');
+assert.deepEqual(canonicalAnimationSync, [true, false], 'Default-prevented legacy clicks must not mutate the animation clock');
+console.log('PASS: one PAUSE owner; physical, keyboard and cached-legacy events toggle exactly once with canonical MAG clock sync.');
