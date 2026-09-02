@@ -1,0 +1,61 @@
+name: R501 first-frame copy contract
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/r501-first-frame-contract.yml'
+      - '.github/scripts/validate-r501-first-frame-copy.cjs'
+      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+      - 'docs/scifi-ui/styles/formatx-first-frame-stability-r283.css'
+      - 'docs/scifi-ui/index.html'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-r501-first-frame-contract
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/validate-r501-first-frame-copy.cjs
+          grep -F 'production-r501-p0-first-paint-desktop-copy-box' docs/scifi-ui/styles/formatx-p0-first-paint-r490.css
+          test "$(grep -o 'data-fx-canonical-hero-product-state="true"' docs/scifi-ui/index.html | wc -l)" -eq 1
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Verify first-frame and settled rect parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4186 --directory docs > "$RUNNER_TEMP/r501-http.log" 2>&1 &
+          server=$!
+          trap 'kill $server 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:4186/scifi-ui/index.html >/dev/null && break
+            sleep .25
+          done
+          node .github/scripts/validate-r501-first-frame-copy.cjs
+      - name: Preserve R500 canonical product-state runtime contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4186 --directory docs > "$RUNNER_TEMP/r500-http.log" 2>&1 &
+          server=$!
+          trap 'kill $server 2>/dev/null || true' EXIT
+          node .github/scripts/validate-r500-hero-product-state.cjs
