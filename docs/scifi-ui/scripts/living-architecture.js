@@ -295,6 +295,7 @@
       if (languageChanged) updateCommerce();
     });
     observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
+
     document.addEventListener('click', event => {
       if (!event.target.closest('[data-currency], .fx-language-toggle, [data-language], [data-language-choice]')) return;
       setTimeout(() => {
@@ -326,6 +327,7 @@
     prepareQrDock();
     bind();
     ROOT.dataset.fxLivingArchitecture = 'ready-performance-v3';
+    ROOT.dataset.fxOrganismActivationOwner = 'motion-runtime-r499';
     dispatchEvent(new CustomEvent('formatx:livingready'));
   }
 

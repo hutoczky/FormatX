@@ -1,9 +1,43 @@
-/* FormatX r454 — native MAG layout and accessibility composition.
-   Visible material and surface motion belong exclusively to the WebGL shader. */
+/* FormatX r522 — native MAG layout, single first-frame owner and overflow-safe Live OS.
+   The render-blocking quality layer owns the only first-frame image bytes.
+   This later progressive stylesheet reuses that variable without replacing it,
+   preventing late mobile LCP invalidation while native WebGL enhances on intent. */
 html,
 body {
   max-width: 100% !important;
   overflow-x: clip !important;
+}
+
+html body.living-architecture #hero .hero-space {
+  isolation: isolate !important;
+}
+
+/* Reuse the render-blocking quality-layer asset. Never redefine
+   --fx-mag-first-frame here: a late replacement becomes a new mobile LCP. */
+html body.living-architecture #hero .hero-space::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 4% !important;
+  z-index: 1 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: var(--fx-mag-first-frame) center / contain no-repeat !important;
+  opacity: .98 !important;
+  filter: drop-shadow(0 0 24px rgba(73, 213, 255, .18)) !important;
+  pointer-events: none !important;
+  transform: translateZ(0) !important;
+}
+
+html body.living-architecture #hero .hero-space::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 14% 10% 9% !important;
+  z-index: 0 !important;
+  display: block !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 50% 48%, rgba(116, 235, 255, .15), rgba(78, 113, 255, .055) 46%, transparent 72%) !important;
+  box-shadow: 0 0 72px rgba(55, 183, 255, .075) !important;
+  pointer-events: none !important;
 }
 
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
@@ -20,7 +54,6 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   visibility:visible!important;pointer-events:none!important;transform-origin:50% 48%!important;
 }
 
-/* CSS fallback artwork must disappear as soon as native WebGL is ready. */
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
 html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::after,
@@ -29,10 +62,45 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   box-shadow:none!important;filter:none!important;opacity:0!important;animation:none!important;
 }
 
+html body.living-architecture #live-operating-system.fx-live-os {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+@media (min-width:901px) {
+  html body.living-architecture #hero .hero-grid > .hero-copy {
+    min-height: 0 !important;
+  }
+  html body.living-architecture #hero #hero-title,
+  html body.living-architecture #hero .hero-title-main,
+  html body.living-architecture #hero .hero-title-sub,
+  html body.living-architecture #hero .hero-lead,
+  html body.living-architecture #hero .hero-actions {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* R522: the previous 65px drop-shadow on the LCP H1 forced an expensive
+     compositor blur. Keep the restrained cyan depth cue without a filter pass. */
+  html body.living-architecture #hero .hero-title-main {
+    filter: none !important;
+    text-shadow: 0 12px 30px rgba(75,170,220,.14) !important;
+  }
+  html body.living-architecture #hero .hero-title-sub {
+    filter: none !important;
+    text-shadow: 0 8px 24px rgba(88,184,226,.10) !important;
+  }
+}
+
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
   html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
     inset:0 auto 0 50%!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;
     translate:-50% 0!important;
+  }
+
+  html body.living-architecture #hero .hero-space::before {
+    inset: 2% 4% 3% !important;
+    filter: drop-shadow(0 0 18px rgba(73, 213, 255, .15)) !important;
   }
 
   html body.living-architecture #hero > .hero-grid > .fx-reference-heading {
@@ -71,4 +139,12 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
-/* production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer */
+@media (prefers-reduced-motion:reduce) {
+  html body.living-architecture #hero .hero-space::before,
+  html body.living-architecture #hero .hero-space::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* production-r522-single-first-frame-owner-cheap-desktop-title-glow */

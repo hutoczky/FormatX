@@ -93,21 +93,22 @@ jobs:
         if: always()
         run: |
           {
-            echo "## Lighthouse CI Results"
+            echo "## Lighthouse CI — P0 VIP thresholds"
             echo
             echo "Validated surfaces: desktop + mobile, normal visitor experience"
             echo
-            echo "### Strict truthful thresholds"
-            echo "- Performance ≥ 0.95; 1.00 remains the optimisation target"
+            echo "### Blocking thresholds"
+            echo "- Performance = 1.00"
             echo "- Accessibility = 1.00"
             echo "- Best practices = 1.00"
             echo "- SEO = 1.00"
-            echo "- FCP ≤ 1.8s"
-            echo "- LCP ≤ 2.5s"
-            echo "- TBT ≤ 200ms"
-            echo "- CLS ≤ 0.10"
-            echo "- TTFB ≤ 600ms"
+            echo "- FCP <= 1.8s"
+            echo "- LCP < 2.0s"
+            echo "- TBT <= 150ms"
+            echo "- CLS < 0.05"
+            echo "- TTFB <= 500ms"
             echo "- 3 runs per viewport profile"
+            echo "- Pessimistic aggregation: the worst run must pass"
             echo "- No audit-only query parameter"
             echo "- No forced reduced-motion mode"
             echo "- No skipped Lighthouse audits"
@@ -124,10 +125,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Real-experience desktop and mobile Lighthouse gates passed'
+            description='P0 VIP desktop/mobile Lighthouse 100/100/100/100 gates passed'
           else
             state='failure'
-            description='Real-experience desktop or mobile Lighthouse gate failed'
+            description='P0 VIP desktop or mobile Lighthouse gate failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \

@@ -1,9 +1,30 @@
-/* FormatX r467 — final cross-device header owner.
+/* FormatX r490/R497/R498/R505/R517 — final cross-device header owner.
    Mobile keeps one branded 72px carrier for MAG, language and menu. Desktop
-   now owns all three right-side controls as a non-overlapping cluster instead
-   of leaving MAG/menu geometry to legacy layers. The MAG control is always a
-   stable text control: MAG in Hungarian, CORE in English, never blank/star. */
+   owns all three right-side controls as a non-overlapping cluster. Compact
+   phones collapse the secondary brand tagline and retain the canonical design
+   system floor even while the heavy desktop critical sheet remains deferred. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root {
+    --fx-cyan:#7cecff;
+    --fx-cyan-rgb:124,236,255;
+    --fx-violet:#8f72ff;
+    --fx-violet-rgb:143,114,255;
+    --fx-radius-lg:30px 7px 30px 7px;
+  }
+
+  html:root:root body.living-architecture {
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  }
+
+  html:root:root body.living-architecture .fx-category-deck {
+    border-radius:30px 7px 30px 7px!important;
+  }
+
+  html:root:root body.living-architecture :is(button,a,input,select,textarea):focus-visible {
+    outline:2px solid var(--fx-cyan)!important;
+    outline-offset:3px!important;
+  }
+
   html:root:root body.living-architecture .topbar {
     position:relative!important;
     top:auto!important;
@@ -20,7 +41,10 @@
     max-height:72px!important;
     margin:0!important;
     padding:0!important;
+    border-bottom:1px solid rgba(116,206,242,.18)!important;
     overflow:visible!important;
+    background:linear-gradient(180deg,rgba(2,14,24,.985),rgba(2,11,20,.965))!important;
+    box-shadow:0 10px 34px rgba(0,0,0,.26)!important;
     transform:none!important;
     translate:none!important;
     z-index:12060!important;
@@ -37,12 +61,17 @@
     gap:9px!important;
     box-sizing:border-box!important;
     width:auto!important;
+    min-width:0!important;
     max-width:118px!important;
     height:52px!important;
     margin:0!important;
     overflow:hidden!important;
     transform:none!important;
     translate:none!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .brand > * {
+    min-width:0!important;
   }
 
   html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264,
@@ -131,6 +160,38 @@
   }
 }
 
+@media (max-width:430px) {
+  html:root:root body.living-architecture .topbar > .brand {
+    width:118px!important;
+    max-width:118px!important;
+    overflow:hidden!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand > span {
+    display:block!important;
+    box-sizing:border-box!important;
+    width:62px!important;
+    min-width:0!important;
+    max-width:62px!important;
+    overflow:hidden!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand small {
+    display:none!important;
+    visibility:hidden!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand strong {
+    display:block!important;
+    box-sizing:border-box!important;
+    width:62px!important;
+    min-width:0!important;
+    max-width:62px!important;
+    font-size:11px!important;
+    letter-spacing:.09em!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:clip!important;
+  }
+}
+
 @media (min-width:901px) and (pointer:fine) {
   html:root:root body.living-architecture .topbar {
     position:relative!important;
@@ -138,8 +199,6 @@
     overflow:visible!important;
   }
 
-  /* r467 desktop header geometry: 12–14px physical gaps at 1440px and the
-     same right-edge carrier logic at smaller desktop widths. */
   html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
   html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264,
   html:root:root body.living-architecture .topbar > .fx-language-toggle,
@@ -175,7 +234,7 @@
   html:root:root body.living-architecture .topbar > .fx-language-toggle,
   html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
     top:14px!important;
-    right:92px!important;
+    right:104px!important;
     display:inline-flex!important;
     align-items:center!important;
     justify-content:center!important;
@@ -190,7 +249,7 @@
   html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
   html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264 {
     top:14px!important;
-    right:150px!important;
+    right:162px!important;
     display:grid!important;
     place-items:center!important;
     width:54px!important;
@@ -213,11 +272,17 @@
   }
 }
 
-/* The architecture overlay is a user-opened interaction surface. Keeping its
-   close button in the render tree while the surface is closed creates a ghost
-   fixed control that can sit under the header and be reported as information.
-   Remove the closed surface from layout/paint entirely; restore it only for the
-   explicit open state. */
+@media (min-width:901px) {
+  html:root:root body.living-architecture .topbar > .fx-language-toggle,
+  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
+    right:104px!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264 {
+    right:162px!important;
+  }
+}
+
 html:not(.fx-signature-open) body.living-architecture .fx-signature-architecture {
   display:none!important;
   visibility:hidden!important;
@@ -228,9 +293,7 @@ html.fx-signature-open body.living-architecture .fx-signature-architecture {
   visibility:visible!important;
 }
 
-/* production-r418-final-mobile-header-owner */
-/* production-r418-final-mobile-header-owner-non-occluding */
-/* production-r428-final-cross-device-header-owner-language-visible-non-occluding */
-/* production-r466-mobile-mag-text-lock-no-star-blank-state */
-/* production-r467-desktop-header-three-control-no-overlap */
-/* production-r467-release-candidate-20260831 */
+/* production-r490-compact-brand-no-clipping */
+/* production-r498-mobile-design-system-floor-and-brand-overflow-owner */
+/* production-r505-desktop-header-control-gap */
+/* production-r517-webkit-brand-intrinsic-fit */

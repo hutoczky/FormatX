@@ -45,22 +45,23 @@ async function waitForScrollShell(page) {
 }
 
 async function activateAndWaitForInterface(page) {
-  const referenceMenu = page.locator('.fx-reference-menu-button');
-  await referenceMenu.waitFor({ state: 'visible' });
-  await referenceMenu.click();
+  if (!await page.evaluate(() => document.documentElement.dataset.fxOrganismInterface === 'ready')) {
+    const ask = page.locator('#hero .fx-reference-controls-r204 .fx-reference-ask').first();
+    await ask.waitFor({ state: 'visible', timeout: 15000 });
+    const mobile = await page.evaluate(() => matchMedia('(max-width: 900px), (pointer: coarse)').matches);
+    if (mobile) await ask.tap({ timeout: 5000 });
+    else await ask.click({ timeout: 5000 });
+  }
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxOrganismInterface === 'ready'
-      && root.dataset.fxOrganismMenu === 'ready'
+      && root.dataset.fxOrganismMenu === 'delegated-r264'
       && root.dataset.fxOrganismCoreController === 'ready'
       && root.dataset.fxOrganismConsoleState === 'ready'
       && root.dataset.fxInteractionGenomeExport === 'ready'
       && root.dataset.fxOrganismMasterSync === 'ready-v1'
       && root.dataset.fxTranscendLoader === 'safe-ready-v28';
   }, null, { timeout: 60000 });
-  if (await page.evaluate(() => document.getElementById('main-nav')?.classList.contains('open'))) {
-    await referenceMenu.click();
-  }
   await page.waitForFunction(() => !document.getElementById('main-nav')?.classList.contains('open'));
 }
 

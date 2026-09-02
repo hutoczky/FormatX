@@ -1,23 +1,29 @@
 /* FormatX mobile seamless loop bridge.
-   Production revision: 2026-08-12 r2.
+   Production revision: 2026-09-01 r508.
    CSP-safe external override; keeps a real mobile runway beyond the footer. */
 @media (max-width: 900px), (pointer: coarse) {
-  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
+  /* Do not depend on the optional mobile-unified dataset here. The seamless-v7
+     runtime is itself the loop owner, so every mobile/coarse instance must have
+     enough post-mirror runway to make bridgeTop + threshold physically
+     reachable even when the source Hero is shorter than the viewport. */
+  html[data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge {
+    --fx-loop-runway: max(320px, 100svh) !important;
     display: block !important;
+    box-sizing: border-box !important;
     width: 100% !important;
     height: auto !important;
-    min-height: calc(100svh + max(320px, 24svh)) !important;
+    min-height: calc(var(--fx-loop-source-height, 100svh) + var(--fx-loop-runway)) !important;
     max-height: none !important;
     margin: 0 !important;
-    padding-bottom: max(320px, 24svh) !important;
+    padding-bottom: var(--fx-loop-runway) !important;
     overflow: clip !important;
     visibility: visible !important;
     pointer-events: none !important;
     contain: layout paint style !important;
   }
 
-  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
-  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] [data-fx-loop-clone='true'] {
+  html[data-fx-infinite-controller='seamless-v7'] .fx-loop-hero-clone,
+  html[data-fx-infinite-controller='seamless-v7'] [data-fx-loop-clone='true'] {
     display: block !important;
     width: 100% !important;
     height: auto !important;

@@ -133,7 +133,9 @@ if (!seamlessScroll.includes('buildReferenceMirror') || !seamlessScroll.includes
 if (!seamlessScroll.includes('static-2d-snapshot-no-webgl')) report('seamless scroll: bridge must not allocate another WebGL context');
 if (!seamlessScroll.includes("mobileTransfer: 'scrollend-or-idle'")) report('seamless scroll: mobile transfer must wait for scrollend/idle');
 if (/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(seamlessScroll)) report('seamless scroll: wheel/touch input capture returned');
-if (!mobileLoopCss.includes('min-height: calc(100svh + max(320px, 24svh))') || !mobileLoopCss.includes('display: block !important')) report('mobile seamless bridge: footer runway override missing');
+if (!mobileLoopCss.includes('--fx-loop-runway: max(320px, 100svh)')
+  || !mobileLoopCss.includes('min-height: calc(var(--fx-loop-source-height, 100svh) + var(--fx-loop-runway))')
+  || !mobileLoopCss.includes('display: block !important')) report('mobile seamless bridge: source-height plus full viewport runway missing');
 if (!mobileCss.includes('.fx-award-proof__grid') || !mobileCss.includes('grid-template-columns: 1fr !important')) report('mobile CSS: public proof single-column safeguard missing');
 if (!mobileCss.includes('.fx-plan-qr-card:not(.is-qr-ready)')) report('mobile CSS: QR broken-image safeguard missing');
 

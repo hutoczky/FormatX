@@ -1,10 +1,9 @@
-/* FormatX r477 — canonical ASK activation + R476 synchronized MAG iconography.
+/* FormatX r477/R498 — canonical ASK activation + synchronized MAG iconography.
    The active HTML contains only current deferred enhancements. Mobile keeps the
    bounded R484 surface-energy budget and zero frames between sweeps, while the
    final full-size MAG compositor uses the R474 softer-glow, feathered-facet
-   phone tone. R476 mirrors the primary MAG crystal/sphere state into the header
-   and Mini MAG icons. R477 makes the visible ASK control the explicit deferred
-   Organism activation path. Desktop stays on the existing R326 material path. */
+   phone tone. R498 makes the already-active ASK owner deterministically bootstrap
+   the Organism interface on demand, independent of later living-runtime bind order. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -26,20 +25,24 @@ const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r4
 const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy';
-const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
+const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260901-r491-progressive-first-frame';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260831-r475-canonical-ask-surface';
 const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260831-r484-readable-electric-surface';
+const ORGANISM_STYLE='/scifi-ui/styles/organism-interface.css?v=20260727-organism-1';
+const ORGANISM_LAYERING='/scifi-ui/styles/organism-interface-layering.css?v=20260727-fullscreen-1';
+const ORGANISM_SCRIPT='/scifi-ui/scripts/organism-interface.js?v=20260727-organism-2';
+const ORGANISM_MENU='/scifi-ui/scripts/organism-menu-controller.js?v=20260727-organism-1';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false;
+let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,organismRequested=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function mount(spec){
@@ -108,6 +111,39 @@ function ensureCurrentMag(){
   const script=document.createElement('script');script.src=CURRENT_MAG;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
+function ensureStyle(href,marker){
+  let link=document.querySelector('link['+marker+']');
+  if(link instanceof HTMLLinkElement)return link;
+  link=document.createElement('link');
+  link.rel='stylesheet';link.href=href;link.setAttribute(marker,'true');document.head.appendChild(link);return link;
+}
+function ensureOrganismInterface(){
+  if(root.dataset.fxOrganismInterface==='ready'){root.dataset.fxOrganismBootstrapR498='ready-existing';return;}
+  if(organismRequested||document.querySelector('script[data-fx-organism-interface-script]')){
+    root.dataset.fxOrganismBootstrapR498='already-requested';return;
+  }
+  organismRequested=true;
+  root.dataset.fxOrganismBootstrapR498='loading';
+  ensureStyle(ORGANISM_STYLE,'data-fx-organism-interface-style');
+  ensureStyle(ORGANISM_LAYERING,'data-fx-organism-layering-style');
+  const interfaceScript=document.createElement('script');
+  interfaceScript.src=ORGANISM_SCRIPT;
+  interfaceScript.async=false;
+  interfaceScript.dataset.fxOrganismInterfaceScript='true';
+  interfaceScript.addEventListener('load',()=>{
+    root.dataset.fxOrganismBootstrapR498=root.dataset.fxOrganismInterface==='ready'?'interface-ready':'interface-loaded';
+    if(document.querySelector('script[data-fx-organism-menu-script]'))return;
+    const menuScript=document.createElement('script');
+    menuScript.src=ORGANISM_MENU;
+    menuScript.async=false;
+    menuScript.dataset.fxOrganismMenuScript='true';
+    menuScript.addEventListener('load',()=>{root.dataset.fxOrganismMenuBootstrapR498=root.dataset.fxOrganismMenu==='ready'?'ready':'loaded';},{once:true});
+    menuScript.addEventListener('error',()=>{root.dataset.fxOrganismMenuBootstrapR498='failed';},{once:true});
+    document.head.appendChild(menuScript);
+  },{once:true});
+  interfaceScript.addEventListener('error',()=>{root.dataset.fxOrganismBootstrapR498='failed';},{once:true});
+  document.head.appendChild(interfaceScript);
+}
 function ensureStaticMotionCss(){
   const existing=document.getElementById('fx-r170-mobile-seam-override');
   if(existing instanceof HTMLLinkElement){
@@ -154,14 +190,17 @@ function openPendingCanonicalAsk(){
 function activateCanonicalAsk(event){
   const target=event.target instanceof Element?event.target.closest('#hero .fx-reference-controls-r204 .fx-reference-ask'):null;
   if(!(target instanceof HTMLButtonElement))return;
-  if(typeof window.FormatXOrganismVoice?.open==='function')return;
+  const voiceReady=typeof window.FormatXOrganismVoice?.open==='function';
+  if(root.dataset.fxImmersive!=='active')root.dataset.fxImmersive='active';
+  root.dataset.fxImmersiveSource='canonical-ask-r477';
+  ensureOrganismInterface();
+  dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'canonical-ask-r477'}}));
+  if(voiceReady){
+    root.dataset.fxCanonicalAskActivationR477='runtime-activated-existing-dialogue';
+    return;
+  }
   askActivationPending=true;
   root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
-  if(root.dataset.fxImmersive!=='active'){
-    root.dataset.fxImmersive='active';
-    root.dataset.fxImmersiveSource='canonical-ask-r477';
-    dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'canonical-ask-r477'}}));
-  }else mountEnhancements();
   queueMicrotask(openPendingCanonicalAsk);
 }
 

@@ -1,6 +1,13 @@
-/* FormatX r461/r462/R489 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R489/R492/R493 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
+
+/* R525: reserve the classic desktop scrollbar gutter before any content/runtime
+   expansion can make the document scrollable. This prevents the 15px viewport
+   width change from reflowing the entire hero and repainting the title LCP. */
+@media (min-width: 901px) {
+  html { scrollbar-gutter: stable !important; }
+}
 
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
@@ -11,6 +18,47 @@ html body.living-architecture #hero .hero-lead {
   opacity: 1 !important;
   animation: none !important;
   transition: none !important;
+}
+
+@media (min-width: 901px) {
+  html body.living-architecture #hero .hero-grid > .hero-copy {
+    min-height: 0 !important;
+  }
+}
+
+/* R493: the ~3 KB first frame is embedded in the already render-blocking quality
+   stylesheet. This removes an entire late image discovery/network round trip on
+   throttled mobile connections while remaining the exact same production visual. */
+html body.living-architecture #hero .hero-space {
+  --fx-mag-first-frame: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MjAgNzIwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkZvcm1hdFggTUFHIGNyeXN0YWwgZmlyc3QgZnJhbWUiPjxkZWZzPjxyYWRpYWxHcmFkaWVudCBpZD0iaGFsbyIgY3g9IjUwJSIgY3k9IjQ4JSIgcj0iNTIlIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNkOGZiZmYiIHN0b3Atb3BhY2l0eT0iLjMyIi8+PHN0b3Agb2Zmc2V0PSIuMzYiIHN0b3AtY29sb3I9IiM2MmU3ZmYiIHN0b3Atb3BhY2l0eT0iLjIwIi8+PHN0b3Agb2Zmc2V0PSIuNzIiIHN0b3AtY29sb3I9IiM3MzVjZmYiIHN0b3Atb3BhY2l0eT0iLjEwIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDMxMDFkIiBzdG9wLW9wYWNpdHk9IjAiLz48L3JhZGlhbEdyYWRpZW50PjxyYWRpYWxHcmFkaWVudCBpZD0iY29yZSIgY3g9IjQyJSIgY3k9IjM0JSIgcj0iNjglIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmM2ZlZmYiLz48c3RvcCBvZmZzZXQ9Ii4xOCIgc3RvcC1jb2xvcj0iI2E2ZjRmZiIvPjxzdG9wIG9mZnNldD0iLjQ4IiBzdG9wLWNvbG9yPSIjMzljOWYxIi8+PHN0b3Agb2Zmc2V0PSIuNzIiIHN0b3AtY29sb3I9IiM0Nzc4ZDgiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxNzFiNTIiLz48L3JhZGlhbEdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iZmFjZXRBIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZTlmZGZmIiBzdG9wLW9wYWNpdHk9Ii42OCIvPjxzdG9wIG9mZnNldD0iLjQ1IiBzdG9wLWNvbG9yPSIjNzllYWZmIiBzdG9wLW9wYWNpdHk9Ii4xOCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzhkNjlmZiIgc3RvcC1vcGFjaXR5PSIuMjgiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iZmFjZXRCIiB4MT0iMSIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjOThmMmZmIiBzdG9wLW9wYWNpdHk9Ii40NiIvPjxzdG9wIG9mZnNldD0iLjUiIHN0b3AtY29sb3I9IiMzMzdmYzkiIHN0b3Atb3BhY2l0eT0iLjEwIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjYjc4Y2ZmIiBzdG9wLW9wYWNpdHk9Ii4yMiIvPjwvbGluZWFyR3JhZGllbnQ+PGZpbHRlciBpZD0ic29mdCIgeD0iLTM1JSIgeT0iLTM1JSIgd2lkdGg9IjE3MCUiIGhlaWdodD0iMTcwJSI+PGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMjAiLz48L2ZpbHRlcj48ZmlsdGVyIGlkPSJnbG93IiB4PSItMjUlIiB5PSItMjUlIiB3aWR0aD0iMTUwJSIgaGVpZ2h0PSIxNTAlIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSI1IiByZXN1bHQ9ImIiLz48ZmVNZXJnZT48ZmVNZXJnZU5vZGUgaW49ImIiLz48ZmVNZXJnZU5vZGUgaW49IlNvdXJjZUdyYXBoaWMiLz48L2ZlTWVyZ2U+PC9maWx0ZXI+PGNsaXBQYXRoIGlkPSJjcnlzdGFsIj48cGF0aCBkPSJNMzYwIDg3IDQ3NyAxMjEgNTc0IDIxOCA1OTggMzQ3IDU1MyA0ODcgNDUyIDYwNCAzMTcgNjMwIDE5MSA1NjMgMTE5IDQ0NCAxMjYgMzAzIDIwNSAxNzN6Ii8+PC9jbGlwUGF0aD48L2RlZnM+PGNpcmNsZSBjeD0iMzYwIiBjeT0iMzUwIiByPSIyNzgiIGZpbGw9InVybCgjaGFsbykiIGZpbHRlcj0idXJsKCNzb2Z0KSIvPjxwYXRoIGQ9Ik0zNjAgODcgNDc3IDEyMSA1NzQgMjE4IDU5OCAzNDcgNTUzIDQ4NyA0NTIgNjA0IDMxNyA2MzAgMTkxIDU2MyAxMTkgNDQ0IDEyNiAzMDMgMjA1IDE3M3oiIGZpbGw9InVybCgjY29yZSkiIG9wYWNpdHk9Ii45MyIgZmlsdGVyPSJ1cmwoI2dsb3cpIi8+PGcgY2xpcC1wYXRoPSJ1cmwoI2NyeXN0YWwpIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMzYwIDg3IDMzNSAyNDkgMjA1IDE3M00zNjAgODcgNDc3IDEyMSA0MjEgMjU5IDMzNSAyNDkgMTI2IDMwM000NzcgMTIxIDU3NCAyMTggNDIxIDI1OSA1OTggMzQ3TTEyNiAzMDMgMzM1IDI0OSAyOTEgMzkxIDExOSA0NDRNNDIxIDI1OSAyOTEgMzkxIDM2MCA1MjAgNTUzIDQ4N001OTggMzQ3IDQyMSAyNTkgNTUzIDQ4N00xMTkgNDQ0IDI5MSAzOTEgMTkxIDU2MyAzMTcgNjMwTTI5MSAzOTEgMzYwIDUyMCAzMTcgNjMwTTM2MCA1MjAgNTUzIDQ4NyA0NTIgNjA0IDMxNyA2MzAiIHN0cm9rZT0iI2Q3ZmJmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4zMCIgc3Ryb2tlLXdpZHRoPSIyLjIiLz48cGF0aCBkPSJNMjA1IDE3MyAzMzUgMjQ5IDI5MSAzOTEgMTI2IDMwM3oiIGZpbGw9InVybCgjZmFjZXRBKSIgc3Ryb2tlPSJub25lIi8+PHBhdGggZD0iTTQ3NyAxMjEgNTc0IDIxOCA0MjEgMjU5eiIgZmlsbD0idXJsKCNmYWNldEIpIiBzdHJva2U9Im5vbmUiLz48cGF0aCBkPSJNMzM1IDI0OSA0MjEgMjU5IDI5MSAzOTF6IiBmaWxsPSIjYzRmOGZmIiBmaWxsLW9wYWNpdHk9Ii4xOCIgc3Ryb2tlPSJub25lIi8+PHBhdGggZD0iTTQyMSAyNTkgNTk4IDM0NyA1NTMgNDg3IDM2MCA1MjAgMjkxIDM5MXoiIGZpbGw9InVybCgjZmFjZXRBKSIgZmlsbC1vcGFjaXR5PSIuNDQiIHN0cm9rZT0ibm9uZSIvPjxwYXRoIGQ9Ik0xMTkgNDQ0IDI5MSAzOTEgMzYwIDUyMCAzMTcgNjMwIDE5MSA1NjN6IiBmaWxsPSJ1cmwoI2ZhY2V0QikiIGZpbGwtb3BhY2l0eT0iLjU1IiBzdHJva2U9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMzM4IiBjeT0iMzE2IiByeD0iMTIyIiByeT0iOTEiIGZpbGw9IiNkZmZmZmYiIGZpbGwtb3BhY2l0eT0iLjEwIiBzdHJva2U9Im5vbmUiLz48L2c+PHBhdGggZD0iTTM2MCA4NyA0NzcgMTIxIDU3NCAyMTggNTk4IDM0NyA1NTMgNDg3IDQ1MiA2MDQgMzE3IDYzMCAxOTEgNTYzIDExOSA0NDQgMTI2IDMwMyAyMDUgMTczeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOWJlZWZmIiBzdHJva2Utb3BhY2l0eT0iLjQ4IiBzdHJva2Utd2lkdGg9IjIuNCIgZmlsdGVyPSJ1cmwoI2dsb3cpIi8+PC9zdmc+");
+  position: relative;
+  isolation: isolate !important;
+}
+
+html body.living-architecture #hero .hero-space::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 4% !important;
+  z-index: 1 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: var(--fx-mag-first-frame) center / contain no-repeat !important;
+  opacity: .98 !important;
+  filter: drop-shadow(0 0 24px rgba(73, 213, 255, .18)) !important;
+  pointer-events: none !important;
+  transform: translateZ(0) !important;
+}
+
+html body.living-architecture #hero .hero-space::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 14% 10% 9% !important;
+  z-index: 0 !important;
+  display: block !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 50% 48%, rgba(116, 235, 255, .15), rgba(78, 113, 255, .055) 46%, transparent 72%) !important;
+  box-shadow: 0 0 72px rgba(55, 183, 255, .075) !important;
+  pointer-events: none !important;
 }
 
 html body.living-architecture .fx-reference-liveos {
@@ -35,9 +83,7 @@ html body.living-architecture .topbar > .fx-language-toggle {
 }
 
 @media (min-width: 901px) {
-  html body.living-architecture .topbar {
-    min-height: 72px !important;
-  }
+  html body.living-architecture .topbar { min-height: 72px !important; }
   html body.living-architecture .topbar > .fx-language-toggle {
     position: absolute !important;
     top: 13px !important;
@@ -56,7 +102,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
     visibility: hidden !important;
     pointer-events: none !important;
   }
-
   html body.living-architecture .topbar > .fx-language-toggle {
     position: absolute !important;
     top: 11px !important;
@@ -66,7 +111,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
     margin: 0 !important;
     z-index: 12070 !important;
   }
-
   html body.living-architecture .topbar #main-nav:not(.open),
   html body.living-architecture #main-nav:not(.open) {
     display: none !important;
@@ -84,12 +128,14 @@ html body.living-architecture .topbar > .fx-language-toggle {
     min-height: 48px !important;
     padding: 12px 14px !important;
   }
-
   html body.living-architecture #hero .hero-space {
     contain: layout paint !important;
     overflow: hidden !important;
   }
-
+  html body.living-architecture #hero .hero-space::before {
+    inset: 2% 4% 3% !important;
+    filter: drop-shadow(0 0 18px rgba(73, 213, 255, .15)) !important;
+  }
   html body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
     inset: auto auto 18px 50% !important;
@@ -112,9 +158,7 @@ html body.living-architecture .topbar > .fx-language-toggle {
     pointer-events: auto !important;
     transform: translateX(-50%) !important;
   }
-  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-reference-rail {
-    display: contents !important;
-  }
+  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-reference-rail { display: contents !important; }
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
   html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
   html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
@@ -137,18 +181,9 @@ html body.living-architecture .topbar > .fx-language-toggle {
     pointer-events: auto !important;
     transform: none !important;
   }
-  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-  }
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-  }
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
-    grid-column: 3 !important;
-    grid-row: 1 !important;
-  }
+  html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound { grid-column: 1 !important; grid-row: 1 !important; }
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask { grid-column: 2 !important; grid-row: 1 !important; }
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause { grid-column: 3 !important; grid-row: 1 !important; }
   html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask span {
     position: absolute !important;
     top: 55px !important;
@@ -159,18 +194,12 @@ html body.living-architecture .topbar > .fx-language-toggle {
     transform: translateX(-50%) !important;
     pointer-events: none !important;
   }
-
   html body.living-architecture #hero .fx-category-definition {
     contain: layout style !important;
     min-height: 131px !important;
     transform: none !important;
     filter: none !important;
   }
-
-  /* R489: QR fallback is independently contrast-safe even when a white QR
-     surface is already present underneath it. Do not rely on the card colour:
-     the label carries its own dark pill so Lighthouse and real users see the
-     same >= AA contrast before hydration. */
   html body.living-architecture .fx-plan-qr-card .fx-qr-placeholder {
     display: inline-flex !important;
     align-items: center !important;
@@ -187,10 +216,38 @@ html body.living-architecture .topbar > .fx-language-toggle {
 
 @media (prefers-reduced-motion: reduce) {
   html body.living-architecture .fx-reference-liveos,
-  html body.living-architecture .scroll-cue > span {
+  html body.living-architecture .scroll-cue > span,
+  html body.living-architecture #hero .hero-space::before,
+  html body.living-architecture #hero .hero-space::after {
     transition: none !important;
     animation: none !important;
   }
 }
 
-/* deploy-r489-mobile-a11y-contrast */
+/* deploy-r493-inline-first-frame */
+
+/* R495 P0 critical reset + filter-free MAG first frame. */
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+  overflow-x: clip !important;
+}
+body.living-architecture {
+  margin: 0 !important;
+}
+html body.living-architecture #hero .hero-space {
+  --fx-mag-first-frame: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MjAgNzIwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkZvcm1hdFggTUFHIGNyeXN0YWwgZmlyc3QgZnJhbWUiPgo8ZGVmcz4KPHJhZGlhbEdyYWRpZW50IGlkPSJoYWxvIiBjeD0iNTAlIiBjeT0iNDglIiByPSI1MiUiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2Q4ZmJmZiIgc3RvcC1vcGFjaXR5PSIuMjYiLz48c3RvcCBvZmZzZXQ9Ii40MiIgc3RvcC1jb2xvcj0iIzYyZTdmZiIgc3RvcC1vcGFjaXR5PSIuMTQiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMzEwMWQiIHN0b3Atb3BhY2l0eT0iMCIvPjwvcmFkaWFsR3JhZGllbnQ+CjxyYWRpYWxHcmFkaWVudCBpZD0iY29yZSIgY3g9IjQyJSIgY3k9IjM0JSIgcj0iNjglIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmM2ZlZmYiLz48c3RvcCBvZmZzZXQ9Ii4xOCIgc3RvcC1jb2xvcj0iI2E2ZjRmZiIvPjxzdG9wIG9mZnNldD0iLjQ4IiBzdG9wLWNvbG9yPSIjMzljOWYxIi8+PHN0b3Agb2Zmc2V0PSIuNzIiIHN0b3AtY29sb3I9IiM0Nzc4ZDgiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxNzFiNTIiLz48L3JhZGlhbEdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNlOWZkZmYiIHN0b3Atb3BhY2l0eT0iLjYyIi8+PHN0b3Agb2Zmc2V0PSIuNSIgc3RvcC1jb2xvcj0iIzc5ZWFmZiIgc3RvcC1vcGFjaXR5PSIuMTUiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM4ZDY5ZmYiIHN0b3Atb3BhY2l0eT0iLjI0Ii8+PC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJiIiB4MT0iMSIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjOThmMmZmIiBzdG9wLW9wYWNpdHk9Ii40MiIvPjxzdG9wIG9mZnNldD0iLjUiIHN0b3AtY29sb3I9IiMzMzdmYzkiIHN0b3Atb3BhY2l0eT0iLjEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNiNzhjZmYiIHN0b3Atb3BhY2l0eT0iLjIiLz48L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+CjxjaXJjbGUgY3g9IjM2MCIgY3k9IjM1MCIgcj0iMjc4IiBmaWxsPSJ1cmwoI2hhbG8pIi8+CjxwYXRoIGQ9Ik0zNjAgODcgNDc3IDEyMSA1NzQgMjE4IDU5OCAzNDcgNTUzIDQ4NyA0NTIgNjA0IDMxNyA2MzAgMTkxIDU2MyAxMTkgNDQ0IDEyNiAzMDMgMjA1IDE3M1oiIGZpbGw9InVybCgjY29yZSkiIG9wYWNpdHk9Ii45NCIvPgo8cGF0aCBkPSJNMjA1IDE3MyAzMzUgMjQ5IDI5MSAzOTEgMTI2IDMwM1oiIGZpbGw9InVybCgjYSkiLz4KPHBhdGggZD0iTTQ3NyAxMjEgNTc0IDIxOCA0MjEgMjU5WiIgZmlsbD0idXJsKCNiKSIvPgo8cGF0aCBkPSJNMzM1IDI0OSA0MjEgMjU5IDI5MSAzOTFaIiBmaWxsPSIjYzRmOGZmIiBmaWxsLW9wYWNpdHk9Ii4xNiIvPgo8cGF0aCBkPSJNNDIxIDI1OSA1OTggMzQ3IDU1MyA0ODcgMzYwIDUyMCAyOTEgMzkxWiIgZmlsbD0idXJsKCNhKSIgZmlsbC1vcGFjaXR5PSIuNCIvPgo8cGF0aCBkPSJNMTE5IDQ0NCAyOTEgMzkxIDM2MCA1MjAgMzE3IDYzMCAxOTEgNTYzWiIgZmlsbD0idXJsKCNiKSIgZmlsbC1vcGFjaXR5PSIuNSIvPgo8ZWxsaXBzZSBjeD0iMzM4IiBjeT0iMzE2IiByeD0iMTIyIiByeT0iOTEiIGZpbGw9IiNkZmZmZmYiIGZpbGwtb3BhY2l0eT0iLjA5Ii8+CjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Q3ZmJmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4yOSIgc3Ryb2tlLXdpZHRoPSIyLjIiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgo8cGF0aCBkPSJNMzYwIDg3IDMzNSAyNDkgMjA1IDE3M00zNjAgODcgNDc3IDEyMSA0MjEgMjU5IDMzNSAyNDkgMTI2IDMwM000NzcgMTIxIDU3NCAyMTggNDIxIDI1OSA1OTggMzQ3TTEyNiAzMDMgMzM1IDI0OSAyOTEgMzkxIDExOSA0NDRNNDIxIDI1OSAyOTEgMzkxIDM2MCA1MjAgNTUzIDQ4N001OTggMzQ3IDQyMSAyNTkgNTUzIDQ4N00xMTkgNDQ0IDI5MSAzOTEgMTkxIDU2MyAzMTcgNjMwTTI5MSAzOTEgMzYwIDUyMCAzMTcgNjMwTTM2MCA1MjAgNTUzIDQ4NyA0NTIgNjA0IDMxNyA2MzAiLz4KPC9nPgo8cGF0aCBkPSJNMzYwIDg3IDQ3NyAxMjEgNTc0IDIxOCA1OTggMzQ3IDU1MyA0ODcgNDUyIDYwNCAzMTcgNjMwIDE5MSA1NjMgMTE5IDQ0NCAxMjYgMzAzIDIwNSAxNzNaIiBmaWxsPSJub25lIiBzdHJva2U9IiM5YmVlZmYiIHN0cm9rZS1vcGFjaXR5PSIuNDYiIHN0cm9rZS13aWR0aD0iMi40Ii8+Cjwvc3ZnPg==");
+}
+html body.living-architecture #hero .hero-space::before {
+  filter: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+html body.living-architecture #hero .hero-space::after {
+  box-shadow: none !important;
+  filter: none !important;
+}
+/* deploy-r495-filter-free-first-frame */
+/* deploy-r525-stable-desktop-scrollbar-gutter */

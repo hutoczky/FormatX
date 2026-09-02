@@ -113,7 +113,7 @@ jobs:
           grep -Fq 'data-fx-intro=' docs/scifi-ui/index.html
           grep -Fq 'formatx-event-horizon.js' docs/scifi-ui/index.html
           grep -Fq 'data-fx-production-first-paint-r370="true"' docs/scifi-ui/index.html
-          grep -Fq "const STARTUP_REVISION = '20260818-r208-flicker-free-owner'" billing-worker/src/production-content-entry.js
+          grep -Fq "const STARTUP_REVISION = '20260901-r489-first-paint-a11y'" billing-worker/src/production-content-entry.js
           grep -Fq 'data-fx-seamless-scroll-runtime' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/scripts/formatx-infinite-scroll.js' billing-worker/src/production-entry.js
           grep -Fq '"status": "full_release"' docs/scifi-ui/data/platform-status.json

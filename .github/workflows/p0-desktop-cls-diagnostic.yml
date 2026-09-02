@@ -1,0 +1,141 @@
+# temporary P0 desktop CLS diagnostic — remove after root cause is fixed
+name: P0 desktop CLS diagnostic
+
+on:
+  push:
+    branches: [p0-vip-awwwards-gate]
+    paths:
+      - '.github/workflows/p0-desktop-cls-diagnostic.yml'
+      - 'docs/scifi-ui/styles/formatx-quality-r461.css'
+      - 'docs/scifi-ui/styles/formatx-current-mag-r422.css'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trace-desktop-cls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/p0-cls"
+          cd "$RUNNER_TEMP/p0-cls"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.1
+          npx playwright install --with-deps chromium
+
+      - name: Serve current source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE/docs"
+          nohup python3 -m http.server 4173 --bind 127.0.0.1 >"$RUNNER_TEMP/p0-cls/server.log" 2>&1 &
+          for i in {1..40}; do
+            curl -fsS http://127.0.0.1:4173/scifi-ui/index.html >/dev/null && exit 0
+            sleep .25
+          done
+          exit 1
+
+      - name: Trace desktop first five seconds
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/p0-cls"
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('node:fs');
+
+          (async () => {
+            const browser = await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+            const context = await browser.newContext({viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});
+            const page = await context.newPage();
+            const cdp = await context.newCDPSession(page);
+            await cdp.send('Network.enable');
+            await cdp.send('Network.emulateNetworkConditions',{
+              offline:false, latency:40,
+              downloadThroughput:10*1024*1024/8,
+              uploadThroughput:2*1024*1024/8,
+              connectionType:'wifi'
+            });
+
+            await page.addInitScript(() => {
+              window.__p0Shifts=[];
+              window.__p0Mutations=[];
+              const sel=node=>{
+                if(!(node instanceof Element)) return '';
+                if(node.id) return '#'+node.id;
+                return node.tagName.toLowerCase()+([...node.classList].length?'.'+[...node.classList].slice(0,5).join('.'):'');
+              };
+              new PerformanceObserver(list=>{
+                for(const entry of list.getEntries()){
+                  if(entry.hadRecentInput) continue;
+                  window.__p0Shifts.push({
+                    t:+entry.startTime.toFixed(2),
+                    v:entry.value,
+                    sources:(entry.sources||[]).map(s=>({
+                      node:sel(s.node),
+                      previous:{x:s.previousRect.x,y:s.previousRect.y,width:s.previousRect.width,height:s.previousRect.height},
+                      current:{x:s.currentRect.x,y:s.currentRect.y,width:s.currentRect.width,height:s.currentRect.height}
+                    }))
+                  });
+                }
+              }).observe({type:'layout-shift',buffered:true});
+              new MutationObserver(records=>{
+                for(const r of records){
+                  if(performance.now()>5000) break;
+                  window.__p0Mutations.push({
+                    t:+performance.now().toFixed(2),type:r.type,target:sel(r.target),attr:r.attributeName||'',
+                    added:r.addedNodes?.length||0,removed:r.removedNodes?.length||0
+                  });
+                }
+              }).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden','data-fx-reference-production-r244','data-fx-control-owner-r268','data-fx-current-mag-runtime-r422','data-fx-current-mag-styles-r423']});
+            });
+
+            const samples=[];
+            async function sample(label){
+              samples.push(await page.evaluate(label=>{
+                const box=q=>{
+                  const e=document.querySelector(q); if(!e) return null;
+                  const r=e.getBoundingClientRect(),s=getComputedStyle(e);
+                  return {x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),minHeight:s.minHeight,display:s.display,position:s.position,opacity:s.opacity,transform:s.transform};
+                };
+                return {
+                  label,t:+performance.now().toFixed(2),
+                  root:{reference:document.documentElement.dataset.fxReferenceProductionR244||'',controlOwner:document.documentElement.dataset.fxControlOwnerR268||'',currentMag:document.documentElement.dataset.fxCurrentMagRuntimeR422||'',currentMagStyles:document.documentElement.dataset.fxCurrentMagStylesR423||'',motion:document.documentElement.dataset.fxMotionRuntimeR239||''},
+                  copy:box('#hero .hero-copy'),title:box('#hero-title'),download:box('#hero-download'),space:box('#hero .hero-space'),mag:box('.fx-reference-mag-button'),lang:box('.fx-language-toggle'),menu:box('#menu-toggle'),
+                  styles:[...document.querySelectorAll('link[rel=stylesheet],link[rel=preload][as=style]')].filter(l=>/first-frame|current-mag|quality|reference-production|mobile-header/.test(l.href)).map(l=>({href:l.href,rel:l.rel,media:l.media,sheet:!!l.sheet}))
+                };
+              },label));
+            }
+
+            await page.goto('http://127.0.0.1:4173/scifi-ui/index.html?p0_cls='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
+            await sample('dcl');
+            let elapsed=0;
+            for(const delay of [25,25,50,50,100,100,150,250,250,500,500,1000,2000]){
+              await page.waitForTimeout(delay); elapsed+=delay; await sample(elapsed+'ms');
+            }
+            const final=await page.evaluate(()=>({shifts:window.__p0Shifts,mutations:window.__p0Mutations,cls:window.__p0Shifts.reduce((n,e)=>n+e.v,0)}));
+            const out={samples,...final};
+            fs.writeFileSync('p0-desktop-cls.json',JSON.stringify(out,null,2));
+            console.log('P0_DESKTOP_CLS '+JSON.stringify(out));
+            await page.screenshot({path:'p0-desktop-cls.png',fullPage:false,animations:'disabled',caret:'hide'});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-desktop-cls-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/p0-cls/p0-desktop-cls.json
+            ${{ runner.temp }}/p0-cls/p0-desktop-cls.png
+            ${{ runner.temp }}/p0-cls/server.log
+          retention-days: 7

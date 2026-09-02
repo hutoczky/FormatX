@@ -88,7 +88,12 @@ require("mobile requests seamless runtime", "installSeamlessRuntime('mobile')" i
 require("mobile automatic loop is pending then enabled by shared runtime", "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'" in scroll_bootstrap)
 require("mobile loop policy preserves native momentum", "native-momentum-loop-v1" in scroll_bootstrap and "scrollend-or-idle-v1" in scroll_bootstrap)
 require("mobile bridge override is external and CSP-safe", "formatx-mobile-seamless-loop.css" in scroll_bootstrap and "createElement('style')" not in scroll_bootstrap)
-require("mobile seamless bridge has viewport runway", "min-height: calc(100svh + max(320px, 24svh))" in mobile_loop_css and "display: block !important" in mobile_loop_css)
+require(
+    "mobile seamless bridge has source-height plus full viewport runway",
+    "--fx-loop-runway: max(320px, 100svh)" in mobile_loop_css
+    and "min-height: calc(var(--fx-loop-source-height, 100svh) + var(--fx-loop-runway))" in mobile_loop_css
+    and "display: block !important" in mobile_loop_css,
+)
 require("mobile bootstrap performs no forced scrolling", "scrollTo(" not in scroll_bootstrap and "scrollIntoView(" not in scroll_bootstrap)
 require("mobile bootstrap performs no cloning", "cloneNode(" not in scroll_bootstrap)
 require("bootstrap loads shared seamless runtime", "formatx-infinite-scroll-desktop-v7.js" in scroll_bootstrap)

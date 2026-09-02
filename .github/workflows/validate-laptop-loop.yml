@@ -63,10 +63,12 @@ jobs:
           grep -Fq "native-momentum-loop-v1" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "formatx-infinite-scroll-desktop-v7.js" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "formatx-heart-core-r252.js" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "footer-to-real-core-no-reference-mirror" docs/scifi-ui/scripts/formatx-heart-core-r252.js
-          grep -Fq "none-mobile-r252" docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          grep -Fq "seamless-v7-single-owner-interaction-only" docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          grep -Fq "retired-r508-seamless-v7" docs/scifi-ui/scripts/formatx-heart-core-r252.js
           grep -Fq "fx-mag-heart-hit-r252" docs/scifi-ui/scripts/formatx-heart-core-r252.js
           grep -Fq "FormatXOrganismVoice" docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          ! grep -Fq "pruneMobileReferenceMirror" docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          ! grep -Fq "heart-core-transfer" docs/scifi-ui/scripts/formatx-heart-core-r252.js
           grep -Fq "const VERSION = 'seamless-v7'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "buildReferenceMirror" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "window.scrollTo(" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
@@ -119,7 +121,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Footer-to-MAG mobile loop, desktop loop and MAG interaction passed'
+            description='Single seamless-v7 loop ownership and MAG interaction passed'
           else
             state='failure'
             description='Platform scroll or living MAG interaction validation failed'

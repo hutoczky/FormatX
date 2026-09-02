@@ -1,0 +1,254 @@
+/* FormatX R496/R509/R510/R529 — deterministic final control geometry.
+   Loaded by the canonical first-paint owner before dynamic hero controls mount.
+   It mirrors r264 final geometry and corrects viewport-width overflow without
+   changing the visual design. */
+
+html,
+html body.living-architecture {
+  max-width: 100% !important;
+  overflow-x: clip !important;
+}
+
+@media (min-width: 901px) {
+  html:root:root:root:root:root body.living-architecture .topbar .fx-reference-menu-button {
+    position: fixed !important;
+    inset: auto !important;
+    top: 12px !important;
+    right: 22px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture .topbar .fx-language-toggle {
+    position: fixed !important;
+    inset: auto !important;
+    top: 13px !important;
+    right: 112px !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture .topbar .fx-reference-mag-button {
+    position: fixed !important;
+    inset: auto !important;
+    top: 13px !important;
+    right: 174px !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: auto auto 28px 50% !important;
+    z-index: 12040 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 54px) !important;
+    grid-template-rows: auto !important;
+    align-items: start !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    box-sizing: border-box !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 82px !important;
+    margin: 0 !important;
+    padding: 0 8px 24px !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-r264 {
+    display: contents !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* Desktop first paint uses a compositor-cheap crystalline silhouette rather
+     than an image URL so static Hero copy can own LCP. */
+  html:root:root:root:root:root body.living-architecture #hero .hero-space::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 10% 14% 12% !important;
+    z-index: 1 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    background:
+      linear-gradient(142deg, rgba(245, 254, 255, .88) 0 7%, transparent 7% 36%, rgba(104, 225, 255, .28) 36% 44%, transparent 44% 100%),
+      linear-gradient(28deg, rgba(115, 83, 255, .34) 0 22%, transparent 22% 53%, rgba(197, 249, 255, .26) 53% 61%, transparent 61% 100%),
+      conic-gradient(from 214deg at 49% 47%, #18295e 0deg, #347bc8 48deg, #73e8ff 96deg, #d9fcff 132deg, #61c8ef 178deg, #7257e8 226deg, #253870 280deg, #18295e 360deg) !important;
+    clip-path: polygon(50% 0, 70% 6%, 87% 25%, 91% 49%, 83% 73%, 66% 94%, 43% 100%, 21% 88%, 8% 67%, 9% 41%, 23% 17%) !important;
+    opacity: .97 !important;
+    filter: none !important;
+    pointer-events: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 14% 10% 9% !important;
+    z-index: 0 !important;
+    display: block !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle at 50% 48%, rgba(116, 235, 255, .15), rgba(78, 113, 255, .055) 46%, transparent 72%) !important;
+    box-shadow: 0 0 72px rgba(55, 183, 255, .075) !important;
+    pointer-events: none !important;
+  }
+
+  /* R529: preserve the cyan title depth cue without rasterising a 30px blur
+     around every glyph. The ambient glow is a cheap gradient behind the H1,
+     while the real text remains the accessible, contentful title. */
+  html:root:root:root:root:root body.living-architecture #hero #hero-title {
+    position: relative !important;
+    isolation: isolate !important;
+  }
+  html:root:root:root:root:root body.living-architecture #hero #hero-title::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: -18px -34px -14px !important;
+    z-index: -1 !important;
+    display: block !important;
+    background: radial-gradient(ellipse at 43% 54%, rgba(75,170,220,.13), rgba(75,170,220,.04) 42%, transparent 72%) !important;
+    pointer-events: none !important;
+    filter: none !important;
+  }
+  html:root:root:root:root:root body.living-architecture #hero #hero-title .hero-title-main,
+  html:root:root:root:root:root body.living-architecture #hero #hero-title .hero-title-sub {
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  /* The bridge trigger must be physically reachable after a tall desktop
+     viewport just as it already is on mobile R508. */
+  html:root:root:root:root:root body.living-architecture .fx-loop-bridge {
+    --fx-loop-runway: max(320px, 100svh) !important;
+  }
+
+  /* Once native R326 WebGL is ready, no CSS/image overlay may remain above it. */
+  html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
+  html:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
+  html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::after,
+  html:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    opacity: 0 !important;
+    animation: none !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  html:root:root:root:root:root body.living-architecture .fx-mini-mag-assistant-r459 {
+    top: 88px !important;
+    right: max(18px, env(safe-area-inset-right)) !important;
+    bottom: auto !important;
+  }
+  html:root:root:root:root:root body.living-architecture .fx-mini-mag-assistant-r459 .fx-mini-mag-panel-r459 {
+    top: 76px !important;
+    bottom: auto !important;
+    max-height: calc(100dvh - 182px) !important;
+    transform-origin: 100% 0 !important;
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root:root:root:root body.living-architecture .topbar,
+  html:root:root:root:root:root body.living-architecture footer.site-footer {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero,
+  html:root:root:root:root:root body.living-architecture #hero > .hero-grid,
+  html:root:root:root:root:root body.living-architecture #hero .hero-space {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture .fx-organism-dialogue,
+  html:root:root:root:root:root body.living-architecture .fx-organism-thought {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  html:root:root:root:root:root body.living-architecture .fx-organism-thought {
+    width: 100% !important;
+  }
+}
+
+html:root:root:root:root:root body.living-architecture.fx-organism-panel-open .fx-organism-console,
+html:root:root:root:root:root.fx-organism-interface-ready body.living-architecture .fx-organism-console.is-authorised-open {
+  z-index: 13050 !important;
+}
+
+/* deploy-r529-fast-lcp-and-desktop-loop-runway */

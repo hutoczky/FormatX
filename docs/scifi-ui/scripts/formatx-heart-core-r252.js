@@ -3,11 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'heart-core-r252';
-  const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260825-r252-controls';
-  const LOOP_OVERSHOOT = 28;
-  let touchActive = false;
-  let idleTimer = 0;
+  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260901-r524-visible-surface-owner';
   let bindingFrame = 0;
   let interactionCooldown = false;
 
@@ -86,6 +82,12 @@
     });
   }
 
+  function protectedSurfaceTarget(target) {
+    return target instanceof Element && Boolean(target.closest(
+      '.fx-reference-controls-r204,.fx-reference-mag-button,.fx-language-toggle,#menu-toggle,#main-nav,a[href],input,select,textarea,[contenteditable="true"]'
+    ));
+  }
+
   function installHeartHitTarget() {
     const hero = document.getElementById('hero');
     const space = hero?.querySelector(':scope .hero-space');
@@ -118,23 +120,22 @@
       });
     }
 
+    if (space.dataset.fxHeartSurfaceBoundR524 !== 'true') {
+      space.dataset.fxHeartSurfaceBoundR524 = 'true';
+      space.addEventListener('click', event => {
+        if (!event.isTrusted || protectedSurfaceTarget(event.target)) return;
+        activateCore('surface');
+      });
+    }
+
     const headerMag = document.querySelector('.fx-reference-mag-button');
     if (headerMag instanceof HTMLButtonElement && headerMag.dataset.fxHeartBoundR252 !== 'true') {
       headerMag.dataset.fxHeartBoundR252 = 'true';
       headerMag.addEventListener('click', () => activateCore('header'));
     }
 
-    root.dataset.fxMagHeartHit = 'ready-r252';
+    root.dataset.fxMagHeartHit = 'ready-r524-visible-surface-owner';
     return true;
-  }
-
-  function pruneMobileReferenceMirror() {
-    if (!MOBILE_QUERY.matches) return;
-    const bridge = document.querySelector('.fx-loop-bridge');
-    if (!(bridge instanceof HTMLElement)) return;
-    bridge.dataset.fxHeartLoopR252 = 'true';
-    bridge.querySelectorAll(':scope > .fx-loop-reference-mirror, :scope > [data-fx-loop-mirror]').forEach(node => node.remove());
-    root.dataset.fxLoopMirrorMode = 'none-mobile-r252';
   }
 
   function scheduleBinding() {
@@ -142,92 +143,18 @@
     bindingFrame = requestAnimationFrame(() => {
       bindingFrame = 0;
       installHeartHitTarget();
-      pruneMobileReferenceMirror();
       syncPureWebglComposition();
     });
-  }
-
-  function mobileLoopBoundary() {
-    if (!MOBILE_QUERY.matches) return null;
-    pruneMobileReferenceMirror();
-    const footer = document.querySelector('body > .site-footer');
-    const bridge = document.querySelector('.fx-loop-bridge');
-    const hero = document.querySelector('#main-content > #hero');
-    if (!(footer instanceof HTMLElement) || !(bridge instanceof HTMLElement) || !(hero instanceof HTMLElement)) return null;
-
-    bridge.dataset.fxHeartLoopR252 = 'true';
-    const bridgeTop = bridge.offsetTop;
-    const viewportBottom = scrollY + innerHeight;
-    return {
-      bridge,
-      hero,
-      bridgeTop,
-      overshoot: viewportBottom - bridgeTop
-    };
-  }
-
-  function transferToRealCore(source) {
-    if (!MOBILE_QUERY.matches || touchActive) return false;
-    const boundary = mobileLoopBoundary();
-    if (!boundary || boundary.overshoot < LOOP_OVERSHOOT) return false;
-
-    const target = Math.max(0, boundary.hero.offsetTop);
-    const nextLoopCount = Number(root.dataset.fxLoopCount || 0) + 1;
-    root.classList.add('fx-seamless-loop-transfer');
-    root.dataset.fxHeartLoopTransfer = source;
-    root.dataset.fxInfiniteInput = 'heart-core-transfer';
-    root.dataset.fxLoopCount = String(nextLoopCount);
-    root.dataset.fxLoopSource = `heart-core-${source}`;
-    root.dataset.fxLoopLanding = String(Math.round(target));
-    root.dataset.fxLoopLandingState = 'heart-core-stabilising';
-
-    window.scrollTo({ top: target, left: 0, behavior: 'auto' });
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: target, left: 0, behavior: 'auto' });
-      requestAnimationFrame(() => {
-        root.classList.remove('fx-seamless-loop-transfer');
-        root.dataset.fxInfiniteInput = 'native';
-        root.dataset.fxLoopLandingState = 'heart-core-settled';
-        window.FormatXCoreMobileV69?.pulse?.({ phase: 'loop-return', source });
-        dispatchEvent(new CustomEvent('formatx:loop', {
-          detail: { count: nextLoopCount, source: `heart-core-${source}`, relative: 0, revision: VERSION }
-        }));
-      });
-    });
-    return true;
-  }
-
-  function onScroll() {
-    if (!MOBILE_QUERY.matches) return;
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => transferToRealCore('idle'), 90);
-  }
-
-  function onTouchStart() {
-    if (!MOBILE_QUERY.matches) return;
-    touchActive = true;
-    clearTimeout(idleTimer);
-  }
-
-  function onTouchEnd() {
-    if (!MOBILE_QUERY.matches) return;
-    touchActive = false;
-    requestAnimationFrame(() => transferToRealCore('touchend'));
   }
 
   function boot() {
     ensureStyle();
     root.dataset.fxHeartCoreR252 = 'ready';
-    root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
+    root.dataset.fxHeartLoopPolicy = 'seamless-v7-single-owner-interaction-only';
+    root.dataset.fxHeartScrollOwner = 'retired-r508-seamless-v7';
+    root.dataset.fxHeartPointerOwnerR524 = 'visible-mag-surface-plus-semantic-keyboard-target';
     installHeartHitTarget();
-    pruneMobileReferenceMirror();
     syncPureWebglComposition();
-
-    addEventListener('scroll', onScroll, { passive: true });
-    addEventListener('scrollend', () => transferToRealCore('scrollend'), { passive: true });
-    document.addEventListener('touchstart', onTouchStart, { passive: true });
-    document.addEventListener('touchend', onTouchEnd, { passive: true });
-    document.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
     for (const eventName of [
       'formatx:real3dready',
@@ -251,7 +178,6 @@
   else boot();
 
   addEventListener('pagehide', () => {
-    clearTimeout(idleTimer);
     cancelAnimationFrame(bindingFrame);
   }, { once: true });
 }());

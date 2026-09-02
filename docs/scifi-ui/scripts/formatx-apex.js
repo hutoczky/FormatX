@@ -14,12 +14,6 @@
     return;
   }
 
-  // r294: on phone/coarse-pointer surfaces the current native core, canonical
-  // language control, release metadata runtime and r268 navigation already own
-  // the jobs this legacy APEX controller used to duplicate. Avoid whole-page
-  // language/link scans, reveal observers and scene/flow observers during the
-  // first-load critical window. Publish apexready only after the complete defer
-  // chain has subscribed, so final control owners never miss the event.
   const MOBILE_NATIVE_CORE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   if (MOBILE_NATIVE_CORE) {
     ROOT.dataset.fxApex = 'controller-performance-v2';
@@ -69,17 +63,31 @@
       const stored = localStorage.getItem(LANG_KEY);
       if (stored === 'hu' || stored === 'en') return stored;
     } catch (_) {}
+    /* The static document owns first paint. Hydration must never rewrite the
+       already-correct HU/EN tree merely because navigator.language differs. */
+    const declared = String(ROOT.lang || '').toLowerCase().split('-')[0];
+    if (declared === 'hu' || declared === 'en') return declared;
     return String(navigator.language || '').toLowerCase().startsWith('hu') ? 'hu' : 'en';
   }
 
   function applyLanguage(next, persist) {
     language = next === 'en' ? 'en' : 'hu';
+    const declaredBefore = String(ROOT.lang || '').toLowerCase().split('-')[0];
+    const needsTextHydration = persist || declaredBefore !== language;
     ROOT.lang = language;
-    document.querySelectorAll('[data-hu][data-en]').forEach(element => {
-      element.textContent = element.dataset[language];
-    });
+
+    /* Replacing hundreds of text nodes with byte-identical strings invalidates
+       layout and was a measurable first-paint task. Only touch bilingual text
+       when the visible language actually changes. */
+    if (needsTextHydration) {
+      document.querySelectorAll('[data-hu][data-en]').forEach(element => {
+        const value = element.dataset[language] || '';
+        if (element.textContent !== value) element.textContent = value;
+      });
+    }
     document.querySelectorAll('[data-language]').forEach(button => {
-      button.setAttribute('aria-pressed', String(button.dataset.language === language));
+      const pressed = String(button.dataset.language === language);
+      if (button.getAttribute('aria-pressed') !== pressed) button.setAttribute('aria-pressed', pressed);
     });
     if (persist) {
       try { localStorage.setItem(LANG_KEY, language); } catch (_) {}
@@ -87,10 +95,13 @@
       url.searchParams.set('lang', language);
       history.replaceState({}, '', url.pathname + url.search + url.hash);
     }
-    updateLinks();
-    updatePrice();
-    updateFlow(activeFlow);
-    dispatchEvent(new CustomEvent('formatx:languagechange'));
+    if (needsTextHydration) {
+      updateLinks();
+      updatePrice();
+      updateFlow(activeFlow);
+      dispatchEvent(new CustomEvent('formatx:languagechange'));
+    }
+    ROOT.dataset.fxApexLanguageHydrationR491 = needsTextHydration ? 'changed-visible-language' : 'static-language-noop';
   }
 
   function updateLinks() {
@@ -102,7 +113,8 @@
         if (url.origin !== location.origin) return;
         if (!url.pathname.endsWith('.html') && !url.pathname.endsWith('/')) return;
         url.searchParams.set('lang', language);
-        anchor.href = url.pathname + url.search + url.hash;
+        const next = url.pathname + url.search + url.hash;
+        if (anchor.getAttribute('href') !== next) anchor.href = next;
       } catch (_) {}
     });
   }
@@ -323,6 +335,7 @@
     setScene(activeScene);
     ROOT.dataset.fxApex = 'controller-performance-v2';
     ROOT.dataset.fxRenderer = 'three-host';
+    ROOT.dataset.fxApexFirstPaintR491 = 'static-language-noop-hydration';
     dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
   }
 

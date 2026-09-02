@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" role="img" aria-label="FormatX MAG crystal first frame">
+  <defs>
+    <radialGradient id="halo" cx="50%" cy="48%" r="52%">
+      <stop offset="0" stop-color="#d8fbff" stop-opacity=".32"/>
+      <stop offset=".36" stop-color="#62e7ff" stop-opacity=".20"/>
+      <stop offset=".72" stop-color="#735cff" stop-opacity=".10"/>
+      <stop offset="1" stop-color="#03101d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="core" cx="42%" cy="34%" r="68%">
+      <stop offset="0" stop-color="#f3feff"/>
+      <stop offset=".18" stop-color="#a6f4ff"/>
+      <stop offset=".48" stop-color="#39c9f1"/>
+      <stop offset=".72" stop-color="#4778d8"/>
+      <stop offset="1" stop-color="#171b52"/>
+    </radialGradient>
+    <linearGradient id="facetA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9fdff" stop-opacity=".68"/>
+      <stop offset=".45" stop-color="#79eaff" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#8d69ff" stop-opacity=".28"/>
+    </linearGradient>
+    <linearGradient id="facetB" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#98f2ff" stop-opacity=".46"/>
+      <stop offset=".5" stop-color="#337fc9" stop-opacity=".10"/>
+      <stop offset="1" stop-color="#b78cff" stop-opacity=".22"/>
+    </linearGradient>
+    <filter id="soft" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+    <filter id="glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="crystal">
+      <path d="M360 87 477 121 574 218 598 347 553 487 452 604 317 630 191 563 119 444 126 303 205 173z"/>
+    </clipPath>
+  </defs>
+  <circle cx="360" cy="350" r="278" fill="url(#halo)" filter="url(#soft)"/>
+  <path d="M360 87 477 121 574 218 598 347 553 487 452 604 317 630 191 563 119 444 126 303 205 173z" fill="url(#core)" opacity=".93" filter="url(#glow)"/>
+  <g clip-path="url(#crystal)" fill="none" stroke-linejoin="round">
+    <path d="M360 87 335 249 205 173M360 87 477 121 421 259 335 249 126 303M477 121 574 218 421 259 598 347M126 303 335 249 291 391 119 444M421 259 291 391 360 520 553 487M598 347 421 259 553 487M119 444 291 391 191 563 317 630M291 391 360 520 317 630M360 520 553 487 452 604 317 630" stroke="#d7fbff" stroke-opacity=".30" stroke-width="2.2"/>
+    <path d="M205 173 335 249 291 391 126 303z" fill="url(#facetA)" stroke="none"/>
+    <path d="M477 121 574 218 421 259z" fill="url(#facetB)" stroke="none"/>
+    <path d="M335 249 421 259 291 391z" fill="#c4f8ff" fill-opacity=".18" stroke="none"/>
+    <path d="M421 259 598 347 553 487 360 520 291 391z" fill="url(#facetA)" fill-opacity=".44" stroke="none"/>
+    <path d="M119 444 291 391 360 520 317 630 191 563z" fill="url(#facetB)" fill-opacity=".55" stroke="none"/>
+    <ellipse cx="338" cy="316" rx="122" ry="91" fill="#dfffff" fill-opacity=".10" stroke="none"/>
+  </g>
+  <path d="M360 87 477 121 574 218 598 347 553 487 452 604 317 630 191 563 119 444 126 303 205 173z" fill="none" stroke="#9beeff" stroke-opacity=".48" stroke-width="2.4" filter="url(#glow)"/>
+</svg>

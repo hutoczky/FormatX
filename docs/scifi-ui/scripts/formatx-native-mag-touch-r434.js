@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='native-r326-touch-r460-controller-tap';
+const VERSION='native-r326-touch-r515-semantic-hit-owner';
 if(root.dataset.fxNativeMagTouchR436==='ready')return;
 root.dataset.fxNativeMagTouchR436='booting';
 
@@ -73,7 +73,7 @@ function protectedUi(target,clientX,clientY,stageRect){
   const stageArea=Math.max(1,stageRect.width*stageRect.height);
   const coverage=overlapArea(rect,stageRect)/stageArea;
   if(coverage>=.42){
-    root.dataset.fxNativeMagTouchGuardR436='legacy-overlay-bypassed';
+    root.dataset.fxNativeMagTouchGuardR436='semantic-mag-surface';
     root.dataset.fxNativeMagTouchLastTargetR436=describe(generic);
     root.dataset.fxNativeMagTouchOverlayCoverageR436=coverage.toFixed(3);
     return false;
@@ -133,8 +133,9 @@ function finishTap(clientX,clientY,id,phase){
   if(!current||current.id!==id||phase!=='release')return false;
   const moved=current.moved||Math.hypot(clientX-current.x,clientY-current.y)>TAP_DISTANCE;
   if(moved||performance.now()-current.at>TAP_DURATION)return false;
+  /* A semantic MAG button owns click activation; direct stage taps still open
+     the mini controller when no semantic control was the event target. */
   suppressClickUntil=performance.now()+650;
-  openController(`${VERSION}-${current.type}-tap`);
   return true;
 }
 
@@ -150,7 +151,6 @@ function pointerDown(event){
   lastMoveAt=performance.now();
   armTap(event.clientX,event.clientY,event.pointerId,event.pointerType);
   root.dataset.fxNativeMagTouchGuardR436='native-stage';
-  try{value.info.node.setPointerCapture?.(event.pointerId);}catch(_){ }
   emit(value,'press',event.pointerType,event.pointerId);
 }
 
@@ -169,8 +169,6 @@ function pointerMove(event){
 function pointerFinish(event,phase){
   if(activePointer!==event.pointerId)return;
   const value=point(event.clientX,event.clientY,true)||lastPoint;
-  const info=stageInfo();
-  try{info?.node.releasePointerCapture?.(event.pointerId);}catch(_){ }
   const id=activePointer;
   activePointer=null;
   lastPoint=null;
@@ -208,6 +206,11 @@ function touchFinish(event,phase){
 }
 
 function clickStage(event){
+  const target=event.target instanceof Element?event.target:null;
+  /* The accessible heart button owns the activation click. Do not swallow it
+     in document capture; its own handler sets active-r252 and opens the canonical
+     Organism target. */
+  if(target?.closest('.fx-mag-heart-hit-r252'))return;
   if(performance.now()<suppressClickUntil)return;
   const value=point(event.clientX,event.clientY);
   if(!value)return;
@@ -231,6 +234,6 @@ root.dataset.fxNativeMagTouchR434='ready';
 root.dataset.fxNativeMagTouchR436='ready';
 root.dataset.fxHeroMagControllerR460='ready';
 root.dataset.fxNativeMagTouchContractR434='direct-r326-stage-ui-safe';
-root.dataset.fxNativeMagTouchContractR436='direct-r326-stage-protected-ui-controller-tap-drag-safe';
+root.dataset.fxNativeMagTouchContractR436='semantic-hit-owner-global-r326-geometry-tap-drag-safe';
 dispatchEvent(new CustomEvent('formatx:nativemagtouchready',{detail:{version:VERSION,heroController:true}}));
 }());

@@ -33,14 +33,13 @@ async function visibleBox(page,selector,required=false){
 }
 
 async function assertHeaderAndHeroControls(page,profile){
-  const brand=await visibleBox(page,'.topbar > .brand');
-  const mag=await visibleBox(page,'.fx-reference-mag-button');
-  const lang=await visibleBox(page,'.fx-language-toggle');
-  const menu=await visibleBox(page,'.fx-reference-menu-button,#menu-toggle');
-  const header=[['brand',brand],['mag',mag],['lang',lang],['menu',menu]].filter(([,v])=>v);
-  for(let i=0;i<header.length;i++)for(let j=i+1;j<header.length;j++){
-    assert(!overlaps(header[i][1],header[j][1],2),`${profile.name} header overlap ${header[i][0]} / ${header[j][0]}: ${JSON.stringify({a:header[i],b:header[j]})}`);
-  }
+  const header=[
+    ['brand',await visibleBox(page,'.topbar > .brand')],
+    ['mag',await visibleBox(page,'.fx-reference-mag-button')],
+    ['lang',await visibleBox(page,'.fx-language-toggle')],
+    ['menu',await visibleBox(page,'.fx-reference-menu-button,#menu-toggle')]
+  ].filter(([,v])=>v);
+  for(let i=0;i<header.length;i++)for(let j=i+1;j<header.length;j++)assert(!overlaps(header[i][1],header[j][1],2),`${profile.name} header overlap ${header[i][0]} / ${header[j][0]}: ${JSON.stringify({a:header[i],b:header[j]})}`);
 
   const controls=await visibleBox(page,'#hero .fx-reference-controls-r204');
   const sound=await visibleBox(page,'#hero .fx-reference-controls-r204 .fx-three-sound');
@@ -59,38 +58,39 @@ async function assertHeaderAndHeroControls(page,profile){
   }
 }
 
-async function assertPure3d(page,profile){
+async function activateNativeMag(page,profile){
+  const surface=page.locator('#hero .hero-space').first();
+  await surface.waitFor({state:'visible',timeout:10000});
+  const box=await surface.boundingBox();
+  assert(box&&box.width>80&&box.height>80,`${profile.name} MAG surface has no usable pointer geometry: ${JSON.stringify(box)}`);
+  await page.mouse.click(box.x+box.width*.5,box.y+box.height*.5);
   await page.waitForFunction(()=>{
     const root=document.documentElement;
-    const canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r120-canvas');
+    const canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r120-canvas,#hero .fx-crystal-organism-r326-canvas');
     return root.dataset.fxCoreCompositionR285==='pure-webgl3d-no-2d-overlays'&&canvas;
   },null,{timeout:15000});
+  console.log(`PASS ${profile.name}: genuine pointer on visible MAG surface activated native WebGL`);
+}
 
+async function assertPure3d(page,profile){
   const state=await page.evaluate(()=>{
     const root=document.documentElement;
     const heroSpace=document.querySelector('#hero .hero-space');
-    const stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r120-stage');
-    const canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r120-canvas');
+    const stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r120-stage,#hero .fx-crystal-organism-r326-stage');
+    const canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r120-canvas,#hero .fx-crystal-organism-r326-canvas');
     const before=heroSpace?getComputedStyle(heroSpace,'::before'):null;
     const after=heroSpace?getComputedStyle(heroSpace,'::after'):null;
     const visible=el=>{if(!(el instanceof Element))return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>.02&&r.width>0&&r.height>0;};
     const legacy=[...document.querySelectorAll('#hero .fx-core-detail-r122,#hero .fx-core-live-r147-layer,#hero .fx-r155-heartbeat-core,#hero .fx-r155-heartbeat-ring,#hero .fx-r155-heartbeat-wave,#hero [class^="fx-r168-"],#hero [class*=" fx-r168-"]')];
     let context='none';
-    try{
-      const gl=canvas?.getContext?.('webgl2')||canvas?.getContext?.('webgl');
-      if(gl)context=typeof WebGL2RenderingContext!=='undefined'&&gl instanceof WebGL2RenderingContext?'webgl2':'webgl1';
-    }catch(_){context='error';}
+    try{const gl=canvas?.getContext?.('webgl2')||canvas?.getContext?.('webgl');if(gl)context=typeof WebGL2RenderingContext!=='undefined'&&gl instanceof WebGL2RenderingContext?'webgl2':'webgl1';}catch(_){context='error';}
     return{
-      composition:root.dataset.fxCoreCompositionR285||'',
-      renderer:root.dataset.fxCoreRenderer||'',
-      real3d:root.dataset.fxCoreReal3d||'',
-      context,
+      composition:root.dataset.fxCoreCompositionR285||'',renderer:root.dataset.fxCoreRenderer||'',real3d:root.dataset.fxCoreReal3d||'',context,
       stageChildren:stage?[...stage.children].map(el=>({tag:el.tagName,className:el.className,visible:visible(el)})):[],
       legacyVisible:legacy.filter(visible).map(el=>el.className),
       detailCount:document.querySelectorAll('#hero .fx-core-detail-r122').length,
       liveLayerCount:document.querySelectorAll('#hero .fx-core-live-r147-layer').length,
-      before:{content:before?.content||'',background:before?.backgroundImage||''},
-      after:{content:after?.content||'',background:after?.backgroundImage||''}
+      before:{content:before?.content||'',background:before?.backgroundImage||''},after:{content:after?.content||'',background:after?.backgroundImage||''}
     };
   });
   assert.equal(state.composition,'pure-webgl3d-no-2d-overlays',`${profile.name} pure-3D marker missing: ${JSON.stringify(state)}`);
@@ -113,60 +113,28 @@ async function scanInformation(page,label){
     const clipped=[];
     for(const el of info){
       const s=getComputedStyle(el),r=el.getBoundingClientRect();
-      const ox=s.overflowX,oy=s.overflowY;
-      const clipX=(ox==='hidden'||ox==='clip')&&el.scrollWidth>el.clientWidth+2;
-      const clipY=(oy==='hidden'||oy==='clip')&&el.scrollHeight>el.clientHeight+2;
+      const clipX=(s.overflowX==='hidden'||s.overflowX==='clip')&&el.scrollWidth>el.clientWidth+2;
+      const clipY=(s.overflowY==='hidden'||s.overflowY==='clip')&&el.scrollHeight>el.clientHeight+2;
       const outside=r.left<-2||r.right>innerWidth+2;
-      if(clipX||clipY||outside||s.textOverflow==='ellipsis')clipped.push({tag:el.tagName,id:el.id||'',className:typeof el.className==='string'?el.className.slice(0,120):'',text:(el.textContent||'').trim().slice(0,120),clipX,clipY,outside,left:r.left,right:r.right,width:r.width,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,height:r.height,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,overflowX:ox,overflowY:oy,textOverflow:s.textOverflow});
+      if(clipX||clipY||outside||s.textOverflow==='ellipsis')clipped.push({tag:el.tagName,id:el.id||'',className:typeof el.className==='string'?el.className.slice(0,120):'',text:(el.textContent||'').trim().slice(0,120),clipX,clipY,outside,left:r.left,right:r.right,width:r.width,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth});
     }
-
-    const overlays=[...document.querySelectorAll('body *')].filter(el=>{
-      if(!visible(el))return false;
-      const s=getComputedStyle(el);
-      if(s.position!=='fixed'&&s.position!=='sticky')return false;
-      const r=el.getBoundingClientRect();
-      return r.width*r.height>500;
-    });
-    const occluded=[];
+    const overlays=[...document.querySelectorAll('body *')].filter(el=>{if(!visible(el))return false;const s=getComputedStyle(el);if(s.position!=='fixed'&&s.position!=='sticky')return false;const r=el.getBoundingClientRect();return r.width*r.height>500;});
     const alpha=color=>{const m=String(color).match(/rgba?\([^,]+,[^,]+,[^,]+(?:,\s*([\d.]+))?\)/);return m?(m[1]===undefined?1:Number(m[1])):0;};
+    const occluded=[];
     for(const infoEl of info){
       const a=infoEl.getBoundingClientRect(),area=Math.max(1,a.width*a.height);
       for(const overlay of overlays){
         if(overlay===infoEl||overlay.contains(infoEl)||infoEl.contains(overlay))continue;
-        const b=overlay.getBoundingClientRect();
-        const left=Math.max(a.left,b.left),right=Math.min(a.right,b.right),top=Math.max(a.top,b.top),bottom=Math.min(a.bottom,b.bottom);
+        const b=overlay.getBoundingClientRect(),left=Math.max(a.left,b.left),right=Math.min(a.right,b.right),top=Math.max(a.top,b.top),bottom=Math.min(a.bottom,b.bottom);
         if(right<=left||bottom<=top)continue;
-        const intersection=(right-left)*(bottom-top);
-        if(intersection<120||intersection/area<.18)continue;
-        const s=getComputedStyle(overlay);
-        const painted=alpha(s.backgroundColor)>.08||s.backgroundImage!=='none'||s.backdropFilter!=='none'||s.boxShadow!=='none'||s.borderTopWidth!=='0px'||(overlay.textContent||'').trim().length>0;
-        if(!painted)continue;
+        const intersection=(right-left)*(bottom-top);if(intersection<120||intersection/area<.18)continue;
+        const s=getComputedStyle(overlay),painted=alpha(s.backgroundColor)>.08||s.backgroundImage!=='none'||s.backdropFilter!=='none'||s.boxShadow!=='none'||s.borderTopWidth!=='0px'||(overlay.textContent||'').trim().length>0;if(!painted)continue;
         const x=Math.max(1,Math.min(innerWidth-1,(left+right)/2)),y=Math.max(1,Math.min(innerHeight-1,(top+bottom)/2));
-        const stack=document.elementsFromPoint(x,y);
-        const overlayIndex=stack.findIndex(el=>el===overlay||overlay.contains(el));
-        const infoIndex=stack.findIndex(el=>el===infoEl||infoEl.contains(el));
-        if(overlayIndex!==-1&&(infoIndex===-1||overlayIndex<infoIndex)){
-          occluded.push({info:{tag:infoEl.tagName,id:infoEl.id||'',className:typeof infoEl.className==='string'?infoEl.className.slice(0,90):'',text:(infoEl.textContent||'').trim().slice(0,100)},overlay:{tag:overlay.tagName,id:overlay.id||'',className:typeof overlay.className==='string'?overlay.className.slice(0,90):'',position:s.position},ratio:Number((intersection/area).toFixed(3))});
-        }
+        const stack=document.elementsFromPoint(x,y),overlayIndex=stack.findIndex(el=>el===overlay||overlay.contains(el)),infoIndex=stack.findIndex(el=>el===infoEl||infoEl.contains(el));
+        if(overlayIndex!==-1&&(infoIndex===-1||overlayIndex<infoIndex))occluded.push({info:{tag:infoEl.tagName,id:infoEl.id||'',text:(infoEl.textContent||'').trim().slice(0,100)},overlay:{tag:overlay.tagName,id:overlay.id||'',className:typeof overlay.className==='string'?overlay.className.slice(0,90):''},ratio:Number((intersection/area).toFixed(3))});
       }
     }
-
-    const overflowOffenders=[...document.querySelectorAll('body *')].map(el=>{
-      const s=getComputedStyle(el),r=el.getBoundingClientRect();
-      return{
-        tag:el.tagName.toLowerCase(),
-        id:el.id||'',
-        className:typeof el.className==='string'?el.className.slice(0,140):'',
-        left:Number(r.left.toFixed(1)),right:Number(r.right.toFixed(1)),top:Number(r.top.toFixed(1)),bottom:Number(r.bottom.toFixed(1)),
-        width:Number(r.width.toFixed(1)),height:Number(r.height.toFixed(1)),
-        position:s.position,display:s.display,visibility:s.visibility,opacity:s.opacity,
-        transform:s.transform,overflowX:s.overflowX,overflowY:s.overflowY,
-        cssWidth:s.width,maxWidth:s.maxWidth
-      };
-    }).filter(x=>x.display!=='none'&&x.visibility!=='hidden'&&Number(x.opacity)>.02&&x.width>0&&x.height>0&&(x.left<-2||x.right>innerWidth+2))
-      .sort((a,b)=>Math.max(b.right-innerWidth,-b.left)-Math.max(a.right-innerWidth,-a.left)).slice(0,24);
-
-    return{clipped:clipped.slice(0,30),occluded:occluded.slice(0,30),overflowOffenders,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
+    return{clipped:clipped.slice(0,30),occluded:occluded.slice(0,30),scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
   });
   assert(result.scrollWidth-result.clientWidth<=2,`${label} horizontal overflow: ${JSON.stringify(result)}`);
   assert.deepEqual(result.clipped,[],`${label} clipped information: ${JSON.stringify(result.clipped)}`);
@@ -176,39 +144,16 @@ async function scanInformation(page,label){
 async function runProfile(browser,profile){
   const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},isMobile:profile.mobile,hasTouch:profile.mobile,deviceScaleFactor:profile.mobile?2:1,colorScheme:'dark',reducedMotion:'no-preference'});
   await context.addInitScript(()=>{try{localStorage.setItem('formatx:intro-seen-v1','1');}catch(_){}});
-  const page=await context.newPage();
-  const errors=[];
+  const page=await context.newPage();const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('console',m=>{if(m.type()==='error'&&!/WebGL|WebGPU|favicon|404|ERR_ABORTED/i.test(m.text()))errors.push(m.text());});
   try{
-    await page.goto(BASE,{waitUntil:'domcontentloaded'});
-    await page.waitForSelector('#hero',{timeout:10000});
-    await page.waitForTimeout(1500);
-    await assertPure3d(page,profile);
-    await assertHeaderAndHeroControls(page,profile);
-    for(const selector of STOPS){
-      const target=page.locator(selector).first();
-      if(!(await target.count()))continue;
-      await target.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'}));
-      await page.waitForTimeout(120);
-      await scanInformation(page,`${profile.name}:${selector}`);
-    }
-    await page.evaluate(()=>scrollTo({top:0,left:0,behavior:'auto'}));
-    await page.waitForTimeout(100);
-    assert.deepEqual(errors,[],`${profile.name} browser errors: ${JSON.stringify(errors)}`);
-    console.log(`PASS ${profile.name}: pure WebGL MAG + no clipped/covered information`);
-  }catch(error){
-    await fs.mkdir(OUT,{recursive:true});
-    await page.screenshot({path:path.join(OUT,`occlusion-failure-${profile.name}.png`),fullPage:true}).catch(()=>{});
-    throw error;
-  }finally{
-    await context.close();
-  }
+    await page.goto(BASE,{waitUntil:'domcontentloaded'});await page.waitForSelector('#hero',{timeout:10000});await page.waitForTimeout(800);
+    await activateNativeMag(page,profile);await assertPure3d(page,profile);await assertHeaderAndHeroControls(page,profile);
+    for(const selector of STOPS){const target=page.locator(selector).first();if(!(await target.count()))continue;await target.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'}));await page.waitForTimeout(120);await scanInformation(page,`${profile.name}:${selector}`);}
+    await page.evaluate(()=>scrollTo({top:0,left:0,behavior:'auto'}));await page.waitForTimeout(100);assert.deepEqual(errors,[],`${profile.name} browser errors: ${JSON.stringify(errors)}`);
+    console.log(`PASS ${profile.name}: interaction-activated pure WebGL MAG + no clipped/covered information`);
+  }catch(error){await fs.mkdir(OUT,{recursive:true});await page.screenshot({path:path.join(OUT,`occlusion-failure-${profile.name}.png`),fullPage:true}).catch(()=>{});throw error;}finally{await context.close();}
 }
 
-(async()=>{
-  await fs.mkdir(OUT,{recursive:true});
-  const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});
-  try{for(const profile of VIEWPORTS)await runProfile(browser,profile);}finally{await browser.close();}
-  console.log('PASS: 320–1920px browser matrix has a pure WebGL MAG and no detected information clipping or fixed/sticky occlusion.');
-})().catch(error=>{console.error(error.stack||error);process.exit(1);});
+(async()=>{await fs.mkdir(OUT,{recursive:true});const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});try{for(const profile of VIEWPORTS)await runProfile(browser,profile);}finally{await browser.close();}console.log('PASS: 320–1920px browser matrix has interaction-activated pure WebGL MAG and no detected information clipping or fixed/sticky occlusion.');})().catch(error=>{console.error(error.stack||error);process.exit(1);});

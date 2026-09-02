@@ -1,12 +1,16 @@
-/* FormatX r252 — MAG as the living heart of the page.
-   This layer owns only the MAG interaction hit-area and the mobile loop handoff.
-   It never paints a second fake hero after the footer. */
+/* FormatX r252/R522 — MAG as the living heart of the page.
+   The semantic hit target owns activation while the native stage remains the
+   visual geometry source. Layout ancestors keep normal browser hit testing. */
+
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-core-r120-stage {
+  pointer-events: none !important;
+}
 
 .fx-mag-heart-hit-r252 {
   position: absolute;
-  /* The WebGL stage is z=3. Keep the heart hit-area directly above the MAG,
-     while canonical ASK / pause / navigation controls remain above it. */
-  z-index: 4;
+  z-index: 12020 !important;
   left: 50%;
   top: 50%;
   width: min(36vw, 430px);
@@ -22,6 +26,19 @@
   transform: translate(-50%, -50%);
   touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: auto !important;
+}
+
+html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
+html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 {
+  z-index: 12120 !important;
+  pointer-events: auto !important;
+}
+html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 button,
+html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 a {
+  position: relative !important;
+  z-index: 12121 !important;
+  pointer-events: auto !important;
 }
 
 .fx-mag-heart-hit-r252::before {
@@ -56,26 +73,6 @@
     height: min(72vw, 330px);
     min-width: 210px;
     min-height: 210px;
-  }
-
-  /* r252: the footer is the last real content. The loop bridge is only a short
-     visual runway used to transfer native touch momentum back to the real hero.
-     The old full-screen reference mirror is deliberately never shown on mobile. */
-  html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge,
-  html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
-    display: block !important;
-    box-sizing: border-box !important;
-    width: 100% !important;
-    height: max(96px, 14svh) !important;
-    min-height: max(96px, 14svh) !important;
-    max-height: max(96px, 14svh) !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    pointer-events: none !important;
-    background:
-      radial-gradient(circle at 50% 0%, rgba(25, 118, 188, .16), transparent 62%),
-      linear-gradient(180deg, #02070d 0%, #020b14 58%, #01050b 100%) !important;
   }
 
   html[data-fx-heart-core-r252='ready'] .fx-loop-bridge > .fx-loop-reference-mirror,
@@ -116,3 +113,5 @@
 @media (prefers-reduced-motion: reduce) {
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
+
+/* production-r522-semantic-hit-target-over-pointer-transparent-visual-stage */
