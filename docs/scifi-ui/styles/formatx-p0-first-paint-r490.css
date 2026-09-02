@@ -1,7 +1,8 @@
-/* FormatX R496 — deterministic first-paint safety without geometry guesses.
+/* FormatX R499 — deterministic first-paint safety without geometry guesses.
    Canonical hero geometry belongs to formatx-first-frame-stability-r283.css.
-   This layer only prevents legacy reveal states and real scroll-area defects;
-   it must not reserve guessed min-heights that can fight the canonical frame. */
+   This layer prevents legacy reveal states, real scroll-area defects and makes
+   the canonical MAG pause state a CSS invariant. It does not reserve guessed
+   min-heights that can fight the canonical frame. */
 
 /* Keep the readable LCP surface paintable. */
 html body.living-architecture #hero .hero-copy,
@@ -24,6 +25,22 @@ html body.living-architecture #hero .hero-copy > :is(
 ) {
   animation: none !important;
   transition: none !important;
+}
+
+/* R499 canonical MAG pause invariant.
+   The control updates the root state synchronously. Styling the root state,
+   rather than one transient Animation object, also freezes animations created
+   by a life-state change after the PAUSE event. The no-preference rule resumes
+   the same animation clock; reduced-motion keeps its own static contract. */
+html[data-fx-reference-motion-paused="true"] body.living-architecture
+  #hero .fx-crystal-organism-r326-canvas {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-fx-reference-motion-paused="true"]) body.living-architecture
+    #hero .fx-crystal-organism-r326-canvas {
+    animation-play-state: running !important;
+  }
 }
 
 /* Feedback honeypot: the source input stays enabled and named for bot filtering,
@@ -103,4 +120,4 @@ html body.living-architecture .skip-link:focus-visible {
   min-height: 44px !important;
 }
 
-/* production-r496-p0-first-paint-honeypot-touch-fix */
+/* production-r499-p0-first-paint-mag-pause-invariant */
