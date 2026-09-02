@@ -1,4 +1,4 @@
-/* FormatX R495 — deterministic first-paint safety without geometry guesses.
+/* FormatX R496 — deterministic first-paint safety without geometry guesses.
    Canonical hero geometry belongs to formatx-first-frame-stability-r283.css.
    This layer only prevents legacy reveal states and real scroll-area defects;
    it must not reserve guessed min-heights that can fight the canonical frame. */
@@ -26,34 +26,10 @@ html body.living-architecture #hero .hero-copy > :is(
   transition: none !important;
 }
 
-/* Honeypot: remain in the form for bot filtering, but never create a scrollable
-   box thousands of pixels outside the viewport and never become interactive. */
+/* Feedback honeypot: the source input stays enabled and named for bot filtering,
+   but the wrapper is deliberately not rendered, hit-testable, or tabbable. */
 html body.living-architecture .fx-feedback-honeypot {
-  position: absolute !important;
-  inset: 0 auto auto 0 !important;
-  inline-size: 1px !important;
-  block-size: 1px !important;
-  min-inline-size: 0 !important;
-  min-block-size: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  clip: rect(0 0 0 0) !important;
-  clip-path: inset(50%) !important;
-  white-space: nowrap !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-html body.living-architecture .fx-feedback-honeypot input {
-  inline-size: 1px !important;
-  block-size: 1px !important;
-  min-inline-size: 0 !important;
-  min-block-size: 0 !important;
-  max-inline-size: 1px !important;
-  max-block-size: 1px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
+  display: none !important;
 }
 
 /* Narrow footer navigation must wrap inside its own content box. The R494
@@ -127,4 +103,4 @@ html body.living-architecture .skip-link:focus-visible {
   min-height: 44px !important;
 }
 
-/* production-r495-p0-first-paint-canonical-geometry-owner */
+/* production-r496-p0-first-paint-honeypot-touch-fix */
