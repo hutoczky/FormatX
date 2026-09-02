@@ -57,6 +57,11 @@ function resolveMarkedScript(html, baseUrl, marker, expectedPath, label) {
     sourceValue(/const P0_MOTION_SCHEDULER = '([^']+)'/, 'P0 scheduler URL'),
     `${ORIGIN}/`,
   ).pathname;
+  const canonicalBaseUrl = new URL(expectedBase, `${ORIGIN}/`);
+  const canonicalFaviconPath = new URL(
+    canonicalValue(/<link\b(?=[^>]*\brel=["']icon["'])[^>]*\bhref=["']([^"']+)["'][^>]*>/i, 'favicon href'),
+    canonicalBaseUrl,
+  ).pathname;
 
   assert.ok(criticalCore.includes('BEGIN formatx-design-system.css'), 'critical-core lost embedded design system');
   assert.ok(criticalCore.includes('FormatX Design System 2.0'), 'embedded design system signature missing');
@@ -70,19 +75,22 @@ function resolveMarkedScript(html, baseUrl, marker, expectedPath, label) {
     critical: await fetchText(`${ORIGIN}/scifi-ui/styles/formatx-critical-shell-v56.css?v=apex-${nonce}`),
     legacyCore: await fetchText(`${ORIGIN}/scifi-ui/scripts/formatx-core-real3d-v20.js?v=apex-${nonce}`),
   };
-  const icon = await fetch(`${ORIGIN}/scifi-ui/assets/images/formatx-icon.png?v=apex-${nonce}`);
+  const legacyIcon = await fetch(`${ORIGIN}/scifi-ui/assets/images/formatx-icon.png?v=apex-${nonce}`);
+  const canonicalIcon = await fetch(`${ORIGIN}${canonicalFaviconPath}?v=apex-${nonce}`);
 
   assert.equal(home.response.status, 200, 'home status');
   assert.equal(www.status, 302, 'www redirect status');
   for (const [name, result] of Object.entries(assets)) assert.equal(result.response.status, 200, `${name} status`);
-  assert.equal(icon.status, 200, 'icon status');
+  assert.equal(legacyIcon.status, 200, 'legacy icon endpoint status');
+  assert.equal(canonicalIcon.status, 200, 'canonical favicon status');
 
   assert.match(home.response.headers.get('content-type') || '', /text\/html/i);
   for (const name of ['design', 'mobile', 'critical']) {
     assert.match(assets[name].response.headers.get('content-type') || '', /text\/css/i, `${name} MIME`);
   }
   assert.match(assets.legacyCore.response.headers.get('content-type') || '', /(application|text)\/javascript/i);
-  assert.match(icon.headers.get('content-type') || '', /image\/png/i);
+  assert.match(legacyIcon.headers.get('content-type') || '', /image\/png/i);
+  assert.match(canonicalIcon.headers.get('content-type') || '', /image\/png/i);
 
   const liveBase = home.text.match(/<base\s+href=["']([^"']+)["']/i)?.[1] || '';
   assert.equal(liveBase, expectedBase, `base href must match canonical source (${expectedBase})`);
@@ -104,10 +112,10 @@ function resolveMarkedScript(html, baseUrl, marker, expectedPath, label) {
       home.text, baseUrl,
       'data-fx-p0-motion-scheduler-r490', p0SchedulerPath, 'P0 motion scheduler',
     ),
-    icon: resolveLiveAsset(
+    favicon: resolveLiveAsset(
       home.text, baseUrl,
-      /<(?:img|link)\b[^>]*(?:src|href)=["']([^"']*formatx-icon\.png[^"']*)["'][^>]*>/i,
-      '/scifi-ui/assets/images/formatx-icon.png', 'icon',
+      /<link\b(?=[^>]*\brel=["']icon["'])[^>]*\bhref=["']([^"']+)["'][^>]*>/i,
+      canonicalFaviconPath, 'canonical favicon',
     ),
   };
 
@@ -132,6 +140,8 @@ function resolveMarkedScript(html, baseUrl, marker, expectedPath, label) {
     status: 'PASS', firstFrame, p0Paint, expectedBase, startup,
     standaloneDesignAsset: `${ORIGIN}/scifi-ui/styles/formatx-design-system.css`,
     legacyCoreAsset: `${ORIGIN}/scifi-ui/scripts/formatx-core-real3d-v20.js`,
+    legacyIconAsset: `${ORIGIN}/scifi-ui/assets/images/formatx-icon.png`,
+    canonicalFaviconPath,
     resolvedAssets,
     edge: home.response.headers.get('x-formatx-edge-stability'),
     cssScheduler: expectedCssScheduler,
