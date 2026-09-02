@@ -8,6 +8,7 @@ const ORIGIN = 'https://formatxsuite.com';
 const WWW = 'https://www.formatxsuite.com';
 const production = fs.readFileSync(path.join(ROOT, 'billing-worker/src/production-content-entry.js'), 'utf8');
 const canonical = fs.readFileSync(path.join(ROOT, 'docs/scifi-ui/index.html'), 'utf8');
+const criticalCore = fs.readFileSync(path.join(ROOT, 'docs/scifi-ui/styles/formatx-critical-core-r227.css'), 'utf8');
 
 function sourceValue(pattern, label) {
   const match = production.match(pattern);
@@ -41,6 +42,12 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   const expectedMotionScheduler = sourceValue(/headers\.set\('X-FormatX-Motion-Scheduler', '([^']+)'\)/, 'motion scheduler');
   const expectedBase = canonicalValue(/<base\s+href=["']([^"']+)["']/, 'base href');
 
+  // Homepage critical-core already embeds the design-system source. The
+  // standalone design-system asset remains a typed/reachable public dependency
+  // for other canonical surfaces, but it is not required as a second home link.
+  assert.ok(criticalCore.includes('BEGIN formatx-design-system.css'), 'critical-core lost embedded design system');
+  assert.ok(criticalCore.includes('FormatX Design System 2.0'), 'embedded design system signature missing');
+
   const nonce = Date.now();
   const home = await fetchText(`${ORIGIN}/?apex_contract=${nonce}`, { headers: { 'Cache-Control': 'no-cache' } });
   const www = await fetch(`${WWW}/`, { redirect: 'manual', headers: { 'Cache-Control': 'no-cache' } });
@@ -68,9 +75,6 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   assert.equal(liveBase, expectedBase, `base href must match canonical source (${expectedBase})`);
   const baseUrl = new URL(liveBase, `${ORIGIN}/`);
 
-  // Functional navigation contract: relative canonical links must resolve to
-  // the intended /scifi-ui/ targets. The literal relative/root-relative spelling
-  // is deliberately not a release contract.
   assert.equal(new URL('./project-simulator.html?lang=hu', baseUrl).pathname, '/scifi-ui/project-simulator.html');
   assert.equal(new URL('./checkout.html?plan=business_pro', baseUrl).pathname, '/scifi-ui/checkout.html');
 
@@ -78,11 +82,6 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   assert.ok(home.text.includes(`data-fx-p0-first-paint-${p0Paint}=\"true\"`), `missing live P0 first-paint ${p0Paint}`);
 
   const resolvedAssets = {
-    design: resolveLiveAsset(
-      home.text, baseUrl,
-      /<link\b[^>]*href=["']([^"']*formatx-design-system\.css[^"']*)["'][^>]*>/i,
-      '/scifi-ui/styles/formatx-design-system.css', 'design CSS',
-    ),
     critical: resolveLiveAsset(
       home.text, baseUrl,
       /<link\b[^>]*href=["']([^"']*formatx-critical-shell-v56\.css[^"']*)["'][^>]*>/i,
@@ -119,6 +118,7 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
 
   console.log(JSON.stringify({
     status: 'PASS', firstFrame, p0Paint, expectedBase, startup,
+    standaloneDesignAsset: `${ORIGIN}/scifi-ui/styles/formatx-design-system.css`,
     resolvedAssets,
     edge: home.response.headers.get('x-formatx-edge-stability'),
     cssScheduler: expectedCssScheduler,
