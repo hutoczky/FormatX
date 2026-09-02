@@ -1,15 +1,16 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R493 — deterministic P0 first-frame edge owner.
-   Server-visible product/MAG/Live OS content stays intact. The settled hero
-   geometry is discovered in parallel with the rest of the critical CSS, while
-   genuinely non-layout presentation remains deferred. */
+/* FormatX R494 — deterministic critical-CSS discovery.
+   The canonical HTML remains server-visible and complete. Settled hero geometry
+   is discovered before the legacy stylesheet graph, duplicate first-frame
+   requests are removed at the edge, and motion/WebGL remains progressive. */
 
-const STARTUP_REVISION = '20260902-r493-deterministic-first-frame';
+const STARTUP_REVISION = '20260902-r494-critical-css-dedupe';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
-const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r493="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260823-r320-render-blocking">';
-const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r490="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r493-deterministic-first-frame">';
+const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
+const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r494="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r494-direct-critical">';
+const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r490="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r494-direct-critical">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260902-r493-explicit-intent';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
@@ -32,7 +33,7 @@ const HEADER_CSP = [
   'upgrade-insecure-requests',
 ].join('; ');
 const ROBOTS = [
-  '# FormatX canonical robots policy — served by production Worker R493',
+  '# FormatX canonical robots policy — served by production Worker R494',
   'User-agent: *',
   'Allow: /',
   'Disallow: /api/',
@@ -64,7 +65,7 @@ function robotsResponse(request) {
     'Content-Type': 'text/plain; charset=utf-8',
     'Cache-Control': 'no-store, max-age=0',
     'X-Content-Type-Options': 'nosniff',
-    'X-FormatX-Robots-Owner': 'worker-r493',
+    'X-FormatX-Robots-Owner': 'worker-r494',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -76,31 +77,32 @@ function normalizeMetaCsp(html) {
   }
   return source.replace(/<meta\s+name=["']color-scheme["'][^>]*>/i, match => `${match}\n  ${tag}`);
 }
-function injectFirstFrameStability(html) {
-  const source = String(html || '');
-  if (source.includes('data-fx-first-frame-stability-r493="true"')) return source;
-  return source.replace('</head>', `  ${FIRST_FRAME_STABILITY_LINK}\n</head>`);
+function stylesheetPath(tag) {
+  const hrefMatch = tag.match(/\bhref=(["'])(.*?)\1/i);
+  if (!hrefMatch) return '';
+  try {
+    return new URL(hrefMatch[2], 'https://formatxsuite.com/scifi-ui/').pathname;
+  } catch (_) {
+    return '';
+  }
 }
-function injectP0FirstPaint(html) {
-  const source = String(html || '');
-  if (source.includes('data-fx-p0-first-paint-r490="true"')) return source;
-  return source.replace('</head>', `  ${P0_FIRST_PAINT_LINK}\n</head>`);
-}
-function injectFirstPaint(html) {
-  const source = String(html || '');
-  if (source.includes('data-fx-production-first-paint-r370="true"')) return source;
-  return source.replace('</head>', `  ${FIRST_PAINT_LINK}\n</head>`);
+function injectCriticalFirstPaint(html) {
+  let source = String(html || '');
+  source = source.replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
+    const pathname = stylesheetPath(tag);
+    if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') return '';
+    if (pathname === '/scifi-ui/styles/formatx-p0-first-paint-r490.css') return '';
+    if (pathname === '/scifi-ui/styles/formatx-mobile-first-paint-r358.css' && /data-fx-production-first-paint-r370/i.test(tag)) return '';
+    return tag;
+  });
+  const critical = `  ${FIRST_FRAME_STABILITY_LINK}\n  ${P0_FIRST_PAINT_LINK}\n  ${FIRST_PAINT_LINK}\n`;
+  const firstStylesheet = /<link\b[^>]*\brel=["']stylesheet["'][^>]*>/i;
+  if (firstStylesheet.test(source)) return source.replace(firstStylesheet, match => `${critical}${match}`);
+  return source.replace('</head>', `${critical}</head>`);
 }
 function normalizeMobileStylesheetMedia(html) {
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
-    const hrefMatch = tag.match(/\bhref=(["'])(.*?)\1/i);
-    if (!hrefMatch) return tag;
-    let pathname = '';
-    try {
-      pathname = new URL(hrefMatch[2], 'https://formatxsuite.com/scifi-ui/').pathname;
-    } catch (_) {
-      return tag;
-    }
+    const pathname = stylesheetPath(tag);
     if (pathname !== '/scifi-ui/styles/formatx-mobile-apex-composition.css') return tag;
     if (/\smedia=(["'])(.*?)\1/i.test(tag)) return tag;
     return tag.replace(/\s*\/?>$/, close => ` media="${MOBILE_MEDIA}"${close}`);
@@ -130,14 +132,8 @@ function escapeAttribute(value) {
 function deferNonCriticalStyles(html) {
   let awardReadinessSeen = false;
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
-    const hrefMatch = tag.match(/\bhref=(["'])(.*?)\1/i);
-    if (!hrefMatch) return tag;
-    let pathname = '';
-    try {
-      pathname = new URL(hrefMatch[2], 'https://formatxsuite.com/scifi-ui/').pathname;
-    } catch (_) {
-      return tag;
-    }
+    const pathname = stylesheetPath(tag);
+    if (!pathname) return tag;
     if (pathname === '/scifi-ui/styles/formatx-award-readiness.css') {
       if (awardReadinessSeen) return '';
       awardReadinessSeen = true;
@@ -159,33 +155,42 @@ function injectDeferredCssRuntime(html) {
 function cacheBustCriticalQuality(html) {
   return String(html || '').replace(
     /formatx-quality-r461\.css\?v=[^"']+/g,
-    'formatx-quality-r461.css?v=20260902-r493-deterministic-first-frame'
+    'formatx-quality-r461.css?v=20260902-r494-critical-css-dedupe'
   );
 }
 function optimizeHomepage(html) {
   let source = normalizeHomepageSemantics(html);
   source = scheduleMotionRuntime(source);
   source = normalizeMobileStylesheetMedia(source);
-  source = injectFirstFrameStability(source);
-  source = injectP0FirstPaint(source);
-  source = injectFirstPaint(source);
+  source = injectCriticalFirstPaint(source);
   source = cacheBustCriticalQuality(source);
   source = deferNonCriticalStyles(source);
   source = injectDeferredCssRuntime(source);
   return source;
 }
+function stripNestedFirstFrameImport(css) {
+  return String(css || '').replace(/^\s*@import\s+url\(["']?\.\/formatx-first-frame-stability-r283\.css[^)]*\)\s*;\s*/i, '');
+}
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', `r493-deterministic-first-frame:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r493-parallel-final-geometry');
+  headers.set('X-FormatX-Edge-Stability', `r494-critical-css-dedupe:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r494-direct-critical-no-import-duplicate');
   headers.set('X-FormatX-Motion-Scheduler', 'r493-explicit-intent-late-auto');
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
     return new Response(null, { status: response.status, statusText: response.statusText, headers });
   }
   const contentType = headers.get('Content-Type') || '';
+  if (url.pathname === EVENT_HORIZON_PATH && contentType.includes('text/css')) {
+    const css = stripNestedFirstFrameImport(await response.text());
+    headers.delete('Content-Length');
+    headers.delete('Content-Encoding');
+    headers.delete('ETag');
+    headers.set('X-FormatX-First-Frame-Import', 'removed-r494-direct-owner');
+    return new Response(css, { status: response.status, statusText: response.statusText, headers });
+  }
   if (!contentType.includes('text/html')) {
     return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   }
