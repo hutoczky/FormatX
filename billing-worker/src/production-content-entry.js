@@ -1,18 +1,17 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R500 — canonical hero product-state first-frame ownership.
-   R498 proved that server-inserting extra hero-grid/control/proof nodes changes
-   the initial grid itself and restores the R495-sized CLS. R499 removes that
-   experiment completely. R496/R497 canonical geometry is preserved, while the
-   MAG pause state is enforced by the blocking P0 CSS layer so present and future
-   CSSAnimation objects obey the same root motion state. */
+/* FormatX R501 — measured desktop hero-copy first-frame geometry ownership.
+   R500 keeps canonical product-state ownership with zero runtime insertion.
+   R501 mirrors only the settled desktop hero-copy box contract in the blocking
+   P0 layer, avoiding promotion of legacy bundles while eliminating the measured
+   grid-to-block first-paint layout transition. */
 
-const STARTUP_REVISION = '20260902-r500-canonical-hero-product-state';
+const STARTUP_REVISION = '20260902-r501-desktop-copy-first-frame';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
-const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r500="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r500-canonical-hero-state">';
+const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r501="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r501-desktop-copy-first-frame">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260902-r493-explicit-intent';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
@@ -175,8 +174,8 @@ async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', `r500-canonical-hero-state:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r500-canonical-hero-state-no-runtime-insertion');
+  headers.set('X-FormatX-Edge-Stability', `r501-desktop-copy-first-frame:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r501-p0-copy-box-first-frame');
   headers.set('X-FormatX-Motion-Scheduler', 'r493-explicit-intent-late-auto');
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
