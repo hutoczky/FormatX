@@ -1,8 +1,8 @@
-/* FormatX R499 — deterministic first-paint safety without geometry guesses.
-   Canonical hero geometry belongs to formatx-first-frame-stability-r283.css.
-   This layer prevents legacy reveal states, real scroll-area defects and makes
-   the canonical MAG pause state a CSS invariant. It does not reserve guessed
-   min-heights that can fight the canonical frame. */
+/* FormatX R501 — deterministic first-paint safety from measured final geometry.
+   Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
+   This blocking layer mirrors only the measured desktop hero-copy box mode that
+   was activating after first paint in R500, while preserving R500 product-state
+   ownership and the canonical MAG pause invariant. */
 
 /* Keep the readable LCP surface paintable. */
 html body.living-architecture #hero .hero-copy,
@@ -25,6 +25,30 @@ html body.living-architecture #hero .hero-copy > :is(
 ) {
   animation: none !important;
   transition: none !important;
+}
+
+/* R501: R500 production attribution showed the desktop copy painting as grid
+   first, then settling to the canonical block/contained box. That single
+   transition accounted for about 0.05 CLS. Mirror only that final box contract
+   in the already-blocking P0 layer; do not promote another legacy stylesheet. */
+@media (min-width: 901px) {
+  html body.living-architecture #hero > .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 12 !important;
+    display: block !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    contain: layout style !important;
+  }
 }
 
 /* R499 canonical MAG pause invariant.
@@ -120,8 +144,6 @@ html body.living-architecture .skip-link:focus-visible {
   min-height: 44px !important;
 }
 
-
-
 /* R500 canonical hero product-state first-frame geometry.
    This mirrors the settled platform-status + desktop r244 cascade. */
 html body.living-architecture #hero .fx-hero-product-state {
@@ -168,4 +190,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
   }
 }
 
-/* production-r500-p0-first-paint-canonical-hero-state */
+/* production-r501-p0-first-paint-desktop-copy-box */
