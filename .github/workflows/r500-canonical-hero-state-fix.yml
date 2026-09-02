@@ -1,4 +1,5 @@
 name: R500 canonical hero state source fix
+# retry: functional apex URL resolution contract
 
 on:
   workflow_dispatch:
