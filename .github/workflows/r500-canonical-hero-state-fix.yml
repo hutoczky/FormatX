@@ -1,5 +1,5 @@
 name: R500 canonical hero state source fix
-# retry: current scheduler apex contract, fail-fast before Chromium
+# retry: canonical favicon-derived apex contract, fail-fast before Chromium
 
 on:
   workflow_dispatch:
