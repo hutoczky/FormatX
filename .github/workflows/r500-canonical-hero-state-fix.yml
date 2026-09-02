@@ -29,299 +29,33 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply targeted R500 source fixes
+      - name: Apply targeted R500 source and validator fixes
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          # 1. Canonical homepage owns exactly one product-state node from first frame.
-          index_path = Path('docs/scifi-ui/index.html')
-          index = index_path.read_text(encoding='utf-8')
-          if 'data-fx-canonical-hero-product-state="true"' not in index:
-              lead = re.search(r'(?P<lead><p class="hero-lead"[^>]*>.*?</p>)', index, re.S)
-              if not lead:
-                  raise SystemExit('canonical hero lead not found')
-              state = '''\n          <div class="fx-hero-product-state" data-fx-canonical-hero-product-state="true" data-fx-hero-product-state="first-frame">\n            <span class="fx-platform-status-badge" data-status="full_release" data-hu="Teljes verzió" data-en="Full release">Teljes verzió</span>\n            <span data-fx-hero-product-state-copy="true" data-hu="Bazzite/Linux elsődleges · Windows támogatott · teljes verzió · 5 napos próbalicenc" data-en="Bazzite/Linux primary · Windows supported · full version · 5-day trial licence">Bazzite/Linux elsődleges · Windows támogatott · teljes verzió · 5 napos próbalicenc</span>\n          </div>'''
-              index = index[:lead.end()] + state + index[lead.end():]
-          if index.count('data-fx-canonical-hero-product-state="true"') != 1:
-              raise SystemExit('canonical hero product-state must exist exactly once')
-          index_path.write_text(index, encoding='utf-8')
-
-          # 2. Runtime reuses canonical node. Creation is legacy/noncanonical fallback only.
-          runtime_path = Path('docs/scifi-ui/scripts/platform-status.js')
-          runtime = runtime_path.read_text(encoding='utf-8')
-          start = runtime.find('  function installHeroState(data) {')
-          end = runtime.find('\n  function installCheckoutNotice(data) {', start)
-          if start < 0 or end < 0:
-              raise SystemExit('installHeroState function boundaries not found')
-          replacement = '''  function installHeroState(data) {\n    const heroCopy = document.querySelector('#hero .hero-copy');\n    if (!heroCopy) return;\n    const canonicalHome = Boolean(\n      heroCopy.closest('#hero')?.parentElement?.id === 'main-content'\n      && document.querySelector('link[rel="canonical"][href^="https://formatxsuite.com/"]')\n    );\n    let state = heroCopy.querySelector('.fx-hero-product-state');\n    if (!state) {\n      if (canonicalHome) {\n        ROOT.dataset.fxHeroProductState = 'missing-canonical-node';\n        return;\n      }\n      state = document.createElement('div');\n      state.className = 'fx-hero-product-state';\n      state.dataset.fxHeroProductState = 'legacy-fallback';\n      const lead = heroCopy.querySelector('.hero-lead');\n      if (lead) lead.insertAdjacentElement('afterend', state);\n      else heroCopy.prepend(state);\n    }\n\n    const lang = language();\n    let statusBadge = state.querySelector('.fx-platform-status-badge');\n    let statusCopy = state.querySelector('[data-fx-hero-product-state-copy]');\n    if (!statusBadge || !statusCopy) {\n      if (canonicalHome) {\n        ROOT.dataset.fxHeroProductState = 'invalid-canonical-node';\n        return;\n      }\n      if (!statusBadge) {\n        statusBadge = badge(data.product_release.status, data.status_labels, lang);\n        state.prepend(statusBadge);\n      }\n      if (!statusCopy) {\n        statusCopy = document.createElement('span');\n        statusCopy.dataset.fxHeroProductStateCopy = 'true';\n        state.append(statusCopy);\n      }\n    }\n\n    statusBadge.dataset.status = data.product_release.status;\n    statusBadge.textContent = text(data.status_labels[data.product_release.status], lang);\n    statusCopy.textContent = lang === 'en'\n      ? 'Bazzite/Linux primary · Windows supported · full version · 5-day trial licence'\n      : 'Bazzite/Linux elsődleges · Windows támogatott · teljes verzió · 5 napos próbalicenc';\n    state.dataset.fxHeroProductState = 'ready';\n    ROOT.dataset.fxHeroProductState = canonicalHome ? 'canonical-reused' : 'fallback-ready';\n\n    const download = document.getElementById('hero-download');\n    if (download instanceof HTMLAnchorElement) {\n      download.href = './downloads/';\n      download.dataset.releaseDownload = 'multiplatform';\n      download.removeAttribute('download');\n      const label = download.querySelector('[data-release-download-label], span');\n      if (label) {\n        label.textContent = lang === 'en'\n          ? 'Full multiplatform version'\n          : 'Teljes multiplatform verzió';\n      }\n    }\n  }\n'''
-          runtime = runtime[:start] + replacement + runtime[end:]
-          runtime_path.write_text(runtime, encoding='utf-8')
-
-          # 3. First-frame geometry mirrors the actual platform-status + desktop r244 cascade.
-          p0_path = Path('docs/scifi-ui/styles/formatx-p0-first-paint-r490.css')
-          p0 = p0_path.read_text(encoding='utf-8')
-          marker = '/* R500 canonical hero product-state first-frame geometry. */'
-          if marker not in p0:
-              block = r'''
-
-/* R500 canonical hero product-state first-frame geometry.
-   This is the exact settled platform-status geometry, not a guessed reserve. */
-html body.living-architecture #hero .fx-hero-product-state {
-  position: relative !important;
-  inset: auto !important;
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  box-sizing: border-box !important;
-  width: 100% !important;
-  max-width: 560px !important;
-  height: auto !important;
-  min-height: 0 !important;
-  margin: 18px 0 0 !important;
-  padding: 0 !important;
-  gap: 10px !important;
-  color: rgba(224, 241, 248, .78) !important;
-  font-size: 13px !important;
-  line-height: 1.45 !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-}
-html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-badge {
-  display: inline-flex !important;
-  align-items: center !important;
-  box-sizing: border-box !important;
-  min-height: 28px !important;
-  padding: 5px 10px !important;
-  border: 1px solid currentColor !important;
-  border-radius: 999px !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
-  font-size: 12px !important;
-  font-weight: 800 !important;
-  line-height: 1.2 !important;
-  letter-spacing: .04em !important;
-  white-space: nowrap !important;
-}
-@media (min-width: 901px) {
-  html body.living-architecture #hero .fx-hero-product-state {
-    gap: 8px 12px !important;
-    color: rgba(189, 210, 222, .75) !important;
-    font-size: 12px !important;
-    line-height: 1.45 !important;
-  }
-}
-'''
-              p0 = p0.replace('/* production-r499-p0-first-paint-mag-pause-invariant */', block + '\n/* production-r500-p0-first-paint-canonical-hero-state */')
-          p0_path.write_text(p0, encoding='utf-8')
-
-          # 4. Semantic first-paint expectations derive from the currently shipped loader.
-          sem_path = Path('.github/scripts/validate-semantic-first-paint.cjs')
-          sem = sem_path.read_text(encoding='utf-8')
-          if 'EXPECTED_CONTENT_GATE' not in sem:
-              anchor = "const RECOVERY_SOURCE = fs.readFileSync(\n  path.join(REPO, 'docs/scifi-ui/scripts/formatx-canonical-recovery.js'),\n  'utf8',\n);\n"
-              derived = anchor + "const CONTENT_RUNTIME_SOURCE = fs.readFileSync(path.join(REPO, 'docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js'), 'utf8');\nfunction sourceDatasetValue(name) {\n  const match = CONTENT_RUNTIME_SOURCE.match(new RegExp(`root\\\\.dataset\\\\.${name}\\\\s*=\\\\s*['\\\"]([^'\\\"]+)['\\\"]`));\n  assert.ok(match, `missing source dataset contract ${name}`);\n  return match[1];\n}\nconst EXPECTED_CONTENT_GATE = sourceDatasetValue('fxContentRuntimeR241');\nconst EXPECTED_STABILITY = sourceDatasetValue('fxFirstFrameStabilityR283');\n"
-              if anchor not in sem:
-                  raise SystemExit('semantic validator source anchor not found')
-              sem = sem.replace(anchor, derived, 1)
-          sem = sem.replace("    'armed-r301-user-intent',", '    EXPECTED_CONTENT_GATE,')
-          sem = sem.replace("assert.equal(state.stability, 'critical-only-r300',", 'assert.equal(state.stability, EXPECTED_STABILITY,')
-          sem_path.write_text(sem, encoding='utf-8')
-
-          # 5. MAG mobile visual validator derives exact compositor filter from canonical CSS.
-          mag_path = Path('.github/scripts/validate-mag-surface-energy-r484.cjs')
-          mag = mag_path.read_text(encoding='utf-8')
-          if 'MOBILE_OPTICS_SOURCE' not in mag:
-              anchor = "fs.mkdirSync(output, { recursive: true });\n"
-              derived = anchor + "const MOBILE_OPTICS_SOURCE = fs.readFileSync(path.join(__dirname, '../../docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'), 'utf8');\nfunction sourceFilterToken(name, unit = '') {\n  const escapedUnit = unit.replace(/[.*+?^${}()|[\\\\]\\\\]/g, '\\\\$&');\n  const match = MOBILE_OPTICS_SOURCE.match(new RegExp(`${name}\\\\(([-\\\\d.]+)${escapedUnit}\\\\)`));\n  assert.ok(match, `missing canonical mobile optics token ${name}`);\n  return `${name}(${match[1]}${unit})`;\n}\nconst EXPECTED_MOBILE_FILTER = [\n  sourceFilterToken('brightness'), sourceFilterToken('contrast'), sourceFilterToken('saturate'),\n  sourceFilterToken('hue-rotate', 'deg'), sourceFilterToken('blur', 'px')\n];\n"
-              if anchor not in mag:
-                  raise SystemExit('MAG validator source anchor not found')
-              mag = mag.replace(anchor, derived, 1)
-          old = """      assert.match(report.dom.filter, /brightness\\(0?\\.965\\)/);\n      assert.match(report.dom.filter, /contrast\\(0?\\.885\\)/);\n      assert.match(report.dom.filter, /saturate\\(1\\.14\\)/);\n      assert.match(report.dom.filter, /blur\\(0?\\.58px\\)/);"""
-          new = """      for (const token of EXPECTED_MOBILE_FILTER) {\n        assert.ok(report.dom.filter.includes(token), `${name}: canonical mobile optics token missing ${token}; computed=${report.dom.filter}`);\n      }"""
-          if old in mag:
-              mag = mag.replace(old, new, 1)
-          if 'brightness\\(0?\\.965\\)' in mag:
-              raise SystemExit('stale MAG brightness expectation remains')
-          mag_path.write_text(mag, encoding='utf-8')
-
-          # 6. Apex: retry only marker propagation. Functional contract is one-shot/fail-fast.
-          apex_path = Path('.github/workflows/verify-apex-shell-live.yml')
-          apex = apex_path.read_text(encoding='utf-8')
-          pattern = re.compile(r"      - name: Wait for and verify current apex shell contract\n.*?(?=      - name: Publish live shell status\n)", re.S)
-          replacement = r'''      - name: Wait for exact production marker propagation
-        shell: bash
-        run: |
-          set -euo pipefail
-          APEX='https://formatxsuite.com'
-          for attempt in $(seq 1 36); do
-            echo "FormatX marker probe $attempt/36"
-            if curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "$APEX/p0-validation-version.txt?marker=${GITHUB_RUN_ID}-${attempt}" -o "$RUNNER_TEMP/live-p0.txt" \
-              && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
-              echo 'Exact production marker is live.'
-              exit 0
-            fi
-            sleep 10
-          done
-          echo 'Production marker did not converge.' >&2
-          exit 1
-
-      - name: Verify current apex shell contract once
-        shell: bash
-        run: |
-          set -euo pipefail
-          APEX='https://formatxsuite.com'
-          WWW='https://www.formatxsuite.com'
-          tmp="$(mktemp -d)"
-          trap 'rm -rf "$tmp"' EXIT
-
-          home_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/home.headers" -o "$tmp/home.html" -w '%{http_code}' -H 'Cache-Control: no-cache' "$APEX/?apex_contract=${GITHUB_RUN_ID}")"
-          www_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/www.headers" -o /dev/null -w '%{http_code}' "$WWW/)"
-          css_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/design.headers" -o "$tmp/design.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-design-system.css?v=shell-live")"
-          mobile_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/mobile.headers" -o "$tmp/mobile.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-mobile-recovery.css?v=shell-live")"
-          critical_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/critical.headers" -o "$tmp/critical.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-critical-shell-v56.css?v=shell-live")"
-          js_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/core.headers" -o "$tmp/core.js" -w '%{http_code}' "$APEX/scifi-ui/scripts/formatx-core-real3d-v20.js?v=shell-live")"
-          icon_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/icon.headers" -o "$tmp/icon.bin" -w '%{http_code}' "$APEX/scifi-ui/assets/images/formatx-icon.png?v=shell-live")"
-
-          echo "home=$home_code www=$www_code design=$css_code mobile=$mobile_code critical=$critical_code js=$js_code icon=$icon_code"
-          [[ "$home_code" == 200 && "$www_code" == 302 && "$css_code" == 200 && "$mobile_code" == 200 && "$critical_code" == 200 && "$js_code" == 200 && "$icon_code" == 200 ]]
-
-          python3 - "$tmp" <<'PY'
-          import pathlib,re,sys
-          from urllib.parse import urljoin,urlparse
-          root=pathlib.Path(sys.argv[1])
-          source=pathlib.Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
-          def header(name): return (root/name).read_text(errors='replace').lower()
-          home=(root/'home.html').read_text(errors='replace')
-          design=(root/'design.css').read_text(errors='replace')
-          mobile=(root/'mobile.css').read_text(errors='replace')
-          critical=(root/'critical.css').read_text(errors='replace')
-          core=(root/'core.js').read_text(errors='replace')
-
-          assert 'content-type: text/html' in header('home.headers')
-          assert re.search(r'content-type:\s*text/css',header('design.headers'))
-          assert re.search(r'content-type:\s*text/css',header('mobile.headers'))
-          assert re.search(r'content-type:\s*text/css',header('critical.headers'))
-          assert 'content-type: application/javascript' in header('core.headers') or 'content-type: text/javascript' in header('core.headers')
-          assert 'content-type: image/png' in header('icon.headers')
-          assert 'FormatX Design System 2.0' in design
-          assert 'FormatX living-core visibility and responsive layout recovery' in mobile
-          assert 'FormatX critical shell v56' in critical
-          assert 'First-paint geometry lock r4' in critical
-          assert 'html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay' in critical
-          assert 'display: none !important' in critical
-          assert 'formatx-core' in core.lower() or 'fxcore' in core.lower()
-
-          source_base=re.search(r'<base\s+href=["\']([^"\']+)["\']',source,re.I)
-          live_base=re.search(r'<base\s+href=["\']([^"\']+)["\']',home,re.I)
-          assert source_base and live_base and live_base.group(1)==source_base.group(1), (source_base.group(1) if source_base else None, live_base.group(1) if live_base else None)
-          base_url=urljoin('https://formatxsuite.com/',live_base.group(1))
-          for rel,expected in [('./project-simulator.html?lang=hu','/scifi-ui/project-simulator.html'),('./checkout.html?plan=business_pro','/scifi-ui/checkout.html')]:
-              assert urlparse(urljoin(base_url,rel)).path==expected
-          assert 'href="/scifi-ui/styles/formatx-design-system.css' in home
-          assert 'href="/scifi-ui/styles/formatx-critical-shell-v56.css' in home
-          assert 'src="/scifi-ui/scripts/formatx-core-real3d-v20.js' in home
-          assert 'src="/scifi-ui/assets/images/formatx-icon.png' in home
-          assert 'href="./styles/formatx-design-system.css' not in home
-          assert 'src="./scripts/formatx-core-real3d-v20.js' not in home
-          assert 'src="./assets/images/formatx-icon.png' not in home
-          assert 'location:' not in header('home.headers')
-          www_headers=header('www.headers')
-          assert 'location: https://formatxsuite.com/?_fx_redirect_recovery=1' in www_headers
-          assert 'cache-control: no-store' in www_headers
-          print('FormatX apex functional URL and current first-frame contract PASS')
-          PY
-'''
-          apex, count = pattern.subn(replacement, apex, count=1)
-          if count != 1:
-              raise SystemExit('apex functional verification step not found exactly once')
-          if "assert '<base href=\"/\">' in home" in apex:
-              raise SystemExit('stale apex base assertion remains')
-          apex_path.write_text(apex, encoding='utf-8')
-          PY
-
-      - name: Add targeted R500 pre-deploy browser assertion
-        shell: bash
-        run: |
-          cat > .github/scripts/validate-r500-hero-product-state.cjs <<'NODE'
-          'use strict';
-          const assert=require('node:assert/strict');
-          const fs=require('node:fs');
-          const {chromium}=require('playwright');
-          const ORIGIN='http://127.0.0.1:4186';
-          const canonical=fs.readFileSync('docs/scifi-ui/index.html','utf8');
-          function rect(r){return{x:r.x,y:r.y,width:r.width,height:r.height}}
-          async function run(browser,language){
-            const context=await browser.newContext({viewport:{width:1440,height:900},locale:language==='en'?'en-GB':'hu-HU',reducedMotion:'no-preference'});
-            const page=await context.newPage();
-            await page.route(`${ORIGIN}/scifi-ui/index.html*`,async route=>{
-              let html=canonical.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<script\b[^>]*\/>/gi,'');
-              html=html.replace(/<link\b[^>]*platform-status\.css[^>]*>/gi,'');
-              if(!html.includes('formatx-p0-first-paint-r490.css')) html=html.replace('</head>','<link rel="stylesheet" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=r500-local">\n</head>');
-              await route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:html});
-            });
-            await page.goto(`${ORIGIN}/scifi-ui/index.html?lang=${language}`,{waitUntil:'domcontentloaded'});
-            await page.evaluate(lang=>{
-              document.documentElement.lang=lang;
-              document.documentElement.dataset.fxReferenceProductionR244='desktop';
-              document.querySelectorAll('[data-hu][data-en]').forEach(el=>{if(!el.matches('input,textarea'))el.textContent=el.dataset[lang]||el.textContent});
-            },language);
-            await page.waitForFunction(()=>Array.from(document.styleSheets).some(s=>String(s.href||'').includes('formatx-p0-first-paint-r490.css')));
-            await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-            const before=await page.evaluate(()=>{
-              const q=s=>document.querySelector(s).getBoundingClientRect();
-              const state=document.querySelector('#hero .fx-hero-product-state');
-              return{count:document.querySelectorAll('#hero .fx-hero-product-state').length,canonical:state?.dataset.fxCanonicalHeroProductState||'',copy:q('#hero .hero-copy'),state:q('#hero .fx-hero-product-state'),download:q('#hero-download')};
-            });
-            assert.equal(before.count,1,`${language}: canonical product-state count before runtime`);
-            assert.equal(before.canonical,'true',`${language}: canonical product-state marker missing`);
-            await page.evaluate(()=>{
-              window.__r500InsertedHeroStates=0;
-              const hero=document.querySelector('#hero .hero-copy');
-              window.__r500Observer=new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes){if(node.nodeType!==1)continue;if(node.matches?.('.fx-hero-product-state')||node.querySelector?.('.fx-hero-product-state'))window.__r500InsertedHeroStates++}});
-              window.__r500Observer.observe(hero,{childList:true,subtree:true});
-            });
-            await page.addScriptTag({url:`${ORIGIN}/scifi-ui/scripts/platform-status.js?v=r500-local-${language}`});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxPlatformStatus==='ready',{timeout:10000});
-            await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-            const after=await page.evaluate(()=>{
-              window.__r500Observer.disconnect();
-              const q=s=>document.querySelector(s).getBoundingClientRect();
-              return{insertions:window.__r500InsertedHeroStates,count:document.querySelectorAll('#hero .fx-hero-product-state').length,owner:document.documentElement.dataset.fxHeroProductState||'',copy:q('#hero .hero-copy'),state:q('#hero .fx-hero-product-state'),download:q('#hero-download')};
-            });
-            const deltas={copyHeight:after.copy.height-before.copy.height,copyY:after.copy.y-before.copy.y,stateHeight:after.state.height-before.state.height,stateY:after.state.y-before.state.y,downloadY:after.download.y-before.download.y};
-            assert.equal(after.insertions,0,`${language}: runtime inserted a new .fx-hero-product-state`);
-            assert.equal(after.count,1,`${language}: product-state count changed`);
-            assert.equal(after.owner,'canonical-reused',`${language}: runtime did not reuse canonical node`);
-            for(const [name,value] of Object.entries(deltas)) assert.ok(Math.abs(value)<=1,`${language}: ${name} delta ${value}px`);
-            console.log(JSON.stringify({language,before:{copy:rect(before.copy),state:rect(before.state),download:rect(before.download)},after:{copy:rect(after.copy),state:rect(after.state),download:rect(after.download)},deltas,insertions:after.insertions,owner:after.owner},null,2));
-            await context.close();
-          }
-          (async()=>{const browser=await chromium.launch({headless:true});try{await run(browser,'hu');await run(browser,'en');}finally{await browser.close()}})().catch(e=>{console.error(e.stack||e);process.exit(1)});
-          NODE
-
-      - name: Validate source and stale contracts
-        shell: bash
-        run: |
-          set -euo pipefail
+          python3 -m py_compile .github/scripts/r500_source_fix.py .github/scripts/r500_apex_patch.py
+          python3 .github/scripts/r500_source_fix.py source
+          python3 .github/scripts/r500_apex_patch.py
           node --check docs/scifi-ui/scripts/platform-status.js
           node --check .github/scripts/validate-semantic-first-paint.cjs
           node --check .github/scripts/validate-mag-surface-energy-r484.cjs
           node --check .github/scripts/validate-r500-hero-product-state.cjs
+          node --check .github/scripts/verify-apex-shell-r500.cjs
           python3 - <<'PY'
           from pathlib import Path
           import re
           html=Path('docs/scifi-ui/index.html').read_text()
-          assert html.count('data-fx-canonical-hero-product-state="true"')==1
-          assert re.search(r'<p class="hero-lead"[^>]*>.*?</p>\s*<div class="fx-hero-product-state"',html,re.S)
+          assert html.count('data-fx-canonical-hero-product-state="true"') == 1
+          assert re.search(r'<p class="hero-lead"[^>]*>.*?</p>\s*<div class="fx-hero-product-state"', html, re.S)
           js=Path('docs/scifi-ui/scripts/platform-status.js').read_text()
-          assert "ROOT.dataset.fxHeroProductState = 'missing-canonical-node'" in js
-          assert "ROOT.dataset.fxHeroProductState = canonicalHome ? 'canonical-reused' : 'fallback-ready'" in js
-          sem=Path('.github/scripts/validate-semantic-first-paint.cjs').read_text(); assert 'armed-r301-user-intent' not in sem and 'EXPECTED_CONTENT_GATE' in sem
-          mag=Path('.github/scripts/validate-mag-surface-energy-r484.cjs').read_text(); assert 'brightness\\(0?\\.965\\)' not in mag and 'EXPECTED_MOBILE_FILTER' in mag
-          apex=Path('.github/workflows/verify-apex-shell-live.yml').read_text(); assert "assert '<base href=\"/\">' in home" not in apex and 'Wait for exact production marker propagation' in apex
+          assert "canonical-reused" in js and "missing-canonical-node" in js
+          sem=Path('.github/scripts/validate-semantic-first-paint.cjs').read_text()
+          assert 'armed-r301-user-intent' not in sem and 'EXPECTED_CONTENT_GATE' in sem
+          mag=Path('.github/scripts/validate-mag-surface-energy-r484.cjs').read_text()
+          assert 'brightness\\(0?\\.965\\)' not in mag and 'EXPECTED_MOBILE_FILTER' in mag
+          apex=Path('.github/workflows/verify-apex-shell-live.yml').read_text()
+          assert "assert '<base href=\"/\">' in home" not in apex
+          assert 'Wait for exact production marker propagation' in apex
           print('R500_SOURCE_CONTRACT_PASS')
           PY
 
@@ -332,15 +66,22 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
           npm install --no-save --no-package-lock playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Run R500 production-equivalent hero-state pre-deploy gate
+      - name: Run production-equivalent hero-state pre-deploy gate
         shell: bash
         run: |
           set -euo pipefail
           python3 -m http.server 4186 --directory docs > "$RUNNER_TEMP/r500-http.log" 2>&1 &
           server=$!
           trap 'kill $server 2>/dev/null || true' EXIT
-          for i in $(seq 1 20); do curl -fsS http://127.0.0.1:4186/scifi-ui/index.html >/dev/null && break; sleep .25; done
+          for i in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:4186/scifi-ui/index.html >/dev/null && break
+            sleep .25
+          done
           node .github/scripts/validate-r500-hero-product-state.cjs | tee r500-hero-product-state-predeploy.txt
+
+      - name: Verify modernized apex contract against current production
+        shell: bash
+        run: node .github/scripts/verify-apex-shell-r500.cjs
 
       - name: Commit tested R500 source fix
         shell: bash
@@ -348,56 +89,26 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
           set -euo pipefail
           git config user.name 'Games Tech'
           git config user.email 'hutoczky@users.noreply.github.com'
-          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/platform-status.js docs/scifi-ui/styles/formatx-p0-first-paint-r490.css .github/scripts/validate-r500-hero-product-state.cjs .github/scripts/validate-semantic-first-paint.cjs .github/scripts/validate-mag-surface-energy-r484.cjs .github/workflows/verify-apex-shell-live.yml
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/platform-status.js docs/scifi-ui/styles/formatx-p0-first-paint-r490.css .github/scripts/validate-semantic-first-paint.cjs .github/scripts/validate-mag-surface-energy-r484.cjs .github/workflows/verify-apex-shell-live.yml
           git commit -m 'Fix R500 canonical hero product-state first-frame geometry'
           git push origin HEAD:master
           echo "SOURCE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Prepare R500 production release marker and edge revision
+      - name: Prepare and validate R500 production candidate
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('billing-worker/src/production-content-entry.js')
-          s=p.read_text(encoding='utf-8')
-          replacements={
-            "FormatX R499 — canonical frame rollback + MAG pause invariant.":"FormatX R500 — canonical hero product-state first-frame ownership.",
-            "20260902-r499-canonical-frame-mag-pause":"20260902-r500-canonical-hero-product-state",
-            'data-fx-first-frame-stability-r499="true"':'data-fx-first-frame-stability-r500="true"',
-            '20260902-r499-canonical-frame':'20260902-r500-canonical-hero-state',
-            'data-fx-p0-first-paint-r499="true"':'data-fx-p0-first-paint-r500="true"',
-            '20260902-r499-mag-pause-invariant':'20260902-r500-canonical-hero-state',
-            "r499-canonical-frame:${STARTUP_REVISION}":"r500-canonical-hero-state:${STARTUP_REVISION}",
-            "r499-no-static-hero-injection-no-interaction-media-mutation":"r500-canonical-hero-state-no-runtime-insertion",
-          }
-          for old,new in replacements.items():
-              if old not in s: raise SystemExit(f'missing R500 release token: {old}')
-              s=s.replace(old,new)
-          # Cache-bust only the changed canonical status runtime/style on the homepage.
-          needle="    .replace(/formatx-mag-shape-sync-r476\\.js\\?v=[^\"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260902-r499-persistent-pause-clock');"
-          repl="    .replace(/formatx-mag-shape-sync-r476\\.js\\?v=[^\"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260902-r499-persistent-pause-clock')\\n    .replace(/platform-status\\.js\\?v=[^\"']+/g, 'platform-status.js?v=20260902-r500-canonical-hero-state')\\n    .replace(/platform-status\\.css\\?v=[^\"']+/g, 'platform-status.css?v=20260902-r500-canonical-hero-state');"
-          if needle not in s: raise SystemExit('runtime cache-bust anchor missing')
-          s=s.replace(needle,repl,1)
-          p.write_text(s,encoding='utf-8')
-
-          marker=Path('docs/p0-validation-version.txt')
-          m=marker.read_text(encoding='utf-8')
-          m=m.replace('version=2026-09-02-p0-100x3-r9','version=2026-09-02-p0-100x3-r10')
-          m=re.sub(r'^trigger=.*$', 'trigger=r500-canonical-hero-product-state-cls', m, flags=re.M)
-          marker.write_text(m,encoding='utf-8')
-          PY
+          python3 .github/scripts/r500_source_fix.py deploy
           node --input-type=module --check < billing-worker/src/production-content-entry.js
           node --check docs/scifi-ui/scripts/platform-status.js
           node .github/scripts/production-preflight.cjs
 
-      - name: Commit and publish R500 production candidate
+      - name: Publish R500 production commit
         shell: bash
         run: |
           set -euo pipefail
           git add billing-worker/src/production-content-entry.js docs/p0-validation-version.txt
           git commit -m '[deploy-production] Publish R500 canonical hero product-state CLS fix'
           git push origin HEAD:master
-          echo "DEPLOY_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-          echo "R500 source SHA: $SOURCE_SHA"
-          echo "R500 deploy SHA: $(git rev-parse HEAD)"
+          echo "R500_SOURCE_SHA=$SOURCE_SHA"
+          echo "R500_DEPLOY_SHA=$(git rev-parse HEAD)"
