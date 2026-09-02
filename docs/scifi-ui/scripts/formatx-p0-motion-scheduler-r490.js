@@ -1,11 +1,13 @@
-/* FormatX R490 — post-first-paint motion/MAG scheduler.
+/* FormatX R492 — post-first-paint motion/MAG scheduler.
    Keeps the readable hero off the heavy R326/WebGL startup critical path while
-   preserving the exact canonical motion runtime and all user-triggered features. */
+   preserving the canonical motion runtime. The visible MAG shell remains in the
+   first paint; the expensive living runtime starts immediately on real user
+   intent and only uses a late automatic fallback for an untouched page. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed';
+root.dataset.fxP0MotionSchedulerR490='armed-r492';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260831-r484-periodic-native-energy';
 let started=false;
 let idleId=0;
@@ -35,20 +37,31 @@ function start(reason){
   document.head.appendChild(script);
 }
 
-function afterFirstPaint(){
+function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     root.dataset.fxP0FirstPaintR490='committed';
+    const late=()=>{
+      if(document.visibilityState!=='visible'){
+        timer=setTimeout(late,3000);
+        return;
+      }
+      start('late-idle-fallback');
+    };
     if('requestIdleCallback' in window){
-      idleId=requestIdleCallback(()=>start('idle-after-first-paint'),{timeout:700});
+      idleId=requestIdleCallback(late,{timeout:12000});
     }else{
-      timer=setTimeout(()=>start('timer-after-first-paint'),320);
+      timer=setTimeout(late,10000);
     }
   }));
 }
 
-function onIntent(){start('user-intent');}
-for(const type of ['pointerdown','touchstart','keydown'])addEventListener(type,onIntent,{once:true,passive:true});
+function onIntent(event){
+  start(`user-${event?.type||'intent'}`);
+}
+for(const type of ['pointerdown','pointermove','touchstart','keydown','wheel','scroll']){
+  addEventListener(type,onIntent,{once:true,passive:true});
+}
 
-if(document.readyState==='loading')addEventListener('DOMContentLoaded',afterFirstPaint,{once:true,passive:true});
-else afterFirstPaint();
+if(document.readyState==='loading')addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
+else armLateFallback();
 }());
