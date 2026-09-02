@@ -1,14 +1,16 @@
-/* FormatX R492 — post-first-paint motion/MAG scheduler.
-   Keeps the readable hero off the heavy R326/WebGL startup critical path while
-   preserving the canonical motion runtime. The visible MAG shell remains in the
-   first paint; the expensive living runtime starts immediately on real user
-   intent and only uses a late automatic fallback for an untouched page. */
+/* FormatX R493 — deterministic post-first-paint MAG scheduler.
+   The static MAG shell is part of first paint. Heavy R326/WebGL enhancement is
+   never triggered by ambient startup events: explicit interaction starts it
+   immediately, otherwise a genuinely late visible-tab fallback starts it.
+   This preserves the living system without putting shader/runtime work on the
+   LCP/TBT critical path. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r492';
+root.dataset.fxP0MotionSchedulerR490='armed-r493';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260831-r484-periodic-native-energy';
+const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
 let timer=0;
@@ -29,7 +31,7 @@ function start(reason){
   }
   const script=document.createElement('script');
   script.src=SRC;
-  script.async=false;
+  script.async=true;
   script.dataset.fxMotionRuntimeLoaderR239='true';
   script.dataset.fxP0PostPaintR490='true';
   script.addEventListener('load',()=>{root.dataset.fxP0MotionSchedulerR490=`loaded:${reason}`;},{once:true});
@@ -37,31 +39,47 @@ function start(reason){
   document.head.appendChild(script);
 }
 
+function runLateAuto(){
+  if(started)return;
+  if(document.visibilityState!=='visible'){
+    root.dataset.fxP0MotionSchedulerR490='waiting-visible-r493';
+    timer=setTimeout(runLateAuto,2000);
+    return;
+  }
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+    root.dataset.fxP0MotionSchedulerR490='reduced-motion-static-r493';
+    return;
+  }
+  const launch=()=>start('late-auto-r493');
+  if('requestIdleCallback' in window){
+    idleId=requestIdleCallback(launch,{timeout:2500});
+  }else{
+    timer=setTimeout(launch,250);
+  }
+}
+
 function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    root.dataset.fxP0FirstPaintR490='committed';
-    const late=()=>{
-      if(document.visibilityState!=='visible'){
-        timer=setTimeout(late,3000);
-        return;
-      }
-      start('late-idle-fallback');
-    };
-    if('requestIdleCallback' in window){
-      idleId=requestIdleCallback(late,{timeout:12000});
-    }else{
-      timer=setTimeout(late,10000);
-    }
+    root.dataset.fxP0FirstPaintR490='committed-r493';
+    timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
   }));
 }
 
 function onIntent(event){
-  start(`user-${event?.type||'intent'}`);
+  if(event&&event.isTrusted===false)return;
+  start(`user-${event?.type||'intent'}-r493`);
 }
-for(const type of ['pointerdown','pointermove','touchstart','keydown','wheel','scroll']){
+
+/* Deliberately exclude pointermove and scroll. Those can be emitted during
+   browser startup/restoration and were the source of R492's 0.5–1.0 s random
+   WebGL boot. These events represent explicit user action instead. */
+for(const type of ['pointerdown','touchstart','keydown','wheel']){
   addEventListener(type,onIntent,{once:true,passive:true});
 }
 
-if(document.readyState==='loading')addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
-else armLateFallback();
+if(document.readyState==='loading'){
+  addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
+}else{
+  armLateFallback();
+}
 }());
