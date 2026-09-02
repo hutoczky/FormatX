@@ -1,18 +1,18 @@
 import productionBase from './production-content-entry-r369-base.js';
 
 /*
-  FormatX r489 — public edge stabilizer + first-paint scheduler + a11y cache owner.
+  FormatX r490 — P0 first-paint stabilizer + evidence-safe public edge owner.
 
   The production base remains the functional owner. This edge layer keeps the
-  canonical security/robots contract and, on the homepage only, lets one stable
-  critical frame paint before non-critical presentation styles join the cascade.
-  No visual feature is removed: deferred styles are restored immediately after
-  the first committed frame by formatx-deferred-css-r487.js.
+  canonical security/robots contract, adds the P0 first-paint geometry lock and
+  lets one stable readable frame paint before non-critical presentation styles
+  join the cascade. No product feature or MAG/WebGL capability is removed.
 */
 
-const STARTUP_REVISION = '20260901-r489-first-paint-a11y';
+const STARTUP_REVISION = '20260902-r490-p0-first-paint';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
+const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r490="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r490-p0">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
 const META_CSP = "default-src 'self';base-uri 'self';object-src 'none';script-src 'self' https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'";
@@ -33,7 +33,7 @@ const HEADER_CSP = [
   'upgrade-insecure-requests',
 ].join('; ');
 const ROBOTS = [
-  '# FormatX canonical robots policy — served by the production Worker r489',
+  '# FormatX canonical robots policy — served by the production Worker r490',
   'User-agent: *',
   'Allow: /',
   'Disallow: /api/',
@@ -73,7 +73,7 @@ function robotsResponse(request) {
     'Content-Type': 'text/plain; charset=utf-8',
     'Cache-Control': 'no-store, max-age=0',
     'X-Content-Type-Options': 'nosniff',
-    'X-FormatX-Robots-Owner': 'worker-r489',
+    'X-FormatX-Robots-Owner': 'worker-r490',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -87,10 +87,29 @@ function normalizeMetaCsp(html) {
   return source.replace(/<meta\s+name=["']color-scheme["'][^>]*>/i, match => `${match}\n  ${tag}`);
 }
 
+function injectP0FirstPaint(html) {
+  const source = String(html || '');
+  if (source.includes('data-fx-p0-first-paint-r490="true"')) return source;
+  return source.replace('</head>', `  ${P0_FIRST_PAINT_LINK}\n</head>`);
+}
+
 function injectFirstPaint(html) {
   const source = String(html || '');
   if (source.includes('data-fx-production-first-paint-r370="true"')) return source;
   return source.replace('</head>', `  ${FIRST_PAINT_LINK}\n</head>`);
+}
+
+function normalizeHomepageSemantics(html) {
+  let source = String(html || '');
+  source = source.replace(
+    /<section\s+id=["']live-os-overview["']/i,
+    match => /data-fx-live-os=/i.test(match) ? match : `${match} data-fx-live-os="true"`
+  );
+  source = source.replace(
+    /<a\b([^>]*\bclass=["'][^"']*\bskip-link\b[^"']*["'][^>]*)>/i,
+    (match, attrs) => /data-fx-skip-link=/i.test(attrs) ? match : `<a${attrs} data-fx-skip-link="true">`
+  );
+  return source;
 }
 
 function escapeAttribute(value) {
@@ -131,16 +150,18 @@ function injectDeferredCssRuntime(html) {
   return source.replace('</head>', `  ${DEFERRED_CSS_SCRIPT}\n</head>`);
 }
 
-function cacheBustR489CriticalQuality(html) {
+function cacheBustR490CriticalQuality(html) {
   return String(html || '').replace(
     /formatx-quality-r461\.css\?v=[^"']+/g,
-    'formatx-quality-r461.css?v=20260901-r489-mobile-a11y-contrast'
+    'formatx-quality-r461.css?v=20260902-r490-p0-stability'
   );
 }
 
 function optimizeHomepage(html) {
-  let source = injectFirstPaint(html);
-  source = cacheBustR489CriticalQuality(source);
+  let source = normalizeHomepageSemantics(html);
+  source = injectP0FirstPaint(source);
+  source = injectFirstPaint(source);
+  source = cacheBustR490CriticalQuality(source);
   source = deferNonCriticalStyles(source);
   source = injectDeferredCssRuntime(source);
   return source;
@@ -151,7 +172,7 @@ async function stabilizePublicResponse(request, url, response) {
 
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', `r489-first-paint:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-Edge-Stability', `r490-p0-first-paint:${STARTUP_REVISION}`);
   headers.set('X-FormatX-CSS-Scheduler', 'r487-post-first-paint');
 
   if (request.method === 'HEAD') {
