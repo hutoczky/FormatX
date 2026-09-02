@@ -1,16 +1,16 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R495 — deterministic canonical first frame.
-   One canonical geometry owner is discovered after the legacy stylesheet graph,
-   while non-critical visual/enhancement CSS is allowed to settle progressively.
-   Motion/WebGL remains progressive and the full visual system stays intact. */
+/* FormatX R496 — deterministic canonical first frame.
+   Layout-critical legacy styles remain blocking so final hero/MAG geometry exists
+   before first paint. Canonical r283 still owns the final cascade geometry.
+   Motion/WebGL and genuinely non-critical visual CSS remain progressive. */
 
-const STARTUP_REVISION = '20260902-r495-canonical-frame';
+const STARTUP_REVISION = '20260902-r496-critical-first-frame';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
-const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r495="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r495-canonical-last">';
-const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r495="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r495-no-geometry-floors">';
+const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r496="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r496-critical-first-frame">';
+const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r496="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r496-honeypot-touch">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260902-r493-explicit-intent';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
@@ -33,7 +33,7 @@ const HEADER_CSP = [
   'upgrade-insecure-requests',
 ].join('; ');
 const ROBOTS = [
-  '# FormatX canonical robots policy — served by production Worker R495',
+  '# FormatX canonical robots policy — served by production Worker R496',
   'User-agent: *',
   'Allow: /',
   'Disallow: /api/',
@@ -43,16 +43,10 @@ const ROBOTS = [
   '',
 ].join('\n');
 
-/* The canonical r283 frame owns header/hero/MAG geometry and is placed last in
-   cascade order. These layers are presentation/enhancement owners, so they may
-   load after first paint without being allowed to move the canonical frame. */
+/* Only presentation/enhancement layers proven not to own first-frame geometry
+   are deferred. Hero typography/layout, CTA geometry, language controls,
+   content-standard spacing and first-paint geometry remain blocking. */
 const DEFERRED_STYLE_PATHS = new Set([
-  '/scifi-ui/styles/formatx-event-horizon.css',
-  '/scifi-ui/styles/formatx-reference-production-r244.css',
-  '/scifi-ui/styles/single-language-toggle.css',
-  '/scifi-ui/styles/formatx-award-readiness.css',
-  '/scifi-ui/styles/formatx-content-standard.css',
-  '/scifi-ui/styles/formatx-first-paint-r206.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/platform-status.css',
@@ -71,7 +65,7 @@ function robotsResponse(request) {
     'Content-Type': 'text/plain; charset=utf-8',
     'Cache-Control': 'no-store, max-age=0',
     'X-Content-Type-Options': 'nosniff',
-    'X-FormatX-Robots-Owner': 'worker-r495',
+    'X-FormatX-Robots-Owner': 'worker-r496',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -102,8 +96,8 @@ function injectCriticalFirstPaint(html) {
     return tag;
   });
   const critical = `  ${FIRST_PAINT_LINK}\n  ${FIRST_FRAME_STABILITY_LINK}\n  ${P0_FIRST_PAINT_LINK}\n`;
-  /* Critical owners are intentionally last in cascade order. Deferred legacy
-     styles can become active later without changing the settled hero geometry. */
+  /* Critical canonical owners are intentionally last in cascade order after
+     every blocking layout owner, so first paint already has final geometry. */
   return source.replace('</head>', `${critical}</head>`);
 }
 function normalizeMobileStylesheetMedia(html) {
@@ -136,15 +130,9 @@ function escapeAttribute(value) {
   return String(value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 }
 function deferNonCriticalStyles(html) {
-  let awardReadinessSeen = false;
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
-    if (!pathname) return tag;
-    if (pathname === '/scifi-ui/styles/formatx-award-readiness.css') {
-      if (awardReadinessSeen) return '';
-      awardReadinessSeen = true;
-    }
-    if (!DEFERRED_STYLE_PATHS.has(pathname)) return tag;
+    if (!pathname || !DEFERRED_STYLE_PATHS.has(pathname)) return tag;
     const mediaMatch = tag.match(/\smedia=(["'])(.*?)\1/i);
     const originalMedia = mediaMatch ? mediaMatch[2] : 'all';
     let next = mediaMatch ? tag.replace(mediaMatch[0], '') : tag;
@@ -161,7 +149,7 @@ function injectDeferredCssRuntime(html) {
 function cacheBustCriticalQuality(html) {
   return String(html || '').replace(
     /formatx-quality-r461\.css\?v=[^"']+/g,
-    'formatx-quality-r461.css?v=20260902-r495-canonical-frame'
+    'formatx-quality-r461.css?v=20260902-r496-critical-first-frame'
   );
 }
 function optimizeHomepage(html) {
@@ -181,8 +169,8 @@ async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', `r495-canonical-frame:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r495-canonical-last-progressive-css');
+  headers.set('X-FormatX-Edge-Stability', `r496-critical-first-frame:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r496-layout-critical-blocking-canonical-last');
   headers.set('X-FormatX-Motion-Scheduler', 'r493-explicit-intent-late-auto');
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
@@ -194,7 +182,7 @@ async function stabilizePublicResponse(request, url, response) {
     headers.delete('Content-Length');
     headers.delete('Content-Encoding');
     headers.delete('ETag');
-    headers.set('X-FormatX-First-Frame-Import', 'removed-r495-canonical-owner');
+    headers.set('X-FormatX-First-Frame-Import', 'removed-r496-canonical-owner');
     return new Response(css, { status: response.status, statusText: response.statusText, headers });
   }
   if (!contentType.includes('text/html')) {
