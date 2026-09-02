@@ -21,7 +21,7 @@ function start(reason){
   started=true;
   clearPending();
   root.dataset.fxP0MotionSchedulerR490=`starting:${reason}`;
-  if(document.querySelector('script[data-fx-motion-runtime-loader-r239],script[src*="formatx-motion-runtime-loader-r239.js"]')){
+  if(document.querySelector('script[src*="formatx-motion-runtime-loader-r239.js"]')){
     root.dataset.fxP0MotionSchedulerR490='runtime-already-present';
     return;
   }
