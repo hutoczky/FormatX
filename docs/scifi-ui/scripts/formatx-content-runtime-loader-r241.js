@@ -1,6 +1,7 @@
-/* FormatX r284 — semantic-first, interaction-deferred content enhancements.
-   The settled hero geometry is now render-blocking in the normal-motion core
-   stylesheet, so this loader no longer injects a late layout stylesheet. */
+/* FormatX R497 — semantic-first, interaction-deferred content enhancements.
+   Production owns every layout-critical stylesheet before first paint. This
+   loader may mount enhancement scripts after explicit intent, but it must never
+   mutate stylesheet media and therefore cannot change document geometry. */
 (function () {
   'use strict';
 
@@ -14,7 +15,6 @@
   }
 
   const specs = Array.from(template.content.querySelectorAll('script[src]'));
-  const deferredStyleLinks = Array.from(document.querySelectorAll('link[data-fx-deferred-media-r300]'));
   const mounted = new Set();
   let started = false;
   const passive = { passive: true };
@@ -22,7 +22,6 @@
     ['wheel', passive],
     ['touchstart', passive],
     ['pointerdown', passive],
-    ['scroll', passive],
     ['keydown', false]
   ];
 
@@ -62,26 +61,21 @@
     if (started) return;
     started = true;
     disarm();
-    for (const link of deferredStyleLinks) {
-      const media = link.dataset.fxDeferredMediaR300 || 'all';
-      if (link.media !== media) link.media = media;
-    }
     specs.forEach(mount);
-    root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'active-user-intent' : 'none';
-    root.dataset.fxContentRuntimeR241 = 'requested-r301-user-intent';
+    root.dataset.fxDeferredVisualStylesR300 = 'production-css-owned-r497';
+    root.dataset.fxContentRuntimeR241 = 'requested-r497-user-intent';
   }
 
-  // Category/product definition copy is already delivered by static HTML plus
-  // the dedicated semantic positioning runtime. The template contains only
-  // enhancement layers, so it can remain dormant through first paint and CPU
-  // idle. A real scroll, pointer/touch, wheel or keyboard action activates it.
-  root.dataset.fxContentRuntimeR241 = 'armed-r301-user-intent';
-  root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'armed-no-first-paint-block' : 'none';
-  root.dataset.fxFirstFrameStabilityR283 = 'critical-only-r300';
+  // Browser-generated scroll events are not explicit intent and never activate
+  // enhancements. Wheel, pointer/touch and keyboard actions remain deliberate
+  // user signals, while CSS geometry stays immutable throughout the session.
+  root.dataset.fxContentRuntimeR241 = 'armed-r497-user-intent';
+  root.dataset.fxDeferredVisualStylesR300 = 'production-css-owned-r497';
+  root.dataset.fxFirstFrameStabilityR283 = 'immutable-css-r497';
   for (const [type, options] of listeners) addEventListener(type, onIntent, options);
 
-  // Deep links are explicit navigation intent and need their enhancement layer
-  // immediately at the destination.
+  // Deep links and the explicit immersive action are deliberate navigation
+  // intent, so enhancement scripts may mount without touching stylesheet media.
   addEventListener('formatx:immersiveactivate', start, { passive: true });
   if (location.hash && location.hash !== '#top' && location.hash !== '#hero') start();
 }());
