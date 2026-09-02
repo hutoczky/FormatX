@@ -32,6 +32,18 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   assert.equal(resolved.pathname, expectedPath, `${label} resolved to ${resolved.pathname}`);
   return resolved.href;
 }
+function resolveMarkedScript(html, baseUrl, marker, expectedPath, label) {
+  const tag = html.match(new RegExp(`<script\\b[^>]*${marker}=["']true["'][^>]*>`, 'i'))?.[0]
+    || html.match(new RegExp(`<script\\b(?=[^>]*${marker}=["']true["'])[^>]*>`, 'i'))?.[0]
+    || '';
+  assert.ok(tag, `missing live ${label} script tag`);
+  const src = tag.match(/\bsrc=["']([^"']+)["']/i)?.[1] || '';
+  assert.ok(src, `missing live ${label} src`);
+  const resolved = new URL(src, baseUrl);
+  assert.equal(resolved.origin, ORIGIN, `${label} escaped canonical origin: ${resolved.href}`);
+  assert.equal(resolved.pathname, expectedPath, `${label} resolved to ${resolved.pathname}`);
+  return resolved.href;
+}
 
 (async () => {
   const firstFrame = sourceValue(/data-fx-first-frame-stability-([^=\"]+)=\"true\"/, 'first-frame marker');
@@ -41,10 +53,11 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   const expectedCssScheduler = sourceValue(/headers\.set\('X-FormatX-CSS-Scheduler', '([^']+)'\)/, 'CSS scheduler');
   const expectedMotionScheduler = sourceValue(/headers\.set\('X-FormatX-Motion-Scheduler', '([^']+)'\)/, 'motion scheduler');
   const expectedBase = canonicalValue(/<base\s+href=["']([^"']+)["']/, 'base href');
+  const p0SchedulerPath = new URL(
+    sourceValue(/const P0_MOTION_SCHEDULER = '([^']+)'/, 'P0 scheduler URL'),
+    `${ORIGIN}/`,
+  ).pathname;
 
-  // Homepage critical-core already embeds the design-system source. The
-  // standalone design-system asset remains a typed/reachable public dependency
-  // for other canonical surfaces, but it is not required as a second home link.
   assert.ok(criticalCore.includes('BEGIN formatx-design-system.css'), 'critical-core lost embedded design system');
   assert.ok(criticalCore.includes('FormatX Design System 2.0'), 'embedded design system signature missing');
 
@@ -55,7 +68,7 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
     design: await fetchText(`${ORIGIN}/scifi-ui/styles/formatx-design-system.css?v=apex-${nonce}`),
     mobile: await fetchText(`${ORIGIN}/scifi-ui/styles/formatx-mobile-recovery.css?v=apex-${nonce}`),
     critical: await fetchText(`${ORIGIN}/scifi-ui/styles/formatx-critical-shell-v56.css?v=apex-${nonce}`),
-    core: await fetchText(`${ORIGIN}/scifi-ui/scripts/formatx-core-real3d-v20.js?v=apex-${nonce}`),
+    legacyCore: await fetchText(`${ORIGIN}/scifi-ui/scripts/formatx-core-real3d-v20.js?v=apex-${nonce}`),
   };
   const icon = await fetch(`${ORIGIN}/scifi-ui/assets/images/formatx-icon.png?v=apex-${nonce}`);
 
@@ -68,7 +81,7 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   for (const name of ['design', 'mobile', 'critical']) {
     assert.match(assets[name].response.headers.get('content-type') || '', /text\/css/i, `${name} MIME`);
   }
-  assert.match(assets.core.response.headers.get('content-type') || '', /(application|text)\/javascript/i);
+  assert.match(assets.legacyCore.response.headers.get('content-type') || '', /(application|text)\/javascript/i);
   assert.match(icon.headers.get('content-type') || '', /image\/png/i);
 
   const liveBase = home.text.match(/<base\s+href=["']([^"']+)["']/i)?.[1] || '';
@@ -87,10 +100,9 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
       /<link\b[^>]*href=["']([^"']*formatx-critical-shell-v56\.css[^"']*)["'][^>]*>/i,
       '/scifi-ui/styles/formatx-critical-shell-v56.css', 'critical CSS',
     ),
-    core: resolveLiveAsset(
+    scheduler: resolveMarkedScript(
       home.text, baseUrl,
-      /<script\b[^>]*src=["']([^"']*formatx-core-real3d-v20\.js[^"']*)["'][^>]*>/i,
-      '/scifi-ui/scripts/formatx-core-real3d-v20.js', 'core JS',
+      'data-fx-p0-motion-scheduler-r490', p0SchedulerPath, 'P0 motion scheduler',
     ),
     icon: resolveLiveAsset(
       home.text, baseUrl,
@@ -105,7 +117,7 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   assert.ok(assets.critical.text.includes('First-paint geometry lock r4'));
   assert.ok(assets.critical.text.includes('html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay'));
   assert.ok(assets.critical.text.includes('display: none !important'));
-  assert.match(assets.core.text.toLowerCase(), /formatx-core|fxcore/);
+  assert.match(assets.legacyCore.text.toLowerCase(), /formatx-core|fxcore/);
 
   assert.equal(
     home.response.headers.get('x-formatx-edge-stability'),
@@ -119,6 +131,7 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   console.log(JSON.stringify({
     status: 'PASS', firstFrame, p0Paint, expectedBase, startup,
     standaloneDesignAsset: `${ORIGIN}/scifi-ui/styles/formatx-design-system.css`,
+    legacyCoreAsset: `${ORIGIN}/scifi-ui/scripts/formatx-core-real3d-v20.js`,
     resolvedAssets,
     edge: home.response.headers.get('x-formatx-edge-stability'),
     cssScheduler: expectedCssScheduler,
