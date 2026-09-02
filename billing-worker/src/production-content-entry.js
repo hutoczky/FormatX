@@ -1,16 +1,17 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R496 — deterministic canonical first frame.
-   Layout-critical legacy styles remain blocking so final hero/MAG geometry exists
-   before first paint. Canonical r283 still owns the final cascade geometry.
-   Motion/WebGL and genuinely non-critical visual CSS remain progressive. */
+/* FormatX R497 — immutable canonical first frame.
+   Every stylesheet that owns hero geometry is active at its final media query
+   before first paint. Interaction loaders may mount enhancement scripts only;
+   they never change stylesheet media. The canonical MAG control owns both the
+   WebGL pause event and the visible canvas animation play state. */
 
-const STARTUP_REVISION = '20260902-r496-critical-first-frame';
+const STARTUP_REVISION = '20260902-r497-immutable-first-frame';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
-const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r496="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r496-critical-first-frame">';
-const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r496="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r496-honeypot-touch">';
+const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r497="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r497-immutable-first-frame">';
+const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r497="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r497-honeypot-touch">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260902-r493-explicit-intent';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
@@ -33,7 +34,7 @@ const HEADER_CSP = [
   'upgrade-insecure-requests',
 ].join('; ');
 const ROBOTS = [
-  '# FormatX canonical robots policy — served by production Worker R496',
+  '# FormatX canonical robots policy — served by production Worker R497',
   'User-agent: *',
   'Allow: /',
   'Disallow: /api/',
@@ -42,6 +43,14 @@ const ROBOTS = [
   'Sitemap: https://formatxsuite.com/sitemap.xml',
   '',
 ].join('\n');
+
+/* These legacy bundles contain physical hero geometry and must never transition
+   from media="not all" to active after first paint. Their own source comments
+   identify them as critical first-frame/narrative owners. */
+const FIRST_PAINT_LEGACY_MEDIA = new Map([
+  ['/scifi-ui/styles/formatx-critical-signature-r227.css', '(prefers-reduced-motion: no-preference)'],
+  ['/scifi-ui/styles/formatx-critical-narrative-r227.css', '(min-width: 901px) and (prefers-reduced-motion: no-preference)'],
+]);
 
 /* Only presentation/enhancement layers proven not to own first-frame geometry
    are deferred. Hero typography/layout, CTA geometry, language controls,
@@ -65,7 +74,7 @@ function robotsResponse(request) {
     'Content-Type': 'text/plain; charset=utf-8',
     'Cache-Control': 'no-store, max-age=0',
     'X-Content-Type-Options': 'nosniff',
-    'X-FormatX-Robots-Owner': 'worker-r496',
+    'X-FormatX-Robots-Owner': 'worker-r497',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -86,6 +95,27 @@ function stylesheetPath(tag) {
     return '';
   }
 }
+function setTagAttribute(tag, name, value) {
+  const pattern = new RegExp(`\\s${name}=(["'])(.*?)\\1`, 'i');
+  if (pattern.test(tag)) return tag.replace(pattern, ` ${name}="${value}"`);
+  return tag.replace(/\s*\/?>$/, close => ` ${name}="${value}"${close}`);
+}
+function removeTagAttribute(tag, name) {
+  const pattern = new RegExp(`\\s${name}=(["'])(.*?)\\1`, 'i');
+  return tag.replace(pattern, '');
+}
+function promoteLegacyFirstPaintStyles(html) {
+  return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
+    const pathname = stylesheetPath(tag);
+    const media = FIRST_PAINT_LEGACY_MEDIA.get(pathname);
+    if (!media) return tag;
+    let next = removeTagAttribute(tag, 'data-fx-deferred-media-r300');
+    next = setTagAttribute(next, 'media', media);
+    next = setTagAttribute(next, 'fetchpriority', 'high');
+    next = setTagAttribute(next, 'data-fx-r497-critical-layout', 'true');
+    return next;
+  });
+}
 function injectCriticalFirstPaint(html) {
   let source = String(html || '');
   source = source.replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
@@ -96,8 +126,8 @@ function injectCriticalFirstPaint(html) {
     return tag;
   });
   const critical = `  ${FIRST_PAINT_LINK}\n  ${FIRST_FRAME_STABILITY_LINK}\n  ${P0_FIRST_PAINT_LINK}\n`;
-  /* Critical canonical owners are intentionally last in cascade order after
-     every blocking layout owner, so first paint already has final geometry. */
+  /* Canonical owners remain last in cascade order after every blocking layout
+     bundle. Their geometry is therefore the geometry of the first paint. */
   return source.replace('</head>', `${critical}</head>`);
 }
 function normalizeMobileStylesheetMedia(html) {
@@ -126,6 +156,11 @@ function scheduleMotionRuntime(html) {
     (_match, before, quote, after) => `<script${before}src=${quote}${P0_MOTION_SCHEDULER}${quote}${after} data-fx-p0-motion-scheduler-r490="true"></script>`
   );
 }
+function cacheBustR497Runtime(html) {
+  return String(html || '')
+    .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260902-r497-canonical-resume')
+    .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260902-r497-no-late-layout');
+}
 function escapeAttribute(value) {
   return String(value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 }
@@ -149,13 +184,15 @@ function injectDeferredCssRuntime(html) {
 function cacheBustCriticalQuality(html) {
   return String(html || '').replace(
     /formatx-quality-r461\.css\?v=[^"']+/g,
-    'formatx-quality-r461.css?v=20260902-r496-critical-first-frame'
+    'formatx-quality-r461.css?v=20260902-r497-immutable-first-frame'
   );
 }
 function optimizeHomepage(html) {
   let source = normalizeHomepageSemantics(html);
+  source = cacheBustR497Runtime(source);
   source = scheduleMotionRuntime(source);
   source = normalizeMobileStylesheetMedia(source);
+  source = promoteLegacyFirstPaintStyles(source);
   source = injectCriticalFirstPaint(source);
   source = cacheBustCriticalQuality(source);
   source = deferNonCriticalStyles(source);
@@ -169,8 +206,8 @@ async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', `r496-critical-first-frame:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r496-layout-critical-blocking-canonical-last');
+  headers.set('X-FormatX-Edge-Stability', `r497-immutable-first-frame:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r497-layout-critical-blocking-no-interaction-media-mutation');
   headers.set('X-FormatX-Motion-Scheduler', 'r493-explicit-intent-late-auto');
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
@@ -182,7 +219,7 @@ async function stabilizePublicResponse(request, url, response) {
     headers.delete('Content-Length');
     headers.delete('Content-Encoding');
     headers.delete('ETag');
-    headers.set('X-FormatX-First-Frame-Import', 'removed-r496-canonical-owner');
+    headers.set('X-FormatX-First-Frame-Import', 'removed-r497-canonical-owner');
     return new Response(css, { status: response.status, statusText: response.statusText, headers });
   }
   if (!contentType.includes('text/html')) {
