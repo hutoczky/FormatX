@@ -1,4 +1,5 @@
 name: Diagnose targeted R499 production P0
+# R500 exact-production evidence refresh: hero CLS/LCP + MAG resume + mobile x3.
 
 on:
   workflow_dispatch:
