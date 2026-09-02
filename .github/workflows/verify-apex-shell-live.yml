@@ -19,6 +19,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
+      - name: Checkout audited revision
+        uses: actions/checkout@v5
+
+      - name: Derive current production first-frame contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_ENV"
+          import pathlib,re
+          source=pathlib.Path('billing-worker/src/production-content-entry.js').read_text(encoding='utf-8')
+          def one(pattern, label):
+              m=re.search(pattern, source)
+              assert m, f'missing {label} in production source'
+              return m.group(1)
+          print('FX_EXPECTED_STARTUP_REVISION='+one(r"const STARTUP_REVISION = '([^']+)'", 'STARTUP_REVISION'))
+          print('FX_EXPECTED_FIRST_FRAME_ATTR='+one(r'data-fx-first-frame-stability-([^=\\"]+)=\\"true\\"', 'first-frame stability marker'))
+          print('FX_EXPECTED_P0_FIRST_PAINT_ATTR='+one(r'data-fx-p0-first-paint-([^=\\"]+)=\\"true\\"', 'P0 first-paint marker'))
+          print('FX_EXPECTED_EDGE='+one(r"headers\.set\('X-FormatX-Edge-Stability', `([^`]+)`\)", 'edge owner'))
+          print('FX_EXPECTED_CSS_SCHEDULER='+one(r"headers\.set\('X-FormatX-CSS-Scheduler', '([^']+)'\)", 'CSS scheduler owner'))
+          print('FX_EXPECTED_MOTION_SCHEDULER='+one(r"headers\.set\('X-FormatX-Motion-Scheduler', '([^']+)'\)", 'motion scheduler owner'))
+          PY
+
       - name: Wait for and verify canonical mobile shell assets
         shell: bash
         run: |
@@ -31,34 +53,39 @@ jobs:
             echo "FormatX shell probe $attempt/36"
             tmp="$(mktemp -d)"
 
-            home_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/home.headers" -o "$tmp/home.html" -w '%{http_code}' "$APEX/" || true)"
+            home_code="$(curl -sS --max-time 25 --max-redirs 0 -H 'Cache-Control: no-cache' -D "$tmp/home.headers" -o "$tmp/home.html" -w '%{http_code}' "$APEX/?apex_shell=${GITHUB_RUN_ID}-${attempt}" || true)"
             www_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/www.headers" -o /dev/null -w '%{http_code}' "$WWW/" || true)"
-            css_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/design.headers" -o "$tmp/design.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-design-system.css?v=shell-live" || true)"
-            mobile_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/mobile.headers" -o "$tmp/mobile.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-mobile-recovery.css?v=shell-live" || true)"
-            critical_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/critical.headers" -o "$tmp/critical.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-critical-shell-v56.css?v=shell-live" || true)"
-            js_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/core.headers" -o "$tmp/core.js" -w '%{http_code}' "$APEX/scifi-ui/scripts/formatx-core-real3d-v20.js?v=shell-live" || true)"
-            icon_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/icon.headers" -o "$tmp/icon.bin" -w '%{http_code}' "$APEX/scifi-ui/assets/images/formatx-icon.png?v=shell-live" || true)"
+            css_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/design.headers" -o "$tmp/design.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-design-system.css?v=shell-live-${GITHUB_RUN_ID}" || true)"
+            mobile_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/mobile.headers" -o "$tmp/mobile.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-mobile-recovery.css?v=shell-live-${GITHUB_RUN_ID}" || true)"
+            critical_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/critical.headers" -o "$tmp/critical.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-critical-shell-v56.css?v=shell-live-${GITHUB_RUN_ID}" || true)"
+            js_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/core.headers" -o "$tmp/core.js" -w '%{http_code}' "$APEX/scifi-ui/scripts/formatx-core-real3d-v20.js?v=shell-live-${GITHUB_RUN_ID}" || true)"
+            icon_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/icon.headers" -o "$tmp/icon.bin" -w '%{http_code}' "$APEX/scifi-ui/assets/images/formatx-icon.png?v=shell-live-${GITHUB_RUN_ID}" || true)"
+            marker_code="$(curl -sS --max-time 25 --max-redirs 0 -H 'Cache-Control: no-cache' -o "$tmp/p0-marker.txt" -w '%{http_code}' "$APEX/p0-validation-version.txt?apex_shell=${GITHUB_RUN_ID}-${attempt}" || true)"
 
-            if [[ "$home_code" == 200 && "$www_code" == 302 && "$css_code" == 200 && "$mobile_code" == 200 && "$critical_code" == 200 && "$js_code" == 200 && "$icon_code" == 200 ]]; then
-              if python3 - "$tmp" <<'PY'
-          import pathlib, re, sys
-          root = pathlib.Path(sys.argv[1])
-
+            if [[ "$home_code" == 200 && "$www_code" == 302 && "$css_code" == 200 && "$mobile_code" == 200 && "$critical_code" == 200 && "$js_code" == 200 && "$icon_code" == 200 && "$marker_code" == 200 ]]; then
+              if FX_EXPECTED_STARTUP_REVISION="$FX_EXPECTED_STARTUP_REVISION" \
+                 FX_EXPECTED_FIRST_FRAME_ATTR="$FX_EXPECTED_FIRST_FRAME_ATTR" \
+                 FX_EXPECTED_P0_FIRST_PAINT_ATTR="$FX_EXPECTED_P0_FIRST_PAINT_ATTR" \
+                 FX_EXPECTED_EDGE="$FX_EXPECTED_EDGE" \
+                 FX_EXPECTED_CSS_SCHEDULER="$FX_EXPECTED_CSS_SCHEDULER" \
+                 FX_EXPECTED_MOTION_SCHEDULER="$FX_EXPECTED_MOTION_SCHEDULER" \
+                 python3 - "$tmp" <<'PY'
+          import os,pathlib,re,sys
+          root=pathlib.Path(sys.argv[1])
           def header(name):
-              return (root / name).read_text(errors='replace').lower()
+              return (root/name).read_text(errors='replace').replace('\r\n','\n').lower()
+          home=(root/'home.html').read_text(errors='replace')
+          design=(root/'design.css').read_text(errors='replace')
+          mobile=(root/'mobile.css').read_text(errors='replace')
+          critical=(root/'critical.css').read_text(errors='replace')
+          core=(root/'core.js').read_text(errors='replace')
+          home_headers=header('home.headers')
 
-          home = (root / 'home.html').read_text(errors='replace')
-          design = (root / 'design.css').read_text(errors='replace')
-          mobile = (root / 'mobile.css').read_text(errors='replace')
-          critical = (root / 'critical.css').read_text(errors='replace')
-          core = (root / 'core.js').read_text(errors='replace')
-
-          assert 'content-type: text/html' in header('home.headers')
+          assert 'content-type: text/html' in home_headers
           assert re.search(r'content-type:\s*text/css', header('design.headers'))
           assert re.search(r'content-type:\s*text/css', header('mobile.headers'))
           assert re.search(r'content-type:\s*text/css', header('critical.headers'))
-          assert ('content-type: application/javascript' in header('core.headers') or
-                  'content-type: text/javascript' in header('core.headers'))
+          assert ('content-type: application/javascript' in header('core.headers') or 'content-type: text/javascript' in header('core.headers'))
           assert 'content-type: image/png' in header('icon.headers')
 
           assert 'FormatX Design System 2.0' in design
@@ -67,8 +94,15 @@ jobs:
           assert 'First-paint geometry lock r4' in critical
           assert 'html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay' in critical
           assert 'display: none !important' in critical
-          assert '20260812-first-paint-r4' in home
           assert 'formatx-core' in core.lower() or 'fxcore' in core.lower()
+
+          first='data-fx-first-frame-stability-'+os.environ['FX_EXPECTED_FIRST_FRAME_ATTR']+'="true"'
+          p0='data-fx-p0-first-paint-'+os.environ['FX_EXPECTED_P0_FIRST_PAINT_ATTR']+'="true"'
+          assert first in home, (first, 'missing current first-frame stability link')
+          assert p0 in home, (p0, 'missing current P0 first-paint link')
+          assert os.environ['FX_EXPECTED_STARTUP_REVISION'].lower() in home_headers
+          assert os.environ['FX_EXPECTED_CSS_SCHEDULER'].lower() in home_headers
+          assert os.environ['FX_EXPECTED_MOTION_SCHEDULER'].lower() in home_headers
 
           assert '<base href="/">' in home
           assert 'href="/scifi-ui/styles/formatx-design-system.css' in home
@@ -78,21 +112,24 @@ jobs:
           assert 'href="./styles/' not in home
           assert 'src="./scripts/' not in home
           assert 'src="./assets/' not in home
-          assert 'location:' not in header('home.headers')
+          assert 'location:' not in home_headers
 
-          www_headers = header('www.headers')
+          www_headers=header('www.headers')
           assert 'location: https://formatxsuite.com/?_fx_redirect_recovery=1' in www_headers
           assert 'cache-control: no-store' in www_headers
-          print('FormatX apex shell and stable first-paint assets are live and typed correctly.')
+          print('PASS: current source-derived first-frame, edge and scheduler contract is live with correct MIME types.')
           PY
               then
-                ok=true
-                rm -rf "$tmp"
-                break
+                if cmp -s docs/p0-validation-version.txt "$tmp/p0-marker.txt"; then
+                  ok=true
+                  rm -rf "$tmp"
+                  break
+                fi
+                echo 'Current source contract is live but P0 validation marker has not converged yet.'
               fi
             fi
 
-            echo "home=$home_code www=$www_code design=$css_code mobile=$mobile_code critical=$critical_code js=$js_code icon=$icon_code"
+            echo "home=$home_code www=$www_code design=$css_code mobile=$mobile_code critical=$critical_code js=$js_code icon=$icon_code marker=$marker_code"
             rm -rf "$tmp"
             sleep 10
           done
@@ -108,10 +145,10 @@ jobs:
         run: |
           if [[ "$JOB_STATUS" == success ]]; then
             state=success
-            description='Apex HTML, stable critical CSS, mobile CSS, WebGL bootstrap and logo are live with correct MIME types'
+            description='Current apex first-frame, edge/scheduler contract and typed critical assets are live'
           else
             state=failure
-            description='Apex shell or first-party critical asset verification failed'
+            description='Apex shell or current first-frame contract verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
