@@ -1,0 +1,124 @@
+/* FormatX R490 — P0 first-paint stability and touch-target floor.
+   Locks the readable hero shell before cinematic/MAG enhancement layers start.
+   The MAG/WebGL visual system remains untouched; this file only stabilizes
+   text/control geometry that Lighthouse identified as LCP/CLS contributors. */
+
+html,
+body {
+  max-width: 100% !important;
+  overflow-x: clip !important;
+}
+
+/* The hero copy is the production LCP surface. Keep it immediately paintable
+   and prevent legacy reveal owners from delaying or moving readable content. */
+html body.living-architecture #hero .hero-copy,
+html body.living-architecture #hero .hero-copy > * {
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+  transform: none !important;
+  translate: none !important;
+}
+
+html body.living-architecture #hero .hero-copy {
+  position: relative !important;
+  contain: layout style !important;
+}
+
+html body.living-architecture #hero .hero-copy > :is(
+  .kicker,
+  .fx-category-definition,
+  #hero-title,
+  .hero-lead,
+  .fx-method-inline,
+  .hero-actions,
+  .hero-facts
+) {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Reserve the final text/control geometry up front. These floors follow the
+   measured production layout and avoid late stylesheet/runtime reflow. */
+@media (min-width: 901px) and (pointer: fine) {
+  html body.living-architecture #hero .fx-category-definition {
+    min-block-size: 78px !important;
+  }
+
+  html body.living-architecture #hero #hero-title {
+    min-block-size: 74px !important;
+  }
+
+  html body.living-architecture #hero .hero-lead {
+    min-block-size: 80px !important;
+  }
+
+  html body.living-architecture #hero .fx-method-inline {
+    min-block-size: 50px !important;
+  }
+
+  html body.living-architecture #hero .hero-actions {
+    min-block-size: 48px !important;
+  }
+
+  html body.living-architecture #hero .hero-facts {
+    min-block-size: 44px !important;
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html body.living-architecture #hero .fx-category-definition {
+    min-block-size: 110px !important;
+  }
+
+  html body.living-architecture #hero #hero-title {
+    min-block-size: 82px !important;
+  }
+
+  html body.living-architecture #hero .hero-lead {
+    min-block-size: 116px !important;
+  }
+
+  html body.living-architecture #hero .fx-method-inline {
+    min-block-size: 100px !important;
+  }
+
+  html body.living-architecture #hero .hero-actions {
+    min-block-size: 170px !important;
+  }
+
+  html body.living-architecture #hero .hero-facts {
+    min-block-size: 132px !important;
+  }
+
+  /* Real text links must remain usable on coarse-pointer/mobile layouts. */
+  html body.living-architecture a[href$="/test-matrix.html"],
+  html body.living-architecture a[href*="/test-matrix.html?"],
+  html body.living-architecture .fx-static-live-os__actions :is(a, button),
+  html body.living-architecture [data-fx-award-proof] :is(a, button),
+  html body.living-architecture .fx-proof-grid :is(a, button) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding-block: 8px !important;
+  }
+}
+
+/* Keep the skip link genuinely accessible while preventing its intentionally
+   off-screen resting state from being mistaken for a tiny touch control. */
+html body.living-architecture .skip-link:not(:focus):not(:focus-visible) {
+  position: fixed !important;
+  top: -120px !important;
+}
+
+html body.living-architecture .skip-link:focus,
+html body.living-architecture .skip-link:focus-visible {
+  top: 12px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
+/* production-r490-p0-first-paint-stability */
