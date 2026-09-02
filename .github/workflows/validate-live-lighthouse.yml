@@ -5,6 +5,10 @@ on:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/p0-validation-version.txt'
 
 permissions:
   contents: read
@@ -18,10 +22,11 @@ jobs:
   live-lighthouse:
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]')) ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
        contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     env:
       AUDITED_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       ORIGIN: https://formatxsuite.com
@@ -31,6 +36,22 @@ jobs:
         with:
           ref: ${{ env.AUDITED_SHA }}
 
+      - name: Wait for exact validated revision to reach production
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-${attempt}" -o "$RUNNER_TEMP/live-p0.txt"; then
+              if cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+                echo 'Exact P0 marker is live on production.'
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          echo 'Production never converged to the audited P0 marker.' >&2
+          exit 1
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -39,75 +60,64 @@ jobs:
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.13.x
 
-      - name: Confirm canonical production and security headers
+      - name: Confirm production security headers
         shell: bash
         run: |
           set -euo pipefail
-          code="$(curl -sS --max-time 30 -o "$RUNNER_TEMP/live-home.html" -D "$RUNNER_TEMP/live-headers.txt" -w '%{http_code}' -H 'Cache-Control: no-cache' "$ORIGIN/?p0_header_check=${GITHUB_RUN_ID}")"
-          test "$code" = '200'
-          grep -Fq 'FormatX Suite Pro' "$RUNNER_TEMP/live-home.html"
-          python3 - "$RUNNER_TEMP/live-headers.txt" <<'PY'
+          code="$(curl -sS --max-time 30 -o "$RUNNER_TEMP/home.html" -D "$RUNNER_TEMP/headers.txt" -w '%{http_code}' -H 'Cache-Control: no-cache' "$ORIGIN/?p0_header=${GITHUB_RUN_ID}")"
+          test "$code" = 200
+          grep -Fq 'FormatX Suite Pro' "$RUNNER_TEMP/home.html"
+          python3 - "$RUNNER_TEMP/headers.txt" <<'PY'
           import pathlib,sys
           raw=pathlib.Path(sys.argv[1]).read_text(errors='replace').replace('\r\n','\n')
-          blocks=[b for b in raw.split('\n\n') if b.strip()]
-          lines=blocks[-1].splitlines()
-          assert lines and ' 200 ' in lines[0], lines[0] if lines else 'missing status'
-          h={}
+          blocks=[b for b in raw.split('\n\n') if b.strip()]; lines=blocks[-1].splitlines(); h={}
+          assert lines and ' 200 ' in lines[0]
           for line in lines[1:]:
               if ':' in line:
                   k,v=line.split(':',1); h[k.strip().lower()]=v.strip()
-          hsts=h.get('strict-transport-security','').lower()
-          assert 'max-age=63072000' in hsts and 'includesubdomains' in hsts and 'preload' in hsts, hsts
-          assert h.get('x-content-type-options','').lower() == 'nosniff', h
-          assert h.get('x-frame-options','').upper() == 'DENY', h
-          assert h.get('cross-origin-opener-policy','').lower() == 'same-origin', h
-          csp=h.get('content-security-policy','').lower()
-          assert "default-src 'self'" in csp and "style-src 'self'" in csp and "object-src 'none'" in csp and "frame-ancestors 'none'" in csp, csp
-          assert 'x-powered-by' not in h, h.get('x-powered-by')
-          print('PASS: canonical production headers are strict and current.')
+          hsts=h.get('strict-transport-security','').lower(); csp=h.get('content-security-policy','').lower()
+          assert 'max-age=63072000' in hsts and 'includesubdomains' in hsts and 'preload' in hsts
+          assert h.get('x-content-type-options','').lower()=='nosniff'
+          assert h.get('x-frame-options','').upper()=='DENY'
+          assert h.get('cross-origin-opener-policy','').lower()=='same-origin'
+          assert "default-src 'self'" in csp and "object-src 'none'" in csp and "frame-ancestors 'none'" in csp
+          assert 'x-powered-by' not in h
+          print('P0_SECURITY_HEADERS_PASS')
           PY
 
       - name: Verify checkout readiness invariant
         shell: bash
         run: |
           set -euo pipefail
-          readiness_code="$(curl -sS --max-time 25 -H 'Accept: application/json' -H 'Cache-Control: no-cache' -o "$RUNNER_TEMP/readiness.json" -w '%{http_code}' "$ORIGIN/api/checkout-readiness?audit=${GITHUB_RUN_ID}")"
-          test "$readiness_code" = '200'
-          checkout_code="$(curl -sS --max-time 25 -H 'Cache-Control: no-cache' -o "$RUNNER_TEMP/checkout.html" -w '%{http_code}' "$ORIGIN/scifi-ui/checkout.html?audit=${GITHUB_RUN_ID}")"
-          python3 - "$RUNNER_TEMP/readiness.json" "$checkout_code" <<'PY'
+          rc="$(curl -sS --max-time 25 -H 'Accept: application/json' -H 'Cache-Control: no-cache' -o "$RUNNER_TEMP/readiness.json" -w '%{http_code}' "$ORIGIN/api/checkout-readiness?audit=${GITHUB_RUN_ID}")"
+          test "$rc" = 200
+          cc="$(curl -sS --max-time 25 -H 'Cache-Control: no-cache' -o "$RUNNER_TEMP/checkout.html" -w '%{http_code}' "$ORIGIN/scifi-ui/checkout.html?audit=${GITHUB_RUN_ID}")"
+          python3 - "$RUNNER_TEMP/readiness.json" "$cc" <<'PY'
           import json,sys
-          p=json.load(open(sys.argv[1], encoding='utf-8')); code=int(sys.argv[2])
-          assert p.get('provider') == 'bank_transfer', p
-          assert p.get('business_checkout_only') is True, p
-          assert p.get('legal_acceptance_required') is True, p
-          assert p.get('manual_verification_required') is True, p
-          assert {'HUF','EUR'} <= set(p.get('supported_currencies') or []), p
+          p=json.load(open(sys.argv[1],encoding='utf-8')); code=int(sys.argv[2])
+          assert p.get('provider')=='bank_transfer' and p.get('business_checkout_only') is True
+          assert p.get('legal_acceptance_required') is True and p.get('manual_verification_required') is True
+          assert {'HUF','EUR'} <= set(p.get('supported_currencies') or [])
           if p.get('sales_ready') is True:
-              assert p.get('order_tracking_ready') is True and p.get('live_ready') is True and p.get('ok') is True, p
-              assert code == 200, code
+              assert p.get('order_tracking_ready') is True and p.get('live_ready') is True and p.get('ok') is True and code==200
           else:
-              assert p.get('live_ready') is not True and p.get('ok') is not True, p
-              assert code == 503, code
-          print('PASS: checkout readiness invariant is coherent.')
+              assert p.get('live_ready') is not True and p.get('ok') is not True and code==503
+          print('P0_CHECKOUT_READINESS_PASS')
           PY
 
       - name: Prepare cache-busted Lighthouse configs
         shell: bash
         run: |
-          set -euo pipefail
           node <<'NODE'
-          const fs = require('node:fs');
-          for (const [src, out, profile] of [
-            ['lighthouserc.live.json', 'lighthouserc.live.p0.json', 'desktop'],
-            ['lighthouserc.live.mobile.json', 'lighthouserc.live.mobile.p0.json', 'mobile']
-          ]) {
-            const cfg = JSON.parse(fs.readFileSync(src, 'utf8'));
-            cfg.ci.collect.url = [`https://formatxsuite.com/?p0_lighthouse=${process.env.GITHUB_RUN_ID}-${profile}`];
-            fs.writeFileSync(out, JSON.stringify(cfg, null, 2) + '\n');
+          const fs=require('node:fs');
+          for(const [src,out,profile] of [['lighthouserc.live.json','lighthouserc.live.p0.json','desktop'],['lighthouserc.live.mobile.json','lighthouserc.live.mobile.p0.json','mobile']]){
+            const c=JSON.parse(fs.readFileSync(src,'utf8'));
+            c.ci.collect.url=[`https://formatxsuite.com/?p0_lighthouse=${process.env.GITHUB_RUN_ID}-${profile}`];
+            fs.writeFileSync(out,JSON.stringify(c,null,2)+'\n');
           }
           NODE
 
-      - name: Run live desktop Lighthouse
+      - name: Run and validate desktop Lighthouse x3
         shell: bash
         run: |
           set -euo pipefail
@@ -116,61 +126,9 @@ jobs:
           mkdir -p lighthouse-live-results/desktop
           cp -a .lighthouseci/. lighthouse-live-results/desktop/
           lhci assert --config=./lighthouserc.live.p0.json 2>&1 | tee -a lighthouse-live-desktop-output.txt
+          PROFILE=desktop node .github/scripts/summarize-p0-lighthouse.cjs lighthouse-live-results/desktop | tee -a lighthouse-live-desktop-output.txt
 
-      - name: Summarize desktop Lighthouse evidence
-        shell: bash
-        run: |
-          set -euo pipefail
-          PROFILE=desktop node <<'NODE' | tee -a lighthouse-live-desktop-output.txt
-          const fs=require('node:fs');
-          const dir=`lighthouse-live-results/${process.env.PROFILE}`;
-          const files=fs.readdirSync(dir).filter(f=>/^lhr-.*\.json$/.test(f)).sort();
-          if(files.length !== 3) throw new Error(`Expected exactly 3 Lighthouse runs, got ${files.length}`);
-          const summary=[];
-          for (let i=0;i<files.length;i++) {
-            const file=files[i];
-            const lhr=JSON.parse(fs.readFileSync(`${dir}/${file}`,'utf8'));
-            const categories={};
-            for (const id of ['performance','accessibility','best-practices','seo']) {
-              const score=lhr.categories?.[id]?.score;
-              categories[id]=score;
-              console.log(`RUN ${i+1} CATEGORY ${id}: ${score}`);
-              if(score !== 1) throw new Error(`Run ${i+1} ${id} is not 1.0`);
-              for (const ref of lhr.categories?.[id]?.auditRefs || []) {
-                const a=lhr.audits?.[ref.id];
-                if (ref.weight > 0 && a && a.score !== null && a.score < 1) {
-                  console.log(`FAIL-AUDIT ${ref.id} score=${a.score} title=${a.title}`);
-                  if(a.displayValue) console.log(`  display=${a.displayValue}`);
-                }
-              }
-            }
-            const metric=(id)=>lhr.audits?.[id]?.numericValue ?? null;
-            const row={
-              run:i+1,
-              url:lhr.finalDisplayedUrl || lhr.finalUrl,
-              categories,
-              fcp:metric('first-contentful-paint'),
-              lcp:metric('largest-contentful-paint'),
-              cls:metric('cumulative-layout-shift'),
-              tbt:metric('total-blocking-time'),
-              speedIndex:metric('speed-index'),
-              ttfb:metric('server-response-time')
-            };
-            if(!(row.lcp < 2000)) throw new Error(`Run ${i+1} LCP ${row.lcp}ms is not <2000ms`);
-            if(!(row.cls < 0.05)) throw new Error(`Run ${i+1} CLS ${row.cls} is not <0.05`);
-            summary.push(row);
-            for (const id of ['largest-contentful-paint-element','lcp-breakdown-insight','render-blocking-insight','network-dependency-tree-insight','unused-javascript','unused-css-rules','bootup-time','mainthread-work-breakdown','image-delivery-insight','font-display-insight']) {
-              const a=lhr.audits?.[id];
-              if(!a) continue;
-              console.log(`DIAG run=${i+1} ${id} score=${a.score} numeric=${a.numericValue ?? ''} display=${a.displayValue ?? ''}`);
-              const items=a.details?.items;
-              if(Array.isArray(items)&&items.length) console.log(`  items=${JSON.stringify(items.slice(0,8)).slice(0,9000)}`);
-            }
-          }
-          fs.writeFileSync(`${dir}/p0-summary.json`, JSON.stringify({profile:process.env.PROFILE, runs:summary}, null, 2)+'\n');
-          NODE
-
-      - name: Run live mobile Lighthouse
+      - name: Run and validate mobile Lighthouse x3
         shell: bash
         run: |
           set -euo pipefail
@@ -179,59 +137,7 @@ jobs:
           mkdir -p lighthouse-live-results/mobile
           cp -a .lighthouseci/. lighthouse-live-results/mobile/
           lhci assert --config=./lighthouserc.live.mobile.p0.json 2>&1 | tee -a lighthouse-live-mobile-output.txt
-
-      - name: Summarize mobile Lighthouse evidence
-        shell: bash
-        run: |
-          set -euo pipefail
-          PROFILE=mobile node <<'NODE' | tee -a lighthouse-live-mobile-output.txt
-          const fs=require('node:fs');
-          const dir=`lighthouse-live-results/${process.env.PROFILE}`;
-          const files=fs.readdirSync(dir).filter(f=>/^lhr-.*\.json$/.test(f)).sort();
-          if(files.length !== 3) throw new Error(`Expected exactly 3 Lighthouse runs, got ${files.length}`);
-          const summary=[];
-          for (let i=0;i<files.length;i++) {
-            const file=files[i];
-            const lhr=JSON.parse(fs.readFileSync(`${dir}/${file}`,'utf8'));
-            const categories={};
-            for (const id of ['performance','accessibility','best-practices','seo']) {
-              const score=lhr.categories?.[id]?.score;
-              categories[id]=score;
-              console.log(`RUN ${i+1} CATEGORY ${id}: ${score}`);
-              if(score !== 1) throw new Error(`Run ${i+1} ${id} is not 1.0`);
-              for (const ref of lhr.categories?.[id]?.auditRefs || []) {
-                const a=lhr.audits?.[ref.id];
-                if (ref.weight > 0 && a && a.score !== null && a.score < 1) {
-                  console.log(`FAIL-AUDIT ${ref.id} score=${a.score} title=${a.title}`);
-                  if(a.displayValue) console.log(`  display=${a.displayValue}`);
-                }
-              }
-            }
-            const metric=(id)=>lhr.audits?.[id]?.numericValue ?? null;
-            const row={
-              run:i+1,
-              url:lhr.finalDisplayedUrl || lhr.finalUrl,
-              categories,
-              fcp:metric('first-contentful-paint'),
-              lcp:metric('largest-contentful-paint'),
-              cls:metric('cumulative-layout-shift'),
-              tbt:metric('total-blocking-time'),
-              speedIndex:metric('speed-index'),
-              ttfb:metric('server-response-time')
-            };
-            if(!(row.lcp < 2000)) throw new Error(`Run ${i+1} LCP ${row.lcp}ms is not <2000ms`);
-            if(!(row.cls < 0.05)) throw new Error(`Run ${i+1} CLS ${row.cls} is not <0.05`);
-            summary.push(row);
-            for (const id of ['largest-contentful-paint-element','lcp-breakdown-insight','render-blocking-insight','network-dependency-tree-insight','unused-javascript','unused-css-rules','bootup-time','mainthread-work-breakdown','image-delivery-insight','font-display-insight']) {
-              const a=lhr.audits?.[id];
-              if(!a) continue;
-              console.log(`DIAG run=${i+1} ${id} score=${a.score} numeric=${a.numericValue ?? ''} display=${a.displayValue ?? ''}`);
-              const items=a.details?.items;
-              if(Array.isArray(items)&&items.length) console.log(`  items=${JSON.stringify(items.slice(0,8)).slice(0,9000)}`);
-            }
-          }
-          fs.writeFileSync(`${dir}/p0-summary.json`, JSON.stringify({profile:process.env.PROFILE, runs:summary}, null, 2)+'\n');
-          NODE
+          PROFILE=mobile node .github/scripts/summarize-p0-lighthouse.cjs lighthouse-live-results/mobile | tee -a lighthouse-live-mobile-output.txt
 
       - name: Upload live Lighthouse evidence
         if: always()
