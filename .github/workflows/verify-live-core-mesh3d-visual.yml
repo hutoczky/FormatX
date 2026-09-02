@@ -1,17 +1,7 @@
-name: Verify live R454 native MAG visual
-run-name: R454 native MAG visual proof for ${{ github.event.workflow_run.head_sha || github.sha }}
+name: Verify canonical live MAG visual
+run-name: Canonical live MAG visual for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
-      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
-      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
-      - 'docs/scifi-ui/styles/formatx-current-mag-r422.css'
-      - '.github/scripts/validate-living-core-r425-browser.cjs'
-      - '.github/scripts/validate-living-core-r425-source.cjs'
-      - '.github/workflows/verify-live-core-mesh3d-visual.yml'
   workflow_run:
     workflows: ['Prepare or deploy FormatX production']
     types: [completed]
@@ -22,28 +12,45 @@ permissions:
   statuses: write
 
 concurrency:
-  group: r454-native-mag-visual-${{ github.event.workflow_run.head_sha || github.sha }}
+  group: canonical-live-mag-visual-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
   visual-proof:
     if: >-
-      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
        contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     env:
       AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-      FORMATX_CAPTURE_DIR: ${{ github.workspace }}/artifacts/r454-native-mag
+      FORMATX_TEST_URL: https://formatxsuite.com/
+      FORMATX_MAG_EVIDENCE_DIR: artifacts/live-mag-functional
     steps:
       - name: Check out audited revision
         uses: actions/checkout@v5
         with:
           ref: ${{ env.AUDITED_SHA }}
 
-      - name: Validate source before browser proof
-        run: node .github/scripts/validate-living-core-r425-source.cjs
+      - name: Wait for exact audited production revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' \
+              "https://formatxsuite.com/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-${attempt}" \
+              -o "$RUNNER_TEMP/live-p0.txt" && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+              echo 'Exact production revision is live.'
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
       - name: Install Chromium runtime
         shell: bash
@@ -52,52 +59,33 @@ jobs:
           npm install --no-save --no-package-lock playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Wait for R454 renderer in production
-        shell: bash
-        run: |
-          set -euo pipefail
-          ready=0
-          for attempt in $(seq 1 50); do
-            if curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' \
-              "https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?audit=${GITHUB_RUN_ID}-${attempt}" \
-              | grep -Fq 'living-luminous-electric-crystal-r454'; then
-              ready=1
-              break
-            fi
-            sleep 10
-          done
-          test "$ready" = 1
+      - name: Measure canonical desktop and mobile MAG
+        run: node .github/scripts/validate-live-mag-functional.cjs
 
-      - name: Capture and measure desktop and phone MAG
-        env:
-          FORMATX_TEST_URL: https://formatxsuite.com/scifi-ui/
-        run: node .github/scripts/validate-living-core-r425-browser.cjs
-
-      - name: Upload R454 screenshots
+      - name: Upload canonical MAG evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r454-native-mag-visual-${{ env.AUDITED_SHA }}
-          path: artifacts/r454-native-mag
+          name: canonical-mag-visual-${{ env.AUDITED_SHA }}
+          path: artifacts/live-mag-functional
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 30
 
-      - name: Publish native MAG visual status
+      - name: Publish measured MAG visual status
         if: always()
-        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           RESULT: ${{ job.status }}
         shell: bash
         run: |
           state=failure
-          description='R454 native MAG visual proof failed'
+          description='Canonical desktop/mobile MAG functional visual proof failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R454 desktop and phone MAG visibility proof passed'
+            description='Canonical desktop/mobile renderer, motion, ASK and fallback passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
-            -f context='FormatX R454 native MAG visual' \
+            -f context='FormatX canonical native MAG visual' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
