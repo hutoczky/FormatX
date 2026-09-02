@@ -1,0 +1,105 @@
+name: Diagnose targeted R499 production P0
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/scripts/diagnose-p0-production-r499.cjs'
+      - '.github/workflows/diagnose-p0-production-r499.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-targeted-r499-production-diagnostics
+  cancel-in-progress: true
+
+jobs:
+  hero-cls-mag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      AUDITED_SHA: ${{ github.sha }}
+      FORMATX_TEST_URL: https://formatxsuite.com/
+      FORMATX_P0_DIAG_DIR: artifacts/p0-targeted-production
+      FORMATX_P0_DIAG_RUNS: '20'
+    steps:
+      - name: Checkout diagnostic revision
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate diagnostic syntax
+        run: node --check .github/scripts/diagnose-p0-production-r499.cjs
+
+      - name: Install Chromium diagnostic runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Measure production hero paintability CLS and MAG state
+        run: node .github/scripts/diagnose-p0-production-r499.cjs
+
+      - name: Upload targeted production evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-targeted-production-${{ github.sha }}
+          path: artifacts/p0-targeted-production/
+          if-no-files-found: warn
+          retention-days: 30
+
+  mobile-lighthouse-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout diagnostic revision
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: Prepare independent cache-busted mobile x3 config
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('lighthouserc.live.mobile.json','utf8'));
+          c.ci.collect.url=[`https://formatxsuite.com/?p0_mobile_diag=${process.env.GITHUB_RUN_ID}-${Date.now()}`];
+          fs.writeFileSync('lighthouserc.mobile.diag.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+
+      - name: Run production mobile Lighthouse x3 diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .lighthouseci mobile-lighthouse-diagnostic
+          lhci collect --config=./lighthouserc.mobile.diag.json 2>&1 | tee mobile-lighthouse-diagnostic-output.txt
+          mkdir -p mobile-lighthouse-diagnostic
+          cp -a .lighthouseci/. mobile-lighthouse-diagnostic/
+          PROFILE=mobile node .github/scripts/summarize-p0-lighthouse.cjs mobile-lighthouse-diagnostic | tee -a mobile-lighthouse-diagnostic-output.txt
+
+      - name: Upload independent mobile diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-mobile-lighthouse-diagnostic-${{ github.sha }}
+          path: |
+            mobile-lighthouse-diagnostic/
+            mobile-lighthouse-diagnostic-output.txt
+            lighthouserc.mobile.diag.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
