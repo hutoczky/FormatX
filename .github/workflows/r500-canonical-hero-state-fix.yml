@@ -33,7 +33,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m py_compile .github/scripts/r500_source_fix.py .github/scripts/r500_apex_patch.py
+          python3 -m py_compile .github/scripts/r500_source_fix.py .github/scripts/r500_apex_patch.py .github/scripts/r500_mag_validator_patch.py
+          python3 .github/scripts/r500_mag_validator_patch.py
           python3 .github/scripts/r500_source_fix.py source
           python3 .github/scripts/r500_apex_patch.py
           node --check docs/scifi-ui/scripts/platform-status.js
