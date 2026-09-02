@@ -1,5 +1,5 @@
 FormatX P0 validation contract
-version=2026-09-02-p0-100x3-r4
+version=2026-09-02-p0-100x3-r5
 production_origin=https://formatxsuite.com/
 lighthouse_desktop_runs=3
 lighthouse_mobile_runs=3
@@ -8,4 +8,4 @@ lcp_ms_lt=2000
 cls_lt=0.05
 browser_matrix=strict
 proof_policy=measured-artifacts-only
-trigger=r490-first-paint-browser-lighthouse-fix
+trigger=r491-stable-language-touch-targets
