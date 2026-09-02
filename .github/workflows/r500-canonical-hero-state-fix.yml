@@ -1,5 +1,5 @@
 name: R500 canonical hero state source fix
-# retry: bundled design dependency contract
+# retry: current scheduler apex contract, fail-fast before Chromium
 
 on:
   workflow_dispatch:
@@ -61,6 +61,10 @@ jobs:
           print('R500_SOURCE_CONTRACT_PASS')
           PY
 
+      - name: Verify modernized apex contract against current production
+        shell: bash
+        run: node .github/scripts/verify-apex-shell-r500.cjs
+
       - name: Install Playwright Chromium
         shell: bash
         run: |
@@ -80,10 +84,6 @@ jobs:
             sleep .25
           done
           node .github/scripts/validate-r500-hero-product-state.cjs | tee r500-hero-product-state-predeploy.txt
-
-      - name: Verify modernized apex contract against current production
-        shell: bash
-        run: node .github/scripts/verify-apex-shell-r500.cjs
 
       - name: Commit tested R500 source fix
         shell: bash
