@@ -1,5 +1,5 @@
-name: Verify R484 native surface energy
-run-name: R484 surface energy for ${{ github.event.workflow_run.head_sha || github.sha }}
+name: Verify canonical MAG runtime
+run-name: Canonical MAG runtime for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-mag-surface-energy-r484.cjs'
       - '.github/scripts/validate-mag-pause-owner-r485.cjs'
+      - '.github/scripts/validate-live-mag-functional.cjs'
       - '.github/workflows/verify-mag-surface-energy-r484.yml'
   workflow_run:
     workflows: ['Prepare or deploy FormatX production']
@@ -19,7 +20,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: r484-surface-energy-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
+  group: canonical-mag-runtime-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -29,12 +30,9 @@ jobs:
       (github.event.workflow_run.conclusion == 'success' &&
        contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-      FORMATX_HEADFUL: '1'
-      # A test-only commit can verify the deployed page without redeploying
-      # unchanged application assets. Deploy completion still runs it normally.
       FORMATX_VERIFY_LIVE: ${{ github.event_name == 'workflow_run' || contains(github.event.head_commit.message, '[verify-live-mag]') }}
     steps:
       - uses: actions/checkout@v5
@@ -43,54 +41,67 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Mark browser verification running
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          context='FormatX R484 native surface energy'
-          if [[ "$FORMATX_VERIFY_LIVE" == true ]]; then context='FormatX R484 LIVE surface energy'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
-            -f state=pending -f context="$context" -f description='Testing actual native frames, periodic timing, pause and reduced motion' \
-            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-      - name: Validate native surface sources
+
+      - name: Validate source contracts
         run: |
           node .github/scripts/validate-living-core-r425-source.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
-          node .github/scripts/validate-wda-100-r198.cjs
-          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js
-          node --check .github/scripts/validate-mag-surface-energy-r484.cjs
+          node --check .github/scripts/validate-live-mag-functional.cjs
+
+      - name: Wait for exact audited production revision
+        if: env.FORMATX_VERIFY_LIVE == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' \
+              "https://formatxsuite.com/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-${attempt}" \
+              -o "$RUNNER_TEMP/live-p0.txt" && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+              echo 'Exact production revision is live.'
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
+
       - name: Install browser verifier
         run: |
-          mkdir -p "$RUNNER_TEMP/r484-browser"
-          cd "$RUNNER_TEMP/r484-browser"
-          npm init -y
+          mkdir -p "$RUNNER_TEMP/mag-browser"
+          cd "$RUNNER_TEMP/mag-browser"
+          npm init -y >/dev/null
           npm install --no-audit --no-fund playwright@1.62.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
-      - name: Verify exact commit locally in Chromium
+
+      - name: Verify exact commit locally
         if: env.FORMATX_VERIFY_LIVE != 'true'
         env:
-          NODE_PATH: ${{ runner.temp }}/r484-browser/node_modules
+          NODE_PATH: ${{ runner.temp }}/mag-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4173/scifi-ui/
         run: |
-          python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/r484-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/mag-server.log" 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID"' EXIT
           xvfb-run -a node .github/scripts/validate-mag-surface-energy-r484.cjs
-      - name: Verify deployed native surface energy
+
+      - name: Verify canonical deployed MAG behavior
         if: env.FORMATX_VERIFY_LIVE == 'true'
         env:
-          NODE_PATH: ${{ runner.temp }}/r484-browser/node_modules
+          NODE_PATH: ${{ runner.temp }}/mag-browser/node_modules
           FORMATX_TEST_URL: https://formatxsuite.com/
-        run: xvfb-run -a node .github/scripts/validate-mag-surface-energy-r484.cjs
-      - name: Upload actual frames and audit
+          FORMATX_MAG_EVIDENCE_DIR: artifacts/live-mag-functional
+        run: node .github/scripts/validate-live-mag-functional.cjs
+
+      - name: Upload measured evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r484-surface-energy-${{ github.event_name }}
-          path: artifacts/r484-surface-energy
-          retention-days: 14
+          name: canonical-mag-runtime-${{ env.AUDITED_SHA }}-${{ github.event_name }}
+          path: |
+            artifacts/r484-surface-energy
+            artifacts/live-mag-functional
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Publish measured result
         if: always()
         env:
@@ -98,12 +109,11 @@ jobs:
           RESULT: ${{ job.status }}
         run: |
           state=failure
-          description='R484 native surface energy verification failed'
-          context='FormatX R484 native surface energy'
-          if [[ "$FORMATX_VERIFY_LIVE" == true ]]; then context='FormatX R484 LIVE surface energy'; fi
+          description='Canonical MAG runtime verification failed'
+          context='FormatX canonical MAG runtime'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='Visible periodic 3D sweep; zero idle; pause and reduced motion passed'
+            description='Renderer, motion, pause/resume, ASK and fallback passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" -f context="$context" -f description="$description" \
