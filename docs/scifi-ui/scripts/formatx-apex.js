@@ -69,7 +69,12 @@
       const stored = localStorage.getItem(LANG_KEY);
       if (stored === 'hu' || stored === 'en') return stored;
     } catch (_) {}
-    return String(navigator.language || '').toLowerCase().startsWith('hu') ? 'hu' : 'en';
+    // P0 r491: the server/static shell owns first-paint language. Falling back
+    // to navigator.language here used to rewrite the already-painted hero on
+    // desktop, causing the dominant CLS and late text LCP. The explicit HU/EN
+    // toggle still persists a choice and ?lang= continues to override it.
+    if (ROOT.lang === 'hu' || ROOT.lang === 'en') return ROOT.lang;
+    return 'hu';
   }
 
   function applyLanguage(next, persist) {
