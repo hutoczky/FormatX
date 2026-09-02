@@ -1,4 +1,4 @@
-name: Verify R486 live MAG and ASK crystal
+name: Verify canonical live MAG and ASK
 
 on:
   workflow_run:
@@ -11,279 +11,69 @@ permissions:
   statuses: write
 
 concurrency:
-  group: verify-r486-live-mag-and-ask-${{ github.ref }}
+  group: canonical-live-mag-ask-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  verify-live-r486:
+  verify-live-mag:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
        contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      FORMATX_TEST_URL: https://formatxsuite.com/
+      FORMATX_MAG_EVIDENCE_DIR: artifacts/live-mag-functional
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ env.AUDITED_SHA }}
 
+      - name: Wait for exact audited production revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' \
+              "https://formatxsuite.com/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-${attempt}" \
+              -o "$RUNNER_TEMP/live-p0.txt" && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+              echo 'Exact production revision is live.'
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'Production never converged to audited revision.' >&2
+          exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate canonical functional gate syntax
+        run: node --check .github/scripts/validate-live-mag-functional.cjs
+
       - name: Install Chromium verifier
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/r486-live"
-          cd "$RUNNER_TEMP/r486-live"
-          npm init -y >/dev/null 2>&1
-          npm install --silent playwright@1.62.0
+          npm install --no-save --no-package-lock playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Verify live mobile MAG pulse and desktop ASK crystal
-        shell: bash
-        env:
-          NODE_PATH: ${{ runner.temp }}/r486-live/node_modules
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts/r486-live
-          node <<'NODE'
-          const assert = require('node:assert/strict');
-          const { chromium } = require('playwright');
+      - name: Verify real production MAG renderer and ASK behavior
+        run: node .github/scripts/validate-live-mag-functional.cjs
 
-          const SITE_URL = 'https://formatxsuite.com/?r486-live-verify=1';
-          const CSS_URL = 'https://formatxsuite.com/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?r486-live-verify=1';
-          const CORE = '#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
-          const ASK_GLYPH = '#hero .fx-reference-controls-r204 .fx-reference-ask > i';
-          const PAUSE = '#hero .fx-reference-controls-r204 .fx-reference-pause';
-
-          const num = value => {
-            if (!value || value === 'none') return 1;
-            const parsed = Number.parseFloat(value);
-            return Number.isFinite(parsed) ? parsed : 1;
-          };
-
-          async function prepare(browser, viewport, mobile) {
-            const context = await browser.newContext({
-              viewport,
-              isMobile: mobile,
-              hasTouch: mobile,
-              deviceScaleFactor: mobile ? 2 : 1,
-              locale: 'hu-HU',
-              colorScheme: 'dark',
-              reducedMotion: 'no-preference'
-            });
-            await context.addInitScript(() => {
-              try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-            });
-            const page = await context.newPage();
-            await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
-            await page.waitForFunction(() => (
-              document.documentElement.dataset.fxCrystalOrganismR326 === 'ready'
-              && document.querySelector('#hero .fx-crystal-organism-r326-canvas')
-            ), null, { timeout: 60000 });
-            await page.waitForTimeout(1100);
-            return { context, page };
-          }
-
-          async function sampleLife(page, samples = 12, delay = 360) {
-            const values = [];
-            for (let index = 0; index < samples; index += 1) {
-              values.push(await page.locator(CORE).evaluate(canvas => {
-                const style = getComputedStyle(canvas);
-                const rect = canvas.getBoundingClientRect();
-                const animations = canvas.getAnimations();
-                const life = animations.find(animation => /fx-primary-mag/i.test(String(animation.animationName || ''))) || animations[0] || null;
-                const timing = life?.effect?.getComputedTiming?.() || null;
-                return {
-                  opacity: Number.parseFloat(style.opacity || '1'),
-                  scale: style.scale || 'none',
-                  animationName: style.animationName,
-                  animationPlayState: style.animationPlayState,
-                  animationCurrentTime: Number(life?.currentTime || 0),
-                  animationProgress: Number.isFinite(Number(timing?.progress)) ? Number(timing.progress) : -1,
-                  filter: style.filter,
-                  width: rect.width,
-                  height: rect.height
-                };
-              }));
-              await page.waitForTimeout(delay);
-            }
-            return values;
-          }
-
-          async function verifyPauseControl(page) {
-            const pause = page.locator(PAUSE).first();
-            assert.equal(await pause.count(), 1, 'Mobile PAUSE control is missing');
-            assert.equal(await pause.isVisible(), true, 'Mobile PAUSE control is not visible');
-            assert.notEqual(await pause.getAttribute('data-paused'), 'true', 'Mobile MAG starts user-paused');
-
-            await pause.click();
-            await page.waitForFunction(selector => document.querySelector(selector)?.dataset.paused === 'true', PAUSE, { timeout: 5000 });
-            await page.waitForTimeout(180);
-            const stopped = await page.locator(CORE).evaluate(canvas => {
-              const style = getComputedStyle(canvas);
-              return { animationName: style.animationName, animationPlayState: style.animationPlayState };
-            });
-            assert.doesNotMatch(stopped.animationName, /fx-primary-mag-mobile-heart-r483/, JSON.stringify(stopped));
-
-            await pause.click();
-            await page.waitForFunction(selector => document.querySelector(selector)?.dataset.paused !== 'true', PAUSE, { timeout: 5000 });
-            await page.waitForTimeout(180);
-            const resumed = await page.locator(CORE).evaluate(canvas => {
-              const style = getComputedStyle(canvas);
-              return { animationName: style.animationName, animationPlayState: style.animationPlayState };
-            });
-            assert.match(resumed.animationName, /fx-primary-mag-mobile-heart-r483/, JSON.stringify(resumed));
-            assert.notEqual(resumed.animationPlayState, 'paused', JSON.stringify(resumed));
-            return { stopped, resumed };
-          }
-
-          (async () => {
-            const browser = await chromium.launch({
-              headless: true,
-              args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
-            });
-            try {
-              const request = await browser.newContext();
-              const cssResponse = await request.request.get(CSS_URL, { timeout: 30000 });
-              assert.equal(cssResponse.status(), 200, 'R486 CSS is not live');
-              const css = await cssResponse.text();
-              assert.match(css, /production-r486-calmer-mobile-luminance-feathered-silhouette-periodic-native-surface-energy/);
-              assert.match(css, /brightness\(\.965\)/);
-              assert.match(css, /contrast\(\.885\)/);
-              assert.match(css, /saturate\(1\.14\)/);
-              assert.match(css, /blur\(\.58px\)/);
-              assert.match(css, /drop-shadow\(0 0 3px/);
-              assert.match(css, /drop-shadow\(0 0 7px/);
-              assert.match(css, /fx-primary-mag-mobile-heart-r483/);
-              assert.match(css, /fx-reference-pause\[data-paused="true"\]/);
-              await request.close();
-
-              const mobile = await prepare(browser, { width: 390, height: 844 }, true);
-              const mobileValues = await sampleLife(mobile.page);
-              const mOpacity = mobileValues.map(value => value.opacity);
-              const mScale = mobileValues.map(value => num(value.scale));
-              const mOpacitySpan = Math.max(...mOpacity) - Math.min(...mOpacity);
-              const mScaleSpan = Math.max(...mScale) - Math.min(...mScale);
-              const mobileFirst = mobileValues[0];
-              const mobileRoot = await mobile.page.evaluate(() => ({
-                life: document.documentElement.dataset.fxPrimaryMagLifeR482 || '',
-                optics: document.documentElement.dataset.fxPrimaryMagOpticsR486 || '',
-                rendererPaused: document.documentElement.dataset.fxReferenceMotionPaused || '',
-                userPaused: document.querySelector('.fx-reference-pause')?.dataset.paused || '',
-                idlePolicy: document.documentElement.dataset.fxCoreMobileIdlePolicyR426 || '',
-                renderer: document.documentElement.dataset.fxCoreRenderer || ''
-              }));
-              assert.equal(mobileRoot.renderer, 'single-webgl-crystal-organism-r326');
-              assert.equal(mobileRoot.optics, 'calmer-luminance-feathered-mobile-silhouette');
-              assert.notEqual(mobileRoot.life, 'steady', 'Mobile MAG is unexpectedly in steady mode');
-              assert.notEqual(mobileRoot.userPaused, 'true', 'Mobile MAG is unexpectedly user-paused');
-              assert.match(mobileRoot.idlePolicy, /zero-idle/, JSON.stringify(mobileRoot));
-              assert.match(mobileFirst.animationName, /fx-primary-mag-mobile-heart-r483/, JSON.stringify({ mobileRoot, mobileFirst }));
-              assert.notEqual(mobileFirst.animationPlayState, 'paused', JSON.stringify(mobileFirst));
-              assert.match(mobileFirst.filter, /brightness\(0?\.965\)/, mobileFirst.filter);
-              assert.match(mobileFirst.filter, /contrast\(0?\.885\)/, mobileFirst.filter);
-              assert.match(mobileFirst.filter, /saturate\(1\.14\)/, mobileFirst.filter);
-              assert.match(mobileFirst.filter, /blur\(0?\.58px\)/, mobileFirst.filter);
-              assert.ok(Math.min(...mOpacity) >= .84, JSON.stringify({ mOpacity, mScale }));
-              assert.ok(mOpacitySpan >= .025 || mScaleSpan >= .010, JSON.stringify({ mOpacitySpan, mScaleSpan, mobileValues }));
-              assert.ok(mobileFirst.width > 250 && mobileFirst.height > 300, JSON.stringify(mobileFirst));
-              const pauseContract = await verifyPauseControl(mobile.page);
-              await mobile.page.screenshot({ path: 'artifacts/r486-live/mobile-r486.png', fullPage: false, timeout: 8000 }).catch(() => {});
-              await mobile.context.close();
-
-              const desktop = await prepare(browser, { width: 1440, height: 900 }, false);
-              await desktop.page.waitForFunction(selector => {
-                const glyph = document.querySelector(selector);
-                if (!glyph) return false;
-                const style = getComputedStyle(glyph);
-                const rect = glyph.getBoundingClientRect();
-                return style.display !== 'none' && style.visibility !== 'hidden'
-                  && Number(style.opacity || 1) > .02 && rect.width >= 16 && rect.height >= 16;
-              }, ASK_GLYPH, { timeout: 30000 });
-
-              const ask = await desktop.page.locator(ASK_GLYPH).evaluate(glyph => {
-                const style = getComputedStyle(glyph);
-                const rect = glyph.getBoundingClientRect();
-                const button = glyph.closest('.fx-reference-ask');
-                const hit = button ? document.elementFromPoint(
-                  button.getBoundingClientRect().left + button.getBoundingClientRect().width / 2,
-                  button.getBoundingClientRect().top + button.getBoundingClientRect().height / 2
-                ) : null;
-                return {
-                  width: rect.width,
-                  height: rect.height,
-                  opacity: Number.parseFloat(style.opacity || '1'),
-                  backgroundImage: style.backgroundImage,
-                  boxShadow: style.boxShadow,
-                  buttonOwnsHit: Boolean(button && hit && button.contains(hit))
-                };
-              });
-              assert.ok(ask.width >= 16 && ask.height >= 16, JSON.stringify(ask));
-              assert.ok(ask.opacity > .9, JSON.stringify(ask));
-              assert.notEqual(ask.backgroundImage, 'none', JSON.stringify(ask));
-              assert.notEqual(ask.boxShadow, 'none', JSON.stringify(ask));
-              assert.equal(ask.buttonOwnsHit, true, JSON.stringify(ask));
-
-              const desktopValues = await sampleLife(desktop.page, 10, 430);
-              const dOpacity = desktopValues.map(value => value.opacity);
-              const dScale = desktopValues.map(value => num(value.scale));
-              const dOpacitySpan = Math.max(...dOpacity) - Math.min(...dOpacity);
-              const dScaleSpan = Math.max(...dScale) - Math.min(...dScale);
-              const dTimes = desktopValues.map(value => value.animationCurrentTime);
-              const dProgress = desktopValues.map(value => value.animationProgress).filter(value => value >= 0);
-              const dTimeSpan = Math.max(...dTimes) - Math.min(...dTimes);
-              const dProgressSpan = dProgress.length ? Math.max(...dProgress) - Math.min(...dProgress) : 0;
-              assert.match(desktopValues[0].animationName, /fx-primary-mag-living-desktop-r482/, JSON.stringify(desktopValues[0]));
-              assert.notEqual(desktopValues[0].animationPlayState, 'paused', JSON.stringify(desktopValues[0]));
-              // Registered custom-property animations are not reflected reliably
-              // in getComputedStyle(opacity/scale) by headless Chromium. Verify
-              // the CSS animation clock and effect progress themselves instead.
-              assert.ok(dTimeSpan >= 2000, JSON.stringify({ dTimeSpan, dProgressSpan, desktopValues }));
-              assert.ok(dProgressSpan >= .20 || dTimeSpan >= 3000, JSON.stringify({ dTimeSpan, dProgressSpan, desktopValues }));
-              await desktop.page.screenshot({ path: 'artifacts/r486-live/desktop-r486.png', fullPage: false, timeout: 8000 }).catch(() => {});
-              await desktop.context.close();
-
-              console.log(JSON.stringify({
-                pass: true,
-                mobile: {
-                  rendererPausedAtIdle: mobileRoot.rendererPaused,
-                  userPausedAtIdle: mobileRoot.userPaused,
-                  idlePolicy: mobileRoot.idlePolicy,
-                  optics: mobileRoot.optics,
-                  opacitySpan: mOpacitySpan,
-                  scaleSpan: mScaleSpan,
-                  animation: mobileFirst.animationName,
-                  pauseContract
-                },
-                desktop: {
-                  opacitySpan: dOpacitySpan,
-                  scaleSpan: dScaleSpan,
-                  animationTimeSpan: dTimeSpan,
-                  animationProgressSpan: dProgressSpan,
-                  animation: desktopValues[0].animationName,
-                  ask
-                }
-              }, null, 2));
-            } finally {
-              await browser.close();
-            }
-          })().catch(error => {
-            console.error(error);
-            process.exit(1);
-          });
-          NODE
-
-      - name: Upload live visual evidence
+      - name: Upload functional MAG evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r486-live-mag-and-ask
-          path: artifacts/r486-live
+          name: canonical-live-mag-${{ env.AUDITED_SHA }}
+          path: artifacts/live-mag-functional
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 30
 
-      - name: Publish R486 live status
+      - name: Publish canonical MAG status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -292,13 +82,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='R486 calmer mobile MAG plus desktop ASK crystal passed live'
+            description='Canonical renderer, animation, pause/resume, ASK and fallback passed'
           else
             state=failure
-            description='R486 live MAG/ASK verification failed'
+            description='Canonical production MAG/ASK functional verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
-            -f context='FormatX R486 live MAG and ASK' \
+            -f context='FormatX canonical live MAG and ASK' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
