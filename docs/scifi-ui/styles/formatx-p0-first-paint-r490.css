@@ -96,7 +96,8 @@ html body.living-architecture #hero .hero-copy > :is(
   html body.living-architecture a[href*="/test-matrix.html?"],
   html body.living-architecture .fx-static-live-os__actions :is(a, button),
   html body.living-architecture [data-fx-award-proof] :is(a, button),
-  html body.living-architecture .fx-proof-grid :is(a, button) {
+  html body.living-architecture .fx-proof-grid :is(a, button),
+  html body.living-architecture .fx-feedback-consent a[href*="privacy.html"] {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
