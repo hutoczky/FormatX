@@ -1,4 +1,4 @@
-/* FormatX r461 — lean first-paint owner for the R460/R326 production path.
+/* FormatX r461/R497 — lean first-paint owner for the R460/R326 production path.
    Static HTML owns LCP. One current MAG runtime owns rendering; no legacy
    award/regression/Real3D repair stack is mounted after first paint. */
 (function(){
@@ -77,6 +77,19 @@ function bindSound(button){
   },true);
 }
 
+function syncCanonicalMagAnimations(paused){
+  const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+  if(!(canvas instanceof HTMLCanvasElement))return;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for(const animation of canvas.getAnimations()){
+    try{
+      if(paused||reduced)animation.pause();
+      else animation.play();
+    }catch(_){}
+  }
+  ROOT.dataset.fxCanonicalMagMotionR497=paused?'paused':reduced?'reduced-motion':'running';
+}
+
 function bindPause(button){
   if(!(button instanceof HTMLButtonElement)||button.dataset.fxPauseR461==='true')return;
   button.dataset.fxPauseR461='true';
@@ -96,6 +109,10 @@ function bindPause(button){
     button.textContent=paused?'▶':'Ⅱ';
     button.setAttribute('aria-label',paused?strings.resume:strings.pause);
     dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));
+    // The WebGL renderer owns simulation frames, while the canonical canvas
+    // also has a bounded CSS/WAAPI life animation. Pause/resume both real
+    // motion owners together so RESUME cannot leave the visible MAG frozen.
+    syncCanonicalMagAnimations(paused);
   });
 }
 
