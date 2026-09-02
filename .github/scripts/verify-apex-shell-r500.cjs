@@ -23,6 +23,14 @@ async function fetchText(url, options = {}) {
   const response = await fetch(url, options);
   return { response, text: await response.text() };
 }
+function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
+  const value = html.match(pattern)?.[1] || '';
+  assert.ok(value, `missing live ${label} URL`);
+  const resolved = new URL(value, baseUrl);
+  assert.equal(resolved.origin, ORIGIN, `${label} escaped canonical origin: ${resolved.href}`);
+  assert.equal(resolved.pathname, expectedPath, `${label} resolved to ${resolved.pathname}`);
+  return resolved.href;
+}
 
 (async () => {
   const firstFrame = sourceValue(/data-fx-first-frame-stability-([^=\"]+)=\"true\"/, 'first-frame marker');
@@ -50,25 +58,47 @@ async function fetchText(url, options = {}) {
   assert.equal(icon.status, 200, 'icon status');
 
   assert.match(home.response.headers.get('content-type') || '', /text\/html/i);
-  for (const name of ['design', 'mobile', 'critical']) assert.match(assets[name].response.headers.get('content-type') || '', /text\/css/i, `${name} MIME`);
+  for (const name of ['design', 'mobile', 'critical']) {
+    assert.match(assets[name].response.headers.get('content-type') || '', /text\/css/i, `${name} MIME`);
+  }
   assert.match(assets.core.response.headers.get('content-type') || '', /(application|text)\/javascript/i);
   assert.match(icon.headers.get('content-type') || '', /image\/png/i);
 
   const liveBase = home.text.match(/<base\s+href=["']([^"']+)["']/i)?.[1] || '';
   assert.equal(liveBase, expectedBase, `base href must match canonical source (${expectedBase})`);
   const baseUrl = new URL(liveBase, `${ORIGIN}/`);
+
+  // Functional navigation contract: relative canonical links must resolve to
+  // the intended /scifi-ui/ targets. The literal relative/root-relative spelling
+  // is deliberately not a release contract.
   assert.equal(new URL('./project-simulator.html?lang=hu', baseUrl).pathname, '/scifi-ui/project-simulator.html');
   assert.equal(new URL('./checkout.html?plan=business_pro', baseUrl).pathname, '/scifi-ui/checkout.html');
 
   assert.ok(home.text.includes(`data-fx-first-frame-stability-${firstFrame}=\"true\"`), `missing live first-frame ${firstFrame}`);
   assert.ok(home.text.includes(`data-fx-p0-first-paint-${p0Paint}=\"true\"`), `missing live P0 first-paint ${p0Paint}`);
-  assert.ok(home.text.includes('href="/scifi-ui/styles/formatx-design-system.css'));
-  assert.ok(home.text.includes('href="/scifi-ui/styles/formatx-critical-shell-v56.css'));
-  assert.ok(home.text.includes('src="/scifi-ui/scripts/formatx-core-real3d-v20.js'));
-  assert.ok(home.text.includes('src="/scifi-ui/assets/images/formatx-icon.png'));
-  assert.ok(!home.text.includes('href="./styles/formatx-design-system.css'));
-  assert.ok(!home.text.includes('src="./scripts/formatx-core-real3d-v20.js'));
-  assert.ok(!home.text.includes('src="./assets/images/formatx-icon.png'));
+
+  const resolvedAssets = {
+    design: resolveLiveAsset(
+      home.text, baseUrl,
+      /<link\b[^>]*href=["']([^"']*formatx-design-system\.css[^"']*)["'][^>]*>/i,
+      '/scifi-ui/styles/formatx-design-system.css', 'design CSS',
+    ),
+    critical: resolveLiveAsset(
+      home.text, baseUrl,
+      /<link\b[^>]*href=["']([^"']*formatx-critical-shell-v56\.css[^"']*)["'][^>]*>/i,
+      '/scifi-ui/styles/formatx-critical-shell-v56.css', 'critical CSS',
+    ),
+    core: resolveLiveAsset(
+      home.text, baseUrl,
+      /<script\b[^>]*src=["']([^"']*formatx-core-real3d-v20\.js[^"']*)["'][^>]*>/i,
+      '/scifi-ui/scripts/formatx-core-real3d-v20.js', 'core JS',
+    ),
+    icon: resolveLiveAsset(
+      home.text, baseUrl,
+      /<(?:img|link)\b[^>]*(?:src|href)=["']([^"']*formatx-icon\.png[^"']*)["'][^>]*>/i,
+      '/scifi-ui/assets/images/formatx-icon.png', 'icon',
+    ),
+  };
 
   assert.ok(assets.design.text.includes('FormatX Design System 2.0'));
   assert.ok(assets.mobile.text.includes('FormatX living-core visibility and responsive layout recovery'));
@@ -78,7 +108,10 @@ async function fetchText(url, options = {}) {
   assert.ok(assets.critical.text.includes('display: none !important'));
   assert.match(assets.core.text.toLowerCase(), /formatx-core|fxcore/);
 
-  assert.equal(home.response.headers.get('x-formatx-edge-stability'), `${expectedEdgePrefix.replace(':${STARTUP_REVISION}', '')}:${startup}`);
+  assert.equal(
+    home.response.headers.get('x-formatx-edge-stability'),
+    `${expectedEdgePrefix.replace(':${STARTUP_REVISION}', '')}:${startup}`,
+  );
   assert.equal(home.response.headers.get('x-formatx-css-scheduler'), expectedCssScheduler);
   assert.equal(home.response.headers.get('x-formatx-motion-scheduler'), expectedMotionScheduler);
   assert.equal(www.headers.get('location'), 'https://formatxsuite.com/?_fx_redirect_recovery=1');
@@ -86,6 +119,7 @@ async function fetchText(url, options = {}) {
 
   console.log(JSON.stringify({
     status: 'PASS', firstFrame, p0Paint, expectedBase, startup,
+    resolvedAssets,
     edge: home.response.headers.get('x-formatx-edge-stability'),
     cssScheduler: expectedCssScheduler,
     motionScheduler: expectedMotionScheduler,
