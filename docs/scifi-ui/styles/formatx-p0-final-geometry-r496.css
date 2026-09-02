@@ -1,4 +1,4 @@
-/* FormatX R496/R509/R510 — deterministic final control geometry.
+/* FormatX R496/R509/R510/R529 — deterministic final control geometry.
    Loaded by the canonical first-paint owner before dynamic hero controls mount.
    It mirrors r264 final geometry and corrects viewport-width overflow without
    changing the visual design. */
@@ -157,6 +157,35 @@ html body.living-architecture {
     pointer-events: none !important;
   }
 
+  /* R529: preserve the cyan title depth cue without rasterising a 30px blur
+     around every glyph. The ambient glow is a cheap gradient behind the H1,
+     while the real text remains the accessible, contentful title. */
+  html:root:root:root:root:root body.living-architecture #hero #hero-title {
+    position: relative !important;
+    isolation: isolate !important;
+  }
+  html:root:root:root:root:root body.living-architecture #hero #hero-title::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: -18px -34px -14px !important;
+    z-index: -1 !important;
+    display: block !important;
+    background: radial-gradient(ellipse at 43% 54%, rgba(75,170,220,.13), rgba(75,170,220,.04) 42%, transparent 72%) !important;
+    pointer-events: none !important;
+    filter: none !important;
+  }
+  html:root:root:root:root:root body.living-architecture #hero #hero-title .hero-title-main,
+  html:root:root:root:root:root body.living-architecture #hero #hero-title .hero-title-sub {
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  /* The bridge trigger must be physically reachable after a tall desktop
+     viewport just as it already is on mobile R508. */
+  html:root:root:root:root:root body.living-architecture .fx-loop-bridge {
+    --fx-loop-runway: max(320px, 100svh) !important;
+  }
+
   /* Once native R326 WebGL is ready, no CSS/image overlay may remain above it. */
   html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
   html:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
@@ -222,4 +251,4 @@ html:root:root:root:root:root.fx-organism-interface-ready body.living-architectu
   z-index: 13050 !important;
 }
 
-/* deploy-r510-deterministic-final-geometry-pure-webgl-handoff */
+/* deploy-r529-fast-lcp-and-desktop-loop-runway */
