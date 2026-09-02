@@ -124,23 +124,50 @@
   function installHeroState(data) {
     const heroCopy = document.querySelector('#hero .hero-copy');
     if (!heroCopy) return;
+    const canonicalHome = Boolean(
+      heroCopy.closest('#hero')?.parentElement?.id === 'main-content'
+      && document.querySelector('link[rel="canonical"][href^="https://formatxsuite.com/"]')
+    );
     let state = heroCopy.querySelector('.fx-hero-product-state');
     if (!state) {
+      if (canonicalHome) {
+        ROOT.dataset.fxHeroProductState = 'missing-canonical-node';
+        return;
+      }
       state = document.createElement('div');
       state.className = 'fx-hero-product-state';
+      state.dataset.fxHeroProductState = 'legacy-fallback';
       const lead = heroCopy.querySelector('.hero-lead');
       if (lead) lead.insertAdjacentElement('afterend', state);
       else heroCopy.prepend(state);
     }
+
     const lang = language();
-    state.replaceChildren(
-      badge(data.product_release.status, data.status_labels, lang),
-      Object.assign(document.createElement('span'), {
-        textContent: lang === 'en'
-          ? 'Bazzite/Linux primary · Windows supported · full version · 5-day trial licence'
-          : 'Bazzite/Linux elsődleges · Windows támogatott · teljes verzió · 5 napos próbalicenc'
-      })
-    );
+    let statusBadge = state.querySelector('.fx-platform-status-badge');
+    let statusCopy = state.querySelector('[data-fx-hero-product-state-copy]');
+    if (!statusBadge || !statusCopy) {
+      if (canonicalHome) {
+        ROOT.dataset.fxHeroProductState = 'invalid-canonical-node';
+        return;
+      }
+      if (!statusBadge) {
+        statusBadge = badge(data.product_release.status, data.status_labels, lang);
+        state.prepend(statusBadge);
+      }
+      if (!statusCopy) {
+        statusCopy = document.createElement('span');
+        statusCopy.dataset.fxHeroProductStateCopy = 'true';
+        state.append(statusCopy);
+      }
+    }
+
+    statusBadge.dataset.status = data.product_release.status;
+    statusBadge.textContent = text(data.status_labels[data.product_release.status], lang);
+    statusCopy.textContent = lang === 'en'
+      ? 'Bazzite/Linux primary · Windows supported · full version · 5-day trial licence'
+      : 'Bazzite/Linux elsődleges · Windows támogatott · teljes verzió · 5 napos próbalicenc';
+    state.dataset.fxHeroProductState = 'ready';
+    ROOT.dataset.fxHeroProductState = canonicalHome ? 'canonical-reused' : 'fallback-ready';
 
     const download = document.getElementById('hero-download');
     if (download instanceof HTMLAnchorElement) {

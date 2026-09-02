@@ -120,4 +120,52 @@ html body.living-architecture .skip-link:focus-visible {
   min-height: 44px !important;
 }
 
-/* production-r499-p0-first-paint-mag-pause-invariant */
+
+
+/* R500 canonical hero product-state first-frame geometry.
+   This mirrors the settled platform-status + desktop r244 cascade. */
+html body.living-architecture #hero .fx-hero-product-state {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 560px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 18px 0 0 !important;
+  padding: 0 !important;
+  gap: 10px !important;
+  color: rgba(224, 241, 248, .78) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  min-height: 28px !important;
+  padding: 5px 10px !important;
+  border: 1px solid currentColor !important;
+  border-radius: 999px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: .04em !important;
+  white-space: nowrap !important;
+}
+@media (min-width: 901px) {
+  html body.living-architecture #hero .fx-hero-product-state {
+    gap: 8px 12px !important;
+    color: rgba(189, 210, 222, .75) !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+}
+
+/* production-r500-p0-first-paint-canonical-hero-state */

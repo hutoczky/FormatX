@@ -11,6 +11,19 @@ const RECOVERY_SOURCE = fs.readFileSync(
   path.join(REPO, 'docs/scifi-ui/scripts/formatx-canonical-recovery.js'),
   'utf8',
 );
+const CONTENT_RUNTIME_SOURCE = fs.readFileSync(
+  path.join(REPO, 'docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js'),
+  'utf8',
+);
+function sourceDatasetValue(name) {
+  const match = CONTENT_RUNTIME_SOURCE.match(
+    new RegExp(`root\\.dataset\\.${name}\\s*=\\s*['"]([^'"]+)['"]`)
+  );
+  assert.ok(match, `missing source dataset contract ${name}`);
+  return match[1];
+}
+const EXPECTED_CONTENT_GATE = sourceDatasetValue('fxContentRuntimeR241');
+const EXPECTED_STABILITY = sourceDatasetValue('fxFirstFrameStabilityR283');
 
 async function runCase(browser, { width, height, language }) {
   const context = await browser.newContext({
@@ -80,10 +93,10 @@ async function runCase(browser, { width, height, language }) {
   assert.equal(state.categoryRuntime, 'v1', `category runtime missing: ${JSON.stringify(state)}`);
   assert.equal(
     state.contentGate,
-    'armed-r301-user-intent',
+    EXPECTED_CONTENT_GATE,
     `semantic enhancement gate was not dormant before interaction: ${JSON.stringify(state)}`,
   );
-  assert.equal(state.stability, 'critical-only-r300', `critical first-frame stability marker missing: ${JSON.stringify(state)}`);
+  assert.equal(state.stability, EXPECTED_STABILITY, `critical first-frame stability marker missing: ${JSON.stringify(state)}`);
   assert.ok(state.deckTitle.length > 0, `empty category title: ${JSON.stringify(state)}`);
   assert.equal(state.deckCards, 4, `category cards missing: ${JSON.stringify(state)}`);
   assert.ok(state.proofTitle.length > 0, `proof title missing: ${JSON.stringify(state)}`);

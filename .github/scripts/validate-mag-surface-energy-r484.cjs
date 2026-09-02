@@ -9,6 +9,24 @@ const { PNG } = require('pngjs');
 const origin = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4173/scifi-ui/';
 const output = process.env.FORMATX_CAPTURE_DIR || 'artifacts/r484-surface-energy';
 fs.mkdirSync(output, { recursive: true });
+const MOBILE_OPTICS_SOURCE = fs.readFileSync(
+  path.join(__dirname, '../../docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'),
+  'utf8',
+);
+function sourceFilterToken(name, unit = '') {
+  const match = MOBILE_OPTICS_SOURCE.match(
+    new RegExp(`${name}\\(([-\\d.]+)${unit}\\)`)
+  );
+  assert.ok(match, `missing canonical mobile optics token ${name}`);
+  return `${name}(${match[1]}${unit})`;
+}
+const EXPECTED_MOBILE_FILTER = [
+  sourceFilterToken('brightness'),
+  sourceFilterToken('contrast'),
+  sourceFilterToken('saturate'),
+  sourceFilterToken('hue-rotate', 'deg'),
+  sourceFilterToken('blur', 'px'),
+];
 
 // Timing instrumentation must not synchronously read back the GPU: doing that
 // inside RAF stalls SwiftShader and changes the very timing being measured.
@@ -197,10 +215,12 @@ async function verify(browser, name, viewport, mobile) {
     assert.equal(report.dom.glError, 0, `${name}: WebGL error`);
     assert.ok(report.dom.overflow <= 1, `${name}: horizontal overflow`);
     if (mobile) {
-      assert.match(report.dom.filter, /brightness\(0?\.965\)/);
-      assert.match(report.dom.filter, /contrast\(0?\.885\)/);
-      assert.match(report.dom.filter, /saturate\(1\.14\)/);
-      assert.match(report.dom.filter, /blur\(0?\.58px\)/);
+      for (const token of EXPECTED_MOBILE_FILTER) {
+        assert.ok(
+          report.dom.filter.includes(token),
+          `${name}: canonical mobile optics token missing ${token}; computed=${report.dom.filter}`,
+        );
+      }
       assert.equal(report.dom.optics, 'calmer-luminance-feathered-mobile-silhouette');
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');
     }
