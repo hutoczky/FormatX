@@ -1,5 +1,5 @@
 name: R500 canonical hero state source fix
-# retry: canonical favicon-derived apex contract, fail-fast before Chromium
+# retry: apex workflow is precommitted; source job must not self-modify workflows
 
 on:
   workflow_dispatch:
@@ -34,10 +34,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m py_compile .github/scripts/r500_source_fix.py .github/scripts/r500_apex_patch.py .github/scripts/r500_mag_validator_patch.py
+          python3 -m py_compile .github/scripts/r500_source_fix.py .github/scripts/r500_mag_validator_patch.py
           python3 .github/scripts/r500_mag_validator_patch.py
           python3 .github/scripts/r500_source_fix.py source
-          python3 .github/scripts/r500_apex_patch.py
           node --check docs/scifi-ui/scripts/platform-status.js
           node --check .github/scripts/validate-semantic-first-paint.cjs
           node --check .github/scripts/validate-mag-surface-energy-r484.cjs
@@ -91,7 +90,7 @@ jobs:
           set -euo pipefail
           git config user.name 'Games Tech'
           git config user.email 'hutoczky@users.noreply.github.com'
-          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/platform-status.js docs/scifi-ui/styles/formatx-p0-first-paint-r490.css .github/scripts/validate-semantic-first-paint.cjs .github/scripts/validate-mag-surface-energy-r484.cjs .github/workflows/verify-apex-shell-live.yml
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/platform-status.js docs/scifi-ui/styles/formatx-p0-first-paint-r490.css .github/scripts/validate-semantic-first-paint.cjs .github/scripts/validate-mag-surface-energy-r484.cjs
           git commit -m 'Fix R500 canonical hero product-state first-frame geometry'
           git push origin HEAD:master
           echo "SOURCE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
