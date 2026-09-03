@@ -86,10 +86,38 @@ jobs:
           grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy' "$MOTION"
           grep -Fq 'formatx-mag-shape-sync-r476.js?v=20260831-r484-readable-electric-surface' "$MOTION"
 
-          if grep -Eq 'requestAnimationFrame\([^)]*sync|function[[:space:]]+frame|setInterval' "$SYNC"; then
-            echo 'R479 MAG sync must not add an idle JavaScript render loop.' >&2
-            exit 1
-          fi
+          node - "$SYNC" <<'NODE'
+          'use strict';
+          const fs=require('node:fs');
+          const file=process.argv[2];
+          const source=fs.readFileSync(file,'utf8');
+          if(/\bsetInterval\s*\(/.test(source)){
+            throw new Error('R479 zero-idle contract forbids setInterval tickers.');
+          }
+          function bodyFrom(open){
+            let depth=0;
+            for(let i=open;i<source.length;i++){
+              if(source[i]==='{')depth++;
+              else if(source[i]==='}'){
+                depth--;
+                if(depth===0)return source.slice(open+1,i);
+              }
+            }
+            return '';
+          }
+          const named=[];
+          for(const match of source.matchAll(/function\s+([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{/g)){
+            named.push([match[1],bodyFrom(match.index+match[0].lastIndexOf('{'))]);
+          }
+          for(const match of source.matchAll(/(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>\s*\{/g)){
+            named.push([match[1],bodyFrom(match.index+match[0].lastIndexOf('{'))]);
+          }
+          for(const [name,body] of named){
+            const selfRaf=new RegExp(`requestAnimationFrame\\s*\\(\\s*${name.replace(/[$]/g,'\\$&')}\\b`);
+            if(selfRaf.test(body))throw new Error(`R479 zero-idle contract forbids self-rescheduling RAF callback: ${name}`);
+          }
+          console.log('PASS: zero continuous JS idle loop; one-shot requestAnimationFrame synchronization is allowed.');
+          NODE
 
           if grep -Eq 'animation:[^;]*(filter|brightness|contrast|saturate)' "$SYNC_CSS"; then
             echo 'R479 primary MAG breath must remain compositor-only; animated filters are forbidden.' >&2
@@ -97,6 +125,24 @@ jobs:
           fi
 
           echo 'PASS: R479 richer colour depth, lower centre luminance, alpha-aware soft edge and compositor-only primary/Mini MAG life are source-valid.'
+
+      - name: Wait for exact deployed P0 marker before live verification
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          origin='https://formatxsuite.com'
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$origin/p0-validation-version.txt?r479_wait=${GITHUB_RUN_ID}_${attempt}" -o "$RUNNER_TEMP/live-p0.txt"; then
+              if cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+                echo 'Exact source P0 marker is live; R479 live verification is applicable.'
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          echo 'Exact source SHA marker never reached production; refusing stale live verification.' >&2
+          exit 1
 
       - name: Verify production serves R479 when deploying
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
@@ -135,15 +181,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
+          LIVE_APPLICABLE: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]') }}
         shell: bash
         run: |
           set -euo pipefail
           if [[ "$JOB_STATUS" == success ]]; then
             state=success
-            description='R479 source/live optics passed; visual proof pending'
+            if [[ "$LIVE_APPLICABLE" == true ]]; then
+              description='R479 source + exact-production optics passed; visual proof pending'
+            else
+              description='R479 source contract passed; live proof not applicable before deploy'
+            fi
           else
             state=failure
-            description='R479 source/live optics verification failed'
+            description='R479 source/exact-live optics verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
@@ -153,6 +204,9 @@ jobs:
 
   visual-r479-live-mag:
     needs: verify-r479-living-mag
+    if: >-
+      needs.verify-r479-living-mag.result == 'success' &&
+      (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
