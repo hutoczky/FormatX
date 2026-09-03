@@ -9,6 +9,7 @@ const showcase = read('docs/scifi-ui/scripts/formatx-product-showcase.js');
 const styles = read('docs/scifi-ui/styles/formatx-feedback.css');
 const compatible = read('docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg');
 const schema = read('billing-worker/src/feedback-schema.js');
+const api = read('billing-worker/src/feedback-api.js');
 const entry = read('billing-worker/src/production-feedback-entry.js');
 const workerConfig = read('billing-worker/wrangler.jsonc');
 const matrix = read('.github/scripts/validate-responsive-production-matrix.cjs');
@@ -59,7 +60,11 @@ assert.ok(
 assert.match(matrix, /ratingColumns/, 'matrix must verify feedback rating layout');
 
 assert.match(schema, /PRAGMA table_info\(user_feedback\)/, 'D1 feedback schema verification is missing');
-assert.match(entry, /ensureFeedbackSchemaCompatibility/, 'feedback entry must migrate the D1 schema before handling requests');
+assert.match(schema, /ensureFeedbackSchemaCompatibility/, 'maintenance-only D1 compatibility helper is missing');
+assert.match(api, /createFeedbackTableIfMissing/, 'feedback API must retain missing-table bootstrap ownership');
+assert.match(api, /runWithFeedbackTable/, 'feedback API must retry a real operation after missing-table bootstrap');
+assert.doesNotMatch(entry, /ensureFeedbackSchemaCompatibility\s*\(/, 'production feedback hot path must not run schema maintenance before every request');
+assert.match(entry, /handleFeedbackRequest\(request, env\)/, 'production feedback entry must delegate current feedback handling to feedback-api');
 assert.match(workerConfig, /"main": "src\/production-content-entry\.js"/, 'unexpected production Worker entry');
 
-console.log('FormatX mobile showcase, feedback and responsive matrix validation passed with direct compatible asset ownership.');
+console.log('FormatX mobile showcase, feedback and responsive matrix validation passed with current lazy feedback schema ownership and direct compatible asset ownership.');
