@@ -8,4 +8,4 @@ lcp_ms_lt=2000
 cls_lt=0.05
 browser_matrix=strict
 proof_policy=measured-artifacts-only
-trigger=r515-critical-core-first-paint-geometry
+trigger=r515-validated-first-paint-geometry
