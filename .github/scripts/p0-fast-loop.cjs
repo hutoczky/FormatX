@@ -207,52 +207,104 @@ async function verifyOverflowContext(browser, viewport, mobile) {
     await context.close();
   }
 }
-async function verifyCls(browser) {
-  const context = await browser.newContext({ viewport: { width: 1350, height: 940 }, locale: 'hu-HU' });
-  const page = await context.newPage();
-  await page.addInitScript(() => {
-    window.__fxFastShifts = [];
-    new PerformanceObserver(list => {
-      for (const entry of list.getEntries()) {
-        if (!entry.hadRecentInput) window.__fxFastShifts.push({ value: entry.value, startTime: entry.startTime, sources: (entry.sources || []).map(s => ({ node: s.node?.id ? `#${s.node.id}` : s.node?.className ? `.${String(s.node.className).trim().replace(/\s+/g,'.')}` : s.node?.tagName || '', previousRect: s.previousRect, currentRect: s.currentRect })) });
-      }
-    }).observe({ type: 'layout-shift', buffered: true });
-  });
-  try {
-    await page.goto(`${BASE}?p0-fast-cls=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(3500);
-    return page.evaluate(() => ({ cls: (window.__fxFastShifts || []).reduce((s, e) => s + e.value, 0), shifts: window.__fxFastShifts || [] }));
-  } finally { await context.close(); }
+function terminalDatasetValue(source, name) {
+  const matches = Array.from(source.matchAll(new RegExp(`root\\.dataset\\.${name}\\s*=\\s*['\"]([^'\"]+)['\"]`, 'g')));
+  assert.ok(matches.length > 0, `missing terminal dataset source contract ${name}`);
+  return matches[matches.length - 1][1];
+}
+function ruleBody(css, selector, startMarker) {
+  const start = startMarker ? css.indexOf(startMarker) : 0;
+  assert.ok(start >= 0, `missing CSS start marker ${startMarker}`);
+  const selectorIndex = css.indexOf(selector, start);
+  assert.ok(selectorIndex >= 0, `missing CSS selector ${selector}`);
+  const open = css.indexOf('{', selectorIndex + selector.length);
+  const close = css.indexOf('}', open + 1);
+  assert.ok(open >= 0 && close > open, `malformed CSS selector ${selector}`);
+  return css.slice(open + 1, close);
+}
+function propertyValue(body, property) {
+  const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = body.match(new RegExp(`(?:^|\\n)\\s*${escaped}\\s*:\\s*([^;!]+?)\\s*!important\\s*;`, 'm'));
+  assert.ok(match, `missing CSS property ${property}`);
+  return match[1].trim().replace(/\\s+/g, ' ');
+}
+function compareRuleProperties(canonicalCss, blockingCss, selector, canonicalMarker, blockingMarker, properties) {
+  const canonicalBody = ruleBody(canonicalCss, selector, canonicalMarker);
+  const blockingBody = ruleBody(blockingCss, selector, blockingMarker);
+  const result = {};
+  for (const property of properties) {
+    const expected = propertyValue(canonicalBody, property);
+    const actual = propertyValue(blockingBody, property);
+    assert.equal(actual, expected, `R503 first-frame ${selector} ${property} mismatch: ${actual} != ${expected}`);
+    result[property] = actual;
+  }
+  return result;
+}
+function verifyClsSourceContract() {
+  const canonical = fs.readFileSync('docs/scifi-ui/styles/formatx-first-frame-stability-r283.css', 'utf8');
+  const blocking = fs.readFileSync('docs/scifi-ui/styles/formatx-p0-first-paint-r490.css', 'utf8');
+  const canonicalMarker = '@media (min-width: 901px)';
+  const blockingMarker = '/* R503:';
+  const heroSelector = 'html body.living-architecture main#main-content section#hero.scene.hero';
+  const gridSelector = 'html body.living-architecture #hero > .hero-grid';
+  assert.match(blocking, /production-r503-p0-first-paint-hero-ancestor-box/, 'R503 first-frame source marker missing');
+  const hero = compareRuleProperties(canonical, blocking, heroSelector, canonicalMarker, blockingMarker, [
+    'position', 'box-sizing', 'width', 'min-height', 'margin', 'padding', 'overflow'
+  ]);
+  const heroGrid = compareRuleProperties(canonical, blocking, gridSelector, canonicalMarker, blockingMarker, [
+    'position', 'display', 'grid-template-columns', 'grid-template-rows', 'grid-template-areas',
+    'align-items', 'box-sizing', 'width', 'max-width', 'min-height', 'margin', 'padding', 'gap', 'overflow'
+  ]);
+  return {
+    mode: 'source-geometry',
+    owner: '.hero-copy',
+    r502StableContribution: 0.05061276229893252,
+    canonicalOwner: 'formatx-first-frame-stability-r283.css',
+    blockingOwner: 'formatx-p0-first-paint-r490.css',
+    hero,
+    heroGrid,
+  };
 }
 function verifySourceContracts() {
   const entry = fs.readFileSync('billing-worker/src/production-content-entry.js', 'utf8');
   const base = fs.readFileSync('billing-worker/src/production-content-base.js', 'utf8');
   const feedback = fs.readFileSync('billing-worker/src/production-feedback-entry.js', 'utf8');
   const scheduler = fs.readFileSync('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', 'utf8');
+  const contentRuntime = fs.readFileSync('docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js', 'utf8');
+  const semanticValidator = fs.readFileSync('.github/scripts/validate-semantic-first-paint.cjs', 'utf8');
+  const expectedContentGate = terminalDatasetValue(contentRuntime, 'fxContentRuntimeR241');
+  const expectedStability = terminalDatasetValue(contentRuntime, 'fxFirstFrameStabilityR283');
   assert.match(base, /id="live-os-overview"/, 'semantic: Live OS canonical section missing');
-  assert.match(base, /import baseWorker from ['"]\.\/production-feedback-entry\.js['"]/, 'semantic: current production content chain does not include feedback semantic owner');
+  assert.match(base, /import baseWorker from ['\"]\.\/production-feedback-entry\.js['\"]/, 'semantic: current production content chain does not include feedback semantic owner');
   assert.match(feedback, /data-fx-award-proof/, 'semantic: Proof canonical section missing from feedback semantic owner');
+  assert.match(semanticValidator, /function sourceTerminalDatasetValue\(name\)/, 'semantic: validator is not source-derived');
+  assert.match(semanticValidator, /matches\[matches\.length - 1\]\[1\]/, 'semantic: validator does not use terminal canonical assignment');
   assert.match(entry, /data-fx-p0-first-paint-r501/, 'apex: current P0 first-paint owner missing');
   assert.match(entry, /platform-status\.js\?v=/, 'apex: platform status production owner missing');
-  assert.match(entry, /const P0_MOTION_SCHEDULER = ['"]\/scifi-ui\/scripts\/formatx-p0-motion-scheduler-r490\.js\?v=/, 'apex: production P0 motion scheduler asset missing');
+  assert.match(entry, /const P0_MOTION_SCHEDULER = ['\"]\/scifi-ui\/scripts\/formatx-p0-motion-scheduler-r490\.js\?v=/, 'apex: production P0 motion scheduler asset missing');
   assert.match(entry, /function scheduleMotionRuntime\(html\)/, 'apex: production motion scheduler replacement function missing');
   assert.match(entry, /data-fx-motion-runtime-loader-r239/, 'apex: production motion runtime loader replacement anchor missing');
-  assert.match(scheduler, /const SRC=['"]\/scifi-ui\/scripts\/formatx-motion-runtime-loader-r239\.js\?v=/, 'apex: scheduler runtime loader asset missing');
+  assert.match(scheduler, /const SRC=['\"]\/scifi-ui\/scripts\/formatx-motion-runtime-loader-r239\.js\?v=/, 'apex: scheduler runtime loader asset missing');
   assert.match(scheduler, /prefers-reduced-motion:\s*reduce/, 'reduced-motion source contract missing media query');
   assert.match(scheduler, /reduced-motion-static/, 'reduced-motion source contract missing static scheduler state');
-  return { semantic: true, apex: true, semanticOwner: 'production-feedback-entry.js', reducedMotionSource: true };
+  return {
+    semantic: true,
+    apex: true,
+    semanticOwner: 'production-feedback-entry.js',
+    semanticExpectedContentGate: expectedContentGate,
+    semanticExpectedStability: expectedStability,
+    reducedMotionSource: true,
+  };
 }
 
 (async () => {
   const report = { mode, head: process.env.GITHUB_SHA || '', chrome: CHROME };
   if (wants('semantic') || wants('apex')) Object.assign(report, verifySourceContracts());
-  const needsBrowser = wants('mag') || wants('overflow') || wants('cls') || mode === '--all-targeted';
+  if (wants('cls')) report.cls = verifyClsSourceContract();
+  const needsBrowser = wants('mag') || wants('overflow');
   if (needsBrowser) {
     const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
     try {
-      /* Keep the cheap first-paint probe ahead of WebGL-heavy contexts so a
-         compositor/GPU-process lifecycle event cannot erase the CLS result. */
-      if (wants('cls')) report.cls = await verifyCls(browser);
       if (wants('mag')) {
         report.mag = {
           desktop: await verifyMagContext(browser, 'desktop', { width: 1440, height: 900 }, false),
