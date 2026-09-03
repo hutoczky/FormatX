@@ -234,8 +234,10 @@ function verifySourceContracts() {
   assert.match(feedback, /data-fx-award-proof/, 'semantic: Proof canonical section missing from feedback semantic owner');
   assert.match(entry, /data-fx-p0-first-paint-r501/, 'apex: current P0 first-paint owner missing');
   assert.match(entry, /platform-status\.js\?v=/, 'apex: platform status production owner missing');
-  assert.match(entry, /motionSchedulerJs/, 'apex: production motion scheduler asset missing');
-  assert.match(entry, /formatx-motion-runtime-r467\.js/, 'apex: production motion runtime replacement anchor missing');
+  assert.match(entry, /const P0_MOTION_SCHEDULER = ['"]\/scifi-ui\/scripts\/formatx-p0-motion-scheduler-r490\.js\?v=/, 'apex: production P0 motion scheduler asset missing');
+  assert.match(entry, /function scheduleMotionRuntime\(html\)/, 'apex: production motion scheduler replacement function missing');
+  assert.match(entry, /data-fx-motion-runtime-loader-r239/, 'apex: production motion runtime loader replacement anchor missing');
+  assert.match(scheduler, /const SRC=['"]\/scifi-ui\/scripts\/formatx-motion-runtime-loader-r239\.js\?v=/, 'apex: scheduler runtime loader asset missing');
   assert.match(scheduler, /prefers-reduced-motion:\s*reduce/, 'reduced-motion source contract missing media query');
   assert.match(scheduler, /reduced-motion-static/, 'reduced-motion source contract missing static scheduler state');
   return { semantic: true, apex: true, semanticOwner: 'production-feedback-entry.js', reducedMotionSource: true };
