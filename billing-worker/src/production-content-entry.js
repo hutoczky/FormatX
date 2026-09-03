@@ -1,12 +1,13 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R507 — preserve the proven R506 first-paint and delivery contracts,
-   while making the canonical MAG animation clock single-owner and deterministic.
-   The user PAUSE control owns UI/state/event publication; the existing R505
-   formatx-mag-shape-sync-r476.js runtime exclusively owns CSSAnimation pause/play.
-   R506 deferred-CSS, first-frame geometry and transport behavior stay unchanged. */
+/* FormatX R514 — preserve the proven R513 MAG runtime and R504/R506 first-paint
+   contracts while removing the exact R513 Lighthouse first-divergence owner from
+   the blocking path. R513 artifact 9912491940 showed critical-core-r227 as the
+   sole render blocker on the fast run and the largest modeled H3 blocker on the
+   slow runs. It now uses the existing R487 double-rAF post-first-paint scheduler;
+   MAG clock, PAUSE/RESUME, ASK and renderer ownership remain unchanged. */
 
-const STARTUP_REVISION = '20260903-r507-mag-single-clock-owner';
+const STARTUP_REVISION = '20260903-r514-critical-core-post-first-paint';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -46,6 +47,9 @@ const ROBOTS = [
 ].join('\n');
 
 const DEFERRED_STYLE_PATHS = new Set([
+  // R514: artifact-proven first-divergence owner; activate with the existing
+  // R487 double-rAF scheduler after the first painted frame.
+  '/scifi-ui/styles/formatx-critical-core-r227.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/platform-status.css',
@@ -88,7 +92,7 @@ function robotsResponse(request) {
     'X-Content-Type-Options': 'nosniff',
     'X-FormatX-Robots-Owner': 'worker-r499',
     'Alt-Svc': 'clear',
-    'X-FormatX-Transport-Stability': 'r507-mag-single-clock-owner',
+    'X-FormatX-Transport-Stability': 'r514-critical-core-post-first-paint',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -235,9 +239,9 @@ async function stabilizePublicResponse(request, url, response) {
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
   headers.set('Alt-Svc', 'clear');
-  headers.set('X-FormatX-Transport-Stability', 'r507-mag-single-clock-owner');
-  headers.set('X-FormatX-Edge-Stability', `r507-mag-clock:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r506-r487-deferred-enhancements-r504-prepaint');
+  headers.set('X-FormatX-Transport-Stability', 'r514-critical-core-post-first-paint');
+  headers.set('X-FormatX-Edge-Stability', `r514-critical-core:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r514-critical-core-r487-post-first-paint-r504-prepaint');
   headers.set('X-FormatX-Motion-Scheduler', 'r507-single-css-animation-clock-owner');
   headers.set('X-FormatX-Mag-Clock-Owner', 'shape-sync-r476-only');
   if (request.method === 'HEAD') {
