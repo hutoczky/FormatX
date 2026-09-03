@@ -21,6 +21,7 @@ ROOT.dataset.fxStartupOwnerR461='single-current-runtime-no-postdom-repair-stack'
 ROOT.dataset.fxAwardRuntimeMode='retired-from-first-load-r461';
 ROOT.dataset.fxMobileRegressionR310='retired-from-first-load-r461';
 ROOT.dataset.fxCoreReal3dCssR310='retired-r461-r326-owner';
+ROOT.dataset.fxCanonicalMagClockOwnerR507='mag-shape-sync-r476-only';
 
 function copy(){
   return ROOT.lang==='en'?{
