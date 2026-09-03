@@ -1,8 +1,7 @@
-/* FormatX R501 — deterministic first-paint safety from measured final geometry.
+/* FormatX R503 — deterministic first-paint safety from measured final geometry.
    Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
-   This blocking layer mirrors only the measured desktop hero-copy box mode that
-   was activating after first paint in R500, while preserving R500 product-state
-   ownership and the canonical MAG pause invariant. */
+   R503 mirrors only the measured desktop hero ancestor boxes in the already
+   render-blocking P0 layer, preserving R500 product-state and R502 MAG ownership. */
 
 /* Keep the readable LCP surface paintable. */
 html body.living-architecture #hero .hero-copy,
@@ -27,10 +26,42 @@ html body.living-architecture #hero .hero-copy > :is(
   transition: none !important;
 }
 
-/* R501: R500 production attribution showed the desktop copy painting as grid
-   first, then settling to the canonical block/contained box. That single
-   transition accounted for about 0.05 CLS. Mirror only that final box contract
-   in the already-blocking P0 layer; do not promote another legacy stylesheet. */
+/* R503: R502 Lighthouse attributes 0.0506127623 CLS to .hero-copy in every
+   desktop run. R501 already mirrored the copy box itself with no score change,
+   so the stable remaining owner is its ancestor geometry. Mirror only the
+   canonical r283 desktop/no-preference/fine hero and hero-grid boxes here.
+   Because this stylesheet link is unconditionally render-blocking, these final
+   boxes exist before the separate media-qualified r283 asset settles. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {
+  html body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+  }
+
+  html body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+}
+
+/* R501: keep the settled copy box contract in the blocking layer. */
 @media (min-width: 901px) {
   html body.living-architecture #hero > .hero-grid > .hero-copy {
     grid-area: copy !important;
@@ -190,4 +221,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
   }
 }
 
-/* production-r501-p0-first-paint-desktop-copy-box */
+/* production-r503-p0-first-paint-hero-ancestor-box */
