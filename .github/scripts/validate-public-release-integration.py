@@ -38,13 +38,39 @@ def require_tokens(source: str, label: str, tokens: list[str]) -> None:
         require(token in source, f"{label} missing contract: {token}")
 
 
+def active_production_entry(config: dict) -> str:
+    entry = str(config.get("main") or "")
+    canonical = "src/production-content-entry.js"
+    if entry == canonical:
+        return entry
+    if not re.fullmatch(r"src/production-content-entry-r\d+\.js", entry):
+        return ""
+    source = read(f"billing-worker/{entry}")
+    imported = re.search(
+        r"import\s+([A-Za-z_$][\w$]*)\s+from\s+['\"]\./production-content-entry\.js['\"]",
+        source,
+    )
+    if not imported:
+        return ""
+    delegate = re.escape(imported.group(1))
+    if not re.search(rf"\b{delegate}\.fetch\s*\(\s*request\s*,\s*env\s*,\s*ctx\s*\)", source):
+        return ""
+    return entry
+
+
 def production_runtime_contract() -> str:
-    """Return the actual R487 production public-content ownership chain."""
-    return "\n".join([
-        read("billing-worker/src/production-content-entry.js"),
-        read("billing-worker/src/production-content-entry-r369-base.js"),
-        read("billing-worker/src/production-content-base.js"),
+    """Return the configured production content chain with canonical wrapper ownership."""
+    config = load_json("billing-worker/wrangler.jsonc")
+    active = active_production_entry(config)
+    files: list[str] = []
+    if active and active != "src/production-content-entry.js":
+        files.append(f"billing-worker/{active}")
+    files.extend([
+        "billing-worker/src/production-content-entry.js",
+        "billing-worker/src/production-content-entry-r369-base.js",
+        "billing-worker/src/production-content-base.js",
     ])
+    return "\n".join(read(file) for file in files)
 
 
 def official_release(value: str) -> bool:
@@ -197,8 +223,8 @@ def validate_release_sync() -> None:
 def validate_worker_ownership() -> None:
     production_config = load_json("billing-worker/wrangler.jsonc")
     preview_config = load_json("wrangler.jsonc")
-    require(production_config.get("main") == "src/production-content-entry.js",
-            "Production Worker does not use production-content-entry.js")
+    require(bool(active_production_entry(production_config)),
+            "Production Worker does not preserve canonical content-wrapper ownership")
     routes = [route.get("pattern") for route in production_config.get("routes", [])]
     require(routes == ["formatxsuite.com", "www.formatxsuite.com"],
             f"Production custom-domain ownership is unexpected: {routes}")
