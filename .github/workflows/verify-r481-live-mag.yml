@@ -9,6 +9,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
       - 'docs/scifi-ui/data/r481-mag-living-balance.json'
       - '.github/workflows/verify-r481-live-mag.yml'
+      - 'docs/p0-validation-version.txt'
   workflow_dispatch:
 
 permissions:
@@ -21,9 +22,32 @@ concurrency:
 
 jobs:
   live-r482-mag:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 18
     steps:
+      - name: Check out audited revision
+        uses: actions/checkout@v5
+
+      - name: Wait for exact deployed P0 marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          origin='https://formatxsuite.com'
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$origin/p0-validation-version.txt?r482_wait=${GITHUB_RUN_ID}_${attempt}" -o "$RUNNER_TEMP/live-p0.txt"; then
+              if cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+                echo 'Exact source P0 marker is live; R482 live verification is applicable.'
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          echo 'Exact source SHA marker never reached production; refusing stale live verification.' >&2
+          exit 1
+
       - name: Install Chromium verifier
         shell: bash
         run: |
@@ -182,10 +206,10 @@ jobs:
           set -euo pipefail
           if [[ "$JOB_STATUS" == success ]]; then
             state=success
-            description='R482 live mobile + desktop MAG spectrum passed'
+            description='R482 exact-live mobile + desktop MAG spectrum passed'
           else
             state=failure
-            description='R482 live MAG spectrum verification failed'
+            description='R482 exact-live MAG spectrum verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
