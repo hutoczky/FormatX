@@ -4,10 +4,17 @@ on:
   push:
     branches: [master]
     paths:
+      - 'docs/styles.css'
+      - 'docs/scifi-ui/styles/responsive-parity.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-unified.css'
+      - 'docs/scifi-ui/styles/organism-voice.css'
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
+      - 'docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'
+      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
       - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
       - 'billing-worker/src/production-content-entry.js'
       - 'billing-worker/src/production-content-base.js'
+      - 'billing-worker/src/production-feedback-entry.js'
       - '.github/scripts/p0-fast-loop.cjs'
       - '.github/workflows/p0-fast-loop.yml'
   workflow_dispatch:
