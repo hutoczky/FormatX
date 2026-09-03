@@ -40,6 +40,17 @@ function productionRuntimeContract() {
   ].join('\n');
 }
 
+function productionContentWrapperActive(config) {
+  const main = String(config?.main || '');
+  if (main === 'src/production-content-entry.js') return true;
+  if (!/^src\/production-content-entry-r\d+\.js$/.test(main)) return false;
+  const source = read(`billing-worker/${main}`);
+  const imported = source.match(/import\s+([A-Za-z_$][\w$]*)\s+from\s+['"]\.\/production-content-entry\.js['"]/);
+  if (!imported) return false;
+  const delegate = imported[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${delegate}\\.fetch\\s*\\(\\s*request\\s*,\\s*env\\s*,\\s*ctx\\s*\\)`).test(source);
+}
+
 const production = json('billing-worker/wrangler.jsonc');
 const preview = json('wrangler.jsonc');
 const release = json('docs/scifi-ui/data/current-release.json');
@@ -71,7 +82,7 @@ const robots = read('docs/robots.txt');
 
 check(
   'production-worker',
-  production.main === 'src/production-content-entry.js'
+  productionContentWrapperActive(production)
     && JSON.stringify((production.routes || []).map(route => route.pattern))
       === JSON.stringify(['formatxsuite.com', 'www.formatxsuite.com']),
   'Production Worker ownership is invalid'
