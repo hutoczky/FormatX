@@ -10,6 +10,7 @@ const exists = file => fs.existsSync(path.join(root, file));
 const required = [
   'billing-worker/src/feedback-api.js',
   'billing-worker/src/production-feedback-entry.js',
+  'billing-worker/src/production-content-entry-r369-base.js',
   'billing-worker/src/production-content-base.js',
   'billing-worker/license-migrations/0002_user_feedback.sql',
   'docs/scifi-ui/scripts/formatx-feedback.js',
@@ -22,6 +23,7 @@ const required = [
 required.forEach(file => assert.ok(exists(file), `Missing public evidence file: ${file}`));
 
 const contentEntry = read('billing-worker/src/production-content-entry.js');
+const routingBase = read('billing-worker/src/production-content-entry-r369-base.js');
 const contentBase = read('billing-worker/src/production-content-base.js');
 const feedbackApi = read('billing-worker/src/feedback-api.js');
 const feedbackUi = read('docs/scifi-ui/scripts/formatx-feedback.js');
@@ -35,7 +37,8 @@ const summaryStart = feedbackApi.indexOf('async function feedbackSummary');
 const summaryEnd = feedbackApi.indexOf('async function submitFeedback');
 const publicSummary = summaryStart >= 0 && summaryEnd > summaryStart ? feedbackApi.slice(summaryStart, summaryEnd) : '';
 
-assert.match(contentEntry, /production-content-base\.js/, 'public routing wrapper is not delegating to the content pipeline');
+assert.match(contentEntry, /production-content-entry-r369-base\.js/, 'current public stability wrapper is not delegating to the canonical routing layer');
+assert.match(routingBase, /production-content-base\.js/, 'canonical routing layer is not delegating to the content pipeline');
 assert.match(contentBase, /production-feedback-entry\.js/, 'production feedback wrapper is not active in the content pipeline');
 assert.match(contentBase, /id=\"live-os-overview\"/, 'static indexable Live OS section missing');
 assert.match(contentBase, /itemtype=\"https:\/\/schema\.org\/SoftwareApplication\"/, 'SoftwareApplication microdata missing');
@@ -78,9 +81,11 @@ assert.match(report, /Desktop és mobil minőségkapuk/, 'current technical qual
 assert.match(report, /No independent professional review has been published|Nincs publikált független szakmai teszt/, 'honest external evidence gap missing');
 assert.match(report, /Még hiányzó külső bizonyíték/, 'current external evidence-gap section missing');
 assert.match(report, /Seamless-v7 natív folytonos görgetés/, 'current continuous-scroll evidence section missing');
-assert.match(reportDownload, /Performance: legalább 90/, 'downloadable report gate missing');
+assert.match(reportDownload, /Lighthouse Performance: \*\*100\*\*/, 'downloadable report strict P0 performance gate missing');
+assert.match(reportDownload, /Lighthouse SEO: \*\*100\*\*/, 'downloadable report strict P0 SEO gate missing');
 assert.match(reportDownload, /Moderált felhasználói értékelés/, 'downloadable feedback moderation report missing');
-assert.match(reportDownload, /minden eszközre garantált 120 FPS nincs állítva|minden eszközre garantált 60 vagy 120 FPS field eredmény/, 'non-guaranteed field FPS disclosure missing');
+assert.match(reportDownload, /nem helyettesítik a valós felhasználói RUM\/field mérést/, 'field-performance evidence boundary missing');
+assert.match(reportDownload, /Lighthouse navigation vagy TBT eredmény önmagában nem bizonyít production INP PASS/, 'field INP evidence boundary missing');
 assert.match(sitemap, /technical-report\.html/, 'technical report is absent from sitemap');
 
 (async () => {

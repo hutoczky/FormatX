@@ -10,6 +10,7 @@ const styles = read('docs/scifi-ui/styles/formatx-feedback.css');
 const compatible = read('docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg');
 const schema = read('billing-worker/src/feedback-schema.js');
 const entry = read('billing-worker/src/production-feedback-entry.js');
+const feedbackApi = read('billing-worker/src/feedback-api.js');
 const workerConfig = read('billing-worker/wrangler.jsonc');
 const matrix = read('.github/scripts/validate-responsive-production-matrix.cjs');
 
@@ -59,7 +60,10 @@ assert.ok(
 assert.match(matrix, /ratingColumns/, 'matrix must verify feedback rating layout');
 
 assert.match(schema, /PRAGMA table_info\(user_feedback\)/, 'D1 feedback schema verification is missing');
-assert.match(entry, /ensureFeedbackSchemaCompatibility/, 'feedback entry must migrate the D1 schema before handling requests');
+assert.match(entry, /handleFeedbackRequest/, 'production feedback entry must delegate to the feedback API');
+assert.match(feedbackApi, /createFeedbackTableIfMissing/, 'feedback API must bootstrap a missing canonical table');
+assert.match(schema, /ensureFeedbackSchemaCompatibility/, 'maintenance-only D1 compatibility helper is missing');
+assert.doesNotMatch(entry, /ensureFeedbackSchemaCompatibility/, 'D1 maintenance migration must not block every public request');
 assert.match(workerConfig, /"main": "src\/production-content-entry\.js"/, 'unexpected production Worker entry');
 
 console.log('FormatX mobile showcase, feedback and responsive matrix validation passed with direct compatible asset ownership.');
