@@ -14,6 +14,8 @@ const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(ma
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r502-mag-pause-ownership';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
+const REFERENCE_FIRST_PAINT_STATE = "document.documentElement.dataset.fxReferenceProductionR244=matchMedia('(max-width: 900px)').matches?'ready':'desktop';";
+const REFERENCE_FIRST_PAINT_SCRIPT = `<script data-fx-reference-first-paint-r504="true">${REFERENCE_FIRST_PAINT_STATE}</script>`;
 const META_CSP = "default-src 'self';base-uri 'self';object-src 'none';script-src 'self' 'sha256-G5n9M4P0L5SRhfb6wEKZXWR7jW5EtgZHj5zzAsDobuI=' https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'";
 const HEADER_CSP = [
   "default-src 'self'",
@@ -91,6 +93,13 @@ function normalizeMetaCsp(html) {
     return source.replace(/<meta\b[^>]*http-equiv=["']Content-Security-Policy["'][^>]*>/i, tag);
   }
   return source.replace(/<meta\s+name=["']color-scheme["'][^>]*>/i, match => `${match}\n  ${tag}`);
+}
+function normalizeReferenceFirstPaintState(html) {
+  let source = String(html || '');
+  source = source.replace(/<script\b[^>]*\bdata-fx-reference-first-paint-r504=["']true["'][^>]*>[\s\S]*?<\/script>\s*/gi, '');
+  source = source.replace(/<meta\b[^>]*http-equiv=["']Content-Security-Policy["'][^>]*>\s*/gi, '');
+  const criticalHead = `\n  <meta http-equiv="Content-Security-Policy" content="${META_CSP}">\n  ${REFERENCE_FIRST_PAINT_SCRIPT}`;
+  return source.replace(/<head\b[^>]*>/i, match => `${match}${criticalHead}`);
 }
 function stylesheetPath(tag) {
   const hrefMatch = tag.match(/\bhref=(["'])(.*?)\1/i);
@@ -227,7 +236,10 @@ async function stabilizePublicResponse(request, url, response) {
   }
   let html = await response.text();
   html = normalizeMetaCsp(html);
-  if (HOMEPAGE_PATHS.has(url.pathname)) html = optimizeHomepage(html);
+  if (HOMEPAGE_PATHS.has(url.pathname)) {
+    html = optimizeHomepage(html);
+    html = normalizeReferenceFirstPaintState(html);
+  }
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
   headers.delete('ETag');

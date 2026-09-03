@@ -255,6 +255,8 @@ function verifyClsSourceContract() {
   assert.ok(firstStylesheetIndex > stateScriptIndex, 'R504 reference state must be resolved before stylesheet discovery');
   assert.ok(index.includes(`script-src 'self' '${stateHash}'`), 'R504 source CSP does not authorize the exact state seed');
   assert.ok(entry.includes(`script-src 'self' '${stateHash}'`), 'R504 production CSP does not authorize the exact state seed');
+  assert.match(entry, /function normalizeReferenceFirstPaintState\(html\)/, 'R504 production state ordering owner missing');
+  assert.match(entry, /html = normalizeReferenceFirstPaintState\(html\)/, 'R504 production state ordering owner is not active');
   const canonicalMarker = '@media (min-width: 901px)';
   const blockingMarker = '/* R503:';
   const heroSelector = 'html body.living-architecture main#main-content section#hero.scene.hero';
