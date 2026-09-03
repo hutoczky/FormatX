@@ -45,7 +45,20 @@ jobs:
           set -euo pipefail
           npm ci --prefix billing-worker
           npm install --no-save --no-package-lock playwright@1.62.0
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
+
+      - name: Build local-only candidate config
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const source = JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete source.ai;
+          delete source.routes;
+          source.workers_dev = true;
+          fs.writeFileSync('billing-worker/wrangler.r515-candidate.json', JSON.stringify(source,null,2)+'\n');
+          NODE
 
       - name: Start exact candidate Worker locally
         shell: bash
@@ -54,6 +67,7 @@ jobs:
           echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
           cd billing-worker
           nohup npx wrangler dev \
+            --config wrangler.r515-candidate.json \
             --ip 127.0.0.1 \
             --port 8787 \
             --local-protocol https \
