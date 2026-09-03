@@ -24,19 +24,53 @@ def valid_sha256(value: object) -> bool:
     return bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(value or "")))
 
 
-def production_runtime_contract() -> str:
-    """Validate the real production delegation chain, not just its edge wrapper.
+def active_production_entry() -> str:
+    """Return the configured production entry only when it preserves wrapper ownership.
 
-    R487 intentionally keeps edge/CSP/first-paint scheduling in
-    production-content-entry.js while the canonical routing shell and content
-    injection remain delegated through r369-base into production-content-base.js.
-    Treat that import chain as one production runtime contract.
+    A versioned edge entry is valid only when it directly delegates fetch() to the
+    canonical production-content-entry.js wrapper. This keeps the semantic content
+    wrapper contract while allowing evidence-backed transport/first-paint edge layers.
     """
-    return "\n".join([
-        module.read("billing-worker/src/production-content-entry.js"),
-        module.read("billing-worker/src/production-content-entry-r369-base.js"),
-        module.read("billing-worker/src/production-content-base.js"),
+    config = module.read("billing-worker/wrangler.jsonc")
+    match = re.search(r'"main"\s*:\s*"([^"]+)"', config)
+    if not match:
+        module.fail("Production config does not declare a Worker main entry")
+        return "src/production-content-entry.js"
+
+    entry = match.group(1)
+    canonical = "src/production-content-entry.js"
+    if entry == canonical:
+        return entry
+    if not re.fullmatch(r"src/production-content-entry-r\d+\.js", entry):
+        module.fail(f"Production entry is not a canonical or versioned content wrapper: {entry}")
+        return entry
+
+    source = module.read(f"billing-worker/{entry}")
+    import_match = re.search(
+        r"import\s+([A-Za-z_$][\w$]*)\s+from\s+['\"]\./production-content-entry\.js['\"]",
+        source,
+    )
+    if not import_match:
+        module.fail(f"Versioned production entry does not delegate to the canonical content wrapper: {entry}")
+        return entry
+    delegate = re.escape(import_match.group(1))
+    if not re.search(rf"\b{delegate}\.fetch\s*\(\s*request\s*,\s*env\s*,\s*ctx\s*\)", source):
+        module.fail(f"Versioned production entry imports but does not execute the canonical content wrapper: {entry}")
+    return entry
+
+
+def production_runtime_contract() -> str:
+    """Validate the active production delegation chain, not a frozen entry filename."""
+    active = active_production_entry()
+    files = []
+    if active != "src/production-content-entry.js":
+        files.append(f"billing-worker/{active}")
+    files.extend([
+        "billing-worker/src/production-content-entry.js",
+        "billing-worker/src/production-content-entry-r369-base.js",
+        "billing-worker/src/production-content-base.js",
     ])
+    return "\n".join(module.read(file) for file in files)
 
 
 def validate_release_metadata_v2() -> None:
@@ -204,8 +238,7 @@ def validate_runtime_contract_v2() -> None:
             if token not in source:
                 module.fail(f"{name} content wrapper missing {token}")
 
-    if '"main": "src/production-content-entry.js"' not in module.read("billing-worker/wrangler.jsonc"):
-        module.fail("Production does not use the content wrapper")
+    active_production_entry()
     if '"main": "content-preview-entry.js"' not in module.read("wrangler.jsonc"):
         module.fail("Preview does not use the content wrapper")
 

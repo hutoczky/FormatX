@@ -53,6 +53,17 @@ function localTargetExists(pageFile, html, raw) {
   return fs.existsSync(target) || fs.existsSync(target + '.html') || fs.existsSync(path.join(target, 'index.html'));
 }
 
+function productionContentWrapperActive(config) {
+  const main = String(config?.main || '');
+  if (main === 'src/production-content-entry.js') return true;
+  if (!/^src\/production-content-entry-r\d+\.js$/.test(main)) return false;
+  const source = read(`billing-worker/${main}`);
+  const imported = source.match(/import\s+([A-Za-z_$][\w$]*)\s+from\s+['"]\.\/production-content-entry\.js['"]/);
+  if (!imported) return false;
+  const delegate = imported[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${delegate}\\.fetch\\s*\\(\\s*request\\s*,\\s*env\\s*,\\s*ctx\\s*\\)`).test(source);
+}
+
 const htmlFiles = walk(publicRoot).filter(file => file.endsWith('.html'));
 assert.ok(htmlFiles.length >= 10, 'unexpectedly small public HTML surface');
 for (const file of htmlFiles) {
@@ -146,7 +157,7 @@ if (!feedbackEntry.includes("['/downloads/', '/scifi-ui/downloads/']")) report('
 if (!feedbackApi.includes('publish_permission = 1')) report('feedback API: consent-gated public review query missing');
 
 if (!productionEntry.includes('formatx-infinite-scroll.js') || !productionEntry.includes('data-fx-seamless-scroll-runtime')) report('production entry: scroll bootstrap delivery missing');
-if (productionConfig.main !== 'src/production-content-entry.js') report('production config: content wrapper is not active');
+if (!productionContentWrapperActive(productionConfig)) report('production config: content wrapper is not active');
 const domains = (productionConfig.routes || []).map(route => route.pattern);
 if (domains.join(',') !== 'formatxsuite.com,www.formatxsuite.com') report('production config: custom-domain ownership incomplete');
 
