@@ -123,8 +123,9 @@ jobs:
               const css=String(getComputedStyle(canvas).animationPlayState||'').split(',').map(value=>value.trim()).filter(Boolean);
               const animations=canvas.getAnimations();
               if(!animations.length)return false;
-              if(paused)return css.length>0&&css.every(value=>value==='paused')&&animations.every(animation=>animation.playState!=='running');
-              return css.some(value=>value==='running')&&animations.some(animation=>animation.playState==='running');
+              const settled=animations.every(animation=>!animation.pending);
+              if(paused)return settled&&css.length>0&&css.every(value=>value==='paused')&&animations.every(animation=>animation.playState!=='running');
+              return settled&&css.some(value=>value==='running')&&animations.some(animation=>animation.playState==='running');
             },{canvasSel:CANVAS,paused},{timeout:1000});
           }
           function byId(state){return new Map(state.animations.map(a=>[a.id,a]));}
@@ -165,9 +166,11 @@ jobs:
                 const p0=await snapshot(page,`c${cycle}-pause-committed+0`);
                 await page.waitForTimeout(100);const p100=await snapshot(page,`c${cycle}-pause-committed+100`);
                 await page.waitForTimeout(200);const p300=await snapshot(page,`c${cycle}-pause-committed+300`);
+                const cycleEvidence={cycle,p0,p100,p300};
+                result.cycles.push(cycleEvidence);
                 assert.deepEqual(identity(p300),stableIdentity,`${kind} ${index} c${cycle}: pause recreated animation`);
                 assert.ok(maxDelta(p0,p300)<80,`${kind} ${index} c${cycle}: pause clock drift`);
-                assert.ok(p300.animations.every(a=>a.playState!=='running'),`${kind} ${index} c${cycle}: animation still running while paused`);
+                assert.ok(p300.animations.every(a=>a.playState!=='running'&&!a.pending),`${kind} ${index} c${cycle}: animation not settled while paused`);
 
                 await pause.click();
                 await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.paused!=='true',PAUSE,{timeout:3000});
@@ -177,12 +180,12 @@ jobs:
                 await page.waitForTimeout(100);const r150=await snapshot(page,`c${cycle}-resume-committed+150`);
                 await page.waitForTimeout(150);const r300=await snapshot(page,`c${cycle}-resume-committed+300`);
                 await page.waitForTimeout(300);const r600=await snapshot(page,`c${cycle}-resume-committed+600`);
+                Object.assign(cycleEvidence,{r0,r50,r150,r300,r600,resumeAdvance:maxAdvance(r0,r600)});
                 assert.deepEqual(identity(r600),stableIdentity,`${kind} ${index} c${cycle}: resume recreated animation`);
-                assert.ok(r600.animations.some(a=>a.playState==='running'),`${kind} ${index} c${cycle}: resume state not running`);
+                assert.ok(r600.animations.some(a=>a.playState==='running'&&!a.pending),`${kind} ${index} c${cycle}: resume state not running/settled`);
                 assert.ok(maxAdvance(r0,r600)>200,`${kind} ${index} c${cycle}: resume clock stalled`);
                 assert.equal(r600.root.referencePaused,'false',`${kind} ${index} c${cycle}: user pause flag remained set`);
                 assert.equal(r600.root.primaryPlayback,'running',`${kind} ${index} c${cycle}: primary playback not running`);
-                result.cycles.push({cycle,p0,p100,p300,r0,r50,r150,r300,r600,resumeAdvance:maxAdvance(r0,r600)});
               }
               return result;
             }catch(error){
