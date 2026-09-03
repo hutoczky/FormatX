@@ -1,9 +1,10 @@
-/* FormatX R476/R505 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R508 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
    R502 binds delayed compositor sync to the canonical pause state and pins the
    CSSAnimation clock while paused, including any recreated animation instance.
-   R505 resumes from that already-pinned hold time instead of writing currentTime
-   again after the CSS animation returns to running state. */
+   R505 avoids writing currentTime after the CSS animation returns to running.
+   R508 removes WAAPI pause/play lifecycle ownership entirely: canonical CSS
+   animation-play-state owns PAUSE/RESUME, while JS only preserves paused time. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -98,20 +99,11 @@ function freezeAnimation(animation,key){
     frozen=Number.isFinite(now)?now:0;
     frozenClockByName.set(key,frozen);
   }
-  try{animation.pause();}catch(_){}
+  /* R508: CSS animation-play-state has already made the canonical animation
+     paused. Preserve only the hold time. Calling Animation.pause() as well
+     creates a second asynchronous lifecycle owner and can leave Chromium with
+     a pending WAAPI task whose resolution depends on runner scheduling. */
   try{animation.currentTime=frozen;}catch(_){}
-}
-function resumeAnimation(animation,key){
-  const frozen=frozenClockByName.get(key);
-  /* R505: freezeAnimation already pins every current/recreated CSSAnimation
-     instance while paused. Re-writing currentTime after animation-play-state
-     becomes running can leave Chromium with a held CSSAnimation timeline under
-     the R504 prepaint reference state. Only seed a genuinely unresolved newly
-     recreated instance; otherwise play directly from its existing hold time. */
-  if(Number.isFinite(frozen)&&typeof animation.currentTime!=='number'){
-    try{animation.currentTime=frozen;}catch(_){}
-  }
-  try{animation.play();}catch(_){}
 }
 function syncPrimaryPlayback(paused=userPaused()){
   const canvas=primaryCanvas();
@@ -119,15 +111,18 @@ function syncPrimaryPlayback(paused=userPaused()){
   const stop=reduced.matches||paused;
   canvas.style.setProperty('animation-play-state',stop?'paused':'running','important');
   const animations=canvas.getAnimations();
-  animations.forEach((animation,index)=>{
-    const key=animationKey(animation,index);
-    if(stop)freezeAnimation(animation,key);
-    else resumeAnimation(animation,key);
-  });
-  if(!stop)frozenClockByName.clear();
+  if(stop){
+    animations.forEach((animation,index)=>freezeAnimation(animation,animationKey(animation,index)));
+  }else{
+    /* R505/R508: do not write currentTime and do not call Animation.play().
+       Releasing CSS animation-play-state is the only resume transition, so
+       there is no pending WAAPI play task to race the document timeline. */
+    frozenClockByName.clear();
+  }
   root.dataset.fxPrimaryMagPlaybackR498=stop?(reduced.matches?'reduced':'paused'):'running';
   root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
   root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
+  root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
   return true;
 }
 function syncPlaybackSoon(forcePause=false){
@@ -206,6 +201,7 @@ function sync(){
   root.dataset.fxPrimaryMagPauseContractR498='persistent-css-animation-clock-waapi-play-state';
   root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
   root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
+  root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
