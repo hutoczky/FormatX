@@ -11,15 +11,19 @@ const legacy = read('formatx-mobile-reference-layout-v1.js');
 
 const telemetryStart = canonical.indexOf('function syncCanonicalMagAnimations(');
 const telemetryEnd = canonical.indexOf('\nfunction bindPause(', telemetryStart);
-assert.ok(telemetryStart >= 0 && telemetryEnd > telemetryStart, 'R507 canonical MAG telemetry function missing');
+assert.ok(telemetryStart >= 0 && telemetryEnd > telemetryStart, 'R508 canonical MAG telemetry function missing');
 const telemetryBody = canonical.slice(telemetryStart, telemetryEnd);
-assert.doesNotMatch(telemetryBody, /\.getAnimations\s*\(/, 'R507 control owner must not enumerate CSS animations');
-assert.doesNotMatch(telemetryBody, /\.pause\s*\(/, 'R507 control owner must not pause the CSSAnimation clock directly');
-assert.doesNotMatch(telemetryBody, /\.play\s*\(/, 'R507 control owner must not resume the CSSAnimation clock directly');
+assert.doesNotMatch(telemetryBody, /\.getAnimations\s*\(/, 'R508 control owner must not enumerate CSS animations');
+assert.doesNotMatch(telemetryBody, /\.pause\s*\(/, 'R508 control owner must not pause the CSSAnimation clock directly');
+assert.doesNotMatch(telemetryBody, /\.play\s*\(/, 'R508 control owner must not resume the CSSAnimation clock directly');
 assert.match(telemetryBody, /fxCanonicalMagClockOwnerR507=['\"]mag-shape-sync-r476-only['\"]/, 'R507 explicit MAG clock ownership marker missing');
-assert.match(shapeSync, /canvas\.getAnimations\(\)/, 'MAG shape-sync must enumerate the canonical CSSAnimation');
-assert.match(shapeSync, /animation\.pause\(\)/, 'MAG shape-sync must own canonical pause');
-assert.match(shapeSync, /animation\.play\(\)/, 'MAG shape-sync must own canonical resume');
+
+assert.match(shapeSync, /canvas\.getAnimations\(\)/, 'R508 MAG shape-sync must enumerate the canonical CSSAnimation for paused currentTime preservation');
+assert.match(shapeSync, /animation\.currentTime=frozen/, 'R508 MAG shape-sync must preserve canonical currentTime while CSS-paused');
+assert.match(shapeSync, /animation-play-state['\"],stop\?['\"]paused['\"]:['\"]running['\"]/, 'R508 CSS animation-play-state transition owner missing');
+assert.doesNotMatch(shapeSync, /animation\.pause\s*\(/, 'R508 must not create a WAAPI pending-pause lifecycle owner');
+assert.doesNotMatch(shapeSync, /animation\.play\s*\(/, 'R508 must not create a WAAPI pending-play lifecycle owner');
+assert.match(shapeSync, /fxPrimaryMagPauseContractR508=['\"]css-play-state-owner-currenttime-pin-no-waapi-lifecycle['\"]/, 'R508 pause/resume ownership marker missing');
 
 class Element {}
 class Button extends Element {
@@ -86,4 +90,4 @@ button.listeners[0](event('click', true));
 assert.equal(button.dataset.paused, 'true');
 assert.equal(events.length, 2);
 assert.deepEqual(canonicalStateSync, [true, false], 'Default-prevented legacy clicks must not mutate canonical state');
-console.log('PASS: R507 keeps one user PAUSE event owner and one CSSAnimation clock owner; physical, keyboard and cached-legacy activation remain single-toggle.');
+console.log('PASS: R508 keeps one user PAUSE event owner and one CSS animation-play-state clock owner; no WAAPI pause/play lifecycle race remains.');
