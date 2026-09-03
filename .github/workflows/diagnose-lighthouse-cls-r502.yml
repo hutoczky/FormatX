@@ -1,0 +1,50 @@
+name: Diagnose R502 Lighthouse CLS owner
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/scripts/diagnose-lighthouse-cls-r502.cjs'
+      - '.github/workflows/diagnose-lighthouse-cls-r502.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-r502-lighthouse-cls-owner
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      FORMATX_TEST_URL: https://formatxsuite.com/
+      FORMATX_R502_DIAG_DIR: artifacts/r502-lighthouse-cls
+      FORMATX_R502_DIAG_RUNS: '6'
+    steps:
+      - name: Checkout diagnostic revision
+        uses: actions/checkout@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate diagnostic syntax
+        run: node --check .github/scripts/diagnose-lighthouse-cls-r502.cjs
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Measure 1350x940 cold first-paint CLS
+        run: node .github/scripts/diagnose-lighthouse-cls-r502.cjs
+      - name: Upload R502 CLS evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r502-lighthouse-cls-${{ github.sha }}
+          path: artifacts/r502-lighthouse-cls/
+          if-no-files-found: warn
+          retention-days: 30
