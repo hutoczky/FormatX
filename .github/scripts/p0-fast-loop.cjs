@@ -279,7 +279,10 @@ function verifySourceContracts() {
   assert.match(feedback, /data-fx-award-proof/, 'semantic: Proof canonical section missing from feedback semantic owner');
   assert.match(semanticValidator, /function sourceTerminalDatasetValue\(name\)/, 'semantic: validator is not source-derived');
   assert.match(semanticValidator, /matches\[matches\.length - 1\]\[1\]/, 'semantic: validator does not use terminal canonical assignment');
-  assert.match(entry, /data-fx-p0-first-paint-r501/, 'apex: current P0 first-paint owner missing');
+  const p0FirstPaintMatch = entry.match(/const P0_FIRST_PAINT_LINK = '([^']+)'/);
+  assert.ok(p0FirstPaintMatch, 'apex: current P0 first-paint link missing');
+  assert.match(p0FirstPaintMatch[1], /data-fx-p0-first-paint-r\d+="true"/, 'apex: current P0 first-paint revision marker missing');
+  assert.match(p0FirstPaintMatch[1], /\/scifi-ui\/styles\/formatx-p0-first-paint-r490\.css\?v=/, 'apex: current P0 first-paint asset missing');
   assert.match(entry, /platform-status\.js\?v=/, 'apex: platform status production owner missing');
   assert.match(entry, /const P0_MOTION_SCHEDULER = ['\"]\/scifi-ui\/scripts\/formatx-p0-motion-scheduler-r490\.js\?v=/, 'apex: production P0 motion scheduler asset missing');
   assert.match(entry, /function scheduleMotionRuntime\(html\)/, 'apex: production motion scheduler replacement function missing');
