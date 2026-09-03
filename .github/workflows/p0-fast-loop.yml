@@ -116,6 +116,17 @@ jobs:
               };
             },{canvasSel:CANVAS,pauseSel:PAUSE,label});
           }
+          async function waitForPlaybackCommit(page,paused){
+            await page.waitForFunction(({canvasSel,paused})=>{
+              const canvas=document.querySelector(canvasSel);
+              if(!(canvas instanceof HTMLCanvasElement))return false;
+              const css=String(getComputedStyle(canvas).animationPlayState||'').split(',').map(value=>value.trim()).filter(Boolean);
+              const animations=canvas.getAnimations();
+              if(!animations.length)return false;
+              if(paused)return css.length>0&&css.every(value=>value==='paused')&&animations.every(animation=>animation.playState!=='running');
+              return css.some(value=>value==='running')&&animations.some(animation=>animation.playState==='running');
+            },{canvasSel:CANVAS,paused},{timeout:1000});
+          }
           function byId(state){return new Map(state.animations.map(a=>[a.id,a]));}
           function identity(state){return state.animations.map(a=>`${a.id}:${a.animationName}`).sort();}
           function maxDelta(a,b){
@@ -137,7 +148,7 @@ jobs:
             const page=await context.newPage();
             const result={kind,index,cycles:[]};
             try{
-              await page.goto(`${BASE}?r507-determinism=${kind}-${index}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
+              await page.goto(`${BASE}?r512-determinism=${kind}-${index}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
               await activate(page);
               const baseline=await snapshot(page,'baseline');
               await page.waitForTimeout(350);
@@ -150,20 +161,22 @@ jobs:
               for(let cycle=1;cycle<=5;cycle++){
                 await pause.click();
                 await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.paused==='true',PAUSE,{timeout:3000});
-                const p0=await snapshot(page,`c${cycle}-pause+0`);
-                await page.waitForTimeout(100);const p100=await snapshot(page,`c${cycle}-pause+100`);
-                await page.waitForTimeout(200);const p300=await snapshot(page,`c${cycle}-pause+300`);
+                await waitForPlaybackCommit(page,true);
+                const p0=await snapshot(page,`c${cycle}-pause-committed+0`);
+                await page.waitForTimeout(100);const p100=await snapshot(page,`c${cycle}-pause-committed+100`);
+                await page.waitForTimeout(200);const p300=await snapshot(page,`c${cycle}-pause-committed+300`);
                 assert.deepEqual(identity(p300),stableIdentity,`${kind} ${index} c${cycle}: pause recreated animation`);
                 assert.ok(maxDelta(p0,p300)<80,`${kind} ${index} c${cycle}: pause clock drift`);
                 assert.ok(p300.animations.every(a=>a.playState!=='running'),`${kind} ${index} c${cycle}: animation still running while paused`);
 
                 await pause.click();
                 await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.paused!=='true',PAUSE,{timeout:3000});
-                const r0=await snapshot(page,`c${cycle}-resume+0`);
-                await page.waitForTimeout(50);const r50=await snapshot(page,`c${cycle}-resume+50`);
-                await page.waitForTimeout(100);const r150=await snapshot(page,`c${cycle}-resume+150`);
-                await page.waitForTimeout(150);const r300=await snapshot(page,`c${cycle}-resume+300`);
-                await page.waitForTimeout(300);const r600=await snapshot(page,`c${cycle}-resume+600`);
+                await waitForPlaybackCommit(page,false);
+                const r0=await snapshot(page,`c${cycle}-resume-committed+0`);
+                await page.waitForTimeout(50);const r50=await snapshot(page,`c${cycle}-resume-committed+50`);
+                await page.waitForTimeout(100);const r150=await snapshot(page,`c${cycle}-resume-committed+150`);
+                await page.waitForTimeout(150);const r300=await snapshot(page,`c${cycle}-resume-committed+300`);
+                await page.waitForTimeout(300);const r600=await snapshot(page,`c${cycle}-resume-committed+600`);
                 assert.deepEqual(identity(r600),stableIdentity,`${kind} ${index} c${cycle}: resume recreated animation`);
                 assert.ok(r600.animations.some(a=>a.playState==='running'),`${kind} ${index} c${cycle}: resume state not running`);
                 assert.ok(maxAdvance(r0,r600)>200,`${kind} ${index} c${cycle}: resume clock stalled`);
@@ -172,6 +185,11 @@ jobs:
                 result.cycles.push({cycle,p0,p100,p300,r0,r50,r150,r300,r600,resumeAdvance:maxAdvance(r0,r600)});
               }
               return result;
+            }catch(error){
+              result.error=String(error&&error.stack||error);
+              try{result.failureState=await snapshot(page,'failure');}catch(stateError){result.failureStateError=String(stateError);}
+              fs.writeFileSync(`artifacts/p0-fast-loop/mag-determinism-failure-${kind}-${index}.json`,JSON.stringify(result,null,2));
+              throw error;
             }finally{await context.close();}
           }
           (async()=>{
