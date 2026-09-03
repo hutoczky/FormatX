@@ -1,12 +1,13 @@
-/* FormatX R476/R509 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R510 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
-   R502 binds delayed compositor sync to the canonical pause state and pins the
-   CSSAnimation clock while paused, including any recreated animation instance.
+   R502 binds delayed compositor sync to the canonical pause state and preserves
+   the CSSAnimation clock when a paused animation instance is recreated.
    R505 avoids writing currentTime after the CSS animation returns to running.
    R508 removes WAAPI pause/play lifecycle ownership entirely: canonical CSS
-   animation-play-state owns PAUSE/RESUME, while JS only preserves paused time.
-   R509 deterministically resolves the hold time created by that preservation
-   without reintroducing Animation.pause()/play() lifecycle ownership. */
+   animation-play-state owns PAUSE/RESUME.
+   R509 resolved explicit holds against the document timeline. R510 avoids
+   creating that hold on the normal stable-object path: currentTime is written
+   only when a genuinely recreated paused CSSAnimation needs phase restoration. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -95,29 +96,38 @@ function animationKey(animation,index){
   return name||`animation-${index}`;
 }
 function freezeAnimation(animation,key){
-  let frozen=frozenClockByName.get(key);
-  if(!Number.isFinite(frozen)){
+  let state=frozenClockByName.get(key);
+  if(!state||!Number.isFinite(state.time)){
     const now=Number(animation.currentTime);
-    frozen=Number.isFinite(now)?now:0;
-    frozenClockByName.set(key,frozen);
+    state={time:Number.isFinite(now)?now:0,animation,pinned:false};
+    frozenClockByName.set(key,state);
+    return;
   }
-  /* R508: CSS animation-play-state has already made the canonical animation
-     paused. Preserve only the hold time. Calling Animation.pause() as well
-     creates a second asynchronous lifecycle owner and can leave Chromium with
-     a pending WAAPI task whose resolution depends on runner scheduling. */
-  try{animation.currentTime=frozen;}catch(_){}
+  /* R510: CSS animation-play-state already freezes a stable CSSAnimation by
+     itself. Writing currentTime on that same object creates an unnecessary WAAPI
+     hold which can stall DocumentTimeline progress after RESUME on a hosted
+     Chromium runner. Only a genuinely recreated paused animation needs its
+     visual phase restored to the previously frozen time. */
+  if(state.animation===animation)return;
+  state.animation=animation;
+  const frozen=state.time;
+  try{animation.currentTime=frozen;state.pinned=true;}catch(_){}
 }
 function releaseFrozenAnimation(animation,key){
-  const frozen=frozenClockByName.get(key);
-  if(!Number.isFinite(frozen))return true;
+  const state=frozenClockByName.get(key);
+  if(!state)return true;
+  if(!state.pinned){
+    frozenClockByName.delete(key);
+    return true;
+  }
+  const frozen=state.time;
   const timelineTime=Number(animation.timeline&&animation.timeline.currentTime);
   const rate=Number(animation.playbackRate);
   if(!Number.isFinite(timelineTime)||!Number.isFinite(rate)||rate===0)return false;
-  /* Assigning currentTime while CSS-paused creates a WAAPI hold time. Chromium
-     normally resolves the CSS pending-play task later, but the production page
-     can keep startTime unresolved indefinitely under concurrent startup work.
-     Resolve only that hold against the document timeline. CSS remains the sole
-     paused/running lifecycle owner; no Animation.pause()/play() call is used. */
+  /* Recreation-only currentTime restoration can still create a hold. Resolve
+     that exceptional hold against the document timeline without introducing a
+     second pause/play lifecycle owner. The normal stable-object path never gets
+     here and therefore resumes entirely through CSS animation-play-state. */
   try{animation.startTime=timelineTime-(frozen/rate);}catch(_){return false;}
   const released=Number.isFinite(Number(animation.startTime))&&!animation.pending;
   if(released)frozenClockByName.delete(key);
@@ -132,9 +142,6 @@ function syncPrimaryPlayback(paused=userPaused()){
   if(stop){
     animations.forEach((animation,index)=>freezeAnimation(animation,animationKey(animation,index)));
   }else{
-    /* R509: CSS owns the resume transition. Explicitly resolve only the hold
-       created by the paused currentTime pin so pending-play cannot depend on
-       main-thread scheduling. */
     animations.forEach((animation,index)=>releaseFrozenAnimation(animation,animationKey(animation,index)));
   }
   root.dataset.fxPrimaryMagPlaybackR498=stop?(reduced.matches?'reduced':'paused'):'running';
@@ -142,6 +149,7 @@ function syncPrimaryPlayback(paused=userPaused()){
   root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
   root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
   root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
+  root.dataset.fxPrimaryMagPauseContractR510='stable-object-css-pause-recreation-only-currenttime-pin';
   return true;
 }
 function syncPlaybackSoon(forcePause=false){
@@ -222,6 +230,7 @@ function sync(){
   root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
   root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
   root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
+  root.dataset.fxPrimaryMagPauseContractR510='stable-object-css-pause-recreation-only-currenttime-pin';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
