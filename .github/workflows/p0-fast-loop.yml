@@ -11,6 +11,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
       - 'docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'
       - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+      - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
       - 'billing-worker/src/production-content-entry.js'
       - 'billing-worker/src/production-content-base.js'

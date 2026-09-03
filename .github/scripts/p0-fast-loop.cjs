@@ -3,6 +3,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { createHash } = require('node:crypto');
 const { chromium } = require('playwright-core');
 
 const args = new Set(process.argv.slice(2));
@@ -243,6 +244,17 @@ function compareRuleProperties(canonicalCss, blockingCss, selector, canonicalMar
 function verifyClsSourceContract() {
   const canonical = fs.readFileSync('docs/scifi-ui/styles/formatx-first-frame-stability-r283.css', 'utf8');
   const blocking = fs.readFileSync('docs/scifi-ui/styles/formatx-p0-first-paint-r490.css', 'utf8');
+  const index = fs.readFileSync('docs/scifi-ui/index.html', 'utf8');
+  const entry = fs.readFileSync('billing-worker/src/production-content-entry.js', 'utf8');
+  const stateSeed = "document.documentElement.dataset.fxReferenceProductionR244=matchMedia('(max-width: 900px)').matches?'ready':'desktop';";
+  const stateHash = `sha256-${createHash('sha256').update(stateSeed).digest('base64')}`;
+  const stateScript = `<script data-fx-reference-first-paint-r504="true">${stateSeed}</script>`;
+  const stateScriptIndex = index.indexOf(stateScript);
+  const firstStylesheetIndex = index.search(/<link\b[^>]*\brel=["']stylesheet["']/i);
+  assert.ok(stateScriptIndex >= 0, 'R504 canonical reference state seed missing');
+  assert.ok(firstStylesheetIndex > stateScriptIndex, 'R504 reference state must be resolved before stylesheet discovery');
+  assert.ok(index.includes(`script-src 'self' '${stateHash}'`), 'R504 source CSP does not authorize the exact state seed');
+  assert.ok(entry.includes(`script-src 'self' '${stateHash}'`), 'R504 production CSP does not authorize the exact state seed');
   const canonicalMarker = '@media (min-width: 901px)';
   const blockingMarker = '/* R503:';
   const heroSelector = 'html body.living-architecture main#main-content section#hero.scene.hero';
@@ -256,13 +268,15 @@ function verifyClsSourceContract() {
     'align-items', 'box-sizing', 'width', 'max-width', 'min-height', 'margin', 'padding', 'gap', 'overflow'
   ]);
   return {
-    mode: 'source-geometry',
+    mode: 'pre-stylesheet-canonical-state',
     owner: '.hero-copy',
-    r502StableContribution: 0.05061276229893252,
+    r503HeroCopyContribution: 0.05061276229893252,
+    stateOwner: 'data-fx-reference-production-r244',
+    stateSeed: 'formatx-reference-first-paint-r504',
+    stateHash,
     canonicalOwner: 'formatx-first-frame-stability-r283.css',
     blockingOwner: 'formatx-p0-first-paint-r490.css',
-    hero,
-    heroGrid,
+    preservedAncestorGeometry: { hero, heroGrid },
   };
 }
 function verifySourceContracts() {

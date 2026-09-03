@@ -29,6 +29,37 @@ function testEnv(onAsset) {
 }
 
 describe('active production canonical gateway', () => {
+  it('authorizes and preserves the canonical R504 responsive state before stylesheet discovery', async () => {
+    const seed = "document.documentElement.dataset.fxReferenceProductionR244=matchMedia('(max-width: 900px)').matches?'ready':'desktop';";
+    const response = await canonicalWorker.fetch(
+      new Request('https://formatxsuite.com/'),
+      {
+        ASSETS: {
+          async fetch() {
+            return new Response(
+              '<!doctype html><html><head>'
+                + '<meta http-equiv="Content-Security-Policy" content="default-src \'self\';script-src \'self\'">'
+                + `<script data-fx-reference-first-paint-r504="true">${seed}</script>`
+                + '<link rel="stylesheet" href="/scifi-ui/styles/example.css">'
+                + '</head><body><main id="hero">FORMATX</main></body></html>',
+              { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
+            );
+          },
+        },
+      },
+      {},
+    );
+    const html = await response.text();
+    const stateScript = `<script data-fx-reference-first-paint-r504="true">${seed}</script>`;
+
+    expect(html.indexOf(stateScript)).toBeGreaterThan(-1);
+    expect(html.indexOf(stateScript)).toBeLessThan(html.indexOf('<link rel="stylesheet"'));
+    expect(response.headers.get('Content-Security-Policy')).toContain(
+      "'sha256-G5n9M4P0L5SRhfb6wEKZXWR7jW5EtgZHj5zzAsDobuI='",
+    );
+    expect(html).toContain("script-src 'self' 'sha256-G5n9M4P0L5SRhfb6wEKZXWR7jW5EtgZHj5zzAsDobuI='");
+  });
+
   it('serves the canonical apex root as a 200 without any Location header', async () => {
     let assetPath = '';
     const response = await canonicalWorker.fetch(
