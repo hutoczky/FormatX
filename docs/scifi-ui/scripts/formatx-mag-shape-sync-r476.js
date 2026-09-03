@@ -1,4 +1,4 @@
-/* FormatX R476/R510 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R511 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
    R502 binds delayed compositor sync to the canonical pause state and preserves
    the CSSAnimation clock when a paused animation instance is recreated.
@@ -7,7 +7,10 @@
    animation-play-state owns PAUSE/RESUME.
    R509 resolved explicit holds against the document timeline. R510 avoids
    creating that hold on the normal stable-object path: currentTime is written
-   only when a genuinely recreated paused CSSAnimation needs phase restoration. */
+   only when a genuinely recreated paused CSSAnimation needs phase restoration.
+   R511 forces the CSS animation-play-state write through a synchronous CSSOM
+   readback before enumerating animations, so PAUSE is committed without adding
+   a WAAPI hold on the normal stable-object path. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -137,7 +140,14 @@ function syncPrimaryPlayback(paused=userPaused()){
   const canvas=primaryCanvas();
   if(!canvas)return false;
   const stop=reduced.matches||paused;
-  canvas.style.setProperty('animation-play-state',stop?'paused':'running','important');
+  const expectedPlayState=stop?'paused':'running';
+  canvas.style.setProperty('animation-play-state',expectedPlayState,'important');
+  /* R511: force the style/animation state transition to commit before reading
+     CSSAnimation objects. This prevents a repeated PAUSE click from sampling a
+     still-running animation without creating a currentTime hold on the stable
+     object. The readback is the barrier; CSS remains the lifecycle owner. */
+  const committedPlayState=String(getComputedStyle(canvas).animationPlayState||'').trim();
+  root.dataset.fxPrimaryMagCssPlaybackR511=committedPlayState||'unknown';
   const animations=canvas.getAnimations();
   if(stop){
     animations.forEach((animation,index)=>freezeAnimation(animation,animationKey(animation,index)));
@@ -150,6 +160,7 @@ function syncPrimaryPlayback(paused=userPaused()){
   root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
   root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
   root.dataset.fxPrimaryMagPauseContractR510='stable-object-css-pause-recreation-only-currenttime-pin';
+  root.dataset.fxPrimaryMagPauseContractR511='cssom-committed-play-state-recreation-only-currenttime-pin';
   return true;
 }
 function syncPlaybackSoon(forcePause=false){
@@ -231,6 +242,7 @@ function sync(){
   root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
   root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
   root.dataset.fxPrimaryMagPauseContractR510='stable-object-css-pause-recreation-only-currenttime-pin';
+  root.dataset.fxPrimaryMagPauseContractR511='cssom-committed-play-state-recreation-only-currenttime-pin';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
