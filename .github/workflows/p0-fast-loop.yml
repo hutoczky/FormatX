@@ -1,0 +1,64 @@
+name: P0 fast source loop
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/styles/formatx-site-stability.css'
+      - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
+      - 'billing-worker/src/production-content-entry.js'
+      - 'billing-worker/src/production-content-base.js'
+      - '.github/scripts/p0-fast-loop.cjs'
+      - '.github/workflows/p0-fast-loop.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: formatx-p0-fast-loop
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  targeted:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install lightweight browser API only
+        run: npm install --no-save --no-package-lock playwright-core@1.62.0
+      - name: Resolve runner Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Start exact source site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/p0-fast-http.log" 2>&1 &
+          for attempt in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.2
+          done
+          cat "$RUNNER_TEMP/p0-fast-http.log"
+          exit 1
+      - name: Run batched targeted source proof
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
+        run: node .github/scripts/p0-fast-loop.cjs --all-targeted
+      - name: Upload compact evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-fast-loop-${{ github.sha }}
+          path: artifacts/p0-fast-loop/
+          if-no-files-found: warn
+          retention-days: 30
