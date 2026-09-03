@@ -1,13 +1,13 @@
-/* FormatX R476/R498 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R502 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
-   R498 keeps the canonical compositor animation object alive across explicit
-   PAUSE/RESUME so the visible MAG clock pauses and resumes instead of being
-   destroyed and recreated. */
+   R502 keeps every delayed compositor playback sync bound to the canonical
+   pause state at callback execution time, so stale pre-PAUSE callbacks cannot
+   restart the animation clock. */
 (function(){
 'use strict';
 const root=document.documentElement;
-if(root.dataset.fxMagShapeSyncR476==='ready-r498')return;
-root.dataset.fxMagShapeSyncR476='booting-r498';
+if(root.dataset.fxMagShapeSyncR476==='ready-r502')return;
+root.dataset.fxMagShapeSyncR476='booting-r502';
 
 const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
 const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260901-r488-restrained-glow-soft-edge-compositor-pulse';
@@ -81,9 +81,6 @@ function lifeNodes(){
   ].filter(node=>node instanceof HTMLElement);
 }
 function steadyLife(){
-  /* Explicit user pause must not remove the CSSAnimation. Only reduced motion
-     removes compositor life. PAUSE freezes the existing animation via
-     animation-play-state/WAAPI below; RESUME continues the same clock. */
   return reduced.matches?'steady':'breath';
 }
 function syncPrimaryPlayback(paused=userPaused()){
@@ -95,12 +92,18 @@ function syncPrimaryPlayback(paused=userPaused()){
     try{stop?animation.pause():animation.play();}catch(_){}
   }
   root.dataset.fxPrimaryMagPlaybackR498=stop?(reduced.matches?'reduced':'paused'):'running';
+  root.dataset.fxPrimaryMagPauseContractR502='callback-time-canonical-state';
   return true;
 }
-function syncPlaybackSoon(paused=userPaused()){
-  syncPrimaryPlayback(paused);
-  queueMicrotask(()=>syncPrimaryPlayback(paused));
-  requestAnimationFrame(()=>syncPrimaryPlayback(paused));
+function syncPlaybackSoon(forcePause=false){
+  /* Never capture a stale `paused=false` value. The pulse timeout, microtask and
+     rAF may execute after the user has pressed PAUSE. Re-read the canonical DOM
+     state on every callback. `forcePause` is only for document-hidden/reduced
+     safety and can never force a resume. */
+  const syncNow=()=>syncPrimaryPlayback(forcePause||userPaused());
+  syncNow();
+  queueMicrotask(syncNow);
+  requestAnimationFrame(syncNow);
 }
 function setLife(state){
   for(const node of lifeNodes())node.dataset.fxMagLife=state;
@@ -112,7 +115,7 @@ function setLife(state){
 }
 function applyCanonicalLife(){
   setLife(steadyLife());
-  syncPlaybackSoon(userPaused());
+  syncPlaybackSoon();
 }
 function pulse(source){
   if(reduced.matches||document.hidden){
@@ -121,19 +124,21 @@ function pulse(source){
     return false;
   }
   if(userPaused()){
-    /* Keep the breath animation instantiated while paused. */
     setLife('breath');
-    syncPlaybackSoon(true);
+    syncPlaybackSoon();
     return false;
   }
   clearTimeout(pulseTimer);
   setLife('pulse');
-  syncPlaybackSoon(false);
+  syncPlaybackSoon();
   root.dataset.fxMiniMagEnergySourceR478=String(source||'primary-mag');
   root.dataset.fxMiniMagEnergySourceR479=String(source||'primary-mag');
   root.dataset.fxPrimaryMagEnergySourceR481=String(source||'primary-mag');
   root.dataset.fxPrimaryMagEnergySourceR482=String(source||'primary-mag');
-  pulseTimer=setTimeout(()=>{setLife(steadyLife());syncPlaybackSoon(false);},620);
+  pulseTimer=setTimeout(()=>{
+    setLife(steadyLife());
+    syncPlaybackSoon();
+  },620);
   return true;
 }
 function sync(){
@@ -151,11 +156,12 @@ function sync(){
   for(const node of lifeNodes())if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();
   root.dataset.fxMiniMagShapeR476=shape;
   root.dataset.fxMiniMagShapeSyncR476=`ready-${shape}`;
-  root.dataset.fxMagShapeSyncR476='ready-r498';
+  root.dataset.fxMagShapeSyncR476='ready-r502';
   root.dataset.fxMiniMagLifeContractR478='primary-energy-sync-compositor-breath-zero-js-idle';
   root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';
   root.dataset.fxPrimaryMagPauseContractR479='user-pause-only-governor-zero-frame-does-not-freeze-compositor-life';
   root.dataset.fxPrimaryMagPauseContractR498='persistent-css-animation-clock-waapi-play-state';
+  root.dataset.fxPrimaryMagPauseContractR502='callback-time-canonical-state';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
