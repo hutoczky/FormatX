@@ -1,14 +1,12 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R506 — preserve the proven R504/R505 first-paint and MAG contracts,
-   while removing source-controlled duplicate/non-critical render blocking from
-   the Lighthouse critical path. R505 production evidence kept CLS effectively
-   zero, but H3 runs still simulated 3.8–4.2 s of .hero-lead render delay. The
-   current R283/R503/R206 blocking layers already own first-frame geometry, so
-   award/content/language enhancement CSS can activate through the existing R487
-   post-paint scheduler without changing the canonical first frame. */
+/* FormatX R507 — preserve the proven R506 first-paint and delivery contracts,
+   while making the canonical MAG animation clock single-owner and deterministic.
+   The user PAUSE control owns UI/state/event publication; the existing R505
+   formatx-mag-shape-sync-r476.js runtime exclusively owns CSSAnimation pause/play.
+   R506 deferred-CSS, first-frame geometry and transport behavior stay unchanged. */
 
-const STARTUP_REVISION = '20260903-r506-critical-css-scheduler';
+const STARTUP_REVISION = '20260903-r507-mag-single-clock-owner';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -90,7 +88,7 @@ function robotsResponse(request) {
     'X-Content-Type-Options': 'nosniff',
     'X-FormatX-Robots-Owner': 'worker-r499',
     'Alt-Svc': 'clear',
-    'X-FormatX-Transport-Stability': 'r506-critical-css-scheduler',
+    'X-FormatX-Transport-Stability': 'r507-mag-single-clock-owner',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -156,7 +154,7 @@ function scheduleMotionRuntime(html) {
 }
 function cacheBustR502Runtime(html) {
   return String(html || '')
-    .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260902-r500-canonical-hero-state')
+    .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260903-r507-mag-single-clock-owner')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260902-r497-no-late-layout')
     .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock')
     .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260903-r502-mobile-box-model')
@@ -237,10 +235,11 @@ async function stabilizePublicResponse(request, url, response) {
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
   headers.set('Alt-Svc', 'clear');
-  headers.set('X-FormatX-Transport-Stability', 'r506-critical-css-scheduler');
-  headers.set('X-FormatX-Edge-Stability', `r506-critical-css:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-Transport-Stability', 'r507-mag-single-clock-owner');
+  headers.set('X-FormatX-Edge-Stability', `r507-mag-clock:${STARTUP_REVISION}`);
   headers.set('X-FormatX-CSS-Scheduler', 'r506-r487-deferred-enhancements-r504-prepaint');
-  headers.set('X-FormatX-Motion-Scheduler', 'r505-mag-resume-clock');
+  headers.set('X-FormatX-Motion-Scheduler', 'r507-single-css-animation-clock-owner');
+  headers.set('X-FormatX-Mag-Clock-Owner', 'shape-sync-r476-only');
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
     return new Response(null, { status: response.status, statusText: response.statusText, headers });
