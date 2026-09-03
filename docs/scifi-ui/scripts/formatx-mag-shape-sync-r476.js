@@ -1,7 +1,9 @@
-/* FormatX R476/R502 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R505 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
    R502 binds delayed compositor sync to the canonical pause state and pins the
-   CSSAnimation clock while paused, including any recreated animation instance. */
+   CSSAnimation clock while paused, including any recreated animation instance.
+   R505 resumes from that already-pinned hold time instead of writing currentTime
+   again after the CSS animation returns to running state. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -101,7 +103,12 @@ function freezeAnimation(animation,key){
 }
 function resumeAnimation(animation,key){
   const frozen=frozenClockByName.get(key);
-  if(Number.isFinite(frozen)){
+  /* R505: freezeAnimation already pins every current/recreated CSSAnimation
+     instance while paused. Re-writing currentTime after animation-play-state
+     becomes running can leave Chromium with a held CSSAnimation timeline under
+     the R504 prepaint reference state. Only seed a genuinely unresolved newly
+     recreated instance; otherwise play directly from its existing hold time. */
+  if(Number.isFinite(frozen)&&typeof animation.currentTime!=='number'){
     try{animation.currentTime=frozen;}catch(_){}
   }
   try{animation.play();}catch(_){}
@@ -120,6 +127,7 @@ function syncPrimaryPlayback(paused=userPaused()){
   if(!stop)frozenClockByName.clear();
   root.dataset.fxPrimaryMagPlaybackR498=stop?(reduced.matches?'reduced':'paused'):'running';
   root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
+  root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
   return true;
 }
 function syncPlaybackSoon(forcePause=false){
@@ -197,6 +205,7 @@ function sync(){
   root.dataset.fxPrimaryMagPauseContractR479='user-pause-only-governor-zero-frame-does-not-freeze-compositor-life';
   root.dataset.fxPrimaryMagPauseContractR498='persistent-css-animation-clock-waapi-play-state';
   root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
+  root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
