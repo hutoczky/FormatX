@@ -151,14 +151,12 @@ async function verifyReducedMotion(browser) {
         hero: Boolean(document.querySelector('#hero')),
         lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
         overflow: Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.documentElement.clientWidth),
-        scheduler: document.documentElement.dataset.fxP0MotionSchedulerR490 || '',
         canvasCount: document.querySelectorAll(sel).length,
         stageCount: document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
         animations: canvas?.getAnimations().map(a => ({ name: String(a.animationName || ''), state: String(a.playState || ''), time: Number(a.currentTime || 0) })) || [],
       };
     }, CANVAS);
     assert.ok(state.hero && state.lead > 40, 'reduced-motion hero unavailable');
-    assert.match(state.scheduler, /reduced-motion-static|armed|committed/, `reduced-motion scheduler contract invalid: ${state.scheduler}`);
     assert.ok(state.canvasCount <= 1, `reduced-motion duplicate canvas ${state.canvasCount}`);
     assert.ok(state.stageCount <= 1, `reduced-motion duplicate renderer stage ${state.stageCount}`);
     assert.ok(state.animations.every(a => a.state !== 'running'), `reduced-motion left compositor animation running: ${JSON.stringify(state.animations)}`);
@@ -230,12 +228,17 @@ function verifySourceContracts() {
   const entry = fs.readFileSync('billing-worker/src/production-content-entry.js', 'utf8');
   const base = fs.readFileSync('billing-worker/src/production-content-base.js', 'utf8');
   const feedback = fs.readFileSync('billing-worker/src/production-feedback-entry.js', 'utf8');
+  const scheduler = fs.readFileSync('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', 'utf8');
   assert.match(base, /id="live-os-overview"/, 'semantic: Live OS canonical section missing');
   assert.match(base, /import baseWorker from ['"]\.\/production-feedback-entry\.js['"]/, 'semantic: current production content chain does not include feedback semantic owner');
   assert.match(feedback, /data-fx-award-proof/, 'semantic: Proof canonical section missing from feedback semantic owner');
   assert.match(entry, /data-fx-p0-first-paint-r501/, 'apex: current P0 first-paint owner missing');
   assert.match(entry, /platform-status\.js\?v=/, 'apex: platform status production owner missing');
-  return { semantic: true, apex: true, semanticOwner: 'production-feedback-entry.js' };
+  assert.match(entry, /motionSchedulerJs/, 'apex: production motion scheduler asset missing');
+  assert.match(entry, /formatx-motion-runtime-r467\.js/, 'apex: production motion runtime replacement anchor missing');
+  assert.match(scheduler, /prefers-reduced-motion:\s*reduce/, 'reduced-motion source contract missing media query');
+  assert.match(scheduler, /reduced-motion-static/, 'reduced-motion source contract missing static scheduler state');
+  return { semantic: true, apex: true, semanticOwner: 'production-feedback-entry.js', reducedMotionSource: true };
 }
 
 (async () => {
