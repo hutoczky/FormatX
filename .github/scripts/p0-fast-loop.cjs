@@ -36,6 +36,31 @@ async function animationState(page) {
     });
   });
 }
+function animationIdentity(state) {
+  const result = {};
+  for (const animation of state) {
+    const name = animation.name || '<unnamed>';
+    (result[name] ||= []).push(animation.id);
+  }
+  for (const ids of Object.values(result)) ids.sort();
+  return result;
+}
+function assertStableAnimationIdentity(reference, current, label) {
+  const expected = animationIdentity(reference);
+  const actual = animationIdentity(current);
+  const names = Object.keys(expected);
+  assert.ok(names.length >= 1, `${label}: no animation identity to compare`);
+  for (const name of names) {
+    assert.deepEqual(actual[name] || [], expected[name], `${label}: animation identity changed for ${name}`);
+  }
+}
+function maxClockRewind(before, after) {
+  const byId = new Map(after.map(a => [a.id, a.time]));
+  return Math.max(0, ...before.map(a => {
+    const next = byId.get(a.id);
+    return typeof next === 'number' ? a.time - next : 0;
+  }));
+}
 async function activateMag(page) {
   const target = page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
@@ -70,6 +95,7 @@ async function verifyMagContext(browser, name, viewport, mobile) {
     const before = await animationState(page);
     await page.waitForTimeout(900);
     const running = await animationState(page);
+    assertStableAnimationIdentity(before, running, `${name}: baseline`);
     const initialAdvance = Math.max(0, ...running.map(a => a.time - (before.find(b => b.id === a.id)?.time || 0)));
     assert.ok(running.some(a => a.state === 'running'), `${name}: no running compositor animation`);
     assert.ok(initialAdvance > 250, `${name}: baseline MAG clock advance ${initialAdvance}`);
@@ -79,30 +105,36 @@ async function verifyMagContext(browser, name, viewport, mobile) {
     await pause.click();
     await page.waitForFunction(sel => document.querySelector(sel)?.dataset.paused === 'true', PAUSE, { timeout: 3000 });
     const p1 = await animationState(page);
+    assertStableAnimationIdentity(running, p1, `${name}: pause entry`);
     await page.waitForTimeout(700);
     const p2 = await animationState(page);
+    assertStableAnimationIdentity(running, p2, `${name}: paused hold`);
     const pauseDelta = Math.max(0, ...p2.map(a => Math.abs(a.time - (p1.find(b => b.id === a.id)?.time ?? a.time))));
+    assert.ok(p2.every(a => a.state !== 'running'), `${name}: PAUSE left a compositor animation running`);
     assert.ok(pauseDelta < 80, `${name}: PAUSE clock drift ${pauseDelta}`);
 
     await pause.click();
     await page.waitForFunction(sel => document.querySelector(sel)?.dataset.paused !== 'true', PAUSE, { timeout: 3000 });
     const resumeStart = await animationState(page);
-    const startByName = new Map(resumeStart.map(a => [a.name, a.time]));
+    assertStableAnimationIdentity(running, resumeStart, `${name}: resume entry`);
+    const resumeRewind = maxClockRewind(p2, resumeStart);
+    assert.ok(resumeRewind < 80, `${name}: RESUME rewound canonical clock ${resumeRewind}`);
+    const startById = new Map(resumeStart.map(a => [a.id, a.time]));
     let resumeAdvance = 0;
     let resumedState = resumeStart;
     for (const wait of [100, 150, 250, 200, 200, 300, 400]) {
       await page.waitForTimeout(wait);
       resumedState = await animationState(page);
-      resumeAdvance = Math.max(resumeAdvance, ...resumedState.map(a => a.time - (startByName.get(a.name) ?? a.time)));
+      assertStableAnimationIdentity(running, resumedState, `${name}: resumed clock`);
+      resumeAdvance = Math.max(resumeAdvance, ...resumedState.map(a => a.time - (startById.get(a.id) ?? a.time)));
       if (resumeAdvance > 200) break;
     }
     assert.ok(resumedState.some(a => a.state === 'running'), `${name}: RESUME state not running`);
     assert.ok(resumeAdvance > 200, `${name}: RESUME clock advance ${resumeAdvance}`);
 
-    const identityNames = new Set([...p1, ...p2, ...resumeStart, ...resumedState].map(a => a.name).filter(Boolean));
-    assert.ok(identityNames.size >= 1, `${name}: compositor animation identity missing`);
+    const identities = animationIdentity(running);
     assert.equal(errors.length, 0, `${name}: console/page errors: ${errors.join(' | ')}`);
-    return { name, renderer, initialAdvance, pauseDelta, resumeAdvance, animationNames: [...identityNames] };
+    return { name, renderer, initialAdvance, pauseDelta, resumeRewind, resumeAdvance, animationIdentity: identities };
   } finally {
     await context.close();
   }
@@ -113,13 +145,23 @@ async function verifyReducedMotion(browser) {
   try {
     await page.goto(`${BASE}?p0-fast-reduced=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(1800);
-    const state = await page.evaluate(() => ({
-      hero: Boolean(document.querySelector('#hero')),
-      lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
-      overflow: Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.documentElement.clientWidth),
-      scheduler: document.documentElement.dataset.fxP0MotionSchedulerR490 || '',
-    }));
+    const state = await page.evaluate(sel => {
+      const canvas = document.querySelector(sel);
+      return {
+        hero: Boolean(document.querySelector('#hero')),
+        lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
+        overflow: Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.documentElement.clientWidth),
+        scheduler: document.documentElement.dataset.fxP0MotionSchedulerR490 || '',
+        canvasCount: document.querySelectorAll(sel).length,
+        stageCount: document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
+        animations: canvas?.getAnimations().map(a => ({ name: String(a.animationName || ''), state: String(a.playState || ''), time: Number(a.currentTime || 0) })) || [],
+      };
+    }, CANVAS);
     assert.ok(state.hero && state.lead > 40, 'reduced-motion hero unavailable');
+    assert.match(state.scheduler, /reduced-motion-static|armed|committed/, `reduced-motion scheduler contract invalid: ${state.scheduler}`);
+    assert.ok(state.canvasCount <= 1, `reduced-motion duplicate canvas ${state.canvasCount}`);
+    assert.ok(state.stageCount <= 1, `reduced-motion duplicate renderer stage ${state.stageCount}`);
+    assert.ok(state.animations.every(a => a.state !== 'running'), `reduced-motion left compositor animation running: ${JSON.stringify(state.animations)}`);
     assert.ok(state.overflow <= 1, `reduced-motion overflow ${state.overflow}`);
     return state;
   } finally {
@@ -187,11 +229,13 @@ async function verifyCls(browser) {
 function verifySourceContracts() {
   const entry = fs.readFileSync('billing-worker/src/production-content-entry.js', 'utf8');
   const base = fs.readFileSync('billing-worker/src/production-content-base.js', 'utf8');
+  const feedback = fs.readFileSync('billing-worker/src/production-feedback-entry.js', 'utf8');
   assert.match(base, /id="live-os-overview"/, 'semantic: Live OS canonical section missing');
-  assert.match(base, /data-fx-award-proof/, 'semantic: Proof canonical section missing');
+  assert.match(base, /import baseWorker from ['"]\.\/production-feedback-entry\.js['"]/, 'semantic: current production content chain does not include feedback semantic owner');
+  assert.match(feedback, /data-fx-award-proof/, 'semantic: Proof canonical section missing from feedback semantic owner');
   assert.match(entry, /data-fx-p0-first-paint-r501/, 'apex: current P0 first-paint owner missing');
   assert.match(entry, /platform-status\.js\?v=/, 'apex: platform status production owner missing');
-  return { semantic: true, apex: true };
+  return { semantic: true, apex: true, semanticOwner: 'production-feedback-entry.js' };
 }
 
 (async () => {
