@@ -243,6 +243,22 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
     z-index: calc(var(--fx-layer-content) + 10) !important;
   }
 
+  /* R502: mobile padding is part of the owned box width, never added outside it. */
+  .site-footer {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]),
+  #fx-organism-thought-panel.fx-organism-thought:not([hidden]) {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
   #hero.is-core-active .hero-space {
     min-height: 52svh;
   }
