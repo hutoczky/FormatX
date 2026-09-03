@@ -1,7 +1,7 @@
-/* FormatX R488 — restrained mobile luminance, softer silhouette and compositor-safe pulse.
+/* FormatX R488/R502 — restrained mobile luminance, softer silhouette and compositor-safe pulse.
    R326 remains the single WebGL/material owner and R484 keeps the periodic native
-   surface-energy sweep. This late compositor layer reduces the physical-phone
-   highlight peak and spectral spill without flattening the internal facets. */
+   surface-energy sweep. R502 keeps the canonical CSSAnimation declared across
+   PAUSE so the root playback governor freezes/resumes the same timeline object. */
 
 @keyframes fx-primary-mag-mobile-heart-r488 {
   0%,100% { scale: .987; opacity: .790; }
@@ -51,10 +51,11 @@
 @media (prefers-reduced-motion:no-preference) and (max-width:900px),
        (prefers-reduced-motion:no-preference) and (pointer:coarse),
        (prefers-reduced-motion:no-preference) and (max-aspect-ratio:27/25) {
-  /* Direct scale/opacity animation stays on compositor-friendly properties.
-     No animated custom-property indirection, so the living pulse does not add
-     avoidable per-frame style work while WebGL itself remains zero-idle. */
-  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"]:not([data-fx-primary-mag-life-r482="steady"]):not(:has(.fx-reference-pause[data-paused="true"])) body.living-architecture
+  /* R502 ownership invariant: keep the CSSAnimation declared continuously.
+     PAUSE/RESUME is owned only by the canonical root animation-play-state/WAAPI
+     governor; removing the animation rule on PAUSE would destroy its identity
+     and rewind/recreate the compositor timeline. */
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"]:not([data-fx-primary-mag-life-r482="steady"]) body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     animation: fx-primary-mag-mobile-heart-r488 4.8s cubic-bezier(.36,0,.20,1) infinite !important;
     will-change: scale, opacity !important;
@@ -137,4 +138,5 @@
 }
 
 /* production-r488-mobile-optics-restrained-glow-soft-edge-compositor-pulse */
+/* production-r502-mobile-pause-stable-animation-identity */
 /* deploy-r488-live-proof */
