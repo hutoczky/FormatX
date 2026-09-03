@@ -18,7 +18,7 @@ function sourceFilterToken(name, unit = '') {
     new RegExp(`${name}\\(([-\\d.]+)${unit}\\)`)
   );
   assert.ok(match, `missing canonical mobile optics token ${name}`);
-  return `${name}(${match[1]}${unit})`;
+  return `${name}(${Number(match[1])}${unit})`;
 }
 const EXPECTED_MOBILE_FILTER = [
   sourceFilterToken('brightness'),
