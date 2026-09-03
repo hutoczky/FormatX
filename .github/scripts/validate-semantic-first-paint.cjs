@@ -15,15 +15,15 @@ const CONTENT_RUNTIME_SOURCE = fs.readFileSync(
   path.join(REPO, 'docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js'),
   'utf8',
 );
-function sourceDatasetValue(name) {
-  const match = CONTENT_RUNTIME_SOURCE.match(
-    new RegExp(`root\\.dataset\\.${name}\\s*=\\s*['"]([^'"]+)['"]`)
-  );
-  assert.ok(match, `missing source dataset contract ${name}`);
-  return match[1];
+function sourceTerminalDatasetValue(name) {
+  const matches = Array.from(CONTENT_RUNTIME_SOURCE.matchAll(
+    new RegExp(`root\\.dataset\\.${name}\\s*=\\s*['"]([^'"]+)['"]`, 'g')
+  ));
+  assert.ok(matches.length > 0, `missing source dataset contract ${name}`);
+  return matches[matches.length - 1][1];
 }
-const EXPECTED_CONTENT_GATE = sourceDatasetValue('fxContentRuntimeR241');
-const EXPECTED_STABILITY = sourceDatasetValue('fxFirstFrameStabilityR283');
+const EXPECTED_CONTENT_GATE = sourceTerminalDatasetValue('fxContentRuntimeR241');
+const EXPECTED_STABILITY = sourceTerminalDatasetValue('fxFirstFrameStabilityR283');
 
 async function runCase(browser, { width, height, language }) {
   const context = await browser.newContext({
