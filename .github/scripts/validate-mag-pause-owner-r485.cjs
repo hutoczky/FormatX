@@ -11,7 +11,7 @@ const legacy = read('formatx-mobile-reference-layout-v1.js');
 
 const telemetryStart = canonical.indexOf('function syncCanonicalMagAnimations(');
 const telemetryEnd = canonical.indexOf('\nfunction bindPause(', telemetryStart);
-assert.ok(telemetryStart >= 0 && telemetryEnd > telemetryStart, 'R508 canonical MAG telemetry function missing');
+assert.ok(telemetryStart >= 0 && telemetryEnd > telemetryStart, 'R509 canonical MAG telemetry function missing');
 const telemetryBody = canonical.slice(telemetryStart, telemetryEnd);
 assert.doesNotMatch(telemetryBody, /\.getAnimations\s*\(/, 'R508 control owner must not enumerate CSS animations');
 assert.doesNotMatch(telemetryBody, /\.pause\s*\(/, 'R508 control owner must not pause the CSSAnimation clock directly');
@@ -21,9 +21,12 @@ assert.match(telemetryBody, /fxCanonicalMagClockOwnerR507=['\"]mag-shape-sync-r4
 assert.match(shapeSync, /canvas\.getAnimations\(\)/, 'R508 MAG shape-sync must enumerate the canonical CSSAnimation for paused currentTime preservation');
 assert.match(shapeSync, /animation\.currentTime=frozen/, 'R508 MAG shape-sync must preserve canonical currentTime while CSS-paused');
 assert.match(shapeSync, /animation-play-state['\"],stop\?['\"]paused['\"]:['\"]running['\"]/, 'R508 CSS animation-play-state transition owner missing');
+assert.match(shapeSync, /animation\.startTime=timelineTime-\(frozen\/rate\)/, 'R509 must deterministically release the currentTime hold against the document timeline');
+assert.match(shapeSync, /!animation\.pending/, 'R509 must retain the frozen clock until the explicit hold release resolves');
 assert.doesNotMatch(shapeSync, /animation\.pause\s*\(/, 'R508 must not create a WAAPI pending-pause lifecycle owner');
 assert.doesNotMatch(shapeSync, /animation\.play\s*\(/, 'R508 must not create a WAAPI pending-play lifecycle owner');
 assert.match(shapeSync, /fxPrimaryMagPauseContractR508=['\"]css-play-state-owner-currenttime-pin-no-waapi-lifecycle['\"]/, 'R508 pause/resume ownership marker missing');
+assert.match(shapeSync, /fxPrimaryMagPauseContractR509=['\"]css-state-owner-deterministic-starttime-release['\"]/, 'R509 deterministic hold-release marker missing');
 
 class Element {}
 class Button extends Element {
@@ -90,4 +93,4 @@ button.listeners[0](event('click', true));
 assert.equal(button.dataset.paused, 'true');
 assert.equal(events.length, 2);
 assert.deepEqual(canonicalStateSync, [true, false], 'Default-prevented legacy clicks must not mutate canonical state');
-console.log('PASS: R508 keeps one user PAUSE event owner and one CSS animation-play-state clock owner; no WAAPI pause/play lifecycle race remains.');
+console.log('PASS: R509 keeps one CSS lifecycle owner and deterministically releases the paused currentTime hold without WAAPI pause/play calls.');

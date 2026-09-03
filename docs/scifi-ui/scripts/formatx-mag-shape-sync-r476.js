@@ -1,10 +1,12 @@
-/* FormatX R476/R508 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R509 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
    R502 binds delayed compositor sync to the canonical pause state and pins the
    CSSAnimation clock while paused, including any recreated animation instance.
    R505 avoids writing currentTime after the CSS animation returns to running.
    R508 removes WAAPI pause/play lifecycle ownership entirely: canonical CSS
-   animation-play-state owns PAUSE/RESUME, while JS only preserves paused time. */
+   animation-play-state owns PAUSE/RESUME, while JS only preserves paused time.
+   R509 deterministically resolves the hold time created by that preservation
+   without reintroducing Animation.pause()/play() lifecycle ownership. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -105,6 +107,22 @@ function freezeAnimation(animation,key){
      a pending WAAPI task whose resolution depends on runner scheduling. */
   try{animation.currentTime=frozen;}catch(_){}
 }
+function releaseFrozenAnimation(animation,key){
+  const frozen=frozenClockByName.get(key);
+  if(!Number.isFinite(frozen))return true;
+  const timelineTime=Number(animation.timeline&&animation.timeline.currentTime);
+  const rate=Number(animation.playbackRate);
+  if(!Number.isFinite(timelineTime)||!Number.isFinite(rate)||rate===0)return false;
+  /* Assigning currentTime while CSS-paused creates a WAAPI hold time. Chromium
+     normally resolves the CSS pending-play task later, but the production page
+     can keep startTime unresolved indefinitely under concurrent startup work.
+     Resolve only that hold against the document timeline. CSS remains the sole
+     paused/running lifecycle owner; no Animation.pause()/play() call is used. */
+  try{animation.startTime=timelineTime-(frozen/rate);}catch(_){return false;}
+  const released=Number.isFinite(Number(animation.startTime))&&!animation.pending;
+  if(released)frozenClockByName.delete(key);
+  return released;
+}
 function syncPrimaryPlayback(paused=userPaused()){
   const canvas=primaryCanvas();
   if(!canvas)return false;
@@ -114,15 +132,16 @@ function syncPrimaryPlayback(paused=userPaused()){
   if(stop){
     animations.forEach((animation,index)=>freezeAnimation(animation,animationKey(animation,index)));
   }else{
-    /* R505/R508: do not write currentTime and do not call Animation.play().
-       Releasing CSS animation-play-state is the only resume transition, so
-       there is no pending WAAPI play task to race the document timeline. */
-    frozenClockByName.clear();
+    /* R509: CSS owns the resume transition. Explicitly resolve only the hold
+       created by the paused currentTime pin so pending-play cannot depend on
+       main-thread scheduling. */
+    animations.forEach((animation,index)=>releaseFrozenAnimation(animation,animationKey(animation,index)));
   }
   root.dataset.fxPrimaryMagPlaybackR498=stop?(reduced.matches?'reduced':'paused'):'running';
   root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
   root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
   root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
+  root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
   return true;
 }
 function syncPlaybackSoon(forcePause=false){
@@ -202,6 +221,7 @@ function sync(){
   root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
   root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
   root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
+  root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
