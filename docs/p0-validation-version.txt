@@ -1,5 +1,5 @@
 FormatX P0 validation contract
-version=2026-09-02-p0-100x3-r11
+version=2026-09-03-p0-100x3-r12
 production_origin=https://formatxsuite.com/
 lighthouse_desktop_runs=3
 lighthouse_mobile_runs=3
@@ -8,4 +8,4 @@ lcp_ms_lt=2000
 cls_lt=0.05
 browser_matrix=strict
 proof_policy=measured-artifacts-only
-trigger=r501-desktop-copy-first-frame-cls
+trigger=r502-mag-overflow-targeted-candidate
