@@ -63,8 +63,10 @@ function currentShape(){
 }
 function userPaused(){
   const pause=document.querySelector('.fx-reference-pause');
-  if(!(pause instanceof HTMLButtonElement))return root.dataset.fxReferenceMotionPaused==='true';
-  return pause.dataset.paused==='true'||pause.getAttribute('aria-pressed')==='true'||root.dataset.fxReferenceMotionPaused==='true';
+  if(pause instanceof HTMLButtonElement){
+    return pause.dataset.paused==='true'||pause.getAttribute('aria-pressed')==='true';
+  }
+  return root.dataset.fxReferenceMotionPaused==='true';
 }
 function primaryCanvas(){
   const node=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
