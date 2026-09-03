@@ -1,0 +1,113 @@
+name: Validate R515 candidate CLS x5
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'billing-worker/src/production-content-entry-r515.js'
+      - 'billing-worker/wrangler.jsonc'
+      - '.github/scripts/validate-r515-candidate-cls.cjs'
+      - '.github/workflows/validate-r515-candidate-cls.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-r515-candidate-cls
+  cancel-in-progress: true
+
+jobs:
+  candidate-cls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Validate R515 source syntax
+        run: |
+          set -euo pipefail
+          node --input-type=module --check < billing-worker/src/production-content-entry-r515.js
+          node --check .github/scripts/validate-r515-candidate-cls.cjs
+
+      - name: Install Worker and browser dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Start exact candidate Worker locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev \
+            --ip 127.0.0.1 \
+            --port 8787 \
+            --local-protocol https \
+            > "$RUNNER_TEMP/r515-wrangler.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/r515-wrangler.pid"
+          cd ..
+          for attempt in $(seq 1 60); do
+            if curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then
+              echo 'R515_LOCAL_WORKER_READY'
+              exit 0
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r515-wrangler.log" || true
+          exit 1
+
+      - name: Prove candidate CLS below strict target five times
+        env:
+          FORMATX_R515_CANDIDATE_URL: https://formatxsuite.com:8787/
+          FORMATX_R515_CANDIDATE_RUNS: '5'
+          FORMATX_R515_CANDIDATE_DIR: artifacts/r515-candidate-cls
+        run: node .github/scripts/validate-r515-candidate-cls.cjs
+
+      - name: Show Worker log
+        if: always()
+        shell: bash
+        run: cat "$RUNNER_TEMP/r515-wrangler.log" || true
+
+      - name: Upload candidate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r515-candidate-cls-${{ github.sha }}
+          path: artifacts/r515-candidate-cls/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish candidate gate status
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='R515 candidate CLS <0.05 x5 with critical-core first-paint'
+          else
+            state=failure
+            description='R515 candidate CLS gate failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX R515 candidate CLS x5' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
