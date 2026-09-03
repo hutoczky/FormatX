@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,6 +23,24 @@ def require(label: str, condition: bool) -> None:
 
 def network_free(source: str) -> bool:
     return all(token not in source for token in ("fetch(", "XMLHttpRequest", "WebSocket"))
+
+
+def production_content_wrapper_active(config: dict) -> bool:
+    entry = str(config.get("main") or "")
+    canonical = "src/production-content-entry.js"
+    if entry == canonical:
+        return True
+    if not re.fullmatch(r"src/production-content-entry-r\d+\.js", entry):
+        return False
+    source = read(f"billing-worker/{entry}")
+    imported = re.search(
+        r"import\s+([A-Za-z_$][\w$]*)\s+from\s+['\"]\./production-content-entry\.js['\"]",
+        source,
+    )
+    if not imported:
+        return False
+    delegate = re.escape(imported.group(1))
+    return bool(re.search(rf"\b{delegate}\.fetch\s*\(\s*request\s*,\s*env\s*,\s*ctx\s*\)", source))
 
 
 status_data = load_json("docs/scifi-ui/data/platform-status.json")
@@ -116,7 +135,7 @@ require("terms document withdrawal", "Elállás" in terms)
 
 require("preview Worker remains isolated", not preview_config.get("routes"))
 require("preview Worker remains on workers.dev", preview_config.get("workers_dev") is True)
-require("production content wrapper is active", production_config.get("main") == "src/production-content-entry.js")
+require("production content wrapper is active", production_content_wrapper_active(production_config))
 production_domains = [route.get("pattern") for route in production_config.get("routes", [])]
 require("production owns both custom domains", production_domains == ["formatxsuite.com", "www.formatxsuite.com"])
 require("production injects critical scroll bootstrap path", "formatx-infinite-scroll.js" in production_worker and "data-fx-seamless-scroll-runtime" in production_worker)
