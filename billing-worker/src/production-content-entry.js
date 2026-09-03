@@ -1,11 +1,14 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R504 — publish the canonical reference mode before the first body paint.
-   R503 proved that hero ancestor geometry alone does not eliminate the stable
-   .hero-copy shift. R504 reuses the existing r334 prepaint mode owner so the
-   r244 desktop/mobile cascade is selected before deferred runtimes can race it. */
+/* FormatX R505 — keep the R504 canonical reference mode prepaint contract and
+   stabilise the measured first-paint transport path. R504 production evidence
+   eliminated the dominant CLS owner, but Lighthouse run 1 used HTTP/2 while
+   runs 2/3 migrated to HTTP/3 and Lantern then attributed 1.1–1.24 s of
+   render-blocking delay to the same critical resource graph. R505 clears the
+   advertised alternate-service state on public responses so one production
+   revision does not change transport protocol between repeated cold audits. */
 
-const STARTUP_REVISION = '20260903-r504-reference-mode-prepaint';
+const STARTUP_REVISION = '20260903-r505-transport-mag-resume';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -13,7 +16,7 @@ const REFERENCE_MODE_BOOT_SCRIPT = '<script fetchpriority="high" data-fx-referen
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
-const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r502-mag-pause-ownership';
+const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r505-mag-resume-clock';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const META_CSP = "default-src 'self';base-uri 'self';object-src 'none';script-src 'self' https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'";
@@ -54,12 +57,12 @@ const DEFERRED_STYLE_PATHS = new Set([
 
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
-    marker: 'scheduler-to-loader',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20260903-r502-mag-pause-ownership']],
+    marker: 'scheduler-to-loader-r505',
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20260903-r505-mag-resume-clock']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
-    marker: 'loader-to-mag-shape-sync',
-    rewrites: [[/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r502-mag-pause-ownership']],
+    marker: 'loader-to-mag-shape-sync-r505',
+    rewrites: [[/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock']],
   }],
   ['/scifi-ui/scripts/living-architecture.js', {
     marker: 'living-to-igloo',
@@ -83,6 +86,8 @@ function robotsResponse(request) {
     'Cache-Control': 'no-store, max-age=0',
     'X-Content-Type-Options': 'nosniff',
     'X-FormatX-Robots-Owner': 'worker-r499',
+    'Alt-Svc': 'clear',
+    'X-FormatX-Transport-Stability': 'r505-clear-alternative-service',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -150,7 +155,7 @@ function cacheBustR502Runtime(html) {
   return String(html || '')
     .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260902-r500-canonical-hero-state')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260902-r497-no-late-layout')
-    .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r502-mag-pause-ownership')
+    .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock')
     .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260903-r502-mobile-box-model')
     .replace(/platform-status\.js\?v=[^"']+/g, 'platform-status.js?v=20260902-r500-canonical-hero-state')
     .replace(/platform-status\.css\?v=[^"']+/g, 'platform-status.css?v=20260902-r500-canonical-hero-state');
@@ -206,15 +211,18 @@ async function rewriteR502DeliveryAsset(url, response, headers) {
   headers.delete('ETag');
   headers.set('Cache-Control', 'no-store, max-age=0');
   headers.set('X-FormatX-R502-Asset-Graph', spec.marker);
+  headers.set('X-FormatX-R505-Asset-Graph', spec.marker);
   return new Response(source, { status: response.status, statusText: response.statusText, headers });
 }
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', `r504-reference-mode-prepaint:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r504-reference-mode-prepaint-r502-mobile-box-model');
-  headers.set('X-FormatX-Motion-Scheduler', 'r502-mag-pause-ownership');
+  headers.set('Alt-Svc', 'clear');
+  headers.set('X-FormatX-Transport-Stability', 'r505-clear-alternative-service');
+  headers.set('X-FormatX-Edge-Stability', `r505-transport-mag-resume:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r505-transport-r504-prepaint-r502-mobile-box-model');
+  headers.set('X-FormatX-Motion-Scheduler', 'r505-mag-resume-clock');
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
     return new Response(null, { status: response.status, statusText: response.statusText, headers });
