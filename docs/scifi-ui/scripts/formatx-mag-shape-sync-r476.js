@@ -1,4 +1,4 @@
-/* FormatX R476/R511 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R512 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
    R502 binds delayed compositor sync to the canonical pause state and preserves
    the CSSAnimation clock when a paused animation instance is recreated.
@@ -10,7 +10,8 @@
    only when a genuinely recreated paused CSSAnimation needs phase restoration.
    R511 forces the CSS animation-play-state write through a synchronous CSSOM
    readback before enumerating animations, so PAUSE is committed without adding
-   a WAAPI hold on the normal stable-object path. */
+   a WAAPI hold on the normal stable-object path. R512 resolves only the observed
+   CSS pending-start state on RESUME, preserving phase without WAAPI play/pause. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -119,18 +120,21 @@ function freezeAnimation(animation,key){
 function releaseFrozenAnimation(animation,key){
   const state=frozenClockByName.get(key);
   if(!state)return true;
-  if(!state.pinned){
-    frozenClockByName.delete(key);
-    return true;
-  }
   const frozen=state.time;
   const timelineTime=Number(animation.timeline&&animation.timeline.currentTime);
   const rate=Number(animation.playbackRate);
   if(!Number.isFinite(timelineTime)||!Number.isFinite(rate)||rate===0)return false;
-  /* Recreation-only currentTime restoration can still create a hold. Resolve
-     that exceptional hold against the document timeline without introducing a
-     second pause/play lifecycle owner. The normal stable-object path never gets
-     here and therefore resumes entirely through CSS animation-play-state. */
+  const startTime=Number(animation.startTime);
+  const unresolved=state.pinned||animation.pending||!Number.isFinite(startTime);
+  if(!unresolved){
+    frozenClockByName.delete(key);
+    return true;
+  }
+  /* R512 production evidence showed the stable CSSAnimation already reporting
+     playState=running while startTime remained null for most of the 700 ms
+     RESUME window. Do not create a currentTime hold on that stable object.
+     Resolve only this pending CSS start against the document timeline using the
+     phase sampled while CSS-paused. CSS still owns paused/running lifecycle. */
   try{animation.startTime=timelineTime-(frozen/rate);}catch(_){return false;}
   const released=Number.isFinite(Number(animation.startTime))&&!animation.pending;
   if(released)frozenClockByName.delete(key);
@@ -161,6 +165,7 @@ function syncPrimaryPlayback(paused=userPaused()){
   root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
   root.dataset.fxPrimaryMagPauseContractR510='stable-object-css-pause-recreation-only-currenttime-pin';
   root.dataset.fxPrimaryMagPauseContractR511='cssom-committed-play-state-recreation-only-currenttime-pin';
+  root.dataset.fxPrimaryMagPauseContractR512='stable-object-css-pending-starttime-resolution';
   return true;
 }
 function syncPlaybackSoon(forcePause=false){
@@ -243,6 +248,7 @@ function sync(){
   root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
   root.dataset.fxPrimaryMagPauseContractR510='stable-object-css-pause-recreation-only-currenttime-pin';
   root.dataset.fxPrimaryMagPauseContractR511='cssom-committed-play-state-recreation-only-currenttime-pin';
+  root.dataset.fxPrimaryMagPauseContractR512='stable-object-css-pending-starttime-resolution';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
