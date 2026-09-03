@@ -250,6 +250,9 @@ function verifySourceContracts() {
   if (needsBrowser) {
     const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
     try {
+      /* Keep the cheap first-paint probe ahead of WebGL-heavy contexts so a
+         compositor/GPU-process lifecycle event cannot erase the CLS result. */
+      if (wants('cls')) report.cls = await verifyCls(browser);
       if (wants('mag')) {
         report.mag = {
           desktop: await verifyMagContext(browser, 'desktop', { width: 1440, height: 900 }, false),
@@ -268,7 +271,6 @@ function verifySourceContracts() {
           { width: 844, height: 390 },
         ]) report.overflow.push(await verifyOverflowContext(browser, vp, true));
       }
-      if (wants('cls')) report.cls = await verifyCls(browser);
     } finally {
       await browser.close();
     }
