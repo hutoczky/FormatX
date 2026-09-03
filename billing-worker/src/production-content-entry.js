@@ -1,16 +1,15 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R502 — batched MAG ownership + mobile box-model production delivery.
-   The behavioral fixes live in the canonical source owners. R502 keeps the R500
-   product-state and R501 first-paint contracts intact, and gives the fixed MAG
-   and mobile stability assets fresh, deterministic production cache identities. */
+/* FormatX R503 — source-derived semantic contract + measured hero ancestor first-paint delivery.
+   R503 preserves the R500 canonical product-state and R502 MAG/mobile ownership fixes.
+   Only the proven desktop hero ancestor geometry gets a fresh blocking CSS identity. */
 
-const STARTUP_REVISION = '20260903-r502-mag-overflow-targeted';
+const STARTUP_REVISION = '20260903-r503-hero-ancestor-semantic';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
-const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r501="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260902-r501-desktop-copy-first-frame">';
+const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r502-mag-pause-ownership';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
@@ -205,8 +204,8 @@ async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
-  headers.set('X-FormatX-Edge-Stability', `r502-mag-overflow-targeted:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r502-mobile-box-model-r501-first-paint');
+  headers.set('X-FormatX-Edge-Stability', `r503-hero-ancestor-semantic:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r503-hero-ancestor-r502-mobile-box-model');
   headers.set('X-FormatX-Motion-Scheduler', 'r502-mag-pause-ownership');
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
