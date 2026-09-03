@@ -1,14 +1,14 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R505 — keep the R504 canonical reference mode prepaint contract and
-   stabilise the measured first-paint transport path. R504 production evidence
-   eliminated the dominant CLS owner, but Lighthouse run 1 used HTTP/2 while
-   runs 2/3 migrated to HTTP/3 and Lantern then attributed 1.1–1.24 s of
-   render-blocking delay to the same critical resource graph. R505 clears the
-   advertised alternate-service state on public responses so one production
-   revision does not change transport protocol between repeated cold audits. */
+/* FormatX R506 — preserve the proven R504/R505 first-paint and MAG contracts,
+   while removing source-controlled duplicate/non-critical render blocking from
+   the Lighthouse critical path. R505 production evidence kept CLS effectively
+   zero, but H3 runs still simulated 3.8–4.2 s of .hero-lead render delay. The
+   current R283/R503/R206 blocking layers already own first-frame geometry, so
+   award/content/language enhancement CSS can activate through the existing R487
+   post-paint scheduler without changing the canonical first frame. */
 
-const STARTUP_REVISION = '20260903-r505-transport-mag-resume';
+const STARTUP_REVISION = '20260903-r506-critical-css-scheduler';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -53,6 +53,9 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/platform-status.css',
   '/scifi-ui/styles/formatx-copy-polish.css',
   '/scifi-ui/styles/formatx-feedback.css',
+  '/scifi-ui/styles/single-language-toggle.css',
+  '/scifi-ui/styles/formatx-content-standard.css',
+  '/scifi-ui/styles/formatx-award-readiness.css',
 ]);
 
 const R502_ASSET_REWRITES = new Map([
@@ -87,7 +90,7 @@ function robotsResponse(request) {
     'X-Content-Type-Options': 'nosniff',
     'X-FormatX-Robots-Owner': 'worker-r499',
     'Alt-Svc': 'clear',
-    'X-FormatX-Transport-Stability': 'r505-clear-alternative-service',
+    'X-FormatX-Transport-Stability': 'r506-critical-css-scheduler',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -163,6 +166,20 @@ function cacheBustR502Runtime(html) {
 function escapeAttribute(value) {
   return String(value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 }
+function dedupeAwardReadinessStylesheet(html) {
+  const source = String(html || '');
+  const links = source.match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi) || [];
+  const target = '/scifi-ui/styles/formatx-award-readiness.css';
+  const count = links.reduce((total, tag) => total + (stylesheetPath(tag) === target ? 1 : 0), 0);
+  if (count <= 1) return source;
+  let remaining = count;
+  return source.replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
+    if (stylesheetPath(tag) !== target) return tag;
+    const keep = remaining === 1;
+    remaining -= 1;
+    return keep ? tag : '';
+  });
+}
 function deferNonCriticalStyles(html) {
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
@@ -194,6 +211,7 @@ function optimizeHomepage(html) {
   source = injectReferenceModeBoot(source);
   source = injectCriticalFirstPaint(source);
   source = cacheBustCriticalQuality(source);
+  source = dedupeAwardReadinessStylesheet(source);
   source = deferNonCriticalStyles(source);
   source = injectDeferredCssRuntime(source);
   return source;
@@ -219,9 +237,9 @@ async function stabilizePublicResponse(request, url, response) {
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
   headers.set('Alt-Svc', 'clear');
-  headers.set('X-FormatX-Transport-Stability', 'r505-clear-alternative-service');
-  headers.set('X-FormatX-Edge-Stability', `r505-transport-mag-resume:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r505-transport-r504-prepaint-r502-mobile-box-model');
+  headers.set('X-FormatX-Transport-Stability', 'r506-critical-css-scheduler');
+  headers.set('X-FormatX-Edge-Stability', `r506-critical-css:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r506-r487-deferred-enhancements-r504-prepaint');
   headers.set('X-FormatX-Motion-Scheduler', 'r505-mag-resume-clock');
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
