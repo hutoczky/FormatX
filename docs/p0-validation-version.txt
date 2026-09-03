@@ -8,4 +8,4 @@ lcp_ms_lt=2000
 cls_lt=0.05
 browser_matrix=strict
 proof_policy=measured-artifacts-only
-trigger=r503-hero-ancestor-first-paint-semantic
+trigger=r504-reference-mode-prepaint
