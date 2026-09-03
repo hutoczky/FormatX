@@ -1,6 +1,8 @@
-/* FormatX r461/R497 — lean first-paint owner for the R460/R326 production path.
+/* FormatX r461/R507 — lean first-paint owner for the R460/R326 production path.
    Static HTML owns LCP. One current MAG runtime owns rendering; no legacy
-   award/regression/Real3D repair stack is mounted after first paint. */
+   award/regression/Real3D repair stack is mounted after first paint.
+   R507 keeps this control as the single user PAUSE state/event owner while the
+   MAG shape-sync runtime exclusively owns the canonical CSSAnimation clock. */
 (function(){
 'use strict';
 
@@ -78,16 +80,12 @@ function bindSound(button){
 }
 
 function syncCanonicalMagAnimations(paused){
-  const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
-  if(!(canvas instanceof HTMLCanvasElement))return;
+  /* R507: telemetry only. The R505 mag-shape-sync runtime is the exclusive
+     CSSAnimation pause/resume owner. Calling WAAPI play()/pause() here as well
+     created overlapping pending animation tasks from the same physical click. */
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  for(const animation of canvas.getAnimations()){
-    try{
-      if(paused||reduced)animation.pause();
-      else animation.play();
-    }catch(_){}
-  }
   ROOT.dataset.fxCanonicalMagMotionR497=paused?'paused':reduced?'reduced-motion':'running';
+  ROOT.dataset.fxCanonicalMagClockOwnerR507='mag-shape-sync-r476-only';
 }
 
 function bindPause(button){
@@ -109,9 +107,8 @@ function bindPause(button){
     button.textContent=paused?'▶':'Ⅱ';
     button.setAttribute('aria-label',paused?strings.resume:strings.pause);
     dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));
-    // The WebGL renderer owns simulation frames, while the canonical canvas
-    // also has a bounded CSS/WAAPI life animation. Pause/resume both real
-    // motion owners together so RESUME cannot leave the visible MAG frozen.
+    // R507: publish the visible control state only. The event consumer in
+    // formatx-mag-shape-sync-r476.js owns the one canonical CSSAnimation clock.
     syncCanonicalMagAnimations(paused);
   });
 }
