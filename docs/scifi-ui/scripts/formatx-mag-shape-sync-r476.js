@@ -1,8 +1,7 @@
 /* FormatX R476/R502 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
-   R502 binds every delayed compositor sync to the canonical pause state,
-   preserves animation identity while paused, and freezes pending WAAPI pause
-   tasks at playbackRate 0 so the compositor clock cannot drift. */
+   R502 binds delayed compositor sync to the canonical pause state and pins the
+   CSSAnimation clock while paused, including any recreated animation instance. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -16,6 +15,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null;
 let pulseTimer=0;
 let lastEnergyBolt='';
+const frozenClockByName=new Map();
 
 function ensureStyle(){
   let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');
@@ -83,34 +83,41 @@ function lifeNodes(){
 function steadyLife(){
   return reduced.matches?'steady':'breath';
 }
-function setPlaybackRate(animation,rate){
-  try{
-    if(typeof animation.updatePlaybackRate==='function')animation.updatePlaybackRate(rate);
-    else animation.playbackRate=rate;
-  }catch(_){
-    try{animation.playbackRate=rate;}catch(__){}
+function animationKey(animation,index){
+  const name=String(animation.animationName||'').trim();
+  return name||`animation-${index}`;
+}
+function freezeAnimation(animation,key){
+  let frozen=frozenClockByName.get(key);
+  if(!Number.isFinite(frozen)){
+    const now=Number(animation.currentTime);
+    frozen=Number.isFinite(now)?now:0;
+    frozenClockByName.set(key,frozen);
   }
+  try{animation.pause();}catch(_){}
+  try{animation.currentTime=frozen;}catch(_){}
+}
+function resumeAnimation(animation,key){
+  const frozen=frozenClockByName.get(key);
+  if(Number.isFinite(frozen)){
+    try{animation.currentTime=frozen;}catch(_){}
+  }
+  try{animation.play();}catch(_){}
 }
 function syncPrimaryPlayback(paused=userPaused()){
   const canvas=primaryCanvas();
   if(!canvas)return false;
   const stop=reduced.matches||paused;
   canvas.style.setProperty('animation-play-state',stop?'paused':'running','important');
-  for(const animation of canvas.getAnimations()){
-    try{
-      if(stop){
-        /* pause() can remain pending until the next ready time. Freeze the
-           timeline first, so currentTime cannot advance during that window. */
-        setPlaybackRate(animation,0);
-        animation.pause();
-      }else{
-        setPlaybackRate(animation,1);
-        animation.play();
-      }
-    }catch(_){}
-  }
+  const animations=canvas.getAnimations();
+  animations.forEach((animation,index)=>{
+    const key=animationKey(animation,index);
+    if(stop)freezeAnimation(animation,key);
+    else resumeAnimation(animation,key);
+  });
+  if(!stop)frozenClockByName.clear();
   root.dataset.fxPrimaryMagPlaybackR498=stop?(reduced.matches?'reduced':'paused'):'running';
-  root.dataset.fxPrimaryMagPauseContractR502='canonical-clock-rate-zero-pending-pause';
+  root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
   return true;
 }
 function syncPlaybackSoon(forcePause=false){
@@ -134,8 +141,6 @@ function applyCanonicalLife(){
     return;
   }
   if(userPaused()){
-    /* Preserve the exact CSS animation object while paused. Changing pulse to
-       breath recreates a CSSAnimation with a later document-timeline time. */
     syncPlaybackSoon(true);
     return;
   }
@@ -189,7 +194,7 @@ function sync(){
   root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';
   root.dataset.fxPrimaryMagPauseContractR479='user-pause-only-governor-zero-frame-does-not-freeze-compositor-life';
   root.dataset.fxPrimaryMagPauseContractR498='persistent-css-animation-clock-waapi-play-state';
-  root.dataset.fxPrimaryMagPauseContractR502='canonical-clock-rate-zero-pending-pause';
+  root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
