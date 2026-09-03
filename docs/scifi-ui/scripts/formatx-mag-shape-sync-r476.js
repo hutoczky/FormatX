@@ -1,7 +1,8 @@
 /* FormatX R476/R502 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
-   R502 binds every delayed compositor sync to the canonical pause state and
-   never changes the animation-defining life state while PAUSE is active. */
+   R502 binds every delayed compositor sync to the canonical pause state,
+   preserves animation identity while paused, and freezes pending WAAPI pause
+   tasks at playbackRate 0 so the compositor clock cannot drift. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -82,16 +83,34 @@ function lifeNodes(){
 function steadyLife(){
   return reduced.matches?'steady':'breath';
 }
+function setPlaybackRate(animation,rate){
+  try{
+    if(typeof animation.updatePlaybackRate==='function')animation.updatePlaybackRate(rate);
+    else animation.playbackRate=rate;
+  }catch(_){
+    try{animation.playbackRate=rate;}catch(__){}
+  }
+}
 function syncPrimaryPlayback(paused=userPaused()){
   const canvas=primaryCanvas();
   if(!canvas)return false;
   const stop=reduced.matches||paused;
   canvas.style.setProperty('animation-play-state',stop?'paused':'running','important');
   for(const animation of canvas.getAnimations()){
-    try{stop?animation.pause():animation.play();}catch(_){}
+    try{
+      if(stop){
+        /* pause() can remain pending until the next ready time. Freeze the
+           timeline first, so currentTime cannot advance during that window. */
+        setPlaybackRate(animation,0);
+        animation.pause();
+      }else{
+        setPlaybackRate(animation,1);
+        animation.play();
+      }
+    }catch(_){}
   }
   root.dataset.fxPrimaryMagPlaybackR498=stop?(reduced.matches?'reduced':'paused'):'running';
-  root.dataset.fxPrimaryMagPauseContractR502='canonical-clock-no-life-recreation';
+  root.dataset.fxPrimaryMagPauseContractR502='canonical-clock-rate-zero-pending-pause';
   return true;
 }
 function syncPlaybackSoon(forcePause=false){
@@ -141,9 +160,6 @@ function pulse(source){
   root.dataset.fxPrimaryMagEnergySourceR481=String(source||'primary-mag');
   root.dataset.fxPrimaryMagEnergySourceR482=String(source||'primary-mag');
   pulseTimer=setTimeout(()=>{
-    /* A pointerdown on PAUSE legitimately starts a pulse before click toggles
-       the canonical pause state. Never let this delayed pulse cleanup recreate
-       the animation object while the user-facing control is paused. */
     if(userPaused()||document.hidden){
       syncPlaybackSoon(true);
       return;
@@ -173,7 +189,7 @@ function sync(){
   root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';
   root.dataset.fxPrimaryMagPauseContractR479='user-pause-only-governor-zero-frame-does-not-freeze-compositor-life';
   root.dataset.fxPrimaryMagPauseContractR498='persistent-css-animation-clock-waapi-play-state';
-  root.dataset.fxPrimaryMagPauseContractR502='canonical-clock-no-life-recreation';
+  root.dataset.fxPrimaryMagPauseContractR502='canonical-clock-rate-zero-pending-pause';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
@@ -250,8 +266,6 @@ addEventListener('visibilitychange',()=>{
 document.addEventListener('pointerdown',event=>{
   const target=event.target instanceof Element?event.target.closest('#hero .hero-space,.fx-reference-mag-button,.fx-mini-mag-launcher-r459,[data-action="shape"]'):null;
   if(!target)return;
-  /* Do not start an energy pulse from the PAUSE/ASK/sound control itself. Those
-     controls live inside hero-space but are UI, not direct MAG surface input. */
   if(target.closest('.fx-reference-controls-r204'))return;
   pulse(target.closest('.fx-mini-mag-launcher-r459')?'mini-mag-direct':'primary-mag-direct');
   if(target.matches('.fx-reference-mag-button,[data-action="shape"]')){
