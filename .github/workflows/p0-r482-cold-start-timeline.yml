@@ -1,0 +1,69 @@
+name: P0 R482 cold-start timeline
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r482-cold-start-timeline.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ORIGIN: https://formatxsuite.com
+
+jobs:
+  timeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: 76b79fe75eebc9b0ce3998a8111eb8dbf539efb9
+      - name: Exact R516 marker
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?r482_cold=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/live-p0.txt"
+          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Runner Chrome verifier
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Cold start condition timeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r482-cold
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          const origin=process.env.ORIGIN;
+          const checkpoints=[0,500,1000,2000,4000,8000,12000,15000];
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function snap(page){return page.evaluate(()=>{
+            const root=document.documentElement,canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas'),s=canvas?getComputedStyle(canvas):null,r=canvas?.getBoundingClientRect();
+            const link=document.querySelector('link[data-fx-mag-living-balance-r481]');
+            return {t:performance.now(),readyState:document.readyState,crystal:root.dataset.fxCrystalOrganismR326||'',sync:root.dataset.fxMagShapeSyncR476||'',life:root.dataset.fxPrimaryMagLifeR482||'',contract:root.dataset.fxPrimaryMagLifeContractR482||'',optics:root.dataset.fxPrimaryMagOpticsR482||'',renderer:root.dataset.fxCoreRenderer||'',scheduler:root.dataset.fxCoreScheduler||'',idle:root.dataset.fxCoreIdleRenderR441||'',balanceHref:link?.href||'',canvas:{exists:Boolean(canvas),width:r?.width||0,height:r?.height||0,display:s?.display||'',visibility:s?.visibility||'',opacity:Number(s?.opacity||0),animationName:s?.animationName||'',filter:s?.filter||''},canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};});}
+          async function run(browser,name,viewport,mobile){
+            const context=await browser.newContext({viewport,deviceScaleFactor:mobile?2:1,isMobile:mobile,hasTouch:mobile,locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
+            const page=await context.newPage();
+            const net=[];page.on('requestfailed',r=>net.push({type:'failed',url:r.url(),failure:r.failure()}));page.on('response',r=>{if(r.status()>=400)net.push({type:'http',url:r.url(),status:r.status()});});
+            const start=Date.now();await page.goto(`${origin}/?r482_cold=${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});const rows=[];let prev=0;
+            for(const c of checkpoints){if(c>prev)await sleep(c-prev);prev=c;const s=await snap(page);rows.push({checkpoint:c,...s});console.log('R482_COLD',name,JSON.stringify(rows.at(-1)));}
+            await context.close();return{name,elapsed:Date.now()-start,rows,net};
+          }
+          (async()=>{const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});let result;try{result=[await run(browser,'mobile-390x844',{width:390,height:844},true),await run(browser,'desktop-1440x900',{width:1440,height:900},false)];}finally{await browser.close();}fs.writeFileSync('artifacts/r482-cold/timeline.json',JSON.stringify(result,null,2));for(const r of result){const eventual=r.rows.find(x=>x.crystal==='ready'&&/^ready-r\d+$/.test(x.sync)&&x.canvas.exists&&x.canvas.width>120&&x.canvas.height>180);if(!eventual)throw new Error(`${r.name}: semantic MAG never became ready by 15s`);console.log(`R482_EVENTUAL_READY ${r.name} checkpoint=${eventual.checkpoint} sync=${eventual.sync} animation=${eventual.canvas.animationName}`);}})().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r482-cold-start-timeline
+          path: artifacts/r482-cold/
+          if-no-files-found: warn
+          retention-days: 30
