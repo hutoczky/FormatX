@@ -1,0 +1,170 @@
+name: P0 R523 candidate proof
+run-name: R523 exact candidate x5 plus mobile proof
+
+on:
+  push:
+    branches: [p0-r523-candidate-proof]
+    paths:
+      - '.github/workflows/p0-r523-candidate.yml'
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_SHA: 56c8cac881a1827e40a060fe16ad1be9f8407424
+
+jobs:
+  source-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Syntax unit semantic validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          node --check billing-worker/src/production-content-entry.js
+          npm ci --prefix billing-worker --prefer-offline
+          npm test --prefix billing-worker
+          if grep -A20 -F 'const DEFERRED_STYLE_PATHS' billing-worker/src/production-content-entry.js | grep -Fq "'/scifi-ui/styles/formatx-award-readiness.css'"; then
+            echo 'R523 owner fix absent: award stylesheet is still deferred' >&2
+            exit 1
+          fi
+          echo R523_SOURCE_TESTS_PASS
+
+  desktop-x5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Start exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          npm ci --prefix billing-worker --prefer-offline
+          npm install --no-save --no-package-lock --no-audit --no-fund lighthouse@12.8.2
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.candidate.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.candidate.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r523-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do
+            if curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r523-worker.log" || true
+          exit 1
+      - name: Desktop candidate x5 sequential
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r523/desktop
+          for i in 1 2 3 4 5; do
+            ./node_modules/.bin/lighthouse "https://formatxsuite.com:8787/?r523_candidate=desktop-${i}-${GITHUB_RUN_ID}" \
+              --quiet --output=json --output-path="artifacts/r523/desktop/run-${i}.json" \
+              --preset=desktop --only-categories=performance \
+              --max-wait-for-load=60000 --chrome-path="$CHROME_BIN" \
+              --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors"
+            node - "artifacts/r523/desktop/run-${i}.json" "$i" <<'NODE'
+          const fs=require('node:fs');
+          const l=JSON.parse(fs.readFileSync(process.argv[2]));
+          const a=l.audits;
+          const row={run:Number(process.argv[3]),performance:Math.round(l.categories.performance.score*100),fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,si:a['speed-index'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue};
+          console.log('R523_DESKTOP',JSON.stringify(row));
+          if(row.lcp>=2000||row.cls>=0.05||row.tbt>150||row.ttfb>500)process.exit(2);
+          NODE
+          done
+          node <<'NODE'
+          const fs=require('node:fs');
+          const rows=[];
+          for(let i=1;i<=5;i++){
+            const l=JSON.parse(fs.readFileSync(`artifacts/r523/desktop/run-${i}.json`));const a=l.audits;
+            rows.push({run:i,performance:Math.round(l.categories.performance.score*100),fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,si:a['speed-index'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue});
+          }
+          fs.writeFileSync('artifacts/r523/desktop-summary.json',JSON.stringify(rows,null,2)+'\n');
+          console.log('R523_DESKTOP_X5_PASS',JSON.stringify(rows));
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r523-candidate-desktop-x5
+          path: artifacts/r523/
+          retention-days: 30
+
+  mobile-x3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Start exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          npm ci --prefix billing-worker --prefer-offline
+          npm install --no-save --no-package-lock --no-audit --no-fund lighthouse@12.8.2
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.candidate.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.candidate.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r523-mobile-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do if curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi; sleep 1; done
+          cat "$RUNNER_TEMP/r523-mobile-worker.log" || true; exit 1
+      - name: Mobile candidate x3 sequential
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r523-mobile
+          for i in 1 2 3; do
+            ./node_modules/.bin/lighthouse "https://formatxsuite.com:8787/?r523_candidate=mobile-${i}-${GITHUB_RUN_ID}" \
+              --quiet --output=json --output-path="artifacts/r523-mobile/run-${i}.json" \
+              --only-categories=performance --max-wait-for-load=60000 --chrome-path="$CHROME_BIN" \
+              --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors"
+            node - "artifacts/r523-mobile/run-${i}.json" "$i" <<'NODE'
+          const fs=require('node:fs');const l=JSON.parse(fs.readFileSync(process.argv[2]));const a=l.audits;const r={run:Number(process.argv[3]),performance:Math.round(l.categories.performance.score*100),fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,si:a['speed-index'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue};console.log('R523_MOBILE',JSON.stringify(r));if(r.lcp>=2000||r.cls>=0.05||r.tbt>150||r.ttfb>500)process.exit(2);
+          NODE
+          done
+          node <<'NODE'
+          const fs=require('node:fs');const rows=[];for(let i=1;i<=3;i++){const l=JSON.parse(fs.readFileSync(`artifacts/r523-mobile/run-${i}.json`));const a=l.audits;rows.push({run:i,performance:Math.round(l.categories.performance.score*100),fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,si:a['speed-index'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue});}fs.writeFileSync('artifacts/r523-mobile/summary.json',JSON.stringify(rows,null,2)+'\n');console.log('R523_MOBILE_X3_PASS',JSON.stringify(rows));
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r523-candidate-mobile-x3
+          path: artifacts/r523-mobile/
+          retention-days: 30
