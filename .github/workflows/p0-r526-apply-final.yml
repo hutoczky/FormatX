@@ -1,0 +1,74 @@
+name: P0 R526 apply final owners
+
+on:
+  push:
+    branches: [p0-r526-final-422a4cc]
+    paths:
+      - '.github/workflows/p0-r526-apply-final.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: p0-r526-final-422a4cc
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Apply R526 performance and validator owners
+        env:
+          R526_PATCH_GZ_B64: H4sIAEw3m2oC/8U7a3fTSLLf/SsaL2ckgSQ7gcwwzhg2BDNwDyE5cZjdPTE4stS2tciSrlrKY4P/+1b1Q2r5FScws/kQ2+rueld1VXeJ0Zw4tEhIGqZ07IVRI73Jp0n8jDjkt9+Mk38ZjXGWzEjq5dMoHJFwliZZTk7gZ6PB/CkNiohmpMufmEaQ+KzF/HAcOkUIX7IwzVlrnGQzL792AjqmWUYDx2fMyZ6/+MX9NzOsCox7lYU5Heb0OjezZrNpjovYz8MkJqZFbhuEGAWjhOVZ6OfGfgMe+EnMcpIlSQ4kAPJiRuPcVV96EcWPfZgYjomJ09zAyz1Gc3d8/UZSc8jYKdBikYzmRRbj7M0zAZXx/wUtgJGxnwpCIpCjB7ReejkNYMLYixjdlwPjzJtReNguH3hRNPL8r/qzZMRodsllGRdRxKGW/CvQZkY9lsRCGoKrEqvOAKkRk2cF3S8XcGos4nuxT6ODOATVAIq3+FSOaXMloTA9ol52Fs5oUuTVYzFTkf7KDUIGKompn79yTYvzoJQUhfFXBsQcZJl346JRmaXCQJrZTZ9GsC7JDqLINHD2OWrAGV9zU6mMh+U3Ef1sWBI5GBcxKxQkGQtUSkaCkUcmHwxhGvINk96dHX34AM+kkVgW0pmHsRKVojv3sgnNj2gQekA9QtEsA81BDH37RgyQirGvIeWTZ3z4UberQ7KINlYbUev5eEZnySU9yMHiRwVo3xjT3J+mWZiAo9wYUgJzIea7jRaMJ7iRNrt5xWFSxLlc1gfs8YQzw9yIxpN8at21/pSb6ene7s8AQNisWAIGAqHEn/YuQeZmTK/IYcHyZCZ+GzJSdJSyIVBwog271GZAcwhTHXIL+gEiO0QnzCZlMOkQI01Y7ozDDP6jbgHDuIic1Avj3MmANoAqaAMRckEKm5qvdL2DcU6zw2Q2C3PwKuEuG7wRDUJ6mu6WKhRkFGye5QvuB2Gu+7LktBY28A/ErDxQzFwMCzZpK5tYwcnUY2/91FTkCrJISjMudfAKF4ywF4O6KXt98xEJMlZLDwRniC+WFDx5KcisY5SBQceKQlKEVC66ScjGqBiDNchoaylhSPKr2DZvVM5unFRcHcvoZID3k6swDpIrSymlitPK3VmR4g7H4+YKIG45joK6ObtJKavCpYhtIeOfZjnVIj/9RB6VP90w9qMioMxUQlxFDkAvxaPvDeAyK+gC9wTiNeNREYjlmlZNy2UJiJQi7Tibf3FjbmcQodapW9PUndqStC5oS6lHWabOlSu/mLckB3l2lG3ZRGm+w9WsLV1WPuxnEFaIObRWSo3vqLW1mqjnynC58ehGq4AJ2/CQ3w+Jh7ZRd8CVkohgpqO2SkPbVct9j8e2fg4AhPj9ZJZCLkANq8JlyoUUyCVeEPBI+QH0SmNQO0cCkiqnQ6AkCRhGTWScueW1lyELR2EEW4k/9eIJBTh6BFqKZyXd1UJBPO5uAlqEtOsBr+7vG+VVQXWWXX6OjKUeY+GlzhtGmyqZWgqQFSOPKk7AGddywtUwDYOAxkZFrikfObk3cjBLdpIUJ0jCXrTbGHfnJu4fkLfa4Fd+EsCu2TWKfOy8gCS3cZV5aaqlyoAVdq6Jc5VkX2nWYpnfSrMkKHjkVC7ocAflm5XIlSWUxUxZpuXZ3s7eSQmE8MzdcDfB3dlDuCDH1hPylm++/yR823YI9wKSTyl5e3jilM5Uz8Oq/VZg8xp846JsSkBXkNZ+Ov3gAsSdX4h35WUBSa7A9Ng0TIkXB+To4HeSwS4OSgOrmYHbI5j/0NglT1qNhnC7k0+vP7w/HL477p/1ZQTs09w8V9kCK0AWLvgObktXV1fu0vPPoBcB603vbe/0tPdm2D9813vz6UPvdHjaA6Dra5QBCGjw6rJ7/qVpfH7ammyABLximrWp3AFAu+3dn9u/tp9zraKBl7JFPZR7Z8j63pgeUajGAlOmCyIcyQAmn0ESiVOE5f7eOzPQU1eNvesdvAEMcw0HUvAOYhBoxGRJkflUYBAcTsWIFPnCPDR9OcEFPZvGPx1pP85Z5sUM7dEBnxLOhZpZZncTkF4woXesrwl4I7DDft/pK0MtYW1IDwU0KWgJlIuOXnNHA8xeEeVcWB67iX3CM3OlJwwAlzbx8+v6BgJ+kcIXTOrAG8JFh3XXAdETlCKLpEbA3NRcF55qG8yj1cYDhvFIdyYXArMJK90pSAKTgCoRUZTWSrjKIHTDUVNdOazRsdYMq01aaSyguPGZxqEMUB94WrmU7iHfpxKhibs6bgtQ0+UF65REu+KBLQfOIEouDeJDu+RoXi+lBLvSKDDHA5YVoRM0LUUljhlcsIahiV9bqSV7GK1b03wW6fnUKr5KUkdJcPMnMoi0YCojbVGt57uKZUF2kkaeT82VMdNeEwAlnu3Uum5WT26f6+b1zrylMe7yhx54uYNgsiRCR48T2KeSjNpk5l073oR222rhKsmjRH6kwOd2Y74xJYgn0fqcQI3DvgEpHZ6UwczyISaPIgNYBp1EmKMaTdxRmx3SvCO74FlA02iA8TKXl9UmQLAgryM7HSEsL4Sw1b+B1HHWuw5B1EUMsZD6mFBVkAnfwkcUtkDK8wiRsgiCtZyFlcYFeOztCeVpUNOwVooThndLUbqTMJ8WoxaKchwlV6wFO0Y45kB2HQa5BmQdvjPzJu4NemRDhrXdbeQq3CeAiaAu2n0DKaIbJ1em9XQPUsH9+wlyFkJSG09QXLtkj5VgAR2nZ4PY1tOx2+aErBHU8xfbCOr5ix0ngnR7UUiweqOQJI2YX+N8jHTNhaOiI2/Sn3op7cPWefr8l59hZ5CnUwjdQEtofZEPBoPg6eMWRCWWm3eA+fbNMKymvQLhSRbOvOwGFnwIx5QHCEjuTwEZoo7w/M2ZhXHoCP91GJp2VsycEVCRT53/0CxxruhoEjlhAEUOp5D/boUrSVuPkBOJRUgLIT1s+R08Hqdg20xxB3EKVoOBQM6ejPOKt1kCAYc6FFItzpC5BUCOXh76vGwLOvhZ5TSjY22zQz1WmDhejsdCRKsWaNcGWFhUtwZgfWiGGBdHXoSHHtw0XZ70CQKw1MhyF7INLzIxGkNMBpOwdZuy9hGznDnDwwJ95oK1weR1gH2pC/sBVrOWhhKosilrn2ycJkxnA5kJ15i9nfJrdCVfayBKXS8g0+mSenkHGrXv0ttggJobDFQl9OLZjrPGWFpr5XV/hOarzkCUcX/7/NR6tajhkmlPncji+admnuNrJxXuwPFI6YHeocwBLM8g1K4AsJaB2ixgYRN0NMnvpVfKBYa+5kkqPeIHUrwIfxXNOrRxGOU0s1ujLJxM85iiRZioqvbuYGCtV/zKddsgEq7DcpjeBjS/vtgKjbZqGyQM8sAMHkhedrdDoq3aBsm0ALtOcrHAeRbQyVZYasu2Uk1UZFJaz9Lr7bQillTQeWGRQtrtTpI8MS+meZ6yTqu1eELTeiWSji6PBI9vsRidw2eV0cwv7FuE9gnStqhjBMlM5oZ4AEoDw87FwV9nh6c+c0nr/4CAZwo/F8Hc5lXq7UryFgd3a0vjdCYuLKOIOA6DiBADL5F3c8WN/+877s+7bnsQVwfzcXqtTdAWX0GOB86ZMuJPs2QWFjPyshXQyxbiR0ruj+vw3enxUW/4+v3H7qD52AQZzvBEz7kkkySBfN/hmCjWxuvGoDTzRtHilJLC1Y9hb4UklWbWoKmTg0kUcWICtFSU1adQf5rAuEZ4bSp5+RJX//7+7N2n18Pexz8GTaEHkWVLtF1hUooaN/KKGPzgFjMAyFpYB4+mbcgMWOfccJyCUYeXP112FY5zNsU8wbBhhMbIu8gO+INwEkPV5EzSwhlFif8V7270mUXMvDHITIPzWdrRVhTSa+oXXOCY+HegyvKBXpfGl24lBnsNH1hHgyJGyTUnKQgZpwlMyGHTGbDp4fXBX8Mw1NQNvPXnNRCW7yGeV1U1hws+PWOm1VEHMli1xQn6A2Gd8kJqqRIbV6UYFkipl0NQizvkFtafd3ba7c9zqG74RSzeNdRrMaADKisMMjDWJNrf/zIGDeJmIyhmKdDESXtKms0accJy+CEoFBlBiBt8V6OYXnpRgTcgptV9aeqXgNzpOvrtMSfRXpjiZzcYVTrrmnO0cuNQTD3OJpBrsNnps11e0C1CxHx9G3CrisNFWBmNwaxothV5YKyncv4qWL4XX3qic6KzobPlb1MoCgjAc6RonEQy7GTAsSPAlDXWEvc5qOW7kXAoa3EkYId4FLBeKszPkij6RxjgtrJukh+F8MEn1RDMLe1aWBlhElE3Siamgb43PDz++Ob92fvjj8M3n45ODBtdwf6//vFHl/FuFPASs2608upNP3lBi9/y6AX93VegHO4xYNLTJJNnHpWzI1Cb4Ayb7IDHixMhGYGF7rqrFbO96vf1XaveQdVtNjDi/ekYw7H542z4Ube78+3bDzNXBGfVbvE3ymvxLO63be2BMyEuLNdZgwr9NVv48e6zyN98vzKDPyfqLGL8kwLPMpq/RngPOp9Fo+D1jsNX3ssmVpzQqL3HNhC8yoxWyw1PaJTGvx9UXSKrzrgqo7J3qqOo2vlaaQ444zskqmiXSCD+bpYoP37Wz8RXHnHDvn+9dMSt+pHlATfOgeyVRpGT7bXbri+6kfFyFka2uAeQMVi7/uiSMeML30IFhYmHiY3T7r+TMDZPj4/PbHKfvg/e8gFLAOsL3QKaErEAcSq6n+9AZJQtENqt03piK9DYU7FwD1WRJEHi7c0R77/S7qfEAUFrwO92oBIbsCcd/DdomudfBs3PT6GCawGI6kSrBAMIlI2U1C5eMnEJVSTwn6huJYqMQk5xSWuclAjOd7AlpOyDqGAfTmEKpBaiSLIJozTWek4svT9CYggWMarVlmo8RyD8rl2tqO7Zzz/jJD7BC4Jqwn6JRfRbrFCWmqtpQ6MMuxO65PyWk9Yh1WQJb84Ra83TXF3YPS0mCPVhTG9hYw8o7um5AVozBwN3MFhrsudfcNKTAXbNWHxBa2JVHadIlpsWbGq6rrso9ZoQ+Y8gzGLRZyvFYgsyUX1CN6pjV+uKQRzYq7HonH3OF7r3IuLSdsDHmg8LZTzeaCYqpcyTh7XxrNoems3SFsXKP6Ds4kLAEtQmkTeikW57M+ltFUrpb3IJF4vuWdyrLhS5kjx1n0Ae33IM8wu970WJGoSJYimDz9akataFJTka15I66g0yii2c7uqGWONLeBV/bi0TK8xB8o7NeuadbOPJgKY80R7ro22gQOZVoFBX3qL3xeQ9M5pWKPPBEFCjOFLqu3XuPnn66svj27lpfTsfDD4P4A8cAzwXvz3+Sfju/cWFW3HoH60VmuhtmPSuU/NCNiYgQuyVwE/TeHwrSZ5jswTEZQPCMifKurA0WWuISolrz6Tcy1cm6AwYz+mPIgwfXeCmgZ+4b+DnMpE1tFWHTSmqLC/wIES32pYY7J8dnJ59Ohme9v5434eqE+/4lTBaIBi1OKPYL5rEy13oOmqQRql6YGQROHIkAVp6//Eamx2HsRfJthJZjMijIW6b3xWwNFEQfgS3VagqrV06A7bqnWR0HF4vSrdUrVDsxv4+VDAq9wJvGkDmeAGo4qe2G/54NdaZOWSsr73Wti07Sx2GlS9xbmC8apVdhfco4V7+ANRi5Ubss0TEa42AWkT/y6SLWod1C2F0vVncraD1oOoq2Urk64EtCfk7U4Wyd0o69n28r1aNiR64hO829T5M0al47ajrcXQofuMiRStO/S4g0i75cRW+Oqvjl2FYcxiSKp9fIKyaTS1Q+TACa2bz0CJTiBvt7u4Cc/E5B91UzYDGyUG/D8zzg0f+zoJN0vYJ9gtXpL72GC3ju920V4MoM86OTHph8wgh6+WlW5WOqmydp6mdpWQANtPUxM21+3IFGL7r4nPLegjNOw2LV9Hb1drDq/HdHWVawY19ZVpPmQSxseYWxy3V7Ypz71oab0OgyuKHvEx508NANR6ysHyPY+3qhUq7mveAF6urxfc4/1jAmLadSy8KA9744cA6DOxufp0bi4ftQjv3cEllHbxAXXeWJh7bpNQaPwJS1nKnZWovpa/nxNLhAFfqNZiTNqlWlDVDQy7lzUtO+1en/dwB2OXLCWVnKc/bGpUpDJMsnIRxd+3tXyPCm/ZpUjA6lH00w6yIWfeZPiJag9QANtiHoPihD8nnJMF3/LralRxeWtqej/e88i0n/mREWe6kyE0IQ/wRowl+NiI/Hc7YMMq72IvQ8CP+ve229xr5KBdDtLuz127k+XikfoP1NOTt8xCYysLrrnhLH/lPxsM0iUL/pjujHivQTCHQhGNAz5wkjm6UkIbyTaButrejve/N3xuS72mId3fLd4gaatIQDL8rdLD6dV/1zkhD6QfonHR5L7BfAIRYrEGZOCMw6AAQ77ZZI6ITz78Z4qFjt1StdtncADYnE5op5KBzh3nY2jD11vV9n/yr8V/skcfsd0EAAA==
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' "$R526_PATCH_GZ_B64" | base64 -d | gzip -d > "$RUNNER_TEMP/r526-apply.sh"
+          bash "$RUNNER_TEMP/r526-apply.sh"
+
+      - name: Lightweight preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
+          node --check billing-worker/src/production-content-entry-r526.js
+          node --check .github/scripts/verify-apex-shell-r500.cjs
+          grep -Fq "Date.now()+20000" .github/workflows/verify-r522-semantic-mag.yml
+          grep -Fq "R482_CONDITION_DUMP" .github/workflows/verify-r481-live-mag.yml
+          ! grep -Fq "ready-r482" .github/workflows/verify-r481-live-mag.yml
+          ! grep -Fq "playwright install --with-deps chromium" .github/workflows/verify-r481-live-mag.yml
+          grep -Fq '"main": "src/production-content-entry-r526.js"' billing-worker/wrangler.jsonc
+          grep -Fq "20260904-r526-fcp-observer" billing-worker/src/production-content-entry-r526.js
+          git diff --check
+          npm ci --prefix billing-worker --prefer-offline
+          (cd billing-worker && npx wrangler deploy --dry-run --outdir="$RUNNER_TEMP/r526-worker")
+
+      - name: Commit coherent R526 tree and remove helper
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          rm .github/workflows/p0-r526-apply-final.yml
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add \
+            docs/scifi-ui/scripts/formatx-deferred-css-r487.js \
+            billing-worker/src/production-content-entry-r526.js \
+            billing-worker/wrangler.jsonc \
+            .github/workflows/verify-r522-semantic-mag.yml \
+            .github/workflows/verify-r481-live-mag.yml \
+            .github/scripts/verify-apex-shell-r500.cjs \
+            .github/workflows/verify-apex-shell-live.yml \
+            docs/p0-validation-version.txt \
+            .github/workflows/p0-r526-apply-final.yml
+          git commit -m 'Fix R526 final FCP scheduler and semantic gates'
+          git push origin HEAD:p0-r526-final-422a4cc
