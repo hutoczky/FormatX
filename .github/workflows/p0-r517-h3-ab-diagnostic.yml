@@ -1,0 +1,93 @@
+name: P0 R517 HTTP3 A/B diagnostic
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r517-h3-ab-diagnostic.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ORIGIN: https://formatxsuite.com
+
+jobs:
+  h3-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: 76b79fe75eebc9b0ce3998a8111eb8dbf539efb9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact R516 production marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?h3_ab=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/live-p0.txt"
+          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
+      - name: Install Lighthouse tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install -g @lhci/cli@0.13.x
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          echo "CHROME_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Lighthouse default QUIC path x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/h3-ab/default artifacts/h3-ab/noquic
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('lighthouserc.live.json','utf8'));
+          c.ci.collect.url=[`${process.env.ORIGIN}/?h3_ab_default=${process.env.GITHUB_RUN_ID}`];
+          c.ci.collect.numberOfRuns=3;
+          c.ci.collect.settings={...c.ci.collect.settings,chromeFlags:'--headless=new --no-sandbox --disable-dev-shm-usage'};
+          delete c.ci.assert; c.ci.upload={target:'filesystem',outputDir:'unused'};
+          fs.writeFileSync('lighthouserc.h3.default.json',JSON.stringify(c,null,2));
+          NODE
+          rm -rf .lighthouseci
+          lhci collect --config=./lighthouserc.h3.default.json
+          cp -a .lighthouseci/. artifacts/h3-ab/default/
+      - name: Lighthouse forced HTTP2 path x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('lighthouserc.live.json','utf8'));
+          c.ci.collect.url=[`${process.env.ORIGIN}/?h3_ab_noquic=${process.env.GITHUB_RUN_ID}`];
+          c.ci.collect.numberOfRuns=3;
+          c.ci.collect.settings={...c.ci.collect.settings,chromeFlags:'--headless=new --no-sandbox --disable-dev-shm-usage --disable-quic'};
+          delete c.ci.assert; c.ci.upload={target:'filesystem',outputDir:'unused'};
+          fs.writeFileSync('lighthouserc.h3.noquic.json',JSON.stringify(c,null,2));
+          NODE
+          rm -rf .lighthouseci
+          lhci collect --config=./lighthouserc.h3.noquic.json
+          cp -a .lighthouseci/. artifacts/h3-ab/noquic/
+      - name: Compare protocol and metrics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs'),p=require('node:path');
+          function rows(dir,label){return fs.readdirSync(dir).filter(x=>x.endsWith('.json')).sort().map((f,i)=>{const j=JSON.parse(fs.readFileSync(p.join(dir,f),'utf8')),a=j.audits,req=a['network-requests'].details.items,doc=req.find(x=>x.resourceType==='Document');const crit=['formatx-critical-shell-v56.css','formatx-quality-r461.css','formatx-critical-core-r227.css','formatx-reference-production-r244.css','formatx-first-paint-r206.css','formatx-p0-first-paint-r490.css','formatx-reference-mode-boot-r334.js'].map(n=>{const r=req.find(x=>x.url.includes(n));return [n,r?.protocol||'missing'];});return{label,run:i+1,performance:j.categories.performance.score*100,fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue,docProtocol:doc?.protocol||'',criticalProtocols:Object.fromEntries(crit),renderBlockers:(a['render-blocking-resources'].details?.items||[]).map(x=>x.url.split('/').pop().split('?')[0])};});}
+          const out=[...rows('artifacts/h3-ab/default','default'),...rows('artifacts/h3-ab/noquic','noquic')];
+          console.table(out.map(({criticalProtocols,renderBlockers,...r})=>r));
+          for(const r of out)console.log('H3_AB',JSON.stringify(r));
+          fs.writeFileSync('artifacts/h3-ab/summary.json',JSON.stringify(out,null,2));
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r517-h3-ab-${{ github.run_id }}
+          path: artifacts/h3-ab/
+          include-hidden-files: true
+          retention-days: 30
