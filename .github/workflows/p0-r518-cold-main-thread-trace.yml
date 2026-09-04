@@ -1,0 +1,82 @@
+name: P0 R518 cold main-thread trace
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r518-cold-main-thread-trace.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_REF: p0-r517-transport-76b79fe
+  CANDIDATE_SHA: 0cae78cd44785984e5b2b966636fa29032550398
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_REF }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Start exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.trace.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.trace.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r518-trace-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          exit 1
+      - name: Chromium cold trace x3 fresh browser processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r518-cold-trace
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');const {chromium}=require('playwright');
+          async function one(i){
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});
+            const page=await context.newPage();
+            await page.addInitScript(()=>{window.__lt=[];try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__lt.push({t:e.startTime,d:e.duration,attr:[...(e.attribution||[])].map(a=>({name:a.name,containerType:a.containerType,containerName:a.containerName,containerSrc:a.containerSrc}))});}).observe({type:'longtask',buffered:true});}catch{}});
+            const cdp=await context.newCDPSession(page);let ev=[];
+            cdp.on('Tracing.dataCollected',e=>ev.push(...e.value));
+            await cdp.send('Tracing.start',{categories:'devtools.timeline,v8,blink.user_timing,loading,disabled-by-default-devtools.timeline',options:'record-as-much-as-possible'});
+            await page.goto(`https://formatxsuite.com:8787/?cold_trace=${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(2500);
+            const state=await page.evaluate(()=>({lt:window.__lt,nav:performance.getEntriesByType('navigation')[0]?.toJSON(),paint:performance.getEntriesByType('paint').map(e=>({name:e.name,t:e.startTime}))}));
+            await cdp.send('Tracing.end');await new Promise(resolve=>cdp.once('Tracing.tracingComplete',resolve));
+            const mainTasks=ev.filter(e=>e.name==='RunTask'&&e.ph==='X'&&(e.dur||0)>=50000).sort((a,b)=>(b.dur||0)-(a.dur||0));
+            const details=mainTasks.map(t=>{
+              const start=t.ts,end=t.ts+t.dur;
+              const nested=ev.filter(e=>e.ph==='X'&&e.ts>=start&&e.ts<=end&&['EvaluateScript','FunctionCall','TimerFire','FireAnimationFrame','EventDispatch','UpdateLayoutTree','Layout','Paint','CompositeLayers','Commit','RunMicrotasks','v8.compile'].includes(e.name)).sort((a,b)=>(b.dur||0)-(a.dur||0)).slice(0,15).map(e=>({name:e.name,durMs:(e.dur||0)/1000,url:e.args?.data?.url||e.args?.data?.scriptName||'',functionName:e.args?.data?.functionName||'',line:e.args?.data?.lineNumber??null,column:e.args?.data?.columnNumber??null}));
+              return{durMs:t.dur/1000,ts:t.ts,nested};
+            });
+            const out={run:i,state,tasks:details};fs.writeFileSync(`artifacts/r518-cold-trace/run-${i}.json`,JSON.stringify(out,null,2));console.log('COLD_TRACE',JSON.stringify(out,null,2));
+            await browser.close();return out;
+          }
+          (async()=>{const all=[];for(let i=1;i<=3;i++)all.push(await one(i));fs.writeFileSync('artifacts/r518-cold-trace/summary.json',JSON.stringify(all,null,2));})().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r518-cold-main-thread-trace
+          path: artifacts/r518-cold-trace/
+          retention-days: 30
