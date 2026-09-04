@@ -1,0 +1,32 @@
+name: P0 R517 Cloudflare transport surface
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r517-cloudflare-transport-surface.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Live response headers and HTTPS DNS advertisement
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== CURL VERSION ==='
+          curl --version
+          echo '=== LIVE DOCUMENT HEADERS ==='
+          curl -fsS --http2 -D - -o /dev/null -H 'Cache-Control: no-cache' "https://formatxsuite.com/?transport_surface=$GITHUB_RUN_ID" | tr -d '\r'
+          echo '=== LIVE CRITICAL CSS HEADERS ==='
+          curl -fsS --http2 -D - -o /dev/null -H 'Cache-Control: no-cache' "https://formatxsuite.com/scifi-ui/styles/formatx-critical-core-r227.css?transport_surface=$GITHUB_RUN_ID" | tr -d '\r'
+          echo '=== HTTPS RR CLOUDFLARE ==='
+          dig +short HTTPS formatxsuite.com @1.1.1.1 || true
+          echo '=== HTTPS RR GOOGLE ==='
+          dig +short HTTPS formatxsuite.com @8.8.8.8 || true
+          echo '=== HTTPS RR WWW ==='
+          dig +short HTTPS www.formatxsuite.com @1.1.1.1 || true
