@@ -1,0 +1,164 @@
+name: R517 production diagnostics
+run-name: R517 protocol + mobile + SEO + R482 diagnostics for R516 production
+
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths:
+      - '.github/workflows/r517-production-diagnostics.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ORIGIN: https://formatxsuite.com
+      AUDITED_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install lightweight diagnostics only
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --ignore-scripts playwright-core@1.62.0 @lhci/cli@0.13.0
+          command -v google-chrome || command -v chromium || command -v chromium-browser
+          google-chrome --version || true
+      - name: Confirm exact R516 production marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?r517diag=$GITHUB_RUN_ID" -o /tmp/live-marker.txt
+          cmp -s docs/p0-validation-version.txt /tmp/live-marker.txt
+          echo EXACT_R516_MARKER_PASS
+      - name: Controlled network timing probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r517-diagnostics
+          : > artifacts/r517-diagnostics/network.csv
+          echo 'kind,run,http_version,dns,connect,tls,ttfb,total,size,cf_cache_status,alt_svc' >> artifacts/r517-diagnostics/network.csv
+          urls=(
+            "$ORIGIN/"
+            "$ORIGIN/scifi-ui/styles/formatx-critical-core-r227.css?v=20260819-r227"
+            "$ORIGIN/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame"
+          )
+          kinds=(html critical_core p0_first_paint)
+          for i in $(seq 1 12); do
+            for x in 0 1 2; do
+              h="$(mktemp)"
+              read -r hv dns con tls ttfb total size < <(curl -sS -o /dev/null -D "$h" -w '%{http_version} %{time_namelookup} %{time_connect} %{time_appconnect} %{time_starttransfer} %{time_total} %{size_download}\n' -H 'Cache-Control: no-cache' "${urls[$x]}&diag=$GITHUB_RUN_ID-$i" 2>/dev/null || echo 'ERR 0 0 0 0 0 0')
+              cf="$(awk 'BEGIN{IGNORECASE=1}/^cf-cache-status:/{gsub("\r",""); sub(/^[^:]+:[ ]*/,""); print; exit}' "$h")"
+              alt="$(awk 'BEGIN{IGNORECASE=1}/^alt-svc:/{gsub("\r",""); sub(/^[^:]+:[ ]*/,""); print; exit}' "$h" | tr ',' ';')"
+              printf '%s,%s,%s,%s,%s,%s,%s,%s,%s,%q,%q\n' "${kinds[$x]}" "$i" "$hv" "$dns" "$con" "$tls" "$ttfb" "$total" "$size" "$cf" "$alt" >> artifacts/r517-diagnostics/network.csv
+              rm -f "$h"
+            done
+          done
+          cat artifacts/r517-diagnostics/network.csv
+      - name: Dump live robots and SEO policy evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r517-diagnostics
+          curl -fsS -D artifacts/r517-diagnostics/robots.headers "$ORIGIN/robots.txt?r517diag=$GITHUB_RUN_ID" -o artifacts/r517-diagnostics/robots.txt
+          echo '--- ROBOTS HEADERS ---'
+          cat artifacts/r517-diagnostics/robots.headers
+          echo '--- ROBOTS BODY ---'
+          cat artifacts/r517-diagnostics/robots.txt
+      - name: Chromium protocol and LCP render probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r517-diagnostics
+          node <<'NODE' | tee artifacts/r517-diagnostics/protocol-lcp.jsonl
+          const { chromium } = require('playwright-core');
+          const fs = require('node:fs');
+          const cp = require('node:child_process');
+          const chrome = (()=>{ for (const c of ['google-chrome','chromium','chromium-browser']) { try { return cp.execFileSync('which',[c],{encoding:'utf8'}).trim(); } catch {} } throw new Error('Chrome not found'); })();
+          const origin=process.env.ORIGIN;
+          async function series(label,args,mobile=false){
+            const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--disable-dev-shm-usage',...args]});
+            const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1350,height:940},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,locale:'hu-HU',reducedMotion:'no-preference'});
+            for(let i=1;i<=3;i++){
+              const page=await context.newPage();
+              await page.addInitScript(()=>{
+                window.__diag={lcp:[],paint:[],long:[],shift:[],mut:[]};
+                new PerformanceObserver(l=>window.__diag.lcp.push(...l.getEntries().map(e=>({t:e.startTime,size:e.size,tag:e.element?.tagName||'',cls:e.element?.className||'',text:(e.element?.textContent||'').slice(0,80)})))).observe({type:'largest-contentful-paint',buffered:true});
+                new PerformanceObserver(l=>window.__diag.paint.push(...l.getEntries().map(e=>({name:e.name,t:e.startTime})))).observe({type:'paint',buffered:true});
+                try{new PerformanceObserver(l=>window.__diag.long.push(...l.getEntries().map(e=>({t:e.startTime,d:e.duration})))).observe({type:'longtask',buffered:true});}catch{}
+                try{new PerformanceObserver(l=>window.__diag.shift.push(...l.getEntries().filter(e=>!e.hadRecentInput).map(e=>({t:e.startTime,v:e.value,s:(e.sources||[]).map(s=>({node:s.node?.className||s.node?.id||s.node?.tagName||'',previousRect:s.previousRect,currentRect:s.currentRect}))})))).observe({type:'layout-shift',buffered:true});}catch{}
+                addEventListener('DOMContentLoaded',()=>{
+                  const el=document.querySelector('#hero .hero-lead');
+                  if(el) new MutationObserver(ms=>window.__diag.mut.push(...ms.map(m=>({t:performance.now(),type:m.type,text:el.textContent})))).observe(el,{subtree:true,characterData:true,childList:true,attributes:true});
+                },{once:true});
+              });
+              const url=`${origin}/?r517_protocol=${label}-${i}-${Date.now()}`;
+              await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+              await page.waitForTimeout(5500);
+              const result=await page.evaluate(()=>{
+                const nav=performance.getEntriesByType('navigation')[0];
+                const resources=performance.getEntriesByType('resource').filter(r=>/critical-core-r227|p0-first-paint-r490|critical-shell-v56|quality-r461|reference-production-r244|first-paint-r206|reference-mode-boot-r334/.test(r.name)).map(r=>({name:r.name.split('/').pop(),protocol:r.nextHopProtocol,start:r.startTime,responseStart:r.responseStart,responseEnd:r.responseEnd,duration:r.duration,transferSize:r.transferSize,initiator:r.initiatorType}));
+                const hero=document.querySelector('#hero .hero-lead'); const s=hero?getComputedStyle(hero):null;
+                return {nav:{protocol:nav?.nextHopProtocol||'',responseStart:nav?.responseStart||0,responseEnd:nav?.responseEnd||0,domContentLoaded:nav?.domContentLoadedEventEnd||0,load:nav?.loadEventEnd||0},diag:window.__diag,resources,hero:{text:hero?.textContent||'',display:s?.display,visibility:s?.visibility,opacity:s?.opacity,animationName:s?.animationName,transition:s?.transition}};
+              });
+              console.log(JSON.stringify({label,mobile,run:i,...result}));
+              await page.close();
+            }
+            await context.close(); await browser.close();
+          }
+          (async()=>{await series('normal',[],false);await series('force-h2',['--disable-quic'],false);await series('mobile-normal',[],true);})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Independent mobile Lighthouse diagnostic x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r517-diagnostics/mobile
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('lighthouserc.live.mobile.json','utf8'));
+          c.ci.collect.url=[`https://formatxsuite.com/?r517_mobile_lh=${process.env.GITHUB_RUN_ID}`];
+          c.ci.collect.numberOfRuns=3;
+          c.ci.upload={target:'filesystem',outputDir:'artifacts/r517-diagnostics/mobile'};
+          delete c.ci.assert;
+          fs.writeFileSync('/tmp/r517-mobile.json',JSON.stringify(c,null,2));
+          NODE
+          rm -rf .lighthouseci
+          npx lhci collect --config=/tmp/r517-mobile.json | tee artifacts/r517-diagnostics/mobile-output.txt
+          cp -a .lighthouseci/. artifacts/r517-diagnostics/mobile/ || true
+      - name: R482 condition dump and semantic interaction probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE' | tee artifacts/r517-diagnostics/r482.json
+          const { chromium }=require('playwright-core');
+          const cp=require('node:child_process');
+          const chrome=(()=>{for(const c of ['google-chrome','chromium','chromium-browser']){try{return cp.execFileSync('which',[c],{encoding:'utf8'}).trim()}catch{}}throw new Error('Chrome not found')})();
+          (async()=>{
+            const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:1440,height:900},locale:'hu-HU',reducedMotion:'no-preference'});
+            const page=await context.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(String(e))); page.on('console',m=>{if(m.type()==='error') errors.push(m.text())});
+            await page.goto(`${process.env.ORIGIN}/?r482diag=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(5000);
+            async function state(){return page.evaluate(()=>{const root=document.documentElement;const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');const s=canvas?getComputedStyle(canvas):null;const r=canvas?.getBoundingClientRect();const header=document.querySelector('.topbar .fx-reference-mag-button');const hs=header?getComputedStyle(header):null;const hr=header?.getBoundingClientRect();const mini=document.querySelector('.fx-mini-mag-glyph-r459');return {crystalReady:root.dataset.fxCrystalOrganismR326||'',shapeSync:root.dataset.fxMagShapeSyncR476||'',lifeContract:root.dataset.fxPrimaryMagLifeContractR482||'',optics:root.dataset.fxPrimaryMagOpticsR482||'',renderer:root.dataset.fxCoreRenderer||'',scheduler:root.dataset.fxCoreScheduler||'',idle:root.dataset.fxCoreIdleRenderR441||'',balanceLinkExists:Boolean(document.querySelector('link[data-fx-mag-living-balance-r481]')),balanceHref:document.querySelector('link[data-fx-mag-living-balance-r481]')?.href||'',canvasExists:Boolean(canvas),canvasRect:r?{width:r.width,height:r.height,left:r.left,right:r.right}:null,display:s?.display||'',visibility:s?.visibility||'',opacity:s?.opacity||'',animationName:s?.animationName||'',filter:s?.filter||'',headerVisible:Boolean(header&&hs&&hr&&hs.display!=='none'&&hs.visibility!=='hidden'&&Number(hs.opacity)>.2&&hr.width>=40&&hr.height>=40),miniExists:Boolean(mini),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,pause:document.querySelector('#hero .fx-reference-pause')?.dataset?.paused||'',askVisible:Boolean(document.querySelector('#hero .fx-reference-ask'))};});}
+            const before=await state();
+            const pause=page.locator('#hero .fx-reference-pause').first();
+            let pauseOutcome=null,resumeOutcome=null,askOutcome=null;
+            if(await pause.isVisible().catch(()=>false)){await pause.click();await page.waitForTimeout(700);pauseOutcome=await state();await pause.click();await page.waitForTimeout(700);resumeOutcome=await state();}
+            const ask=page.locator('#hero .fx-reference-ask').first();
+            if(await ask.isVisible().catch(()=>false)){const box=await ask.boundingBox();await ask.click();await page.waitForTimeout(500);askOutcome={box,after:await state()};}
+            console.log(JSON.stringify({before,pauseOutcome,resumeOutcome,askOutcome,errors},null,2));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r517-production-diagnostics-${{ github.sha }}
+          path: artifacts/r517-diagnostics
+          include-hidden-files: true
+          retention-days: 30
