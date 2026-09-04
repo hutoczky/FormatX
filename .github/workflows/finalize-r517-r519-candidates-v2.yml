@@ -1,0 +1,248 @@
+name: Finalize R517 audit parity and R519 semantic MAG v2
+run-name: Canonical verifier candidate proof from exact R516
+
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths:
+      - '.github/workflows/finalize-r517-r519-candidates-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      BASE_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+      OUT_BRANCH: p0-r517-candidate
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Apply only proven active audit-specific bypass removal
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          def remove_block(path, marker):
+              p=Path(path); lines=p.read_text(encoding='utf-8').splitlines(True)
+              i=next((n for n,l in enumerate(lines) if marker in l),None)
+              if i is None: raise SystemExit(f'missing marker: {path} {marker}')
+              if 'const AUDIT_MODE' in lines[i]:
+                  del lines[i]
+                  while i<len(lines) and not lines[i].strip(): del lines[i]
+                  if i>=len(lines) or 'if (AUDIT_MODE)' not in lines[i]: raise SystemExit(f'missing AUDIT_MODE block {path}')
+              depth=0; started=False; end=i
+              for j in range(i,len(lines)):
+                  depth += lines[j].count('{')-lines[j].count('}')
+                  if '{' in lines[j]: started=True
+                  end=j
+                  if started and depth<=0: break
+              if not started: raise SystemExit(f'block not found {path}')
+              del lines[i:end+1]
+              if i<len(lines) and not lines[i].strip(): del lines[i]
+              p.write_text(''.join(lines),encoding='utf-8')
+          remove_block('docs/scifi-ui/scripts/living-architecture.js', "const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse')")
+          remove_block('docs/scifi-ui/scripts/formatx-apex.js', "const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse')")
+          remove_block('docs/scifi-ui/scripts/formatx-core-real3d-v20.js', "if (new URLSearchParams(location.search).get('lighthouse') === '1')")
+          p=Path('docs/scifi-ui/scripts/formatx-core-mobile-v55.js'); ls=p.read_text(encoding='utf-8').splitlines(True)
+          i=next((n for n,l in enumerate(ls) if "get('lighthouse') === '1'" in l and 'audit-skip' in l),None)
+          if i is None: raise SystemExit('mobile audit bypass missing')
+          del ls[i]; p.write_text(''.join(ls),encoding='utf-8')
+          p=Path('docs/scifi-ui/scripts/formatx-premium-finish.js'); ls=p.read_text(encoding='utf-8').splitlines(True); out=[]; flags=[False,False,False]
+          for l in ls:
+              if "const auditMode = parameters.get('lighthouse') === '1'" in l: flags[0]=True; continue
+              if "if (auditMode) return 'audit-skip'" in l: flags[1]=True; continue
+              if 'if (auditMode || resilientCore) return resilientCore;' in l: flags[2]=True; out.append(l.replace('if (auditMode || resilientCore)','if (resilientCore)')); continue
+              out.append(l)
+          if not all(flags): raise SystemExit(f'premium flags {flags}')
+          p.write_text(''.join(out),encoding='utf-8')
+          files=['living-architecture.js','formatx-apex.js','formatx-premium-finish.js','formatx-core-real3d-v20.js','formatx-core-mobile-v55.js']
+          for name in files:
+              s=Path('docs/scifi-ui/scripts',name).read_text(encoding='utf-8')
+              if "get('lighthouse')" in s or 'audit-skip' in s or 'fx-audit-mode' in s: raise SystemExit(f'audit branch remains {name}')
+          print('R517_AUDIT_SOURCE_PASS')
+          PY
+          for f in docs/scifi-ui/scripts/living-architecture.js docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/formatx-premium-finish.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-core-mobile-v55.js; do node --check "$f"; done
+          git diff --check
+      - name: Install exact local Worker plus runner-Chrome verifier
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --prefix billing-worker --no-audit --prefer-offline
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          chrome="$(command -v google-chrome)"; test -n "$chrome"; echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');const w=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete w.ai;delete w.routes;w.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r517-parity.json',JSON.stringify(w,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r517-parity.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r517-parity-worker.log" 2>&1 &
+          cd ..
+          for i in $(seq 1 60); do if curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi; sleep 1; done
+          cat "$RUNNER_TEMP/r517-parity-worker.log"; exit 1
+      - name: Run canonical MAG verifier on normal and lighthouse-query candidate
+        shell: bash
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-canonical-parity/normal artifacts/r517-canonical-parity/lighthouse
+          python3 <<'PY'
+          from pathlib import Path
+          s=Path('.github/scripts/validate-live-mag-functional.cjs').read_text(encoding='utf-8')
+          s=s.replace("const { chromium } = require('playwright');","const { chromium } = require('playwright-core');",1)
+          s=s.replace('const browser = await chromium.launch({','const browser = await chromium.launch({\n    executablePath:process.env.CHROME_PATH,',1)
+          Path('.r517-canonical.cjs').write_text(s,encoding='utf-8')
+          PY
+          FORMATX_TEST_URL='https://formatxsuite.com:8787/' FORMATX_MAG_EVIDENCE_DIR='artifacts/r517-canonical-parity/normal' AUDITED_SHA="$BASE_SHA" node .r517-canonical.cjs
+          FORMATX_TEST_URL='https://formatxsuite.com:8787/?lighthouse=1&parity=1' FORMATX_MAG_EVIDENCE_DIR='artifacts/r517-canonical-parity/lighthouse' AUDITED_SHA="$BASE_SHA" node .r517-canonical.cjs
+          node <<'NODE'
+          const fs=require('node:fs');for(const lane of ['normal','lighthouse']){const r=JSON.parse(fs.readFileSync(`artifacts/r517-canonical-parity/${lane}/report.json`));if(r.desktop.renderer!=='single-webgl-crystal-organism-r326'||r.mobile.renderer!=='single-webgl-crystal-organism-r326')throw new Error(`${lane}: renderer`);if(r.desktop.ask.w<44||r.mobile.ask.w<44)throw new Error(`${lane}: ASK`);}console.log('R517_CANONICAL_NORMAL_AND_LIGHTHOUSE_PARITY_PASS');
+          NODE
+      - name: Commit proven source candidate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Games Tech'; git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/living-architecture.js docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/formatx-premium-finish.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          git commit -m 'Remove active audit-specific runtime bypasses'
+          git push origin HEAD:"refs/heads/$OUT_BRANCH"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r517-canonical-parity-${{ github.sha }}
+          path: artifacts/r517-canonical-parity
+          if-no-files-found: warn
+          retention-days: 30
+
+  r482-semantic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      BASE_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+      OUT_BRANCH: p0-r519-r482-candidate
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Confirm exact R516 live marker and install lightweight verifier
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          curl -fsS -H 'Cache-Control: no-cache' "https://formatxsuite.com/p0-validation-version.txt?r519v2=$GITHUB_RUN_ID" -o /tmp/live-marker
+          cmp -s docs/p0-validation-version.txt /tmp/live-marker
+          npm install --no-save --ignore-scripts playwright-core@1.62.0
+          echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+      - name: Prove current semantic MAG with exact canonical verifier logic
+        shell: bash
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r519-semantic-live
+          python3 <<'PY'
+          from pathlib import Path
+          s=Path('.github/scripts/validate-live-mag-functional.cjs').read_text(encoding='utf-8')
+          s=s.replace("const { chromium } = require('playwright');","const { chromium } = require('playwright-core');",1)
+          s=s.replace('const browser = await chromium.launch({','const browser = await chromium.launch({\n    executablePath:process.env.CHROME_PATH,',1)
+          Path('.r519-canonical.cjs').write_text(s,encoding='utf-8')
+          PY
+          FORMATX_TEST_URL='https://formatxsuite.com/' FORMATX_MAG_EVIDENCE_DIR='artifacts/r519-semantic-live' AUDITED_SHA="$BASE_SHA" node .r519-canonical.cjs
+      - name: Replace obsolete R482 marker verifier with canonical semantic verifier workflow
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cat > .github/workflows/verify-r481-live-mag.yml <<'YAML'
+          name: Verify current semantic live MAG (legacy R482 gate)
+          run-name: Current semantic mobile + desktop MAG for ${{ github.sha }}
+          on:
+            push:
+              branches: [master]
+              paths:
+                - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+                - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
+                - 'docs/scifi-ui/styles/formatx-mag-living-balance-r481.css'
+                - '.github/scripts/validate-live-mag-functional.cjs'
+                - '.github/workflows/verify-r481-live-mag.yml'
+                - 'docs/p0-validation-version.txt'
+            workflow_dispatch:
+          permissions:
+            contents: read
+            statuses: write
+          jobs:
+            live-r482-mag:
+              runs-on: ubuntu-24.04
+              timeout-minutes: 15
+              steps:
+                - uses: actions/checkout@v5
+                - name: Wait for exact deployed marker
+                  shell: bash
+                  run: |
+                    set -Eeuo pipefail
+                    for i in $(seq 1 90); do if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://formatxsuite.com/p0-validation-version.txt?r482=${GITHUB_RUN_ID}_${i}" -o "$RUNNER_TEMP/live-marker" && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-marker"; then exit 0; fi; sleep 10; done; exit 1
+                - uses: actions/setup-node@v5
+                  with:
+                    node-version: '22'
+                - name: Install lightweight runner Chrome driver
+                  run: |
+                    npm install --no-save --ignore-scripts playwright-core@1.62.0
+                    echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+                - name: Verify current semantic renderer, PAUSE, RESUME, ASK, fallback and reduced motion
+                  shell: bash
+                  env:
+                    NODE_PATH: ${{ github.workspace }}/node_modules
+                    FORMATX_TEST_URL: https://formatxsuite.com/
+                    FORMATX_MAG_EVIDENCE_DIR: artifacts/r482-semantic-live
+                    AUDITED_SHA: ${{ github.sha }}
+                  run: |
+                    set -Eeuo pipefail
+                    mkdir -p "$FORMATX_MAG_EVIDENCE_DIR"
+                    python3 - <<'PY'
+                    from pathlib import Path
+                    s=Path('.github/scripts/validate-live-mag-functional.cjs').read_text(encoding='utf-8')
+                    s=s.replace("const { chromium } = require('playwright');","const { chromium } = require('playwright-core');",1)
+                    s=s.replace('const browser = await chromium.launch({','const browser = await chromium.launch({\n    executablePath:process.env.CHROME_PATH,',1)
+                    Path('.r482-canonical.cjs').write_text(s,encoding='utf-8')
+                    PY
+                    node .r482-canonical.cjs
+                - uses: actions/upload-artifact@v4
+                  if: always()
+                  with:
+                    name: r482-semantic-${{ github.sha }}
+                    path: artifacts/r482-semantic-live
+                    if-no-files-found: warn
+                    retention-days: 30
+          YAML
+          ruby -e "require 'yaml'; YAML.load_file('.github/workflows/verify-r481-live-mag.yml')"
+          grep -Fq 'validate-live-mag-functional.cjs' .github/workflows/verify-r481-live-mag.yml
+          ! grep -Fq "ready-r482'" .github/workflows/verify-r481-live-mag.yml
+          ! grep -Fq 'r482-spectrum-soft-edge' .github/workflows/verify-r481-live-mag.yml
+      - name: Commit proven semantic validator candidate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Games Tech'; git config user.email 'hutoczky@users.noreply.github.com'
+          git add .github/workflows/verify-r481-live-mag.yml
+          git commit -m 'Modernize R482 legacy gate to canonical MAG semantics'
+          git push origin HEAD:"refs/heads/$OUT_BRANCH"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r519-semantic-proof-${{ github.sha }}
+          path: artifacts/r519-semantic-live
+          if-no-files-found: warn
+          retention-days: 30
