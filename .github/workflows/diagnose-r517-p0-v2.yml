@@ -1,0 +1,236 @@
+name: Diagnose R517 P0 blockers v2
+run-name: R517 parallel diagnostics from exact R516 production
+
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths:
+      - '.github/workflows/diagnose-r517-p0-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r517-p0-diagnostics-v2-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AUDITED_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+  ORIGIN: https://formatxsuite.com
+
+jobs:
+  desktop-traces:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - name: Confirm exact R516 marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags --depth=1 origin "$AUDITED_SHA"
+          git show "$AUDITED_SHA:docs/p0-validation-version.txt" > "$RUNNER_TEMP/expected.txt"
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?diag=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/live.txt"
+          cmp -s "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/live.txt"
+      - uses: actions/setup-node@v5
+        with: { node-version: '22' }
+      - name: Install pinned Lighthouse only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install -g lighthouse@11.4.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+          lighthouse --version
+      - name: Capture three diagnostic desktop Lighthouse traces
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-v2/desktop
+          for i in 1 2 3; do
+            lighthouse "$ORIGIN/" \
+              --preset=desktop \
+              --output=json \
+              --output-path="artifacts/r517-v2/desktop/lhr-$i.json" \
+              --save-assets \
+              --chrome-path="$CHROME_PATH" \
+              --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage' \
+              --max-wait-for-load=60000 \
+              --quiet
+          done
+          node <<'NODE'
+          const fs=require('node:fs');
+          const out=[];
+          for(let i=1;i<=3;i++){
+            const d=JSON.parse(fs.readFileSync(`artifacts/r517-v2/desktop/lhr-${i}.json`,'utf8'));
+            const a=d.audits,c=d.categories;
+            const score=k=>Math.round((c[k]?.score??-1)*100),n=k=>a[k]?.numericValue??null;
+            const rb=a['render-blocking-resources']?.details||null;
+            const lcp=a['largest-contentful-paint-element']?.details||null;
+            out.push({i,performance:score('performance'),accessibility:score('accessibility'),bestPractices:score('best-practices'),seo:score('seo'),FCP:n('first-contentful-paint'),LCP:n('largest-contentful-paint'),SI:n('speed-index'),TBT:n('total-blocking-time'),CLS:n('cumulative-layout-shift'),TTFB:n('server-response-time'),renderBlocking:rb,lcpElement:lcp});
+          }
+          fs.writeFileSync('artifacts/r517-v2/desktop/summary.json',JSON.stringify(out,null,2));
+          console.log('DESKTOP_LIGHTHOUSE_DIAG',JSON.stringify(out,null,2));
+          NODE
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r517-desktop-traces-${{ env.AUDITED_SHA }}
+          path: artifacts/r517-v2/desktop/
+          include-hidden-files: true
+          retention-days: 30
+
+  mobile-lighthouse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Confirm exact R516 marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags --depth=1 origin "$AUDITED_SHA"
+          git show "$AUDITED_SHA:docs/p0-validation-version.txt" > "$RUNNER_TEMP/expected.txt"
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?mobile_diag=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/live.txt"
+          cmp -s "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/live.txt"
+      - uses: actions/setup-node@v5
+        with: { node-version: '22' }
+      - name: Install pinned Lighthouse only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install -g lighthouse@11.4.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+      - name: Run one independent 390x844 mobile diagnostic
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-v2/mobile
+          cat > "$RUNNER_TEMP/mobile-config.cjs" <<'JS'
+          module.exports={
+            extends:'lighthouse:default',
+            settings:{
+              formFactor:'mobile',
+              screenEmulation:{mobile:true,width:390,height:844,deviceScaleFactor:1,disabled:false}
+            }
+          };
+          JS
+          lighthouse "$ORIGIN/" \
+            --config-path="$RUNNER_TEMP/mobile-config.cjs" \
+            --output=json \
+            --output-path='artifacts/r517-v2/mobile/lhr.json' \
+            --save-assets \
+            --chrome-path="$CHROME_PATH" \
+            --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage' \
+            --max-wait-for-load=60000 \
+            --quiet
+          node <<'NODE'
+          const fs=require('node:fs');
+          const d=JSON.parse(fs.readFileSync('artifacts/r517-v2/mobile/lhr.json','utf8'));const a=d.audits,c=d.categories;
+          const score=k=>Math.round((c[k]?.score??-1)*100),n=k=>a[k]?.numericValue??null;
+          const failedSeo=(c.seo?.auditRefs||[]).map(x=>x.id).filter(id=>a[id]?.score!==null&&a[id]?.score<1).map(id=>({id,score:a[id].score,title:a[id].title,details:a[id].details}));
+          const s={performance:score('performance'),accessibility:score('accessibility'),bestPractices:score('best-practices'),seo:score('seo'),FCP:n('first-contentful-paint'),LCP:n('largest-contentful-paint'),SI:n('speed-index'),TBT:n('total-blocking-time'),CLS:n('cumulative-layout-shift'),TTFB:n('server-response-time'),lcpElement:a['largest-contentful-paint-element']?.details||null,renderBlocking:a['render-blocking-resources']?.details||null,failedSeo};
+          fs.writeFileSync('artifacts/r517-v2/mobile/summary.json',JSON.stringify(s,null,2));console.log('MOBILE_LIGHTHOUSE_DIAG',JSON.stringify(s,null,2));
+          NODE
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r517-mobile-diagnostic-${{ env.AUDITED_SHA }}
+          path: artifacts/r517-v2/mobile/
+          include-hidden-files: true
+          retention-days: 30
+
+  seo-robots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Confirm exact R516 marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags --depth=1 origin "$AUDITED_SHA"
+          git show "$AUDITED_SHA:docs/p0-validation-version.txt" > "$RUNNER_TEMP/expected.txt"
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?seo_diag=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/live.txt"
+          cmp -s "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/live.txt"
+      - name: Capture live robots and canonical Worker source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-v2/seo
+          git show "$AUDITED_SHA:billing-worker/src/production-content-entry.js" > artifacts/r517-v2/seo/production-content-entry.js
+          curl -sS --max-time 30 -H 'Cache-Control: no-cache' -D artifacts/r517-v2/seo/robots.headers -o artifacts/r517-v2/seo/robots.txt -w 'http_code=%{http_code}\nhttp_version=%{http_version}\nremote_ip=%{remote_ip}\ntime_starttransfer=%{time_starttransfer}\ntime_total=%{time_total}\nsize_download=%{size_download}\n' "$ORIGIN/robots.txt" | tee artifacts/r517-v2/seo/robots.curl.txt
+          echo '--- LIVE ROBOTS ---'
+          nl -ba artifacts/r517-v2/seo/robots.txt
+          echo '--- WORKER ROBOTS SOURCE ---'
+          grep -A12 -B2 'const ROBOTS' artifacts/r517-v2/seo/production-content-entry.js || true
+          if grep -Fq 'Content-Signal:' artifacts/r517-v2/seo/production-content-entry.js; then
+            echo 'SOURCE_CONTAINS_CONTENT_SIGNAL=true'
+          else
+            echo 'SOURCE_CONTAINS_CONTENT_SIGNAL=false'
+          fi
+          if grep -Fq 'Content-Signal:' artifacts/r517-v2/seo/robots.txt; then
+            echo 'LIVE_CONTAINS_CONTENT_SIGNAL=true'
+          else
+            echo 'LIVE_CONTAINS_CONTENT_SIGNAL=false'
+          fi
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r517-seo-robots-${{ env.AUDITED_SHA }}
+          path: artifacts/r517-v2/seo/
+          include-hidden-files: true
+          retention-days: 30
+
+  r482-mag:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - name: Confirm exact R516 marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags --depth=1 origin "$AUDITED_SHA"
+          git show "$AUDITED_SHA:docs/p0-validation-version.txt" > "$RUNNER_TEMP/expected.txt"
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?r482_diag=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/live.txt"
+          cmp -s "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/live.txt"
+      - uses: actions/setup-node@v5
+        with: { node-version: '22' }
+      - name: Install playwright-core only and use runner Chrome
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "$RUNNER_TEMP/r482diag" && cd "$RUNNER_TEMP/r482diag"
+          npm init -y >/dev/null 2>&1
+          npm install --silent --ignore-scripts playwright-core@1.62.0
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+      - name: Dump legacy conditions and execute current PAUSE RESUME ASK semantics
+        env:
+          NODE_PATH: ${{ runner.temp }}/r482diag/node_modules
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-v2/r482
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');const {chromium}=require('playwright-core');
+          const CANVAS='#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';const PAUSE='#hero .fx-reference-pause';const ASK='#hero .fx-reference-ask';
+          function inspect(){const root=document.documentElement,canvas=document.querySelector('#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas'),link=document.querySelector('link[data-fx-mag-living-balance-r481]'),pause=document.querySelector('#hero .fx-reference-pause'),ask=document.querySelector('#hero .fx-reference-ask'),s=canvas?getComputedStyle(canvas):null,r=canvas?.getBoundingClientRect(),ar=ask?.getBoundingClientRect(),hit=ar?document.elementFromPoint(ar.left+ar.width/2,ar.top+ar.height/2):null;return{crystalReady:root.dataset.fxCrystalOrganismR326||'',shapeSync:root.dataset.fxMagShapeSyncR476||'',lifeContract:root.dataset.fxPrimaryMagLifeContractR482||'',life:root.dataset.fxPrimaryMagLifeR482||'',optics:root.dataset.fxPrimaryMagOpticsR482||'',renderer:root.dataset.fxCoreRenderer||'',scheduler:root.dataset.fxCoreScheduler||'',idle:root.dataset.fxCoreIdleRenderR441||'',playback:root.dataset.fxPrimaryMagPlaybackR498||'',paused:root.dataset.fxReferenceMotionPaused||'',balanceLinkExists:link instanceof HTMLLinkElement,balanceHref:link?.href||'',canvasExists:canvas instanceof HTMLCanvasElement,canvasWidth:r?.width||0,canvasHeight:r?.height||0,display:s?.display||'',visibility:s?.visibility||'',opacity:s?Number(s.opacity):null,animationName:s?.animationName||'',animationPlayState:s?.animationPlayState||'',filter:s?.filter||'',overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,pauseExists:pause instanceof HTMLButtonElement,pauseDataset:pause?{...pause.dataset}:null,askExists:ask instanceof HTMLButtonElement,askHit:{width:ar?.width||0,height:ar?.height||0,owns:Boolean(hit&&ask?.contains(hit))},animations:canvas?.getAnimations?.().map(a=>({name:a.animationName||'',currentTime:typeof a.currentTime==='number'?a.currentTime:null,playState:a.playState,pending:a.pending,startTime:typeof a.startTime==='number'?a.startTime:null}))||[]};}
+          async function run(browser,name,viewport,mobile){const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,locale:'hu-HU',reducedMotion:'no-preference',colorScheme:'dark'});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});await page.goto(process.env.ORIGIN+'/',{waitUntil:'domcontentloaded',timeout:60000});const target=page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252').first();if(await target.isVisible().catch(()=>false))await target.click();await page.waitForTimeout(5000);const initial=await page.evaluate(inspect);const semantic={};if(initial.pauseExists&&initial.canvasExists){const before=await page.evaluate(inspect);await page.locator(PAUSE).click();await page.waitForTimeout(700);const paused=await page.evaluate(inspect);await page.locator(PAUSE).click();await page.waitForTimeout(700);const resumed=await page.evaluate(inspect);semantic.pause={before,paused};semantic.resume={resumed};}if(initial.askExists){await page.locator(ASK).click();await page.waitForTimeout(500);semantic.ask=await page.evaluate(()=>({htmlDataset:{...document.documentElement.dataset},bodyDataset:{...document.body.dataset},activeTag:document.activeElement?.tagName||'',activeClass:document.activeElement?.className||'',visibleThoughts:[...document.querySelectorAll('.fx-reference-thought,[data-fx-reference-thought]')].filter(e=>{const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0;}).map(e=>(e.textContent||'').trim().slice(0,180))}));}const result={name,initial,semantic,errors};fs.writeFileSync(`artifacts/r517-v2/r482/${name}.json`,JSON.stringify(result,null,2));console.log('R482_DIAG',JSON.stringify(result,null,2));await context.close();}
+          (async()=>{const b=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH,args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await run(b,'mobile-390x844',{width:390,height:844},true);await run(b,'desktop-1440x900',{width:1440,height:900},false);await b.close();})().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r517-r482-diagnostic-${{ env.AUDITED_SHA }}
+          path: artifacts/r517-v2/r482/
+          include-hidden-files: true
+          retention-days: 30
