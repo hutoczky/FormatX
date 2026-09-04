@@ -1,15 +1,10 @@
-name: Verify R482 live MAG spectrum
-run-name: R482 live mobile + desktop MAG verification for ${{ github.sha }}
+name: Verify R482 live MAG semantic replacement
+run-name: R482 semantic replacement for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'docs/scifi-ui/styles/formatx-mag-living-balance-r481.css'
-      - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
-      - 'docs/scifi-ui/data/r481-mag-living-balance.json'
-      - '.github/workflows/verify-r481-live-mag.yml'
-      - 'docs/p0-validation-version.txt'
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -17,201 +12,87 @@ permissions:
   statuses: write
 
 concurrency:
-  group: r482-live-mag-${{ github.ref }}
-  cancel-in-progress: true
+  group: formatx-r482-semantic-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
 
 jobs:
   live-r482-mag:
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]'))
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 12
+    env:
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      FORMATX_TEST_URL: https://formatxsuite.com/
+      FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r482-semantic-replacement
     steps:
-      - name: Check out audited revision
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.AUDITED_SHA }}
 
       - name: Wait for exact deployed P0 marker
         shell: bash
         run: |
-          set -Eeuo pipefail
-          origin='https://formatxsuite.com'
-          for attempt in $(seq 1 90); do
-            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$origin/p0-validation-version.txt?r482_wait=${GITHUB_RUN_ID}_${attempt}" -o "$RUNNER_TEMP/live-p0.txt"; then
-              if cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
-                echo 'Exact source P0 marker is live; R482 live verification is applicable.'
-                exit 0
-              fi
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' \
+              "https://formatxsuite.com/p0-validation-version.txt?r482_wait=${GITHUB_RUN_ID}_$attempt" \
+              -o "$RUNNER_TEMP/live-p0.txt" \
+              && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+              echo 'Exact production revision is live.'
+              exit 0
             fi
-            sleep 10
+            sleep 5
           done
-          echo 'Exact source SHA marker never reached production; refusing stale live verification.' >&2
+          echo 'Exact production marker did not converge.' >&2
           exit 1
 
-      - name: Install Chromium verifier
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Validate semantic replacement source
+        run: node --check .github/scripts/validate-r522-semantic-mag.cjs
+
+      - name: Reuse system Chrome
         shell: bash
         run: |
-          set -Eeuo pipefail
-          mkdir -p "$RUNNER_TEMP/r482-live"
-          cd "$RUNNER_TEMP/r482-live"
-          npm init -y >/dev/null 2>&1
-          npm install --silent playwright@1.62.0
-          npx playwright install --with-deps chromium >/dev/null
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
 
-      - name: Verify live mobile and desktop R482 MAG
-        env:
-          NODE_PATH: ${{ runner.temp }}/r482-live/node_modules
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          node <<'NODE'
-          const assert=require('node:assert/strict');
-          const {chromium}=require('playwright');
+      - name: Verify current mobile and desktop MAG semantics
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
 
-          async function verify(browser,name,viewport,mobile){
-            const context=await browser.newContext({
-              viewport,
-              deviceScaleFactor:mobile?2:1,
-              isMobile:mobile,
-              hasTouch:mobile,
-              locale:'hu-HU',
-              reducedMotion:'no-preference',
-              colorScheme:'dark'
-            });
-            const page=await context.newPage();
-            const errors=[];
-            page.on('pageerror',error=>errors.push(String(error)));
-            page.on('console',message=>{
-              const text=message.text();
-              if(message.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(text))errors.push(text);
-            });
-            await page.goto(`https://formatxsuite.com/?verify=r482-${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
-            await page.waitForFunction(()=>{
-              const root=document.documentElement;
-              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
-              const link=document.querySelector('link[data-fx-mag-living-balance-r481]');
-              const style=canvas?getComputedStyle(canvas):null;
-              const box=canvas?.getBoundingClientRect();
-              return root.dataset.fxCrystalOrganismR326==='ready'
-                && root.dataset.fxMagShapeSyncR476==='ready-r482'
-                && root.dataset.fxPrimaryMagLifeContractR482==='large-mini-header-spectrum-breath-zero-webgl-idle'
-                && root.dataset.fxPrimaryMagOpticsR482==='restrained-soft-spectrum-mobile-edge'
-                && link instanceof HTMLLinkElement
-                && link.href.includes('r482-spectrum-soft-edge')
-                && canvas && style && box && box.width>120 && box.height>180
-                && style.display!=='none' && style.visibility!=='hidden' && Number(style.opacity)>.2;
-            },null,{timeout:120000});
-            await page.waitForTimeout(700);
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r482-semantic-replacement-${{ env.AUDITED_SHA }}
+          path: artifacts/r482-semantic-replacement/
+          if-no-files-found: warn
+          retention-days: 30
 
-            const state=await page.evaluate(()=>{
-              const root=document.documentElement;
-              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
-              const style=getComputedStyle(canvas);
-              const rect=canvas.getBoundingClientRect();
-              const header=document.querySelector('.topbar .fx-reference-mag-button');
-              const headerStyle=header?getComputedStyle(header):null;
-              const headerRect=header?.getBoundingClientRect();
-              const mini=document.querySelector('.fx-mini-mag-glyph-r459');
-              const miniStyle=mini?getComputedStyle(mini):null;
-              return{
-                renderer:root.dataset.fxCoreRenderer,
-                sync:root.dataset.fxMagShapeSyncR476,
-                life:root.dataset.fxPrimaryMagLifeR482,
-                contract:root.dataset.fxPrimaryMagLifeContractR482,
-                optics:root.dataset.fxPrimaryMagOpticsR482,
-                scheduler:root.dataset.fxCoreScheduler,
-                idle:root.dataset.fxCoreIdleRenderR441,
-                animationName:style.animationName,
-                filter:style.filter,
-                opacity:Number(style.opacity),
-                scale:style.scale,
-                rect:{width:rect.width,height:rect.height,left:rect.left,right:rect.right},
-                balanceHref:document.querySelector('link[data-fx-mag-living-balance-r481]')?.href||'',
-                header:{
-                  exists:Boolean(header),
-                  visible:Boolean(headerStyle&&headerRect&&headerStyle.display!=='none'&&headerStyle.visibility!=='hidden'&&Number(headerStyle.opacity)>.2&&headerRect.width>=40&&headerRect.height>=40),
-                  boxShadow:headerStyle?.boxShadow||'',
-                  life:header?.dataset.fxMagLife||''
-                },
-                mini:mini?{
-                  background:miniStyle?.backgroundImage||'',
-                  boxShadow:miniStyle?.boxShadow||'',
-                  life:mini.dataset.fxMagLife||''
-                }:null,
-                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
-              };
-            });
-
-            assert.equal(state.renderer,'single-webgl-crystal-organism-r326');
-            assert.equal(state.sync,'ready-r482');
-            assert.ok(['breath','pulse'].includes(state.life),JSON.stringify(state));
-            assert.equal(state.contract,'large-mini-header-spectrum-breath-zero-webgl-idle');
-            assert.equal(state.optics,'restrained-soft-spectrum-mobile-edge');
-            assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441');
-            assert.equal(state.idle,'zero-frame');
-            assert.match(state.balanceHref,/formatx-mag-living-balance-r481\.css\?v=20260831-r482-spectrum-soft-edge/);
-            assert.ok(state.header.exists&&state.header.visible,JSON.stringify(state.header));
-            assert.notEqual(state.header.boxShadow,'none');
-            assert.ok(['breath','pulse'].includes(state.header.life),JSON.stringify(state.header));
-            if(state.mini){
-              assert.notEqual(state.mini.background,'none');
-              assert.notEqual(state.mini.boxShadow,'none');
-              assert.ok(['breath','pulse'].includes(state.mini.life),JSON.stringify(state.mini));
-            }
-            assert.ok(state.overflow<=2,JSON.stringify(state));
-
-            if(mobile){
-              assert.ok(state.animationName.includes('fx-primary-mag-mobile-heart-r483'),state.animationName);
-              assert.match(state.filter,/brightness\(1\.02\)/);
-              assert.match(state.filter,/contrast\(0\.98\)/);
-              assert.match(state.filter,/saturate\(1\.28\)/);
-              assert.match(state.filter,/hue-rotate\(-3deg\)/);
-              assert.match(state.filter,/blur\(0\.3px\)/);
-            }else{
-              assert.ok(state.animationName.includes('fx-primary-mag-living-desktop-r482'),state.animationName);
-            }
-
-            const samples=[];
-            for(let i=0;i<4;i++){
-              samples.push(await page.evaluate(()=>{
-                const s=getComputedStyle(document.querySelector('#hero .fx-crystal-organism-r326-canvas'));
-                return{opacity:Number(s.opacity),scale:Number.parseFloat(s.scale)||1};
-              }));
-              await page.waitForTimeout(620);
-            }
-            const opacitySpan=Math.max(...samples.map(s=>s.opacity))-Math.min(...samples.map(s=>s.opacity));
-            const scaleSpan=Math.max(...samples.map(s=>s.scale))-Math.min(...samples.map(s=>s.scale));
-            assert.ok(opacitySpan>.004||scaleSpan>.002,JSON.stringify({name,samples,opacitySpan,scaleSpan}));
-            assert.equal(errors.length,0,errors.join(' | '));
-            console.log(`PASS ${name}`,JSON.stringify({state,samples,opacitySpan,scaleSpan},null,2));
-            await context.close();
-          }
-
-          (async()=>{
-            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-            await verify(browser,'mobile-390x844',{width:390,height:844},true);
-            await verify(browser,'desktop-1440x900',{width:1440,height:900},false);
-            await browser.close();
-            console.log('PASS: live R482 MAG family has restrained spectrum optics, visible breathing and zero-idle WebGL on mobile and desktop.');
-          })().catch(error=>{console.error(error);process.exit(1);});
-          NODE
-
-      - name: Publish R482 live MAG status
+      - name: Publish R482 semantic replacement status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          set -euo pipefail
-          if [[ "$JOB_STATUS" == success ]]; then
+          if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='R482 exact-live mobile + desktop MAG spectrum passed'
+            description='R482 legacy gate replaced by current bounded MAG semantics'
           else
             state=failure
-            description='R482 exact-live MAG spectrum verification failed'
+            description='R482 semantic replacement failed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX R482 live MAG' \
             -f description="$description" \
