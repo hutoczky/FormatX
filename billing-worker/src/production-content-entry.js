@@ -7,7 +7,7 @@ import productionBase from './production-content-entry-r369-base.js';
    slow runs. It now uses the existing R487 double-rAF post-first-paint scheduler;
    MAG clock, PAUSE/RESUME, ASK and renderer ownership remain unchanged. */
 
-const STARTUP_REVISION = '20260903-r514-critical-core-post-first-paint';
+const STARTUP_REVISION = '20260904-r523-award-first-paint-stability';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -57,7 +57,6 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/formatx-feedback.css',
   '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/formatx-content-standard.css',
-  '/scifi-ui/styles/formatx-award-readiness.css',
 ]);
 
 const R502_ASSET_REWRITES = new Map([
@@ -92,7 +91,7 @@ function robotsResponse(request) {
     'X-Content-Type-Options': 'nosniff',
     'X-FormatX-Robots-Owner': 'worker-r499',
     'Alt-Svc': 'clear',
-    'X-FormatX-Transport-Stability': 'r514-critical-core-post-first-paint',
+    'X-FormatX-Transport-Stability': 'r523-award-first-paint-stability',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
 }
@@ -239,9 +238,9 @@ async function stabilizePublicResponse(request, url, response) {
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', HEADER_CSP);
   headers.set('Alt-Svc', 'clear');
-  headers.set('X-FormatX-Transport-Stability', 'r514-critical-core-post-first-paint');
-  headers.set('X-FormatX-Edge-Stability', `r514-critical-core:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r514-critical-core-r487-post-first-paint-r504-prepaint');
+  headers.set('X-FormatX-Transport-Stability', 'r523-award-first-paint-stability');
+  headers.set('X-FormatX-Edge-Stability', `r523-award-stability:${STARTUP_REVISION}`);
+  headers.set('X-FormatX-CSS-Scheduler', 'r523-award-blocking-r487-rest-post-first-paint-r504-prepaint');
   headers.set('X-FormatX-Motion-Scheduler', 'r507-single-css-animation-clock-owner');
   headers.set('X-FormatX-Mag-Clock-Owner', 'shape-sync-r476-only');
   if (request.method === 'HEAD') {
