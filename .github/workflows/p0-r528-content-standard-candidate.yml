@@ -1,0 +1,108 @@
+name: P0 R528 content-standard owner candidate
+
+on:
+  push:
+    branches: [p0-r528-final-owner]
+    paths:
+      - '.github/workflows/p0-r528-content-standard-candidate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [mobile, desktop]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: f0f7f43c03ec32dbdcee2e7781d06614dbccd5a6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Apply exact deferred structural owner fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('billing-worker/src/production-content-entry.js')
+          s=p.read_text()
+          old="  '/scifi-ui/styles/formatx-content-standard.css',\n"
+          assert s.count(old)==1
+          p.write_text(s.replace(old,'',1))
+          PY
+          node --check billing-worker/src/production-content-entry.js
+          git diff --check
+          ! grep -Fq "'/scifi-ui/styles/formatx-content-standard.css'" billing-worker/src/production-content-entry.js
+      - name: Install cached Worker and Lighthouse
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker --prefer-offline
+          npm install -g @lhci/cli@0.13.x
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Start exact candidate Worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs'); const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.r528-candidate.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r528-candidate.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/wrangler.log" 2>&1 &
+          cd ..
+          for i in $(seq 1 60); do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/wrangler.log"; exit 1
+      - name: Prepare exact profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          profile='${{ matrix.profile }}'
+          if [ "$profile" = mobile ]; then src='lighthouserc.live.mobile.json'; runs=3; else src='lighthouserc.live.json'; runs=1; fi
+          node - "$src" "$profile" "$runs" <<'NODE'
+          const fs=require('node:fs'); const [src,profile,runs]=process.argv.slice(2); const c=JSON.parse(fs.readFileSync(src,'utf8'));
+          c.ci.collect.url=[`https://formatxsuite.com:8787/?r528_candidate=${profile}`]; c.ci.collect.numberOfRuns=Number(runs);
+          c.ci.collect.settings=c.ci.collect.settings||{};
+          c.ci.collect.settings.chromeFlags='--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors --allow-insecure-localhost';
+          fs.writeFileSync(`lighthouserc.r528-${profile}.json`,JSON.stringify(c,null,2)+'\n');
+          NODE
+      - name: Run candidate Lighthouse
+        shell: bash
+        run: |
+          set -euo pipefail
+          profile='${{ matrix.profile }}'; rm -rf .lighthouseci "artifacts/r528-${profile}"
+          lhci collect --config="./lighthouserc.r528-${profile}.json"
+          mkdir -p "artifacts/r528-${profile}"; cp -a .lighthouseci/. "artifacts/r528-${profile}/"
+          PROFILE="$profile" node <<'NODE' | tee "artifacts/r528-${profile}/summary.txt"
+          const fs=require('node:fs'),path=require('node:path'); const p=process.env.PROFILE,dir=`artifacts/r528-${p}`;
+          const files=fs.readdirSync(dir).filter(x=>x.startsWith('lhr-')&&x.endsWith('.json')).sort(); let bad=0;
+          for(const [i,f] of files.entries()){
+            const r=JSON.parse(fs.readFileSync(path.join(dir,f),'utf8')),a=r.audits,c=r.categories;
+            const row={run:i+1,performance:Math.round((c.performance?.score||0)*100),a11y:Math.round((c.accessibility?.score||0)*100),bp:Math.round((c['best-practices']?.score||0)*100),seo:Math.round((c.seo?.score||0)*100),fcp:a['first-contentful-paint']?.numericValue,lcp:a['largest-contentful-paint']?.numericValue,tbt:a['total-blocking-time']?.numericValue,cls:a['cumulative-layout-shift']?.numericValue,ttfb:a['server-response-time']?.numericValue};
+            console.log(JSON.stringify(row));
+            if(p==='mobile' && !(row.lcp<2000 && row.cls<.05 && row.tbt<=150 && row.ttfb<=500)) bad++;
+            if(p==='desktop' && !(row.lcp<2000 && row.cls<.05 && row.tbt<=150 && row.ttfb<=500)) bad++;
+          }
+          if(bad) process.exit(1);
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r528-content-standard-${{ matrix.profile }}-${{ github.sha }}
+          path: artifacts/r528-${{ matrix.profile }}/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
