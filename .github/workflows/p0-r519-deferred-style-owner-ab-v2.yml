@@ -6,6 +6,7 @@ on:
       - p0-r517-owner-76b79fe
     paths:
       - .github/workflows/p0-r519-deferred-style-owner-ab-v2.yml
+      - diagnostics/p0-r519-css-scheduler-ab.sh
 
 permissions:
   contents: read
