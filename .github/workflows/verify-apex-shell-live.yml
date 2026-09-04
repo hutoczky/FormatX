@@ -1,67 +1,58 @@
 name: Verify FormatX apex shell live
+run-name: Apex shell live for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - 'billing-worker/src/production-content-entry.js'
-      - 'docs/scifi-ui/styles/formatx-critical-shell-v56.css'
-      - 'docs/scifi-ui/index.html'
-      - '.github/workflows/verify-apex-shell-live.yml'
 
 permissions:
   contents: read
   statuses: write
 
+concurrency:
+  group: formatx-apex-shell-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
 jobs:
   verify:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 12
+    env:
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
-      - name: Checkout audited revision
-        uses: actions/checkout@v5
-
-      - name: Derive current production first-frame contract
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY' >> "$GITHUB_ENV"
-          import pathlib,re
-          source=pathlib.Path('billing-worker/src/production-content-entry.js').read_text(encoding='utf-8')
-          def one(pattern,label):
-              m=re.search(pattern,source)
-              assert m, f'missing {label} in production source'
-              return m.group(1)
-          print('FX_EXPECTED_STARTUP_REVISION='+one(r"const STARTUP_REVISION = '([^']+)'",'STARTUP_REVISION'))
-          print('FX_EXPECTED_FIRST_FRAME_ATTR='+one(r'data-fx-first-frame-stability-([A-Za-z0-9_-]+)="true"','first-frame stability marker'))
-          print('FX_EXPECTED_P0_FIRST_PAINT_ATTR='+one(r'data-fx-p0-first-paint-([A-Za-z0-9_-]+)="true"','P0 first-paint marker'))
-          print('FX_EXPECTED_CSS_SCHEDULER='+one(r"headers\.set\('X-FormatX-CSS-Scheduler', '([^']+)'\)",'CSS scheduler owner'))
-          print('FX_EXPECTED_MOTION_SCHEDULER='+one(r"headers\.set\('X-FormatX-Motion-Scheduler', '([^']+)'\)",'motion scheduler owner'))
-          PY
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.AUDITED_SHA }}
 
       - name: Wait for exact production marker propagation
         shell: bash
         run: |
           set -euo pipefail
-          APEX='https://formatxsuite.com'
-          for attempt in $(seq 1 36); do
-            echo "FormatX marker probe $attempt/36"
-            if curl -fsS --max-time 25 -H 'Cache-Control: no-cache' \
-              "$APEX/p0-validation-version.txt?marker=${GITHUB_RUN_ID}-${attempt}" \
+          for attempt in $(seq 1 60); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' \
+              "https://formatxsuite.com/p0-validation-version.txt?apex=${GITHUB_RUN_ID}-$attempt" \
               -o "$RUNNER_TEMP/live-p0.txt" \
               && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
               echo 'Exact production marker is live.'
               exit 0
             fi
-            sleep 10
+            sleep 5
           done
           echo 'Production marker did not converge.' >&2
           exit 1
 
-      - name: Verify current apex shell contract once
+      - name: Verify top-level Worker and apex shell contract
         shell: bash
-        run: node .github/scripts/verify-apex-shell-r500.cjs
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/verify-apex-shell-r500.cjs
+          node .github/scripts/verify-apex-shell-r500.cjs
 
       - name: Publish live shell status
         if: always()
@@ -70,15 +61,15 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [[ "$JOB_STATUS" == success ]]; then
+          if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Current apex first-frame, edge/scheduler contract and typed assets are live'
+            description='Top-level Worker, first-frame and apex shell contract are live'
           else
             state=failure
-            description='Apex shell or current first-frame contract verification failed'
+            description='Apex shell or top-level Worker contract verification failed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX apex shell integrity' \
             -f description="$description" \
-            -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
