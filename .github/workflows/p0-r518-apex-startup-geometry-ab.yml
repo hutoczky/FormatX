@@ -1,0 +1,136 @@
+name: P0 R518 Apex startup geometry A/B
+run-name: Prove Apex cold-start forced-layout owner
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths:
+      - '.github/workflows/p0-r518-apex-startup-geometry-ab.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CANDIDATE_REF: p0-r517-transport-76b79fe
+      CANDIDATE_SHA: 0cae78cd44785984e5b2b966636fa29032550398
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_REF }}
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Start exact R517 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          cp docs/scifi-ui/scripts/formatx-apex.js "$RUNNER_TEMP/apex.baseline.js"
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.ab.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.ab.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r518-apex-ab-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do
+            curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r518-apex-ab-worker.log" || true
+          exit 1
+
+      - name: Baseline cold desktop x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r518-apex-ab
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          async function one(i,label){
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});
+            const page=await context.newPage();
+            await page.addInitScript(()=>{window.__lt=[];try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__lt.push({t:e.startTime,d:e.duration});}).observe({type:'longtask',buffered:true});}catch{}});
+            await page.goto(`https://formatxsuite.com:8787/?apex_ab=${label}-${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(1800);
+            const out=await page.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];const paint=performance.getEntriesByType('paint');const lt=window.__lt||[];return{fcp:paint.find(x=>x.name==='first-contentful-paint')?.startTime??null,tbt:lt.reduce((s,e)=>s+Math.max(0,e.d-50),0),longtasks:lt,ttfb:n?.responseStart??null,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,progress:getComputedStyle(document.documentElement).getPropertyValue('--progress').trim(),scrolled:document.documentElement.classList.contains('fx-page-scrolled')}});
+            await browser.close(); return out;
+          }
+          (async()=>{const rows=[];for(let i=1;i<=3;i++)rows.push(await one(i,'baseline'));console.log('BASELINE',JSON.stringify(rows,null,2));fs.writeFileSync('artifacts/r518-apex-ab/baseline.json',JSON.stringify(rows,null,2));})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Apply diagnostic-only removal of synchronous startup geometry read
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/scripts/formatx-apex.js')
+          s=p.read_text()
+          old="""    progress();\n    addEventListener('scroll', scheduleProgress, { passive: true });"""
+          new="""    // Diagnostic A/B: startup state is already progress=0 and not scrolled.\n    // Do not synchronously read scrollHeight during the initial mutation batch.\n    addEventListener('scroll', scheduleProgress, { passive: true });"""
+          assert old in s
+          p.write_text(s.replace(old,new,1))
+          PY
+          grep -F 'Do not synchronously read scrollHeight' docs/scifi-ui/scripts/formatx-apex.js
+          sleep 2
+
+      - name: Treatment cold desktop x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          async function one(i,label){
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});
+            const page=await context.newPage();
+            await page.addInitScript(()=>{window.__lt=[];try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__lt.push({t:e.startTime,d:e.duration});}).observe({type:'longtask',buffered:true});}catch{}});
+            await page.goto(`https://formatxsuite.com:8787/?apex_ab=${label}-${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(1800);
+            const out=await page.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];const paint=performance.getEntriesByType('paint');const lt=window.__lt||[];return{fcp:paint.find(x=>x.name==='first-contentful-paint')?.startTime??null,tbt:lt.reduce((s,e)=>s+Math.max(0,e.d-50),0),longtasks:lt,ttfb:n?.responseStart??null,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,progress:getComputedStyle(document.documentElement).getPropertyValue('--progress').trim(),scrolled:document.documentElement.classList.contains('fx-page-scrolled')}});
+            await browser.close(); return out;
+          }
+          (async()=>{const rows=[];for(let i=1;i<=3;i++)rows.push(await one(i,'treatment'));console.log('TREATMENT',JSON.stringify(rows,null,2));fs.writeFileSync('artifacts/r518-apex-ab/treatment.json',JSON.stringify(rows,null,2));})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Compare A/B without declaring false PASS
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const b=JSON.parse(fs.readFileSync('artifacts/r518-apex-ab/baseline.json'));
+          const t=JSON.parse(fs.readFileSync('artifacts/r518-apex-ab/treatment.json'));
+          const stats=x=>({avgTbt:x.reduce((s,r)=>s+r.tbt,0)/x.length,maxTbt:Math.max(...x.map(r=>r.tbt)),avgFcp:x.reduce((s,r)=>s+(r.fcp||0),0)/x.length,maxFcp:Math.max(...x.map(r=>r.fcp||0))});
+          const out={baseline:stats(b),treatment:stats(t),deltaAvgTbt:stats(t).avgTbt-stats(b).avgTbt,deltaMaxTbt:stats(t).maxTbt-stats(b).maxTbt};
+          console.log('AB_SUMMARY',JSON.stringify(out,null,2));
+          fs.writeFileSync('artifacts/r518-apex-ab/summary.json',JSON.stringify(out,null,2));
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r518-apex-startup-geometry-ab
+          path: artifacts/r518-apex-ab/
+          retention-days: 30
