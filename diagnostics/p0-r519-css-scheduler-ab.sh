@@ -10,6 +10,8 @@ case "$MODE" in
   *) echo "invalid CSS_MODE=$MODE" >&2; exit 2 ;;
 esac
 
+export MODE REPLICA
+
 test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
 test -z "$(git status --porcelain)"
 
@@ -21,11 +23,14 @@ test -n "$CHROME_BIN"
 export CHROME_BIN
 
 python3 - <<'PY'
+import os
 from pathlib import Path
+mode=os.environ['MODE']
+assert mode in {'batch','sequential'}
 p=Path('docs/scifi-ui/scripts/formatx-deferred-css-r487.js')
 s=p.read_text()
 a="  let fallback = 0;"
-b=a+"\n  const diagMode = new URLSearchParams(location.search).get('diag_css_mode') === 'sequential' ? 'sequential' : 'batch';\n  root.dataset.fxDiagCssMode = diagMode;"
+b=a+f"\n  const diagMode = {mode!r};\n  root.dataset.fxDiagCssMode = diagMode;"
 assert a in s
 s=s.replace(a,b,1)
 old="""    const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
@@ -92,7 +97,7 @@ done
 
 mkdir -p "artifacts/r519-css-scheduler/${MODE}-r${REPLICA}"
 OUT="artifacts/r519-css-scheduler/${MODE}-r${REPLICA}/results.json"
-export MODE REPLICA OUT
+export OUT
 
 node <<'NODE'
 'use strict';
@@ -125,7 +130,7 @@ async function one(run){
   });
   const cdp=await context.newCDPSession(page);
   await cdp.send('Performance.enable');
-  const response=await page.goto(`https://formatxsuite.com:8787/?diag_css_mode=${mode}&replica=${replica}&run=${run}&ts=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+  const response=await page.goto(`https://formatxsuite.com:8787/?replica=${replica}&run=${run}&ts=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>document.documentElement.dataset.fxDeferredCssR487==='ready',null,{timeout:10000});
   await page.waitForTimeout(3000);
   const x=await page.evaluate(()=>{
