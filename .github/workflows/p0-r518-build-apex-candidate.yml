@@ -1,0 +1,96 @@
+name: P0 R518 build Apex candidate
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r518-build-apex-candidate.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  TARGET_BRANCH: p0-r518-apex-startup
+  BASE_SHA: 0cae78cd44785984e5b2b966636fa29032550398
+  NEW_TOKEN: 20260904-r518-post-load-progress
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 2
+      - name: Verify exact base
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          test -z "$(git status --porcelain)"
+      - name: Apply evidence-backed R518 patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          apex=Path('docs/scifi-ui/scripts/formatx-apex.js')
+          s=apex.read_text()
+          old="""    progress();
+    addEventListener('scroll', scheduleProgress, { passive: true });
+    addEventListener('resize', scheduleProgress, { passive: true });
+"""
+          new="""    // R518: do not force a global scrollHeight layout flush inside the
+    // DOMContentLoaded startup mutation batch. The initial top-of-page value is
+    // already 0; pageshow runs after initial layout and also covers BFCache / scroll
+    // restoration, while real scroll/resize events keep the same runtime owner.
+    addEventListener('scroll', scheduleProgress, { passive: true });
+    addEventListener('resize', scheduleProgress, { passive: true });
+    addEventListener('pageshow', scheduleProgress, { passive: true });
+"""
+          if s.count(old)!=1:
+              raise SystemExit(f'apex startup target count={s.count(old)}')
+          apex.write_text(s.replace(old,new,1))
+
+          index=Path('docs/scifi-ui/index.html')
+          s=index.read_text()
+          old_token='formatx-apex.js?v=20260726-apex-2'
+          new_token='formatx-apex.js?v=20260904-r518-post-load-progress'
+          if s.count(old_token)!=1:
+              raise SystemExit(f'index apex token count={s.count(old_token)}')
+          index.write_text(s.replace(old_token,new_token,1))
+
+          probe=Path('.github/workflows/probe-live-formatx.yml')
+          s=probe.read_text()
+          if s.count(old_token)!=1:
+              raise SystemExit(f'probe apex token count={s.count(old_token)}')
+          probe.write_text(s.replace(old_token,new_token,1))
+          PY
+
+          node --check docs/scifi-ui/scripts/formatx-apex.js
+          grep -F "addEventListener('pageshow', scheduleProgress" docs/scifi-ui/scripts/formatx-apex.js
+          grep -F "formatx-apex.js?v=$NEW_TOKEN" docs/scifi-ui/index.html
+          grep -F "formatx-apex.js?v=$NEW_TOKEN" .github/workflows/probe-live-formatx.yml
+          ! grep -Fq '    progress();' docs/scifi-ui/scripts/formatx-apex.js
+
+          changed="$(git diff --name-only)"
+          printf '%s\n' "$changed"
+          test "$(printf '%s\n' "$changed" | wc -l)" -eq 3
+          printf '%s\n' "$changed" | grep -Fx 'docs/scifi-ui/scripts/formatx-apex.js'
+          printf '%s\n' "$changed" | grep -Fx 'docs/scifi-ui/index.html'
+          printf '%s\n' "$changed" | grep -Fx '.github/workflows/probe-live-formatx.yml'
+          git diff --check
+      - name: Commit single coherent R518 revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/index.html .github/workflows/probe-live-formatx.yml
+          git commit -m 'Fix R518 Apex startup forced layout'
+          git push origin HEAD:"$TARGET_BRANCH"
+          echo "R518_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          git log -2 --oneline
+          git status --porcelain
