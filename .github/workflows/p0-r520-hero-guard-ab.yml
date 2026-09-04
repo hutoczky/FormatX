@@ -1,0 +1,173 @@
+name: P0 R520 initial hero guard A/B
+run-name: Prove initial hero guard cold-paint ownership
+
+on:
+  push:
+    branches: [p0-r520-hero-guard-ab-76b79fe]
+    paths:
+      - '.github/workflows/p0-r520-hero-guard-ab.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      BASE_SHA: 76b79fe75eebc9b0ce3998a8111eb8dbf539efb9
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Start exact R516 source with system Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          npm ci --prefix billing-worker --prefer-offline
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          cp docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js "$RUNNER_TEMP/infinite.baseline.js"
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.ab.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.ab.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r520-hero-guard-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do
+            if curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r520-hero-guard-worker.log" || true
+          exit 1
+
+      - name: Write controlled cold-paint probe
+        shell: bash
+        run: |
+          mkdir -p artifacts/r520-hero-guard
+          cat > "$RUNNER_TEMP/probe.cjs" <<'NODE'
+          'use strict';
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          const label=process.argv[2];
+          const count=Number(process.argv[3]||3);
+          async function one(i){
+            const browser=await chromium.launch({
+              executablePath:process.env.CHROME_BIN,
+              headless:true,
+              args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors','--disable-background-networking']
+            });
+            const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});
+            const page=await context.newPage();
+            const cdp=await context.newCDPSession(page);
+            await cdp.send('Network.enable');
+            await cdp.send('Network.emulateNetworkConditions',{offline:false,latency:40,downloadThroughput:10*1024*1024/8,uploadThroughput:10*1024*1024/8,connectionType:'wifi'});
+            await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+            await page.addInitScript(()=>{
+              window.__fxPerf={lt:[],lcp:[],ls:[]};
+              try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__fxPerf.lt.push({t:e.startTime,d:e.duration});}).observe({type:'longtask',buffered:true});}catch{}
+              try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__fxPerf.lcp.push({t:e.startTime,size:e.size,id:e.id||'',url:e.url||'',tag:e.element?.tagName||'',cls:e.element?.className||''});}).observe({type:'largest-contentful-paint',buffered:true});}catch{}
+              try{new PerformanceObserver(l=>{for(const e of l.getEntries())if(!e.hadRecentInput)window.__fxPerf.ls.push({t:e.startTime,v:e.value});}).observe({type:'layout-shift',buffered:true});}catch{}
+            });
+            await page.goto(`https://formatxsuite.com:8787/?r520_guard=${label}-${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(5000);
+            const out=await page.evaluate(()=>{
+              const p=window.__fxPerf||{lt:[],lcp:[],ls:[]};
+              const nav=performance.getEntriesByType('navigation')[0];
+              const paints=performance.getEntriesByType('paint');
+              const hero=document.querySelector('#hero .hero-lead');
+              const r=hero?.getBoundingClientRect();
+              const lcp=p.lcp.length?p.lcp[p.lcp.length-1]:null;
+              return {
+                fcp:paints.find(x=>x.name==='first-contentful-paint')?.startTime??null,
+                lcp:lcp?.t??null,
+                lcpElement:lcp,
+                tbt:p.lt.reduce((s,e)=>s+Math.max(0,e.d-50),0),
+                cls:p.ls.reduce((s,e)=>s+e.v,0),
+                ttfb:nav?.responseStart??null,
+                dcl:nav?.domContentLoadedEventStart??null,
+                load:nav?.loadEventEnd??null,
+                longtasks:p.lt,
+                guard:document.documentElement.dataset.fxInitialHeroGuard||'',
+                scrollY,
+                hero:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,
+                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+                canvasCount:document.querySelectorAll('#hero canvas').length,
+                renderer:document.documentElement.dataset.fxCrystalOrganismR326||''
+              };
+            });
+            await browser.close();
+            return out;
+          }
+          (async()=>{
+            const rows=[];
+            for(let i=1;i<=count;i++) rows.push(await one(i));
+            fs.writeFileSync(`artifacts/r520-hero-guard/${label}.json`,JSON.stringify(rows,null,2));
+            console.log(label.toUpperCase(),JSON.stringify(rows,null,2));
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Baseline x3
+        shell: bash
+        run: node "$RUNNER_TEMP/probe.cjs" baseline 3
+
+      - name: Apply diagnostic-only initial hero guard isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js')
+          s=p.read_text()
+          old='''    ensureStyle();\n    guaranteeInitialHero();\n    repairReleasePanel();'''
+          new='''    ensureStyle();\n    // Diagnostic A/B only: static DOM already starts at #hero on a normal navigation.\n    // Remove the pre-paint offsetTop/scrollTo + two-rAF correction path.\n    root.dataset.fxInitialHeroGuard = 'diagnostic-static-start';\n    repairReleasePanel();'''
+          assert old in s
+          p.write_text(s.replace(old,new,1))
+          PY
+          grep -F "diagnostic-static-start" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          sleep 2
+
+      - name: Treatment x3
+        shell: bash
+        run: node "$RUNNER_TEMP/probe.cjs" treatment 3
+
+      - name: Compare without false PASS
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const b=JSON.parse(fs.readFileSync('artifacts/r520-hero-guard/baseline.json'));
+          const t=JSON.parse(fs.readFileSync('artifacts/r520-hero-guard/treatment.json'));
+          const median=a=>{a=[...a].sort((x,y)=>x-y);return a[Math.floor(a.length/2)]};
+          const stats=x=>({
+            medianFcp:median(x.map(r=>r.fcp)), maxFcp:Math.max(...x.map(r=>r.fcp)),
+            medianLcp:median(x.map(r=>r.lcp)), maxLcp:Math.max(...x.map(r=>r.lcp)),
+            medianTbt:median(x.map(r=>r.tbt)), maxTbt:Math.max(...x.map(r=>r.tbt)),
+            maxCls:Math.max(...x.map(r=>r.cls)), medianTtfb:median(x.map(r=>r.ttfb)),
+            maxOverflow:Math.max(...x.map(r=>r.overflow))
+          });
+          const bs=stats(b),ts=stats(t);
+          const out={baseSha:process.env.BASE_SHA,baseline:bs,treatment:ts,deltaMedianFcp:ts.medianFcp-bs.medianFcp,deltaMedianLcp:ts.medianLcp-bs.medianLcp,deltaMedianTbt:ts.medianTbt-bs.medianTbt};
+          console.log('AB_SUMMARY',JSON.stringify(out,null,2));
+          fs.writeFileSync('artifacts/r520-hero-guard/summary.json',JSON.stringify(out,null,2));
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r520-initial-hero-guard-ab
+          path: artifacts/r520-hero-guard/
+          retention-days: 30
