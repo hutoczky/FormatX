@@ -1,307 +1,72 @@
-name: P0 R517 owner diagnostics
-
+name: P0 R519 exact desktop and pricing proof
 on:
   push:
     branches: [p0-r517-owner-76b79fe]
-    paths:
-      - '.github/workflows/p0-r517-owner-diagnostics.yml'
+    paths: ['.github/workflows/p0-r517-owner-diagnostics.yml']
   workflow_dispatch:
-
 permissions:
   contents: read
-
-concurrency:
-  group: p0-r517-owner-diagnostics
-  cancel-in-progress: true
-
 env:
-  ORIGIN: https://formatxsuite.com
-
+  CANDIDATE_REF: p0-r519-apex-price
+  CANDIDATE_SHA: 9272f47f4167485f26906172fe626aef13909f55
 jobs:
-  network-robots:
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-    steps:
-      - uses: actions/checkout@v5
-      - name: Require exact R516 production marker
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?r517_marker=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/live-p0.txt"
-          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
-          echo 'PASS: exact R516 production marker is live.'
-      - name: Controlled production network probes and robots dump
-        shell: bash
-        run: |
-          set -euo pipefail
-          out=artifacts/r517-network
-          mkdir -p "$out/document" "$out/resources" "$out/robots"
-          {
-            echo '=== DNS ==='
-            getent ahosts formatxsuite.com || true
-            echo '=== TLS ==='
-            timeout 15 openssl s_client -connect formatxsuite.com:443 -servername formatxsuite.com </dev/null 2>/dev/null | grep -E 'Protocol|Cipher|Verify return code' || true
-          } > "$out/control.txt"
-
-          for i in $(seq 1 20); do
-            curl -sS --max-time 30 --http2 -H 'Cache-Control: no-cache' \
-              -D "$out/document/headers-$i.txt" -o /dev/null \
-              -w '%{json}\n' "$ORIGIN/?r517_net=$GITHUB_RUN_ID-$i" \
-              > "$out/document/probe-$i.json"
-          done
-
-          resources=(
-            '/scifi-ui/styles/formatx-critical-shell-v56.css'
-            '/scifi-ui/styles/formatx-quality-r461.css'
-            '/scifi-ui/styles/formatx-critical-core-r227.css'
-            '/scifi-ui/styles/formatx-reference-production-r244.css'
-            '/scifi-ui/styles/formatx-first-paint-r206.css'
-            '/scifi-ui/styles/formatx-p0-first-paint-r490.css'
-            '/scifi-ui/scripts/formatx-reference-mode-boot-r334.js'
-          )
-          n=0
-          for path in "${resources[@]}"; do
-            n=$((n+1))
-            safe="$(basename "$path")"
-            for i in 1 2 3; do
-              curl -sS --max-time 30 --http2 -H 'Cache-Control: no-cache' \
-                -D "$out/resources/${safe}-${i}.headers.txt" -o /dev/null \
-                -w '%{json}\n' "$ORIGIN$path?r517_res=$GITHUB_RUN_ID-$n-$i" \
-                > "$out/resources/${safe}-${i}.json"
-            done
-          done
-
-          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' \
-            -D "$out/robots/headers.txt" \
-            "$ORIGIN/robots.txt?r517_robots=$GITHUB_RUN_ID" \
-            -o "$out/robots/body.txt"
-          nl -ba "$out/robots/body.txt" > "$out/robots/body-numbered.txt"
-          cat "$out/robots/headers.txt"
-          cat "$out/robots/body-numbered.txt"
-      - name: Upload network and robots evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: r517-network-robots-${{ github.sha }}
-          path: artifacts/r517-network/
-          if-no-files-found: error
-          retention-days: 30
-
-  desktop-trace-r482:
+  desktop-pricing:
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Require exact R516 production marker
+        with: {ref: '${{ env.CANDIDATE_REF }}', fetch-depth: 2}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', cache: npm, cache-dependency-path: billing-worker/package-lock.json}
+      - name: Verify exact R519 source contract
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?r517_marker=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/live-p0.txt"
-          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
-      - name: Use runner Chrome without browser/deps reinstall
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse HEAD^)" = "0c983b25cbabecbdd73c8df760638c0c7554663b"
+          test -z "$(git status --porcelain)"
+          node --check docs/scifi-ui/scripts/formatx-apex.js
+          test "$(git diff --name-only HEAD^ HEAD)" = "docs/scifi-ui/scripts/formatx-apex.js"
+          grep -q "if (persist || shellLanguage !== language) updatePrice();" docs/scifi-ui/scripts/formatx-apex.js
+      - name: Start exact R519 local Worker
         shell: bash
         run: |
           set -euo pipefail
+          npm ci --prefix billing-worker
           npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
-          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
-          test -n "$CHROME_BIN"
-          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
-          "$CHROME_BIN" --version
-      - name: Five real Chromium traces plus R482 condition dump
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"; test -n "$CHROME_BIN"; echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs'),c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r519-proof.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts >/dev/null
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r519-proof.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r519-proof.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/r519-proof.log" || true; exit 1
+      - name: Existing organism commerce functional regression
+        shell: bash
+        env:
+          FORMATX_TEST_URL: https://formatxsuite.com:8787/
+        run: |
+          set -euo pipefail
+          node .github/scripts/validate-organism-main.cjs
+      - name: Five fresh desktop Chrome measurements
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p artifacts/r517-browser
+          mkdir -p artifacts/r519-desktop
           node <<'NODE'
           'use strict';
-          const fs=require('node:fs');
-          const {chromium}=require('playwright');
-          const ORIGIN=process.env.ORIGIN;
-          const OUT='artifacts/r517-browser';
-          const chrome=process.env.CHROME_BIN;
-          const keep=u=>/formatxsuite\.com/.test(u) && (/\.(css|js)(\?|$)/.test(u) || /\/($|\?)/.test(u));
-          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-
-          async function traceRun(browser,i){
-            const context=await browser.newContext({viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
-            const page=await context.newPage();
-            await page.addInitScript(()=>{
-              window.__r517={paint:[],lcp:[],longtasks:[],shifts:[],mutations:[]};
-              const obs=(type,key,map)=>{try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__r517[key].push(map(e));}).observe({type,buffered:true});}catch{}};
-              obs('paint','paint',e=>({name:e.name,startTime:e.startTime}));
-              obs('largest-contentful-paint','lcp',e=>({startTime:e.startTime,renderTime:e.renderTime||0,loadTime:e.loadTime||0,size:e.size||0,url:e.url||'',element:e.element?`${e.element.tagName}.${e.element.className||''}`:''}));
-              obs('longtask','longtasks',e=>({startTime:e.startTime,duration:e.duration}));
-              obs('layout-shift','shifts',e=>({startTime:e.startTime,value:e.value,hadRecentInput:e.hadRecentInput}));
-              addEventListener('DOMContentLoaded',()=>{
-                const lead=document.querySelector('#hero .hero-lead');
-                if(!lead)return;
-                const snap=kind=>window.__r517.mutations.push({kind,t:performance.now(),text:lead.textContent,html:lead.innerHTML});
-                snap('domcontentloaded');
-                new MutationObserver(()=>snap('mutation')).observe(lead,{subtree:true,childList:true,characterData:true,attributes:true});
-              },{once:true});
-            });
-            const cdp=await context.newCDPSession(page);
-            await cdp.send('Network.enable');
-            await cdp.send('Performance.enable');
-            const net=[];
-            cdp.on('Network.requestWillBeSent',p=>{if(keep(p.request.url))net.push({event:'request',t:p.timestamp,url:p.request.url,type:p.type,priority:p.request.initialPriority||null});});
-            cdp.on('Network.responseReceived',p=>{if(keep(p.response.url))net.push({event:'response',t:p.timestamp,url:p.response.url,type:p.type,status:p.response.status,protocol:p.response.protocol,remoteIPAddress:p.response.remoteIPAddress||'',fromDiskCache:p.response.fromDiskCache||false,fromServiceWorker:p.response.fromServiceWorker||false,headers:p.response.headers});});
-            const trace=[];
-            cdp.on('Tracing.dataCollected',p=>trace.push(...p.value));
-            const traceDone=new Promise(resolve=>cdp.once('Tracing.tracingComplete',resolve));
-            await cdp.send('Tracing.start',{categories:'devtools.timeline,blink.user_timing,loading',transferMode:'ReportEvents'});
-            const url=`${ORIGIN}/?r517_trace=${process.env.GITHUB_RUN_ID}-${i}-${Date.now()}`;
-            const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
-            await page.waitForTimeout(6000);
-            const state=await page.evaluate(()=>{
-              const nav=performance.getEntriesByType('navigation')[0];
-              const lead=document.querySelector('#hero .hero-lead');
-              const s=lead?getComputedStyle(lead):null;
-              const r=lead?.getBoundingClientRect();
-              return {
-                probe:window.__r517,
-                navigation:nav?nav.toJSON():null,
-                resources:performance.getEntriesByType('resource').map(x=>({name:x.name,initiatorType:x.initiatorType,startTime:x.startTime,duration:x.duration,fetchStart:x.fetchStart,responseStart:x.responseStart,responseEnd:x.responseEnd,transferSize:x.transferSize,decodedBodySize:x.decodedBodySize,renderBlockingStatus:x.renderBlockingStatus||null})),
-                heroLead:lead&&s&&r?{text:lead.textContent,display:s.display,visibility:s.visibility,opacity:s.opacity,contentVisibility:s.contentVisibility,animationName:s.animationName,transitionDuration:s.transitionDuration,rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null,
-                dcl:performance.timing.domContentLoadedEventEnd-performance.timing.navigationStart,
-                load:performance.timing.loadEventEnd?performance.timing.loadEventEnd-performance.timing.navigationStart:null
-              };
-            });
-            const perf=await cdp.send('Performance.getMetrics');
-            await cdp.send('Tracing.end');
-            await traceDone;
-            fs.writeFileSync(`${OUT}/desktop-run-${i}.json`,JSON.stringify({i,url,status:response?.status()||null,state,perf,network:net},null,2));
-            fs.writeFileSync(`${OUT}/desktop-trace-${i}.json`,JSON.stringify({traceEvents:trace}));
-            const lcp=state.probe.lcp.at(-1)?.startTime??null;
-            const fcp=state.probe.paint.find(x=>x.name==='first-contentful-paint')?.startTime??null;
-            console.log(`TRACE_RUN ${i} FCP=${fcp} LCP=${lcp} DCL=${state.dcl} longtasks=${state.probe.longtasks.length}`);
-            await context.close();
+          const fs=require('node:fs'),{chromium}=require('playwright');
+          async function one(i){
+            const b=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            const c=await b.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'}),p=await c.newPage();
+            await p.addInitScript(()=>{window.__m={paint:[],lcp:[],shift:[],long:[]};try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.paint.push({n:e.name,t:e.startTime}))).observe({type:'paint',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.lcp.push(e.startTime))).observe({type:'largest-contentful-paint',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{if(!e.hadRecentInput)window.__m.shift.push(e.value)})).observe({type:'layout-shift',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.long.push(e.duration))).observe({type:'longtask',buffered:true})}catch{}});
+            const r=await p.goto(`https://formatxsuite.com:8787/?r519_desktop=${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await p.waitForTimeout(3500);
+            const x=await p.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return{fcp:window.__m.paint.find(e=>e.n==='first-contentful-paint')?.t??0,lcp:window.__m.lcp.at(-1)??0,cls:window.__m.shift.reduce((a,b)=>a+b,0),tbt:window.__m.long.reduce((a,d)=>a+Math.max(0,d-50),0),longtasks:window.__m.long,ttfb:n?.responseStart??0,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,apex:document.documentElement.dataset.fxApex||'',renderer:document.documentElement.dataset.fxRenderer||''}});
+            await c.close();await b.close();return{run:i,status:r?.status()||0,...x};
           }
-
-          async function r482Dump(browser,name,viewport,mobile){
-            const context=await browser.newContext({viewport,deviceScaleFactor:mobile?2:1,isMobile:mobile,hasTouch:mobile,locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
-            const page=await context.newPage();
-            await page.goto(`${ORIGIN}/?r517_r482=${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
-            const sample=async phase=>page.evaluate(phase=>{
-              const root=document.documentElement;
-              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
-              const cs=canvas?getComputedStyle(canvas):null;
-              const cr=canvas?.getBoundingClientRect();
-              const link=document.querySelector('link[data-fx-mag-living-balance-r481]');
-              const header=document.querySelector('.topbar .fx-reference-mag-button');
-              const hs=header?getComputedStyle(header):null;
-              const hr=header?.getBoundingClientRect();
-              const mini=document.querySelector('.fx-mini-mag-glyph-r459');
-              const ms=mini?getComputedStyle(mini):null;
-              const values={
-                phase,t:performance.now(),
-                fxCrystalOrganismR326:root.dataset.fxCrystalOrganismR326||'',
-                fxMagShapeSyncR476:root.dataset.fxMagShapeSyncR476||'',
-                fxPrimaryMagLifeContractR482:root.dataset.fxPrimaryMagLifeContractR482||'',
-                fxPrimaryMagOpticsR482:root.dataset.fxPrimaryMagOpticsR482||'',
-                fxPrimaryMagLifeR482:root.dataset.fxPrimaryMagLifeR482||'',
-                balanceLinkExists:Boolean(link),balanceHref:link?.href||'',
-                canvasExists:Boolean(canvas),canvasWidth:cr?.width||0,canvasHeight:cr?.height||0,
-                display:cs?.display||'',visibility:cs?.visibility||'',opacity:cs?.opacity||'',
-                renderer:root.dataset.fxCoreRenderer||'',scheduler:root.dataset.fxCoreScheduler||root.dataset.fxP0MotionSchedulerR490||'',idle:root.dataset.fxCoreIdleRenderR441||'',
-                animationName:cs?.animationName||'',filter:cs?.filter||'',
-                header:{exists:Boolean(header),display:hs?.display||'',visibility:hs?.visibility||'',opacity:hs?.opacity||'',width:hr?.width||0,height:hr?.height||0,life:header?.dataset.fxMagLife||''},
-                mini:mini?{background:ms?.backgroundImage||'',boxShadow:ms?.boxShadow||'',life:mini.dataset.fxMagLife||''}:null,
-                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
-                canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length
-              };
-              values.legacyConditions={
-                crystal:values.fxCrystalOrganismR326==='ready',
-                sync:values.fxMagShapeSyncR476==='ready-r482',
-                contract:values.fxPrimaryMagLifeContractR482==='large-mini-header-spectrum-breath-zero-webgl-idle',
-                optics:values.fxPrimaryMagOpticsR482==='restrained-soft-spectrum-mobile-edge',
-                balanceHref:values.balanceHref.includes('r482-spectrum-soft-edge'),
-                canvasVisible:values.canvasExists&&values.canvasWidth>120&&values.canvasHeight>180&&values.display!=='none'&&values.visibility!=='hidden'&&Number(values.opacity)>.2
-              };
-              return values;
-            },phase);
-            const samples=[];
-            for(const ms of [0,250,500,1000,2000,4000,8000]){if(ms)await sleep(ms-(samples.at(-1)?.requested||0)); const v=await sample(`pre-${ms}`);v.requested=ms;samples.push(v);}
-            const trigger=page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252, .topbar .fx-reference-mag-button').first();
-            let interacted=false;
-            try{if(await trigger.isVisible({timeout:1000})){await trigger.click();interacted=true;await page.waitForTimeout(2000);samples.push(await sample('post-interaction-2000'));}}catch(e){samples.push({phase:'interaction-error',error:String(e)});}
-            fs.writeFileSync(`${OUT}/r482-${name}.json`,JSON.stringify({name,viewport,mobile,interacted,samples},null,2));
-            console.log(`R482 ${name}`,JSON.stringify(samples.at(-1),null,2));
-            await context.close();
-          }
-
-          (async()=>{
-            const browser=await chromium.launch({executablePath:chrome,headless:true,args:['--disable-dev-shm-usage','--no-sandbox','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-            try{
-              for(let i=1;i<=5;i++)await traceRun(browser,i);
-              await r482Dump(browser,'mobile-390x844',{width:390,height:844},true);
-              await r482Dump(browser,'desktop-1440x900',{width:1440,height:900},false);
-            }finally{await browser.close();}
-          })().catch(e=>{console.error(e);process.exit(1);});
+          (async()=>{const rows=[];for(let i=1;i<=5;i++)rows.push(await one(i));console.log('R519_DESKTOP_X5',JSON.stringify(rows,null,2));fs.writeFileSync('artifacts/r519-desktop/results.json',JSON.stringify(rows,null,2));const fail=rows.filter(r=>r.status!==200||r.lcp>=2000||r.cls>=.05||r.tbt>150||r.ttfb>500||r.overflow>2||r.apex!=='controller-performance-v2');if(fail.length)throw new Error('R519 desktop target failures '+JSON.stringify(fail));})().catch(e=>{console.error(e);process.exit(1)});
           NODE
-      - name: Upload Chromium trace and R482 evidence
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: r517-browser-trace-r482-${{ github.sha }}
-          path: artifacts/r517-browser/
-          if-no-files-found: error
-          retention-days: 30
-          compression-level: 6
-
-  mobile-lighthouse:
-    runs-on: ubuntu-latest
-    timeout-minutes: 18
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Require exact R516 production marker
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?r517_marker=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/live-p0.txt"
-          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli@0.13.x
-      - name: Prepare independent 390x844 mobile x3 config
-        shell: bash
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs=require('node:fs');
-          const c=JSON.parse(fs.readFileSync('lighthouserc.live.mobile.json','utf8'));
-          c.ci.collect.url=[`https://formatxsuite.com/?r517_mobile=${process.env.GITHUB_RUN_ID}-${Date.now()}`];
-          c.ci.collect.numberOfRuns=3;
-          c.ci.collect.settings={...c.ci.collect.settings,formFactor:'mobile',screenEmulation:{mobile:true,width:390,height:844,deviceScaleFactor:2.625,disabled:false}};
-          c.ci.upload={target:'filesystem',outputDir:'mobile-lighthouse-upload'};
-          fs.writeFileSync('lighthouserc.r517.mobile.json',JSON.stringify(c,null,2)+'\n');
-          NODE
-      - name: Run independent production mobile Lighthouse x3
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf .lighthouseci artifacts/r517-mobile
-          mkdir -p artifacts/r517-mobile
-          lhci collect --config=./lighthouserc.r517.mobile.json 2>&1 | tee artifacts/r517-mobile/collect.txt
-          cp -a .lighthouseci artifacts/r517-mobile/lighthouseci
-          PROFILE=mobile node .github/scripts/summarize-p0-lighthouse.cjs artifacts/r517-mobile/lighthouseci | tee artifacts/r517-mobile/summary.txt
-          set +e
-          lhci assert --config=./lighthouserc.r517.mobile.json 2>&1 | tee artifacts/r517-mobile/assert.txt
-          echo ${PIPESTATUS[0]} > artifacts/r517-mobile/assert-exit-code.txt
-          exit 0
-      - name: Upload independent mobile evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: r517-mobile-lighthouse-${{ github.sha }}
-          path: |
-            artifacts/r517-mobile/
-            lighthouserc.r517.mobile.json
-          include-hidden-files: true
-          if-no-files-found: error
-          retention-days: 30
+        with: {name: p0-r519-desktop-pricing-proof, path: 'artifacts/r519-desktop/\norganism-main-report.json\norganism-main-desktop.png\norganism-main-mobile.png', retention-days: 30}
