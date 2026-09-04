@@ -1,0 +1,107 @@
+name: Diagnose R524 mobile LCP owner
+run-name: R524 mobile LCP owner trace for ${{ github.sha }}
+
+on:
+  push:
+    branches: [p0-r524-mobile-lcp-owner-diagnostic]
+    paths:
+      - '.github/workflows/diagnose-r524-mobile-lcp-owner.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Generate exact R523 candidate source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r524
+          python3 <<'PY'
+          from pathlib import Path
+          root=Path('docs/scifi-ui/styles')
+          def read(n): return (root/n).read_text(encoding='utf-8')
+          def safe(n):
+              s=read(n); low=s.lower(); assert '@charset' not in low and '@import' not in low, n; return s
+          mobile=['formatx-mobile-reference-layout-v1.css','formatx-flow-first-r74.css','formatx-responsive-text-guard-r72.css','formatx-mobile-proof-controls-r204.css','formatx-mobile-layout-r207.css','formatx-native-orb-reference-r250.css']
+          out=['/* exact R523 mobile critical cascade */']
+          for n in mobile: out.append(f'@media (max-width: 900px) {{\n{safe(n)}\n}}')
+          (root/'formatx-mobile-critical-r523.css').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          first=read('formatx-mobile-first-paint-r358.css'); frame=safe('formatx-first-frame-stability-r283.css'); p0=read('formatx-p0-first-paint-r490.css')
+          terminal=f'@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {{\n{first}\n}}\n@media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {{\n{frame}\n}}\n{p0}\n'
+          (root/'formatx-terminal-first-paint-r523.css').write_text(terminal,encoding='utf-8')
+          PY
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');s=p.read_text(encoding='utf-8');old='}else existingFlow?.remove();';new="}else if(existingFlow&&!existingFlow.hasAttribute('data-fx-mobile-critical-r523'))existingFlow.remove();";assert s.count(old)==1;p.write_text(s.replace(old,new,1),encoding='utf-8')
+          p=Path('billing-worker/src/production-content-entry-r515.js');s=p.read_text(encoding='utf-8');old='''    if (!/\\sfetchpriority=/i.test(next)) {\n      next = next.replace(/\\s*\\/?>$/, close => ` fetchpriority="high"${close}`);\n    }''';assert s.count(old)==1;p.write_text(s.replace(old,"    next = next.replace(/\\sfetchpriority=([\"'])(.*?)\\1/gi, '');",1),encoding='utf-8')
+          PY
+          cat > billing-worker/src/production-content-entry-r523.js <<'JS'
+          import base from './production-content-entry-r515.js';
+          const HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
+          const MOBILE=new Set(['/scifi-ui/styles/formatx-mobile-reference-layout-v1.css','/scifi-ui/styles/formatx-flow-first-r74.css','/scifi-ui/styles/formatx-responsive-text-guard-r72.css','/scifi-ui/styles/formatx-mobile-proof-controls-r204.css','/scifi-ui/styles/formatx-mobile-layout-r207.css','/scifi-ui/styles/formatx-native-orb-reference-r250.css']);
+          const TERMINAL=new Set(['/scifi-ui/styles/formatx-mobile-first-paint-r358.css','/scifi-ui/styles/formatx-first-frame-stability-r283.css','/scifi-ui/styles/formatx-p0-first-paint-r490.css']);
+          const M='<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px)" data-fx-mobile-critical-r523="true" data-fx-mobile-reference-layout-style="true" data-fx-flow-first-r74="true" data-fx-responsive-text-guard="true" data-fx-mobile-proof-controls-r204="true" data-fx-mobile-layout-r207="true" data-fx-native-orb-reference-r250="true" href="/scifi-ui/styles/formatx-mobile-critical-r523.css?v=20260904-r523-owner">';
+          const T='<link rel="stylesheet" fetchpriority="high" data-fx-terminal-first-paint-r523="true" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" data-fx-first-frame-stability-r500="true" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-terminal-first-paint-r523.css?v=20260904-r523-owner">';
+          function pathOf(tag){const m=tag.match(/\bhref=(["'])(.*?)\1/i);if(!m)return'';try{return new URL(m[2],'https://formatxsuite.com/scifi-ui/').pathname}catch{return''}}
+          function mediaOf(tag){return (tag.match(/\smedia=(["'])(.*?)\1/i)||[])[2]||'all'}
+          function replaceWhere(html,predicate,replacement,expected){const tags=String(html||'').match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi)||[];const hits=tags.map((t,i)=>predicate(t)?i:-1).filter(i=>i>=0);if(hits.length!==expected||hits[hits.length-1]-hits[0]+1!==expected)return html;let inserted=false;return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,t=>{if(!predicate(t))return t;if(inserted)return'';inserted=true;return replacement})}
+          function consolidate(html){let out=replaceWhere(html,t=>MOBILE.has(pathOf(t))&&mediaOf(t).replace(/\s+/g,' ').trim()==='(max-width: 900px)'&&!/data-fx-deferred-media-r300/i.test(t),M,6);return replaceWhere(out,t=>TERMINAL.has(pathOf(t)),T,3)}
+          export default{async fetch(request,env,ctx){const r=await base.fetch(request,env,ctx),u=new URL(request.url);if(!['GET','HEAD'].includes(request.method)||!HOSTS.has(u.hostname))return r;const h=new Headers(r.headers);h.set('X-FormatX-First-Paint-Delivery','r523-critical-core-priority');if(request.method==='HEAD')return new Response(null,{status:r.status,statusText:r.statusText,headers:h});if(!(h.get('Content-Type')||'').includes('text/html'))return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h});const html=consolidate(await r.text());h.delete('Content-Length');h.delete('Content-Encoding');h.delete('ETag');h.set('Cache-Control','no-store,max-age=0');return new Response(html,{status:r.status,statusText:r.statusText,headers:h})}};
+          JS
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('billing-worker/wrangler.jsonc');s=p.read_text();old='"main": "src/production-content-entry-r515.js"';assert old in s;p.write_text(s.replace(old,'"main": "src/production-content-entry-r523.js"',1))
+          PY
+          node --input-type=module --check < billing-worker/src/production-content-entry-r523.js
+          git diff --check
+
+      - name: Install Worker and runner Chrome driver
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --prefix billing-worker --no-audit --prefer-offline
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)";test -n "$chrome";echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r524-local.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+
+      - name: Start exact R523 candidate Worker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r524-local.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r524-worker.log" 2>&1 &)
+          for i in $(seq 1 60);do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1&&exit 0;sleep 1;done
+          cat "$RUNNER_TEMP/r524-worker.log";exit 1
+
+      - name: Trace mobile LCP first-paint state
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE' | tee artifacts/r524/trace.txt
+          const fs=require('node:fs');const{chromium}=require('playwright-core');
+          (async()=>{const b=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true,args:['--headless=new','--no-sandbox','--ignore-certificate-errors','--disable-dev-shm-usage']});const c=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,ignoreHTTPSErrors:true,locale:'hu-HU'});const p=await c.newPage();await p.addInitScript(()=>{window.__fx={paints:[],lcp:[],long:[],mut:[],frames:[]};new PerformanceObserver(l=>{for(const e of l.getEntries())window.__fx.paints.push({name:e.name,t:e.startTime})}).observe({type:'paint',buffered:true});new PerformanceObserver(l=>{for(const e of l.getEntries())window.__fx.lcp.push({t:e.startTime,size:e.size,node:e.element?.className||e.element?.id||e.element?.tagName||''})}).observe({type:'largest-contentful-paint',buffered:true});new PerformanceObserver(l=>{for(const e of l.getEntries())window.__fx.long.push({t:e.startTime,d:e.duration})}).observe({type:'longtask',buffered:true});const start=()=>{const hero=document.getElementById('hero');const root=document.documentElement;const body=document.body;const obs=new MutationObserver(ms=>{for(const m of ms){if(m.target===root||m.target===body||m.target===hero||hero?.contains(m.target)){window.__fx.mut.push({t:performance.now(),type:m.type,target:m.target.id||m.target.className||m.target.tagName,attr:m.attributeName||'',added:[...m.addedNodes].map(n=>n.id||n.className||n.nodeName),removed:[...m.removedNodes].map(n=>n.id||n.className||n.nodeName)})}}});obs.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden','data-fx-reference-composition','data-fx-mobile-hero-flow-r362','data-fx-mobile-reference-layout','data-fx-reference-production-r244']});let n=0;const sample=()=>{const el=document.querySelector('#hero .fx-category-definition');if(el){const cs=getComputedStyle(el),r=el.getBoundingClientRect();window.__fx.frames.push({t:performance.now(),display:cs.display,visibility:cs.visibility,opacity:cs.opacity,transform:cs.transform,filter:cs.filter,fontSize:cs.fontSize,lineHeight:cs.lineHeight,x:r.x,y:r.y,w:r.width,h:r.height,rootClass:root.className,bodyClass:body?.className||'',ref:root.dataset.fxReferenceComposition||'',layout:root.dataset.fxMobileReferenceLayout||'',flow:root.dataset.fxMobileHeroFlowR362||''})}if(++n<90)requestAnimationFrame(sample)};requestAnimationFrame(sample)};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start()});const r=await p.goto('https://formatxsuite.com:8787/',{waitUntil:'load',timeout:60000});await p.waitForTimeout(1400);const result=await p.evaluate(()=>{const blockers=[...performance.getEntriesByType('resource')].filter(e=>/formatx-mobile-critical-r523|formatx-terminal-first-paint-r523|formatx-first-paint-r206|formatx-mobile-apex-composition|formatx-quality-r461|formatx-critical-shell-v56|formatx-reference-mode-boot-r334/.test(e.name)).map(e=>({name:e.name.split('/').pop(),start:e.startTime,end:e.responseEnd,d:e.duration,transfer:e.transferSize}));const nav=performance.getEntriesByType('navigation')[0];return{fx:window.__fx,blockers,nav:{dcl:nav.domContentLoadedEventEnd,load:nav.loadEventEnd,responseEnd:nav.responseEnd}}});console.log(JSON.stringify({http:r.status(),...result},null,2));fs.writeFileSync('artifacts/r524/result.json',JSON.stringify({http:r.status(),...result},null,2));await c.close();await b.close()})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r524-mobile-lcp-owner-${{ github.sha }}
+          path: artifacts/r524/
+          retention-days: 30
+      - name: Show Worker log
+        if: always()
+        run: cat "$RUNNER_TEMP/r524-worker.log" || true
