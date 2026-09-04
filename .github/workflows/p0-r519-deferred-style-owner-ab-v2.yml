@@ -1,4 +1,4 @@
-name: P0 R519 exact R518 cold attribution
+name: P0 R519 exact candidate proof
 
 on:
   push:
@@ -10,35 +10,39 @@ on:
 permissions:
   contents: read
 
+env:
+  CANDIDATE_REF: p0-r519-apex-price
+  CANDIDATE_SHA: 9272f47f4167485f26906172fe626aef13909f55
+
 jobs:
-  cold-attribution:
+  source-pricing:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        replica: [1, 2, 3, 4, 5, 6, 7, 8]
-
+    timeout-minutes: 12
     steps:
-      - name: Checkout exact R518 candidate
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
         with:
-          ref: p0-r518-apex-buildtmp
-          fetch-depth: 1
-
-      - name: Set up Node
-        uses: actions/setup-node@v5
+          ref: ${{ env.CANDIDATE_REF }}
+          fetch-depth: 2
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
-
-      - name: Start exact R518 unchanged
+      - name: Verify source and exact product diff
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "0c983b25cbabecbdd73c8df760638c0c7554663b"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse HEAD^)" = "0c983b25cbabecbdd73c8df760638c0c7554663b"
           test -z "$(git status --porcelain)"
+          node --check docs/scifi-ui/scripts/formatx-apex.js
+          test "$(git diff --name-only HEAD^ HEAD)" = "docs/scifi-ui/scripts/formatx-apex.js"
+          grep -q "if (persist || shellLanguage !== language) updatePrice();" docs/scifi-ui/scripts/formatx-apex.js
+          test "$(grep -c '^    updatePrice();$' docs/scifi-ui/scripts/formatx-apex.js || true)" = "0"
+      - name: Start exact R519
+        shell: bash
+        run: |
+          set -euo pipefail
           npm ci --prefix billing-worker
           npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
           CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
@@ -48,149 +52,177 @@ jobs:
           const fs=require('node:fs');
           const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
           delete c.ai; delete c.routes; c.workers_dev=true;
-          fs.writeFileSync('billing-worker/wrangler.cold.json',JSON.stringify(c,null,2)+'\n');
+          fs.writeFileSync('billing-worker/wrangler.r519.json',JSON.stringify(c,null,2)+'\n');
           NODE
           echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts >/dev/null
-          (cd billing-worker && nohup npx wrangler dev --config wrangler.cold.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r519-cold-worker.log" 2>&1 &)
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r519.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r519-source-worker.log" 2>&1 &)
           for i in $(seq 1 60); do
             curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0
             sleep 1
           done
-          cat "$RUNNER_TEMP/r519-cold-worker.log" || true
+          cat "$RUNNER_TEMP/r519-source-worker.log" || true
           exit 1
-
-      - name: Capture first-navigation CPU and timeline attribution
+      - name: Prove HUF EUR and EN pricing interactions
         shell: bash
-        env:
-          REPLICA: ${{ matrix.replica }}
         run: |
           set -euo pipefail
-          mkdir -p "artifacts/r519-cold-r${REPLICA}"
           node <<'NODE'
           'use strict';
-          const fs=require('node:fs');
           const {chromium}=require('playwright');
-          const replica=Number(process.env.REPLICA);
-          const out=`artifacts/r519-cold-r${replica}/summary.json`;
-
-          const round=n=>Math.round(n*1000)/1000;
-          const keyFrame=f=>`${f.url||'(internal)'} :: ${f.functionName||'(anonymous)'}`;
-
+          const assert=(v,m)=>{if(!v)throw new Error(m)};
           (async()=>{
-            const browser=await chromium.launch({
-              executablePath:process.env.CHROME_BIN,
-              headless:true,
-              args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']
-            });
-            const context=await browser.newContext({
-              ignoreHTTPSErrors:true,
-              viewport:{width:1440,height:900},
-              locale:'hu-HU',
-              colorScheme:'dark'
-            });
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});
             const page=await context.newPage();
-            await page.addInitScript(()=>{
-              window.__cold={paint:[],lcp:[],shift:[],long:[]};
-              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__cold.paint.push({name:e.name,start:e.startTime}))).observe({type:'paint',buffered:true})}catch{}
-              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__cold.lcp.push({start:e.startTime,renderTime:e.renderTime,loadTime:e.loadTime,size:e.size,tag:e.element?.tagName||'',id:e.element?.id||'',cls:e.element?.className||''}))).observe({type:'largest-contentful-paint',buffered:true})}catch{}
-              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{if(!e.hadRecentInput)window.__cold.shift.push({start:e.startTime,value:e.value})})).observe({type:'layout-shift',buffered:true})}catch{}
-              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__cold.long.push({start:e.startTime,duration:e.duration}))).observe({type:'longtask',buffered:true})}catch{}
-            });
+            const errors=[];
+            page.on('pageerror',e=>errors.push('pageerror:'+String(e)));
+            page.on('console',m=>{if(m.type()==='error')errors.push('console:'+m.text())});
+            const response=await page.goto('https://formatxsuite.com:8787/?r519_pricing=1',{waitUntil:'domcontentloaded',timeout:60000});
+            assert(response?.status()===200,'homepage status');
+            await page.waitForFunction(()=>document.documentElement.dataset.fxApex==='controller-performance-v2',null,{timeout:15000});
+            const initial=await page.evaluate(()=>({
+              lang:document.documentElement.lang,
+              price:document.getElementById('preview-main-price')?.textContent||'',
+              checkout:document.getElementById('preview-checkout-link')?.getAttribute('href')||''
+            }));
+            assert(initial.lang==='hu','default language '+JSON.stringify(initial));
+            assert(/15\D*900/.test(initial.price),'static HUF price '+JSON.stringify(initial));
+            assert(initial.checkout.includes('currency=HUF'),'default HUF checkout '+JSON.stringify(initial));
 
-            const cdp=await context.newCDPSession(page);
-            await cdp.send('Performance.enable');
-            await cdp.send('Profiler.enable');
-            await cdp.send('Profiler.setSamplingInterval',{interval:100});
-            await cdp.send('Profiler.start');
+            const trigger=page.locator('[data-organism-open="pricing"]');
+            await trigger.scrollIntoViewIfNeeded();
+            await trigger.click();
+            await page.waitForFunction(()=>{
+              const root=document.getElementById('fx-organism-console');
+              const panel=document.querySelector('[data-organism-panel="pricing"]');
+              return root && !root.hidden && panel && !panel.hidden;
+            },null,{timeout:15000});
+            await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click();
+            await page.waitForFunction(()=>document.getElementById('preview-main-price')?.textContent.includes('44'));
+            let state=await page.evaluate(()=>({price:document.getElementById('preview-main-price')?.textContent||'',checkout:document.getElementById('preview-checkout-link')?.getAttribute('href')||''}));
+            assert(state.checkout.includes('currency=EUR'),'EUR checkout '+JSON.stringify(state));
 
-            const trace=[];
-            cdp.on('Tracing.dataCollected',ev=>trace.push(...ev.value));
-            const traceDone=new Promise(resolve=>cdp.once('Tracing.tracingComplete',resolve));
-            await cdp.send('Tracing.start',{
-              categories:'devtools.timeline,blink.user_timing,v8,disabled-by-default-devtools.timeline',
-              options:'record-as-much-as-possible',
-              transferMode:'ReportEvents'
-            });
-
-            const response=await page.goto(`https://formatxsuite.com:8787/?cold=${replica}-${Date.now()}`,{
-              waitUntil:'domcontentloaded',timeout:60000
-            });
-            await page.waitForTimeout(3000);
-
-            const perf=await page.evaluate(()=>{
-              const nav=performance.getEntriesByType('navigation')[0];
-              const resources=performance.getEntriesByType('resource').map(r=>({
-                name:r.name.replace(location.origin,''),
-                initiator:r.initiatorType,
-                start:r.startTime,duration:r.duration,
-                responseStart:r.responseStart,responseEnd:r.responseEnd,
-                transferSize:r.transferSize,encodedBodySize:r.encodedBodySize
-              }));
-              return {
-                href:location.href,
-                fcp:window.__cold.paint.find(x=>x.name==='first-contentful-paint')?.start??0,
-                lcp:window.__cold.lcp.at(-1)?.start??0,
-                lcpEntries:window.__cold.lcp,
-                cls:window.__cold.shift.reduce((a,b)=>a+b.value,0),
-                shifts:window.__cold.shift,
-                tbt:window.__cold.long.reduce((a,e)=>a+Math.max(0,e.duration-50),0),
-                longtasks:window.__cold.long,
-                ttfb:nav?.responseStart??0,
-                dcl:nav?.domContentLoadedEventEnd??0,
-                load:nav?.loadEventEnd??0,
-                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
-                apex:document.documentElement.dataset.fxApex||'',
-                deferred:document.documentElement.dataset.fxDeferredCssR487||'',
-                resources
-              };
-            });
-            const pm=(await cdp.send('Performance.getMetrics')).metrics.reduce((o,m)=>(o[m.name]=m.value,o),{});
-            const {profile}=await cdp.send('Profiler.stop');
-            await cdp.send('Tracing.end');
-            await traceDone;
-
-            const nodes=new Map(profile.nodes.map(n=>[n.id,n]));
-            const cpu=new Map();
-            for(let i=0;i<(profile.samples||[]).length;i++){
-              const node=nodes.get(profile.samples[i]); if(!node) continue;
-              const us=(profile.timeDeltas?.[i]||0);
-              const k=keyFrame(node.callFrame||{});
-              cpu.set(k,(cpu.get(k)||0)+us/1000);
-            }
-            const cpuTop=[...cpu.entries()].map(([frame,ms])=>({frame,ms:round(ms)})).sort((a,b)=>b.ms-a.ms).slice(0,30);
-
-            const wanted=new Set(['RunTask','EvaluateScript','FunctionCall','UpdateLayoutTree','RecalculateStyles','Layout','Paint','CompositeLayers','ParseHTML','CompileScript','v8.compile','TimerFire','FireAnimationFrame','EventDispatch']);
-            const timed=trace.filter(e=>e.ph==='X'&&e.dur&&wanted.has(e.name));
-            const agg=new Map();
-            for(const e of timed) agg.set(e.name,(agg.get(e.name)||0)+e.dur/1000);
-            const timelineTotals=[...agg.entries()].map(([name,ms])=>({name,ms:round(ms)})).sort((a,b)=>b.ms-a.ms);
-            const timelineTop=timed.map(e=>({
-              name:e.name,ms:round(e.dur/1000),ts:round(e.ts/1000),
-              url:e.args?.data?.url||e.args?.data?.scriptName||'',
-              functionName:e.args?.data?.functionName||''
-            })).filter(e=>e.ms>=20).sort((a,b)=>b.ms-a.ms).slice(0,40);
-
-            const resourceTop=[...perf.resources].sort((a,b)=>b.duration-a.duration).slice(0,20);
-            const summary={
-              candidate:'0c983b25cbabecbdd73c8df760638c0c7554663b',replica,status:response?.status()||0,
-              fcp:round(perf.fcp),lcp:round(perf.lcp),tbt:round(perf.tbt),cls:perf.cls,ttfb:round(perf.ttfb),
-              dcl:round(perf.dcl),load:round(perf.load),overflow:perf.overflow,apex:perf.apex,deferred:perf.deferred,
-              longtasks:perf.longtasks,lcpEntries:perf.lcpEntries,
-              layoutMs:round((pm.LayoutDuration||0)*1000),recalcMs:round((pm.RecalcStyleDuration||0)*1000),
-              scriptMs:round((pm.ScriptDuration||0)*1000),taskMs:round((pm.TaskDuration||0)*1000),
-              cpuTop,timelineTotals,timelineTop,resourceTop
-            };
-            console.log('R519_COLD_ATTRIBUTION',JSON.stringify(summary,null,2));
-            fs.writeFileSync(out,JSON.stringify(summary,null,2));
-            if(summary.status!==200||summary.overflow>2) throw new Error('cold attribution contract failure');
+            const langToggle=page.locator('[data-language-toggle="true"]');
+            await langToggle.click();
+            await page.waitForFunction(()=>document.documentElement.lang==='en');
+            state=await page.evaluate(()=>({lang:document.documentElement.lang,price:document.getElementById('preview-main-price')?.textContent||'',checkout:document.getElementById('preview-checkout-link')?.getAttribute('href')||''}));
+            assert(state.lang==='en','EN toggle '+JSON.stringify(state));
+            assert(state.price.includes('44'),'EN price '+JSON.stringify(state));
+            assert(state.checkout.includes('currency=EUR')&&state.checkout.includes('lang=en'),'EN checkout '+JSON.stringify(state));
+            assert(errors.length===0,'browser errors '+errors.join(' | '));
+            console.log('R519_PRICING_PASS',JSON.stringify({initial,state}));
             await context.close(); await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
 
-      - name: Upload cold attribution evidence
-        if: always()
-        uses: actions/upload-artifact@v4
+  desktop-x5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
         with:
-          name: r519-cold-attribution-r${{ matrix.replica }}
-          path: artifacts/r519-cold-r${{ matrix.replica }}/
+          ref: ${{ env.CANDIDATE_REF }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Start exact R519
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test -z "$(git status --porcelain)"
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"; echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs'),c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r519.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts >/dev/null
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r519.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r519-desktop-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/r519-desktop-worker.log" || true; exit 1
+      - name: Measure five fresh desktop Chrome processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r519-desktop
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs'),{chromium}=require('playwright');
+          async function one(i){
+            const b=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            const c=await b.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'}),p=await c.newPage();
+            await p.addInitScript(()=>{window.__m={paint:[],lcp:[],shift:[],long:[]};try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.paint.push({n:e.name,t:e.startTime}))).observe({type:'paint',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.lcp.push(e.startTime))).observe({type:'largest-contentful-paint',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{if(!e.hadRecentInput)window.__m.shift.push(e.value)})).observe({type:'layout-shift',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.long.push(e.duration))).observe({type:'longtask',buffered:true})}catch{}});
+            const r=await p.goto(`https://formatxsuite.com:8787/?r519_desktop=${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await p.waitForTimeout(3200);
+            const x=await p.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return{fcp:window.__m.paint.find(e=>e.n==='first-contentful-paint')?.t??0,lcp:window.__m.lcp.at(-1)??0,cls:window.__m.shift.reduce((a,b)=>a+b,0),tbt:window.__m.long.reduce((a,d)=>a+Math.max(0,d-50),0),longtasks:window.__m.long,ttfb:n?.responseStart??0,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,apex:document.documentElement.dataset.fxApex||''}});
+            await c.close(); await b.close(); return{run:i,status:r?.status()||0,...x};
+          }
+          (async()=>{const rows=[];for(let i=1;i<=5;i++)rows.push(await one(i));console.log('R519_DESKTOP_X5',JSON.stringify(rows,null,2));fs.writeFileSync('artifacts/r519-desktop/results.json',JSON.stringify(rows,null,2));const fail=rows.filter(r=>r.status!==200||r.lcp>=2000||r.cls>=.05||r.tbt>150||r.ttfb>500||r.overflow>2||r.apex!=='controller-performance-v2');if(fail.length)throw new Error('R519 desktop target failures '+JSON.stringify(fail));})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r519-desktop-x5
+          path: artifacts/r519-desktop/
+          retention-days: 30
+
+  mobile-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_REF }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Start exact R519
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test -z "$(git status --porcelain)"
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"; echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs'),c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r519.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts >/dev/null
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r519.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r519-mobile-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/r519-mobile-worker.log" || true; exit 1
+      - name: Measure mobile matrix independently
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r519-mobile
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs'),{chromium}=require('playwright');
+          const sizes=[[320,568],[360,800],[375,812],[390,844],[412,915],[844,390]];
+          async function one(w,h){
+            const b=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            const c=await b.newContext({ignoreHTTPSErrors:true,viewport:{width:w,height:h},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',colorScheme:'dark'}),p=await c.newPage();
+            await p.addInitScript(()=>{window.__m={paint:[],lcp:[],shift:[],long:[]};try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.paint.push({n:e.name,t:e.startTime}))).observe({type:'paint',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.lcp.push(e.startTime))).observe({type:'largest-contentful-paint',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{if(!e.hadRecentInput)window.__m.shift.push(e.value)})).observe({type:'layout-shift',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.long.push(e.duration))).observe({type:'longtask',buffered:true})}catch{}});
+            const r=await p.goto(`https://formatxsuite.com:8787/?r519_mobile=${w}x${h}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await p.waitForTimeout(3200);
+            const x=await p.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return{fcp:window.__m.paint.find(e=>e.n==='first-contentful-paint')?.t??0,lcp:window.__m.lcp.at(-1)??0,cls:window.__m.shift.reduce((a,b)=>a+b,0),tbt:window.__m.long.reduce((a,d)=>a+Math.max(0,d-50),0),ttfb:n?.responseStart??0,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,apex:document.documentElement.dataset.fxApex||'',mobileMarker:document.documentElement.dataset.fxApexMobileR294||''}});
+            await c.close();await b.close();return{viewport:`${w}x${h}`,status:r?.status()||0,...x};
+          }
+          (async()=>{const rows=[];for(const [w,h] of sizes)rows.push(await one(w,h));console.log('R519_MOBILE_MATRIX',JSON.stringify(rows,null,2));fs.writeFileSync('artifacts/r519-mobile/results.json',JSON.stringify(rows,null,2));const fail=rows.filter(r=>r.status!==200||r.lcp>=2000||r.cls>=.05||r.tbt>150||r.ttfb>500||r.overflow>2||r.apex!=='controller-performance-v2'||r.mobileMarker!=='ready-after-defer-chain');if(fail.length)throw new Error('R519 mobile target failures '+JSON.stringify(fail));})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r519-mobile-matrix
+          path: artifacts/r519-mobile/
           retention-days: 30
