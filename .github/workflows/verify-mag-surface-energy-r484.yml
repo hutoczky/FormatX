@@ -1,14 +1,15 @@
 name: Verify canonical MAG runtime
-run-name: Canonical MAG runtime for ${{ github.event.workflow_run.head_sha || github.sha }}
+run-name: Canonical living MAG runtime for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   push:
-    branches: [master, agent/r484-periodic-surface-energy]
+    branches: [master, p0-r528-candidate]
     paths:
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-mag-surface-energy-r484.cjs'
-      - '.github/scripts/validate-mag-pause-owner-r485.cjs'
+      - '.github/scripts/validate-mag-living-core-r528.cjs'
       - '.github/scripts/validate-live-mag-functional.cjs'
+      - '.github/scripts/validate-r522-semantic-mag.cjs'
       - '.github/workflows/verify-mag-surface-energy-r484.yml'
   workflow_run:
     workflows: ['Prepare or deploy FormatX production']
@@ -45,8 +46,9 @@ jobs:
       - name: Validate source contracts
         run: |
           node .github/scripts/validate-living-core-r425-source.cjs
-          node .github/scripts/validate-mag-pause-owner-r485.cjs
+          node .github/scripts/validate-mag-living-core-r528.cjs
           node --check .github/scripts/validate-live-mag-functional.cjs
+          node --check .github/scripts/validate-mag-surface-energy-r484.cjs
 
       - name: Wait for exact audited production revision
         if: env.FORMATX_VERIFY_LIVE == 'true'
@@ -109,11 +111,11 @@ jobs:
           RESULT: ${{ job.status }}
         run: |
           state=failure
-          description='Canonical MAG runtime verification failed'
+          description='Canonical living MAG runtime verification failed'
           context='FormatX canonical MAG runtime'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='Renderer, motion, pause/resume, ASK and fallback passed'
+            description='Renderer, living motion, ASK, reduced-motion and fallback passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" -f context="$context" -f description="$description" \
