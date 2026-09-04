@@ -1,0 +1,115 @@
+name: P0 R517 candidate proof v2
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r517-candidate-proof-v2.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_REF: p0-r517-candidate-76b79fe
+  CANDIDATE_SHA: 192c2430d6c82c4c419833abfc8309f4e1814aeb
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_REF }}
+          fetch-depth: 1
+      - name: Exact candidate and source checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test -z "$(git status --porcelain)"
+          git log -1 --oneline
+          node --input-type=module --check < billing-worker/src/production-content-entry-r517.js
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Install tools and start exact local Worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          npm install -g @lhci/cli@0.13.x
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          echo "CHROME_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+          node <<'NODE'
+          const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r517-candidate.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r517-candidate.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r517-wrangler.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/r517-wrangler.log"; exit 1
+      - name: FCP ordering + observed geometry x5
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r517-candidate-v2
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');const {chromium}=require('playwright');
+          (async()=>{const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});const rows=[];try{
+            for(let i=1;i<=5;i++){const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});const page=await context.newPage();
+              await page.addInitScript(()=>{window.__r517={paint:[],lcp:[],shifts:[]};
+                try{new PerformanceObserver(list=>{for(const e of list.getEntries())window.__r517.paint.push({name:e.name,t:e.startTime,deferredState:document.documentElement?.dataset.fxDeferredCssR487||'',gate:document.documentElement?.dataset.fxDeferredCssGateR517||''});}).observe({type:'paint',buffered:true});}catch{}
+                try{new PerformanceObserver(list=>{for(const e of list.getEntries())window.__r517.lcp.push({t:e.startTime,size:e.size||0});}).observe({type:'largest-contentful-paint',buffered:true});}catch{}
+                try{new PerformanceObserver(list=>{for(const e of list.getEntries())if(!e.hadRecentInput)window.__r517.shifts.push(e.value);}).observe({type:'layout-shift',buffered:true});}catch{}
+              });
+              const res=await page.goto(`https://formatxsuite.com:8787/?r517_obs=${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForTimeout(3000);
+              const s=await page.evaluate(()=>{const nav=performance.getEntriesByType('navigation')[0];const fcp=window.__r517.paint.find(x=>x.name==='first-contentful-paint')||null;return{fcp,lcp:window.__r517.lcp.at(-1)?.t??null,cls:window.__r517.shifts.reduce((a,b)=>a+b,0),finalDeferred:document.documentElement.dataset.fxDeferredCssR487||'',finalGate:document.documentElement.dataset.fxDeferredCssGateR517||'',ttfb:nav?.responseStart??null,dcl:nav?.domContentLoadedEventEnd??null,load:nav?.loadEventEnd??null};});
+              if(!s.fcp)throw new Error(`run ${i}: no FCP`);if(s.fcp.deferredState==='ready')throw new Error(`run ${i}: deferred CSS was ready at FCP: ${JSON.stringify(s)}`);if(s.finalDeferred!=='ready'||s.finalGate!=='first-contentful-paint')throw new Error(`run ${i}: R517 gate not complete: ${JSON.stringify(s)}`);if(s.cls>=.05)throw new Error(`run ${i}: CLS ${s.cls}`);rows.push({run:i,status:res?.status()||0,...s});await context.close();}
+          }finally{await browser.close();}fs.writeFileSync('artifacts/r517-candidate-v2/observed-x5.json',JSON.stringify(rows,null,2));console.log(JSON.stringify(rows,null,2));})().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+      - name: Desktop Lighthouse x5 candidate gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('lighthouserc.live.json','utf8'));c.ci.collect.url=[`https://formatxsuite.com:8787/?r517_lh=${process.env.GITHUB_RUN_ID}`];c.ci.collect.numberOfRuns=5;c.ci.collect.settings={...c.ci.collect.settings,chromeFlags:'--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors'};c.ci.upload={target:'filesystem',outputDir:'r517-local-upload'};delete c.ci.assert;fs.writeFileSync('lighthouserc.r517.local.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          rm -rf .lighthouseci
+          lhci collect --config=./lighthouserc.r517.local.json | tee artifacts/r517-candidate-v2/desktop-collect.txt
+          cp -a .lighthouseci artifacts/r517-candidate-v2/desktop-lhrs
+          node <<'NODE'
+          const fs=require('node:fs'),p=require('node:path');const dir='artifacts/r517-candidate-v2/desktop-lhrs';const files=fs.readdirSync(dir).filter(x=>x.endsWith('.json')).sort();if(files.length!==5)throw new Error(`expected 5 LHR, got ${files.length}`);const rows=files.map((f,i)=>{const j=JSON.parse(fs.readFileSync(p.join(dir,f)));const a=j.audits;return{run:i+1,performance:j.categories.performance.score*100,fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,speedIndex:a['speed-index'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue,seo:j.categories.seo.score*100};});console.table(rows);for(const r of rows)if(r.lcp>=2000||r.cls>=.05||r.tbt>150||r.ttfb>500)throw new Error(`candidate target fail ${JSON.stringify(r)}`);const ls=rows.map(r=>r.lcp),spread=Math.max(...ls)-Math.min(...ls);fs.writeFileSync('artifacts/r517-candidate-v2/desktop-summary.json',JSON.stringify({sha:process.env.CANDIDATE_SHA,rows,lcpSpread:spread,pass:true},null,2));console.log('LCP_SPREAD',spread);
+          NODE
+      - name: Mobile 390x844 x3 diagnostic
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('lighthouserc.live.mobile.json','utf8'));c.ci.collect.url=[`https://formatxsuite.com:8787/?r517_mobile=${process.env.GITHUB_RUN_ID}`];c.ci.collect.numberOfRuns=3;c.ci.collect.settings={...c.ci.collect.settings,formFactor:'mobile',screenEmulation:{mobile:true,width:390,height:844,deviceScaleFactor:2.625,disabled:false},chromeFlags:'--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors'};c.ci.upload={target:'filesystem',outputDir:'r517-local-mobile-upload'};delete c.ci.assert;fs.writeFileSync('lighthouserc.r517.local.mobile.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          rm -rf .lighthouseci
+          lhci collect --config=./lighthouserc.r517.local.mobile.json | tee artifacts/r517-candidate-v2/mobile-collect.txt
+          cp -a .lighthouseci artifacts/r517-candidate-v2/mobile-lhrs
+          node <<'NODE'
+          const fs=require('node:fs'),p=require('node:path');const dir='artifacts/r517-candidate-v2/mobile-lhrs';const files=fs.readdirSync(dir).filter(x=>x.endsWith('.json')).sort();const rows=files.map((f,i)=>{const j=JSON.parse(fs.readFileSync(p.join(dir,f)));const a=j.audits;return{run:i+1,performance:j.categories.performance.score*100,fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue,seo:j.categories.seo.score*100};});console.table(rows);fs.writeFileSync('artifacts/r517-candidate-v2/mobile-summary.json',JSON.stringify({sha:process.env.CANDIDATE_SHA,rows},null,2));
+          NODE
+      - name: Logs
+        if: always()
+        run: cat "$RUNNER_TEMP/r517-wrangler.log" || true
+      - name: Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r517-candidate-v2-${{ env.CANDIDATE_SHA }}
+          path: artifacts/r517-candidate-v2/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
