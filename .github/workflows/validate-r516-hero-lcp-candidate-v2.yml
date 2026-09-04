@@ -1,0 +1,125 @@
+name: Validate R516 hero LCP candidate v2
+
+on:
+  push:
+    branches: [p0-r516-hero-lcp]
+    paths:
+      - '.github/workflows/validate-r516-hero-lcp-candidate-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-r516-hero-lcp-candidate-v2
+  cancel-in-progress: true
+
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Validate changed runtime syntax
+        run: node --check docs/scifi-ui/scripts/formatx-apex.js
+      - name: Install Worker and audit libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock playwright@1.62.0 lighthouse@12.8.2
+          CHROME_PATH="$(command -v google-chrome-stable || command -v google-chrome || true)"
+          test -n "$CHROME_PATH"
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+      - name: Build local-only candidate config
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const source=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete source.ai; delete source.routes; source.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.r516-candidate.json',JSON.stringify(source,null,2)+'\n');
+          NODE
+      - name: Start exact candidate Worker locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r516-candidate.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r516-wrangler.log" 2>&1 &
+          cd ..
+          for attempt in $(seq 1 60); do
+            if curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then echo R516_LOCAL_WORKER_READY; exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r516-wrangler.log" || true
+          exit 1
+      - name: Prove first-load stability and canonical HU EN interaction
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r516-hero-lcp-v2
+          NODE_PATH="$GITHUB_WORKSPACE/node_modules" node <<'NODE'
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH,args:['--ignore-certificate-errors']});
+            const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1350,height:940},locale:'hu-HU'});
+            const page=await context.newPage();
+            const errors=[];
+            page.on('console',m=>{if(m.type()==='error')errors.push(m.text())}); page.on('pageerror',e=>errors.push(String(e)));
+            await page.addInitScript(()=>{
+              window.__r516={heroWrites:[],shifts:[]};
+              const d=Object.getOwnPropertyDescriptor(Node.prototype,'textContent');
+              if(d?.get&&d?.set)Object.defineProperty(Node.prototype,'textContent',{configurable:true,enumerable:d.enumerable,get(){return d.get.call(this)},set(v){try{if(this?.nodeType===1&&this.matches?.('#hero .hero-lead'))window.__r516.heroWrites.push({t:performance.now(),value:String(v),stack:String(new Error().stack||'')});}catch(_){} return d.set.call(this,v);}});
+              try{new PerformanceObserver(list=>{for(const e of list.getEntries()){if(e.hadRecentInput)continue;window.__r516.shifts.push({t:e.startTime,value:e.value,sources:(e.sources||[]).map(s=>({node:s.node?.id?`#${s.node.id}`:(s.node?.className?String(s.node.className):s.node?.tagName||''),previousRect:s.previousRect,currentRect:s.currentRect}))});}}).observe({type:'layout-shift',buffered:true});}catch(_){}
+            });
+            const response=await page.goto('https://formatxsuite.com:8787/?r516_candidate=browser-v2',{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForTimeout(1800);
+            const before=await page.evaluate(()=>({writes:window.__r516.heroWrites.slice(),text:document.querySelector('#hero .hero-lead')?.textContent||'',hu:document.querySelector('#hero .hero-lead')?.dataset.hu||'',en:document.querySelector('#hero .hero-lead')?.dataset.en||'',toggle:document.querySelector('.fx-language-toggle[data-language-toggle="true"]')?.outerHTML||null}));
+            const toggle=page.locator('.fx-language-toggle[data-language-toggle="true"]').first();
+            const toggleCount=await toggle.count();
+            let clickError=null;
+            if(toggleCount){try{await toggle.click({timeout:10000}); await page.waitForTimeout(180);}catch(e){clickError=String(e)}}
+            const after=await page.evaluate(()=>({writes:window.__r516.heroWrites.slice(),text:document.querySelector('#hero .hero-lead')?.textContent||'',en:document.querySelector('#hero .hero-lead')?.dataset.en||'',lang:document.documentElement.lang,cls:window.__r516.shifts.reduce((s,e)=>s+e.value,0),shifts:window.__r516.shifts}));
+            const evidence={status:response?.status()||0,before,toggleCount,clickError,after,errors};
+            fs.writeFileSync('artifacts/r516-hero-lcp-v2/browser.json',JSON.stringify(evidence,null,2)+'\n'); console.log(JSON.stringify(evidence,null,2));
+            await browser.close();
+            if(evidence.status!==200)throw new Error('candidate HTTP '+evidence.status);
+            if(before.writes.length!==0)throw new Error('first-load hero rewrite still present');
+            if(before.text!==before.hu)throw new Error('first-load HU hero text mismatch');
+            if(toggleCount!==1||clickError)throw new Error('canonical language toggle interaction failed');
+            if(after.lang!=='en'||after.text!==after.en)throw new Error('canonical EN interaction did not update hero');
+            if(after.writes.length<1)throw new Error('real EN interaction produced no hero write');
+            if(errors.length)throw new Error('console errors: '+errors.join(' | '));
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Run real candidate Lighthouse desktop x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in 1 2 3; do
+            ./node_modules/.bin/lighthouse "https://formatxsuite.com:8787/?r516_candidate=lighthouse-v2-$i" --preset=desktop --chrome-path="$CHROME_PATH" --chrome-flags='--headless --no-sandbox --ignore-certificate-errors' --only-categories=performance,accessibility,best-practices,seo --output=json --output-path="artifacts/r516-hero-lcp-v2/lhr-$i.json" --quiet
+          done
+          node <<'NODE'
+          const fs=require('node:fs'); const rows=[];
+          for(let i=1;i<=3;i++){const l=JSON.parse(fs.readFileSync(`artifacts/r516-hero-lcp-v2/lhr-${i}.json`,'utf8'));const r={run:i,performance:Math.round(l.categories.performance.score*100),accessibility:Math.round(l.categories.accessibility.score*100),bestPractices:Math.round(l.categories['best-practices'].score*100),seo:Math.round(l.categories.seo.score*100),fcp:l.audits['first-contentful-paint'].numericValue,lcp:l.audits['largest-contentful-paint'].numericValue,speedIndex:l.audits['speed-index'].numericValue,tbt:l.audits['total-blocking-time'].numericValue,cls:l.audits['cumulative-layout-shift'].numericValue,ttfb:l.audits['server-response-time'].numericValue};rows.push(r);if(!(r.lcp<2000))throw new Error(`run ${i} LCP ${r.lcp}`);if(!(r.cls<0.05))throw new Error(`run ${i} CLS ${r.cls}`);if(!(r.tbt<=150))throw new Error(`run ${i} TBT ${r.tbt}`);if(!(r.ttfb<=500))throw new Error(`run ${i} TTFB ${r.ttfb}`);}
+          fs.writeFileSync('artifacts/r516-hero-lcp-v2/summary.json',JSON.stringify(rows,null,2)+'\n'); console.log(JSON.stringify(rows,null,2));
+          NODE
+      - name: Show Worker log
+        if: always()
+        run: cat "$RUNNER_TEMP/r516-wrangler.log" || true
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r516-hero-lcp-v2-${{ github.sha }}
+          path: artifacts/r516-hero-lcp-v2
+          if-no-files-found: warn
+          retention-days: 30
