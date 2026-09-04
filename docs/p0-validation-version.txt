@@ -1,11 +1,15 @@
 FormatX P0 validation contract
-version=2026-09-04-p0-r517-award-owner
+version=2026-09-04-p0-r525-final-integration
 production_origin=https://formatxsuite.com/
 lighthouse_desktop_runs=3
 lighthouse_mobile_runs=3
 required_categories=performance:100,accessibility:100,best-practices:100,seo:100
 lcp_ms_lt=2000
 cls_lt=0.05
+tbt_ms_lte=150
+ttfb_ms_lte=500
 browser_matrix=strict
 proof_policy=measured-artifacts-only
-trigger=r517-deferred-award-first-paint-ownership
+product_runtime=r517-deferred-award-first-paint-ownership
+semantic_mag=r522-current-contract-fail-fast
+trigger=r525-final-same-sha

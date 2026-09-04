@@ -5,34 +5,29 @@ on:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - 'docs/p0-validation-version.txt'
 
 permissions:
   contents: read
   statuses: write
 
 concurrency:
-  group: formatx-p0-production-browser
-  cancel-in-progress: true
+  group: formatx-p0-production-browser-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
 
 jobs:
   p0-browser:
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]')) ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.conclusion == 'success' &&
        contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
-      AUDITED_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       FORMATX_TEST_URL: https://formatxsuite.com/
     steps:
       - name: Checkout audited production revision
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.AUDITED_SHA }}
 
@@ -40,27 +35,25 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 90); do
-            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://formatxsuite.com/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-${attempt}" -o "$RUNNER_TEMP/live-p0.txt"; then
-              if cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
-                echo "Exact P0 marker is live on production."
-                exit 0
-              fi
+          for attempt in $(seq 1 60); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://formatxsuite.com/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-${attempt}" -o "$RUNNER_TEMP/live-p0.txt" \
+              && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+              echo 'Exact P0 marker is live on production.'
+              exit 0
             fi
-            sleep 10
+            sleep 5
           done
           echo 'Production never converged to the audited P0 marker.' >&2
           exit 1
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
 
       - name: Validate P0 browser test syntax
         run: node --check .github/scripts/validate-p0-production-browser.cjs
 
-      - name: Install Chromium
+      - name: Install Chromium verifier
         shell: bash
         run: |
           set -euo pipefail

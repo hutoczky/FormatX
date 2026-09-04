@@ -5,34 +5,36 @@ on:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - 'docs/p0-validation-version.txt'
 
 permissions:
   contents: read
   statuses: write
 
 concurrency:
-  group: formatx-live-lighthouse
-  cancel-in-progress: true
+  group: formatx-live-lighthouse-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
+env:
+  ORIGIN: https://formatxsuite.com
 
 jobs:
-  live-lighthouse:
+  lighthouse:
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]')) ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.conclusion == 'success' &&
        contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [desktop, mobile]
+    name: Lighthouse ${{ matrix.profile }} x3
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
-      AUDITED_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
-      ORIGIN: https://formatxsuite.com
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - name: Checkout audited revision
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.AUDITED_SHA }}
 
@@ -40,25 +42,103 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 90); do
-            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-${attempt}" -o "$RUNNER_TEMP/live-p0.txt"; then
-              if cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
-                echo 'Exact P0 marker is live on production.'
-                exit 0
-              fi
+          for attempt in $(seq 1 60); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-${{ matrix.profile }}-$attempt" -o "$RUNNER_TEMP/live-p0.txt" \
+              && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+              echo 'Exact P0 marker is live on production.'
+              exit 0
             fi
-            sleep 10
+            sleep 5
           done
           echo 'Production never converged to the audited P0 marker.' >&2
           exit 1
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.13.x
+
+      - name: Prepare cache-busted profile config
+        shell: bash
+        run: |
+          set -euo pipefail
+          profile='${{ matrix.profile }}'
+          if [ "$profile" = desktop ]; then src='lighthouserc.live.json'; else src='lighthouserc.live.mobile.json'; fi
+          out="$RUNNER_TEMP/lighthouserc.$profile.json"
+          node - "$src" "$out" "$profile" <<'NODE'
+          const fs=require('node:fs');
+          const [src,out,profile]=process.argv.slice(2);
+          const c=JSON.parse(fs.readFileSync(src,'utf8'));
+          c.ci.collect.url=[`https://formatxsuite.com/?p0_final=${process.env.GITHUB_RUN_ID}-${profile}`];
+          fs.writeFileSync(out,JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo "LH_CONFIG=$out" >> "$GITHUB_ENV"
+
+      - name: Run strict production Lighthouse x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          profile='${{ matrix.profile }}'
+          rm -rf .lighthouseci "lighthouse-live-results/$profile"
+          lhci collect --config="$LH_CONFIG" 2>&1 | tee "lighthouse-live-$profile-output.txt"
+          mkdir -p "lighthouse-live-results/$profile"
+          cp -a .lighthouseci/. "lighthouse-live-results/$profile/"
+          lhci assert --config="$LH_CONFIG" 2>&1 | tee -a "lighthouse-live-$profile-output.txt"
+          PROFILE="$profile" node .github/scripts/summarize-p0-lighthouse.cjs "lighthouse-live-results/$profile" | tee -a "lighthouse-live-$profile-output.txt"
+
+      - name: Upload Lighthouse evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-lighthouse-${{ matrix.profile }}-${{ env.AUDITED_SHA }}
+          path: |
+            lighthouse-live-results/${{ matrix.profile }}/
+            lighthouse-live-${{ matrix.profile }}-output.txt
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish profile status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          profile='${{ matrix.profile }}'
+          if [ "$JOB_STATUS" = success ]; then state=success; description="P0 live $profile Lighthouse 100x3 and metric contract passed"; else state=failure; description="P0 live $profile Lighthouse strict gate failed"; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state="$state" \
+            -f context="FormatX P0 live Lighthouse $profile" \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+  security-checkout:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.AUDITED_SHA }}
+
+      - name: Wait for exact production marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-security-$attempt" -o "$RUNNER_TEMP/live-p0.txt" \
+              && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then exit 0; fi
+            sleep 5
+          done
+          exit 1
 
       - name: Confirm production security headers
         shell: bash
@@ -105,61 +185,14 @@ jobs:
           print('P0_CHECKOUT_READINESS_PASS')
           PY
 
-      - name: Prepare cache-busted Lighthouse configs
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs=require('node:fs');
-          for(const [src,out,profile] of [['lighthouserc.live.json','lighthouserc.live.p0.json','desktop'],['lighthouserc.live.mobile.json','lighthouserc.live.mobile.p0.json','mobile']]){
-            const c=JSON.parse(fs.readFileSync(src,'utf8'));
-            c.ci.collect.url=[`https://formatxsuite.com/?p0_lighthouse=${process.env.GITHUB_RUN_ID}-${profile}`];
-            fs.writeFileSync(out,JSON.stringify(c,null,2)+'\n');
-          }
-          NODE
-
-      - name: Run and validate desktop Lighthouse x3
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf .lighthouseci lighthouse-live-results/desktop
-          lhci collect --config=./lighthouserc.live.p0.json 2>&1 | tee lighthouse-live-desktop-output.txt
-          mkdir -p lighthouse-live-results/desktop
-          cp -a .lighthouseci/. lighthouse-live-results/desktop/
-          lhci assert --config=./lighthouserc.live.p0.json 2>&1 | tee -a lighthouse-live-desktop-output.txt
-          PROFILE=desktop node .github/scripts/summarize-p0-lighthouse.cjs lighthouse-live-results/desktop | tee -a lighthouse-live-desktop-output.txt
-
-      - name: Run and validate mobile Lighthouse x3
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf .lighthouseci lighthouse-live-results/mobile
-          lhci collect --config=./lighthouserc.live.mobile.p0.json 2>&1 | tee lighthouse-live-mobile-output.txt
-          mkdir -p lighthouse-live-results/mobile
-          cp -a .lighthouseci/. lighthouse-live-results/mobile/
-          lhci assert --config=./lighthouserc.live.mobile.p0.json 2>&1 | tee -a lighthouse-live-mobile-output.txt
-          PROFILE=mobile node .github/scripts/summarize-p0-lighthouse.cjs lighthouse-live-results/mobile | tee -a lighthouse-live-mobile-output.txt
-
-      - name: Upload live Lighthouse evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: live-lighthouse-results-${{ env.AUDITED_SHA }}
-          path: |
-            lighthouse-live-results/
-            lighthouse-live-desktop-output.txt
-            lighthouse-live-mobile-output.txt
-            lighthouserc.live.p0.json
-            lighthouserc.live.mobile.p0.json
-          include-hidden-files: true
-          if-no-files-found: warn
-          retention-days: 30
-
-      - name: Publish live Lighthouse status
+      - name: Publish security and checkout status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='P0 live desktop/mobile 3x Lighthouse and security gate passed'; else state=failure; description='P0 live Lighthouse or security gate failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" -f state="$state" -f context='FormatX P0 live Lighthouse gate' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='P0 production security and checkout invariants passed'; else state=failure; description='P0 production security or checkout invariant failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state="$state" -f context='FormatX P0 security and checkout' -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
