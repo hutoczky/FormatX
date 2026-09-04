@@ -57,7 +57,6 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/formatx-feedback.css',
   '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/formatx-content-standard.css',
-  '/scifi-ui/styles/formatx-award-readiness.css',
 ]);
 
 const R502_ASSET_REWRITES = new Map([
