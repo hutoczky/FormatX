@@ -1,4 +1,5 @@
 'use strict';
+
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -6,24 +7,62 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '../..');
 const ORIGIN = 'https://formatxsuite.com';
 const WWW = 'https://www.formatxsuite.com';
-const production = fs.readFileSync(path.join(ROOT, 'billing-worker/src/production-content-entry.js'), 'utf8');
+const workerRoot = path.join(ROOT, 'billing-worker');
+const wrangler = fs.readFileSync(path.join(workerRoot, 'wrangler.jsonc'), 'utf8');
+const mainMatch = wrangler.match(/"main"\s*:\s*"([^"]+)"/);
+assert.ok(mainMatch, 'missing wrangler production main entry');
+const entryPath = path.resolve(workerRoot, mainMatch[1]);
 const canonical = fs.readFileSync(path.join(ROOT, 'docs/scifi-ui/index.html'), 'utf8');
 const criticalCore = fs.readFileSync(path.join(ROOT, 'docs/scifi-ui/styles/formatx-critical-core-r227.css'), 'utf8');
 
-function sourceValue(pattern, label) {
-  const match = production.match(pattern);
-  assert.ok(match, `missing source contract ${label}`);
-  return match[1];
+function productionChain(filePath, seen = new Set()) {
+  const resolved = path.resolve(filePath);
+  if (seen.has(resolved)) return [];
+  seen.add(resolved);
+  const source = fs.readFileSync(resolved, 'utf8');
+  const result = [{ path: resolved, source }];
+  const imports = [...source.matchAll(/from\s+['"](\.\/production-content-entry[^'"]*\.js)['"]/g)];
+  for (const match of imports) {
+    result.push(...productionChain(path.resolve(path.dirname(resolved), match[1]), seen));
+  }
+  return result;
 }
+
+const productionSources = productionChain(entryPath);
+
+function sourceValue(pattern, label) {
+  for (const item of productionSources) {
+    const match = item.source.match(pattern);
+    if (match) return match[1];
+  }
+  assert.fail(`missing source contract ${label} in production entry chain`);
+}
+
+function expectedHeader(name) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const item of productionSources) {
+    const staticMatch = item.source.match(new RegExp(`headers\\.set\\('${escaped}', '([^']+)'\\)`));
+    if (staticMatch) return staticMatch[1];
+    const templateMatch = item.source.match(new RegExp(`headers\\.set\\('${escaped}', \`([^\`]+)\`\\)`));
+    if (templateMatch) {
+      const startup = sourceValue(/const STARTUP_REVISION = '([^']+)'/, 'startup revision');
+      return templateMatch[1].replace('${STARTUP_REVISION}', startup);
+    }
+  }
+  assert.fail(`missing final header owner ${name} in production entry chain`);
+}
+
 function canonicalValue(pattern, label) {
   const match = canonical.match(pattern);
   assert.ok(match, `missing canonical source ${label}`);
   return match[1];
 }
+
 async function fetchText(url, options = {}) {
   const response = await fetch(url, options);
   return { response, text: await response.text() };
 }
+
 function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   const value = html.match(pattern)?.[1] || '';
   assert.ok(value, `missing live ${label} URL`);
@@ -32,6 +71,7 @@ function resolveLiveAsset(html, baseUrl, pattern, expectedPath, label) {
   assert.equal(resolved.pathname, expectedPath, `${label} resolved to ${resolved.pathname}`);
   return resolved.href;
 }
+
 function resolveMarkedScript(html, baseUrl, marker, expectedPath, label) {
   const tag = html.match(new RegExp(`<script\\b[^>]*${marker}=["']true["'][^>]*>`, 'i'))?.[0]
     || html.match(new RegExp(`<script\\b(?=[^>]*${marker}=["']true["'])[^>]*>`, 'i'))?.[0]
@@ -48,10 +88,10 @@ function resolveMarkedScript(html, baseUrl, marker, expectedPath, label) {
 (async () => {
   const firstFrame = sourceValue(/data-fx-first-frame-stability-([^=\"]+)=\"true\"/, 'first-frame marker');
   const p0Paint = sourceValue(/data-fx-p0-first-paint-([^=\"]+)=\"true\"/, 'P0 first-paint marker');
-  const expectedEdgePrefix = sourceValue(/headers\.set\('X-FormatX-Edge-Stability', `([^`]+)`\)/, 'edge owner');
   const startup = sourceValue(/const STARTUP_REVISION = '([^']+)'/, 'startup revision');
-  const expectedCssScheduler = sourceValue(/headers\.set\('X-FormatX-CSS-Scheduler', '([^']+)'\)/, 'CSS scheduler');
-  const expectedMotionScheduler = sourceValue(/headers\.set\('X-FormatX-Motion-Scheduler', '([^']+)'\)/, 'motion scheduler');
+  const expectedEdge = expectedHeader('X-FormatX-Edge-Stability');
+  const expectedCssScheduler = expectedHeader('X-FormatX-CSS-Scheduler');
+  const expectedMotionScheduler = expectedHeader('X-FormatX-Motion-Scheduler');
   const expectedBase = canonicalValue(/<base\s+href=["']([^"']+)["']/, 'base href');
   const p0SchedulerPath = new URL(
     sourceValue(/const P0_MOTION_SCHEDULER = '([^']+)'/, 'P0 scheduler URL'),
@@ -127,23 +167,26 @@ function resolveMarkedScript(html, baseUrl, marker, expectedPath, label) {
   assert.ok(assets.critical.text.includes('display: none !important'));
   assert.match(assets.legacyCore.text.toLowerCase(), /formatx-core|fxcore/);
 
-  assert.equal(
-    home.response.headers.get('x-formatx-edge-stability'),
-    `${expectedEdgePrefix.replace(':${STARTUP_REVISION}', '')}:${startup}`,
-  );
+  assert.equal(home.response.headers.get('x-formatx-edge-stability'), expectedEdge);
   assert.equal(home.response.headers.get('x-formatx-css-scheduler'), expectedCssScheduler);
   assert.equal(home.response.headers.get('x-formatx-motion-scheduler'), expectedMotionScheduler);
   assert.equal(www.headers.get('location'), 'https://formatxsuite.com/?_fx_redirect_recovery=1');
   assert.match(www.headers.get('cache-control') || '', /no-store/i);
 
   console.log(JSON.stringify({
-    status: 'PASS', firstFrame, p0Paint, expectedBase, startup,
+    status: 'PASS',
+    entryPath: path.relative(ROOT, entryPath),
+    sourceChain: productionSources.map(item => path.relative(ROOT, item.path)),
+    firstFrame,
+    p0Paint,
+    expectedBase,
+    startup,
     standaloneDesignAsset: `${ORIGIN}/scifi-ui/styles/formatx-design-system.css`,
     legacyCoreAsset: `${ORIGIN}/scifi-ui/scripts/formatx-core-real3d-v20.js`,
     legacyIconAsset: `${ORIGIN}/scifi-ui/assets/images/formatx-icon.png`,
     canonicalFaviconPath,
     resolvedAssets,
-    edge: home.response.headers.get('x-formatx-edge-stability'),
+    edge: expectedEdge,
     cssScheduler: expectedCssScheduler,
     motionScheduler: expectedMotionScheduler,
   }, null, 2));
