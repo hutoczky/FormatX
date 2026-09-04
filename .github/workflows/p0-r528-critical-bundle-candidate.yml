@@ -1,0 +1,177 @@
+name: P0 R528 critical request fan-out candidate
+
+on:
+  push:
+    branches: [p0-r528-final-owner]
+    paths:
+      - '.github/workflows/p0-r528-critical-bundle-candidate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [mobile, desktop]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: f0f7f43c03ec32dbdcee2e7781d06614dbccd5a6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Install cached Worker and Lighthouse
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker --prefer-offline
+          npm install -g @lhci/cli@0.13.x
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
+
+      - name: Capture exact R527 final stylesheet contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs'); const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.r528-base.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r528-base.json --ip 127.0.0.1 --port 8786 --local-protocol https > "$RUNNER_TEMP/wrangler-base.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/base.pid"
+          cd ..
+          for i in $(seq 1 60); do
+            if curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8786/ -o "$RUNNER_TEMP/r527.html"; then break; fi
+            sleep 1
+          done
+          test -s "$RUNNER_TEMP/r527.html"
+
+      - name: Build one order-preserving critical CSS bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          HTML="$RUNNER_TEMP/r527.html" node <<'NODE'
+          'use strict';
+          const fs=require('node:fs'),path=require('node:path');
+          const html=fs.readFileSync(process.env.HTML,'utf8');
+          const targets=new Set([
+            '/scifi-ui/styles/formatx-critical-shell-v56.css',
+            '/scifi-ui/styles/formatx-quality-r461.css',
+            '/scifi-ui/styles/formatx-mobile-apex-composition.css',
+            '/scifi-ui/styles/formatx-award-readiness.css',
+            '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
+            '/scifi-ui/styles/formatx-flow-first-r74.css',
+            '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
+            '/scifi-ui/styles/formatx-mobile-proof-controls-r204.css',
+            '/scifi-ui/styles/formatx-mobile-layout-r207.css',
+            '/scifi-ui/styles/formatx-first-paint-r206.css',
+            '/scifi-ui/styles/formatx-mobile-first-paint-r358.css',
+            '/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+          ]);
+          const tags=html.match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi)||[];
+          const rows=[];
+          for(const tag of tags){
+            const href=tag.match(/\bhref=(["'])(.*?)\1/i)?.[2]; if(!href)continue;
+            const u=new URL(href,'https://formatxsuite.com/scifi-ui/'); if(!targets.has(u.pathname))continue;
+            const deferred=tag.match(/\bdata-fx-r487-media=(["'])(.*?)\1/i)?.[2];
+            const media=deferred||tag.match(/\bmedia=(["'])(.*?)\1/i)?.[2]||'all';
+            rows.push({pathname:u.pathname,media});
+          }
+          const found=new Set(rows.map(r=>r.pathname));
+          for(const target of targets)if(!found.has(target))throw new Error(`missing critical style in final R527 HTML: ${target}`);
+          let out='/* FormatX R528 candidate — exact R527 critical styles, original cascade order and media contracts. */\n';
+          for(const row of rows){
+            const file=path.join('docs',row.pathname.replace(/^\//,''));
+            let css=fs.readFileSync(file,'utf8').replace(/^\uFEFF/,'').replace(/@charset\s+["'][^"']+["']\s*;?/gi,'');
+            if(/@import\s/i.test(css))throw new Error(`nested @import not safe to bundle: ${file}`);
+            out+=`\n/* ${row.pathname} | media=${row.media} */\n`;
+            out+=row.media&&row.media!=='all'?`@media ${row.media}{\n${css}\n}\n`:`${css}\n`;
+          }
+          fs.writeFileSync('docs/scifi-ui/styles/formatx-p0-critical-bundle-r528.css',out);
+          fs.writeFileSync('billing-worker/r528-critical-targets.json',JSON.stringify([...targets],null,2)+'\n');
+          console.log(JSON.stringify({styles:rows.length,bytes:Buffer.byteLength(out),rows},null,2));
+          NODE
+
+      - name: Wrap R527 delivery without changing CSS semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > billing-worker/src/production-content-entry-r528-bundle-candidate.js <<'JS'
+          import r527Production from './production-content-entry-r527.js';
+          const PUBLIC_HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
+          const TARGETS=new Set([
+            '/scifi-ui/styles/formatx-critical-shell-v56.css',
+            '/scifi-ui/styles/formatx-quality-r461.css',
+            '/scifi-ui/styles/formatx-mobile-apex-composition.css',
+            '/scifi-ui/styles/formatx-award-readiness.css',
+            '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
+            '/scifi-ui/styles/formatx-flow-first-r74.css',
+            '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
+            '/scifi-ui/styles/formatx-mobile-proof-controls-r204.css',
+            '/scifi-ui/styles/formatx-mobile-layout-r207.css',
+            '/scifi-ui/styles/formatx-first-paint-r206.css',
+            '/scifi-ui/styles/formatx-mobile-first-paint-r358.css',
+            '/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+          ]);
+          const BUNDLE='<link rel="stylesheet" fetchpriority="high" data-fx-p0-critical-bundle-r528="true" href="/scifi-ui/styles/formatx-p0-critical-bundle-r528.css?v=20260905-r528-request-fanout">';
+          function pathname(tag){const m=tag.match(/\bhref=(["'])(.*?)\1/i);if(!m)return'';try{return new URL(m[2],'https://formatxsuite.com/scifi-ui/').pathname}catch{return''}}
+          function bundle(html){let removed=0;let source=String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>{if(!TARGETS.has(pathname(tag)))return tag;removed++;return'';});if(removed!==TARGETS.size)throw new Error(`R528 critical bundle expected ${TARGETS.size} links, removed ${removed}`);return source.replace('</head>',`  ${BUNDLE}\n</head>`)}
+          export default{async fetch(request,env,ctx){const response=await r527Production.fetch(request,env,ctx);const url=new URL(request.url);if(!['GET','HEAD'].includes(request.method)||!PUBLIC_HOSTS.has(url.hostname)||request.method==='HEAD')return response;const headers=new Headers(response.headers);const type=headers.get('Content-Type')||'';if(!type.includes('text/html'))return response;const html=bundle(await response.text());headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');headers.set('X-FormatX-Critical-Delivery','r528-single-request-fanout');return new Response(html,{status:response.status,statusText:response.statusText,headers});}};
+          JS
+          node --check billing-worker/src/production-content-entry-r528-bundle-candidate.js
+          node - <<'NODE'
+          const fs=require('node:fs'); const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true; c.main='src/production-content-entry-r528-bundle-candidate.js';
+          fs.writeFileSync('billing-worker/wrangler.r528-bundle.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          git diff --check
+
+      - name: Start bundled candidate Worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f "$RUNNER_TEMP/base.pid" ]; then kill "$(cat "$RUNNER_TEMP/base.pid")" 2>/dev/null || true; fi
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r528-bundle.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/wrangler-bundle.log" 2>&1 &
+          cd ..
+          for i in $(seq 1 60); do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/wrangler-bundle.log"; exit 1
+
+      - name: Prepare profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          profile='${{ matrix.profile }}'; if [ "$profile" = mobile ]; then src='lighthouserc.live.mobile.json'; runs=3; else src='lighthouserc.live.json'; runs=1; fi
+          node - "$src" "$profile" "$runs" <<'NODE'
+          const fs=require('node:fs');const [src,p,runs]=process.argv.slice(2);const c=JSON.parse(fs.readFileSync(src,'utf8'));c.ci.collect.url=[`https://formatxsuite.com:8787/?r528_bundle=${p}`];c.ci.collect.numberOfRuns=Number(runs);c.ci.collect.settings.chromeFlags='--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors --allow-insecure-localhost';fs.writeFileSync(`lighthouserc.r528-bundle-${p}.json`,JSON.stringify(c,null,2)+'\n');
+          NODE
+
+      - name: Run real Lighthouse candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          p='${{ matrix.profile }}';rm -rf .lighthouseci "artifacts/r528-bundle-$p";lhci collect --config="./lighthouserc.r528-bundle-$p.json";mkdir -p "artifacts/r528-bundle-$p";cp -a .lighthouseci/. "artifacts/r528-bundle-$p/"
+          PROFILE="$p" node <<'NODE' | tee "artifacts/r528-bundle-$p/summary.txt"
+          const fs=require('node:fs'),path=require('node:path');const p=process.env.PROFILE,dir=`artifacts/r528-bundle-${p}`;const files=fs.readdirSync(dir).filter(x=>x.startsWith('lhr-')&&x.endsWith('.json')).sort();let bad=0;for(const [i,f] of files.entries()){const r=JSON.parse(fs.readFileSync(path.join(dir,f),'utf8')),a=r.audits,c=r.categories,m=a.metrics.details.items[0];const row={run:i+1,performance:Math.round(c.performance.score*100),a11y:Math.round(c.accessibility.score*100),bp:Math.round(c['best-practices'].score*100),seo:Math.round(c.seo.score*100),fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,observedLcp:m.observedLargestContentfulPaint,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue,renderBlocking:a['render-blocking-resources']?.numericValue||0};console.log(JSON.stringify(row));if(!(row.lcp<2000&&row.cls<.05&&row.tbt<=150&&row.ttfb<=500))bad++;}if(bad)process.exit(1);
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r528-critical-bundle-${{ matrix.profile }}-${{ github.sha }}
+          path: artifacts/r528-bundle-${{ matrix.profile }}/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
