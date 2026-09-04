@@ -1,0 +1,167 @@
+name: Validate R521 hero-LCP deferred CSS candidate v2
+run-name: R521 exact-owner performance x5+x5 v2 for ${{ github.sha }}
+
+on:
+  push:
+    branches: [p0-r517-mobile-critical]
+    paths:
+      - '.github/workflows/validate-r521-hero-lcp-deferred-css-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      OUT_BRANCH: p0-r521-candidate
+      LOCAL_URL: https://formatxsuite.com:8787/
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Build identical R521 source candidate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r521-v2
+          python3 <<'PY'
+          from pathlib import Path
+          root=Path('docs/scifi-ui/styles')
+          first=(root/'formatx-first-paint-r206.css').read_text(encoding='utf-8')
+          mobile=(root/'formatx-mobile-first-paint-r358.css').read_text(encoding='utf-8')
+          frame=(root/'formatx-first-frame-stability-r283.css').read_text(encoding='utf-8')
+          p0=(root/'formatx-p0-first-paint-r490.css').read_text(encoding='utf-8')
+          assert '@charset' not in frame.lower() and '@import' not in frame.lower()
+          desktop_media='(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)'
+          bundle=(
+            '/* FormatX R520 — exact-order first-paint tail consolidation. */\n'
+            '/* BEGIN formatx-first-paint-r206.css */\n'+first+'\n/* END formatx-first-paint-r206.css */\n'
+            '/* BEGIN formatx-mobile-first-paint-r358.css */\n'+mobile+'\n/* END formatx-mobile-first-paint-r358.css */\n'
+            f'@media {desktop_media} {{\n/* BEGIN formatx-first-frame-stability-r283.css */\n'+frame+'\n/* END formatx-first-frame-stability-r283.css */\n}\n'
+            '/* BEGIN formatx-p0-first-paint-r490.css */\n'+p0+'\n/* END formatx-p0-first-paint-r490.css */\n'
+          )
+          (root/'formatx-first-paint-tail-r520.css').write_text(bundle,encoding='utf-8')
+          PY
+
+          cat > billing-worker/src/production-content-entry-r520.js <<'JS'
+          import r517Production from './production-content-entry-r517.js';
+          const PUBLIC_HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
+          const TAIL_PATH='/scifi-ui/styles/formatx-first-paint-tail-r520.css';
+          const TAIL_SOURCES=new Set(['/scifi-ui/styles/formatx-first-paint-r206.css','/scifi-ui/styles/formatx-mobile-first-paint-r358.css','/scifi-ui/styles/formatx-first-frame-stability-r283.css','/scifi-ui/styles/formatx-p0-first-paint-r490.css']);
+          function stylesheetPath(tag){const m=tag.match(/\bhref=(["'])(.*?)\1/i);if(!m)return'';try{return new URL(m[2],'https://formatxsuite.com/scifi-ui/').pathname}catch{return''}}
+          function consolidateTail(html){let inserted=false;return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>{const pathname=stylesheetPath(tag);if(!TAIL_SOURCES.has(pathname))return tag;if(inserted)return'';inserted=true;return `<link rel="stylesheet" fetchpriority="high" data-fx-first-paint-tail-r520="true" data-fx-first-paint-r206="true" data-fx-mobile-first-paint-r358="true" data-fx-first-frame-stability-r500="true" data-fx-p0-first-paint-r503="true" href="${TAIL_PATH}?v=20260904-r520-first-paint-tail">`;});}
+          export default{async fetch(request,env,ctx){const response=await r517Production.fetch(request,env,ctx);const url=new URL(request.url);if(!['GET','HEAD'].includes(request.method)||!PUBLIC_HOSTS.has(url.hostname))return response;const headers=new Headers(response.headers);headers.set('X-FormatX-First-Paint-Tail','r520-exact-cascade');headers.set('X-FormatX-R521-Owner','hero-lcp-before-r487-deferred-css');if(request.method==='HEAD'){headers.delete('Content-Length');return new Response(null,{status:response.status,statusText:response.statusText,headers});}if(!(headers.get('Content-Type')||'').includes('text/html'))return new Response(response.body,{status:response.status,statusText:response.statusText,headers});const html=consolidateTail(await response.text());headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');return new Response(html,{status:response.status,statusText:response.statusText,headers});}};
+          JS
+
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('billing-worker/wrangler.jsonc');s=p.read_text(encoding='utf-8');old='"main": "src/production-content-entry-r517.js"';assert old in s;s=s.replace(old,'"main": "src/production-content-entry-r520.js"',1);p.write_text(s,encoding='utf-8')
+          p=Path('docs/scifi-ui/scripts/formatx-deferred-css-r487.js');s=p.read_text(encoding='utf-8')
+          old="""  function afterFirstPaint() {\n    // First RAF runs before paint. The second callback is queued from the first,\n    // letting Chromium commit one stable critical frame before non-critical\n    // styles participate in cascade/layout.\n    frame = requestAnimationFrame(() => {\n      frame = requestAnimationFrame(() => {\n        setTimeout(activate, 0);\n      });\n    });\n  }\n\n  if (document.readyState === 'loading') {\n    document.addEventListener('DOMContentLoaded', afterFirstPaint, { once: true });\n  } else {\n    afterFirstPaint();\n  }\n\n  // Fail-open for unusual background tabs / throttled RAF scheduling.\n  fallback = setTimeout(activate, 1800);\n"""
+          new="""  let lcpObserver = null;\n\n  function activateAfterHeroPaint() {\n    if (activated) return;\n    frame = requestAnimationFrame(() => {\n      setTimeout(activate, 0);\n    });\n  }\n\n  function observeHeroPaint() {\n    if (!('PerformanceObserver' in window)) return false;\n    try {\n      lcpObserver = new PerformanceObserver(list => {\n        for (const entry of list.getEntries()) {\n          const element = entry.element;\n          if (!(element instanceof Element)) continue;\n          if (!element.closest('#hero .hero-copy')) continue;\n          lcpObserver.disconnect();\n          lcpObserver = null;\n          root.dataset.fxDeferredCssR487Owner = 'post-hero-lcp-r521';\n          activateAfterHeroPaint();\n          break;\n        }\n      });\n      lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });\n      return true;\n    } catch (_) {\n      lcpObserver = null;\n      return false;\n    }\n  }\n\n  function legacyPaintFallback() {\n    frame = requestAnimationFrame(() => {\n      frame = requestAnimationFrame(() => {\n        setTimeout(activate, 0);\n      });\n    });\n  }\n\n  if (!observeHeroPaint()) {\n    if (document.readyState === 'loading') {\n      document.addEventListener('DOMContentLoaded', legacyPaintFallback, { once: true });\n    } else {\n      legacyPaintFallback();\n    }\n  }\n\n  // Fail-open for hidden/background tabs, unsupported LCP observation, or a\n  // page where no hero-copy LCP candidate is emitted. This keeps all product\n  // enhancements available without allowing them to race the first hero paint.\n  fallback = setTimeout(() => {\n    if (lcpObserver) lcpObserver.disconnect();\n    lcpObserver = null;\n    if (!root.dataset.fxDeferredCssR487Owner) root.dataset.fxDeferredCssR487Owner = 'fail-open-1800-r521';\n    activate();\n  }, 1800);\n"""
+          assert old in s,'R487 scheduler block changed';p.write_text(s.replace(old,new,1),encoding='utf-8')
+          PY
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
+          node --input-type=module --check < billing-worker/src/production-content-entry-r520.js
+          git diff --check
+          git diff -- docs/scifi-ui/scripts/formatx-deferred-css-r487.js billing-worker/src/production-content-entry-r520.js billing-worker/wrangler.jsonc docs/scifi-ui/styles/formatx-first-paint-tail-r520.css > artifacts/r521-v2/source.diff
+
+      - name: Install local Worker and Lighthouse tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --prefix billing-worker --no-audit --prefer-offline
+          npm install --no-save --no-package-lock lighthouse@13.4.1 playwright-core@1.62.0 >/dev/null
+          echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          google-chrome --version
+          npx lighthouse --version
+
+      - name: Start exact candidate Worker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');const w=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete w.ai;delete w.routes;w.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r521-v2.json',JSON.stringify(w,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r521-v2.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r521-v2-worker.log" 2>&1 &
+          cd ..
+          for i in $(seq 1 60); do if curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi; sleep 1; done
+          cat "$RUNNER_TEMP/r521-v2-worker.log"; exit 1
+
+      - name: Real Chromium prove hero LCP ordering and semantic geometry
+        shell: bash
+        env:
+          NODE_PATH: /home/runner/work/FormatX/FormatX/node_modules
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE' | tee artifacts/r521-v2/browser-proof.json
+          const assert=require('node:assert/strict');const {chromium}=require('playwright-core');
+          (async()=>{const b=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});const out=[];for(const [name,v,m] of [['desktop',{width:1440,height:900},false],['mobile',{width:390,height:844},true]]){const c=await b.newContext({viewport:v,isMobile:m,hasTouch:m,deviceScaleFactor:m?2:1,ignoreHTTPSErrors:true,locale:'hu-HU'});const p=await c.newPage();await p.addInitScript(()=>{window.__r521={lcp:[],shift:[],ready:null};try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__r521.lcp.push({t:e.startTime,selector:e.element?.className||e.element?.id||e.element?.tagName||'',heroCopy:Boolean(e.element?.closest?.('#hero .hero-copy'))})}).observe({type:'largest-contentful-paint',buffered:true})}catch{};try{new PerformanceObserver(l=>{for(const e of l.getEntries())if(!e.hadRecentInput)window.__r521.shift.push({t:e.startTime,value:e.value})}).observe({type:'layout-shift',buffered:true})}catch{};addEventListener('formatx:deferredcssready',()=>window.__r521.ready=performance.now(),{once:true})});const r=await p.goto(`${process.env.LOCAL_URL}?r521_browser_v2=${name}`,{waitUntil:'domcontentloaded',timeout:60000});assert.equal(r.status(),200);await p.waitForFunction(()=>document.documentElement.dataset.fxDeferredCssR487==='ready',null,{timeout:4000});await p.waitForTimeout(250);const state=await p.evaluate(()=>{const e=document.querySelector('#hero .fx-category-definition');if(!(e instanceof Element))return{missing:true};const s=getComputedStyle(e),r=e.getBoundingClientRect();const d=window.__r521;const hero=d.lcp.filter(x=>x.heroCopy).at(-1);return{diag:d,owner:document.documentElement.dataset.fxDeferredCssR487Owner||'',deferredCount:Number(document.documentElement.dataset.fxDeferredCssCountR487||0),category:{display:s.display,visibility:s.visibility,opacity:s.opacity,w:r.width,h:r.height},overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,heroLcp:hero?.t??null}});assert.notEqual(state.missing,true,`${name}: category missing`);assert.ok(state.heroLcp!==null,`${name}: no hero-copy LCP`);assert.ok(state.diag.ready>state.heroLcp,`${name}: R487 activated before hero LCP ${JSON.stringify(state)}`);assert.equal(state.owner,'post-hero-lcp-r521');assert.ok(state.deferredCount>=1);assert.equal(state.category.display,'block');assert.notEqual(state.category.visibility,'hidden');assert.equal(state.category.opacity,'1');assert.ok(state.category.w>0&&state.category.h>0,`${name}: zero category geometry ${JSON.stringify(state.category)}`);assert.ok(state.overflow<=2);assert.ok(state.diag.shift.reduce((a,x)=>a+x.value,0)<0.05);out.push({name,...state});await c.close()}await b.close();console.log(JSON.stringify({pass:true,out},null,2))})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Five consecutive desktop and mobile Lighthouse runs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r521-v2/desktop artifacts/r521-v2/mobile
+          for mode in desktop mobile; do
+            for i in 1 2 3 4 5; do
+              extra=()
+              if [[ "$mode" == desktop ]]; then
+                extra+=(--preset=desktop)
+              else
+                extra+=(--form-factor=mobile --screenEmulation.mobile=true --screenEmulation.width=390 --screenEmulation.height=844 --screenEmulation.deviceScaleFactor=2)
+              fi
+              CHROME_PATH="$CHROME_PATH" npx lighthouse "${LOCAL_URL}?r521_lh_v2=${mode}_${i}" \
+                --output=json --output-path="artifacts/r521-v2/${mode}/run-${i}.json" \
+                --only-categories=performance,accessibility,best-practices,seo \
+                --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors --allow-insecure-localhost' \
+                --quiet "${extra[@]}"
+            done
+          done
+
+      - name: Validate unchanged strict R521 performance contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE' | tee artifacts/r521-v2/summary.txt
+          const fs=require('node:fs');let fail=false;const rows=[];
+          for(const mode of ['desktop','mobile'])for(let i=1;i<=5;i++){const l=JSON.parse(fs.readFileSync(`artifacts/r521-v2/${mode}/run-${i}.json`));const c=l.categories,a=l.audits;const row={mode,run:i,performance:Math.round(c.performance.score*100),accessibility:Math.round(c.accessibility.score*100),bestPractices:Math.round(c['best-practices'].score*100),seo:Math.round(c.seo.score*100),fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue};rows.push(row);console.log(JSON.stringify(row));if(row.performance!==100||row.lcp>=2000||row.tbt>150||row.cls>=0.05||row.ttfb>500)fail=true;}
+          fs.writeFileSync('artifacts/r521-v2/report.json',JSON.stringify(rows,null,2));
+          for(const mode of ['desktop','mobile']){const x=rows.filter(r=>r.mode===mode);console.log(`${mode.toUpperCase()} perf=${x.map(r=>r.performance).join('/')} lcp=${x.map(r=>Math.round(r.lcp)).join('/')} cls=${x.map(r=>r.cls.toFixed(4)).join('/')}`)}
+          if(fail){console.error('R521_TARGETED_CONTRACT_FAIL');process.exit(1)}console.log('R521_TARGETED_CONTRACT_PASS');
+          NODE
+
+      - name: Commit proven source candidate branch
+        if: success()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/styles/formatx-first-paint-tail-r520.css docs/scifi-ui/scripts/formatx-deferred-css-r487.js billing-worker/src/production-content-entry-r520.js billing-worker/wrangler.jsonc
+          git commit -m 'Fix R521 deferred CSS hero LCP race'
+          git push --force-with-lease origin HEAD:"refs/heads/$OUT_BRANCH"
+
+      - name: Show Worker log
+        if: always()
+        shell: bash
+        run: cat "$RUNNER_TEMP/r521-v2-worker.log" || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r521-targeted-v2-${{ github.sha }}
+          path: artifacts/r521-v2/
+          if-no-files-found: warn
+          retention-days: 30
