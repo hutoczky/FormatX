@@ -1,0 +1,158 @@
+name: Build and prove R517 audit-parity candidate v2
+run-name: Build R517 active audit-bypass removal candidate
+
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths:
+      - '.github/workflows/build-r517-candidate-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      BASE_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+      CANDIDATE_BRANCH: p0-r517-candidate
+    steps:
+      - name: Checkout exact R516 base
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Patch proven active audit-specific runtime branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r517-candidate
+          python3 <<'PY'
+          from pathlib import Path
+
+          def remove_block(path, marker):
+              p=Path(path); lines=p.read_text(encoding='utf-8').splitlines(True)
+              idx=next((i for i,l in enumerate(lines) if marker in l),None)
+              if idx is None: raise SystemExit(f'marker missing in {path}: {marker}')
+              line=lines[idx]
+              # Declaration marker followed by an if block: remove declaration first.
+              if 'const AUDIT_MODE' in line:
+                  del lines[idx]
+                  while idx < len(lines) and not lines[idx].strip(): del lines[idx]
+                  if idx>=len(lines) or 'if (AUDIT_MODE)' not in lines[idx]: raise SystemExit(f'AUDIT_MODE block missing in {path}')
+              # Remove the if block at idx using brace balance, including one following blank line.
+              depth=0; started=False; end=idx
+              for j in range(idx,len(lines)):
+                  depth += lines[j].count('{') - lines[j].count('}')
+                  if '{' in lines[j]: started=True
+                  end=j
+                  if started and depth<=0: break
+              if not started: raise SystemExit(f'block start missing in {path}')
+              del lines[idx:end+1]
+              if idx < len(lines) and not lines[idx].strip(): del lines[idx]
+              p.write_text(''.join(lines),encoding='utf-8')
+
+          remove_block('docs/scifi-ui/scripts/living-architecture.js', "const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse')")
+          remove_block('docs/scifi-ui/scripts/formatx-apex.js', "const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse')")
+          remove_block('docs/scifi-ui/scripts/formatx-core-real3d-v20.js', "if (new URLSearchParams(location.search).get('lighthouse') === '1')")
+
+          p=Path('docs/scifi-ui/scripts/formatx-core-mobile-v55.js'); lines=p.read_text(encoding='utf-8').splitlines(True)
+          idx=next((i for i,l in enumerate(lines) if "get('lighthouse') === '1'" in l and 'audit-skip' in l),None)
+          if idx is None: raise SystemExit('mobile audit bypass line missing')
+          del lines[idx]; p.write_text(''.join(lines),encoding='utf-8')
+
+          p=Path('docs/scifi-ui/scripts/formatx-premium-finish.js'); lines=p.read_text(encoding='utf-8').splitlines(True)
+          found={'decl':False,'renderer':False,'fallback':False}; out=[]
+          for l in lines:
+              if "const auditMode = parameters.get('lighthouse') === '1'" in l: found['decl']=True; continue
+              if "if (auditMode) return 'audit-skip'" in l: found['renderer']=True; continue
+              if 'if (auditMode || resilientCore) return resilientCore;' in l:
+                  found['fallback']=True; out.append(l.replace('if (auditMode || resilientCore)','if (resilientCore)')); continue
+              out.append(l)
+          if not all(found.values()): raise SystemExit(f'premium patch incomplete {found}')
+          p.write_text(''.join(out),encoding='utf-8')
+
+          targets=[
+            'docs/scifi-ui/scripts/living-architecture.js',
+            'docs/scifi-ui/scripts/formatx-apex.js',
+            'docs/scifi-ui/scripts/formatx-premium-finish.js',
+            'docs/scifi-ui/scripts/formatx-core-real3d-v20.js',
+            'docs/scifi-ui/scripts/formatx-core-mobile-v55.js',
+          ]
+          for f in targets:
+              s=Path(f).read_text(encoding='utf-8')
+              if "get('lighthouse')" in s or 'audit-skip' in s or 'fx-audit-mode' in s:
+                  raise SystemExit(f'active audit-specific behavior remains in {f}')
+          print('R517_SOURCE_PATCH_PASS')
+          PY
+          for f in docs/scifi-ui/scripts/living-architecture.js docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/formatx-premium-finish.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-core-mobile-v55.js; do node --check "$f"; done
+          git diff --check
+          git diff -- docs/scifi-ui/scripts > artifacts/r517-candidate/source.diff
+      - name: Install lightweight real-browser verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --ignore-scripts playwright-core@1.62.0
+          command -v google-chrome
+          google-chrome --version
+      - name: Start patched candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4177 --directory docs > /tmp/r517-http.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4177/scifi-ui/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/r517-http.log; exit 1
+      - name: Real Chrome normal-vs-lighthouse-query parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE' | tee artifacts/r517-candidate/browser-parity.json
+          const assert=require('node:assert/strict');
+          const {chromium}=require('playwright-core');
+          const cp=require('node:child_process');
+          const chrome=cp.execFileSync('which',['google-chrome'],{encoding:'utf8'}).trim();
+          const noAudit=s=>Object.entries(s).filter(([,v])=>String(v).includes('audit-skip'));
+          async function verify(browser,name,query,viewport,mobile){
+            const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
+            const page=await context.newPage(); const pageErrors=[];
+            page.on('pageerror',e=>pageErrors.push(String(e)));
+            await page.goto(`http://127.0.0.1:4177/scifi-ui/${query}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(1000);
+            let pre=await page.evaluate(()=>({dataset:{...document.documentElement.dataset},auditClass:document.documentElement.classList.contains('fx-audit-mode'),hero:Boolean(document.querySelector('#hero')),lead:(document.querySelector('#hero .hero-lead')?.textContent||'').trim().length}));
+            assert.equal(pre.auditClass,false,`${name}: fx-audit-mode`); assert.equal(noAudit(pre.dataset).length,0,`${name}: pre audit state`); assert.ok(pre.hero&&pre.lead>40,`${name}: hero`);
+            const target=page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252').first(); await target.waitFor({state:'visible',timeout:30000}); await target.click();
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'&&document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length===1,null,{timeout:45000});
+            const ask=page.locator('#hero .fx-reference-ask').first(); const askBox=await ask.boundingBox(); assert.ok(askBox&&askBox.width>=44&&askBox.height>=44,`${name}: ASK box`);
+            const pause=page.locator('#hero .fx-reference-pause').first(); await pause.click(); await page.waitForTimeout(500);
+            let paused=await page.evaluate(()=>({flag:document.querySelector('#hero .fx-reference-pause')?.dataset.paused||'',dataset:{...document.documentElement.dataset}})); assert.equal(paused.flag,'true',`${name}: pause`); assert.equal(noAudit(paused.dataset).length,0,`${name}: pause audit state`);
+            await pause.click(); await page.waitForTimeout(500);
+            const post=await page.evaluate(()=>{const r=document.documentElement;return{dataset:{...r.dataset},renderer:r.dataset.fxCoreRenderer||'',crystal:r.dataset.fxCrystalOrganismR326||'',sync:r.dataset.fxMagShapeSyncR476||'',scheduler:r.dataset.fxCoreScheduler||'',idle:r.dataset.fxCoreIdleRenderR441||'',pause:document.querySelector('#hero .fx-reference-pause')?.dataset.paused||'',canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};});
+            assert.equal(noAudit(post.dataset).length,0,`${name}: post audit state`); assert.equal(post.renderer,'single-webgl-crystal-organism-r326',`${name}: renderer`); assert.equal(post.crystal,'ready'); assert.match(post.sync,/^ready-r\d+$/); assert.equal(post.scheduler,'interaction-bursts-idle-zero-frame-r441'); assert.equal(post.idle,'zero-frame'); assert.equal(post.pause,'false'); assert.equal(post.canvasCount,1); assert.ok(post.overflow<=2,`${name}: overflow`);
+            await ask.click(); await page.waitForTimeout(200); assert.equal(pageErrors.length,0,`${name}: page errors ${pageErrors.join(' | ')}`);
+            const result={name,query,viewport,mobile,pre:{auditClass:pre.auditClass,hero:pre.hero,lead:pre.lead},post:{renderer:post.renderer,crystal:post.crystal,sync:post.sync,scheduler:post.scheduler,idle:post.idle,pause:post.pause,canvasCount:post.canvasCount,overflow:post.overflow},ask:{width:askBox.width,height:askBox.height}};
+            await context.close(); return result;
+          }
+          (async()=>{const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});const results=[];results.push(await verify(browser,'desktop-normal','?candidate=normal',{width:1440,height:900},false));results.push(await verify(browser,'desktop-lighthouse-query','?lighthouse=1',{width:1440,height:900},false));results.push(await verify(browser,'mobile-normal','?candidate=mobile',{width:390,height:844},true));results.push(await verify(browser,'mobile-lighthouse-query','?lighthouse=1',{width:390,height:844},true));await browser.close();const sem=x=>x.post;assert.deepEqual(sem(results[0]),sem(results[1]),'desktop semantic mismatch');assert.deepEqual(sem(results[2]),sem(results[3]),'mobile semantic mismatch');console.log(JSON.stringify({pass:true,results},null,2));})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Commit and push R517 candidate branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/living-architecture.js docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/formatx-premium-finish.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          git commit -m 'Remove active audit-specific runtime bypasses'
+          git rev-parse HEAD | tee artifacts/r517-candidate/sha.txt
+          git log -2 --oneline | tee artifacts/r517-candidate/commits.txt
+          git push --force-with-lease origin HEAD:"refs/heads/$CANDIDATE_BRANCH"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r517-candidate-${{ github.sha }}
+          path: artifacts/r517-candidate
+          include-hidden-files: true
+          retention-days: 30
