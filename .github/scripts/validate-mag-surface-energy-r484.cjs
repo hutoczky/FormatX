@@ -14,9 +14,7 @@ const MOBILE_OPTICS_SOURCE = fs.readFileSync(
   'utf8',
 );
 function sourceFilterToken(name, unit = '') {
-  const match = MOBILE_OPTICS_SOURCE.match(
-    new RegExp(`${name}\\(([-\\d.]+)${unit}\\)`)
-  );
+  const match = MOBILE_OPTICS_SOURCE.match(new RegExp(`${name}\\(([-\\d.]+)${unit}\\)`));
   assert.ok(match, `missing canonical mobile optics token ${name}`);
   return `${name}(${Number(match[1])}${unit})`;
 }
@@ -28,9 +26,6 @@ const EXPECTED_MOBILE_FILTER = [
   sourceFilterToken('blur', 'px'),
 ];
 
-// Timing instrumentation must not synchronously read back the GPU: doing that
-// inside RAF stalls SwiftShader and changes the very timing being measured.
-// Separate, deterministic single-frame screenshots below test visible motion.
 function instrumentNativeFrames() {
   const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [] };
   const names = new WeakMap();
@@ -55,8 +50,6 @@ function instrumentNativeFrames() {
       return location;
     };
     proto.uniform1f = function(location, value) {
-      // Only the later screenshot pass pins uniforms; the autonomous timing
-      // pass above runs the unmodified production values and scheduler.
       if (Number.isFinite(window.__magCapturePhase)) {
         const fixed = { uSurfacePulse: window.__magCapturePhase, uTime: 0, uEnergy: .5, uBreath: .12 };
         if (Object.hasOwn(fixed, names.get(location))) value = fixed[names.get(location)];
@@ -89,13 +82,10 @@ function instrumentNativeFrames() {
 async function captureSurface(page, name, label, phase) {
   await page.evaluate(phase => {
     window.__magCapturePhase = phase;
-    document.documentElement.dataset.fxReferenceMotionPaused = 'false';
     window.FormatXCoreMobileV69.requestRender(1);
   }, phase);
   await page.waitForTimeout(180);
   const box = await page.locator('#hero .fx-crystal-organism-r326-canvas').boundingBox();
-  // Capture the actual compositor directly. Playwright's global animation
-  // fast-forward also fires unrelated page animations and can change layout.
   const session = await page.context().newCDPSession(page);
   let screenshot;
   let timeout;
@@ -150,14 +140,15 @@ async function verify(browser, name, viewport, mobile) {
   const report = { name, viewport, mobile };
   try {
     const url = new URL(origin);
-    url.searchParams.set('r486-optics-energy-check', `${name}-${Date.now()}`);
+    url.searchParams.set('r528-optics-energy-check', `${name}-${Date.now()}`);
     url.searchParams.set('lang', 'hu');
     await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(() => (
       document.documentElement.dataset.fxCoreSurfaceEnergyR484 === 'periodic-native-surface-energy'
       && document.documentElement.dataset.fxCrystalOrganismR326 === 'ready'
     ), null, { timeout: 60000 });
-    // No click, artificial API pulse, hover or pointer movement is used here.
+    assert.equal(await page.locator('#hero .fx-reference-pause').count(), 0, `${name}: obsolete manual MAG PAUSE returned`);
+
     await page.waitForFunction(() => __magEnergyAudit.events.some(e => e.phase === 'end' && e.source === 'autonomous'), null, { timeout: 18000 });
     await page.waitForTimeout(600);
     const frameCount = await page.evaluate(() => __magEnergyAudit.frames);
@@ -169,21 +160,16 @@ async function verify(browser, name, viewport, mobile) {
 
     const audit = await page.evaluate(() => window.__magEnergyAudit);
     report.audit = audit;
-    // SwiftShader cadence varies with runner load. Allow one measured frame
-    // interval at the end, not a guessed fixed FPS. A 240ms governor cutoff
-    // still fails both the halfway and full-window coverage checks below.
     let previousPhase = 0;
     let maximumPhaseStep = 0;
     for (const phase of audit.phases) {
-      if (phase < previousPhase) previousPhase = 0; // next autonomous sweep
+      if (phase < previousPhase) previousPhase = 0;
       maximumPhaseStep = Math.max(maximumPhaseStep, phase - previousPhase);
       previousPhase = phase;
     }
     report.maximumPhaseStep = maximumPhaseStep;
-    assert.ok(audit.phases.length >= 3 && audit.maximumPhase > .5,
-      `${name}: sweep did not render beyond its midpoint`);
-    assert.ok(audit.maximumPhase + maximumPhaseStep >= .97,
-      `${name}: sweep truncated at phase ${audit.maximumPhase}; measured frame step ${maximumPhaseStep}`);
+    assert.ok(audit.phases.length >= 3 && audit.maximumPhase > .5, `${name}: sweep did not render beyond its midpoint`);
+    assert.ok(audit.maximumPhase + maximumPhaseStep >= .97, `${name}: sweep truncated at phase ${audit.maximumPhase}; measured frame step ${maximumPhaseStep}`);
     const starts = audit.events.filter(e => e.phase === 'start' && e.source === 'autonomous');
     const ends = audit.events.filter(e => e.phase === 'end' && e.source === 'autonomous');
     assert.ok(starts.length >= 2 && ends.length >= 2, `${name}: recurring autonomous sweep missing`);
@@ -205,6 +191,7 @@ async function verify(browser, name, viewport, mobile) {
         policy: root.dataset.fxCoreMobileIdlePolicyR426,
         shape: root.dataset.fxCoreShapeR337,
         optics: root.dataset.fxPrimaryMagOpticsR486 || '',
+        productContract: root.dataset.fxMagProductContractR528 || '',
         ancestors: (() => { const list = []; for (let node = canvas; node; node = node.parentElement) {
           const s = getComputedStyle(node); list.push({ tag: node.tagName, id: node.id, class: node.className, opacity: s.opacity, filter: s.filter, blend: s.mixBlendMode });
         } return list; })()
@@ -216,17 +203,14 @@ async function verify(browser, name, viewport, mobile) {
     assert.ok(report.dom.overflow <= 1, `${name}: horizontal overflow`);
     if (mobile) {
       for (const token of EXPECTED_MOBILE_FILTER) {
-        assert.ok(
-          report.dom.filter.includes(token),
-          `${name}: canonical mobile optics token missing ${token}; computed=${report.dom.filter}`,
-        );
+        assert.ok(report.dom.filter.includes(token), `${name}: canonical mobile optics token missing ${token}; computed=${report.dom.filter}`);
       }
       assert.equal(report.dom.optics, 'calmer-luminance-feathered-mobile-silhouette');
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');
     }
 
-    // Timing above used unmodified uniforms. Pin the same native material at
-    // three phases only for this image comparison, keeping the normal layout.
+    /* Deterministic capture uses test-owned WAAPI sampling only; it does not
+       represent or require a user-facing product pause control. */
     await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => canvas.getAnimations().forEach(animation => animation.pause()));
     report.captures = {};
     report.captures.idle = await captureSurface(page, name, 'idle', -1);
@@ -240,21 +224,7 @@ async function verify(browser, name, viewport, mobile) {
     assert.ok(report.earlyChange.changed >= 8 && report.lateChange.changed >= 8, `${name}: surface energy is not visibly distinct`);
     assert.ok(Math.abs(report.lateChange.centroidY - report.earlyChange.centroidY) > 3, `${name}: light does not travel along the surface`);
 
-    const pause = page.locator('#hero .fx-reference-pause').first();
-    await pause.click();
-    await page.waitForFunction(() => document.querySelector('#hero .fx-reference-pause')?.dataset.paused === 'true');
-    await page.waitForTimeout(300);
-    const pausedCount = await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length);
-    await page.waitForTimeout(6800);
-    assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), pausedCount, `${name}: sweep ignores PAUSE`);
-    assert.equal(await page.evaluate(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484), 'suspended');
-    await pause.click();
-    await page.waitForFunction(count => __magEnergyAudit.events.filter(e => e.phase === 'start').length > count, pausedCount, { timeout: 10000 });
-    report.pauseResume = 'passed';
-
-    // Stay in a middle section. The production desktop intentionally loops
-    // from the footer back to MAG, so scrolling to the bottom is not an
-    // offscreen test. Verify the actual canvas bounds as well as the timer.
+    // Automatic offscreen suspension remains a lifecycle/resource requirement.
     await page.locator('#pricing').evaluate(section => section.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await page.waitForFunction(() => {
       const box = document.querySelector('#hero .fx-crystal-organism-r326-canvas').getBoundingClientRect();
@@ -267,8 +237,7 @@ async function verify(browser, name, viewport, mobile) {
       const box = canvas.getBoundingClientRect();
       return { top: box.top, bottom: box.bottom, viewportHeight: innerHeight };
     });
-    assert.ok(report.offscreenBounds.bottom <= 0 || report.offscreenBounds.top >= report.offscreenBounds.viewportHeight,
-      `${name}: page returned to MAG during the offscreen test`);
+    assert.ok(report.offscreenBounds.bottom <= 0 || report.offscreenBounds.top >= report.offscreenBounds.viewportHeight, `${name}: page returned to MAG during the offscreen test`);
     assert.equal(await page.evaluate(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484), 'suspended');
     assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), offscreenCount, `${name}: offscreen sweep still running`);
     report.offscreen = 'passed';
@@ -284,7 +253,7 @@ async function verify(browser, name, viewport, mobile) {
 
     assert.deepEqual(errors, [], `${name}: page errors`);
     report.result = 'passed';
-    console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; R486 mobile optics, pause, offscreen, reduced motion passed`);
+    console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; R528 living motion, offscreen lifecycle and reduced motion passed`);
   } catch (error) {
     report.result = 'failed';
     report.error = String(error.stack || error);
