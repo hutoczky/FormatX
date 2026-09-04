@@ -13,6 +13,7 @@ import r527Production from './production-content-entry-r527.js';
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
+const REDUCED_MAG_LINK = '<link rel="stylesheet" media="(prefers-reduced-motion: reduce)" data-fx-reduced-mag-identity-r528="true" href="/scifi-ui/styles/formatx-reduced-mag-identity-r528.css?v=20260905-r528-living-core">';
 
 const MOBILE_DEFER_PATHS = new Set([
   '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
@@ -97,6 +98,12 @@ function stabilizeMobileCriticalGraph(html) {
   });
 }
 
+function injectReducedMagIdentity(html) {
+  const source = String(html || '');
+  if (source.includes('data-fx-reduced-mag-identity-r528="true"')) return source;
+  return source.replace('</head>', `  ${REDUCED_MAG_LINK}\n</head>`);
+}
+
 function r528Headers(source) {
   const headers = new Headers(source);
   headers.set('X-FormatX-Transport-Stability', 'r528-mobile-critical-graph');
@@ -123,7 +130,8 @@ export default {
       return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
     }
 
-    const html = stabilizeMobileCriticalGraph(await response.text());
+    let html = stabilizeMobileCriticalGraph(await response.text());
+    html = injectReducedMagIdentity(html);
     headers.delete('Content-Length');
     headers.delete('Content-Encoding');
     headers.delete('ETag');
