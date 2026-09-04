@@ -1,28 +1,28 @@
-/* FormatX R484 periodic surface energy on the current native MAG runtime.
+/* FormatX R484/R528 periodic surface energy on the current native MAG runtime.
    R326 remains the only full-size hero WebGL organism. Mobile keeps the R468
-   interaction energy and bounded periodic sweeps with zero frames between. The phone
-   display now uses a softer R474 compositor pass: reduced glow, feathered
-   facet edges and unchanged desktop optics. */
+   interaction energy and bounded periodic sweeps with zero frames between.
+   R528 replaces the old overloaded pause flag with explicit lifecycle/resource
+   suspension while normal foreground MAG motion remains intrinsic. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle';
+const VERSION='direct-r326-r528-living-core-lifecycle-zero-idle';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
-if(reduced)root.dataset.fxCurrentMagMotionR424='r468-static-render-explicit-interaction';
+if(reduced)root.dataset.fxCurrentMagMotionR424='r528-reduced-motion-static-safe';
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
 const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
 const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
-const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
-const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge';
+const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260905-r528-living-core';
+const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260905-r528-living-core';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy';
-const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260905-r528-lifecycle-suspension';
+const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260905-r528-living-core';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
-const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260831-r484-bounded-surface-window';
+const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260905-r528-lifecycle-suspension';
 const LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
@@ -40,14 +40,13 @@ const LEGACY_STAGE_SELECTOR=[
   '#hero .fx-transcend-shell[data-fx-native-apex="true"]'
 ].join(',');
 
-// Compatibility markers retained for cross-device/source contracts.
+// Historical visual milestones retained only as provenance markers.
 // direct-r326-r454-visible-electric-surface-style-first-protected-touch
 // direct-r326-r456-uniform-solid-glass-no-vram-artifact
 // direct-r326-r458-restrained-mobile-nucleus-soft-fresnel-rim
 // direct-r326-r459-persistent-mini-mag-site-controller
 // direct-r326-r460-primary-controller-clean-runtime
 // direct-r326-r463-award-mobile-optics-strict-tbt
-// direct-r326-r463-optics-r464-explicit-interaction-tbt
 // direct-r326-r465-soft-optics-no-idle-redraw
 // direct-r326-r468-soft-optics-live-energy-zero-idle
 // r471-softer-mobile-bloom-feathered-silhouette
@@ -182,8 +181,9 @@ async function start(){
   root.dataset.fxCurrentMagOpticsR471=mobile?'superseded-by-r472-pc-bright-low-halo':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagOpticsR472=mobile?'pc-bright-centre-restrained-perimeter-zero-idle':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged';
-  root.dataset.fxCurrentMagSchedulerR465=mobile?'direct-pause-flag-no-idle-redraw':'desktop-native-scheduler';
+  root.dataset.fxCurrentMagSchedulerR465=mobile?'r528-lifecycle-suspend-no-idle-redraw':'desktop-native-scheduler';
   root.dataset.fxCoreMobileIdlePolicyR426=mobile?'periodic-surface-bursts-between-zero-idle':'desktop-native-scheduler';
+  root.dataset.fxCurrentMagContractR528='living-core-no-manual-pause-lifecycle-safe';
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
 
@@ -201,15 +201,15 @@ async function start(){
   if(rendererReady){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
     await addScript(LIFE,'data-fx-core-life-r455');
-    root.dataset.fxCoreRendererSelection=mobile?'r326-direct-r468-soft-optics-live-energy-zero-idle':'r326-direct-r468-desktop-live-energy';
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r468';
+    root.dataset.fxCoreRendererSelection=mobile?'r326-direct-r528-lifecycle-live-energy-zero-idle':'r326-direct-r528-desktop-live-energy';
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r528';
     root.dataset.fxCurrentMagRuntimeR422='ready';
   }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
 
   root.dataset.fxCoreCriticalPathR422=mobile
-    ?'direct-r326-r468-soft-optics-live-energy-zero-idle-native-touch'
-    :'direct-r326-r468-primary-controller-desktop';
-  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r474'}}));
+    ?'direct-r326-r528-living-core-lifecycle-zero-idle-native-touch'
+    :'direct-r326-r528-primary-controller-desktop';
+  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r474',contract:'r528-living-core'}}));
 }
 
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});
