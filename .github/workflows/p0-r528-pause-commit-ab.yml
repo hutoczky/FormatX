@@ -1,0 +1,102 @@
+name: P0 R528 PAUSE commit-barrier proof
+
+on:
+  push:
+    branches: [p0-r528-final-owner]
+    paths:
+      - '.github/workflows/p0-r528-pause-commit-ab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pause-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Apply read-only PAUSE CSSOM commit barrier
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/scripts/formatx-event-horizon.js')
+          s=p.read_text()
+          old="""    dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));\n    // R507: publish the visible control state only. The event consumer in\n    // formatx-mag-shape-sync-r476.js owns the one canonical CSSAnimation clock.\n    syncCanonicalMagAnimations(paused);"""
+          new="""    dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));\n    // R528: read-only CSSOM commit barrier. Shape-sync remains the exclusive\n    // CSSAnimation clock owner; this read only makes the requested pause/resume\n    // state observable before the physical control event returns.\n    const primaryCanvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');\n    if(primaryCanvas instanceof HTMLCanvasElement){\n      const committed=getComputedStyle(primaryCanvas).animationPlayState;\n      ROOT.dataset.fxReferencePauseCommitR528=paused?(committed.split(',').every(v=>v.trim()==='paused')?'paused':'pending'):(committed.split(',').some(v=>v.trim()==='running')?'running':'pending');\n    }\n    // R507: publish the visible control state only. The event consumer in\n    // formatx-mag-shape-sync-r476.js owns the one canonical CSSAnimation clock.\n    syncCanonicalMagAnimations(paused);"""
+          assert old in s
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node .github/scripts/validate-mag-pause-owner-r485.cjs
+          git diff --check
+
+      - name: Install cached Worker and browser tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker --prefer-offline
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+
+      - name: Build and start local production Worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs'); const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.r528-pause.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r528-pause.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/wrangler.log" 2>&1 &
+          cd ..
+          for i in $(seq 1 60); do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/wrangler.log"; exit 1
+
+      - name: Allow local self-signed TLS in verifier Chrome only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          for name in ['.github/scripts/validate-r522-semantic-mag.cjs','.github/scripts/validate-live-mag-functional.cjs']:
+              p=Path(name); s=p.read_text()
+              needle="'--no-sandbox',"
+              assert needle in s
+              s=s.replace(needle,"'--ignore-certificate-errors',\n      '--no-sandbox',",1)
+              p.write_text(s)
+          PY
+
+      - name: R522 semantic PAUSE RESUME proof
+        env:
+          FORMATX_TEST_URL: https://formatxsuite.com:8787/
+          FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r528-pause-semantic
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
+
+      - name: Canonical functional PAUSE RESUME proof
+        env:
+          FORMATX_TEST_URL: https://formatxsuite.com:8787/
+          FORMATX_MAG_EVIDENCE_DIR: artifacts/r528-pause-functional
+        run: node .github/scripts/validate-live-mag-functional.cjs
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r528-pause-commit-${{ github.sha }}
+          path: |
+            artifacts/r528-pause-semantic/
+            artifacts/r528-pause-functional/
+          if-no-files-found: warn
+          retention-days: 30
