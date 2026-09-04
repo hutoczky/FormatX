@@ -1,6 +1,8 @@
-/* FormatX r459/r460 — persistent mini MAG site controller + hero bridge.
+/* FormatX r459/r528 — persistent mini MAG site controller + hero bridge.
    The hero MAG remains the primary native WebGL organism. This lightweight
-   companion provides persistent site control without creating another renderer. */
+   companion provides persistent site control without creating another renderer.
+   R528 removes the obsolete manual MAG pause action: normal MAG motion is an
+   intrinsic part of the living FormatX system; reduced-motion stays separate. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -21,7 +23,6 @@ const COPY={
     ask:['ASSZISZTENS','Kérdezz'],
     menu:['OLDAL','Menü'],
     sound:['HANG','Hang ki / be'],
-    pause:['MOZGÁS','Szünet / folytatás'],
     language:['NYELV','HU / EN'],
     shape:['MAG','Alakváltás'],
     hero:['01','Kezdőlap'],
@@ -42,7 +43,6 @@ const COPY={
     ask:['ASSISTANT','Ask'],
     menu:['SITE','Menu'],
     sound:['SOUND','Sound on / off'],
-    pause:['MOTION','Pause / resume'],
     language:['LANGUAGE','HU / EN'],
     shape:['CORE','Change shape'],
     hero:['01','Home'],
@@ -106,7 +106,6 @@ function toggleMenu(){
   return true;
 }
 function toggleSound(){return clickButton('.fx-three-sound');}
-function togglePause(){return clickButton('.fx-reference-pause');}
 function toggleLanguage(){return clickButton('.fx-language-toggle');}
 function toggleShape(){
   if(typeof window.FormatXCoreShapeR337?.next==='function'){window.FormatXCoreShapeR337.next();return true;}
@@ -158,7 +157,7 @@ function install(){
 
   const controlLabel=node('span','fx-mini-mag-section-label-r459');
   const actions=node('div','fx-mini-mag-actions-r459');
-  for(const action of ['ask','menu','sound','pause','language','shape'])actions.appendChild(buildAction(action));
+  for(const action of ['ask','menu','sound','language','shape'])actions.appendChild(buildAction(action));
   const navLabel=node('span','fx-mini-mag-section-label-r459');
   const nav=node('div','fx-mini-mag-nav-r459');
   for(const id of SECTION_IDS)nav.appendChild(buildNav(id));
@@ -193,7 +192,6 @@ function install(){
     if(action==='ask')handled=openAsk();
     else if(action==='menu')handled=toggleMenu();
     else if(action==='sound')handled=toggleSound();
-    else if(action==='pause')handled=togglePause();
     else if(action==='language')handled=toggleLanguage();
     else if(action==='shape')handled=toggleShape();
     root.dataset.fxMiniMagLastActionR459=handled?String(action):`${action}-unavailable`;
@@ -225,7 +223,6 @@ function install(){
     ask:openAsk,
     menu:toggleMenu,
     sound:toggleSound,
-    pause:togglePause,
     language:toggleLanguage,
     shape:toggleShape,
     element:host
@@ -238,7 +235,7 @@ function install(){
     setOpen(true,true);
     root.dataset.fxMiniMagHeroBridgeR460='opened-queued-request';
   }
-  dispatchEvent(new CustomEvent('formatx:minimagready',{detail:{version:'r459',persistent:true,heroBridge:'r460'}}));
+  dispatchEvent(new CustomEvent('formatx:minimagready',{detail:{version:'r528',persistent:true,heroBridge:'r460',manualPause:false}}));
 }
 
 addStyle();
