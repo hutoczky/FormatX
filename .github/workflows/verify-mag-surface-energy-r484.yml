@@ -6,7 +6,7 @@ on:
     branches: [master, p0-r528-candidate]
     paths:
       - 'docs/scifi-ui/**'
-      - '.github/scripts/validate-mag-surface-energy-r484.cjs'
+      - '.github/scripts/validate-mag-surface-energy-r528.cjs'
       - '.github/scripts/validate-mag-living-core-r528.cjs'
       - '.github/scripts/validate-live-mag-functional.cjs'
       - '.github/scripts/validate-r522-semantic-mag.cjs'
@@ -48,7 +48,7 @@ jobs:
           node .github/scripts/validate-living-core-r425-source.cjs
           node .github/scripts/validate-mag-living-core-r528.cjs
           node --check .github/scripts/validate-live-mag-functional.cjs
-          node --check .github/scripts/validate-mag-surface-energy-r484.cjs
+          node --check .github/scripts/validate-mag-surface-energy-r528.cjs
 
       - name: Wait for exact audited production revision
         if: env.FORMATX_VERIFY_LIVE == 'true'
@@ -79,11 +79,12 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/mag-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4173/scifi-ui/
+          FORMATX_CAPTURE_DIR: artifacts/r528-canonical-mag
         run: |
           python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/mag-server.log" 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID"' EXIT
-          xvfb-run -a node .github/scripts/validate-mag-surface-energy-r484.cjs
+          xvfb-run -a node .github/scripts/validate-mag-surface-energy-r528.cjs
 
       - name: Verify canonical deployed MAG behavior
         if: env.FORMATX_VERIFY_LIVE == 'true'
@@ -99,7 +100,7 @@ jobs:
         with:
           name: canonical-mag-runtime-${{ env.AUDITED_SHA }}-${{ github.event_name }}
           path: |
-            artifacts/r484-surface-energy
+            artifacts/r528-canonical-mag
             artifacts/live-mag-functional
           if-no-files-found: warn
           retention-days: 30
