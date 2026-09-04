@@ -1,0 +1,86 @@
+name: P0 R528 mobile compositor isolation
+
+on:
+  push:
+    branches: [p0-r528-final-owner]
+    paths:
+      - '.github/workflows/p0-r528-mobile-compositor-ab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolate:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [normal, no-webgl, reduced-motion]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Install cached Worker and LHCI
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker --prefer-offline
+          npm install -g @lhci/cli@0.13.x
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Local production config
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs'); const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.r528-compositor.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+      - name: Start local R527
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r528-compositor.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/wrangler.log" 2>&1 &
+          cd ..
+          for i in $(seq 1 60); do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/wrangler.log"; exit 1
+      - name: Lighthouse isolation run
+        shell: bash
+        run: |
+          set -euo pipefail
+          variant='${{ matrix.variant }}'
+          node - "$variant" <<'NODE'
+          const fs=require('node:fs'); const variant=process.argv[2];
+          const c=JSON.parse(fs.readFileSync('lighthouserc.live.mobile.json','utf8'));
+          c.ci.collect.url=[`https://formatxsuite.com:8787/?r528_compositor=${variant}`]; c.ci.collect.numberOfRuns=1;
+          let flags='--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors --allow-insecure-localhost';
+          if(variant==='no-webgl') flags+=' --disable-webgl --disable-webgl2';
+          if(variant==='reduced-motion') flags+=' --force-prefers-reduced-motion=reduce';
+          c.ci.collect.settings.chromeFlags=flags;
+          fs.writeFileSync('lighthouserc.r528-compositor.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          rm -rf .lighthouseci "artifacts/r528-compositor-${variant}"
+          lhci collect --config=./lighthouserc.r528-compositor.json
+          mkdir -p "artifacts/r528-compositor-${variant}"; cp -a .lighthouseci/. "artifacts/r528-compositor-${variant}/"
+          VARIANT="$variant" node <<'NODE' | tee "artifacts/r528-compositor-${variant}/summary.txt"
+          const fs=require('node:fs'),path=require('node:path'); const dir=`artifacts/r528-compositor-${process.env.VARIANT}`;
+          const f=fs.readdirSync(dir).find(x=>x.startsWith('lhr-')&&x.endsWith('.json')); const r=JSON.parse(fs.readFileSync(path.join(dir,f),'utf8'));
+          const a=r.audits,c=r.categories; const node=a['largest-contentful-paint-element']?.details?.items?.[0]?.items?.[0]?.node||a['largest-contentful-paint-element']?.details?.items?.[0]?.node||{};
+          console.log(JSON.stringify({variant:process.env.VARIANT,performance:Math.round((c.performance.score||0)*100),fcp:a['first-contentful-paint'].numericValue,lcp:a['largest-contentful-paint'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,ttfb:a['server-response-time'].numericValue,lcpSelector:node.selector||''}));
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r528-compositor-${{ matrix.variant }}-${{ github.sha }}
+          path: artifacts/r528-compositor-${{ matrix.variant }}/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
