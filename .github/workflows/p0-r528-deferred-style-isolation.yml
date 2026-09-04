@@ -1,0 +1,89 @@
+name: P0 R528 deferred style isolation
+
+on:
+  push:
+    branches: [p0-r528-final-owner]
+    paths:
+      - '.github/workflows/p0-r528-deferred-style-isolation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: f0f7f43c03ec32dbdcee2e7781d06614dbccd5a6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Exact marker and browser package
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://formatxsuite.com/p0-validation-version.txt?r528_style_iso=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/live-p0.txt"
+          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Activate each deferred stylesheet independently
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r528-deferred-style-isolation
+          node <<'NODE' | tee artifacts/r528-deferred-style-isolation/report.txt
+          'use strict';
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          const ORIGIN='https://formatxsuite.com/';
+          const raf2=page=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+          const snap=page=>page.evaluate(()=>{
+            const rect=s=>{const e=document.querySelector(s); if(!e)return null; const b=e.getBoundingClientRect(),c=getComputedStyle(e); return {top:b.top,left:b.left,width:b.width,height:b.height,display:c.display,position:c.position,font:c.fontSize,line:c.lineHeight};};
+            return {category:rect('#hero .fx-category-definition'),copy:rect('#hero .hero-copy'),hero:rect('#hero'),method:rect('#hero .fx-method-inline'),facts:rect('#hero .hero-facts'),product:rect('#hero .fx-hero-product-state')};
+          });
+          const delta=(a,b)=>Object.fromEntries(Object.keys(a).map(k=>[k,a[k]&&b[k]?{top:+(b[k].top-a[k].top).toFixed(3),height:+(b[k].height-a[k].height).toFixed(3),width:+(b[k].width-a[k].width).toFixed(3)}:null]));
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+            try{
+              const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,locale:'hu-HU',colorScheme:'dark'});
+              const page=await context.newPage();
+              await page.route(/formatx-deferred-css-r487\.js/,route=>route.fulfill({status:200,contentType:'application/javascript; charset=utf-8',body:'document.documentElement.dataset.fxDeferredCssR487="diagnostic-held";'}));
+              await page.goto(`${ORIGIN}?r528_style_iso=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
+              await page.waitForTimeout(1200);
+              await page.evaluate(()=>{for(const l of document.querySelectorAll('link[data-fx-r487-deferred-style]'))l.media='print';});
+              await raf2(page);
+              const baseline=await snap(page);
+              const links=await page.evaluate(()=>Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]')).map((l,i)=>({i,href:l.href,target:l.dataset.fxR487Media||'all'})));
+              const rows=[];
+              for(const link of links){
+                await page.evaluate(({i,target})=>{const l=document.querySelectorAll('link[data-fx-r487-deferred-style]')[i];l.media=target;},{i:link.i,target:link.target});
+                await raf2(page);
+                const active=await snap(page);
+                rows.push({file:new URL(link.href).pathname.split('/').pop(),target:link.target,delta:delta(baseline,active),active});
+                await page.evaluate(i=>{document.querySelectorAll('link[data-fx-r487-deferred-style]')[i].media='print';},link.i);
+                await raf2(page);
+              }
+              await page.evaluate(()=>{for(const l of document.querySelectorAll('link[data-fx-r487-deferred-style]'))l.media=l.dataset.fxR487Media||'all';});
+              await raf2(page);
+              const all=await snap(page);
+              const report={baseline,rows,all,allDelta:delta(baseline,all)};
+              fs.writeFileSync('artifacts/r528-deferred-style-isolation/report.json',JSON.stringify(report,null,2)+'\n');
+              console.log(JSON.stringify(report,null,2));
+              await context.close();
+            } finally {await browser.close();}
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r528-deferred-style-isolation-${{ github.sha }}
+          path: artifacts/r528-deferred-style-isolation/
+          if-no-files-found: warn
+          retention-days: 30
