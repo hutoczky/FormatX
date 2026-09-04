@@ -1,5 +1,5 @@
-name: Validate R521 proven-group first-paint candidate
-run-name: R521 proven-group first-paint candidate for ${{ github.sha }}
+name: Validate R521 late-owner first-paint candidate
+run-name: R521 late-owner first-paint candidate for ${{ github.sha }}
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: r521-proven-group-candidate
+  group: r521-late-owner-candidate
   cancel-in-progress: true
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Generate proven-position bundles and candidate Worker
+      - name: Generate exact owner fix and proven-position bundles
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -46,25 +46,36 @@ jobs:
           (root/'formatx-terminal-first-paint-r521.css').write_text(terminal,encoding='utf-8')
           PY
 
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js')
+          s=p.read_text(encoding='utf-8')
+          old='}else existingFlow?.remove();'
+          new="}else if(existingFlow&&!existingFlow.hasAttribute('data-fx-mobile-critical-r521'))existingFlow.remove();"
+          assert s.count(old)==1, f'expected one legacy desktop flow cleanup, found {s.count(old)}'
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          PY
+
           cat > billing-worker/src/production-content-entry-r521.js <<'JS'
           import r516Production from './production-content-entry-r515.js';
           const HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
           const MOBILE=new Set(['/scifi-ui/styles/formatx-mobile-reference-layout-v1.css','/scifi-ui/styles/formatx-flow-first-r74.css','/scifi-ui/styles/formatx-responsive-text-guard-r72.css','/scifi-ui/styles/formatx-mobile-proof-controls-r204.css','/scifi-ui/styles/formatx-mobile-layout-r207.css','/scifi-ui/styles/formatx-native-orb-reference-r250.css']);
           const TERMINAL=new Set(['/scifi-ui/styles/formatx-mobile-first-paint-r358.css','/scifi-ui/styles/formatx-first-frame-stability-r283.css','/scifi-ui/styles/formatx-p0-first-paint-r490.css']);
-          const MOBILE_LINK='<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px)" data-fx-mobile-critical-r521="true" data-fx-mobile-reference-layout-style="true" data-fx-flow-first-r74="true" data-fx-responsive-text-guard="true" data-fx-mobile-proof-controls-r204="true" data-fx-mobile-layout-r207="true" data-fx-native-orb-reference-r250="true" href="/scifi-ui/styles/formatx-mobile-critical-r521.css?v=20260904-r521-proven-groups">';
-          const TERMINAL_LINK='<link rel="stylesheet" fetchpriority="high" data-fx-terminal-first-paint-r521="true" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" data-fx-first-frame-stability-r500="true" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-terminal-first-paint-r521.css?v=20260904-r521-proven-groups">';
+          const MOBILE_LINK='<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px)" data-fx-mobile-critical-r521="true" data-fx-mobile-reference-layout-style="true" data-fx-flow-first-r74="true" data-fx-responsive-text-guard="true" data-fx-mobile-proof-controls-r204="true" data-fx-mobile-layout-r207="true" data-fx-native-orb-reference-r250="true" href="/scifi-ui/styles/formatx-mobile-critical-r521.css?v=20260904-r521-owner-fix">';
+          const TERMINAL_LINK='<link rel="stylesheet" fetchpriority="high" data-fx-terminal-first-paint-r521="true" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" data-fx-first-frame-stability-r500="true" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-terminal-first-paint-r521.css?v=20260904-r521-owner-fix">';
           function pathOf(tag){const m=tag.match(/\bhref=(["'])(.*?)\1/i);if(!m)return'';try{return new URL(m[2],'https://formatxsuite.com/scifi-ui/').pathname}catch{return''}}
           function mediaOf(tag){return (tag.match(/\smedia=(["'])(.*?)\1/i)||[])[2]||'all'}
           function isMobileBootstrap(tag){const p=pathOf(tag);if(!MOBILE.has(p))return false;return mediaOf(tag).replace(/\s+/g,' ').trim()==='(max-width: 900px)'&&!/data-fx-deferred-media-r300/i.test(tag)}
           function replaceWhere(html,predicate,replacement,expected){const tags=String(html||'').match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi)||[];const hits=tags.map((t,i)=>predicate(t)?i:-1).filter(i=>i>=0);if(hits.length!==expected)return html;if(hits[hits.length-1]-hits[0]+1!==expected)return html;let inserted=false;return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,t=>{if(!predicate(t))return t;if(inserted)return'';inserted=true;return replacement})}
           function consolidate(html){let out=replaceWhere(String(html||''),isMobileBootstrap,MOBILE_LINK,6);out=replaceWhere(out,t=>TERMINAL.has(pathOf(t)),TERMINAL_LINK,3);return out}
-          export default{async fetch(request,env,ctx){const response=await r516Production.fetch(request,env,ctx);const url=new URL(request.url);if(!['GET','HEAD'].includes(request.method)||!HOSTS.has(url.hostname))return response;const headers=new Headers(response.headers);headers.set('X-FormatX-First-Paint-Delivery','r521-proven-groups');if(request.method==='HEAD'){headers.delete('Content-Length');return new Response(null,{status:response.status,statusText:response.statusText,headers})}if(!(headers.get('Content-Type')||'').includes('text/html'))return new Response(response.body,{status:response.status,statusText:response.statusText,headers});const html=consolidate(await response.text());headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');return new Response(html,{status:response.status,statusText:response.statusText,headers})}};
+          export default{async fetch(request,env,ctx){const response=await r516Production.fetch(request,env,ctx);const url=new URL(request.url);if(!['GET','HEAD'].includes(request.method)||!HOSTS.has(url.hostname))return response;const headers=new Headers(response.headers);headers.set('X-FormatX-First-Paint-Delivery','r521-owner-fix');if(request.method==='HEAD'){headers.delete('Content-Length');return new Response(null,{status:response.status,statusText:response.statusText,headers})}if(!(headers.get('Content-Type')||'').includes('text/html'))return new Response(response.body,{status:response.status,statusText:response.statusText,headers});const html=consolidate(await response.text());headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');return new Response(html,{status:response.status,statusText:response.statusText,headers})}};
           JS
           python3 <<'PY'
           from pathlib import Path
           p=Path('billing-worker/wrangler.jsonc');s=p.read_text(encoding='utf-8');old='"main": "src/production-content-entry-r515.js"';assert old in s;p.write_text(s.replace(old,'"main": "src/production-content-entry-r521.js"',1),encoding='utf-8')
           PY
           node --input-type=module --check < billing-worker/src/production-content-entry-r521.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           git diff --check
 
       - name: Install Worker and runner Chrome tooling
@@ -118,15 +129,15 @@ jobs:
         run: |
           set -Eeuo pipefail
           git config user.name 'Games Tech';git config user.email 'hutoczky@users.noreply.github.com'
-          git add billing-worker/src/production-content-entry-r521.js billing-worker/wrangler.jsonc docs/scifi-ui/styles/formatx-mobile-critical-r521.css docs/scifi-ui/styles/formatx-terminal-first-paint-r521.css
-          git commit -m 'Consolidate proven first-paint request groups'
+          git add billing-worker/src/production-content-entry-r521.js billing-worker/wrangler.jsonc docs/scifi-ui/styles/formatx-mobile-critical-r521.css docs/scifi-ui/styles/formatx-terminal-first-paint-r521.css docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          git commit -m 'Fix late mobile stylesheet ownership and request fanout'
           git push origin HEAD:refs/heads/p0-r521-proven-candidate
 
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r521-proven-group-${{ github.sha }}
+          name: r521-late-owner-${{ github.sha }}
           path: artifacts/r521/
           retention-days: 30
 
