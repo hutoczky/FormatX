@@ -1,5 +1,5 @@
-name: Validate R521 contiguous first-paint candidate
-run-name: R521 contiguous first-paint candidate for ${{ github.sha }}
+name: Validate R521 proven-group first-paint candidate
+run-name: R521 proven-group first-paint candidate for ${{ github.sha }}
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: r521-contiguous-first-paint-candidate
+  group: r521-proven-group-candidate
   cancel-in-progress: true
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Generate exact contiguous bundles and candidate Worker
+      - name: Generate proven-position bundles and candidate Worker
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -38,28 +38,27 @@ jobs:
           def safe(n):
               s=read(n); low=s.lower(); assert '@charset' not in low and '@import' not in low, n; return s
           mobile=['formatx-mobile-reference-layout-v1.css','formatx-flow-first-r74.css','formatx-responsive-text-guard-r72.css','formatx-mobile-proof-controls-r204.css','formatx-mobile-layout-r207.css','formatx-native-orb-reference-r250.css']
-          out=['/* R521 exact R206 bootstrap cascade. */']
+          out=['/* R521 candidate: exact six-link mobile bootstrap cascade; r206 first-paint remains separate. */']
           for n in mobile: out.append(f'@media (max-width: 900px) {{\n/* BEGIN {n} */\n{safe(n)}\n/* END {n} */\n}}')
-          out.append('/* BEGIN formatx-first-paint-r206.css */\n'+read('formatx-first-paint-r206.css')+'\n/* END formatx-first-paint-r206.css */')
-          (root/'formatx-r206-first-paint-r521.css').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          (root/'formatx-mobile-critical-r521.css').write_text('\n'.join(out)+'\n',encoding='utf-8')
           first=read('formatx-mobile-first-paint-r358.css'); frame=safe('formatx-first-frame-stability-r283.css'); p0=read('formatx-p0-first-paint-r490.css')
-          terminal='/* R521 exact terminal first-paint cascade. */\n'+f'@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {{\n{first}\n}}\n'+f'@media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {{\n{frame}\n}}\n'+p0+'\n'
+          terminal='/* R521 candidate: exact terminal three-link cascade. */\n'+f'@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {{\n{first}\n}}\n'+f'@media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {{\n{frame}\n}}\n'+p0+'\n'
           (root/'formatx-terminal-first-paint-r521.css').write_text(terminal,encoding='utf-8')
           PY
 
           cat > billing-worker/src/production-content-entry-r521.js <<'JS'
           import r516Production from './production-content-entry-r515.js';
           const HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
-          const MOBILE_BOOT=new Set(['/scifi-ui/styles/formatx-mobile-reference-layout-v1.css','/scifi-ui/styles/formatx-flow-first-r74.css','/scifi-ui/styles/formatx-responsive-text-guard-r72.css','/scifi-ui/styles/formatx-mobile-proof-controls-r204.css','/scifi-ui/styles/formatx-mobile-layout-r207.css','/scifi-ui/styles/formatx-native-orb-reference-r250.css']);
+          const MOBILE=new Set(['/scifi-ui/styles/formatx-mobile-reference-layout-v1.css','/scifi-ui/styles/formatx-flow-first-r74.css','/scifi-ui/styles/formatx-responsive-text-guard-r72.css','/scifi-ui/styles/formatx-mobile-proof-controls-r204.css','/scifi-ui/styles/formatx-mobile-layout-r207.css','/scifi-ui/styles/formatx-native-orb-reference-r250.css']);
           const TERMINAL=new Set(['/scifi-ui/styles/formatx-mobile-first-paint-r358.css','/scifi-ui/styles/formatx-first-frame-stability-r283.css','/scifi-ui/styles/formatx-p0-first-paint-r490.css']);
-          const R206_LINK='<link rel="stylesheet" fetchpriority="high" data-fx-r206-first-paint-r521="true" data-fx-first-paint-r206="true" data-fx-mobile-reference-layout-style="true" data-fx-flow-first-r74="true" data-fx-responsive-text-guard="true" data-fx-mobile-proof-controls-r204="true" data-fx-mobile-layout-r207="true" data-fx-native-orb-reference-r250="true" href="/scifi-ui/styles/formatx-r206-first-paint-r521.css?v=20260904-r521-contiguous">';
-          const TERMINAL_LINK='<link rel="stylesheet" fetchpriority="high" data-fx-terminal-first-paint-r521="true" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" data-fx-first-frame-stability-r500="true" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-terminal-first-paint-r521.css?v=20260904-r521-contiguous">';
+          const MOBILE_LINK='<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px)" data-fx-mobile-critical-r521="true" data-fx-mobile-reference-layout-style="true" data-fx-flow-first-r74="true" data-fx-responsive-text-guard="true" data-fx-mobile-proof-controls-r204="true" data-fx-mobile-layout-r207="true" data-fx-native-orb-reference-r250="true" href="/scifi-ui/styles/formatx-mobile-critical-r521.css?v=20260904-r521-proven-groups">';
+          const TERMINAL_LINK='<link rel="stylesheet" fetchpriority="high" data-fx-terminal-first-paint-r521="true" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" data-fx-first-frame-stability-r500="true" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-terminal-first-paint-r521.css?v=20260904-r521-proven-groups">';
           function pathOf(tag){const m=tag.match(/\bhref=(["'])(.*?)\1/i);if(!m)return'';try{return new URL(m[2],'https://formatxsuite.com/scifi-ui/').pathname}catch{return''}}
           function mediaOf(tag){return (tag.match(/\smedia=(["'])(.*?)\1/i)||[])[2]||'all'}
-          function isR206Bootstrap(tag){const p=pathOf(tag);if(p==='/scifi-ui/styles/formatx-first-paint-r206.css')return /data-fx-first-paint-r206=(["'])true\1/i.test(tag);if(!MOBILE_BOOT.has(p))return false;return mediaOf(tag).replace(/\s+/g,' ').trim()==='(max-width: 900px)'&&!/data-fx-deferred-media-r300/i.test(tag)}
+          function isMobileBootstrap(tag){const p=pathOf(tag);if(!MOBILE.has(p))return false;return mediaOf(tag).replace(/\s+/g,' ').trim()==='(max-width: 900px)'&&!/data-fx-deferred-media-r300/i.test(tag)}
           function replaceWhere(html,predicate,replacement,expected){const tags=String(html||'').match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi)||[];const hits=tags.map((t,i)=>predicate(t)?i:-1).filter(i=>i>=0);if(hits.length!==expected)return html;if(hits[hits.length-1]-hits[0]+1!==expected)return html;let inserted=false;return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,t=>{if(!predicate(t))return t;if(inserted)return'';inserted=true;return replacement})}
-          function consolidate(html){let out=replaceWhere(String(html||''),isR206Bootstrap,R206_LINK,7);out=replaceWhere(out,t=>TERMINAL.has(pathOf(t)),TERMINAL_LINK,3);return out}
-          export default{async fetch(request,env,ctx){const response=await r516Production.fetch(request,env,ctx);const url=new URL(request.url);if(!['GET','HEAD'].includes(request.method)||!HOSTS.has(url.hostname))return response;const headers=new Headers(response.headers);headers.set('X-FormatX-First-Paint-Delivery','r521-contiguous-bundles');if(request.method==='HEAD'){headers.delete('Content-Length');return new Response(null,{status:response.status,statusText:response.statusText,headers})}if(!(headers.get('Content-Type')||'').includes('text/html'))return new Response(response.body,{status:response.status,statusText:response.statusText,headers});const html=consolidate(await response.text());headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');return new Response(html,{status:response.status,statusText:response.statusText,headers})}};
+          function consolidate(html){let out=replaceWhere(String(html||''),isMobileBootstrap,MOBILE_LINK,6);out=replaceWhere(out,t=>TERMINAL.has(pathOf(t)),TERMINAL_LINK,3);return out}
+          export default{async fetch(request,env,ctx){const response=await r516Production.fetch(request,env,ctx);const url=new URL(request.url);if(!['GET','HEAD'].includes(request.method)||!HOSTS.has(url.hostname))return response;const headers=new Headers(response.headers);headers.set('X-FormatX-First-Paint-Delivery','r521-proven-groups');if(request.method==='HEAD'){headers.delete('Content-Length');return new Response(null,{status:response.status,statusText:response.statusText,headers})}if(!(headers.get('Content-Type')||'').includes('text/html'))return new Response(response.body,{status:response.status,statusText:response.statusText,headers});const html=consolidate(await response.text());headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');return new Response(html,{status:response.status,statusText:response.statusText,headers})}};
           JS
           python3 <<'PY'
           from pathlib import Path
@@ -88,13 +87,13 @@ jobs:
           for i in $(seq 1 60); do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
           cat "$RUNNER_TEMP/r521-worker.log"; exit 1
 
-      - name: Real browser semantic geometry and CLS smoke
+      - name: Real browser geometry CLS and ownership smoke
         shell: bash
         run: |
           set -Eeuo pipefail
           node <<'NODE' | tee artifacts/r521/browser-smoke.txt
           const assert=require('node:assert/strict');const{chromium}=require('playwright-core');
-          async function one(browser,name,viewport,mobile){const c=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,ignoreHTTPSErrors:true,locale:'hu-HU'});const p=await c.newPage();const errors=[];p.on('pageerror',e=>errors.push(String(e)));p.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text())});await p.addInitScript(()=>{window.__cls={v:0,e:[]};new PerformanceObserver(l=>{for(const x of l.getEntries())if(!x.hadRecentInput){window.__cls.v+=x.value;window.__cls.e.push({value:x.value,startTime:x.startTime,sources:(x.sources||[]).map(s=>({node:s.node?.className||s.node?.id||s.node?.tagName||'',previousRect:s.previousRect,currentRect:s.currentRect}))})}}).observe({type:'layout-shift',buffered:true})});const r=await p.goto('https://formatxsuite.com:8787/',{waitUntil:'domcontentloaded',timeout:60000});assert.equal(r.status(),200);await p.waitForTimeout(2500);const s=await p.evaluate(()=>{const links=[...document.querySelectorAll('link[rel="stylesheet"]')];const legacy=links.filter(x=>/mobile-reference-layout-v1\.css|flow-first-r74\.css|responsive-text-guard-r72\.css|mobile-proof-controls-r204\.css|mobile-layout-r207\.css|native-orb-reference-r250\.css|first-paint-r206\.css/.test(x.href)).map(x=>({href:x.href,media:x.media,deferred:x.hasAttribute('data-fx-deferred-media-r300')}));const hero=document.querySelector('#hero .hero-copy');const hs=hero&&getComputedStyle(hero);return{r206:links.filter(x=>x.href.includes('formatx-r206-first-paint-r521.css')).length,terminal:links.filter(x=>x.href.includes('formatx-terminal-first-paint-r521.css')).length,legacy,oldTerminal:links.filter(x=>/mobile-first-paint-r358\.css|first-frame-stability-r283\.css|p0-first-paint-r490\.css/.test(x.href)).length,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,heroVisible:Boolean(hero&&hs&&hs.display!=='none'&&hs.visibility!=='hidden'&&Number(hs.opacity)>.2),cls:window.__cls}});console.log(name,JSON.stringify(s,null,2));assert.equal(s.r206,1);assert.equal(s.terminal,1);assert.equal(s.oldTerminal,0);assert.equal(s.legacy.length,1,JSON.stringify(s.legacy));assert.ok(s.legacy[0].href.includes('formatx-native-orb-reference-r250.css'),JSON.stringify(s.legacy));assert.ok(s.legacy[0].deferred||s.legacy[0].media==='not all',JSON.stringify(s.legacy));assert.ok(s.overflow<=2);assert.equal(s.heroVisible,true);assert.ok(s.cls.v<0.05,`${name} CLS ${s.cls.v}`);assert.equal(errors.length,0,errors.join(' | '));await c.close()}
+          async function one(browser,name,viewport,mobile){const c=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,ignoreHTTPSErrors:true,locale:'hu-HU'});const p=await c.newPage();const errors=[];p.on('pageerror',e=>errors.push(String(e)));p.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text())});await p.addInitScript(()=>{window.__cls={v:0,e:[]};new PerformanceObserver(l=>{for(const x of l.getEntries())if(!x.hadRecentInput){window.__cls.v+=x.value;window.__cls.e.push({value:x.value,startTime:x.startTime,sources:(x.sources||[]).map(s=>({node:s.node?.className||s.node?.id||s.node?.tagName||'',previousRect:s.previousRect,currentRect:s.currentRect}))})}}).observe({type:'layout-shift',buffered:true})});const r=await p.goto('https://formatxsuite.com:8787/',{waitUntil:'domcontentloaded',timeout:60000});assert.equal(r.status(),200);await p.waitForTimeout(2500);const s=await p.evaluate(()=>{const links=[...document.querySelectorAll('link[rel="stylesheet"]')];const six=/mobile-reference-layout-v1\.css|flow-first-r74\.css|responsive-text-guard-r72\.css|mobile-proof-controls-r204\.css|mobile-layout-r207\.css|native-orb-reference-r250\.css/;const legacy=links.filter(x=>six.test(x.href)).map(x=>({href:x.href,media:x.media,deferred:x.hasAttribute('data-fx-deferred-media-r300')}));const hero=document.querySelector('#hero .hero-copy');const hs=hero&&getComputedStyle(hero);return{mobileBundle:links.filter(x=>x.href.includes('formatx-mobile-critical-r521.css')).length,terminal:links.filter(x=>x.href.includes('formatx-terminal-first-paint-r521.css')).length,firstPaintR206:links.filter(x=>x.href.includes('formatx-first-paint-r206.css')).length,legacy,oldTerminal:links.filter(x=>/mobile-first-paint-r358\.css|first-frame-stability-r283\.css|p0-first-paint-r490\.css/.test(x.href)).length,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,heroVisible:Boolean(hero&&hs&&hs.display!=='none'&&hs.visibility!=='hidden'&&Number(hs.opacity)>.2),cls:window.__cls}});console.log(name,JSON.stringify(s,null,2));assert.equal(s.mobileBundle,1);assert.equal(s.terminal,1);assert.equal(s.firstPaintR206,1);assert.equal(s.oldTerminal,0);assert.equal(s.legacy.length,1,JSON.stringify(s.legacy));assert.ok(s.legacy[0].href.includes('formatx-native-orb-reference-r250.css'),JSON.stringify(s.legacy));assert.ok(s.legacy[0].deferred||s.legacy[0].media==='not all',JSON.stringify(s.legacy));assert.ok(s.overflow<=2);assert.equal(s.heroVisible,true);assert.ok(s.cls.v<0.05,`${name} CLS ${s.cls.v}`);assert.equal(errors.length,0,errors.join(' | '));await c.close()}
           (async()=>{const b=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true,args:['--headless=new','--no-sandbox','--ignore-certificate-errors','--disable-dev-shm-usage','--enable-webgl','--ignore-gpu-blocklist']});await one(b,'desktop',{width:1350,height:940},false);await one(b,'mobile',{width:390,height:844},true);await b.close()})().catch(e=>{console.error(e);process.exit(1)});
           NODE
 
@@ -119,15 +118,15 @@ jobs:
         run: |
           set -Eeuo pipefail
           git config user.name 'Games Tech';git config user.email 'hutoczky@users.noreply.github.com'
-          git add billing-worker/src/production-content-entry-r521.js billing-worker/wrangler.jsonc docs/scifi-ui/styles/formatx-r206-first-paint-r521.css docs/scifi-ui/styles/formatx-terminal-first-paint-r521.css
-          git commit -m 'Consolidate contiguous first-paint request fanout'
+          git add billing-worker/src/production-content-entry-r521.js billing-worker/wrangler.jsonc docs/scifi-ui/styles/formatx-mobile-critical-r521.css docs/scifi-ui/styles/formatx-terminal-first-paint-r521.css
+          git commit -m 'Consolidate proven first-paint request groups'
           git push origin HEAD:refs/heads/p0-r521-proven-candidate
 
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r521-contiguous-first-paint-${{ github.sha }}
+          name: r521-proven-group-${{ github.sha }}
           path: artifacts/r521/
           retention-days: 30
 
