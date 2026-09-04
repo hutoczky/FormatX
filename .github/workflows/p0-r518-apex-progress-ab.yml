@@ -1,0 +1,96 @@
+name: P0 R518 Apex startup geometry A/B
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r518-apex-progress-ab.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_REF: p0-r517-transport-76b79fe
+  CANDIDATE_SHA: 0cae78cd44785984e5b2b966636fa29032550398
+
+jobs:
+  ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_REF }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Prepare exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.apex-ab.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+
+      - name: Baseline fresh-browser x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/apex-ab
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.apex-ab.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/apex-base.log" 2>&1 & echo $! > "$RUNNER_TEMP/apex-base.pid")
+          for i in $(seq 1 60); do curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && break; sleep 1; done
+          node <<'NODE'
+          'use strict'; const fs=require('node:fs');const {chromium}=require('playwright');
+          async function run(i){const b=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});const c=await b.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});const p=await c.newPage();await p.addInitScript(()=>{window.__lt=[];try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__lt.push({t:e.startTime,d:e.duration});}).observe({type:'longtask',buffered:true});}catch{}});await p.goto(`https://formatxsuite.com:8787/?apex_base=${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await p.waitForTimeout(1800);const s=await p.evaluate(()=>({lt:window.__lt,tbt:window.__lt.reduce((a,e)=>a+Math.max(0,e.d-50),0),paint:performance.getEntriesByType('paint').map(e=>({name:e.name,t:e.startTime})),scrollHeight:document.documentElement.scrollHeight,progress:getComputedStyle(document.documentElement).getPropertyValue('--progress'),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth}));await b.close();return{run:i,...s};}
+          (async()=>{const rows=[];for(let i=1;i<=3;i++)rows.push(await run(i));console.log('APEX_BASE',JSON.stringify(rows,null,2));fs.writeFileSync('artifacts/apex-ab/base.json',JSON.stringify(rows,null,2));})().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+          pkill -f 'wrangler dev --config wrangler.apex-ab.json' || true
+          sleep 1
+
+      - name: Diagnostic variant without synchronous initial progress geometry read x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp docs/scifi-ui/scripts/formatx-apex.js "$RUNNER_TEMP/apex-original.js"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/scripts/formatx-apex.js')
+          s=p.read_text()
+          old='    progress();\n    addEventListener(\'scroll\', scheduleProgress, { passive: true });'
+          new='    /* diagnostic A/B: omit only synchronous startup scrollHeight read */\n    addEventListener(\'scroll\', scheduleProgress, { passive: true });'
+          if old not in s: raise SystemExit('target startup progress call not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+          git diff -- docs/scifi-ui/scripts/formatx-apex.js
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.apex-ab.json --ip 127.0.0.1 --port 8788 --local-protocol https > "$RUNNER_TEMP/apex-no-progress.log" 2>&1 & echo $! > "$RUNNER_TEMP/apex-no-progress.pid")
+          for i in $(seq 1 60); do curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8788/ >/dev/null 2>&1 && break; sleep 1; done
+          node <<'NODE'
+          'use strict'; const fs=require('node:fs');const {chromium}=require('playwright');
+          async function run(i){const b=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});const c=await b.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});const p=await c.newPage();await p.addInitScript(()=>{window.__lt=[];try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__lt.push({t:e.startTime,d:e.duration});}).observe({type:'longtask',buffered:true});}catch{}});await p.goto(`https://formatxsuite.com:8788/?apex_noprogress=${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await p.waitForTimeout(1800);const s=await p.evaluate(()=>({lt:window.__lt,tbt:window.__lt.reduce((a,e)=>a+Math.max(0,e.d-50),0),paint:performance.getEntriesByType('paint').map(e=>({name:e.name,t:e.startTime})),scrollHeight:document.documentElement.scrollHeight,progress:getComputedStyle(document.documentElement).getPropertyValue('--progress'),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth}));await b.close();return{run:i,...s};}
+          (async()=>{const rows=[];for(let i=1;i<=3;i++)rows.push(await run(i));console.log('APEX_NOPROGRESS',JSON.stringify(rows,null,2));fs.writeFileSync('artifacts/apex-ab/no-progress.json',JSON.stringify(rows,null,2));})().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+          cp "$RUNNER_TEMP/apex-original.js" docs/scifi-ui/scripts/formatx-apex.js
+
+      - name: Compare A/B
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');const a=JSON.parse(fs.readFileSync('artifacts/apex-ab/base.json')),b=JSON.parse(fs.readFileSync('artifacts/apex-ab/no-progress.json'));const med=x=>[...x].sort((m,n)=>m-n)[Math.floor(x.length/2)];const out={baseline:{tbt:a.map(x=>x.tbt),median:med(a.map(x=>x.tbt)),fcp:a.map(x=>x.paint.find(p=>p.name==='first-contentful-paint')?.t)},noProgress:{tbt:b.map(x=>x.tbt),median:med(b.map(x=>x.tbt)),fcp:b.map(x=>x.paint.find(p=>p.name==='first-contentful-paint')?.t)}};console.log('APEX_AB_SUMMARY',JSON.stringify(out,null,2));fs.writeFileSync('artifacts/apex-ab/summary.json',JSON.stringify(out,null,2));
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r518-apex-progress-ab
+          path: artifacts/apex-ab/
+          retention-days: 30
