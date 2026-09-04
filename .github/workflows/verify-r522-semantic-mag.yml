@@ -1,0 +1,144 @@
+name: Verify current semantic MAG
+run-name: Current semantic MAG verification for ${{ github.sha }}
+
+on:
+  push:
+    branches: [p0-r522-r482-validator-76b79fe]
+    paths:
+      - '.github/workflows/verify-r522-semantic-mag.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-mag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: 76b79fe75eebc9b0ce3998a8111eb8dbf539efb9
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Reuse system Chrome and cached Playwright package
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker --prefer-offline
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          echo "NODE_PATH=$GITHUB_WORKSPACE/node_modules" >> "$GITHUB_ENV"
+
+      - name: Semantic MAG dump and bounded proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          'use strict';
+          const assert=require('node:assert/strict');
+          const {chromium}=require('playwright');
+
+          const semanticReady=s=>
+            s.crystal==='ready' &&
+            s.renderer==='single-webgl-crystal-organism-r326' &&
+            s.canvasCount===1 &&
+            s.stageCount===1 &&
+            s.canvas.width>120 && s.canvas.height>180 &&
+            s.canvas.display!=='none' && s.canvas.visibility!=='hidden' && s.canvas.opacity>.2 &&
+            s.balanceHref.includes('/scifi-ui/styles/formatx-mag-living-balance-r481.css') &&
+            s.scheduler==='interaction-bursts-idle-zero-frame-r441' &&
+            s.idle==='zero-frame' &&
+            s.header.exists && s.header.visible &&
+            s.overflow<=2;
+
+          async function snapshot(page){
+            return page.evaluate(()=>{
+              const root=document.documentElement;
+              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+              const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+              const cs=canvas?getComputedStyle(canvas):null;
+              const box=canvas?.getBoundingClientRect();
+              const header=document.querySelector('.topbar .fx-reference-mag-button');
+              const hs=header?getComputedStyle(header):null;
+              const hb=header?.getBoundingClientRect();
+              const mini=document.querySelector('.fx-mini-mag-glyph-r459');
+              const ms=mini?getComputedStyle(mini):null;
+              return {
+                crystal:root.dataset.fxCrystalOrganismR326||'',
+                shapeSync:root.dataset.fxMagShapeSyncR476||'',
+                lifeContract:root.dataset.fxPrimaryMagLifeContractR482||'',
+                optics:root.dataset.fxPrimaryMagOpticsR482||'',
+                life:root.dataset.fxPrimaryMagLifeR482||root.dataset.fxMiniMagLifeR479||'',
+                renderer:root.dataset.fxCoreRenderer||'',
+                scheduler:root.dataset.fxCoreScheduler||'',
+                idle:root.dataset.fxCoreIdleRenderR441||'',
+                canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
+                stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
+                canvas:{
+                  width:box?.width||0,height:box?.height||0,
+                  display:cs?.display||'',visibility:cs?.visibility||'',opacity:Number(cs?.opacity||0),
+                  animation:cs?.animationName||'',filter:cs?.filter||''
+                },
+                balanceHref:document.querySelector('link[data-fx-mag-living-balance-r481]')?.href||'',
+                header:{
+                  exists:Boolean(header),
+                  visible:Boolean(hs&&hb&&hs.display!=='none'&&hs.visibility!=='hidden'&&Number(hs.opacity)>.2&&hb.width>=40&&hb.height>=40),
+                  life:header?.dataset.fxMagLife||''
+                },
+                mini:mini?{life:mini.dataset.fxMagLife||'',background:ms?.backgroundImage||'',boxShadow:ms?.boxShadow||''}:null,
+                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
+              };
+            });
+          }
+
+          async function verify(browser,name,viewport,mobile){
+            const context=await browser.newContext({
+              viewport,deviceScaleFactor:mobile?2:1,isMobile:mobile,hasTouch:mobile,
+              locale:'hu-HU',reducedMotion:'no-preference',colorScheme:'dark'
+            });
+            const page=await context.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            page.on('console',m=>{const t=m.text();if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(t))errors.push(t);});
+            await page.goto(`https://formatxsuite.com/?r522_semantic=${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
+
+            await page.waitForTimeout(4000);
+            let state=await snapshot(page);
+            console.log(`R522_INITIAL_DUMP ${name}`,JSON.stringify(state,null,2));
+
+            const deadline=Date.now()+20000;
+            while(!semanticReady(state) && Date.now()<deadline){
+              await page.waitForTimeout(500);
+              state=await snapshot(page);
+            }
+            console.log(`R522_FINAL_DUMP ${name}`,JSON.stringify(state,null,2));
+            assert.ok(semanticReady(state),`semantic MAG prerequisites absent: ${JSON.stringify(state)}`);
+            assert.ok(['breath','pulse','ready'].includes(state.life)||state.life==='',JSON.stringify(state));
+            assert.notEqual(state.canvas.animation,'none',JSON.stringify(state));
+            assert.equal(errors.length,0,errors.join(' | '));
+            await context.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({
+              executablePath:process.env.CHROME_BIN,
+              headless:true,
+              args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']
+            });
+            await Promise.all([
+              verify(browser,'mobile-390x844',{width:390,height:844},true),
+              verify(browser,'desktop-1440x900',{width:1440,height:900},false)
+            ]);
+            await browser.close();
+            console.log('R522_SEMANTIC_MAG_PASS');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
