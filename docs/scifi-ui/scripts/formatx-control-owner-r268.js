@@ -7,6 +7,7 @@ const SHAPESHIFTER_URL='/scifi-ui/scripts/formatx-core-shapeshifter-r337.js?v=20
 if(root.dataset.fxControlOwnerR268==='ready')return;
 root.dataset.fxControlOwnerR268='booting';
 root.dataset.fxControlOwnerR264='booting';
+root.dataset.fxManualMagPauseContractR528='retired-living-core';
 
 const mobileQuery=matchMedia('(max-width:900px)');
 let menu=null,queued=false,bootObserver=null,bootTimer=0,controlObserver=null,controlObserverTarget=null,audioObserver=null,lastMobile=null,applying=false;
@@ -32,6 +33,10 @@ function retireLegacyMenu(node){
 function retireLegacyMenus(){
   for(const legacy of document.querySelectorAll('#fx-reference-legacy-menu,.menu-toggle:not(.fx-reference-menu-button),.fx-organism-system-toggle:not(.fx-reference-menu-button),[data-fx-legacy-menu="true"]'))retireLegacyMenu(legacy);
   root.dataset.fxLegacyMenuRetirementR280='contained-no-200vw';
+}
+function retireManualPause(scope=document){
+  for(const pause of scope.querySelectorAll('.fx-reference-pause'))pause.remove();
+  root.dataset.fxReferenceMotionPaused='false';
 }
 function canonicalTopbar(){
   const bars=Array.from(document.querySelectorAll('.topbar')).filter(node=>node instanceof HTMLElement);
@@ -128,20 +133,20 @@ function ensureAsk(rail){
   }
   return ask;
 }
-function ensurePause(rail){let pause=rail.querySelector('.fx-reference-pause');if(!(pause instanceof HTMLButtonElement)){pause=document.createElement('button');pause.className='fx-reference-pause';pause.type='button';pause.textContent='Ⅱ';rail.appendChild(pause);}if(!pause.textContent.trim())pause.textContent='Ⅱ';return pause;}
 function canonicalControls(hero){
   const grid=hero.querySelector(':scope > .hero-grid'),space=grid?.querySelector(':scope > .hero-space');if(!(grid instanceof HTMLElement)||!(space instanceof HTMLElement))return false;
   let controls=hero.querySelector('.fx-reference-controls-r204');if(!(controls instanceof HTMLElement)){controls=document.createElement('div');controls.className='fx-reference-controls-r204';}controls.classList.add('fx-reference-controls-r264');controls.hidden=false;controls.removeAttribute('aria-hidden');controls.setAttribute('aria-label',language()==='en'?'Hero controls':'Hero vezérlők');
   let rail=controls.querySelector(':scope > .fx-reference-rail')||hero.querySelector('.fx-reference-rail');if(!(rail instanceof HTMLElement)){rail=document.createElement('div');rail.className='fx-reference-rail';}rail.classList.add('fx-reference-rail-r264');
-  const ask=ensureAsk(rail),pause=ensurePause(rail),sound=document.querySelector('.fx-three-sound');
+  retireManualPause(hero);
+  const ask=ensureAsk(rail),sound=document.querySelector('.fx-three-sound');
   if(sound instanceof HTMLButtonElement){sound.type='button';sound.classList.add('fx-control-owner-r264');sound.hidden=false;sound.removeAttribute('aria-hidden');sound.removeAttribute('tabindex');if(sound.parentElement!==controls)controls.prepend(sound);}
-  if(rail.parentElement!==controls)controls.appendChild(rail);if(controls.parentElement!==space)space.appendChild(controls);for(const node of [controls,rail,sound,ask,pause,ask.querySelector('span')])stripInline(node);
-  root.dataset.fxReferenceControlLayout=isMobile()?'r250-mobile-reference-rail':'r264-desktop-three-cell';return sound instanceof HTMLButtonElement;
+  if(rail.parentElement!==controls)controls.appendChild(rail);if(controls.parentElement!==space)space.appendChild(controls);for(const node of [controls,rail,sound,ask,ask.querySelector('span')])stripInline(node);
+  root.dataset.fxReferenceControlLayout=isMobile()?'r528-mobile-reference-rail-no-manual-pause':'r528-desktop-two-cell-no-manual-pause';return sound instanceof HTMLButtonElement;
 }
 function visibleControl(node){if(!(node instanceof HTMLElement)||node.hidden||node.getAttribute('aria-hidden')==='true')return false;const style=getComputedStyle(node),rect=node.getBoundingClientRect();return style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity||1)>.02&&rect.width>=40&&rect.height>=40;}
 function healthy(hero,mobile){
-  const topbar=canonicalTopbar(),currentMenu=document.getElementById('menu-toggle'),lang=topbar?.querySelector(':scope > .fx-language-toggle'),controls=hero.querySelector('.fx-reference-controls-r204.fx-reference-controls-r264'),grid=hero.querySelector(':scope > .hero-grid'),space=grid?.querySelector(':scope > .hero-space'),sound=controls?.querySelector(':scope > .fx-three-sound'),ask=controls?.querySelector('.fx-reference-ask'),pause=controls?.querySelector('.fx-reference-pause');
-  return topbar instanceof HTMLElement&&Boolean(topbar.querySelector('.brand'))&&lang instanceof HTMLButtonElement&&lang.parentElement===topbar&&visibleControl(lang)&&currentMenu instanceof HTMLButtonElement&&currentMenu.classList.contains('fx-reference-menu-button')&&currentMenu.parentElement===topbar&&controls instanceof HTMLElement&&controls.parentElement===space&&(mobile||visibleControl(sound))&&visibleControl(ask)&&visibleControl(pause);
+  const topbar=canonicalTopbar(),currentMenu=document.getElementById('menu-toggle'),lang=topbar?.querySelector(':scope > .fx-language-toggle'),controls=hero.querySelector('.fx-reference-controls-r204.fx-reference-controls-r264'),grid=hero.querySelector(':scope > .hero-grid'),space=grid?.querySelector(':scope > .hero-space'),sound=controls?.querySelector(':scope > .fx-three-sound'),ask=controls?.querySelector('.fx-reference-ask');
+  return topbar instanceof HTMLElement&&Boolean(topbar.querySelector('.brand'))&&lang instanceof HTMLButtonElement&&lang.parentElement===topbar&&visibleControl(lang)&&currentMenu instanceof HTMLButtonElement&&currentMenu.classList.contains('fx-reference-menu-button')&&currentMenu.parentElement===topbar&&controls instanceof HTMLElement&&controls.parentElement===space&&(mobile||visibleControl(sound))&&visibleControl(ask)&&!hero.querySelector('.fx-reference-pause');
 }
 function bindControlObserver(hero){
   const controls=hero.querySelector('.fx-reference-controls-r204.fx-reference-controls-r264');if(!(controls instanceof HTMLElement)||controlObserverTarget===controls&&controlObserver)return;controlObserver?.disconnect();controlObserverTarget=controls;controlObserver=new MutationObserver(records=>{if(applying)return;if(records.some(record=>record.type==='childList'))schedule(true);});controlObserver.observe(controls,{childList:true});root.dataset.fxControlStabilityR321='direct-structure-observer-no-feedback';
@@ -151,11 +156,11 @@ function bindAudioObserver(){
 }
 function reconcile(force=false){
   queued=false;if(applying)return false;const hero=document.getElementById('hero');if(!(hero instanceof HTMLElement))return false;const mobile=isMobile();
-  if(!force&&root.dataset.fxControlOwnerR268==='ready'&&mobile===lastMobile&&healthy(hero,mobile)){retireLegacyMenus();retireLegacyTopbars(canonicalTopbar());return true;}
+  if(!force&&root.dataset.fxControlOwnerR268==='ready'&&mobile===lastMobile&&healthy(hero,mobile)){retireManualPause(hero);retireLegacyMenus();retireLegacyTopbars(canonicalTopbar());return true;}
   ensureReferenceStyle();ensureShapeshifter();applying=true;
   try{
     const headerReady=canonicalHeader(hero),controlsReady=canonicalControls(hero);
-    if(headerReady&&controlsReady&&healthy(hero,mobile)){lastMobile=mobile;root.dataset.fxControlOwnerR264='ready';root.dataset.fxControlOwnerR268='ready';bindControlObserver(hero);bootObserver?.disconnect();bootObserver=null;if(bootTimer)clearTimeout(bootTimer);bootTimer=0;dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r423-branded-header-language-owned'}}));return true;}
+    if(headerReady&&controlsReady&&healthy(hero,mobile)){lastMobile=mobile;root.dataset.fxControlOwnerR264='ready';root.dataset.fxControlOwnerR268='ready';bindControlObserver(hero);bootObserver?.disconnect();bootObserver=null;if(bootTimer)clearTimeout(bootTimer);bootTimer=0;dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r528-living-core-no-manual-pause'}}));return true;}
     return false;
   }finally{applying=false;}
 }
