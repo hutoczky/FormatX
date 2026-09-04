@@ -1,0 +1,192 @@
+name: Prove R519 semantic R482 validator candidate
+run-name: R519 legacy R482 semantic verifier against exact R516 production
+
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths:
+      - '.github/workflows/build-r519-r482-semantic-candidate.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+      CANDIDATE_BRANCH: p0-r519-r482-candidate
+      ORIGIN: https://formatxsuite.com
+    steps:
+      - name: Checkout exact R516 base
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Replace only stale R482 implementation-specific verifier
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cat > .github/workflows/verify-r481-live-mag.yml <<'YAML'
+          name: Verify current semantic live MAG (legacy R482 gate)
+          run-name: Current semantic mobile + desktop MAG verification for ${{ github.sha }}
+
+          on:
+            push:
+              branches: [master]
+              paths:
+                - 'docs/scifi-ui/styles/formatx-mag-living-balance-r481.css'
+                - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
+                - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+                - '.github/workflows/verify-r481-live-mag.yml'
+                - 'docs/p0-validation-version.txt'
+            workflow_dispatch:
+
+          permissions:
+            contents: read
+            statuses: write
+
+          concurrency:
+            group: r482-live-mag-${{ github.ref }}
+            cancel-in-progress: true
+
+          jobs:
+            live-r482-mag:
+              if: >-
+                github.event_name == 'workflow_dispatch' ||
+                (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]'))
+              runs-on: ubuntu-latest
+              timeout-minutes: 12
+              steps:
+                - name: Check out audited revision
+                  uses: actions/checkout@v5
+
+                - name: Wait for exact deployed P0 marker
+                  shell: bash
+                  run: |
+                    set -Eeuo pipefail
+                    origin='https://formatxsuite.com'
+                    for attempt in $(seq 1 90); do
+                      if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$origin/p0-validation-version.txt?r482_wait=${GITHUB_RUN_ID}_${attempt}" -o "$RUNNER_TEMP/live-p0.txt"; then
+                        if cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+                          echo 'Exact source P0 marker is live; semantic MAG verification is applicable.'
+                          exit 0
+                        fi
+                      fi
+                      sleep 10
+                    done
+                    echo 'Exact source SHA marker never reached production; refusing stale live verification.' >&2
+                    exit 1
+
+                - name: Install lightweight real-browser verifier
+                  shell: bash
+                  run: |
+                    set -Eeuo pipefail
+                    npm install --no-save --ignore-scripts playwright-core@1.62.0
+                    command -v google-chrome
+                    google-chrome --version
+
+                - name: Verify current live MAG semantic invariants with real interactions
+                  shell: bash
+                  run: |
+                    set -Eeuo pipefail
+                    node <<'NODE'
+                    const assert=require('node:assert/strict');
+                    const {chromium}=require('playwright-core');
+                    const cp=require('node:child_process');
+                    const chrome=cp.execFileSync('which',['google-chrome'],{encoding:'utf8'}).trim();
+                    async function verify(browser,name,viewport,mobile){
+                      const context=await browser.newContext({viewport,deviceScaleFactor:mobile?2:1,isMobile:mobile,hasTouch:mobile,locale:'hu-HU',reducedMotion:'no-preference',colorScheme:'dark'});
+                      const page=await context.newPage(); const errors=[]; const failed=[];
+                      page.on('pageerror',e=>errors.push(String(e)));
+                      page.on('console',m=>{const t=m.text();if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(t))errors.push(t)});
+                      page.on('requestfailed',r=>failed.push(`${r.method()} ${r.url()} ${r.failure()?.errorText||''}`));
+                      await page.goto(`https://formatxsuite.com/?verify=current-semantic-mag-${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+                      const target=page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252').first();
+                      await target.waitFor({state:'visible',timeout:30000}); const tb=await target.boundingBox(); assert.ok(tb&&tb.width>=16&&tb.height>=16,`${name}: activation target`); await page.mouse.click(tb.x+tb.width/2,tb.y+tb.height/2);
+                      await page.waitForFunction(()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'&&document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length===1,null,{timeout:45000});
+                      async function state(){return page.evaluate(()=>{const root=document.documentElement;const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');const s=canvas?getComputedStyle(canvas):null;const r=canvas?.getBoundingClientRect();const header=document.querySelector('.topbar .fx-reference-mag-button');const hs=header?getComputedStyle(header):null;const hr=header?.getBoundingClientRect();const link=document.querySelector('link[data-fx-mag-living-balance-r481]');return{renderer:root.dataset.fxCoreRenderer||'',sync:root.dataset.fxMagShapeSyncR476||'',life:root.dataset.fxPrimaryMagLifeR482||'',lifeContract:root.dataset.fxPrimaryMagLifeContractR482||'',optics:root.dataset.fxPrimaryMagOpticsR482||'',scheduler:root.dataset.fxCoreScheduler||'',idle:root.dataset.fxCoreIdleRenderR441||'',balanceHref:link?.href||'',canvasRect:r?{width:r.width,height:r.height}:null,display:s?.display||'',visibility:s?.visibility||'',opacity:Number(s?.opacity||0),animationName:s?.animationName||'',filter:s?.filter||'',animations:canvas?.getAnimations().map(a=>({name:a.animationName,currentTime:typeof a.currentTime==='number'?a.currentTime:null,playState:a.playState,pending:a.pending}))||[],headerVisible:Boolean(header&&hs&&hr&&hs.display!=='none'&&hs.visibility!=='hidden'&&Number(hs.opacity)>.2&&hr.width>=40&&hr.height>=40),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,pause:document.querySelector('#hero .fx-reference-pause')?.dataset.paused||''};});}
+                      await page.waitForTimeout(700); const initial=await state();
+                      assert.equal(initial.renderer,'single-webgl-crystal-organism-r326',`${name}: renderer`); assert.match(initial.sync,/^ready-r\d+$/,`${name}: current sync`); assert.equal(initial.lifeContract,'large-mini-header-spectrum-breath-zero-webgl-idle'); assert.equal(initial.optics,'restrained-soft-spectrum-mobile-edge'); assert.equal(initial.scheduler,'interaction-bursts-idle-zero-frame-r441'); assert.equal(initial.idle,'zero-frame'); assert.ok(new URL(initial.balanceHref).pathname.endsWith('/scifi-ui/styles/formatx-mag-living-balance-r481.css'),`${name}: balance stylesheet path`); assert.ok(initial.canvasRect&&initial.canvasRect.width>120&&initial.canvasRect.height>180); assert.notEqual(initial.display,'none'); assert.notEqual(initial.visibility,'hidden'); assert.ok(initial.opacity>.2); assert.ok(initial.headerVisible); assert.ok(initial.overflow<=2);
+                      const samples=[];for(let i=0;i<4;i++){samples.push(await state());await page.waitForTimeout(420)}
+                      const op=samples.map(x=>x.opacity); const opacitySpan=Math.max(...op)-Math.min(...op); const times=samples.flatMap(x=>x.animations.map(a=>a.currentTime)).filter(Number.isFinite); const timeSpan=times.length?Math.max(...times)-Math.min(...times):0; assert.ok(opacitySpan>.004||timeSpan>50,`${name}: motion missing ${JSON.stringify({opacitySpan,timeSpan})}`);
+                      const pause=page.locator('#hero .fx-reference-pause').first(); await pause.waitFor({state:'visible',timeout:10000}); const pb=await pause.boundingBox(); assert.ok(pb); await page.mouse.click(pb.x+pb.width/2,pb.y+pb.height/2); await page.waitForTimeout(250); const p1=await state(); await page.waitForTimeout(650); const p2=await state(); assert.equal(p2.pause,'true',`${name}: pause flag`); const pa=p1.animations.find(a=>Number.isFinite(a.currentTime)); const pbState=p2.animations.find(a=>a.name===pa?.name&&Number.isFinite(a.currentTime)); if(pa&&pbState)assert.ok(Math.abs(pbState.currentTime-pa.currentTime)<80,`${name}: pause drift`);
+                      await page.mouse.click(pb.x+pb.width/2,pb.y+pb.height/2); await page.waitForTimeout(250); const r1=await state(); await page.waitForTimeout(500); const r2=await state(); assert.equal(r2.pause,'false',`${name}: resume flag`); const ra=r1.animations.find(a=>Number.isFinite(a.currentTime)); const rb=r2.animations.find(a=>a.name===ra?.name&&Number.isFinite(a.currentTime)); if(ra&&rb)assert.ok(rb.currentTime-ra.currentTime>16,`${name}: resume clock`);
+                      const ask=page.locator('#hero .fx-reference-ask').first(); await ask.waitFor({state:'visible',timeout:10000}); const ab=await ask.boundingBox(); assert.ok(ab&&ab.width>=44&&ab.height>=44,`${name}: ASK hit target`); await page.mouse.click(ab.x+ab.width/2,ab.y+ab.height/2); await page.waitForTimeout(200);
+                      assert.equal(errors.length,0,`${name}: errors ${errors.join(' | ')}`); assert.equal(failed.length,0,`${name}: request failures ${failed.join(' | ')}`); console.log(`PASS ${name}`,JSON.stringify({initial,opacitySpan,timeSpan,ask:{width:ab.width,height:ab.height}},null,2)); await context.close();
+                    }
+                    (async()=>{const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await verify(browser,'mobile-390x844',{width:390,height:844},true);await verify(browser,'desktop-1440x900',{width:1440,height:900},false);await browser.close();console.log('R519_CURRENT_SEMANTIC_R482_PASS');})().catch(e=>{console.error(e);process.exit(1)});
+                    NODE
+
+                - name: Publish R482 live MAG status
+                  if: always()
+                  env:
+                    GH_TOKEN: ${{ github.token }}
+                    JOB_STATUS: ${{ job.status }}
+                  shell: bash
+                  run: |
+                    set -euo pipefail
+                    if [[ "$JOB_STATUS" == success ]]; then state=success; description='Current semantic MAG activation, motion, pause/resume and ASK passed'; else state=failure; description='Current semantic MAG verification failed'; fi
+                    gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX R482 live MAG' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          YAML
+          ruby -e "require 'yaml'; YAML.load_file('.github/workflows/verify-r481-live-mag.yml'); puts 'R519_WORKFLOW_YAML_PASS'"
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('.github/workflows/verify-r481-live-mag.yml').read_text()
+          assert "ready-r482'" not in s
+          assert "fxPrimaryMagLifeContractR482==='" not in s
+          assert 'target.waitFor' in s and '#hero .fx-reference-pause' in s and '#hero .fx-reference-ask' in s
+          assert "assert.match(initial.sync,/^ready-r\\d+$/" in s
+          print('R519_NO_STALE_IMPLEMENTATION_ASSERTION_PASS')
+          PY
+
+      - name: Install lightweight runner Chrome driver
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install --no-save --ignore-scripts playwright-core@1.62.0
+          command -v google-chrome
+          google-chrome --version
+
+      - name: Confirm exact R516 production marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          curl -fsS -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?r519candidate=$GITHUB_RUN_ID" -o /tmp/r519-marker.txt
+          cmp -s docs/p0-validation-version.txt /tmp/r519-marker.txt
+          echo EXACT_R516_MARKER_PASS
+
+      - name: Execute intended semantic verifier logic against real R516 production
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('.github/workflows/verify-r481-live-mag.yml').read_text()
+          start=s.index("                    const assert=require('node:assert/strict');")
+          end=s.index("                    NODE", start)
+          js=s[start:end]
+          # Strip YAML indentation only; execute exact JS body intended for final workflow.
+          lines=[]
+          for line in js.splitlines():
+              lines.append(line[20:] if line.startswith('                    ') else line)
+          Path('/tmp/r519-verifier.cjs').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+          PY
+          node /tmp/r519-verifier.cjs | tee /tmp/r519-semantic.log
+          grep -Fq 'R519_CURRENT_SEMANTIC_R482_PASS' /tmp/r519-semantic.log
+
+      - name: Commit proven validator candidate and push branch
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add .github/workflows/verify-r481-live-mag.yml
+          git commit -m 'Modernize R482 legacy gate to current semantic MAG'
+          git rev-parse HEAD
+          git push --force-with-lease origin HEAD:"refs/heads/$CANDIDATE_BRANCH"
