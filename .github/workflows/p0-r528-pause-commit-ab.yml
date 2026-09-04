@@ -1,4 +1,4 @@
-name: P0 R528 PAUSE commit-barrier proof
+name: P0 R528 PAUSE commit-synchronized proof
 
 on:
   push:
@@ -22,20 +22,141 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Apply read-only PAUSE CSSOM commit barrier
+      - name: Apply commit-synchronized PAUSE control
         shell: bash
         run: |
           set -euo pipefail
           python3 <<'PY'
           from pathlib import Path
+
           p=Path('docs/scifi-ui/scripts/formatx-event-horizon.js')
           s=p.read_text()
-          old="""    dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));\n    // R507: publish the visible control state only. The event consumer in\n    // formatx-mag-shape-sync-r476.js owns the one canonical CSSAnimation clock.\n    syncCanonicalMagAnimations(paused);"""
-          new="""    dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));\n    // R528: force a read-only style/layout commit after the exclusive shape-sync\n    // event consumer applies animation-play-state. This does not mutate or own\n    // an animation clock; it only makes the requested state observable before\n    // the physical control event returns.\n    void ROOT.offsetWidth;\n    ROOT.dataset.fxReferencePauseCommitR528=paused?'paused-committed':'running-committed';\n    // R507: publish the visible control state only. The event consumer in\n    // formatx-mag-shape-sync-r476.js owns the one canonical CSSAnimation clock.\n    syncCanonicalMagAnimations(paused);"""
+          old="""function bindPause(button){
+  if(!(button instanceof HTMLButtonElement)||button.dataset.fxPauseR461==='true')return;
+  button.dataset.fxPauseR461='true';
+  if(!button.dataset.paused)button.dataset.paused='false';
+  button.setAttribute('aria-pressed',button.dataset.paused);
+  button.addEventListener('click',event=>{
+    // Cached compatibility code may already have consumed pointerup/click.
+    // Never toggle a second time after that earlier owner handled the event.
+    if(event.defaultPrevented)return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const paused=button.dataset.paused!=='true';
+    button.dataset.paused=String(paused);
+    ROOT.dataset.fxReferenceMotionPaused=String(paused);
+    const strings=copy();
+    button.setAttribute('aria-pressed',String(paused));
+    button.textContent=paused?'▶':'Ⅱ';
+    button.setAttribute('aria-label',paused?strings.resume:strings.pause);
+    dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));
+    // R507: publish the visible control state only. The event consumer in
+    // formatx-mag-shape-sync-r476.js owns the one canonical CSSAnimation clock.
+    syncCanonicalMagAnimations(paused);
+  });
+}
+"""
+          new="""function publishCommittedPause(button,paused,attempt=0){
+  const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+  const animations=canvas instanceof HTMLCanvasElement?canvas.getAnimations():[];
+  const cssStates=canvas instanceof HTMLCanvasElement
+    ? String(getComputedStyle(canvas).animationPlayState||'').split(',').map(value=>value.trim()).filter(Boolean)
+    : [];
+  const committed=paused
+    ? cssStates.length>0&&cssStates.every(value=>value==='paused')&&animations.length>0&&animations.every(animation=>animation.playState==='paused'&&!animation.pending)
+    : cssStates.some(value=>value==='running')&&animations.some(animation=>animation.playState==='running'&&!animation.pending);
+  if(!committed&&attempt<12){
+    requestAnimationFrame(()=>publishCommittedPause(button,paused,attempt+1));
+    return;
+  }
+  if(!committed){
+    button.dataset.fxPauseCommitR528='failed';
+    delete button.dataset.fxPausePendingR528;
+    return;
+  }
+  button.dataset.paused=String(paused);
+  ROOT.dataset.fxReferenceMotionPaused=String(paused);
+  const strings=copy();
+  button.setAttribute('aria-pressed',String(paused));
+  button.textContent=paused?'▶':'Ⅱ';
+  button.setAttribute('aria-label',paused?strings.resume:strings.pause);
+  button.dataset.fxPauseCommitR528=paused?'paused-committed':'running-committed';
+  delete button.dataset.fxPausePendingR528;
+}
+function bindPause(button){
+  if(!(button instanceof HTMLButtonElement)||button.dataset.fxPauseR461==='true')return;
+  button.dataset.fxPauseR461='true';
+  if(!button.dataset.paused)button.dataset.paused='false';
+  button.setAttribute('aria-pressed',button.dataset.paused);
+  button.addEventListener('click',event=>{
+    // Cached compatibility code may already have consumed pointerup/click.
+    // Never toggle a second time after that earlier owner handled the event.
+    if(event.defaultPrevented||button.dataset.fxPausePendingR528)return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const paused=button.dataset.paused!=='true';
+    button.dataset.fxPausePendingR528=String(paused);
+    dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));
+    // R528: the control publishes data-paused only after the exclusive shape-sync
+    // clock owner has committed the requested CSSAnimation state. This keeps the
+    // public PAUSE signal truthful without creating a second animation owner.
+    requestAnimationFrame(()=>publishCommittedPause(button,paused));
+    syncCanonicalMagAnimations(paused);
+  });
+}
+"""
+          assert old in s
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js')
+          s=p.read_text()
+          old="""function syncPlaybackSoon(forcePause=false){
+  const syncNow=()=>syncPrimaryPlayback(forcePause||userPaused());
+  syncNow();
+  queueMicrotask(syncNow);
+  requestAnimationFrame(syncNow);
+}
+"""
+          new="""function syncPlaybackSoon(forcePause=false,forceResume=false){
+  const syncNow=()=>syncPrimaryPlayback(forceResume?false:(forcePause||userPaused()));
+  syncNow();
+  queueMicrotask(syncNow);
+  requestAnimationFrame(syncNow);
+}
+"""
+          assert old in s
+          s=s.replace(old,new,1)
+          old="""addEventListener('formatx:referencepause',event=>{
+  const paused=event.detail?.paused===true;
+  if(paused){
+    clearTimeout(pulseTimer);
+    pulseTimer=0;
+    syncPlaybackSoon(true);
+    return;
+  }
+  applyCanonicalLife();
+},{passive:true});
+"""
+          new="""addEventListener('formatx:referencepause',event=>{
+  const paused=event.detail?.paused===true;
+  if(paused){
+    clearTimeout(pulseTimer);
+    pulseTimer=0;
+    syncPlaybackSoon(true);
+    return;
+  }
+  setLife('breath');
+  // R528: resume is explicit while the visible control still truthfully reports
+  // the previously committed paused state. The control flips to running only
+  // after CSSAnimation playState has actually committed.
+  syncPlaybackSoon(false,true);
+},{passive:true});
+"""
           assert old in s
           p.write_text(s.replace(old,new,1))
           PY
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           git diff --check
 
@@ -72,33 +193,34 @@ jobs:
           python3 <<'PY'
           from pathlib import Path
           p=Path('.github/scripts/validate-r522-semantic-mag.cjs')
-          s=p.read_text()
-          old="""    args: [\n      '--no-sandbox',"""
-          new="""    args: [\n      '--ignore-certificate-errors',\n      '--no-sandbox',"""
-          assert old in s
-          p.write_text(s.replace(old,new,1))
-
+          s=p.read_text(); old="""    args: [\n      '--no-sandbox',"""; new="""    args: [\n      '--ignore-certificate-errors',\n      '--no-sandbox',"""; assert old in s; p.write_text(s.replace(old,new,1))
           p=Path('.github/scripts/validate-live-mag-functional.cjs')
-          s=p.read_text()
-          old="""  const browser = await chromium.launch({\n    headless:true,\n    args:[\n      '--use-angle=swiftshader',"""
-          new="""  const browser = await chromium.launch({\n    executablePath:process.env.CHROME_BIN,\n    headless:true,\n    args:[\n      '--ignore-certificate-errors',\n      '--use-angle=swiftshader',"""
-          assert old in s
-          p.write_text(s.replace(old,new,1))
+          s=p.read_text(); old="""  const browser = await chromium.launch({\n    headless:true,\n    args:[\n      '--use-angle=swiftshader',"""; new="""  const browser = await chromium.launch({\n    executablePath:process.env.CHROME_BIN,\n    headless:true,\n    args:[\n      '--ignore-certificate-errors',\n      '--use-angle=swiftshader',"""; assert old in s; p.write_text(s.replace(old,new,1))
           PY
-          node --check .github/scripts/validate-r522-semantic-mag.cjs
-          node --check .github/scripts/validate-live-mag-functional.cjs
 
       - name: R522 semantic PAUSE RESUME proof
+        id: semantic
+        continue-on-error: true
         env:
           FORMATX_TEST_URL: https://formatxsuite.com:8787/
           FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r528-pause-semantic
         run: node .github/scripts/validate-r522-semantic-mag.cjs
 
       - name: Canonical functional PAUSE RESUME proof
+        id: functional
+        if: always()
+        continue-on-error: true
         env:
           FORMATX_TEST_URL: https://formatxsuite.com:8787/
           FORMATX_MAG_EVIDENCE_DIR: artifacts/r528-pause-functional
         run: node .github/scripts/validate-live-mag-functional.cjs
+
+      - name: Require both real PAUSE proofs
+        if: always()
+        env:
+          SEMANTIC: ${{ steps.semantic.outcome }}
+          FUNCTIONAL: ${{ steps.functional.outcome }}
+        run: test "$SEMANTIC" = success -a "$FUNCTIONAL" = success
 
       - uses: actions/upload-artifact@v4
         if: always()
