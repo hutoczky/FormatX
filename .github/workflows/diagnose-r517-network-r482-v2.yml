@@ -1,0 +1,55 @@
+name: Diagnose R517 protocol and R482 conditions v2
+run-name: R517 controlled network + R482 diagnostic on exact R516 production
+
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths:
+      - '.github/workflows/diagnose-r517-network-r482-v2.yml'
+      - '.github/scripts/diagnose-r517-network-r482.cjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AUDITED_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+  ORIGIN: https://formatxsuite.com/
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - name: Confirm exact R516 production marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags --depth=1 origin "$AUDITED_SHA"
+          git show "$AUDITED_SHA:docs/p0-validation-version.txt" > "$RUNNER_TEMP/expected.txt"
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt" -o "$RUNNER_TEMP/live.txt"
+          cmp -s "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/live.txt"
+          echo 'Exact R516 marker confirmed.'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install lightweight browser driver only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+      - name: Run controlled production protocol and R482 diagnostic
+        env:
+          OUT_DIR: artifacts/r517-network-r482
+        run: node .github/scripts/diagnose-r517-network-r482.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r517-network-r482-${{ env.AUDITED_SHA }}
+          path: artifacts/r517-network-r482/
+          retention-days: 30
