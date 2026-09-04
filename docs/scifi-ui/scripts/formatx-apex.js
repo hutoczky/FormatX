@@ -81,7 +81,8 @@
     language = next === 'en' ? 'en' : 'hu';
     ROOT.lang = language;
     document.querySelectorAll('[data-hu][data-en]').forEach(element => {
-      element.textContent = element.dataset[language];
+      const value = element.dataset[language];
+      if (element.textContent !== value) element.textContent = value;
     });
     document.querySelectorAll('[data-language]').forEach(button => {
       button.setAttribute('aria-pressed', String(button.dataset.language === language));
