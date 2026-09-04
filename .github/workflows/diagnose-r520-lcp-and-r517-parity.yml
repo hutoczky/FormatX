@@ -1,0 +1,218 @@
+name: Diagnose R520 mobile LCP race and R517 audit parity
+run-name: Exact R516/R520 owner diagnostics for ${{ github.sha }}
+
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths:
+      - '.github/workflows/diagnose-r520-lcp-and-r517-parity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  r520-mobile-lcp-owner:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      R520_BASE: d6b924ab153a33dbb15aec4af5205164dd1c91e5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.R520_BASE }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Reproduce exact R520 candidate source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r520-mobile-owner
+          python3 <<'PY'
+          from pathlib import Path
+          root=Path('docs/scifi-ui/styles')
+          first=(root/'formatx-first-paint-r206.css').read_text(encoding='utf-8')
+          mobile=(root/'formatx-mobile-first-paint-r358.css').read_text(encoding='utf-8')
+          frame=(root/'formatx-first-frame-stability-r283.css').read_text(encoding='utf-8')
+          p0=(root/'formatx-p0-first-paint-r490.css').read_text(encoding='utf-8')
+          assert '@charset' not in frame.lower() and '@import' not in frame.lower()
+          desktop_media='(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)'
+          bundle=(
+            '/* FormatX R520 diagnostic — exact prior candidate cascade. */\n'
+            '/* BEGIN formatx-first-paint-r206.css */\n'+first+'\n/* END formatx-first-paint-r206.css */\n'
+            '/* BEGIN formatx-mobile-first-paint-r358.css */\n'+mobile+'\n/* END formatx-mobile-first-paint-r358.css */\n'
+            f'@media {desktop_media} {{\n/* BEGIN formatx-first-frame-stability-r283.css */\n'+frame+'\n/* END formatx-first-frame-stability-r283.css */\n}\n'
+            '/* BEGIN formatx-p0-first-paint-r490.css */\n'+p0+'\n/* END formatx-p0-first-paint-r490.css */\n'
+          )
+          (root/'formatx-first-paint-tail-r520.css').write_text(bundle,encoding='utf-8')
+          PY
+          cat > billing-worker/src/production-content-entry-r520.js <<'JS'
+          import r517Production from './production-content-entry-r517.js';
+          const PUBLIC_HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
+          const TAIL_PATH='/scifi-ui/styles/formatx-first-paint-tail-r520.css';
+          const TAIL_SOURCES=new Set(['/scifi-ui/styles/formatx-first-paint-r206.css','/scifi-ui/styles/formatx-mobile-first-paint-r358.css','/scifi-ui/styles/formatx-first-frame-stability-r283.css','/scifi-ui/styles/formatx-p0-first-paint-r490.css']);
+          function stylesheetPath(tag){const m=tag.match(/\bhref=(["'])(.*?)\1/i);if(!m)return'';try{return new URL(m[2],'https://formatxsuite.com/scifi-ui/').pathname}catch{return''}}
+          function consolidateTail(html){let inserted=false;return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>{const pathname=stylesheetPath(tag);if(!TAIL_SOURCES.has(pathname))return tag;if(inserted)return'';inserted=true;return `<link rel="stylesheet" fetchpriority="high" data-fx-first-paint-tail-r520="true" data-fx-first-paint-r206="true" data-fx-mobile-first-paint-r358="true" data-fx-first-frame-stability-r500="true" data-fx-p0-first-paint-r503="true" href="${TAIL_PATH}?v=20260904-r520-first-paint-tail">`;});}
+          export default{async fetch(request,env,ctx){const response=await r517Production.fetch(request,env,ctx);const url=new URL(request.url);if(!['GET','HEAD'].includes(request.method)||!PUBLIC_HOSTS.has(url.hostname))return response;const headers=new Headers(response.headers);headers.set('X-FormatX-First-Paint-Tail','r520-exact-cascade');if(request.method==='HEAD'){headers.delete('Content-Length');return new Response(null,{status:response.status,statusText:response.statusText,headers});}if(!(headers.get('Content-Type')||'').includes('text/html'))return new Response(response.body,{status:response.status,statusText:response.statusText,headers});const html=consolidateTail(await response.text());headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');return new Response(html,{status:response.status,statusText:response.statusText,headers});}};
+          JS
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('billing-worker/wrangler.jsonc');s=p.read_text(encoding='utf-8');old='"main": "src/production-content-entry-r517.js"';assert old in s;p.write_text(s.replace(old,'"main": "src/production-content-entry-r520.js"',1),encoding='utf-8')
+          PY
+          node --input-type=module --check < billing-worker/src/production-content-entry-r520.js
+          git diff --check
+      - name: Start exact local R520 Worker with runner Chrome
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --prefix billing-worker --no-audit --prefer-offline
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');const w=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete w.ai;delete w.routes;w.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r520-owner.json',JSON.stringify(w,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r520-owner.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r520-owner-worker.log" 2>&1 &
+          cd ..
+          for i in $(seq 1 60); do if curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi; sleep 1; done
+          cat "$RUNNER_TEMP/r520-owner-worker.log"; exit 1
+      - name: Ten-run real Chrome LCP mutation and long-task correlation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE' | tee artifacts/r520-mobile-owner/summary.txt
+          const fs=require('node:fs');const assert=require('node:assert/strict');const {chromium}=require('playwright-core');
+          const out='artifacts/r520-mobile-owner';
+          const init=()=>{
+            window.__fxOwner={lcp:[],longtasks:[],shifts:[],resources:[],mutations:[],samples:[],events:[]};
+            const D=window.__fxOwner;const cap=(a,x,n=300)=>{if(a.length<n)a.push(x)};
+            const targetName=n=>{if(!(n instanceof Element))return String(n?.nodeName||'');if(n===document.documentElement)return'HTML';if(n.matches?.('.fx-category-definition'))return'.fx-category-definition';if(n.matches?.('.fx-category-definition *'))return'.fx-category-definition '+n.tagName;if(n.matches?.('#hero .hero-copy'))return'#hero .hero-copy';return n.id?`#${n.id}`:(typeof n.className==='string'&&n.className?'.'+n.className.trim().split(/\s+/).slice(0,2).join('.'):n.tagName)};
+            const snap=reason=>{const e=document.querySelector('#hero .fx-category-definition');if(!e)return;const s=getComputedStyle(e),r=e.getBoundingClientRect();cap(D.samples,{t:performance.now(),reason,display:s.display,visibility:s.visibility,opacity:s.opacity,contentVisibility:s.contentVisibility,position:s.position,transform:s.transform,fontSize:s.fontSize,lineHeight:s.lineHeight,w:r.width,h:r.height,top:r.top,bottom:r.bottom,text:e.textContent?.length||0,html:e.innerHTML});};
+            try{new PerformanceObserver(l=>{for(const e of l.getEntries())cap(D.lcp,{t:e.startTime,size:e.size,selector:targetName(e.element),text:e.element?.textContent?.slice(0,80)||''})}).observe({type:'largest-contentful-paint',buffered:true})}catch{}
+            try{new PerformanceObserver(l=>{for(const e of l.getEntries())cap(D.longtasks,{t:e.startTime,duration:e.duration,name:e.name})}).observe({type:'longtask',buffered:true})}catch{}
+            try{new PerformanceObserver(l=>{for(const e of l.getEntries())if(!e.hadRecentInput)cap(D.shifts,{t:e.startTime,value:e.value,sources:(e.sources||[]).map(s=>({node:targetName(s.node),previousRect:s.previousRect,currentRect:s.currentRect}))})}).observe({type:'layout-shift',buffered:true})}catch{}
+            try{new PerformanceObserver(l=>{for(const e of l.getEntries())if(/\.(?:css|js)(?:\?|$)/.test(e.name))cap(D.resources,{name:e.name,t:e.startTime,responseEnd:e.responseEnd,duration:e.duration,initiatorType:e.initiatorType,transferSize:e.transferSize})}).observe({type:'resource',buffered:true})}catch{}
+            try{new MutationObserver(ms=>{for(const m of ms){const n=m.target instanceof Text?m.target.parentElement:m.target;const label=targetName(n);if(label==='HTML'||label.includes('fx-category-definition')||label==='#hero .hero-copy'){cap(D.mutations,{t:performance.now(),type:m.type,target:label,attr:m.attributeName||'',value:m.type==='attributes'&&n instanceof Element?n.getAttribute(m.attributeName):'',text:n?.textContent?.slice(0,100)||''});snap('mutation')}}}).observe(document,{subtree:true,childList:true,attributes:true,characterData:true})}catch{}
+            addEventListener('DOMContentLoaded',()=>{cap(D.events,{name:'DOMContentLoaded',t:performance.now()});snap('DCL')});addEventListener('load',()=>{cap(D.events,{name:'load',t:performance.now()});snap('load')});
+            let c=0;const id=setInterval(()=>{snap('tick');if(++c>=60)clearInterval(id)},20);
+          };
+          function summarize(r){const lcp=r.lcp.at(-1)?.t??null;const muts=r.mutations.filter(x=>lcp!==null&&x.t<=lcp&&x.t>=lcp-150);const tasks=r.longtasks.filter(x=>lcp!==null&&x.t<=lcp&&x.t+x.duration>=lcp-120);const res=r.resources.filter(x=>lcp!==null&&x.responseEnd>=lcp-150&&x.responseEnd<=lcp+30).map(x=>({name:x.name.split('/').pop(),responseEnd:x.responseEnd,duration:x.duration}));return{lcp,events:r.events,nearMutations:muts,nearLongtasks:tasks,nearResources:res,shiftTotal:r.shifts.reduce((a,x)=>a+x.value,0)};}
+          (async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH,args:['--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});const report=[];for(let i=1;i<=10;i++){const c=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,locale:'hu-HU',reducedMotion:'no-preference',ignoreHTTPSErrors:true});const p=await c.newPage();const errors=[];p.on('pageerror',e=>errors.push(String(e)));await p.addInitScript(init);const response=await p.goto(`https://formatxsuite.com:8787/?owner_run=${i}`,{waitUntil:'domcontentloaded',timeout:60000});assert.equal(response.status(),200);await p.waitForTimeout(1250);const raw=await p.evaluate(()=>({diag:window.__fxOwner,nav:(()=>{const n=performance.getEntriesByType('navigation')[0];return n?{responseStart:n.responseStart,responseEnd:n.responseEnd,domContentLoadedEventEnd:n.domContentLoadedEventEnd,loadEventEnd:n.loadEventEnd}:null})(),root:{...document.documentElement.dataset},category:(()=>{const e=document.querySelector('#hero .fx-category-definition');const s=e?getComputedStyle(e):null,r=e?.getBoundingClientRect();return e&&s&&r?{html:e.innerHTML,display:s.display,visibility:s.visibility,opacity:s.opacity,w:r.width,h:r.height,top:r.top}:null})()}));const item={run:i,errors,nav:raw.nav,root:raw.root,category:raw.category,...raw.diag,summary:summarize(raw.diag)};report.push(item);fs.writeFileSync(`${out}/run-${i}.json`,JSON.stringify(item,null,2));console.log(JSON.stringify({run:i,...item.summary,category:item.category},null,2));await c.close();}await browser.close();const simple=report.map(r=>({run:r.run,lcp:r.summary.lcp,dcl:r.nav?.domContentLoadedEventEnd,load:r.nav?.loadEventEnd,shift:r.summary.shiftTotal,mutations:r.summary.nearMutations,longtasks:r.summary.nearLongtasks,resources:r.summary.nearResources}));fs.writeFileSync(`${out}/report.json`,JSON.stringify(simple,null,2));const lcps=simple.map(x=>x.lcp).filter(Number.isFinite);assert.ok(lcps.length===10,'missing LCP entries');console.log('LCP_VALUES',lcps.map(x=>Math.round(x)).join(','));})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r520-mobile-lcp-owner-${{ github.sha }}
+          path: artifacts/r520-mobile-owner/
+          if-no-files-found: warn
+          retention-days: 30
+
+  r517-audit-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      BASE_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Remove only previously proven active audit-specific branches
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-audit-parity
+          python3 <<'PY'
+          from pathlib import Path
+          def remove_block(path, marker):
+              p=Path(path);lines=p.read_text(encoding='utf-8').splitlines(True);i=next((n for n,l in enumerate(lines) if marker in l),None)
+              if i is None: raise SystemExit(f'missing marker {path}')
+              if 'const AUDIT_MODE' in lines[i]:
+                  del lines[i]
+                  while i<len(lines) and not lines[i].strip(): del lines[i]
+                  if i>=len(lines) or 'if (AUDIT_MODE)' not in lines[i]: raise SystemExit(f'missing AUDIT_MODE block {path}')
+              depth=0;started=False;end=i
+              for j in range(i,len(lines)):
+                  depth+=lines[j].count('{')-lines[j].count('}')
+                  if '{' in lines[j]: started=True
+                  end=j
+                  if started and depth<=0: break
+              if not started: raise SystemExit(f'block not found {path}')
+              del lines[i:end+1]
+              if i<len(lines) and not lines[i].strip(): del lines[i]
+              p.write_text(''.join(lines),encoding='utf-8')
+          remove_block('docs/scifi-ui/scripts/living-architecture.js',"const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse')")
+          remove_block('docs/scifi-ui/scripts/formatx-apex.js',"const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse')")
+          remove_block('docs/scifi-ui/scripts/formatx-core-real3d-v20.js',"if (new URLSearchParams(location.search).get('lighthouse') === '1')")
+          p=Path('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');ls=p.read_text(encoding='utf-8').splitlines(True);i=next((n for n,l in enumerate(ls) if "get('lighthouse') === '1'" in l and 'audit-skip' in l),None);assert i is not None;del ls[i];p.write_text(''.join(ls),encoding='utf-8')
+          p=Path('docs/scifi-ui/scripts/formatx-premium-finish.js');ls=p.read_text(encoding='utf-8').splitlines(True);out=[];flags=[False,False,False]
+          for l in ls:
+              if "const auditMode = parameters.get('lighthouse') === '1'" in l: flags[0]=True;continue
+              if "if (auditMode) return 'audit-skip'" in l: flags[1]=True;continue
+              if 'if (auditMode || resilientCore) return resilientCore;' in l: flags[2]=True;out.append(l.replace('if (auditMode || resilientCore)','if (resilientCore)'));continue
+              out.append(l)
+          assert all(flags),flags;p.write_text(''.join(out),encoding='utf-8')
+          PY
+          for f in docs/scifi-ui/scripts/living-architecture.js docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/formatx-premium-finish.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-core-mobile-v55.js; do node --check "$f"; done
+          git diff --check
+          git diff -- docs/scifi-ui/scripts > artifacts/r517-audit-parity/source.diff
+      - name: Start patched local Worker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --prefix billing-worker --no-audit --prefer-offline
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');const w=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete w.ai;delete w.routes;w.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r517-parity.json',JSON.stringify(w,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r517-parity.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r517-parity.log" 2>&1 &
+          cd ..
+          for i in $(seq 1 60); do if curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi; sleep 1; done
+          cat "$RUNNER_TEMP/r517-parity.log"; exit 1
+      - name: Canonical normal versus lighthouse-query semantic proof
+        shell: bash
+        env:
+          NODE_PATH: /home/runner/work/FormatX/FormatX/node_modules
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-audit-parity/normal artifacts/r517-audit-parity/lighthouse
+          python3 <<'PY'
+          from pathlib import Path
+          s=Path('.github/scripts/validate-live-mag-functional.cjs').read_text(encoding='utf-8')
+          s=s.replace("const { chromium } = require('playwright');","const { chromium } = require('playwright-core');",1)
+          s=s.replace('const browser = await chromium.launch({','const browser = await chromium.launch({\n    executablePath:process.env.CHROME_PATH,',1)
+          s=s.replace('browser.newContext({','browser.newContext({\n    ignoreHTTPSErrors:true,')
+          Path('.r517-canonical.cjs').write_text(s,encoding='utf-8')
+          PY
+          FORMATX_TEST_URL='https://formatxsuite.com:8787/' FORMATX_MAG_EVIDENCE_DIR='artifacts/r517-audit-parity/normal' AUDITED_SHA="$BASE_SHA" node .r517-canonical.cjs
+          FORMATX_TEST_URL='https://formatxsuite.com:8787/?lighthouse=1&parity=1' FORMATX_MAG_EVIDENCE_DIR='artifacts/r517-audit-parity/lighthouse' AUDITED_SHA="$BASE_SHA" node .r517-canonical.cjs
+      - name: Reject any remaining active audit-skip runtime state
+        shell: bash
+        env:
+          NODE_PATH: /home/runner/work/FormatX/FormatX/node_modules
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE' | tee artifacts/r517-audit-parity/runtime-scan.json
+          const assert=require('node:assert/strict');const {chromium}=require('playwright-core');
+          async function scan(browser,name,url){const c=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,ignoreHTTPSErrors:true});const p=await c.newPage();await p.goto(url,{waitUntil:'domcontentloaded',timeout:60000});await p.waitForTimeout(1800);const s=await p.evaluate(()=>{const root={...document.documentElement.dataset};const suspicious=Object.entries(root).filter(([k,v])=>/audit-skip|static-audit|fx-audit-mode/i.test(`${k}:${v}`));const scripts=[...document.scripts].map(x=>x.src).filter(Boolean);return{root,suspicious,scripts};});await c.close();return{name,...s};}
+          (async()=>{const b=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH,args:['--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});const normal=await scan(b,'normal','https://formatxsuite.com:8787/?parity=normal');const audit=await scan(b,'lighthouse','https://formatxsuite.com:8787/?lighthouse=1&parity=audit');await b.close();console.log(JSON.stringify({normal,audit},null,2));assert.equal(normal.suspicious.length,0,`normal suspicious ${JSON.stringify(normal.suspicious)}`);assert.equal(audit.suspicious.length,0,`audit suspicious ${JSON.stringify(audit.suspicious)}`);})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r517-audit-parity-${{ github.sha }}
+          path: artifacts/r517-audit-parity/
+          if-no-files-found: warn
+          retention-days: 30
