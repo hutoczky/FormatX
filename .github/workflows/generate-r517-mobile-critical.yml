@@ -5,6 +5,9 @@ on:
   push:
     branches: [p0-r517-mobile-critical]
     paths:
+      - 'billing-worker/src/production-content-entry-r517.js'
+      - 'billing-worker/wrangler.jsonc'
+      - 'docs/scifi-ui/styles/formatx-mobile-critical-r517.css'
       - '.github/workflows/generate-r517-mobile-critical.yml'
   workflow_dispatch:
 
@@ -126,11 +129,12 @@ jobs:
               const oldLinks=[...document.querySelectorAll('link[rel="stylesheet"]')].filter(l=>old.some(x=>l.href.includes(x)));
               const hero=document.querySelector('#hero .fx-category-definition');
               const hs=hero?getComputedStyle(hero):null;
-              return {bundleCount:bundle.length,bundleMedia:bundle[0]?.media||'',bundleMatches:bundle[0]?matchMedia(bundle[0].media).matches:false,oldCount:oldLinks.length,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,heroVisible:Boolean(hero&&hs&&hs.display!=='none'&&hs.visibility!=='hidden'&&Number(hs.opacity)>.2&&hero.getBoundingClientRect().height>40),cls:window.__r517cls};
+              return {bundleCount:bundle.length,bundleMedia:bundle[0]?.media||'',bundleMatches:bundle[0]?matchMedia(bundle[0].media).matches:false,nativeOrbOwner:Boolean(bundle[0]?.dataset.fxNativeOrbReferenceR250),oldCount:oldLinks.length,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,heroVisible:Boolean(hero&&hs&&hs.display!=='none'&&hs.visibility!=='hidden'&&Number(hs.opacity)>.2&&hero.getBoundingClientRect().height>40),cls:window.__r517cls};
             });
             console.log(JSON.stringify(state,null,2));
             assert.equal(state.bundleCount,1);
             assert.equal(state.bundleMatches,true);
+            assert.equal(state.nativeOrbOwner,true);
             assert.equal(state.oldCount,0);
             assert.ok(state.overflow<=2,`overflow ${state.overflow}`);
             assert.equal(state.heroVisible,true);
