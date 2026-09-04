@@ -1,0 +1,71 @@
+name: P0 R519 Cloudflare robots normalization
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r519-cloudflare-robots-fix.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p0-r519-cloudflare-robots-normalization
+  cancel-in-progress: false
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.FORMATX_CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_WORKERS_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
+    steps:
+      - name: Require legitimate configured token
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$CLOUDFLARE_API_TOKEN" ]]; then
+            echo 'BLOCKED_EXTERNAL: no configured Cloudflare API token is available to this workflow.' >&2
+            exit 2
+          fi
+          echo 'Configured Cloudflare token is available; proceeding with the already-proven robots owner fix.'
+
+      - name: Disable Cloudflare managed robots prepend
+        shell: bash
+        run: |
+          set -euo pipefail
+          auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
+          zone_json="$(curl -fsS --retry 2 "${auth[@]}" 'https://api.cloudflare.com/client/v4/zones?name=formatxsuite.com&status=active&per_page=1')"
+          zone_id="$(python3 -c 'import json,sys; p=json.load(sys.stdin); assert p.get("success") is True,p; r=p.get("result") or []; print(r[0].get("id","") if r else "")' <<<"$zone_json")"
+          test -n "$zone_id"
+          before="$(curl -fsS --retry 2 "${auth[@]}" "https://api.cloudflare.com/client/v4/zones/$zone_id/bot_management")"
+          python3 -c 'import json,sys; p=json.load(sys.stdin); assert p.get("success") is True,p; r=p.get("result") or {}; print("BEFORE is_robots_txt_managed=",r.get("is_robots_txt_managed"),"bot_preference_sync_enabled=",r.get("bot_preference_sync_enabled"),"cf_robots_variant=",r.get("cf_robots_variant"))' <<<"$before"
+          update="$(curl -fsS --retry 2 -X PUT "${auth[@]}" --data '{"is_robots_txt_managed":false,"bot_preference_sync_enabled":false,"cf_robots_variant":"off"}' "https://api.cloudflare.com/client/v4/zones/$zone_id/bot_management")"
+          python3 -c 'import json,sys; p=json.load(sys.stdin); assert p.get("success") is True,p; r=p.get("result") or {}; assert r.get("is_robots_txt_managed") is False,r; assert ("bot_preference_sync_enabled" not in r or r.get("bot_preference_sync_enabled") is False),r; assert ("cf_robots_variant" not in r or r.get("cf_robots_variant")=="off"),r; print("UPDATED",r)' <<<"$update"
+
+      - name: Verify exact live canonical robots policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="$(cat <<'EOF'
+          # FormatX canonical robots policy — served by production Worker R499
+          User-agent: *
+          Allow: /
+          Disallow: /api/
+          Disallow: /scifi-ui/payment/
+
+          Sitemap: https://formatxsuite.com/sitemap.xml
+          EOF
+          )"
+          for attempt in $(seq 1 18); do
+            body="$(curl -fsS -H 'Cache-Control: no-cache' "https://formatxsuite.com/robots.txt?p0_r519=$GITHUB_RUN_ID-$attempt")"
+            if [[ "$body" == "$expected" ]]; then
+              echo 'PASS: live robots body exactly matches canonical Worker policy.'
+              printf '%s\n' "$body"
+              exit 0
+            fi
+            echo "Attempt $attempt: live response not canonical yet."
+            printf '%s\n' "$body"
+            sleep 5
+          done
+          echo 'FAIL: Cloudflare normalization API succeeded but live response is still not exact canonical policy.' >&2
+          exit 1
