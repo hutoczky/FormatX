@@ -7,8 +7,8 @@ const { chromium } = require('playwright');
 const ORIGIN = process.env.FORMATX_TEST_URL || 'https://formatxsuite.com/';
 const OUT = process.env.FORMATX_MAG_EVIDENCE_DIR || 'artifacts/live-mag-functional';
 const CANVAS = '#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
-const PAUSE = '#hero .fx-reference-pause';
 const ASK = '#hero .fx-reference-ask';
+const MANUAL_PAUSE = '#hero .fx-reference-pause';
 fs.mkdirSync(OUT, { recursive:true });
 
 function writeJson(name, value) {
@@ -27,7 +27,6 @@ async function safeScreenshot(page, fileName) {
 async function runtimeState(page) {
   return page.evaluate(({ canvasSel, pauseSel }) => {
     const canvas = document.querySelector(canvasSel);
-    const pause = document.querySelector(pauseSel);
     window.__fxMagVerifierIds ||= new WeakMap();
     window.__fxMagVerifierSeq ||= 0;
     const animations = canvas?.getAnimations?.().map(animation => {
@@ -51,14 +50,15 @@ async function runtimeState(page) {
       timelineTime:typeof timelineRaw === 'number' ? timelineRaw : null,
       visibilityState:document.visibilityState,
       reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,
-      pauseDataset:pause ? { ...pause.dataset } : null,
+      manualPauseCount:document.querySelectorAll(pauseSel).length,
       inlineAnimationPlayState:canvas?.style?.getPropertyValue('animation-play-state') || '',
       computedAnimationPlayState:computed?.animationPlayState || '',
       htmlDataset:{ ...document.documentElement.dataset },
       bodyDataset:document.body ? { ...document.body.dataset } : null,
+      overflow:Math.max(document.documentElement.scrollWidth, document.body?.scrollWidth || 0) - innerWidth,
       animations,
     };
-  }, { canvasSel:CANVAS, pauseSel:PAUSE });
+  }, { canvasSel:CANVAS, pauseSel:MANUAL_PAUSE });
 }
 
 function identity(state) {
@@ -73,41 +73,6 @@ function maxAdvance(start, end) {
       ? a.currentTime - before.currentTime
       : 0;
   }));
-}
-
-function maxAbsDelta(start, end) {
-  const first = new Map(start.animations.map(a => [a.id, a]));
-  return Math.max(0, ...end.animations.map(a => {
-    const before = first.get(a.id);
-    return typeof a.currentTime === 'number' && typeof before?.currentTime === 'number'
-      ? Math.abs(a.currentTime - before.currentTime)
-      : 0;
-  }));
-}
-
-async function waitForCommittedPlayback(page, paused) {
-  await page.waitForFunction(({ canvasSel, pauseSel, paused }) => {
-    const canvas = document.querySelector(canvasSel);
-    const button = document.querySelector(pauseSel);
-    if (!(canvas instanceof HTMLCanvasElement) || !(button instanceof HTMLButtonElement)) return false;
-    const animations = canvas.getAnimations();
-    if (!animations.length) return false;
-    const css = getComputedStyle(canvas).animationPlayState
-      .split(',')
-      .map(value => value.trim())
-      .filter(Boolean);
-    if (paused) {
-      return button.dataset.paused === 'true'
-        && css.length > 0
-        && css.every(value => value === 'paused')
-        && animations.every(animation => animation.playState !== 'running' && !animation.pending);
-    }
-    return button.dataset.paused !== 'true'
-      && css.some(value => value === 'running')
-      && animations.some(animation => animation.playState === 'running')
-      && animations.every(animation => !animation.pending)
-      && animations.every(animation => typeof animation.startTime === 'number' && Number.isFinite(animation.startTime));
-  }, { canvasSel:CANVAS, pauseSel:PAUSE, paused }, { timeout:5000 });
 }
 
 async function waitForClockProgress(page, { minAdvance=16, timeout=3000 } = {}) {
@@ -163,8 +128,10 @@ async function verifyNormal(browser, name, viewport, mobile) {
   const errors = [], failed = [];
   const evidence = { name, viewport, mobile, phases:{} };
   page.on('pageerror', error => errors.push(error.message));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-  page.on('requestfailed', request => failed.push(`${request.method()} ${request.url()} ${request.failure()?.errorText || ''}`));
+  page.on('console', message => { if (message.type() === 'error' && !/favicon|WebGL|WebGPU|GPU/i.test(message.text())) errors.push(message.text()); });
+  page.on('requestfailed', request => {
+    if (!/cloudflareinsights|favicon/i.test(request.url())) failed.push(`${request.method()} ${request.url()} ${request.failure()?.errorText || ''}`);
+  });
   try {
     await page.goto(`${ORIGIN}${ORIGIN.includes('?') ? '&' : '?'}mag-functional=${name}-${Date.now()}`, {
       waitUntil:'domcontentloaded',
@@ -178,13 +145,17 @@ async function verifyNormal(browser, name, viewport, mobile) {
     evidence.phases.initialClock = initial;
     const initialEnd = initial.second;
     assert.equal(initialEnd.htmlDataset.fxCoreRenderer, 'single-webgl-crystal-organism-r326', `${name}: non-canonical renderer`);
+    assert.equal(initialEnd.manualPauseCount, 0, `${name}: obsolete manual MAG PAUSE control is still present`);
+    assert.equal(initialEnd.htmlDataset.fxManualMagPauseContractR528, 'retired-living-core', `${name}: living-core manual-pause retirement marker missing`);
+    assert.ok(initialEnd.overflow <= 2, `${name}: horizontal overflow ${initialEnd.overflow}`);
+
     const size = await page.locator(CANVAS).evaluate(canvas => {
       const rect = canvas.getBoundingClientRect();
       return { w:rect.width, h:rect.height };
     });
     assert.ok(size.w > 220 && size.h > 220, `${name}: canvas too small ${JSON.stringify(size)}`);
     assert.ok(initialEnd.animations.some(a => a.playState === 'running'), `${name}: no running MAG animation`);
-    assert.ok(initial.maxAdvance > 50, `${name}: MAG animation clock did not advance: ${initial.maxAdvance}`);
+    assert.ok(initial.maxAdvance > 50, `${name}: living MAG animation clock did not advance: ${initial.maxAdvance}`);
 
     const ask = page.locator(ASK).first();
     assert.equal(await ask.isVisible(), true, `${name}: ASK missing`);
@@ -201,45 +172,11 @@ async function verifyNormal(browser, name, viewport, mobile) {
     evidence.ask = askHit;
     assert.ok(askHit.w >= 44 && askHit.h >= 44 && askHit.owns, `${name}: ASK hit target invalid ${JSON.stringify(askHit)}`);
 
-    const pause = page.locator(PAUSE).first();
-    assert.equal(await pause.isVisible(), true, `${name}: PAUSE missing`);
-
-    await pause.click();
-    await waitForCommittedPlayback(page, true);
-    const pausedStart = await runtimeState(page);
-    evidence.phases.pausedStart = pausedStart;
-    await page.waitForTimeout(700);
-    const pausedEnd = await runtimeState(page);
-    evidence.phases.pausedEnd = pausedEnd;
-    assert.deepEqual(identity(pausedEnd), identity(pausedStart), `${name}: PAUSE recreated animation`);
-    const pauseDelta = maxAbsDelta(pausedStart, pausedEnd);
-    evidence.pauseDeltaMs = pauseDelta;
-    assert.ok(pauseDelta < 80, `${name}: PAUSE did not stop animation ${pauseDelta}`);
-    assert.ok(pausedEnd.animations.every(a => a.playState !== 'running' && !a.pending), `${name}: PAUSE state did not settle`);
-    assert.ok(pausedEnd.computedAnimationPlayState.split(',').every(value => value.trim() === 'paused'), `${name}: computed CSS did not commit paused`);
-
-    await pause.click();
-    await waitForCommittedPlayback(page, false);
-    const resumeStart = await runtimeState(page);
-    evidence.phases.resumeStart = resumeStart;
-    assert.ok(resumeStart.animations.every(a => !a.pending), `${name}: RESUME remained pending`);
-    assert.ok(resumeStart.animations.every(a => typeof a.startTime === 'number' && Number.isFinite(a.startTime)), `${name}: RESUME startTime unresolved`);
-    assert.ok(resumeStart.computedAnimationPlayState.split(',').some(value => value.trim() === 'running'), `${name}: computed CSS did not commit running`);
-
-    const resumed = await waitForClockProgress(page, { minAdvance:16, timeout:3000 });
-    evidence.phases.resumeClock = resumed;
-    evidence.phases.resumeEnd = resumed.second;
-    evidence.resumeAdvanceMs = resumed.maxAdvance;
-    evidence.resumeTimelineAdvanceMs = resumed.timelineAdvance;
-    assert.deepEqual(identity(resumed.second), identity(resumeStart), `${name}: RESUME recreated animation`);
-    assert.ok(resumed.second.animations.some(a => a.playState === 'running'), `${name}: RESUME state not running`);
-    assert.ok(resumed.second.animations.every(a => !a.pending), `${name}: RESUME pending state returned`);
-    assert.ok(resumed.maxAdvance > 16, `${name}: RESUME clock did not advance: ${resumed.maxAdvance}`);
-    if (typeof resumed.timelineAdvance === 'number') {
-      assert.ok(resumed.timelineAdvance > 16, `${name}: document timeline did not advance: ${resumed.timelineAdvance}`);
-    }
-    assert.equal(resumed.second.htmlDataset.fxReferenceMotionPaused, 'false', `${name}: user pause flag remained set`);
-    assert.equal(resumed.second.htmlDataset.fxPrimaryMagPlaybackR498, 'running', `${name}: primary playback not running`);
+    const followup = await waitForClockProgress(page, { minAdvance:16, timeout:3000 });
+    evidence.phases.followupClock = followup;
+    assert.deepEqual(identity(followup.second), identity(initialEnd), `${name}: living MAG recreated animation unexpectedly`);
+    assert.ok(followup.maxAdvance > 16, `${name}: living MAG motion stopped unexpectedly: ${followup.maxAdvance}`);
+    assert.equal(followup.second.manualPauseCount, 0, `${name}: manual pause control reappeared after runtime stabilization`);
 
     const gl = await page.locator(CANVAS).evaluate(canvas => {
       const context = canvas.getContext('webgl2') || canvas.getContext('webgl');
@@ -257,9 +194,8 @@ async function verifyNormal(browser, name, viewport, mobile) {
       renderer:initialEnd.htmlDataset.fxCoreRenderer,
       size,
       animationAdvanceMs:initial.maxAdvance,
-      pauseDeltaMs:pauseDelta,
-      resumeAdvanceMs:resumed.maxAdvance,
-      resumeTimelineAdvanceMs:resumed.timelineAdvance,
+      followupAdvanceMs:followup.maxAdvance,
+      manualPauseCount:followup.second.manualPauseCount,
       ask:askHit,
       gl,
       screenshotError:evidence.screenshotError,
@@ -308,17 +244,19 @@ async function verifyFallback(browser) {
     const target = page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252').first();
     if (await target.isVisible()) await target.click().catch(() => {});
     await page.waitForTimeout(1800);
-    const state = await page.evaluate(() => ({
+    const state = await page.evaluate(pauseSel => ({
       hero:Boolean(document.querySelector('#hero')),
       lead:(document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
       live:Boolean(document.querySelector('#live-os,#live-os-overview,[data-fx-live-os]')),
       proof:Boolean(document.querySelector('[data-fx-award-proof],.fx-proof-grid')),
       overflow:Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+      manualPauseCount:document.querySelectorAll(pauseSel).length,
       renderer:document.documentElement.dataset.fxCoreRenderer || '',
       fallback:document.documentElement.dataset.fxCrystalOrganismR326 || document.documentElement.dataset.fxCoreReal3d || '',
-    }));
+    }), MANUAL_PAUSE);
     assert.ok(state.hero && state.lead > 40 && state.live && state.proof, 'WebGL fallback lost meaningful product content');
     assert.ok(state.overflow <= 2, `WebGL fallback overflow ${state.overflow}`);
+    assert.equal(state.manualPauseCount, 0, 'WebGL fallback exposed obsolete manual MAG PAUSE control');
     assert.equal(errors.length, 0, `WebGL fallback page errors ${errors.join(' | ')}`);
     return state;
   } finally {
@@ -341,15 +279,17 @@ async function verifyReduced(browser) {
       timeout:60000,
     });
     await page.waitForTimeout(7500);
-    const state = await page.evaluate(() => ({
+    const state = await page.evaluate(pauseSel => ({
       scheduler:document.documentElement.dataset.fxP0MotionSchedulerR490 || '',
       hero:Boolean(document.querySelector('#hero')),
       lead:(document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
       overflow:Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
-    }));
+      manualPauseCount:document.querySelectorAll(pauseSel).length,
+    }), MANUAL_PAUSE);
     assert.ok(state.hero && state.lead > 40, 'Reduced-motion hero unavailable');
     assert.ok(/reduced-motion-static|armed|committed/.test(state.scheduler), `Reduced-motion unexpectedly booted heavy runtime: ${state.scheduler}`);
     assert.ok(state.overflow <= 2, `Reduced-motion overflow ${state.overflow}`);
+    assert.equal(state.manualPauseCount, 0, 'Reduced-motion mode exposed obsolete manual MAG PAUSE control');
     return state;
   } finally {
     await context.close();
@@ -371,6 +311,7 @@ async function verifyReduced(browser) {
     const report = {
       auditedSha:process.env.AUDITED_SHA || '',
       url:ORIGIN,
+      contract:'r528-living-core-no-manual-pause',
       desktop:await verifyNormal(browser, 'desktop', { width:1440, height:900 }, false),
       mobile:await verifyNormal(browser, 'mobile', { width:390, height:844 }, true),
       fallback:await verifyFallback(browser),
