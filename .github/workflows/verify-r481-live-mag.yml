@@ -1,5 +1,5 @@
 name: Verify R482 live MAG semantic replacement
-run-name: R482 semantic replacement for ${{ github.event.workflow_run.head_sha || github.sha }}
+run-name: R482 current living-core semantic replacement for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   workflow_run:
@@ -55,8 +55,13 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate semantic replacement source
-        run: node --check .github/scripts/validate-r522-semantic-mag.cjs
+      - name: Validate current living-core semantic source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
+          node --check .github/scripts/validate-mag-living-core-r528.cjs
+          node .github/scripts/validate-mag-living-core-r528.cjs
 
       - name: Reuse system Chrome
         shell: bash
@@ -67,7 +72,7 @@ jobs:
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
 
-      - name: Verify current mobile and desktop MAG semantics
+      - name: Verify current mobile and desktop living MAG semantics
         run: node .github/scripts/validate-r522-semantic-mag.cjs
 
       - uses: actions/upload-artifact@v4
@@ -87,10 +92,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='R482 legacy gate replaced by current bounded MAG semantics'
+            description='R482 replaced by renderer, living motion, ASK, reduced-motion and fallback semantics'
           else
             state=failure
-            description='R482 semantic replacement failed'
+            description='R482 current semantic replacement failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
