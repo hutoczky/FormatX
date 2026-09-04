@@ -13,6 +13,7 @@ const STAGE='#hero .fx-crystal-organism-r326-stage';
 fs.mkdirSync(OUT,{recursive:true});
 
 function instrument(){
+  const canvasSelector='#hero .fx-crystal-organism-r326-canvas';
   const audit=window.__r528VisualAudit={frames:0,maximumPhase:-1,phases:[],events:[]};
   const names=new WeakMap();
   const states=new WeakMap();
@@ -37,7 +38,7 @@ function instrument(){
     proto.depthMask=function(enabled){stateFor(this).depthWrite=enabled;return depthMask.call(this,enabled);};
     proto.drawArrays=function(...args){
       const result=drawArrays.apply(this,args);const state=stateFor(this);
-      if(this.canvas?.matches(CANVAS)&&state.layer===0&&state.depthWrite){
+      if(this.canvas?.matches(canvasSelector)&&state.layer===0&&state.depthWrite){
         audit.frames++;audit.maximumPhase=Math.max(audit.maximumPhase,state.phase);
         if(state.phase>=0){audit.phases.push(state.phase);if(audit.phases.length>180)audit.phases.shift();}
       }
