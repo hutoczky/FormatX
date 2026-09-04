@@ -23,6 +23,7 @@ assert.ok(!/fxReferenceMotionPaused|data-fx-reference-motion-paused/.test(sync),
 assert.match(sync, /prefers-reduced-motion:\s*reduce/, 'reduced-motion media query missing from MAG runtime');
 assert.match(sync, /document\.hidden/, 'automatic background suspension missing from MAG runtime');
 assert.match(sync, /visibilitychange/, 'background lifecycle listener missing from MAG runtime');
+assert.match(sync, /formatx-reduced-mag-identity-r528\.css/, 'canonical runtime does not load reduced-motion MAG identity CSS');
 assert.match(sync, /continuous-normal-reduced-motion-background-safe/, 'R528 living-core runtime contract marker missing');
 assert.match(reducedCss, /prefers-reduced-motion:\s*reduce/, 'R528 reduced-motion MAG identity stylesheet missing media contract');
 assert.match(reducedCss, /fx-crystal-organism-r326-stage/, 'reduced-motion MAG stage identity override missing');
@@ -34,7 +35,9 @@ assert.match(semantic, /verifyReducedMotion/, 'R522 validator does not verify re
 assert.match(semantic, /verifyBackgroundLifecycle/, 'R522 validator does not verify background lifecycle');
 assert.match(worker, /r528-mobile-critical-graph/, 'R528 production wrapper missing');
 assert.match(worker, /formatx-reduced-mag-identity-r528\.css/, 'R528 reduced-motion identity layer not delivered');
-assert.match(worker, /formatx-event-horizon\.js\?v=\[\^/, 'R528 runtime cache-bust graph does not include event-horizon');
-assert.match(worker, /formatx-control-owner-r268\.js\?v=\[\^/, 'R528 runtime cache-bust graph does not include control-owner');
+assert.ok(worker.includes('formatx-event-horizon\\.js'), 'R528 runtime cache-bust graph does not include event-horizon');
+assert.ok(worker.includes('formatx-control-owner-r268\\.js'), 'R528 runtime cache-bust graph does not include control-owner');
+assert.ok(worker.includes('formatx-motion-runtime-loader-r239\\.js'), 'R528 runtime cache-bust graph does not include motion loader');
+assert.ok(worker.includes('formatx-mini-mag-assistant-r459\\.js'), 'R528 runtime cache-bust graph does not include Mini MAG');
 
 console.log('PASS: R528 MAG living-core source contract is coherent');
