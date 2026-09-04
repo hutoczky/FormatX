@@ -1,0 +1,70 @@
+name: P0 R519 deferred style owner A/B v2
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r519-deferred-style-owner-ab-v2.yml']
+permissions:
+  contents: read
+env:
+  CANDIDATE_REF: p0-r518-apex-buildtmp
+  CANDIDATE_SHA: 0c983b25cbabecbdd73c8df760638c0c7554663b
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+        with: {ref: '${{ env.CANDIDATE_REF }}', fetch-depth: 1}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', cache: npm, cache-dependency-path: billing-worker/package-lock.json}
+      - name: Prepare exact R518 diagnostic-only exclusion switch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test -z "$(git status --porcelain)"
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"; echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/scripts/formatx-deferred-css-r487.js'); s=p.read_text()
+          a="    const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));"
+          b="    const diagSkipStyle = new URLSearchParams(location.search).get('diag_skip_style') || '';\n"+a
+          assert a in s; s=s.replace(a,b,1)
+          a="      const targetMedia = link.dataset.fxR487Media || 'all';"
+          b="      if (diagSkipStyle && link.href.includes(diagSkipStyle)) { link.dataset.fxDiagSkippedStyle = diagSkipStyle; continue; }\n"+a
+          assert a in s; p.write_text(s.replace(a,b,1))
+          PY
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
+          node <<'NODE'
+          const fs=require('node:fs'),c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r519ab.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r519ab.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r519ab.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/r519ab.log"; exit 1
+      - name: Screen deferred styles
+        shell: bash
+        run: |
+          set -euo pipefail; mkdir -p artifacts/r519ab
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs'),{chromium}=require('playwright');
+          const V=[['baseline',''],['continuous','formatx-continuous-scroll.css'],['seamless','formatx-seamless-loop.css'],['platform','platform-status.css'],['copy','formatx-copy-polish.css'],['feedback','formatx-feedback.css'],['language','single-language-toggle.css'],['content','formatx-content-standard.css'],['award','formatx-award-readiness.css']];
+          const med=a=>{a=[...a].sort((x,y)=>x-y);return a.length%2?a[(a.length-1)/2]:(a[a.length/2-1]+a[a.length/2])/2};
+          async function one(name,skip,i){
+            const b=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            const c=await b.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'}),p=await c.newPage();
+            await p.addInitScript(()=>{window.__m={paint:[],lcp:[],shift:[],long:[]};try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.paint.push({n:e.name,t:e.startTime}))).observe({type:'paint',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.lcp.push(e.startTime))).observe({type:'largest-contentful-paint',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{if(!e.hadRecentInput)window.__m.shift.push(e.value)})).observe({type:'layout-shift',buffered:true})}catch{}try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__m.long.push(e.duration))).observe({type:'longtask',buffered:true})}catch{}});
+            const cdp=await c.newCDPSession(p);await cdp.send('Performance.enable');
+            const q=skip?'&diag_skip_style='+encodeURIComponent(skip):'';const r=await p.goto(`https://formatxsuite.com:8787/?ab=${name}-${i}-${Date.now()}${q}`,{waitUntil:'domcontentloaded',timeout:60000});await p.waitForTimeout(3000);
+            const m=await p.evaluate(()=>({fcp:window.__m.paint.find(x=>x.n==='first-contentful-paint')?.t??0,lcp:window.__m.lcp.at(-1)??0,cls:window.__m.shift.reduce((a,b)=>a+b,0),tbt:window.__m.long.reduce((a,d)=>a+Math.max(0,d-50),0),long:window.__m.long,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,skipped:[...document.querySelectorAll('[data-fx-diag-skipped-style]')].map(x=>x.href)}));
+            const pm=(await cdp.send('Performance.getMetrics')).metrics.reduce((o,x)=>(o[x.name]=x.value,o),{});await c.close();await b.close();return{name,skip,run:i,status:r?.status()||0,...m,layout:(pm.LayoutDuration||0)*1000,recalc:(pm.RecalcStyleDuration||0)*1000,task:(pm.TaskDuration||0)*1000,script:(pm.ScriptDuration||0)*1000};
+          }
+          (async()=>{const rows=[];for(const [n,s] of V)for(let i=1;i<=(n==='baseline'?5:3);i++)rows.push(await one(n,s,i));const sum=V.map(([n,s])=>{const x=rows.filter(r=>r.name===n);return{name:n,skip:s,n:x.length,medianTbt:med(x.map(r=>r.tbt)),maxTbt:Math.max(...x.map(r=>r.tbt)),medianLayout:med(x.map(r=>r.layout)),medianRecalc:med(x.map(r=>r.recalc)),medianTask:med(x.map(r=>r.task)),medianFcp:med(x.map(r=>r.fcp)),medianLcp:med(x.map(r=>r.lcp)),maxCls:Math.max(...x.map(r=>r.cls)),maxOverflow:Math.max(...x.map(r=>r.overflow)),skipObserved:n==='baseline'||x.every(r=>r.skipped.some(u=>u.includes(s)))};});console.log('STYLE_AB_SUMMARY',JSON.stringify(sum,null,2));console.log('STYLE_AB_ROWS',JSON.stringify(rows,null,2));fs.writeFileSync('artifacts/r519ab/summary.json',JSON.stringify(sum,null,2));fs.writeFileSync('artifacts/r519ab/rows.json',JSON.stringify(rows,null,2));})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: p0-r519-deferred-style-owner-ab-v2, path: artifacts/r519ab/, retention-days: 30}
