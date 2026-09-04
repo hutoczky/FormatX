@@ -1,0 +1,151 @@
+name: P0 R521 deferred award Lighthouse A/B
+run-name: Prove deferred award stylesheet LCP ownership
+
+on:
+  push:
+    branches: [p0-r521-award-defer-ab-76b79fe]
+    paths:
+      - '.github/workflows/p0-r521-award-defer-lighthouse-ab.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      BASE_SHA: 76b79fe75eebc9b0ce3998a8111eb8dbf539efb9
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Start exact R516 source with cached dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          npm ci --prefix billing-worker --prefer-offline
+          npm install --no-save --no-package-lock --no-audit --no-fund lighthouse@12.8.2
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.ab.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.ab.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r521-award-ab-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do
+            if curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r521-award-ab-worker.log" || true
+          exit 1
+
+      - name: Write exact desktop Lighthouse probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r521-award-ab
+          cat > "$RUNNER_TEMP/run-lh.sh" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          label="$1"
+          mkdir -p "artifacts/r521-award-ab/$label"
+          for i in 1 2 3; do
+            ./node_modules/.bin/lighthouse "https://formatxsuite.com:8787/?r521_award_ab=${label}-${i}-${GITHUB_RUN_ID}" \
+              --quiet \
+              --output=json \
+              --output-path="artifacts/r521-award-ab/$label/run-$i.json" \
+              --preset=desktop \
+              --only-categories=performance \
+              --max-wait-for-load=60000 \
+              --chrome-path="$CHROME_BIN" \
+              --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors"
+          done
+          SH
+          chmod +x "$RUNNER_TEMP/run-lh.sh"
+
+      - name: Baseline desktop Lighthouse x3
+        shell: bash
+        run: "$RUNNER_TEMP/run-lh.sh baseline"
+
+      - name: Apply diagnostic-only award delivery isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('billing-worker/src/production-content-entry.js')
+          s=p.read_text()
+          old="  '/scifi-ui/styles/formatx-award-readiness.css',\n"
+          assert old in s
+          p.write_text(s.replace(old,'',1))
+          PY
+          if grep -A20 -F 'const DEFERRED_STYLE_PATHS' billing-worker/src/production-content-entry.js | grep -Fq "'/scifi-ui/styles/formatx-award-readiness.css'"; then
+            echo 'award stylesheet still deferred' >&2
+            exit 1
+          fi
+          sleep 3
+
+      - name: Treatment desktop Lighthouse x3
+        shell: bash
+        run: "$RUNNER_TEMP/run-lh.sh treatment"
+
+      - name: Compare exact LCP path
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          function read(label){
+            const rows=[];
+            for(let i=1;i<=3;i++){
+              const l=JSON.parse(fs.readFileSync(`artifacts/r521-award-ab/${label}/run-${i}.json`));
+              const a=l.audits;
+              const item=a['largest-contentful-paint-element']?.details?.items?.[0]?.items?.[0] || a['largest-contentful-paint-element']?.details?.items?.[0] || null;
+              rows.push({
+                performance:Math.round((l.categories.performance.score||0)*100),
+                fcp:a['first-contentful-paint']?.numericValue??null,
+                lcp:a['largest-contentful-paint']?.numericValue??null,
+                si:a['speed-index']?.numericValue??null,
+                tbt:a['total-blocking-time']?.numericValue??null,
+                cls:a['cumulative-layout-shift']?.numericValue??null,
+                ttfb:a['server-response-time']?.numericValue??null,
+                lcpElement:item?.node?.snippet||item?.node?.selector||null
+              });
+            }
+            return rows;
+          }
+          const median=x=>{const a=[...x].sort((a,b)=>a-b);return a[Math.floor(a.length/2)]};
+          const stats=rows=>({
+            perf:rows.map(r=>r.performance),
+            medianLcp:median(rows.map(r=>r.lcp)),maxLcp:Math.max(...rows.map(r=>r.lcp)),
+            medianTbt:median(rows.map(r=>r.tbt)),maxTbt:Math.max(...rows.map(r=>r.tbt)),
+            maxCls:Math.max(...rows.map(r=>r.cls)),medianTtfb:median(rows.map(r=>r.ttfb))
+          });
+          const baseline=read('baseline'), treatment=read('treatment');
+          const bs=stats(baseline), ts=stats(treatment);
+          const out={baseSha:process.env.BASE_SHA,baseline,treatment,baselineStats:bs,treatmentStats:ts,deltaMedianLcp:ts.medianLcp-bs.medianLcp,deltaMaxLcp:ts.maxLcp-bs.maxLcp,deltaMedianTbt:ts.medianTbt-bs.medianTbt};
+          console.log('R521_AWARD_AB',JSON.stringify(out,null,2));
+          fs.writeFileSync('artifacts/r521-award-ab/summary.json',JSON.stringify(out,null,2)+'\n');
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r521-deferred-award-lighthouse-ab
+          path: artifacts/r521-award-ab/
+          include-hidden-files: true
+          retention-days: 30
