@@ -1,0 +1,38 @@
+name: Diagnose R517 live stylesheet order
+run-name: R517 exact R516 stylesheet ownership order
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths: ['.github/workflows/diagnose-r517-stylesheet-order.yml']
+permissions:
+  contents: read
+env:
+  AUDITED_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+jobs:
+  order:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Confirm exact production and dump mobile stylesheet order
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags --depth=1 origin "$AUDITED_SHA"
+          git show "$AUDITED_SHA:docs/p0-validation-version.txt" > "$RUNNER_TEMP/expected.txt"
+          curl -fsS --max-time 30 'https://formatxsuite.com/p0-validation-version.txt' -o "$RUNNER_TEMP/live.txt"
+          cmp -s "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/live.txt"
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          CHROME_PATH="$chrome" node <<'NODE'
+          const {chromium}=require('playwright-core');
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true,args:['--headless=new','--no-sandbox']});
+            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,locale:'hu-HU',reducedMotion:'no-preference'});
+            const page=await context.newPage();
+            await page.goto('https://formatxsuite.com/',{waitUntil:'domcontentloaded',timeout:60000});
+            const result=await page.evaluate(()=>[...document.head.querySelectorAll('link[rel="stylesheet"]')].map((l,i)=>({i,href:l.href,media:l.media||'all',matches:l.media?matchMedia(l.media).matches:true,disabled:l.disabled,fetchPriority:l.fetchPriority||'',deferred:l.dataset.fxR487DeferredStyle||'',targetMedia:l.dataset.fxR487Media||''})));
+            console.log('R517_STYLESHEET_ORDER',JSON.stringify(result,null,2));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
