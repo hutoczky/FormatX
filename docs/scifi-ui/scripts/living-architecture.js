@@ -2,17 +2,6 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  if (AUDIT_MODE) {
-    const canvas = document.getElementById('fx-apex-canvas');
-    if (canvas) canvas.hidden = true;
-    ROOT.classList.add('fx-audit-mode');
-    ROOT.dataset.fxThree = 'audit-skip';
-    ROOT.dataset.fxLighthouse = 'ready';
-    ROOT.dataset.fxLivingArchitecture = 'audit-skip';
-    dispatchEvent(new CustomEvent('formatx:livingready'));
-    return;
-  }
 
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
   const PLANS = {
