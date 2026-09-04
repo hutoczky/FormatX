@@ -1,5 +1,5 @@
-name: Verify current semantic MAG R522
-run-name: R522 semantic MAG for ${{ github.event.workflow_run.head_sha || github.sha }}
+name: Verify current semantic MAG R528
+run-name: R528 living-core MAG semantics for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   workflow_run:
@@ -12,7 +12,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-r522-semantic-${{ github.event.workflow_run.head_sha || github.sha }}
+  group: formatx-r528-semantic-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
     env:
       AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       FORMATX_TEST_URL: https://formatxsuite.com/
-      FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r522-semantic-mag
+      FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r528-semantic-mag
     steps:
       - uses: actions/checkout@v5
         with:
@@ -38,7 +38,7 @@ jobs:
           set -euo pipefail
           for attempt in $(seq 1 60); do
             if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' \
-              "https://formatxsuite.com/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-r522-$attempt" \
+              "https://formatxsuite.com/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-r528-$attempt" \
               -o "$RUNNER_TEMP/live-p0.txt" \
               && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
               echo 'Exact production revision is live.'
@@ -60,8 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check .github/scripts/validate-r522-semantic-mag.cjs
-          node --check .github/scripts/validate-mag-pause-owner-r485.cjs
-          node .github/scripts/validate-mag-pause-owner-r485.cjs
+          node --check .github/scripts/validate-live-mag-functional.cjs
 
       - name: Reuse system Chrome
         shell: bash
@@ -72,14 +71,14 @@ jobs:
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
 
-      - name: Semantic MAG bounded functional proof
+      - name: Semantic living-core MAG bounded functional proof
         run: node .github/scripts/validate-r522-semantic-mag.cjs
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r522-semantic-mag-${{ env.AUDITED_SHA }}
-          path: artifacts/r522-semantic-mag/
+          name: r528-semantic-mag-${{ env.AUDITED_SHA }}
+          path: artifacts/r528-semantic-mag/
           if-no-files-found: warn
           retention-days: 30
 
@@ -92,13 +91,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Current semantic MAG, PAUSE/RESUME, ASK and fallback passed'
+            description='Living MAG motion, ASK, reduced-motion and fallback passed'
           else
             state=failure
-            description='Current semantic MAG contract failed'
+            description='Current living-core MAG semantic contract failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
-            -f context='FormatX R522 semantic MAG gate' \
+            -f context='FormatX R528 semantic MAG gate' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
