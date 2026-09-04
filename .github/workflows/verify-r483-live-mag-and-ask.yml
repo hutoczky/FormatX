@@ -61,7 +61,7 @@ jobs:
           npm install --no-save --no-package-lock playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Verify real production MAG renderer and ASK behavior
+      - name: Verify real production living MAG renderer and ASK behavior
         run: node .github/scripts/validate-live-mag-functional.cjs
 
       - name: Upload functional MAG evidence
@@ -82,7 +82,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Canonical renderer, animation, pause/resume, ASK and fallback passed'
+            description='Canonical living motion, ASK, reduced-motion and fallback passed'
           else
             state=failure
             description='Canonical production MAG/ASK functional verification failed'
