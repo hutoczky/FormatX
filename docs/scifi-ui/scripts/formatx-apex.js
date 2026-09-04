@@ -78,6 +78,7 @@
   }
 
   function applyLanguage(next, persist) {
+    const shellLanguage = ROOT.lang === 'en' ? 'en' : 'hu';
     language = next === 'en' ? 'en' : 'hu';
     ROOT.lang = language;
     document.querySelectorAll('[data-hu][data-en]').forEach(element => {
@@ -94,7 +95,10 @@
       history.replaceState({}, '', url.pathname + url.search + url.hash);
     }
     updateLinks();
-    updatePrice();
+    // R519: the static shell already owns the default HUF first-paint price.
+    // Avoid cold Intl.NumberFormat construction when language did not change;
+    // interaction and a real startup language change still refresh the price.
+    if (persist || shellLanguage !== language) updatePrice();
     updateFlow(activeFlow);
     dispatchEvent(new CustomEvent('formatx:languagechange'));
   }
@@ -326,7 +330,6 @@
     scenes();
     flow();
     pointerVariables();
-    updatePrice();
     latestRelease();
     setScene(activeScene);
     ROOT.dataset.fxApex = 'controller-performance-v2';
