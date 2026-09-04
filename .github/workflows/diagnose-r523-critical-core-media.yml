@@ -1,0 +1,63 @@
+name: Diagnose R523 critical-core mobile media
+run-name: R523 critical-core mobile media for ${{ github.sha }}
+
+on:
+  push:
+    branches: [p0-r523-critical-core-media-diagnostic]
+    paths:
+      - '.github/workflows/diagnose-r523-critical-core-media.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Install exact Worker and runner Chrome driver
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --prefix billing-worker --no-audit --prefer-offline
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r523-local.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+      - name: Start exact current Worker locally
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r523
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r523-local.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r523-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ -o artifacts/r523/raw.html && break; sleep 1; done
+          test -s artifacts/r523/raw.html
+          grep -o '<link[^>]*formatx-critical-core-r227.css[^>]*>' artifacts/r523/raw.html | tee artifacts/r523/raw-critical-core.txt
+      - name: Inspect real mobile browser media state and mutations
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE' | tee artifacts/r523/browser.txt
+          const fs=require('node:fs');const {chromium}=require('playwright-core');
+          (async()=>{const b=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true,args:['--headless=new','--no-sandbox','--ignore-certificate-errors','--disable-dev-shm-usage']});const c=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,ignoreHTTPSErrors:true,locale:'hu-HU'});const p=await c.newPage();await p.addInitScript(()=>{window.__cc=[];const snap=(op)=>{const l=document.querySelector('link[data-fx-critical-core-r227]');window.__cc.push({t:performance.now(),op,outer:l?.outerHTML||'',media:l?.media||'',matches:l?.media?matchMedia(l.media).matches:null,sheet:Boolean(l?.sheet)});};const start=()=>{snap('observer-start');new MutationObserver(ms=>{for(const m of ms){const target=m.target;if(target instanceof HTMLLinkElement&&(target.matches('[data-fx-critical-core-r227]')||String(target.href).includes('formatx-critical-core-r227.css')))snap(`mutation:${m.type}:${m.attributeName||''}`)}}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['media','href','data-fx-r487-media','data-fx-r487-deferred-style'],childList:true});};if(document.documentElement)start();else new MutationObserver((_,o)=>{if(document.documentElement){o.disconnect();start()}}).observe(document,{childList:true,subtree:true});});const r=await p.goto('https://formatxsuite.com:8787/',{waitUntil:'domcontentloaded',timeout:60000});const take=async label=>p.evaluate(label=>{const l=document.querySelector('link[data-fx-critical-core-r227]');const perf=[...performance.getEntriesByType('resource')].find(e=>e.name.includes('formatx-critical-core-r227.css'));return{label,status:document.readyState,outer:l?.outerHTML||'',media:l?.media||'',matches:l?.media?matchMedia(l.media).matches:null,sheet:Boolean(l?.sheet),resource:perf?{startTime:perf.startTime,responseEnd:perf.responseEnd,transferSize:perf.transferSize,initiatorType:perf.initiatorType}:null,trace:window.__cc||[]}},label);const states=[];states.push(await take('domcontentloaded'));await p.waitForTimeout(250);states.push(await take('250ms'));await p.waitForTimeout(1000);states.push(await take('1250ms'));console.log(JSON.stringify({http:r.status(),states},null,2));fs.writeFileSync('artifacts/r523/state.json',JSON.stringify({http:r.status(),states},null,2));await c.close();await b.close()})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r523-critical-core-media-${{ github.sha }}
+          path: artifacts/r523/
+          retention-days: 30
+      - name: Show Worker log
+        if: always()
+        run: cat "$RUNNER_TEMP/r523-worker.log" || true
