@@ -1,0 +1,35 @@
+name: P0 R527 preflight
+
+on:
+  push:
+    branches: [p0-r527-wrapper-0457c939]
+    paths:
+      - '.github/workflows/p0-r527-preflight.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: p0-r527-wrapper-0457c939
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Exact production preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check billing-worker/src/production-content-entry-r527.js
+          node .github/scripts/production-preflight.cjs
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
+          node --check .github/scripts/verify-apex-shell-r500.cjs
+          git diff --check
+          npm ci --prefix billing-worker --prefer-offline
+          (cd billing-worker && npx wrangler deploy --dry-run --outdir="$RUNNER_TEMP/r527-worker")
