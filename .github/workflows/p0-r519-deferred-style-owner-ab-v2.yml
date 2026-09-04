@@ -1,4 +1,4 @@
-name: P0 R519 CSS scheduler proof
+name: P0 R519 exact R518 cold attribution
 
 on:
   push:
@@ -6,39 +6,24 @@ on:
       - p0-r517-owner-76b79fe
     paths:
       - .github/workflows/p0-r519-deferred-style-owner-ab-v2.yml
-      - diagnostics/p0-r519-css-scheduler-ab.sh
 
 permissions:
   contents: read
 
 jobs:
-  scheduler-proof:
+  cold-attribution:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        mode:
-          - batch
-          - sequential
-        replica:
-          - 1
-          - 2
-          - 3
+        replica: [1, 2, 3, 4, 5, 6, 7, 8]
 
     steps:
-      - name: Checkout diagnostic harness
-        uses: actions/checkout@v5
-        with:
-          ref: p0-r517-owner-76b79fe
-          path: diag
-          fetch-depth: 1
-
       - name: Checkout exact R518 candidate
         uses: actions/checkout@v5
         with:
           ref: p0-r518-apex-buildtmp
-          path: candidate
           fetch-depth: 1
 
       - name: Set up Node
@@ -46,24 +31,166 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: candidate/billing-worker/package-lock.json
+          cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Verify exact candidate and run scheduler proof
+      - name: Start exact R518 unchanged
         shell: bash
-        working-directory: candidate
-        env:
-          CSS_MODE: ${{ matrix.mode }}
-          REPLICA: ${{ matrix.replica }}
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "0c983b25cbabecbdd73c8df760638c0c7554663b"
           test -z "$(git status --porcelain)"
-          bash ../diag/diagnostics/p0-r519-css-scheduler-ab.sh
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.cold.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts >/dev/null
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.cold.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r519-cold-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do
+            curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r519-cold-worker.log" || true
+          exit 1
 
-      - name: Upload scheduler evidence
+      - name: Capture first-navigation CPU and timeline attribution
+        shell: bash
+        env:
+          REPLICA: ${{ matrix.replica }}
+        run: |
+          set -euo pipefail
+          mkdir -p "artifacts/r519-cold-r${REPLICA}"
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          const replica=Number(process.env.REPLICA);
+          const out=`artifacts/r519-cold-r${replica}/summary.json`;
+
+          const round=n=>Math.round(n*1000)/1000;
+          const keyFrame=f=>`${f.url||'(internal)'} :: ${f.functionName||'(anonymous)'}`;
+
+          (async()=>{
+            const browser=await chromium.launch({
+              executablePath:process.env.CHROME_BIN,
+              headless:true,
+              args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']
+            });
+            const context=await browser.newContext({
+              ignoreHTTPSErrors:true,
+              viewport:{width:1440,height:900},
+              locale:'hu-HU',
+              colorScheme:'dark'
+            });
+            const page=await context.newPage();
+            await page.addInitScript(()=>{
+              window.__cold={paint:[],lcp:[],shift:[],long:[]};
+              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__cold.paint.push({name:e.name,start:e.startTime}))).observe({type:'paint',buffered:true})}catch{}
+              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__cold.lcp.push({start:e.startTime,renderTime:e.renderTime,loadTime:e.loadTime,size:e.size,tag:e.element?.tagName||'',id:e.element?.id||'',cls:e.element?.className||''}))).observe({type:'largest-contentful-paint',buffered:true})}catch{}
+              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{if(!e.hadRecentInput)window.__cold.shift.push({start:e.startTime,value:e.value})})).observe({type:'layout-shift',buffered:true})}catch{}
+              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__cold.long.push({start:e.startTime,duration:e.duration}))).observe({type:'longtask',buffered:true})}catch{}
+            });
+
+            const cdp=await context.newCDPSession(page);
+            await cdp.send('Performance.enable');
+            await cdp.send('Profiler.enable');
+            await cdp.send('Profiler.setSamplingInterval',{interval:100});
+            await cdp.send('Profiler.start');
+
+            const trace=[];
+            cdp.on('Tracing.dataCollected',ev=>trace.push(...ev.value));
+            const traceDone=new Promise(resolve=>cdp.once('Tracing.tracingComplete',resolve));
+            await cdp.send('Tracing.start',{
+              categories:'devtools.timeline,blink.user_timing,v8,disabled-by-default-devtools.timeline',
+              options:'record-as-much-as-possible',
+              transferMode:'ReportEvents'
+            });
+
+            const response=await page.goto(`https://formatxsuite.com:8787/?cold=${replica}-${Date.now()}`,{
+              waitUntil:'domcontentloaded',timeout:60000
+            });
+            await page.waitForTimeout(3000);
+
+            const perf=await page.evaluate(()=>{
+              const nav=performance.getEntriesByType('navigation')[0];
+              const resources=performance.getEntriesByType('resource').map(r=>({
+                name:r.name.replace(location.origin,''),
+                initiator:r.initiatorType,
+                start:r.startTime,duration:r.duration,
+                responseStart:r.responseStart,responseEnd:r.responseEnd,
+                transferSize:r.transferSize,encodedBodySize:r.encodedBodySize
+              }));
+              return {
+                href:location.href,
+                fcp:window.__cold.paint.find(x=>x.name==='first-contentful-paint')?.start??0,
+                lcp:window.__cold.lcp.at(-1)?.start??0,
+                lcpEntries:window.__cold.lcp,
+                cls:window.__cold.shift.reduce((a,b)=>a+b.value,0),
+                shifts:window.__cold.shift,
+                tbt:window.__cold.long.reduce((a,e)=>a+Math.max(0,e.duration-50),0),
+                longtasks:window.__cold.long,
+                ttfb:nav?.responseStart??0,
+                dcl:nav?.domContentLoadedEventEnd??0,
+                load:nav?.loadEventEnd??0,
+                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+                apex:document.documentElement.dataset.fxApex||'',
+                deferred:document.documentElement.dataset.fxDeferredCssR487||'',
+                resources
+              };
+            });
+            const pm=(await cdp.send('Performance.getMetrics')).metrics.reduce((o,m)=>(o[m.name]=m.value,o),{});
+            const {profile}=await cdp.send('Profiler.stop');
+            await cdp.send('Tracing.end');
+            await traceDone;
+
+            const nodes=new Map(profile.nodes.map(n=>[n.id,n]));
+            const cpu=new Map();
+            for(let i=0;i<(profile.samples||[]).length;i++){
+              const node=nodes.get(profile.samples[i]); if(!node) continue;
+              const us=(profile.timeDeltas?.[i]||0);
+              const k=keyFrame(node.callFrame||{});
+              cpu.set(k,(cpu.get(k)||0)+us/1000);
+            }
+            const cpuTop=[...cpu.entries()].map(([frame,ms])=>({frame,ms:round(ms)})).sort((a,b)=>b.ms-a.ms).slice(0,30);
+
+            const wanted=new Set(['RunTask','EvaluateScript','FunctionCall','UpdateLayoutTree','RecalculateStyles','Layout','Paint','CompositeLayers','ParseHTML','CompileScript','v8.compile','TimerFire','FireAnimationFrame','EventDispatch']);
+            const timed=trace.filter(e=>e.ph==='X'&&e.dur&&wanted.has(e.name));
+            const agg=new Map();
+            for(const e of timed) agg.set(e.name,(agg.get(e.name)||0)+e.dur/1000);
+            const timelineTotals=[...agg.entries()].map(([name,ms])=>({name,ms:round(ms)})).sort((a,b)=>b.ms-a.ms);
+            const timelineTop=timed.map(e=>({
+              name:e.name,ms:round(e.dur/1000),ts:round(e.ts/1000),
+              url:e.args?.data?.url||e.args?.data?.scriptName||'',
+              functionName:e.args?.data?.functionName||''
+            })).filter(e=>e.ms>=20).sort((a,b)=>b.ms-a.ms).slice(0,40);
+
+            const resourceTop=[...perf.resources].sort((a,b)=>b.duration-a.duration).slice(0,20);
+            const summary={
+              candidate:'0c983b25cbabecbdd73c8df760638c0c7554663b',replica,status:response?.status()||0,
+              fcp:round(perf.fcp),lcp:round(perf.lcp),tbt:round(perf.tbt),cls:perf.cls,ttfb:round(perf.ttfb),
+              dcl:round(perf.dcl),load:round(perf.load),overflow:perf.overflow,apex:perf.apex,deferred:perf.deferred,
+              longtasks:perf.longtasks,lcpEntries:perf.lcpEntries,
+              layoutMs:round((pm.LayoutDuration||0)*1000),recalcMs:round((pm.RecalcStyleDuration||0)*1000),
+              scriptMs:round((pm.ScriptDuration||0)*1000),taskMs:round((pm.TaskDuration||0)*1000),
+              cpuTop,timelineTotals,timelineTop,resourceTop
+            };
+            console.log('R519_COLD_ATTRIBUTION',JSON.stringify(summary,null,2));
+            fs.writeFileSync(out,JSON.stringify(summary,null,2));
+            if(summary.status!==200||summary.overflow>2) throw new Error('cold attribution contract failure');
+            await context.close(); await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Upload cold attribution evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r519-css-${{ matrix.mode }}-r${{ matrix.replica }}
-          path: candidate/artifacts/r519-css-scheduler/
+          name: r519-cold-attribution-r${{ matrix.replica }}
+          path: artifacts/r519-cold-r${{ matrix.replica }}/
           retention-days: 30
