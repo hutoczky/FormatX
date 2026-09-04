@@ -1,24 +1,15 @@
-/* FormatX R476/R512 — synchronize Mini MAG/header shape and living energy with
+/* FormatX R476/R528 — synchronize Mini MAG/header shape and living energy with
    the primary MAG. One semantic state, one WebGL renderer, zero JS idle loop.
-   R502 binds delayed compositor sync to the canonical pause state and preserves
-   the CSSAnimation clock when a paused animation instance is recreated.
-   R505 avoids writing currentTime after the CSS animation returns to running.
-   R508 removes WAAPI pause/play lifecycle ownership entirely: canonical CSS
-   animation-play-state owns PAUSE/RESUME.
-   R509 resolved explicit holds against the document timeline. R510 avoids
-   creating that hold on the normal stable-object path: currentTime is written
-   only when a genuinely recreated paused CSSAnimation needs phase restoration.
-   R511 forces the CSS animation-play-state write through a synchronous CSSOM
-   readback before enumerating animations, so PAUSE is committed without adding
-   a WAAPI hold on the normal stable-object path. R512 resolves only the observed
-   CSS pending-start state on RESUME, preserving phase without WAAPI play/pause. */
+   R528 product contract: the MAG is the living core and remains continuously
+   alive in normal foreground operation. Motion suspension is reserved for
+   prefers-reduced-motion and automatic background lifecycle efficiency. */
 (function(){
 'use strict';
 const root=document.documentElement;
-if(root.dataset.fxMagShapeSyncR476==='ready-r502')return;
-root.dataset.fxMagShapeSyncR476='booting-r502';
+if(root.dataset.fxMagShapeSyncR476==='ready-r528')return;
+root.dataset.fxMagShapeSyncR476='booting-r528';
 
-const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
+const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260905-r528-living-core';
 const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260901-r488-restrained-glow-soft-edge-compositor-pulse';
 const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260831-r482-spectrum-soft-edge';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -30,7 +21,7 @@ const frozenClockByName=new Map();
 function ensureStyle(){
   let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');
   if(link instanceof HTMLLinkElement){
-    if(!link.href.includes('r4791-user-pause-aware'))link.href=STYLE;
+    if(!link.href.includes('r528-living-core'))link.href=STYLE;
     return link;
   }
   link=document.createElement('link');
@@ -71,13 +62,6 @@ function currentShape(){
   const state=String(apiShape||root.dataset.fxCoreShapeR337||'crystal');
   return state==='sphere'?'sphere':'crystal';
 }
-function userPaused(){
-  const pause=document.querySelector('.fx-reference-pause');
-  if(pause instanceof HTMLButtonElement){
-    return pause.dataset.paused==='true'||pause.getAttribute('aria-pressed')==='true';
-  }
-  return root.dataset.fxReferenceMotionPaused==='true';
-}
 function primaryCanvas(){
   const node=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
   return node instanceof HTMLCanvasElement?node:null;
@@ -92,9 +76,7 @@ function lifeNodes(){
     primaryCanvas()
   ].filter(node=>node instanceof HTMLElement);
 }
-function steadyLife(){
-  return reduced.matches?'steady':'breath';
-}
+function steadyLife(){return reduced.matches?'steady':'breath';}
 function animationKey(animation,index){
   const name=String(animation.animationName||'').trim();
   return name||`animation-${index}`;
@@ -107,20 +89,13 @@ function freezeAnimation(animation,key){
     frozenClockByName.set(key,state);
     return;
   }
-  /* R510: CSS animation-play-state already freezes a stable CSSAnimation by
-     itself. Writing currentTime on that same object creates an unnecessary WAAPI
-     hold which can stall DocumentTimeline progress after RESUME on a hosted
-     Chromium runner. Only a genuinely recreated paused animation needs its
-     visual phase restored to the previously frozen time. */
   if(state.animation===animation)return;
   state.animation=animation;
-  const frozen=state.time;
-  try{animation.currentTime=frozen;state.pinned=true;}catch(_){}
+  try{animation.currentTime=state.time;state.pinned=true;}catch(_){}
 }
 function releaseFrozenAnimation(animation,key){
   const state=frozenClockByName.get(key);
   if(!state)return true;
-  const frozen=state.time;
   const timelineTime=Number(animation.timeline&&animation.timeline.currentTime);
   const rate=Number(animation.playbackRate);
   if(!Number.isFinite(timelineTime)||!Number.isFinite(rate)||rate===0)return false;
@@ -130,46 +105,29 @@ function releaseFrozenAnimation(animation,key){
     frozenClockByName.delete(key);
     return true;
   }
-  /* R512 production evidence showed the stable CSSAnimation already reporting
-     playState=running while startTime remained null for most of the 700 ms
-     RESUME window. Do not create a currentTime hold on that stable object.
-     Resolve only this pending CSS start against the document timeline using the
-     phase sampled while CSS-paused. CSS still owns paused/running lifecycle. */
-  try{animation.startTime=timelineTime-(frozen/rate);}catch(_){return false;}
+  try{animation.startTime=timelineTime-(state.time/rate);}catch(_){return false;}
   const released=Number.isFinite(Number(animation.startTime))&&!animation.pending;
   if(released)frozenClockByName.delete(key);
   return released;
 }
-function syncPrimaryPlayback(paused=userPaused()){
+function syncPrimaryPlayback(forceStop=false){
   const canvas=primaryCanvas();
   if(!canvas)return false;
-  const stop=reduced.matches||paused;
+  const background=document.hidden===true;
+  const stop=reduced.matches||background||forceStop;
   const expectedPlayState=stop?'paused':'running';
   canvas.style.setProperty('animation-play-state',expectedPlayState,'important');
-  /* R511: force the style/animation state transition to commit before reading
-     CSSAnimation objects. This prevents a repeated PAUSE click from sampling a
-     still-running animation without creating a currentTime hold on the stable
-     object. The readback is the barrier; CSS remains the lifecycle owner. */
-  const committedPlayState=String(getComputedStyle(canvas).animationPlayState||'').trim();
-  root.dataset.fxPrimaryMagCssPlaybackR511=committedPlayState||'unknown';
+  const committed=String(getComputedStyle(canvas).animationPlayState||'').trim();
+  root.dataset.fxPrimaryMagCssPlaybackR511=committed||'unknown';
   const animations=canvas.getAnimations();
-  if(stop){
-    animations.forEach((animation,index)=>freezeAnimation(animation,animationKey(animation,index)));
-  }else{
-    animations.forEach((animation,index)=>releaseFrozenAnimation(animation,animationKey(animation,index)));
-  }
-  root.dataset.fxPrimaryMagPlaybackR498=stop?(reduced.matches?'reduced':'paused'):'running';
-  root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
-  root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
-  root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
-  root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
-  root.dataset.fxPrimaryMagPauseContractR510='stable-object-css-pause-recreation-only-currenttime-pin';
-  root.dataset.fxPrimaryMagPauseContractR511='cssom-committed-play-state-recreation-only-currenttime-pin';
-  root.dataset.fxPrimaryMagPauseContractR512='stable-object-css-pending-starttime-resolution';
+  if(stop)animations.forEach((animation,index)=>freezeAnimation(animation,animationKey(animation,index)));
+  else animations.forEach((animation,index)=>releaseFrozenAnimation(animation,animationKey(animation,index)));
+  root.dataset.fxPrimaryMagPlaybackR498=reduced.matches?'reduced':(background||forceStop?'background':'running');
+  root.dataset.fxPrimaryMagLivingContractR528='continuous-normal-reduced-motion-background-safe';
   return true;
 }
-function syncPlaybackSoon(forcePause=false){
-  const syncNow=()=>syncPrimaryPlayback(forcePause||userPaused());
+function syncPlaybackSoon(forceStop=false){
+  const syncNow=()=>syncPrimaryPlayback(forceStop);
   syncNow();
   queueMicrotask(syncNow);
   requestAnimationFrame(syncNow);
@@ -188,7 +146,7 @@ function applyCanonicalLife(){
     syncPlaybackSoon(true);
     return;
   }
-  if(userPaused()){
+  if(document.hidden){
     syncPlaybackSoon(true);
     return;
   }
@@ -201,7 +159,7 @@ function pulse(source){
     syncPlaybackSoon(true);
     return false;
   }
-  if(document.hidden||userPaused()){
+  if(document.hidden){
     syncPlaybackSoon(true);
     return false;
   }
@@ -213,10 +171,7 @@ function pulse(source){
   root.dataset.fxPrimaryMagEnergySourceR481=String(source||'primary-mag');
   root.dataset.fxPrimaryMagEnergySourceR482=String(source||'primary-mag');
   pulseTimer=setTimeout(()=>{
-    if(userPaused()||document.hidden){
-      syncPlaybackSoon(true);
-      return;
-    }
+    if(document.hidden){syncPlaybackSoon(true);return;}
     setLife(steadyLife());
     syncPlaybackSoon(false);
   },620);
@@ -237,18 +192,10 @@ function sync(){
   for(const node of lifeNodes())if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();
   root.dataset.fxMiniMagShapeR476=shape;
   root.dataset.fxMiniMagShapeSyncR476=`ready-${shape}`;
-  root.dataset.fxMagShapeSyncR476='ready-r502';
+  root.dataset.fxMagShapeSyncR476='ready-r528';
   root.dataset.fxMiniMagLifeContractR478='primary-energy-sync-compositor-breath-zero-js-idle';
   root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';
-  root.dataset.fxPrimaryMagPauseContractR479='user-pause-only-governor-zero-frame-does-not-freeze-compositor-life';
-  root.dataset.fxPrimaryMagPauseContractR498='persistent-css-animation-clock-waapi-play-state';
-  root.dataset.fxPrimaryMagPauseContractR502='canonical-currenttime-pin-recreated-animation-safe';
-  root.dataset.fxPrimaryMagPauseContractR505='resume-existing-hold-time-no-running-currenttime-repin';
-  root.dataset.fxPrimaryMagPauseContractR508='css-play-state-owner-currenttime-pin-no-waapi-lifecycle';
-  root.dataset.fxPrimaryMagPauseContractR509='css-state-owner-deterministic-starttime-release';
-  root.dataset.fxPrimaryMagPauseContractR510='stable-object-css-pause-recreation-only-currenttime-pin';
-  root.dataset.fxPrimaryMagPauseContractR511='cssom-committed-play-state-recreation-only-currenttime-pin';
-  root.dataset.fxPrimaryMagPauseContractR512='stable-object-css-pending-starttime-resolution';
+  root.dataset.fxPrimaryMagLivingContractR528='continuous-normal-reduced-motion-background-safe';
   root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';
   root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';
   root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';
@@ -256,6 +203,7 @@ function sync(){
   root.dataset.fxPrimaryMagOpticsR488='restrained-glow-soft-edge-compositor-pulse';
   root.dataset.fxPrimaryMagLifeContractR481='desktop-mobile-compositor-breath-zero-webgl-idle';
   root.dataset.fxPrimaryMagLifeContractR482='large-mini-header-spectrum-breath-zero-webgl-idle';
+  root.dataset.fxMagProductContractR528='living-core-continuous-normal-motion';
 }
 function onCoreInteraction(event){
   const phase=String(event.detail?.phase||'interaction');
@@ -263,10 +211,8 @@ function onCoreInteraction(event){
 }
 function inspectRootState(records){
   let needsSync=false;
-  let pauseChanged=false;
   for(const record of records){
     if(record.attributeName==='data-fx-core-shape-r337')needsSync=true;
-    if(record.attributeName==='data-fx-reference-motion-paused')pauseChanged=true;
     if(record.attributeName==='data-fx-core-energy-bolt-r455'){
       const bolt=String(root.dataset.fxCoreEnergyBoltR455||'');
       if(bolt&&bolt!==lastEnergyBolt){
@@ -276,7 +222,6 @@ function inspectRootState(records){
     }
   }
   if(needsSync)sync();
-  if(pauseChanged)applyCanonicalLife();
 }
 function boot(){
   ensureStyle();
@@ -289,8 +234,7 @@ function boot(){
     observer=new MutationObserver(inspectRootState);
     observer.observe(root,{attributes:true,attributeFilter:[
       'data-fx-core-shape-r337',
-      'data-fx-core-energy-bolt-r455',
-      'data-fx-reference-motion-paused'
+      'data-fx-core-energy-bolt-r455'
     ]});
   }
 }
@@ -303,24 +247,18 @@ for(const name of [
   'pageshow'
 ])addEventListener(name,()=>{sync();applyCanonicalLife();},{passive:true});
 
-addEventListener('formatx:referencepause',event=>{
-  const paused=event.detail?.paused===true;
-  if(paused){
-    clearTimeout(pulseTimer);
-    pulseTimer=0;
-    syncPlaybackSoon(true);
-    return;
-  }
-  applyCanonicalLife();
-},{passive:true});
 addEventListener('formatx:coreinteraction',onCoreInteraction,{passive:true});
 addEventListener('formatx:coreshapechange',()=>{sync();pulse('shape-change');},{passive:true});
 addEventListener('visibilitychange',()=>{
   if(document.hidden){
+    clearTimeout(pulseTimer);
+    pulseTimer=0;
     if(reduced.matches)setLife('steady');
     syncPlaybackSoon(true);
   }else applyCanonicalLife();
 },{passive:true});
+if(typeof reduced.addEventListener==='function')reduced.addEventListener('change',applyCanonicalLife);
+else if(typeof reduced.addListener==='function')reduced.addListener(applyCanonicalLife);
 
 document.addEventListener('pointerdown',event=>{
   const target=event.target instanceof Element?event.target.closest('#hero .hero-space,.fx-reference-mag-button,.fx-mini-mag-launcher-r459,[data-action="shape"]'):null;
