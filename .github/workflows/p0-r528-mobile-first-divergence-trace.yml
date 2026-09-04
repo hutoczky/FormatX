@@ -1,0 +1,98 @@
+name: P0 R528 mobile first divergence trace
+
+on:
+  push:
+    branches: [p0-r528-final-owner]
+    paths:
+      - '.github/workflows/p0-r528-mobile-first-divergence-trace.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: f0f7f43c03ec32dbdcee2e7781d06614dbccd5a6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Verify exact R527 marker and install Playwright package
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://formatxsuite.com/p0-validation-version.txt?r528_trace=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/live-p0.txt"
+          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Trace 3 controlled mobile starts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r528-mobile-trace
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          const ORIGIN='https://formatxsuite.com/';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+            try{
+              for(let run=1;run<=3;run++){
+                const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
+                const page=await context.newPage();
+                const cdp=await context.newCDPSession(page);
+                await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+                await cdp.send('Network.enable');
+                await cdp.send('Network.emulateNetworkConditions',{offline:false,latency:40,downloadThroughput:1.6*1024*1024/8,uploadThroughput:750*1024/8,connectionType:'cellular4g'});
+                await page.addInitScript(()=>{
+                  window.__fxTrace={paints:[],lcp:[],mutations:[],samples:[],links:[]};
+                  try{new PerformanceObserver(list=>{for(const e of list.getEntries())window.__fxTrace.paints.push({name:e.name,startTime:e.startTime});}).observe({type:'paint',buffered:true});}catch(_){}
+                  try{new PerformanceObserver(list=>{for(const e of list.getEntries())window.__fxTrace.lcp.push({startTime:e.startTime,size:e.size,id:e.id||'',url:e.url||'',element:e.element?.className||e.element?.tagName||''});}).observe({type:'largest-contentful-paint',buffered:true});}catch(_){}
+                  addEventListener('DOMContentLoaded',()=>{
+                    const targets=[document.documentElement,document.body,document.querySelector('#hero'),document.querySelector('#hero .hero-copy'),document.querySelector('#hero .fx-category-definition')].filter(Boolean);
+                    const mo=new MutationObserver(rs=>{for(const r of rs){const t=r.target;window.__fxTrace.mutations.push({t:performance.now(),type:r.type,attr:r.attributeName||'',target:t===document.documentElement?'html':t===document.body?'body':t.id||t.className||t.tagName,value:r.attributeName?t.getAttribute(r.attributeName):''});}});
+                    for(const t of targets)mo.observe(t,{attributes:true,attributeFilter:['class','style','hidden','data-fx-r487-deferred-style','media']});
+                    const sample=()=>{
+                      const q=s=>document.querySelector(s),el=q('#hero .fx-category-definition'),copy=q('#hero .hero-copy'),hero=q('#hero');
+                      const css=e=>{if(!e)return null;const s=getComputedStyle(e),b=e.getBoundingClientRect();return{display:s.display,visibility:s.visibility,opacity:s.opacity,position:s.position,transform:s.transform,animation:s.animationName,transition:s.transitionDuration,contentVisibility:s.contentVisibility,font:s.fontSize,line:s.lineHeight,top:b.top,left:b.left,width:b.width,height:b.height};};
+                      window.__fxTrace.samples.push({t:performance.now(),visibility:document.visibilityState,scrollY,root:{deferred:document.documentElement.dataset.fxDeferredCssR487||'',reason:document.documentElement.dataset.fxDeferredCssReasonR526||'',mobileLayout:document.documentElement.dataset.fxMobileReferenceLayout||'',mobileLanguage:document.documentElement.dataset.fxMobileLanguageOwnerR423||'',apex:document.documentElement.dataset.fxApex||'',motion:document.documentElement.dataset.fxP0MotionSchedulerR490||'',crystal:document.documentElement.dataset.fxCrystalOrganismR326||''},category:css(el),copy:css(copy),hero:css(hero),links:Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]')).map(l=>({href:l.href.split('/').pop(),media:l.media,ready:l.dataset.fxR487Ready||''}))});
+                    };
+                    sample(); window.__fxTraceTimer=setInterval(sample,200);
+                  },{once:true});
+                });
+                await context.tracing.start({screenshots:true,snapshots:true,sources:false});
+                const url=`${ORIGIN}?r528_first_divergence=${run}-${Date.now()}`;
+                await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
+                await sleep(12000);
+                const data=await page.evaluate(()=>{clearInterval(window.__fxTraceTimer);return window.__fxTrace;});
+                await context.tracing.stop({path:`artifacts/r528-mobile-trace/run-${run}.zip`});
+                fs.writeFileSync(`artifacts/r528-mobile-trace/run-${run}.json`,JSON.stringify(data,null,2)+'\n');
+                const changed=[]; let prev=null;
+                for(const s of data.samples){const key=JSON.stringify({r:s.root,c:s.category,cp:s.copy,h:s.hero,links:s.links});if(key!==prev){changed.push(s);prev=key;}}
+                fs.writeFileSync(`artifacts/r528-mobile-trace/run-${run}-changes.json`,JSON.stringify({paints:data.paints,lcp:data.lcp,mutations:data.mutations,changes:changed},null,2)+'\n');
+                console.log(`RUN ${run} PAINTS`,JSON.stringify(data.paints));
+                console.log(`RUN ${run} LCP`,JSON.stringify(data.lcp));
+                console.log(`RUN ${run} MUTATIONS`,JSON.stringify(data.mutations));
+                console.log(`RUN ${run} CHANGES`,JSON.stringify(changed));
+                await context.close();
+              }
+            } finally {await browser.close();}
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r528-mobile-first-divergence-${{ github.sha }}
+          path: artifacts/r528-mobile-trace/
+          if-no-files-found: warn
+          retention-days: 30
