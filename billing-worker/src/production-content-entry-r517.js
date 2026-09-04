@@ -39,7 +39,7 @@ function consolidateMobileFirstPaintRequests(html) {
     if (!MOBILE_BUNDLE_SOURCES.has(pathname)) return tag;
     if (inserted) return '';
     inserted = true;
-    return `<link rel="stylesheet" fetchpriority="high" media="${MOBILE_MEDIA}" data-fx-mobile-critical-r517="true" href="${MOBILE_BUNDLE_PATH}?v=20260904-r517-cascade-consolidation">`;
+    return `<link rel="stylesheet" fetchpriority="high" media="${MOBILE_MEDIA}" data-fx-mobile-critical-r517="true" data-fx-native-orb-reference-r250="true" href="${MOBILE_BUNDLE_PATH}?v=20260904-r517-cascade-consolidation">`;
   });
 }
 
