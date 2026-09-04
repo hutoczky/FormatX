@@ -1,0 +1,190 @@
+name: P0 R517 deferred award owner candidate
+run-name: R517 candidate x5 for deferred award CSS owner
+
+on:
+  push:
+    branches: [p0-r517-award-owner-76b79fe]
+    paths:
+      - '.github/workflows/p0-r517-award-owner-candidate.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 32
+    env:
+      BASE_SHA: 76b79fe75eebc9b0ce3998a8111eb8dbf539efb9
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: p0-r517-award-owner-76b79fe
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Apply exact-owner fix in workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base HEAD "$BASE_SHA")" = "$BASE_SHA"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('billing-worker/src/production-content-entry.js')
+          s=p.read_text()
+          marker="const DEFERRED_STYLE_PATHS = new Set(["
+          start=s.index(marker)
+          end=s.index(']);',start)
+          block=s[start:end]
+          old="  '/scifi-ui/styles/formatx-award-readiness.css',\n"
+          if block.count(old)!=1:
+              raise SystemExit(f'expected exactly one deferred award stylesheet entry, got {block.count(old)}')
+          block=block.replace(old,'',1)
+          p.write_text(s[:start]+block+s[end:])
+          PY
+          node --check billing-worker/src/production-content-entry.js
+          node .github/scripts/validate-award-readiness.cjs
+          git diff --check
+          git diff -- billing-worker/src/production-content-entry.js
+
+      - name: Prepare cached browser tooling and exact local Worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker --prefer-offline
+          npm install --no-save --no-package-lock --no-audit --no-fund lighthouse@12.8.2 playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.candidate.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.candidate.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r517-candidate-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do
+            if curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r517-candidate-worker.log" || true
+          exit 1
+
+      - name: Candidate desktop Lighthouse x5 with fail-fast metrics
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r517-candidate/lhr
+          : > artifacts/r517-candidate/rows.ndjson
+          for i in 1 2 3 4 5; do
+            out="artifacts/r517-candidate/lhr/run-$i.json"
+            ./node_modules/.bin/lighthouse "https://formatxsuite.com:8787/?r517_candidate=${GITHUB_RUN_ID}-${i}" \
+              --quiet \
+              --output=json \
+              --output-path="$out" \
+              --preset=desktop \
+              --only-categories=performance \
+              --max-wait-for-load=60000 \
+              --chrome-path="$CHROME_BIN" \
+              --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors"
+            node - "$out" "$i" <<'NODE' | tee -a artifacts/r517-candidate/rows.ndjson
+          const fs=require('node:fs');
+          const l=JSON.parse(fs.readFileSync(process.argv[2]));
+          const i=Number(process.argv[3]);
+          const a=l.audits;
+          const row={
+            run:i,
+            performance:Math.round((l.categories.performance.score||0)*100),
+            fcp:a['first-contentful-paint']?.numericValue??null,
+            lcp:a['largest-contentful-paint']?.numericValue??null,
+            speedIndex:a['speed-index']?.numericValue??null,
+            tbt:a['total-blocking-time']?.numericValue??null,
+            cls:a['cumulative-layout-shift']?.numericValue??null,
+            ttfb:a['server-response-time']?.numericValue??null
+          };
+          console.log(JSON.stringify(row));
+          if(!(row.lcp<2000 && row.cls<0.05 && row.tbt<=150 && row.ttfb<=500)) process.exit(23);
+          NODE
+          done
+          node <<'NODE'
+          const fs=require('node:fs');
+          const rows=fs.readFileSync('artifacts/r517-candidate/rows.ndjson','utf8').trim().split(/\n+/).filter(Boolean).map(JSON.parse);
+          if(rows.length!==5) throw new Error(`expected 5 candidate rows, got ${rows.length}`);
+          const summary={sha:process.env.BASE_SHA,owner:'deferred-award-readiness-css-activation',rows,maxLcp:Math.max(...rows.map(x=>x.lcp)),maxTbt:Math.max(...rows.map(x=>x.tbt)),maxCls:Math.max(...rows.map(x=>x.cls)),maxTtfb:Math.max(...rows.map(x=>x.ttfb))};
+          fs.writeFileSync('artifacts/r517-candidate/summary.json',JSON.stringify(summary,null,2)+'\n');
+          console.log('R517_CANDIDATE_X5_PASS',JSON.stringify(summary));
+          NODE
+
+      - name: Targeted desktop and mobile browser proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          async function verify(browser,name,viewport,mobile){
+            const context=await browser.newContext({ignoreHTTPSErrors:true,viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,locale:'hu-HU',colorScheme:'dark'});
+            const page=await context.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
+            await page.goto(`https://formatxsuite.com:8787/?r517_browser=${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(1800);
+            const s=await page.evaluate(()=>{
+              const lead=document.querySelector('#hero .hero-lead');
+              const lr=lead?.getBoundingClientRect();
+              const ls=lead?getComputedStyle(lead):null;
+              return{
+                title:document.title,
+                lead:{exists:Boolean(lead),width:lr?.width||0,height:lr?.height||0,display:ls?.display||'',visibility:ls?.visibility||'',opacity:Number(ls?.opacity||0)},
+                award:Boolean(document.querySelector('[data-fx-award-proof]')),
+                liveOS:Boolean(document.querySelector('#live-os-overview')),
+                simulator:Boolean(document.querySelector('#simulator, [data-fx-project-simulator], [data-fx-operational-twin]')),
+                navigation:Boolean(document.querySelector('nav, .topbar')),
+                downloads:Boolean(document.querySelector('a[href*="download"]')),
+                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+                deferred:document.documentElement.dataset.fxDeferredCssR487||''
+              };
+            });
+            if(!s.title.includes('FormatX')||!s.lead.exists||s.lead.width<200||s.lead.height<30||s.lead.display==='none'||s.lead.visibility==='hidden'||s.lead.opacity<.5||!s.award||!s.liveOS||!s.navigation||!s.downloads||s.overflow>2||errors.length) throw new Error(`${name} ${JSON.stringify({s,errors})}`);
+            await context.close();
+            return {name,s,errors};
+          }
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            try{
+              const rows=[];
+              rows.push(await verify(browser,'desktop-1440x900',{width:1440,height:900},false));
+              rows.push(await verify(browser,'mobile-390x844',{width:390,height:844},true));
+              fs.writeFileSync('artifacts/r517-candidate/browser.json',JSON.stringify(rows,null,2)+'\n');
+              console.log('R517_TARGETED_BROWSER_PASS');
+            } finally { await browser.close(); }
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r517-deferred-award-candidate-x5
+          path: artifacts/r517-candidate/
+          include-hidden-files: true
+          retention-days: 30
+
+      - name: Commit exact-owner product fix only after PASS
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          rm .github/workflows/p0-r517-award-owner-candidate.yml
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add billing-worker/src/production-content-entry.js .github/workflows/p0-r517-award-owner-candidate.yml
+          git commit -m 'Fix R517 deferred award first-paint ownership'
+          git push origin HEAD:p0-r517-award-owner-76b79fe
