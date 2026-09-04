@@ -55,8 +55,6 @@ function instrumentNativeFrames() {
       return location;
     };
     proto.uniform1f = function(location, value) {
-      // Only the later screenshot pass pins uniforms; the autonomous timing
-      // pass above runs the unmodified production values and scheduler.
       if (Number.isFinite(window.__magCapturePhase)) {
         const fixed = { uSurfacePulse: window.__magCapturePhase, uTime: 0, uEnergy: .5, uBreath: .12 };
         if (Object.hasOwn(fixed, names.get(location))) value = fixed[names.get(location)];
@@ -89,13 +87,10 @@ function instrumentNativeFrames() {
 async function captureSurface(page, name, label, phase) {
   await page.evaluate(phase => {
     window.__magCapturePhase = phase;
-    document.documentElement.dataset.fxReferenceMotionPaused = 'false';
     window.FormatXCoreMobileV69.requestRender(1);
   }, phase);
   await page.waitForTimeout(180);
   const box = await page.locator('#hero .fx-crystal-organism-r326-canvas').boundingBox();
-  // Capture the actual compositor directly. Playwright's global animation
-  // fast-forward also fires unrelated page animations and can change layout.
   const session = await page.context().newCDPSession(page);
   let screenshot;
   let timeout;
@@ -147,17 +142,20 @@ async function verify(browser, name, viewport, mobile) {
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  const report = { name, viewport, mobile };
+  const report = { name, viewport, mobile, contract: 'r528-living-core-no-manual-pause' };
   try {
     const url = new URL(origin);
-    url.searchParams.set('r486-optics-energy-check', `${name}-${Date.now()}`);
+    url.searchParams.set('r528-optics-energy-check', `${name}-${Date.now()}`);
     url.searchParams.set('lang', 'hu');
     await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(() => (
       document.documentElement.dataset.fxCoreSurfaceEnergyR484 === 'periodic-native-surface-energy'
       && document.documentElement.dataset.fxCrystalOrganismR326 === 'ready'
     ), null, { timeout: 60000 });
-    // No click, artificial API pulse, hover or pointer movement is used here.
+
+    assert.equal(await page.locator('#hero .fx-reference-pause').count(), 0, `${name}: obsolete manual MAG PAUSE control is present`);
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.fxManualMagPauseContractR528), 'retired-living-core', `${name}: manual pause retirement marker missing`);
+
     await page.waitForFunction(() => __magEnergyAudit.events.some(e => e.phase === 'end' && e.source === 'autonomous'), null, { timeout: 18000 });
     await page.waitForTimeout(600);
     const frameCount = await page.evaluate(() => __magEnergyAudit.frames);
@@ -169,13 +167,10 @@ async function verify(browser, name, viewport, mobile) {
 
     const audit = await page.evaluate(() => window.__magEnergyAudit);
     report.audit = audit;
-    // SwiftShader cadence varies with runner load. Allow one measured frame
-    // interval at the end, not a guessed fixed FPS. A 240ms governor cutoff
-    // still fails both the halfway and full-window coverage checks below.
     let previousPhase = 0;
     let maximumPhaseStep = 0;
     for (const phase of audit.phases) {
-      if (phase < previousPhase) previousPhase = 0; // next autonomous sweep
+      if (phase < previousPhase) previousPhase = 0;
       maximumPhaseStep = Math.max(maximumPhaseStep, phase - previousPhase);
       previousPhase = phase;
     }
@@ -199,6 +194,7 @@ async function verify(browser, name, viewport, mobile) {
       return {
         canvasCount: document.querySelectorAll('#hero canvas').length,
         legacyCount: document.querySelectorAll('#hero .fx-three-frame, #hero .fx-core-mobile-v55-stage:not(.fx-crystal-organism-r326-stage)').length,
+        manualPauseCount: document.querySelectorAll('#hero .fx-reference-pause').length,
         overflow: Math.max(0, root.scrollWidth - innerWidth),
         filter: style.filter, opacity: Number(style.opacity),
         glError: gl.getError(), budget: root.dataset.fxMobileSurfaceBudgetR484,
@@ -212,6 +208,7 @@ async function verify(browser, name, viewport, mobile) {
     });
     assert.equal(report.dom.canvasCount, 1, `${name}: duplicate native canvases`);
     assert.equal(report.dom.legacyCount, 0, `${name}: obsolete MAG stage returned`);
+    assert.equal(report.dom.manualPauseCount, 0, `${name}: obsolete manual pause returned`);
     assert.equal(report.dom.glError, 0, `${name}: WebGL error`);
     assert.ok(report.dom.overflow <= 1, `${name}: horizontal overflow`);
     if (mobile) {
@@ -225,8 +222,9 @@ async function verify(browser, name, viewport, mobile) {
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');
     }
 
-    // Timing above used unmodified uniforms. Pin the same native material at
-    // three phases only for this image comparison, keeping the normal layout.
+    // Test-only deterministic compositor capture. This does not expose or
+    // restore a product PAUSE control; it freezes animation objects only while
+    // comparing three measured frames and immediately restores them.
     await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => canvas.getAnimations().forEach(animation => animation.pause()));
     report.captures = {};
     report.captures.idle = await captureSurface(page, name, 'idle', -1);
@@ -239,22 +237,9 @@ async function verify(browser, name, viewport, mobile) {
     report.lateChange = surfaceChange(report.captures.idle, report.captures.late);
     assert.ok(report.earlyChange.changed >= 8 && report.lateChange.changed >= 8, `${name}: surface energy is not visibly distinct`);
     assert.ok(Math.abs(report.lateChange.centroidY - report.earlyChange.centroidY) > 3, `${name}: light does not travel along the surface`);
+    report.manualPause = 'retired';
 
-    const pause = page.locator('#hero .fx-reference-pause').first();
-    await pause.click();
-    await page.waitForFunction(() => document.querySelector('#hero .fx-reference-pause')?.dataset.paused === 'true');
-    await page.waitForTimeout(300);
-    const pausedCount = await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length);
-    await page.waitForTimeout(6800);
-    assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), pausedCount, `${name}: sweep ignores PAUSE`);
-    assert.equal(await page.evaluate(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484), 'suspended');
-    await pause.click();
-    await page.waitForFunction(count => __magEnergyAudit.events.filter(e => e.phase === 'start').length > count, pausedCount, { timeout: 10000 });
-    report.pauseResume = 'passed';
-
-    // Stay in a middle section. The production desktop intentionally loops
-    // from the footer back to MAG, so scrolling to the bottom is not an
-    // offscreen test. Verify the actual canvas bounds as well as the timer.
+    // Automatic offscreen suspension remains a lifecycle/performance behavior.
     await page.locator('#pricing').evaluate(section => section.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await page.waitForFunction(() => {
       const box = document.querySelector('#hero .fx-crystal-organism-r326-canvas').getBoundingClientRect();
@@ -273,6 +258,7 @@ async function verify(browser, name, viewport, mobile) {
     assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), offscreenCount, `${name}: offscreen sweep still running`);
     report.offscreen = 'passed';
 
+    // Reduced motion remains mandatory accessibility behavior.
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     await page.waitForTimeout(500);
@@ -280,11 +266,12 @@ async function verify(browser, name, viewport, mobile) {
     const reducedCount = await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length);
     await page.waitForTimeout(6800);
     assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), reducedCount, `${name}: reduced-motion sweep still running`);
+    assert.equal(await page.locator('#hero .fx-reference-pause').count(), 0, `${name}: reduced-motion exposed obsolete manual pause`);
     report.reducedMotion = 'passed';
 
     assert.deepEqual(errors, [], `${name}: page errors`);
     report.result = 'passed';
-    console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; R486 mobile optics, pause, offscreen, reduced motion passed`);
+    console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; R486 mobile optics, living motion, offscreen and reduced motion passed`);
   } catch (error) {
     report.result = 'failed';
     report.error = String(error.stack || error);
