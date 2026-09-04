@@ -256,9 +256,11 @@
       if (progressFrame) return;
       progressFrame = requestAnimationFrame(progress);
     };
-    progress();
+    // R518: avoid the forced startup scrollHeight layout flush after the DCL mutation batch.
+    // pageshow runs after initial layout and also covers BFCache / restored scroll state.
     addEventListener('scroll', scheduleProgress, { passive: true });
     addEventListener('resize', scheduleProgress, { passive: true });
+    addEventListener('pageshow', scheduleProgress, { passive: true });
     addEventListener('pagehide', () => {
       if (progressFrame) cancelAnimationFrame(progressFrame);
     }, { once: true });
