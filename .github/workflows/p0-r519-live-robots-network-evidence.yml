@@ -1,0 +1,76 @@
+name: P0 R519 live robots and network evidence
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r519-live-robots-network-evidence.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Capture exact live robots response
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/live
+          curl -sS --max-time 30 -D artifacts/live/robots.headers -o artifacts/live/robots.body \
+            -w 'status=%{http_code}\nhttp_version=%{http_version}\ndns=%{time_namelookup}\ntcp=%{time_connect}\ntls=%{time_appconnect}\nttfb=%{time_starttransfer}\ntotal=%{time_total}\nsize=%{size_download}\n' \
+            'https://formatxsuite.com/robots.txt?evidence='"$GITHUB_RUN_ID" | tee artifacts/live/robots.timing
+          echo '=== ROBOTS HEADERS ==='
+          cat artifacts/live/robots.headers
+          echo '=== ROBOTS BODY ==='
+          cat artifacts/live/robots.body
+          echo '=== ROBOTS TIMING ==='
+          cat artifacts/live/robots.timing
+
+      - name: Production document network probes x20
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > artifacts/live/document-probes.tsv
+          printf 'run\tstatus\thttp\tdns\ttcp\ttls\tttfb\ttotal\tsize\tcf_cache\tcf_ray\tcache_control\tage\tetag\talt_svc\n' >> artifacts/live/document-probes.tsv
+          for i in $(seq 1 20); do
+            h="artifacts/live/doc-$i.headers"
+            timing="$(curl -sS --max-time 30 -D "$h" -o /dev/null \
+              -w '%{http_code}\t%{http_version}\t%{time_namelookup}\t%{time_connect}\t%{time_appconnect}\t%{time_starttransfer}\t%{time_total}\t%{size_download}' \
+              "https://formatxsuite.com/?p0_probe=$GITHUB_RUN_ID-$i")"
+            geth(){ awk -v IGNORECASE=1 -v n="$1" 'BEGIN{FS=":"} tolower($1)==tolower(n){sub(/^[^:]*:[[:space:]]*/,""); sub(/\r$/,""); v=$0} END{print v}' "$h"; }
+            printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$i" "$timing" "$(geth cf-cache-status)" "$(geth cf-ray)" "$(geth cache-control)" "$(geth age)" "$(geth etag)" "$(geth alt-svc)" >> artifacts/live/document-probes.tsv
+          done
+          column -ts $'\t' artifacts/live/document-probes.tsv || cat artifacts/live/document-probes.tsv
+
+      - name: Critical resource probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > artifacts/live/resource-probes.tsv
+          printf 'path\tstatus\thttp\tttfb\ttotal\tsize\tcache\tage\tetag\talt_svc\n' >> artifacts/live/resource-probes.tsv
+          paths=(
+            '/scifi-ui/styles/formatx-critical-core-r227.css'
+            '/scifi-ui/styles/formatx-critical-shell-v56.css'
+            '/scifi-ui/scripts/formatx-reference-mode-boot-r334.js'
+            '/scifi-ui/scripts/formatx-event-horizon.js'
+            '/scifi-ui/scripts/formatx-apex.js'
+          )
+          n=0
+          for p in "${paths[@]}"; do
+            for j in 1 2 3; do
+              n=$((n+1)); h="artifacts/live/res-$n.headers"
+              timing="$(curl -sS --max-time 30 -D "$h" -o /dev/null -w '%{http_code}\t%{http_version}\t%{time_starttransfer}\t%{time_total}\t%{size_download}' "https://formatxsuite.com${p}?probe=$GITHUB_RUN_ID-$j")"
+              geth(){ awk -v IGNORECASE=1 -v n="$1" 'BEGIN{FS=":"} tolower($1)==tolower(n){sub(/^[^:]*:[[:space:]]*/,""); sub(/\r$/,""); v=$0} END{print v}' "$h"; }
+              printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$p" "$timing" "$(geth cf-cache-status)" "$(geth age)" "$(geth etag)" "$(geth alt-svc)" >> artifacts/live/resource-probes.tsv
+            done
+          done
+          column -ts $'\t' artifacts/live/resource-probes.tsv || cat artifacts/live/resource-probes.tsv
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p0-r519-live-robots-network-evidence
+          path: artifacts/live/
+          retention-days: 30
