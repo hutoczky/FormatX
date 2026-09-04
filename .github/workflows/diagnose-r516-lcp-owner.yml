@@ -1,0 +1,155 @@
+name: Diagnose R516 production LCP owner
+
+on:
+  push:
+    branches:
+      - p0-r516-lcp-diagnostic
+    paths:
+      - '.github/workflows/diagnose-r516-lcp-owner.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lcp-owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright library only
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/fx-lcp" --no-audit --no-fund playwright@1.62.0
+          CHROME_PATH="$(command -v google-chrome-stable || command -v google-chrome || true)"
+          test -n "$CHROME_PATH"
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+      - name: Trace real production hero LCP mutations x3
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/fx-lcp/node_modules
+          ORIGIN: https://formatxsuite.com
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r516-lcp-owner
+          node <<'NODE'
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          const runs=[];
+          (async()=>{
+            const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH});
+            for(let i=0;i<3;i++){
+              const context=await browser.newContext({viewport:{width:1350,height:940},locale:'hu-HU',reducedMotion:'no-preference',colorScheme:'dark'});
+              const page=await context.newPage();
+              const consoleErrors=[];
+              page.on('console',m=>{if(m.type()==='error') consoleErrors.push(m.text())});
+              page.on('pageerror',e=>consoleErrors.push(String(e)));
+              await page.addInitScript(()=>{
+                window.__fxLcpOwner={writes:[],mutations:[],lcp:[],shifts:[]};
+                const original=Object.getOwnPropertyDescriptor(Node.prototype,'textContent');
+                if(original?.set&&original?.get){
+                  Object.defineProperty(Node.prototype,'textContent',{
+                    configurable:true,
+                    enumerable:original.enumerable,
+                    get(){return original.get.call(this)},
+                    set(value){
+                      try{
+                        if(this?.nodeType===1&&this.matches?.('#hero .hero-lead')){
+                          window.__fxLcpOwner.writes.push({
+                            t:performance.now(),
+                            value:String(value),
+                            stack:String(new Error('hero-lead textContent write').stack||'')
+                          });
+                        }
+                      }catch(_){}
+                      return original.set.call(this,value);
+                    }
+                  });
+                }
+                new MutationObserver(records=>{
+                  for(const record of records){
+                    const el=record.target?.nodeType===1?record.target:record.target?.parentElement;
+                    const hero=el?.matches?.('#hero .hero-lead')?el:el?.closest?.('#hero .hero-lead');
+                    if(!hero) continue;
+                    window.__fxLcpOwner.mutations.push({
+                      t:performance.now(),
+                      type:record.type,
+                      text:hero.textContent,
+                      added:record.addedNodes?.length||0,
+                      removed:record.removedNodes?.length||0
+                    });
+                  }
+                }).observe(document,{subtree:true,childList:true,characterData:true});
+                try{
+                  new PerformanceObserver(list=>{
+                    for(const e of list.getEntries()){
+                      const el=e.element;
+                      window.__fxLcpOwner.lcp.push({
+                        t:e.startTime,
+                        size:e.size,
+                        selector:el?.matches?.('#hero .hero-lead')?'#hero .hero-lead':(el?.id?`#${el.id}`:(el?.className?String(el.className):el?.tagName||'')),
+                        text:el?.textContent?.slice?.(0,180)||''
+                      });
+                    }
+                  }).observe({type:'largest-contentful-paint',buffered:true});
+                }catch(_){}
+                try{
+                  new PerformanceObserver(list=>{
+                    for(const e of list.getEntries()){
+                      if(e.hadRecentInput) continue;
+                      window.__fxLcpOwner.shifts.push({
+                        t:e.startTime,
+                        value:e.value,
+                        sources:(e.sources||[]).map(s=>({
+                          node:s.node?.id?`#${s.node.id}`:(s.node?.className?String(s.node.className):s.node?.tagName||''),
+                          previousRect:s.previousRect,
+                          currentRect:s.currentRect
+                        }))
+                      });
+                    }
+                  }).observe({type:'layout-shift',buffered:true});
+                }catch(_){}
+              });
+              const url=`${process.env.ORIGIN}/?r516_lcp_owner=${Date.now()}-${i}`;
+              const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
+              await page.waitForTimeout(6000);
+              const state=await page.evaluate(async()=>{
+                const hero=document.querySelector('#hero .hero-lead');
+                const marker=await fetch('/p0-validation-version.txt?owner_probe='+Date.now(),{cache:'no-store'}).then(r=>r.text()).catch(()=>null);
+                return {
+                  evidence:window.__fxLcpOwner,
+                  hero:{text:hero?.textContent||'',rect:hero?.getBoundingClientRect()?.toJSON?.()||null,style:hero?{opacity:getComputedStyle(hero).opacity,visibility:getComputedStyle(hero).visibility,display:getComputedStyle(hero).display}:null},
+                  scripts:[...document.scripts].map(s=>s.src).filter(Boolean),
+                  marker,
+                  readyState:document.readyState,
+                  overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
+                };
+              });
+              runs.push({index:i+1,status:response?.status()||0,url,consoleErrors,...state});
+              await context.close();
+            }
+            await browser.close();
+            fs.writeFileSync('artifacts/r516-lcp-owner/report.json',JSON.stringify({generatedAt:new Date().toISOString(),runs},null,2)+'\n');
+            for(const run of runs){
+              console.log(JSON.stringify({
+                run:run.index,status:run.status,overflow:run.overflow,
+                writes:run.evidence.writes,
+                mutations:run.evidence.mutations,
+                lcp:run.evidence.lcp,
+                shifts:run.evidence.shifts,
+                consoleErrors:run.consoleErrors,
+                marker:run.marker
+              },null,2));
+            }
+          })().catch(error=>{console.error(error);process.exit(1)});
+          NODE
+      - name: Upload diagnostic evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: r516-lcp-owner-${{ github.sha }}
+          path: artifacts/r516-lcp-owner
+          retention-days: 30
