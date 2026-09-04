@@ -1,0 +1,153 @@
+name: P0 R482 semantic legacy proof
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r482-semantic-proof.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ORIGIN: https://formatxsuite.com
+
+jobs:
+  semantic-r482:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: 76b79fe75eebc9b0ce3998a8111eb8dbf539efb9
+      - name: Require exact R516 production marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?r482_semantic=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/live-p0.txt"
+          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install verifier only; use runner Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Prove current mobile and desktop semantic MAG contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r482-semantic
+          node <<'NODE'
+          'use strict';
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          const origin=process.env.ORIGIN;
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+          async function snapshot(page,phase){
+            return page.evaluate(phase=>{
+              const root=document.documentElement;
+              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+              const cs=canvas?getComputedStyle(canvas):null;
+              const cr=canvas?.getBoundingClientRect();
+              const link=document.querySelector('link[data-fx-mag-living-balance-r481]');
+              const header=document.querySelector('.topbar .fx-reference-mag-button');
+              const hs=header?getComputedStyle(header):null;
+              const hr=header?.getBoundingClientRect();
+              const mini=document.querySelector('.fx-mini-mag-glyph-r459');
+              const ms=mini?getComputedStyle(mini):null;
+              return {
+                phase,t:performance.now(),
+                crystal:root.dataset.fxCrystalOrganismR326||'',
+                sync:root.dataset.fxMagShapeSyncR476||'',
+                life:root.dataset.fxPrimaryMagLifeR482||'',
+                contract:root.dataset.fxPrimaryMagLifeContractR482||'',
+                optics:root.dataset.fxPrimaryMagOpticsR482||'',
+                renderer:root.dataset.fxCoreRenderer||'',
+                scheduler:root.dataset.fxCoreScheduler||'',
+                idle:root.dataset.fxCoreIdleRenderR441||'',
+                balanceHref:link?.href||'',
+                canvas:{exists:Boolean(canvas),width:cr?.width||0,height:cr?.height||0,display:cs?.display||'',visibility:cs?.visibility||'',opacity:Number(cs?.opacity||0),animationName:cs?.animationName||'',filter:cs?.filter||'',scale:cs?.scale||''},
+                header:{exists:Boolean(header),width:hr?.width||0,height:hr?.height||0,display:hs?.display||'',visibility:hs?.visibility||'',opacity:Number(hs?.opacity||0),boxShadow:hs?.boxShadow||'',life:header?.dataset.fxMagLife||''},
+                mini:mini?{background:ms?.backgroundImage||'',boxShadow:ms?.boxShadow||'',life:mini.dataset.fxMagLife||''}:null,
+                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+                canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length
+              };
+            },phase);
+          }
+
+          async function verify(browser,name,viewport,mobile){
+            const context=await browser.newContext({viewport,deviceScaleFactor:mobile?2:1,isMobile:mobile,hasTouch:mobile,locale:'hu-HU',reducedMotion:'no-preference',colorScheme:'dark'});
+            const page=await context.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            page.on('console',m=>{const t=m.text();if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(t))errors.push(t);});
+            await page.goto(`${origin}/?r482_semantic=${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+
+            const early=[];
+            for(const delay of [0,250,500,1000,2000,4000]){
+              if(delay) await sleep(delay-(early.at(-1)?.delay||0));
+              const s=await snapshot(page,`t${delay}`);s.delay=delay;early.push(s);
+              console.log('R482_CONDITION_DUMP',name,JSON.stringify(s));
+            }
+            const state=early.at(-1);
+            assert.equal(state.crystal,'ready');
+            assert.match(state.sync,/^ready-r\d+$/);
+            assert.equal(state.contract,'large-mini-header-spectrum-breath-zero-webgl-idle');
+            assert.equal(state.optics,'restrained-soft-spectrum-mobile-edge');
+            assert.ok(['breath','pulse'].includes(state.life),JSON.stringify(state));
+            assert.match(state.balanceHref,/formatx-mag-living-balance-r481\.css\?v=20260831-r482-spectrum-soft-edge/);
+            assert.equal(state.renderer,'single-webgl-crystal-organism-r326');
+            assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441');
+            assert.equal(state.idle,'zero-frame');
+            assert.equal(state.canvasCount,1);
+            assert.ok(state.canvas.exists&&state.canvas.width>120&&state.canvas.height>180&&state.canvas.display!=='none'&&state.canvas.visibility!=='hidden'&&state.canvas.opacity>.2,JSON.stringify(state.canvas));
+            assert.ok(state.header.exists&&state.header.width>=40&&state.header.height>=40&&state.header.display!=='none'&&state.header.visibility!=='hidden'&&state.header.opacity>.2,JSON.stringify(state.header));
+            assert.notEqual(state.header.boxShadow,'none');
+            assert.ok(['breath','pulse'].includes(state.header.life));
+            if(state.mini){assert.notEqual(state.mini.background,'none');assert.notEqual(state.mini.boxShadow,'none');assert.ok(['breath','pulse'].includes(state.mini.life));}
+            assert.ok(state.overflow<=2,JSON.stringify(state));
+            if(mobile) assert.match(state.canvas.animationName,/fx-primary-mag-mobile-heart-r\d+/);
+            else assert.match(state.canvas.animationName,/fx-primary-mag-living-desktop-r\d+/);
+            assert.notEqual(state.canvas.filter,'none');
+            assert.match(state.canvas.filter,/brightness\(/);
+            assert.match(state.canvas.filter,/contrast\(/);
+            assert.match(state.canvas.filter,/saturate\(/);
+
+            const motion=[];
+            for(let i=0;i<4;i++){
+              const s=await snapshot(page,`motion-${i}`);motion.push({opacity:s.canvas.opacity,scale:s.canvas.scale});
+              await page.waitForTimeout(620);
+            }
+            const op=motion.map(x=>x.opacity);
+            assert.ok(Math.max(...op)-Math.min(...op)>.004,JSON.stringify(motion));
+            assert.equal(errors.length,0,errors.join(' | '));
+            await context.close();
+            return {name,state,motion,errors};
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--disable-dev-shm-usage','--no-sandbox','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            try{
+              const result=[];
+              result.push(await verify(browser,'mobile-390x844',{width:390,height:844},true));
+              result.push(await verify(browser,'desktop-1440x900',{width:1440,height:900},false));
+              fs.writeFileSync('artifacts/r482-semantic/result.json',JSON.stringify(result,null,2));
+              console.log('PASS: current MAG semantic contract proves legacy R482 implementation markers are stale.');
+            }finally{await browser.close();}
+          })().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r482-semantic-proof
+          path: artifacts/r482-semantic/
+          if-no-files-found: warn
+          retention-days: 30
