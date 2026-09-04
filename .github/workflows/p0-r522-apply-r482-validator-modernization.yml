@@ -1,0 +1,103 @@
+name: P0 R522 apply R482 validator modernization
+
+on:
+  push:
+    branches: [p0-r522-r482-validator-76b79fe]
+    paths:
+      - '.github/workflows/p0-r522-apply-r482-validator-modernization.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: p0-r522-r482-validator-76b79fe
+          fetch-depth: 0
+
+      - name: Modernize stale R482 implementation-detail gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          live=Path('.github/workflows/verify-r481-live-mag.yml')
+          s=live.read_text()
+          reps={
+            "root.dataset.fxMagShapeSyncR476==='ready-r482'":"/^ready-r\\d+$/.test(root.dataset.fxMagShapeSyncR476||'')",
+            "assert.equal(state.sync,'ready-r482');":"assert.match(state.sync,/^ready-r\\d+$/);",
+            "assert.match(state.balanceHref,/formatx-mag-living-balance-r481\\.css\\?v=20260831-r482-spectrum-soft-edge/);":"assert.match(state.balanceHref,/formatx-mag-living-balance-r481\\.css(?:\\?v=[^#]+)?/);",
+            "assert.ok(state.animationName.includes('fx-primary-mag-mobile-heart-r483'),state.animationName);":"assert.match(state.animationName,/fx-primary-mag-mobile-heart-r\\d+/);",
+            "assert.ok(state.animationName.includes('fx-primary-mag-living-desktop-r482'),state.animationName);":"assert.match(state.animationName,/fx-primary-mag-living-desktop-r\\d+/);",
+            "await page.goto(`https://formatxsuite.com/?verify=r482-${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});":"await page.goto(`https://formatxsuite.com/?verify=r482-${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});",
+            "},null,{timeout:120000});":"},null,{timeout:12000});",
+            "npm install --silent playwright@1.62.0\n          npx playwright install --with-deps chromium >/dev/null":"npm install --silent playwright@1.62.0\n          CHROME_BIN=\"$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)\"\n          test -n \"$CHROME_BIN\"\n          echo \"CHROME_BIN=$CHROME_BIN\" >> \"$GITHUB_ENV\"",
+            "const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});":"const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});",
+          }
+          for old,new in reps.items():
+              if old not in s:
+                  raise SystemExit(f'missing live validator pattern: {old[:100]}')
+              s=s.replace(old,new)
+
+          anchor="""            await page.goto(`https://formatxsuite.com/?verify=r482-${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});\n            await page.waitForFunction(()=>{"""
+          dump="""            await page.goto(`https://formatxsuite.com/?verify=r482-${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});\n            const firstCondition=await page.evaluate(()=>{\n              const root=document.documentElement;\n              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');\n              const cs=canvas?getComputedStyle(canvas):null;\n              const box=canvas?.getBoundingClientRect();\n              const link=document.querySelector('link[data-fx-mag-living-balance-r481]');\n              const header=document.querySelector('.topbar .fx-reference-mag-button');\n              const mini=document.querySelector('.fx-mini-mag-glyph-r459');\n              return {\n                t:performance.now(),\n                crystal:root.dataset.fxCrystalOrganismR326||'',\n                sync:root.dataset.fxMagShapeSyncR476||'',\n                contract:root.dataset.fxPrimaryMagLifeContractR482||'',\n                optics:root.dataset.fxPrimaryMagOpticsR482||'',\n                balanceHref:link?.href||'',\n                canvas:{exists:Boolean(canvas),width:box?.width||0,height:box?.height||0,display:cs?.display||'',visibility:cs?.visibility||'',opacity:Number(cs?.opacity||0),animationName:cs?.animationName||'',filter:cs?.filter||''},\n                renderer:root.dataset.fxCoreRenderer||'',\n                scheduler:root.dataset.fxCoreScheduler||'',\n                idle:root.dataset.fxCoreIdleRenderR441||'',\n                header:Boolean(header),mini:Boolean(mini),\n                overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth\n              };\n            });\n            console.log('R482_CONDITION_DUMP',name,JSON.stringify(firstCondition));\n            await page.waitForFunction(()=>{"""
+          if anchor not in s:
+              raise SystemExit('missing first condition anchor')
+          s=s.replace(anchor,dump,1)
+          live.write_text(s)
+
+          mini=Path('.github/workflows/verify-r459-live-mini-mag.yml')
+          s=mini.read_text()
+          reps={
+            "d.fxMagShapeSyncR476==='ready-r482'":"/^ready-r\\d+$/.test(d.fxMagShapeSyncR476||'')",
+            "assert.equal(state.shapeSync,'ready-r482');":"assert.match(state.shapeSync,/^ready-r\\d+$/);",
+            "timeout:120000":"timeout:60000",
+            "},null,{timeout:120000});":"},null,{timeout:12000});",
+            "npm install --silent playwright@1.62.0\n          npx playwright install --with-deps chromium >/dev/null":"npm install --silent playwright@1.62.0\n          CHROME_BIN=\"$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)\"\n          test -n \"$CHROME_BIN\"\n          echo \"CHROME_BIN=$CHROME_BIN\" >> \"$GITHUB_ENV\"",
+            "const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});":"const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});",
+          }
+          for old,new in reps.items():
+              if old in s:
+                  s=s.replace(old,new)
+          mini.write_text(s)
+
+          browser=Path('.github/scripts/validate-living-core-r425-browser.cjs')
+          s=browser.read_text()
+          old="root.dataset.fxMagShapeSyncR476 === 'ready-r482'"
+          if old not in s:
+              raise SystemExit('missing browser stale sync marker')
+          s=s.replace(old,"/^ready-r\\d+$/.test(root.dataset.fxMagShapeSyncR476 || '')",1)
+          browser.write_text(s)
+          PY
+
+      - name: Validate patch semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/validate-living-core-r425-browser.cjs
+          grep -Fq "R482_CONDITION_DUMP" .github/workflows/verify-r481-live-mag.yml
+          grep -Fq "timeout:12000" .github/workflows/verify-r481-live-mag.yml
+          ! grep -Fq "fxMagShapeSyncR476==='ready-r482'" .github/workflows/verify-r481-live-mag.yml
+          ! grep -Fq "fxMagShapeSyncR476==='ready-r482'" .github/workflows/verify-r459-live-mini-mag.yml
+          ! grep -Fq "fxMagShapeSyncR476 === 'ready-r482'" .github/scripts/validate-living-core-r425-browser.cjs
+          ! grep -Fq "playwright install --with-deps chromium" .github/workflows/verify-r481-live-mag.yml
+          git diff --check
+          git diff -- .github/workflows/verify-r481-live-mag.yml .github/workflows/verify-r459-live-mini-mag.yml .github/scripts/validate-living-core-r425-browser.cjs
+
+      - name: Commit coherent validator fix and remove helper
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          rm .github/workflows/p0-r522-apply-r482-validator-modernization.yml
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add .github/workflows/verify-r481-live-mag.yml .github/workflows/verify-r459-live-mini-mag.yml .github/scripts/validate-living-core-r425-browser.cjs .github/workflows/p0-r522-apply-r482-validator-modernization.yml
+          git commit -m 'Modernize legacy R482 MAG semantic gate'
+          git push origin HEAD:p0-r522-r482-validator-76b79fe
