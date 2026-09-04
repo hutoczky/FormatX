@@ -1,0 +1,83 @@
+name: Diagnose R515 mobile LCP owner v2
+
+on:
+  push:
+    branches: [p0-r515-mobile-lcp-owner]
+    paths: ['.github/workflows/diagnose-r515-mobile-lcp-owner-v2.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: bd30cb24cde49d42594dce4c4a8a5eff58e26912
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Verify exact R515 production marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://formatxsuite.com/p0-validation-version.txt?mobile_owner_v2=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/live-marker.txt"
+          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-marker.txt"
+          echo R515_EXACT_MARKER_LIVE
+      - name: Install Playwright library only
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.62.0
+          CHROME_PATH="$(command -v google-chrome-stable || command -v google-chrome || true)"
+          test -n "$CHROME_PATH"
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+      - name: Trace mobile category LCP writes x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r515-mobile-lcp-owner-v2
+          NODE_PATH="$GITHUB_WORKSPACE/node_modules" node <<'NODE'
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH});
+            const runs=[];
+            for(let i=0;i<3;i++){
+              const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:3,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
+              const page=await context.newPage(); const errors=[];
+              page.on('console',m=>{if(m.type()==='error')errors.push(m.text())}); page.on('pageerror',e=>errors.push(String(e)));
+              await page.addInitScript(()=>{
+                window.__mobileOwner={innerWrites:[],textWrites:[],mutations:[],lcp:[],shifts:[],samples:[]};
+                const inner=Object.getOwnPropertyDescriptor(Element.prototype,'innerHTML');
+                if(inner?.get&&inner?.set)Object.defineProperty(Element.prototype,'innerHTML',{configurable:true,enumerable:inner.enumerable,get(){return inner.get.call(this)},set(v){try{if(this?.matches?.('#hero .fx-category-definition'))window.__mobileOwner.innerWrites.push({t:performance.now(),value:String(v),stack:String(new Error('category innerHTML write').stack||'')});}catch(_){} return inner.set.call(this,v);}});
+                const text=Object.getOwnPropertyDescriptor(Node.prototype,'textContent');
+                if(text?.get&&text?.set)Object.defineProperty(Node.prototype,'textContent',{configurable:true,enumerable:text.enumerable,get(){return text.get.call(this)},set(v){try{if(this?.nodeType===1&&this.matches?.('#hero .fx-category-definition'))window.__mobileOwner.textWrites.push({t:performance.now(),value:String(v),stack:String(new Error('category textContent write').stack||'')});}catch(_){} return text.set.call(this,v);}});
+                new MutationObserver(records=>{for(const r of records){const el=r.target?.nodeType===1?r.target:r.target?.parentElement;const cat=el?.matches?.('#hero .fx-category-definition')?el:el?.closest?.('#hero .fx-category-definition');if(cat)window.__mobileOwner.mutations.push({t:performance.now(),type:r.type,text:cat.textContent,html:cat.innerHTML,added:r.addedNodes?.length||0,removed:r.removedNodes?.length||0});}}).observe(document,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style']});
+                try{new PerformanceObserver(list=>{for(const e of list.getEntries()){const el=e.element;window.__mobileOwner.lcp.push({t:e.startTime,size:e.size,selector:el?.matches?.('#hero .fx-category-definition')?'#hero .fx-category-definition':(el?.id?`#${el.id}`:(el?.className?String(el.className):el?.tagName||'')),text:el?.textContent?.slice?.(0,180)||''});}}).observe({type:'largest-contentful-paint',buffered:true});}catch(_){}
+                try{new PerformanceObserver(list=>{for(const e of list.getEntries()){if(e.hadRecentInput)continue;window.__mobileOwner.shifts.push({t:e.startTime,value:e.value,sources:(e.sources||[]).map(s=>({node:s.node?.id?`#${s.node.id}`:(s.node?.className?String(s.node.className):s.node?.tagName||''),previousRect:s.previousRect,currentRect:s.currentRect}))});}}).observe({type:'layout-shift',buffered:true});}catch(_){}
+              });
+              const response=await page.goto(`https://formatxsuite.com/?mobile_owner_v2=${Date.now()}-${i}`,{waitUntil:'domcontentloaded',timeout:120000});
+              let elapsed=0;
+              for(const target of [0,100,250,500,1000,1800,3000,5000]){
+                if(target>elapsed)await page.waitForTimeout(target-elapsed); elapsed=target;
+                const sample=await page.evaluate(()=>{const e=document.querySelector('#hero .fx-category-definition');if(!e)return null;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{t:performance.now(),text:e.textContent,html:e.innerHTML,rect:{x:r.x,y:r.y,width:r.width,height:r.height},display:s.display,position:s.position,opacity:s.opacity,visibility:s.visibility,fontSize:s.fontSize,lineHeight:s.lineHeight};});
+                if(sample)await page.evaluate(s=>window.__mobileOwner.samples.push(s),sample);
+              }
+              const state=await page.evaluate(()=>window.__mobileOwner);
+              runs.push({run:i+1,status:response?.status()||0,errors,...state}); await context.close();
+            }
+            await browser.close(); const report={runs}; fs.writeFileSync('artifacts/r515-mobile-lcp-owner-v2/report.json',JSON.stringify(report,null,2)+'\n'); console.log(JSON.stringify(report,null,2));
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r515-mobile-lcp-owner-v2-${{ github.sha }}
+          path: artifacts/r515-mobile-lcp-owner-v2
+          if-no-files-found: warn
+          retention-days: 30
