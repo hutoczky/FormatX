@@ -9,8 +9,8 @@ const ORIGIN = (process.env.FORMATX_TEST_URL || 'https://formatxsuite.com/').rep
 const OUT = process.env.FORMATX_SEMANTIC_EVIDENCE_DIR || 'artifacts/r522-semantic-mag';
 const CANVAS = '#hero .fx-crystal-organism-r326-canvas';
 const STAGE = '#hero .fx-crystal-organism-r326-stage';
-const PAUSE = '#hero .fx-reference-pause';
 const ASK = '#hero .fx-reference-ask';
+const MANUAL_PAUSE = '#hero .fx-reference-pause';
 
 fs.mkdirSync(OUT, { recursive: true });
 
@@ -32,13 +32,13 @@ function semanticReady(state) {
     && state.scheduler === 'interaction-bursts-idle-zero-frame-r441'
     && state.idle === 'zero-frame'
     && state.header.visible
-    && state.pause.visible
     && state.ask.visible
+    && state.manualPauseCount === 0
     && state.overflow <= 2;
 }
 
 async function snapshot(page) {
-  return page.evaluate(({ CANVAS, STAGE, PAUSE, ASK }) => {
+  return page.evaluate(({ CANVAS, STAGE, ASK, MANUAL_PAUSE }) => {
     const root = document.documentElement;
     const canvas = document.querySelector(CANVAS);
     const cs = canvas ? getComputedStyle(canvas) : null;
@@ -46,7 +46,6 @@ async function snapshot(page) {
     const header = document.querySelector('.topbar .fx-reference-mag-button');
     const hs = header ? getComputedStyle(header) : null;
     const hb = header?.getBoundingClientRect();
-    const pause = document.querySelector(PAUSE);
     const ask = document.querySelector(ASK);
     const visible = element => Boolean(
       element
@@ -67,6 +66,8 @@ async function snapshot(page) {
       renderer: root.dataset.fxCoreRenderer || '',
       scheduler: root.dataset.fxCoreScheduler || '',
       idle: root.dataset.fxCoreIdleRenderR441 || '',
+      manualPauseContract: root.dataset.fxManualMagPauseContractR528 || '',
+      manualPauseCount: document.querySelectorAll(MANUAL_PAUSE).length,
       canvasCount: document.querySelectorAll(CANVAS).length,
       stageCount: document.querySelectorAll(STAGE).length,
       canvas: {
@@ -91,11 +92,10 @@ async function snapshot(page) {
           && hb.height >= 40
         ),
       },
-      pause: { visible: visible(pause), paused: pause?.dataset.paused || '' },
       ask: { visible: visible(ask) },
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
     };
-  }, { CANVAS, STAGE, PAUSE, ASK });
+  }, { CANVAS, STAGE, ASK, MANUAL_PAUSE });
 }
 
 async function animations(page) {
@@ -126,7 +126,7 @@ function maxDelta(before, after) {
 async function waitForSemanticReady(page, name) {
   await page.waitForTimeout(4000);
   let state = await snapshot(page);
-  console.log('R522_INITIAL_DUMP', name, JSON.stringify(state));
+  console.log('R528_INITIAL_DUMP', name, JSON.stringify(state));
 
   const deadline = Date.now() + 20000;
   while (!semanticReady(state) && Date.now() < deadline) {
@@ -134,8 +134,9 @@ async function waitForSemanticReady(page, name) {
     state = await snapshot(page);
   }
 
-  console.log('R522_FINAL_DUMP', name, JSON.stringify(state));
+  console.log('R528_FINAL_DUMP', name, JSON.stringify(state));
   assert.ok(semanticReady(state), `${name}: semantic MAG prerequisites absent ${JSON.stringify(state)}`);
+  assert.equal(state.manualPauseContract, 'retired-living-core', `${name}: manual pause retirement marker missing`);
   assert.match(state.shapeSync, /^ready-r\d+$/, `${name}: shape sync is not a current ready revision`);
   assert.ok(state.lifeContract.length > 0 && /webgl/i.test(state.lifeContract) && /idle/i.test(state.lifeContract),
     `${name}: current MAG life contract missing ${state.lifeContract}`);
@@ -170,7 +171,7 @@ async function verifyNormal(browser, name, viewport, mobile) {
   });
 
   try {
-    await page.goto(`${ORIGIN}?r526_semantic=${name}-${Date.now()}`, {
+    await page.goto(`${ORIGIN}?r528_semantic=${name}-${Date.now()}`, {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
@@ -186,34 +187,17 @@ async function verifyNormal(browser, name, viewport, mobile) {
     assert.ok(a0.length > 0 && a1.length === a0.length, `${name}: MAG animation set unavailable`);
     assert.deepEqual(animationNames(a1), animationNames(a0), `${name}: MAG animation identity changed`);
     const initialAdvance = maxDelta(a0, a1);
-    assert.ok(initialAdvance > 16, `${name}: MAG motion did not progress (${initialAdvance}ms)`);
+    assert.ok(initialAdvance > 16, `${name}: living MAG motion did not progress (${initialAdvance}ms)`);
 
-    const pause = page.locator(PAUSE).first();
-    await pause.click();
-    await page.waitForFunction(selector => document.querySelector(selector)?.dataset.paused === 'true', PAUSE, { timeout: 3000 });
-    const p0 = await animations(page);
+    const a2 = await animations(page);
     await page.waitForTimeout(650);
-    const p1 = await animations(page);
-    const pauseDelta = maxDelta(p0, p1);
-    assert.ok(pauseDelta < 80, `${name}: PAUSE clock moved ${pauseDelta}ms`);
+    const a3 = await animations(page);
+    assert.deepEqual(animationNames(a3), animationNames(a2), `${name}: living MAG animation identity changed during sustained run`);
+    const sustainedAdvance = maxDelta(a2, a3);
+    assert.ok(sustainedAdvance > 16, `${name}: living MAG motion stopped unexpectedly (${sustainedAdvance}ms)`);
 
-    await pause.click();
-    await page.waitForFunction(selector => document.querySelector(selector)?.dataset.paused !== 'true', PAUSE, { timeout: 3000 });
-    const r0 = await animations(page);
-    await page.waitForTimeout(350);
-    const r1 = await animations(page);
-    const resumeDelta = maxDelta(r0, r1);
-    assert.ok(resumeDelta > 16, `${name}: RESUME clock did not progress (${resumeDelta}ms)`);
-
-    await pause.click();
-    await page.waitForFunction(selector => document.querySelector(selector)?.dataset.paused === 'true', PAUSE, { timeout: 3000 });
-    await pause.click();
-    await page.waitForFunction(selector => document.querySelector(selector)?.dataset.paused !== 'true', PAUSE, { timeout: 3000 });
-    const rr0 = await animations(page);
-    await page.waitForTimeout(350);
-    const rr1 = await animations(page);
-    const repeatResumeDelta = maxDelta(rr0, rr1);
-    assert.ok(repeatResumeDelta > 16, `${name}: repeated PAUSE/RESUME did not recover motion`);
+    const after = await snapshot(page);
+    assert.equal(after.manualPauseCount, 0, `${name}: obsolete manual MAG PAUSE control reappeared`);
 
     const ask = page.locator(ASK).first();
     const askBox = await ask.boundingBox();
@@ -229,9 +213,8 @@ async function verifyNormal(browser, name, viewport, mobile) {
       viewport,
       state,
       initialAdvance,
-      pauseDelta,
-      resumeDelta,
-      repeatResumeDelta,
+      sustainedAdvance,
+      manualPauseCount: after.manualPauseCount,
       ask: { width: askBox.width, height: askBox.height },
     };
   } finally {
@@ -262,20 +245,22 @@ async function verifyFallback(browser) {
   });
 
   try {
-    await page.goto(`${ORIGIN}?r526_semantic_fallback=${Date.now()}`, {
+    await page.goto(`${ORIGIN}?r528_semantic_fallback=${Date.now()}`, {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
     await page.waitForTimeout(2200);
-    const state = await page.evaluate(() => ({
+    const state = await page.evaluate(pauseSel => ({
       hero: Boolean(document.querySelector('#hero')),
       lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
       live: Boolean(document.querySelector('#live-os,#live-os-overview,[data-fx-live-os]')),
       proof: Boolean(document.querySelector('[data-fx-award-proof],.fx-proof-grid')),
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
-    }));
+      manualPauseCount: document.querySelectorAll(pauseSel).length,
+    }), MANUAL_PAUSE);
     assert.ok(state.hero && state.lead > 40 && state.live && state.proof, `fallback lost meaningful content ${JSON.stringify(state)}`);
     assert.ok(state.overflow <= 2, `fallback horizontal overflow ${state.overflow}`);
+    assert.equal(state.manualPauseCount, 0, 'fallback exposed obsolete manual MAG PAUSE control');
     assert.equal(errors.length, 0, `fallback page errors ${errors.join(' | ')}`);
     return state;
   } finally {
@@ -293,20 +278,22 @@ async function verifyReducedMotion(browser) {
   });
   const page = await context.newPage();
   try {
-    await page.goto(`${ORIGIN}?r526_semantic_reduced=${Date.now()}`, {
+    await page.goto(`${ORIGIN}?r528_semantic_reduced=${Date.now()}`, {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
     await page.waitForTimeout(4000);
-    const state = await page.evaluate(() => ({
+    const state = await page.evaluate(pauseSel => ({
       scheduler: document.documentElement.dataset.fxP0MotionSchedulerR490 || '',
       hero: Boolean(document.querySelector('#hero')),
       lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
-    }));
+      manualPauseCount: document.querySelectorAll(pauseSel).length,
+    }), MANUAL_PAUSE);
     assert.ok(state.hero && state.lead > 40, `reduced-motion hero unavailable ${JSON.stringify(state)}`);
     assert.match(state.scheduler, /reduced-motion-static|armed|committed/, `unexpected reduced-motion scheduler ${state.scheduler}`);
     assert.ok(state.overflow <= 2, `reduced-motion horizontal overflow ${state.overflow}`);
+    assert.equal(state.manualPauseCount, 0, 'reduced-motion mode exposed obsolete manual MAG PAUSE control');
     return state;
   } finally {
     await context.close();
@@ -337,13 +324,14 @@ async function verifyReducedMotion(browser) {
     const report = {
       auditedSha: process.env.AUDITED_SHA || '',
       origin: ORIGIN,
+      contract: 'r528-living-core-no-manual-pause',
       desktop,
       mobile,
       fallback,
       reducedMotion,
     };
     writeJson('report.json', report);
-    console.log('R522_SEMANTIC_MAG_PASS');
+    console.log('R528_SEMANTIC_MAG_PASS');
     console.log(JSON.stringify(report, null, 2));
   } finally {
     await browser.close();
