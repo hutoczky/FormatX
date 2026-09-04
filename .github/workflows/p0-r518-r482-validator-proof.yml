@@ -1,0 +1,63 @@
+name: P0 R518 R482 validator proof
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r518-r482-validator-proof.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_REF: p0-r518-r482-semantic
+  CANDIDATE_SHA: a10aaf67f6128cd4af0c5483c269015b2bdd88b7
+  ORIGIN: https://formatxsuite.com
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_REF }}
+          fetch-depth: 3
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Exact validator source proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          grep -F "test -n \"\$CHROME_BIN\"" .github/workflows/verify-r481-live-mag.yml
+          grep -F "R482_CONDITION_DUMP" .github/workflows/verify-r481-live-mag.yml
+          grep -F "ready-r\\d+" .github/workflows/verify-r481-live-mag.yml
+          ! grep -F "ready-r482'" .github/workflows/verify-r481-live-mag.yml
+          ! grep -F "playwright install --with-deps chromium" .github/workflows/verify-r481-live-mag.yml
+      - name: Verify exact current production marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?r482_candidate=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/live-p0.txt"
+          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
+      - name: Install runner Chrome verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Current semantic MAG proof mobile and desktop
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const assert=require('node:assert/strict');const {chromium}=require('playwright');
+          function snap(){const root=document.documentElement,c=document.querySelector('#hero .fx-crystal-organism-r326-canvas'),s=c?getComputedStyle(c):null,r=c?.getBoundingClientRect(),link=document.querySelector('link[data-fx-mag-living-balance-r481]');return{crystal:root.dataset.fxCrystalOrganismR326||'',sync:root.dataset.fxMagShapeSyncR476||'',life:root.dataset.fxPrimaryMagLifeR482||'',contract:root.dataset.fxPrimaryMagLifeContractR482||'',optics:root.dataset.fxPrimaryMagOpticsR482||'',renderer:root.dataset.fxCoreRenderer||'',scheduler:root.dataset.fxCoreScheduler||'',idle:root.dataset.fxCoreIdleRenderR441||'',balance:link?.href||'',count:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,canvas:{width:r?.width||0,height:r?.height||0,display:s?.display||'',visibility:s?.visibility||'',opacity:Number(s?.opacity||0),animation:s?.animationName||'',filter:s?.filter||''},overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};}
+          function ready(s){return s.crystal==='ready'&&/^ready-r\d+$/.test(s.sync)&&['breath','pulse'].includes(s.life)&&s.contract==='large-mini-header-spectrum-breath-zero-webgl-idle'&&s.optics==='restrained-soft-spectrum-mobile-edge'&&s.renderer==='single-webgl-crystal-organism-r326'&&s.scheduler==='interaction-bursts-idle-zero-frame-r441'&&s.idle==='zero-frame'&&/formatx-mag-living-balance-r481\.css/.test(s.balance)&&s.count===1&&s.canvas.width>120&&s.canvas.height>180&&s.canvas.display!=='none'&&s.canvas.visibility!=='hidden'&&s.canvas.opacity>.2&&s.overflow<=2;}
+          async function run(b,name,v,m){const c=await b.newContext({viewport:v,isMobile:m,hasTouch:m,deviceScaleFactor:m?2:1,locale:'hu-HU',colorScheme:'dark'}),p=await c.newPage();await p.goto(`${process.env.ORIGIN}/?r482proof=${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});let s;for(let t=0;t<=20000;t+=1000){s=await p.evaluate(snap);console.log('R482_PROOF',name,t,JSON.stringify(s));if(ready(s))break;await p.waitForTimeout(1000);}assert.ok(ready(s),JSON.stringify(s));assert.match(s.canvas.filter,/brightness\(/);assert.match(s.canvas.filter,/contrast\(/);assert.match(s.canvas.filter,/saturate\(/);if(m)assert.match(s.canvas.animation,/fx-primary-mag-mobile-heart-r\d+/);else assert.match(s.canvas.animation,/fx-primary-mag-living-desktop-r\d+/);await c.close();}
+          (async()=>{const b=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await run(b,'mobile',{width:390,height:844},true);await run(b,'desktop',{width:1440,height:900},false);}finally{await b.close();}console.log('R482_SEMANTIC_VALIDATOR_PASS');})().catch(e=>{console.error(e);process.exit(1);});
+          NODE
