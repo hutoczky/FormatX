@@ -25,7 +25,8 @@ jobs:
     timeout-minutes: 12
     env:
       AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-      ORIGIN: https://formatxsuite.com
+      FORMATX_TEST_URL: https://formatxsuite.com/
+      FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r522-semantic-mag
     steps:
       - uses: actions/checkout@v5
         with:
@@ -36,13 +37,16 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in $(seq 1 60); do
-            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-r522-$attempt" -o "$RUNNER_TEMP/live-p0.txt" \
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' \
+              "https://formatxsuite.com/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-r522-$attempt" \
+              -o "$RUNNER_TEMP/live-p0.txt" \
               && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
               echo 'Exact production revision is live.'
               exit 0
             fi
             sleep 5
           done
+          echo 'Exact production marker did not converge.' >&2
           exit 1
 
       - uses: actions/setup-node@v5
@@ -51,14 +55,15 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Source ownership sanity
+      - name: Lightweight semantic source sanity
         shell: bash
         run: |
           set -euo pipefail
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
           node --check .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
 
-      - name: Reuse system Chrome and Playwright package
+      - name: Reuse system Chrome
         shell: bash
         run: |
           set -euo pipefail
@@ -68,129 +73,7 @@ jobs:
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
 
       - name: Semantic MAG bounded functional proof
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts/r522-semantic-mag
-          node <<'NODE' | tee artifacts/r522-semantic-mag/report.txt
-          'use strict';
-          const assert=require('node:assert/strict');
-          const {chromium}=require('playwright');
-          const ORIGIN=process.env.ORIGIN;
-          const CANVAS='#hero .fx-crystal-organism-r326-canvas';
-          const PAUSE='#hero .fx-reference-pause';
-          const ASK='#hero .fx-reference-ask';
-
-          async function snapshot(page){
-            return page.evaluate(({CANVAS,PAUSE,ASK})=>{
-              const root=document.documentElement;
-              const canvas=document.querySelector(CANVAS);
-              const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
-              const cs=canvas?getComputedStyle(canvas):null;
-              const box=canvas?.getBoundingClientRect();
-              const header=document.querySelector('.topbar .fx-reference-mag-button');
-              const hs=header?getComputedStyle(header):null;
-              const hb=header?.getBoundingClientRect();
-              const pause=document.querySelector(PAUSE);
-              const ask=document.querySelector(ASK);
-              const visible=e=>Boolean(e&&getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden'&&Number(getComputedStyle(e).opacity||1)>.2&&e.getBoundingClientRect().width>0&&e.getBoundingClientRect().height>0);
-              return {
-                crystal:root.dataset.fxCrystalOrganismR326||'',
-                shapeSync:root.dataset.fxMagShapeSyncR476||'',
-                lifeContract:root.dataset.fxPrimaryMagLifeContractR482||'',
-                optics:root.dataset.fxPrimaryMagOpticsR482||'',
-                renderer:root.dataset.fxCoreRenderer||'',
-                scheduler:root.dataset.fxCoreScheduler||'',
-                idle:root.dataset.fxCoreIdleRenderR441||'',
-                canvasCount:document.querySelectorAll(CANVAS).length,
-                stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
-                canvas:{width:box?.width||0,height:box?.height||0,display:cs?.display||'',visibility:cs?.visibility||'',opacity:Number(cs?.opacity||0),animation:cs?.animationName||'',playState:cs?.animationPlayState||''},
-                balanceHref:document.querySelector('link[data-fx-mag-living-balance-r481]')?.href||'',
-                header:{exists:Boolean(header),visible:Boolean(hs&&hb&&hs.display!=='none'&&hs.visibility!=='hidden'&&Number(hs.opacity)>.2&&hb.width>=40&&hb.height>=40)},
-                pause:{visible:visible(pause),paused:pause?.dataset.paused||''},
-                ask:{visible:visible(ask)},
-                overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
-              };
-            },{CANVAS,PAUSE,ASK});
-          }
-
-          async function animations(page){
-            return page.evaluate(sel=>(document.querySelector(sel)?.getAnimations?.()||[]).map((a,i)=>({i,name:String(a.animationName||''),time:typeof a.currentTime==='number'?a.currentTime:null,state:String(a.playState||''),pending:Boolean(a.pending)})),CANVAS);
-          }
-          const maxDelta=(a,b)=>Math.max(0,...b.map(x=>{const y=a.find(v=>v.i===x.i&&v.name===x.name);return typeof x.time==='number'&&typeof y?.time==='number'?Math.abs(x.time-y.time):0;}));
-
-          async function normal(browser,name,viewport,mobile){
-            const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
-            const page=await context.newPage();
-            const errors=[];
-            page.on('pageerror',e=>errors.push(String(e)));
-            page.on('console',m=>{const t=m.text();if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(t))errors.push(t);});
-            await page.goto(`${ORIGIN}/?r522_semantic=${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
-            let state=await snapshot(page);
-            console.log('R522_INITIAL_DUMP',name,JSON.stringify(state));
-            const deadline=Date.now()+5000;
-            while(Date.now()<deadline){
-              if(state.crystal==='ready'&&state.renderer==='single-webgl-crystal-organism-r326'&&state.canvasCount===1&&state.stageCount===1&&state.canvas.width>120&&state.canvas.height>180&&state.canvas.display!=='none'&&state.canvas.visibility!=='hidden'&&state.canvas.opacity>.2&&state.balanceHref.includes('/scifi-ui/styles/formatx-mag-living-balance-r481.css')&&state.scheduler==='interaction-bursts-idle-zero-frame-r441'&&state.idle==='zero-frame'&&state.header.visible&&state.pause.visible&&state.ask.visible&&state.overflow<=2) break;
-              await page.waitForTimeout(250); state=await snapshot(page);
-            }
-            console.log('R522_FINAL_DUMP',name,JSON.stringify(state));
-            assert.equal(state.crystal,'ready'); assert.equal(state.renderer,'single-webgl-crystal-organism-r326');
-            assert.equal(state.canvasCount,1); assert.equal(state.stageCount,1); assert.ok(state.canvas.width>120&&state.canvas.height>180);
-            assert.notEqual(state.canvas.display,'none'); assert.notEqual(state.canvas.visibility,'hidden'); assert.ok(state.canvas.opacity>.2);
-            assert.ok(state.balanceHref.includes('/scifi-ui/styles/formatx-mag-living-balance-r481.css'));
-            assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441'); assert.equal(state.idle,'zero-frame'); assert.ok(state.header.visible); assert.ok(state.overflow<=2);
-            assert.notEqual(state.canvas.animation,'none'); assert.ok(state.pause.visible&&state.ask.visible);
-
-            const a0=await animations(page); await page.waitForTimeout(300); const a1=await animations(page);
-            assert.ok(a0.length>0&&a1.length===a0.length,'MAG animation set unavailable');
-            assert.deepEqual(a1.map(x=>x.name),a0.map(x=>x.name),'MAG animation identity changed');
-            assert.ok(maxDelta(a0,a1)>16,'MAG motion did not progress');
-
-            const pause=page.locator(PAUSE).first();
-            await pause.click();
-            await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.paused==='true',PAUSE,{timeout:3000});
-            const p0=await animations(page); await page.waitForTimeout(600); const p1=await animations(page);
-            assert.ok(maxDelta(p0,p1)<80,`PAUSE clock moved ${maxDelta(p0,p1)}ms`);
-            await pause.click();
-            await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.paused!=='true',PAUSE,{timeout:3000});
-            const r0=await animations(page); await page.waitForTimeout(300); const r1=await animations(page);
-            assert.ok(maxDelta(r0,r1)>16,'RESUME clock did not progress');
-
-            await pause.click(); await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.paused==='true',PAUSE,{timeout:3000});
-            await pause.click(); await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.paused!=='true',PAUSE,{timeout:3000});
-            const rr0=await animations(page); await page.waitForTimeout(300); const rr1=await animations(page);
-            assert.ok(maxDelta(rr0,rr1)>16,'Repeated PAUSE/RESUME did not recover motion');
-
-            const ask=page.locator(ASK).first(); const box=await ask.boundingBox(); assert.ok(box&&box.width>=44&&box.height>=44,'ASK hit target invalid');
-            await ask.click(); await page.waitForTimeout(120); assert.equal(errors.length,0,errors.join(' | '));
-            await context.close();
-            return {name,state,pauseDelta:maxDelta(p0,p1),resumeDelta:maxDelta(r0,r1),repeatResumeDelta:maxDelta(rr0,rr1)};
-          }
-
-          async function fallback(browser){
-            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,locale:'hu-HU'});
-            await context.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){if(['webgl','webgl2','experimental-webgl'].includes(type))return null;return original.call(this,type,...args);};});
-            const page=await context.newPage(); await page.goto(`${ORIGIN}/?r522_fallback=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000}); await page.waitForTimeout(1800);
-            const s=await page.evaluate(()=>({hero:Boolean(document.querySelector('#hero')),lead:(document.querySelector('#hero .hero-lead')?.textContent||'').trim().length,live:Boolean(document.querySelector('#live-os,#live-os-overview,[data-fx-live-os]')),proof:Boolean(document.querySelector('[data-fx-award-proof],.fx-proof-grid')),overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth}));
-            assert.ok(s.hero&&s.lead>40&&s.live&&s.proof&&s.overflow<=2,JSON.stringify(s)); await context.close(); return s;
-          }
-
-          async function reduced(browser){
-            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce',locale:'hu-HU'});
-            const page=await context.newPage(); await page.goto(`${ORIGIN}/?r522_reduced=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000}); await page.waitForTimeout(4000);
-            const s=await page.evaluate(()=>({scheduler:document.documentElement.dataset.fxP0MotionSchedulerR490||'',hero:Boolean(document.querySelector('#hero')),lead:(document.querySelector('#hero .hero-lead')?.textContent||'').trim().length,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth}));
-            assert.ok(s.hero&&s.lead>40&&s.overflow<=2,JSON.stringify(s)); assert.match(s.scheduler,/reduced-motion-static|armed|committed/); await context.close(); return s;
-          }
-
-          (async()=>{
-            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-            try{
-              const report={auditedSha:process.env.AUDITED_SHA,desktop:await normal(browser,'desktop',{width:1440,height:900},false),mobile:await normal(browser,'mobile',{width:390,height:844},true),fallback:await fallback(browser),reduced:await reduced(browser)};
-              require('node:fs').writeFileSync('artifacts/r522-semantic-mag/report.json',JSON.stringify(report,null,2)+'\n');
-              console.log('R522_SEMANTIC_MAG_PASS');
-            } finally { await browser.close(); }
-          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
-          NODE
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -207,7 +90,15 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Current semantic MAG, motion, pause/resume, ASK and fallback passed'; else state=failure; description='Current semantic MAG contract failed'; fi
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Current semantic MAG, PAUSE/RESUME, ASK and fallback passed'
+          else
+            state=failure
+            description='Current semantic MAG contract failed'
+          fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
-            -f state="$state" -f context='FormatX R522 semantic MAG gate' -f description="$description" \
+            -f state="$state" \
+            -f context='FormatX R522 semantic MAG gate' \
+            -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
