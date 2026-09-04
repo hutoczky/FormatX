@@ -1,8 +1,9 @@
-/* FormatX r461/R507 — lean first-paint owner for the R460/R326 production path.
+/* FormatX r461/R528 — lean first-paint owner for the R460/R326 production path.
    Static HTML owns LCP. One current MAG runtime owns rendering; no legacy
    award/regression/Real3D repair stack is mounted after first paint.
-   R507 keeps this control as the single user PAUSE state/event owner while the
-   MAG shape-sync runtime exclusively owns the canonical CSSAnimation clock. */
+   R528 retires the manual MAG PAUSE/RESUME product control: the MAG is the
+   continuously living core of FormatX. Reduced-motion and browser lifecycle
+   suspension remain separate accessibility/performance responsibilities. */
 (function(){
 'use strict';
 
@@ -22,16 +23,17 @@ ROOT.dataset.fxAwardRuntimeMode='retired-from-first-load-r461';
 ROOT.dataset.fxMobileRegressionR310='retired-from-first-load-r461';
 ROOT.dataset.fxCoreReal3dCssR310='retired-r461-r326-owner';
 ROOT.dataset.fxCanonicalMagClockOwnerR507='mag-shape-sync-r476-only';
+ROOT.dataset.fxManualMagPauseContractR528='retired-living-core';
 
 function copy(){
   return ROOT.lang==='en'?{
     heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',
     body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',
-    ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',pause:'Pause animation',resume:'Resume animation',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'
+    ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'
   }:{
     heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',
     body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',
-    ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',pause:'Animáció szüneteltetése',resume:'Animáció folytatása',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'
+    ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'
   };
 }
 
@@ -80,38 +82,10 @@ function bindSound(button){
   },true);
 }
 
-function syncCanonicalMagAnimations(paused){
-  /* R507: telemetry only. The R505 mag-shape-sync runtime is the exclusive
-     CSSAnimation pause/resume owner. Calling WAAPI play()/pause() here as well
-     created overlapping pending animation tasks from the same physical click. */
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  ROOT.dataset.fxCanonicalMagMotionR497=paused?'paused':reduced?'reduced-motion':'running';
-  ROOT.dataset.fxCanonicalMagClockOwnerR507='mag-shape-sync-r476-only';
-}
-
-function bindPause(button){
-  if(!(button instanceof HTMLButtonElement)||button.dataset.fxPauseR461==='true')return;
-  button.dataset.fxPauseR461='true';
-  if(!button.dataset.paused)button.dataset.paused='false';
-  button.setAttribute('aria-pressed',button.dataset.paused);
-  button.addEventListener('click',event=>{
-    // Cached compatibility code may already have consumed pointerup/click.
-    // Never toggle a second time after that earlier owner handled the event.
-    if(event.defaultPrevented)return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    const paused=button.dataset.paused!=='true';
-    button.dataset.paused=String(paused);
-    ROOT.dataset.fxReferenceMotionPaused=String(paused);
-    const strings=copy();
-    button.setAttribute('aria-pressed',String(paused));
-    button.textContent=paused?'▶':'Ⅱ';
-    button.setAttribute('aria-label',paused?strings.resume:strings.pause);
-    dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused,source:'r461-canonical-control'}}));
-    // R507: publish the visible control state only. The event consumer in
-    // formatx-mag-shape-sync-r476.js owns the one canonical CSSAnimation clock.
-    syncCanonicalMagAnimations(paused);
-  });
+function retireManualPause(scope){
+  for(const pause of scope.querySelectorAll('.fx-reference-pause'))pause.remove();
+  ROOT.dataset.fxReferenceMotionPaused='false';
+  ROOT.dataset.fxCanonicalMagMotionR497=matchMedia('(prefers-reduced-motion: reduce)').matches?'reduced-motion':'running';
 }
 
 function ensureControls(hero,space){
@@ -150,15 +124,8 @@ function ensureControls(hero,space){
   if(!(askLabel instanceof HTMLElement)){askLabel=document.createElement('span');ask.appendChild(askLabel);}
   askLabel.textContent=strings.ask;
 
-  let pause=rail.querySelector('.fx-reference-pause');
-  if(!(pause instanceof HTMLButtonElement)){
-    pause=document.createElement('button');pause.type='button';pause.className='fx-reference-pause';pause.textContent='Ⅱ';pause.dataset.paused='false';
-  }
-  pause.setAttribute('aria-label',pause.dataset.paused==='true'?strings.resume:strings.pause);
-  bindPause(pause);
-
+  retireManualPause(hero);
   if(ask.parentElement!==rail)rail.prepend(ask);
-  if(pause.parentElement!==rail)rail.appendChild(pause);
   if(rail.parentElement!==controls)controls.appendChild(rail);
   if(controls.parentElement!==space)space.appendChild(controls);
   return controls;
@@ -191,7 +158,7 @@ function stabilize(){
   ensureControls(hero,space);
   ensureProof(hero,grid);
   ROOT.dataset.fxHeroCopyPlacementR411='static-dom-css-order';
-  ROOT.dataset.fxFirstPaintControlsR306=MOBILE?'mobile-static-r461':'desktop-static-r461';
+  ROOT.dataset.fxFirstPaintControlsR306=MOBILE?'mobile-static-r528-no-manual-pause':'desktop-static-r528-no-manual-pause';
   return true;
 }
 
@@ -215,8 +182,8 @@ function fastRelease(source){
 
 stabilize();
 fixLanguageAccessibleName();
-ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r461-clean':'desktop-direct-r461-clean';
-fastRelease('instant-r461-clean');
+ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r528-clean':'desktop-direct-r528-clean';
+fastRelease('instant-r528-clean');
 
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow']){
   addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
