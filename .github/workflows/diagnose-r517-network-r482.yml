@@ -1,0 +1,181 @@
+name: Diagnose R517 protocol and R482 conditions
+run-name: R517 network protocol + R482 condition dump on exact R516 production
+
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths:
+      - '.github/workflows/diagnose-r517-network-r482.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AUDITED_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+  ORIGIN: https://formatxsuite.com/
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Confirm exact R516 production marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags --depth=1 origin "$AUDITED_SHA"
+          git show "$AUDITED_SHA:docs/p0-validation-version.txt" > "$RUNNER_TEMP/expected.txt"
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt" -o "$RUNNER_TEMP/live.txt"
+          cmp -s "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/live.txt"
+          echo 'Exact R516 marker confirmed.'
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install lightweight browser driver only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+
+      - name: Run controlled production protocol and R482 diagnostic
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-network-r482
+          node <<'NODE'
+          const fs=require('node:fs');
+          const {chromium}=require('playwright-core');
+          const ORIGIN=process.env.ORIGIN;
+          const OUT='artifacts/r517-network-r482';
+          const CANVAS='#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
+          const PAUSE='#hero .fx-reference-pause';
+          const ASK='#hero .fx-reference-ask';
+          const activation='#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252';
+
+          async function instrument(page){
+            await page.addInitScript(() => {
+              window.__r517={lcp:0,shifts:[],longtasks:[],heroMutations:[]};
+              try { new PerformanceObserver(list=>{ for(const e of list.getEntries()) window.__r517.lcp=Math.max(window.__r517.lcp,e.startTime||0); }).observe({type:'largest-contentful-paint',buffered:true}); } catch {}
+              try { new PerformanceObserver(list=>{ for(const e of list.getEntries()) if(!e.hadRecentInput) window.__r517.shifts.push({t:e.startTime,value:e.value,sources:(e.sources||[]).map(s=>({node:s.node?.className||s.node?.id||s.node?.tagName||'',previousRect:s.previousRect,currentRect:s.currentRect}))}); }).observe({type:'layout-shift',buffered:true}); } catch {}
+              try { new PerformanceObserver(list=>{ for(const e of list.getEntries()) window.__r517.longtasks.push({t:e.startTime,duration:e.duration}); }).observe({type:'longtask',buffered:true}); } catch {}
+              document.addEventListener('DOMContentLoaded',()=>{
+                const hero=document.querySelector('#hero .hero-copy');
+                if(hero){
+                  new MutationObserver(ms=>{ for(const m of ms) window.__r517.heroMutations.push({t:performance.now(),type:m.type,target:m.target?.className||m.target?.id||m.target?.nodeName||''}); }).observe(hero,{subtree:true,childList:true,characterData:true,attributes:true});
+                }
+              },{once:true});
+            });
+          }
+
+          async function oneProbe(browser,index){
+            const context=await browser.newContext({viewport:{width:1350,height:940},locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
+            await context.setExtraHTTPHeaders({'Cache-Control':'no-cache'});
+            const page=await context.newPage();
+            await instrument(page);
+            const responseHeaders={};
+            page.on('response',async response=>{
+              const u=response.url();
+              if(u===ORIGIN || /formatx-(?:critical|p0-first-paint|first-paint|quality|reference-production|mobile-first-paint)/.test(u)){
+                try {
+                  const h=await response.allHeaders();
+                  responseHeaders[u]={status:response.status(),cfCacheStatus:h['cf-cache-status']||'',altSvc:h['alt-svc']||'',cacheControl:h['cache-control']||'',server:h['server']||'',cfRay:h['cf-ray']||''};
+                } catch {}
+              }
+            });
+            const started=Date.now();
+            const resp=await page.goto(ORIGIN,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(1600);
+            const data=await page.evaluate(() => {
+              const nav=performance.getEntriesByType('navigation')[0];
+              const paints=performance.getEntriesByType('paint');
+              const fcp=paints.find(e=>e.name==='first-contentful-paint')?.startTime||null;
+              const resources=performance.getEntriesByType('resource').filter(e=>/formatx-(?:critical|p0-first-paint|first-paint|quality|reference-production|mobile-first-paint)/.test(e.name)).map(e=>({
+                url:e.name,nextHopProtocol:e.nextHopProtocol,startTime:e.startTime,requestStart:e.requestStart,responseStart:e.responseStart,responseEnd:e.responseEnd,duration:e.duration,transferSize:e.transferSize,encodedBodySize:e.encodedBodySize,decodedBodySize:e.decodedBodySize,initiatorType:e.initiatorType
+              }));
+              const hero=document.querySelector('#hero .hero-lead');
+              const hs=hero?getComputedStyle(hero):null;
+              return {
+                nav:nav?{nextHopProtocol:nav.nextHopProtocol,startTime:nav.startTime,domainLookupStart:nav.domainLookupStart,domainLookupEnd:nav.domainLookupEnd,connectStart:nav.connectStart,secureConnectionStart:nav.secureConnectionStart,connectEnd:nav.connectEnd,requestStart:nav.requestStart,responseStart:nav.responseStart,responseEnd:nav.responseEnd,domContentLoadedEventEnd:nav.domContentLoadedEventEnd,loadEventEnd:nav.loadEventEnd,duration:nav.duration,transferSize:nav.transferSize,encodedBodySize:nav.encodedBodySize,decodedBodySize:nav.decodedBodySize},
+                fcp,lcp:window.__r517?.lcp||null,cls:(window.__r517?.shifts||[]).reduce((a,b)=>a+b.value,0),shifts:window.__r517?.shifts||[],longtasks:window.__r517?.longtasks||[],heroMutations:window.__r517?.heroMutations||[],
+                hero:hero?{text:hero.textContent.trim(),display:hs.display,visibility:hs.visibility,opacity:hs.opacity,animationName:hs.animationName,transition:hs.transition,rect:hero.getBoundingClientRect().toJSON()}:null,
+                resources
+              };
+            });
+            data.index=index; data.httpStatus=resp?.status()||null; data.wallMs=Date.now()-started; data.responseHeaders=responseHeaders;
+            await context.close();
+            return data;
+          }
+
+          async function r482Dump(browser,name,viewport,mobile){
+            const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
+            const page=await context.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            page.on('console',m=>{if(m.type()==='error') errors.push(m.text());});
+            await page.goto(ORIGIN,{waitUntil:'domcontentloaded',timeout:60000});
+            const target=page.locator(activation).first();
+            if(await target.isVisible().catch(()=>false)) await target.click().catch(()=>{});
+            await page.waitForTimeout(5000);
+            const dump=await page.evaluate(({CANVAS,PAUSE,ASK})=>{
+              const root=document.documentElement;
+              const canvas=document.querySelector(CANVAS);
+              const style=canvas?getComputedStyle(canvas):null;
+              const rect=canvas?.getBoundingClientRect();
+              const balance=document.querySelector('link[data-fx-mag-living-balance-r481]');
+              const header=document.querySelector('.topbar .fx-reference-mag-button');
+              const hs=header?getComputedStyle(header):null, hr=header?.getBoundingClientRect();
+              const mini=document.querySelector('.fx-mini-mag-glyph-r459');
+              const ms=mini?getComputedStyle(mini):null;
+              return {
+                crystalReady:root.dataset.fxCrystalOrganismR326||'',shapeSync:root.dataset.fxMagShapeSyncR476||'',lifeContract:root.dataset.fxPrimaryMagLifeContractR482||'',optics:root.dataset.fxPrimaryMagOpticsR482||'',life:root.dataset.fxPrimaryMagLifeR482||'',renderer:root.dataset.fxCoreRenderer||'',scheduler:root.dataset.fxCoreScheduler||'',idle:root.dataset.fxCoreIdleRenderR441||'',playback:root.dataset.fxPrimaryMagPlaybackR498||'',balanceLinkExists:Boolean(balance),balanceHref:balance?.href||'',canvasExists:Boolean(canvas),canvasRect:rect?{width:rect.width,height:rect.height,left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom}:null,display:style?.display||'',visibility:style?.visibility||'',opacity:style?.opacity||'',animationName:style?.animationName||'',animationPlayState:style?.animationPlayState||'',filter:style?.filter||'',header:{exists:Boolean(header),visible:Boolean(header&&hs&&hr&&hs.display!=='none'&&hs.visibility!=='hidden'&&Number(hs.opacity)>.2&&hr.width>=40&&hr.height>=40),life:header?.dataset.fxMagLife||'',boxShadow:hs?.boxShadow||''},mini:mini?{life:mini.dataset.fxMagLife||'',background:ms?.backgroundImage||'',boxShadow:ms?.boxShadow||''}:null,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,askVisible:Boolean(document.querySelector(ASK)?.getBoundingClientRect().width),pauseVisible:Boolean(document.querySelector(PAUSE)?.getBoundingClientRect().width)
+              };
+            },{CANVAS,PAUSE,ASK});
+            // Real PAUSE/RESUME outcome sample; diagnostic only.
+            const pause=page.locator(PAUSE).first();
+            if(await pause.isVisible().catch(()=>false)){
+              const times=async()=>page.locator(CANVAS).evaluate(c=>c.getAnimations().map(a=>({currentTime:a.currentTime,playState:a.playState,animationName:a.animationName||''}))).catch(()=>[]);
+              dump.beforePause=await times();
+              await pause.click(); await page.waitForTimeout(650); dump.afterPause=await times();
+              await pause.click(); await page.waitForTimeout(650); dump.afterResume=await times();
+            }
+            const ask=page.locator(ASK).first();
+            if(await ask.isVisible().catch(()=>false)){
+              const box=await ask.boundingBox(); dump.askHit=box?{width:box.width,height:box.height}:null;
+              await ask.click().catch(()=>{}); await page.waitForTimeout(150); dump.askClicked=true;
+            }
+            dump.errors=errors;
+            await context.close();
+            return {name,viewport,mobile,dump};
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true,args:['--headless=new','--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--ignore-gpu-blocklist']});
+            const probes=[];
+            for(let i=1;i<=12;i++){ const x=await oneProbe(browser,i); probes.push(x); console.log('R517_PROBE',i,JSON.stringify({protocol:x.nav?.nextHopProtocol,fcp:x.fcp,lcp:x.lcp,cls:x.cls,responseStart:x.nav?.responseStart,responseEnd:x.nav?.responseEnd,heroMutations:x.heroMutations.length})); }
+            const r482=[];
+            r482.push(await r482Dump(browser,'mobile-390x844',{width:390,height:844},true));
+            r482.push(await r482Dump(browser,'desktop-1440x900',{width:1440,height:900},false));
+            await browser.close();
+            fs.writeFileSync(`${OUT}/probe.json`,JSON.stringify({auditedSha:process.env.AUDITED_SHA,probes},null,2));
+            fs.writeFileSync(`${OUT}/r482.json`,JSON.stringify({auditedSha:process.env.AUDITED_SHA,r482},null,2));
+            const summary={protocols:probes.reduce((m,p)=>(m[p.nav?.nextHopProtocol||'unknown']=(m[p.nav?.nextHopProtocol||'unknown']||0)+1,m),{}),fcp:probes.map(p=>p.fcp),lcp:probes.map(p=>p.lcp),cls:probes.map(p=>p.cls),r482:r482.map(x=>({name:x.name,shapeSync:x.dump.shapeSync,lifeContract:x.dump.lifeContract,optics:x.dump.optics,balanceHref:x.dump.balanceHref,renderer:x.dump.renderer,scheduler:x.dump.scheduler,idle:x.dump.idle,canvasExists:x.dump.canvasExists,canvasRect:x.dump.canvasRect,display:x.dump.display,visibility:x.dump.visibility,opacity:x.dump.opacity,animationName:x.dump.animationName,overflow:x.dump.overflow,errors:x.dump.errors}))};
+            fs.writeFileSync(`${OUT}/summary.json`,JSON.stringify(summary,null,2));
+            console.log('R517_NETWORK_R482_SUMMARY',JSON.stringify(summary,null,2));
+          })().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r517-network-r482-${{ env.AUDITED_SHA }}
+          path: artifacts/r517-network-r482/
+          retention-days: 30
