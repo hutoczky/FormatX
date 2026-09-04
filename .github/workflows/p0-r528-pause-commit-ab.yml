@@ -65,19 +65,28 @@ jobs:
           for i in $(seq 1 60); do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
           cat "$RUNNER_TEMP/wrangler.log"; exit 1
 
-      - name: Allow local self-signed TLS in verifier Chrome only
+      - name: Use system Chrome against local self-signed TLS
         shell: bash
         run: |
           set -euo pipefail
           python3 <<'PY'
           from pathlib import Path
-          for name in ['.github/scripts/validate-r522-semantic-mag.cjs','.github/scripts/validate-live-mag-functional.cjs']:
-              p=Path(name); s=p.read_text()
-              needle="'--no-sandbox',"
-              assert needle in s
-              s=s.replace(needle,"'--ignore-certificate-errors',\n      '--no-sandbox',",1)
-              p.write_text(s)
+          p=Path('.github/scripts/validate-r522-semantic-mag.cjs')
+          s=p.read_text()
+          old="""    args: [\n      '--no-sandbox',"""
+          new="""    args: [\n      '--ignore-certificate-errors',\n      '--no-sandbox',"""
+          assert old in s
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('.github/scripts/validate-live-mag-functional.cjs')
+          s=p.read_text()
+          old="""  const browser = await chromium.launch({\n    headless:true,\n    args:[\n      '--use-angle=swiftshader',"""
+          new="""  const browser = await chromium.launch({\n    executablePath:process.env.CHROME_BIN,\n    headless:true,\n    args:[\n      '--ignore-certificate-errors',\n      '--use-angle=swiftshader',"""
+          assert old in s
+          p.write_text(s.replace(old,new,1))
           PY
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
+          node --check .github/scripts/validate-live-mag-functional.cjs
 
       - name: R522 semantic PAUSE RESUME proof
         env:
