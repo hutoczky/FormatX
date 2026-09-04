@@ -1,0 +1,50 @@
+/* FormatX R528 — reduced-motion MAG identity contract.
+   Reduced motion restrains movement; it does not remove the living core. */
+@media (prefers-reduced-motion: reduce) {
+  html:root:root body.living-architecture #hero .hero-space {
+    position: relative !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: clamp(310px, 76vw, 430px) !important;
+    height: clamp(310px, 76vw, 430px) !important;
+    max-height: 430px !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+    pointer-events: auto !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-crystal-organism-r326-stage,
+  html:root:root body.living-architecture #hero .fx-crystal-organism-r326-canvas {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-crystal-organism-r326-canvas {
+    animation-play-state: paused !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-ask,
+  html:root:root body.living-architecture #hero .fx-three-sound {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (min-width: 901px) {
+  html:root:root body.living-architecture #hero .hero-space {
+    min-height: 480px !important;
+    height: 480px !important;
+    max-height: 480px !important;
+  }
+}
