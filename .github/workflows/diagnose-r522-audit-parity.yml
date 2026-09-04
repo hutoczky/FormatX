@@ -1,0 +1,63 @@
+name: Diagnose R522 audit parity
+run-name: Exact production audit parity diagnostic for R516
+
+on:
+  push:
+    branches: [p0-r522-audit-parity-diagnostic]
+    paths:
+      - '.github/workflows/diagnose-r522-audit-parity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install lightweight runner-Chrome verifier
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+      - name: Compare normal and lighthouse query runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r522-audit-parity
+          node <<'NODE' | tee artifacts/r522-audit-parity/report.json
+          const {chromium}=require('playwright-core');
+          const assert=require('node:assert/strict');
+          async function collect(browser,label,url){
+            const c=await browser.newContext({viewport:{width:1350,height:940},locale:'hu-HU',reducedMotion:'no-preference'});
+            const p=await c.newPage(); const errors=[];
+            p.on('pageerror',e=>errors.push(String(e)));
+            p.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text())});
+            const r=await p.goto(url,{waitUntil:'domcontentloaded',timeout:120000}); assert.equal(r.status(),200);
+            await p.waitForTimeout(5000);
+            const state=await p.evaluate(()=>{
+              const d={...document.documentElement.dataset};
+              const auditDataset=Object.fromEntries(Object.entries(d).filter(([k,v])=>/audit|lighthouse/i.test(k)||/audit-skip|static-audit/i.test(String(v))));
+              const scripts=performance.getEntriesByType('resource').filter(e=>e.initiatorType==='script').map(e=>new URL(e.name,location.href).pathname).filter((v,i,a)=>a.indexOf(v)===i).sort();
+              const allAuditSkip=Object.fromEntries(Object.entries(d).filter(([,v])=>/audit-skip|static-audit/i.test(String(v))));
+              const canvases=[...document.querySelectorAll('canvas')].map(x=>({id:x.id,className:x.className,width:x.width,height:x.height,display:getComputedStyle(x).display,visibility:getComputedStyle(x).visibility,opacity:getComputedStyle(x).opacity}));
+              return {url:location.href,auditDataset,allAuditSkip,scripts,canvases,renderer:d.fxCoreRenderer||d.fxRenderer||'',scheduler:d.fxCoreScheduler||'',idle:d.fxCoreIdleRenderR441||'',living:d.fxLivingArchitecture||'',apex:d.fxApex||'',real3d:d.fxCoreReal3d||'',mobile:d.fxCoreMobileV55||'',reference:d.fxReferenceCore||''};
+            });
+            await c.close(); return {label,status:r.status(),errors,state};
+          }
+          (async()=>{const b=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true,args:['--headless=new','--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--ignore-gpu-blocklist']});const normal=await collect(b,'normal','https://formatxsuite.com/?r522_normal=1');const audit=await collect(b,'lighthouse-query','https://formatxsuite.com/?lighthouse=1');await b.close();const activeAuditScripts=audit.state.scripts.filter(s=>/living-architecture|formatx-apex|formatx-core-real3d-v20|formatx-core-mobile-v55|formatx-core-mobile-award-v56|formatx-reference-core-v26|formatx-core-reference-v53|formatx-core-v50|formatx-core-v51|formatx-premium-finish|formatx-mobile-seam-bridge-r172|formatx-seamless-enforcer-r159|formatx-desktop-apex-r181/.test(s));console.log(JSON.stringify({normal,audit,activeAuditScripts},null,2));})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r522-audit-parity-diagnostic-${{ github.sha }}
+          path: artifacts/r522-audit-parity/
+          retention-days: 30
