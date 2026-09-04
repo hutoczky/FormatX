@@ -1,0 +1,137 @@
+name: P0 R528 mobile owner A/B
+
+on:
+  push:
+    branches: [p0-r528-final-owner]
+    paths:
+      - '.github/workflows/p0-r528-mobile-owner-ab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p0-r528-mobile-owner-ab
+  cancel-in-progress: true
+
+jobs:
+  mobile-ab:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [baseline, nohidden, parity, both]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Apply isolated treatment
+        shell: bash
+        run: |
+          set -euo pipefail
+          variant='${{ matrix.variant }}'
+          python3 - "$variant" <<'PY'
+          from pathlib import Path
+          import sys
+          variant=sys.argv[1]
+          if variant in {'nohidden','both'}:
+              p=Path('docs/scifi-ui/scripts/formatx-deferred-css-r487.js')
+              s=p.read_text()
+              old="if (!activated && document.visibilityState === 'hidden') activate('hidden-tab-fail-open');"
+              new="if (!activated && document.visibilityState === 'visible' && hasFcp()) activateAfterCommittedFrame('visible-fallback-fcp');"
+              assert old in s
+              p.write_text(s.replace(old,new,1))
+          if variant in {'parity','both'}:
+              p=Path('docs/scifi-ui/styles/formatx-p0-first-paint-r490.css')
+              s=p.read_text()
+              s += '''\n\n/* R528 diagnostic: mirror settled category-definition LCP paint before deferred enhancement. */\nhtml body.living-architecture #hero .hero-copy > .fx-category-definition {\n  box-sizing: border-box !important;\n  max-width: 760px !important;\n  margin: 14px 0 0 !important;\n  padding: 14px 16px !important;\n  border-left: 2px solid rgba(53,217,255,.82) !important;\n  background: linear-gradient(90deg,rgba(5,26,39,.82),rgba(5,26,39,.16)) !important;\n  color: #d9edf6 !important;\n  font-size: clamp(.95rem,1.3vw,1.08rem) !important;\n  line-height: 1.6 !important;\n}\nhtml body.living-architecture #hero .hero-copy > .fx-category-definition strong {\n  display: block !important;\n  margin-bottom: 4px !important;\n  color: #7fe9ff !important;\n  letter-spacing: .08em !important;\n  text-transform: uppercase !important;\n  font-size: .78em !important;\n}\n@media (max-width:560px) {\n  html body.living-architecture #hero .hero-copy > .fx-category-definition { font-size:.93rem !important; }\n}\n'''
+              p.write_text(s)
+          PY
+          git diff --check
+
+      - name: Install cached Worker and Lighthouse tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker --prefer-offline
+          npm install -g @lhci/cli@0.13.x
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
+
+      - name: Build local-only production config
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const source=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete source.ai;
+          delete source.routes;
+          source.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.r528-ab.json',JSON.stringify(source,null,2)+'\n');
+          NODE
+
+      - name: Start exact R527 Worker locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r528-ab.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/wrangler.log" 2>&1 &
+          cd ..
+          for attempt in $(seq 1 60); do
+            if curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/wrangler.log" || true
+          exit 1
+
+      - name: Run mobile Lighthouse x2
+        shell: bash
+        run: |
+          set -euo pipefail
+          variant='${{ matrix.variant }}'
+          node - "$variant" <<'NODE'
+          const fs=require('node:fs');
+          const variant=process.argv[2];
+          const c=JSON.parse(fs.readFileSync('lighthouserc.live.mobile.json','utf8'));
+          c.ci.collect.url=[`https://formatxsuite.com:8787/?r528_ab=${variant}`];
+          c.ci.collect.numberOfRuns=2;
+          c.ci.collect.settings=c.ci.collect.settings||{};
+          c.ci.collect.settings.chromeFlags='--headless=new --no-sandbox --disable-dev-shm-usage --ignore-certificate-errors --allow-insecure-localhost';
+          fs.writeFileSync('lighthouserc.r528-ab.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          rm -rf .lighthouseci "artifacts/r528-${variant}"
+          lhci collect --config=./lighthouserc.r528-ab.json
+          mkdir -p "artifacts/r528-${variant}"
+          cp -a .lighthouseci/. "artifacts/r528-${variant}/"
+          VARIANT="$variant" node <<'NODE' | tee "artifacts/r528-${variant}/summary.txt"
+          const fs=require('node:fs'),path=require('node:path');
+          const dir=`artifacts/r528-${process.env.VARIANT}`;
+          const files=fs.readdirSync(dir).filter(f=>f.endsWith('.json')&&f.startsWith('lhr-')).sort();
+          for(const [i,f] of files.entries()){
+            const r=JSON.parse(fs.readFileSync(path.join(dir,f),'utf8'));
+            const a=r.audits,c=r.categories;
+            const node=a['largest-contentful-paint-element']?.details?.items?.[0]?.items?.[0]?.node||a['largest-contentful-paint-element']?.details?.items?.[0]?.node||{};
+            console.log(JSON.stringify({run:i+1,performance:Math.round((c.performance?.score||0)*100),seo:Math.round((c.seo?.score||0)*100),fcp:a['first-contentful-paint']?.numericValue,lcp:a['largest-contentful-paint']?.numericValue,tbt:a['total-blocking-time']?.numericValue,cls:a['cumulative-layout-shift']?.numericValue,ttfb:a['server-response-time']?.numericValue,lcpSelector:node.selector||'',lcpSnippet:node.snippet||''}));
+          }
+          NODE
+
+      - name: Upload A/B evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r528-mobile-${{ matrix.variant }}-${{ github.sha }}
+          path: |
+            artifacts/r528-${{ matrix.variant }}/
+            lighthouserc.r528-ab.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
