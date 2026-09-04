@@ -1,0 +1,40 @@
+name: P0 R526 preflight
+
+on:
+  push:
+    branches: [p0-r526-final-422a4cc]
+    paths:
+      - '.github/workflows/p0-r526-preflight.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: p0-r526-final-422a4cc
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Source and Worker preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
+          node --check billing-worker/src/production-content-entry-r526.js
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
+          node --check .github/scripts/verify-apex-shell-r500.cjs
+          grep -Fq 'Date.now() + 20000' .github/scripts/validate-r522-semantic-mag.cjs
+          ! grep -Fq 'ready-r482' .github/workflows/verify-r481-live-mag.yml
+          ! grep -Fq 'playwright install --with-deps chromium' .github/workflows/verify-r481-live-mag.yml
+          grep -Fq '"main": "src/production-content-entry-r526.js"' billing-worker/wrangler.jsonc
+          grep -Fq '20260904-r526-fcp-observer' billing-worker/src/production-content-entry-r526.js
+          git diff --check HEAD^..HEAD || true
+          npm ci --prefix billing-worker --prefer-offline
+          (cd billing-worker && npx wrangler deploy --dry-run --outdir="$RUNNER_TEMP/r526-worker")
