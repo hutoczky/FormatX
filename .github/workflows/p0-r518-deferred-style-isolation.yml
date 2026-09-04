@@ -1,0 +1,116 @@
+name: P0 R518 deferred stylesheet isolation
+
+on:
+  push:
+    branches: [p0-r517-owner-76b79fe]
+    paths: ['.github/workflows/p0-r518-deferred-style-isolation.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_REF: p0-r517-candidate-76b79fe
+  CANDIDATE_SHA: 192c2430d6c82c4c419833abfc8309f4e1814aeb
+
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.CANDIDATE_REF }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Start exact R517 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          npm ci --prefix billing-worker
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs=require('node:fs');
+          const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete c.ai; delete c.routes; c.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.r518-isolation.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r518-isolation.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r518-wrangler.log" 2>&1 &)
+          for i in $(seq 1 60); do
+            curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r518-wrangler.log" || true
+          exit 1
+      - name: Isolate deferred stylesheet impact on hero LCP
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r518-isolation
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          const styles=[
+            'formatx-continuous-scroll.css','formatx-seamless-loop.css','platform-status.css',
+            'formatx-copy-polish.css','formatx-feedback.css','single-language-toggle.css',
+            'formatx-content-standard.css','formatx-award-readiness.css'
+          ];
+          const snap=()=>{
+            const el=document.querySelector('#hero .hero-lead');
+            const copy=document.querySelector('#hero .hero-copy');
+            const s=getComputedStyle(el), c=getComputedStyle(copy), r=el.getBoundingClientRect();
+            return {rect:{x:r.x,y:r.y,width:r.width,height:r.height},fontSize:s.fontSize,lineHeight:s.lineHeight,maxWidth:s.maxWidth,textWrap:s.textWrap,contain:c.contain,opacity:s.opacity,visibility:s.visibility,transform:s.transform,filter:s.filter,lcp:(window.__isoLcp||[]).slice()};
+          };
+          (async()=>{
+            const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors']});
+            const rows=[];
+            try{
+              for(const name of styles){
+                const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900},locale:'hu-HU',colorScheme:'dark'});
+                const page=await context.newPage();
+                await page.route('**/formatx-deferred-css-r487.js?*',route=>route.fulfill({status:200,contentType:'application/javascript',body:'/* diagnostic: scheduler intentionally blocked */'}));
+                await page.addInitScript(()=>{window.__isoLcp=[];try{new PerformanceObserver(l=>{for(const e of l.getEntries())window.__isoLcp.push({t:e.startTime,size:e.size||0});}).observe({type:'largest-contentful-paint',buffered:true});}catch{}});
+                await page.goto(`https://formatxsuite.com:8787/?r518_iso=${encodeURIComponent(name)}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+                await page.waitForFunction(()=>performance.getEntriesByType('paint').some(e=>e.name==='first-contentful-paint'),null,{timeout:15000});
+                await page.waitForTimeout(150);
+                const before=await page.evaluate(snap);
+                const found=await page.evaluate(name=>{
+                  const link=[...document.querySelectorAll('link[data-fx-r487-deferred-style]')].find(l=>new URL(l.href).pathname.endsWith('/'+name));
+                  if(!link)return null;
+                  const old=link.media, target=link.dataset.fxR487Media||'all';
+                  link.media=target;
+                  return {href:link.href,old,target};
+                },name);
+                if(!found){rows.push({name,found:false,before});await context.close();continue;}
+                await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+                await page.waitForTimeout(400);
+                const after=await page.evaluate(snap);
+                const changed={};
+                for(const k of ['fontSize','lineHeight','maxWidth','textWrap','contain','opacity','visibility','transform','filter']) if(before[k]!==after[k]) changed[k]=[before[k],after[k]];
+                for(const k of ['x','y','width','height']) if(Math.abs(before.rect[k]-after.rect[k])>0.1) changed['rect.'+k]=[before.rect[k],after.rect[k]];
+                rows.push({name,found:true,link:found,before,after,changed,lcpDelta:after.lcp.slice(before.lcp.length)});
+                console.log('R518_ISO',JSON.stringify(rows.at(-1)));
+                await context.close();
+              }
+            }finally{await browser.close();}
+            fs.writeFileSync('artifacts/r518-isolation/results.json',JSON.stringify(rows,null,2));
+            const owners=rows.filter(r=>r.found&&(Object.keys(r.changed||{}).length||r.lcpDelta?.length));
+            console.log('R518_OWNER_CANDIDATES',JSON.stringify(owners.map(r=>({name:r.name,changed:r.changed,lcpDelta:r.lcpDelta})),null,2));
+          })().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r518-deferred-style-isolation
+          path: artifacts/r518-isolation/
+          retention-days: 30
