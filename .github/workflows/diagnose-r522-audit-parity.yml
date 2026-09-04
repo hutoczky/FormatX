@@ -1,5 +1,5 @@
-name: Diagnose R522 audit parity
-run-name: Exact production audit parity diagnostic for R516
+name: Prove R522 active audit parity candidate
+run-name: R522 active audit parity candidate for ${{ github.sha }}
 
 on:
   push:
@@ -8,56 +8,95 @@ on:
       - '.github/workflows/diagnose-r522-audit-parity.yml'
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: r522-audit-parity-candidate
+  cancel-in-progress: true
 
 jobs:
-  diagnose:
+  candidate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - name: Install lightweight runner-Chrome verifier
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
-          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
-          test -n "$chrome"
-          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
-          "$chrome" --version
-      - name: Compare normal and lighthouse query runtime
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Remove only proven active lighthouse query bypasses
         shell: bash
         run: |
           set -Eeuo pipefail
           mkdir -p artifacts/r522-audit-parity
-          node <<'NODE' | tee artifacts/r522-audit-parity/report.json
-          const {chromium}=require('playwright-core');
-          const assert=require('node:assert/strict');
-          async function collect(browser,label,url){
-            const c=await browser.newContext({viewport:{width:1350,height:940},locale:'hu-HU',reducedMotion:'no-preference'});
-            const p=await c.newPage(); const errors=[];
-            p.on('pageerror',e=>errors.push(String(e)));
-            p.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text())});
-            const r=await p.goto(url,{waitUntil:'domcontentloaded',timeout:120000}); assert.equal(r.status(),200);
-            await p.waitForTimeout(5000);
-            const state=await p.evaluate(()=>{
-              const d={...document.documentElement.dataset};
-              const auditDataset=Object.fromEntries(Object.entries(d).filter(([k,v])=>/audit|lighthouse/i.test(k)||/audit-skip|static-audit/i.test(String(v))));
-              const scripts=performance.getEntriesByType('resource').filter(e=>e.initiatorType==='script').map(e=>new URL(e.name,location.href).pathname).filter((v,i,a)=>a.indexOf(v)===i).sort();
-              const allAuditSkip=Object.fromEntries(Object.entries(d).filter(([,v])=>/audit-skip|static-audit/i.test(String(v))));
-              const canvases=[...document.querySelectorAll('canvas')].map(x=>({id:x.id,className:x.className,width:x.width,height:x.height,display:getComputedStyle(x).display,visibility:getComputedStyle(x).visibility,opacity:getComputedStyle(x).opacity}));
-              return {url:location.href,auditDataset,allAuditSkip,scripts,canvases,renderer:d.fxCoreRenderer||d.fxRenderer||'',scheduler:d.fxCoreScheduler||'',idle:d.fxCoreIdleRenderR441||'',living:d.fxLivingArchitecture||'',apex:d.fxApex||'',real3d:d.fxCoreReal3d||'',mobile:d.fxCoreMobileV55||'',reference:d.fxReferenceCore||''};
-            });
-            await c.close(); return {label,status:r.status(),errors,state};
-          }
-          (async()=>{const b=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true,args:['--headless=new','--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--ignore-gpu-blocklist']});const normal=await collect(b,'normal','https://formatxsuite.com/?r522_normal=1');const audit=await collect(b,'lighthouse-query','https://formatxsuite.com/?lighthouse=1');await b.close();const activeAuditScripts=audit.state.scripts.filter(s=>/living-architecture|formatx-apex|formatx-core-real3d-v20|formatx-core-mobile-v55|formatx-core-mobile-award-v56|formatx-reference-core-v26|formatx-core-reference-v53|formatx-core-v50|formatx-core-v51|formatx-premium-finish|formatx-mobile-seam-bridge-r172|formatx-seamless-enforcer-r159|formatx-desktop-apex-r181/.test(s));console.log(JSON.stringify({normal,audit,activeAuditScripts},null,2));})().catch(e=>{console.error(e);process.exit(1)});
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          files=[Path('docs/scifi-ui/scripts/formatx-apex.js'),Path('docs/scifi-ui/scripts/living-architecture.js')]
+          pattern=re.compile(r"\n  const AUDIT_MODE = new URLSearchParams\(location\.search\)\.get\('lighthouse'\) === '1';\n  if \(AUDIT_MODE\) \{.*?\n    return;\n  \}\n",re.S)
+          for p in files:
+              s=p.read_text(encoding='utf-8')
+              out,n=pattern.subn('\n',s,count=1)
+              assert n==1,f'{p}: expected exactly one proven active AUDIT_MODE branch, got {n}'
+              p.write_text(out,encoding='utf-8')
+          PY
+          node --check docs/scifi-ui/scripts/formatx-apex.js
+          node --check docs/scifi-ui/scripts/living-architecture.js
+          ! grep -n "get('lighthouse') === '1'" docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/living-architecture.js
+          git diff --check
+          git diff -- docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/living-architecture.js > artifacts/r522-audit-parity/source.diff
+
+      - name: Install exact local Worker and runner Chrome tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --prefix billing-worker --no-audit --prefer-offline
+          npm install --no-save --no-package-lock playwright-core@1.62.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"; test -n "$chrome"; echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"; "$chrome" --version
+          node <<'NODE'
+          const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));delete c.ai;delete c.routes;c.workers_dev=true;fs.writeFileSync('billing-worker/wrangler.r522-local.json',JSON.stringify(c,null,2)+'\n');
           NODE
+
+      - name: Start exact patched local Worker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          (cd billing-worker && nohup npx wrangler dev --config wrangler.r522-local.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r522-worker.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/r522-worker.log"; exit 1
+
+      - name: Real Chrome normal versus lighthouse query parity
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE' | tee artifacts/r522-audit-parity/report.json
+          const {chromium}=require('playwright-core');const assert=require('node:assert/strict');
+          async function collect(browser,label,url){const c=await browser.newContext({viewport:{width:1350,height:940},ignoreHTTPSErrors:true,locale:'hu-HU',reducedMotion:'no-preference'});const p=await c.newPage();const errors=[];p.on('pageerror',e=>errors.push(String(e)));p.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text())});const r=await p.goto(url,{waitUntil:'domcontentloaded',timeout:60000});assert.equal(r.status(),200);await p.waitForTimeout(5000);const state=await p.evaluate(()=>{const d={...document.documentElement.dataset};const audit=Object.fromEntries(Object.entries(d).filter(([k,v])=>/audit|lighthouse/i.test(k)||/audit-skip|static-audit/i.test(String(v))));const scripts=performance.getEntriesByType('resource').filter(e=>e.initiatorType==='script').map(e=>new URL(e.name,location.href).pathname);const canvas=document.getElementById('fx-apex-canvas');const cs=canvas?getComputedStyle(canvas):null;return{url:location.href,audit,apex:d.fxApex||'',living:d.fxLivingArchitecture||'',renderer:d.fxRenderer||d.fxCoreRenderer||'',three:d.fxThree||'',canvas:canvas?{display:cs.display,visibility:cs.visibility,opacity:cs.opacity,hidden:canvas.hidden}:null,scripts:[...new Set(scripts)].sort()}});await c.close();return{label,errors,state}}
+          (async()=>{const b=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true,args:['--headless=new','--no-sandbox','--ignore-certificate-errors','--disable-dev-shm-usage','--enable-webgl','--ignore-gpu-blocklist']});const normal=await collect(b,'normal','https://formatxsuite.com:8787/?r522_normal=1');const audit=await collect(b,'lighthouse-query','https://formatxsuite.com:8787/?lighthouse=1');await b.close();const out={normal,audit};console.log(JSON.stringify(out,null,2));assert.equal(normal.errors.length,0,normal.errors.join(' | '));assert.equal(audit.errors.length,0,audit.errors.join(' | '));for(const s of [normal.state,audit.state]){assert.ok(s.scripts.includes('/scifi-ui/scripts/formatx-apex.js'));assert.ok(s.scripts.includes('/scifi-ui/scripts/living-architecture.js'));assert.ok(!Object.values(s.audit).some(v=>/audit-skip|static-audit/i.test(String(v))),JSON.stringify(s.audit));}assert.equal(audit.state.apex,normal.state.apex);assert.equal(audit.state.living,normal.state.living);assert.equal(audit.state.renderer,normal.state.renderer);assert.equal(audit.state.three,normal.state.three);assert.deepEqual(audit.state.canvas,normal.state.canvas);assert.notEqual(normal.state.apex,'');assert.notEqual(normal.state.living,'');assert.notEqual(normal.state.renderer,'');})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Commit proven audit-parity candidate branch
+        if: success()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Games Tech';git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/living-architecture.js
+          git commit -m 'Remove active Lighthouse query runtime bypasses'
+          git push origin HEAD:refs/heads/p0-r522-audit-parity-candidate
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r522-audit-parity-diagnostic-${{ github.sha }}
+          name: r522-audit-parity-${{ github.sha }}
           path: artifacts/r522-audit-parity/
           retention-days: 30
+
+      - name: Show Worker log
+        if: always()
+        run: cat "$RUNNER_TEMP/r522-worker.log" || true
