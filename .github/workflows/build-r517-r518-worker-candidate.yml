@@ -1,0 +1,256 @@
+name: Prove R517-R518 exact Worker candidate
+run-name: R517 first-paint discovery + R518 audit parity x5
+
+on:
+  push:
+    branches: [p0-r517-diagnostics]
+    paths:
+      - '.github/workflows/build-r517-r518-worker-candidate.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BASE_SHA: eed41fefc20f60547fb37c983e70be2e9dccd438
+      CANDIDATE_BRANCH: p0-r518-candidate
+    steps:
+      - name: Checkout exact R516 base
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Apply only artifact-proven source changes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-r518-worker
+          python3 <<'PY'
+          from pathlib import Path
+
+          # R517: measured browser discovery showed mobile/P0 first-paint CSS starts
+          # only after the synchronous prepaint boot script completes. Preserve the
+          # synchronous boot; only insert critical first-paint links before it.
+          p=Path('billing-worker/src/production-content-entry.js')
+          s=p.read_text(encoding='utf-8')
+          old='''  source = normalizeMobileStylesheetMedia(source);\n  source = injectReferenceModeBoot(source);\n  source = injectCriticalFirstPaint(source);\n'''
+          new='''  source = normalizeMobileStylesheetMedia(source);\n  source = injectCriticalFirstPaint(source);\n  source = injectReferenceModeBoot(source);\n'''
+          if s.count(old) != 1: raise SystemExit('R517 optimizeHomepage ordering block mismatch')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+
+          # R518: remove only the five production-reachable lighthouse=1 bypasses
+          # proven by the loader chain. No feature or ordinary-user path is removed.
+          def remove_block(path, marker):
+              p=Path(path); lines=p.read_text(encoding='utf-8').splitlines(True)
+              idx=next((i for i,l in enumerate(lines) if marker in l),None)
+              if idx is None: raise SystemExit(f'marker missing in {path}: {marker}')
+              if 'const AUDIT_MODE' in lines[idx]:
+                  del lines[idx]
+                  while idx < len(lines) and not lines[idx].strip(): del lines[idx]
+                  if idx>=len(lines) or 'if (AUDIT_MODE)' not in lines[idx]: raise SystemExit(f'AUDIT_MODE body missing in {path}')
+              depth=0; started=False; end=idx
+              for j in range(idx,len(lines)):
+                  depth += lines[j].count('{') - lines[j].count('}')
+                  if '{' in lines[j]: started=True
+                  end=j
+                  if started and depth<=0: break
+              if not started: raise SystemExit(f'block start missing in {path}')
+              del lines[idx:end+1]
+              if idx < len(lines) and not lines[idx].strip(): del lines[idx]
+              p.write_text(''.join(lines),encoding='utf-8')
+
+          remove_block('docs/scifi-ui/scripts/living-architecture.js', "const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse')")
+          remove_block('docs/scifi-ui/scripts/formatx-apex.js', "const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse')")
+          remove_block('docs/scifi-ui/scripts/formatx-core-real3d-v20.js', "if (new URLSearchParams(location.search).get('lighthouse') === '1')")
+
+          p=Path('docs/scifi-ui/scripts/formatx-core-mobile-v55.js'); lines=p.read_text(encoding='utf-8').splitlines(True)
+          idx=next((i for i,l in enumerate(lines) if "get('lighthouse') === '1'" in l and 'audit-skip' in l),None)
+          if idx is None: raise SystemExit('mobile active audit bypass line missing')
+          del lines[idx]; p.write_text(''.join(lines),encoding='utf-8')
+
+          p=Path('docs/scifi-ui/scripts/formatx-premium-finish.js'); lines=p.read_text(encoding='utf-8').splitlines(True)
+          found={'decl':False,'renderer':False,'fallback':False}; out=[]
+          for l in lines:
+              if "const auditMode = parameters.get('lighthouse') === '1'" in l: found['decl']=True; continue
+              if "if (auditMode) return 'audit-skip'" in l: found['renderer']=True; continue
+              if 'if (auditMode || resilientCore) return resilientCore;' in l:
+                  found['fallback']=True; out.append(l.replace('if (auditMode || resilientCore)','if (resilientCore)')); continue
+              out.append(l)
+          if not all(found.values()): raise SystemExit(f'premium active audit patch incomplete {found}')
+          p.write_text(''.join(out),encoding='utf-8')
+
+          active=[
+            'docs/scifi-ui/scripts/living-architecture.js',
+            'docs/scifi-ui/scripts/formatx-apex.js',
+            'docs/scifi-ui/scripts/formatx-premium-finish.js',
+            'docs/scifi-ui/scripts/formatx-core-real3d-v20.js',
+            'docs/scifi-ui/scripts/formatx-core-mobile-v55.js',
+          ]
+          for f in active:
+              text=Path(f).read_text(encoding='utf-8')
+              if "get('lighthouse')" in text or 'audit-skip' in text or 'fx-audit-mode' in text:
+                  raise SystemExit(f'active audit-specific behavior remains in {f}')
+          print('R517_R518_SOURCE_PATCH_PASS')
+          PY
+          node --input-type=module --check < billing-worker/src/production-content-entry.js
+          for f in docs/scifi-ui/scripts/living-architecture.js docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/formatx-premium-finish.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-core-mobile-v55.js; do node --check "$f"; done
+          git diff --check
+          git diff -- billing-worker/src/production-content-entry.js docs/scifi-ui/scripts > artifacts/r517-r518-worker/source.diff
+
+      - name: Install exact Worker and real audit tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --prefix billing-worker --no-audit --prefer-offline
+          npm install --no-save --no-package-lock lighthouse@13.4.1 playwright-core@1.62.0 >/dev/null
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+          npx lighthouse@13.4.1 --version
+
+      - name: Build local-only exact candidate Worker config
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const source=JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc','utf8'));
+          delete source.ai;
+          delete source.routes;
+          source.workers_dev=true;
+          fs.writeFileSync('billing-worker/wrangler.r517-r518-candidate.json',JSON.stringify(source,null,2)+'\n');
+          NODE
+
+      - name: Start exact candidate Worker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo '127.0.0.1 formatxsuite.com www.formatxsuite.com' | sudo tee -a /etc/hosts
+          cd billing-worker
+          nohup npx wrangler dev --config wrangler.r517-r518-candidate.json --ip 127.0.0.1 --port 8787 --local-protocol https > "$RUNNER_TEMP/r517-r518-wrangler.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/r517-r518-wrangler.pid"
+          cd ..
+          for attempt in $(seq 1 60); do
+            if curl -kfsS --max-time 5 -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ >/dev/null 2>&1; then echo EXACT_CANDIDATE_WORKER_READY; exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r517-r518-wrangler.log" || true
+          exit 1
+
+      - name: Prove response discovery order before synchronous boot
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          curl -kfsS -H 'Host: formatxsuite.com' https://127.0.0.1:8787/ -o artifacts/r517-r518-worker/candidate.html
+          python3 <<'PY' | tee artifacts/r517-r518-worker/discovery-order.txt
+          from pathlib import Path
+          s=Path('artifacts/r517-r518-worker/candidate.html').read_text(encoding='utf-8')
+          markers={
+            'mobile':'data-fx-mobile-first-paint-r358="true"',
+            'frame':'data-fx-first-frame-stability-r500="true"',
+            'p0':'data-fx-p0-first-paint-r503="true"',
+            'boot':'data-fx-reference-mode-boot-r504="true"',
+          }
+          pos={k:s.find(v) for k,v in markers.items()}
+          print(pos)
+          assert all(v>=0 for v in pos.values()), pos
+          assert pos['mobile'] < pos['boot'] and pos['frame'] < pos['boot'] and pos['p0'] < pos['boot'], pos
+          print('R517_CRITICAL_DISCOVERY_BEFORE_SYNC_BOOT_PASS')
+          PY
+
+      - name: Real Chrome x5 CLS geometry and lighthouse-query semantic parity
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE' | tee artifacts/r517-r518-worker/browser.json
+          const assert=require('node:assert/strict');
+          const {chromium}=require('playwright-core');
+          const cp=require('node:child_process');
+          const chrome=process.env.CHROME_PATH||cp.execFileSync('which',['google-chrome'],{encoding:'utf8'}).trim();
+          const ORIGIN='https://formatxsuite.com:8787/';
+          const noAudit=d=>Object.entries(d||{}).filter(([,v])=>String(v).includes('audit-skip'));
+          async function one(browser,name,query,viewport,mobile){
+            const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference',ignoreHTTPSErrors:true});
+            const page=await context.newPage(); const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            page.on('console',m=>{const t=m.text();if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(t))errors.push(t)});
+            await page.addInitScript(()=>{window.__cls={total:0,entries:[]};try{new PerformanceObserver(l=>{for(const e of l.getEntries())if(!e.hadRecentInput){window.__cls.total+=e.value;window.__cls.entries.push({value:e.value,startTime:e.startTime,sources:(e.sources||[]).map(s=>({node:s.node?.className||s.node?.id||s.node?.tagName||'',previousRect:s.previousRect,currentRect:s.currentRect}))})}}).observe({type:'layout-shift',buffered:true})}catch{}});
+            const response=await page.goto(`${ORIGIN}${query}`,{waitUntil:'domcontentloaded',timeout:60000}); assert.equal(response.status(),200);
+            await page.waitForTimeout(1800);
+            const pre=await page.evaluate(()=>{const cc=[...document.querySelectorAll('link[rel=stylesheet]')].find(l=>l.href.includes('formatx-critical-core-r227.css'));return{dataset:{...document.documentElement.dataset},auditClass:document.documentElement.classList.contains('fx-audit-mode'),critical:cc?{media:cc.media,deferred:cc.hasAttribute('data-fx-r487-deferred-style'),sheet:Boolean(cc.sheet)}:null,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,cls:window.__cls};});
+            assert.equal(pre.auditClass,false,`${name}: audit class`); assert.equal(noAudit(pre.dataset).length,0,`${name}: audit-skip pre`); assert.ok(pre.critical&&pre.critical.media!=='print'&&!pre.critical.deferred&&pre.critical.sheet,`${name}: critical core not first paint`); assert.ok(pre.overflow<=2,`${name}: overflow`); assert.ok(pre.cls.total<0.05,`${name}: CLS ${pre.cls.total}`);
+            const target=page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252').first(); await target.waitFor({state:'visible',timeout:30000}); const tb=await target.boundingBox(); assert.ok(tb&&tb.width>=16&&tb.height>=16); await page.mouse.click(tb.x+tb.width/2,tb.y+tb.height/2);
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'&&document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length===1,null,{timeout:45000});
+            const pause=page.locator('#hero .fx-reference-pause').first(); await pause.waitFor({state:'visible',timeout:10000}); const pb=await pause.boundingBox(); assert.ok(pb&&pb.width>=16&&pb.height>=16); await page.mouse.click(pb.x+pb.width/2,pb.y+pb.height/2); await page.waitForTimeout(650);
+            const paused=await page.evaluate(()=>({flag:document.querySelector('#hero .fx-reference-pause')?.dataset.paused||'',dataset:{...document.documentElement.dataset},states:getComputedStyle(document.querySelector('#hero .fx-crystal-organism-r326-canvas')).animationPlayState})); assert.equal(paused.flag,'true',`${name}: pause flag`); assert.equal(noAudit(paused.dataset).length,0,`${name}: pause audit`);
+            await page.mouse.click(pb.x+pb.width/2,pb.y+pb.height/2); await page.waitForTimeout(650);
+            const ask=page.locator('#hero .fx-reference-ask').first(); await ask.waitFor({state:'visible',timeout:10000}); const ab=await ask.boundingBox(); assert.ok(ab&&ab.width>=44&&ab.height>=44,`${name}: ASK hit box`); await page.mouse.click(ab.x+ab.width/2,ab.y+ab.height/2); await page.waitForTimeout(200);
+            const post=await page.evaluate(()=>{const r=document.documentElement;const c=document.querySelector('#hero .fx-crystal-organism-r326-canvas');return{dataset:{...r.dataset},renderer:r.dataset.fxCoreRenderer||'',crystal:r.dataset.fxCrystalOrganismR326||'',sync:r.dataset.fxMagShapeSyncR476||'',scheduler:r.dataset.fxCoreScheduler||'',idle:r.dataset.fxCoreIdleRenderR441||'',pause:document.querySelector('#hero .fx-reference-pause')?.dataset.paused||'',canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,animations:c?.getAnimations().map(a=>({name:a.animationName,currentTime:a.currentTime,playState:a.playState}))||[],overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,cls:window.__cls};});
+            assert.equal(noAudit(post.dataset).length,0,`${name}: post audit`); assert.equal(post.renderer,'single-webgl-crystal-organism-r326'); assert.equal(post.crystal,'ready'); assert.match(post.sync,/^ready-r\d+$/); assert.equal(post.scheduler,'interaction-bursts-idle-zero-frame-r441'); assert.equal(post.idle,'zero-frame'); assert.equal(post.pause,'false'); assert.equal(post.canvasCount,1); assert.ok(post.animations.some(a=>a.playState==='running'),`${name}: resume not running`); assert.ok(post.overflow<=2); assert.ok(post.cls.total<0.05,`${name}: post CLS ${post.cls.total}`); assert.equal(errors.length,0,`${name}: errors ${errors.join(' | ')}`);
+            const result={name,query,viewport,mobile,pre:{critical:pre.critical,overflow:pre.overflow,cls:pre.cls.total},post:{renderer:post.renderer,crystal:post.crystal,sync:post.sync,scheduler:post.scheduler,idle:post.idle,pause:post.pause,canvasCount:post.canvasCount,overflow:post.overflow,cls:post.cls.total},ask:{width:ab.width,height:ab.height}}; await context.close(); return result;
+          }
+          (async()=>{const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--disable-dev-shm-usage','--ignore-certificate-errors','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});const results=[];for(let i=1;i<=5;i++)results.push(await one(browser,`mobile-${i}`,`?candidate=mobile-${i}`,{width:390,height:844},true));results.push(await one(browser,'desktop-normal','?candidate=desktop',{width:1440,height:900},false));results.push(await one(browser,'desktop-lighthouse-query','?lighthouse=1',{width:1440,height:900},false));results.push(await one(browser,'mobile-lighthouse-query','?lighthouse=1',{width:390,height:844},true));await browser.close();const sem=x=>({renderer:x.post.renderer,crystal:x.post.crystal,sync:x.post.sync,scheduler:x.post.scheduler,idle:x.post.idle,pause:x.post.pause,canvasCount:x.post.canvasCount});assert.deepEqual(sem(results[5]),sem(results[6]),'desktop lighthouse query semantic mismatch');assert.deepEqual(sem(results[0]),sem(results[7]),'mobile lighthouse query semantic mismatch');console.log(JSON.stringify({pass:true,results},null,2));})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Five consecutive real mobile Lighthouse candidate audits
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-r518-worker/mobile-lh
+          for i in 1 2 3 4 5; do
+            npx lighthouse@13.4.1 "https://formatxsuite.com:8787/?candidate_mobile_lh=$i" --output=json --output-path="artifacts/r517-r518-worker/mobile-lh/run-$i.json" --chrome-path="$CHROME_PATH" --chrome-flags='--headless=new --no-sandbox --ignore-certificate-errors --disable-dev-shm-usage' --only-categories=performance,accessibility,best-practices,seo --max-wait-for-load=60000 --quiet
+          done
+          node <<'NODE' | tee artifacts/r517-r518-worker/mobile-summary.json
+          const fs=require('node:fs');const rows=[];let fail=false;for(let i=1;i<=5;i++){const l=JSON.parse(fs.readFileSync(`artifacts/r517-r518-worker/mobile-lh/run-${i}.json`));const r={run:i,perf:Math.round(l.categories.performance.score*100),a11y:Math.round(l.categories.accessibility.score*100),bp:Math.round(l.categories['best-practices'].score*100),seo:Math.round(l.categories.seo.score*100),FCP:l.audits['first-contentful-paint'].numericValue,LCP:l.audits['largest-contentful-paint'].numericValue,TBT:l.audits['total-blocking-time'].numericValue,CLS:l.audits['cumulative-layout-shift'].numericValue,TTFB:l.audits['server-response-time'].numericValue};rows.push(r);if(r.LCP>=2000||r.CLS>=0.05||r.TBT>150||r.TTFB>500)fail=true;}console.log(JSON.stringify(rows,null,2));if(fail)process.exit(1);
+          NODE
+
+      - name: Five consecutive real desktop Lighthouse candidate audits
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/r517-r518-worker/desktop-lh
+          for i in 1 2 3 4 5; do
+            npx lighthouse@13.4.1 "https://formatxsuite.com:8787/?candidate_desktop_lh=$i" --preset=desktop --output=json --output-path="artifacts/r517-r518-worker/desktop-lh/run-$i.json" --chrome-path="$CHROME_PATH" --chrome-flags='--headless=new --no-sandbox --ignore-certificate-errors --disable-dev-shm-usage' --only-categories=performance,accessibility,best-practices,seo --max-wait-for-load=60000 --quiet
+          done
+          node <<'NODE' | tee artifacts/r517-r518-worker/desktop-summary.json
+          const fs=require('node:fs');const rows=[];let fail=false;for(let i=1;i<=5;i++){const l=JSON.parse(fs.readFileSync(`artifacts/r517-r518-worker/desktop-lh/run-${i}.json`));const r={run:i,perf:Math.round(l.categories.performance.score*100),a11y:Math.round(l.categories.accessibility.score*100),bp:Math.round(l.categories['best-practices'].score*100),seo:Math.round(l.categories.seo.score*100),FCP:l.audits['first-contentful-paint'].numericValue,LCP:l.audits['largest-contentful-paint'].numericValue,TBT:l.audits['total-blocking-time'].numericValue,CLS:l.audits['cumulative-layout-shift'].numericValue,TTFB:l.audits['server-response-time'].numericValue};rows.push(r);if(r.LCP>=2000||r.CLS>=0.05||r.TBT>150||r.TTFB>500)fail=true;}console.log(JSON.stringify(rows,null,2));if(fail)process.exit(1);
+          NODE
+
+      - name: Commit coherent proven candidate changes and push candidate branch
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add billing-worker/src/production-content-entry.js
+          git commit -m 'Fix R517 first-paint discovery before sync boot'
+          git rev-parse HEAD | tee artifacts/r517-r518-worker/r517-sha.txt
+          git add docs/scifi-ui/scripts/living-architecture.js docs/scifi-ui/scripts/formatx-apex.js docs/scifi-ui/scripts/formatx-premium-finish.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          git commit -m 'Remove active audit-specific runtime bypasses'
+          git rev-parse HEAD | tee artifacts/r517-r518-worker/r518-sha.txt
+          git log -3 --oneline | tee artifacts/r517-r518-worker/commits.txt
+          git status --short | tee artifacts/r517-r518-worker/status.txt
+          git push --force-with-lease origin HEAD:"refs/heads/$CANDIDATE_BRANCH"
+
+      - name: Show Worker log
+        if: always()
+        run: cat "$RUNNER_TEMP/r517-r518-wrangler.log" || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r517-r518-worker-${{ github.sha }}
+          path: artifacts/r517-r518-worker
+          include-hidden-files: true
+          retention-days: 30
