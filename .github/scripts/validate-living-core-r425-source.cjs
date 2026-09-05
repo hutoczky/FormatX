@@ -42,7 +42,6 @@ has(controls, ['fx-reference-controls-r204', 'fx-reference-ask'], 'canonical con
 assert.ok(!controls.includes('visibleControl(pause)'), 'manual PAUSE must not be a required control');
 assert.ok(!controls.includes('function ensurePause'), 'manual PAUSE creator returned');
 
-/* Positive navigation-owned bootstrap. */
 has(scheduler, [
   "fxMagStartupContractR530='living-core-autostart-navigation-owned'",
   "fxMagCanonicalClockR530='compositor-heartbeat-navigation-owned'",
@@ -56,8 +55,6 @@ absent(scheduler, [
   "['pointerdown'", "'touchstart'", "'keydown'", "'wheel'", 'function onIntent', 'setTimeout('
 ], 'MAG startup scheduler');
 
-/* User intent may still mount heavy deferred application enhancements, but the
-   current MAG request itself must be unconditional in this loader. */
 has(motionLoader, [
   "fxMagStartupContractR530='living-core-autostart-navigation-owned'",
   "fxMotionRuntimeStartR530='navigation-owned-current-mag'",
@@ -90,7 +87,7 @@ has(heartbeatCss, [
   'animation-play-state: running !important',
   '@media (prefers-reduced-motion:reduce)'
 ], 'navigation-owned mobile compositor life');
-absent(heartbeatCss, ['PAUSE/RESUME', 'data-fx-primary-mag-life-r482="steady"', 'data-fx-reference-motion-paused'], 'mobile heartbeat contract');
+absent(heartbeatCss, ['data-fx-primary-mag-life-r482="steady"', 'data-fx-reference-motion-paused', '.fx-reference-pause'], 'mobile heartbeat runtime contract');
 
 has(firstPaintCss, ['production-r530-p0-first-paint-no-manual-mag-pause'], 'first-paint no-pause marker');
 absent(firstPaintCss, ['data-fx-reference-motion-paused', 'animation-play-state: paused'], 'first-paint manual pause CSS');
