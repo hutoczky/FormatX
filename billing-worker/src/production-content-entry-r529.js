@@ -22,7 +22,7 @@ const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
 const DEFERRED_SCHEDULER_URL = 'formatx-deferred-css-r487.js?v=20260904-r526-fcp-observer';
 const EVENT_HORIZON_RE = /formatx-event-horizon\.js\?v=[^"']+/g;
-const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r531-preloader-hotfix';
+const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r531-preloader-effects-v2';
 const DEFERRED_REDUCED_RE = /formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g;
 const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner';
 const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
@@ -118,8 +118,8 @@ function r529Headers(source) {
   headers.set('X-FormatX-CSS-Scheduler', 'r526-post-first-contentful-paint');
   headers.set('X-FormatX-Product-Contract', 'r529-living-core-no-manual-pause');
   headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
-  headers.set('X-FormatX-Preloader', 'r531-visual-only-navigation-owned');
-  headers.set('X-FormatX-Preloader-Cache', 'r531-hotfix-fresh-assets');
+  headers.set('X-FormatX-Preloader', 'r531-extended-effects-navigation-owned');
+  headers.set('X-FormatX-Preloader-Cache', 'r531-effects-v2-fresh-assets');
   return headers;
 }
 
