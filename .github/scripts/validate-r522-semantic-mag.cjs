@@ -8,7 +8,8 @@ const { chromium } = require('playwright');
 /* R530 current product contract: MAG is the living core. Normal foreground
    motion progresses continuously; there is no user-facing PAUSE/RESUME.
    Reduced-motion and automatic background suspension remain accessibility /
-   resource-lifecycle behavior and are tested separately. */
+   resource-lifecycle behavior. WebGL failure must retain a static-safe MAG
+   identity without creating a fallback canvas, RAF owner or second renderer. */
 const ORIGIN = (process.env.FORMATX_TEST_URL || 'https://formatxsuite.com/').replace(/\/$/, '');
 const OUT = process.env.FORMATX_SEMANTIC_EVIDENCE_DIR || 'artifacts/r522-semantic-mag';
 const CANVAS = '#hero .fx-crystal-organism-r326-canvas';
@@ -196,6 +197,14 @@ async function verifyReducedMotion(browser) {
   } finally { await context.close(); }
 }
 
+async function waitForFallbackReady(page) {
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    return root.dataset.fxMagFallbackR530 === 'static-safe-css'
+      && root.dataset.fxCurrentMagRuntimeR422 === 'ready-static-fallback';
+  }, null, { timeout: 10000 });
+}
+
 async function verifyFallback(browser) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, locale: 'hu-HU' });
   await context.addInitScript(() => {
@@ -209,22 +218,65 @@ async function verifyFallback(browser) {
   const errors = []; page.on('pageerror', error => errors.push(String(error)));
   try {
     await page.goto(`${ORIGIN}?r530_semantic_fallback=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(2500);
-    const state = await page.evaluate(() => ({
-      hero: Boolean(document.querySelector('#hero')),
-      lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
-      live: Boolean(document.querySelector('#live-os,#live-os-overview,[data-fx-live-os],[data-fx-live-os-launcher],[data-fx-live-os-cta]')),
-      proof: Boolean(document.querySelector('[data-fx-award-proof],.fx-proof-grid')),
-      headerCore: Boolean(document.querySelector('.fx-reference-mag-button')),
-      ask: Boolean(document.querySelector('.fx-reference-ask')),
-      pause: document.querySelectorAll('.fx-reference-pause').length,
-      overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth
-    }));
-    assert.ok(state.hero && state.lead > 40 && state.live && state.proof && state.headerCore && state.ask, `fallback lost meaningful product content ${JSON.stringify(state)}`);
+    await waitForFallbackReady(page);
+    const state = await page.evaluate(({ CANVAS, STAGE, ASK, SOUND, MANUAL_PAUSE }) => {
+      const root = document.documentElement;
+      const host = document.querySelector('#hero .hero-space');
+      const before = host ? getComputedStyle(host, '::before') : null;
+      const after = host ? getComputedStyle(host, '::after') : null;
+      const visible = element => {
+        if (!element) return false;
+        const style = getComputedStyle(element), rect = element.getBoundingClientRect();
+        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .2 && rect.width > 0 && rect.height > 0;
+      };
+      const pseudo = style => style ? {
+        content: style.content,
+        display: style.display,
+        opacity: style.opacity,
+        backgroundImage: style.backgroundImage,
+        animationName: style.animationName,
+        animationDuration: style.animationDuration,
+        animationPlayState: style.animationPlayState
+      } : null;
+      return {
+        hero: Boolean(document.querySelector('#hero')),
+        lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
+        proof: Boolean(document.querySelector('[data-fx-award-proof],.fx-proof-grid')),
+        headerCore: visible(document.querySelector('.fx-reference-mag-button')),
+        ask: visible(document.querySelector(ASK)),
+        sound: visible(document.querySelector(SOUND)),
+        pause: document.querySelectorAll(MANUAL_PAUSE).length,
+        canvasCount: document.querySelectorAll(CANVAS).length,
+        stageCount: document.querySelectorAll(STAGE).length,
+        crystal: root.dataset.fxCrystalOrganismR326 || '',
+        real3d: root.dataset.fxCoreReal3d || '',
+        three: root.dataset.fxThree || '',
+        fallback: root.dataset.fxMagFallbackR530 || '',
+        runtime: root.dataset.fxCurrentMagRuntimeR422 || '',
+        rendererSelection: root.dataset.fxCoreRendererSelection || '',
+        before: pseudo(before),
+        after: pseudo(after),
+        overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth
+      };
+    }, { CANVAS, STAGE, ASK, SOUND, MANUAL_PAUSE });
+
+    assert.ok(state.hero && state.lead > 40 && state.proof && state.headerCore && state.ask && state.sound,
+      `fallback lost meaningful product/control content ${JSON.stringify(state)}`);
+    assert.equal(state.crystal, 'context-unavailable', `fallback did not originate from WebGL failure ${JSON.stringify(state)}`);
+    assert.equal(state.three, 'error', `fallback CSS artwork state missing ${JSON.stringify(state)}`);
+    assert.equal(state.fallback, 'static-safe-css', `fallback identity owner missing ${JSON.stringify(state)}`);
+    assert.equal(state.runtime, 'ready-static-fallback', `fallback runtime did not settle ${JSON.stringify(state)}`);
+    assert.equal(state.rendererSelection, 'static-safe-css-fallback-r530', `fallback renderer selection invalid ${JSON.stringify(state)}`);
+    assert.equal(state.canvasCount, 0, `fallback must not create/retain a renderer canvas ${JSON.stringify(state)}`);
+    assert.equal(state.stageCount, 0, `fallback must not create/retain a renderer stage ${JSON.stringify(state)}`);
     assert.equal(state.pause, 0, 'fallback: obsolete manual PAUSE present');
+    assert.ok(state.before && state.before.content !== 'none' && state.before.display !== 'none' && state.before.backgroundImage !== 'none',
+      `fallback MAG identity artwork is blank ${JSON.stringify(state.before)}`);
+    assert.equal(state.before.animationName, 'none', `fallback MAG identity must be static-safe ${JSON.stringify(state.before)}`);
     assert.ok(state.overflow <= 2, `fallback overflow ${state.overflow}`);
+    const ask = await verifyAsk(page, 'fallback');
     assert.equal(errors.length, 0, `fallback page errors ${errors.join(' | ')}`);
-    return state;
+    return { ...state, ask };
   } finally { await context.close(); }
 }
 
@@ -238,7 +290,7 @@ async function verifyFallback(browser) {
       verifyReducedMotion(browser), verifyFallback(browser)
     ]);
     const report = { auditedSha: process.env.AUDITED_SHA || '', origin: ORIGIN,
-      contract: 'R530 living core: SOUND+ASK, continuous normal motion, reduced/background lifecycle safe, no manual PAUSE',
+      contract: 'R530 living core: SOUND+ASK, continuous normal motion, reduced/background lifecycle safe, static-safe WebGL fallback, no manual PAUSE',
       desktop, mobile, reducedMotion, fallback };
     writeJson('report.json', report);
     console.log('R530_SEMANTIC_MAG_PASS');
