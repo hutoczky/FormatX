@@ -1,8 +1,9 @@
-/* FormatX R531 — lightweight preloader over the navigation-owned living core.
+/* FormatX R531/R532 — lightweight preloader over the navigation-owned living core.
    The preloader never owns MAG startup: MAG stays navigation-owned behind the
    overlay, manual PAUSE stays retired, and release is hard-bounded for LCP.
    R531 closeout moves recurring visual effects to compositor-only CSS so this
-   runtime owns only progress/status timing and bounded release. */
+   runtime owns only progress/status timing and bounded release. R532 adds a
+   real geometry-settle gate before reveal without extending the hard cap. */
 (function(){
 'use strict';
 
@@ -15,7 +16,9 @@ const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-s
 const PRELOADER_MIN_MS=REDUCED?180:(MOBILE?1180:1350);
 const PRELOADER_MAX_MS=REDUCED?520:(MOBILE?1450:1650);
 const RELEASE_FADE_MS=REDUCED?0:160;
+const GEOMETRY_SETTLE_MS=REDUCED?0:(MOBILE?80:180);
 let audio=null,preloaderRaf=0,preloaderHardTimer=0,preloaderReleased=false;
+let geometryObserver=null,geometryLastChange=performance.now();
 
 if(!ROOT.dataset.fxReferenceProductionR244)ROOT.dataset.fxReferenceProductionR244=MOBILE?'ready':'desktop';
 ROOT.dataset.fxReferenceComposition=MOBILE?'reference-frame-r244':'desktop-reference-r244';
@@ -31,6 +34,7 @@ ROOT.dataset.fxCanonicalMagMotionR528='living-core-normal-continuous-reduced-bac
 ROOT.dataset.fxPreloaderContractR531='visual-only-mag-independent-bounded';
 ROOT.dataset.fxPreloaderEffectsR531=REDUCED?'reduced-static':'compositor-glow-scan-pulse';
 ROOT.dataset.fxPreloaderMainThreadR531='status-only-css-compositor-effects';
+ROOT.dataset.fxPreloaderSettleGateR532='reference-runtime-control-owner-resize-quiet';
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
@@ -45,6 +49,27 @@ function fixLanguageAccessibleName(){const button=document.querySelector('.fx-la
 function enforceMagVisibleName(){const button=document.querySelector('.topbar .fx-reference-mag-button');if(!(button instanceof HTMLButtonElement))return;button.textContent='MAG';button.setAttribute('aria-label',ROOT.lang==='en'?'Change MAG shape':'A MAG alakjának váltása');}
 function complete(source){document.dispatchEvent(new CustomEvent('formatx:introcomplete',{detail:{source}}));}
 function ensurePreloaderStyle(){let link=document.querySelector('link[data-fx-preloader-style-r531]');if(link instanceof HTMLLinkElement)return link;link=document.createElement('link');link.rel='stylesheet';link.href=PRELOADER_STYLE;link.fetchPriority='high';link.dataset.fxPreloaderStyleR531='true';(document.head||document.documentElement).appendChild(link);return link;}
+function watchGeometry(){
+  geometryObserver?.disconnect();geometryObserver=null;geometryLastChange=performance.now();
+  if(typeof ResizeObserver!=='function')return;
+  const hero=document.getElementById('hero'),grid=hero?.querySelector(':scope > .hero-grid'),copyNode=grid?.querySelector(':scope > .hero-copy');
+  const nodes=[grid,copyNode,copyNode?.querySelector('.hero-actions'),copyNode?.querySelector('.fx-hero-product-state')].filter(node=>node instanceof HTMLElement);
+  if(!nodes.length)return;
+  geometryObserver=new ResizeObserver(()=>{geometryLastChange=performance.now();ROOT.dataset.fxPreloaderGeometryR532='changing';});
+  for(const node of nodes)geometryObserver.observe(node);
+  ROOT.dataset.fxPreloaderGeometryR532='observing';
+}
+function referenceGeometryReady(now=performance.now()){
+  if(REDUCED)return true;
+  const expected=MOBILE?'ready':'desktop';
+  const modeReady=ROOT.dataset.fxReferenceProductionR244===expected;
+  const runtimeReady=Boolean(ROOT.dataset.fxReferenceRuntimeR254);
+  const controlReady=ROOT.dataset.fxControlOwnerR268==='ready';
+  const styleReady=MOBILE||Array.from(document.styleSheets).some(sheet=>String(sheet.href||'').includes('formatx-reference-production-r244.css'));
+  const quiet=now-geometryLastChange>=GEOMETRY_SETTLE_MS;
+  if(modeReady&&runtimeReady&&controlReady&&styleReady&&quiet)ROOT.dataset.fxPreloaderGeometryR532='settled';
+  return modeReady&&runtimeReady&&controlReady&&styleReady&&quiet;
+}
 
 function showPreloader(){
   const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement))return null;
@@ -61,7 +86,7 @@ function showPreloader(){
   if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'LIVING CORE STARTING':'ÉLŐ MAG INDÍTÁSA';
   return overlay;
 }
-function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-mag-heart-hit-r252,.fx-crystal-organism-r326-stage,.hero-space');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}
+function preloaderReady(now=performance.now()){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-mag-heart-hit-r252,.fx-crystal-organism-r326-stage,.hero-space');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup&&referenceGeometryReady(now));}
 function updatePreloader(overlay,elapsed){const output=overlay?.querySelector('[data-fx-intro-output]'),progress=overlay?.querySelector('[data-fx-intro-progress]'),status=overlay?.querySelector('[data-fx-intro-status]');const ratio=Math.min(1,elapsed/PRELOADER_MAX_MS),eased=1-Math.pow(1-ratio,2.05),value=Math.min(96,Math.max(5,Math.round(5+eased*91)));if(output instanceof HTMLOutputElement)output.value=String(value).padStart(3,'0');if(progress instanceof HTMLProgressElement)progress.value=value;if(status instanceof HTMLElement){const phase=ratio<.42?0:(ratio<.78?1:2);status.textContent=ROOT.lang==='en'?(phase===0?'LIVING CORE STARTING':phase===1?'MAG SYNCHRONIZING':'SYSTEM READY'):(phase===0?'ÉLŐ MAG INDÍTÁSA':phase===1?'MAG SZINKRONIZÁLÁSA':'RENDSZER KÉSZ');}}
 function hidePreloader(source){
   if(preloaderReleased)return;
@@ -75,6 +100,7 @@ function hidePreloader(source){
   if(progress instanceof HTMLProgressElement)progress.value=100;
   if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'READY':'KÉSZ';
   const finalize=()=>{
+    geometryObserver?.disconnect();geometryObserver=null;
     ROOT.dataset.fxPreloaderReleaseR531=source;
     overlay.hidden=true;
     overlay.setAttribute('aria-hidden','true');
@@ -94,7 +120,7 @@ function runPreloader(overlay){
   const tick=now=>{
     const elapsed=now-started;
     updatePreloader(overlay,elapsed);
-    if(elapsed>=PRELOADER_MIN_MS&&preloaderReady()){hidePreloader('mag-shell-ready');return;}
+    if(elapsed>=PRELOADER_MIN_MS&&preloaderReady(now)){hidePreloader('mag-shell-reference-settled');return;}
     if(elapsed>=PRELOADER_MAX_MS){hidePreloader('bounded-timeout');return;}
     preloaderRaf=requestAnimationFrame(tick);
   };
@@ -107,10 +133,11 @@ const preloader=showPreloader();
 fixLanguageAccessibleName();enforceMagVisibleName();
 ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r531-living-core':'desktop-direct-r531-living-core';
 markIntroComplete('instant-r531-living-core');
+watchGeometry();
 runPreloader(preloader);
 requestAnimationFrame(()=>{stabilize();enforceMagVisibleName();});
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(()=>{fixLanguageAccessibleName();enforceMagVisibleName();});},{passive:true});
-addEventListener('pagehide',()=>{try{audio?.pause();}catch(_){}},{once:true});
+addEventListener('pagehide',()=>{try{audio?.pause();}catch(_){}geometryObserver?.disconnect();geometryObserver=null;},{once:true});
 addEventListener('error',()=>{ROOT.dataset.fxPreloaderRuntimeIssueR531='runtime-error';},{passive:true});
 addEventListener('unhandledrejection',()=>{ROOT.dataset.fxPreloaderPromiseIssueR531='promise-error';},{passive:true});
 }());
