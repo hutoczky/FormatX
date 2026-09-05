@@ -8,6 +8,15 @@ const LISTEN_HOST = '127.0.0.1';
 const LISTEN_PORT = 8788;
 const CANONICAL = '<https://formatxsuite.com/>; rel="canonical"';
 
+function normalizedLinkHeader(value) {
+  const parts = String(value || '')
+    .split(/,(?=\s*<)/)
+    .map(item => item.trim())
+    .filter(Boolean)
+    .filter(item => !/\brel\s*=\s*["']?canonical["']?/i.test(item));
+  return [CANONICAL, ...parts].join(', ');
+}
+
 const server = http.createServer((request, response) => {
   const headers = { ...request.headers, host: `${UPSTREAM_HOST}:${UPSTREAM_PORT}` };
   const upstream = http.request({
@@ -20,7 +29,7 @@ const server = http.createServer((request, response) => {
     const nextHeaders = { ...upstreamResponse.headers };
     const contentType = String(nextHeaders['content-type'] || '');
     if (contentType.includes('text/html') && new URL(request.url, 'http://candidate.local').pathname === '/') {
-      nextHeaders.link = CANONICAL;
+      nextHeaders.link = normalizedLinkHeader(nextHeaders.link);
       nextHeaders['x-formatx-candidate-proxy'] = 'canonical-header-normalizer-only';
     }
     response.writeHead(upstreamResponse.statusCode || 502, upstreamResponse.statusMessage, nextHeaders);
