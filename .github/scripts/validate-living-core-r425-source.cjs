@@ -1,10 +1,9 @@
 'use strict';
 
-/* FormatX R535 — current living-core source contract.
-   MAG remains navigation-owned and automatic; manual PAUSE/RESUME stays retired.
-   The visual preloader keeps the roadmap bounds and immutable first-paint content.
-   The tiny reference layout selector and global critical/a11y shell remain prepaint;
-   only genuinely legacy mobile layout layers may wait for real scroll intent. */
+/* FormatX R535 — authoritative current living-core source contract.
+   The real MAG starts from navigation with no user input. Manual PAUSE/RESUME is
+   retired. The visual preloader is bounded and independent, while non-critical
+   motion/Organism work and seamless geometry may remain intent/lifecycle driven. */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
@@ -15,6 +14,7 @@ const absent=(source,tokens,label)=>{for(const token of tokens)assert.ok(!source
 
 const home=read('docs/scifi-ui/index.html');
 const intro=read('docs/scifi-ui/scripts/formatx-event-horizon.js');
+const scheduler=read('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js');
 const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
 const current=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
@@ -46,7 +46,23 @@ absent(intro,[
   'function updatePreloader','SYNCHRONIZING MAG','MAG SZINKRONIZÁLÁSA',"output.value='100'",'progress.value=100'
 ],'R535 preloader must not repaint content after first paint');
 
-has(motion,['external-strict-csp','formatx-current-mag-loader-r422.js','ensureCurrentMag();',"fxCanonicalAskActivationR477='armed'",'formatx:immersiveactivate'],'current motion/MAG loader route');
+has(scheduler,[
+  'navigation-owned living MAG + post-first-paint enhancements',
+  "const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r535-navigation-autostart'",
+  'function startCriticalMag()','requested-navigation',"script.dataset.fxCurrentMagLoaderR422='true'",
+  "script.dataset.fxNavigationMagR535='true'",'startCriticalMag();',
+  'The living MAG is already requested above'
+],'R535 unconditional navigation MAG scheduler');
+assert.match(scheduler,/startCriticalMag\(\);\s*if\(document\.readyState===['"]loading['"]\)/,'critical MAG must be requested unconditionally before late enhancement scheduling');
+absent(scheduler,['lighthouse=1','force-prefers-reduced-motion','formatx:referencepause'],'navigation MAG scheduler must not contain audit/manual-pause bypasses');
+
+has(motion,[
+  'external-strict-csp','formatx-current-mag-loader-r422.js','ensureCurrentMag();',"fxCanonicalAskActivationR477='armed'",'formatx:immersiveactivate',
+  "const PLATFORM_SCROLL='/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260906-r535-scroll-intent-owner'",
+  "fxPlatformScrollBootstrapR535='armed-scroll-intent'",'function ensureScrollBootstrap()','scrollIntentListeners','onScrollIntent'
+],'current motion/MAG + independent scroll bootstrap route');
+absent(motion,['fx-reference-pause','formatx:referencepause'],'active motion owner must not retain manual pause semantics');
+
 has(current,["const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'",'cleanupLegacyMagRuntime',"fxPrimaryMagOwnerR460='r326-only'",'formatx-crystal-organism-r326.js','formatx-mobile-render-governor-r426.js','formatx-core-life-r455.js','formatx-mini-mag-assistant-r459.js'],'single current MAG loader');
 has(renderer,["const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','const SURFACE_PULSE_MS = 1160','prefers-reduced-motion:reduce','document.hidden','uSurfacePulse','single-luminous-webgl-material-owner'],'native R326 renderer');
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
@@ -69,19 +85,23 @@ absent(quality,['#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main'
 has(referenceBoot,["fxReferenceProductionR244 = mode","fxReferenceComposition = mobile","fxReferenceModeBootR334 = 'prepaint-' + mode"],'tiny synchronous prepaint reference selector');
 has(criticalShell,['.main-nav,',' .header-actions { display: none;','pointer-events: none;'],'mobile critical shell');
 has(worker,[
+  "P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r535-navigation-mag-scroll-intent'",
+  "MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r535-scroll-intent-owner'",
   "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r534-static-lcp-v1'",
   "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner'",
   "QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1'",
+  "X-FormatX-Product-Contract', 'r535-navigation-mag-no-manual-pause'",
+  "X-FormatX-MAG-Startup', 'r535-navigation-owned-critical-living-core'",
   "X-FormatX-Preloader', 'r534-static-content-roadmap-timing'",
   "X-FormatX-Preloader-Cache', 'r534-static-lcp-v1-compositor-css-v1'",
   "X-FormatX-Reference-Boot', 'r535-prepaint-layout-selector'",
   "X-FormatX-CSS-Scheduler', 'r535-global-critical-first-paint-mobile-legacy-intent'",
   "X-FormatX-Candidate-Delivery', 'r535-exact-production-entry-localhost-8787'",
-  'MOBILE_FIRST_PAINT_PRELOAD','P0_FIRST_PAINT_PRELOAD','HEART_STYLE_PRELOAD',
+  'rewrittenSchedulerResponse','MOBILE_FIRST_PAINT_PRELOAD','P0_FIRST_PAINT_PRELOAD','HEART_STYLE_PRELOAD',
   "headers.set('Link', '<https://formatxsuite.com/>; rel=\"canonical\"')"
-],'R535 production cache/prepaint/delivery contract');
+],'R535 production cache/prepaint/navigation-MAG delivery contract');
 absent(worker,['deferReferenceModeBoot','REFERENCE_BOOT_DEFERRED_PREFIX','GLOBAL_LEGACY_PATHS'],'R535 must not defer the prepaint selector or global critical/a11y shell');
 
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
-for(const source of [intro,motion,current,renderer,life,governor,mini,referenceBoot])new Function(source);
-console.log('PASS: R535 validates one native living MAG, no manual PAUSE owner, bounded preloader, prepaint layout selector, critical mobile shell, and automatic reduced/background lifecycle.');
+for(const source of [intro,scheduler,motion,current,renderer,life,governor,mini,referenceBoot])new Function(source);
+console.log('PASS: R535 validates navigation-owned native living MAG, no manual PAUSE owner, bounded preloader, prepaint layout selector, critical mobile shell, and automatic reduced/background lifecycle.');
