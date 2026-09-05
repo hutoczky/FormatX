@@ -54,14 +54,18 @@ jobs:
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
           "$CHROME_BIN" --version
 
-      - name: Validate living-core source contract
+      - name: Validate navigation-owned living-core source contract
         run: |
           set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js
+          node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
+          node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
           node --check docs/scifi-ui/scripts/formatx-core-gyro-r144.js
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
           node .github/scripts/validate-living-core-r425-source.cjs
           node .github/scripts/validate-real3d-core.cjs
           node .github/scripts/validate-real3d-core-v20.cjs
@@ -81,12 +85,6 @@ jobs:
           cat "$RUNNER_TEMP/p0-fast-http.log"
           exit 1
 
-      - name: Run retained semantic source proof
-        env:
-          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
-          FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
-        run: node .github/scripts/p0-fast-loop.cjs --semantic
-
       - name: Run retained CLS source proof
         env:
           FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
@@ -98,7 +96,7 @@ jobs:
           FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
         run: node .github/scripts/p0-fast-loop.cjs --overflow
 
-      - name: Run R530 living-core browser matrix
+      - name: Run R530 navigation-owned living-core browser matrix
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r522-semantic-mag
