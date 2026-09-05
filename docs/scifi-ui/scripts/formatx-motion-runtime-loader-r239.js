@@ -1,10 +1,8 @@
-/* FormatX r477 — canonical ASK activation + R476 synchronized MAG iconography.
-   The active HTML contains only current deferred enhancements. Mobile keeps the
-   bounded R484 surface-energy budget and zero frames between sweeps, while the
-   final full-size MAG compositor uses the R474 softer-glow, feathered-facet
-   phone tone. R476 mirrors the primary MAG crystal/sphere state into the header
-   and Mini MAG icons. R477 makes the visible ASK control the explicit deferred
-   Organism activation path. Desktop stays on the existing R326 material path. */
+/* FormatX r535 — canonical MAG startup + independent scroll-intent bootstrap.
+   MAG remains navigation-owned and automatic. Heavy Organism enhancements remain
+   deferred, while the lightweight platform-scroll bootstrap is requested on the
+   first real scroll intent so the seamless product contract works without ASK.
+   Manual MAG pause is fully absent from the active interaction reservation path. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -18,6 +16,7 @@ root.dataset.fxFullSuiteR474='r474-mobile-mag';
 root.dataset.fxDialogueSurfaceR475='booting';
 root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
+root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -33,13 +32,15 @@ const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260831-r475-canonical-ask-surface';
 const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260831-r484-readable-electric-surface';
+const PLATFORM_SCROLL='/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260906-r535-scroll-intent-owner';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false;
+const scrollIntentListeners=[['wheel',passive],['scroll',passive],['touchstart',passive],['pointerdown',passive],['keydown',false]];
+let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,scrollBootstrapRequested=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function mount(spec){
@@ -123,12 +124,33 @@ function ensureStaticMotionCss(){
   stylesheet.addEventListener('error',()=>{root.dataset.fxMotionCssR243='external-strict-csp-load-failed';},{once:true});
   document.head.appendChild(stylesheet);
 }
+function ensureScrollBootstrap(){
+  if(root.dataset.fxScrollBootstrap==='platform-scroll-v2'){
+    root.dataset.fxPlatformScrollBootstrapR535='ready-existing';
+    disarmScrollIntent();
+    return;
+  }
+  if(scrollBootstrapRequested||document.querySelector('script[data-fx-platform-scroll-r535]'))return;
+  scrollBootstrapRequested=true;
+  root.dataset.fxPlatformScrollBootstrapR535='loading-scroll-intent';
+  const script=document.createElement('script');
+  script.src=PLATFORM_SCROLL;
+  script.async=false;
+  script.dataset.fxPlatformScrollR535='true';
+  script.addEventListener('load',()=>{
+    root.dataset.fxPlatformScrollBootstrapR535=root.dataset.fxScrollBootstrap==='platform-scroll-v2'?'ready-scroll-intent':'loaded-awaiting-bootstrap';
+  },{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxPlatformScrollBootstrapR535='failed';},{once:true});
+  document.head.appendChild(script);
+  disarmScrollIntent();
+}
 function reservedInteraction(event){
   if(root.dataset.fxOrganismThought==='open')return true;
   const target=event?.target instanceof Element?event.target:null;
-  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-reference-pause,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));
+  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));
 }
 function disarm(){for(const [type,options] of intentListeners)removeEventListener(type,onIntent,options);}
+function disarmScrollIntent(){for(const [type,options] of scrollIntentListeners)removeEventListener(type,onScrollIntent,options);}
 function mountEnhancements(){
   if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
@@ -136,6 +158,11 @@ function mountEnhancements(){
   root.dataset.fxMotionRuntimeR239='enhanced-r468-user-intent';
 }
 function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
+function onScrollIntent(event){
+  if(event.type==='pointerdown'&&event.pointerType!=='touch')return;
+  if(event.type==='keydown'&&!['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' '].includes(event.key))return;
+  ensureScrollBootstrap();
+}
 function openPendingCanonicalAsk(){
   if(!askActivationPending)return false;
   const api=window.FormatXOrganismVoice;
@@ -180,6 +207,9 @@ ensureCurrentMag();
 
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
+
+for(const [type,options] of scrollIntentListeners)addEventListener(type,onScrollIntent,options);
+if(Math.abs(scrollY)>1||(location.hash&&location.hash!=='#top'&&location.hash!=='#hero'))queueMicrotask(ensureScrollBootstrap);
 
 if(deferred.length){
   for(const [type,options] of intentListeners)addEventListener(type,onIntent,options);
