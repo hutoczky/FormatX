@@ -1,3 +1,4 @@
+# Candidate-only R530 targeted proof harness. Never ship this workflow to production.
 name: P0 R530 targeted browser proof
 
 on:
