@@ -1,4 +1,4 @@
-name: P0 R530 matcher repair
+name: P0 R530 fallback semantic repair
 
 on:
   push:
@@ -10,30 +10,29 @@ permissions:
 
 jobs:
   repair:
+    if: ${{ !contains(github.event.head_commit.message, '[candidate] Align R530 fallback Live OS surface') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: p0-r530-candidate
-      - name: Repair R529 Worker contract matcher
+      - name: Align fallback semantic proof with current Live OS surfaces
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('.github/workflows/p0-r530-contract-migrate.yml')
+          p=Path('.github/scripts/validate-r522-semantic-mag.cjs')
           s=p.read_text()
-          old="assert.match(worker, /X-FormatX-Product-Contract','r529-living-core-no-manual-pause/, 'R529 Worker living-core product contract header missing');"
-          new="assert.match(worker, /X-FormatX-Product-Contract'\\s*,\\s*'r529-living-core-no-manual-pause/, 'R529 Worker living-core product contract header missing');"
-          if old in s:
-              p.write_text(s.replace(old,new))
+          old="live: Boolean(document.querySelector('#live-os,#live-os-overview,[data-fx-live-os]'))"
+          new="live: Boolean(document.querySelector('#live-os,#live-os-overview,[data-fx-live-os],[data-fx-live-os-launcher],[data-fx-live-os-cta]'))"
+          if old not in s:
+              raise SystemExit('R522 fallback Live OS selector anchor missing')
+          p.write_text(s.replace(old,new,1))
           PY
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add .github/workflows/p0-r530-contract-migrate.yml
-          if git diff --cached --quiet; then
-            echo 'Matcher already repaired.'
-            exit 0
-          fi
-          git commit -m '[candidate] Fix R530 Worker contract matcher'
+          git add .github/scripts/validate-r522-semantic-mag.cjs
+          git commit -m '[candidate] Align R530 fallback Live OS surface'
           git push origin HEAD:p0-r530-candidate
