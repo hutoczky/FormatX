@@ -54,14 +54,20 @@ function localTargetExists(pageFile, html, raw) {
 }
 
 function productionContentWrapperActive(config) {
-  const main = String(config?.main || '');
-  if (main === 'src/production-content-entry.js') return true;
-  if (!/^src\/production-content-entry-r\d+\.js$/.test(main)) return false;
-  const source = read(`billing-worker/${main}`);
-  const imported = source.match(/import\s+([A-Za-z_$][\w$]*)\s+from\s+['"]\.\/production-content-entry\.js['"]/);
-  if (!imported) return false;
-  const delegate = imported[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`\\b${delegate}\\.fetch\\s*\\(\\s*request\\s*,\\s*env\\s*,\\s*ctx\\s*\\)`).test(source);
+  let main = String(config?.main || '');
+  const seen = new Set();
+  for (let depth = 0; depth < 8; depth += 1) {
+    if (main === 'src/production-content-entry.js') return true;
+    if (!/^src\/production-content-entry-r\d+\.js$/.test(main) || seen.has(main)) return false;
+    seen.add(main);
+    const source = read(`billing-worker/${main}`);
+    const imported = source.match(/import\s+([A-Za-z_$][\w$]*)\s+from\s+['"]\.\/(production-content-entry(?:-r\d+)?\.js)['"]/);
+    if (!imported) return false;
+    const delegate = imported[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (!new RegExp(`\\b${delegate}\\.fetch\\s*\\(\\s*request\\s*,\\s*env\\s*,\\s*ctx\\s*\\)`).test(source)) return false;
+    main = `src/${imported[2]}`;
+  }
+  return false;
 }
 
 const htmlFiles = walk(publicRoot).filter(file => file.endsWith('.html'));
