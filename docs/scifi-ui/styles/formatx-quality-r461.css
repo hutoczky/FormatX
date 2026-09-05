@@ -1,4 +1,4 @@
-/* FormatX r461/r462/R530/R531/R534/R537 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R530/R531/R534/R537/R538 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
@@ -146,18 +146,87 @@ html body.living-architecture .topbar > .fx-language-toggle {
     visibility: hidden !important;
     pointer-events: none !important;
   }
+
+  /* R538: the R268 handoff creates canonical MAG/menu controls after DOM load.
+     Older header rules briefly give those fresh nodes 120–140px boxes before
+     the final cross-device owner settles them, which is visible to CLS even
+     while the preloader covers the page. Lock the final r467 desktop carrier
+     geometry from the blocking frame and fully retire the legacy menu box. */
+  html:root:root body.living-architecture .topbar > #menu-toggle.menu-toggle:not(.fx-reference-menu-button) {
+    position: absolute !important;
+    inset: auto !important;
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264 {
+    position: absolute !important;
+    inset: auto !important;
+    top: 14px !important;
+    right: 150px !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 12070 !important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar > #menu-toggle.fx-reference-menu-button {
+    position: absolute !important;
+    inset: auto !important;
+    top: 8px !important;
+    right: 22px !important;
+    box-sizing: border-box !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 12070 !important;
+  }
   html:root:root body.living-architecture .topbar > .fx-language-toggle,
   html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
     position: absolute !important;
     inset: auto !important;
-    top: 16px !important;
-    right: 112px !important;
+    top: 14px !important;
+    right: 92px !important;
     display: grid !important;
     place-items: center !important;
     box-sizing: border-box !important;
-    width: 46px !important;
-    min-width: 46px !important;
-    max-width: 46px !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
     height: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;
@@ -453,3 +522,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
 /* deploy-r530-r531-p0-intro-integration */
 /* deploy-r534-static-desktop-r244-first-frame-parity */
 /* deploy-r537-static-r244-product-header-first-frame-parity */
+/* deploy-r538-blocking-final-desktop-header-control-geometry */
