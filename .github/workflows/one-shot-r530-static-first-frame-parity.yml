@@ -19,6 +19,10 @@ jobs:
         with:
           ref: p0-r530-static-first-frame-parity
           fetch-depth: 0
+      - name: Install validation runtime
+        run: |
+          npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
+          npm install -g @lhci/cli@0.13.x
       - name: Patch only static first-frame link
         shell: bash
         run: |
@@ -39,15 +43,13 @@ jobs:
           PY
           grep -F 'data-fx-p0-first-paint-r503="true"' docs/scifi-ui/index.html
           node .github/scripts/p0-fast-loop.cjs --cls
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli@0.13.x
       - name: Collect desktop x3
         shell: bash
         run: |
           set -euo pipefail
           rm -rf .lighthouseci
           lhci collect --config=./lighthouserc.json
-      - name: Verify exact CLS/LCP/TBT evidence
+      - name: Verify exact CLS/LCP evidence
         shell: bash
         run: |
           set -euo pipefail
