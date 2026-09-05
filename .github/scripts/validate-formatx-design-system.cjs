@@ -79,16 +79,18 @@ async function inspect(browser, config, viewport) {
   }, config.sheet, { timeout: 20000 });
 
   if (config.waitForMotionCss) {
-    // R468 deliberately keeps non-core motion CSS off the first-load path.
-    // Exercise the production contract with real non-reserved user intent,
-    // then require the external strict-CSP stylesheet and current runtime state.
+    /* R536: main keeps the full DS2 stylesheet out of first paint. Exercise a
+       genuine non-reserved intent and require both the enhancement CSS and the
+       canonical DS2 sheet before validating its tokens and component geometry. */
     await page.keyboard.press('ArrowDown');
     await page.waitForFunction(() => {
-      const link = document.querySelector('link[data-fx-runtime-static-r243="true"]');
+      const motion = document.querySelector('link[data-fx-runtime-static-r243="true"]');
+      const design = document.querySelector('link[data-fx-design-system-main-r536="true"]');
       const state = document.documentElement.dataset.fxMotionRuntimeR239 || '';
       return document.documentElement.dataset.fxMotionCssR243 === 'external-strict-csp-user-intent'
+        && document.documentElement.dataset.fxDesignSystemRuntimeR536 === 'ready-user-intent'
         && state === 'enhanced-r468-user-intent'
-        && link && link.sheet;
+        && motion && motion.sheet && design && design.sheet;
     }, null, { timeout: 20000 });
   }
 
@@ -115,13 +117,10 @@ async function inspect(browser, config, viewport) {
       .map(element => {
         const r = element.getBoundingClientRect();
         return {
-          tag: element.tagName.toLowerCase(),
-          id: element.id || '',
+          tag: element.tagName.toLowerCase(), id: element.id || '',
           className: typeof element.className === 'string' ? element.className : '',
-          left: Math.round(r.left * 10) / 10,
-          right: Math.round(r.right * 10) / 10,
-          width: Math.round(r.width * 10) / 10,
-          position: getComputedStyle(element).position,
+          left: Math.round(r.left * 10) / 10, right: Math.round(r.right * 10) / 10,
+          width: Math.round(r.width * 10) / 10, position: getComputedStyle(element).position,
           overflowX: getComputedStyle(element).overflowX
         };
       })
@@ -131,42 +130,29 @@ async function inspect(browser, config, viewport) {
 
     return {
       designSystem: root.dataset.fxDesignSystem || '',
+      designSystemRuntime: root.dataset.fxDesignSystemRuntimeR536 || '',
       motionCss: root.dataset.fxMotionCssR243 || '',
       motionRuntime: root.dataset.fxMotionRuntimeR239 || '',
-      sheetHref: sheet?.href || '',
-      sheetLoaded: Boolean(sheet?.sheet),
+      sheetHref: sheet?.href || '', sheetLoaded: Boolean(sheet?.sheet),
       cyan: rootStyle.getPropertyValue('--fx-cyan').trim(),
       violet: rootStyle.getPropertyValue('--fx-violet').trim(),
       radius: rootStyle.getPropertyValue('--fx-radius-lg').trim(),
-      bodyFont: bodyStyle.fontFamily,
-      bodyColor: bodyStyle.color,
-      panelRadii: panelStyle ? [
-        panelStyle.borderTopLeftRadius,
-        panelStyle.borderTopRightRadius,
-        panelStyle.borderBottomRightRadius,
-        panelStyle.borderBottomLeftRadius
-      ] : [],
+      bodyFont: bodyStyle.fontFamily, bodyColor: bodyStyle.color,
+      panelRadii: panelStyle ? [panelStyle.borderTopLeftRadius,panelStyle.borderTopRightRadius,panelStyle.borderBottomRightRadius,panelStyle.borderBottomLeftRadius] : [],
       panelBorder: panelStyle?.borderTopColor || '',
       headerBackdrop: headerStyle?.backdropFilter || headerStyle?.webkitBackdropFilter || '',
-      actionHeight: rect?.height || 0,
-      actionWidth: rect?.width || 0,
-      outlineStyle: actionStyle?.outlineStyle || '',
-      outlineWidth: actionStyle?.outlineWidth || '',
-      overflow: document.documentElement.scrollWidth - innerWidth,
-      overflowElements,
+      actionHeight: rect?.height || 0, actionWidth: rect?.width || 0,
+      outlineStyle: actionStyle?.outlineStyle || '', outlineWidth: actionStyle?.outlineWidth || '',
+      overflow: document.documentElement.scrollWidth - innerWidth, overflowElements,
       viewport: { width: innerWidth, height: innerHeight }
     };
-  }, {
-    panelSelector: config.panel,
-    headerSelector: config.header,
-    actionSelector,
-    sheetSelector: config.sheet
-  });
+  }, { panelSelector: config.panel, headerSelector: config.header, actionSelector, sheetSelector: config.sheet });
 
   assert.equal(result.designSystem, '2');
   if (config.waitForMotionCss) {
     assert.equal(result.motionCss, 'external-strict-csp-user-intent');
     assert.equal(result.motionRuntime, 'enhanced-r468-user-intent');
+    assert.equal(result.designSystemRuntime, 'ready-user-intent');
   }
   assert.equal(result.sheetLoaded, true);
   assert.match(result.sheetHref, config.sheetPattern);
@@ -183,32 +169,18 @@ async function inspect(browser, config, viewport) {
   assert.ok(result.overflow <= 2, 'horizontal overflow: ' + JSON.stringify(result));
   assert.deepEqual(errors, [], 'browser errors: ' + JSON.stringify(errors));
 
-  if (viewport.width >= 1200) {
-    await page.screenshot({
-      path: path.join(process.cwd(), 'design-system-' + config.name + '.png'),
-      fullPage: true
-    });
-  }
-
+  if (viewport.width >= 1200) await page.screenshot({ path: path.join(process.cwd(), 'design-system-' + config.name + '.png'), fullPage: true });
   console.log(JSON.stringify({ case: config.name + '-' + viewport.width, result }));
   await context.close();
 }
 
 (async () => {
   const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
-  const browser = await chromium.launch({
-    headless: true,
-    ...(executablePath ? { executablePath } : {})
-  });
+  const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
   try {
     for (const config of CASES) {
       await inspect(browser, config, { width: 1440, height: 1000 });
       await inspect(browser, config, { width: 390, height: 844 });
     }
-  } finally {
-    await browser.close();
-  }
-})().catch(error => {
-  console.error(error.stack || error);
-  process.exitCode = 1;
-});
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error.stack || error); process.exitCode = 1; });
