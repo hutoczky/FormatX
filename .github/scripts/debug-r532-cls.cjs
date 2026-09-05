@@ -10,7 +10,7 @@ const OUT=process.env.FORMATX_CLS_DEBUG_DIR||'artifacts/r532-cls-probe';
 (async()=>{
   fs.mkdirSync(OUT,{recursive:true});
   const browser=await chromium.launch({headless:true,executablePath:CHROME,args:['--no-sandbox','--disable-dev-shm-usage']});
-  const context=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,reducedMotion:'no-preference'});
+  const context=await browser.newContext({viewport:{width:1350,height:940},deviceScaleFactor:1,reducedMotion:'no-preference'});
   await context.addInitScript(()=>{
     window.__fxR532Shifts=[];
     try{
