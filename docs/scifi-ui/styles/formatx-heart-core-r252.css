@@ -1,12 +1,14 @@
-/* FormatX r536 — MAG as the living heart of the page.
+/* FormatX r537 — MAG as the living heart of the page.
    This layer owns only the MAG interaction hit-area and the mobile loop handoff.
-   It never paints a second fake hero after the footer. */
+   The WebGL host is visual-only; the semantic heart remains the explicit hit owner. */
+
+html body.living-architecture #hero .hero-space {
+  pointer-events: none;
+}
 
 .fx-mag-heart-hit-r252 {
   position: absolute;
-  /* The WebGL stage is visual-only. The semantic heart target owns hit testing,
-     while canonical ASK / SOUND / navigation controls remain independently live. */
-  z-index: 4;
+  z-index: 40;
   left: 50%;
   top: 50%;
   width: min(36vw, 430px);
@@ -22,11 +24,11 @@
   transform: translate(-50%, -50%);
   touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: auto !important;
 }
 
-/* R536: R326 pointer/touch logic listens globally and reads stage geometry, so
-   the visual stage never needs to win DOM hit-testing. This prevents it from
-   swallowing the accessible living-core button while keeping drag/touch input. */
+/* R537: R326 pointer/touch logic listens globally and reads stage geometry, so
+   neither the host nor the visual WebGL stage needs to win DOM hit-testing. */
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   pointer-events: none !important;
 }
@@ -65,9 +67,6 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
     min-height: 210px;
   }
 
-  /* r252: the footer is the last real content. The loop bridge is only a short
-     visual runway used to transfer native touch momentum back to the real hero.
-     The old full-screen reference mirror is deliberately never shown on mobile. */
   html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge,
   html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
     display: block !important;
