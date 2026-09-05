@@ -2,6 +2,17 @@
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
+/* R530: critical DS2 semantic-token projection for the main page on every
+   viewport. Desktop also receives these from critical-core-r227; mobile does
+   not load that desktop media sheet, so keep the three shared product tokens
+   available here without pulling the full design-system stylesheet into the
+   mobile first-paint path. Values mirror formatx-design-system.css exactly. */
+html[data-fx-design-system="2"] {
+  --fx-cyan: #7cecff;
+  --fx-violet: #8f72ff;
+  --fx-radius-lg: 30px 7px 30px 7px;
+}
+
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
 html body.living-architecture #hero #hero-title,
