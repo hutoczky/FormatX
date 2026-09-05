@@ -1,15 +1,17 @@
-/* FormatX R528 — lean first-paint owner for the living-core product contract.
-   Static HTML owns LCP. One current MAG runtime owns rendering. The MAG is an
-   intrinsic, continuously living part of the site in normal mode; accessibility
-   motion reduction and browser lifecycle suspension are owned by their runtimes. */
+/* FormatX R531 — lightweight preloader over the navigation-owned living core.
+   The preloader never owns MAG startup: MAG stays navigation-owned behind the
+   overlay, manual PAUSE stays retired, and release is hard-bounded for LCP. */
 (function(){
 'use strict';
 
 const ROOT=document.documentElement;
 const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
+const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const OVERLAY_ID='formatx-event-horizon';
 const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-score-v6';
-let audio=null;
+const PRELOADER_MIN_MS=REDUCED?0:(MOBILE?220:280);
+const PRELOADER_MAX_MS=MOBILE?680:820;
+let audio=null,preloaderRaf=0,preloaderReleased=false;
 
 if(!ROOT.dataset.fxReferenceProductionR244)ROOT.dataset.fxReferenceProductionR244=MOBILE?'ready':'desktop';
 ROOT.dataset.fxReferenceComposition=MOBILE?'reference-frame-r244':'desktop-reference-r244';
@@ -22,18 +24,9 @@ ROOT.dataset.fxMobileRegressionR310='retired-from-first-load-r461';
 ROOT.dataset.fxCoreReal3dCssR310='retired-r461-r326-owner';
 ROOT.dataset.fxCanonicalMagClockOwnerR507='mag-shape-sync-r476-only';
 ROOT.dataset.fxCanonicalMagMotionR528='living-core-normal-continuous-reduced-background-managed';
+ROOT.dataset.fxPreloaderContractR531='visual-only-mag-independent-bounded';
 
-function copy(){
-  return ROOT.lang==='en'?{
-    heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',
-    body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',
-    ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'
-  }:{
-    heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',
-    body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',
-    ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'
-  };
-}
+function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
 function soundIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M15 9.2c1.2 1.5 1.2 4.1 0 5.6"/><path d="M18 6.8c2.8 2.9 2.8 7.5 0 10.4"/></svg></span>';}
 function syncSound(button,on){const strings=copy();button.dataset.fxAudioState=on?'on':'off';button.setAttribute('aria-pressed',String(on));button.setAttribute('aria-label',on?strings.soundOn:strings.soundOff);button.innerHTML=on?soundIcon():mutedIcon();ROOT.dataset.fxAudioState=on?'on':'off';ROOT.dataset.fxAudioOwner='r461-lightweight-first-party';}
@@ -44,6 +37,35 @@ function ensureProof(hero,grid){const strings=copy();let heading=hero.querySelec
 function stabilize(){const hero=document.getElementById('hero');const grid=hero?.querySelector(':scope > .hero-grid');const space=grid?.querySelector(':scope > .hero-space');const heroCopy=grid?.querySelector(':scope > .hero-copy');if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement)||!(heroCopy instanceof HTMLElement))return false;ensureControls(hero,space);ensureProof(hero,grid);removeObsoletePause(hero);ROOT.dataset.fxHeroCopyPlacementR411='static-dom-css-order';ROOT.dataset.fxFirstPaintControlsR306=MOBILE?'mobile-static-r528':'desktop-static-r528';return true;}
 function fixLanguageAccessibleName(){const button=document.querySelector('.fx-language-toggle');if(!(button instanceof HTMLButtonElement))return;const current=ROOT.lang==='en'?'EN':'HU';button.textContent=current;button.setAttribute('aria-label',current==='HU'?'HU – váltás angol nyelvre':'EN – switch to Hungarian');}
 function complete(source){document.dispatchEvent(new CustomEvent('formatx:introcomplete',{detail:{source}}));}
-function fastRelease(source){const overlay=document.getElementById(OVERLAY_ID);if(overlay){overlay.hidden=true;overlay.setAttribute('aria-hidden','true');}ROOT.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');ROOT.classList.add('fx-intro-complete');ROOT.dataset.fxIntro=source;complete(source);}
-stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r528-living-core':'desktop-direct-r528-living-core';fastRelease('instant-r528-living-core');for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});addEventListener('pagehide',()=>{try{audio?.pause();}catch(_){}},{once:true});addEventListener('error',()=>fastRelease('runtime-error'));addEventListener('unhandledrejection',()=>fastRelease('promise-error'));
+function force(node,property,value){if(node instanceof HTMLElement)node.style.setProperty(property,value,'important');}
+function clear(node,property){if(node instanceof HTMLElement)node.style.removeProperty(property);}
+
+function showPreloader(){
+  const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement))return null;
+  preloaderReleased=false;overlay.hidden=false;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='active';ROOT.dataset.fxPreloaderR531='active';
+  force(overlay,'display','grid');force(overlay,'visibility','visible');force(overlay,'opacity','1');force(overlay,'pointer-events','none');
+  const center=overlay.querySelector('.fx-intro-center'),word=overlay.querySelector('.fx-intro-word'),wordSpan=overlay.querySelector('.fx-intro-word span'),kicker=overlay.querySelector('.fx-intro-kicker'),subtitle=overlay.querySelector('.fx-intro-subtitle'),meta=overlay.querySelector('.fx-intro-meta'),progressWrap=overlay.querySelector('.fx-intro-progress-wrap'),output=overlay.querySelector('[data-fx-intro-output]'),progress=overlay.querySelector('[data-fx-intro-progress]'),status=overlay.querySelector('[data-fx-intro-status]');
+  force(center,'width','min(520px, calc(100vw - 40px))');force(word,'font-size','clamp(32px,5vw,56px)');force(word,'line-height','1');force(word,'letter-spacing','.08em');force(wordSpan,'opacity','1');force(wordSpan,'transform','none');force(wordSpan,'filter','none');force(kicker,'opacity','1');force(kicker,'transform','none');force(kicker,'letter-spacing','.24em');force(subtitle,'opacity','1');force(subtitle,'transform','none');force(subtitle,'font-size','10px');force(meta,'opacity',MOBILE?'0':'.5');force(meta,'transform','none');force(progressWrap,'opacity','1');force(progressWrap,'transform','none');force(progressWrap,'max-width','560px');force(progressWrap,'margin','0 auto');
+  if(output instanceof HTMLOutputElement)output.value='000';if(progress instanceof HTMLProgressElement)progress.value=0;if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'LIVING CORE STARTING':'ÉLŐ MAG INDÍTÁSA';
+  if(!REDUCED&&wordSpan instanceof HTMLElement)wordSpan.animate([{opacity:.82},{opacity:1},{opacity:.82}],{duration:950,iterations:Infinity,easing:'ease-in-out'});
+  return overlay;
+}
+function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-mag-heart-hit-r252,.fx-crystal-organism-r326-stage,.hero-space');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}
+function updatePreloader(overlay,elapsed){const output=overlay?.querySelector('[data-fx-intro-output]'),progress=overlay?.querySelector('[data-fx-intro-progress]'),status=overlay?.querySelector('[data-fx-intro-status]');const ratio=Math.min(1,elapsed/PRELOADER_MAX_MS),eased=1-Math.pow(1-ratio,2.2),value=Math.min(94,Math.max(8,Math.round(8+eased*86)));if(output instanceof HTMLOutputElement)output.value=String(value).padStart(3,'0');if(progress instanceof HTMLProgressElement)progress.value=value;if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?(elapsed>Math.max(1,PRELOADER_MIN_MS)*.7?'SYSTEM READY':'LIVING CORE STARTING'):(elapsed>Math.max(1,PRELOADER_MIN_MS)*.7?'RENDSZER KÉSZ':'ÉLŐ MAG INDÍTÁSA');}
+function hidePreloader(source){
+  if(preloaderReleased)return;preloaderReleased=true;if(preloaderRaf)cancelAnimationFrame(preloaderRaf);preloaderRaf=0;
+  const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;return;}
+  const output=overlay.querySelector('[data-fx-intro-output]'),progress=overlay.querySelector('[data-fx-intro-progress]'),status=overlay.querySelector('[data-fx-intro-status]');if(output instanceof HTMLOutputElement)output.value='100';if(progress instanceof HTMLProgressElement)progress.value=100;if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'READY':'KÉSZ';
+  const finalize=()=>{try{overlay.getAnimations({subtree:true}).forEach(animation=>animation.cancel());}catch(_){}overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));};
+  if(REDUCED){finalize();return;}const finish=overlay.animate([{opacity:1},{opacity:0}],{duration:120,easing:'ease-out',fill:'forwards'});finish.finished.then(finalize,finalize);
+}
+function runPreloader(overlay){if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='unavailable';return;}const started=performance.now();const tick=now=>{const elapsed=now-started;updatePreloader(overlay,elapsed);if((elapsed>=PRELOADER_MIN_MS&&preloaderReady())||elapsed>=PRELOADER_MAX_MS){hidePreloader(elapsed>=PRELOADER_MAX_MS?'bounded-timeout':'mag-shell-ready');return;}preloaderRaf=requestAnimationFrame(tick);};preloaderRaf=requestAnimationFrame(tick);}
+function markIntroComplete(source){ROOT.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');ROOT.classList.add('fx-intro-complete');ROOT.dataset.fxIntro=source;complete(source);}
+
+const preloader=showPreloader();
+stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r531-living-core':'desktop-direct-r531-living-core';markIntroComplete('instant-r531-living-core');runPreloader(preloader);
+for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
+addEventListener('pagehide',()=>{try{audio?.pause();}catch(_){}},{once:true});
+addEventListener('error',()=>hidePreloader('runtime-error'));
+addEventListener('unhandledrejection',()=>hidePreloader('promise-error'));
 }());
