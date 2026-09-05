@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'native-webgl-periodic-and-interaction-life-r484';
+  const VERSION = 'native-webgl-periodic-and-interaction-life-r528';
   if (root.dataset.fxCoreLifeR455 === 'ready' || root.dataset.fxCoreLifeR455 === 'booting') return;
   root.dataset.fxCoreLifeR455 = 'booting';
 
@@ -16,7 +16,6 @@
 
   function fireSurfacePulse(source) {
     if (!api || typeof api.surfacePulse !== 'function' || reduced.matches || document.hidden || !visible) return false;
-    if (document.querySelector('.fx-reference-pause')?.dataset.paused === 'true') return false;
     const now = performance.now();
     if (now - lastSurfacePulse < 2200) return false;
     if (!api.surfacePulse(source)) return false;
@@ -62,11 +61,12 @@
 
     root.dataset.fxCoreLifeR455 = 'ready';
     root.dataset.fxCoreLifeVersionR455 = VERSION;
-    root.dataset.fxCoreLivingBehavior = 'native-periodic-surface-energy-and-interaction-r484';
+    root.dataset.fxCoreLivingBehavior = 'native-periodic-surface-energy-and-interaction-r528';
     if (!root.dataset.fxCoreEnergyBoltR455?.startsWith('surface-sweep-')) {
       root.dataset.fxCoreEnergyBoltR455 = 'armed-periodic-and-interaction-surface-energy';
     }
     root.dataset.fxCoreIdlePolicyR455 = 'periodic-surface-bursts-between-zero-idle';
+    root.dataset.fxCoreLifeContractR528 = 'living-core-no-manual-pause-reduced-motion-and-lifecycle-safe';
     return true;
   }
 
