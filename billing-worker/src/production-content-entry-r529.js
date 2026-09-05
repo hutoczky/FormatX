@@ -12,13 +12,21 @@ import canonicalProduction from './production-content-entry.js';
      render blocking. R529 makes the real heart hit-surface part of initial HTML
      and keeps R528's mobile legacy CSS on the existing post-FCP scheduler.
    - Manual MAG pause is not a product contract. Normal MAG remains alive;
-     reduced-motion/background lifecycle stays owned by the R528 runtime. */
+     reduced-motion/background lifecycle stays owned by the R528 runtime.
+   - R531 hotfix only refreshes the proven lightweight preloader assets; the
+     underlying R529 production/content/LCP architecture remains unchanged. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
 const DEFERRED_SCHEDULER_URL = 'formatx-deferred-css-r487.js?v=20260904-r526-fcp-observer';
+const EVENT_HORIZON_RE = /formatx-event-horizon\.js\?v=[^"']+/g;
+const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r531-preloader-hotfix';
+const DEFERRED_REDUCED_RE = /formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g;
+const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner';
+const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
+const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r531-preloader-cls-lock';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MEDIA = '(min-width: 901px) and (pointer: fine) and (min-aspect-ratio: 27/25)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
@@ -110,6 +118,8 @@ function r529Headers(source) {
   headers.set('X-FormatX-CSS-Scheduler', 'r526-post-first-contentful-paint');
   headers.set('X-FormatX-Product-Contract', 'r529-living-core-no-manual-pause');
   headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
+  headers.set('X-FormatX-Preloader', 'r531-visual-only-navigation-owned');
+  headers.set('X-FormatX-Preloader-Cache', 'r531-hotfix-fresh-assets');
   return headers;
 }
 
@@ -131,6 +141,9 @@ export default {
 
     let html = restoreCriticalCoreFirstPaint(await response.text());
     html = html.replace(DEFERRED_SCHEDULER_RE, DEFERRED_SCHEDULER_URL);
+    html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL);
+    html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL);
+    html = html.replace(QUALITY_RE, QUALITY_URL);
     if (HOMEPAGE_PATHS.has(url.pathname)) {
       html = stabilizeMobileFirstPaint(html);
       html = injectStaticHeart(html);
