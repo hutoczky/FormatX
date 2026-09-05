@@ -95,6 +95,21 @@ jobs:
           p.write_text(s)
           PY
 
+      - name: Normalize R522 semantic target URL for page and origin inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/scripts/validate-r522-semantic-mag.cjs')
+          s=p.read_text()
+          old="const ORIGIN = (process.env.FORMATX_TEST_URL || 'https://formatxsuite.com/').replace(/\\/?$/, '/');"
+          new="const ORIGIN = (process.env.FORMATX_TEST_URL || 'https://formatxsuite.com/').replace(/\\/$/, '');"
+          if old not in s:
+              raise SystemExit('R522 ORIGIN normalization owner not found')
+          p.write_text(s.replace(old,new))
+          PY
+
       - name: Assert no stale active manual-pause contract remains in core P0 path
         shell: bash
         run: |
