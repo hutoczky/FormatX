@@ -33,10 +33,7 @@ def production_content_wrapper_active(config: dict) -> bool:
     if not re.fullmatch(r"src/production-content-entry-r\d+\.js", entry):
         return False
     source = read(f"billing-worker/{entry}")
-    imported = re.search(
-        r"import\s+([A-Za-z_$][\w$]*)\s+from\s+['\"]\./production-content-entry\.js['\"]",
-        source,
-    )
+    imported = re.search(r"import\s+([A-Za-z_$][\w$]*)\s+from\s+['\"]\./production-content-entry\.js['\"]", source)
     if not imported:
         return False
     delegate = re.escape(imported.group(1))
@@ -68,12 +65,9 @@ production_config = load_json("billing-worker/wrangler.jsonc")
 preview_config = load_json("wrangler.jsonc")
 
 expected = {
-    "linux-bazzite": ("full_release", "primary"),
-    "windows": ("full_release", "secondary"),
-    "android": ("full_release", "secondary"),
-    "web": ("technical_preview", "preview"),
-    "macos": ("planned", "roadmap"),
-    "ios": ("planned", "roadmap"),
+    "linux-bazzite": ("full_release", "primary"), "windows": ("full_release", "secondary"),
+    "android": ("full_release", "secondary"), "web": ("technical_preview", "preview"),
+    "macos": ("planned", "roadmap"), "ios": ("planned", "roadmap"),
 }
 actual = {item["id"]: (item["status"], item.get("support_role")) for item in status_data["platforms"]}
 require("canonical Bazzite-first platform matrix", actual == expected)
@@ -97,20 +91,19 @@ require("public release version remains hidden", public_copy.get("public_release
 require("downloads expose multiplatform release", 'data-release-download="multiplatform"' in downloads)
 require("home CTA exposes multiplatform release", 'data-release-download="multiplatform"' in home)
 
-# Loader/runtime contract: mobile and desktop both use seamless-v7. Mobile keeps
-# native browser momentum and defers the visual bridge handoff until scrollend/idle.
 require("loader uses current v28 marker", "safe-ready-v28" in loader and "safe-loading-v28" in loader)
 require("loader includes current voice stability", "organism-voice-stability.js?v=20260808-mobile-visual-viewport-1" in loader)
 require("loader includes unified mobile controller", "formatx-mobile-unified.js" in loader)
 require("scroll bootstrap is platform split v2", "platform-scroll-v2" in scroll_bootstrap)
-require("mobile requests seamless runtime", "installSeamlessRuntime('mobile')" in scroll_bootstrap)
-require("mobile automatic loop is pending then enabled by shared runtime", "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'" in scroll_bootstrap)
+require("shared seamless runtime is armed on mobile/desktop intent", "armSeamlessRuntime(MOBILE_QUERY.matches ? 'mobile' : 'desktop')" in scroll_bootstrap)
+require("intent resolves into shared seamless runtime", "installSeamlessRuntime(platform)" in scroll_bootstrap)
+require("automatic loop stays pending until user scroll intent", "pending-user-scroll-intent" in scroll_bootstrap and "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'" in scroll_bootstrap)
 require("mobile loop policy preserves native momentum", "native-momentum-loop-v1" in scroll_bootstrap and "scrollend-or-idle-v1" in scroll_bootstrap)
 require("mobile bridge override is external and CSP-safe", "formatx-mobile-seamless-loop.css" in scroll_bootstrap and "createElement('style')" not in scroll_bootstrap)
 require("mobile seamless bridge has viewport runway", "min-height: calc(100svh + max(320px, 24svh))" in mobile_loop_css and "display: block !important" in mobile_loop_css)
 require("mobile bootstrap performs no forced scrolling", "scrollTo(" not in scroll_bootstrap and "scrollIntoView(" not in scroll_bootstrap)
 require("mobile bootstrap performs no cloning", "cloneNode(" not in scroll_bootstrap)
-require("bootstrap loads shared seamless runtime", "formatx-infinite-scroll-desktop-v7.js" in scroll_bootstrap)
+require("bootstrap references shared seamless runtime", "formatx-infinite-scroll-desktop-v7.js" in scroll_bootstrap)
 require("shared runtime remains seamless-v7", "const VERSION = 'seamless-v7'" in desktop_scroll)
 require("shared runtime retains inert visual bridge", "buildReferenceMirror" in desktop_scroll and "window.scrollTo(" in desktop_scroll)
 require("shared bridge creates no WebGL context", "static-2d-snapshot-no-webgl" in desktop_scroll)
@@ -122,6 +115,7 @@ require("mobile proof layout is single-column", ".fx-award-proof__grid" in mobil
 
 require("intro remains fail-open", "runtime-error" in intro and "promise-error" in intro)
 require("intro keeps r411 static hero LCP ownership", "fxHeroLcpOwnerR411" in intro and "static-html-no-reparent" in intro)
+require("intro content is immutable after first paint", "fxPreloaderContentR534='static-no-repaint'" in intro and "function updatePreloader" not in intro)
 require("voice is off by default", "let speechEnabled = false" in voice)
 require("voice remains local", network_free(voice))
 require("voice stability guard exists", "function interfaceBlocked()" in voice_stability and "function stopSpeech()" in voice_stability)
