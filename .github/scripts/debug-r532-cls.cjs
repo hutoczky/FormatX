@@ -18,6 +18,13 @@ const OUT=process.env.FORMATX_CLS_DEBUG_DIR||'artifacts/r532-cls-probe';
         for(const entry of list.getEntries()){
           if(entry.hadRecentInput)continue;
           const root=document.documentElement;
+          const resources=performance.getEntriesByType('resource')
+            .filter(item=>/\.css(?:\?|$)/.test(item.name)&&item.responseEnd<=entry.startTime+120&&item.responseEnd>=entry.startTime-180)
+            .map(item=>({name:item.name.split('/').pop(),start:item.startTime,responseEnd:item.responseEnd,duration:item.duration}));
+          const activeStyles=Array.from(document.styleSheets)
+            .map(sheet=>String(sheet.href||''))
+            .filter(Boolean)
+            .map(href=>href.split('/').pop());
           window.__fxR532Shifts.push({
             at:entry.startTime,
             value:entry.value,
@@ -28,6 +35,8 @@ const OUT=process.env.FORMATX_CLS_DEBUG_DIR||'artifacts/r532-cls-probe';
             referenceRuntime:root?.dataset?.fxReferenceRuntimeR254||'',
             controlOwner:root?.dataset?.fxControlOwnerR268||'',
             crystal:root?.dataset?.fxCrystalOrganismR326||'',
+            nearbyCss:resources,
+            activeStyles,
             sources:(entry.sources||[]).map(source=>({
               selector:source.node instanceof Element?(()=>{const n=source.node;if(n.id)return '#'+n.id;if(n.classList?.length)return n.tagName.toLowerCase()+'.'+Array.from(n.classList).slice(0,3).join('.');return n.tagName?.toLowerCase()||'';})():'',
               previousRect:source.previousRect?{x:source.previousRect.x,y:source.previousRect.y,width:source.previousRect.width,height:source.previousRect.height}:null,
@@ -46,6 +55,10 @@ const OUT=process.env.FORMATX_CLS_DEBUG_DIR||'artifacts/r532-cls-probe';
     now:performance.now(),
     observerError:window.__fxR532ObserverError||'',
     shifts:window.__fxR532Shifts||[],
+    cssResources:performance.getEntriesByType('resource')
+      .filter(item=>/\.css(?:\?|$)/.test(item.name))
+      .map(item=>({name:item.name.split('/').pop(),start:item.startTime,responseEnd:item.responseEnd,duration:item.duration}))
+      .sort((a,b)=>a.responseEnd-b.responseEnd),
     root:{
       preloader:document.documentElement.dataset.fxPreloaderR531||'',
       release:document.documentElement.dataset.fxPreloaderReleaseR531||'',
