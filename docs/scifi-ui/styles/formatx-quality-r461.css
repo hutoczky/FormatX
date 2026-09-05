@@ -1,6 +1,6 @@
-/* FormatX r461/r462/R489 — compact quality layer for the current R326/R460 experience.
-   This owns measurable first-paint stability, accessibility and touch geometry
-   for the one active landing-page runtime. */
+/* FormatX r461/r462/R533 — compact quality layer for the current R326/R460 experience.
+   R533 keeps the canonical hero paintable behind the visual-only preloader and
+   gives the cover a compositor-owned hard visual deadline. */
 
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
@@ -167,10 +167,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
     filter: none !important;
   }
 
-  /* R489: QR fallback is independently contrast-safe even when a white QR
-     surface is already present underneath it. Do not rely on the card colour:
-     the label carries its own dark pill so Lighthouse and real users see the
-     same >= AA contrast before hydration. */
   html body.living-architecture .fx-plan-qr-card .fx-qr-placeholder {
     display: inline-flex !important;
     align-items: center !important;
@@ -193,8 +189,14 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* R531: short preloader is a fixed viewport cover. The underlying page stays
-   laid out behind it, so reveal cannot move content or create an intro CLS. */
+/* R533: the preloader is a visual-only fixed cover. The hero, topbar and page
+   remain fully paintable behind it; no sibling visibility gate may delay LCP.
+   The clip-path animation gives the cover a compositor-owned hard deadline even
+   if JavaScript timers are delayed by rendering/main-thread work. */
+@keyframes fx-r533-preloader-visual-bound {
+  0%, 86% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(50% 50% 50% 50%); }
+}
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   position: fixed !important;
   inset: 0 !important;
@@ -215,11 +217,13 @@ html body.living-architecture .topbar > .fx-language-toggle {
   background:
     radial-gradient(circle at 50% 46%, rgba(90, 216, 255, .12), transparent 38%),
     linear-gradient(180deg, #05070a, #010204) !important;
+  animation: fx-r533-preloader-visual-bound 1640ms linear both !important;
+  will-change: clip-path !important;
 }
-#formatx-event-horizon[data-fx-preloader-r531="active"] ~ .topbar,
-#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main,
-#formatx-event-horizon[data-fx-preloader-r531="active"] ~ footer {
-  visibility: hidden !important;
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+    animation-duration: 1360ms !important;
+  }
 }
 #formatx-event-horizon[data-fx-preloader-r531="active"] :is(
   .fx-intro-curtain,
@@ -292,4 +296,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* deploy-r531-preloader-hotfix */
+/* deploy-r533-preloader-compositor-bound */
