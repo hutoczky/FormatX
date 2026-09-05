@@ -109,7 +109,7 @@ jobs:
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_VISUAL_DIR: artifacts/content-visuals
-        run: node .github/scripts/validate-content-visuals.cjs
+        run: PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="$CHROME_BIN" node .github/scripts/validate-content-visuals.cjs
 
       - name: Upload compact evidence
         if: always()
