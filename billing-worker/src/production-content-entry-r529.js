@@ -148,11 +148,12 @@ function r529Headers(source, url) {
 
 export default {
   async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    const response = await canonicalProduction.fetch(canonicalDeliveryRequest(request, url), env, ctx);
-    if (!isSafeMethod(request) || !isDeliveryHost(url)) return response;
+    const deliveryUrl = new URL(request.url);
+    if (isLocalCandidate(deliveryUrl)) request = canonicalDeliveryRequest(request, deliveryUrl);
+    const response = await canonicalProduction.fetch(request, env, ctx);
+    if (!isSafeMethod(request) || !isDeliveryHost(deliveryUrl)) return response;
 
-    const headers = r529Headers(response.headers, url);
+    const headers = r529Headers(response.headers, deliveryUrl);
     if (request.method === 'HEAD') {
       headers.delete('Content-Length');
       return new Response(null, { status: response.status, statusText: response.statusText, headers });
@@ -167,7 +168,7 @@ export default {
     html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL);
     html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL);
     html = html.replace(QUALITY_RE, QUALITY_URL);
-    if (HOMEPAGE_PATHS.has(url.pathname)) {
+    if (HOMEPAGE_PATHS.has(deliveryUrl.pathname)) {
       html = stabilizeMobileFirstPaint(html);
       html = injectStaticHeart(html);
     }
