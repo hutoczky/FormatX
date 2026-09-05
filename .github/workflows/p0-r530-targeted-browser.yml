@@ -49,7 +49,7 @@ jobs:
         run: node .github/scripts/validate-content-visuals.cjs
       - name: Living MAG semantic contract
         env:
-          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/
           FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r530-semantic-mag
         run: node .github/scripts/validate-r522-semantic-mag.cjs
       - uses: actions/upload-artifact@v4
