@@ -54,10 +54,13 @@ async function verify(browser, spec) {
       return {
         evidence: window.__fxR533PreloaderEvidence || {},
         timing: root.dataset.fxPreloaderTimingR533 || '',
+        bootAt: Number(root.dataset.fxPreloaderBootR533 || NaN),
+        lateSkip: root.dataset.fxPreloaderLateSkipR533 === 'true',
         preloader: root.dataset.fxPreloaderR531 || '',
         release: root.dataset.fxPreloaderReleaseR531 || '',
         intro: root.dataset.fxIntro || '',
         overlayHidden: overlay ? overlay.hidden : true,
+        overlayDisplay: overlay ? getComputedStyle(overlay).display : 'none',
         heroVisible: Boolean(hero && heroStyle && heroStyle.display !== 'none' && heroStyle.visibility !== 'hidden' && hero.getBoundingClientRect().height > 0),
         pauseCount: document.querySelectorAll('#hero .fx-reference-pause').length,
         overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
@@ -66,7 +69,9 @@ async function verify(browser, spec) {
 
     const completeAt = Number(state.evidence.completeAt);
     const source = String(state.evidence.source || state.release || '');
+    const duration = completeAt - state.bootAt;
     assert.ok(Number.isFinite(completeAt), `${spec.name}: preloader completion event was not measured`);
+    assert.ok(Number.isFinite(state.bootAt), `${spec.name}: preloader boot timestamp missing`);
     assert.equal(state.timing, spec.timing, `${spec.name}: wrong R533 timing contract`);
     assert.equal(state.preloader, 'done', `${spec.name}: preloader did not finish`);
     assert.equal(state.overlayHidden, true, `${spec.name}: overlay remained visible`);
@@ -74,8 +79,17 @@ async function verify(browser, spec) {
     assert.equal(state.pauseCount, 0, `${spec.name}: obsolete manual PAUSE returned`);
     assert.ok(state.overflow <= 2, `${spec.name}: horizontal overflow ${state.overflow}`);
     assert.ok(!/runtime-error|promise-error/.test(source), `${spec.name}: preloader escaped through ${source}`);
-    assert.ok(completeAt >= spec.min - 20, `${spec.name}: released before minimum contract (${completeAt}ms)`);
-    assert.ok(completeAt <= spec.max + 350, `${spec.name}: exceeded bounded release window (${completeAt}ms)`);
+
+    if (source === 'late-boot-skip') {
+      assert.equal(state.lateSkip, true, `${spec.name}: late boot did not declare safe skip`);
+      assert.ok(state.bootAt >= spec.max - 20, `${spec.name}: late-skip activated before hard deadline (${state.bootAt}ms)`);
+      assert.ok(duration >= 0 && duration <= 180, `${spec.name}: late-skip was not immediate (${duration}ms)`);
+      assert.equal(state.overlayDisplay, 'none', `${spec.name}: late-skip overlay became paintable`);
+    } else {
+      assert.equal(state.lateSkip, false, `${spec.name}: normal path incorrectly marked late-skip`);
+      assert.ok(duration >= spec.min - 20, `${spec.name}: visible intro released before minimum contract (${duration}ms)`);
+      assert.ok(duration <= spec.max + 220, `${spec.name}: visible intro exceeded bounded window (${duration}ms)`);
+    }
     assert.equal(errors.length, 0, `${spec.name}: browser errors ${errors.join(' | ')}`);
 
     return {
@@ -83,8 +97,11 @@ async function verify(browser, spec) {
       viewport: spec.viewport,
       minMs: spec.min,
       maxMs: spec.max,
+      bootAtMs: state.bootAt,
       completeAtMs: completeAt,
+      durationMs: duration,
       source,
+      lateSkip: state.lateSkip,
       timing: state.timing,
       overflow: state.overflow,
     };
@@ -103,7 +120,7 @@ async function verify(browser, spec) {
   try {
     const report = {
       auditedSha: process.env.AUDITED_SHA || '',
-      contract: 'r533-roadmap-bounded-preloader',
+      contract: 'r533-roadmap-bounded-preloader-or-safe-late-skip',
       mobile: await verify(browser, {
         name: 'mobile-390x844',
         viewport: { width: 390, height: 844 },
