@@ -85,6 +85,12 @@ jobs:
           cat "$RUNNER_TEMP/p0-fast-http.log"
           exit 1
 
+      - name: Probe R532 desktop layout shifts
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_CLS_DEBUG_DIR: artifacts/r532-cls-probe
+        run: node .github/scripts/debug-r532-cls.cjs
+
       - name: Run retained CLS source proof
         env:
           FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
@@ -118,5 +124,6 @@ jobs:
             artifacts/p0-fast-loop/
             artifacts/r522-semantic-mag/
             artifacts/content-visuals/
+            artifacts/r532-cls-probe/
           if-no-files-found: warn
           retention-days: 30
