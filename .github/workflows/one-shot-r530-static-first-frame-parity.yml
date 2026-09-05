@@ -1,0 +1,86 @@
+name: One-shot R530 static first-frame parity
+
+on:
+  push:
+    branches: [p0-r530-static-first-frame-parity]
+    paths:
+      - '.github/workflows/one-shot-r530-static-first-frame-parity.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  prove-and-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: p0-r530-static-first-frame-parity
+          fetch-depth: 0
+      - name: Patch only static first-frame link
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/index.html')
+          s=p.read_text()
+          link='  <link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">\n'
+          if 'formatx-p0-first-paint-r490.css' not in s:
+              needle='  <link rel="stylesheet" fetchpriority="high" data-fx-quality-r461="true" href="./styles/formatx-quality-r461.css?v=20260830-r462-mobile-a11y">\n'
+              if needle not in s:
+                  raise SystemExit('quality link insertion point missing')
+              s=s.replace(needle, needle+link, 1)
+          if s.count('formatx-p0-first-paint-r490.css') != 1:
+              raise SystemExit('expected exactly one static r490 link')
+          p.write_text(s)
+          PY
+          grep -F 'data-fx-p0-first-paint-r503="true"' docs/scifi-ui/index.html
+          node .github/scripts/p0-fast-loop.cjs --cls
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+      - name: Collect desktop x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .lighthouseci
+          lhci collect --config=./lighthouserc.json
+      - name: Verify exact CLS/LCP/TBT evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const rows=fs.readdirSync('.lighthouseci').filter(f=>f.endsWith('.json')).map(f=>{try{return JSON.parse(fs.readFileSync('.lighthouseci/'+f,'utf8'));}catch{return null;}}).filter(j=>j?.categories?.performance&&j?.audits).map(j=>({
+            performance:j.categories.performance.score,
+            accessibility:j.categories.accessibility.score,
+            bestPractices:j.categories['best-practices'].score,
+            seo:j.categories.seo.score,
+            fcp:j.audits['first-contentful-paint'].numericValue,
+            lcp:j.audits['largest-contentful-paint'].numericValue,
+            tbt:j.audits['total-blocking-time'].numericValue,
+            cls:j.audits['cumulative-layout-shift'].numericValue,
+            ttfb:j.audits['server-response-time'].numericValue,
+            lcpElement:j.audits['largest-contentful-paint-element']?.details?.items?.[0]?.items?.[0]?.node?.snippet||j.audits['largest-contentful-paint-element']?.details?.items?.[0]?.node?.snippet||''
+          }));
+          if(rows.length!==3)throw new Error('expected 3 desktop LHRs, got '+rows.length);
+          console.log('R530_STATIC_PARITY',JSON.stringify(rows,null,2));
+          for(const [i,r] of rows.entries()){
+            if(r.cls>=0.05)throw new Error(`run ${i+1}: CLS ${r.cls} >= 0.05`);
+            if(r.lcp>=2000)throw new Error(`run ${i+1}: LCP ${r.lcp} >= 2000ms`);
+            if(r.accessibility!==1||r.bestPractices!==1||r.seo!==1)throw new Error(`run ${i+1}: non-performance category regression`);
+          }
+          NODE
+      - name: Commit proven product fix and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/one-shot-r530-static-first-frame-parity.yml
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/index.html .github/workflows/one-shot-r530-static-first-frame-parity.yml
+          git commit -m '[candidate] Align R530 static first-frame r490 ownership'
+          git pull --rebase --autostash origin p0-r530-static-first-frame-parity
+          git push origin HEAD:p0-r530-static-first-frame-parity
