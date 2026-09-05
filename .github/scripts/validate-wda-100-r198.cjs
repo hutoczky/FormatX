@@ -29,7 +29,7 @@ for(const obsolete of ['formatx:referencepause','fxReferenceMotionPaused','funct
   assert.ok(!intro.includes(obsolete),`obsolete manual MAG pause owner returned: ${obsolete}`);
 
 for(const token of [
-  'canonicalControls(hero)','fx-reference-controls-r204','pauseCount===0',
+  'canonicalControls(hero)','fx-reference-controls-r204',"!controls.querySelector('.fx-reference-pause')",
   "fxMagProductContractR528='living-core-continuous-normal-motion'",
   'fxControlOwnerR268','HU – váltás angol nyelvre','EN – switch to Hungarian'
 ])assert.ok(controls.includes(token),`missing current canonical control contract: ${token}`);
