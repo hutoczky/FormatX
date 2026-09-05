@@ -1,7 +1,8 @@
-/* FormatX R536 navigation-owned current native MAG runtime.
+/* FormatX R537 navigation-owned current native MAG runtime.
    R326 remains the only full-size hero WebGL organism. Mobile keeps bounded
    periodic surface energy with zero frames between sweeps and automatic lifecycle
-   suspension; renderer/touch/governor dependencies use fresh R536 identities. */
+   suspension. The lightweight semantic heart owner is armed with navigation so
+   the already-living MAG is immediately interactive without loading Organism. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -17,6 +18,7 @@ const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-so
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge';
+const HEART_CORE='/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260906-r537-navigation-interaction-owner';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r536-automatic-lifecycle-no-audit-path';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260906-r536-lifecycle-safe';
@@ -92,6 +94,16 @@ function addScript(src,attr){
     document.head.appendChild(script);
   });
 }
+function ensureHeartCore(){
+  if(root.dataset.fxHeartCoreR252==='ready')return Promise.resolve(true);
+  const existing=document.querySelector('script[src*="formatx-heart-core-r252.js"]');
+  if(existing instanceof HTMLScriptElement){
+    root.dataset.fxHeartCoreBootstrapR537='already-requested';
+    return Promise.resolve(existing);
+  }
+  root.dataset.fxHeartCoreBootstrapR537='requested-with-navigation-mag';
+  return addScript(HEART_CORE,'data-fx-heart-core-script-r252');
+}
 
 function waitForRendererReady(timeout=8000){
   if(root.dataset.fxCrystalOrganismR326==='ready')return Promise.resolve(true);
@@ -163,6 +175,7 @@ async function start(){
   if(started)return;started=true;
   cleanupLegacyMagRuntime();
   repairAccessibleNames();installSoundTouchRecovery();
+  void ensureHeartCore();
   await Promise.all([
     addStyle(STYLE,'data-fx-current-mag-r422'),
     addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
