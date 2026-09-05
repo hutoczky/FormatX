@@ -1,7 +1,7 @@
-/* FormatX R530 — deterministic first-paint safety from measured final geometry.
-   Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
-   This blocking layer preserves readable LCP geometry only; MAG startup/life is
-   navigation-owned and manual PAUSE/RESUME is retired. */
+/* FormatX R533 — deterministic first-paint safety from measured final geometry.
+   Canonical settled desktop geometry is r244. This blocking layer mirrors only
+   that settled geometry; it does not own MAG startup/life, intro, or motion.
+   Manual PAUSE/RESUME remains retired. */
 
 /* Keep the readable LCP surface paintable. */
 html body.living-architecture #hero .hero-copy,
@@ -26,12 +26,10 @@ html body.living-architecture #hero .hero-copy > :is(
   transition: none !important;
 }
 
-/* R503: R502 Lighthouse attributes 0.0506127623 CLS to .hero-copy in every
-   desktop run. R501 already mirrored the copy box itself with no score change,
-   so the stable remaining owner is its ancestor geometry. Mirror only the
-   canonical r283 desktop/no-preference/fine hero and hero-grid boxes here.
-   Because this stylesheet link is unconditionally render-blocking, these final
-   boxes exist before the separate media-qualified r283 asset settles. */
+/* R533: the old r283 reservation kept explicit 808/505/106px minimums and
+   explicit grid rows even though settled desktop r244 uses auto rows and zero
+   minimums. At 1350x940 that stale reservation collapsed after first paint and
+   moved the complete hero copy. Mirror the actual r244 boxes here instead. */
 @media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {
   html body.living-architecture main#main-content section#hero.scene.hero {
     position: relative !important;
@@ -47,21 +45,36 @@ html body.living-architecture #hero .hero-copy > :is(
     position: relative !important;
     display: grid !important;
     grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
-    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
+    grid-template-rows: none !important;
     grid-template-areas: "copy space" "heading proof" !important;
     align-items: center !important;
     box-sizing: border-box !important;
     width: min(1320px, calc(100% - 80px)) !important;
     max-width: 1320px !important;
-    min-height: 808px !important;
+    height: auto !important;
+    min-height: 0 !important;
     margin: 0 auto !important;
     padding: 0 !important;
     gap: 30px 56px !important;
     overflow: visible !important;
   }
+
+  html body.living-architecture #hero > .hero-grid > .hero-copy {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  html body.living-architecture #hero .hero-lead {
+    min-block-size: 0 !important;
+  }
+
+  html body.living-architecture #hero .fx-method-inline,
+  html body.living-architecture #hero .hero-actions {
+    min-height: 0 !important;
+  }
 }
 
-/* R501: keep the settled copy box contract in the blocking layer. */
+/* Keep the settled copy box contract in the blocking layer. */
 @media (min-width: 901px) {
   html body.living-architecture #hero > .hero-grid > .hero-copy {
     grid-area: copy !important;
@@ -74,6 +87,8 @@ html body.living-architecture #hero .hero-copy > :is(
     width: 100% !important;
     min-width: 0 !important;
     max-width: 580px !important;
+    height: auto !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
@@ -204,3 +219,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r501-p0-first-paint-desktop-copy-box */
 /* production-r503-p0-first-paint-hero-ancestor-box */
 /* production-r530-p0-first-paint-no-manual-mag-pause */
+/* production-r533-p0-r244-auto-row-parity */
