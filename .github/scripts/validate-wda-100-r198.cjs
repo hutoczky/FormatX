@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — R468 runtime with R474 softer mobile display. */
+/* FormatX award-quality gate — R528 living-core contract on the proven R468/R474 runtime. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -15,6 +15,7 @@ const solidGlass=read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js'
 const life=read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
 const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const controls=read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
+const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
 const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 const optics=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
 const lifeStyle=read('docs/scifi-ui/styles/formatx-core-life-r455.css');
@@ -23,12 +24,13 @@ const mobile=JSON.parse(read('lighthouserc.mobile.json'));
 
 for(const token of [
   'fxHeroLcpOwnerR411','static-html-no-reparent','single-current-runtime-no-postdom-repair-stack',
-  'fx-reference-controls-r204','fx-reference-ask','fx-reference-pause','formatx:referencepause',
-  'r461-lightweight-first-party','runtime-error','promise-error'
-])assert.ok(intro.includes(token),`missing R461 intro contract: ${token}`);
+  'fx-reference-controls-r204','fx-reference-ask','fxManualMagPauseContractR528','retired-living-core',
+  'retireManualPause','r461-lightweight-first-party','runtime-error','promise-error'
+])assert.ok(intro.includes(token),`missing R528 intro contract: ${token}`);
 for(const retired of [
-  'formatx-award-runtime-r206.js','formatx-mobile-regression-r310.js','activateCriticalReal3dStyle','queuePostDomEnhancements'
-])assert.ok(!intro.includes(retired),`retired first-load repair stack returned: ${retired}`);
+  'formatx-award-runtime-r206.js','formatx-mobile-regression-r310.js','activateCriticalReal3dStyle',
+  'queuePostDomEnhancements','bindPause(','formatx:referencepause'
+])assert.ok(!intro.includes(retired),`retired first-load/manual-pause contract returned: ${retired}`);
 
 for(const token of [
   'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy',
@@ -109,9 +111,13 @@ assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepa
 assert.ok(!governor.includes("active('scroll-r463'"),'mobile scroll must not wake WebGL');
 assert.ok(!governor.includes("active('resize-r463'"),'mobile resize must not wake WebGL');
 for(const token of [
-  'canonicalControls(hero)','fx-reference-controls-r204','visibleControl(pause)',
-  'fxControlOwnerR268','HU – váltás angol nyelvre','EN – switch to Hungarian'
-])assert.ok(controls.includes(token),`missing canonical control contract: ${token}`);
+  'canonicalControls(hero)','fx-reference-controls-r204','retireManualPause(hero)',
+  "!hero.querySelector('.fx-reference-pause')",'fxControlOwnerR268','HU – váltás angol nyelvre','EN – switch to Hungarian'
+])assert.ok(controls.includes(token),`missing R528 canonical control contract: ${token}`);
+assert.ok(!controls.includes('function ensurePause'),'manual pause creator returned in control owner');
+for(const token of ['window.FormatXMiniMagR459={','manualPause:false'])assert.ok(mini.includes(token),`missing R528 Mini MAG contract: ${token}`);
+assert.ok(!mini.includes('togglePause'),'Mini MAG manual pause action returned');
+assert.ok(!mini.includes("pause:['"),'Mini MAG manual pause copy returned');
 
 function validateLighthouse(config,label){
   const collect=config.ci.collect;
@@ -133,5 +139,5 @@ function validateLighthouse(config,label){
 validateLighthouse(desktop,'desktop');
 validateLighthouse(mobile,'mobile');
 
-for(const source of [intro,motion,language,currentMag,solidGlass,life,governor,controls])new Function(source);
-console.log('PASS: R484 single native MAG path, bounded periodic energy, zero-idle gaps, stable semantics/accessibility and unchanged Lighthouse budgets are structurally valid.');
+for(const source of [intro,motion,language,currentMag,solidGlass,life,governor,controls,mini])new Function(source);
+console.log('PASS: R528 single native living MAG path, no manual pause UI, reduced-motion accessibility and unchanged Lighthouse budgets are structurally valid.');
