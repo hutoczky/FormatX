@@ -39,9 +39,11 @@ for(const token of [
 
 has(intro,[
   'single-current-runtime-no-postdom-repair-stack','fxHeroLcpOwnerR411','static-html-no-reparent',
-  'r461-lightweight-first-party','formatx:referencepause','fx-reference-controls-r204',
-  'runtime-error','promise-error'
-],'R461 first-paint owner');
+  'r461-lightweight-first-party','fxHeroControlContractR528','sound-ask-no-manual-mag-pause',
+  'fx-reference-controls-r204','runtime-error','promise-error'
+],'R461/R531 first-paint owner');
+assert.ok(!intro.includes('formatx:referencepause'),'retired manual MAG PAUSE event returned to first-paint owner');
+assert.ok(!intro.includes('function bindPause'),'retired manual MAG PAUSE binder returned to first-paint owner');
 for(const token of ['formatx-award-runtime-r206.js','formatx-mobile-regression-r310.js','activateCriticalReal3dStyle','queuePostDomEnhancements'])assert.ok(!intro.includes(token),`retired post-DOM stack returned: ${token}`);
 
 has(motion,[
@@ -133,7 +135,7 @@ has(governor,[
   "addEventListener('formatx:coresurfacesweep'",'surfaceDeadline-performance.now()',
   'full-1160ms-sweep-then-zero-idle'
 ],'R465 direct-flag mobile TBT governor');
-assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepause'"),'internal governor idle must not trigger the legacy synchronous redraw handler');
+assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepause'"),'internal governor idle must not trigger the retired synchronous manual-pause handler');
 assert.ok(!governor.includes("active('scroll-r463'"),'mobile scroll must not wake WebGL');
 assert.ok(!governor.includes("active('resize-r463'"),'mobile resize must not wake WebGL');
 
@@ -148,4 +150,4 @@ has(quality,[
 ],'R462 measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: R484 keeps one native MAG, visible surface filaments, a full 1160ms periodic sweep, zero frames between sweeps, and pause/reduced-motion guards.');
+console.log('PASS: R531 keeps the current single native MAG architecture, retires manual PAUSE from the first-paint owner, and preserves reduced/background lifecycle guards.');
