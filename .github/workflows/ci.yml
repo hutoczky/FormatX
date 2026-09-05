@@ -60,7 +60,7 @@ jobs:
           set -euo pipefail
           (
             cd billing-worker
-            npx wrangler dev --local --ip 127.0.0.1 --port 8787 > "$RUNNER_TEMP/formatx-lighthouse-worker.log" 2>&1 &
+            npx wrangler dev --local --ip 127.0.0.1 --port 8787 --var FORMATX_LOCAL_CANDIDATE:1 > "$RUNNER_TEMP/formatx-lighthouse-worker.log" 2>&1 &
             echo $! > "$RUNNER_TEMP/formatx-lighthouse-worker.pid"
           )
           ready=0
@@ -157,7 +157,7 @@ jobs:
             echo "- No forced reduced-motion mode"
             echo "- No skipped Lighthouse audits"
             echo
-            echo "The audited candidate is the same Cloudflare Worker entry and Static Assets binding used for production, internally canonicalised through formatxsuite.com before delivery transforms run."
+            echo "The audited candidate is the same Cloudflare Worker entry and Static Assets binding used for production, internally canonicalised through formatxsuite.com before delivery transforms run. The local-candidate binding only selects that production path; it does not alter browser feature behavior or Lighthouse audits."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish Lighthouse status
