@@ -1,0 +1,39 @@
+name: P0 R530 matcher repair
+
+on:
+  push:
+    branches:
+      - p0-r530-candidate
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: p0-r530-candidate
+      - name: Repair R529 Worker contract matcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/p0-r530-contract-migrate.yml')
+          s=p.read_text()
+          old="assert.match(worker, /X-FormatX-Product-Contract','r529-living-core-no-manual-pause/, 'R529 Worker living-core product contract header missing');"
+          new="assert.match(worker, /X-FormatX-Product-Contract'\\s*,\\s*'r529-living-core-no-manual-pause/, 'R529 Worker living-core product contract header missing');"
+          if old in s:
+              p.write_text(s.replace(old,new))
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .github/workflows/p0-r530-contract-migrate.yml
+          if git diff --cached --quiet; then
+            echo 'Matcher already repaired.'
+            exit 0
+          fi
+          git commit -m '[candidate] Fix R530 Worker contract matcher'
+          git push origin HEAD:p0-r530-candidate
