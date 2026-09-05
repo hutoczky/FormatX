@@ -18,6 +18,10 @@ html[data-fx-design-system="2"] body.living-architecture {
 html[data-fx-design-system="2"] body.living-architecture .fx-category-deck {
   border-radius: var(--fx-radius-lg) !important;
 }
+html[data-fx-design-system="2"] body.living-architecture :where(a,button,input,select,textarea):focus-visible {
+  outline: 2px solid #b9f5ff !important;
+  outline-offset: 3px !important;
+}
 
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
