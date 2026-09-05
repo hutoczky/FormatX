@@ -1,4 +1,4 @@
-/* FormatX r461/r462/R530/R531/R534/R537/R538 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R530/R531/R534/R537/R538/R539 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
@@ -56,6 +56,13 @@ html body.living-architecture .topbar > .fx-language-toggle {
 }
 
 @media (min-width: 901px) {
+  /* R539: reserve the vertical scrollbar carrier before deferred content can
+     increase page height. Without a stable gutter the usable desktop width can
+     shrink by one scrollbar during startup, rewrapping the hero by a few px. */
+  html {
+    scrollbar-gutter: stable !important;
+  }
+
   /* R530: reserve the settled desktop header in normal document flow on the
      render-blocking frame. The previous APEX fixed header left zero flow space
      until r244 mounted, shifting the complete hero-copy after first paint. */
@@ -268,6 +275,51 @@ html body.living-architecture .topbar > .fx-language-toggle {
     line-height: 1.2 !important;
     letter-spacing: .04em !important;
     white-space: nowrap !important;
+  }
+
+  /* R539: finish first-frame parity for the remaining copy-flow nodes. These
+     rules match r244 exactly so a late reference dataset cannot change wrapping,
+     flex basis, button height, or method spacing after the first paint. */
+  html:root:root body.living-architecture #hero .fx-method-inline {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 14px 0 0 !important;
+    padding: 0 !important;
+    gap: 7px 18px !important;
+    list-style: none !important;
+    color: rgba(185, 210, 224, .7) !important;
+    font: 500 11px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  }
+  html:root:root body.living-architecture #hero .fx-method-inline li {
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+  }
+  html:root:root body.living-architecture #hero .hero-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 22px 0 0 !important;
+    gap: 10px !important;
+  }
+  html:root:root body.living-architecture #hero .hero-actions .button {
+    box-sizing: border-box !important;
+    min-height: 48px !important;
+    max-width: 100% !important;
+    padding: 0 18px !important;
+    white-space: normal !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+  }
+  html:root:root body.living-architecture #hero .hero-actions #hero-download {
+    flex: 1 1 250px !important;
+  }
+  html:root:root body.living-architecture #hero .hero-actions .button:not(#hero-download) {
+    flex: 1 1 180px !important;
   }
   html:root:root body.living-architecture #hero .hero-facts {
     display: none !important;
@@ -523,3 +575,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
 /* deploy-r534-static-desktop-r244-first-frame-parity */
 /* deploy-r537-static-r244-product-header-first-frame-parity */
 /* deploy-r538-blocking-final-desktop-header-control-geometry */
+/* deploy-r539-stable-scrollbar-and-copy-flow-parity */
