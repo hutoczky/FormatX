@@ -1,6 +1,8 @@
 /* FormatX R533 — bounded lightweight preloader over the navigation-owned living core.
    The preloader never owns MAG startup: MAG stays navigation-owned behind the
-   overlay, manual PAUSE stays retired, and release is hard-bounded for LCP. */
+   overlay, manual PAUSE stays retired, and release is hard-bounded for LCP.
+   If this script itself boots after the hard deadline, the visual intro is
+   skipped rather than creating a late paint/LCP candidate. */
 (function(){
 'use strict';
 
@@ -12,6 +14,7 @@ const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-s
 const PRELOADER_MIN_MS=REDUCED?180:(MOBILE?440:560);
 const PRELOADER_MAX_MS=REDUCED?520:(MOBILE?1360:1640);
 const PRELOADER_TICK_MS=80;
+const PRELOADER_BOOT_AT=performance.now();
 let audio=null,preloaderTimer=0,preloaderReleased=false;
 
 if(!ROOT.dataset.fxReferenceProductionR244)ROOT.dataset.fxReferenceProductionR244=MOBILE?'ready':'desktop';
@@ -28,6 +31,7 @@ ROOT.dataset.fxCanonicalMagMotionR528='living-core-normal-continuous-reduced-bac
 ROOT.dataset.fxPreloaderContractR531='visual-only-mag-independent-bounded';
 ROOT.dataset.fxPreloaderEffectsR531=REDUCED?'reduced-static':'compositor-glow-scan-pulse';
 ROOT.dataset.fxPreloaderTimingR533=MOBILE?'mobile-440-1360':'desktop-560-1640';
+ROOT.dataset.fxPreloaderBootR533=String(Math.round(PRELOADER_BOOT_AT));
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
@@ -44,6 +48,19 @@ function force(node,property,value){if(node instanceof HTMLElement)node.style.se
 function clear(node,property){if(node instanceof HTMLElement)node.style.removeProperty(property);}
 function animateEffect(node,keyframes,options){if(REDUCED||!(node instanceof HTMLElement)||typeof node.animate!=='function')return;try{node.animate(keyframes,options);}catch(_){} }
 
+function skipLatePreloader(){
+  preloaderReleased=true;
+  const overlay=document.getElementById(OVERLAY_ID);
+  if(overlay instanceof HTMLElement){
+    overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';
+    for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);
+  }
+  ROOT.dataset.fxPreloaderR531='done';
+  ROOT.dataset.fxPreloaderReleaseR531='late-boot-skip';
+  ROOT.dataset.fxPreloaderLateSkipR533='true';
+  document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source:'late-boot-skip'}}));
+  return null;
+}
 function showPreloader(){
   const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement))return null;
   preloaderReleased=false;overlay.hidden=false;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='active';ROOT.dataset.fxPreloaderR531='active';
@@ -66,8 +83,9 @@ function updatePreloader(overlay,elapsed){const output=overlay?.querySelector('[
 function hidePreloader(source){if(preloaderReleased)return;preloaderReleased=true;if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;return;}const output=overlay.querySelector('[data-fx-intro-output]'),progress=overlay.querySelector('[data-fx-intro-progress]'),status=overlay.querySelector('[data-fx-intro-status]');if(output instanceof HTMLOutputElement)output.value='100';if(progress instanceof HTMLProgressElement)progress.value=100;if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'READY':'KÉSZ';const finalize=()=>{try{overlay.getAnimations({subtree:true}).forEach(animation=>animation.cancel());}catch(_){}overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));};if(REDUCED){finalize();return;}const finish=overlay.animate([{opacity:1,filter:'brightness(1)'},{opacity:.94,filter:'brightness(1.18)',offset:.42},{opacity:0,filter:'brightness(1.06)'}],{duration:120,easing:'cubic-bezier(.22,.61,.36,1)',fill:'forwards'});finish.finished.then(finalize,finalize);}
 function runPreloader(overlay){if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='unavailable';return;}const started=performance.now();const tick=()=>{const elapsed=performance.now()-started;updatePreloader(overlay,elapsed);if((elapsed>=PRELOADER_MIN_MS&&preloaderReady())||elapsed>=PRELOADER_MAX_MS){hidePreloader(elapsed>=PRELOADER_MAX_MS?'bounded-timeout':'mag-shell-ready');return;}preloaderTimer=setTimeout(tick,PRELOADER_TICK_MS);};tick();}
 function markIntroComplete(source){ROOT.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');ROOT.classList.add('fx-intro-complete');ROOT.dataset.fxIntro=source;complete(source);}
-const preloader=showPreloader();
-stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r533-living-core':'desktop-direct-r533-living-core';markIntroComplete('instant-r533-living-core');runPreloader(preloader);
+const preloader=PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?skipLatePreloader():showPreloader();
+stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r533-living-core':'desktop-direct-r533-living-core';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r533-living-core':'instant-r533-living-core');
+if(preloader)runPreloader(preloader);
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
 addEventListener('pagehide',()=>{try{audio?.pause();}catch(_){}},{once:true});
 addEventListener('error',()=>hidePreloader('runtime-error'));
