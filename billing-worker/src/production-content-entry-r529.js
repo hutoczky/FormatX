@@ -108,7 +108,7 @@ function r529Headers(source) {
   headers.set('X-FormatX-Transport-Stability', 'r529-direct-canonical-living-core');
   headers.set('X-FormatX-Edge-Stability', 'r529-r527-fcp-r528-mobile-post-fcp');
   headers.set('X-FormatX-CSS-Scheduler', 'r526-post-first-contentful-paint');
-  headers.set('X-FormatX-Product-Contract', 'r529-living-core-no-manual-pause');
+  headers.set('X-FormatX-Product-Contract','r529-living-core-no-manual-pause');
   headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
   return headers;
 }
