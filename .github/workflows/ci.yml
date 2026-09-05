@@ -53,7 +53,7 @@ jobs:
           npm install -g @lhci/cli@0.13.x
           npm ci --prefix billing-worker
 
-      - name: Start exact R534 production candidate Worker
+      - name: Start exact R535 production candidate Worker
         id: candidate
         shell: bash
         env:
@@ -69,11 +69,12 @@ jobs:
           : > "$RUNNER_TEMP/formatx-lighthouse-headers.txt"
           for attempt in $(seq 1 240); do
             if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-headers.txt" -o /dev/null http://127.0.0.1:8787/ 2>/dev/null; then
-              if grep -Fqi 'X-FormatX-Candidate-Delivery: r534-exact-production-entry-localhost-8787' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+              if grep -Fqi 'X-FormatX-Candidate-Delivery: r535-exact-production-entry-localhost-8787' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
                  grep -Fqi 'X-FormatX-Candidate-Canonical-Origin: formatxsuite.com' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
                  grep -Fqi 'X-FormatX-Preloader: r534-static-content-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
-                 grep -Fqi 'X-FormatX-Reference-Boot: r534-deferred-after-static-first-paint' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
-                 grep -Fqi 'X-FormatX-CSS-Scheduler: r534-desktop-fcp-mobile-scroll-intent' "$RUNNER_TEMP/formatx-lighthouse-headers.txt"; then
+                 grep -Fqi 'X-FormatX-Reference-Boot: r535-prepaint-layout-selector' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+                 grep -Fqi 'X-FormatX-CSS-Scheduler: r535-global-critical-first-paint-mobile-legacy-intent' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+                 grep -Fqi 'rel=preload' "$RUNNER_TEMP/formatx-lighthouse-headers.txt"; then
                 ready=1
                 break
               fi
@@ -95,7 +96,9 @@ jobs:
             if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" -o /dev/null http://127.0.0.1:8788/ 2>/dev/null; then
               if grep -Fqi 'X-FormatX-Candidate-Proxy: canonical-header-normalizer-only' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && \
                  grep -Fqi 'Link: <https://formatxsuite.com/>; rel="canonical"' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && \
-                 grep -Fqi 'X-FormatX-Preloader: r534-static-content-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt"; then
+                 grep -Fqi 'rel=preload' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && \
+                 grep -Fqi 'X-FormatX-Preloader: r534-static-content-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && \
+                 grep -Fqi 'X-FormatX-Reference-Boot: r535-prepaint-layout-selector' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt"; then
                 proxy_ready=1
                 break
               fi
@@ -109,7 +112,7 @@ jobs:
             cat "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" || true
             exit 1
           fi
-          echo 'Exact R534 production candidate + canonical transport proxy ready on 127.0.0.1:8788/.'
+          echo 'Exact R535 production candidate + canonical transport proxy ready on 127.0.0.1:8788/.'
 
       - name: Run desktop Lighthouse CI on the real production candidate
         id: lighthouse_desktop
@@ -166,24 +169,24 @@ jobs:
           {
             echo "## Lighthouse CI Results"
             echo
-            echo "Validated surface: exact R534 local production Worker candidate, canonical transport normalized, desktop + mobile, normal visitor experience"
+            echo "Validated surface: exact R535 local production Worker candidate, canonical transport normalized, desktop + mobile, normal visitor experience"
             echo
-            echo "### Current fail-closed thresholds"
-            echo "- Performance ≥ 0.95; roadmap target remains 1.00"
+            echo "### Authoritative P0 thresholds"
+            echo "- Performance = 1.00"
             echo "- Accessibility = 1.00"
             echo "- Best practices = 1.00"
             echo "- SEO = 1.00"
             echo "- FCP ≤ 1.8s"
-            echo "- LCP ≤ 2.5s; roadmap target < 2.0s"
-            echo "- TBT ≤ 200ms; roadmap target ≤ 150ms"
-            echo "- CLS ≤ 0.10; roadmap target < 0.05"
-            echo "- TTFB ≤ 600ms"
-            echo "- 3 runs per viewport profile"
+            echo "- LCP < 2.0s"
+            echo "- TBT ≤ 150ms"
+            echo "- CLS < 0.05"
+            echo "- TTFB ≤ 500ms"
+            echo "- 3 runs per viewport profile; every run must pass"
             echo "- No audit-only query parameter"
             echo "- No forced reduced-motion mode"
             echo "- No skipped Lighthouse audits"
             echo
-            echo "The 8788 proxy only removes Wrangler's localhost-only canonical Link artifact and replaces it with the production canonical URL; all page bytes and application behavior come from the exact production Worker on 8787."
+            echo "The 8788 proxy only replaces Wrangler's localhost-only canonical Link artifact while preserving production preload Link values; all page bytes and application behavior come from the exact production Worker on 8787."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish Lighthouse status
