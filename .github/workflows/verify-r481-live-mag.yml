@@ -1,5 +1,5 @@
 name: Verify R482 live MAG semantic replacement
-run-name: R482 semantic replacement for ${{ github.event.workflow_run.head_sha || github.sha }}
+run-name: R528 R482 semantic replacement for ${{ github.event.workflow_run.head_sha || github.sha }}
 
 on:
   workflow_run:
@@ -31,7 +31,6 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ env.AUDITED_SHA }}
-
       - name: Wait for exact deployed P0 marker
         shell: bash
         run: |
@@ -48,16 +47,13 @@ jobs:
           done
           echo 'Exact production marker did not converge.' >&2
           exit 1
-
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
-
       - name: Validate semantic replacement source
         run: node --check .github/scripts/validate-r522-semantic-mag.cjs
-
       - name: Reuse system Chrome
         shell: bash
         run: |
@@ -66,10 +62,8 @@ jobs:
           CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
-
-      - name: Verify current mobile and desktop MAG semantics
+      - name: Verify current mobile and desktop living MAG semantics
         run: node .github/scripts/validate-r522-semantic-mag.cjs
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -77,7 +71,6 @@ jobs:
           path: artifacts/r482-semantic-replacement/
           if-no-files-found: warn
           retention-days: 30
-
       - name: Publish R482 semantic replacement status
         if: always()
         env:
@@ -87,7 +80,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='R482 legacy gate replaced by current bounded MAG semantics'
+            description='R482 legacy gate replaced by current living MAG semantics'
           else
             state=failure
             description='R482 semantic replacement failed'

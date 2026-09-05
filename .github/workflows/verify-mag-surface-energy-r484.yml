@@ -41,13 +41,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
       - name: Validate source contracts
         run: |
           node .github/scripts/validate-living-core-r425-source.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           node --check .github/scripts/validate-live-mag-functional.cjs
-
       - name: Wait for exact audited production revision
         if: env.FORMATX_VERIFY_LIVE == 'true'
         shell: bash
@@ -63,7 +61,6 @@ jobs:
             sleep 10
           done
           exit 1
-
       - name: Install browser verifier
         run: |
           mkdir -p "$RUNNER_TEMP/mag-browser"
@@ -71,7 +68,6 @@ jobs:
           npm init -y >/dev/null
           npm install --no-audit --no-fund playwright@1.62.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
-
       - name: Verify exact commit locally
         if: env.FORMATX_VERIFY_LIVE != 'true'
         env:
@@ -82,7 +78,6 @@ jobs:
           SERVER_PID=$!
           trap 'kill "$SERVER_PID"' EXIT
           xvfb-run -a node .github/scripts/validate-mag-surface-energy-r484.cjs
-
       - name: Verify canonical deployed MAG behavior
         if: env.FORMATX_VERIFY_LIVE == 'true'
         env:
@@ -90,7 +85,6 @@ jobs:
           FORMATX_TEST_URL: https://formatxsuite.com/
           FORMATX_MAG_EVIDENCE_DIR: artifacts/live-mag-functional
         run: node .github/scripts/validate-live-mag-functional.cjs
-
       - name: Upload measured evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -101,7 +95,6 @@ jobs:
             artifacts/live-mag-functional
           if-no-files-found: warn
           retention-days: 30
-
       - name: Publish measured result
         if: always()
         env:
@@ -113,7 +106,7 @@ jobs:
           context='FormatX canonical MAG runtime'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='Renderer, motion, pause/resume, ASK and fallback passed'
+            description='Renderer, living motion, ASK, reduced-motion and fallback passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" -f context="$context" -f description="$description" \
