@@ -2,7 +2,9 @@
 
 /* FormatX R530 — current living-core source contract.
    Manual MAG PAUSE/RESUME is retired. Reduced-motion and automatic lifecycle
-   suspension are accessibility/resource-management behavior, not user pause. */
+   suspension are accessibility/resource-management behavior, not user pause.
+   WebGL failure retains one static-safe CSS MAG identity and no fallback
+   canvas/renderer clock. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -19,6 +21,7 @@ const home = read('docs/scifi-ui/index.html');
 const intro = read('docs/scifi-ui/scripts/formatx-event-horizon.js');
 const controls = read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
 const current = read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
+const magCss = read('docs/scifi-ui/styles/formatx-current-mag-r422.css');
 const renderer = read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const governor = read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const touch = read('docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js');
@@ -39,9 +42,22 @@ has(current, [
   'formatx-crystal-organism-r326.js?v=20260905-r528-lifecycle-suspension',
   'formatx-mobile-render-governor-r426.js?v=20260905-r528-lifecycle-suspension',
   'formatx-core-touch-pulse-r99.js?v=20260905-r528-living-core',
-  'r528-lifecycle-suspend-no-idle-redraw'
+  'r528-lifecycle-suspend-no-idle-redraw',
+  'function rendererTerminalState',
+  'function enableStaticFallback',
+  "fxThree='error'",
+  "fxMagFallbackR530='static-safe-css'",
+  "fxCurrentMagRuntimeR422='ready-static-fallback'",
+  "fxCoreRendererSelection='static-safe-css-fallback-r530'"
 ], 'current MAG loader');
 assert.ok(!current.includes('direct-pause-flag'), 'current MAG loader advertises obsolete pause-flag ownership');
+
+has(magCss, [
+  'data-fx-mag-fallback-r530="static-safe-css"',
+  'animation:none!important',
+  'animation-play-state:paused!important',
+  'production-r530-direct-r326-layout-a11y-touch-static-safe-fallback'
+], 'static-safe fallback stylesheet');
 
 has(renderer, [
   "const VERSION = 'crystal-organism-r326'",
@@ -51,7 +67,8 @@ has(renderer, [
   'setLifecycleSuspended:(suspended,source)',
   'document.hidden||!visible||renderSuspended',
   "fxMagProductContractR528='living-core-continuous-normal-motion'",
-  "listen(reduced,'change',onReducedMotionChange"
+  "listen(reduced,'change',onReducedMotionChange",
+  "fxCrystalOrganismR326 = 'context-unavailable'"
 ], 'single living renderer');
 absent(renderer, ['formatx:referencepause', 'fxReferenceMotionPaused', '.fx-reference-pause', 'function onPause'], 'renderer');
 
@@ -82,4 +99,4 @@ has(worker, [
 ], 'R529 direct-canonical wrapper');
 
 for (const source of [intro, controls, current, renderer, governor, touch, direct, geometry, content]) new Function(source);
-console.log('PASS: R530 current living-core source contract — SOUND+ASK, one renderer/lifecycle owner, reduced-motion/background safety, no manual MAG pause owner.');
+console.log('PASS: R530 current living-core source contract — SOUND+ASK, one renderer/lifecycle owner, reduced/background safety, static-safe WebGL fallback, no manual MAG pause owner.');
