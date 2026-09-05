@@ -3,15 +3,15 @@ import canonicalProduction from './production-content-entry.js';
 /* FormatX R529/R534 — direct canonical production ownership + bounded static-content intro.
    Candidate mode exists only behind the Wrangler-only FORMATX_LOCAL_CANDIDATE=1
    binding and is absent from deployed production. Candidate requests traverse the
-   same canonical production chain; the local response then preserves the real
-   production canonical URL for truthful SEO auditing. */
+   same canonical production chain. R534 keeps mobile legacy layout work outside
+   startup and activates it on real scroll intent. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
-const DEFERRED_SCHEDULER_URL = 'formatx-deferred-css-r487.js?v=20260904-r526-fcp-observer';
+const DEFERRED_SCHEDULER_URL = 'formatx-deferred-css-r487.js?v=20260905-r534-mobile-scroll-intent-v1';
 const EVENT_HORIZON_RE = /formatx-event-horizon\.js\?v=[^"']+/g;
 const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r534-static-lcp-v1';
 const DEFERRED_REDUCED_RE = /formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g;
@@ -118,15 +118,15 @@ function deferReferenceModeBoot(html) {
 function r529Headers(source, localCandidate) {
   const headers = new Headers(source);
   headers.set('X-FormatX-Transport-Stability', 'r529-direct-canonical-living-core');
-  headers.set('X-FormatX-Edge-Stability', 'r534-static-intro-lcp-r529-mobile-post-fcp');
-  headers.set('X-FormatX-CSS-Scheduler', 'r526-post-first-contentful-paint');
+  headers.set('X-FormatX-Edge-Stability', 'r534-static-intro-mobile-scroll-intent');
+  headers.set('X-FormatX-CSS-Scheduler', 'r534-desktop-fcp-mobile-scroll-intent');
   headers.set('X-FormatX-Product-Contract', 'r529-living-core-no-manual-pause');
-  headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
+  headers.set('X-FormatX-Mobile-LCP', 'static-heart-mobile-legacy-scroll-intent');
   headers.set('X-FormatX-Preloader', 'r534-static-content-roadmap-timing');
   headers.set('X-FormatX-Preloader-Cache', 'r534-static-lcp-v1-compositor-css-v1');
   headers.set('X-FormatX-Reference-Boot', 'r534-deferred-after-static-first-paint');
   if (localCandidate) {
-    headers.set('X-FormatX-Candidate-Delivery', 'r533-exact-production-entry-localhost-8787');
+    headers.set('X-FormatX-Candidate-Delivery', 'r534-exact-production-entry-localhost-8787');
     headers.set('X-FormatX-Candidate-Canonical-Origin', 'formatxsuite.com');
     headers.set('Link', '<https://formatxsuite.com/>; rel="canonical"');
   }
@@ -156,7 +156,7 @@ export default {
       html = stabilizeMobileFirstPaint(html);
       html = injectStaticHeart(html);
     }
-    headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.delete('Content-Length'); headers.delete('Content-Encoding'); headers.delete('ETag'); headers.set('Cache-Control', 'no-store, max-age=0');
     return new Response(html, { status: response.status, statusText: response.statusText, headers });
   },
 };
