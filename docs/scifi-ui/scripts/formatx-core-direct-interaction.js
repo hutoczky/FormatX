@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'direct-core-interaction-v3';
+  const VERSION = 'direct-core-interaction-r528';
   const LIVING_SCRIPT = '/scifi-ui/scripts/formatx-living-system-rendering-v1.js?v=20260813-policy-clean-r70';
   const TELEMETRY_BRIDGE = '/scifi-ui/scripts/formatx-living-telemetry-visual-bridge-v1.js?v=20260812-award-r2';
   const desktop = matchMedia('(min-width:901px) and (pointer:fine)').matches;
@@ -131,13 +131,14 @@
     }, desktop ? 520 : 360);
   }
 
-  function wakeRenderer() {
-    const pauseButton = document.querySelector('.fx-reference-pause');
-    if (pauseButton instanceof HTMLButtonElement && pauseButton.dataset.paused === 'true') return;
-    if (root.dataset.fxReferenceMotionPaused === 'true') root.dataset.fxReferenceMotionPaused = 'false';
-    dispatchEvent(new CustomEvent('formatx:referencepause', {
-      detail: { paused: false, source: VERSION, reason: 'direct-core-interaction' }
-    }));
+  function wakeRendererForInteraction() {
+    if (document.hidden) return false;
+    const renderer = window.FormatXCoreMobileV69;
+    if (!renderer) return false;
+    renderer.setLifecycleSuspended?.(false, 'direct-core-interaction');
+    renderer.requestRender?.(2);
+    root.dataset.fxCoreInteractionWakeR528 = 'lifecycle-interaction';
+    return true;
   }
 
   function pulse(event, phase, point = null) {
@@ -163,7 +164,7 @@
     if (!point) return;
     activePointer = event.pointerId;
     bootLivingSystem();
-    wakeRenderer();
+    wakeRendererForInteraction();
     amplifyDesktopPointer(event, point);
     pulse(event, 'press', point);
     if (desktop) {
@@ -203,7 +204,7 @@
     const point = pointInCore(event);
     if (!point) return;
     bootLivingSystem();
-    wakeRenderer();
+    wakeRendererForInteraction();
     amplifyDesktopPointer(event, point);
     pulse(event, 'burst', point);
     const delays = desktop ? [55, 110, 175, 250, 340] : [90, 180];
