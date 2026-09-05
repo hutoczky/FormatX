@@ -115,8 +115,10 @@ absent(renderer, ['formatx:referencepause', 'fxReferenceMotionPaused', '.fx-refe
 
 has(governor, [
   'setLifecycleSuspended',
-  "fxMobileRenderGovernorRevisionR433='r528-lifecycle-suspend-no-idle-redraw'",
-  "fxMobileRenderContractR528='automatic-resource-lifecycle-not-user-pause'"
+  "fxMobileRenderGovernorRevisionR433='r530-navigation-compositor-life-interaction-webgl'",
+  "fxMobileRenderContractR528='automatic-resource-lifecycle-not-user-pause'",
+  "fxMobileRenderContractR530='navigation-owned-compositor-life-bounded-webgl'",
+  "fxMobileAutonomousSurfaceR530='suppressed-performance-safe'"
 ], 'mobile lifecycle governor');
 absent(governor, ['userPaused', 'fxReferenceMotionPaused', 'formatx:referencepause', '.fx-reference-pause'], 'mobile lifecycle governor');
 
