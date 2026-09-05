@@ -196,8 +196,7 @@
     z-index: 1 !important;
   }
 
-  #hero .fx-reference-controls-r204 .fx-reference-ask,
-  #hero .fx-reference-controls-r204 .fx-reference-pause {
+  #hero .fx-reference-controls-r204 .fx-reference-ask {
     position: relative !important;
     inset: auto !important;
     margin: 0 !important;
@@ -267,13 +266,12 @@
     align-items: flex-start !important;
     justify-content: flex-end !important;
     gap: 10px !important;
-    width: 110px !important;
-    min-width: 110px !important;
+    width: 48px !important;
+    min-width: 48px !important;
     padding-bottom: 18px !important;
   }
 
-  #hero .fx-reference-controls-r204 .fx-reference-ask,
-  #hero .fx-reference-controls-r204 .fx-reference-pause {
+  #hero .fx-reference-controls-r204 .fx-reference-ask {
     width: 48px !important;
     min-width: 48px !important;
     height: 48px !important;
@@ -363,7 +361,7 @@
   }
 }
 
-/* r205 production marker: compact audio + horizontal ASK/Pause + mini MAG. */
+/* r528 production marker: compact audio + ASK + mini MAG; no manual PAUSE control. */
 
 /* r213 — mobile readable plane is always the topmost visual layer.
    Decorative WebGL/glow/atmosphere layers stay below; copy never inherits their
