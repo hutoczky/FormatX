@@ -1,4 +1,4 @@
-/* FormatX r461/r462/R530 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R530/R531 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
@@ -223,4 +223,103 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* deploy-r530-desktop-first-frame-flow-lock */
+/* R531: preloader is a fixed viewport cover. The underlying page stays laid out
+   and MAG/runtime startup continues behind it, so reveal cannot create intro CLS. */
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  display: grid !important;
+  box-sizing: border-box !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100svh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  isolation: isolate !important;
+  color: #f4fbff !important;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(90, 216, 255, .12), transparent 38%),
+    linear-gradient(180deg, #05070a, #010204) !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] ~ .topbar,
+#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main,
+#formatx-event-horizon[data-fx-preloader-r531="active"] ~ footer {
+  visibility: hidden !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] :is(
+  .fx-intro-curtain,
+  .fx-intro-grid,
+  .fx-intro-scan,
+  .fx-intro-portal,
+  .fx-intro-flare,
+  .fx-intro-meta,
+  .fx-intro-skip
+) {
+  display: none !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  z-index: 2 !important;
+  display: grid !important;
+  justify-items: center !important;
+  gap: 9px !important;
+  width: min(520px, calc(100vw - 40px)) !important;
+  margin: 0 !important;
+  text-align: center !important;
+  transform: translate(-50%, -50%) !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-kicker,
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle,
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-status,
+#formatx-event-horizon[data-fx-preloader-r531="active"] [data-fx-intro-output] {
+  color: rgba(223, 247, 255, .82) !important;
+  font: 700 10px/1.35 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+  letter-spacing: .14em !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word {
+  margin: 0 !important;
+  color: #f6fdff !important;
+  font: 900 clamp(32px, 11vw, 56px)/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  letter-spacing: .08em !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: max(clamp(30px, 7svh, 64px), calc(env(safe-area-inset-bottom, 0px) + 16px)) !important;
+  z-index: 2 !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(120px, 240px) !important;
+  align-items: center !important;
+  gap: 8px 12px !important;
+  width: min(360px, calc(100vw - 40px)) !important;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap .fx-intro-status {
+  grid-column: 1 / -1 !important;
+  text-align: center !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] progress[data-fx-intro-progress] {
+  width: 100% !important;
+  height: 3px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  background: rgba(124, 236, 255, .13) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"],
+  #formatx-event-horizon[data-fx-preloader-r531="active"] * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* deploy-r530-r531-p0-intro-integration */

@@ -1,7 +1,8 @@
-/* FormatX R528/R530 — synchronize Mini MAG/header shape and living energy with the
-   primary MAG. Normal product mode is continuously alive. Only accessibility
-   reduced-motion and automatic background lifecycle suspension may stop the CSS
-   compositor clock. One WebGL renderer, one CSS animation owner, zero JS idle loop. */
+/* FormatX R528/R530/R531 — synchronize internal Mini MAG/header compatibility
+   surfaces with the primary MAG. Normal product mode is continuously alive.
+   Only accessibility reduced-motion and automatic background lifecycle may stop
+   the CSS compositor clock. R531 adds deterministic bfcache resume without
+   creating a second renderer, RAF loop or animation owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -12,7 +13,7 @@ const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260
 const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260831-r482-spectrum-soft-edge';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
-let observer=null,pulseTimer=0,lastEnergyBolt='';
+let observer=null,pulseTimer=0,lastEnergyBolt='',resumeToken=0;
 function watchStyle(link){if(!(link instanceof HTMLLinkElement))return link;link.addEventListener('load',()=>{sync();applyCanonicalLife();},{once:true});return link;}
 function ensureStyle(){let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r4791-user-pause-aware')){watchStyle(link);link.href=STYLE;}return link;}link=document.createElement('link');link.rel='stylesheet';link.href=STYLE;link.dataset.fxMagVisualSyncR476='true';watchStyle(link);document.head.appendChild(link);return link;}
 function ensureMobileOptics(){if(!mobile.matches)return null;let link=document.querySelector('link[data-fx-mag-mobile-optics-r480]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r488-restrained-glow-soft-edge-compositor-pulse')){watchStyle(link);link.href=MOBILE_OPTICS;}return link;}link=document.createElement('link');link.rel='stylesheet';link.href=MOBILE_OPTICS;link.dataset.fxMagMobileOpticsR480='true';watchStyle(link);document.head.appendChild(link);return link;}
@@ -25,13 +26,42 @@ function syncPrimaryPlayback(forceSuspend=false){const canvas=primaryCanvas();if
 function syncPlaybackSoon(forceSuspend=false){const syncNow=()=>syncPrimaryPlayback(forceSuspend);syncNow();requestAnimationFrame(syncNow);}
 function setLife(state){for(const node of lifeNodes())node.dataset.fxMagLife=state;root.dataset.fxMiniMagLifeR478=state;root.dataset.fxMiniMagLifeR479=state;root.dataset.fxPrimaryMagLifeR479=state;root.dataset.fxPrimaryMagLifeR481=state;root.dataset.fxPrimaryMagLifeR482=state;}
 function applyCanonicalLife(){if(reduced.matches||document.hidden){setLife('steady');syncPlaybackSoon(true);return;}setLife('breath');syncPlaybackSoon(false);}
+function restartPrimaryCompositor(source='pageshow-r531'){
+  if(reduced.matches||document.hidden){applyCanonicalLife();return false;}
+  const canvas=primaryCanvas();
+  if(!(canvas instanceof HTMLCanvasElement)){applyCanonicalLife();return false;}
+  const token=++resumeToken;
+  clearTimeout(pulseTimer);pulseTimer=0;
+  canvas.style.setProperty('animation','none','important');
+  canvas.style.setProperty('animation-play-state','paused','important');
+  root.dataset.fxPrimaryMagBfcacheResumeR531=`rearming-${source}`;
+  requestAnimationFrame(()=>{
+    if(token!==resumeToken||document.hidden||reduced.matches)return;
+    canvas.style.removeProperty('animation');
+    setLife('breath');
+    canvas.style.setProperty('animation-play-state','running','important');
+    requestAnimationFrame(()=>{
+      if(token!==resumeToken||document.hidden||reduced.matches)return;
+      syncPrimaryPlayback(false);
+      const animations=canvas.getAnimations?.()||[];
+      for(const animation of animations){try{animation.playbackRate=1;animation.play();}catch(_){}}
+      root.dataset.fxPrimaryMagBfcacheResumeR531=`resumed-${source}`;
+      root.dataset.fxPrimaryMagCssPlaybackR528='running';
+    });
+  });
+  return true;
+}
 function pulse(source){if(reduced.matches||document.hidden){setLife('steady');syncPlaybackSoon(true);return false;}clearTimeout(pulseTimer);setLife('pulse');syncPlaybackSoon(false);root.dataset.fxMiniMagEnergySourceR478=String(source||'primary-mag');root.dataset.fxMiniMagEnergySourceR479=String(source||'primary-mag');root.dataset.fxPrimaryMagEnergySourceR481=String(source||'primary-mag');root.dataset.fxPrimaryMagEnergySourceR482=String(source||'primary-mag');pulseTimer=setTimeout(()=>{if(reduced.matches||document.hidden){setLife('steady');syncPlaybackSoon(true);return;}setLife(steadyLife());syncPlaybackSoon(false);},620);return true;}
-function sync(){const shape=currentShape();const header=document.querySelector('.topbar .fx-reference-mag-button');const launcher=document.querySelector('.fx-mini-mag-launcher-r459');const glyph=document.querySelector('.fx-mini-mag-glyph-r459');const host=document.querySelector('.fx-mini-mag-assistant-r459');for(const node of [header,launcher,glyph,host])if(node instanceof HTMLElement){node.dataset.fxCoreShape=shape;if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();}for(const node of lifeNodes())if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();root.dataset.fxMiniMagShapeR476=shape;root.dataset.fxMiniMagShapeSyncR476=`ready-${shape}`;root.dataset.fxMagShapeSyncR476='ready-r528';root.dataset.fxMiniMagLifeContractR478='primary-energy-sync-compositor-breath-zero-js-idle';root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';root.dataset.fxPrimaryMagMotionContractR528='living-core-normal-continuous-reduced-background-safe';root.dataset.fxManualMagPauseR528='retired-product-contract';root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';root.dataset.fxPrimaryMagOpticsR486='calmer-luminance-feathered-mobile-silhouette';root.dataset.fxPrimaryMagOpticsR488='restrained-glow-soft-edge-compositor-pulse';root.dataset.fxPrimaryMagLifeContractR481='desktop-mobile-compositor-breath-zero-webgl-idle';root.dataset.fxPrimaryMagLifeContractR482='large-mini-header-spectrum-breath-zero-webgl-idle';}
+function sync(){const shape=currentShape();const header=document.querySelector('.topbar .fx-reference-mag-button');const launcher=document.querySelector('.fx-mini-mag-launcher-r459');const glyph=document.querySelector('.fx-mini-mag-glyph-r459');const host=document.querySelector('.fx-mini-mag-assistant-r459');for(const node of [header,launcher,glyph,host])if(node instanceof HTMLElement){node.dataset.fxCoreShape=shape;if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();}for(const node of lifeNodes())if(!node.dataset.fxMagLife)node.dataset.fxMagLife=steadyLife();root.dataset.fxMiniMagShapeR476=shape;root.dataset.fxMiniMagShapeSyncR476=`ready-${shape}`;root.dataset.fxMagShapeSyncR476='ready-r528';root.dataset.fxMiniMagLifeContractR478='primary-energy-sync-compositor-breath-zero-js-idle';root.dataset.fxMiniMagLifeContractR479='primary-and-mini-compositor-breath-colour-depth-zero-js-idle';root.dataset.fxPrimaryMagMotionContractR528='living-core-normal-continuous-reduced-background-safe';root.dataset.fxManualMagPauseR528='retired-product-contract';root.dataset.fxPrimaryMagOpticsR480='restrained-mobile-glow-feathered-edge';root.dataset.fxPrimaryMagOpticsR481='cross-device-breath-softer-phone-halo-and-edge';root.dataset.fxPrimaryMagOpticsR482='restrained-soft-spectrum-mobile-edge';root.dataset.fxPrimaryMagOpticsR486='calmer-luminance-feathered-mobile-silhouette';root.dataset.fxPrimaryMagOpticsR488='restrained-glow-soft-edge-compositor-pulse';root.dataset.fxPrimaryMagLifeContractR481='desktop-mobile-compositor-breath-zero-webgl-idle';root.dataset.fxPrimaryMagLifeContractR482='large-mini-header-spectrum-breath-zero-webgl-idle';root.dataset.fxPrimaryMagClockResumeR531='shape-sync-single-owner-bfcache-only';}
 function onCoreInteraction(event){const phase=String(event.detail?.phase||'interaction');if(phase==='press'||phase==='release'||phase==='pulse'||phase==='boost'||phase==='interaction')pulse(`core-${phase}`);}
 function inspectRootState(records){let needsSync=false;for(const record of records){if(record.attributeName==='data-fx-core-shape-r337')needsSync=true;if(record.attributeName==='data-fx-core-energy-bolt-r455'){const bolt=String(root.dataset.fxCoreEnergyBoltR455||'');if(bolt&&bolt!==lastEnergyBolt){lastEnergyBolt=bolt;if(bolt.startsWith('surface-sweep-'))pulse(bolt);}}}if(needsSync)sync();}
 function boot(){ensureStyle();ensureMobileOptics();ensureLivingBalance();sync();applyCanonicalLife();lastEnergyBolt=String(root.dataset.fxCoreEnergyBoltR455||'');if(!observer){observer=new MutationObserver(inspectRootState);observer.observe(root,{attributes:true,attributeFilter:['data-fx-core-shape-r337','data-fx-core-energy-bolt-r455']});}}
-for(const name of ['formatx:controlownerready','formatx:minimagready','formatx:currentmagready','formatx:real3dready','formatx:languagechange','pageshow'])addEventListener(name,()=>{sync();applyCanonicalLife();},{passive:true});
-addEventListener('formatx:coreinteraction',onCoreInteraction,{passive:true});addEventListener('formatx:coreshapechange',()=>{sync();pulse('shape-change');},{passive:true});addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(pulseTimer);pulseTimer=0;setLife('steady');syncPlaybackSoon(true);}else applyCanonicalLife();},{passive:true});reduced.addEventListener?.('change',applyCanonicalLife);
+for(const name of ['formatx:controlownerready','formatx:minimagready','formatx:currentmagready','formatx:real3dready','formatx:languagechange'])addEventListener(name,()=>{sync();applyCanonicalLife();},{passive:true});
+addEventListener('pageshow',event=>{sync();applyCanonicalLife();if(event.persisted)restartPrimaryCompositor('bfcache-r531');else syncPlaybackSoon(false);},{passive:true});
+addEventListener('formatx:coreinteraction',onCoreInteraction,{passive:true});
+addEventListener('formatx:coreshapechange',()=>{sync();pulse('shape-change');},{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){resumeToken+=1;clearTimeout(pulseTimer);pulseTimer=0;setLife('steady');syncPlaybackSoon(true);}else applyCanonicalLife();},{passive:true});
+reduced.addEventListener?.('change',()=>{resumeToken+=1;applyCanonicalLife();});
 document.addEventListener('pointerdown',event=>{const target=event.target instanceof Element?event.target.closest('#hero .hero-space,.fx-reference-mag-button,.fx-mini-mag-launcher-r459,[data-action="shape"]'):null;if(!target)return;if(target.closest('.fx-reference-controls-r204'))return;pulse(target.closest('.fx-mini-mag-launcher-r459')?'mini-mag-direct':'primary-mag-direct');if(target.matches('.fx-reference-mag-button,[data-action="shape"]')){queueMicrotask(sync);setTimeout(()=>{sync();applyCanonicalLife();},80);}},{passive:true,capture:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 }());
