@@ -4,13 +4,18 @@ import canonicalProduction from './production-content-entry.js';
    Candidate mode exists only behind the Wrangler-only FORMATX_LOCAL_CANDIDATE=1
    binding and is absent from deployed production. Candidate requests traverse the
    same canonical production chain. R535 keeps the tiny reference layout selector
-   prepaint, preserves the mobile critical/accessibility shell at first paint, and
-   defers only genuinely legacy mobile layout layers until real scroll intent. */
+   prepaint, preserves the mobile critical/accessibility shell at first paint,
+   starts the living MAG from navigation, and defers only non-critical enhancements. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
+const P0_SCHEDULER_PATH = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js';
+const P0_MOTION_SCHEDULER_RE = /formatx-p0-motion-scheduler-r490\.js\?v=[^"']+/g;
+const P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r535-navigation-mag-scroll-intent';
+const MOTION_RUNTIME_RE = /formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g;
+const MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r535-scroll-intent-owner';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
 const DEFERRED_SCHEDULER_URL = 'formatx-deferred-css-r487.js?v=20260906-r535-mobile-scroll-intent-v2';
 const EVENT_HORIZON_RE = /formatx-event-horizon\.js\?v=[^"']+/g;
@@ -108,7 +113,8 @@ function r529Headers(source, localCandidate) {
   headers.set('X-FormatX-Transport-Stability', 'r529-direct-canonical-living-core');
   headers.set('X-FormatX-Edge-Stability', 'r535-prepaint-reference-critical-shell');
   headers.set('X-FormatX-CSS-Scheduler', 'r535-global-critical-first-paint-mobile-legacy-intent');
-  headers.set('X-FormatX-Product-Contract', 'r529-living-core-no-manual-pause');
+  headers.set('X-FormatX-Product-Contract', 'r535-navigation-mag-no-manual-pause');
+  headers.set('X-FormatX-MAG-Startup', 'r535-navigation-owned-critical-living-core');
   headers.set('X-FormatX-Mobile-LCP', 'r535-critical-shell-first-paint-preloaded');
   headers.set('X-FormatX-Preloader', 'r534-static-content-roadmap-timing');
   headers.set('X-FormatX-Preloader-Cache', 'r534-static-lcp-v1-compositor-css-v1');
@@ -119,6 +125,17 @@ function r529Headers(source, localCandidate) {
     headers.set('Link', '<https://formatxsuite.com/>; rel="canonical"');
   }
   return headers;
+}
+function rewrittenSchedulerResponse(response, headers) {
+  return response.text().then(source => {
+    const body = String(source || '').replace(MOTION_RUNTIME_RE, MOTION_RUNTIME_URL);
+    headers.delete('Content-Length');
+    headers.delete('Content-Encoding');
+    headers.delete('ETag');
+    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.set('X-FormatX-Scheduler-Cache', 'r535-navigation-mag-scroll-intent');
+    return new Response(body, { status: response.status, statusText: response.statusText, headers });
+  });
 }
 
 export default {
@@ -132,9 +149,13 @@ export default {
     const headers = r529Headers(response.headers, localCandidate);
     if (request.method === 'HEAD') { headers.delete('Content-Length'); return new Response(null, { status: response.status, statusText: response.statusText, headers }); }
     const type = headers.get('Content-Type') || '';
+    if (deliveryUrl.pathname === P0_SCHEDULER_PATH && /javascript|text\/plain/i.test(type)) {
+      return rewrittenSchedulerResponse(response, headers);
+    }
     if (!type.includes('text/html')) return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 
     let html = restoreCriticalCoreFirstPaint(await response.text());
+    html = html.replace(P0_MOTION_SCHEDULER_RE, P0_MOTION_SCHEDULER_URL);
     html = html.replace(DEFERRED_SCHEDULER_RE, DEFERRED_SCHEDULER_URL);
     html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL);
     html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL);
