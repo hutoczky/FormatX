@@ -15,9 +15,13 @@ import canonicalProduction from './production-content-entry.js';
      reduced-motion/background lifecycle stays owned by the R528 runtime.
    - R533 refreshes the proven lightweight preloader with the roadmap timing,
      compositor visual deadline and lower-frequency progress work; the underlying
-     R529 production/content/LCP architecture remains unchanged. */
+     R529 production/content/LCP architecture remains unchanged.
+   - R533 CI is allowed to exercise this exact production entry only on the
+     dedicated local candidate endpoint 127.0.0.1:8787 / localhost:8787. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
+const LOCAL_CANDIDATE_HOSTS = new Set(['127.0.0.1', 'localhost']);
+const LOCAL_CANDIDATE_PORT = '8787';
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
@@ -51,6 +55,10 @@ const GLOBAL_LEGACY_PATHS = new Set([
 
 function isSafeMethod(request) {
   return request.method === 'GET' || request.method === 'HEAD';
+}
+function isDeliveryHost(url) {
+  if (PUBLIC_HOSTS.has(url.hostname)) return true;
+  return LOCAL_CANDIDATE_HOSTS.has(url.hostname) && url.port === LOCAL_CANDIDATE_PORT;
 }
 function stylesheetPath(tag) {
   const hrefMatch = tag.match(/\bhref=(["'])(.*?)\1/i);
@@ -112,7 +120,7 @@ function injectStaticHeart(html) {
   }
   return source;
 }
-function r529Headers(source) {
+function r529Headers(source, url) {
   const headers = new Headers(source);
   headers.set('X-FormatX-Transport-Stability', 'r529-direct-canonical-living-core');
   headers.set('X-FormatX-Edge-Stability', 'r529-r527-fcp-r528-mobile-post-fcp');
@@ -121,6 +129,9 @@ function r529Headers(source) {
   headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
   headers.set('X-FormatX-Preloader', 'r533-roadmap-timing-navigation-owned');
   headers.set('X-FormatX-Preloader-Cache', 'r533-intro-lcp-v1-compositor-css-v1');
+  if (LOCAL_CANDIDATE_HOSTS.has(url.hostname) && url.port === LOCAL_CANDIDATE_PORT) {
+    headers.set('X-FormatX-Candidate-Delivery', 'r533-exact-production-entry-localhost-8787');
+  }
   return headers;
 }
 
@@ -128,9 +139,9 @@ export default {
   async fetch(request, env, ctx) {
     const response = await canonicalProduction.fetch(request, env, ctx);
     const url = new URL(request.url);
-    if (!isSafeMethod(request) || !PUBLIC_HOSTS.has(url.hostname)) return response;
+    if (!isSafeMethod(request) || !isDeliveryHost(url)) return response;
 
-    const headers = r529Headers(response.headers);
+    const headers = r529Headers(response.headers, url);
     if (request.method === 'HEAD') {
       headers.delete('Content-Length');
       return new Response(null, { status: response.status, statusText: response.statusText, headers });
