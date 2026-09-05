@@ -16,14 +16,14 @@ import canonicalProduction from './production-content-entry.js';
    - R533 refreshes the proven lightweight preloader with the roadmap timing,
      compositor visual deadline and lower-frequency progress work; the underlying
      R529 production/content/LCP architecture remains unchanged.
-   - R533 CI is allowed to exercise this exact production entry only on the
-     dedicated local candidate endpoint 127.0.0.1:8787 / localhost:8787. Local
-     candidate requests are internally canonicalised to formatxsuite.com before
-     entering the production chain, so every R514/R529 delivery transform runs. */
+   - R533 CI is allowed to exercise this exact production entry only on Workerd's
+     local candidate hosts 127.0.0.1 / localhost. The workflow binds that runtime
+     to port 8787. Local candidate requests are internally canonicalised to
+     formatxsuite.com before entering the production chain, so every R514/R529
+     delivery transform runs. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const LOCAL_CANDIDATE_HOSTS = new Set(['127.0.0.1', 'localhost']);
-const LOCAL_CANDIDATE_PORT = '8787';
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
@@ -60,7 +60,7 @@ function isSafeMethod(request) {
   return request.method === 'GET' || request.method === 'HEAD';
 }
 function isLocalCandidate(url) {
-  return LOCAL_CANDIDATE_HOSTS.has(url.hostname) && url.port === LOCAL_CANDIDATE_PORT;
+  return LOCAL_CANDIDATE_HOSTS.has(url.hostname);
 }
 function isDeliveryHost(url) {
   return PUBLIC_HOSTS.has(url.hostname) || isLocalCandidate(url);
