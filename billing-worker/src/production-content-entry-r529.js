@@ -1,11 +1,10 @@
 import canonicalProduction from './production-content-entry.js';
 
-/* FormatX R529/R535 — direct canonical production ownership + bounded static-content intro.
-   Candidate mode exists only behind the Wrangler-only FORMATX_LOCAL_CANDIDATE=1
-   binding and is absent from deployed production. Candidate requests traverse the
-   same canonical production chain. R535 keeps the tiny reference layout selector
-   prepaint, preserves the mobile critical/accessibility shell at first paint,
-   starts the living MAG from navigation, and defers only non-critical enhancements. */
+/* FormatX R536 — direct canonical production ownership + bounded static intro.
+   Candidate mode exists only behind Wrangler-only FORMATX_LOCAL_CANDIDATE=1.
+   The tiny reference layout selector remains prepaint, the critical shell remains
+   first-paint safe, MAG starts from navigation, and non-critical enhancement work
+   is intent/lifecycle driven. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
@@ -13,9 +12,9 @@ const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
 const P0_SCHEDULER_PATH = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js';
 const P0_MOTION_SCHEDULER_RE = /formatx-p0-motion-scheduler-r490\.js\?v=[^"']+/g;
-const P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r535-navigation-mag-scroll-intent';
+const P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r536-navigation-mag-automatic-lifecycle';
 const MOTION_RUNTIME_RE = /formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g;
-const MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r535-scroll-intent-owner';
+const MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r536-design-system-intent';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
 const DEFERRED_SCHEDULER_URL = 'formatx-deferred-css-r487.js?v=20260906-r535-mobile-scroll-intent-v2';
 const EVENT_HORIZON_RE = /formatx-event-horizon\.js\?v=[^"']+/g;
@@ -26,11 +25,11 @@ const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
 const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
-const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260905-r529-first-paint-hit-surface">';
+const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r536-semantic-hit-owner">';
 const HEART_BUTTON = '<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
 const MOBILE_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)"';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
-const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260905-r529-first-paint-hit-surface>; rel=preload; as=style';
+const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r536-semantic-hit-owner>; rel=preload; as=style';
 
 const MOBILE_LEGACY_PATHS = new Set([
   '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
@@ -108,19 +107,19 @@ function addFirstPaintPreloads(headers) {
   const preloads = [MOBILE_FIRST_PAINT_PRELOAD, P0_FIRST_PAINT_PRELOAD, HEART_STYLE_PRELOAD].join(', ');
   headers.set('Link', existing ? `${existing}, ${preloads}` : preloads);
 }
-function r529Headers(source, localCandidate) {
+function r536Headers(source, localCandidate) {
   const headers = new Headers(source);
-  headers.set('X-FormatX-Transport-Stability', 'r529-direct-canonical-living-core');
-  headers.set('X-FormatX-Edge-Stability', 'r535-prepaint-reference-critical-shell');
-  headers.set('X-FormatX-CSS-Scheduler', 'r535-global-critical-first-paint-mobile-legacy-intent');
-  headers.set('X-FormatX-Product-Contract', 'r535-navigation-mag-no-manual-pause');
-  headers.set('X-FormatX-MAG-Startup', 'r535-navigation-owned-critical-living-core');
-  headers.set('X-FormatX-Mobile-LCP', 'r535-critical-shell-first-paint-preloaded');
+  headers.set('X-FormatX-Transport-Stability', 'r536-direct-canonical-living-core');
+  headers.set('X-FormatX-Edge-Stability', 'r536-prepaint-reference-critical-shell');
+  headers.set('X-FormatX-CSS-Scheduler', 'r536-global-critical-first-paint-mobile-legacy-intent');
+  headers.set('X-FormatX-Product-Contract', 'r536-navigation-mag-automatic-lifecycle');
+  headers.set('X-FormatX-MAG-Startup', 'r536-navigation-owned-critical-living-core');
+  headers.set('X-FormatX-Mobile-LCP', 'r536-critical-shell-first-paint-preloaded');
   headers.set('X-FormatX-Preloader', 'r534-static-content-roadmap-timing');
   headers.set('X-FormatX-Preloader-Cache', 'r534-static-lcp-v1-compositor-css-v1');
-  headers.set('X-FormatX-Reference-Boot', 'r535-prepaint-layout-selector');
+  headers.set('X-FormatX-Reference-Boot', 'r536-prepaint-layout-selector');
   if (localCandidate) {
-    headers.set('X-FormatX-Candidate-Delivery', 'r535-exact-production-entry-localhost-8787');
+    headers.set('X-FormatX-Candidate-Delivery', 'r536-exact-production-entry-localhost-8787');
     headers.set('X-FormatX-Candidate-Canonical-Origin', 'formatxsuite.com');
     headers.set('Link', '<https://formatxsuite.com/>; rel="canonical"');
   }
@@ -133,7 +132,7 @@ function rewrittenSchedulerResponse(response, headers) {
     headers.delete('Content-Encoding');
     headers.delete('ETag');
     headers.set('Cache-Control', 'no-store, max-age=0');
-    headers.set('X-FormatX-Scheduler-Cache', 'r535-navigation-mag-scroll-intent');
+    headers.set('X-FormatX-Scheduler-Cache', 'r536-navigation-mag-automatic-lifecycle');
     return new Response(body, { status: response.status, statusText: response.statusText, headers });
   });
 }
@@ -146,7 +145,7 @@ export default {
     const response = await canonicalProduction.fetch(request, env, ctx);
     if (!isSafeMethod(request) || !isDeliveryHost(deliveryUrl, localCandidate)) return response;
 
-    const headers = r529Headers(response.headers, localCandidate);
+    const headers = r536Headers(response.headers, localCandidate);
     if (request.method === 'HEAD') { headers.delete('Content-Length'); return new Response(null, { status: response.status, statusText: response.statusText, headers }); }
     const type = headers.get('Content-Type') || '';
     if (deliveryUrl.pathname === P0_SCHEDULER_PATH && /javascript|text\/plain/i.test(type)) {
