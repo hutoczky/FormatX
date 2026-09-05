@@ -5,24 +5,27 @@ on:
     branches: [master]
     paths:
       - 'docs/styles.css'
-      - 'docs/scifi-ui/styles/responsive-parity.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-unified.css'
-      - 'docs/scifi-ui/styles/organism-voice.css'
-      - 'docs/scifi-ui/styles/formatx-site-stability.css'
-      - 'docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'
-      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
-      - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
-      - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
-      - 'billing-worker/src/production-content-entry.js'
+      - 'docs/scifi-ui/styles/**'
+      - 'docs/scifi-ui/scripts/**'
+      - 'billing-worker/src/production-content-entry*.js'
       - 'billing-worker/src/production-content-base.js'
       - 'billing-worker/src/production-feedback-entry.js'
-      - '.github/scripts/validate-mag-pause-owner-r485.cjs'
-      - '.github/scripts/p0-fast-loop.cjs'
+      - '.github/scripts/**'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/styles.css'
+      - 'docs/scifi-ui/styles/**'
+      - 'docs/scifi-ui/scripts/**'
+      - 'billing-worker/src/production-content-entry*.js'
+      - 'billing-worker/src/production-content-base.js'
+      - 'billing-worker/src/production-feedback-entry.js'
+      - '.github/scripts/**'
       - '.github/workflows/p0-fast-loop.yml'
   workflow_dispatch:
 
 concurrency:
-  group: formatx-p0-fast-loop
+  group: formatx-p0-fast-loop-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -31,14 +34,14 @@ permissions:
 jobs:
   targeted:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install lightweight browser API only
-        run: npm install --no-save --no-package-lock playwright-core@1.62.0
+      - name: Install browser validation runtime
+        run: npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
       - name: Resolve runner Chrome
         shell: bash
         run: |
@@ -47,170 +50,64 @@ jobs:
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
           "$CHROME_BIN" --version
-      - name: Validate canonical MAG ownership source contract
-        run: node .github/scripts/validate-mag-pause-owner-r485.cjs
+      - name: Validate living-core source contract
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
+          node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
+          node --check docs/scifi-ui/scripts/formatx-core-gyro-r144.js
+          node .github/scripts/validate-living-core-r425-source.cjs
+          node .github/scripts/validate-real3d-core.cjs
+          node .github/scripts/validate-real3d-core-v20.cjs
+          node .github/scripts/production-preflight.cjs
+          node .github/scripts/validate-mag-pause-owner-r485.cjs
+          node .github/scripts/validate-wda-100-r198.cjs
       - name: Start exact source site
         shell: bash
         run: |
           set -euo pipefail
           python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/p0-fast-http.log" 2>&1 &
-          for attempt in $(seq 1 20); do
+          for attempt in $(seq 1 30); do
             curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
             sleep 0.2
           done
           cat "$RUNNER_TEMP/p0-fast-http.log"
           exit 1
-      - name: Run batched targeted source proof
+      - name: Run retained semantic source proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
-        run: node .github/scripts/p0-fast-loop.cjs --all-targeted
-      - name: Run deterministic MAG pause resume matrix
+        run: node .github/scripts/p0-fast-loop.cjs --semantic
+      - name: Run retained CLS source proof
+        env:
+          FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
+        run: node .github/scripts/p0-fast-loop.cjs --cls
+      - name: Run retained responsive overflow proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
-        run: |
-          node <<'NODE'
-          'use strict';
-          const assert=require('node:assert/strict');
-          const fs=require('node:fs');
-          const {chromium}=require('playwright-core');
-          const BASE=process.env.FORMATX_TEST_URL;
-          const CHROME=process.env.CHROME_BIN;
-          const CANVAS='#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
-          const PAUSE='#hero .fx-reference-pause';
-          fs.mkdirSync('artifacts/p0-fast-loop',{recursive:true});
-
-          async function snapshot(page,label){
-            return page.evaluate(({canvasSel,pauseSel,label})=>{
-              const canvas=document.querySelector(canvasSel);
-              const pause=document.querySelector(pauseSel);
-              window.__fxR507AnimIds ||= new WeakMap();
-              window.__fxR507AnimSeq ||= 0;
-              const animations=canvas?.getAnimations().map(a=>{
-                if(!window.__fxR507AnimIds.has(a))window.__fxR507AnimIds.set(a,`a${++window.__fxR507AnimSeq}`);
-                return {
-                  id:window.__fxR507AnimIds.get(a),
-                  animationName:String(a.animationName||''),
-                  currentTime:typeof a.currentTime==='number'?a.currentTime:null,
-                  startTime:typeof a.startTime==='number'?a.startTime:null,
-                  playState:String(a.playState||''),
-                  playbackRate:Number(a.playbackRate),
-                  pending:Boolean(a.pending),
-                };
-              })||[];
-              const css=canvas?getComputedStyle(canvas):null;
-              return {
-                label,at:performance.now(),visibility:document.visibilityState,
-                reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,
-                pauseDataset:pause?{...pause.dataset}:null,
-                animationPlayState:css?.animationPlayState||'',animations,
-                root:{
-                  referencePaused:document.documentElement.dataset.fxReferenceMotionPaused||'',
-                  primaryPlayback:document.documentElement.dataset.fxPrimaryMagPlaybackR498||'',
-                  canonicalMotion:document.documentElement.dataset.fxCanonicalMagMotionR497||'',
-                  canonicalClockOwner:document.documentElement.dataset.fxCanonicalMagClockOwnerR507||'',
-                  scheduler:document.documentElement.dataset.fxP0MotionSchedulerR490||'',
-                  referenceMode:document.documentElement.dataset.fxReferenceModeBootR334||'',
-                  deferredCss:document.documentElement.dataset.fxDeferredCssR487||'',
-                }
-              };
-            },{canvasSel:CANVAS,pauseSel:PAUSE,label});
-          }
-          async function waitForPlaybackCommit(page,paused){
-            await page.waitForFunction(({canvasSel,paused})=>{
-              const canvas=document.querySelector(canvasSel);
-              if(!(canvas instanceof HTMLCanvasElement))return false;
-              const css=String(getComputedStyle(canvas).animationPlayState||'').split(',').map(value=>value.trim()).filter(Boolean);
-              const animations=canvas.getAnimations();
-              if(!animations.length)return false;
-              const settled=animations.every(animation=>!animation.pending);
-              if(paused)return settled&&css.length>0&&css.every(value=>value==='paused')&&animations.every(animation=>animation.playState!=='running');
-              return settled&&css.some(value=>value==='running')&&animations.some(animation=>animation.playState==='running');
-            },{canvasSel:CANVAS,paused},{timeout:1000});
-          }
-          function byId(state){return new Map(state.animations.map(a=>[a.id,a]));}
-          function identity(state){return state.animations.map(a=>`${a.id}:${a.animationName}`).sort();}
-          function maxDelta(a,b){
-            const bm=byId(b);
-            return Math.max(0,...a.animations.map(x=>Math.abs((bm.get(x.id)?.currentTime??x.currentTime??0)-(x.currentTime??0))));
-          }
-          function maxAdvance(start,end){
-            const sm=byId(start);
-            return Math.max(0,...end.animations.map(x=>(x.currentTime??0)-(sm.get(x.id)?.currentTime??x.currentTime??0)));
-          }
-          async function activate(page){
-            const target=page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252').first();
-            await target.waitFor({state:'visible',timeout:20000});
-            await target.click();
-            await page.waitForFunction(sel=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'&&document.querySelectorAll(sel).length===1,CANVAS,{timeout:30000});
-          }
-          async function one(browser,kind,index,viewport,mobile){
-            const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
-            const page=await context.newPage();
-            const result={kind,index,cycles:[]};
-            try{
-              await page.goto(`${BASE}?r512-determinism=${kind}-${index}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
-              await activate(page);
-              const baseline=await snapshot(page,'baseline');
-              await page.waitForTimeout(350);
-              const baselineEnd=await snapshot(page,'baseline+350');
-              assert.deepEqual(identity(baselineEnd),identity(baseline),`${kind} ${index}: baseline animation identity changed`);
-              assert.ok(maxAdvance(baseline,baselineEnd)>120,`${kind} ${index}: baseline clock stalled`);
-              assert.equal(baselineEnd.root.canonicalClockOwner,'mag-shape-sync-r476-only',`${kind} ${index}: wrong canonical clock owner`);
-              const stableIdentity=identity(baselineEnd);
-              const pause=page.locator(PAUSE).first();
-              for(let cycle=1;cycle<=5;cycle++){
-                await pause.click();
-                await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.paused==='true',PAUSE,{timeout:3000});
-                await waitForPlaybackCommit(page,true);
-                const p0=await snapshot(page,`c${cycle}-pause-committed+0`);
-                await page.waitForTimeout(100);const p100=await snapshot(page,`c${cycle}-pause-committed+100`);
-                await page.waitForTimeout(200);const p300=await snapshot(page,`c${cycle}-pause-committed+300`);
-                const cycleEvidence={cycle,p0,p100,p300};
-                result.cycles.push(cycleEvidence);
-                assert.deepEqual(identity(p300),stableIdentity,`${kind} ${index} c${cycle}: pause recreated animation`);
-                assert.ok(maxDelta(p0,p300)<80,`${kind} ${index} c${cycle}: pause clock drift`);
-                assert.ok(p300.animations.every(a=>a.playState!=='running'&&!a.pending),`${kind} ${index} c${cycle}: animation not settled while paused`);
-
-                await pause.click();
-                await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.paused!=='true',PAUSE,{timeout:3000});
-                await waitForPlaybackCommit(page,false);
-                const r0=await snapshot(page,`c${cycle}-resume-committed+0`);
-                await page.waitForTimeout(50);const r50=await snapshot(page,`c${cycle}-resume-committed+50`);
-                await page.waitForTimeout(100);const r150=await snapshot(page,`c${cycle}-resume-committed+150`);
-                await page.waitForTimeout(150);const r300=await snapshot(page,`c${cycle}-resume-committed+300`);
-                await page.waitForTimeout(300);const r600=await snapshot(page,`c${cycle}-resume-committed+600`);
-                Object.assign(cycleEvidence,{r0,r50,r150,r300,r600,resumeAdvance:maxAdvance(r0,r600)});
-                assert.deepEqual(identity(r600),stableIdentity,`${kind} ${index} c${cycle}: resume recreated animation`);
-                assert.ok(r600.animations.some(a=>a.playState==='running'&&!a.pending),`${kind} ${index} c${cycle}: resume state not running/settled`);
-                assert.ok(maxAdvance(r0,r600)>200,`${kind} ${index} c${cycle}: resume clock stalled`);
-                assert.equal(r600.root.referencePaused,'false',`${kind} ${index} c${cycle}: user pause flag remained set`);
-                assert.equal(r600.root.primaryPlayback,'running',`${kind} ${index} c${cycle}: primary playback not running`);
-              }
-              return result;
-            }catch(error){
-              result.error=String(error&&error.stack||error);
-              try{result.failureState=await snapshot(page,'failure');}catch(stateError){result.failureStateError=String(stateError);}
-              fs.writeFileSync(`artifacts/p0-fast-loop/mag-determinism-failure-${kind}-${index}.json`,JSON.stringify(result,null,2));
-              throw error;
-            }finally{await context.close();}
-          }
-          (async()=>{
-            const browser=await chromium.launch({executablePath:CHROME,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
-            const report={head:process.env.GITHUB_SHA||'',desktop:[],mobile:[]};
-            try{
-              for(let i=1;i<=8;i++)report.desktop.push(await one(browser,'desktop',i,{width:1440,height:900},false));
-              for(let i=1;i<=5;i++)report.mobile.push(await one(browser,'mobile',i,{width:390,height:844},true));
-            }finally{await browser.close();}
-            fs.writeFileSync('artifacts/p0-fast-loop/mag-determinism.json',JSON.stringify(report,null,2));
-            console.log(`PASS: deterministic MAG matrix desktop=${report.desktop.length}/8 mobile=${report.mobile.length}/5 cycles=5 each`);
-          })().catch(error=>{console.error(error&&error.stack||error);process.exit(1);});
-          NODE
+          FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
+        run: node .github/scripts/p0-fast-loop.cjs --overflow
+      - name: Run R530 living-core browser matrix
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r522-semantic-mag
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
+      - name: Run current hero visual contract
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_VISUAL_DIR: artifacts/content-visuals
+        run: node .github/scripts/validate-content-visuals.cjs
       - name: Upload compact evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: p0-fast-loop-${{ github.sha }}
-          path: artifacts/p0-fast-loop/
+          name: p0-fast-loop-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/p0-fast-loop/
+            artifacts/r522-semantic-mag/
+            artifacts/content-visuals/
           if-no-files-found: warn
           retention-days: 30
