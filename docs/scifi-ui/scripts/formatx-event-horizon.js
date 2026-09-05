@@ -9,7 +9,7 @@ const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27
 const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const OVERLAY_ID='formatx-event-horizon';
 const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-score-v6';
-const PRELOADER_MIN_MS=MOBILE?220:280;
+const PRELOADER_MIN_MS=REDUCED?0:(MOBILE?220:280);
 const PRELOADER_MAX_MS=MOBILE?680:820;
 let audio=null,preloaderRaf=0,preloaderReleased=false;
 
@@ -50,8 +50,8 @@ function showPreloader(){
   if(!REDUCED&&wordSpan instanceof HTMLElement)wordSpan.animate([{opacity:.82},{opacity:1},{opacity:.82}],{duration:950,iterations:Infinity,easing:'ease-in-out'});
   return overlay;
 }
-function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-mag-heart-hit-r252,.fx-crystal-organism-r326-stage,.hero-space');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||ROOT.dataset.fxCurrentMagRequestR530==='navigation-owned'||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&(startup||ROOT.classList.contains('fx-intro-complete')));}
-function updatePreloader(overlay,elapsed){const output=overlay?.querySelector('[data-fx-intro-output]'),progress=overlay?.querySelector('[data-fx-intro-progress]'),status=overlay?.querySelector('[data-fx-intro-status]');const ratio=Math.min(1,elapsed/PRELOADER_MAX_MS),eased=1-Math.pow(1-ratio,2.2),value=Math.min(94,Math.max(8,Math.round(8+eased*86)));if(output instanceof HTMLOutputElement)output.value=String(value).padStart(3,'0');if(progress instanceof HTMLProgressElement)progress.value=value;if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?(elapsed>PRELOADER_MIN_MS*.7?'SYSTEM READY':'LIVING CORE STARTING'):(elapsed>PRELOADER_MIN_MS*.7?'RENDSZER KÉSZ':'ÉLŐ MAG INDÍTÁSA');}
+function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-mag-heart-hit-r252,.fx-crystal-organism-r326-stage,.hero-space');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}
+function updatePreloader(overlay,elapsed){const output=overlay?.querySelector('[data-fx-intro-output]'),progress=overlay?.querySelector('[data-fx-intro-progress]'),status=overlay?.querySelector('[data-fx-intro-status]');const ratio=Math.min(1,elapsed/PRELOADER_MAX_MS),eased=1-Math.pow(1-ratio,2.2),value=Math.min(94,Math.max(8,Math.round(8+eased*86)));if(output instanceof HTMLOutputElement)output.value=String(value).padStart(3,'0');if(progress instanceof HTMLProgressElement)progress.value=value;if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?(elapsed>Math.max(1,PRELOADER_MIN_MS)*.7?'SYSTEM READY':'LIVING CORE STARTING'):(elapsed>Math.max(1,PRELOADER_MIN_MS)*.7?'RENDSZER KÉSZ':'ÉLŐ MAG INDÍTÁSA');}
 function hidePreloader(source){
   if(preloaderReleased)return;preloaderReleased=true;if(preloaderRaf)cancelAnimationFrame(preloaderRaf);preloaderRaf=0;
   const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;return;}
