@@ -69,11 +69,12 @@ jobs:
           : > "$RUNNER_TEMP/formatx-lighthouse-headers.txt"
           for attempt in $(seq 1 240); do
             if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-headers.txt" -o /dev/null http://127.0.0.1:8787/ 2>/dev/null; then
-              if grep -Fqi 'X-FormatX-Candidate-Delivery: r535-exact-production-entry-localhost-8787' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+              if grep -Fqi 'X-FormatX-Candidate-Delivery: r536-exact-production-entry-localhost-8787' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
                  grep -Fqi 'X-FormatX-Candidate-Canonical-Origin: formatxsuite.com' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
                  grep -Fqi 'X-FormatX-Preloader: r534-static-content-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
-                 grep -Fqi 'X-FormatX-Reference-Boot: r535-prepaint-layout-selector' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
-                 grep -Fqi 'X-FormatX-CSS-Scheduler: r535-global-critical-first-paint-mobile-legacy-intent' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+                 grep -Fqi 'X-FormatX-Reference-Boot: r536-prepaint-layout-selector' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+                 grep -Fqi 'X-FormatX-CSS-Scheduler: r536-global-critical-first-paint-mobile-legacy-intent' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+                 grep -Fqi 'X-FormatX-MAG-Startup: r536-navigation-owned-critical-living-core' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
                  grep -Fqi 'rel=preload' "$RUNNER_TEMP/formatx-lighthouse-headers.txt"; then
                 ready=1
                 break
@@ -98,7 +99,7 @@ jobs:
                  grep -Fqi 'Link: <https://formatxsuite.com/>; rel="canonical"' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && \
                  grep -Fqi 'rel=preload' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && \
                  grep -Fqi 'X-FormatX-Preloader: r534-static-content-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && \
-                 grep -Fqi 'X-FormatX-Reference-Boot: r535-prepaint-layout-selector' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt"; then
+                 grep -Fqi 'X-FormatX-Reference-Boot: r536-prepaint-layout-selector' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt"; then
                 proxy_ready=1
                 break
               fi
