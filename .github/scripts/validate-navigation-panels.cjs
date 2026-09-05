@@ -216,7 +216,12 @@ async function preparePage(page) {
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await installProductionShell(page);
   await clearIntro(page);
+
+  /* R534+: the seamless runtime is intentionally outside navigation startup.
+     A real wheel input arms it; all previous shell, panel and two-cycle checks remain. */
+  await page.mouse.wheel(0, 48);
   await waitForScrollShell(page);
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
   await activateAndWaitForInterface(page);
 }
 
