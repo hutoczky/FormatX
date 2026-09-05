@@ -39,7 +39,7 @@ function stabilizeMobileCriticalGraph(html){return String(html||'').replace(/<li
 function injectReducedMagIdentity(html){const source=String(html||'');if(source.includes('data-fx-reduced-mag-identity-r528="true"'))return source;return source.replace('</head>',`  ${REDUCED_MAG_LINK}\n</head>`);}
 function cacheBustR528Runtime(html){let source=String(html||'');for(const [pattern,replacement] of R528_HTML_SCRIPT_REWRITES)source=source.replace(pattern,replacement);return source;}
 function rewriteR528Asset(url,text){let source=String(text||'');if(url.pathname==='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')source=source.replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g,`formatx-mag-shape-sync-r476.js?v=${R528_QUERY}`);return source;}
-function r528Headers(source){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r528-mobile-critical-graph');headers.set('X-FormatX-Edge-Stability','r528-mobile-critical-graph-deterministic');headers.set('X-FormatX-CSS-Scheduler','r526-post-first-contentful-paint');headers.set('X-FormatX-MAG-Contract','r528-living-core-no-manual-pause');return headers;}
+function r528Headers(source){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r528-mobile-critical-graph');headers.set('X-FormatX-Edge-Stability','r528-mobile-critical-graph-deterministic');headers.set('X-FormatX-CSS-Scheduler','r526-post-first-contentful-paint');headers.set('X-FormatX-MAG-Contract','living-core-continuous-normal-motion');return headers;}
 export default {
   async fetch(request,env,ctx){
     const response=await r527Production.fetch(request,env,ctx);const url=new URL(request.url);
