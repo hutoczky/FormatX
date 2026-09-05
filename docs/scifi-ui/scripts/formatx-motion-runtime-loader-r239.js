@@ -1,10 +1,7 @@
-/* FormatX r477 — canonical ASK activation + R476 synchronized MAG iconography.
-   The active HTML contains only current deferred enhancements. Mobile keeps the
-   bounded R484 surface-energy budget and zero frames between sweeps, while the
-   final full-size MAG compositor uses the R474 softer-glow, feathered-facet
-   phone tone. R476 mirrors the primary MAG crystal/sphere state into the header
-   and Mini MAG icons. R477 makes the visible ASK control the explicit deferred
-   Organism activation path. Desktop stays on the existing R326 material path. */
+/* FormatX R530 — navigation-owned current MAG + deferred noncritical enhancements.
+   The full-size R326 MAG is requested automatically as soon as this loader runs.
+   User-intent listeners below apply only to heavy deferred Organism/Live OS
+   enhancements; they never gate MAG startup, rendering or living motion. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -18,15 +15,19 @@ root.dataset.fxFullSuiteR474='r474-mobile-mag';
 root.dataset.fxDialogueSurfaceR475='booting';
 root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
+root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';
+root.dataset.fxMagCanonicalClockR530='compositor-heartbeat-navigation-owned';
+root.dataset.fxMagStartupNoInputR530='required';
+root.dataset.fxMotionRuntimeStartR530='navigation-owned-current-mag';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260905-r530-navigation-autostart';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy';
-const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260905-r528-lifecycle-suspension';
+const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260905-r530-static-safe-fallback';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy';
@@ -105,6 +106,7 @@ function ensureLanguageToggle(){
 function ensureCurrentMag(){
   if(currentRequested||document.querySelector('script[data-fx-current-mag-loader-r422]'))return;
   currentRequested=true;
+  root.dataset.fxCurrentMagRequestR530='navigation-owned';
   const script=document.createElement('script');script.src=CURRENT_MAG;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
@@ -126,14 +128,14 @@ function ensureStaticMotionCss(){
 function reservedInteraction(event){
   if(root.dataset.fxOrganismThought==='open')return true;
   const target=event?.target instanceof Element?event.target:null;
-  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-reference-pause,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));
+  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));
 }
 function disarm(){for(const [type,options] of intentListeners)removeEventListener(type,onIntent,options);}
 function mountEnhancements(){
   if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
-  root.dataset.fxMotionRuntimeR239='enhanced-r468-user-intent';
+  root.dataset.fxMotionRuntimeR239='enhanced-r530-deferred-user-intent';
 }
 function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
 function openPendingCanonicalAsk(){
@@ -170,8 +172,8 @@ root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
 root.dataset.fxLegacyMagRuntimeCleanupR460='static-html-clean-r461';
 root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
-root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r468':mobile.matches?'core-ready-r468-mobile-r326-controller':'core-ready-r468-desktop-r326-controller';
-root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
+root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r530-navigation':'core-ready-r530-navigation-owned';
+root.dataset.fxCoreCriticalPathR422='navigation-autostart-direct-r326-r530-living-core';
 warmCriticalOwners();
 ensureDialogueSurface();
 ensureMagShapeSync();

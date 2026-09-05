@@ -1,9 +1,11 @@
 (function(){
 'use strict';
-// r292: the r285 production composition is pure WebGL and permanently removes
+// r530: the r285 production composition is pure WebGL and permanently removes
 // the legacy r122 detail canvas. End immediately instead of probing/retrying a
 // canvas that cannot exist. The compatibility bridge remains below for older
-// deployments where the detail canvas is still present.
+// deployments where the detail canvas is still present, but it follows only
+// bounded event work plus document visibility lifecycle; manual MAG pause is
+// not part of the product contract.
 const root=document.documentElement;
 if(root.dataset.fxCoreCompositionR285==='pure-webgl3d-no-2d-overlays'){
   root.dataset.fxReferenceFinalizerR143='retired-pure-webgl-r292';
@@ -13,7 +15,6 @@ if(root.dataset.fxCoreCompositionR285==='pure-webgl3d-no-2d-overlays'){
 const FRAME_INTERVAL=1000/24;
 let raf=0,bootTimer=0,bootTries=0,tail=null,tailCtx=null,lastW=0,lastH=0,layoutDirty=true,geom=null,observedStage=null,observedGrid=null,lastDraw=0;
 let burstFrames=0;
-let paused=root.dataset.fxReferenceMotionPaused==='true';
 const imp=(el,prop,value)=>{if(el instanceof HTMLElement&&el.style.getPropertyValue(prop)!==value)el.style.setProperty(prop,value,'important');};
 const ro=typeof ResizeObserver==='function'?new ResizeObserver(()=>{layoutDirty=true;requestBurst(2);}):null;
 
@@ -58,15 +59,15 @@ function draw(now){
   const {detail}=host;if(detail.width<2||detail.height<2||g.stageHeight<2){burstFrames=0;return;}
   const visualScale=g.targetH/g.stageHeight,srcCssH=g.extra/visualScale,srcPxH=Math.max(1,Math.round(srcCssH*(detail.height/g.stageHeight)));
   tailCtx.setTransform(1,0,0,1,0,0);tailCtx.clearRect(0,0,tail.width,tail.height);tailCtx.drawImage(detail,0,Math.max(0,detail.height-srcPxH),detail.width,srcPxH,0,0,tail.width,tail.height);lastDraw=now;
-  if(burstFrames>0)burstFrames--;if(burstFrames>0&&!paused)schedule();
+  if(burstFrames>0)burstFrames--;if(burstFrames>0)schedule();
 }
 function schedule(){if(!raf&&!document.hidden)raf=requestAnimationFrame(draw);}
-function requestBurst(frames=1){paused=root.dataset.fxReferenceMotionPaused==='true';if(paused&&frames>1)frames=1;burstFrames=Math.max(burstFrames,Math.max(1,Math.min(10,frames)));schedule();}
+function requestBurst(frames=1){burstFrames=Math.max(burstFrames,Math.max(1,Math.min(10,frames)));schedule();}
 function invalidate(frames=2){layoutDirty=true;requestBurst(frames);}
 for(const name of ['formatx:real3dready','formatx:coredetailready','formatx:organisminterfaceready','formatx:languagechange'])addEventListener(name,()=>invalidate(3),{passive:true});
 addEventListener('formatx:coreinteraction',()=>requestBurst(6),{passive:true});
-addEventListener('formatx:referencepause',()=>{paused=root.dataset.fxReferenceMotionPaused==='true';if(!paused)requestBurst(3);},{passive:true});
 addEventListener('resize',()=>invalidate(2),{passive:true});addEventListener('orientationchange',()=>invalidate(2),{passive:true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(raf)cancelAnimationFrame(raf);raf=0;if(bootTimer)clearTimeout(bootTimer);bootTimer=0;burstFrames=0;}else invalidate(2);});
+root.dataset.fxReferenceFinalizerR143LifecycleR530='visibility-bounded-no-manual-pause';
 requestBurst(2);
 }());

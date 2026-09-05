@@ -1,9 +1,9 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='touch-pulse-r417-ui-safe';
-if(root.dataset.fxCoreTouchPulseR99==='ready-r417')return;
-root.dataset.fxCoreTouchPulseR99='booting-r417';
+const VERSION='touch-pulse-r528-living-core';
+if(root.dataset.fxCoreTouchPulseR99==='ready-r528')return;
+root.dataset.fxCoreTouchPulseR99='booting-r528';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let activePointer=null;
@@ -15,7 +15,7 @@ let inertiaRaf=0;
 
 const UI_SELECTOR=[
   'button','a','input','select','textarea','summary','label','[role="button"]','[role="link"]','[contenteditable="true"]','[tabindex]',
-  '.fx-reference-controls-r204','.fx-reference-rail','.fx-three-sound','.fx-reference-ask','.fx-reference-pause',
+  '.fx-reference-controls-r204','.fx-reference-rail','.fx-three-sound','.fx-reference-ask',
   '.fx-reference-mag-button','.fx-language-toggle','.fx-reference-menu-button','#menu-toggle','#main-nav',
   '.fx-organism-dialogue','.fx-organism-thought','.fx-organism-console','.fx-plan-qr-link'
 ].join(',');
@@ -34,9 +34,6 @@ function usableRect(node){
   return rect.width>=2&&rect.height>=2?rect:null;
 }
 
-/* r432: the production MAG is the r326 crystal-organism stage. Older v55
-   stages can remain in the DOM as retired compatibility nodes, so never let a
-   hidden legacy stage win geometry/pointer capture over the visible r326 MAG. */
 function stageAndRect(){
   const candidates=[
     document.querySelector('#hero .fx-crystal-organism-r326-stage'),
@@ -62,16 +59,12 @@ function stagePoint(clientX,clientY,allowOutside=false){
 
 function wake(point,phase='press',pointerType='touch'){
   if(!point)return false;
-  const pause=document.querySelector('.fx-reference-pause');
-  if(!(pause instanceof HTMLButtonElement&&pause.dataset.paused==='true')){
-    root.dataset.fxReferenceMotionPaused='false';
-    dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused:false,source:VERSION,reason:'true3d-direct-input'}}));
-  }
   const detail={source:VERSION,phase,x:point.x,y:point.y,pointerType};
   dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail}));
   dispatchEvent(new CustomEvent('formatx:organismcoreactivate',{detail}));
   root.dataset.fxCoreTouchPhysicsR384=phase;
   root.dataset.fxCoreTouchStageR432='current-r326-visible-stage';
+  root.dataset.fxCoreTouchContractR528='living-core-no-manual-pause-wake';
   return true;
 }
 
@@ -181,8 +174,8 @@ if('PointerEvent'in window){
 
 addEventListener('formatx:nativemagtouchready',()=>{activePointer=null;lastPoint=null;stopInertia();root.dataset.fxCoreTouchDelegateR434='native-r326';},{passive:true});
 addEventListener('pagehide',stopInertia,{once:true});
-root.dataset.fxCoreTouchPulseR99='ready-r417';
-root.dataset.fxCoreTouchInteractionR384='drag-inertia-webgl-ui-guard-r417';
+root.dataset.fxCoreTouchPulseR99='ready-r528';
+root.dataset.fxCoreTouchInteractionR384='drag-inertia-webgl-ui-guard-r528';
 root.dataset.fxCoreTouchUiGuardR417='ready';
 root.dataset.fxCoreTouchGeometryR432='current-r326-first-visible-stage';
 }());
