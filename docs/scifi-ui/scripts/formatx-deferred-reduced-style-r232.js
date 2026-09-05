@@ -1,10 +1,11 @@
-/* FormatX r455/R531 — CSP-safe mobile geometry seed + interaction-gated reduced-motion stylesheet. */
+/* FormatX r455/R531 — CSP-safe mobile geometry seed + reduced-motion critical visibility bootstrap. */
 (function(){
 'use strict';
 const root=document.documentElement;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const stub=document.querySelector('link[data-fx-critical-reduced-r228]');
 const FULL_URL='./styles/formatx-critical-reduced-full-r298.css?v=20260822-r299-reduced-only';
+const REDUCED_STUB_URL='./styles/formatx-critical-reduced-r228.css?v=20260905-r531-reduced-mag-visible';
 const MOBILE_FIRST_PAINT_URL='./styles/formatx-mobile-first-paint-r358.css?v=20260830-r455-csp-safe-geometry-seed';
 
 function seedMobileGeometry(){
@@ -51,6 +52,21 @@ if(!reduced.matches){
   return;
 }
 
+/* R531: reduced-motion still has a visible, automatically initialized MAG.
+   Activate only the tiny critical visibility layer immediately; the historical
+   full reduced payload remains interaction-gated to keep startup inexpensive. */
+if(stub instanceof HTMLLinkElement){
+  stub.href=REDUCED_STUB_URL;
+  stub.media='all';
+  stub.fetchPriority='high';
+  root.dataset.fxReducedMagSurfaceR531='critical-visible-loading';
+  stub.addEventListener('load',()=>{
+    root.dataset.fxReducedMagSurfaceR531='critical-visible-ready';
+    if(root.dataset.fxReducedStyleR233==='armed-no-full-fetch-r299')root.dataset.fxReducedStyleR233='armed-critical-visible-r531';
+  },{once:true});
+  stub.addEventListener('error',()=>{root.dataset.fxReducedMagSurfaceR531='critical-visible-load-failed';},{once:true});
+}
+
 let active=false;
 function activate(){
   if(active)return;
@@ -68,7 +84,6 @@ function activate(){
   }else{
     root.dataset.fxReducedStyleR233='activated-on-user-intent-r299';
   }
-  if(stub instanceof HTMLLinkElement)stub.media='not all';
   for(const [type,opts] of listeners)removeEventListener(type,activate,opts);
 }
 
@@ -76,7 +91,7 @@ const passive={passive:true};
 const listeners=[['wheel',passive],['touchstart',passive],['pointerdown',passive],['scroll',passive],['keydown',false]];
 for(const [type,opts] of listeners)addEventListener(type,activate,opts);
 if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')activate();
-else root.dataset.fxReducedStyleR233='armed-no-full-fetch-r299';
+else root.dataset.fxReducedStyleR233=stub instanceof HTMLLinkElement?'armed-critical-visible-r531':'armed-no-full-fetch-r299';
 }());
 
 /* deploy-ready-r455-csp-safe-mobile-geometry-r531-overlay-owner */

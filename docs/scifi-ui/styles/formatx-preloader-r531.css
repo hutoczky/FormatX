@@ -1,0 +1,324 @@
+/* FormatX R531 closeout — premium visual-only preloader surface.
+   One fixed DOM/CSS cover, zero WebGL/canvas/RAF ownership. MAG and the page
+   initialize underneath it. Normal motion uses compositor transform/opacity;
+   reduced motion keeps a short static presentation. */
+
+@keyframes fx-r531-static-failsafe {
+  0%, 88% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+@keyframes fx-r531-word-breathe {
+  0%,100% { transform: scale(.985); opacity: .82; }
+  44% { transform: scale(1.018); opacity: 1; }
+  68% { transform: scale(.997); opacity: .92; }
+}
+@keyframes fx-r531-grid-breathe {
+  0%,100% { opacity: .11; transform: scale(1); }
+  50% { opacity: .22; transform: scale(1.018); }
+}
+@keyframes fx-r531-scan {
+  0% { transform: translate3d(0,-26vh,0); opacity: 0; }
+  20% { opacity: .16; }
+  48% { opacity: .56; }
+  100% { transform: translate3d(0,126vh,0); opacity: 0; }
+}
+@keyframes fx-r531-flare-breathe {
+  0%,100% { transform: translate3d(-50%,-50%,0) scale(.76); opacity: .16; }
+  50% { transform: translate3d(-50%,-50%,0) scale(1.08); opacity: .42; }
+}
+@keyframes fx-r531-progress-breathe {
+  0%,100% { opacity: .76; }
+  50% { opacity: 1; }
+}
+@keyframes fx-r531-release {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Production static first paint. The source HTML may retain `hidden`; author
+   display intentionally overrides it only while the R531 static marker exists.
+   If JS never starts, the CSS-only failsafe reveals the already-laid-out page. */
+html:not([data-fx-preloader-release-r531])
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531="active"]):not([data-fx-preloader-r531="releasing"]),
+html:not([data-fx-preloader-release-r531])
+#formatx-event-horizon.fx-intro-overlay[hidden]:not([data-fx-preloader-r531]) {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100svh !important;
+  margin: 0 !important;
+  padding: max(18px, env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) max(18px, env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px)) !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  isolation: isolate !important;
+  color: #f4fbff !important;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(90,216,255,.15), transparent 31%),
+    radial-gradient(circle at 56% 54%, rgba(127,84,255,.11), transparent 48%),
+    linear-gradient(145deg, #01040b 0%, #030817 52%, #070519 100%) !important;
+  animation: fx-r531-static-failsafe 2100ms linear forwards !important;
+}
+
+#formatx-event-horizon[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531]) :is(.fx-intro-curtain,.fx-intro-portal,.fx-intro-meta,.fx-intro-skip,.fx-intro-scan,.fx-intro-flare) {
+  display: none !important;
+}
+#formatx-event-horizon[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531]) .fx-intro-grid {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  opacity: .12 !important;
+  background-image:
+    linear-gradient(rgba(124,236,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,236,255,.035) 1px, transparent 1px) !important;
+  background-size: 36px 36px !important;
+  pointer-events: none !important;
+}
+#formatx-event-horizon[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531]) .fx-intro-center {
+  position: relative !important;
+  z-index: 2 !important;
+  display: grid !important;
+  justify-items: center !important;
+  gap: 10px !important;
+  width: min(520px, calc(100vw - 40px)) !important;
+  text-align: center !important;
+}
+#formatx-event-horizon[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531]) .fx-intro-word,
+#formatx-event-horizon[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531]) .fx-intro-word span {
+  display: block !important;
+  margin: 0 !important;
+  color: #f6fdff !important;
+  -webkit-text-fill-color: #f6fdff !important;
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  font: 900 clamp(36px, 11vw, 62px)/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  letter-spacing: .08em !important;
+}
+#formatx-event-horizon[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531]) .fx-intro-kicker,
+#formatx-event-horizon[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531]) .fx-intro-subtitle {
+  display: block !important;
+  margin: 0 !important;
+  color: rgba(223,247,255,.72) !important;
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  font: 700 9px/1.35 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+  letter-spacing: .17em !important;
+}
+#formatx-event-horizon[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531]) .fx-intro-progress-wrap {
+  display: none !important;
+}
+
+/* JS-managed active/release states. */
+#formatx-event-horizon.fx-intro-overlay:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100svh !important;
+  margin: 0 !important;
+  padding: max(18px, env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) max(18px, env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px)) !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  isolation: isolate !important;
+  color: #f4fbff !important;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(90,216,255,.15), transparent 31%),
+    radial-gradient(circle at 56% 54%, rgba(127,84,255,.11), transparent 48%),
+    linear-gradient(145deg, #01040b 0%, #030817 52%, #070519 100%) !important;
+  animation: none !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="releasing"] {
+  animation: fx-r531-release 160ms cubic-bezier(.22,.61,.36,1) forwards !important;
+}
+
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) :is(.fx-intro-curtain,.fx-intro-portal,.fx-intro-skip) {
+  display: none !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-grid {
+  position: absolute !important;
+  inset: -3% !important;
+  z-index: 0 !important;
+  display: block !important;
+  opacity: .14 !important;
+  pointer-events: none !important;
+  background-image:
+    linear-gradient(rgba(124,236,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,236,255,.04) 1px, transparent 1px) !important;
+  background-size: clamp(30px, 5vw, 54px) clamp(30px, 5vw, 54px) !important;
+  transform-origin: 50% 50% !important;
+  will-change: transform, opacity !important;
+  animation: fx-r531-grid-breathe 1820ms ease-in-out infinite !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-scan {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 3 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 16vh !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(180deg, transparent, rgba(124,236,255,.18), rgba(143,114,255,.08), transparent) !important;
+  filter: blur(1px) !important;
+  will-change: transform, opacity !important;
+  animation: fx-r531-scan 1280ms cubic-bezier(.22,.61,.36,1) infinite !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-flare {
+  position: absolute !important;
+  top: 46% !important;
+  left: 50% !important;
+  z-index: 1 !important;
+  display: block !important;
+  width: min(52vw, 560px) !important;
+  height: min(52vw, 560px) !important;
+  border-radius: 50% !important;
+  opacity: .22 !important;
+  pointer-events: none !important;
+  background: radial-gradient(circle, rgba(124,236,255,.28) 0%, rgba(143,114,255,.14) 34%, rgba(124,236,255,0) 72%) !important;
+  filter: blur(18px) !important;
+  transform: translate3d(-50%,-50%,0) scale(.76) !important;
+  will-change: transform, opacity !important;
+  animation: fx-r531-flare-breathe 1540ms ease-in-out infinite !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-meta {
+  position: absolute !important;
+  top: max(18px, env(safe-area-inset-top, 0px)) !important;
+  right: max(22px, env(safe-area-inset-right, 0px)) !important;
+  left: max(22px, env(safe-area-inset-left, 0px)) !important;
+  z-index: 4 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  color: rgba(214,249,255,.48) !important;
+  opacity: .55 !important;
+  font: 700 9px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+  letter-spacing: .16em !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-center {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  z-index: 4 !important;
+  display: grid !important;
+  justify-items: center !important;
+  gap: 10px !important;
+  width: min(520px, calc(100vw - 40px)) !important;
+  margin: 0 !important;
+  text-align: center !important;
+  transform: translate3d(-50%,-50%,0) !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-kicker,
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-subtitle,
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-status,
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) [data-fx-intro-output] {
+  color: rgba(223,247,255,.82) !important;
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  font: 700 10px/1.35 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+  letter-spacing: .14em !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-word,
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-word span {
+  display: block !important;
+  margin: 0 !important;
+  color: #f6fdff !important;
+  -webkit-text-fill-color: #f6fdff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  font: 900 clamp(32px, 10vw, 58px)/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  letter-spacing: .08em !important;
+  transform-origin: 50% 50% !important;
+  will-change: transform, opacity !important;
+  animation: fx-r531-word-breathe 1180ms ease-in-out infinite !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-progress-wrap {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: max(clamp(30px, 7svh, 64px), calc(env(safe-area-inset-bottom, 0px) + 16px)) !important;
+  z-index: 4 !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(120px, 240px) !important;
+  align-items: center !important;
+  gap: 8px 12px !important;
+  width: min(360px, calc(100vw - 40px)) !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  transform: translate3d(-50%,0,0) !important;
+  will-change: opacity !important;
+  animation: fx-r531-progress-breathe 920ms ease-in-out infinite !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-progress-wrap .fx-intro-status {
+  grid-column: 1 / -1 !important;
+  text-align: center !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) progress[data-fx-intro-progress] {
+  width: 100% !important;
+  height: 3px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  appearance: none !important;
+  background: rgba(124,236,255,.13) !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) progress[data-fx-intro-progress]::-webkit-progress-bar {
+  background: rgba(124,236,255,.13) !important;
+}
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) progress[data-fx-intro-progress]::-webkit-progress-value,
+#formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) progress[data-fx-intro-progress]::-moz-progress-bar {
+  background: linear-gradient(90deg, #7cecff, #8f72ff 76%, #d9f9ff) !important;
+  box-shadow: 0 0 14px rgba(124,236,255,.45) !important;
+}
+
+@media (max-width: 720px) {
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-meta { display: none !important; }
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-flare {
+    width: 76vw !important;
+    height: 76vw !important;
+  }
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-progress-wrap {
+    width: min(340px, calc(100vw - 32px)) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-fx-preloader-release-r531]) #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-static-r531="true"]:not([data-fx-preloader-r531]) {
+    animation-duration: 700ms !important;
+  }
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]),
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) * {
+    animation: none !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-scan,
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-flare {
+    display: none !important;
+  }
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-grid {
+    display: block !important;
+    opacity: .10 !important;
+    transform: none !important;
+  }
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-word,
+  #formatx-event-horizon:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) .fx-intro-word span {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* production-r531-static-first-paint-compositor-effects-reduced-safe */
