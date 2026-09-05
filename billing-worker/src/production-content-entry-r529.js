@@ -13,9 +13,9 @@ import canonicalProduction from './production-content-entry.js';
      and keeps R528's mobile legacy CSS on the existing post-FCP scheduler.
    - Manual MAG pause is not a product contract. Normal MAG remains alive;
      reduced-motion/background lifecycle stays owned by the R528 runtime.
-   - R533 refreshes the proven lightweight preloader with the roadmap timing
-     contract and lower-frequency progress work; the underlying R529 production/
-     content/LCP architecture remains unchanged. */
+   - R533 refreshes the proven lightweight preloader with the roadmap timing,
+     compositor visual deadline and lower-frequency progress work; the underlying
+     R529 production/content/LCP architecture remains unchanged. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
@@ -27,7 +27,7 @@ const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r533-intro-lcp-v1
 const DEFERRED_REDUCED_RE = /formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g;
 const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner';
 const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
-const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r531-preloader-cls-lock';
+const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MEDIA = '(min-width: 901px) and (pointer: fine) and (min-aspect-ratio: 27/25)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
@@ -120,7 +120,7 @@ function r529Headers(source) {
   headers.set('X-FormatX-Product-Contract', 'r529-living-core-no-manual-pause');
   headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
   headers.set('X-FormatX-Preloader', 'r533-roadmap-timing-navigation-owned');
-  headers.set('X-FormatX-Preloader-Cache', 'r533-intro-lcp-v1-fresh-assets');
+  headers.set('X-FormatX-Preloader-Cache', 'r533-intro-lcp-v1-compositor-css-v1');
   return headers;
 }
 
