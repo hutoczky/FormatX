@@ -16,14 +16,13 @@ import canonicalProduction from './production-content-entry.js';
    - R533 refreshes the proven lightweight preloader with the roadmap timing,
      compositor visual deadline and lower-frequency progress work; the underlying
      R529 production/content/LCP architecture remains unchanged.
-   - R533 CI is allowed to exercise this exact production entry only on Workerd's
-     local candidate hosts 127.0.0.1 / localhost. The workflow binds that runtime
-     to port 8787. Local candidate requests are internally canonicalised to
-     formatxsuite.com before entering the production chain, so every R514/R529
-     delivery transform runs. */
+   - R533 CI is allowed to exercise this exact production entry only when the
+     inbound HTTP Host is 127.0.0.1:8787 / localhost:8787. Local candidate
+     requests are internally canonicalised to formatxsuite.com before entering
+     the production chain, so every R514/R529 delivery transform runs. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
-const LOCAL_CANDIDATE_HOSTS = new Set(['127.0.0.1', 'localhost']);
+const LOCAL_CANDIDATE_HTTP_HOSTS = new Set(['127.0.0.1:8787', 'localhost:8787', '127.0.0.1', 'localhost']);
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
@@ -59,14 +58,13 @@ const GLOBAL_LEGACY_PATHS = new Set([
 function isSafeMethod(request) {
   return request.method === 'GET' || request.method === 'HEAD';
 }
-function isLocalCandidate(url) {
-  return LOCAL_CANDIDATE_HOSTS.has(url.hostname);
+function isLocalCandidateRequest(request) {
+  return LOCAL_CANDIDATE_HTTP_HOSTS.has(String(request.headers.get('host') || '').trim().toLowerCase());
 }
-function isDeliveryHost(url) {
-  return PUBLIC_HOSTS.has(url.hostname) || isLocalCandidate(url);
+function isDeliveryHost(url, localCandidate) {
+  return PUBLIC_HOSTS.has(url.hostname) || localCandidate;
 }
 function canonicalDeliveryRequest(request, url) {
-  if (!isLocalCandidate(url)) return request;
   const canonicalUrl = new URL(url.pathname + url.search, CANONICAL_CANDIDATE_ORIGIN);
   return new Request(canonicalUrl, request);
 }
@@ -77,7 +75,7 @@ function stylesheetPath(tag) {
   catch (_) { return ''; }
 }
 function withoutAttr(tag, name) {
-  return tag.replace(new RegExp(`\\s${name}=(["'])(.*?)\\1`, 'gi'), '');
+  return tag.replace(new RegExp(`\\s${name}=(["'])(.*?)\1`, 'gi'), '');
 }
 function addAttrs(tag, attrs) {
   return tag.replace(/\s*\/?>$/, close => `${attrs}${close}`);
@@ -130,7 +128,7 @@ function injectStaticHeart(html) {
   }
   return source;
 }
-function r529Headers(source, url) {
+function r529Headers(source, localCandidate) {
   const headers = new Headers(source);
   headers.set('X-FormatX-Transport-Stability', 'r529-direct-canonical-living-core');
   headers.set('X-FormatX-Edge-Stability', 'r529-r527-fcp-r528-mobile-post-fcp');
@@ -139,7 +137,7 @@ function r529Headers(source, url) {
   headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
   headers.set('X-FormatX-Preloader', 'r533-roadmap-timing-navigation-owned');
   headers.set('X-FormatX-Preloader-Cache', 'r533-intro-lcp-v1-compositor-css-v1');
-  if (isLocalCandidate(url)) {
+  if (localCandidate) {
     headers.set('X-FormatX-Candidate-Delivery', 'r533-exact-production-entry-localhost-8787');
     headers.set('X-FormatX-Candidate-Canonical-Origin', 'formatxsuite.com');
   }
@@ -149,11 +147,12 @@ function r529Headers(source, url) {
 export default {
   async fetch(request, env, ctx) {
     const deliveryUrl = new URL(request.url);
-    if (isLocalCandidate(deliveryUrl)) request = canonicalDeliveryRequest(request, deliveryUrl);
+    const localCandidate = isLocalCandidateRequest(request);
+    if (localCandidate) request = canonicalDeliveryRequest(request, deliveryUrl);
     const response = await canonicalProduction.fetch(request, env, ctx);
-    if (!isSafeMethod(request) || !isDeliveryHost(deliveryUrl)) return response;
+    if (!isSafeMethod(request) || !isDeliveryHost(deliveryUrl, localCandidate)) return response;
 
-    const headers = r529Headers(response.headers, deliveryUrl);
+    const headers = r529Headers(response.headers, localCandidate);
     if (request.method === 'HEAD') {
       headers.delete('Content-Length');
       return new Response(null, { status: response.status, statusText: response.statusText, headers });
