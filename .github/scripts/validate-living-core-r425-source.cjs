@@ -36,6 +36,7 @@ has(intro,[
   'PRELOADER_MIN_MS=REDUCED?180:(MOBILE?440:560)',
   'PRELOADER_MAX_MS=REDUCED?520:(MOBILE?1360:1640)',
   'PRELOADER_TICK_MS=80','preloaderTimer=setTimeout(tick,PRELOADER_TICK_MS)',
+  'PRELOADER_BOOT_AT=performance.now()','late-boot-skip',
   'duration:120','SYNCHRONIZING MAG','MAG SZINKRONIZÁLÁSA','formatx:preloadercomplete',
   'fxHeroControlContractR528','sound-ask-no-manual-mag-pause','fx-reference-controls-r204',
   'fx-reference-ask','runtime-error','promise-error'
@@ -79,19 +80,26 @@ assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepa
 has(quality,[
   '#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]',
   'position: fixed !important','pointer-events: none !important',
-  '#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main',
+  '@keyframes fx-r533-preloader-visual-bound',
+  'animation: fx-r533-preloader-visual-bound 1640ms linear both !important',
+  'animation-duration: 1360ms !important','will-change: clip-path !important',
   '@media (prefers-reduced-motion: reduce)'
-],'R531 fixed preloader/CLS lock');
+],'R533 fixed paintable/compositor preloader contract');
+absent(quality,[
+  '#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main',
+  '#formatx-event-horizon[data-fx-preloader-r531="active"] ~ .topbar',
+  '#formatx-event-horizon[data-fx-preloader-r531="active"] ~ footer'
+],'R533 hero must remain paintable behind preloader');
 
 has(worker,[
   "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r533-intro-lcp-v1'",
   "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner'",
-  "QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r531-preloader-cls-lock'",
+  "QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1'",
   "X-FormatX-Preloader', 'r533-roadmap-timing-navigation-owned'",
-  "X-FormatX-Preloader-Cache', 'r533-intro-lcp-v1-fresh-assets'"
+  "X-FormatX-Preloader-Cache', 'r533-intro-lcp-v1-compositor-css-v1'"
 ],'R533 production cache/delivery contract');
 
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 for(const source of [intro,motion,current,renderer,life,governor,mini])new Function(source);
 
-console.log('PASS: R533 validates one native living MAG, no manual PAUSE owner, automatic reduced/background lifecycle, and the roadmap-bounded low-main-thread preloader contract.');
+console.log('PASS: R533 validates one native living MAG, no manual PAUSE owner, automatic reduced/background lifecycle, and the roadmap-bounded paintable/compositor preloader contract.');
