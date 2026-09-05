@@ -318,7 +318,7 @@ async function verifyFallback(browser) {
     const state = await page.evaluate(() => ({
       hero: Boolean(document.querySelector('#hero')),
       lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
-      live: Boolean(document.querySelector('#live-os,#live-os-overview,[data-fx-live-os]')),
+      live: Boolean(document.querySelector('#live-os,#live-os-overview,[data-fx-live-os],[data-fx-live-os-launcher],[data-fx-live-os-cta]')),
       proof: Boolean(document.querySelector('[data-fx-award-proof],.fx-proof-grid')),
       headerCore: Boolean(document.querySelector('.fx-reference-mag-button')),
       ask: Boolean(document.querySelector('.fx-reference-ask')),
