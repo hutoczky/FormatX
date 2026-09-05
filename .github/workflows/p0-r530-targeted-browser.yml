@@ -29,6 +29,7 @@ jobs:
           CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
       - name: Serve exact candidate docs
         shell: bash
         run: |
