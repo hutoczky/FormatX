@@ -1,4 +1,4 @@
-/* FormatX r455 — CSP-safe mobile geometry seed + interaction-gated reduced-motion stylesheet. */
+/* FormatX r455/R531 — CSP-safe mobile geometry seed + interaction-gated reduced-motion stylesheet. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -39,11 +39,9 @@ if(!reduced.matches){
   if(mobileDirect){
     seedMobileGeometry();
 
-    const overlay=document.getElementById('formatx-event-horizon');
-    if(overlay instanceof HTMLElement){
-      overlay.hidden=true;
-      overlay.setAttribute('aria-hidden','true');
-    }
+    /* R531: this bootstrap owns mobile geometry only. The Event Horizon runtime
+       is the sole owner of the short preloader overlay lifecycle, so this early
+       path must not hide or release #formatx-event-horizon. */
     root.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');
     root.classList.add('fx-intro-complete');
     root.dataset.fxIntro='mobile-direct-early-r455';
@@ -65,7 +63,7 @@ function activate(){
     full.media='all';
     full.dataset.fxCriticalReducedFullR299='true';
     full.addEventListener('load',()=>{root.dataset.fxReducedStyleR233='activated-on-user-intent-r299';},{once:true});
-    full.addEventListener('error',()=>{root.dataset.fxReducedStyleR233='full-style-load-failed-r299';},{once:true});
+    full.addEventListener('error',()=>{root.dataset.fxReducedStyleR233='full-style-load-failed';},{once:true});
     document.head.appendChild(full);
   }else{
     root.dataset.fxReducedStyleR233='activated-on-user-intent-r299';
@@ -81,4 +79,4 @@ if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')activate();
 else root.dataset.fxReducedStyleR233='armed-no-full-fetch-r299';
 }());
 
-/* deploy-ready-r455-csp-safe-mobile-geometry */
+/* deploy-ready-r455-csp-safe-mobile-geometry-r531-overlay-owner */
