@@ -20,9 +20,9 @@ const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-
 const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
 const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
-const DESKTOP_MEDIA = '(min-width: 901px) and (pointer: fine) and (min-aspect-ratio: 27/25)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
 const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260905-r529-first-paint-hit-surface">';
+const HEART_BUTTON = '<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
 const MOBILE_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)"';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260905-r529-first-paint-hit-surface>; rel=preload; as=style';
