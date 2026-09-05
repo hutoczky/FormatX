@@ -17,11 +17,14 @@ import canonicalProduction from './production-content-entry.js';
      compositor visual deadline and lower-frequency progress work; the underlying
      R529 production/content/LCP architecture remains unchanged.
    - R533 CI is allowed to exercise this exact production entry only on the
-     dedicated local candidate endpoint 127.0.0.1:8787 / localhost:8787. */
+     dedicated local candidate endpoint 127.0.0.1:8787 / localhost:8787. Local
+     candidate requests are internally canonicalised to formatxsuite.com before
+     entering the production chain, so every R514/R529 delivery transform runs. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const LOCAL_CANDIDATE_HOSTS = new Set(['127.0.0.1', 'localhost']);
 const LOCAL_CANDIDATE_PORT = '8787';
+const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
@@ -56,9 +59,16 @@ const GLOBAL_LEGACY_PATHS = new Set([
 function isSafeMethod(request) {
   return request.method === 'GET' || request.method === 'HEAD';
 }
-function isDeliveryHost(url) {
-  if (PUBLIC_HOSTS.has(url.hostname)) return true;
+function isLocalCandidate(url) {
   return LOCAL_CANDIDATE_HOSTS.has(url.hostname) && url.port === LOCAL_CANDIDATE_PORT;
+}
+function isDeliveryHost(url) {
+  return PUBLIC_HOSTS.has(url.hostname) || isLocalCandidate(url);
+}
+function canonicalDeliveryRequest(request, url) {
+  if (!isLocalCandidate(url)) return request;
+  const canonicalUrl = new URL(url.pathname + url.search, CANONICAL_CANDIDATE_ORIGIN);
+  return new Request(canonicalUrl, request);
 }
 function stylesheetPath(tag) {
   const hrefMatch = tag.match(/\bhref=(["'])(.*?)\1/i);
@@ -129,16 +139,17 @@ function r529Headers(source, url) {
   headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
   headers.set('X-FormatX-Preloader', 'r533-roadmap-timing-navigation-owned');
   headers.set('X-FormatX-Preloader-Cache', 'r533-intro-lcp-v1-compositor-css-v1');
-  if (LOCAL_CANDIDATE_HOSTS.has(url.hostname) && url.port === LOCAL_CANDIDATE_PORT) {
+  if (isLocalCandidate(url)) {
     headers.set('X-FormatX-Candidate-Delivery', 'r533-exact-production-entry-localhost-8787');
+    headers.set('X-FormatX-Candidate-Canonical-Origin', 'formatxsuite.com');
   }
   return headers;
 }
 
 export default {
   async fetch(request, env, ctx) {
-    const response = await canonicalProduction.fetch(request, env, ctx);
     const url = new URL(request.url);
+    const response = await canonicalProduction.fetch(canonicalDeliveryRequest(request, url), env, ctx);
     if (!isSafeMethod(request) || !isDeliveryHost(url)) return response;
 
     const headers = r529Headers(response.headers, url);
