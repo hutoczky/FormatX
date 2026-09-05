@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-organism-main.cjs'
+      - '.github/scripts/validate-r522-semantic-mag.cjs'
       - '.github/workflows/validate-organism-main.yml'
   workflow_dispatch:
 
@@ -25,19 +26,21 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Validate new JavaScript syntax
+      - name: Validate current living-core JavaScript syntax
         shell: bash
         run: |
           set -euo pipefail
-          node --check docs/scifi-ui/scripts/organism-interface.js
-          node --check docs/scifi-ui/scripts/living-architecture.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
+          node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
           node --check .github/scripts/validate-organism-main.cjs
 
       - name: Install Chromium
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save --no-audit --no-fund playwright@1.55.0
+          npm install --no-save --no-audit --no-fund playwright@1.62.0
           npx playwright install --with-deps chromium
 
       - name: Start static website
@@ -52,20 +55,19 @@ jobs:
           cat "$RUNNER_TEMP/formatx-organism-http.log"
           exit 1
 
-      - name: Test desktop and mobile organism interactions
+      - name: Test current desktop/mobile living organism contract
         shell: bash
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_ORGANISM_EVIDENCE_DIR: artifacts/organism-main-current
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node .github/scripts/validate-organism-main.cjs
 
-      - name: Upload visual evidence and diagnostics
+      - name: Upload current organism evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-organism-main-evidence
-          path: |
-            organism-main-report.json
-            organism-main-desktop.png
-            organism-main-desktop-failure.png
-            organism-main-mobile.png
-            organism-main-mobile-failure.png
+          name: formatx-organism-main-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/organism-main-current/
           if-no-files-found: warn
           retention-days: 7

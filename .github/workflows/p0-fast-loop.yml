@@ -11,6 +11,7 @@ on:
       - 'billing-worker/src/production-content-base.js'
       - 'billing-worker/src/production-feedback-entry.js'
       - '.github/scripts/**'
+      - '.github/workflows/p0-fast-loop.yml'
   pull_request:
     branches: [master]
     paths:
@@ -40,8 +41,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+
       - name: Install browser validation runtime
         run: npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
+
       - name: Resolve runner Chrome
         shell: bash
         run: |
@@ -50,20 +53,27 @@ jobs:
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
           "$CHROME_BIN" --version
-      - name: Validate living-core source contract
+
+      - name: Validate navigation-owned living-core source contract
         run: |
           set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js
+          node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
+          node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
           node --check docs/scifi-ui/scripts/formatx-core-gyro-r144.js
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
+          node --check .github/scripts/validate-r533-first-frame-parity.cjs
           node .github/scripts/validate-living-core-r425-source.cjs
           node .github/scripts/validate-real3d-core.cjs
           node .github/scripts/validate-real3d-core-v20.cjs
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-wda-100-r198.cjs
+
       - name: Start exact source site
         shell: bash
         run: |
@@ -75,31 +85,35 @@ jobs:
           done
           cat "$RUNNER_TEMP/p0-fast-http.log"
           exit 1
-      - name: Run retained semantic source proof
+
+      - name: Probe R532 desktop layout shifts
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
-          FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
-        run: node .github/scripts/p0-fast-loop.cjs --semantic
-      - name: Run retained CLS source proof
-        env:
-          FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
-        run: node .github/scripts/p0-fast-loop.cjs --cls
+          FORMATX_CLS_DEBUG_DIR: artifacts/r532-cls-probe
+        run: node .github/scripts/debug-r532-cls.cjs
+
+      - name: Run R533 settled-geometry CLS source proof
+        run: node .github/scripts/validate-r533-first-frame-parity.cjs
+
       - name: Run retained responsive overflow proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
         run: node .github/scripts/p0-fast-loop.cjs --overflow
-      - name: Run R530 living-core browser matrix
+
+      - name: Run R530 navigation-owned living-core browser matrix
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r522-semantic-mag
           AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node .github/scripts/validate-r522-semantic-mag.cjs
+
       - name: Run current hero visual contract
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_VISUAL_DIR: artifacts/content-visuals
-        run: node .github/scripts/validate-content-visuals.cjs
+        run: PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="$CHROME_BIN" node .github/scripts/validate-content-visuals.cjs
+
       - name: Upload compact evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -109,5 +123,6 @@ jobs:
             artifacts/p0-fast-loop/
             artifacts/r522-semantic-mag/
             artifacts/content-visuals/
+            artifacts/r532-cls-probe/
           if-no-files-found: warn
           retention-days: 30

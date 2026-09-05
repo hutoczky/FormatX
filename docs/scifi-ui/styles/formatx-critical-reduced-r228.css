@@ -1,1 +1,124 @@
-/* FormatX r299 — intentionally empty normal-mode reduced-motion stub. The full reduced payload is created by formatx-deferred-reduced-style-r232.js only for actual reduced-motion users. */
+/* FormatX R531 — lightweight reduced-motion critical surface.
+   Reduced motion keeps MAG present and automatically initialized, but removes
+   repeated/sweeping motion. This stylesheet is activated immediately only for
+   prefers-reduced-motion users by formatx-deferred-reduced-style-r232.js. */
+
+@media (prefers-reduced-motion: reduce) {
+  html:root:root body.living-architecture #hero .hero-space {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 680px !important;
+    height: clamp(360px, 92vw, 460px) !important;
+    min-height: clamp(360px, 92vw, 460px) !important;
+    margin: 0 auto 18px !important;
+    overflow: hidden !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
+  html:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+  }
+
+  html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
+  html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    visibility: visible !important;
+    opacity: .82 !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    scale: 1 !important;
+    pointer-events: none !important;
+    will-change: auto !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 {
+    position: absolute !important;
+    inset: auto auto 14px 50% !important;
+    z-index: 12080 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 52px) !important;
+    align-items: start !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    width: max-content !important;
+    min-height: 66px !important;
+    margin: 0 !important;
+    padding: 0 6px 12px !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail {
+    display: contents !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask {
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html:root:root #formatx-event-horizon.fx-intro-overlay:is([data-fx-preloader-r531="active"],[data-fx-preloader-r531="releasing"]) {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483000 !important;
+    display: grid !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100svh !important;
+    overflow: hidden !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+  }
+}
+
+/* production-r531-reduced-mag-visible-no-repeated-motion */
