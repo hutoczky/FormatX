@@ -1,0 +1,62 @@
+name: P0 R530 targeted browser proof
+
+on:
+  push:
+    branches:
+      - p0-r530-candidate
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p0-r530-targeted-browser
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install browser harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Serve exact candidate docs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs >"$RUNNER_TEMP/r530-http.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/r530-http.pid"
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/r530-http.log"
+          exit 1
+      - name: Full website hero visual contract
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_VISUAL_DIR: artifacts/r530-content-visuals
+        run: node .github/scripts/validate-content-visuals.cjs
+      - name: Living MAG semantic contract
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r530-semantic-mag
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r530-targeted-browser-${{ github.sha }}
+          path: |
+            artifacts/r530-content-visuals/
+            artifacts/r530-semantic-mag/
+          if-no-files-found: warn
+          retention-days: 14
