@@ -31,7 +31,7 @@
   const ICONS = Object.freeze({
     muted: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg>',
     sound: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M15 9.2c1.2 1.5 1.2 4.1 0 5.6"/><path d="M18 6.8c2.8 2.9 2.8 7.5 0 10.4"/></svg>',
-    pending: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 3a9 9 0 1 1-8.3 5.5"/><path d="M4 3v5h5"/></svg>',
+    pending: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 1-8.3 5.5"/><path d="M4 3v5h5"/></svg>',
     retry: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 8.5A8 8 0 1 1 4 15"/><path d="M4 4v5h5"/></svg>'
   });
 
@@ -111,7 +111,6 @@
     const controls = hero?.querySelector('.fx-reference-controls-r204');
     const rail = controls?.querySelector(':scope > .fx-reference-rail') || hero?.querySelector('.fx-reference-rail');
     const ask = rail?.querySelector('.fx-reference-ask');
-    const pause = rail?.querySelector('.fx-reference-pause');
     const topbar = document.querySelector('.topbar');
     const mag = document.querySelector('.fx-reference-mag-button');
     const lang = document.querySelector('.fx-language-toggle');
@@ -124,6 +123,10 @@
       || !(rail instanceof HTMLElement)
       || !(button instanceof HTMLButtonElement)) return false;
 
+    for (const pause of hero.querySelectorAll('.fx-reference-pause')) pause.remove();
+    root.dataset.fxManualMagPauseContractR528 = 'retired-living-core';
+    root.dataset.fxReferenceMotionPaused = 'false';
+
     if (button.parentElement !== controls) controls.prepend(button);
     if (rail.parentElement !== controls) controls.appendChild(rail);
 
@@ -131,11 +134,7 @@
     const owner = space;
     if (controls.parentElement !== owner) owner.appendChild(controls);
 
-    // r244 and older mobile generations may have left inline !important flex,
-    // top/right or translate geometry. The late r263 stylesheet is the single
-    // final geometry owner, so remove only layout inline state from this small
-    // canonical control group. Audio state and event listeners remain intact.
-    for (const node of [controls, rail, button, ask, pause]) clearLegacyControlGeometry(node);
+    for (const node of [controls, rail, button, ask]) clearLegacyControlGeometry(node);
 
     controls.classList.add('fx-reference-controls-r263');
     button.classList.add('fx-wda-sound-toggle');
@@ -149,7 +148,7 @@
     if (topbar instanceof HTMLElement && mag instanceof HTMLElement && mag.parentElement !== topbar) topbar.appendChild(mag);
     if (topbar instanceof HTMLElement && menu instanceof HTMLElement && menu.parentElement !== topbar) topbar.appendChild(menu);
 
-    root.dataset.fxReferenceControlLayout = mobile ? 'r250-mobile-reference-rail' : 'r263-desktop-three-cell';
+    root.dataset.fxReferenceControlLayout = mobile ? 'r528-mobile-reference-rail-no-manual-pause' : 'r528-desktop-two-cell-no-manual-pause';
     root.dataset.fxReferenceHeaderLayout = mag instanceof HTMLElement ? 'r263-fixed-no-overlap' : 'r263-header-pending';
     return true;
   }
@@ -265,9 +264,6 @@
     document.head.appendChild(script);
   }
 
-  // r423: the physical pointer sequence stays on the same SOUND element. The
-  // professional engine may be installed asynchronously after the trusted click;
-  // preserve that first toggle intent and replay it exactly once after handoff.
   document.addEventListener('pointerdown', event => {
     const target = event.target instanceof Element ? event.target.closest(SELECTOR) : null;
     if (!target || root.dataset.fxAudioOwner === 'professional-v6') return;
@@ -287,8 +283,6 @@
     scheduleLayout();
   }, true);
 
-  // Audio/reference state are the only steady-state mutation sources observed.
-  // No document-wide steady-state DOM observer is installed.
   const rootObserver = new MutationObserver(records => {
     const button = pickButton();
     if (button) sync(button);
