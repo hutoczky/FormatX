@@ -817,7 +817,7 @@
       surfacePulse:source=>startSurfacePulse(typeof source==='string'?source:'api'),
       surfacePulseDurationMs:SURFACE_PULSE_MS,
       setMorph:(value,source)=>setMorph(value,source||'api-morph',true),
-      setShape:(shape,source)=>setShape(shape,source||'api-set',true),
+      setShape:(shape,source)=>setShape(shape,source||'api-set'),
       toggleShape:source=>toggleShape(source||'api-toggle'),
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
       setLifecycleSuspended:(suspended,source)=>setLifecycleSuspended(suspended,source||'api-lifecycle-r528'),
@@ -851,7 +851,7 @@
     root.dataset.fxCoreGeometryTopology=geometry.topology;
     root.dataset.fxCoreVertexCount=String(geometry.count);
     root.dataset.fxCoreDimension='native-closed-3d-volume-r413';
-    root.dataset.fxCoreMorphGeometryR413='closed-sphere-and-four-tip-crystal-sphere-same-topology';
+    root.dataset.fxCoreMorphGeometryR413='closed-sphere-and-four-tip-crystal-same-topology';
     root.dataset.fxCoreMorphNormalsR413='sphere-smooth-to-crystal-faceted-native-shader';
     root.dataset.fxCoreReferenceGeometry='closed-four-tip-crystal-and-sphere-r413';
     root.dataset.fxCoreReferenceMaterial='living-organic-prismatic-membrane-r413';
