@@ -5,6 +5,8 @@ on:
     branches: [chatgpt/r530-lightweight-preloader-v2]
     paths:
       - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
+      - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
+      - 'docs/scifi-ui/styles/formatx-quality-r461.css'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - '.github/workflows/validate-r531-preloader-proof-v2.yml'
 
