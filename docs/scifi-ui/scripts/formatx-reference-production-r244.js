@@ -1,16 +1,17 @@
 (function () {
   'use strict';
 
-  /* r408 — semantic reference compatibility layer.
+  /* r408/r528 — semantic reference compatibility layer.
      r244 still creates the reference copy/control DOM required by older modules,
      but it no longer writes physical geometry. The render-blocking CSS plus the
-     canonical r268 owner are the only geometry authorities. This removes the
-     r244 -> r268 layout ping-pong that was visible to Lighthouse as CLS. */
+     canonical r268 owner are the only geometry authorities. R528 retires the
+     manual MAG PAUSE/RESUME product control because MAG is the living core. */
   const root = document.documentElement;
   const VERSION = 'r244-reference-frame';
   let queued = false;
   let bootObserver = null;
   let bootTimer = 0;
+  root.dataset.fxManualMagPauseContractR528 = 'retired-living-core';
 
   function installKeyboardModality() {
     if (root.dataset.fxKeyboardNavigationInstalledR425 === 'true') return;
@@ -39,12 +40,15 @@
     ask: 'KÉRDEZZ'
   };
 
-  // Existing validators and integrations intentionally keep this named no-op.
-  // Stylesheet order is static; moving links at runtime would re-run the cascade.
   function ensureStyleLast() {}
 
   function mutedIcon() {
     return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';
+  }
+
+  function retireManualPause(scope = document) {
+    for (const pause of scope.querySelectorAll('.fx-reference-pause')) pause.remove();
+    root.dataset.fxReferenceMotionPaused = 'false';
   }
 
   function ensureHeaderControls() {
@@ -68,8 +72,6 @@
       menu.setAttribute('aria-expanded', 'false');
       bar.appendChild(menu);
     }
-    // r268 uses document-level capture ownership, therefore this node can be
-    // declared canonical immediately without cloning/replacing it later.
     menu.dataset.fxControlOwnerR268 = 'true';
     menu.dataset.fxControlOwnerR264 = 'true';
 
@@ -140,10 +142,11 @@
     if (!(rail instanceof HTMLElement)) {
       rail = document.createElement('div');
       rail.className = 'fx-reference-rail fx-reference-rail-r264';
-      rail.innerHTML = '<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i aria-hidden="true"></i><span>KÉRDEZZ</span></button><button class="fx-reference-pause" type="button" aria-label="Animáció szüneteltetése" data-paused="false">Ⅱ</button>';
+      rail.innerHTML = '<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i aria-hidden="true"></i><span>KÉRDEZZ</span></button>';
     } else {
       rail.classList.add('fx-reference-rail-r264');
     }
+    retireManualPause(hero);
 
     const askLabel = rail.querySelector('.fx-reference-ask span');
     if (askLabel && askLabel.textContent !== strings.ask) askLabel.textContent = strings.ask;
@@ -158,14 +161,14 @@
     return { heading, proof, live, rail, controls, sound };
   }
 
-  // r408: CSS/r268 owns SOUND | ASK | PAUSE geometry. Never write inline
+  // r528: CSS/r268 owns SOUND | ASK geometry. Never write inline
   // position/display/size here; repeated real3d/mobile events must be idempotent.
   function applyControlLayout(nodes, mobile) {
     void mobile;
     nodes.controls?.classList.add('fx-reference-controls-r264');
     nodes.rail?.classList.add('fx-reference-rail-r264');
     nodes.sound?.classList.add('fx-control-owner-r264');
-    root.dataset.fxReferenceGeometrySchedulerR304 = 'css-canonical-r408-no-inline-geometry';
+    root.dataset.fxReferenceGeometrySchedulerR304 = 'css-canonical-r528-no-manual-pause';
   }
 
   function reconcile() {
@@ -187,6 +190,7 @@
       root.dataset.fxReferenceComposition = 'desktop-reference-r244';
     }
 
+    retireManualPause(hero);
     ensureHeaderControls();
     const nodes = ensureReferenceNodes(hero, grid, space);
     const expectedControlOwner = space;
