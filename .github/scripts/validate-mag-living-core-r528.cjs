@@ -3,19 +3,33 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
-const reference = fs.readFileSync('docs/scifi-ui/scripts/formatx-reference-production-r244.js', 'utf8');
-const eventHorizon = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
-const controlOwner = fs.readFileSync('docs/scifi-ui/scripts/formatx-control-owner-r268.js', 'utf8');
-const miniMag = fs.readFileSync('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js', 'utf8');
-const motionLoader = fs.readFileSync('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', 'utf8');
-const currentMag = fs.readFileSync('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js', 'utf8');
-const renderer = fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js', 'utf8');
-const governor = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js', 'utf8');
-const touch = fs.readFileSync('docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js', 'utf8');
-const sync = fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js', 'utf8');
-const reducedCss = fs.readFileSync('docs/scifi-ui/styles/formatx-reduced-mag-identity-r528.css', 'utf8');
-const semantic = fs.readFileSync('.github/scripts/validate-r522-semantic-mag.cjs', 'utf8');
-const worker = fs.readFileSync('billing-worker/src/production-content-entry-r528.js', 'utf8');
+const read = path => fs.readFileSync(path, 'utf8');
+const reference = read('docs/scifi-ui/scripts/formatx-reference-production-r244.js');
+const eventHorizon = read('docs/scifi-ui/scripts/formatx-event-horizon.js');
+const controlOwner = read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
+const miniMag = read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
+const motionLoader = read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
+const currentMag = read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
+const renderer = read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const governor = read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
+const touch = read('docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js');
+const sync = read('docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js');
+const coreLife = read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
+const directInteraction = read('docs/scifi-ui/scripts/formatx-core-direct-interaction.js');
+const geometryGuard = read('docs/scifi-ui/scripts/formatx-geometry-guard-r286.js');
+const contentLoader = read('docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js');
+const reducedCss = read('docs/scifi-ui/styles/formatx-reduced-mag-identity-r528.css');
+const p0Css = read('docs/scifi-ui/styles/formatx-p0-first-paint-r490.css');
+const activeMobileCss = [
+  ['quality-r461', read('docs/scifi-ui/styles/formatx-quality-r461.css')],
+  ['mobile-reference-layout-v1', read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css')],
+  ['mobile-proof-controls-r204', read('docs/scifi-ui/styles/formatx-mobile-proof-controls-r204.css')],
+  ['mobile-layout-r207', read('docs/scifi-ui/styles/formatx-mobile-layout-r207.css')],
+];
+const semantic = read('.github/scripts/validate-r522-semantic-mag.cjs');
+const worker = read('billing-worker/src/production-content-entry-r528.js');
+
+const obsoleteRuntime = /formatx:referencepause|fxReferenceMotionPaused|data-fx-reference-motion-paused|\.fx-reference-pause/;
 
 assert.ok(!/class=["'][^"']*fx-reference-pause/.test(reference), 'manual MAG PAUSE markup remains in canonical reference source');
 assert.ok(!/function\s+bindPause|formatx:referencepause|fxReferenceMotionPaused/.test(eventHorizon), 'event-horizon still owns obsolete manual MAG pause state/events');
@@ -31,14 +45,26 @@ for (const [name, source] of [
   ['governor', governor],
   ['touch', touch],
   ['shape-sync', sync],
+  ['core-life', coreLife],
+  ['direct-interaction', directInteraction],
+  ['geometry-guard', geometryGuard],
+  ['content-runtime-loader', contentLoader],
 ]) {
-  assert.ok(!/formatx:referencepause|fxReferenceMotionPaused|data-fx-reference-motion-paused|\.fx-reference-pause/.test(source), `${name}: obsolete manual MAG pause contract remains`);
+  assert.ok(!obsoleteRuntime.test(source), `${name}: obsolete manual MAG pause contract remains`);
 }
+for (const [name, source] of activeMobileCss) {
+  assert.ok(!/\.fx-reference-pause|data-paused=|data-fx-reference-motion-paused/.test(source), `${name}: obsolete manual MAG pause styling remains`);
+}
+assert.ok(!/\.fx-reference-pause|data-fx-reference-motion-paused/.test(p0Css), 'P0 first-paint CSS still contains obsolete manual MAG pause styling');
+
 assert.match(renderer, /function setLifecycleSuspended/, 'renderer lifecycle suspension API missing');
 assert.match(renderer, /setLifecycleSuspended:\(suspended,source\)/, 'renderer public lifecycle suspension API missing');
 assert.match(renderer, /document\.hidden\|\|!visible\|\|renderSuspended/, 'renderer lifecycle block state missing');
 assert.match(governor, /automatic-resource-lifecycle-not-user-pause/, 'mobile governor lifecycle contract marker missing');
 assert.match(touch, /living-core-no-manual-pause-wake/, 'touch path living-core contract marker missing');
+assert.match(coreLife, /living-core-no-manual-pause-reduced-motion-and-lifecycle-safe/, 'core-life R528 contract marker missing');
+assert.match(directInteraction, /setLifecycleSuspended\?\.\(false, 'direct-core-interaction'\)/, 'direct interaction does not wake through lifecycle API');
+assert.match(directInteraction, /requestRender\?\.\(2\)/, 'direct interaction lifecycle wake does not request bounded render work');
 
 assert.match(sync, /prefers-reduced-motion:\s*reduce/, 'reduced-motion media query missing from MAG runtime');
 assert.match(sync, /document\.hidden/, 'automatic background suspension missing from MAG runtime');
@@ -54,11 +80,12 @@ assert.match(semantic, /living MAG motion did not progress/, 'R522 validator doe
 assert.match(semantic, /verifyReducedMotion/, 'R522 validator does not verify reduced motion');
 assert.match(semantic, /verifyBackgroundLifecycle/, 'R522 validator does not verify background lifecycle');
 assert.match(worker, /r528-mobile-critical-graph/, 'R528 production wrapper missing');
+assert.match(worker, /X-FormatX-MAG-Contract','living-core-continuous-normal-motion/, 'R528 Worker MAG product contract header is not canonical');
 assert.match(worker, /formatx-reduced-mag-identity-r528\.css/, 'R528 reduced-motion identity layer not delivered');
 assert.ok(worker.includes('formatx-event-horizon\\.js'), 'R528 runtime cache-bust graph does not include event-horizon');
 assert.ok(worker.includes('formatx-control-owner-r268\\.js'), 'R528 runtime cache-bust graph does not include control-owner');
 assert.ok(worker.includes('formatx-motion-runtime-loader-r239\\.js'), 'R528 runtime cache-bust graph does not include motion loader');
 assert.ok(worker.includes('formatx-mini-mag-assistant-r459\\.js'), 'R528 runtime cache-bust graph does not include Mini MAG');
 
-for (const source of [reference,eventHorizon,controlOwner,miniMag,motionLoader,currentMag,renderer,governor,touch,sync]) new Function(source);
-console.log('PASS: R528 MAG living-core source contract is coherent');
+for (const source of [reference,eventHorizon,controlOwner,miniMag,motionLoader,currentMag,renderer,governor,touch,sync,coreLife,directInteraction,geometryGuard,contentLoader]) new Function(source);
+console.log('PASS: R528 MAG living-core source contract is coherent across active runtime, controls, lifecycle, reduced motion and mobile CSS');
