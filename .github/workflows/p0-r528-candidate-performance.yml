@@ -28,10 +28,9 @@ jobs:
     timeout-minutes: 30
     env:
       AUDITED_SHA: ${{ github.sha }}
-      BASE_URL: http://formatxsuite.com:4178/
+      BASE_URL: 'http://formatxsuite.com:4178/'
       EVIDENCE: artifacts/r528-candidate-performance
-      NO_PROXY: formatxsuite.com,127.0.0.1,localhost
-      no_proxy: formatxsuite.com,127.0.0.1,localhost
+      NO_PROXY: 'formatxsuite.com,127.0.0.1,localhost'
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
