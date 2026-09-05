@@ -1,5 +1,7 @@
-/* FormatX r454 — native MAG layout and accessibility composition.
-   Visible material and surface motion belong exclusively to the WebGL shader. */
+/* FormatX r454/r530 — native MAG layout and accessibility composition.
+   Visible material and surface motion belong exclusively to the WebGL shader.
+   R530 reuses the existing CSS error artwork only when WebGL is unavailable;
+   that fallback identity is explicitly static-safe and owns no render clock. */
 html,
 body {
   max-width: 100% !important;
@@ -27,6 +29,16 @@ html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero
 html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::after {
   content:none!important;display:none!important;background:none!important;background-image:none!important;
   box-shadow:none!important;filter:none!important;opacity:0!important;animation:none!important;
+}
+
+/* R530: WebGL-unavailable fallback reuses the existing external CSS error art,
+   but it must remain a restrained/static identity with no animation clock. */
+html[data-fx-three="error"][data-fx-mag-fallback-r530="static-safe-css"] body.living-architecture #hero .hero-space::before,
+html[data-fx-three="error"][data-fx-mag-fallback-r530="static-safe-css"] body.living-architecture #hero .hero-space::after {
+  animation:none!important;
+  animation-name:none!important;
+  animation-duration:0s!important;
+  animation-play-state:paused!important;
 }
 
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
@@ -71,4 +83,4 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
-/* production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer */
+/* production-r530-direct-r326-layout-a11y-touch-static-safe-fallback */
