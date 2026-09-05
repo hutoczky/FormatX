@@ -1,10 +1,10 @@
 import canonicalProduction from './production-content-entry.js';
 
-/* FormatX R536 — direct canonical production ownership + bounded static intro.
+/* FormatX R537 — direct canonical production ownership + bounded static intro.
    Candidate mode exists only behind Wrangler-only FORMATX_LOCAL_CANDIDATE=1.
    The tiny reference layout selector remains prepaint, the critical shell remains
-   first-paint safe, MAG starts from navigation, and non-critical enhancement work
-   is intent/lifecycle driven. */
+   first-paint safe, MAG starts from navigation with its lightweight semantic heart,
+   and non-critical enhancement work is intent/lifecycle driven. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
@@ -12,7 +12,7 @@ const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
 const P0_SCHEDULER_PATH = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js';
 const P0_MOTION_SCHEDULER_RE = /formatx-p0-motion-scheduler-r490\.js\?v=[^"']+/g;
-const P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r536-navigation-mag-automatic-lifecycle';
+const P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r537-navigation-interaction';
 const MOTION_RUNTIME_RE = /formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g;
 const MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r536-design-system-intent';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
@@ -25,11 +25,11 @@ const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
 const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
-const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r536-semantic-hit-owner">';
+const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r537-semantic-hit-owner">';
 const HEART_BUTTON = '<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
 const MOBILE_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)"';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
-const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r536-semantic-hit-owner>; rel=preload; as=style';
+const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r537-semantic-hit-owner>; rel=preload; as=style';
 
 const MOBILE_LEGACY_PATHS = new Set([
   '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
@@ -132,7 +132,7 @@ function rewrittenSchedulerResponse(response, headers) {
     headers.delete('Content-Encoding');
     headers.delete('ETag');
     headers.set('Cache-Control', 'no-store, max-age=0');
-    headers.set('X-FormatX-Scheduler-Cache', 'r536-navigation-mag-automatic-lifecycle');
+    headers.set('X-FormatX-Scheduler-Cache', 'r537-navigation-interaction');
     return new Response(body, { status: response.status, statusText: response.statusText, headers });
   });
 }
