@@ -16,6 +16,8 @@ function start(reason='navigation-r530'){
   started=true;
   root.dataset.fxP0MotionSchedulerR490=`starting:${reason}`;
   root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';
+  root.dataset.fxMagCanonicalClockR530='compositor-heartbeat-navigation-owned';
+  root.dataset.fxMagStartupNoInputR530='required';
   root.dataset.fxMagStartupModeR530=matchMedia('(prefers-reduced-motion: reduce)').matches
     ?'reduced-motion-navigation-owned'
     :'normal-navigation-owned';
@@ -42,6 +44,8 @@ function afterFirstPaintBoundary(){
 function armNavigationStart(){
   root.dataset.fxP0MotionSchedulerR490='navigation-owned-r530';
   root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';
+  root.dataset.fxMagCanonicalClockR530='compositor-heartbeat-navigation-owned';
+  root.dataset.fxMagStartupNoInputR530='required';
   requestAnimationFrame(()=>requestAnimationFrame(afterFirstPaintBoundary));
 }
 
