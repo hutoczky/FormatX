@@ -5,103 +5,118 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('playwright');
 
-/* R530 current product contract: MAG is the living core. Normal foreground
-   motion progresses continuously; there is no user-facing PAUSE/RESUME.
-   Reduced-motion and automatic background suspension remain accessibility /
-   resource-lifecycle behavior. WebGL failure must retain a static-safe MAG
-   identity without creating a fallback canvas, RAF owner or second renderer. */
-const ORIGIN = (process.env.FORMATX_TEST_URL || 'https://formatxsuite.com/').replace(/\/$/, '');
+/* R530 product contract: one living MAG renderer in normal foreground mode,
+   SOUND + ASK and no manual PAUSE; reduced/background lifecycle remains safe;
+   terminal WebGL failure retains a static CSS MAG identity with no canvas/RAF.
+   Browser contexts run sequentially so compositor-clock evidence is collected
+   from one foreground page at a time instead of competing headless contexts. */
+const BASE = (process.env.FORMATX_TEST_URL || 'https://formatxsuite.com/').replace(/\/$/, '');
 const OUT = process.env.FORMATX_SEMANTIC_EVIDENCE_DIR || 'artifacts/r522-semantic-mag';
 const CANVAS = '#hero .fx-crystal-organism-r326-canvas';
 const STAGE = '#hero .fx-crystal-organism-r326-stage';
 const ASK = '#hero .fx-reference-ask';
 const SOUND = '#hero .fx-three-sound';
-const MANUAL_PAUSE = '#hero .fx-reference-pause';
-
+const PAUSE = '#hero .fx-reference-pause';
 fs.mkdirSync(OUT, { recursive: true });
 const writeJson = (name, value) => fs.writeFileSync(path.join(OUT, name), JSON.stringify(value, null, 2) + '\n');
+const urlFor = tag => `${BASE}${BASE.includes('?') ? '&' : '?'}r530_semantic=${encodeURIComponent(tag)}-${Date.now()}`;
 
-async function snapshot(page) {
-  return page.evaluate(({ CANVAS, STAGE, ASK, SOUND, MANUAL_PAUSE }) => {
+async function state(page) {
+  return page.evaluate(({ CANVAS, STAGE, ASK, SOUND, PAUSE }) => {
     const root = document.documentElement;
-    const canvas = document.querySelector(CANVAS);
-    const stage = document.querySelector(STAGE);
-    const ask = document.querySelector(ASK);
-    const sound = document.querySelector(SOUND);
-    const header = document.querySelector('.topbar .fx-reference-mag-button');
-    const cs = canvas ? getComputedStyle(canvas) : null;
-    const box = canvas?.getBoundingClientRect();
-    const isVisible = element => {
-      if (!element) return false;
-      const style = getComputedStyle(element);
-      const rect = element.getBoundingClientRect();
-      return style.display !== 'none' && style.visibility !== 'hidden'
-        && Number(style.opacity || 1) > 0.2 && rect.width > 0 && rect.height > 0;
+    const visible = node => {
+      if (!node) return false;
+      const style = getComputedStyle(node), rect = node.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .2 && rect.width > 0 && rect.height > 0;
     };
+    const canvas = document.querySelector(CANVAS);
+    const box = canvas?.getBoundingClientRect();
     return {
-      at: performance.now(),
-      visibilityState: document.visibilityState,
-      reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+      visibility: document.visibilityState,
+      reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
       crystal: root.dataset.fxCrystalOrganismR326 || '',
-      shapeSync: root.dataset.fxMagShapeSyncR476 || '',
       renderer: root.dataset.fxCoreRenderer || '',
-      scheduler: root.dataset.fxCoreScheduler || '',
-      productContract: root.dataset.fxMagProductContractR528 || '',
+      product: root.dataset.fxMagProductContractR528 || '',
       playback: root.dataset.fxPrimaryMagPlaybackR498 || '',
+      surfacePulse: root.dataset.fxCoreSurfacePulseR454 || '',
+      surfaceCount: Number(root.dataset.fxCoreSurfaceCountR484 || 0),
+      surfaceScheduler: root.dataset.fxCoreSurfaceSchedulerR484 || '',
       canvasCount: document.querySelectorAll(CANVAS).length,
       stageCount: document.querySelectorAll(STAGE).length,
       rendererScriptCount: document.querySelectorAll('script[src*="formatx-crystal-organism-r326.js"]').length,
-      manualPauseCount: document.querySelectorAll(MANUAL_PAUSE).length,
-      canvas: { visible: isVisible(canvas), width: box?.width || 0, height: box?.height || 0,
-        animation: cs?.animationName || '', playState: cs?.animationPlayState || '' },
-      stageVisible: isVisible(stage), headerVisible: isVisible(header),
-      askVisible: isVisible(ask), soundVisible: isVisible(sound),
-      overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+      pauseCount: document.querySelectorAll(PAUSE).length,
+      canvasVisible: visible(canvas),
+      canvasWidth: box?.width || 0,
+      canvasHeight: box?.height || 0,
+      askVisible: visible(document.querySelector(ASK)),
+      soundVisible: visible(document.querySelector(SOUND)),
+      headerVisible: visible(document.querySelector('.topbar .fx-reference-mag-button')),
+      overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth
     };
-  }, { CANVAS, STAGE, ASK, SOUND, MANUAL_PAUSE });
+  }, { CANVAS, STAGE, ASK, SOUND, PAUSE });
 }
 
-async function animations(page) {
-  return page.evaluate(selector => (document.querySelector(selector)?.getAnimations?.() || []).map((animation, index) => ({
-    index, name: String(animation.animationName || ''),
-    time: typeof animation.currentTime === 'number' ? animation.currentTime : null,
-    state: String(animation.playState || '')
-  })), CANVAS);
+async function animationState(page) {
+  return page.evaluate(selector => (document.querySelector(selector)?.getAnimations?.() || []).map((animation, index) => {
+    const value = Number(animation.currentTime);
+    return { index, name: String(animation.animationName || ''), time: Number.isFinite(value) ? value : null, state: String(animation.playState || '') };
+  }), CANVAS);
 }
-const maxAdvance = (before, after) => Math.max(0, ...after.map(item => {
-  const previous = before.find(candidate => candidate.index === item.index && candidate.name === item.name);
-  return typeof item.time === 'number' && typeof previous?.time === 'number' ? item.time - previous.time : 0;
-}));
-const maxAbsDelta = (before, after) => Math.max(0, ...after.map(item => {
-  const previous = before.find(candidate => candidate.index === item.index && candidate.name === item.name);
-  return typeof item.time === 'number' && typeof previous?.time === 'number' ? Math.abs(item.time - previous.time) : 0;
-}));
-
-function semanticReady(state) {
-  return state.crystal === 'ready'
-    && state.renderer === 'single-webgl-crystal-organism-r326'
-    && state.canvasCount === 1 && state.stageCount === 1 && state.rendererScriptCount <= 1
-    && state.manualPauseCount === 0 && state.canvas.visible
-    && state.canvas.width > 120 && state.canvas.height > 180
-    && state.headerVisible && state.askVisible && state.soundVisible && state.overflow <= 2;
+function maxAdvance(before, after) {
+  return Math.max(0, ...after.map(item => {
+    const previous = before.find(candidate => candidate.index === item.index && candidate.name === item.name);
+    return typeof item.time === 'number' && typeof previous?.time === 'number' ? item.time - previous.time : 0;
+  }));
+}
+function maxAbsDelta(before, after) {
+  return Math.max(0, ...after.map(item => {
+    const previous = before.find(candidate => candidate.index === item.index && candidate.name === item.name);
+    return typeof item.time === 'number' && typeof previous?.time === 'number' ? Math.abs(item.time - previous.time) : 0;
+  }));
 }
 
-async function waitForSemanticReady(page, name) {
-  await page.waitForTimeout(1800);
-  let state = await snapshot(page);
-  const deadline = Date.now() + 20000;
-  while (!semanticReady(state) && Date.now() < deadline) {
-    await page.waitForTimeout(250);
-    state = await snapshot(page);
+async function waitNormalReady(page, name) {
+  await page.waitForFunction(({ CANVAS, STAGE, ASK, SOUND, PAUSE }) => {
+    const root = document.documentElement;
+    const visible = node => {
+      if (!node) return false;
+      const style = getComputedStyle(node), rect = node.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .2 && rect.width > 0 && rect.height > 0;
+    };
+    return root.dataset.fxCrystalOrganismR326 === 'ready'
+      && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
+      && document.querySelectorAll(CANVAS).length === 1
+      && document.querySelectorAll(STAGE).length === 1
+      && document.querySelectorAll(PAUSE).length === 0
+      && visible(document.querySelector(CANVAS))
+      && visible(document.querySelector(ASK))
+      && visible(document.querySelector(SOUND));
+  }, { CANVAS, STAGE, ASK, SOUND, PAUSE }, { timeout: 20000 });
+  const snapshot = await state(page);
+  console.log('R530_MAG_STATE', name, JSON.stringify(snapshot));
+  assert.equal(snapshot.rendererScriptCount <= 1, true, `${name}: duplicate renderer script`);
+  assert.ok(snapshot.canvasWidth > 120 && snapshot.canvasHeight > 180, `${name}: MAG canvas too small`);
+  assert.equal(snapshot.pauseCount, 0, `${name}: manual PAUSE reappeared`);
+  assert.ok(snapshot.headerVisible && snapshot.askVisible && snapshot.soundVisible, `${name}: controls/identity incomplete`);
+  assert.ok(snapshot.overflow <= 2, `${name}: horizontal overflow ${snapshot.overflow}`);
+  return snapshot;
+}
+
+async function proveForegroundMotion(page, name) {
+  const before = await animationState(page);
+  assert.ok(before.length > 0, `${name}: compositor animation unavailable`);
+  assert.ok(before.some(item => item.state === 'running'), `${name}: no running compositor animation`);
+  let best = 0;
+  let after = before;
+  for (const delay of [200, 300, 500, 700]) {
+    await page.waitForTimeout(delay);
+    after = await animationState(page);
+    best = Math.max(best, maxAdvance(before, after));
+    if (best > 16) break;
   }
-  console.log('R530_MAG_STATE', name, JSON.stringify(state));
-  assert.ok(semanticReady(state), `${name}: living MAG prerequisites absent ${JSON.stringify(state)}`);
-  assert.equal(state.manualPauseCount, 0, `${name}: obsolete manual MAG PAUSE still present`);
-  assert.equal(state.canvasCount, 1, `${name}: duplicate/missing canvas`);
-  assert.equal(state.stageCount, 1, `${name}: duplicate/missing stage`);
-  assert.equal(state.renderer, 'single-webgl-crystal-organism-r326', `${name}: renderer owner not singular`);
-  assert.ok(state.overflow <= 2, `${name}: horizontal overflow ${state.overflow}`);
-  return state;
+  assert.ok(after.some(item => item.state === 'running'), `${name}: compositor animation stopped`);
+  assert.ok(best > 16, `${name}: living MAG foreground animation did not progress (${best}ms)`);
+  return { advance: best, before, after };
 }
 
 async function verifyAsk(page, name) {
@@ -110,103 +125,91 @@ async function verifyAsk(page, name) {
   assert.ok(box && box.width >= 44 && box.height >= 44, `${name}: ASK hit target invalid`);
   await ask.click();
   await page.waitForTimeout(350);
-  const activation = await page.evaluate(() => ({
+  const result = await page.evaluate(() => ({
     state: document.documentElement.dataset.fxCanonicalAskActivationR477 || '',
     thought: document.documentElement.dataset.fxOrganismThought || '',
-    dialogueVisible: (() => {
+    dialogue: (() => {
       const node = document.querySelector('.fx-organism-dialogue,[data-fx-organism-dialogue]');
       if (!node) return false;
       const style = getComputedStyle(node), rect = node.getBoundingClientRect();
       return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
     })()
   }));
-  assert.ok(/dialogue-opened|loading-deferred-organism|armed/.test(activation.state)
-    || activation.thought === 'open' || activation.dialogueVisible,
-    `${name}: ASK did not enter a functional activation path ${JSON.stringify(activation)}`);
-  return { width: box.width, height: box.height, ...activation };
+  assert.ok(/dialogue-opened|loading-deferred-organism|armed/.test(result.state) || result.thought === 'open' || result.dialogue,
+    `${name}: ASK activation failed ${JSON.stringify(result)}`);
+  return { width: box.width, height: box.height, ...result };
 }
 
-async function verifyBackgroundLifecycle(context, page, name) {
-  const before = await snapshot(page);
+async function verifyLifecycle(context, page, name) {
+  const before = await state(page);
   const other = await context.newPage();
-  await other.setContent('<!doctype html><title>background probe</title>');
+  await other.setContent('<!doctype html><title>background lifecycle probe</title>');
   await other.bringToFront();
-  await page.waitForTimeout(250);
-  const hidden = await snapshot(page);
+  await page.waitForTimeout(300);
+  const hidden = await state(page);
   await page.bringToFront();
   await page.waitForTimeout(350);
-  const after = await snapshot(page);
+  const after = await state(page);
   await other.close();
-  const testable = hidden.visibilityState === 'hidden';
+  const testable = hidden.visibility === 'hidden';
   if (testable) {
-    assert.equal(hidden.canvasCount, 1, `${name}: canvas duplicated while backgrounded`);
-    assert.equal(hidden.stageCount, 1, `${name}: stage duplicated while backgrounded`);
-    assert.equal(after.canvasCount, 1, `${name}: canvas duplicated after foreground return`);
-    assert.equal(after.stageCount, 1, `${name}: stage duplicated after foreground return`);
-    assert.equal(after.renderer, before.renderer, `${name}: renderer owner changed after lifecycle`);
-    const a0 = await animations(page); await page.waitForTimeout(300); const a1 = await animations(page);
-    assert.ok(maxAdvance(a0, a1) > 16, `${name}: motion did not resume after background return`);
+    assert.equal(hidden.canvasCount, 1, `${name}: canvas changed in background`);
+    assert.equal(hidden.stageCount, 1, `${name}: stage changed in background`);
+    assert.equal(after.canvasCount, 1, `${name}: canvas changed after resume`);
+    assert.equal(after.stageCount, 1, `${name}: stage changed after resume`);
+    assert.equal(after.renderer, before.renderer, `${name}: renderer owner changed after resume`);
+    await proveForegroundMotion(page, `${name}-resumed`);
   }
   return { testable, before, hidden, after };
 }
 
 async function verifyNormal(browser, name, viewport, mobile) {
-  const context = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile,
-    deviceScaleFactor: mobile ? 2 : 1, locale: 'hu-HU', colorScheme: 'dark', reducedMotion: 'no-preference' });
+  const context = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: mobile ? 2 : 1,
+    locale: 'hu-HU', colorScheme: 'dark', reducedMotion: 'no-preference' });
   const page = await context.newPage();
   const errors = [], failed = [];
   page.on('pageerror', error => errors.push(String(error)));
   page.on('console', message => { const text = message.text(); if (message.type() === 'error' && !/favicon|WebGL|WebGPU|GPU/i.test(text)) errors.push(text); });
-  page.on('requestfailed', request => { const url = request.url(); if (!/cloudflareinsights|favicon/i.test(url)) failed.push(`${request.method()} ${url} ${request.failure()?.errorText || ''}`.trim()); });
+  page.on('requestfailed', request => { if (!/cloudflareinsights|favicon/i.test(request.url())) failed.push(`${request.method()} ${request.url()} ${request.failure()?.errorText || ''}`); });
   try {
-    await page.goto(`${ORIGIN}?r530_semantic=${name}-${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    const state = await waitForSemanticReady(page, name);
-    const a0 = await animations(page); await page.waitForTimeout(400); const a1 = await animations(page);
-    assert.ok(a0.length > 0 && a1.length === a0.length, `${name}: MAG animation set unavailable`);
-    const motionAdvance = maxAdvance(a0, a1);
-    assert.ok(motionAdvance > 16, `${name}: living MAG motion did not progress (${motionAdvance}ms)`);
+    await page.goto(urlFor(name), { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const initial = await waitNormalReady(page, name);
+    const motion = await proveForegroundMotion(page, name);
     const ask = await verifyAsk(page, name);
-    const lifecycle = await verifyBackgroundLifecycle(context, page, name);
-    const finalState = await snapshot(page);
-    assert.equal(finalState.canvasCount, 1); assert.equal(finalState.stageCount, 1); assert.equal(finalState.manualPauseCount, 0);
+    const lifecycle = await verifyLifecycle(context, page, name);
+    const finalState = await state(page);
+    assert.equal(finalState.canvasCount, 1); assert.equal(finalState.stageCount, 1); assert.equal(finalState.pauseCount, 0);
     assert.equal(errors.length, 0, `${name}: console/page errors ${errors.join(' | ')}`);
     assert.equal(failed.length, 0, `${name}: request failures ${failed.join(' | ')}`);
-    return { name, viewport, state, motionAdvance, ask, lifecycle, finalState };
+    return { name, viewport, initial, motionAdvance: motion.advance, ask, lifecycle, finalState };
   } finally { await context.close(); }
 }
 
-async function verifyReducedMotion(browser) {
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce', locale: 'hu-HU' });
+async function verifyReduced(browser) {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+    deviceScaleFactor: 2, locale: 'hu-HU', reducedMotion: 'reduce' });
   const page = await context.newPage();
   const errors = []; page.on('pageerror', error => errors.push(String(error)));
   try {
-    await page.goto(`${ORIGIN}?r530_semantic_reduced=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.goto(urlFor('reduced-motion'), { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(4200);
-    const state = await snapshot(page);
-    const content = await page.evaluate(() => ({ hero: Boolean(document.querySelector('#hero')), lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length }));
-    assert.ok(content.hero && content.lead > 40, `reduced-motion content incomplete ${JSON.stringify(content)}`);
-    assert.equal(state.manualPauseCount, 0, 'reduced-motion: obsolete manual PAUSE present');
-    assert.ok(state.headerVisible && (state.stageVisible || state.canvas.visible) && state.askVisible, `reduced-motion: product identity incomplete ${JSON.stringify(state)}`);
-    assert.ok(state.overflow <= 2, `reduced-motion overflow ${state.overflow}`);
-    const a0 = await animations(page); await page.waitForTimeout(500); const a1 = await animations(page);
-    const reducedDelta = maxAbsDelta(a0, a1);
-    if (a0.length && a1.length) assert.ok(reducedDelta < 100, `reduced-motion animation too active (${reducedDelta}ms)`);
+    const snapshot = await state(page);
+    const text = await page.locator('#hero .hero-lead').textContent();
+    assert.ok((text || '').trim().length > 40, 'reduced-motion: hero content missing');
+    assert.equal(snapshot.pauseCount, 0, 'reduced-motion: manual PAUSE present');
+    assert.ok(snapshot.headerVisible && snapshot.askVisible && snapshot.soundVisible, 'reduced-motion: MAG identity/controls incomplete');
+    assert.ok(snapshot.canvasVisible || snapshot.crystal === 'context-unavailable', 'reduced-motion: MAG identity blank');
+    assert.ok(snapshot.overflow <= 2, `reduced-motion overflow ${snapshot.overflow}`);
+    const a0 = await animationState(page); await page.waitForTimeout(500); const a1 = await animationState(page);
+    if (a0.length && a1.length) assert.ok(maxAbsDelta(a0, a1) < 100, 'reduced-motion animation too active');
     const ask = await verifyAsk(page, 'reduced-motion');
     assert.equal(errors.length, 0, `reduced-motion page errors ${errors.join(' | ')}`);
-    return { state, content, reducedDelta, ask };
+    return { state: snapshot, ask };
   } finally { await context.close(); }
 }
 
-async function waitForFallbackReady(page) {
-  await page.waitForFunction(() => {
-    const root = document.documentElement;
-    return root.dataset.fxMagFallbackR530 === 'static-safe-css'
-      && root.dataset.fxCurrentMagRuntimeR422 === 'ready-static-fallback';
-  }, null, { timeout: 10000 });
-}
-
 async function verifyFallback(browser) {
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, locale: 'hu-HU' });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, locale: 'hu-HU' });
   await context.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function(type, ...args) {
@@ -217,66 +220,46 @@ async function verifyFallback(browser) {
   const page = await context.newPage();
   const errors = []; page.on('pageerror', error => errors.push(String(error)));
   try {
-    await page.goto(`${ORIGIN}?r530_semantic_fallback=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await waitForFallbackReady(page);
-    const state = await page.evaluate(({ CANVAS, STAGE, ASK, SOUND, MANUAL_PAUSE }) => {
-      const root = document.documentElement;
-      const host = document.querySelector('#hero .hero-space');
+    await page.goto(urlFor('webgl-fallback'), { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.documentElement.dataset.fxMagFallbackR530 === 'static-safe-css'
+      && document.documentElement.dataset.fxCurrentMagRuntimeR422 === 'ready-static-fallback', null, { timeout: 10000 });
+    const fallback = await page.evaluate(({ CANVAS, STAGE, ASK, SOUND, PAUSE }) => {
+      const root = document.documentElement, host = document.querySelector('#hero .hero-space');
       const before = host ? getComputedStyle(host, '::before') : null;
-      const after = host ? getComputedStyle(host, '::after') : null;
-      const visible = element => {
-        if (!element) return false;
-        const style = getComputedStyle(element), rect = element.getBoundingClientRect();
+      const visible = node => {
+        if (!node) return false;
+        const style = getComputedStyle(node), rect = node.getBoundingClientRect();
         return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .2 && rect.width > 0 && rect.height > 0;
       };
-      const pseudo = style => style ? {
-        content: style.content,
-        display: style.display,
-        opacity: style.opacity,
-        backgroundImage: style.backgroundImage,
-        animationName: style.animationName,
-        animationDuration: style.animationDuration,
-        animationPlayState: style.animationPlayState
-      } : null;
       return {
-        hero: Boolean(document.querySelector('#hero')),
         lead: (document.querySelector('#hero .hero-lead')?.textContent || '').trim().length,
         proof: Boolean(document.querySelector('[data-fx-award-proof],.fx-proof-grid')),
-        headerCore: visible(document.querySelector('.fx-reference-mag-button')),
-        ask: visible(document.querySelector(ASK)),
-        sound: visible(document.querySelector(SOUND)),
-        pause: document.querySelectorAll(MANUAL_PAUSE).length,
-        canvasCount: document.querySelectorAll(CANVAS).length,
-        stageCount: document.querySelectorAll(STAGE).length,
-        crystal: root.dataset.fxCrystalOrganismR326 || '',
-        real3d: root.dataset.fxCoreReal3d || '',
-        three: root.dataset.fxThree || '',
-        fallback: root.dataset.fxMagFallbackR530 || '',
-        runtime: root.dataset.fxCurrentMagRuntimeR422 || '',
+        header: visible(document.querySelector('.fx-reference-mag-button')),
+        ask: visible(document.querySelector(ASK)), sound: visible(document.querySelector(SOUND)),
+        pauseCount: document.querySelectorAll(PAUSE).length, canvasCount: document.querySelectorAll(CANVAS).length,
+        stageCount: document.querySelectorAll(STAGE).length, crystal: root.dataset.fxCrystalOrganismR326 || '',
+        three: root.dataset.fxThree || '', fallback: root.dataset.fxMagFallbackR530 || '', runtime: root.dataset.fxCurrentMagRuntimeR422 || '',
         rendererSelection: root.dataset.fxCoreRendererSelection || '',
-        before: pseudo(before),
-        after: pseudo(after),
+        pseudo: before ? { content: before.content, display: before.display, opacity: before.opacity,
+          backgroundImage: before.backgroundImage, animationName: before.animationName, animationPlayState: before.animationPlayState } : null,
         overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth
       };
-    }, { CANVAS, STAGE, ASK, SOUND, MANUAL_PAUSE });
-
-    assert.ok(state.hero && state.lead > 40 && state.proof && state.headerCore && state.ask && state.sound,
-      `fallback lost meaningful product/control content ${JSON.stringify(state)}`);
-    assert.equal(state.crystal, 'context-unavailable', `fallback did not originate from WebGL failure ${JSON.stringify(state)}`);
-    assert.equal(state.three, 'error', `fallback CSS artwork state missing ${JSON.stringify(state)}`);
-    assert.equal(state.fallback, 'static-safe-css', `fallback identity owner missing ${JSON.stringify(state)}`);
-    assert.equal(state.runtime, 'ready-static-fallback', `fallback runtime did not settle ${JSON.stringify(state)}`);
-    assert.equal(state.rendererSelection, 'static-safe-css-fallback-r530', `fallback renderer selection invalid ${JSON.stringify(state)}`);
-    assert.equal(state.canvasCount, 0, `fallback must not create/retain a renderer canvas ${JSON.stringify(state)}`);
-    assert.equal(state.stageCount, 0, `fallback must not create/retain a renderer stage ${JSON.stringify(state)}`);
-    assert.equal(state.pause, 0, 'fallback: obsolete manual PAUSE present');
-    assert.ok(state.before && state.before.content !== 'none' && state.before.display !== 'none' && state.before.backgroundImage !== 'none',
-      `fallback MAG identity artwork is blank ${JSON.stringify(state.before)}`);
-    assert.equal(state.before.animationName, 'none', `fallback MAG identity must be static-safe ${JSON.stringify(state.before)}`);
-    assert.ok(state.overflow <= 2, `fallback overflow ${state.overflow}`);
+    }, { CANVAS, STAGE, ASK, SOUND, PAUSE });
+    assert.ok(fallback.lead > 40 && fallback.proof && fallback.header && fallback.ask && fallback.sound,
+      `fallback lost product/control content ${JSON.stringify(fallback)}`);
+    assert.equal(fallback.crystal, 'context-unavailable'); assert.equal(fallback.three, 'error');
+    assert.equal(fallback.fallback, 'static-safe-css'); assert.equal(fallback.runtime, 'ready-static-fallback');
+    assert.equal(fallback.rendererSelection, 'static-safe-css-fallback-r530');
+    assert.equal(fallback.canvasCount, 0, 'fallback retained renderer canvas');
+    assert.equal(fallback.stageCount, 0, 'fallback retained renderer stage');
+    assert.equal(fallback.pauseCount, 0, 'fallback manual PAUSE present');
+    assert.ok(fallback.pseudo && fallback.pseudo.content !== 'none' && fallback.pseudo.display !== 'none'
+      && fallback.pseudo.backgroundImage !== 'none', `fallback MAG identity blank ${JSON.stringify(fallback.pseudo)}`);
+    assert.equal(fallback.pseudo.animationName, 'none', 'fallback MAG identity is animated');
+    assert.ok(fallback.overflow <= 2, `fallback overflow ${fallback.overflow}`);
     const ask = await verifyAsk(page, 'fallback');
     assert.equal(errors.length, 0, `fallback page errors ${errors.join(' | ')}`);
-    return { ...state, ask };
+    return { ...fallback, ask };
   } finally { await context.close(); }
 }
 
@@ -284,19 +267,17 @@ async function verifyFallback(browser) {
   const browser = await chromium.launch({ executablePath: process.env.CHROME_BIN, headless: true,
     args: ['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader'] });
   try {
-    const [desktop, mobile, reducedMotion, fallback] = await Promise.all([
-      verifyNormal(browser, 'desktop-1440x900', { width: 1440, height: 900 }, false),
-      verifyNormal(browser, 'mobile-390x844', { width: 390, height: 844 }, true),
-      verifyReducedMotion(browser), verifyFallback(browser)
-    ]);
-    const report = { auditedSha: process.env.AUDITED_SHA || '', origin: ORIGIN,
-      contract: 'R530 living core: SOUND+ASK, continuous normal motion, reduced/background lifecycle safe, static-safe WebGL fallback, no manual PAUSE',
+    const desktop = await verifyNormal(browser, 'desktop-1440x900', { width: 1440, height: 900 }, false);
+    const mobile = await verifyNormal(browser, 'mobile-390x844', { width: 390, height: 844 }, true);
+    const reducedMotion = await verifyReduced(browser);
+    const fallback = await verifyFallback(browser);
+    const report = { auditedSha: process.env.AUDITED_SHA || '', origin: BASE,
+      contract: 'R530 living core: SOUND+ASK, foreground motion, reduced/background lifecycle, static-safe WebGL fallback, no manual PAUSE',
       desktop, mobile, reducedMotion, fallback };
     writeJson('report.json', report);
     console.log('R530_SEMANTIC_MAG_PASS');
-    console.log(JSON.stringify(report, null, 2));
   } finally { await browser.close(); }
 })().catch(error => {
-  writeJson('report-failure.json', { auditedSha: process.env.AUDITED_SHA || '', origin: ORIGIN, error: String(error?.stack || error) });
+  writeJson('report-failure.json', { auditedSha: process.env.AUDITED_SHA || '', origin: BASE, error: String(error?.stack || error) });
   console.error(error?.stack || error); process.exit(1);
 });
