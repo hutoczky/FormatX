@@ -458,12 +458,14 @@
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
+      const nextAspect=rect.width/Math.max(1,rect.height);
+      const changed=canvas.width!==w||canvas.height!==h||Math.abs(nextAspect-aspect)>.0005;
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
-      width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
+      width=w;height=h;aspect=nextAspect;gl.viewport(0,0,w,h);
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
       root.dataset.fxCoreViewportAspect=aspect.toFixed(4);
-      return true;
+      return changed;
     }
 
     function blocked(){return disposed||contextLost||document.hidden||!visible||renderSuspended;}
@@ -774,9 +776,11 @@
     const ro=new ResizeObserver(()=>{if(resize())schedule(1);});
     ro.observe(stage);
     const io=new IntersectionObserver(entries=>{
-      visible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.04);
-      if(visible)schedule(1);else if(raf){cancelAnimationFrame(raf);raf=0;}
-      scheduleSurfacePulse();
+      const nextVisible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.04);
+      const visibilityChanged=nextVisible!==visible;
+      visible=nextVisible;
+      if(visibilityChanged&&visible)schedule(1);else if(!visible&&raf){cancelAnimationFrame(raf);raf=0;}
+      if(visibilityChanged)scheduleSurfacePulse();
     },{threshold:[0,.04]});
     io.observe(stage);
     const sectionShapes={hero:'crystal',experience:'sphere',capabilities:'crystal',pricing:'sphere',system:'crystal',resources:'sphere'};
