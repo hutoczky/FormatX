@@ -1,8 +1,7 @@
-/* FormatX R533 — bounded lightweight preloader over the navigation-owned living core.
-   The preloader never owns MAG startup: MAG stays navigation-owned behind the
-   overlay, manual PAUSE stays retired, and release is hard-bounded for LCP.
-   If this script itself boots after the hard deadline, the visual intro is
-   skipped rather than creating a late paint/LCP candidate. */
+/* FormatX R534 — static-content, compositor-only bounded preloader.
+   MAG startup remains navigation-owned behind the visual layer. The intro keeps
+   the roadmap minimum/hard bounds, but its text never changes after first paint:
+   no counter/status repaint can become a late LCP candidate. */
 (function(){
 'use strict';
 
@@ -31,6 +30,7 @@ ROOT.dataset.fxCanonicalMagMotionR528='living-core-normal-continuous-reduced-bac
 ROOT.dataset.fxPreloaderContractR531='visual-only-mag-independent-bounded';
 ROOT.dataset.fxPreloaderEffectsR531=REDUCED?'reduced-static':'compositor-glow-scan-pulse';
 ROOT.dataset.fxPreloaderTimingR533=MOBILE?'mobile-440-1360':'desktop-560-1640';
+ROOT.dataset.fxPreloaderContentR534='static-no-repaint';
 ROOT.dataset.fxPreloaderBootR533=String(Math.round(PRELOADER_BOOT_AT));
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
@@ -51,15 +51,9 @@ function animateEffect(node,keyframes,options){if(REDUCED||!(node instanceof HTM
 function skipLatePreloader(){
   preloaderReleased=true;
   const overlay=document.getElementById(OVERLAY_ID);
-  if(overlay instanceof HTMLElement){
-    overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';
-    for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);
-  }
-  ROOT.dataset.fxPreloaderR531='done';
-  ROOT.dataset.fxPreloaderReleaseR531='late-boot-skip';
-  ROOT.dataset.fxPreloaderLateSkipR533='true';
-  document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source:'late-boot-skip'}}));
-  return null;
+  if(overlay instanceof HTMLElement){overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);}
+  ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531='late-boot-skip';ROOT.dataset.fxPreloaderLateSkipR533='true';
+  document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source:'late-boot-skip'}}));return null;
 }
 function showPreloader(){
   const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement))return null;
@@ -70,21 +64,18 @@ function showPreloader(){
   if(scan instanceof HTMLElement){force(scan,'display','block');force(scan,'position','absolute');force(scan,'left','0');force(scan,'top','0');force(scan,'width','100%');force(scan,'height','16vh');force(scan,'opacity','0');force(scan,'pointer-events','none');force(scan,'background','linear-gradient(180deg,transparent,rgba(124,236,255,.18),rgba(143,114,255,.08),transparent)');force(scan,'filter','blur(1px)');}
   if(flare instanceof HTMLElement){force(flare,'display','block');force(flare,'position','absolute');force(flare,'left','50%');force(flare,'top','46%');force(flare,'width',MOBILE?'74vw':'min(48vw,520px)');force(flare,'height',MOBILE?'74vw':'min(48vw,520px)');force(flare,'border-radius','50%');force(flare,'opacity','.24');force(flare,'pointer-events','none');force(flare,'background','radial-gradient(circle,rgba(124,236,255,.28) 0%,rgba(143,114,255,.14) 34%,rgba(124,236,255,0) 72%)');force(flare,'filter','blur(18px)');force(flare,'transform','translate(-50%,-50%) scale(.72)');}
   if(grid instanceof HTMLElement){force(grid,'display','block');force(grid,'position','absolute');force(grid,'inset','0');force(grid,'opacity','.18');force(grid,'pointer-events','none');force(grid,'background-image','linear-gradient(rgba(124,236,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(124,236,255,.035) 1px,transparent 1px)');force(grid,'background-size','36px 36px');}
-  if(output instanceof HTMLOutputElement)output.value='000';if(progress instanceof HTMLProgressElement)progress.value=0;if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'LIVING CORE STARTING':'ÉLŐ MAG INDÍTÁSA';
-  animateEffect(wordSpan,[{opacity:.72,transform:'scale(.975)'},{opacity:1,transform:'scale(1.025)'},{opacity:.82,transform:'scale(.99)'}],{duration:1180,iterations:Infinity,easing:'ease-in-out'});
+  if(output instanceof HTMLOutputElement)output.value='LIVE';if(progress instanceof HTMLProgressElement){progress.removeAttribute('value');progress.setAttribute('aria-label',ROOT.lang==='en'?'Living core starting':'Élő MAG indítása');}if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'LIVING CORE STARTING':'ÉLŐ MAG INDÍTÁSA';
   animateEffect(scan,[{transform:'translateY(-24vh)',opacity:0},{opacity:.58,offset:.44},{transform:'translateY(112vh)',opacity:0}],{duration:1280,iterations:Infinity,easing:'cubic-bezier(.22,.61,.36,1)'});
   animateEffect(flare,[{transform:'translate(-50%,-50%) scale(.72)',opacity:.18},{transform:'translate(-50%,-50%) scale(1.08)',opacity:.48},{transform:'translate(-50%,-50%) scale(.82)',opacity:.24}],{duration:1540,iterations:Infinity,easing:'ease-in-out'});
   animateEffect(grid,[{opacity:.14},{opacity:.28},{opacity:.16}],{duration:1820,iterations:Infinity,easing:'ease-in-out'});
-  animateEffect(progressWrap,[{opacity:.72},{opacity:1},{opacity:.82}],{duration:920,iterations:Infinity,easing:'ease-in-out'});
   return overlay;
 }
 function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-mag-heart-hit-r252,.fx-crystal-organism-r326-stage,.hero-space');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}
-function updatePreloader(overlay,elapsed){const output=overlay?.querySelector('[data-fx-intro-output]'),progress=overlay?.querySelector('[data-fx-intro-progress]'),status=overlay?.querySelector('[data-fx-intro-status]');const ratio=Math.min(1,elapsed/PRELOADER_MAX_MS),eased=1-Math.pow(1-ratio,2.05),value=Math.min(96,Math.max(5,Math.round(5+eased*91)));if(output instanceof HTMLOutputElement)output.value=String(value).padStart(3,'0');if(progress instanceof HTMLProgressElement)progress.value=value;if(status instanceof HTMLElement){const phase=ratio<.42?0:(ratio<.78?1:2);status.textContent=ROOT.lang==='en'?(phase===0?'LIVING CORE STARTING':phase===1?'SYNCHRONIZING MAG':'SYSTEM READY'):(phase===0?'ÉLŐ MAG INDÍTÁSA':phase===1?'MAG SZINKRONIZÁLÁSA':'RENDSZER KÉSZ');}}
-function hidePreloader(source){if(preloaderReleased)return;preloaderReleased=true;if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;return;}const output=overlay.querySelector('[data-fx-intro-output]'),progress=overlay.querySelector('[data-fx-intro-progress]'),status=overlay.querySelector('[data-fx-intro-status]');if(output instanceof HTMLOutputElement)output.value='100';if(progress instanceof HTMLProgressElement)progress.value=100;if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'READY':'KÉSZ';const finalize=()=>{try{overlay.getAnimations({subtree:true}).forEach(animation=>animation.cancel());}catch(_){}overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));};if(REDUCED){finalize();return;}const finish=overlay.animate([{opacity:1,filter:'brightness(1)'},{opacity:.94,filter:'brightness(1.18)',offset:.42},{opacity:0,filter:'brightness(1.06)'}],{duration:120,easing:'cubic-bezier(.22,.61,.36,1)',fill:'forwards'});finish.finished.then(finalize,finalize);}
-function runPreloader(overlay){if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='unavailable';return;}const started=performance.now();const tick=()=>{const elapsed=performance.now()-started;updatePreloader(overlay,elapsed);if((elapsed>=PRELOADER_MIN_MS&&preloaderReady())||elapsed>=PRELOADER_MAX_MS){hidePreloader(elapsed>=PRELOADER_MAX_MS?'bounded-timeout':'mag-shell-ready');return;}preloaderTimer=setTimeout(tick,PRELOADER_TICK_MS);};tick();}
+function hidePreloader(source){if(preloaderReleased)return;preloaderReleased=true;if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;return;}const finalize=()=>{try{overlay.getAnimations({subtree:true}).forEach(animation=>animation.cancel());}catch(_){}overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));};if(REDUCED){finalize();return;}const finish=overlay.animate([{opacity:1},{opacity:0}],{duration:90,easing:'ease-out',fill:'forwards'});finish.finished.then(finalize,finalize);}
+function runPreloader(overlay){if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='unavailable';return;}const started=performance.now();const tick=()=>{const elapsed=performance.now()-started;if((elapsed>=PRELOADER_MIN_MS&&preloaderReady())||elapsed>=PRELOADER_MAX_MS){hidePreloader(elapsed>=PRELOADER_MAX_MS?'bounded-timeout':'mag-shell-ready');return;}preloaderTimer=setTimeout(tick,PRELOADER_TICK_MS);};tick();}
 function markIntroComplete(source){ROOT.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');ROOT.classList.add('fx-intro-complete');ROOT.dataset.fxIntro=source;complete(source);}
 const preloader=PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?skipLatePreloader():showPreloader();
-stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r533-living-core':'desktop-direct-r533-living-core';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r533-living-core':'instant-r533-living-core');
+stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r534-static-lcp':'desktop-direct-r534-static-lcp';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r534-living-core':'instant-r534-living-core');
 if(preloader)runPreloader(preloader);
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
 addEventListener('pagehide',()=>{try{audio?.pause();}catch(_){}},{once:true});
