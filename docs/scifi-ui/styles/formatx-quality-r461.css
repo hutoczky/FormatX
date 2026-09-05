@@ -1,4 +1,4 @@
-/* FormatX r461/r462/R530/R531/R534 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R530/R531/R534/R537 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
@@ -98,6 +98,112 @@ html body.living-architecture .topbar > .fx-language-toggle {
   html:root:root body.living-architecture #hero .fx-method-inline,
   html:root:root body.living-architecture #hero .hero-actions {
     min-height: 0 !important;
+  }
+
+  /* R537: static-source parity for the Worker prepaint r244 state. Production
+     sets data-fx-reference-production-r244 before paint; static Lighthouse does
+     not. Mirror every layout-affecting desktop state that changes when that
+     dataset arrives so there is no block/flex, facts, or header geometry race. */
+  html:root:root body.living-architecture .topbar {
+    height: 76px !important;
+    min-height: 76px !important;
+    padding: 0 !important;
+  }
+  html:root:root body.living-architecture .topbar .brand {
+    position: absolute !important;
+    inset: 18px auto auto max(38px, calc((100vw - 1320px) / 2)) !important;
+    z-index: 4 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+  html:root:root body.living-architecture .topbar .brand img {
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+    object-fit: contain !important;
+  }
+  html:root:root body.living-architecture .topbar .brand strong {
+    font: 780 14px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .15em !important;
+  }
+  html:root:root body.living-architecture .topbar .brand small {
+    margin-top: 5px !important;
+    font: 650 7px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .22em !important;
+  }
+  html:root:root body.living-architecture .topbar > .header-actions,
+  html:root:root body.living-architecture .topbar > .menu-toggle:not(.fx-reference-menu-button) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-language-toggle,
+  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
+    position: absolute !important;
+    inset: auto !important;
+    top: 16px !important;
+    right: 112px !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 12070 !important;
+  }
+  html:root:root body.living-architecture #hero .fx-hero-product-state {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 18px 0 0 !important;
+    padding: 0 !important;
+    gap: 8px 12px !important;
+    color: rgba(189, 210, 222, .75) !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+  html:root:root body.living-architecture #hero .fx-hero-product-state .fx-platform-status-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    min-height: 28px !important;
+    padding: 5px 10px !important;
+    border: 1px solid currentColor !important;
+    border-radius: 999px !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    letter-spacing: .04em !important;
+    white-space: nowrap !important;
+  }
+  html:root:root body.living-architecture #hero .hero-facts {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 }
 
@@ -346,3 +452,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
 
 /* deploy-r530-r531-p0-intro-integration */
 /* deploy-r534-static-desktop-r244-first-frame-parity */
+/* deploy-r537-static-r244-product-header-first-frame-parity */
