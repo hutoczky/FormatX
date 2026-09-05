@@ -15,6 +15,12 @@ function testUrl(name) {
   url.searchParams.set('r533_preloader', `${name}-${Date.now()}`);
   return url.href;
 }
+function cssTimeToMs(value) {
+  const first = String(value || '').split(',')[0].trim();
+  if (first.endsWith('ms')) return Number.parseFloat(first);
+  if (first.endsWith('s')) return Number.parseFloat(first) * 1000;
+  return NaN;
+}
 
 async function verify(browser, spec) {
   const context = await browser.newContext({
@@ -36,10 +42,38 @@ async function verify(browser, spec) {
   });
 
   await page.addInitScript(() => {
-    window.__fxR533PreloaderEvidence = { completeAt: null, source: null };
+    window.__fxR533PreloaderEvidence = { completeAt: null, source: null, activeContract: null };
+    const captureActiveContract = () => {
+      const evidence = window.__fxR533PreloaderEvidence;
+      if (!evidence || evidence.activeContract) return;
+      const overlay = document.getElementById('formatx-event-horizon');
+      if (!(overlay instanceof HTMLElement) || overlay.dataset.fxPreloaderR531 !== 'active') return;
+      const main = document.querySelector('main');
+      const hero = document.getElementById('hero');
+      const overlayStyle = getComputedStyle(overlay);
+      const mainStyle = main ? getComputedStyle(main) : null;
+      const heroStyle = hero ? getComputedStyle(hero) : null;
+      evidence.activeContract = {
+        capturedAt: performance.now(),
+        animationName: overlayStyle.animationName,
+        animationDuration: overlayStyle.animationDuration,
+        animationFillMode: overlayStyle.animationFillMode,
+        clipPath: overlayStyle.clipPath,
+        overlayVisibility: overlayStyle.visibility,
+        mainVisibility: mainStyle?.visibility || '',
+        mainDisplay: mainStyle?.display || '',
+        heroVisibility: heroStyle?.visibility || '',
+        heroDisplay: heroStyle?.display || '',
+        heroHeight: hero?.getBoundingClientRect().height || 0,
+      };
+    };
+    const observer = new MutationObserver(captureActiveContract);
+    observer.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-fx-preloader-r531'] });
+    document.addEventListener('DOMContentLoaded', captureActiveContract, { once: true, capture: true });
     document.addEventListener('formatx:preloadercomplete', event => {
       window.__fxR533PreloaderEvidence.completeAt = performance.now();
       window.__fxR533PreloaderEvidence.source = String(event?.detail?.source || '');
+      observer.disconnect();
     }, { once: true, capture: true });
   });
 
@@ -70,6 +104,7 @@ async function verify(browser, spec) {
     const completeAt = Number(state.evidence.completeAt);
     const source = String(state.evidence.source || state.release || '');
     const duration = completeAt - state.bootAt;
+    const active = state.evidence.activeContract;
     assert.ok(Number.isFinite(completeAt), `${spec.name}: preloader completion event was not measured`);
     assert.ok(Number.isFinite(state.bootAt), `${spec.name}: preloader boot timestamp missing`);
     assert.equal(state.timing, spec.timing, `${spec.name}: wrong R533 timing contract`);
@@ -87,8 +122,20 @@ async function verify(browser, spec) {
       assert.equal(state.overlayDisplay, 'none', `${spec.name}: late-skip overlay became paintable`);
     } else {
       assert.equal(state.lateSkip, false, `${spec.name}: normal path incorrectly marked late-skip`);
+      assert.ok(active, `${spec.name}: active preloader computed-style contract was not captured`);
+      assert.match(String(active.animationName), /fx-r533-preloader-visual-bound/, `${spec.name}: compositor visual-bound animation missing`);
+      const animationMs = cssTimeToMs(active.animationDuration);
+      assert.ok(Number.isFinite(animationMs) && Math.abs(animationMs - spec.max) <= 20, `${spec.name}: wrong compositor deadline ${active.animationDuration}`);
+      assert.match(String(active.animationFillMode), /both/, `${spec.name}: compositor deadline does not retain terminal clip`);
+      assert.notEqual(active.mainVisibility, 'hidden', `${spec.name}: main content is hidden behind preloader`);
+      assert.notEqual(active.mainDisplay, 'none', `${spec.name}: main content is not paintable behind preloader`);
+      assert.notEqual(active.heroVisibility, 'hidden', `${spec.name}: hero visibility is gated by preloader`);
+      assert.notEqual(active.heroDisplay, 'none', `${spec.name}: hero display is gated by preloader`);
+      assert.ok(active.heroHeight > 0, `${spec.name}: hero has no paintable geometry behind preloader`);
       assert.ok(duration >= spec.min - 20, `${spec.name}: visible intro released before minimum contract (${duration}ms)`);
-      assert.ok(duration <= spec.max + 220, `${spec.name}: visible intro exceeded bounded window (${duration}ms)`);
+      if (duration > spec.max + 220) {
+        assert.equal(source, 'bounded-timeout', `${spec.name}: delayed logical release is not the bounded-timeout path (${source}, ${duration}ms)`);
+      }
     }
     assert.equal(errors.length, 0, `${spec.name}: browser errors ${errors.join(' | ')}`);
 
@@ -99,10 +146,11 @@ async function verify(browser, spec) {
       maxMs: spec.max,
       bootAtMs: state.bootAt,
       completeAtMs: completeAt,
-      durationMs: duration,
+      logicalDurationMs: duration,
       source,
       lateSkip: state.lateSkip,
       timing: state.timing,
+      activeContract: active,
       overflow: state.overflow,
     };
   } finally {
@@ -120,7 +168,7 @@ async function verify(browser, spec) {
   try {
     const report = {
       auditedSha: process.env.AUDITED_SHA || '',
-      contract: 'r533-roadmap-bounded-preloader-or-safe-late-skip',
+      contract: 'r533-paintable-hero-plus-compositor-bounded-preloader',
       mobile: await verify(browser, {
         name: 'mobile-390x844',
         viewport: { width: 390, height: 844 },
