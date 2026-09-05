@@ -179,12 +179,11 @@ html body.living-architecture .topbar > .fx-language-toggle {
     border: 1px solid rgba(112, 220, 255, .32) !important;
     text-shadow: none !important;
   }
-}
 
-/* R533: at 320–360px a persistent fixed 58px controller can physically cover
-   full-width information. Keep every Mini MAG action, but dock the controller in
-   normal flow after the footer on narrow phones. The panel still opens upward. */
-@media (max-width: 360px) {
+  /* A floating controller cannot satisfy the no-information-occlusion contract
+     on narrow/touch layouts. Keep the full controller and panel, but dock the
+     host in normal flow after the footer. Desktop keeps the persistent fixed
+     companion. */
   html body.living-architecture > .fx-mini-mag-assistant-r459 {
     position: relative !important;
     right: auto !important;
