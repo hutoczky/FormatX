@@ -44,14 +44,9 @@ assert.ok(!loader.includes('organism-voice-foreground.js'), 'conflicting foregro
 assert.ok(includesAll(menu, ['function setOpen(toggle, nav, open)', 'aria-expanded', 'fx-organism-menu-open']), 'menu state contract missing');
 assert.ok(includesAll(consoleState, ['forceClosed', 'is-authorised-open', 'shell.hidden = true']), 'panel closed-state contract missing');
 assert.ok(includesAll(language, [
-  "const VERSION='7'",
-  "button.className='fx-language-toggle'",
-  'localStorage.setItem',
-  'localStorage.getItem',
-  'HU – váltás angol nyelvre',
-  'EN – switch to Hungarian',
-  "fxSingleLanguageToggle='ready'",
-  'event-driven-no-document-mutation-observer'
+  "const VERSION='7'", "button.className='fx-language-toggle'", 'localStorage.setItem', 'localStorage.getItem',
+  'HU – váltás angol nyelvre', 'EN – switch to Hungarian', "fxSingleLanguageToggle='ready'", 'event-driven-no-document-mutation-observer',
+  "button.addEventListener('click'"
 ]), 'single language toggle contract missing');
 assert.ok(!language.includes('new MutationObserver'), 'single language toggle must remain event-driven and observer-free');
 
@@ -69,28 +64,21 @@ assert.equal(scrollPolicy.policy.input_capture, false, 'wheel/touch capture must
 
 assert.ok(includesAll(scrollBootstrap, [
   'platform-scroll-v2',
-  "installSeamlessRuntime('mobile')",
+  "armSeamlessRuntime(MOBILE_QUERY.matches ? 'mobile' : 'desktop')",
+  'installSeamlessRuntime(platform)',
+  'pending-user-scroll-intent',
   'native-momentum-loop-v1',
   "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'",
   'formatx-mobile-seamless-loop.css',
   'formatx-infinite-scroll-desktop-v7.js'
-]), 'shared mobile/desktop seamless bootstrap contract missing');
+]), 'R534 intent-loaded shared mobile/desktop seamless bootstrap contract missing');
 assert.ok(!scrollBootstrap.includes("createElement('style')"), 'mobile seamless bridge override must remain CSP-safe external CSS');
 assert.ok(!scrollBootstrap.includes('scrollTo(') && !scrollBootstrap.includes('scrollIntoView(') && !scrollBootstrap.includes('cloneNode('), 'mobile-capable bootstrap must not move/clone the page');
 assert.ok(!scrollBootstrap.includes('preventDefault'), 'scroll bootstrap must not capture input');
 assert.ok(includesAll(seamlessScroll, [
-  "const VERSION = 'seamless-v7'",
-  "root.dataset.fxInfiniteInput = 'native'",
-  "root.dataset.fxInfiniteCloneMode = 'inert-reference-mirror'",
-  "root.dataset.fxAutomaticLoop = 'enabled'",
-  'automaticLoop: true',
-  'visualBridge: true',
-  'inertReferenceMirror: true',
-  "mirrorContext: 'static-2d-snapshot-no-webgl'",
-  'clonedContent: false',
-  "mobileTransfer: 'scrollend-or-idle'",
-  'buildReferenceMirror',
-  'window.scrollTo('
+  "const VERSION = 'seamless-v7'", "root.dataset.fxInfiniteInput = 'native'", "root.dataset.fxInfiniteCloneMode = 'inert-reference-mirror'",
+  "root.dataset.fxAutomaticLoop = 'enabled'", 'automaticLoop: true', 'visualBridge: true', 'inertReferenceMirror: true',
+  "mirrorContext: 'static-2d-snapshot-no-webgl'", 'clonedContent: false', "mobileTransfer: 'scrollend-or-idle'", 'buildReferenceMirror', 'window.scrollTo('
 ]), 'shared seamless-v7 implementation missing');
 assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(seamlessScroll), 'shared seamless runtime must not capture wheel/touchmove');
 assert.ok(includesAll(loopStyle, ['scroll-snap-type: none !important', 'scroll-snap-align: none !important']), 'seamless loop snap suppression missing');
@@ -99,8 +87,7 @@ assert.ok(includesAll(mobileLoopStyle, ['display: block !important', 'min-height
 assert.ok(includesAll(mobileStyle, ['.fx-award-proof__grid', '.fx-plan-qr-card:not(.is-qr-ready)', '.site-footer nav']), 'mobile production stability layer incomplete');
 
 assert.ok(includesAll(downloads, [
-  'https://github.com/hutoczky/FormatX-Updates/releases/latest',
-  'data-release-download="multiplatform"',
+  'https://github.com/hutoczky/FormatX-Updates/releases/latest', 'data-release-download="multiplatform"',
   '../verification.html', '../test-matrix.html', '../known-issues.html', '../security.html', '../support.html',
   'Teljes multiplatform verzió letöltése', '5 napos próbalicenc'
 ]), 'downloads fallback/evidence/trial links missing');
@@ -133,8 +120,6 @@ assert.ok(mobileEntry.includes('mobile-core-engine-v3.js') && includesAll(morphE
 assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-interface.js', 'formatx-premium-finish.js']), 'critical production assets missing');
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 
-// The iconic MAG is a first-class requested feature and therefore part of the
-// same production gate as scrolling, downloads and the public operating surface.
 require('./validate-signature-system-r185.cjs');
 require('./validate-igloo-floor.cjs');
-console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, current semantic language owner, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
+console.log('PASS: requested site features validated with R534 intent-loaded seamless-v7 mobile/desktop scrolling, current semantic language owner, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
