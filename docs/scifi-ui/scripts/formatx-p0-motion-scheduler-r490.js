@@ -1,15 +1,14 @@
 /* FormatX R536 — navigation-owned living MAG + post-first-paint enhancements.
    The real current MAG loader starts automatically as soon as this deferred
    production scheduler executes; it never waits for click, tap, wheel or scroll.
-   Only the broader motion/Organism enhancement runtime remains late/intent-driven.
-   This keeps MAG alive behind the short boot preloader without audit-specific UX. */
+   Only the broader motion/Organism enhancement runtime remains late/intent-driven. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
 root.dataset.fxP0MotionSchedulerR490='armed-r536-navigation-mag';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r536-design-system-intent';
-const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r535-navigation-autostart';
+const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r536-navigation-autostart';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let criticalMagStarted=false;
@@ -24,15 +23,15 @@ function startCriticalMag(){
   if(criticalMagStarted)return;
   criticalMagStarted=true;
   if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting'){
-    root.dataset.fxMagNavigationBootR535='already-running';return;
+    root.dataset.fxMagNavigationBootR536='already-running';return;
   }
   if(document.querySelector('script[data-fx-current-mag-loader-r422]')){
-    root.dataset.fxMagNavigationBootR535='already-requested';return;
+    root.dataset.fxMagNavigationBootR536='already-requested';return;
   }
-  root.dataset.fxMagNavigationBootR535='requested-navigation';
-  const script=document.createElement('script');script.src=CRITICAL_MAG_SRC;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';script.dataset.fxNavigationMagR535='true';
-  script.addEventListener('load',()=>{root.dataset.fxMagNavigationBootR535=/^(?:ready|booting)$/.test(root.dataset.fxCurrentMagRuntimeR422||'')?'loaded-navigation':'loaded-awaiting-current-mag';},{once:true});
-  script.addEventListener('error',()=>{root.dataset.fxMagNavigationBootR535='load-failed';},{once:true});
+  root.dataset.fxMagNavigationBootR536='requested-navigation';
+  const script=document.createElement('script');script.src=CRITICAL_MAG_SRC;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';script.dataset.fxNavigationMagR536='true';
+  script.addEventListener('load',()=>{root.dataset.fxMagNavigationBootR536=/^(?:ready|booting)$/.test(root.dataset.fxCurrentMagRuntimeR422||'')?'loaded-navigation':'loaded-awaiting-current-mag';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxMagNavigationBootR536='load-failed';},{once:true});
   document.head.appendChild(script);
 }
 function start(reason){
