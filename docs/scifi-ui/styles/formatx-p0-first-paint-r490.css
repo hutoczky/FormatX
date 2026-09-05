@@ -1,7 +1,7 @@
-/* FormatX R503 — deterministic first-paint safety from measured final geometry.
+/* FormatX R528 — deterministic first-paint safety from measured final geometry.
    Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
-   R503 mirrors only the measured desktop hero ancestor boxes in the already
-   render-blocking P0 layer, preserving R500 product-state and R502 MAG ownership. */
+   This blocking layer mirrors only measured first-frame geometry and readability.
+   Manual MAG PAUSE/RESUME styling was removed by the R528 living-core contract. */
 
 /* Keep the readable LCP surface paintable. */
 html body.living-architecture #hero .hero-copy,
@@ -82,31 +82,13 @@ html body.living-architecture #hero .hero-copy > :is(
   }
 }
 
-/* R499 canonical MAG pause invariant.
-   The control updates the root state synchronously. Styling the root state,
-   rather than one transient Animation object, also freezes animations created
-   by a life-state change after the PAUSE event. The no-preference rule resumes
-   the same animation clock; reduced-motion keeps its own static contract. */
-html[data-fx-reference-motion-paused="true"] body.living-architecture
-  #hero .fx-crystal-organism-r326-canvas {
-  animation-play-state: paused !important;
-}
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-fx-reference-motion-paused="true"]) body.living-architecture
-    #hero .fx-crystal-organism-r326-canvas {
-    animation-play-state: running !important;
-  }
-}
-
 /* Feedback honeypot: the source input stays enabled and named for bot filtering,
    but the wrapper is deliberately not rendered, hit-testable, or tabbable. */
 html body.living-architecture .fx-feedback-honeypot {
   display: none !important;
 }
 
-/* Narrow footer navigation must wrap inside its own content box. The R494
-   overflow artifact showed three anonymous footer anchors extending to 463.5px
-   in a 320px viewport. Fix the flex/grid sizing rather than clipping the page. */
+/* Narrow footer navigation must wrap inside its own content box. */
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   html body.living-architecture footer.site-footer,
   html body.living-architecture footer.site-footer nav,
@@ -140,7 +122,6 @@ html body.living-architecture .fx-feedback-honeypot {
     translate: none !important;
   }
 
-  /* Real text links remain usable coarse-pointer targets. */
   html body.living-architecture a[href$="/test-matrix.html"],
   html body.living-architecture a[href*="/test-matrix.html?"],
   html body.living-architecture .fx-static-live-os__actions :is(a, button),
@@ -175,8 +156,7 @@ html body.living-architecture .skip-link:focus-visible {
   min-height: 44px !important;
 }
 
-/* R500 canonical hero product-state first-frame geometry.
-   This mirrors the settled platform-status + desktop r244 cascade. */
+/* R500 canonical hero product-state first-frame geometry. */
 html body.living-architecture #hero .fx-hero-product-state {
   position: relative !important;
   inset: auto !important;
@@ -223,3 +203,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 
 /* production-r501-p0-first-paint-desktop-copy-box */
 /* production-r503-p0-first-paint-hero-ancestor-box */
+/* production-r528-living-core-no-manual-pause */
