@@ -2,18 +2,6 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  if (AUDIT_MODE) {
-    const canvas = document.getElementById('fx-apex-canvas');
-    if (canvas) canvas.hidden = true;
-    ROOT.classList.add('fx-audit-mode');
-    ROOT.dataset.fxThree = 'audit-skip';
-    ROOT.dataset.fxLighthouse = 'ready';
-    ROOT.dataset.fxLivingArchitecture = 'audit-skip';
-    dispatchEvent(new CustomEvent('formatx:livingready'));
-    return;
-  }
-
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
   const PLANS = {
     business_lite: { name: 'Business Lite', HUF: 7900, EUR: 22 },
@@ -35,6 +23,7 @@
   const nodes = Array.from(document.querySelectorAll('[data-organ-node]'));
   let qrGeneration = 0;
   let threeLoadStarted = false;
+  let threeLoaderArmed = false;
   let qrDockActivated = false;
   let qrDockObserver = null;
 
@@ -140,7 +129,9 @@
     ROOT.dataset.fxThreeLoader = 'requested-on-demand';
   }
 
-  function scheduleThreeExperience() {
+  function armThreeExperience() {
+    if (threeLoaderArmed || threeLoadStarted) return;
+    threeLoaderArmed = true;
     if (ROOT.dataset.fxImmersive === 'active') {
       loadThreeExperience();
       return;
@@ -148,6 +139,13 @@
     ROOT.dataset.fxThreeLoader = 'deferred-user-activation';
     addEventListener('formatx:immersiveactivate', loadThreeExperience, { once: true });
   }
+
+  /* R536: arm the heavy Organism handoff immediately while this lightweight
+     owner is evaluated. MAG still boots independently with navigation, and the
+     heavy interface remains strictly user-activated. This closes the race where
+     a real MAG interaction could arrive before the old DCL commerce init armed
+     the immersive listener. */
+  armThreeExperience();
 
   function revealQrDock() {
     const dock = document.getElementById('formatx-plan-qr-dock');
@@ -319,7 +317,6 @@
 
   function initialise() {
     ROOT.dataset.fxQrOwner = 'living-v3-performance';
-    scheduleThreeExperience();
     revealQrDock();
     syncScene();
     updateCommerce();
