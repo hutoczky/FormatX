@@ -100,7 +100,7 @@ async function waitForStableHero(page, mobile) {
           && visible('#hero .fx-reference-controls-r204')
           && visible('#hero .fx-reference-controls-r204 .fx-three-sound')
           && visible('#hero .fx-reference-controls-r204 .fx-reference-ask')
-          && visible('#hero .fx-reference-controls-r204 .fx-reference-pause')
+          && !document.querySelector('#hero .fx-reference-controls-r204 .fx-reference-pause')
           && visible('#hero .hero-copy')
           && visible('#hero .hero-lead')
           && visible('#hero .fx-reference-heading')
@@ -226,7 +226,7 @@ async function commonAssertions(page, mobile) {
     const controls = await box(page, '#hero .fx-reference-controls-r204');
     const sound = await box(page, '#hero .fx-reference-controls-r204 .fx-three-sound');
     const ask = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-ask');
-    const pause = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-pause');
+    const pauseCount = await page.locator('#hero .fx-reference-controls-r204 .fx-reference-pause').count();
     const heroCopy = await box(page, '#hero .hero-copy');
     const heroLead = await box(page, '#hero .hero-lead');
     const heading = await box(page, '#hero .fx-reference-heading');
@@ -235,13 +235,12 @@ async function commonAssertions(page, mobile) {
 
     assert(sound.width >= 44 && sound.height >= 44, 'Mobile SOUND target is too small: ' + JSON.stringify(sound));
     assert(ask.width >= 44 && ask.height >= 44, 'Mobile ASK target is too small: ' + JSON.stringify(ask));
-    assert(pause.width >= 44 && pause.height >= 44, 'Mobile pause target is too small: ' + JSON.stringify(pause));
+    assert(pauseCount === 0, 'Retired manual MAG PAUSE control reappeared: ' + pauseCount);
     assert(!overlap(sound, ask, 2), 'Mobile SOUND and ASK controls overlap: ' + JSON.stringify({ sound, ask, controls }));
-    assert(!overlap(ask, pause, 2), 'Mobile ASK and pause controls overlap: ' + JSON.stringify({ ask, pause, controls }));
-    assert(Math.abs(sound.top - ask.top) <= 2 && Math.abs(ask.top - pause.top) <= 2,
-      'Mobile SOUND, ASK and pause controls must form one horizontal row: ' + JSON.stringify({ sound, ask, pause, controls }));
-    assert(sound.left < ask.left && ask.left < pause.left,
-      'Mobile controls are not ordered SOUND → ASK → PAUSE: ' + JSON.stringify({ sound, ask, pause, controls }));
+    assert(Math.abs(sound.top - ask.top) <= 2,
+      'Mobile SOUND and ASK controls must form one horizontal row: ' + JSON.stringify({ sound, ask, controls }));
+    assert(sound.left < ask.left,
+      'Mobile controls are not ordered SOUND → ASK: ' + JSON.stringify({ sound, ask, controls }));
     assert(controls.left >= heroSpace.left && controls.right <= heroSpace.right + 1, 'Mobile controls escaped the 3D stage horizontally: ' + JSON.stringify({ heroSpace, controls }));
     assert(controls.top >= heroSpace.top && controls.bottom <= heroSpace.bottom + 1, 'Mobile controls escaped the 3D stage vertically: ' + JSON.stringify({ heroSpace, controls }));
     const ownership = await page.locator('#hero .fx-reference-controls-r204').evaluate(node => node.parentElement?.classList.contains('hero-space'));

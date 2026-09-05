@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   if (root.dataset.fxGeometryGuardR286 === 'ready') return;
-  root.dataset.fxGeometryGuardR286 = 'booting-r320';
+  root.dataset.fxGeometryGuardR286 = 'booting-r528';
 
   const SELECTORS = [
     '.topbar .fx-reference-mag-button',
@@ -13,7 +13,6 @@
     '#hero .fx-reference-controls-r204 .fx-reference-rail',
     '#hero .fx-reference-controls-r204 .fx-three-sound',
     '#hero .fx-reference-controls-r204 .fx-reference-ask',
-    '#hero .fx-reference-controls-r204 .fx-reference-pause',
     '#hero .fx-reference-controls-r204 .fx-reference-ask span'
   ];
 
@@ -21,12 +20,10 @@
   let bootTimer = 0;
   let scheduled = false;
 
-  /* r320: the external canonical stylesheets are the only geometry owner.
-     Older revisions used CSSStyleDeclaration.removeProperty() from permanent
-     per-control MutationObservers. Besides creating avoidable mutation churn,
-     CSSOM writes are not compatible with the site's strict style-src policy.
-     A bounded pass now removes stale legacy style attributes atomically and
-     then gets out of the render path. */
+  /* r528: the external canonical stylesheets are the only geometry owner.
+     A bounded pass removes stale legacy style attributes atomically and then
+     leaves the render path. The obsolete manual MAG PAUSE control is not part
+     of the selector contract. */
   function sanitize(node) {
     if (!(node instanceof HTMLElement)) return;
     if (!node.hasAttribute('style')) return;
@@ -43,9 +40,10 @@
         sanitize(node);
       });
     }
-    if (found >= 6) {
+    if (found >= 5) {
       root.dataset.fxGeometryGuardR286 = 'ready';
       root.dataset.fxGeometryGuardPolicyR320 = 'bounded-attribute-cleanup-no-cssom-observer';
+      root.dataset.fxGeometryGuardContractR528 = 'living-core-controls-no-manual-pause';
       stopBootObserver();
     }
     return found;
@@ -65,7 +63,7 @@
   }
 
   function boot() {
-    if (scan() >= 6) return;
+    if (scan() >= 5) return;
     const target = document.body || document.documentElement;
     bootObserver = new MutationObserver(schedule);
     bootObserver.observe(target, { childList: true, subtree: true });
@@ -74,6 +72,7 @@
       scan();
       root.dataset.fxGeometryGuardR286 = 'ready';
       root.dataset.fxGeometryGuardPolicyR320 = 'bounded-attribute-cleanup-no-cssom-observer';
+      root.dataset.fxGeometryGuardContractR528 = 'living-core-controls-no-manual-pause';
     }, 4000);
   }
 

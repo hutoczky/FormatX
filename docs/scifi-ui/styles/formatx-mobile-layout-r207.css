@@ -62,7 +62,7 @@
     align-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
-    width: 178px !important;
+    width: 114px !important;
     max-width: calc(100vw - 24px) !important;
     height: 50px !important;
     min-height: 50px !important;
@@ -83,14 +83,14 @@
     inset: auto auto clamp(22px, 3.2svh, 34px) 50% !important;
     z-index: 12040 !important;
     display: grid !important;
-    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-columns: repeat(2, 50px) !important;
     grid-template-rows: 50px !important;
     align-items: center !important;
     justify-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
-    width: 178px !important;
-    min-width: 178px !important;
+    width: 114px !important;
+    min-width: 114px !important;
     max-width: calc(100vw - 24px) !important;
     height: 50px !important;
     min-height: 50px !important;
@@ -127,8 +127,7 @@
   }
 
   html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
-  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
-  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask {
     position: relative !important;
     inset: auto !important;
     display: grid !important;

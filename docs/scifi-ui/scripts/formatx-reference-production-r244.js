@@ -1,11 +1,11 @@
 (function () {
   'use strict';
 
-  /* r408 — semantic reference compatibility layer.
+  /* r408/R528 — semantic reference compatibility layer.
      r244 still creates the reference copy/control DOM required by older modules,
-     but it no longer writes physical geometry. The render-blocking CSS plus the
-     canonical r268 owner are the only geometry authorities. This removes the
-     r244 -> r268 layout ping-pong that was visible to Lighthouse as CLS. */
+     but it no longer writes physical geometry. R528 removes the obsolete manual
+     MAG PAUSE control: normal MAG motion is intrinsic to the living-core product.
+     Accessibility motion handling remains owned by prefers-reduced-motion. */
   const root = document.documentElement;
   const VERSION = 'r244-reference-frame';
   let queued = false;
@@ -39,8 +39,6 @@
     ask: 'KÉRDEZZ'
   };
 
-  // Existing validators and integrations intentionally keep this named no-op.
-  // Stylesheet order is static; moving links at runtime would re-run the cascade.
   function ensureStyleLast() {}
 
   function mutedIcon() {
@@ -68,8 +66,6 @@
       menu.setAttribute('aria-expanded', 'false');
       bar.appendChild(menu);
     }
-    // r268 uses document-level capture ownership, therefore this node can be
-    // declared canonical immediately without cloning/replacing it later.
     menu.dataset.fxControlOwnerR268 = 'true';
     menu.dataset.fxControlOwnerR264 = 'true';
 
@@ -140,9 +136,10 @@
     if (!(rail instanceof HTMLElement)) {
       rail = document.createElement('div');
       rail.className = 'fx-reference-rail fx-reference-rail-r264';
-      rail.innerHTML = '<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i aria-hidden="true"></i><span>KÉRDEZZ</span></button><button class="fx-reference-pause" type="button" aria-label="Animáció szüneteltetése" data-paused="false">Ⅱ</button>';
+      rail.innerHTML = '<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i aria-hidden="true"></i><span>KÉRDEZZ</span></button>';
     } else {
       rail.classList.add('fx-reference-rail-r264');
+      rail.querySelectorAll('.fx-reference-pause').forEach(node => node.remove());
     }
 
     const askLabel = rail.querySelector('.fx-reference-ask span');
@@ -155,11 +152,11 @@
     if (space.nextElementSibling !== heading) space.after(heading);
     if (heading.nextElementSibling !== proof) heading.after(proof);
 
+    root.dataset.fxMagProductContractR528 = 'living-core-continuous-normal-motion';
     return { heading, proof, live, rail, controls, sound };
   }
 
-  // r408: CSS/r268 owns SOUND | ASK | PAUSE geometry. Never write inline
-  // position/display/size here; repeated real3d/mobile events must be idempotent.
+  // R528: CSS/r268 owns SOUND | ASK geometry. No dedicated MAG pause control.
   function applyControlLayout(nodes, mobile) {
     void mobile;
     nodes.controls?.classList.add('fx-reference-controls-r264');

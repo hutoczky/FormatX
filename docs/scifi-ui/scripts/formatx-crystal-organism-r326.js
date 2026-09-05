@@ -1,3 +1,7 @@
+/* FormatX R326/R528 — single native WebGL living core renderer.
+   R528 removes obsolete user-facing MAG pause ownership. Runtime suspension is
+   lifecycle/resource management only: reduced motion, background/offscreen and
+   the mobile zero-idle governor. */
 (function () {
   'use strict';
 
@@ -429,7 +433,7 @@
       return timer;
     };
     const initialShape=root.dataset.fxCoreShapeR337==='sphere'?'sphere':'crystal';
-    let disposed=false,contextLost=false,visible=true,paused=false;
+    let disposed=false,contextLost=false,visible=true,renderSuspended=false;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1;
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
@@ -462,12 +466,23 @@
       return true;
     }
 
-    function blocked(){return disposed||contextLost||document.hidden||!visible||paused||root.dataset.fxReferenceMotionPaused==='true';}
+    function blocked(){return disposed||contextLost||document.hidden||!visible||renderSuspended;}
     function schedule(frames=1){
       if(blocked())return;
       const frameCap=mobile?8:24;
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       if(!raf){last=performance.now();raf=requestAnimationFrame(frame);}
+    }
+    function setLifecycleSuspended(suspended,source='runtime-r528'){
+      const next=Boolean(suspended);
+      renderSuspended=next;
+      root.dataset.fxCoreLifecycleR528=next?'suspended':'active';
+      root.dataset.fxCoreLifecycleSourceR528=String(source||'runtime-r528');
+      if(next){
+        if(raf)cancelAnimationFrame(raf);
+        raf=0;
+      }else schedule(1);
+      return renderSuspended;
     }
     function boost(value=.84,frames=8){
       targetEnergy=Math.max(targetEnergy,value);
@@ -510,19 +525,19 @@
 
     /* heartbeat-and-interaction-bursts-no-idle-loop-r326.
        R484 has one bounded native surface sweep every five to six seconds.
-       Its timeout is suspended when hidden, offscreen, user-paused or reduced.
-       Between sweeps the renderer returns to zero idle frames. */
+       The timer is suspended when hidden, offscreen or reduced. The mobile
+       governor may suspend rendering between sweeps without changing product
+       motion semantics. */
     function scheduleHeartbeat(){
       clearTimeout(heartbeatTimer);heartbeatTimer=0;
       root.dataset.fxCoreIdleHeartbeatR441='disabled-no-continuous-rendering';
     }
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
-      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
-        ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'
+      if(disposed||contextLost||reduced.matches||document.hidden||!visible
         ||now-lastSurfacePulseAt<2200)return false;
-      // The mobile governor's idle flag is not the user's PAUSE control.
-      // Reserve the full sweep before asking the single renderer to draw it.
+      /* Dispatch first: on mobile the lifecycle governor synchronously wakes
+         the renderer for this bounded native sweep. */
       dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
         detail:{phase:'start',source,duration:SURFACE_PULSE_MS}
       }));
@@ -535,8 +550,6 @@
       root.dataset.fxCoreSurfacePulseR454=`sweep-${surfacePulseCount}-${source}`;
       root.dataset.fxCoreEnergyBoltR455=`surface-sweep-${source}-${surfacePulseCount}`;
       root.dataset.fxCoreSurfaceCountR484=String(surfacePulseCount);
-      // surfacePulseActive keeps RAF alive for the bounded duration. Do not
-      // leave a second frame quota behind it on slower desktop renderers.
       schedule(1);
       later(()=>{
         if(pulseId!==surfacePulseCount)return;
@@ -551,8 +564,7 @@
     }
     function scheduleSurfacePulse(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
-      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
-        ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'){
+      if(disposed||contextLost||reduced.matches||document.hidden||!visible){
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
         return;
       }
@@ -612,10 +624,6 @@
       const surfacePulse=surfacePulseElapsed>=0&&surfacePulseElapsed<=1?surfacePulseElapsed:-1;
       gl.uniform1f(uniforms.uSurfacePulse,surfacePulse);
 
-      /* r442 phone budget: desktop keeps the three-pass optical depth. Mobile
-         drops the extra front-cull outer-glow pass, which both reduces the bloom
-         seen in the physical phone capture and removes roughly one third of the
-         expensive fragment work per interaction frame. */
       gl.depthMask(false);
       gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
       if(!mobile){
@@ -702,15 +710,6 @@
         if(candidate&&!candidate.moved&&performance.now()-candidate.started<720)toggleShape('core-tap');
       }else if(detail.phase==='cancel')tapCandidate=null;
     }
-    function onPause(event){
-      paused=event.detail?.paused===true||root.dataset.fxReferenceMotionPaused==='true';
-      if(paused){
-        surfacePulseStart=-Infinity;
-        root.dataset.fxCoreSurfacePulseR454='idle';
-        if(!disposed&&!contextLost&&resize())render(performance.now());
-      }else schedule(1);
-      scheduleSurfacePulse();
-    }
     function onReducedMotionChange(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
       surfacePulseStart=-Infinity;
@@ -738,7 +737,6 @@
     listen(hero,'pointerdown',onDown,{passive:true});
     listen(hero,'pointerleave',onLeave,{passive:true});
     listen(window,'formatx:coreinteraction',onCoreInteraction,{passive:true});
-    listen(window,'formatx:referencepause',onPause,{passive:true});
     listen(reduced,'change',onReducedMotionChange,{passive:true});
     listen(window,'scroll',onScroll,{passive:true});
     listen(window,'resize',resize,{passive:true});
@@ -818,6 +816,7 @@
       setShape:(shape,source)=>setShape(shape,source||'api-set'),
       toggleShape:source=>toggleShape(source||'api-toggle'),
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
+      setLifecycleSuspended:(suspended,source)=>setLifecycleSuspended(suspended,source||'api-lifecycle-r528'),
       requestRender:schedule,
       destroy,
       canvas,
@@ -827,7 +826,8 @@
       get morph(){return morph;},
       get shape(){return shapeName();},
       get rotation(){return[rotationX,rotationY,rotationZ];},
-      get vertexCount(){return geometry.count;}
+      get vertexCount(){return geometry.count;},
+      get lifecycleSuspended(){return renderSuspended;}
     };
     window.FormatXCoreMobileV69=publicApi;
     window.FormatXLivingCore=publicApi;
@@ -881,6 +881,9 @@
     root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
+    root.dataset.fxCoreLifecycleR528='active';
+    root.dataset.fxCoreLifecycleSourceR528='renderer-ready';
+    root.dataset.fxMagProductContractR528='living-core-continuous-normal-motion';
 
     publishShape('initial');
     schedule(1);

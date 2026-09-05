@@ -1,52 +1,84 @@
-/* FormatX award-quality gate — R528 living-core product contract. */
+/* FormatX award-quality source gate — R528 living-core product contract. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'../..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
-const home=read('docs/scifi-ui/index.html');
+
+/* Reuse the authoritative R528 MAG source contract instead of preserving
+   obsolete manual PAUSE/RESUME or historical exact-version assumptions. */
+require('./validate-mag-living-core-r528.cjs');
+
 const intro=read('docs/scifi-ui/scripts/formatx-event-horizon.js');
-const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
-const language=read('docs/scifi-ui/scripts/single-language-toggle.js');
-const currentMag=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
-const solidGlass=read('docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js');
-const life=read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
-const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const controls=read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
-const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
-const shape=read('docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js');
-const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
-const optics=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
-const lifeStyle=read('docs/scifi-ui/styles/formatx-core-life-r455.css');
-const desktop=JSON.parse(read('lighthouserc.json'));
-const mobile=JSON.parse(read('lighthouserc.mobile.json'));
-for(const token of ['fxHeroLcpOwnerR411','static-html-no-reparent','single-current-runtime-no-postdom-repair-stack','fx-reference-controls-r204','fx-reference-ask','fxCanonicalMagMotionR528','living-core-normal-continuous-reduced-background-managed','r461-lightweight-first-party','runtime-error','promise-error'])assert.ok(intro.includes(token),`missing current intro contract: ${token}`);
-for(const retired of ['formatx-award-runtime-r206.js','formatx-mobile-regression-r310.js','activateCriticalReal3dStyle','queuePostDomEnhancements'])assert.ok(!intro.includes(retired),`retired first-load repair stack returned: ${retired}`);
-for(const token of ['formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy','formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy','formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments','formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom','formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow','armed-direct-r326-r468-soft-optics-live-energy-zero-idle'])assert.ok(motion.includes(token),`missing current motion owner: ${token}`);
-assert.ok(motion.includes('single-language-toggle.js?v=20260830-r462-semantic-owner'));
-assert.ok(motion.includes("fxSingleLanguageToggleVersion==='7'"));
-assert.ok(!motion.includes('isRetiredMagRuntime'));
-for(const token of ["const VERSION='7'",'fx-language-toggle','HU – váltás angol nyelvre','EN – switch to Hungarian','event-driven-no-document-mutation-observer',"fxSingleLanguageToggle='ready-v3'"])assert.ok(language.includes(token),`missing language contract: ${token}`);
-assert.ok(!language.includes('new MutationObserver'));
-for(const token of ['content-visibility: visible','fx-reference-liveos','.scroll-cue > span','.topbar > .header-actions','> .fx-rail','contain: layout paint','.fx-qr-placeholder','#main-nav:not(.open)','fx-reference-controls-r204.fx-reference-controls-r264'])assert.ok(quality.includes(token),`missing quality CSS: ${token}`);
-assert.match(home,/formatx-quality-r461\.css\?v=20260830-r462-mobile-a11y/);
-assert.match(home,/class="fx-language-toggle"/);
-assert.match(home,/data-fx-single-language-toggle="ready-v3"/);
-for(const retired of ['data-fx-premium-finish','data-fx-live-heartbeat-r155','data-fx-signature-system-r185','data-fx-seamless-enforcer-r159','data-fx-living-energy-r168="true" src=','data-fx-desktop-apex-r181-loader'])assert.ok(!home.includes(retired),`retired runtime remains active: ${retired}`);
-for(const token of ['r326-only','cleanupLegacyMagRuntime','direct-r326-r468-soft-optics-live-energy-zero-idle','r484-bounded-surface-window','periodic-surface-bursts-between-zero-idle','soft-perimeter-low-bloom-low-cost-shader','formatx-mini-mag-assistant-r459.js'])assert.ok(currentMag.includes(token),`missing current MAG contract: ${token}`);
-for(const token of ["const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'","const smoothWeight=mobile?'.998':'.930'","float fresnel=pow(1.0-facing,1.92);","float edge=0.0;",'surfacePulsePattern','soft-perimeter-low-bloom-low-cost-shader'])assert.ok(solidGlass.includes(token),`missing shader contract: ${token}`);
-for(const token of ['FormatX r467','brightness(1.065)','contrast(.89)','saturate(1.10)','blur(.82px)'])assert.ok(optics.includes(token),`missing optics contract: ${token}`);
-for(const token of ['FormatX r474','softer mobile crystal glow','opacity: .970','image-rendering: auto','brightness(.985)','contrast(.855)','saturate(1.010)','blur(.30px)','production-r474-softer-mobile-glow-feathered-facets'])assert.ok(lifeStyle.includes(token),`missing final display contract: ${token}`);
-assert.ok(!lifeStyle.includes('fx-core-r468-compositor-breathe'));
-for(const token of ['native-webgl-periodic-and-interaction-life-r528','armed-periodic-and-interaction-surface-energy','periodic-surface-bursts-between-zero-idle','formatx:coreinteraction','pointerdown'])assert.ok(life.includes(token),`missing R528 life contract: ${token}`);
-assert.ok(!life.includes('setInterval('));assert.ok(!life.includes('requestAnimationFrame('));
-for(const token of ['activeWindowMs=240','shapeProbeMs=150','state.core?.requestRender?.(2)','userShapeSource(source)','guardPassiveState(source)',"fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'",'r528-automatic-idle-flag-no-manual-pause','fxReferenceMotionPaused'])assert.ok(governor.includes(token),`missing R528 mobile render budget: ${token}`);
-for(const token of ['canonicalControls(hero)','fx-reference-controls-r204','visibleControl(ask)','fxControlOwnerR268','HU – váltás angol nyelvre','EN – switch to Hungarian','fxManualMagPauseR528'])assert.ok(controls.includes(token),`missing canonical control contract: ${token}`);
-for(const source of [intro,controls,mini,shape,life,governor])assert.doesNotMatch(source,/formatx:referencepause/,`manual pause event remains`);
-assert.doesNotMatch(controls,/ensurePause\s*\(/);assert.doesNotMatch(intro,/bindPause\s*\(/);assert.doesNotMatch(mini,/togglePause/);
-assert.match(shape,/prefers-reduced-motion:\s*reduce/);assert.match(shape,/visibilitychange/);assert.match(shape,/animation-play-state/);assert.match(shape,/living-core-normal-continuous-reduced-background-safe/);
-function validateLighthouse(config,label){const collect=config.ci.collect,assertions=config.ci.assert.assertions;assert.equal(collect.numberOfRuns,3,`${label}: needs 3 runs`);assert.ok(collect.url.every(url=>!url.includes('lighthouse=1')),`${label}: audit-only URL forbidden`);assert.ok(!String(collect.settings.chromeFlags||'').includes('force-prefers-reduced-motion'),`${label}: forced reduced motion forbidden`);assert.ok(!('skipAudits' in collect.settings),`${label}: skipped audits forbidden`);assert.equal(assertions['categories:performance'][1].minScore,.95);assert.equal(assertions['categories:accessibility'][1].minScore,1);assert.equal(assertions['categories:best-practices'][1].minScore,1);assert.equal(assertions['categories:seo'][1].minScore,1);assert.equal(assertions['first-contentful-paint'][1].maxNumericValue,1800);assert.equal(assertions['largest-contentful-paint'][1].maxNumericValue,2500);assert.equal(assertions['total-blocking-time'][1].maxNumericValue,200);assert.equal(assertions['cumulative-layout-shift'][1].maxNumericValue,.1);assert.equal(assertions['server-response-time'][1].maxNumericValue,600);}
-validateLighthouse(desktop,'desktop');validateLighthouse(mobile,'mobile');
-for(const source of [intro,motion,language,currentMag,solidGlass,life,governor,controls,mini,shape])new Function(source);
-console.log('PASS: R528 living MAG remains native, singular and alive while manual pause is retired and accessibility/lifecycle safeguards remain enforced.');
+const language=read('docs/scifi-ui/scripts/single-language-toggle.js');
+const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
+const reduced=read('docs/scifi-ui/styles/formatx-reduced-mag-identity-r528.css');
+const desktop=JSON.parse(read('lighthouserc.live.json'));
+const mobile=JSON.parse(read('lighthouserc.live.mobile.json'));
+
+for(const token of [
+  'fxHeroLcpOwnerR411','static-html-no-reparent','single-current-runtime-no-postdom-repair-stack',
+  'fx-reference-controls-r204','fx-reference-ask','r461-lightweight-first-party',
+  "fxMagProductContractR528='living-core-continuous-normal-motion'",
+  'runtime-error','promise-error'
+])assert.ok(intro.includes(token),`missing current first-paint contract: ${token}`);
+for(const obsolete of ['formatx:referencepause','fxReferenceMotionPaused','function bindPause'])
+  assert.ok(!intro.includes(obsolete),`obsolete manual MAG pause owner returned: ${obsolete}`);
+
+for(const token of [
+  'canonicalControls(hero)','fx-reference-controls-r204',"!controls.querySelector('.fx-reference-pause')",
+  "fxManualMagPauseR528='retired-product-contract'",'removeObsoletePause(controls)',
+  'fxControlOwnerR268','HU – váltás angol nyelvre','EN – switch to Hungarian'
+])assert.ok(controls.includes(token),`missing current canonical control contract: ${token}`);
+assert.ok(!controls.includes('visibleControl(pause)'),'manual MAG PAUSE is not a required control');
+assert.ok(!controls.includes('function ensurePause'),'manual MAG PAUSE creator returned');
+
+for(const token of [
+  "const VERSION='7'",'HU – váltás angol nyelvre','EN – switch to Hungarian',
+  'event-driven-no-document-mutation-observer',"fxSingleLanguageToggle='ready-v3'"
+])assert.ok(language.includes(token),`missing stable language contract: ${token}`);
+assert.ok(!language.includes('new MutationObserver'),'language owner must remain observer-free');
+
+for(const token of [
+  'single-webgl-crystal-organism-r326','function setLifecycleSuspended',
+  'document.hidden||!visible||renderSuspended',"fxMagProductContractR528='living-core-continuous-normal-motion'",
+  "listen(reduced,'change',onReducedMotionChange"
+])assert.ok(renderer.includes(token),`missing R528 renderer contract: ${token}`);
+for(const obsolete of ['formatx:referencepause','fxReferenceMotionPaused','.fx-reference-pause'])
+  assert.ok(!renderer.includes(obsolete),`renderer still contains obsolete pause contract: ${obsolete}`);
+
+for(const token of [
+  'setLifecycleSuspended',"fxMobileRenderGovernorRevisionR433='r528-lifecycle-suspend-no-idle-redraw'",
+  "fxMobileRenderContractR528='automatic-resource-lifecycle-not-user-pause'",
+  'full-1160ms-sweep-then-zero-idle'
+])assert.ok(governor.includes(token),`missing R528 mobile lifecycle budget: ${token}`);
+for(const obsolete of ['userPaused','fxReferenceMotionPaused','formatx:referencepause','.fx-reference-pause'])
+  assert.ok(!governor.includes(obsolete),`governor still contains obsolete pause contract: ${obsolete}`);
+
+for(const token of ['prefers-reduced-motion: reduce','fx-crystal-organism-r326-stage','animation-play-state: paused'])
+  assert.ok(reduced.includes(token),`missing reduced-motion accessibility contract: ${token}`);
+
+function validateLighthouse(config,label){
+  const collect=config.ci.collect;
+  const assertions=config.ci.assert.assertions;
+  assert.equal(collect.numberOfRuns,3,`${label}: final proof requires 3 runs`);
+  assert.ok(collect.url.every(url=>!url.includes('lighthouse=1')),`${label}: audit-only URL forbidden`);
+  assert.ok(!String(collect.settings.chromeFlags||'').includes('force-prefers-reduced-motion'),`${label}: forced reduced motion forbidden`);
+  assert.ok(!('skipAudits' in collect.settings),`${label}: skipped audits forbidden`);
+  assert.equal(assertions['categories:performance'][1].minScore,1,`${label}: performance must be 100`);
+  assert.equal(assertions['categories:accessibility'][1].minScore,1,`${label}: accessibility must be 100`);
+  assert.equal(assertions['categories:best-practices'][1].minScore,1,`${label}: best-practices must be 100`);
+  assert.equal(assertions['categories:seo'][1].minScore,1,`${label}: SEO must be 100`);
+  assert.ok(assertions['largest-contentful-paint'][1].maxNumericValue<2000,`${label}: LCP must be <2.0s`);
+  assert.ok(assertions['cumulative-layout-shift'][1].maxNumericValue<.05,`${label}: CLS must be <0.05`);
+  assert.ok(assertions['total-blocking-time'][1].maxNumericValue<=150,`${label}: TBT must be <=150ms`);
+  assert.ok(assertions['server-response-time'][1].maxNumericValue<=500,`${label}: TTFB must be <=500ms`);
+}
+validateLighthouse(desktop,'desktop');
+validateLighthouse(mobile,'mobile');
+
+for(const source of [intro,controls,language,renderer,governor])new Function(source);
+console.log('PASS: R528 WDA source gate uses the living-core contract, lifecycle/reduced-motion accessibility, and strict final 100x3 Lighthouse targets.');

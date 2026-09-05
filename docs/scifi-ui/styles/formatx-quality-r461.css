@@ -95,7 +95,7 @@ html body.living-architecture .topbar > .fx-language-toggle {
     inset: auto auto 18px 50% !important;
     z-index: 12080 !important;
     display: grid !important;
-    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-columns: repeat(2, 50px) !important;
     grid-template-rows: 72px !important;
     align-items: start !important;
     justify-items: center !important;
@@ -116,8 +116,7 @@ html body.living-architecture .topbar > .fx-language-toggle {
     display: contents !important;
   }
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask {
     position: relative !important;
     inset: auto !important;
     box-sizing: border-box !important;
@@ -143,10 +142,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
   html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask {
     grid-column: 2 !important;
-    grid-row: 1 !important;
-  }
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
-    grid-column: 3 !important;
     grid-row: 1 !important;
   }
   html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask span {
