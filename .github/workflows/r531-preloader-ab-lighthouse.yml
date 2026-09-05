@@ -1,5 +1,6 @@
 name: R531 preloader Lighthouse A-B
 
+# R531 closeout: this workflow is intentionally branch-scoped and source-read-only.
 on:
   push:
     branches: [chatgpt/r530-lightweight-preloader-v2]
@@ -68,7 +69,6 @@ jobs:
           node <<'NODE'
           const fs=require('node:fs'),path=require('node:path');
           const root=process.env.RUNNER_TEMP+'/r531-ab';
-          const metricIds=['first-contentful-paint','largest-contentful-paint','speed-index','total-blocking-time','cumulative-layout-shift','server-response-time'];
           const read=(variant,mode)=>fs.readdirSync(path.join(root,variant,mode)).filter(f=>f.endsWith('.json')).map(f=>{try{return JSON.parse(fs.readFileSync(path.join(root,variant,mode,f),'utf8'));}catch{return null;}}).filter(j=>j?.categories?.performance&&j?.audits).map(j=>({
             performance:j.categories.performance.score,
             accessibility:j.categories.accessibility.score,
