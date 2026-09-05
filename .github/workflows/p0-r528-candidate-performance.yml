@@ -1,0 +1,177 @@
+name: P0 R528 candidate performance
+run-name: R528 candidate performance for ${{ github.sha }}
+
+on:
+  push:
+    branches: [p0-r528-candidate]
+    paths:
+      - 'billing-worker/**'
+      - 'docs/**'
+      - 'lighthouserc.live.json'
+      - 'lighthouserc.live.mobile.json'
+      - '.github/scripts/validate-wda-100-r198.cjs'
+      - '.github/scripts/validate-mag-living-core-r528.cjs'
+      - '.github/workflows/p0-r528-candidate-performance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: p0-r528-candidate-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile-x3-desktop-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      AUDITED_SHA: ${{ github.sha }}
+      BASE_URL: http://127.0.0.1:4178/
+      EVIDENCE: artifacts/r528-candidate-performance
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Validate current R528 source and final quality contracts
+        run: |
+          set -euo pipefail
+          node .github/scripts/validate-mag-living-core-r528.cjs
+          node .github/scripts/validate-wda-100-r198.cjs
+          node --check billing-worker/src/production-content-entry-r528.js
+
+      - name: Install worker and Lighthouse dependencies
+        run: |
+          set -euo pipefail
+          npm ci --prefix billing-worker
+          mkdir -p "$EVIDENCE"
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/lighthouse" lighthouse@12.8.2
+
+      - name: Start exact candidate Worker locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd billing-worker
+          nohup npx wrangler dev --local --ip 127.0.0.1 --port 4178 > "$RUNNER_TEMP/r528-worker.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/r528-worker.pid"
+          cd ..
+          for attempt in $(seq 1 60); do
+            if curl -fsS --max-time 5 -D "$RUNNER_TEMP/r528-headers.txt" -o "$RUNNER_TEMP/r528-home.html" "$BASE_URL?candidate=$GITHUB_RUN_ID-$attempt"; then
+              grep -Fqi 'X-FormatX-Transport-Stability: r528-mobile-critical-graph' "$RUNNER_TEMP/r528-headers.txt"
+              grep -Fqi 'X-FormatX-MAG-Contract: living-core-continuous-normal-motion' "$RUNNER_TEMP/r528-headers.txt"
+              test -s "$RUNNER_TEMP/r528-home.html"
+              echo 'PASS: exact R528 candidate Worker is serving the R528 transport and MAG contract.'
+              exit 0
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/r528-worker.log" >&2 || true
+          exit 1
+
+      - name: Mobile Lighthouse x3
+        shell: bash
+        env:
+          LIGHTHOUSE: ${{ runner.temp }}/lighthouse/node_modules/lighthouse/cli/index.js
+        run: |
+          set -euo pipefail
+          for run in 1 2 3; do
+            node "$LIGHTHOUSE" "$BASE_URL?r528-mobile=$GITHUB_RUN_ID-$run" \
+              --output=json \
+              --output-path="$EVIDENCE/mobile-$run.json" \
+              --only-categories=performance,accessibility,best-practices,seo \
+              --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage' \
+              --quiet
+          done
+
+      - name: Desktop Lighthouse regression guard
+        shell: bash
+        env:
+          LIGHTHOUSE: ${{ runner.temp }}/lighthouse/node_modules/lighthouse/cli/index.js
+        run: |
+          set -euo pipefail
+          node "$LIGHTHOUSE" "$BASE_URL?r528-desktop=$GITHUB_RUN_ID" \
+            --preset=desktop \
+            --output=json \
+            --output-path="$EVIDENCE/desktop-1.json" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage' \
+            --quiet
+
+      - name: Enforce candidate thresholds
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const path=require('node:path');
+          const dir=process.env.EVIDENCE;
+          const rows=[];
+          function read(name){return JSON.parse(fs.readFileSync(path.join(dir,name),'utf8'));}
+          function inspect(name,strict){
+            const l=read(name),c=l.categories,a=l.audits;
+            const row={
+              name,
+              performance:Math.round(c.performance.score*100),
+              accessibility:Math.round(c.accessibility.score*100),
+              bestPractices:Math.round(c['best-practices'].score*100),
+              seo:Math.round(c.seo.score*100),
+              lcp:a['largest-contentful-paint'].numericValue,
+              cls:a['cumulative-layout-shift'].numericValue,
+              tbt:a['total-blocking-time'].numericValue,
+              ttfb:a['server-response-time'].numericValue,
+              lcpElement:a['largest-contentful-paint-element']?.details?.items?.[0]?.items?.[0]?.node?.selector||null
+            };
+            rows.push(row);
+            if(strict){
+              for(const key of ['performance','accessibility','bestPractices','seo']){
+                if(row[key]!==100)throw new Error(`${name}: ${key}=${row[key]}, expected 100`);
+              }
+              if(!(row.lcp<2000))throw new Error(`${name}: LCP ${row.lcp}ms >= 2000ms`);
+              if(!(row.cls<0.05))throw new Error(`${name}: CLS ${row.cls} >= 0.05`);
+              if(!(row.tbt<=150))throw new Error(`${name}: TBT ${row.tbt}ms > 150ms`);
+              if(!(row.ttfb<=500))throw new Error(`${name}: TTFB ${row.ttfb}ms > 500ms`);
+            }
+            return row;
+          }
+          for(let i=1;i<=3;i++)inspect(`mobile-${i}.json`,true);
+          inspect('desktop-1.json',true);
+          fs.writeFileSync(path.join(dir,'summary.json'),JSON.stringify(rows,null,2)+'\n');
+          console.table(rows);
+          console.log('PASS: R528 candidate mobile 100x3 and desktop regression guard meet the strict P0 thresholds.');
+          NODE
+
+      - name: Upload candidate Lighthouse evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r528-candidate-performance-${{ env.AUDITED_SHA }}
+          path: |
+            artifacts/r528-candidate-performance
+            ${{ runner.temp }}/r528-worker.log
+            ${{ runner.temp }}/r528-headers.txt
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish candidate performance status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ job.status }}
+        shell: bash
+        run: |
+          state=failure
+          description='R528 candidate performance or quality gate failed'
+          if [[ "$RESULT" == success ]]; then
+            state=success
+            description='Mobile 100x3 plus desktop strict regression guard passed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state="$state" \
+            -f context='FormatX R528 candidate performance' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
