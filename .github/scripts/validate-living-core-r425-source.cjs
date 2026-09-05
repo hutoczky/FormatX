@@ -39,10 +39,13 @@ for(const token of [
 
 has(intro,[
   'single-current-runtime-no-postdom-repair-stack','fxHeroLcpOwnerR411','static-html-no-reparent',
-  'r461-lightweight-first-party','formatx:referencepause','fx-reference-controls-r204',
-  'runtime-error','promise-error'
-],'R461 first-paint owner');
-for(const token of ['formatx-award-runtime-r206.js','formatx-mobile-regression-r310.js','activateCriticalReal3dStyle','queuePostDomEnhancements'])assert.ok(!intro.includes(token),`retired post-DOM stack returned: ${token}`);
+  'r461-lightweight-first-party','fxManualMagPauseContractR528','retired-living-core',
+  'retireManualPause','fx-reference-controls-r204','runtime-error','promise-error'
+],'R528 living-core first-paint owner');
+for(const token of [
+  'formatx-award-runtime-r206.js','formatx-mobile-regression-r310.js','activateCriticalReal3dStyle',
+  'queuePostDomEnhancements','bindPause(','formatx:referencepause'
+])assert.ok(!intro.includes(token),`retired first-load/manual-pause contract returned: ${token}`);
 
 has(motion,[
   'single-language-toggle.js?v=20260830-r462-semantic-owner',
@@ -138,7 +141,9 @@ assert.ok(!governor.includes("active('scroll-r463'"),'mobile scroll must not wak
 assert.ok(!governor.includes("active('resize-r463'"),'mobile resize must not wake WebGL');
 
 has(nativeTouch,['native-r326-touch-r460-controller-tap','formatx:heromagcontrollerrequest','fxHeroMagControllerR460'],'R460 native touch controller');
-has(mini,['formatx:heromagcontrollerrequest','window.FormatXMiniMagR459={','formatx:minimagready'],'R459 persistent controller');
+has(mini,['formatx:heromagcontrollerrequest','window.FormatXMiniMagR459={','formatx:minimagready','manualPause:false'],'R528 persistent controller');
+assert.ok(!mini.includes('togglePause'),'R528 Mini MAG must not expose manual pause');
+assert.ok(!mini.includes("pause:['"),'R528 Mini MAG copy must not expose manual pause');
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 
 has(quality,[
@@ -148,4 +153,4 @@ has(quality,[
 ],'R462 measurable quality CSS');
 
 for(const source of [intro,motion,language,current,renderer,solidGlass,life,governor,nativeTouch,mini])new Function(source);
-console.log('PASS: R484 keeps one native MAG, visible surface filaments, a full 1160ms periodic sweep, zero frames between sweeps, and pause/reduced-motion guards.');
+console.log('PASS: R528 keeps one native living MAG, visible surface energy, zero-idle lifecycle, reduced-motion accessibility, and no manual MAG PAUSE/RESUME product control.');
