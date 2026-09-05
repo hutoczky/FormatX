@@ -1,0 +1,69 @@
+name: P0 R530 fallback Live OS debug
+
+on:
+  push:
+    branches:
+      - p0-r530-fallback-debug
+
+permissions:
+  contents: read
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          python3 -m http.server 4178 --directory docs >"$RUNNER_TEMP/http.log" 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && break; sleep 1; done
+      - name: Diagnose fallback execution chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN,args:['--no-sandbox','--disable-dev-shm-usage']});
+            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});
+            await context.addInitScript(()=>{
+              const original=HTMLCanvasElement.prototype.getContext;
+              HTMLCanvasElement.prototype.getContext=function(type,...args){
+                if(['webgl','webgl2','experimental-webgl'].includes(type)) return null;
+                return original.call(this,type,...args);
+              };
+            });
+            const page=await context.newPage();
+            const pageErrors=[]; const consoleErrors=[]; const failed=[];
+            page.on('pageerror',e=>pageErrors.push(String(e)));
+            page.on('console',m=>{if(m.type()==='error') consoleErrors.push(m.text())});
+            page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));
+            const resp=await page.goto('http://127.0.0.1:4178/scifi-ui/?r530_fallback_debug=1',{waitUntil:'domcontentloaded',timeout:30000});
+            await page.waitForTimeout(5000);
+            const state=await page.evaluate(()=>({
+              status:document.readyState,
+              originProof:document.documentElement.dataset.fxOriginProof||'',
+              originProofState:document.documentElement.dataset.fxOriginProofState||'',
+              liveLoader:document.documentElement.dataset.fxLiveOsLoader||'',
+              liveLoadState:document.documentElement.dataset.fxLiveOsLoadState||'',
+              originScript:[...document.scripts].filter(s=>s.src.includes('formatx-origin-proof.js')).map(s=>({src:s.src,defer:s.defer,async:s.async})),
+              launcherCount:document.querySelectorAll('[data-fx-live-os-launcher]').length,
+              liveOverview:document.querySelectorAll('#live-os,#live-os-overview,[data-fx-live-os],[data-fx-live-os-cta]').length,
+              hero:Boolean(document.querySelector('#hero')),
+              proof:Boolean(document.querySelector('[data-fx-award-proof],.fx-proof-grid')),
+              body:Boolean(document.body)
+            }));
+            console.log('R530_FALLBACK_DEBUG',JSON.stringify({httpStatus:resp?.status(),state,pageErrors,consoleErrors,failed},null,2));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
