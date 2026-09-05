@@ -28,8 +28,10 @@ jobs:
     timeout-minutes: 30
     env:
       AUDITED_SHA: ${{ github.sha }}
-      BASE_URL: http://127.0.0.1:4178/
+      BASE_URL: http://formatxsuite.com:4178/
       EVIDENCE: artifacts/r528-candidate-performance
+      NO_PROXY: formatxsuite.com,127.0.0.1,localhost
+      no_proxy: formatxsuite.com,127.0.0.1,localhost
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
@@ -52,26 +54,34 @@ jobs:
           mkdir -p "$EVIDENCE"
           npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/lighthouse" lighthouse@12.8.2
 
-      - name: Start exact candidate Worker locally
+      - name: Start exact candidate Worker locally under canonical hostname
         shell: bash
         run: |
           set -euo pipefail
+          echo '127.0.0.1 formatxsuite.com' | sudo tee -a /etc/hosts >/dev/null
           cd billing-worker
           nohup npx wrangler dev --local --ip 127.0.0.1 --port 4178 > "$RUNNER_TEMP/r528-worker.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/r528-worker.pid"
           cd ..
+          ready=0
           for attempt in $(seq 1 60); do
             if curl -fsS --max-time 5 -D "$RUNNER_TEMP/r528-headers.txt" -o "$RUNNER_TEMP/r528-home.html" "$BASE_URL?candidate=$GITHUB_RUN_ID-$attempt"; then
-              grep -Fqi 'X-FormatX-Transport-Stability: r528-mobile-critical-graph' "$RUNNER_TEMP/r528-headers.txt"
-              grep -Fqi 'X-FormatX-MAG-Contract: living-core-continuous-normal-motion' "$RUNNER_TEMP/r528-headers.txt"
-              test -s "$RUNNER_TEMP/r528-home.html"
-              echo 'PASS: exact R528 candidate Worker is serving the R528 transport and MAG contract.'
-              exit 0
+              if grep -Fqi 'X-FormatX-Transport-Stability: r528-mobile-critical-graph' "$RUNNER_TEMP/r528-headers.txt" \
+                && grep -Fqi 'X-FormatX-MAG-Contract: living-core-continuous-normal-motion' "$RUNNER_TEMP/r528-headers.txt" \
+                && test -s "$RUNNER_TEMP/r528-home.html"; then
+                ready=1
+                break
+              fi
+              echo 'Worker responded before the complete R528 contract was visible:' >&2
+              cat "$RUNNER_TEMP/r528-headers.txt" >&2
             fi
             sleep 2
           done
-          cat "$RUNNER_TEMP/r528-worker.log" >&2 || true
-          exit 1
+          if [[ "$ready" != 1 ]]; then
+            cat "$RUNNER_TEMP/r528-worker.log" >&2 || true
+            exit 1
+          fi
+          echo 'PASS: exact R528 candidate Worker is serving the canonical hostname with R528 transport and MAG contract.'
 
       - name: Mobile Lighthouse x3
         shell: bash
