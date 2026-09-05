@@ -44,7 +44,7 @@ absent(intro,['formatx:referencepause','function bindPause','function ensurePaus
 
 has(scheduler,[
   'navigation-owned living MAG + post-first-paint enhancements',
-  "const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r535-navigation-autostart'",
+  "const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r536-lifecycle-clean'",
   'function startCriticalMag()','requested-navigation',"script.dataset.fxCurrentMagLoaderR422='true'",
   "script.dataset.fxNavigationMagR535='true'",'startCriticalMag();'
 ],'R536 unconditional navigation MAG scheduler');
@@ -59,9 +59,10 @@ has(motion,[
 ],'current motion/MAG + independent intent enhancement route');
 absent(motion,['fx-reference-pause','formatx:referencepause'],'active motion owner');
 
-has(current,["const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'",'cleanupLegacyMagRuntime',"fxPrimaryMagOwnerR460='r326-only'",'formatx-crystal-organism-r326.js','formatx-mobile-render-governor-r426.js','formatx-core-life-r455.js','formatx-mini-mag-assistant-r459.js'],'single current MAG loader');
-has(renderer,["const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','const SURFACE_PULSE_MS = 1160','prefers-reduced-motion:reduce','document.hidden','uSurfacePulse','single-luminous-webgl-material-owner'],'native R326 renderer');
+has(current,["const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'",'cleanupLegacyMagRuntime',"fxPrimaryMagOwnerR460='r326-only'",'formatx-crystal-organism-r326.js?v=20260906-r536-automatic-lifecycle-no-audit-path','formatx-mobile-render-governor-r426.js?v=20260906-r536-automatic-lifecycle','formatx-core-life-r455.js','formatx-mini-mag-assistant-r459.js',"fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle'"],'single current MAG loader');
+has(renderer,["const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','const SURFACE_PULSE_MS = 1160','prefers-reduced-motion:reduce','document.hidden','uSurfacePulse','single-luminous-webgl-material-owner','fxRenderLifecycleSuspended'],'native R326 renderer');
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
+absent(renderer,['lighthouse=1','auditMode','formatx:referencepause','fxReferenceMotionPaused','.fx-reference-pause'],'native renderer audit/manual-pause bypass');
 
 has(life,["const VERSION = 'native-webgl-periodic-and-interaction-life-r528'",'prefers-reduced-motion: reduce','document.hidden','IntersectionObserver','formatx:coreinteraction','pointerdown',"fxCoreIdlePolicyR455 = 'periodic-surface-bursts-between-zero-idle'"],'automatic living-core lifecycle');
 assert.ok(!life.includes('setInterval('),'living-core life owner must remain interval-free');
@@ -71,7 +72,7 @@ has(governor,['automatic lifecycle governor','activeWindowMs=240',"fxMobileRende
 has(controls,['canonicalControls(hero)','fx-reference-controls-r204','visibleControl(ask)','fxLivingCoreControlsR536'],'R536 control owner');
 has(coreTouch,['formatx:coreinteraction','formatx:organismcoreactivate','touch-pulse-r536-lifecycle-safe'],'R536 touch fallback');
 has(nativeTouch,['formatx:coreinteraction','formatx:organismcoreactivate','native-r326-touch-r536-controller-tap'],'R536 native MAG touch');
-for(const [name,source] of Object.entries({intro,motion,governor,controls,coreTouch,nativeTouch,mini,life}))absent(source,['formatx:referencepause','fxReferenceMotionPaused','fxManualMagPauseR528','.fx-reference-pause'],`${name} manual MAG pause contract`);
+for(const [name,source] of Object.entries({intro,motion,renderer,governor,controls,coreTouch,nativeTouch,mini,life}))absent(source,['formatx:referencepause','fxReferenceMotionPaused','fxManualMagPauseR528','.fx-reference-pause'],`${name} manual MAG pause contract`);
 
 has(quality,['#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]','position: fixed !important','pointer-events: none !important','@keyframes fx-r533-preloader-visual-bound','animation: fx-r533-preloader-visual-bound 1640ms linear both !important','animation-duration: 1360ms !important','will-change: clip-path !important','@media (prefers-reduced-motion: reduce)'],'R536 fixed paintable compositor preloader contract');
 absent(quality,['#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ .topbar','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ footer'],'hero must remain paintable behind preloader');
@@ -79,15 +80,16 @@ absent(quality,['#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main'
 has(referenceBoot,["fxReferenceProductionR244 = mode","fxReferenceComposition = mobile","fxReferenceModeBootR334 = 'prepaint-' + mode"],'tiny synchronous prepaint reference selector');
 has(criticalShell,['.main-nav,',' .header-actions { display: none;','pointer-events: none;'],'mobile critical shell');
 has(worker,[
-  "P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r535-navigation-mag-scroll-intent'",
-  "MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r535-scroll-intent-owner'",
+  "P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r536-navigation-mag-automatic-lifecycle'",
+  "MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r536-design-system-intent'",
   "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r534-static-lcp-v1'",
   "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner'",
   "QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1'",
-  "X-FormatX-Product-Contract', 'r535-navigation-mag-no-manual-pause'",
-  "X-FormatX-MAG-Startup', 'r535-navigation-owned-critical-living-core'",
+  "X-FormatX-Product-Contract', 'r536-navigation-mag-automatic-lifecycle'",
+  "X-FormatX-MAG-Startup', 'r536-navigation-owned-critical-living-core'",
   "X-FormatX-Preloader', 'r534-static-content-roadmap-timing'",
-  "X-FormatX-Reference-Boot', 'r535-prepaint-layout-selector'",
+  "X-FormatX-Reference-Boot', 'r536-prepaint-layout-selector'",
+  "X-FormatX-CSS-Scheduler', 'r536-global-critical-first-paint-mobile-legacy-intent'",
   'rewrittenSchedulerResponse','MOBILE_FIRST_PAINT_PRELOAD','P0_FIRST_PAINT_PRELOAD','HEART_STYLE_PRELOAD'
 ],'R536 production cache/prepaint/navigation-MAG delivery contract');
 absent(worker,['deferReferenceModeBoot','REFERENCE_BOOT_DEFERRED_PREFIX','GLOBAL_LEGACY_PATHS'],'production must not defer the prepaint selector or global critical shell');
