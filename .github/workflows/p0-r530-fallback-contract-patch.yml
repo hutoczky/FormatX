@@ -1,0 +1,84 @@
+name: P0 R530 fallback contract patch
+
+on:
+  push:
+    branches:
+      - p0-r530-fallback-debug
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-prove:
+    if: ${{ !contains(github.event.head_commit.message, '[candidate] Finalize R530 deferred fallback semantic contract') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: p0-r530-fallback-debug
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Patch semantic fallback contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/scripts/validate-r522-semantic-mag.cjs')
+          s=p.read_text()
+          old="""    assert.ok(state.hero && state.lead > 40 && state.live && state.proof && state.headerCore && state.ask,
+      `fallback lost meaningful product content ${JSON.stringify(state)}`);
+"""
+          new="""    assert.ok(state.hero && state.lead > 40 && state.proof && state.headerCore && state.ask,
+      `fallback lost meaningful base product content ${JSON.stringify(state)}`);
+    if (!state.live) {
+      const runtimeState = await page.evaluate(() => document.documentElement.dataset.fxContentRuntimeR241 || '');
+      assert.equal(runtimeState, 'armed-r528-user-intent',
+        `fallback deferred content runtime is not armed ${runtimeState}`);
+      await page.keyboard.press('Tab');
+      await page.waitForFunction(() => Boolean(document.querySelector(
+        '#live-os,#live-os-overview,[data-fx-live-os],[data-fx-live-os-launcher],[data-fx-live-os-cta]'
+      )), null, { timeout: 8000 });
+      const liveAfterIntent = await page.evaluate(() => Boolean(document.querySelector(
+        '#live-os,#live-os-overview,[data-fx-live-os],[data-fx-live-os-launcher],[data-fx-live-os-cta]'
+      )));
+      assert.ok(liveAfterIntent, 'fallback Live OS surface did not mount after real user intent');
+    }
+"""
+          if old not in s:
+              raise SystemExit('fallback assertion anchor missing')
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
+      - name: Install browser harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
+          python3 -m http.server 4178 --directory docs >"$RUNNER_TEMP/http.log" 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && break; sleep 1; done
+      - name: Re-run full website visual contract
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_VISUAL_DIR: artifacts/r530-final-content-visuals
+        run: node .github/scripts/validate-content-visuals.cjs
+      - name: Re-run living MAG semantic contract
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/
+          FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r530-final-semantic-mag
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
+      - name: Commit proven semantic contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .github/scripts/validate-r522-semantic-mag.cjs
+          git commit -m '[candidate] Finalize R530 deferred fallback semantic contract'
+          git push origin HEAD:p0-r530-fallback-debug
