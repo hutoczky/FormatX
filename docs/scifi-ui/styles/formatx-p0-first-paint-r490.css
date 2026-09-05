@@ -201,29 +201,6 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
   }
 }
 
-/* R532: the previous reservation layer was still taller than the settled r244
-   desktop contract. Reset only synthetic reservation heights/rows so the
-   render-blocking frame and the final r244 grid resolve to the same geometry. */
-@media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {
-  html body.living-architecture #hero > .hero-grid {
-    grid-template-rows: none !important;
-    min-height: 0 !important;
-  }
-  html body.living-architecture #hero > .hero-grid > .hero-copy {
-    height: auto !important;
-    min-height: 0 !important;
-    contain: none !important;
-  }
-  html body.living-architecture #hero .hero-lead {
-    min-block-size: 0 !important;
-  }
-  html body.living-architecture #hero .fx-method-inline,
-  html body.living-architecture #hero .hero-actions {
-    min-height: 0 !important;
-  }
-}
-
 /* production-r501-p0-first-paint-desktop-copy-box */
 /* production-r503-p0-first-paint-hero-ancestor-box */
 /* production-r530-p0-first-paint-no-manual-mag-pause */
-/* production-r532-p0-first-paint-settled-desktop-geometry */
