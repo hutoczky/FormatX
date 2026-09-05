@@ -1,0 +1,106 @@
+name: R531 preloader Lighthouse A-B
+
+on:
+  push:
+    branches: [chatgpt/r530-lightweight-preloader-v2]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
+      - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
+      - 'docs/scifi-ui/styles/formatx-quality-r461.css'
+      - '.github/workflows/r531-preloader-ab-lighthouse.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      BASE_SHA: 37342f3c6050877b60645d50054ecf5ffde6ba77
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+      - name: Fetch exact baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git cat-file -e "$BASE_SHA^{commit}"
+          echo "candidate=$GITHUB_SHA"
+          echo "baseline=$BASE_SHA"
+      - name: Collect baseline desktop and mobile x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$BASE_SHA"
+          rm -rf "$RUNNER_TEMP/r531-ab" .lighthouseci
+          mkdir -p "$RUNNER_TEMP/r531-ab/baseline/desktop" "$RUNNER_TEMP/r531-ab/baseline/mobile"
+          lhci collect --config=./lighthouserc.json
+          cp -a .lighthouseci/. "$RUNNER_TEMP/r531-ab/baseline/desktop/"
+          rm -rf .lighthouseci
+          lhci collect --config=./lighthouserc.mobile.json
+          cp -a .lighthouseci/. "$RUNNER_TEMP/r531-ab/baseline/mobile/"
+      - name: Collect candidate desktop and mobile x3
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$GITHUB_SHA"
+          mkdir -p "$RUNNER_TEMP/r531-ab/candidate/desktop" "$RUNNER_TEMP/r531-ab/candidate/mobile"
+          rm -rf .lighthouseci
+          lhci collect --config=./lighthouserc.json
+          cp -a .lighthouseci/. "$RUNNER_TEMP/r531-ab/candidate/desktop/"
+          rm -rf .lighthouseci
+          lhci collect --config=./lighthouserc.mobile.json
+          cp -a .lighthouseci/. "$RUNNER_TEMP/r531-ab/candidate/mobile/"
+      - name: Parse exact A-B evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs'),path=require('node:path');
+          const root=process.env.RUNNER_TEMP+'/r531-ab';
+          const metricIds=['first-contentful-paint','largest-contentful-paint','speed-index','total-blocking-time','cumulative-layout-shift','server-response-time'];
+          const read=(variant,mode)=>fs.readdirSync(path.join(root,variant,mode)).filter(f=>f.endsWith('.json')).map(f=>{try{return JSON.parse(fs.readFileSync(path.join(root,variant,mode,f),'utf8'));}catch{return null;}}).filter(j=>j?.categories?.performance&&j?.audits).map(j=>({
+            performance:j.categories.performance.score,
+            accessibility:j.categories.accessibility.score,
+            bestPractices:j.categories['best-practices'].score,
+            seo:j.categories.seo.score,
+            fcp:j.audits['first-contentful-paint'].numericValue,
+            lcp:j.audits['largest-contentful-paint'].numericValue,
+            speedIndex:j.audits['speed-index'].numericValue,
+            tbt:j.audits['total-blocking-time'].numericValue,
+            cls:j.audits['cumulative-layout-shift'].numericValue,
+            ttfb:j.audits['server-response-time'].numericValue,
+            lcpElement:j.audits['largest-contentful-paint-element']?.details?.items?.[0]?.items?.[0]?.node?.snippet||j.audits['largest-contentful-paint-element']?.details?.items?.[0]?.node?.snippet||''
+          }));
+          const median=a=>{const b=[...a].sort((x,y)=>x-y);return b[Math.floor(b.length/2)];};
+          const summary={baseSha:process.env.BASE_SHA,candidateSha:process.env.GITHUB_SHA,modes:{}};
+          for(const mode of ['desktop','mobile']){
+            const baseline=read('baseline',mode),candidate=read('candidate',mode);
+            if(baseline.length!==3||candidate.length!==3)throw new Error(`${mode}: expected 3+3 LHRs, got ${baseline.length}+${candidate.length}`);
+            const med=rows=>Object.fromEntries(['performance','accessibility','bestPractices','seo','fcp','lcp','speedIndex','tbt','cls','ttfb'].map(k=>[k,median(rows.map(r=>r[k]))]));
+            const b=med(baseline),c=med(candidate);
+            summary.modes[mode]={baseline,candidate,medianBaseline:b,medianCandidate:c,delta:{performance:c.performance-b.performance,fcp:c.fcp-b.fcp,lcp:c.lcp-b.lcp,speedIndex:c.speedIndex-b.speedIndex,tbt:c.tbt-b.tbt,cls:c.cls-b.cls,ttfb:c.ttfb-b.ttfb}};
+          }
+          fs.writeFileSync(root+'/summary.json',JSON.stringify(summary,null,2));
+          console.log(JSON.stringify(summary,null,2));
+          NODE
+          mkdir -p artifacts/r531-preloader-ab
+          cp -a "$RUNNER_TEMP/r531-ab/." artifacts/r531-preloader-ab/
+      - name: Upload A-B evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r531-preloader-ab-${{ github.sha }}
+          path: artifacts/r531-preloader-ab/
+          include-hidden-files: true
+          retention-days: 30
