@@ -1,0 +1,148 @@
+name: P0 R530 living-core contract migration
+
+on:
+  push:
+    branches:
+      - p0-r530-candidate
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: ${{ !contains(github.event.head_commit.message, '[candidate] R530 living-core contract migration') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: p0-r530-candidate
+
+      - name: Port proven lifecycle-only living-core implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin p0-r528-candidate
+          git checkout origin/p0-r528-candidate -- \
+            .github/scripts/validate-living-core-r425-source.cjs \
+            .github/scripts/validate-live-mag-functional.cjs \
+            .github/scripts/validate-r522-semantic-mag.cjs \
+            .github/scripts/validate-wda-100-r198.cjs \
+            .github/scripts/validate-mag-living-core-r528.cjs \
+            .github/scripts/validate-mag-surface-energy-r528.cjs \
+            .github/scripts/validate-mag-surface-energy-r484.cjs \
+            docs/scifi-ui/scripts/formatx-reference-production-r244.js \
+            docs/scifi-ui/scripts/formatx-event-horizon.js \
+            docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js \
+            docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js \
+            docs/scifi-ui/scripts/formatx-crystal-organism-r326.js \
+            docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js \
+            docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js \
+            docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js \
+            docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js \
+            docs/scifi-ui/scripts/formatx-core-life-r455.js \
+            docs/scifi-ui/scripts/formatx-core-direct-interaction.js \
+            docs/scifi-ui/scripts/formatx-geometry-guard-r286.js \
+            docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js \
+            docs/scifi-ui/styles/formatx-reduced-mag-identity-r528.css \
+            docs/scifi-ui/styles/formatx-p0-first-paint-r490.css \
+            docs/scifi-ui/styles/formatx-quality-r461.css \
+            docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css \
+            docs/scifi-ui/styles/formatx-mobile-proof-controls-r204.css \
+            docs/scifi-ui/styles/formatx-mobile-layout-r207.css
+
+      - name: Align R528 semantic source gate with R529 direct-canonical production architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/scripts/validate-mag-living-core-r528.cjs')
+          s=p.read_text()
+          s=s.replace("const worker = read('billing-worker/src/production-content-entry-r528.js');", "const worker = read('billing-worker/src/production-content-entry-r529.js');")
+          old="""assert.match(worker, /r528-mobile-critical-graph/, 'R528 production wrapper missing');
+          assert.match(worker, /X-FormatX-MAG-Contract','living-core-continuous-normal-motion/, 'R528 Worker MAG product contract header is not canonical');
+          assert.match(worker, /formatx-reduced-mag-identity-r528\\.css/, 'R528 reduced-motion identity layer not delivered');
+          assert.ok(worker.includes('formatx-event-horizon\\\\.js'), 'R528 runtime cache-bust graph does not include event-horizon');
+          assert.ok(worker.includes('formatx-control-owner-r268\\\\.js'), 'R528 runtime cache-bust graph does not include control-owner');
+          assert.ok(worker.includes('formatx-motion-runtime-loader-r239\\\\.js'), 'R528 runtime cache-bust graph does not include motion loader');
+          assert.ok(worker.includes('formatx-mini-mag-assistant-r459\\\\.js'), 'R528 runtime cache-bust graph does not include Mini MAG');
+          """
+          new="""assert.match(worker, /r529-direct-canonical-living-core/, 'R529 direct-canonical production wrapper missing');
+          assert.match(worker, /X-FormatX-Product-Contract','r529-living-core-no-manual-pause/, 'R529 Worker living-core product contract header missing');
+          assert.match(worker, /formatx-heart-core-r252\\.css/, 'R529 static heart first-paint layer missing');
+          assert.match(worker, /production-content-entry\\.js/, 'R529 wrapper must delegate to canonical production content entry');
+          """
+          if old not in s:
+              raise SystemExit('R528 worker assertion block not found')
+          p.write_text(s.replace(old,new))
+          PY
+
+      - name: Modernize active browser hero readiness to SOUND plus ASK and no manual PAUSE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/scripts/validate-content-visuals.cjs')
+          s=p.read_text()
+          s=s.replace("          && visible('#hero .fx-reference-controls-r204 .fx-reference-pause')\n", "          && !document.querySelector('#hero .fx-reference-controls-r204 .fx-reference-pause')\n")
+          s=s.replace("    const pause = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-pause');\n", "    const pauseCount = await page.locator('#hero .fx-reference-controls-r204 .fx-reference-pause').count();\n")
+          s=s.replace("    assert(pause.width >= 44 && pause.height >= 44, 'Mobile pause target is too small: ' + JSON.stringify(pause));\n", "    assert(pauseCount === 0, 'Retired manual MAG PAUSE control reappeared: ' + pauseCount);\n")
+          s=s.replace("    assert(!overlap(ask, pause, 2), 'Mobile ASK and pause controls overlap: ' + JSON.stringify({ ask, pause, controls }));\n", "")
+          s=s.replace("    assert(Math.abs(sound.top - ask.top) <= 2 && Math.abs(ask.top - pause.top) <= 2,\n      'Mobile SOUND, ASK and pause controls must form one horizontal row: ' + JSON.stringify({ sound, ask, pause, controls }));\n", "    assert(Math.abs(sound.top - ask.top) <= 2,\n      'Mobile SOUND and ASK controls must form one horizontal row: ' + JSON.stringify({ sound, ask, controls }));\n")
+          s=s.replace("    assert(sound.left < ask.left && ask.left < pause.left,\n      'Mobile controls are not ordered SOUND → ASK → PAUSE: ' + JSON.stringify({ sound, ask, pause, controls }));\n", "    assert(sound.left < ask.left,\n      'Mobile controls are not ordered SOUND → ASK: ' + JSON.stringify({ sound, ask, controls }));\n")
+          p.write_text(s)
+          PY
+
+      - name: Assert no stale active manual-pause contract remains in core P0 path
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad=0
+          for f in \
+            docs/scifi-ui/scripts/formatx-reference-production-r244.js \
+            docs/scifi-ui/scripts/formatx-event-horizon.js \
+            docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js \
+            docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js \
+            docs/scifi-ui/scripts/formatx-crystal-organism-r326.js \
+            docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js \
+            docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js \
+            docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js \
+            docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js \
+            docs/scifi-ui/scripts/formatx-core-life-r455.js \
+            docs/scifi-ui/scripts/formatx-core-direct-interaction.js \
+            docs/scifi-ui/scripts/formatx-geometry-guard-r286.js \
+            docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js; do
+              if grep -En 'formatx:referencepause|fxReferenceMotionPaused|data-fx-reference-motion-paused|\\.fx-reference-pause' "$f"; then bad=1; fi
+          done
+          test "$bad" -eq 0
+
+      - name: Run cheap current-contract source gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-reference-production-r244.js
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
+          node .github/scripts/validate-living-core-r425-source.cjs
+          node .github/scripts/validate-real3d-core.cjs
+          node .github/scripts/validate-real3d-core-v20.cjs
+          node .github/scripts/production-preflight.cjs
+          node .github/scripts/validate-mag-living-core-r528.cjs
+          node .github/scripts/validate-wda-100-r198.cjs
+
+      - name: Commit coherent R530 contract migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .
+          if git diff --cached --quiet; then
+            echo 'No migration changes required.'
+            exit 0
+          fi
+          git commit -m '[candidate] R530 living-core contract migration'
+          git push origin HEAD:p0-r530-candidate
