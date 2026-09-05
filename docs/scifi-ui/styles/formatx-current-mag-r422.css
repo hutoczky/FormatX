@@ -52,7 +52,6 @@ html[data-fx-three="error"][data-fx-mag-fallback-r530="static-safe-css"] body.li
   animation:none!important;
   animation-name:none!important;
   animation-duration:0s!important;
-  animation-play-state:paused!important;
 }
 html[data-fx-three="error"][data-fx-mag-fallback-r530="static-safe-css"] body.living-architecture #hero .hero-space::before {
   z-index:1!important;
