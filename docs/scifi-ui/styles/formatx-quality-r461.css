@@ -52,25 +52,233 @@ html body.living-architecture .topbar > .fx-language-toggle {
   min-height: 44px !important;
 }
 
+/* R532/P0: desktop first-frame lock. These rules intentionally mirror the
+   final R244 desktop composition before data-fx-reference-production-r244 is
+   written by deferred JS. The runtime therefore attaches semantics/controls
+   without changing the already-painted hero geometry. */
 @media (min-width: 901px) {
-  /* R530: reserve the settled desktop header in normal flow on first paint. */
   html body.living-architecture .topbar {
     position: relative !important;
     inset: auto !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    height: 72px !important;
-    min-height: 72px !important;
+    height: 76px !important;
+    min-height: 76px !important;
     margin: 0 !important;
   }
   html body.living-architecture .topbar > .fx-language-toggle {
     position: absolute !important;
-    top: 13px !important;
-    right: 88px !important;
+    top: 16px !important;
+    right: 112px !important;
     width: 46px !important;
-    height: 48px !important;
+    height: 44px !important;
     margin: 0 !important;
     z-index: 12070 !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+    background:
+      radial-gradient(ellipse at 74% 30%, rgba(20, 106, 170, .15), transparent 34%),
+      radial-gradient(ellipse at 70% 34%, rgba(126, 42, 210, .07), transparent 38%),
+      linear-gradient(180deg, #01050d 0%, #021120 54%, #01070e 100%) !important;
+  }
+  html body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 12 !important;
+    display: block !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+  html body.living-architecture #hero .hero-copy .kicker {
+    margin: 0 0 14px !important;
+    color: rgba(134, 224, 249, .78) !important;
+    font: 700 10px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    letter-spacing: .28em !important;
+  }
+  html body.living-architecture #hero .fx-category-definition {
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    min-height: 62px !important;
+    margin: 0 0 24px !important;
+    padding: 12px 14px !important;
+    border-left: 2px solid rgba(67, 221, 255, .85) !important;
+    color: rgba(205, 222, 233, .72) !important;
+    background: linear-gradient(90deg, rgba(4, 31, 45, .76), transparent) !important;
+    font: 400 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+  html body.living-architecture #hero .fx-category-definition strong {
+    display: block !important;
+    margin: 0 0 4px !important;
+    color: #74e7ff !important;
+    font: 750 10px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    letter-spacing: .08em !important;
+    text-transform: uppercase !important;
+  }
+  html body.living-architecture #hero #hero-title {
+    display: grid !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    white-space: normal !important;
+  }
+  html body.living-architecture #hero .hero-title-main {
+    display: block !important;
+    max-width: 100% !important;
+    font-size: clamp(64px, 6.25vw, 92px) !important;
+    line-height: .88 !important;
+    letter-spacing: -.075em !important;
+    white-space: nowrap !important;
+  }
+  html body.living-architecture #hero .hero-title-sub {
+    justify-self: end !important;
+    margin: 7px 2px 0 0 !important;
+    font-size: clamp(27px, 2.7vw, 40px) !important;
+    line-height: 1 !important;
+    letter-spacing: .12em !important;
+    white-space: nowrap !important;
+  }
+  html body.living-architecture #hero .hero-lead {
+    width: 100% !important;
+    max-width: 560px !important;
+    margin: 24px 0 0 !important;
+    color: rgba(218, 231, 239, .8) !important;
+    font: 400 clamp(16px, 1.25vw, 18px)/1.55 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+  html body.living-architecture #hero .fx-hero-product-state {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 18px 0 0 !important;
+    gap: 8px 12px !important;
+    color: rgba(189, 210, 222, .75) !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    transform: none !important;
+  }
+  html body.living-architecture #hero .fx-method-inline {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    margin: 14px 0 0 !important;
+    padding: 0 !important;
+    gap: 7px 18px !important;
+    list-style: none !important;
+    color: rgba(185, 210, 224, .7) !important;
+    font: 500 11px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  }
+  html body.living-architecture #hero .fx-method-inline li {
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+  }
+  html body.living-architecture #hero .hero-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    margin: 22px 0 0 !important;
+    gap: 10px !important;
+  }
+  html body.living-architecture #hero .hero-actions .button {
+    box-sizing: border-box !important;
+    min-height: 48px !important;
+    max-width: 100% !important;
+    padding: 0 18px !important;
+    white-space: normal !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+  }
+  html body.living-architecture #hero .hero-actions #hero-download {
+    flex: 1 1 250px !important;
+  }
+  html body.living-architecture #hero .hero-actions .button:not(#hero-download) {
+    flex: 1 1 180px !important;
+  }
+  html body.living-architecture #hero .hero-facts {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  html body.living-architecture #hero .hero-grid > .hero-space {
+    grid-area: space !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(520px, 42vw, 620px) !important;
+    min-height: 520px !important;
+    max-height: 620px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+    clip: auto !important;
+    clip-path: none !important;
   }
 }
 
@@ -306,4 +514,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* deploy-r531-p0-final-preloader-and-first-frame */
+/* deploy-r532-p0-desktop-first-frame-lock */
