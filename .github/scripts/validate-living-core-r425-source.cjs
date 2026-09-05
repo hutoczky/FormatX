@@ -73,7 +73,13 @@ absent(geometry, ['.fx-reference-pause'], 'geometry guard');
 has(content, ['fx-reference-ask', 'fx-three-sound'], 'content runtime reserved controls');
 absent(content, ['.fx-reference-pause'], 'content runtime loader');
 
-has(worker, ['r529-direct-canonical-living-core', "X-FormatX-Product-Contract','r529-living-core-no-manual-pause", 'formatx-heart-core-r252.css', 'production-content-entry.js'], 'R529 direct-canonical wrapper');
+has(worker, [
+  'r529-direct-canonical-living-core',
+  'X-FormatX-Product-Contract',
+  'r529-living-core-no-manual-pause',
+  'formatx-heart-core-r252.css',
+  'production-content-entry.js'
+], 'R529 direct-canonical wrapper');
 
 for (const source of [intro, controls, current, renderer, governor, touch, direct, geometry, content]) new Function(source);
 console.log('PASS: R530 current living-core source contract — SOUND+ASK, one renderer/lifecycle owner, reduced-motion/background safety, no manual MAG pause owner.');
