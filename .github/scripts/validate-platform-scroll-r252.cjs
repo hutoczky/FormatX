@@ -12,6 +12,11 @@ async function prepare(page) {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
   await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252', { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => document.documentElement.dataset.fxHeartCoreR252 === 'ready', null, { timeout: 20000 });
+
+  /* R534+: seamless-v7 is intentionally not a navigation critical-path owner.
+     Use a real browser input event, then prove the complete runtime/bridge contract. */
+  await page.mouse.wheel(0, 48);
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxInfiniteController === 'seamless-v7'
@@ -19,6 +24,7 @@ async function prepare(page) {
       && root.dataset.fxHeartCoreR252 === 'ready';
   }, null, { timeout: 20000 });
   await page.evaluate(async () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     try { await document.fonts?.ready; } catch (_) {}
     dispatchEvent(new Event('resize'));
   });
