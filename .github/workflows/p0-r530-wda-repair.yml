@@ -1,0 +1,58 @@
+name: P0 R530 WDA contract repair
+
+on:
+  push:
+    branches:
+      - p0-r530-candidate
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: ${{ !contains(github.event.head_commit.message, '[candidate] Repair R530 WDA no-pause matcher') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: p0-r530-candidate
+      - name: Patch migration workflow for current R529 control-owner truth
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/p0-r530-contract-migrate.yml')
+          s=p.read_text()
+          anchor="      - name: Assert no stale active manual-pause contract remains in core P0 path\n"
+          if 'Align WDA no-manual-pause source proof to R529 control owner' not in s:
+              step="""      - name: Align WDA no-manual-pause source proof to R529 control owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY2'
+          from pathlib import Path
+          p=Path('.github/scripts/validate-wda-100-r198.cjs')
+          s=p.read_text()
+          old=\"  'canonicalControls(hero)','fx-reference-controls-r204','pauseCount===0',\"
+          new=\"  'canonicalControls(hero)','fx-reference-controls-r204','removeObsoletePause(controls)',\"
+          if old not in s:
+              raise SystemExit('stale WDA pauseCount matcher not found')
+          p.write_text(s.replace(old,new))
+          PY2
+
+"""
+              if anchor not in s:
+                  raise SystemExit('migration insertion anchor not found')
+              s=s.replace(anchor,step+anchor)
+          p.write_text(s)
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .github/workflows/p0-r530-contract-migrate.yml
+          if git diff --cached --quiet; then
+            echo 'R530 WDA migration patch already present.'
+            exit 0
+          fi
+          git commit -m '[candidate] Repair R530 WDA no-pause matcher'
+          git push origin HEAD:p0-r530-candidate
