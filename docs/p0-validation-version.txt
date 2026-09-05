@@ -1,5 +1,5 @@
 FormatX P0 validation contract
-version=2026-09-05-p0-r528-living-core-mobile-first-paint
+version=2026-09-05-p0-r529-direct-canonical-living-core-mobile-lcp
 production_origin=https://formatxsuite.com/
 lighthouse_desktop_runs=3
 lighthouse_mobile_runs=3
@@ -12,9 +12,9 @@ browser_matrix=strict
 proof_policy=measured-artifacts-only
 product_runtime=r528-living-core-no-manual-pause
 motion_accessibility=prefers-reduced-motion-and-background-lifecycle
-mobile_lcp=r528-current-first-paint-legacy-post-fcp
+mobile_lcp=r529-static-heart-plus-mobile-legacy-post-fcp
 deferred_css=r526-first-contentful-paint-observer
-production_wrapper=r528-r527-delegate
+production_wrapper=r529-direct-canonical-r527-fcp-preserved
 semantic_mag=r528-living-core-current-contract
 legacy_r482=r528-semantic-replacement
-trigger=r528-final-same-sha
+trigger=r529-final-same-sha
