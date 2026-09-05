@@ -1,8 +1,7 @@
-/* FormatX r535 — canonical MAG startup + independent scroll-intent bootstrap.
-   MAG remains navigation-owned and automatic. Heavy Organism enhancements remain
-   deferred, while the lightweight platform-scroll bootstrap is requested on the
-   first real scroll intent so the seamless product contract works without ASK.
-   Manual MAG pause is fully absent from the active interaction reservation path. */
+/* FormatX r536 — navigation-owned MAG + independent intent enhancements.
+   MAG remains automatic from navigation. Heavy Organism/motion enhancements and
+   the full Design System stylesheet remain outside the first-paint critical path,
+   while scroll functionality arms on the first genuine scroll intent. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -17,6 +16,7 @@ root.dataset.fxDialogueSurfaceR475='booting';
 root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
+root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -33,6 +33,7 @@ const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=2026
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260831-r475-canonical-ask-surface';
 const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260831-r484-readable-electric-surface';
 const PLATFORM_SCROLL='/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260906-r535-scroll-intent-owner';
+const DESIGN_SYSTEM='/scifi-ui/styles/formatx-design-system.css?v=20260728-ds2';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
@@ -76,9 +77,7 @@ function ensureDialogueSurface(){
   let link=document.querySelector('link[data-fx-dialogue-surface-r475]');
   if(link instanceof HTMLLinkElement){root.dataset.fxDialogueSurfaceR475=link.sheet?'ready':'loading';return;}
   link=document.createElement('link');
-  link.rel='stylesheet';
-  link.href=DIALOGUE_STYLE;
-  link.dataset.fxDialogueSurfaceR475='true';
+  link.rel='stylesheet';link.href=DIALOGUE_STYLE;link.dataset.fxDialogueSurfaceR475='true';
   link.addEventListener('load',()=>{root.dataset.fxDialogueSurfaceR475='ready';},{once:true});
   link.addEventListener('error',()=>{root.dataset.fxDialogueSurfaceR475='load-failed';},{once:true});
   document.head.appendChild(link);
@@ -86,10 +85,7 @@ function ensureDialogueSurface(){
 function ensureMagShapeSync(){
   if(shapeSyncRequested||document.querySelector('script[data-fx-mag-shape-sync-r476]'))return;
   shapeSyncRequested=true;
-  const script=document.createElement('script');
-  script.src=MAG_SHAPE_SYNC;
-  script.async=false;
-  script.dataset.fxMagShapeSyncR476='true';
+  const script=document.createElement('script');script.src=MAG_SHAPE_SYNC;script.async=false;script.dataset.fxMagShapeSyncR476='true';
   script.addEventListener('load',()=>{root.dataset.fxMagShapeSyncBootstrapR476='loaded';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxMagShapeSyncBootstrapR476='failed';},{once:true});
   document.head.appendChild(script);
@@ -111,38 +107,29 @@ function ensureCurrentMag(){
 }
 function ensureStaticMotionCss(){
   const existing=document.getElementById('fx-r170-mobile-seam-override');
-  if(existing instanceof HTMLLinkElement){
-    if(existing.sheet)root.dataset.fxMotionCssR243='external-strict-csp-user-intent';
-    return;
-  }
+  if(existing instanceof HTMLLinkElement){if(existing.sheet)root.dataset.fxMotionCssR243='external-strict-csp-user-intent';return;}
   const stylesheet=document.createElement('link');
-  stylesheet.id='fx-r170-mobile-seam-override';
-  stylesheet.rel='stylesheet';
-  stylesheet.href='./styles/formatx-runtime-static-r243.css?v=20260819-r243-csp';
-  stylesheet.dataset.fxRuntimeStaticR243='true';
+  stylesheet.id='fx-r170-mobile-seam-override';stylesheet.rel='stylesheet';stylesheet.href='./styles/formatx-runtime-static-r243.css?v=20260819-r243-csp';stylesheet.dataset.fxRuntimeStaticR243='true';
   stylesheet.addEventListener('load',()=>{root.dataset.fxMotionCssR243='external-strict-csp-user-intent';},{once:true});
   stylesheet.addEventListener('error',()=>{root.dataset.fxMotionCssR243='external-strict-csp-load-failed';},{once:true});
   document.head.appendChild(stylesheet);
 }
+function ensureDesignSystem(){
+  let link=document.querySelector('link[data-fx-design-system-main-r536]');
+  if(link instanceof HTMLLinkElement){if(link.sheet)root.dataset.fxDesignSystemRuntimeR536='ready-user-intent';return;}
+  link=document.createElement('link');link.rel='stylesheet';link.href=DESIGN_SYSTEM;link.dataset.fxDesignSystemMainR536='true';
+  link.addEventListener('load',()=>{root.dataset.fxDesignSystemRuntimeR536='ready-user-intent';},{once:true});
+  link.addEventListener('error',()=>{root.dataset.fxDesignSystemRuntimeR536='load-failed';},{once:true});
+  document.head.appendChild(link);
+}
 function ensureScrollBootstrap(){
-  if(root.dataset.fxScrollBootstrap==='platform-scroll-v2'){
-    root.dataset.fxPlatformScrollBootstrapR535='ready-existing';
-    disarmScrollIntent();
-    return;
-  }
+  if(root.dataset.fxScrollBootstrap==='platform-scroll-v2'){root.dataset.fxPlatformScrollBootstrapR535='ready-existing';disarmScrollIntent();return;}
   if(scrollBootstrapRequested||document.querySelector('script[data-fx-platform-scroll-r535]'))return;
-  scrollBootstrapRequested=true;
-  root.dataset.fxPlatformScrollBootstrapR535='loading-scroll-intent';
-  const script=document.createElement('script');
-  script.src=PLATFORM_SCROLL;
-  script.async=false;
-  script.dataset.fxPlatformScrollR535='true';
-  script.addEventListener('load',()=>{
-    root.dataset.fxPlatformScrollBootstrapR535=root.dataset.fxScrollBootstrap==='platform-scroll-v2'?'ready-scroll-intent':'loaded-awaiting-bootstrap';
-  },{once:true});
+  scrollBootstrapRequested=true;root.dataset.fxPlatformScrollBootstrapR535='loading-scroll-intent';
+  const script=document.createElement('script');script.src=PLATFORM_SCROLL;script.async=false;script.dataset.fxPlatformScrollR535='true';
+  script.addEventListener('load',()=>{root.dataset.fxPlatformScrollBootstrapR535=root.dataset.fxScrollBootstrap==='platform-scroll-v2'?'ready-scroll-intent':'loaded-awaiting-bootstrap';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxPlatformScrollBootstrapR535='failed';},{once:true});
-  document.head.appendChild(script);
-  disarmScrollIntent();
+  document.head.appendChild(script);disarmScrollIntent();
 }
 function reservedInteraction(event){
   if(root.dataset.fxOrganismThought==='open')return true;
@@ -152,7 +139,7 @@ function reservedInteraction(event){
 function disarm(){for(const [type,options] of intentListeners)removeEventListener(type,onIntent,options);}
 function disarmScrollIntent(){for(const [type,options] of scrollIntentListeners)removeEventListener(type,onScrollIntent,options);}
 function mountEnhancements(){
-  if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
+  if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureDesignSystem();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
   root.dataset.fxMotionRuntimeR239='enhanced-r468-user-intent';
@@ -169,12 +156,8 @@ function openPendingCanonicalAsk(){
   if(!api||typeof api.open!=='function')return false;
   askActivationPending=false;
   queueMicrotask(()=>{
-    try{
-      api.open();
-      root.dataset.fxCanonicalAskActivationR477='dialogue-opened';
-    }catch(_){
-      root.dataset.fxCanonicalAskActivationR477='dialogue-open-failed';
-    }
+    try{api.open();root.dataset.fxCanonicalAskActivationR477='dialogue-opened';}
+    catch(_){root.dataset.fxCanonicalAskActivationR477='dialogue-open-failed';}
   });
   return true;
 }
@@ -182,11 +165,9 @@ function activateCanonicalAsk(event){
   const target=event.target instanceof Element?event.target.closest('#hero .fx-reference-controls-r204 .fx-reference-ask'):null;
   if(!(target instanceof HTMLButtonElement))return;
   if(typeof window.FormatXOrganismVoice?.open==='function')return;
-  askActivationPending=true;
-  root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
+  askActivationPending=true;root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
   if(root.dataset.fxImmersive!=='active'){
-    root.dataset.fxImmersive='active';
-    root.dataset.fxImmersiveSource='canonical-ask-r477';
+    root.dataset.fxImmersive='active';root.dataset.fxImmersiveSource='canonical-ask-r477';
     dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'canonical-ask-r477'}}));
   }else mountEnhancements();
   queueMicrotask(openPendingCanonicalAsk);
@@ -199,15 +180,10 @@ root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
 root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r468':mobile.matches?'core-ready-r468-mobile-r326-controller':'core-ready-r468-desktop-r326-controller';
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
-warmCriticalOwners();
-ensureDialogueSurface();
-ensureMagShapeSync();
-ensureLanguageToggle();
-ensureCurrentMag();
+warmCriticalOwners();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureCurrentMag();
 
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
-
 for(const [type,options] of scrollIntentListeners)addEventListener(type,onScrollIntent,options);
 if(Math.abs(scrollY)>1||(location.hash&&location.hash!=='#top'&&location.hash!=='#hero'))queueMicrotask(ensureScrollBootstrap);
 
