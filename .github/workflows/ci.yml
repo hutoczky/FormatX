@@ -11,6 +11,7 @@ on:
       - 'billing-worker/package-lock.json'
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
+      - '.github/scripts/lighthouse-production-candidate-proxy.cjs'
       - '.github/workflows/ci.yml'
   push:
     branches: [master]
@@ -22,6 +23,7 @@ on:
       - 'billing-worker/package-lock.json'
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
+      - '.github/scripts/lighthouse-production-candidate-proxy.cjs'
       - '.github/workflows/ci.yml'
   workflow_dispatch:
 
@@ -51,7 +53,7 @@ jobs:
           npm install -g @lhci/cli@0.13.x
           npm ci --prefix billing-worker
 
-      - name: Start exact production candidate Worker
+      - name: Start exact R534 production candidate Worker
         id: candidate
         shell: bash
         env:
@@ -69,7 +71,8 @@ jobs:
             if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-headers.txt" -o /dev/null http://127.0.0.1:8787/ 2>/dev/null; then
               if grep -Fqi 'X-FormatX-Candidate-Delivery: r533-exact-production-entry-localhost-8787' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
                  grep -Fqi 'X-FormatX-Candidate-Canonical-Origin: formatxsuite.com' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
-                 grep -Fqi 'X-FormatX-Preloader: r533-roadmap-timing-navigation-owned' "$RUNNER_TEMP/formatx-lighthouse-headers.txt"; then
+                 grep -Fqi 'X-FormatX-Preloader: r534-static-content-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+                 grep -Fqi 'X-FormatX-Reference-Boot: r534-deferred-after-static-first-paint' "$RUNNER_TEMP/formatx-lighthouse-headers.txt"; then
                 ready=1
                 break
               fi
@@ -83,7 +86,29 @@ jobs:
             cat "$RUNNER_TEMP/formatx-lighthouse-headers.txt" || true
             exit 1
           fi
-          echo 'Exact R533 production candidate Worker is ready on 127.0.0.1:8787/.'
+
+          node .github/scripts/lighthouse-production-candidate-proxy.cjs > "$RUNNER_TEMP/formatx-lighthouse-proxy.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/formatx-lighthouse-proxy.pid"
+          proxy_ready=0
+          for attempt in $(seq 1 80); do
+            if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" -o /dev/null http://127.0.0.1:8788/ 2>/dev/null; then
+              if grep -Fqi 'X-FormatX-Candidate-Proxy: canonical-header-normalizer-only' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && \
+                 grep -Fqi 'Link: <https://formatxsuite.com/>; rel="canonical"' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && \
+                 grep -Fqi 'X-FormatX-Preloader: r534-static-content-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt"; then
+                proxy_ready=1
+                break
+              fi
+            fi
+            sleep 0.25
+          done
+          if [ "$proxy_ready" -ne 1 ]; then
+            echo '--- Candidate proxy log ---'
+            cat "$RUNNER_TEMP/formatx-lighthouse-proxy.log" || true
+            echo '--- Last proxy headers ---'
+            cat "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" || true
+            exit 1
+          fi
+          echo 'Exact R534 production candidate + canonical transport proxy ready on 127.0.0.1:8788/.'
 
       - name: Run desktop Lighthouse CI on the real production candidate
         id: lighthouse_desktop
@@ -96,7 +121,7 @@ jobs:
           lhci autorun --config=./lighthouserc.json 2>&1 | tee lighthouse-desktop-output.txt
           lhci_status=${PIPESTATUS[0]}
           set -e
-          grep -Fq 'Running Lighthouse 3 time(s) on http://127.0.0.1:8787/' lighthouse-desktop-output.txt
+          grep -Fq 'Running Lighthouse 3 time(s) on http://127.0.0.1:8788/' lighthouse-desktop-output.txt
           mkdir -p lighthouse-results/desktop
           cp -a .lighthouseci/. lighthouse-results/desktop/
           exit "$lhci_status"
@@ -114,7 +139,7 @@ jobs:
           lhci autorun --config=./lighthouserc.mobile.json 2>&1 | tee lighthouse-mobile-output.txt
           lhci_status=${PIPESTATUS[0]}
           set -e
-          grep -Fq 'Running Lighthouse 3 time(s) on http://127.0.0.1:8787/' lighthouse-mobile-output.txt
+          grep -Fq 'Running Lighthouse 3 time(s) on http://127.0.0.1:8788/' lighthouse-mobile-output.txt
           mkdir -p lighthouse-results/mobile
           cp -a .lighthouseci/. lighthouse-results/mobile/
           exit "$lhci_status"
@@ -140,24 +165,24 @@ jobs:
           {
             echo "## Lighthouse CI Results"
             echo
-            echo "Validated surface: exact local production Worker candidate canonical root, desktop + mobile, normal visitor experience"
+            echo "Validated surface: exact R534 local production Worker candidate, canonical transport normalized, desktop + mobile, normal visitor experience"
             echo
-            echo "### Strict truthful thresholds"
-            echo "- Performance ≥ 0.95; 1.00 remains the optimisation target"
+            echo "### Current fail-closed thresholds"
+            echo "- Performance ≥ 0.95; roadmap target remains 1.00"
             echo "- Accessibility = 1.00"
             echo "- Best practices = 1.00"
             echo "- SEO = 1.00"
             echo "- FCP ≤ 1.8s"
-            echo "- LCP ≤ 2.5s"
-            echo "- TBT ≤ 200ms"
-            echo "- CLS ≤ 0.10"
+            echo "- LCP ≤ 2.5s; roadmap target < 2.0s"
+            echo "- TBT ≤ 200ms; roadmap target ≤ 150ms"
+            echo "- CLS ≤ 0.10; roadmap target < 0.05"
             echo "- TTFB ≤ 600ms"
             echo "- 3 runs per viewport profile"
             echo "- No audit-only query parameter"
             echo "- No forced reduced-motion mode"
             echo "- No skipped Lighthouse audits"
             echo
-            echo "The audited candidate is the same Cloudflare Worker entry and Static Assets binding used for production, internally canonicalised through formatxsuite.com before delivery transforms run. The local-candidate binding only selects that production path; it does not alter browser feature behavior or Lighthouse audits."
+            echo "The 8788 proxy only removes Wrangler's localhost-only canonical Link artifact and replaces it with the production canonical URL; all page bytes and application behavior come from the exact production Worker on 8787."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish Lighthouse status
