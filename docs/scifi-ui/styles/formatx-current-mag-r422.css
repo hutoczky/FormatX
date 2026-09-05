@@ -1,7 +1,7 @@
 /* FormatX r454/r530 — native MAG layout and accessibility composition.
    Visible material and surface motion belong exclusively to the WebGL shader.
-   R530 reuses the existing CSS error artwork only when WebGL is unavailable;
-   that fallback identity is explicitly static-safe and owns no render clock. */
+   R530 owns a standalone static-safe CSS identity only when WebGL is unavailable;
+   the fallback has no canvas, no RAF owner and no animation clock. */
 html,
 body {
   max-width: 100% !important;
@@ -31,14 +31,54 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   box-shadow:none!important;filter:none!important;opacity:0!important;animation:none!important;
 }
 
-/* R530: WebGL-unavailable fallback reuses the existing external CSS error art,
-   but it must remain a restrained/static identity with no animation clock. */
+/* R530: terminal WebGL failure retains a visible MAG identity without creating
+   another renderer. This art is deliberately static, pointer-transparent and
+   scoped to the explicit fallback state, so normal WebGL optics are untouched. */
+html[data-fx-three="error"][data-fx-mag-fallback-r530="static-safe-css"] body.living-architecture #hero .hero-space {
+  isolation:isolate!important;
+}
 html[data-fx-three="error"][data-fx-mag-fallback-r530="static-safe-css"] body.living-architecture #hero .hero-space::before,
 html[data-fx-three="error"][data-fx-mag-fallback-r530="static-safe-css"] body.living-architecture #hero .hero-space::after {
+  content:""!important;
+  position:absolute!important;
+  display:block!important;
+  top:50%!important;
+  left:50%!important;
+  aspect-ratio:1!important;
+  border-radius:50%!important;
+  pointer-events:none!important;
+  opacity:1!important;
+  visibility:visible!important;
   animation:none!important;
   animation-name:none!important;
   animation-duration:0s!important;
   animation-play-state:paused!important;
+}
+html[data-fx-three="error"][data-fx-mag-fallback-r530="static-safe-css"] body.living-architecture #hero .hero-space::before {
+  z-index:1!important;
+  width:min(78%,520px)!important;
+  border:1px solid rgba(150,245,255,.38)!important;
+  background:
+    radial-gradient(circle at 45% 39%,rgba(239,255,255,.96) 0 7%,rgba(104,236,240,.72) 8% 17%,transparent 18%),
+    radial-gradient(circle at 39% 32%,rgba(94,244,235,.30),transparent 34%),
+    repeating-radial-gradient(circle at 50% 50%,rgba(101,224,236,.13) 0 1px,transparent 2px 29px),
+    conic-gradient(from 20deg,rgba(27,168,182,.82),rgba(37,89,151,.48),rgba(43,205,190,.70),rgba(9,48,91,.60),rgba(27,168,182,.82))!important;
+  background-image:
+    radial-gradient(circle at 45% 39%,rgba(239,255,255,.96) 0 7%,rgba(104,236,240,.72) 8% 17%,transparent 18%),
+    radial-gradient(circle at 39% 32%,rgba(94,244,235,.30),transparent 34%),
+    repeating-radial-gradient(circle at 50% 50%,rgba(101,224,236,.13) 0 1px,transparent 2px 29px),
+    conic-gradient(from 20deg,rgba(27,168,182,.82),rgba(37,89,151,.48),rgba(43,205,190,.70),rgba(9,48,91,.60),rgba(27,168,182,.82))!important;
+  box-shadow:inset 0 0 76px rgba(224,255,255,.18),inset -30px -38px 84px rgba(0,18,48,.68),0 0 82px rgba(48,208,215,.20),0 34px 90px rgba(0,0,0,.42)!important;
+  transform:translate(-50%,-50%)!important;
+}
+html[data-fx-three="error"][data-fx-mag-fallback-r530="static-safe-css"] body.living-architecture #hero .hero-space::after {
+  z-index:0!important;
+  width:min(92%,640px)!important;
+  border:1px solid rgba(126,226,255,.17)!important;
+  background:radial-gradient(circle,rgba(53,196,214,.07),transparent 66%)!important;
+  background-image:radial-gradient(circle,rgba(53,196,214,.07),transparent 66%)!important;
+  box-shadow:0 0 0 30px rgba(86,225,230,.022),0 0 0 64px rgba(86,164,230,.014),0 0 92px rgba(45,209,220,.13)!important;
+  transform:translate(-50%,-50%) scaleY(.76)!important;
 }
 
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
