@@ -2,24 +2,11 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  if (AUDIT_MODE) {
-    ROOT.dataset.fxApex = 'audit-skip';
-    ROOT.dataset.fxRenderer = 'static-audit';
-    ROOT.dataset.fxScene = '0';
-    ROOT.dataset.fxFlow = '0';
-    ROOT.style.setProperty('--accent', '120,210,255');
-    ROOT.style.setProperty('--progress', '0');
-    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'static-audit', infinite: 'skipped' } }));
-    return;
-  }
 
-  // r294: on phone/coarse-pointer surfaces the current native core, canonical
-  // language control, release metadata runtime and r268 navigation already own
-  // the jobs this legacy APEX controller used to duplicate. Avoid whole-page
-  // language/link scans, reveal observers and scene/flow observers during the
-  // first-load critical window. Publish apexready only after the complete defer
-  // chain has subscribed, so final control owners never miss the event.
+  // r536: every visitor follows the same product path. On phone/coarse-pointer
+  // surfaces the current native core, canonical language control, release
+  // metadata runtime and r268 navigation already own the jobs this legacy APEX
+  // controller used to duplicate, so mobile delegates without audit detection.
   const MOBILE_NATIVE_CORE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   if (MOBILE_NATIVE_CORE) {
     ROOT.dataset.fxApex = 'controller-performance-v2';
@@ -69,10 +56,6 @@
       const stored = localStorage.getItem(LANG_KEY);
       if (stored === 'hu' || stored === 'en') return stored;
     } catch (_) {}
-    // P0 r491: the server/static shell owns first-paint language. Falling back
-    // to navigator.language here used to rewrite the already-painted hero on
-    // desktop, causing the dominant CLS and late text LCP. The explicit HU/EN
-    // toggle still persists a choice and ?lang= continues to override it.
     if (ROOT.lang === 'hu' || ROOT.lang === 'en') return ROOT.lang;
     return 'hu';
   }
