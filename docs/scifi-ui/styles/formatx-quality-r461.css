@@ -1,4 +1,4 @@
-/* FormatX r461/r462/R530/R531 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R530/R531/R534 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
@@ -76,6 +76,28 @@ html body.living-architecture .topbar > .fx-language-toggle {
     height: 48px !important;
     margin: 0 !important;
     z-index: 12070 !important;
+  }
+
+  /* R534: static Lighthouse does not receive the Worker-only r490 layer.
+     Override the stale r283 808/505/106px desktop reservations here with
+     greater specificity, so the first static frame already matches settled
+     r244 auto-row/zero-minimum geometry before the desktop dataset is mounted. */
+  html:root:root body.living-architecture #hero > .hero-grid {
+    grid-template-rows: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-copy,
+  html:root:root body.living-architecture #hero .hero-grid > .hero-copy {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  html:root:root body.living-architecture #hero .hero-lead {
+    min-block-size: 0 !important;
+  }
+  html:root:root body.living-architecture #hero .fx-method-inline,
+  html:root:root body.living-architecture #hero .hero-actions {
+    min-height: 0 !important;
   }
 }
 
@@ -323,3 +345,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
 }
 
 /* deploy-r530-r531-p0-intro-integration */
+/* deploy-r534-static-desktop-r244-first-frame-parity */
