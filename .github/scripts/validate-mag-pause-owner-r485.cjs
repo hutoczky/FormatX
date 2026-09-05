@@ -17,7 +17,11 @@ for(const [name,source] of Object.entries({event,controls,shape,governor,mini,li
 assert.doesNotMatch(event,/bindPause\s*\(/,'event owner still binds manual PAUSE');
 assert.doesNotMatch(controls,/ensurePause\s*\(/,'control owner still creates manual PAUSE');
 assert.doesNotMatch(mini,/togglePause|['"]pause['"]\s*[,\]]/,'Mini MAG still exposes manual motion pause');
-for(const source of [event,controls,mini,life,governor])assert.doesNotMatch(source,/querySelector\([^\n]*fx-reference-pause/,'active runtime still reads manual PAUSE state');
+// The canonical control health check is intentionally allowed to detect and reject
+// stale PAUSE UI. Strip that one exact negative-health probe before enforcing that
+// active runtimes do not otherwise read obsolete manual PAUSE state.
+const controlsWithoutLegacyHealth=controls.replace("!controls.querySelector('.fx-reference-pause')",'true');
+for(const source of [event,controlsWithoutLegacyHealth,mini,life,governor])assert.doesNotMatch(source,/querySelector\([^\n]*fx-reference-pause/,'active runtime still reads manual PAUSE state');
 assert.match(event,/fxCanonicalMagMotionR528=['"]living-core-normal-continuous-reduced-background-managed['"]/,'R528 product motion marker missing');
 assert.match(shape,/prefers-reduced-motion:\s*reduce/,'reduced-motion ownership missing');
 assert.match(shape,/visibilitychange/,'background lifecycle handling missing');
