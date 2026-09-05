@@ -7,12 +7,15 @@
   const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260823-r316-dcl-safe-geometry';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
   const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260825-r252-core3';
+  const HERO_START_HASHES = new Set(['', '#top', '#hero']);
   let mobileGeometryTimer = 0;
   let desktopGeometryTimer = 0;
+  let intentArmed = false;
+  let intentResolved = false;
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r252-heart-core-r316-dcl-safe';
+  root.dataset.fxScrollBootstrapRevision = 'r534-scroll-intent-r252-heart-core';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
@@ -33,23 +36,14 @@
   }
 
   function requestLoopGeometryRefresh(source) {
-    dispatchEvent(new CustomEvent('formatx:loopgeometryrefresh', {
-      detail: { source: source || 'scroll-bootstrap' }
-    }));
+    dispatchEvent(new CustomEvent('formatx:loopgeometryrefresh', { detail: { source: source || 'scroll-bootstrap' } }));
   }
 
   function requestMobileGeometryRefresh(recheckBoundary) {
     if (!MOBILE_QUERY.matches) return;
     clearTimeout(mobileGeometryTimer);
-
-    // r316: never synthesize a global resize from mobile-layout events.
-    // r207 listens to resize and emits formatx:mobilelayoutready; feeding that
-    // event back into resize created an unbounded microtask/event cycle that
-    // starved DOMContentLoaded on real mobile navigation. The loop runtime now
-    // owns a dedicated geometry-refresh event with no layout-owner feedback.
     requestLoopGeometryRefresh('mobile-layout-settled-r316');
     root.dataset.fxMobileLoopGeometry = 'refresh-requested-r316-dcl-safe';
-
     if (!recheckBoundary) return;
     mobileGeometryTimer = window.setTimeout(() => {
       mobileGeometryTimer = 0;
@@ -62,15 +56,10 @@
   function installMobileGeometryResync() {
     if (!MOBILE_QUERY.matches || root.dataset.fxMobileLoopGeometryResync === 'isolated-r316') return;
     root.dataset.fxMobileLoopGeometryResync = 'isolated-r316';
-
     addEventListener('scrollend', () => requestMobileGeometryRefresh(true), { passive: true });
-
-    for (const eventName of [
-      'formatx:mobilelayoutready',
-      'formatx:controlownerready',
-      'formatx:languagechange',
-      'pageshow'
-    ]) addEventListener(eventName, () => requestMobileGeometryRefresh(false), { passive: true });
+    for (const eventName of ['formatx:mobilelayoutready','formatx:controlownerready','formatx:languagechange','pageshow']) {
+      addEventListener(eventName, () => requestMobileGeometryRefresh(false), { passive: true });
+    }
   }
 
   function requestDesktopGeometryRefresh() {
@@ -88,16 +77,14 @@
     if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'isolated-r316') return;
     root.dataset.fxDesktopLoopGeometryResync = 'isolated-r316';
     addEventListener('scroll', requestDesktopGeometryRefresh, { passive: true });
-
-    for (const eventName of [
-      'formatx:controlownerready',
-      'formatx:languagechange',
-      'pageshow'
-    ]) addEventListener(eventName, requestDesktopGeometryRefresh, { passive: true });
+    for (const eventName of ['formatx:controlownerready','formatx:languagechange','pageshow']) {
+      addEventListener(eventName, requestDesktopGeometryRefresh, { passive: true });
+    }
   }
 
   function installSeamlessRuntime(platform) {
     const mobile = platform === 'mobile';
+    if (document.querySelector('script[data-fx-seamless-runtime]')) return;
 
     root.dataset.fxScrollBootstrapState = mobile ? 'mobile-loop-loading' : 'desktop-loading';
     root.dataset.fxInfiniteController = mobile ? 'mobile-seamless-loading-v1' : 'desktop-runtime-loading-v7';
@@ -114,30 +101,21 @@
       root.classList.remove('fx-mobile-native-scroll', 'fx-mobile-native-scroll-v2');
       ensureMobileLoopBridgeOverride();
       installMobileGeometryResync();
-    } else {
-      installDesktopGeometryResync();
-    }
-
-    const existing = document.querySelector('script[data-fx-seamless-runtime]');
-    if (existing) return;
+    } else installDesktopGeometryResync();
 
     const script = document.createElement('script');
     script.src = RUNTIME_SRC;
     script.async = false;
     script.dataset.fxSeamlessRuntime = platform;
     script.dataset.fxDesktopSeamlessRuntime = 'true';
-
     script.addEventListener('load', () => {
       root.dataset.fxScrollBootstrapState = mobile ? 'mobile-loop-ready' : 'desktop-ready';
       if (mobile) {
         root.dataset.fxMobileScrollMode = 'native-momentum-loop';
         root.dataset.fxMobileScrollPolicy = 'native-momentum-loop-v1';
         requestMobileGeometryRefresh(false);
-      } else {
-        requestDesktopGeometryRefresh();
-      }
+      } else requestDesktopGeometryRefresh();
     }, { once: true });
-
     script.addEventListener('error', () => {
       root.dataset.fxScrollBootstrapState = mobile ? 'mobile-loop-failed' : 'desktop-failed';
       root.dataset.fxInfiniteController = 'native-fallback';
@@ -145,20 +123,55 @@
       root.dataset.fxInfiniteInput = 'native';
       root.dataset.fxLoopBridge = 'disabled-runtime-error';
       root.classList.remove('fx-seamless-loop-transfer', 'fx-mobile-seamless-loop');
-      root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
-        version: BOOTSTRAP,
-        controller: 'native-fallback',
-        automaticLoop: false,
-        visualBridge: false,
-        mobileNativeMomentumPreserved: true,
-        inputCapture: false
-      });
+      root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({ version: BOOTSTRAP, controller: 'native-fallback', automaticLoop: false, visualBridge: false, mobileNativeMomentumPreserved: true, inputCapture: false });
     }, { once: true });
-
     document.head.appendChild(script);
   }
 
+  function armSeamlessRuntime(platform) {
+    if (intentArmed || intentResolved) return;
+    intentArmed = true;
+    root.dataset.fxScrollBootstrapState = 'deferred-until-scroll-intent-r534';
+    root.dataset.fxInfiniteController = 'seamless-v7-intent-pending';
+    root.dataset.fxAutomaticLoop = 'pending-user-scroll-intent';
+    root.dataset.fxInfiniteInput = 'native';
+    root.dataset.fxScrollSnap = 'disabled';
+    root.dataset.fxLoopBridge = 'deferred-until-scroll-intent';
+    if (platform === 'mobile') {
+      root.dataset.fxMobileScrollMode = 'native-momentum-loop';
+      root.dataset.fxMobileScrollPolicy = 'native-momentum-loop-v1';
+      root.dataset.fxMobileMomentumGuard = 'scrollend-or-idle-v1';
+    }
+
+    const cleanup = () => {
+      removeEventListener('scroll', resolve, true);
+      removeEventListener('wheel', resolve, true);
+      document.removeEventListener('touchstart', resolve, true);
+      document.removeEventListener('pointerdown', pointerResolve, true);
+      document.removeEventListener('keydown', keyResolve, true);
+    };
+    const activate = source => {
+      if (intentResolved) return;
+      intentResolved = true;
+      cleanup();
+      root.dataset.fxScrollIntentR534 = source;
+      installSeamlessRuntime(platform);
+    };
+    const resolve = event => activate(event.type || 'scroll');
+    const pointerResolve = event => { if (event.pointerType === 'touch') activate('pointer-touch'); };
+    const keyResolve = event => {
+      if (['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' '].includes(event.key)) activate('keyboard-scroll');
+    };
+
+    addEventListener('scroll', resolve, { capture: true, passive: true });
+    addEventListener('wheel', resolve, { capture: true, passive: true });
+    document.addEventListener('touchstart', resolve, { capture: true, passive: true });
+    document.addEventListener('pointerdown', pointerResolve, { capture: true, passive: true });
+    document.addEventListener('keydown', keyResolve, { capture: true, passive: true });
+
+    if (Math.abs(scrollY) > 1 || !HERO_START_HASHES.has(location.hash)) queueMicrotask(() => activate('existing-scroll-or-deep-link'));
+  }
+
   ensureHeartCoreRuntime();
-  if (MOBILE_QUERY.matches) installSeamlessRuntime('mobile');
-  else installSeamlessRuntime('desktop');
+  armSeamlessRuntime(MOBILE_QUERY.matches ? 'mobile' : 'desktop');
 }());
