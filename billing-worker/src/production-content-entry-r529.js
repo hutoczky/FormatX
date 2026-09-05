@@ -13,8 +13,9 @@ import canonicalProduction from './production-content-entry.js';
      and keeps R528's mobile legacy CSS on the existing post-FCP scheduler.
    - Manual MAG pause is not a product contract. Normal MAG remains alive;
      reduced-motion/background lifecycle stays owned by the R530 runtime.
-   - R531 refreshes only the bounded visual-cover assets; MAG startup remains
-     navigation-owned behind the intro and the direct R529 architecture stays intact. */
+   - R531 refreshes only the bounded visual-cover/lifecycle assets; MAG startup
+     remains navigation-owned behind the intro and the direct R529 architecture
+     stays intact. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
@@ -27,6 +28,14 @@ const DEFERRED_REDUCED_RE = /formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g
 const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-p0-closeout-v3';
 const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
 const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r531-p0-closeout-v3';
+const R531_CACHE_REV = '&rev=20260905-r531-p0-closeout-fix1';
+const PRELOADER_STYLE_PATH = '/scifi-ui/styles/formatx-preloader-r531.css';
+const PRELOADER_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-preloader-style-r531="true" href="/scifi-ui/styles/formatx-preloader-r531.css?v=20260905-r531-p0-closeout-fix1">';
+const CONTROL_OWNER_RE = /formatx-control-owner-r268\.js\?v=[^"']+/g;
+const CONTROL_OWNER_URL = 'formatx-control-owner-r268.js?v=20260905-r531-mag-visible-name&rev=20260905-r531-p0-closeout-fix1';
+const MOTION_LOADER_PATH = '/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js';
+const SHAPE_SYNC_RE = /formatx-mag-shape-sync-r476\.js\?v=[^"']+/g;
+const SHAPE_SYNC_URL = 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock&rev=20260905-r531-bfcache-resume-fix1';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MEDIA = '(min-width: 901px) and (pointer: fine) and (min-aspect-ratio: 27/25)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
@@ -111,6 +120,29 @@ function injectStaticHeart(html) {
   }
   return source;
 }
+function armStaticPreloader(html) {
+  let source = String(html || '');
+  const links = source.match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi) || [];
+  if (!links.some(tag => stylesheetPath(tag) === PRELOADER_STYLE_PATH)) {
+    source = source.replace('</head>', `  ${PRELOADER_STYLE_LINK}\n</head>`);
+  }
+  source = source.replace(/<div\s+id=(["'])formatx-event-horizon\1([^>]*)>/i, tag => {
+    if (/data-fx-preloader-static-r531=/i.test(tag)) return tag;
+    return tag.replace(/>$/, ' data-fx-preloader-static-r531="true">');
+  });
+  return source;
+}
+async function rewriteMotionLoaderAsset(url, response, headers, type) {
+  if (url.pathname !== MOTION_LOADER_PATH || !/javascript|ecmascript|text\/plain/i.test(type)) return null;
+  let source = await response.text();
+  source = source.replace(SHAPE_SYNC_RE, SHAPE_SYNC_URL);
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  headers.delete('ETag');
+  headers.set('Cache-Control', 'no-store, max-age=0');
+  headers.set('X-FormatX-R531-Asset-Graph', 'motion-loader-to-bfcache-safe-shape-sync');
+  return new Response(source, { status: response.status, statusText: response.statusText, headers });
+}
 function r529Headers(source) {
   const headers = new Headers(source);
   headers.set('X-FormatX-Transport-Stability', 'r529-direct-canonical-living-core');
@@ -120,6 +152,7 @@ function r529Headers(source) {
   headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
   headers.set('X-FormatX-Preloader', 'r531-p0-closeout-navigation-owned');
   headers.set('X-FormatX-Preloader-Cache', 'r531-p0-closeout-v3-fresh-assets');
+  headers.set('X-FormatX-Preloader-Revision', 'r531-p0-closeout-fix1-static-first-paint');
   return headers;
 }
 
@@ -135,18 +168,22 @@ export default {
       return new Response(null, { status: response.status, statusText: response.statusText, headers });
     }
     const type = headers.get('Content-Type') || '';
+    const motionAsset = await rewriteMotionLoaderAsset(url, response, headers, type);
+    if (motionAsset) return motionAsset;
     if (!type.includes('text/html')) {
       return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
     }
 
     let html = restoreCriticalCoreFirstPaint(await response.text());
     html = html.replace(DEFERRED_SCHEDULER_RE, DEFERRED_SCHEDULER_URL);
-    html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL);
-    html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL);
+    html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL + R531_CACHE_REV);
+    html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL + R531_CACHE_REV);
     html = html.replace(QUALITY_RE, QUALITY_URL);
+    html = html.replace(CONTROL_OWNER_RE, CONTROL_OWNER_URL);
     if (HOMEPAGE_PATHS.has(url.pathname)) {
       html = stabilizeMobileFirstPaint(html);
       html = injectStaticHeart(html);
+      html = armStaticPreloader(html);
     }
     headers.delete('Content-Length');
     headers.delete('Content-Encoding');
