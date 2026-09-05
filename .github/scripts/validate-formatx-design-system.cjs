@@ -79,15 +79,24 @@ async function inspect(browser, config, viewport) {
   }, config.sheet, { timeout: 20000 });
 
   if (config.waitForMotionCss) {
-    // R468 deliberately keeps non-core motion CSS off the first-load path.
-    // Exercise the production contract with real non-reserved user intent,
-    // then require the external strict-CSP stylesheet and current runtime state.
+    /* R530 contract split:
+       - MAG itself must already be navigation-owned and ready before any input.
+       - heavy noncritical runtime-static/Live OS enhancement CSS may still be
+         mounted by genuine non-reserved user intent. */
+    await page.waitForFunction(() => {
+      const root = document.documentElement;
+      return root.dataset.fxMagStartupContractR530 === 'living-core-autostart-navigation-owned'
+        && root.dataset.fxMagStartupNoInputR530 === 'required'
+        && root.dataset.fxMagCanonicalClockR530 === 'compositor-heartbeat-navigation-owned'
+        && root.dataset.fxCurrentMagRequestR530 === 'navigation-owned';
+    }, null, { timeout: 20000 });
+
     await page.keyboard.press('ArrowDown');
     await page.waitForFunction(() => {
       const link = document.querySelector('link[data-fx-runtime-static-r243="true"]');
       const state = document.documentElement.dataset.fxMotionRuntimeR239 || '';
       return document.documentElement.dataset.fxMotionCssR243 === 'external-strict-csp-user-intent'
-        && state === 'enhanced-r468-user-intent'
+        && state === 'enhanced-r530-deferred-user-intent'
         && link && link.sheet;
     }, null, { timeout: 20000 });
   }
@@ -131,6 +140,9 @@ async function inspect(browser, config, viewport) {
 
     return {
       designSystem: root.dataset.fxDesignSystem || '',
+      magStartupContract: root.dataset.fxMagStartupContractR530 || '',
+      magStartupNoInput: root.dataset.fxMagStartupNoInputR530 || '',
+      magCanonicalClock: root.dataset.fxMagCanonicalClockR530 || '',
       motionCss: root.dataset.fxMotionCssR243 || '',
       motionRuntime: root.dataset.fxMotionRuntimeR239 || '',
       sheetHref: sheet?.href || '',
@@ -165,8 +177,11 @@ async function inspect(browser, config, viewport) {
 
   assert.equal(result.designSystem, '2');
   if (config.waitForMotionCss) {
+    assert.equal(result.magStartupContract, 'living-core-autostart-navigation-owned');
+    assert.equal(result.magStartupNoInput, 'required');
+    assert.equal(result.magCanonicalClock, 'compositor-heartbeat-navigation-owned');
     assert.equal(result.motionCss, 'external-strict-csp-user-intent');
-    assert.equal(result.motionRuntime, 'enhanced-r468-user-intent');
+    assert.equal(result.motionRuntime, 'enhanced-r530-deferred-user-intent');
   }
   assert.equal(result.sheetLoaded, true);
   assert.match(result.sheetHref, config.sheetPattern);
@@ -184,10 +199,7 @@ async function inspect(browser, config, viewport) {
   assert.deepEqual(errors, [], 'browser errors: ' + JSON.stringify(errors));
 
   if (viewport.width >= 1200) {
-    await page.screenshot({
-      path: path.join(process.cwd(), 'design-system-' + config.name + '.png'),
-      fullPage: true
-    });
+    await page.screenshot({ path: path.join(process.cwd(), 'design-system-' + config.name + '.png'), fullPage: true });
   }
 
   console.log(JSON.stringify({ case: config.name + '-' + viewport.width, result }));
@@ -196,10 +208,7 @@ async function inspect(browser, config, viewport) {
 
 (async () => {
   const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
-  const browser = await chromium.launch({
-    headless: true,
-    ...(executablePath ? { executablePath } : {})
-  });
+  const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
   try {
     for (const config of CASES) {
       await inspect(browser, config, { width: 1440, height: 1000 });
