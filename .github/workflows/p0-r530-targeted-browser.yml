@@ -1,15 +1,16 @@
+# Frozen R530 proof harness. This branch is not a production integration source.
 name: P0 R530 targeted browser proof
 
 on:
   push:
     branches:
-      - p0-r530-candidate
+      - p0-r530-proof
 
 permissions:
   contents: read
 
 concurrency:
-  group: p0-r530-targeted-browser
+  group: p0-r530-proof-browser
   cancel-in-progress: true
 
 jobs:
@@ -30,7 +31,7 @@ jobs:
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
           echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
-      - name: Serve exact candidate docs
+      - name: Serve exact proof docs
         shell: bash
         run: |
           set -euo pipefail
