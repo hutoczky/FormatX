@@ -16,13 +16,13 @@ import canonicalProduction from './production-content-entry.js';
    - R533 refreshes the proven lightweight preloader with the roadmap timing,
      compositor visual deadline and lower-frequency progress work; the underlying
      R529 production/content/LCP architecture remains unchanged.
-   - R533 CI is allowed to exercise this exact production entry only when the
-     inbound HTTP Host is 127.0.0.1:8787 / localhost:8787. Local candidate
-     requests are internally canonicalised to formatxsuite.com before entering
-     the production chain, so every R514/R529 delivery transform runs. */
+   - R533 CI exercises this exact production entry through a Wrangler-only
+     FORMATX_LOCAL_CANDIDATE=1 text binding. That binding is absent from deployed
+     production. Candidate requests are internally canonicalised to
+     formatxsuite.com before entering the production chain, so every R514/R529
+     delivery transform runs without an audit-only product shortcut. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
-const LOCAL_CANDIDATE_HTTP_HOSTS = new Set(['127.0.0.1:8787', 'localhost:8787', '127.0.0.1', 'localhost']);
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
@@ -58,8 +58,8 @@ const GLOBAL_LEGACY_PATHS = new Set([
 function isSafeMethod(request) {
   return request.method === 'GET' || request.method === 'HEAD';
 }
-function isLocalCandidateRequest(request) {
-  return LOCAL_CANDIDATE_HTTP_HOSTS.has(String(request.headers.get('host') || '').trim().toLowerCase());
+function isLocalCandidateEnv(env) {
+  return String(env?.FORMATX_LOCAL_CANDIDATE || '') === '1';
 }
 function isDeliveryHost(url, localCandidate) {
   return PUBLIC_HOSTS.has(url.hostname) || localCandidate;
@@ -75,7 +75,26 @@ function stylesheetPath(tag) {
   catch (_) { return ''; }
 }
 function withoutAttr(tag, name) {
-  return tag.replace(new RegExp(`\\s${name}=(["'])(.*?)\1`, 'gi'), '');
+  if (!/^[a-z0-9-]+$/i.test(name)) return tag;
+  const lower = tag.toLowerCase();
+  const needle = `${name.toLowerCase()}=`;
+  let index = 0;
+  while ((index = lower.indexOf(needle, index)) !== -1) {
+    const before = index - 1;
+    if (before < 0 || !/\s/.test(tag[before])) {
+      index += needle.length;
+      continue;
+    }
+    const quote = tag[index + needle.length];
+    if (quote !== '"' && quote !== "'") {
+      index += needle.length;
+      continue;
+    }
+    const end = tag.indexOf(quote, index + needle.length + 1);
+    if (end === -1) return tag;
+    return tag.slice(0, before) + tag.slice(end + 1);
+  }
+  return tag;
 }
 function addAttrs(tag, attrs) {
   return tag.replace(/\s*\/?>$/, close => `${attrs}${close}`);
@@ -147,7 +166,7 @@ function r529Headers(source, localCandidate) {
 export default {
   async fetch(request, env, ctx) {
     const deliveryUrl = new URL(request.url);
-    const localCandidate = isLocalCandidateRequest(request);
+    const localCandidate = isLocalCandidateEnv(env);
     if (localCandidate) request = canonicalDeliveryRequest(request, deliveryUrl);
     const response = await canonicalProduction.fetch(request, env, ctx);
     if (!isSafeMethod(request) || !isDeliveryHost(deliveryUrl, localCandidate)) return response;
