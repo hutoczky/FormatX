@@ -34,29 +34,33 @@ function meaningfulDiagnostics(items) {
 async function activateImmersive(page, label) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
+    const hit = document.querySelector('#hero .fx-mag-heart-hit-r252');
     return root.dataset.fxOrganismInterface === 'ready'
-      || root.dataset.fxThreeLoader === 'deferred-user-activation';
+      || (root.dataset.fxThreeLoader === 'deferred-user-activation'
+        && root.dataset.fxHeartCoreR252 === 'ready'
+        && hit instanceof HTMLButtonElement
+        && hit.dataset.fxHeartBound === 'true');
   }, null, { timeout: 30000 });
   const armed = await page.evaluate(() => ({
     threeLoader: document.documentElement.dataset.fxThreeLoader || '',
-    organismInterface: document.documentElement.dataset.fxOrganismInterface || ''
+    organismInterface: document.documentElement.dataset.fxOrganismInterface || '',
+    heart: document.documentElement.dataset.fxHeartCoreR252 || '',
+    heartBound: document.querySelector('#hero .fx-mag-heart-hit-r252')?.dataset.fxHeartBound || ''
   }));
   mark(label + ': immersive-loader-armed', armed);
   if (armed.organismInterface === 'ready') return;
 
-  const launch = page.locator('.fx-immersive-launch').first();
-  if (await launch.count() && await launch.isVisible().catch(() => false)) {
-    await launch.click({ force: true, timeout: 3000 });
-    mark(label + ': immersive-activated', { source: 'visible-launch-control' });
-    return;
-  }
-  await page.evaluate(() => {
+  const heart = page.locator('#hero .fx-mag-heart-hit-r252').first();
+  await heart.waitFor({ state: 'visible', timeout: 10000 });
+  await heart.scrollIntoViewIfNeeded();
+  await heart.click({ position: { x: 20, y: 20 }, timeout: 5000 });
+  mark(label + ': immersive-activated', { source: 'real-mag-heart-click' });
+
+  await page.waitForFunction(() => {
     const root = document.documentElement;
-    root.dataset.fxImmersive = 'active';
-    root.dataset.fxImmersiveSource = 'organism-validation-user-intent';
-    dispatchEvent(new CustomEvent('formatx:immersiveactivate', { detail: { source: 'organism-validation-user-intent' } }));
-  });
-  mark(label + ': immersive-activated', { source: 'armed-semantic-user-intent' });
+    return root.dataset.fxThreeLoader === 'requested-on-demand'
+      || root.dataset.fxOrganismInterface === 'ready';
+  }, null, { timeout: 10000 });
 }
 
 async function enterSite(page, label) {
