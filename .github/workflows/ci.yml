@@ -69,10 +69,11 @@ jobs:
           : > "$RUNNER_TEMP/formatx-lighthouse-headers.txt"
           for attempt in $(seq 1 240); do
             if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-headers.txt" -o /dev/null http://127.0.0.1:8787/ 2>/dev/null; then
-              if grep -Fqi 'X-FormatX-Candidate-Delivery: r533-exact-production-entry-localhost-8787' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+              if grep -Fqi 'X-FormatX-Candidate-Delivery: r534-exact-production-entry-localhost-8787' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
                  grep -Fqi 'X-FormatX-Candidate-Canonical-Origin: formatxsuite.com' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
                  grep -Fqi 'X-FormatX-Preloader: r534-static-content-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
-                 grep -Fqi 'X-FormatX-Reference-Boot: r534-deferred-after-static-first-paint' "$RUNNER_TEMP/formatx-lighthouse-headers.txt"; then
+                 grep -Fqi 'X-FormatX-Reference-Boot: r534-deferred-after-static-first-paint' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && \
+                 grep -Fqi 'X-FormatX-CSS-Scheduler: r534-desktop-fcp-mobile-scroll-intent' "$RUNNER_TEMP/formatx-lighthouse-headers.txt"; then
                 ready=1
                 break
               fi
