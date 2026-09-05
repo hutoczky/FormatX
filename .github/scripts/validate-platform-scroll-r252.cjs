@@ -12,11 +12,21 @@ async function prepare(page) {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
   await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252', { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => document.documentElement.dataset.fxHeartCoreR252 === 'ready', null, { timeout: 20000 });
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    return Boolean(root.dataset.fxMotionRuntimeR239)
+      && root.dataset.fxPlatformScrollBootstrapR535 === 'armed-scroll-intent';
+  }, null, { timeout: 20000 });
 
-  /* R534+: seamless-v7 is intentionally not a navigation critical-path owner.
-     Use a real browser input event, then prove the complete runtime/bridge contract. */
+  /* R535: use a real browser input event to prove the active production motion
+     owner requests platform-scroll, which then owns heart-core + seamless-v7. */
   await page.mouse.wheel(0, 48);
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    return root.dataset.fxScrollBootstrap === 'platform-scroll-v2'
+      && root.dataset.fxHeartCoreR252 === 'ready'
+      && /^ready-/.test(root.dataset.fxPlatformScrollBootstrapR535 || '');
+  }, null, { timeout: 20000 });
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxInfiniteController === 'seamless-v7'
