@@ -7,7 +7,6 @@
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
-  const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   const IDLE_ENERGY = mobile ? .50 : .43;
   const SURFACE_PULSE_MS = 1160;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -83,12 +82,11 @@
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
   }
 
-  /* One closed topology owns both endpoints. r442 uses a lighter phone mesh:
-     the silhouette and morph remain fully 3D, but the larger native facets need
-     fewer fragment invocations and also avoid the razor-fine edge impression. */
+  /* One closed topology owns both endpoints. Mobile uses the same product mesh
+     contract for every visitor; there is no audit-specific geometry path. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 18 : mobile ? 18 : 30;
-    const longitudeSegments = auditMode ? 32 : mobile ? 36 : 56;
+    const latitudeSegments = mobile ? 18 : 30;
+    const longitudeSegments = mobile ? 36 : 56;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -429,7 +427,7 @@
       return timer;
     };
     const initialShape=root.dataset.fxCoreShapeR337==='sphere'?'sphere':'crystal';
-    let disposed=false,contextLost=false,visible=true,paused=false;
+    let disposed=false,contextLost=false,visible=true;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1;
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
@@ -448,9 +446,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:mobile?1.75:1.65;
+      const cap=mobile?1.75:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:mobile?920000:1150000;
+      const budget=mobile?920000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -462,7 +460,7 @@
       return true;
     }
 
-    function blocked(){return disposed||contextLost||document.hidden||!visible||paused||root.dataset.fxReferenceMotionPaused==='true';}
+    function blocked(){return disposed||contextLost||document.hidden||!visible||root.dataset.fxRenderLifecycleSuspended==='true';}
     function schedule(frames=1){
       if(blocked())return;
       const frameCap=mobile?8:24;
@@ -508,21 +506,17 @@
       boost(.84,mobile?5:8);
     }
 
-    /* heartbeat-and-interaction-bursts-no-idle-loop-r326.
-       R484 has one bounded native surface sweep every five to six seconds.
-       Its timeout is suspended when hidden, offscreen, user-paused or reduced.
-       Between sweeps the renderer returns to zero idle frames. */
+    /* One bounded native surface sweep every five to six seconds. Background,
+       offscreen and reduced-motion suspend the timer. Zero-idle lifecycle state
+       does not cancel the timer: the sweep event wakes the single renderer only
+       for its bounded window, then the governor returns it to zero frames. */
     function scheduleHeartbeat(){
       clearTimeout(heartbeatTimer);heartbeatTimer=0;
       root.dataset.fxCoreIdleHeartbeatR441='disabled-no-continuous-rendering';
     }
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
-      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
-        ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'
-        ||now-lastSurfacePulseAt<2200)return false;
-      // The mobile governor's idle flag is not the user's PAUSE control.
-      // Reserve the full sweep before asking the single renderer to draw it.
+      if(disposed||contextLost||reduced.matches||document.hidden||!visible||now-lastSurfacePulseAt<2200)return false;
       dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
         detail:{phase:'start',source,duration:SURFACE_PULSE_MS}
       }));
@@ -535,8 +529,6 @@
       root.dataset.fxCoreSurfacePulseR454=`sweep-${surfacePulseCount}-${source}`;
       root.dataset.fxCoreEnergyBoltR455=`surface-sweep-${source}-${surfacePulseCount}`;
       root.dataset.fxCoreSurfaceCountR484=String(surfacePulseCount);
-      // surfacePulseActive keeps RAF alive for the bounded duration. Do not
-      // leave a second frame quota behind it on slower desktop renderers.
       schedule(1);
       later(()=>{
         if(pulseId!==surfacePulseCount)return;
@@ -551,8 +543,7 @@
     }
     function scheduleSurfacePulse(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
-      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
-        ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'){
+      if(disposed||contextLost||reduced.matches||document.hidden||!visible){
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
         return;
       }
@@ -612,10 +603,6 @@
       const surfacePulse=surfacePulseElapsed>=0&&surfacePulseElapsed<=1?surfacePulseElapsed:-1;
       gl.uniform1f(uniforms.uSurfacePulse,surfacePulse);
 
-      /* r442 phone budget: desktop keeps the three-pass optical depth. Mobile
-         drops the extra front-cull outer-glow pass, which both reduces the bloom
-         seen in the physical phone capture and removes roughly one third of the
-         expensive fragment work per interaction frame. */
       gl.depthMask(false);
       gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
       if(!mobile){
@@ -702,15 +689,6 @@
         if(candidate&&!candidate.moved&&performance.now()-candidate.started<720)toggleShape('core-tap');
       }else if(detail.phase==='cancel')tapCandidate=null;
     }
-    function onPause(event){
-      paused=event.detail?.paused===true||root.dataset.fxReferenceMotionPaused==='true';
-      if(paused){
-        surfacePulseStart=-Infinity;
-        root.dataset.fxCoreSurfacePulseR454='idle';
-        if(!disposed&&!contextLost&&resize())render(performance.now());
-      }else schedule(1);
-      scheduleSurfacePulse();
-    }
     function onReducedMotionChange(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
       surfacePulseStart=-Infinity;
@@ -738,7 +716,6 @@
     listen(hero,'pointerdown',onDown,{passive:true});
     listen(hero,'pointerleave',onLeave,{passive:true});
     listen(window,'formatx:coreinteraction',onCoreInteraction,{passive:true});
-    listen(window,'formatx:referencepause',onPause,{passive:true});
     listen(reduced,'change',onReducedMotionChange,{passive:true});
     listen(window,'scroll',onScroll,{passive:true});
     listen(window,'resize',resize,{passive:true});
@@ -881,6 +858,7 @@
     root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
+    root.dataset.fxCoreLifecycleR536='automatic-zero-idle-visible-pulse';
 
     publishShape('initial');
     schedule(1);
