@@ -1,26 +1,10 @@
 import canonicalProduction from './production-content-entry.js';
 
-/* FormatX R529 — direct canonical production ownership + R527 FCP preservation
-   + R528 living-core/mobile first-paint closeout.
-
-   Evidence:
-   - R528 deploy 33931843758 was blocked before deployment because the versioned
-     entry delegated indirectly through R527 instead of directly to the canonical
-     production-content-entry.js required by production preflight.
-   - R527 mobile LHRs proved a client/render slow path. The bad runs introduced a
-     late fx-mag-heart-hit-r252 layout shift and ~1.8 s of legacy mobile CSS
-     render blocking. R529 makes the real heart hit-surface part of initial HTML
-     and keeps R528's mobile legacy CSS on the existing post-FCP scheduler.
-   - Manual MAG pause is not a product contract. Normal MAG remains alive;
-     reduced-motion/background lifecycle stays owned by the R528 runtime.
-   - R533 refreshes the proven lightweight preloader with the roadmap timing,
-     compositor visual deadline and lower-frequency progress work; the underlying
-     R529 production/content/LCP architecture remains unchanged.
-   - R533 CI exercises this exact production entry through a Wrangler-only
-     FORMATX_LOCAL_CANDIDATE=1 text binding. That binding is absent from deployed
-     production. Candidate requests are internally canonicalised to
-     formatxsuite.com before entering the production chain, so every R514/R529
-     delivery transform runs without an audit-only product shortcut. */
+/* FormatX R529/R534 — direct canonical production ownership + bounded static-content intro.
+   Candidate mode exists only behind the Wrangler-only FORMATX_LOCAL_CANDIDATE=1
+   binding and is absent from deployed production. Candidate requests traverse the
+   same canonical production chain; the local response then preserves the real
+   production canonical URL for truthful SEO auditing. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
@@ -29,7 +13,7 @@ const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
 const DEFERRED_SCHEDULER_URL = 'formatx-deferred-css-r487.js?v=20260904-r526-fcp-observer';
 const EVENT_HORIZON_RE = /formatx-event-horizon\.js\?v=[^"']+/g;
-const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r533-intro-lcp-v1';
+const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r534-static-lcp-v1';
 const DEFERRED_REDUCED_RE = /formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g;
 const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner';
 const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
@@ -39,6 +23,8 @@ const DESKTOP_MEDIA = '(min-width: 901px) and (pointer: fine) and (min-aspect-ra
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
 const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260905-r529-first-paint-hit-surface">';
 const HEART_BUTTON = '<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
+const REFERENCE_BOOT_PREFIX = '<script fetchpriority="high" data-fx-reference-mode-boot-r504="true"';
+const REFERENCE_BOOT_DEFERRED_PREFIX = '<script defer fetchpriority="high" data-fx-reference-mode-boot-r504="true"';
 
 const MOBILE_LEGACY_PATHS = new Set([
   '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
@@ -55,15 +41,9 @@ const GLOBAL_LEGACY_PATHS = new Set([
   '/scifi-ui/styles/formatx-quality-r461.css',
 ]);
 
-function isSafeMethod(request) {
-  return request.method === 'GET' || request.method === 'HEAD';
-}
-function isLocalCandidateEnv(env) {
-  return String(env?.FORMATX_LOCAL_CANDIDATE || '') === '1';
-}
-function isDeliveryHost(url, localCandidate) {
-  return PUBLIC_HOSTS.has(url.hostname) || localCandidate;
-}
+function isSafeMethod(request) { return request.method === 'GET' || request.method === 'HEAD'; }
+function isLocalCandidateEnv(env) { return String(env?.FORMATX_LOCAL_CANDIDATE || '') === '1'; }
+function isDeliveryHost(url, localCandidate) { return PUBLIC_HOSTS.has(url.hostname) || localCandidate; }
 function canonicalDeliveryRequest(request, url) {
   const canonicalUrl = new URL(url.pathname + url.search, CANONICAL_CANDIDATE_ORIGIN);
   return new Request(canonicalUrl, request);
@@ -81,24 +61,16 @@ function withoutAttr(tag, name) {
   let index = 0;
   while ((index = lower.indexOf(needle, index)) !== -1) {
     const before = index - 1;
-    if (before < 0 || !/\s/.test(tag[before])) {
-      index += needle.length;
-      continue;
-    }
+    if (before < 0 || !/\s/.test(tag[before])) { index += needle.length; continue; }
     const quote = tag[index + needle.length];
-    if (quote !== '"' && quote !== "'") {
-      index += needle.length;
-      continue;
-    }
+    if (quote !== '"' && quote !== "'") { index += needle.length; continue; }
     const end = tag.indexOf(quote, index + needle.length + 1);
     if (end === -1) return tag;
     return tag.slice(0, before) + tag.slice(end + 1);
   }
   return tag;
 }
-function addAttrs(tag, attrs) {
-  return tag.replace(/\s*\/?>$/, close => `${attrs}${close}`);
-}
+function addAttrs(tag, attrs) { return tag.replace(/\s*\/?>$/, close => `${attrs}${close}`); }
 function deferredMobile(tag) {
   let next = withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag, 'media'), 'fetchpriority'), 'data-fx-r487-deferred-style'), 'data-fx-r487-media');
   return addAttrs(next, ` data-fx-r487-deferred-style="true" data-fx-r487-media="${MOBILE_MEDIA}" media="print" data-fx-r529-mobile-legacy="true"`);
@@ -116,12 +88,8 @@ function restoreCriticalCoreFirstPaint(html) {
       .replace(/\sdata-fx-r487-deferred-style=(["'])true\1/gi, '')
       .replace(/\sdata-fx-r487-media=(["'])(.*?)\1/gi, '')
       .replace(/\smedia=(["'])print\1/gi, '');
-    if (originalMedia && originalMedia !== 'all' && !/\smedia=(["'])(.*?)\1/i.test(next)) {
-      next = next.replace(/\s*\/?>$/, close => ` media="${originalMedia}"${close}`);
-    }
-    if (!/\sfetchpriority=/i.test(next)) {
-      next = next.replace(/\s*\/?>$/, close => ` fetchpriority="high"${close}`);
-    }
+    if (originalMedia && originalMedia !== 'all' && !/\smedia=(["'])(.*?)\1/i.test(next)) next = next.replace(/\s*\/?>$/, close => ` media="${originalMedia}"${close}`);
+    if (!/\sfetchpriority=/i.test(next)) next = next.replace(/\s*\/?>$/, close => ` fetchpriority="high"${close}`);
     return next;
   });
 }
@@ -139,26 +107,28 @@ function stabilizeMobileFirstPaint(html) {
 function injectStaticHeart(html) {
   let source = String(html || '');
   const links = source.match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi) || [];
-  if (!links.some(tag => stylesheetPath(tag) === HEART_STYLE_PATH)) {
-    source = source.replace('</head>', `  ${HEART_STYLE_LINK}\n</head>`);
-  }
-  if (!source.includes('class="fx-mag-heart-hit-r252"')) {
-    source = source.replace(/<div\s+class=(["'])hero-space\1\s*>/i, match => `${match}\n          ${HEART_BUTTON}`);
-  }
+  if (!links.some(tag => stylesheetPath(tag) === HEART_STYLE_PATH)) source = source.replace('</head>', `  ${HEART_STYLE_LINK}\n</head>`);
+  if (!source.includes('class="fx-mag-heart-hit-r252"')) source = source.replace(/<div\s+class=(["'])hero-space\1\s*>/i, match => `${match}\n          ${HEART_BUTTON}`);
   return source;
+}
+function deferReferenceModeBoot(html) {
+  const source = String(html || '');
+  return source.includes(REFERENCE_BOOT_DEFERRED_PREFIX) ? source : source.replace(REFERENCE_BOOT_PREFIX, REFERENCE_BOOT_DEFERRED_PREFIX);
 }
 function r529Headers(source, localCandidate) {
   const headers = new Headers(source);
   headers.set('X-FormatX-Transport-Stability', 'r529-direct-canonical-living-core');
-  headers.set('X-FormatX-Edge-Stability', 'r529-r527-fcp-r528-mobile-post-fcp');
+  headers.set('X-FormatX-Edge-Stability', 'r534-static-intro-lcp-r529-mobile-post-fcp');
   headers.set('X-FormatX-CSS-Scheduler', 'r526-post-first-contentful-paint');
   headers.set('X-FormatX-Product-Contract', 'r529-living-core-no-manual-pause');
   headers.set('X-FormatX-Mobile-LCP', 'static-heart-hit-plus-legacy-post-fcp');
-  headers.set('X-FormatX-Preloader', 'r533-roadmap-timing-navigation-owned');
-  headers.set('X-FormatX-Preloader-Cache', 'r533-intro-lcp-v1-compositor-css-v1');
+  headers.set('X-FormatX-Preloader', 'r534-static-content-roadmap-timing');
+  headers.set('X-FormatX-Preloader-Cache', 'r534-static-lcp-v1-compositor-css-v1');
+  headers.set('X-FormatX-Reference-Boot', 'r534-deferred-after-static-first-paint');
   if (localCandidate) {
     headers.set('X-FormatX-Candidate-Delivery', 'r533-exact-production-entry-localhost-8787');
     headers.set('X-FormatX-Candidate-Canonical-Origin', 'formatxsuite.com');
+    headers.set('Link', '<https://formatxsuite.com/>; rel="canonical"');
   }
   return headers;
 }
@@ -172,28 +142,21 @@ export default {
     if (!isSafeMethod(request) || !isDeliveryHost(deliveryUrl, localCandidate)) return response;
 
     const headers = r529Headers(response.headers, localCandidate);
-    if (request.method === 'HEAD') {
-      headers.delete('Content-Length');
-      return new Response(null, { status: response.status, statusText: response.statusText, headers });
-    }
+    if (request.method === 'HEAD') { headers.delete('Content-Length'); return new Response(null, { status: response.status, statusText: response.statusText, headers }); }
     const type = headers.get('Content-Type') || '';
-    if (!type.includes('text/html')) {
-      return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
-    }
+    if (!type.includes('text/html')) return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 
     let html = restoreCriticalCoreFirstPaint(await response.text());
     html = html.replace(DEFERRED_SCHEDULER_RE, DEFERRED_SCHEDULER_URL);
     html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL);
     html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL);
     html = html.replace(QUALITY_RE, QUALITY_URL);
+    html = deferReferenceModeBoot(html);
     if (HOMEPAGE_PATHS.has(deliveryUrl.pathname)) {
       html = stabilizeMobileFirstPaint(html);
       html = injectStaticHeart(html);
     }
-    headers.delete('Content-Length');
-    headers.delete('Content-Encoding');
-    headers.delete('ETag');
-    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control', 'no-store, max-age=0');
     return new Response(html, { status: response.status, statusText: response.statusText, headers });
   },
 };
