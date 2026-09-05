@@ -1,7 +1,7 @@
-/* FormatX R488/R502 — restrained mobile luminance, softer silhouette and compositor-safe pulse.
-   R326 remains the single WebGL/material owner and R484 keeps the periodic native
-   surface-energy sweep. R502 keeps the canonical CSSAnimation declared across
-   PAUSE so the root playback governor freezes/resumes the same timeline object. */
+/* FormatX R530 — restrained mobile luminance with one navigation-owned compositor heartbeat.
+   R326 remains the single WebGL/material owner; bounded native surface sweeps
+   add fidelity without owning normal foreground life. Manual PAUSE/RESUME is
+   retired, so the heartbeat is present whenever normal motion is permitted. */
 
 @keyframes fx-primary-mag-mobile-heart-r488 {
   0%,100% { scale: .987; opacity: .790; }
@@ -13,10 +13,6 @@
 }
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  /* R488 phone tone: no synthetic outer drop-shadow. The WebGL material already
-     carries its own Fresnel/emission, so the compositor only feathers the native
-     edge and lowers peak energy. This directly addresses the over-extended aura
-     and razor-cut OLED edge visible in physical mobile captures. */
   html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: .805 !important;
@@ -38,7 +34,6 @@
     backface-visibility: hidden !important;
   }
 
-  /* Keep the atmosphere behind the MAG, not around its silhouette. */
   html:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space {
     background:
       radial-gradient(circle at 48% 46%, rgba(27,192,235,.011) 0, rgba(15,91,161,.006) 25%, transparent 36%),
@@ -51,13 +46,13 @@
 @media (prefers-reduced-motion:no-preference) and (max-width:900px),
        (prefers-reduced-motion:no-preference) and (pointer:coarse),
        (prefers-reduced-motion:no-preference) and (max-aspect-ratio:27/25) {
-  /* R502 ownership invariant: keep the CSSAnimation declared continuously.
-     PAUSE/RESUME is owned only by the canonical root animation-play-state/WAAPI
-     governor; removing the animation rule on PAUSE would destroy its identity
-     and rewind/recreate the compositor timeline. */
-  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"]:not([data-fx-primary-mag-life-r482="steady"]) body.living-architecture
+  /* Canonical mobile living clock: cheap compositor scale/opacity only.
+     It starts automatically with the renderer-ready state and never waits for
+     user intent. WebGL may idle between bounded enhancement sweeps. */
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     animation: fx-primary-mag-mobile-heart-r488 4.8s cubic-bezier(.36,0,.20,1) infinite !important;
+    animation-play-state: running !important;
     will-change: scale, opacity !important;
   }
 }
@@ -72,9 +67,7 @@
   }
 }
 
-/* Desktop canonical ASK crystal. Older desktop layers left the button visible
-   but its <i> glyph visually empty. Keep the existing button/label/interaction
-   owner and restore only the missing luminous violet-white crystal cluster. */
+/* Desktop canonical ASK crystal. */
 @media (min-width:901px) {
   html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask > i {
     position: relative !important;
@@ -138,5 +131,4 @@
 }
 
 /* production-r488-mobile-optics-restrained-glow-soft-edge-compositor-pulse */
-/* production-r502-mobile-pause-stable-animation-identity */
-/* deploy-r488-live-proof */
+/* production-r530-navigation-owned-mobile-heartbeat */

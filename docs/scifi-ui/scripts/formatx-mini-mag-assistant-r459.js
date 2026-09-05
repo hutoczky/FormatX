@@ -1,11 +1,14 @@
-/* FormatX R528 — persistent Mini MAG site controller. Manual MAG pause is
-   intentionally absent; motion accessibility is handled by reduced-motion. */
+/* FormatX R531/P0 — persistent MAG site controller on layouts with a safe
+   companion lane. Manual MAG pause is intentionally absent; motion
+   accessibility is handled by reduced-motion. Phone layouts <=430px keep the
+   canonical full hero MAG + SOUND + ASK and do not mount a fixed companion,
+   preventing information occlusion. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxMiniMagAssistantR459==='ready'||root.dataset.fxMiniMagAssistantR459==='booting')return;
 root.dataset.fxMiniMagAssistantR459='booting';
-const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
+const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260905-r530-no-phone-occlusion';
 const SECTION_IDS=['hero','experience','capabilities','pricing','system','resources'];
 let pendingHeroRequest=false;
 const COPY={
@@ -29,6 +32,12 @@ function buildNav(id){const button=node('button');button.type='button';button.da
 addEventListener('formatx:heromagcontrollerrequest',()=>{const api=window.FormatXMiniMagR459;if(typeof api?.toggle==='function'){api.toggle();root.dataset.fxMiniMagHeroBridgeR460='handled-live-request';}else{pendingHeroRequest=true;root.dataset.fxMiniMagHeroBridgeR460='queued-until-ready';}},{passive:true});
 function install(){
   if(!document.body||document.body.dataset.fxPublicPage){root.dataset.fxMiniMagAssistantR459='public-page-skip';return;}
+  if(matchMedia('(max-width:430px)').matches){
+    root.dataset.fxMiniMagAssistantR459='phone-primary-mag-only-r530';
+    root.dataset.fxMiniMagPhonePolicyR530='no-fixed-companion-no-information-occlusion';
+    root.dataset.fxMiniMagPrimaryHeroR459='preserved-native-webgl';
+    return;
+  }
   if(document.querySelector('.fx-mini-mag-assistant-r459')){root.dataset.fxMiniMagAssistantR459='ready';return;}
   const host=node('aside','fx-mini-mag-assistant-r459');host.dataset.open='false';host.setAttribute('aria-label','MAG');
   const launcher=node('button','fx-mini-mag-launcher-r459');launcher.type='button';launcher.setAttribute('aria-expanded','false');launcher.setAttribute('aria-controls','fx-mini-mag-panel-r459');
@@ -50,7 +59,7 @@ function install(){
   window.FormatXMiniMagR459={open:()=>setOpen(true,true),close:()=>setOpen(false),toggle:()=>setOpen(host.dataset.open!=='true',true),navigate:scrollToSection,ask:openAsk,menu:toggleMenu,sound:toggleSound,language:toggleLanguage,shape:toggleShape,element:host};
   root.dataset.fxMiniMagAssistantR459='ready';root.dataset.fxMiniMagPrimaryHeroR459='preserved-native-webgl';root.dataset.fxMiniMagHeroBridgeR460='ready';root.dataset.fxMiniMagMotionControlR528='reduced-motion-only-no-manual-pause';
   if(pendingHeroRequest){pendingHeroRequest=false;setOpen(true,true);root.dataset.fxMiniMagHeroBridgeR460='opened-queued-request';}
-  dispatchEvent(new CustomEvent('formatx:minimagready',{detail:{version:'r528',persistent:true,heroBridge:'r460'}}));
+  dispatchEvent(new CustomEvent('formatx:minimagready',{detail:{version:'r530',persistent:true,heroBridge:'r460'}}));
 }
 addStyle();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 }());

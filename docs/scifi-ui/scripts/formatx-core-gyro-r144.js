@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='mobile-gyro-parallax-r379-explicit-touch-center-lock';
+const VERSION='mobile-gyro-parallax-r530-living-core';
 if(root.dataset.fxCoreGyroR144===VERSION&&root.dataset.fxCoreGyroRuntimeR292==='event-driven-bounded-no-idle-raf')return;
 root.dataset.fxCoreGyroR144=VERSION;
 
@@ -52,7 +52,7 @@ function axes(beta,gamma){
 }
 function emit(now){
   const s=stage(),h=hero();if(!(s instanceof HTMLElement)||!(h instanceof HTMLElement))return;
-  if(now<manualUntil||root.dataset.fxReferenceMotionPaused==='true')return;
+  if(now<manualUntil)return;
   const r=s.getBoundingClientRect();if(r.width<2||r.height<2||r.bottom<0||r.top>innerHeight)return;
   const clientX=r.left+r.width*(.5+smoothX*.16),clientY=r.top+r.height*(.5-smoothY*.14);
   try{h.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,cancelable:false,clientX,clientY,pointerId:144,pointerType:'mouse',isPrimary:true,buttons:0,pressure:0}));}
