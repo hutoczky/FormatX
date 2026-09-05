@@ -6,18 +6,51 @@ on:
       - p0-r530-fallback-debug
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   debug:
+    if: ${{ !contains(github.event.head_commit.message, '[candidate] Finalize R530 deferred fallback semantic contract') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - name: Install harness
+      - name: Patch final semantic fallback contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/scripts/validate-r522-semantic-mag.cjs')
+          s=p.read_text()
+          old="""    assert.ok(state.hero && state.lead > 40 && state.live && state.proof && state.headerCore && state.ask,
+      `fallback lost meaningful product content ${JSON.stringify(state)}`);
+"""
+          new="""    assert.ok(state.hero && state.lead > 40 && state.proof && state.headerCore && state.ask,
+      `fallback lost meaningful base product content ${JSON.stringify(state)}`);
+    if (!state.live) {
+      const runtimeState = await page.evaluate(() => document.documentElement.dataset.fxContentRuntimeR241 || '');
+      assert.equal(runtimeState, 'armed-r528-user-intent',
+        `fallback deferred content runtime is not armed ${runtimeState}`);
+      await page.keyboard.press('Tab');
+      await page.waitForFunction(() => Boolean(document.querySelector(
+        '#live-os,#live-os-overview,[data-fx-live-os],[data-fx-live-os-launcher],[data-fx-live-os-cta]'
+      )), null, { timeout: 8000 });
+      const liveAfterIntent = await page.evaluate(() => Boolean(document.querySelector(
+        '#live-os,#live-os-overview,[data-fx-live-os],[data-fx-live-os-launcher],[data-fx-live-os-cta]'
+      )));
+      assert.ok(liveAfterIntent, 'fallback Live OS surface did not mount after real user intent');
+    }
+"""
+          if old not in s:
+              raise SystemExit('fallback assertion anchor missing')
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
+      - name: Install browser harness
         shell: bash
         run: |
           set -euo pipefail
@@ -25,55 +58,25 @@ jobs:
           CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
           python3 -m http.server 4178 --directory docs >"$RUNNER_TEMP/http.log" 2>&1 &
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && break; sleep 1; done
-      - name: Diagnose fallback execution chain
+      - name: Full website visual contract
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_VISUAL_DIR: artifacts/r530-final-content-visuals
+        run: node .github/scripts/validate-content-visuals.cjs
+      - name: Living MAG semantic contract
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/
+          FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r530-final-semantic-mag
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
+      - name: Commit proven semantic contract
         shell: bash
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const { chromium } = require('playwright');
-          (async()=>{
-            const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN,args:['--no-sandbox','--disable-dev-shm-usage']});
-            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});
-            await context.addInitScript(()=>{
-              const original=HTMLCanvasElement.prototype.getContext;
-              HTMLCanvasElement.prototype.getContext=function(type,...args){
-                if(['webgl','webgl2','experimental-webgl'].includes(type)) return null;
-                return original.call(this,type,...args);
-              };
-            });
-            const page=await context.newPage();
-            const pageErrors=[]; const consoleErrors=[]; const failed=[];
-            page.on('pageerror',e=>pageErrors.push(String(e)));
-            page.on('console',m=>{if(m.type()==='error') consoleErrors.push(m.text())});
-            page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));
-            const resp=await page.goto('http://127.0.0.1:4178/scifi-ui/?r530_fallback_debug=2',{waitUntil:'domcontentloaded',timeout:30000});
-            await page.waitForTimeout(2500);
-            const snap=()=>page.evaluate(()=>({
-              status:document.readyState,
-              contentRuntime:document.documentElement.dataset.fxContentRuntimeR241||'',
-              originProof:document.documentElement.dataset.fxOriginProof||'',
-              originProofState:document.documentElement.dataset.fxOriginProofState||'',
-              liveLoader:document.documentElement.dataset.fxLiveOsLoader||'',
-              liveLoadState:document.documentElement.dataset.fxLiveOsLoadState||'',
-              originScript:[...document.scripts].filter(s=>s.src.includes('formatx-origin-proof.js')).map(s=>({src:s.src,defer:s.defer,async:s.async})),
-              launcherCount:document.querySelectorAll('[data-fx-live-os-launcher]').length,
-              liveOverview:document.querySelectorAll('#live-os,#live-os-overview,[data-fx-live-os],[data-fx-live-os-cta]').length,
-              hero:Boolean(document.querySelector('#hero')),
-              proof:Boolean(document.querySelector('[data-fx-award-proof],.fx-proof-grid')),
-              pause:document.querySelectorAll('.fx-reference-pause').length,
-              overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
-            }));
-            const before=await snap();
-            await page.keyboard.press('Tab');
-            await page.waitForFunction(()=>document.querySelector('[data-fx-live-os-launcher]') || document.documentElement.dataset.fxLiveOsLoader==='v1',null,{timeout:8000});
-            await page.waitForTimeout(800);
-            const after=await snap();
-            console.log('R530_FALLBACK_INTENT_DEBUG',JSON.stringify({httpStatus:resp?.status(),before,after,pageErrors,consoleErrors,failed},null,2));
-            if(before.contentRuntime!=='armed-r528-user-intent') throw new Error('content runtime not armed before intent: '+JSON.stringify(before));
-            if(after.originScript.length!==1 || after.liveLoader!=='v1' || after.launcherCount!==1) throw new Error('deferred Live OS did not mount after intent: '+JSON.stringify(after));
-            if(after.pause!==0 || after.overflow>2 || pageErrors.length || failed.length) throw new Error('fallback intent path regression');
-            await browser.close();
-          })().catch(e=>{console.error(e);process.exit(1)});
-          NODE
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .github/scripts/validate-r522-semantic-mag.cjs
+          git commit -m '[candidate] Finalize R530 deferred fallback semantic contract'
+          git push origin HEAD:p0-r530-fallback-debug
