@@ -16,6 +16,8 @@ root.dataset.fxDialogueSurfaceR475='booting';
 root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';
+root.dataset.fxMagCanonicalClockR530='compositor-heartbeat-navigation-owned';
+root.dataset.fxMagStartupNoInputR530='required';
 root.dataset.fxMotionRuntimeStartR530='navigation-owned-current-mag';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
