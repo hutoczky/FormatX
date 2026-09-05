@@ -1,11 +1,11 @@
-/* FormatX r252 — MAG as the living heart of the page.
+/* FormatX r536 — MAG as the living heart of the page.
    This layer owns only the MAG interaction hit-area and the mobile loop handoff.
    It never paints a second fake hero after the footer. */
 
 .fx-mag-heart-hit-r252 {
   position: absolute;
-  /* The WebGL stage is z=3. Keep the heart hit-area directly above the MAG,
-     while canonical ASK / pause / navigation controls remain above it. */
+  /* The WebGL stage is visual-only. The semantic heart target owns hit testing,
+     while canonical ASK / SOUND / navigation controls remain independently live. */
   z-index: 4;
   left: 50%;
   top: 50%;
@@ -22,6 +22,13 @@
   transform: translate(-50%, -50%);
   touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* R536: R326 pointer/touch logic listens globally and reads stage geometry, so
+   the visual stage never needs to win DOM hit-testing. This prevents it from
+   swallowing the accessible living-core button while keeping drag/touch input. */
+html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+  pointer-events: none !important;
 }
 
 .fx-mag-heart-hit-r252::before {
