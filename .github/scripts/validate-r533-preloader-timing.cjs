@@ -68,9 +68,11 @@ async function verify(browser, spec) {
       };
     };
     const observer = new MutationObserver(captureActiveContract);
-    observer.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-fx-preloader-r531'] });
+    observer.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-fx-preloader-r531'] });
+    document.addEventListener('readystatechange', captureActiveContract, { capture: true });
     document.addEventListener('DOMContentLoaded', captureActiveContract, { once: true, capture: true });
     document.addEventListener('formatx:preloadercomplete', event => {
+      captureActiveContract();
       window.__fxR533PreloaderEvidence.completeAt = performance.now();
       window.__fxR533PreloaderEvidence.source = String(event?.detail?.source || '');
       observer.disconnect();
