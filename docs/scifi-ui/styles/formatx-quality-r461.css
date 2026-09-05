@@ -1,4 +1,4 @@
-/* FormatX r461/r462/R489 — compact quality layer for the current R326/R460 experience.
+/* FormatX r461/r462/R530 — compact quality layer for the current R326/R460 experience.
    This owns measurable first-paint stability, accessibility and touch geometry
    for the one active landing-page runtime. */
 
@@ -35,8 +35,17 @@ html body.living-architecture .topbar > .fx-language-toggle {
 }
 
 @media (min-width: 901px) {
+  /* R530: reserve the settled desktop header in normal document flow on the
+     render-blocking frame. The previous APEX fixed header left zero flow space
+     until r244 mounted, shifting the complete hero-copy after first paint. */
   html body.living-architecture .topbar {
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 72px !important;
     min-height: 72px !important;
+    margin: 0 !important;
   }
   html body.living-architecture .topbar > .fx-language-toggle {
     position: absolute !important;
@@ -193,4 +202,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* deploy-r489-mobile-a11y-contrast */
+/* deploy-r530-desktop-first-frame-flow-lock */
