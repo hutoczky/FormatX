@@ -1,0 +1,20 @@
+FormatX P0 validation contract
+version=2026-09-05-p0-r530-living-core-contract-final
+production_origin=https://formatxsuite.com/
+lighthouse_desktop_runs=3
+lighthouse_mobile_runs=3
+required_categories=performance:100,accessibility:100,best-practices:100,seo:100
+lcp_ms_lt=2000
+cls_lt=0.05
+tbt_ms_lte=150
+ttfb_ms_lte=500
+browser_matrix=strict
+proof_policy=measured-artifacts-only
+product_runtime=r530-living-core-no-manual-pause-lifecycle
+motion_accessibility=prefers-reduced-motion-and-background-lifecycle
+mobile_lcp=r529-static-heart-plus-mobile-legacy-post-fcp
+deferred_css=r526-first-contentful-paint-observer
+production_wrapper=r529-direct-canonical-r527-fcp-preserved
+semantic_mag=r530-living-core-current-contract
+legacy_r482=r528-semantic-replacement
+trigger=r530-final-same-sha
