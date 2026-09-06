@@ -144,16 +144,20 @@ async function runCase(browser, name, contextOptions) {
 
   await page.goto(TEST_URL + '?lang=hu&audio-test=1&score=v6', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
-  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'professional-v6', null, { timeout: 45000 });
-  await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 20000 });
 
+  /* Sound is user opt-in by product contract. The professional engine must not
+     be required before the first trusted SOUND gesture; that gesture owns load
+     and the one-time toggle handoff. */
   const button = page.locator('.fx-three-sound');
-  await button.waitFor({ state: contextOptions.isMobile ? 'attached' : 'visible', timeout: 15000 });
+  await button.waitFor({ state: 'visible', timeout: 15000 });
   assert(await button.count() === 1, name + ': exactly one music button is required');
   await assertClickable(page, name);
 
-  if (contextOptions.isMobile) await button.evaluate(node => node.click());
+  if (contextOptions.isMobile) await button.tap();
   else await button.click();
+
+  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'professional-v6', null, { timeout: 45000 });
+  await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 20000 });
   await waitForAudioOn(page, name);
   await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 15000 });
   await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 15000 });
@@ -208,7 +212,7 @@ async function runCase(browser, name, contextOptions) {
   assert(['signal-verified', 'wav-fallback'].includes(sustained.output), name + ': music signal was not sustained: ' + JSON.stringify(sustained));
   assert(sustained.music === 'fallback-playing' || sustained.chord.length > 0, name + ': score scheduler stopped: ' + JSON.stringify(sustained));
 
-  if (contextOptions.isMobile) await button.evaluate(node => node.click());
+  if (contextOptions.isMobile) await button.tap();
   else await button.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'off');
 
