@@ -7,7 +7,8 @@ const UPSTREAM_PORT = 8787;
 const LISTEN_HOST = '127.0.0.1';
 const LISTEN_PORT = 8788;
 const CANONICAL = '<https://formatxsuite.com/>; rel="canonical"';
-const MAX_RETRIES = 2;
+const MAX_STATUS_RETRIES = 2;
+const MAX_CONNECT_RETRIES = 24;
 const RETRY_STATUS = new Set([502, 503, 504]);
 const RETRY_ERRORS = new Set(['ECONNRESET', 'ECONNREFUSED', 'EPIPE', 'ETIMEDOUT']);
 const agent = new http.Agent({ keepAlive: true, maxSockets: 32, maxFreeSockets: 8, timeout: 15000 });
@@ -22,13 +23,14 @@ function normalizedLinkHeader(value) {
 }
 function retryableMethod(method) { return method === 'GET' || method === 'HEAD'; }
 function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+function reconnectDelay(attempt) { return Math.min(120 + attempt * 80, 500); }
 
 const server = http.createServer((request, response) => {
   const requestBody = [];
   request.on('data', chunk => requestBody.push(chunk));
   request.on('end', () => {
     const body = Buffer.concat(requestBody);
-    const forward = async attempt => {
+    const forward = async (statusAttempt, connectAttempt) => {
       if (response.writableEnded) return;
       const headers = { ...request.headers, host: `${UPSTREAM_HOST}:${UPSTREAM_PORT}` };
       delete headers.connection;
@@ -45,10 +47,10 @@ const server = http.createServer((request, response) => {
         upstreamResponse.on('data', chunk => chunks.push(chunk));
         upstreamResponse.on('end', async () => {
           const status = upstreamResponse.statusCode || 502;
-          if (retryableMethod(request.method) && RETRY_STATUS.has(status) && attempt < MAX_RETRIES) {
-            console.warn(`[candidate-proxy] retry ${attempt + 1}/${MAX_RETRIES} for ${request.method} ${request.url}: upstream HTTP ${status}`);
-            await delay(80 * (attempt + 1));
-            return forward(attempt + 1);
+          if (retryableMethod(request.method) && RETRY_STATUS.has(status) && statusAttempt < MAX_STATUS_RETRIES) {
+            console.warn(`[candidate-proxy] HTTP retry ${statusAttempt + 1}/${MAX_STATUS_RETRIES} for ${request.method} ${request.url}: upstream HTTP ${status}`);
+            await delay(80 * (statusAttempt + 1));
+            return forward(statusAttempt + 1, connectAttempt);
           }
           const nextHeaders = { ...upstreamResponse.headers };
           const contentType = String(nextHeaders['content-type'] || '');
@@ -65,10 +67,10 @@ const server = http.createServer((request, response) => {
       });
       upstream.setTimeout(15000, () => upstream.destroy(Object.assign(new Error('upstream timeout'), { code: 'ETIMEDOUT' })));
       upstream.on('error', async error => {
-        if (retryableMethod(request.method) && RETRY_ERRORS.has(error.code) && attempt < MAX_RETRIES) {
-          console.warn(`[candidate-proxy] retry ${attempt + 1}/${MAX_RETRIES} for ${request.method} ${request.url}: ${error.code || error.message}`);
-          await delay(80 * (attempt + 1));
-          return forward(attempt + 1);
+        if (retryableMethod(request.method) && RETRY_ERRORS.has(error.code) && connectAttempt < MAX_CONNECT_RETRIES) {
+          console.warn(`[candidate-proxy] reconnect ${connectAttempt + 1}/${MAX_CONNECT_RETRIES} for ${request.method} ${request.url}: ${error.code || error.message}`);
+          await delay(reconnectDelay(connectAttempt));
+          return forward(statusAttempt, connectAttempt + 1);
         }
         console.error(`[candidate-proxy] terminal upstream error for ${request.method} ${request.url}:`, error);
         if (!response.headersSent) response.writeHead(502, { 'content-type': 'text/plain; charset=utf-8' });
@@ -77,7 +79,7 @@ const server = http.createServer((request, response) => {
       if (body.length) upstream.end(body);
       else upstream.end();
     };
-    void forward(0);
+    void forward(0, 0);
   });
 });
 
