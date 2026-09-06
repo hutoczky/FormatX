@@ -1,9 +1,11 @@
-/* FormatX R556 — priority-owned absolute boot-deadline bounded preloader.
+/* FormatX R562 — priority-owned absolute boot-deadline bounded preloader.
    MAG startup remains navigation-owned behind the visual layer. The intro keeps
    the intended premium 1.2–1.65s UX dwell while text remains immutable after
    first paint. The boot-relative deadline is armed before DOM stabilization and
    uses the browser scheduler's user-blocking queue when available, with a normal
-   timer fallback. The fade retains an independently bounded finalize fallback. */
+   timer fallback. If main-thread work delays the release callback beyond the hard
+   deadline, finalization is immediate because the compositor visual bound has
+   already elapsed; normal on-time releases retain the 90ms fade. */
 (function(){
 'use strict';
 
@@ -41,6 +43,7 @@ ROOT.dataset.fxPreloaderClockR544='navigation-script-boot-single-deadline';
 ROOT.dataset.fxPreloaderDeadlineR549=`fade-compensated-${Math.round(PRELOADER_HIDE_BY_MS)}-${PRELOADER_MAX_MS}`;
 ROOT.dataset.fxPreloaderDeadlineR555='absolute-boot-hard-deadline-bounded-fade-finalize';
 ROOT.dataset.fxPreloaderDeadlineR556='prearmed-user-blocking-scheduler-with-timer-fallback';
+ROOT.dataset.fxPreloaderDeadlineR562='overdue-callback-direct-finalize-normal-fade-preserved';
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
@@ -113,6 +116,8 @@ function hidePreloader(source){
     try{overlay.getAnimations({subtree:true}).forEach(animation=>animation.cancel());}catch(_){}
     overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));
   };
+  const releaseElapsed=performance.now()-PRELOADER_BOOT_AT;
+  if(releaseElapsed>=PRELOADER_MAX_MS){ROOT.dataset.fxPreloaderOverdueFinalizeR562=`direct-${Math.round(releaseElapsed)}`;finalize();return;}
   if(REDUCED){finalize();return;}
   let finish=null;
   try{finish=overlay.animate([{opacity:1},{opacity:0}],{duration:PRELOADER_FADE_MS,easing:'ease-out',fill:'forwards'});}catch(_){finalize();return;}
