@@ -1,11 +1,11 @@
-/* FormatX R565 — mobile OffscreenCanvas MAG post-critical-paint startup owner.
+/* FormatX R566 — mobile OffscreenCanvas MAG post-critical-paint startup owner.
    Compatibility owner name remains R561 because the current MAG loader already
    loads this same navigation-owned mobile context policy URL. The canonical stage,
-   canvas and worker are created during normal navigation, but expensive WebGL
-   context creation and shader compilation start only after the fixed critical
-   paint window. This is the same visitor path for every request: no Lighthouse,
-   FCP observer, reduced audit path or user-input gate exists. Unsupported/failed
-   OffscreenCanvas falls back automatically to canonical R326. */
+   canvas and worker are created during normal navigation. Expensive WebGL context
+   creation starts after the fixed critical paint window, while the intro's mobile
+   flare is normalized to a gradient-only compositor effect so large blur/shadow
+   stacks cannot starve the bounded release. Same visitor path for every request:
+   no Lighthouse, FCP observer, reduced audit path or user-input gate exists. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -13,13 +13,25 @@ if(root.dataset.fxMagContextPolicyR561)return;
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 root.dataset.fxMagContextPolicyR561=mobile?'armed-mobile-webgl1-first':'desktop-no-op';
 if(!mobile)return;
-const WORKER='/scifi-ui/scripts/formatx-crystal-worker-r564.js?v=20260906-r565-post-critical-paint';
-const FALLBACK='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r565-main-thread-fallback';
+const WORKER='/scifi-ui/scripts/formatx-crystal-worker-r564.js?v=20260906-r566-post-critical-paint';
+const FALLBACK='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r566-main-thread-fallback';
 const WORKER_INIT_AT_MS=2200;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let worker=null,stage=null,canvas=null,ro=null,io=null,destroyed=false,ready=false,fallbackStarted=false,initPosted=false,initTimer=0,readyTimer=0;
 let shape=root.dataset.fxCoreShapeR337==='sphere'?'sphere':'crystal',morph=shape==='sphere'?1:0,energy=.50,breath=.12,pointerX=0,pointerY=0,rotationY=0,pulseStart=-Infinity,pulseTimer=0,visible=true;
+function decontendIntroCompositor(){
+  const overlay=document.getElementById('formatx-event-horizon');
+  if(!(overlay instanceof HTMLElement)||overlay.hidden)return;
+  const scan=overlay.querySelector('.fx-intro-scan');
+  const flare=overlay.querySelector('.fx-intro-flare');
+  const portal=overlay.querySelector('.fx-intro-portal');
+  if(scan instanceof HTMLElement){scan.style.setProperty('filter','none','important');scan.style.setProperty('mix-blend-mode','normal','important');}
+  if(flare instanceof HTMLElement){flare.style.setProperty('filter','none','important');flare.style.setProperty('box-shadow','none','important');flare.style.setProperty('width','min(56vw,320px)','important');flare.style.setProperty('height','min(56vw,320px)','important');flare.style.setProperty('background','radial-gradient(circle,rgba(210,251,255,.34) 0%,rgba(124,236,255,.24) 22%,rgba(143,114,255,.12) 48%,rgba(124,236,255,0) 74%)','important');}
+  if(portal instanceof HTMLElement){portal.style.setProperty('filter','none','important');portal.style.setProperty('box-shadow','none','important');}
+  root.dataset.fxPreloaderCompositorR566='gradient-only-mobile-glow-no-blur-stack';
+}
+decontendIntroCompositor();
 function fallback(reason){
   if(fallbackStarted||destroyed)return;fallbackStarted=true;
   clearTimeout(initTimer);clearTimeout(readyTimer);
@@ -31,7 +43,7 @@ function fallback(reason){
   if(window.FormatXLivingCore?.revision==='r564-offscreen')delete window.FormatXLivingCore;
   delete root.dataset.fxCrystalOrganismR326;
   delete root.dataset.fxCoreReal3d;
-  const script=document.createElement('script');script.src=`${FALLBACK}&t=${Date.now()}`;script.async=false;script.dataset.fxR565Fallback='true';document.head.appendChild(script);
+  const script=document.createElement('script');script.src=`${FALLBACK}&t=${Date.now()}`;script.async=false;script.dataset.fxR566Fallback='true';document.head.appendChild(script);
 }
 function size(){
   const rect=stage?.getBoundingClientRect();if(!rect||rect.width<2||rect.height<2)return null;
@@ -42,7 +54,7 @@ function postState(now=performance.now()){
   const elapsed=(now-pulseStart)/1160,surfacePulse=elapsed>=0&&elapsed<=1?elapsed:-1;
   worker.postMessage({type:'state',morph,energy,breath,pointerX,pointerY,rotationY,surfacePulse,now});
 }
-function setMorph(value,source='api',announce=true){morph=clamp(Number(value)||0,0,1);shape=morph>=.5?'sphere':'crystal';root.dataset.fxCoreShapeR337=shape;root.dataset.fxCoreTargetShape=shape;root.dataset.fxCoreShape=shape;root.dataset.fxCoreMorph=morph.toFixed(3);root.dataset.fxCoreMorphSource=source;postState();if(announce)dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{shape,source,revision:'r565',renderer:'crystal-organism-r326',geometry:'closed-3d-volume'}}));return morph;}
+function setMorph(value,source='api',announce=true){morph=clamp(Number(value)||0,0,1);shape=morph>=.5?'sphere':'crystal';root.dataset.fxCoreShapeR337=shape;root.dataset.fxCoreTargetShape=shape;root.dataset.fxCoreShape=shape;root.dataset.fxCoreMorph=morph.toFixed(3);root.dataset.fxCoreMorphSource=source;postState();if(announce)dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{shape,source,revision:'r566',renderer:'crystal-organism-r326',geometry:'closed-3d-volume'}}));return morph;}
 function setShape(next,source='api'){return setMorph(next==='sphere'||next===1||next===true?1:0,source,true);}
 function toggleShape(source='interaction'){return setShape(shape==='sphere'?'crystal':'sphere',source);}
 function pulse(detail={}){if(Number.isFinite(detail.x))pointerX=clamp(detail.x,-1,1);if(Number.isFinite(detail.y))pointerY=clamp(detail.y,-1,1);energy=Math.max(.5,detail.phase==='drag'?.62:.92);breath=Math.max(.12,detail.phase==='drag'?.48:.72);postState();setTimeout(()=>{energy=.5;breath=.12;postState();},220);}
@@ -53,16 +65,16 @@ function schedulePulse(){clearTimeout(pulseTimer);if(destroyed||reduced.matches|
 function publishReady(count){
   if(ready||destroyed)return;ready=true;clearTimeout(readyTimer);
   root.dataset.fxMagOffscreenR564='ready-worker-webgl1';root.dataset.fxMagOffscreenR565='ready-worker-webgl1-post-critical-paint';root.dataset.fxMagContextR561='offscreen-worker-webgl1-antialias-off';root.dataset.fxMagContextPolicyR561='released-to-offscreen-worker';
-  root.dataset.fxCrystalOrganismR326='ready';root.dataset.fxLivingOrganicCoreR413='ready';root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';root.dataset.fxCoreMobileR99='ready-v69';root.dataset.fxCoreMobileV69='ready-v69';root.dataset.fxCoreMobileV55='ready-v55';root.dataset.fxCoreReferenceLock='ready-v69';root.dataset.fxCoreReal3d='ready-v69';root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';root.dataset.fxCoreMaterial='translucent-living-facet-organism-r326';root.dataset.fxCoreGeometry='four-direction-asymmetric-crystal-organism-r326';root.dataset.fxCoreRendererVersion='living-luminous-electric-crystal-r565-offscreen-worker';root.dataset.fxCoreGeometryTopology='12x24-closed-uv-surface';root.dataset.fxCoreVertexCount=String(count||0);root.dataset.fxCoreDimension='native-closed-3d-volume-r413';root.dataset.fxCoreContexts='1';root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';root.dataset.fxCoreSurfaceMotionR454='intermittent-native-electric-filament-every-five-to-six-seconds';root.dataset.fxCoreSurfacePulseR454='idle';root.dataset.fxCoreScheduler='interaction-bursts-idle-zero-frame-r441';root.dataset.fxCoreIdleRenderR441='zero-frame';root.dataset.fxCoreLifecycleR536='automatic-zero-idle-visible-pulse';root.dataset.fxGpuCapability='webgl1-offscreen';
+  root.dataset.fxCrystalOrganismR326='ready';root.dataset.fxLivingOrganicCoreR413='ready';root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';root.dataset.fxCoreMobileR99='ready-v69';root.dataset.fxCoreMobileV69='ready-v69';root.dataset.fxCoreMobileV55='ready-v55';root.dataset.fxCoreReferenceLock='ready-v69';root.dataset.fxCoreReal3d='ready-v69';root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';root.dataset.fxCoreMaterial='translucent-living-facet-organism-r326';root.dataset.fxCoreGeometry='four-direction-asymmetric-crystal-organism-r326';root.dataset.fxCoreRendererVersion='living-luminous-electric-crystal-r566-offscreen-worker';root.dataset.fxCoreGeometryTopology='12x24-closed-uv-surface';root.dataset.fxCoreVertexCount=String(count||0);root.dataset.fxCoreDimension='native-closed-3d-volume-r413';root.dataset.fxCoreContexts='1';root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';root.dataset.fxCoreSurfaceMotionR454='intermittent-native-electric-filament-every-five-to-six-seconds';root.dataset.fxCoreSurfacePulseR454='idle';root.dataset.fxCoreScheduler='interaction-bursts-idle-zero-frame-r441';root.dataset.fxCoreIdleRenderR441='zero-frame';root.dataset.fxCoreLifecycleR536='automatic-zero-idle-visible-pulse';root.dataset.fxGpuCapability='webgl1-offscreen';
   const api={version:'crystal-organism-r326',revision:'r564-offscreen',renderer:'single-webgl-crystal-organism-r326',material:'translucent-living-facet-organism-r326',geometry:'four-direction-asymmetric-crystal-organism-r326',scheduler:'interaction-bursts-idle-zero-frame-r441',pulse,surfacePulse,surfacePulseDurationMs:1160,setMorph:(v,s)=>setMorph(v,s||'api-morph',true),setShape:(v,s)=>setShape(v,s||'api-set'),toggleShape:s=>toggleShape(s||'api-toggle'),rotateBy:(x,y)=>{rotationY+=Number(y)||Number(x)||0;postState();},requestRender:postState,destroy,canvas,stage,get energy(){return energy;},get openness(){return .08+breath*.025;},get morph(){return morph;},get shape(){return shape;},get rotation(){return[0,rotationY,0];},get vertexCount(){return Number(count)||0;}};
   window.FormatXCoreMobileV69=api;window.FormatXLivingCore=api;postState();schedulePulse();
-  dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{version:'r565',renderer:'crystal-organism-r326',revision:'r565-post-critical-paint-offscreen',context:'webgl1-offscreen',geometry:'closed-3d-volume',morph:'crystal-sphere-native-webgl',interactive:true,organism:true,legacyFallback:false,shaderCompile:'worker-thread'}}));
+  dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{version:'r566',renderer:'crystal-organism-r326',revision:'r566-post-critical-paint-offscreen',context:'webgl1-offscreen',geometry:'closed-3d-volume',morph:'crystal-sphere-native-webgl',interactive:true,organism:true,legacyFallback:false,shaderCompile:'worker-thread'}}));
 }
 function destroy(){if(destroyed)return;destroyed=true;clearTimeout(initTimer);clearTimeout(readyTimer);clearTimeout(pulseTimer);try{worker?.postMessage({type:'destroy'});worker?.terminate();}catch(_){}try{ro?.disconnect();io?.disconnect();}catch(_){}stage?.remove();if(window.FormatXCoreMobileV69?.revision==='r564-offscreen')delete window.FormatXCoreMobileV69;if(window.FormatXLivingCore?.revision==='r564-offscreen')delete window.FormatXLivingCore;}
 try{
   if(typeof Worker!=='function'||typeof HTMLCanvasElement.prototype.transferControlToOffscreen!=='function'){root.dataset.fxMagContextPolicyR561='offscreen-unavailable-main-r326';return;}
   const hero=document.getElementById('hero'),host=hero?.querySelector('.hero-space');if(!(hero instanceof HTMLElement)||!(host instanceof HTMLElement)){root.dataset.fxMagContextPolicyR561='host-unavailable-main-r326';return;}
-  stage=document.createElement('div');stage.className='fx-core-mobile-v55-stage fx-crystal-organism-r326-stage';stage.dataset.renderer='crystal-organism-r326';stage.dataset.revision='r565-offscreen-scheduled';stage.dataset.active='true';stage.setAttribute('aria-hidden','true');host.prepend(stage);
+  stage=document.createElement('div');stage.className='fx-core-mobile-v55-stage fx-crystal-organism-r326-stage';stage.dataset.renderer='crystal-organism-r326';stage.dataset.revision='r566-offscreen-scheduled';stage.dataset.active='true';stage.setAttribute('aria-hidden','true');host.prepend(stage);
   canvas=document.createElement('canvas');canvas.className='fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';canvas.setAttribute('aria-hidden','true');stage.appendChild(canvas);
   const initial=size();if(!initial){stage.remove();root.dataset.fxMagContextPolicyR561='geometry-unavailable-main-r326';return;}
   canvas.width=initial.width;canvas.height=initial.height;
