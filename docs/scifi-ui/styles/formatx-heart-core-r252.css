@@ -1,7 +1,8 @@
-/* FormatX r543 — body-level semantic MAG hit owner + proven interaction plane.
-   The visual hero remains a normal document surface. The WebGL host is pointer-
-   transparent, while one fixed semantic button follows the rendered MAG geometry.
-   SOUND/ASK stay on the higher hero-space plane and win intentional overlaps. */
+/* FormatX r549 — body-level semantic MAG geometry + trusted physical router.
+   The fixed semantic button remains focusable for keyboard accessibility but is
+   pointer-transparent. Real pointer/touch events land on the actual page surface;
+   the document-level trusted router activates MAG only inside the synced geometry.
+   SOUND/ASK/nav therefore cannot be covered by the semantic heart layer. */
 
 html body.living-architecture #hero .hero-grid {
   pointer-events: none !important;
@@ -47,9 +48,8 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   pointer-events: none !important;
 }
 
-/* One body child follows the current stage rect. JS owns left/top/size/visibility.
-   12060 is above normal page/hero-grid content but below the 12070 header controls
-   and 12080 hero control plane, so MAG is clickable without stealing SOUND/ASK. */
+/* One body child follows the current stage rect. It is semantic/focus geometry,
+   not a pointer overlay: trusted pointer routing is handled in heart-core JS. */
 body.living-architecture > .fx-mag-heart-hit-r252 {
   position: fixed !important;
   z-index: 12060 !important;
@@ -69,7 +69,7 @@ body.living-architecture > .fx-mag-heart-hit-r252 {
   transform: translate(-50%, -50%) !important;
   touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
-  pointer-events: auto !important;
+  pointer-events: none !important;
   isolation: isolate;
 }
 
@@ -85,7 +85,6 @@ body.living-architecture > .fx-mag-heart-hit-r252 {
   pointer-events: none;
 }
 
-.fx-mag-heart-hit-r252:hover::before,
 .fx-mag-heart-hit-r252:focus-visible::before,
 .fx-mag-heart-hit-r252[data-fx-heart-active='true']::before {
   opacity: .88;
@@ -173,4 +172,4 @@ body.living-architecture > .fx-mag-heart-hit-r252 {
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
 
-/* production-r543-elevated-body-stage-synced-semantic-heart */
+/* production-r549-pointer-transparent-body-semantic-heart */
