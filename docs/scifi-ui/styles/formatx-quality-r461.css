@@ -1,6 +1,6 @@
-/* FormatX r461/r462/R567 — compact quality layer for the current R326/R460 experience.
-   R567 keeps the canonical hero paintable behind the visual-only preloader,
-   gives the cover a transform-only compositor hard deadline and exposes only SOUND + ASK. */
+/* FormatX r461/r462/R568 — compact quality layer for the current R326/R460 experience.
+   R568 keeps first-paint and settled mobile hero geometry identical, preserves the
+   transform-only intro hard bound, and exposes only SOUND + ASK. */
 
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
@@ -88,6 +88,35 @@ html body.living-architecture .topbar > .fx-language-toggle {
   html body.living-architecture #hero .hero-space {
     contain: layout paint !important;
     overflow: hidden !important;
+  }
+
+  /* R568: r244 still contained a historical mobile rule that collapsed the
+     semantic hero copy to an absolute 1x1 clipped box after first paint. Keep
+     the settled geometry equal to the render-blocking r283 reservation instead. */
+  html[data-fx-reference-production-r244="ready"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 12 !important;
+    display: block !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: calc(100% - 24px) !important;
+    max-width: 680px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto 26px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    border: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
   }
 
   html body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
@@ -203,11 +232,7 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* R567: the preloader remains a visual-only fixed cover. The hero, topbar and page
-   remain fully paintable behind it. The previous full-screen clip-path animation
-   was expensive under software compositing. A single transform-only collapse now
-   provides the same 1.36/1.64s compositor hard bound without rasterizing a moving
-   full-screen clip. */
+/* R567/R568: transform-only visual hard bound; no full-screen clip raster. */
 @keyframes fx-r533-preloader-visual-bound {
   0%, 86% { transform: translate3d(0,0,0) scale(1); }
   94% { transform: translate3d(0,0,0) scale(.985); }
@@ -313,4 +338,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* deploy-r567-preloader-transform-bound-no-manual-pause */
+/* deploy-r568-stable-mobile-hero-transform-bound-no-manual-pause */
