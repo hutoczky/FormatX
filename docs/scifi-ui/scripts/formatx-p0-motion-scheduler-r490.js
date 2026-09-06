@@ -1,4 +1,4 @@
-/* FormatX R537 — navigation-owned living MAG + post-first-paint enhancements.
+/* FormatX R538 — navigation-owned living MAG + post-first-paint enhancements.
    The real current MAG loader starts automatically as soon as this deferred
    production scheduler executes; it never waits for click, tap, wheel or scroll.
    The lightweight semantic MAG interaction owner travels with that critical boot;
@@ -7,9 +7,9 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r537-navigation-mag';
+root.dataset.fxP0MotionSchedulerR490='armed-r538-navigation-mag';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle';
-const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r537-navigation-interaction';
+const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r538-pause-free-optics';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let criticalMagStarted=false;
