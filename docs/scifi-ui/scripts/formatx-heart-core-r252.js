@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'heart-core-r542';
+  const VERSION = 'heart-core-r551';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r549-pointer-transparent-router';
   const LOOP_OVERSHOOT = 28;
@@ -27,6 +27,15 @@
     link.href = STYLE;
     link.dataset.fxHeartCoreR252 = 'true';
     document.head.appendChild(link);
+  }
+
+  function ensureStyleAfterFirstPaint() {
+    if (root.dataset.fxHeartStyleR551) return;
+    root.dataset.fxHeartStyleR551 = 'queued-post-first-paint';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      ensureStyle();
+      root.dataset.fxHeartStyleR551 = 'requested-post-first-paint';
+    }));
   }
 
   function syncPureWebglComposition() {
@@ -60,7 +69,7 @@
       detail: { phase: 'activate', source, x: 0, y: 0, revision: VERSION }
     }));
     dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
-      detail: { source: `mag-${source}-r542` }
+      detail: { source: `mag-${source}-r551` }
     }));
 
     const hit = document.querySelector('.fx-mag-heart-hit-r252');
@@ -124,9 +133,6 @@
     hit.style.height = `${diameter}px`;
     hit.style.visibility = 'visible';
     hit.style.setProperty('z-index', HEART_HIT_Z, 'important');
-    /* The semantic button owns keyboard/focus semantics only. Physical pointer
-       events pass through to the real page and the trusted document router below
-       activates MAG only when the click coordinates are inside this geometry. */
     hit.style.setProperty('pointer-events', 'none', 'important');
     hit.removeAttribute('aria-hidden');
     root.dataset.fxMagHeartHitGeometryR542 = 'viewport-stage-synced';
@@ -193,10 +199,7 @@
   }
 
   function routePhysicalHeartClick(event) {
-    if (!event.isTrusted || event.defaultPrevented) return;
-    /* SOUND/ASK/nav/links keep priority. The semantic heart itself is pointer-
-       transparent, so an unreserved click inside its stage-synchronised rectangle
-       is a real physical MAG interaction without an overlay stealing controls. */
+    if (!event.isTrusted) return;
     if (isReservedInteractiveTarget(event.target)) return;
     const hit = document.querySelector('.fx-mag-heart-hit-r252');
     if (!(hit instanceof HTMLButtonElement) || hit.getAttribute('aria-hidden') === 'true') return;
@@ -208,6 +211,7 @@
     if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return;
     root.dataset.fxMagHeartPhysicalRouteR546 = 'captured-stage-hit';
     root.dataset.fxMagHeartPhysicalRouteR549 = 'captured-pointer-transparent-stage-hit';
+    root.dataset.fxMagHeartTouchRouteR551 = event.defaultPrevented ? 'trusted-after-default-prevented' : 'trusted-direct';
     activateCore('core-hit-zone');
   }
 
@@ -306,7 +310,7 @@
   }
 
   function boot() {
-    ensureStyle();
+    ensureStyleAfterFirstPaint();
     root.dataset.fxHeartCoreR252 = 'ready';
     root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
     installHeartHitTarget();
