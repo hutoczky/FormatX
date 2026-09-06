@@ -1,10 +1,10 @@
 import canonicalProduction from './production-content-entry.js';
 
-/* FormatX R537 — direct canonical production ownership + bounded static intro.
+/* FormatX R538 — direct canonical production ownership + bounded static intro.
    Candidate mode exists only behind Wrangler-only FORMATX_LOCAL_CANDIDATE=1.
    The tiny reference layout selector remains prepaint, the critical shell remains
    first-paint safe, MAG starts from navigation with its lightweight semantic heart,
-   and non-critical enhancement work is intent/lifecycle driven. */
+   and exact first-paint dependencies are warmed from HTTP headers before HTML parse. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
@@ -24,12 +24,24 @@ const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-
 const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
 const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
+const DESKTOP_MOTION_MEDIA = '(prefers-reduced-motion: no-preference) and (min-width: 901px)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
-const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r537-semantic-hit-owner">';
+const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r538-hero-hit-owner">';
 const HEART_BUTTON = '<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
-const MOBILE_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)"';
+
+/* R538: all of these are already required by the normal visitor first frame.
+   Header preloads only advance request discovery; they do not hide, disable or
+   replace any product content, animation, MAG runtime or accessibility layer. */
+const MOBILE_FIRST_PAINT_PRELOAD = `</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="${MOBILE_MEDIA}"`;
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
-const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r537-semantic-hit-owner>; rel=preload; as=style';
+const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r538-hero-hit-owner>; rel=preload; as=style';
+const CRITICAL_SHELL_PRELOAD = '</scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint>; rel=preload; as=style';
+const QUALITY_PRELOAD = '</scifi-ui/styles/formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1>; rel=preload; as=style';
+const AWARD_READINESS_PRELOAD = '</scifi-ui/styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability>; rel=preload; as=style';
+const FIRST_PAINT_R206_PRELOAD = '</scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero>; rel=preload; as=style';
+const REFERENCE_BOOT_PRELOAD = '</scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode>; rel=preload; as=script';
+const CRITICAL_CORE_PRELOAD = `</scifi-ui/styles/formatx-critical-core-r227.css?v=20260819-r227>; rel=preload; as=style; media="${DESKTOP_MOTION_MEDIA}"`;
+const REFERENCE_PRODUCTION_PRELOAD = `</scifi-ui/styles/formatx-reference-production-r244.css?v=20260824-native-orb-r250>; rel=preload; as=style; media="${DESKTOP_MOTION_MEDIA}"`;
 
 const MOBILE_LEGACY_PATHS = new Set([
   '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
@@ -104,17 +116,28 @@ function injectStaticHeart(html) {
 }
 function addFirstPaintPreloads(headers) {
   const existing = headers.get('Link');
-  const preloads = [MOBILE_FIRST_PAINT_PRELOAD, P0_FIRST_PAINT_PRELOAD, HEART_STYLE_PRELOAD].join(', ');
+  const preloads = [
+    MOBILE_FIRST_PAINT_PRELOAD,
+    P0_FIRST_PAINT_PRELOAD,
+    HEART_STYLE_PRELOAD,
+    CRITICAL_SHELL_PRELOAD,
+    QUALITY_PRELOAD,
+    AWARD_READINESS_PRELOAD,
+    FIRST_PAINT_R206_PRELOAD,
+    REFERENCE_BOOT_PRELOAD,
+    CRITICAL_CORE_PRELOAD,
+    REFERENCE_PRODUCTION_PRELOAD,
+  ].join(', ');
   headers.set('Link', existing ? `${existing}, ${preloads}` : preloads);
 }
 function r536Headers(source, localCandidate) {
   const headers = new Headers(source);
   headers.set('X-FormatX-Transport-Stability', 'r536-direct-canonical-living-core');
-  headers.set('X-FormatX-Edge-Stability', 'r536-prepaint-reference-critical-shell');
+  headers.set('X-FormatX-Edge-Stability', 'r538-first-paint-header-warm');
   headers.set('X-FormatX-CSS-Scheduler', 'r536-global-critical-first-paint-mobile-legacy-intent');
   headers.set('X-FormatX-Product-Contract', 'r536-navigation-mag-automatic-lifecycle');
   headers.set('X-FormatX-MAG-Startup', 'r536-navigation-owned-critical-living-core');
-  headers.set('X-FormatX-Mobile-LCP', 'r536-critical-shell-first-paint-preloaded');
+  headers.set('X-FormatX-Mobile-LCP', 'r538-critical-chain-header-preloaded');
   headers.set('X-FormatX-Preloader', 'r534-static-content-roadmap-timing');
   headers.set('X-FormatX-Preloader-Cache', 'r537-static-lcp-no-manual-pause');
   headers.set('X-FormatX-Reference-Boot', 'r536-prepaint-layout-selector');
