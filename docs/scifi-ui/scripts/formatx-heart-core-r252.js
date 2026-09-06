@@ -179,7 +179,35 @@
     syncHeartGeometry(hit);
     root.dataset.fxMagHeartHit = 'ready-r542';
     root.dataset.fxMagHeartHitOwnerR542 = 'body-fixed-stage-synced';
+    root.dataset.fxMagHeartPhysicalRouteR546 = 'armed-trusted-stage-hit';
     return true;
+  }
+
+  function isReservedInteractiveTarget(target) {
+    return target instanceof Element
+      && Boolean(target.closest('a[href],button,input,select,textarea,[role="button"],[contenteditable="true"]'));
+  }
+
+  function introOwnsPointer() {
+    const overlay = document.getElementById('formatx-event-horizon');
+    return overlay instanceof HTMLElement
+      && !overlay.hidden
+      && overlay.dataset.fxPreloaderR531 === 'active';
+  }
+
+  function routePhysicalHeartClick(event) {
+    if (!event.isTrusted || event.defaultPrevented || introOwnsPointer()) return;
+    if (isReservedInteractiveTarget(event.target)) return;
+    const hit = document.querySelector('.fx-mag-heart-hit-r252');
+    if (!(hit instanceof HTMLButtonElement) || hit.getAttribute('aria-hidden') === 'true') return;
+    const rect = hit.getBoundingClientRect();
+    if (rect.width < 80 || rect.height < 80) return;
+    const x = Number(event.clientX);
+    const y = Number(event.clientY);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return;
+    root.dataset.fxMagHeartPhysicalRouteR546 = 'captured-stage-hit';
+    activateCore('core-hit-zone');
   }
 
   function pruneMobileReferenceMirror() {
@@ -288,6 +316,7 @@
     addEventListener('scrollend', () => { transferToRealCore('scrollend'); scheduleGeometry(); }, { passive: true });
     addEventListener('resize', scheduleGeometry, { passive: true });
     addEventListener('orientationchange', scheduleGeometry, { passive: true });
+    document.addEventListener('click', routePhysicalHeartClick, true);
     document.addEventListener('visibilitychange', scheduleGeometry, { passive: true });
     document.addEventListener('touchstart', onTouchStart, { passive: true });
     document.addEventListener('touchend', onTouchEnd, { passive: true });
