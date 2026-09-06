@@ -1,8 +1,8 @@
-/* FormatX r549 — body-level semantic MAG geometry + trusted physical router.
+/* FormatX r554 — body-level semantic MAG geometry + trusted physical router.
    The fixed semantic button remains focusable for keyboard accessibility but is
    pointer-transparent. Real pointer/touch events land on the actual page surface;
    the document-level trusted router activates MAG only inside the synced geometry.
-   SOUND/ASK/nav therefore cannot be covered by the semantic heart layer. */
+   SOUND/ASK/nav remain interactive while the obsolete click-to-launch owner is retired. */
 
 html body.living-architecture #hero .hero-grid {
   pointer-events: none !important;
@@ -15,21 +15,29 @@ html body.living-architecture #hero .hero-space {
   pointer-events: none !important;
 }
 
+/* MAG is navigation-owned. The old click-to-launch control must neither capture
+   trusted heart input nor advertise a false startup requirement. */
+html body.living-architecture #hero .hero-space > .fx-immersive-launch {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Real hero controls remain native interactive descendants. */
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero a,
-html body.living-architecture #hero button:not(.fx-mag-heart-hit-r252),
+html body.living-architecture #hero button:not(.fx-mag-heart-hit-r252):not(.fx-immersive-launch),
 html body.living-architecture #hero input,
 html body.living-architecture #hero select,
 html body.living-architecture #hero textarea,
 html body.living-architecture #hero summary,
 html body.living-architecture #hero label,
-html body.living-architecture #hero [role='button'],
+html body.living-architecture #hero [role='button']:not(.fx-immersive-launch),
 html body.living-architecture #hero [role='link'],
-html body.living-architecture #hero [tabindex],
+html body.living-architecture #hero [tabindex]:not(.fx-immersive-launch),
 html body.living-architecture #hero [data-fx-live-os-launcher],
 html body.living-architecture #hero .fx-organism-thought-trigger,
-html body.living-architecture #hero .hero-space > .fx-immersive-launch,
 html body.living-architecture #hero .hero-space > .fx-organism-map,
 html body.living-architecture #hero .hero-space > .fx-organism-map a,
 html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
@@ -172,4 +180,4 @@ body.living-architecture > .fx-mag-heart-hit-r252 {
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
 
-/* production-r549-pointer-transparent-body-semantic-heart */
+/* production-r554-pointer-transparent-heart-retired-click-launch */
