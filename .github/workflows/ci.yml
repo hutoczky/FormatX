@@ -29,7 +29,18 @@ jobs:
         env: { CI: '1' }
         run: |
           set -euo pipefail
-          (cd billing-worker; npx --yes wrangler@4.129.0 dev --local --ip 127.0.0.1 --port 8787 --var FORMATX_LOCAL_CANDIDATE:1 > "$RUNNER_TEMP/formatx-lighthouse-worker.log" 2>&1 & echo $! > "$RUNNER_TEMP/formatx-lighthouse-worker.pid")
+          (
+            set +e
+            cd billing-worker
+            while true; do
+              echo "--- exact candidate Wrangler start $(date -u +%FT%TZ) ---" >> "$RUNNER_TEMP/formatx-lighthouse-worker.log"
+              npx --yes wrangler@4.129.0 dev --local --ip 127.0.0.1 --port 8787 --var FORMATX_LOCAL_CANDIDATE:1 >> "$RUNNER_TEMP/formatx-lighthouse-worker.log" 2>&1
+              code=$?
+              echo "--- exact candidate Wrangler exited code=$code; restarting same bytes ---" >> "$RUNNER_TEMP/formatx-lighthouse-worker.log"
+              sleep .25
+            done
+          ) &
+          echo $! > "$RUNNER_TEMP/formatx-lighthouse-worker.pid"
           ready=0; : > "$RUNNER_TEMP/formatx-lighthouse-headers.txt"
           for attempt in $(seq 1 240); do
             if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-headers.txt" -o /dev/null http://127.0.0.1:8787/ 2>/dev/null && grep -Fqi 'X-FormatX-Candidate-Delivery: r543-exact-production-entry-localhost-8787' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Candidate-Canonical-Origin: formatxsuite.com' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Preloader: r543-static-content-extended-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Reference-Boot: r536-prepaint-layout-selector' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-CSS-Scheduler: r536-global-critical-first-paint-mobile-legacy-intent' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-MAG-Startup: r543-navigation-owned-elevated-body-heart' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Product-Contract: r543-navigation-mag-elevated-heart-no-manual-pause' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Mobile-LCP: r538-critical-chain-header-preloaded' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'rel=preload' "$RUNNER_TEMP/formatx-lighthouse-headers.txt"; then ready=1; break; fi
@@ -43,7 +54,7 @@ jobs:
             sleep .25
           done
           if [ "$proxy_ready" -ne 1 ]; then cat "$RUNNER_TEMP/formatx-lighthouse-proxy.log" || true; cat "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" || true; exit 1; fi
-          echo 'Exact R543 production candidate + canonical transport proxy ready on 127.0.0.1:8788/.'
+          echo 'Exact R543 production candidate + restart-tolerant canonical transport proxy ready on 127.0.0.1:8788/.'
       - name: Run desktop Lighthouse CI on the real production candidate
         id: lighthouse_desktop
         if: steps.candidate.outcome == 'success'
