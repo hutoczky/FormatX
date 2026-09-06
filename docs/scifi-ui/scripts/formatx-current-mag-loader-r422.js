@@ -1,8 +1,8 @@
-/* FormatX R538 navigation-owned current native MAG runtime.
+/* FormatX R542 navigation-owned current native MAG runtime.
    R326 remains the only full-size hero WebGL organism. Mobile keeps bounded
    periodic surface energy with zero frames between sweeps and automatic lifecycle
-   suspension. The lightweight semantic heart owner is armed with navigation so
-   the already-living MAG is immediately interactive without loading Organism. */
+   suspension. The lightweight body-level semantic heart owner is armed with
+   navigation so the already-living MAG is immediately interactive. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -18,7 +18,7 @@ const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-so
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge';
-const HEART_CORE='/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260906-r537-navigation-interaction-owner';
+const HEART_CORE='/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260906-r542-body-fixed-stage-sync';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r536-automatic-lifecycle-no-audit-path';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260906-r536-lifecycle-safe';
@@ -222,7 +222,7 @@ async function start(){
     ?'direct-r326-r468-soft-optics-live-energy-zero-idle-native-touch'
     :'direct-r326-r468-primary-controller-desktop';
   root.dataset.fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle';
-  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r538'}}));
+  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r538',heart:'r542-body-fixed-stage-synced'}}));
 }
 
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});
