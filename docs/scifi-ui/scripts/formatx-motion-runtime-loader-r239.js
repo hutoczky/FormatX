@@ -1,7 +1,7 @@
-/* FormatX r537 — navigation-owned MAG + independent intent enhancements.
-   MAG remains automatic from navigation. Heavy Organism/motion enhancements and
-   the full Design System stylesheet remain outside the first-paint critical path,
-   while scroll functionality arms on the first genuine scroll intent. */
+/* FormatX r541 — navigation-owned MAG + SOUND control + independent intent enhancements.
+   MAG and the lightweight SOUND control owner are automatic from navigation. The
+   professional audio engine remains user opt-in. Heavy Organism/motion enhancements
+   and the full Design System stylesheet stay outside the first-paint critical path. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -22,11 +22,12 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r537-navigation-interaction';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r541-body-semantic-heart';
+const SOUND_CONTROL='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r539-navigation-sound-opt-in-owner';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r536-automatic-lifecycle-no-audit-path';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
-const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
+const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260906-r538-two-control-visual-only';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
@@ -41,7 +42,7 @@ const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
 const scrollIntentListeners=[['wheel',passive],['scroll',passive],['touchstart',passive],['pointerdown',passive],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,scrollBootstrapRequested=false;
+let enhancementsStarted=false,currentRequested=false,soundRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,scrollBootstrapRequested=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function mount(spec){
@@ -63,6 +64,7 @@ function warmCriticalOwners(){
   root.dataset.fxCurrentMagWarmR461='ready';
   warmAsset(LANGUAGE_TOGGLE,'script');
   warmAsset(CURRENT_MAG,'script');
+  warmAsset(SOUND_CONTROL,'script');
   warmAsset(CURRENT_SOLID_GLASS,'script');
   warmAsset(CURRENT_RENDERER,'script');
   warmAsset(CURRENT_STYLE,'style');
@@ -97,6 +99,15 @@ function ensureLanguageToggle(){
   const script=document.createElement('script');script.src=LANGUAGE_TOGGLE;script.async=false;script.dataset.fxCriticalLanguageR461='true';
   script.addEventListener('load',()=>{root.dataset.fxLanguageCriticalPathR461=root.dataset.fxSingleLanguageToggle==='ready'?'ready':'loaded-awaiting-install';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxLanguageCriticalPathR461='failed';},{once:true});
+  document.head.appendChild(script);
+}
+function ensureSoundControl(){
+  if(root.dataset.fxWdaHardening==='r263'){root.dataset.fxSoundNavigationOwnerR541='ready-existing';return;}
+  if(soundRequested||document.querySelector('script[data-fx-wda-hardening-r541]'))return;
+  soundRequested=true;root.dataset.fxSoundNavigationOwnerR541='requested-navigation';
+  const script=document.createElement('script');script.src=SOUND_CONTROL;script.async=false;script.dataset.fxWdaHardeningR541='true';
+  script.addEventListener('load',()=>{root.dataset.fxSoundNavigationOwnerR541=root.dataset.fxWdaHardening==='r263'?'ready-navigation':'loaded-awaiting-owner';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxSoundNavigationOwnerR541='load-failed';},{once:true});
   document.head.appendChild(script);
 }
 function ensureCurrentMag(){
@@ -134,7 +145,7 @@ function ensureScrollBootstrap(){
 function reservedInteraction(event){
   if(root.dataset.fxOrganismThought==='open')return true;
   const target=event?.target instanceof Element?event.target:null;
-  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));
+  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button,.fx-mag-heart-hit-r252'));
 }
 function disarm(){for(const [type,options] of intentListeners)removeEventListener(type,onIntent,options);}
 function disarmScrollIntent(){for(const [type,options] of scrollIntentListeners)removeEventListener(type,onScrollIntent,options);}
@@ -180,7 +191,7 @@ root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
 root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r468':mobile.matches?'core-ready-r468-mobile-r326-controller':'core-ready-r468-desktop-r326-controller';
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
-warmCriticalOwners();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureCurrentMag();
+warmCriticalOwners();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureSoundControl();ensureCurrentMag();
 
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
