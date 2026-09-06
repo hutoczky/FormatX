@@ -80,8 +80,8 @@ has(coreTouch,['formatx:coreinteraction','formatx:organismcoreactivate','touch-p
 has(nativeTouch,['formatx:coreinteraction','formatx:organismcoreactivate','native-r326-touch-r536-controller-tap'],'R536 native MAG touch');
 for(const [name,source] of Object.entries({intro,motion,renderer,governor,controls,coreTouch,nativeTouch,shapeSync,mini,life}))absent(source,['formatx:referencepause','fxReferenceMotionPaused','fxManualMagPauseR528','.fx-reference-pause'],`${name} manual MAG pause contract`);
 
-has(quality,['#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]','position: fixed !important','pointer-events: none !important','@keyframes fx-r533-preloader-visual-bound','animation: fx-r533-preloader-visual-bound 1640ms linear both !important','animation-duration: 1360ms !important','will-change: clip-path !important','@media (prefers-reduced-motion: reduce)'],'R538 fixed paintable compositor preloader contract');
-absent(quality,['#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ .topbar','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ footer'],'hero must remain paintable behind preloader');
+has(quality,['#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]','position: fixed !important','pointer-events: none !important','@keyframes fx-r533-preloader-visual-bound','animation: fx-r533-preloader-visual-bound 1640ms linear both !important','animation-duration: 1360ms !important','will-change: clip-path !important','@media (prefers-reduced-motion: reduce)','grid-template-columns: repeat(2, 50px) !important'],'R538 fixed paintable compositor preloader + two-control layout');
+absent(quality,['#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ .topbar','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ footer','.fx-reference-pause'],'R538 quality layer must not hide hero or retain manual PAUSE geometry');
 has(heartStyle,['#hero .hero-grid','pointer-events: none;','.fx-mag-heart-hit-r252','pointer-events: auto !important;'],'R538 semantic MAG hit ownership');
 
 has(referenceBoot,["fxReferenceProductionR244 = mode","fxReferenceComposition = mobile","fxReferenceModeBootR334 = 'prepaint-' + mode"],'tiny synchronous prepaint reference selector');
@@ -91,7 +91,7 @@ has(worker,[
   "MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle'",
   "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260906-r537-no-manual-pause'",
   "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner'",
-  "QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1'",
+  "QUALITY_URL = 'formatx-quality-r461.css?v=20260906-r538-no-manual-pause'",
   'formatx-heart-core-r252.css?v=20260906-r538-hero-hit-owner',
   'CRITICAL_SHELL_PRELOAD','QUALITY_PRELOAD','AWARD_READINESS_PRELOAD','FIRST_PAINT_R206_PRELOAD','REFERENCE_BOOT_PRELOAD','CRITICAL_CORE_PRELOAD','REFERENCE_PRODUCTION_PRELOAD',
   "X-FormatX-Product-Contract', 'r536-navigation-mag-automatic-lifecycle'",
