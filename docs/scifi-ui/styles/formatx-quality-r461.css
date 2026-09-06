@@ -1,6 +1,6 @@
-/* FormatX r461/r462/R568 — compact quality layer for the current R326/R460 experience.
-   R568 keeps first-paint and settled mobile hero geometry identical, preserves the
-   transform-only intro hard bound, and exposes only SOUND + ASK. */
+/* FormatX r461/r462/R568/R576 — compact quality layer for the current R326/R460 experience.
+   R576 locks the Lighthouse-observed hero/reference geometry before deferred runtime
+   activation while preserving the transform-only intro hard bound and SOUND + ASK. */
 
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
@@ -34,6 +34,31 @@ html body.living-architecture .topbar > .fx-language-toggle {
   min-height: 44px !important;
 }
 
+/* R576: the semantic heart hit is created after first paint, but its box must
+   already have the final fixed/transparent UA-free contract the instant it is
+   inserted. The trusted document router remains the pointer owner. */
+html body.living-architecture > .fx-mag-heart-hit-r252 {
+  position: fixed !important;
+  z-index: 12060 !important;
+  left: 50vw;
+  top: 50vh;
+  width: 220px;
+  height: 220px;
+  min-width: 160px;
+  min-height: 160px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: transparent !important;
+  box-shadow: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  transform: translate(-50%, -50%) !important;
+  pointer-events: none !important;
+}
+
 @media (min-width: 901px) {
   html body.living-architecture .topbar {
     min-height: 72px !important;
@@ -46,6 +71,69 @@ html body.living-architecture .topbar > .fx-language-toggle {
     height: 48px !important;
     margin: 0 !important;
     z-index: 12070 !important;
+  }
+
+  /* R576 desktop parity: reserve the exact two-row reference composition before
+     r244 inserts the heading/proof nodes. Deferred real3D CSS may change paint,
+     never document geometry. */
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) 258px !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .hero-space {
+    grid-area: space !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(520px, 42vw, 620px) !important;
+    min-height: 520px !important;
+    max-height: 620px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .fx-reference-heading {
+    grid-area: heading !important;
+    min-height: 24px !important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .fx-reference-proof {
+    grid-area: proof !important;
+    min-height: 258px !important;
   }
 }
 
@@ -83,6 +171,68 @@ html body.living-architecture .topbar > .fx-language-toggle {
     align-items: center !important;
     min-height: 48px !important;
     padding: 12px 14px !important;
+  }
+
+  /* R576 mobile parity: this selector outranks the deferred v20 legacy 82px
+     hero padding / 576–896px stage expansion. The first and settled layouts now
+     use one geometry owner. */
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 0 56px !important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    overflow: visible !important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space {
+    order: 0 !important;
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(350px, 97.6vw, 470px) !important;
+    min-height: clamp(350px, 97.6vw, 470px) !important;
+    max-height: 470px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    translate: none !important;
+    contain: layout paint !important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid:not(:has(> .fx-reference-controls-r204)) > .hero-space {
+    margin-bottom: 0 !important;
+  }
+
+  /* The first-paint stylesheet already defines the eventual heading/proof sizes.
+     Reserve the same 396px while those idempotent r244 nodes do not exist; the
+     placeholder disappears in the same style recalculation that reveals them. */
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid:not(:has(> .fx-reference-proof))::after {
+    content: "" !important;
+    order: 3 !important;
+    display: block !important;
+    flex: 0 0 396px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 396px !important;
+    min-height: 396px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
   }
 
   html body.living-architecture #hero .hero-space {
@@ -338,4 +488,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* deploy-r568-stable-mobile-hero-transform-bound-no-manual-pause */
+/* deploy-r576-first-paint-hero-reference-parity-no-manual-pause */
