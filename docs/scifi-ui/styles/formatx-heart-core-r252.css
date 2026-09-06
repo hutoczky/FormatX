@@ -3,6 +3,10 @@
    transparent, while one fixed semantic button follows the rendered MAG geometry.
    SOUND/ASK stay on the higher hero-space plane and win intentional overlaps. */
 
+html body.living-architecture #hero .hero-grid {
+  pointer-events: none !important;
+}
+
 html body.living-architecture #hero .hero-space {
   position: relative !important;
   z-index: 12080 !important;
