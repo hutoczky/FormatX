@@ -40,7 +40,7 @@ has(intro,[
   'formatx:preloadercomplete','fxHeroControlContractR528','sound-ask-no-manual-mag-pause',
   'fx-reference-controls-r204','fx-reference-ask','runtime-error','promise-error'
 ],'R537 bounded static-content first-paint/preloader owner');
-absent(intro,['formatx:referencepause','function bindPause','function ensurePause','requestAnimationFrame(tick)','function updatePreloader','SYNCHRONIZING MAG','MAG SZINKRONIZÁLÁSA',"output.value='100'",'progress.value=100'],'R537 preloader');
+absent(intro,['formatx:referencepause','.fx-reference-pause','data-fx-reference-motion-paused','function bindPause','function ensurePause','function removeObsoletePause','requestAnimationFrame(tick)','function updatePreloader','SYNCHRONIZING MAG','MAG SZINKRONIZÁLÁSA',"output.value='100'",'progress.value=100'],'R537 preloader');
 
 has(scheduler,[
   'navigation-owned living MAG + post-first-paint enhancements',
@@ -82,13 +82,14 @@ has(criticalShell,['.main-nav,',' .header-actions { display: none;','pointer-eve
 has(worker,[
   "P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r537-navigation-interaction'",
   "MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r536-design-system-intent'",
-  "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r534-static-lcp-v1'",
+  "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260906-r537-no-manual-pause'",
   "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner'",
   "QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1'",
   "HEART_STYLE_LINK = '<link rel=\"stylesheet\" fetchpriority=\"high\" data-fx-heart-core-r252=\"true\" href=\"/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r537-semantic-hit-owner\">'",
   "X-FormatX-Product-Contract', 'r536-navigation-mag-automatic-lifecycle'",
   "X-FormatX-MAG-Startup', 'r536-navigation-owned-critical-living-core'",
   "X-FormatX-Preloader', 'r534-static-content-roadmap-timing'",
+  "X-FormatX-Preloader-Cache', 'r537-static-lcp-no-manual-pause'",
   "X-FormatX-Reference-Boot', 'r536-prepaint-layout-selector'",
   "X-FormatX-CSS-Scheduler', 'r536-global-critical-first-paint-mobile-legacy-intent'",
   'rewrittenSchedulerResponse','MOBILE_FIRST_PAINT_PRELOAD','P0_FIRST_PAINT_PRELOAD','HEART_STYLE_PRELOAD'
@@ -97,4 +98,4 @@ absent(worker,['deferReferenceModeBoot','REFERENCE_BOOT_DEFERRED_PREFIX','GLOBAL
 
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 for(const source of [intro,scheduler,motion,current,renderer,life,governor,controls,coreTouch,nativeTouch,mini,referenceBoot])new Function(source);
-console.log('PASS: R537 validates navigation-owned native living MAG, immediate semantic heart, bounded independent intro, no active manual PAUSE owner, and automatic lifecycle suspension.');
+console.log('PASS: R537 validates navigation-owned native living MAG, immediate semantic heart, bounded independent intro, fresh cache delivery, no active manual PAUSE owner, and automatic lifecycle suspension.');
