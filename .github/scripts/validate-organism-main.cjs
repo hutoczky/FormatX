@@ -40,6 +40,7 @@ async function activateImmersive(page, label) {
         && root.dataset.fxHeartCoreR252 === 'ready'
         && root.dataset.fxMagHeartHitOwnerR542 === 'body-fixed-stage-synced'
         && root.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced'
+        && root.dataset.fxMagHeartPhysicalRouteR546 === 'armed-trusted-stage-hit'
         && hit instanceof HTMLButtonElement
         && hit.parentElement === document.body
         && hit.dataset.fxHeartBound === 'true');
@@ -50,6 +51,7 @@ async function activateImmersive(page, label) {
     heart: document.documentElement.dataset.fxHeartCoreR252 || '',
     heartOwner: document.documentElement.dataset.fxMagHeartHitOwnerR542 || '',
     heartGeometry: document.documentElement.dataset.fxMagHeartHitGeometryR542 || '',
+    heartPhysicalRoute: document.documentElement.dataset.fxMagHeartPhysicalRouteR546 || '',
     heartBound: document.querySelector('.fx-mag-heart-hit-r252')?.dataset.fxHeartBound || '',
     heartParent: document.querySelector('.fx-mag-heart-hit-r252')?.parentElement?.tagName || ''
   }));
@@ -58,8 +60,15 @@ async function activateImmersive(page, label) {
 
   const heart = page.locator('.fx-mag-heart-hit-r252').first();
   await heart.waitFor({ state: 'visible', timeout: 10000 });
-  await heart.click({ position: { x: 20, y: 20 }, timeout: 5000 });
-  mark(label + ': immersive-activated', { source: 'real-body-level-mag-heart-click' });
+  const box = await heart.boundingBox();
+  assert(box && box.width >= 80 && box.height >= 80, label + ': invalid MAG hit geometry ' + JSON.stringify(box));
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  const isMobile = await page.evaluate(() => matchMedia('(max-width:900px),(pointer:coarse)').matches);
+  if (isMobile) await page.touchscreen.tap(x, y);
+  else await page.mouse.click(x, y);
+  await page.waitForFunction(() => document.documentElement.dataset.fxMagHeartPhysicalRouteR546 === 'captured-stage-hit', null, { timeout: 5000 });
+  mark(label + ': immersive-activated', { source: 'trusted-physical-mag-stage-hit', x, y });
 
   await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -175,7 +184,7 @@ async function validateMobile() {
 
 (async () => {
   await validateDesktop(); await validateMobile(); mark('validation: passed'); writeReport();
-  console.log('Organism-first main-site validation passed.');
+  console.log('Organism-first main-site validation passed with R546 trusted physical MAG routing.');
 })().catch(error => {
   report.error = error.stack || String(error); writeReport(); console.error(report.error); process.exit(1);
 });
