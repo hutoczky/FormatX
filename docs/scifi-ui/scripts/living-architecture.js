@@ -80,21 +80,47 @@
     return link;
   }
 
-  function loadScriptOrdered(src, attr) {
+  function loadScriptOrdered(src, attr, readyCheck) {
     return new Promise((resolve, reject) => {
       let script = document.querySelector(`script[${attr}]`);
-      if (script instanceof HTMLScriptElement && script.dataset.fxLoadedR552 === 'true') {
+      let probeTimer = 0;
+      let settled = false;
+      const ready = () => {
+        try { return typeof readyCheck === 'function' && Boolean(readyCheck()); }
+        catch (_) { return false; }
+      };
+      const cleanup = () => {
+        if (probeTimer) clearTimeout(probeTimer);
+        probeTimer = 0;
+        script?.removeEventListener('load', loaded);
+        script?.removeEventListener('error', failed);
+      };
+      const finish = (ok, value) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        if (ok) {
+          if (script instanceof HTMLScriptElement) script.dataset.fxLoadedR552 = 'true';
+          resolve(script);
+        } else reject(value);
+      };
+      const loaded = () => finish(true);
+      const failed = () => finish(false, new Error(`failed to load ${src}`));
+      const probe = () => {
+        if (settled) return;
+        if (ready()) { loaded(); return; }
+        probeTimer = setTimeout(probe, 25);
+      };
+
+      if (script instanceof HTMLScriptElement && (script.dataset.fxLoadedR552 === 'true' || ready())) {
+        script.dataset.fxLoadedR552 = 'true';
         resolve(script);
         return;
       }
-      const loaded = () => {
-        script.dataset.fxLoadedR552 = 'true';
-        resolve(script);
-      };
-      const failed = () => reject(new Error(`failed to load ${src}`));
       if (script instanceof HTMLScriptElement) {
         script.addEventListener('load', loaded, { once: true });
         script.addEventListener('error', failed, { once: true });
+        if (typeof readyCheck === 'function') probe();
         return;
       }
       script = document.createElement('script');
@@ -104,13 +130,14 @@
       script.addEventListener('load', loaded, { once: true });
       script.addEventListener('error', failed, { once: true });
       document.head.appendChild(script);
+      if (typeof readyCheck === 'function') probe();
     });
   }
 
   async function loadThreeExperience() {
     if (threeLoadStarted) return;
     threeLoadStarted = true;
-    ROOT.dataset.fxThreeLoader = 'starting-on-demand-r552';
+    ROOT.dataset.fxThreeLoader = 'starting-on-demand-r554';
 
     ensureStyle('./styles/igloo-parity.css?v=20260727-webgpu-1', 'data-fx-cryosphere-style');
     ensureStyle('./styles/readability-focus.css?v=20260727-readability-2', 'data-fx-readability-style', () => {
@@ -120,21 +147,33 @@
     ensureStyle('./styles/organism-interface-layering.css?v=20260727-fullscreen-1', 'data-fx-organism-layering-style');
 
     try {
-      ROOT.dataset.fxThreeLoader = 'loading-interface-r552';
-      await loadScriptOrdered('./scripts/organism-interface.js?v=20260906-r552-deterministic-handoff', 'data-fx-organism-interface-script');
+      ROOT.dataset.fxThreeLoader = 'loading-interface-r554';
+      await loadScriptOrdered(
+        './scripts/organism-interface.js?v=20260906-r554-idempotent-handoff',
+        'data-fx-organism-interface-script',
+        () => ROOT.dataset.fxOrganismInterface === 'ready'
+      );
       if (ROOT.dataset.fxOrganismInterface !== 'ready') throw new Error('organism interface loaded without READY state');
-      ROOT.dataset.fxThreeLoader = 'interface-ready-r552';
+      ROOT.dataset.fxThreeLoader = 'interface-ready-r554';
 
-      await loadScriptOrdered('./scripts/organism-menu-controller.js?v=20260906-r552-deterministic-handoff', 'data-fx-organism-menu-script');
-      ROOT.dataset.fxThreeLoader = 'menu-ready-r552';
+      await loadScriptOrdered(
+        './scripts/organism-menu-controller.js?v=20260906-r554-idempotent-handoff',
+        'data-fx-organism-menu-script',
+        () => ROOT.dataset.fxOrganismMenu === 'ready'
+      );
+      ROOT.dataset.fxThreeLoader = 'menu-ready-r554';
 
-      await loadScriptOrdered('./scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20260906-r552-deterministic-handoff', 'data-fx-cryosphere-script');
-      ROOT.dataset.fxThreeLoader = 'ready-on-demand-r552';
-      dispatchEvent(new CustomEvent('formatx:organismhandoffready', { detail: { revision: 'r552' } }));
+      await loadScriptOrdered(
+        './scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20260906-r554-idempotent-handoff',
+        'data-fx-cryosphere-script',
+        () => ROOT.dataset.fxTranscendLoader === 'safe-ready-v28'
+      );
+      ROOT.dataset.fxThreeLoader = 'ready-on-demand-r554';
+      dispatchEvent(new CustomEvent('formatx:organismhandoffready', { detail: { revision: 'r554' } }));
     } catch (error) {
-      ROOT.dataset.fxThreeLoader = 'failed-on-demand-r552';
+      ROOT.dataset.fxThreeLoader = 'failed-on-demand-r554';
       ROOT.dataset.fxThreeLoaderErrorR552 = String(error?.message || error || 'unknown-load-error').slice(0, 160);
-      dispatchEvent(new CustomEvent('formatx:organismhandofferror', { detail: { revision: 'r552', message: ROOT.dataset.fxThreeLoaderErrorR552 } }));
+      dispatchEvent(new CustomEvent('formatx:organismhandofferror', { detail: { revision: 'r554', message: ROOT.dataset.fxThreeLoaderErrorR552 } }));
     }
   }
 
@@ -149,9 +188,10 @@
     addEventListener('formatx:immersiveactivate', () => { void loadThreeExperience(); }, { once: true });
   }
 
-  /* R552: arm the lightweight handoff immediately. MAG still boots from
+  /* R554: arm the lightweight handoff immediately. MAG still boots from
      navigation independently; only the heavy Organism UI waits for a genuine
-     immersive/MAG activation. Dynamic scripts execute in deterministic order. */
+     immersive/MAG activation. Existing already-ready scripts are recognized
+     deterministically rather than waiting for a second load event. */
   armThreeExperience();
 
   function revealQrDock() {
