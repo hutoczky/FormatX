@@ -1,10 +1,10 @@
 import canonicalProduction from './production-content-entry.js';
 
-/* FormatX R553 — direct canonical production ownership + measured critical path.
+/* FormatX R554 — direct canonical production ownership + first-paint geometry lock.
    Candidate mode exists only behind Wrangler-only FORMATX_LOCAL_CANDIDATE=1.
-   The canonical owner keeps critical-core and the payment/QR visual layer out of
-   the blocking hero path. Payment UI is delivered as a deferred same-product
-   enhancement; MAG/navigation ownership and audit behavior remain unchanged. */
+   Layout-critical hero geometry and the semantic hero shell are present before
+   first paint. Only genuinely noncritical enhancements remain deferred. MAG and
+   the extended intro keep their normal visitor lifecycle with no audit-only path. */
 const PUBLIC_HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN='https://formatxsuite.com';
 const HOMEPAGE_PATHS=new Set(['/','/index.html','/scifi-ui','/scifi-ui/','/scifi-ui/index.html']);
@@ -32,10 +32,14 @@ const PAYMENT_SURFACE_TAG=`<script defer data-fx-payment-surface-r553="true" src
 const MOBILE_MEDIA='(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MOTION_MEDIA='(prefers-reduced-motion: no-preference) and (min-width: 901px)';
 const HEART_BUTTON='<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
+const HERO_CONTROLS='<div class="fx-reference-controls-r204 fx-reference-controls-r264" aria-label="Hero vezérlők"><button type="button" class="fx-three-sound fx-wda-sound-toggle fx-control-owner-r264" aria-label="FormatX hang bekapcsolása" aria-pressed="false"></button><div class="fx-reference-rail fx-reference-rail-r264"><button type="button" class="fx-reference-ask" aria-label="Kérdezz a FormatX-től"><i aria-hidden="true"></i><span>KÉRDEZZ</span></button></div></div>';
+const HERO_PROOF='<div class="fx-reference-heading">A MŰKÖDÉS MEGISMERÉSE</div><article class="fx-reference-proof"><span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2>Bizonyíték a látvány mögött.</h2><p>A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.</p><a class="fx-reference-liveos" href="#experience" aria-label="Live OS — munkafolyamat megnyitása">Live OS</a></article>';
+const HERO_GRID_TAIL='        </div>\n      </div>\n      <a class="scroll-cue"';
 
 const MOBILE_FIRST_PAINT_PRELOAD=`</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="${MOBILE_MEDIA}"`;
 const P0_FIRST_PAINT_PRELOAD='</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const CRITICAL_SHELL_PRELOAD='</scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint>; rel=preload; as=style';
+const CRITICAL_CORE_PRELOAD=`</scifi-ui/styles/formatx-critical-core-r227.css?v=20260819-r227>; rel=preload; as=style; media="${DESKTOP_MOTION_MEDIA}"`;
 const QUALITY_PRELOAD='</scifi-ui/styles/formatx-quality-r461.css?v=20260906-r538-no-manual-pause>; rel=preload; as=style';
 const AWARD_READINESS_PRELOAD='</scifi-ui/styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability>; rel=preload; as=style';
 const FIRST_PAINT_R206_PRELOAD='</scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero>; rel=preload; as=style';
@@ -59,10 +63,12 @@ function withoutAttr(tag,name){if(!/^[a-z0-9-]+$/i.test(name))return tag;const l
 function addAttrs(tag,attrs){return tag.replace(/\s*\/?>$/,close=>`${attrs}${close}`);}
 function deferredMobile(tag){let next=withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag,'media'),'fetchpriority'),'data-fx-r487-deferred-style'),'data-fx-r487-media');return addAttrs(next,` data-fx-r487-deferred-style="true" data-fx-r487-media="${MOBILE_MEDIA}" media="print" data-fx-r529-mobile-legacy="true"`);}
 function stabilizeMobileFirstPaint(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>MOBILE_LEGACY_PATHS.has(stylesheetPath(tag))?deferredMobile(tag):tag);}
+function restoreCriticalCoreFirstPaint(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>{if(stylesheetPath(tag)!=='/scifi-ui/styles/formatx-critical-core-r227.css')return tag;let next=withoutAttr(withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag,'media'),'fetchpriority'),'data-fx-r487-deferred-style'),'data-fx-r487-media'),'data-fx-r554-prepaint-geometry');return addAttrs(next,` fetchpriority="high" media="${DESKTOP_MOTION_MEDIA}" data-fx-r554-prepaint-geometry="true"`);});}
 function injectStaticHeart(html){let source=String(html||'');if(!source.includes('class="fx-mag-heart-hit-r252"'))source=source.replace(/<div\s+class=(["'])hero-space\1\s*>/i,match=>`${match}\n          ${HEART_BUTTON}`);return source;}
+function injectStaticHeroShell(html){let source=String(html||'');if(!source.includes('class="fx-reference-controls-r204'))source=source.replace(/<div\s+class=(["'])hero-space\1\s*>/i,match=>`${match}\n          ${HERO_CONTROLS}`);if(!source.includes('class="fx-reference-heading"')||!source.includes('class="fx-reference-proof"'))source=source.replace(HERO_GRID_TAIL,`        </div>\n        ${HERO_PROOF}\n      </div>\n      <a class="scroll-cue"`);return source;}
 function injectPaymentSurface(html){let source=String(html||'');if(source.includes('data-fx-payment-surface-r553='))return source;return source.replace(/<\/body>/i,`${PAYMENT_SURFACE_TAG}\n</body>`);}
-function addFirstPaintPreloads(headers){const existing=headers.get('Link');const preloads=[MOBILE_FIRST_PAINT_PRELOAD,P0_FIRST_PAINT_PRELOAD,CRITICAL_SHELL_PRELOAD,QUALITY_PRELOAD,AWARD_READINESS_PRELOAD,FIRST_PAINT_R206_PRELOAD,REFERENCE_BOOT_PRELOAD,REFERENCE_PRODUCTION_PRELOAD].join(', ');headers.set('Link',existing?`${existing}, ${preloads}`:preloads);}
-function r543Headers(source,localCandidate){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r543-direct-canonical-extended-intro');headers.set('X-FormatX-Edge-Stability','r551-post-paint-critical-core-navigation-mag');headers.set('X-FormatX-CSS-Scheduler','r551-canonical-post-first-paint-critical-core');headers.set('X-FormatX-Product-Contract','r543-navigation-mag-elevated-heart-no-manual-pause');headers.set('X-FormatX-MAG-Startup','r543-navigation-owned-elevated-body-heart');headers.set('X-FormatX-Mobile-LCP','r551-critical-core-post-first-paint-heart-runtime-style');headers.set('X-FormatX-Preloader','r543-static-content-extended-roadmap-timing');headers.set('X-FormatX-Preloader-Cache','r543-extended-static-lcp-audio-owner-safe');headers.set('X-FormatX-Reference-Boot','r536-prepaint-layout-selector');headers.set('X-FormatX-Payment-Surface','r553-post-paint-visible-qr');if(localCandidate){headers.set('X-FormatX-Candidate-Delivery','r543-exact-production-entry-localhost-8787');headers.set('X-FormatX-Candidate-Canonical-Origin','formatxsuite.com');headers.set('Link','<https://formatxsuite.com/>; rel="canonical"');}return headers;}
+function addFirstPaintPreloads(headers){const existing=headers.get('Link');const preloads=[MOBILE_FIRST_PAINT_PRELOAD,P0_FIRST_PAINT_PRELOAD,CRITICAL_SHELL_PRELOAD,CRITICAL_CORE_PRELOAD,QUALITY_PRELOAD,AWARD_READINESS_PRELOAD,FIRST_PAINT_R206_PRELOAD,REFERENCE_BOOT_PRELOAD,REFERENCE_PRODUCTION_PRELOAD].join(', ');headers.set('Link',existing?`${existing}, ${preloads}`:preloads);}
+function r543Headers(source,localCandidate){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r543-direct-canonical-extended-intro');headers.set('X-FormatX-Edge-Stability','r551-post-paint-critical-core-navigation-mag');headers.set('X-FormatX-CSS-Scheduler','r551-canonical-post-first-paint-critical-core');headers.set('X-FormatX-Product-Contract','r543-navigation-mag-elevated-heart-no-manual-pause');headers.set('X-FormatX-MAG-Startup','r543-navigation-owned-elevated-body-heart');headers.set('X-FormatX-Mobile-LCP','r551-critical-core-post-first-paint-heart-runtime-style');headers.set('X-FormatX-Preloader','r543-static-content-extended-roadmap-timing');headers.set('X-FormatX-Preloader-Cache','r543-extended-static-lcp-audio-owner-safe');headers.set('X-FormatX-Reference-Boot','r536-prepaint-layout-selector');headers.set('X-FormatX-Payment-Surface','r553-post-paint-visible-qr');headers.set('X-FormatX-Layout-Stability','r554-static-hero-shell-critical-core-prepaint');if(localCandidate){headers.set('X-FormatX-Candidate-Delivery','r543-exact-production-entry-localhost-8787');headers.set('X-FormatX-Candidate-Canonical-Origin','formatxsuite.com');headers.set('Link','<https://formatxsuite.com/>; rel="canonical"');}return headers;}
 function rewrittenSchedulerResponse(response,headers){return response.text().then(source=>{const body=String(source||'').replace(MOTION_RUNTIME_RE,MOTION_RUNTIME_URL);headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');headers.set('X-FormatX-Scheduler-Cache','r543-extended-intro-elevated-heart');return new Response(body,{status:response.status,statusText:response.statusText,headers});});}
 
 export default{async fetch(request,env,ctx){
@@ -87,7 +93,9 @@ export default{async fetch(request,env,ctx){
   html=html.replace(HEART_STYLE_RE,HEART_STYLE_URL);
   if(HOMEPAGE_PATHS.has(deliveryUrl.pathname)){
     html=stabilizeMobileFirstPaint(html);
+    html=restoreCriticalCoreFirstPaint(html);
     html=injectStaticHeart(html);
+    html=injectStaticHeroShell(html);
     html=injectPaymentSurface(html);
     addFirstPaintPreloads(headers);
   }
