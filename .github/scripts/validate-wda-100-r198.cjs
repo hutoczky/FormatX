@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — R539 authoritative P0 quality contract. */
+/* FormatX award-quality gate — R540 authoritative P0 quality contract. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -57,7 +57,7 @@ has(controls,['canonicalControls(hero)','fx-reference-controls-r204','visibleCon
 
 has(wdaControls,['AUDIO_SRC','formatx-audio-repair.js','pendingToggleAfterLoad','requestProfessionalAudio()','first-click-replayed','r538-mobile-two-cell','r538-desktop-two-cell'],'user-opt-in professional SOUND handoff');
 absent(wdaControls,/formatx:referencepause|fxReferenceMotionPaused|fxManualMagPauseR528|\.fx-reference-pause/,'SOUND owner must not restore manual MAG PAUSE');
-has(heart,['FormatX r539','semantic hit ownership','pointer-events: none','z-index: 12090','production-r539-semantic-heart-native-hit-owner','.fx-trust-grid > a.fx-trust-card','min-block-size: 96px'],'semantic MAG hit + mobile touch target contract');
+has(heart,['FormatX r540','#main-content','semantic MAG hit ownership','pointer-events: none','z-index: 12060','z-index: 12080','production-r540-main-transparent-control-safe-semantic-heart','.fx-trust-grid > a.fx-trust-card','min-block-size: 96px'],'semantic MAG hit + control-safe z-order + mobile touch target contract');
 has(quality,['content-visibility: visible','fx-reference-liveos','.scroll-cue > span','grid-template-columns: repeat(2, 50px)','fx-reference-ask'],'quality CSS');
 absent(quality,/\.fx-reference-pause/,'quality CSS must expose SOUND + ASK only');
 
@@ -83,4 +83,4 @@ function validateLighthouse(config,label){
 }
 validateLighthouse(desktop,'desktop');validateLighthouse(mobile,'mobile');
 for(const source of [intro,scheduler,motion,language,currentMag,renderer,solidGlass,life,governor,controls,wdaControls,mini,shape])new Function(source);
-console.log('PASS: R539 proves navigation-owned MAG, opt-in SOUND control, semantic MAG hit ownership, no manual PAUSE, automatic lifecycle and strict 100x3 P0 gates.');
+console.log('PASS: R540 proves navigation-owned MAG, opt-in SOUND control, main-transparent/control-safe semantic MAG hit ownership, no manual PAUSE, automatic lifecycle and strict 100x3 P0 gates.');
