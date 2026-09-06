@@ -11,7 +11,7 @@ async function prepare(page) {
   await page.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
-  await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r542', { waitUntil: 'domcontentloaded' });
+  await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r546', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return Boolean(root.dataset.fxMotionRuntimeR239)
@@ -55,6 +55,7 @@ async function state(page) {
       heart: root.dataset.fxHeartCoreR252 || '',
       heartOwner: root.dataset.fxMagHeartHitOwnerR542 || '',
       heartGeometry: root.dataset.fxMagHeartHitGeometryR542 || '',
+      heartPhysicalRoute: root.dataset.fxMagHeartPhysicalRouteR546 || '',
       heartPolicy: root.dataset.fxHeartLoopPolicy || '',
       mirrorMode: root.dataset.fxLoopMirrorMode || '',
       bridgeCount: bridge ? 1 : 0,
@@ -85,7 +86,7 @@ async function state(page) {
   });
 }
 
-async function verifyHeartInteraction(page, label) {
+async function verifyHeartInteraction(page, label, touch = false) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
     const hit = document.querySelector('.fx-mag-heart-hit-r252');
@@ -93,25 +94,36 @@ async function verifyHeartInteraction(page, label) {
       && hit.parentElement === document.body
       && root.dataset.fxMagHeartHitOwnerR542 === 'body-fixed-stage-synced'
       && root.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced'
+      && root.dataset.fxMagHeartPhysicalRouteR546 === 'armed-trusted-stage-hit'
       && (window.FormatXOrganismVoice?.open || document.querySelector('#hero .fx-reference-ask'));
   }, null, { timeout: 15000 });
 
   const hit = page.locator('.fx-mag-heart-hit-r252').first();
   assert(await hit.count() === 1, `${label} MAG heart hit target missing`);
-  await hit.click({ position: { x: 20, y: 20 } });
+  const box = await hit.boundingBox();
+  assert(box && box.width >= 80 && box.height >= 80, `${label} MAG physical hit geometry invalid: ${JSON.stringify(box)}`);
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  if (touch) await page.touchscreen.tap(x, y);
+  else await page.mouse.click(x, y);
 
-  await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    return root.dataset.fxMagHeartPhysicalRouteR546 === 'captured-stage-hit'
+      && root.dataset.fxCoreInteractionMode === 'active-r252';
+  }, null, { timeout: 5000 });
   await page.waitForFunction(() => Boolean(document.documentElement.dataset.fxCoreInteractionTarget), null, { timeout: 5000 });
 
   const interaction = await page.evaluate(() => ({
     mode: document.documentElement.dataset.fxCoreInteractionMode || '',
+    route: document.documentElement.dataset.fxMagHeartPhysicalRouteR546 || '',
     target: document.documentElement.dataset.fxCoreInteractionTarget || '',
     thoughtOpen: (() => {
       const bubble = document.querySelector('.fx-organism-thought');
       return Boolean(bubble && bubble.hidden === false);
     })()
   }));
-  assert(interaction.mode === 'active-r252', `${label} MAG did not activate core interaction: ${JSON.stringify(interaction)}`);
+  assert(interaction.mode === 'active-r252' && interaction.route === 'captured-stage-hit', `${label} MAG did not route trusted physical interaction: ${JSON.stringify(interaction)}`);
   assert(/organism-voice|ask-control|thought-trigger/.test(interaction.target), `${label} MAG has no canonical interaction target: ${JSON.stringify(interaction)}`);
 }
 
@@ -134,6 +146,7 @@ async function verifyMobile(browser) {
   assert(initial.controller === 'seamless-v7', `mobile seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.heart === 'ready', `mobile heart core not ready: ${JSON.stringify(initial)}`);
   assert(initial.heartOwner === 'body-fixed-stage-synced' && initial.heartGeometry === 'viewport-stage-synced', `mobile body-level heart owner missing: ${JSON.stringify(initial)}`);
+  assert(initial.heartPhysicalRoute === 'armed-trusted-stage-hit', `mobile trusted physical heart route missing: ${JSON.stringify(initial)}`);
   assert(initial.heartPolicy === 'footer-to-real-core-no-reference-mirror', `mobile heart loop policy missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1, `mobile handoff bridge missing: ${JSON.stringify(initial)}`);
   assert(initial.mirrorCount === 0 && initial.mirrorMode === 'none-mobile-r252', `mobile fake hero mirror still exists: ${JSON.stringify(initial)}`);
@@ -143,7 +156,7 @@ async function verifyMobile(browser) {
   assert(initial.snapRoot === 'none' && initial.snapBody === 'none', `mobile scroll snapping active: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
-  await verifyHeartInteraction(page, 'mobile');
+  await verifyHeartInteraction(page, 'mobile', true);
   await page.keyboard.press('Escape').catch(() => {});
   await page.waitForTimeout(200);
 
@@ -162,7 +175,7 @@ async function verifyMobile(browser) {
 
   const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
   assert(!meaningful.length, `mobile browser errors: ${meaningful.join(' | ')}`);
-  console.log('PASS r542 mobile footer → real MAG loop and body-level MAG interaction');
+  console.log('PASS r546 mobile footer → real MAG loop and trusted physical MAG interaction');
   await context.close();
 }
 
@@ -174,6 +187,7 @@ async function verifyDesktop(browser) {
   assert(initial.controller === 'seamless-v7', `desktop seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, `desktop inert reference mirror contract changed: ${JSON.stringify(initial)}`);
   assert(initial.heartOwner === 'body-fixed-stage-synced' && initial.hitBodyOwned, `desktop body-level heart owner missing: ${JSON.stringify(initial)}`);
+  assert(initial.heartPhysicalRoute === 'armed-trusted-stage-hit', `desktop trusted physical heart route missing: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG interaction target missing: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
@@ -189,7 +203,7 @@ async function verifyDesktop(browser) {
   const after = await state(page);
   assert(after.loopCount === before.loopCount + 1, `desktop seamless loop failed: ${JSON.stringify({ before, after })}`);
   assert(!/^heart-core-/.test(after.loopSource), `desktop was incorrectly routed through mobile heart transfer: ${JSON.stringify(after)}`);
-  console.log('PASS desktop seamless-v7 preserved + body-level MAG interaction');
+  console.log('PASS desktop seamless-v7 preserved + trusted physical MAG interaction');
   await context.close();
 }
 
@@ -198,7 +212,7 @@ async function verifyDesktop(browser) {
   try {
     await verifyMobile(browser);
     await verifyDesktop(browser);
-    console.log('PASS FormatX r542 platform scroll and living MAG interaction contract');
+    console.log('PASS FormatX r546 platform scroll and living MAG interaction contract');
   } finally {
     await browser.close();
   }
