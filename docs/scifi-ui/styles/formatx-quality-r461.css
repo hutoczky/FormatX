@@ -1,6 +1,6 @@
-/* FormatX r461/r462/R538 — compact quality layer for the current R326/R460 experience.
-   R538 keeps the canonical hero paintable behind the visual-only preloader,
-   gives the cover a compositor hard deadline and exposes only SOUND + ASK. */
+/* FormatX r461/r462/R567 — compact quality layer for the current R326/R460 experience.
+   R567 keeps the canonical hero paintable behind the visual-only preloader,
+   gives the cover a transform-only compositor hard deadline and exposes only SOUND + ASK. */
 
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
@@ -175,10 +175,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
     text-shadow: none !important;
   }
 
-  /* A floating controller cannot satisfy the no-information-occlusion contract
-     on narrow/touch layouts. Keep the full controller and panel, but dock the
-     host in normal flow after the footer. Desktop keeps the persistent fixed
-     companion. */
   html body.living-architecture > .fx-mini-mag-assistant-r459 {
     position: relative !important;
     right: auto !important;
@@ -207,13 +203,15 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* R533/R538: the preloader is a visual-only fixed cover. The hero, topbar and page
-   remain fully paintable behind it; no sibling visibility gate may delay LCP.
-   The clip-path animation gives the cover a compositor-owned hard deadline even
-   if JavaScript timers are delayed by rendering/main-thread work. */
+/* R567: the preloader remains a visual-only fixed cover. The hero, topbar and page
+   remain fully paintable behind it. The previous full-screen clip-path animation
+   was expensive under software compositing. A single transform-only collapse now
+   provides the same 1.36/1.64s compositor hard bound without rasterizing a moving
+   full-screen clip. */
 @keyframes fx-r533-preloader-visual-bound {
-  0%, 86% { clip-path: inset(0 0 0 0); }
-  100% { clip-path: inset(50% 50% 50% 50%); }
+  0%, 86% { transform: translate3d(0,0,0) scale(1); }
+  94% { transform: translate3d(0,0,0) scale(.985); }
+  100% { transform: translate3d(0,0,0) scale(.001); }
 }
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   position: fixed !important;
@@ -236,7 +234,8 @@ html body.living-architecture .topbar > .fx-language-toggle {
     radial-gradient(circle at 50% 46%, rgba(90, 216, 255, .12), transparent 38%),
     linear-gradient(180deg, #05070a, #010204) !important;
   animation: fx-r533-preloader-visual-bound 1640ms linear both !important;
-  will-change: clip-path !important;
+  transform-origin: 50% 50% !important;
+  will-change: transform !important;
 }
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
@@ -314,4 +313,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* deploy-r538-preloader-compositor-bound-no-manual-pause */
+/* deploy-r567-preloader-transform-bound-no-manual-pause */
