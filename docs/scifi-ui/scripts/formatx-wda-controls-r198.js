@@ -111,7 +111,6 @@
     const controls = hero?.querySelector('.fx-reference-controls-r204');
     const rail = controls?.querySelector(':scope > .fx-reference-rail') || hero?.querySelector('.fx-reference-rail');
     const ask = rail?.querySelector('.fx-reference-ask');
-    const pause = rail?.querySelector('.fx-reference-pause');
     const topbar = document.querySelector('.topbar');
     const mag = document.querySelector('.fx-reference-mag-button');
     const lang = document.querySelector('.fx-language-toggle');
@@ -131,11 +130,10 @@
     const owner = space;
     if (controls.parentElement !== owner) owner.appendChild(controls);
 
-    // r244 and older mobile generations may have left inline !important flex,
-    // top/right or translate geometry. The late r263 stylesheet is the single
-    // final geometry owner, so remove only layout inline state from this small
-    // canonical control group. Audio state and event listeners remain intact.
-    for (const node of [controls, rail, button, ask, pause]) clearLegacyControlGeometry(node);
+    // Older mobile generations may have left inline !important flex, top/right
+    // or translate geometry. The current stylesheet is the single final geometry
+    // owner for the two retained controls: SOUND and ASK.
+    for (const node of [controls, rail, button, ask]) clearLegacyControlGeometry(node);
 
     controls.classList.add('fx-reference-controls-r263');
     button.classList.add('fx-wda-sound-toggle');
@@ -149,7 +147,7 @@
     if (topbar instanceof HTMLElement && mag instanceof HTMLElement && mag.parentElement !== topbar) topbar.appendChild(mag);
     if (topbar instanceof HTMLElement && menu instanceof HTMLElement && menu.parentElement !== topbar) topbar.appendChild(menu);
 
-    root.dataset.fxReferenceControlLayout = mobile ? 'r250-mobile-reference-rail' : 'r263-desktop-three-cell';
+    root.dataset.fxReferenceControlLayout = mobile ? 'r538-mobile-two-cell' : 'r538-desktop-two-cell';
     root.dataset.fxReferenceHeaderLayout = mag instanceof HTMLElement ? 'r263-fixed-no-overlap' : 'r263-header-pending';
     return true;
   }
@@ -265,7 +263,7 @@
     document.head.appendChild(script);
   }
 
-  // r423: the physical pointer sequence stays on the same SOUND element. The
+  // The physical pointer sequence stays on the same SOUND element. The
   // professional engine may be installed asynchronously after the trusted click;
   // preserve that first toggle intent and replay it exactly once after handoff.
   document.addEventListener('pointerdown', event => {
