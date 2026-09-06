@@ -1,24 +1,41 @@
-/* FormatX R538 — navigation-owned living MAG + post-first-paint enhancements.
-   The real current MAG loader starts automatically as soon as this deferred
-   production scheduler executes; it never waits for click, tap, wheel or scroll.
-   The lightweight semantic MAG interaction owner travels with that critical boot;
-   only the broader motion/Organism enhancement runtime remains late/intent-driven. */
+/* FormatX R539 — navigation-owned living MAG + sound control + post-first-paint enhancements.
+   The real current MAG loader and the lightweight SOUND click owner start automatically
+   as soon as this deferred production scheduler executes; neither waits for user input.
+   The professional audio engine itself remains strict user opt-in and is requested only
+   by the SOUND control. Heavy motion/Organism enhancement runtime remains late/intent-driven. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r538-navigation-mag';
+root.dataset.fxP0MotionSchedulerR490='armed-r539-navigation-mag-sound-control';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle';
 const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r538-pause-free-optics';
+const SOUND_CONTROL_SRC='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r539-navigation-sound-opt-in-owner';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let criticalMagStarted=false;
+let soundControlStarted=false;
 let idleId=0;
 let timer=0;
 
 function clearPending(){
   if(timer){clearTimeout(timer);timer=0;}
   if(idleId&&'cancelIdleCallback' in window){cancelIdleCallback(idleId);idleId=0;}
+}
+function startSoundControl(){
+  if(soundControlStarted)return;
+  soundControlStarted=true;
+  if(root.dataset.fxWdaHardening==='r263'){
+    root.dataset.fxSoundNavigationOwnerR539='already-running';return;
+  }
+  if(document.querySelector('script[data-fx-wda-hardening-r539]')){
+    root.dataset.fxSoundNavigationOwnerR539='already-requested';return;
+  }
+  root.dataset.fxSoundNavigationOwnerR539='requested-navigation';
+  const script=document.createElement('script');script.src=SOUND_CONTROL_SRC;script.async=false;script.dataset.fxWdaHardeningR539='true';
+  script.addEventListener('load',()=>{root.dataset.fxSoundNavigationOwnerR539=root.dataset.fxWdaHardening==='r263'?'ready-navigation':'loaded-awaiting-owner';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxSoundNavigationOwnerR539='load-failed';},{once:true});
+  document.head.appendChild(script);
 }
 function startCriticalMag(){
   if(criticalMagStarted)return;
@@ -65,6 +82,7 @@ function armLateFallback(){
 }
 function onIntent(event){if(event&&event.isTrusted===false)return;start(`user-${event?.type||'intent'}-r536`);}
 for(const type of ['pointerdown','touchstart','keydown','wheel'])addEventListener(type,onIntent,{once:true,passive:true});
+startSoundControl();
 startCriticalMag();
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
 else armLateFallback();
