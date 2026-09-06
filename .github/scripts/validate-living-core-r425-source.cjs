@@ -1,6 +1,6 @@
 'use strict';
 
-/* FormatX R552 — authoritative P0 living-core source contract. */
+/* FormatX R554 — authoritative P0 living-core source contract. */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
@@ -39,13 +39,13 @@ absent(motion,['lighthouse=1','auditMode','force-prefers-reduced-motion','format
 has(current,['FormatX R550','r326-only',"HEART_CORE='/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260906-r549-pointer-transparent-physical-router'",'ensureHeartCore()','requested-with-navigation-mag',"RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r550-parallel-shader-compile'",'function yieldUntilFirstVisualPaint()','PerformanceObserver',"const layoutStyle=addStyle(STYLE,'data-fx-current-mag-r422')",'const nonCriticalStyles=Promise.all([','const rendererStart=Promise.all([layoutStyle,yieldUntilFirstVisualPaint()]).then(async()=>{',"fxCurrentMagStartupR550='renderer-parallel-with-noncritical-styles'","fxCurrentMagRendererStartR550='loaded-under-intro-parallel'",'const rendererReady=await rendererStart;',"fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle'"],'navigation current MAG owner with first-paint parallel shader startup');
 absent(current,['waitForBoundedIntroRelease','formatx:preloadercomplete','fxCurrentMagIntroYieldR547','await waitForBoundedIntroRelease();','lighthouse=1','auditMode','force-prefers-reduced-motion','formatx:referencepause','.fx-reference-pause','pointerdown-first-renderer-start','click-first-renderer-start'],'current MAG cannot wait for intro/audit/manual/user intent');
 
-has(heart,["const VERSION = 'heart-core-r551'","STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r549-pointer-transparent-router'",'function ensureStyleAfterFirstPaint()',"fxHeartStyleR551 = 'queued-post-first-paint'","fxHeartStyleR551 = 'requested-post-first-paint'","fxMagHeartHitOwnerR542 = 'body-fixed-stage-synced'","fxMagHeartHitGeometryR542 = 'viewport-stage-synced'",'function routePhysicalHeartClick(event)',"fxMagHeartPhysicalRouteR546 = 'armed-trusted-stage-hit'","fxMagHeartPhysicalRouteR546 = 'captured-stage-hit'","fxMagHeartPhysicalRouteR549 = 'captured-pointer-transparent-stage-hit'","fxMagHeartTouchRouteR551",'event.isTrusted','isReservedInteractiveTarget(event.target)','formatx:coreinteraction','formatx:immersiveactivate','document.hidden','visibilitychange','footer-to-real-core-no-reference-mirror','none-mobile-r252','FormatXOrganismVoice'],'R551 semantic heart lifecycle + post-paint style + trusted touch route');
+has(heart,["const VERSION = 'heart-core-r551'","STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r549-pointer-transparent-router'",'function ensureStyleAfterFirstPaint()',"fxHeartStyleR551 = 'queued-post-first-paint'","fxHeartStyleR551 = 'requested-post-first-paint'","fxMagHeartHitOwnerR542 = 'body-fixed-stage-synced'","fxMagHeartHitGeometryR542 = 'viewport-stage-synced'",'function routePhysicalHeartClick(event)',"fxMagHeartPhysicalRouteR546 = 'armed-trusted-stage-hit'","fxMagHeartPhysicalRouteR546 = 'captured-stage-hit'","fxMagHeartPhysicalRouteR549 = 'captured-pointer-transparent-stage-hit'","fxMagHeartTouchRouteR551",'event.isTrusted','isReservedInteractiveTarget(event.target)','formatx:coreinteraction','formatx:immersiveactivate','document.hidden','visibilitychange','footer-to-real-core-no-reference-mirror','none-mobile-r252','FormatXOrganismVoice'],'R551 semantic heart lifecycle + trusted touch route');
 assert.match(heart,/document\.querySelector\(['"]\.fx-mag-heart-hit-r252['"]\)/);
-has(heartCss,['FormatX r549','body.living-architecture > .fx-mag-heart-hit-r252','position: fixed !important','pointer-events: none !important','.fx-trust-grid > a.fx-trust-card','min-block-size: 96px','production-r549-pointer-transparent-body-semantic-heart'],'heart geometry/touch contract');
+has(heartCss,['FormatX r554','body.living-architecture > .fx-mag-heart-hit-r252','position: fixed !important','pointer-events: none !important','fx-immersive-launch','display: none !important','.fx-trust-grid > a.fx-trust-card','min-block-size: 96px','production-r554-pointer-transparent-heart-retired-click-launch'],'R554 heart geometry/touch/retired launch contract');
 absent(heartCss,['.fx-reference-pause'],'heart CSS manual PAUSE forbidden');
 
-has(living,['function loadScriptOrdered(src, attr)','script.async = false',"fxThreeLoader = 'starting-on-demand-r552'","fxThreeLoader = 'loading-interface-r552'","fxThreeLoader = 'interface-ready-r552'","fxThreeLoader = 'menu-ready-r552'","fxThreeLoader = 'ready-on-demand-r552'","fxThreeLoader = 'failed-on-demand-r552'",'organism-interface.js?v=20260906-r552-deterministic-handoff','organism-menu-controller.js?v=20260906-r552-deterministic-handoff','formatx:organismhandoffready',"fxThreeLoader = 'deferred-user-activation'",'formatx:immersiveactivate'],'deterministic user-activated Organism handoff');
-assert.ok(living.indexOf('organism-interface.js?v=20260906-r552-deterministic-handoff') < living.indexOf('organism-menu-controller.js?v=20260906-r552-deterministic-handoff'),'Organism interface must be requested before menu');
+has(living,['function loadScriptOrdered(src, attr, readyCheck)','typeof readyCheck === \'function\'','probeTimer = setTimeout(probe, 25)',"fxThreeLoader = 'starting-on-demand-r554'","fxThreeLoader = 'loading-interface-r554'","fxThreeLoader = 'interface-ready-r554'","fxThreeLoader = 'menu-ready-r554'","fxThreeLoader = 'ready-on-demand-r554'","fxThreeLoader = 'failed-on-demand-r554'",'organism-interface.js?v=20260906-r554-idempotent-handoff','organism-menu-controller.js?v=20260906-r554-idempotent-handoff','formatx:organismhandoffready',"fxThreeLoader = 'deferred-user-activation'",'formatx:immersiveactivate'],'idempotent user-activated Organism handoff');
+assert.ok(living.indexOf('organism-interface.js?v=20260906-r554-idempotent-handoff') < living.indexOf('organism-menu-controller.js?v=20260906-r554-idempotent-handoff'),'Organism interface must be requested before menu');
 
 has(wda,['requestProfessionalAudio()','pendingToggleAfterLoad','first-click-replayed','function enforceProfessionalOwnership(button)',"button.dataset.fxAudioOwner !== 'professional-v6'","root.dataset.fxAudioOwner = 'professional-v6'","fxWdaSoundOwnershipR542 = 'professional-owner-reasserted'"],'professional audio ownership handoff');
 absent(wda,['formatx:referencepause','.fx-reference-pause'],'WDA no manual pause');
@@ -70,11 +70,9 @@ absent(p0FirstPaint,['.fx-reference-pause','data-fx-reference-motion-paused','fo
 assert.match(worker,/P0_MOTION_SCHEDULER_URL\s*=\s*'formatx-p0-motion-scheduler-r490\.js\?v=20260906-r549-navigation-mag-under-intro'/,'scheduler cache identity');
 assert.match(worker,/MOTION_RUNTIME_URL\s*=\s*'formatx-motion-runtime-loader-r239\.js\?v=20260906-r550-parallel-shader-under-intro'/,'R550 motion cache identity');
 assert.match(worker,/EVENT_HORIZON_URL\s*=\s*'formatx-event-horizon\.js\?v=20260906-r549-extended-static-intro-fade-deadline'/,'intro cache identity');
-assert.match(worker,/headers\.set\(\s*'X-FormatX-CSS-Scheduler'\s*,\s*'r551-canonical-post-first-paint-critical-core'\s*\)/,'R551 post-paint critical CSS delivery');
-assert.match(worker,/headers\.set\(\s*'X-FormatX-Mobile-LCP'\s*,\s*'r551-critical-core-post-first-paint-heart-runtime-style'\s*\)/,'R551 mobile LCP delivery marker');
-assert.ok(!worker.includes('restoreCriticalCoreFirstPaint'),'R551 wrapper must not restore critical-core into first paint');
-assert.ok(!worker.includes('CRITICAL_CORE_PRELOAD'),'R551 wrapper must not preload critical-core');
-assert.ok(!worker.includes('HEART_STYLE_PRELOAD'),'R551 wrapper must not preload heart CSS');
+has(worker,['function restoreCriticalCoreFirstPaint(html)','CRITICAL_CORE_PRELOAD','function injectStaticHeroShell(html)','HERO_CONTROLS','HERO_PROOF',"X-FormatX-Layout-Stability','r554-static-hero-shell-critical-core-prepaint"],'R554 prepaint hero geometry delivery');
+assert.ok(worker.includes('html=restoreCriticalCoreFirstPaint(html)'),'R554 wrapper must restore critical-core before first paint');
+assert.ok(worker.includes('html=injectStaticHeroShell(html)'),'R554 wrapper must inject semantic hero shell before first paint');
 assert.match(worker,/html\s*=\s*html\.replace\(MOTION_RUNTIME_RE\s*,\s*MOTION_RUNTIME_URL\)/,'motion runtime rewrite');
 has(worker,['canonicalProduction.fetch(request, env, ctx)'],'canonical production ownership');
 
@@ -91,4 +89,4 @@ function validateLighthouse(config,label){
 }
 validateLighthouse(desktop,'desktop');validateLighthouse(mobile,'mobile');
 for(const source of [intro,motion,current,heart,wda,content,living,renderer,life,governor,shape])new Function(source);
-console.log('PASS: R552 proves extended static intro, navigation-owned native MAG, R551 post-paint critical CSS/heart style, trusted touch routing, deterministic user-activated Organism handoff, professional SOUND ownership, automatic lifecycle, no manual PAUSE, and strict 100x3 Lighthouse gates.');
+console.log('PASS: R554 proves extended static intro, navigation-owned native MAG, prepaint hero geometry, trusted physical heart routing without click-to-launch, idempotent user-activated Organism handoff, professional SOUND ownership, automatic lifecycle, no manual PAUSE, and strict 100x3 Lighthouse gates.');
