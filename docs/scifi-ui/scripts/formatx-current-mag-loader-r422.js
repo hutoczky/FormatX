@@ -1,9 +1,9 @@
 /* FormatX R550 navigation-owned current native MAG runtime.
    R326 remains the only full-size hero WebGL organism. Navigation arms MAG and
    its semantic heart immediately. Expensive shader compile/link yields only until
-   first visual paint, then KHR parallel compile proceeds automatically while the
-   bounded intro is still visible. No intro-release, audit, or user-input gate may
-   own MAG startup. */
+   first visual paint and the layout-critical MAG style, then proceeds automatically
+   in parallel with non-render-critical MAG styles while the bounded intro is still
+   visible. No intro-release, audit, or user-input gate may own MAG startup. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -212,18 +212,35 @@ async function start(){
   cleanupLegacyMagRuntime();
   repairAccessibleNames();installSoundTouchRecovery();
   void ensureHeartCore();
-  await Promise.all([
-    addStyle(STYLE,'data-fx-current-mag-r422'),
+
+  const layoutStyle=addStyle(STYLE,'data-fx-current-mag-r422');
+  const nonCriticalStyles=Promise.all([
     addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
     addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418'),
     addStyle(MINI_STYLE,'data-fx-mini-mag-assistant-r459'),
     addStyle(LIFE_STYLE,'data-fx-core-life-style-r455')
   ]);
+  root.dataset.fxCurrentMagStartupR550='renderer-parallel-with-noncritical-styles';
+  const rendererStart=Promise.all([layoutStyle,yieldUntilFirstVisualPaint()]).then(async()=>{
+    root.dataset.fxCurrentMagRendererStartR550='starting-after-paint-layout-ready';
+    await addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
+    await addScript(RENDERER,'data-fx-current-r326-r422');
+    root.dataset.fxCurrentMagRendererStartR550='loaded-under-intro-parallel';
+    await addScript(NATIVE_TOUCH,'data-fx-native-mag-touch-r434');
+    await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
+    root.dataset.fxCurrentMagTouchBootstrapR435='native-owner-installed-before-ready-check';
+    root.dataset.fxCurrentMagTouchBootstrapR436='protected-owner-controller-tap-and-touch-fallback-installed';
+    root.dataset.fxCurrentMagOpticsR454='single-luminous-native-electric-surface-owner';
+    root.dataset.fxCurrentMagOpticsR456='uniform-solid-glass-shell-no-vram-artifact';
+    root.dataset.fxCurrentMagSchedulerR441='interaction-bursts-idle-zero-frame';
+    return waitForRendererReady();
+  });
+
+  await Promise.all([layoutStyle,nonCriticalStyles]);
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
   root.dataset.fxCurrentMagStylesR423='ready';
-  root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
+  root.dataset.fxCurrentMagStartupR442='layout-style-before-renderer-noncritical-parallel';
   root.dataset.fxCurrentMagStartupR549='navigation-owned-first-paint-yield-under-intro';
-  root.dataset.fxCurrentMagStartupR550='parallel-shader-compile-under-intro';
   root.dataset.fxCurrentMagOpticsR458='superseded-by-r468-soft-mobile-bloom';
   root.dataset.fxCurrentMagOpticsR460=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagOpticsR463=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
@@ -237,18 +254,7 @@ async function start(){
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
 
-  await yieldUntilFirstVisualPaint();
-  await addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
-  await addScript(RENDERER,'data-fx-current-r326-r422');
-  await addScript(NATIVE_TOUCH,'data-fx-native-mag-touch-r434');
-  await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
-  root.dataset.fxCurrentMagTouchBootstrapR435='native-owner-installed-before-ready-check';
-  root.dataset.fxCurrentMagTouchBootstrapR436='protected-owner-controller-tap-and-touch-fallback-installed';
-  root.dataset.fxCurrentMagOpticsR454='single-luminous-native-electric-surface-owner';
-  root.dataset.fxCurrentMagOpticsR456='uniform-solid-glass-shell-no-vram-artifact';
-  root.dataset.fxCurrentMagSchedulerR441='interaction-bursts-idle-zero-frame';
-
-  const rendererReady=await waitForRendererReady();
+  const rendererReady=await rendererStart;
   if(rendererReady){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
     await addScript(LIFE,'data-fx-core-life-r455');
