@@ -12,6 +12,7 @@
   root.dataset.fxMobileMagFinishR414 = 'restrained-glow-soft-edge';
   root.dataset.fxMobileMagFinishR424 = 'r454-sharp-readable-native-webgl-electric-caustics';
   root.dataset.fxMobileMagFinishR455 = 'restrained-bloom-soft-edge-living-native-webgl';
+  root.dataset.fxAwardRuntimeMode = 'normal-visitor-r538';
 
   const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260830-r454-single-native-optics-owner';
 
@@ -41,17 +42,11 @@
 
   ensureMobileRegressionR310();
 
-  const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
-  if (auditMode) {
-    root.dataset.fxAwardRuntimeMode = 'audit-passive';
-    return;
-  }
-
-  const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260824-native-orb-r250';
+  const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260906-r538-two-control-no-pause';
   const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
-  const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260824-native-orb-r250';
+  const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r538-two-control-no-pause';
   const CONTROL_OWNER_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260830-r454-visible-electric-surface';
   const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260822-r291-nav-state';
   const DIALOGUE_STYLE_URL = '/scifi-ui/styles/formatx-dialogue-open-r287.css?v=20260822-r287-open-state';
