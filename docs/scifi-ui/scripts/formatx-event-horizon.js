@@ -1,11 +1,10 @@
-/* FormatX R562 — priority-owned absolute boot-deadline bounded preloader.
+/* FormatX R575 — priority-owned absolute boot-deadline bounded preloader.
    MAG startup remains navigation-owned behind the visual layer. The intro keeps
    the intended premium 1.2–1.65s UX dwell while text remains immutable after
-   first paint. The boot-relative deadline is armed before DOM stabilization and
-   uses the browser scheduler's user-blocking queue when available, with a normal
-   timer fallback. If main-thread work delays the release callback beyond the hard
-   deadline, finalization is immediate because the compositor visual bound has
-   already elapsed; normal on-time releases retain the 90ms fade. */
+   first paint. R575 keeps legacy intro effect DOM nodes out of the paint path;
+   scan/grid/pulse motion is supplied by a same-origin external CSS layer using
+   compositor-friendly transform/opacity only. The boot-relative deadline remains
+   pre-armed with user-blocking scheduler ownership and a timer fallback. */
 (function(){
 'use strict';
 
@@ -14,6 +13,7 @@ const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27
 const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const OVERLAY_ID='formatx-event-horizon';
 const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-score-v6';
+const P0_FX_STYLE='./styles/formatx-intro-p0-r575.css?v=20260906-r575-csp-safe-compositor';
 const PRELOADER_MIN_MS=REDUCED?180:(MOBILE?1180:1350);
 const PRELOADER_MAX_MS=REDUCED?520:(MOBILE?1450:1650);
 const PRELOADER_TICK_MS=80;
@@ -44,6 +44,7 @@ ROOT.dataset.fxPreloaderDeadlineR549=`fade-compensated-${Math.round(PRELOADER_HI
 ROOT.dataset.fxPreloaderDeadlineR555='absolute-boot-hard-deadline-bounded-fade-finalize';
 ROOT.dataset.fxPreloaderDeadlineR556='prearmed-user-blocking-scheduler-with-timer-fallback';
 ROOT.dataset.fxPreloaderDeadlineR562='overdue-callback-direct-finalize-normal-fade-preserved';
+ROOT.dataset.fxPreloaderPaintOwnerR575='external-css-pseudo-grid-scan-legacy-dom-suppressed';
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
@@ -59,6 +60,11 @@ function complete(source){document.dispatchEvent(new CustomEvent('formatx:introc
 function force(node,property,value){if(node instanceof HTMLElement)node.style.setProperty(property,value,'important');}
 function clear(node,property){if(node instanceof HTMLElement)node.style.removeProperty(property);}
 function animateEffect(node,keyframes,options){if(REDUCED||!(node instanceof HTMLElement)||typeof node.animate!=='function')return;try{node.animate(keyframes,options);}catch(_){} }
+function ensureP0FxStyle(){
+  let link=document.querySelector('link[data-fx-intro-p0-r575]');
+  if(link instanceof HTMLLinkElement)return link;
+  link=document.createElement('link');link.rel='stylesheet';link.href=P0_FX_STYLE;link.dataset.fxIntroP0R575='true';document.head.appendChild(link);return link;
+}
 function cancelDeadline(){
   if(preloaderDeadlineTimer)clearTimeout(preloaderDeadlineTimer);preloaderDeadlineTimer=0;
   try{preloaderDeadlineAbort?.abort();}catch(_){}
@@ -88,17 +94,13 @@ function skipLatePreloader(){
 }
 function showPreloader(){
   const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement))return null;
+  ensureP0FxStyle();
   preloaderReleased=false;overlay.hidden=false;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='active';ROOT.dataset.fxPreloaderR531='active';
   force(overlay,'display','grid');force(overlay,'visibility','visible');force(overlay,'opacity','1');force(overlay,'pointer-events','none');
-  const center=overlay.querySelector('.fx-intro-center'),word=overlay.querySelector('.fx-intro-word'),wordSpan=overlay.querySelector('.fx-intro-word span'),kicker=overlay.querySelector('.fx-intro-kicker'),subtitle=overlay.querySelector('.fx-intro-subtitle'),meta=overlay.querySelector('.fx-intro-meta'),progressWrap=overlay.querySelector('.fx-intro-progress-wrap'),output=overlay.querySelector('[data-fx-intro-output]'),progress=overlay.querySelector('[data-fx-intro-progress]'),status=overlay.querySelector('[data-fx-intro-status]'),scan=overlay.querySelector('.fx-intro-scan'),flare=overlay.querySelector('.fx-intro-flare'),grid=overlay.querySelector('.fx-intro-grid');
+  const center=overlay.querySelector('.fx-intro-center'),word=overlay.querySelector('.fx-intro-word'),wordSpan=overlay.querySelector('.fx-intro-word span'),kicker=overlay.querySelector('.fx-intro-kicker'),subtitle=overlay.querySelector('.fx-intro-subtitle'),meta=overlay.querySelector('.fx-intro-meta'),progressWrap=overlay.querySelector('.fx-intro-progress-wrap'),output=overlay.querySelector('[data-fx-intro-output]'),progress=overlay.querySelector('[data-fx-intro-progress]'),status=overlay.querySelector('[data-fx-intro-status]');
   force(center,'width','min(520px, calc(100vw - 40px))');force(word,'font-size','clamp(32px,5vw,56px)');force(word,'line-height','1');force(word,'letter-spacing','.08em');force(wordSpan,'opacity','1');force(wordSpan,'transform','none');force(wordSpan,'filter','none');force(kicker,'opacity','1');force(kicker,'transform','none');force(kicker,'letter-spacing','.24em');force(subtitle,'opacity','1');force(subtitle,'transform','none');force(subtitle,'font-size','10px');force(meta,'opacity',MOBILE?'0':'.5');force(meta,'transform','none');force(progressWrap,'opacity','1');force(progressWrap,'transform','none');force(progressWrap,'max-width','560px');force(progressWrap,'margin','0 auto');
-  if(scan instanceof HTMLElement){force(scan,'display','block');force(scan,'position','absolute');force(scan,'left','0');force(scan,'top','0');force(scan,'width','100%');force(scan,'height','16vh');force(scan,'opacity','0');force(scan,'pointer-events','none');force(scan,'background','linear-gradient(180deg,transparent,rgba(124,236,255,.18),rgba(143,114,255,.08),transparent)');force(scan,'filter','blur(1px)');}
-  if(flare instanceof HTMLElement){force(flare,'display','block');force(flare,'position','absolute');force(flare,'left','50%');force(flare,'top','46%');force(flare,'width',MOBILE?'74vw':'min(48vw,520px)');force(flare,'height',MOBILE?'74vw':'min(48vw,520px)');force(flare,'border-radius','50%');force(flare,'opacity','.24');force(flare,'pointer-events','none');force(flare,'background','radial-gradient(circle,rgba(124,236,255,.28) 0%,rgba(143,114,255,.14) 34%,rgba(124,236,255,0) 72%)');force(flare,'filter','blur(18px)');force(flare,'transform','translate(-50%,-50%) scale(.72)');}
-  if(grid instanceof HTMLElement){force(grid,'display','block');force(grid,'position','absolute');force(grid,'inset','0');force(grid,'opacity','.18');force(grid,'pointer-events','none');force(grid,'background-image','linear-gradient(rgba(124,236,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(124,236,255,.035) 1px,transparent 1px)');force(grid,'background-size','36px 36px');}
   if(output instanceof HTMLOutputElement)output.value='LIVE';if(progress instanceof HTMLProgressElement){progress.removeAttribute('value');progress.setAttribute('aria-label',ROOT.lang==='en'?'Living core starting':'Élő MAG indítása');}if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'LIVING CORE STARTING':'ÉLŐ MAG INDÍTÁSA';
-  animateEffect(scan,[{transform:'translateY(-24vh)',opacity:0},{opacity:.58,offset:.44},{transform:'translateY(112vh)',opacity:0}],{duration:1280,iterations:Infinity,easing:'cubic-bezier(.22,.61,.36,1)'});
-  animateEffect(flare,[{transform:'translate(-50%,-50%) scale(.72)',opacity:.18},{transform:'translate(-50%,-50%) scale(1.08)',opacity:.48},{transform:'translate(-50%,-50%) scale(.82)',opacity:.24}],{duration:1540,iterations:Infinity,easing:'ease-in-out'});
-  animateEffect(grid,[{opacity:.14},{opacity:.28},{opacity:.16}],{duration:1820,iterations:Infinity,easing:'ease-in-out'});
+  ROOT.dataset.fxPreloaderLegacyEffectsR575='suppressed-quality-layer-external-pseudo-motion';
   return overlay;
 }
 function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-crystal-organism-r326-stage,.hero-space')||document.querySelector('.fx-mag-heart-hit-r252');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}

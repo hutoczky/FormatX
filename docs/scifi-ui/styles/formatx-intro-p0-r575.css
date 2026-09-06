@@ -1,0 +1,51 @@
+/* FormatX R575 — CSP-safe lightweight intro motion.
+   The quality layer keeps legacy scan/grid/flare DOM nodes out of the paint path.
+   These pseudo layers preserve the living-system grid, scan and restrained pulse
+   using transform/opacity only. No filter, blend mode, box-shadow or inline CSS. */
+@keyframes fx-r575-intro-grid {
+  0% { transform: translate3d(-6px,-4px,0); opacity: .13; }
+  50% { opacity: .21; }
+  100% { transform: translate3d(6px,4px,0); opacity: .16; }
+}
+@keyframes fx-r575-intro-scan {
+  0% { transform: translate3d(0,-24vh,0); opacity: 0; }
+  40% { opacity: .30; }
+  100% { transform: translate3d(0,118vh,0); opacity: 0; }
+}
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .13;
+  background-image:
+    linear-gradient(rgba(124,236,255,.034) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,236,255,.034) 1px,transparent 1px);
+  background-size: 42px 42px;
+  will-change: transform,opacity;
+  animation: fx-r575-intro-grid 1380ms ease-in-out infinite alternate;
+}
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+  content: "";
+  position: absolute;
+  inset: -24vh 0 auto;
+  height: 18vh;
+  z-index: 1;
+  pointer-events: none;
+  border: 0;
+  opacity: 0;
+  background: linear-gradient(180deg,transparent,rgba(124,236,255,.15),rgba(143,114,255,.055),transparent);
+  background-size: auto;
+  mix-blend-mode: normal;
+  will-change: transform,opacity;
+  animation: fx-r575-intro-scan 1280ms cubic-bezier(.22,.61,.36,1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+    animation: none;
+    transform: none;
+    opacity: .08;
+  }
+}
