@@ -44,6 +44,20 @@ async function waitForScrollShell(page) {
   }, null, { timeout: 45000 });
 }
 
+async function clickPhysicalHeart(page) {
+  const heart = page.locator('.fx-mag-heart-hit-r252').first();
+  await heart.waitFor({ state: 'visible', timeout: 10000 });
+  const box = await heart.boundingBox();
+  if (!box || box.width < 80 || box.height < 80) throw new Error(`MAG physical hit geometry invalid: ${JSON.stringify(box)}`);
+  const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  await page.mouse.click(point.x, point.y);
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    return root.dataset.fxMagHeartPhysicalRouteR546 === 'captured-stage-hit'
+      && root.dataset.fxCoreInteractionMode === 'active-r252';
+  }, null, { timeout: 5000 });
+}
+
 async function activateAndWaitForInterface(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -59,9 +73,7 @@ async function activateAndWaitForInterface(page) {
   }, null, { timeout: 30000 });
 
   if (await page.evaluate(() => document.documentElement.dataset.fxOrganismInterface !== 'ready')) {
-    const heart = page.locator('.fx-mag-heart-hit-r252').first();
-    await heart.waitFor({ state: 'visible', timeout: 10000 });
-    await heart.click({ position: { x: 20, y: 20 }, timeout: 5000 });
+    await clickPhysicalHeart(page);
   }
 
   await page.waitForFunction(() => {
@@ -292,7 +304,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling with R542 body-level MAG activation');
+    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling with R546 physical MAG hit routing');
   } finally {
     await browser.close();
   }
