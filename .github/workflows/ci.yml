@@ -53,7 +53,7 @@ jobs:
           npm install -g @lhci/cli@0.13.x
           npm ci --prefix billing-worker
 
-      - name: Start exact R536 production candidate Worker
+      - name: Start exact R537 production candidate Worker
         id: candidate
         shell: bash
         env:
@@ -62,7 +62,7 @@ jobs:
           set -euo pipefail
           (
             cd billing-worker
-            npx wrangler dev --local --ip 127.0.0.1 --port 8787 --var FORMATX_LOCAL_CANDIDATE:1 > "$RUNNER_TEMP/formatx-lighthouse-worker.log" 2>&1 &
+            npx --yes wrangler@4.129.0 dev --local --ip 127.0.0.1 --port 8787 --var FORMATX_LOCAL_CANDIDATE:1 > "$RUNNER_TEMP/formatx-lighthouse-worker.log" 2>&1 &
             echo $! > "$RUNNER_TEMP/formatx-lighthouse-worker.pid"
           )
           ready=0
@@ -113,7 +113,7 @@ jobs:
             cat "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" || true
             exit 1
           fi
-          echo 'Exact R536 production candidate + canonical transport proxy ready on 127.0.0.1:8788/.'
+          echo 'Exact R537 production candidate + canonical transport proxy ready on 127.0.0.1:8788/.'
 
       - name: Run desktop Lighthouse CI on the real production candidate
         id: lighthouse_desktop
@@ -182,7 +182,7 @@ jobs:
           {
             echo "## Lighthouse CI Results"
             echo
-            echo "Validated surface: exact R536 local production Worker candidate, canonical transport normalized, desktop + mobile, normal visitor experience"
+            echo "Validated surface: exact R537 local production Worker candidate, canonical transport normalized, desktop + mobile, normal visitor experience"
             echo
             echo "### Authoritative P0 thresholds"
             echo "- Performance = 1.00"
