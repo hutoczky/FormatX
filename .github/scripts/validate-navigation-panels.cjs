@@ -45,9 +45,22 @@ async function waitForScrollShell(page) {
 }
 
 async function activateAndWaitForInterface(page) {
-  const referenceMenu = page.locator('.fx-reference-menu-button');
-  await referenceMenu.waitFor({ state: 'visible' });
-  await referenceMenu.click();
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const heart = document.querySelector('#hero .fx-mag-heart-hit-r252');
+    return root.dataset.fxOrganismInterface === 'ready'
+      || (root.dataset.fxThreeLoader === 'deferred-user-activation'
+        && root.dataset.fxHeartCoreR252 === 'ready'
+        && heart instanceof HTMLButtonElement
+        && heart.dataset.fxHeartBound === 'true');
+  }, null, { timeout: 30000 });
+
+  if (await page.evaluate(() => document.documentElement.dataset.fxOrganismInterface !== 'ready')) {
+    const heart = page.locator('#hero .fx-mag-heart-hit-r252').first();
+    await heart.waitFor({ state: 'visible', timeout: 10000 });
+    await heart.click({ position: { x: 20, y: 20 }, timeout: 5000 });
+  }
+
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxOrganismInterface === 'ready'
@@ -58,8 +71,9 @@ async function activateAndWaitForInterface(page) {
       && root.dataset.fxOrganismMasterSync === 'ready-v1'
       && root.dataset.fxTranscendLoader === 'safe-ready-v28';
   }, null, { timeout: 60000 });
+
   if (await page.evaluate(() => document.getElementById('main-nav')?.classList.contains('open'))) {
-    await referenceMenu.click();
+    await page.locator('.fx-reference-menu-button').click();
   }
   await page.waitForFunction(() => !document.getElementById('main-nav')?.classList.contains('open'));
 }
