@@ -1,15 +1,28 @@
-/* FormatX r538 — MAG as the living heart of the page.
-   This layer owns only the MAG interaction hit-area and the mobile loop handoff.
-   The hero/WebGL layout is visual-only; semantic controls explicitly own input. */
+/* FormatX r539 — MAG semantic hit ownership + mobile trust target floor.
+   The hero section and WebGL layout are visual containers; only real interactive
+   descendants own pointer input. This keeps MAG, CTA, SOUND and ASK hit-testing native. */
 
+html body.living-architecture #hero,
 html body.living-architecture #hero .hero-grid,
 html body.living-architecture #hero .hero-space {
   pointer-events: none;
 }
 
-/* The grid itself must never cover the semantic MAG heart. Re-enable only the
-   real interactive descendants so normal CTAs/navigation keep native hit-testing. */
+html body.living-architecture #hero .hero-space {
+  position: relative !important;
+  z-index: 30 !important;
+  isolation: isolate;
+}
+
+/* Re-enable only semantic/native interactive descendants. */
 html body.living-architecture #hero .hero-copy,
+html body.living-architecture #hero a,
+html body.living-architecture #hero button,
+html body.living-architecture #hero input,
+html body.living-architecture #hero select,
+html body.living-architecture #hero textarea,
+html body.living-architecture #hero [role='button'],
+html body.living-architecture #hero [tabindex],
 html body.living-architecture #hero .hero-space > .fx-immersive-launch,
 html body.living-architecture #hero .hero-space > .fx-organism-map,
 html body.living-architecture #hero .hero-space > .fx-organism-map a,
@@ -19,7 +32,7 @@ html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
 
 .fx-mag-heart-hit-r252 {
   position: absolute;
-  z-index: 40;
+  z-index: 12090 !important;
   left: 50%;
   top: 50%;
   width: min(36vw, 430px);
@@ -36,10 +49,11 @@ html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
   touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto !important;
+  isolation: isolate;
 }
 
-/* R538: R326 pointer/touch logic listens globally and reads stage geometry, so
-   neither the host nor the visual WebGL stage needs to win DOM hit-testing. */
+/* R539: R326 pointer/touch logic listens globally and reads stage geometry, so
+   neither the host nor the visual WebGL stage may win DOM hit-testing. */
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   pointer-events: none !important;
 }
@@ -76,6 +90,19 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
     height: min(72vw, 330px);
     min-width: 210px;
     min-height: 210px;
+  }
+
+  /* Lighthouse and real touch users need the entire trust card to be the target,
+     not only its text line. Keep cards separated and comfortably above 44px. */
+  html body.living-architecture .fx-trust-grid > a.fx-trust-card {
+    box-sizing: border-box !important;
+    display: flex !important;
+    min-block-size: 96px !important;
+    min-height: 96px !important;
+    padding: 17px !important;
+    margin: 0 !important;
+    touch-action: manipulation;
+    isolation: isolate;
   }
 
   html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge,
@@ -133,3 +160,5 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
 @media (prefers-reduced-motion: reduce) {
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
+
+/* production-r539-semantic-heart-native-hit-owner */
