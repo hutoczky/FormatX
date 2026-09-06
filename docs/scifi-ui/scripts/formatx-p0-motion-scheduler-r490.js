@@ -1,16 +1,16 @@
-/* FormatX R539 — navigation-owned living MAG + sound control + post-first-paint enhancements.
-   The real current MAG loader and the lightweight SOUND click owner start automatically
-   as soon as this deferred production scheduler executes; neither waits for user input.
-   The professional audio engine itself remains strict user opt-in and is requested only
-   by the SOUND control. Heavy motion/Organism enhancement runtime remains late/intent-driven. */
+/* FormatX R548 — single navigation-owned MAG + sound control + post-first-paint enhancements.
+   The lightweight MAG shell/heart and SOUND owner arm automatically from navigation.
+   The one current MAG loader uses the same R547 bounded-intro identity everywhere,
+   preventing duplicate cache identities from fetching the same startup runtime twice.
+   Heavy motion/Organism enhancements remain late/intent-driven. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r539-navigation-mag-sound-control';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle';
-const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r538-pause-free-optics';
-const SOUND_CONTROL_SRC='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r539-navigation-sound-opt-in-owner';
+root.dataset.fxP0MotionSchedulerR490='armed-r548-single-navigation-mag-sound-control';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r547-bounded-intro-release-no-user-gate';
+const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r547-bounded-intro-release-yield';
+const SOUND_CONTROL_SRC='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r542-professional-owner-authoritative';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let criticalMagStarted=false;
@@ -46,7 +46,7 @@ function startCriticalMag(){
   if(document.querySelector('script[data-fx-current-mag-loader-r422]')){
     root.dataset.fxMagNavigationBootR536='already-requested';return;
   }
-  root.dataset.fxMagNavigationBootR536='requested-navigation';
+  root.dataset.fxMagNavigationBootR536='requested-navigation-r548-single-identity';
   const script=document.createElement('script');script.src=CRITICAL_MAG_SRC;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';script.dataset.fxNavigationMagR536='true';
   script.addEventListener('load',()=>{root.dataset.fxMagNavigationBootR536=/^(?:ready|booting)$/.test(root.dataset.fxCurrentMagRuntimeR422||'')?'loaded-navigation':'loaded-awaiting-current-mag';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxMagNavigationBootR536='load-failed';},{once:true});
