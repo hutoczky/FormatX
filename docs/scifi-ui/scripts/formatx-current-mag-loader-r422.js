@@ -1,4 +1,4 @@
-/* FormatX R537 navigation-owned current native MAG runtime.
+/* FormatX R538 navigation-owned current native MAG runtime.
    R326 remains the only full-size hero WebGL organism. Mobile keeps bounded
    periodic surface energy with zero frames between sweeps and automatic lifecycle
    suspension. The lightweight semantic heart owner is armed with navigation so
@@ -13,7 +13,7 @@ if(reduced)root.dataset.fxCurrentMagMotionR424='r468-static-render-explicit-inte
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
-const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
+const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260906-r538-two-control-visual-only';
 const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
@@ -222,7 +222,7 @@ async function start(){
     ?'direct-r326-r468-soft-optics-live-energy-zero-idle-native-touch'
     :'direct-r326-r468-primary-controller-desktop';
   root.dataset.fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle';
-  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r474'}}));
+  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r538'}}));
 }
 
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});
