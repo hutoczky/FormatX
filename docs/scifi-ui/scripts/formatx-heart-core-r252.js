@@ -6,6 +6,7 @@
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r542-body-fixed-stage-sync';
   const LOOP_OVERSHOOT = 28;
+  const HEART_HIT_Z = '2147482500';
   let touchActive = false;
   let idleTimer = 0;
   let bindingFrame = 0;
@@ -122,9 +123,11 @@
     hit.style.width = `${diameter}px`;
     hit.style.height = `${diameter}px`;
     hit.style.visibility = 'visible';
+    hit.style.setProperty('z-index', HEART_HIT_Z, 'important');
     hit.style.setProperty('pointer-events', 'auto', 'important');
     hit.removeAttribute('aria-hidden');
     root.dataset.fxMagHeartHitGeometryR542 = 'viewport-stage-synced';
+    root.dataset.fxMagHeartHitPlaneR544 = 'body-top-interaction-below-intro';
     return true;
   }
 
