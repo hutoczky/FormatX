@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'heart-core-r569';
+  const VERSION = 'heart-core-r551';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r569-trusted-route-stable';
   const LOOP_OVERSHOOT = 28;
