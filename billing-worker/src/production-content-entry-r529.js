@@ -1,10 +1,9 @@
 import canonicalProduction from './production-content-entry.js';
 
-/* FormatX R540 — direct canonical production ownership + bounded static intro.
+/* FormatX R542 — direct canonical production ownership + bounded static intro.
    Candidate mode exists only behind Wrangler-only FORMATX_LOCAL_CANDIDATE=1.
-   The tiny reference layout selector remains prepaint, the critical shell remains
-   first-paint safe, MAG and lightweight SOUND control arm from navigation, and
-   changed semantic-heart bytes receive an explicit fresh production cache identity. */
+   MAG and lightweight SOUND arm from navigation; the semantic heart moves to a
+   body-level stage-synchronised hit owner and every changed byte has a fresh URL. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN = 'https://formatxsuite.com';
@@ -14,7 +13,7 @@ const P0_SCHEDULER_PATH = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js
 const P0_MOTION_SCHEDULER_RE = /formatx-p0-motion-scheduler-r490\.js\?v=[^"']+/g;
 const P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r540-navigation-mag-sound';
 const MOTION_RUNTIME_RE = /formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g;
-const MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle';
+const MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r542-body-heart-audio-owner';
 const CONTENT_RUNTIME_RE = /formatx-content-runtime-loader-r241\.js\?v=[^"']+/g;
 const CONTENT_RUNTIME_URL = 'formatx-content-runtime-loader-r241.js?v=20260906-r538-no-manual-pause';
 const CONTENT_STANDARD_RE = /formatx-content-standard\.css(?:\?v=[^"']+)?/g;
@@ -28,18 +27,16 @@ const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-
 const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
 const QUALITY_URL = 'formatx-quality-r461.css?v=20260906-r538-no-manual-pause';
 const HEART_STYLE_RE = /formatx-heart-core-r252\.css(?:\?v=[^"']+)?/g;
-const HEART_STYLE_URL = 'formatx-heart-core-r252.css?v=20260906-r540-main-transparent-control-safe';
+const HEART_STYLE_URL = 'formatx-heart-core-r252.css?v=20260906-r542-body-fixed-stage-sync';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MOTION_MEDIA = '(prefers-reduced-motion: no-preference) and (min-width: 901px)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
-const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r540-main-transparent-control-safe">';
+const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r542-body-fixed-stage-sync">';
 const HEART_BUTTON = '<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
 
-/* These assets are required by the normal visitor first frame. Header preloads
-   only advance request discovery; they do not hide/disable content or alter MAG. */
 const MOBILE_FIRST_PAINT_PRELOAD = `</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="${MOBILE_MEDIA}"`;
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
-const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r540-main-transparent-control-safe>; rel=preload; as=style';
+const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r542-body-fixed-stage-sync>; rel=preload; as=style';
 const CRITICAL_SHELL_PRELOAD = '</scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint>; rel=preload; as=style';
 const QUALITY_PRELOAD = '</scifi-ui/styles/formatx-quality-r461.css?v=20260906-r538-no-manual-pause>; rel=preload; as=style';
 const AWARD_READINESS_PRELOAD = '</scifi-ui/styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability>; rel=preload; as=style';
@@ -135,19 +132,19 @@ function addFirstPaintPreloads(headers) {
   ].join(', ');
   headers.set('Link', existing ? `${existing}, ${preloads}` : preloads);
 }
-function r538Headers(source, localCandidate) {
+function r542Headers(source, localCandidate) {
   const headers = new Headers(source);
-  headers.set('X-FormatX-Transport-Stability', 'r538-direct-canonical-living-core');
-  headers.set('X-FormatX-Edge-Stability', 'r538-first-paint-header-warm');
+  headers.set('X-FormatX-Transport-Stability', 'r542-direct-canonical-living-core');
+  headers.set('X-FormatX-Edge-Stability', 'r542-body-heart-audio-owner');
   headers.set('X-FormatX-CSS-Scheduler', 'r536-global-critical-first-paint-mobile-legacy-intent');
-  headers.set('X-FormatX-Product-Contract', 'r538-navigation-mag-no-manual-pause');
-  headers.set('X-FormatX-MAG-Startup', 'r538-navigation-owned-critical-living-core');
+  headers.set('X-FormatX-Product-Contract', 'r542-navigation-mag-body-heart-no-manual-pause');
+  headers.set('X-FormatX-MAG-Startup', 'r542-navigation-owned-body-heart');
   headers.set('X-FormatX-Mobile-LCP', 'r538-critical-chain-header-preloaded');
   headers.set('X-FormatX-Preloader', 'r534-static-content-roadmap-timing');
   headers.set('X-FormatX-Preloader-Cache', 'r537-static-lcp-no-manual-pause');
   headers.set('X-FormatX-Reference-Boot', 'r536-prepaint-layout-selector');
   if (localCandidate) {
-    headers.set('X-FormatX-Candidate-Delivery', 'r538-exact-production-entry-localhost-8787');
+    headers.set('X-FormatX-Candidate-Delivery', 'r542-exact-production-entry-localhost-8787');
     headers.set('X-FormatX-Candidate-Canonical-Origin', 'formatxsuite.com');
     headers.set('Link', '<https://formatxsuite.com/>; rel="canonical"');
   }
@@ -160,7 +157,7 @@ function rewrittenSchedulerResponse(response, headers) {
     headers.delete('Content-Encoding');
     headers.delete('ETag');
     headers.set('Cache-Control', 'no-store, max-age=0');
-    headers.set('X-FormatX-Scheduler-Cache', 'r540-navigation-mag-sound');
+    headers.set('X-FormatX-Scheduler-Cache', 'r542-body-heart-audio-owner');
     return new Response(body, { status: response.status, statusText: response.statusText, headers });
   });
 }
@@ -173,7 +170,7 @@ export default {
     const response = await canonicalProduction.fetch(request, env, ctx);
     if (!isSafeMethod(request) || !isDeliveryHost(deliveryUrl, localCandidate)) return response;
 
-    const headers = r538Headers(response.headers, localCandidate);
+    const headers = r542Headers(response.headers, localCandidate);
     if (request.method === 'HEAD') { headers.delete('Content-Length'); return new Response(null, { status: response.status, statusText: response.statusText, headers }); }
     const type = headers.get('Content-Type') || '';
     if (deliveryUrl.pathname === P0_SCHEDULER_PATH && /javascript|text\/plain/i.test(type)) {
@@ -183,6 +180,7 @@ export default {
 
     let html = restoreCriticalCoreFirstPaint(await response.text());
     html = html.replace(P0_MOTION_SCHEDULER_RE, P0_MOTION_SCHEDULER_URL);
+    html = html.replace(MOTION_RUNTIME_RE, MOTION_RUNTIME_URL);
     html = html.replace(CONTENT_RUNTIME_RE, CONTENT_RUNTIME_URL);
     html = html.replace(CONTENT_STANDARD_RE, CONTENT_STANDARD_URL);
     html = html.replace(DEFERRED_SCHEDULER_RE, DEFERRED_SCHEDULER_URL);
