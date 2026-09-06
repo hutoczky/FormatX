@@ -51,6 +51,17 @@
     return buttons.find(button => button.dataset.fxAudioOwner === 'professional-v6') || buttons[0];
   }
 
+  function enforceProfessionalOwnership(button) {
+    if (!(button instanceof HTMLButtonElement) || button.dataset.fxAudioOwner !== 'professional-v6') return false;
+    if (root.dataset.fxAudioOwner !== 'professional-v6') {
+      root.dataset.fxAudioOwner = 'professional-v6';
+      root.dataset.fxWdaSoundOwnershipR542 = 'professional-owner-reasserted';
+    } else if (!root.dataset.fxWdaSoundOwnershipR542) {
+      root.dataset.fxWdaSoundOwnershipR542 = 'professional-owner-authoritative';
+    }
+    return true;
+  }
+
   function ensureLabel(button) {
     let label = button.querySelector('[data-fx-wda-sound-label]');
     if (!(label instanceof HTMLElement)) {
@@ -70,6 +81,7 @@
     if (!(button instanceof HTMLButtonElement) || syncing) return;
     syncing = true;
     try {
+      enforceProfessionalOwnership(button);
       button.classList.add('fx-wda-sound-toggle');
       button.type = 'button';
       button.hidden = false;
@@ -130,9 +142,6 @@
     const owner = space;
     if (controls.parentElement !== owner) owner.appendChild(controls);
 
-    // Older mobile generations may have left inline !important flex, top/right
-    // or translate geometry. The current stylesheet is the single final geometry
-    // owner for the two retained controls: SOUND and ASK.
     for (const node of [controls, rail, button, ask]) clearLegacyControlGeometry(node);
 
     controls.classList.add('fx-reference-controls-r263');
@@ -209,6 +218,7 @@
     for (const duplicate of Array.from(document.querySelectorAll(SELECTOR))) {
       if (duplicate !== button) duplicate.remove();
     }
+    enforceProfessionalOwnership(button);
     sync(button);
     canonicalizeReferenceControls(button);
     return button;
@@ -223,6 +233,7 @@
     queueMicrotask(() => {
       const live = pickButton();
       if (!(live instanceof HTMLButtonElement)) return;
+      enforceProfessionalOwnership(live);
       root.dataset.fxWdaSoundTouchR418 = 'first-click-replayed';
       live.click();
     });
@@ -246,6 +257,7 @@
       loadingAudio = false;
       queueMicrotask(() => {
         const button = ensureButton();
+        enforceProfessionalOwnership(button);
         sync(button);
         scheduleLayout();
         replayPendingToggle();
@@ -263,9 +275,6 @@
     document.head.appendChild(script);
   }
 
-  // The physical pointer sequence stays on the same SOUND element. The
-  // professional engine may be installed asynchronously after the trusted click;
-  // preserve that first toggle intent and replay it exactly once after handoff.
   document.addEventListener('pointerdown', event => {
     const target = event.target instanceof Element ? event.target.closest(SELECTOR) : null;
     if (!target || root.dataset.fxAudioOwner === 'professional-v6') return;
@@ -285,11 +294,16 @@
     scheduleLayout();
   }, true);
 
-  // Audio/reference state are the only steady-state mutation sources observed.
-  // No document-wide steady-state DOM observer is installed.
+  // The professional button-level owner is authoritative. A legacy lightweight
+  // fallback may finish an earlier async play() after handoff on slow mobile; when
+  // that stale callback rewrites the root marker, reassert professional-v6 without
+  // restarting audio or synthesising a user gesture.
   const rootObserver = new MutationObserver(records => {
     const button = pickButton();
-    if (button) sync(button);
+    if (button) {
+      enforceProfessionalOwnership(button);
+      sync(button);
+    }
     if (records.some(record => record.attributeName === 'data-fx-reference-production-r244')) scheduleLayout();
   });
   rootObserver.observe(root, {
@@ -310,7 +324,9 @@
     'formatx:mobilelayoutready',
     'pageshow'
   ]) addEventListener(eventName, () => {
-    sync(ensureButton());
+    const button = ensureButton();
+    enforceProfessionalOwnership(button);
+    sync(button);
     scheduleLayout();
   });
 
