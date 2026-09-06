@@ -8,7 +8,7 @@
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
 root.dataset.fxP0MotionSchedulerR490='armed-r537-navigation-mag';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r536-design-system-intent';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle';
 const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r537-navigation-interaction';
 const AUTO_DELAY_MS=6500;
 let started=false;
