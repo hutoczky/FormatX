@@ -104,14 +104,15 @@ absent(wdaHardening,['.fx-reference-pause','repeat(3, 54px)','repeat(3, 50px)'],
 has(referenceBoot,["fxReferenceProductionR244 = mode","fxReferenceComposition = mobile","fxReferenceModeBootR334 = 'prepaint-' + mode"],'tiny synchronous prepaint reference selector');
 has(criticalShell,['.main-nav,',' .header-actions { display: none;','pointer-events: none;'],'mobile critical shell');
 has(worker,[
-  "P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r538-pause-free-cache-chain'",
+  "P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r540-navigation-mag-sound'",
   "MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle'",
   "CONTENT_RUNTIME_URL = 'formatx-content-runtime-loader-r241.js?v=20260906-r538-no-manual-pause'",
   "CONTENT_STANDARD_URL = 'formatx-content-standard.css?v=20260906-r538-mobile-touch-spacing'",
   "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260906-r537-no-manual-pause'",
   "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner'",
   "QUALITY_URL = 'formatx-quality-r461.css?v=20260906-r538-no-manual-pause'",
-  'formatx-heart-core-r252.css?v=20260906-r538-hero-hit-owner',
+  "HEART_STYLE_URL = 'formatx-heart-core-r252.css?v=20260906-r540-main-transparent-control-safe'",
+  'formatx-heart-core-r252.css?v=20260906-r540-main-transparent-control-safe','HEART_STYLE_RE',
   'CRITICAL_SHELL_PRELOAD','QUALITY_PRELOAD','AWARD_READINESS_PRELOAD','FIRST_PAINT_R206_PRELOAD','REFERENCE_BOOT_PRELOAD','CRITICAL_CORE_PRELOAD','REFERENCE_PRODUCTION_PRELOAD',
   "X-FormatX-Product-Contract', 'r538-navigation-mag-no-manual-pause'",
   "X-FormatX-MAG-Startup', 'r538-navigation-owned-critical-living-core'",
@@ -121,10 +122,11 @@ has(worker,[
   "X-FormatX-CSS-Scheduler', 'r536-global-critical-first-paint-mobile-legacy-intent'",
   "X-FormatX-Edge-Stability', 'r538-first-paint-header-warm'",
   "X-FormatX-Mobile-LCP', 'r538-critical-chain-header-preloaded'",
+  "X-FormatX-Scheduler-Cache', 'r540-navigation-mag-sound'",
   'rewrittenSchedulerResponse','MOBILE_FIRST_PAINT_PRELOAD','P0_FIRST_PAINT_PRELOAD','HEART_STYLE_PRELOAD'
-],'R538 production cache/prepaint/navigation-MAG delivery contract');
+],'R540 production cache/prepaint/navigation-MAG delivery contract');
 absent(worker,['deferReferenceModeBoot','REFERENCE_BOOT_DEFERRED_PREFIX','GLOBAL_LEGACY_PATHS'],'production must not defer the prepaint selector or global critical shell');
 
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 for(const source of [intro,scheduler,motion,contentRuntime,current,renderer,life,governor,controls,wdaControls,awardRuntime,coreTouch,nativeTouch,shapeSync,mini,referenceBoot])new Function(source);
-console.log('PASS: R540 validates navigation-owned native living MAG, navigation-armed opt-in SOUND control, semantic main/hero hit ownership, bounded independent intro, strict no-manual-PAUSE contract, early first-paint warming and automatic lifecycle suspension.');
+console.log('PASS: R540 validates navigation-owned native living MAG, navigation-armed opt-in SOUND control, semantic main/hero hit ownership, bounded independent intro, fresh scheduler/heart cache identity, strict no-manual-PAUSE contract and automatic lifecycle suspension.');
