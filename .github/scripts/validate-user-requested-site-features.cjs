@@ -26,6 +26,8 @@ const feedbackSchema = read('billing-worker/src/feedback-schema.js');
 const feedbackEntry = read('billing-worker/src/production-feedback-entry.js');
 const feedbackUi = read('docs/scifi-ui/scripts/formatx-feedback.js');
 const living = read('docs/scifi-ui/scripts/living-architecture.js');
+const paymentSurface = read('docs/scifi-ui/scripts/formatx-payment-surface-r553.js');
+const paymentStyle = read('docs/scifi-ui/styles/payment-qr.css');
 const apex = read('docs/scifi-ui/scripts/formatx-apex.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice.js');
 const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
@@ -100,8 +102,25 @@ assert.ok(includesAll(feedbackApi, ['runWithFeedbackTable', 'publish_permission 
 assert.ok(includesAll(feedbackEntry, ["['/downloads/', '/scifi-ui/downloads/']", 'handleFeedbackRequest(request, env)']), 'public alias/feedback routing missing');
 assert.ok(includesAll(feedbackUi, ['function renderPublicReviews', "rootMargin: '800px 0px'", 'paragraph.textContent']), 'lazy public comment rendering missing');
 
-assert.ok(includesAll(living, ["ROOT.dataset.fxThreeLoader = 'deferred-user-activation'", "addEventListener('formatx:immersiveactivate', loadThreeExperience, { once: true })", "image.loading = 'lazy'"]), 'heavy renderer/QR work is not deferred');
+assert.ok(includesAll(living, [
+  "ROOT.dataset.fxThreeLoader = 'deferred-user-activation'",
+  "addEventListener('formatx:immersiveactivate', () => { void loadThreeExperience(); }, { once: true })",
+  "image.loading = 'lazy'",
+  "rootMargin: '700px 0px'"
+]), 'heavy Organism/QR image work is not deferred');
 assert.ok(!living.includes("document.addEventListener('formatx:introcomplete', loadThreeExperience"), 'heavy renderer must not auto-load after intro');
+assert.ok(includesAll(paymentSurface, [
+  'afterFirstPaint(ensureStyle)',
+  "const STYLE='/scifi-ui/styles/payment-qr.css?v=20260906-r553-pricing-visible'",
+  "fxPaymentSurfaceVisibleR553=payment&&dock?'payment-and-qr-visible':'partial-surface'"
+]), 'R553 payment visual layer must load after first paint while remaining visible');
+assert.ok(includesAll(paymentStyle, [
+  'body.living-architecture #pricing .payment',
+  'body.living-architecture #pricing #formatx-plan-qr-dock',
+  'body.living-architecture #pricing .fx-plan-qr-link',
+  'pointer-events: auto !important'
+]), 'R553 visible payment/QR CSS contract missing');
+assert.ok(!paymentStyle.includes('.reference-commerce #formatx-plan-qr-dock'), 'payment visibility must not depend on legacy reference-commerce mode');
 assert.ok(includesAll(apex, ["const RELEASE_API = './data/current-release.json'", 'requestAnimationFrame(progress)', 'requestAnimationFrame(apply)']), 'frame-throttled local release metadata contract missing');
 assert.ok(!apex.includes('https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest'), 'homepage must not call GitHub release API directly');
 
@@ -122,4 +141,4 @@ assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes(
 
 require('./validate-signature-system-r185.cjs');
 require('./validate-igloo-floor.cjs');
-console.log('PASS: requested site features validated with R534 intent-loaded seamless-v7 mobile/desktop scrolling, current semantic language owner, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
+console.log('PASS: requested site features validated with R553 deferred visible payment/QR, R534 intent-loaded seamless-v7 scrolling, current semantic language owner, native MAG, responsive UI, feedback, downloads and production gates.');
