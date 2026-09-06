@@ -1,8 +1,9 @@
-/* FormatX r547 — navigation-owned MAG + SOUND control + independent intent enhancements.
+/* FormatX r549 — navigation-owned MAG + SOUND control + independent intent enhancements.
    MAG and the lightweight SOUND control owner are automatic from navigation. The
-   native R326 renderer now waits only for the bounded intro release before shader
-   compile; no user interaction or audit path controls MAG startup. Heavy Organism/
-   motion enhancements and the full Design System stylesheet stay outside first paint. */
+   native R326 renderer yields only to first visual paint, then starts while the
+   bounded intro remains visible; no user interaction, audit path, or intro-release
+   event controls MAG startup. Heavy Organism/motion enhancements and the full
+   Design System stylesheet stay outside first paint. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -18,13 +19,13 @@ root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
 root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
-root.dataset.fxMagNavigationStartupR547='bounded-intro-release-no-user-gate';
+root.dataset.fxMagNavigationStartupR549='first-paint-yield-under-intro-no-user-gate';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r547-bounded-intro-release-yield';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r549-first-paint-yield-under-intro';
 const SOUND_CONTROL='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r542-professional-owner-authoritative';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r536-automatic-lifecycle-no-audit-path';
