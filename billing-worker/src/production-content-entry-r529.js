@@ -12,9 +12,13 @@ const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '
 const CRITICAL_CORE_PATH = '/scifi-ui/styles/formatx-critical-core-r227.css';
 const P0_SCHEDULER_PATH = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js';
 const P0_MOTION_SCHEDULER_RE = /formatx-p0-motion-scheduler-r490\.js\?v=[^"']+/g;
-const P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r537-navigation-interaction';
+const P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r538-pause-free-cache-chain';
 const MOTION_RUNTIME_RE = /formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g;
 const MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle';
+const CONTENT_RUNTIME_RE = /formatx-content-runtime-loader-r241\.js\?v=[^"']+/g;
+const CONTENT_RUNTIME_URL = 'formatx-content-runtime-loader-r241.js?v=20260906-r538-no-manual-pause';
+const CONTENT_STANDARD_RE = /formatx-content-standard\.css(?:\?v=[^"']+)?/g;
+const CONTENT_STANDARD_URL = 'formatx-content-standard.css?v=20260906-r538-mobile-touch-spacing';
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
 const DEFERRED_SCHEDULER_URL = 'formatx-deferred-css-r487.js?v=20260906-r535-mobile-scroll-intent-v2';
 const EVENT_HORIZON_RE = /formatx-event-horizon\.js\?v=[^"']+/g;
@@ -130,19 +134,19 @@ function addFirstPaintPreloads(headers) {
   ].join(', ');
   headers.set('Link', existing ? `${existing}, ${preloads}` : preloads);
 }
-function r536Headers(source, localCandidate) {
+function r538Headers(source, localCandidate) {
   const headers = new Headers(source);
-  headers.set('X-FormatX-Transport-Stability', 'r536-direct-canonical-living-core');
+  headers.set('X-FormatX-Transport-Stability', 'r538-direct-canonical-living-core');
   headers.set('X-FormatX-Edge-Stability', 'r538-first-paint-header-warm');
   headers.set('X-FormatX-CSS-Scheduler', 'r536-global-critical-first-paint-mobile-legacy-intent');
-  headers.set('X-FormatX-Product-Contract', 'r536-navigation-mag-automatic-lifecycle');
-  headers.set('X-FormatX-MAG-Startup', 'r536-navigation-owned-critical-living-core');
+  headers.set('X-FormatX-Product-Contract', 'r538-navigation-mag-no-manual-pause');
+  headers.set('X-FormatX-MAG-Startup', 'r538-navigation-owned-critical-living-core');
   headers.set('X-FormatX-Mobile-LCP', 'r538-critical-chain-header-preloaded');
   headers.set('X-FormatX-Preloader', 'r534-static-content-roadmap-timing');
   headers.set('X-FormatX-Preloader-Cache', 'r537-static-lcp-no-manual-pause');
   headers.set('X-FormatX-Reference-Boot', 'r536-prepaint-layout-selector');
   if (localCandidate) {
-    headers.set('X-FormatX-Candidate-Delivery', 'r536-exact-production-entry-localhost-8787');
+    headers.set('X-FormatX-Candidate-Delivery', 'r538-exact-production-entry-localhost-8787');
     headers.set('X-FormatX-Candidate-Canonical-Origin', 'formatxsuite.com');
     headers.set('Link', '<https://formatxsuite.com/>; rel="canonical"');
   }
@@ -155,7 +159,7 @@ function rewrittenSchedulerResponse(response, headers) {
     headers.delete('Content-Encoding');
     headers.delete('ETag');
     headers.set('Cache-Control', 'no-store, max-age=0');
-    headers.set('X-FormatX-Scheduler-Cache', 'r537-navigation-interaction');
+    headers.set('X-FormatX-Scheduler-Cache', 'r538-pause-free-cache-chain');
     return new Response(body, { status: response.status, statusText: response.statusText, headers });
   });
 }
@@ -168,7 +172,7 @@ export default {
     const response = await canonicalProduction.fetch(request, env, ctx);
     if (!isSafeMethod(request) || !isDeliveryHost(deliveryUrl, localCandidate)) return response;
 
-    const headers = r536Headers(response.headers, localCandidate);
+    const headers = r538Headers(response.headers, localCandidate);
     if (request.method === 'HEAD') { headers.delete('Content-Length'); return new Response(null, { status: response.status, statusText: response.statusText, headers }); }
     const type = headers.get('Content-Type') || '';
     if (deliveryUrl.pathname === P0_SCHEDULER_PATH && /javascript|text\/plain/i.test(type)) {
@@ -178,6 +182,8 @@ export default {
 
     let html = restoreCriticalCoreFirstPaint(await response.text());
     html = html.replace(P0_MOTION_SCHEDULER_RE, P0_MOTION_SCHEDULER_URL);
+    html = html.replace(CONTENT_RUNTIME_RE, CONTENT_RUNTIME_URL);
+    html = html.replace(CONTENT_STANDARD_RE, CONTENT_STANDARD_URL);
     html = html.replace(DEFERRED_SCHEDULER_RE, DEFERRED_SCHEDULER_URL);
     html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL);
     html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL);
