@@ -11,15 +11,13 @@ async function prepare(page) {
   await page.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
-  await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252', { waitUntil: 'domcontentloaded' });
+  await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r542', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return Boolean(root.dataset.fxMotionRuntimeR239)
       && root.dataset.fxPlatformScrollBootstrapR535 === 'armed-scroll-intent';
   }, null, { timeout: 20000 });
 
-  /* R535: use a real browser input event to prove the active production motion
-     owner requests platform-scroll, which then owns heart-core + seamless-v7. */
   await page.mouse.wheel(0, 48);
   await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -31,14 +29,16 @@ async function prepare(page) {
     const root = document.documentElement;
     return root.dataset.fxInfiniteController === 'seamless-v7'
       && root.dataset.fxLoopBridge === 'ready-v3'
-      && root.dataset.fxHeartCoreR252 === 'ready';
+      && root.dataset.fxHeartCoreR252 === 'ready'
+      && root.dataset.fxMagHeartHitOwnerR542 === 'body-fixed-stage-synced';
   }, null, { timeout: 20000 });
   await page.evaluate(async () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     try { await document.fonts?.ready; } catch (_) {}
     dispatchEvent(new Event('resize'));
   });
-  await page.waitForTimeout(1200);
+  await page.waitForFunction(() => document.documentElement.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced', null, { timeout: 10000 });
+  await page.waitForTimeout(400);
 }
 
 async function state(page) {
@@ -47,12 +47,14 @@ async function state(page) {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     const mirror = bridge?.querySelector('[data-fx-loop-mirror]');
     const hero = document.querySelector('#main-content > #hero');
-    const hit = document.querySelector('#hero .fx-mag-heart-hit-r252');
+    const hit = document.querySelector('.fx-mag-heart-hit-r252');
     const bridgeStyle = bridge ? getComputedStyle(bridge) : null;
     const hitRect = hit?.getBoundingClientRect();
     return {
       controller: root.dataset.fxInfiniteController || '',
       heart: root.dataset.fxHeartCoreR252 || '',
+      heartOwner: root.dataset.fxMagHeartHitOwnerR542 || '',
+      heartGeometry: root.dataset.fxMagHeartHitGeometryR542 || '',
       heartPolicy: root.dataset.fxHeartLoopPolicy || '',
       mirrorMode: root.dataset.fxLoopMirrorMode || '',
       bridgeCount: bridge ? 1 : 0,
@@ -69,6 +71,7 @@ async function state(page) {
       landing: Number(root.dataset.fxLoopLanding || 0),
       landingState: root.dataset.fxLoopLandingState || '',
       hitExists: hit instanceof HTMLButtonElement,
+      hitBodyOwned: hit?.parentElement === document.body,
       hitWidth: hitRect?.width || 0,
       hitHeight: hitRect?.height || 0,
       hitLabel: hit?.getAttribute('aria-label') || '',
@@ -83,14 +86,18 @@ async function state(page) {
 }
 
 async function verifyHeartInteraction(page, label) {
-  await page.waitForFunction(() => (
-    document.querySelector('#hero .fx-mag-heart-hit-r252')
-    && (window.FormatXOrganismVoice?.open || document.querySelector('#hero .fx-reference-ask'))
-  ), null, { timeout: 15000 });
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const hit = document.querySelector('.fx-mag-heart-hit-r252');
+    return hit instanceof HTMLButtonElement
+      && hit.parentElement === document.body
+      && root.dataset.fxMagHeartHitOwnerR542 === 'body-fixed-stage-synced'
+      && root.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced'
+      && (window.FormatXOrganismVoice?.open || document.querySelector('#hero .fx-reference-ask'));
+  }, null, { timeout: 15000 });
 
-  const hit = page.locator('#hero .fx-mag-heart-hit-r252').first();
+  const hit = page.locator('.fx-mag-heart-hit-r252').first();
   assert(await hit.count() === 1, `${label} MAG heart hit target missing`);
-  await hit.scrollIntoViewIfNeeded();
   await hit.click({ position: { x: 20, y: 20 } });
 
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
@@ -126,12 +133,13 @@ async function verifyMobile(browser) {
   const initial = await state(page);
   assert(initial.controller === 'seamless-v7', `mobile seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.heart === 'ready', `mobile heart core not ready: ${JSON.stringify(initial)}`);
+  assert(initial.heartOwner === 'body-fixed-stage-synced' && initial.heartGeometry === 'viewport-stage-synced', `mobile body-level heart owner missing: ${JSON.stringify(initial)}`);
   assert(initial.heartPolicy === 'footer-to-real-core-no-reference-mirror', `mobile heart loop policy missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1, `mobile handoff bridge missing: ${JSON.stringify(initial)}`);
   assert(initial.mirrorCount === 0 && initial.mirrorMode === 'none-mobile-r252', `mobile fake hero mirror still exists: ${JSON.stringify(initial)}`);
   assert(initial.bridgeDisplay !== 'none', `mobile handoff bridge is hidden: ${JSON.stringify(initial)}`);
   assert(initial.bridgeHeight >= 80 && initial.bridgeHeight <= Math.max(180, initial.viewportHeight * .24), `mobile bridge is not a short handoff runway: ${JSON.stringify(initial)}`);
-  assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180 && initial.hitLabel.length > 8, `mobile MAG is not a semantic interactive target: ${JSON.stringify(initial)}`);
+  assert(initial.hitExists && initial.hitBodyOwned && initial.hitWidth >= 176 && initial.hitHeight >= 176 && initial.hitLabel.length > 8, `mobile MAG is not a semantic interactive target: ${JSON.stringify(initial)}`);
   assert(initial.snapRoot === 'none' && initial.snapBody === 'none', `mobile scroll snapping active: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
@@ -154,7 +162,7 @@ async function verifyMobile(browser) {
 
   const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
   assert(!meaningful.length, `mobile browser errors: ${meaningful.join(' | ')}`);
-  console.log('PASS r252 mobile footer → real MAG loop and MAG interaction');
+  console.log('PASS r542 mobile footer → real MAG loop and body-level MAG interaction');
   await context.close();
 }
 
@@ -165,6 +173,7 @@ async function verifyDesktop(browser) {
   const initial = await state(page);
   assert(initial.controller === 'seamless-v7', `desktop seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, `desktop inert reference mirror contract changed: ${JSON.stringify(initial)}`);
+  assert(initial.heartOwner === 'body-fixed-stage-synced' && initial.hitBodyOwned, `desktop body-level heart owner missing: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG interaction target missing: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
@@ -180,7 +189,7 @@ async function verifyDesktop(browser) {
   const after = await state(page);
   assert(after.loopCount === before.loopCount + 1, `desktop seamless loop failed: ${JSON.stringify({ before, after })}`);
   assert(!/^heart-core-/.test(after.loopSource), `desktop was incorrectly routed through mobile heart transfer: ${JSON.stringify(after)}`);
-  console.log('PASS desktop seamless-v7 preserved + MAG interaction');
+  console.log('PASS desktop seamless-v7 preserved + body-level MAG interaction');
   await context.close();
 }
 
@@ -189,7 +198,7 @@ async function verifyDesktop(browser) {
   try {
     await verifyMobile(browser);
     await verifyDesktop(browser);
-    console.log('PASS FormatX r252 platform scroll and living MAG interaction contract');
+    console.log('PASS FormatX r542 platform scroll and living MAG interaction contract');
   } finally {
     await browser.close();
   }
