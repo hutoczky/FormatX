@@ -2,9 +2,9 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'heart-core-r551';
+  const VERSION = 'heart-core-r569';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r549-pointer-transparent-router';
+  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r569-trusted-route-stable';
   const LOOP_OVERSHOOT = 28;
   const HEART_HIT_Z = '2147482500';
   let touchActive = false;
@@ -69,7 +69,7 @@
       detail: { phase: 'activate', source, x: 0, y: 0, revision: VERSION }
     }));
     dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
-      detail: { source: `mag-${source}-r551` }
+      detail: { source: `mag-${source}-r569` }
     }));
 
     const hit = document.querySelector('.fx-mag-heart-hit-r252');
@@ -189,7 +189,9 @@
     syncHeartGeometry(hit);
     root.dataset.fxMagHeartHit = 'ready-r542';
     root.dataset.fxMagHeartHitOwnerR542 = 'body-fixed-stage-synced';
-    root.dataset.fxMagHeartPhysicalRouteR546 = 'armed-trusted-stage-hit';
+    if (root.dataset.fxMagHeartPhysicalRouteR546 !== 'captured-stage-hit') {
+      root.dataset.fxMagHeartPhysicalRouteR546 = 'armed-trusted-stage-hit';
+    }
     return true;
   }
 
