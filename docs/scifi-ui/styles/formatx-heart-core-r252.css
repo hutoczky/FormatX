@@ -1,9 +1,20 @@
-/* FormatX r537 — MAG as the living heart of the page.
+/* FormatX r538 — MAG as the living heart of the page.
    This layer owns only the MAG interaction hit-area and the mobile loop handoff.
-   The WebGL host is visual-only; the semantic heart remains the explicit hit owner. */
+   The hero/WebGL layout is visual-only; semantic controls explicitly own input. */
 
+html body.living-architecture #hero .hero-grid,
 html body.living-architecture #hero .hero-space {
   pointer-events: none;
+}
+
+/* The grid itself must never cover the semantic MAG heart. Re-enable only the
+   real interactive descendants so normal CTAs/navigation keep native hit-testing. */
+html body.living-architecture #hero .hero-copy,
+html body.living-architecture #hero .hero-space > .fx-immersive-launch,
+html body.living-architecture #hero .hero-space > .fx-organism-map,
+html body.living-architecture #hero .hero-space > .fx-organism-map a,
+html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+  pointer-events: auto;
 }
 
 .fx-mag-heart-hit-r252 {
@@ -27,7 +38,7 @@ html body.living-architecture #hero .hero-space {
   pointer-events: auto !important;
 }
 
-/* R537: R326 pointer/touch logic listens globally and reads stage geometry, so
+/* R538: R326 pointer/touch logic listens globally and reads stage geometry, so
    neither the host nor the visual WebGL stage needs to win DOM hit-testing. */
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   pointer-events: none !important;
