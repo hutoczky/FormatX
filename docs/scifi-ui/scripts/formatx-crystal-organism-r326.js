@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
-  const REVISION = 'living-luminous-electric-crystal-r454';
+  const REVISION = 'living-luminous-electric-crystal-r550-parallel-compile';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
@@ -25,22 +25,39 @@
   root.dataset.fxCoreMobileV55 = 'booting-v55';
   root.dataset.fxCoreMobileV69 = 'booting-v69';
 
-  function compile(gl, type, source) {
+  function createShader(gl, type, source) {
     const shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      const message = gl.getShaderInfoLog(shader) || 'crystal organism shader compile failed';
-      gl.deleteShader(shader);
-      throw new Error(message);
-    }
     return shader;
   }
 
-  function link(gl, vertexSource, fragmentSource) {
+  function shaderFailure(gl, shader, fallback) {
+    if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) return '';
+    return gl.getShaderInfoLog(shader) || fallback;
+  }
+
+  function waitForProgram(gl, program, extension) {
+    if (!extension) return Promise.resolve('synchronous-fallback');
+    root.dataset.fxCoreShaderCompileR550 = 'parallel-khr-pending';
+    return new Promise(resolve => {
+      const poll = () => {
+        if (gl.isContextLost()) { resolve('context-lost'); return; }
+        if (gl.getProgramParameter(program, extension.COMPLETION_STATUS_KHR)) {
+          root.dataset.fxCoreShaderCompileR550 = 'parallel-khr-complete';
+          resolve('parallel-khr');
+          return;
+        }
+        setTimeout(poll, 12);
+      };
+      poll();
+    });
+  }
+
+  async function link(gl, vertexSource, fragmentSource) {
     const program = gl.createProgram();
-    const vertex = compile(gl, gl.VERTEX_SHADER, vertexSource);
-    const fragment = compile(gl, gl.FRAGMENT_SHADER, fragmentSource);
+    const vertex = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+    const fragment = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
     gl.attachShader(program, vertex);
     gl.attachShader(program, fragment);
     gl.bindAttribLocation(program, 0, 'aSphere');
@@ -51,8 +68,23 @@
     gl.bindAttribLocation(program, 5, 'aBary');
     gl.bindAttribLocation(program, 6, 'aFacet');
     gl.linkProgram(program);
+
+    const parallel = gl.getExtension('KHR_parallel_shader_compile');
+    const compileMode = await waitForProgram(gl, program, parallel);
+    if (compileMode === 'context-lost') {
+      gl.deleteShader(vertex); gl.deleteShader(fragment); gl.deleteProgram(program);
+      throw new Error('crystal organism context lost during shader compile');
+    }
+    if (!parallel) root.dataset.fxCoreShaderCompileR550 = 'synchronous-fallback';
+
+    const vertexError = shaderFailure(gl, vertex, 'crystal organism vertex shader compile failed');
+    const fragmentError = shaderFailure(gl, fragment, 'crystal organism fragment shader compile failed');
     gl.deleteShader(vertex);
     gl.deleteShader(fragment);
+    if (vertexError || fragmentError) {
+      gl.deleteProgram(program);
+      throw new Error(vertexError || fragmentError);
+    }
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       const message = gl.getProgramInfoLog(program) || 'crystal organism program link failed';
       gl.deleteProgram(program);
@@ -171,11 +203,11 @@
     };
   }
 
-  function boot(attempt=0) {
+  async function boot(attempt=0) {
     const hero = document.getElementById('hero');
     const host = hero?.querySelector('.hero-space');
     if (!(hero instanceof HTMLElement) || !(host instanceof HTMLElement)) {
-      if (attempt < 180) requestAnimationFrame(() => boot(attempt+1));
+      if (attempt < 180) requestAnimationFrame(() => { void boot(attempt+1); });
       else root.dataset.fxCrystalOrganismR326 = 'host-unavailable';
       return;
     }
@@ -386,7 +418,7 @@
       }`;
 
     let program;
-    try { program=link(gl,vertexSource,fragmentSource); }
+    try { program=await link(gl,vertexSource,fragmentSource); }
     catch(error){
       console.warn('FormatX crystal organism unavailable:',error);
       stage.remove();
@@ -506,10 +538,6 @@
       boost(.84,mobile?5:8);
     }
 
-    /* One bounded native surface sweep every five to six seconds. Background,
-       offscreen and reduced-motion suspend the timer. Zero-idle lifecycle state
-       does not cancel the timer: the sweep event wakes the single renderer only
-       for its bounded window, then the governor returns it to zero frames. */
     function scheduleHeartbeat(){
       clearTimeout(heartbeatTimer);heartbeatTimer=0;
       root.dataset.fxCoreIdleHeartbeatR441='disabled-no-continuous-rendering';
@@ -747,7 +775,7 @@
       root.dataset.fxCoreReal3d='context-lost';root.dataset.fxCrystalOrganismR326='context-lost';
     });
     listen(canvas,'webglcontextrestored',()=>{
-      root.dataset.fxCrystalOrganismR326='restoring';destroy();requestAnimationFrame(()=>boot());
+      root.dataset.fxCrystalOrganismR326='restoring';destroy();requestAnimationFrame(()=>{ void boot(); });
     });
 
     const ro=new ResizeObserver(()=>{if(resize())schedule(1);});
@@ -859,6 +887,7 @@
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
     root.dataset.fxCoreLifecycleR536='automatic-zero-idle-visible-pulse';
+    root.dataset.fxCoreShaderCompileModeR550=root.dataset.fxCoreShaderCompileR550||'synchronous-fallback';
 
     publishShape('initial');
     schedule(1);
@@ -866,12 +895,13 @@
     scheduleSurfacePulse();
     scheduleAutonomousMorph();
     dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
-      version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
-      geometry:'closed-3d-volume',morph:'crystal-sphere-native-webgl',interactive:true,organism:true,legacyFallback:false
+      version:'r550',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
+      geometry:'closed-3d-volume',morph:'crystal-sphere-native-webgl',interactive:true,organism:true,legacyFallback:false,
+      shaderCompile:root.dataset.fxCoreShaderCompileModeR550
     }}));
     listen(window,'pagehide',destroy,{once:true});
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>boot(),{once:true});
-  else boot();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{ void boot(); },{once:true});
+  else void boot();
 }());
