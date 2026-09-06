@@ -18,7 +18,7 @@ const MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r53
 const DEFERRED_SCHEDULER_RE = /formatx-deferred-css-r487\.js\?v=[^"']+/g;
 const DEFERRED_SCHEDULER_URL = 'formatx-deferred-css-r487.js?v=20260906-r535-mobile-scroll-intent-v2';
 const EVENT_HORIZON_RE = /formatx-event-horizon\.js\?v=[^"']+/g;
-const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r534-static-lcp-v1';
+const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260906-r537-no-manual-pause';
 const DEFERRED_REDUCED_RE = /formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g;
 const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner';
 const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
@@ -116,7 +116,7 @@ function r536Headers(source, localCandidate) {
   headers.set('X-FormatX-MAG-Startup', 'r536-navigation-owned-critical-living-core');
   headers.set('X-FormatX-Mobile-LCP', 'r536-critical-shell-first-paint-preloaded');
   headers.set('X-FormatX-Preloader', 'r534-static-content-roadmap-timing');
-  headers.set('X-FormatX-Preloader-Cache', 'r534-static-lcp-v1-compositor-css-v1');
+  headers.set('X-FormatX-Preloader-Cache', 'r537-static-lcp-no-manual-pause');
   headers.set('X-FormatX-Reference-Boot', 'r536-prepaint-layout-selector');
   if (localCandidate) {
     headers.set('X-FormatX-Candidate-Delivery', 'r536-exact-production-entry-localhost-8787');
