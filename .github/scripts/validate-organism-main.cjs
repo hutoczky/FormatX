@@ -34,27 +34,32 @@ function meaningfulDiagnostics(items) {
 async function activateImmersive(page, label) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
-    const hit = document.querySelector('#hero .fx-mag-heart-hit-r252');
+    const hit = document.querySelector('.fx-mag-heart-hit-r252');
     return root.dataset.fxOrganismInterface === 'ready'
       || (root.dataset.fxThreeLoader === 'deferred-user-activation'
         && root.dataset.fxHeartCoreR252 === 'ready'
+        && root.dataset.fxMagHeartHitOwnerR542 === 'body-fixed-stage-synced'
+        && root.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced'
         && hit instanceof HTMLButtonElement
+        && hit.parentElement === document.body
         && hit.dataset.fxHeartBound === 'true');
   }, null, { timeout: 30000 });
   const armed = await page.evaluate(() => ({
     threeLoader: document.documentElement.dataset.fxThreeLoader || '',
     organismInterface: document.documentElement.dataset.fxOrganismInterface || '',
     heart: document.documentElement.dataset.fxHeartCoreR252 || '',
-    heartBound: document.querySelector('#hero .fx-mag-heart-hit-r252')?.dataset.fxHeartBound || ''
+    heartOwner: document.documentElement.dataset.fxMagHeartHitOwnerR542 || '',
+    heartGeometry: document.documentElement.dataset.fxMagHeartHitGeometryR542 || '',
+    heartBound: document.querySelector('.fx-mag-heart-hit-r252')?.dataset.fxHeartBound || '',
+    heartParent: document.querySelector('.fx-mag-heart-hit-r252')?.parentElement?.tagName || ''
   }));
   mark(label + ': immersive-loader-armed', armed);
   if (armed.organismInterface === 'ready') return;
 
-  const heart = page.locator('#hero .fx-mag-heart-hit-r252').first();
+  const heart = page.locator('.fx-mag-heart-hit-r252').first();
   await heart.waitFor({ state: 'visible', timeout: 10000 });
-  await heart.scrollIntoViewIfNeeded();
   await heart.click({ position: { x: 20, y: 20 }, timeout: 5000 });
-  mark(label + ': immersive-activated', { source: 'real-mag-heart-click' });
+  mark(label + ': immersive-activated', { source: 'real-body-level-mag-heart-click' });
 
   await page.waitForFunction(() => {
     const root = document.documentElement;
