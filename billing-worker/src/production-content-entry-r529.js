@@ -1,11 +1,10 @@
 import canonicalProduction from './production-content-entry.js';
 
-/* FormatX R551 — direct canonical production ownership + measured critical path.
+/* FormatX R553 — direct canonical production ownership + measured critical path.
    Candidate mode exists only behind Wrangler-only FORMATX_LOCAL_CANDIDATE=1.
-   The canonical R514 owner keeps critical-core post-first-paint instead of this
-   wrapper restoring the 28 KB legacy layer into the blocking path. The semantic
-   MAG heart button remains static, while its non-critical stylesheet is loaded by
-   the navigation-owned heart runtime. No visitor/audit-specific product path. */
+   The canonical owner keeps critical-core and the payment/QR visual layer out of
+   the blocking hero path. Payment UI is delivered as a deferred same-product
+   enhancement; MAG/navigation ownership and audit behavior remain unchanged. */
 const PUBLIC_HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN='https://formatxsuite.com';
 const HOMEPAGE_PATHS=new Set(['/','/index.html','/scifi-ui','/scifi-ui/','/scifi-ui/index.html']);
@@ -28,6 +27,8 @@ const QUALITY_RE=/formatx-quality-r461\.css\?v=[^"']+/g;
 const QUALITY_URL='formatx-quality-r461.css?v=20260906-r538-no-manual-pause';
 const HEART_STYLE_RE=/formatx-heart-core-r252\.css(?:\?v=[^"']+)?/g;
 const HEART_STYLE_URL='formatx-heart-core-r252.css?v=20260906-r549-pointer-transparent-router';
+const PAYMENT_SURFACE_SCRIPT='/scifi-ui/scripts/formatx-payment-surface-r553.js?v=20260906-r553-visible-payment-qr';
+const PAYMENT_SURFACE_TAG=`<script defer data-fx-payment-surface-r553="true" src="${PAYMENT_SURFACE_SCRIPT}"></script>`;
 const MOBILE_MEDIA='(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MOTION_MEDIA='(prefers-reduced-motion: no-preference) and (min-width: 901px)';
 const HEART_BUTTON='<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
@@ -59,8 +60,9 @@ function addAttrs(tag,attrs){return tag.replace(/\s*\/?>$/,close=>`${attrs}${clo
 function deferredMobile(tag){let next=withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag,'media'),'fetchpriority'),'data-fx-r487-deferred-style'),'data-fx-r487-media');return addAttrs(next,` data-fx-r487-deferred-style="true" data-fx-r487-media="${MOBILE_MEDIA}" media="print" data-fx-r529-mobile-legacy="true"`);}
 function stabilizeMobileFirstPaint(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>MOBILE_LEGACY_PATHS.has(stylesheetPath(tag))?deferredMobile(tag):tag);}
 function injectStaticHeart(html){let source=String(html||'');if(!source.includes('class="fx-mag-heart-hit-r252"'))source=source.replace(/<div\s+class=(["'])hero-space\1\s*>/i,match=>`${match}\n          ${HEART_BUTTON}`);return source;}
+function injectPaymentSurface(html){let source=String(html||'');if(source.includes('data-fx-payment-surface-r553='))return source;return source.replace(/<\/body>/i,`${PAYMENT_SURFACE_TAG}\n</body>`);}
 function addFirstPaintPreloads(headers){const existing=headers.get('Link');const preloads=[MOBILE_FIRST_PAINT_PRELOAD,P0_FIRST_PAINT_PRELOAD,CRITICAL_SHELL_PRELOAD,QUALITY_PRELOAD,AWARD_READINESS_PRELOAD,FIRST_PAINT_R206_PRELOAD,REFERENCE_BOOT_PRELOAD,REFERENCE_PRODUCTION_PRELOAD].join(', ');headers.set('Link',existing?`${existing}, ${preloads}`:preloads);}
-function r543Headers(source,localCandidate){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r543-direct-canonical-extended-intro');headers.set('X-FormatX-Edge-Stability','r551-post-paint-critical-core-navigation-mag');headers.set('X-FormatX-CSS-Scheduler','r551-canonical-post-first-paint-critical-core');headers.set('X-FormatX-Product-Contract','r543-navigation-mag-elevated-heart-no-manual-pause');headers.set('X-FormatX-MAG-Startup','r543-navigation-owned-elevated-body-heart');headers.set('X-FormatX-Mobile-LCP','r551-critical-core-post-first-paint-heart-runtime-style');headers.set('X-FormatX-Preloader','r543-static-content-extended-roadmap-timing');headers.set('X-FormatX-Preloader-Cache','r543-extended-static-lcp-audio-owner-safe');headers.set('X-FormatX-Reference-Boot','r536-prepaint-layout-selector');if(localCandidate){headers.set('X-FormatX-Candidate-Delivery','r543-exact-production-entry-localhost-8787');headers.set('X-FormatX-Candidate-Canonical-Origin','formatxsuite.com');headers.set('Link','<https://formatxsuite.com/>; rel="canonical"');}return headers;}
+function r543Headers(source,localCandidate){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r543-direct-canonical-extended-intro');headers.set('X-FormatX-Edge-Stability','r551-post-paint-critical-core-navigation-mag');headers.set('X-FormatX-CSS-Scheduler','r551-canonical-post-first-paint-critical-core');headers.set('X-FormatX-Product-Contract','r543-navigation-mag-elevated-heart-no-manual-pause');headers.set('X-FormatX-MAG-Startup','r543-navigation-owned-elevated-body-heart');headers.set('X-FormatX-Mobile-LCP','r551-critical-core-post-first-paint-heart-runtime-style');headers.set('X-FormatX-Preloader','r543-static-content-extended-roadmap-timing');headers.set('X-FormatX-Preloader-Cache','r543-extended-static-lcp-audio-owner-safe');headers.set('X-FormatX-Reference-Boot','r536-prepaint-layout-selector');headers.set('X-FormatX-Payment-Surface','r553-post-paint-visible-qr');if(localCandidate){headers.set('X-FormatX-Candidate-Delivery','r543-exact-production-entry-localhost-8787');headers.set('X-FormatX-Candidate-Canonical-Origin','formatxsuite.com');headers.set('Link','<https://formatxsuite.com/>; rel="canonical"');}return headers;}
 function rewrittenSchedulerResponse(response,headers){return response.text().then(source=>{const body=String(source||'').replace(MOTION_RUNTIME_RE,MOTION_RUNTIME_URL);headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');headers.set('X-FormatX-Scheduler-Cache','r543-extended-intro-elevated-heart');return new Response(body,{status:response.status,statusText:response.statusText,headers});});}
 
 export default{async fetch(request,env,ctx){
@@ -86,6 +88,7 @@ export default{async fetch(request,env,ctx){
   if(HOMEPAGE_PATHS.has(deliveryUrl.pathname)){
     html=stabilizeMobileFirstPaint(html);
     html=injectStaticHeart(html);
+    html=injectPaymentSurface(html);
     addFirstPaintPreloads(headers);
   }
   headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');
