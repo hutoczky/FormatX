@@ -68,83 +68,90 @@
     return './assets/qr/' + planId + '-' + selectedCurrency.toLowerCase() + '.svg?v=20260730-qr1';
   }
 
-  function loadThreeExperience() {
+  function ensureStyle(href, attr, onReady) {
+    let link = document.querySelector(`link[${attr}]`);
+    if (link instanceof HTMLLinkElement) return link;
+    link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.setAttribute(attr, 'true');
+    if (onReady) link.addEventListener('load', onReady, { once: true });
+    document.head.appendChild(link);
+    return link;
+  }
+
+  function loadScriptOrdered(src, attr) {
+    return new Promise((resolve, reject) => {
+      let script = document.querySelector(`script[${attr}]`);
+      if (script instanceof HTMLScriptElement && script.dataset.fxLoadedR552 === 'true') {
+        resolve(script);
+        return;
+      }
+      const loaded = () => {
+        script.dataset.fxLoadedR552 = 'true';
+        resolve(script);
+      };
+      const failed = () => reject(new Error(`failed to load ${src}`));
+      if (script instanceof HTMLScriptElement) {
+        script.addEventListener('load', loaded, { once: true });
+        script.addEventListener('error', failed, { once: true });
+        return;
+      }
+      script = document.createElement('script');
+      script.src = src;
+      script.async = false;
+      script.setAttribute(attr, 'true');
+      script.addEventListener('load', loaded, { once: true });
+      script.addEventListener('error', failed, { once: true });
+      document.head.appendChild(script);
+    });
+  }
+
+  async function loadThreeExperience() {
     if (threeLoadStarted) return;
     threeLoadStarted = true;
-    ROOT.dataset.fxThreeLoader = 'starting-on-demand';
+    ROOT.dataset.fxThreeLoader = 'starting-on-demand-r552';
 
-    if (!document.querySelector('link[data-fx-cryosphere-style]')) {
-      const style = document.createElement('link');
-      style.rel = 'stylesheet';
-      style.href = './styles/igloo-parity.css?v=20260727-webgpu-1';
-      style.dataset.fxCryosphereStyle = 'true';
-      document.head.appendChild(style);
-    }
-    if (!document.querySelector('link[data-fx-readability-style]')) {
-      const readability = document.createElement('link');
-      readability.rel = 'stylesheet';
-      readability.href = './styles/readability-focus.css?v=20260727-readability-2';
-      readability.dataset.fxReadabilityStyle = 'true';
-      readability.addEventListener('load', () => {
-        ROOT.dataset.fxReadability = 'ready';
-      }, { once: true });
-      document.head.appendChild(readability);
-    }
-    if (!document.querySelector('link[data-fx-organism-interface-style]')) {
-      const organismStyle = document.createElement('link');
-      organismStyle.rel = 'stylesheet';
-      organismStyle.href = './styles/organism-interface.css?v=20260727-organism-1';
-      organismStyle.dataset.fxOrganismInterfaceStyle = 'true';
-      document.head.appendChild(organismStyle);
-    }
-    if (!document.querySelector('link[data-fx-organism-layering-style]')) {
-      const organismLayering = document.createElement('link');
-      organismLayering.rel = 'stylesheet';
-      organismLayering.href = './styles/organism-interface-layering.css?v=20260727-fullscreen-1';
-      organismLayering.dataset.fxOrganismLayeringStyle = 'true';
-      document.head.appendChild(organismLayering);
-    }
-    if (!document.querySelector('script[data-fx-cryosphere-script]')) {
-      const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20260827-r413-single-mag-owner';
-      script.defer = true;
-      script.dataset.fxCryosphereScript = 'true';
-      document.head.appendChild(script);
-    }
-    if (!document.querySelector('script[data-fx-organism-interface-script]')) {
-      const organismScript = document.createElement('script');
-      organismScript.src = './scripts/organism-interface.js?v=20260727-organism-2';
-      organismScript.defer = true;
-      organismScript.dataset.fxOrganismInterfaceScript = 'true';
-      document.head.appendChild(organismScript);
-    }
-    if (!document.querySelector('script[data-fx-organism-menu-script]')) {
-      const menuScript = document.createElement('script');
-      menuScript.src = './scripts/organism-menu-controller.js?v=20260727-organism-1';
-      menuScript.defer = true;
-      menuScript.dataset.fxOrganismMenuScript = 'true';
-      document.head.appendChild(menuScript);
-    }
+    ensureStyle('./styles/igloo-parity.css?v=20260727-webgpu-1', 'data-fx-cryosphere-style');
+    ensureStyle('./styles/readability-focus.css?v=20260727-readability-2', 'data-fx-readability-style', () => {
+      ROOT.dataset.fxReadability = 'ready';
+    });
+    ensureStyle('./styles/organism-interface.css?v=20260727-organism-1', 'data-fx-organism-interface-style');
+    ensureStyle('./styles/organism-interface-layering.css?v=20260727-fullscreen-1', 'data-fx-organism-layering-style');
 
-    ROOT.dataset.fxThreeLoader = 'requested-on-demand';
+    try {
+      ROOT.dataset.fxThreeLoader = 'loading-interface-r552';
+      await loadScriptOrdered('./scripts/organism-interface.js?v=20260906-r552-deterministic-handoff', 'data-fx-organism-interface-script');
+      if (ROOT.dataset.fxOrganismInterface !== 'ready') throw new Error('organism interface loaded without READY state');
+      ROOT.dataset.fxThreeLoader = 'interface-ready-r552';
+
+      await loadScriptOrdered('./scripts/organism-menu-controller.js?v=20260906-r552-deterministic-handoff', 'data-fx-organism-menu-script');
+      ROOT.dataset.fxThreeLoader = 'menu-ready-r552';
+
+      await loadScriptOrdered('./scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20260906-r552-deterministic-handoff', 'data-fx-cryosphere-script');
+      ROOT.dataset.fxThreeLoader = 'ready-on-demand-r552';
+      dispatchEvent(new CustomEvent('formatx:organismhandoffready', { detail: { revision: 'r552' } }));
+    } catch (error) {
+      ROOT.dataset.fxThreeLoader = 'failed-on-demand-r552';
+      ROOT.dataset.fxThreeLoaderErrorR552 = String(error?.message || error || 'unknown-load-error').slice(0, 160);
+      dispatchEvent(new CustomEvent('formatx:organismhandofferror', { detail: { revision: 'r552', message: ROOT.dataset.fxThreeLoaderErrorR552 } }));
+    }
   }
 
   function armThreeExperience() {
     if (threeLoaderArmed || threeLoadStarted) return;
     threeLoaderArmed = true;
     if (ROOT.dataset.fxImmersive === 'active') {
-      loadThreeExperience();
+      void loadThreeExperience();
       return;
     }
     ROOT.dataset.fxThreeLoader = 'deferred-user-activation';
-    addEventListener('formatx:immersiveactivate', loadThreeExperience, { once: true });
+    addEventListener('formatx:immersiveactivate', () => { void loadThreeExperience(); }, { once: true });
   }
 
-  /* R536: arm the heavy Organism handoff immediately while this lightweight
-     owner is evaluated. MAG still boots independently with navigation, and the
-     heavy interface remains strictly user-activated. This closes the race where
-     a real MAG interaction could arrive before the old DCL commerce init armed
-     the immersive listener. */
+  /* R552: arm the lightweight handoff immediately. MAG still boots from
+     navigation independently; only the heavy Organism UI waits for a genuine
+     immersive/MAG activation. Dynamic scripts execute in deterministic order. */
   armThreeExperience();
 
   function revealQrDock() {
