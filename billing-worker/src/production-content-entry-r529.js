@@ -22,7 +22,7 @@ const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260906-r537-no-manual-pa
 const DEFERRED_REDUCED_RE = /formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g;
 const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner';
 const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
-const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1';
+const QUALITY_URL = 'formatx-quality-r461.css?v=20260906-r538-no-manual-pause';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MOTION_MEDIA = '(prefers-reduced-motion: no-preference) and (min-width: 901px)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
@@ -36,7 +36,7 @@ const MOBILE_FIRST_PAINT_PRELOAD = `</scifi-ui/styles/formatx-mobile-first-paint
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const HEART_STYLE_PRELOAD = '</scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r538-hero-hit-owner>; rel=preload; as=style';
 const CRITICAL_SHELL_PRELOAD = '</scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint>; rel=preload; as=style';
-const QUALITY_PRELOAD = '</scifi-ui/styles/formatx-quality-r461.css?v=20260905-r533-compositor-bound-v1>; rel=preload; as=style';
+const QUALITY_PRELOAD = '</scifi-ui/styles/formatx-quality-r461.css?v=20260906-r538-no-manual-pause>; rel=preload; as=style';
 const AWARD_READINESS_PRELOAD = '</scifi-ui/styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability>; rel=preload; as=style';
 const FIRST_PAINT_R206_PRELOAD = '</scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero>; rel=preload; as=style';
 const REFERENCE_BOOT_PRELOAD = '</scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode>; rel=preload; as=script';
