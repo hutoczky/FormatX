@@ -1,8 +1,9 @@
-/* FormatX R555 — absolute boot-deadline bounded preloader.
+/* FormatX R556 — priority-owned absolute boot-deadline bounded preloader.
    MAG startup remains navigation-owned behind the visual layer. The intro keeps
    the intended premium 1.2–1.65s UX dwell while text remains immutable after
-   first paint. One absolute boot-relative hard deadline prevents cumulative
-   readiness-poll drift; the fade has an independent bounded finalize fallback. */
+   first paint. The boot-relative deadline is armed before DOM stabilization and
+   uses the browser scheduler's user-blocking queue when available, with a normal
+   timer fallback. The fade retains an independently bounded finalize fallback. */
 (function(){
 'use strict';
 
@@ -18,7 +19,7 @@ const PRELOADER_FADE_MS=REDUCED?0:90;
 const PRELOADER_RELEASE_GUARD_MS=PRELOADER_FADE_MS+PRELOADER_TICK_MS+40;
 const PRELOADER_HIDE_BY_MS=Math.max(PRELOADER_MIN_MS,PRELOADER_MAX_MS-PRELOADER_RELEASE_GUARD_MS);
 const PRELOADER_BOOT_AT=performance.now();
-let audio=null,preloaderTimer=0,preloaderDeadlineTimer=0,preloaderFadeTimer=0,preloaderReleased=false;
+let audio=null,preloaderTimer=0,preloaderDeadlineTimer=0,preloaderFadeTimer=0,preloaderReleased=false,preloaderDeadlineAbort=null;
 
 if(!ROOT.dataset.fxReferenceProductionR244)ROOT.dataset.fxReferenceProductionR244=MOBILE?'ready':'desktop';
 ROOT.dataset.fxReferenceComposition=MOBILE?'reference-frame-r244':'desktop-reference-r244';
@@ -39,6 +40,7 @@ ROOT.dataset.fxPreloaderBootR533=String(Math.round(PRELOADER_BOOT_AT));
 ROOT.dataset.fxPreloaderClockR544='navigation-script-boot-single-deadline';
 ROOT.dataset.fxPreloaderDeadlineR549=`fade-compensated-${Math.round(PRELOADER_HIDE_BY_MS)}-${PRELOADER_MAX_MS}`;
 ROOT.dataset.fxPreloaderDeadlineR555='absolute-boot-hard-deadline-bounded-fade-finalize';
+ROOT.dataset.fxPreloaderDeadlineR556='prearmed-user-blocking-scheduler-with-timer-fallback';
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
@@ -54,6 +56,25 @@ function complete(source){document.dispatchEvent(new CustomEvent('formatx:introc
 function force(node,property,value){if(node instanceof HTMLElement)node.style.setProperty(property,value,'important');}
 function clear(node,property){if(node instanceof HTMLElement)node.style.removeProperty(property);}
 function animateEffect(node,keyframes,options){if(REDUCED||!(node instanceof HTMLElement)||typeof node.animate!=='function')return;try{node.animate(keyframes,options);}catch(_){} }
+function cancelDeadline(){
+  if(preloaderDeadlineTimer)clearTimeout(preloaderDeadlineTimer);preloaderDeadlineTimer=0;
+  try{preloaderDeadlineAbort?.abort();}catch(_){}
+  preloaderDeadlineAbort=null;
+}
+function armDeadline(callback,delay){
+  cancelDeadline();
+  const boundedDelay=Math.max(0,delay);
+  const browserScheduler=globalThis.scheduler;
+  if(browserScheduler&&typeof browserScheduler.postTask==='function'&&typeof AbortController==='function'){
+    preloaderDeadlineAbort=new AbortController();
+    browserScheduler.postTask(callback,{delay:boundedDelay,priority:'user-blocking',signal:preloaderDeadlineAbort.signal}).catch(()=>{});
+    preloaderDeadlineTimer=setTimeout(callback,boundedDelay+32);
+    ROOT.dataset.fxPreloaderDeadlineQueueR556='scheduler-user-blocking-plus-timer';
+    return;
+  }
+  preloaderDeadlineTimer=setTimeout(callback,boundedDelay);
+  ROOT.dataset.fxPreloaderDeadlineQueueR556='timer-fallback';
+}
 
 function skipLatePreloader(){
   preloaderReleased=true;
@@ -82,7 +103,7 @@ function hidePreloader(source){
   if(preloaderReleased)return;
   preloaderReleased=true;
   if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;
-  if(preloaderDeadlineTimer)clearTimeout(preloaderDeadlineTimer);preloaderDeadlineTimer=0;
+  cancelDeadline();
   const overlay=document.getElementById(OVERLAY_ID);
   if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));return;}
   let finalized=false;
@@ -110,15 +131,15 @@ function runPreloader(overlay){
     preloaderTimer=setTimeout(checkReady,Math.min(PRELOADER_TICK_MS,Math.max(0,PRELOADER_HIDE_BY_MS-nowElapsed)));
   };
   const nowElapsed=elapsed();
-  preloaderDeadlineTimer=setTimeout(()=>hidePreloader('bounded-timeout'),Math.max(0,PRELOADER_HIDE_BY_MS-nowElapsed));
+  armDeadline(()=>hidePreloader('bounded-timeout'),Math.max(0,PRELOADER_HIDE_BY_MS-nowElapsed));
   preloaderTimer=setTimeout(checkReady,Math.max(0,PRELOADER_MIN_MS-nowElapsed));
 }
 function markIntroComplete(source){ROOT.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');ROOT.classList.add('fx-intro-complete');ROOT.dataset.fxIntro=source;complete(source);}
 const preloader=PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?skipLatePreloader():showPreloader();
-stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r549-extended-static-lcp':'desktop-direct-r549-extended-static-lcp';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r549-living-core':'instant-r549-living-core');
 if(preloader)runPreloader(preloader);
+stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r556-priority-deadline':'desktop-direct-r556-priority-deadline';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r556-living-core':'instant-r556-living-core');
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
-addEventListener('pagehide',()=>{try{audio?.pause();}catch(_){}},{once:true});
+addEventListener('pagehide',()=>{cancelDeadline();try{audio?.pause();}catch(_){}},{once:true});
 addEventListener('error',()=>hidePreloader('runtime-error'));
 addEventListener('unhandledrejection',()=>hidePreloader('promise-error'));
 }());
