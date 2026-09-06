@@ -1,11 +1,20 @@
-/* FormatX r539 — MAG semantic hit ownership + mobile trust target floor.
-   The hero section and WebGL layout are visual containers; only real interactive
-   descendants own pointer input. This keeps MAG, CTA, SOUND and ASK hit-testing native. */
+/* FormatX r540 — semantic MAG hit ownership + control-safe z-order.
+   The page/main/hero shells are visual containers around the hero. Normal content
+   sections remain interactive, while hero interaction belongs only to real semantic
+   descendants. SOUND/ASK stay above the large MAG heart hit surface. */
 
+html body.living-architecture #main-content,
 html body.living-architecture #hero,
 html body.living-architecture #hero .hero-grid,
 html body.living-architecture #hero .hero-space {
   pointer-events: none;
+}
+
+/* Outside the hero, the product surface remains a normal interactive document. */
+html body.living-architecture #main-content > section:not(#hero),
+html body.living-architecture #main-content > article,
+html body.living-architecture #main-content > div:not(#hero) {
+  pointer-events: auto;
 }
 
 html body.living-architecture #hero .hero-space {
@@ -14,15 +23,20 @@ html body.living-architecture #hero .hero-space {
   isolation: isolate;
 }
 
-/* Re-enable only semantic/native interactive descendants. */
+/* Re-enable only semantic/native hero interaction owners. */
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero a,
 html body.living-architecture #hero button,
 html body.living-architecture #hero input,
 html body.living-architecture #hero select,
 html body.living-architecture #hero textarea,
+html body.living-architecture #hero summary,
+html body.living-architecture #hero label,
 html body.living-architecture #hero [role='button'],
+html body.living-architecture #hero [role='link'],
 html body.living-architecture #hero [tabindex],
+html body.living-architecture #hero [data-fx-live-os-launcher],
+html body.living-architecture #hero .fx-organism-thought-trigger,
 html body.living-architecture #hero .hero-space > .fx-immersive-launch,
 html body.living-architecture #hero .hero-space > .fx-organism-map,
 html body.living-architecture #hero .hero-space > .fx-organism-map a,
@@ -30,9 +44,15 @@ html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
   pointer-events: auto;
 }
 
+/* Canonical controls must win hit-testing wherever their visual boxes overlap MAG. */
+html body.living-architecture #hero .fx-reference-controls-r204 {
+  z-index: 12080 !important;
+  isolation: isolate;
+}
+
 .fx-mag-heart-hit-r252 {
   position: absolute;
-  z-index: 12090 !important;
+  z-index: 12060 !important;
   left: 50%;
   top: 50%;
   width: min(36vw, 430px);
@@ -52,7 +72,7 @@ html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
   isolation: isolate;
 }
 
-/* R539: R326 pointer/touch logic listens globally and reads stage geometry, so
+/* R540: R326 pointer/touch logic listens globally and reads stage geometry, so
    neither the host nor the visual WebGL stage may win DOM hit-testing. */
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   pointer-events: none !important;
@@ -92,8 +112,7 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
     min-height: 210px;
   }
 
-  /* Lighthouse and real touch users need the entire trust card to be the target,
-     not only its text line. Keep cards separated and comfortably above 44px. */
+  /* Entire trust cards are real touch targets, not only their text lines. */
   html body.living-architecture .fx-trust-grid > a.fx-trust-card {
     box-sizing: border-box !important;
     display: flex !important;
@@ -161,4 +180,4 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
 
-/* production-r539-semantic-heart-native-hit-owner */
+/* production-r540-main-transparent-control-safe-semantic-heart */
