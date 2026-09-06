@@ -1,12 +1,10 @@
-/* FormatX R571/R572 — all-device OffscreenCanvas MAG startup owner.
+/* FormatX R571 — all-device OffscreenCanvas MAG startup owner.
    Compatibility owner name remains R561 because the navigation MAG loader already
    loads this policy URL. The canonical stage, canvas and worker are created during
    normal navigation on mobile and desktop. Mobile keeps the proven post-critical-
    paint init; desktop starts the same worker during the intro so synchronous WebGL
    compilation cannot monopolise the main thread and starve the bounded release.
-   R572 removes hidden legacy intro layers from the paint path and replaces them
-   with lightweight pseudo-layer scan/grid/pulse motion. Same visitor path for
-   every request: no Lighthouse, CI, audit or user-input gate. */
+   Same visitor path for every request: no Lighthouse, CI, audit or user-input gate. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -21,35 +19,16 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let worker=null,stage=null,canvas=null,ro=null,io=null,destroyed=false,ready=false,fallbackStarted=false,initPosted=false,initTimer=0,readyTimer=0;
 let shape=root.dataset.fxCoreShapeR337==='sphere'?'sphere':'crystal',morph=shape==='sphere'?1:0,energy=.50,breath=.12,pointerX=0,pointerY=0,rotationY=0,pulseStart=-Infinity,pulseTimer=0,visible=true;
-function installP0IntroFx(){
-  if(document.querySelector('style[data-fx-intro-p0-r572]'))return;
-  const style=document.createElement('style');
-  style.dataset.fxIntroP0R572='true';
-  style.textContent=`
-@keyframes fx-r572-intro-grid{0%{transform:translate3d(-10px,-8px,0);opacity:.12}50%{opacity:.20}100%{transform:translate3d(10px,8px,0);opacity:.14}}
-@keyframes fx-r572-intro-scan{0%{transform:translate3d(0,-28vh,0);opacity:0}38%{opacity:.34}100%{transform:translate3d(0,118vh,0);opacity:0}}
-#formatx-event-horizon[data-fx-preloader-r531="active"] :is(.fx-intro-curtain,.fx-intro-grid,.fx-intro-scan,.fx-intro-portal,.fx-intro-flare){visibility:hidden!important;content-visibility:hidden!important;contain:strict!important;}
-#formatx-event-horizon[data-fx-preloader-r531="active"]::before{content:""!important;position:absolute!important;inset:-12%!important;z-index:0!important;pointer-events:none!important;visibility:visible!important;opacity:.14;background-image:linear-gradient(rgba(124,236,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(124,236,255,.035) 1px,transparent 1px)!important;background-size:42px 42px!important;mask-image:none!important;-webkit-mask-image:none!important;will-change:transform,opacity!important;animation:fx-r572-intro-grid 1320ms ease-in-out infinite alternate!important;}
-#formatx-event-horizon[data-fx-preloader-r531="active"]::after{content:""!important;position:absolute!important;inset:-24vh 0 auto!important;height:20vh!important;z-index:1!important;pointer-events:none!important;visibility:visible!important;opacity:0;background:linear-gradient(180deg,transparent,rgba(124,236,255,.16),rgba(143,114,255,.065),transparent)!important;background-size:auto!important;border:0!important;mix-blend-mode:normal!important;will-change:transform,opacity!important;animation:fx-r572-intro-scan 1280ms cubic-bezier(.22,.61,.36,1) infinite!important;}
-@media(prefers-reduced-motion:reduce){#formatx-event-horizon[data-fx-preloader-r531="active"]::before,#formatx-event-horizon[data-fx-preloader-r531="active"]::after{animation:none!important;transform:none!important;opacity:.08!important;}}
-`;
-  document.head.appendChild(style);
-  root.dataset.fxPreloaderRenderR572='pseudo-grid-scan-no-hidden-layer-paint';
-}
 function decontendIntroCompositor(){
-  installP0IntroFx();
   const overlay=document.getElementById('formatx-event-horizon');
   if(!(overlay instanceof HTMLElement)||overlay.hidden)return;
   const scan=overlay.querySelector('.fx-intro-scan');
   const flare=overlay.querySelector('.fx-intro-flare');
-  const grid=overlay.querySelector('.fx-intro-grid');
   const portal=overlay.querySelector('.fx-intro-portal');
-  for(const node of [scan,flare,grid,portal])if(node instanceof HTMLElement){node.style.setProperty('visibility','hidden','important');node.style.setProperty('content-visibility','hidden','important');node.style.setProperty('contain','strict','important');}
   if(scan instanceof HTMLElement){scan.style.setProperty('filter','none','important');scan.style.setProperty('mix-blend-mode','normal','important');}
-  if(flare instanceof HTMLElement){flare.style.setProperty('filter','none','important');flare.style.setProperty('box-shadow','none','important');flare.style.setProperty('width','4px','important');flare.style.setProperty('height','4px','important');flare.style.setProperty('background','transparent','important');}
+  if(flare instanceof HTMLElement){flare.style.setProperty('filter','none','important');flare.style.setProperty('box-shadow','none','important');flare.style.setProperty('width',mobile?'min(56vw,320px)':'min(42vw,460px)','important');flare.style.setProperty('height',mobile?'min(56vw,320px)':'min(42vw,460px)','important');flare.style.setProperty('background','radial-gradient(circle,rgba(210,251,255,.34) 0%,rgba(124,236,255,.24) 22%,rgba(143,114,255,.12) 48%,rgba(124,236,255,0) 74%)','important');}
   if(portal instanceof HTMLElement){portal.style.setProperty('filter','none','important');portal.style.setProperty('box-shadow','none','important');}
   root.dataset.fxPreloaderCompositorR571=`gradient-only-${profile}-glow-no-blur-stack`;
-  root.dataset.fxPreloaderCompositorR572=`hidden-legacy-layers-pseudo-${profile}-scan-grid`;
 }
 decontendIntroCompositor();
 function fallback(reason){
