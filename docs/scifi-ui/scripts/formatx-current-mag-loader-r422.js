@@ -1,13 +1,13 @@
-/* FormatX R545 navigation-owned current native MAG runtime.
-   R326 remains the only full-size hero WebGL organism. The renderer is still
-   navigation-autostarted, but shader compile/link yields until the browser has
-   produced the first visual paint so MAG startup cannot delay FCP/LCP. Mobile
-   keeps bounded periodic surface energy with zero frames between sweeps and
-   automatic lifecycle suspension. */
+/* FormatX R547 navigation-owned current native MAG runtime.
+   R326 remains the only full-size hero WebGL organism. Navigation arms the MAG
+   immediately, while the expensive shader compile/link yields until the bounded
+   visual intro has released and the first visual paint exists. This keeps the
+   renderer automatic and user-input independent without allowing SwiftShader or
+   slow GPU startup to hold the intro/LCP deadline hostage. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r545-first-paint-yield-live-energy-zero-idle';
+const VERSION='direct-r326-r547-bounded-intro-release-yield-live-energy-zero-idle';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='r468-static-render-explicit-interaction';
@@ -19,7 +19,7 @@ const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-so
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260830-r460-hero-controller-bridge';
-const HEART_CORE='/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260906-r542-body-fixed-stage-sync';
+const HEART_CORE='/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260906-r546-trusted-physical-stage-hit';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r536-automatic-lifecycle-no-audit-path';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260906-r536-lifecycle-safe';
@@ -93,6 +93,28 @@ function addScript(src,attr){
     script.addEventListener('load',()=>resolve(script),{once:true});
     script.addEventListener('error',()=>resolve(script),{once:true});
     document.head.appendChild(script);
+  });
+}
+
+function waitForBoundedIntroRelease(){
+  if(root.dataset.fxPreloaderR531==='done'){
+    root.dataset.fxCurrentMagIntroYieldR547='already-released';
+    return Promise.resolve('already-released');
+  }
+  return new Promise(resolve=>{
+    let settled=false;
+    let timer=0;
+    const finish=source=>{
+      if(settled)return;
+      settled=true;
+      if(timer)clearTimeout(timer);
+      removeEventListener('formatx:preloadercomplete',onComplete);
+      root.dataset.fxCurrentMagIntroYieldR547=source;
+      resolve(source);
+    };
+    const onComplete=()=>finish('bounded-preloadercomplete');
+    addEventListener('formatx:preloadercomplete',onComplete,{once:true,passive:true});
+    timer=setTimeout(()=>finish('navigation-bounded-fallback'),mobile?1750:1950);
   });
 }
 
@@ -222,7 +244,7 @@ async function start(){
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
   root.dataset.fxCurrentMagStylesR423='ready';
   root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
-  root.dataset.fxCurrentMagStartupR545='navigation-owned-first-paint-yield-before-shader-compile';
+  root.dataset.fxCurrentMagStartupR547='navigation-owned-bounded-intro-release-yield-before-shader-compile';
   root.dataset.fxCurrentMagOpticsR458='superseded-by-r468-soft-mobile-bloom';
   root.dataset.fxCurrentMagOpticsR460=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagOpticsR463=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
@@ -236,6 +258,7 @@ async function start(){
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
 
+  await waitForBoundedIntroRelease();
   await yieldUntilFirstVisualPaint();
   await addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
   await addScript(RENDERER,'data-fx-current-r326-r422');
@@ -260,7 +283,7 @@ async function start(){
     ?'direct-r326-r468-soft-optics-live-energy-zero-idle-native-touch'
     :'direct-r326-r468-primary-controller-desktop';
   root.dataset.fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle';
-  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r538',heart:'r542-body-fixed-stage-synced',startup:'r545-first-paint-yield'}}));
+  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r538',heart:'r546-trusted-physical-stage-hit',startup:'r547-bounded-intro-release-yield'}}));
 }
 
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});
