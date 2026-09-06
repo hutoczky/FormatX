@@ -1,12 +1,10 @@
-/* FormatX r467 — the one native WebGL MAG optical + final hero-control display owner.
-   The shader owns geometry and living light. CSS preserves the touch surface
-   and applies only final display tone. Mobile keeps the balanced low-bloom
-   finish from r466. Desktop now also owns one canonical horizontal
-   SOUND | ASK | PAUSE row under the full-size MAG, retiring the legacy vertical
-   right-side control stack without changing the desktop crystal material. */
+/* FormatX r538 — one native WebGL MAG optical + final hero-control display owner.
+   The shader owns geometry and living light. CSS preserves the semantic heart
+   as the explicit hit surface and applies only final display tone. Desktop owns
+   one canonical horizontal SOUND | ASK row under the full-size MAG. */
 
 html[data-fx-core-shape-r337] #hero .hero-space > .fx-crystal-organism-r326-stage {
-  pointer-events: auto !important;
+  pointer-events: none !important;
 }
 
 html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
@@ -14,7 +12,7 @@ html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
 }
 
 html[data-fx-core-shape-r337] #hero .fx-reference-controls-r204,
-html[data-fx-core-shape-r337] #hero .fx-reference-controls-r204 :is(button,.fx-three-sound,.fx-reference-ask,.fx-reference-pause) {
+html[data-fx-core-shape-r337] #hero .fx-reference-controls-r204 :is(button,.fx-three-sound,.fx-reference-ask) {
   pointer-events: auto !important;
 }
 
@@ -62,10 +60,8 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     top: auto !important;
   }
 
-  /* r466/r467: interpolate between the original over-bright/hard phone crystal
-     and the overly dark r465 pass. The shader still owns the soft perimeter;
-     this display pass restores midtone body and restrained spectral colour while
-     a sub-pixel feather removes staircase/razor edges without smearing facets. */
+  /* Balanced phone optics: the shader owns the soft perimeter and this display
+     pass restores midtone body and restrained spectral colour. */
   html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: .965 !important;
@@ -107,10 +103,8 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
 }
 
 @media (min-width: 901px) and (pointer: fine) {
-  /* r467: one physical desktop row. The rail participates as display:contents
-     so old right/top/flex declarations on the rail can no longer stack ASK and
-     PAUSE vertically. This owner is deliberately more specific than legacy
-     reference layers and contains every control inside the hero-space. */
+  /* One physical desktop row. The rail participates as display:contents so old
+     right/top/flex declarations cannot recreate a secondary control stack. */
   html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
     top: auto !important;
@@ -119,14 +113,14 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     left: 50% !important;
     z-index: 12080 !important;
     display: grid !important;
-    grid-template-columns: repeat(3,54px) !important;
+    grid-template-columns: repeat(2,54px) !important;
     grid-template-rows: 76px !important;
     align-items: start !important;
     justify-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
-    width: 190px !important;
-    min-width: 190px !important;
+    width: 122px !important;
+    min-width: 122px !important;
     max-width: calc(100% - 28px) !important;
     height: 76px !important;
     min-height: 76px !important;
@@ -166,8 +160,7 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
   }
 
   html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause {
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask {
     position: relative !important;
     inset: auto !important;
     top: auto !important;
@@ -204,10 +197,6 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     grid-column: 2 !important;
     grid-row: 1 !important;
   }
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause {
-    grid-column: 3 !important;
-    grid-row: 1 !important;
-  }
   html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask > span {
     position: absolute !important;
     top: 59px !important;
@@ -238,7 +227,4 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
   }
 }
 
-/* production-r460-single-native-webgl-optics-owner-soft-mobile-rim
-   production-r465-soft-perimeter-low-bloom-mobile-display
-   production-r466-balanced-mobile-luminance-soft-edge-display
-   production-r467-desktop-three-cell-control-row · deploy-ready-r467 */
+/* production-r538-single-native-webgl-optics-owner-two-control-row */
