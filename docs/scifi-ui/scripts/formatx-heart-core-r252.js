@@ -2,13 +2,14 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'heart-core-r252';
+  const VERSION = 'heart-core-r542';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260825-r252-controls';
+  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r542-body-fixed-stage-sync';
   const LOOP_OVERSHOOT = 28;
   let touchActive = false;
   let idleTimer = 0;
   let bindingFrame = 0;
+  let geometryFrame = 0;
   let interactionCooldown = false;
 
   if (root.dataset.fxHeartCoreR252 === 'ready') return;
@@ -18,7 +19,8 @@
   }
 
   function ensureStyle() {
-    if (document.querySelector('link[data-fx-heart-core-r252]')) return;
+    const existing = document.querySelector('link[data-fx-heart-core-r252]');
+    if (existing instanceof HTMLLinkElement) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = STYLE;
@@ -57,7 +59,7 @@
       detail: { phase: 'activate', source, x: 0, y: 0, revision: VERSION }
     }));
     dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
-      detail: { source: `mag-${source}-r252` }
+      detail: { source: `mag-${source}-r542` }
     }));
 
     const hit = document.querySelector('.fx-mag-heart-hit-r252');
@@ -86,20 +88,67 @@
     });
   }
 
-  function installHeartHitTarget() {
+  function syncHeartGeometry(hit) {
+    if (!(hit instanceof HTMLButtonElement)) return false;
     const hero = document.getElementById('hero');
     const space = hero?.querySelector(':scope .hero-space');
-    if (!(hero instanceof HTMLElement) || !(space instanceof HTMLElement)) return false;
+    const stage = space?.querySelector(':scope > .fx-crystal-organism-r326-stage');
+    const target = stage instanceof HTMLElement && stage.getBoundingClientRect().width > 80 ? stage : space;
+    if (!(target instanceof HTMLElement)) return false;
 
-    let hit = space.querySelector(':scope > .fx-mag-heart-hit-r252');
+    const rect = target.getBoundingClientRect();
+    const visible = !document.hidden
+      && rect.width > 80
+      && rect.height > 120
+      && rect.bottom > 0
+      && rect.top < innerHeight
+      && rect.right > 0
+      && rect.left < innerWidth;
+
+    if (!visible) {
+      hit.style.visibility = 'hidden';
+      hit.style.setProperty('pointer-events', 'none', 'important');
+      hit.setAttribute('aria-hidden', 'true');
+      root.dataset.fxMagHeartHitGeometryR542 = 'offscreen-suspended';
+      return true;
+    }
+
+    const base = Math.min(rect.width, rect.height);
+    const diameter = MOBILE_QUERY.matches
+      ? Math.min(280, Math.max(176, base * .68))
+      : Math.min(360, Math.max(180, base * .58));
+    hit.style.left = `${rect.left + rect.width / 2}px`;
+    hit.style.top = `${rect.top + rect.height / 2}px`;
+    hit.style.width = `${diameter}px`;
+    hit.style.height = `${diameter}px`;
+    hit.style.visibility = 'visible';
+    hit.style.setProperty('pointer-events', 'auto', 'important');
+    hit.removeAttribute('aria-hidden');
+    root.dataset.fxMagHeartHitGeometryR542 = 'viewport-stage-synced';
+    return true;
+  }
+
+  function installHeartHitTarget() {
+    const body = document.body;
+    const hero = document.getElementById('hero');
+    const space = hero?.querySelector(':scope .hero-space');
+    if (!(body instanceof HTMLBodyElement) || !(hero instanceof HTMLElement) || !(space instanceof HTMLElement)) return false;
+
+    let hit = document.querySelector('.fx-mag-heart-hit-r252');
     if (!(hit instanceof HTMLButtonElement)) {
       hit = document.createElement('button');
       hit.type = 'button';
       hit.className = 'fx-mag-heart-hit-r252';
       hit.dataset.fxHeartCoreR252 = 'true';
-      space.appendChild(hit);
     }
 
+    if (hit.parentElement !== body) {
+      const main = document.getElementById('main-content');
+      if (main?.parentElement === body) body.insertBefore(hit, main);
+      else body.appendChild(hit);
+    }
+
+    hit.dataset.fxHeartOwnerR542 = 'body-fixed-stage-synced';
     hit.setAttribute('aria-label', language() === 'en'
       ? 'Activate the living FormatX core'
       : 'A FormatX élő MAG interakciójának indítása');
@@ -124,7 +173,9 @@
       headerMag.addEventListener('click', () => activateCore('header'));
     }
 
-    root.dataset.fxMagHeartHit = 'ready-r252';
+    syncHeartGeometry(hit);
+    root.dataset.fxMagHeartHit = 'ready-r542';
+    root.dataset.fxMagHeartHitOwnerR542 = 'body-fixed-stage-synced';
     return true;
   }
 
@@ -137,6 +188,15 @@
     root.dataset.fxLoopMirrorMode = 'none-mobile-r252';
   }
 
+  function scheduleGeometry() {
+    if (geometryFrame) return;
+    geometryFrame = requestAnimationFrame(() => {
+      geometryFrame = 0;
+      const hit = document.querySelector('.fx-mag-heart-hit-r252');
+      if (hit instanceof HTMLButtonElement) syncHeartGeometry(hit);
+    });
+  }
+
   function scheduleBinding() {
     if (bindingFrame) return;
     bindingFrame = requestAnimationFrame(() => {
@@ -144,6 +204,7 @@
       installHeartHitTarget();
       pruneMobileReferenceMirror();
       syncPureWebglComposition();
+      scheduleGeometry();
     });
   }
 
@@ -158,12 +219,7 @@
     bridge.dataset.fxHeartLoopR252 = 'true';
     const bridgeTop = bridge.offsetTop;
     const viewportBottom = scrollY + innerHeight;
-    return {
-      bridge,
-      hero,
-      bridgeTop,
-      overshoot: viewportBottom - bridgeTop
-    };
+    return { bridge, hero, bridgeTop, overshoot: viewportBottom - bridgeTop };
   }
 
   function transferToRealCore(source) {
@@ -192,12 +248,14 @@
         dispatchEvent(new CustomEvent('formatx:loop', {
           detail: { count: nextLoopCount, source: `heart-core-${source}`, relative: 0, revision: VERSION }
         }));
+        scheduleGeometry();
       });
     });
     return true;
   }
 
   function onScroll() {
+    scheduleGeometry();
     if (!MOBILE_QUERY.matches) return;
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => transferToRealCore('idle'), 90);
@@ -224,7 +282,10 @@
     syncPureWebglComposition();
 
     addEventListener('scroll', onScroll, { passive: true });
-    addEventListener('scrollend', () => transferToRealCore('scrollend'), { passive: true });
+    addEventListener('scrollend', () => { transferToRealCore('scrollend'); scheduleGeometry(); }, { passive: true });
+    addEventListener('resize', scheduleGeometry, { passive: true });
+    addEventListener('orientationchange', scheduleGeometry, { passive: true });
+    document.addEventListener('visibilitychange', scheduleGeometry, { passive: true });
     document.addEventListener('touchstart', onTouchStart, { passive: true });
     document.addEventListener('touchend', onTouchEnd, { passive: true });
     document.addEventListener('touchcancel', onTouchEnd, { passive: true });
@@ -235,6 +296,7 @@
       'formatx:mobilelayoutready',
       'formatx:languagechange',
       'formatx:loopgeometryrefresh',
+      'formatx:preloadercomplete',
       'pageshow'
     ]) addEventListener(eventName, scheduleBinding, { passive: true });
 
@@ -253,5 +315,6 @@
   addEventListener('pagehide', () => {
     clearTimeout(idleTimer);
     cancelAnimationFrame(bindingFrame);
+    cancelAnimationFrame(geometryFrame);
   }, { once: true });
 }());
