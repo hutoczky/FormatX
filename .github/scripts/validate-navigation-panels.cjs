@@ -47,16 +47,19 @@ async function waitForScrollShell(page) {
 async function activateAndWaitForInterface(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
-    const heart = document.querySelector('#hero .fx-mag-heart-hit-r252');
+    const heart = document.querySelector('.fx-mag-heart-hit-r252');
     return root.dataset.fxOrganismInterface === 'ready'
       || (root.dataset.fxThreeLoader === 'deferred-user-activation'
         && root.dataset.fxHeartCoreR252 === 'ready'
+        && root.dataset.fxMagHeartHitOwnerR542 === 'body-fixed-stage-synced'
+        && root.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced'
         && heart instanceof HTMLButtonElement
+        && heart.parentElement === document.body
         && heart.dataset.fxHeartBound === 'true');
   }, null, { timeout: 30000 });
 
   if (await page.evaluate(() => document.documentElement.dataset.fxOrganismInterface !== 'ready')) {
-    const heart = page.locator('#hero .fx-mag-heart-hit-r252').first();
+    const heart = page.locator('.fx-mag-heart-hit-r252').first();
     await heart.waitFor({ state: 'visible', timeout: 10000 });
     await heart.click({ position: { x: 20, y: 20 }, timeout: 5000 });
   }
@@ -231,11 +234,10 @@ async function preparePage(page) {
   await installProductionShell(page);
   await clearIntro(page);
 
-  /* R534+: the seamless runtime is intentionally outside navigation startup.
-     A real wheel input arms it; all previous shell, panel and two-cycle checks remain. */
   await page.mouse.wheel(0, 48);
   await waitForScrollShell(page);
   await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
+  await page.waitForFunction(() => document.documentElement.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced', null, { timeout: 10000 });
   await activateAndWaitForInterface(page);
 }
 
@@ -290,7 +292,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling');
+    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling with R542 body-level MAG activation');
   } finally {
     await browser.close();
   }
