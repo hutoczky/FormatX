@@ -1,7 +1,8 @@
-/* FormatX R543 — extended static-content, compositor-only bounded preloader.
-   MAG startup remains navigation-owned behind the visual layer. The intro restores
-   the intended premium UX dwell while its text remains immutable after first paint:
-   no counter/status repaint can become a late LCP candidate. */
+/* FormatX R549 — extended static-content, compositor-only bounded preloader.
+   MAG startup remains navigation-owned behind the visual layer. The intro keeps
+   the intended premium 1.2–1.65s UX dwell while text remains immutable after
+   first paint. The hard deadline includes fade/timer guard time so the logical
+   completion event cannot drift beyond the product bound under normal scheduling. */
 (function(){
 'use strict';
 
@@ -13,6 +14,9 @@ const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-s
 const PRELOADER_MIN_MS=REDUCED?180:(MOBILE?1180:1350);
 const PRELOADER_MAX_MS=REDUCED?520:(MOBILE?1450:1650);
 const PRELOADER_TICK_MS=80;
+const PRELOADER_FADE_MS=REDUCED?0:90;
+const PRELOADER_RELEASE_GUARD_MS=PRELOADER_FADE_MS+PRELOADER_TICK_MS+40;
+const PRELOADER_HIDE_BY_MS=Math.max(PRELOADER_MIN_MS,PRELOADER_MAX_MS-PRELOADER_RELEASE_GUARD_MS);
 const PRELOADER_BOOT_AT=performance.now();
 let audio=null,preloaderTimer=0,preloaderReleased=false;
 
@@ -33,6 +37,7 @@ ROOT.dataset.fxPreloaderTimingR533=MOBILE?'mobile-1180-1450':'desktop-1350-1650'
 ROOT.dataset.fxPreloaderContentR534='static-no-repaint';
 ROOT.dataset.fxPreloaderBootR533=String(Math.round(PRELOADER_BOOT_AT));
 ROOT.dataset.fxPreloaderClockR544='navigation-script-boot-single-deadline';
+ROOT.dataset.fxPreloaderDeadlineR549=`fade-compensated-${Math.round(PRELOADER_HIDE_BY_MS)}-${PRELOADER_MAX_MS}`;
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
@@ -72,11 +77,11 @@ function showPreloader(){
   return overlay;
 }
 function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-crystal-organism-r326-stage,.hero-space')||document.querySelector('.fx-mag-heart-hit-r252');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}
-function hidePreloader(source){if(preloaderReleased)return;preloaderReleased=true;if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;return;}const finalize=()=>{try{overlay.getAnimations({subtree:true}).forEach(animation=>animation.cancel());}catch(_){}overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));};if(REDUCED){finalize();return;}const finish=overlay.animate([{opacity:1},{opacity:0}],{duration:90,easing:'ease-out',fill:'forwards'});finish.finished.then(finalize,finalize);}
-function runPreloader(overlay){if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='unavailable';return;}const tick=()=>{const elapsed=performance.now()-PRELOADER_BOOT_AT;if((elapsed>=PRELOADER_MIN_MS&&preloaderReady())||elapsed>=PRELOADER_MAX_MS){hidePreloader(elapsed>=PRELOADER_MAX_MS?'bounded-timeout':'mag-shell-ready');return;}preloaderTimer=setTimeout(tick,PRELOADER_TICK_MS);};tick();}
+function hidePreloader(source){if(preloaderReleased)return;preloaderReleased=true;if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;return;}const finalize=()=>{try{overlay.getAnimations({subtree:true}).forEach(animation=>animation.cancel());}catch(_){}overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));};if(REDUCED){finalize();return;}const finish=overlay.animate([{opacity:1},{opacity:0}],{duration:PRELOADER_FADE_MS,easing:'ease-out',fill:'forwards'});finish.finished.then(finalize,finalize);}
+function runPreloader(overlay){if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='unavailable';return;}const tick=()=>{const elapsed=performance.now()-PRELOADER_BOOT_AT;if(elapsed>=PRELOADER_MIN_MS&&preloaderReady()){hidePreloader('mag-shell-ready');return;}if(elapsed>=PRELOADER_HIDE_BY_MS){hidePreloader('bounded-timeout');return;}preloaderTimer=setTimeout(tick,PRELOADER_TICK_MS);};tick();}
 function markIntroComplete(source){ROOT.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');ROOT.classList.add('fx-intro-complete');ROOT.dataset.fxIntro=source;complete(source);}
 const preloader=PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?skipLatePreloader():showPreloader();
-stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r543-extended-static-lcp':'desktop-direct-r543-extended-static-lcp';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r543-living-core':'instant-r543-living-core');
+stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r549-extended-static-lcp':'desktop-direct-r549-extended-static-lcp';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r549-living-core':'instant-r549-living-core');
 if(preloader)runPreloader(preloader);
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
 addEventListener('pagehide',()=>{try{audio?.pause();}catch(_){}},{once:true});
