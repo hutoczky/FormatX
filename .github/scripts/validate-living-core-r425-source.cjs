@@ -1,6 +1,6 @@
 'use strict';
 
-/* FormatX R538 — authoritative current living-core source contract. */
+/* FormatX R540 — authoritative current living-core source contract. */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
@@ -46,18 +46,20 @@ has(intro,[
   'PRELOADER_BOOT_AT=performance.now()','late-boot-skip','duration:90',
   'formatx:preloadercomplete','fxHeroControlContractR528','sound-ask-no-manual-mag-pause',
   'fx-reference-controls-r204','fx-reference-ask','runtime-error','promise-error'
-],'R538 bounded static-content first-paint/preloader owner');
-absent(intro,['formatx:referencepause','.fx-reference-pause','data-fx-reference-motion-paused','function bindPause','function ensurePause','function removeObsoletePause','requestAnimationFrame(tick)','function updatePreloader','SYNCHRONIZING MAG','MAG SZINKRONIZÁLÁSA',"output.value='100'",'progress.value=100'],'R538 preloader');
+],'R540 bounded static-content first-paint/preloader owner');
+absent(intro,['formatx:referencepause','.fx-reference-pause','data-fx-reference-motion-paused','function bindPause','function ensurePause','function removeObsoletePause','requestAnimationFrame(tick)','function updatePreloader','SYNCHRONIZING MAG','MAG SZINKRONIZÁLÁSA',"output.value='100'",'progress.value=100'],'R540 preloader');
 
 has(scheduler,[
-  'navigation-owned living MAG + post-first-paint enhancements',
+  'FormatX R539','navigation-owned living MAG + sound control + post-first-paint enhancements',
   "const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle'",
   "const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r538-pause-free-optics'",
-  'function startCriticalMag()','requested-navigation',"script.dataset.fxCurrentMagLoaderR422='true'",
-  "script.dataset.fxNavigationMagR536='true'",'startCriticalMag();'
-],'R538 unconditional navigation MAG scheduler');
-assert.match(scheduler,/startCriticalMag\(\);\s*if\(document\.readyState===['"]loading['"]\)/,'critical MAG must be requested unconditionally before late enhancement scheduling');
-absent(scheduler,['lighthouse=1','auditMode','force-prefers-reduced-motion','formatx:referencepause'],'navigation MAG scheduler');
+  "const SOUND_CONTROL_SRC='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r539-navigation-sound-opt-in-owner'",
+  'function startSoundControl()','function startCriticalMag()',"fxSoundNavigationOwnerR539='requested-navigation'",
+  "script.dataset.fxCurrentMagLoaderR422='true'","script.dataset.fxNavigationMagR536='true'",
+  'startSoundControl();','startCriticalMag();'
+],'R540 unconditional navigation MAG + lightweight SOUND scheduler');
+assert.match(scheduler,/startSoundControl\(\);\s*startCriticalMag\(\);\s*if\(document\.readyState===['"]loading['"]\)/,'SOUND control and critical MAG must arm unconditionally before late enhancement scheduling');
+absent(scheduler,['lighthouse=1','auditMode','force-prefers-reduced-motion','formatx:referencepause','.fx-reference-pause'],'navigation MAG/SOUND scheduler');
 
 has(motion,[
   'external-strict-csp','formatx-current-mag-loader-r422.js','ensureCurrentMag();',"fxCanonicalAskActivationR477='armed'",'formatx:immersiveactivate',
@@ -84,7 +86,7 @@ assert.ok(!life.includes('requestAnimationFrame('),'living-core life owner must 
 
 has(governor,['automatic lifecycle governor','activeWindowMs=240',"fxMobileRenderGovernorRevisionR433='r536-automatic-lifecycle-suspension'","fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'",'fxRenderLifecycleSuspended','fxMobileRenderLifecycleSourceR536','idle-zero-frame','visibilitychange','document.hidden'],'R536 mobile lifecycle governor');
 has(controls,['canonicalControls(hero)','fx-reference-controls-r204','visibleControl(ask)','fxLivingCoreControlsR536'],'R536 control owner');
-has(wdaControls,["fxReferenceControlLayout = mobile ? 'r538-mobile-two-cell' : 'r538-desktop-two-cell'",'const ask = rail?.querySelector(\'.fx-reference-ask\')','requestProfessionalAudio()'],'R538 WDA SOUND/ASK owner');
+has(wdaControls,["fxReferenceControlLayout = mobile ? 'r538-mobile-two-cell' : 'r538-desktop-two-cell'",'const ask = rail?.querySelector(\'.fx-reference-ask\')','requestProfessionalAudio()'],'R539 WDA SOUND/ASK opt-in owner');
 has(awardRuntime,["fxAwardRuntimeMode = 'normal-visitor-r538'",'formatx-wda-hardening-r198.css?v=20260906-r538-two-control-no-pause','formatx-wda-controls-r198.js?v=20260906-r538-two-control-no-pause'],'R538 normal visitor award runtime');
 absent(awardRuntime,['lighthouse=1','auditMode','audit-passive'],'award runtime audit-only path');
 has(coreTouch,['formatx:coreinteraction','formatx:organismcoreactivate','touch-pulse-r536-lifecycle-safe'],'R536 touch fallback');
@@ -93,7 +95,7 @@ for(const [name,source] of Object.entries({intro,motion,contentRuntime,renderer,
 
 has(quality,['#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]','position: fixed !important','pointer-events: none !important','@keyframes fx-r533-preloader-visual-bound','animation: fx-r533-preloader-visual-bound 1640ms linear both !important','animation-duration: 1360ms !important','will-change: clip-path !important','@media (prefers-reduced-motion: reduce)','grid-template-columns: repeat(2, 50px) !important'],'R538 fixed paintable compositor preloader + two-control layout');
 absent(quality,['#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ .topbar','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ footer','.fx-reference-pause'],'R538 quality layer must not hide hero or retain manual PAUSE geometry');
-has(heartStyle,['#hero .hero-grid','pointer-events: none;','.fx-mag-heart-hit-r252','pointer-events: auto !important;'],'R538 semantic MAG hit ownership');
+has(heartStyle,['FormatX r540','#main-content','pointer-events: none;','.fx-mag-heart-hit-r252','z-index: 12060 !important','z-index: 12080 !important','production-r540-main-transparent-control-safe-semantic-heart'],'R540 semantic MAG hit/control ownership');
 has(shapeshifter,['production-r538-single-native-webgl-optics-owner-two-control-row','grid-template-columns: repeat(2,54px) !important','pointer-events: none !important'],'R538 visual-only native optics/two-control layout');
 absent(shapeshifter,['.fx-reference-pause','SOUND | ASK | PAUSE','repeat(3,54px)'],'R538 shapeshifter retired PAUSE geometry');
 has(wdaHardening,['FormatX r538','grid-template-columns: repeat(2, 54px) !important','grid-template-columns: repeat(2, 50px) !important'],'R538 WDA two-control geometry');
@@ -125,4 +127,4 @@ absent(worker,['deferReferenceModeBoot','REFERENCE_BOOT_DEFERRED_PREFIX','GLOBAL
 
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 for(const source of [intro,scheduler,motion,contentRuntime,current,renderer,life,governor,controls,wdaControls,awardRuntime,coreTouch,nativeTouch,shapeSync,mini,referenceBoot])new Function(source);
-console.log('PASS: R538 validates one normal visitor path, navigation-owned native living MAG, explicit semantic hit ownership, bounded independent intro, early first-paint warming, fresh cache delivery, no active manual PAUSE owner, and automatic lifecycle suspension.');
+console.log('PASS: R540 validates navigation-owned native living MAG, navigation-armed opt-in SOUND control, semantic main/hero hit ownership, bounded independent intro, strict no-manual-PAUSE contract, early first-paint warming and automatic lifecycle suspension.');
