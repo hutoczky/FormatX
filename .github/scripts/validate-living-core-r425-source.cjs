@@ -13,16 +13,21 @@ const home=read('docs/scifi-ui/index.html');
 const intro=read('docs/scifi-ui/scripts/formatx-event-horizon.js');
 const scheduler=read('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js');
 const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
+const contentRuntime=read('docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js');
 const current=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const life=read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
 const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const controls=read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
+const wdaControls=read('docs/scifi-ui/scripts/formatx-wda-controls-r198.js');
+const awardRuntime=read('docs/scifi-ui/scripts/formatx-award-runtime-r206.js');
 const coreTouch=read('docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js');
 const nativeTouch=read('docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js');
 const shapeSync=read('docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js');
 const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 const heartStyle=read('docs/scifi-ui/styles/formatx-heart-core-r252.css');
+const shapeshifter=read('docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css');
+const wdaHardening=read('docs/scifi-ui/styles/formatx-wda-hardening-r198.css');
 const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
 const worker=read('billing-worker/src/production-content-entry-r529.js');
 const referenceBoot=read('docs/scifi-ui/scripts/formatx-reference-mode-boot-r334.js');
@@ -47,12 +52,12 @@ absent(intro,['formatx:referencepause','.fx-reference-pause','data-fx-reference-
 has(scheduler,[
   'navigation-owned living MAG + post-first-paint enhancements',
   "const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle'",
-  "const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r537-navigation-interaction'",
+  "const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r538-pause-free-optics'",
   'function startCriticalMag()','requested-navigation',"script.dataset.fxCurrentMagLoaderR422='true'",
   "script.dataset.fxNavigationMagR536='true'",'startCriticalMag();'
 ],'R538 unconditional navigation MAG scheduler');
 assert.match(scheduler,/startCriticalMag\(\);\s*if\(document\.readyState===['"]loading['"]\)/,'critical MAG must be requested unconditionally before late enhancement scheduling');
-absent(scheduler,['lighthouse=1','force-prefers-reduced-motion','formatx:referencepause'],'navigation MAG scheduler');
+absent(scheduler,['lighthouse=1','auditMode','force-prefers-reduced-motion','formatx:referencepause'],'navigation MAG scheduler');
 
 has(motion,[
   'external-strict-csp','formatx-current-mag-loader-r422.js','ensureCurrentMag();',"fxCanonicalAskActivationR477='armed'",'formatx:immersiveactivate',
@@ -63,7 +68,10 @@ has(motion,[
 ],'current motion/MAG + independent intent enhancement route');
 absent(motion,['fx-reference-pause','formatx:referencepause'],'active motion owner');
 
-has(current,["const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'",'cleanupLegacyMagRuntime',"fxPrimaryMagOwnerR460='r326-only'",'formatx-heart-core-r252.js?v=20260906-r537-navigation-interaction-owner','ensureHeartCore()','requested-with-navigation-mag','formatx-crystal-organism-r326.js?v=20260906-r536-automatic-lifecycle-no-audit-path','formatx-mobile-render-governor-r426.js?v=20260906-r536-automatic-lifecycle','formatx-core-life-r455.js','formatx-mini-mag-assistant-r459.js',"fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle'"],'single current MAG loader + semantic heart');
+has(contentRuntime,["fxContentRuntimeR241 = 'armed-r538-user-intent'","fxDeferredVisualStylesR300 = 'production-css-owned-r538'","fxFirstFrameStabilityR283 = 'immutable-css-r538'",'formatx:immersiveactivate'],'R538 content enhancement intent router');
+absent(contentRuntime,['.fx-reference-pause','formatx:referencepause','lighthouse=1'],'R538 content runtime retired/audit-only paths');
+
+has(current,["const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'",'cleanupLegacyMagRuntime',"fxPrimaryMagOwnerR460='r326-only'",'formatx-heart-core-r252.js?v=20260906-r537-navigation-interaction-owner','ensureHeartCore()','requested-with-navigation-mag','formatx-core-shapeshifter-r337.css?v=20260906-r538-two-control-visual-only','formatx-crystal-organism-r326.js?v=20260906-r536-automatic-lifecycle-no-audit-path','formatx-mobile-render-governor-r426.js?v=20260906-r536-automatic-lifecycle','formatx-core-life-r455.js','formatx-mini-mag-assistant-r459.js',"fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle'"],'single current MAG loader + semantic heart');
 has(renderer,["const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry','const SURFACE_PULSE_MS = 1160','prefers-reduced-motion:reduce','document.hidden','uSurfacePulse','single-luminous-webgl-material-owner','fxRenderLifecycleSuspended'],'native R326 renderer');
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
 absent(renderer,['lighthouse=1','auditMode','formatx:referencepause','fxReferenceMotionPaused','.fx-reference-pause'],'native renderer audit/manual-pause bypass');
@@ -76,26 +84,35 @@ assert.ok(!life.includes('requestAnimationFrame('),'living-core life owner must 
 
 has(governor,['automatic lifecycle governor','activeWindowMs=240',"fxMobileRenderGovernorRevisionR433='r536-automatic-lifecycle-suspension'","fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'",'fxRenderLifecycleSuspended','fxMobileRenderLifecycleSourceR536','idle-zero-frame','visibilitychange','document.hidden'],'R536 mobile lifecycle governor');
 has(controls,['canonicalControls(hero)','fx-reference-controls-r204','visibleControl(ask)','fxLivingCoreControlsR536'],'R536 control owner');
+has(wdaControls,["fxReferenceControlLayout = mobile ? 'r538-mobile-two-cell' : 'r538-desktop-two-cell'",'const ask = rail?.querySelector(\'.fx-reference-ask\')','requestProfessionalAudio()'],'R538 WDA SOUND/ASK owner');
+has(awardRuntime,["fxAwardRuntimeMode = 'normal-visitor-r538'",'formatx-wda-hardening-r198.css?v=20260906-r538-two-control-no-pause','formatx-wda-controls-r198.js?v=20260906-r538-two-control-no-pause'],'R538 normal visitor award runtime');
+absent(awardRuntime,['lighthouse=1','auditMode','audit-passive'],'award runtime audit-only path');
 has(coreTouch,['formatx:coreinteraction','formatx:organismcoreactivate','touch-pulse-r536-lifecycle-safe'],'R536 touch fallback');
 has(nativeTouch,['formatx:coreinteraction','formatx:organismcoreactivate','native-r326-touch-r536-controller-tap'],'R536 native MAG touch');
-for(const [name,source] of Object.entries({intro,motion,renderer,governor,controls,coreTouch,nativeTouch,shapeSync,mini,life}))absent(source,['formatx:referencepause','fxReferenceMotionPaused','fxManualMagPauseR528','.fx-reference-pause'],`${name} manual MAG pause contract`);
+for(const [name,source] of Object.entries({intro,motion,contentRuntime,renderer,governor,controls,wdaControls,awardRuntime,coreTouch,nativeTouch,shapeSync,mini,life}))absent(source,['formatx:referencepause','fxReferenceMotionPaused','fxManualMagPauseR528','.fx-reference-pause'],`${name} manual MAG pause contract`);
 
 has(quality,['#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]','position: fixed !important','pointer-events: none !important','@keyframes fx-r533-preloader-visual-bound','animation: fx-r533-preloader-visual-bound 1640ms linear both !important','animation-duration: 1360ms !important','will-change: clip-path !important','@media (prefers-reduced-motion: reduce)','grid-template-columns: repeat(2, 50px) !important'],'R538 fixed paintable compositor preloader + two-control layout');
 absent(quality,['#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ .topbar','#formatx-event-horizon[data-fx-preloader-r531="active"] ~ footer','.fx-reference-pause'],'R538 quality layer must not hide hero or retain manual PAUSE geometry');
 has(heartStyle,['#hero .hero-grid','pointer-events: none;','.fx-mag-heart-hit-r252','pointer-events: auto !important;'],'R538 semantic MAG hit ownership');
+has(shapeshifter,['production-r538-single-native-webgl-optics-owner-two-control-row','grid-template-columns: repeat(2,54px) !important','pointer-events: none !important'],'R538 visual-only native optics/two-control layout');
+absent(shapeshifter,['.fx-reference-pause','SOUND | ASK | PAUSE','repeat(3,54px)'],'R538 shapeshifter retired PAUSE geometry');
+has(wdaHardening,['FormatX r538','grid-template-columns: repeat(2, 54px) !important','grid-template-columns: repeat(2, 50px) !important'],'R538 WDA two-control geometry');
+absent(wdaHardening,['.fx-reference-pause','repeat(3, 54px)','repeat(3, 50px)'],'R538 WDA retired PAUSE geometry');
 
 has(referenceBoot,["fxReferenceProductionR244 = mode","fxReferenceComposition = mobile","fxReferenceModeBootR334 = 'prepaint-' + mode"],'tiny synchronous prepaint reference selector');
 has(criticalShell,['.main-nav,',' .header-actions { display: none;','pointer-events: none;'],'mobile critical shell');
 has(worker,[
-  "P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r537-navigation-interaction'",
+  "P0_MOTION_SCHEDULER_URL = 'formatx-p0-motion-scheduler-r490.js?v=20260906-r538-pause-free-cache-chain'",
   "MOTION_RUNTIME_URL = 'formatx-motion-runtime-loader-r239.js?v=20260906-r537-automatic-lifecycle'",
+  "CONTENT_RUNTIME_URL = 'formatx-content-runtime-loader-r241.js?v=20260906-r538-no-manual-pause'",
+  "CONTENT_STANDARD_URL = 'formatx-content-standard.css?v=20260906-r538-mobile-touch-spacing'",
   "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260906-r537-no-manual-pause'",
   "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner'",
   "QUALITY_URL = 'formatx-quality-r461.css?v=20260906-r538-no-manual-pause'",
   'formatx-heart-core-r252.css?v=20260906-r538-hero-hit-owner',
   'CRITICAL_SHELL_PRELOAD','QUALITY_PRELOAD','AWARD_READINESS_PRELOAD','FIRST_PAINT_R206_PRELOAD','REFERENCE_BOOT_PRELOAD','CRITICAL_CORE_PRELOAD','REFERENCE_PRODUCTION_PRELOAD',
-  "X-FormatX-Product-Contract', 'r536-navigation-mag-automatic-lifecycle'",
-  "X-FormatX-MAG-Startup', 'r536-navigation-owned-critical-living-core'",
+  "X-FormatX-Product-Contract', 'r538-navigation-mag-no-manual-pause'",
+  "X-FormatX-MAG-Startup', 'r538-navigation-owned-critical-living-core'",
   "X-FormatX-Preloader', 'r534-static-content-roadmap-timing'",
   "X-FormatX-Preloader-Cache', 'r537-static-lcp-no-manual-pause'",
   "X-FormatX-Reference-Boot', 'r536-prepaint-layout-selector'",
@@ -107,5 +124,5 @@ has(worker,[
 absent(worker,['deferReferenceModeBoot','REFERENCE_BOOT_DEFERRED_PREFIX','GLOBAL_LEGACY_PATHS'],'production must not defer the prepaint selector or global critical shell');
 
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
-for(const source of [intro,scheduler,motion,current,renderer,life,governor,controls,coreTouch,nativeTouch,shapeSync,mini,referenceBoot])new Function(source);
-console.log('PASS: R538 validates navigation-owned native living MAG, explicit semantic hit ownership, bounded independent intro, early first-paint warming, fresh cache delivery, no active manual PAUSE owner, and automatic lifecycle suspension.');
+for(const source of [intro,scheduler,motion,contentRuntime,current,renderer,life,governor,controls,wdaControls,awardRuntime,coreTouch,nativeTouch,shapeSync,mini,referenceBoot])new Function(source);
+console.log('PASS: R538 validates one normal visitor path, navigation-owned native living MAG, explicit semantic hit ownership, bounded independent intro, early first-paint warming, fresh cache delivery, no active manual PAUSE owner, and automatic lifecycle suspension.');
