@@ -1,32 +1,19 @@
-/* FormatX r540 — semantic MAG hit ownership + control-safe z-order.
-   The page/main/hero shells are visual containers around the hero. Normal content
-   sections remain interactive, while hero interaction belongs only to real semantic
-   descendants. SOUND/ASK stay above the large MAG heart hit surface. */
-
-html body.living-architecture #main-content,
-html body.living-architecture #hero,
-html body.living-architecture #hero .hero-grid,
-html body.living-architecture #hero .hero-space {
-  pointer-events: none;
-}
-
-/* Outside the hero, the product surface remains a normal interactive document. */
-html body.living-architecture #main-content > section:not(#hero),
-html body.living-architecture #main-content > article,
-html body.living-architecture #main-content > div:not(#hero) {
-  pointer-events: auto;
-}
+/* FormatX r542 — body-level semantic MAG hit owner + control-safe geometry.
+   The visual hero remains a normal document surface. The WebGL host is pointer-
+   transparent, while one fixed semantic button follows the rendered MAG geometry.
+   SOUND/ASK remain inside the higher hero-space stacking context and win overlaps. */
 
 html body.living-architecture #hero .hero-space {
   position: relative !important;
-  z-index: 30 !important;
+  z-index: 300 !important;
   isolation: isolate;
+  pointer-events: none !important;
 }
 
-/* Re-enable only semantic/native hero interaction owners. */
+/* Real hero controls remain native interactive descendants. */
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero a,
-html body.living-architecture #hero button,
+html body.living-architecture #hero button:not(.fx-mag-heart-hit-r252),
 html body.living-architecture #hero input,
 html body.living-architecture #hero select,
 html body.living-architecture #hero textarea,
@@ -44,38 +31,42 @@ html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
   pointer-events: auto;
 }
 
-/* Canonical controls must win hit-testing wherever their visual boxes overlap MAG. */
 html body.living-architecture #hero .fx-reference-controls-r204 {
-  z-index: 12080 !important;
+  position: relative;
+  z-index: 20 !important;
   isolation: isolate;
 }
 
-.fx-mag-heart-hit-r252 {
-  position: absolute;
-  z-index: 12060 !important;
-  left: 50%;
-  top: 50%;
-  width: min(36vw, 430px);
-  height: min(36vw, 430px);
-  min-width: 180px;
-  min-height: 180px;
+/* R326 pointer/touch logic listens globally and reads stage geometry. The visual
+   WebGL stage never owns DOM hit-testing. */
+html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+  pointer-events: none !important;
+}
+
+/* One body child follows the current stage rect. JS owns left/top/size/visibility;
+   CSS owns semantics, focus treatment and a stable root stacking level below the
+   fixed header while remaining above normal page content. */
+body.living-architecture > .fx-mag-heart-hit-r252 {
+  position: fixed !important;
+  z-index: 200 !important;
+  left: 50vw;
+  top: 50vh;
+  width: 220px;
+  height: 220px;
+  min-width: 160px;
+  min-height: 160px;
+  margin: 0;
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: transparent;
   color: transparent;
   cursor: pointer;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) !important;
   touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto !important;
   isolation: isolate;
-}
-
-/* R540: R326 pointer/touch logic listens globally and reads stage geometry, so
-   neither the host nor the visual WebGL stage may win DOM hit-testing. */
-html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
-  pointer-events: none !important;
 }
 
 .fx-mag-heart-hit-r252::before {
@@ -105,11 +96,9 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
 }
 
 @media (max-width: 900px), (pointer: coarse) {
-  .fx-mag-heart-hit-r252 {
-    width: min(72vw, 330px);
-    height: min(72vw, 330px);
-    min-width: 210px;
-    min-height: 210px;
+  body.living-architecture > .fx-mag-heart-hit-r252 {
+    min-width: 176px;
+    min-height: 176px;
   }
 
   /* Entire trust cards are real touch targets, not only their text lines. */
@@ -180,4 +169,4 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
 
-/* production-r540-main-transparent-control-safe-semantic-heart */
+/* production-r542-body-fixed-stage-synced-semantic-heart */
