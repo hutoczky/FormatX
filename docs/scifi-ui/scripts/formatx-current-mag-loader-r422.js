@@ -1,12 +1,13 @@
-/* FormatX R542 navigation-owned current native MAG runtime.
-   R326 remains the only full-size hero WebGL organism. Mobile keeps bounded
-   periodic surface energy with zero frames between sweeps and automatic lifecycle
-   suspension. The lightweight body-level semantic heart owner is armed with
-   navigation so the already-living MAG is immediately interactive. */
+/* FormatX R545 navigation-owned current native MAG runtime.
+   R326 remains the only full-size hero WebGL organism. The renderer is still
+   navigation-autostarted, but shader compile/link yields until the browser has
+   produced the first visual paint so MAG startup cannot delay FCP/LCP. Mobile
+   keeps bounded periodic surface energy with zero frames between sweeps and
+   automatic lifecycle suspension. */
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle';
+const VERSION='direct-r326-r545-first-paint-yield-live-energy-zero-idle';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(reduced)root.dataset.fxCurrentMagMotionR424='r468-static-render-explicit-interaction';
@@ -94,6 +95,41 @@ function addScript(src,attr){
     document.head.appendChild(script);
   });
 }
+
+function yieldUntilFirstVisualPaint(){
+  return new Promise(resolve=>{
+    let settled=false;
+    let observer=null;
+    let fallbackTimer=0;
+    const finish=source=>{
+      if(settled)return;
+      settled=true;
+      if(fallbackTimer)clearTimeout(fallbackTimer);
+      observer?.disconnect();
+      root.dataset.fxCurrentMagFirstPaintYieldR545=source;
+      resolve(source);
+    };
+    const releaseAfterPaint=source=>requestAnimationFrame(()=>setTimeout(()=>finish(source),0));
+    try{
+      if(performance.getEntriesByName('first-contentful-paint').length){
+        releaseAfterPaint('existing-fcp');
+        return;
+      }
+      observer=new PerformanceObserver(list=>{
+        if(list.getEntries().some(entry=>entry.name==='first-contentful-paint')){
+          observer.disconnect();
+          observer=null;
+          releaseAfterPaint('observed-fcp');
+        }
+      });
+      observer.observe({type:'paint',buffered:true});
+    }catch{
+      releaseAfterPaint('raf-fallback');
+    }
+    fallbackTimer=setTimeout(()=>finish(document.hidden?'hidden-bounded-fallback':'bounded-fallback'),650);
+  });
+}
+
 function ensureHeartCore(){
   if(root.dataset.fxHeartCoreR252==='ready')return Promise.resolve(true);
   const existing=document.querySelector('script[src*="formatx-heart-core-r252.js"]');
@@ -186,6 +222,7 @@ async function start(){
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
   root.dataset.fxCurrentMagStylesR423='ready';
   root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
+  root.dataset.fxCurrentMagStartupR545='navigation-owned-first-paint-yield-before-shader-compile';
   root.dataset.fxCurrentMagOpticsR458='superseded-by-r468-soft-mobile-bloom';
   root.dataset.fxCurrentMagOpticsR460=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
   root.dataset.fxCurrentMagOpticsR463=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
@@ -199,6 +236,7 @@ async function start(){
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
 
+  await yieldUntilFirstVisualPaint();
   await addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
   await addScript(RENDERER,'data-fx-current-r326-r422');
   await addScript(NATIVE_TOUCH,'data-fx-native-mag-touch-r434');
@@ -222,7 +260,7 @@ async function start(){
     ?'direct-r326-r468-soft-optics-live-energy-zero-idle-native-touch'
     :'direct-r326-r468-primary-controller-desktop';
   root.dataset.fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle';
-  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r538',heart:'r542-body-fixed-stage-synced'}}));
+  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r538',heart:'r542-body-fixed-stage-synced',startup:'r545-first-paint-yield'}}));
 }
 
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});
