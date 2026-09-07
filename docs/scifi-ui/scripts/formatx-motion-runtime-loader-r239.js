@@ -1,4 +1,4 @@
-/* FormatX r619 — navigation-owned MAG + SOUND control + independent intent enhancements.
+/* FormatX r550 compatibility · R619 navigation-owned MAG + SOUND control + independent intent enhancements.
    MAG and the lightweight SOUND control owner are automatic from navigation. The
    normal OffscreenCanvas path warms only assets it actually consumes before paint;
    the main-thread R326 renderer remains an automatic fallback, but is not preloaded
