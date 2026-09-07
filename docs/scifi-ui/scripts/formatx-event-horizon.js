@@ -1,8 +1,9 @@
-/* FormatX R606 — compositor-owned bounded preloader release.
+/* FormatX R609 — hide-first bounded preloader release.
    MAG startup remains navigation-owned behind the visual layer. Product timing
    remains mobile 1180–1450ms / desktop 1350–1650ms. The required 1360/1640ms
-   compositor animation now owns the primary logical release; scheduler/timer
-   deadlines remain fail-safe fallbacks rather than a second drifting clock. */
+   compositor animation owns the primary logical release; scheduler/timer
+   deadlines remain fail-safe fallbacks. Release no longer performs synchronous
+   subtree animation enumeration before the overlay is hidden and reported done. */
 (function(){
 'use strict';
 
@@ -45,6 +46,7 @@ ROOT.dataset.fxPreloaderDeadlineR562='overdue-callback-direct-finalize-normal-fa
 ROOT.dataset.fxPreloaderDeadlineR606='compositor-animation-end-primary-timer-fallback';
 ROOT.dataset.fxPreloaderPaintOwnerR575='external-css-pseudo-grid-scan-legacy-dom-suppressed';
 ROOT.dataset.fxPreloaderPaintOwnerR606='bounded-raster-single-compositor-deadline';
+ROOT.dataset.fxPreloaderFinalizeR609='hide-first-no-subtree-animation-enumeration';
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
@@ -115,7 +117,6 @@ function hidePreloader(source,direct=false){
   const finalize=()=>{
     if(finalized)return;finalized=true;
     if(preloaderFadeTimer)clearTimeout(preloaderFadeTimer);preloaderFadeTimer=0;
-    try{overlay.getAnimations({subtree:true}).forEach(animation=>animation.cancel());}catch(_){}
     overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));
   };
   const releaseElapsed=performance.now()-PRELOADER_BOOT_AT;
