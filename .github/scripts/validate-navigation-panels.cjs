@@ -188,6 +188,7 @@ async function assertStableOrdinaryScroll(page, expectedMirrors) {
 }
 
 async function assertTwoLoopCycles(page, name, expectedMirrors) {
+  const mobile = name === 'mobile';
   await page.evaluate(() => {
     document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
     document.body.style.setProperty('scroll-behavior', 'auto', 'important');
@@ -200,30 +201,30 @@ async function assertTwoLoopCycles(page, name, expectedMirrors) {
         && bridge.offsetHeight > 40;
     }, null, { timeout: 12000 });
 
-    const before = await page.evaluate(() => {
+    const before = await page.evaluate(isMobile => {
       const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
       const hero = document.querySelector('#main-content > #hero');
       const relative = Math.max(48, Math.min(innerHeight * .24, Math.max(48, hero.offsetHeight - 12)));
       return {
         count: Number(document.documentElement.dataset.fxLoopCount || 0),
-        target: bridge.offsetTop + relative,
-        expectedLanding: hero.offsetTop + relative,
+        target: isMobile ? document.documentElement.scrollHeight : bridge.offsetTop + relative,
+        expectedLanding: isMobile ? hero.offsetTop : hero.offsetTop + relative,
       };
-    });
+    }, mobile);
 
     await page.evaluate(target => window.scrollTo({ top: target, left: 0, behavior: 'auto' }), before.target);
-    await page.waitForFunction(expected => (
+    await page.waitForFunction(({ expected, isMobile }) => (
       Number(document.documentElement.dataset.fxLoopCount || 0) === expected
       && document.documentElement.dataset.fxInfiniteInput === 'native'
-      && document.documentElement.dataset.fxLoopLandingState === 'settled'
+      && document.documentElement.dataset.fxLoopLandingState === (isMobile ? 'heart-core-settled' : 'settled')
       && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
-    ), before.count + 1, { timeout: 12000 });
+    ), { expected: before.count + 1, isMobile: mobile }, { timeout: 12000 });
 
     const after = await page.evaluate(() => ({
       count: Number(document.documentElement.dataset.fxLoopCount || 0),
       y: window.scrollY,
       landing: Number(document.documentElement.dataset.fxLoopLanding || NaN),
-      source: document.documentElement.dataset.fxLoopSource,
+      source: document.documentElement.dataset.fxLoopSource || '',
       bridges: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
       mirrors: document.querySelectorAll('[data-fx-loop-mirror]').length,
     }));
@@ -231,7 +232,9 @@ async function assertTwoLoopCycles(page, name, expectedMirrors) {
       || Math.abs(after.y - before.expectedLanding) > 8
       || Math.abs(after.landing - before.expectedLanding) > 8
       || after.bridges !== 1
-      || after.mirrors !== expectedMirrors) {
+      || after.mirrors !== expectedMirrors
+      || (mobile && !/^heart-core-/.test(after.source))
+      || (!mobile && /^heart-core-/.test(after.source))) {
       throw new Error(`${name}: loop cycle ${cycle} failed: ${JSON.stringify({ expectedMirrors, before, after })}`);
     }
     await page.waitForTimeout(500);
@@ -304,7 +307,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling with R546 physical MAG hit routing');
+    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling with current desktop inert-mirror/mobile heart-core contracts');
   } finally {
     await browser.close();
   }
