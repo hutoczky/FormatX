@@ -1,7 +1,35 @@
-/* FormatX R597 — desktop seamless-loop reachability + compact mid-width mini-MAG dock.
-   This stylesheet is loaded only after real desktop scroll intent, so it cannot
-   enter the initial Lighthouse critical path. */
-@media (min-width: 901px) {
+/* FormatX R613 — desktop seamless-loop final-layout guard.
+   This stylesheet is loaded only after a real desktop scroll intent. Before the
+   seamless-v7 runtime measures/builds its bridge, all document blocks that may
+   otherwise use content-visibility placeholders are realised at their true
+   height. That keeps the bridge on one stable document coordinate without
+   moving below-fold work into the initial Lighthouse/LCP path. */
+@media (min-width: 901px) and (pointer: fine) {
+  html:is(
+    [data-fx-infinite-controller='desktop-runtime-loading-v7'],
+    [data-fx-infinite-controller='seamless-v7']
+  ) body.living-architecture :is(
+    main#main-content > .fx-category-deck,
+    main#main-content > section.scene:not(#hero),
+    main#main-content .fx-origin-proof,
+    .fx-static-live-os,
+    .fx-award-proof,
+    .fx-product-showcase,
+    #user-feedback,
+    footer.site-footer,
+    main#main-content > section.scene:not(#hero) > .flow,
+    main#main-content > section.scene:not(#hero) > .cards,
+    main#main-content > section.scene:not(#hero) > .pricing,
+    main#main-content > section.scene:not(#hero) > .payment,
+    main#main-content > section.scene:not(#hero) > .payment-console,
+    main#main-content > section.scene:not(#hero) > #formatx-plan-qr-dock,
+    main#main-content > section.scene:not(#hero) > .system-grid,
+    main#main-content > section.scene:not(#hero) > .release-layout
+  ) {
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+  }
+
   html[data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge {
     --fx-loop-runway: max(460px, 34svh);
   }

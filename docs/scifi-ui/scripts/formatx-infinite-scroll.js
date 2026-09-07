@@ -4,9 +4,9 @@
   const root = document.documentElement;
   const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260823-r316-dcl-safe-geometry';
+  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260907-r613-layout-stable-desktop-loop';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
-  const DESKTOP_RUNTIME_GUARD_STYLE = '/scifi-ui/styles/formatx-desktop-runtime-guard-r597.css?v=20260907-r597-reachable-loop-compact-mini';
+  const DESKTOP_RUNTIME_GUARD_STYLE = '/scifi-ui/styles/formatx-desktop-runtime-guard-r597.css?v=20260907-r613-final-layout-before-loop';
   const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260825-r252-core3';
   const HERO_START_HASHES = new Set(['', '#top', '#hero']);
   let mobileGeometryTimer = 0;
@@ -16,8 +16,9 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r534-scroll-intent-r252-heart-core';
+  root.dataset.fxScrollBootstrapRevision = 'r613-desktop-final-layout-before-seamless-runtime';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
+  root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
@@ -29,12 +30,39 @@
   }
 
   function ensureDesktopRuntimeGuardStyle() {
-    if (document.querySelector('link[data-fx-desktop-runtime-guard-r597]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = DESKTOP_RUNTIME_GUARD_STYLE;
-    link.dataset.fxDesktopRuntimeGuardR597 = 'true';
-    document.head.appendChild(link);
+    return new Promise(resolve => {
+      let link = document.querySelector('link[data-fx-desktop-runtime-guard-r597]');
+      if (link instanceof HTMLLinkElement && link.sheet) {
+        root.dataset.fxDesktopLoopLayoutR613 = 'ready-existing-before-runtime';
+        resolve(link);
+        return;
+      }
+      if (!(link instanceof HTMLLinkElement)) {
+        link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = DESKTOP_RUNTIME_GUARD_STYLE;
+        link.dataset.fxDesktopRuntimeGuardR597 = 'true';
+        document.head.appendChild(link);
+      }
+
+      let settled = false;
+      const finish = source => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        link.removeEventListener('load', onLoad);
+        link.removeEventListener('error', onError);
+        root.dataset.fxDesktopLoopLayoutR613 = source;
+        requestAnimationFrame(() => resolve(link));
+      };
+      const onLoad = () => finish('ready-load-before-runtime');
+      const onError = () => finish('failed-load-runtime-continues');
+      link.addEventListener('load', onLoad, { once: true });
+      link.addEventListener('error', onError, { once: true });
+      const timer = window.setTimeout(() => {
+        finish(link.sheet ? 'ready-sheet-timeout-check-before-runtime' : 'failed-style-timeout-runtime-continues');
+      }, 2000);
+    });
   }
 
   function ensureHeartCoreRuntime() {
@@ -93,6 +121,38 @@
     }
   }
 
+  function mountSeamlessRuntime(platform) {
+    const mobile = platform === 'mobile';
+    if (document.querySelector('script[data-fx-seamless-runtime]')) return;
+
+    const script = document.createElement('script');
+    script.src = RUNTIME_SRC;
+    script.async = false;
+    script.dataset.fxSeamlessRuntime = platform;
+    script.dataset.fxDesktopSeamlessRuntime = 'true';
+    script.addEventListener('load', () => {
+      root.dataset.fxScrollBootstrapState = mobile ? 'mobile-loop-ready' : 'desktop-ready';
+      if (mobile) {
+        root.dataset.fxMobileScrollMode = 'native-momentum-loop';
+        root.dataset.fxMobileScrollPolicy = 'native-momentum-loop-v1';
+        requestMobileGeometryRefresh(false);
+      } else {
+        root.dataset.fxDesktopLoopLayoutR613 = 'runtime-mounted-after-final-layout-style';
+        requestDesktopGeometryRefresh();
+      }
+    }, { once: true });
+    script.addEventListener('error', () => {
+      root.dataset.fxScrollBootstrapState = mobile ? 'mobile-loop-failed' : 'desktop-failed';
+      root.dataset.fxInfiniteController = 'native-fallback';
+      root.dataset.fxAutomaticLoop = 'disabled-runtime-error';
+      root.dataset.fxInfiniteInput = 'native';
+      root.dataset.fxLoopBridge = 'disabled-runtime-error';
+      root.classList.remove('fx-seamless-loop-transfer', 'fx-mobile-seamless-loop');
+      root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({ version: BOOTSTRAP, controller: 'native-fallback', automaticLoop: false, visualBridge: false, mobileNativeMomentumPreserved: true, inputCapture: false });
+    }, { once: true });
+    document.head.appendChild(script);
+  }
+
   function installSeamlessRuntime(platform) {
     const mobile = platform === 'mobile';
     if (document.querySelector('script[data-fx-seamless-runtime]')) return;
@@ -112,34 +172,15 @@
       root.classList.remove('fx-mobile-native-scroll', 'fx-mobile-native-scroll-v2');
       ensureMobileLoopBridgeOverride();
       installMobileGeometryResync();
-    } else {
-      ensureDesktopRuntimeGuardStyle();
-      installDesktopGeometryResync();
+      mountSeamlessRuntime(platform);
+      return;
     }
 
-    const script = document.createElement('script');
-    script.src = RUNTIME_SRC;
-    script.async = false;
-    script.dataset.fxSeamlessRuntime = platform;
-    script.dataset.fxDesktopSeamlessRuntime = 'true';
-    script.addEventListener('load', () => {
-      root.dataset.fxScrollBootstrapState = mobile ? 'mobile-loop-ready' : 'desktop-ready';
-      if (mobile) {
-        root.dataset.fxMobileScrollMode = 'native-momentum-loop';
-        root.dataset.fxMobileScrollPolicy = 'native-momentum-loop-v1';
-        requestMobileGeometryRefresh(false);
-      } else requestDesktopGeometryRefresh();
-    }, { once: true });
-    script.addEventListener('error', () => {
-      root.dataset.fxScrollBootstrapState = mobile ? 'mobile-loop-failed' : 'desktop-failed';
-      root.dataset.fxInfiniteController = 'native-fallback';
-      root.dataset.fxAutomaticLoop = 'disabled-runtime-error';
-      root.dataset.fxInfiniteInput = 'native';
-      root.dataset.fxLoopBridge = 'disabled-runtime-error';
-      root.classList.remove('fx-seamless-loop-transfer', 'fx-mobile-seamless-loop');
-      root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({ version: BOOTSTRAP, controller: 'native-fallback', automaticLoop: false, visualBridge: false, mobileNativeMomentumPreserved: true, inputCapture: false });
-    }, { once: true });
-    document.head.appendChild(script);
+    root.dataset.fxDesktopLoopLayoutR613 = 'loading-final-layout-style-before-runtime';
+    ensureDesktopRuntimeGuardStyle().then(() => {
+      installDesktopGeometryResync();
+      mountSeamlessRuntime(platform);
+    });
   }
 
   function armSeamlessRuntime(platform) {
