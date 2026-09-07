@@ -1,0 +1,23 @@
+name: R642 P0 contract-window release and gate fixes
+
+on:
+  push:
+    branches:
+      - fix/r533-p0-intro-lcp
+    paths:
+      - .github/workflows/r642-p0-window-and-gates.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/r533-p0-intro-lcp
+          fetch-depth: 0
+      - name: Apply R642 source fixes
+        env:
+          PATCH_B64: ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCgpwPVBhdGgoJ2RvY3Mvc2NpZmktdWkvc2NyaXB0cy9mb3JtYXR4LWV2ZW50LWhvcml6b24uanMnKQpzPXAucmVhZF90ZXh0KGVuY29kaW5nPSd1dGYtOCcpCm9sZD0iY29uc3QgUFJFTE9BREVSX1JFVkVBTF9BVF9NUz1SRURVQ0VEPzA6TWF0aC5tYXgoUFJFTE9BREVSX01JTl9NUyxQUkVMT0FERVJfTUFYX01TLVBSRUxPQURFUl9GQURFX01TKTtcbmNvbnN0IFBSRUxPQURFUl9WSVNVQUxfTVM9TU9CSUxFPzEzNjA6MTY0MDsiCm5ldz0iY29uc3QgUFJFTE9BREVSX1JFVkVBTF9BVF9NUz1SRURVQ0VEPzA6TWF0aC5tYXgoUFJFTE9BREVSX01JTl9NUyxQUkVMT0FERVJfTUFYX01TLVBSRUxPQURFUl9GQURFX01TKTtcbmNvbnN0IFBSRUxPQURFUl9SRUxFQVNFX0FUX01TPVJFRFVDRUQ/UFJFTE9BREVSX01JTl9NUzooTU9CSUxFPzEyMjA6MTQwMCk7XG5jb25zdCBQUkVMT0FERVJfVklTVUFMX01TPU1PQklMRT8xMzYwOjE2NDA7IgppZiBvbGQgbm90IGluIHM6IHJhaXNlIFN5c3RlbUV4aXQoJ1I2NDIgcmVsZWFzZSBjb25zdGFudCBpbnNlcnRpb24gb3duZXIgbm90IGZvdW5kJykKcz1zLnJlcGxhY2Uob2xkLG5ldyw xKS==
