@@ -1,0 +1,54 @@
+name: R638 P0 scroll source fix
+
+on:
+  push:
+    branches:
+      - fix/r533-p0-intro-lcp
+    paths:
+      - .github/workflows/r638-p0-scroll-source-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/r533-p0-intro-lcp
+          fetch-depth: 0
+      - name: Patch desktop geometry settle before seamless runtime
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('docs/scifi-ui/scripts/formatx-infinite-scroll.js')
+          source = path.read_text(encoding='utf-8')
+          anchor = """  function mountSeamlessRuntime(platform) {\n"""
+          helper = """  function waitForDesktopDocumentStable(maxFrames = 10) {\n    if (MOBILE_QUERY.matches) return Promise.resolve(document.documentElement.scrollHeight);\n    return new Promise(resolve => {\n      let previousHeight = -1;\n      let stableFrames = 0;\n      let frames = 0;\n      const settle = () => {\n        realiseDesktopDocumentGeometry('settle-r638');\n        const height = document.documentElement.scrollHeight;\n        stableFrames = previousHeight >= 0 && Math.abs(height - previousHeight) <= 1 ? stableFrames + 1 : 0;\n        previousHeight = height;\n        frames += 1;\n        root.dataset.fxDesktopGeometrySettleR638 = `${frames}:${height}:${stableFrames}`;\n        if (stableFrames >= 2 || frames >= maxFrames) {\n          root.dataset.fxDesktopLoopLayoutR613 = `stable-document-before-runtime-r638-${height}`;\n          resolve(height);\n          return;\n        }\n        requestAnimationFrame(settle);\n      };\n      const begin = () => requestAnimationFrame(settle);\n      if (document.readyState === 'complete') begin();\n      else addEventListener('load', begin, { once: true });\n    });\n  }\n\n"""
+          if 'function waitForDesktopDocumentStable(maxFrames = 10)' not in source:
+              if anchor not in source:
+                  raise SystemExit('R638 helper anchor missing')
+              source = source.replace(anchor, helper + anchor, 1)
+          old = """    root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r634';\n    realiseDesktopDocumentGeometry('pre-guard-r634');\n    ensureDesktopRuntimeGuardStyle().then(() => {\n      realiseDesktopDocumentGeometry('post-guard-r634');\n      requestAnimationFrame(() => requestAnimationFrame(() => {\n        realiseDesktopDocumentGeometry('pre-runtime-r634');\n        root.dataset.fxDesktopLoopLayoutR613 = 'final-document-realised-before-runtime-r634';\n        installDesktopGeometryResync();\n        mountSeamlessRuntime(platform);\n      }));\n    });\n"""
+          new = """    root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r634';\n    realiseDesktopDocumentGeometry('pre-guard-r634');\n    ensureDesktopRuntimeGuardStyle().then(() => {\n      realiseDesktopDocumentGeometry('post-guard-r634');\n      waitForDesktopDocumentStable().then(() => {\n        realiseDesktopDocumentGeometry('pre-runtime-r634');\n        root.dataset.fxDesktopLoopLayoutR613 = 'final-document-stable-before-runtime-r638';\n        installDesktopGeometryResync();\n        mountSeamlessRuntime(platform);\n      });\n    });\n"""
+          if old in source:
+              source = source.replace(old, new, 1)
+          elif 'final-document-stable-before-runtime-r638' not in source:
+              raise SystemExit('R638 install block anchor missing')
+          path.write_text(source, encoding='utf-8')
+          PY
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          git diff --check
+      - name: Commit R638 source fix
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "Games Tech"
+          git config user.email "hutoczky@users.noreply.github.com"
+          git add docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          git commit -m "R638 settle desktop document geometry before loop mount"
+          git push origin HEAD:fix/r533-p0-intro-lcp
