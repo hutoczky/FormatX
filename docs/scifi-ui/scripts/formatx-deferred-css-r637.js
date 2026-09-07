@@ -1,0 +1,93 @@
+(function () {
+  'use strict';
+
+  const root = document.documentElement;
+  if (root.dataset.fxDeferredCssR637) return;
+  root.dataset.fxDeferredCssR637 = 'queued-post-fcp-network-deferred';
+  root.dataset.fxDeferredCssPolicyR637 = 'autonomous-post-fcp-no-user-audit-gate';
+
+  let activated = false;
+  let frame = 0;
+  let fallback = 0;
+  let observer = null;
+
+  function activate(reason) {
+    if (activated) return;
+    activated = true;
+    if (frame) cancelAnimationFrame(frame);
+    if (fallback) clearTimeout(fallback);
+    observer?.disconnect?.();
+
+    const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
+    let restored = 0;
+    for (const link of links) {
+      if (!(link instanceof HTMLLinkElement)) continue;
+      const targetMedia = link.dataset.fxR487Media || link.dataset.fxDeferredMediaR300 || 'all';
+      const deferredHref = link.dataset.fxR637Href || '';
+      if (targetMedia && link.media !== targetMedia) link.media = targetMedia;
+      if (deferredHref && !link.getAttribute('href')) {
+        link.setAttribute('href', deferredHref);
+        restored += 1;
+      }
+      link.removeAttribute('fetchpriority');
+    }
+
+    root.dataset.fxDeferredCssR487 = 'ready-fcp-r637';
+    root.dataset.fxDeferredCssR637 = 'ready-post-fcp-network-restored';
+    root.dataset.fxDeferredCssCountR487 = String(links.length);
+    root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
+    root.dataset.fxDeferredCssReasonR526 = reason;
+    dispatchEvent(new CustomEvent('formatx:deferredcssready', {
+      detail: { count: links.length, restored, scheduler: 'autonomous-post-first-contentful-paint-r637', reason }
+    }));
+  }
+
+  function activateAfterCommittedFrame(reason) {
+    if (activated || frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      setTimeout(() => activate(reason), 0);
+    });
+  }
+
+  function hasFcp() {
+    return performance.getEntriesByName('first-contentful-paint', 'paint').length > 0;
+  }
+
+  function observeFcp() {
+    if (hasFcp()) {
+      activateAfterCommittedFrame('buffered-fcp');
+      return true;
+    }
+    if (!('PerformanceObserver' in window)) return false;
+    const supported = PerformanceObserver.supportedEntryTypes;
+    if (Array.isArray(supported) && !supported.includes('paint')) return false;
+    try {
+      observer = new PerformanceObserver(list => {
+        if (list.getEntries().some(entry => entry.name === 'first-contentful-paint')) {
+          activateAfterCommittedFrame('observed-fcp');
+        }
+      });
+      observer.observe({ type: 'paint', buffered: true });
+      return true;
+    } catch (_) {
+      observer = null;
+      return false;
+    }
+  }
+
+  if (!observeFcp()) {
+    const afterLoad = () => activateAfterCommittedFrame('load-fallback');
+    if (document.readyState === 'complete') afterLoad();
+    else addEventListener('load', afterLoad, { once: true });
+  }
+
+  addEventListener('visibilitychange', () => {
+    if (activated || document.visibilityState !== 'visible') return;
+    if (hasFcp()) activateAfterCommittedFrame('visibility-buffered-fcp');
+  }, { passive: true });
+
+  fallback = setTimeout(() => {
+    if (!activated && document.visibilityState === 'hidden') activate('hidden-tab-fail-open');
+  }, 8000);
+}());
