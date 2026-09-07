@@ -211,6 +211,32 @@
     }
   }
 
+  function waitForDesktopDocumentStable(maxFrames = 10) {
+    if (MOBILE_QUERY.matches) return Promise.resolve(document.documentElement.scrollHeight);
+    return new Promise(resolve => {
+      let previousHeight = -1;
+      let stableFrames = 0;
+      let frames = 0;
+      const settle = () => {
+        realiseDesktopDocumentGeometry('settle-r638');
+        const height = document.documentElement.scrollHeight;
+        stableFrames = previousHeight >= 0 && Math.abs(height - previousHeight) <= 1 ? stableFrames + 1 : 0;
+        previousHeight = height;
+        frames += 1;
+        root.dataset.fxDesktopGeometrySettleR638 = `${frames}:${height}:${stableFrames}`;
+        if (stableFrames >= 2 || frames >= maxFrames) {
+          root.dataset.fxDesktopLoopLayoutR613 = `stable-document-before-runtime-r638-${height}`;
+          resolve(height);
+          return;
+        }
+        requestAnimationFrame(settle);
+      };
+      const begin = () => requestAnimationFrame(settle);
+      if (document.readyState === 'complete') begin();
+      else addEventListener('load', begin, { once: true });
+    });
+  }
+
   function mountSeamlessRuntime(platform) {
     const mobile = platform === 'mobile';
     if (document.querySelector('script[data-fx-seamless-runtime]')) return;
@@ -271,12 +297,12 @@
     realiseDesktopDocumentGeometry('pre-guard-r634');
     ensureDesktopRuntimeGuardStyle().then(() => {
       realiseDesktopDocumentGeometry('post-guard-r634');
-      requestAnimationFrame(() => requestAnimationFrame(() => {
+      waitForDesktopDocumentStable().then(() => {
         realiseDesktopDocumentGeometry('pre-runtime-r634');
-        root.dataset.fxDesktopLoopLayoutR613 = 'final-document-realised-before-runtime-r634';
+        root.dataset.fxDesktopLoopLayoutR613 = 'final-document-stable-before-runtime-r638';
         installDesktopGeometryResync();
         mountSeamlessRuntime(platform);
-      }));
+      });
     });
   }
 
