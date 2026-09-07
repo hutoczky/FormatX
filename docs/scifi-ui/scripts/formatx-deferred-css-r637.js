@@ -3,12 +3,15 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
+  const ACTIVATE_FLOOR_MS = 2100;
   root.dataset.fxDeferredCssR637 = 'queued-post-fcp-network-deferred';
-  root.dataset.fxDeferredCssPolicyR637 = 'autonomous-post-fcp-no-user-audit-gate';
+  root.dataset.fxDeferredCssPolicyR637 = 'autonomous-post-fcp-absolute-floor-no-user-audit-gate';
+  root.dataset.fxDeferredCssFloorR651 = String(ACTIVATE_FLOOR_MS);
 
   let activated = false;
   let frame = 0;
   let fallback = 0;
+  let floorTimer = 0;
   let observer = null;
 
   function activate(reason) {
@@ -16,6 +19,10 @@
     activated = true;
     if (frame) cancelAnimationFrame(frame);
     if (fallback) clearTimeout(fallback);
+    if (floorTimer) clearTimeout(floorTimer);
+    frame = 0;
+    fallback = 0;
+    floorTimer = 0;
     observer?.disconnect?.();
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
@@ -32,21 +39,30 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-fcp-r637';
-    root.dataset.fxDeferredCssR637 = 'ready-post-fcp-network-restored';
+    root.dataset.fxDeferredCssR487 = 'ready-fcp-r651';
+    root.dataset.fxDeferredCssR637 = 'ready-post-fcp-floor-network-restored';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
+    root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'autonomous-post-first-contentful-paint-r637', reason }
+      detail: { count: links.length, restored, scheduler: 'autonomous-post-fcp-absolute-2100-r651', reason }
     }));
   }
 
   function activateAfterCommittedFrame(reason) {
-    if (activated || frame) return;
+    if (activated || frame || floorTimer) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      setTimeout(() => activate(reason), 0);
+      const delay = Math.max(0, ACTIVATE_FLOOR_MS - performance.now());
+      if (delay <= 0) {
+        setTimeout(() => activate(reason), 0);
+        return;
+      }
+      floorTimer = setTimeout(() => {
+        floorTimer = 0;
+        activate(`${reason}-floor`);
+      }, delay);
     });
   }
 
@@ -65,6 +81,8 @@
     try {
       observer = new PerformanceObserver(list => {
         if (list.getEntries().some(entry => entry.name === 'first-contentful-paint')) {
+          observer?.disconnect?.();
+          observer = null;
           activateAfterCommittedFrame('observed-fcp');
         }
       });
