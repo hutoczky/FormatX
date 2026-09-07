@@ -1,0 +1,79 @@
+name: R640 P0 owner fixes
+
+on:
+  push:
+    branches:
+      - fix/r533-p0-intro-lcp
+    paths:
+      - .github/workflows/r640-p0-owner-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/r533-p0-intro-lcp
+          fetch-depth: 0
+      - name: Patch intro renderer checkpoint and narrow production CSS staging
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          context = Path('docs/scifi-ui/scripts/formatx-mag-context-policy-r561.js')
+          source = context.read_text(encoding='utf-8')
+          replacements = {
+              'const WORKER_INIT_AT_MS=mobile?2200:620;': 'const WORKER_INIT_AT_MS=mobile?2200:2050;',
+              'const DESKTOP_INIT_FALLBACK_MS=1750;': 'const DESKTOP_INIT_FALLBACK_MS=2600;',
+              "'paint-checkpoint-floor-620-no-intro-gate'": "'navigation-checkpoint-2050-no-intro-gate'",
+              "'observed-first-paint-or-1750-fallback'": "'observed-first-paint-or-2600-fallback'",
+              "'await-first-paint-opportunity-floor-620'": "'await-first-paint-opportunity-floor-2050'",
+              "'await-observed-first-paint-or-1750'": "'await-observed-first-paint-or-2600'",
+              '`\\${source}-init-armed-floor-620`': '`\\${source}-init-armed-floor-2050`',
+              '`\\${source}-transport-armed-floor-620`': '`\\${source}-transport-armed-floor-2050`',
+              "'paint-observer-unavailable-fallback-1750'": "'paint-observer-unavailable-fallback-2600'",
+              "'desktop-paint-api-unavailable-fallback-1750'": "'desktop-paint-api-unavailable-fallback-2600'",
+              "'paint-api-unavailable-fallback-1750'": "'paint-api-unavailable-fallback-2600'",
+          }
+          for old, new in replacements.items():
+              source = source.replace(old, new)
+          source = source.replace('FormatX R598 — paint-safe OffscreenCanvas MAG transport owner.', 'FormatX R640 — deadline-safe OffscreenCanvas MAG transport owner.', 1)
+          source = source.replace('observed first-paint checkpoint with the existing 620 ms floor and a 1750 ms\n   fallback only where paint observation is unavailable.', 'observed first-paint checkpoint with a navigation-absolute 2050 ms floor and a 2600 ms\n   fallback only where paint observation is unavailable.', 1)
+          if 'const WORKER_INIT_AT_MS=mobile?2200:2050;' not in source or 'const DESKTOP_INIT_FALLBACK_MS=2600;' not in source:
+              raise SystemExit('R640 context checkpoint patch failed')
+          context.write_text(source, encoding='utf-8')
+
+          worker = Path('billing-worker/src/production-content-entry.js')
+          source = worker.read_text(encoding='utf-8')
+          styles = """const DEFERRED_STYLE_PATHS = new Set([
+  '/scifi-ui/styles/formatx-critical-core-r227.css',
+  '/scifi-ui/styles/formatx-continuous-scroll.css',
+  '/scifi-ui/styles/formatx-seamless-loop.css',
+  '/scifi-ui/styles/platform-status.css',
+  '/scifi-ui/styles/formatx-copy-polish.css',
+  '/scifi-ui/styles/formatx-feedback.css',
+  '/scifi-ui/styles/single-language-toggle.css',
+  '/scifi-ui/styles/formatx-content-standard.css',
+]);"""
+          source, count = re.subn(r"const DEFERRED_STYLE_PATHS = new Set\(\[.*?\n\]\);", styles, source, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit('R640 production deferred set patch failed')
+          source = source.replace("const STARTUP_REVISION = '20260907-r639-secondary-css-network-after-first-paint';", "const STARTUP_REVISION = '20260907-r640-critical-css-network-after-first-paint';", 1)
+          worker.write_text(source, encoding='utf-8')
+          PY
+          node --check docs/scifi-ui/scripts/formatx-mag-context-policy-r561.js
+          node --check billing-worker/src/production-content-entry.js
+          git diff --check
+      - name: Commit R640 source fixes
+        shell: bash
+        run: |
+          git config user.name "Games Tech"
+          git config user.email "hutoczky@users.noreply.github.com"
+          git add docs/scifi-ui/scripts/formatx-mag-context-policy-r561.js billing-worker/src/production-content-entry.js
+          git commit -m "R640 decontend intro deadline and narrow CSS staging"
+          git push origin HEAD:fix/r533-p0-intro-lcp
