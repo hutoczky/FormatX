@@ -1,0 +1,120 @@
+name: R639 P0 canonical first-frame network fix
+
+on:
+  push:
+    branches:
+      - fix/r533-p0-intro-lcp
+    paths:
+      - .github/workflows/r639-p0-canonical-network-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/r533-p0-intro-lcp
+          fetch-depth: 0
+      - name: Patch canonical production CSS network staging
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          path = Path('billing-worker/src/production-content-entry.js')
+          source = path.read_text(encoding='utf-8')
+          source, count = re.subn(
+              r"const DEFERRED_CSS_SCRIPT = .*?;",
+              "const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487=\"true\" src=\"/scifi-ui/scripts/formatx-deferred-css-r637.js?v=20260907-r637-post-fcp-network-restore\"></script>';",
+              source,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit('R639 deferred scheduler constant not found')
+          styles = """const DEFERRED_STYLE_PATHS = new Set([
+  '/scifi-ui/styles/formatx-critical-core-r227.css',
+  '/scifi-ui/styles/formatx-core-real3d-v20.css',
+  '/scifi-ui/styles/formatx-critical-reduced-r228.css',
+  '/scifi-ui/styles/formatx-critical-signature-r227.css',
+  '/scifi-ui/styles/formatx-critical-narrative-r227.css',
+  '/scifi-ui/styles/formatx-soty-continuity-r179.css',
+  '/scifi-ui/styles/formatx-reference-production-r244.css',
+  '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
+  '/scifi-ui/styles/formatx-continuous-scroll.css',
+  '/scifi-ui/styles/formatx-seamless-loop.css',
+  '/scifi-ui/styles/formatx-mobile-apex-composition.css',
+  '/scifi-ui/styles/single-language-toggle.css',
+  '/scifi-ui/styles/platform-status.css',
+  '/scifi-ui/styles/formatx-copy-polish.css',
+  '/scifi-ui/styles/formatx-content-standard.css',
+  '/scifi-ui/styles/formatx-feedback.css',
+  '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
+  '/scifi-ui/styles/formatx-flow-first-r74.css',
+  '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
+  '/scifi-ui/styles/formatx-mobile-proof-controls-r204.css',
+  '/scifi-ui/styles/formatx-mobile-layout-r207.css',
+]);"""
+          source, count = re.subn(
+              r"const DEFERRED_STYLE_PATHS = new Set\(\[.*?\n\]\);",
+              styles,
+              source,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit('R639 deferred style set not found')
+          function = r'''function deferNonCriticalStyles(html) {
+  return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
+    const pathname = stylesheetPath(tag);
+    if (!pathname || !DEFERRED_STYLE_PATHS.has(pathname)) return tag;
+    const hrefMatch = tag.match(/\shref=(["'])(.*?)\1/i);
+    if (!hrefMatch) return tag;
+    const deferredHref = hrefMatch[2];
+    const mediaMatch = tag.match(/\smedia=(["'])(.*?)\1/i);
+    const declaredDeferredMedia = tag.match(/\sdata-fx-deferred-media-r300=(["'])(.*?)\1/i);
+    const originalMedia = declaredDeferredMedia ? declaredDeferredMedia[2] : (mediaMatch ? mediaMatch[2] : 'all');
+    let next = tag.replace(hrefMatch[0], '');
+    if (mediaMatch) next = next.replace(mediaMatch[0], '');
+    next = next.replace(/\sfetchpriority=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r487-deferred-style=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r487-media=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r637-href=(["'])(.*?)\1/i, '');
+    const close = /\/>$/.test(next) ? '/>' : '>';
+    next = next.replace(/\s*\/?>$/, '');
+    return `${next} data-fx-r637-href="${escapeAttribute(deferredHref)}" data-fx-r487-deferred-style="true" data-fx-r487-media="${escapeAttribute(originalMedia)}" media="not all"${close}`;
+  });
+}
+'''
+          source, count = re.subn(
+              r"function deferNonCriticalStyles\(html\) \{.*?\n\}\n(?=function injectDeferredCssRuntime)",
+              lambda _: function,
+              source,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit('R639 deferNonCriticalStyles function not found')
+          source = source.replace(
+              "const STARTUP_REVISION = '20260903-r514-critical-core-post-first-paint';",
+              "const STARTUP_REVISION = '20260907-r639-secondary-css-network-after-first-paint';",
+              1,
+          )
+          path.write_text(source, encoding='utf-8')
+          PY
+          node --check billing-worker/src/production-content-entry.js
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r637.js
+          git diff --check
+      - name: Commit R639 canonical source fix
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "Games Tech"
+          git config user.email "hutoczky@users.noreply.github.com"
+          git add billing-worker/src/production-content-entry.js
+          git commit -m "R639 defer secondary CSS network until first paint"
+          git push origin HEAD:fix/r533-p0-intro-lcp
