@@ -1,19 +1,11 @@
-/* FormatX R635 — three-phase premium intro inside the absolute product window.
-   The canonical overlay keeps the exact 1360/1640ms measurable visual clock, but
-   the viewport itself owns no transform animation. System wake, MAG sync and ready
-   are expressed with static gradients, opacity and one small energy-line transform.
-   The final 90ms dissolve begins before the 1450/1650ms absolute deadline. MAG and
-   the semantic hero continue running/painting behind the near-opaque visual cover. */
+/* FormatX R648 — compact premium intro raster inside the absolute product window.
+   The canonical overlay keeps the exact 1360/1640ms measurable visual clock, while
+   full-viewport paint is reduced to one opaque surface. The premium grid/glow field
+   is bounded around the centre, and the only transformed surface is the 2px energy
+   line. MAG and the semantic hero continue running behind the visual cover. */
 @keyframes fx-r533-preloader-visual-bound {
   from {}
   to {}
-}
-
-@keyframes fx-r635-intro-grid-breathe {
-  0% { opacity: .075; }
-  28% { opacity: .145; }
-  72% { opacity: .11; }
-  100% { opacity: .07; }
 }
 
 @keyframes fx-r635-intro-energy-line {
@@ -27,28 +19,33 @@
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   isolation: auto !important;
   contain: none !important;
-  background:
-    radial-gradient(circle at 50% 46%,rgba(86,221,255,.105),transparent 34%),
-    radial-gradient(circle at 50% 52%,rgba(120,84,255,.045),transparent 48%),
-    linear-gradient(145deg,rgba(1,4,11,.985) 0%,rgba(3,8,23,.985) 58%,rgba(7,5,25,.985) 100%) !important;
+  background: #02050d !important;
   transform: none !important;
   will-change: auto !important;
 }
 
+/* R648: bound the decorative raster. This preserves the cyan grid and living-core
+   glow without asking Chrome/SwiftShader to repaint multiple DPR-scaled full-screen
+   radial gradients during the timing-critical intro window. */
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
   content: "";
   position: absolute;
-  inset: 0;
+  left: 50%;
+  top: 48%;
+  width: min(620px, 88vw);
+  height: min(520px, 62svh);
   z-index: 0;
   pointer-events: none;
-  opacity: .1;
+  opacity: .10;
+  border-radius: 32px;
   background-image:
-    linear-gradient(rgba(124,236,255,.034) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(124,236,255,.034) 1px,transparent 1px),
-    radial-gradient(circle at 50% 48%,rgba(98,227,255,.08),transparent 32%);
+    linear-gradient(rgba(124,236,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,236,255,.045) 1px,transparent 1px),
+    radial-gradient(circle at 50% 48%,rgba(98,227,255,.22),rgba(120,84,255,.07) 38%,transparent 68%);
   background-size: 48px 48px,48px 48px,100% 100%;
-  transform: none;
+  transform: translate(-50%, -50%);
   will-change: auto;
+  transition: opacity 120ms ease !important;
   animation: none;
 }
 
@@ -64,7 +61,6 @@
   opacity: 0;
   border-radius: 999px;
   background: linear-gradient(90deg,transparent,rgba(75,219,255,.82),rgba(145,108,255,.44),transparent);
-  box-shadow: 0 0 18px rgba(86,223,255,.18);
   transform: translateX(-50%) scaleX(.08);
   transform-origin: 50% 50%;
   will-change: transform,opacity;
@@ -76,26 +72,28 @@
 #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle,
 #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-status,
 #formatx-event-horizon[data-fx-preloader-r531="active"] [data-fx-intro-output] {
-  transition: color 120ms ease,opacity 120ms ease,text-shadow 120ms ease !important;
+  transition: color 120ms ease,opacity 120ms ease !important;
 }
 
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"]::before { opacity: .075; }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-word {
-  text-shadow: 0 0 22px rgba(68,219,255,.16) !important;
+  color: #f5fdff !important;
 }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] :is(.fx-intro-status,[data-fx-intro-output]) {
   color: rgba(137,231,255,.88) !important;
 }
 
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"]::before { opacity: .13; }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-word {
-  text-shadow: 0 0 28px rgba(72,220,255,.20),0 0 42px rgba(134,91,255,.08) !important;
+  color: #f7fdff !important;
 }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] :is(.fx-intro-status,[data-fx-intro-output]) {
   color: rgba(163,219,255,.94) !important;
 }
 
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"]::before { opacity: .085; }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-word {
   color: #fbfeff !important;
-  text-shadow: 0 0 30px rgba(133,235,255,.24),0 0 46px rgba(255,205,104,.055) !important;
 }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] :is(.fx-intro-status,[data-fx-intro-output]) {
   color: rgba(255,226,158,.94) !important;
@@ -112,12 +110,14 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
 }
 
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
-  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
-  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
-    animation-duration: 1360ms;
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
+    width: min(460px, 86vw);
+    height: min(390px, 50svh);
+    background-size: 44px 44px,44px 44px,100% 100%;
   }
   #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
     width: min(82vw,520px);
+    animation-duration: 1360ms;
   }
 }
 
@@ -131,9 +131,11 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   #formatx-event-horizon[data-fx-preloader-r531="active"] [data-fx-intro-output] {
     animation: none !important;
     transition: none !important;
-    transform: none;
     text-shadow: none !important;
   }
-  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before { opacity: .075; }
-  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after { opacity: 0; }
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
+    opacity: .075;
+    transform: translate(-50%, -50%);
+  }
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after { opacity: 0; transform: none; }
 }
