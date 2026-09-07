@@ -1,12 +1,19 @@
-/* FormatX R601 — single-moving-layer premium intro compositor.
-   Product timing remains owned by Event Horizon: mobile 1180–1450ms with a
-   1360ms visual bound, desktop 1350–1650ms with a 1640ms visual bound.
-   The premium cyan/violet grid and energy band remain visible, but they are
-   static paint layers. Only the bounded overlay itself moves, avoiding two
-   additional full-viewport compositor animations competing with first paint. */
+/* FormatX R602 — bounded cold-start intro raster budget.
+   R601 proved that moving-layer count alone was not sufficient on a fresh
+   SwiftShader desktop profile: WebGL was still uninitialised and no long
+   main-thread task owned the 2.6s first-paint stall. Keep the premium
+   cyan/violet grid + energy band and the exact 1360/1640ms compositor contract,
+   but collapse the active overlay to a bounded raster surface: one base gradient,
+   two grid gradients and one restrained energy band. No user/audit/intro gate. */
 @keyframes fx-r533-preloader-visual-bound {
   0%, 96% { transform: translate3d(0,0,0); }
   100% { transform: translate3d(0,-110vh,0); }
+}
+
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+  isolation: auto !important;
+  contain: layout paint style !important;
+  background: linear-gradient(145deg,#01040b 0%,#030817 58%,#070519 100%) !important;
 }
 
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
@@ -15,12 +22,11 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: .14;
+  opacity: .13;
   background-image:
     linear-gradient(rgba(124,236,255,.032) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(124,236,255,.032) 1px,transparent 1px),
-    radial-gradient(circle at 50% 46%,rgba(124,236,255,.055),transparent 43%);
-  background-size: 48px 48px,48px 48px,100% 100%;
+    linear-gradient(90deg,rgba(124,236,255,.032) 1px,transparent 1px);
+  background-size: 48px 48px,48px 48px;
   transform: none;
   will-change: auto;
   animation: none;
@@ -29,13 +35,13 @@
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
   content: "";
   position: absolute;
-  inset: 42% 0 auto;
-  height: 16%;
+  inset: 43% 0 auto;
+  height: 14%;
   z-index: 1;
   pointer-events: none;
   border: 0;
-  opacity: .16;
-  background: linear-gradient(180deg,transparent,rgba(124,236,255,.12),rgba(143,114,255,.045),transparent);
+  opacity: .15;
+  background: linear-gradient(180deg,transparent,rgba(124,236,255,.11),rgba(143,114,255,.04),transparent);
   mix-blend-mode: normal;
   transform: none;
   will-change: auto;
