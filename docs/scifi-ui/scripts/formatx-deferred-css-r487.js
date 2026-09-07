@@ -3,8 +3,8 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR487) return;
-  const mobile = matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;
-  root.dataset.fxDeferredCssR487 = mobile ? 'queued-mobile-intent-r534' : 'queued-fcp';
+  root.dataset.fxDeferredCssR487 = 'queued-fcp-r594';
+  root.dataset.fxDeferredCssPolicyR594 = 'autonomous-post-fcp-no-user-intent';
 
   let activated = false;
   let frame = 0;
@@ -17,7 +17,6 @@
     if (frame) cancelAnimationFrame(frame);
     if (fallback) clearTimeout(fallback);
     observer?.disconnect?.();
-    cleanupIntent?.();
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
     for (const link of links) {
@@ -27,11 +26,11 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = mobile ? 'ready-mobile-intent-r534' : 'ready-fcp';
+    root.dataset.fxDeferredCssR487 = 'ready-fcp-r594';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssReasonR526 = reason;
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, scheduler: mobile ? 'mobile-user-intent-r534' : 'post-first-contentful-paint-r526', reason }
+      detail: { count: links.length, scheduler: 'autonomous-post-first-contentful-paint-r594', reason }
     }));
   }
 
@@ -43,50 +42,45 @@
     });
   }
 
-  function hasFcp() { return performance.getEntriesByName('first-contentful-paint', 'paint').length > 0; }
+  function hasFcp() {
+    return performance.getEntriesByName('first-contentful-paint', 'paint').length > 0;
+  }
+
   function observeFcp() {
-    if (hasFcp()) { activateAfterCommittedFrame('buffered-fcp'); return true; }
+    if (hasFcp()) {
+      activateAfterCommittedFrame('buffered-fcp');
+      return true;
+    }
     if (!('PerformanceObserver' in window)) return false;
     const supported = PerformanceObserver.supportedEntryTypes;
     if (Array.isArray(supported) && !supported.includes('paint')) return false;
     try {
       observer = new PerformanceObserver(list => {
-        if (list.getEntries().some(entry => entry.name === 'first-contentful-paint')) activateAfterCommittedFrame('observed-fcp');
+        if (list.getEntries().some(entry => entry.name === 'first-contentful-paint')) {
+          activateAfterCommittedFrame('observed-fcp');
+        }
       });
       observer.observe({ type: 'paint', buffered: true });
       return true;
-    } catch (_) { observer = null; return false; }
+    } catch (_) {
+      observer = null;
+      return false;
+    }
   }
 
-  let cleanupIntent = null;
-  function armMobileIntent() {
-    const listeners = [];
-    const add = (target, type, handler, options) => { target.addEventListener(type, handler, options); listeners.push([target,type,handler,options]); };
-    cleanupIntent = () => { for (const [target,type,handler,options] of listeners) target.removeEventListener(type, handler, options); listeners.length = 0; };
-    const activateEvent = event => activate('mobile-' + (event.type || 'intent'));
-    const pointer = event => { if (event.pointerType === 'touch') activate('mobile-pointer-touch'); };
-    const key = event => { if (['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' '].includes(event.key)) activate('mobile-keyboard-scroll'); };
-    add(window, 'scroll', activateEvent, { capture: true, passive: true });
-    add(window, 'wheel', activateEvent, { capture: true, passive: true });
-    add(document, 'touchstart', activateEvent, { capture: true, passive: true });
-    add(document, 'pointerdown', pointer, { capture: true, passive: true });
-    add(document, 'keydown', key, { capture: true, passive: true });
-    if (Math.abs(scrollY) > 1 || !['', '#top', '#hero'].includes(location.hash)) queueMicrotask(() => activate('mobile-existing-scroll-or-deep-link'));
-  }
-
-  if (mobile) {
-    armMobileIntent();
-  } else if (!observeFcp()) {
+  if (!observeFcp()) {
     const afterLoad = () => activateAfterCommittedFrame('load-fallback');
     if (document.readyState === 'complete') afterLoad();
     else addEventListener('load', afterLoad, { once: true });
   }
 
   addEventListener('visibilitychange', () => {
-    if (activated || document.visibilityState !== 'visible' || mobile) return;
+    if (activated || document.visibilityState !== 'visible') return;
     if (hasFcp()) activateAfterCommittedFrame('visibility-buffered-fcp');
   }, { passive: true });
 
+  // Background tabs may never publish an FCP entry. Activating while hidden is
+  // safe because no user-visible first paint can be displaced.
   fallback = setTimeout(() => {
     if (!activated && document.visibilityState === 'hidden') activate('hidden-tab-fail-open');
   }, 8000);
