@@ -27,6 +27,7 @@
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
   let desktopStableGeometry = null;
+  let introTransferRetryArmed = false;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
@@ -65,6 +66,7 @@
   root.dataset.fxLoopOrganismRepairR609 = 'geometry-only-no-bridge-rebuild';
   root.dataset.fxDesktopLoopCrossingR618 = 'last-idle-real-bridge-boundary';
   root.dataset.fxDesktopLoopSnapshotR623 = 'stable-only-outside-organism-overlays';
+  root.dataset.fxDesktopLoopRetryR650 = 'preserve-crossing-through-intro-ui-block';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -611,6 +613,18 @@
     });
   }
 
+  function armDesktopTransferRetry(source) {
+    if (isMobileFlow() || introTransferRetryArmed || pendingDesktopRelative == null) return;
+    introTransferRetryArmed = true;
+    root.dataset.fxDesktopLoopRetryR650 = `armed-${source}`;
+    document.addEventListener('formatx:preloadercomplete', () => {
+      introTransferRetryArmed = false;
+      root.dataset.fxDesktopLoopRetryR650 = 'preloader-complete-retry';
+      if (!initialised || pendingDesktopRelative == null) return;
+      queueMicrotask(commitDesktopTransfer);
+    }, { once: true, capture: true });
+  }
+
   function performTransfer(relative, source) {
     if (relative == null || Date.now() < transferLockedUntil) return false;
     if (document.body.classList.contains('fx-organism-panel-open')) {
@@ -630,6 +644,7 @@
       && !introOverlay.hidden
       && introOverlay.dataset.fxPreloaderR531 === 'active') {
       root.dataset.fxDesktopLoopBlockedR644 = 'canonical-intro-overlay-active';
+      armDesktopTransferRetry('intro-active');
       return false;
     }
     root.dataset.fxDesktopLoopBlockedR644 = 'none';
@@ -841,7 +856,7 @@
       mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
-      desktopTransfer: 'stable-origin-live-overrides-stale-capture-r646',
+      desktopTransfer: 'stable-origin-live-overrides-stale-capture-intro-retry-r650',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
     });
@@ -868,11 +883,17 @@
   addEventListener('formatx:organismpanelclose', () => {
     if (!initialised) return;
     scheduleRepair(false);
-    queueMicrotask(() => settleDesktopStableGeometry('organism-panel-close-r647'));
+    queueMicrotask(() => {
+      settleDesktopStableGeometry('organism-panel-close-r647');
+      if (!isMobileFlow() && pendingDesktopRelative != null) commitDesktopTransfer();
+    });
   });
   addEventListener('formatx:menustatechange', event => {
     if (initialised && event.detail?.open === false) {
-      queueMicrotask(() => settleDesktopStableGeometry('organism-menu-close-r647'));
+      queueMicrotask(() => {
+        settleDesktopStableGeometry('organism-menu-close-r647');
+        if (!isMobileFlow() && pendingDesktopRelative != null) commitDesktopTransfer();
+      });
     }
   });
   addEventListener('formatx:languagechange', () => {
