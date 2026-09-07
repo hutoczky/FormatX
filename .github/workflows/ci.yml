@@ -1,30 +1,14 @@
 name: Lighthouse CI
-
 on:
   pull_request:
     branches: [master]
-    paths:
-      - 'docs/scifi-ui/**'
-      - 'lighthouserc.json'
-      - 'lighthouserc.mobile.json'
-      - '.github/workflows/ci.yml'
+    paths: ['docs/scifi-ui/**','billing-worker/src/production-content-entry*.js','billing-worker/wrangler.jsonc','billing-worker/package.json','billing-worker/package-lock.json','lighthouserc.json','lighthouserc.mobile.json','.github/scripts/lighthouse-production-candidate-proxy.cjs','.github/workflows/ci.yml']
   push:
     branches: [master]
-    paths:
-      - 'docs/scifi-ui/**'
-      - 'lighthouserc.json'
-      - 'lighthouserc.mobile.json'
-      - '.github/workflows/ci.yml'
+    paths: ['docs/scifi-ui/**','billing-worker/src/production-content-entry*.js','billing-worker/wrangler.jsonc','billing-worker/package.json','billing-worker/package-lock.json','lighthouserc.json','lighthouserc.mobile.json','.github/scripts/lighthouse-production-candidate-proxy.cjs','.github/workflows/ci.yml']
   workflow_dispatch:
-
-permissions:
-  contents: read
-  statuses: write
-
-concurrency:
-  group: lighthouse-${{ github.ref }}
-  cancel-in-progress: true
-
+permissions: { contents: read, statuses: write }
+concurrency: { group: 'lighthouse-${{ github.ref }}', cancel-in-progress: true }
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
@@ -32,50 +16,61 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-
+        with: { node-version: '22' }
       - name: Install dependencies
-        run: npm install -g @lhci/cli@0.13.x
-
-      - name: Run desktop Lighthouse CI on the real experience
+        run: |
+          npm install -g @lhci/cli@0.13.x
+          npm ci --prefix billing-worker
+      - name: Start exact R551 production candidate Worker
+        id: candidate
+        shell: bash
+        env: { CI: '1' }
+        run: |
+          set -euo pipefail
+          (
+            set +e
+            cd billing-worker
+            while true; do
+              echo "--- exact candidate Wrangler start $(date -u +%FT%TZ) ---" >> "$RUNNER_TEMP/formatx-lighthouse-worker.log"
+              npx --yes wrangler@4.129.0 dev --local --ip 127.0.0.1 --port 8787 --var FORMATX_LOCAL_CANDIDATE:1 >> "$RUNNER_TEMP/formatx-lighthouse-worker.log" 2>&1
+              code=$?
+              echo "--- exact candidate Wrangler exited code=$code; restarting same bytes ---" >> "$RUNNER_TEMP/formatx-lighthouse-worker.log"
+              sleep .25
+            done
+          ) &
+          echo $! > "$RUNNER_TEMP/formatx-lighthouse-worker.pid"
+          ready=0; : > "$RUNNER_TEMP/formatx-lighthouse-headers.txt"
+          for attempt in $(seq 1 240); do
+            if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-headers.txt" -o /dev/null http://127.0.0.1:8787/ 2>/dev/null && grep -Fqi 'X-FormatX-Candidate-Delivery: r543-exact-production-entry-localhost-8787' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Candidate-Canonical-Origin: formatxsuite.com' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Preloader: r543-static-content-extended-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Reference-Boot: r536-prepaint-layout-selector' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-CSS-Scheduler: r551-canonical-post-first-paint-critical-core' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-MAG-Startup: r543-navigation-owned-elevated-body-heart' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Product-Contract: r543-navigation-mag-elevated-heart-no-manual-pause' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'X-FormatX-Mobile-LCP: r551-critical-core-post-first-paint-heart-runtime-style' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" && grep -Fqi 'rel=preload' "$RUNNER_TEMP/formatx-lighthouse-headers.txt"; then ready=1; break; fi
+            sleep .25
+          done
+          if [ "$ready" -ne 1 ]; then echo '--- Wrangler log ---'; cat "$RUNNER_TEMP/formatx-lighthouse-worker.log" || true; echo '--- Last candidate headers ---'; cat "$RUNNER_TEMP/formatx-lighthouse-headers.txt" || true; exit 1; fi
+          node .github/scripts/lighthouse-production-candidate-proxy.cjs > "$RUNNER_TEMP/formatx-lighthouse-proxy.log" 2>&1 & echo $! > "$RUNNER_TEMP/formatx-lighthouse-proxy.pid"
+          proxy_ready=0
+          for attempt in $(seq 1 80); do
+            if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" -o /dev/null http://127.0.0.1:8788/ 2>/dev/null && grep -Fqi 'X-FormatX-Candidate-Proxy: canonical-header-normalizer-only' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && grep -Fqi 'Link: <https://formatxsuite.com/>; rel="canonical"' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && grep -Fqi 'rel=preload' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && grep -Fqi 'X-FormatX-Preloader: r543-static-content-extended-roadmap-timing' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && grep -Fqi 'X-FormatX-MAG-Startup: r543-navigation-owned-elevated-body-heart' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" && grep -Fqi 'X-FormatX-Reference-Boot: r536-prepaint-layout-selector' "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt"; then proxy_ready=1; break; fi
+            sleep .25
+          done
+          if [ "$proxy_ready" -ne 1 ]; then cat "$RUNNER_TEMP/formatx-lighthouse-proxy.log" || true; cat "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" || true; exit 1; fi
+          echo 'Exact R551 production candidate + restart-tolerant canonical transport proxy ready on 127.0.0.1:8788/.'
+      - name: Run desktop Lighthouse CI on the real production candidate
         id: lighthouse_desktop
+        if: steps.candidate.outcome == 'success'
         shell: bash
         run: |
-          set -o pipefail
-          rm -rf .lighthouseci
-          set +e
-          lhci autorun --config=./lighthouserc.json 2>&1 | tee lighthouse-desktop-output.txt
-          lhci_status=${PIPESTATUS[0]}
-          set -e
-          grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html$' lighthouse-desktop-output.txt
-          mkdir -p lighthouse-results/desktop
-          cp -a .lighthouseci/. lighthouse-results/desktop/
-          exit "$lhci_status"
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-
-      - name: Run mobile Lighthouse CI on the real experience
+          set -o pipefail; rm -rf .lighthouseci; set +e; lhci autorun --config=./lighthouserc.json 2>&1 | tee lighthouse-desktop-output.txt; s=${PIPESTATUS[0]}; set -e
+          grep -Fq 'Running Lighthouse 3 time(s) on http://127.0.0.1:8788/' lighthouse-desktop-output.txt; mkdir -p lighthouse-results/desktop; cp -a .lighthouseci/. lighthouse-results/desktop/; exit "$s"
+        env: { LHCI_GITHUB_APP_TOKEN: '${{ secrets.LHCI_GITHUB_APP_TOKEN }}' }
+      - name: Run mobile Lighthouse CI on the real production candidate
         id: lighthouse_mobile
-        if: always()
+        if: always() && steps.candidate.outcome == 'success'
         shell: bash
         run: |
-          set -o pipefail
-          rm -rf .lighthouseci
-          set +e
-          lhci autorun --config=./lighthouserc.mobile.json 2>&1 | tee lighthouse-mobile-output.txt
-          lhci_status=${PIPESTATUS[0]}
-          set -e
-          grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html$' lighthouse-mobile-output.txt
-          mkdir -p lighthouse-results/mobile
-          cp -a .lighthouseci/. lighthouse-results/mobile/
-          exit "$lhci_status"
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-
+          set -o pipefail; rm -rf .lighthouseci; set +e; lhci autorun --config=./lighthouserc.mobile.json 2>&1 | tee lighthouse-mobile-output.txt; s=${PIPESTATUS[0]}; set -e
+          grep -Fq 'Running Lighthouse 3 time(s) on http://127.0.0.1:8788/' lighthouse-mobile-output.txt; mkdir -p lighthouse-results/mobile; cp -a .lighthouseci/. lighthouse-results/mobile/; exit "$s"
+        env: { LHCI_GITHUB_APP_TOKEN: '${{ secrets.LHCI_GITHUB_APP_TOKEN }}' }
       - name: Upload Lighthouse results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
@@ -85,52 +80,21 @@ jobs:
             lighthouse-results/
             lighthouse-desktop-output.txt
             lighthouse-mobile-output.txt
+            ${{ runner.temp }}/formatx-lighthouse-worker.log
+            ${{ runner.temp }}/formatx-lighthouse-proxy.log
+            ${{ runner.temp }}/formatx-lighthouse-headers.txt
+            ${{ runner.temp }}/formatx-lighthouse-proxy-headers.txt
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 30
-
       - name: Summarize Lighthouse results
         if: always()
         run: |
-          {
-            echo "## Lighthouse CI Results"
-            echo
-            echo "Validated surfaces: desktop + mobile, normal visitor experience"
-            echo
-            echo "### Strict truthful thresholds"
-            echo "- Performance ≥ 0.95; 1.00 remains the optimisation target"
-            echo "- Accessibility = 1.00"
-            echo "- Best practices = 1.00"
-            echo "- SEO = 1.00"
-            echo "- FCP ≤ 1.8s"
-            echo "- LCP ≤ 2.5s"
-            echo "- TBT ≤ 200ms"
-            echo "- CLS ≤ 0.10"
-            echo "- TTFB ≤ 600ms"
-            echo "- 3 runs per viewport profile"
-            echo "- No audit-only query parameter"
-            echo "- No forced reduced-motion mode"
-            echo "- No skipped Lighthouse audits"
-            echo
-            echo "The production site is deployed as one Cloudflare Worker with Static Assets."
-          } >> "$GITHUB_STEP_SUMMARY"
-
+          { echo '## Lighthouse CI Results'; echo; echo 'Validated surface: exact R551 local production Worker candidate, canonical transport normalized, desktop + mobile, normal visitor experience'; echo; echo 'Authoritative P0: 100/100/100/100 each run; FCP <=1.8s; LCP <2.0s; TBT <=150ms; CLS <0.05; TTFB <=500ms; 3 runs/profile; no audit-only path.'; } >> "$GITHUB_STEP_SUMMARY"
       - name: Publish Lighthouse status
         if: always() && github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          JOB_STATUS: ${{ job.status }}
+        env: { GH_TOKEN: '${{ github.token }}', JOB_STATUS: '${{ job.status }}' }
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then
-            state='success'
-            description='Real-experience desktop and mobile Lighthouse gates passed'
-          else
-            state='failure'
-            description='Real-experience desktop or mobile Lighthouse gate failed'
-          fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
-            -f state="$state" \
-            -f context='FormatX Lighthouse quality gate' \
-            -f description="$description" \
-            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Production-candidate desktop and mobile Lighthouse gates passed'; else state=failure; description='Production-candidate desktop or mobile Lighthouse gate failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX Lighthouse quality gate' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

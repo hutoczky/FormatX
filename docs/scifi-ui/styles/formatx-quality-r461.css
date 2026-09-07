@@ -1,6 +1,6 @@
-/* FormatX r461/r462/R489 — compact quality layer for the current R326/R460 experience.
-   This owns measurable first-paint stability, accessibility and touch geometry
-   for the one active landing-page runtime. */
+/* FormatX r461/r462/R568/R576 — compact quality layer for the current R326/R460 experience.
+   R576 locks the Lighthouse-observed hero/reference geometry before deferred runtime
+   activation while preserving the transform-only intro hard bound and SOUND + ASK. */
 
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
@@ -34,6 +34,31 @@ html body.living-architecture .topbar > .fx-language-toggle {
   min-height: 44px !important;
 }
 
+/* R576: the semantic heart hit is created after first paint, but its box must
+   already have the final fixed/transparent UA-free contract the instant it is
+   inserted. The trusted document router remains the pointer owner. */
+html body.living-architecture > .fx-mag-heart-hit-r252 {
+  position: fixed !important;
+  z-index: 12060 !important;
+  left: 50vw;
+  top: 50vh;
+  width: 220px;
+  height: 220px;
+  min-width: 160px;
+  min-height: 160px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: transparent !important;
+  box-shadow: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  transform: translate(-50%, -50%) !important;
+  pointer-events: none !important;
+}
+
 @media (min-width: 901px) {
   html body.living-architecture .topbar {
     min-height: 72px !important;
@@ -46,6 +71,69 @@ html body.living-architecture .topbar > .fx-language-toggle {
     height: 48px !important;
     margin: 0 !important;
     z-index: 12070 !important;
+  }
+
+  /* R576 desktop parity: reserve the exact two-row reference composition before
+     r244 inserts the heading/proof nodes. Deferred real3D CSS may change paint,
+     never document geometry. */
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) 258px !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .hero-space {
+    grid-area: space !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(520px, 42vw, 620px) !important;
+    min-height: 520px !important;
+    max-height: 620px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .fx-reference-heading {
+    grid-area: heading !important;
+    min-height: 24px !important;
+  }
+  html:root:root:root body.living-architecture #hero > .hero-grid > .fx-reference-proof {
+    grid-area: proof !important;
+    min-height: 258px !important;
   }
 }
 
@@ -85,9 +173,100 @@ html body.living-architecture .topbar > .fx-language-toggle {
     padding: 12px 14px !important;
   }
 
+  /* R576 mobile parity: this selector outranks the deferred v20 legacy 82px
+     hero padding / 576–896px stage expansion. The first and settled layouts now
+     use one geometry owner. */
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 0 56px !important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    overflow: visible !important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space {
+    order: 0 !important;
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(350px, 97.6vw, 470px) !important;
+    min-height: clamp(350px, 97.6vw, 470px) !important;
+    max-height: 470px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    translate: none !important;
+    contain: layout paint !important;
+  }
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid:not(:has(> .fx-reference-controls-r204)) > .hero-space {
+    margin-bottom: 0 !important;
+  }
+
+  /* The first-paint stylesheet already defines the eventual heading/proof sizes.
+     Reserve the same 396px while those idempotent r244 nodes do not exist; the
+     placeholder disappears in the same style recalculation that reveals them. */
+  html:root:root:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid:not(:has(> .fx-reference-proof))::after {
+    content: "" !important;
+    order: 3 !important;
+    display: block !important;
+    flex: 0 0 396px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 396px !important;
+    min-height: 396px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+  }
+
   html body.living-architecture #hero .hero-space {
     contain: layout paint !important;
     overflow: hidden !important;
+  }
+
+  /* R568: r244 still contained a historical mobile rule that collapsed the
+     semantic hero copy to an absolute 1x1 clipped box after first paint. Keep
+     the settled geometry equal to the render-blocking r283 reservation instead. */
+  html[data-fx-reference-production-r244="ready"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 12 !important;
+    display: block !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: calc(100% - 24px) !important;
+    max-width: 680px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto 26px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    border: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
   }
 
   html body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
@@ -95,7 +274,7 @@ html body.living-architecture .topbar > .fx-language-toggle {
     inset: auto auto 18px 50% !important;
     z-index: 12080 !important;
     display: grid !important;
-    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-columns: repeat(2, 50px) !important;
     grid-template-rows: 72px !important;
     align-items: start !important;
     justify-items: center !important;
@@ -116,8 +295,7 @@ html body.living-architecture .topbar > .fx-language-toggle {
     display: contents !important;
   }
   html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
+  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask {
     position: relative !important;
     inset: auto !important;
     box-sizing: border-box !important;
@@ -145,10 +323,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
     grid-column: 2 !important;
     grid-row: 1 !important;
   }
-  html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
-    grid-column: 3 !important;
-    grid-row: 1 !important;
-  }
   html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask span {
     position: absolute !important;
     top: 55px !important;
@@ -167,10 +341,6 @@ html body.living-architecture .topbar > .fx-language-toggle {
     filter: none !important;
   }
 
-  /* R489: QR fallback is independently contrast-safe even when a white QR
-     surface is already present underneath it. Do not rely on the card colour:
-     the label carries its own dark pill so Lighthouse and real users see the
-     same >= AA contrast before hydration. */
   html body.living-architecture .fx-plan-qr-card .fx-qr-placeholder {
     display: inline-flex !important;
     align-items: center !important;
@@ -183,6 +353,25 @@ html body.living-architecture .topbar > .fx-language-toggle {
     border: 1px solid rgba(112, 220, 255, .32) !important;
     text-shadow: none !important;
   }
+
+  html body.living-architecture > .fx-mini-mag-assistant-r459 {
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 58px !important;
+    height: 58px !important;
+    margin: 16px max(12px, env(safe-area-inset-right)) 18px auto !important;
+    z-index: 40 !important;
+  }
+  html body.living-architecture > .fx-mini-mag-assistant-r459 > .fx-mini-mag-launcher-r459 {
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+  }
+  html body.living-architecture > .fx-mini-mag-assistant-r459 > .fx-mini-mag-panel-r459 {
+    right: 0 !important;
+    bottom: 70px !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -193,8 +382,12 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* R531: short preloader is a fixed viewport cover. The underlying page stays
-   laid out behind it, so reveal cannot move content or create an intro CLS. */
+/* R567/R568: transform-only visual hard bound; no full-screen clip raster. */
+@keyframes fx-r533-preloader-visual-bound {
+  0%, 86% { transform: translate3d(0,0,0) scale(1); }
+  94% { transform: translate3d(0,0,0) scale(.985); }
+  100% { transform: translate3d(0,0,0) scale(.001); }
+}
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   position: fixed !important;
   inset: 0 !important;
@@ -215,11 +408,14 @@ html body.living-architecture .topbar > .fx-language-toggle {
   background:
     radial-gradient(circle at 50% 46%, rgba(90, 216, 255, .12), transparent 38%),
     linear-gradient(180deg, #05070a, #010204) !important;
+  animation: fx-r533-preloader-visual-bound 1640ms linear both !important;
+  transform-origin: 50% 50% !important;
+  will-change: transform !important;
 }
-#formatx-event-horizon[data-fx-preloader-r531="active"] ~ .topbar,
-#formatx-event-horizon[data-fx-preloader-r531="active"] ~ main,
-#formatx-event-horizon[data-fx-preloader-r531="active"] ~ footer {
-  visibility: hidden !important;
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+    animation-duration: 1360ms !important;
+  }
 }
 #formatx-event-horizon[data-fx-preloader-r531="active"] :is(
   .fx-intro-curtain,
@@ -292,4 +488,4 @@ html body.living-architecture .topbar > .fx-language-toggle {
   }
 }
 
-/* deploy-r531-preloader-hotfix */
+/* deploy-r576-first-paint-hero-reference-parity-no-manual-pause */

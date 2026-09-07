@@ -44,10 +44,38 @@ async function waitForScrollShell(page) {
   }, null, { timeout: 45000 });
 }
 
+async function clickPhysicalHeart(page) {
+  const heart = page.locator('.fx-mag-heart-hit-r252').first();
+  await heart.waitFor({ state: 'visible', timeout: 10000 });
+  const box = await heart.boundingBox();
+  if (!box || box.width < 80 || box.height < 80) throw new Error(`MAG physical hit geometry invalid: ${JSON.stringify(box)}`);
+  const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  await page.mouse.click(point.x, point.y);
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    return root.dataset.fxMagHeartPhysicalRouteR546 === 'captured-stage-hit'
+      && root.dataset.fxCoreInteractionMode === 'active-r252';
+  }, null, { timeout: 5000 });
+}
+
 async function activateAndWaitForInterface(page) {
-  const referenceMenu = page.locator('.fx-reference-menu-button');
-  await referenceMenu.waitFor({ state: 'visible' });
-  await referenceMenu.click();
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const heart = document.querySelector('.fx-mag-heart-hit-r252');
+    return root.dataset.fxOrganismInterface === 'ready'
+      || (root.dataset.fxThreeLoader === 'deferred-user-activation'
+        && root.dataset.fxHeartCoreR252 === 'ready'
+        && root.dataset.fxMagHeartHitOwnerR542 === 'body-fixed-stage-synced'
+        && root.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced'
+        && heart instanceof HTMLButtonElement
+        && heart.parentElement === document.body
+        && heart.dataset.fxHeartBound === 'true');
+  }, null, { timeout: 30000 });
+
+  if (await page.evaluate(() => document.documentElement.dataset.fxOrganismInterface !== 'ready')) {
+    await clickPhysicalHeart(page);
+  }
+
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxOrganismInterface === 'ready'
@@ -58,8 +86,9 @@ async function activateAndWaitForInterface(page) {
       && root.dataset.fxOrganismMasterSync === 'ready-v1'
       && root.dataset.fxTranscendLoader === 'safe-ready-v28';
   }, null, { timeout: 60000 });
+
   if (await page.evaluate(() => document.getElementById('main-nav')?.classList.contains('open'))) {
-    await referenceMenu.click();
+    await page.locator('.fx-reference-menu-button').click();
   }
   await page.waitForFunction(() => !document.getElementById('main-nav')?.classList.contains('open'));
 }
@@ -124,7 +153,7 @@ async function closePanelAndAssertCore(page) {
   await page.waitForTimeout(250);
 }
 
-async function assertStableOrdinaryScroll(page) {
+async function assertStableOrdinaryScroll(page, expectedMirrors) {
   const before = await page.evaluate(() => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     return {
@@ -151,14 +180,15 @@ async function assertStableOrdinaryScroll(page) {
   }));
   if (Math.abs(after.y - target) > 6) throw new Error(`Ordinary page position changed away from the loop boundary: ${JSON.stringify({ target, after })}`);
   if (after.loopCount !== before.loopCount) throw new Error(`Loop counter changed away from the visual bridge: ${JSON.stringify({ before, after })}`);
-  if (after.bridges !== 1 || after.mirrors !== 1 || after.mirrorFocusable !== 0 || after.transfer) throw new Error(`Seamless inert bridge state invalid during normal navigation: ${JSON.stringify(after)}`);
+  if (after.bridges !== 1 || after.mirrors !== expectedMirrors || after.mirrorFocusable !== 0 || after.transfer) throw new Error(`Seamless inert bridge state invalid during normal navigation: ${JSON.stringify({ expectedMirrors, ...after })}`);
   if (after.automatic !== 'enabled' || after.jumpGuard !== 'visual-match-v4' || after.runtime?.automaticLoop !== true || after.runtime?.mobileNativeMomentumPreserved !== true) {
     throw new Error(`Seamless-v7 navigation contract missing: ${JSON.stringify(after)}`);
   }
   if (after.rootSnap !== 'none') throw new Error(`Section snap returned during normal navigation: ${JSON.stringify(after)}`);
 }
 
-async function assertTwoLoopCycles(page, name) {
+async function assertTwoLoopCycles(page, name, expectedMirrors) {
+  const mobile = name === 'mobile';
   await page.evaluate(() => {
     document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
     document.body.style.setProperty('scroll-behavior', 'auto', 'important');
@@ -171,30 +201,30 @@ async function assertTwoLoopCycles(page, name) {
         && bridge.offsetHeight > 40;
     }, null, { timeout: 12000 });
 
-    const before = await page.evaluate(() => {
+    const before = await page.evaluate(isMobile => {
       const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
       const hero = document.querySelector('#main-content > #hero');
       const relative = Math.max(48, Math.min(innerHeight * .24, Math.max(48, hero.offsetHeight - 12)));
       return {
         count: Number(document.documentElement.dataset.fxLoopCount || 0),
-        target: bridge.offsetTop + relative,
-        expectedLanding: hero.offsetTop + relative,
+        target: isMobile ? document.documentElement.scrollHeight : bridge.offsetTop + relative,
+        expectedLanding: isMobile ? hero.offsetTop : hero.offsetTop + relative,
       };
-    });
+    }, mobile);
 
     await page.evaluate(target => window.scrollTo({ top: target, left: 0, behavior: 'auto' }), before.target);
-    await page.waitForFunction(expected => (
+    await page.waitForFunction(({ expected, isMobile }) => (
       Number(document.documentElement.dataset.fxLoopCount || 0) === expected
       && document.documentElement.dataset.fxInfiniteInput === 'native'
-      && document.documentElement.dataset.fxLoopLandingState === 'settled'
+      && document.documentElement.dataset.fxLoopLandingState === (isMobile ? 'heart-core-settled' : 'settled')
       && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
-    ), before.count + 1, { timeout: 12000 });
+    ), { expected: before.count + 1, isMobile: mobile }, { timeout: 12000 });
 
     const after = await page.evaluate(() => ({
       count: Number(document.documentElement.dataset.fxLoopCount || 0),
       y: window.scrollY,
       landing: Number(document.documentElement.dataset.fxLoopLanding || NaN),
-      source: document.documentElement.dataset.fxLoopSource,
+      source: document.documentElement.dataset.fxLoopSource || '',
       bridges: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
       mirrors: document.querySelectorAll('[data-fx-loop-mirror]').length,
     }));
@@ -202,8 +232,10 @@ async function assertTwoLoopCycles(page, name) {
       || Math.abs(after.y - before.expectedLanding) > 8
       || Math.abs(after.landing - before.expectedLanding) > 8
       || after.bridges !== 1
-      || after.mirrors !== 1) {
-      throw new Error(`${name}: loop cycle ${cycle} failed: ${JSON.stringify({ before, after })}`);
+      || after.mirrors !== expectedMirrors
+      || (mobile && !/^heart-core-/.test(after.source))
+      || (!mobile && /^heart-core-/.test(after.source))) {
+      throw new Error(`${name}: loop cycle ${cycle} failed: ${JSON.stringify({ expectedMirrors, before, after })}`);
     }
     await page.waitForTimeout(500);
   }
@@ -216,7 +248,11 @@ async function preparePage(page) {
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await installProductionShell(page);
   await clearIntro(page);
+
+  await page.mouse.wheel(0, 48);
   await waitForScrollShell(page);
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
+  await page.waitForFunction(() => document.documentElement.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced', null, { timeout: 10000 });
   await activateAndWaitForInterface(page);
 }
 
@@ -241,8 +277,8 @@ async function testDesktop(browser) {
   await assertPanel(page, 'system', 4);
   await closePanelAndAssertCore(page);
 
-  await assertStableOrdinaryScroll(page);
-  await assertTwoLoopCycles(page, 'desktop');
+  await assertStableOrdinaryScroll(page, 1);
+  await assertTwoLoopCycles(page, 'desktop', 1);
   await page.close();
 }
 
@@ -261,8 +297,8 @@ async function testMobile(browser) {
   await assertPanel(page, 'experience', 1);
   await closePanelAndAssertCore(page);
 
-  await assertStableOrdinaryScroll(page);
-  await assertTwoLoopCycles(page, 'mobile');
+  await assertStableOrdinaryScroll(page, 0);
+  await assertTwoLoopCycles(page, 'mobile', 0);
   await page.close();
 }
 
@@ -271,7 +307,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling');
+    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling with current desktop inert-mirror/mobile heart-core contracts');
   } finally {
     await browser.close();
   }

@@ -1,0 +1,66 @@
+/* FormatX R586 — finite compositor intro motion.
+   The premium intro keeps the living grid, scan and restrained energy pulse, but
+   every decorative motion path is single-pass. R586 also overrides the existing
+   visual-bound keyframes with an offscreen translate instead of scaling a full
+   viewport raster. Product timing remains owned by Event Horizon: mobile
+   1180–1450ms / 1360ms visual bound, desktop 1350–1650ms / 1640ms visual bound. */
+@keyframes fx-r533-preloader-visual-bound {
+  0%, 96% { transform: translate3d(0,0,0); }
+  100% { transform: translate3d(0,-110vh,0); }
+}
+@keyframes fx-r586-intro-grid {
+  0% { transform: translate3d(-5px,-3px,0); opacity: .12; }
+  48% { transform: translate3d(0,0,0); opacity: .20; }
+  100% { transform: translate3d(5px,3px,0); opacity: .14; }
+}
+@keyframes fx-r586-intro-scan {
+  0% { transform: translate3d(0,-18vh,0); opacity: 0; }
+  30% { opacity: .26; }
+  78% { opacity: .17; }
+  100% { transform: translate3d(0,112vh,0); opacity: 0; }
+}
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .12;
+  background-image:
+    linear-gradient(rgba(124,236,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,236,255,.03) 1px,transparent 1px);
+  background-size: 48px 48px;
+  will-change: transform,opacity;
+  animation: fx-r586-intro-grid 1320ms ease-in-out 1 both;
+}
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+  content: "";
+  position: absolute;
+  inset: -18vh 0 auto;
+  height: 14vh;
+  z-index: 1;
+  pointer-events: none;
+  border: 0;
+  opacity: 0;
+  background: linear-gradient(180deg,transparent,rgba(124,236,255,.14),rgba(143,114,255,.05),transparent);
+  background-size: auto;
+  mix-blend-mode: normal;
+  will-change: transform,opacity;
+  animation: fx-r586-intro-scan 1240ms cubic-bezier(.22,.61,.36,1) 1 both;
+}
+@media (min-width: 901px) and (pointer: fine) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
+    animation-duration: 1540ms;
+  }
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+    animation-duration: 1480ms;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+    animation: none;
+    transform: none;
+    opacity: .08;
+  }
+}

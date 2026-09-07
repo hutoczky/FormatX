@@ -1,10 +1,9 @@
-/* FormatX r477 — canonical ASK activation + R476 synchronized MAG iconography.
-   The active HTML contains only current deferred enhancements. Mobile keeps the
-   bounded R484 surface-energy budget and zero frames between sweeps, while the
-   final full-size MAG compositor uses the R474 softer-glow, feathered-facet
-   phone tone. R476 mirrors the primary MAG crystal/sphere state into the header
-   and Mini MAG icons. R477 makes the visible ASK control the explicit deferred
-   Organism activation path. Desktop stays on the existing R326 material path. */
+/* FormatX r550 — navigation-owned MAG + SOUND control + independent intent enhancements.
+   MAG and the lightweight SOUND control owner are automatic from navigation. The
+   native R326 renderer yields only to first visual paint, then starts in parallel
+   with non-render-critical MAG styles while the bounded intro remains visible;
+   no user interaction, audit path, or intro-release event controls MAG startup.
+   Heavy Organism/motion enhancements and the full Design System stylesheet stay outside first paint. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -18,28 +17,35 @@ root.dataset.fxFullSuiteR474='r474-mobile-mag';
 root.dataset.fxDialogueSurfaceR475='booting';
 root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
+root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
+root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
+root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r550-parallel-shader-under-intro';
+const SOUND_CONTROL='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r542-professional-owner-authoritative';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r550-parallel-shader-compile';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
-const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
+const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260906-r538-two-control-visual-only';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260831-r475-canonical-ask-surface';
-const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260831-r484-readable-electric-surface';
+const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260906-r537-automatic-lifecycle';
+const PLATFORM_SCROLL='/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260906-r535-scroll-intent-owner';
+const DESIGN_SYSTEM='/scifi-ui/styles/formatx-design-system.css?v=20260728-ds2';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false;
+const scrollIntentListeners=[['wheel',passive],['scroll',passive],['touchstart',passive],['pointerdown',passive],['keydown',false]];
+let enhancementsStarted=false,currentRequested=false,soundRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,scrollBootstrapRequested=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function mount(spec){
@@ -61,6 +67,7 @@ function warmCriticalOwners(){
   root.dataset.fxCurrentMagWarmR461='ready';
   warmAsset(LANGUAGE_TOGGLE,'script');
   warmAsset(CURRENT_MAG,'script');
+  warmAsset(SOUND_CONTROL,'script');
   warmAsset(CURRENT_SOLID_GLASS,'script');
   warmAsset(CURRENT_RENDERER,'script');
   warmAsset(CURRENT_STYLE,'style');
@@ -75,9 +82,7 @@ function ensureDialogueSurface(){
   let link=document.querySelector('link[data-fx-dialogue-surface-r475]');
   if(link instanceof HTMLLinkElement){root.dataset.fxDialogueSurfaceR475=link.sheet?'ready':'loading';return;}
   link=document.createElement('link');
-  link.rel='stylesheet';
-  link.href=DIALOGUE_STYLE;
-  link.dataset.fxDialogueSurfaceR475='true';
+  link.rel='stylesheet';link.href=DIALOGUE_STYLE;link.dataset.fxDialogueSurfaceR475='true';
   link.addEventListener('load',()=>{root.dataset.fxDialogueSurfaceR475='ready';},{once:true});
   link.addEventListener('error',()=>{root.dataset.fxDialogueSurfaceR475='load-failed';},{once:true});
   document.head.appendChild(link);
@@ -85,10 +90,7 @@ function ensureDialogueSurface(){
 function ensureMagShapeSync(){
   if(shapeSyncRequested||document.querySelector('script[data-fx-mag-shape-sync-r476]'))return;
   shapeSyncRequested=true;
-  const script=document.createElement('script');
-  script.src=MAG_SHAPE_SYNC;
-  script.async=false;
-  script.dataset.fxMagShapeSyncR476='true';
+  const script=document.createElement('script');script.src=MAG_SHAPE_SYNC;script.async=false;script.dataset.fxMagShapeSyncR476='true';
   script.addEventListener('load',()=>{root.dataset.fxMagShapeSyncBootstrapR476='loaded';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxMagShapeSyncBootstrapR476='failed';},{once:true});
   document.head.appendChild(script);
@@ -102,6 +104,15 @@ function ensureLanguageToggle(){
   script.addEventListener('error',()=>{root.dataset.fxLanguageCriticalPathR461='failed';},{once:true});
   document.head.appendChild(script);
 }
+function ensureSoundControl(){
+  if(root.dataset.fxWdaHardening==='r263'){root.dataset.fxSoundNavigationOwnerR541='ready-existing';return;}
+  if(soundRequested||document.querySelector('script[data-fx-wda-hardening-r541]'))return;
+  soundRequested=true;root.dataset.fxSoundNavigationOwnerR541='requested-navigation';
+  const script=document.createElement('script');script.src=SOUND_CONTROL;script.async=false;script.dataset.fxWdaHardeningR541='true';
+  script.addEventListener('load',()=>{root.dataset.fxSoundNavigationOwnerR541=root.dataset.fxWdaHardening==='r263'?'ready-navigation':'loaded-awaiting-owner';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxSoundNavigationOwnerR541='load-failed';},{once:true});
+  document.head.appendChild(script);
+}
 function ensureCurrentMag(){
   if(currentRequested||document.querySelector('script[data-fx-current-mag-loader-r422]'))return;
   currentRequested=true;
@@ -110,44 +121,57 @@ function ensureCurrentMag(){
 }
 function ensureStaticMotionCss(){
   const existing=document.getElementById('fx-r170-mobile-seam-override');
-  if(existing instanceof HTMLLinkElement){
-    if(existing.sheet)root.dataset.fxMotionCssR243='external-strict-csp-user-intent';
-    return;
-  }
+  if(existing instanceof HTMLLinkElement){if(existing.sheet)root.dataset.fxMotionCssR243='external-strict-csp-user-intent';return;}
   const stylesheet=document.createElement('link');
-  stylesheet.id='fx-r170-mobile-seam-override';
-  stylesheet.rel='stylesheet';
-  stylesheet.href='./styles/formatx-runtime-static-r243.css?v=20260819-r243-csp';
-  stylesheet.dataset.fxRuntimeStaticR243='true';
+  stylesheet.id='fx-r170-mobile-seam-override';stylesheet.rel='stylesheet';stylesheet.href='./styles/formatx-runtime-static-r243.css?v=20260819-r243-csp';stylesheet.dataset.fxRuntimeStaticR243='true';
   stylesheet.addEventListener('load',()=>{root.dataset.fxMotionCssR243='external-strict-csp-user-intent';},{once:true});
   stylesheet.addEventListener('error',()=>{root.dataset.fxMotionCssR243='external-strict-csp-load-failed';},{once:true});
   document.head.appendChild(stylesheet);
 }
+function ensureDesignSystem(){
+  let link=document.querySelector('link[data-fx-design-system-main-r536]');
+  if(link instanceof HTMLLinkElement){if(link.sheet)root.dataset.fxDesignSystemRuntimeR536='ready-user-intent';return;}
+  link=document.createElement('link');link.rel='stylesheet';link.href=DESIGN_SYSTEM;link.dataset.fxDesignSystemMainR536='true';
+  link.addEventListener('load',()=>{root.dataset.fxDesignSystemRuntimeR536='ready-user-intent';},{once:true});
+  link.addEventListener('error',()=>{root.dataset.fxDesignSystemRuntimeR536='load-failed';},{once:true});
+  document.head.appendChild(link);
+}
+function ensureScrollBootstrap(){
+  if(root.dataset.fxScrollBootstrap==='platform-scroll-v2'){root.dataset.fxPlatformScrollBootstrapR535='ready-existing';disarmScrollIntent();return;}
+  if(scrollBootstrapRequested||document.querySelector('script[data-fx-platform-scroll-r535]'))return;
+  scrollBootstrapRequested=true;root.dataset.fxPlatformScrollBootstrapR535='loading-scroll-intent';
+  const script=document.createElement('script');script.src=PLATFORM_SCROLL;script.async=false;script.dataset.fxPlatformScrollR535='true';
+  script.addEventListener('load',()=>{root.dataset.fxPlatformScrollBootstrapR535=root.dataset.fxScrollBootstrap==='platform-scroll-v2'?'ready-scroll-intent':'loaded-awaiting-bootstrap';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxPlatformScrollBootstrapR535='failed';},{once:true});
+  document.head.appendChild(script);disarmScrollIntent();
+}
 function reservedInteraction(event){
   if(root.dataset.fxOrganismThought==='open')return true;
   const target=event?.target instanceof Element?event.target:null;
-  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-reference-pause,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));
+  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button,.fx-mag-heart-hit-r252'));
 }
 function disarm(){for(const [type,options] of intentListeners)removeEventListener(type,onIntent,options);}
+function disarmScrollIntent(){for(const [type,options] of scrollIntentListeners)removeEventListener(type,onScrollIntent,options);}
 function mountEnhancements(){
-  if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
+  if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureDesignSystem();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
   root.dataset.fxMotionRuntimeR239='enhanced-r468-user-intent';
 }
 function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
+function onScrollIntent(event){
+  if(event.type==='pointerdown'&&event.pointerType!=='touch')return;
+  if(event.type==='keydown'&&!['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' '].includes(event.key))return;
+  ensureScrollBootstrap();
+}
 function openPendingCanonicalAsk(){
   if(!askActivationPending)return false;
   const api=window.FormatXOrganismVoice;
   if(!api||typeof api.open!=='function')return false;
   askActivationPending=false;
   queueMicrotask(()=>{
-    try{
-      api.open();
-      root.dataset.fxCanonicalAskActivationR477='dialogue-opened';
-    }catch(_){
-      root.dataset.fxCanonicalAskActivationR477='dialogue-open-failed';
-    }
+    try{api.open();root.dataset.fxCanonicalAskActivationR477='dialogue-opened';}
+    catch(_){root.dataset.fxCanonicalAskActivationR477='dialogue-open-failed';}
   });
   return true;
 }
@@ -155,11 +179,9 @@ function activateCanonicalAsk(event){
   const target=event.target instanceof Element?event.target.closest('#hero .fx-reference-controls-r204 .fx-reference-ask'):null;
   if(!(target instanceof HTMLButtonElement))return;
   if(typeof window.FormatXOrganismVoice?.open==='function')return;
-  askActivationPending=true;
-  root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
+  askActivationPending=true;root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
   if(root.dataset.fxImmersive!=='active'){
-    root.dataset.fxImmersive='active';
-    root.dataset.fxImmersiveSource='canonical-ask-r477';
+    root.dataset.fxImmersive='active';root.dataset.fxImmersiveSource='canonical-ask-r477';
     dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'canonical-ask-r477'}}));
   }else mountEnhancements();
   queueMicrotask(openPendingCanonicalAsk);
@@ -172,14 +194,12 @@ root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
 root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r468':mobile.matches?'core-ready-r468-mobile-r326-controller':'core-ready-r468-desktop-r326-controller';
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
-warmCriticalOwners();
-ensureDialogueSurface();
-ensureMagShapeSync();
-ensureLanguageToggle();
-ensureCurrentMag();
+warmCriticalOwners();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureSoundControl();ensureCurrentMag();
 
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
+for(const [type,options] of scrollIntentListeners)addEventListener(type,onScrollIntent,options);
+if(Math.abs(scrollY)>1||(location.hash&&location.hash!=='#top'&&location.hash!=='#hero'))queueMicrotask(ensureScrollBootstrap);
 
 if(deferred.length){
   for(const [type,options] of intentListeners)addEventListener(type,onIntent,options);

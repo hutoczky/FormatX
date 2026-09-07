@@ -1,17 +1,20 @@
-/* FormatX R493 — deterministic post-first-paint MAG scheduler.
-   The static MAG shell is part of first paint. Heavy R326/WebGL enhancement is
-   never triggered by ambient startup events: explicit interaction starts it
-   immediately, otherwise a genuinely late visible-tab fallback starts it.
-   This preserves the living system without putting shader/runtime work on the
-   LCP/TBT critical path. */
+/* FormatX R549 — single navigation-owned MAG + sound control + post-first-paint enhancements.
+   The lightweight MAG shell/heart and SOUND owner arm automatically from navigation.
+   The one current MAG loader uses the same R549 first-paint-under-intro identity
+   everywhere, preventing duplicate cache identities from fetching startup twice.
+   Heavy motion/Organism enhancements remain late/intent-driven. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r493';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260831-r484-periodic-native-energy';
+root.dataset.fxP0MotionSchedulerR490='armed-r549-single-navigation-mag-sound-control';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r549-first-paint-under-intro-no-user-gate';
+const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r549-first-paint-yield-under-intro';
+const SOUND_CONTROL_SRC='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r542-professional-owner-authoritative';
 const AUTO_DELAY_MS=6500;
 let started=false;
+let criticalMagStarted=false;
+let soundControlStarted=false;
 let idleId=0;
 let timer=0;
 
@@ -19,67 +22,68 @@ function clearPending(){
   if(timer){clearTimeout(timer);timer=0;}
   if(idleId&&'cancelIdleCallback' in window){cancelIdleCallback(idleId);idleId=0;}
 }
-
-function start(reason){
-  if(started)return;
-  started=true;
-  clearPending();
-  root.dataset.fxP0MotionSchedulerR490=`starting:${reason}`;
-  if(document.querySelector('script[src*="formatx-motion-runtime-loader-r239.js"]')){
-    root.dataset.fxP0MotionSchedulerR490='runtime-already-present';
-    return;
+function startSoundControl(){
+  if(soundControlStarted)return;
+  soundControlStarted=true;
+  if(root.dataset.fxWdaHardening==='r263'){
+    root.dataset.fxSoundNavigationOwnerR539='already-running';return;
   }
-  const script=document.createElement('script');
-  script.src=SRC;
-  script.async=true;
-  script.dataset.fxMotionRuntimeLoaderR239='true';
-  script.dataset.fxP0PostPaintR490='true';
-  script.addEventListener('load',()=>{root.dataset.fxP0MotionSchedulerR490=`loaded:${reason}`;},{once:true});
-  script.addEventListener('error',()=>{root.dataset.fxP0MotionSchedulerR490='load-failed';},{once:true});
+  if(document.querySelector('script[data-fx-wda-hardening-r539]')){
+    root.dataset.fxSoundNavigationOwnerR539='already-requested';return;
+  }
+  root.dataset.fxSoundNavigationOwnerR539='requested-navigation';
+  const script=document.createElement('script');script.src=SOUND_CONTROL_SRC;script.async=false;script.dataset.fxWdaHardeningR539='true';
+  script.addEventListener('load',()=>{root.dataset.fxSoundNavigationOwnerR539=root.dataset.fxWdaHardening==='r263'?'ready-navigation':'loaded-awaiting-owner';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxSoundNavigationOwnerR539='load-failed';},{once:true});
   document.head.appendChild(script);
 }
-
+function startCriticalMag(){
+  if(criticalMagStarted)return;
+  criticalMagStarted=true;
+  if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting'){
+    root.dataset.fxMagNavigationBootR536='already-running';return;
+  }
+  if(document.querySelector('script[data-fx-current-mag-loader-r422]')){
+    root.dataset.fxMagNavigationBootR536='already-requested';return;
+  }
+  root.dataset.fxMagNavigationBootR536='requested-navigation-r549-single-identity';
+  const script=document.createElement('script');script.src=CRITICAL_MAG_SRC;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';script.dataset.fxNavigationMagR536='true';
+  script.addEventListener('load',()=>{root.dataset.fxMagNavigationBootR536=/^(?:ready|booting)$/.test(root.dataset.fxCurrentMagRuntimeR422||'')?'loaded-navigation':'loaded-awaiting-current-mag';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxMagNavigationBootR536='load-failed';},{once:true});
+  document.head.appendChild(script);
+}
+function start(reason){
+  if(started)return;
+  started=true;clearPending();root.dataset.fxP0MotionSchedulerR490=`starting-enhancements:${reason}`;
+  if(document.querySelector('script[src*="formatx-motion-runtime-loader-r239.js"]')){
+    root.dataset.fxP0MotionSchedulerR490='enhancements-runtime-already-present';return;
+  }
+  const script=document.createElement('script');script.src=SRC;script.async=true;script.dataset.fxMotionRuntimeLoaderR239='true';script.dataset.fxP0PostPaintR490='true';
+  script.addEventListener('load',()=>{root.dataset.fxP0MotionSchedulerR490=`enhancements-loaded:${reason}`;},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxP0MotionSchedulerR490='enhancements-load-failed';},{once:true});
+  document.head.appendChild(script);
+}
 function runLateAuto(){
   if(started)return;
   if(document.visibilityState!=='visible'){
-    root.dataset.fxP0MotionSchedulerR490='waiting-visible-r493';
-    timer=setTimeout(runLateAuto,2000);
-    return;
+    root.dataset.fxP0MotionSchedulerR490='enhancements-waiting-visible-r536';timer=setTimeout(runLateAuto,2000);return;
   }
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
-    root.dataset.fxP0MotionSchedulerR490='reduced-motion-static-r493';
-    return;
+    root.dataset.fxP0MotionSchedulerR490='reduced-motion-critical-mag-only-r536';return;
   }
-  const launch=()=>start('late-auto-r493');
-  if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:2500});
-  }else{
-    timer=setTimeout(launch,250);
-  }
+  const launch=()=>start('late-auto-r536');
+  if('requestIdleCallback' in window)idleId=requestIdleCallback(launch,{timeout:2500});
+  else timer=setTimeout(launch,250);
 }
-
 function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    root.dataset.fxP0FirstPaintR490='committed-r493';
-    timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
+    root.dataset.fxP0FirstPaintR490='committed-r536';timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
   }));
 }
-
-function onIntent(event){
-  if(event&&event.isTrusted===false)return;
-  start(`user-${event?.type||'intent'}-r493`);
-}
-
-/* Deliberately exclude pointermove and scroll. Those can be emitted during
-   browser startup/restoration and were the source of R492's 0.5–1.0 s random
-   WebGL boot. These events represent explicit user action instead. */
-for(const type of ['pointerdown','touchstart','keydown','wheel']){
-  addEventListener(type,onIntent,{once:true,passive:true});
-}
-
-if(document.readyState==='loading'){
-  addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
-}else{
-  armLateFallback();
-}
+function onIntent(event){if(event&&event.isTrusted===false)return;start(`user-${event?.type||'intent'}-r536`);}
+for(const type of ['pointerdown','touchstart','keydown','wheel'])addEventListener(type,onIntent,{once:true,passive:true});
+startSoundControl();
+startCriticalMag();
+if(document.readyState==='loading')addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
+else armLateFallback();
 }());

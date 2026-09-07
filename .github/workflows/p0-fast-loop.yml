@@ -75,6 +75,18 @@ jobs:
           done
           cat "$RUNNER_TEMP/p0-fast-http.log"
           exit 1
+      - name: Diagnose R560 startup owner
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_R560_EVIDENCE_DIR: artifacts/r560-startup-owner
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/diagnose-r560-startup-owner.cjs
+      - name: Run R533 bounded preloader timing proof
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_R533_EVIDENCE_DIR: artifacts/r533-preloader-timing
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-r533-preloader-timing.cjs
       - name: Run retained semantic source proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
@@ -106,6 +118,8 @@ jobs:
         with:
           name: p0-fast-loop-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            artifacts/r560-startup-owner/
+            artifacts/r533-preloader-timing/
             artifacts/p0-fast-loop/
             artifacts/r522-semantic-mag/
             artifacts/content-visuals/
