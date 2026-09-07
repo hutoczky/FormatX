@@ -382,11 +382,12 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
   }
 }
 
-/* R567/R568: transform-only visual hard bound; no full-screen clip raster. */
+/* R641: keep the exact measurable intro clock without promoting or
+   transforming the full viewport. Visual motion is owned by the small
+   energy-line pseudo element; the overlay clock is timing-only. */
 @keyframes fx-r533-preloader-visual-bound {
-  0%, 86% { transform: translate3d(0,0,0) scale(1); }
-  94% { transform: translate3d(0,0,0) scale(.985); }
-  100% { transform: translate3d(0,0,0) scale(.001); }
+  from {}
+  to {}
 }
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   position: fixed !important;
@@ -409,8 +410,9 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
     radial-gradient(circle at 50% 46%, rgba(90, 216, 255, .12), transparent 38%),
     linear-gradient(180deg, #05070a, #010204) !important;
   animation: fx-r533-preloader-visual-bound 1640ms linear both !important;
+  transform: none !important;
   transform-origin: 50% 50% !important;
-  will-change: transform !important;
+  will-change: auto !important;
 }
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {

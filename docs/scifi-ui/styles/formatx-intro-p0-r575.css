@@ -26,7 +26,7 @@
 
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   isolation: auto !important;
-  contain: layout paint style !important;
+  contain: none !important;
   background:
     radial-gradient(circle at 50% 46%,rgba(86,221,255,.105),transparent 34%),
     radial-gradient(circle at 50% 52%,rgba(120,84,255,.045),transparent 48%),
@@ -48,8 +48,8 @@
     radial-gradient(circle at 50% 48%,rgba(98,227,255,.08),transparent 32%);
   background-size: 48px 48px,48px 48px,100% 100%;
   transform: none;
-  will-change: opacity;
-  animation: fx-r635-intro-grid-breathe 1640ms linear both;
+  will-change: auto;
+  animation: none;
 }
 
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {

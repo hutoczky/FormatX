@@ -51,7 +51,7 @@ ROOT.dataset.fxPreloaderDeadlineR635='immutable-navigation-boot-min-floor-max-ce
 ROOT.dataset.fxPreloaderReleaseOwnerR635='single-idempotent-finalizer';
 ROOT.dataset.fxPreloaderPaintOwnerR575='external-css-pseudo-grid-scan-legacy-dom-suppressed';
 ROOT.dataset.fxPreloaderPaintOwnerR606='bounded-raster-single-compositor-deadline';
-ROOT.dataset.fxPreloaderPaintOwnerR636='sync-no-transform-before-visual-css';
+ROOT.dataset.fxPreloaderPaintOwnerR636='sync-no-transform-before-visual-css';ROOT.dataset.fxPreloaderPaintOwnerR641='timing-only-overlay-clock-small-energy-line';
 ROOT.dataset.fxPreloaderFinalizeR609='hide-first-no-subtree-animation-enumeration';
 ROOT.dataset.fxPreloaderVisualSequenceR635='system-wake-core-sync-ready-reveal';
 
@@ -170,7 +170,7 @@ function showPreloader(){
   ensureP0FxStyle();
   preloaderReleased=false;overlay.hidden=false;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='active';ROOT.dataset.fxPreloaderR531='active';
   overlay.classList.remove('fx-preloader-reveal-r635');
-  force(overlay,'display','grid');force(overlay,'visibility','visible');force(overlay,'opacity','1');force(overlay,'pointer-events','none');force(overlay,'transform','none');force(overlay,'will-change','auto');force(overlay,'isolation','auto');force(overlay,'contain','layout paint style');
+  force(overlay,'display','grid');force(overlay,'visibility','visible');force(overlay,'opacity','1');force(overlay,'pointer-events','none');force(overlay,'transform','none');force(overlay,'will-change','auto');force(overlay,'isolation','auto');force(overlay,'contain','none');
   const center=overlay.querySelector('.fx-intro-center'),word=overlay.querySelector('.fx-intro-word'),wordSpan=overlay.querySelector('.fx-intro-word span'),kicker=overlay.querySelector('.fx-intro-kicker'),subtitle=overlay.querySelector('.fx-intro-subtitle'),meta=overlay.querySelector('.fx-intro-meta'),progressWrap=overlay.querySelector('.fx-intro-progress-wrap');
   force(center,'width','min(520px, calc(100vw - 40px))');force(word,'font-size','clamp(32px,5vw,56px)');force(word,'line-height','1');force(word,'letter-spacing','.08em');force(wordSpan,'opacity','1');force(wordSpan,'transform','none');force(wordSpan,'filter','none');force(kicker,'opacity','1');force(kicker,'transform','none');force(kicker,'letter-spacing','.24em');force(subtitle,'opacity','1');force(subtitle,'transform','none');force(subtitle,'font-size','10px');force(meta,'opacity',MOBILE?'0':'.5');force(meta,'transform','none');force(progressWrap,'opacity','1');force(progressWrap,'transform','none');force(progressWrap,'max-width','560px');force(progressWrap,'margin','0 auto');
   setIntroPhase(overlay,'wake');
