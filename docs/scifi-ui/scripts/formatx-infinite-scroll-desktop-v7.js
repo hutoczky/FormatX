@@ -557,7 +557,7 @@
   }
 
   function commitDesktopTransfer() {
-    if (isMobileFlow() || pendingDesktopRelative == null || Date.now() < transferLockedUntil) return;
+    if (isMobileFlow() || Date.now() < transferLockedUntil) return;
     refreshGeometry();
     const relative = bridgeRelative();
     if (relative == null) {
@@ -566,6 +566,7 @@
       return;
     }
     pendingDesktopRelative = relative;
+    root.dataset.fxDesktopLoopBoundaryR607 = 'settled-idle-recomputed';
     performTransfer(relative, 'visual-bridge-desktop-idle');
   }
 
@@ -689,7 +690,7 @@
       mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
-      desktopTransfer: 'scroll-idle-visual-match',
+      desktopTransfer: 'settled-idle-recomputed-r607',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
     });
