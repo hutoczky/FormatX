@@ -6,6 +6,7 @@
   const LOOP_GUARD_MS = 420;
   const ACTIVITY_IDLE_MS = 170;
   const MOBILE_SETTLE_MS = 220;
+  const LOOP_BOOT_FLOOR_MS = 1750;
   const STYLE_URL = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260907-r592-style-ready-geometry';
   const MOBILE_FLOW_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const HERO_START_HASHES = new Set(['', '#top', '#hero']);
@@ -27,6 +28,7 @@
   let repairTimer = 0;
   let geometryFrame = 0;
   let geometryObserver = null;
+  let bootTimer = 0;
   let layoutWidth = innerWidth;
   let initialHeroGuardApplied = false;
   let initialised = false;
@@ -50,6 +52,7 @@
   root.dataset.fxScrollJumpGuard = 'visual-match-v4';
   root.dataset.fxLoopBridge = 'initialising';
   root.dataset.fxLoopStyleR592 = 'loading';
+  root.dataset.fxLoopBootstrapR593 = 'post-critical-window-pending';
   root.dataset.fxScrollSnap = 'disabled';
   root.dataset.fxMobileScrollMode = 'native-momentum-loop';
   root.dataset.fxInitialHeroGuard = 'pending';
@@ -104,6 +107,18 @@
         if (link.sheet) finish(true, 'ready-sheet-timeout-check');
         else finish(false, 'failed-style-timeout');
       }, 2000);
+    });
+  }
+
+  function waitForBootFloor() {
+    const delay = Math.max(0, LOOP_BOOT_FLOOR_MS - performance.now());
+    if (delay <= 0) return Promise.resolve();
+    return new Promise(resolve => {
+      clearTimeout(bootTimer);
+      bootTimer = window.setTimeout(() => {
+        bootTimer = 0;
+        resolve();
+      }, delay);
     });
   }
 
@@ -643,10 +658,12 @@
     if (initialised) return;
     try {
       await ensureStyleReady();
+      await waitForBootFloor();
     } catch (_) {
       root.dataset.fxInfiniteScroll = 'failed-style-' + VERSION;
       return;
     }
+    root.dataset.fxLoopBootstrapR593 = 'post-critical-window-running';
     guaranteeInitialHero();
     repairReleasePanel();
     if (!buildBridge()) {
@@ -668,6 +685,7 @@
       sectionSnapDisabled: true,
       geometryCachedOutsideScroll: true,
       styleReadyGeometryR592: true,
+      postCriticalWindowBootR593: LOOP_BOOT_FLOOR_MS,
       mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
@@ -679,6 +697,7 @@
     root.dataset.fxInfiniteController = VERSION;
     root.dataset.fxAutomaticLoop = 'enabled';
     root.dataset.fxMobileScrollMode = 'native-momentum-loop';
+    root.dataset.fxLoopBootstrapR593 = 'ready-post-critical-window';
     onScroll();
 
     if (document.fonts?.ready) {
@@ -722,6 +741,7 @@
     clearTimeout(mobileSettleTimer);
     clearTimeout(repairTimer);
     clearTimeout(mirrorCaptureTimer);
+    clearTimeout(bootTimer);
     geometryObserver?.disconnect();
   }, { once: true });
 }());
