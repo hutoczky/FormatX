@@ -63,6 +63,7 @@
   root.dataset.fxLoopMirrorCaptureR609 = 'async-to-blob';
   root.dataset.fxLoopOrganismRepairR609 = 'geometry-only-no-bridge-rebuild';
   root.dataset.fxDesktopLoopCrossingR618 = 'last-idle-real-bridge-boundary';
+  root.dataset.fxDesktopLoopSnapshotR623 = 'stable-only-outside-organism-overlays';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -434,12 +435,22 @@
     return true;
   }
 
+  function desktopGeometryCanStabilize() {
+    return root.dataset.fxOrganismThought !== 'open'
+      && !document.body.classList.contains('fx-organism-panel-open')
+      && !root.classList.contains('fx-organism-menu-open');
+  }
+
   function rememberDesktopStableGeometry(source) {
-    if (isMobileFlow()) return false;
+    if (isMobileFlow() || !desktopGeometryCanStabilize()) {
+      if (!isMobileFlow()) root.dataset.fxDesktopLoopStableBoundaryR623 = 'transient-organism-geometry-ignored';
+      return false;
+    }
     const actual = readActualGeometry();
     if (!actual) return false;
     desktopStableGeometry = actual;
     root.dataset.fxDesktopLoopStableBoundaryR618 = `${source}:${Math.round(actual.bridgeTop)}:${Math.round(actual.bridgeThreshold)}:${Math.round(actual.documentEnd)}`;
+    root.dataset.fxDesktopLoopStableBoundaryR623 = `accepted-${source}`;
     return true;
   }
 
@@ -576,6 +587,7 @@
   function performTransfer(relative, source) {
     if (relative == null || Date.now() < transferLockedUntil) return false;
     if (document.body.classList.contains('fx-organism-panel-open')) return false;
+    if (root.dataset.fxOrganismThought === 'open') return false;
     if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return false;
 
     transferLockedUntil = Date.now() + LOOP_GUARD_MS;
@@ -748,6 +760,7 @@
       mirrorCapture: 'async-to-blob-r609',
       organismLifecycleBridgeRepair: 'geometry-only-r609',
       desktopCrossingIntent: 'last-idle-real-bridge-boundary-r618',
+      desktopStableSnapshot: 'transient-organism-geometry-ignored-r623',
       reinitialisedRenderer: false,
       frameStableLanding: true,
       jumpFree: true,
