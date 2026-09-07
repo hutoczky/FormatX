@@ -1,9 +1,10 @@
-/* FormatX R609 — hide-first bounded preloader release.
-   MAG startup remains navigation-owned behind the visual layer. Product timing
-   remains mobile 1180–1450ms / desktop 1350–1650ms. The required 1360/1640ms
-   compositor animation owns the primary logical release; scheduler/timer
-   deadlines remain fail-safe fallbacks. Release no longer performs synchronous
-   subtree animation enumeration before the overlay is hidden and reported done. */
+/* FormatX R635 — single-owner absolute-bounded premium intro release.
+   MAG startup remains navigation-owned behind the visual cover. Product timing
+   remains mobile 1180–1450ms / desktop 1350–1650ms. The existing 1360/1640ms
+   visual clock may request release, but exactly one idempotent finalizer owns the
+   actual completion event. A navigation-relative absolute deadline can never be
+   restarted by MAG/CSS/layout/animation readiness, and the final dissolve lives
+   inside the maximum product window rather than extending it. */
 (function(){
 'use strict';
 
@@ -12,15 +13,17 @@ const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27
 const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const OVERLAY_ID='formatx-event-horizon';
 const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-score-v6';
-const P0_FX_STYLE='./styles/formatx-intro-p0-r575.css?v=20260907-r606-compositor-deadline-owner';
+const P0_FX_STYLE='./styles/formatx-intro-p0-r575.css?v=20260907-r635-three-phase-absolute-reveal';
 const PRELOADER_MIN_MS=REDUCED?180:(MOBILE?1180:1350);
 const PRELOADER_MAX_MS=REDUCED?520:(MOBILE?1450:1650);
 const PRELOADER_TICK_MS=80;
 const PRELOADER_FADE_MS=REDUCED?0:90;
 const PRELOADER_RELEASE_GUARD_MS=PRELOADER_FADE_MS+PRELOADER_TICK_MS+40;
-const PRELOADER_HIDE_BY_MS=Math.max(PRELOADER_MIN_MS,PRELOADER_MAX_MS-PRELOADER_RELEASE_GUARD_MS);
+const PRELOADER_HIDE_BY_MS=PRELOADER_MAX_MS;
+const PRELOADER_REVEAL_AT_MS=REDUCED?0:Math.max(PRELOADER_MIN_MS,PRELOADER_MAX_MS-PRELOADER_FADE_MS);
+const PRELOADER_VISUAL_MS=MOBILE?1360:1640;
 const PRELOADER_BOOT_AT=performance.now();
-let audio=null,preloaderTimer=0,preloaderDeadlineTimer=0,preloaderFadeTimer=0,preloaderReleased=false,preloaderDeadlineAbort=null;
+let audio=null,preloaderTimer=0,preloaderDeadlineTimer=0,preloaderRevealTimer=0,preloaderPhaseTimerA=0,preloaderPhaseTimerB=0,preloaderReleased=false,preloaderDeadlineAbort=null;
 
 if(!ROOT.dataset.fxReferenceProductionR244)ROOT.dataset.fxReferenceProductionR244=MOBILE?'ready':'desktop';
 ROOT.dataset.fxReferenceComposition=MOBILE?'reference-frame-r244':'desktop-reference-r244';
@@ -39,14 +42,17 @@ ROOT.dataset.fxPreloaderTimingR533=MOBILE?'mobile-1180-1450':'desktop-1350-1650'
 ROOT.dataset.fxPreloaderContentR534='static-no-repaint';
 ROOT.dataset.fxPreloaderBootR533=String(Math.round(PRELOADER_BOOT_AT));
 ROOT.dataset.fxPreloaderClockR544='navigation-script-boot-single-deadline';
-ROOT.dataset.fxPreloaderDeadlineR549=`fade-compensated-${Math.round(PRELOADER_HIDE_BY_MS)}-${PRELOADER_MAX_MS}`;
-ROOT.dataset.fxPreloaderDeadlineR555='absolute-boot-hard-deadline-bounded-fade-finalize';
+ROOT.dataset.fxPreloaderDeadlineR549=`absolute-${PRELOADER_MIN_MS}-${PRELOADER_MAX_MS}`;
+ROOT.dataset.fxPreloaderDeadlineR555='absolute-boot-hard-deadline-single-finalizer';
 ROOT.dataset.fxPreloaderDeadlineR556='prearmed-user-blocking-scheduler-with-timer-fallback';
 ROOT.dataset.fxPreloaderDeadlineR562='overdue-callback-direct-finalize-normal-fade-preserved';
-ROOT.dataset.fxPreloaderDeadlineR606='compositor-animation-end-primary-timer-fallback';
+ROOT.dataset.fxPreloaderDeadlineR606='compositor-animation-end-advisory-absolute-deadline-owner';
+ROOT.dataset.fxPreloaderDeadlineR635='immutable-navigation-boot-min-floor-max-ceiling';
+ROOT.dataset.fxPreloaderReleaseOwnerR635='single-idempotent-finalizer';
 ROOT.dataset.fxPreloaderPaintOwnerR575='external-css-pseudo-grid-scan-legacy-dom-suppressed';
 ROOT.dataset.fxPreloaderPaintOwnerR606='bounded-raster-single-compositor-deadline';
 ROOT.dataset.fxPreloaderFinalizeR609='hide-first-no-subtree-animation-enumeration';
+ROOT.dataset.fxPreloaderVisualSequenceR635='system-wake-core-sync-ready-reveal';
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
@@ -64,13 +70,19 @@ function clear(node,property){if(node instanceof HTMLElement)node.style.removePr
 function animateEffect(node,keyframes,options){if(REDUCED||!(node instanceof HTMLElement)||typeof node.animate!=='function')return;try{node.animate(keyframes,options);}catch(_){} }
 function ensureP0FxStyle(){
   let link=document.querySelector('link[data-fx-intro-p0-r575]');
-  if(link instanceof HTMLLinkElement)return link;
+  if(link instanceof HTMLLinkElement){if(!link.href.includes('r635-three-phase-absolute-reveal'))link.href=P0_FX_STYLE;return link;}
   link=document.createElement('link');link.rel='stylesheet';link.href=P0_FX_STYLE;link.dataset.fxIntroP0R575='true';document.head.appendChild(link);return link;
 }
 function cancelDeadline(){
   if(preloaderDeadlineTimer)clearTimeout(preloaderDeadlineTimer);preloaderDeadlineTimer=0;
   try{preloaderDeadlineAbort?.abort();}catch(_){}
   preloaderDeadlineAbort=null;
+}
+function cancelPreloaderTimers(){
+  if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;
+  if(preloaderRevealTimer)clearTimeout(preloaderRevealTimer);preloaderRevealTimer=0;
+  if(preloaderPhaseTimerA)clearTimeout(preloaderPhaseTimerA);preloaderPhaseTimerA=0;
+  if(preloaderPhaseTimerB)clearTimeout(preloaderPhaseTimerB);preloaderPhaseTimerB=0;
 }
 function armDeadline(callback,delay){
   cancelDeadline();
@@ -79,84 +91,117 @@ function armDeadline(callback,delay){
   if(browserScheduler&&typeof browserScheduler.postTask==='function'&&typeof AbortController==='function'){
     preloaderDeadlineAbort=new AbortController();
     browserScheduler.postTask(callback,{delay:boundedDelay,priority:'user-blocking',signal:preloaderDeadlineAbort.signal}).catch(()=>{});
-    preloaderDeadlineTimer=setTimeout(callback,boundedDelay+32);
+    preloaderDeadlineTimer=setTimeout(callback,boundedDelay+16);
     ROOT.dataset.fxPreloaderDeadlineQueueR556='scheduler-user-blocking-plus-timer';
     return;
   }
   preloaderDeadlineTimer=setTimeout(callback,boundedDelay);
   ROOT.dataset.fxPreloaderDeadlineQueueR556='timer-fallback';
 }
-
-function skipLatePreloader(){
+function setIntroPhase(overlay,phase){
+  if(!(overlay instanceof HTMLElement)||preloaderReleased)return;
+  overlay.dataset.fxIntroPhaseR635=phase;
+  const output=overlay.querySelector('[data-fx-intro-output]');
+  const progress=overlay.querySelector('[data-fx-intro-progress]');
+  const status=overlay.querySelector('[data-fx-intro-status]');
+  const english=ROOT.lang==='en';
+  const phases={
+    wake:{out:'WAKE',value:24,en:'LIVING MAG STARTING',hu:'ÉLŐ MAG INDÍTÁSA'},
+    sync:{out:'SYNC',value:72,en:'MAG SYNCHRONIZING',hu:'MAG SZINKRONIZÁLÁS'},
+    ready:{out:'READY',value:100,en:'SYSTEM STABLE',hu:'RENDSZER STABIL'}
+  };
+  const state=phases[phase]||phases.wake;
+  if(output instanceof HTMLOutputElement)output.value=state.out;
+  if(progress instanceof HTMLProgressElement){progress.max=100;progress.value=state.value;progress.setAttribute('aria-label',english?state.en:state.hu);}
+  if(status instanceof HTMLElement)status.textContent=english?state.en:state.hu;
+}
+function startReveal(overlay){
+  if(preloaderReleased||REDUCED||!(overlay instanceof HTMLElement))return;
+  setIntroPhase(overlay,'ready');
+  clear(overlay,'opacity');
+  overlay.classList.add('fx-preloader-reveal-r635');
+  ROOT.dataset.fxPreloaderRevealR635=`inside-window-${Math.round(performance.now()-PRELOADER_BOOT_AT)}`;
+}
+function finalizePreloader(source){
+  if(preloaderReleased)return false;
   preloaderReleased=true;
+  cancelPreloaderTimers();
+  cancelDeadline();
+  const elapsed=performance.now()-PRELOADER_BOOT_AT;
   const overlay=document.getElementById(OVERLAY_ID);
-  if(overlay instanceof HTMLElement){overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);}
-  ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531='late-boot-skip';ROOT.dataset.fxPreloaderLateSkipR533='true';
-  document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source:'late-boot-skip'}}));return null;
+  if(overlay instanceof HTMLElement){
+    overlay.hidden=true;
+    overlay.setAttribute('aria-hidden','true');
+    overlay.dataset.fxPreloaderR531='done';
+    overlay.classList.remove('fx-preloader-reveal-r635');
+    for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);
+  }
+  ROOT.dataset.fxPreloaderR531='done';
+  ROOT.dataset.fxPreloaderReleaseR531=source;
+  ROOT.dataset.fxPreloaderReleaseElapsedR635=String(Math.round(elapsed));
+  ROOT.dataset.fxPreloaderFinalizerR635='single-dispatch-complete';
+  document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source,elapsed}}));
+  return true;
+}
+function requestPreloaderRelease(source){
+  if(preloaderReleased)return false;
+  const elapsed=performance.now()-PRELOADER_BOOT_AT;
+  if(REDUCED){
+    if(preloaderReady()||elapsed>=PRELOADER_MAX_MS)return finalizePreloader(source);
+    if(preloaderTimer)clearTimeout(preloaderTimer);
+    preloaderTimer=setTimeout(()=>requestPreloaderRelease(source),Math.min(40,Math.max(0,PRELOADER_MAX_MS-elapsed)));
+    return false;
+  }
+  if(elapsed<PRELOADER_MIN_MS){
+    if(preloaderTimer)clearTimeout(preloaderTimer);
+    preloaderTimer=setTimeout(()=>requestPreloaderRelease(source),Math.max(0,PRELOADER_MIN_MS-elapsed));
+    return false;
+  }
+  return finalizePreloader(source);
+}
+function skipLatePreloader(){
+  ROOT.dataset.fxPreloaderLateSkipR533='true';
+  finalizePreloader('late-boot-skip');
+  return null;
 }
 function showPreloader(){
   const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement))return null;
   ensureP0FxStyle();
   preloaderReleased=false;overlay.hidden=false;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='active';ROOT.dataset.fxPreloaderR531='active';
+  overlay.classList.remove('fx-preloader-reveal-r635');
   force(overlay,'display','grid');force(overlay,'visibility','visible');force(overlay,'opacity','1');force(overlay,'pointer-events','none');
-  const center=overlay.querySelector('.fx-intro-center'),word=overlay.querySelector('.fx-intro-word'),wordSpan=overlay.querySelector('.fx-intro-word span'),kicker=overlay.querySelector('.fx-intro-kicker'),subtitle=overlay.querySelector('.fx-intro-subtitle'),meta=overlay.querySelector('.fx-intro-meta'),progressWrap=overlay.querySelector('.fx-intro-progress-wrap'),output=overlay.querySelector('[data-fx-intro-output]'),progress=overlay.querySelector('[data-fx-intro-progress]'),status=overlay.querySelector('[data-fx-intro-status]');
+  const center=overlay.querySelector('.fx-intro-center'),word=overlay.querySelector('.fx-intro-word'),wordSpan=overlay.querySelector('.fx-intro-word span'),kicker=overlay.querySelector('.fx-intro-kicker'),subtitle=overlay.querySelector('.fx-intro-subtitle'),meta=overlay.querySelector('.fx-intro-meta'),progressWrap=overlay.querySelector('.fx-intro-progress-wrap');
   force(center,'width','min(520px, calc(100vw - 40px))');force(word,'font-size','clamp(32px,5vw,56px)');force(word,'line-height','1');force(word,'letter-spacing','.08em');force(wordSpan,'opacity','1');force(wordSpan,'transform','none');force(wordSpan,'filter','none');force(kicker,'opacity','1');force(kicker,'transform','none');force(kicker,'letter-spacing','.24em');force(subtitle,'opacity','1');force(subtitle,'transform','none');force(subtitle,'font-size','10px');force(meta,'opacity',MOBILE?'0':'.5');force(meta,'transform','none');force(progressWrap,'opacity','1');force(progressWrap,'transform','none');force(progressWrap,'max-width','560px');force(progressWrap,'margin','0 auto');
-  if(output instanceof HTMLOutputElement)output.value='LIVE';if(progress instanceof HTMLProgressElement){progress.removeAttribute('value');progress.setAttribute('aria-label',ROOT.lang==='en'?'Living core starting':'Élő MAG indítása');}if(status instanceof HTMLElement)status.textContent=ROOT.lang==='en'?'LIVING CORE STARTING':'ÉLŐ MAG INDÍTÁSA';
+  setIntroPhase(overlay,'wake');
   ROOT.dataset.fxPreloaderLegacyEffectsR575='suppressed-quality-layer-external-pseudo-motion';
   return overlay;
 }
-function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-crystal-organism-r326-stage,.hero-space')||document.querySelector('.fx-mag-heart-hit-r252');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}
-function hidePreloader(source,direct=false){
-  if(preloaderReleased)return;
-  preloaderReleased=true;
-  if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;
-  cancelDeadline();
-  const overlay=document.getElementById(OVERLAY_ID);
-  if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));return;}
-  let finalized=false;
-  const finalize=()=>{
-    if(finalized)return;finalized=true;
-    if(preloaderFadeTimer)clearTimeout(preloaderFadeTimer);preloaderFadeTimer=0;
-    overlay.hidden=true;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source}}));
-  };
-  const releaseElapsed=performance.now()-PRELOADER_BOOT_AT;
-  if(direct){ROOT.dataset.fxPreloaderCompositorReleaseR606=`direct-${Math.round(releaseElapsed)}`;finalize();return;}
-  if(releaseElapsed>=PRELOADER_MAX_MS){ROOT.dataset.fxPreloaderOverdueFinalizeR562=`direct-${Math.round(releaseElapsed)}`;finalize();return;}
-  if(REDUCED){finalize();return;}
-  let finish=null;
-  try{finish=overlay.animate([{opacity:1},{opacity:0}],{duration:PRELOADER_FADE_MS,easing:'ease-out',fill:'forwards'});}catch(_){finalize();return;}
-  preloaderFadeTimer=setTimeout(finalize,PRELOADER_FADE_MS+40);
-  finish.finished.then(finalize,finalize);
-}
+function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-crystal-organism-r326-stage,.hero-space')||document.querySelector('.fx-mag-heart-hit-r252');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autost-navigation-owned'||ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}
 function runPreloader(overlay){
   if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='unavailable';return;}
   const elapsed=()=>performance.now()-PRELOADER_BOOT_AT;
-  if(!REDUCED){
-    overlay.addEventListener('animationend',event=>{
-      if(event.target!==overlay||event.animationName!=='fx-r533-preloader-visual-bound')return;
-      const nowElapsed=elapsed();
-      if(nowElapsed<PRELOADER_MIN_MS){preloaderTimer=setTimeout(()=>hidePreloader('compositor-bound',true),Math.max(0,PRELOADER_MIN_MS-nowElapsed));return;}
-      hidePreloader('compositor-bound',true);
-    },{once:true});
+  const scheduleAt=(target,callback)=>setTimeout(callback,Math.max(0,target-elapsed()));
+  const absoluteDeadline=()=>finalizePreloader('absolute-deadline');
+  armDeadline(absoluteDeadline,Math.max(0,PRELOADER_MAX_MS-elapsed()));
+  if(REDUCED){
+    preloaderTimer=scheduleAt(PRELOADER_MIN_MS,()=>requestPreloaderRelease('reduced-semantic-ready'));
+    return;
   }
-  const checkReady=()=>{
-    if(preloaderReleased)return;
-    const nowElapsed=elapsed();
-    if(nowElapsed<PRELOADER_MIN_MS){preloaderTimer=setTimeout(checkReady,Math.max(0,PRELOADER_MIN_MS-nowElapsed));return;}
-    if(preloaderReady()){hidePreloader('mag-shell-ready');return;}
-    if(nowElapsed>=PRELOADER_HIDE_BY_MS){hidePreloader('bounded-timeout');return;}
-    preloaderTimer=setTimeout(checkReady,Math.min(PRELOADER_TICK_MS,Math.max(0,PRELOADER_HIDE_BY_MS-nowElapsed)));
-  };
-  const nowElapsed=elapsed();
-  armDeadline(()=>hidePreloader('bounded-timeout'),Math.max(0,PRELOADER_HIDE_BY_MS-nowElapsed));
-  preloaderTimer=setTimeout(checkReady,Math.max(0,PRELOADER_MIN_MS-nowElapsed));
+  preloaderPhaseTimerA=scheduleAt(PRELOADER_VISUAL_MS*.30,()=>setIntroPhase(overlay,'sync'));
+  preloaderPhaseTimerB=scheduleAt(PRELOADER_VISUAL_MS*.75,()=>setIntroPhase(overlay,'ready'));
+  preloaderRevealTimer=scheduleAt(PRELOADER_REVEAL_AT_MS,()=>startReveal(overlay));
+  overlay.addEventListener('animationend',event=>{
+    if(event.target!==overlay||event.animationName!=='fx-r533-preloader-visual-bound')return;
+    ROOT.dataset.fxPreloaderVisualEndR635=String(Math.round(elapsed()));
+    requestPreloaderRelease('visual-complete');
+  },{once:true});
 }
 function markIntroComplete(source){ROOT.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');ROOT.classList.add('fx-intro-complete');ROOT.dataset.fxIntro=source;complete(source);}
 const preloader=PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?skipLatePreloader():showPreloader();
 if(preloader)runPreloader(preloader);
-stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-direct-r606-compositor-deadline':'desktop-direct-r606-compositor-deadline';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r606-living-core':'instant-r606-living-core');
+stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-r635-three-phase-absolute-deadline':'desktop-r635-three-phase-absolute-deadline';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r635-living-core':'instant-r635-living-core');
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
-addEventListener('pagehide',()=>{cancelDeadline();try{audio?.pause();}catch(_){}},{once:true});
-addEventListener('error',()=>hidePreloader('runtime-error'));
-addEventListener('unhandledrejection',()=>hidePreloader('promise-error'));
+addEventListener('pagehide',()=>{cancelPreloaderTimers();cancelDeadline();try{audio?.pause();}catch(_){}},{once:true});
+addEventListener('error',()=>requestPreloaderRelease('runtime-error'));
+addEventListener('unhandledrejection',()=>requestPreloaderRelease('promise-error'));
 }());
