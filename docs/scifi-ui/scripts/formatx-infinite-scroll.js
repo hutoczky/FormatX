@@ -38,7 +38,8 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r634-discovered-desktop-lazy-geometry-before-runtime';
+  root.dataset.fxScrollBootstrapRevision = 'r649-trusted-desktop-scroll-intent';
+  root.dataset.fxScrollIntentPolicyR649 = 'trusted-scroll-wheel-touch-keyboard-only';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
   root.dataset.fxDesktopLoopLifecycleR621 = 'organism-settle-recheck-through-canonical-scroll-owner';
@@ -335,7 +336,13 @@
       root.dataset.fxScrollIntentR534 = source;
       installSeamlessRuntime(platform);
     };
-    const resolve = event => activate(event.type || 'scroll');
+    const resolve = event => {
+      if (event.type === 'scroll' && !event.isTrusted) {
+        root.dataset.fxScrollProgrammaticIgnoredR649 = 'true';
+        return;
+      }
+      activate(event.type || 'scroll');
+    };
     const pointerResolve = event => { if (event.pointerType === 'touch') activate('pointer-touch'); };
     const keyResolve = event => {
       if (['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' '].includes(event.key)) activate('keyboard-scroll');
