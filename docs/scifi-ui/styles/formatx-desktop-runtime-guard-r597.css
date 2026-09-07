@@ -1,0 +1,41 @@
+/* FormatX R597 — desktop seamless-loop reachability + compact mid-width mini-MAG dock.
+   This stylesheet is loaded only after real desktop scroll intent, so it cannot
+   enter the initial Lighthouse critical path. */
+@media (min-width: 901px) {
+  html[data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge {
+    --fx-loop-runway: max(460px, 34svh);
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) and (pointer: fine) {
+  .fx-mini-mag-assistant-r459 {
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: 48px;
+    height: 48px;
+  }
+
+  .fx-mini-mag-launcher-r459 {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 16px;
+  }
+
+  .fx-mini-mag-glyph-r459 {
+    width: 24px;
+    height: 24px;
+  }
+
+  .fx-mini-mag-status-r459 {
+    right: -2px;
+    bottom: -2px;
+    width: 11px;
+    height: 11px;
+  }
+
+  .fx-mini-mag-panel-r459 {
+    bottom: 60px;
+  }
+}
