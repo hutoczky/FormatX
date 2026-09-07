@@ -18,33 +18,16 @@ jobs:
         with:
           ref: fix/r533-p0-intro-lcp
           fetch-depth: 0
-      - name: Patch P0 owners
-        shell: bash
+      - name: Apply source fixes
+        env:
+          PATCH_B64: ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCmltcG9ydCByZQpwPVBhdGgoImRvY3Mvc2NpZmktdWkvc2NyaXB0cy9mb3JtYXR4LW1hZy1jb250ZXh0LXBvbGljeS1yNTYxLmpzIikKcz1wLnJlYWRfdGV4dChlbmNvZGluZz0idXRmLTgiKQpwYWlycz1bCigiY29uc3QgV09SS0VSX0lOSVRfQVRfTVM9bW9iaWxlPzIyMDA6NjIwOyIsImNvbnN0IFdPUktFUl9JTklUX0FUX01TPW1vYmlsZT8yMjAwOjIwNTA7IiksCigiY29uc3QgREVTS1RPUF9JTklUX0ZBTExCQUNLX01TPTE3NTA7IiwiY29uc3QgREVTS1RPUF9JTklUX0ZBTExCQUNLX01TPTI2MDA7IiksCigicGFpbnQtY2hlY2twb2ludC1mbG9vci02MjAtbm8taW50cm8tZ2F0ZSIsIm5hdmlnYXRpb24tY2hlY2twb2ludC0yMDUwLW5vLWludHJvLWdhdGUiKSwKKCJvYnNlcnZlZC1maXJzdC1wYWludC1vci0xNzUwLWZhbGxiYWNrIiwib2JzZXJ2ZWQtZmlyc3QtcGFpbnQtb3ItMjYwMC1mYWxsYmFjayIpLAooImF3YWl0LWZpcnN0LXBhaW50LW9wcG9ydHVuaXR5LWZsb29yLTYyMCIsImF3YWl0LWZpcnN0LXBhaW50LW9wcG9ydHVuaXR5LWZsb29yLTIwNTAiKSwKKCJhd2FpdC1vYnNlcnZlZC1maXJzdC1wYWludC1vci0xNzUwIiwiYXdhaXQtb2JzZXJ2ZWQtZmlyc3QtcGFpbnQtb3ItMjYwMCIpLAooImluaXQtYXJtZWQtZmxvb3ItNjIwIiwiaW5pdC1hcm1lZC1mbG9vci0yMDUwIiksCigidHJhbnNwb3J0LWFybWVkLWZsb29yLTYyMCIsInRyYW5zcG9ydC1hcm1lZC1mbG9vci0yMDUwIiksCigicGFpbnQtb2JzZXJ2ZXItdW5hdmFpbGFibGUtZmFsbGJhY2stMTc1MCIsInBhaW50LW9ic2VydmVyLXVuYXZhaWxhYmxlLWZhbGxiYWNrLTI2MDAiKSwKKCJkZXNrdG9wLXBhaW50LWFwaS11bmF2YWlsYWJsZS1mYWxsYmFjay0xNzUwIiwiZGVza3RvcC1wYWludC1hcGktdW5hdmFpbGFibGUtZmFsbGJhY2stMjYwMCIpLAooInBhaW50LWFwaS11bmF2YWlsYWJsZS1mYWxsYmFjay0xNzUwIiwicGFpbnQtYXBpLXVuYXZhaWxhYmxlLWZhbGxiYWNrLTI2MDAiKSwKXQpmb3IgYSxiIGluIHBhaXJzOgogICAgcz1zLnJlcGxhY2UoYSxiKQpzPXMucmVwbGFjZSgiRm9ybWF0WCBSNTk4IOKAlCBwYWludC1zYWZlIE9mZnNjcmVlbkNhbnZhcyBNQUcgdHJhbnNwb3J0IG93bmVyLiIsIkZvcm1hdFggUjY0MCDigJQgZGVhZGxpbmUtc2FmZSBPZmZzY3JlZW5DYW52YXMgTUFHIHRyYW5zcG9ydCBvd25lci4iLDEpCmlmICJjb25zdCBXT1JLRVJfSU5JVF9BVF9NUz1tb2JpbGU/MjIwMDoyMDUwOyIgbm90IGluIHMgb3IgImNvbnN0IERFU0tUT1BfSU5JVF9GQUxMQkFDS19NUz0yNjAwOyIgbm90IGluIHM6CiAgICByYWlzZSBTeXN0ZW1FeGl0KCJjb250ZXh0IHBhdGNoIGZhaWxlZCIpCnAud3JpdGVfdGV4dChzLGVuY29kaW5nPSJ1dGYtOCIpCgpwPVBhdGgoImJpbGxpbmctd29ya2VyL3NyYy9wcm9kdWN0aW9uLWNvbnRlbnQtZW50cnkuanMiKQpzPXAucmVhZF90ZXh0KGVuY29kaW5nPSJ1dGYtOCIpCnBhdGhzPVsKIi9zY2lmaS11aS9zdHlsZXMvZm9ybWF0eC1jcml0aWNhbC1jb3JlLXIyMjcuY3NzIiwKIi9zY2lmaS11aS9zdHlsZXMvZm9ybWF0eC1jb250aW51b3VzLXNjcm9sbC5jc3MiLAoiL3NjaWZpLXVpL3N0eWxlcy9mb3JtYXR4LXNlYW1sZXNzLWxvb3AuY3NzIiwKIi9zY2lmaS11aS9zdHlsZXMvcGxhdGZvcm0tc3RhdHVzLmNzcyIsCiIvc2NpZmktdWkvc3R5bGVzL2Zvcm1hdHgtY29weS1wb2xpc2guY3NzIiwKIi9zY2lmaS11aS9zdHlsZXMvZm9ybWF0eC1mZWVkYmFjay5jc3MiLAoiL3NjaWZpLXVpL3N0eWxlcy9zaW5nbGUtbGFuZ3VhZ2UtdG9nZ2xlLmNzcyIsCiIvc2NpZmktdWkvc3R5bGVzL2Zvcm1hdHgtY29udGVudC1zdGFuZGFyZC5jc3MiLApdCmJsb2NrPSJjb25zdCBERUZFUlJFRF9TVFlMRV9QQVRIUyA9IG5ldyBTZXQoW1xuIisiIi5qb2luKCIgICciK3grIicsXG4iIGZvciB4IGluIHBhdGhzKSsiXSk7IgpzLG49cmUuc3VibihyImNvbnN0IERFRkVSUkVEX1NUWUxFX1BBVEhTID0gbmV3IFNldFwoXFsuKj9cblxdXCk7IixibG9jayxzLGNvdW50PTEsZmxhZ3M9cmUuUykKaWYgbiE9MToKICAgIHJhaXNlIFN5c3RlbUV4aXQoImRlZmVycmVkIHNldCBwYXRjaCBmYWlsZWQiKQpzPXMucmVwbGFjZSgiY29uc3QgU1RBUlRVUF9SRVZJU0lPTiA9ICcyMDI2MDkwNy1yNjM5LXNlY29uZGFyeS1jc3MtbmV0d29yay1hZnRlci1maXJzdC1wYWludCc7IiwiY29uc3QgU1RBUlRVUF9SRVZJU0lPTiA9ICcyMDI2MDkwNy1yNjQwLWNyaXRpY2FsLWNzcy1uZXR3b3JrLWFmdGVyLWZpcnN0LXBhaW50JzsiLDEpCnAud3JpdGVfdGV4dChzLGVuY29kaW5nPSJ1dGYtOCIpCg==
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p=Path('docs/scifi-ui/scripts/formatx-mag-context-policy-r561.js')
-          s=p.read_text(encoding='utf-8')
-          pairs=[('const WORKER_INIT_AT_MS=mobile?2200:620;','const WORKER_INIT_AT_MS=mobile?2200:2050;'),('const DESKTOP_INIT_FALLBACK_MS=1750;','const DESKTOP_INIT_FALLBACK_MS=2600;'),('paint-checkpoint-floor-620-no-intro-gate','navigation-checkpoint-2050-no-intro-gate'),('observed-first-paint-or-1750-fallback','observed-first-paint-or-2600-fallback'),('await-first-paint-opportunity-floor-620','await-first-paint-opportunity-floor-2050'),('await-observed-first-paint-or-1750','await-observed-first-paint-or-2600'),('init-armed-floor-620','init-armed-floor-2050'),('transport-armed-floor-620','transport-armed-floor-2050'),('paint-observer-unavailable-fallback-1750','paint-observer-unavailable-fallback-2600'),('desktop-paint-api-unavailable-fallback-1750','desktop-paint-api-unavailable-fallback-2600'),('paint-api-unavailable-fallback-1750','paint-api-unavailable-fallback-2600')]
-          for a,b in pairs:s=s.replace(a,b)
-          s=s.replace('FormatX R598 — paint-safe OffscreenCanvas MAG transport owner.','FormatX R640 — deadline-safe OffscreenCanvas MAG transport owner.',1)
-          if 'const WORKER_INIT_AT_MS=mobile?2200:2050;' not in s or 'const DESKTOP_INIT_FALLBACK_MS=2600;' not in s:raise SystemExit('context patch failed')
-          p.write_text(s,encoding='utf-8')
-          p=Path('billing-worker/src/production-content-entry.js')
-          s=p.read_text(encoding='utf-8')
-          paths=['/scifi-ui/styles/formatx-critical-core-r227.css','/scifi-ui/styles/formatx-continuous-scroll.css','/scifi-ui/styles/formatx-seamless-loop.css','/scifi-ui/styles/platform-status.css','/scifi-ui/styles/formatx-copy-polish.css','/scifi-ui/styles/formatx-feedback.css','/scifi-ui/styles/single-language-toggle.css','/scifi-ui/styles/formatx-content-standard.css']
-          block='const DEFERRED_STYLE_PATHS = new Set([\n'+''.join("  '"+x+"',\n" for x in paths)+']);'
-          s,n=re.subn(r'const DEFERRED_STYLE_PATHS = new Set\(\[.*?\n\]\);',block,s,count=1,flags=re.S)
-          if n!=1:raise SystemExit('deferred set patch failed')
-          s=s.replace("const STARTUP_REVISION = '20260907-r639-secondary-css-network-after-first-paint';","const STARTUP_REVISION = '20260907-r640-critical-css-network-after-first-paint';",1)
-          p.write_text(s,encoding='utf-8')
-          PY
+          printf '%s' "$PATCH_B64" | base64 -d > /tmp/r640.py
+          python3 /tmp/r640.py
           node --check docs/scifi-ui/scripts/formatx-mag-context-policy-r561.js
           node --check billing-worker/src/production-content-entry.js
           git diff --check
       - name: Commit source fixes
-        shell: bash
         run: |
           git config user.name "Games Tech"
           git config user.email "hutoczky@users.noreply.github.com"
