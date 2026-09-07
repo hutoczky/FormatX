@@ -1,11 +1,13 @@
+import canonicalProduction from './production-content-entry.js';
 import r529Production from './production-content-entry-r529.js';
 
 /* FormatX R637 — first-frame network ownership.
-   The canonical R529 production path remains authoritative. This thin production
-   layer only prevents secondary stylesheet requests from competing with the
-   semantic hero/intro first frame. Secondary CSS keeps its original cascade slot
-   and media contract, but its href is restored autonomously immediately after the
-   first committed contentful paint by r637. No audit, UA or user-intent branch. */
+   Unsafe/non-page methods preserve direct canonical ownership. Safe public reads
+   retain the proven R529 production wrapper, then this thin final layer prevents
+   secondary stylesheet requests from competing with the semantic hero/intro first
+   frame. Secondary CSS keeps its original cascade slot and media contract, but its
+   href is restored autonomously immediately after the first committed contentful
+   paint by r637. No audit, UA or user-intent branch. */
 
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const DEFERRED_SCHEDULER_RE = /(?:\.\/|\/scifi-ui\/scripts\/)?formatx-deferred-css-r487\.js\?v=[^"']+/g;
@@ -65,8 +67,10 @@ function deferSecondaryStylesheetNetwork(html) {
 
 export default {
   async fetch(request, env, ctx) {
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      return canonicalProduction.fetch(request, env, ctx);
+    }
     const response = await r529Production.fetch(request, env, ctx);
-    if (request.method !== 'GET' && request.method !== 'HEAD') return response;
     const url = new URL(request.url);
     const type = response.headers.get('Content-Type') || '';
     if (!HOMEPAGE_PATHS.has(url.pathname) || !type.includes('text/html') || request.method === 'HEAD') return response;
