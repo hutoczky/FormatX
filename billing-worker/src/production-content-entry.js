@@ -7,7 +7,7 @@ import productionBase from './production-content-entry-r369-base.js';
    slow runs. It now uses the existing R487 double-rAF post-first-paint scheduler;
    MAG clock, PAUSE/RESUME, ASK and renderer ownership remain unchanged. */
 
-const STARTUP_REVISION = '20260907-r639-secondary-css-network-after-first-paint';
+const STARTUP_REVISION = '20260907-r640-critical-css-network-after-first-paint';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -48,26 +48,13 @@ const ROBOTS = [
 
 const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/formatx-critical-core-r227.css',
-  '/scifi-ui/styles/formatx-core-real3d-v20.css',
-  '/scifi-ui/styles/formatx-critical-reduced-r228.css',
-  '/scifi-ui/styles/formatx-critical-signature-r227.css',
-  '/scifi-ui/styles/formatx-critical-narrative-r227.css',
-  '/scifi-ui/styles/formatx-soty-continuity-r179.css',
-  '/scifi-ui/styles/formatx-reference-production-r244.css',
-  '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
-  '/scifi-ui/styles/formatx-mobile-apex-composition.css',
-  '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/platform-status.css',
   '/scifi-ui/styles/formatx-copy-polish.css',
-  '/scifi-ui/styles/formatx-content-standard.css',
   '/scifi-ui/styles/formatx-feedback.css',
-  '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
-  '/scifi-ui/styles/formatx-flow-first-r74.css',
-  '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
-  '/scifi-ui/styles/formatx-mobile-proof-controls-r204.css',
-  '/scifi-ui/styles/formatx-mobile-layout-r207.css',
+  '/scifi-ui/styles/single-language-toggle.css',
+  '/scifi-ui/styles/formatx-content-standard.css',
 ]);
 
 const R502_ASSET_REWRITES = new Map([
