@@ -1,19 +1,20 @@
-/* FormatX R622 — bounded intro clock with prepaint-safe visual cover.
+/* FormatX R624 — bounded intro clock with prepaint-safe visual cover.
    The exact 1360/1640ms product clock remains on the canonical overlay so the
    normal-motion contract stays directly measurable. Its keyframes intentionally
    carry no visual property: the viewport cover therefore does not force a large
    compositor transform. The dark cover is intentionally near-opaque rather than
    fully opaque so the browser must retain and prepaint the canonical semantic hero
-   underneath instead of culling it until intro release. Premium motion stays on one
-   restrained energy band over a static cyan/violet grid. No user/audit/intro gate. */
+   underneath instead of culling it until intro release. Premium motion is a single
+   opacity-only energy pulse over a static cyan/violet grid; no continuously moved
+   full-width composited layer remains. No user/audit/intro gate. */
 @keyframes fx-r533-preloader-visual-bound {
   from {}
   to {}
 }
 
 @keyframes fx-r611-preloader-energy-band {
-  0%, 100% { transform: translate3d(0,-5px,0); opacity: .12; }
-  50% { transform: translate3d(0,5px,0); opacity: .18; }
+  0%, 100% { opacity: .11; }
+  50% { opacity: .19; }
 }
 
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
@@ -51,8 +52,8 @@
   opacity: .15;
   background: linear-gradient(180deg,transparent,rgba(124,236,255,.11),rgba(143,114,255,.04),transparent);
   mix-blend-mode: normal;
-  transform: translate3d(0,0,0);
-  will-change: transform,opacity;
+  transform: none;
+  will-change: opacity;
   animation: fx-r611-preloader-energy-band 900ms ease-in-out infinite;
 }
 
