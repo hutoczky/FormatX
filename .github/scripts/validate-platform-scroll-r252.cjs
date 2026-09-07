@@ -128,10 +128,15 @@ async function verifyHeartInteraction(page, label, touch = false) {
 }
 
 async function closeHeartInteractionUi(page, label) {
-  for (const selector of ['.fx-organism-thought-close', '.fx-organism-console-close']) {
-    const close = page.locator(selector).first();
-    if (await close.isVisible().catch(() => false)) await close.click();
-  }
+  await page.evaluate(() => {
+    try { window.FormatXOrganismVoice?.close?.(); } catch (_) {}
+    if (document.body.classList.contains('fx-organism-panel-open')) {
+      document.querySelector('.fx-organism-console-close')?.click();
+    }
+    if (document.documentElement.classList.contains('fx-organism-menu-open')) {
+      document.querySelector('.fx-reference-menu-button')?.click();
+    }
+  });
   await page.waitForFunction(() => {
     const root = document.documentElement;
     const bubble = document.querySelector('.fx-organism-thought');
