@@ -1,9 +1,11 @@
-/* FormatX R611 — bounded intro clock without a full-viewport transform owner.
+/* FormatX R622 — bounded intro clock with prepaint-safe visual cover.
    The exact 1360/1640ms product clock remains on the canonical overlay so the
    normal-motion contract stays directly measurable. Its keyframes intentionally
    carry no visual property: the viewport cover therefore does not force a large
-   compositor layer or GPU transform. Premium motion stays on one restrained
-   energy band over a static cyan/violet grid. No user/audit/intro gate. */
+   compositor transform. The dark cover is intentionally near-opaque rather than
+   fully opaque so the browser must retain and prepaint the canonical semantic hero
+   underneath instead of culling it until intro release. Premium motion stays on one
+   restrained energy band over a static cyan/violet grid. No user/audit/intro gate. */
 @keyframes fx-r533-preloader-visual-bound {
   from {}
   to {}
@@ -17,7 +19,7 @@
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   isolation: auto !important;
   contain: layout paint style !important;
-  background: linear-gradient(145deg,#01040b 0%,#030817 58%,#070519 100%) !important;
+  background: linear-gradient(145deg,rgba(1,4,11,.985) 0%,rgba(3,8,23,.985) 58%,rgba(7,5,25,.985) 100%) !important;
   transform: none !important;
   will-change: auto !important;
 }
