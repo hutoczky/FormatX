@@ -560,7 +560,13 @@
     }
     if (!geometry.ready) return null;
     const bounded = Math.max(0, Math.min(relative, Math.max(0, geometry.sourceHeight - 2)));
-    return geometry.sourceTop + bounded;
+    const stableSourceTop = !isMobileFlow() && desktopStableGeometry?.ready
+      ? desktopStableGeometry.sourceTop
+      : geometry.sourceTop;
+    root.dataset.fxDesktopLoopLandingOriginR644 = !isMobileFlow() && desktopStableGeometry?.ready
+      ? `stable-${Math.round(stableSourceTop)}`
+      : `live-${Math.round(stableSourceTop)}`;
+    return stableSourceTop + bounded;
   }
 
   function landAt(relative) {
@@ -586,9 +592,26 @@
 
   function performTransfer(relative, source) {
     if (relative == null || Date.now() < transferLockedUntil) return false;
-    if (document.body.classList.contains('fx-organism-panel-open')) return false;
-    if (root.dataset.fxOrganismThought === 'open') return false;
-    if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return false;
+    if (document.body.classList.contains('fx-organism-panel-open')) {
+      root.dataset.fxDesktopLoopBlockedR644 = 'organism-panel-open';
+      return false;
+    }
+    if (root.dataset.fxOrganismThought === 'open') {
+      root.dataset.fxDesktopLoopBlockedR644 = 'organism-thought-open';
+      return false;
+    }
+    if (root.classList.contains('fx-organism-menu-open')) {
+      root.dataset.fxDesktopLoopBlockedR644 = 'organism-menu-open';
+      return false;
+    }
+    const introOverlay = document.getElementById('formatx-event-horizon');
+    if (introOverlay instanceof HTMLElement
+      && !introOverlay.hidden
+      && introOverlay.dataset.fxPreloaderR531 === 'active') {
+      root.dataset.fxDesktopLoopBlockedR644 = 'canonical-intro-overlay-active';
+      return false;
+    }
+    root.dataset.fxDesktopLoopBlockedR644 = 'none';
 
     transferLockedUntil = Date.now() + LOOP_GUARD_MS;
     pendingMobileRelative = null;
@@ -634,15 +657,40 @@
     if (isMobileFlow() || Date.now() < transferLockedUntil) return;
     const captured = pendingDesktopRelative;
     refreshGeometry();
-    const relative = captured == null ? bridgeRelative() : captured;
+    let relative = captured == null ? bridgeRelative() : captured;
+    let collapsedStableBoundary = false;
+
+    if (relative == null && captured == null && desktopStableGeometry?.ready && loopGeometry.ready) {
+      const stable = desktopStableGeometry;
+      const live = loopGeometry;
+      const stableThresholdUnreachable = live.documentEnd + 2 < stable.bridgeThreshold;
+      const liveBoundaryCrossed = scrollY >= live.bridgeThreshold && scrollY <= live.documentEnd + 2;
+      if (stableThresholdUnreachable && liveBoundaryCrossed) {
+        relative = Math.max(0, Math.min(
+          scrollY - live.bridgeTop,
+          Math.max(0, live.sourceHeight - 2)
+        ));
+        collapsedStableBoundary = true;
+        root.dataset.fxDesktopLoopBoundaryR644 =
+          `collapsed-live-${Math.round(live.bridgeTop)}-${Math.round(scrollY)}-stable-${Math.round(stable.bridgeTop)}`;
+      }
+    }
+
     if (relative == null) {
       pendingDesktopRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
       return;
     }
     pendingDesktopRelative = relative;
-    root.dataset.fxDesktopLoopBoundaryR607 = captured == null ? 'settled-idle-recomputed' : 'last-idle-crossing-preserved-r618';
-    performTransfer(relative, captured == null ? 'visual-bridge-desktop-idle' : 'visual-bridge-desktop-stable-crossing');
+    root.dataset.fxDesktopLoopBoundaryR607 = collapsedStableBoundary
+      ? 'collapsed-live-boundary-stable-origin-r644'
+      : (captured == null ? 'settled-idle-recomputed' : 'last-idle-crossing-preserved-r618');
+    performTransfer(
+      relative,
+      collapsedStableBoundary
+        ? 'visual-bridge-desktop-collapsed-live-boundary-r644'
+        : (captured == null ? 'visual-bridge-desktop-idle' : 'visual-bridge-desktop-stable-crossing')
+    );
   }
 
   function transferIfNeeded() {
@@ -771,7 +819,7 @@
       mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
-      desktopTransfer: 'last-idle-crossing-or-settled-idle-r618',
+      desktopTransfer: 'stable-origin-collapse-safe-active-ui-guard-r644',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
     });
