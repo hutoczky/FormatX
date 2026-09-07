@@ -32,6 +32,7 @@
   let repairTimer = 0;
   let geometryFrame = 0;
   let geometryObserver = null;
+  let desktopStateObserver = null;
   let bootTimer = 0;
   let layoutWidth = innerWidth;
   let initialHeroGuardApplied = false;
@@ -454,6 +455,26 @@
     return true;
   }
 
+  function settleDesktopStableGeometry(source) {
+    if (!initialised || isMobileFlow() || !desktopGeometryCanStabilize()) return false;
+    return rememberDesktopStableGeometry(source);
+  }
+
+  function observeDesktopStableState() {
+    desktopStateObserver?.disconnect();
+    desktopStateObserver = null;
+    if (!('MutationObserver' in window)) return;
+    desktopStateObserver = new MutationObserver(records => {
+      if (!records.some(record => record.attributeName === 'data-fx-organism-thought')) return;
+      settleDesktopStableGeometry('organism-thought-settled-r647');
+    });
+    desktopStateObserver.observe(root, {
+      attributes: true,
+      attributeFilter: ['data-fx-organism-thought']
+    });
+    root.dataset.fxDesktopLoopStableStateR647 = 'observing-organism-ui-close';
+  }
+
   function scheduleGeometryRefresh() {
     if (geometryFrame) return;
     geometryFrame = requestAnimationFrame(() => {
@@ -797,6 +818,7 @@
       return;
     }
     initialised = true;
+    observeDesktopStableState();
     root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
       version: VERSION,
       automaticLoop: true,
@@ -808,7 +830,7 @@
       mirrorCapture: 'async-to-blob-r609',
       organismLifecycleBridgeRepair: 'geometry-only-r609',
       desktopCrossingIntent: 'last-idle-real-bridge-boundary-r618',
-      desktopStableSnapshot: 'transient-organism-geometry-ignored-r623',
+      desktopStableSnapshot: 'organism-ui-close-refresh-r647',
       reinitialisedRenderer: false,
       frameStableLanding: true,
       jumpFree: true,
@@ -843,7 +865,16 @@
   addEventListener('pageshow', () => { if (initialised) scheduleRepair(true); }, { passive: true });
   addEventListener('formatx:organisminterfaceready', () => { if (initialised) scheduleRepair(false); });
   addEventListener('formatx:organismpanelopen', onPanelOpen);
-  addEventListener('formatx:organismpanelclose', () => { if (initialised) scheduleRepair(false); });
+  addEventListener('formatx:organismpanelclose', () => {
+    if (!initialised) return;
+    scheduleRepair(false);
+    queueMicrotask(() => settleDesktopStableGeometry('organism-panel-close-r647'));
+  });
+  addEventListener('formatx:menustatechange', event => {
+    if (initialised && event.detail?.open === false) {
+      queueMicrotask(() => settleDesktopStableGeometry('organism-menu-close-r647'));
+    }
+  });
   addEventListener('formatx:languagechange', () => {
     if (!initialised) return;
     setBilingualText(bridge);
@@ -876,5 +907,6 @@
     mirrorCapturePending = false;
     releaseMirrorObjectUrl();
     geometryObserver?.disconnect();
+    desktopStateObserver?.disconnect();
   }, { once: true });
 }());
