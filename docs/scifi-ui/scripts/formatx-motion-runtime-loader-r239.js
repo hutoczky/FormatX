@@ -1,8 +1,10 @@
-/* FormatX r550 compatibility · R619 navigation-owned MAG + SOUND control + independent intent enhancements.
+/* FormatX r550 compatibility · R620 navigation-owned MAG + SOUND control + independent intent enhancements.
    MAG and the lightweight SOUND control owner are automatic from navigation. The
-   normal OffscreenCanvas path warms only assets it actually consumes before paint;
-   the main-thread R326 renderer remains an automatic fallback, but is not preloaded
-   speculatively on the normal worker path. No user, intro, audit or headless gate. */
+   normal path now requests each owner directly instead of issuing a parallel
+   high-priority speculative preload burst for the same assets. This removes the
+   stale duplicate current-MAG stylesheet warm-up, unused solid-glass warm-up and
+   renderer-ready-only LIFE warm-up while preserving automatic fallback behavior.
+   No user, intro, audit or headless gate. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -20,6 +22,7 @@ root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
 root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
 root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
 root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
+root.dataset.fxMagWarmPathR620='direct-owner-requests-no-speculative-preload-burst';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -65,17 +68,7 @@ function warmAsset(href,as){
 function warmCriticalOwners(){
   if(root.dataset.fxCurrentMagWarmR461==='ready')return;
   root.dataset.fxCurrentMagWarmR461='ready';
-  warmAsset(LANGUAGE_TOGGLE,'script');
-  warmAsset(CURRENT_MAG,'script');
-  warmAsset(SOUND_CONTROL,'script');
-  warmAsset(CURRENT_SOLID_GLASS,'script');
-  warmAsset(CURRENT_STYLE,'style');
-  warmAsset(CURRENT_OPTICS,'style');
-  warmAsset(CURRENT_LIFE_STYLE,'style');
-  warmAsset(CURRENT_LIFE,'script');
-  warmAsset(FINAL_HEADER,'style');
-  warmAsset(DIALOGUE_STYLE,'style');
-  warmAsset(MAG_SHAPE_SYNC,'script');
+  root.dataset.fxCurrentMagWarmR620='direct-owner-requests';
 }
 function ensureDialogueSurface(){
   let link=document.querySelector('link[data-fx-dialogue-surface-r475]');
