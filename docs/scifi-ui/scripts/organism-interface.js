@@ -81,7 +81,7 @@
     const summary = create('span', 'fx-organism-chapter-summary');
     summary.dataset.hu = spec.summaryHu;
     summary.dataset.en = spec.summaryEn;
-    summary.textContent = language() === 'en' ? spec.summaryEn : spec.hu;
+    summary.textContent = language() === 'en' ? spec.summaryEn : spec.summaryHu;
     const action = create('span', 'fx-organism-chapter-action');
     action.dataset.hu = 'Rendszerpanel megnyitása';
     action.dataset.en = 'Open system panel';
