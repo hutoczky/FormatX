@@ -1,10 +1,11 @@
-/* FormatX R590 — all-device OffscreenCanvas MAG startup owner.
+/* FormatX R591 — all-device OffscreenCanvas MAG startup owner.
    Compatibility owner name remains R561 because the navigation MAG loader already
    loads this policy URL. The canonical stage, canvas and worker are created during
    normal navigation on mobile and desktop. Mobile keeps the proven 2200ms init.
    Desktop keeps navigation-owned zero-input startup but the expensive WebGL init
-   is posted only after a real paint opportunity, with a 620ms floor and a bounded
-   no-paint fallback. No Lighthouse, CI, audit, intro-complete or user-input gate. */
+   is posted only after an observed first-paint entry, with a 620ms floor and a
+   bounded 1750ms no-paint fallback. No Lighthouse, CI, audit, intro-complete or
+   user-input gate; the MAG still starts automatically beneath the premium intro. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -65,7 +66,7 @@ function surfacePulse(source='api'){
 function schedulePulse(){clearTimeout(pulseTimer);if(destroyed||reduced.matches||document.hidden||!visible)return;pulseTimer=setTimeout(()=>{surfacePulse('autonomous');schedulePulse();},4200);}
 function publishReady(count){
   if(ready||destroyed)return;ready=true;clearTimeout(readyTimer);cancelPaintSchedule();
-  root.dataset.fxMagOffscreenR564='ready-worker-webgl1';root.dataset.fxMagOffscreenR571=`ready-${profile}-worker-webgl1`;root.dataset.fxMagContextR561='offscreen-worker-webgl1-antialias-off';root.dataset.fxMagContextPolicyR561=`released-${profile}-offscreen-worker`;root.dataset.fxMagDesktopDecontentionR578=mobile?'mobile-existing-2200':'desktop-first-paint-checkpoint-650k';root.dataset.fxMagDesktopDecontentionR590=mobile?'mobile-existing-2200':'paint-checkpoint-floor-620-no-intro-gate';
+  root.dataset.fxMagOffscreenR564='ready-worker-webgl1';root.dataset.fxMagOffscreenR571=`ready-${profile}-worker-webgl1`;root.dataset.fxMagContextR561='offscreen-worker-webgl1-antialias-off';root.dataset.fxMagContextPolicyR561=`released-${profile}-offscreen-worker`;root.dataset.fxMagDesktopDecontentionR578=mobile?'mobile-existing-2200':'desktop-first-paint-checkpoint-650k';root.dataset.fxMagDesktopDecontentionR590=mobile?'mobile-existing-2200':'paint-checkpoint-floor-620-no-intro-gate';root.dataset.fxMagDesktopDecontentionR591=mobile?'mobile-existing-2200':'observed-first-paint-or-1750-fallback';
   root.dataset.fxCrystalOrganismR326='ready';root.dataset.fxLivingOrganicCoreR413='ready';root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';root.dataset.fxCoreMobileR99='ready-v69';root.dataset.fxCoreMobileV69='ready-v69';root.dataset.fxCoreMobileV55='ready-v55';root.dataset.fxCoreReferenceLock='ready-v69';root.dataset.fxCoreReal3d='ready-v69';root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';root.dataset.fxCoreMaterial='translucent-living-facet-organism-r326';root.dataset.fxCoreGeometry='four-direction-asymmetric-crystal-organism-r326';root.dataset.fxCoreRendererVersion=`living-luminous-electric-crystal-r571-${profile}-offscreen-worker`;root.dataset.fxCoreGeometryTopology='12x24-closed-uv-surface';root.dataset.fxCoreVertexCount=String(count||0);root.dataset.fxCoreDimension='native-closed-3d-volume-r413';root.dataset.fxCoreContexts='1';root.dataset.fxCoreCompositionR285='pure-webgl3d-no-2d-overlays';root.dataset.fxCoreSurfaceMotionR454='intermittent-native-electric-filament-every-five-to-six-seconds';root.dataset.fxCoreSurfacePulseR454='idle';root.dataset.fxCoreScheduler='interaction-bursts-idle-zero-frame-r441';root.dataset.fxCoreIdleRenderR441='zero-frame';root.dataset.fxCoreLifecycleR536='automatic-zero-idle-visible-pulse';root.dataset.fxGpuCapability='webgl1-offscreen';
   const api={version:'crystal-organism-r326',revision:'r571-offscreen',renderer:'single-webgl-crystal-organism-r326',material:'translucent-living-facet-organism-r326',geometry:'four-direction-asymmetric-crystal-organism-r326',scheduler:'interaction-bursts-idle-zero-frame-r441',pulse,surfacePulse,surfacePulseDurationMs:1160,setMorph:(v,s)=>setMorph(v,s||'api-morph',true),setShape:(v,s)=>setShape(v,s||'api-set'),toggleShape:s=>toggleShape(s||'api-toggle'),rotateBy:(x,y)=>{rotationY+=Number(y)||Number(x)||0;postState();},requestRender:postState,destroy,canvas,stage,get energy(){return energy;},get openness(){return .08+breath*.025;},get morph(){return morph;},get shape(){return shape;},get rotation(){return[0,rotationY,0];},get vertexCount(){return Number(count)||0;}};
   window.FormatXCoreMobileV69=api;window.FormatXLivingCore=api;postState();schedulePulse();
@@ -80,23 +81,22 @@ try{
   const initial=size();if(!initial){stage.remove();root.dataset.fxMagContextPolicyR561='geometry-unavailable-main-r326';return;}
   canvas.width=initial.width;canvas.height=initial.height;
   worker=new Worker(WORKER);const offscreen=canvas.transferControlToOffscreen();
-  root.dataset.fxCrystalOrganismR326='booting';root.dataset.fxCoreReal3d='booting';root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';root.dataset.fxCurrentMagRequestR530=`navigation-owned-r571-${profile}-offscreen-started`;root.dataset.fxMagOffscreenR564='worker-started-under-intro';root.dataset.fxMagOffscreenR571=`worker-created-${profile}-init-scheduled`;root.dataset.fxMagWorkerInitAtR565=String(WORKER_INIT_AT_MS);root.dataset.fxMagDesktopDecontentionR578=mobile?'mobile-existing-2200':'desktop-paint-checkpoint-scheduled';root.dataset.fxMagDesktopDecontentionR590=mobile?'mobile-existing-2200':'await-first-paint-opportunity-floor-620';
+  root.dataset.fxCrystalOrganismR326='booting';root.dataset.fxCoreReal3d='booting';root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';root.dataset.fxCurrentMagRequestR530=`navigation-owned-r571-${profile}-offscreen-started`;root.dataset.fxMagOffscreenR564='worker-started-under-intro';root.dataset.fxMagOffscreenR571=`worker-created-${profile}-init-scheduled`;root.dataset.fxMagWorkerInitAtR565=String(WORKER_INIT_AT_MS);root.dataset.fxMagDesktopDecontentionR578=mobile?'mobile-existing-2200':'desktop-paint-checkpoint-scheduled';root.dataset.fxMagDesktopDecontentionR590=mobile?'mobile-existing-2200':'await-first-paint-opportunity-floor-620';root.dataset.fxMagDesktopDecontentionR591=mobile?'mobile-existing-2200':'await-observed-first-paint-or-1750';
   worker.onmessage=event=>{const detail=event.data||{};if(detail.type==='ready'){publishReady(detail.count);return;}if(detail.type==='error')fallback('worker-error');};worker.onerror=()=>fallback('worker-event-error');
-  const beginInit=()=>{if(destroyed||fallbackStarted||!worker||initPosted)return;const start=size()||initial;initPosted=true;root.dataset.fxMagOffscreenR571=`worker-init-started-${profile}`;root.dataset.fxMagDesktopDecontentionR590=mobile?'mobile-init-2200':'desktop-init-after-paint-checkpoint';worker.postMessage({type:'init',canvas:offscreen,width:start.width,height:start.height},[offscreen]);readyTimer=setTimeout(()=>{if(!ready)fallback('ready-timeout');},5500);};
+  const beginInit=()=>{if(destroyed||fallbackStarted||!worker||initPosted)return;const start=size()||initial;initPosted=true;root.dataset.fxMagOffscreenR571=`worker-init-started-${profile}`;root.dataset.fxMagDesktopDecontentionR590=mobile?'mobile-init-2200':'desktop-init-after-paint-checkpoint';root.dataset.fxMagDesktopDecontentionR591=mobile?'mobile-init-2200':'desktop-init-after-observed-paint';worker.postMessage({type:'init',canvas:offscreen,width:start.width,height:start.height},[offscreen]);readyTimer=setTimeout(()=>{if(!ready)fallback('ready-timeout');},5500);};
   if(mobile){
     const initDelay=Math.max(0,WORKER_INIT_AT_MS-performance.now());
     initTimer=setTimeout(beginInit,initDelay);
   }else{
     let paintArmed=false;
-    const armAfterPaint=()=>{if(paintArmed||destroyed||fallbackStarted)return;paintArmed=true;cancelPaintSchedule();const floorDelay=Math.max(0,WORKER_INIT_AT_MS-performance.now());initTimer=setTimeout(beginInit,floorDelay);root.dataset.fxMagDesktopDecontentionR590='paint-observed-init-armed-floor-620';};
+    const armAfterPaint=(source)=>{if(paintArmed||destroyed||fallbackStarted)return;paintArmed=true;cancelPaintSchedule();const floorDelay=Math.max(0,WORKER_INIT_AT_MS-performance.now());initTimer=setTimeout(beginInit,floorDelay);root.dataset.fxMagDesktopDecontentionR591=`${source}-init-armed-floor-620`;};
     const alreadyPainted=performance.getEntriesByType('paint').some(entry=>entry.name==='first-paint');
-    if(alreadyPainted){armAfterPaint();}
+    if(alreadyPainted){armAfterPaint('buffered-first-paint');}
     else{
       if(typeof PerformanceObserver==='function'){
-        try{paintObserver=new PerformanceObserver(list=>{if(list.getEntries().some(entry=>entry.name==='first-paint'))armAfterPaint();});paintObserver.observe({type:'paint',buffered:true});}catch(_){}
+        try{paintObserver=new PerformanceObserver(list=>{if(list.getEntries().some(entry=>entry.name==='first-paint'))armAfterPaint('observed-first-paint');});paintObserver.observe({type:'paint',buffered:true});}catch(_){}
       }
-      if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(()=>armAfterPaint()));
-      paintFallbackTimer=setTimeout(armAfterPaint,DESKTOP_INIT_FALLBACK_MS);
+      paintFallbackTimer=setTimeout(()=>armAfterPaint('no-paint-fallback-1750'),DESKTOP_INIT_FALLBACK_MS);
     }
   }
   ro=new ResizeObserver(()=>{const next=size();if(next&&worker&&initPosted)worker.postMessage({type:'resize',width:next.width,height:next.height});});ro.observe(stage);
