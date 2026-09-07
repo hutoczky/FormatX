@@ -2,9 +2,10 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'heart-core-r551';
+  const VERSION = 'heart-core-r603';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r569-trusted-route-stable';
+  const MOBILE_LIFECYCLE_STYLE = '/scifi-ui/styles/formatx-mobile-lifecycle-r603.css?v=20260907-r603-loop-sheet-geometry';
   const LOOP_OVERSHOOT = 28;
   const HEART_HIT_Z = '2147482500';
   let touchActive = false;
@@ -20,13 +21,21 @@
   }
 
   function ensureStyle() {
-    const existing = document.querySelector('link[data-fx-heart-core-r252]');
-    if (existing instanceof HTMLLinkElement) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = STYLE;
-    link.dataset.fxHeartCoreR252 = 'true';
-    document.head.appendChild(link);
+    let existing = document.querySelector('link[data-fx-heart-core-r252]');
+    if (!(existing instanceof HTMLLinkElement)) {
+      existing = document.createElement('link');
+      existing.rel = 'stylesheet';
+      existing.href = STYLE;
+      existing.dataset.fxHeartCoreR252 = 'true';
+      document.head.appendChild(existing);
+    }
+    if (!document.querySelector('link[data-fx-mobile-lifecycle-r603]')) {
+      const lifecycle = document.createElement('link');
+      lifecycle.rel = 'stylesheet';
+      lifecycle.href = MOBILE_LIFECYCLE_STYLE;
+      lifecycle.dataset.fxMobileLifecycleR603 = 'true';
+      document.head.appendChild(lifecycle);
+    }
   }
 
   function ensureStyleAfterFirstPaint() {
@@ -249,15 +258,21 @@
   function mobileLoopBoundary() {
     if (!MOBILE_QUERY.matches) return null;
     pruneMobileReferenceMirror();
-    const footer = document.querySelector('body > .site-footer');
-    const bridge = document.querySelector('.fx-loop-bridge');
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge], .fx-loop-bridge');
     const hero = document.querySelector('#main-content > #hero');
-    if (!(footer instanceof HTMLElement) || !(bridge instanceof HTMLElement) || !(hero instanceof HTMLElement)) return null;
+    if (!(bridge instanceof HTMLElement) || !(hero instanceof HTMLElement)) return null;
 
     bridge.dataset.fxHeartLoopR252 = 'true';
-    const bridgeTop = bridge.offsetTop;
+    const bridgeRect = bridge.getBoundingClientRect();
+    const bridgeTop = scrollY + bridgeRect.top;
     const viewportBottom = scrollY + innerHeight;
-    return { bridge, hero, bridgeTop, overshoot: viewportBottom - bridgeTop };
+    const scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    const documentEnd = Math.max(0, scrollHeight - innerHeight);
+    const atDocumentEnd = scrollY >= documentEnd - 2;
+    const measuredOvershoot = viewportBottom - bridgeTop;
+    const overshoot = atDocumentEnd ? Math.max(LOOP_OVERSHOOT, measuredOvershoot) : measuredOvershoot;
+    root.dataset.fxHeartLoopBoundaryR603 = atDocumentEnd ? 'document-end-canonical-bridge' : 'bridge-overshoot';
+    return { bridge, hero, bridgeTop, overshoot, documentEnd, atDocumentEnd };
   }
 
   function transferToRealCore(source) {
