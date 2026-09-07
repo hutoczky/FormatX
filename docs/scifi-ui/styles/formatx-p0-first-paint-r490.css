@@ -1,6 +1,8 @@
-/* FormatX R552 — deterministic first-paint safety from measured final geometry.
-   Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
-   This blocking P0 layer contains no retired manual MAG PAUSE state. */
+/* FormatX R589 — deterministic first-paint safety from measured final geometry.
+   Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css,
+   with the current mobile nested-controls geometry locked here before any deferred
+   runtime can create a 110px legacy reservation shift. This blocking P0 layer
+   contains no retired manual MAG PAUSE state. */
 
 /* Keep the readable LCP surface paintable. */
 html body.living-architecture #hero .hero-copy,
@@ -75,6 +77,42 @@ html body.living-architecture #hero .hero-copy > :is(
     overflow: visible !important;
     white-space: normal !important;
     contain: layout style !important;
+  }
+}
+
+/* R589: controls are nested inside .hero-space in the current product. The
+   older r283 reservation expected a direct hero-grid child and therefore kept a
+   110px bottom margin until a later stylesheet overrode it. Lock the exact
+   settled R576 geometry in the blocking layer so .hero-copy never jumps. */
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-space {
+    height: clamp(350px, 97.6vw, 470px) !important;
+    min-height: clamp(350px, 97.6vw, 470px) !important;
+    max-height: 470px !important;
+    margin: 0 auto !important;
+  }
+  html:root:root body.living-architecture #hero > .hero-grid:not(:has(> .fx-reference-controls-r204)) > .hero-space {
+    margin-bottom: 0 !important;
+  }
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: calc(100% - 24px) !important;
+    max-width: 680px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto 26px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
   }
 }
 
@@ -200,3 +238,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r501-p0-first-paint-desktop-copy-box */
 /* production-r503-p0-first-paint-hero-ancestor-box */
 /* production-r552-no-manual-pause-blocking-css */
+/* production-r589-mobile-nested-controls-hero-lock */
