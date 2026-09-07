@@ -660,7 +660,7 @@
     let relative = captured == null ? bridgeRelative() : captured;
     let collapsedStableBoundary = false;
 
-    if (relative == null && captured == null && desktopStableGeometry?.ready && loopGeometry.ready) {
+    if (desktopStableGeometry?.ready && loopGeometry.ready) {
       const stable = desktopStableGeometry;
       const live = loopGeometry;
       const stableThresholdUnreachable = live.documentEnd + 2 < stable.bridgeThreshold;
@@ -671,8 +671,8 @@
           Math.max(0, live.sourceHeight - 2)
         ));
         collapsedStableBoundary = true;
-        root.dataset.fxDesktopLoopBoundaryR644 =
-          `collapsed-live-${Math.round(live.bridgeTop)}-${Math.round(scrollY)}-stable-${Math.round(stable.bridgeTop)}`;
+        root.dataset.fxDesktopLoopBoundaryR646 =
+          `live-overrode-${captured == null ? 'none' : 'stale'}-${Math.round(live.bridgeTop)}-${Math.round(scrollY)}-stable-${Math.round(stable.bridgeTop)}`;
       }
     }
 
@@ -819,7 +819,7 @@
       mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
-      desktopTransfer: 'stable-origin-collapse-safe-active-ui-guard-r644',
+      desktopTransfer: 'stable-origin-live-overrides-stale-capture-r646',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
     });
