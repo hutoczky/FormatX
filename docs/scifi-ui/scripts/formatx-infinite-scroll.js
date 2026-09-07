@@ -30,6 +30,7 @@
     '#main-content > section.scene:not(#hero) > .system-grid',
     '#main-content > section.scene:not(#hero) > .release-layout'
   ].join(',');
+  const DESKTOP_GEOMETRY_ROOT_SELECTOR = '#main-content,.site-footer';
   let mobileGeometryTimer = 0;
   let desktopGeometryTimer = 0;
   let intentArmed = false;
@@ -37,7 +38,7 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r631-desktop-document-realised-before-runtime';
+  root.dataset.fxScrollBootstrapRevision = 'r634-discovered-desktop-lazy-geometry-before-runtime';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
   root.dataset.fxDesktopLoopLifecycleR621 = 'organism-settle-recheck-through-canonical-scroll-owner';
@@ -87,17 +88,62 @@
     });
   }
 
-  function realiseDesktopDocumentGeometry() {
+  function collectDesktopGeometryOwners() {
+    const owners = new Set(document.querySelectorAll(DESKTOP_GEOMETRY_SELECTOR));
+    let inspected = 0;
+    let discovered = 0;
+    for (const scope of document.querySelectorAll(DESKTOP_GEOMETRY_ROOT_SELECTOR)) {
+      if (!(scope instanceof HTMLElement)) continue;
+      const candidates = [scope, ...scope.querySelectorAll('*')];
+      for (const node of candidates) {
+        if (!(node instanceof HTMLElement)) continue;
+        inspected += 1;
+        let visibility = '';
+        try {
+          const style = getComputedStyle(node);
+          visibility = String(style.contentVisibility || style.getPropertyValue('content-visibility') || '').trim();
+        } catch (_) {}
+        if (visibility !== 'auto') continue;
+        if (!owners.has(node)) discovered += 1;
+        owners.add(node);
+      }
+    }
+    root.dataset.fxDesktopLazyGeometryInspectedR634 = String(inspected);
+    root.dataset.fxDesktopLazyGeometryDiscoveredR634 = String(discovered);
+    return owners;
+  }
+
+  function realiseDesktopDocumentGeometry(source) {
     if (MOBILE_QUERY.matches) return 0;
     let count = 0;
-    for (const node of document.querySelectorAll(DESKTOP_GEOMETRY_SELECTOR)) {
+    for (const node of collectDesktopGeometryOwners()) {
       if (!(node instanceof HTMLElement)) continue;
       node.style.setProperty('content-visibility', 'visible', 'important');
       node.style.setProperty('contain-intrinsic-size', 'none', 'important');
       count += 1;
     }
+    const height = document.documentElement.scrollHeight;
     root.dataset.fxDesktopDocumentGeometryR631 = `realised-${count}`;
+    root.dataset.fxDesktopDocumentGeometryR634 = `${String(source || 'runtime')}:${count}:${height}`;
     return count;
+  }
+
+  function realiseDesktopOrganismTriggerGeometry() {
+    if (MOBILE_QUERY.matches) return 0;
+    const scenes = new Set();
+    for (const trigger of document.querySelectorAll('[data-organism-open]')) {
+      const scene = trigger.closest('#main-content > section.scene:not(#hero)');
+      if (scene instanceof HTMLElement) scenes.add(scene);
+    }
+    for (const scene of scenes) {
+      scene.style.setProperty('content-visibility', 'visible', 'important');
+      scene.style.setProperty('contain-intrinsic-size', 'none', 'important');
+    }
+    if (scenes.size) {
+      const height = document.documentElement.scrollHeight;
+      root.dataset.fxDesktopOrganismTriggerGeometryR634 = `realised-${scenes.size}:${height}`;
+    }
+    return scenes.size;
   }
 
   function ensureHeartCoreRuntime() {
@@ -221,11 +267,16 @@
       return;
     }
 
-    root.dataset.fxDesktopLoopLayoutR613 = 'realising-document-before-final-layout-style-r631';
-    realiseDesktopDocumentGeometry();
+    root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r634';
+    realiseDesktopDocumentGeometry('pre-guard-r634');
     ensureDesktopRuntimeGuardStyle().then(() => {
-      installDesktopGeometryResync();
-      mountSeamlessRuntime(platform);
+      realiseDesktopDocumentGeometry('post-guard-r634');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        realiseDesktopDocumentGeometry('pre-runtime-r634');
+        root.dataset.fxDesktopLoopLayoutR613 = 'final-document-realised-before-runtime-r634';
+        installDesktopGeometryResync();
+        mountSeamlessRuntime(platform);
+      }));
     });
   }
 
@@ -274,5 +325,7 @@
   }
 
   ensureHeartCoreRuntime();
+  addEventListener('formatx:organisminterfaceready', realiseDesktopOrganismTriggerGeometry, { passive: true });
+  if (root.classList.contains('fx-organism-interface-ready') || root.dataset.fxOrganismInterface === 'ready') queueMicrotask(realiseDesktopOrganismTriggerGeometry);
   armSeamlessRuntime(MOBILE_QUERY.matches ? 'mobile' : 'desktop');
 }());
