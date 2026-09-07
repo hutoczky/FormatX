@@ -16,9 +16,10 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r613-desktop-final-layout-before-seamless-runtime';
+  root.dataset.fxScrollBootstrapRevision = 'r621-desktop-lifecycle-boundary-resync';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
+  root.dataset.fxDesktopLoopLifecycleR621 = 'organism-settle-recheck-through-canonical-scroll-owner';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
@@ -101,23 +102,32 @@
     }
   }
 
-  function requestDesktopGeometryRefresh() {
+  function requestDesktopGeometryRefresh(recheckBoundary, source) {
     if (MOBILE_QUERY.matches) return;
     clearTimeout(desktopGeometryTimer);
     desktopGeometryTimer = window.setTimeout(() => {
       desktopGeometryTimer = 0;
       if (root.dataset.fxInfiniteController !== 'seamless-v7') return;
-      requestLoopGeometryRefresh('desktop-idle-r316');
-      root.dataset.fxDesktopLoopGeometry = 'idle-refresh-requested-r316';
+      requestLoopGeometryRefresh(source || 'desktop-idle-r621');
+      root.dataset.fxDesktopLoopGeometry = recheckBoundary
+        ? 'lifecycle-boundary-recheck-requested-r621'
+        : 'idle-refresh-requested-r621';
+      if (recheckBoundary) {
+        dispatchEvent(new Event('scroll'));
+        root.dataset.fxDesktopLoopGeometry = 'lifecycle-boundary-rechecked-r621';
+      }
     }, 90);
   }
 
   function installDesktopGeometryResync() {
-    if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'isolated-r316') return;
-    root.dataset.fxDesktopLoopGeometryResync = 'isolated-r316';
-    addEventListener('scroll', requestDesktopGeometryRefresh, { passive: true });
-    for (const eventName of ['formatx:controlownerready','formatx:languagechange','pageshow']) {
-      addEventListener(eventName, requestDesktopGeometryRefresh, { passive: true });
+    if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'isolated-r621') return;
+    root.dataset.fxDesktopLoopGeometryResync = 'isolated-r621';
+    addEventListener('scroll', event => {
+      if (!event.isTrusted) return;
+      requestDesktopGeometryRefresh(false, 'desktop-scroll-idle-r621');
+    }, { passive: true });
+    for (const eventName of ['formatx:controlownerready','formatx:languagechange','pageshow','formatx:organisminterfaceready','formatx:organismpanelopen','formatx:organismpanelclose']) {
+      addEventListener(eventName, () => requestDesktopGeometryRefresh(true, `${eventName}-settled-r621`), { passive: true });
     }
   }
 
@@ -138,7 +148,7 @@
         requestMobileGeometryRefresh(false);
       } else {
         root.dataset.fxDesktopLoopLayoutR613 = 'runtime-mounted-after-final-layout-style';
-        requestDesktopGeometryRefresh();
+        requestDesktopGeometryRefresh(true, 'desktop-runtime-mounted-r621');
       }
     }, { once: true });
     script.addEventListener('error', () => {
