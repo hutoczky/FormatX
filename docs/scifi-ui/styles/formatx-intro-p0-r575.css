@@ -1,19 +1,25 @@
-/* FormatX R602 — bounded cold-start intro raster budget.
-   R601 proved that moving-layer count alone was not sufficient on a fresh
-   SwiftShader desktop profile: WebGL was still uninitialised and no long
-   main-thread task owned the 2.6s first-paint stall. Keep the premium
-   cyan/violet grid + energy band and the exact 1360/1640ms compositor contract,
-   but collapse the active overlay to a bounded raster surface: one base gradient,
-   two grid gradients and one restrained energy band. No user/audit/intro gate. */
+/* FormatX R611 — bounded intro clock without a full-viewport transform owner.
+   The exact 1360/1640ms product clock remains on the canonical overlay so the
+   normal-motion contract stays directly measurable. Its keyframes intentionally
+   carry no visual property: the viewport cover therefore does not force a large
+   compositor layer or GPU transform. Premium motion stays on one restrained
+   energy band over a static cyan/violet grid. No user/audit/intro gate. */
 @keyframes fx-r533-preloader-visual-bound {
-  0%, 96% { transform: translate3d(0,0,0); }
-  100% { transform: translate3d(0,-110vh,0); }
+  from {}
+  to {}
+}
+
+@keyframes fx-r611-preloader-energy-band {
+  0%, 100% { transform: translate3d(0,-5px,0); opacity: .12; }
+  50% { transform: translate3d(0,5px,0); opacity: .18; }
 }
 
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   isolation: auto !important;
   contain: layout paint style !important;
   background: linear-gradient(145deg,#01040b 0%,#030817 58%,#070519 100%) !important;
+  transform: none !important;
+  will-change: auto !important;
 }
 
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
@@ -43,9 +49,9 @@
   opacity: .15;
   background: linear-gradient(180deg,transparent,rgba(124,236,255,.11),rgba(143,114,255,.04),transparent);
   mix-blend-mode: normal;
-  transform: none;
-  will-change: auto;
-  animation: none;
+  transform: translate3d(0,0,0);
+  will-change: transform,opacity;
+  animation: fx-r611-preloader-energy-band 900ms ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
