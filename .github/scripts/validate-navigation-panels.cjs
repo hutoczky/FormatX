@@ -153,7 +153,7 @@ async function closePanelAndAssertCore(page) {
   await page.waitForTimeout(250);
 }
 
-async function assertStableOrdinaryScroll(page) {
+async function assertStableOrdinaryScroll(page, expectedMirrors) {
   const before = await page.evaluate(() => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     return {
@@ -180,14 +180,14 @@ async function assertStableOrdinaryScroll(page) {
   }));
   if (Math.abs(after.y - target) > 6) throw new Error(`Ordinary page position changed away from the loop boundary: ${JSON.stringify({ target, after })}`);
   if (after.loopCount !== before.loopCount) throw new Error(`Loop counter changed away from the visual bridge: ${JSON.stringify({ before, after })}`);
-  if (after.bridges !== 1 || after.mirrors !== 1 || after.mirrorFocusable !== 0 || after.transfer) throw new Error(`Seamless inert bridge state invalid during normal navigation: ${JSON.stringify(after)}`);
+  if (after.bridges !== 1 || after.mirrors !== expectedMirrors || after.mirrorFocusable !== 0 || after.transfer) throw new Error(`Seamless inert bridge state invalid during normal navigation: ${JSON.stringify({ expectedMirrors, ...after })}`);
   if (after.automatic !== 'enabled' || after.jumpGuard !== 'visual-match-v4' || after.runtime?.automaticLoop !== true || after.runtime?.mobileNativeMomentumPreserved !== true) {
     throw new Error(`Seamless-v7 navigation contract missing: ${JSON.stringify(after)}`);
   }
   if (after.rootSnap !== 'none') throw new Error(`Section snap returned during normal navigation: ${JSON.stringify(after)}`);
 }
 
-async function assertTwoLoopCycles(page, name) {
+async function assertTwoLoopCycles(page, name, expectedMirrors) {
   await page.evaluate(() => {
     document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
     document.body.style.setProperty('scroll-behavior', 'auto', 'important');
@@ -231,8 +231,8 @@ async function assertTwoLoopCycles(page, name) {
       || Math.abs(after.y - before.expectedLanding) > 8
       || Math.abs(after.landing - before.expectedLanding) > 8
       || after.bridges !== 1
-      || after.mirrors !== 1) {
-      throw new Error(`${name}: loop cycle ${cycle} failed: ${JSON.stringify({ before, after })}`);
+      || after.mirrors !== expectedMirrors) {
+      throw new Error(`${name}: loop cycle ${cycle} failed: ${JSON.stringify({ expectedMirrors, before, after })}`);
     }
     await page.waitForTimeout(500);
   }
@@ -274,8 +274,8 @@ async function testDesktop(browser) {
   await assertPanel(page, 'system', 4);
   await closePanelAndAssertCore(page);
 
-  await assertStableOrdinaryScroll(page);
-  await assertTwoLoopCycles(page, 'desktop');
+  await assertStableOrdinaryScroll(page, 1);
+  await assertTwoLoopCycles(page, 'desktop', 1);
   await page.close();
 }
 
@@ -294,8 +294,8 @@ async function testMobile(browser) {
   await assertPanel(page, 'experience', 1);
   await closePanelAndAssertCore(page);
 
-  await assertStableOrdinaryScroll(page);
-  await assertTwoLoopCycles(page, 'mobile');
+  await assertStableOrdinaryScroll(page, 0);
+  await assertTwoLoopCycles(page, 'mobile', 0);
   await page.close();
 }
 
