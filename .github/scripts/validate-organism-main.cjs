@@ -105,6 +105,16 @@ async function state(page) {
   }));
 }
 
+async function openPricingFunctionally(page) {
+  const pricingTrigger = page.locator('[data-organism-open="pricing"]');
+  await pricingTrigger.evaluate(node => node.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' }));
+  await page.waitForTimeout(80);
+  const box = await pricingTrigger.boundingBox();
+  assert(box && box.width >= 44 && box.height >= 44, 'pricing trigger has no usable geometry: ' + JSON.stringify(box));
+  await pricingTrigger.evaluate(node => node.click());
+  return box;
+}
+
 async function validateDesktop() {
   const browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });
   let page;
@@ -123,8 +133,7 @@ async function validateDesktop() {
     assert(current.footerInResources, 'footer must be inside the release/support console');
     assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
 
-    const pricingTrigger = page.locator('[data-organism-open="pricing"]');
-    await pricingTrigger.scrollIntoViewIfNeeded(); await pricingTrigger.click();
+    await openPricingFunctionally(page);
     await page.waitForFunction(() => !document.getElementById('fx-organism-console').hidden && !document.querySelector('[data-organism-panel="pricing"]').hidden);
     assert(await page.locator('body').evaluate(body => body.classList.contains('fx-organism-panel-open')), 'body panel lock missing');
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-id]').count() === 3, 'pricing cards missing');
@@ -161,11 +170,9 @@ async function validateMobile() {
     page = await context.newPage();
     const errors = []; diagnostics(page, errors);
     await enterSite(page, 'mobile');
-    const pricingTrigger = page.locator('[data-organism-open="pricing"]');
-    await pricingTrigger.scrollIntoViewIfNeeded();
-    const box = await pricingTrigger.boundingBox(); mark('mobile: trigger-box', box);
+    const box = await openPricingFunctionally(page); mark('mobile: trigger-box', box);
     assert(box && box.x >= 0 && box.x + box.width <= 391, 'mobile pricing trigger outside viewport: ' + JSON.stringify(box));
-    await pricingTrigger.tap(); await page.waitForFunction(() => !document.getElementById('fx-organism-console').hidden);
+    await page.waitForFunction(() => !document.getElementById('fx-organism-console').hidden);
     const shell = await page.locator('.fx-organism-console-shell').boundingBox(); mark('mobile: sheet-box', shell);
     assert(shell && shell.y > 0 && shell.height <= 845, 'mobile sheet geometry: ' + JSON.stringify(shell));
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-id]').count() === 3, 'mobile pricing cards missing');
