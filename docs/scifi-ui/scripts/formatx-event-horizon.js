@@ -1,10 +1,10 @@
-/* FormatX R635 — single-owner absolute-bounded premium intro release.
+/* FormatX R636 — single-owner absolute-bounded premium intro release.
    MAG startup remains navigation-owned behind the visual cover. Product timing
    remains mobile 1180–1450ms / desktop 1350–1650ms. The existing 1360/1640ms
    visual clock may request release, but exactly one idempotent finalizer owns the
-   actual completion event. A navigation-relative absolute deadline can never be
-   restarted by MAG/CSS/layout/animation readiness, and the final dissolve lives
-   inside the maximum product window rather than extending it. */
+   actual completion event. R636 also neutralises full-viewport transform promotion
+   synchronously before the optional visual stylesheet arrives, removing the narrow
+   quality-keyframe race without changing the measurable visual clock. */
 (function(){
 'use strict';
 
@@ -51,6 +51,7 @@ ROOT.dataset.fxPreloaderDeadlineR635='immutable-navigation-boot-min-floor-max-ce
 ROOT.dataset.fxPreloaderReleaseOwnerR635='single-idempotent-finalizer';
 ROOT.dataset.fxPreloaderPaintOwnerR575='external-css-pseudo-grid-scan-legacy-dom-suppressed';
 ROOT.dataset.fxPreloaderPaintOwnerR606='bounded-raster-single-compositor-deadline';
+ROOT.dataset.fxPreloaderPaintOwnerR636='sync-no-transform-before-visual-css';
 ROOT.dataset.fxPreloaderFinalizeR609='hide-first-no-subtree-animation-enumeration';
 ROOT.dataset.fxPreloaderVisualSequenceR635='system-wake-core-sync-ready-reveal';
 
@@ -134,7 +135,7 @@ function finalizePreloader(source){
     overlay.setAttribute('aria-hidden','true');
     overlay.dataset.fxPreloaderR531='done';
     overlay.classList.remove('fx-preloader-reveal-r635');
-    for(const property of ['display','visibility','opacity','pointer-events'])clear(overlay,property);
+    for(const property of ['display','visibility','opacity','pointer-events','transform','will-change','isolation','contain'])clear(overlay,property);
   }
   ROOT.dataset.fxPreloaderR531='done';
   ROOT.dataset.fxPreloaderReleaseR531=source;
@@ -169,14 +170,14 @@ function showPreloader(){
   ensureP0FxStyle();
   preloaderReleased=false;overlay.hidden=false;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='active';ROOT.dataset.fxPreloaderR531='active';
   overlay.classList.remove('fx-preloader-reveal-r635');
-  force(overlay,'display','grid');force(overlay,'visibility','visible');force(overlay,'opacity','1');force(overlay,'pointer-events','none');
+  force(overlay,'display','grid');force(overlay,'visibility','visible');force(overlay,'opacity','1');force(overlay,'pointer-events','none');force(overlay,'transform','none');force(overlay,'will-change','auto');force(overlay,'isolation','auto');force(overlay,'contain','layout paint style');
   const center=overlay.querySelector('.fx-intro-center'),word=overlay.querySelector('.fx-intro-word'),wordSpan=overlay.querySelector('.fx-intro-word span'),kicker=overlay.querySelector('.fx-intro-kicker'),subtitle=overlay.querySelector('.fx-intro-subtitle'),meta=overlay.querySelector('.fx-intro-meta'),progressWrap=overlay.querySelector('.fx-intro-progress-wrap');
   force(center,'width','min(520px, calc(100vw - 40px))');force(word,'font-size','clamp(32px,5vw,56px)');force(word,'line-height','1');force(word,'letter-spacing','.08em');force(wordSpan,'opacity','1');force(wordSpan,'transform','none');force(wordSpan,'filter','none');force(kicker,'opacity','1');force(kicker,'transform','none');force(kicker,'letter-spacing','.24em');force(subtitle,'opacity','1');force(subtitle,'transform','none');force(subtitle,'font-size','10px');force(meta,'opacity',MOBILE?'0':'.5');force(meta,'transform','none');force(progressWrap,'opacity','1');force(progressWrap,'transform','none');force(progressWrap,'max-width','560px');force(progressWrap,'margin','0 auto');
   setIntroPhase(overlay,'wake');
   ROOT.dataset.fxPreloaderLegacyEffectsR575='suppressed-quality-layer-external-pseudo-motion';
   return overlay;
 }
-function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-crystal-organism-r326-stage,.hero-space')||document.querySelector('.fx-mag-heart-hit-r252');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autost-navigation-owned'||ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}
+function preloaderReady(){const hero=document.getElementById('hero');const shell=hero?.querySelector('.fx-reference-mag-button,.fx-crystal-organism-r326-stage,.hero-space')||document.querySelector('.fx-mag-heart-hit-r252');const startup=ROOT.dataset.fxMagStartupContractR530==='living-core-autostart-navigation-owned'||String(ROOT.dataset.fxCurrentMagRequestR530||'').startsWith('navigation-owned')||ROOT.dataset.fxCrystalOrganismR326==='ready';return Boolean(hero&&shell&&startup);}
 function runPreloader(overlay){
   if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='unavailable';return;}
   const elapsed=()=>performance.now()-PRELOADER_BOOT_AT;
