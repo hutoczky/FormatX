@@ -61,6 +61,7 @@
   root.dataset.fxInitialHeroGuard = 'pending';
   root.dataset.fxLoopMirrorCaptureR609 = 'async-to-blob';
   root.dataset.fxLoopOrganismRepairR609 = 'geometry-only-no-bridge-rebuild';
+  root.dataset.fxDesktopLoopCrossingR617 = 'scroll-event-stable-boundary-capture';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -464,6 +465,7 @@
     bridge = null;
     mirror = null;
     mirrorImage = null;
+    pendingDesktopRelative = null;
     resetGeometry();
     root.dataset.fxLoopBridge = 'missing';
   }
@@ -486,8 +488,6 @@
     bridge.appendChild(mirror);
     footer.insertAdjacentElement('afterend', bridge);
 
-    // R592: stylesheet readiness is a prerequisite. Geometry is sampled only
-    // after the bridge's min-height/runway rules are in the render tree.
     refreshGeometry();
     observeGeometry();
     scheduleGeometryRefresh();
@@ -502,6 +502,16 @@
     const y = scrollY;
     if (y < geometry.bridgeThreshold || y > geometry.documentEnd + 2) return null;
     return Math.max(0, Math.min(y - geometry.bridgeTop, Math.max(0, geometry.sourceHeight - 2)));
+  }
+
+  function captureDesktopCrossingIntent() {
+    if (isMobileFlow() || !initialised || Date.now() < transferLockedUntil) return;
+    const geometry = loopGeometry;
+    if (!geometry.ready) return;
+    const y = scrollY;
+    if (y < geometry.bridgeThreshold || y > geometry.documentEnd + 2) return;
+    pendingDesktopRelative = Math.max(0, Math.min(y - geometry.bridgeTop, Math.max(0, geometry.sourceHeight - 2)));
+    root.dataset.fxDesktopLoopBoundaryR617 = `captured-${Math.round(geometry.bridgeTop)}-${Math.round(y)}`;
   }
 
   function markIdle() {
@@ -592,16 +602,17 @@
 
   function commitDesktopTransfer() {
     if (isMobileFlow() || Date.now() < transferLockedUntil) return;
+    const captured = pendingDesktopRelative;
     refreshGeometry();
-    const relative = bridgeRelative();
+    const relative = captured == null ? bridgeRelative() : captured;
     if (relative == null) {
       pendingDesktopRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
       return;
     }
     pendingDesktopRelative = relative;
-    root.dataset.fxDesktopLoopBoundaryR607 = 'settled-idle-recomputed';
-    performTransfer(relative, 'visual-bridge-desktop-idle');
+    root.dataset.fxDesktopLoopBoundaryR607 = captured == null ? 'settled-idle-recomputed' : 'scroll-event-crossing-preserved-r617';
+    performTransfer(relative, captured == null ? 'visual-bridge-desktop-idle' : 'visual-bridge-desktop-crossing-intent');
   }
 
   function transferIfNeeded() {
@@ -618,7 +629,7 @@
         pendingMobileRelative = null;
         clearTimeout(mobileSettleTimer);
         mobileSettleTimer = 0;
-      } else pendingDesktopRelative = null;
+      }
       return;
     }
 
@@ -636,7 +647,9 @@
   }
 
   function onScroll() {
-    if (scrollFrame || !initialised) return;
+    if (!initialised) return;
+    captureDesktopCrossingIntent();
+    if (scrollFrame) return;
     scrollFrame = requestAnimationFrame(transferIfNeeded);
   }
 
@@ -716,6 +729,7 @@
       mirrorContext: 'static-2d-snapshot-no-webgl',
       mirrorCapture: 'async-to-blob-r609',
       organismLifecycleBridgeRepair: 'geometry-only-r609',
+      desktopCrossingIntent: 'scroll-event-stable-boundary-r617',
       reinitialisedRenderer: false,
       frameStableLanding: true,
       jumpFree: true,
@@ -726,7 +740,7 @@
       mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
-      desktopTransfer: 'settled-idle-recomputed-r607',
+      desktopTransfer: 'captured-crossing-or-settled-idle-r617',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
     });
