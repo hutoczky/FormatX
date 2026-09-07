@@ -127,6 +127,27 @@ async function verifyHeartInteraction(page, label, touch = false) {
   assert(/organism-voice|ask-control|thought-trigger/.test(interaction.target), `${label} MAG has no canonical interaction target: ${JSON.stringify(interaction)}`);
 }
 
+async function closeHeartInteractionUi(page, label) {
+  for (const selector of ['.fx-organism-thought-close', '.fx-organism-console-close']) {
+    const close = page.locator(selector).first();
+    if (await close.isVisible().catch(() => false)) await close.click();
+  }
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const bubble = document.querySelector('.fx-organism-thought');
+    const thoughtClosed = !bubble || bubble.hidden || root.dataset.fxOrganismThought !== 'open';
+    return thoughtClosed
+      && !document.body.classList.contains('fx-organism-panel-open')
+      && !root.classList.contains('fx-organism-menu-open');
+  }, null, { timeout: 3000 });
+  const blockers = await page.evaluate(() => ({
+    thought: document.documentElement.dataset.fxOrganismThought || '',
+    panel: document.body.classList.contains('fx-organism-panel-open'),
+    menu: document.documentElement.classList.contains('fx-organism-menu-open')
+  }));
+  assert(blockers.thought !== 'open' && !blockers.panel && !blockers.menu, `${label} interaction UI did not close before native scroll: ${JSON.stringify(blockers)}`);
+}
+
 async function verifyMobile(browser) {
   const context = await browser.newContext({
     viewport: { width: 412, height: 915 },
@@ -157,8 +178,7 @@ async function verifyMobile(browser) {
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
   await verifyHeartInteraction(page, 'mobile', true);
-  await page.keyboard.press('Escape').catch(() => {});
-  await page.waitForTimeout(200);
+  await closeHeartInteractionUi(page, 'mobile');
 
   for (let cycle = 0; cycle < 2; cycle += 1) {
     const before = await state(page);
@@ -191,6 +211,7 @@ async function verifyDesktop(browser) {
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG interaction target missing: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
+  await closeHeartInteractionUi(page, 'desktop');
 
   const before = await state(page);
   const relative = Math.min(220, Math.max(120, (before.runtime && 180) || 180));
