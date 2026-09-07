@@ -71,6 +71,13 @@ async function state(page) {
       loopSource: root.dataset.fxLoopSource || '',
       landing: Number(root.dataset.fxLoopLanding || 0),
       landingState: root.dataset.fxLoopLandingState || '',
+      loopGeometry: root.dataset.fxLoopGeometryR592 || '',
+      loopBridgeState: root.dataset.fxLoopBridge || '',
+      scrollActivity: root.dataset.fxScrollActivity || '',
+      infiniteInput: root.dataset.fxInfiniteInput || '',
+      desktopBoundary: root.dataset.fxDesktopLoopBoundaryR607 || '',
+      organismRepair: root.dataset.fxLoopOrganismRepairR609 || '',
+      mirrorCapture: root.dataset.fxLoopMirrorCaptureR609 || '',
       hitExists: hit instanceof HTMLButtonElement,
       hitBodyOwned: hit?.parentElement === document.body,
       hitWidth: hitRect?.width || 0,
@@ -224,7 +231,12 @@ async function verifyDesktop(browser) {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     window.scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'auto' });
   }, relative);
-  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
+  try {
+    await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
+  } catch (error) {
+    const stuck = await state(page);
+    throw new Error(`desktop seamless loop timeout diagnostics: ${JSON.stringify({ relative, before, stuck })}; ${error.message}`);
+  }
   await page.waitForTimeout(500);
   const after = await state(page);
   assert(after.loopCount === before.loopCount + 1, `desktop seamless loop failed: ${JSON.stringify({ before, after })}`);
