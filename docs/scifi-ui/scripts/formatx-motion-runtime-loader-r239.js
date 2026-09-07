@@ -1,9 +1,8 @@
-/* FormatX r550 — navigation-owned MAG + SOUND control + independent intent enhancements.
+/* FormatX r619 — navigation-owned MAG + SOUND control + independent intent enhancements.
    MAG and the lightweight SOUND control owner are automatic from navigation. The
-   native R326 renderer yields only to first visual paint, then starts in parallel
-   with non-render-critical MAG styles while the bounded intro remains visible;
-   no user interaction, audit path, or intro-release event controls MAG startup.
-   Heavy Organism/motion enhancements and the full Design System stylesheet stay outside first paint. */
+   normal OffscreenCanvas path warms only assets it actually consumes before paint;
+   the main-thread R326 renderer remains an automatic fallback, but is not preloaded
+   speculatively on the normal worker path. No user, intro, audit or headless gate. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -20,6 +19,7 @@ root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
 root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
 root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
+root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -69,7 +69,6 @@ function warmCriticalOwners(){
   warmAsset(CURRENT_MAG,'script');
   warmAsset(SOUND_CONTROL,'script');
   warmAsset(CURRENT_SOLID_GLASS,'script');
-  warmAsset(CURRENT_RENDERER,'script');
   warmAsset(CURRENT_STYLE,'style');
   warmAsset(CURRENT_OPTICS,'style');
   warmAsset(CURRENT_LIFE_STYLE,'style');
