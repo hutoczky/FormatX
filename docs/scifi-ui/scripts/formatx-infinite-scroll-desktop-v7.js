@@ -15,6 +15,9 @@
   let mirrorImage = null;
   let mirrorCaptureFrame = 0;
   let mirrorCaptureTimer = 0;
+  let mirrorCaptureGeneration = 0;
+  let mirrorCapturePending = false;
+  let mirrorObjectUrl = '';
   let sourceHero = null;
   let transferLockedUntil = 0;
   let scrollFrame = 0;
@@ -56,6 +59,8 @@
   root.dataset.fxScrollSnap = 'disabled';
   root.dataset.fxMobileScrollMode = 'native-momentum-loop';
   root.dataset.fxInitialHeroGuard = 'pending';
+  root.dataset.fxLoopMirrorCaptureR609 = 'async-to-blob';
+  root.dataset.fxLoopOrganismRepairR609 = 'geometry-only-no-bridge-rebuild';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -332,20 +337,46 @@
     return section;
   }
 
+  function releaseMirrorObjectUrl() {
+    if (!mirrorObjectUrl) return;
+    try { URL.revokeObjectURL(mirrorObjectUrl); } catch (_) {}
+    mirrorObjectUrl = '';
+  }
+
   function captureReferenceMirror() {
     mirrorCaptureFrame = 0;
-    if (!mirrorImage || !mirror?.isConnected || !sourceHero?.isConnected) return false;
+    if (mirrorCapturePending || !mirrorImage || !mirror?.isConnected || !sourceHero?.isConnected) return false;
     const detail = sourceHero.querySelector('.fx-core-detail-r122');
     if (!(detail instanceof HTMLCanvasElement) || detail.width < 8 || detail.height < 8) return false;
+    if (typeof detail.toBlob !== 'function') {
+      root.dataset.fxLoopMirrorFrame = 'async-capture-unavailable';
+      return false;
+    }
+
+    const generation = mirrorCaptureGeneration;
+    const targetImage = mirrorImage;
+    const width = detail.width;
+    const height = detail.height;
+    mirrorCapturePending = true;
     try {
-      const snapshot = detail.toDataURL('image/webp', .9);
-      if (!snapshot || snapshot.length < 512) return false;
-      mirrorImage.src = snapshot;
-      mirrorImage.hidden = false;
-      root.dataset.fxLoopMirrorFrame = `${detail.width}x${detail.height}`;
+      detail.toBlob(blob => {
+        if (generation !== mirrorCaptureGeneration) return;
+        mirrorCapturePending = false;
+        if (!(blob instanceof Blob) || blob.size < 256 || targetImage !== mirrorImage || !targetImage.isConnected) {
+          root.dataset.fxLoopMirrorFrame = 'async-capture-unavailable';
+          return;
+        }
+        const nextUrl = URL.createObjectURL(blob);
+        releaseMirrorObjectUrl();
+        mirrorObjectUrl = nextUrl;
+        targetImage.src = nextUrl;
+        targetImage.hidden = false;
+        root.dataset.fxLoopMirrorFrame = `${width}x${height}`;
+      }, 'image/webp', .9);
       return true;
     } catch (_) {
-      root.dataset.fxLoopMirrorFrame = 'capture-unavailable';
+      mirrorCapturePending = false;
+      root.dataset.fxLoopMirrorFrame = 'async-capture-unavailable';
       return false;
     }
   }
@@ -421,6 +452,9 @@
   }
 
   function removeBridge() {
+    mirrorCaptureGeneration += 1;
+    mirrorCapturePending = false;
+    releaseMirrorObjectUrl();
     geometryObserver?.disconnect();
     geometryObserver = null;
     bridge?.remove();
@@ -680,6 +714,8 @@
       clonedHeroOnly: false,
       inertReferenceMirror: true,
       mirrorContext: 'static-2d-snapshot-no-webgl',
+      mirrorCapture: 'async-to-blob-r609',
+      organismLifecycleBridgeRepair: 'geometry-only-r609',
       reinitialisedRenderer: false,
       frameStableLanding: true,
       jumpFree: true,
@@ -712,9 +748,9 @@
   addEventListener('resize', onResize, { passive: true });
   addEventListener('load', scheduleGeometryRefresh, { once: true, passive: true });
   addEventListener('pageshow', () => { if (initialised) scheduleRepair(true); }, { passive: true });
-  addEventListener('formatx:organisminterfaceready', () => { if (initialised) scheduleRepair(true); });
+  addEventListener('formatx:organisminterfaceready', () => { if (initialised) scheduleRepair(false); });
   addEventListener('formatx:organismpanelopen', onPanelOpen);
-  addEventListener('formatx:organismpanelclose', () => { if (initialised) scheduleRepair(true); });
+  addEventListener('formatx:organismpanelclose', () => { if (initialised) scheduleRepair(false); });
   addEventListener('formatx:languagechange', () => {
     if (!initialised) return;
     setBilingualText(bridge);
@@ -743,6 +779,9 @@
     clearTimeout(repairTimer);
     clearTimeout(mirrorCaptureTimer);
     clearTimeout(bootTimer);
+    mirrorCaptureGeneration += 1;
+    mirrorCapturePending = false;
+    releaseMirrorObjectUrl();
     geometryObserver?.disconnect();
   }, { once: true });
 }());
