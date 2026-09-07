@@ -26,6 +26,7 @@
   let mobileSettleTimer = 0;
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
+  let desktopStableGeometry = null;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
@@ -61,7 +62,7 @@
   root.dataset.fxInitialHeroGuard = 'pending';
   root.dataset.fxLoopMirrorCaptureR609 = 'async-to-blob';
   root.dataset.fxLoopOrganismRepairR609 = 'geometry-only-no-bridge-rebuild';
-  root.dataset.fxDesktopLoopCrossingR617 = 'scroll-event-stable-boundary-capture';
+  root.dataset.fxDesktopLoopCrossingR618 = 'last-idle-real-bridge-boundary';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -403,22 +404,15 @@
     });
   }
 
-  function refreshGeometry() {
+  function readActualGeometry() {
     sourceHero = document.querySelector('#main-content > #hero');
-    if (!bridge || !sourceHero || !bridge.isConnected || !sourceHero.isConnected) {
-      resetGeometry();
-      return false;
-    }
-
+    if (!bridge || !sourceHero || !bridge.isConnected || !sourceHero.isConnected) return null;
     const viewportHeight = innerHeight;
     const bridgeTop = bridge.offsetTop;
     const sourceTop = sourceHero.offsetTop;
     const sourceHeight = sourceHero.offsetHeight;
     const documentEnd = Math.max(0, document.documentElement.scrollHeight - viewportHeight);
-
-    bridge.style.setProperty('--fx-loop-source-height', `${Math.round(sourceHeight)}px`);
-
-    loopGeometry = Object.freeze({
+    return Object.freeze({
       ready: true,
       bridgeTop,
       bridgeThreshold: bridgeTop + Math.max(36, Math.min(viewportHeight * .18, 180)),
@@ -426,7 +420,26 @@
       sourceHeight,
       documentEnd,
     });
-    root.dataset.fxLoopGeometryR592 = `${Math.round(bridgeTop)}:${Math.round(loopGeometry.bridgeThreshold)}:${Math.round(documentEnd)}`;
+  }
+
+  function refreshGeometry() {
+    const next = readActualGeometry();
+    if (!next) {
+      resetGeometry();
+      return false;
+    }
+    bridge.style.setProperty('--fx-loop-source-height', `${Math.round(next.sourceHeight)}px`);
+    loopGeometry = next;
+    root.dataset.fxLoopGeometryR592 = `${Math.round(next.bridgeTop)}:${Math.round(next.bridgeThreshold)}:${Math.round(next.documentEnd)}`;
+    return true;
+  }
+
+  function rememberDesktopStableGeometry(source) {
+    if (isMobileFlow()) return false;
+    const actual = readActualGeometry();
+    if (!actual) return false;
+    desktopStableGeometry = actual;
+    root.dataset.fxDesktopLoopStableBoundaryR618 = `${source}:${Math.round(actual.bridgeTop)}:${Math.round(actual.bridgeThreshold)}:${Math.round(actual.documentEnd)}`;
     return true;
   }
 
@@ -466,6 +479,7 @@
     mirror = null;
     mirrorImage = null;
     pendingDesktopRelative = null;
+    desktopStableGeometry = null;
     resetGeometry();
     root.dataset.fxLoopBridge = 'missing';
   }
@@ -489,6 +503,7 @@
     footer.insertAdjacentElement('afterend', bridge);
 
     refreshGeometry();
+    rememberDesktopStableGeometry('build');
     observeGeometry();
     scheduleGeometryRefresh();
     scheduleMirrorCapture(80);
@@ -506,12 +521,12 @@
 
   function captureDesktopCrossingIntent() {
     if (isMobileFlow() || !initialised || Date.now() < transferLockedUntil) return;
-    const geometry = loopGeometry;
-    if (!geometry.ready) return;
+    const geometry = desktopStableGeometry || loopGeometry;
+    if (!geometry?.ready) return;
     const y = scrollY;
     if (y < geometry.bridgeThreshold || y > geometry.documentEnd + 2) return;
     pendingDesktopRelative = Math.max(0, Math.min(y - geometry.bridgeTop, Math.max(0, geometry.sourceHeight - 2)));
-    root.dataset.fxDesktopLoopBoundaryR617 = `captured-${Math.round(geometry.bridgeTop)}-${Math.round(y)}`;
+    root.dataset.fxDesktopLoopBoundaryR618 = `captured-stable-${Math.round(geometry.bridgeTop)}-${Math.round(y)}`;
   }
 
   function markIdle() {
@@ -520,7 +535,10 @@
     root.dataset.fxScrollActivity = 'idle';
     root.classList.remove('fx-page-scrolling');
     if (isMobileFlow()) scheduleMobileTransfer();
-    else commitDesktopTransfer();
+    else {
+      commitDesktopTransfer();
+      if (pendingDesktopRelative == null && Date.now() >= transferLockedUntil) rememberDesktopStableGeometry('idle');
+    }
   }
 
   function landingTarget(relative) {
@@ -611,8 +629,8 @@
       return;
     }
     pendingDesktopRelative = relative;
-    root.dataset.fxDesktopLoopBoundaryR607 = captured == null ? 'settled-idle-recomputed' : 'scroll-event-crossing-preserved-r617';
-    performTransfer(relative, captured == null ? 'visual-bridge-desktop-idle' : 'visual-bridge-desktop-crossing-intent');
+    root.dataset.fxDesktopLoopBoundaryR607 = captured == null ? 'settled-idle-recomputed' : 'last-idle-crossing-preserved-r618';
+    performTransfer(relative, captured == null ? 'visual-bridge-desktop-idle' : 'visual-bridge-desktop-stable-crossing');
   }
 
   function transferIfNeeded() {
@@ -641,7 +659,7 @@
       return;
     }
 
-    pendingDesktopRelative = relative;
+    if (pendingDesktopRelative == null) pendingDesktopRelative = relative;
     root.dataset.fxInfiniteInput = 'native-wheel';
     root.dataset.fxLoopLandingState = 'waiting-wheel-idle';
   }
@@ -729,7 +747,7 @@
       mirrorContext: 'static-2d-snapshot-no-webgl',
       mirrorCapture: 'async-to-blob-r609',
       organismLifecycleBridgeRepair: 'geometry-only-r609',
-      desktopCrossingIntent: 'scroll-event-stable-boundary-r617',
+      desktopCrossingIntent: 'last-idle-real-bridge-boundary-r618',
       reinitialisedRenderer: false,
       frameStableLanding: true,
       jumpFree: true,
@@ -740,7 +758,7 @@
       mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
-      desktopTransfer: 'captured-crossing-or-settled-idle-r617',
+      desktopTransfer: 'last-idle-crossing-or-settled-idle-r618',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
     });
