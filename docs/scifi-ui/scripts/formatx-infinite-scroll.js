@@ -9,6 +9,27 @@
   const DESKTOP_RUNTIME_GUARD_STYLE = '/scifi-ui/styles/formatx-desktop-runtime-guard-r597.css?v=20260907-r613-final-layout-before-loop';
   const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260825-r252-core3';
   const HERO_START_HASHES = new Set(['', '#top', '#hero']);
+  const DESKTOP_GEOMETRY_SELECTOR = [
+    '#main-content > section.scene:not(#hero)',
+    '#main-content > .fx-category-deck',
+    '#main-content .fx-origin-proof',
+    '.fx-live-os',
+    '#live-os-overview',
+    '.fx-static-live-os',
+    '.fx-award-proof',
+    '.fx-product-showcase',
+    '#user-feedback',
+    '.fx-feedback-public',
+    '.site-footer',
+    '#main-content > section.scene:not(#hero) > .flow',
+    '#main-content > section.scene:not(#hero) > .cards',
+    '#main-content > section.scene:not(#hero) > .pricing',
+    '#main-content > section.scene:not(#hero) > .payment',
+    '#main-content > section.scene:not(#hero) > .payment-console',
+    '#main-content > section.scene:not(#hero) > #formatx-plan-qr-dock',
+    '#main-content > section.scene:not(#hero) > .system-grid',
+    '#main-content > section.scene:not(#hero) > .release-layout'
+  ].join(',');
   let mobileGeometryTimer = 0;
   let desktopGeometryTimer = 0;
   let intentArmed = false;
@@ -16,7 +37,7 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r621-desktop-lifecycle-boundary-resync';
+  root.dataset.fxScrollBootstrapRevision = 'r631-desktop-document-realised-before-runtime';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
   root.dataset.fxDesktopLoopLifecycleR621 = 'organism-settle-recheck-through-canonical-scroll-owner';
@@ -64,6 +85,19 @@
         finish(link.sheet ? 'ready-sheet-timeout-check-before-runtime' : 'failed-style-timeout-runtime-continues');
       }, 2000);
     });
+  }
+
+  function realiseDesktopDocumentGeometry() {
+    if (MOBILE_QUERY.matches) return 0;
+    let count = 0;
+    for (const node of document.querySelectorAll(DESKTOP_GEOMETRY_SELECTOR)) {
+      if (!(node instanceof HTMLElement)) continue;
+      node.style.setProperty('content-visibility', 'visible', 'important');
+      node.style.setProperty('contain-intrinsic-size', 'none', 'important');
+      count += 1;
+    }
+    root.dataset.fxDesktopDocumentGeometryR631 = `realised-${count}`;
+    return count;
   }
 
   function ensureHeartCoreRuntime() {
@@ -156,6 +190,7 @@
       root.dataset.fxInfiniteController = 'native-fallback';
       root.dataset.fxAutomaticLoop = 'disabled-runtime-error';
       root.dataset.fxInfiniteInput = 'native';
+      root.dataset.fxScrollSnap = 'disabled';
       root.dataset.fxLoopBridge = 'disabled-runtime-error';
       root.classList.remove('fx-seamless-loop-transfer', 'fx-mobile-seamless-loop');
       root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({ version: BOOTSTRAP, controller: 'native-fallback', automaticLoop: false, visualBridge: false, mobileNativeMomentumPreserved: true, inputCapture: false });
@@ -186,7 +221,8 @@
       return;
     }
 
-    root.dataset.fxDesktopLoopLayoutR613 = 'loading-final-layout-style-before-runtime';
+    root.dataset.fxDesktopLoopLayoutR613 = 'realising-document-before-final-layout-style-r631';
+    realiseDesktopDocumentGeometry();
     ensureDesktopRuntimeGuardStyle().then(() => {
       installDesktopGeometryResync();
       mountSeamlessRuntime(platform);
