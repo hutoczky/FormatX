@@ -1,8 +1,15 @@
-/* FormatX R589 — deterministic first-paint safety from measured final geometry.
-   Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css,
-   with the current mobile nested-controls geometry locked here before any deferred
-   runtime can create a 110px legacy reservation shift. This blocking P0 layer
-   contains no retired manual MAG PAUSE state. */
+/* FormatX R652 — deterministic first-paint safety from measured final geometry.
+   Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
+   R652 also carries the canonical base overflow floor while critical-core is
+   intentionally network-deferred, so early Organism activation cannot widen the
+   document before the full visual bundle arrives. */
+
+/* The canonical critical-core begins with the same body overflow contract. Keep
+   that layout invariant in the blocking first-paint layer; this does not hide or
+   resize product content, it preserves the established viewport clipping owner. */
+html body.living-architecture {
+  overflow-x: clip !important;
+}
 
 /* Keep the readable LCP surface paintable. */
 html body.living-architecture #hero .hero-copy,
@@ -239,3 +246,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r503-p0-first-paint-hero-ancestor-box */
 /* production-r552-no-manual-pause-blocking-css */
 /* production-r589-mobile-nested-controls-hero-lock */
+/* production-r652-critical-core-overflow-floor */
