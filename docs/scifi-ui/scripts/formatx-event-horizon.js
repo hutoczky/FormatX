@@ -1,4 +1,4 @@
-/* FormatX R636 — single-owner absolute-bounded premium intro release.
+/* FormatX R642 — contract-window single-owner premium intro release.
    MAG startup remains navigation-owned behind the visual cover. Product timing
    remains mobile 1180–1450ms / desktop 1350–1650ms. The existing 1360/1640ms
    visual clock may request release, but exactly one idempotent finalizer owns the
@@ -21,6 +21,7 @@ const PRELOADER_FADE_MS=REDUCED?0:90;
 const PRELOADER_RELEASE_GUARD_MS=PRELOADER_FADE_MS+PRELOADER_TICK_MS+40;
 const PRELOADER_HIDE_BY_MS=PRELOADER_MAX_MS;
 const PRELOADER_REVEAL_AT_MS=REDUCED?0:Math.max(PRELOADER_MIN_MS,PRELOADER_MAX_MS-PRELOADER_FADE_MS);
+const PRELOADER_RELEASE_AT_MS=REDUCED?PRELOADER_MIN_MS:(MOBILE?1220:1400);
 const PRELOADER_VISUAL_MS=MOBILE?1360:1640;
 const PRELOADER_BOOT_AT=performance.now();
 let audio=null,preloaderTimer=0,preloaderDeadlineTimer=0,preloaderRevealTimer=0,preloaderPhaseTimerA=0,preloaderPhaseTimerB=0,preloaderReleased=false,preloaderDeadlineAbort=null;
@@ -49,6 +50,7 @@ ROOT.dataset.fxPreloaderDeadlineR562='overdue-callback-direct-finalize-normal-fa
 ROOT.dataset.fxPreloaderDeadlineR606='compositor-animation-end-advisory-absolute-deadline-owner';
 ROOT.dataset.fxPreloaderDeadlineR635='immutable-navigation-boot-min-floor-max-ceiling';
 ROOT.dataset.fxPreloaderReleaseOwnerR635='single-idempotent-finalizer';
+ROOT.dataset.fxPreloaderLogicalReleaseR642=MOBILE?'bounded-window-1220':'bounded-window-1400';
 ROOT.dataset.fxPreloaderPaintOwnerR575='external-css-pseudo-grid-scan-legacy-dom-suppressed';
 ROOT.dataset.fxPreloaderPaintOwnerR606='bounded-raster-single-compositor-deadline';
 ROOT.dataset.fxPreloaderPaintOwnerR636='sync-no-transform-before-visual-css';ROOT.dataset.fxPreloaderPaintOwnerR641='timing-only-overlay-clock-small-energy-line';
@@ -188,6 +190,7 @@ function runPreloader(overlay){
     preloaderTimer=scheduleAt(PRELOADER_MIN_MS,()=>requestPreloaderRelease('reduced-semantic-ready'));
     return;
   }
+  preloaderTimer=scheduleAt(PRELOADER_RELEASE_AT_MS,()=>requestPreloaderRelease('bounded-window-release'));
   preloaderPhaseTimerA=scheduleAt(PRELOADER_VISUAL_MS*.30,()=>setIntroPhase(overlay,'sync'));
   preloaderPhaseTimerB=scheduleAt(PRELOADER_VISUAL_MS*.75,()=>setIntroPhase(overlay,'ready'));
   preloaderRevealTimer=scheduleAt(PRELOADER_REVEAL_AT_MS,()=>startReveal(overlay));

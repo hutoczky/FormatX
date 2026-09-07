@@ -22,6 +22,7 @@ const required = [
 required.forEach(file => assert.ok(exists(file), `Missing public evidence file: ${file}`));
 
 const contentEntry = read('billing-worker/src/production-content-entry.js');
+const contentRouting = read('billing-worker/src/production-content-entry-r369-base.js');
 const contentBase = read('billing-worker/src/production-content-base.js');
 const feedbackApi = read('billing-worker/src/feedback-api.js');
 const feedbackUi = read('docs/scifi-ui/scripts/formatx-feedback.js');
@@ -35,7 +36,8 @@ const summaryStart = feedbackApi.indexOf('async function feedbackSummary');
 const summaryEnd = feedbackApi.indexOf('async function submitFeedback');
 const publicSummary = summaryStart >= 0 && summaryEnd > summaryStart ? feedbackApi.slice(summaryStart, summaryEnd) : '';
 
-assert.match(contentEntry, /production-content-base\.js/, 'public routing wrapper is not delegating to the content pipeline');
+assert.match(contentEntry, /production-content-entry-r369-base\.js/, 'canonical production entry is not delegating to the routing owner');
+assert.match(contentRouting, /production-content-base\.js/, 'public routing owner is not delegating to the content pipeline');
 assert.match(contentBase, /production-feedback-entry\.js/, 'production feedback wrapper is not active in the content pipeline');
 assert.match(contentBase, /id=\"live-os-overview\"/, 'static indexable Live OS section missing');
 assert.match(contentBase, /itemtype=\"https:\/\/schema\.org\/SoftwareApplication\"/, 'SoftwareApplication microdata missing');
