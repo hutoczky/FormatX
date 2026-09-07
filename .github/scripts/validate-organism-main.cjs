@@ -109,7 +109,10 @@ async function openPricingFunctionally(page) {
   const pricingTrigger = page.locator('[data-organism-open="pricing"]');
   await pricingTrigger.evaluate(node => node.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' }));
   await page.waitForTimeout(80);
-  const box = await pricingTrigger.boundingBox();
+  const box = await pricingTrigger.evaluate(node => {
+    const rect = node.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
   assert(box && box.width >= 44 && box.height >= 44, 'pricing trigger has no usable geometry: ' + JSON.stringify(box));
   await pricingTrigger.evaluate(node => node.click());
   return box;
