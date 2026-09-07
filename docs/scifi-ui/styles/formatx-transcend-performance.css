@@ -41,6 +41,32 @@ html[data-fx-performance="balanced"] .scene:not(.fx-section-active) > :is(
   contain-intrinsic-size: auto 900px;
 }
 
+/* R625: balanced desktop may keep inactive chapter bodies culled during the
+   critical first-paint window, but a real functional surface must never scroll
+   against synthetic 900px placeholders. The Organism interface and seamless-v7
+   bootstrap both mark an ownership transition before functional scrolling. At
+   that point realise the canonical chapter boxes once, before bridge geometry or
+   scrollIntoView can synchronously materialise ~5.5kpx of document height.
+   This is normal product lifecycle behaviour: no audit/headless/user-agent path. */
+@media (min-width: 901px) and (pointer: fine) {
+  html[data-fx-performance="balanced"]:is(
+    .fx-organism-interface-ready,
+    [data-fx-infinite-controller="desktop-runtime-loading-v7"],
+    [data-fx-infinite-controller="seamless-v7"]
+  ) .scene:not(.fx-section-active) > :is(
+    .flow,
+    .cards,
+    .pricing,
+    .payment,
+    #formatx-plan-qr-dock,
+    .system-grid,
+    .release-layout
+  ) {
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+  }
+}
+
 html[data-fx-performance="balanced"] .hero-copy,
 html[data-fx-performance="balanced"] .section-heading,
 html[data-fx-performance="balanced"] .flow,
