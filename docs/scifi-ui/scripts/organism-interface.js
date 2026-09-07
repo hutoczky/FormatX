@@ -81,7 +81,7 @@
     const summary = create('span', 'fx-organism-chapter-summary');
     summary.dataset.hu = spec.summaryHu;
     summary.dataset.en = spec.summaryEn;
-    summary.textContent = language() === 'en' ? spec.summaryEn : spec.summaryHu;
+    summary.textContent = language() === 'en' ? spec.summaryEn : spec.hu;
     const action = create('span', 'fx-organism-chapter-action');
     action.dataset.hu = 'Rendszerpanel megnyitása';
     action.dataset.en = 'Open system panel';
@@ -96,6 +96,8 @@
     const root = create('div', 'fx-organism-console', {
       id: 'fx-organism-console', hidden: '', 'aria-hidden': 'true'
     });
+    root.style.setProperty('z-index', '13000', 'important');
+    root.dataset.fxOrganismModalLayerR580 = 'above-mobile-header';
     const backdrop = create('button', 'fx-organism-console-backdrop', {
       type: 'button', 'data-organism-close': '',
       'aria-label': language() === 'en' ? 'Close panel' : 'Panel bezárása'
