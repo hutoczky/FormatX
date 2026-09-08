@@ -36,6 +36,18 @@ async function waitGenome(page) {
   ), null, { timeout: 30000 });
 }
 
+async function ensureGenomeOpen(page) {
+  const isOpen = await page.evaluate(() => (
+    document.getElementById('fx-interaction-genome')?.dataset.open === 'true'
+  ));
+  if (!isOpen) {
+    await page.locator('.fx-genome-launcher').click();
+  }
+  await page.waitForFunction(() => (
+    document.getElementById('fx-interaction-genome')?.dataset.open === 'true'
+  ));
+}
+
 async function state(page) {
   return page.evaluate(() => {
     const api = window.FormatXInteractionGenome;
@@ -107,8 +119,7 @@ async function desktop(browser) {
     }
   ));
 
-  await page.locator('.fx-genome-launcher').click();
-  await page.waitForFunction(() => document.getElementById('fx-interaction-genome')?.dataset.open === 'true');
+  await ensureGenomeOpen(page);
   await page.waitForTimeout(180);
 
   let current = await state(page);
@@ -137,7 +148,7 @@ async function desktop(browser) {
   await page.waitForFunction(() => Math.abs(scrollY - 640) < 12, null, { timeout: 5000 });
   await page.waitForFunction(() => document.documentElement.lang === 'hu', null, { timeout: 5000 });
 
-  await page.locator('.fx-genome-launcher').click();
+  await ensureGenomeOpen(page);
   const exported = await page.evaluate(() => window.FormatXExportInteractionGenome());
   assert(exported === true, 'local genome export API did not complete');
   await page.waitForFunction(() => (
