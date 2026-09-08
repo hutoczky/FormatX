@@ -1,16 +1,18 @@
 (function () {
   'use strict';
 
-  /* r701 — semantic reference compatibility + lazy base Interaction Genome.
+  /* r703 — semantic reference compatibility + post-critical base Interaction Genome.
      r244 still creates the reference copy/control DOM required by older modules,
      but it no longer writes physical geometry. The render-blocking CSS plus the
      canonical r268 owner are the only geometry authorities. The base Interaction
-     Genome is navigation-owned but starts only after the intro/LCP window; its
-     optional WebGL adapter remains launcher-on-demand through igloo-parity. */
+     Genome is navigation-owned but starts only after the intro/LCP/TTI-critical
+     window; its optional WebGL adapter remains launcher-on-demand through igloo-parity. */
   const root = document.documentElement;
   const VERSION = 'r244-reference-frame';
-  const GENOME_SRC = './scripts/interaction-genome.js?v=20260908-r701-navigation-base';
-  const GENOME_EXPORT_SRC = './scripts/interaction-genome-export-stability.js?v=20260908-r701-navigation-base';
+  const GENOME_SRC = './scripts/interaction-genome.js?v=20260908-r703-post-critical-base';
+  const GENOME_EXPORT_SRC = './scripts/interaction-genome-export-stability.js?v=20260908-r703-post-critical-base';
+  const GENOME_POST_CRITICAL_DELAY = 8200;
+  const GENOME_FALLBACK_DELAY = 12000;
   let queued = false;
   let bootObserver = null;
   let bootTimer = 0;
@@ -45,8 +47,6 @@
     ask: 'KÉRDEZZ'
   };
 
-  // Existing validators and integrations intentionally keep this named no-op.
-  // Stylesheet order is static; moving links at runtime would re-run the cascade.
   function ensureStyleLast() {}
 
   function mutedIcon() {
@@ -260,30 +260,30 @@
     genomeStarted = true;
     clearTimeout(genomeStartTimer);
     clearTimeout(genomeFallbackTimer);
-    root.dataset.fxInteractionGenomeBootstrapR701 = 'loading-post-lcp';
+    root.dataset.fxInteractionGenomeBootstrapR701 = 'loading-post-critical-r703';
     loadGenomeModule(GENOME_SRC, 'data-fx-navigation-genome-r701', () => root.dataset.fxInteractionGenome === 'ready')
       .then(() => loadGenomeModule(GENOME_EXPORT_SRC, 'data-fx-navigation-genome-export-r701', () => root.dataset.fxInteractionGenomeExport === 'ready'))
       .then(() => {
-        root.dataset.fxInteractionGenomeBootstrapR701 = 'ready-navigation-base';
-        dispatchEvent(new CustomEvent('formatx:interaction-genome-navigation-ready', { detail: { revision: 'r701' } }));
+        root.dataset.fxInteractionGenomeBootstrapR701 = 'ready-navigation-base-r703';
+        dispatchEvent(new CustomEvent('formatx:interaction-genome-navigation-ready', { detail: { revision: 'r703' } }));
       })
       .catch(error => {
-        root.dataset.fxInteractionGenomeBootstrapR701 = 'degraded';
+        root.dataset.fxInteractionGenomeBootstrapR701 = 'degraded-r703';
         root.dataset.fxInteractionGenomeBootstrapErrorR701 = String(error?.message || error || 'unknown').slice(0, 160);
       });
   }
 
   function scheduleBaseGenome() {
     if (genomeStarted || genomeStartTimer) return;
-    root.dataset.fxInteractionGenomeBootstrapR701 = 'armed-post-lcp';
-    genomeStartTimer = setTimeout(startBaseGenome, 900);
+    root.dataset.fxInteractionGenomeBootstrapR701 = 'armed-post-critical-r703';
+    genomeStartTimer = setTimeout(startBaseGenome, GENOME_POST_CRITICAL_DELAY);
   }
 
   function armBaseGenome() {
     if (root.dataset.fxInteractionGenome === 'ready' && root.dataset.fxInteractionGenomeExport === 'ready') return;
     addEventListener('formatx:preloadercomplete', scheduleBaseGenome, { once: true, passive: true });
     if (root.classList.contains('fx-intro-complete') || root.dataset.fxPreloaderR531 === 'done') scheduleBaseGenome();
-    genomeFallbackTimer = setTimeout(startBaseGenome, 3600);
+    genomeFallbackTimer = setTimeout(startBaseGenome, GENOME_FALLBACK_DELAY);
   }
 
   addEventListener('resize', schedule, { passive: true });
