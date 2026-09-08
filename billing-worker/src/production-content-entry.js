@@ -14,6 +14,7 @@ const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
 const REFERENCE_MODE_BOOT_SCRIPT = '<script fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
+const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r505-mag-resume-clock';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r637.js?v=20260907-r637-post-fcp-network-restore"></script>';
@@ -240,6 +241,14 @@ async function rewriteR502DeliveryAsset(url, response, headers) {
   headers.set('X-FormatX-R505-Asset-Graph', spec.marker);
   return new Response(source, { status: response.status, statusText: response.statusText, headers });
 }
+function mergeHomepageLinkHeader(existing) {
+  const values = String(existing || '')
+    .split(/,\s*(?=<)/)
+    .map(value => value.trim())
+    .filter(Boolean)
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-p0-first-paint-r490.css'));
+  return [...values, P0_FIRST_PAINT_PRELOAD].join(', ');
+}
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
@@ -250,6 +259,9 @@ async function stabilizePublicResponse(request, url, response) {
   headers.set('X-FormatX-CSS-Scheduler', 'r514-critical-core-r487-post-first-paint-r504-prepaint');
   headers.set('X-FormatX-Motion-Scheduler', 'r507-single-css-animation-clock-owner');
   headers.set('X-FormatX-Mag-Clock-Owner', 'shape-sync-r476-only');
+  if (HOMEPAGE_PATHS.has(url.pathname)) {
+    headers.set('Link', mergeHomepageLinkHeader(headers.get('Link')));
+  }
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
     return new Response(null, { status: response.status, statusText: response.statusText, headers });
