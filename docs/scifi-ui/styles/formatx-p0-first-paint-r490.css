@@ -1,14 +1,33 @@
-/* FormatX R652 — deterministic first-paint safety from measured final geometry.
+/* FormatX R669 — deterministic first-paint safety from measured final geometry.
    Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
-   R652 also carries the canonical base overflow floor while critical-core is
-   intentionally network-deferred, so early Organism activation cannot widen the
-   document before the full visual bundle arrives. */
+   R669 also carries the canonical base overflow floor and the bounded intro paint
+   clamp in the already-blocking first-frame layer, so the deadline does not wait
+   for the dynamically loaded visual intro stylesheet. */
 
 /* The canonical critical-core begins with the same body overflow contract. Keep
    that layout invariant in the blocking first-paint layer; this does not hide or
    resize product content, it preserves the established viewport clipping owner. */
 html body.living-architecture {
   overflow-x: clip !important;
+}
+
+/* The intro is a full viewport visual cover. While it owns the screen, keep the
+   visible hero at one viewport and skip rendering below-fold section contents.
+   The selector is purely product state: no CI, audit, Lighthouse or user branch.
+   When the canonical preloader owner switches active -> done, these declarations
+   stop matching and the final document geometry resumes automatically. */
+html[data-fx-preloader-r531="active"] body.living-architecture #hero.scene.hero {
+  box-sizing: border-box !important;
+  height: 100svh !important;
+  min-height: 100svh !important;
+  max-height: 100svh !important;
+  overflow: clip !important;
+  contain: layout paint style !important;
+}
+html[data-fx-preloader-r531="active"] body.living-architecture main#main-content > :not(#hero) {
+  content-visibility: hidden !important;
+  contain: layout style paint !important;
+  contain-intrinsic-size: auto 900px !important;
 }
 
 /* Keep the readable LCP surface paintable. */
@@ -247,3 +266,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r552-no-manual-pause-blocking-css */
 /* production-r589-mobile-nested-controls-hero-lock */
 /* production-r652-critical-core-overflow-floor */
+/* production-r669-blocking-intro-paint-clamp */
