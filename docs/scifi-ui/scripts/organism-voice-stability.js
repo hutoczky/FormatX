@@ -70,7 +70,7 @@
     stopSpeech();
   }
 
-  /* R673 — a physical MAG hit can request the deferred dialogue before the
+  /* R673/R674 — a physical MAG hit can request the deferred dialogue before the
      voice module has finished loading. If navigation leaves the hero while that
      transient dialogue has no active focus, it must not pop open later and pin
      the seamless-scroll lifecycle. A focused question/editor remains untouched. */
@@ -84,16 +84,6 @@
     closeDialogue();
     stopSpeech();
     ROOT.dataset.fxOrganismThoughtDismissR673 = 'scroll-away-unfocused-transient';
-  }
-
-  function closeSystemPanelBeforeDialogue() {
-    if (!document.body?.classList.contains('fx-organism-panel-open')) return;
-    const consoleRoot = document.getElementById('fx-organism-console');
-    const closeControl = consoleRoot?.querySelector('[data-organism-close]');
-    if (closeControl instanceof HTMLElement) {
-      closeControl.click();
-      ROOT.dataset.fxOrganismDialoguePanelHandoff = 'closed-through-owner';
-    }
   }
 
   function syncVisualViewport() {
