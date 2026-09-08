@@ -6,13 +6,37 @@ const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui
 const CHROME = process.env.CHROME_BIN;
 const ARGS = ['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader'];
 
+async function activateImmersive(page) {
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const hit = document.querySelector('.fx-mag-heart-hit-r252');
+    return root.dataset.fxOrganismInterface === 'ready'
+      || (root.dataset.fxThreeLoader === 'deferred-user-activation'
+        && root.dataset.fxHeartCoreR252 === 'ready'
+        && hit instanceof HTMLButtonElement
+        && hit.dataset.fxHeartBound === 'true');
+  }, null, { timeout: 30000 });
+  if (await page.evaluate(() => document.documentElement.dataset.fxOrganismInterface === 'ready')) return;
+  const heart = page.locator('.fx-mag-heart-hit-r252').first();
+  await heart.waitFor({ state: 'visible', timeout: 10000 });
+  const box = await heart.boundingBox();
+  if (!box) throw new Error('R679 missing trusted MAG hit geometry');
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
+  await page.waitForTimeout(120);
+}
+
 (async () => {
   const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ARGS });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark', reducedMotion: 'no-preference' });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 960 }, locale: 'hu-HU', colorScheme: 'dark', reducedMotion: 'no-preference' });
   const page = await context.newPage();
   try {
     await page.goto(TEST_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1200);
+    const skip = page.locator('.fx-intro-skip');
+    if (await skip.isVisible().catch(() => false)) await skip.click({ force: true, timeout: 1500 }).catch(() => {});
+    await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
+    await activateImmersive(page);
     const report = await page.evaluate(() => {
       const root = document.documentElement;
       const body = document.body;
@@ -66,18 +90,20 @@ const ARGS = ['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader'
         scroll: { html:root.scrollWidth, body:body.scrollWidth, overflow:Math.max(root.scrollWidth,body.scrollWidth)-width },
         datasets: {
           preloader:root.dataset.fxPreloaderR531 || '',
-          organism:root.dataset.fxOrganismInterface || root.dataset.fxOrganismThought || '',
+          organism:root.dataset.fxOrganismInterface || '',
+          thought:root.dataset.fxOrganismThought || '',
           coreActive:root.classList.contains('fx-organism-core-active'),
           scrollBootstrap:root.dataset.fxScrollBootstrapRevision || '',
           desktopStableBoundary:root.dataset.fxDesktopStableBoundary || '',
         },
+        classes: { html:root.className, body:body.className },
         bodyRect: rect(body),
         htmlBefore:pseudo(root,'::before'), htmlAfter:pseudo(root,'::after'),
         bodyBefore:pseudo(body,'::before'), bodyAfter:pseudo(body,'::after'),
         offenders:offenders.slice(0,40),
       };
     });
-    console.log('R676_DESKTOP_GEOMETRY_DIAGNOSTIC');
+    console.log('R679_DESKTOP_GEOMETRY_DIAGNOSTIC');
     console.log(JSON.stringify(report, null, 2));
   } finally {
     await context.close();
