@@ -6,6 +6,22 @@
   html body.living-architecture {
     scroll-snap-type: none !important;
   }
+
+  /* The action dock is fixed at left:50%. Every desktop pointer profile must
+     retain the matching -50% X translation while the duplicate dock is hidden.
+     A Y-only transform leaves the invisible dock shifted half a viewport right
+     and makes body.scrollWidth exceed the viewport. The stronger selector owns
+     this geometry over legacy generated bundles without changing visibility. */
+  html:root:root.fx-organism-core-active body.living-architecture .fx-organism-actionbar {
+    left: 50% !important;
+    right: auto !important;
+    max-width: calc(100vw - 32px) !important;
+    box-sizing: border-box !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translate(-50%, 16px) !important;
+  }
 }
 
 @media (min-width: 1100px) and (pointer: fine) {
@@ -151,17 +167,6 @@
     bottom: clamp(16px, 2.2vh, 28px);
     margin: 0;
     transform: translateX(-50%);
-  }
-
-  /* The hero already exposes download and navigation actions. The duplicate
-     fixed dock must not cover the composition while the core is active. Keep
-     the canonical -50% X centering while moving the hidden dock downward;
-     dropping translateX made its invisible box extend beyond the viewport. */
-  html.fx-organism-core-active .fx-organism-actionbar {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    transform: translate(-50%, 16px) !important;
   }
 
   html body.living-architecture main > .scene:not(#hero) {
