@@ -1,8 +1,8 @@
-/* FormatX R675 — deterministic first-paint safety from measured final geometry.
+/* FormatX R681 — deterministic first-paint safety from measured final geometry.
    Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
-   The blocking P0 layer now owns three invariants from navigation: bounded intro
-   document work, zero wasted raster for fully covered visual surfaces, and the
-   centred hidden desktop Organism action dock. */
+   The blocking P0 layer owns mobile-only bounded intro document work, zero wasted
+   raster for fully covered visual surfaces, and zero-width hidden desktop dock
+   ownership while the canonical hero controls are active. */
 
 /* The canonical critical-core begins with the same body overflow contract. Keep
    that layout invariant in the blocking first-paint layer; this does not hide or
@@ -11,23 +11,24 @@ html body.living-architecture {
   overflow-x: clip !important;
 }
 
-/* The intro is a full viewport visual cover. While it owns the screen, keep the
-   visible hero at one viewport and skip rendering below-fold section contents.
-   The selector is purely product state: no CI, audit, Lighthouse or user branch.
-   When the canonical preloader owner switches active -> done, these declarations
-   stop matching and the final document geometry resumes automatically. */
-html[data-fx-preloader-r531="active"] body.living-architecture #hero.scene.hero {
-  box-sizing: border-box !important;
-  height: 100svh !important;
-  min-height: 100svh !important;
-  max-height: 100svh !important;
-  overflow: clip !important;
-  contain: layout paint style !important;
-}
-html[data-fx-preloader-r531="active"] body.living-architecture main#main-content > :not(#hero) {
-  content-visibility: hidden !important;
-  contain: layout style paint !important;
-  contain-intrinsic-size: auto 900px !important;
+/* The intro paint clamp is required only for the compact/mobile path. Applying a
+   100svh hero box on desktop and releasing it into the settled desktop grid was
+   the measured R680 Lighthouse CLS owner (#hero + .hero-copy). Keep the mobile
+   win without changing desktop layout geometry underneath the visual cover. */
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html[data-fx-preloader-r531="active"] body.living-architecture #hero.scene.hero {
+    box-sizing: border-box !important;
+    height: 100svh !important;
+    min-height: 100svh !important;
+    max-height: 100svh !important;
+    overflow: clip !important;
+    contain: layout paint style !important;
+  }
+  html[data-fx-preloader-r531="active"] body.living-architecture main#main-content > :not(#hero) {
+    content-visibility: hidden !important;
+    contain: layout style paint !important;
+    contain-intrinsic-size: auto 900px !important;
+  }
 }
 
 /* The Event Horizon is opaque during this bounded state. Do not raster the large
@@ -52,8 +53,10 @@ html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space
 /* The fixed action dock is authored at left:50%. Some legacy Organism bundles
    replace its centring transform with a Y-only hide transform, which leaves the
    invisible wide dock half a viewport to the right and widens body.scrollWidth.
-   Keep the canonical centring in the always-loaded P0 layer, independent of the
-   later igloo/desktop stylesheet arrival and pointer profile. */
+   Keep the canonical centring in the always-loaded P0 layer. While the core is
+   active the dock is intentionally redundant with the hero controls, so remove
+   it from layout/scrollable-overflow ownership entirely instead of retaining an
+   invisible transformed box. */
 @media (min-width: 901px) {
   html:root:root body.living-architecture .fx-organism-actionbar {
     left: 50% !important;
@@ -66,10 +69,11 @@ html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space
     transform: translateX(-50%) !important;
   }
   html:root:root.fx-organism-core-active body.living-architecture .fx-organism-actionbar {
+    display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
-    transform: translate(-50%, 16px) !important;
+    transform: none !important;
   }
   html:root:root body.living-architecture.fx-organism-panel-open .fx-organism-actionbar {
     transform: translate(-50%, 18px) !important;
@@ -314,5 +318,5 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r652-critical-core-overflow-floor */
 /* production-r669-blocking-intro-paint-clamp */
 /* production-r671-covered-raster-and-organism-dock-owner */
-
 /* production-r675-visible-hero-space-centred-desktop-actionbar */
+/* production-r681-mobile-only-intro-clamp-zero-width-core-dock */
