@@ -1,8 +1,8 @@
-/* FormatX R669 — deterministic first-paint safety from measured final geometry.
+/* FormatX R671 — deterministic first-paint safety from measured final geometry.
    Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
-   R669 also carries the canonical base overflow floor and the bounded intro paint
-   clamp in the already-blocking first-frame layer, so the deadline does not wait
-   for the dynamically loaded visual intro stylesheet. */
+   The blocking P0 layer now owns three invariants from navigation: bounded intro
+   document work, zero wasted raster for fully covered visual surfaces, and the
+   centred hidden desktop Organism action dock. */
 
 /* The canonical critical-core begins with the same body overflow contract. Keep
    that layout invariant in the blocking first-paint layer; this does not hide or
@@ -28,6 +28,39 @@ html[data-fx-preloader-r531="active"] body.living-architecture main#main-content
   content-visibility: hidden !important;
   contain: layout style paint !important;
   contain-intrinsic-size: auto 900px !important;
+}
+
+/* The Event Horizon is opaque during this bounded state. Do not raster the large
+   canvas/atmosphere/MAG visual surfaces underneath an opaque cover. Their layout
+   boxes and DOM remain present, so automatic MAG ownership and semantic geometry
+   are unchanged; the visual layers become paintable again at preloader release. */
+html[data-fx-preloader-r531="active"] body.living-architecture > #fx-apex-canvas,
+html[data-fx-preloader-r531="active"] body.living-architecture > .fx-atmosphere,
+html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  filter: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+/* The fixed action dock is authored at left:50%. Some legacy Organism bundles
+   replace its centring transform with a Y-only hide transform, which leaves the
+   invisible wide dock half a viewport to the right and widens body.scrollWidth.
+   Keep the canonical centring in the always-loaded P0 layer, independent of the
+   later igloo/desktop stylesheet arrival and pointer profile. */
+@media (min-width: 901px) {
+  html:root:root.fx-organism-core-active body.living-architecture .fx-organism-actionbar {
+    left: 50% !important;
+    right: auto !important;
+    max-width: calc(100vw - 32px) !important;
+    box-sizing: border-box !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translate(-50%, 16px) !important;
+  }
 }
 
 /* Keep the readable LCP surface paintable. */
@@ -267,3 +300,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r589-mobile-nested-controls-hero-lock */
 /* production-r652-critical-core-overflow-floor */
 /* production-r669-blocking-intro-paint-clamp */
+/* production-r671-covered-raster-and-organism-dock-owner */
