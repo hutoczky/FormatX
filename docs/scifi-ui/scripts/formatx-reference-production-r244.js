@@ -1,16 +1,22 @@
 (function () {
   'use strict';
 
-  /* r408 — semantic reference compatibility layer.
+  /* r701 — semantic reference compatibility + lazy base Interaction Genome.
      r244 still creates the reference copy/control DOM required by older modules,
      but it no longer writes physical geometry. The render-blocking CSS plus the
-     canonical r268 owner are the only geometry authorities. This removes the
-     r244 -> r268 layout ping-pong that was visible to Lighthouse as CLS. */
+     canonical r268 owner are the only geometry authorities. The base Interaction
+     Genome is navigation-owned but starts only after the intro/LCP window; its
+     optional WebGL adapter remains launcher-on-demand through igloo-parity. */
   const root = document.documentElement;
   const VERSION = 'r244-reference-frame';
+  const GENOME_SRC = './scripts/interaction-genome.js?v=20260908-r701-navigation-base';
+  const GENOME_EXPORT_SRC = './scripts/interaction-genome-export-stability.js?v=20260908-r701-navigation-base';
   let queued = false;
   let bootObserver = null;
   let bootTimer = 0;
+  let genomeStartTimer = 0;
+  let genomeFallbackTimer = 0;
+  let genomeStarted = false;
 
   function installKeyboardModality() {
     if (root.dataset.fxKeyboardNavigationInstalledR425 === 'true') return;
@@ -68,8 +74,6 @@
       menu.setAttribute('aria-expanded', 'false');
       bar.appendChild(menu);
     }
-    // r268 uses document-level capture ownership, therefore this node can be
-    // declared canonical immediately without cloning/replacing it later.
     menu.dataset.fxControlOwnerR268 = 'true';
     menu.dataset.fxControlOwnerR264 = 'true';
 
@@ -158,8 +162,6 @@
     return { heading, proof, live, rail, controls, sound };
   }
 
-  // r408: CSS/r268 owns SOUND | ASK | PAUSE geometry. Never write inline
-  // position/display/size here; repeated real3d/mobile events must be idempotent.
   function applyControlLayout(nodes, mobile) {
     void mobile;
     nodes.controls?.classList.add('fx-reference-controls-r264');
@@ -226,6 +228,64 @@
     }, 4000);
   }
 
+  function loadGenomeModule(src, marker, readyCheck) {
+    return new Promise((resolve, reject) => {
+      if (readyCheck()) { resolve(); return; }
+      const existing = document.querySelector(`script[${marker}]`);
+      if (existing instanceof HTMLScriptElement) {
+        const poll = setInterval(() => {
+          if (!readyCheck()) return;
+          clearInterval(poll);
+          resolve();
+        }, 40);
+        setTimeout(() => {
+          clearInterval(poll);
+          if (readyCheck()) resolve();
+          else reject(new Error(`module readiness timeout: ${src}`));
+        }, 6000);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = false;
+      script.setAttribute(marker, 'true');
+      script.addEventListener('load', () => resolve(), { once: true });
+      script.addEventListener('error', () => reject(new Error(`module load failed: ${src}`)), { once: true });
+      document.head.appendChild(script);
+    });
+  }
+
+  function startBaseGenome() {
+    if (genomeStarted) return;
+    genomeStarted = true;
+    clearTimeout(genomeStartTimer);
+    clearTimeout(genomeFallbackTimer);
+    root.dataset.fxInteractionGenomeBootstrapR701 = 'loading-post-lcp';
+    loadGenomeModule(GENOME_SRC, 'data-fx-navigation-genome-r701', () => root.dataset.fxInteractionGenome === 'ready')
+      .then(() => loadGenomeModule(GENOME_EXPORT_SRC, 'data-fx-navigation-genome-export-r701', () => root.dataset.fxInteractionGenomeExport === 'ready'))
+      .then(() => {
+        root.dataset.fxInteractionGenomeBootstrapR701 = 'ready-navigation-base';
+        dispatchEvent(new CustomEvent('formatx:interaction-genome-navigation-ready', { detail: { revision: 'r701' } }));
+      })
+      .catch(error => {
+        root.dataset.fxInteractionGenomeBootstrapR701 = 'degraded';
+        root.dataset.fxInteractionGenomeBootstrapErrorR701 = String(error?.message || error || 'unknown').slice(0, 160);
+      });
+  }
+
+  function scheduleBaseGenome() {
+    if (genomeStarted || genomeStartTimer) return;
+    root.dataset.fxInteractionGenomeBootstrapR701 = 'armed-post-lcp';
+    genomeStartTimer = setTimeout(startBaseGenome, 900);
+  }
+
+  function armBaseGenome() {
+    if (root.dataset.fxInteractionGenome === 'ready' && root.dataset.fxInteractionGenomeExport === 'ready') return;
+    addEventListener('formatx:preloadercomplete', scheduleBaseGenome, { once: true, passive: true });
+    if (root.classList.contains('fx-intro-complete') || root.dataset.fxPreloaderR531 === 'done') scheduleBaseGenome();
+    genomeFallbackTimer = setTimeout(startBaseGenome, 3600);
+  }
+
   addEventListener('resize', schedule, { passive: true });
   addEventListener('orientationchange', schedule, { passive: true });
   for (const eventName of [
@@ -237,6 +297,12 @@
   ]) addEventListener(eventName, schedule, { passive: true });
 
   installKeyboardModality();
+  armBaseGenome();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
+
+  addEventListener('pagehide', () => {
+    clearTimeout(genomeStartTimer);
+    clearTimeout(genomeFallbackTimer);
+  }, { once: true });
 }());
