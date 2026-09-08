@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'heart-core-r694';
+  const VERSION = 'heart-core-r603';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260908-r694-release-window';
   const MOBILE_LIFECYCLE_STYLE = '/scifi-ui/styles/formatx-mobile-lifecycle-r603.css?v=20260907-r603-loop-sheet-geometry';
@@ -36,7 +36,15 @@
       lifecycle.dataset.fxMobileLifecycleR603 = 'true';
       document.head.appendChild(lifecycle);
     }
-    root.dataset.fxHeartStyleR551 = 'requested-at-heart-boot-r694';
+  }
+
+  function ensureStyleAfterFirstPaint() {
+    if (root.dataset.fxHeartStyleR551) return;
+    root.dataset.fxHeartStyleR551 = 'requested-at-heart-boot-r696';
+    ensureStyle();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      root.dataset.fxHeartStyleR551 = 'settled-post-first-paint-r696';
+    }));
   }
 
   function introComplete() {
@@ -353,7 +361,7 @@
   }
 
   function boot() {
-    ensureStyle();
+    ensureStyleAfterFirstPaint();
     root.dataset.fxHeartCoreR252 = 'ready';
     root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
     installHeartHitTarget();
