@@ -93,8 +93,9 @@ async function desktop(browser) {
     });
   });
 
-  const english = page.locator('[data-language="en"]').first();
-  if (await english.count()) await english.evaluate(node => node.click());
+  const languageToggle = page.locator('.fx-language-toggle').first();
+  assert((await languageToggle.count()) === 1, 'canonical language toggle missing');
+  await languageToggle.evaluate(node => node.click());
   await page.waitForFunction(() => document.documentElement.lang === 'en');
   await page.evaluate(() => window.FormatXInteractionGenome.record(
     'language',
