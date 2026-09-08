@@ -1,4 +1,4 @@
-/* FormatX R671 — deterministic first-paint safety from measured final geometry.
+/* FormatX R675 — deterministic first-paint safety from measured final geometry.
    Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
    The blocking P0 layer now owns three invariants from navigation: bounded intro
    document work, zero wasted raster for fully covered visual surfaces, and the
@@ -36,13 +36,17 @@ html[data-fx-preloader-r531="active"] body.living-architecture main#main-content
    are unchanged; the visual layers become paintable again at preloader release. */
 html[data-fx-preloader-r531="active"] body.living-architecture > #fx-apex-canvas,
 html[data-fx-preloader-r531="active"] body.living-architecture > .fx-atmosphere,
-html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space {
+html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space canvas {
   visibility: hidden !important;
   opacity: 0 !important;
   filter: none !important;
   box-shadow: none !important;
   animation: none !important;
   transition: none !important;
+}
+html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space {
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* The fixed action dock is authored at left:50%. Some legacy Organism bundles
@@ -51,15 +55,24 @@ html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space
    Keep the canonical centring in the always-loaded P0 layer, independent of the
    later igloo/desktop stylesheet arrival and pointer profile. */
 @media (min-width: 901px) {
-  html:root:root.fx-organism-core-active body.living-architecture .fx-organism-actionbar {
+  html:root:root body.living-architecture .fx-organism-actionbar {
     left: 50% !important;
     right: auto !important;
+    width: max-content !important;
     max-width: calc(100vw - 32px) !important;
     box-sizing: border-box !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    transform: translateX(-50%) !important;
+  }
+  html:root:root.fx-organism-core-active body.living-architecture .fx-organism-actionbar {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
     transform: translate(-50%, 16px) !important;
+  }
+  html:root:root body.living-architecture.fx-organism-panel-open .fx-organism-actionbar {
+    transform: translate(-50%, 18px) !important;
   }
 }
 
@@ -301,3 +314,5 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r652-critical-core-overflow-floor */
 /* production-r669-blocking-intro-paint-clamp */
 /* production-r671-covered-raster-and-organism-dock-owner */
+
+/* production-r675-visible-hero-space-centred-desktop-actionbar */

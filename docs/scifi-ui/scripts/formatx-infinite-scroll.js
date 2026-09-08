@@ -38,7 +38,7 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r659-physical-intent-settled-desktop-commit';
+  root.dataset.fxScrollBootstrapRevision = 'r675-deferred-css-stable-desktop-bridge';
   root.dataset.fxScrollIntentPolicyR649 = 'physical-wheel-touch-keyboard-only';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
@@ -218,6 +218,39 @@
     }
   }
 
+  function realiseDesktopDeferredStylesForLoop() {
+    if (MOBILE_QUERY.matches) return Promise.resolve(0);
+    const pending = Array.from(document.querySelectorAll('link[data-fx-r637-href]:not([href])'));
+    if (!pending.length) {
+      root.dataset.fxDesktopDeferredGeometryR675 = 'ready-no-pending-links';
+      return Promise.resolve(0);
+    }
+    root.dataset.fxDesktopDeferredGeometryR675 = `restoring-${pending.length}`;
+    return Promise.all(pending.map(link => new Promise(resolve => {
+      if (!(link instanceof HTMLLinkElement)) { resolve(); return; }
+      let settled = false;
+      let timer = 0;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        link.removeEventListener('load', finish);
+        link.removeEventListener('error', finish);
+        resolve();
+      };
+      link.addEventListener('load', finish, { once: true });
+      link.addEventListener('error', finish, { once: true });
+      const media = link.dataset.fxR487Media || link.dataset.fxDeferredMediaR300 || 'all';
+      const href = link.dataset.fxR637Href || '';
+      if (media) link.media = media;
+      if (href) link.href = href;
+      timer = setTimeout(finish, 2500);
+    }))).then(() => {
+      root.dataset.fxDesktopDeferredGeometryR675 = `ready-${pending.length}`;
+      return pending.length;
+    });
+  }
+
   function waitForDesktopDocumentStable(maxFrames = 10) {
     if (MOBILE_QUERY.matches) return Promise.resolve(document.documentElement.scrollHeight);
     return new Promise(resolve => {
@@ -300,16 +333,16 @@
       return;
     }
 
-    root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r634';
-    realiseDesktopDocumentGeometry('pre-guard-r634');
+    root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r675';
+    realiseDesktopDocumentGeometry('pre-guard-r675');
     ensureDesktopRuntimeGuardStyle().then(() => {
-      realiseDesktopDocumentGeometry('post-guard-r634');
-      waitForDesktopDocumentStable().then(() => {
-        realiseDesktopDocumentGeometry('pre-runtime-r634');
-        root.dataset.fxDesktopLoopLayoutR613 = 'final-document-stable-before-runtime-r638';
-        installDesktopGeometryResync();
-        mountSeamlessRuntime(platform);
-      });
+      realiseDesktopDocumentGeometry('post-guard-r675');
+      return realiseDesktopDeferredStylesForLoop();
+    }).then(() => waitForDesktopDocumentStable(18)).then(() => {
+      realiseDesktopDocumentGeometry('pre-runtime-r675');
+      root.dataset.fxDesktopLoopLayoutR613 = `final-document-stable-after-deferred-css-r675-${document.documentElement.scrollHeight}`;
+      installDesktopGeometryResync();
+      mountSeamlessRuntime(platform);
     });
   }
 

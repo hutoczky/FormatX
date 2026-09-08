@@ -7,11 +7,11 @@ import productionBase from './production-content-entry-r369-base.js';
    slow runs. It now uses the existing R487 double-rAF post-first-paint scheduler;
    MAG clock, PAUSE/RESUME, ASK and renderer ownership remain unchanged. */
 
-const STARTUP_REVISION = '20260907-r640-critical-css-network-after-first-paint';
+const STARTUP_REVISION = '20260908-r675-nonblocking-reference-and-visual-css';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
-const REFERENCE_MODE_BOOT_SCRIPT = '<script fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
+const REFERENCE_MODE_BOOT_SCRIPT = '<script defer fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
@@ -56,6 +56,9 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/formatx-feedback.css',
   '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/formatx-content-standard.css',
+  '/scifi-ui/styles/formatx-award-readiness.css',
+  '/scifi-ui/styles/formatx-flow-first-r74.css',
+  '/scifi-ui/styles/formatx-mobile-apex-composition.css',
 ]);
 
 const R502_ASSET_REWRITES = new Map([
