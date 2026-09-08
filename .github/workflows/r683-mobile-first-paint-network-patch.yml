@@ -1,0 +1,32 @@
+name: R683 mobile first-paint network owner patch
+
+on:
+  push:
+    branches:
+      - fix/r533-p0-intro-lcp
+    paths:
+      - .github/workflows/r683-mobile-first-paint-network-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/r533-p0-intro-lcp
+          fetch-depth: 0
+      - name: Patch canonical production CSS scheduling
+        run: >-
+          python3 -c 'from pathlib import Path; p=Path("billing-worker/src/production-content-entry.js"); s=p.read_text(); old="  '\''/scifi-ui/styles/formatx-flow-first-r74.css'\'',\n  '\''/scifi-ui/styles/formatx-mobile-apex-composition.css'\'',\n]);"; new="  '\''/scifi-ui/styles/formatx-flow-first-r74.css'\'',\n  '\''/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'\'',\n  '\''/scifi-ui/styles/formatx-responsive-text-guard-r72.css'\'',\n  '\''/scifi-ui/styles/formatx-mobile-proof-controls-r204.css'\'',\n  '\''/scifi-ui/styles/formatx-mobile-layout-r207.css'\'',\n  '\''/scifi-ui/styles/formatx-native-orb-reference-r250.css'\'',\n  '\''/scifi-ui/styles/formatx-mobile-apex-composition.css'\'',\n]);"; assert old in s, "R683 deferred-style anchor missing"; p.write_text(s.replace(old,new,1))'
+      - name: Validate source
+        run: node --check billing-worker/src/production-content-entry.js
+      - name: Commit R683 source fix
+        run: |
+          git config user.name "Games Tech"
+          git config user.email "hutoczky@users.noreply.github.com"
+          git add billing-worker/src/production-content-entry.js
+          git commit -m "R683 defer legacy mobile-only paint layers"
+          git push origin HEAD:fix/r533-p0-intro-lcp
