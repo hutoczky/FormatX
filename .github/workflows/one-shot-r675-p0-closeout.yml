@@ -1,0 +1,233 @@
+name: one-shot R675 P0 closeout
+
+on:
+  push:
+    branches: [fix/r533-p0-intro-lcp]
+    paths:
+      - '.github/workflows/one-shot-r675-p0-closeout.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/r533-p0-intro-lcp
+          fetch-depth: 0
+
+      - name: Apply R675 product and proof ownership fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          def read(path):
+              return Path(path).read_text(encoding='utf-8')
+
+          def write(path, text):
+              Path(path).write_text(text, encoding='utf-8')
+
+          def replace_once(path, old, new, label):
+              text = read(path)
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected one match, found {count}')
+              write(path, text.replace(old, new, 1))
+
+          # 1) Proof-chain truth: the declared product maximum is the actual maximum.
+          replace_once(
+              '.github/scripts/validate-r533-preloader-timing.cjs',
+              "assert.ok(duration<=spec.max+220,`${spec.name}: logical release exceeded bounded window ${duration}ms`);",
+              "assert.ok(duration<=spec.max,`${spec.name}: logical release exceeded product maximum ${duration}ms`);",
+              'strict mobile/desktop intro maximum'
+          )
+
+          # 2) Keep the real hero/MAG stage visible during the intro; suspend only heavy raster children.
+          p0 = 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+          text = read(p0)
+          old = '''html[data-fx-preloader-r531="active"] body.living-architecture > #fx-apex-canvas,
+          html[data-fx-preloader-r531="active"] body.living-architecture > .fx-atmosphere,
+          html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space {
+            visibility: hidden !important;
+            opacity: 0 !important;
+            filter: none !important;
+            box-shadow: none !important;
+            animation: none !important;
+            transition: none !important;
+          }'''.replace('          ', '')
+          new = '''html[data-fx-preloader-r531="active"] body.living-architecture > #fx-apex-canvas,
+          html[data-fx-preloader-r531="active"] body.living-architecture > .fx-atmosphere,
+          html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space canvas {
+            visibility: hidden !important;
+            opacity: 0 !important;
+            filter: none !important;
+            box-shadow: none !important;
+            animation: none !important;
+            transition: none !important;
+          }
+          html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space {
+            visibility: visible !important;
+            opacity: 1 !important;
+          }'''.replace('          ', '')
+          if text.count(old) != 1:
+              raise SystemExit(f'hero-space raster owner: expected one match, found {text.count(old)}')
+          text = text.replace(old, new, 1)
+
+          # 3) Desktop action dock geometry is centred in every desktop state, not only core-active.
+          pattern = re.compile(r'''@media \(min-width: 901px\) \{\n  html:root:root\.fx-organism-core-active body\.living-architecture \.fx-organism-actionbar \{\n    left: 50% !important;\n    right: auto !important;\n    max-width: calc\(100vw - 32px\) !important;\n    box-sizing: border-box !important;\n    opacity: 0 !important;\n    visibility: hidden !important;\n    pointer-events: none !important;\n    transform: translate\(-50%, 16px\) !important;\n  \}\n\}''')
+          replacement = '''@media (min-width: 901px) {
+  html:root:root body.living-architecture .fx-organism-actionbar {
+    left: 50% !important;
+    right: auto !important;
+    width: max-content !important;
+    max-width: calc(100vw - 32px) !important;
+    box-sizing: border-box !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    transform: translateX(-50%) !important;
+  }
+  html:root:root.fx-organism-core-active body.living-architecture .fx-organism-actionbar {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translate(-50%, 16px) !important;
+  }
+  html:root:root body.living-architecture.fx-organism-panel-open .fx-organism-actionbar {
+    transform: translate(-50%, 18px) !important;
+  }
+}'''
+          text, n = pattern.subn(replacement, text, count=1)
+          if n != 1:
+              raise SystemExit(f'desktop actionbar owner: expected one match, found {n}')
+          text = text.replace('/* FormatX R671', '/* FormatX R675', 1)
+          text += '\n/* production-r675-visible-hero-space-centred-desktop-actionbar */\n'
+          write(p0, text)
+
+          # 4) A genuinely open thought always exposes its canonical close control.
+          voice_css = 'docs/scifi-ui/styles/organism-voice.css'
+          text = read(voice_css)
+          marker = '''.fx-organism-thought-close:hover,
+          .fx-organism-thought-close:focus-visible {'''.replace('          ', '')
+          rule = '''.fx-organism-thought:not([hidden]) .fx-organism-thought-close {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+'''
+          if marker not in text:
+              raise SystemExit('thought close marker missing')
+          if rule.strip() not in text:
+              text = text.replace(marker, rule + marker, 1)
+          write(voice_css, text)
+
+          # 5) Normal production delivery: reference boot must never parser-block body paint.
+          worker = 'billing-worker/src/production-content-entry.js'
+          replace_once(
+              worker,
+              '<script fetchpriority="high" data-fx-reference-mode-boot-r504="true"',
+              '<script defer fetchpriority="high" data-fx-reference-mode-boot-r504="true"',
+              'nonblocking reference boot'
+          )
+          text = read(worker)
+          anchor = "  '/scifi-ui/styles/formatx-content-standard.css',\n]);"
+          addition = "  '/scifi-ui/styles/formatx-content-standard.css',\n  '/scifi-ui/styles/formatx-award-readiness.css',\n  '/scifi-ui/styles/formatx-flow-first-r74.css',\n  '/scifi-ui/styles/formatx-mobile-apex-composition.css',\n]);"
+          if text.count(anchor) != 1:
+              raise SystemExit(f'deferred visual css set: expected one anchor, found {text.count(anchor)}')
+          text = text.replace(anchor, addition, 1)
+          text = text.replace("const STARTUP_REVISION = '20260907-r640-critical-css-network-after-first-paint';", "const STARTUP_REVISION = '20260908-r675-nonblocking-reference-and-visual-css';", 1)
+          write(worker, text)
+
+          # 6) Desktop seamless-v7 may only capture a bridge after deferred CSS geometry is real.
+          scroll = 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+          text = read(scroll)
+          insert_before = '''  function waitForDesktopDocumentStable(maxFrames = 10) {'''
+          helper = '''  function realiseDesktopDeferredStylesForLoop() {
+    if (MOBILE_QUERY.matches) return Promise.resolve(0);
+    const pending = Array.from(document.querySelectorAll('link[data-fx-r637-href]:not([href])'));
+    if (!pending.length) {
+      root.dataset.fxDesktopDeferredGeometryR675 = 'ready-no-pending-links';
+      return Promise.resolve(0);
+    }
+    root.dataset.fxDesktopDeferredGeometryR675 = `restoring-${pending.length}`;
+    return Promise.all(pending.map(link => new Promise(resolve => {
+      if (!(link instanceof HTMLLinkElement)) { resolve(); return; }
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        link.removeEventListener('load', finish);
+        link.removeEventListener('error', finish);
+        resolve();
+      };
+      link.addEventListener('load', finish, { once: true });
+      link.addEventListener('error', finish, { once: true });
+      const media = link.dataset.fxR487Media || link.dataset.fxDeferredMediaR300 || 'all';
+      const href = link.dataset.fxR637Href || '';
+      if (media) link.media = media;
+      if (href) link.href = href;
+      const timer = setTimeout(finish, 2500);
+    }))).then(() => {
+      root.dataset.fxDesktopDeferredGeometryR675 = `ready-${pending.length}`;
+      return pending.length;
+    });
+  }
+
+'''
+          if insert_before not in text:
+              raise SystemExit('desktop stable helper insertion point missing')
+          if 'function realiseDesktopDeferredStylesForLoop()' not in text:
+              text = text.replace(insert_before, helper + insert_before, 1)
+          old_chain = '''    root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r634';
+    realiseDesktopDocumentGeometry('pre-guard-r634');
+    ensureDesktopRuntimeGuardStyle().then(() => {
+      realiseDesktopDocumentGeometry('post-guard-r634');
+      waitForDesktopDocumentStable().then(() => {
+        realiseDesktopDocumentGeometry('pre-runtime-r634');
+        root.dataset.fxDesktopLoopLayoutR613 = 'final-document-stable-before-runtime-r638';
+        installDesktopGeometryResync();
+        mountSeamlessRuntime(platform);
+      });
+    });'''
+          new_chain = '''    root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r675';
+    realiseDesktopDocumentGeometry('pre-guard-r675');
+    ensureDesktopRuntimeGuardStyle().then(() => {
+      realiseDesktopDocumentGeometry('post-guard-r675');
+      return realiseDesktopDeferredStylesForLoop();
+    }).then(() => waitForDesktopDocumentStable(18)).then(() => {
+      realiseDesktopDocumentGeometry('pre-runtime-r675');
+      root.dataset.fxDesktopLoopLayoutR613 = `final-document-stable-after-deferred-css-r675-${document.documentElement.scrollHeight}`;
+      installDesktopGeometryResync();
+      mountSeamlessRuntime(platform);
+    });'''
+          if text.count(old_chain) != 1:
+              raise SystemExit(f'desktop runtime mount chain: expected one match, found {text.count(old_chain)}')
+          text = text.replace(old_chain, new_chain, 1)
+          text = text.replace("root.dataset.fxScrollBootstrapRevision = 'r659-physical-intent-settled-desktop-commit';", "root.dataset.fxScrollBootstrapRevision = 'r675-deferred-css-stable-desktop-bridge';", 1)
+          write(scroll, text)
+
+          print('R675 patch applied')
+          PY
+
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check billing-worker/src/production-content-entry.js
+          node --check .github/scripts/validate-r533-preloader-timing.cjs
+
+          git config user.name 'FormatX P0 closeout bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            .github/scripts/validate-r533-preloader-timing.cjs \
+            docs/scifi-ui/styles/formatx-p0-first-paint-r490.css \
+            docs/scifi-ui/styles/organism-voice.css \
+            billing-worker/src/production-content-entry.js \
+            docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          git commit -m 'R675 reconcile P0 timing visibility overflow and loop ownership'
+          git push origin HEAD:fix/r533-p0-intro-lcp
