@@ -239,19 +239,6 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
   user-select: none;
 }
 
-/* R691: once the desktop Organism and seamless runtime are both live, every
-   in-flow descendant before the bridge must own its real size. Dynamic Organism
-   styles must not reintroduce content-visibility placeholders after the scroll
-   bootstrap already measured its canonical boundary. */
-@media (min-width: 901px) and (pointer: fine) {
-  html.fx-organism-interface-ready[data-fx-infinite-controller="seamless-v7"] #main-content *,
-  html.fx-organism-interface-ready[data-fx-infinite-controller="seamless-v7"] body > .site-footer,
-  html.fx-organism-interface-ready[data-fx-infinite-controller="seamless-v7"] body > .site-footer * {
-    content-visibility: visible !important;
-    contain-intrinsic-size: none !important;
-  }
-}
-
 @media (max-width: 900px), (pointer: coarse) {
   #main-content {
     z-index: calc(var(--fx-layer-content) + 10) !important;
