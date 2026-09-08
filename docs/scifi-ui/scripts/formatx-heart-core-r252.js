@@ -2,9 +2,9 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'heart-core-r603';
+  const VERSION = 'heart-core-r694';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260906-r569-trusted-route-stable';
+  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260908-r694-release-window';
   const MOBILE_LIFECYCLE_STYLE = '/scifi-ui/styles/formatx-mobile-lifecycle-r603.css?v=20260907-r603-loop-sheet-geometry';
   const LOOP_OVERSHOOT = 28;
   const HEART_HIT_Z = '2147482500';
@@ -36,15 +36,12 @@
       lifecycle.dataset.fxMobileLifecycleR603 = 'true';
       document.head.appendChild(lifecycle);
     }
+    root.dataset.fxHeartStyleR551 = 'requested-at-heart-boot-r694';
   }
 
-  function ensureStyleAfterFirstPaint() {
-    if (root.dataset.fxHeartStyleR551) return;
-    root.dataset.fxHeartStyleR551 = 'queued-post-first-paint';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      ensureStyle();
-      root.dataset.fxHeartStyleR551 = 'requested-post-first-paint';
-    }));
+  function introComplete() {
+    return root.classList.contains('fx-intro-complete')
+      || root.dataset.fxPreloaderR531 === 'done';
   }
 
   function syncPureWebglComposition() {
@@ -112,10 +109,19 @@
     const hero = document.getElementById('hero');
     const space = hero?.querySelector(':scope .hero-space');
     const stage = space?.querySelector(':scope > .fx-crystal-organism-r326-stage');
-    const target = stage instanceof HTMLElement && stage.getBoundingClientRect().width > 80 ? stage : space;
-    if (!(target instanceof HTMLElement)) return false;
+    if (!(space instanceof HTMLElement)) return false;
 
-    const rect = target.getBoundingClientRect();
+    let target = space;
+    let rect = null;
+    if (stage instanceof HTMLElement) {
+      const stageRect = stage.getBoundingClientRect();
+      if (stageRect.width > 80) {
+        target = stage;
+        rect = stageRect;
+      }
+    }
+    if (!rect) rect = target.getBoundingClientRect();
+
     const visible = !document.hidden
       && rect.width > 80
       && rect.height > 120
@@ -125,9 +131,12 @@
       && rect.left < innerWidth;
 
     if (!visible) {
-      hit.style.visibility = 'hidden';
-      hit.style.setProperty('pointer-events', 'none', 'important');
-      hit.setAttribute('aria-hidden', 'true');
+      if (hit.dataset.fxHeartGeometrySignatureR694 !== 'offscreen') {
+        hit.style.visibility = 'hidden';
+        hit.style.setProperty('pointer-events', 'none', 'important');
+        hit.setAttribute('aria-hidden', 'true');
+        hit.dataset.fxHeartGeometrySignatureR694 = 'offscreen';
+      }
       root.dataset.fxMagHeartHitGeometryR542 = 'offscreen-suspended';
       return true;
     }
@@ -136,14 +145,22 @@
     const diameter = MOBILE_QUERY.matches
       ? Math.min(280, Math.max(176, base * .68))
       : Math.min(360, Math.max(180, base * .58));
-    hit.style.left = `${rect.left + rect.width / 2}px`;
-    hit.style.top = `${rect.top + rect.height / 2}px`;
-    hit.style.width = `${diameter}px`;
-    hit.style.height = `${diameter}px`;
-    hit.style.visibility = 'visible';
-    hit.style.setProperty('z-index', HEART_HIT_Z, 'important');
-    hit.style.setProperty('pointer-events', 'none', 'important');
-    hit.removeAttribute('aria-hidden');
+    const left = rect.left + rect.width / 2;
+    const top = rect.top + rect.height / 2;
+    const signature = `${Math.round(left)}:${Math.round(top)}:${Math.round(diameter)}`;
+
+    if (hit.dataset.fxHeartGeometrySignatureR694 !== signature) {
+      hit.style.left = `${left}px`;
+      hit.style.top = `${top}px`;
+      hit.style.width = `${diameter}px`;
+      hit.style.height = `${diameter}px`;
+      hit.style.visibility = 'visible';
+      hit.style.setProperty('z-index', HEART_HIT_Z, 'important');
+      hit.style.setProperty('pointer-events', 'none', 'important');
+      hit.removeAttribute('aria-hidden');
+      hit.dataset.fxHeartGeometrySignatureR694 = signature;
+    }
+    hit.dataset.fxHeartGeometryPrimedR694 = 'true';
     root.dataset.fxMagHeartHitGeometryR542 = 'viewport-stage-synced';
     root.dataset.fxMagHeartHitPlaneR544 = 'body-top-interaction-below-intro';
     root.dataset.fxMagHeartPointerPolicyR549 = 'semantic-focus-pointer-transparent-trusted-document-router';
@@ -195,7 +212,11 @@
       headerMag.addEventListener('click', () => activateCore('header'));
     }
 
-    syncHeartGeometry(hit);
+    if (introComplete() || hit.dataset.fxHeartGeometryPrimedR694 !== 'true') {
+      syncHeartGeometry(hit);
+    } else {
+      root.dataset.fxMagHeartHitGeometryR694 = 'intro-stable-no-repeat-layout';
+    }
     root.dataset.fxMagHeartHit = 'ready-r542';
     root.dataset.fxMagHeartHitOwnerR542 = 'body-fixed-stage-synced';
     if (root.dataset.fxMagHeartPhysicalRouteR546 !== 'captured-stage-hit') {
@@ -237,10 +258,15 @@
 
   function scheduleGeometry() {
     if (geometryFrame) return;
+    const hit = document.querySelector('.fx-mag-heart-hit-r252');
+    if (!introComplete() && hit instanceof HTMLButtonElement && hit.dataset.fxHeartGeometryPrimedR694 === 'true') {
+      root.dataset.fxMagHeartHitGeometryR694 = 'intro-stable-no-repeat-layout';
+      return;
+    }
     geometryFrame = requestAnimationFrame(() => {
       geometryFrame = 0;
-      const hit = document.querySelector('.fx-mag-heart-hit-r252');
-      if (hit instanceof HTMLButtonElement) syncHeartGeometry(hit);
+      const current = document.querySelector('.fx-mag-heart-hit-r252');
+      if (current instanceof HTMLButtonElement) syncHeartGeometry(current);
     });
   }
 
@@ -327,7 +353,7 @@
   }
 
   function boot() {
-    ensureStyleAfterFirstPaint();
+    ensureStyle();
     root.dataset.fxHeartCoreR252 = 'ready';
     root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
     installHeartHitTarget();
@@ -356,11 +382,14 @@
 
     addEventListener('formatx:real3dready', syncPureWebglComposition, { passive: true });
 
-    const observer = new MutationObserver(scheduleBinding);
-    observer.observe(document.body, { childList: true, subtree: true });
-    setTimeout(() => observer.disconnect(), 6500);
+    const space = document.querySelector('#hero .hero-space');
+    if (space instanceof HTMLElement) {
+      const observer = new MutationObserver(scheduleBinding);
+      observer.observe(space, { childList: true });
+      setTimeout(() => observer.disconnect(), 1800);
+    }
 
-    for (const delay of [0, 80, 220, 520, 1100, 2600]) setTimeout(scheduleBinding, delay);
+    for (const delay of [0, 80, 220, 520, 1800, 2600]) setTimeout(scheduleBinding, delay);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
