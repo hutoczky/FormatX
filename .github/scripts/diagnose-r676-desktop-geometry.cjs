@@ -20,16 +20,101 @@ async function activateImmersive(page) {
   const heart = page.locator('.fx-mag-heart-hit-r252').first();
   await heart.waitFor({ state: 'visible', timeout: 10000 });
   const box = await heart.boundingBox();
-  if (!box) throw new Error('R679 missing trusted MAG hit geometry');
+  if (!box) throw new Error('R702 missing trusted MAG hit geometry');
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
   await page.waitForTimeout(120);
 }
 
+async function waitSemanticMagReady(page) {
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const canvas = document.querySelector('#hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas');
+    return root.dataset.fxCrystalOrganismR326 === 'ready'
+      && root.dataset.fxMagShapeSyncR476 === 'ready-r634'
+      && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
+      && canvas instanceof HTMLElement;
+  }, null, { timeout: 45000 });
+  await page.waitForTimeout(350);
+}
+
+async function snapshot(page, label) {
+  return page.evaluate(labelValue => {
+    const root = document.documentElement;
+    const body = document.body;
+    const width = innerWidth;
+    const height = innerHeight;
+    const rect = node => {
+      const r = node.getBoundingClientRect();
+      return { left:r.left, right:r.right, top:r.top, bottom:r.bottom, width:r.width, height:r.height };
+    };
+    const visible = node => {
+      const s = getComputedStyle(node);
+      return s.display !== 'none' && s.visibility !== 'hidden' && Number.parseFloat(s.opacity || '1') > 0;
+    };
+    const offenders = [];
+    for (const node of document.querySelectorAll('body *')) {
+      if (!(node instanceof HTMLElement || node instanceof SVGElement)) continue;
+      const r = node.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      const leftOverflow = Math.max(0, -r.left);
+      const rightOverflow = Math.max(0, r.right - width);
+      if (leftOverflow <= 1 && rightOverflow <= 1) continue;
+      const s = getComputedStyle(node);
+      offenders.push({
+        tag: node.tagName,
+        id: node.id || '',
+        className: typeof node.className === 'string' ? node.className : String(node.className?.baseVal || ''),
+        rect: { left:r.left, right:r.right, top:r.top, bottom:r.bottom, width:r.width, height:r.height },
+        overflow: { left:leftOverflow, right:rightOverflow },
+        visible: visible(node),
+        position: s.position,
+        display: s.display,
+        visibility: s.visibility,
+        opacity: s.opacity,
+        transform: s.transform,
+        translate: s.translate,
+        width: s.width,
+        maxWidth: s.maxWidth,
+        overflowX: s.overflowX,
+        contain: s.contain,
+        contentVisibility: s.contentVisibility,
+        zIndex: s.zIndex,
+      });
+    }
+    offenders.sort((a,b) => Math.max(b.overflow.left,b.overflow.right) - Math.max(a.overflow.left,a.overflow.right));
+    const pseudo = (node, which) => {
+      const s = getComputedStyle(node, which);
+      return { content:s.content, display:s.display, position:s.position, left:s.left, right:s.right, width:s.width, transform:s.transform, translate:s.translate, overflow:s.overflow, visibility:s.visibility, opacity:s.opacity };
+    };
+    return {
+      label: labelValue,
+      viewport: { width, height },
+      scroll: { html:root.scrollWidth, body:body.scrollWidth, overflow:Math.max(root.scrollWidth,body.scrollWidth)-width },
+      datasets: {
+        preloader:root.dataset.fxPreloaderR531 || '',
+        organism:root.dataset.fxOrganismInterface || '',
+        thought:root.dataset.fxOrganismThought || '',
+        crystal:root.dataset.fxCrystalOrganismR326 || '',
+        shapeSync:root.dataset.fxMagShapeSyncR476 || '',
+        renderer:root.dataset.fxCoreRenderer || '',
+        coreActive:root.classList.contains('fx-organism-core-active'),
+        scrollBootstrap:root.dataset.fxScrollBootstrapRevision || '',
+        desktopStableBoundary:root.dataset.fxDesktopStableBoundary || '',
+      },
+      classes: { html:root.className, body:body.className },
+      bodyRect: rect(body),
+      htmlBefore:pseudo(root,'::before'), htmlAfter:pseudo(root,'::after'),
+      bodyBefore:pseudo(body,'::before'), bodyAfter:pseudo(body,'::after'),
+      offenders:offenders.slice(0,40),
+    };
+  }, label);
+}
+
 (async () => {
   const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ARGS });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 960 }, locale: 'hu-HU', colorScheme: 'dark', reducedMotion: 'no-preference' });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark', reducedMotion: 'no-preference' });
   const page = await context.newPage();
   try {
     await page.goto(TEST_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -37,74 +122,14 @@ async function activateImmersive(page) {
     if (await skip.isVisible().catch(() => false)) await skip.click({ force: true, timeout: 1500 }).catch(() => {});
     await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
     await activateImmersive(page);
-    const report = await page.evaluate(() => {
-      const root = document.documentElement;
-      const body = document.body;
-      const width = innerWidth;
-      const height = innerHeight;
-      const rect = node => {
-        const r = node.getBoundingClientRect();
-        return { left:r.left, right:r.right, top:r.top, bottom:r.bottom, width:r.width, height:r.height };
-      };
-      const visible = node => {
-        const s = getComputedStyle(node);
-        return s.display !== 'none' && s.visibility !== 'hidden' && Number.parseFloat(s.opacity || '1') > 0;
-      };
-      const offenders = [];
-      for (const node of document.querySelectorAll('body *')) {
-        if (!(node instanceof HTMLElement || node instanceof SVGElement)) continue;
-        const r = node.getBoundingClientRect();
-        if (!r.width || !r.height) continue;
-        const leftOverflow = Math.max(0, -r.left);
-        const rightOverflow = Math.max(0, r.right - width);
-        if (leftOverflow <= 1 && rightOverflow <= 1) continue;
-        const s = getComputedStyle(node);
-        offenders.push({
-          tag: node.tagName,
-          id: node.id || '',
-          className: typeof node.className === 'string' ? node.className : String(node.className?.baseVal || ''),
-          rect: { left:r.left, right:r.right, top:r.top, bottom:r.bottom, width:r.width, height:r.height },
-          overflow: { left:leftOverflow, right:rightOverflow },
-          visible: visible(node),
-          position: s.position,
-          display: s.display,
-          visibility: s.visibility,
-          opacity: s.opacity,
-          transform: s.transform,
-          translate: s.translate,
-          width: s.width,
-          maxWidth: s.maxWidth,
-          overflowX: s.overflowX,
-          contain: s.contain,
-          contentVisibility: s.contentVisibility,
-          zIndex: s.zIndex,
-        });
-      }
-      offenders.sort((a,b) => Math.max(b.overflow.left,b.overflow.right) - Math.max(a.overflow.left,a.overflow.right));
-      const pseudo = (node, which) => {
-        const s = getComputedStyle(node, which);
-        return { content:s.content, display:s.display, position:s.position, left:s.left, right:s.right, width:s.width, transform:s.transform, translate:s.translate, overflow:s.overflow, visibility:s.visibility, opacity:s.opacity };
-      };
-      return {
-        viewport: { width, height },
-        scroll: { html:root.scrollWidth, body:body.scrollWidth, overflow:Math.max(root.scrollWidth,body.scrollWidth)-width },
-        datasets: {
-          preloader:root.dataset.fxPreloaderR531 || '',
-          organism:root.dataset.fxOrganismInterface || '',
-          thought:root.dataset.fxOrganismThought || '',
-          coreActive:root.classList.contains('fx-organism-core-active'),
-          scrollBootstrap:root.dataset.fxScrollBootstrapRevision || '',
-          desktopStableBoundary:root.dataset.fxDesktopStableBoundary || '',
-        },
-        classes: { html:root.className, body:body.className },
-        bodyRect: rect(body),
-        htmlBefore:pseudo(root,'::before'), htmlAfter:pseudo(root,'::after'),
-        bodyBefore:pseudo(body,'::before'), bodyAfter:pseudo(body,'::after'),
-        offenders:offenders.slice(0,40),
-      };
-    });
-    console.log('R679_DESKTOP_GEOMETRY_DIAGNOSTIC');
-    console.log(JSON.stringify(report, null, 2));
+    const early = await snapshot(page, 'organism-interface-ready');
+    console.log('R702_DESKTOP_GEOMETRY_EARLY');
+    console.log(JSON.stringify(early, null, 2));
+
+    await waitSemanticMagReady(page);
+    const semantic = await snapshot(page, 'semantic-mag-ready');
+    console.log('R702_DESKTOP_GEOMETRY_SEMANTIC_MAG_READY');
+    console.log(JSON.stringify(semantic, null, 2));
   } finally {
     await context.close();
     await browser.close();
