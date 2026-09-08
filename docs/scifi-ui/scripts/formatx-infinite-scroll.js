@@ -38,11 +38,12 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r649-trusted-desktop-scroll-intent';
-  root.dataset.fxScrollIntentPolicyR649 = 'trusted-scroll-wheel-touch-keyboard-only';
+  root.dataset.fxScrollBootstrapRevision = 'r659-physical-intent-settled-desktop-commit';
+  root.dataset.fxScrollIntentPolicyR649 = 'physical-wheel-touch-keyboard-only';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
   root.dataset.fxDesktopLoopLifecycleR621 = 'organism-settle-recheck-through-canonical-scroll-owner';
+  root.dataset.fxDesktopLoopSettledCommitR659 = 'scrollend-rechecks-canonical-v7-owner';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
@@ -195,17 +196,22 @@
         : 'idle-refresh-requested-r621';
       if (recheckBoundary) {
         dispatchEvent(new Event('scroll'));
-        root.dataset.fxDesktopLoopGeometry = 'lifecycle-boundary-rechecked-r621';
+        root.dataset.fxDesktopLoopGeometry = source === 'desktop-scrollend-settled-r659'
+          ? 'scrollend-boundary-rechecked-r659'
+          : 'lifecycle-boundary-rechecked-r621';
       }
     }, 90);
   }
 
   function installDesktopGeometryResync() {
-    if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'isolated-r621') return;
-    root.dataset.fxDesktopLoopGeometryResync = 'isolated-r621';
+    if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'isolated-r659') return;
+    root.dataset.fxDesktopLoopGeometryResync = 'isolated-r659';
     addEventListener('scroll', event => {
       if (!event.isTrusted) return;
       requestDesktopGeometryRefresh(false, 'desktop-scroll-idle-r621');
+    }, { passive: true });
+    addEventListener('scrollend', () => {
+      requestDesktopGeometryRefresh(true, 'desktop-scrollend-settled-r659');
     }, { passive: true });
     for (const eventName of ['formatx:controlownerready','formatx:languagechange','pageshow','formatx:organisminterfaceready','formatx:organismpanelopen','formatx:organismpanelclose']) {
       addEventListener(eventName, () => requestDesktopGeometryRefresh(true, `${eventName}-settled-r621`), { passive: true });
@@ -323,7 +329,6 @@
     }
 
     const cleanup = () => {
-      removeEventListener('scroll', resolve, true);
       removeEventListener('wheel', resolve, true);
       document.removeEventListener('touchstart', resolve, true);
       document.removeEventListener('pointerdown', pointerResolve, true);
@@ -336,19 +341,12 @@
       root.dataset.fxScrollIntentR534 = source;
       installSeamlessRuntime(platform);
     };
-    const resolve = event => {
-      if (event.type === 'scroll' && !event.isTrusted) {
-        root.dataset.fxScrollProgrammaticIgnoredR649 = 'true';
-        return;
-      }
-      activate(event.type || 'scroll');
-    };
+    const resolve = event => activate(event.type || 'physical-scroll-intent');
     const pointerResolve = event => { if (event.pointerType === 'touch') activate('pointer-touch'); };
     const keyResolve = event => {
       if (['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' '].includes(event.key)) activate('keyboard-scroll');
     };
 
-    addEventListener('scroll', resolve, { capture: true, passive: true });
     addEventListener('wheel', resolve, { capture: true, passive: true });
     document.addEventListener('touchstart', resolve, { capture: true, passive: true });
     document.addEventListener('pointerdown', pointerResolve, { capture: true, passive: true });
