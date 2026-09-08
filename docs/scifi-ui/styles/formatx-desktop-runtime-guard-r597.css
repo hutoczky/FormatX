@@ -1,12 +1,15 @@
-/* FormatX R616 — desktop seamless-loop final-layout guard.
+/* FormatX R686 — desktop seamless-loop final-layout guard.
    This stylesheet is loaded only after real desktop scroll intent, before
    seamless-v7 measures/builds its bridge. At that point the scroll document
    must have one real geometry: disable every remaining content-visibility
    placeholder under the canonical main/footer trees so a direct or fast native
    scroll cannot move the bridge thousands of pixels during the handoff.
+   The desktop runtime is selected by width + physical scroll intent in JS; do
+   not additionally require pointer:fine here because Chromium desktop contexts
+   can report a non-fine primary pointer while still delivering trusted wheel.
    Initial Lighthouse/LCP remains untouched because this file is not requested
    until desktop scroll intent. */
-@media (min-width: 901px) and (pointer: fine) {
+@media (min-width: 901px) {
   html:is(
     [data-fx-infinite-controller='desktop-runtime-loading-v7'],
     [data-fx-infinite-controller='seamless-v7']
