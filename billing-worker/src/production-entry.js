@@ -3,7 +3,7 @@ import productionWorker from './production-with-license.js';
 const CANONICAL_ORIGIN = 'https://formatxsuite.com';
 const LEGACY_WWW_ORIGIN = 'https://www.formatxsuite.com';
 const INLINE_CRITICAL_STYLE_HASH = "'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68='";
-const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
+const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260907-r608-source-first-paint-parity>; rel=preload; as=style';
 const SCIFI_ENTRY_PATHS = new Set(['/', '/scifi-ui/', '/scifi-ui/index.html']);
 const HOMEPAGE_ALIASES = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const LANGUAGE_PAGE_PATHS = new Set([
