@@ -9,6 +9,21 @@ const ARGS=['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','
 fs.mkdirSync(OUT,{recursive:true});
 const compactData=data=>{if(!data||typeof data!=='object')return null;const out={};for(const key of ['url','scriptName','functionName','frame','type','nodeName','reason','timerId'])if(data[key]!==undefined&&data[key]!==null&&data[key]!=='')out[key]=String(data[key]);const top=data.stackTrace?.[0];if(top)out.stack={functionName:String(top.functionName||''),url:String(top.url||''),lineNumber:top.lineNumber,columnNumber:top.columnNumber};return Object.keys(out).length?out:null;};
 const asEvent=e=>({name:e.name,startMs:e.ts/1000,durationMs:Number(e.dur||0)/1000,pid:e.pid,tid:e.tid,data:compactData(e.args?.data)});
+function summariseProfile(profile,startMs=0,endMs=Infinity){
+  if(!profile||!Array.isArray(profile.nodes)||!Array.isArray(profile.samples)||!Array.isArray(profile.timeDeltas))return [];
+  const nodes=new Map(profile.nodes.map(node=>[node.id,node]));
+  const totals=new Map();let elapsedUs=0;
+  for(let i=0;i<profile.samples.length;i+=1){
+    const deltaUs=Number(profile.timeDeltas[i]||0);elapsedUs+=deltaUs;
+    const atMs=elapsedUs/1000;if(atMs<startMs||atMs>endMs)continue;
+    const node=nodes.get(profile.samples[i]);if(!node)continue;
+    const frame=node.callFrame||{};const url=String(frame.url||'');const fn=String(frame.functionName||'(anonymous)');
+    const key=`${url}\n${fn}\n${frame.lineNumber??-1}:${frame.columnNumber??-1}`;
+    const entry=totals.get(key)||{url,functionName:fn,lineNumber:frame.lineNumber??-1,columnNumber:frame.columnNumber??-1,selfMs:0,samples:0};
+    entry.selfMs+=deltaUs/1000;entry.samples+=1;totals.set(key,entry);
+  }
+  return [...totals.values()].sort((a,b)=>b.selfMs-a.selfMs).slice(0,40).map(entry=>({...entry,selfMs:Number(entry.selfMs.toFixed(3))}));
+}
 (async()=>{
   if(!CHROME)throw new Error('CHROME_BIN is required');
   const browser=await chromium.launch({executablePath:CHROME,headless:true,args:ARGS});
@@ -17,6 +32,9 @@ const asEvent=e=>({name:e.name,startMs:e.ts/1000,durationMs:Number(e.dur||0)/100
   const client=await context.newCDPSession(page);
   const errors=[];page.on('pageerror',e=>errors.push(String(e)));
   const tracingComplete=new Promise(resolve=>client.once('Tracing.tracingComplete',resolve));
+  await client.send('Profiler.enable');
+  await client.send('Profiler.setSamplingInterval',{interval:500});
+  await client.send('Profiler.start');
   await client.send('Tracing.start',{categories:'devtools.timeline,disabled-by-default-devtools.timeline,v8.execute,blink.user_timing,loading',options:'sampling-frequency=10000',transferMode:'ReturnAsStream'});
   const url=new URL(BASE);url.searchParams.set('r560_trace',Date.now().toString());
   await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
@@ -28,6 +46,8 @@ const asEvent=e=>({name:e.name,startMs:e.ts/1000,durationMs:Number(e.dur||0)/100
     navigation:(()=>{const n=performance.getEntriesByType('navigation')[0];return n?{responseStart:n.responseStart,domInteractive:n.domInteractive,domContentLoadedEventStart:n.domContentLoadedEventStart,domContentLoadedEventEnd:n.domContentLoadedEventEnd,loadEventStart:n.loadEventStart,loadEventEnd:n.loadEventEnd}:null;})(),
     state:{preloader:document.documentElement.dataset.fxPreloaderR531||'',release:document.documentElement.dataset.fxPreloaderReleaseR531||'',crystal:document.documentElement.dataset.fxCrystalOrganismR326||'',renderer:document.documentElement.dataset.fxCoreRenderer||'',shaderCompile:document.documentElement.dataset.fxCoreShaderCompileR550||''}
   }));
+  const {profile}=await client.send('Profiler.stop');
+  await client.send('Profiler.disable');
   await client.send('Tracing.end');
   const complete=await tracingComplete;const handle=complete.stream;if(!handle)throw new Error('Tracing stream unavailable');
   let raw='';for(;;){const part=await client.send('IO.read',{handle,size:4*1024*1024});raw+=part.data||'';if(part.eof)break;}await client.send('IO.close',{handle});
@@ -50,8 +70,9 @@ const asEvent=e=>({name:e.name,startMs:e.ts/1000,durationMs:Number(e.dur||0)/100
     const totals={};for(const item of nested)totals[item.name]=(totals[item.name]||0)+item.durationMs;
     return {task:asEvent(task),nested,totals:Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([name,durationMs])=>({name,durationMs:Number(durationMs.toFixed(3))})).slice(0,30)};
   });
-  const report={auditedSha:process.env.AUDITED_SHA||'',runtime,errors,rendererMainThread:rendererKey||null,rendererTaskDetails,topEvents:events.slice(0,120)};
+  const cpuProfile={full:summariseProfile(profile),releaseWindow:summariseProfile(profile,700,1900),targetWindow:summariseProfile(profile,1000,1550)};
+  const report={auditedSha:process.env.AUDITED_SHA||'',runtime,errors,rendererMainThread:rendererKey||null,rendererTaskDetails,cpuProfile,topEvents:events.slice(0,120)};
   fs.writeFileSync(path.join(OUT,'report.json'),JSON.stringify(report,null,2)+'\n');
-  console.log('R560_STARTUP_OWNER '+JSON.stringify({state:runtime.state,paints:runtime.paints,navigation:runtime.navigation,rendererMainThread:report.rendererMainThread,rendererTaskDetails:rendererTaskDetails.slice(0,6),topEvents:events.slice(0,35),resources:runtime.resources.filter(r=>r.initiatorType==='script'||r.initiatorType==='link').slice(0,80)},null,2));
+  console.log('R560_STARTUP_OWNER '+JSON.stringify({state:runtime.state,paints:runtime.paints,navigation:runtime.navigation,rendererMainThread:report.rendererMainThread,rendererTaskDetails:rendererTaskDetails.slice(0,6),cpuProfile,topEvents:events.slice(0,35),resources:runtime.resources.filter(r=>r.initiatorType==='script'||r.initiatorType==='link').slice(0,80)},null,2));
   await context.close();await browser.close();
 })().catch(error=>{console.error(error?.stack||error);process.exit(1);});
