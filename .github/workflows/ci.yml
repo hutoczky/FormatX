@@ -45,7 +45,7 @@ jobs:
           for attempt in $(seq 1 240); do
             if curl -sS -D "$RUNNER_TEMP/formatx-lighthouse-headers.txt" -o /dev/null http://127.0.0.1:8787/ 2>/dev/null \
               && grep -Fqi 'X-FormatX-Transport-Stability: r514-critical-core-post-first-paint' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" \
-              && grep -Fqi 'X-FormatX-Edge-Stability: r514-critical-core:20260907-r640-critical-css-network-after-first-paint' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" \
+              && grep -Fqi 'X-FormatX-Edge-Stability: r514-critical-core:20260908-r675-nonblocking-reference-and-visual-css' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" \
               && grep -Fqi 'X-FormatX-CSS-Scheduler: r514-critical-core-r487-post-first-paint-r504-prepaint' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" \
               && grep -Fqi 'X-FormatX-Motion-Scheduler: r507-single-css-animation-clock-owner' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" \
               && grep -Fqi 'X-FormatX-Mag-Clock-Owner: shape-sync-r476-only' "$RUNNER_TEMP/formatx-lighthouse-headers.txt" \
