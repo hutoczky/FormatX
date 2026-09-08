@@ -1,4 +1,4 @@
-/* FormatX R688 — single-owner intro timing with bounded first-frame document work.
+/* FormatX R705 — single-owner intro timing with mobile phase raster isolation.
    The overlay keeps the exact fx-r533-preloader-visual-bound name and 1360/1640ms
    duration required by the product timing contract, but that full-viewport clock
    is paused so Chrome/SwiftShader never promotes it as an actively animated screen.
@@ -6,6 +6,8 @@
    below-fold section contents remain layout boxes but skip rendering until release.
    Premium motion remains real: the compact centre field, phase/state transitions,
    progress updates and 2px energy line run for the same bounded visual sequence.
+   On mobile, phase labels no longer re-raster the large gradient field: the field
+   keeps one fixed opacity and no opacity transition until the bounded release.
    The legacy v3 curtain/grid/scan/portal/flare DOM is retired while this owner is
    active so five duplicate full-viewport compositor layers cannot compete with the
    canonical compact P0 visual sequence. */
@@ -147,6 +149,13 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     width: min(460px, 86vw);
     height: min(390px, 50svh);
     background-size: 44px 44px,44px 44px,100% 100%;
+    opacity: .10 !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"]::before,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"]::before,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"]::before {
+    opacity: .10 !important;
   }
   #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
     width: min(82vw,520px);
