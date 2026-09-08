@@ -353,7 +353,8 @@
     });
     addEventListener('pageshow', () => {
       revealQrDock();
-      updateCommerce();
+      if (qrDockActivated) updateCommerce();
+      else prepareQrDock();
     });
     addEventListener('pagehide', () => {
       observer.disconnect();
@@ -366,10 +367,10 @@
     ROOT.dataset.fxQrOwner = 'living-v3-performance';
     revealQrDock();
     syncScene();
-    updateCommerce();
     prepareQrDock();
     bind();
     ROOT.dataset.fxLivingArchitecture = 'ready-performance-v3';
+    ROOT.dataset.fxCommerceStartupR699 = 'static-pricing-lazy-dynamic-commerce';
     dispatchEvent(new CustomEvent('formatx:livingready'));
   }
 
