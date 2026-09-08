@@ -67,7 +67,7 @@ A P0 optimalizálás nem távolíthatja el és nem gyengítheti a következő m�
 - audit/report export;
 - veszélyes vagy bizonytalan műveletnél fail-closed viselkedés.
 
-A kijelzett teljesítményadatok nem helyettesítik a valós felhasználói RUM/field mérést. Hiányzó field adatot a FormatX nem jelöl sikeresnek. Minden eszközre garantált 120 FPS nincs állítva; hiteles 60 vagy 120 FPS field eredmény nélkül ilyen általános teljesítménygarancia nem publikálható.
+A kijelzett teljesítményadatok nem helyettesítik a valós felhasználói RUM/field mérést. Hiányzó field adatot a FormatX nem jelöl sikeresnek. minden eszközre garantált 120 FPS nincs állítva; hiteles 60 vagy 120 FPS field eredmény nélkül ilyen általános teljesítménygarancia nem publikálható.
 
 ## 5. Termékbizonyíték és kiadási integritás
 
