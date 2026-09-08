@@ -27,6 +27,8 @@
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
   let desktopStableGeometry = null;
+  let desktopStableFrame = 0;
+  let desktopStableGeneration = 0;
   let introTransferRetryArmed = false;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
@@ -67,6 +69,7 @@
   root.dataset.fxDesktopLoopCrossingR618 = 'last-idle-real-bridge-boundary';
   root.dataset.fxDesktopLoopSnapshotR623 = 'stable-only-outside-organism-overlays';
   root.dataset.fxDesktopLoopRetryR650 = 'preserve-crossing-through-intro-ui-block';
+  root.dataset.fxDesktopLoopStableSettleR663 = 'frame-settled-pending';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -444,22 +447,73 @@
       && !root.classList.contains('fx-organism-menu-open');
   }
 
-  function rememberDesktopStableGeometry(source) {
-    if (isMobileFlow() || !desktopGeometryCanStabilize()) {
-      if (!isMobileFlow()) root.dataset.fxDesktopLoopStableBoundaryR623 = 'transient-organism-geometry-ignored';
-      return false;
-    }
-    const actual = readActualGeometry();
-    if (!actual) return false;
+  function acceptDesktopStableGeometry(actual, source) {
+    if (!actual?.ready) return false;
     desktopStableGeometry = actual;
     root.dataset.fxDesktopLoopStableBoundaryR618 = `${source}:${Math.round(actual.bridgeTop)}:${Math.round(actual.bridgeThreshold)}:${Math.round(actual.documentEnd)}`;
     root.dataset.fxDesktopLoopStableBoundaryR623 = `accepted-${source}`;
     return true;
   }
 
-  function settleDesktopStableGeometry(source) {
+  function rememberDesktopStableGeometry(source) {
+    if (isMobileFlow() || !desktopGeometryCanStabilize()) {
+      if (!isMobileFlow()) root.dataset.fxDesktopLoopStableBoundaryR623 = 'transient-organism-geometry-ignored';
+      return false;
+    }
+    const actual = readActualGeometry();
+    return acceptDesktopStableGeometry(actual, source);
+  }
+
+  function desktopGeometryMatches(a, b) {
+    if (!a?.ready || !b?.ready) return false;
+    return Math.abs(a.bridgeTop - b.bridgeTop) <= 1
+      && Math.abs(a.bridgeThreshold - b.bridgeThreshold) <= 1
+      && Math.abs(a.sourceTop - b.sourceTop) <= 1
+      && Math.abs(a.sourceHeight - b.sourceHeight) <= 1
+      && Math.abs(a.documentEnd - b.documentEnd) <= 1;
+  }
+
+  function scheduleDesktopStableGeometry(source) {
     if (!initialised || isMobileFlow() || !desktopGeometryCanStabilize()) return false;
-    return rememberDesktopStableGeometry(source);
+    desktopStableGeneration += 1;
+    const generation = desktopStableGeneration;
+    cancelAnimationFrame(desktopStableFrame);
+    desktopStableFrame = 0;
+    let previous = null;
+    let stableFrames = 0;
+    let frames = 0;
+
+    const sample = () => {
+      desktopStableFrame = 0;
+      if (generation !== desktopStableGeneration || !initialised || isMobileFlow()) return;
+      if (!desktopGeometryCanStabilize() || pendingDesktopRelative != null || root.dataset.fxScrollActivity === 'scrolling') {
+        root.dataset.fxDesktopLoopStableSettleR663 = `held-${source}`;
+        return;
+      }
+      const actual = readActualGeometry();
+      if (!actual) return;
+      stableFrames = previous && desktopGeometryMatches(previous, actual) ? stableFrames + 1 : 0;
+      previous = actual;
+      frames += 1;
+      root.dataset.fxDesktopLoopStableSettleR663 = `${source}:${frames}:${stableFrames}:${Math.round(actual.bridgeTop)}:${Math.round(actual.documentEnd)}`;
+      if (stableFrames >= 1) {
+        acceptDesktopStableGeometry(actual, `${source}-frame-settled-r663`);
+        root.dataset.fxDesktopLoopStableSettleR663 = `accepted-${source}-${Math.round(actual.bridgeTop)}`;
+        return;
+      }
+      if (frames >= 24) {
+        root.dataset.fxDesktopLoopStableSettleR663 = `unsettled-${source}-${Math.round(actual.bridgeTop)}`;
+        return;
+      }
+      desktopStableFrame = requestAnimationFrame(sample);
+    };
+
+    desktopStableFrame = requestAnimationFrame(sample);
+    return true;
+  }
+
+  function settleDesktopStableGeometry(source) {
+    return scheduleDesktopStableGeometry(source);
   }
 
   function observeDesktopStableState() {
@@ -468,13 +522,13 @@
     if (!('MutationObserver' in window)) return;
     desktopStateObserver = new MutationObserver(records => {
       if (!records.some(record => record.attributeName === 'data-fx-organism-thought')) return;
-      settleDesktopStableGeometry('organism-thought-settled-r647');
+      settleDesktopStableGeometry('organism-thought-settled-r663');
     });
     desktopStateObserver.observe(root, {
       attributes: true,
       attributeFilter: ['data-fx-organism-thought']
     });
-    root.dataset.fxDesktopLoopStableStateR647 = 'observing-organism-ui-close';
+    root.dataset.fxDesktopLoopStableStateR647 = 'observing-frame-settled-organism-ui-close-r663';
   }
 
   function scheduleGeometryRefresh() {
@@ -490,7 +544,16 @@
     geometryObserver = null;
     if (!('ResizeObserver' in window) || !bridge || !sourceHero) return;
 
-    geometryObserver = new ResizeObserver(() => scheduleGeometryRefresh());
+    geometryObserver = new ResizeObserver(() => {
+      scheduleGeometryRefresh();
+      if (!isMobileFlow()
+        && initialised
+        && pendingDesktopRelative == null
+        && root.dataset.fxScrollActivity !== 'scrolling'
+        && desktopGeometryCanStabilize()) {
+        scheduleDesktopStableGeometry('resize-observer-r663');
+      }
+    });
     const main = document.getElementById('main-content');
     const footer = document.querySelector('body > .site-footer');
     if (main) geometryObserver.observe(main);
@@ -502,6 +565,9 @@
   function removeBridge() {
     mirrorCaptureGeneration += 1;
     mirrorCapturePending = false;
+    desktopStableGeneration += 1;
+    cancelAnimationFrame(desktopStableFrame);
+    desktopStableFrame = 0;
     releaseMirrorObjectUrl();
     geometryObserver?.disconnect();
     geometryObserver = null;
@@ -571,7 +637,7 @@
     if (isMobileFlow()) scheduleMobileTransfer();
     else {
       commitDesktopTransfer();
-      if (pendingDesktopRelative == null && Date.now() >= transferLockedUntil) rememberDesktopStableGeometry('idle');
+      if (pendingDesktopRelative == null && Date.now() >= transferLockedUntil) scheduleDesktopStableGeometry('idle-r663');
     }
   }
 
@@ -801,9 +867,16 @@
   }
 
   function onScrollEnd() {
-    if (!initialised || !isMobileFlow() || touchActive) return;
-    clearTimeout(mobileSettleTimer);
-    mobileSettleTimer = window.setTimeout(commitMobileTransfer, 0);
+    if (!initialised) return;
+    if (isMobileFlow()) {
+      if (touchActive) return;
+      clearTimeout(mobileSettleTimer);
+      mobileSettleTimer = window.setTimeout(commitMobileTransfer, 0);
+      return;
+    }
+    clearTimeout(activityTimer);
+    activityTimer = 0;
+    markIdle();
   }
 
   function onPanelOpen(event) {
@@ -834,6 +907,7 @@
     }
     initialised = true;
     observeDesktopStableState();
+    scheduleDesktopStableGeometry('initialised-r663');
     root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
       version: VERSION,
       automaticLoop: true,
@@ -845,7 +919,7 @@
       mirrorCapture: 'async-to-blob-r609',
       organismLifecycleBridgeRepair: 'geometry-only-r609',
       desktopCrossingIntent: 'last-idle-real-bridge-boundary-r618',
-      desktopStableSnapshot: 'organism-ui-close-refresh-r647',
+      desktopStableSnapshot: 'frame-settled-organism-and-resize-r663',
       reinitialisedRenderer: false,
       frameStableLanding: true,
       jumpFree: true,
@@ -856,7 +930,7 @@
       mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
-      desktopTransfer: 'stable-origin-live-overrides-stale-capture-intro-retry-r650',
+      desktopTransfer: 'stable-origin-live-overrides-stale-capture-intro-retry-scrollend-r663',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
     });
@@ -868,7 +942,10 @@
     onScroll();
 
     if (document.fonts?.ready) {
-      document.fonts.ready.then(scheduleGeometryRefresh).catch(() => {});
+      document.fonts.ready.then(() => {
+        scheduleGeometryRefresh();
+        scheduleDesktopStableGeometry('fonts-ready-r663');
+      }).catch(() => {});
     }
     for (const delay of [320, 900, 2200]) scheduleMirrorCapture(delay);
   }
@@ -876,22 +953,29 @@
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('scrollend', onScrollEnd, { passive: true });
   addEventListener('resize', onResize, { passive: true });
-  addEventListener('load', scheduleGeometryRefresh, { once: true, passive: true });
+  addEventListener('load', () => {
+    scheduleGeometryRefresh();
+    scheduleDesktopStableGeometry('load-r663');
+  }, { once: true, passive: true });
   addEventListener('pageshow', () => { if (initialised) scheduleRepair(true); }, { passive: true });
-  addEventListener('formatx:organisminterfaceready', () => { if (initialised) scheduleRepair(false); });
+  addEventListener('formatx:organisminterfaceready', () => {
+    if (!initialised) return;
+    scheduleRepair(false);
+    scheduleDesktopStableGeometry('organism-interface-ready-r663');
+  });
   addEventListener('formatx:organismpanelopen', onPanelOpen);
   addEventListener('formatx:organismpanelclose', () => {
     if (!initialised) return;
     scheduleRepair(false);
     queueMicrotask(() => {
-      settleDesktopStableGeometry('organism-panel-close-r647');
+      settleDesktopStableGeometry('organism-panel-close-r663');
       if (!isMobileFlow() && pendingDesktopRelative != null) commitDesktopTransfer();
     });
   });
   addEventListener('formatx:menustatechange', event => {
     if (initialised && event.detail?.open === false) {
       queueMicrotask(() => {
-        settleDesktopStableGeometry('organism-menu-close-r647');
+        settleDesktopStableGeometry('organism-menu-close-r663');
         if (!isMobileFlow() && pendingDesktopRelative != null) commitDesktopTransfer();
       });
     }
@@ -904,6 +988,7 @@
     const panel = document.querySelector('[data-organism-panel="resources"]');
     if (panel) syncReleaseHub(panel);
     scheduleGeometryRefresh();
+    scheduleDesktopStableGeometry('language-change-r663');
   });
   addEventListener('formatx:coredetailready', () => { if (initialised) scheduleMirrorCapture(80); });
   addEventListener('formatx:real3dready', () => { if (initialised) scheduleMirrorCapture(220); });
@@ -915,6 +1000,8 @@
   else initialise();
 
   addEventListener('pagehide', () => {
+    desktopStableGeneration += 1;
+    cancelAnimationFrame(desktopStableFrame);
     cancelAnimationFrame(scrollFrame);
     cancelAnimationFrame(landingFrame);
     cancelAnimationFrame(geometryFrame);
