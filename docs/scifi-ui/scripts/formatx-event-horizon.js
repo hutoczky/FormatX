@@ -1,10 +1,9 @@
-/* FormatX R642 — contract-window single-owner premium intro release.
+/* FormatX R687 — contract-window single-owner premium intro release.
    MAG startup remains navigation-owned behind the visual cover. Product timing
    remains mobile 1180–1450ms / desktop 1350–1650ms. The existing 1360/1640ms
    visual clock may request release, but exactly one idempotent finalizer owns the
-   actual completion event. R636 also neutralises full-viewport transform promotion
-   synchronously before the optional visual stylesheet arrives, removing the narrow
-   quality-keyframe race without changing the measurable visual clock. */
+   actual completion event. A cheap monotonic watchdog samples only performance.now
+   and calls that same finalizer path; it performs no per-frame DOM/render work. */
 (function(){
 'use strict';
 
@@ -17,6 +16,7 @@ const P0_FX_STYLE='./styles/formatx-intro-p0-r575.css?v=20260907-r635-three-phas
 const PRELOADER_MIN_MS=REDUCED?180:(MOBILE?1180:1350);
 const PRELOADER_MAX_MS=REDUCED?520:(MOBILE?1450:1650);
 const PRELOADER_TICK_MS=80;
+const PRELOADER_WATCHDOG_MS=32;
 const PRELOADER_FADE_MS=REDUCED?0:90;
 const PRELOADER_RELEASE_GUARD_MS=PRELOADER_FADE_MS+PRELOADER_TICK_MS+40;
 const PRELOADER_HIDE_BY_MS=PRELOADER_MAX_MS;
@@ -24,7 +24,7 @@ const PRELOADER_REVEAL_AT_MS=REDUCED?0:Math.max(PRELOADER_MIN_MS,PRELOADER_MAX_M
 const PRELOADER_RELEASE_AT_MS=REDUCED?PRELOADER_MIN_MS:(MOBILE?1220:1400);
 const PRELOADER_VISUAL_MS=MOBILE?1360:1640;
 const PRELOADER_BOOT_AT=performance.now();
-let audio=null,preloaderTimer=0,preloaderDeadlineTimer=0,preloaderRevealTimer=0,preloaderPhaseTimerA=0,preloaderPhaseTimerB=0,preloaderReleased=false,preloaderDeadlineAbort=null;
+let audio=null,preloaderTimer=0,preloaderDeadlineTimer=0,preloaderRevealTimer=0,preloaderPhaseTimerA=0,preloaderPhaseTimerB=0,preloaderWatchdog=0,preloaderReleased=false,preloaderDeadlineAbort=null;
 
 if(!ROOT.dataset.fxReferenceProductionR244)ROOT.dataset.fxReferenceProductionR244=MOBILE?'ready':'desktop';
 ROOT.dataset.fxReferenceComposition=MOBILE?'reference-frame-r244':'desktop-reference-r244';
@@ -51,6 +51,7 @@ ROOT.dataset.fxPreloaderDeadlineR606='compositor-animation-end-advisory-absolute
 ROOT.dataset.fxPreloaderDeadlineR635='immutable-navigation-boot-min-floor-max-ceiling';
 ROOT.dataset.fxPreloaderReleaseOwnerR635='single-idempotent-finalizer';
 ROOT.dataset.fxPreloaderLogicalReleaseR642=MOBILE?'bounded-window-1220':'bounded-window-1400';
+ROOT.dataset.fxPreloaderWatchdogR687='monotonic-32ms-no-dom-single-finalizer';
 ROOT.dataset.fxPreloaderPaintOwnerR575='external-css-pseudo-grid-scan-legacy-dom-suppressed';
 ROOT.dataset.fxPreloaderPaintOwnerR606='bounded-raster-single-compositor-deadline';
 ROOT.dataset.fxPreloaderPaintOwnerR636='sync-no-transform-before-visual-css';ROOT.dataset.fxPreloaderPaintOwnerR641='timing-only-overlay-clock-small-energy-line';
@@ -86,6 +87,7 @@ function cancelPreloaderTimers(){
   if(preloaderRevealTimer)clearTimeout(preloaderRevealTimer);preloaderRevealTimer=0;
   if(preloaderPhaseTimerA)clearTimeout(preloaderPhaseTimerA);preloaderPhaseTimerA=0;
   if(preloaderPhaseTimerB)clearTimeout(preloaderPhaseTimerB);preloaderPhaseTimerB=0;
+  if(preloaderWatchdog)clearInterval(preloaderWatchdog);preloaderWatchdog=0;
 }
 function armDeadline(callback,delay){
   cancelDeadline();
@@ -190,6 +192,11 @@ function runPreloader(overlay){
     preloaderTimer=scheduleAt(PRELOADER_MIN_MS,()=>requestPreloaderRelease('reduced-semantic-ready'));
     return;
   }
+  const watchdogTarget=MOBILE?PRELOADER_MIN_MS:PRELOADER_RELEASE_AT_MS;
+  preloaderWatchdog=setInterval(()=>{
+    if(preloaderReleased)return;
+    if(elapsed()>=watchdogTarget)requestPreloaderRelease('monotonic-watchdog-r687');
+  },PRELOADER_WATCHDOG_MS);
   preloaderTimer=scheduleAt(PRELOADER_RELEASE_AT_MS,()=>requestPreloaderRelease('bounded-window-release'));
   preloaderPhaseTimerA=scheduleAt(PRELOADER_VISUAL_MS*.30,()=>setIntroPhase(overlay,'sync'));
   preloaderPhaseTimerB=scheduleAt(PRELOADER_VISUAL_MS*.75,()=>setIntroPhase(overlay,'ready'));
