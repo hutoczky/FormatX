@@ -58,6 +58,11 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/formatx-content-standard.css',
   '/scifi-ui/styles/formatx-award-readiness.css',
   '/scifi-ui/styles/formatx-flow-first-r74.css',
+  '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
+  '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
+  '/scifi-ui/styles/formatx-mobile-proof-controls-r204.css',
+  '/scifi-ui/styles/formatx-mobile-layout-r207.css',
+  '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
   '/scifi-ui/styles/formatx-mobile-apex-composition.css',
 ]);
 
