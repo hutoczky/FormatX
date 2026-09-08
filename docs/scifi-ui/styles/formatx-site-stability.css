@@ -127,6 +127,7 @@ html.fx-organism-core-active .fx-three-stage-shell {
 
 #main-nav.fx-organism-system-menu {
   z-index: var(--fx-layer-menu) !important;
+  box-sizing: border-box !important;
   touch-action: pan-y;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
