@@ -1,4 +1,4 @@
-/* FormatX r459 — persistent mini MAG assistant.
+/* FormatX r682 — persistent mini MAG assistant.
    The full-size native WebGL MAG remains untouched in the hero. This fixed,
    lightweight companion is only a site-control surface, so it adds no second
    WebGL renderer and cannot compete with the primary MAG GPU budget. */
@@ -234,8 +234,25 @@
   line-height: 1.45;
 }
 
+/* Laptop-width pricing content uses the lower-right information area. Keep the
+   persistent controller visible and fully functional, but anchor it on the
+   opposite edge so it cannot cover the Live OS/evidence links. The open panel
+   follows the same edge and stays inside the viewport. */
+@media (min-width: 901px) and (max-width: 1100px) {
+  .fx-mini-mag-assistant-r459 {
+    left: max(18px, env(safe-area-inset-left));
+    right: auto;
+  }
+  .fx-mini-mag-panel-r459 {
+    left: 0;
+    right: auto;
+    transform-origin: 0 100%;
+  }
+}
+
 @media (max-width: 680px), (pointer: coarse) {
   .fx-mini-mag-assistant-r459 {
+    left: auto;
     right: max(12px, env(safe-area-inset-right));
     bottom: max(14px, env(safe-area-inset-bottom));
     width: 58px;
@@ -250,12 +267,14 @@
   }
   .fx-mini-mag-glyph-r459 { width: 29px; height: 29px; }
   .fx-mini-mag-panel-r459 {
+    left: auto;
     right: 0;
     bottom: 70px;
     width: min(360px, calc(100vw - 24px));
     max-height: min(620px, calc(100dvh - 96px));
     padding: 14px;
     border-radius: 22px;
+    transform-origin: 100% 100%;
   }
 }
 
