@@ -4,10 +4,10 @@
   const root = document.documentElement;
   const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260907-r613-layout-stable-desktop-loop';
+  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260908-r700-resize-before-boundary';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
   const DESKTOP_RUNTIME_GUARD_STYLE = '/scifi-ui/styles/formatx-desktop-runtime-guard-r597.css?v=20260907-r613-final-layout-before-loop';
-  const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260825-r252-core3';
+  const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260908-r696-r603-release-window';
   const HERO_START_HASHES = new Set(['', '#top', '#hero']);
   const DESKTOP_GEOMETRY_SELECTOR = [
     '#main-content > section.scene:not(#hero)',
@@ -38,12 +38,13 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r675-deferred-css-stable-desktop-bridge';
+  root.dataset.fxScrollBootstrapRevision = 'r700-resize-before-boundary-recheck';
   root.dataset.fxScrollIntentPolicyR649 = 'physical-wheel-touch-keyboard-only';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
   root.dataset.fxDesktopLoopLifecycleR621 = 'organism-settle-recheck-through-canonical-scroll-owner';
   root.dataset.fxDesktopLoopSettledCommitR659 = 'scrollend-rechecks-canonical-v7-owner';
+  root.dataset.fxDesktopLoopResyncR700 = 'resize-settle-before-boundary-recheck';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
@@ -190,16 +191,28 @@
     desktopGeometryTimer = window.setTimeout(() => {
       desktopGeometryTimer = 0;
       if (root.dataset.fxInfiniteController !== 'seamless-v7') return;
-      requestLoopGeometryRefresh(source || 'desktop-idle-r621');
-      root.dataset.fxDesktopLoopGeometry = recheckBoundary
-        ? 'lifecycle-boundary-recheck-requested-r621'
-        : 'idle-refresh-requested-r621';
-      if (recheckBoundary) {
-        dispatchEvent(new Event('scroll'));
-        root.dataset.fxDesktopLoopGeometry = source === 'desktop-scrollend-settled-r659'
-          ? 'scrollend-boundary-rechecked-r659'
-          : 'lifecycle-boundary-rechecked-r621';
-      }
+
+      /* R700: v7 listens to resize, not the bootstrap-only custom refresh event.
+         First let its canonical repair/ResizeObserver path settle the live bridge
+         geometry; only then re-evaluate a desktop crossing. This preserves native
+         input while preventing a stale pre-Organism snapshot from swallowing the
+         user's footer-to-hero loop. */
+      root.dataset.fxDesktopLoopGeometry = 'layout-refresh-dispatched-r700';
+      dispatchEvent(new Event('resize'));
+      desktopGeometryTimer = window.setTimeout(() => {
+        desktopGeometryTimer = 0;
+        if (root.dataset.fxInfiniteController !== 'seamless-v7') return;
+        requestLoopGeometryRefresh(source || 'desktop-idle-r700');
+        root.dataset.fxDesktopLoopGeometry = recheckBoundary
+          ? 'settled-boundary-recheck-requested-r700'
+          : 'settled-refresh-complete-r700';
+        if (recheckBoundary) {
+          dispatchEvent(new Event('scroll'));
+          root.dataset.fxDesktopLoopGeometry = source === 'desktop-scrollend-settled-r659'
+            ? 'scrollend-boundary-rechecked-r700'
+            : 'lifecycle-boundary-rechecked-r700';
+        }
+      }, 96);
     }, 90);
   }
 
