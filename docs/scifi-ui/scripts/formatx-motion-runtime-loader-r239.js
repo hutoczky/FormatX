@@ -1,10 +1,10 @@
-/* FormatX r550 compatibility · R620 navigation-owned MAG + SOUND control + independent intent enhancements.
+/* FormatX r550 compatibility · R656 navigation-owned MAG + SOUND control + physical scroll intent isolation.
    MAG and the lightweight SOUND control owner are automatic from navigation. The
-   normal path now requests each owner directly instead of issuing a parallel
-   high-priority speculative preload burst for the same assets. This removes the
-   stale duplicate current-MAG stylesheet warm-up, unused solid-glass warm-up and
-   renderer-ready-only LIFE warm-up while preserving automatic fallback behavior.
-   No user, intro, audit or headless gate. */
+   normal path requests each owner directly without a speculative preload burst.
+   Seamless-scroll bootstrap is now armed only by physical wheel/touch/scroll-key
+   input (or an existing/deep-linked scroll position), so browser-generated scroll
+   events from programmatic scrollIntoView cannot synchronously wake the desktop
+   geometry runtime. No user, intro, audit or headless gate applies to MAG. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -19,6 +19,7 @@ root.dataset.fxDialogueSurfaceR475='booting';
 root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
+root.dataset.fxScrollIntentPolicyR656='physical-wheel-touch-scroll-key-no-scroll-event';
 root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
 root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
 root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
@@ -47,7 +48,7 @@ const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
-const scrollIntentListeners=[['wheel',passive],['scroll',passive],['touchstart',passive],['pointerdown',passive],['keydown',false]];
+const scrollIntentListeners=[['wheel',passive],['touchstart',passive],['pointerdown',passive],['keydown',false]];
 let enhancementsStarted=false,currentRequested=false,soundRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,scrollBootstrapRequested=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
