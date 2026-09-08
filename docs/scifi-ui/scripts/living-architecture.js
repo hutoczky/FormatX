@@ -26,6 +26,7 @@
   let threeLoaderArmed = false;
   let qrDockActivated = false;
   let qrDockObserver = null;
+  let qrDockArmPending = false;
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -35,13 +36,21 @@
     return document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
   }
 
+  const moneyFormatters = new Map();
   function money(value, selectedCurrency) {
-    return new Intl.NumberFormat(language() === 'hu' ? 'hu-HU' : 'en-GB', {
-      style: 'currency',
-      currency: selectedCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+    const locale = language() === 'hu' ? 'hu-HU' : 'en-GB';
+    const key = locale + ':' + selectedCurrency;
+    let formatter = moneyFormatters.get(key);
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: selectedCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      moneyFormatters.set(key, formatter);
+    }
+    return formatter.format(value);
   }
 
   function checkoutHref(planId, selectedCurrency) {
@@ -217,7 +226,7 @@
   function prepareQrDock() {
     const dock = document.getElementById('formatx-plan-qr-dock');
     revealQrDock();
-    if (!dock) return;
+    if (!dock || qrDockObserver || qrDockActivated) return;
     if (!('IntersectionObserver' in window)) {
       activateQrDock();
       return;
@@ -227,6 +236,24 @@
       if (entries.some(entry => entry.isIntersecting)) activateQrDock();
     }, { rootMargin: '700px 0px', threshold: 0 });
     qrDockObserver.observe(dock);
+  }
+
+  function armQrDockAfterCritical() {
+    if (qrDockActivated || qrDockObserver || qrDockArmPending) return;
+    const start = () => {
+      qrDockArmPending = false;
+      prepareQrDock();
+    };
+    if (ROOT.dataset.fxPreloaderR531 === 'done') {
+      if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 });
+      else setTimeout(start, 180);
+      return;
+    }
+    qrDockArmPending = true;
+    addEventListener('formatx:preloadercomplete', () => {
+      if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 });
+      else setTimeout(start, 180);
+    }, { once: true, passive: true });
   }
 
   function syncScene() {
@@ -337,7 +364,11 @@
         if (entry.attributeName === 'lang') languageChanged = true;
       }
       if (sceneChanged || languageChanged) syncScene();
-      if (languageChanged) updateCommerce();
+      /* R706: initial language canonicalisation is startup plumbing, not a
+         commerce interaction. Only an already-activated commerce dock follows
+         passive language mutations; explicit user language/currency actions
+         below still refresh immediately. */
+      if (languageChanged && qrDockActivated) updateCommerce();
     });
     observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
     document.addEventListener('click', event => {
@@ -347,30 +378,35 @@
         updateCommerce();
       }, 0);
     });
-    addEventListener('formatx:languagechange', () => {
+    addEventListener('formatx:languagechange', event => {
       syncScene();
-      updateCommerce();
+      /* A published languagechange with the canonical user-toggle source is a
+         real interaction and must refresh pricing immediately. Other automatic
+         handoffs stay lazy until the commerce dock is active. */
+      if (event.detail?.source === 'single-language-toggle-r462' || qrDockActivated) updateCommerce();
     });
     addEventListener('pageshow', () => {
       revealQrDock();
       if (qrDockActivated) updateCommerce();
-      else prepareQrDock();
+      else armQrDockAfterCritical();
     });
     addEventListener('pagehide', () => {
       observer.disconnect();
       qrDockObserver?.disconnect();
       qrDockObserver = null;
+      qrDockArmPending = false;
     }, { once: true });
   }
 
   function initialise() {
-    ROOT.dataset.fxQrOwner = 'living-v3-performance';
+    ROOT.dataset.fxQrOwner = 'living-v3-performance-r706';
     revealQrDock();
     syncScene();
-    prepareQrDock();
     bind();
+    armQrDockAfterCritical();
     ROOT.dataset.fxLivingArchitecture = 'ready-performance-v3';
     ROOT.dataset.fxCommerceStartupR699 = 'static-pricing-lazy-dynamic-commerce';
+    ROOT.dataset.fxCommerceStartupR706 = 'post-preloader-proximity-or-explicit-user-action';
     dispatchEvent(new CustomEvent('formatx:livingready'));
   }
 
