@@ -70,6 +70,32 @@
     stopSpeech();
   }
 
+  /* R673 — a physical MAG hit can request the deferred dialogue before the
+     voice module has finished loading. If navigation leaves the hero while that
+     transient dialogue has no active focus, it must not pop open later and pin
+     the seamless-scroll lifecycle. A focused question/editor remains untouched. */
+  function dismissTransientDialogueOnScroll() {
+    if (ROOT.dataset.fxOrganismThought !== 'open' || !(shell instanceof HTMLElement)) return;
+    const active = document.activeElement;
+    if (active instanceof Element && shell.contains(active)) return;
+    const hero = document.getElementById('hero');
+    const heroTop = hero instanceof HTMLElement ? Math.max(0, hero.offsetTop) : 0;
+    if (Math.abs(scrollY - heroTop) <= 96) return;
+    closeDialogue();
+    stopSpeech();
+    ROOT.dataset.fxOrganismThoughtDismissR673 = 'scroll-away-unfocused-transient';
+  }
+
+  function closeSystemPanelBeforeDialogue() {
+    if (!document.body?.classList.contains('fx-organism-panel-open')) return;
+    const consoleRoot = document.getElementById('fx-organism-console');
+    const closeControl = consoleRoot?.querySelector('[data-organism-close]');
+    if (closeControl instanceof HTMLElement) {
+      closeControl.click();
+      ROOT.dataset.fxOrganismDialoguePanelHandoff = 'closed-through-owner';
+    }
+  }
+
   function syncVisualViewport() {
     viewportFrame = 0;
     if (!(shell instanceof HTMLElement)) return;
@@ -146,6 +172,7 @@
     }
 
     ROOT.dataset.fxOrganismVoiceStability = 'ready-v4';
+    ROOT.dataset.fxOrganismThoughtDismissPolicyR673 = 'scroll-away-unfocused-transient';
     dispatchEvent(new CustomEvent('formatx:organismvoicestabilityready', {
       detail: {
         duplicateGuard: true,
@@ -154,7 +181,8 @@
         mobileVisualViewportGuard: true,
         panelDialogueHandoff: true,
         explicitOpenVisibilityGuard: true,
-        cspSafeViewportOwnership: true
+        cspSafeViewportOwnership: true,
+        transientScrollAwayDismiss: true
       }
     }));
     return true;
@@ -176,6 +204,10 @@
   addEventListener('formatx:organismpanelopen', suspendForOverlay);
   addEventListener('formatx:pagestartscroll', suspendForOverlay);
   addEventListener('formatx:loop', suspendForOverlay);
+  addEventListener('scroll', () => {
+    dismissTransientDialogueOnScroll();
+    scheduleViewportSync();
+  }, { passive: true });
   addEventListener('resize', scheduleViewportSync, { passive: true });
   addEventListener('orientationchange', scheduleViewportSync, { passive: true });
   document.addEventListener('click', event => {
