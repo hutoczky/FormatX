@@ -1,8 +1,9 @@
-/* FormatX R725 — navigation-owned MAG worker shell with canonical post-release GPU activation.
+/* FormatX R728 — navigation-owned MAG worker shell with bounded failure recovery.
    The canonical stage and one OffscreenCanvas worker shell still start as soon as layout
-   is available. Canvas transfer and the expensive synchronous WebGL context activation
-   are queued only after the canonical preloader lifecycle reports done and the uncovered
-   page has painted, so transport setup cannot contend with the bounded intro release. */
+   is available. Canvas transfer and the expensive WebGL context activation remain queued
+   after the canonical preloader lifecycle and uncovered-page paint. If the worker path
+   genuinely fails, recovery now uses the bounded WebGL1 R727 fallback instead of the
+   desktop-heavy legacy main-thread renderer, keeping scroll/dialogue lifecycle responsive. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -12,7 +13,7 @@ const profile=mobile?'mobile':'desktop';
 root.dataset.fxMagContextPolicyR561=`armed-${profile}-offscreen-webgl1`;
 root.dataset.fxMagOffscreenTransportR598='navigation-shell-transport-deferred';
 const WORKER='/scifi-ui/scripts/formatx-crystal-worker-r564.js?v=20260907-r598-paint-safe-transport';
-const FALLBACK='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260907-r598-main-thread-fallback';
+const FALLBACK='/scifi-ui/scripts/formatx-crystal-bounded-fallback-r727.js?v=20260910-r727-bounded-webgl1';
 const WORKER_INIT_AT_MS='post-intro-release-paint';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -40,8 +41,8 @@ function ensureWorkerTransport(){if(transportCreated)return Boolean(worker&&offs
 try{
 if(typeof Worker!=='function'||typeof HTMLCanvasElement.prototype.transferControlToOffscreen!=='function'){root.dataset.fxMagContextPolicyR561='offscreen-unavailable-main-r326';root.dataset.fxMagOffscreenTransportR598='offscreen-unavailable-main-r326';return;}
 const hero=document.getElementById('hero'),host=hero?.querySelector('.hero-space');if(!(hero instanceof HTMLElement)||!(host instanceof HTMLElement)){root.dataset.fxMagContextPolicyR561='host-unavailable-main-r326';return;}
-stage=document.createElement('div');stage.className='fx-core-mobile-v55-stage fx-crystal-organism-r326-stage';stage.dataset.renderer='crystal-organism-r326';stage.dataset.revision=`r725-${profile}-offscreen-post-release-gpu`;stage.dataset.active='true';stage.setAttribute('aria-hidden','true');host.prepend(stage);canvas=document.createElement('canvas');canvas.className='fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';canvas.setAttribute('aria-hidden','true');stage.appendChild(canvas);const initial=size();if(!initial){stage.remove();root.dataset.fxMagContextPolicyR561='geometry-unavailable-main-r326';return;}canvas.width=initial.width;canvas.height=initial.height;
-root.dataset.fxCrystalOrganismR326='booting';root.dataset.fxCoreReal3d='booting';root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';root.dataset.fxCurrentMagRequestR530=`navigation-owned-r725-${profile}-shell-worker-created`;root.dataset.fxMagOffscreenR564='navigation-shell-created-worker-started';root.dataset.fxMagOffscreenR571=`navigation-shell-created-${profile}-worker-started`;root.dataset.fxMagWorkerInitAtR565=String(WORKER_INIT_AT_MS);
+stage=document.createElement('div');stage.className='fx-core-mobile-v55-stage fx-crystal-organism-r326-stage';stage.dataset.renderer='crystal-organism-r326';stage.dataset.revision=`r728-${profile}-offscreen-post-release-gpu`;stage.dataset.active='true';stage.setAttribute('aria-hidden','true');host.prepend(stage);canvas=document.createElement('canvas');canvas.className='fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';canvas.setAttribute('aria-hidden','true');stage.appendChild(canvas);const initial=size();if(!initial){stage.remove();root.dataset.fxMagContextPolicyR561='geometry-unavailable-main-r326';return;}canvas.width=initial.width;canvas.height=initial.height;
+root.dataset.fxCrystalOrganismR326='booting';root.dataset.fxCoreReal3d='booting';root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';root.dataset.fxCurrentMagRequestR530=`navigation-owned-r728-${profile}-shell-worker-created`;root.dataset.fxMagOffscreenR564='navigation-shell-created-worker-started';root.dataset.fxMagOffscreenR571=`navigation-shell-created-${profile}-worker-started`;root.dataset.fxMagWorkerInitAtR565=String(WORKER_INIT_AT_MS);
 const beginInit=()=>{if(destroyed||fallbackStarted||initPosted)return;root.dataset.fxMagWorkerInitEnteredAtR721=String(performance.now());const start=size()||initial;if(!ensureWorkerTransport())return;initPosted=true;root.dataset.fxMagOffscreenR571=`worker-init-started-${profile}`;root.dataset.fxMagOffscreenTransportR598=`init-posted-${profile}-post-intro-release-paint`;worker.postMessage({type:'init',canvas:offscreen,width:start.width,height:start.height},[offscreen]);offscreen=null;readyTimer=setTimeout(()=>{if(!ready)fallback('ready-timeout');},5500);};
 const queueRendererInitAfterReleasePaint=()=>{if(destroyed||fallbackStarted||initPosted)return;root.dataset.fxMagOffscreenTransportR598=`awaiting-${profile}-post-intro-release-paint`;requestAnimationFrame(()=>requestAnimationFrame(()=>{root.dataset.fxMagGpuActivationR725='canonical-preloader-done-post-release-paint';beginInit();}));};
 root.dataset.fxMagOffscreenTransportR598='navigation-worker-created-awaiting-canonical-release';
