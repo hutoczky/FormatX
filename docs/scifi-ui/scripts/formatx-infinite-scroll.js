@@ -33,18 +33,20 @@
   const DESKTOP_GEOMETRY_ROOT_SELECTOR = '#main-content,.site-footer';
   let mobileGeometryTimer = 0;
   let desktopGeometryTimer = 0;
+  let desktopLifecycleObserver = null;
   let intentArmed = false;
   let intentResolved = false;
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r700-resize-before-boundary-recheck';
+  root.dataset.fxScrollBootstrapRevision = 'r711-lifecycle-materialised-before-boundary-recheck';
   root.dataset.fxScrollIntentPolicyR649 = 'physical-wheel-touch-keyboard-only';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
   root.dataset.fxDesktopLoopLifecycleR621 = 'organism-settle-recheck-through-canonical-scroll-owner';
   root.dataset.fxDesktopLoopSettledCommitR659 = 'scrollend-rechecks-canonical-v7-owner';
   root.dataset.fxDesktopLoopResyncR700 = 'resize-settle-before-boundary-recheck';
+  root.dataset.fxDesktopLoopMaterializeR711 = 'idle-until-runtime';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
@@ -192,33 +194,41 @@
       desktopGeometryTimer = 0;
       if (root.dataset.fxInfiniteController !== 'seamless-v7') return;
 
-      /* R700: v7 listens to resize, not the bootstrap-only custom refresh event.
-         First let its canonical repair/ResizeObserver path settle the live bridge
-         geometry; only then re-evaluate a desktop crossing. This preserves native
-         input while preventing a stale pre-Organism snapshot from swallowing the
-         user's footer-to-hero loop. */
-      root.dataset.fxDesktopLoopGeometry = 'layout-refresh-dispatched-r700';
+      /* R711: once desktop seamless scrolling is user-activated, re-materialise
+         any content-visibility:auto nodes inserted by late Organism/language/UI
+         ownership before v7 snapshots its bridge boundary. This work remains
+         outside initial paint and is debounced away from active scroll frames. */
+      const realised = realiseDesktopDocumentGeometry(source || 'desktop-idle-r711');
+      root.dataset.fxDesktopLoopMaterializeR711 = `${String(source || 'desktop-idle')}:${realised}:${document.documentElement.scrollHeight}`;
+      root.dataset.fxDesktopLoopGeometry = 'layout-materialised-before-refresh-r711';
       dispatchEvent(new Event('resize'));
       desktopGeometryTimer = window.setTimeout(() => {
         desktopGeometryTimer = 0;
         if (root.dataset.fxInfiniteController !== 'seamless-v7') return;
+        realiseDesktopDocumentGeometry(`${String(source || 'desktop-idle')}-post-resize-r711`);
         requestLoopGeometryRefresh(source || 'desktop-idle-r700');
         root.dataset.fxDesktopLoopGeometry = recheckBoundary
-          ? 'settled-boundary-recheck-requested-r700'
-          : 'settled-refresh-complete-r700';
+          ? 'settled-boundary-recheck-requested-r711'
+          : 'settled-refresh-complete-r711';
         if (recheckBoundary) {
           dispatchEvent(new Event('scroll'));
           root.dataset.fxDesktopLoopGeometry = source === 'desktop-scrollend-settled-r659'
-            ? 'scrollend-boundary-rechecked-r700'
-            : 'lifecycle-boundary-rechecked-r700';
+            ? 'scrollend-boundary-rechecked-r711'
+            : 'lifecycle-boundary-rechecked-r711';
         }
       }, 96);
     }, 90);
   }
 
+  function materialiseDesktopLifecycle(source) {
+    if (MOBILE_QUERY.matches || root.dataset.fxInfiniteController !== 'seamless-v7') return;
+    const realised = realiseDesktopDocumentGeometry(source);
+    root.dataset.fxDesktopLoopMaterializeR711 = `${source}:${realised}:${document.documentElement.scrollHeight}`;
+  }
+
   function installDesktopGeometryResync() {
-    if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'isolated-r659') return;
-    root.dataset.fxDesktopLoopGeometryResync = 'isolated-r659';
+    if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'isolated-r711') return;
+    root.dataset.fxDesktopLoopGeometryResync = 'isolated-r711';
     addEventListener('scroll', event => {
       if (!event.isTrusted) return;
       requestDesktopGeometryRefresh(false, 'desktop-scroll-idle-r621');
@@ -227,7 +237,22 @@
       requestDesktopGeometryRefresh(true, 'desktop-scrollend-settled-r659');
     }, { passive: true });
     for (const eventName of ['formatx:controlownerready','formatx:languagechange','pageshow','formatx:organisminterfaceready','formatx:organismpanelopen','formatx:organismpanelclose']) {
-      addEventListener(eventName, () => requestDesktopGeometryRefresh(true, `${eventName}-settled-r621`), { passive: true });
+      addEventListener(eventName, () => {
+        materialiseDesktopLifecycle(`${eventName}-materialised-r711`);
+        requestDesktopGeometryRefresh(true, `${eventName}-settled-r621`);
+      }, { passive: true });
+    }
+    if ('MutationObserver' in window) {
+      desktopLifecycleObserver?.disconnect();
+      desktopLifecycleObserver = new MutationObserver(records => {
+        if (!records.some(record => record.attributeName === 'data-fx-organism-thought')) return;
+        materialiseDesktopLifecycle('organism-thought-materialised-r711');
+        requestDesktopGeometryRefresh(true, 'organism-thought-settled-r711');
+      });
+      desktopLifecycleObserver.observe(root, {
+        attributes: true,
+        attributeFilter: ['data-fx-organism-thought']
+      });
     }
   }
 
@@ -405,4 +430,5 @@
   addEventListener('formatx:organisminterfaceready', realiseDesktopOrganismTriggerGeometry, { passive: true });
   if (root.classList.contains('fx-organism-interface-ready') || root.dataset.fxOrganismInterface === 'ready') queueMicrotask(realiseDesktopOrganismTriggerGeometry);
   armSeamlessRuntime(MOBILE_QUERY.matches ? 'mobile' : 'desktop');
+  addEventListener('pagehide', () => desktopLifecycleObserver?.disconnect(), { once: true });
 }());
