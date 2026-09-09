@@ -46,3 +46,15 @@ body.fx-genome-open{overflow:hidden}
 @media(max-width:980px){.fx-genome-grid{grid-template-columns:1fr}.fx-genome-stage{min-height:62vh}.fx-genome-stage canvas{min-height:62vh}.fx-genome-inspector{grid-template-columns:1fr 1fr}.fx-genome-metrics,.fx-genome-selected,.fx-genome-scrubber,.fx-genome-proof,.fx-genome-privacy{grid-column:1/-1}}
 @media(max-width:620px){.fx-genome-launcher{right:12px;bottom:74px;grid-template-columns:40px;min-width:46px;padding:3px}.fx-genome-launcher>b{display:none}.fx-genome-shell{padding:18px 12px 28px}.fx-genome-topbar{gap:12px}.fx-genome-heading h2{font-size:clamp(32px,12vw,52px)}.fx-genome-heading p{font-size:13px}.fx-genome-close{width:42px;height:42px;flex-basis:42px}.fx-genome-stage,.fx-genome-stage canvas{min-height:58vh}.fx-genome-inspector{grid-template-columns:1fr;padding:12px}.fx-genome-actions{grid-template-columns:1fr}.fx-genome-actions button:first-child{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){.fx-genome-launcher i::before,.fx-genome-launcher i::after,.fx-genome-shell::after{animation:none}.fx-genome-launcher{transition:none}}
+
+/* R709: constrain the open Genome's intrinsic sizing instead of clipping the
+   document. Flex/grid children are allowed to shrink, and padded surface owners
+   use border-box geometry so long bilingual controls cannot increase scrollWidth. */
+.fx-genome-shell,.fx-genome-topbar,.fx-genome-heading,.fx-genome-grid,.fx-genome-stage,.fx-genome-inspector,.fx-genome-metrics,.fx-genome-selected,.fx-genome-scrubber,.fx-genome-actions,.fx-genome-proof,.fx-genome-privacy{box-sizing:border-box;min-width:0;max-width:100%}
+.fx-genome-stage canvas,.fx-genome-metrics>div,.fx-genome-selected dl,.fx-genome-selected dl>div,.fx-genome-actions button,.fx-genome-scrubber label,.fx-genome-scrubber input{box-sizing:border-box;min-width:0;max-width:100%}
+@media(max-width:620px){
+  .fx-genome-shell,.fx-genome-topbar,.fx-genome-grid,.fx-genome-stage,.fx-genome-inspector{width:100%;max-width:100%}
+  .fx-genome-heading{flex:1 1 0;min-width:0}
+  .fx-genome-heading h2,.fx-genome-heading p,.fx-genome-stage-note,.fx-genome-selected h3,.fx-genome-selected p,.fx-genome-actions button,.fx-genome-scrubber label{max-width:100%;overflow-wrap:anywhere}
+  .fx-genome-stage canvas{width:100%;max-width:100%}
+}
