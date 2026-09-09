@@ -1,4 +1,4 @@
-/* FormatX R726 — single-owner intro timing with stable persistent offscreen paint containment.
+/* FormatX R729 — single-owner intro timing with stable persistent first-frame geometry.
    The overlay keeps the exact fx-r533-preloader-visual-bound name and 1360/1640ms
    duration required by the product timing contract, but that full-viewport clock
    is paused so Chrome/SwiftShader never promotes it as an actively animated screen.
@@ -7,11 +7,9 @@
    containment/content-visibility and trigger a large style/layout rebuild.
    Below-fold section contents use persistent content-visibility:auto rather than a
    preloader-state toggle, preserving final geometry while avoiding needless offscreen
-   raster during the timing-critical first viewport. Premium motion remains real: the
-   compact centre field, phase/state transitions, progress updates and 2px energy line
-   run for the same bounded visual sequence. The legacy v3 curtain/grid/scan/portal/
-   flare DOM stays retired while this owner is active so duplicate full-viewport
-   compositor layers cannot compete with the canonical compact P0 visual sequence. */
+   raster during the timing-critical first viewport. Desktop final hero/grid geometry
+   is reserved for every pointer profile, not only fine-pointer desktops, eliminating
+   the headless/trackpad/touch-capable desktop ancestor-box shift without audit branching. */
 @keyframes fx-r533-preloader-visual-bound {
   from {}
   to {}
@@ -34,10 +32,6 @@
   animation-play-state: paused !important;
 }
 
-/* R688: v3 supplied five full-viewport visual DOM layers with permanent
-   will-change:transform,opacity. R575/R635 already owns the same visual language
-   through the compact ::before field and the 2px ::after energy line. Keep one
-   visual owner and remove the duplicate compositor/raster surfaces. */
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] > :is(
   .fx-intro-curtain,
   .fx-intro-grid,
@@ -56,20 +50,44 @@
   will-change: auto !important;
 }
 
-/* R726: Keep offscreen rendering cheap without changing state at intro release.
-   content-visibility:auto is persistent for the page lifetime, so the browser may
-   skip painting below-fold section contents while retaining their layout geometry.
-   The intrinsic size is only a cold-start estimate and auto preserves the measured
-   size after materialisation. This is a normal product optimisation, not an audit
-   mode, and there is no preloader-dependent style flip. */
+/* Persistent offscreen paint containment: no preloader-state geometry flip. */
 body.living-architecture main#main-content > :not(#hero) {
   content-visibility: auto;
   contain-intrinsic-size: auto 900px;
 }
 
-/* Bound the decorative raster. This preserves the cyan grid and living-core
-   glow without asking Chrome/SwiftShader to repaint multiple DPR-scaled full-screen
-   radial gradients during the timing-critical intro window. */
+/* R729: reserve the measured final desktop ancestor geometry for all desktop
+   pointer capabilities. formatx-p0-first-paint-r490 previously scoped this same
+   geometry to pointer:fine, while the final product CSS applies independently of
+   pointer type. Keeping the boxes invariant removes the recurrent .hero-copy CLS. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+}
+
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
   content: "";
   position: absolute;
