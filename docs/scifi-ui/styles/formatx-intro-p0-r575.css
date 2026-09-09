@@ -1,9 +1,10 @@
-/* FormatX R705 — single-owner intro timing with mobile phase raster isolation.
+/* FormatX R716 — single-owner intro timing with stable page geometry beneath cover.
    The overlay keeps the exact fx-r533-preloader-visual-bound name and 1360/1640ms
    duration required by the product timing contract, but that full-viewport clock
    is paused so Chrome/SwiftShader never promotes it as an actively animated screen.
-   While the visual cover is active, only the visible hero viewport is paint-owned;
-   below-fold section contents remain layout boxes but skip rendering until release.
+   The intro is a visual cover only: hero and below-fold document geometry remain in
+   their final product state throughout the bounded window, so release does not flip
+   containment/content-visibility and trigger a large style/layout rebuild.
    Premium motion remains real: the compact centre field, phase/state transitions,
    progress updates and 2px energy line run for the same bounded visual sequence.
    On mobile, phase labels no longer re-raster the large gradient field: the field
@@ -55,21 +56,9 @@
   will-change: auto !important;
 }
 
-/* The page beneath a full visual cover must not spend the deadline window
-   rasterising several screens of mobile hero/proof content. The hero DOM remains
-   visible and measurable (the P0 semantic contract), but its paint is clipped to
-   the current viewport. Later sections keep their outer layout geometry while
-   their contents are skipped. Once data-fx-preloader-r531 becomes done these
-   declarations cease immediately and the ordinary product layout owns rendering. */
-html[data-fx-preloader-r531="active"] body.living-architecture #hero {
-  max-height: 100svh !important;
-  overflow: clip !important;
-  contain: layout paint style !important;
-}
-html[data-fx-preloader-r531="active"] body.living-architecture main#main-content > :not(#hero) {
-  content-visibility: hidden !important;
-  contain-intrinsic-size: auto 900px !important;
-}
+/* The cover does not alter application layout. Browser viewport clipping and the
+   existing product-level containment owners handle offscreen paint independently;
+   changing the preloader state therefore has no document-geometry side effect. */
 
 /* Bound the decorative raster. This preserves the cyan grid and living-core
    glow without asking Chrome/SwiftShader to repaint multiple DPR-scaled full-screen
