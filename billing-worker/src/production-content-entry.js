@@ -1,11 +1,10 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R514 — preserve the proven R513 MAG runtime and R504/R506 first-paint
-   contracts while removing the exact R513 Lighthouse first-divergence owner from
-   the blocking path. R513 artifact 9912491940 showed critical-core-r227 as the
-   sole render blocker on the fast run and the largest modeled H3 blocker on the
-   slow runs. It now uses the existing R487 double-rAF post-first-paint scheduler;
-   MAG clock, PAUSE/RESUME, ASK and renderer ownership remain unchanged. */
+/* FormatX R720 — preserve canonical geometry through the production pipeline.
+   Critical core supplies the desktop body, hero and canvas geometry before paint.
+   Removing its href here defeated the source first-frame contract: later wrappers
+   restored its media/priority but left it unfetched until the 2100ms CSS checkpoint.
+   Only secondary styles belong to the autonomous deferred stylesheet scheduler. */
 
 const STARTUP_REVISION = '20260908-r675-nonblocking-reference-and-visual-css';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
@@ -48,7 +47,6 @@ const ROBOTS = [
 ].join('\n');
 
 const DEFERRED_STYLE_PATHS = new Set([
-  '/scifi-ui/styles/formatx-critical-core-r227.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/platform-status.css',
