@@ -88,20 +88,45 @@ async function snapshot(page, label) {
       const s = getComputedStyle(node, which);
       return { content:s.content, display:s.display, position:s.position, left:s.left, right:s.right, width:s.width, transform:s.transform, translate:s.translate, overflow:s.overflow, visibility:s.visibility, opacity:s.opacity };
     };
+    const fallbackScript = document.querySelector('script[data-fx-r571-fallback]');
+    const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
+    const canvas = stage?.querySelector('.fx-crystal-organism-r326-canvas');
     return {
       label: labelValue,
+      now: performance.now(),
       viewport: { width, height },
       scroll: { html:root.scrollWidth, body:body.scrollWidth, overflow:Math.max(root.scrollWidth,body.scrollWidth)-width },
       datasets: {
         preloader:root.dataset.fxPreloaderR531 || '',
+        preloaderRelease:root.dataset.fxPreloaderReleaseR531 || '',
+        preloaderReleaseElapsed:root.dataset.fxPreloaderReleaseElapsedR635 || '',
         organism:root.dataset.fxOrganismInterface || '',
         thought:root.dataset.fxOrganismThought || '',
         crystal:root.dataset.fxCrystalOrganismR326 || '',
+        coreReal3d:root.dataset.fxCoreReal3d || '',
         shapeSync:root.dataset.fxMagShapeSyncR476 || '',
         renderer:root.dataset.fxCoreRenderer || '',
+        contextPolicy:root.dataset.fxMagContextPolicyR561 || '',
+        offscreen564:root.dataset.fxMagOffscreenR564 || '',
+        offscreen571:root.dataset.fxMagOffscreenR571 || '',
+        transport598:root.dataset.fxMagOffscreenTransportR598 || '',
+        workerInitAt:root.dataset.fxMagWorkerInitAtR565 || '',
+        shaderCompile550:root.dataset.fxCoreShaderCompileR550 || '',
+        shaderCompile558:root.dataset.fxCoreShaderCompileR558 || '',
+        shaderCompile563:root.dataset.fxCoreShaderCompileR563 || '',
+        currentMagRequest:root.dataset.fxCurrentMagRequestR530 || '',
+        coreMobile55:root.dataset.fxCoreMobileV55 || '',
+        coreMobile69:root.dataset.fxCoreMobileV69 || '',
         coreActive:root.classList.contains('fx-organism-core-active'),
         scrollBootstrap:root.dataset.fxScrollBootstrapRevision || '',
         desktopStableBoundary:root.dataset.fxDesktopStableBoundary || '',
+      },
+      magDom: {
+        stageExists: stage instanceof HTMLElement,
+        canvasExists: canvas instanceof HTMLCanvasElement,
+        fallbackScript: fallbackScript instanceof HTMLScriptElement,
+        fallbackSrc: fallbackScript instanceof HTMLScriptElement ? fallbackScript.src : '',
+        stageRevision: stage instanceof HTMLElement ? stage.dataset.revision || '' : '',
       },
       classes: { html:root.className, body:body.className },
       bodyRect: rect(body),
@@ -123,12 +148,19 @@ async function snapshot(page, label) {
     await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
     await activateImmersive(page);
     const early = await snapshot(page, 'organism-interface-ready');
-    console.log('R702_DESKTOP_GEOMETRY_EARLY');
+    console.log('R719_DESKTOP_GEOMETRY_EARLY');
     console.log(JSON.stringify(early, null, 2));
 
-    await waitSemanticMagReady(page);
+    try {
+      await waitSemanticMagReady(page);
+    } catch (error) {
+      const stalled = await snapshot(page, 'semantic-mag-timeout');
+      console.log('R719_DESKTOP_MAG_STALLED');
+      console.log(JSON.stringify(stalled, null, 2));
+      throw error;
+    }
     const semantic = await snapshot(page, 'semantic-mag-ready');
-    console.log('R702_DESKTOP_GEOMETRY_SEMANTIC_MAG_READY');
+    console.log('R719_DESKTOP_GEOMETRY_SEMANTIC_MAG_READY');
     console.log(JSON.stringify(semantic, null, 2));
   } finally {
     await context.close();
