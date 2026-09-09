@@ -65,6 +65,27 @@ async function state(page) {
       overlayOpen: overlay?.dataset.open,
       canvas: [Math.round(rect?.width || 0), Math.round(rect?.height || 0)],
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+      overflowOwners: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > innerWidth + 1
+        ? Array.from(document.querySelectorAll('body *')).flatMap(node => {
+          const rect = node.getBoundingClientRect();
+          if (!rect.width || !rect.height || (rect.right <= innerWidth + 1 && rect.left >= -1)) return [];
+          const style = getComputedStyle(node);
+          return [{ tag: node.tagName, id: node.id, className: String(node.className),
+            left: rect.left, right: rect.right, width: rect.width, position: style.position,
+            overflow: style.overflow, parent: node.parentElement?.className || '' }];
+        }).slice(0, 20) : [],
+      scan: (() => {
+        const shell = document.querySelector('.fx-genome-shell');
+        if (!shell) return null;
+        const style = getComputedStyle(shell, '::after');
+        return { transform: style.transform, width: style.width, position: style.position };
+      })(),
+      overflowContainers: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > innerWidth + 1
+        ? Array.from(document.querySelectorAll('html,body,body *')).filter(node => node.scrollWidth > node.clientWidth + 1 && node.clientWidth > 0).slice(0, 24).map(node => {
+          const style = getComputedStyle(node);
+          const pseudo = which => { const s = getComputedStyle(node, which); return { content:s.content, width:s.width, left:s.left, right:s.right, position:s.position, transform:s.transform, padding:s.padding }; };
+          return { tag:node.tagName, id:node.id, className:String(node.className), scrollWidth:node.scrollWidth, clientWidth:node.clientWidth, overflowX:style.overflowX, overflowY:style.overflowY, before:pseudo('::before'), after:pseudo('::after') };
+        }) : [],
       lang: document.documentElement.lang,
       launcher: Boolean(document.querySelector('.fx-genome-launcher')),
       schemaReady: data.items.every(item => (
@@ -191,7 +212,7 @@ async function mobile(browser) {
   await page.waitForTimeout(150);
   const current = await state(page);
   assert(current.canvas[0] >= 360 && current.canvas[1] >= 420, 'mobile canvas: ' + JSON.stringify(current));
-  assert(current.overflow <= 1, 'mobile horizontal overflow: ' + current.overflow);
+  assert(current.overflow <= 1, 'mobile horizontal overflow: ' + JSON.stringify(current));
   assert(current.launcher && current.count >= 2, 'mobile genome missing: ' + JSON.stringify(current));
   console.log(JSON.stringify({ case: 'interaction-genome-mobile', current }));
   await context.close();
@@ -199,6 +220,7 @@ async function mobile(browser) {
 
 (async () => {
   const browser = await chromium.launch({
+    executablePath: process.env.CHROME_BIN || undefined,
     headless: true,
     args: ['--enable-unsafe-swiftshader', '--disable-smooth-scrolling']
   });
