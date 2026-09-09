@@ -58,3 +58,12 @@ body.fx-genome-open{overflow:hidden}
   .fx-genome-heading h2,.fx-genome-heading p,.fx-genome-stage-note,.fx-genome-selected h3,.fx-genome-selected p,.fx-genome-actions button,.fx-genome-scrubber label{max-width:100%;overflow-wrap:anywhere}
   .fx-genome-stage canvas{width:100%;max-width:100%}
 }
+
+/* R710: the absolute stage note previously combined left:20px with a 100%-wide
+   content box. Its padding and border could therefore add 46–47px to mobile
+   scrollWidth even though the stage itself was correctly bounded. Make the note
+   own a border-box inside explicit stage gutters. */
+.fx-genome-stage-note{box-sizing:border-box;min-width:0}
+@media(max-width:620px){
+  .fx-genome-stage-note{left:12px;right:12px;width:auto;max-width:none}
+}
