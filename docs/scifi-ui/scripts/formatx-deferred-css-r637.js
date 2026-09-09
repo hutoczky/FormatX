@@ -4,8 +4,8 @@
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
   const ACTIVATE_FLOOR_MS = 2100;
-  root.dataset.fxDeferredCssR637 = 'queued-post-fcp-network-deferred';
-  root.dataset.fxDeferredCssPolicyR637 = 'autonomous-post-fcp-absolute-floor-no-user-audit-gate';
+  root.dataset.fxDeferredCssR637 = 'critical-geometry-pre-fcp-decorative-post-fcp';
+  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-pre-fcp-decorative-autonomous-post-fcp-no-user-audit-gate';
   root.dataset.fxDeferredCssFloorR651 = String(ACTIVATE_FLOOR_MS);
 
   let activated = false;
@@ -13,6 +13,22 @@
   let fallback = 0;
   let floorTimer = 0;
   let observer = null;
+
+  function activateCriticalGeometry() {
+    const link = document.querySelector('link[data-fx-critical-signature-r227][data-fx-r637-href]');
+    if (!(link instanceof HTMLLinkElement)) {
+      root.dataset.fxCriticalGeometryR717 = 'unavailable';
+      return false;
+    }
+    const targetMedia = link.dataset.fxR487Media || link.dataset.fxDeferredMediaR300 || 'all';
+    const deferredHref = link.dataset.fxR637Href || '';
+    if (targetMedia && link.media !== targetMedia) link.media = targetMedia;
+    if (deferredHref && !link.getAttribute('href')) link.setAttribute('href', deferredHref);
+    link.setAttribute('fetchpriority', 'high');
+    root.dataset.fxCriticalGeometryR717 = 'requested-before-fcp';
+    root.dataset.fxCriticalGeometryHrefR717 = deferredHref ? 'canonical-r637-href' : 'existing-href';
+    return true;
+  }
 
   function activate(reason) {
     if (activated) return;
@@ -46,7 +62,7 @@
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'autonomous-post-fcp-absolute-2100-r651', reason }
+      detail: { count: links.length, restored, scheduler: 'critical-geometry-pre-fcp-plus-autonomous-post-fcp-absolute-2100-r717', reason }
     }));
   }
 
@@ -93,6 +109,8 @@
       return false;
     }
   }
+
+  activateCriticalGeometry();
 
   if (!observeFcp()) {
     const afterLoad = () => activateAfterCommittedFrame('load-fallback');
