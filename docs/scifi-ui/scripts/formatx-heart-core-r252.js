@@ -314,20 +314,32 @@
     const boundary = mobileLoopBoundary();
     if (!boundary || boundary.overshoot < LOOP_OVERSHOOT) return false;
 
-    const target = Math.max(0, boundary.hero.offsetTop);
+    const liveLandingTarget = () => {
+      const hero = document.querySelector('#main-content > #hero');
+      const owner = hero instanceof HTMLElement ? hero : boundary.hero;
+      return Math.max(0, Math.round(owner.offsetTop || 0));
+    };
+    let target = liveLandingTarget();
     const nextLoopCount = Number(root.dataset.fxLoopCount || 0) + 1;
     root.classList.add('fx-seamless-loop-transfer');
     root.dataset.fxHeartLoopTransfer = source;
     root.dataset.fxInfiniteInput = 'heart-core-transfer';
     root.dataset.fxLoopCount = String(nextLoopCount);
     root.dataset.fxLoopSource = `heart-core-${source}`;
-    root.dataset.fxLoopLanding = String(Math.round(target));
+    root.dataset.fxLoopLanding = String(target);
     root.dataset.fxLoopLandingState = 'heart-core-stabilising';
 
     window.scrollTo({ top: target, left: 0, behavior: 'auto' });
     requestAnimationFrame(() => {
+      target = liveLandingTarget();
+      root.dataset.fxLoopLanding = String(target);
       window.scrollTo({ top: target, left: 0, behavior: 'auto' });
       requestAnimationFrame(() => {
+        target = liveLandingTarget();
+        root.dataset.fxLoopLanding = String(target);
+        if (Math.abs(scrollY - target) > 1) {
+          window.scrollTo({ top: target, left: 0, behavior: 'auto' });
+        }
         root.classList.remove('fx-seamless-loop-transfer');
         root.dataset.fxInfiniteInput = 'native';
         root.dataset.fxLoopLandingState = 'heart-core-settled';
