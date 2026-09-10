@@ -234,11 +234,12 @@
   line-height: 1.45;
 }
 
-/* Laptop-width pricing content uses the lower-right information area. Keep the
-   persistent controller visible and fully functional, but anchor it on the
-   opposite edge so it cannot cover the Live OS/evidence links. The open panel
-   follows the same edge and stays inside the viewport. */
-@media (min-width: 901px) and (max-width: 1100px) {
+/* Laptop and compact-desktop pricing content uses the lower-right information
+   area through 1366px. Keep the persistent controller visible and fully
+   functional, but anchor it on the opposite edge so it cannot cover the Live
+   OS/evidence links. The open panel follows the same edge and stays inside the
+   viewport. Wide desktop returns to the canonical lower-right anchor. */
+@media (min-width: 901px) and (max-width: 1439px) {
   .fx-mini-mag-assistant-r459 {
     left: max(18px, env(safe-area-inset-left));
     right: auto;
