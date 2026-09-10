@@ -1,10 +1,10 @@
-/* FormatX r550 compatibility · R735 navigation-owned MAG + ordered physical scroll activation.
+/* FormatX r550 compatibility · R656 navigation-owned MAG + SOUND control + physical scroll intent isolation.
    MAG and the lightweight SOUND control owner are automatic from navigation. The
    normal path requests each owner directly without a speculative preload burst.
-   Seamless-scroll bootstrap remains armed only by physical wheel/touch/scroll-key
-   input (or an existing/deep-linked scroll position), but deferred enhancement scripts
-   are now inserted before the seamless-scroll bootstrap so the bridge measures the
-   materialised product document rather than a transient pre-enhancement geometry. */
+   Seamless-scroll bootstrap is now armed only by physical wheel/touch/scroll-key
+   input (or an existing/deep-linked scroll position), so browser-generated scroll
+   events from programmatic scrollIntoView cannot synchronously wake the desktop
+   geometry runtime. No user, intro, audit or headless gate applies to MAG. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -20,7 +20,6 @@ root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
 root.dataset.fxScrollIntentPolicyR656='physical-wheel-touch-scroll-key-no-scroll-event';
-root.dataset.fxScrollEnhancementOrderR735='deferred-before-scroll-bootstrap';
 root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
 root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
 root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
@@ -156,11 +155,6 @@ function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
 function onScrollIntent(event){
   if(event.type==='pointerdown'&&event.pointerType!=='touch')return;
   if(event.type==='keydown'&&!['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' '].includes(event.key))return;
-  /* R735: materialise the deferred product runtime first. These dynamic scripts are
-     explicitly async=false, so inserting the platform-scroll owner afterwards keeps
-     execution ordered without blocking the browser's native scroll input. */
-  mountEnhancements();
-  root.dataset.fxScrollEnhancementOrderR735='deferred-inserted-before-scroll-bootstrap';
   ensureScrollBootstrap();
 }
 function openPendingCanonicalAsk(){
@@ -198,7 +192,7 @@ warmCriticalOwners();ensureDialogueSurface();ensureMagShapeSync();ensureLanguage
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
 for(const [type,options] of scrollIntentListeners)addEventListener(type,onScrollIntent,options);
-if(Math.abs(scrollY)>1||(location.hash&&location.hash!=='#top'&&location.hash!=='#hero'))queueMicrotask(()=>{mountEnhancements();ensureScrollBootstrap();});
+if(Math.abs(scrollY)>1||(location.hash&&location.hash!=='#top'&&location.hash!=='#hero'))queueMicrotask(ensureScrollBootstrap);
 
 if(deferred.length){
   for(const [type,options] of intentListeners)addEventListener(type,onIntent,options);
