@@ -307,13 +307,19 @@
     }
 
     const source = queue[index];
-    const dedicatedCoreReady = /^(?:ready-v20|ready-v69)$/.test(root.dataset.fxCoreReal3d || '');
+    const dedicatedCoreState = root.dataset.fxCoreReal3d || '';
+    const currentMagRuntime = root.dataset.fxCurrentMagRuntimeR422 || '';
+    const dedicatedCoreReady = /^(?:ready-v20|ready-v69)$/.test(dedicatedCoreState);
+    const dedicatedCoreBooting = dedicatedCoreState === 'booting' || currentMagRuntime === 'booting';
     const dedicatedCoreSettled = dedicatedCoreReady
-      || ['context-unavailable', 'webgl2-unavailable', 'shader-failed', 'context-lost'].includes(root.dataset.fxCoreReal3d);
+      || dedicatedCoreBooting
+      || ['context-unavailable', 'webgl2-unavailable', 'shader-failed', 'context-lost'].includes(dedicatedCoreState);
     if (dedicatedCoreSettled
       && (source.includes('formatx-apex-native.js') || source.includes('formatx-three-host-safe.js'))) {
       root.dataset.fxNativeApex = 'retired-for-dedicated-core-v69';
-      root.dataset.fxThreeHost = dedicatedCoreReady ? 'single-real3d-v69' : 'canvas2d-safety-fallback-v22';
+      root.dataset.fxThreeHost = dedicatedCoreReady
+        ? 'single-real3d-v69'
+        : (dedicatedCoreBooting ? 'reserved-for-dedicated-core-v69' : 'canvas2d-safety-fallback-v22');
       root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
       load(index + 1);
       return;
