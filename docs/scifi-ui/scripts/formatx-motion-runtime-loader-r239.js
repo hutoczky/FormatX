@@ -1,10 +1,10 @@
-/* FormatX r550 compatibility · R744 release-first automatic MAG + stable physical scroll bootstrap.
-   MAG remains automatic from navigation, but its noncritical worker/runtime bootstrap starts
-   only after the canonical preloader-complete event so it cannot compete with the hard intro
-   release deadline. The lightweight SOUND/language owners remain available during the cover.
-   Seamless-scroll bootstrap remains armed only by physical wheel/touch/scroll-key input (or an
-   existing/deep-linked scroll position). Deferred product geometry is inserted before the bridge
-   owner is requested on both native mobile and desktop paths. No scroll event is used as an
+/* FormatX r550 compatibility · R745 navigation-owned MAG + stable physical scroll bootstrap.
+   MAG and the lightweight SOUND control owner remain automatic from navigation. The
+   normal path requests each owner directly without a speculative preload burst; worker/GPU
+   release-window isolation belongs to the MAG context policy rather than this public owner.
+   Seamless-scroll bootstrap remains armed only by physical wheel/touch/scroll-key input
+   (or an existing/deep-linked scroll position). Deferred product geometry is inserted before
+   the bridge owner on both native mobile and desktop paths. No scroll event is used as an
    activation owner, so programmatic scrolling remains isolated. */
 (function(){
 'use strict';
@@ -23,8 +23,8 @@ root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
 root.dataset.fxScrollIntentPolicyR656='physical-wheel-touch-scroll-key-no-scroll-event';
 root.dataset.fxScrollEnhancementOrderR742='deferred-before-scroll-bootstrap';
 root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
-root.dataset.fxMagNavigationStartupR550='automatic-after-canonical-preloader-release';
-root.dataset.fxMagNavigationStartupR744='waiting-canonical-preloader-complete';
+root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
+root.dataset.fxMagWorkerIsolationR745='context-policy-release-owned';
 root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
 root.dataset.fxMagWarmPathR620='direct-owner-requests-no-speculative-preload-burst';
 
@@ -114,11 +114,6 @@ function ensureCurrentMag(){
   currentRequested=true;
   const script=document.createElement('script');script.src=CURRENT_MAG;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
   root.dataset.fxMotionRuntimeRequestedR271='1';
-  root.dataset.fxMagNavigationStartupR744='requested-post-preloader-complete';
-}
-function ensureCurrentMagAfterIntro(){
-  if(root.dataset.fxPreloaderR531==='done'){ensureCurrentMag();return;}
-  document.addEventListener('formatx:preloadercomplete',ensureCurrentMag,{once:true,passive:true});
 }
 function ensureStaticMotionCss(){
   const existing=document.getElementById('fx-r170-mobile-seam-override');
@@ -197,7 +192,7 @@ root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
 root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r468':mobile.matches?'core-ready-r468-mobile-r326-controller':'core-ready-r468-desktop-r326-controller';
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
-warmCriticalOwners();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureSoundControl();ensureCurrentMagAfterIntro();
+warmCriticalOwners();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureSoundControl();ensureCurrentMag();
 
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
