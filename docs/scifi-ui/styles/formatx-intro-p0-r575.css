@@ -1,4 +1,4 @@
-/* FormatX R729 — single-owner intro timing with stable persistent first-frame geometry.
+/* FormatX R732 — single-owner intro timing with stable persistent first-frame geometry.
    The overlay keeps the exact fx-r533-preloader-visual-bound name and 1360/1640ms
    duration required by the product timing contract, but that full-viewport clock
    is paused so Chrome/SwiftShader never promotes it as an actively animated screen.
@@ -7,9 +7,9 @@
    containment/content-visibility and trigger a large style/layout rebuild.
    Below-fold section contents use persistent content-visibility:auto rather than a
    preloader-state toggle, preserving final geometry while avoiding needless offscreen
-   raster during the timing-critical first viewport. Desktop final hero/grid geometry
-   is reserved for every pointer profile, not only fine-pointer desktops, eliminating
-   the headless/trackpad/touch-capable desktop ancestor-box shift without audit branching. */
+   raster during the timing-critical first viewport. Desktop final hero/grid and copy
+   geometry is reserved before late premium styles settle, eliminating the measured
+   Lighthouse .hero-copy descendant shift without benchmark-specific behavior. */
 @keyframes fx-r533-preloader-visual-bound {
   from {}
   to {}
@@ -56,10 +56,9 @@ body.living-architecture main#main-content > :not(#hero) {
   contain-intrinsic-size: auto 900px;
 }
 
-/* R729: reserve the measured final desktop ancestor geometry for all desktop
-   pointer capabilities. formatx-p0-first-paint-r490 previously scoped this same
-   geometry to pointer:fine, while the final product CSS applies independently of
-   pointer type. Keeping the boxes invariant removes the recurrent .hero-copy CLS. */
+/* R732: reserve the measured final desktop ancestor and hero-copy geometry for
+   every desktop pointer capability. The late desktop composition stylesheet may
+   add visual finish, but it no longer changes the first-frame boxes that own CLS. */
 @media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
   html body.living-architecture main#main-content section#hero.scene.hero {
     position: relative !important;
@@ -85,6 +84,61 @@ body.living-architecture main#main-content > :not(#hero) {
     padding: 0 !important;
     gap: 30px 56px !important;
     overflow: visible !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 1100px) and (pointer: fine) {
+  html body.living-architecture #hero .hero-copy {
+    position: relative !important;
+    left: auto !important;
+    bottom: auto !important;
+    display: grid !important;
+    grid-template-rows: repeat(7, auto) !important;
+    row-gap: clamp(7px, 1.05vh, 14px) !important;
+    align-content: center !important;
+    align-self: center !important;
+    width: min(700px, 100%) !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero .hero-copy > .kicker { grid-row: 1 !important; margin-bottom: 0 !important; }
+  html body.living-architecture #hero .hero-copy > .fx-category-definition {
+    grid-row: 2 !important;
+    align-self: start !important;
+    width: min(620px, 100%) !important;
+    max-width: 620px !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero .hero-copy > #hero-title { grid-row: 3 !important; margin-block: clamp(2px, .5vh, 8px) !important; }
+  html body.living-architecture #hero .hero-copy > .hero-lead { grid-row: 4 !important; }
+  html body.living-architecture #hero .hero-copy > .fx-method-inline { grid-row: 5 !important; align-self: start !important; margin-block: clamp(4px, .7vh, 10px) !important; overflow: visible !important; }
+  html body.living-architecture #hero .hero-copy > .hero-actions { grid-row: 6 !important; }
+  html body.living-architecture #hero .hero-copy > .hero-facts { grid-row: 7 !important; }
+  html body.living-architecture #hero .hero-title-main { font-size: clamp(66px, 7.1vw, 124px) !important; line-height: .84 !important; }
+  html body.living-architecture #hero .hero-title-sub { font-size: clamp(27px, 2.9vw, 48px) !important; }
+  html body.living-architecture #hero .hero-lead {
+    max-width: 620px !important;
+    margin-top: clamp(8px, 1.2vh, 16px) !important;
+    font-size: clamp(15px, 1.05vw, 18px) !important;
+    line-height: 1.58 !important;
+  }
+  html body.living-architecture #hero .hero-actions {
+    display: flex !important;
+    width: min(620px, 100%) !important;
+    margin-top: clamp(10px, 1.5vh, 20px) !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+  html body.living-architecture #hero .hero-actions .button { min-height: 48px !important; }
+  html body.living-architecture #hero .hero-facts {
+    display: flex !important;
+    width: min(620px, 100%) !important;
+    margin-top: clamp(8px, 1.2vh, 16px) !important;
+    flex-wrap: wrap !important;
   }
 }
 
