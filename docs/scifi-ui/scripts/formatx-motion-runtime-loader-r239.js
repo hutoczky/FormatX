@@ -1,11 +1,13 @@
-/* FormatX r550 compatibility · R745 navigation-owned MAG + stable physical scroll bootstrap.
+/* FormatX r550 compatibility · R746 navigation-owned MAG + release-safe physical scroll bootstrap.
    MAG and the lightweight SOUND control owner remain automatic from navigation. The
    normal path requests each owner directly without a speculative preload burst; worker/GPU
    release-window isolation belongs to the MAG context policy rather than this public owner.
    Seamless-scroll bootstrap remains armed only by physical wheel/touch/scroll-key input
    (or an existing/deep-linked scroll position). Deferred product geometry is inserted before
-   the bridge owner on both native mobile and desktop paths. No scroll event is used as an
-   activation owner, so programmatic scrolling remains isolated. */
+   the bridge owner on both native mobile and desktop paths. Restored-position probing is
+   deferred until canonical intro completion so startup never forces layout at the release
+   deadline. No scroll event is used as an activation owner, so programmatic scrolling
+   remains isolated. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -22,6 +24,7 @@ root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
 root.dataset.fxScrollIntentPolicyR656='physical-wheel-touch-scroll-key-no-scroll-event';
 root.dataset.fxScrollEnhancementOrderR742='deferred-before-scroll-bootstrap';
+root.dataset.fxScrollRestorationProbeR746='armed-after-canonical-intro-release';
 root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
 root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
 root.dataset.fxMagWorkerIsolationR745='context-policy-release-owned';
@@ -184,6 +187,20 @@ function activateCanonicalAsk(event){
   }else mountEnhancements();
   queueMicrotask(openPendingCanonicalAsk);
 }
+function activateExistingScrollAfterIntro(){
+  if(scrollBootstrapRequested)return;
+  root.dataset.fxScrollRestorationProbeR746='checking-after-canonical-intro-release';
+  if(Math.abs(scrollY)<=1){root.dataset.fxScrollRestorationProbeR746='top-no-bootstrap';return;}
+  mountEnhancements();
+  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-deferred-inserted-before-restored-scroll-bootstrap`;
+  root.dataset.fxScrollRestorationProbeR746='restored-scroll-bootstrap';
+  ensureScrollBootstrap();
+}
+function armExistingScrollProbeAfterIntro(){
+  const probe=()=>setTimeout(activateExistingScrollAfterIntro,0);
+  if(root.dataset.fxPreloaderR531==='done')probe();
+  else document.addEventListener('formatx:preloadercomplete',probe,{once:true,passive:true});
+}
 
 root.dataset.fxMotionRuntimeRequestedR271='0';
 root.dataset.fxMotionRuntimeDeferredCountR284=String(deferred.length);
@@ -197,15 +214,18 @@ warmCriticalOwners();ensureDialogueSurface();ensureMagShapeSync();ensureLanguage
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
 for(const [type,options] of scrollIntentListeners)addEventListener(type,onScrollIntent,options);
-if(Math.abs(scrollY)>1||(location.hash&&location.hash!=='#top'&&location.hash!=='#hero'))queueMicrotask(()=>{
+const deepLinked=Boolean(location.hash&&location.hash!=='#top'&&location.hash!=='#hero');
+if(deepLinked)queueMicrotask(()=>{
   mountEnhancements();
   root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-deferred-inserted-before-deeplink-bootstrap`;
+  root.dataset.fxScrollRestorationProbeR746='deeplink-bootstrap-no-layout-probe';
   ensureScrollBootstrap();
 });
+else armExistingScrollProbeAfterIntro();
 
 if(deferred.length){
   for(const [type,options] of intentListeners)addEventListener(type,onIntent,options);
   addEventListener('formatx:immersiveactivate',mountEnhancements,{passive:true});
-  if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')mountEnhancements();
+  if(deepLinked)mountEnhancements();
 }
 }());
