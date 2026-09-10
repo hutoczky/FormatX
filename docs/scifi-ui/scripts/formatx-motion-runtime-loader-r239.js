@@ -1,11 +1,11 @@
-/* FormatX r550 compatibility · R740 navigation-owned MAG + SOUND control + stable physical desktop scroll bootstrap.
+/* FormatX r550 compatibility · R742 navigation-owned MAG + SOUND control + stable physical scroll bootstrap.
    MAG and the lightweight SOUND control owner are automatic from navigation. The
    normal path requests each owner directly without a speculative preload burst.
    Seamless-scroll bootstrap remains armed only by physical wheel/touch/scroll-key
-   input (or an existing/deep-linked scroll position). On desktop, deferred product
-   geometry is inserted before the bridge owner is requested so its first boundary is
-   measured from the materialised document. Mobile keeps the established native path.
-   Programmatic scroll events still do not wake the desktop geometry runtime. */
+   input (or an existing/deep-linked scroll position). Deferred product geometry is
+   inserted before the bridge owner is requested so its first boundary is measured
+   from the materialised document on both native mobile and desktop paths. No scroll
+   event is used as an activation owner, so programmatic scrolling remains isolated. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -21,7 +21,7 @@ root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
 root.dataset.fxScrollIntentPolicyR656='physical-wheel-touch-scroll-key-no-scroll-event';
-root.dataset.fxScrollEnhancementOrderR740='desktop-deferred-before-scroll-bootstrap';
+root.dataset.fxScrollEnhancementOrderR742='deferred-before-scroll-bootstrap';
 root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
 root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
 root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
@@ -157,10 +157,8 @@ function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
 function onScrollIntent(event){
   if(event.type==='pointerdown'&&event.pointerType!=='touch')return;
   if(event.type==='keydown'&&!['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' '].includes(event.key))return;
-  if(!mobile.matches){
-    mountEnhancements();
-    root.dataset.fxScrollEnhancementOrderR740='desktop-deferred-inserted-before-scroll-bootstrap';
-  }
+  mountEnhancements();
+  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-deferred-inserted-before-scroll-bootstrap`;
   ensureScrollBootstrap();
 }
 function openPendingCanonicalAsk(){
@@ -199,7 +197,8 @@ document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
 for(const [type,options] of scrollIntentListeners)addEventListener(type,onScrollIntent,options);
 if(Math.abs(scrollY)>1||(location.hash&&location.hash!=='#top'&&location.hash!=='#hero'))queueMicrotask(()=>{
-  if(!mobile.matches){mountEnhancements();root.dataset.fxScrollEnhancementOrderR740='desktop-deferred-inserted-before-deeplink-bootstrap';}
+  mountEnhancements();
+  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-deferred-inserted-before-deeplink-bootstrap`;
   ensureScrollBootstrap();
 });
 
