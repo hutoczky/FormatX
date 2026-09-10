@@ -157,6 +157,7 @@
       const apiSource = '/api/checkout-qr?plan=' + encodeURIComponent(plan)
         + '&cycle=monthly&currency=' + encodeURIComponent(selectedCurrency)
         + '&v=20260730-qr1';
+      // R741: use the shipped checkout code before requesting server generation.
       const localSource = './assets/qr/' + plan + '-' + assetCurrency + '.svg?v=20260730-qr1';
       const checkoutSource = './checkout.html?plan=' + encodeURIComponent(plan)
         + '&cycle=monthly&currency=' + encodeURIComponent(selectedCurrency)
@@ -184,13 +185,13 @@
         card.classList.remove('is-qr-loading', 'is-qr-error');
         card.classList.add('is-qr-ready');
         image.dataset.fxQrSource = image.currentSrc || image.src;
-        root.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'local-fallback' : 'api';
+        root.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'api-fallback' : 'local-asset';
       };
 
       image.onerror = () => {
         if (image.dataset.fxQrFallback !== 'true') {
           image.dataset.fxQrFallback = 'true';
-          image.src = localSource;
+          image.src = apiSource;
           return;
         }
         card.classList.remove('is-qr-loading', 'is-qr-ready');
@@ -198,8 +199,8 @@
         root.dataset.fxQrDelivery = 'failed';
       };
 
-      if (image.getAttribute('src') !== apiSource || !image.complete || image.naturalWidth < 32) {
-        image.src = apiSource;
+      if (image.getAttribute('src') !== localSource || !image.complete || image.naturalWidth < 32) {
+        image.src = localSource;
       } else {
         image.onload();
       }

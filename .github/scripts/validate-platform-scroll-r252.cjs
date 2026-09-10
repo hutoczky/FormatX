@@ -199,7 +199,11 @@ async function verifyMobile(browser) {
   for (let cycle = 0; cycle < 2; cycle += 1) {
     const before = await state(page);
     await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, left: 0, behavior: 'auto' }));
-    await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
+    try {
+      await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
+    } catch (error) {
+      throw new Error(`mobile loop timeout diagnostics: ${JSON.stringify({ cycle: cycle + 1, before, stuck: await state(page) })}; ${error.message}`);
+    }
     await page.waitForFunction(() => document.documentElement.dataset.fxLoopLandingState === 'heart-core-settled', null, { timeout: 4000 });
     await page.waitForTimeout(180);
     const after = await state(page);

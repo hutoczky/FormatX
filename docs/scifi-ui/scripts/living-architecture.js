@@ -273,6 +273,8 @@
 
   function loadQrImage(card, image, planId, selectedCurrency, generation) {
     const apiSource = qrApiUrl(planId, selectedCurrency);
+    // R741: these immutable checkout codes ship with the page. Avoid an
+    // unnecessary API round trip; retain the real endpoint as a failure path.
     const localSource = qrLocalUrl(planId, selectedCurrency);
 
     card.classList.remove('is-qr-ready', 'is-qr-error');
@@ -289,14 +291,14 @@
       }
       card.classList.remove('is-qr-loading', 'is-qr-error');
       card.classList.add('is-qr-ready');
-      ROOT.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'local-fallback' : 'api';
+      ROOT.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'api-fallback' : 'local-asset';
     };
 
     image.onerror = () => {
       if (generation !== qrGeneration) return;
       if (image.dataset.fxQrFallback !== 'true') {
         image.dataset.fxQrFallback = 'true';
-        image.src = localSource;
+        image.src = apiSource;
         return;
       }
       card.classList.remove('is-qr-loading', 'is-qr-ready');
@@ -304,8 +306,8 @@
       ROOT.dataset.fxQrDelivery = 'failed';
     };
 
-    if (image.getAttribute('src') !== apiSource || !image.complete || image.naturalWidth < 32) {
-      image.src = apiSource;
+    if (image.getAttribute('src') !== localSource || !image.complete || image.naturalWidth < 32) {
+      image.src = localSource;
     } else {
       image.onload();
     }
