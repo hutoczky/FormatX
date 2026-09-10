@@ -1,9 +1,9 @@
-/* FormatX R736 — navigation-owned MAG worker shell with task-yield GPU activation and immediate bounded fallback handoff.
+/* FormatX R737 — navigation-owned MAG worker shell with task-yield GPU activation and independently executable bounded fallback handoff.
    The canonical stage and one OffscreenCanvas worker shell still start as soon as layout
    is available. Canvas transfer and WebGL activation happen in a next-task yield after
    canonical preloader completion instead of depending on animation frames that may be
-   throttled or starved. Genuine worker failure keeps durable state and immediately appends
-   the bounded WebGL1 fallback without creating a no-owner gap. */
+   throttled or starved. Genuine worker failure keeps the current visual surface while the
+   bounded WebGL1 fallback loads independently of unrelated ordered dynamic scripts. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -35,6 +35,7 @@ function fallback(reason){
  root.dataset.fxMagOffscreenTransportR598=`fallback-${reason}`;
  root.dataset.fxCoreFallbackR733=`handoff-${reason}`;
  root.dataset.fxCoreFallbackR734=`immediate-handoff-${reason}`;
+ root.dataset.fxCoreFallbackR737=`independent-script-handoff-${reason}`;
  try{worker?.terminate();}catch(_){}
  worker=null;offscreen=null;
  try{ro?.disconnect();io?.disconnect();}catch(_){}
@@ -45,14 +46,16 @@ function fallback(reason){
  root.dataset.fxCoreRenderer='fallback-handoff-pending';
  root.dataset.fxCoreFallbackLoaderR733='superseded-r734-immediate-append';
  root.dataset.fxCoreFallbackLoaderR734='appending-after-worker-retire';
+ root.dataset.fxCoreFallbackLoaderR737='appending-independent-script';
  const script=document.createElement('script');
  script.src=FALLBACK;
- script.async=false;
+ script.async=true;
  script.dataset.fxR571Fallback='true';
  script.dataset.fxR733FallbackHandoff='true';
  script.dataset.fxR734FallbackHandoff='true';
- script.addEventListener('load',()=>{root.dataset.fxCoreFallbackLoaderR734=root.dataset.fxCrystalOrganismR326==='ready'?'ready':'loaded-awaiting-canonical-ready';},{once:true});
- script.addEventListener('error',()=>{root.dataset.fxCoreFallbackLoaderR734='load-failed';root.dataset.fxCrystalOrganismR326='fallback-load-failed';root.dataset.fxCoreReal3d='fallback-load-failed';root.dataset.fxCoreRenderer='fallback-load-failed';},{once:true});
+ script.dataset.fxR737FallbackHandoff='true';
+ script.addEventListener('load',()=>{root.dataset.fxCoreFallbackLoaderR734=root.dataset.fxCrystalOrganismR326==='ready'?'ready':'loaded-awaiting-canonical-ready';root.dataset.fxCoreFallbackLoaderR737=root.dataset.fxCrystalOrganismR326==='ready'?'ready':'loaded-awaiting-canonical-ready';},{once:true});
+ script.addEventListener('error',()=>{root.dataset.fxCoreFallbackLoaderR734='load-failed';root.dataset.fxCoreFallbackLoaderR737='load-failed';root.dataset.fxCrystalOrganismR326='fallback-load-failed';root.dataset.fxCoreReal3d='fallback-load-failed';root.dataset.fxCoreRenderer='fallback-load-failed';},{once:true});
  document.head.appendChild(script);
 }
 function size(){const rect=stage?.getBoundingClientRect();if(!rect||rect.width<2||rect.height<2)return null;const dpr=Math.min(devicePixelRatio||1,mobile?1.35:1.25),budget=mobile?560000:650000;let width=Math.max(2,Math.round(rect.width*dpr)),height=Math.max(2,Math.round(rect.height*dpr));if(width*height>budget){const k=Math.sqrt(budget/(width*height));width=Math.round(width*k);height=Math.round(height*k);}return{width,height,cssWidth:rect.width,cssHeight:rect.height};}
@@ -69,8 +72,8 @@ function ensureWorkerTransport(){if(transportCreated)return Boolean(worker&&offs
 try{
 if(typeof Worker!=='function'||typeof HTMLCanvasElement.prototype.transferControlToOffscreen!=='function'){root.dataset.fxMagContextPolicyR561='offscreen-unavailable-main-r326';root.dataset.fxMagOffscreenTransportR598='offscreen-unavailable-main-r326';return;}
 const hero=document.getElementById('hero'),host=hero?.querySelector('.hero-space');if(!(hero instanceof HTMLElement)||!(host instanceof HTMLElement)){root.dataset.fxMagContextPolicyR561='host-unavailable-main-r326';return;}
-stage=document.createElement('div');stage.className='fx-core-mobile-v55-stage fx-crystal-organism-r326-stage';stage.dataset.renderer='crystal-organism-r326';stage.dataset.revision=`r736-${profile}-offscreen-task-yield-fallback-handoff`;stage.dataset.active='true';stage.setAttribute('aria-hidden','true');host.prepend(stage);canvas=document.createElement('canvas');canvas.className='fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';canvas.setAttribute('aria-hidden','true');stage.appendChild(canvas);const initial=size();if(!initial){stage.remove();root.dataset.fxMagContextPolicyR561='geometry-unavailable-main-r326';return;}canvas.width=initial.width;canvas.height=initial.height;
-root.dataset.fxCrystalOrganismR326='booting';root.dataset.fxCoreReal3d='booting';root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';root.dataset.fxCurrentMagRequestR530=`navigation-owned-r736-${profile}-shell-worker-created`;root.dataset.fxMagOffscreenR564='navigation-shell-created-worker-started';root.dataset.fxMagOffscreenR571=`navigation-shell-created-${profile}-worker-started`;root.dataset.fxMagWorkerInitAtR565=String(WORKER_INIT_AT_MS);
+stage=document.createElement('div');stage.className='fx-core-mobile-v55-stage fx-crystal-organism-r326-stage';stage.dataset.renderer='crystal-organism-r326';stage.dataset.revision=`r737-${profile}-offscreen-eventloop-yield-fallback-handoff`;stage.dataset.active='true';stage.setAttribute('aria-hidden','true');host.prepend(stage);canvas=document.createElement('canvas');canvas.className='fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';canvas.setAttribute('aria-hidden','true');stage.appendChild(canvas);const initial=size();if(!initial){stage.remove();root.dataset.fxMagContextPolicyR561='geometry-unavailable-main-r326';return;}canvas.width=initial.width;canvas.height=initial.height;
+root.dataset.fxCrystalOrganismR326='booting';root.dataset.fxCoreReal3d='booting';root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';root.dataset.fxCurrentMagRequestR530=`navigation-owned-r737-${profile}-shell-worker-created`;root.dataset.fxMagOffscreenR564='navigation-shell-created-worker-started';root.dataset.fxMagOffscreenR571=`navigation-shell-created-${profile}-worker-started`;root.dataset.fxMagWorkerInitAtR565=String(WORKER_INIT_AT_MS);
 const beginInit=()=>{if(destroyed||fallbackStarted||initPosted)return;root.dataset.fxMagWorkerInitEnteredAtR721=String(performance.now());const start=size()||initial;if(!ensureWorkerTransport())return;initPosted=true;root.dataset.fxMagOffscreenR571=`worker-init-started-${profile}`;root.dataset.fxMagOffscreenTransportR598=`init-posted-${profile}-post-intro-release-task-yield`;worker.postMessage({type:'init',canvas:offscreen,width:start.width,height:start.height},[offscreen]);offscreen=null;readyTimer=setTimeout(()=>{if(!ready)fallback('ready-timeout');},5500);};
 const queueRendererInitAfterReleasePaint=()=>{if(destroyed||fallbackStarted||initPosted)return;root.dataset.fxMagOffscreenTransportR598=`awaiting-${profile}-post-intro-release-task-yield`;let started=false;const activate=()=>{if(started||destroyed||fallbackStarted||initPosted)return;started=true;root.dataset.fxMagGpuActivationR725='canonical-preloader-done-post-release-task-yield';beginInit();};const browserScheduler=globalThis.scheduler;if(browserScheduler&&typeof browserScheduler.postTask==='function'){browserScheduler.postTask(activate,{priority:'user-visible'}).catch(()=>{});}initTimer=setTimeout(activate,0);};
 root.dataset.fxMagOffscreenTransportR598='navigation-worker-created-awaiting-canonical-release';
