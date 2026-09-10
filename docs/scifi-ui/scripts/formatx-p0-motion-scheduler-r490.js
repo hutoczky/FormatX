@@ -1,13 +1,13 @@
-/* FormatX R549 — single navigation-owned MAG + sound control + post-first-paint enhancements.
-   The lightweight MAG shell/heart and SOUND owner arm automatically from navigation.
-   The one current MAG loader uses the same R549 first-paint-under-intro identity
-   everywhere, preventing duplicate cache identities from fetching startup twice.
-   Heavy motion/Organism enhancements remain late/intent-driven. */
+/* FormatX R748 — intro-isolated navigation runtime bootstrap.
+   The preloader is a visual cover, never an application boot barrier.
+   SOUND ownership, the current MAG loader and enhancement runtime start only
+   after the durable canonical preloader completion state has been published.
+   MAG startup remains automatic and has no user-intent gate. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r549-single-navigation-mag-sound-control';
+root.dataset.fxP0MotionSchedulerR490='armed-r748-post-intro-runtime';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r549-first-paint-under-intro-no-user-gate';
 const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r549-first-paint-yield-under-intro';
 const SOUND_CONTROL_SRC='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r542-professional-owner-authoritative';
@@ -15,9 +15,17 @@ const AUTO_DELAY_MS=6500;
 let started=false;
 let criticalMagStarted=false;
 let soundControlStarted=false;
+let postIntroStarted=false;
 let idleId=0;
 let timer=0;
 
+function isPreloaderComplete(){
+  return window.__formatxPreloaderComplete===true
+    || root.dataset.formatxPreloader==='complete'
+    || root.dataset.preloaderComplete==='true'
+    || document.body?.dataset.preloaderComplete==='true'
+    || document.body?.classList.contains('fx-preloader-complete');
+}
 function clearPending(){
   if(timer){clearTimeout(timer);timer=0;}
   if(idleId&&'cancelIdleCallback' in window){cancelIdleCallback(idleId);idleId=0;}
@@ -31,7 +39,7 @@ function startSoundControl(){
   if(document.querySelector('script[data-fx-wda-hardening-r539]')){
     root.dataset.fxSoundNavigationOwnerR539='already-requested';return;
   }
-  root.dataset.fxSoundNavigationOwnerR539='requested-navigation';
+  root.dataset.fxSoundNavigationOwnerR539='requested-navigation-post-intro-r748';
   const script=document.createElement('script');script.src=SOUND_CONTROL_SRC;script.async=false;script.dataset.fxWdaHardeningR539='true';
   script.addEventListener('load',()=>{root.dataset.fxSoundNavigationOwnerR539=root.dataset.fxWdaHardening==='r263'?'ready-navigation':'loaded-awaiting-owner';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxSoundNavigationOwnerR539='load-failed';},{once:true});
@@ -46,7 +54,7 @@ function startCriticalMag(){
   if(document.querySelector('script[data-fx-current-mag-loader-r422]')){
     root.dataset.fxMagNavigationBootR536='already-requested';return;
   }
-  root.dataset.fxMagNavigationBootR536='requested-navigation-r549-single-identity';
+  root.dataset.fxMagNavigationBootR536='requested-navigation-post-intro-r748';
   const script=document.createElement('script');script.src=CRITICAL_MAG_SRC;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';script.dataset.fxNavigationMagR536='true';
   script.addEventListener('load',()=>{root.dataset.fxMagNavigationBootR536=/^(?:ready|booting)$/.test(root.dataset.fxCurrentMagRuntimeR422||'')?'loaded-navigation':'loaded-awaiting-current-mag';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxMagNavigationBootR536='load-failed';},{once:true});
@@ -69,21 +77,28 @@ function runLateAuto(){
     root.dataset.fxP0MotionSchedulerR490='enhancements-waiting-visible-r536';timer=setTimeout(runLateAuto,2000);return;
   }
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
-    root.dataset.fxP0MotionSchedulerR490='reduced-motion-critical-mag-only-r536';return;
+    root.dataset.fxP0MotionSchedulerR490='reduced-motion-post-intro-runtime-r748';return;
   }
-  const launch=()=>start('late-auto-r536');
+  const launch=()=>start('late-auto-r748');
   if('requestIdleCallback' in window)idleId=requestIdleCallback(launch,{timeout:2500});
   else timer=setTimeout(launch,250);
 }
 function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    root.dataset.fxP0FirstPaintR490='committed-r536';timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
+    root.dataset.fxP0FirstPaintR490='committed-r748';timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
   }));
 }
-function onIntent(event){if(event&&event.isTrusted===false)return;start(`user-${event?.type||'intent'}-r536`);}
-for(const type of ['pointerdown','touchstart','keydown','wheel'])addEventListener(type,onIntent,{once:true,passive:true});
-startSoundControl();
-startCriticalMag();
-if(document.readyState==='loading')addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
-else armLateFallback();
+function onIntent(event){if(event&&event.isTrusted===false)return;start(`user-${event?.type||'intent'}-r748`);}
+function startPostIntroRuntime(){
+  if(postIntroStarted)return;
+  postIntroStarted=true;
+  root.dataset.fxP0MotionSchedulerR490='post-intro-runtime-starting-r748';
+  startSoundControl();
+  startCriticalMag();
+  if(document.readyState==='loading')addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
+  else armLateFallback();
+  for(const type of ['pointerdown','touchstart','keydown','wheel'])addEventListener(type,onIntent,{once:true,passive:true});
+}
+if(isPreloaderComplete())queueMicrotask(startPostIntroRuntime);
+else addEventListener('formatx:preloadercomplete',startPostIntroRuntime,{once:true,passive:true});
 }());
