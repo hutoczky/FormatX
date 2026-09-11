@@ -51,13 +51,11 @@
   will-change: auto !important;
 }
 
-/* Persistent offscreen paint containment: no preloader-state geometry flip. */
 body.living-architecture main#main-content > :not(#hero) {
   content-visibility: auto;
   contain-intrinsic-size: auto 900px;
 }
 
-/* Reserve the measured final desktop ancestor geometry. */
 @media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
   html body.living-architecture main#main-content section#hero.scene.hero {
     position: relative !important;
@@ -183,20 +181,16 @@ body.living-architecture main#main-content > :not(#hero) {
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"]::before { opacity: .075; }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-word { color: #f5fdff !important; }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] :is(.fx-intro-status,[data-fx-intro-output]) { color: rgba(137,231,255,.88) !important; }
-
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"]::before { opacity: .13; }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-word { color: #f7fdff !important; }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] :is(.fx-intro-status,[data-fx-intro-output]) { color: rgba(163,219,255,.94) !important; }
-
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"]::before { opacity: .085; }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-word { color: #fbfeff !important; }
 #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] :is(.fx-intro-status,[data-fx-intro-output]) { color: rgba(255,226,158,.94) !important; }
-
 #formatx-event-horizon[data-fx-preloader-r531="active"] progress[data-fx-intro-progress] {
   accent-color: rgb(96,220,255);
   transition: opacity 120ms ease !important;
 }
-
 html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx-preloader-reveal-r635 {
   opacity: 0 !important;
   transition: opacity 90ms ease-out !important;
@@ -212,9 +206,7 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   }
   #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"]::before,
   #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"]::before,
-  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"]::before {
-    opacity: .10 !important;
-  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"]::before { opacity: .10 !important; }
   #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
     width: min(82vw,520px);
     animation-duration: 820ms;
@@ -233,16 +225,10 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     transition: none !important;
     text-shadow: none !important;
   }
-  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
-    opacity: .075;
-    transform: translate(-50%, -50%);
-  }
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before { opacity: .075; transform: translate(-50%, -50%); }
   #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after { opacity: 0; transform: none; }
 }
 
-/* R750: the cover owns no independently rasterized full-frame decoration during the
-   bounded release window. Keep the premium static material and readable status, but
-   eliminate pseudo-layer animation/blending that can delay browser task service. */
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
   content: none !important;
@@ -255,19 +241,19 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   will-change: auto !important;
 }
 
-/* R750: the blocking P0 sheet already owns the final desktop copy box. Do not let
-   this dynamically attached quality layer switch that box from block to grid after
-   first paint; late typography may refine paint only, never layout mode/placement. */
+/* R752 — undo only the R750 desktop-copy box clamp that displaced the 1366px hero
+   information into the fixed mini-MAG footprint. Keep the quiet cover optimization,
+   but restore the already-proven R749 desktop content geometry. */
 @media (prefers-reduced-motion: no-preference) and (min-width: 1100px) and (pointer: fine) {
   html:root:root body.living-architecture #hero > .hero-grid > .hero-copy {
     display: block !important;
-    align-self: center !important;
-    width: 100% !important;
-    max-width: 580px !important;
-    min-height: 627px !important;
-    contain: layout style !important;
+    align-self: auto !important;
+    width: min(700px, 100%) !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    contain: none !important;
   }
 }
 
 /* production-r750-static-cover-no-pseudo-raster */
-/* production-r750-desktop-copy-layout-owned-by-blocking-p0 */
+/* production-r752-restored-r749-desktop-copy-geometry */
