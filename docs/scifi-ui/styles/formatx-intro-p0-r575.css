@@ -1,16 +1,14 @@
-/* FormatX R747 — single-owner intro timing with stable persistent first-frame geometry and a release-safe compositor quiet hold.
+/* FormatX R750 — single-owner intro timing with stable persistent first-frame geometry and a release-safe compositor quiet hold.
    The overlay keeps the exact fx-r533-preloader-visual-bound name and 1360/1640ms
    duration required by the product timing contract, but that full-viewport clock
    is paused so Chrome/SwiftShader never promotes it as an actively animated screen.
    The intro is a visual cover only: hero and below-fold document geometry remain in
    their final product state throughout the bounded window, so release does not flip
    containment/content-visibility and trigger a large style/layout rebuild.
-   The small energy sweep finishes before the hard release window and does not retain
-   a will-change promotion through the deadline, leaving a quiet compositor hold before
-   release. Below-fold section contents use persistent content-visibility:auto rather
-   than a preloader-state toggle, preserving final geometry while avoiding needless
-   offscreen raster during the timing-critical first viewport. Desktop final hero/grid
-   and copy geometry stays reserved before late premium styles settle. */
+   The critical cover is a static premium material while active: no full-frame pseudo
+   raster animation or blend stack competes with the monotonic release owner. Desktop
+   hero-copy keeps the blocking first-paint layout mode, so this late quality sheet
+   cannot change the LCP box after first paint. */
 @keyframes fx-r533-preloader-visual-bound {
   from {}
   to {}
@@ -27,10 +25,12 @@
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   isolation: auto !important;
   contain: none !important;
-  background: #02050d !important;
+  background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
   transform: none !important;
   will-change: auto !important;
   animation-play-state: paused !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] > :is(
@@ -57,9 +57,7 @@ body.living-architecture main#main-content > :not(#hero) {
   contain-intrinsic-size: auto 900px;
 }
 
-/* R732: reserve the measured final desktop ancestor and hero-copy geometry for
-   every desktop pointer capability. The late desktop composition stylesheet may
-   add visual finish, but it no longer changes the first-frame boxes that own CLS. */
+/* Reserve the measured final desktop ancestor geometry. */
 @media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
   html body.living-architecture main#main-content section#hero.scene.hero {
     position: relative !important;
@@ -93,11 +91,6 @@ body.living-architecture main#main-content > :not(#hero) {
     position: relative !important;
     left: auto !important;
     bottom: auto !important;
-    display: grid !important;
-    grid-template-rows: repeat(7, auto) !important;
-    row-gap: clamp(7px, 1.05vh, 14px) !important;
-    align-content: center !important;
-    align-self: center !important;
     width: min(700px, 100%) !important;
     max-width: none !important;
     min-height: 0 !important;
@@ -105,20 +98,16 @@ body.living-architecture main#main-content > :not(#hero) {
     transform: none !important;
     overflow: visible !important;
   }
-  html body.living-architecture #hero .hero-copy > .kicker { grid-row: 1 !important; margin-bottom: 0 !important; }
+  html body.living-architecture #hero .hero-copy > .kicker { margin-bottom: 0 !important; }
   html body.living-architecture #hero .hero-copy > .fx-category-definition {
-    grid-row: 2 !important;
     align-self: start !important;
     width: min(620px, 100%) !important;
     max-width: 620px !important;
     margin: 0 !important;
     overflow: visible !important;
   }
-  html body.living-architecture #hero .hero-copy > #hero-title { grid-row: 3 !important; margin-block: clamp(2px, .5vh, 8px) !important; }
-  html body.living-architecture #hero .hero-copy > .hero-lead { grid-row: 4 !important; }
-  html body.living-architecture #hero .hero-copy > .fx-method-inline { grid-row: 5 !important; align-self: start !important; margin-block: clamp(4px, .7vh, 10px) !important; overflow: visible !important; }
-  html body.living-architecture #hero .hero-copy > .hero-actions { grid-row: 6 !important; }
-  html body.living-architecture #hero .hero-copy > .hero-facts { grid-row: 7 !important; }
+  html body.living-architecture #hero .hero-copy > #hero-title { margin-block: clamp(2px, .5vh, 8px) !important; }
+  html body.living-architecture #hero .hero-copy > .fx-method-inline { align-self: start !important; margin-block: clamp(4px, .7vh, 10px) !important; overflow: visible !important; }
   html body.living-architecture #hero .hero-title-main { font-size: clamp(66px, 7.1vw, 124px) !important; line-height: .84 !important; }
   html body.living-architecture #hero .hero-title-sub { font-size: clamp(27px, 2.9vw, 48px) !important; }
   html body.living-architecture #hero .hero-lead {
@@ -250,3 +239,35 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   }
   #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after { opacity: 0; transform: none; }
 }
+
+/* R750: the cover owns no independently rasterized full-frame decoration during the
+   bounded release window. Keep the premium static material and readable status, but
+   eliminate pseudo-layer animation/blending that can delay browser task service. */
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  will-change: auto !important;
+}
+
+/* R750: the blocking P0 sheet already owns the final desktop copy box. Do not let
+   this dynamically attached quality layer switch that box from block to grid after
+   first paint; late typography may refine paint only, never layout mode/placement. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 1100px) and (pointer: fine) {
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-copy {
+    display: block !important;
+    align-self: center !important;
+    width: 100% !important;
+    max-width: 580px !important;
+    min-height: 627px !important;
+    contain: layout style !important;
+  }
+}
+
+/* production-r750-static-cover-no-pseudo-raster */
+/* production-r750-desktop-copy-layout-owned-by-blocking-p0 */
