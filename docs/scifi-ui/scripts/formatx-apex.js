@@ -302,7 +302,10 @@
 
   function initialise() {
     navigation();
-    applyLanguage(language, false);
+    // R760: deferred enhancement adopts the live language. The user may have
+    // changed it while the cover was visible; the navigation-time snapshot is
+    // no longer authoritative when this background task finally runs.
+    applyLanguage(ROOT.lang === 'en' ? 'en' : 'hu', false);
     reveal();
     scenes();
     flow();
