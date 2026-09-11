@@ -72,6 +72,29 @@ html[data-fx-preloader-r531="active"] body.living-architecture #hero .hero-space
   opacity: 1 !important;
 }
 
+/* R755: the opaque intro also covers the header glass and title glow. Their
+   filters created compositor work before any MAG context existed, stalling the
+   release owner in a GPU fence. Preserve every layout/text box while these
+   covered effects are dormant; the existing materials resume on release. */
+html:not([data-fx-preloader-r531="done"]) body.living-architecture .topbar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: none !important;
+}
+html:not([data-fx-preloader-r531="done"]) body.living-architecture .brand img,
+html:not([data-fx-preloader-r531="done"]) body.living-architecture #hero .hero-copy .hero-title-main {
+  filter: none !important;
+  transition: none !important;
+}
+html:not([data-fx-preloader-r531="done"]) body.living-architecture .fx-reference-mag-button,
+html:not([data-fx-preloader-r531="done"]) body.living-architecture .fx-mini-mag-glyph-r459,
+html:not([data-fx-preloader-r531="done"]) body.living-architecture .fx-mini-mag-status-r459,
+html:not([data-fx-preloader-r531="done"]) body.living-architecture #main-content *,
+html:not([data-fx-preloader-r531="done"]) body.living-architecture #main-content *::before,
+html:not([data-fx-preloader-r531="done"]) body.living-architecture #main-content *::after {
+  animation: none !important;
+}
+
 /* The fixed action dock is authored at left:50%. Some legacy Organism bundles
    replace its centring transform with a Y-only hide transform, which leaves the
    invisible wide dock half a viewport to the right and widens body.scrollWidth.
