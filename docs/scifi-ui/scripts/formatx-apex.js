@@ -312,9 +312,24 @@
     setScene(activeScene);
     ROOT.dataset.fxApex = 'controller-performance-v2';
     ROOT.dataset.fxRenderer = 'three-host';
+    ROOT.dataset.fxApexDesktopR759 = 'post-intro-noncritical-initialise';
     dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
-  else initialise();
+  function preloaderDone() {
+    return ROOT.dataset.fxPreloaderR531 === 'done' || window.__formatxPreloaderComplete === true || ROOT.dataset.formatxPreloader === 'complete' || ROOT.dataset.preloaderComplete === 'true';
+  }
+
+  function armInitialise() {
+    if (preloaderDone()) { initialise(); return; }
+    ROOT.dataset.fxApexDesktopR759 = 'waiting-canonical-preloadercomplete';
+    document.addEventListener('formatx:preloadercomplete', () => {
+      const browserScheduler = globalThis.scheduler;
+      if (browserScheduler && typeof browserScheduler.postTask === 'function') browserScheduler.postTask(initialise, { priority: 'background' }).catch(() => setTimeout(initialise, 0));
+      else setTimeout(initialise, 0);
+    }, { once: true, passive: true });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', armInitialise, { once: true });
+  else armInitialise();
 }());
