@@ -20,7 +20,11 @@ const FIRST_FRAME_STYLES = new Set([
   '/scifi-ui/styles/formatx-critical-shell-v56.css',
   '/scifi-ui/styles/formatx-award-readiness.css',
   '/scifi-ui/styles/formatx-first-paint-r206.css',
-  '/scifi-ui/styles/formatx-critical-core-r227.css'
+  '/scifi-ui/styles/formatx-critical-core-r227.css',
+  // R761: these styles own the visible hero's final boxes and cover material.
+  // A preload alone does not apply them; keep their stylesheet hrefs live.
+  '/scifi-ui/styles/formatx-reference-production-r244.css',
+  '/scifi-ui/styles/formatx-intro-p0-r575.css'
 ]);
 
 function attrValue(tag, name) {

@@ -7,6 +7,11 @@
 /* The canonical critical-core begins with the same body overflow contract. Keep
    that layout invariant in the blocking first-paint layer; this does not hide or
    resize product content, it preserves the established viewport clipping owner. */
+html {
+  /* Match the reference-mode boot before its script runs, avoiding a late
+     scrollbar-width change across the entire desktop hero. */
+  scrollbar-gutter: stable;
+}
 html body.living-architecture {
   overflow-x: clip !important;
 }
