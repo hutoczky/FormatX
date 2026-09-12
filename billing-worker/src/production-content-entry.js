@@ -1,22 +1,22 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R514 — preserve the proven R513 MAG runtime and R504/R506 first-paint
-   contracts while removing the exact R513 Lighthouse first-divergence owner from
-   the blocking path. R513 artifact 9912491940 showed critical-core-r227 as the
-   sole render blocker on the fast run and the largest modeled H3 blocker on the
-   slow runs. It now uses the existing R487 double-rAF post-first-paint scheduler;
-   MAG clock, PAUSE/RESUME, ASK and renderer ownership remain unchanged. */
+/* FormatX R720 — preserve canonical geometry through the production pipeline.
+   Critical core supplies the desktop body, hero and canvas geometry before paint.
+   Removing its href here defeated the source first-frame contract: later wrappers
+   restored its media/priority but left it unfetched until the 2100ms CSS checkpoint.
+   Only secondary styles belong to the autonomous deferred stylesheet scheduler. */
 
-const STARTUP_REVISION = '20260903-r514-critical-core-post-first-paint';
+const STARTUP_REVISION = '20260908-r675-nonblocking-reference-and-visual-css';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
-const REFERENCE_MODE_BOOT_SCRIPT = '<script fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
-const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
+const REFERENCE_MODE_BOOT_SCRIPT = '<script defer fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
+const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
+const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r505-mag-resume-clock';
-const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
+const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r637.js?v=20260907-r637-post-fcp-network-restore"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const META_CSP = "default-src 'self';base-uri 'self';object-src 'none';script-src 'self' https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'";
 const HEADER_CSP = [
@@ -47,9 +47,6 @@ const ROBOTS = [
 ].join('\n');
 
 const DEFERRED_STYLE_PATHS = new Set([
-  // R514: artifact-proven first-divergence owner; activate with the existing
-  // R487 double-rAF scheduler after the first painted frame.
-  '/scifi-ui/styles/formatx-critical-core-r227.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/platform-status.css',
@@ -57,6 +54,14 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/formatx-feedback.css',
   '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/formatx-content-standard.css',
+  '/scifi-ui/styles/formatx-award-readiness.css',
+  '/scifi-ui/styles/formatx-flow-first-r74.css',
+  '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
+  '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
+  '/scifi-ui/styles/formatx-mobile-proof-controls-r204.css',
+  '/scifi-ui/styles/formatx-mobile-layout-r207.css',
+  '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
+  '/scifi-ui/styles/formatx-mobile-apex-composition.css',
 ]);
 
 const R502_ASSET_REWRITES = new Map([
@@ -119,14 +124,27 @@ function injectReferenceModeBoot(html) {
 }
 function injectCriticalFirstPaint(html) {
   let source = String(html || '');
+  let introStyle = '';
+  let firstFrameStyle = FIRST_FRAME_STABILITY_LINK;
   source = source.replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
-    if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') return '';
+    // R761: keep the intro's settled hero geometry after the blocking P0 layer,
+    // in the same cascade slot formerly occupied by its runtime-created link.
+    if (pathname === '/scifi-ui/styles/formatx-intro-p0-r575.css') {
+      introStyle = tag;
+      return '';
+    }
+    if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') {
+      // R763: the authored stylesheet covers mouse and keyboard-only desktops.
+      // Do not replace its current media/cache contract with an older snapshot.
+      firstFrameStyle = tag;
+      return '';
+    }
     if (pathname === '/scifi-ui/styles/formatx-p0-first-paint-r490.css') return '';
     if (pathname === '/scifi-ui/styles/formatx-mobile-first-paint-r358.css' && /data-fx-production-first-paint-r370/i.test(tag)) return '';
     return tag;
   });
-  const critical = `  ${FIRST_PAINT_LINK}\n  ${FIRST_FRAME_STABILITY_LINK}\n  ${P0_FIRST_PAINT_LINK}\n`;
+  const critical = `  ${FIRST_PAINT_LINK}\n  ${firstFrameStyle}\n  ${P0_FIRST_PAINT_LINK}\n  ${introStyle}\n`;
   return source.replace('</head>', `${critical}</head>`);
 }
 function normalizeMobileStylesheetMedia(html) {
@@ -185,12 +203,21 @@ function deferNonCriticalStyles(html) {
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
     if (!pathname || !DEFERRED_STYLE_PATHS.has(pathname)) return tag;
+    const hrefMatch = tag.match(/\shref=(["'])(.*?)\1/i);
+    if (!hrefMatch) return tag;
+    const deferredHref = hrefMatch[2];
     const mediaMatch = tag.match(/\smedia=(["'])(.*?)\1/i);
-    const originalMedia = mediaMatch ? mediaMatch[2] : 'all';
-    let next = mediaMatch ? tag.replace(mediaMatch[0], '') : tag;
+    const declaredDeferredMedia = tag.match(/\sdata-fx-deferred-media-r300=(["'])(.*?)\1/i);
+    const originalMedia = declaredDeferredMedia ? declaredDeferredMedia[2] : (mediaMatch ? mediaMatch[2] : 'all');
+    let next = tag.replace(hrefMatch[0], '');
+    if (mediaMatch) next = next.replace(mediaMatch[0], '');
+    next = next.replace(/\sfetchpriority=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r487-deferred-style=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r487-media=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r637-href=(["'])(.*?)\1/i, '');
     const close = /\/>$/.test(next) ? '/>' : '>';
     next = next.replace(/\s*\/?>$/, '');
-    return `${next} data-fx-r487-deferred-style="true" data-fx-r487-media="${escapeAttribute(originalMedia)}" media="print"${close}`;
+    return `${next} data-fx-r637-href="${escapeAttribute(deferredHref)}" data-fx-r487-deferred-style="true" data-fx-r487-media="${escapeAttribute(originalMedia)}" media="not all"${close}`;
   });
 }
 function injectDeferredCssRuntime(html) {
@@ -233,6 +260,14 @@ async function rewriteR502DeliveryAsset(url, response, headers) {
   headers.set('X-FormatX-R505-Asset-Graph', spec.marker);
   return new Response(source, { status: response.status, statusText: response.statusText, headers });
 }
+function mergeHomepageLinkHeader(existing) {
+  const values = String(existing || '')
+    .split(/,\s*(?=<)/)
+    .map(value => value.trim())
+    .filter(Boolean)
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-p0-first-paint-r490.css'));
+  return [...values, P0_FIRST_PAINT_PRELOAD].join(', ');
+}
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
@@ -243,6 +278,9 @@ async function stabilizePublicResponse(request, url, response) {
   headers.set('X-FormatX-CSS-Scheduler', 'r514-critical-core-r487-post-first-paint-r504-prepaint');
   headers.set('X-FormatX-Motion-Scheduler', 'r507-single-css-animation-clock-owner');
   headers.set('X-FormatX-Mag-Clock-Owner', 'shape-sync-r476-only');
+  if (HOMEPAGE_PATHS.has(url.pathname)) {
+    headers.set('Link', mergeHomepageLinkHeader(headers.get('Link')));
+  }
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
     return new Response(null, { status: response.status, statusText: response.statusText, headers });

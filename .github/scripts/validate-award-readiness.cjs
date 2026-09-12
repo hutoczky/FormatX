@@ -68,14 +68,8 @@ function sitemapLastmod(url) {
   return match[1];
 }
 
-assert.ok(
-  sitemapLastmod('https://formatxsuite.com/') >= '2026-08-08',
-  'homepage sitemap lastmod is older than the audited award-readiness baseline'
-);
-assert.ok(
-  sitemapLastmod('https://formatxsuite.com/scifi-ui/technical-report.html') >= '2026-08-10',
-  'technical-report sitemap lastmod is older than the current evidence report'
-);
+assert.ok(sitemapLastmod('https://formatxsuite.com/') >= '2026-08-08','homepage sitemap lastmod is older than the audited award-readiness baseline');
+assert.ok(sitemapLastmod('https://formatxsuite.com/scifi-ui/technical-report.html') >= '2026-08-10','technical-report sitemap lastmod is older than the current evidence report');
 assert.match(sitemap, /hreflang="hu" href="https:\/\/formatxsuite\.com\/\?lang=hu"/, 'Hungarian sitemap hreflang missing');
 assert.match(sitemap, /hreflang="en" href="https:\/\/formatxsuite\.com\/\?lang=en"/, 'English sitemap hreflang missing');
 assert.match(sitemap, /hreflang="x-default" href="https:\/\/formatxsuite\.com\/"/, 'x-default sitemap hreflang missing');
@@ -105,7 +99,9 @@ assert.equal(scrollPolicy.desktop?.automatic_loop, true, 'desktop seamless scrol
 assert.equal(scrollPolicy.policy?.input_capture, false, 'wheel/touch capture must remain disabled');
 assert.equal(scrollPolicy.policy?.section_scroll_snap, false, 'section scroll snap must remain disabled');
 assert.match(scrollBootstrap, /platform-scroll-v2/, 'platform scroll bootstrap missing');
-assert.match(scrollBootstrap, /installSeamlessRuntime\('mobile'\)/, 'mobile shared seamless runtime bootstrap missing');
+assert.match(scrollBootstrap, /armSeamlessRuntime\(MOBILE_QUERY\.matches \? 'mobile' : 'desktop'\)/, 'R534 intent-armed shared seamless runtime bootstrap missing');
+assert.match(scrollBootstrap, /installSeamlessRuntime\(platform\)/, 'scroll intent must resolve into shared seamless-v7 runtime');
+assert.match(scrollBootstrap, /pending-user-scroll-intent/, 'first-load seamless runtime must remain outside the startup critical path');
 assert.match(scrollBootstrap, /native-momentum-loop-v1/, 'mobile momentum loop marker missing');
 assert.doesNotMatch(scrollBootstrap, /scrollTo\s*\(|scrollIntoView\s*\(|cloneNode\s*\(/, 'mobile-capable bootstrap must not move or clone the page');
 assert.match(seamlessScroll, /const VERSION = 'seamless-v7'/, 'shared seamless runtime missing');
@@ -113,4 +109,4 @@ assert.match(seamlessScroll, /mobileTransfer: 'scrollend-or-idle'/, 'shared runt
 assert.doesNotMatch(seamlessScroll, /addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/, 'shared seamless runtime must not capture wheel/touch input');
 assert.match(mobileLoopCss, /min-height:\s*calc\(100svh \+ max\(320px, 24svh\)\)/, 'mobile seamless bridge runway missing');
 
-console.log('FormatX award-readiness SEO, hierarchy, proof, accessibility, first-party delivery, sitemap freshness and shared seamless-v7 mobile/desktop scroll validation passed.');
+console.log('FormatX award-readiness SEO, hierarchy, proof, accessibility, first-party delivery, sitemap freshness and R534 intent-loaded seamless-v7 mobile/desktop scroll validation passed.');

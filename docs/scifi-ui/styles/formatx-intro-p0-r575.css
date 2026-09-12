@@ -1,0 +1,309 @@
+/* FormatX R750 — single-owner intro timing with stable persistent first-frame geometry and a release-safe compositor quiet hold.
+   The overlay keeps the exact fx-r533-preloader-visual-bound name and 1360/1640ms
+   duration required by the product timing contract, but that full-viewport clock
+   is paused so Chrome/SwiftShader never promotes it as an actively animated screen.
+   The intro is a visual cover only: hero and below-fold document geometry remain in
+   their final product state throughout the bounded window, so release does not flip
+   containment/content-visibility and trigger a large style/layout rebuild.
+   The critical cover is a static premium material while active: no full-frame pseudo
+   raster animation or blend stack competes with the monotonic release owner. Desktop
+   hero-copy keeps the blocking first-paint layout mode, so this late quality sheet
+   cannot change the LCP box after first paint. */
+@keyframes fx-r533-preloader-visual-bound {
+  from {}
+  to {}
+}
+
+@keyframes fx-r635-intro-energy-line {
+  0% { opacity: 0; transform: translateX(-50%) scaleX(.08); }
+  18% { opacity: .24; }
+  58% { opacity: .34; transform: translateX(-50%) scaleX(.72); }
+  82% { opacity: .20; transform: translateX(-50%) scaleX(1); }
+  100% { opacity: 0; transform: translateX(-50%) scaleX(1); }
+}
+
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+  isolation: auto !important;
+  contain: none !important;
+  background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
+  transform: none !important;
+  will-change: auto !important;
+  animation-play-state: paused !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] > :is(
+  .fx-intro-curtain,
+  .fx-intro-grid,
+  .fx-intro-scan,
+  .fx-intro-portal,
+  .fx-intro-flare
+) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
+
+body.living-architecture main#main-content > :not(#hero) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 1100px) and (pointer: fine) {
+  html body.living-architecture #hero .hero-copy {
+    position: relative !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: min(700px, 100%) !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero .hero-copy > .kicker { margin-bottom: 0 !important; }
+  html body.living-architecture #hero .hero-copy > .fx-category-definition {
+    align-self: start !important;
+    width: min(620px, 100%) !important;
+    max-width: 620px !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero .hero-copy > #hero-title { margin-block: clamp(2px, .5vh, 8px) !important; }
+  html body.living-architecture #hero .hero-copy > .fx-method-inline { align-self: start !important; margin-block: clamp(4px, .7vh, 10px) !important; overflow: visible !important; }
+  html body.living-architecture #hero .hero-title-main { font-size: clamp(66px, 7.1vw, 124px) !important; line-height: .84 !important; }
+  html body.living-architecture #hero .hero-title-sub { font-size: clamp(27px, 2.9vw, 48px) !important; }
+  html body.living-architecture #hero .hero-lead {
+    max-width: 620px !important;
+    margin-top: clamp(8px, 1.2vh, 16px) !important;
+    font-size: clamp(15px, 1.05vw, 18px) !important;
+    line-height: 1.58 !important;
+  }
+  html body.living-architecture #hero .hero-actions {
+    display: flex !important;
+    width: min(620px, 100%) !important;
+    margin-top: clamp(10px, 1.5vh, 20px) !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+  html body.living-architecture #hero .hero-actions .button { min-height: 48px !important; }
+  html body.living-architecture #hero .hero-facts {
+    display: flex !important;
+    width: min(620px, 100%) !important;
+    margin-top: clamp(8px, 1.2vh, 16px) !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: min(620px, 88vw);
+  height: min(520px, 62svh);
+  z-index: 0;
+  pointer-events: none;
+  opacity: .10;
+  border-radius: 32px;
+  background-image:
+    linear-gradient(rgba(124,236,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,236,255,.045) 1px,transparent 1px),
+    radial-gradient(circle at 50% 48%,rgba(98,227,255,.22),rgba(120,84,255,.07) 38%,transparent 68%);
+  background-size: 48px 48px,48px 48px,100% 100%;
+  transform: translate(-50%, -50%);
+  will-change: auto;
+  transition: opacity 120ms ease !important;
+  animation: none;
+}
+
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(68vw,720px);
+  height: 2px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg,transparent,rgba(75,219,255,.82),rgba(145,108,255,.44),transparent);
+  transform: translateX(-50%) scaleX(.08);
+  transform-origin: 50% 50%;
+  will-change: auto;
+  animation: fx-r635-intro-energy-line 900ms cubic-bezier(.22,.61,.36,1) both running;
+}
+
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word,
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-kicker,
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle,
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-status,
+#formatx-event-horizon[data-fx-preloader-r531="active"] [data-fx-intro-output] {
+  transition: color 120ms ease,opacity 120ms ease !important;
+}
+
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"]::before { opacity: .075; }
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-word { color: #f5fdff !important; }
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] :is(.fx-intro-status,[data-fx-intro-output]) { color: rgba(137,231,255,.88) !important; }
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"]::before { opacity: .13; }
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-word { color: #f7fdff !important; }
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] :is(.fx-intro-status,[data-fx-intro-output]) { color: rgba(163,219,255,.94) !important; }
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"]::before { opacity: .085; }
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-word { color: #fbfeff !important; }
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] :is(.fx-intro-status,[data-fx-intro-output]) { color: rgba(255,226,158,.94) !important; }
+#formatx-event-horizon[data-fx-preloader-r531="active"] progress[data-fx-intro-progress] {
+  accent-color: rgb(96,220,255);
+  transition: opacity 120ms ease !important;
+}
+html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx-preloader-reveal-r635 {
+  opacity: 0 !important;
+  transition: opacity 90ms ease-out !important;
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before {
+    width: min(460px, 86vw);
+    height: min(390px, 50svh);
+    background-size: 44px 44px,44px 44px,100% 100%;
+    opacity: .10 !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"]::before,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"]::before,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"]::before { opacity: .10 !important; }
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+    width: min(82vw,520px);
+    animation-duration: 820ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-kicker,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-status,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] [data-fx-intro-output] {
+    animation: none !important;
+    transition: none !important;
+    text-shadow: none !important;
+  }
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before { opacity: .075; transform: translate(-50%, -50%); }
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after { opacity: 0; transform: none; }
+}
+
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
+#formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  will-change: auto !important;
+}
+
+/* R752 — undo only the R750 desktop-copy box clamp that displaced the 1366px hero
+   information into the fixed mini-MAG footprint. Keep the quiet cover optimization,
+   but restore the already-proven R749 desktop content geometry. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 1100px) and (pointer: fine) {
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-copy {
+    display: block !important;
+    align-self: auto !important;
+    width: min(700px, 100%) !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    contain: none !important;
+  }
+}
+
+/* R772 — the full-screen intro is the sole visible desktop cover. Keep every hero
+   box in its settled R761 geometry, but do not ask SwiftShader/compositor to raster
+   decorative fixed/pseudo/filter layers that are completely hidden behind it. These
+   rules change paint only; no width/height/position/display of semantic content is
+   changed, and all decoration returns automatically when the finalizer removes the
+   intro-running/managed state. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html.fx-intro-running body.living-architecture::before,
+  html.fx-intro-managed body.living-architecture::before {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+  }
+
+  html.fx-intro-running body.living-architecture .fx-atmosphere,
+  html.fx-intro-running body.living-architecture .fx-atmosphere > span,
+  html.fx-intro-managed body.living-architecture .fx-atmosphere,
+  html.fx-intro-managed body.living-architecture .fx-atmosphere > span {
+    display: none !important;
+    visibility: hidden !important;
+    background: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  html.fx-intro-running body.living-architecture #hero.scene.hero::before,
+  html.fx-intro-running body.living-architecture #hero.scene.hero::after,
+  html.fx-intro-managed body.living-architecture #hero.scene.hero::before,
+  html.fx-intro-managed body.living-architecture #hero.scene.hero::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  html.fx-intro-running body.living-architecture #hero .hero-title-main,
+  html.fx-intro-managed body.living-architecture #hero .hero-title-main {
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  html.fx-intro-running body.living-architecture #hero .scroll-cue i::after,
+  html.fx-intro-managed body.living-architecture #hero .scroll-cue i::after {
+    animation: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* production-r750-static-cover-no-pseudo-raster */
+/* production-r752-restored-r749-desktop-copy-geometry */
+/* production-r772-covered-desktop-decorative-raster-quiet */

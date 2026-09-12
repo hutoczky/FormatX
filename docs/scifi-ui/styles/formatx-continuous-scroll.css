@@ -29,6 +29,55 @@ body {
   overscroll-behavior-y: auto;
 }
 
+/* R626: desktop may use browser-native content-visibility during the critical
+   first-paint window, but once the real Organism or seamless-v7 runtime owns
+   functional scrolling the document-height owners must be realised together.
+   Otherwise independent 420/900/1100/1800px intrinsic placeholders materialise
+   during scroll and move the canonical bridge by several thousand pixels.
+   This is a normal product lifecycle rule, not an audit/headless/test path. */
+@media (min-width: 901px) and (pointer: fine) {
+  html:is(
+    .fx-organism-interface-ready,
+    [data-fx-infinite-controller='desktop-runtime-loading-v7'],
+    [data-fx-infinite-controller='seamless-v7']
+  ) :is(
+    main#main-content > .scene:not(#hero),
+    main#main-content > .fx-category-deck,
+    main#main-content .fx-origin-proof,
+    .fx-live-os,
+    #live-os-overview,
+    .fx-static-live-os,
+    .fx-award-proof,
+    .fx-product-showcase,
+    #user-feedback,
+    .fx-feedback-public,
+    .site-footer,
+    .fx-loop-bridge,
+    .fx-transcend-loop-bridge
+  ) {
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+  }
+
+  html:is(
+    .fx-organism-interface-ready,
+    [data-fx-infinite-controller='desktop-runtime-loading-v7'],
+    [data-fx-infinite-controller='seamless-v7']
+  ) main#main-content > .scene:not(#hero) :is(
+    .flow,
+    .cards,
+    .pricing,
+    .payment,
+    .payment-console,
+    #formatx-plan-qr-dock,
+    .system-grid,
+    .release-layout
+  ) {
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+  }
+}
+
 @media (pointer: coarse), (max-width: 900px) {
   html,
   body,

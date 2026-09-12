@@ -3,7 +3,8 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR487) return;
-  root.dataset.fxDeferredCssR487 = 'queued-fcp';
+  root.dataset.fxDeferredCssR487 = 'queued-fcp-r594';
+  root.dataset.fxDeferredCssPolicyR594 = 'autonomous-post-fcp-no-user-intent';
 
   let activated = false;
   let frame = 0;
@@ -25,11 +26,11 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-fcp';
+    root.dataset.fxDeferredCssR487 = 'ready-fcp-r594';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssReasonR526 = reason;
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, scheduler: 'post-first-contentful-paint-r526', reason }
+      detail: { count: links.length, scheduler: 'autonomous-post-first-contentful-paint-r594', reason }
     }));
   }
 

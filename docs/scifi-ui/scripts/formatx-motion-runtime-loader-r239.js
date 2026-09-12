@@ -1,10 +1,16 @@
-/* FormatX r477 — canonical ASK activation + R476 synchronized MAG iconography.
-   The active HTML contains only current deferred enhancements. Mobile keeps the
-   bounded R484 surface-energy budget and zero frames between sweeps, while the
-   final full-size MAG compositor uses the R474 softer-glow, feathered-facet
-   phone tone. R476 mirrors the primary MAG crystal/sphere state into the header
-   and Mini MAG icons. R477 makes the visible ASK control the explicit deferred
-   Organism activation path. Desktop stays on the existing R326 material path. */
+/* FormatX r550 compatibility · R784 navigation-owned MAG + race-free desktop physical scroll intent.
+   MAG and the lightweight SOUND control owner remain automatic from navigation. The
+   normal path requests each owner directly without a speculative preload burst; worker/GPU
+   release-window isolation belongs to the MAG context policy rather than this public owner.
+   Seamless-scroll activation remains owned only by physical wheel/touch/scroll-key input
+   (or an existing/deep-linked scroll position). Returning desktop users with the intro already
+   seen may prime only the lightweight bootstrap script so its physical-intent listener exists
+   before the first wheel; mobile keeps its native first-intent sequencing so momentum/loop
+   geometry is not materialised early. The seamless runtime itself still waits for real input.
+   Scroll ownership is requested before the optional deferred enhancement burst, while a tiny
+   geometry-only SOUND | ASK sheet is navigation-critical so optional shapeshifter optics can
+   stay post-release. Restored-position probing is deferred until canonical intro completion
+   so startup never forces layout at the release deadline. No scroll event is an activation owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -18,28 +24,45 @@ root.dataset.fxFullSuiteR474='r474-mobile-mag';
 root.dataset.fxDialogueSurfaceR475='booting';
 root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
+root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
+root.dataset.fxScrollIntentPolicyR656='physical-wheel-touch-scroll-key-no-scroll-event';
+root.dataset.fxScrollEnhancementOrderR742='bootstrap-before-deferred-r781';
+root.dataset.fxScrollRestorationProbeR746='armed-after-canonical-intro-release';
+root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
+root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
+root.dataset.fxMagWorkerIsolationR745='context-policy-release-owned';
+root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
+root.dataset.fxMagWarmPathR620='direct-owner-requests-no-speculative-preload-burst';
+root.dataset.fxControlCriticalR780='armed-navigation-critical';
+root.dataset.fxScrollBootstrapPrimeR782='armed-desktop-returning-user-only-r784';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r550-parallel-shader-under-intro';
+const SOUND_CONTROL='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260906-r542-professional-owner-authoritative';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260831-r484-periodic-native-energy';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260906-r550-parallel-shader-compile';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-a11y-touch';
-const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260831-r468-soft-mobile-bloom';
+const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260906-r538-two-control-visual-only';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260831-r475-canonical-ask-surface';
-const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260831-r484-readable-electric-surface';
+const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260906-r537-automatic-lifecycle';
+const PLATFORM_SCROLL='/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260906-r535-scroll-intent-owner';
+const DESIGN_SYSTEM='/scifi-ui/styles/formatx-design-system.css?v=20260728-ds2';
+const CONTROL_GEOMETRY='/scifi-ui/styles/formatx-control-critical-r780.css?v=20260912-r780-render-critical-two-control';
+const SCROLL_KEYS=new Set(['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' ']);
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
-const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false;
+const intentListeners=[['pointerdown',passive],['keydown',false]];
+const scrollIntentListeners=[['wheel',passive],['touchstart',passive],['pointerdown',passive],['keydown',false]];
+let enhancementsStarted=false,currentRequested=false,soundRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,scrollBootstrapRequested=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function mount(spec){
@@ -59,25 +82,23 @@ function warmAsset(href,as){
 function warmCriticalOwners(){
   if(root.dataset.fxCurrentMagWarmR461==='ready')return;
   root.dataset.fxCurrentMagWarmR461='ready';
-  warmAsset(LANGUAGE_TOGGLE,'script');
-  warmAsset(CURRENT_MAG,'script');
-  warmAsset(CURRENT_SOLID_GLASS,'script');
-  warmAsset(CURRENT_RENDERER,'script');
-  warmAsset(CURRENT_STYLE,'style');
-  warmAsset(CURRENT_OPTICS,'style');
-  warmAsset(CURRENT_LIFE_STYLE,'style');
-  warmAsset(CURRENT_LIFE,'script');
-  warmAsset(FINAL_HEADER,'style');
-  warmAsset(DIALOGUE_STYLE,'style');
-  warmAsset(MAG_SHAPE_SYNC,'script');
+  root.dataset.fxCurrentMagWarmR620='direct-owner-requests';
+}
+function ensureControlGeometry(){
+  let link=document.querySelector('link[data-fx-control-critical-r780]');
+  if(link instanceof HTMLLinkElement){root.dataset.fxControlCriticalR780=link.sheet?'ready':'loading';return;}
+  link=document.createElement('link');
+  link.rel='stylesheet';link.href=CONTROL_GEOMETRY;link.fetchPriority='high';link.dataset.fxControlCriticalR780='true';
+  link.addEventListener('load',()=>{root.dataset.fxControlCriticalR780='ready';},{once:true});
+  link.addEventListener('error',()=>{root.dataset.fxControlCriticalR780='load-failed';},{once:true});
+  document.head.appendChild(link);
+  root.dataset.fxControlCriticalR780='requested-navigation-critical';
 }
 function ensureDialogueSurface(){
   let link=document.querySelector('link[data-fx-dialogue-surface-r475]');
   if(link instanceof HTMLLinkElement){root.dataset.fxDialogueSurfaceR475=link.sheet?'ready':'loading';return;}
   link=document.createElement('link');
-  link.rel='stylesheet';
-  link.href=DIALOGUE_STYLE;
-  link.dataset.fxDialogueSurfaceR475='true';
+  link.rel='stylesheet';link.href=DIALOGUE_STYLE;link.dataset.fxDialogueSurfaceR475='true';
   link.addEventListener('load',()=>{root.dataset.fxDialogueSurfaceR475='ready';},{once:true});
   link.addEventListener('error',()=>{root.dataset.fxDialogueSurfaceR475='load-failed';},{once:true});
   document.head.appendChild(link);
@@ -85,10 +106,7 @@ function ensureDialogueSurface(){
 function ensureMagShapeSync(){
   if(shapeSyncRequested||document.querySelector('script[data-fx-mag-shape-sync-r476]'))return;
   shapeSyncRequested=true;
-  const script=document.createElement('script');
-  script.src=MAG_SHAPE_SYNC;
-  script.async=false;
-  script.dataset.fxMagShapeSyncR476='true';
+  const script=document.createElement('script');script.src=MAG_SHAPE_SYNC;script.async=false;script.dataset.fxMagShapeSyncR476='true';
   script.addEventListener('load',()=>{root.dataset.fxMagShapeSyncBootstrapR476='loaded';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxMagShapeSyncBootstrapR476='failed';},{once:true});
   document.head.appendChild(script);
@@ -102,6 +120,15 @@ function ensureLanguageToggle(){
   script.addEventListener('error',()=>{root.dataset.fxLanguageCriticalPathR461='failed';},{once:true});
   document.head.appendChild(script);
 }
+function ensureSoundControl(){
+  if(root.dataset.fxWdaHardening==='r263'){root.dataset.fxSoundNavigationOwnerR541='ready-existing';return;}
+  if(soundRequested||document.querySelector('script[data-fx-wda-hardening-r541]'))return;
+  soundRequested=true;root.dataset.fxSoundNavigationOwnerR541='requested-navigation';
+  const script=document.createElement('script');script.src=SOUND_CONTROL;script.async=false;script.dataset.fxWdaHardeningR541='true';
+  script.addEventListener('load',()=>{root.dataset.fxSoundNavigationOwnerR541=root.dataset.fxWdaHardening==='r263'?'ready-navigation':'loaded-awaiting-owner';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxSoundNavigationOwnerR541='load-failed';},{once:true});
+  document.head.appendChild(script);
+}
 function ensureCurrentMag(){
   if(currentRequested||document.querySelector('script[data-fx-current-mag-loader-r422]'))return;
   currentRequested=true;
@@ -110,44 +137,86 @@ function ensureCurrentMag(){
 }
 function ensureStaticMotionCss(){
   const existing=document.getElementById('fx-r170-mobile-seam-override');
-  if(existing instanceof HTMLLinkElement){
-    if(existing.sheet)root.dataset.fxMotionCssR243='external-strict-csp-user-intent';
-    return;
-  }
+  if(existing instanceof HTMLLinkElement){if(existing.sheet)root.dataset.fxMotionCssR243='external-strict-csp-user-intent';return;}
   const stylesheet=document.createElement('link');
-  stylesheet.id='fx-r170-mobile-seam-override';
-  stylesheet.rel='stylesheet';
-  stylesheet.href='./styles/formatx-runtime-static-r243.css?v=20260819-r243-csp';
-  stylesheet.dataset.fxRuntimeStaticR243='true';
+  stylesheet.id='fx-r170-mobile-seam-override';stylesheet.rel='stylesheet';stylesheet.href='./styles/formatx-runtime-static-r243.css?v=20260819-r243-csp';stylesheet.dataset.fxRuntimeStaticR243='true';
   stylesheet.addEventListener('load',()=>{root.dataset.fxMotionCssR243='external-strict-csp-user-intent';},{once:true});
   stylesheet.addEventListener('error',()=>{root.dataset.fxMotionCssR243='external-strict-csp-load-failed';},{once:true});
   document.head.appendChild(stylesheet);
 }
+function ensureDesignSystem(){
+  let link=document.querySelector('link[data-fx-design-system-main-r536]');
+  if(link instanceof HTMLLinkElement){if(link.sheet)root.dataset.fxDesignSystemRuntimeR536='ready-user-intent';return;}
+  link=document.createElement('link');link.rel='stylesheet';link.href=DESIGN_SYSTEM;link.dataset.fxDesignSystemMainR536='true';
+  link.addEventListener('load',()=>{root.dataset.fxDesignSystemRuntimeR536='ready-user-intent';},{once:true});
+  link.addEventListener('error',()=>{root.dataset.fxDesignSystemRuntimeR536='load-failed';},{once:true});
+  document.head.appendChild(link);
+}
+function ensureScrollBootstrap(){
+  if(root.dataset.fxScrollBootstrap==='platform-scroll-v2'){root.dataset.fxPlatformScrollBootstrapR535='ready-existing';disarmScrollIntent();return;}
+  if(scrollBootstrapRequested||document.querySelector('script[data-fx-platform-scroll-r535]'))return;
+  scrollBootstrapRequested=true;root.dataset.fxPlatformScrollBootstrapR535='loading-scroll-intent';
+  const script=document.createElement('script');script.src=PLATFORM_SCROLL;script.async=false;script.dataset.fxPlatformScrollR535='true';
+  script.addEventListener('load',()=>{root.dataset.fxPlatformScrollBootstrapR535=root.dataset.fxScrollBootstrap==='platform-scroll-v2'?'ready-scroll-intent':'loaded-awaiting-bootstrap';},{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxPlatformScrollBootstrapR535='failed';},{once:true});
+  document.head.appendChild(script);disarmScrollIntent();
+}
+function returningIntroSeen(){
+  try{return localStorage.getItem('formatx:intro-seen-v1')==='1';}catch(_){return false;}
+}
+function primeReturningScrollOwner(){
+  if(mobile.matches){root.dataset.fxScrollBootstrapPrimeR782='mobile-native-not-primed-r784';return;}
+  if(!returningIntroSeen()||scrollBootstrapRequested||document.querySelector('script[data-fx-platform-scroll-r535]'))return;
+  scrollBootstrapRequested=true;
+  root.dataset.fxPlatformScrollBootstrapR535='priming-returning-scroll-owner-r782';
+  root.dataset.fxScrollBootstrapPrimeR782='loading-returning-desktop-owner-r784';
+  const script=document.createElement('script');script.src=PLATFORM_SCROLL;script.async=false;script.dataset.fxPlatformScrollR535='true';
+  script.addEventListener('load',()=>{
+    root.dataset.fxScrollBootstrapPrimeR782=root.dataset.fxScrollBootstrap==='platform-scroll-v2'?'ready-returning-desktop-owner-r784':'loaded-without-bootstrap';
+    root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
+  },{once:true});
+  script.addEventListener('error',()=>{
+    scrollBootstrapRequested=false;
+    root.dataset.fxScrollBootstrapPrimeR782='prime-failed-fallback-to-first-intent';
+    root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
+  },{once:true});
+  document.head.appendChild(script);
+}
 function reservedInteraction(event){
   if(root.dataset.fxOrganismThought==='open')return true;
   const target=event?.target instanceof Element?event.target:null;
-  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-reference-pause,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));
+  return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button,.fx-mag-heart-hit-r252'));
+}
+function isScrollIntentEvent(event){
+  if(event.type==='pointerdown')return event.pointerType==='touch';
+  if(event.type==='keydown')return SCROLL_KEYS.has(event.key);
+  return event.type==='wheel'||event.type==='touchstart';
 }
 function disarm(){for(const [type,options] of intentListeners)removeEventListener(type,onIntent,options);}
+function disarmScrollIntent(){for(const [type,options] of scrollIntentListeners)removeEventListener(type,onScrollIntent,options);}
 function mountEnhancements(){
-  if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureStaticMotionCss();
+  if(enhancementsStarted)return;enhancementsStarted=true;disarm();ensureDesignSystem();ensureStaticMotionCss();
   let requested=0;for(const spec of deferred)if(mount(spec))requested+=1;
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
   root.dataset.fxMotionRuntimeR239='enhanced-r468-user-intent';
 }
-function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
+function onIntent(event){if(isScrollIntentEvent(event))return;if(!reservedInteraction(event))mountEnhancements();}
+function startEnhancementsAfterScrollOwner(){setTimeout(mountEnhancements,0);}
+function onScrollIntent(event){
+  if(event.type==='pointerdown'&&event.pointerType!=='touch')return;
+  if(event.type==='keydown'&&!SCROLL_KEYS.has(event.key))return;
+  ensureScrollBootstrap();
+  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-scroll-bootstrap-requested-before-deferred-r781`;
+  startEnhancementsAfterScrollOwner();
+}
 function openPendingCanonicalAsk(){
   if(!askActivationPending)return false;
   const api=window.FormatXOrganismVoice;
   if(!api||typeof api.open!=='function')return false;
   askActivationPending=false;
   queueMicrotask(()=>{
-    try{
-      api.open();
-      root.dataset.fxCanonicalAskActivationR477='dialogue-opened';
-    }catch(_){
-      root.dataset.fxCanonicalAskActivationR477='dialogue-open-failed';
-    }
+    try{api.open();root.dataset.fxCanonicalAskActivationR477='dialogue-opened';}
+    catch(_){root.dataset.fxCanonicalAskActivationR477='dialogue-open-failed';}
   });
   return true;
 }
@@ -155,14 +224,26 @@ function activateCanonicalAsk(event){
   const target=event.target instanceof Element?event.target.closest('#hero .fx-reference-controls-r204 .fx-reference-ask'):null;
   if(!(target instanceof HTMLButtonElement))return;
   if(typeof window.FormatXOrganismVoice?.open==='function')return;
-  askActivationPending=true;
-  root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
+  askActivationPending=true;root.dataset.fxCanonicalAskActivationR477='loading-deferred-organism';
   if(root.dataset.fxImmersive!=='active'){
-    root.dataset.fxImmersive='active';
-    root.dataset.fxImmersiveSource='canonical-ask-r477';
+    root.dataset.fxImmersive='active';root.dataset.fxImmersiveSource='canonical-ask-r477';
     dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'canonical-ask-r477'}}));
   }else mountEnhancements();
   queueMicrotask(openPendingCanonicalAsk);
+}
+function activateExistingScrollAfterIntro(){
+  if(scrollBootstrapRequested)return;
+  root.dataset.fxScrollRestorationProbeR746='checking-after-canonical-intro-release';
+  if(Math.abs(scrollY)<=1){root.dataset.fxScrollRestorationProbeR746='top-no-bootstrap';return;}
+  ensureScrollBootstrap();
+  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-restored-scroll-bootstrap-before-deferred-r781`;
+  root.dataset.fxScrollRestorationProbeR746='restored-scroll-bootstrap';
+  startEnhancementsAfterScrollOwner();
+}
+function armExistingScrollProbeAfterIntro(){
+  const probe=()=>setTimeout(activateExistingScrollAfterIntro,0);
+  if(root.dataset.fxPreloaderR531==='done')probe();
+  else document.addEventListener('formatx:preloadercomplete',probe,{once:true,passive:true});
 }
 
 root.dataset.fxMotionRuntimeRequestedR271='0';
@@ -172,18 +253,23 @@ root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
 root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r468':mobile.matches?'core-ready-r468-mobile-r326-controller':'core-ready-r468-desktop-r326-controller';
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
-warmCriticalOwners();
-ensureDialogueSurface();
-ensureMagShapeSync();
-ensureLanguageToggle();
-ensureCurrentMag();
+warmCriticalOwners();ensureControlGeometry();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureSoundControl();ensureCurrentMag();primeReturningScrollOwner();
 
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
+for(const [type,options] of scrollIntentListeners)addEventListener(type,onScrollIntent,options);
+const deepLinked=Boolean(location.hash&&location.hash!=='#top'&&location.hash!=='#hero');
+if(deepLinked)queueMicrotask(()=>{
+  ensureScrollBootstrap();
+  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-deeplink-scroll-bootstrap-before-deferred-r781`;
+  root.dataset.fxScrollRestorationProbeR746='deeplink-bootstrap-no-layout-probe';
+  startEnhancementsAfterScrollOwner();
+});
+else armExistingScrollProbeAfterIntro();
 
 if(deferred.length){
   for(const [type,options] of intentListeners)addEventListener(type,onIntent,options);
   addEventListener('formatx:immersiveactivate',mountEnhancements,{passive:true});
-  if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')mountEnhancements();
+  if(deepLinked)startEnhancementsAfterScrollOwner();
 }
 }());

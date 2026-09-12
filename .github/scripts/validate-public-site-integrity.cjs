@@ -22,15 +22,11 @@ function walk(directory) {
 
 function attrs(tag) {
   const result = {};
-  for (const match of tag.matchAll(/([:\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) {
-    result[match[1].toLowerCase()] = match[2] ?? match[3] ?? '';
-  }
+  for (const match of tag.matchAll(/([:\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) result[match[1].toLowerCase()] = match[2] ?? match[3] ?? '';
   return result;
 }
 
-function publicPath(file) {
-  return '/' + path.relative(docs, file).split(path.sep).join('/');
-}
+function publicPath(file) { return '/' + path.relative(docs, file).split(path.sep).join('/'); }
 
 function localTargetExists(pageFile, html, raw) {
   if (!raw || raw.startsWith('#')) return true;
@@ -71,8 +67,7 @@ for (const file of htmlFiles) {
   const label = path.relative(repo, file);
   const ids = new Map();
   for (const match of html.matchAll(/\bid\s*=\s*(?:"([^"]+)"|'([^']+)')/gi)) {
-    const id = match[1] ?? match[2];
-    ids.set(id, (ids.get(id) || 0) + 1);
+    const id = match[1] ?? match[2]; ids.set(id, (ids.get(id) || 0) + 1);
   }
   for (const [id, count] of ids) if (count > 1) report(`${label}: duplicate id ${id} (${count})`);
   for (const match of html.matchAll(/<(?:a|link|script|img|source)\b[^>]*>/gi)) {
@@ -112,10 +107,7 @@ if (!downloads.includes('data-release-download="multiplatform"')) report('downlo
 if (!downloads.includes('5 napos próbalicenc')) report('downloads: five-day trial copy missing');
 if (/\b(?:nyilvános béta|public beta)\b/i.test(downloads)) report('downloads: retired beta wording remains');
 
-const expectedPlatforms = {
-  'linux-bazzite': 'full_release', windows: 'full_release', android: 'full_release',
-  web: 'technical_preview', macos: 'planned', ios: 'planned'
-};
+const expectedPlatforms = { 'linux-bazzite': 'full_release', windows: 'full_release', android: 'full_release', web: 'technical_preview', macos: 'planned', ios: 'planned' };
 const actualPlatforms = Object.fromEntries(platformStatus.platforms.map(item => [item.id, item.status]));
 for (const [id, status] of Object.entries(expectedPlatforms)) if (actualPlatforms[id] !== status) report(`platform status: ${id} must be ${status}`);
 if (platformStatus.product_release?.status !== 'full_release') report('platform status: product must be full_release');
@@ -134,8 +126,9 @@ if (scrollPolicy.mobile?.finite_document !== false) report('scroll policy: mobil
 if (scrollPolicy.desktop?.controller !== 'seamless-v7' || scrollPolicy.desktop?.automatic_loop !== true) report('scroll policy: desktop seamless-v7 must remain enabled');
 if (scrollPolicy.policy?.input_capture !== false || scrollPolicy.policy?.section_scroll_snap !== false) report('scroll policy: input capture/snap contract regressed');
 
-if (!scrollBootstrap.includes('platform-scroll-v2') || !scrollBootstrap.includes("installSeamlessRuntime('mobile')")) report('scroll bootstrap: shared mobile seamless runtime missing');
-if (!scrollBootstrap.includes("fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'") || !scrollBootstrap.includes('native-momentum-loop-v1')) report('scroll bootstrap: mobile seamless loop policy missing');
+const intentBootstrap = scrollBootstrap.includes("armSeamlessRuntime(MOBILE_QUERY.matches ? 'mobile' : 'desktop')") && scrollBootstrap.includes('installSeamlessRuntime(platform)');
+if (!scrollBootstrap.includes('platform-scroll-v2') || !intentBootstrap) report('scroll bootstrap: R534 intent-loaded shared seamless runtime missing');
+if (!scrollBootstrap.includes('pending-user-scroll-intent') || !scrollBootstrap.includes("fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'") || !scrollBootstrap.includes('native-momentum-loop-v1')) report('scroll bootstrap: mobile seamless loop policy missing');
 if (!scrollBootstrap.includes('formatx-mobile-seamless-loop.css') || scrollBootstrap.includes("createElement('style')")) report('scroll bootstrap: CSP-safe external mobile bridge layer missing');
 if (scrollBootstrap.includes('scrollTo(') || scrollBootstrap.includes('scrollIntoView(') || scrollBootstrap.includes('cloneNode(')) report('scroll bootstrap: mobile-capable bootstrap must not move or clone the document');
 if (!scrollBootstrap.includes('formatx-infinite-scroll-desktop-v7.js')) report('scroll bootstrap: shared seamless runtime loader missing');
@@ -149,9 +142,7 @@ if (!mobileCss.includes('.fx-award-proof__grid') || !mobileCss.includes('grid-te
 if (!mobileCss.includes('.fx-plan-qr-card:not(.is-qr-ready)')) report('mobile CSS: QR broken-image safeguard missing');
 
 if (!checkout.includes('new Uint8Array(12)') || !checkout.includes("return 'FX-' + ymd + '-' + random")) report('checkout: high-entropy order reference missing');
-for (const [name, source] of [['pricing API', pricingApi], ['feedback entry', feedbackEntry], ['feedback API', feedbackApi]]) {
-  if (/eval\s*\(|new Function\s*\(/.test(source)) report(`${name}: dynamic code execution is forbidden`);
-}
+for (const [name, source] of [['pricing API', pricingApi], ['feedback entry', feedbackEntry], ['feedback API', feedbackApi]]) if (/eval\s*\(|new Function\s*\(/.test(source)) report(`${name}: dynamic code execution is forbidden`);
 if (!pricingApi.includes('SECURE_ORDER_REFERENCE = /^FX-\\d{8}-[A-F0-9]{24}$/')) report('pricing API: secure order-reference validation missing');
 if (!feedbackEntry.includes("['/downloads/', '/scifi-ui/downloads/']")) report('feedback/public routing: downloads alias missing');
 if (!feedbackApi.includes('publish_permission = 1')) report('feedback API: consent-gated public review query missing');
@@ -161,8 +152,5 @@ if (!productionContentWrapperActive(productionConfig)) report('production config
 const domains = (productionConfig.routes || []).map(route => route.pattern);
 if (domains.join(',') !== 'formatxsuite.com,www.formatxsuite.com') report('production config: custom-domain ownership incomplete');
 
-if (failures.length) {
-  console.error('FormatX public-site integrity failures:\n- ' + failures.join('\n- '));
-  process.exit(1);
-}
-console.log(`PASS public-site integrity: ${htmlFiles.length} HTML pages, release/platform/security/routing and shared seamless scroll contracts validated.`);
+if (failures.length) { console.error('FormatX public-site integrity failures:\n- ' + failures.join('\n- ')); process.exit(1); }
+console.log(`PASS public-site integrity: ${htmlFiles.length} HTML pages, release/platform/security/routing and R534 intent-loaded seamless scroll contracts validated.`);

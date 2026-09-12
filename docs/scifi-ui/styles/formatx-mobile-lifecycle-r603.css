@@ -1,0 +1,27 @@
+/* FormatX R603 — mobile lifecycle geometry ownership.
+   The Organism modal keeps a visible sheet inset on touch/coarse layouts even
+   when older recovery layers declare full-screen fixed geometry. Desktop is
+   untouched. The heart-core loader owns delivery of this small lifecycle layer. */
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  body.fx-organism-panel-open
+  .fx-organism-console.is-authorised-open:not([hidden])[aria-hidden="false"]
+  > .fx-organism-console-shell {
+    box-sizing: border-box !important;
+    position: fixed !important;
+    top: max(8px, env(safe-area-inset-top, 0px)) !important;
+    right: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    left: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 16px) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 16px) !important;
+    margin: 0 !important;
+    border-radius: 26px 26px 18px 18px !important;
+    transform: none !important;
+    translate: none !important;
+    animation: none !important;
+  }
+}

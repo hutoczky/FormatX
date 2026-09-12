@@ -6,6 +6,22 @@
   html body.living-architecture {
     scroll-snap-type: none !important;
   }
+
+  /* The action dock is fixed at left:50%. Every desktop pointer profile must
+     retain the matching -50% X translation while the duplicate dock is hidden.
+     A Y-only transform leaves the invisible dock shifted half a viewport right
+     and makes body.scrollWidth exceed the viewport. The stronger selector owns
+     this geometry over legacy generated bundles without changing visibility. */
+  html:root:root.fx-organism-core-active body.living-architecture .fx-organism-actionbar {
+    left: 50% !important;
+    right: auto !important;
+    max-width: calc(100vw - 32px) !important;
+    box-sizing: border-box !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translate(-50%, 16px) !important;
+  }
 }
 
 @media (min-width: 1100px) and (pointer: fine) {
@@ -153,15 +169,6 @@
     transform: translateX(-50%);
   }
 
-  /* The hero already exposes download and navigation actions. The duplicate
-     fixed dock must not cover the composition while the core is active. */
-  html.fx-organism-core-active .fx-organism-actionbar {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    transform: translateY(16px) !important;
-  }
-
   html body.living-architecture main > .scene:not(#hero) {
     min-height: clamp(760px, 94svh, 980px);
     padding-block: clamp(96px, 12vh, 150px);
@@ -215,21 +222,5 @@
 
   html body.living-architecture #hero .hero-facts {
     margin-top: 4px;
-  }
-}
-
-@media (min-width: 1600px) and (min-height: 900px) and (pointer: fine) {
-  html body.living-architecture #hero .hero-grid {
-    grid-template-columns: minmax(600px, .95fr) minmax(650px, 1.05fr);
-  }
-
-  html body.living-architecture #hero .hero-space {
-    height: min(100%, 700px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html body.living-architecture #hero .hero-copy {
-    transform: none;
   }
 }

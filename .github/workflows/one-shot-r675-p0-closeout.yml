@@ -1,0 +1,42 @@
+name: one-shot R675 P0 closeout
+
+on:
+  push:
+    branches: [fix/r533-p0-intro-lcp]
+    paths:
+      - '.github/workflows/one-shot-r675-p0-closeout.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/r533-p0-intro-lcp
+          fetch-depth: 0
+      - name: Apply fail-fast R675 patch
+        run: python3 .github/scripts/r675-p0-closeout.py
+      - name: Validate patched sources
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check billing-worker/src/production-content-entry.js
+          node --check .github/scripts/validate-r533-preloader-timing.cjs
+      - name: Commit and push R675 source
+        run: |
+          set -euo pipefail
+          git config user.name 'FormatX P0 closeout bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            .github/scripts/validate-r533-preloader-timing.cjs \
+            docs/scifi-ui/styles/formatx-p0-first-paint-r490.css \
+            docs/scifi-ui/styles/organism-voice.css \
+            billing-worker/src/production-content-entry.js \
+            docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          git diff --cached --quiet && { echo 'No source changes produced'; exit 1; }
+          git commit -m 'R675 reconcile P0 timing visibility overflow and loop ownership'
+          git push origin HEAD:fix/r533-p0-intro-lcp

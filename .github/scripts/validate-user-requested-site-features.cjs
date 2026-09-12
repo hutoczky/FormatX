@@ -26,6 +26,8 @@ const feedbackSchema = read('billing-worker/src/feedback-schema.js');
 const feedbackEntry = read('billing-worker/src/production-feedback-entry.js');
 const feedbackUi = read('docs/scifi-ui/scripts/formatx-feedback.js');
 const living = read('docs/scifi-ui/scripts/living-architecture.js');
+const paymentSurface = read('docs/scifi-ui/scripts/formatx-payment-surface-r553.js');
+const paymentStyle = read('docs/scifi-ui/styles/payment-qr.css');
 const apex = read('docs/scifi-ui/scripts/formatx-apex.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice.js');
 const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
@@ -44,14 +46,9 @@ assert.ok(!loader.includes('organism-voice-foreground.js'), 'conflicting foregro
 assert.ok(includesAll(menu, ['function setOpen(toggle, nav, open)', 'aria-expanded', 'fx-organism-menu-open']), 'menu state contract missing');
 assert.ok(includesAll(consoleState, ['forceClosed', 'is-authorised-open', 'shell.hidden = true']), 'panel closed-state contract missing');
 assert.ok(includesAll(language, [
-  "const VERSION='7'",
-  "button.className='fx-language-toggle'",
-  'localStorage.setItem',
-  'localStorage.getItem',
-  'HU – váltás angol nyelvre',
-  'EN – switch to Hungarian',
-  "fxSingleLanguageToggle='ready'",
-  'event-driven-no-document-mutation-observer'
+  "const VERSION='7'", "button.className='fx-language-toggle'", 'localStorage.setItem', 'localStorage.getItem',
+  'HU – váltás angol nyelvre', 'EN – switch to Hungarian', "fxSingleLanguageToggle='ready'", 'event-driven-no-document-mutation-observer',
+  "button.addEventListener('click'"
 ]), 'single language toggle contract missing');
 assert.ok(!language.includes('new MutationObserver'), 'single language toggle must remain event-driven and observer-free');
 
@@ -69,28 +66,21 @@ assert.equal(scrollPolicy.policy.input_capture, false, 'wheel/touch capture must
 
 assert.ok(includesAll(scrollBootstrap, [
   'platform-scroll-v2',
-  "installSeamlessRuntime('mobile')",
+  "armSeamlessRuntime(MOBILE_QUERY.matches ? 'mobile' : 'desktop')",
+  'installSeamlessRuntime(platform)',
+  'pending-user-scroll-intent',
   'native-momentum-loop-v1',
   "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'",
   'formatx-mobile-seamless-loop.css',
   'formatx-infinite-scroll-desktop-v7.js'
-]), 'shared mobile/desktop seamless bootstrap contract missing');
+]), 'R534 intent-loaded shared mobile/desktop seamless bootstrap contract missing');
 assert.ok(!scrollBootstrap.includes("createElement('style')"), 'mobile seamless bridge override must remain CSP-safe external CSS');
 assert.ok(!scrollBootstrap.includes('scrollTo(') && !scrollBootstrap.includes('scrollIntoView(') && !scrollBootstrap.includes('cloneNode('), 'mobile-capable bootstrap must not move/clone the page');
 assert.ok(!scrollBootstrap.includes('preventDefault'), 'scroll bootstrap must not capture input');
 assert.ok(includesAll(seamlessScroll, [
-  "const VERSION = 'seamless-v7'",
-  "root.dataset.fxInfiniteInput = 'native'",
-  "root.dataset.fxInfiniteCloneMode = 'inert-reference-mirror'",
-  "root.dataset.fxAutomaticLoop = 'enabled'",
-  'automaticLoop: true',
-  'visualBridge: true',
-  'inertReferenceMirror: true',
-  "mirrorContext: 'static-2d-snapshot-no-webgl'",
-  'clonedContent: false',
-  "mobileTransfer: 'scrollend-or-idle'",
-  'buildReferenceMirror',
-  'window.scrollTo('
+  "const VERSION = 'seamless-v7'", "root.dataset.fxInfiniteInput = 'native'", "root.dataset.fxInfiniteCloneMode = 'inert-reference-mirror'",
+  "root.dataset.fxAutomaticLoop = 'enabled'", 'automaticLoop: true', 'visualBridge: true', 'inertReferenceMirror: true',
+  "mirrorContext: 'static-2d-snapshot-no-webgl'", 'clonedContent: false', "mobileTransfer: 'scrollend-or-idle'", 'buildReferenceMirror', 'window.scrollTo('
 ]), 'shared seamless-v7 implementation missing');
 assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(seamlessScroll), 'shared seamless runtime must not capture wheel/touchmove');
 assert.ok(includesAll(loopStyle, ['scroll-snap-type: none !important', 'scroll-snap-align: none !important']), 'seamless loop snap suppression missing');
@@ -99,8 +89,7 @@ assert.ok(includesAll(mobileLoopStyle, ['display: block !important', 'min-height
 assert.ok(includesAll(mobileStyle, ['.fx-award-proof__grid', '.fx-plan-qr-card:not(.is-qr-ready)', '.site-footer nav']), 'mobile production stability layer incomplete');
 
 assert.ok(includesAll(downloads, [
-  'https://github.com/hutoczky/FormatX-Updates/releases/latest',
-  'data-release-download="multiplatform"',
+  'https://github.com/hutoczky/FormatX-Updates/releases/latest', 'data-release-download="multiplatform"',
   '../verification.html', '../test-matrix.html', '../known-issues.html', '../security.html', '../support.html',
   'Teljes multiplatform verzió letöltése', '5 napos próbalicenc'
 ]), 'downloads fallback/evidence/trial links missing');
@@ -113,8 +102,25 @@ assert.ok(includesAll(feedbackApi, ['runWithFeedbackTable', 'publish_permission 
 assert.ok(includesAll(feedbackEntry, ["['/downloads/', '/scifi-ui/downloads/']", 'handleFeedbackRequest(request, env)']), 'public alias/feedback routing missing');
 assert.ok(includesAll(feedbackUi, ['function renderPublicReviews', "rootMargin: '800px 0px'", 'paragraph.textContent']), 'lazy public comment rendering missing');
 
-assert.ok(includesAll(living, ["ROOT.dataset.fxThreeLoader = 'deferred-user-activation'", "addEventListener('formatx:immersiveactivate', loadThreeExperience, { once: true })", "image.loading = 'lazy'"]), 'heavy renderer/QR work is not deferred');
+assert.ok(includesAll(living, [
+  "ROOT.dataset.fxThreeLoader = 'deferred-user-activation'",
+  "addEventListener('formatx:immersiveactivate', () => { void loadThreeExperience(); }, { once: true })",
+  "image.loading = 'lazy'",
+  "rootMargin: '700px 0px'"
+]), 'heavy Organism/QR image work is not deferred');
 assert.ok(!living.includes("document.addEventListener('formatx:introcomplete', loadThreeExperience"), 'heavy renderer must not auto-load after intro');
+assert.ok(includesAll(paymentSurface, [
+  'afterFirstPaint(ensureStyle)',
+  "const STYLE='/scifi-ui/styles/payment-qr.css?v=20260906-r553-pricing-visible'",
+  "fxPaymentSurfaceVisibleR553=payment&&dock?'payment-and-qr-visible':'partial-surface'"
+]), 'R553 payment visual layer must load after first paint while remaining visible');
+assert.ok(includesAll(paymentStyle, [
+  'body.living-architecture #pricing .payment',
+  'body.living-architecture #pricing #formatx-plan-qr-dock',
+  'body.living-architecture #pricing .fx-plan-qr-link',
+  'pointer-events: auto !important'
+]), 'R553 visible payment/QR CSS contract missing');
+assert.ok(!paymentStyle.includes('.reference-commerce #formatx-plan-qr-dock'), 'payment visibility must not depend on legacy reference-commerce mode');
 assert.ok(includesAll(apex, ["const RELEASE_API = './data/current-release.json'", 'requestAnimationFrame(progress)', 'requestAnimationFrame(apply)']), 'frame-throttled local release metadata contract missing');
 assert.ok(!apex.includes('https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest'), 'homepage must not call GitHub release API directly');
 
@@ -133,8 +139,6 @@ assert.ok(mobileEntry.includes('mobile-core-engine-v3.js') && includesAll(morphE
 assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-interface.js', 'formatx-premium-finish.js']), 'critical production assets missing');
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 
-// The iconic MAG is a first-class requested feature and therefore part of the
-// same production gate as scrolling, downloads and the public operating surface.
 require('./validate-signature-system-r185.cjs');
 require('./validate-igloo-floor.cjs');
-console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, current semantic language owner, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
+console.log('PASS: requested site features validated with R553 deferred visible payment/QR, R534 intent-loaded seamless-v7 scrolling, current semantic language owner, native MAG, responsive UI, feedback, downloads and production gates.');

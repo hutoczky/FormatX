@@ -218,6 +218,13 @@
   cursor: pointer;
 }
 
+.fx-organism-thought:not([hidden]) .fx-organism-thought-close {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 .fx-organism-thought-close:hover,
 .fx-organism-thought-close:focus-visible {
   color: #fff;

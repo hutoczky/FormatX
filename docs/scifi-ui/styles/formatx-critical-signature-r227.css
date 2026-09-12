@@ -23,7 +23,7 @@ main>.scene,main>.fx-category-deck{position:relative;isolation:isolate;scroll-ma
 
 /* Consistent premium rhythm below the hero. The aura has no hard rectangle, so sections remain one organism. */
 main>.scene:not(#hero)::before,main>.fx-category-deck::before{
-  content:"";position:absolute;z-index:-2;pointer-events:none;inset:-5rem max(-7vw,-96px);
+  content:"";position:absolute;z-index:-2;pointer-events:none;inset:-5rem 0;
   background:
     radial-gradient(ellipse at 18% 18%,rgba(47,206,255,.055),transparent 43%),
     radial-gradient(ellipse at 84% 72%,rgba(142,76,255,.045),transparent 46%);
@@ -141,7 +141,7 @@ html.fx-signature-open .fx-signature-architecture{visibility:visible;pointer-eve
 }
 
 @media (max-width:430px){
-  main>.scene:not(#hero)::before,main>.fx-category-deck::before{inset:-3rem -12vw}
+  main>.scene:not(#hero)::before,main>.fx-category-deck::before{inset:-3rem 0}
   .fx-signature-caption{width:70vw}.fx-signature-caption span{font-size:10px}
 }
 

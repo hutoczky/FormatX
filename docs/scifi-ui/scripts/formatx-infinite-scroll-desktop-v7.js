@@ -6,6 +6,8 @@
   const LOOP_GUARD_MS = 420;
   const ACTIVITY_IDLE_MS = 170;
   const MOBILE_SETTLE_MS = 220;
+  const LOOP_BOOT_FLOOR_MS = 1750;
+  const STYLE_URL = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260907-r592-style-ready-geometry';
   const MOBILE_FLOW_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const HERO_START_HASHES = new Set(['', '#top', '#hero']);
   let bridge = null;
@@ -13,6 +15,9 @@
   let mirrorImage = null;
   let mirrorCaptureFrame = 0;
   let mirrorCaptureTimer = 0;
+  let mirrorCaptureGeneration = 0;
+  let mirrorCapturePending = false;
+  let mirrorObjectUrl = '';
   let sourceHero = null;
   let transferLockedUntil = 0;
   let scrollFrame = 0;
@@ -21,13 +26,20 @@
   let mobileSettleTimer = 0;
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
+  let desktopStableGeometry = null;
+  let desktopStableFrame = 0;
+  let desktopStableGeneration = 0;
+  let introTransferRetryArmed = false;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
   let geometryFrame = 0;
   let geometryObserver = null;
+  let desktopStateObserver = null;
+  let bootTimer = 0;
   let layoutWidth = innerWidth;
   let initialHeroGuardApplied = false;
+  let initialised = false;
   let loopGeometry = Object.freeze({
     ready: false,
     bridgeTop: 0,
@@ -39,7 +51,7 @@
 
   if (root.dataset.fxInfiniteController === VERSION) return;
 
-  root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
+  root.dataset.fxInfiniteScroll = 'initialising-' + VERSION;
   root.dataset.fxInfiniteController = VERSION;
   root.dataset.fxInfiniteCloneMode = 'inert-reference-mirror';
   root.dataset.fxInfiniteInput = 'native';
@@ -47,9 +59,17 @@
   root.dataset.fxAutomaticLoop = 'enabled';
   root.dataset.fxScrollJumpGuard = 'visual-match-v4';
   root.dataset.fxLoopBridge = 'initialising';
+  root.dataset.fxLoopStyleR592 = 'loading';
+  root.dataset.fxLoopBootstrapR593 = 'post-critical-window-pending';
   root.dataset.fxScrollSnap = 'disabled';
   root.dataset.fxMobileScrollMode = 'native-momentum-loop';
   root.dataset.fxInitialHeroGuard = 'pending';
+  root.dataset.fxLoopMirrorCaptureR609 = 'async-to-blob';
+  root.dataset.fxLoopOrganismRepairR609 = 'geometry-only-no-bridge-rebuild';
+  root.dataset.fxDesktopLoopCrossingR618 = 'last-idle-real-bridge-boundary';
+  root.dataset.fxDesktopLoopSnapshotR623 = 'stable-only-outside-organism-overlays';
+  root.dataset.fxDesktopLoopRetryR650 = 'preserve-crossing-through-intro-ui-block';
+  root.dataset.fxDesktopLoopStableSettleR663 = 'frame-settled-pending';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -62,13 +82,58 @@
     return MOBILE_FLOW_QUERY.matches;
   }
 
-  function ensureStyle() {
-    if (document.querySelector('link[data-fx-seamless-loop-style]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260820-reference-loop-r246';
-    link.dataset.fxSeamlessLoopStyle = 'true';
-    document.head.appendChild(link);
+  function ensureStyleReady() {
+    return new Promise((resolve, reject) => {
+      let link = document.querySelector('link[data-fx-seamless-loop-style]');
+      if (link instanceof HTMLLinkElement && link.sheet) {
+        root.dataset.fxLoopStyleR592 = 'ready-existing';
+        resolve(link);
+        return;
+      }
+      if (!(link instanceof HTMLLinkElement)) {
+        link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = STYLE_URL;
+        link.dataset.fxSeamlessLoopStyle = 'true';
+        document.head.appendChild(link);
+      }
+      let settled = false;
+      const finish = (ok, source) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        link.removeEventListener('load', onLoad);
+        link.removeEventListener('error', onError);
+        if (ok) {
+          root.dataset.fxLoopStyleR592 = source;
+          requestAnimationFrame(() => resolve(link));
+        } else {
+          root.dataset.fxLoopStyleR592 = source;
+          root.dataset.fxLoopBridge = 'style-unavailable';
+          reject(new Error('FormatX seamless loop stylesheet unavailable'));
+        }
+      };
+      const onLoad = () => finish(true, 'ready-load');
+      const onError = () => finish(false, 'failed-load');
+      link.addEventListener('load', onLoad, { once: true });
+      link.addEventListener('error', onError, { once: true });
+      const timer = window.setTimeout(() => {
+        if (link.sheet) finish(true, 'ready-sheet-timeout-check');
+        else finish(false, 'failed-style-timeout');
+      }, 2000);
+    });
+  }
+
+  function waitForBootFloor() {
+    const delay = Math.max(0, LOOP_BOOT_FLOOR_MS - performance.now());
+    if (delay <= 0) return Promise.resolve();
+    return new Promise(resolve => {
+      clearTimeout(bootTimer);
+      bootTimer = window.setTimeout(() => {
+        bootTimer = 0;
+        resolve();
+      }, delay);
+    });
   }
 
   function language() {
@@ -96,9 +161,15 @@
     return navigationType() !== 'back_forward';
   }
 
+  // R762: Organism can change the positioned ancestor. Native scrollY and
+  // the bridge/hero boundaries must remain in document coordinates.
+  function documentTop(element) {
+    return element.getBoundingClientRect().top + window.scrollY;
+  }
+
   function heroTop() {
     sourceHero = document.querySelector('#main-content > #hero');
-    return sourceHero ? Math.max(0, sourceHero.offsetTop) : 0;
+    return sourceHero ? Math.max(0, documentTop(sourceHero)) : 0;
   }
 
   function forceHeroStart(source) {
@@ -281,20 +352,46 @@
     return section;
   }
 
+  function releaseMirrorObjectUrl() {
+    if (!mirrorObjectUrl) return;
+    try { URL.revokeObjectURL(mirrorObjectUrl); } catch (_) {}
+    mirrorObjectUrl = '';
+  }
+
   function captureReferenceMirror() {
     mirrorCaptureFrame = 0;
-    if (!mirrorImage || !mirror?.isConnected || !sourceHero?.isConnected) return false;
+    if (mirrorCapturePending || !mirrorImage || !mirror?.isConnected || !sourceHero?.isConnected) return false;
     const detail = sourceHero.querySelector('.fx-core-detail-r122');
     if (!(detail instanceof HTMLCanvasElement) || detail.width < 8 || detail.height < 8) return false;
+    if (typeof detail.toBlob !== 'function') {
+      root.dataset.fxLoopMirrorFrame = 'async-capture-unavailable';
+      return false;
+    }
+
+    const generation = mirrorCaptureGeneration;
+    const targetImage = mirrorImage;
+    const width = detail.width;
+    const height = detail.height;
+    mirrorCapturePending = true;
     try {
-      const snapshot = detail.toDataURL('image/webp', .9);
-      if (!snapshot || snapshot.length < 512) return false;
-      mirrorImage.src = snapshot;
-      mirrorImage.hidden = false;
-      root.dataset.fxLoopMirrorFrame = `${detail.width}x${detail.height}`;
+      detail.toBlob(blob => {
+        if (generation !== mirrorCaptureGeneration) return;
+        mirrorCapturePending = false;
+        if (!(blob instanceof Blob) || blob.size < 256 || targetImage !== mirrorImage || !targetImage.isConnected) {
+          root.dataset.fxLoopMirrorFrame = 'async-capture-unavailable';
+          return;
+        }
+        const nextUrl = URL.createObjectURL(blob);
+        releaseMirrorObjectUrl();
+        mirrorObjectUrl = nextUrl;
+        targetImage.src = nextUrl;
+        targetImage.hidden = false;
+        root.dataset.fxLoopMirrorFrame = `${width}x${height}`;
+      }, 'image/webp', .9);
       return true;
     } catch (_) {
-      root.dataset.fxLoopMirrorFrame = 'capture-unavailable';
+      mirrorCapturePending = false;
+      root.dataset.fxLoopMirrorFrame = 'async-capture-unavailable';
       return false;
     }
   }
@@ -320,22 +417,15 @@
     });
   }
 
-  function refreshGeometry() {
+  function readActualGeometry() {
     sourceHero = document.querySelector('#main-content > #hero');
-    if (!bridge || !sourceHero || !bridge.isConnected || !sourceHero.isConnected) {
-      resetGeometry();
-      return false;
-    }
-
+    if (!bridge || !sourceHero || !bridge.isConnected || !sourceHero.isConnected) return null;
     const viewportHeight = innerHeight;
-    const bridgeTop = bridge.offsetTop;
-    const sourceTop = sourceHero.offsetTop;
+    const bridgeTop = documentTop(bridge);
+    const sourceTop = documentTop(sourceHero);
     const sourceHeight = sourceHero.offsetHeight;
     const documentEnd = Math.max(0, document.documentElement.scrollHeight - viewportHeight);
-
-    bridge.style.setProperty('--fx-loop-source-height', `${Math.round(sourceHeight)}px`);
-
-    loopGeometry = Object.freeze({
+    return Object.freeze({
       ready: true,
       bridgeTop,
       bridgeThreshold: bridgeTop + Math.max(36, Math.min(viewportHeight * .18, 180)),
@@ -343,7 +433,108 @@
       sourceHeight,
       documentEnd,
     });
+  }
+
+  function refreshGeometry() {
+    const next = readActualGeometry();
+    if (!next) {
+      resetGeometry();
+      return false;
+    }
+    bridge.style.setProperty('--fx-loop-source-height', `${Math.round(next.sourceHeight)}px`);
+    loopGeometry = next;
+    root.dataset.fxLoopGeometryR592 = `${Math.round(next.bridgeTop)}:${Math.round(next.bridgeThreshold)}:${Math.round(next.documentEnd)}`;
     return true;
+  }
+
+  function desktopGeometryCanStabilize() {
+    return root.dataset.fxOrganismThought !== 'open'
+      && !document.body.classList.contains('fx-organism-panel-open')
+      && !root.classList.contains('fx-organism-menu-open');
+  }
+
+  function acceptDesktopStableGeometry(actual, source) {
+    if (!actual?.ready) return false;
+    desktopStableGeometry = actual;
+    root.dataset.fxDesktopLoopStableBoundaryR618 = `${source}:${Math.round(actual.bridgeTop)}:${Math.round(actual.bridgeThreshold)}:${Math.round(actual.documentEnd)}`;
+    root.dataset.fxDesktopLoopStableBoundaryR623 = `accepted-${source}`;
+    return true;
+  }
+
+  function rememberDesktopStableGeometry(source) {
+    if (isMobileFlow() || !desktopGeometryCanStabilize()) {
+      if (!isMobileFlow()) root.dataset.fxDesktopLoopStableBoundaryR623 = 'transient-organism-geometry-ignored';
+      return false;
+    }
+    const actual = readActualGeometry();
+    return acceptDesktopStableGeometry(actual, source);
+  }
+
+  function desktopGeometryMatches(a, b) {
+    if (!a?.ready || !b?.ready) return false;
+    return Math.abs(a.bridgeTop - b.bridgeTop) <= 1
+      && Math.abs(a.bridgeThreshold - b.bridgeThreshold) <= 1
+      && Math.abs(a.sourceTop - b.sourceTop) <= 1
+      && Math.abs(a.sourceHeight - b.sourceHeight) <= 1
+      && Math.abs(a.documentEnd - b.documentEnd) <= 1;
+  }
+
+  function scheduleDesktopStableGeometry(source) {
+    if (!initialised || isMobileFlow() || !desktopGeometryCanStabilize()) return false;
+    desktopStableGeneration += 1;
+    const generation = desktopStableGeneration;
+    cancelAnimationFrame(desktopStableFrame);
+    desktopStableFrame = 0;
+    let previous = null;
+    let stableFrames = 0;
+    let frames = 0;
+
+    const sample = () => {
+      desktopStableFrame = 0;
+      if (generation !== desktopStableGeneration || !initialised || isMobileFlow()) return;
+      if (!desktopGeometryCanStabilize() || pendingDesktopRelative != null || root.dataset.fxScrollActivity === 'scrolling') {
+        root.dataset.fxDesktopLoopStableSettleR663 = `held-${source}`;
+        return;
+      }
+      const actual = readActualGeometry();
+      if (!actual) return;
+      stableFrames = previous && desktopGeometryMatches(previous, actual) ? stableFrames + 1 : 0;
+      previous = actual;
+      frames += 1;
+      root.dataset.fxDesktopLoopStableSettleR663 = `${source}:${frames}:${stableFrames}:${Math.round(actual.bridgeTop)}:${Math.round(actual.documentEnd)}`;
+      if (stableFrames >= 1) {
+        acceptDesktopStableGeometry(actual, `${source}-frame-settled-r663`);
+        root.dataset.fxDesktopLoopStableSettleR663 = `accepted-${source}-${Math.round(actual.bridgeTop)}`;
+        return;
+      }
+      if (frames >= 24) {
+        root.dataset.fxDesktopLoopStableSettleR663 = `unsettled-${source}-${Math.round(actual.bridgeTop)}`;
+        return;
+      }
+      desktopStableFrame = requestAnimationFrame(sample);
+    };
+
+    desktopStableFrame = requestAnimationFrame(sample);
+    return true;
+  }
+
+  function settleDesktopStableGeometry(source) {
+    return scheduleDesktopStableGeometry(source);
+  }
+
+  function observeDesktopStableState() {
+    desktopStateObserver?.disconnect();
+    desktopStateObserver = null;
+    if (!('MutationObserver' in window)) return;
+    desktopStateObserver = new MutationObserver(records => {
+      if (!records.some(record => record.attributeName === 'data-fx-organism-thought')) return;
+      settleDesktopStableGeometry('organism-thought-settled-r663');
+    });
+    desktopStateObserver.observe(root, {
+      attributes: true,
+      attributeFilter: ['data-fx-organism-thought']
+    });
+    root.dataset.fxDesktopLoopStableStateR647 = 'observing-frame-settled-organism-ui-close-r663';
   }
 
   function scheduleGeometryRefresh() {
@@ -359,7 +550,16 @@
     geometryObserver = null;
     if (!('ResizeObserver' in window) || !bridge || !sourceHero) return;
 
-    geometryObserver = new ResizeObserver(() => scheduleGeometryRefresh());
+    geometryObserver = new ResizeObserver(() => {
+      scheduleGeometryRefresh();
+      if (!isMobileFlow()
+        && initialised
+        && pendingDesktopRelative == null
+        && root.dataset.fxScrollActivity !== 'scrolling'
+        && desktopGeometryCanStabilize()) {
+        scheduleDesktopStableGeometry('resize-observer-r663');
+      }
+    });
     const main = document.getElementById('main-content');
     const footer = document.querySelector('body > .site-footer');
     if (main) geometryObserver.observe(main);
@@ -369,6 +569,12 @@
   }
 
   function removeBridge() {
+    mirrorCaptureGeneration += 1;
+    mirrorCapturePending = false;
+    desktopStableGeneration += 1;
+    cancelAnimationFrame(desktopStableFrame);
+    desktopStableFrame = 0;
+    releaseMirrorObjectUrl();
     geometryObserver?.disconnect();
     geometryObserver = null;
     bridge?.remove();
@@ -378,6 +584,8 @@
     bridge = null;
     mirror = null;
     mirrorImage = null;
+    pendingDesktopRelative = null;
+    desktopStableGeometry = null;
     resetGeometry();
     root.dataset.fxLoopBridge = 'missing';
   }
@@ -399,14 +607,13 @@
     bridge.setAttribute('inert', '');
     bridge.appendChild(mirror);
     footer.insertAdjacentElement('afterend', bridge);
-    root.dataset.fxLoopBridge = 'ready-v3';
 
-    // Geometry is deliberately sampled outside the scroll hot path. This avoids
-    // style writes followed by offset/scrollHeight reads on every animation frame.
     refreshGeometry();
+    rememberDesktopStableGeometry('build');
     observeGeometry();
     scheduleGeometryRefresh();
     scheduleMirrorCapture(80);
+    root.dataset.fxLoopBridge = 'ready-v3';
     return true;
   }
 
@@ -418,13 +625,26 @@
     return Math.max(0, Math.min(y - geometry.bridgeTop, Math.max(0, geometry.sourceHeight - 2)));
   }
 
+  function captureDesktopCrossingIntent() {
+    if (isMobileFlow() || !initialised || Date.now() < transferLockedUntil) return;
+    const geometry = desktopStableGeometry || loopGeometry;
+    if (!geometry?.ready) return;
+    const y = scrollY;
+    if (y < geometry.bridgeThreshold || y > geometry.documentEnd + 2) return;
+    pendingDesktopRelative = Math.max(0, Math.min(y - geometry.bridgeTop, Math.max(0, geometry.sourceHeight - 2)));
+    root.dataset.fxDesktopLoopBoundaryR618 = `captured-stable-${Math.round(geometry.bridgeTop)}-${Math.round(y)}`;
+  }
+
   function markIdle() {
     clearTimeout(activityTimer);
     activityTimer = 0;
     root.dataset.fxScrollActivity = 'idle';
     root.classList.remove('fx-page-scrolling');
     if (isMobileFlow()) scheduleMobileTransfer();
-    else commitDesktopTransfer();
+    else {
+      commitDesktopTransfer();
+      if (pendingDesktopRelative == null && Date.now() >= transferLockedUntil) scheduleDesktopStableGeometry('idle-r663');
+    }
   }
 
   function landingTarget(relative) {
@@ -435,7 +655,13 @@
     }
     if (!geometry.ready) return null;
     const bounded = Math.max(0, Math.min(relative, Math.max(0, geometry.sourceHeight - 2)));
-    return geometry.sourceTop + bounded;
+    const stableSourceTop = !isMobileFlow() && desktopStableGeometry?.ready
+      ? desktopStableGeometry.sourceTop
+      : geometry.sourceTop;
+    root.dataset.fxDesktopLoopLandingOriginR644 = !isMobileFlow() && desktopStableGeometry?.ready
+      ? `stable-${Math.round(stableSourceTop)}`
+      : `live-${Math.round(stableSourceTop)}`;
+    return stableSourceTop + bounded;
   }
 
   function landAt(relative) {
@@ -459,10 +685,41 @@
     });
   }
 
+  function armDesktopTransferRetry(source) {
+    if (isMobileFlow() || introTransferRetryArmed || pendingDesktopRelative == null) return;
+    introTransferRetryArmed = true;
+    root.dataset.fxDesktopLoopRetryR650 = `armed-${source}`;
+    document.addEventListener('formatx:preloadercomplete', () => {
+      introTransferRetryArmed = false;
+      root.dataset.fxDesktopLoopRetryR650 = 'preloader-complete-retry';
+      if (!initialised || pendingDesktopRelative == null) return;
+      queueMicrotask(commitDesktopTransfer);
+    }, { once: true, capture: true });
+  }
+
   function performTransfer(relative, source) {
     if (relative == null || Date.now() < transferLockedUntil) return false;
-    if (document.body.classList.contains('fx-organism-panel-open')) return false;
-    if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return false;
+    if (document.body.classList.contains('fx-organism-panel-open')) {
+      root.dataset.fxDesktopLoopBlockedR644 = 'organism-panel-open';
+      return false;
+    }
+    if (root.dataset.fxOrganismThought === 'open') {
+      root.dataset.fxDesktopLoopBlockedR644 = 'organism-thought-open';
+      return false;
+    }
+    if (root.classList.contains('fx-organism-menu-open')) {
+      root.dataset.fxDesktopLoopBlockedR644 = 'organism-menu-open';
+      return false;
+    }
+    const introOverlay = document.getElementById('formatx-event-horizon');
+    if (introOverlay instanceof HTMLElement
+      && !introOverlay.hidden
+      && introOverlay.dataset.fxPreloaderR531 === 'active') {
+      root.dataset.fxDesktopLoopBlockedR644 = 'canonical-intro-overlay-active';
+      armDesktopTransferRetry('intro-active');
+      return false;
+    }
+    root.dataset.fxDesktopLoopBlockedR644 = 'none';
 
     transferLockedUntil = Date.now() + LOOP_GUARD_MS;
     pendingMobileRelative = null;
@@ -487,10 +744,6 @@
     mobileSettleTimer = 0;
     if (touchActive || Date.now() < transferLockedUntil) return;
 
-    // r306: r305 intentionally removes large mobile placeholder heights. Any
-    // late content/font/layout settling can therefore move the loop bridge after
-    // the scroll hot path cached its position. Re-sample only at the idle/end
-    // boundary, never on an active scroll frame, then decide from live geometry.
     refreshGeometry();
     const relative = bridgeRelative();
     if (relative == null) {
@@ -509,22 +762,47 @@
   }
 
   function commitDesktopTransfer() {
-    if (isMobileFlow() || pendingDesktopRelative == null || Date.now() < transferLockedUntil) return;
-    const relative = bridgeRelative();
+    if (isMobileFlow() || Date.now() < transferLockedUntil) return;
+    const captured = pendingDesktopRelative;
+    refreshGeometry();
+    let relative = captured == null ? bridgeRelative() : captured;
+    let collapsedStableBoundary = false;
+
+    if (desktopStableGeometry?.ready && loopGeometry.ready) {
+      const stable = desktopStableGeometry;
+      const live = loopGeometry;
+      const stableThresholdUnreachable = live.documentEnd + 2 < stable.bridgeThreshold;
+      const liveBoundaryCrossed = scrollY >= live.bridgeThreshold && scrollY <= live.documentEnd + 2;
+      if (stableThresholdUnreachable && liveBoundaryCrossed) {
+        relative = Math.max(0, Math.min(
+          scrollY - live.bridgeTop,
+          Math.max(0, live.sourceHeight - 2)
+        ));
+        collapsedStableBoundary = true;
+        root.dataset.fxDesktopLoopBoundaryR646 =
+          `live-overrode-${captured == null ? 'none' : 'stale'}-${Math.round(live.bridgeTop)}-${Math.round(scrollY)}-stable-${Math.round(stable.bridgeTop)}`;
+      }
+    }
+
     if (relative == null) {
       pendingDesktopRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
       return;
     }
     pendingDesktopRelative = relative;
-    performTransfer(relative, 'visual-bridge-desktop-idle');
+    root.dataset.fxDesktopLoopBoundaryR607 = collapsedStableBoundary
+      ? 'collapsed-live-boundary-stable-origin-r644'
+      : (captured == null ? 'settled-idle-recomputed' : 'last-idle-crossing-preserved-r618');
+    performTransfer(
+      relative,
+      collapsedStableBoundary
+        ? 'visual-bridge-desktop-collapsed-live-boundary-r644'
+        : (captured == null ? 'visual-bridge-desktop-idle' : 'visual-bridge-desktop-stable-crossing')
+    );
   }
 
   function transferIfNeeded() {
     scrollFrame = 0;
-
-    // Read the cached transfer position before mutating classes/data attributes.
-    // The scroll frame therefore contains no layout-dependent DOM reads.
     const relative = bridgeRelative();
 
     root.dataset.fxScrollActivity = 'scrolling';
@@ -537,7 +815,7 @@
         pendingMobileRelative = null;
         clearTimeout(mobileSettleTimer);
         mobileSettleTimer = 0;
-      } else pendingDesktopRelative = null;
+      }
       return;
     }
 
@@ -549,12 +827,14 @@
       return;
     }
 
-    pendingDesktopRelative = relative;
+    if (pendingDesktopRelative == null) pendingDesktopRelative = relative;
     root.dataset.fxInfiniteInput = 'native-wheel';
     root.dataset.fxLoopLandingState = 'waiting-wheel-idle';
   }
 
   function onScroll() {
+    if (!initialised) return;
+    captureDesktopCrossingIntent();
     if (scrollFrame) return;
     scrollFrame = requestAnimationFrame(transferIfNeeded);
   }
@@ -569,6 +849,7 @@
   }
 
   function onResize() {
+    if (!initialised) return;
     const nextWidth = innerWidth;
     const widthChanged = Math.abs(nextWidth - layoutWidth) > 8;
     if (widthChanged) layoutWidth = nextWidth;
@@ -577,7 +858,7 @@
   }
 
   function onTouchStart() {
-    if (!isMobileFlow()) return;
+    if (!initialised || !isMobileFlow()) return;
     touchActive = true;
     clearTimeout(mobileSettleTimer);
     mobileSettleTimer = 0;
@@ -585,16 +866,23 @@
   }
 
   function onTouchEnd() {
-    if (!isMobileFlow()) return;
+    if (!initialised || !isMobileFlow()) return;
     touchActive = false;
     root.dataset.fxInfiniteInput = 'native';
     scheduleMobileTransfer();
   }
 
   function onScrollEnd() {
-    if (!isMobileFlow() || touchActive) return;
-    clearTimeout(mobileSettleTimer);
-    mobileSettleTimer = window.setTimeout(commitMobileTransfer, 0);
+    if (!initialised) return;
+    if (isMobileFlow()) {
+      if (touchActive) return;
+      clearTimeout(mobileSettleTimer);
+      mobileSettleTimer = window.setTimeout(commitMobileTransfer, 0);
+      return;
+    }
+    clearTimeout(activityTimer);
+    activityTimer = 0;
+    markIdle();
   }
 
   function onPanelOpen(event) {
@@ -607,11 +895,25 @@
     scheduleGeometryRefresh();
   }
 
-  function initialise() {
-    ensureStyle();
+  async function initialise() {
+    if (initialised) return;
+    try {
+      await ensureStyleReady();
+      await waitForBootFloor();
+    } catch (_) {
+      root.dataset.fxInfiniteScroll = 'failed-style-' + VERSION;
+      return;
+    }
+    root.dataset.fxLoopBootstrapR593 = 'post-critical-window-running';
     guaranteeInitialHero();
     repairReleasePanel();
-    buildBridge();
+    if (!buildBridge()) {
+      root.dataset.fxInfiniteScroll = 'failed-bridge-' + VERSION;
+      return;
+    }
+    initialised = true;
+    observeDesktopStableState();
+    scheduleDesktopStableGeometry('initialised-r663');
     root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
       version: VERSION,
       automaticLoop: true,
@@ -620,15 +922,21 @@
       clonedHeroOnly: false,
       inertReferenceMirror: true,
       mirrorContext: 'static-2d-snapshot-no-webgl',
+      mirrorCapture: 'async-to-blob-r609',
+      organismLifecycleBridgeRepair: 'geometry-only-r609',
+      desktopCrossingIntent: 'last-idle-real-bridge-boundary-r618',
+      desktopStableSnapshot: 'frame-settled-organism-and-resize-r663',
       reinitialisedRenderer: false,
       frameStableLanding: true,
       jumpFree: true,
       sectionSnapDisabled: true,
       geometryCachedOutsideScroll: true,
+      styleReadyGeometryR592: true,
+      postCriticalWindowBootR593: LOOP_BOOT_FLOOR_MS,
       mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
-      desktopTransfer: 'scroll-idle-visual-match',
+      desktopTransfer: 'stable-origin-live-overrides-stale-capture-intro-retry-scrollend-r663',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
     });
@@ -636,10 +944,14 @@
     root.dataset.fxInfiniteController = VERSION;
     root.dataset.fxAutomaticLoop = 'enabled';
     root.dataset.fxMobileScrollMode = 'native-momentum-loop';
+    root.dataset.fxLoopBootstrapR593 = 'ready-post-critical-window';
     onScroll();
 
     if (document.fonts?.ready) {
-      document.fonts.ready.then(scheduleGeometryRefresh).catch(() => {});
+      document.fonts.ready.then(() => {
+        scheduleGeometryRefresh();
+        scheduleDesktopStableGeometry('fonts-ready-r663');
+      }).catch(() => {});
     }
     for (const delay of [320, 900, 2200]) scheduleMirrorCapture(delay);
   }
@@ -647,21 +959,45 @@
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('scrollend', onScrollEnd, { passive: true });
   addEventListener('resize', onResize, { passive: true });
-  addEventListener('load', scheduleGeometryRefresh, { once: true, passive: true });
-  addEventListener('pageshow', () => scheduleRepair(true), { passive: true });
-  addEventListener('formatx:organisminterfaceready', () => scheduleRepair(true));
+  addEventListener('load', () => {
+    scheduleGeometryRefresh();
+    scheduleDesktopStableGeometry('load-r663');
+  }, { once: true, passive: true });
+  addEventListener('pageshow', () => { if (initialised) scheduleRepair(true); }, { passive: true });
+  addEventListener('formatx:organisminterfaceready', () => {
+    if (!initialised) return;
+    scheduleRepair(false);
+    scheduleDesktopStableGeometry('organism-interface-ready-r663');
+  });
   addEventListener('formatx:organismpanelopen', onPanelOpen);
-  addEventListener('formatx:organismpanelclose', () => scheduleRepair(true));
+  addEventListener('formatx:organismpanelclose', () => {
+    if (!initialised) return;
+    scheduleRepair(false);
+    queueMicrotask(() => {
+      settleDesktopStableGeometry('organism-panel-close-r663');
+      if (!isMobileFlow() && pendingDesktopRelative != null) commitDesktopTransfer();
+    });
+  });
+  addEventListener('formatx:menustatechange', event => {
+    if (initialised && event.detail?.open === false) {
+      queueMicrotask(() => {
+        settleDesktopStableGeometry('organism-menu-close-r663');
+        if (!isMobileFlow() && pendingDesktopRelative != null) commitDesktopTransfer();
+      });
+    }
+  });
   addEventListener('formatx:languagechange', () => {
+    if (!initialised) return;
     setBilingualText(bridge);
     const footer = document.querySelector('.site-footer');
     if (footer) repairFooterCopy(footer);
     const panel = document.querySelector('[data-organism-panel="resources"]');
     if (panel) syncReleaseHub(panel);
     scheduleGeometryRefresh();
+    scheduleDesktopStableGeometry('language-change-r663');
   });
-  addEventListener('formatx:coredetailready', () => scheduleMirrorCapture(80));
-  addEventListener('formatx:real3dready', () => scheduleMirrorCapture(220));
+  addEventListener('formatx:coredetailready', () => { if (initialised) scheduleMirrorCapture(80); });
+  addEventListener('formatx:real3dready', () => { if (initialised) scheduleMirrorCapture(220); });
   document.addEventListener('touchstart', onTouchStart, { passive: true });
   document.addEventListener('touchend', onTouchEnd, { passive: true });
   document.addEventListener('touchcancel', onTouchEnd, { passive: true });
@@ -670,6 +1006,8 @@
   else initialise();
 
   addEventListener('pagehide', () => {
+    desktopStableGeneration += 1;
+    cancelAnimationFrame(desktopStableFrame);
     cancelAnimationFrame(scrollFrame);
     cancelAnimationFrame(landingFrame);
     cancelAnimationFrame(geometryFrame);
@@ -678,6 +1016,11 @@
     clearTimeout(mobileSettleTimer);
     clearTimeout(repairTimer);
     clearTimeout(mirrorCaptureTimer);
+    clearTimeout(bootTimer);
+    mirrorCaptureGeneration += 1;
+    mirrorCapturePending = false;
+    releaseMirrorObjectUrl();
     geometryObserver?.disconnect();
+    desktopStateObserver?.disconnect();
   }, { once: true });
 }());

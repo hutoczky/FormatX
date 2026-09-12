@@ -1,4 +1,4 @@
-/* FormatX r264 — single final header + hero control geometry owner. */
+/* FormatX r264/R779 — single final header + hero control geometry owner. */
 
 html body.living-architecture .topbar {
   position: relative !important;
@@ -77,9 +77,6 @@ html body.living-architecture .topbar .fx-reference-menu-button.fx-control-owner
   transform: translateX(-50%) rotate(-45deg) !important;
 }
 
-/* r264 owns both the state and the render-tree contract of the navigation.
-   Older generations may keep closed-state display/visibility declarations;
-   these selectors make .open physically visible on both viewport classes. */
 html body #main-nav {
   position: fixed !important;
   display: grid !important;
@@ -420,5 +417,53 @@ html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pa
   html body.living-architecture .topbar .brand strong {
     font-size: 10px !important;
     letter-spacing: .08em !important;
+  }
+}
+
+/* R779 — canonical desktop two-control geometry must exist before optional optics.
+   This outranks legacy/small-height presentation layers without changing hero/MAG
+   layout. SOUND and ASK remain a single horizontal row at every desktop height. */
+@media (min-width: 901px) {
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
+    position: absolute !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: 20px !important;
+    left: 50% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 54px) !important;
+    grid-template-rows: 76px !important;
+    align-items: start !important;
+    justify-items: center !important;
+    justify-content: center !important;
+    column-gap: 14px !important;
+    row-gap: 0 !important;
+    box-sizing: border-box !important;
+    width: 122px !important;
+    min-width: 122px !important;
+    max-width: 122px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail,
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail-r264 {
+    display: contents !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
   }
 }

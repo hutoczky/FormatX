@@ -2,18 +2,6 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  if (AUDIT_MODE) {
-    const canvas = document.getElementById('fx-apex-canvas');
-    if (canvas) canvas.hidden = true;
-    ROOT.classList.add('fx-audit-mode');
-    ROOT.dataset.fxThree = 'audit-skip';
-    ROOT.dataset.fxLighthouse = 'ready';
-    ROOT.dataset.fxLivingArchitecture = 'audit-skip';
-    dispatchEvent(new CustomEvent('formatx:livingready'));
-    return;
-  }
-
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
   const PLANS = {
     business_lite: { name: 'Business Lite', HUF: 7900, EUR: 22 },
@@ -35,8 +23,10 @@
   const nodes = Array.from(document.querySelectorAll('[data-organ-node]'));
   let qrGeneration = 0;
   let threeLoadStarted = false;
+  let threeLoaderArmed = false;
   let qrDockActivated = false;
   let qrDockObserver = null;
+  let qrDockArmPending = false;
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -46,13 +36,21 @@
     return document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
   }
 
+  const moneyFormatters = new Map();
   function money(value, selectedCurrency) {
-    return new Intl.NumberFormat(language() === 'hu' ? 'hu-HU' : 'en-GB', {
-      style: 'currency',
-      currency: selectedCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+    const locale = language() === 'hu' ? 'hu-HU' : 'en-GB';
+    const key = locale + ':' + selectedCurrency;
+    let formatter = moneyFormatters.get(key);
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: selectedCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      moneyFormatters.set(key, formatter);
+    }
+    return formatter.format(value);
   }
 
   function checkoutHref(planId, selectedCurrency) {
@@ -79,75 +77,131 @@
     return './assets/qr/' + planId + '-' + selectedCurrency.toLowerCase() + '.svg?v=20260730-qr1';
   }
 
-  function loadThreeExperience() {
-    if (threeLoadStarted) return;
-    threeLoadStarted = true;
-    ROOT.dataset.fxThreeLoader = 'starting-on-demand';
-
-    if (!document.querySelector('link[data-fx-cryosphere-style]')) {
-      const style = document.createElement('link');
-      style.rel = 'stylesheet';
-      style.href = './styles/igloo-parity.css?v=20260727-webgpu-1';
-      style.dataset.fxCryosphereStyle = 'true';
-      document.head.appendChild(style);
-    }
-    if (!document.querySelector('link[data-fx-readability-style]')) {
-      const readability = document.createElement('link');
-      readability.rel = 'stylesheet';
-      readability.href = './styles/readability-focus.css?v=20260727-readability-2';
-      readability.dataset.fxReadabilityStyle = 'true';
-      readability.addEventListener('load', () => {
-        ROOT.dataset.fxReadability = 'ready';
-      }, { once: true });
-      document.head.appendChild(readability);
-    }
-    if (!document.querySelector('link[data-fx-organism-interface-style]')) {
-      const organismStyle = document.createElement('link');
-      organismStyle.rel = 'stylesheet';
-      organismStyle.href = './styles/organism-interface.css?v=20260727-organism-1';
-      organismStyle.dataset.fxOrganismInterfaceStyle = 'true';
-      document.head.appendChild(organismStyle);
-    }
-    if (!document.querySelector('link[data-fx-organism-layering-style]')) {
-      const organismLayering = document.createElement('link');
-      organismLayering.rel = 'stylesheet';
-      organismLayering.href = './styles/organism-interface-layering.css?v=20260727-fullscreen-1';
-      organismLayering.dataset.fxOrganismLayeringStyle = 'true';
-      document.head.appendChild(organismLayering);
-    }
-    if (!document.querySelector('script[data-fx-cryosphere-script]')) {
-      const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20260827-r413-single-mag-owner';
-      script.defer = true;
-      script.dataset.fxCryosphereScript = 'true';
-      document.head.appendChild(script);
-    }
-    if (!document.querySelector('script[data-fx-organism-interface-script]')) {
-      const organismScript = document.createElement('script');
-      organismScript.src = './scripts/organism-interface.js?v=20260727-organism-2';
-      organismScript.defer = true;
-      organismScript.dataset.fxOrganismInterfaceScript = 'true';
-      document.head.appendChild(organismScript);
-    }
-    if (!document.querySelector('script[data-fx-organism-menu-script]')) {
-      const menuScript = document.createElement('script');
-      menuScript.src = './scripts/organism-menu-controller.js?v=20260727-organism-1';
-      menuScript.defer = true;
-      menuScript.dataset.fxOrganismMenuScript = 'true';
-      document.head.appendChild(menuScript);
-    }
-
-    ROOT.dataset.fxThreeLoader = 'requested-on-demand';
+  function ensureStyle(href, attr, onReady) {
+    let link = document.querySelector(`link[${attr}]`);
+    if (link instanceof HTMLLinkElement) return link;
+    link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.setAttribute(attr, 'true');
+    if (onReady) link.addEventListener('load', onReady, { once: true });
+    document.head.appendChild(link);
+    return link;
   }
 
-  function scheduleThreeExperience() {
+  function loadScriptOrdered(src, attr, readyCheck) {
+    return new Promise((resolve, reject) => {
+      let script = document.querySelector(`script[${attr}]`);
+      let probeTimer = 0;
+      let settled = false;
+      const ready = () => {
+        try { return typeof readyCheck === 'function' && Boolean(readyCheck()); }
+        catch (_) { return false; }
+      };
+      const cleanup = () => {
+        if (probeTimer) clearTimeout(probeTimer);
+        probeTimer = 0;
+        script?.removeEventListener('load', loaded);
+        script?.removeEventListener('error', failed);
+      };
+      const finish = (ok, value) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        if (ok) {
+          if (script instanceof HTMLScriptElement) script.dataset.fxLoadedR552 = 'true';
+          resolve(script);
+        } else reject(value);
+      };
+      const loaded = () => finish(true);
+      const failed = () => finish(false, new Error(`failed to load ${src}`));
+      const probe = () => {
+        if (settled) return;
+        if (ready()) { loaded(); return; }
+        probeTimer = setTimeout(probe, 25);
+      };
+
+      if (script instanceof HTMLScriptElement && (script.dataset.fxLoadedR552 === 'true' || ready())) {
+        script.dataset.fxLoadedR552 = 'true';
+        resolve(script);
+        return;
+      }
+      if (script instanceof HTMLScriptElement) {
+        script.addEventListener('load', loaded, { once: true });
+        script.addEventListener('error', failed, { once: true });
+        if (typeof readyCheck === 'function') probe();
+        return;
+      }
+      script = document.createElement('script');
+      script.src = src;
+      script.async = false;
+      script.setAttribute(attr, 'true');
+      script.addEventListener('load', loaded, { once: true });
+      script.addEventListener('error', failed, { once: true });
+      document.head.appendChild(script);
+      if (typeof readyCheck === 'function') probe();
+    });
+  }
+
+  async function loadThreeExperience() {
+    if (threeLoadStarted) return;
+    threeLoadStarted = true;
+    ROOT.dataset.fxThreeLoader = 'starting-on-demand-r554';
+
+    ensureStyle('./styles/igloo-parity.css?v=20260727-webgpu-1', 'data-fx-cryosphere-style');
+    ensureStyle('./styles/readability-focus.css?v=20260727-readability-2', 'data-fx-readability-style', () => {
+      ROOT.dataset.fxReadability = 'ready';
+    });
+    ensureStyle('./styles/organism-interface.css?v=20260727-organism-1', 'data-fx-organism-interface-style');
+    ensureStyle('./styles/organism-interface-layering.css?v=20260727-fullscreen-1', 'data-fx-organism-layering-style');
+
+    try {
+      ROOT.dataset.fxThreeLoader = 'loading-interface-r554';
+      await loadScriptOrdered(
+        './scripts/organism-interface.js?v=20260906-r554-idempotent-handoff',
+        'data-fx-organism-interface-script',
+        () => ROOT.dataset.fxOrganismInterface === 'ready'
+      );
+      if (ROOT.dataset.fxOrganismInterface !== 'ready') throw new Error('organism interface loaded without READY state');
+      ROOT.dataset.fxThreeLoader = 'interface-ready-r554';
+
+      await loadScriptOrdered(
+        './scripts/organism-menu-controller.js?v=20260906-r554-idempotent-handoff',
+        'data-fx-organism-menu-script',
+        () => ROOT.dataset.fxOrganismMenu === 'ready'
+      );
+      ROOT.dataset.fxThreeLoader = 'menu-ready-r554';
+
+      await loadScriptOrdered(
+        './scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20260906-r554-idempotent-handoff',
+        'data-fx-cryosphere-script',
+        () => ROOT.dataset.fxTranscendLoader === 'safe-ready-v28'
+      );
+      ROOT.dataset.fxThreeLoader = 'ready-on-demand-r554';
+      dispatchEvent(new CustomEvent('formatx:organismhandoffready', { detail: { revision: 'r554' } }));
+    } catch (error) {
+      ROOT.dataset.fxThreeLoader = 'failed-on-demand-r554';
+      ROOT.dataset.fxThreeLoaderErrorR552 = String(error?.message || error || 'unknown-load-error').slice(0, 160);
+      dispatchEvent(new CustomEvent('formatx:organismhandofferror', { detail: { revision: 'r554', message: ROOT.dataset.fxThreeLoaderErrorR552 } }));
+    }
+  }
+
+  function armThreeExperience() {
+    if (threeLoaderArmed || threeLoadStarted) return;
+    threeLoaderArmed = true;
     if (ROOT.dataset.fxImmersive === 'active') {
-      loadThreeExperience();
+      void loadThreeExperience();
       return;
     }
     ROOT.dataset.fxThreeLoader = 'deferred-user-activation';
-    addEventListener('formatx:immersiveactivate', loadThreeExperience, { once: true });
+    addEventListener('formatx:immersiveactivate', () => { void loadThreeExperience(); }, { once: true });
   }
+
+  /* R554: arm the lightweight handoff immediately. MAG still boots from
+     navigation independently; only the heavy Organism UI waits for a genuine
+     immersive/MAG activation. Existing already-ready scripts are recognized
+     deterministically rather than waiting for a second load event. */
+  armThreeExperience();
 
   function revealQrDock() {
     const dock = document.getElementById('formatx-plan-qr-dock');
@@ -172,7 +226,7 @@
   function prepareQrDock() {
     const dock = document.getElementById('formatx-plan-qr-dock');
     revealQrDock();
-    if (!dock) return;
+    if (!dock || qrDockObserver || qrDockActivated) return;
     if (!('IntersectionObserver' in window)) {
       activateQrDock();
       return;
@@ -182,6 +236,24 @@
       if (entries.some(entry => entry.isIntersecting)) activateQrDock();
     }, { rootMargin: '700px 0px', threshold: 0 });
     qrDockObserver.observe(dock);
+  }
+
+  function armQrDockAfterCritical() {
+    if (qrDockActivated || qrDockObserver || qrDockArmPending) return;
+    const start = () => {
+      qrDockArmPending = false;
+      prepareQrDock();
+    };
+    if (ROOT.dataset.fxPreloaderR531 === 'done') {
+      if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 });
+      else setTimeout(start, 180);
+      return;
+    }
+    qrDockArmPending = true;
+    addEventListener('formatx:preloadercomplete', () => {
+      if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 });
+      else setTimeout(start, 180);
+    }, { once: true, passive: true });
   }
 
   function syncScene() {
@@ -201,6 +273,8 @@
 
   function loadQrImage(card, image, planId, selectedCurrency, generation) {
     const apiSource = qrApiUrl(planId, selectedCurrency);
+    // R741: these immutable checkout codes ship with the page. Avoid an
+    // unnecessary API round trip; retain the real endpoint as a failure path.
     const localSource = qrLocalUrl(planId, selectedCurrency);
 
     card.classList.remove('is-qr-ready', 'is-qr-error');
@@ -217,14 +291,14 @@
       }
       card.classList.remove('is-qr-loading', 'is-qr-error');
       card.classList.add('is-qr-ready');
-      ROOT.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'local-fallback' : 'api';
+      ROOT.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'api-fallback' : 'local-asset';
     };
 
     image.onerror = () => {
       if (generation !== qrGeneration) return;
       if (image.dataset.fxQrFallback !== 'true') {
         image.dataset.fxQrFallback = 'true';
-        image.src = localSource;
+        image.src = apiSource;
         return;
       }
       card.classList.remove('is-qr-loading', 'is-qr-ready');
@@ -232,8 +306,8 @@
       ROOT.dataset.fxQrDelivery = 'failed';
     };
 
-    if (image.getAttribute('src') !== apiSource || !image.complete || image.naturalWidth < 32) {
-      image.src = apiSource;
+    if (image.getAttribute('src') !== localSource || !image.complete || image.naturalWidth < 32) {
+      image.src = localSource;
     } else {
       image.onload();
     }
@@ -292,7 +366,11 @@
         if (entry.attributeName === 'lang') languageChanged = true;
       }
       if (sceneChanged || languageChanged) syncScene();
-      if (languageChanged) updateCommerce();
+      /* R706: initial language canonicalisation is startup plumbing, not a
+         commerce interaction. Only an already-activated commerce dock follows
+         passive language mutations; explicit user language/currency actions
+         below still refresh immediately. */
+      if (languageChanged && qrDockActivated) updateCommerce();
     });
     observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
     document.addEventListener('click', event => {
@@ -302,30 +380,35 @@
         updateCommerce();
       }, 0);
     });
-    addEventListener('formatx:languagechange', () => {
+    addEventListener('formatx:languagechange', event => {
       syncScene();
-      updateCommerce();
+      /* A published languagechange with the canonical user-toggle source is a
+         real interaction and must refresh pricing immediately. Other automatic
+         handoffs stay lazy until the commerce dock is active. */
+      if (event.detail?.source === 'single-language-toggle-r462' || qrDockActivated) updateCommerce();
     });
     addEventListener('pageshow', () => {
       revealQrDock();
-      updateCommerce();
+      if (qrDockActivated) updateCommerce();
+      else armQrDockAfterCritical();
     });
     addEventListener('pagehide', () => {
       observer.disconnect();
       qrDockObserver?.disconnect();
       qrDockObserver = null;
+      qrDockArmPending = false;
     }, { once: true });
   }
 
   function initialise() {
-    ROOT.dataset.fxQrOwner = 'living-v3-performance';
-    scheduleThreeExperience();
+    ROOT.dataset.fxQrOwner = 'living-v3-performance-r706';
     revealQrDock();
     syncScene();
-    updateCommerce();
-    prepareQrDock();
     bind();
+    armQrDockAfterCritical();
     ROOT.dataset.fxLivingArchitecture = 'ready-performance-v3';
+    ROOT.dataset.fxCommerceStartupR699 = 'static-pricing-lazy-dynamic-commerce';
+    ROOT.dataset.fxCommerceStartupR706 = 'post-preloader-proximity-or-explicit-user-action';
     dispatchEvent(new CustomEvent('formatx:livingready'));
   }
 
