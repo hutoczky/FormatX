@@ -3,8 +3,8 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'critical-geometry-pre-fcp-decorative-post-intro';
-  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-pre-fcp-deferred-post-intro-committed-frame-r769';
+  root.dataset.fxDeferredCssR637 = 'settled-geometry-owner-decorative-post-intro-r785';
+  root.dataset.fxDeferredCssPolicyR637 = 'existing-first-frame-geometry-deferred-post-intro-two-committed-frames-r785';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
 
   let activated = false;
@@ -22,19 +22,20 @@
     root.dataset.fxIntroBootStateR769 = 'normalized-before-event-horizon';
   }
 
-  function activateCriticalGeometry() {
+  function preserveCriticalGeometryOwner() {
+    // R785: the render-blocking first-frame bundles already own settled hero/MAG
+    // geometry (including the r286 native WebGL geometry contract). Activating the
+    // complete signature bundle here duplicated those rules and also pulled
+    // gradients, backdrop filters, transitions and below-fold decoration into the
+    // release window. Keep the full signature sheet deferred with the rest of the
+    // non-critical presentation layer.
     const link = document.querySelector('link[data-fx-critical-signature-r227][data-fx-r637-href]');
     if (!(link instanceof HTMLLinkElement)) {
       root.dataset.fxCriticalGeometryR717 = 'unavailable';
       return false;
     }
-    const targetMedia = link.dataset.fxR487Media || link.dataset.fxDeferredMediaR300 || 'all';
-    const deferredHref = link.dataset.fxR637Href || '';
-    if (targetMedia && link.media !== targetMedia) link.media = targetMedia;
-    if (deferredHref && !link.getAttribute('href')) link.setAttribute('href', deferredHref);
-    link.setAttribute('fetchpriority', 'high');
-    root.dataset.fxCriticalGeometryR717 = 'requested-before-fcp';
-    root.dataset.fxCriticalGeometryHrefR717 = deferredHref ? 'canonical-r637-href' : 'existing-href';
+    root.dataset.fxCriticalGeometryR717 = 'owned-by-render-blocking-first-frame-r785';
+    root.dataset.fxCriticalGeometryHrefR717 = 'signature-remains-post-intro';
     return true;
   }
 
@@ -62,25 +63,31 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r769';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r785';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r785';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'critical-geometry-pre-fcp-plus-post-intro-committed-frame-r769', reason }
+      detail: { count: links.length, restored, scheduler: 'existing-critical-geometry-plus-two-committed-frames-r785', reason }
     }));
   }
 
   function activateAfterCommittedFrame(reason) {
     if (activated || frame || commitTimer) return;
+    // A single rAF callback still runs before that frame is painted. Nesting a
+    // second rAF guarantees one post-release frame can actually commit before the
+    // decorative stylesheet burst is restored, preventing it from delaying the
+    // first settled hero paint/LCP.
     frame = requestAnimationFrame(() => {
-      frame = 0;
-      commitTimer = setTimeout(() => {
-        commitTimer = 0;
-        activate(reason);
-      }, 0);
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        commitTimer = setTimeout(() => {
+          commitTimer = 0;
+          activate(reason);
+        }, 0);
+      });
     });
   }
 
@@ -94,7 +101,7 @@
     activateAfterCommittedFrame(reason);
   }
 
-  activateCriticalGeometry();
+  preserveCriticalGeometryOwner();
 
   document.addEventListener('formatx:preloadercomplete', () => {
     releaseDeferredStyles('preloader-complete');
