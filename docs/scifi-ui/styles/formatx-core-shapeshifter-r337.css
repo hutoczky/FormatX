@@ -1,7 +1,8 @@
-/* FormatX r538 — one native WebGL MAG optical + final hero-control display owner.
+/* FormatX r538/R778 — one native WebGL MAG optical + final hero-control display owner.
    The shader owns geometry and living light. CSS preserves the semantic heart
    as the explicit hit surface and applies only final display tone. Desktop owns
-   one canonical horizontal SOUND | ASK row under the full-size MAG. */
+   one canonical horizontal SOUND | ASK row under the full-size MAG. Reduced
+   motion removes animation only; it must never collapse that two-control grid. */
 
 html[data-fx-core-shape-r337] #hero .hero-space > .fx-crystal-organism-r326-stage {
   pointer-events: none !important;
@@ -218,13 +219,38 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
   html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
   body.living-architecture #hero .hero-grid > .hero-space,
   html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
-  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
-  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
-  body.living-architecture #hero .fx-reference-controls-r204 {
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
+
+  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
+    display: grid !important;
+    grid-template-columns: repeat(2,54px) !important;
+    grid-template-rows: 76px !important;
+    align-items: start !important;
+    justify-items: center !important;
+    justify-content: center !important;
+    column-gap: 14px !important;
+    row-gap: 0 !important;
+    width: 122px !important;
+    min-width: 122px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail,
+  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail-r264 {
+    display: contents !important;
+  }
 }
 
-/* production-r538-single-native-webgl-optics-owner-two-control-row */
+/* production-r778-reduced-motion-preserves-two-control-grid */
