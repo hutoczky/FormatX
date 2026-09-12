@@ -1,9 +1,11 @@
-/* FormatX R766 — navigation-owned semantic MAG boot with post-intro enhancements.
+/* FormatX R767 — navigation-owned semantic MAG boot with post-intro enhancements.
    R326 remains the only full-size hero WebGL organism. Navigation arms the
    canonical semantic owner immediately; only the tiny layout/context policy is
-   allowed under the visual cover. Optional optics, heart, touch, mini-assistant
-   and lifecycle work starts after canonical renderer readiness, which is already
-   gated by durable preloader completion in the context policy.
+   allowed under the visual cover. Optional optics, touch, mini-assistant and
+   lifecycle work starts after canonical renderer readiness. The semantic heart
+   request remains navigation-owned, while its actual DOM/style materialisation is
+   armed by the shared post-intro CSS-ready scheduler so it never occupies the
+   preloader release-critical window.
 
    R558 compatibility evidence retained for unchanged downstream source contracts:
    FormatX R558
@@ -16,7 +18,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='direct-r326-r766-semantic-first-post-intro-enhancements';
+const VERSION='direct-r326-r767-semantic-first-post-intro-heart';
 if(root.dataset.fxCurrentMagRuntimeR422==='ready'||root.dataset.fxCurrentMagRuntimeR422==='booting')return;
 const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;if(reduced)root.dataset.fxCurrentMagMotionR424='r468-static-render-explicit-interaction';root.dataset.fxCurrentMagRuntimeR422='booting';
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260830-r454-layout-only-no-painted-mag';
@@ -37,7 +39,14 @@ const LEGACY_STAGE_SELECTOR=['#hero .fx-core-mobile-v55-stage','#hero .fx-core-r
 function cleanupLegacyMagRuntime(){let removedStages=0;for(const node of document.querySelectorAll(LEGACY_STAGE_SELECTOR)){if(node.classList?.contains('fx-crystal-organism-r326-stage'))continue;node.remove();removedStages+=1;}root.dataset.fxLegacyMagDomCleanupR460='ready';root.dataset.fxLegacyMagDomRemovedR460=String(removedStages);root.dataset.fxPrimaryMagOwnerR460='r326-only';}
 function addStyle(href,attr){return new Promise(resolve=>{let link=document.querySelector(`link[${attr}]`);if(link instanceof HTMLLinkElement){if(link.sheet){resolve(link);return;}link.addEventListener('load',()=>resolve(link),{once:true});link.addEventListener('error',()=>resolve(link),{once:true});return;}link=document.createElement('link');link.rel='stylesheet';link.href=href;link.setAttribute(attr,'true');link.addEventListener('load',()=>resolve(link),{once:true});link.addEventListener('error',()=>resolve(link),{once:true});document.head.appendChild(link);});}
 function addScript(src,attr){return new Promise(resolve=>{let script=document.querySelector(`script[${attr}]`);if(script instanceof HTMLScriptElement){resolve(script);return;}script=document.createElement('script');script.src=src;script.async=false;script.setAttribute(attr,'true');script.addEventListener('load',()=>resolve(script),{once:true});script.addEventListener('error',()=>resolve(script),{once:true});document.head.appendChild(script);});}
-function ensureHeartCore(){if(root.dataset.fxHeartCoreR252==='ready')return Promise.resolve(true);const existing=document.querySelector('script[src*="formatx-heart-core-r252.js"]');if(existing instanceof HTMLScriptElement){root.dataset.fxHeartCoreBootstrapR537='already-requested';return Promise.resolve(existing);}root.dataset.fxHeartCoreMaterialisationR766='post-intro-renderer-ready';return addScript(HEART_CORE,'data-fx-heart-core-script-r252');}
+function ensureHeartCore(){if(root.dataset.fxHeartCoreR252==='ready')return Promise.resolve(true);const existing=document.querySelector('script[src*="formatx-heart-core-r252.js"]');if(existing instanceof HTMLScriptElement){root.dataset.fxHeartCoreMaterialisationR766='already-requested';return Promise.resolve(existing);}root.dataset.fxHeartCoreMaterialisationR766='post-intro-shared-scheduler';return addScript(HEART_CORE,'data-fx-heart-core-script-r252');}
+function armPostIntroHeart(){
+  let armed=true;
+  const launch=()=>{if(!armed)return;armed=false;root.dataset.fxHeartCoreMaterialisationR767='shared-post-intro-css-ready';void ensureHeartCore();};
+  if(String(root.dataset.fxDeferredCssR637||'').startsWith('ready-post-intro')){queueMicrotask(launch);return;}
+  addEventListener('formatx:deferredcssready',launch,{once:true,passive:true});
+  root.dataset.fxHeartCorePostIntroArmR767='armed-with-navigation-mag';
+}
 function waitForRendererReady(timeout=8000){if(root.dataset.fxCrystalOrganismR326==='ready')return Promise.resolve(true);return new Promise(resolve=>{let settled=false,timer=0,observer=null;const finish=ready=>{if(settled)return;settled=true;if(timer)clearTimeout(timer);observer?.disconnect();removeEventListener('formatx:real3dready',onReady);resolve(Boolean(ready));};const onReady=()=>{if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);};addEventListener('formatx:real3dready',onReady,{passive:true});observer=new MutationObserver(()=>{if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);});observer.observe(root,{attributes:true,attributeFilter:['data-fx-crystal-organism-r326']});timer=setTimeout(()=>finish(root.dataset.fxCrystalOrganismR326==='ready'),timeout);});}
 function visibleText(node){return String(node?.textContent||'').replace(/\s+/g,' ').trim();}
 function repairAccessibleNames(){const topBrand=document.querySelector('.topbar > .brand');if(topBrand instanceof HTMLAnchorElement)topBrand.removeAttribute('aria-label');const simulator=document.querySelector('[data-fx-simulator-entry="hero"]');if(simulator instanceof HTMLAnchorElement)simulator.removeAttribute('aria-label');for(const link of document.querySelectorAll('.fx-plan-qr-link')){if(!(link instanceof HTMLAnchorElement))continue;const card=link.closest('.fx-plan-qr-card'),label=visibleText(link.querySelector('.fx-qr-placeholder'))||'QR ↗',plan=visibleText(card?.querySelector('.fx-plan-qr-copy strong'))||'FormatX',action=root.lang==='en'?'open secure checkout':'biztonságos fizetési oldal megnyitása';link.setAttribute('aria-label',`${label} — ${plan} — ${action}`);}root.dataset.fxA11yNamesR422='visible-label-contained';}
@@ -51,6 +60,7 @@ async function start(){
   root.dataset.fxCurrentMagStartupR561='navigation-owned-semantic-owner-context-policy-first';
   root.dataset.fxCurrentMagEnhancementPolicyR765='post-intro-renderer-ready';
   root.dataset.fxHeartCoreBootstrapR537='requested-with-navigation-mag';
+  armPostIntroHeart();
 
   const layoutStyle=addStyle(STYLE,'data-fx-current-mag-r422');
   const headerStyle=addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418');
@@ -76,7 +86,7 @@ async function start(){
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-stable-mobile':'loaded-cross-device-desktop';
   root.dataset.fxCurrentMagStylesR423='layout-critical-ready-noncritical-post-intro';
   root.dataset.fxCurrentMagStartupR442='layout-style-before-renderer-noncritical-post-intro';
-  root.dataset.fxCurrentMagStartupR549='superseded-r766-semantic-first-post-intro-enhancements';
+  root.dataset.fxCurrentMagStartupR549='superseded-r767-semantic-first-post-intro-heart';
 
   const rendererReady=await rendererStart;
   const nonCriticalStyles=Promise.all([
@@ -102,13 +112,13 @@ async function start(){
   if(rendererReady){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
     await addScript(LIFE,'data-fx-core-life-r455');
-    root.dataset.fxCoreRendererSelection=`r326-direct-r766-${mobile?'mobile':'desktop'}-offscreen-webgl1-zero-idle`;
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r766';
+    root.dataset.fxCoreRendererSelection=`r326-direct-r767-${mobile?'mobile':'desktop'}-offscreen-webgl1-zero-idle`;
+    root.dataset.fxCoreReferenceLockLoad='ready-v69-r767';
     root.dataset.fxCurrentMagRuntimeR422='ready';
   }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
-  root.dataset.fxCoreCriticalPathR422=`direct-r326-r766-${mobile?'mobile':'desktop'}-offscreen-webgl1-native-touch`;
+  root.dataset.fxCoreCriticalPathR422=`direct-r326-r767-${mobile?'mobile':'desktop'}-offscreen-webgl1-native-touch`;
   root.dataset.fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle';
-  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r766-post-intro',heart:'r549-pointer-transparent-physical-router',startup:'r766-semantic-first-post-intro-enhancements'}}));
+  dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r767-post-intro',heart:'r767-shared-post-intro-scheduler',startup:'r767-semantic-first-post-intro-enhancements'}}));
 }
 addEventListener('formatx:languagechange',repairAccessibleNames,{passive:true});addEventListener('pageshow',repairAccessibleNames,{passive:true});start();
 }());
