@@ -12,6 +12,7 @@
   let idleTimer = 0;
   let bindingFrame = 0;
   let geometryFrame = 0;
+  let loopRecheckFrame = 0;
   let interactionCooldown = false;
 
   if (root.dataset.fxHeartCoreR252 === 'ready') return;
@@ -310,7 +311,7 @@
   }
 
   function transferToRealCore(source) {
-    if (!MOBILE_QUERY.matches || touchActive) return false;
+    if (!MOBILE_QUERY.matches || touchActive || root.classList.contains('fx-seamless-loop-transfer')) return false;
     const boundary = mobileLoopBoundary();
     if (!boundary || boundary.overshoot < LOOP_OVERSHOOT) return false;
 
@@ -353,6 +354,15 @@
     return true;
   }
 
+  function scheduleLoopBoundaryRecheck(source) {
+    if (!MOBILE_QUERY.matches || loopRecheckFrame) return;
+    loopRecheckFrame = requestAnimationFrame(() => {
+      loopRecheckFrame = 0;
+      if (touchActive) return;
+      transferToRealCore(source || 'geometry-refresh');
+    });
+  }
+
   function onScroll() {
     scheduleGeometry();
     if (!MOBILE_QUERY.matches) return;
@@ -364,24 +374,38 @@
     if (!MOBILE_QUERY.matches) return;
     touchActive = true;
     clearTimeout(idleTimer);
+    if (loopRecheckFrame) cancelAnimationFrame(loopRecheckFrame);
+    loopRecheckFrame = 0;
   }
 
   function onTouchEnd() {
     if (!MOBILE_QUERY.matches) return;
     touchActive = false;
-    requestAnimationFrame(() => transferToRealCore('touchend'));
+    scheduleLoopBoundaryRecheck('touchend');
+  }
+
+  function onScrollEnd() {
+    if (MOBILE_QUERY.matches) touchActive = false;
+    transferToRealCore('scrollend');
+    scheduleGeometry();
+  }
+
+  function onLoopGeometryRefresh() {
+    scheduleBinding();
+    scheduleLoopBoundaryRecheck('geometry-refresh');
   }
 
   function boot() {
     ensureStyleAfterFirstPaint();
     root.dataset.fxHeartCoreR252 = 'ready';
     root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
+    root.dataset.fxHeartLoopRecheckR771 = 'scrollend-and-settled-geometry';
     installHeartHitTarget();
     pruneMobileReferenceMirror();
     syncPureWebglComposition();
 
     addEventListener('scroll', onScroll, { passive: true });
-    addEventListener('scrollend', () => { transferToRealCore('scrollend'); scheduleGeometry(); }, { passive: true });
+    addEventListener('scrollend', onScrollEnd, { passive: true });
     addEventListener('resize', scheduleGeometry, { passive: true });
     addEventListener('orientationchange', scheduleGeometry, { passive: true });
     document.addEventListener('click', routePhysicalHeartClick, true);
@@ -395,10 +419,10 @@
       'formatx:controlownerready',
       'formatx:mobilelayoutready',
       'formatx:languagechange',
-      'formatx:loopgeometryrefresh',
       'formatx:preloadercomplete',
       'pageshow'
     ]) addEventListener(eventName, scheduleBinding, { passive: true });
+    addEventListener('formatx:loopgeometryrefresh', onLoopGeometryRefresh, { passive: true });
 
     addEventListener('formatx:real3dready', syncPureWebglComposition, { passive: true });
 
@@ -419,5 +443,6 @@
     clearTimeout(idleTimer);
     cancelAnimationFrame(bindingFrame);
     cancelAnimationFrame(geometryFrame);
+    cancelAnimationFrame(loopRecheckFrame);
   }, { once: true });
 }());
