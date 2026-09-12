@@ -1,9 +1,9 @@
-/* FormatX R687 — contract-window single-owner premium intro release.
+/* FormatX R769 — contract-window single-owner premium intro release.
    MAG startup remains navigation-owned behind the visual cover. Product timing
    remains mobile 1180–1450ms / desktop 1350–1650ms. The existing 1360/1640ms
    visual clock may request release, but exactly one idempotent finalizer owns the
-   actual completion event. A cheap monotonic watchdog samples only performance.now
-   and calls that same finalizer path; it performs no per-frame DOM/render work. */
+   actual completion state and both completion notifications. A cheap monotonic
+   watchdog samples only performance.now and performs no per-frame DOM/render work. */
 (function(){
 'use strict';
 
@@ -61,6 +61,7 @@ ROOT.dataset.fxPreloaderPaintOwnerR606='bounded-raster-single-compositor-deadlin
 ROOT.dataset.fxPreloaderPaintOwnerR636='sync-no-transform-before-visual-css';ROOT.dataset.fxPreloaderPaintOwnerR641='timing-only-overlay-clock-small-energy-line';
 ROOT.dataset.fxPreloaderFinalizeR609='hide-first-no-subtree-animation-enumeration';
 ROOT.dataset.fxPreloaderVisualSequenceR635='system-wake-core-sync-ready-reveal';
+ROOT.dataset.fxIntroCompletionOwnerR769='preloader-finalizer-only';
 
 function copy(){return ROOT.lang==='en'?{heading:'DISCOVER HOW IT WORKS',title:'Proof behind the visual.',body:'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',ask:'ASK',askAria:'Ask FormatX',controls:'Hero controls',soundOn:'Mute FormatX audio',soundOff:'Enable FormatX audio'}:{heading:'A MŰKÖDÉS MEGISMERÉSE',title:'Bizonyíték a látvány mögött.',body:'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',ask:'KÉRDEZZ',askAria:'Kérdezz a FormatX-től',controls:'Hero vezérlők',soundOn:'FormatX hang némítása',soundOff:'FormatX hang bekapcsolása'};}
 function mutedIcon(){return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';}
@@ -73,6 +74,7 @@ function ensureProof(hero,grid){const strings=copy();let heading=hero.querySelec
 function stabilize(){const hero=document.getElementById('hero');const grid=hero?.querySelector(':scope > .hero-grid');const space=grid?.querySelector(':scope > .hero-space');const heroCopy=grid?.querySelector(':scope > .hero-copy');if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement)||!(heroCopy instanceof HTMLElement))return false;ensureControls(hero,space);ensureProof(hero,grid);ROOT.dataset.fxHeroCopyPlacementR411='static-dom-css-order';ROOT.dataset.fxFirstPaintControlsR306=MOBILE?'mobile-static-r528':'desktop-static-r528';return true;}
 function fixLanguageAccessibleName(){const button=document.querySelector('.fx-language-toggle');if(!(button instanceof HTMLButtonElement))return;const current=ROOT.lang==='en'?'EN':'HU';button.textContent=current;button.setAttribute('aria-label',current==='HU'?'HU – váltás angol nyelvre':'EN – switch to Hungarian');}
 function complete(source){document.dispatchEvent(new CustomEvent('formatx:introcomplete',{detail:{source}}));}
+function markIntroComplete(source){if(ROOT.dataset.fxIntroCompletionR769==='done')return false;ROOT.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');ROOT.classList.add('fx-intro-complete');ROOT.dataset.fxIntro=source;ROOT.dataset.fxIntroCompletionR769='done';complete(source);return true;}
 function force(node,property,value){if(node instanceof HTMLElement)node.style.setProperty(property,value,'important');}
 function clear(node,property){if(node instanceof HTMLElement)node.style.removeProperty(property);}
 function animateEffect(node,keyframes,options){if(REDUCED||!(node instanceof HTMLElement)||typeof node.animate!=='function')return;try{node.animate(keyframes,options);}catch(_){} }
@@ -153,6 +155,7 @@ function finalizePreloader(source){
   ROOT.dataset.fxPreloaderReleaseElapsedR635=String(Math.round(elapsed));
   ROOT.dataset.fxPreloaderFinalizerR635='single-dispatch-complete';
   introMark('completedAt');
+  markIntroComplete(`release-${source}-r769`);
   document.dispatchEvent(new CustomEvent('formatx:preloadercomplete',{detail:{source,elapsed}}));
   return true;
 }
@@ -182,6 +185,7 @@ function showPreloader(){
   const overlay=document.getElementById(OVERLAY_ID);if(!(overlay instanceof HTMLElement))return null;
   introMark('introInstalledAt');
   ensureP0FxStyle();
+  ROOT.classList.remove('fx-intro-complete','fx-intro-reveal');ROOT.classList.add('fx-intro-running','fx-intro-managed');ROOT.dataset.fxIntro='bounded-release-running-r769';delete ROOT.dataset.fxIntroCompletionR769;
   preloaderReleased=false;overlay.hidden=false;overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='active';ROOT.dataset.fxPreloaderR531='active';
   overlay.classList.remove('fx-preloader-reveal-r635');
   force(overlay,'display','grid');force(overlay,'visibility','visible');force(overlay,'opacity','1');force(overlay,'pointer-events','none');force(overlay,'transform','none');force(overlay,'will-change','auto');force(overlay,'isolation','auto');force(overlay,'contain','none');
@@ -220,10 +224,9 @@ function runPreloader(overlay){
     requestPreloaderRelease('visual-complete');
   },{once:true});
 }
-function markIntroComplete(source){ROOT.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');ROOT.classList.add('fx-intro-complete');ROOT.dataset.fxIntro=source;complete(source);}
 const preloader=PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?skipLatePreloader():showPreloader();
-if(preloader)runPreloader(preloader);
-stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-r635-three-phase-absolute-deadline':'desktop-r635-three-phase-absolute-deadline';markIntroComplete(PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?'late-skip-r635-living-core':'instant-r635-living-core');
+if(preloader)runPreloader(preloader);else if(!preloaderReleased)markIntroComplete('intro-unavailable-r769');
+stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-r635-three-phase-absolute-deadline':'desktop-r635-three-phase-absolute-deadline';
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
 addEventListener('pagehide',()=>{cancelPreloaderTimers();cancelDeadline();try{audio?.pause();}catch(_){}},{once:true});
 addEventListener('error',()=>requestPreloaderRelease('runtime-error'));
