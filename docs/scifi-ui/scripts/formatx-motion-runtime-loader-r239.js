@@ -1,13 +1,13 @@
-/* FormatX r550 compatibility · R746 navigation-owned MAG + release-safe physical scroll bootstrap.
+/* FormatX r550 compatibility · R781 navigation-owned MAG + bootstrap-first physical scroll intent.
    MAG and the lightweight SOUND control owner remain automatic from navigation. The
    normal path requests each owner directly without a speculative preload burst; worker/GPU
    release-window isolation belongs to the MAG context policy rather than this public owner.
    Seamless-scroll bootstrap remains armed only by physical wheel/touch/scroll-key input
-   (or an existing/deep-linked scroll position). Deferred product geometry is inserted before
-   the bridge owner on both native mobile and desktop paths. Restored-position probing is
-   deferred until canonical intro completion so startup never forces layout at the release
-   deadline. No scroll event is used as an activation owner, so programmatic scrolling
-   remains isolated. */
+   (or an existing/deep-linked scroll position). Scroll ownership is requested before the
+   optional deferred enhancement burst, while a tiny geometry-only SOUND | ASK sheet is
+   navigation-critical so optional shapeshifter optics can stay post-release. Restored-position
+   probing is deferred until canonical intro completion so startup never forces layout at the
+   release deadline. No scroll event is used as an activation owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -23,13 +23,14 @@ root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
 root.dataset.fxScrollIntentPolicyR656='physical-wheel-touch-scroll-key-no-scroll-event';
-root.dataset.fxScrollEnhancementOrderR742='deferred-before-scroll-bootstrap';
+root.dataset.fxScrollEnhancementOrderR742='bootstrap-before-deferred-r781';
 root.dataset.fxScrollRestorationProbeR746='armed-after-canonical-intro-release';
 root.dataset.fxDesignSystemRuntimeR536='deferred-user-intent';
 root.dataset.fxMagNavigationStartupR550='first-paint-yield-parallel-styles-under-intro-no-user-gate';
 root.dataset.fxMagWorkerIsolationR745='context-policy-release-owned';
 root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
 root.dataset.fxMagWarmPathR620='direct-owner-requests-no-speculative-preload-burst';
+root.dataset.fxControlCriticalR780='armed-navigation-critical';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -48,12 +49,14 @@ const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260
 const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260906-r537-automatic-lifecycle';
 const PLATFORM_SCROLL='/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260906-r535-scroll-intent-owner';
 const DESIGN_SYSTEM='/scifi-ui/styles/formatx-design-system.css?v=20260728-ds2';
+const CONTROL_GEOMETRY='/scifi-ui/styles/formatx-control-critical-r780.css?v=20260912-r780-render-critical-two-control';
+const SCROLL_KEYS=new Set(['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' ']);
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
-const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
+const intentListeners=[['pointerdown',passive],['keydown',false]];
 const scrollIntentListeners=[['wheel',passive],['touchstart',passive],['pointerdown',passive],['keydown',false]];
 let enhancementsStarted=false,currentRequested=false,soundRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,scrollBootstrapRequested=false;
 
@@ -76,6 +79,16 @@ function warmCriticalOwners(){
   if(root.dataset.fxCurrentMagWarmR461==='ready')return;
   root.dataset.fxCurrentMagWarmR461='ready';
   root.dataset.fxCurrentMagWarmR620='direct-owner-requests';
+}
+function ensureControlGeometry(){
+  let link=document.querySelector('link[data-fx-control-critical-r780]');
+  if(link instanceof HTMLLinkElement){root.dataset.fxControlCriticalR780=link.sheet?'ready':'loading';return;}
+  link=document.createElement('link');
+  link.rel='stylesheet';link.href=CONTROL_GEOMETRY;link.fetchPriority='high';link.dataset.fxControlCriticalR780='true';
+  link.addEventListener('load',()=>{root.dataset.fxControlCriticalR780='ready';},{once:true});
+  link.addEventListener('error',()=>{root.dataset.fxControlCriticalR780='load-failed';},{once:true});
+  document.head.appendChild(link);
+  root.dataset.fxControlCriticalR780='requested-navigation-critical';
 }
 function ensureDialogueSurface(){
   let link=document.querySelector('link[data-fx-dialogue-surface-r475]');
@@ -149,6 +162,11 @@ function reservedInteraction(event){
   const target=event?.target instanceof Element?event.target:null;
   return Boolean(target?.closest('.fx-crystal-organism-r326-stage,.fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-reference-ask,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button,.fx-mag-heart-hit-r252'));
 }
+function isScrollIntentEvent(event){
+  if(event.type==='pointerdown')return event.pointerType==='touch';
+  if(event.type==='keydown')return SCROLL_KEYS.has(event.key);
+  return event.type==='wheel'||event.type==='touchstart';
+}
 function disarm(){for(const [type,options] of intentListeners)removeEventListener(type,onIntent,options);}
 function disarmScrollIntent(){for(const [type,options] of scrollIntentListeners)removeEventListener(type,onScrollIntent,options);}
 function mountEnhancements(){
@@ -157,13 +175,14 @@ function mountEnhancements(){
   root.dataset.fxMotionRuntimeDeferredRequestedR284=String(requested);
   root.dataset.fxMotionRuntimeR239='enhanced-r468-user-intent';
 }
-function onIntent(event){if(!reservedInteraction(event))mountEnhancements();}
+function onIntent(event){if(isScrollIntentEvent(event))return;if(!reservedInteraction(event))mountEnhancements();}
+function startEnhancementsAfterScrollOwner(){setTimeout(mountEnhancements,0);}
 function onScrollIntent(event){
   if(event.type==='pointerdown'&&event.pointerType!=='touch')return;
-  if(event.type==='keydown'&&!['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' '].includes(event.key))return;
-  mountEnhancements();
-  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-deferred-inserted-before-scroll-bootstrap`;
+  if(event.type==='keydown'&&!SCROLL_KEYS.has(event.key))return;
   ensureScrollBootstrap();
+  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-scroll-bootstrap-requested-before-deferred-r781`;
+  startEnhancementsAfterScrollOwner();
 }
 function openPendingCanonicalAsk(){
   if(!askActivationPending)return false;
@@ -191,10 +210,10 @@ function activateExistingScrollAfterIntro(){
   if(scrollBootstrapRequested)return;
   root.dataset.fxScrollRestorationProbeR746='checking-after-canonical-intro-release';
   if(Math.abs(scrollY)<=1){root.dataset.fxScrollRestorationProbeR746='top-no-bootstrap';return;}
-  mountEnhancements();
-  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-deferred-inserted-before-restored-scroll-bootstrap`;
-  root.dataset.fxScrollRestorationProbeR746='restored-scroll-bootstrap';
   ensureScrollBootstrap();
+  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-restored-scroll-bootstrap-before-deferred-r781`;
+  root.dataset.fxScrollRestorationProbeR746='restored-scroll-bootstrap';
+  startEnhancementsAfterScrollOwner();
 }
 function armExistingScrollProbeAfterIntro(){
   const probe=()=>setTimeout(activateExistingScrollAfterIntro,0);
@@ -209,23 +228,23 @@ root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
 root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r468':mobile.matches?'core-ready-r468-mobile-r326-controller':'core-ready-r468-desktop-r326-controller';
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
-warmCriticalOwners();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureSoundControl();ensureCurrentMag();
+warmCriticalOwners();ensureControlGeometry();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureSoundControl();ensureCurrentMag();
 
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
 for(const [type,options] of scrollIntentListeners)addEventListener(type,onScrollIntent,options);
 const deepLinked=Boolean(location.hash&&location.hash!=='#top'&&location.hash!=='#hero');
 if(deepLinked)queueMicrotask(()=>{
-  mountEnhancements();
-  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-deferred-inserted-before-deeplink-bootstrap`;
-  root.dataset.fxScrollRestorationProbeR746='deeplink-bootstrap-no-layout-probe';
   ensureScrollBootstrap();
+  root.dataset.fxScrollEnhancementOrderR742=`${mobile.matches?'mobile-native':'desktop'}-deeplink-scroll-bootstrap-before-deferred-r781`;
+  root.dataset.fxScrollRestorationProbeR746='deeplink-bootstrap-no-layout-probe';
+  startEnhancementsAfterScrollOwner();
 });
 else armExistingScrollProbeAfterIntro();
 
 if(deferred.length){
   for(const [type,options] of intentListeners)addEventListener(type,onIntent,options);
   addEventListener('formatx:immersiveactivate',mountEnhancements,{passive:true});
-  if(deepLinked)mountEnhancements();
+  if(deepLinked)startEnhancementsAfterScrollOwner();
 }
 }());
