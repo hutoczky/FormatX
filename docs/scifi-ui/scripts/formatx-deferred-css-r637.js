@@ -3,16 +3,14 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  const ACTIVATE_FLOOR_MS = 2100;
-  root.dataset.fxDeferredCssR637 = 'critical-geometry-pre-fcp-decorative-post-fcp';
-  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-pre-fcp-decorative-autonomous-post-fcp-no-user-audit-gate';
-  root.dataset.fxDeferredCssFloorR651 = String(ACTIVATE_FLOOR_MS);
+  root.dataset.fxDeferredCssR637 = 'critical-geometry-pre-fcp-decorative-post-intro';
+  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-pre-fcp-deferred-post-intro-committed-frame-r764';
+  root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
 
   let activated = false;
   let frame = 0;
+  let commitTimer = 0;
   let fallback = 0;
-  let floorTimer = 0;
-  let observer = null;
 
   function activateCriticalGeometry() {
     const link = document.querySelector('link[data-fx-critical-signature-r227][data-fx-r637-href]');
@@ -34,12 +32,11 @@
     if (activated) return;
     activated = true;
     if (frame) cancelAnimationFrame(frame);
+    if (commitTimer) clearTimeout(commitTimer);
     if (fallback) clearTimeout(fallback);
-    if (floorTimer) clearTimeout(floorTimer);
     frame = 0;
+    commitTimer = 0;
     fallback = 0;
-    floorTimer = 0;
-    observer?.disconnect?.();
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
@@ -55,74 +52,65 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-fcp-r651';
-    root.dataset.fxDeferredCssR637 = 'ready-post-fcp-floor-network-restored';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r764';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'critical-geometry-pre-fcp-plus-autonomous-post-fcp-absolute-2100-r717', reason }
+      detail: { count: links.length, restored, scheduler: 'critical-geometry-pre-fcp-plus-post-intro-committed-frame-r764', reason }
     }));
   }
 
   function activateAfterCommittedFrame(reason) {
-    if (activated || frame || floorTimer) return;
+    if (activated || frame || commitTimer) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      const delay = Math.max(0, ACTIVATE_FLOOR_MS - performance.now());
-      if (delay <= 0) {
-        setTimeout(() => activate(reason), 0);
-        return;
-      }
-      floorTimer = setTimeout(() => {
-        floorTimer = 0;
-        activate(`${reason}-floor`);
-      }, delay);
+      commitTimer = setTimeout(() => {
+        commitTimer = 0;
+        activate(reason);
+      }, 0);
     });
   }
 
-  function hasFcp() {
-    return performance.getEntriesByName('first-contentful-paint', 'paint').length > 0;
+  function preloaderComplete() {
+    return root.dataset.fxPreloaderR531 === 'done';
   }
 
-  function observeFcp() {
-    if (hasFcp()) {
-      activateAfterCommittedFrame('buffered-fcp');
-      return true;
-    }
-    if (!('PerformanceObserver' in window)) return false;
-    const supported = PerformanceObserver.supportedEntryTypes;
-    if (Array.isArray(supported) && !supported.includes('paint')) return false;
-    try {
-      observer = new PerformanceObserver(list => {
-        if (list.getEntries().some(entry => entry.name === 'first-contentful-paint')) {
-          observer?.disconnect?.();
-          observer = null;
-          activateAfterCommittedFrame('observed-fcp');
-        }
-      });
-      observer.observe({ type: 'paint', buffered: true });
-      return true;
-    } catch (_) {
-      observer = null;
-      return false;
-    }
+  function releaseDeferredStyles(reason) {
+    if (activated) return;
+    if (!preloaderComplete()) return;
+    activateAfterCommittedFrame(reason);
   }
 
   activateCriticalGeometry();
 
-  if (!observeFcp()) {
-    const afterLoad = () => activateAfterCommittedFrame('load-fallback');
-    if (document.readyState === 'complete') afterLoad();
-    else addEventListener('load', afterLoad, { once: true });
-  }
+  document.addEventListener('formatx:preloadercomplete', () => {
+    releaseDeferredStyles('preloader-complete');
+  }, { once: true, capture: true });
+
+  // Durable-state catch-up for late execution or a very fast reduced-motion path.
+  if (preloaderComplete()) releaseDeferredStyles('preloader-complete-buffered');
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (preloaderComplete()) {
+      releaseDeferredStyles('domready-preloader-complete');
+      return;
+    }
+    // A document without the intro owner must not strand the deferred sheets.
+    if (!document.getElementById('formatx-event-horizon')) {
+      activateAfterCommittedFrame('domready-no-intro-owner');
+    }
+  }, { once: true });
 
   addEventListener('visibilitychange', () => {
     if (activated || document.visibilityState !== 'visible') return;
-    if (hasFcp()) activateAfterCommittedFrame('visibility-buffered-fcp');
+    releaseDeferredStyles('visibility-preloader-complete');
   }, { passive: true });
 
+  // Hidden/background documents may never produce a useful animation frame.
+  // Fail open without introducing a visible-page fixed activation timestamp.
   fallback = setTimeout(() => {
     if (!activated && document.visibilityState === 'hidden') activate('hidden-tab-fail-open');
   }, 8000);
