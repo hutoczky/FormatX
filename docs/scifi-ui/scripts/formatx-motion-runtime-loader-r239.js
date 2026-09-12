@@ -1,11 +1,12 @@
-/* FormatX r550 compatibility · R782 navigation-owned MAG + race-free physical scroll intent.
+/* FormatX r550 compatibility · R784 navigation-owned MAG + race-free desktop physical scroll intent.
    MAG and the lightweight SOUND control owner remain automatic from navigation. The
    normal path requests each owner directly without a speculative preload burst; worker/GPU
    release-window isolation belongs to the MAG context policy rather than this public owner.
    Seamless-scroll activation remains owned only by physical wheel/touch/scroll-key input
-   (or an existing/deep-linked scroll position). Returning users with the intro already seen
-   may prime only the lightweight bootstrap script so its physical-intent listener exists
-   before the first wheel; the seamless runtime itself still waits for that real input.
+   (or an existing/deep-linked scroll position). Returning desktop users with the intro already
+   seen may prime only the lightweight bootstrap script so its physical-intent listener exists
+   before the first wheel; mobile keeps its native first-intent sequencing so momentum/loop
+   geometry is not materialised early. The seamless runtime itself still waits for real input.
    Scroll ownership is requested before the optional deferred enhancement burst, while a tiny
    geometry-only SOUND | ASK sheet is navigation-critical so optional shapeshifter optics can
    stay post-release. Restored-position probing is deferred until canonical intro completion
@@ -33,7 +34,7 @@ root.dataset.fxMagWorkerIsolationR745='context-policy-release-owned';
 root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
 root.dataset.fxMagWarmPathR620='direct-owner-requests-no-speculative-preload-burst';
 root.dataset.fxControlCriticalR780='armed-navigation-critical';
-root.dataset.fxScrollBootstrapPrimeR782='armed-returning-user-only';
+root.dataset.fxScrollBootstrapPrimeR782='armed-desktop-returning-user-only-r784';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -164,13 +165,14 @@ function returningIntroSeen(){
   try{return localStorage.getItem('formatx:intro-seen-v1')==='1';}catch(_){return false;}
 }
 function primeReturningScrollOwner(){
+  if(mobile.matches){root.dataset.fxScrollBootstrapPrimeR782='mobile-native-not-primed-r784';return;}
   if(!returningIntroSeen()||scrollBootstrapRequested||document.querySelector('script[data-fx-platform-scroll-r535]'))return;
   scrollBootstrapRequested=true;
   root.dataset.fxPlatformScrollBootstrapR535='priming-returning-scroll-owner-r782';
-  root.dataset.fxScrollBootstrapPrimeR782='loading-returning-user-owner';
+  root.dataset.fxScrollBootstrapPrimeR782='loading-returning-desktop-owner-r784';
   const script=document.createElement('script');script.src=PLATFORM_SCROLL;script.async=false;script.dataset.fxPlatformScrollR535='true';
   script.addEventListener('load',()=>{
-    root.dataset.fxScrollBootstrapPrimeR782=root.dataset.fxScrollBootstrap==='platform-scroll-v2'?'ready-returning-user-owner':'loaded-without-bootstrap';
+    root.dataset.fxScrollBootstrapPrimeR782=root.dataset.fxScrollBootstrap==='platform-scroll-v2'?'ready-returning-desktop-owner-r784':'loaded-without-bootstrap';
     root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
   },{once:true});
   script.addEventListener('error',()=>{
