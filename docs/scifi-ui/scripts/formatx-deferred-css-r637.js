@@ -3,8 +3,8 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'desktop-core-quiesced-decorative-post-intro-r786';
-  root.dataset.fxDeferredCssPolicyR637 = 'first-frame-geometry-only-desktop-core-post-paint-r786';
+  root.dataset.fxDeferredCssR637 = 'desktop-core-quiesced-release-restored-r787';
+  root.dataset.fxDeferredCssPolicyR637 = 'desktop-core-quiesced-until-canonical-release-r787';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
 
   let activated = false;
@@ -23,6 +23,15 @@
   }
 
   const desktopCriticalCore = quiesceDesktopCriticalCore();
+
+  function restoreDesktopCriticalCore(reason) {
+    if (!(desktopCriticalCore instanceof HTMLLinkElement)) return;
+    if (!desktopCriticalCore.dataset.fxR786Media) return;
+    desktopCriticalCore.media = desktopCriticalCore.dataset.fxR786Media || '(prefers-reduced-motion: no-preference) and (min-width: 901px)';
+    delete desktopCriticalCore.dataset.fxR786Media;
+    root.dataset.fxCriticalCorePaintR786 = 'restored-at-canonical-release-r787';
+    root.dataset.fxCriticalCoreRestoreReasonR787 = reason;
+  }
 
   // Until the authored HTML boot state is migrated, normalize its historical
   // fx-intro-complete marker before event-horizon executes. This is boot-state
@@ -61,11 +70,7 @@
     commitTimer = 0;
     fallback = 0;
 
-    if (desktopCriticalCore instanceof HTMLLinkElement) {
-      desktopCriticalCore.media = desktopCriticalCore.dataset.fxR786Media || '(prefers-reduced-motion: no-preference) and (min-width: 901px)';
-      delete desktopCriticalCore.dataset.fxR786Media;
-      root.dataset.fxCriticalCorePaintR786 = 'restored-after-first-committed-paint';
-    }
+    restoreDesktopCriticalCore('deferred-css-activation-fallback');
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
@@ -81,14 +86,14 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r786';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r786';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r787';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r787';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'desktop-core-quiesced-plus-two-committed-frames-r786', reason }
+      detail: { count: links.length, restored, scheduler: 'desktop-core-restored-at-release-decorative-two-frames-r787', reason }
     }));
   }
 
@@ -122,6 +127,11 @@
   preserveCriticalGeometryOwner();
 
   document.addEventListener('formatx:preloadercomplete', () => {
+    // Restore the structural core in the canonical release dispatch itself, before
+    // any post-release user/MAG interaction can observe the temporary paint quiet.
+    // The media flip is tiny and schedules style work after this event; it does not
+    // make the visual preloader wait for that work.
+    restoreDesktopCriticalCore('preloader-complete-capture');
     releaseDeferredStyles('preloader-complete');
   }, { once: true, capture: true });
 
