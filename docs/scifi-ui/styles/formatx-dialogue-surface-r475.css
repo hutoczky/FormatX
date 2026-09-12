@@ -1,11 +1,13 @@
-/* FormatX r475 — canonical ASK dialogue render-surface owner.
+/* FormatX r777 — canonical ASK dialogue render-surface owner.
    r244 intentionally retires the legacy floating Organism shell so its old
    launcher cannot compete with the canonical ASK control. The dialogue itself,
-   however, is still the canonical response surface. Restore only an explicitly
-   open dialogue, and only while no higher-priority menu/intro/system panel owns
-   the interface. */
+   however, is still the canonical response surface. An explicitly opened dialogue
+   must have real layout even while the visual intro cover is present: the cover
+   remains the higher-z visual owner and still prevents normal user interaction,
+   while programmatic/accessibility activation gets a truthful renderable surface.
+   Menu and higher-priority system panels continue to suppress the dialogue. */
 
-html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+html:not(.fx-organism-menu-open)
 body.living-architecture:not(.fx-organism-panel-open)
 .fx-organism-dialogue.is-open {
   position: fixed !important;
@@ -17,7 +19,7 @@ body.living-architecture:not(.fx-organism-panel-open)
   transform: none !important;
 }
 
-html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+html:not(.fx-organism-menu-open)
 body.living-architecture:not(.fx-organism-panel-open)
 .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
   display: grid !important;
@@ -37,7 +39,7 @@ body.living-architecture .fx-organism-dialogue > .fx-organism-thought-trigger {
 }
 
 @media (max-width: 820px) {
-  html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+  html:not(.fx-organism-menu-open)
   body.living-architecture:not(.fx-organism-panel-open)
   .fx-organism-dialogue.is-open {
     right: max(12px, env(safe-area-inset-right)) !important;
@@ -47,7 +49,7 @@ body.living-architecture .fx-organism-dialogue > .fx-organism-thought-trigger {
     max-height: calc(100dvh - 32px) !important;
   }
 
-  html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+  html:not(.fx-organism-menu-open)
   body.living-architecture:not(.fx-organism-panel-open)
   .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
     max-height: min(78dvh, 620px) !important;
