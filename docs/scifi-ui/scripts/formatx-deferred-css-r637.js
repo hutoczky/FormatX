@@ -4,13 +4,68 @@
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
   root.dataset.fxDeferredCssR637 = 'critical-geometry-pre-fcp-decorative-post-intro';
-  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-pre-fcp-deferred-post-intro-committed-frame-r764';
+  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-pre-fcp-deferred-post-intro-committed-frame-r768';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
+  root.dataset.fxIntroCompletionGuardR768 = 'canonical-preloader-release-only';
 
   let activated = false;
   let frame = 0;
   let commitTimer = 0;
   let fallback = 0;
+  let canonicalIntroReleased = root.dataset.fxPreloaderR531 === 'done';
+  let completionQueued = false;
+
+  function suppressPrematureIntroComplete() {
+    if (canonicalIntroReleased) return;
+    root.classList.remove('fx-intro-complete', 'fx-intro-reveal');
+    root.classList.add('fx-intro-pending');
+    if (root.dataset.fxIntro !== 'bounded-release-pending-r768') {
+      root.dataset.fxIntro = 'bounded-release-pending-r768';
+    }
+  }
+
+  // R768 diagnostic owner: index.html historically starts in fx-intro-complete and
+  // event-horizon publishes the same class/event before its bounded visual release.
+  // Keep that premature state from reaching later defer scripts. Rendering cannot
+  // occur between this script task and the MutationObserver microtask, so downstream
+  // consumers see one durable completion edge: formatx:preloadercomplete.
+  suppressPrematureIntroComplete();
+  const completionObserver = new MutationObserver(() => {
+    if (!canonicalIntroReleased && root.classList.contains('fx-intro-complete')) {
+      suppressPrematureIntroComplete();
+    }
+  });
+  completionObserver.observe(root, { attributes: true, attributeFilter: ['class'] });
+
+  function blockPrematureIntroEvent(event) {
+    if (canonicalIntroReleased) return;
+    event.stopImmediatePropagation();
+    suppressPrematureIntroComplete();
+    root.dataset.fxIntroCompletionGuardR768 = 'premature-introcomplete-quarantined';
+  }
+  document.addEventListener('formatx:introcomplete', blockPrematureIntroEvent, true);
+
+  function publishCanonicalIntroCompletion(source) {
+    if (!canonicalIntroReleased || completionQueued) return;
+    completionQueued = true;
+    queueMicrotask(() => {
+      root.dataset.fxIntroCompletionGuardR768 = 'canonical-release-published';
+      document.dispatchEvent(new CustomEvent('formatx:introcomplete', {
+        detail: { source: source || 'preloadercomplete-r768', revision: 'r768' }
+      }));
+    });
+  }
+
+  function commitCanonicalIntroCompletion(event) {
+    if (canonicalIntroReleased) return;
+    canonicalIntroReleased = true;
+    completionObserver.disconnect();
+    document.removeEventListener('formatx:introcomplete', blockPrematureIntroEvent, true);
+    root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-reveal', 'fx-intro-managed');
+    root.classList.add('fx-intro-complete');
+    root.dataset.fxIntro = 'canonical-preloader-release-r768';
+    publishCanonicalIntroCompletion(event?.detail?.source || 'preloadercomplete-r768');
+  }
 
   function activateCriticalGeometry() {
     const link = document.querySelector('link[data-fx-critical-signature-r227][data-fx-r637-href]');
@@ -52,14 +107,14 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r764';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r768';
     root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'critical-geometry-pre-fcp-plus-post-intro-committed-frame-r764', reason }
+      detail: { count: links.length, restored, scheduler: 'critical-geometry-pre-fcp-plus-post-intro-committed-frame-r768', reason }
     }));
   }
 
@@ -86,12 +141,20 @@
 
   activateCriticalGeometry();
 
-  document.addEventListener('formatx:preloadercomplete', () => {
+  document.addEventListener('formatx:preloadercomplete', event => {
+    commitCanonicalIntroCompletion(event);
     releaseDeferredStyles('preloader-complete');
   }, { once: true, capture: true });
 
   // Durable-state catch-up for late execution or a very fast reduced-motion path.
-  if (preloaderComplete()) releaseDeferredStyles('preloader-complete-buffered');
+  if (preloaderComplete()) {
+    canonicalIntroReleased = true;
+    completionObserver.disconnect();
+    document.removeEventListener('formatx:introcomplete', blockPrematureIntroEvent, true);
+    root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-reveal', 'fx-intro-managed');
+    root.classList.add('fx-intro-complete');
+    releaseDeferredStyles('preloader-complete-buffered');
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
     if (preloaderComplete()) {
@@ -100,6 +163,11 @@
     }
     // A document without the intro owner must not strand the deferred sheets.
     if (!document.getElementById('formatx-event-horizon')) {
+      canonicalIntroReleased = true;
+      completionObserver.disconnect();
+      document.removeEventListener('formatx:introcomplete', blockPrematureIntroEvent, true);
+      root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-reveal', 'fx-intro-managed');
+      root.classList.add('fx-intro-complete');
       activateAfterCommittedFrame('domready-no-intro-owner');
     }
   }, { once: true });
