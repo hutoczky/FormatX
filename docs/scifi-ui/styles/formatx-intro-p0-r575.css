@@ -307,3 +307,36 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
 /* production-r750-static-cover-no-pseudo-raster */
 /* production-r752-restored-r749-desktop-copy-geometry */
 /* production-r772-covered-desktop-decorative-raster-quiet */
+
+/* R789 — retain R788 covered decoration in the canonical external stylesheet.
+   The rules apply only while the real intro cover owns the viewport and restore
+   automatically at canonical release. No inline CSP exception is required. */
+@media (prefers-reduced-motion: no-preference) {
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture #hero .hero-space::before {
+    content: none !important;
+    display: none !important;
+    opacity: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture :is(.fx-r179-field,.fx-r179-aurora,.fx-r179-carrier) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    will-change: auto !important;
+  }
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture #hero :is(.hero-ring,.hero-label) {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    filter: none !important;
+    box-shadow: none !important;
+    will-change: auto !important;
+  }
+}

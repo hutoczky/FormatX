@@ -12,43 +12,8 @@
   let commitTimer = 0;
   let fallback = 0;
 
-  // R788 — the opaque intro cover is the only visible full-viewport surface.
-  // Keep semantic/structural geometry live, but do not raster hidden fallback and
-  // continuity decoration underneath it. Every selector is paint-only/positioned
-  // decoration and automatically returns when the canonical intro classes clear.
-  const introPaintQuiet = document.createElement('style');
-  introPaintQuiet.dataset.fxIntroPaintQuietR788 = 'true';
-  introPaintQuiet.textContent = `
-@media (prefers-reduced-motion: no-preference) {
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture #hero .hero-space::before {
-    content: none !important;
-    display: none !important;
-    opacity: 0 !important;
-    background: none !important;
-    box-shadow: none !important;
-    filter: none !important;
-    clip-path: none !important;
-    transition: none !important;
-  }
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture :is(.fx-r179-field,.fx-r179-aurora,.fx-r179-carrier) {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    background: none !important;
-    box-shadow: none !important;
-    filter: none !important;
-    mix-blend-mode: normal !important;
-    will-change: auto !important;
-  }
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture #hero :is(.hero-ring,.hero-label) {
-    visibility: hidden !important;
-    opacity: 0 !important;
-    filter: none !important;
-    box-shadow: none !important;
-    will-change: auto !important;
-  }
-}`;
-  document.head.appendChild(introPaintQuiet);
+  // R789: covered decoration is defined in the render-blocking intro stylesheet.
+  // Runtime style elements violate the public style-src policy.
 
   function quiesceDesktopCriticalCore() {
     if (!matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 901px)').matches) return null;
