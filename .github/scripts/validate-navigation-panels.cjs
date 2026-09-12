@@ -157,7 +157,7 @@ async function assertStableOrdinaryScroll(page, expectedMirrors) {
   const before = await page.evaluate(() => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     return {
-      bridgeTop: bridge?.offsetTop || 0,
+      bridgeTop: bridge ? bridge.getBoundingClientRect().top + scrollY : 0,
       loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
       viewport: innerHeight,
     };
@@ -207,8 +207,8 @@ async function assertTwoLoopCycles(page, name, expectedMirrors) {
       const relative = Math.max(48, Math.min(innerHeight * .24, Math.max(48, hero.offsetHeight - 12)));
       return {
         count: Number(document.documentElement.dataset.fxLoopCount || 0),
-        target: isMobile ? document.documentElement.scrollHeight : bridge.offsetTop + relative,
-        expectedLanding: isMobile ? hero.offsetTop : hero.offsetTop + relative,
+        target: isMobile ? document.documentElement.scrollHeight : bridge.getBoundingClientRect().top + scrollY + relative,
+        expectedLanding: hero.getBoundingClientRect().top + scrollY + (isMobile ? 0 : relative),
       };
     }, mobile);
 

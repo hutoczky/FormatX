@@ -11,7 +11,7 @@ const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
 const REFERENCE_MODE_BOOT_SCRIPT = '<script defer fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
-const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
+const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
@@ -125,6 +125,7 @@ function injectReferenceModeBoot(html) {
 function injectCriticalFirstPaint(html) {
   let source = String(html || '');
   let introStyle = '';
+  let firstFrameStyle = FIRST_FRAME_STABILITY_LINK;
   source = source.replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
     // R761: keep the intro's settled hero geometry after the blocking P0 layer,
@@ -133,12 +134,17 @@ function injectCriticalFirstPaint(html) {
       introStyle = tag;
       return '';
     }
-    if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') return '';
+    if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') {
+      // R763: the authored stylesheet covers mouse and keyboard-only desktops.
+      // Do not replace its current media/cache contract with an older snapshot.
+      firstFrameStyle = tag;
+      return '';
+    }
     if (pathname === '/scifi-ui/styles/formatx-p0-first-paint-r490.css') return '';
     if (pathname === '/scifi-ui/styles/formatx-mobile-first-paint-r358.css' && /data-fx-production-first-paint-r370/i.test(tag)) return '';
     return tag;
   });
-  const critical = `  ${FIRST_PAINT_LINK}\n  ${FIRST_FRAME_STABILITY_LINK}\n  ${P0_FIRST_PAINT_LINK}\n  ${introStyle}\n`;
+  const critical = `  ${FIRST_PAINT_LINK}\n  ${firstFrameStyle}\n  ${P0_FIRST_PAINT_LINK}\n  ${introStyle}\n`;
   return source.replace('</head>', `${critical}</head>`);
 }
 function normalizeMobileStylesheetMedia(html) {

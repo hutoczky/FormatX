@@ -24,6 +24,10 @@ const { pathToFileURL } = require('node:url');
     assert.match(tags[0], /\smedia="\(prefers-reduced-motion: no-preference\) and \(min-width: 901px\)"/, `${name}: retain desktop media`);
     assert.doesNotMatch(tags[0], /data-fx-r637-href|data-fx-r487-deferred-style|media="(?:not all|print)"/, `${name}: never postpone first-frame geometry`);
     assert.ok(html.indexOf(tags[0]) < html.indexOf('</head>'), `${name}: critical CSS belongs in the document head`);
+    const stability = (html.match(/<link\b[^>]*data-fx-first-frame-stability-r500[^>]*>/gi) || []);
+    assert.equal(stability.length, 1, `${name}: one desktop first-frame owner`);
+    assert.match(stability[0], /\(pointer: fine\)/, `${name}: mouse desktop geometry`);
+    assert.match(stability[0], /\(pointer: none\)/, `${name}: keyboard-only desktop geometry`);
     for (const file of ['formatx-reference-production-r244.css', 'formatx-intro-p0-r575.css']) {
       const geometry = (html.match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi) || [])
         .filter(tag => tag.includes(file));
