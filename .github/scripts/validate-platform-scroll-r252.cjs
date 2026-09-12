@@ -61,9 +61,11 @@ async function state(page) {
       bridgeCount: bridge ? 1 : 0,
       mirrorCount: mirror ? 1 : 0,
       bridgeHeight: bridge?.offsetHeight || 0,
-      bridgeTop: bridge?.offsetTop || 0,
+      bridgeTop: bridge ? bridge.getBoundingClientRect().top + scrollY : 0,
       bridgeDisplay: bridgeStyle?.display || '',
-      heroTop: hero?.offsetTop || 0,
+      heroTop: hero ? hero.getBoundingClientRect().top + scrollY : 0,
+      heroOffsetTop: hero?.offsetTop || 0,
+      heroOffsetParent: hero?.offsetParent?.id || hero?.offsetParent?.tagName || '',
       viewportHeight: innerHeight,
       maximum: Math.max(0, root.scrollHeight - innerHeight),
       scrollY,
@@ -237,7 +239,8 @@ async function verifyDesktop(browser) {
   const relative = Math.min(220, Math.max(120, (before.runtime && 180) || 180));
   await page.evaluate(offset => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    window.scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'auto' });
+    const bridgeTop = bridge ? bridge.getBoundingClientRect().top + scrollY : 0;
+    window.scrollTo({ top: bridgeTop + offset, left: 0, behavior: 'auto' });
   }, relative);
   try {
     await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });

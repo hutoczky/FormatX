@@ -317,7 +317,7 @@
     const liveLandingTarget = () => {
       const hero = document.querySelector('#main-content > #hero');
       const owner = hero instanceof HTMLElement ? hero : boundary.hero;
-      return Math.max(0, Math.round(owner.offsetTop || 0));
+      return Math.max(0, Math.round(owner.getBoundingClientRect().top + scrollY));
     };
     let target = liveLandingTarget();
     const nextLoopCount = Number(root.dataset.fxLoopCount || 0) + 1;

@@ -161,9 +161,15 @@
     return navigationType() !== 'back_forward';
   }
 
+  // R762: Organism can change the positioned ancestor. Native scrollY and
+  // the bridge/hero boundaries must remain in document coordinates.
+  function documentTop(element) {
+    return element.getBoundingClientRect().top + window.scrollY;
+  }
+
   function heroTop() {
     sourceHero = document.querySelector('#main-content > #hero');
-    return sourceHero ? Math.max(0, sourceHero.offsetTop) : 0;
+    return sourceHero ? Math.max(0, documentTop(sourceHero)) : 0;
   }
 
   function forceHeroStart(source) {
@@ -415,8 +421,8 @@
     sourceHero = document.querySelector('#main-content > #hero');
     if (!bridge || !sourceHero || !bridge.isConnected || !sourceHero.isConnected) return null;
     const viewportHeight = innerHeight;
-    const bridgeTop = bridge.offsetTop;
-    const sourceTop = sourceHero.offsetTop;
+    const bridgeTop = documentTop(bridge);
+    const sourceTop = documentTop(sourceHero);
     const sourceHeight = sourceHero.offsetHeight;
     const documentEnd = Math.max(0, document.documentElement.scrollHeight - viewportHeight);
     return Object.freeze({
