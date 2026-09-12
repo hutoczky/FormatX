@@ -1,13 +1,15 @@
-/* FormatX r550 compatibility · R781 navigation-owned MAG + bootstrap-first physical scroll intent.
+/* FormatX r550 compatibility · R782 navigation-owned MAG + race-free physical scroll intent.
    MAG and the lightweight SOUND control owner remain automatic from navigation. The
    normal path requests each owner directly without a speculative preload burst; worker/GPU
    release-window isolation belongs to the MAG context policy rather than this public owner.
-   Seamless-scroll bootstrap remains armed only by physical wheel/touch/scroll-key input
-   (or an existing/deep-linked scroll position). Scroll ownership is requested before the
-   optional deferred enhancement burst, while a tiny geometry-only SOUND | ASK sheet is
-   navigation-critical so optional shapeshifter optics can stay post-release. Restored-position
-   probing is deferred until canonical intro completion so startup never forces layout at the
-   release deadline. No scroll event is used as an activation owner. */
+   Seamless-scroll activation remains owned only by physical wheel/touch/scroll-key input
+   (or an existing/deep-linked scroll position). Returning users with the intro already seen
+   may prime only the lightweight bootstrap script so its physical-intent listener exists
+   before the first wheel; the seamless runtime itself still waits for that real input.
+   Scroll ownership is requested before the optional deferred enhancement burst, while a tiny
+   geometry-only SOUND | ASK sheet is navigation-critical so optional shapeshifter optics can
+   stay post-release. Restored-position probing is deferred until canonical intro completion
+   so startup never forces layout at the release deadline. No scroll event is an activation owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -31,6 +33,7 @@ root.dataset.fxMagWorkerIsolationR745='context-policy-release-owned';
 root.dataset.fxMagWarmPathR619='offscreen-normal-no-main-r326-preload';
 root.dataset.fxMagWarmPathR620='direct-owner-requests-no-speculative-preload-burst';
 root.dataset.fxControlCriticalR780='armed-navigation-critical';
+root.dataset.fxScrollBootstrapPrimeR782='armed-returning-user-only';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -157,6 +160,26 @@ function ensureScrollBootstrap(){
   script.addEventListener('error',()=>{root.dataset.fxPlatformScrollBootstrapR535='failed';},{once:true});
   document.head.appendChild(script);disarmScrollIntent();
 }
+function returningIntroSeen(){
+  try{return localStorage.getItem('formatx:intro-seen-v1')==='1';}catch(_){return false;}
+}
+function primeReturningScrollOwner(){
+  if(!returningIntroSeen()||scrollBootstrapRequested||document.querySelector('script[data-fx-platform-scroll-r535]'))return;
+  scrollBootstrapRequested=true;
+  root.dataset.fxPlatformScrollBootstrapR535='priming-returning-scroll-owner-r782';
+  root.dataset.fxScrollBootstrapPrimeR782='loading-returning-user-owner';
+  const script=document.createElement('script');script.src=PLATFORM_SCROLL;script.async=false;script.dataset.fxPlatformScrollR535='true';
+  script.addEventListener('load',()=>{
+    root.dataset.fxScrollBootstrapPrimeR782=root.dataset.fxScrollBootstrap==='platform-scroll-v2'?'ready-returning-user-owner':'loaded-without-bootstrap';
+    root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
+  },{once:true});
+  script.addEventListener('error',()=>{
+    scrollBootstrapRequested=false;
+    root.dataset.fxScrollBootstrapPrimeR782='prime-failed-fallback-to-first-intent';
+    root.dataset.fxPlatformScrollBootstrapR535='armed-scroll-intent';
+  },{once:true});
+  document.head.appendChild(script);
+}
 function reservedInteraction(event){
   if(root.dataset.fxOrganismThought==='open')return true;
   const target=event?.target instanceof Element?event.target:null;
@@ -228,7 +251,7 @@ root.dataset.fxLegacyMagRuntimesRetiredR460='static-not-requested';
 root.dataset.fxLivingEnergyR168='retired-r461-r326-native-owner';
 root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r468':mobile.matches?'core-ready-r468-mobile-r326-controller':'core-ready-r468-desktop-r326-controller';
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
-warmCriticalOwners();ensureControlGeometry();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureSoundControl();ensureCurrentMag();
+warmCriticalOwners();ensureControlGeometry();ensureDialogueSurface();ensureMagShapeSync();ensureLanguageToggle();ensureSoundControl();ensureCurrentMag();primeReturningScrollOwner();
 
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});
