@@ -3,8 +3,8 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'desktop-core-quiesced-release-restored-paint-quiet-r788';
-  root.dataset.fxDeferredCssPolicyR637 = 'desktop-core-quiesced-until-release-plus-hidden-paint-quiet-r788';
+  root.dataset.fxDeferredCssR637 = 'critical-geometry-stable-external-paint-quiet-r790';
+  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-persistent-decorative-post-intro-r790';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
 
   let activated = false;
@@ -15,27 +15,10 @@
   // R789: covered decoration is defined in the render-blocking intro stylesheet.
   // Runtime style elements violate the public style-src policy.
 
-  function quiesceDesktopCriticalCore() {
-    if (!matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 901px)').matches) return null;
-    const link = document.querySelector('link[data-fx-critical-core-r227]');
-    if (!(link instanceof HTMLLinkElement)) return null;
-    if (!link.dataset.fxR786Media) link.dataset.fxR786Media = link.media || 'all';
-    link.media = 'not all';
-    root.dataset.fxCriticalCorePaintR786 = 'quiesced-behind-intro';
-    return link;
-  }
-
-  const desktopCriticalCore = quiesceDesktopCriticalCore();
-
-  function restoreDesktopCriticalCore(reason) {
-    if (!(desktopCriticalCore instanceof HTMLLinkElement)) return;
-    if (!desktopCriticalCore.dataset.fxR786Media) return;
-    desktopCriticalCore.media = desktopCriticalCore.dataset.fxR786Media || '(prefers-reduced-motion: no-preference) and (min-width: 901px)';
-    delete desktopCriticalCore.dataset.fxR786Media;
-    root.dataset.fxCriticalCorePaintR786 = 'restored-at-canonical-release-r787';
-    root.dataset.fxCriticalCoreRestoreReasonR787 = reason;
-  }
-
+  // R790: the fetched critical core owns structural geometry before first paint.
+  // Temporarily disabling it caused the header, hero and text to reflow at release.
+  // The external intro rules suppress covered decoration without changing that
+  // structural cascade or triggering a second critical layout.
   // Until the authored HTML boot state is migrated, normalize its historical
   // fx-intro-complete marker before event-horizon executes. This is boot-state
   // normalization only; event-horizon R769 is the sole completion publisher.
@@ -73,8 +56,6 @@
     commitTimer = 0;
     fallback = 0;
 
-    restoreDesktopCriticalCore('deferred-css-activation-fallback');
-
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
     for (const link of links) {
@@ -96,7 +77,7 @@
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'desktop-core-restored-at-release-decorative-two-frames-r787', reason }
+      detail: { count: links.length, restored, scheduler: 'persistent-critical-core-decorative-two-frames-r790', reason }
     }));
   }
 
@@ -130,11 +111,6 @@
   preserveCriticalGeometryOwner();
 
   document.addEventListener('formatx:preloadercomplete', () => {
-    // Restore the structural core in the canonical release dispatch itself, before
-    // any post-release user/MAG interaction can observe the temporary paint quiet.
-    // The media flip is tiny and schedules style work after this event; it does not
-    // make the visual preloader wait for that work.
-    restoreDesktopCriticalCore('preloader-complete-capture');
     releaseDeferredStyles('preloader-complete');
   }, { once: true, capture: true });
 
