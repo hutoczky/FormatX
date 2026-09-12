@@ -3,14 +3,26 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'settled-geometry-owner-decorative-post-intro-r785';
-  root.dataset.fxDeferredCssPolicyR637 = 'existing-first-frame-geometry-deferred-post-intro-two-committed-frames-r785';
+  root.dataset.fxDeferredCssR637 = 'desktop-core-quiesced-decorative-post-intro-r786';
+  root.dataset.fxDeferredCssPolicyR637 = 'first-frame-geometry-only-desktop-core-post-paint-r786';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
 
   let activated = false;
   let frame = 0;
   let commitTimer = 0;
   let fallback = 0;
+
+  function quiesceDesktopCriticalCore() {
+    if (!matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 901px)').matches) return null;
+    const link = document.querySelector('link[data-fx-critical-core-r227]');
+    if (!(link instanceof HTMLLinkElement)) return null;
+    if (!link.dataset.fxR786Media) link.dataset.fxR786Media = link.media || 'all';
+    link.media = 'not all';
+    root.dataset.fxCriticalCorePaintR786 = 'quiesced-behind-intro';
+    return link;
+  }
+
+  const desktopCriticalCore = quiesceDesktopCriticalCore();
 
   // Until the authored HTML boot state is migrated, normalize its historical
   // fx-intro-complete marker before event-horizon executes. This is boot-state
@@ -49,6 +61,12 @@
     commitTimer = 0;
     fallback = 0;
 
+    if (desktopCriticalCore instanceof HTMLLinkElement) {
+      desktopCriticalCore.media = desktopCriticalCore.dataset.fxR786Media || '(prefers-reduced-motion: no-preference) and (min-width: 901px)';
+      delete desktopCriticalCore.dataset.fxR786Media;
+      root.dataset.fxCriticalCorePaintR786 = 'restored-after-first-committed-paint';
+    }
+
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
     for (const link of links) {
@@ -63,14 +81,14 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r785';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r785';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r786';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r786';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'existing-critical-geometry-plus-two-committed-frames-r785', reason }
+      detail: { count: links.length, restored, scheduler: 'desktop-core-quiesced-plus-two-committed-frames-r786', reason }
     }));
   }
 
