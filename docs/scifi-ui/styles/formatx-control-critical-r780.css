@@ -1,7 +1,9 @@
-/* FormatX R780 — render-critical SOUND | ASK geometry only.
-   Optional shapeshifter optics stay post-release; this tiny sheet exists so the
-   canonical r268 control owner and the first visual frame share one desktop box.
-   It changes geometry only and contains no filters, animation or renderer work. */
+/* FormatX R783 — render-critical SOUND | ASK geometry plus intro-time paint quiescence.
+   Optional shapeshifter optics stay post-release; this tiny navigation-critical sheet
+   keeps the canonical r268 control owner and the first visual frame on one desktop box.
+   The R783 extension changes only paint/compositor effects while the full-screen intro
+   cover owns presentation; semantic content, geometry, visibility and interaction layout
+   remain intact and all normal effects return automatically when intro ownership clears. */
 @media (min-width: 901px) {
   html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
@@ -81,4 +83,50 @@
     grid-column: 2 !important;
     grid-row: 1 !important;
   }
+}
+
+/* R783 — the event horizon is the only visible surface during the bounded intro.
+   Keep all settled hero boxes in the tree, but stop hidden-behind-cover effects from
+   creating animation/compositor layers. This is viewport-neutral because the R780
+   desktop geometry above remains separately media-scoped. */
+html.fx-intro-running body.living-architecture #hero,
+html.fx-intro-running body.living-architecture #hero *,
+html.fx-intro-running body.living-architecture #hero *::before,
+html.fx-intro-running body.living-architecture #hero *::after,
+html.fx-intro-managed body.living-architecture #hero,
+html.fx-intro-managed body.living-architecture #hero *,
+html.fx-intro-managed body.living-architecture #hero *::before,
+html.fx-intro-managed body.living-architecture #hero *::after {
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  mix-blend-mode: normal !important;
+  will-change: auto !important;
+}
+
+html.fx-intro-running body.living-architecture::before,
+html.fx-intro-managed body.living-architecture::before {
+  content: none !important;
+  background: none !important;
+  animation: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+html.fx-intro-running body.living-architecture .fx-atmosphere,
+html.fx-intro-running body.living-architecture .fx-atmosphere > span,
+html.fx-intro-managed body.living-architecture .fx-atmosphere,
+html.fx-intro-managed body.living-architecture .fx-atmosphere > span {
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  mix-blend-mode: normal !important;
+  will-change: auto !important;
 }
