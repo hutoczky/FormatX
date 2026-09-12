@@ -255,5 +255,55 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   }
 }
 
+/* R772 — the full-screen intro is the sole visible desktop cover. Keep every hero
+   box in its settled R761 geometry, but do not ask SwiftShader/compositor to raster
+   decorative fixed/pseudo/filter layers that are completely hidden behind it. These
+   rules change paint only; no width/height/position/display of semantic content is
+   changed, and all decoration returns automatically when the finalizer removes the
+   intro-running/managed state. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html.fx-intro-running body.living-architecture::before,
+  html.fx-intro-managed body.living-architecture::before {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+  }
+
+  html.fx-intro-running body.living-architecture .fx-atmosphere,
+  html.fx-intro-running body.living-architecture .fx-atmosphere > span,
+  html.fx-intro-managed body.living-architecture .fx-atmosphere,
+  html.fx-intro-managed body.living-architecture .fx-atmosphere > span {
+    display: none !important;
+    visibility: hidden !important;
+    background: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  html.fx-intro-running body.living-architecture #hero.scene.hero::before,
+  html.fx-intro-running body.living-architecture #hero.scene.hero::after,
+  html.fx-intro-managed body.living-architecture #hero.scene.hero::before,
+  html.fx-intro-managed body.living-architecture #hero.scene.hero::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  html.fx-intro-running body.living-architecture #hero .hero-title-main,
+  html.fx-intro-managed body.living-architecture #hero .hero-title-main {
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  html.fx-intro-running body.living-architecture #hero .scroll-cue i::after,
+  html.fx-intro-managed body.living-architecture #hero .scroll-cue i::after {
+    animation: none !important;
+    box-shadow: none !important;
+  }
+}
+
 /* production-r750-static-cover-no-pseudo-raster */
 /* production-r752-restored-r749-desktop-copy-geometry */
+/* production-r772-covered-desktop-decorative-raster-quiet */
