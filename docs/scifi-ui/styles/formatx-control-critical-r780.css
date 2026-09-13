@@ -1,7 +1,7 @@
-/* FormatX R819 — exact R798/R794 critical paint scope plus forward-ported geometry fixes.
-   The bounded intro keeps the R818 timing-green render-critical suppression scope.
-   Restore only the proven desktop below-fold containment needed to prevent late
-   document expansion; R817's intro pseudo-layer removal remains retired.
+/* FormatX R820 — restore the exact R818 timing-green critical paint scope while
+   retaining the forward-ported interaction geometry fixes. R817's decorative
+   event-horizon pseudo layers are retired during the bounded intro because exact
+   Organism evidence shows that compositor load is not required for product state.
    No timing bounds, semantic content, renderer ownership or native input are changed. */
 @media (min-width: 901px) {
   html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
@@ -132,31 +132,35 @@
     mix-blend-mode: normal !important;
     will-change: auto !important;
   }
-}
 
-/* R806/R819 — keep below-fold desktop sections at a stable intrinsic block size
-   during the bounded intro and before trusted seamless-scroll intent. The existing
-   continuous-scroll override below materialises real boxes before bridge capture,
-   so this reduces startup/layout pressure without freezing canonical loop geometry. */
-@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791)
-  body.living-architecture #main-content > :is(#experience,#capabilities,#pricing,#system,#resources) {
-    content-visibility: auto !important;
-    contain: layout style paint !important;
-    contain-intrinsic-size: auto 1100px !important;
+  /* R817/R820 — these two event-horizon pseudo layers are purely decorative.
+     Removing their raster/compositor work while the canonical intro is active
+     preserves semantic intro copy and the overlay's required R533 timing owner. */
+  html:root #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
+  html:root #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
+    content: none !important;
+    display: none !important;
+    opacity: 0 !important;
+    background: none !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    will-change: auto !important;
   }
 }
 
-/* R817/R819 — seamless-v7 is armed only after trusted physical scroll intent.
-   Replace lazy intrinsic estimates with real section boxes before the bridge snapshot.
-   Startup remains lazy and native scrolling remains the input owner. */
+/* R817/R820 — seamless-v7 owns the real bridge geometry. Keep the decontainment
+   reset for compatibility with any deferred style owner, but do not install the
+   R819 five-section content-visibility:auto lifecycle that starved the R533 deadline. */
 html.fx-continuous-scroll-mode body.living-architecture main#main-content > :not(#hero) {
   content-visibility: visible !important;
   contain: none !important;
   contain-intrinsic-size: none !important;
 }
 
-/* R817/R819 — constrain only the mobile Organism console's internal layout boxes
+/* R817/R820 — constrain only the mobile Organism console's internal layout boxes
    to its already-correct inset shell. This fixes real box geometry without root
    overflow clipping or hiding any functional content. */
 @media (max-width: 900px), (pointer: coarse) {
