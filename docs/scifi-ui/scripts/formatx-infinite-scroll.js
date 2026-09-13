@@ -39,7 +39,7 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r711-lifecycle-materialised-before-boundary-recheck';
+  root.dataset.fxScrollBootstrapRevision = 'r808-desktop-geometry-styles-before-runtime';
   root.dataset.fxScrollIntentPolicyR649 = 'physical-wheel-touch-keyboard-only';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
@@ -47,6 +47,7 @@
   root.dataset.fxDesktopLoopSettledCommitR659 = 'scrollend-rechecks-canonical-v7-owner';
   root.dataset.fxDesktopLoopResyncR700 = 'resize-settle-before-boundary-recheck';
   root.dataset.fxDesktopLoopMaterializeR711 = 'idle-until-runtime';
+  root.dataset.fxDesktopGeometryStyleReadyR808 = 'idle-until-desktop-scroll-intent';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
@@ -55,6 +56,46 @@
     link.href = MOBILE_LOOP_STYLE;
     link.dataset.fxMobileLoopBridgeOverride = 'true';
     document.head.appendChild(link);
+  }
+
+  function waitForDesktopGeometryStyles() {
+    if (MOBILE_QUERY.matches) return Promise.resolve([]);
+    const links = Array.from(document.querySelectorAll(
+      'link[data-fx-first-frame-stability-r500],link[data-fx-critical-core-r227]'
+    ));
+    if (!links.length) {
+      root.dataset.fxDesktopGeometryStyleReadyR808 = 'no-matching-links';
+      return Promise.resolve([]);
+    }
+    root.dataset.fxDesktopGeometryStyleReadyR808 = `waiting-${links.length}`;
+    return Promise.all(links.map(link => new Promise(resolve => {
+      if (!(link instanceof HTMLLinkElement)) {
+        resolve('non-link');
+        return;
+      }
+      if (link.sheet) {
+        resolve('ready-existing');
+        return;
+      }
+      let settled = false;
+      let timer = 0;
+      const finish = source => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        link.removeEventListener('load', onLoad);
+        link.removeEventListener('error', onError);
+        resolve(source);
+      };
+      const onLoad = () => finish('ready-load');
+      const onError = () => finish('failed-load');
+      link.addEventListener('load', onLoad, { once: true });
+      link.addEventListener('error', onError, { once: true });
+      timer = window.setTimeout(() => finish(link.sheet ? 'ready-timeout-check' : 'timeout-continue'), 2000);
+    }))).then(results => new Promise(resolve => {
+      root.dataset.fxDesktopGeometryStyleReadyR808 = results.join(',');
+      requestAnimationFrame(() => resolve(results));
+    }));
   }
 
   function ensureDesktopRuntimeGuardStyle() {
@@ -371,9 +412,12 @@
       return;
     }
 
-    root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r675';
-    realiseDesktopDocumentGeometry('pre-guard-r675');
-    ensureDesktopRuntimeGuardStyle().then(() => {
+    root.dataset.fxDesktopLoopLayoutR613 = 'waiting-navigation-geometry-styles-r808';
+    waitForDesktopGeometryStyles().then(() => {
+      root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r675';
+      realiseDesktopDocumentGeometry('pre-guard-r675');
+      return ensureDesktopRuntimeGuardStyle();
+    }).then(() => {
       realiseDesktopDocumentGeometry('post-guard-r675');
       return realiseDesktopDeferredStylesForLoop();
     }).then(() => waitForDesktopDocumentStable(18)).then(() => {
