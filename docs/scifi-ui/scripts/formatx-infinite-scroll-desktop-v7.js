@@ -66,7 +66,7 @@
   root.dataset.fxInitialHeroGuard = 'pending';
   root.dataset.fxLoopMirrorCaptureR609 = 'async-to-blob';
   root.dataset.fxLoopOrganismRepairR609 = 'geometry-only-no-bridge-rebuild';
-  root.dataset.fxDesktopLoopCrossingR618 = 'last-idle-real-bridge-boundary';
+  root.dataset.fxDesktopLoopCrossingR618 = 'live-crossing-rejects-stale-stable-r821';
   root.dataset.fxDesktopLoopSnapshotR623 = 'stable-only-outside-organism-overlays';
   root.dataset.fxDesktopLoopRetryR650 = 'preserve-crossing-through-intro-ui-block';
   root.dataset.fxDesktopLoopStableSettleR663 = 'frame-settled-pending';
@@ -627,12 +627,14 @@
 
   function captureDesktopCrossingIntent() {
     if (isMobileFlow() || !initialised || Date.now() < transferLockedUntil) return;
-    const geometry = desktopStableGeometry || loopGeometry;
-    if (!geometry?.ready) return;
+    const live = readActualGeometry();
+    if (!live?.ready) return;
+    const useStable = desktopGeometryMatches(desktopStableGeometry, live);
+    const geometry = useStable ? desktopStableGeometry : live;
     const y = scrollY;
     if (y < geometry.bridgeThreshold || y > geometry.documentEnd + 2) return;
     pendingDesktopRelative = Math.max(0, Math.min(y - geometry.bridgeTop, Math.max(0, geometry.sourceHeight - 2)));
-    root.dataset.fxDesktopLoopBoundaryR618 = `captured-stable-${Math.round(geometry.bridgeTop)}-${Math.round(y)}`;
+    root.dataset.fxDesktopLoopBoundaryR618 = `captured-${useStable ? 'stable' : 'live'}-${Math.round(geometry.bridgeTop)}-${Math.round(y)}`;
   }
 
   function markIdle() {
@@ -924,7 +926,7 @@
       mirrorContext: 'static-2d-snapshot-no-webgl',
       mirrorCapture: 'async-to-blob-r609',
       organismLifecycleBridgeRepair: 'geometry-only-r609',
-      desktopCrossingIntent: 'last-idle-real-bridge-boundary-r618',
+      desktopCrossingIntent: 'live-crossing-rejects-stale-stable-r821',
       desktopStableSnapshot: 'frame-settled-organism-and-resize-r663',
       reinitialisedRenderer: false,
       frameStableLanding: true,
