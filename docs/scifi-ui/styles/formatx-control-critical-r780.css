@@ -137,3 +137,16 @@
     will-change: auto !important;
   }
 }
+
+/* R806 — the opaque intro never needs below-fold desktop sections to participate
+   in layout/paint/compositor work. Keep them in the accessibility tree and reserve
+   their authored scroll geometry, but let the browser skip off-screen rendering
+   until the existing startup-quiet owner releases after settled post-intro frames.
+   Hero, header, MAG ownership and all semantic DOM remain untouched. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html.fx-startup-paint-quiet-r791 body.living-architecture main#main-content > :not(#hero) {
+    content-visibility: auto !important;
+    contain: layout style paint !important;
+    contain-intrinsic-size: auto 1100px !important;
+  }
+}
