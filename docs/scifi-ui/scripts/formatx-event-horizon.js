@@ -1,9 +1,9 @@
-/* FormatX R813 — frame-aligned contract-window single-owner premium intro release.
+/* FormatX R814 — frame-aligned contract-window single-owner premium intro release with release-window render diagnostics.
    MAG startup remains navigation-owned behind the visual cover. Product timing
    remains mobile 1180–1450ms / desktop 1350–1650ms. Exactly one idempotent
-   finalizer owns durable completion state. A no-DOM rAF deadline guard runs beside
-   timer/scheduler/watchdog owners so timer-queue starvation cannot miss the real
-   contract window. General intro consumers remain two committed frames later. */
+   finalizer owns durable completion state. Long Animation Frame evidence is captured
+   without changing product bounds or pass/fail behavior so native render/style
+   starvation can be attributed precisely. */
 (function(){
 'use strict';
 
@@ -24,8 +24,33 @@ const PRELOADER_REVEAL_AT_MS=REDUCED?0:Math.max(PRELOADER_MIN_MS,PRELOADER_MAX_M
 const PRELOADER_RELEASE_AT_MS=REDUCED?PRELOADER_MIN_MS:(MOBILE?1220:1400);
 const PRELOADER_VISUAL_MS=MOBILE?1360:1640;
 const PRELOADER_BOOT_AT=performance.now();
-const INTRO_TIMING=window.FormatXIntroTiming={bootAt:PRELOADER_BOOT_AT,releaseEligibleAt:PRELOADER_BOOT_AT+PRELOADER_MIN_MS};
+const INTRO_TIMING=window.FormatXIntroTiming={bootAt:PRELOADER_BOOT_AT,releaseEligibleAt:PRELOADER_BOOT_AT+PRELOADER_MIN_MS,longAnimationFrames:[]};
 const introMark=name=>{const at=performance.now();INTRO_TIMING[name]=at;return at;};
+try{
+  new PerformanceObserver(list=>{
+    for(const entry of list.getEntries()){
+      if(INTRO_TIMING.longAnimationFrames.length>=16)break;
+      INTRO_TIMING.longAnimationFrames.push({
+        startTime:entry.startTime,
+        duration:entry.duration,
+        blockingDuration:Number(entry.blockingDuration||0),
+        renderStart:Number(entry.renderStart||0),
+        styleAndLayoutStart:Number(entry.styleAndLayoutStart||0),
+        firstUIEventTimestamp:Number(entry.firstUIEventTimestamp||0),
+        scripts:Array.from(entry.scripts||[]).slice(0,16).map(script=>({
+          invoker:String(script.invoker||''),
+          invokerType:String(script.invokerType||''),
+          sourceURL:String(script.sourceURL||''),
+          sourceFunctionName:String(script.sourceFunctionName||''),
+          duration:Number(script.duration||0),
+          pauseDuration:Number(script.pauseDuration||0),
+          forcedStyleAndLayoutDuration:Number(script.forcedStyleAndLayoutDuration||0),
+          windowAttribution:String(script.windowAttribution||'')
+        }))
+      });
+    }
+  }).observe({type:'long-animation-frame',buffered:true});
+}catch(_){}
 let audio=null,preloaderTimer=0,preloaderDeadlineTimer=0,preloaderRevealTimer=0,preloaderPhaseTimerA=0,preloaderPhaseTimerB=0,preloaderWatchdog=0,preloaderFrameDeadline=0,preloaderReleased=false,preloaderDeadlineAbort=null,introNotifyFrameA=0,introNotifyFrameB=0;
 
 if(!ROOT.dataset.fxReferenceProductionR244)ROOT.dataset.fxReferenceProductionR244=MOBILE?'ready':'desktop';
@@ -55,6 +80,7 @@ ROOT.dataset.fxPreloaderReleaseOwnerR635='single-idempotent-finalizer';
 ROOT.dataset.fxPreloaderLogicalReleaseR642=MOBILE?'bounded-window-1220':'bounded-window-1400';
 ROOT.dataset.fxPreloaderWatchdogR687='monotonic-32ms-no-dom-single-finalizer';
 ROOT.dataset.fxPreloaderFrameDeadlineR813='frame-aligned-no-dom-deadline-guard';
+ROOT.dataset.fxPreloaderRenderDiagnosticR814='long-animation-frame-buffered';
 ROOT.dataset.fxPreloaderPaintOwnerR575='external-css-pseudo-grid-scan-legacy-dom-suppressed';
 ROOT.dataset.fxPreloaderPaintOwnerR606='bounded-raster-single-compositor-deadline';
 ROOT.dataset.fxPreloaderPaintOwnerR636='sync-no-transform-before-visual-css';ROOT.dataset.fxPreloaderPaintOwnerR641='timing-only-overlay-clock-small-energy-line';
@@ -117,7 +143,7 @@ function preloaderReady(){const hero=document.getElementById('hero');const shell
 function runPreloader(overlay){if(!(overlay instanceof HTMLElement)){ROOT.dataset.fxPreloaderR531='unavailable';return;}const elapsed=()=>performance.now()-PRELOADER_BOOT_AT;const scheduleAt=(target,callback)=>setTimeout(callback,Math.max(0,target-elapsed()));introMark('releaseScheduledAt');INTRO_TIMING.releaseDueAt=PRELOADER_BOOT_AT+(MOBILE?PRELOADER_MIN_MS:PRELOADER_RELEASE_AT_MS);const absoluteDeadline=()=>finalizePreloader('absolute-deadline');armDeadline(absoluteDeadline,Math.max(0,PRELOADER_MAX_MS-elapsed()));if(REDUCED){preloaderTimer=scheduleAt(PRELOADER_MIN_MS,()=>requestPreloaderRelease('reduced-semantic-ready'));return;}const watchdogTarget=MOBILE?PRELOADER_MIN_MS:PRELOADER_RELEASE_AT_MS;armFrameDeadline(watchdogTarget);preloaderWatchdog=setInterval(()=>{if(preloaderReleased)return;if(elapsed()>=watchdogTarget)requestPreloaderRelease('monotonic-watchdog-r687');},PRELOADER_WATCHDOG_MS);preloaderTimer=scheduleAt(PRELOADER_RELEASE_AT_MS,()=>requestPreloaderRelease('bounded-window-release'));preloaderPhaseTimerA=scheduleAt(PRELOADER_VISUAL_MS*.30,()=>setIntroPhase(overlay,'sync'));preloaderPhaseTimerB=scheduleAt(PRELOADER_VISUAL_MS*.75,()=>setIntroPhase(overlay,'ready'));preloaderRevealTimer=scheduleAt(PRELOADER_REVEAL_AT_MS,()=>startReveal(overlay));overlay.addEventListener('animationend',event=>{if(event.target!==overlay||event.animationName!=='fx-r533-preloader-visual-bound')return;ROOT.dataset.fxPreloaderVisualEndR635=String(Math.round(elapsed()));requestPreloaderRelease('visual-complete');},{once:true});}
 const preloader=PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?skipLatePreloader():showPreloader();
 if(preloader)runPreloader(preloader);else if(!preloaderReleased){markIntroComplete('intro-unavailable-r770');complete('intro-unavailable-r770');}
-stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-r813-frame-deadline':'desktop-r813-frame-deadline';
+stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-r814-render-diagnostic':'desktop-r814-render-diagnostic';
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
 addEventListener('pagehide',()=>{cancelPreloaderTimers();cancelDeadline();if(introNotifyFrameA)cancelAnimationFrame(introNotifyFrameA);if(introNotifyFrameB)cancelAnimationFrame(introNotifyFrameB);try{audio?.pause();}catch(_){}},{once:true});
 addEventListener('error',()=>requestPreloaderRelease('runtime-error'));
