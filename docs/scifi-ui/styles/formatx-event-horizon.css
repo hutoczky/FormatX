@@ -41,36 +41,39 @@ html.fx-intro-managed .fx-intro-overlay {
   animation: none;
 }
 
+/* R825 — the top-level decorative pseudo surfaces are non-semantic and are
+   already retired by the render-critical control layer. Establish that exact
+   paint-neutral state in the first Event Horizon stylesheet so Chromium never
+   has to build the expensive star/grid compositor surfaces and tear them down
+   when the later control stylesheet arrives. The generated boxes remain stable;
+   only their decorative raster/compositor inputs are neutral from first paint. */
 .fx-intro-overlay::before,
 .fx-intro-overlay::after {
   content: "";
   position: absolute;
+  visibility: visible;
+  opacity: 0;
   pointer-events: none;
+  background: none;
+  background-image: none;
+  border: 0;
+  animation: none;
+  transition: none;
+  transform: none;
+  filter: none;
+  box-shadow: none;
+  mix-blend-mode: normal;
+  will-change: auto;
 }
 
 .fx-intro-overlay::before {
   z-index: -6;
   inset: -20%;
-  opacity: 0.28;
-  background-image:
-    radial-gradient(circle at 9% 18%, rgba(255, 255, 255, 0.8) 0 0.55px, transparent 0.8px),
-    radial-gradient(circle at 21% 76%, rgba(124, 236, 255, 0.7) 0 0.7px, transparent 0.95px),
-    radial-gradient(circle at 74% 24%, rgba(255, 210, 148, 0.55) 0 0.6px, transparent 0.9px),
-    radial-gradient(circle at 88% 68%, rgba(143, 114, 255, 0.7) 0 0.7px, transparent 1px);
-  background-size: 121px 117px, 173px 163px, 211px 197px, 263px 241px;
-  transform: rotate(-7deg) scale(1.08);
 }
 
 .fx-intro-overlay::after {
   z-index: 8;
   inset: 0;
-  border: 1px solid rgba(130, 230, 255, 0.06);
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px);
-  background-size: 4px 4px;
-  opacity: 0.18;
-  mix-blend-mode: screen;
 }
 
 .fx-intro-overlay[hidden] {
