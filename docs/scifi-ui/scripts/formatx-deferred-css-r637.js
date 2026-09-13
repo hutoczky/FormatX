@@ -3,9 +3,16 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'critical-geometry-stable-external-paint-quiet-r790';
-  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-persistent-decorative-post-intro-r790';
+  root.dataset.fxDeferredCssR637 = 'critical-geometry-stable-release-staged-paint-r792';
+  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-persistent-decorative-settled-frame-r792';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
+
+  // R792: paint/compositor effects hidden by the opaque intro are not allowed to
+  // compete with the absolute release deadline or the first settled hero paint.
+  // The navigation-critical R791 stylesheet changes paint only; geometry and
+  // semantic state remain live. Reduced-motion is unaffected by that stylesheet.
+  root.classList.add('fx-startup-paint-quiet-r791');
+  root.dataset.fxStartupPaintQuietR791 = 'armed-before-settled-release-frame';
 
   let activated = false;
   let frame = 0;
@@ -56,6 +63,12 @@
     commitTimer = 0;
     fallback = 0;
 
+    // Release the paint-only quiet state only after the hero has had committed
+    // post-intro frames. This does not gate semantic readiness, interaction, MAG,
+    // scroll or the preloader completion event.
+    root.classList.remove('fx-startup-paint-quiet-r791');
+    root.dataset.fxStartupPaintQuietR791 = 'released-after-settled-hero-frame';
+
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
     for (const link of links) {
@@ -70,30 +83,30 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r787';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r787';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r792';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r792';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'persistent-critical-core-decorative-two-frames-r790', reason }
+      detail: { count: links.length, restored, scheduler: 'settled-hero-frames-plus-180ms-r792', reason }
     }));
   }
 
   function activateAfterCommittedFrame(reason) {
     if (activated || frame || commitTimer) return;
     // A single rAF callback still runs before that frame is painted. Nesting a
-    // second rAF guarantees one post-release frame can actually commit before the
-    // decorative stylesheet burst is restored, preventing it from delaying the
-    // first settled hero paint/LCP.
+    // second rAF guarantees one post-release frame can actually commit. R792 then
+    // reserves a short enhancement grace for hero LCP before paint-heavy optional
+    // decoration returns; this never changes the preloader deadline or completion.
     frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {
         frame = 0;
         commitTimer = setTimeout(() => {
           commitTimer = 0;
           activate(reason);
-        }, 0);
+        }, 180);
       });
     });
   }
