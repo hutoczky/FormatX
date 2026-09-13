@@ -1,10 +1,10 @@
-/* FormatX R791 — render-critical SOUND | ASK geometry plus release-staged paint quiescence.
+/* FormatX R794 — render-critical SOUND | ASK geometry plus release-staged paint quiescence.
    Optional optics stay post-release; this tiny navigation-critical sheet keeps the
    canonical r268 control owner and first-frame geometry stable while the opaque intro
    owns presentation. R791 broadens only paint/compositor suppression to every non-intro
-   surface, never width/height/position/display/semantic state. The quiet class persists
-   through the first settled post-release frames so hero LCP can paint before decoration
-   and compositor-heavy effects return. */
+   surface, never width/height/position/display/semantic state. R794 additionally makes
+   the visible intro descendants a static single-surface presentation while preserving
+   the overlay's required fx-r533-preloader-visual-bound timing animation contract. */
 @media (min-width: 901px) {
   html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
@@ -114,5 +114,24 @@
     animation: none !important;
     filter: none !important;
     box-shadow: none !important;
+  }
+
+  /* R794 — keep the overlay's own empty/paused timing animation intact because it
+     is the product timing contract measured by R533. Only descendants and their
+     pseudo-elements are flattened to static paint, so text/status remain visible
+     without shadow/filter/blend/transition compositor layers. */
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] *,
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] *::before,
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] *::after {
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    mix-blend-mode: normal !important;
+    will-change: auto !important;
   }
 }
