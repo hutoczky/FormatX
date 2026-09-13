@@ -1,7 +1,7 @@
-/* FormatX R820 — restore the exact R818 timing-green critical paint scope while
-   retaining the forward-ported interaction geometry fixes. R817's decorative
-   event-horizon pseudo layers are retired during the bounded intro because exact
-   Organism evidence shows that compositor load is not required for product state.
+/* FormatX R822 — preserve the R818 timing-green critical paint scope and R821
+   interaction geometry while keeping the Event Horizon's decorative pseudo boxes
+   structurally stable. Their paint/compositor effects stay retired for the overlay
+   lifetime without content/display teardown at the bounded release boundary.
    No timing bounds, semantic content, renderer ownership or native input are changed. */
 @media (min-width: 901px) {
   html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
@@ -133,25 +133,27 @@
     will-change: auto !important;
   }
 
-  /* R817/R820 — these two event-horizon pseudo layers are purely decorative.
-     Removing their raster/compositor work while the canonical intro is active
-     preserves semantic intro copy and the overlay's required R533 timing owner. */
-  html:root #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
-  html:root #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
-    content: none !important;
-    display: none !important;
-    opacity: 0 !important;
+  /* R822 — keep the pseudo generated boxes alive so Chromium does not tear down and
+     rebuild their layer-tree identity around release. They carry no visual meaning,
+     so retire only their raster/compositor inputs for the overlay's full lifetime. */
+  html:root #formatx-event-horizon.fx-intro-overlay::before,
+  html:root #formatx-event-horizon.fx-intro-overlay::after {
+    content: "" !important;
+    visibility: hidden !important;
     background: none !important;
+    background-image: none !important;
+    border: 0 !important;
     animation: none !important;
     transition: none !important;
     transform: none !important;
     filter: none !important;
     box-shadow: none !important;
+    mix-blend-mode: normal !important;
     will-change: auto !important;
   }
 }
 
-/* R817/R820 — seamless-v7 owns the real bridge geometry. Keep the decontainment
+/* R817/R822 — seamless-v7 owns the real bridge geometry. Keep the decontainment
    reset for compatibility with any deferred style owner, but do not install the
    R819 five-section content-visibility:auto lifecycle that starved the R533 deadline. */
 html.fx-continuous-scroll-mode body.living-architecture main#main-content > :not(#hero) {
@@ -160,7 +162,7 @@ html.fx-continuous-scroll-mode body.living-architecture main#main-content > :not
   contain-intrinsic-size: none !important;
 }
 
-/* R817/R820 — constrain only the mobile Organism console's internal layout boxes
+/* R817/R822 — constrain only the mobile Organism console's internal layout boxes
    to its already-correct inset shell. This fixes real box geometry without root
    overflow clipping or hiding any functional content. */
 @media (max-width: 900px), (pointer: coarse) {
