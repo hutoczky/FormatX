@@ -3,15 +3,39 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'critical-core-persistent-paint-quiet-r796';
-  root.dataset.fxDeferredCssPolicyR637 = 'structural-core-persistent-decorative-post-release-r796';
+  root.dataset.fxDeferredCssR637 = 'desktop-core-quiesced-settled-release-r798';
+  root.dataset.fxDeferredCssPolicyR637 = 'first-frame-geometry-live-full-core-post-release-r798';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
-  root.dataset.fxCriticalCorePaintR793 = 'retired-r796-structural-core-persistent';
 
-  // R796: never media-toggle the generated critical core. R793 proved that doing
-  // so shifts the desktop hero/header when the structural cascade returns and does
-  // not improve bounded release timing. R794's navigation-critical paint quieting
-  // remains the compositor control; geometry stays stable from first paint onward.
+  // R798: keep render-blocking first-frame geometry live, but take the generated
+  // full desktop core out of the opaque intro cascade. Exact R794 evidence showed
+  // this removes the release-window compositor starvation while preserving the
+  // authored geometry owners. The full core returns only after stable hero frames.
+  function quiesceDesktopCriticalCore() {
+    if (!matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 901px)').matches) return null;
+    const link = document.querySelector('link[data-fx-critical-core-r227]');
+    if (!(link instanceof HTMLLinkElement)) return null;
+    if (!link.dataset.fxR798Media) link.dataset.fxR798Media = link.media || 'all';
+    link.media = 'not all';
+    link.removeAttribute('fetchpriority');
+    root.dataset.fxCriticalCorePaintR793 = 'quiesced-behind-intro-first-frame-geometry-live-r798';
+    return link;
+  }
+
+  const desktopCriticalCore = quiesceDesktopCriticalCore();
+
+  function restoreDesktopCriticalCore(reason) {
+    if (!(desktopCriticalCore instanceof HTMLLinkElement)) return;
+    const media = desktopCriticalCore.dataset.fxR798Media;
+    if (!media) return;
+    desktopCriticalCore.media = media;
+    delete desktopCriticalCore.dataset.fxR798Media;
+    root.dataset.fxCriticalCorePaintR793 = 'restored-post-release-settled-frame-r798';
+    root.dataset.fxCriticalCoreRestoreReasonR793 = reason;
+  }
+
+  // Covered decoration is not allowed to compete with the absolute intro deadline.
+  // This class only quiets paint/compositor effects; semantic/layout owners remain live.
   root.classList.add('fx-startup-paint-quiet-r791');
   root.dataset.fxStartupPaintQuietR791 = 'armed-before-settled-release-frame';
 
@@ -21,12 +45,9 @@
   let fallback = 0;
   let paintReleaseFrame = 0;
 
-  // R789: covered decoration is defined in the render-blocking intro stylesheet.
-  // Runtime style elements violate the public style-src policy.
-
   // Until the authored HTML boot state is migrated, normalize its historical
   // fx-intro-complete marker before event-horizon executes. This is boot-state
-  // normalization only; event-horizon R769 is the sole completion publisher.
+  // normalization only; event-horizon is the sole completion publisher.
   if (root.dataset.fxPreloaderR531 !== 'done' && root.classList.contains('fx-intro-complete')) {
     root.classList.remove('fx-intro-complete', 'fx-intro-reveal');
     root.classList.add('fx-intro-pending');
@@ -35,28 +56,25 @@
   }
 
   function preserveCriticalGeometryOwner() {
-    // R785: the render-blocking first-frame bundles already own settled hero/MAG
-    // geometry (including the r286 native WebGL geometry contract). Activating the
-    // complete signature bundle here duplicated those rules and also pulled
-    // gradients, backdrop filters, transitions and below-fold decoration into the
-    // release window. Keep the full signature sheet deferred with the rest of the
-    // non-critical presentation layer.
+    // The render-blocking first-frame bundles own settled hero/MAG geometry.
+    // Keep the complete signature sheet deferred so gradients, filters,
+    // transitions and below-fold decoration stay outside the release window.
     const link = document.querySelector('link[data-fx-critical-signature-r227][data-fx-r637-href]');
     if (!(link instanceof HTMLLinkElement)) {
       root.dataset.fxCriticalGeometryR717 = 'unavailable';
       return false;
     }
-    root.dataset.fxCriticalGeometryR717 = 'owned-by-render-blocking-first-frame-r785';
+    root.dataset.fxCriticalGeometryR717 = 'owned-by-render-blocking-first-frame-r798';
     root.dataset.fxCriticalGeometryHrefR717 = 'signature-remains-post-intro';
     return true;
   }
 
-  function releasePaintQuietAfterDeferredCommit() {
+  function releasePaintQuietAfterCoreCommit() {
     if (paintReleaseFrame) return;
     paintReleaseFrame = requestAnimationFrame(() => {
       paintReleaseFrame = 0;
       root.classList.remove('fx-startup-paint-quiet-r791');
-      root.dataset.fxStartupPaintQuietR791 = 'released-after-deferred-settled-frame-r796';
+      root.dataset.fxStartupPaintQuietR791 = 'released-after-core-settled-frame-r798';
     });
   }
 
@@ -70,8 +88,11 @@
     commitTimer = 0;
     fallback = 0;
 
-    // Structural critical CSS stays live. Only explicitly deferred presentation
-    // sheets are materialised after the hero has committed stable post-intro frames.
+    // Restore the full desktop cascade only after canonical release has already
+    // committed stable hero frames. Paint remains quiet for one further frame so
+    // structural cascade and compositor-heavy decoration do not materialise together.
+    restoreDesktopCriticalCore('post-release-settled-frame-r798');
+
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
     for (const link of links) {
@@ -86,25 +107,24 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r796';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r796';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r798';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r798';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'persistent-core-settled-hero-plus-180ms-r796', reason }
+      detail: { count: links.length, restored, scheduler: 'quiesced-core-settled-hero-plus-180ms-r798', reason }
     }));
 
-    releasePaintQuietAfterDeferredCommit();
+    releasePaintQuietAfterCoreCommit();
   }
 
   function activateAfterCommittedFrame(reason) {
     if (activated || frame || commitTimer) return;
     // A single rAF callback still runs before that frame is painted. Nesting a
     // second rAF guarantees one post-release frame can actually commit. The short
-    // grace is for optional presentation only; it never changes the preloader clock,
-    // deadline, completion event, MAG readiness, scroll ownership or semantics.
+    // grace applies only to optional presentation and never changes intro timing.
     frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {
         frame = 0;
@@ -121,8 +141,7 @@
   }
 
   function releaseDeferredStyles(reason) {
-    if (activated) return;
-    if (!preloaderComplete()) return;
+    if (activated || !preloaderComplete()) return;
     activateAfterCommittedFrame(reason);
   }
 
