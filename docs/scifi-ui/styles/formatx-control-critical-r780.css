@@ -1,10 +1,9 @@
-/* FormatX R794 — render-critical SOUND | ASK geometry plus release-staged paint quiescence.
-   Optional optics stay post-release; this tiny navigation-critical sheet keeps the
-   canonical r268 control owner and first-frame geometry stable while the opaque intro
-   owns presentation. R791 broadens only paint/compositor suppression to every non-intro
-   surface, never width/height/position/display/semantic state. R794 additionally makes
-   the visible intro descendants a static single-surface presentation while preserving
-   the overlay's required fx-r533-preloader-visual-bound timing animation contract. */
+/* FormatX R811 — render-critical SOUND | ASK geometry plus bounded intro paint quiescence.
+   R794/R798 exact-SHA evidence showed that descendant paint suppression plus the
+   dedicated body/background/hero rules can meet the bounded intro timing contract.
+   Keep those proven selectors intact. R801's extra top-level pseudo-element wildcard
+   selectors are intentionally retired because they broadened startup style invalidation
+   without adding semantic or geometry protection. R806 below-fold containment remains. */
 @media (min-width: 901px) {
   html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
@@ -86,16 +85,13 @@
   }
 }
 
-/* R791 — the event horizon is the only visible surface during the bounded intro.
-   Keep all settled document boxes alive, but stop hidden-behind-cover effects from
-   creating animation/compositor layers. The durable startup-quiet class is removed
-   only after canonical release has committed stable frames, preventing the release
-   deadline and the first hero LCP from competing with a full-page effect burst. */
+/* R791/R811 — the event horizon is the only visible surface during the bounded
+   intro. Keep settled document boxes alive while flattening descendant paint and
+   compositor effects. Top-level pseudo-elements use dedicated targeted owners
+   instead of the broader R801 wildcard invalidation path. */
 @media (prefers-reduced-motion: no-preference) {
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon),
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *,
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon)::before,
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon)::after,
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *::before,
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *::after {
     animation: none !important;
