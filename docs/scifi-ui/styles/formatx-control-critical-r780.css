@@ -1,9 +1,7 @@
-/* FormatX R817 — render-critical SOUND | ASK geometry plus bounded intro paint quiescence.
-   R794/R798 exact-SHA evidence showed that descendant paint suppression plus the
-   dedicated body/background/hero rules can meet the bounded intro timing contract.
-   Keep those proven selectors intact. R801's extra top-level pseudo-element wildcard
-   selectors remain retired because they broadened startup style invalidation without
-   adding semantic or geometry protection. R806 below-fold containment remains. */
+/* FormatX R818 — exact R798/R794 critical paint scope plus forward-ported geometry fixes.
+   The bounded intro uses the last exact-SHA proven render-critical suppression scope.
+   R817's real seamless-loop geometry and mobile Organism box constraints remain.
+   No timing bounds, semantic content, renderer ownership or native input are changed. */
 @media (min-width: 901px) {
   html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
@@ -85,10 +83,11 @@
   }
 }
 
-/* R791/R811 — the event horizon is the only visible surface during the bounded
-   intro. Keep settled document boxes alive while flattening descendant paint and
-   compositor effects. Top-level pseudo-elements use dedicated targeted owners
-   instead of the broader R801 wildcard invalidation path. */
+/* R791 — the event horizon is the only visible surface during the bounded intro.
+   Keep all settled document boxes alive, but stop hidden-behind-cover effects from
+   creating animation/compositor layers. The durable startup-quiet class is removed
+   only after canonical release has committed stable frames, preventing the release
+   deadline and the first hero LCP from competing with a full-page effect burst. */
 @media (prefers-reduced-motion: no-preference) {
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon),
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *,
@@ -132,52 +131,20 @@
     mix-blend-mode: normal !important;
     will-change: auto !important;
   }
-
-  /* R817 — the grid/energy-line pseudo layers are purely decorative and are fully
-     covered by the event horizon. Retire their raster/compositor work while active;
-     the overlay's required fx-r533-preloader-visual-bound animation remains owned
-     by the overlay itself and all semantic intro copy remains visible. */
-  html:root #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::before,
-  html:root #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"]::after {
-    content: none !important;
-    display: none !important;
-    opacity: 0 !important;
-    background: none !important;
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
-    filter: none !important;
-    box-shadow: none !important;
-    will-change: auto !important;
-  }
 }
 
-/* R806 — the opaque intro never needs below-fold desktop sections to participate
-   in layout/paint/compositor work. Keep them in the accessibility tree and reserve
-   their authored scroll geometry, but let the browser skip off-screen rendering
-   until the existing startup-quiet owner releases after settled post-intro frames.
-   Hero, header, MAG ownership and all semantic DOM remain untouched. */
-@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
-  html.fx-startup-paint-quiet-r791 body.living-architecture main#main-content > :not(#hero) {
-    content-visibility: auto !important;
-    contain: layout style paint !important;
-    contain-intrinsic-size: auto 1100px !important;
-  }
-}
-
-/* R817 — seamless-v7 is armed only after trusted physical scroll intent. Once the
-   runtime takes ownership, replace lazy intrinsic estimates with real section boxes
-   before its bridge snapshot. This preserves zero-cost startup laziness and native
-   input while preventing bridge geometry from growing mid-scroll on mobile/desktop. */
+/* R817/R818 — seamless-v7 is armed only after trusted physical scroll intent.
+   Replace lazy intrinsic estimates with real section boxes before the bridge snapshot.
+   Startup remains lazy and native scrolling remains the input owner. */
 html.fx-continuous-scroll-mode body.living-architecture main#main-content > :not(#hero) {
   content-visibility: visible !important;
   contain: none !important;
   contain-intrinsic-size: none !important;
 }
 
-/* R817 — mobile Organism shell is already correctly inset. Constrain only its
-   internal layout boxes to that shell so borders/padding cannot create the observed
-   2px document overflow; no root clipping and no content suppression are used. */
+/* R817/R818 — constrain only the mobile Organism console's internal layout boxes
+   to its already-correct inset shell. This fixes real box geometry without root
+   overflow clipping or hiding any functional content. */
 @media (max-width: 900px), (pointer: coarse) {
   html.fx-organism-interface-ready .fx-organism-console-shell :is(
     .fx-organism-console-head,
