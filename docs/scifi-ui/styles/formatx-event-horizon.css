@@ -41,30 +41,6 @@ html.fx-intro-managed .fx-intro-overlay {
   animation: none;
 }
 
-/* R826 — the decorative top-level star/grid pseudo surfaces are not semantic
-   product content and are already absent during the canonical intro in the
-   Organism-stable path. Retire the generated boxes before first composition,
-   with enough specificity to keep later control CSS from recreating them. This
-   avoids both the expensive raster surface and the late build/teardown lifecycle. */
-html:root:root:root:root:root #formatx-event-horizon.fx-intro-overlay::before,
-html:root:root:root:root:root #formatx-event-horizon.fx-intro-overlay::after {
-  content: none !important;
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  background: none !important;
-  background-image: none !important;
-  border: 0 !important;
-  animation: none !important;
-  transition: none !important;
-  transform: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-  mix-blend-mode: normal !important;
-  will-change: auto !important;
-}
-
 .fx-intro-overlay::before,
 .fx-intro-overlay::after {
   content: "";
@@ -75,11 +51,26 @@ html:root:root:root:root:root #formatx-event-horizon.fx-intro-overlay::after {
 .fx-intro-overlay::before {
   z-index: -6;
   inset: -20%;
+  opacity: 0.28;
+  background-image:
+    radial-gradient(circle at 9% 18%, rgba(255, 255, 255, 0.8) 0 0.55px, transparent 0.8px),
+    radial-gradient(circle at 21% 76%, rgba(124, 236, 255, 0.7) 0 0.7px, transparent 0.95px),
+    radial-gradient(circle at 74% 24%, rgba(255, 210, 148, 0.55) 0 0.6px, transparent 0.9px),
+    radial-gradient(circle at 88% 68%, rgba(143, 114, 255, 0.7) 0 0.7px, transparent 1px);
+  background-size: 121px 117px, 173px 163px, 211px 197px, 263px 241px;
+  transform: rotate(-7deg) scale(1.08);
 }
 
 .fx-intro-overlay::after {
   z-index: 8;
   inset: 0;
+  border: 1px solid rgba(130, 230, 255, 0.06);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px);
+  background-size: 4px 4px;
+  opacity: 0.18;
+  mix-blend-mode: screen;
 }
 
 .fx-intro-overlay[hidden] {

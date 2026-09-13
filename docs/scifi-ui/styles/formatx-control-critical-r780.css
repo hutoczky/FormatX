@@ -1,8 +1,8 @@
-/* FormatX R823 — preserve the R818 timing-green critical paint scope and R821
-   interaction geometry while keeping Event Horizon pseudo layer identity stable.
-   Decorative pseudo paint is transparent rather than visibility-torn-down, and the
-   desktop hero CTA group is locked to the same normal-flow geometry as settled r244.
-   No timing bounds, semantic content, renderer ownership or native input are changed. */
+/* FormatX R827 — restore the exact R818 timing-green render-critical scope while
+   preserving R821 live-crossing geometry and the post-intro CTA correction.
+   The bounded intro keeps its original compositor topology; no top-level Event
+   Horizon pseudo suppression or five-section containment runs inside the hard
+   R533 timing window. CTA geometry is locked only after canonical completion. */
 @media (min-width: 901px) {
   html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
@@ -83,10 +83,10 @@
     grid-row: 1 !important;
   }
 
-  /* R823 — the settled reference-production owner keeps CTA controls in normal
-     hero-copy flow. Enforce that geometry in the blocking layer as well so a
-     transient enhancement rule cannot place the first CTA inside the lead box. */
-  html:root:root body.living-architecture #hero .hero-copy > .hero-actions {
+  /* R827: keep the real post-intro overlap correction, but do not make hero CTA
+     layout participate in the opaque cover's deadline-critical composition. */
+  html.fx-intro-complete:root:root body.living-architecture #hero .hero-copy > .hero-actions,
+  html[data-fx-preloader-r531="done"]:root:root body.living-architecture #hero .hero-copy > .hero-actions {
     position: relative !important;
     inset: auto !important;
     top: auto !important;
@@ -102,7 +102,8 @@
     transform: none !important;
     translate: none !important;
   }
-  html:root:root body.living-architecture #hero .hero-copy > .hero-actions > .button {
+  html.fx-intro-complete:root:root body.living-architecture #hero .hero-copy > .hero-actions > .button,
+  html[data-fx-preloader-r531="done"]:root:root body.living-architecture #hero .hero-copy > .hero-actions > .button {
     position: relative !important;
     inset: auto !important;
     top: auto !important;
@@ -163,39 +164,18 @@
     mix-blend-mode: normal !important;
     will-change: auto !important;
   }
-
-  /* R823 — keep generated pseudo boxes in the live layer tree. Opacity retires
-     their decorative output without visibility/display teardown, while all heavy
-     raster/compositor properties stay neutral for the bounded intro lifetime. */
-  html:root #formatx-event-horizon.fx-intro-overlay::before,
-  html:root #formatx-event-horizon.fx-intro-overlay::after {
-    content: "" !important;
-    visibility: visible !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    background: none !important;
-    background-image: none !important;
-    border: 0 !important;
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
-    filter: none !important;
-    box-shadow: none !important;
-    mix-blend-mode: normal !important;
-    will-change: auto !important;
-  }
 }
 
-/* R817/R823 — seamless-v7 owns the real bridge geometry. Keep the decontainment
-   reset for compatibility with any deferred style owner, but do not install the
-   R819 five-section content-visibility:auto lifecycle that starved the R533 deadline. */
+/* R817/R827 — seamless-v7 is armed only after trusted physical scroll intent.
+   Replace lazy intrinsic estimates with real section boxes before bridge snapshot.
+   Startup remains lazy and native scrolling remains the input owner. */
 html.fx-continuous-scroll-mode body.living-architecture main#main-content > :not(#hero) {
   content-visibility: visible !important;
   contain: none !important;
   contain-intrinsic-size: none !important;
 }
 
-/* R817/R823 — constrain only the mobile Organism console's internal layout boxes
+/* R817/R827 — constrain only the mobile Organism console's internal layout boxes
    to its already-correct inset shell. This fixes real box geometry without root
    overflow clipping or hiding any functional content. */
 @media (max-width: 900px), (pointer: coarse) {
