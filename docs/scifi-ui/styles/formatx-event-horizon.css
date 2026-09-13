@@ -41,29 +41,35 @@ html.fx-intro-managed .fx-intro-overlay {
   animation: none;
 }
 
-/* R825 — the top-level decorative pseudo surfaces are non-semantic and are
-   already retired by the render-critical control layer. Establish that exact
-   paint-neutral state in the first Event Horizon stylesheet so Chromium never
-   has to build the expensive star/grid compositor surfaces and tear them down
-   when the later control stylesheet arrives. The generated boxes remain stable;
-   only their decorative raster/compositor inputs are neutral from first paint. */
+/* R826 — the decorative top-level star/grid pseudo surfaces are not semantic
+   product content and are already absent during the canonical intro in the
+   Organism-stable path. Retire the generated boxes before first composition,
+   with enough specificity to keep later control CSS from recreating them. This
+   avoids both the expensive raster surface and the late build/teardown lifecycle. */
+html:root:root:root:root:root #formatx-event-horizon.fx-intro-overlay::before,
+html:root:root:root:root:root #formatx-event-horizon.fx-intro-overlay::after {
+  content: none !important;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  background: none !important;
+  background-image: none !important;
+  border: 0 !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  mix-blend-mode: normal !important;
+  will-change: auto !important;
+}
+
 .fx-intro-overlay::before,
 .fx-intro-overlay::after {
   content: "";
   position: absolute;
-  visibility: visible;
-  opacity: 0;
   pointer-events: none;
-  background: none;
-  background-image: none;
-  border: 0;
-  animation: none;
-  transition: none;
-  transform: none;
-  filter: none;
-  box-shadow: none;
-  mix-blend-mode: normal;
-  will-change: auto;
 }
 
 .fx-intro-overlay::before {
