@@ -340,24 +340,3 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
-
-/* R810 — keep R809's early covered compositor quiescence but remove its unproven
-   global desktop header-flow override. R808 proved seamless-v7 green before that
-   override landed, while R809 did not improve the measured desktop CLS. Geometry
-   remains owned by the established critical/deferred header cascade. */
-@media (prefers-reduced-motion: no-preference) {
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture :is(.topbar,#main-content),
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture :is(.topbar,#main-content) * {
-    animation: none !important;
-    transition: none !important;
-    filter: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    mix-blend-mode: normal !important;
-    will-change: auto !important;
-  }
-}
-
-/* production-r810-covered-compositor-quiescence-with-canonical-header-geometry */

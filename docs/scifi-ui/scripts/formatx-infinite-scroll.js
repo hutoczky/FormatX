@@ -39,7 +39,7 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r808-desktop-geometry-styles-before-runtime';
+  root.dataset.fxScrollBootstrapRevision = 'r812-canonical-deferred-geometry-before-runtime';
   root.dataset.fxScrollIntentPolicyR649 = 'physical-wheel-touch-keyboard-only';
   root.dataset.fxDesktopRuntimeGuardR597 = 'scroll-intent-loaded-reachable-loop-compact-mini';
   root.dataset.fxDesktopLoopLayoutR613 = 'idle-until-desktop-scroll-intent';
@@ -48,6 +48,7 @@
   root.dataset.fxDesktopLoopResyncR700 = 'resize-settle-before-boundary-recheck';
   root.dataset.fxDesktopLoopMaterializeR711 = 'idle-until-runtime';
   root.dataset.fxDesktopGeometryStyleReadyR808 = 'idle-until-desktop-scroll-intent';
+  root.dataset.fxDesktopCanonicalGeometryReadyR812 = 'idle-until-desktop-scroll-intent';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
@@ -96,6 +97,60 @@
       root.dataset.fxDesktopGeometryStyleReadyR808 = results.join(',');
       requestAnimationFrame(() => resolve(results));
     }));
+  }
+
+  function canonicalDesktopGeometryReady() {
+    if (MOBILE_QUERY.matches) return true;
+    const deferredState = String(root.dataset.fxDeferredCssR637 || '');
+    const core = document.querySelector('link[data-fx-critical-core-r227]');
+    const coreApplied = !(core instanceof HTMLLinkElement) || core.media !== 'not all';
+    return deferredState.startsWith('ready-post-intro') && coreApplied;
+  }
+
+  function waitForCanonicalDesktopGeometryReady() {
+    if (MOBILE_QUERY.matches) return Promise.resolve('mobile');
+    if (canonicalDesktopGeometryReady()) {
+      root.dataset.fxDesktopCanonicalGeometryReadyR812 = 'ready-existing';
+      return Promise.resolve('ready-existing');
+    }
+    root.dataset.fxDesktopCanonicalGeometryReadyR812 = 'waiting-deferred-css-and-core-media';
+    return new Promise(resolve => {
+      let settled = false;
+      let timer = 0;
+      let rootObserver = null;
+      let coreObserver = null;
+      const core = document.querySelector('link[data-fx-critical-core-r227]');
+      const finish = source => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        removeEventListener('formatx:deferredcssready', onReady);
+        rootObserver?.disconnect();
+        coreObserver?.disconnect();
+        root.dataset.fxDesktopCanonicalGeometryReadyR812 = source;
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve(source)));
+      };
+      const check = source => {
+        if (canonicalDesktopGeometryReady()) finish(source);
+      };
+      const onReady = () => check('ready-deferredcss-event');
+      addEventListener('formatx:deferredcssready', onReady, { passive: true });
+      if ('MutationObserver' in window) {
+        rootObserver = new MutationObserver(() => check('ready-root-state'));
+        rootObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-deferred-css-r637'] });
+        if (core instanceof HTMLLinkElement) {
+          coreObserver = new MutationObserver(() => check('ready-core-media'));
+          coreObserver.observe(core, { attributes: true, attributeFilter: ['media'] });
+        }
+      }
+      timer = window.setTimeout(() => {
+        root.dataset.fxDesktopCanonicalGeometryReadyR812 = canonicalDesktopGeometryReady()
+          ? 'ready-timeout-check'
+          : 'timeout-fail-open';
+        finish(root.dataset.fxDesktopCanonicalGeometryReadyR812);
+      }, 5000);
+      check('ready-synchronous-check');
+    });
   }
 
   function ensureDesktopRuntimeGuardStyle() {
@@ -235,10 +290,6 @@
       desktopGeometryTimer = 0;
       if (root.dataset.fxInfiniteController !== 'seamless-v7') return;
 
-      /* R711: once desktop seamless scrolling is user-activated, re-materialise
-         any content-visibility:auto nodes inserted by late Organism/language/UI
-         ownership before v7 snapshots its bridge boundary. This work remains
-         outside initial paint and is debounced away from active scroll frames. */
       const realised = realiseDesktopDocumentGeometry(source || 'desktop-idle-r711');
       root.dataset.fxDesktopLoopMaterializeR711 = `${String(source || 'desktop-idle')}:${realised}:${document.documentElement.scrollHeight}`;
       root.dataset.fxDesktopLoopGeometry = 'layout-materialised-before-refresh-r711';
@@ -372,7 +423,7 @@
         root.dataset.fxMobileScrollPolicy = 'native-momentum-loop-v1';
         requestMobileGeometryRefresh(false);
       } else {
-        root.dataset.fxDesktopLoopLayoutR613 = 'runtime-mounted-after-final-layout-style';
+        root.dataset.fxDesktopLoopLayoutR613 = 'runtime-mounted-after-canonical-deferred-geometry-r812';
         requestDesktopGeometryRefresh(true, 'desktop-runtime-mounted-r621');
       }
     }, { once: true });
@@ -412,17 +463,20 @@
       return;
     }
 
-    root.dataset.fxDesktopLoopLayoutR613 = 'waiting-navigation-geometry-styles-r808';
+    root.dataset.fxDesktopLoopLayoutR613 = 'waiting-navigation-geometry-styles-r812';
     waitForDesktopGeometryStyles().then(() => {
-      root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-before-final-layout-style-r675';
-      realiseDesktopDocumentGeometry('pre-guard-r675');
+      root.dataset.fxDesktopLoopLayoutR613 = 'waiting-canonical-deferred-geometry-r812';
+      return waitForCanonicalDesktopGeometryReady();
+    }).then(() => {
+      root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-after-canonical-css-r812';
+      realiseDesktopDocumentGeometry('pre-guard-r812');
       return ensureDesktopRuntimeGuardStyle();
     }).then(() => {
-      realiseDesktopDocumentGeometry('post-guard-r675');
+      realiseDesktopDocumentGeometry('post-guard-r812');
       return realiseDesktopDeferredStylesForLoop();
     }).then(() => waitForDesktopDocumentStable(18)).then(() => {
-      realiseDesktopDocumentGeometry('pre-runtime-r675');
-      root.dataset.fxDesktopLoopLayoutR613 = `final-document-stable-after-deferred-css-r675-${document.documentElement.scrollHeight}`;
+      realiseDesktopDocumentGeometry('pre-runtime-r812');
+      root.dataset.fxDesktopLoopLayoutR613 = `final-document-stable-after-canonical-deferred-css-r812-${document.documentElement.scrollHeight}`;
       installDesktopGeometryResync();
       mountSeamlessRuntime(platform);
     });
