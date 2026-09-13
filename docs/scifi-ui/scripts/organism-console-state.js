@@ -69,7 +69,7 @@
     const shell = consoleRoot();
     if (shell) {
       if (shell.classList.contains('is-authorised-open')) shell.classList.remove('is-authorised-open');
-      setHiddenIfChanged(shell, true);
+      if (!shell.hidden) shell.hidden = true;
       setAttributeIfChanged(shell, 'aria-hidden', 'true');
       if (shell.style.getPropertyValue('display') !== 'none') shell.style.setProperty('display', 'none');
     }
