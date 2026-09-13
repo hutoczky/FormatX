@@ -3,42 +3,15 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'desktop-core-quiesced-settled-release-r793';
-  root.dataset.fxDeferredCssPolicyR637 = 'first-frame-geometry-live-full-core-post-release-r793';
+  root.dataset.fxDeferredCssR637 = 'critical-core-persistent-paint-quiet-r796';
+  root.dataset.fxDeferredCssPolicyR637 = 'structural-core-persistent-decorative-post-release-r796';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
+  root.dataset.fxCriticalCorePaintR793 = 'retired-r796-structural-core-persistent';
 
-  // R793: keep the lightweight first-frame geometry active, but take the generated
-  // full desktop core out of the intro cascade. R789 proved this collapses the
-  // LayerTreeHost teardown at the deadline; unlike R789, R793 does not flip the core
-  // back on inside the canonical release dispatch. The full core returns only in the
-  // post-release enhancement phase after settled hero frames.
-  function quiesceDesktopCriticalCore() {
-    if (!matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 901px)').matches) return null;
-    const link = document.querySelector('link[data-fx-critical-core-r227]');
-    if (!(link instanceof HTMLLinkElement)) return null;
-    if (!link.dataset.fxR793Media) link.dataset.fxR793Media = link.media || 'all';
-    link.media = 'not all';
-    link.removeAttribute('fetchpriority');
-    root.dataset.fxCriticalCorePaintR793 = 'quiesced-behind-intro-first-frame-geometry-live';
-    return link;
-  }
-
-  const desktopCriticalCore = quiesceDesktopCriticalCore();
-
-  function restoreDesktopCriticalCore(reason) {
-    if (!(desktopCriticalCore instanceof HTMLLinkElement)) return;
-    const media = desktopCriticalCore.dataset.fxR793Media;
-    if (!media) return;
-    desktopCriticalCore.media = media;
-    delete desktopCriticalCore.dataset.fxR793Media;
-    root.dataset.fxCriticalCorePaintR793 = 'restored-post-release-settled-frame';
-    root.dataset.fxCriticalCoreRestoreReasonR793 = reason;
-  }
-
-  // R792/R793: paint/compositor effects hidden by the opaque intro are not allowed
-  // to compete with the absolute release deadline or the first settled hero paint.
-  // The navigation-critical R791 stylesheet changes paint only; geometry and
-  // semantic state remain live. Reduced-motion is unaffected by that stylesheet.
+  // R796: never media-toggle the generated critical core. R793 proved that doing
+  // so shifts the desktop hero/header when the structural cascade returns and does
+  // not improve bounded release timing. R794's navigation-critical paint quieting
+  // remains the compositor control; geometry stays stable from first paint onward.
   root.classList.add('fx-startup-paint-quiet-r791');
   root.dataset.fxStartupPaintQuietR791 = 'armed-before-settled-release-frame';
 
@@ -78,12 +51,12 @@
     return true;
   }
 
-  function releasePaintQuietAfterCoreCommit() {
+  function releasePaintQuietAfterDeferredCommit() {
     if (paintReleaseFrame) return;
     paintReleaseFrame = requestAnimationFrame(() => {
       paintReleaseFrame = 0;
       root.classList.remove('fx-startup-paint-quiet-r791');
-      root.dataset.fxStartupPaintQuietR791 = 'released-after-core-settled-frame-r793';
+      root.dataset.fxStartupPaintQuietR791 = 'released-after-deferred-settled-frame-r796';
     });
   }
 
@@ -97,12 +70,8 @@
     commitTimer = 0;
     fallback = 0;
 
-    // Restore the full desktop cascade only after the canonical release has already
-    // committed stable hero frames. Keep paint quiet for one additional frame so the
-    // core's structural cascade and its compositor-heavy decoration are not materialised
-    // in the same lifecycle update.
-    restoreDesktopCriticalCore('post-release-settled-frame-r793');
-
+    // Structural critical CSS stays live. Only explicitly deferred presentation
+    // sheets are materialised after the hero has committed stable post-intro frames.
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
     for (const link of links) {
@@ -117,17 +86,17 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r793';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r793';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r796';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r796';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'quiesced-core-settled-hero-plus-180ms-r793', reason }
+      detail: { count: links.length, restored, scheduler: 'persistent-core-settled-hero-plus-180ms-r796', reason }
     }));
 
-    releasePaintQuietAfterCoreCommit();
+    releasePaintQuietAfterDeferredCommit();
   }
 
   function activateAfterCommittedFrame(reason) {
