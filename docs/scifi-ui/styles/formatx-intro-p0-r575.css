@@ -341,19 +341,10 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   }
 }
 
-/* R809 — reserve the final desktop header flow before deferred header ownership.
-   This removes the 72px fixed-to-relative shift observed by Lighthouse without
-   changing the settled header appearance. While the real intro cover owns the
-   viewport, quiesce paint/compositor-only effects underneath it; geometry,
-   display and visibility remain untouched so the semantic first-frame contract
-   stays real and release only needs a paint, not a layout reconstruction. */
-@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
-  html body.living-architecture .topbar {
-    position: relative !important;
-    min-height: 72px !important;
-  }
-}
-
+/* R810 — keep R809's early covered compositor quiescence but remove its unproven
+   global desktop header-flow override. R808 proved seamless-v7 green before that
+   override landed, while R809 did not improve the measured desktop CLS. Geometry
+   remains owned by the established critical/deferred header cascade. */
 @media (prefers-reduced-motion: no-preference) {
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture :is(.topbar,#main-content),
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture :is(.topbar,#main-content) * {
@@ -369,4 +360,4 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   }
 }
 
-/* production-r809-header-flow-and-covered-compositor-quiescence */
+/* production-r810-covered-compositor-quiescence-with-canonical-header-geometry */
