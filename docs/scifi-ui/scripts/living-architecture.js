@@ -25,7 +25,6 @@
   let threeLoadStarted = false;
   let threeLoaderArmed = false;
   let threeActivationObserver = null;
-  let threeActivationHandler = null;
   let qrDockActivated = false;
   let qrDockObserver = null;
   let qrDockArmPending = false;
@@ -145,9 +144,49 @@
     });
   }
 
+  function canonicalMagSettled() {
+    const dedicated = ROOT.dataset.fxCoreReal3d || '';
+    const current = ROOT.dataset.fxCurrentMagRuntimeR422 || '';
+    return /^(?:ready-v20|ready-v69|context-unavailable|webgl2-unavailable|shader-failed|context-lost)$/.test(dedicated)
+      || current === 'ready'
+      || current === 'renderer-timeout';
+  }
+
+  function waitForCanonicalMagSettlement() {
+    if (canonicalMagSettled()) return Promise.resolve();
+    ROOT.dataset.fxOrganismEnhancementGateR797 = 'waiting-canonical-mag-settlement';
+    return new Promise(resolve => {
+      let settled = false;
+      const observer = new MutationObserver(check);
+      const finish = reason => {
+        if (settled) return;
+        settled = true;
+        observer.disconnect();
+        removeEventListener('formatx:real3dready', check);
+        removeEventListener('formatx:currentmagready', check);
+        removeEventListener('formatx:core3dfallback', check);
+        ROOT.dataset.fxOrganismEnhancementGateR797 = reason;
+        resolve();
+      };
+      function check() {
+        if (canonicalMagSettled()) finish('canonical-mag-settled');
+      }
+      observer.observe(ROOT, {
+        attributes: true,
+        attributeFilter: ['data-fx-core-real3d', 'data-fx-current-mag-runtime-r422']
+      });
+      addEventListener('formatx:real3dready', check, { passive: true });
+      addEventListener('formatx:currentmagready', check, { passive: true });
+      addEventListener('formatx:core3dfallback', check, { passive: true });
+      queueMicrotask(check);
+    });
+  }
+
   async function loadThreeExperience() {
     if (threeLoadStarted) return;
     threeLoadStarted = true;
+    threeActivationObserver?.disconnect();
+    threeActivationObserver = null;
     ROOT.dataset.fxThreeLoader = 'starting-on-demand-r554';
 
     ensureStyle('./styles/igloo-parity.css?v=20260727-webgpu-1', 'data-fx-cryosphere-style');
@@ -174,31 +213,29 @@
       );
       ROOT.dataset.fxThreeLoader = 'menu-ready-r554';
 
+      // R797: the interface/menu are interaction-critical, but the legacy
+      // enhancement queue is not. Let the navigation-owned canonical MAG settle
+      // before loading that long optional chain so SwiftShader/main-thread work
+      // cannot starve semantic MAG readiness under real constrained execution.
+      await waitForCanonicalMagSettlement();
+      ROOT.dataset.fxThreeLoader = 'loading-enhancements-after-mag-r797';
       await loadScriptOrdered(
         './scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20260906-r554-idempotent-handoff',
         'data-fx-cryosphere-script',
         () => ROOT.dataset.fxTranscendLoader === 'safe-ready-v28'
       );
       ROOT.dataset.fxThreeLoader = 'ready-on-demand-r554';
-      dispatchEvent(new CustomEvent('formatx:organismhandoffready', { detail: { revision: 'r554' } }));
+      dispatchEvent(new CustomEvent('formatx:organismhandoffready', { detail: { revision: 'r797' } }));
     } catch (error) {
       ROOT.dataset.fxThreeLoader = 'failed-on-demand-r554';
       ROOT.dataset.fxThreeLoaderErrorR552 = String(error?.message || error || 'unknown-load-error').slice(0, 160);
-      dispatchEvent(new CustomEvent('formatx:organismhandofferror', { detail: { revision: 'r554', message: ROOT.dataset.fxThreeLoaderErrorR552 } }));
+      dispatchEvent(new CustomEvent('formatx:organismhandofferror', { detail: { revision: 'r797', message: ROOT.dataset.fxThreeLoaderErrorR552 } }));
     }
-  }
-
-  function clearThreeActivationWatch() {
-    if (threeActivationHandler) removeEventListener('formatx:immersiveactivate', threeActivationHandler);
-    threeActivationHandler = null;
-    threeActivationObserver?.disconnect();
-    threeActivationObserver = null;
   }
 
   function startThreeFromDurableImmersive(reason) {
     if (threeLoadStarted || ROOT.dataset.fxImmersive !== 'active') return false;
     ROOT.dataset.fxThreeLoaderActivationR795 = reason;
-    clearThreeActivationWatch();
     void loadThreeExperience();
     return true;
   }
@@ -206,31 +243,27 @@
   function armThreeExperience() {
     if (threeLoaderArmed || threeLoadStarted) return;
     threeLoaderArmed = true;
-    if (startThreeFromDurableImmersive('already-active-at-arm-r795')) return;
+    if (startThreeFromDurableImmersive('already-active-at-arm-r797')) return;
 
     ROOT.dataset.fxThreeLoader = 'deferred-user-activation';
-    threeActivationHandler = () => {
-      startThreeFromDurableImmersive('immersive-event-r795');
-    };
-    addEventListener('formatx:immersiveactivate', threeActivationHandler, { passive: true });
+    addEventListener('formatx:immersiveactivate', () => { void loadThreeExperience(); }, { once: true });
 
-    // R795: fxImmersive is the durable activation truth. The event remains the fast
-    // notification path, while this short-lived attribute observer closes the race
-    // where an activation can commit between owner arming and listener delivery.
-    // Heavy Organism assets still remain strictly user/immersive activated.
+    // R797: keep the canonical one-shot event fast path and pair it with the
+    // durable fxImmersive state. The observer only closes the tiny race where the
+    // state commits around listener arming; it never starts Organism at navigation.
     threeActivationObserver = new MutationObserver(() => {
-      startThreeFromDurableImmersive('durable-state-observer-r795');
+      startThreeFromDurableImmersive('durable-state-observer-r797');
     });
     threeActivationObserver.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-immersive'] });
     queueMicrotask(() => {
-      startThreeFromDurableImmersive('post-arm-durable-recheck-r795');
+      startThreeFromDurableImmersive('post-arm-durable-recheck-r797');
     });
   }
 
-  /* R795: arm the lightweight handoff immediately. MAG still boots from
-     navigation independently; only the heavy Organism UI waits for a genuine
-     durable immersive/MAG activation. Existing already-ready scripts are recognized
-     deterministically rather than waiting for a second load event. */
+  /* R797: arm the lightweight handoff immediately. MAG still boots from
+     navigation independently; only the Organism UI waits for genuine immersive
+     activation, while its long optional enhancement queue waits for canonical MAG
+     settlement. Existing already-ready scripts remain idempotent. */
   armThreeExperience();
 
   function revealQrDock() {
@@ -424,7 +457,8 @@
     });
     addEventListener('pagehide', () => {
       observer.disconnect();
-      clearThreeActivationWatch();
+      threeActivationObserver?.disconnect();
+      threeActivationObserver = null;
       qrDockObserver?.disconnect();
       qrDockObserver = null;
       qrDockArmPending = false;
