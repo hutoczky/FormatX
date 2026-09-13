@@ -3,37 +3,43 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'structural-core-live-paint-quiesced-r799';
-  root.dataset.fxDeferredCssPolicyR637 = 'layout-live-compositor-quiet-until-settled-release-r799';
+  root.dataset.fxDeferredCssR637 = 'desktop-core-quiesced-settled-release-r803';
+  root.dataset.fxDeferredCssPolicyR637 = 'first-frame-geometry-live-full-core-post-release-r803';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
 
-  // R799: structural CSS must never be toggled out of the cascade. R798 proved
-  // that doing so meets the intro deadline, but its post-release reattachment
-  // creates a material desktop layout shift. Keep geometry live continuously and
-  // quiet only non-layout paint/compositor work hidden behind the intro cover.
+  // R803: R794 was the last exact-SHA proof where the bounded intro timing gate
+  // passed. Keep the generated full desktop core out of the opaque intro cascade
+  // while the render-blocking first-frame bundles own settled hero/MAG geometry.
+  // The core returns only after canonical release has committed settled frames.
   function quiesceDesktopCriticalCore() {
+    if (!matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 901px)').matches) return null;
     const link = document.querySelector('link[data-fx-critical-core-r227]');
     if (!(link instanceof HTMLLinkElement)) return null;
+    if (!link.dataset.fxR803Media) link.dataset.fxR803Media = link.media || 'all';
+    link.media = 'not all';
     link.removeAttribute('fetchpriority');
-    root.dataset.fxCriticalCorePaintR793 = 'structural-core-live-paint-quiesced-r799';
+    root.dataset.fxCriticalCorePaintR793 = 'quiesced-behind-intro-first-frame-geometry-live-r803';
     return link;
   }
 
   const desktopCriticalCore = quiesceDesktopCriticalCore();
 
   function restoreDesktopCriticalCore(reason) {
-    // R799: retained as the single durable bookkeeping owner. There is no media
-    // mutation to restore; the full structural cascade has remained live.
     if (!(desktopCriticalCore instanceof HTMLLinkElement)) return;
-    root.dataset.fxCriticalCorePaintR793 = 'structural-core-remained-live-r799';
+    const media = desktopCriticalCore.dataset.fxR803Media;
+    if (!media) return;
+    desktopCriticalCore.media = media;
+    delete desktopCriticalCore.dataset.fxR803Media;
+    root.dataset.fxCriticalCorePaintR793 = 'restored-post-release-settled-frame-r803';
     root.dataset.fxCriticalCoreRestoreReasonR793 = reason;
   }
 
   // Covered decoration is not allowed to compete with the absolute intro deadline.
-  // Geometry, visibility, semantic content and hit targets remain fully live.
-  // R801: covered paint rules belong to the blocking external stylesheet.
+  // Geometry, visibility, semantic content and hit targets remain owned by the
+  // navigation-critical first-frame bundles. CSP-safe covered paint rules remain
+  // in the blocking external stylesheet.
   root.classList.add('fx-startup-paint-quiet-r791');
-  root.dataset.fxStartupPaintQuietR791 = 'armed-layout-live-compositor-quiet-r799';
+  root.dataset.fxStartupPaintQuietR791 = 'armed-before-settled-release-frame-r803';
 
   let activated = false;
   let frame = 0;
@@ -52,15 +58,12 @@
   }
 
   function preserveCriticalGeometryOwner() {
-    // The render-blocking first-frame bundles plus continuously live structural
-    // core own settled hero/MAG geometry. The complete signature sheet remains
-    // deferred so optional decoration stays outside the release window.
     const link = document.querySelector('link[data-fx-critical-signature-r227][data-fx-r637-href]');
     if (!(link instanceof HTMLLinkElement)) {
       root.dataset.fxCriticalGeometryR717 = 'unavailable';
       return false;
     }
-    root.dataset.fxCriticalGeometryR717 = 'structural-core-and-first-frame-live-r799';
+    root.dataset.fxCriticalGeometryR717 = 'owned-by-render-blocking-first-frame-r803';
     root.dataset.fxCriticalGeometryHrefR717 = 'signature-remains-post-intro';
     return true;
   }
@@ -70,7 +73,7 @@
     paintReleaseFrame = requestAnimationFrame(() => {
       paintReleaseFrame = 0;
       root.classList.remove('fx-startup-paint-quiet-r791');
-      root.dataset.fxStartupPaintQuietR791 = 'released-after-layout-stable-frame-r799';
+      root.dataset.fxStartupPaintQuietR791 = 'released-after-core-settled-frame-r803';
     });
   }
 
@@ -84,7 +87,7 @@
     commitTimer = 0;
     fallback = 0;
 
-    restoreDesktopCriticalCore('layout-remained-live-through-release-r799');
+    restoreDesktopCriticalCore('post-release-settled-frame-r803');
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
@@ -100,14 +103,14 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r799';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r799';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r803';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r803';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'layout-live-compositor-quiet-settled-hero-plus-180ms-r799', reason }
+      detail: { count: links.length, restored, scheduler: 'quiesced-core-settled-hero-plus-180ms-r803', reason }
     }));
 
     releasePaintQuietAfterCoreCommit();
@@ -115,9 +118,6 @@
 
   function activateAfterCommittedFrame(reason) {
     if (activated || frame || commitTimer) return;
-    // A single rAF callback still runs before that frame is painted. Nesting a
-    // second rAF guarantees one post-release frame can commit before optional
-    // presentation materialises. This never changes the intro timing contract.
     frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {
         frame = 0;
@@ -144,7 +144,6 @@
     releaseDeferredStyles('preloader-complete');
   }, { once: true, capture: true });
 
-  // Durable-state catch-up for late execution or a very fast reduced-motion path.
   if (preloaderComplete()) releaseDeferredStyles('preloader-complete-buffered');
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -152,7 +151,6 @@
       releaseDeferredStyles('domready-preloader-complete');
       return;
     }
-    // A document without the intro owner must not strand the deferred sheets.
     if (!document.getElementById('formatx-event-horizon')) {
       activateAfterCommittedFrame('domready-no-intro-owner');
     }
@@ -163,8 +161,6 @@
     releaseDeferredStyles('visibility-preloader-complete');
   }, { passive: true });
 
-  // Hidden/background documents may never produce a useful animation frame.
-  // Fail open without introducing a visible-page fixed activation timestamp.
   fallback = setTimeout(() => {
     if (!activated && document.visibilityState === 'hidden') activate('hidden-tab-fail-open');
   }, 8000);
