@@ -1,7 +1,7 @@
-/* FormatX R822 — preserve the R818 timing-green critical paint scope and R821
-   interaction geometry while keeping the Event Horizon's decorative pseudo boxes
-   structurally stable. Their paint/compositor effects stay retired for the overlay
-   lifetime without content/display teardown at the bounded release boundary.
+/* FormatX R823 — preserve the R818 timing-green critical paint scope and R821
+   interaction geometry while keeping Event Horizon pseudo layer identity stable.
+   Decorative pseudo paint is transparent rather than visibility-torn-down, and the
+   desktop hero CTA group is locked to the same normal-flow geometry as settled r244.
    No timing bounds, semantic content, renderer ownership or native input are changed. */
 @media (min-width: 901px) {
   html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
@@ -82,6 +82,37 @@
     grid-column: 2 !important;
     grid-row: 1 !important;
   }
+
+  /* R823 — the settled reference-production owner keeps CTA controls in normal
+     hero-copy flow. Enforce that geometry in the blocking layer as well so a
+     transient enhancement rule cannot place the first CTA inside the lead box. */
+  html:root:root body.living-architecture #hero .hero-copy > .hero-actions {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    min-height: 106px !important;
+    margin: 22px 0 0 !important;
+    gap: 10px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+  html:root:root body.living-architecture #hero .hero-copy > .hero-actions > .button {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    min-height: 48px !important;
+    transform: none !important;
+    translate: none !important;
+  }
 }
 
 /* R791 — the event horizon is the only visible surface during the bounded intro.
@@ -133,13 +164,15 @@
     will-change: auto !important;
   }
 
-  /* R822 — keep the pseudo generated boxes alive so Chromium does not tear down and
-     rebuild their layer-tree identity around release. They carry no visual meaning,
-     so retire only their raster/compositor inputs for the overlay's full lifetime. */
+  /* R823 — keep generated pseudo boxes in the live layer tree. Opacity retires
+     their decorative output without visibility/display teardown, while all heavy
+     raster/compositor properties stay neutral for the bounded intro lifetime. */
   html:root #formatx-event-horizon.fx-intro-overlay::before,
   html:root #formatx-event-horizon.fx-intro-overlay::after {
     content: "" !important;
-    visibility: hidden !important;
+    visibility: visible !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
     background: none !important;
     background-image: none !important;
     border: 0 !important;
@@ -153,7 +186,7 @@
   }
 }
 
-/* R817/R822 — seamless-v7 owns the real bridge geometry. Keep the decontainment
+/* R817/R823 — seamless-v7 owns the real bridge geometry. Keep the decontainment
    reset for compatibility with any deferred style owner, but do not install the
    R819 five-section content-visibility:auto lifecycle that starved the R533 deadline. */
 html.fx-continuous-scroll-mode body.living-architecture main#main-content > :not(#hero) {
@@ -162,7 +195,7 @@ html.fx-continuous-scroll-mode body.living-architecture main#main-content > :not
   contain-intrinsic-size: none !important;
 }
 
-/* R817/R822 — constrain only the mobile Organism console's internal layout boxes
+/* R817/R823 — constrain only the mobile Organism console's internal layout boxes
    to its already-correct inset shell. This fixes real box geometry without root
    overflow clipping or hiding any functional content. */
 @media (max-width: 900px), (pointer: coarse) {
