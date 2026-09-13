@@ -227,7 +227,11 @@
   });
   documentObserver.observe(document.documentElement, { subtree: true, childList: true });
 
+  // R800: this module can legitimately load after the interface has already
+  // opened a panel. The panel-open event is only a notification; durable DOM
+  // state is authoritative. Reconcile first so a late loader adopts an already
+  // open console instead of destroying it with an unconditional close.
   bindConsoleObserver();
-  forceClosed({ replaceHash: true });
+  reconcile();
   root.dataset.fxOrganismConsoleState = 'ready';
 }());
