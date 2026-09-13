@@ -3,12 +3,40 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'critical-geometry-stable-release-staged-paint-r792';
-  root.dataset.fxDeferredCssPolicyR637 = 'critical-geometry-persistent-decorative-settled-frame-r792';
+  root.dataset.fxDeferredCssR637 = 'desktop-core-quiesced-settled-release-r793';
+  root.dataset.fxDeferredCssPolicyR637 = 'first-frame-geometry-live-full-core-post-release-r793';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
 
-  // R792: paint/compositor effects hidden by the opaque intro are not allowed to
-  // compete with the absolute release deadline or the first settled hero paint.
+  // R793: keep the lightweight first-frame geometry active, but take the generated
+  // full desktop core out of the intro cascade. R789 proved this collapses the
+  // LayerTreeHost teardown at the deadline; unlike R789, R793 does not flip the core
+  // back on inside the canonical release dispatch. The full core returns only in the
+  // post-release enhancement phase after settled hero frames.
+  function quiesceDesktopCriticalCore() {
+    if (!matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 901px)').matches) return null;
+    const link = document.querySelector('link[data-fx-critical-core-r227]');
+    if (!(link instanceof HTMLLinkElement)) return null;
+    if (!link.dataset.fxR793Media) link.dataset.fxR793Media = link.media || 'all';
+    link.media = 'not all';
+    link.removeAttribute('fetchpriority');
+    root.dataset.fxCriticalCorePaintR793 = 'quiesced-behind-intro-first-frame-geometry-live';
+    return link;
+  }
+
+  const desktopCriticalCore = quiesceDesktopCriticalCore();
+
+  function restoreDesktopCriticalCore(reason) {
+    if (!(desktopCriticalCore instanceof HTMLLinkElement)) return;
+    const media = desktopCriticalCore.dataset.fxR793Media;
+    if (!media) return;
+    desktopCriticalCore.media = media;
+    delete desktopCriticalCore.dataset.fxR793Media;
+    root.dataset.fxCriticalCorePaintR793 = 'restored-post-release-settled-frame';
+    root.dataset.fxCriticalCoreRestoreReasonR793 = reason;
+  }
+
+  // R792/R793: paint/compositor effects hidden by the opaque intro are not allowed
+  // to compete with the absolute release deadline or the first settled hero paint.
   // The navigation-critical R791 stylesheet changes paint only; geometry and
   // semantic state remain live. Reduced-motion is unaffected by that stylesheet.
   root.classList.add('fx-startup-paint-quiet-r791');
@@ -18,14 +46,11 @@
   let frame = 0;
   let commitTimer = 0;
   let fallback = 0;
+  let paintReleaseFrame = 0;
 
   // R789: covered decoration is defined in the render-blocking intro stylesheet.
   // Runtime style elements violate the public style-src policy.
 
-  // R790: the fetched critical core owns structural geometry before first paint.
-  // Temporarily disabling it caused the header, hero and text to reflow at release.
-  // The external intro rules suppress covered decoration without changing that
-  // structural cascade or triggering a second critical layout.
   // Until the authored HTML boot state is migrated, normalize its historical
   // fx-intro-complete marker before event-horizon executes. This is boot-state
   // normalization only; event-horizon R769 is the sole completion publisher.
@@ -53,6 +78,15 @@
     return true;
   }
 
+  function releasePaintQuietAfterCoreCommit() {
+    if (paintReleaseFrame) return;
+    paintReleaseFrame = requestAnimationFrame(() => {
+      paintReleaseFrame = 0;
+      root.classList.remove('fx-startup-paint-quiet-r791');
+      root.dataset.fxStartupPaintQuietR791 = 'released-after-core-settled-frame-r793';
+    });
+  }
+
   function activate(reason) {
     if (activated) return;
     activated = true;
@@ -63,11 +97,11 @@
     commitTimer = 0;
     fallback = 0;
 
-    // Release the paint-only quiet state only after the hero has had committed
-    // post-intro frames. This does not gate semantic readiness, interaction, MAG,
-    // scroll or the preloader completion event.
-    root.classList.remove('fx-startup-paint-quiet-r791');
-    root.dataset.fxStartupPaintQuietR791 = 'released-after-settled-hero-frame';
+    // Restore the full desktop cascade only after the canonical release has already
+    // committed stable hero frames. Keep paint quiet for one additional frame so the
+    // core's structural cascade and its compositor-heavy decoration are not materialised
+    // in the same lifecycle update.
+    restoreDesktopCriticalCore('post-release-settled-frame-r793');
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
@@ -83,23 +117,25 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r792';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r792';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r793';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r793';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'settled-hero-frames-plus-180ms-r792', reason }
+      detail: { count: links.length, restored, scheduler: 'quiesced-core-settled-hero-plus-180ms-r793', reason }
     }));
+
+    releasePaintQuietAfterCoreCommit();
   }
 
   function activateAfterCommittedFrame(reason) {
     if (activated || frame || commitTimer) return;
     // A single rAF callback still runs before that frame is painted. Nesting a
-    // second rAF guarantees one post-release frame can actually commit. R792 then
-    // reserves a short enhancement grace for hero LCP before paint-heavy optional
-    // decoration returns; this never changes the preloader deadline or completion.
+    // second rAF guarantees one post-release frame can actually commit. The short
+    // grace is for optional presentation only; it never changes the preloader clock,
+    // deadline, completion event, MAG readiness, scroll ownership or semantics.
     frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {
         frame = 0;
