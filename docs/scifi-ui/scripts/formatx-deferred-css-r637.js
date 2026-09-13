@@ -3,41 +3,62 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'desktop-core-quiesced-settled-release-r798';
-  root.dataset.fxDeferredCssPolicyR637 = 'first-frame-geometry-live-full-core-post-release-r798';
+  root.dataset.fxDeferredCssR637 = 'structural-core-live-paint-quiesced-r799';
+  root.dataset.fxDeferredCssPolicyR637 = 'layout-live-compositor-quiet-until-settled-release-r799';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
 
-  // R798: keep render-blocking first-frame geometry live, but take the generated
-  // full desktop core out of the opaque intro cascade. Exact R794 evidence showed
-  // this removes the release-window compositor starvation while preserving the
-  // authored geometry owners. The full core returns only after stable hero frames.
+  // R799: structural CSS must never be toggled out of the cascade. R798 proved
+  // that doing so meets the intro deadline, but its post-release reattachment
+  // creates a material desktop layout shift. Keep geometry live continuously and
+  // quiet only non-layout paint/compositor work hidden behind the intro cover.
   function quiesceDesktopCriticalCore() {
-    if (!matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 901px)').matches) return null;
     const link = document.querySelector('link[data-fx-critical-core-r227]');
     if (!(link instanceof HTMLLinkElement)) return null;
-    if (!link.dataset.fxR798Media) link.dataset.fxR798Media = link.media || 'all';
-    link.media = 'not all';
     link.removeAttribute('fetchpriority');
-    root.dataset.fxCriticalCorePaintR793 = 'quiesced-behind-intro-first-frame-geometry-live-r798';
+    root.dataset.fxCriticalCorePaintR793 = 'structural-core-live-paint-quiesced-r799';
     return link;
   }
 
   const desktopCriticalCore = quiesceDesktopCriticalCore();
 
   function restoreDesktopCriticalCore(reason) {
+    // R799: retained as the single durable bookkeeping owner. There is no media
+    // mutation to restore; the full structural cascade has remained live.
     if (!(desktopCriticalCore instanceof HTMLLinkElement)) return;
-    const media = desktopCriticalCore.dataset.fxR798Media;
-    if (!media) return;
-    desktopCriticalCore.media = media;
-    delete desktopCriticalCore.dataset.fxR798Media;
-    root.dataset.fxCriticalCorePaintR793 = 'restored-post-release-settled-frame-r798';
+    root.dataset.fxCriticalCorePaintR793 = 'structural-core-remained-live-r799';
     root.dataset.fxCriticalCoreRestoreReasonR793 = reason;
   }
 
+  function ensureStartupPaintQuietStyle() {
+    if (document.querySelector('style[data-fx-startup-paint-quiet-r799]')) return;
+    const style = document.createElement('style');
+    style.dataset.fxStartupPaintQuietR799 = 'true';
+    style.textContent = `
+      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon),
+      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon) *,
+      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon)::before,
+      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon)::after,
+      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon) *::before,
+      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon) *::after {
+        animation: none !important;
+        transition: none !important;
+        filter: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        mix-blend-mode: normal !important;
+        will-change: auto !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   // Covered decoration is not allowed to compete with the absolute intro deadline.
-  // This class only quiets paint/compositor effects; semantic/layout owners remain live.
+  // Geometry, visibility, semantic content and hit targets remain fully live.
+  ensureStartupPaintQuietStyle();
   root.classList.add('fx-startup-paint-quiet-r791');
-  root.dataset.fxStartupPaintQuietR791 = 'armed-before-settled-release-frame';
+  root.dataset.fxStartupPaintQuietR791 = 'armed-layout-live-compositor-quiet-r799';
 
   let activated = false;
   let frame = 0;
@@ -56,15 +77,15 @@
   }
 
   function preserveCriticalGeometryOwner() {
-    // The render-blocking first-frame bundles own settled hero/MAG geometry.
-    // Keep the complete signature sheet deferred so gradients, filters,
-    // transitions and below-fold decoration stay outside the release window.
+    // The render-blocking first-frame bundles plus continuously live structural
+    // core own settled hero/MAG geometry. The complete signature sheet remains
+    // deferred so optional decoration stays outside the release window.
     const link = document.querySelector('link[data-fx-critical-signature-r227][data-fx-r637-href]');
     if (!(link instanceof HTMLLinkElement)) {
       root.dataset.fxCriticalGeometryR717 = 'unavailable';
       return false;
     }
-    root.dataset.fxCriticalGeometryR717 = 'owned-by-render-blocking-first-frame-r798';
+    root.dataset.fxCriticalGeometryR717 = 'structural-core-and-first-frame-live-r799';
     root.dataset.fxCriticalGeometryHrefR717 = 'signature-remains-post-intro';
     return true;
   }
@@ -74,7 +95,8 @@
     paintReleaseFrame = requestAnimationFrame(() => {
       paintReleaseFrame = 0;
       root.classList.remove('fx-startup-paint-quiet-r791');
-      root.dataset.fxStartupPaintQuietR791 = 'released-after-core-settled-frame-r798';
+      root.dataset.fxStartupPaintQuietR791 = 'released-after-layout-stable-frame-r799';
+      document.querySelector('style[data-fx-startup-paint-quiet-r799]')?.remove();
     });
   }
 
@@ -88,10 +110,7 @@
     commitTimer = 0;
     fallback = 0;
 
-    // Restore the full desktop cascade only after canonical release has already
-    // committed stable hero frames. Paint remains quiet for one further frame so
-    // structural cascade and compositor-heavy decoration do not materialise together.
-    restoreDesktopCriticalCore('post-release-settled-frame-r798');
+    restoreDesktopCriticalCore('layout-remained-live-through-release-r799');
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
@@ -107,14 +126,14 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r798';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r798';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r799';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r799';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'quiesced-core-settled-hero-plus-180ms-r798', reason }
+      detail: { count: links.length, restored, scheduler: 'layout-live-compositor-quiet-settled-hero-plus-180ms-r799', reason }
     }));
 
     releasePaintQuietAfterCoreCommit();
@@ -123,8 +142,8 @@
   function activateAfterCommittedFrame(reason) {
     if (activated || frame || commitTimer) return;
     // A single rAF callback still runs before that frame is painted. Nesting a
-    // second rAF guarantees one post-release frame can actually commit. The short
-    // grace applies only to optional presentation and never changes intro timing.
+    // second rAF guarantees one post-release frame can commit before optional
+    // presentation materialises. This never changes the intro timing contract.
     frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {
         frame = 0;
