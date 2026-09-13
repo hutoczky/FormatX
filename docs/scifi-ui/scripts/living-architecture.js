@@ -24,6 +24,8 @@
   let qrGeneration = 0;
   let threeLoadStarted = false;
   let threeLoaderArmed = false;
+  let threeActivationObserver = null;
+  let threeActivationHandler = null;
   let qrDockActivated = false;
   let qrDockObserver = null;
   let qrDockArmPending = false;
@@ -186,20 +188,48 @@
     }
   }
 
+  function clearThreeActivationWatch() {
+    if (threeActivationHandler) removeEventListener('formatx:immersiveactivate', threeActivationHandler);
+    threeActivationHandler = null;
+    threeActivationObserver?.disconnect();
+    threeActivationObserver = null;
+  }
+
+  function startThreeFromDurableImmersive(reason) {
+    if (threeLoadStarted || ROOT.dataset.fxImmersive !== 'active') return false;
+    ROOT.dataset.fxThreeLoaderActivationR795 = reason;
+    clearThreeActivationWatch();
+    void loadThreeExperience();
+    return true;
+  }
+
   function armThreeExperience() {
     if (threeLoaderArmed || threeLoadStarted) return;
     threeLoaderArmed = true;
-    if (ROOT.dataset.fxImmersive === 'active') {
-      void loadThreeExperience();
-      return;
-    }
+    if (startThreeFromDurableImmersive('already-active-at-arm-r795')) return;
+
     ROOT.dataset.fxThreeLoader = 'deferred-user-activation';
-    addEventListener('formatx:immersiveactivate', () => { void loadThreeExperience(); }, { once: true });
+    threeActivationHandler = () => {
+      startThreeFromDurableImmersive('immersive-event-r795');
+    };
+    addEventListener('formatx:immersiveactivate', threeActivationHandler, { passive: true });
+
+    // R795: fxImmersive is the durable activation truth. The event remains the fast
+    // notification path, while this short-lived attribute observer closes the race
+    // where an activation can commit between owner arming and listener delivery.
+    // Heavy Organism assets still remain strictly user/immersive activated.
+    threeActivationObserver = new MutationObserver(() => {
+      startThreeFromDurableImmersive('durable-state-observer-r795');
+    });
+    threeActivationObserver.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-immersive'] });
+    queueMicrotask(() => {
+      startThreeFromDurableImmersive('post-arm-durable-recheck-r795');
+    });
   }
 
-  /* R554: arm the lightweight handoff immediately. MAG still boots from
+  /* R795: arm the lightweight handoff immediately. MAG still boots from
      navigation independently; only the heavy Organism UI waits for a genuine
-     immersive/MAG activation. Existing already-ready scripts are recognized
+     durable immersive/MAG activation. Existing already-ready scripts are recognized
      deterministically rather than waiting for a second load event. */
   armThreeExperience();
 
@@ -394,6 +424,7 @@
     });
     addEventListener('pagehide', () => {
       observer.disconnect();
+      clearThreeActivationWatch();
       qrDockObserver?.disconnect();
       qrDockObserver = null;
       qrDockArmPending = false;
