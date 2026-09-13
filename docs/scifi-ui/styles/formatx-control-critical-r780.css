@@ -94,6 +94,8 @@
 @media (prefers-reduced-motion: no-preference) {
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon),
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *,
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon)::before,
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon)::after,
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *::before,
   html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *::after {
     animation: none !important;

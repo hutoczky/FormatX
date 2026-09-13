@@ -29,34 +29,9 @@
     root.dataset.fxCriticalCoreRestoreReasonR793 = reason;
   }
 
-  function ensureStartupPaintQuietStyle() {
-    if (document.querySelector('style[data-fx-startup-paint-quiet-r799]')) return;
-    const style = document.createElement('style');
-    style.dataset.fxStartupPaintQuietR799 = 'true';
-    style.textContent = `
-      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon),
-      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon) *,
-      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon)::before,
-      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon)::after,
-      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon) *::before,
-      html.fx-startup-paint-quiet-r791 body.living-architecture > :not(#formatx-event-horizon) *::after {
-        animation: none !important;
-        transition: none !important;
-        filter: none !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        box-shadow: none !important;
-        text-shadow: none !important;
-        mix-blend-mode: normal !important;
-        will-change: auto !important;
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
   // Covered decoration is not allowed to compete with the absolute intro deadline.
   // Geometry, visibility, semantic content and hit targets remain fully live.
-  ensureStartupPaintQuietStyle();
+  // R801: covered paint rules belong to the blocking external stylesheet.
   root.classList.add('fx-startup-paint-quiet-r791');
   root.dataset.fxStartupPaintQuietR791 = 'armed-layout-live-compositor-quiet-r799';
 
@@ -96,7 +71,6 @@
       paintReleaseFrame = 0;
       root.classList.remove('fx-startup-paint-quiet-r791');
       root.dataset.fxStartupPaintQuietR791 = 'released-after-layout-stable-frame-r799';
-      document.querySelector('style[data-fx-startup-paint-quiet-r799]')?.remove();
     });
   }
 
