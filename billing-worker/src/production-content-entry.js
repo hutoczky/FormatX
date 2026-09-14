@@ -7,7 +7,7 @@ import productionBase from './production-content-entry-r369-base.js';
    reference-mode bootstrap is redundant with the blocking scrollbar/hero floor,
    so neither may compete at high priority with mobile render-blocking CSS. */
 
-const STARTUP_REVISION = '20260914-r841-active-entry-network-budget';
+const STARTUP_REVISION = '20260908-r675-nonblocking-reference-and-visual-css';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
