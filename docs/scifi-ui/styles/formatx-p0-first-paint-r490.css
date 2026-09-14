@@ -420,6 +420,18 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
   }
 }
 
+/* R843 — once the real Event Horizon JS owns the viewport, keep the entire
+   underlying document paint-transparent until the bounded finalizer releases it.
+   This preserves every layout box, DOM node, focus target and accessibility node;
+   it only prevents SwiftShader/GPU raster of a surface completely covered by the
+   opaque intro. The authored fx-intro-complete bootstrap state is intentionally
+   excluded, so no-JS/error fallback content can never be stranded invisible. */
+@media (prefers-reduced-motion: no-preference) {
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture > :not(#formatx-event-horizon) {
+    opacity: 0 !important;
+  }
+}
+
 /* production-r501-p0-first-paint-desktop-copy-box */
 /* production-r503-p0-first-paint-hero-ancestor-box */
 /* production-r552-no-manual-pause-blocking-css */
@@ -431,3 +443,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r681-mobile-only-intro-clamp-zero-width-core-dock */
 /* production-r685-final-box-reservation-marquee-bound */
 /* production-r840-parser-bootstrap-paint-quiet */
+/* production-r843-opaque-intro-underlay-raster-budget */
