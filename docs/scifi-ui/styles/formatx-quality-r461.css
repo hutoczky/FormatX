@@ -240,10 +240,10 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
     overflow: hidden !important;
   }
 
-  /* R568: r244 still contained a historical mobile rule that collapsed the
-     semantic hero copy to an absolute 1x1 clipped box after first paint. Keep
-     the settled geometry equal to the render-blocking r283 reservation instead. */
-  html[data-fx-reference-production-r244="ready"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
+  /* R831: this is permanent mobile geometry, independent of r244's ready/mobile
+     state transitions. Keep the same block flow and border-free text width from
+     first paint through late module adoption, so the LCP copy never reflows. */
+  html:root body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
     order: 2 !important;
     position: relative !important;
     inset: auto !important;

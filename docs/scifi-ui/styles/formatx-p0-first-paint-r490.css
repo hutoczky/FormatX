@@ -16,6 +16,18 @@ html body.living-architecture {
   overflow-x: clip !important;
 }
 
+/* R831: the APEX background must keep its fixed geometry while the full core
+   stylesheet is dormant. Its unstyled 300x150 inline box otherwise inserts a
+   157px line before the header, then removes that line when the core activates. */
+html body.living-architecture > #fx-apex-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 /* R685: the decorative SYSTEM marquee is intentionally wider than its text box,
    but its old negative gutter margins made that decoration part of the document
    scrollable width. Keep the moving max-content text and full animation while the
