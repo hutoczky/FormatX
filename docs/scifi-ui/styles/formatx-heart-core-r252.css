@@ -124,17 +124,22 @@ body.living-architecture > .fx-mag-heart-hit-r252 {
     isolation: isolate;
   }
 
+  /* R846: seamless-v7 owns a real mobile runway. The old heart-core visual
+     strip collapsed the bridge to 14svh, making bridgeThreshold physically
+     unreachable because documentEnd ended before the crossing point. Preserve
+     the compact visual treatment/mirror pruning, but keep the canonical mobile
+     runway geometry from formatx-mobile-seamless-loop.css. */
   html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge,
   html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
     display: block !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    height: max(96px, 14svh) !important;
-    min-height: max(96px, 14svh) !important;
-    max-height: max(96px, 14svh) !important;
+    height: auto !important;
+    min-height: calc(100svh + max(320px, 24svh)) !important;
+    max-height: none !important;
     margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+    padding: 0 0 max(320px, 24svh) !important;
+    overflow: clip !important;
     pointer-events: none !important;
     background:
       radial-gradient(circle at 50% 0%, rgba(25, 118, 188, .16), transparent 62%),
@@ -181,3 +186,4 @@ body.living-architecture > .fx-mag-heart-hit-r252 {
 }
 
 /* production-r554-pointer-transparent-heart-retired-click-launch */
+/* production-r846-mobile-seamless-runway-preserved */
