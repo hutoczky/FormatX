@@ -376,6 +376,50 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
   }
 }
 
+/* R840 — parser-bootstrap paint quiet.
+   R839's repeated exact-SHA trace shows the release queue waiting behind a
+   755–995ms compositor/GPU LayerTreeHost teardown. Before deferred scripts can
+   normalize the historical static fx-intro-complete marker to pending/running,
+   keep only covered decorative paint dormant. No geometry, semantic content,
+   visibility of the hero copy, hit target, or timing state is changed. */
+@media (prefers-reduced-motion: no-preference) {
+  html.fx-intro-complete[data-fx-intro="instant-award-r251"] body.living-architecture::before {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+  }
+  html.fx-intro-complete[data-fx-intro="instant-award-r251"] body.living-architecture > .fx-atmosphere,
+  html.fx-intro-complete[data-fx-intro="instant-award-r251"] body.living-architecture > .fx-atmosphere > span {
+    display: none !important;
+    visibility: hidden !important;
+    background: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+  }
+  html.fx-intro-complete[data-fx-intro="instant-award-r251"] body.living-architecture #hero.scene.hero::before,
+  html.fx-intro-complete[data-fx-intro="instant-award-r251"] body.living-architecture #hero.scene.hero::after,
+  html.fx-intro-complete[data-fx-intro="instant-award-r251"] body.living-architecture #hero .hero-space::before {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    clip-path: none !important;
+  }
+  html.fx-intro-complete[data-fx-intro="instant-award-r251"] body.living-architecture :is(.fx-r179-field,.fx-r179-aurora,.fx-r179-carrier),
+  html.fx-intro-complete[data-fx-intro="instant-award-r251"] body.living-architecture #hero :is(.hero-ring,.hero-label) {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+}
+
 /* production-r501-p0-first-paint-desktop-copy-box */
 /* production-r503-p0-first-paint-hero-ancestor-box */
 /* production-r552-no-manual-pause-blocking-css */
@@ -386,3 +430,4 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r675-visible-hero-space-centred-desktop-actionbar */
 /* production-r681-mobile-only-intro-clamp-zero-width-core-dock */
 /* production-r685-final-box-reservation-marquee-bound */
+/* production-r840-parser-bootstrap-paint-quiet */
