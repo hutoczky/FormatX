@@ -1,14 +1,13 @@
 import canonicalProduction from './production-content-entry.js';
 
-/* FormatX R838 — stable first-frame geometry without first-frame full-core cost.
-   Candidate mode exists only behind Wrangler-only FORMATX_LOCAL_CANDIDATE=1.
-   The small first-frame bundles own settled hero geometry from the first cascade.
-   The generated desktop critical core is emitted non-applying and may fetch at
-   browser-selected low priority, then becomes active only after canonical intro
-   release. Mobile never renders the Event Horizon, so its desktop intro quality
-   sheet is media-scoped out of the mobile render-blocking chain. Reference-mode
-   boot remains the same visitor code path but is async/low and is not force-
-   preloaded; R490 already reserves scrollbar-gutter before that helper executes. */
+/* FormatX R839 — preserve the proven desktop first-frame contract while removing
+   mobile-only network waste measured in the exact R837 Lighthouse reports.
+   Desktop critical-core remains active/high-priority exactly as R720/WDA require.
+   Mobile never renders the Event Horizon, so the intro quality sheet is scoped to
+   desktop motion media instead of blocking mobile FCP. The tiny reference-mode
+   boot keeps the same visitor behavior but runs async/low and is no longer force-
+   preloaded; R490 already reserves scrollbar-gutter before that helper executes.
+   No timing, MAG, renderer, scroll, Organism or semantic contract is changed. */
 const PUBLIC_HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN='https://formatxsuite.com';
 const HOMEPAGE_PATHS=new Set(['/','/index.html','/scifi-ui','/scifi-ui/','/scifi-ui/index.html']);
@@ -36,7 +35,6 @@ const PAYMENT_SURFACE_SCRIPT='/scifi-ui/scripts/formatx-payment-surface-r553.js?
 const PAYMENT_SURFACE_TAG=`<script defer data-fx-payment-surface-r553="true" src="${PAYMENT_SURFACE_SCRIPT}"></script>`;
 const MOBILE_MEDIA='(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MOTION_MEDIA='(prefers-reduced-motion: no-preference) and (min-width: 901px)';
-const CRITICAL_CORE_PATH='/scifi-ui/styles/formatx-critical-core-r227.css';
 const INTRO_P0_PATH='/scifi-ui/styles/formatx-intro-p0-r575.css';
 const FIRST_FRAME_FINE_MARKER='media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true"';
 const FIRST_FRAME_DESKTOP_MARKER='media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)" data-fx-first-frame-stability-r500="true"';
@@ -70,13 +68,14 @@ function addAttrs(tag,attrs){return tag.replace(/\s*\/?>$/,close=>`${attrs}${clo
 function deferredMobile(tag){let next=withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag,'media'),'fetchpriority'),'data-fx-r487-deferred-style'),'data-fx-r487-media');return addAttrs(next,` data-fx-r487-deferred-style="true" data-fx-r487-media="${MOBILE_MEDIA}" media="print" data-fx-r529-mobile-legacy="true"`);}
 function stabilizeMobileFirstPaint(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>MOBILE_LEGACY_PATHS.has(stylesheetPath(tag))?deferredMobile(tag):tag);}
 function stabilizeDesktopFirstFrameMedia(html){return String(html||'').replace(FIRST_FRAME_FINE_MARKER,FIRST_FRAME_DESKTOP_MARKER);}
-function restoreCriticalCoreFirstPaint(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>{const path=stylesheetPath(tag);if(path===CRITICAL_CORE_PATH){let next=withoutAttr(withoutAttr(withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag,'media'),'fetchpriority'),'data-fx-r487-deferred-style'),'data-fx-r487-media'),'data-fx-r554-prepaint-geometry'),'data-fx-r838-core-media');return addAttrs(next,` data-fx-r838-core-media="${DESKTOP_MOTION_MEDIA}" media="not all" data-fx-r554-prepaint-geometry="stable-first-frame-owner-r838"`);}if(path===INTRO_P0_PATH){let next=withoutAttr(withoutAttr(tag,'media'),'fetchpriority');return addAttrs(next,` media="${DESKTOP_MOTION_MEDIA}" data-fx-r838-intro-desktop-only="true"`);}return tag;});}
+function restoreCriticalCoreFirstPaint(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>{if(stylesheetPath(tag)!=='/scifi-ui/styles/formatx-critical-core-r227.css')return tag;let next=withoutAttr(withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag,'media'),'fetchpriority'),'data-fx-r487-deferred-style'),'data-fx-r487-media'),'data-fx-r554-prepaint-geometry');return addAttrs(next,` fetchpriority="high" media="${DESKTOP_MOTION_MEDIA}" data-fx-r554-prepaint-geometry="true"`);});}
+function scopeDesktopIntroCss(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>{if(stylesheetPath(tag)!==INTRO_P0_PATH)return tag;let next=withoutAttr(withoutAttr(tag,'media'),'fetchpriority');return addAttrs(next,` media="${DESKTOP_MOTION_MEDIA}" data-fx-r839-intro-desktop-only="true"`);});}
 function makeReferenceBootNonBlocking(html){return String(html||'').replace(REFERENCE_BOOT_TAG_RE,tag=>{let next=withoutAttr(tag,'fetchpriority');if(!/\sasync(?:\s|>)/i.test(next))next=next.replace('<script','<script async');return next.replace('<script async','<script async fetchpriority="low"');});}
 function injectStaticHeart(html){let source=String(html||'');if(!source.includes('class="fx-mag-heart-hit-r252"'))source=source.replace(/<div\s+class=(["'])hero-space\1\s*>/i,match=>`${match}\n          ${HEART_BUTTON}`);return source;}
 function injectStaticHeroShell(html){let source=String(html||'');if(!source.includes('class="fx-reference-controls-r204'))source=source.replace(/<div\s+class=(["'])hero-space\1\s*>/i,match=>`${match}\n          ${HERO_CONTROLS}`);if(!source.includes('class="fx-reference-heading"')||!source.includes('class="fx-reference-proof"'))source=source.replace(HERO_GRID_TAIL,`        </div>\n        ${HERO_PROOF}\n      </div>\n      <a class="scroll-cue"`);return source;}
 function injectPaymentSurface(html){let source=String(html||'');if(source.includes('data-fx-payment-surface-r553='))return source;return source.replace(/<\/body>/i,`${PAYMENT_SURFACE_TAG}\n</body>`);}
 function addFirstPaintPreloads(headers){const existing=headers.get('Link');const preloads=[MOBILE_FIRST_PAINT_PRELOAD,P0_FIRST_PAINT_PRELOAD,CRITICAL_SHELL_PRELOAD,QUALITY_PRELOAD,FIRST_PAINT_R206_PRELOAD,REFERENCE_PRODUCTION_PRELOAD].join(', ');headers.set('Link',existing?`${existing}, ${preloads}`:preloads);}
-function r543Headers(source,localCandidate){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r838-stable-first-frame-network-budget');headers.set('X-FormatX-Edge-Stability','r838-core-never-applies-before-release');headers.set('X-FormatX-CSS-Scheduler','r838-small-first-frame-full-core-post-release');headers.set('X-FormatX-Product-Contract','r543-navigation-mag-elevated-heart-no-manual-pause');headers.set('X-FormatX-MAG-Startup','r543-navigation-owned-elevated-body-heart');headers.set('X-FormatX-Mobile-LCP','r838-no-mobile-intro-or-reference-preload');headers.set('X-FormatX-Preloader','r543-static-content-extended-roadmap-timing');headers.set('X-FormatX-Preloader-Cache','r543-extended-static-lcp-audio-owner-safe');headers.set('X-FormatX-Reference-Boot','r838-async-low-no-forced-preload');headers.set('X-FormatX-Payment-Surface','r553-post-paint-visible-qr');headers.set('X-FormatX-Layout-Stability','r838-first-frame-geometry-never-replaced');if(localCandidate){headers.set('X-FormatX-Candidate-Delivery','r838-exact-production-entry-localhost-8787');headers.set('X-FormatX-Candidate-Canonical-Origin','formatxsuite.com');headers.set('Link','<https://formatxsuite.com/>; rel="canonical"');}return headers;}
+function r543Headers(source,localCandidate){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r839-r837-core-mobile-network-budget');headers.set('X-FormatX-Edge-Stability','r839-desktop-core-preserved-mobile-intro-scoped');headers.set('X-FormatX-CSS-Scheduler','r839-r837-core-mobile-first-frame-budget');headers.set('X-FormatX-Product-Contract','r543-navigation-mag-elevated-heart-no-manual-pause');headers.set('X-FormatX-MAG-Startup','r543-navigation-owned-elevated-body-heart');headers.set('X-FormatX-Mobile-LCP','r839-no-mobile-intro-or-reference-preload');headers.set('X-FormatX-Preloader','r543-static-content-extended-roadmap-timing');headers.set('X-FormatX-Preloader-Cache','r543-extended-static-lcp-audio-owner-safe');headers.set('X-FormatX-Reference-Boot','r839-async-low-no-forced-preload');headers.set('X-FormatX-Payment-Surface','r553-post-paint-visible-qr');headers.set('X-FormatX-Layout-Stability','r698-desktop-fine-and-none-first-frame');if(localCandidate){headers.set('X-FormatX-Candidate-Delivery','r839-exact-production-entry-localhost-8787');headers.set('X-FormatX-Candidate-Canonical-Origin','formatxsuite.com');headers.set('Link','<https://formatxsuite.com/>; rel="canonical"');}return headers;}
 function rewrittenSchedulerResponse(response,headers){return response.text().then(source=>{const body=String(source||'').replace(MOTION_RUNTIME_RE,MOTION_RUNTIME_URL);headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');headers.set('X-FormatX-Scheduler-Cache','r543-extended-intro-elevated-heart');return new Response(body,{status:response.status,statusText:response.statusText,headers});});}
 
 export default{async fetch(request,env,ctx){
@@ -103,6 +102,7 @@ export default{async fetch(request,env,ctx){
     html=stabilizeMobileFirstPaint(html);
     html=stabilizeDesktopFirstFrameMedia(html);
     html=restoreCriticalCoreFirstPaint(html);
+    html=scopeDesktopIntroCss(html);
     html=makeReferenceBootNonBlocking(html);
     html=injectStaticHeart(html);
     html=injectStaticHeroShell(html);
