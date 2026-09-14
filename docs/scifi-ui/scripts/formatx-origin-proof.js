@@ -124,6 +124,10 @@
   const root = document.documentElement;
   if (root.dataset.fxProductShowcaseLoader === 'v2') return;
   root.dataset.fxProductShowcaseLoader = 'v2';
+  const DESKTOP_EAGER = matchMedia('(min-width: 901px) and (pointer: fine)').matches;
+  root.dataset.fxProductShowcaseGeometryR834 = DESKTOP_EAGER
+    ? 'desktop-user-intent-eager-before-loop-geometry'
+    : 'mobile-or-coarse-near-viewport-lazy';
 
   let observer = null;
   let targetRetry = 0;
@@ -144,7 +148,7 @@
 
     const script = document.createElement('script');
     script.src = './scripts/formatx-product-showcase.js?v=20260806-real-product-1';
-    script.async = true;
+    script.async = false;
     script.dataset.fxProductShowcaseScript = 'true';
     script.addEventListener('load', () => { root.dataset.fxProductShowcaseLoadState = 'ready'; }, { once: true });
     script.addEventListener('error', () => { root.dataset.fxProductShowcaseLoadState = 'error'; }, { once: true });
@@ -163,7 +167,7 @@
     const trigger = findTrigger();
     if (!trigger) return false;
 
-    if (!('IntersectionObserver' in window)) {
+    if (DESKTOP_EAGER || !('IntersectionObserver' in window)) {
       inject();
       return true;
     }
