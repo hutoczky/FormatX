@@ -14,8 +14,6 @@
   let geometryFrame = 0;
   let loopRecheckFrame = 0;
   let interactionCooldown = false;
-  let mobileEndIntentUntil = 0;
-  let lastMobileScrollY = 0;
 
   if (root.dataset.fxHeartCoreR252 === 'ready') return;
 
@@ -292,27 +290,6 @@
     });
   }
 
-  function cachedMobileDocumentEnd() {
-    const values = String(root.dataset.fxLoopGeometryR592 || '').split(':');
-    const end = Number(values[2]);
-    return Number.isFinite(end) ? end : null;
-  }
-
-  function captureMobileEndIntent() {
-    if (!MOBILE_QUERY.matches) return;
-    const y = scrollY;
-    if (y < lastMobileScrollY - 2) {
-      mobileEndIntentUntil = 0;
-      root.dataset.fxHeartLoopIntentR847 = 'cleared-upward-scroll';
-    }
-    lastMobileScrollY = y;
-    const cachedEnd = cachedMobileDocumentEnd();
-    if (cachedEnd != null && y >= cachedEnd - 2) {
-      mobileEndIntentUntil = performance.now() + 700;
-      root.dataset.fxHeartLoopIntentR847 = `cached-end-${Math.round(cachedEnd)}`;
-    }
-  }
-
   function mobileLoopBoundary() {
     if (!MOBILE_QUERY.matches) return null;
     pruneMobileReferenceMirror();
@@ -336,11 +313,7 @@
   function transferToRealCore(source) {
     if (!MOBILE_QUERY.matches || touchActive || root.classList.contains('fx-seamless-loop-transfer')) return false;
     const boundary = mobileLoopBoundary();
-    if (!boundary) return false;
-    const preservedEndIntent = mobileEndIntentUntil >= performance.now();
-    if (boundary.overshoot < LOOP_OVERSHOOT && !preservedEndIntent) return false;
-    mobileEndIntentUntil = 0;
-    root.dataset.fxHeartLoopIntentR847 = preservedEndIntent ? 'consumed-cached-end' : 'live-boundary';
+    if (!boundary || boundary.overshoot < LOOP_OVERSHOOT) return false;
 
     const liveLandingTarget = () => {
       const hero = document.querySelector('#main-content > #hero');
@@ -393,7 +366,6 @@
   function onScroll() {
     scheduleGeometry();
     if (!MOBILE_QUERY.matches) return;
-    captureMobileEndIntent();
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => transferToRealCore('idle'), 90);
   }
@@ -401,9 +373,6 @@
   function onTouchStart() {
     if (!MOBILE_QUERY.matches) return;
     touchActive = true;
-    mobileEndIntentUntil = 0;
-    lastMobileScrollY = scrollY;
-    root.dataset.fxHeartLoopIntentR847 = 'new-touch-sequence';
     clearTimeout(idleTimer);
     if (loopRecheckFrame) cancelAnimationFrame(loopRecheckFrame);
     loopRecheckFrame = 0;
@@ -431,8 +400,6 @@
     root.dataset.fxHeartCoreR252 = 'ready';
     root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
     root.dataset.fxHeartLoopRecheckR771 = 'scrollend-and-settled-geometry';
-    root.dataset.fxHeartLoopIntentR847 = 'cached-end-crossing-preserved';
-    lastMobileScrollY = scrollY;
     installHeartHitTarget();
     pruneMobileReferenceMirror();
     syncPureWebglComposition();
@@ -473,7 +440,6 @@
   else boot();
 
   addEventListener('pagehide', () => {
-    mobileEndIntentUntil = 0;
     clearTimeout(idleTimer);
     cancelAnimationFrame(bindingFrame);
     cancelAnimationFrame(geometryFrame);
