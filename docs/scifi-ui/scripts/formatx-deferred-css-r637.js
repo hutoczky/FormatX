@@ -3,22 +3,29 @@
 
   const root = document.documentElement;
   if (root.dataset.fxDeferredCssR637) return;
-  root.dataset.fxDeferredCssR637 = 'desktop-core-first-paint-settled-release-r837';
-  root.dataset.fxDeferredCssPolicyR637 = 'critical-core-first-paint-secondary-css-post-release-r837';
+  root.dataset.fxDeferredCssR637 = 'server-quiesced-core-settled-release-r838';
+  root.dataset.fxDeferredCssPolicyR637 = 'first-frame-geometry-only-full-core-post-release-r838';
   root.dataset.fxDeferredCssFloorR651 = 'preloader-release';
 
-  // R837: R515 proved that toggling the structural critical core after first
-  // paint directly owns desktop hero CLS. The current production Worker already
-  // fetches this stylesheet as render-blocking first-paint geometry, so changing
-  // its media here cannot save network critical-path time; it only removes and
-  // later re-applies settled layout. Keep the lifecycle hook for compatibility,
-  // but preserve the active sheet and its transport priority throughout intro.
+  // R838: R836 proved that applying the generated core and then removing it owns
+  // desktop hero CLS; R837 proved that keeping the full core active removes CLS
+  // but leaves first-frame style/layout work on the Lighthouse path. Production
+  // now emits the core non-applying from the first HTML response. The small R283,
+  // R490 and R461 bundles therefore own settled geometry continuously, and this
+  // scheduler performs only the one-way post-release activation of the full core.
   function quiesceDesktopCriticalCore() {
     if (!matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 901px)').matches) return null;
     const link = document.querySelector('link[data-fx-critical-core-r227]');
     if (!(link instanceof HTMLLinkElement)) return null;
-    root.dataset.fxCriticalCorePaintR793 = 'preserved-first-paint-geometry-r837';
-    root.dataset.fxCriticalCoreFirstPaintR837 = link.media || 'all';
+    const targetMedia = link.dataset.fxR838CoreMedia || '';
+    if (targetMedia && link.media === 'not all') {
+      root.dataset.fxCriticalCorePaintR793 = 'server-quiesced-before-first-paint-r838';
+      root.dataset.fxCriticalCoreFirstPaintR837 = 'retired-r838-server-quiesced';
+      return link;
+    }
+    // Fail-safe for non-production/static callers: never create an apply→remove
+    // transition in the browser. Leave an already-active sheet continuous.
+    root.dataset.fxCriticalCorePaintR793 = 'static-fail-safe-continuous-r838';
     return link;
   }
 
@@ -26,9 +33,14 @@
 
   function restoreDesktopCriticalCore(reason) {
     if (!(desktopCriticalCore instanceof HTMLLinkElement)) return;
-    // Compatibility lifecycle only: R837 intentionally performs no media/href
-    // mutation because the structural sheet never left the active cascade.
-    root.dataset.fxCriticalCorePaintR793 = 'continuous-first-paint-through-release-r837';
+    const media = desktopCriticalCore.dataset.fxR838CoreMedia;
+    if (media && desktopCriticalCore.media === 'not all') {
+      desktopCriticalCore.media = media;
+      delete desktopCriticalCore.dataset.fxR838CoreMedia;
+      root.dataset.fxCriticalCorePaintR793 = 'activated-one-way-post-release-r838';
+    } else {
+      root.dataset.fxCriticalCorePaintR793 = 'continuous-static-fail-safe-r838';
+    }
     root.dataset.fxCriticalCoreRestoreReasonR793 = reason;
   }
 
@@ -37,7 +49,7 @@
   // navigation-critical first-frame bundles. CSP-safe covered paint rules remain
   // in the blocking external stylesheet.
   root.classList.add('fx-startup-paint-quiet-r791');
-  root.dataset.fxStartupPaintQuietR791 = 'armed-before-settled-release-frame-r837';
+  root.dataset.fxStartupPaintQuietR791 = 'armed-before-settled-release-frame-r838';
 
   let activated = false;
   let frame = 0;
@@ -61,7 +73,7 @@
       root.dataset.fxCriticalGeometryR717 = 'unavailable';
       return false;
     }
-    root.dataset.fxCriticalGeometryR717 = 'owned-by-render-blocking-core-plus-first-frame-r837';
+    root.dataset.fxCriticalGeometryR717 = 'owned-by-render-blocking-first-frame-r838';
     root.dataset.fxCriticalGeometryHrefR717 = 'signature-remains-post-intro';
     return true;
   }
@@ -71,7 +83,7 @@
     paintReleaseFrame = requestAnimationFrame(() => {
       paintReleaseFrame = 0;
       root.classList.remove('fx-startup-paint-quiet-r791');
-      root.dataset.fxStartupPaintQuietR791 = 'released-after-core-settled-frame-r837';
+      root.dataset.fxStartupPaintQuietR791 = 'released-after-core-activation-frame-r838';
     });
   }
 
@@ -85,7 +97,7 @@
     commitTimer = 0;
     fallback = 0;
 
-    restoreDesktopCriticalCore('continuous-first-paint-release-r837');
+    restoreDesktopCriticalCore('one-way-post-release-r838');
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style],link[data-fx-r637-href]'));
     let restored = 0;
@@ -101,14 +113,14 @@
       link.removeAttribute('fetchpriority');
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r837';
-    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r837';
+    root.dataset.fxDeferredCssR487 = 'ready-post-intro-r838';
+    root.dataset.fxDeferredCssR637 = 'ready-post-intro-network-restored-r838';
     root.dataset.fxDeferredCssCountR487 = String(links.length);
     root.dataset.fxDeferredCssNetworkRestoredR637 = String(restored);
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'critical-core-continuous-secondary-css-plus-180ms-r837', reason }
+      detail: { count: links.length, restored, scheduler: 'server-quiesced-core-one-way-plus-180ms-r838', reason }
     }));
 
     releasePaintQuietAfterCoreCommit();

@@ -1,13 +1,14 @@
 import canonicalProduction from './production-content-entry.js';
 
-/* FormatX R633 — direct canonical production ownership + device-relevant first-paint delivery.
+/* FormatX R838 — stable first-frame geometry without first-frame full-core cost.
    Candidate mode exists only behind Wrangler-only FORMATX_LOCAL_CANDIDATE=1.
-   Layout-critical hero geometry and the semantic hero shell are present before
-   first paint. Desktop critical-core remains a high-priority desktop stylesheet,
-   but it is no longer forced into the HTTP preload queue for mobile visitors.
-   The tiny reference-mode boot remains early/high-priority but is async so its
-   network RTT cannot parser-block the canonical hero. Only genuinely noncritical
-   enhancements remain deferred. MAG and intro keep the same normal visitor path. */
+   The small first-frame bundles own settled hero geometry from the first cascade.
+   The generated desktop critical core is emitted non-applying and may fetch at
+   browser-selected low priority, then becomes active only after canonical intro
+   release. Mobile never renders the Event Horizon, so its desktop intro quality
+   sheet is media-scoped out of the mobile render-blocking chain. Reference-mode
+   boot remains the same visitor code path but is async/low and is not force-
+   preloaded; R490 already reserves scrollbar-gutter before that helper executes. */
 const PUBLIC_HOSTS=new Set(['formatxsuite.com','www.formatxsuite.com']);
 const CANONICAL_CANDIDATE_ORIGIN='https://formatxsuite.com';
 const HOMEPAGE_PATHS=new Set(['/','/index.html','/scifi-ui','/scifi-ui/','/scifi-ui/index.html']);
@@ -35,6 +36,8 @@ const PAYMENT_SURFACE_SCRIPT='/scifi-ui/scripts/formatx-payment-surface-r553.js?
 const PAYMENT_SURFACE_TAG=`<script defer data-fx-payment-surface-r553="true" src="${PAYMENT_SURFACE_SCRIPT}"></script>`;
 const MOBILE_MEDIA='(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MOTION_MEDIA='(prefers-reduced-motion: no-preference) and (min-width: 901px)';
+const CRITICAL_CORE_PATH='/scifi-ui/styles/formatx-critical-core-r227.css';
+const INTRO_P0_PATH='/scifi-ui/styles/formatx-intro-p0-r575.css';
 const FIRST_FRAME_FINE_MARKER='media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true"';
 const FIRST_FRAME_DESKTOP_MARKER='media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)" data-fx-first-frame-stability-r500="true"';
 const HEART_BUTTON='<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
@@ -46,9 +49,7 @@ const MOBILE_FIRST_PAINT_PRELOAD=`</scifi-ui/styles/formatx-mobile-first-paint-r
 const P0_FIRST_PAINT_PRELOAD='</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const CRITICAL_SHELL_PRELOAD='</scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint>; rel=preload; as=style';
 const QUALITY_PRELOAD='</scifi-ui/styles/formatx-quality-r461.css?v=20260906-r538-no-manual-pause>; rel=preload; as=style';
-const AWARD_READINESS_PRELOAD='</scifi-ui/styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability>; rel=preload; as=style';
 const FIRST_PAINT_R206_PRELOAD='</scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero>; rel=preload; as=style';
-const REFERENCE_BOOT_PRELOAD='</scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode>; rel=preload; as=script';
 const REFERENCE_PRODUCTION_PRELOAD=`</scifi-ui/styles/formatx-reference-production-r244.css?v=20260824-native-orb-r250>; rel=preload; as=style; media="${DESKTOP_MOTION_MEDIA}"`;
 const MOBILE_LEGACY_PATHS=new Set([
   '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
@@ -69,13 +70,13 @@ function addAttrs(tag,attrs){return tag.replace(/\s*\/?>$/,close=>`${attrs}${clo
 function deferredMobile(tag){let next=withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag,'media'),'fetchpriority'),'data-fx-r487-deferred-style'),'data-fx-r487-media');return addAttrs(next,` data-fx-r487-deferred-style="true" data-fx-r487-media="${MOBILE_MEDIA}" media="print" data-fx-r529-mobile-legacy="true"`);}
 function stabilizeMobileFirstPaint(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>MOBILE_LEGACY_PATHS.has(stylesheetPath(tag))?deferredMobile(tag):tag);}
 function stabilizeDesktopFirstFrameMedia(html){return String(html||'').replace(FIRST_FRAME_FINE_MARKER,FIRST_FRAME_DESKTOP_MARKER);}
-function restoreCriticalCoreFirstPaint(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>{if(stylesheetPath(tag)!=='/scifi-ui/styles/formatx-critical-core-r227.css')return tag;let next=withoutAttr(withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag,'media'),'fetchpriority'),'data-fx-r487-deferred-style'),'data-fx-r487-media'),'data-fx-r554-prepaint-geometry');return addAttrs(next,` fetchpriority="high" media="${DESKTOP_MOTION_MEDIA}" data-fx-r554-prepaint-geometry="true"`);});}
-function makeReferenceBootNonBlocking(html){return String(html||'').replace(REFERENCE_BOOT_TAG_RE,tag=>/\sasync(?:\s|>)/i.test(tag)?tag:tag.replace('<script','<script async'));}
+function restoreCriticalCoreFirstPaint(html){return String(html||'').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi,tag=>{const path=stylesheetPath(tag);if(path===CRITICAL_CORE_PATH){let next=withoutAttr(withoutAttr(withoutAttr(withoutAttr(withoutAttr(withoutAttr(tag,'media'),'fetchpriority'),'data-fx-r487-deferred-style'),'data-fx-r487-media'),'data-fx-r554-prepaint-geometry'),'data-fx-r838-core-media');return addAttrs(next,` data-fx-r838-core-media="${DESKTOP_MOTION_MEDIA}" media="not all" data-fx-r554-prepaint-geometry="stable-first-frame-owner-r838"`);}if(path===INTRO_P0_PATH){let next=withoutAttr(withoutAttr(tag,'media'),'fetchpriority');return addAttrs(next,` media="${DESKTOP_MOTION_MEDIA}" data-fx-r838-intro-desktop-only="true"`);}return tag;});}
+function makeReferenceBootNonBlocking(html){return String(html||'').replace(REFERENCE_BOOT_TAG_RE,tag=>{let next=withoutAttr(tag,'fetchpriority');if(!/\sasync(?:\s|>)/i.test(next))next=next.replace('<script','<script async');return next.replace('<script async','<script async fetchpriority="low"');});}
 function injectStaticHeart(html){let source=String(html||'');if(!source.includes('class="fx-mag-heart-hit-r252"'))source=source.replace(/<div\s+class=(["'])hero-space\1\s*>/i,match=>`${match}\n          ${HEART_BUTTON}`);return source;}
 function injectStaticHeroShell(html){let source=String(html||'');if(!source.includes('class="fx-reference-controls-r204'))source=source.replace(/<div\s+class=(["'])hero-space\1\s*>/i,match=>`${match}\n          ${HERO_CONTROLS}`);if(!source.includes('class="fx-reference-heading"')||!source.includes('class="fx-reference-proof"'))source=source.replace(HERO_GRID_TAIL,`        </div>\n        ${HERO_PROOF}\n      </div>\n      <a class="scroll-cue"`);return source;}
 function injectPaymentSurface(html){let source=String(html||'');if(source.includes('data-fx-payment-surface-r553='))return source;return source.replace(/<\/body>/i,`${PAYMENT_SURFACE_TAG}\n</body>`);}
-function addFirstPaintPreloads(headers){const existing=headers.get('Link');const preloads=[MOBILE_FIRST_PAINT_PRELOAD,P0_FIRST_PAINT_PRELOAD,CRITICAL_SHELL_PRELOAD,QUALITY_PRELOAD,AWARD_READINESS_PRELOAD,FIRST_PAINT_R206_PRELOAD,REFERENCE_BOOT_PRELOAD,REFERENCE_PRODUCTION_PRELOAD].join(', ');headers.set('Link',existing?`${existing}, ${preloads}`:preloads);}
-function r543Headers(source,localCandidate){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r633-device-relevant-first-paint-preloads');headers.set('X-FormatX-Edge-Stability','r633-desktop-critical-core-html-media-only');headers.set('X-FormatX-CSS-Scheduler','r633-no-mobile-desktop-core-preload');headers.set('X-FormatX-Product-Contract','r543-navigation-mag-elevated-heart-no-manual-pause');headers.set('X-FormatX-MAG-Startup','r543-navigation-owned-elevated-body-heart');headers.set('X-FormatX-Mobile-LCP','r633-nonblocking-reference-boot');headers.set('X-FormatX-Preloader','r543-static-content-extended-roadmap-timing');headers.set('X-FormatX-Preloader-Cache','r543-extended-static-lcp-audio-owner-safe');headers.set('X-FormatX-Reference-Boot','r633-async-prepaint-layout-selector');headers.set('X-FormatX-Payment-Surface','r553-post-paint-visible-qr');headers.set('X-FormatX-Layout-Stability','r698-desktop-fine-and-none-first-frame');if(localCandidate){headers.set('X-FormatX-Candidate-Delivery','r633-exact-production-entry-localhost-8787');headers.set('X-FormatX-Candidate-Canonical-Origin','formatxsuite.com');headers.set('Link','<https://formatxsuite.com/>; rel="canonical"');}return headers;}
+function addFirstPaintPreloads(headers){const existing=headers.get('Link');const preloads=[MOBILE_FIRST_PAINT_PRELOAD,P0_FIRST_PAINT_PRELOAD,CRITICAL_SHELL_PRELOAD,QUALITY_PRELOAD,FIRST_PAINT_R206_PRELOAD,REFERENCE_PRODUCTION_PRELOAD].join(', ');headers.set('Link',existing?`${existing}, ${preloads}`:preloads);}
+function r543Headers(source,localCandidate){const headers=new Headers(source);headers.set('X-FormatX-Transport-Stability','r838-stable-first-frame-network-budget');headers.set('X-FormatX-Edge-Stability','r838-core-never-applies-before-release');headers.set('X-FormatX-CSS-Scheduler','r838-small-first-frame-full-core-post-release');headers.set('X-FormatX-Product-Contract','r543-navigation-mag-elevated-heart-no-manual-pause');headers.set('X-FormatX-MAG-Startup','r543-navigation-owned-elevated-body-heart');headers.set('X-FormatX-Mobile-LCP','r838-no-mobile-intro-or-reference-preload');headers.set('X-FormatX-Preloader','r543-static-content-extended-roadmap-timing');headers.set('X-FormatX-Preloader-Cache','r543-extended-static-lcp-audio-owner-safe');headers.set('X-FormatX-Reference-Boot','r838-async-low-no-forced-preload');headers.set('X-FormatX-Payment-Surface','r553-post-paint-visible-qr');headers.set('X-FormatX-Layout-Stability','r838-first-frame-geometry-never-replaced');if(localCandidate){headers.set('X-FormatX-Candidate-Delivery','r838-exact-production-entry-localhost-8787');headers.set('X-FormatX-Candidate-Canonical-Origin','formatxsuite.com');headers.set('Link','<https://formatxsuite.com/>; rel="canonical"');}return headers;}
 function rewrittenSchedulerResponse(response,headers){return response.text().then(source=>{const body=String(source||'').replace(MOTION_RUNTIME_RE,MOTION_RUNTIME_URL);headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');headers.set('Cache-Control','no-store, max-age=0');headers.set('X-FormatX-Scheduler-Cache','r543-extended-intro-elevated-heart');return new Response(body,{status:response.status,statusText:response.statusText,headers});});}
 
 export default{async fetch(request,env,ctx){
