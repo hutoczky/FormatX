@@ -1,4 +1,6 @@
-@import url("./formatx-first-frame-stability-r283.css?v=20260823-r320-render-blocking");
+/* FormatX R849 — first-frame stability is owned by the document/production head.
+   Do not @import the same stylesheet from Event Horizon: that created a second
+   cache-key, duplicate cascade pass and avoidable desktop layer-tree churn. */
 
 /* FormatX Event Horizon v3
    Deterministic first-load presentation. Motion is driven by one WAAPI controller;
