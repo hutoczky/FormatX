@@ -8,30 +8,27 @@ const event=read('docs/scifi-ui/scripts/formatx-event-horizon.js');
 const controls=read('docs/scifi-ui/scripts/formatx-control-owner-r268.js');
 const shape=read('docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js');
 const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
+const renderer=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
 const life=read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
-for(const [name,source] of Object.entries({event,controls,shape,governor,mini,life})){
+const active={event,controls,shape,governor,renderer,mini,life};
+for(const [name,source] of Object.entries(active)){
   new Function(source);
-  assert.doesNotMatch(source,/formatx:referencepause/,`${name}: obsolete manual pause event remains`);
+  assert.doesNotMatch(source,/formatx:referencepause|fxReferenceMotionPaused|fxManualMagPauseR528|\.fx-reference-pause/,`${name}: obsolete manual MAG PAUSE contract remains`);
 }
-assert.doesNotMatch(event,/bindPause\s*\(/,'event owner still binds manual PAUSE');
+assert.doesNotMatch(event,/bindPause\s*\(|ensurePause\s*\(|removeObsoletePause\s*\(/,'Event Horizon still owns obsolete manual PAUSE lifecycle');
 assert.doesNotMatch(controls,/ensurePause\s*\(/,'control owner still creates manual PAUSE');
-assert.doesNotMatch(mini,/togglePause|['"]pause['"]\s*[,\]]/,'Mini MAG still exposes manual motion pause');
-// The canonical control health check is intentionally allowed to detect and reject
-// stale PAUSE UI. Strip that one exact negative-health probe before enforcing that
-// active runtimes do not otherwise read obsolete manual PAUSE state.
-const controlsWithoutLegacyHealth=controls.replace("!controls.querySelector('.fx-reference-pause')",'true');
-for(const source of [event,controlsWithoutLegacyHealth,mini,life,governor])assert.doesNotMatch(source,/querySelector\([^\n]*fx-reference-pause/,'active runtime still reads manual PAUSE state');
-assert.match(event,/fxCanonicalMagMotionR528=['"]living-core-normal-continuous-reduced-background-managed['"]/,'R528 product motion marker missing');
+assert.doesNotMatch(mini,/togglePause|['"]pause['"]\s*[,\]]/,'Mini MAG still exposes manual motion PAUSE');
+assert.match(event,/fxCanonicalMagMotionR528=['"]living-core-normal-continuous-reduced-background-managed['"]/,'navigation living-core motion marker missing');
 assert.match(shape,/prefers-reduced-motion:\s*reduce/,'reduced-motion ownership missing');
 assert.match(shape,/visibilitychange/,'background lifecycle handling missing');
 assert.match(shape,/document\.hidden/,'background state check missing');
 assert.match(shape,/animation-play-state/,'CSS compositor lifecycle owner missing');
 assert.match(shape,/fxPrimaryMagMotionContractR528=['"]living-core-normal-continuous-reduced-background-safe['"]/,'living-core motion contract missing');
-assert.doesNotMatch(shape,/animation\.pause\s*\(/,'WAAPI pause lifecycle owner forbidden');
-assert.doesNotMatch(shape,/animation\.play\s*\(/,'WAAPI play lifecycle owner forbidden');
-assert.match(governor,/fxReferenceMotionPaused/,'automatic zero-idle renderer suspension flag missing');
-assert.match(governor,/r528-automatic-idle-flag-no-manual-pause/,'automatic lifecycle marker missing');
-assert.match(controls,/!controls\.querySelector\('\.fx-reference-pause'\)/,'control health must reject obsolete PAUSE UI');
+assert.match(shape,/fxMagLifecycleContractR537=['"]automatic-reduced-background-managed['"]/,'R537 automatic compositor lifecycle marker missing');
+assert.doesNotMatch(shape,/animation\.pause\s*\(|animation\.play\s*\(/,'WAAPI manual play/pause owner forbidden');
+assert.match(governor,/fxRenderLifecycleSuspended/,'automatic zero-idle renderer suspension flag missing');
+assert.match(governor,/r536-automatic-lifecycle-suspension/,'automatic lifecycle marker missing');
+assert.match(renderer,/fxRenderLifecycleSuspended/,'single renderer must consume automatic lifecycle suspension');
 assert.match(mini,/reduced-motion-only-no-manual-pause/,'Mini MAG accessibility motion contract missing');
-console.log('PASS: R528 living-core contract removes manual MAG pause while preserving reduced-motion and automatic lifecycle suspension.');
+console.log('PASS: R537 removes manual MAG PAUSE completely while preserving reduced-motion, background/offscreen and automatic zero-idle lifecycle suspension.');
