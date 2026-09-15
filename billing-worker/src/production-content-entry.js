@@ -6,7 +6,7 @@ import productionBase from './production-content-entry-r369-base.js';
    restored its media/priority but left it unfetched until the 2100ms CSS checkpoint.
    Only secondary styles belong to the autonomous deferred stylesheet scheduler. */
 
-const STARTUP_REVISION = '20260908-r675-nonblocking-reference-and-visual-css';
+const STARTUP_REVISION = '20260915-r850-defer-legacy-r206-first-paint';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -55,6 +55,9 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/formatx-content-standard.css',
   '/scifi-ui/styles/formatx-award-readiness.css',
+  // R850: legacy R206 first-paint geometry is superseded by the canonical
+  // mobile/desktop/P0 first-frame owners; keep it eventual, not render-blocking.
+  '/scifi-ui/styles/formatx-first-paint-r206.css',
   '/scifi-ui/styles/formatx-flow-first-r74.css',
   '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
   '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
