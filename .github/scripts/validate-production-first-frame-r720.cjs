@@ -8,6 +8,12 @@ const { pathToFileURL } = require('node:url');
 (async () => {
   const repo = path.resolve(__dirname, '../..');
   const source = await fs.readFile(path.join(repo, 'docs/scifi-ui/index.html'), 'utf8');
+  const eventHorizon = await fs.readFile(path.join(repo, 'docs/scifi-ui/styles/formatx-event-horizon.css'), 'utf8');
+  assert.doesNotMatch(
+    eventHorizon,
+    /^\s*@import\s+url\(["']?\.\/formatx-first-frame-stability-r283\.css/im,
+    'R849: Event Horizon must not re-import the canonical first-frame stylesheet',
+  );
   const env = { ASSETS: { fetch: async () => new Response(source, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
   }) } };
@@ -34,6 +40,15 @@ const { pathToFileURL } = require('node:url');
       assert.equal(geometry.length, 1, `${name}: one ${file} geometry owner`);
       assert.match(geometry[0], /\shref=["']\/scifi-ui\/styles\//, `${name}: ${file} must load before paint`);
       assert.doesNotMatch(geometry[0], /data-fx-r637-href|data-fx-r487-deferred-style|media="(?:not all|print)"/, `${name}: ${file} must apply before paint`);
+    }
+    if (name === 'production-content-entry.js') {
+      const legacyR206 = (html.match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi) || [])
+        .filter(tag => tag.includes('formatx-first-paint-r206.css'));
+      assert.equal(legacyR206.length, 1, 'R850: retain one eventual legacy R206 stylesheet');
+      assert.match(legacyR206[0], /data-fx-r637-href=["'][^"']*formatx-first-paint-r206\.css/, 'R850: legacy R206 href must be owned by deferred scheduler');
+      assert.match(legacyR206[0], /data-fx-r487-deferred-style=["']true["']/, 'R850: legacy R206 must be marked deferred');
+      assert.match(legacyR206[0], /media=["']not all["']/, 'R850: legacy R206 must not block first paint');
+      assert.doesNotMatch(legacyR206[0], /\shref=/, 'R850: legacy R206 must not carry a live render-blocking href before FCP');
     }
     console.log(`PASS R720 ${name}: canonical desktop geometry loads before first paint`);
   }
