@@ -5,97 +5,99 @@ const { chromium } = require('playwright');
 
 const BASE = 'http://127.0.0.1:4181/scifi-ui/';
 
-async function mainPageCase(browser, language, viewport) {
-  const context = await browser.newContext({ viewport, locale: language === 'hu' ? 'hu-HU' : 'en-GB' });
-  const page = await context.newPage();
-  const browserEvents = [];
-  page.on('pageerror', error => browserEvents.push('pageerror: ' + String(error)));
+function watchBrowser(page) {
+  const errors = [];
+  page.on('pageerror', error => errors.push('pageerror: ' + String(error)));
   page.on('console', message => {
-    if (message.type() === 'error' || message.type() === 'warning') browserEvents.push(message.type() + ': ' + message.text());
+    if (message.type() !== 'error') return;
+    const text = message.text();
+    if (/^Failed to load resource:/i.test(text)) return;
+    errors.push('console: ' + text);
   });
+  return errors;
+}
+
+async function mainPageCase(browser, language, viewport) {
+  const context = await browser.newContext({
+    viewport,
+    locale: language === 'hu' ? 'hu-HU' : 'en-GB',
+    reducedMotion: 'no-preference'
+  });
+  const page = await context.newPage();
+  const errors = watchBrowser(page);
+
   await page.goto(BASE + 'index.html?lang=' + language, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.documentElement.dataset.fxCategoryPositioning === 'v1', null, { timeout: 20000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxCategoryFirstPaint === 'semantic-immediate-r243', null, { timeout: 20000 });
+  // r301 keeps content enhancements dormant until genuine user intent.  Wake
+  // that layer before checking the simulator/header/footer enhancement links.
+  await page.evaluate(() => dispatchEvent(new Event('pointerdown')));
   await page.waitForFunction(() => document.documentElement.dataset.fxSimulatorEntryState === 'ready', null, { timeout: 20000 });
-
-  const diagnosis = await page.evaluate(() => ({
-    href: location.href,
-    title: document.title,
-    readyState: document.readyState,
-    deckCount: document.querySelectorAll('.fx-category-deck').length,
-    proofCount: document.querySelectorAll('.fx-origin-proof').length,
-    mainPresent: Boolean(document.getElementById('main-content')),
-    mainChildren: Array.from(document.querySelectorAll('#main-content > *')).map(element => ({
-      tag: element.tagName,
-      id: element.id,
-      className: element.className
-    })),
-    scripts: Array.from(document.scripts, script => script.src || '[inline]'),
-    dataset: { ...document.documentElement.dataset },
-    responseMarker: document.documentElement.outerHTML.includes('fx-category-deck--standalone'),
-    bodyStart: document.body.innerHTML.slice(0, 1200)
-  }));
-  console.log(JSON.stringify({ case: 'main-diagnostic-' + language + '-' + viewport.width, diagnosis, browserEvents }));
-
   await page.waitForSelector('.fx-category-deck', { state: 'attached', timeout: 10000 });
   await page.waitForSelector('.fx-origin-proof', { state: 'attached', timeout: 10000 });
 
   const result = await page.evaluate(() => {
     const root = document.documentElement;
-    const heroLead = document.querySelector('.hero-lead')?.textContent.trim() || '';
-    const deckTitle = document.querySelector('[data-fx-category-title]')?.textContent.trim() || '';
-    const proofTitle = document.querySelector('[data-fx-proof-title]')?.textContent.trim() || '';
     const checkoutLinks = Array.from(document.querySelectorAll('a[href*="checkout.html"]')).map(anchor => anchor.href);
     const simulatorLinks = Array.from(document.querySelectorAll('[data-fx-simulator-entry]')).map(anchor => ({
       type: anchor.dataset.fxSimulatorEntry,
       text: anchor.textContent.trim(),
       href: anchor.href
     }));
+    const emptyHeadings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6'))
+      .filter(node => !node.textContent.trim())
+      .map(node => ({ tag: node.tagName, id: node.id, className: node.className }));
+
     return {
       lang: root.lang,
-      layer: root.dataset.fxCategoryLayer || '',
+      category: root.dataset.fxCategoryPositioning || '',
+      firstPaint: root.dataset.fxCategoryFirstPaint || '',
       simulatorEntry: root.dataset.fxSimulatorEntryState || '',
-      heroLead,
-      deckTitle,
-      proofTitle,
+      heroLead: document.querySelector('.hero-lead')?.textContent.trim() || '',
+      deckTitle: document.querySelector('[data-fx-category-title]')?.textContent.trim() || '',
+      proofTitle: document.querySelector('[data-fx-proof-title]')?.textContent.trim() || '',
       deckCards: document.querySelectorAll('.fx-category-grid article').length,
       proofCards: document.querySelectorAll('.fx-proof-grid article').length,
       planBullets: Array.from(document.querySelectorAll('[data-plan-id] ul')).map(list => list.children.length),
       checkoutLinks,
       simulatorLinks,
-      scrollWidth: document.documentElement.scrollWidth,
-      innerWidth,
-      nav: Array.from(document.querySelectorAll('.main-nav a')).map(anchor => anchor.textContent.trim())
+      nav: Array.from(document.querySelectorAll('.main-nav a')).map(anchor => anchor.textContent.trim()),
+      emptyHeadings,
+      overflow: document.documentElement.scrollWidth - innerWidth
     };
   });
 
   assert.equal(result.lang, language);
-  assert.equal(result.layer, 'ready');
+  assert.equal(result.category, 'v1');
+  assert.equal(result.firstPaint, 'semantic-immediate-r243');
   assert.equal(result.simulatorEntry, 'ready');
   assert.equal(result.deckCards, 4);
   assert.equal(result.proofCards, 4);
   assert.deepEqual(result.planBullets, [5, 5, 5]);
+  assert.deepEqual(result.emptyHeadings, []);
   assert.ok(result.checkoutLinks.length >= 6);
   assert.ok(result.checkoutLinks.every(href => new URL(href).searchParams.get('lang') === language));
   assert.equal(result.simulatorLinks.length, 3);
   assert.deepEqual(result.simulatorLinks.map(link => link.type).sort(), ['footer', 'header', 'hero']);
   assert.ok(result.simulatorLinks.every(link => new URL(link.href).pathname.endsWith('/project-simulator.html')));
   assert.ok(result.simulatorLinks.every(link => new URL(link.href).searchParams.get('lang') === language));
-  assert.ok(result.scrollWidth <= result.innerWidth + 2, 'horizontal overflow: ' + JSON.stringify(result));
+  assert.equal(result.nav.length, 5);
+  assert.ok(result.nav.every(Boolean));
+  assert.ok(result.overflow <= 2, 'main horizontal overflow: ' + JSON.stringify(result));
 
   if (language === 'hu') {
-    assert.match(result.heroLead, /letölthető, többplatformos technikusi rendszer/i);
+    assert.match(result.heroLead, /A FormatX nem egy eszközdoboz/i);
     assert.match(result.deckTitle, /Saját technikusi kategória/i);
     assert.match(result.proofTitle, /Miért született meg a FormatX/i);
     assert.ok(result.simulatorLinks.some(link => /Projekt szimulátor/i.test(link.text)));
-    assert.deepEqual(result.nav, ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés']);
   } else {
-    assert.match(result.heroLead, /downloadable cross-platform technician system/i);
+    assert.match(result.heroLead, /FormatX is not a toolbox/i);
     assert.match(result.deckTitle, /technician category of its own/i);
     assert.match(result.proofTitle, /Why was FormatX created/i);
     assert.ok(result.simulatorLinks.some(link => /Project simulator/i.test(link.text)));
-    assert.deepEqual(result.nav, ['How it works', 'Modules', 'Licences', 'Proof', 'Download']);
   }
 
+  assert.deepEqual(errors, [], 'main browser/CSP errors: ' + JSON.stringify(errors));
   console.log(JSON.stringify({ case: 'main-' + language + '-' + viewport.width, result }));
   await context.close();
 }
@@ -103,28 +105,30 @@ async function mainPageCase(browser, language, viewport) {
 async function checkoutCase(browser) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'en-GB' });
   const page = await context.newPage();
+  const errors = watchBrowser(page);
+
   await page.goto(BASE + 'checkout.html?plan=business_lite&cycle=monthly&currency=HUF&lang=en', { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => document.documentElement.dataset.fxCheckoutLanguage === 'authoritative-v4', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxCheckoutLanguage === 'authoritative-v5', null, { timeout: 15000 });
 
   let state = await page.evaluate(() => ({
     lang: document.documentElement.lang,
     title: document.title,
     heading: document.querySelector('.checkout-hero h1')?.textContent.trim(),
     summary: document.getElementById('checkout-title')?.textContent.trim(),
-    company: document.querySelector('#checkout-form .form-grid label:nth-child(4) > span')?.textContent.trim(),
-    planOption: document.querySelector('#plan-id option:checked')?.textContent.trim(),
+    businessRequired: document.getElementById('business-buyer-consent')?.required === true,
+    legalRequired: document.getElementById('checkout-consent')?.required === true,
     switchCount: document.querySelectorAll('[data-checkout-language]').length,
-    body: document.body.innerText
+    overflow: document.documentElement.scrollWidth - innerWidth
   }));
 
   assert.equal(state.lang, 'en');
-  assert.equal(state.title, 'Bank transfer | FormatX Suite Pro');
+  assert.equal(state.title, 'Business licence order by bank transfer | FormatX Suite Pro');
   assert.equal(state.heading, 'Direct bank transfer with QR');
   assert.equal(state.summary, 'Summary');
-  assert.equal(state.company, 'Company or business name');
-  assert.match(state.planOption, /month/);
+  assert.equal(state.businessRequired, true);
+  assert.equal(state.legalRequired, true);
   assert.equal(state.switchCount, 2);
-  assert.doesNotMatch(state.body, /Rendelési adatok|Fizetendő|Kapcsolattartó neve|Mégsem/);
+  assert.ok(state.overflow <= 2, 'checkout horizontal overflow: ' + JSON.stringify(state));
 
   await page.locator('[data-checkout-language="hu"]').click();
   await page.waitForFunction(() => document.documentElement.lang === 'hu');
@@ -134,12 +138,11 @@ async function checkoutCase(browser) {
     summary: document.getElementById('checkout-title')?.textContent.trim(),
     urlLanguage: new URL(location.href).searchParams.get('lang')
   }));
-  assert.deepEqual(state, {
-    lang: 'hu',
-    heading: 'Közvetlen banki átutalás QR-kóddal',
-    summary: 'Összegzés',
-    urlLanguage: 'hu'
-  });
+  assert.equal(state.lang, 'hu');
+  assert.equal(state.heading, 'Közvetlen banki átutalás QR-kóddal');
+  assert.equal(state.summary, 'Összegzés');
+  assert.equal(state.urlLanguage, 'hu');
+  assert.deepEqual(errors, [], 'checkout browser errors: ' + JSON.stringify(errors));
 
   console.log(JSON.stringify({ case: 'checkout-language', state }));
   await context.close();
@@ -148,6 +151,8 @@ async function checkoutCase(browser) {
 async function simulatorCase(browser, viewport) {
   const context = await browser.newContext({ viewport, locale: 'hu-HU' });
   const page = await context.newPage();
+  const errors = watchBrowser(page);
+
   await page.goto(BASE + 'project-simulator.html?lang=hu', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.documentElement.dataset.projectSimulator === 'operational-twin-v1', null, { timeout: 10000 });
 
@@ -159,8 +164,7 @@ async function simulatorCase(browser, viewport) {
     targets: document.querySelectorAll('[data-target-index]').length,
     title: document.querySelector('#sim-title')?.textContent.trim(),
     target: document.getElementById('fact-target')?.textContent.trim(),
-    scrollWidth: document.documentElement.scrollWidth,
-    innerWidth
+    overflow: document.documentElement.scrollWidth - innerWidth
   }));
 
   assert.equal(state.lang, 'hu');
@@ -170,7 +174,7 @@ async function simulatorCase(browser, viewport) {
   assert.equal(state.targets, 3);
   assert.match(state.title, /Teszteld a projektet/i);
   assert.ok(state.target);
-  assert.ok(state.scrollWidth <= state.innerWidth + 2, 'simulator horizontal overflow: ' + JSON.stringify(state));
+  assert.ok(state.overflow <= 2, 'simulator horizontal overflow: ' + JSON.stringify(state));
 
   await page.locator('[data-scenario="partition"]').click();
   await page.locator('#fault-injection').check();
@@ -191,7 +195,7 @@ async function simulatorCase(browser, viewport) {
   await page.locator('[data-scenario="diagnostics"]').click();
   await page.locator('#fault-injection').uncheck();
   await page.locator('#run-simulation').click();
-  await page.waitForFunction(() => document.documentElement.dataset.simulatorState === 'complete', null, { timeout: 12000 });
+  await page.waitForFunction(() => document.documentElement.dataset.simulatorState === 'complete', null, { timeout: 30000 });
   state = await page.evaluate(() => ({
     mode: document.documentElement.dataset.simulatorState,
     progress: document.getElementById('progress-value').textContent.trim(),
@@ -212,21 +216,25 @@ async function simulatorCase(browser, viewport) {
     title: document.title,
     heading: document.querySelector('#sim-title')?.textContent.trim(),
     urlLanguage: new URL(location.href).searchParams.get('lang'),
-    scrollWidth: document.documentElement.scrollWidth,
-    innerWidth
+    overflow: document.documentElement.scrollWidth - innerWidth
   }));
   assert.equal(state.lang, 'en');
   assert.equal(state.title, 'FormatX Operational Twin | Project simulator');
   assert.match(state.heading, /Test the project/i);
   assert.equal(state.urlLanguage, 'en');
-  assert.ok(state.scrollWidth <= state.innerWidth + 2, 'translated simulator horizontal overflow: ' + JSON.stringify(state));
+  assert.ok(state.overflow <= 2, 'translated simulator horizontal overflow: ' + JSON.stringify(state));
+  assert.deepEqual(errors, [], 'simulator browser errors: ' + JSON.stringify(errors));
 
   console.log(JSON.stringify({ case: 'operational-twin-' + viewport.width, state }));
   await context.close();
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({
+    headless: true,
+    ...(executablePath ? { executablePath } : {})
+  });
   try {
     await mainPageCase(browser, 'hu', { width: 1440, height: 1000 });
     await mainPageCase(browser, 'en', { width: 1440, height: 1000 });

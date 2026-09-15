@@ -1,0 +1,6 @@
+{
+  "revision": "r313-mobile-postdom-real3d-chain",
+  "requestedAt": "2026-08-23T19:55:00Z",
+  "reason": "Deploy mobile DOMContentLoaded recovery by deferring the entire Real3D/recovery/signature dynamic script chain until the post-DOM task, while retaining the r312 continuous compositor MAG pulse",
+  "sourceHead": "b0df54e883f92c992c246a84e8b3f83d6db1191c"
+}

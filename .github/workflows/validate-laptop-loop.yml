@@ -1,5 +1,5 @@
-name: Validate FormatX seamless cyclic scrolling
-run-name: Validate seamless scrolling from ${{ github.sha }}
+name: Validate FormatX platform scroll policy
+run-name: Validate platform scroll policy from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -7,17 +7,27 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
+      - 'docs/scifi-ui/scripts/formatx-heart-core-r252.js'
+      - 'docs/scifi-ui/styles/formatx-heart-core-r252.css'
       - 'docs/scifi-ui/styles/formatx-seamless-loop.css'
-      - 'docs/scifi-ui/data/public-platform-contract.json'
-      - '.github/scripts/validate-laptop-continuous-loop.cjs'
+      - 'docs/scifi-ui/styles/formatx-continuous-scroll.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-production-r5.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-seamless-loop.css'
+      - '.github/scripts/validate-platform-scroll-r252.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
   pull_request:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
+      - 'docs/scifi-ui/scripts/formatx-heart-core-r252.js'
+      - 'docs/scifi-ui/styles/formatx-heart-core-r252.css'
       - 'docs/scifi-ui/styles/formatx-seamless-loop.css'
-      - 'docs/scifi-ui/data/public-platform-contract.json'
-      - '.github/scripts/validate-laptop-continuous-loop.cjs'
+      - 'docs/scifi-ui/styles/formatx-continuous-scroll.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-production-r5.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-seamless-loop.css'
+      - '.github/scripts/validate-platform-scroll-r252.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
 
 permissions:
@@ -25,84 +35,82 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-seamless-scroll-${{ github.ref }}
+  group: formatx-platform-scroll-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 18
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
 
-      - name: Validate seamless scroll source
+      - name: Validate source contract
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          node --check .github/scripts/validate-laptop-continuous-loop.cjs
-          python3 -m json.tool docs/scifi-ui/data/public-platform-contract.json >/dev/null
-          grep -Fq "const VERSION = 'seamless-v6'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "const REVISION = 'ratio-v4'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "automaticLoop: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "visualBridge: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "clonedContent: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "clonedHeroOnly: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "ratioMatchedLanding: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "frameStableLanding: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "inputInterception: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "jumpFree: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq '"automatic_scroll_loop": true' docs/scifi-ui/data/public-platform-contract.json
-          grep -Fq '"hero_visual_bridge": true' docs/scifi-ui/data/public-platform-contract.json
-          grep -Fq '"ratio_matched_landing": true' docs/scifi-ui/data/public-platform-contract.json
-          grep -Fq '"input_event_interception": false' docs/scifi-ui/data/public-platform-contract.json
-          ! grep -Fq "preventDefault" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          node --check docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          node --check .github/scripts/validate-platform-scroll-r252.cjs
+          grep -Fq "platform-scroll-v2" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "native-momentum-loop-v1" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "formatx-infinite-scroll-desktop-v7.js" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "formatx-heart-core-r252.js" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "footer-to-real-core-no-reference-mirror" docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          grep -Fq "none-mobile-r252" docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          grep -Fq "fx-mag-heart-hit-r252" docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          grep -Fq "FormatXOrganismVoice" docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          grep -Fq "const VERSION = 'seamless-v7'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq "buildReferenceMirror" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq "window.scrollTo(" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq "scroll-snap-type: none !important" docs/scifi-ui/styles/formatx-continuous-scroll.css
 
       - name: Install Chromium
         shell: bash
         run: |
           set -euo pipefail
-          npm install --prefix "$RUNNER_TEMP/formatx-seamless-scroll" --no-audit --no-fund playwright@1.62.0
-          "$RUNNER_TEMP/formatx-seamless-scroll/node_modules/.bin/playwright" install --with-deps chromium
+          npm install --prefix "$RUNNER_TEMP/formatx-platform-scroll" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-platform-scroll/node_modules/.bin/playwright" install --with-deps chromium
 
       - name: Start website
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-seamless-scroll-http.log" 2>&1 &
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-platform-scroll-http.log" 2>&1 &
           for attempt in $(seq 1 40); do
             curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
             sleep 0.25
           done
-          cat "$RUNNER_TEMP/formatx-seamless-scroll-http.log"
+          cat "$RUNNER_TEMP/formatx-platform-scroll-http.log"
           exit 1
 
-      - name: Verify mobile through 8K seamless scrolling
+      - name: Verify mobile and desktop seamless scrolling and living MAG interaction
         env:
-          NODE_PATH: ${{ runner.temp }}/formatx-seamless-scroll/node_modules
+          NODE_PATH: ${{ runner.temp }}/formatx-platform-scroll/node_modules
         shell: bash
         run: |
           set -o pipefail
-          node .github/scripts/validate-laptop-continuous-loop.cjs 2>&1 | tee seamless-scroll-report.txt
+          node .github/scripts/validate-platform-scroll-r252.cjs 2>&1 | tee platform-scroll-report.txt
 
-      - name: Upload seamless scroll report
+      - name: Upload scroll report
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@v4
         with:
-          name: formatx-seamless-scroll-report
-          path: seamless-scroll-report.txt
+          name: formatx-platform-scroll-report
+          path: platform-scroll-report.txt
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Publish seamless scroll status
+      - name: Publish platform scroll status
         if: always() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -111,13 +119,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Seamless cyclic scrolling passed from mobile through 8K'
+            description='Footer-to-MAG mobile loop, desktop loop and MAG interaction passed'
           else
             state='failure'
-            description='Seamless cyclic scrolling validation failed'
+            description='Platform scroll or living MAG interaction validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX seamless cyclic scrolling' \
+            -f context='FormatX platform scroll policy' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

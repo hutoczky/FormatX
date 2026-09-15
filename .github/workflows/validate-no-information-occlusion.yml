@@ -1,0 +1,88 @@
+name: Validate no information occlusion and pure 3D MAG
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/**'
+      - '.github/scripts/validate-no-information-occlusion.cjs'
+      - '.github/workflows/validate-no-information-occlusion.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/**'
+      - '.github/scripts/validate-no-information-occlusion.cjs'
+      - '.github/workflows/validate-no-information-occlusion.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-no-occlusion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Validate script syntax
+        run: node --check .github/scripts/validate-no-information-occlusion.cjs
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-occlusion" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-occlusion/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start static website
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-occlusion-http.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-occlusion-http.log"
+          exit 1
+
+      - name: Validate 320 to 1920 px information visibility and pure 3D MAG
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-occlusion/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_VISUAL_DIR: artifacts/content-visuals
+        run: node .github/scripts/validate-no-information-occlusion.cjs
+
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: formatx-no-occlusion-failure
+          path: artifacts/content-visuals/occlusion-failure-*.png
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Publish no-occlusion status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='320–1920px information visibility and pure WebGL MAG passed'
+          else
+            state='failure'
+            description='Information occlusion, clipping or pure-3D MAG validation failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX no-information-occlusion' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

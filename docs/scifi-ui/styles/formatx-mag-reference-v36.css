@@ -1,0 +1,96 @@
+/* FormatX MAG reference v36 — curved crystalline optics.
+   The existing WebGL2 renderer remains the only 3D geometry source.
+   This layer removes the oversized straight v35 facets and adds thin curved
+   cyan/violet glass edges, denser central rings and a smaller reactor core. */
+
+.fx-mag-v34-overlay,
+.fx-mag-v35-overlay,
+.fx-v33-core-glass,
+.fx-v33-reactor-halo{display:none!important}
+
+.fx-core-real3d-canvas{
+  transform:scale(1.00,.98)!important;
+  transform-origin:var(--fx-core-x) 49%!important;
+  filter:saturate(2.04) contrast(2.16) brightness(1.48)
+    drop-shadow(0 0 3px rgba(225,255,255,.58))
+    drop-shadow(0 0 10px rgba(64,234,255,.38))
+    drop-shadow(0 0 23px rgba(40,145,255,.21))
+    drop-shadow(0 0 34px rgba(158,64,255,.13))!important;
+}
+.fx-core-postfx-v31{filter:saturate(1.12) contrast(1.14) brightness(1.00)!important}
+.fx-v31-spectrum{opacity:.26!important}
+.fx-v31-ring-a{opacity:.42!important}
+.fx-v31-ring-b{opacity:.30!important}
+.fx-v31-ring-c{opacity:.20!important}
+.fx-v31-flare{
+  width:8px!important;height:8px!important;margin:-4px 0 0 -4px!important;
+  box-shadow:0 0 3px #fff,0 0 8px rgba(232,255,255,.96),0 0 18px rgba(80,239,255,.82),0 0 34px rgba(53,155,255,.35)!important
+}
+
+.fx-mag-v36-overlay{
+  --fx-v36-x:0px;--fx-v36-y:0px;--fx-v36-scale:1;
+  position:absolute;z-index:4;inset:0;pointer-events:none;overflow:hidden;mix-blend-mode:screen
+}
+.fx-v36-svg{
+  position:absolute;left:var(--fx-core-x);top:49%;
+  width:min(72vmin,860px);height:min(72vmin,860px);
+  transform:translate(calc(-50% + var(--fx-v36-x)),calc(-50% + var(--fx-v36-y))) scale(var(--fx-v36-scale));
+  transform-origin:50% 50%;overflow:visible;
+  filter:drop-shadow(0 0 3px rgba(193,252,255,.38)) drop-shadow(0 0 12px rgba(49,215,255,.12))
+}
+
+.fx-v36-shell{fill:rgba(20,123,185,.025);stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.fx-v36-shell-outer{stroke:rgba(111,241,255,.66);stroke-width:1.35}
+.fx-v36-shell-mid{stroke:rgba(93,211,255,.34);stroke-width:1}
+.fx-v36-shell-inner{stroke:rgba(173,78,255,.30);stroke-width:.9}
+
+.fx-v36-spine{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.fx-v36-spine-main{stroke:rgba(211,255,255,.60);stroke-width:1.05}
+.fx-v36-spine-soft{stroke:rgba(65,220,255,.28);stroke-width:.8}
+
+.fx-v36-filament{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.fx-v36-filament-cyan{stroke:rgba(84,233,255,.50);stroke-width:1.15}
+.fx-v36-filament-violet{stroke:rgba(177,76,255,.42);stroke-width:1.05}
+.fx-v36-filament-dim{stroke:rgba(105,219,255,.23);stroke-width:.75}
+
+.fx-v36-ring{fill:none;vector-effect:non-scaling-stroke}
+.fx-v36-ring-cyan{stroke:rgba(105,239,255,.48);stroke-width:1}
+.fx-v36-ring-blue{stroke:rgba(59,171,255,.32);stroke-width:.9}
+.fx-v36-ring-violet{stroke:rgba(171,72,255,.31);stroke-width:.9}
+
+.fx-v36-node{fill:#f5ffff;stroke:rgba(123,244,255,.82);stroke-width:.8;vector-effect:non-scaling-stroke}
+.fx-v36-node-dim{fill:rgba(107,235,255,.52);stroke:none}
+.fx-v36-core-halo{fill:url(#fxV36CoreGradient)}
+.fx-v36-core-dot{fill:#fff;stroke:#dfffff;stroke-width:1.2;vector-effect:non-scaling-stroke}
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-canvas{
+    transform:translate3d(0,-3.8dvh,0) scale(.95,.96)!important;
+    transform-origin:50% 49%!important;
+    filter:saturate(2.08) contrast(2.18) brightness(1.52)
+      drop-shadow(0 0 3px rgba(230,255,255,.60))
+      drop-shadow(0 0 10px rgba(65,235,255,.39))
+      drop-shadow(0 0 21px rgba(40,148,255,.21))
+      drop-shadow(0 0 31px rgba(158,64,255,.12))!important
+  }
+  .fx-core-postfx-v31{
+    transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 3.8dvh),0) scale(.95,.96)!important;
+    transform-origin:50% 49%!important
+  }
+  .fx-v36-svg{
+    width:91vmin;height:91vmin;
+    transform:translate(calc(-50% + var(--fx-v36-x)),calc(-50% - 3.8dvh + var(--fx-v36-y))) scale(var(--fx-v36-scale))
+  }
+}
+
+@media(max-width:480px){
+  .fx-core-real3d-canvas{transform:translate3d(0,-3.4dvh,0) scale(.94,.95)!important}
+  .fx-core-postfx-v31{transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 3.4dvh),0) scale(.94,.95)!important}
+  .fx-v36-svg{width:92vmin;height:92vmin;transform:translate(calc(-50% + var(--fx-v36-x)),calc(-50% - 3.4dvh + var(--fx-v36-y))) scale(var(--fx-v36-scale))}
+}
+
+.fx-core-real3d-stage[data-fx-mobile-text-guard="text"] .fx-mag-v36-overlay{opacity:0!important;visibility:hidden!important}
+
+@media(prefers-reduced-motion:reduce){
+  .fx-v36-svg{filter:none!important}
+}

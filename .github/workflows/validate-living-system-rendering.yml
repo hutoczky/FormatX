@@ -1,0 +1,42 @@
+name: Validate Living System Rendering
+
+on:
+  push:
+    branches:
+      - master
+      - award-upgrade-20260812
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
+      - 'docs/scifi-ui/scripts/formatx-core-direct-interaction.js'
+      - 'docs/scifi-ui/scripts/formatx-living-system-rendering-v1.js'
+      - 'docs/scifi-ui/scripts/formatx-living-telemetry-visual-bridge-v1.js'
+      - 'docs/scifi-ui/styles/formatx-living-system-rendering-v1.css'
+      - '.github/scripts/validate-living-system-rendering.cjs'
+      - '.github/workflows/validate-living-system-rendering.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Validate architecture contracts
+        run: node .github/scripts/validate-living-system-rendering.cjs
+
+      - name: Validate JavaScript syntax
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
+          node --check docs/scifi-ui/scripts/formatx-living-system-rendering-v1.js
+          node --check docs/scifi-ui/scripts/formatx-living-telemetry-visual-bridge-v1.js

@@ -1,0 +1,105 @@
+/* FormatX mobile text guard v32 — reserve a dedicated MAG area and keep all hero text readable below it. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero {
+    position:relative!important;
+    min-height:auto!important;
+    height:auto!important;
+    padding-top:max(74px,calc(env(safe-area-inset-top) + 64px))!important;
+    padding-bottom:28px!important;
+    overflow:visible!important;
+  }
+
+  html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-grid {
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:0!important;
+    width:100%!important;
+    min-height:0!important;
+    height:auto!important;
+    padding-inline:0!important;
+    overflow:visible!important;
+  }
+
+  /* The 3D MAG owns this area only. No text is pulled back into it. */
+  html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-space {
+    order:1!important;
+    position:relative!important;
+    z-index:1!important;
+    inset:auto!important;
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-height:clamp(330px,44svh,470px)!important;
+    max-height:480px!important;
+    margin:0!important;
+    transform:none!important;
+    translate:none!important;
+    overflow:visible!important;
+    border-radius:0!important;
+  }
+
+  /* Hard separation: positive margin only, opaque reading surface, always above WebGL. */
+  html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-copy {
+    order:2!important;
+    position:relative!important;
+    z-index:220!important;
+    inset:auto!important;
+    flex:0 0 auto!important;
+    width:min(calc(100% - 20px),720px)!important;
+    max-width:720px!important;
+    min-width:0!important;
+    margin:12px auto 0!important;
+    padding:22px 16px 26px!important;
+    transform:none!important;
+    translate:none!important;
+    opacity:1!important;
+    visibility:visible!important;
+    overflow:visible!important;
+    border:0!important;
+    border-radius:0!important;
+    background:linear-gradient(180deg,rgba(1,7,17,.94) 0%,rgba(1,7,17,.985) 46%,#010711 100%)!important;
+    box-shadow:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    isolation:isolate!important;
+  }
+
+  #hero .hero-copy > .kicker {
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    margin:0 0 10px!important;
+    color:rgba(228,248,255,.90)!important;
+  }
+
+  #hero #hero-title,
+  #hero .hero-title-main,
+  #hero .hero-title-sub,
+  #hero .hero-lead,
+  #hero .hero-actions,
+  #hero .hero-facts {
+    position:relative!important;
+    z-index:2!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+
+  #hero #hero-title { margin:0 0 14px!important; }
+  #hero .hero-lead { color:rgba(235,246,253,.92)!important; }
+  #hero .hero-actions { margin-top:18px!important; }
+  #hero .hero-facts { margin-top:16px!important; }
+  #hero .scroll-cue { position:relative!important; z-index:225!important; margin-top:14px!important; }
+}
+
+@media (max-width:480px) {
+  html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-space {
+    min-height:clamp(305px,40svh,420px)!important;
+    max-height:430px!important;
+  }
+
+  html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-copy {
+    width:min(calc(100% - 16px),720px)!important;
+    margin-top:10px!important;
+    padding:20px 14px 24px!important;
+  }
+}

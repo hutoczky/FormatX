@@ -1,0 +1,4 @@
+FormatX r151 final mobile hero stability deployment marker.
+Production candidate: 92354a8f5d71871ca78df44447a53cf621148adc
+Includes cache-busted r151 bootstrap/style/script URLs, broken visual fallback removal, stable MAG-to-heading gap, and heading -> download -> proof mobile flow.
+Date: 2026-08-15

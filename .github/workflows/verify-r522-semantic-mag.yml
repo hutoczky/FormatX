@@ -1,0 +1,97 @@
+name: Verify current semantic MAG R522
+run-name: R528 living-core semantic MAG for ${{ github.event.workflow_run.head_sha || github.sha }}
+
+on:
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-r522-semantic-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  semantic-mag:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      FORMATX_TEST_URL: https://formatxsuite.com/
+      FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r522-semantic-mag
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.AUDITED_SHA }}
+      - name: Wait for exact audited production revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' \
+              "https://formatxsuite.com/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-r522-$attempt" \
+              -o "$RUNNER_TEMP/live-p0.txt" \
+              && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
+              echo 'Exact production revision is live.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Exact production marker did not converge.' >&2
+          exit 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Living-core semantic source sanity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/validate-r522-semantic-mag.cjs
+          node --check .github/scripts/validate-mag-pause-owner-r485.cjs
+          node .github/scripts/validate-mag-pause-owner-r485.cjs
+      - name: Reuse system Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Semantic living MAG bounded functional proof
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r522-semantic-mag-${{ env.AUDITED_SHA }}
+          path: artifacts/r522-semantic-mag/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Publish semantic MAG status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Living MAG motion, ASK, reduced-motion and fallback passed'
+          else
+            state=failure
+            description='Current living MAG semantic contract failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state="$state" \
+            -f context='FormatX R522 semantic MAG gate' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

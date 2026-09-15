@@ -1,0 +1,55 @@
+'use strict';
+// r285 public-integrity revalidation: first-paint-stable narrative + pure WebGL energy bridge.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const repo=path.resolve(__dirname,'../..');
+const read=f=>fs.readFileSync(path.join(repo,f),'utf8');
+const index=read('docs/scifi-ui/index.html');
+const css=read('docs/scifi-ui/styles/formatx-award-narrative-r175.css');
+const criticalNarrative=read('docs/scifi-ui/styles/formatx-critical-narrative-r227.css');
+const js=read('docs/scifi-ui/scripts/formatx-award-narrative-r175.js');
+const energy=read('docs/scifi-ui/scripts/formatx-living-energy-r168.js');
+
+assert.ok(index.includes('formatx-critical-narrative-r227.css?v=20260819-r227'),'missing r227 critical narrative bundle');
+assert.ok(index.includes('formatx-award-narrative-r175.js?v=20260816-r175-award-narrative'),'missing r175 narrative JS asset');
+assert.equal((index.match(/formatx-critical-narrative-r227\.css/g)||[]).length,1,'critical narrative bundle must load once');
+assert.ok(criticalNarrative.includes('BEGIN formatx-award-narrative-r175.css'),'critical narrative bundle must identify its canonical r175 source');
+assert.ok(criticalNarrative.includes(css),'critical narrative bundle must contain the complete canonical r175 CSS');
+
+for(const token of [
+  'data-fx-design-system="2"',
+  '--fx-r175-space-scene',
+  '.section-heading h2',
+  'text-wrap: balance',
+  'data-fx-story-state="active"',
+  '@media (max-width: 900px)',
+  '@media (prefers-reduced-motion: reduce)'
+])assert.ok(css.includes(token),`missing r175 CSS contract ${token}`);
+
+for(const token of [
+  "VERSION='r175-award-narrative-system'",
+  'IntersectionObserver',
+  'requestAnimationFrame',
+  "addEventListener('scroll',scheduleProgress,{passive:true})",
+  'formatx:storychapter',
+  'fxActiveOrganR175',
+  'fxNarrativeMotionR175',
+  'SENSE / MAP / DECIDE',
+  'ACT / VERIFY / REPORT',
+  'PROOF / SUPPORT / SIGNAL'
+])assert.ok(js.includes(token),`missing r175 JS contract ${token}`);
+
+assert.doesNotMatch(js,/setInterval\s*\(/,'r175 story runtime must not use setInterval');
+assert.doesNotMatch(css,/transition:\s*all\b/i,'r175 CSS must not animate all properties');
+assert.doesNotMatch(css,/var\(--fx-r175-[^)]+\)\s*\*/,'r175 CSS must not depend on custom-property multiplication');
+
+for(const token of [
+  "VERSION='r285-native-webgl-energy-bridge'",
+  "fxLivingEnergyClockR168='native-renderer-burst-clock-r285'",
+  "fxLivingEnergyEffectModeR168='native-webgl-material-only-r285'",
+  "fxLivingEnergySchedulerR175='no-2d-runtime'",
+  "fxLivingEnergySchedulerR182='no-2d-runtime'",
+  'FormatXCoreMobileV69?.pulse?.()'
+])assert.ok(energy.includes(token),`missing pure-WebGL energy contract ${token}`);
+assert.doesNotMatch(energy,/setInterval\s*\(|requestAnimationFrame\s*\(|radial-gradient|conic-gradient|linear-gradient|getContext\(['"]2d['"]/i,'r285 energy bridge must not own a 2D visual scheduler or material');
+new Function(js);new Function(energy);
+console.log('PASS: r285 bundled award narrative, responsive composition, reduced motion and pure WebGL energy bridge are valid.');

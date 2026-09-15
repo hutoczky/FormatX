@@ -1,0 +1,5 @@
+FormatX MAG r147 production marker
+Preserve r145 approved visual.
+Add live optical animation/interactivity driven by existing pointer/touch/gyro state.
+Move mobile heading/proof/following content below the crystal safe area.
+2026-08-15

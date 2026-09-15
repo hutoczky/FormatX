@@ -6,6 +6,7 @@ const origin = process.env.FORMATX_PUBLIC_ORIGIN || 'http://127.0.0.1:4178';
 const pages = [
   ['/scifi-ui/method.html', 'method'],
   ['/scifi-ui/verification.html', 'verification'],
+  ['/scifi-ui/technical-report.html', 'technical-report'],
   ['/scifi-ui/test-matrix.html', 'test-matrix'],
   ['/scifi-ui/known-issues.html', 'known-issues'],
   ['/scifi-ui/security.html', 'security'],
@@ -47,6 +48,45 @@ async function ensureRuntime(page, name) {
   }
 }
 
+async function assertMeaningfulMain(page, name, viewport) {
+  const state = await page.evaluate(() => {
+    const main = document.querySelector('main#main-content');
+    if (!main) return { exists: false };
+    const style = getComputedStyle(main);
+    const rect = main.getBoundingClientRect();
+    const text = (main.innerText || '').replace(/\s+/g, ' ').trim();
+    const dynamic = main.querySelector('[data-method-root],[data-verification-root],[data-test-table-body],[data-issues-root],[data-decisions-root]');
+    let dynamicText = '';
+    let dynamicChildren = 0;
+    if (dynamic) {
+      dynamicText = (dynamic.innerText || '').replace(/\s+/g, ' ').trim();
+      dynamicChildren = dynamic.children.length;
+    }
+    return {
+      exists: true,
+      display: style.display,
+      visibility: style.visibility,
+      opacity: Number(style.opacity || 1),
+      width: rect.width,
+      height: rect.height,
+      textLength: text.length,
+      textSample: text.slice(0, 180),
+      dynamicPresent: Boolean(dynamic),
+      dynamicTextLength: dynamicText.length,
+      dynamicChildren,
+      fallbackCount: main.querySelectorAll('[data-public-static-fallback]').length,
+    };
+  });
+
+  assert(state.exists, `${name}: main content is missing`);
+  assert(state.display !== 'none' && state.visibility !== 'hidden' && state.opacity > .02, `${name}: main content is hidden: ${JSON.stringify(state)}`);
+  assert(state.width > 100 && state.height > 160, `${name}: main content has no meaningful rendered area: ${JSON.stringify(state)}`);
+  assert(state.textLength >= 80, `${name}: page is effectively blank (${viewport.width}px): ${JSON.stringify(state)}`);
+  if (state.dynamicPresent) {
+    assert(state.dynamicChildren >= 1 || state.dynamicTextLength >= 24, `${name}: dynamic public content root is blank (${viewport.width}px): ${JSON.stringify(state)}`);
+  }
+}
+
 async function assertPage(browser, pathname, name, viewport) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
@@ -54,7 +94,7 @@ async function assertPage(browser, pathname, name, viewport) {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(origin + pathname, { waitUntil: 'domcontentloaded' });
   await ensureRuntime(page, name);
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(180);
 
   assert(errors.length === 0, `${name}: page errors: ${errors.join(' | ')}`);
   assert(await page.locator('header.fx-public-header').count() === 1, `${name}: canonical public header missing or duplicated`);
@@ -62,6 +102,7 @@ async function assertPage(browser, pathname, name, viewport) {
   assert(await page.locator('.fx-language-toggle:visible').count() === 1, `${name}: exactly one visible language toggle is required`);
   assert(await page.locator('main#main-content').count() === 1, `${name}: main-content skip target is missing or duplicated`);
   assert(await page.locator('.skip-link[href="#main-content"]').count() === 1, `${name}: canonical skip link is missing or duplicated`);
+  await assertMeaningfulMain(page, name, viewport);
 
   const current = await page.locator('.fx-public-footer a[aria-current="page"]').count();
   assert(current >= 1, `${name}: current page is not identified in public navigation`);
@@ -76,6 +117,7 @@ async function assertPage(browser, pathname, name, viewport) {
     return currentLanguage !== previous && ['hu', 'en'].includes(currentLanguage);
   }, before, { timeout: 8000 });
 
+  await assertMeaningfulMain(page, name + '-after-language-switch', viewport);
   console.log(`PASS ${name}`);
   await context.close();
 }
@@ -123,6 +165,72 @@ async function assertKnownIssues(browser, viewport, name) {
   await context.close();
 }
 
+async function assertTechnicalReport(browser, viewport, name) {
+  const context = await browser.newContext({ viewport });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(origin + '/scifi-ui/technical-report.html', { waitUntil: 'domcontentloaded' });
+  await ensureRuntime(page, name);
+  await page.waitForTimeout(150);
+
+  assert(errors.length === 0, `${name}: page errors: ${errors.join(' | ')}`);
+  assert(await page.locator('meta[http-equiv="Content-Security-Policy"]').count() === 1, `${name}: standalone CSP meta missing`);
+  assert(await page.locator('.fx-public-footer a[aria-current="page"][href="/scifi-ui/technical-report.html"]').count() === 1, `${name}: canonical current-page navigation missing`);
+  const text = await page.locator('main').innerText();
+  assert(/reference-lock v30/i.test(text), `${name}: v30 production authority claim missing`);
+  assert(/seamless-v7/i.test(text), `${name}: seamless-v7 scroll state missing`);
+  assert(/5 napos próbalicenc|5-day trial licence/i.test(text), `${name}: five-day trial truth missing`);
+  assert(/detached signature/i.test(text), `${name}: missing-signature limitation is not disclosed`);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  assert(overflow <= 2, `${name}: horizontal overflow ${overflow}px`);
+
+  console.log(`PASS ${name}`);
+  await context.close();
+}
+
+async function assertAndroidStatus(browser, viewport, name) {
+  const context = await browser.newContext({ viewport, locale: 'hu-HU' });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(origin + '/scifi-ui/android/?lang=hu', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(200);
+
+  assert(errors.length === 0, `${name}: page errors: ${errors.join(' | ')}`);
+  assert(await page.locator('h1').count() === 1, `${name}: exactly one h1 is required`);
+  assert(await page.locator('a[href="/download/android"]').count() >= 2, `${name}: official Android full-release links missing`);
+  assert(await page.locator('a[href="/download/android-native-beta"]').count() >= 1, `${name}: first-party Native beta download route missing`);
+  const text = await page.locator('body').innerText();
+  assert(/ANDROID TELJES|Android full release/i.test(text), `${name}: full-release copy missing`);
+  assert(/NATÍV BÉTA|Native beta/i.test(text), `${name}: beta-channel separation missing`);
+
+  const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+  const ogUrl = await page.locator('meta[property="og:url"]').getAttribute('content');
+  const alternates = await page.locator('link[rel="alternate"][hreflang]').evaluateAll(nodes => Object.fromEntries(
+    nodes.map(node => [node.hreflang, node.href]),
+  ));
+  assert(canonical === 'https://formatxsuite.com/scifi-ui/android/', `${name}: canonical URL mismatch`);
+  assert(ogUrl === canonical, `${name}: og:url must match canonical`);
+  assert(alternates.hu === 'https://formatxsuite.com/scifi-ui/android/?lang=hu', `${name}: HU hreflang mismatch`);
+  assert(alternates.en === 'https://formatxsuite.com/scifi-ui/android/?lang=en', `${name}: EN hreflang mismatch`);
+  assert(alternates['x-default'] === canonical, `${name}: x-default hreflang mismatch`);
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  assert(overflow <= 2, `${name}: horizontal overflow ${overflow}px`);
+
+  const button = page.locator('#languageButton');
+  assert(await button.count() === 1, `${name}: language button missing`);
+  const before = await page.locator('html').getAttribute('lang');
+  assert(before === 'hu', `${name}: explicit Hungarian query language was not applied`);
+  await button.click();
+  await page.waitForFunction(previous => document.documentElement.lang !== previous, before, { timeout: 5000 });
+  assert(await page.locator('html').getAttribute('lang') === 'en', `${name}: HU to EN language switch failed`);
+
+  console.log(`PASS ${name}`);
+  await context.close();
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -134,7 +242,11 @@ async function assertKnownIssues(browser, viewport, name) {
     }
     await assertKnownIssues(browser, { width: 1440, height: 900 }, 'known-issues-filter-desktop');
     await assertKnownIssues(browser, { width: 390, height: 844 }, 'known-issues-filter-mobile');
-    console.log('PASS: public shell, skip navigation, language control, known-issues filters and responsive layouts are valid.');
+    await assertTechnicalReport(browser, { width: 1440, height: 900 }, 'technical-report-truth-desktop');
+    await assertTechnicalReport(browser, { width: 390, height: 844 }, 'technical-report-truth-mobile');
+    await assertAndroidStatus(browser, { width: 1440, height: 900 }, 'android-status-desktop');
+    await assertAndroidStatus(browser, { width: 390, height: 844 }, 'android-status-mobile');
+    console.log('PASS: every public page has meaningful visible content on desktop and mobile, with responsive navigation, language controls, known-issues filters, technical-report truth and Android status validated.');
   } finally {
     await browser.close();
   }

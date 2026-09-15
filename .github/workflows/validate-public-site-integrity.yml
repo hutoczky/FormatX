@@ -6,7 +6,12 @@ on:
       - 'docs/**'
       - 'billing-worker/src/**'
       - '.github/scripts/validate-public-site-integrity.cjs'
+      - '.github/scripts/validate-release-truth-runtime.cjs'
+      - '.github/scripts/validate-experimental-lab-indexing.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-legal-language-browser.cjs'
+      - '.github/scripts/validate-real3d-core.cjs'
+      - '.github/scripts/validate-award-narrative-r175.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
   push:
     branches: [master]
@@ -14,7 +19,12 @@ on:
       - 'docs/**'
       - 'billing-worker/src/**'
       - '.github/scripts/validate-public-site-integrity.cjs'
+      - '.github/scripts/validate-release-truth-runtime.cjs'
+      - '.github/scripts/validate-experimental-lab-indexing.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-legal-language-browser.cjs'
+      - '.github/scripts/validate-real3d-core.cjs'
+      - '.github/scripts/validate-award-narrative-r175.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
   workflow_dispatch:
 
@@ -29,7 +39,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,12 +47,23 @@ jobs:
           node-version: '22'
       - name: Validate full public surface
         run: node .github/scripts/validate-public-site-integrity.cjs
+      - name: Validate canonical release runtime truth
+        run: node .github/scripts/validate-release-truth-runtime.cjs
+      - name: Validate experimental lab indexing boundaries
+        run: node .github/scripts/validate-experimental-lab-indexing.cjs
+      - name: Validate native WebGL3D core
+        run: node .github/scripts/validate-real3d-core.cjs
+      - name: Validate award narrative and animation scheduler
+        run: node .github/scripts/validate-award-narrative-r175.cjs
       - name: Validate feedback and moderation
         run: node .github/scripts/validate-feedback-moderation.cjs
       - name: Validate requested site features
         run: node .github/scripts/validate-user-requested-site-features.cjs
       - name: Validate browser test syntax
-        run: node --check .github/scripts/validate-public-pages-browser.cjs
+        run: |
+          node --check .github/scripts/validate-public-pages-browser.cjs
+          node --check .github/scripts/validate-legal-language-browser.cjs
+          node --check docs/scifi-ui/scripts/legal-page-i18n.js
       - name: Install Playwright Chromium
         run: |
           npm install --prefix "$RUNNER_TEMP/formatx-public-browser" --no-audit --no-fund playwright@1.62.0
@@ -61,6 +82,11 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/formatx-public-browser/node_modules
           FORMATX_PUBLIC_ORIGIN: http://127.0.0.1:4178
         run: node .github/scripts/validate-public-pages-browser.cjs
+      - name: Validate real HU EN legal and support content
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-public-browser/node_modules
+          FORMATX_PUBLIC_ORIGIN: http://127.0.0.1:4178
+        run: node .github/scripts/validate-legal-language-browser.cjs
       - name: Publish public-site integrity status
         if: always() && github.event_name == 'push'
         env:
@@ -70,7 +96,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Static integrity and desktop/mobile Chromium public-page validation passed'
+            description='Release truth, award narrative, WebGL3D and desktop/mobile Chromium passed'
           else
             state='failure'
             description='FormatX public-site integrity validation failed'

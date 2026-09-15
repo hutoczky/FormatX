@@ -1,0 +1,4 @@
+{
+  "revision": "r304",
+  "purpose": "stable browser and Lighthouse measurement after idempotent reference geometry, mobile hero scheduling, and throttled intro progress updates"
+}

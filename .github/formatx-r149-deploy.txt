@@ -1,0 +1,4 @@
+FormatX MAG r149 production deployment marker.
+Centered optical reactor on the actual detail canvas.
+Mobile safe lane reduced to measured 40-50 px after the visual tail.
+Legacy hero overlays forced out of the mobile visual plane.

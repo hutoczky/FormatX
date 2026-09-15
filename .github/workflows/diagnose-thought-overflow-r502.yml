@@ -1,0 +1,45 @@
+name: Diagnose R502 mobile thought overflow owner
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/scripts/diagnose-thought-overflow-r502.cjs'
+      - '.github/workflows/diagnose-thought-overflow-r502.yml'
+permissions:
+  contents: read
+concurrency:
+  group: formatx-r502-thought-overflow-owner
+  cancel-in-progress: true
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+      FORMATX_R502_OVERFLOW_DIR: artifacts/r502-overflow
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check .github/scripts/diagnose-thought-overflow-r502.cjs
+      - name: Install Playwright
+        run: |
+          npm install --no-save --no-package-lock playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Start exact source site
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/r502-overflow-http.log" 2>&1 &
+          for attempt in $(seq 1 80); do curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0; sleep 0.25; done
+          cat "$RUNNER_TEMP/r502-overflow-http.log"; exit 1
+      - name: Capture winning mobile box-model rules
+        run: node .github/scripts/diagnose-thought-overflow-r502.cjs
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r502-thought-overflow-${{ github.sha }}
+          path: artifacts/r502-overflow/
+          if-no-files-found: warn
+          retention-days: 30

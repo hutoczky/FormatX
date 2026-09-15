@@ -1,0 +1,35 @@
+/* FormatX r287 — authoritative physical open state for ASK/Thought dialogue.
+   Semantic state already lives on data-fx-organism-thought. This layer only
+   guarantees that legacy menu/panel/scroll opacity rules cannot hide an
+   explicitly open dialogue. */
+
+html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:none!important;
+  z-index:2147481600!important;
+}
+
+html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open .fx-organism-thought:not([hidden]){
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:none!important;
+}
+
+html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open .fx-organism-thought-trigger{
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open,
+  html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open .fx-organism-thought{
+    animation:none!important;
+    transition:none!important;
+  }
+}

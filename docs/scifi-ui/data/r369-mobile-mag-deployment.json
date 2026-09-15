@@ -1,0 +1,24 @@
+{
+  "revision": "r369",
+  "purpose": "publish-balanced-mobile-mag-optics-after-live-device-feedback",
+  "renderer": "single-webgl-crystal-organism-r326",
+  "optics_owner": "r369-balanced-mobile-optics-owner",
+  "cache_revision": "20260827-r369-balanced-mobile-optics",
+  "mobile_profile": {
+    "canvas_opacity": 0.865,
+    "brightness": 0.94,
+    "contrast": 0.555,
+    "blur_px": 1.07,
+    "aura_opacity": 0.073
+  },
+  "narrow_mobile_profile": {
+    "max_width_px": 430,
+    "canvas_opacity": 0.845,
+    "brightness": 0.92,
+    "contrast": 0.53,
+    "blur_px": 1.12,
+    "aura_opacity": 0.062
+  },
+  "intent": "restore-readable-crystal-body-without-returning-to-hard-r367-perimeter",
+  "desktop_optics_unchanged": true
+}

@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxIntroSkipGuard === 'ready-v3') return;
-  root.dataset.fxIntroSkipGuard = 'ready-v3';
+  if (root.dataset.fxIntroSkipGuard === 'ready-v4') return;
+  root.dataset.fxIntroSkipGuard = 'ready-v4';
 
   let completionTimer = 0;
 
@@ -44,10 +44,10 @@
     }
     root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-reveal', 'fx-intro-managed');
     root.classList.add('fx-intro-complete');
-    root.dataset.fxIntro = 'skip-guard-complete-v3';
+    root.dataset.fxIntro = 'skip-guard-complete-v4';
     syncGenomeLaunchers();
     document.dispatchEvent(new CustomEvent('formatx:introcomplete', {
-      detail: { source: 'authoritative-skip-guard-v3' }
+      detail: { source: 'authoritative-skip-guard-v4' }
     }));
   }
 
@@ -60,17 +60,31 @@
   document.addEventListener('formatx:introcomplete', syncGenomeLaunchers);
 
   const observer = new MutationObserver(syncGenomeLaunchers);
-  observer.observe(document.documentElement, {
-    subtree: true,
-    childList: true,
-    attributes: true,
-    attributeFilter: ['hidden', 'aria-hidden', 'class']
-  });
+  function observe() {
+    observer.disconnect();
+    observer.observe(document.documentElement, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['hidden', 'aria-hidden', 'class']
+    });
+  }
+
+  observe();
   syncGenomeLaunchers();
 
-  addEventListener('pagehide', () => {
+  addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    root.dataset.fxIntroSkipGuard = 'ready-v4';
+    observe();
+    syncGenomeLaunchers();
+  }, { passive: true });
+
+  addEventListener('pagehide', event => {
     clearTimeout(completionTimer);
+    completionTimer = 0;
+    if (event.persisted) return;
     observer.disconnect();
-    root.dataset.fxIntroSkipGuard = 'released';
-  }, { once: true });
+    root.dataset.fxIntroSkipGuard = 'released-v4';
+  });
 }());

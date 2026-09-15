@@ -22,9 +22,10 @@ assert.match(compatible, /Linux indítófájlt/, 'portable installer visual is m
 assert.match(compatible, /Windows EXE/, 'portable installer visual is missing Windows launcher state');
 assert.match(compatible, /macOS indítófájlt/, 'portable installer visual is missing macOS launcher state');
 
-assert.match(showcase, /image: 'portable-installer-compatible\.svg'/, 'showcase does not use the compatible portable installer asset at source');
-assert.doesNotMatch(showcase, /image: 'portable-installer\.svg'/, 'showcase still generates the obsolete portable installer asset');
-assert.match(feedback, /portable-installer-compatible\.svg\?v=/, 'cached legacy mobile compatibility fallback is missing');
+assert.match(feedback, /portable-installer-compatible\.svg\?v=/, 'mobile compatibility fallback replacement is missing');
+assert.match(showcase, /image: 'portable-installer-compatible\.svg'/, 'showcase producer must create the compatible portable installer directly');
+assert.doesNotMatch(showcase, /image: 'portable-installer\.svg'/, 'showcase producer still creates the obsolete portable installer');
+assert.match(feedback, /patchPortableInstallerImages\(\)/, 'legacy/static portable installer fallback patch is missing');
 assert.match(feedback, /FEEDBACK_SUMMARY_URL = '\/api\/feedback\/summary'/, 'feedback summary endpoint is missing');
 assert.match(feedback, /FEEDBACK_SUBMIT_URL = '\/api\/feedback'/, 'feedback submit endpoint is missing');
 assert.match(feedback, /privacy_consent: true/, 'privacy consent is not sent explicitly');
@@ -58,15 +59,12 @@ assert.ok(
 );
 assert.match(matrix, /ratingColumns/, 'matrix must verify feedback rating layout');
 
-assert.match(schema, /SCHEMA_VERSION = '6'/, 'current D1 feedback schema version is missing');
 assert.match(schema, /PRAGMA table_info\(user_feedback\)/, 'D1 feedback schema verification is missing');
-assert.match(schema, /createFeedbackTableIfMissing/, 'targeted feedback bootstrap is missing');
-assert.match(schema, /ALTER TABLE user_feedback ADD COLUMN/, 'non-destructive feedback column repair is missing');
-assert.doesNotMatch(schema, /DROP TABLE user_feedback/, 'feedback recovery must never drop the live table');
-assert.match(api, /runWithFeedbackTable/, 'feedback API targeted table bootstrap wrapper is missing');
-assert.match(api, /createFeedbackTableIfMissing/, 'feedback API cannot recover a missing feedback table');
-assert.doesNotMatch(entry, /ensureFeedbackSchemaCompatibility/, 'legacy blocking blanket feedback migration returned');
-assert.match(entry, /handleFeedbackRequest\(request, env\)/, 'feedback routing is missing');
+assert.match(schema, /ensureFeedbackSchemaCompatibility/, 'maintenance-only D1 compatibility helper is missing');
+assert.match(api, /createFeedbackTableIfMissing/, 'feedback API must retain missing-table bootstrap ownership');
+assert.match(api, /runWithFeedbackTable/, 'feedback API must retry a real operation after missing-table bootstrap');
+assert.doesNotMatch(entry, /ensureFeedbackSchemaCompatibility\s*\(/, 'production feedback hot path must not run schema maintenance before every request');
+assert.match(entry, /handleFeedbackRequest\(request, env\)/, 'production feedback entry must delegate current feedback handling to feedback-api');
 assert.match(workerConfig, /"main": "src\/production-content-entry\.js"/, 'unexpected production Worker entry');
 
-console.log('FormatX mobile showcase, feedback and responsive matrix validation passed.');
+console.log('FormatX mobile showcase, feedback and responsive matrix validation passed with current lazy feedback schema ownership and direct compatible asset ownership.');

@@ -1,0 +1,12 @@
+{
+  "release": "r147b-visible-motion-safe-lane",
+  "date": "2026-08-15",
+  "core_base": "r145",
+  "changes": [
+    "visible optical pulse and rotating energy rings",
+    "pointer/touch reactive light field",
+    "existing r144 gyroscope motion retained",
+    "measured safe gap below extended crystal tail",
+    "cache-busted production bootstrap"
+  ]
+}

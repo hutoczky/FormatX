@@ -1,0 +1,6 @@
+{
+  "revision": "r308",
+  "purpose": "Measure interaction-deferred visual CSS with merged stable first-paint geometry",
+  "source_commit": "15220285ad957af3f3da6b7d0e5f74278ba42f38",
+  "thresholds_unchanged": true
+}

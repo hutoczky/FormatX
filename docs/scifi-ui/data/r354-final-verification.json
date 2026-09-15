@@ -1,0 +1,12 @@
+{
+  "revision": "r354-final-verification",
+  "renderer": "crystal-organism-r326",
+  "mobileOptics": "r354-soft-edge-low-bloom",
+  "purpose": "Trigger one stable production, live-award and Lighthouse verification pass after the r354 mobile optics correction.",
+  "requestedGates": [
+    "production-smoke",
+    "live-award-readiness",
+    "desktop-lighthouse",
+    "mobile-lighthouse"
+  ]
+}

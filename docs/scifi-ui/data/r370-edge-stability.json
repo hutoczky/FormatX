@@ -1,0 +1,8 @@
+{
+  "revision": "r370",
+  "purpose": "render-blocking-mobile-first-paint-and-public-csp-stability",
+  "mobile_first_paint": "formatx-mobile-first-paint-r358.css?v=20260827-r370-render-blocking",
+  "csp_cloudflare_beacon": true,
+  "worker_robots_owner": true,
+  "lighthouse_thresholds_relaxed": false
+}

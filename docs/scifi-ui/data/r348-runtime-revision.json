@@ -1,0 +1,9 @@
+{
+  "revision": "r348-balanced-soft-glass-edge",
+  "purpose": "stable full browser and Lighthouse measurement after mobile MAG optical refinement",
+  "mobileOptics": {
+    "target": "restrained bloom with softer glass perimeter",
+    "geometryChanged": false,
+    "desktopChanged": false
+  }
+}

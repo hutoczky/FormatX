@@ -7,6 +7,7 @@
   const PUBLIC_PATHS = new Set([
     '/scifi-ui/method.html',
     '/scifi-ui/verification.html',
+    '/scifi-ui/technical-report.html',
     '/scifi-ui/test-matrix.html',
     '/scifi-ui/known-issues.html',
     '/scifi-ui/security.html',
@@ -27,6 +28,7 @@
     hu: [
       ['/scifi-ui/method.html', 'Módszer'],
       ['/scifi-ui/verification.html', 'Bizonyíték'],
+      ['/scifi-ui/technical-report.html', 'Technikai riport'],
       ['/scifi-ui/test-matrix.html', 'Tesztek'],
       ['/scifi-ui/known-issues.html', 'Ismert hibák'],
       ['/scifi-ui/security.html', 'Biztonság'],
@@ -37,6 +39,7 @@
     en: [
       ['/scifi-ui/method.html', 'Method'],
       ['/scifi-ui/verification.html', 'Verification'],
+      ['/scifi-ui/technical-report.html', 'Technical report'],
       ['/scifi-ui/test-matrix.html', 'Tests'],
       ['/scifi-ui/known-issues.html', 'Known issues'],
       ['/scifi-ui/security.html', 'Security'],

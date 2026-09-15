@@ -1,0 +1,10 @@
+{
+  "revision": "r301",
+  "purpose": "stable browser plus 3x desktop and 3x mobile Lighthouse verification",
+  "qualityGatesUnchanged": true,
+  "desktopRuns": 3,
+  "mobileRuns": 3,
+  "mobileFastPathPreserved": true,
+  "desktopMicroIntro": true,
+  "dialogueStability": "scroll-safe"
+}

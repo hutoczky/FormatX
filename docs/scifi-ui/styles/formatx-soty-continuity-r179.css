@@ -1,0 +1,324 @@
+/* FormatX r179 — continuous SOTY organ-field system.
+   The MAG remains the visual source; the rest of the page receives the same
+   living energy grammar without adding a second GPU context. Only compositor-
+   friendly transform/opacity/filter properties animate. */
+
+html[data-fx-design-system="2"]{
+  --fx-r179-accent:96,228,255;
+  --fx-r179-secondary:143,114,255;
+  --fx-r179-x:50%;
+  --fx-r179-y:42%;
+  --fx-r179-px:0;
+  --fx-r179-py:0;
+  --fx-r179-progress:0;
+  --fx-r179-local:.18;
+  --fx-r179-boost:0;
+  --fx-r179-field-opacity:.42;
+  --fx-r179-sigil-opacity:.22;
+  --fx-r179-card-x:50%;
+  --fx-r179-card-y:32%;
+}
+
+html[data-fx-soty-continuity-r179="ready"] #main-content{
+  position:relative;
+  isolation:isolate;
+  overflow:clip;
+}
+
+/* One viewport-scale carrier keeps every chapter in the same visual world. */
+html[data-fx-soty-continuity-r179="ready"] .fx-r179-field{
+  position:fixed;
+  z-index:0;
+  inset:74px 0 0;
+  pointer-events:none;
+  overflow:hidden;
+  contain:layout paint style;
+  opacity:var(--fx-r179-field-opacity);
+  mix-blend-mode:screen;
+}
+
+html[data-fx-soty-continuity-r179="ready"] .fx-r179-field::before{
+  content:"";
+  position:absolute;
+  width:min(72vw,980px);
+  aspect-ratio:1;
+  left:var(--fx-r179-x);
+  top:var(--fx-r179-y);
+  transform:translate(-50%,-50%) translate3d(calc(var(--fx-r179-px) * 18px),calc(var(--fx-r179-py) * 13px),0) scale(calc(.78 + var(--fx-r179-local) * .14));
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(248,255,255,.085) 0 1.2%,rgba(var(--fx-r179-accent),.10) 7%,rgba(var(--fx-r179-secondary),.055) 19%,transparent 48%),
+    conic-gradient(from calc(var(--fx-r179-progress) * 280deg),transparent 0 8%,rgba(var(--fx-r179-accent),.065) 11%,transparent 16% 34%,rgba(var(--fx-r179-secondary),.045) 39%,transparent 45% 67%,rgba(235,253,255,.04) 71%,transparent 77% 100%);
+  -webkit-mask-image:radial-gradient(circle,#000 0 44%,rgba(0,0,0,.74) 58%,rgba(0,0,0,.24) 72%,transparent 84%);
+  mask-image:radial-gradient(circle,#000 0 44%,rgba(0,0,0,.74) 58%,rgba(0,0,0,.24) 72%,transparent 84%);
+  filter:blur(calc(6px - var(--fx-r179-boost) * 2px)) saturate(calc(1.05 + var(--fx-r179-boost) * .24));
+  opacity:calc(.46 + var(--fx-r179-local) * .30 + var(--fx-r179-boost) * .18);
+  will-change:transform,opacity,filter;
+}
+
+html[data-fx-soty-continuity-r179="ready"] .fx-r179-aurora{
+  position:absolute;
+  inset:-22% -14%;
+  background:
+    radial-gradient(ellipse 30% 42% at calc(18% + var(--fx-r179-progress) * 64%) 36%,rgba(var(--fx-r179-accent),.085),transparent 72%),
+    radial-gradient(ellipse 28% 36% at calc(84% - var(--fx-r179-progress) * 56%) 62%,rgba(var(--fx-r179-secondary),.065),transparent 76%);
+  filter:blur(34px);
+  transform:translate3d(calc(var(--fx-r179-px) * -12px),calc(var(--fx-r179-py) * 10px),0);
+  opacity:calc(.46 + var(--fx-r179-local) * .26);
+  will-change:transform,opacity;
+}
+
+html[data-fx-soty-continuity-r179="ready"] .fx-r179-carrier{
+  position:absolute;
+  left:clamp(28px,6.2vw,112px);
+  top:0;
+  bottom:0;
+  width:1px;
+  background:linear-gradient(180deg,transparent 0%,rgba(var(--fx-r179-accent),.10) 12%,rgba(var(--fx-r179-accent),.46) 46%,rgba(var(--fx-r179-secondary),.22) 72%,transparent 100%);
+  opacity:calc(.28 + var(--fx-r179-local) * .32);
+  box-shadow:0 0 14px rgba(var(--fx-r179-accent),.10);
+}
+
+html[data-fx-soty-continuity-r179="ready"] .fx-r179-carrier::after{
+  content:"";
+  position:absolute;
+  width:7px;
+  height:7px;
+  left:50%;
+  top:calc(8% + var(--fx-r179-progress) * 84%);
+  border:1px solid rgba(226,253,255,.82);
+  transform:translate(-50%,-50%) rotate(45deg) scale(calc(.78 + var(--fx-r179-boost) * .26));
+  background:rgba(var(--fx-r179-accent),.22);
+  box-shadow:0 0 12px rgba(var(--fx-r179-accent),.52),0 0 28px rgba(var(--fx-r179-secondary),.22);
+}
+
+html[data-fx-soty-continuity-r179="ready"] #main-content>section.scene{
+  z-index:1;
+}
+
+html[data-fx-soty-continuity-r179="ready"] #main-content>section.scene:not(#hero){
+  overflow:clip;
+}
+
+/* Chapter atmospheres overlap so no section reads as a separate card/page. */
+html[data-fx-soty-continuity-r179="ready"] #main-content>section.scene:not(#hero)::before{
+  content:"";
+  position:absolute;
+  z-index:-2;
+  inset:-14% -10% -18%;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse 48% 42% at calc(14% + var(--fx-r179-chapter-x,18%)) 36%,rgba(var(--fx-r175-accent),.045),transparent 72%),
+    radial-gradient(ellipse 35% 30% at 84% 70%,rgba(var(--fx-r175-secondary),.025),transparent 74%);
+  opacity:calc(.48 + var(--fx-r179-section-energy,.18) * .52);
+  filter:blur(18px);
+}
+
+html[data-fx-soty-continuity-r179="ready"] #main-content>section.scene:not(#hero)::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:clamp(28px,6.2vw,112px);
+  top:-18%;
+  bottom:-18%;
+  width:1px;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(var(--fx-r175-accent),.20) 18%,rgba(var(--fx-r175-accent),.08) 72%,transparent);
+  opacity:var(--fx-r179-sigil-opacity);
+}
+
+/* Organ sigils: same energy source, distinct anatomy. */
+.fx-r179-organ-sigil{
+  position:absolute;
+  z-index:-1;
+  right:clamp(-70px,3vw,34px);
+  top:clamp(42px,9vw,118px);
+  width:clamp(220px,28vw,470px);
+  aspect-ratio:1;
+  pointer-events:none;
+  opacity:calc(var(--fx-r179-sigil-opacity) + var(--fx-r179-section-energy,.18) * .22);
+  transform:translate3d(calc(var(--fx-r179-section-px,0) * 12px),calc(var(--fx-r179-section-py,0) * 9px),0) scale(calc(.92 + var(--fx-r179-section-energy,.18) * .08));
+  transform-origin:50% 50%;
+  mix-blend-mode:screen;
+  filter:saturate(1.08);
+  will-change:transform,opacity;
+}
+
+.fx-r179-organ-sigil>span{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  pointer-events:none;
+}
+
+/* Nervous system — converging synaptic arcs. */
+#experience .fx-r179-sigil-a{
+  border:1px solid rgba(96,228,255,.20);
+  border-left-color:transparent;
+  border-bottom-color:rgba(105,142,255,.10);
+  transform:rotate(calc(-18deg + var(--fx-r179-organ-phase,0deg))) scaleX(1.22) scaleY(.58);
+  box-shadow:0 0 20px rgba(96,228,255,.08),inset 0 0 22px rgba(96,228,255,.04);
+}
+#experience .fx-r179-sigil-b{
+  inset:14%;
+  border:1px solid rgba(191,250,255,.18);
+  border-right-color:transparent;
+  transform:rotate(calc(38deg - var(--fx-r179-organ-phase,0deg))) scaleX(.70) scaleY(1.18);
+}
+#experience .fx-r179-sigil-c{
+  inset:28%;
+  background:radial-gradient(circle,rgba(235,255,255,.52) 0 1%,rgba(96,228,255,.17) 4%,rgba(105,142,255,.07) 18%,transparent 52%);
+  box-shadow:32px -24px 0 -30px rgba(212,252,255,.72),-38px 18px 0 -30px rgba(96,228,255,.58),18px 40px 0 -30px rgba(132,113,255,.52);
+}
+
+/* Organs — coordinated living nodes rather than generic cards. */
+#capabilities .fx-r179-sigil-a{
+  background:
+    radial-gradient(circle at 30% 28%,rgba(226,255,249,.48) 0 1.2%,rgba(121,241,219,.15) 2.5%,transparent 9%),
+    radial-gradient(circle at 70% 24%,rgba(214,250,255,.42) 0 1.1%,rgba(98,161,255,.13) 2.4%,transparent 9%),
+    radial-gradient(circle at 76% 66%,rgba(226,255,249,.40) 0 1.2%,rgba(121,241,219,.12) 2.6%,transparent 10%),
+    radial-gradient(circle at 36% 74%,rgba(220,240,255,.36) 0 1%,rgba(98,161,255,.12) 2.5%,transparent 9%),
+    radial-gradient(circle at 50% 49%,rgba(245,255,255,.58) 0 1.4%,rgba(121,241,219,.18) 4%,transparent 18%);
+}
+#capabilities .fx-r179-sigil-b{
+  inset:13%;
+  border:1px solid rgba(121,241,219,.13);
+  border-top-color:rgba(225,255,250,.38);
+  border-left-color:rgba(98,161,255,.20);
+  transform:rotate(var(--fx-r179-organ-phase,0deg)) scaleX(1.12) scaleY(.78);
+}
+#capabilities .fx-r179-sigil-c{
+  inset:31%;
+  border:1px solid rgba(98,161,255,.14);
+  transform:rotate(calc(-1 * var(--fx-r179-organ-phase,0deg))) scaleX(.72) scaleY(1.18);
+}
+
+/* Commerce heart — unmistakable double-beat energy chamber. */
+#pricing .fx-r179-sigil-a{
+  inset:16%;
+  background:radial-gradient(circle,rgba(255,251,238,.44) 0 1.3%,rgba(255,207,137,.18) 5%,rgba(160,109,255,.08) 21%,transparent 58%);
+  transform:scale(calc(.92 + var(--fx-r179-heartbeat,0) * .16));
+  box-shadow:0 0 calc(18px + var(--fx-r179-heartbeat,0) * 20px) rgba(255,207,137,.14);
+}
+#pricing .fx-r179-sigil-b{
+  inset:7%;
+  border:1px solid rgba(255,207,137,.16);
+  border-right-color:rgba(160,109,255,.28);
+  transform:rotate(calc(12deg + var(--fx-r179-organ-phase,0deg))) scaleX(1.18) scaleY(.72);
+}
+#pricing .fx-r179-sigil-c{
+  inset:26%;
+  border:1px solid rgba(240,229,255,.14);
+  transform:rotate(calc(-26deg - var(--fx-r179-organ-phase,0deg))) scaleX(.72) scaleY(1.20);
+}
+
+/* Skeleton — structural light lattice, kept atmospheric. */
+#system .fx-r179-sigil-a{
+  border-radius:0;
+  background-image:linear-gradient(rgba(139,203,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(143,114,255,.07) 1px,transparent 1px);
+  background-size:clamp(28px,3vw,44px) clamp(28px,3vw,44px);
+  -webkit-mask-image:radial-gradient(circle,#000 0 20%,rgba(0,0,0,.72) 48%,transparent 76%);
+  mask-image:radial-gradient(circle,#000 0 20%,rgba(0,0,0,.72) 48%,transparent 76%);
+  transform:rotate(calc(-8deg + var(--fx-r179-organ-phase,0deg) * .08));
+}
+#system .fx-r179-sigil-b{
+  inset:18%;
+  border:1px solid rgba(204,238,255,.18);
+  transform:rotate(45deg) scale(.72);
+  border-radius:8%;
+}
+#system .fx-r179-sigil-c{
+  inset:36%;
+  border:1px solid rgba(143,114,255,.18);
+  transform:rotate(calc(45deg - var(--fx-r179-organ-phase,0deg))) scale(.72);
+  border-radius:8%;
+}
+
+/* Beacon — outward proof/signal transmission. */
+#resources .fx-r179-sigil-a{
+  inset:12%;
+  border:1px solid rgba(183,244,255,.18);
+  transform:scale(calc(.72 + var(--fx-r179-beacon,0) * .42));
+  opacity:calc(.20 + (1 - var(--fx-r179-beacon,0)) * .42);
+}
+#resources .fx-r179-sigil-b{
+  inset:28%;
+  border:1px solid rgba(111,227,200,.18);
+  transform:scale(calc(.70 + var(--fx-r179-beacon,0) * .52));
+  opacity:calc(.18 + (1 - var(--fx-r179-beacon,0)) * .36);
+}
+#resources .fx-r179-sigil-c{
+  inset:42%;
+  background:radial-gradient(circle,rgba(245,255,255,.72) 0 1.4%,rgba(183,244,255,.24) 5%,rgba(111,227,200,.08) 18%,transparent 58%);
+  box-shadow:0 0 22px rgba(183,244,255,.14),0 0 48px rgba(111,227,200,.07);
+}
+
+/* Surface coherence: existing cards become translucent organs in the same field. */
+html[data-fx-soty-continuity-r179="ready"] :is(.card,.price-card,.system-grid article,.fx-category-grid article,.fx-proof-grid article){
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+html[data-fx-soty-continuity-r179="ready"] .fx-r179-surface-light{
+  position:absolute;
+  z-index:-1;
+  inset:-1px;
+  pointer-events:none;
+  border-radius:inherit;
+  background:radial-gradient(circle at var(--fx-r179-card-x,50%) var(--fx-r179-card-y,30%),rgba(var(--fx-r175-accent),.12),rgba(var(--fx-r175-secondary),.035) 28%,transparent 58%);
+  opacity:.44;
+  transition:opacity .28s ease;
+}
+html[data-fx-soty-continuity-r179="ready"] [data-fx-r179-card-active="true"] .fx-r179-surface-light{opacity:.90}
+
+@media (hover:hover) and (pointer:fine){
+  html[data-fx-soty-continuity-r179="ready"] [data-fx-r179-card-active="true"]{
+    border-color:rgba(var(--fx-r175-accent),.32)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 26px 72px rgba(0,0,0,.25),0 0 42px rgba(var(--fx-r175-accent),.055)!important;
+  }
+}
+
+/* Mobile keeps the exact narrative quality but uses fewer expensive pixels. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-field{
+    inset:64px 0 0;
+    opacity:calc(var(--fx-r179-field-opacity) * .72);
+  }
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-field::before{
+    width:128vw;
+    filter:blur(7px) saturate(1.05);
+  }
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-aurora{
+    filter:blur(22px);
+    opacity:.42;
+  }
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-carrier{
+    left:14px;
+    opacity:.30;
+  }
+  html[data-fx-soty-continuity-r179="ready"] #main-content>section.scene:not(#hero)::after{left:14px}
+  .fx-r179-organ-sigil{
+    right:-24vw;
+    top:52px;
+    width:min(82vw,360px);
+    opacity:calc(var(--fx-r179-sigil-opacity) * .82 + var(--fx-r179-section-energy,.18) * .14);
+    filter:none;
+  }
+  html[data-fx-soty-continuity-r179="ready"] #main-content>section.scene:not(#hero)::before{filter:blur(10px)}
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-surface-light{opacity:.34}
+}
+
+@media (max-width:430px){
+  .fx-r179-organ-sigil{right:-35vw;width:92vw}
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-field::before,
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-aurora,
+  .fx-r179-organ-sigil{
+    will-change:auto;
+    transform:none!important;
+  }
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-field{opacity:.22}
+  .fx-r179-organ-sigil{opacity:.14}
+}

@@ -14,6 +14,30 @@
     return;
   }
 
+  // r294: on phone/coarse-pointer surfaces the current native core, canonical
+  // language control, release metadata runtime and r268 navigation already own
+  // the jobs this legacy APEX controller used to duplicate. Avoid whole-page
+  // language/link scans, reveal observers and scene/flow observers during the
+  // first-load critical window. Publish apexready only after the complete defer
+  // chain has subscribed, so final control owners never miss the event.
+  const MOBILE_NATIVE_CORE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  if (MOBILE_NATIVE_CORE) {
+    ROOT.dataset.fxApex = 'controller-performance-v2';
+    ROOT.dataset.fxApexMobileR293 = 'delegated-native-core-no-startup-scan';
+    ROOT.dataset.fxRenderer = 'three-host';
+    ROOT.dataset.fxScene = '0';
+    ROOT.dataset.fxFlow = '0';
+    ROOT.style.setProperty('--accent', '120,210,255');
+    ROOT.style.setProperty('--progress', '0');
+    const publishMobileReady = () => {
+      ROOT.dataset.fxApexMobileR294 = 'ready-after-defer-chain';
+      dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated', mobile: 'native-r294' } }));
+    };
+    if (document.readyState === 'complete') publishMobileReady();
+    else document.addEventListener('DOMContentLoaded', publishMobileReady, { once: true });
+    return;
+  }
+
   const LANG_KEY = 'formatx-language';
   const RELEASE_API = './data/current-release.json';
   const DOWNLOAD_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
@@ -45,14 +69,20 @@
       const stored = localStorage.getItem(LANG_KEY);
       if (stored === 'hu' || stored === 'en') return stored;
     } catch (_) {}
-    return String(navigator.language || '').toLowerCase().startsWith('hu') ? 'hu' : 'en';
+    // P0 r491: the server/static shell owns first-paint language. Falling back
+    // to navigator.language here used to rewrite the already-painted hero on
+    // desktop, causing the dominant CLS and late text LCP. The explicit HU/EN
+    // toggle still persists a choice and ?lang= continues to override it.
+    if (ROOT.lang === 'hu' || ROOT.lang === 'en') return ROOT.lang;
+    return 'hu';
   }
 
   function applyLanguage(next, persist) {
     language = next === 'en' ? 'en' : 'hu';
     ROOT.lang = language;
     document.querySelectorAll('[data-hu][data-en]').forEach(element => {
-      element.textContent = element.dataset[language];
+      const value = element.dataset[language];
+      if (element.textContent !== value) element.textContent = value;
     });
     document.querySelectorAll('[data-language]').forEach(button => {
       button.setAttribute('aria-pressed', String(button.dataset.language === language));

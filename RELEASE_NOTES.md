@@ -10,24 +10,26 @@ Az aktuális hivatalos kiadás adatai:
 
 ## Állapot
 
-- Bazzite / Linux: **Public beta**, elsődleges rendszer és támogatási irány
-- Windows: **Public beta**, támogatott másodlagos platform
-- Közös asztali csomag: **Multiplatform public beta**
-- Android: **Public beta**, külön telepíthető csomag
+- Bazzite / Linux: **Full release**, elsődleges rendszer és támogatási irány
+- Windows: **Full release**, támogatott másodlagos platform
+- Közös asztali csomag: **Full multiplatform release**
+- Android: **Full release**, külön telepíthető csomag
 - Web: **Technical preview**
 - macOS: **Planned**
 - iOS / iPadOS: **Planned**
 
-A Bazzite/Linux és a Windows ugyanabból a hivatalos multiplatform csomagból telepíthető. Jelenleg egyik platform sem Stable. Az irányadó forrás: [`docs/scifi-ui/data/platform-status.json`](docs/scifi-ui/data/platform-status.json).
+A Bazzite/Linux és a Windows ugyanabból a hivatalos multiplatform csomagból telepíthető. Az Android külön hivatalos letöltési csatornát használ. Az első használat **5 napos próbalicenccel** indul.
 
-A publikus weboldal nem jelenít meg belső komponens-, loader- vagy buildverziókat. A kiadási azonosító a háttérben kizárólag szinkronizálási, integritási és hibakeresési célra marad meg.
+A **Full release** kereskedelmi/termékállapot és a **Stable** bizonyítéki minősítés két külön fogalom. Stable csak akkor állítható egy platformról, ha a `stable-gate.json` szerinti, nyilvánosan visszakövethető tesztbizonyítékok teljesülnek. Az irányadó platformforrás: [`docs/scifi-ui/data/platform-status.json`](docs/scifi-ui/data/platform-status.json).
+
+A publikus weboldal nem talál ki kiadási adatot. A verzió, kiadási dátum, csomag URL-je és digestje a szinkronizált hivatalos metaadatból származik. Hiányzó checksum asset, aláírás vagy tesztbizonyíték hiányként jelenik meg, nem sikeres ellenőrzésként.
 
 ## Minden nyilvános kiadás kötelező elemei
 
 - pontos kiadási dátum;
 - platform- és státuszcímke;
 - kiadási megjegyzések;
-- ismert hibák;
+- ismert hibák és korlátozások;
 - letöltési URL;
 - elérhető ellenőrzőösszeg vagy digest;
 - aláírási bizonyíték, ha ténylegesen közzétették;

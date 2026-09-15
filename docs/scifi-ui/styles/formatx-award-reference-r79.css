@@ -1,0 +1,108 @@
+/* Award reference r79 — geometry measured against the supplied mobile reference.
+   Goal: keep the native WebGL MAG fully interactive while matching the reference
+   silhouette width, vertical framing, control rail and title overlap more closely. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
+    height:clamp(430px,109vw,600px)!important;
+    min-height:clamp(430px,109vw,600px)!important;
+    max-height:600px!important;
+    overflow:visible!important;
+    background:
+      radial-gradient(circle at 50% 47%,rgba(44,205,255,.18),transparent 29%),
+      radial-gradient(circle at 55% 49%,rgba(171,72,255,.13),transparent 43%),
+      linear-gradient(180deg,#010611 0%,#010a18 50%,#031d34 78%,#061a2c 100%)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage{
+    overflow:visible!important;
+    background:
+      radial-gradient(circle at 50% 49%,rgba(59,233,255,.36),transparent 26%),
+      radial-gradient(circle at 55% 49%,rgba(179,73,255,.23),transparent 43%),
+      radial-gradient(circle at 18% 24%,rgba(104,216,255,.52) 0 1px,transparent 1.8px),
+      radial-gradient(circle at 80% 30%,rgba(185,99,255,.50) 0 1px,transparent 1.9px),
+      radial-gradient(circle at 88% 56%,rgba(83,230,255,.46) 0 1px,transparent 1.8px),
+      linear-gradient(180deg,#01040c 0%,#010b19 49%,#04243f 77%,#031d35 100%)!important;
+    filter:saturate(1.34) contrast(1.12) brightness(1.05)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
+    position:relative!important;
+    z-index:2!important;
+    transform-origin:50% 49%!important;
+    transform:translateY(-1.0%) scaleX(1.06) scaleY(1.02)!important;
+    filter:saturate(1.52) contrast(1.17) brightness(1.17) drop-shadow(0 0 14px rgba(41,213,255,.27))!important;
+  }
+
+  /* Reference rail: approximately 7% from the right edge and aligned with the
+     upper-right quadrant of the MAG instead of participating in document flow. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{
+    position:absolute!important;
+    top:30px!important;
+    right:6.4%!important;
+    left:auto!important;
+    bottom:auto!important;
+    z-index:18!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    gap:14px!important;
+    margin:0!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask,
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-pause{
+    width:62px!important;
+    height:62px!important;
+    min-width:62px!important;
+    min-height:62px!important;
+    border-color:rgba(145,202,229,.30)!important;
+    background:rgba(3,14,24,.76)!important;
+    box-shadow:inset 0 0 30px rgba(55,180,255,.055),0 0 22px rgba(0,0,0,.18)!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask span{
+    top:67px!important;
+    font-size:10px!important;
+    letter-spacing:.045em!important;
+  }
+
+  /* The reference title begins close to the lower tip of the MAG, overlapping
+     its lower glow rather than sitting directly after the canvas. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
+    position:relative!important;
+    margin:clamp(118px,20vw,158px) 6% 24px!important;
+    z-index:19!important;
+    font-size:16px!important;
+    letter-spacing:.15em!important;
+    line-height:1.08!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading:after{
+    width:40px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{
+    position:relative!important;
+    z-index:16!important;
+  }
+}
+
+@media (max-width:430px){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
+    height:clamp(430px,111vw,478px)!important;
+    min-height:clamp(430px,111vw,478px)!important;
+    max-height:478px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
+    transform:translateY(-.8%) scaleX(1.055) scaleY(1.025)!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
+    margin:clamp(92px,18vw,118px) 6% 24px!important;
+    font-size:15px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask,
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-pause{
+    width:58px!important;
+    height:58px!important;
+    min-width:58px!important;
+    min-height:58px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask span{top:63px!important}
+}

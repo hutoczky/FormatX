@@ -14,9 +14,11 @@ Független, egyszemélyes **technikusi operációs réteg** (*Technician Operati
 - Ismert korlátozások: [`docs/scifi-ui/data/known-issues.json`](docs/scifi-ui/data/known-issues.json)
 - Stable kapu: [`docs/scifi-ui/data/stable-gate.json`](docs/scifi-ui/data/stable-gate.json)
 
-A **Bazzite/Linux a FormatX elsődleges rendszere és támogatási iránya**. A Windows támogatott másodlagos platform. Mindkettő ugyanabban a hivatalos **multiplatform nyilvános béta csomagban** érhető el. Az Android külön Public beta, a Web Technical preview, a macOS és iOS/iPadOS Planned. Jelenleg egyik platform sem Stable.
+A **Bazzite/Linux a FormatX elsődleges rendszere és támogatási iránya**. Linux/Bazzite és Windows **Full release** állapotú, és ugyanabban a hivatalos multiplatform csomagban érhető el. Az Android külön **Full release** csatornán érhető el. A Web **Technical preview**, a macOS és iOS/iPadOS **Planned**.
 
-A verzió, kiadási dátum és letöltési URL nem szerepel kézzel több fájlban. Ezeket a `current-release.json` tartalmazza, amelyet a hivatalos FormatX-Updates kiadásból a `sync-current-release.yml` frissít. A nyilvános felület nem jelenít meg belső komponens- vagy buildverziókat, és metaadat-hiány esetén nem talál ki verziót.
+A **Full release** termékállapot nem azonos a külön, bizonyítékhoz kötött **Stable** minősítéssel. A Stable kapuhoz platformonként közzétett, visszakövethető tesztbizonyíték szükséges. A jelenlegi bizonyítéki állapotot mindig a `stable-gate.json`, a tesztmátrix és az ismert korlátozások alapján kell megítélni.
+
+Az első használat **5 napos próbalicenccel** indul. A verzió, kiadási dátum és letöltési URL nem szerepel kézzel több fájlban. Ezeket a `current-release.json` tartalmazza, amelyet a hivatalos FormatX-Updates kiadásból a `sync-current-release.yml` frissít. A nyilvános felület metaadat-hiány esetén nem talál ki verziót vagy integritási bizonyítékot.
 
 ## Nyilvános oldalak
 
@@ -27,6 +29,7 @@ A verzió, kiadási dátum és letöltési URL nem szerepel kézzel több fájlb
 - [Biztonsági modell](https://www.formatxsuite.com/scifi-ui/security.html)
 - [Döntésnapló](https://www.formatxsuite.com/scifi-ui/decision-log.html)
 - [Letöltések](https://www.formatxsuite.com/scifi-ui/downloads/)
+- [Android státusz](https://www.formatxsuite.com/scifi-ui/android/)
 - [Támogatás](https://www.formatxsuite.com/scifi-ui/support.html)
 
 A projekt tervezését, fejlesztését és termékirányát Hutóczky József végzi.

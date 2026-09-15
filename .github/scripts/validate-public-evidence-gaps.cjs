@@ -10,6 +10,7 @@ const exists = file => fs.existsSync(path.join(root, file));
 const required = [
   'billing-worker/src/feedback-api.js',
   'billing-worker/src/production-feedback-entry.js',
+  'billing-worker/src/production-content-base.js',
   'billing-worker/license-migrations/0002_user_feedback.sql',
   'docs/scifi-ui/scripts/formatx-feedback.js',
   'docs/scifi-ui/styles/formatx-feedback.css',
@@ -21,6 +22,7 @@ const required = [
 required.forEach(file => assert.ok(exists(file), `Missing public evidence file: ${file}`));
 
 const contentEntry = read('billing-worker/src/production-content-entry.js');
+const contentBase = read('billing-worker/src/production-content-base.js');
 const feedbackApi = read('billing-worker/src/feedback-api.js');
 const feedbackUi = read('docs/scifi-ui/scripts/formatx-feedback.js');
 const feedbackCss = read('docs/scifi-ui/styles/formatx-feedback.css');
@@ -33,15 +35,16 @@ const summaryStart = feedbackApi.indexOf('async function feedbackSummary');
 const summaryEnd = feedbackApi.indexOf('async function submitFeedback');
 const publicSummary = summaryStart >= 0 && summaryEnd > summaryStart ? feedbackApi.slice(summaryStart, summaryEnd) : '';
 
-assert.match(contentEntry, /production-feedback-entry\.js/, 'production feedback wrapper is not active');
-assert.match(contentEntry, /id=\"live-os-overview\"/, 'static indexable Live OS section missing');
-assert.match(contentEntry, /itemtype=\"https:\/\/schema\.org\/SoftwareApplication\"/, 'SoftwareApplication microdata missing');
-assert.match(contentEntry, /data-fx-live-os-cta/, 'primary Live OS CTA missing');
-assert.match(contentEntry, /id=\"user-feedback\"/, 'homepage user feedback form missing');
-assert.match(contentEntry, /data-fx-feedback-summary/, 'approved feedback summary missing');
-assert.match(contentEntry, /fx-noscript-proof/, 'noscript evidence fallback missing');
-assert.match(contentEntry, /technical-report\.html/, 'technical report link missing');
-assert.match(contentEntry, /Felhasználói értékelés és visszajelzés/, 'privacy disclosure injection missing');
+assert.match(contentEntry, /production-content-base\.js/, 'public routing wrapper is not delegating to the content pipeline');
+assert.match(contentBase, /production-feedback-entry\.js/, 'production feedback wrapper is not active in the content pipeline');
+assert.match(contentBase, /id=\"live-os-overview\"/, 'static indexable Live OS section missing');
+assert.match(contentBase, /itemtype=\"https:\/\/schema\.org\/SoftwareApplication\"/, 'SoftwareApplication microdata missing');
+assert.match(contentBase, /data-fx-live-os-cta/, 'primary Live OS CTA missing');
+assert.match(contentBase, /id=\"user-feedback\"/, 'homepage user feedback form missing');
+assert.match(contentBase, /data-fx-feedback-summary/, 'approved feedback summary missing');
+assert.match(contentBase, /fx-noscript-proof/, 'noscript evidence fallback missing');
+assert.match(contentBase, /technical-report\.html/, 'technical report link missing');
+assert.match(contentBase, /Felhasználói értékelés és visszajelzés/, 'privacy disclosure injection missing');
 
 assert.match(publicSummary, /WHERE status = 'approved'/, 'public average must use approved feedback only');
 assert.match(publicSummary, /publish_permission = 1/, 'public text must require explicit publication permission');
@@ -71,11 +74,13 @@ assert.match(feedbackCss, /prefers-reduced-motion/, 'reduced-motion feedback sty
 assert.match(feedbackPublicCss, /\.fx-feedback-public-card/, 'approved review card styling missing');
 assert.match(feedbackPublicCss, /contain: layout paint style/, 'approved review rendering containment missing');
 
-assert.match(report, /Kötelező teljesítménykapuk/, 'technical gate section missing');
+assert.match(report, /Desktop és mobil minőségkapuk/, 'current technical quality-gate section missing');
 assert.match(report, /No independent professional review has been published|Nincs publikált független szakmai teszt/, 'honest external evidence gap missing');
-assert.match(report, /Moderált felhasználói értékelés/, 'feedback moderation report missing');
+assert.match(report, /Még hiányzó külső bizonyíték/, 'current external evidence-gap section missing');
+assert.match(report, /Seamless-v7 natív folytonos görgetés/, 'current continuous-scroll evidence section missing');
 assert.match(reportDownload, /Performance: legalább 90/, 'downloadable report gate missing');
-assert.match(reportDownload, /120 FPS élmény nem garantált/, 'non-guaranteed 120 FPS disclosure missing');
+assert.match(reportDownload, /Moderált felhasználói értékelés/, 'downloadable feedback moderation report missing');
+assert.match(reportDownload, /minden eszközre garantált 120 FPS nincs állítva|minden eszközre garantált 60 vagy 120 FPS field eredmény/, 'non-guaranteed field FPS disclosure missing');
 assert.match(sitemap, /technical-report\.html/, 'technical report is absent from sitemap');
 
 (async () => {
@@ -110,7 +115,7 @@ assert.match(sitemap, /technical-report\.html/, 'technical report is absent from
   assert.ok(invalid.errors.contact_email);
   assert.ok(invalid.errors.privacy_consent);
 
-  console.log('FormatX public evidence, lazy feedback and consent-gated public comment validation passed.');
+  console.log('FormatX public evidence, lazy feedback and consent-gated public comment validation passed through the current production content pipeline.');
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;

@@ -1,0 +1,84 @@
+/* FormatX r474 — softer mobile crystal glow with feathered facet edges.
+   The phone pass keeps the native faceted WebGL body readable but trims the
+   centre/perimeter luminance that looked overdriven on OLED-class mobile
+   displays. A modest compositor feather softens the silhouette without the
+   foggy look of the older half-pixel blur. Desktop rendering is unchanged. */
+
+html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage,
+html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canvas {
+  backface-visibility: hidden;
+  transform-origin: 50% 50%;
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage {
+    overflow: visible !important;
+    filter: none !important;
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+
+  html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: .970 !important;
+    image-rendering: auto !important;
+    filter:
+      brightness(.985)
+      contrast(.855)
+      saturate(1.010)
+      blur(.30px) !important;
+    -webkit-filter:
+      brightness(.985)
+      contrast(.855)
+      saturate(1.010)
+      blur(.30px) !important;
+  }
+
+  /* Keep the skip-navigation link fully accessible to keyboard users without
+     letting legacy mobile layers leave it painted during normal browsing. */
+  html:root:root:root:root body.living-architecture .skip-link:not(:focus):not(:focus-visible) {
+    position: fixed !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+
+  html:root:root:root:root body.living-architecture .skip-link:focus,
+  html:root:root:root:root body.living-architecture .skip-link:focus-visible {
+    width: auto !important;
+    height: auto !important;
+    clip: auto !important;
+    clip-path: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 :is(button,.fx-three-sound) {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 :is(button,.fx-three-sound):focus:not(:focus-visible) {
+    outline: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-stage {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+}
+
+/* production-r474-softer-mobile-glow-feathered-facets */
+/* deploy-r474-live-proof */

@@ -1,0 +1,51 @@
+/* FormatX MAG v33 — global reference polish + mobile text hard-separation.
+   The source object remains the single WebGL2 MAG; this file only changes composition/post-FX. */
+.fx-core-real3d-canvas{
+  filter:saturate(1.78) contrast(1.48) brightness(2.72)
+    drop-shadow(0 0 6px rgba(118,246,255,.55))
+    drop-shadow(0 0 22px rgba(45,172,255,.30))
+    drop-shadow(0 0 42px rgba(156,69,255,.17))!important;
+  transform:scale(.93,1.08)!important;
+  transform-origin:var(--fx-core-x) 49%!important;
+}
+.fx-core-postfx-v31{filter:saturate(1.26) contrast(1.14) brightness(1.20)!important}
+.fx-v31-flare{width:16px!important;height:16px!important;margin:-8px 0 0 -8px!important;box-shadow:0 0 5px #fff,0 0 14px rgba(225,255,255,1),0 0 34px rgba(80,238,255,.98),0 0 68px rgba(46,167,255,.65),0 0 112px rgba(157,62,255,.25)!important}
+.fx-v31-ring-a{opacity:.86!important}.fx-v31-ring-b{opacity:.67!important}.fx-v31-ring-c{opacity:.55!important}.fx-v31-spectrum{opacity:.74!important}
+
+.fx-mag-v33-overlay{position:absolute;z-index:2;inset:0;pointer-events:none;overflow:hidden;mix-blend-mode:screen}
+.fx-mag-v33-overlay>*{position:absolute;left:var(--fx-core-x);top:49%;transform-origin:50% 50%;pointer-events:none}
+.fx-v33-core-glass{
+  width:min(68vmin,760px);height:min(76vmin,850px);margin:min(-38vmin,-425px) 0 0 min(-34vmin,-380px);
+  clip-path:polygon(50% 0%,59% 28%,100% 50%,68% 59%,50% 100%,32% 59%,0% 50%,41% 28%);
+  background:radial-gradient(circle at 50% 50%,rgba(236,255,255,.30) 0 1.4%,rgba(76,238,255,.22) 3%,rgba(41,142,255,.12) 12%,transparent 30%),conic-gradient(from 45deg,rgba(33,191,255,.08),rgba(148,64,255,.11),rgba(34,225,255,.08),rgba(156,59,255,.10),rgba(33,191,255,.08));
+  box-shadow:inset 0 0 34px rgba(68,229,255,.12),0 0 26px rgba(63,202,255,.08);opacity:.52
+}
+.fx-v33-core-glass::before,.fx-v33-core-glass::after{content:"";position:absolute;inset:8%;clip-path:inherit;border:1px solid rgba(134,244,255,.22);filter:drop-shadow(0 0 5px rgba(61,220,255,.22))}
+.fx-v33-core-glass::after{inset:19%;border-color:rgba(177,91,255,.20);transform:rotate(45deg) scale(.86)}
+.fx-v33-reactor-halo{
+  width:min(32vmin,360px);height:min(32vmin,360px);margin:min(-16vmin,-180px) 0 0 min(-16vmin,-180px);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.34) 0 2%,rgba(134,250,255,.20) 4%,rgba(53,218,255,.10) 13%,rgba(93,71,255,.07) 29%,transparent 58%);
+  box-shadow:0 0 30px rgba(66,230,255,.16),0 0 64px rgba(59,137,255,.11),0 0 92px rgba(148,59,255,.08);opacity:.92
+}
+.fx-v33-reactor-halo::before,.fx-v33-reactor-halo::after{content:"";position:absolute;inset:19%;border-radius:50%;border:1px solid rgba(164,247,255,.35);transform:rotateX(64deg) rotateZ(-14deg);box-shadow:0 0 8px rgba(74,224,255,.18)}
+.fx-v33-reactor-halo::after{inset:31%;border-color:rgba(167,83,255,.28);transform:rotateX(58deg) rotateZ(23deg)}
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-stage{--fx-core-x:50%!important;clip-path:inset(0 0 29dvh 0)!important;transition:opacity 180ms ease,visibility 0s linear 180ms!important}
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="text"]{opacity:0!important;visibility:hidden!important}
+  .fx-core-real3d-canvas{transform:translate3d(0,-5dvh,0) scale(.78,1.04)!important;transform-origin:50% 49%!important;filter:saturate(1.86) contrast(1.52) brightness(2.86) drop-shadow(0 0 7px rgba(118,247,255,.59)) drop-shadow(0 0 23px rgba(45,174,255,.31)) drop-shadow(0 0 43px rgba(157,67,255,.18))!important}
+  .fx-core-postfx-v31{transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 5dvh),0) scale(.78,1.04)!important;transform-origin:50% 49%!important}
+  .fx-mag-v33-overlay{transform:translateY(-5dvh) scale(.78,1.04)!important;transform-origin:50% 49%!important}
+  .fx-v33-core-glass{width:88vmin;height:100vmin;margin:-50vmin 0 0 -44vmin;opacity:.58}.fx-v33-reactor-halo{width:40vmin;height:40vmin;margin:-20vmin 0 0 -20vmin}
+  body.living-architecture #hero{min-height:auto!important;height:auto!important;padding-top:max(74px,calc(env(safe-area-inset-top) + 64px))!important;padding-bottom:34px!important;overflow:visible!important}
+  body.living-architecture #hero .hero-grid{display:flex!important;flex-direction:column!important;width:100%!important;min-height:0!important;height:auto!important;gap:0!important;padding-inline:0!important;overflow:visible!important}
+  body.living-architecture #hero .hero-space{order:1!important;position:relative!important;inset:auto!important;z-index:1!important;flex:0 0 auto!important;width:100%!important;min-height:clamp(420px,58svh,620px)!important;max-height:620px!important;margin:0!important;overflow:hidden!important;border-radius:0!important;transform:none!important;translate:none!important}
+  body.living-architecture #hero .hero-copy{order:2!important;position:relative!important;inset:auto!important;z-index:300!important;flex:0 0 auto!important;width:min(calc(100% - 18px),720px)!important;max-width:720px!important;min-width:0!important;margin:0 auto!important;padding:24px 16px 28px!important;transform:none!important;translate:none!important;opacity:1!important;visibility:visible!important;overflow:visible!important;border:0!important;border-radius:0!important;background:#010711!important;box-shadow:0 -34px 50px rgba(1,7,17,1)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;isolation:isolate!important}
+  #hero .hero-copy>.kicker,#hero #hero-title,#hero .hero-title-main,#hero .hero-title-sub,#hero .hero-lead,#hero .hero-actions,#hero .hero-facts{position:relative!important;z-index:4!important;opacity:1!important;visibility:visible!important}
+  #hero .hero-copy>.kicker{display:block!important;margin:0 0 10px!important;color:rgba(229,249,255,.92)!important}#hero #hero-title{margin:0 0 14px!important}#hero .hero-title-main{font-size:clamp(40px,11vw,56px)!important;line-height:.91!important}#hero .hero-title-sub{font-size:clamp(18px,5.3vw,27px)!important;margin-top:8px!important}#hero .hero-lead{color:rgba(237,247,253,.94)!important;line-height:1.5!important}#hero .hero-actions{margin-top:18px!important}#hero .hero-facts{margin-top:16px!important}#hero .scroll-cue{position:relative!important;z-index:305!important;margin-top:14px!important}
+}
+@media(max-width:480px){
+  .fx-core-real3d-stage{clip-path:inset(0 0 31dvh 0)!important}.fx-core-real3d-canvas{transform:translate3d(0,-4.5dvh,0) scale(.76,1.03)!important}.fx-core-postfx-v31{transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 4.5dvh),0) scale(.76,1.03)!important}.fx-mag-v33-overlay{transform:translateY(-4.5dvh) scale(.76,1.03)!important}
+  body.living-architecture #hero .hero-space{min-height:clamp(390px,54svh,540px)!important;max-height:540px!important}body.living-architecture #hero .hero-copy{width:min(calc(100% - 14px),720px)!important;padding:21px 14px 25px!important}
+}
+@media(prefers-reduced-motion:reduce){.fx-core-real3d-stage{transition-duration:90ms!important}}

@@ -30,6 +30,7 @@
   function rendererCapability() {
     if (auditMode) return 'audit-skip';
     if (typeof WebGL2RenderingContext === 'undefined') return 'canvas2d';
+    if (document.querySelector('script[data-fx-core-real3d="true"]')) return 'webgl2-pending';
 
     const probe = document.createElement('canvas');
     const suppressCreationNoise = event => event.preventDefault();
@@ -343,6 +344,12 @@
       return;
     }
 
+    if (/^(?:ready-v20|ready-v69)$/.test(root.dataset.fxCoreReal3d || '')) {
+      root.dataset.fxPremiumCore = 'single-webgl2-real3d';
+      resilientCore?.setActive(false);
+      return;
+    }
+
     if (root.dataset.fxImmersive !== 'active') {
       root.dataset.fxPremiumCore = 'static-standby';
       resilientCore?.setActive(false);
@@ -366,6 +373,14 @@
       if (hardFallback && frame.getAttribute('src') !== 'about:blank') frame.src = 'about:blank';
     }
     if (hardFallback) ensureFallbackStatus();
+  }
+
+  function handleCoreFallback(event) {
+    root.dataset.fxGpuCapability = 'canvas2d';
+    root.dataset.fxThree = 'fallback';
+    root.dataset.fxImmersive = 'active';
+    root.dataset.fxPremiumFallbackReason = event?.detail?.reason || 'real3d-unavailable';
+    syncRendererState();
   }
 
   function updateLaunchCopy() {
@@ -482,6 +497,9 @@
     if (root.dataset.fxImmersive === 'active') ensureFallbackStatus();
   });
   addEventListener('formatx:premiumfallback', syncRendererState);
+  addEventListener('formatx:real3dready', syncRendererState);
+  addEventListener('formatx:core3dfallback', handleCoreFallback);
+  addEventListener('formatx:coremesh3dready', syncRendererState);
   const initialise = () => {
     bindImmersiveLaunch();
     syncRendererState();

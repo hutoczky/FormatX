@@ -1,0 +1,6 @@
+{
+  "revision": "r312-postdom-mobile-startup-living-pulse",
+  "requestedAt": "2026-08-23T19:48:00Z",
+  "reason": "Deploy post-DOM mobile startup recovery and continuous compositor-only living MAG pulse on desktop and mobile",
+  "sourceHead": "04485dc073bde99eb9ab2c978f875dcbae76152b"
+}

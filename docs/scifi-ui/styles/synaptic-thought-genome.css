@@ -1,12 +1,20 @@
 /* FormatX Synaptic Thought Genome — visual layer behind content, controls inside dialogue. */
 
+.fx-thought-genome-stage-host {
+  position: relative !important;
+}
+
 .fx-thought-genome-layer {
   position: absolute;
   inset: 0;
   z-index: 4;
   width: 100%;
+  max-width: 100%;
   height: 100%;
-  overflow: visible;
+  max-height: 100%;
+  overflow: hidden;
+  clip-path: inset(0);
+  contain: paint;
   opacity: .72;
   pointer-events: none;
   mix-blend-mode: screen;
@@ -34,18 +42,36 @@
 }
 
 .fx-thought-genome-star {
-  fill: hsl(var(--fx-genome-hue) 88% 72%);
   filter: url(#fx-thought-genome-glow);
   opacity: .92;
 }
 
 .fx-thought-genome-orbit {
   fill: none;
-  stroke: hsl(var(--fx-genome-hue) 84% 67% / .34);
   stroke-width: 1.2;
   vector-effect: non-scaling-stroke;
   opacity: .58;
 }
+
+/* r3 CSP-safe palette. Dynamic SVG geometry publishes only a data-tone index;
+   all paint remains in this external stylesheet so strict style-src never needs
+   unsafe-inline or runtime style/presentation attributes. */
+.fx-thought-genome-node[data-tone='0'] .fx-thought-genome-orbit { stroke: hsl(168 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='0'] .fx-thought-genome-star { fill: hsl(168 88% 72%); }
+.fx-thought-genome-node[data-tone='1'] .fx-thought-genome-orbit { stroke: hsl(192 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='1'] .fx-thought-genome-star { fill: hsl(192 88% 72%); }
+.fx-thought-genome-node[data-tone='2'] .fx-thought-genome-orbit { stroke: hsl(216 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='2'] .fx-thought-genome-star { fill: hsl(216 88% 72%); }
+.fx-thought-genome-node[data-tone='3'] .fx-thought-genome-orbit { stroke: hsl(240 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='3'] .fx-thought-genome-star { fill: hsl(240 88% 72%); }
+.fx-thought-genome-node[data-tone='4'] .fx-thought-genome-orbit { stroke: hsl(264 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='4'] .fx-thought-genome-star { fill: hsl(264 88% 72%); }
+.fx-thought-genome-node[data-tone='5'] .fx-thought-genome-orbit { stroke: hsl(288 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='5'] .fx-thought-genome-star { fill: hsl(288 88% 72%); }
+.fx-thought-genome-node[data-tone='6'] .fx-thought-genome-orbit { stroke: hsl(312 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='6'] .fx-thought-genome-star { fill: hsl(312 88% 72%); }
+.fx-thought-genome-node[data-tone='7'] .fx-thought-genome-orbit { stroke: hsl(336 84% 67% / .34); }
+.fx-thought-genome-node[data-tone='7'] .fx-thought-genome-star { fill: hsl(336 88% 72%); }
 
 .fx-thought-genome-node.is-new .fx-thought-genome-star,
 .fx-thought-genome-layer.is-replaying .fx-thought-genome-star {

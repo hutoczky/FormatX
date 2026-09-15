@@ -1,6 +1,10 @@
 import productionWorker from './production-with-license.js';
 
+const CANONICAL_ORIGIN = 'https://formatxsuite.com';
+const LEGACY_WWW_ORIGIN = 'https://www.formatxsuite.com';
+const INLINE_CRITICAL_STYLE_HASH = "'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68='";
 const SCIFI_ENTRY_PATHS = new Set(['/', '/scifi-ui/', '/scifi-ui/index.html']);
+const HOMEPAGE_ALIASES = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const LANGUAGE_PAGE_PATHS = new Set([
   '/',
   '/scifi-ui/',
@@ -17,8 +21,18 @@ const LANGUAGE_PAGE_PATHS = new Set([
   '/scifi-ui/payment/success.html',
   '/scifi-ui/payment/cancel.html',
 ]);
+const CONTINUOUS_SCROLL_ASSET = [
+  '  <link rel="stylesheet" data-fx-continuous-scroll-style="true" href="/scifi-ui/styles/formatx-continuous-scroll.css?v=20260808-native-continuous-2">',
+  '  <link rel="stylesheet" data-fx-seamless-loop-style="true" href="/scifi-ui/styles/formatx-seamless-loop.css?v=20260820-reference-loop-r247">',
+  '  <script defer data-fx-seamless-scroll-runtime="true" src="/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260820-reference-loop-r247"></script>',
+].join('\n') + '\n';
+const MOBILE_APEX_COMPOSITION_ASSET = '  <link rel="stylesheet" data-fx-mobile-apex-composition="true" href="/scifi-ui/styles/formatx-mobile-apex-composition.css?v=20260808-mobile-apex-live-2">\n';
+const WEBGPU_PREVIEW_ASSETS = [
+  '  <link rel="stylesheet" data-fx-reference-core-v26="true" href="/scifi-ui/styles/formatx-reference-core-v26.css?v=20260809-reference-crystal-v26-1">',
+  '  <script defer data-fx-reference-core-v26="true" src="/scifi-ui/scripts/formatx-reference-core-v26.js?v=20260809-reference-crystal-v26-1"></script>',
+].join('\n') + '\n';
 const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260729-single-language-3">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260729-single-language-2"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
-const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
+const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260820-r248-footer-licence"></script>\n';
 const STATUS_ASSETS = '  <link rel="stylesheet" data-fx-platform-status-style="true" href="/scifi-ui/styles/platform-status.css?v=20260730-platform-status-2">\n  <script defer src="/scifi-ui/scripts/platform-status.js?v=20260730-platform-status-2"></script>\n';
 const EMBEDDABLE_STAGE_PATHS = new Set([
   '/scifi-ui/three-stage-mobile',
@@ -30,10 +44,27 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/data/platform-status.json',
   '/scifi-ui/scripts/platform-status.js',
   '/scifi-ui/styles/platform-status.css',
+  '/scifi-ui/styles/formatx-continuous-scroll.css',
+  '/scifi-ui/styles/formatx-seamless-loop.css',
+  '/scifi-ui/styles/formatx-mobile-apex-composition.css',
+  '/scifi-ui/scripts/formatx-reference-core-v26.js',
+  '/scifi-ui/styles/formatx-reference-core-v26.css',
+  '/scifi-ui/scripts/formatx-cinematic-core-v27.js',
+  '/scifi-ui/styles/formatx-cinematic-core-v27.css',
   '/scifi-ui/scripts/formatx-event-horizon.js',
-  '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/igloo-parity.js',
+  '/scifi-ui/scripts/formatx-apex-scene-stability.js',
+  '/scifi-ui/scripts/formatx-apex-native.js',
+  '/scifi-ui/scripts/formatx-core-real3d-v20.js',
+  '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
+  '/scifi-ui/scripts/formatx-reference-lock-v30.js',
+  '/scifi-ui/styles/formatx-reference-lock-v30.css',
+  '/scifi-ui/scripts/formatx-three-host-safe.js',
+  '/scifi-ui/styles/igloo-parity.css',
+  '/scifi-ui/styles/formatx-transcend.css',
+  '/scifi-ui/styles/formatx-transcend-performance.css',
+  '/scifi-ui/styles/formatx-core-real3d-v20.css',
   '/scifi-ui/scripts/single-language-toggle.js',
   '/scifi-ui/scripts/formatx-copy-polish.js',
   '/scifi-ui/scripts/formatx-license-links.js',
@@ -88,8 +119,6 @@ const EMBEDDABLE_STAGE_CSP = [
 ].join('; ');
 
 const REPLACEMENTS = [
-  ['formatx-mobile-recovery.js?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
-  ['formatx-mobile-recovery.js?v=20260729-safe-three-gate-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
   ['formatx-mobile-recovery.css?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
   ['formatx-mobile-recovery.css?v=20260729-safe-three-css-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
   ['formatx-mobile-recovery.css?v=20260729-living-core-css-v2', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
@@ -103,10 +132,81 @@ const REPLACEMENTS = [
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const response = await productionWorker.fetch(request, env, ctx);
-    return applyStartupSafety(request, url, response);
+    const isRead = request.method === 'GET' || request.method === 'HEAD';
+
+    // The public product homepage has one canonical address only:
+    // https://formatxsuite.com/
+    if (isRead && url.hostname === 'www.formatxsuite.com') {
+      const target = new URL(url.pathname, CANONICAL_ORIGIN);
+      target.search = url.search;
+      if (HOMEPAGE_ALIASES.has(url.pathname)) {
+        target.pathname = '/';
+        target.search = '';
+      }
+      return Response.redirect(target.toString(), 308);
+    }
+
+    if (isRead && url.hostname === 'formatxsuite.com' && HOMEPAGE_ALIASES.has(url.pathname) && url.pathname !== '/') {
+      return Response.redirect(`${CANONICAL_ORIGIN}/`, 308);
+    }
+
+    // production-with-license still recognises its historic www homepage route.
+    // For the canonical apex root we proxy only the internal request URL to that
+    // route, then rewrite canonical metadata back to the apex domain. The user
+    // never sees the historic hostname or /scifi-ui alias.
+    let upstreamRequest = request;
+    if (isRead && url.hostname === 'formatxsuite.com' && url.pathname === '/') {
+      const upstreamUrl = new URL(request.url);
+      upstreamUrl.protocol = 'https:';
+      upstreamUrl.host = 'www.formatxsuite.com';
+      upstreamUrl.pathname = '/';
+      upstreamUrl.search = '';
+      upstreamRequest = new Request(upstreamUrl, request);
+    }
+
+    let response = await productionWorker.fetch(upstreamRequest, env, ctx);
+    response = await applyStartupSafety(request, url, response);
+    return canonicaliseApexResponse(request, url, response);
   },
 };
+
+async function canonicaliseApexResponse(request, url, response) {
+  const isRead = request.method === 'GET' || request.method === 'HEAD';
+  if (!isRead || url.hostname !== 'formatxsuite.com' || url.pathname !== '/') return response;
+
+  const headers = new Headers(response.headers);
+  const csp = headers.get('Content-Security-Policy');
+  if (csp && !csp.includes(INLINE_CRITICAL_STYLE_HASH)) {
+    headers.set('Content-Security-Policy', csp.replace("style-src 'self'", `style-src 'self' ${INLINE_CRITICAL_STYLE_HASH}`));
+  }
+  headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
+  headers.set('Cache-Control', 'no-store, max-age=0');
+  headers.set('Pragma', 'no-cache');
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  headers.delete('ETag');
+
+  if (request.method === 'HEAD') {
+    return new Response(null, { status: response.status, statusText: response.statusText, headers });
+  }
+
+  const contentType = headers.get('Content-Type') || '';
+  if (!contentType.includes('text/html')) {
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  }
+
+  let html = await response.text();
+  html = html
+    .replaceAll(LEGACY_WWW_ORIGIN, CANONICAL_ORIGIN)
+    .replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?\s*>/i, `<link rel="canonical" href="${CANONICAL_ORIGIN}/">`)
+    .replace(/(<meta\s+property="og:url"\s+content=")[^"]*("\s*\/?\s*>)/i, `$1${CANONICAL_ORIGIN}/$2`);
+
+  return new Response(html, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
 
 async function applyStartupSafety(request, url, response) {
   const isRead = request.method === 'GET' || request.method === 'HEAD';
@@ -129,6 +229,16 @@ async function applyStartupSafety(request, url, response) {
   let html = await response.text();
   if (SCIFI_ENTRY_PATHS.has(url.pathname)) {
     for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
+    if (!html.includes('data-fx-seamless-scroll-runtime')) {
+      html = html.replace('</head>', CONTINUOUS_SCROLL_ASSET + '</head>');
+    }
+    if (!html.includes('data-fx-mobile-apex-composition')) {
+      html = html.replace('</head>', MOBILE_APEX_COMPOSITION_ASSET + '</head>');
+    }
+    const webgpuPreview = url.searchParams.get('webgpu') === '1';
+    if (webgpuPreview && !html.includes('data-fx-reference-core-v26')) {
+      html = html.replace('</head>', WEBGPU_PREVIEW_ASSETS + '</head>');
+    }
   }
   if (!html.includes('data-fx-single-language-style')) {
     html = html.replace('</head>', LANGUAGE_ASSETS + '</head>');
@@ -180,6 +290,6 @@ function withNoStore(response, withoutBody) {
   return new Response(withoutBody ? null : response.body, {
     status: response.status,
     statusText: response.statusText,
-    headers,
+    headers
   });
 }

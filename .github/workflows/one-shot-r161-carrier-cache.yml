@@ -1,0 +1,34 @@
+name: One-shot wire r161 continuous carrier
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r161-carrier-cache.yml']
+permissions:
+  contents: write
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Bump r161 seamless carrier cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('docs/scifi-ui/index.html')
+          s=p.read_text()
+          pat=r'(formatx-seamless-enforcer-r159\.js\?v=)[^"\']+'
+          s,n=re.subn(pat,r'\g<1>20260815-r161-continuous-carrier',s,count=1)
+          if n!=1: raise SystemExit('r159 enforcer script URL not found exactly once')
+          p.write_text(s)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html
+          if git diff --cached --quiet; then echo 'r161 cache already current'; exit 0; fi
+          git commit -m '[deploy-production] fix(mag): publish r161 continuous carrier seam removal'
+          git push origin HEAD:master

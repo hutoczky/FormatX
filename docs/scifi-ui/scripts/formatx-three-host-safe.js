@@ -3,7 +3,20 @@
 
   const root = document.documentElement;
   const body = document.body;
-  if (!body || root.dataset.fxThreeHost === 'safe-ready-v1') return;
+  if (!body || root.dataset.fxThreeHost === 'safe-ready-v1' || root.dataset.fxThreeHost === 'native-apex') return;
+
+  if (root.dataset.fxNativeApex === 'ready') {
+    root.dataset.fxThreeHost = 'native-apex';
+    root.dataset.fxThree = 'ready-native-apex';
+    root.dataset.fxRenderer = root.dataset.fxNativeApexRenderer || 'native-apex';
+    root.dataset.fxPerformance = 'adaptive-native';
+    root.dataset.fxThreeFallback = 'not-required';
+    return;
+  }
+
+  root.dataset.fxThreeFallback = root.dataset.fxNativeApex === 'reduced-motion-fallback'
+    ? 'reduced-motion-safe-stage'
+    : 'native-apex-unavailable-safe-stage';
 
   const immersiveActive = () => root.dataset.fxImmersive === 'active';
 

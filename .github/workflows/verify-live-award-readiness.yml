@@ -1,0 +1,136 @@
+# R474 final live award gate after WDA contract synchronization.
+name: Verify R474 award readiness
+run-name: R474 award audit for ${{ github.event.workflow_run.head_sha || github.sha }}
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/**'
+      - 'billing-worker/**'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - '.github/scripts/validate-living-core-r425-source.cjs'
+      - '.github/scripts/validate-wda-100-r198.cjs'
+      - '.github/workflows/verify-live-award-readiness.yml'
+  workflow_run:
+    workflows: ['Prepare or deploy FormatX production']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: r474-award-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  live-award:
+    if: >-
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      ORIGIN: https://formatxsuite.com
+    steps:
+      - name: Check out audited revision
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.AUDITED_SHA }}
+
+      - name: Validate current R474 source contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/validate-award-readiness.cjs
+          node .github/scripts/validate-living-core-r425-source.cjs
+          node .github/scripts/validate-real3d-core.cjs
+          node .github/scripts/validate-wda-100-r198.cjs
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js
+          node --check docs/scifi-ui/scripts/formatx-native-mag-touch-r434.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
+          node --check docs/scifi-ui/scripts/single-language-toggle.js
+
+      - name: Verify deployed R474 optics and first-paint ownership
+        if: >-
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]')) ||
+          (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+           contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          ready=0
+          for attempt in $(seq 1 50); do
+            stamp="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}"
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/?audit=$stamp" -o "$tmp/home.html" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?audit=$stamp" -o "$tmp/motion.js" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-crystal-organism-r326.js?audit=$stamp" -o "$tmp/core.js" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-current-mag-loader-r422.js?audit=$stamp" -o "$tmp/loader.js" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?audit=$stamp" -o "$tmp/solid.js" || true
+            curl -fsSL --max-time 30 -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/styles/formatx-core-life-r455.css?audit=$stamp" -o "$tmp/life.css" || true
+            if grep -Fq 'living-luminous-electric-crystal-r454' "$tmp/core.js" \
+              && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260831-r484-periodic-native-energy' "$tmp/motion.js" \
+              && grep -Fq "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'" "$tmp/motion.js" \
+              && grep -Fq 'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow' "$tmp/loader.js" \
+              && grep -Fq "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'" "$tmp/loader.js" \
+              && grep -Fq "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'" "$tmp/solid.js" \
+              && grep -Fq 'FormatX r474' "$tmp/life.css"; then
+              ready=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ready" = 1
+          grep -Fq 'single-luminous-webgl-material-owner' "$tmp/core.js"
+          grep -Fq 'periodic-surface-bursts-between-zero-idle' "$tmp/loader.js"
+          grep -Fq 'soft-perimeter-low-bloom-low-cost-shader' "$tmp/solid.js"
+          grep -Fq 'softer mobile crystal glow' "$tmp/life.css"
+          grep -Fq 'opacity: .970' "$tmp/life.css"
+          grep -Fq 'brightness(.985)' "$tmp/life.css"
+          grep -Fq 'contrast(.855)' "$tmp/life.css"
+          grep -Fq 'saturate(1.010)' "$tmp/life.css"
+          grep -Fq 'blur(.30px)' "$tmp/life.css"
+          grep -Fq 'image-rendering: auto' "$tmp/life.css"
+          grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$tmp/life.css"
+          grep -Fq 'production-r474-softer-mobile-glow-feathered-facets' "$tmp/life.css"
+          grep -Fq 'animation: none' "$tmp/life.css"
+          ! grep -Fq 'fx-core-r468-compositor-breathe' "$tmp/life.css"
+          grep -Fq 'data-fx-production-first-paint-r370' "$tmp/home.html"
+          ! grep -Eq 'formatx-(crystal-portal-r318|quantum-particles-r335|core-mechanical-orb-r250)' "$tmp/home.html"
+
+      - name: Publish award readiness status
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ job.status }}
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_MESSAGE: ${{ github.event.head_commit.message }}
+          WORKFLOW_MESSAGE: ${{ github.event.workflow_run.head_commit.message }}
+        shell: bash
+        run: |
+          state=failure
+          description='R474 award readiness audit failed'
+          if [[ "$RESULT" == success ]]; then
+            state=success
+            description='R474 source award readiness passed'
+            if [[ "$EVENT_NAME" == workflow_dispatch || "$PUSH_MESSAGE" == *'[deploy-production]'* || "$WORKFLOW_MESSAGE" == *'[deploy-production]'* ]]; then
+              description='R474 softer mobile MAG and first-paint ownership passed live'
+            fi
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state="$state" \
+            -f context='FormatX R454 live award readiness' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

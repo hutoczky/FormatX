@@ -1,0 +1,28 @@
+.fx-core-mesh3d-stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: calc(var(--fx-layer-stage, 120) + 1);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  contain: strict;
+}
+
+.fx-core-mesh3d-stage[data-active="true"] {
+  opacity: 1;
+}
+
+.fx-core-mesh3d-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-core-mesh3d-stage {
+    transition: none;
+  }
+}

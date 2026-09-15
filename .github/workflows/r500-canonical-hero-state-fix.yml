@@ -1,0 +1,115 @@
+name: R500 canonical hero state source fix
+# retry: apex workflow is precommitted; source job must not self-modify workflows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/r500-canonical-hero-state-fix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-r500-source-fix
+  cancel-in-progress: false
+
+jobs:
+  fix-test-commit-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout current master
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Apply targeted R500 source and validator fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile .github/scripts/r500_source_fix.py .github/scripts/r500_mag_validator_patch.py
+          python3 .github/scripts/r500_mag_validator_patch.py
+          python3 .github/scripts/r500_source_fix.py source
+          node --check docs/scifi-ui/scripts/platform-status.js
+          node --check .github/scripts/validate-semantic-first-paint.cjs
+          node --check .github/scripts/validate-mag-surface-energy-r484.cjs
+          node --check .github/scripts/validate-r500-hero-product-state.cjs
+          node --check .github/scripts/verify-apex-shell-r500.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('docs/scifi-ui/index.html').read_text()
+          assert html.count('data-fx-canonical-hero-product-state="true"') == 1
+          assert re.search(r'<p class="hero-lead"[^>]*>.*?</p>\s*<div class="fx-hero-product-state"', html, re.S)
+          js=Path('docs/scifi-ui/scripts/platform-status.js').read_text()
+          assert "canonical-reused" in js and "missing-canonical-node" in js
+          sem=Path('.github/scripts/validate-semantic-first-paint.cjs').read_text()
+          assert 'armed-r301-user-intent' not in sem and 'EXPECTED_CONTENT_GATE' in sem
+          mag=Path('.github/scripts/validate-mag-surface-energy-r484.cjs').read_text()
+          assert 'brightness\\(0?\\.965\\)' not in mag and 'EXPECTED_MOBILE_FILTER' in mag
+          apex=Path('.github/workflows/verify-apex-shell-live.yml').read_text()
+          assert "assert '<base href=\"/\">' in home" not in apex
+          assert 'Wait for exact production marker propagation' in apex
+          print('R500_SOURCE_CONTRACT_PASS')
+          PY
+
+      - name: Verify modernized apex contract against current production
+        shell: bash
+        run: node .github/scripts/verify-apex-shell-r500.cjs
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Run production-equivalent hero-state pre-deploy gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4186 --directory docs > "$RUNNER_TEMP/r500-http.log" 2>&1 &
+          server=$!
+          trap 'kill $server 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:4186/scifi-ui/index.html >/dev/null && break
+            sleep .25
+          done
+          node .github/scripts/validate-r500-hero-product-state.cjs | tee r500-hero-product-state-predeploy.txt
+
+      - name: Commit tested R500 source fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/platform-status.js docs/scifi-ui/styles/formatx-p0-first-paint-r490.css .github/scripts/validate-semantic-first-paint.cjs .github/scripts/validate-mag-surface-energy-r484.cjs
+          git commit -m 'Fix R500 canonical hero product-state first-frame geometry'
+          git push origin HEAD:master
+          echo "SOURCE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Prepare and validate R500 production candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/r500_source_fix.py deploy
+          node --input-type=module --check < billing-worker/src/production-content-entry.js
+          node --check docs/scifi-ui/scripts/platform-status.js
+          node .github/scripts/production-preflight.cjs
+
+      - name: Publish R500 production commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add billing-worker/src/production-content-entry.js docs/p0-validation-version.txt
+          git commit -m '[deploy-production] Publish R500 canonical hero product-state CLS fix'
+          git push origin HEAD:master
+          echo "R500_SOURCE_SHA=$SOURCE_SHA"
+          echo "R500_DEPLOY_SHA=$(git rev-parse HEAD)"

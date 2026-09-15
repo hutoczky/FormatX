@@ -1,0 +1,8 @@
+{
+  "revision": "2026-08-09-calibrated-postgrade-mag-v22-candidate",
+  "material": "reference-glass-v21-sparse-high-dynamic-facets",
+  "post_grade": "calibrated-postgrade-v22",
+  "geometry": "indexed-webgl2-mesh-v11-shape-v14-scale-v13",
+  "pixel_gate": "unchanged-reference-gate",
+  "status": "candidate-awaiting-live-chromium-validation"
+}

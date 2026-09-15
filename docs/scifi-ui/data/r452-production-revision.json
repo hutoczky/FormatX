@@ -1,0 +1,11 @@
+{
+  "revision": "r452",
+  "surface": "mobile-mag",
+  "purpose": "materially lower centre flare and soften the mobile crystal perimeter on real phones",
+  "optics": "lower exposure and contrast, wider sub-pixel blur, near-zero external glow, weaker sheen",
+  "cache_bust": "20260830-r452-softer-light-natural-edge",
+  "mobile_viewports": [
+    "390x844",
+    "430x932"
+  ]
+}

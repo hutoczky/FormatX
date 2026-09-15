@@ -1,0 +1,65 @@
+/* r90 — reference clarity lock.
+   Preserve the approved r87 MAG geometry/size. Correct only optical material,
+   flare discipline, lower-title separation, rail breathing room and MAG label centering. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage{
+    background:
+      radial-gradient(circle at 50% 50%,rgba(255,255,255,.94) 0 .42%,rgba(210,252,255,.88) .55% 1.05%,rgba(62,224,255,.42) 1.2% 2.35%,rgba(26,126,222,.12) 2.6% 5.4%,transparent 7.8%),
+      radial-gradient(circle at 50% 50%,transparent 0 8.4%,rgba(201,250,255,.30) 8.7% 9.0%,transparent 9.35% 12.4%,rgba(54,215,255,.30) 12.7% 13.05%,transparent 13.4% 16.8%,rgba(142,84,255,.24) 17.05% 17.45%,transparent 17.8% 21.2%,rgba(49,195,255,.18) 21.5% 21.9%,transparent 22.3%),
+      radial-gradient(ellipse at 49% 48%,rgba(20,116,194,.12),transparent 31%),
+      radial-gradient(ellipse at 56% 50%,rgba(105,43,190,.12),transparent 46%),
+      linear-gradient(180deg,#01040b 0%,#010612 45%,#021023 73%,#03172a 100%)!important;
+    filter:saturate(1.12) contrast(1.25) brightness(.90)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
+    opacity:.94!important;
+    filter:saturate(1.22) contrast(1.62) brightness(1.03)
+      drop-shadow(0 0 5px rgba(194,252,255,.48))
+      drop-shadow(0 0 14px rgba(47,181,255,.22))
+      drop-shadow(0 0 23px rgba(133,74,255,.10))!important;
+  }
+
+  /* Thin optical axis only. r89's broad cross and diagonal beams washed out the facets. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:before{
+    content:""!important;
+    position:absolute!important;
+    inset:0!important;
+    z-index:4!important;
+    pointer-events:none!important;
+    background:
+      linear-gradient(90deg,transparent 0 40%,rgba(103,222,255,.015) 46%,rgba(218,253,255,.13) 49.72%,rgba(255,255,255,.48) 49.94%,rgba(255,255,255,.68) 50%,rgba(255,255,255,.48) 50.06%,rgba(218,253,255,.13) 50.28%,rgba(103,222,255,.015) 54%,transparent 60% 100%),
+      linear-gradient(180deg,transparent 0 37%,rgba(103,222,255,.012) 45%,rgba(219,253,255,.10) 49.70%,rgba(255,255,255,.38) 49.94%,rgba(255,255,255,.55) 50%,rgba(255,255,255,.38) 50.06%,rgba(219,253,255,.10) 50.30%,rgba(103,222,255,.012) 55%,transparent 63% 100%),
+      radial-gradient(circle at 50% 50%,#fff 0 .38%,rgba(239,255,255,.96) .48% .82%,rgba(82,229,255,.62) .95% 1.55%,rgba(10,157,243,.18) 1.8% 3.2%,transparent 3.8%),
+      radial-gradient(circle at 50% 50%,transparent 0 8.15%,rgba(208,252,255,.42) 8.35% 8.62%,transparent 8.9% 11.45%,rgba(62,220,255,.37) 11.68% 12.02%,transparent 12.3% 15.05%,rgba(141,85,255,.29) 15.28% 15.66%,transparent 15.98% 19.0%,rgba(63,207,255,.22) 19.24% 19.58%,transparent 19.9% 23.2%),
+      conic-gradient(from 0deg at 50% 50%,transparent 0 8%,rgba(116,236,255,.09) 8.25% 8.65%,transparent 9% 21%,rgba(193,90,255,.09) 21.25% 21.65%,transparent 22% 34%,rgba(95,227,255,.09) 34.25% 34.65%,transparent 35% 47%,rgba(187,85,255,.08) 47.25% 47.65%,transparent 48% 60%,rgba(94,226,255,.09) 60.25% 60.65%,transparent 61% 73%,rgba(181,82,255,.08) 73.25% 73.65%,transparent 74% 86%,rgba(92,224,255,.09) 86.25% 86.65%,transparent 87% 100%)!important;
+    mix-blend-mode:screen!important;
+    opacity:.72!important;
+    filter:none!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:after{
+    background:radial-gradient(ellipse at 50% 0%,rgba(92,228,255,.18),rgba(40,108,203,.065) 31%,rgba(117,56,194,.045) 48%,transparent 70%)!important;
+    opacity:.43!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] .fx-reference-mag-button{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    text-align:center!important;
+    line-height:1!important;
+    padding-top:0!important;
+    padding-bottom:0!important;
+  }
+}
+
+@media (max-width:430px){
+  /* Keep r87 dimensions intact; only stop the caption from cutting through the lower tip. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
+    margin:-8px 6% 24px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{
+    right:4.2%!important;
+  }
+}

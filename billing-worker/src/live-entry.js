@@ -7,8 +7,8 @@ const PLAN_CATALOG = {
     id: 'business_lite',
     name: 'Business Lite',
     prices: {
-      HUF: { monthly: 15900, annual: 139300 },
-      EUR: { monthly: 44, annual: 383 },
+      HUF: { monthly: 7900, annual: 79000 },
+      EUR: { monthly: 22, annual: 220 },
     },
     maxTechnicians: 1,
     maxDevices: 10,
@@ -18,8 +18,8 @@ const PLAN_CATALOG = {
     id: 'business_pro',
     name: 'Business Pro',
     prices: {
-      HUF: { monthly: 39900, annual: 349300 },
-      EUR: { monthly: 110, annual: 961 },
+      HUF: { monthly: 15900, annual: 159000 },
+      EUR: { monthly: 44, annual: 440 },
     },
     maxTechnicians: 3,
     maxDevices: 50,
@@ -29,8 +29,8 @@ const PLAN_CATALOG = {
     id: 'technician_team',
     name: 'Technician Team',
     prices: {
-      HUF: { monthly: 79900, annual: 699300 },
-      EUR: { monthly: 220, annual: 1924 },
+      HUF: { monthly: 29900, annual: 299000 },
+      EUR: { monthly: 83, annual: 830 },
     },
     maxTechnicians: 5,
     maxDevices: 150,
@@ -40,6 +40,8 @@ const PLAN_CATALOG = {
 
 const BILLING_CYCLES = new Set(['monthly', 'annual']);
 const SUPPORTED_CURRENCIES = new Set(['HUF', 'EUR']);
+const SECURE_ORDER_REFERENCE = /^FX-\d{8}-[A-F0-9]{24}$/;
+const LEGACY_ORDER_REFERENCE = /^FX-\d{8}-[A-Z0-9]{3,8}$/;
 
 export default {
   async fetch(request, env, ctx) {
@@ -154,7 +156,7 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
   const billingCycle = payload.billing_cycle;
   const currency = normaliseCurrency(payload.currency);
   const amount = getPlanAmount(plan, billingCycle, currency);
-  const orderReference = payload.order_reference.trim();
+  const orderReference = normaliseOrderReference(payload.order_reference);
   const account = getBankAccount(env);
   const paymentUri = buildPaytoUri(account, amount, currency, orderReference);
   const qrPayload = currency === 'EUR'
@@ -185,6 +187,7 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
       subscription_status: 'pending_payment',
       payment_status: 'pending',
       metadata: {
+        pricing_version: 'v100-market-2026-07',
         company_name: payload.company_name.trim(),
         contact_name: payload.contact_name.trim(),
         contact_email: payload.email.trim(),
@@ -212,6 +215,7 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
     order_reference: orderReference,
     payment_provider: 'bank_transfer',
     payment_mode: 'live',
+    pricing_version: 'v100-market-2026-07',
     amount,
     amount_huf: currency === 'HUF' ? amount : null,
     currency,
@@ -241,9 +245,10 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
     return jsonResponse({ error: validationError }, 400, corsHeaders);
   }
 
+  const orderReference = normaliseOrderReference(payload.order_reference);
   const supabase = createSupabaseClient(env);
   const subscription = await supabase.selectSingle('subscriptions', {
-    provider_checkout_session_id: ['eq', payload.order_reference.trim()],
+    provider_checkout_session_id: ['eq', orderReference],
   });
   if (!subscription) {
     return jsonResponse({ error: 'A rendelési azonosító nem található.' }, 404, corsHeaders);
@@ -265,7 +270,7 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
     return jsonResponse({ error: 'A visszajelzett összeg nem egyezik a rendeléssel.' }, 409, corsHeaders);
   }
 
-  const eventId = `bank-transfer-confirmation:${payload.order_reference.trim()}`;
+  const eventId = `bank-transfer-confirmation:${orderReference}`;
   const now = new Date().toISOString();
   await supabase.upsert('payment_events', [{
     provider_event_id: eventId,
@@ -273,6 +278,7 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
     status: 'awaiting_manual_review',
     payload: {
       ...payload,
+      order_reference: orderReference,
       amount: expectedAmount,
       currency: expectedCurrency,
       plan_id: subscription.plan_id,
@@ -300,7 +306,7 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
 
   return jsonResponse({
     ok: true,
-    order_reference: payload.order_reference.trim(),
+    order_reference: orderReference,
     amount: expectedAmount,
     currency: expectedCurrency,
     status: 'awaiting_manual_review',
@@ -313,9 +319,14 @@ async function handleSessionStatus(url, env, corsHeaders) {
     return jsonResponse({ error: 'A rendeléskövetés nincs konfigurálva.' }, 503, corsHeaders);
   }
 
-  const orderReference = url.searchParams.get('session_id') || url.searchParams.get('order_reference');
+  const orderReference = normaliseOrderReference(
+    url.searchParams.get('session_id') || url.searchParams.get('order_reference')
+  );
   if (!orderReference) {
     return jsonResponse({ error: 'A session_id vagy order_reference kötelező.' }, 400, corsHeaders);
+  }
+  if (!isValidOrderReference(orderReference)) {
+    return jsonResponse({ error: 'Érvénytelen rendelési azonosító.' }, 400, corsHeaders);
   }
 
   const supabase = createSupabaseClient(env);
@@ -362,8 +373,9 @@ async function handleApprovePayment(request, env, corsHeaders) {
   ensureLicenseConfiguration(env);
 
   const payload = await readJson(request);
-  if (!payload.order_reference?.trim()) {
-    return jsonResponse({ error: 'Az order_reference kötelező.' }, 400, corsHeaders);
+  const orderReference = normaliseOrderReference(payload.order_reference);
+  if (!isValidOrderReference(orderReference)) {
+    return jsonResponse({ error: 'Érvénytelen order_reference.' }, 400, corsHeaders);
   }
   if (!payload.bank_transaction_id?.trim()) {
     return jsonResponse({ error: 'A bank_transaction_id kötelező.' }, 400, corsHeaders);
@@ -371,7 +383,7 @@ async function handleApprovePayment(request, env, corsHeaders) {
 
   const supabase = createSupabaseClient(env);
   const subscription = await supabase.selectSingle('subscriptions', {
-    provider_checkout_session_id: ['eq', payload.order_reference.trim()],
+    provider_checkout_session_id: ['eq', orderReference],
   });
   if (!subscription) {
     return jsonResponse({ error: 'A rendelés nem található.' }, 404, corsHeaders);
@@ -459,7 +471,7 @@ async function handleApprovePayment(request, env, corsHeaders) {
     event_type: 'manual_bank_transfer_approved',
     status: 'processed',
     payload: {
-      order_reference: payload.order_reference.trim(),
+      order_reference: orderReference,
       bank_transaction_id: payload.bank_transaction_id.trim(),
       amount: Number(subscription.metadata?.amount ?? subscription.amount_huf),
       currency: subscription.currency || subscription.metadata?.currency || 'HUF',
@@ -471,10 +483,19 @@ async function handleApprovePayment(request, env, corsHeaders) {
 
   return jsonResponse({
     ok: true,
-    order_reference: payload.order_reference.trim(),
+    order_reference: orderReference,
     license_key: licenseKey,
     valid_until: validUntil,
   }, 200, corsHeaders);
+}
+
+function normaliseOrderReference(value) {
+  return String(value || '').trim().toUpperCase();
+}
+
+function isValidOrderReference(value) {
+  const reference = normaliseOrderReference(value);
+  return SECURE_ORDER_REFERENCE.test(reference) || LEGACY_ORDER_REFERENCE.test(reference);
 }
 
 function validateCheckoutRequest(payload) {
@@ -486,13 +507,13 @@ function validateCheckoutRequest(payload) {
   if (!payload.contact_name?.trim()) return 'A kapcsolattartó neve kötelező.';
   if (!payload.email?.includes('@')) return 'Érvényes e-mail-cím szükséges.';
   if (!payload.billing_address?.trim()) return 'A számlázási cím kötelező.';
-  if (!/^FX-\d{8}-[A-Z0-9]{3,8}$/.test(payload.order_reference || '')) return 'Érvénytelen rendelési azonosító.';
+  if (!isValidOrderReference(payload.order_reference)) return 'Érvénytelen rendelési azonosító.';
   return null;
 }
 
 function validatePaymentConfirmation(payload) {
   if (!payload || typeof payload !== 'object') return 'Hiányzó kérés törzs.';
-  if (!payload.order_reference?.trim()) return 'A rendelési azonosító kötelező.';
+  if (!isValidOrderReference(payload.order_reference)) return 'Érvénytelen rendelési azonosító.';
   if (!payload.payer_name?.trim()) return 'Az utaló neve kötelező.';
   if (!payload.buyer_email?.includes('@')) return 'Érvényes vásárlói e-mail-cím szükséges.';
   if (!payload.transfer_reference?.trim()) return 'A banki tranzakció hivatkozása kötelező.';

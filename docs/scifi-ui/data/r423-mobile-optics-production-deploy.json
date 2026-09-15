@@ -1,0 +1,13 @@
+{
+  "revision": "r423-final-restrained-soft-edge",
+  "renderer": "single-webgl-crystal-organism-r326",
+  "surface": "mobile",
+  "purpose": "production deployment marker for the softened MAG optics already present in master",
+  "visual_contract": {
+    "center_glare": "reduced",
+    "perimeter_glare": "reduced",
+    "edge_contrast": "softened",
+    "canvas_blur": "sub-pixel",
+    "geometry": "unchanged"
+  }
+}

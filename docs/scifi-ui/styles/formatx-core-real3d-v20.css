@@ -1,0 +1,432 @@
+/* FormatX living glass v25 — internal moving reactor, refractive membranes and reactive spectral orbits. */
+.fx-core-real3d-stage {
+  position: fixed;
+  z-index: 121;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  contain: strict;
+  isolation: isolate;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 420ms ease, visibility 0s linear 420ms;
+}
+
+.fx-core-real3d-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 16% 34%, rgba(87, 161, 255, .72) 0 1px, transparent 3px),
+    radial-gradient(circle at 27% 24%, rgba(141, 72, 255, .68) 0 1px, transparent 2.5px),
+    radial-gradient(circle at 82% 31%, rgba(90, 226, 255, .76) 0 1px, transparent 3px),
+    radial-gradient(circle at 73% 61%, rgba(166, 65, 255, .58) 0 1px, transparent 3px),
+    radial-gradient(circle at 10% 57%, rgba(62, 178, 255, .54) 0 1px, transparent 2.5px),
+    radial-gradient(circle at 91% 52%, rgba(134, 76, 255, .64) 0 1px, transparent 3px),
+    radial-gradient(circle at var(--fx-core-x, 71%) 48%, rgba(205, 251, 255, .13) 0 1.5%, rgba(45, 218, 255, .12) 5%, transparent 18%),
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 47%, rgba(20, 183, 255, .16) 0, rgba(17, 92, 190, .075) 27%, transparent 56%),
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 49%, rgba(151, 50, 242, .105) 0, rgba(93, 35, 174, .045) 30%, transparent 49%),
+    linear-gradient(180deg, rgba(0, 4, 12, .01), rgba(0, 4, 13, .12));
+}
+
+.fx-core-real3d-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: -14vw;
+  right: -14vw;
+  top: 53%;
+  height: 62%;
+  pointer-events: none;
+  transform: perspective(520px) rotateX(61deg) translateY(3%);
+  transform-origin: 50% 0;
+  background:
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 0%, rgba(76, 222, 255, .27), rgba(29, 106, 198, .075) 31%, transparent 62%),
+    repeating-radial-gradient(ellipse at var(--fx-core-x, 71%) 0%, rgba(97, 221, 255, .055) 0 1px, transparent 3px 17px),
+    repeating-linear-gradient(180deg, rgba(62, 190, 255, .085) 0 1px, transparent 2px 12px),
+    linear-gradient(90deg, transparent 4%, rgba(39, 119, 223, .07) 31%, rgba(85, 219, 255, .135) 50%, rgba(145, 58, 229, .085) 70%, transparent 96%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .86), transparent 83%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, .86), transparent 83%);
+  opacity: .58;
+}
+
+.fx-core-real3d-canvas {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  filter: saturate(2.00) contrast(1.065);
+  image-rendering: auto;
+  transform: translateZ(0);
+}
+
+.fx-core-real3d-stage[data-active="true"] {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 420ms ease, visibility 0s;
+}
+
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) #hero .hero-copy {
+  position: relative;
+  z-index: 130;
+}
+
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) #hero .fx-organism-map,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) #hero .fx-immersive-launch,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) #hero .hero-ring,
+html[data-fx-core-real3d="ready-v20"] #hero .hero-label,
+html[data-fx-core-real3d="ready-v20"] .fx-resilient-core,
+html[data-fx-core-real3d="ready-v20"] .fx-premium-core-status,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) .fx-three-stage-shell,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) .fx-core-mesh3d-stage,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) .fx-core-fracture3d-stage,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) .fx-transcend-shell[data-fx-native-apex="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.fx-organism-menu-open .fx-core-real3d-stage,
+body.fx-organism-panel-open .fx-core-real3d-stage {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+@media (max-width: 820px), (pointer: coarse) {
+  .fx-core-real3d-stage {
+    --fx-core-x: 50%;
+  }
+
+  .fx-core-real3d-stage::before {
+    background:
+      radial-gradient(circle at 12% 31%, rgba(69, 157, 255, .70) 0 1px, transparent 3px),
+      radial-gradient(circle at 25% 22%, rgba(151, 72, 255, .64) 0 1px, transparent 2.5px),
+      radial-gradient(circle at 84% 29%, rgba(83, 226, 255, .74) 0 1px, transparent 3px),
+      radial-gradient(circle at 76% 57%, rgba(169, 61, 255, .58) 0 1px, transparent 3px),
+      radial-gradient(circle at 9% 54%, rgba(60, 176, 255, .50) 0 1px, transparent 2.5px),
+      radial-gradient(circle at 92% 49%, rgba(134, 76, 255, .60) 0 1px, transparent 3px),
+      radial-gradient(circle at 50% 43%, rgba(204, 252, 255, .14) 0 1.5%, rgba(41, 213, 255, .12) 5%, transparent 18%),
+      radial-gradient(ellipse at 50% 43%, rgba(32, 180, 244, .17) 0, rgba(20, 92, 180, .07) 27%, transparent 57%),
+      radial-gradient(ellipse at 50% 46%, rgba(144, 55, 241, .10) 0, transparent 48%),
+      linear-gradient(180deg, rgba(1, 5, 11, .02), rgba(0, 2, 7, .17));
+  }
+
+  .fx-core-real3d-stage::after {
+    top: 49%;
+    opacity: .52;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(62, 211, 255, .28), rgba(28, 104, 190, .075) 32%, transparent 63%),
+      repeating-radial-gradient(ellipse at 50% 0%, rgba(93, 218, 255, .052) 0 1px, transparent 3px 16px),
+      repeating-linear-gradient(180deg, rgba(64, 195, 255, .085) 0 1px, transparent 2px 12px),
+      linear-gradient(90deg, transparent 2%, rgba(40, 117, 215, .065) 29%, rgba(83, 220, 255, .14) 50%, rgba(139, 61, 229, .08) 71%, transparent 98%);
+  }
+
+  html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) body.living-architecture #hero {
+    min-height: auto !important;
+    padding-top: max(82px, calc(env(safe-area-inset-top) + 72px)) !important;
+  }
+
+  html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) body.living-architecture #hero .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    min-height: 0 !important;
+  }
+
+  html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) body.living-architecture #hero .hero-space {
+    position: relative !important;
+    z-index: 1 !important;
+    inset: auto !important;
+    order: -1 !important;
+    width: 100% !important;
+    min-height: clamp(576px, 63svh, 896px) !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) body.living-architecture #hero .hero-copy {
+    order: 2 !important;
+    z-index: 130 !important;
+    margin-top: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-core-real3d-stage {
+    transition-duration: 120ms;
+  }
+}
+
+/* r284 — render-blocking settled geometry.
+   These selectors intentionally outrank transitional r244/r207 ownership so
+   first paint already has the final stable composition instead of reflowing
+   through legacy intermediate states. Visual materials remain owned elsewhere. */
+@media (max-width: 900px), (pointer: coarse) {
+  html:root:root,
+  html:root:root body.living-architecture {
+    max-width: 100% !important;
+    overflow-x: clip !important;
+  }
+
+  html:root:root body.living-architecture #fx-reference-legacy-menu,
+  html:root:root body.living-architecture .menu-toggle.fx-organism-system-toggle:not(.fx-reference-menu-button) {
+    position: fixed !important;
+    inset: 0 auto auto 0 !important;
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+    translate: none !important;
+    clip-path: inset(100%) !important;
+  }
+
+  html:root:root body.living-architecture .topbar .brand {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 132px !important;
+    overflow: hidden !important;
+  }
+
+  html:root:root body.living-architecture .topbar .brand > * { min-width: 0 !important; }
+  html:root:root body.living-architecture .topbar .brand strong {
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    gap: 0 !important;
+    overflow: visible !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-space {
+    order: 0 !important;
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(390px, 100vw, 500px) !important;
+    min-height: clamp(390px, 100vw, 500px) !important;
+    max-height: 500px !important;
+    margin: 0 auto !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid:not(:has(> .fx-reference-controls-r204)) > .hero-space {
+    margin-bottom: 110px !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204 {
+    order: 1 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 50px) !important;
+    align-items: start !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    box-sizing: border-box !important;
+    width: max-content !important;
+    max-width: calc(100% - 24px) !important;
+    min-height: 76px !important;
+    margin: 14px auto 20px !important;
+    padding: 0 4px 20px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    align-self: center !important;
+    width: calc(100% - 24px) !important;
+    max-width: 680px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto 26px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  html:root:root body.living-architecture .topbar .brand { max-width: 126px !important; }
+  html:root:root body.living-architecture .topbar .brand small { display: none !important; }
+  html:root:root body.living-architecture .topbar .brand strong {
+    font-size: 11px !important;
+    letter-spacing: .09em !important;
+  }
+}
+
+@media (min-width: 901px) {
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-grid > .hero-space {
+    grid-area: space !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(520px, 42vw, 620px) !important;
+    min-height: 520px !important;
+    max-height: 620px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-heading {
+    grid-area: heading !important;
+    min-height: 24px !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-proof {
+    grid-area: proof !important;
+    min-height: 258px !important;
+  }
+}
+
+/* r293 — reserve the final r244 header in the render-blocking core stylesheet.
+   r244's mode attribute is published by a deferred script. Without this neutral
+   reservation, the header changed from fixed to in-flow after the first layout,
+   moving the entire main surface by 70/76px and dominating CLS. */
+@media (max-width: 900px), (pointer: coarse) {
+  html:root:root body.living-architecture .topbar {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 70px !important;
+    min-height: 70px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  html:root:root body.living-architecture .topbar .brand {
+    position: absolute !important;
+    inset: 18px auto auto 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  html:root:root body.living-architecture .topbar .brand img {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+  }
+}
+
+@media (min-width: 901px) {
+  html:root:root body.living-architecture .topbar {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  html:root:root body.living-architecture .topbar .brand {
+    position: absolute !important;
+    inset: 18px auto auto max(38px, calc((100vw - 1320px) / 2)) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    height: 40px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  html:root:root body.living-architecture .topbar .brand img {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "revision":"2026-08-09-reference-energy-network-mag-v23-candidate",
+  "material":"reference-glass-v23",
+  "highlight_model":"reference-energy-network-v23",
+  "highlight_coverage":"controlled-10-20pct-network-v23",
+  "grade":"reference-network-v23",
+  "geometry":"indexed-webgl2-mesh-v11-shape-v14-scale-v13",
+  "pixel_gate":"unchanged-reference-gate",
+  "status":"candidate-awaiting-live-chromium-validation"
+}

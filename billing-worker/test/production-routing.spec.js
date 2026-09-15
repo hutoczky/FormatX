@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import productionWorker, {
+  buildLiveReleaseMetadata,
   canonicalPageRedirect,
   concealUpstreamText,
   createAudioTestWav,
@@ -155,6 +156,7 @@ describe('production routing and frame security', () => {
     const response = await productionWorker.fetch(
       new Request('https://www.formatxsuite.com/scifi-ui/data/current-release.json'),
       {
+        FORMATX_RELEASE_API_DISABLED: 'true',
         ASSETS: {
           async fetch() {
             return new Response(JSON.stringify(rawRelease), {
@@ -175,6 +177,38 @@ describe('production routing and frame security', () => {
     expect(payload.release_url).toBe('/scifi-ui/downloads/');
     expect(payload.channels.multiplatform.download_url).toBe('/download/multiplatform');
     expect(text.toLowerCase()).not.toContain('github');
+  });
+
+  it('builds the canonical package from the live latest-release response', () => {
+    const digest = `sha256:${'b'.repeat(64)}`;
+    const payload = {
+      id: 368609187,
+      tag_name: 'v134',
+      name: 'FormatX Suite Pro V134',
+      draft: false,
+      prerelease: false,
+      target_commitish: 'main',
+      published_at: '2026-08-11T13:54:19Z',
+      updated_at: '2026-08-11T13:54:42Z',
+      html_url: 'https://github.com/hutoczky/FormatX-Updates/releases/tag/v134',
+      assets: [{
+        id: 510197083,
+        state: 'uploaded',
+        name: 'FormatX-Suite-Pro-V134.zip',
+        content_type: 'application/zip',
+        size: 539649245,
+        digest,
+        browser_download_url: 'https://github.com/hutoczky/FormatX-Updates/releases/download/v134/FormatX-Suite-Pro-V134.zip',
+      }],
+    };
+    const fallback = { channels: { android: { available: true, download_url: '/download/android' } } };
+    const release = buildLiveReleaseMetadata(payload, fallback);
+
+    expect(release?.version).toBe('v134');
+    expect(release?.channels.multiplatform.name).toBe('FormatX-Suite-Pro-V134.zip');
+    expect(release?.channels.multiplatform.digest).toBe(digest);
+    expect(release?.channels.android.download_url).toBe('/download/android');
+    expect(release?.integrity.status).toBe('digest_published');
   });
 
   it('redirects the apex domain to the canonical www product page', () => {

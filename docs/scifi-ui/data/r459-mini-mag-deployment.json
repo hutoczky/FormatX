@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "revision": "r459",
+  "feature": "persistent-mini-mag-site-controller",
+  "primary_mag": "preserved-single-webgl-crystal-organism-r326",
+  "mobile_optics": "r458-restrained-nucleus-soft-fresnel-rim",
+  "mini_mag": {
+    "persistent": true,
+    "viewport_fixed": true,
+    "second_webgl_renderer": false,
+    "controls": [
+      "ask",
+      "menu",
+      "sound",
+      "pause-resume",
+      "language",
+      "shape",
+      "section-navigation"
+    ],
+    "validated_viewports": [
+      "390x844-mobile",
+      "1440x900-desktop"
+    ]
+  },
+  "validation": {
+    "source_contract": "pass",
+    "browser_mobile": "pass",
+    "browser_desktop": "pass"
+  }
+}

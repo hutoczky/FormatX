@@ -18,14 +18,63 @@ const LANGUAGE_PAGE_PATHS = new Set([
   '/scifi-ui/payment/success.html',
   '/scifi-ui/payment/cancel.html',
 ]);
-const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260729-single-language-3">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260729-single-language-2"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
+const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260819-award-r216">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260819-language-r217"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
 const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
 const STATUS_ASSETS = '  <link rel="stylesheet" data-fx-platform-status-style="true" href="/scifi-ui/styles/platform-status.css?v=20260730-platform-status-2">\n  <script defer src="/scifi-ui/scripts/platform-status.js?v=20260730-platform-status-2"></script>\n';
+const SOCIAL_IMAGE = 'https://formatxsuite.com/scifi-ui/assets/images/formatx-technician-console.png';
+const AWARD_META_HU = `  <meta data-fx-award-meta="r218" name="application-name" content="FormatX Suite Pro">
+  <meta property="og:site_name" content="FormatX Suite Pro">
+  <meta property="og:locale" content="hu_HU">
+  <meta property="og:locale:alternate" content="en_GB">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FormatX Suite Pro — Élő rendszerarchitektúra">
+  <meta name="twitter:description" content="Biztonságos, tervezhető és visszaellenőrizhető lemezkezelési munkafolyamat Linuxon, Windowson és Androidon.">
+  <meta name="twitter:image" content="${SOCIAL_IMAGE}">
+`;
+const AWARD_META_EN = `  <meta data-fx-award-meta="r218" name="application-name" content="FormatX Suite Pro">
+  <meta property="og:site_name" content="FormatX Suite Pro">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:locale:alternate" content="hu_HU">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FormatX Suite Pro — Living System Architecture">
+  <meta name="twitter:description" content="A safe, plan-first and verifiable disk-management workflow for Linux, Windows and Android.">
+  <meta name="twitter:image" content="${SOCIAL_IMAGE}">
+`;
+const HU_STATIC_REPLACEMENTS = [
+  ['>FORMATX / LIVING CORE<', '>FORMATX / ÉLŐ MAG<'],
+  ['>RESPONSIVE SYSTEM ARCHITECTURE<', '>RESZPONZÍV RENDSZERARCHITEKTÚRA<'],
+  ['>SYSTEM ORGANISM INITIALISING<', '>RENDSZERORGANIZMUS INDÍTÁSA<'],
+  ['>SUITE PRO · LIVING ARCHITECTURE<', '>SUITE PRO · ÉLŐ ARCHITEKTÚRA<'],
+  ['>LIVING SYSTEM<', '>ÉLŐ RENDSZER<'],
+  ['>CORE STATE<', '>MAG ÁLLAPOT<'],
+  ['>RELEASE CHANNEL<', '>KIADÁSI CSATORNA<'],
+  ['>INTEGRITY<', '>INTEGRITÁS<'],
+  ['>02 — NERVOUS SYSTEM<', '>02 — IDEGRENDSZER<'],
+  ['>03 — SYSTEM ORGANS<', '>03 — RENDSZERSZERVEK<'],
+  ['>04 — COMMERCE HEART<', '>04 — KERESKEDELMI SZÍV<'],
+  ['>05 — SYSTEM SKELETON<', '>05 — RENDSZERVÁZ<'],
+  ['>06 — RELEASE BEACON<', '>06 — KIADÁSI JELADÓ<'],
+  ['>DISCOVER<', '>FELDERÍTÉS<'],
+  ['>PLAN<', '>TERVEZÉS<'],
+  ['>EXECUTE<', '>VÉGREHAJTÁS<'],
+  ['>VERIFY<', '>ELLENŐRZÉS<'],
+  ['>WRITE / VERIFY<', '>ÍRÁS / ELLENŐRZÉS<'],
+  ['>QUICK / DEEP<', '>GYORS / MÉLY<'],
+  ['>PLAN / PREVIEW<', '>TERV / ELŐNÉZET<'],
+  ['>CONFIRM / ERASE<', '>MEGERŐSÍTÉS / TÖRLÉS<'],
+  ['>READ / ANALYSE<', '>OLVASÁS / ELEMZÉS<'],
+  ['>EXPLAIN / GUIDE<', '>MAGYARÁZAT / SEGÍTSÉG<'],
+  ['>INDIVIDUAL<', '>EGYÉNI<'],
+  ['>RECOMMENDED<', '>AJÁNLOTT<'],
+  ['>TEAM<', '>CSAPAT<'],
+  ['>PAYMENT ACCESS LAYER<', '>FIZETÉSI HOZZÁFÉRÉSI RÉTEG<'],
+  ['>ASK<', '>KÉRDEZZ<'],
+  ['>PROOF<', '>BIZONYÍTÉK<'],
+];
 const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/data/platform-status.json',
   '/scifi-ui/scripts/platform-status.js',
   '/scifi-ui/styles/platform-status.css',
-  '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/igloo-parity.js',
   '/scifi-ui/scripts/single-language-toggle.js',
@@ -64,10 +113,15 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/styles/formatx-premium-finish.css',
   '/scifi-ui/scripts/formatx-premium-finish.js',
   '/scifi-ui/scripts/formatx-event-horizon.js',
+  '/scifi-ui/scripts/formatx-core-real3d-v20.js',
+  '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
+  '/scifi-ui/scripts/formatx-core-v51.js',
+  '/scifi-ui/styles/formatx-core-v51.css',
+  '/scifi-ui/scripts/formatx-core-mobile-compat-v52.js',
+  '/scifi-ui/styles/formatx-core-mobile-compat-v52.css',
+  '/scifi-ui/scripts/formatx-desktop-apex-loader-r224.js',
 ]);
 const REPLACEMENTS = [
-  ['formatx-mobile-recovery.js?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
-  ['formatx-mobile-recovery.js?v=20260729-safe-three-gate-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
   ['formatx-mobile-recovery.css?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
   ['formatx-mobile-recovery.css?v=20260729-safe-three-css-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
   ['formatx-mobile-recovery.css?v=20260729-living-core-css-v2', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
@@ -76,6 +130,33 @@ const REPLACEMENTS = [
   ['formatx-event-horizon.js?v=20260726-event-horizon-3', 'formatx-event-horizon.js?v=20260731-intro-restored-1'],
   ['formatx-event-horizon.js?v=20260729-event-horizon-5', 'formatx-event-horizon.js?v=20260731-intro-restored-1'],
   ['formatx-event-horizon.js?v=20260730-first-visit-1', 'formatx-event-horizon.js?v=20260731-intro-restored-1'],
+  ['formatx-core-real3d-v20.js?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11', 'formatx-core-real3d-v20.js?v=20260810-mobile-safe-v52-r13'],
+];
+const WPO_REPLACEMENTS = [
+  [
+    '<link rel="stylesheet" href="./styles/formatx-event-horizon.css?v=20260726-event-horizon-3">',
+    '<link rel="stylesheet" href="./styles/formatx-event-horizon.css?v=20260819-r224-desktop-intro" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)">'
+  ],
+  [
+    '<link rel="stylesheet" data-fx-category-style="true" href="./styles/formatx-category-positioning.css?v=20260728-category-v1">',
+    '<link rel="stylesheet" data-fx-category-style="true" href="./styles/formatx-category-positioning.css?v=20260819-r223-mobile-wpo">'
+  ],
+  [
+    '<link rel="stylesheet" data-fx-mobile-ui-polish-r179="true" href="./styles/formatx-mobile-ui-polish-r179.css?v=20260816-r179-mobile-ui-polish">',
+    '<link rel="stylesheet" data-fx-mobile-ui-polish-r179="true" href="./styles/formatx-mobile-ui-polish-r179.css?v=20260819-r222-critical-flat" media="(max-width: 900px), (pointer: coarse)">'
+  ],
+  [
+    '<link rel="stylesheet" data-fx-desktop-apex-r181="true" href="./styles/formatx-desktop-apex-r181.css?v=20260816-r181-crystal-apex">',
+    '<link rel="stylesheet" data-fx-desktop-apex-r181="true" href="./styles/formatx-desktop-apex-r181.css?v=20260816-r181-crystal-apex" media="(min-width: 901px) and (pointer: fine)">'
+  ],
+  [
+    '<script defer data-fx-desktop-apex-r181="true" src="./scripts/formatx-desktop-apex-r181.js?v=20260816-r181-crystal-apex"></script>',
+    '<script defer data-fx-desktop-apex-r181-loader="true" src="./scripts/formatx-desktop-apex-loader-r224.js?v=20260819-r224"></script>'
+  ],
+  [
+    '<script defer data-fx-simulator-entry-script="true" src="./scripts/project-simulator-entry.js?v=20260728-operational-twin-1"></script>',
+    '<script defer data-fx-simulator-entry-script="true" src="./scripts/project-simulator-entry.js?v=20260819-ready-contract-v2"></script>'
+  ],
 ];
 
 export default {
@@ -86,7 +167,7 @@ export default {
       return serveAndroidApk(request, env);
     }
     if ((request.method === 'GET' || request.method === 'HEAD') && LANGUAGE_PAGE_PATHS.has(url.pathname)) {
-      return serveLanguagePage(request, env, url.pathname);
+      return serveLanguagePage(request, env, url.pathname, url.searchParams.get('lang'));
     }
     if ((request.method === 'GET' || request.method === 'HEAD') && CRITICAL_ASSET_PATHS.has(url.pathname)) {
       return serveNoStoreAsset(request, env);
@@ -95,7 +176,7 @@ export default {
   },
 };
 
-async function serveLanguagePage(request, env, pathname) {
+async function serveLanguagePage(request, env, pathname, languageHint) {
   const upstream = await env.ASSETS.fetch(request);
   if (!upstream.ok || request.method === 'HEAD') {
     const headers = new Headers(upstream.headers);
@@ -109,7 +190,19 @@ async function serveLanguagePage(request, env, pathname) {
 
   let html = await upstream.text();
   if (SCIFI_ENTRY_PATHS.has(pathname)) {
+    const isEnglish = languageHint === 'en';
     for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
+    for (const [before, after] of WPO_REPLACEMENTS) html = html.replaceAll(before, after);
+    if (isEnglish) {
+      html = html.replace('<html lang="hu"', '<html lang="en"');
+    } else {
+      for (const [before, after] of HU_STATIC_REPLACEMENTS) html = html.replaceAll(before, after);
+      html = html.replace('<title>FormatX Suite Pro | Living System Architecture</title>', '<title>FormatX Suite Pro | Élő rendszerarchitektúra</title>');
+      html = html.replace('content="FormatX Suite Pro — Living System Architecture"', 'content="FormatX Suite Pro — Élő rendszerarchitektúra"');
+    }
+    if (!html.includes('data-fx-award-meta="r218"')) {
+      html = html.replace('</head>', (isEnglish ? AWARD_META_EN : AWARD_META_HU) + '</head>');
+    }
   }
   if (!html.includes('data-fx-single-language-style')) {
     html = html.replace('</head>', LANGUAGE_ASSETS + '</head>');
@@ -124,6 +217,8 @@ async function serveLanguagePage(request, env, pathname) {
   const headers = new Headers(upstream.headers);
   headers.set('Cache-Control', 'no-store, max-age=0');
   headers.set('Pragma', 'no-cache');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
   headers.delete('ETag');

@@ -1,38 +1,47 @@
-/* FormatX MAG/core interaction guard — keeps the single primary core control clickable. */
+/* FormatX r326 — explicit ASK-only Organism interaction ownership.
+   The WebGL MAG is never a dialogue opener. The legacy thought trigger stays in
+   the DOM as a compatibility proxy for the canonical ASK button, but it has no
+   visible or hit-testable surface of its own. */
 
-/* Closed dialogue must occupy only the visible question pill, never a transparent 380px box. */
 .fx-organism-dialogue:not(.is-open) {
-  width: 92px !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  pointer-events: none !important;
 }
 
-.fx-organism-dialogue.is-disabled:not(.is-open) {
-  width: 68px !important;
+.fx-organism-dialogue .fx-organism-thought-trigger {
+  position: absolute !important;
+  width: 1px !important;
+  min-width: 1px !important;
+  height: 1px !important;
+  min-height: 1px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
 }
 
-.fx-organism-dialogue .fx-organism-thought-trigger,
+.fx-organism-dialogue.is-open {
+  width: min(380px, calc(100vw - 32px)) !important;
+  height: auto !important;
+  pointer-events: none !important;
+}
+
 .fx-organism-dialogue.is-open .fx-organism-thought {
   pointer-events: auto !important;
 }
 
-/* The hero system map owns the single visible MAG navigation control. */
+/* The hero system map owns MAG navigation; navigation never opens dialogue. */
 .fx-rail [data-scene-link="0"] {
   display: none !important;
-}
-
-/* The dialogue trigger is an action, not a second MAG navigation button. */
-.fx-organism-thought-trigger b {
-  font-size: 0 !important;
-}
-
-.fx-organism-thought-trigger b::after {
-  content: "KÉRDEZZ";
-  font-size: 9px;
-  line-height: 1;
-  letter-spacing: .08em;
-}
-
-html[lang="en"] .fx-organism-thought-trigger b::after {
-  content: "ASK";
 }
 
 [data-organ-node="0"],
@@ -55,11 +64,9 @@ a[href="#hero"]:not(.brand):not(.skip-link):focus-visible {
 }
 
 @media (max-width: 820px), (pointer: coarse) {
-  .fx-organism-dialogue:not(.is-open) {
-    width: 86px !important;
-  }
-
-  .fx-organism-dialogue.is-disabled:not(.is-open) {
-    width: 64px !important;
+  .fx-organism-dialogue.is-open {
+    right: max(12px, env(safe-area-inset-right));
+    left: max(12px, env(safe-area-inset-left));
+    width: auto !important;
   }
 }

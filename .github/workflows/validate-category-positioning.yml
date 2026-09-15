@@ -14,6 +14,8 @@ on:
       - 'docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
       - 'docs/scifi-ui/scripts/formatx-infinite-loop-fix.js'
+      - 'docs/scifi-ui/checkout.html'
+      - 'docs/scifi-ui/scripts/checkout-v100.js'
       - 'docs/scifi-ui/scripts/checkout-language-v100.js'
       - '.github/scripts/diagnose-main-document.cjs'
       - '.github/scripts/validate-category-positioning.cjs'
@@ -30,6 +32,8 @@ on:
       - 'docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
       - 'docs/scifi-ui/scripts/formatx-infinite-loop-fix.js'
+      - 'docs/scifi-ui/checkout.html'
+      - 'docs/scifi-ui/scripts/checkout-v100.js'
       - 'docs/scifi-ui/scripts/checkout-language-v100.js'
       - '.github/scripts/diagnose-main-document.cjs'
       - '.github/scripts/validate-category-positioning.cjs'
@@ -63,6 +67,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-category-positioning.js
           node --check docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js
           node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
+          node --check docs/scifi-ui/scripts/checkout-v100.js
           node --check docs/scifi-ui/scripts/checkout-language-v100.js
           node --check docs/scifi-ui/scripts/project-simulator.js
           node --check docs/scifi-ui/scripts/project-simulator-entry.js
@@ -70,7 +75,9 @@ jobs:
           node --check .github/scripts/validate-category-positioning.cjs
           grep -Fq "Saját technikusi kategória" docs/scifi-ui/scripts/formatx-category-positioning.js
           grep -Fq "fxCategoryDeckState = 'ready'" docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js
-          grep -Fq "authoritative-v4" docs/scifi-ui/scripts/checkout-language-v100.js
+          grep -Fq "authoritative-v5" docs/scifi-ui/scripts/checkout-language-v100.js
+          grep -Fq 'business-buyer-consent' docs/scifi-ui/checkout.html
+          grep -Fq '/checkout-readiness' docs/scifi-ui/scripts/checkout-v100.js
           grep -Fq 'data-fx-category-script="true"' docs/scifi-ui/index.html
           grep -Fq 'data-fx-category-deck-stabilizer="true"' docs/scifi-ui/index.html
           grep -Fq 'data-fx-origin-proof-script="true"' docs/scifi-ui/index.html
@@ -101,6 +108,7 @@ jobs:
           for attempt in $(seq 1 40); do
             curl -fsS http://127.0.0.1:4181/scifi-ui/index.html >/dev/null \
               && curl -fsS http://127.0.0.1:4181/scifi-ui/project-simulator.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4181/scifi-ui/checkout.html >/dev/null \
               && exit 0
             sleep 0.25
           done
@@ -141,10 +149,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Category, bilingual checkout and Operational Twin validation passed'
+            description='Category, business checkout and Operational Twin validation passed'
           else
             state='failure'
-            description='FormatX category or Operational Twin validation failed'
+            description='FormatX category, checkout or Operational Twin validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \

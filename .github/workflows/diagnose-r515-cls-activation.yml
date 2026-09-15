@@ -1,0 +1,65 @@
+name: Diagnose R515 critical-core CLS activation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/scripts/diagnose-r515-cls-activation.cjs'
+      - '.github/workflows/diagnose-r515-cls-activation.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-r515-cls-activation
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      FORMATX_TEST_URL: https://formatxsuite.com/
+      FORMATX_R515_DIAG_DIR: artifacts/r515-cls-activation
+      FORMATX_R515_DIAG_RUNS: '5'
+    steps:
+      - name: Checkout diagnostic revision
+        uses: actions/checkout@v5
+
+      - name: Confirm production is still exact R514 marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' \
+            "https://formatxsuite.com/p0-validation-version.txt?r515_diag=${GITHUB_RUN_ID}" \
+            -o "$RUNNER_TEMP/live-p0.txt"
+          cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"
+          echo 'R515_DIAG_EXACT_R514_PRODUCTION_PASS'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate diagnostic syntax
+        run: node --check .github/scripts/diagnose-r515-cls-activation.cjs
+
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Prove critical-core activation owns CLS
+        run: node .github/scripts/diagnose-r515-cls-activation.cjs
+
+      - name: Upload R515 CLS activation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r515-cls-activation-${{ github.sha }}
+          path: artifacts/r515-cls-activation/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,6 +1,8 @@
 import { isSalesLegallyReady } from './sales-gate.js';
 
 const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';
+const TERMS_VERSION = '2026-08-07';
+const PRIVACY_VERSION = '2026-08-10';
 
 const PLAN_CATALOG = {
   business_lite: {
@@ -37,6 +39,8 @@ const PLAN_CATALOG = {
 
 const BILLING_CYCLES = new Set(['monthly', 'annual']);
 const SUPPORTED_CURRENCIES = new Set(['HUF', 'EUR']);
+const SECURE_ORDER_REFERENCE = /^FX-\d{8}-[A-F0-9]{24}$/;
+const LEGACY_ORDER_REFERENCE = /^FX-\d{8}-[A-Z0-9]{3,8}$/;
 
 export async function handleV100PricingRequest(request, env) {
   const url = new URL(request.url);
@@ -45,18 +49,40 @@ export async function handleV100PricingRequest(request, env) {
     return await handleCheckoutQr(request, url);
   }
 
+  if (request.method === 'GET' && url.pathname === '/api/checkout-readiness') {
+    return handleCheckoutReadiness(request, env);
+  }
+
   if (request.method !== 'POST' || url.pathname !== '/api/create-checkout-session') {
     return null;
   }
 
-  // Preserve the existing legal sales gate. When sales are disabled, the
-  // production worker returns the standard unavailable response.
   if (!isSalesLegallyReady(env)) return null;
 
   const rateLimited = await enforceRateLimit(request, env, url.pathname);
   if (rateLimited) return rateLimited;
 
   return await handleCreateCheckoutSession(request, env);
+}
+
+function handleCheckoutReadiness(request, env) {
+  const corsHeaders = buildCorsHeaders(request, env);
+  const configurationErrors = getConfigurationErrors(env);
+  const salesReady = isSalesLegallyReady(env);
+  const ready = salesReady && configurationErrors.length === 0;
+  return jsonResponse({
+    ok: ready,
+    provider: 'bank_transfer',
+    mode: env.PAYMENT_MODE || 'unconfigured',
+    live_ready: ready,
+    sales_ready: salesReady,
+    order_tracking_ready: hasSupabaseConfiguration(env),
+    supported_currencies: [...SUPPORTED_CURRENCIES],
+    manual_verification_required: true,
+    business_checkout_only: true,
+    legal_acceptance_required: true,
+    configuration_errors: configurationErrors.length,
+  }, 200, corsHeaders);
 }
 
 async function handleCheckoutQr(request, url) {
@@ -107,8 +133,8 @@ async function handleCreateCheckoutSession(request, env) {
   const configurationErrors = getConfigurationErrors(env);
   if (configurationErrors.length > 0) {
     return jsonResponse({
-      error: 'A közvetlen HUF/EUR banki átutalás nincs teljesen konfigurálva.',
-      details: configurationErrors,
+      error: 'A banki fizetés és a tartós rendeléskövetés nincs teljesen konfigurálva.',
+      configuration_errors: configurationErrors.length,
     }, 503, corsHeaders);
   }
 
@@ -120,59 +146,63 @@ async function handleCreateCheckoutSession(request, env) {
   const billingCycle = payload.billing_cycle;
   const currency = normaliseCurrency(payload.currency);
   const amount = plan.prices[currency][billingCycle];
-  const orderReference = payload.order_reference.trim();
+  const orderReference = payload.order_reference.trim().toUpperCase();
   const account = getBankAccount(env);
   const paymentUri = buildPaytoUri(account, amount, currency, orderReference);
   const qrPayload = currency === 'EUR'
     ? buildEpcQrPayload(account, amount, orderReference)
     : paymentUri;
   const qrFormat = currency === 'EUR' ? 'epc069-12-v3.1' : 'payto-rfc8905';
+  const supabase = createSupabaseClient(env);
+  const company = await upsertCompany(supabase, payload);
+  const now = new Date().toISOString();
 
-  if (hasSupabaseConfiguration(env)) {
-    const supabase = createSupabaseClient(env);
-    const company = await upsertCompany(supabase, payload);
-    const now = new Date().toISOString();
-
-    await supabase.upsert('subscriptions', [{
-      company_id: company.id,
-      plan_id: plan.id,
-      plan_name: plan.name,
-      billing_cycle: billingCycle,
-      amount_huf: plan.prices.HUF[billingCycle],
+  await supabase.upsert('subscriptions', [{
+    company_id: company.id,
+    plan_id: plan.id,
+    plan_name: plan.name,
+    billing_cycle: billingCycle,
+    amount_huf: plan.prices.HUF[billingCycle],
+    currency,
+    max_technicians: plan.maxTechnicians,
+    max_devices: plan.maxDevices,
+    payment_provider: 'bank_transfer',
+    payment_mode: 'live',
+    provider_customer_id: null,
+    provider_subscription_id: null,
+    provider_checkout_session_id: orderReference,
+    checkout_url: paymentUri,
+    subscription_status: 'pending_payment',
+    payment_status: 'pending',
+    metadata: {
+      pricing_version: 'v100-market-2026-07',
+      company_name: payload.company_name.trim(),
+      contact_name: payload.contact_name.trim(),
+      contact_email: payload.email.trim(),
+      billing_address: payload.billing_address.trim(),
+      tax_number: payload.tax_number?.trim() || null,
+      purchase_order: payload.purchase_order?.trim() || null,
+      order_reference: orderReference,
+      account_holder: account.holder,
+      account_iban: currency === 'EUR' ? account.eur_iban : account.iban,
+      account_local_huf: currency === 'HUF' ? account.local_huf_account : null,
+      amount,
       currency,
-      max_technicians: plan.maxTechnicians,
-      max_devices: plan.maxDevices,
-      payment_provider: 'bank_transfer',
-      payment_mode: 'live',
-      provider_customer_id: null,
-      provider_subscription_id: null,
-      provider_checkout_session_id: orderReference,
-      checkout_url: paymentUri,
-      subscription_status: 'pending_payment',
-      payment_status: 'pending',
-      metadata: {
-        pricing_version: 'v100-market-2026-07',
-        company_name: payload.company_name.trim(),
-        contact_name: payload.contact_name.trim(),
-        contact_email: payload.email.trim(),
-        billing_address: payload.billing_address.trim(),
-        tax_number: payload.tax_number?.trim() || null,
-        purchase_order: payload.purchase_order?.trim() || null,
-        order_reference: orderReference,
-        account_holder: account.holder,
-        account_iban: currency === 'EUR' ? account.eur_iban : account.iban,
-        account_local_huf: currency === 'HUF' ? account.local_huf_account : null,
-        amount,
-        currency,
-        qr_format: qrFormat,
-        automatic_renewal: false,
-        qvik: false,
-        sepa: currency === 'EUR',
-      },
-      created_at: now,
-      updated_at: now,
-    }], 'provider_checkout_session_id');
-  }
+      qr_format: qrFormat,
+      automatic_renewal: false,
+      qvik: false,
+      sepa: currency === 'EUR',
+      buyer_type: 'business',
+      business_buyer_confirmed: true,
+      terms_accepted: true,
+      privacy_notice_acknowledged: true,
+      terms_version: TERMS_VERSION,
+      privacy_version: PRIVACY_VERSION,
+      legal_acceptance_recorded_at: now,
+    },
+    created_at: now,
+    updated_at: now,
+  }], 'provider_checkout_session_id');
 
   return jsonResponse({
     session_id: orderReference,
@@ -191,9 +221,15 @@ async function handleCreateCheckoutSession(request, env) {
     sepa: currency === 'EUR',
     qr_format: qrFormat,
     manual_verification_required: true,
-    order_tracking_ready: hasSupabaseConfiguration(env),
+    order_tracking_ready: true,
+    legal_acceptance_recorded: true,
     automatic_renewal: false,
   }, 200, corsHeaders);
+}
+
+function isValidOrderReference(value) {
+  const reference = String(value || '').trim().toUpperCase();
+  return SECURE_ORDER_REFERENCE.test(reference) || LEGACY_ORDER_REFERENCE.test(reference);
 }
 
 function validateCheckoutRequest(payload) {
@@ -205,7 +241,10 @@ function validateCheckoutRequest(payload) {
   if (!payload.contact_name?.trim()) return 'A kapcsolattartó neve kötelező.';
   if (!payload.email?.includes('@')) return 'Érvényes e-mail-cím szükséges.';
   if (!payload.billing_address?.trim()) return 'A számlázási cím kötelező.';
-  if (!/^FX-\d{8}-[A-Z0-9]{3,8}$/.test(payload.order_reference || '')) return 'Érvénytelen rendelési azonosító.';
+  if (!isValidOrderReference(payload.order_reference)) return 'Érvénytelen rendelési azonosító.';
+  if (payload.business_buyer_confirmed !== true) return 'A vállalkozási vagy szakmai célú vásárlói státusz megerősítése kötelező.';
+  if (payload.terms_accepted !== true) return 'A felhasználási feltételek elfogadása kötelező.';
+  if (payload.privacy_notice_acknowledged !== true) return 'Az adatkezelési tájékoztató elolvasásának és tudomásulvételének megerősítése kötelező.';
   return null;
 }
 
@@ -221,6 +260,8 @@ function getConfigurationErrors(env) {
   if (!/^\d{8}-\d{8}-\d{8}$/.test(account.local_huf_account)) errors.push('BANK_LOCAL_HUF_ACCOUNT');
   if (!isValidBic(account.bic)) errors.push('BANK_BIC');
   if (!isValidBic(account.correspondent_bic)) errors.push('BANK_CORRESPONDENT_BIC');
+  if (!env.SUPABASE_URL) errors.push('SUPABASE_URL');
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) errors.push('SUPABASE_SERVICE_ROLE_KEY');
   return errors;
 }
 
@@ -286,6 +327,9 @@ function hasSupabaseConfiguration(env) {
 }
 
 function createSupabaseClient(env) {
+  if (!hasSupabaseConfiguration(env)) {
+    throw new Error('A tartós rendelés-adatbázis nincs konfigurálva.');
+  }
   const baseUrl = String(env.SUPABASE_URL).replace(/\/$/, '');
   const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
   return {

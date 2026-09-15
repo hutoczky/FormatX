@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "renderer": "FormatX Reference Core",
+  "version": "v26",
+  "deployment_intent": "production",
+  "visual_target": "four-tip transparent crystalline living core",
+  "visual_calibration": "reference-glass-calibration-2",
+  "rendering": {
+    "api": "WebGL2",
+    "indexed_geometry": true,
+    "depth_buffer": true,
+    "perspective_camera": true,
+    "procedural_glass_shader": true,
+    "post_process_bloom": true,
+    "image_backed": false,
+    "third_party_3d_engine": false
+  },
+  "animation": {
+    "display_synchronised": true,
+    "independent_shell_motion": true,
+    "independent_reactor_motion": true,
+    "multi_axis_orbits": true,
+    "pointer_parallax": true,
+    "adaptive_render_scale": true,
+    "reduced_motion_supported": true
+  },
+  "platform_strategy": {
+    "desktop": "high-performance WebGL2",
+    "mobile": "adaptive WebGL2 geometry and DPR cap",
+    "fallback": "legacy safe visual remains if v26 cannot initialise"
+  },
+  "live_visual_gate": {
+    "workflow": "Verify live true 3D MAG visual",
+    "revision": "v26-mobile-desktop-calibration-2-coverage-tolerance-1",
+    "captures": ["753x1536 mobile", "1440x1000 desktop"],
+    "runtime_assertions": ["WebGL2", "depth", "perspective", "indexed crystal", "no legacy stage", "no image backing"],
+    "minimum_viewport_coverage": 0.97,
+    "coverage_policy": "Allow intentional CSS safe-area/micro-margin while rejecting materially undersized render surfaces",
+    "known_external_noise": "Cloudflare analytics beacon blocked by first-party CSP is ignored by the visual gate"
+  },
+  "reference_position_gate": {
+    "workflow": "Verify live real3D reference position",
+    "revision": "v26-scroll-zero-centroid-1",
+    "viewport": "753x1536 mobile",
+    "requirements": ["scrollY=0", "v26 renderer active", "single v26 stage", "no legacy stage", "crystal centroid within reference window"]
+  },
+  "deployed_at": "2026-08-09"
+}

@@ -1,0 +1,24 @@
+{
+  "revision": "r420-mobile-mag-centered-r326-primary-v2",
+  "purpose": "Deploy the fully validated mobile MAG centering and renderer-ownership correction to production.",
+  "scope": "mobile-production",
+  "source_commits": {
+    "centering": "61edd44b24a897a76630506aca4c89b21489c4d5",
+    "renderer_ownership": "10f21947168d52cde15460d99720d0e55b0693ab",
+    "targeted_gate": "ff2378a2dbf39c607786d52620fde163e58e8492",
+    "production_validator": "fed9cfbee46cb9caeb2e6184c4282efe0e524c67"
+  },
+  "measured": {
+    "390x844_stage_center_px": 195,
+    "390x844_host_center_px": 195,
+    "430x932_stage_center_px": 215,
+    "430x932_host_center_px": 215,
+    "horizontal_overflow_px": 0,
+    "visible_ratio": 1,
+    "left_touch_retains_center": true,
+    "right_touch_retains_center": true,
+    "r326_primary": true,
+    "r267_loaded_with_r326": false
+  },
+  "status": "validated-for-production"
+}

@@ -1,0 +1,10 @@
+{
+  "revision": "r450",
+  "surface": "mobile-mag",
+  "purpose": "restrained halo and softer natural perimeter",
+  "validated_source_gate": "FormatX r448-r450 mobile MAG optics",
+  "mobile_viewports": [
+    "390x844",
+    "430x932"
+  ]
+}

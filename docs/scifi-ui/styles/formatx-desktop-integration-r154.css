@@ -1,0 +1,66 @@
+/* r154e — desktop aspect + seamless hero integration.
+   Desktop keeps the supplied 412x410 crystal aspect. r157 removes the dark
+   reference-bitmap background at canvas level. r154e also disables the legacy
+   stage pseudo-elements that painted a separate perspective grid rectangle.
+   Mobile is intentionally untouched. */
+
+@media (min-width:901px) and (pointer:fine){
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space{
+    position:relative!important;isolation:isolate!important;overflow:hidden!important;
+    background:transparent!important;border:0!important;box-shadow:none!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space::before{
+    content:""!important;position:absolute!important;inset:-16% -18%!important;border-radius:50%!important;
+    background:radial-gradient(ellipse at 50% 48%,rgba(18,91,137,.15) 0%,rgba(8,56,92,.09) 31%,rgba(4,31,56,.035) 51%,rgba(1,12,24,.012) 66%,transparent 79%)!important;
+    filter:blur(30px)!important;opacity:.74!important;pointer-events:none!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-rayglass-r91-stage{
+    background:transparent!important;background-image:none!important;background-color:transparent!important;
+    border:0!important;outline:0!important;box-shadow:none!important;filter:none!important;
+  }
+
+  /* Remove legacy r91/r109 floor grid + duplicate reactor crosshair on desktop.
+     r153/r155 now own the live reactor/orbits, so these old pseudo-elements only
+     create a rectangular panel and duplicate light. */
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-rayglass-r91-stage::before,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-rayglass-r91-stage::after,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-stage::before,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-stage::after,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage::before,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage::after{
+    content:none!important;display:none!important;background:none!important;background-image:none!important;
+    opacity:0!important;box-shadow:none!important;filter:none!important;transform:none!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-detail-r122{
+    inset:auto!important;left:50%!important;right:auto!important;top:50%!important;bottom:auto!important;
+    height:min(100%,720px)!important;width:auto!important;max-width:none!important;aspect-ratio:412 / 410!important;
+    transform:translate(-50%,-50%)!important;transform-origin:50% 50%!important;
+    mix-blend-mode:screen!important;opacity:.99!important;
+    -webkit-mask-image:radial-gradient(ellipse 75% 75% at 50% 50%,#000 0 70%,rgba(0,0,0,.98) 76%,rgba(0,0,0,.64) 88%,transparent 100%)!important;
+    mask-image:radial-gradient(ellipse 75% 75% at 50% 50%,#000 0 70%,rgba(0,0,0,.98) 76%,rgba(0,0,0,.64) 88%,transparent 100%)!important;
+    -webkit-mask-repeat:no-repeat!important;mask-repeat:no-repeat!important;-webkit-mask-size:100% 100%!important;mask-size:100% 100%!important;
+    filter:brightness(1.035) contrast(1.22) saturate(1.09) drop-shadow(0 0 14px rgba(76,225,255,.19)) drop-shadow(0 0 34px rgba(137,73,255,.10))!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-stage .fx-core-mobile-v55-canvas,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage .fx-core-r112-canvas,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-canvas,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-canvas{
+    opacity:.012!important;filter:brightness(.90) contrast(1.08) saturate(1.18)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-live-r147-layer{
+    background:transparent!important;background-image:none!important;border:0!important;box-shadow:none!important;mix-blend-mode:screen!important;
+  }
+}
+
+@media (min-width:901px) and (pointer:fine) and (max-height:760px){
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-detail-r122{height:min(96%,620px)!important}
+}
+
+@media (prefers-reduced-motion:reduce){html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{transition:none!important}}

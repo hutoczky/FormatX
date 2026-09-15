@@ -217,3 +217,108 @@
 @media (prefers-reduced-motion: reduce) {
   .fx-category-grid article { transition: none; }
 }
+
+/* r223 — accessibility-first mobile WPO path.
+   Reduced-motion users get content first: the expensive hero visual surface is
+   removed from initial layout and every below-fold section uses browser-native
+   lazy layout with a stable intrinsic size. Normal motion/mobile rendering is
+   completely untouched. */
+@media (prefers-reduced-motion: reduce) and (max-width: 900px),
+       (prefers-reduced-motion: reduce) and (pointer: coarse) {
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero#hero.scene.hero {
+    min-height: 0 !important;
+    height: auto !important;
+    padding-top: 0 !important;
+    overflow: visible !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero#hero.scene.hero > .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero#hero.scene.hero > .hero-grid > .hero-space {
+    order: 0 !important;
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    contain: strict !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero#hero.scene.hero > .hero-grid > .hero-space::before,
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero#hero.scene.hero > .hero-grid > .hero-space::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero#hero.scene.hero > .hero-grid > .hero-copy {
+    order: 1 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    width: calc(100% - 24px) !important;
+    max-width: 680px !important;
+    height: auto !important;
+    min-height: 1px !important;
+    margin: 8px auto 32px !important;
+    padding: 18px clamp(16px, 5vw, 24px) 22px !important;
+    overflow: hidden !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+    contain: layout style !important;
+    z-index: 10000 !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero#hero.scene.hero > .hero-grid > .hero-copy > .fx-category-definition {
+    display: block !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > .fx-category-deck,
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > section.scene:not(#hero),
+  html[data-fx-design-system="2"] body.living-architecture main#main-content .fx-origin-proof,
+  html[data-fx-design-system="2"] body.living-architecture .site-footer {
+    content-visibility: auto !important;
+    contain: layout paint style !important;
+    contain-intrinsic-size: auto 760px !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > .fx-category-deck {
+    contain-intrinsic-size: auto 900px !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > #experience {
+    contain-intrinsic-size: auto 1100px !important;
+  }
+}

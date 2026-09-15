@@ -1,0 +1,6 @@
+{
+  "revision": "r343",
+  "purpose": "Publish softer mobile MAG optics without changing application runtime behavior.",
+  "source_commit": "f812c26869366237cd6f3848f68b8527473342b1",
+  "scope": "production deployment marker"
+}

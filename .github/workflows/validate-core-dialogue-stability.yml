@@ -1,0 +1,76 @@
+name: Validate FormatX core and mobile dialogue stability
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-apex-scene-stability.js'
+      - 'docs/scifi-ui/scripts/formatx-apex-native.js'
+      - 'docs/scifi-ui/scripts/organism-voice-stability.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
+      - 'docs/scifi-ui/data/scroll-policy.json'
+      - '.github/scripts/validate-core-dialogue-stability.cjs'
+      - '.github/workflows/validate-core-dialogue-stability.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-apex-scene-stability.js'
+      - 'docs/scifi-ui/scripts/organism-voice-stability.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
+      - 'docs/scifi-ui/data/scroll-policy.json'
+      - '.github/scripts/validate-core-dialogue-stability.cjs'
+      - '.github/workflows/validate-core-dialogue-stability.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-core-dialogue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-core-dialogue-stability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate core animation and mobile visual viewport
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-apex-scene-stability.js
+          node --check docs/scifi-ui/scripts/organism-voice-stability.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          node --check .github/scripts/validate-core-dialogue-stability.cjs
+          node .github/scripts/validate-core-dialogue-stability.cjs
+
+      - name: Publish stability status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          SHA: ${{ github.sha }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Core animation, dialogue viewport and platform scroll verified'
+          else
+            state='failure'
+            description='Core/dialogue/platform-scroll stability failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX core and mobile dialogue stability' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"

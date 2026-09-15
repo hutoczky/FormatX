@@ -1,0 +1,18 @@
+{
+  "revision": "r324-mobile-optics",
+  "date": "2026-08-24",
+  "purpose": "Balanced mobile MAG glow and softened edge treatment",
+  "contracts": {
+    "mobile_renderer": "r317-native-webgl",
+    "biolume_tuner": "r323-deep-water-biolume",
+    "optical_profile": "r324-balanced-optics",
+    "desktop_isolation": true
+  },
+  "validated_commits": {
+    "optics": "f5c0532a7011117adc6a161d895e7bcd170608eb",
+    "cache_bust": "86f4c07c2a5fc8a4379ccddfe346d0c7a0219f39",
+    "optics_gate": "f22ec878488a257677a53bb6119b2564a122ff9d",
+    "real3d_contract": "ce464ce07cf1e6efd8f9569f3c2be5f5f6d8f65d",
+    "mobile_startup_contract": "9abbbf11a1eeae3177fb7867123a6186a186876b"
+  }
+}

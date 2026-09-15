@@ -1,0 +1,159 @@
+name: Verify live r326 mobile MAG
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/verify-live-r326-mobile-mag.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  live-mobile-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify deployed mobile optics and ASK-only ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',colorScheme:'dark'});
+            await context.addInitScript(()=>{try{localStorage.setItem('formatx:intro-seen-v1','1')}catch(_){}});
+            const page=await context.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU|404/i.test(m.text()))errors.push(m.text())});
+
+            await page.goto('https://formatxsuite.com/?verify=r326-live-'+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>{
+              const d=document.documentElement.dataset;
+              return d.fxCoreMobileR317==='ready-v69'
+                && d.fxMobileReferenceLayout==='ready-v1'
+                && d.fxOrganismDialogueOwner==='ask-only-r326'
+                && Boolean(document.querySelector('#hero .fx-core-r317-canvas'))
+                && Boolean(document.querySelector('#hero .fx-core-biolume-r323'))
+                && Boolean(document.querySelector('#hero .fx-reference-controls-r204 .fx-three-sound'))
+                && Boolean(document.querySelector('#hero .fx-reference-controls-r204 .fx-reference-ask'))
+                && Boolean(document.querySelector('#hero .fx-reference-controls-r204 .fx-reference-pause'));
+            },null,{timeout:90000});
+            await page.waitForTimeout(900);
+
+            const optics=await page.evaluate(()=>{
+              const canvas=document.querySelector('#hero .fx-core-r317-canvas');
+              const svg=document.querySelector('#hero .fx-core-biolume-r323');
+              const halo=svg?.querySelector('.fx-biolume-halo');
+              const base=svg?.querySelector('.fx-biolume-base');
+              const runner=svg?.querySelector('.fx-biolume-runner-a');
+              const cs=canvas?getComputedStyle(canvas):null;
+              const ss=svg?getComputedStyle(svg):null;
+              const hs=halo?getComputedStyle(halo):null;
+              const bs=base?getComputedStyle(base):null;
+              const rs=runner?getComputedStyle(runner):null;
+              return{
+                canvasOpacity:Number(cs?.opacity||0),
+                canvasFilter:cs?.filter||'',
+                svgOpacity:Number(ss?.opacity||0),
+                haloOpacity:Number(hs?.opacity||0),
+                haloFilter:hs?.filter||'',
+                haloStrokeWidth:hs?.strokeWidth||'',
+                baseOpacity:Number(bs?.opacity||0),
+                baseStrokeWidth:bs?.strokeWidth||'',
+                runnerOpacity:Number(rs?.opacity||0),
+                runnerStrokeWidth:rs?.strokeWidth||''
+              };
+            });
+            assert.ok(optics.canvasOpacity>=.87&&optics.canvasOpacity<=.91,JSON.stringify(optics));
+            assert.match(optics.canvasFilter,/brightness\(0\.83\)/,JSON.stringify(optics));
+            assert.match(optics.canvasFilter,/blur\(0\.38px\)/,JSON.stringify(optics));
+            assert.ok(optics.svgOpacity>=.66&&optics.svgOpacity<=.70,JSON.stringify(optics));
+            assert.ok(optics.haloOpacity>=.14&&optics.haloOpacity<=.18,JSON.stringify(optics));
+            assert.match(optics.haloFilter,/blur\(3\.8px\)/,JSON.stringify(optics));
+            assert.ok(optics.baseOpacity>=.25&&optics.baseOpacity<=.29,JSON.stringify(optics));
+            assert.ok(optics.runnerOpacity>=.40&&optics.runnerOpacity<=.46,JSON.stringify(optics));
+
+            const canvasBox=await page.locator('#hero .fx-core-r317-canvas').first().boundingBox();
+            assert.ok(canvasBox&&canvasBox.width>100&&canvasBox.height>100);
+            await page.touchscreen.tap(canvasBox.x+canvasBox.width/2,canvasBox.y+canvasBox.height/2);
+            await page.waitForTimeout(350);
+            const coreState=await page.evaluate(()=>({
+              owner:document.documentElement.dataset.fxOrganismDialogueOwner||'',
+              activation:document.documentElement.dataset.fxOrganismCoreActivation||'',
+              thoughtOpen:document.documentElement.dataset.fxOrganismThought==='open'||document.querySelector('.fx-organism-thought')?.hidden===false
+            }));
+            assert.equal(coreState.owner,'ask-only-r326');
+            assert.equal(coreState.thoughtOpen,false,JSON.stringify(coreState));
+            assert.equal(coreState.activation,'native-core-no-dialogue-r326');
+
+            await page.evaluate(()=>document.querySelector('#hero .fx-reference-controls-r204')?.scrollIntoView({block:'center',behavior:'auto'}));
+            await page.waitForTimeout(300);
+            const hits=await page.evaluate(()=>{
+              const check=selector=>{
+                const el=document.querySelector(selector);const r=el?.getBoundingClientRect();
+                const hit=r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
+                return{width:r?.width||0,height:r?.height||0,top:r?.top??-1,bottom:r?.bottom??-1,owned:Boolean(el&&hit&&el.contains(hit)),hit:hit?`${hit.tagName}.${typeof hit.className==='string'?hit.className:''}`:''};
+              };
+              return{
+                sound:check('#hero .fx-reference-controls-r204 .fx-three-sound'),
+                ask:check('#hero .fx-reference-controls-r204 .fx-reference-ask'),
+                pause:check('#hero .fx-reference-controls-r204 .fx-reference-pause'),
+                vh:innerHeight
+              };
+            });
+            for(const item of [hits.sound,hits.ask,hits.pause]){
+              assert.ok(item.width>=44&&item.height>=44,JSON.stringify(hits));
+              assert.ok(item.top>=0&&item.bottom<=hits.vh,JSON.stringify(hits));
+              assert.equal(item.owned,true,JSON.stringify(hits));
+            }
+
+            const askBox=await page.locator('#hero .fx-reference-controls-r204 .fx-reference-ask').first().boundingBox();
+            assert.ok(askBox);
+            await page.touchscreen.tap(askBox.x+askBox.width/2,askBox.y+askBox.height/2);
+            await page.waitForFunction(()=>document.documentElement.dataset.fxOrganismThought==='open'&&document.querySelector('.fx-organism-thought')?.hidden===false,null,{timeout:7000});
+            await page.evaluate(()=>window.FormatXOrganismVoice?.close?.());
+            await page.waitForFunction(()=>document.querySelector('.fx-organism-thought')?.hidden!==false,null,{timeout:7000});
+
+            await page.screenshot({path:'live-r326-mobile.png',fullPage:false});
+            assert.equal(errors.length,0,errors.join(' | '));
+            console.log('LIVE R326 OPTICS',JSON.stringify(optics));
+            console.log('LIVE R326 HITS',JSON.stringify(hits));
+            console.log('PASS: deployed r326 has restrained mobile MAG bloom/edge optics, MAG does not open dialogue, controls are topmost, and ASK alone opens the Organism dialogue.');
+            await context.close();await browser.close();
+          })().catch(error=>{console.error(error);process.exit(1)});
+          NODE
+
+      - name: Upload live mobile proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-r326-mobile-proof
+          path: live-r326-mobile.png
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Publish live r326 status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Deployed r326 mobile MAG and ASK ownership passed'; else state=failure; description='Deployed r326 mobile proof failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX r326 live mobile proof' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

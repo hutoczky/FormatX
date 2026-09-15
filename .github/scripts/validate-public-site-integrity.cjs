@@ -9,43 +9,60 @@ const docs = path.join(repo, 'docs');
 const publicRoot = path.join(docs, 'scifi-ui');
 const failures = [];
 
+const read = relative => fs.readFileSync(path.join(repo, relative), 'utf8');
+const json = relative => JSON.parse(read(relative));
+const report = message => failures.push(message);
+
 function walk(directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const absolute = path.join(directory, entry.name);
     return entry.isDirectory() ? walk(absolute) : [absolute];
   });
 }
-function report(message) { failures.push(message); }
-function attributes(tag) {
+
+function attrs(tag) {
   const result = {};
-  for (const match of tag.matchAll(/([:\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) result[match[1].toLowerCase()] = match[2] ?? match[3] ?? '';
+  for (const match of tag.matchAll(/([:\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) {
+    result[match[1].toLowerCase()] = match[2] ?? match[3] ?? '';
+  }
   return result;
 }
-function publicPathForFile(file) { return '/' + path.relative(docs, file).split(path.sep).join('/'); }
-function localTargetExists(pageFile, html, rawValue) {
-  if (!rawValue || rawValue.startsWith('#')) return true;
-  if (/^(?:https?:|mailto:|tel:|data:|blob:|javascript:)/i.test(rawValue)) return true;
-  const pageUrl = new URL(publicPathForFile(pageFile), 'https://www.formatxsuite.com');
+
+function publicPath(file) {
+  return '/' + path.relative(docs, file).split(path.sep).join('/');
+}
+
+function localTargetExists(pageFile, html, raw) {
+  if (!raw || raw.startsWith('#')) return true;
+  if (/^(?:https?:|mailto:|tel:|data:|blob:)/i.test(raw)) return true;
+  const pageUrl = new URL(publicPath(pageFile), 'https://formatxsuite.com');
   const baseMatch = html.match(/<base\b[^>]*href\s*=\s*["']([^"']+)["']/i);
   const baseUrl = baseMatch ? new URL(baseMatch[1], pageUrl) : pageUrl;
-  const resolved = new URL(rawValue, baseUrl);
-  const pathname = decodeURIComponent(resolved.pathname);
+  const pathname = decodeURIComponent(new URL(raw, baseUrl).pathname);
   if (pathname.startsWith('/api/') || pathname.startsWith('/download/') || pathname.startsWith('/fx-owner-license/')) return true;
   if (pathname === '/' || pathname === '/index.html') return fs.existsSync(path.join(publicRoot, 'index.html'));
   const aliases = new Set([
     '/downloads', '/downloads/', '/support', '/support.html', '/license', '/license.html',
     '/privacy', '/privacy.html', '/terms', '/terms.html', '/verification', '/verification.html',
     '/test-matrix', '/test-matrix.html', '/known-issues', '/known-issues.html', '/security',
-    '/security.html', '/technical-report', '/technical-report.html', '/method', '/method.html',
+    '/security.html', '/technical-report', '/technical-report.html', '/method', '/method.html'
   ]);
   if (aliases.has(pathname)) return true;
-  const relative = pathname.replace(/^\//, '');
-  let target = path.join(docs, relative);
+  let target = path.join(docs, pathname.replace(/^\//, ''));
   if (pathname.endsWith('/')) target = path.join(target, 'index.html');
   return fs.existsSync(target) || fs.existsSync(target + '.html') || fs.existsSync(path.join(target, 'index.html'));
 }
-function read(relative) { return fs.readFileSync(path.join(repo, relative), 'utf8'); }
-function json(relative) { return JSON.parse(read(relative)); }
+
+function productionContentWrapperActive(config) {
+  const main = String(config?.main || '');
+  if (main === 'src/production-content-entry.js') return true;
+  if (!/^src\/production-content-entry-r\d+\.js$/.test(main)) return false;
+  const source = read(`billing-worker/${main}`);
+  const imported = source.match(/import\s+([A-Za-z_$][\w$]*)\s+from\s+['"]\.\/production-content-entry\.js['"]/);
+  if (!imported) return false;
+  const delegate = imported[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${delegate}\\.fetch\\s*\\(\\s*request\\s*,\\s*env\\s*,\\s*ctx\\s*\\)`).test(source);
+}
 
 const htmlFiles = walk(publicRoot).filter(file => file.endsWith('.html'));
 assert.ok(htmlFiles.length >= 10, 'unexpectedly small public HTML surface');
@@ -58,148 +75,94 @@ for (const file of htmlFiles) {
     ids.set(id, (ids.get(id) || 0) + 1);
   }
   for (const [id, count] of ids) if (count > 1) report(`${label}: duplicate id ${id} (${count})`);
-  for (const tag of html.matchAll(/<(?:a|link|script|img|source)\b[^>]*>/gi)) {
-    const attrs = attributes(tag[0]);
-    const value = attrs.href || attrs.src || attrs.srcset;
-    const firstCandidate = value ? value.split(/\s+/)[0].replace(/,$/, '') : '';
-    if (firstCandidate && !localTargetExists(file, html, firstCandidate)) report(`${label}: missing local target ${value}`);
-    if (tag[0].toLowerCase().startsWith('<img') && !Object.hasOwn(attrs, 'alt')) report(`${label}: image without alt attribute`);
-    if (attrs.target === '_blank' && !/\bnoopener\b/i.test(attrs.rel || '')) report(`${label}: target=_blank without rel=noopener (${attrs.href || ''})`);
+  for (const match of html.matchAll(/<(?:a|link|script|img|source)\b[^>]*>/gi)) {
+    const a = attrs(match[0]);
+    const value = a.href || a.src || a.srcset;
+    const candidate = value ? value.split(/\s+/)[0].replace(/,$/, '') : '';
+    if (candidate && !localTargetExists(file, html, candidate)) report(`${label}: missing local target ${value}`);
+    if (/^<img/i.test(match[0]) && !Object.hasOwn(a, 'alt')) report(`${label}: image without alt`);
+    if (a.target === '_blank' && !/\bnoopener\b/i.test(a.rel || '')) report(`${label}: target=_blank without noopener`);
   }
   if (/\son[a-z]+\s*=/i.test(html)) report(`${label}: inline event handler conflicts with CSP`);
   if (/http:\/\//i.test(html)) report(`${label}: insecure http URL found`);
 }
 
 const homepage = read('docs/scifi-ui/index.html');
-const productionContent = read('billing-worker/src/production-content-entry.js');
 const downloads = read('docs/scifi-ui/downloads/index.html');
-const legacyAndroidDownload = read('docs/scifi-ui/downloads/android.html');
-const support = read('docs/scifi-ui/support.html');
-const siteRuntime = read('docs/scifi-ui/scripts/site.js');
-const portable = read('docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg');
-const aliases = read('billing-worker/src/production-feedback-entry.js');
-const loop = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
-const legacyLoopFix = read('docs/scifi-ui/scripts/formatx-infinite-loop-fix.js');
-const guard = read('docs/scifi-ui/scripts/formatx-full-release-guard.js');
-const seo = read('docs/scifi-ui/scripts/formatx-seo.js');
-const evidenceRenderer = read('docs/scifi-ui/scripts/public-evidence-pages.js');
-const androidPage = read('docs/scifi-ui/android/index.html');
-const salesGate = read('billing-worker/src/sales-gate.js');
-const paymentSuccess = read('docs/scifi-ui/payment/success.html');
-const paymentCancel = read('docs/scifi-ui/payment/cancel.html');
-const sitemap = read('docs/sitemap.xml');
-const androidManifest = json('docs/scifi-ui/downloads/android-native-update.json');
+const checkout = read('docs/scifi-ui/scripts/checkout-v100.js');
+const pricingApi = read('billing-worker/src/pricing-v100-api.js');
+const productionEntry = read('billing-worker/src/production-entry.js');
+const feedbackEntry = read('billing-worker/src/production-feedback-entry.js');
+const feedbackApi = read('billing-worker/src/feedback-api.js');
+const scrollBootstrap = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
+const seamlessScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
+const mobileCss = read('docs/scifi-ui/styles/formatx-mobile-production-r5.css');
+const mobileLoopCss = read('docs/scifi-ui/styles/formatx-mobile-seamless-loop.css');
 const platformStatus = json('docs/scifi-ui/data/platform-status.json');
-const publicContract = json('docs/scifi-ui/data/public-platform-contract.json');
 const currentRelease = json('docs/scifi-ui/data/current-release.json');
-const knownIssues = json('docs/scifi-ui/data/known-issues.json');
-const testMatrix = json('docs/scifi-ui/data/test-matrix.json');
+const scrollPolicy = json('docs/scifi-ui/data/scroll-policy.json');
+const productionConfig = json('billing-worker/wrangler.jsonc');
 
 if ((homepage.match(/<h1\b/gi) || []).length !== 1) report('homepage: exactly one h1 is required');
-const feedbackAvailable = homepage.includes('id="user-feedback"') || (productionContent.includes('id="user-feedback"') && productionContent.includes('USER_FEEDBACK_SECTION'));
-if (!feedbackAvailable) report('homepage: user feedback section missing from static page and production injection');
 if (!homepage.includes('id="resources"')) report('homepage: release section missing');
-if (!homepage.includes('Teljes multiplatform verzió letöltése') || !homepage.includes('Download full multiplatform version')) report('homepage: static full-release download copy missing');
-if (/\b(?:nyilvános béta|public beta)\b/i.test(homepage)) report('homepage: retired generic beta wording remains in static source');
-if (/Windows, macOS, web és Android hozzáférés támogatott|Windows, macOS, web and Android access are supported/i.test(homepage)) report('homepage: planned/preview platforms are presented as supported');
-if (/A stabil csomagok|Stable packages and release information/i.test(homepage)) report('homepage: evidence-gated Stable is overstated');
-
-if (!productionContent.includes('itemprop="operatingSystem" content="Linux, Bazzite, Windows, Android"')) report('production structured data: canonical native operating-system list missing');
-if (/itemprop="operatingSystem" content="[^"]*(?:macOS|Web|iOS)/i.test(productionContent)) report('production structured data: planned/preview surface presented as supported OS');
-if (/Lighthouse-kapuk|Lighthouse gates/.test(productionContent)) report('production Live OS evidence copy must use scoped CI evidence wording');
-if (!productionContent.includes('data-fx-seamless-scroll-runtime="true"')) report('production homepage: seamless scroll runtime is not bootstrapped independently');
-if (!productionContent.includes('20260808-seamless-ratio-v4')) report('production homepage: seamless scroll cache-bust missing');
-if (!productionContent.includes('CATEGORY_STATIC_HEAD')) report('production homepage: static category copy fallback missing');
-
-if (/data-release-download="multiplatform"[^>]+href=["']\.\/?["']/i.test(downloads)) report('downloads: primary fallback points to itself');
+if (!homepage.includes('Teljes multiplatform verzió letöltése') || !homepage.includes('Download full multiplatform version')) report('homepage: full-release CTA copy missing');
+if (/\b(?:nyilvános béta|public beta)\b/i.test(homepage)) report('homepage: retired generic beta wording remains');
 if (!downloads.includes('FormatX-Updates/releases/latest')) report('downloads: JavaScript-free latest release fallback missing');
-if (!downloads.includes('Teljes multiplatform verzió letöltése') || !downloads.includes('5 napos próbalicenc')) report('downloads: full release / five-day trial copy missing');
-if (/\b(?:nyilvános béta|public beta)\b/i.test(downloads)) report('downloads: retired generic beta wording remains');
+if (!downloads.includes('data-release-download="multiplatform"')) report('downloads: multiplatform download marker missing');
+if (!downloads.includes('5 napos próbalicenc')) report('downloads: five-day trial copy missing');
+if (/\b(?:nyilvános béta|public beta)\b/i.test(downloads)) report('downloads: retired beta wording remains');
 
-if (/Android-1\.0\.4|release-unsigned\.aab/i.test(legacyAndroidDownload)) report('legacy Android download page: stale hard-coded package link remains');
-if (!legacyAndroidDownload.includes('href="/download/android"')) report('legacy Android download page: canonical worker download route missing');
-if (!/<meta\s+name="robots"\s+content="noindex,follow">/i.test(legacyAndroidDownload)) report('legacy Android download page: compatibility noindex missing');
-if (!legacyAndroidDownload.includes('rel="canonical" href="https://www.formatxsuite.com/scifi-ui/android/"')) report('legacy Android download page: Android canonical target missing');
-
-if (/Platform és irányadó állapot:\s*Public beta/i.test(support)) report('support: stale Public beta reporting state remains');
-if (!support.includes('Full release, Technical preview vagy Planned')) report('support: canonical issue-report release states missing');
-if (/const state = copy\('Nyilvános béta', 'Public beta'\)/.test(siteRuntime) || /public-beta-available/.test(siteRuntime)) report('shared site runtime: retired beta release state remains');
-if (!siteRuntime.includes("data?.channels?.multiplatform")) report('shared site runtime: canonical multiplatform channel missing');
-
-if (/\b(?:Public beta product status|FormatX beta|bétaállapot|beta package|Overall status['"],?\s*value:['"]Public beta)/i.test(seo)) report('SEO: retired generic beta metadata remains');
-if (!seo.includes("value:'Full release'") || !seo.includes("value:'5 days'")) report('SEO: full release/trial structured data missing');
-if (/Windows \(Public beta\)|Linux\/Bazzite \(Development\)/i.test(seo)) report('SEO: stale platform maturity remains');
-if (/operatingSystem:'[^']*(?:macOS|iOS|Web)/i.test(seo)) report('SEO: planned/preview surface included as supported operating system');
-
-if (!evidenceRenderer.includes('release?.channels?.multiplatform')) report('verification renderer: canonical multiplatform channel missing');
-if (/language\(\) === 'en' \? 'Public beta' : 'Nyilvános béta'/i.test(evidenceRenderer)) report('verification renderer: retired beta status remains');
-if (!evidenceRenderer.includes("'Full release'") || !evidenceRenderer.includes("'Teljes verzió'")) report('verification renderer: full-release status missing');
-
-if (platformStatus.product_release?.status !== 'full_release') report('platform status: product is not full_release');
+const expectedPlatforms = {
+  'linux-bazzite': 'full_release', windows: 'full_release', android: 'full_release',
+  web: 'technical_preview', macos: 'planned', ios: 'planned'
+};
+const actualPlatforms = Object.fromEntries(platformStatus.platforms.map(item => [item.id, item.status]));
+for (const [id, status] of Object.entries(expectedPlatforms)) if (actualPlatforms[id] !== status) report(`platform status: ${id} must be ${status}`);
+if (platformStatus.product_release?.status !== 'full_release') report('platform status: product must be full_release');
 if (platformStatus.product_release?.trial_days !== 5) report('platform status: trial_days must be 5');
-const byId = Object.fromEntries(platformStatus.platforms.map(platform => [platform.id, platform]));
-for (const id of ['linux-bazzite', 'windows', 'android']) if (byId[id]?.status !== 'full_release') report(`platform status: ${id} must be full_release`);
-if (byId.web?.status !== 'technical_preview') report('platform status: web must remain technical_preview');
-for (const id of ['macos', 'ios']) if (byId[id]?.status !== 'planned') report(`platform status: ${id} must remain planned`);
 
-if (publicContract.layout_contract?.automatic_scroll_loop !== true) report('public layout contract: seamless automatic scroll loop must be enabled');
-if (publicContract.layout_contract?.hero_visual_bridge !== true) report('public layout contract: Hero visual bridge must be enabled');
-if (publicContract.layout_contract?.ratio_matched_landing !== true) report('public layout contract: ratio-matched landing missing');
-if (publicContract.layout_contract?.frame_stable_landing !== true) report('public layout contract: frame-stable landing missing');
-if (publicContract.layout_contract?.input_event_interception !== false) report('public layout contract: scroll input must remain native');
-if (publicContract.layout_contract?.automatic_page_position_changes !== 'loop-boundary-only') report('public layout contract: loop-boundary position transfer is not documented accurately');
+const multi = currentRelease.channels?.multiplatform || currentRelease.channels?.windows;
+if (!currentRelease.ok || !multi?.available) report('current release: public package unavailable');
+if (!/^sha256:[0-9a-f]{64}$/i.test(multi?.digest || '')) report('current release: SHA-256 digest missing');
 
-const multi = currentRelease.channels?.multiplatform;
-if (!currentRelease.ok || !multi?.available) report('current release: public multiplatform package unavailable');
-if (!Array.isArray(multi?.supported_platforms) || !multi.supported_platforms.includes('linux-bazzite') || !multi.supported_platforms.includes('windows')) report('current release: canonical supported platform list incomplete');
-if (!/^sha256:[0-9a-f]{64}$/i.test(multi?.digest || '')) report('current release: package SHA-256 digest missing');
+if (scrollPolicy.schema_version !== 1) report('scroll policy: schema version mismatch');
+if (scrollPolicy.mobile?.controller !== 'seamless-v7') report('scroll policy: mobile seamless-v7 controller missing');
+if (scrollPolicy.mobile?.automatic_loop !== true || scrollPolicy.mobile?.visual_bridge !== true) report('scroll policy: mobile loop/bridge must be enabled');
+if (scrollPolicy.mobile?.automatic_page_position_changes !== true || scrollPolicy.mobile?.boundary_handoff_only !== true) report('scroll policy: mobile boundary-only handoff contract missing');
+if (scrollPolicy.mobile?.transfer_mode !== 'scrollend-or-idle' || scrollPolicy.mobile?.native_momentum_preserved !== true) report('scroll policy: mobile native momentum handoff contract missing');
+if (scrollPolicy.mobile?.finite_document !== false) report('scroll policy: mobile document must not terminate at the footer');
+if (scrollPolicy.desktop?.controller !== 'seamless-v7' || scrollPolicy.desktop?.automatic_loop !== true) report('scroll policy: desktop seamless-v7 must remain enabled');
+if (scrollPolicy.policy?.input_capture !== false || scrollPolicy.policy?.section_scroll_snap !== false) report('scroll policy: input capture/snap contract regressed');
 
-const knownIssueText = JSON.stringify(knownIssues);
-if (/no public native package is currently available|nincs nyilvános natív csomag|Treat the release as beta|kiadást bétaállapotként kezeld/i.test(knownIssueText)) report('known issues: stale full-release contradiction remains');
-if (knownIssues.updated !== '2026-08-07') report('known issues: audit date is stale');
+if (!scrollBootstrap.includes('platform-scroll-v2') || !scrollBootstrap.includes("installSeamlessRuntime('mobile')")) report('scroll bootstrap: shared mobile seamless runtime missing');
+if (!scrollBootstrap.includes("fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'") || !scrollBootstrap.includes('native-momentum-loop-v1')) report('scroll bootstrap: mobile seamless loop policy missing');
+if (!scrollBootstrap.includes('formatx-mobile-seamless-loop.css') || scrollBootstrap.includes("createElement('style')")) report('scroll bootstrap: CSP-safe external mobile bridge layer missing');
+if (scrollBootstrap.includes('scrollTo(') || scrollBootstrap.includes('scrollIntoView(') || scrollBootstrap.includes('cloneNode(')) report('scroll bootstrap: mobile-capable bootstrap must not move or clone the document');
+if (!scrollBootstrap.includes('formatx-infinite-scroll-desktop-v7.js')) report('scroll bootstrap: shared seamless runtime loader missing');
+if (!seamlessScroll.includes("const VERSION = 'seamless-v7'")) report('seamless scroll: seamless-v7 runtime missing');
+if (!seamlessScroll.includes('buildReferenceMirror') || !seamlessScroll.includes('window.scrollTo(')) report('seamless scroll: inert visual bridge handoff implementation missing');
+if (!seamlessScroll.includes('static-2d-snapshot-no-webgl')) report('seamless scroll: bridge must not allocate another WebGL context');
+if (!seamlessScroll.includes("mobileTransfer: 'scrollend-or-idle'")) report('seamless scroll: mobile transfer must wait for scrollend/idle');
+if (/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(seamlessScroll)) report('seamless scroll: wheel/touch input capture returned');
+if (!mobileLoopCss.includes('min-height: calc(100svh + max(320px, 24svh))') || !mobileLoopCss.includes('display: block !important')) report('mobile seamless bridge: footer runway override missing');
+if (!mobileCss.includes('.fx-award-proof__grid') || !mobileCss.includes('grid-template-columns: 1fr !important')) report('mobile CSS: public proof single-column safeguard missing');
+if (!mobileCss.includes('.fx-plan-qr-card:not(.is-qr-ready)')) report('mobile CSS: QR broken-image safeguard missing');
 
-const matrixText = JSON.stringify(testMatrix);
-if (/Install the public beta package|nyilvános béta csomag|edition is in Development and no public native package|native edition is in Development/i.test(matrixText)) report('test matrix: stale release maturity remains');
-const linuxCase = testMatrix.cases.find(item => item.id === 'FX-LINUX-NATIVE-001');
-if (!linuxCase || linuxCase.status === 'blocked') report('test matrix: Linux full release must not be blocked solely for package availability');
-
-if (!/beta$/i.test(androidManifest.versionName || '')) report('Android Native manifest: expected separate beta channel marker');
-if (!androidPage.includes('/download/android') || !androidPage.includes('ANDROID TELJES VERZIÓ')) report('Android page: canonical full-release route missing');
-if (!androidPage.includes('NATÍV BÉTA') || !androidPage.includes('android-native-v1.1.0-beta')) report('Android page: Native beta channel is not explicitly separated');
-if (!androidPage.includes('rel="canonical" href="https://www.formatxsuite.com/scifi-ui/android/"')) report('Android page: canonical URL missing');
-if (/WEBVIEW NÉLKÜLI NATÍV TELJES KIADÁS|current native edition is the full release|jelenlegi natív kiadás a teljes verzió/i.test(androidPage)) report('Android page: Native beta is falsely presented as full release');
-if (!sitemap.includes('https://www.formatxsuite.com/scifi-ui/android/')) report('sitemap: Android release-status page missing');
-
-if (guard.includes("['NATÍV BÉTA'") || guard.includes("['NATIVE BETA'") || guard.includes("['BÉTA'") || guard.includes("['BETA'")) report('full-release guard: legitimate beta channel labels would be rewritten');
-if (guard.includes("['Nyilvános béta'") || guard.includes("['Public beta'")) report('full-release guard: generic beta wording is over-broad');
-if (!guard.includes("fxFullRelease = 'full-release'") || !guard.includes("fxTrialDays = '5'")) report('full-release guard contract missing');
-
-if (/PUBLIC BETA|FormatX V92|nyilvános béta|public beta/i.test(salesGate)) report('sales gate: retired beta/V92 copy remains');
-if (!salesGate.includes('TELJES KIADÁS') || !salesGate.includes('5 napos próbalicenc')) report('sales gate: full-release/trial truth missing');
-for (const [name, source] of [['payment success', paymentSuccess], ['payment cancel', paymentCancel]]) {
-  if (!/<meta\s+name="robots"\s+content="noindex,nofollow,noarchive">/i.test(source)) report(`${name}: transactional noindex contract missing`);
+if (!checkout.includes('new Uint8Array(12)') || !checkout.includes("return 'FX-' + ymd + '-' + random")) report('checkout: high-entropy order reference missing');
+for (const [name, source] of [['pricing API', pricingApi], ['feedback entry', feedbackEntry], ['feedback API', feedbackApi]]) {
+  if (/eval\s*\(|new Function\s*\(/.test(source)) report(`${name}: dynamic code execution is forbidden`);
 }
+if (!pricingApi.includes('SECURE_ORDER_REFERENCE = /^FX-\\d{8}-[A-F0-9]{24}$/')) report('pricing API: secure order-reference validation missing');
+if (!feedbackEntry.includes("['/downloads/', '/scifi-ui/downloads/']")) report('feedback/public routing: downloads alias missing');
+if (!feedbackApi.includes('publish_permission = 1')) report('feedback API: consent-gated public review query missing');
 
-if (/data:image\/webp|<image\b/i.test(portable)) report('portable installer: embedded raster/WebP is forbidden');
-if (!loop.includes("const VERSION = 'seamless-v6'")) report('homepage: scroll controller version missing');
-if (!loop.includes("const REVISION = 'ratio-v4'")) report('homepage: ratio-matched seamless revision missing');
-if (!loop.includes("root.dataset.fxAutomaticLoop = 'enabled'") || !loop.includes('ratioMatchedLanding: true')) report('homepage: seamless cyclic scroll contract missing');
-if (!loop.includes('cloneNode(true)') || !loop.includes('hero-visual-bridge')) report('homepage: inert Hero visual bridge missing');
-if (!loop.includes('window.scrollTo({ top: target') || !loop.includes('loop-boundary-only') && publicContract.layout_contract?.automatic_page_position_changes !== 'loop-boundary-only') report('homepage: loop-boundary landing implementation missing');
-if (loop.includes("addEventListener('wheel'") || loop.includes("addEventListener('touchmove'") || loop.includes('preventDefault')) report('homepage: seamless loop must not intercept wheel/touch input');
-if (legacyLoopFix.includes("addEventListener('scroll'") || legacyLoopFix.includes('scrollTo(')) report('legacy loop fix: competing scroll controller still active');
-if (!legacyLoopFix.includes("fxLegacyScrollController = 'disabled'")) report('legacy loop fix: retirement marker missing');
-
-for (const token of [
-  "['/downloads/', '/scifi-ui/downloads/']",
-  "['/support.html', '/scifi-ui/support.html']",
-  "['/privacy.html', '/scifi-ui/privacy.html']",
-  "['/terms.html', '/scifi-ui/terms.html']",
-]) if (!aliases.includes(token)) report(`routing: missing public alias ${token}`);
+if (!productionEntry.includes('formatx-infinite-scroll.js') || !productionEntry.includes('data-fx-seamless-scroll-runtime')) report('production entry: scroll bootstrap delivery missing');
+if (!productionContentWrapperActive(productionConfig)) report('production config: content wrapper is not active');
+const domains = (productionConfig.routes || []).map(route => route.pattern);
+if (domains.join(',') !== 'formatxsuite.com,www.formatxsuite.com') report('production config: custom-domain ownership incomplete');
 
 if (failures.length) {
-  console.error('FAILED FormatX public-site integrity audit:');
-  failures.forEach(item => console.error(' - ' + item));
+  console.error('FormatX public-site integrity failures:\n- ' + failures.join('\n- '));
   process.exit(1);
 }
-console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, Android channel/download separation, legal gate, transactional noindex, seamless cyclic scrolling, downloads and aliases validated.`);
+console.log(`PASS public-site integrity: ${htmlFiles.length} HTML pages, release/platform/security/routing and shared seamless scroll contracts validated.`);

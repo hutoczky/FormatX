@@ -1,0 +1,231 @@
+/* FormatX native continuous scroll policy.
+   Compatibility lineage: mobile-seamless-r5.
+   Production revision: 2026-08-23 mobile-content-flow-r305.
+   Mobile keeps browser-owned momentum and realises chapter content immediately,
+   so no synthetic intrinsic-height placeholders or reveal states can create
+   empty screens between the visible section heading and its real content. */
+
+html,
+body,
+html.fx-organism-interface-ready,
+html.fx-organism-interface-ready body,
+html[data-fx-infinite-controller],
+html[data-fx-infinite-controller] body {
+  scroll-snap-type: none !important;
+}
+
+#hero,
+main > .scene,
+.fx-organism-interface-ready #hero,
+.fx-organism-interface-ready main > .scene:not(#hero),
+.fx-organism-chapter,
+.fx-organism-chapter-trigger {
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+}
+
+html,
+body {
+  overscroll-behavior-y: auto;
+}
+
+@media (pointer: coarse), (max-width: 900px) {
+  html,
+  body,
+  html.fx-organism-interface-ready,
+  html.fx-organism-interface-ready body,
+  html[data-fx-infinite-controller],
+  html[data-fx-infinite-controller] body,
+  html.fx-seamless-loop-transfer,
+  html.fx-seamless-loop-transfer body {
+    scroll-behavior: auto !important;
+    scroll-snap-type: none !important;
+    overflow-y: auto !important;
+    overscroll-behavior-x: none !important;
+    overscroll-behavior-y: auto !important;
+    touch-action: pan-y pinch-zoom !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  body.fx-organism-panel-open {
+    overflow-y: hidden !important;
+    overscroll-behavior-y: none !important;
+  }
+
+  #main-content,
+  #hero,
+  main > .scene,
+  .fx-organism-chapter,
+  .fx-organism-chapter-trigger,
+  .fx-category-deck,
+  .fx-static-live-os,
+  .fx-award-proof,
+  .fx-origin-proof,
+  .fx-product-showcase,
+  #user-feedback {
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  /* r305: mobile chapter geometry is content-sized from first paint onward.
+     Do not wait for the seamless controller marker before removing the legacy
+     cinematic 104/118svh scene reserve. That late-state dependency was the
+     source of the large black gaps visible on real Android Chrome. */
+  main#main-content > .scene:not(#hero),
+  .fx-organism-chapter {
+    min-height: 0 !important;
+    height: auto !important;
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    contain: none !important;
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+    overflow-anchor: none !important;
+  }
+
+  .fx-organism-chapter-trigger {
+    min-height: 0 !important;
+    height: auto !important;
+    transform: none !important;
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    overflow-anchor: none !important;
+  }
+
+  /* r305: realise every real mobile content block unconditionally. The balanced
+     performance layer can reserve 900px for inactive desktop chapters, but a
+     touch document must never expose that synthetic placeholder to the user. */
+  :is(
+    main#main-content > .scene:not(#hero) > .flow,
+    main#main-content > .scene:not(#hero) > .cards,
+    main#main-content > .scene:not(#hero) > .pricing,
+    main#main-content > .scene:not(#hero) > .payment,
+    main#main-content > .scene:not(#hero) > .payment-console,
+    main#main-content > .scene:not(#hero) > #formatx-plan-qr-dock,
+    main#main-content > .scene:not(#hero) > .system-grid,
+    main#main-content > .scene:not(#hero) > .release-layout,
+    .fx-category-deck,
+    .fx-static-live-os,
+    .fx-award-proof,
+    .fx-origin-proof,
+    .fx-product-showcase,
+    #user-feedback
+  ) {
+    content-visibility: visible !important;
+    contain: none !important;
+    contain-intrinsic-size: none !important;
+    overflow-anchor: none !important;
+  }
+
+  /* The legacy reveal animation is decorative. On mobile, content visibility is
+     a correctness requirement: cards/pricing/proof must never occupy layout
+     while remaining transparent because an observer or enhancement runtime was
+     late, cancelled or interrupted by momentum scrolling. */
+  main#main-content > .scene:not(#hero) [data-reveal],
+  .fx-category-deck [data-reveal],
+  .fx-static-live-os [data-reveal],
+  .fx-award-proof [data-reveal],
+  .fx-origin-proof [data-reveal],
+  .fx-product-showcase [data-reveal],
+  #user-feedback [data-reveal] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    transform: none !important;
+    translate: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+
+  /* Keep the immediate child after every section heading close enough that a
+     phone cannot show a viewport-sized dead zone even if older cinematic CSS is
+     still present later in the cascade. */
+  main#main-content > .scene:not(#hero) > .section-heading {
+    margin-bottom: clamp(24px, 7vw, 38px) !important;
+  }
+
+  main#main-content > .scene:not(#hero) > :is(
+    .flow,
+    .cards,
+    .pricing,
+    .payment,
+    .system-grid,
+    .release-layout
+  ) {
+    margin-top: 0 !important;
+  }
+
+  /* Hard native momentum policy. It applies both while the shared seamless
+     runtime is loading and after seamless-v7 takes ownership. */
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']),
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) body {
+    overflow-anchor: none !important;
+    scroll-behavior: auto !important;
+    scroll-snap-type: none !important;
+  }
+
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) .topbar {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+  }
+
+  /* The 3D stage remains visually untouched, but it never owns a touch gesture. */
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) .fx-three-stage-shell,
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) #fx-three-frame {
+    pointer-events: none !important;
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  /* Only the finite emergency fallback hides bridge nodes. The normal mobile
+     path is seamless-v7 and must keep the bridge visible so the document has
+     runway beyond the footer instead of stopping at the physical page end. */
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-loop-bridge,
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-loop-hero-clone,
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-transcend-loop-bridge,
+  html[data-fx-infinite-controller='mobile-native-document-v1'] [data-fx-loop-clone='true'] {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    contain: strict !important;
+  }
+
+  /* While the finger/momentum is moving, fixed glass surfaces stop asking the
+     compositor for blur and large shadows. They return immediately at scroll end. */
+  html.fx-mobile-scroll-active .topbar,
+  html.fx-page-scrolling .topbar,
+  html.fx-mobile-scroll-active .fx-organism-actionbar,
+  html.fx-page-scrolling .fx-organism-actionbar,
+  html.fx-mobile-scroll-active .fx-organism-dialogue,
+  html.fx-page-scrolling .fx-organism-dialogue {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+
+  html.fx-mobile-scroll-active .fx-organism-actionbar,
+  html.fx-mobile-scroll-active .fx-organism-dialogue {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html.fx-mobile-scroll-active :is(
+    .fx-organism-chapter-trigger,
+    .fx-award-proof,
+    .fx-static-live-os,
+    .fx-category-deck
+  ) {
+    transition: none !important;
+  }
+}

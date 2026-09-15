@@ -1,0 +1,51 @@
+name: Verify live MAG-first flow r75
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/verify-live-flow-r75.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-flow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install Chromium
+        run: |
+          mkdir -p "$RUNNER_TEMP/live-r75" && cd "$RUNNER_TEMP/live-r75"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Check live phone and desktop flow
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/live-r75"
+          node <<'NODE'
+          const assert=require('node:assert/strict'),fs=require('node:fs');const {chromium}=require('playwright');
+          const bottom=b=>b.y+b.h,right=b=>b.x+b.w,separate=(a,b)=>bottom(a)<=b.y+.5||bottom(b)<=a.y+.5||right(a)<=b.x+.5||right(b)<=a.x+.5;
+          async function check(browser,name,viewport,mobile,dpr){
+            const c=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,deviceScaleFactor:dpr,locale:'hu-HU'}),p=await c.newPage();
+            p.on('pageerror',e=>console.log(name,'PAGEERROR',e.message));
+            await p.goto(`https://formatxsuite.com/?live_flow_r75=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await p.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxFlowFirstR75==='ready',null,{timeout:60000});
+            await p.waitForTimeout(1900);
+            const before=await p.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0),pos:[...(window.FormatXCoreCinematic?.corePosition||[])]}));
+            if(mobile)await p.touchscreen.tap(viewport.width/2,Math.min(320,viewport.height/2));else await p.mouse.click(viewport.width/2,400);await p.waitForTimeout(350);
+            const s=await p.evaluate(()=>{const q=x=>{const e=document.querySelector(x),r=e?.getBoundingClientRect(),c=e?getComputedStyle(e):null;return r?{x:r.x,y:r.y,w:r.width,h:r.height,position:c.position,display:c.display,visibility:c.visibility}:null},root=document.documentElement,canvas=document.querySelector('.fx-core-mobile-v55-canvas');return{composition:root.dataset.fxReferenceComposition,renderer:root.dataset.fxCoreRenderer,render:Number(root.dataset.fxCoreRenderMs||99),gl:!!canvas?.getContext('webgl2'),glError:canvas?.getContext('webgl2')?.getError(),energy:Number(window.FormatXCoreMobileV69?.energy||0),pos:[...(window.FormatXCoreCinematic?.corePosition||[])],top:q('.topbar'),brand:q('.topbar .brand'),mag:q('.topbar>.fx-reference-mag-button'),lang:q('.topbar>.fx-language-toggle'),menu:q('.topbar>.fx-reference-menu-button'),space:q('#hero .hero-space'),rail:q('#hero .fx-reference-rail'),ask:q('#hero .fx-reference-ask span'),copy:q('#hero .hero-copy'),category:q('#hero .fx-category-definition'),title:q('#hero-title'),lead:q('#hero .hero-lead'),actions:q('#hero .hero-actions'),facts:q('#hero .hero-facts'),heading:q('#hero .fx-reference-heading'),proof:q('#hero .fx-reference-proof'),proofText:q('#hero .fx-reference-proof p'),live:q('#hero .fx-reference-liveos'),legacy:q('#fx-reference-legacy-menu')};});
+            console.log(name,JSON.stringify(s));assert.equal(s.composition,'mag-first-normal-flow-r75');assert.equal(s.renderer,'single-webgl2-mobile-cinematic-reference-glass-v69');assert.equal(s.gl,true);assert.equal(s.glError,0);assert.ok(s.render<16.67,JSON.stringify(s));assert.ok(s.energy>=before.energy);assert.notDeepEqual(s.pos,before.pos);
+            for(const k of ['top','brand','mag','menu','space','rail','copy','category','title','lead','actions','facts','heading','proof','proofText','live']){assert.ok(s[k],`${name} missing ${k}`);assert.ok(s[k].h>0,`${name} zero-height ${k}`)}
+            assert.ok(s.space.y>=bottom(s.top)-1,`${name} header covers MAG`);assert.ok(s.rail.y>=bottom(s.space)-1,`${name} rail covers MAG`);assert.ok(s.copy.y>=bottom(s.rail)-1,`${name} copy overlaps controls`);if(s.ask)assert.ok(s.copy.y>=bottom(s.ask)-1,`${name} ASK covers copy`);assert.ok(s.copy.h>200,`${name} copy collapsed`);assert.ok(s.heading.y>=bottom(s.copy)-1,`${name} heading overlaps copy`);assert.ok(s.proof.y>=bottom(s.heading)-1,`${name} proof overlaps heading`);assert.ok(s.live.y>=bottom(s.proofText)-1,`${name} Live OS covers text`);
+            const controls=[s.brand,s.mag,s.lang,s.menu].filter(Boolean);for(let i=0;i<controls.length;i++){assert.ok(controls[i].y>=s.top.y-1&&bottom(controls[i])<=bottom(s.top)+1,`${name} control escapes header`);for(let j=i+1;j<controls.length;j++)assert.ok(separate(controls[i],controls[j]),`${name} header controls overlap`)}
+            if(s.legacy)assert.equal(s.legacy.display,'none');await p.screenshot({path:`${name}.png`,fullPage:false});await c.close();
+          }
+          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await check(b,'phone-390x844',{width:390,height:844},true,2);await check(b,'phone-412x680',{width:412,height:680},true,2);await check(b,'desktop-1440x960',{width:1440,height:960},false,1);}finally{await b.close()}for(const f of['phone-390x844.png','phone-412x680.png','desktop-1440x960.png'])assert.ok(fs.statSync(f).size>10000);console.log('PASS: live r75 MAG-first no-overlap flow verified on phone and desktop.');})().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Upload live captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-flow-r75-${{ github.run_id }}
+          path: ${{ runner.temp }}/live-r75/*.png
+          retention-days: 14

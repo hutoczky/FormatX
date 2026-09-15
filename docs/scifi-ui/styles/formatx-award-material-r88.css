@@ -1,0 +1,49 @@
+/* r88 — preserve approved r87 size; correct material, lighting and reactor toward the supplied award reference. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage{
+    isolation:isolate!important;
+    background:
+      radial-gradient(circle at 50% 50%,rgba(229,252,255,.98) 0 1.2%,rgba(89,237,255,.78) 1.4% 3.0%,rgba(0,170,255,.26) 3.2% 8%,transparent 15%),
+      radial-gradient(circle at 50% 50%,transparent 0 12%,rgba(77,228,255,.34) 12.4% 12.9%,transparent 13.4% 17%,rgba(139,91,255,.20) 17.4% 18.0%,transparent 18.5% 23%,rgba(50,204,255,.19) 23.4% 24.0%,transparent 24.6%),
+      conic-gradient(from 6deg at 50% 50%,transparent 0 6%,rgba(53,211,255,.12) 7%,transparent 9% 18%,rgba(159,78,255,.13) 19%,transparent 21% 31%,rgba(75,219,255,.11) 32%,transparent 34% 44%,rgba(157,70,255,.11) 45%,transparent 47% 57%,rgba(58,214,255,.11) 58%,transparent 60% 70%,rgba(159,78,255,.12) 71%,transparent 73% 83%,rgba(62,214,255,.10) 84%,transparent 86% 100%),
+      radial-gradient(ellipse at 50% 49%,rgba(24,163,235,.20),transparent 28%),
+      radial-gradient(ellipse at 54% 50%,rgba(119,55,222,.15),transparent 45%),
+      linear-gradient(180deg,#01050e 0%,#020816 47%,#031326 72%,#041628 100%)!important;
+    filter:saturate(1.34) contrast(1.18) brightness(.96)!important;
+  }
+
+  /* Keep r87 geometry/size. Darken the membrane slightly and let highlights read as glass instead of flat cyan wireframe. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
+    filter:saturate(1.42) contrast(1.34) brightness(1.10)
+      drop-shadow(0 0 7px rgba(104,239,255,.58))
+      drop-shadow(0 0 18px rgba(23,164,255,.26))
+      drop-shadow(0 0 31px rgba(122,64,255,.12))!important;
+    opacity:.94!important;
+  }
+
+  /* Reference-like optical cross flare + faceted icy center. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:before{
+    content:""!important;
+    position:absolute!important;inset:0!important;z-index:4!important;pointer-events:none!important;
+    background:
+      linear-gradient(90deg,transparent 1%,rgba(107,223,255,.035) 22%,rgba(206,251,255,.64) 49.83%,#f7ffff 50%,rgba(201,249,255,.61) 50.17%,rgba(78,212,255,.04) 78%,transparent 99%),
+      linear-gradient(180deg,transparent 1%,rgba(72,211,255,.025) 25%,rgba(198,248,255,.38) 49.86%,rgba(249,255,255,.96) 50%,rgba(194,246,255,.34) 50.14%,rgba(64,203,255,.025) 76%,transparent 99%),
+      radial-gradient(circle at 50% 50%,#fff 0 1.0%,rgba(224,255,255,.98) 1.1% 1.7%,rgba(55,225,255,.67) 2% 4.0%,transparent 6%),
+      radial-gradient(circle at 50% 50%,transparent 0 10.3%,rgba(117,244,255,.50) 10.6% 11.0%,transparent 11.4% 15.1%,rgba(113,78,255,.30) 15.4% 15.9%,transparent 16.3% 20.1%,rgba(65,221,255,.34) 20.4% 20.9%,transparent 21.3%),
+      conic-gradient(from 0deg at 50% 50%,transparent 0 10%,rgba(42,204,255,.16) 11%,transparent 12.5% 23%,rgba(167,67,255,.16) 24%,transparent 25.5% 36%,rgba(52,214,255,.15) 37%,transparent 38.5% 49%,rgba(167,67,255,.15) 50%,transparent 51.5% 62%,rgba(52,214,255,.14) 63%,transparent 64.5% 75%,rgba(167,67,255,.14) 76%,transparent 77.5% 88%,rgba(52,214,255,.14) 89%,transparent 90.5% 100%)!important;
+    mix-blend-mode:screen!important;
+    opacity:.92!important;
+    filter:blur(.15px) drop-shadow(0 0 10px rgba(82,224,255,.30))!important;
+  }
+
+  /* Cinematic water/reflection plane, subdued versus the crystal itself. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:after{
+    content:""!important;position:absolute!important;left:-10%!important;right:-10%!important;bottom:-11%!important;height:43%!important;z-index:1!important;pointer-events:none!important;
+    background:
+      radial-gradient(ellipse at 50% 0%,rgba(70,224,255,.22),rgba(49,109,214,.10) 30%,rgba(119,56,198,.07) 47%,transparent 72%),
+      repeating-linear-gradient(0deg,rgba(66,194,255,.055) 0 1px,transparent 1px 7px),
+      repeating-linear-gradient(90deg,transparent 0 20px,rgba(79,184,255,.025) 20px 21px,transparent 21px 43px)!important;
+    transform:perspective(430px) rotateX(63deg) scaleX(1.16)!important;
+    transform-origin:50% 0!important;opacity:.66!important;mix-blend-mode:screen!important;
+  }
+}

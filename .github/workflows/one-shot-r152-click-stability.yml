@@ -1,0 +1,54 @@
+name: One-shot r152 MAG click stability
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-r152-click-stability.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Wire r152 click stability after live-motion CSS
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          s=p.read_text()
+          old="const LIVE_MOTION_STYLE = '/scifi-ui/styles/formatx-live-motion-r147.css?v=20260815-centered-optics-safe-lane-r149b';"
+          new=old+"\n  const CLICK_STABILITY_STYLE = '/scifi-ui/styles/formatx-click-stability-r152.css?v=20260815-r152-center-lock';"
+          if 'formatx-click-stability-r152.css' not in s:
+              if old not in s: raise SystemExit('LIVE_MOTION_STYLE marker missing')
+              s=s.replace(old,new,1)
+          old_boot="responsive-cinematic-reference-v69-r99-luminous-interactive-r151-final"
+          s=s.replace(old_boot,"responsive-cinematic-reference-v69-r99-luminous-interactive-r152-click-stable",1)
+          old_fn="addStyle(LIVE_MOTION_STYLE,'data-fx-live-motion-r147-style','fxLiveMotionStyleR147');}"
+          new_fn="addStyle(LIVE_MOTION_STYLE,'data-fx-live-motion-r147-style','fxLiveMotionStyleR147');addStyle(CLICK_STABILITY_STYLE,'data-fx-click-stability-r152-style','fxClickStabilityStyleR152');}"
+          if "data-fx-click-stability-r152-style" not in s:
+              if old_fn not in s: raise SystemExit('addExactStyle marker missing')
+              s=s.replace(old_fn,new_fn,1)
+          p.write_text(s)
+          PY
+      - name: Bump entry cache revision
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/index.html')
+          s=p.read_text()
+          old='rev=20260815-r151-final'
+          new='rev=20260815-r152-click-stable'
+          if old not in s and new not in s: raise SystemExit('index cache marker missing')
+          s=s.replace(old,new)
+          p.write_text(s)
+          PY
+      - name: Commit production repair
+        run: |
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m '[deploy-production] fix(mobile): keep MAG animation centered on interaction r152'
+          git push origin master

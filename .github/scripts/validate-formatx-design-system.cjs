@@ -8,11 +8,15 @@ const BASE = 'http://127.0.0.1:4181/scifi-ui/';
 const CASES = [
   {
     name: 'main',
-    url: 'index.html?lang=hu&lighthouse=1',
+    url: 'index.html?lang=hu',
     ready: '.fx-category-deck',
     panel: '.fx-category-deck',
     header: '.topbar',
-    action: '.hero-actions .button'
+    action: '.hero-actions .button',
+    mobileAction: '#menu-toggle',
+    sheet: 'link[data-fx-critical-core-r227]',
+    sheetPattern: /formatx-critical-core-r227\.css/,
+    waitForMotionCss: true
   },
   {
     name: 'checkout',
@@ -20,7 +24,9 @@ const CASES = [
     ready: '.checkout-summary',
     panel: '.checkout-summary',
     header: '.site-header',
-    action: '.checkout-language-control button'
+    action: '.checkout-language-control button',
+    sheet: 'link[data-fx-design-system]',
+    sheetPattern: /formatx-design-system\.css\?v=20260728-ds2$/
   },
   {
     name: 'simulator',
@@ -28,7 +34,9 @@ const CASES = [
     ready: '.sim-hero-manifest',
     panel: '.sim-hero-manifest',
     header: '.sim-header',
-    action: '#run-simulation'
+    action: '#run-simulation',
+    sheet: 'link[data-fx-design-system]',
+    sheetPattern: /formatx-design-system\.css\?v=20260728-ds2$/
   }
 ];
 
@@ -65,16 +73,33 @@ async function inspect(browser, config, viewport) {
 
   await page.goto(BASE + config.url, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector(config.ready, { state: 'attached', timeout: 20000 });
-  await page.waitForFunction(() => {
-    const link = document.querySelector('link[data-fx-design-system]');
+  await page.waitForFunction(selector => {
+    const link = document.querySelector(selector);
     return document.documentElement.dataset.fxDesignSystem === '2' && link && link.sheet;
-  }, null, { timeout: 20000 });
+  }, config.sheet, { timeout: 20000 });
 
-  const action = page.locator(config.action).first();
+  if (config.waitForMotionCss) {
+    // R468 deliberately keeps non-core motion CSS off the first-load path.
+    // Exercise the production contract with real non-reserved user intent,
+    // then require the external strict-CSP stylesheet and current runtime state.
+    await page.keyboard.press('ArrowDown');
+    await page.waitForFunction(() => {
+      const link = document.querySelector('link[data-fx-runtime-static-r243="true"]');
+      const state = document.documentElement.dataset.fxMotionRuntimeR239 || '';
+      return document.documentElement.dataset.fxMotionCssR243 === 'external-strict-csp-user-intent'
+        && state === 'enhanced-r468-user-intent'
+        && link && link.sheet;
+    }, null, { timeout: 20000 });
+  }
+
+  const actionSelector = viewport.width <= 900 && config.mobileAction
+    ? config.mobileAction
+    : config.action;
+  const action = page.locator(actionSelector).first();
   await action.waitFor({ state: 'visible', timeout: 15000 });
   await action.focus();
 
-  const result = await page.evaluate(({ panelSelector, headerSelector, actionSelector }) => {
+  const result = await page.evaluate(({ panelSelector, headerSelector, actionSelector, sheetSelector }) => {
     const root = document.documentElement;
     const rootStyle = getComputedStyle(root);
     const bodyStyle = getComputedStyle(document.body);
@@ -85,10 +110,29 @@ async function inspect(browser, config, viewport) {
     const headerStyle = header ? getComputedStyle(header) : null;
     const actionStyle = action ? getComputedStyle(action) : null;
     const rect = action?.getBoundingClientRect();
-    const sheet = document.querySelector('link[data-fx-design-system]');
+    const sheet = document.querySelector(sheetSelector);
+    const overflowElements = Array.from(document.querySelectorAll('body *'))
+      .map(element => {
+        const r = element.getBoundingClientRect();
+        return {
+          tag: element.tagName.toLowerCase(),
+          id: element.id || '',
+          className: typeof element.className === 'string' ? element.className : '',
+          left: Math.round(r.left * 10) / 10,
+          right: Math.round(r.right * 10) / 10,
+          width: Math.round(r.width * 10) / 10,
+          position: getComputedStyle(element).position,
+          overflowX: getComputedStyle(element).overflowX
+        };
+      })
+      .filter(item => item.width > 0 && (item.left < -2 || item.right > innerWidth + 2))
+      .sort((a, b) => Math.max(b.right - innerWidth, -b.left) - Math.max(a.right - innerWidth, -a.left))
+      .slice(0, 20);
 
     return {
       designSystem: root.dataset.fxDesignSystem || '',
+      motionCss: root.dataset.fxMotionCssR243 || '',
+      motionRuntime: root.dataset.fxMotionRuntimeR239 || '',
       sheetHref: sheet?.href || '',
       sheetLoaded: Boolean(sheet?.sheet),
       cyan: rootStyle.getPropertyValue('--fx-cyan').trim(),
@@ -109,13 +153,23 @@ async function inspect(browser, config, viewport) {
       outlineStyle: actionStyle?.outlineStyle || '',
       outlineWidth: actionStyle?.outlineWidth || '',
       overflow: document.documentElement.scrollWidth - innerWidth,
+      overflowElements,
       viewport: { width: innerWidth, height: innerHeight }
     };
-  }, { panelSelector: config.panel, headerSelector: config.header, actionSelector: config.action });
+  }, {
+    panelSelector: config.panel,
+    headerSelector: config.header,
+    actionSelector,
+    sheetSelector: config.sheet
+  });
 
   assert.equal(result.designSystem, '2');
+  if (config.waitForMotionCss) {
+    assert.equal(result.motionCss, 'external-strict-csp-user-intent');
+    assert.equal(result.motionRuntime, 'enhanced-r468-user-intent');
+  }
   assert.equal(result.sheetLoaded, true);
-  assert.match(result.sheetHref, /formatx-design-system\.css\?v=20260728-ds2$/);
+  assert.match(result.sheetHref, config.sheetPattern);
   assert.equal(result.cyan.toLowerCase(), '#7cecff');
   assert.equal(result.violet.toLowerCase(), '#8f72ff');
   assert.equal(result.radius, '30px 7px 30px 7px');
@@ -141,7 +195,11 @@ async function inspect(browser, config, viewport) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({
+    headless: true,
+    ...(executablePath ? { executablePath } : {})
+  });
   try {
     for (const config of CASES) {
       await inspect(browser, config, { width: 1440, height: 1000 });

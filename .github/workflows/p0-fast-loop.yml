@@ -1,0 +1,113 @@
+name: P0 fast source loop
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/styles.css'
+      - 'docs/scifi-ui/styles/**'
+      - 'docs/scifi-ui/scripts/**'
+      - 'billing-worker/src/production-content-entry*.js'
+      - 'billing-worker/src/production-content-base.js'
+      - 'billing-worker/src/production-feedback-entry.js'
+      - '.github/scripts/**'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/styles.css'
+      - 'docs/scifi-ui/styles/**'
+      - 'docs/scifi-ui/scripts/**'
+      - 'billing-worker/src/production-content-entry*.js'
+      - 'billing-worker/src/production-content-base.js'
+      - 'billing-worker/src/production-feedback-entry.js'
+      - '.github/scripts/**'
+      - '.github/workflows/p0-fast-loop.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: formatx-p0-fast-loop-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  targeted:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser validation runtime
+        run: npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
+      - name: Resolve runner Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Validate living-core source contract
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
+          node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
+          node --check docs/scifi-ui/scripts/formatx-core-gyro-r144.js
+          node .github/scripts/validate-living-core-r425-source.cjs
+          node .github/scripts/validate-real3d-core.cjs
+          node .github/scripts/validate-real3d-core-v20.cjs
+          node .github/scripts/production-preflight.cjs
+          node .github/scripts/validate-mag-pause-owner-r485.cjs
+          node .github/scripts/validate-wda-100-r198.cjs
+      - name: Start exact source site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/p0-fast-http.log" 2>&1 &
+          for attempt in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.2
+          done
+          cat "$RUNNER_TEMP/p0-fast-http.log"
+          exit 1
+      - name: Run retained semantic source proof
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
+        run: node .github/scripts/p0-fast-loop.cjs --semantic
+      - name: Run retained CLS source proof
+        env:
+          FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
+        run: node .github/scripts/p0-fast-loop.cjs --cls
+      - name: Run retained responsive overflow proof
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
+        run: node .github/scripts/p0-fast-loop.cjs --overflow
+      - name: Run R530 living-core browser matrix
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r522-semantic-mag
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
+      - name: Run current hero visual contract
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_VISUAL_DIR: artifacts/content-visuals
+        run: node .github/scripts/validate-content-visuals.cjs
+      - name: Upload compact evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-fast-loop-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/p0-fast-loop/
+            artifacts/r522-semantic-mag/
+            artifacts/content-visuals/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,47 @@
+/* r89 — material-only refinement against the approved mobile award reference.
+   IMPORTANT: do not change r87 geometry or size. This layer only deepens glass, facets,
+   cyan/violet refraction, reactor rings and cinematic reflection. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage{
+    background:
+      radial-gradient(circle at 50% 50%,rgba(255,255,255,.98) 0 .75%,rgba(219,254,255,.98) .8% 1.55%,rgba(64,230,255,.74) 1.7% 3.4%,rgba(16,142,255,.24) 3.6% 7.2%,transparent 10.8%),
+      radial-gradient(circle at 50% 50%,transparent 0 8.6%,rgba(199,251,255,.40) 8.9% 9.25%,transparent 9.6% 12.5%,rgba(45,221,255,.44) 12.8% 13.3%,transparent 13.7% 16.8%,rgba(143,82,255,.32) 17.1% 17.65%,transparent 18.0% 21.2%,rgba(48,204,255,.26) 21.5% 22.0%,transparent 22.5%),
+      conic-gradient(from 3deg at 50% 50%,transparent 0 5.2%,rgba(228,254,255,.13) 5.6% 6.2%,transparent 6.6% 17.4%,rgba(38,211,255,.17) 17.8% 18.5%,transparent 18.9% 29.6%,rgba(179,70,255,.18) 30.0% 30.8%,transparent 31.2% 42.1%,rgba(61,226,255,.17) 42.5% 43.2%,transparent 43.6% 54.5%,rgba(185,69,255,.17) 54.9% 55.7%,transparent 56.1% 67.0%,rgba(55,221,255,.16) 67.4% 68.1%,transparent 68.5% 79.4%,rgba(172,69,255,.17) 79.8% 80.6%,transparent 81.0% 91.8%,rgba(59,222,255,.15) 92.2% 93.0%,transparent 93.4% 100%),
+      radial-gradient(ellipse at 50% 50%,rgba(9,101,181,.19),transparent 29%),
+      radial-gradient(ellipse at 55% 51%,rgba(98,34,191,.17),transparent 44%),
+      linear-gradient(180deg,#01040c 0%,#010714 45%,#021127 72%,#03162a 100%)!important;
+    filter:saturate(1.24) contrast(1.19) brightness(.93)!important;
+  }
+
+  /* The reference reads as transparent crystal, not a filled cyan membrane. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
+    opacity:.91!important;
+    filter:saturate(1.34) contrast(1.43) brightness(1.12)
+      drop-shadow(0 0 8px rgba(141,246,255,.55))
+      drop-shadow(0 0 24px rgba(45,169,255,.25))!important;
+  }
+
+  /* Dense optical core + sharp shard highlights. Keep this above WebGL as light only. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:before{
+    content:""!important;position:absolute!important;inset:0!important;z-index:4!important;pointer-events:none!important;
+    background:
+      linear-gradient(90deg,transparent 0 7%,rgba(64,204,255,.035) 26%,rgba(169,245,255,.24) 45%,rgba(244,255,255,.92) 49.86%,#fff 50%,rgba(243,255,255,.91) 50.14%,rgba(169,245,255,.23) 55%,rgba(56,196,255,.03) 76%,transparent 93% 100%),
+      linear-gradient(180deg,transparent 0 9%,rgba(56,197,255,.025) 29%,rgba(164,243,255,.18) 44%,rgba(246,255,255,.72) 49.86%,#fff 50%,rgba(246,255,255,.70) 50.14%,rgba(154,239,255,.16) 56%,rgba(50,190,255,.025) 75%,transparent 94% 100%),
+      linear-gradient(45deg,transparent 0 42%,rgba(104,230,255,.035) 45%,rgba(196,248,255,.20) 49.75%,transparent 50.35% 100%),
+      linear-gradient(-45deg,transparent 0 42%,rgba(166,91,255,.028) 45%,rgba(208,192,255,.16) 49.75%,transparent 50.35% 100%),
+      radial-gradient(circle at 50% 50%,#fff 0 .72%,rgba(235,255,255,.99) .78% 1.28%,rgba(72,235,255,.83) 1.45% 2.7%,rgba(5,170,255,.29) 3.0% 5.1%,transparent 5.8%),
+      radial-gradient(circle at 50% 50%,transparent 0 8.0%,rgba(208,253,255,.62) 8.25% 8.55%,transparent 8.9% 11.3%,rgba(54,226,255,.55) 11.55% 11.95%,transparent 12.3% 14.9%,rgba(131,79,255,.39) 15.15% 15.62%,transparent 16% 18.7%,rgba(54,212,255,.32) 19.0% 19.45%,transparent 19.9% 23.1%,rgba(147,70,255,.23) 23.45% 23.9%,transparent 24.3%),
+      conic-gradient(from 0deg at 50% 50%,transparent 0 7%,rgba(117,238,255,.17) 7.3% 8%,transparent 8.5% 20%,rgba(201,89,255,.16) 20.4% 21.2%,transparent 21.7% 33%,rgba(86,228,255,.17) 33.4% 34.2%,transparent 34.7% 46%,rgba(199,84,255,.15) 46.4% 47.2%,transparent 47.7% 59%,rgba(83,227,255,.16) 59.4% 60.2%,transparent 60.7% 72%,rgba(194,81,255,.15) 72.4% 73.2%,transparent 73.7% 85%,rgba(82,225,255,.16) 85.4% 86.2%,transparent 86.7% 100%)!important;
+    mix-blend-mode:screen!important;
+    opacity:.87!important;
+    filter:drop-shadow(0 0 7px rgba(98,232,255,.27))!important;
+  }
+
+  /* Reflection should support the crystal, not read as a grid panel. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:after{
+    background:
+      radial-gradient(ellipse at 50% 0%,rgba(99,238,255,.26),rgba(38,112,216,.095) 31%,rgba(120,54,205,.065) 48%,transparent 72%),
+      repeating-linear-gradient(0deg,rgba(71,199,255,.045) 0 1px,transparent 1px 9px)!important;
+    opacity:.58!important;
+  }
+}

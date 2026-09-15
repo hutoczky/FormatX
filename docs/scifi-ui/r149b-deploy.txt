@@ -1,0 +1,4 @@
+FormatX MAG r149b production sync.
+Physical rendered clearance reconciler enabled.
+Legacy mobile hero copy hard-hidden.
+Centered/clipped live optical layer retained with touch and gyro input.

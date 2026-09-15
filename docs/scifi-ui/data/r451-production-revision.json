@@ -1,0 +1,10 @@
+{
+  "revision": "r451",
+  "surface": "mobile-mag",
+  "purpose": "restore readable crystal body while keeping restrained halo and soft natural edge",
+  "validated_source_gate": "FormatX r448-r451 mobile MAG optics",
+  "mobile_viewports": [
+    "390x844",
+    "430x932"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "revision": "r368",
+  "purpose": "rerun-live-r326-r368-verification-after-contract-marker-correction",
+  "production_optics_unchanged": true,
+  "expected_composition_marker": "new-organism-no-legacy-visual-fallback",
+  "mobile_profile": {
+    "width": 390,
+    "height": 844,
+    "device_scale_factor": 2,
+    "touch": true
+  },
+  "required_result": "FormatX live MAG r326 = success"
+}

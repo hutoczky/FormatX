@@ -32,6 +32,25 @@ function check(id, passed, detail, severity = 'error') {
   if (!result) (severity === 'warning' ? warnings : errors).push(detail);
 }
 
+function productionRuntimeContract() {
+  return [
+    read('billing-worker/src/production-content-entry.js'),
+    read('billing-worker/src/production-content-entry-r369-base.js'),
+    read('billing-worker/src/production-content-base.js'),
+  ].join('\n');
+}
+
+function productionContentWrapperActive(config) {
+  const main = String(config?.main || '');
+  if (main === 'src/production-content-entry.js') return true;
+  if (!/^src\/production-content-entry-r\d+\.js$/.test(main)) return false;
+  const source = read(`billing-worker/${main}`);
+  const imported = source.match(/import\s+([A-Za-z_$][\w$]*)\s+from\s+['"]\.\/production-content-entry\.js['"]/);
+  if (!imported) return false;
+  const delegate = imported[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${delegate}\\.fetch\\s*\\(\\s*request\\s*,\\s*env\\s*,\\s*ctx\\s*\\)`).test(source);
+}
+
 const production = json('billing-worker/wrangler.jsonc');
 const preview = json('wrangler.jsonc');
 const release = json('docs/scifi-ui/data/current-release.json');
@@ -44,6 +63,8 @@ const downloads = read('docs/scifi-ui/downloads/index.html');
 const releaseController = read('docs/scifi-ui/scripts/release-metadata.js');
 const desktopCss = read('docs/scifi-ui/styles/formatx-desktop-unified.css');
 const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
+const nativeApex = read('docs/scifi-ui/scripts/formatx-apex-native.js');
+const safeThreeHost = read('docs/scifi-ui/scripts/formatx-three-host-safe.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice.js');
 const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
 const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
@@ -52,7 +73,7 @@ const genome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
 const disclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
 const disclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
 const privacy = read('docs/scifi-ui/privacy.html');
-const productionWrapper = read('billing-worker/src/production-content-entry.js');
+const productionWrapper = productionRuntimeContract();
 const productionEntry = read('billing-worker/src/production-entry.js');
 const previewWrapper = read('content-preview-entry.js');
 const previewWorker = read('worker.js');
@@ -61,7 +82,7 @@ const robots = read('docs/robots.txt');
 
 check(
   'production-worker',
-  production.main === 'src/production-content-entry.js'
+  productionContentWrapperActive(production)
     && JSON.stringify((production.routes || []).map(route => route.pattern))
       === JSON.stringify(['formatxsuite.com', 'www.formatxsuite.com']),
   'Production Worker ownership is invalid'
@@ -190,12 +211,36 @@ check(
 );
 check(
   'organism-loader',
-  loader.includes('safe-ready-v27')
-    && loader.includes('safe-degraded-v27')
+  loader.includes('safe-ready-v28')
+    && loader.includes('safe-degraded-v28')
     && loader.includes('formatx-desktop-unified.css')
     && loader.includes('organism-master-sync.js?v=20260802-master-sync-1')
-    && loader.includes('synaptic-thought-disclosure.js'),
-  'Current Organism loader contract is missing'
+    && loader.includes('synaptic-thought-disclosure.js')
+    && loader.includes('formatx-apex-native.js?v=20260808-native-apex-1')
+    && loader.indexOf('formatx-apex-native.js') < loader.indexOf('formatx-three-host-safe.js'),
+  'Current Organism / Native Apex loader contract is missing'
+);
+check(
+  'native-apex-floor',
+  nativeApex.includes("getContext('webgl2'")
+    && nativeApex.includes('#define MAX_STEPS')
+    && nativeApex.includes('float fbm(')
+    && nativeApex.includes('vec2 core(')
+    && nativeApex.includes('vec2 nerves(')
+    && nativeApex.includes('vec2 organs(')
+    && nativeApex.includes('vec2 commerce(')
+    && nativeApex.includes('vec2 skeleton(')
+    && nativeApex.includes('vec2 beacon(')
+    && nativeApex.includes("fxScrollOwnership='seamless-v7'")
+    && nativeApex.includes("fxSectionSnap='disabled'")
+    && !nativeApex.includes('scrollTo(')
+    && !nativeApex.includes("addEventListener('wheel'")
+    && !nativeApex.includes("addEventListener('touchmove'")
+    && safeThreeHost.includes("root.dataset.fxNativeApex === 'ready'")
+    && safeThreeHost.includes("root.dataset.fxThreeHost = 'native-apex'")
+    && publicContract.quality_contract?.benchmark_floor?.policy === 'igloo-inc-is-mandatory-minimum-reference'
+    && publicContract.quality_contract?.benchmark_floor?.external_superiority_claim === false,
+  'Native Apex Igloo-floor production contract is incomplete'
 );
 check(
   'organism-safe-defaults',
@@ -249,7 +294,7 @@ check(
 
 check(
   'sitemap-root',
-  sitemap.includes('<loc>https://www.formatxsuite.com/</loc>'),
+  sitemap.includes('<loc>https://formatxsuite.com/</loc>'),
   'Sitemap missing canonical root homepage'
 );
 for (const route of [
@@ -264,7 +309,7 @@ for (const route of [
 }
 check(
   'robots-sitemap',
-  robots.includes('Sitemap: https://www.formatxsuite.com/sitemap.xml'),
+  robots.includes('Sitemap: https://formatxsuite.com/sitemap.xml'),
   'robots.txt does not declare the canonical sitemap'
 );
 
@@ -276,11 +321,14 @@ for (const relative of [
   'docs/scifi-ui/scripts/formatx-public-shell.js',
   'docs/scifi-ui/scripts/public-evidence-pages.js',
   'docs/scifi-ui/scripts/organism-master-sync.js',
+  'docs/scifi-ui/scripts/formatx-apex-native.js',
   '.github/scripts/validate-public-release-integration.py',
   '.github/scripts/validate-public-pages-browser.cjs',
   '.github/scripts/validate-thought-disclosure-browser.cjs',
+  '.github/scripts/validate-igloo-floor.cjs',
   '.github/workflows/validate-organism-dialogue.yml',
   '.github/workflows/validate-android-release-integrity.yml',
+  '.github/workflows/validate-igloo-floor.yml',
 ]) {
   check(
     `required-${relative}`,

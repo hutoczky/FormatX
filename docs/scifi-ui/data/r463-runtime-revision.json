@@ -1,0 +1,20 @@
+{
+  "revision": "r463",
+  "purpose": "strict cross-device measurement after restrained mobile MAG optics and TBT burst cleanup",
+  "desktop": "lighthouse-and-browser-required",
+  "mobile": "lighthouse-and-browser-required",
+  "qualityTarget": {
+    "performanceMinimum": 0.95,
+    "accessibility": 1,
+    "bestPractices": 1,
+    "seo": 1,
+    "fcpMaximumMs": 1800,
+    "lcpMaximumMs": 2500,
+    "tbtMaximumMs": 200,
+    "clsMaximum": 0.1
+  },
+  "rendererOwner": "r326-r454",
+  "mobileOptics": "r463-restrained-award-optics",
+  "mobileRenderBudget": "r463-short-burst-strict-tbt",
+  "externalAwardJuryScore": "not-claimed-by-technical-gate"
+}

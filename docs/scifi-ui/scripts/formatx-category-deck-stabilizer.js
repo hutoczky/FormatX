@@ -4,17 +4,84 @@
   const root = document.documentElement;
   if (root.dataset.fxCategoryDeckStabilizer === 'v1') return;
   root.dataset.fxCategoryDeckStabilizer = 'v1';
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   const NAVIGATION = {
     hu: ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
     en: ['How it works', 'Modules', 'Licences', 'Proof', 'Download']
   };
 
-  let retryTimer = 0;
-  let attempts = 0;
+  let accessibilityScheduled = false;
+  let ensureScheduled = false;
+  let bootObserver = null;
+  let bootTimer = 0;
 
   function language() {
     return root.lang === 'en' ? 'en' : 'hu';
+  }
+
+  function setAttributeIfChanged(element, name, value) {
+    if (!(element instanceof Element)) return;
+    if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+  }
+
+  function ensureReadabilityFloor() {
+    if (reducedMotion.matches) {
+      root.dataset.fxEarlyReadabilityFloor = 'critical-r236';
+      return;
+    }
+    if (document.querySelector('link[data-fx-early-readability-floor]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/scifi-ui/styles/formatx-readability-floor.css?v=20260808-a11y-floor-2';
+    link.dataset.fxEarlyReadabilityFloor = 'true';
+    document.head.appendChild(link);
+  }
+
+  function syncAccessibility() {
+    accessibilityScheduled = false;
+    ensureReadabilityFloor();
+
+    const brand = document.querySelector('.topbar > a.brand');
+    if (brand?.hasAttribute('aria-label')) brand.removeAttribute('aria-label');
+
+    const immersive = document.querySelector('.fx-immersive-launch');
+    if (immersive instanceof HTMLButtonElement) {
+      setAttributeIfChanged(immersive, 'aria-label', language() === 'en'
+        ? 'LIVING CORE LAUNCH — launch the living visual core'
+        : 'ÉLŐ MAG INDÍTÁS — az élő vizuális mag indítása');
+    }
+
+    const coreNode = document.querySelector('[data-organ-node="0"]');
+    if (coreNode instanceof HTMLAnchorElement && coreNode.hasAttribute('aria-label')) {
+      coreNode.removeAttribute('aria-label');
+    }
+
+    document.querySelectorAll('.fx-plan-qr-link').forEach(link => {
+      if (!(link instanceof HTMLAnchorElement)) return;
+      const card = link.closest('[data-plan-qr]');
+      const planName = card?.querySelector('.fx-plan-qr-copy strong')?.textContent?.trim() || 'FormatX';
+      setAttributeIfChanged(link, 'aria-label', language() === 'en'
+        ? 'QR — open ' + planName + ' payment page'
+        : 'QR — ' + planName + ' fizetési oldal megnyitása');
+    });
+
+    const launcher = document.querySelector('[data-fx-live-os-launcher]');
+    if (launcher instanceof HTMLButtonElement) {
+      const label = language() === 'en'
+        ? 'Live OS — FormatX command'
+        : 'Live OS — FormatX parancs';
+      setAttributeIfChanged(launcher, 'aria-label', label);
+      if (launcher.title !== label + ' · Ctrl/⌘ K') launcher.title = label + ' · Ctrl/⌘ K';
+    }
+
+    root.dataset.fxEarlyAccessibility = 'ready-v3';
+  }
+
+  function scheduleAccessibility() {
+    if (accessibilityScheduled) return;
+    accessibilityScheduled = true;
+    queueMicrotask(syncAccessibility);
   }
 
   function syncNavigation() {
@@ -22,12 +89,14 @@
       if (!NAVIGATION.hu[index] || !NAVIGATION.en[index]) return;
       anchor.dataset.hu = NAVIGATION.hu[index];
       anchor.dataset.en = NAVIGATION.en[index];
-      anchor.textContent = NAVIGATION[language()][index];
+      const text = NAVIGATION[language()][index];
+      if (anchor.textContent !== text) anchor.textContent = text;
     });
   }
 
   function createDeck() {
-    document.querySelectorAll('#hero .fx-category-deck').forEach(deck => deck.remove());
+    const heroDecks = Array.from(document.querySelectorAll('#hero .fx-category-deck'));
+    heroDecks.forEach(deck => deck.remove());
     const standalone = Array.from(document.querySelectorAll('.fx-category-deck'))
       .find(deck => !deck.closest('#hero'));
     if (standalone) return standalone;
@@ -44,56 +113,63 @@
     return deck;
   }
 
+  function stopBootObserver() {
+    bootObserver?.disconnect();
+    bootObserver = null;
+    if (bootTimer) clearTimeout(bootTimer);
+    bootTimer = 0;
+  }
+
   function announceReady() {
     root.dataset.fxCategoryDeckState = 'ready';
     root.dataset.fxCategoryLayer = 'ready';
     syncNavigation();
-    dispatchEvent(new CustomEvent('formatx:languagechange', {
-      detail: { language: language(), source: 'category-deck-stabilizer' }
-    }));
+    scheduleAccessibility();
+    stopBootObserver();
   }
 
   function ensure() {
+    ensureScheduled = false;
     const deck = createDeck();
     if (deck) {
       announceReady();
-      clearInterval(retryTimer);
-      retryTimer = 0;
-      attempts = 0;
-      return;
+      return true;
     }
-
-    if (!retryTimer) {
-      attempts = 0;
-      retryTimer = window.setInterval(() => {
-        attempts += 1;
-        const result = createDeck();
-        if (result || attempts >= 80) {
-          clearInterval(retryTimer);
-          retryTimer = 0;
-          if (result) announceReady();
-          else root.dataset.fxCategoryDeckState = 'missing-target';
-        }
-      }, 250);
-    }
+    return false;
   }
 
-  const structureObserver = new MutationObserver(() => {
-    const standalone = Array.from(document.querySelectorAll('.fx-category-deck'))
-      .find(deck => !deck.closest('#hero'));
-    const heroDeck = document.querySelector('#hero .fx-category-deck');
-    if (!standalone || heroDeck) queueMicrotask(ensure);
-  });
-  structureObserver.observe(root, { childList: true, subtree: true });
+  function scheduleEnsure() {
+    if (ensureScheduled) return;
+    ensureScheduled = true;
+    queueMicrotask(ensure);
+  }
 
-  ensure();
-  ['DOMContentLoaded', 'pageshow', 'formatx:livingready', 'formatx:threeready', 'formatx:loop'].forEach(name => {
-    addEventListener(name, ensure);
-  });
-  addEventListener('formatx:languagechange', () => queueMicrotask(syncNavigation));
+  function boot() {
+    ensureReadabilityFloor();
+    syncAccessibility();
+    if (ensure()) return;
 
-  addEventListener('pagehide', () => {
-    clearInterval(retryTimer);
-    structureObserver.disconnect();
-  }, { once: true });
+    const target = document.getElementById('main-content') || document.body || document.documentElement;
+    bootObserver = new MutationObserver(scheduleEnsure);
+    bootObserver.observe(target, { childList: true, subtree: true });
+    bootTimer = setTimeout(() => {
+      stopBootObserver();
+      if (!ensure()) root.dataset.fxCategoryDeckState = 'missing-target';
+    }, 4500);
+  }
+
+  for (const name of ['pageshow', 'formatx:livingready', 'formatx:threeready', 'formatx:loop']) {
+    addEventListener(name, () => {
+      scheduleEnsure();
+      scheduleAccessibility();
+    }, { passive: true });
+  }
+  addEventListener('formatx:languagechange', () => queueMicrotask(() => {
+    syncNavigation();
+    syncAccessibility();
+  }));
+  addEventListener('pagehide', stopBootObserver, { once: true });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 }());

@@ -1,0 +1,12 @@
+/* r201 reliability compatibility shim.
+   r199/r200 parser-time geometry locking caused the mobile hero to remain in a
+   partially hydrated blank MAG-first state on real browsers. The file remains at
+   the historic URL so stale clients receive a harmless response, but it no longer
+   owns hero geometry, visibility, order, height or copy clipping. Runtime layout
+   is again controlled by the canonical mobile/reference styles after hydration. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  html {
+    --fx-r201-firstpaint-recovery: 1;
+  }
+}

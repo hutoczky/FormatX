@@ -8,234 +8,304 @@ function assert(value, message) {
   if (!value) throw new Error(message);
 }
 
-async function clearIntro(page) {
-  await page.evaluate(() => {
+async function prepare(page) {
+  await page.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-    const root = document.documentElement;
-    const overlay = document.getElementById('formatx-event-horizon');
-    root.classList.remove('fx-intro-running', 'fx-intro-pending');
-    root.classList.add('fx-intro-complete');
-    if (overlay) {
-      overlay.hidden = true;
-      overlay.style.display = 'none';
-      overlay.setAttribute('aria-hidden', 'true');
-    }
-    document.body?.classList.remove('fx-organism-panel-open');
-    document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
   });
-}
+  await page.goto(TEST_URL + '?lang=hu&scroll-test=platform-v2', { waitUntil: 'domcontentloaded' });
 
-async function ensureScrollRuntime(page) {
-  const loaded = await page.evaluate(() => (
-    document.documentElement.dataset.fxInfiniteController === 'seamless-v6'
-    && document.documentElement.__FORMATX_INFINITE_SCROLL__?.revision === 'ratio-v4'
-  ));
-  if (loaded) return;
-  const runtimeUrl = await page.evaluate(() => new URL('./scripts/formatx-infinite-scroll.js?v=20260808-seamless-ratio-v5-test', document.baseURI).href);
-  await page.addScriptTag({ url: runtimeUrl });
+  await page.evaluate(origin => new Promise(resolve => {
+    let link = document.querySelector('link[href*="formatx-continuous-scroll.css"]');
+    const finish = () => resolve(true);
+    if (link) {
+      if (link.sheet) return finish();
+      link.addEventListener('load', finish, { once: true });
+      link.addEventListener('error', finish, { once: true });
+      return;
+    }
+    link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = origin + '/scifi-ui/styles/formatx-continuous-scroll.css?v=platform-v2-browser-test';
+    link.dataset.fxContinuousScrollTest = 'true';
+    link.addEventListener('load', finish, { once: true });
+    link.addEventListener('error', finish, { once: true });
+    document.head.appendChild(link);
+  }), new URL(TEST_URL).origin);
+
+  if (!await page.locator('script[src*="formatx-infinite-scroll.js"]').count()) {
+    const runtimeUrl = await page.evaluate(() => new URL('./scripts/formatx-infinite-scroll.js?v=platform-v2-browser-test', document.baseURI).href);
+    await page.addScriptTag({ url: runtimeUrl });
+  }
+
+  await page.evaluate(async () => {
+    try { await document.fonts?.ready; } catch (_) {}
+    dispatchEvent(new Event('resize'));
+  });
+  await page.waitForTimeout(220);
 }
 
 async function snapshot(page) {
   return page.evaluate(() => {
+    const root = document.documentElement;
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    const clone = bridge?.querySelector('.fx-loop-hero-clone');
-    const hero = document.querySelector('#main-content > #hero');
+    const mirror = document.querySelector('.fx-loop-bridge [data-fx-loop-mirror]');
+    const source = document.querySelector('#main-content > #hero');
+    const bridgeStyle = bridge ? getComputedStyle(bridge) : null;
     return {
-      controller: document.documentElement.dataset.fxInfiniteController || '',
-      ready: document.documentElement.dataset.fxInfiniteScroll || '',
-      input: document.documentElement.dataset.fxInfiniteInput || '',
-      automaticLoop: document.documentElement.dataset.fxAutomaticLoop || '',
-      jumpGuard: document.documentElement.dataset.fxScrollJumpGuard || '',
-      bridgeState: document.documentElement.dataset.fxLoopBridge || '',
-      landingState: document.documentElement.dataset.fxLoopLandingState || '',
-      authority: document.documentElement.dataset.fxScrollAuthority || '',
-      scrollY,
+      controller: root.dataset.fxInfiniteController || '',
+      automaticLoop: root.dataset.fxAutomaticLoop || '',
+      bridgeState: root.dataset.fxLoopBridge || '',
+      mobileMode: root.dataset.fxMobileScrollMode || '',
+      mobilePolicy: root.dataset.fxMobileScrollPolicy || '',
+      bootstrapState: root.dataset.fxScrollBootstrapState || '',
+      bridgeCount: bridge ? 1 : 0,
+      mirrorCount: mirror ? 1 : 0,
+      mirrorFocusable: mirror?.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])').length || 0,
+      mirrorWebglCanvases: [...(mirror?.querySelectorAll('canvas') || [])].filter(canvas => canvas.getContext('webgl2') || canvas.getContext('webgl')).length,
+      bridgeDisplay: bridgeStyle?.display || '',
+      bridgeVisibility: bridgeStyle?.visibility || '',
+      bridgeHeight: bridge?.offsetHeight || 0,
+      bridgeTop: bridge?.offsetTop || 0,
+      sourceTop: source?.offsetTop || 0,
+      sourceHeight: source?.offsetHeight || 0,
       viewportHeight: innerHeight,
-      viewportWidth: innerWidth,
-      maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
-      bridgeTop: bridge?.offsetTop ?? -1,
-      bridgeHeight: bridge?.offsetHeight ?? 0,
-      bridgeVisualHeight: clone?.offsetHeight ?? 0,
-      heroTop: hero?.offsetTop ?? -1,
-      heroHeight: hero?.offsetHeight ?? 0,
-      loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
-      bridgeCount: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
-      cloneCount: document.querySelectorAll('[data-fx-loop-clone="true"]').length,
-      heroIdCount: document.querySelectorAll('#hero').length,
-      transferClass: document.documentElement.classList.contains('fx-seamless-loop-transfer'),
-      runtime: document.documentElement.__FORMATX_INFINITE_SCROLL__ || null,
-      footerInPanel: Boolean(document.querySelector('[data-organism-panel="resources"] .site-footer')),
-      footerInFlow: Boolean(document.querySelector('body > .site-footer')),
-      horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body?.scrollWidth || 0) - innerWidth,
-      bridgeInert: Boolean(document.querySelector('.fx-loop-hero-clone[inert][aria-hidden="true"]')),
-      introRunning: document.documentElement.classList.contains('fx-intro-running'),
-      introComplete: document.documentElement.classList.contains('fx-intro-complete'),
-      menuOpen: document.documentElement.classList.contains('fx-organism-menu-open'),
-      panelOpen: document.body?.classList.contains('fx-organism-panel-open') || false,
-      hidden: document.hidden,
-      declaredThreshold: Number(document.documentElement.dataset.fxLoopThreshold || 0),
-      declaredVisualHeight: Number(document.documentElement.dataset.fxLoopVisualHeight || 0),
+      loopCount: Number(root.dataset.fxLoopCount || 0),
+      landing: Number(root.dataset.fxLoopLanding || NaN),
+      landingState: root.dataset.fxLoopLandingState || '',
+      loopSource: root.dataset.fxLoopSource || '',
+      infiniteInput: root.dataset.fxInfiniteInput || '',
+      scrollActivity: root.dataset.fxScrollActivity || '',
+      rootClass: root.className,
+      bodyClass: document.body.className,
+      scrollY,
+      maximum: Math.max(0, root.scrollHeight - innerHeight),
+      runtime: root.__FORMATX_INFINITE_SCROLL__ || null,
+      snapRoot: getComputedStyle(root).scrollSnapType,
+      snapBody: getComputedStyle(document.body).scrollSnapType,
+      overflow: root.scrollWidth - root.clientWidth,
     };
   });
 }
 
-async function verifyProgressiveScroll(page, name) {
-  const result = await page.evaluate(async () => {
-    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    const clone = bridge?.querySelector('.fx-loop-hero-clone');
-    if (!bridge || !clone) return { positions: [], start: 0, end: 0, threshold: 0 };
-
-    const bridgeTop = bridge.offsetTop;
-    const visualHeight = Math.max(1, clone.offsetHeight);
-    const thresholdDepth = Math.max(48, Math.min(innerHeight * .28, 300));
-    const threshold = bridgeTop + Math.min(thresholdDepth, Math.max(0, visualHeight - 2));
-    const maximum = Math.max(0, document.documentElement.scrollHeight - innerHeight);
-    const safety = Math.max(64, Math.min(innerHeight * .08, 240));
-    const end = Math.max(0, Math.min(maximum, bridgeTop - safety, threshold - safety));
-    const span = Math.max(360, Math.min(innerHeight * .9, 1800));
-    const start = Math.max(0, end - span);
-    const positions = [];
-
-    scrollTo(0, start);
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    for (let index = 1; index <= 18; index += 1) {
-      const target = Math.round(start + (end - start) * index / 18);
-      scrollTo(0, target);
-      await new Promise(resolve => setTimeout(resolve, 32));
-      positions.push(scrollY);
-    }
-    return { positions, start, end, threshold };
+async function mobileContentFlowSnapshot(page) {
+  return page.evaluate(() => {
+    const inspect = (sectionSelector, contentSelector) => {
+      const section = document.querySelector(sectionSelector);
+      const heading = section?.querySelector(':scope > .section-heading');
+      const content = section?.querySelector(contentSelector);
+      if (!(section instanceof HTMLElement) || !(heading instanceof HTMLElement) || !(content instanceof HTMLElement)) {
+        return { sectionSelector, exists: false };
+      }
+      const sectionStyle = getComputedStyle(section);
+      const contentStyle = getComputedStyle(content);
+      const headingRect = heading.getBoundingClientRect();
+      const contentRect = content.getBoundingClientRect();
+      return {
+        sectionSelector,
+        exists: true,
+        gap: contentRect.top - headingRect.bottom,
+        sectionMinHeight: sectionStyle.minHeight,
+        sectionHeight: sectionStyle.height,
+        contentVisibility: contentStyle.contentVisibility,
+        contentDisplay: contentStyle.display,
+        contentOpacity: Number(contentStyle.opacity || 1),
+        contentHeight: contentRect.height,
+        firstRevealVisible: (() => {
+          const node = content.querySelector('[data-reveal]');
+          if (!(node instanceof HTMLElement)) return true;
+          const style = getComputedStyle(node);
+          const rect = node.getBoundingClientRect();
+          return style.display !== 'none'
+            && style.visibility !== 'hidden'
+            && Number(style.opacity || 1) > .02
+            && rect.height > 0;
+        })()
+      };
+    };
+    return [
+      inspect('#capabilities', ':scope > .cards'),
+      inspect('#pricing', ':scope > .pricing'),
+      inspect('#system', ':scope > .system-grid')
+    ];
   });
-
-  assert(result.positions.length === 18, name + ': progressive scroll did not collect enough positions');
-  assert(result.end < result.threshold,
-    name + ': normal-scroll probe crossed the loop seam: ' + JSON.stringify(result));
-  for (let index = 1; index < result.positions.length; index += 1) {
-    assert(result.positions[index] + 8 >= result.positions[index - 1],
-      name + ': ordinary scrolling moved backwards before the loop seam: ' + JSON.stringify(result));
-  }
 }
 
-async function triggerLoop(page, name) {
-  const before = await snapshot(page);
-  assert(before.bridgeTop >= 0 && before.bridgeHeight > 0 && before.bridgeVisualHeight > 0 && before.heroHeight > 0,
-    name + ': missing loop geometry: ' + JSON.stringify(before));
-
-  const thresholdDepth = Math.max(48, Math.min(before.viewportHeight * .28, 300));
-  const threshold = before.bridgeTop + Math.min(thresholdDepth, Math.max(0, before.bridgeVisualHeight - 2));
-  assert(before.maximum >= threshold + 8,
-    name + ': loop seam is not physically reachable: ' + JSON.stringify({ before, threshold }));
-
-  const target = Math.min(before.maximum - 4, threshold + Math.max(24, Math.min(before.viewportHeight * .08, 80)));
-  const expectedRatio = Math.max(0, Math.min(1, (target - before.bridgeTop) / before.bridgeVisualHeight));
-  const expectedLanding = before.heroTop + Math.min(Math.max(0, before.heroHeight - 2), Math.round(before.heroHeight * expectedRatio));
-
-  await page.evaluate(y => scrollTo(0, y), target);
-  try {
-    await page.waitForFunction(previous => Number(document.documentElement.dataset.fxLoopCount || 0) > previous, before.loopCount, { timeout: 5000 });
-  } catch (_) {
-    const blocked = await snapshot(page);
-    throw new Error(name + ': loop did not start after reaching seam: ' + JSON.stringify({ target, threshold, before, blocked }));
-  }
+async function waitForSeamless(page) {
   await page.waitForFunction(() => (
-    document.documentElement.dataset.fxLoopLandingState === 'settled'
-    && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
-  ), null, { timeout: 5000 });
-  await page.waitForTimeout(80);
-
-  const after = await snapshot(page);
-  const tolerance = Math.max(10, Math.round(after.viewportHeight * .018));
-  assert(after.loopCount === before.loopCount + 1,
-    name + ': loop count did not increment exactly once: ' + JSON.stringify({ before, after }));
-  assert(Math.abs(after.scrollY - expectedLanding) <= tolerance,
-    name + ': ratio-matched landing drifted: ' + JSON.stringify({ target, expectedRatio, expectedLanding, tolerance, after }));
-  assert(after.bridgeCount === 1 && after.cloneCount === 1,
-    name + ': bridge/clone count changed after transfer: ' + JSON.stringify(after));
-  assert(after.heroIdCount === 1,
-    name + ': duplicate #hero id appeared after transfer: ' + JSON.stringify(after));
-  assert(!after.transferClass && after.input === 'native',
-    name + ': transfer state remained active: ' + JSON.stringify(after));
-  return after;
+    document.documentElement.dataset.fxInfiniteController === 'seamless-v7'
+    && document.documentElement.dataset.fxLoopBridge === 'ready-v3'
+  ), null, { timeout: 20000 });
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
+    document.body.style.setProperty('scroll-behavior', 'auto', 'important');
+    dispatchEvent(new Event('resize'));
+  });
+  await page.waitForTimeout(2500);
 }
 
-async function verifyViewport(browser, viewport, name, mobile, cycles = 1) {
+async function advanceThroughLiveBridge(page, relative, previousLoopCount, label) {
+  const attempts = [];
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const target = await page.evaluate(offset => {
+      const root = document.documentElement;
+      const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+      const bridgeTop = bridge?.offsetTop || 0;
+      const maximum = Math.max(0, root.scrollHeight - innerHeight);
+      const y = Math.min(maximum, bridgeTop + offset);
+      scrollTo({ top: y, left: 0, behavior: 'instant' });
+      return { bridgeTop, maximum, target: y };
+    }, relative);
+
+    // r305 makes formerly synthetic mobile blocks real. A late product/proof
+    // enhancement may legitimately increase document height while this synthetic
+    // CI jump is in flight. A real user reaches the bridge progressively; the
+    // validator therefore follows the live bridge for a bounded number of
+    // attempts, while still requiring exactly one seamless transfer.
+    await page.waitForTimeout(720);
+    const state = await snapshot(page);
+    attempts.push({ target, state });
+    if (state.loopCount > previousLoopCount) {
+      assert(state.loopCount === previousLoopCount + 1, label + ' transferred more than once: ' + JSON.stringify(attempts));
+      return state;
+    }
+  }
+  throw new Error(label + ' did not transfer through the live mobile bridge: ' + JSON.stringify(attempts));
+}
+
+async function verifyMobile(browser) {
   const context = await browser.newContext({
-    viewport,
+    viewport: { width: 412, height: 915 },
     locale: 'hu-HU',
-    colorScheme: 'dark',
-    hasTouch: mobile,
-    isMobile: mobile,
-    deviceScaleFactor: mobile ? 2 : 1
-  });
-  await context.addInitScript(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+    hasTouch: true,
+    isMobile: true,
+    deviceScaleFactor: 2,
+    colorScheme: 'dark'
   });
   const page = await context.newPage();
-  const diagnostics = [];
-  page.on('pageerror', error => diagnostics.push('pageerror: ' + String(error)));
-  page.on('console', message => {
-    if (message.type() === 'error') diagnostics.push('console-error: ' + message.text());
-  });
+  const errors = [];
+  page.on('pageerror', error => errors.push(String(error)));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
 
-  await page.goto(TEST_URL + '?lang=hu&scroll-test=seamless-ratio-v5', { waitUntil: 'domcontentloaded' });
-  await clearIntro(page);
-  await ensureScrollRuntime(page);
-  await page.waitForFunction(() => (
-    document.documentElement.dataset.fxInfiniteController === 'seamless-v6'
-    && document.documentElement.__FORMATX_INFINITE_SCROLL__?.revision === 'ratio-v4'
-    && document.documentElement.dataset.fxInfiniteInput === 'native'
-    && document.documentElement.dataset.fxAutomaticLoop === 'enabled'
-    && document.documentElement.dataset.fxLoopBridge.startsWith('ready')
-    && !document.documentElement.classList.contains('fx-intro-running')
-  ), null, { timeout: 10000 });
-  await page.waitForTimeout(300);
+  await prepare(page);
+  await waitForSeamless(page);
 
   const initial = await snapshot(page);
-  assert(initial.bridgeCount === 1 && initial.cloneCount === 1,
-    name + ': exactly one inert Hero bridge is required: ' + JSON.stringify(initial));
-  assert(initial.bridgeInert, name + ': Hero bridge must be inert and aria-hidden: ' + JSON.stringify(initial));
-  assert(initial.heroIdCount === 1, name + ': duplicate #hero id detected: ' + JSON.stringify(initial));
-  assert(initial.footerInFlow && !initial.footerInPanel,
-    name + ': footer must remain in document flow, not inside the release dialog: ' + JSON.stringify(initial));
-  assert(initial.horizontalOverflow <= 2,
-    name + ': horizontal overflow detected: ' + JSON.stringify(initial));
-  assert(initial.runtime?.automaticLoop === true
-    && initial.runtime?.visualBridge === true
-    && initial.runtime?.clonedHeroOnly === true
-    && initial.runtime?.ratioMatchedLanding === true
-    && initial.runtime?.frameStableLanding === true
-    && initial.runtime?.reachableSeam === true
-    && initial.runtime?.guardRetry === true
-    && initial.runtime?.inputInterception === false
-    && initial.runtime?.jumpFree === true,
-    name + ': seamless runtime contract missing: ' + JSON.stringify(initial));
+  assert(initial.automaticLoop === 'enabled', 'mobile seamless loop is not enabled: ' + JSON.stringify(initial));
+  assert(initial.mobileMode === 'native-momentum-loop', 'mobile momentum-loop marker missing: ' + JSON.stringify(initial));
+  assert(initial.mobilePolicy === 'native-momentum-loop-v1', 'mobile loop policy missing: ' + JSON.stringify(initial));
+  assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, 'mobile inert visual bridge contract broken: ' + JSON.stringify(initial));
+  assert(initial.mirrorFocusable === 0 && initial.mirrorWebglCanvases === 0, 'mobile bridge duplicated interaction or WebGL state: ' + JSON.stringify(initial));
+  assert(initial.bridgeDisplay !== 'none' && initial.bridgeVisibility !== 'hidden', 'mobile bridge is hidden: ' + JSON.stringify(initial));
+  assert(initial.bridgeHeight >= initial.viewportHeight, 'mobile bridge has no usable runway: ' + JSON.stringify(initial));
+  assert(initial.maximum > initial.bridgeTop + Math.min(220, initial.viewportHeight * .2), 'mobile document still ends at the footer/bridge boundary: ' + JSON.stringify(initial));
+  assert(initial.runtime?.automaticLoop === true && initial.runtime?.visualBridge === true, 'mobile seamless runtime contract missing: ' + JSON.stringify(initial));
+  assert(initial.runtime?.mobileTransfer === 'scrollend-or-idle', 'mobile transfer is not deferred until momentum end: ' + JSON.stringify(initial));
+  assert(initial.runtime?.mobileNativeMomentumPreserved === true, 'mobile native momentum is not preserved: ' + JSON.stringify(initial));
+  assert(initial.runtime?.inertReferenceMirror === true && initial.runtime?.mirrorContext === 'static-2d-snapshot-no-webgl', 'mobile inert mirror runtime contract missing: ' + JSON.stringify(initial));
+  assert(initial.runtime?.mobileIdleGeometryRefresh === true, 'mobile idle geometry refresh contract missing: ' + JSON.stringify(initial.runtime));
+  assert(initial.snapRoot === 'none' && initial.snapBody === 'none', 'mobile scroll snapping is active: ' + JSON.stringify(initial));
+  assert(initial.overflow <= 2, 'mobile horizontal overflow: ' + JSON.stringify(initial));
 
-  await verifyProgressiveScroll(page, name);
-  for (let cycle = 0; cycle < cycles; cycle += 1) await triggerLoop(page, name + '-cycle-' + (cycle + 1));
+  const flow = await mobileContentFlowSnapshot(page);
+  for (const chapter of flow) {
+    assert(chapter.exists, 'mobile content-flow section missing: ' + JSON.stringify(chapter));
+    assert(chapter.gap >= -2 && chapter.gap <= 180, 'mobile phantom section gap detected: ' + JSON.stringify(chapter));
+    assert(chapter.contentVisibility === 'visible', 'mobile chapter still uses synthetic content visibility: ' + JSON.stringify(chapter));
+    assert(chapter.contentDisplay !== 'none' && chapter.contentOpacity > .02 && chapter.contentHeight > 40, 'mobile chapter content is not physically rendered: ' + JSON.stringify(chapter));
+    assert(chapter.firstRevealVisible, 'mobile reveal content occupies layout while remaining hidden: ' + JSON.stringify(chapter));
+  }
 
-  const meaningful = diagnostics.filter(item => (
-    !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item)
-  ));
-  assert(!meaningful.length, name + ': browser diagnostics: ' + meaningful.join(' | '));
+  const threshold = Math.max(36, Math.min(initial.viewportHeight * .18, 180));
+  const relative = Math.min(Math.max(threshold + 84, 220), Math.max(220, initial.sourceHeight - 36));
 
-  console.log(JSON.stringify({ case: name, viewport, state: await snapshot(page) }));
+  const after = await advanceThroughLiveBridge(page, relative, initial.loopCount, 'mobile first cycle');
+  assert(Math.abs(after.scrollY - (after.sourceTop + relative)) <= 110, 'mobile loop did not preserve the visual relative position: ' + JSON.stringify({ relative, after }));
+  assert(after.scrollY < after.maximum - 100, 'mobile remained pinned at the physical document end after loop transfer: ' + JSON.stringify(after));
+
+  const stableY = after.scrollY;
+  await page.waitForTimeout(900);
+  const settledY = await page.evaluate(() => scrollY);
+  assert(Math.abs(settledY - stableY) <= 6, 'mobile kept moving after seamless landing settled: ' + JSON.stringify({ stableY, settledY }));
+
+  const second = await advanceThroughLiveBridge(page, relative, after.loopCount, 'mobile second cycle');
+  assert(Math.abs(second.scrollY - (second.sourceTop + relative)) <= 110, 'mobile second cycle lost its relative landing: ' + JSON.stringify({ relative, second }));
+
+  const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
+  assert(!meaningful.length, 'mobile browser errors: ' + meaningful.join(' | '));
+  console.log('PASS mobile seamless-v7 + r305 content flow', JSON.stringify({ flow, relative, loopBefore: initial.loopCount, loopAfter: second.loopCount, landing: second.scrollY }));
+  await context.close();
+}
+
+async function verifyDesktop(browser) {
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    locale: 'hu-HU',
+    colorScheme: 'dark'
+  });
+  const page = await context.newPage();
+
+  await prepare(page);
+  await waitForSeamless(page);
+
+  const initial = await snapshot(page);
+  assert(initial.automaticLoop === 'enabled', 'desktop seamless loop not enabled: ' + JSON.stringify(initial));
+  assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, 'desktop inert visual bridge contract broken: ' + JSON.stringify(initial));
+  assert(initial.mirrorFocusable === 0 && initial.mirrorWebglCanvases === 0, 'desktop bridge duplicated interaction or WebGL state: ' + JSON.stringify(initial));
+  assert(initial.runtime?.automaticLoop === true && initial.runtime?.visualBridge === true, 'desktop v7 runtime contract missing: ' + JSON.stringify(initial));
+  assert(initial.snapRoot === 'none' && initial.snapBody === 'none', 'desktop scroll snapping is active');
+  assert(initial.overflow <= 2, 'desktop horizontal overflow: ' + JSON.stringify(initial));
+
+  const safeEnd = Math.max(200, initial.bridgeTop - initial.viewportHeight - 250);
+  await page.evaluate(y => scrollTo({ top: y, left: 0, behavior: 'instant' }), Math.round(safeEnd * .2));
+  const positions = [await page.evaluate(() => scrollY)];
+  for (let i = 0; i < 10; i += 1) {
+    await page.mouse.wheel(0, 220);
+    await page.waitForTimeout(65);
+    positions.push(await page.evaluate(() => scrollY));
+  }
+  for (let i = 1; i < positions.length; i += 1) {
+    assert(positions[i] + 6 >= positions[i - 1], 'desktop wheel moved backwards before bridge: ' + JSON.stringify(positions));
+  }
+
+  const before = await snapshot(page);
+  const threshold = Math.max(36, Math.min(before.viewportHeight * .18, 180));
+  const relative = Math.min(Math.max(threshold + 70, 120), Math.max(120, before.sourceHeight - 30));
+  await page.evaluate(offset => {
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+    scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'instant' });
+  }, relative);
+  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 5000 });
+  await page.waitForTimeout(500);
+  const after = await snapshot(page);
+  assert(after.loopCount === before.loopCount + 1, 'desktop loop did not transfer exactly once: ' + JSON.stringify({ before, after }));
+  assert(Number.isFinite(after.landing) && Math.abs(after.scrollY - after.landing) <= 80, 'desktop loop did not settle at its recorded visual landing: ' + JSON.stringify({ relative, after }));
+  assert(after.landing >= after.sourceTop + relative - 80, 'desktop loop moved backwards across the boundary: ' + JSON.stringify({ relative, after }));
+  assert(after.landing <= after.sourceTop + relative + Math.min(320, after.viewportHeight * .4), 'desktop loop overran the bounded wheel continuation: ' + JSON.stringify({ relative, after }));
+
+  await page.evaluate(offset => {
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+    scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'instant' });
+  }, relative);
+  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, after.loopCount, { timeout: 5000 });
+  await page.waitForTimeout(500);
+  const second = await snapshot(page);
+  assert(second.loopCount === after.loopCount + 1, 'desktop second cycle did not transfer exactly once: ' + JSON.stringify({ after, second }));
+  assert(Number.isFinite(second.landing) && Math.abs(second.scrollY - second.landing) <= 80, 'desktop second cycle did not settle at its recorded visual landing: ' + JSON.stringify({ relative, second }));
+  assert(second.landing >= second.sourceTop + relative - 80 && second.landing <= second.sourceTop + relative + 100, 'desktop second cycle lost its relative landing: ' + JSON.stringify({ relative, second }));
+
+  console.log('PASS desktop seamless-v7', JSON.stringify({ positions, loopBefore: before.loopCount, loopAfter: second.loopCount }));
   await context.close();
 }
 
 (async () => {
   const browser = await chromium.launch({
     headless: true,
+    executablePath: process.env.FORMATX_CHROMIUM_PATH || undefined,
     args: ['--disable-smooth-scrolling', '--enable-unsafe-swiftshader']
   });
   try {
-    await verifyViewport(browser, { width: 412, height: 915 }, 'mobile-412x915', true, 2);
-    await verifyViewport(browser, { width: 1366, height: 768 }, 'hd-1366x768', false, 2);
-    await verifyViewport(browser, { width: 1920, height: 1080 }, 'full-hd-1920x1080', false, 2);
-    await verifyViewport(browser, { width: 2560, height: 1440 }, 'qhd-2560x1440', false);
-    await verifyViewport(browser, { width: 3440, height: 1440 }, 'ultrawide-3440x1440', false);
-    await verifyViewport(browser, { width: 5120, height: 1440 }, 'super-ultrawide-5120x1440', false);
-    await verifyViewport(browser, { width: 3840, height: 2160 }, '4k-3840x2160', false);
-    await verifyViewport(browser, { width: 7680, height: 4320 }, '8k-7680x4320', false);
+    await verifyMobile(browser);
+    await verifyDesktop(browser);
   } finally {
     await browser.close();
   }

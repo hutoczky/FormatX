@@ -1,0 +1,82 @@
+name: One-shot r153 desktop live MAG
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-r153-desktop-live.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Wire desktop live MAG layer
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          core = Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          text = core.read_text()
+
+          old_boot = "const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r152-click-stable';"
+          new_boot = "const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r153-desktop-live';"
+          if old_boot in text:
+              text = text.replace(old_boot, new_boot, 1)
+          elif new_boot not in text:
+              raise SystemExit('BOOTSTRAP marker not found')
+
+          anchor = "  const CLICK_STABILITY_STYLE = '/scifi-ui/styles/formatx-click-stability-r152.css?v=20260815-r152-center-lock';\n"
+          desktop = "  const DESKTOP_LIVE_STYLE = '/scifi-ui/styles/formatx-desktop-live-r153.css?v=20260815-r153-desktop-live';\n"
+          if desktop not in text:
+              if anchor not in text:
+                  raise SystemExit('desktop style anchor not found')
+              text = text.replace(anchor, anchor + desktop, 1)
+
+          exact_old = "addStyle(CLICK_STABILITY_STYLE,'data-fx-click-stability-r152-style','fxClickStabilityStyleR152');}"
+          exact_new = "addStyle(CLICK_STABILITY_STYLE,'data-fx-click-stability-r152-style','fxClickStabilityStyleR152');addStyle(DESKTOP_LIVE_STYLE,'data-fx-desktop-live-r153-style','fxDesktopLiveStyleR153');}"
+          if exact_new not in text:
+              if exact_old not in text:
+                  raise SystemExit('addExactStyle marker not found')
+              text = text.replace(exact_old, exact_new, 1)
+
+          live_old = "function addLiveMotion(){addStyle(LIVE_MOTION_STYLE,'data-fx-live-motion-r147-style','fxLiveMotionStyleR147');"
+          live_new = "function addLiveMotion(){addStyle(LIVE_MOTION_STYLE,'data-fx-live-motion-r147-style','fxLiveMotionStyleR147');addStyle(DESKTOP_LIVE_STYLE,'data-fx-desktop-live-r153-style','fxDesktopLiveStyleR153');"
+          if live_new not in text:
+              if live_old not in text:
+                  raise SystemExit('addLiveMotion marker not found')
+              text = text.replace(live_old, live_new, 1)
+
+          core.write_text(text)
+
+          index = Path('docs/scifi-ui/index.html')
+          html = index.read_text()
+          old_rev = 'rev=20260815-r152-click-stable'
+          new_rev = 'rev=20260815-r153-desktop-live'
+          if old_rev in html:
+              html = html.replace(old_rev, new_rev, 1)
+          elif new_rev not in html:
+              raise SystemExit('index cache marker not found')
+          index.write_text(html)
+
+          assert 'formatx-desktop-live-r153.css' in text
+          assert 'r153-desktop-live' in text
+          assert new_rev in html
+          PY
+
+      - name: Publish r153 desktop live MAG
+        run: |
+          git config user.name "Games Tech"
+          git config user.email "hutoczky@users.noreply.github.com"
+          git add docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html
+          if git diff --cached --quiet; then
+            echo "No changes required"
+            exit 0
+          fi
+          git commit -m "[deploy-production] feat(desktop): enable live MAG pulse and reactor motion r153"
+          git push

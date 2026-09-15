@@ -1,0 +1,26 @@
+/* FormatX r320 — explicit architecture disclosure.
+   The living WebGL MAG owns its own pointer/touch interaction. A second hidden
+   full-core hit layer must never intercept mobile hero controls or open a modal
+   as a side effect of touching the crystal. */
+#hero > .fx-signature-core-trigger {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+html.fx-signature-open,
+html.fx-signature-open body {
+  overflow: hidden !important;
+}
+
+.fx-signature-architecture[aria-hidden="true"] {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.fx-signature-open .fx-signature-architecture[aria-hidden="false"] {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}

@@ -4,6 +4,12 @@
   const ROOT = document.documentElement;
   const THEME_KEY = 'formatx-site-theme';
   const RELEASE_URL = '/scifi-ui/data/current-release.json';
+  const LEGAL_HEADER_STYLE = '/scifi-ui/styles/formatx-legal-header-r426.css?v=20260829-r426-language-grid';
+  const LEGAL_I18N_PATHS = new Set([
+    '/scifi-ui/terms.html',
+    '/scifi-ui/privacy.html',
+    '/scifi-ui/support.html'
+  ]);
 
   function language() { return ROOT.lang === 'en' ? 'en' : 'hu'; }
   function copy(hu, en) { return language() === 'en' ? en : hu; }
@@ -71,6 +77,39 @@
       });
     }, { threshold: 0.12 });
     items.forEach(item => observer.observe(item));
+  }
+
+  function initialiseLegalPageI18n() {
+    if (!LEGAL_I18N_PATHS.has(location.pathname)) return;
+    if (document.querySelector('script[data-fx-legal-page-i18n]')) return;
+
+    const mountI18n = () => {
+      if (document.querySelector('script[data-fx-legal-page-i18n]')) return;
+      const script = document.createElement('script');
+      script.src = '/scifi-ui/scripts/legal-page-i18n.js?v=20260810-legal-i18n-1';
+      script.defer = true;
+      script.dataset.fxLegalPageI18n = 'true';
+      document.head.appendChild(script);
+    };
+
+    let style = document.querySelector('link[data-fx-legal-header-r426]');
+    if (style instanceof HTMLLinkElement) {
+      if (style.sheet) mountI18n();
+      else {
+        style.addEventListener('load', mountI18n, { once: true });
+        style.addEventListener('error', mountI18n, { once: true });
+      }
+      return;
+    }
+
+    style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = LEGAL_HEADER_STYLE;
+    style.dataset.fxLegalHeaderR426 = 'true';
+    style.addEventListener('load', mountI18n, { once: true });
+    style.addEventListener('error', mountI18n, { once: true });
+    document.head.appendChild(style);
+    ROOT.dataset.fxLegalHeaderLayoutR426 = 'reserved-before-language-control';
   }
 
   function formatBytes(bytes) {
@@ -188,6 +227,7 @@
   initialiseTheme();
   initialiseMenu();
   initialiseReveal();
+  initialiseLegalPageI18n();
   initialiseCopy();
   loadRelease();
   addEventListener('formatx:languagechange', loadRelease);

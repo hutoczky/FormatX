@@ -1,0 +1,64 @@
+name: Diagnose r185b live MAG
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/diagnose-r185b-live.yml']
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.62.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Inspect production r185b DOM and hit testing
+        run: |
+          cat > diagnose-r185b.cjs <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            for(const cfg of [
+              {name:'desktop',context:{viewport:{width:1440,height:900},deviceScaleFactor:1,locale:'hu-HU'}},
+              {name:'mobile',context:{viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'}}
+            ]){
+              const context=await browser.newContext(cfg.context),page=await context.newPage(),events=[];
+              page.on('pageerror',e=>events.push('PAGEERROR '+e.message));
+              page.on('console',m=>{if(['error','warning'].includes(m.type()))events.push('CONSOLE '+m.type()+' '+m.text())});
+              await page.goto(`https://formatxsuite.com/?diagnose=r185b-${cfg.name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+              await page.waitForTimeout(12000);
+              const state=await page.evaluate(()=>{
+                const root=document.documentElement,hero=document.getElementById('hero'),tr=document.querySelector('#hero>.fx-signature-core-trigger'),any=document.querySelector('#hero .fx-signature-core-trigger'),visual=document.querySelector('#hero .fx-core-detail-r122,#hero .fx-core-r112-canvas,#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r112-stage,#hero .fx-core-mobile-v55-stage');
+                const rect=e=>{const r=e?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height}:null};
+                const r=tr?.getBoundingClientRect();const cx=r?r.left+r.width*.5:0,cy=r?r.top+r.height*.5:0;const hit=r?document.elementFromPoint(cx,cy):null;
+                const css=tr?getComputedStyle(tr):null;
+                return{
+                  href:location.href,
+                  signatureSystem:root.dataset.fxSignatureSystem||'',signatureTrigger:root.dataset.fxSignatureTrigger||'',signatureUsability:root.dataset.fxSignatureUsability||'',
+                  mobileLayout:root.dataset.fxMobileReferenceLayout||'',referenceTexture:root.dataset.fxCoreReferenceTextureR130||'',real3d:root.dataset.fxCoreReal3d||'',
+                  signatureScripts:[...document.scripts].map(s=>s.src).filter(s=>s.includes('formatx-signature-system-r185')),
+                  signatureStyles:[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>l.href).filter(s=>s.includes('formatx-signature-system-r185')),
+                  triggerExists:!!tr,anyTriggerExists:!!any,directParent:tr?.parentElement===hero,trigger:rect(tr),visual:rect(visual),
+                  triggerStyle:css?{z:css.zIndex,pointer:css.pointerEvents,position:css.position,clip:css.clipPath,display:css.display,visibility:css.visibility,opacity:css.opacity}:null,
+                  hit:{tag:hit?.tagName||'',id:hit?.id||'',class:String(hit?.className||''),isTrigger:hit===tr||!!tr?.contains(hit)},
+                  heroChildren:hero?[...hero.children].map(e=>({tag:e.tagName,id:e.id,class:String(e.className||''),z:getComputedStyle(e).zIndex,position:getComputedStyle(e).position,pointer:getComputedStyle(e).pointerEvents})):[]
+                };
+              });
+              console.log(`DIAGNOSTIC ${cfg.name.toUpperCase()}\n${JSON.stringify(state,null,2)}\nEVENTS\n${events.join('\n')}`);
+              await page.screenshot({path:`r185b-${cfg.name}-diagnostic.png`,fullPage:false,animations:'disabled',timeout:120000});
+              await context.close();
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node diagnose-r185b.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r185b-diagnostic-${{ github.run_id }}
+          path: r185b-*-diagnostic.png
+          if-no-files-found: warn
+          retention-days: 2

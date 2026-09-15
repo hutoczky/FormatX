@@ -161,7 +161,9 @@
       if (note) note.textContent = words.note;
       if (link) {
         link.href = checkout;
-        link.setAttribute('aria-label', words.open + ' ' + plan.name);
+        // The rendered card exposes the visible pseudo-label "QR ↗". Include
+        // that exact visible label in the accessible name before the plan copy.
+        link.setAttribute('aria-label', 'QR ↗ — ' + words.open + ' ' + plan.name);
       }
       if (image) {
         image.alt = words.alt + ' — ' + plan.name;

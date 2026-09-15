@@ -12,10 +12,10 @@
       story: 'A projekt abból a problémából indult, hogy a technikusi eszközök gyakran szétszórtak, platformfüggők vagy nem mutatják meg elég világosan, mi fog történni egy kritikus művelet során. A FormatX célja ezért nem egy újabb eszköztár, hanem egy közös operációs réteg: ugyanaz a felmérési, tervezési, végrehajtási és ellenőrzési logika minden támogatott környezetben.',
       statement: 'A jövőkép: a technikus egyetlen felületen lássa, mit tud a rendszer, mit készül végrehajtani, és mi lett ténylegesen ellenőrizve.',
       cards: [
-        ['KIADÁSI LÁNC', 'A stabil csomag kizárólag a hivatalos GitHub Releases csatornáról érkezhet, pontos VNN assetnévvel.'],
-        ['INTEGRITÁS', 'SHA-256 és Ed25519 ellenőrzés; eltérő vagy hiányos csomagnál a frissítési folyamat fail-closed módon leáll.'],
+        ['KIADÁSI LÁNC', 'A teljes kiadás hivatalos csomagja a FormatX ellenőrzött kiadási csatornájából származik. A külön Stable minősítéshez további nyilvános tesztbizonyíték szükséges.'],
+        ['INTEGRITÁS', 'A kiadási metaadat közzétett SHA-256 digestet ellenőriz. Külön checksum- vagy aláírási bizonyíték csak akkor jelenik meg, ha ténylegesen publikálták.'],
         ['BIZTONSÁGI MODELL', 'Célmeghajtó-azonosítás, többlépcsős megerősítés, naplózott végrehajtás és dokumentálható végeredmény.'],
-        ['PLATFORMSTRATÉGIA', 'Linux/Bazzite az elsődleges irány; Windows, macOS, web és Android hozzáférés támogatott.']
+        ['PLATFORMSTRATÉGIA', 'Linux/Bazzite az elsődleges platform. Windows és Android támogatott Full release; a web Technical preview, macOS és iOS/iPadOS Planned.']
       ]
     },
     en: {
@@ -24,10 +24,10 @@
       story: 'The project began with a practical problem: technician tools are often fragmented, platform-bound or fail to explain clearly what a critical operation will do. FormatX is therefore not another toolbox. It is a shared operating layer that applies the same assess, plan, execute and verify logic across every supported environment.',
       statement: 'The vision: one interface where the technician can see what the system knows, what it is about to execute and what was actually verified.',
       cards: [
-        ['RELEASE CHAIN', 'Stable packages can only come from the official GitHub Releases channel with an exact VNN asset name.'],
-        ['INTEGRITY', 'SHA-256 and Ed25519 verification; a missing or mismatched package stops the update flow in fail-closed mode.'],
+        ['RELEASE CHAIN', 'The official full-release package comes from the verified FormatX release channel. The separate Stable designation requires additional published test evidence.'],
+        ['INTEGRITY', 'Release metadata verifies a published SHA-256 digest. Separate checksum or signature proof is shown only when it has actually been published.'],
         ['SAFETY MODEL', 'Target identification, multi-step confirmation, logged execution and a documentable final result.'],
-        ['PLATFORM STRATEGY', 'Linux/Bazzite is the primary direction; Windows, macOS, web and Android access are supported.']
+        ['PLATFORM STRATEGY', 'Linux/Bazzite is primary. Windows and Android are supported Full release platforms; Web is a Technical preview, while macOS and iOS/iPadOS are Planned.']
       ]
     }
   };
@@ -218,13 +218,24 @@
   let observer = null;
   let retryTimer = 0;
 
+  function launcherLabel() {
+    return root.lang === 'en'
+      ? 'Live OS — FormatX command'
+      : 'Live OS — FormatX parancs';
+  }
+
   function ensureLauncher() {
-    if (document.querySelector('[data-fx-live-os-launcher]')) return;
-    const button = document.createElement('button');
+    let button = document.querySelector('[data-fx-live-os-launcher]');
+    if (button instanceof HTMLButtonElement) {
+      button.setAttribute('aria-label', launcherLabel());
+      button.title = launcherLabel() + ' · Ctrl/⌘ K';
+      return;
+    }
+    button = document.createElement('button');
     button.type = 'button';
     button.dataset.fxLiveOsLauncher = 'true';
-    button.setAttribute('aria-label', root.lang === 'en' ? 'FormatX command' : 'FormatX parancs');
-    button.title = (root.lang === 'en' ? 'FormatX command' : 'FormatX parancs') + ' · Ctrl/⌘ K';
+    button.setAttribute('aria-label', launcherLabel());
+    button.title = launcherLabel() + ' · Ctrl/⌘ K';
     button.innerHTML = '<span>Live OS</span>';
     Object.assign(button.style, {
       position: 'fixed',
@@ -269,6 +280,7 @@
     script.dataset.fxLiveOsScript = 'true';
     script.addEventListener('load', () => {
       root.dataset.fxLiveOsLoadState = 'ready';
+      ensureLauncher();
       dispatchEvent(new CustomEvent('formatx:open-live-os-ready'));
     }, { once: true });
     script.addEventListener('error', () => { root.dataset.fxLiveOsLoadState = 'error'; }, { once: true });
@@ -324,6 +336,7 @@
     }
   });
 
+  addEventListener('formatx:languagechange', ensureLauncher);
   if (document.readyState === 'loading') addEventListener('DOMContentLoaded', ensureArmed, { once: true });
   else ensureArmed();
   ['pageshow', 'formatx:livingready', 'formatx:loop', 'formatx:productshowcaseready'].forEach(name => addEventListener(name, ensureArmed));

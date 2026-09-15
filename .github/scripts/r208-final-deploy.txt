@@ -1,0 +1,2 @@
+FormatX r208 final mobile flicker-free deployment marker.
+Includes canonical normal-flow ownership, legacy r75/r180 delegation, inline-style pre-paint shield, r208 asset URLs, and one-shot fx_startup_r208 cache migration.

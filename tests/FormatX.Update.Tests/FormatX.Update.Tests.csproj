@@ -20,6 +20,9 @@
 
   <ItemGroup>
     <Compile Include="..\..\Services\UpdateSecurity.cs" Link="UpdateSecurity.cs" />
+    <Compile Include="..\..\Models\MagState.cs" Link="MagState.cs" />
+    <Compile Include="..\..\Services\MagStateResolver.cs" Link="MagStateResolver.cs" />
+    <Compile Include="..\..\Services\LicenseStateProvider.cs" Link="LicenseStateProvider.cs" />
   </ItemGroup>
 
 </Project>

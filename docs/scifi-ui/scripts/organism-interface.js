@@ -33,8 +33,8 @@
     {
       id: 'resources', scene: 5, index: '06 / RELEASE BEACON',
       hu: 'Letöltés és támogatás', en: 'Downloads and support',
-      summaryHu: 'Stabil kiadások, Android alkalmazás, GitHub, támogatás és jogi információk egyetlen jeladóban.',
-      summaryEn: 'Stable releases, Android, GitHub, support and legal information in one beacon.'
+      summaryHu: 'Hivatalos teljes kiadások, Android alkalmazás, GitHub, támogatás és jogi információk egyetlen jeladóban.',
+      summaryEn: 'Official full releases, Android, GitHub, support and legal information in one beacon.'
     }
   ];
 
@@ -179,10 +179,10 @@
     const downloadSource = document.getElementById('hero-download');
     const releaseSource = document.getElementById('release-page-link');
     const download = actionLink(
-      downloadSource?.href || 'https://github.com/hutoczky/FormatX-Updates/releases/tag/v92',
-      'Teljes verzió', 'Full version'
+      downloadSource?.href || '/scifi-ui/downloads/',
+      'Teljes multiplatform verzió', 'Full multiplatform version'
     );
-    const android = actionLink('/download/android', 'Android APK', 'Android APK');
+    const android = actionLink('/download/android', 'Android teljes verzió', 'Android full release');
     const github = actionLink(
       releaseSource?.href || 'https://github.com/hutoczky/FormatX-Updates/releases',
       'GitHub Releases', 'GitHub Releases'

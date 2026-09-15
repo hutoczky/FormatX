@@ -1,0 +1,29 @@
+name: One-shot r151 final cache bust
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-r151-final-cache.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Apply final r151 cache bust
+        run: |
+          python3 .github/scripts/patch-r151-final-cache.py
+          grep -q 'r151-final' docs/scifi-ui/index.html
+          grep -q 'r151-final' docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+      - name: Publish final r151 cache revision
+        run: |
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          git diff --cached --check
+          git commit -m '[deploy-production] fix(mobile): finalize r151 cache-safe hero repair'
+          git push origin HEAD:master

@@ -1,0 +1,10 @@
+{
+  "revision":"2026-08-09-luminous-energy-network-mag-v24-candidate",
+  "material":"reference-glass-v24",
+  "highlight_model":"luminous-energy-network-v24",
+  "highlight_coverage":"expanded-10-25pct-network-v24",
+  "grade":"reference-network-v23",
+  "geometry":"indexed-webgl2-mesh-v11-shape-v14-scale-v13",
+  "pixel_gate":"unchanged-reference-gate",
+  "status":"candidate-awaiting-live-chromium-validation"
+}

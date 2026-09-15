@@ -1,0 +1,16 @@
+{
+  "revision": "r374",
+  "scope": "mobile-mag-lighting",
+  "renderer": "single-webgl-crystal-organism-r326",
+  "lighting": "feathered-heart-fresnel-r374",
+  "desktop": "r326-unchanged",
+  "geometry": "r373-visible-recovery-preserved",
+  "controls": "unchanged",
+  "changes": [
+    "reduce additive inner heart highlight on mobile",
+    "broaden and reduce Fresnel perimeter energy on mobile",
+    "reduce residual decorative biolume perimeter",
+    "preserve mobile centring and visible recovery geometry"
+  ],
+  "live_gate": "FormatX r374 live mobile lighting"
+}

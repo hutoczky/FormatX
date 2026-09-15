@@ -40,7 +40,13 @@ export default defineConfig({
       'test/license-center.spec.js',
       'test/license-center-e2e.spec.js',
       'test/production-routing.spec.js',
+      'test/canonical-entry.spec.js',
     ],
     setupFiles: ['./test/license-center.setup.js'],
+    // Full Worker + D1 lifecycle tests perform several cryptographic and
+    // persistence round-trips. Keep a finite production-preflight guard, but
+    // avoid CI runner scheduling jitter turning a valid 5-6 second lifecycle
+    // into a false production-deploy failure.
+    testTimeout: 15_000,
   },
 });

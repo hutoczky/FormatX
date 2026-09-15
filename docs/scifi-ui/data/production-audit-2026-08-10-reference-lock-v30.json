@@ -1,0 +1,126 @@
+{
+  "schema_version": 9,
+  "audit_date": "2026-08-10",
+  "deployment_iteration": 9,
+  "scope": "complete public-site deep audit: uploaded-reference production MAG, canonical full-release truth, desktop/mobile browser validation, strict static and post-deploy live Lighthouse gates, real HU/EN legal and support content, experimental-lab indexing boundaries, business-only fail-closed checkout, durable server-side order tracking, auditable legal acknowledgement and production checkout-readiness invariants",
+  "audited_release": {
+    "version": "v130",
+    "product_status": "full_release",
+    "trial_days": 5,
+    "primary_platform": "linux-bazzite",
+    "supported_secondary_platforms": [
+      "windows",
+      "android"
+    ],
+    "web_status": "technical_preview",
+    "planned_platforms": [
+      "macos",
+      "ios-ipados"
+    ]
+  },
+  "reference_contract": {
+    "target": "user-supplied four-tip luminous crystalline sci-fi core reference, 2026-08-10",
+    "production_authority": "uploaded-reference lock v30 r5 calibrated luminance grade",
+    "renderer": "/scifi-ui/scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-5",
+    "presentation": "/scifi-ui/styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-5",
+    "image_backed": false,
+    "webgl2_context_count": 1,
+    "geometry": "indexed concave four-sail crystal, p-norm 0.68, mobile vertical multiplier 1.50",
+    "surface": "glass-dominant-sparse-veins-r4",
+    "surface_passes": {
+      "base_glass_shell": 1,
+      "cyan_translucent_glass": 1,
+      "violet_translucent_glass": 1,
+      "additive_detail_shell": 1,
+      "fresnel_rim": 1
+    },
+    "veins": {
+      "transverse_levels": [2, 4, 6, 8, 10, 12],
+      "longitudinal_count_approx": 12,
+      "cyan_line_opacity": 0.22,
+      "violet_line_opacity": 0.055
+    },
+    "reactor": "moving white-cyan sphere plus four thin real 3D torus rings",
+    "outer_orbits": "three low-opacity cyan/violet real 3D tori",
+    "luminance_calibration": {
+      "canvas_filter": "saturate(1.25) contrast(1.16) brightness(2.60)",
+      "core_glow_center_percent_y": 40.2,
+      "horizon_center_percent_y": 40.18,
+      "organic_floor_top_percent": 47.5,
+      "organic_floor_height_percent": 76,
+      "floor_opacity": 0.72,
+      "acceptance": "must remain inside the live screenshot luminance, saturation, spectral-colour and geometry bounds"
+    },
+    "performance_target": "adaptive 60-plus FPS",
+    "performance_guarantee": false,
+    "scroll_capture": false,
+    "reduced_motion": true,
+    "webgpu_preview": "explicit ?webgpu=1 only; not production authority"
+  },
+  "public_surface_contract": {
+    "scroll_controller": "seamless-v7 native continuous",
+    "desktop_mobile_chromium": "required",
+    "technical_report_truth_gate": "required",
+    "known_issues_filter_gate": "required",
+    "android_full_release_route": "/download/android",
+    "android_native_beta_route": "/download/android-native-beta",
+    "android_channels_separated": true,
+    "checkout_robots": "noindex,nofollow,noarchive",
+    "payment_status_robots": "noindex,nofollow,noarchive",
+    "transactional_surfaces_indexable": false,
+    "experimental_living_core_robots": "noindex,nofollow,noarchive",
+    "experimental_webgpu_stage_robots": "noindex,nofollow,noarchive",
+    "legal_support_real_bilingual_content": true,
+    "canonical_sitemap_date": "2026-08-10"
+  },
+  "commerce_safety_contract": {
+    "checkout_audience": "business_or_professional_only",
+    "consumer_checkout_enabled": false,
+    "sales_legal_gate": "fail_closed",
+    "checkout_readiness_endpoint": "/api/checkout-readiness",
+    "payment_instructions_require_durable_order_tracking": true,
+    "production_static_payment_fallback": false,
+    "business_buyer_confirmation_required": true,
+    "terms_acceptance_required": true,
+    "privacy_notice_acknowledgement_required": true,
+    "server_side_legal_record_required": true,
+    "manual_bank_verification_required": true,
+    "automatic_renewal": false,
+    "live_invariant": "sales_ready may never be true without order_tracking_ready, live_ready and zero configuration errors"
+  },
+  "release_integrity": {
+    "multiplatform_digest": "sha256:10036483a06794ba0e1985c9402324248052a18720b3f4a561b768945a2b9187",
+    "android_digest": "sha256:ac8add4fa5d1532c35f6994fe22a97ca8400781ce272f8577d313628e509b69f",
+    "detached_signature_asset_published": false,
+    "signature_limitation_publicly_disclosed": true
+  },
+  "live_acceptance": {
+    "production_validation": "required",
+    "production_smoke": "required",
+    "public_site_integrity": "required",
+    "static_lighthouse_desktop_mobile": "required",
+    "live_worker_lighthouse_desktop_mobile": "required_after_deploy",
+    "live_checkout_readiness_invariant": "required_after_deploy",
+    "live_mobile_desktop_visual_gate": "required",
+    "live_visual_surface_marker": "glass-dominant-sparse-veins-r4",
+    "live_white_core_position_gate": "required",
+    "live_mobile_apex_gate": "required",
+    "live_mobile_hero_gate": "required",
+    "live_award_readiness": "required",
+    "direct_reference_screenshot_comparison": "required"
+  },
+  "known_non_blocking_evidence_gaps": [
+    "no detached signature asset is published for the current release",
+    "no complete real-device end-to-end matrix exists for every supported hardware configuration",
+    "no independent professional review or verified customer case study is published",
+    "60 or 120 FPS is a performance target, not a universal field guarantee"
+  ],
+  "external_legal_readiness_dependency": {
+    "consumer_sales_not_enabled_by_checkout_policy": true,
+    "full_operator_postal_or_registered_address_must_be_supplied_before_consumer_sales": true,
+    "tax_and_registration_details_must_be_supplied_where_legally_applicable": true,
+    "exact_invoice_provider_must_be_configured_before_sales_gate_can_be_approved": true,
+    "values_must_not_be_fabricated_by_software_or_ci": true
+  },
+  "acceptance_policy": "Do not call the visual exact or the whole product universally verified merely because CI is green. Production acceptance additionally requires the live Worker checkout invariant and live desktop/mobile Lighthouse gate after deployment. External real-device, independent evidence, signature and operator-supplied legal-data gaps remain explicitly disclosed."
+}

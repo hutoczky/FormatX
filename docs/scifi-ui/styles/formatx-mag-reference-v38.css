@@ -1,0 +1,84 @@
+/* FormatX MAG reference v38 — native WebGL visibility + optical finish.
+   v37 intentionally parks the legacy renderer by keeping data-active=false.
+   Core CSS also hid the entire fixed stage when data-active was false, which made
+   the native v37 renderer invisible on desktop. v38 separates renderer activity
+   from stage visibility with data-fx-v38-visible. No image/SVG replacement. */
+
+.fx-core-real3d-stage[data-fx-v38-visible="true"]{
+  opacity:1!important;
+  visibility:visible!important;
+  transition:opacity 320ms ease,visibility 0s!important;
+}
+.fx-core-real3d-stage[data-fx-v38-visible="false"]{
+  opacity:0!important;
+  visibility:hidden!important;
+  transition:opacity 240ms ease,visibility 0s linear 240ms!important;
+}
+
+/* Keep every experimental DOM crystal replacement retired. */
+.fx-v33-core-glass,
+.fx-v33-reactor-halo,
+.fx-mag-v34-overlay,
+.fx-mag-v35-overlay,
+.fx-mag-v36-overlay{display:none!important}
+
+/* v37 carries the actual material in WebGL. This is only final display grading. */
+.fx-core-real3d-canvas{
+  opacity:1!important;
+  visibility:visible!important;
+  filter:saturate(1.24) contrast(1.20) brightness(1.15)
+    drop-shadow(0 0 4px rgba(218,255,255,.34))
+    drop-shadow(0 0 15px rgba(57,224,255,.20))
+    drop-shadow(0 0 32px rgba(38,139,255,.13))
+    drop-shadow(0 0 48px rgba(153,59,255,.08))!important;
+}
+
+/* The reference has a bright internal reactor but not a large white blob. */
+.fx-core-postfx-v31{filter:saturate(1.10) contrast(1.08) brightness(1.02)!important}
+.fx-v31-spectrum{opacity:.18!important}
+.fx-v31-ring-a{opacity:.30!important}
+.fx-v31-ring-b{opacity:.20!important}
+.fx-v31-ring-c{opacity:.12!important}
+.fx-v31-flare{
+  width:8px!important;height:8px!important;margin:-4px 0 0 -4px!important;
+  box-shadow:0 0 4px #fff,0 0 10px rgba(224,255,255,.96),0 0 24px rgba(72,239,255,.76),0 0 48px rgba(51,154,255,.31)!important;
+}
+
+/* Desktop framing: keep the real crystal on the right of the copy. */
+@media(min-width:901px) and (pointer:fine){
+  .fx-core-real3d-stage{--fx-core-x:71%!important}
+  .fx-core-real3d-canvas{
+    filter:saturate(1.28) contrast(1.22) brightness(1.17)
+      drop-shadow(0 0 4px rgba(220,255,255,.36))
+      drop-shadow(0 0 16px rgba(58,226,255,.21))
+      drop-shadow(0 0 34px rgba(38,141,255,.14))
+      drop-shadow(0 0 50px rgba(154,60,255,.08))!important;
+  }
+}
+
+/* Mobile remains centered and the existing text guard stays authoritative. */
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-stage{--fx-core-x:50%!important}
+  .fx-core-real3d-canvas{
+    filter:saturate(1.27) contrast(1.21) brightness(1.16)
+      drop-shadow(0 0 4px rgba(220,255,255,.36))
+      drop-shadow(0 0 15px rgba(59,227,255,.21))
+      drop-shadow(0 0 30px rgba(40,143,255,.13))
+      drop-shadow(0 0 44px rgba(154,60,255,.08))!important;
+  }
+}
+
+.fx-core-real3d-stage[data-fx-mobile-text-guard="text"] .fx-core-real3d-canvas{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+html.fx-organism-menu-open .fx-core-real3d-stage,
+body.fx-organism-panel-open .fx-core-real3d-stage{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .fx-core-real3d-canvas{filter:saturate(1.16) contrast(1.14) brightness(1.10)!important}
+}

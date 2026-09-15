@@ -1,0 +1,162 @@
+name: Verify R460 mobile interaction flow
+
+on:
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mobile-flow:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.62.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify R460 live mobile controls and hero MAG interaction
+        run: |
+          cat > verify-r460-mobile.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs');
+
+          const overlap=(a,b,gap=0)=>!(a.right+gap<=b.left||b.right+gap<=a.left||a.bottom+gap<=b.top||b.bottom+gap<=a.top);
+          const rect=async locator=>{
+            const box=await locator.boundingBox();
+            assert.ok(box,'missing visible bounding box');
+            return{left:box.x,right:box.x+box.width,top:box.y,bottom:box.y+box.height,width:box.width,height:box.height,cx:box.x+box.width/2,cy:box.y+box.height/2};
+          };
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
+            const page=await context.newPage();
+            page.setDefaultTimeout(120000);
+
+            await page.goto('https://formatxsuite.com/?verify_r460_mobile='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>{
+              const r=document.documentElement.dataset;
+              return r.fxCurrentMagRuntimeR422==='ready'
+                && r.fxCrystalOrganismR326==='ready'
+                && r.fxMiniMagAssistantR459==='ready'
+                && r.fxNativeMagTouchR436==='ready';
+            },null,{timeout:90000});
+            await page.waitForTimeout(1400);
+
+            const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
+            const mini=page.locator('.fx-mini-mag-assistant-r459').first();
+            const sound=page.locator('#hero .fx-reference-controls-r204 .fx-three-sound').first();
+            const ask=page.locator('#hero .fx-reference-controls-r204 .fx-reference-ask').first();
+            const pause=page.locator('#hero .fx-reference-controls-r204 .fx-reference-pause').first();
+            const brand=page.locator('.topbar .brand').first();
+            const magButton=page.locator('.topbar .fx-reference-mag-button').first();
+            const lang=page.locator('.topbar .fx-language-toggle').first();
+            const menu=page.locator('.topbar .fx-reference-menu-button').first();
+
+            for(const locator of [stage,mini,sound,ask,pause,brand,magButton,lang,menu])assert.ok(await locator.count(),'required R460 mobile UI node missing');
+            assert.ok(await stage.isVisible(),'R326 hero MAG stage is not visible');
+            for(const locator of [sound,ask,pause,brand,magButton,lang,menu])assert.ok(await locator.isVisible(),'required R460 control is not visible');
+
+            const [s,a,p,b,m,l,n]=await Promise.all([rect(sound),rect(ask),rect(pause),rect(brand),rect(magButton),rect(lang),rect(menu)]);
+            assert.ok(s.width>=44&&s.height>=44,'SOUND touch target too small');
+            assert.ok(a.width>=44&&a.height>=44,'ASK touch target too small');
+            assert.ok(p.width>=44&&p.height>=44,'PAUSE touch target too small');
+            assert.ok(!overlap(s,a,2)&&!overlap(a,p,2),'hero controls overlap');
+            assert.ok(Math.abs(s.top-a.top)<=8&&Math.abs(a.top-p.top)<=8,'hero controls are not one horizontal row');
+            assert.ok(!overlap(b,m,2),'brand overlaps MAG header button');
+            assert.ok(!overlap(m,l,2),'MAG header button overlaps language');
+            assert.ok(!overlap(l,n,2),'language overlaps menu');
+
+            const runtime=await page.evaluate(()=>{
+              const legacySelector=[
+                '#hero .fx-core-mobile-v55-stage:not(.fx-crystal-organism-r326-stage)',
+                '#hero .fx-core-r112-stage',
+                '#hero .fx-core-mesh3d-stage',
+                '#hero .fx-core-fracture3d-stage',
+                '#hero .fx-core-reference-v53-stage',
+                '#hero .fx-core-mobile-v54-stage',
+                '#hero .fx-resilient-core',
+                '#hero .fx-premium-core-status',
+                '#hero .fx-three-stage-shell',
+                '#hero .fx-transcend-shell[data-fx-native-apex="true"]'
+              ].join(',');
+              const legacyNodes=[...document.querySelectorAll(legacySelector)].map(node=>({
+                tag:node.tagName,
+                id:node.id||'',
+                className:typeof node.className==='string'?node.className:'',
+                renderer:node.dataset?.renderer||''
+              }));
+              return{
+                primary:document.documentElement.dataset.fxPrimaryMagOwnerR460,
+                cleanup:document.documentElement.dataset.fxLegacyMagDomCleanupR460,
+                touch:document.documentElement.dataset.fxNativeMagTouchContractR436,
+                bridge:document.documentElement.dataset.fxMiniMagHeroBridgeR460,
+                optics:document.documentElement.dataset.fxCoreMobileOpticalBalanceR460,
+                legacyStages:legacyNodes.length,
+                legacyNodes,
+                r326Stages:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
+                r326CompatibilityClasses:[...document.querySelectorAll('#hero .fx-crystal-organism-r326-stage')].map(node=>node.className)
+              };
+            });
+            assert.equal(runtime.primary,'r326-only',JSON.stringify(runtime));
+            assert.equal(runtime.cleanup,'ready',JSON.stringify(runtime));
+            assert.equal(runtime.touch,'direct-r326-stage-protected-ui-controller-tap-drag-safe',JSON.stringify(runtime));
+            assert.ok(['ready','handled-live-request','opened-queued-request'].includes(runtime.bridge),JSON.stringify(runtime));
+            assert.equal(runtime.optics,'superseded-by-r465-soft-perimeter',JSON.stringify(runtime));
+            assert.equal(runtime.legacyStages,0,'real legacy MAG stages remain: '+JSON.stringify(runtime));
+            assert.equal(runtime.r326Stages,1,'R326 stage ownership is not singular: '+JSON.stringify(runtime));
+
+            // The current R326 stage intentionally retains the old v55 class as a CSS compatibility alias.
+            // It is not a second renderer and must never be counted as a legacy stage.
+            assert.ok(runtime.r326CompatibilityClasses.every(value=>value.includes('fx-crystal-organism-r326-stage')),JSON.stringify(runtime));
+
+            const heroBox=await rect(stage);
+            await page.touchscreen.tap(heroBox.cx,heroBox.cy);
+            await page.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open==='true',null,{timeout:5000});
+            assert.equal(await mini.getAttribute('data-open'),'true','hero MAG tap did not open Mini MAG controller');
+
+            await page.evaluate(()=>window.FormatXMiniMagR459?.close?.());
+            assert.equal(await mini.getAttribute('data-open'),'false');
+            const start={x:heroBox.cx-28,y:heroBox.cy};
+            const end={x:heroBox.cx+28,y:heroBox.cy+10};
+            await page.touchscreen.touchStart(start.x,start.y);
+            await page.touchscreen.touchMove(end.x,end.y);
+            await page.touchscreen.touchEnd();
+            await page.waitForTimeout(350);
+            assert.equal(await mini.getAttribute('data-open'),'false','MAG drag incorrectly opened site controller');
+
+            const pauseBox=await rect(pause);
+            const pausedBefore=await pause.getAttribute('data-paused');
+            await page.touchscreen.tap(pauseBox.cx,pauseBox.cy);
+            await page.waitForTimeout(180);
+            assert.equal(await mini.getAttribute('data-open'),'false','PAUSE tap leaked into hero MAG controller');
+            const pausedAfter=await pause.getAttribute('data-paused');
+            assert.notEqual(pausedAfter,pausedBefore,'PAUSE control did not toggle');
+
+            await page.screenshot({path:'r460-mobile.png',fullPage:false,animations:'allow',timeout:120000});
+            await browser.close();
+            assert.ok(fs.statSync('r460-mobile.png').size>10000);
+            console.log('PASS: R460 live mobile has one R326 MAG, zero real legacy stages, clean header/controls, softer optics marker, hero tap controller bridge, drag separation and protected controls.');
+          })().catch(error=>{console.error(error);process.exit(1);});
+          JS
+          node verify-r460-mobile.cjs
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r460-mobile-${{ github.run_id }}
+          path: r460-mobile.png
+          if-no-files-found: warn
+          retention-days: 14

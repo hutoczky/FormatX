@@ -319,6 +319,14 @@ html[data-fx-three-host="ready"] .scene {
     backdrop-filter: none;
   }
 
+  /* Mobile-only optical post-process: keep the crystal geometry intact while
+     taking the overdriven rim, centre flare and razor-sharp edge contrast down.
+     Desktop rendering remains untouched. */
+  html body.living-architecture #hero .fx-core-mobile-v55-canvas.fx-core-r120-canvas {
+    opacity: .96 !important;
+    filter: brightness(.84) saturate(.88) contrast(.90) blur(.24px) !important;
+  }
+
   .fx-three-loop-bridge {
     min-height: 100svh !important;
   }

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "reference": "v53",
+  "renderer": "single-webgl2-reference-crystal-v53",
+  "geometry": "sharp-four-tip-concave-crystal-v53",
+  "material": "clean-faceted-refractive-glass-v53",
+  "reactor": "moving-white-nucleus-concentric-spectral-rings-v53",
+  "image_backed": false,
+  "target": "https://www.formatxsuite.com/",
+  "release_date": "2026-08-11"
+}

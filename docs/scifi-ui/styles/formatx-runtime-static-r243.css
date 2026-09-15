@@ -1,0 +1,126 @@
+/* FormatX r290 — static compatibility CSS for the pure native WebGL MAG.
+   Legacy heartbeat selectors remain only as fallback contracts. Retired MAG
+   pseudo surfaces stay disabled and all ambient section paint is constrained
+   to the viewport so visual atmosphere can never create scrollable overflow. */
+
+#hero .fx-r155-heartbeat-core,
+#hero .fx-r155-heartbeat-ring,
+#hero .fx-r155-heartbeat-wave{
+  position:absolute;left:50%;top:49%;pointer-events:none;border-radius:50%;
+  transform:translate3d(-50%,-50%,0);transform-origin:50% 50%;mix-blend-mode:screen;
+  will-change:transform,opacity,filter;contain:layout paint style;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+}
+#hero .fx-r155-heartbeat-core{
+  z-index:31;width:clamp(104px,12vw,188px);aspect-ratio:1;
+  background:radial-gradient(circle,rgba(255,255,255,.99) 0 1%,rgba(222,255,255,.84) 2.4%,rgba(83,239,255,.46) 7.5%,rgba(43,205,255,.20) 18%,rgba(164,76,255,.14) 31%,transparent 66%);
+  box-shadow:0 0 16px rgba(220,255,255,.40),0 0 35px rgba(55,220,255,.22),0 0 62px rgba(146,70,255,.12);
+}
+#hero .fx-r155-heartbeat-ring{
+  z-index:30;width:clamp(116px,13vw,204px);aspect-ratio:1;border:1px solid rgba(190,253,255,.52);
+  box-shadow:0 0 14px rgba(79,230,255,.28),0 0 32px rgba(141,72,255,.12),inset 0 0 18px rgba(97,236,255,.14);
+}
+#hero .fx-r155-heartbeat-wave{
+  z-index:29;width:clamp(144px,16vw,252px);aspect-ratio:1;border:1px solid rgba(108,235,255,.25);
+  box-shadow:0 0 21px rgba(62,216,255,.13),0 0 44px rgba(151,73,255,.08);
+}
+
+/* r288: pre-WebGL hero atmosphere used a -12vw/+12vw field and the older
+   decorative ring used right:-18vw. Both expanded the document scroll width
+   after the real WebGL MAG had already replaced their visuals. */
+html body.living-architecture main#main-content section#hero.scene.hero[data-organ="core"]::before,
+html body.living-architecture main#main-content section#hero.scene.hero[data-organ="core"]::after{
+  content:none!important;
+  display:none!important;
+  position:absolute!important;
+  inset:0!important;
+  width:0!important;
+  height:0!important;
+  background:none!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  opacity:0!important;
+  filter:none!important;
+  pointer-events:none!important;
+}
+
+/* r289: r185's section aura used horizontal negative inset. At 1920px its
+   max(-7vw,-96px) rule created exactly 96px scroll overflow; at 390px the
+   mobile -12vw rule created ~46.8px. Preserve the vertical bleed and same
+   gradients, but make horizontal geometry non-scrollable. */
+html body.living-architecture main#main-content > .scene:not(#hero)::before,
+html body.living-architecture main#main-content > .fx-category-deck::before{
+  left:0!important;
+  right:0!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin-left:0!important;
+  margin-right:0!important;
+  inset-block:-5rem!important;
+  inset-inline:0!important;
+}
+
+@media(max-width:900px),(pointer:coarse){
+  #hero .fx-r155-heartbeat-core{width:clamp(92px,29vw,132px)}
+  #hero .fx-r155-heartbeat-ring{width:clamp(104px,32vw,146px)}
+  #hero .fx-r155-heartbeat-wave{width:clamp(128px,39vw,176px)}
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero[data-organ="core"] .hero-grid .hero-space::before,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero[data-organ="core"] .hero-grid .hero-space::after{
+    content:none!important;
+    display:none!important;
+    position:absolute!important;
+    inset:0!important;
+    width:0!important;
+    height:0!important;
+    background:none!important;
+    background-image:none!important;
+    border:0!important;
+    box-shadow:none!important;
+    opacity:0!important;
+    filter:none!important;
+    pointer-events:none!important;
+  }
+
+  html body.living-architecture #hero .fx-r168-spectrum,
+  html body.living-architecture #hero .fx-r168-flare,
+  html body.living-architecture #hero .fx-r168-shockwave,
+  html body.living-architecture #hero .fx-r168-interaction-wave{
+    display:none!important;opacity:0!important;filter:none!important;animation:none!important;will-change:auto!important;
+  }
+  html body.living-architecture #hero .fx-r168-orbit,
+  html body.living-architecture #hero .fx-r168-caustic,
+  html body.living-architecture #hero .fx-r168-spark{
+    opacity:.095!important;filter:none!important;will-change:transform!important;
+  }
+  html body.living-architecture #hero .fx-r168-spark{opacity:.16!important;}
+
+  /* r290: the r179 organ sigils used right:-24vw / -35vw and transformed
+     children beyond their own box. They are decorative and sit behind content,
+     so keep the same organ grammar but contain every painted pixel inside a
+     right-aligned viewport-safe box. This also keeps Thought Genome expansion
+     from changing document scroll width after the ASK interaction. */
+  html[data-fx-soty-continuity-r179="ready"] body.living-architecture #main-content > section.scene:not(#hero){
+    overflow:clip!important;
+  }
+  html[data-fx-soty-continuity-r179="ready"] body.living-architecture #main-content > section.scene:not(#hero) > .fx-r179-organ-sigil{
+    right:0!important;
+    width:min(70vw,300px)!important;
+    max-width:calc(100% - 16px)!important;
+    overflow:clip!important;
+    contain:layout paint style!important;
+  }
+  html[data-fx-soty-continuity-r179="ready"] body.living-architecture #main-content > section.scene:not(#hero) > .fx-r179-organ-sigil > span{
+    max-width:100%!important;
+    max-height:100%!important;
+  }
+}
+
+@media(max-width:430px){
+  html body.living-architecture main#main-content > .scene:not(#hero)::before,
+  html body.living-architecture main#main-content > .fx-category-deck::before{
+    inset-block:-3rem!important;
+    inset-inline:0!important;
+  }
+}

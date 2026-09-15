@@ -1,0 +1,10 @@
+{
+  "revision":"2026-08-09-balanced-emissive-alpha-mag-v26-candidate",
+  "material":"reference-glass-v26",
+  "highlight_model":"balanced-emissive-alpha-network-v26",
+  "highlight_coverage":"reference-balanced-network-alpha-v26",
+  "grade":"reference-network-v23",
+  "geometry":"indexed-webgl2-mesh-v11-shape-v14-scale-v13",
+  "pixel_gate":"unchanged-reference-gate",
+  "status":"candidate-awaiting-live-chromium-validation"
+}

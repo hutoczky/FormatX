@@ -1,0 +1,10 @@
+{
+  "revision": "r379",
+  "scope": "mobile MAG center and optics",
+  "intent": [
+    "keep the MAG centered before explicit crystal interaction",
+    "require a trusted crystal touch before enabling device orientation",
+    "reduce mobile gyro travel after activation",
+    "soften phone-size edge contrast and luminance"
+  ]
+}

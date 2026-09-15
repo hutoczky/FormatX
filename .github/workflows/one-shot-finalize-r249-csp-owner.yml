@@ -1,0 +1,439 @@
+name: One-shot finalize r249 CSP-safe reference owner
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-finalize-r249-csp-owner.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-r249-csp-owner-finalizer
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out master
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Finalize CSP-safe reference ownership and cache migration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cat > docs/scifi-ui/scripts/formatx-reference-production-r244.js <<'JS'
+          (function () {
+            'use strict';
+
+            const root = document.documentElement;
+            const VERSION = 'r244-reference-frame';
+            const CONTROLLER = 'r249-csp-safe-reference-owner';
+            let queued = false;
+
+            const isMobile = () => matchMedia('(max-width: 900px)').matches;
+            const copy = () => root.lang === 'en' ? {
+              heading: 'DISCOVER HOW IT WORKS',
+              title: 'Proof behind the visual.',
+              body: 'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',
+              ask: 'ASK'
+            } : {
+              heading: 'A MŰKÖDÉS MEGISMERÉSE',
+              title: 'Bizonyíték a látvány mögött.',
+              body: 'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',
+              ask: 'KÉRDEZZ'
+            };
+
+            const LEGACY_LAYOUT_PROPERTIES = Object.freeze([
+              'position', 'inset', 'top', 'right', 'bottom', 'left', 'display',
+              'flex-direction', 'align-items', 'align-self', 'justify-content',
+              'grid-area', 'grid-row', 'grid-column', 'grid-template-columns',
+              'grid-template-rows', 'order', 'width', 'min-width', 'max-width',
+              'height', 'min-height', 'max-height', 'margin', 'margin-top',
+              'margin-right', 'margin-bottom', 'margin-left', 'padding',
+              'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+              'overflow', 'clip', 'clip-path', 'white-space', 'transform',
+              'transform-origin', 'translate', 'flex', 'visibility', 'opacity',
+              'pointer-events', 'border', 'border-radius', 'z-index', 'filter',
+              'mix-blend-mode'
+            ]);
+
+            function clearLegacyInline(node) {
+              if (!(node instanceof HTMLElement)) return;
+              for (const property of LEGACY_LAYOUT_PROPERTIES) node.style.removeProperty(property);
+            }
+
+            function clearNodes(nodes) {
+              for (const node of nodes) clearLegacyInline(node);
+            }
+
+            function ensureHeaderControls(hero) {
+              const bar = document.querySelector('.topbar');
+              if (!(bar instanceof HTMLElement)) return {};
+
+              let mag = document.querySelector('.fx-reference-mag-button');
+              if (!(mag instanceof HTMLButtonElement)) {
+                mag = document.createElement('button');
+                mag.className = 'fx-reference-mag-button';
+                mag.type = 'button';
+                bar.appendChild(mag);
+              }
+
+              let menu = document.querySelector('.fx-reference-menu-button');
+              if (!(menu instanceof HTMLButtonElement)) {
+                menu = document.createElement('button');
+                menu.className = 'fx-reference-menu-button';
+                menu.type = 'button';
+                menu.innerHTML = '<span></span><span></span>';
+                menu.setAttribute('aria-expanded', 'false');
+                bar.appendChild(menu);
+              }
+
+              const language = document.querySelector('.fx-language-toggle');
+              if (language instanceof HTMLElement && language.parentElement !== bar) bar.appendChild(language);
+              if (mag.parentElement !== bar) bar.appendChild(mag);
+              if (menu.parentElement !== bar) bar.appendChild(menu);
+
+              if (mag.dataset.fxR244Bound !== 'true') {
+                mag.dataset.fxR244Bound = 'true';
+                mag.addEventListener('click', () => {
+                  hero.scrollIntoView({
+                    block: 'start',
+                    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+                  });
+                  window.FormatXCoreMobileV69?.pulse?.();
+                });
+              }
+
+              if (menu.dataset.fxR244Bound !== 'true') {
+                menu.dataset.fxR244Bound = 'true';
+                menu.addEventListener('click', () => {
+                  const original = document.querySelector('#fx-reference-legacy-menu, .menu-toggle:not(.fx-reference-menu-button), .fx-organism-system-toggle:not(.fx-reference-menu-button)');
+                  const nav = document.getElementById('main-nav');
+                  const wasOpen = nav instanceof HTMLElement && nav.classList.contains('open');
+
+                  if (root.dataset.fxImmersive !== 'active') {
+                    root.dataset.fxImmersive = 'active';
+                    dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
+                      detail: { source: 'reference-menu-r249' }
+                    }));
+                  }
+
+                  if (original instanceof HTMLButtonElement) original.click();
+                  const controllerChangedState = nav instanceof HTMLElement
+                    && nav.classList.contains('open') !== wasOpen;
+                  if (nav instanceof HTMLElement && !controllerChangedState) {
+                    nav.classList.toggle('open', !wasOpen);
+                    root.classList.toggle('fx-organism-menu-open', !wasOpen);
+                    original?.classList.toggle('open', !wasOpen);
+                    original?.setAttribute('aria-expanded', String(!wasOpen));
+                  }
+                  const open = nav instanceof HTMLElement && nav.classList.contains('open');
+                  menu.setAttribute('aria-expanded', String(open));
+                });
+              }
+
+              return { bar, mag, language, menu };
+            }
+
+            function ensureReferenceNodes(hero, grid, space) {
+              const strings = copy();
+
+              const headings = Array.from(hero.querySelectorAll('.fx-reference-heading'));
+              const heading = headings.shift() || document.createElement('div');
+              headings.forEach(node => node.remove());
+              heading.className = 'fx-reference-heading';
+              if (heading.textContent !== strings.heading) heading.textContent = strings.heading;
+
+              const proofs = Array.from(hero.querySelectorAll('.fx-reference-proof'));
+              const proof = proofs.shift() || document.createElement('article');
+              proofs.forEach(node => node.remove());
+              proof.className = 'fx-reference-proof';
+              if (!proof.querySelector('.fx-reference-proof-kicker, h2, p, .fx-reference-liveos')) {
+                proof.innerHTML = '<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2></h2><p></p><a class="fx-reference-liveos" href="#experience">Live OS</a>';
+              }
+              const kicker = proof.querySelector('.fx-reference-proof-kicker');
+              const title = proof.querySelector('h2');
+              const body = proof.querySelector('p');
+              const live = proof.querySelector('.fx-reference-liveos');
+              if (kicker && kicker.textContent !== 'PUBLIC PROOF LAYER') kicker.textContent = 'PUBLIC PROOF LAYER';
+              if (title && title.textContent !== strings.title) title.textContent = strings.title;
+              if (body && body.textContent !== strings.body) body.textContent = strings.body;
+              if (live instanceof HTMLAnchorElement) {
+                live.textContent = 'Live OS';
+                live.href = '#experience';
+                live.setAttribute('aria-label', root.lang === 'en' ? 'Open Live OS' : 'Live OS megnyitása');
+              }
+
+              let rail = hero.querySelector('.fx-reference-rail');
+              if (!(rail instanceof HTMLElement)) {
+                rail = document.createElement('div');
+                rail.className = 'fx-reference-rail';
+                rail.innerHTML = '<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i aria-hidden="true"></i><span>KÉRDEZZ</span></button><button class="fx-reference-pause" type="button" aria-label="Animáció szüneteltetése" data-paused="false">Ⅱ</button>';
+              }
+              const askLabel = rail.querySelector('.fx-reference-ask span');
+              if (askLabel && askLabel.textContent !== strings.ask) askLabel.textContent = strings.ask;
+
+              let controls = hero.querySelector('.fx-reference-controls-r204');
+              if (!(controls instanceof HTMLElement)) {
+                controls = document.createElement('div');
+                controls.className = 'fx-reference-controls-r204';
+                controls.setAttribute('aria-label', root.lang === 'en' ? 'Hero controls' : 'Hero vezérlők');
+              }
+              controls.querySelectorAll('.fx-three-sound').forEach(sound => document.body.appendChild(sound));
+              if (rail.parentElement !== controls) controls.appendChild(rail);
+              if (controls.parentElement !== hero) hero.appendChild(controls);
+
+              if (space.nextElementSibling !== heading) space.after(heading);
+              if (heading.nextElementSibling !== proof) heading.after(proof);
+
+              return { heading, proof, live, rail, controls };
+            }
+
+            function updateLabels(header, nodes, brandTagline) {
+              if (brandTagline && brandTagline.textContent !== 'LIVING SYSTEM') brandTagline.textContent = 'LIVING SYSTEM';
+              if (header.mag instanceof HTMLButtonElement) {
+                header.mag.textContent = root.lang === 'en' ? 'CORE' : 'MAG';
+                header.mag.setAttribute('aria-label', root.lang === 'en' ? 'Focus the living core' : 'Az élő mag fókuszálása');
+              }
+              if (header.menu instanceof HTMLButtonElement) {
+                header.menu.setAttribute('aria-label', root.lang === 'en' ? 'Menu' : 'Menü');
+              }
+              const askLabel = nodes.rail?.querySelector('.fx-reference-ask span');
+              if (askLabel) askLabel.textContent = root.lang === 'en' ? 'ASK' : 'KÉRDEZZ';
+            }
+
+            function relevantVisualNodes(hero, grid, space, header, nodes) {
+              const brand = header.bar?.querySelector('.brand');
+              const heroCopy = hero.querySelector('.hero-copy');
+              const download = hero.querySelector('.fx-mobile-download-r151');
+              const stage = hero.querySelector('.fx-core-mobile-v55-stage, .fx-core-r112-stage');
+              const mainCanvas = stage?.querySelector('.fx-core-mobile-v55-canvas, .fx-core-r112-canvas');
+              const detailCanvas = stage?.querySelector('.fx-core-detail-r122');
+              const liveLayer = stage?.querySelector('.fx-core-live-r147-layer');
+              return {
+                brand,
+                brandTagline: brand?.querySelector('small'),
+                stage,
+                nodesToClear: [
+                  header.bar, brand, header.mag, header.language, header.menu,
+                  hero, grid, space, heroCopy, download,
+                  nodes.heading, nodes.proof, nodes.live, nodes.rail, nodes.controls,
+                  stage, mainCanvas, detailCanvas, liveLayer
+                ]
+              };
+            }
+
+            function applyMobile() {
+              const hero = document.getElementById('hero');
+              const grid = hero?.querySelector('.hero-grid');
+              const space = hero?.querySelector('.hero-space');
+              if (!(hero instanceof HTMLElement) || !(grid instanceof HTMLElement) || !(space instanceof HTMLElement)) return false;
+
+              root.dataset.fxMobileLayoutOwner = VERSION;
+              root.dataset.fxReferenceProductionR244 = 'ready';
+              root.dataset.fxReferenceComposition = 'reference-frame-r244';
+
+              const header = ensureHeaderControls(hero);
+              const nodes = ensureReferenceNodes(hero, grid, space);
+              if (nodes.controls.parentElement !== hero) hero.appendChild(nodes.controls);
+              const visual = relevantVisualNodes(hero, grid, space, header, nodes);
+              clearNodes(visual.nodesToClear);
+              updateLabels(header, nodes, visual.brandTagline);
+
+              document.querySelectorAll('.fx-loop-hero-clone').forEach(node => node.setAttribute('aria-hidden', 'true'));
+              document.querySelectorAll('.skip-link').forEach(link => {
+                if (document.activeElement === link && !link.matches(':focus-visible')) link.blur();
+              });
+              return true;
+            }
+
+            function applyDesktop() {
+              if (root.dataset.fxMobileLayoutOwner === VERSION) delete root.dataset.fxMobileLayoutOwner;
+              root.dataset.fxReferenceProductionR244 = 'desktop';
+              root.dataset.fxReferenceComposition = 'desktop-reference-r244';
+
+              const hero = document.getElementById('hero');
+              const grid = hero?.querySelector('.hero-grid');
+              const space = hero?.querySelector('.hero-space');
+              if (!(hero instanceof HTMLElement) || !(grid instanceof HTMLElement) || !(space instanceof HTMLElement)) return false;
+
+              const header = ensureHeaderControls(hero);
+              const nodes = ensureReferenceNodes(hero, grid, space);
+              if (nodes.controls.parentElement !== space) space.appendChild(nodes.controls);
+              const visual = relevantVisualNodes(hero, grid, space, header, nodes);
+              clearNodes(visual.nodesToClear);
+              updateLabels(header, nodes, visual.brandTagline);
+
+              document.querySelectorAll('.fx-loop-hero-clone').forEach(node => node.setAttribute('aria-hidden', 'true'));
+              return true;
+            }
+
+            function apply() {
+              queued = false;
+              const ready = isMobile() ? applyMobile() : applyDesktop();
+              if (ready) {
+                root.dataset.fxReferenceControllerR249 = 'ready-csp-safe';
+                root.dataset.fxReferenceInlineWritesR249 = '0';
+                root.dataset.fxReferenceLayoutOwnerR249 = 'external-css-owned';
+              }
+              return ready;
+            }
+
+            function schedule() {
+              if (queued) return;
+              queued = true;
+              requestAnimationFrame(apply);
+            }
+
+            const RELEVANT_SELECTOR = '.topbar,#hero,.fx-reference-heading,.fx-reference-proof,.fx-reference-rail,.fx-reference-controls-r204,.fx-reference-mag-button,.fx-reference-menu-button,.fx-language-toggle,.fx-core-mobile-v55-stage,.fx-core-r112-stage';
+            const observer = new MutationObserver(records => {
+              const relevant = records.some(record => [...record.addedNodes, ...record.removedNodes].some(node => (
+                node instanceof Element && (node.matches(RELEVANT_SELECTOR) || node.querySelector(RELEVANT_SELECTOR))
+              )));
+              if (relevant) schedule();
+            });
+            observer.observe(document.documentElement, { subtree: true, childList: true });
+
+            addEventListener('resize', schedule, { passive: true });
+            addEventListener('orientationchange', schedule, { passive: true });
+            addEventListener('pageshow', event => { if (event.persisted) schedule(); });
+            for (const eventName of ['formatx:real3dready', 'formatx:coredetailready', 'formatx:languagechange', 'formatx:organisminterfaceready']) {
+              addEventListener(eventName, schedule);
+            }
+
+            root.dataset.fxReferenceControllerR249 = 'booting-csp-safe';
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
+            else schedule();
+            for (const delay of [0, 120, 700, 1800]) setTimeout(schedule, delay);
+          }());
+          JS
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          css = Path('docs/scifi-ui/styles/formatx-reference-production-r244.css')
+          text = css.read_text(encoding='utf-8')
+          marker = '/* r249 CSP-safe reference ownership: geometry belongs to external CSS only. */'
+          if marker not in text:
+              text += '''\n\n/* r249 CSP-safe reference ownership: geometry belongs to external CSS only. */\n@media (max-width: 900px) {\n  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero :is(.fx-core-mobile-v55-stage, .fx-core-r112-stage) {\n    transform: scaleY(.97) !important;\n    transform-origin: 50% 0 !important;\n  }\n}\n'''
+          css.write_text(text, encoding='utf-8')
+
+          index = Path('docs/scifi-ui/index.html')
+          text = index.read_text(encoding='utf-8')
+          text = text.replace('formatx-reference-production-r244.css?v=20260820-r247', 'formatx-reference-production-r244.css?v=20260821-r249-csp-safe-owner')
+          text = text.replace('formatx-reference-production-r244.js?v=20260820-r247', 'formatx-reference-production-r244.js?v=20260821-r249-csp-safe-owner')
+          index.write_text(text, encoding='utf-8')
+
+          production = Path('billing-worker/src/production-content-entry.js')
+          text = production.read_text(encoding='utf-8')
+          text = text.replace("const STARTUP_REVISION = '20260818-r208-flicker-free-owner';", "const STARTUP_REVISION = '20260821-r249-csp-safe-reference-owner';")
+          text = text.replace('fx_startup_r208=1', 'fx_startup_r249=1')
+          text = text.replace("headers.set('X-FormatX-Client-Revision', 'r208-flicker-free-owner');", "headers.set('X-FormatX-Client-Revision', 'r249-csp-safe-reference-owner');")
+          text = text.replace("headers.set('X-FormatX-Cache-Migration', 'r208-one-shot-cleared');", "headers.set('X-FormatX-Cache-Migration', 'r249-one-shot-cleared');")
+          text = text.replace('r208 flicker-free mobile layout ownership.', 'r249 CSP-safe reference ownership and cache migration.')
+          production.write_text(text, encoding='utf-8')
+
+          startup = Path('.github/scripts/validate-real3d-mobile-startup-v22.cjs')
+          text = startup.read_text(encoding='utf-8')
+          if "const referenceController=read('docs/scifi-ui/scripts/formatx-reference-production-r244.js');" not in text:
+              text = text.replace(
+                  "const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');\n",
+                  "const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');\nconst referenceController=read('docs/scifi-ui/scripts/formatx-reference-production-r244.js');\nconst referenceCss=read('docs/scifi-ui/styles/formatx-reference-production-r244.css');\n"
+              )
+              anchor = "assert.match(layout,/restoreDesktopMenu/);\n"
+              contract = """assert.match(layout,/restoreDesktopMenu/);\n\n// r249: the current award reference controller is CSP-safe and delegates geometry to external CSS.\nfor(const token of ['r244-reference-frame','fxReferenceControllerR249','external-css-owned','ensureReferenceNodes','ensureHeaderControls'])assert.ok(referenceController.includes(token),`missing r249 reference controller contract: ${token}`);\nassert.doesNotMatch(referenceController,/\\.style\\.setProperty|setAttribute\\(['\"]style|\\.style\\.[A-Za-z_$][\\w$]*\\s*=/);\nassert.ok(referenceCss.includes('r249 CSP-safe reference ownership'));\n"""
+              text = text.replace(anchor, contract)
+              text = text.replace(
+                  'for(const source of [bootstrap,wrapper,renderer,layout,premium,loader,stability,interactionStability])new Function(source);',
+                  'for(const source of [bootstrap,wrapper,renderer,layout,referenceController,premium,loader,stability,interactionStability])new Function(source);'
+              )
+              text = text.replace(
+                  "console.log('PASS: r204 mobile proof/control ownership + luminous native WebGL startup contract passed.');",
+                  "console.log('PASS: r249 CSP-safe reference owner + r204 proof/control + native WebGL startup contract passed.');"
+              )
+          startup.write_text(text, encoding='utf-8')
+
+          wda = Path('.github/scripts/validate-wda-100-r198.cjs')
+          text = wda.read_text(encoding='utf-8')
+          text = text.replace('/* FormatX Web Design Awards — r208 flicker-free canonical mobile-flow source contract. */', '/* FormatX Web Design Awards — r249 CSP-safe reference-owner source contract. */')
+          if "const referenceController = read('docs/scifi-ui/scripts/formatx-reference-production-r244.js');" not in text:
+              text = text.replace(
+                  "const production = read('billing-worker/src/production-content-entry.js');\n",
+                  "const production = read('billing-worker/src/production-content-entry.js');\nconst referenceController = read('docs/scifi-ui/scripts/formatx-reference-production-r244.js');\nconst referenceCss = read('docs/scifi-ui/styles/formatx-reference-production-r244.css');\n"
+              )
+          text = text.replace("formatx-mobile-reference-layout-v1\\.js\\?v=20260818-r208-first-paint-owner", "formatx-mobile-reference-layout-v1\\.js\\?v=20260820-r248-reference-owner")
+          text = text.replace("STARTUP_REVISION = '20260818-r208-flicker-free-owner'", "STARTUP_REVISION = '20260821-r249-csp-safe-reference-owner'")
+          text = text.replace("X-FormatX-Client-Revision', 'r208-flicker-free-owner", "X-FormatX-Client-Revision', 'r249-csp-safe-reference-owner")
+          text = text.replace("X-FormatX-Recovery', 'r208-static-cascade", "X-FormatX-Recovery', 'r243-language-canonical")
+          text = text.replace('fx_startup_r208=1', 'fx_startup_r249=1')
+          text = text.replace('r208-one-shot-cleared', 'r249-one-shot-cleared')
+          marker2 = "// Mobile performance: measured 60fps target, adaptive backing resolution and bounded scale.\n"
+          if 'missing r249 reference owner contract' not in text:
+              block = """// r249: the final reference controller must never write inline layout under strict CSP.\nfor (const token of ['r244-reference-frame', 'fxReferenceControllerR249', 'external-css-owned', 'ensureReferenceNodes', 'ensureHeaderControls']) {\n  assert.ok(referenceController.includes(token), `missing r249 reference owner contract: ${token}`);\n}\nassert.doesNotMatch(referenceController, /\\.style\\.setProperty|setAttribute\\(['\"]style|\\.style\\.[A-Za-z_$][\\w$]*\\s*=/);\nassert.ok(referenceCss.includes('r249 CSP-safe reference ownership'));\nassert.match(home, /formatx-reference-production-r244\\.js\\?v=20260821-r249-csp-safe-owner/);\n\n"""
+              text = text.replace(marker2, block + marker2)
+          text = text.replace(
+              'for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, legacyFlow, legacyFinalizer]) new Function(source);',
+              'for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, legacyFlow, legacyFinalizer, referenceController]) new Function(source);'
+          )
+          text = text.replace(
+              "console.log('PASS: r208 flicker-free canonical mobile flow, cache migration, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');",
+              "console.log('PASS: r249 CSP-safe reference owner, cache migration, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');"
+          )
+          wda.write_text(text, encoding='utf-8')
+
+          recovery = Path('.github/workflows/validate-mobile-intro-recovery.yml')
+          text = recovery.read_text(encoding='utf-8')
+          text = text.replace("const STARTUP_REVISION = '20260818-r208-flicker-free-owner'", "const STARTUP_REVISION = '20260821-r249-csp-safe-reference-owner'")
+          recovery.write_text(text, encoding='utf-8')
+
+          wda_workflow = Path('.github/workflows/validate-wda-100-r198.yml')
+          text = wda_workflow.read_text(encoding='utf-8')
+          text = text.replace('name: Validate FormatX WDA 100-target r206', 'name: Validate FormatX WDA 100-target r249')
+          text = text.replace('group: formatx-wda-r206-', 'group: formatx-wda-r249-')
+          text = text.replace('r206 award UX, a11y, audio, fail-open, mobile GPU and Lighthouse contracts passed', 'r249 CSP-safe reference owner, award UX, a11y, audio, GPU and Lighthouse contracts passed')
+          text = text.replace('FormatX r206 100-target source gate failed', 'FormatX r249 100-target source gate failed')
+          wda_workflow.write_text(text, encoding='utf-8')
+          PY
+
+          # Remove obsolete historical one-shot workflows. They were designed to
+          # self-delete after use and several still contain write-to-master steps.
+          shopt -s nullglob
+          old_one_shots=(.github/workflows/one-shot-*.yml)
+          if ((${#old_one_shots[@]})); then
+            git rm -f "${old_one_shots[@]}"
+          fi
+          git rm -f .github/scripts/r208-final-deploy.txt 2>/dev/null || true
+
+      - name: Validate finalized source contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-reference-production-r244.js
+          node --check .github/scripts/validate-real3d-mobile-startup-v22.cjs
+          node --check .github/scripts/validate-wda-100-r198.cjs
+          node --input-type=module --check < billing-worker/src/production-content-entry.js
+          node .github/scripts/validate-real3d-mobile-startup-v22.cjs
+          node .github/scripts/validate-wda-100-r198.cjs
+          ! grep -Eq '\.style\.setProperty|setAttribute\(["'"']style|\.style\.[A-Za-z_$][A-Za-z0-9_$]*[[:space:]]*=' docs/scifi-ui/scripts/formatx-reference-production-r244.js
+          grep -Fq 'formatx-reference-production-r244.js?v=20260821-r249-csp-safe-owner' docs/scifi-ui/index.html
+          grep -Fq "const STARTUP_REVISION = '20260821-r249-csp-safe-reference-owner'" billing-worker/src/production-content-entry.js
+          grep -Fq 'fx_startup_r249=1' billing-worker/src/production-content-entry.js
+          git diff --check
+
+      - name: Commit and publish final r249 state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'FormatX r249 finalizer'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m '[deploy-production] fix(site): finalize CSP-safe r249 reference owner'
+          git push origin HEAD:master

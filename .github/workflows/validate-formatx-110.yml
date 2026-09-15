@@ -1,6 +1,7 @@
 name: Validate FormatX 110 finish
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [master]
     paths:
@@ -9,7 +10,11 @@ on:
       - 'docs/scifi-ui/scripts/webgl-fallback-loader.js'
       - 'docs/scifi-ui/scripts/experience-entry.js'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
+      - 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
       - 'docs/scifi-ui/styles/formatx-premium-finish.css'
+      - 'docs/scifi-ui/data/scroll-policy.json'
       - 'billing-worker/src/production-with-license.js'
       - '.github/scripts/validate-formatx-110.cjs'
       - '.github/workflows/validate-formatx-110.yml'
@@ -21,7 +26,11 @@ on:
       - 'docs/scifi-ui/scripts/webgl-fallback-loader.js'
       - 'docs/scifi-ui/scripts/experience-entry.js'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
+      - 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
       - 'docs/scifi-ui/styles/formatx-premium-finish.css'
+      - 'docs/scifi-ui/data/scroll-policy.json'
       - 'billing-worker/src/production-with-license.js'
       - '.github/scripts/validate-formatx-110.cjs'
       - '.github/workflows/validate-formatx-110.yml'
@@ -29,27 +38,36 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: formatx-high-finish-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
 
       - name: Validate final runtime safeguards
         run: |
+          set -euo pipefail
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
           node --check docs/scifi-ui/scripts/webgl-fallback-loader.js
           node --check docs/scifi-ui/scripts/experience-entry.js
           node --check docs/scifi-ui/scripts/formatx-premium-finish.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check billing-worker/src/production-with-license.js
+          node --check .github/scripts/validate-formatx-110.cjs
           node .github/scripts/validate-formatx-110.cjs
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-user-requested-site-features.cjs

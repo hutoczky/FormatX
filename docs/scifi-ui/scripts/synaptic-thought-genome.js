@@ -150,22 +150,49 @@
     if (document.querySelector('link[data-fx-thought-genome-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/synaptic-thought-genome.css?v=20260731-thought-genome-1';
+    link.href = './styles/synaptic-thought-genome.css?v=20260824-csp-safe-r3';
     link.dataset.fxThoughtGenomeStyle = 'true';
     document.head.appendChild(link);
   }
 
+  function resolveLayerStage() {
+    const legacyStage = document.querySelector('.fx-three-stage-shell');
+    if (legacyStage instanceof HTMLElement) {
+      ROOT.dataset.fxThoughtGenomeStage = 'legacy-three-shell';
+      return legacyStage;
+    }
+
+    const heroSpace = document.querySelector('#hero .hero-space');
+    if (heroSpace instanceof HTMLElement) {
+      ROOT.dataset.fxThoughtGenomeStage = 'hero-space';
+      return heroSpace;
+    }
+
+    const hero = document.querySelector('#hero');
+    if (hero instanceof HTMLElement) {
+      ROOT.dataset.fxThoughtGenomeStage = 'hero-fallback';
+      return hero;
+    }
+
+    ROOT.dataset.fxThoughtGenomeStage = 'missing';
+    return null;
+  }
+
   function ensureLayer() {
     if (layer?.isConnected) return true;
-    const stage = document.querySelector('.fx-three-stage-shell');
+    const stage = resolveLayerStage();
     if (!(stage instanceof HTMLElement)) return false;
+
+    if (getComputedStyle(stage).position === 'static') {
+      stage.classList.add('fx-thought-genome-stage-host');
+    }
 
     layer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     layer.classList.add('fx-thought-genome-layer');
     layer.setAttribute('viewBox', '0 0 1000 1000');
     layer.setAttribute('preserveAspectRatio', 'none');
     layer.setAttribute('aria-hidden', 'true');
-    layer.dataset.fxThoughtGenomeLayer = 'ready-v1';
+    layer.dataset.fxThoughtGenomeLayer = 'ready-v3';
 
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
@@ -213,6 +240,10 @@
     };
   }
 
+  function toneForHue(hue) {
+    return Math.max(0, Math.min(7, Math.floor((Number(hue) - 168) / 24)));
+  }
+
   function renderLayer(activeFingerprint) {
     if (!ensureLayer()) return;
     layer.classList.toggle('is-disabled', !enabled);
@@ -226,16 +257,15 @@
     path.setAttribute('d', pathPoints.length > 1
       ? pathPoints.map((point, index) => `${index ? 'L' : 'M'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ')
       : '');
-    path.style.setProperty('--fx-genome-path-length', String(Math.max(1, pathPoints.length * 150)));
 
     points.forEach((point, index) => {
       const entry = history[index];
       const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       group.classList.add('fx-thought-genome-node');
       if (entry.fingerprint === activeFingerprint) group.classList.add('is-new');
-      group.style.setProperty('--fx-genome-hue', String(point.hue));
       group.dataset.scene = String(entry.scene);
       group.dataset.fingerprint = String(entry.fingerprint);
+      group.dataset.tone = String(toneForHue(point.hue));
 
       const orbit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       orbit.setAttribute('cx', point.x);
@@ -485,13 +515,15 @@
     ROOT.dataset.fxThoughtGenomeEnabled = String(enabled);
     ROOT.dataset.fxThoughtGenomePrivacy = 'fingerprint-only';
     ROOT.dataset.fxThoughtGenomeForms = '6';
+    ROOT.dataset.fxThoughtGenomePaint = 'external-css-tone-r3';
     dispatchEvent(new CustomEvent('formatx:thoughtgenomeready', {
       detail: {
         enabled,
         forms: 6,
         history: history.length,
         questionStored: false,
-        localOnly: true
+        localOnly: true,
+        cspSafePaint: true
       }
     }));
   }

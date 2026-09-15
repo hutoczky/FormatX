@@ -1,0 +1,125 @@
+/* FormatX r386 — pure, directly interactive 3D MAG contract.
+   The visible MAG heart remains a native WebGL mesh. The whole website is the
+   MAG system; the crystal is only its visual heart. No bitmap/SVG/canvas2D
+   substitute is allowed. */
+
+html:root:root body.living-architecture #hero .hero-space {
+  background: transparent !important;
+  background-image: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+html:root:root body.living-architecture #hero .hero-space::before,
+html:root:root body.living-architecture #hero .hero-space::after,
+html:root:root body.living-architecture #hero .fx-core-real3d-stage::before,
+html:root:root body.living-architecture #hero .fx-core-real3d-stage::after,
+html:root:root body.living-architecture #hero .fx-core-mobile-v55-stage::before,
+html:root:root body.living-architecture #hero .fx-core-mobile-v55-stage::after,
+html:root:root body.living-architecture #hero .fx-core-r112-stage::before,
+html:root:root body.living-architecture #hero .fx-core-r112-stage::after,
+html:root:root body.living-architecture #hero .fx-core-rayglass-r91-stage::before,
+html:root:root body.living-architecture #hero .fx-core-rayglass-r91-stage::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+html:root:root body.living-architecture #hero .fx-core-mobile-v55-stage,
+html:root:root body.living-architecture #hero .fx-core-r112-stage,
+html:root:root body.living-architecture #hero .fx-core-rayglass-r91-stage,
+html:root:root body.living-architecture #hero .fx-core-r120-stage {
+  background: transparent !important;
+  background-image: none !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
+html:root:root body.living-architecture #hero .fx-core-r112-canvas,
+html:root:root body.living-architecture #hero .fx-core-r120-canvas {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: transparent !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  box-shadow: none !important;
+}
+
+/* Direct manipulation reaches the native WebGL renderer. Vertical touch
+   scrolling stays native while drag/press continues to rotate and energise it. */
+html:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
+html:root:root body.living-architecture #hero .hero-space > .fx-core-r112-stage,
+html:root:root body.living-architecture #hero .hero-space > .fx-core-r120-stage,
+html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
+html:root:root body.living-architecture #hero .fx-core-r112-canvas,
+html:root:root body.living-architecture #hero .fx-core-r120-canvas {
+  pointer-events: auto !important;
+  touch-action: pan-y !important;
+}
+
+/* r386 mobile finish: pull the cyan bloom back and feather the raster perimeter
+   more aggressively. The blur remains sub-pixel, so the WebGL facets stay
+   readable while the four-point silhouette no longer looks knife-sharp. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r112-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r120-canvas {
+    opacity: .92 !important;
+    filter: blur(.48px) saturate(.90) brightness(.88) contrast(.76) !important;
+  }
+}
+
+@media (max-width:430px) {
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r112-canvas,
+  html:root:root body.living-architecture #hero .fx-core-r120-canvas {
+    opacity: .91 !important;
+    filter: blur(.56px) saturate(.88) brightness(.86) contrast(.73) !important;
+  }
+}
+
+@media (pointer:fine) {
+  html:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas {
+    cursor: grab !important;
+  }
+  html:root:root body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage:active,
+  html:root:root body.living-architecture #hero .fx-core-mobile-v55-canvas:active {
+    cursor: grabbing !important;
+  }
+}
+
+/* Legacy 2D MAG material layers are never allowed to become visible again. */
+html:root:root body.living-architecture #hero .fx-core-detail-r122,
+html:root:root body.living-architecture #hero .fx-core-live-r147-layer,
+html:root:root body.living-architecture #hero .fx-r155-heartbeat-core,
+html:root:root body.living-architecture #hero .fx-r155-heartbeat-ring,
+html:root:root body.living-architecture #hero .fx-r155-heartbeat-wave,
+html:root:root body.living-architecture #hero [class^="fx-r168-"],
+html:root:root body.living-architecture #hero [class*=" fx-r168-"],
+html:root:root body.living-architecture #hero .fx-r181-apex-meta,
+html:root:root body.living-architecture #hero .hero-ring,
+html:root:root body.living-architecture #hero .hero-label,
+html:root:root body.living-architecture #hero .fx-immersive-launch,
+html:root:root body.living-architecture #hero .fx-organism-map {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}

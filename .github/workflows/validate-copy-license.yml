@@ -61,7 +61,7 @@ jobs:
           grep -Fq '5 napos próbalicenc' docs/scifi-ui/Licenc.txt
           grep -Fq 'nem nyílt forráskódú' docs/scifi-ui/Licenc.txt
           grep -Fq 'does not transfer ownership' docs/scifi-ui/Licenc.txt
-          grep -Fq 'formatx-copy-polish.js?v=20260729-copy-polish-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'formatx-copy-polish.js?v=20260820-r248-footer-licence' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq '/scifi-ui/scripts/formatx-copy-polish.js' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/styles/formatx-copy-polish.css' billing-worker/src/production-entry.js
 

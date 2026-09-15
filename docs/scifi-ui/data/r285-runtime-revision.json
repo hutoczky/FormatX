@@ -1,0 +1,12 @@
+{
+  "revision": "r285-pure-webgl3d-no-occlusion",
+  "purpose": "Trigger stable production, browser, public-site, no-occlusion and Lighthouse measurement after the pure WebGL MAG and cross-device visibility changes.",
+  "requirements": {
+    "mag_visual_body": "native WebGL triangle mesh only",
+    "mag_2d_overlays": 0,
+    "viewport_min_width": 320,
+    "viewport_max_width": 1920,
+    "information_occlusion_allowed": false,
+    "information_clipping_allowed": false
+  }
+}

@@ -1,0 +1,178 @@
+name: Validate current mobile visual and touch ownership
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js'
+      - 'docs/scifi-ui/scripts/formatx-control-owner-r268.js'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js'
+      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-header-final-r418.css'
+      - '.github/scripts/validate-living-core-r425-source.cjs'
+      - '.github/workflows/validate-mobile-touch-ownership-r417.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  mobile-touch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate R467 source contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
+          node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          node --check docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js
+          node .github/scripts/validate-living-core-r425-source.cjs
+          grep -q 'production-r467-desktop-three-cell-control-row' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q 'production-r467-desktop-header-three-control-no-overlap' docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
+          grep -q 'production-r466-balanced-mobile-luminance-soft-edge-display' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q 'brightness(1.065)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q 'contrast(.89)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q 'saturate(1.10)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+          grep -q 'blur(.82px)' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
+      - name: Install Chromium runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/mobile-touch" && cd "$RUNNER_TEMP/mobile-touch"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Verify R467 mobile and desktop physical controls
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/mobile-touch/node_modules
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/mobile-touch-server.log" 2>&1 &
+          server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do curl -fsS http://127.0.0.1:4173/scifi-ui/ >/dev/null && break; sleep .25; done
+          node <<'NODE'
+          const { chromium }=require('playwright');
+          const assert=(value,message)=>{if(!value)throw new Error(message);};
+          const overlap=(a,b,gap=2)=>Boolean(a&&b)&&!(a.right+gap<=b.left||b.right+gap<=a.left||a.bottom+gap<=b.top||b.bottom+gap<=a.top);
+          const rect=node=>{if(!node)return null;const r=node.getBoundingClientRect(),s=getComputedStyle(node);return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,position:s.position,display:s.display,visibility:s.visibility,opacity:Number(s.opacity||1)};};
+
+          async function ready(page,mobile){
+            await page.waitForFunction(isMobile=>{
+              const r=document.documentElement.dataset;
+              return r.fxCurrentMagRuntimeR422==='ready'
+                && r.fxCrystalOrganismR326==='ready'
+                && r.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+                && r.fxCoreSurfaceR456==='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'
+                && (!isMobile||r.fxCurrentMagOpticsR465==='soft-perimeter-low-bloom-low-cost-shader')
+                && r.fxMiniMagAssistantR459==='ready'
+                && Boolean(document.querySelector('.topbar > .fx-reference-mag-button'))
+                && Boolean(document.querySelector('.topbar > .fx-language-toggle'))
+                && Boolean(document.querySelector('.topbar > .fx-reference-menu-button'))
+                && Boolean(document.querySelector('#hero .fx-reference-controls-r204'));
+            },mobile,{timeout:45000});
+            await page.waitForTimeout(220);
+          }
+
+          async function state(page){
+            return page.evaluate(()=>{
+              const rect=node=>{if(!node)return null;const r=node.getBoundingClientRect(),s=getComputedStyle(node);return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,position:s.position,display:s.display,visibility:s.visibility,opacity:Number(s.opacity||1)};};
+              const topbar=document.querySelector('.topbar');
+              const brand=topbar?.querySelector(':scope > .brand');
+              const mag=topbar?.querySelector(':scope > .fx-reference-mag-button');
+              const lang=topbar?.querySelector(':scope > .fx-language-toggle');
+              const menu=topbar?.querySelector(':scope > .fx-reference-menu-button');
+              const controls=document.querySelector('#hero .fx-reference-controls-r204');
+              const sound=controls?.querySelector('.fx-three-sound');
+              const ask=controls?.querySelector('.fx-reference-ask');
+              const pause=controls?.querySelector('.fx-reference-pause');
+              const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+              const miniHost=document.querySelector('.fx-mini-mag-assistant-r459');
+              const mini=document.querySelector('.fx-mini-mag-launcher-r459');
+              const cs=canvas?getComputedStyle(canvas):null;
+              return{brand:rect(brand),mag:rect(mag),lang:rect(lang),menu:rect(menu),controls:rect(controls),sound:rect(sound),ask:rect(ask),pause:rect(pause),canvas:rect(canvas),miniHost:rect(miniHost),mini:rect(mini),magText:String(mag?.textContent||'').trim(),langText:String(lang?.textContent||'').trim(),magBefore:mag?getComputedStyle(mag,'::before').content:'',magAfter:mag?getComputedStyle(mag,'::after').content:'',filter:cs?.filter||'',renderer:document.documentElement.dataset.fxCoreRenderer||'',canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,miniOwner:document.documentElement.dataset.fxMiniMagPrimaryHeroR459||''};
+            });
+          }
+
+          function assertHeader(s,label){
+            for(const key of ['brand','mag','lang','menu'])assert(s[key],`${label}: missing ${key}: ${JSON.stringify(s)}`);
+            assert(!overlap(s.brand,s.mag)&&!overlap(s.mag,s.lang)&&!overlap(s.lang,s.menu),`${label}: header overlap ${JSON.stringify(s)}`);
+            assert(s.mag.width>=44&&s.mag.height>=44&&s.lang.width>=44&&s.lang.height>=44&&s.menu.width>=44&&s.menu.height>=44,`${label}: header target below 44px ${JSON.stringify(s)}`);
+          }
+          function assertRow(s,label,size){
+            for(const key of ['controls','sound','ask','pause'])assert(s[key],`${label}: missing ${key}: ${JSON.stringify(s)}`);
+            assert(s.sound.width>=size&&s.sound.height>=size&&s.ask.width>=size&&s.ask.height>=size&&s.pause.width>=size&&s.pause.height>=size,`${label}: control target too small ${JSON.stringify(s)}`);
+            assert(Math.max(s.sound.top,s.ask.top,s.pause.top)-Math.min(s.sound.top,s.ask.top,s.pause.top)<=8,`${label}: controls not one row ${JSON.stringify(s)}`);
+            assert(!overlap(s.sound,s.ask)&&!overlap(s.ask,s.pause),`${label}: controls overlap ${JSON.stringify(s)}`);
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+
+            const mobileContext=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await mobileContext.newPage();
+            await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
+            await ready(page,true);
+            const mobile=await state(page);
+            console.log('R467_MOBILE',JSON.stringify(mobile));
+            assertHeader(mobile,'mobile');
+            assertRow(mobile,'mobile',44);
+            assert(mobile.renderer==='single-webgl-crystal-organism-r326'&&mobile.canvasCount===1,'mobile: renderer duplication '+JSON.stringify(mobile));
+            assert(mobile.miniOwner==='preserved-native-webgl','mobile: Mini MAG primary owner changed');
+            assert(mobile.magText==='MAG'&&mobile.langText==='HU','mobile: HU/MAG text invalid '+JSON.stringify(mobile));
+            assert(mobile.magBefore==='none'&&mobile.magAfter==='none','mobile: MAG pseudo-art returned '+JSON.stringify(mobile));
+            assert(/brightness\(1\.02\)/.test(mobile.filter)&&/contrast\(0?\.98\)/.test(mobile.filter)&&/saturate\(1\.28\)/.test(mobile.filter)&&/blur\(0\.3px\)/.test(mobile.filter),'mobile: r484 readable surface optics missing '+mobile.filter);
+
+            const mini=page.locator('.fx-mini-mag-launcher-r459').first();
+            const miniBox=await mini.boundingBox();assert(miniBox&&miniBox.width>=54&&miniBox.height>=54,'mobile: Mini MAG target too small');
+            await mini.tap();
+            await page.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open==='true',null,{timeout:5000});
+            await page.locator('.fx-mini-mag-nav-r459 [data-section="pricing"]').tap();
+            await page.waitForFunction(()=>document.documentElement.dataset.fxMiniMagLastNavigationR459==='pricing',null,{timeout:5000});
+            /* Mini MAG navigation closes the panel by design. Assert that closed
+               post-navigation state before testing the underlying hit layers. */
+            await page.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open!=='true',null,{timeout:5000});
+
+            const lang=page.locator('.topbar > .fx-language-toggle').first();
+            await lang.tap();
+            await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.topbar > .fx-language-toggle')?.textContent?.trim()==='EN'&&document.querySelector('.topbar > .fx-reference-mag-button')?.textContent?.trim()==='CORE',null,{timeout:5000});
+            for(const selector of ['.fx-three-sound','.topbar > .fx-reference-mag-button']){
+              // Pricing navigation intentionally scrolled the hero offscreen.
+              // Hit-testing outside the viewport cannot detect an overlay.
+              await page.locator(selector).first().scrollIntoViewIfNeeded();
+              const box=await page.locator(selector).first().boundingBox();assert(box,`mobile: missing ${selector}`);
+              const topmost=await page.evaluate(({selector,x,y})=>Boolean(document.elementFromPoint(x,y)?.closest?.(selector)),{selector,x:box.x+box.width/2,y:box.y+box.height/2});
+              assert(topmost,`mobile: ${selector} is not topmost after closing Mini MAG`);
+            }
+            await mobileContext.close();
+
+            const desktopContext=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,isMobile:false,hasTouch:false,locale:'hu-HU'});
+            const desktop=await desktopContext.newPage();
+            await desktop.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
+            await ready(desktop,false);
+            const desktopState=await state(desktop);
+            console.log('R467_DESKTOP',JSON.stringify(desktopState));
+            assertHeader(desktopState,'desktop');
+            assertRow(desktopState,'desktop',54);
+            assert(desktopState.renderer==='single-webgl-crystal-organism-r326'&&desktopState.canvasCount===1,'desktop: renderer duplication '+JSON.stringify(desktopState));
+            assert(desktopState.miniHost?.position==='fixed'&&desktopState.mini?.width>=60&&desktopState.mini?.height>=60,'desktop: Mini MAG not fixed/large enough '+JSON.stringify(desktopState));
+            assert(desktopState.magText==='MAG'&&desktopState.langText==='HU','desktop: HU/MAG text invalid '+JSON.stringify(desktopState));
+            await desktopContext.close();
+
+            await browser.close();
+            console.log('PASS: R467 cross-device header/control ownership, balanced mobile MAG optics and post-modal touch hit layers passed.');
+          })().catch(error=>{console.error(error);process.exit(1);});
+          NODE
+      - name: Publish current mobile visual/touch status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then state=success; description='R467 cross-device MAG controls and touch ownership passed'; else state=failure; description='R467 cross-device MAG control ownership failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX R459 MAG language and touch' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

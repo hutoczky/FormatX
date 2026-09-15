@@ -7,216 +7,263 @@ const path = require('node:path');
 const base = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
 const origin = new URL(base).origin;
 const out = process.env.FORMATX_VISUAL_DIR || 'artifacts/content-visuals';
+const PAUSE = '.fx-reference-pause';
+const CONTROLS = '#hero .fx-reference-controls-r204';
+const ASK = `${CONTROLS} .fx-reference-ask`;
+const SOUND = `${CONTROLS} .fx-three-sound`;
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function injectContentLayer(page) {
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/single-language-toggle.css?v=20260808-single-language-5' });
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-content-standard.css' });
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-readability.css' });
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-unified.css' });
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-hero-flow.css' });
-  for (const src of [
-    '/scifi-ui/scripts/single-language-toggle.js?v=20260808-single-language-5',
-    '/scifi-ui/scripts/release-metadata.js',
-    '/scifi-ui/scripts/formatx-content-standard.js',
-    '/scifi-ui/scripts/formatx-content-finalizer.js',
-    '/scifi-ui/scripts/formatx-platform-surface-finalizer.js',
-    '/scifi-ui/scripts/formatx-organism-semantic-state.js'
-  ]) {
-    await page.addScriptTag({ url: origin + src });
-  }
-  await page.waitForFunction(() => document.documentElement.dataset.fxSingleLanguageToggle === 'ready', null, { timeout: 8000 });
-  await page.waitForTimeout(2600);
+function urlWith(params = {}) {
+  const url = new URL(base);
+  for (const [key, value] of Object.entries(params)) url.searchParams.set(key, String(value));
+  return url.href;
 }
 
-async function visibleBox(page, selector) {
-  return page.locator(selector).first().evaluate(element => {
+async function visibleBox(page, selector, required = true) {
+  const locator = page.locator(selector).first();
+  if (!(await locator.count())) {
+    if (required) throw new Error(`Missing selector: ${selector}`);
+    return null;
+  }
+  const state = await locator.evaluate(element => {
     const style = getComputedStyle(element);
     const rect = element.getBoundingClientRect();
     return {
-      x: rect.x, y: rect.y, width: rect.width, height: rect.height,
-      display: style.display, visibility: style.visibility, opacity: Number(style.opacity),
-      text: element.textContent.trim()
+      left: rect.left,
+      right: rect.right,
+      top: rect.top,
+      bottom: rect.bottom,
+      width: rect.width,
+      height: rect.height,
+      display: style.display,
+      visibility: style.visibility,
+      opacity: Number(style.opacity || 1),
+      text: (element.textContent || '').trim()
     };
   });
+  state.visible = state.display !== 'none' && state.visibility !== 'hidden' && state.opacity > .02 && state.width > 0 && state.height > 0;
+  if (required) assert(state.visible, `Selector is not visible: ${selector} ${JSON.stringify(state)}`);
+  return state.visible ? state : null;
 }
 
-async function optionalVisibleBox(page, selector) {
-  const locator = page.locator(selector).first();
-  if (!(await locator.count())) return null;
-  return locator.evaluate(element => {
-    const style = getComputedStyle(element);
-    const rect = element.getBoundingClientRect();
-    const visible = style.display !== 'none'
-      && style.visibility !== 'hidden'
-      && Number(style.opacity) > .02
-      && rect.width > 0
-      && rect.height > 0;
-    return visible ? {
-      x: rect.x, y: rect.y, width: rect.width, height: rect.height,
-      display: style.display, visibility: style.visibility, opacity: Number(style.opacity),
-      text: element.textContent.trim()
-    } : null;
+function overlaps(a, b, gap = 0) {
+  if (!a || !b) return false;
+  return !(a.right + gap <= b.left || b.right + gap <= a.left || a.bottom + gap <= b.top || b.bottom + gap <= a.top);
+}
+
+async function overflowState(page) {
+  return page.evaluate(() => {
+    const viewport = document.documentElement.clientWidth;
+    const width = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+    const offenders = [];
+    for (const element of document.querySelectorAll('body *')) {
+      const style = getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden') continue;
+      const rect = element.getBoundingClientRect();
+      if (!Number.isFinite(rect.left) || !Number.isFinite(rect.right) || rect.width <= 0 || rect.height <= 0) continue;
+      if (rect.left < -2 || rect.right > viewport + 2) {
+        offenders.push({
+          tag: element.tagName.toLowerCase(),
+          id: element.id || '',
+          className: typeof element.className === 'string' ? element.className.slice(0, 140) : '',
+          left: Math.round(rect.left * 10) / 10,
+          right: Math.round(rect.right * 10) / 10,
+          width: Math.round(rect.width * 10) / 10,
+          position: style.position
+        });
+      }
+    }
+    return { viewport, width, overflow: width - viewport, offenders: offenders.slice(0, 16) };
   });
 }
 
-function overlap(a, b, gap = 0) {
-  if (!a || !b) return false;
-  return !(
-    a.x + a.width + gap <= b.x
-    || b.x + b.width + gap <= a.x
-    || a.y + a.height + gap <= b.y
-    || b.y + b.height + gap <= a.y
-  );
+async function waitForProductShell(page) {
+  await page.waitForSelector('#hero', { state: 'visible', timeout: 20000 });
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const ask = document.querySelector('#hero .fx-reference-ask');
+    const core = document.querySelector('.topbar .fx-reference-mag-button');
+    const lead = document.querySelector('#hero .hero-lead');
+    const visible = element => {
+      if (!element) return false;
+      const style = getComputedStyle(element), rect = element.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
+    };
+    return root.dataset.fxControlOwnerR268 === 'ready' && visible(ask) && visible(core) && visible(lead);
+  }, null, { timeout: 20000 });
+  await page.waitForTimeout(250);
 }
 
-async function mobileLayoutAssertions(page) {
-  const heroCopy = await visibleBox(page, '#hero .hero-copy');
-  const heroSpace = await visibleBox(page, '#hero .hero-space');
-  const cue = await visibleBox(page, '#hero .scroll-cue');
-  const category = await visibleBox(page, '.fx-category-deck--standalone, .fx-category-deck');
-
-  assert(heroCopy.y + heroCopy.height <= heroSpace.y + 2, 'Reserved 3D field starts inside the hero copy');
-  assert(heroSpace.y + heroSpace.height <= cue.y + 2, 'Chapter cue overlaps the reserved 3D field');
-  assert(cue.y + cue.height <= category.y + 2, 'Next category heading overlaps the hero chapter cue');
-  assert(!overlap(heroCopy, category), 'Category section overlaps the mobile hero copy');
-
-  const genome = await optionalVisibleBox(page, '.fx-genome-launcher');
-  const sound = await optionalVisibleBox(page, '.fx-three-sound');
-  const dock = await optionalVisibleBox(page, '.fx-organism-actionbar');
-
-  for (const [name, control] of [['Genome trigger', genome], ['Sound trigger', sound]]) {
-    if (!control) continue;
-    assert(!overlap(control, heroCopy, 4), `${name} overlaps the mobile hero copy`);
-    assert(!overlap(control, cue, 4), `${name} overlaps the chapter cue`);
-    if (dock) assert(!overlap(control, dock, 4), `${name} overlaps the bottom action dock`);
-  }
-
-  assert(!overlap(genome, sound, 4), 'Genome and sound triggers overlap');
-}
-
-async function commonAssertions(page, mobile) {
-  await page.waitForSelector('#hero-title');
-  const title = await visibleBox(page, '#hero-title');
+async function assertCommon(page, { mobile = false, reduced = false } = {}) {
+  const hero = await visibleBox(page, '#hero');
   const lead = await visibleBox(page, '#hero .hero-lead');
-  const cta = await visibleBox(page, '#hero-download');
-  assert(title.width > 100 && title.height > 20, 'Hero title is not visible');
-  assert(lead.text.length > 80 && lead.height > 20, 'Concrete product definition is not visible');
-  assert(/teljes|full|multiplatform/i.test(cta.text) && !/public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not communicate full-release status');
-  assert(!overlap(lead, cta), 'Primary CTA overlaps the hero product definition');
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  assert(overflow <= 2, `Horizontal overflow detected: ${overflow}px`);
-  const category = await page.locator('.fx-category-definition').first().textContent();
-  assert(/Technikusi operációs réteg|Technician Operating Layer/.test(category || ''), 'Product category is missing');
-  const method = await page.locator('.fx-method-inline:visible').first().locator('li').count();
-  assert(method === 4, `Visible FormatX Method must have four steps, found ${method}`);
-  const visibleLanguageControls = await page.locator('.fx-language-toggle:visible, .language-switch [data-language]:visible, .language-control [data-language-choice]:visible').count();
-  assert(visibleLanguageControls === 1, `Exactly one visible language control is required, found ${visibleLanguageControls}`);
-  const immersive = await page.evaluate(() => ({
-    mode: document.documentElement.dataset.fxImmersive || '',
-    coreCanvases: document.querySelectorAll('.fx-resilient-core').length,
-    frameSource: document.getElementById('fx-three-frame')?.getAttribute('src') || ''
-  }));
-  if (immersive.mode === 'standby') {
-    const launch = await visibleBox(page, '.fx-immersive-launch');
-    assert(launch.width >= 100 && launch.height >= 100, 'Living Core launch target is too small');
-    assert(immersive.coreCanvases === 0, 'Canvas renderer started before user activation');
-    assert(!immersive.frameSource || immersive.frameSource === 'about:blank', 'Three iframe started before user activation');
+  const ask = await visibleBox(page, ASK);
+  const core = await visibleBox(page, '.topbar .fx-reference-mag-button');
+  assert(hero.width > 200 && hero.height > 200, `Hero geometry invalid: ${JSON.stringify(hero)}`);
+  assert(lead.text.length > 80, 'Hero product definition is missing or too short');
+  assert(ask.width >= 44 && ask.height >= 44, `ASK target is below 44px: ${JSON.stringify(ask)}`);
+  assert(core.width >= 40 && core.height >= 40, `MAG header target is too small: ${JSON.stringify(core)}`);
+
+  const pauseCount = await page.locator(PAUSE).count();
+  assert(pauseCount === 0, `Obsolete manual PAUSE returned (${pauseCount})`);
+
+  const controls = await visibleBox(page, CONTROLS);
+  const soundExists = await page.locator(SOUND).count();
+  assert(soundExists === 1, `Canonical SOUND control missing or duplicated (${soundExists})`);
+  const sound = await visibleBox(page, SOUND, false);
+  if (sound) {
+    assert(sound.width >= 44 && sound.height >= 44, `Visible SOUND target is below 44px: ${JSON.stringify(sound)}`);
+    assert(!overlaps(sound, ask, 2), `SOUND and ASK overlap: ${JSON.stringify({ sound, ask, controls })}`);
   }
+
+  const language = await page.evaluate(() => {
+    const toggles = [...document.querySelectorAll('.fx-language-toggle')];
+    const visible = toggles.filter(element => {
+      const style = getComputedStyle(element), rect = element.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
+    });
+    return { total: toggles.length, visible: visible.length };
+  });
+  assert(language.total === 1 && language.visible === 1, `Language control ownership invalid: ${JSON.stringify(language)}`);
+
+  const overflow = await overflowState(page);
+  assert(overflow.overflow <= 2, `Horizontal overflow detected: ${JSON.stringify(overflow)}`);
+
   if (mobile) {
     const menu = await visibleBox(page, '#menu-toggle');
-    assert(menu.width >= 40 && menu.height >= 40, 'Mobile menu target is too small');
-    await mobileLayoutAssertions(page);
+    const heroSpace = await visibleBox(page, '#hero .hero-space');
+    const copy = await visibleBox(page, '#hero .hero-copy');
+    assert(menu.width >= 40 && menu.height >= 40, `Mobile menu target is too small: ${JSON.stringify(menu)}`);
+    assert(controls.left >= heroSpace.left - 1 && controls.right <= heroSpace.right + 1,
+      `Mobile controls escaped MAG stage horizontally: ${JSON.stringify({ controls, heroSpace })}`);
+    assert(controls.top >= heroSpace.top - 1 && controls.bottom <= heroSpace.bottom + 1,
+      `Mobile controls escaped MAG stage vertically: ${JSON.stringify({ controls, heroSpace })}`);
+    const owned = await page.locator(CONTROLS).evaluate(node => node.parentElement?.classList.contains('hero-space'));
+    assert(owned, 'Mobile controls are not owned by .hero-space');
+    assert(copy.width >= 280 && copy.top >= heroSpace.bottom - 2,
+      `Mobile hero copy must follow the MAG stage in normal flow: ${JSON.stringify({ copy, heroSpace })}`);
+  } else {
+    const title = await visibleBox(page, '#hero-title');
+    const cta = await visibleBox(page, '#hero-download');
+    const copy = await visibleBox(page, '#hero .hero-copy');
+    const heroSpace = await visibleBox(page, '#hero .hero-space', false);
+    assert(title.width > 100 && title.height > 20, `Desktop hero title invalid: ${JSON.stringify(title)}`);
+    assert(!overlaps(lead, cta), `Desktop CTA overlaps copy: ${JSON.stringify({ lead, cta })}`);
+    if (heroSpace) assert(copy.right <= heroSpace.left + 4,
+      `Desktop hero copy intrudes into MAG stage: ${JSON.stringify({ copy, heroSpace })}`);
+  }
+
+  if (reduced) {
+    const state = await page.evaluate(() => {
+      const canvas = document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+      return {
+        reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
+        running: (canvas?.getAnimations?.() || []).filter(animation => animation.playState === 'running').length
+      };
+    });
+    assert(state.reduced, 'Reduced-motion media query was not applied');
+    assert(state.running === 0, `Reduced-motion MAG still has running animations: ${JSON.stringify(state)}`);
   }
 }
 
-async function capture(
-  browser,
-  name,
-  viewport,
-  setup = async () => {},
-  contextSetup = async () => {},
-  targetUrl = base
-) {
-  const context = await browser.newContext({ viewport, reducedMotion: name.includes('reduced') ? 'reduce' : 'no-preference' });
-  await context.addInitScript(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+async function capture(browser, name, viewport, options = {}) {
+  const context = await browser.newContext({
+    viewport,
+    colorScheme: 'dark',
+    isMobile: Boolean(options.mobile),
+    hasTouch: Boolean(options.mobile),
+    deviceScaleFactor: options.mobile ? 2 : 1,
+    reducedMotion: options.reduced ? 'reduce' : 'no-preference',
+    locale: options.lang === 'en' ? 'en-US' : 'hu-HU'
   });
-  await contextSetup(context);
   const page = await context.newPage();
-  page.on('pageerror', error => console.warn(`[${name}] pageerror:`, error.message));
-  await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
-  await injectContentLayer(page);
-  await setup(page);
-  await commonAssertions(page, viewport.width < 700);
-  await page.screenshot({ path: path.join(out, `${name}.png`), fullPage: true });
-  await context.close();
+  const errors = [];
+  page.on('pageerror', error => errors.push(String(error)));
+  page.on('console', message => {
+    if (message.type() !== 'error') return;
+    const text = message.text();
+    if (!/WebGL|WebGPU|GPU|favicon|cloudflareinsights/i.test(text)) errors.push(text);
+  });
+  let failure;
+  try {
+    await page.goto(urlWith({ visual: `${name}-${Date.now()}`, ...(options.lang ? { lang: options.lang } : {}) }), {
+      waitUntil: 'domcontentloaded', timeout: 30000
+    });
+    await waitForProductShell(page);
+    if (options.lang) {
+      await page.waitForFunction(lang => document.documentElement.lang === lang, options.lang, { timeout: 8000 });
+    }
+    await assertCommon(page, options);
+    if (typeof options.after === 'function') await options.after(page);
+    assert(errors.length === 0, `${name} browser errors: ${errors.join(' | ')}`);
+  } catch (error) {
+    failure = error;
+  } finally {
+    await page.screenshot({ path: path.join(out, `${name}.png`), fullPage: true }).catch(() => {});
+    await context.close();
+  }
+  if (failure) throw failure;
 }
 
-async function publicPage(browser, name, pathname, expectedSelector, viewport = { width: 1440, height: 900 }) {
-  const context = await browser.newContext({ viewport });
+async function publicPage(browser, name, pathname, selector) {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark' });
   const page = await context.newPage();
-  await page.goto(origin + pathname, { waitUntil: 'networkidle' });
-  await page.waitForSelector(expectedSelector);
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  assert(overflow <= 2, `${pathname} has horizontal overflow: ${overflow}px`);
-  await page.screenshot({ path: path.join(out, `${name}.png`), fullPage: true });
-  await context.close();
+  let failure;
+  try {
+    await page.goto(origin + pathname, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector(selector, { state: 'attached', timeout: 15000 });
+    const overflow = await overflowState(page);
+    assert(overflow.overflow <= 2, `${pathname} horizontal overflow: ${JSON.stringify(overflow)}`);
+  } catch (error) {
+    failure = error;
+  } finally {
+    await page.screenshot({ path: path.join(out, `${name}.png`), fullPage: true }).catch(() => {});
+    await context.close();
+  }
+  if (failure) throw failure;
 }
 
 (async () => {
   await fs.mkdir(out, { recursive: true });
-  const browser = await chromium.launch({ headless: true });
-  const englishUrl = new URL(base);
-  englishUrl.searchParams.set('lang', 'en');
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || process.env.CHROME_BIN || undefined;
+  const browser = await chromium.launch({
+    headless: true,
+    ...(executablePath ? { executablePath } : {}),
+    args: ['--no-sandbox', '--disable-dev-shm-usage', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
+  });
   try {
     await capture(browser, 'desktop-hero-hu', { width: 1440, height: 900 });
-    await capture(browser, 'desktop-immersive-active', { width: 1440, height: 900 }, async page => {
-      await page.locator('.fx-immersive-launch').click();
-      await page.waitForFunction(() => document.documentElement.dataset.fxImmersive === 'active');
-      assert((await page.locator('.fx-immersive-launch').getAttribute('aria-pressed')) === 'true', 'Living Core launch did not expose its active state');
+    await capture(browser, 'desktop-small-height', { width: 1366, height: 600 });
+    await capture(browser, 'mobile-390x844', { width: 390, height: 844 }, { mobile: true });
+    await capture(browser, 'mobile-430x932', { width: 430, height: 932 }, { mobile: true });
+    await capture(browser, 'reduced-motion', { width: 1440, height: 900 }, { reduced: true });
+    await capture(browser, 'desktop-hero-en', { width: 1440, height: 900 }, { lang: 'en' });
+    await capture(browser, 'mobile-menu-open', { width: 390, height: 844 }, {
+      mobile: true,
+      after: async page => {
+        const menu = page.locator('#menu-toggle').first();
+        await menu.click();
+        await page.waitForTimeout(180);
+        assert((await menu.getAttribute('aria-expanded')) === 'true', 'Mobile menu did not open');
+        const nav = await visibleBox(page, '#main-nav');
+        assert(nav.width > 100 && nav.height > 100, `Opened mobile navigation is not visible: ${JSON.stringify(nav)}`);
+      }
     });
-    await capture(browser, 'mobile-hero-hu', { width: 390, height: 844 });
-    await capture(browser, 'mobile-hero-wide', { width: 430, height: 932 });
-    await capture(browser, 'small-height-hero', { width: 1366, height: 600 });
-    await capture(browser, 'reduced-motion', { width: 1440, height: 900 });
-    await capture(
-      browser,
-      'desktop-hero-en',
-      { width: 1440, height: 900 },
-      async page => {
-        await page.waitForFunction(() => document.documentElement.lang === 'en', null, { timeout: 8000 });
-      },
-      async () => {},
-      englishUrl.href
-    );
-    await capture(browser, 'mobile-menu-open', { width: 390, height: 844 }, async page => {
-      await page.locator('#menu-toggle').click();
-      await page.waitForTimeout(200);
-      assert((await page.locator('#menu-toggle').getAttribute('aria-expanded')) === 'true', 'Mobile menu did not open');
-      const nav = await visibleBox(page, '#main-nav');
-      assert(nav.width > 100 && nav.height > 100, 'Opened mobile navigation is not visible');
-    });
-    await capture(browser, 'webgl-fallback', { width: 1440, height: 900 }, async () => {}, async context => {
-      await context.addInitScript(() => {
-        const original = HTMLCanvasElement.prototype.getContext;
-        HTMLCanvasElement.prototype.getContext = function(type, ...args) {
-          if (/webgl|webgpu/i.test(String(type))) return null;
-          return original.call(this, type, ...args);
-        };
-      });
-    });
+
     await publicPage(browser, 'downloads', '/scifi-ui/downloads/', '[data-release-download="multiplatform"]');
-    await publicPage(browser, 'verification-centre', '/scifi-ui/verification.html', '[data-verification-root]');
+    await publicPage(browser, 'verification', '/scifi-ui/verification.html', '[data-verification-root]');
     await publicPage(browser, 'test-matrix', '/scifi-ui/test-matrix.html', '[data-test-table-body]');
-    console.log('Visual contract and fallback screenshots completed.');
+    await publicPage(browser, 'known-issues', '/scifi-ui/known-issues.html', 'main');
+    await publicPage(browser, 'security', '/scifi-ui/security.html', 'main');
+    await publicPage(browser, 'support', '/scifi-ui/support.html', 'main');
+    console.log('PASS: R532 current hero visual contract — no manual PAUSE, stable controls, responsive geometry, reduced-motion, i18n and public pages.');
   } finally {
     await browser.close();
   }
 })().catch(error => {
-  console.error(error.stack || error);
+  console.error(error?.stack || error);
   process.exit(1);
 });

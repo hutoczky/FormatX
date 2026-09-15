@@ -1,0 +1,113 @@
+/* FormatX MAG reference v41 — mobile copy-safe dynamic clipping + v45 optical tuning.
+   The native WebGL2 crystal remains the source of truth. No image or SVG replacement.
+   Mobile keeps the copy-safe clip while the WebGL crystal is widened, brightened and given
+   stronger cyan/violet glass depth to match the visual reference more closely. */
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-stage{
+    clip-path:none!important;
+    --fx-mag-clip-bottom:0px;
+    z-index:121!important;
+  }
+
+  .fx-core-real3d-stage[data-fx-v41-visible="true"],
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="text"],
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="visual"]{
+    opacity:1!important;
+    visibility:visible!important;
+  }
+
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="text"] .fx-core-real3d-canvas,
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="visual"] .fx-core-real3d-canvas,
+  .fx-core-real3d-canvas,
+  .fx-core-postfx-v31,
+  .fx-mag-v33-overlay{
+    opacity:1!important;
+    visibility:visible!important;
+    clip-path:inset(0 0 var(--fx-mag-clip-bottom,0px) 0)!important;
+  }
+
+  .fx-core-real3d-canvas{
+    transform:scaleX(1.12) scaleY(.95)!important;
+    transform-origin:50% 46%!important;
+    filter:saturate(1.62) contrast(1.46) brightness(1.58)
+      drop-shadow(0 0 5px rgba(238,255,255,.68))
+      drop-shadow(0 0 15px rgba(82,244,255,.48))
+      drop-shadow(0 0 32px rgba(48,180,255,.30))
+      drop-shadow(0 0 54px rgba(176,72,255,.19))
+      drop-shadow(0 0 78px rgba(62,128,255,.12))!important;
+  }
+
+  .fx-core-postfx-v31{
+    transform:scaleX(1.10) scaleY(.96)!important;
+    transform-origin:50% 46%!important;
+    filter:saturate(1.30) contrast(1.18) brightness(1.20)!important;
+  }
+  .fx-v31-spectrum{opacity:.34!important}
+  .fx-v31-ring-a{opacity:.50!important}
+  .fx-v31-ring-b{opacity:.36!important}
+  .fx-v31-ring-c{opacity:.24!important}
+  .fx-v31-flare{
+    width:13px!important;
+    height:13px!important;
+    margin:-6.5px 0 0 -6.5px!important;
+    box-shadow:
+      0 0 4px #fff,
+      0 0 10px rgba(245,255,255,1),
+      0 0 22px rgba(95,247,255,.92),
+      0 0 42px rgba(54,190,255,.58),
+      0 0 68px rgba(137,72,255,.26)!important;
+  }
+
+  body.living-architecture #hero .hero-copy{
+    position:relative!important;
+    z-index:420!important;
+    isolation:isolate!important;
+    background:#010711!important;
+    box-shadow:0 -30px 44px rgba(1,7,17,.98)!important;
+  }
+  body.living-architecture #hero .hero-copy::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:-30px;
+    height:30px;
+    z-index:-1;
+    pointer-events:none;
+    background:linear-gradient(180deg,rgba(1,7,17,0),rgba(1,7,17,.98));
+  }
+
+  #hero .hero-copy>.kicker,
+  #hero #hero-title,
+  #hero .hero-title-main,
+  #hero .hero-title-sub,
+  #hero .hero-lead,
+  #hero .hero-actions,
+  #hero .hero-facts{
+    position:relative!important;
+    z-index:2!important;
+  }
+}
+
+@media(min-width:901px) and (pointer:fine){
+  .fx-core-real3d-canvas{
+    filter:saturate(1.45) contrast(1.32) brightness(1.34)
+      drop-shadow(0 0 5px rgba(226,255,255,.44))
+      drop-shadow(0 0 18px rgba(64,232,255,.30))
+      drop-shadow(0 0 38px rgba(44,154,255,.19))
+      drop-shadow(0 0 58px rgba(160,64,255,.11))!important;
+  }
+}
+
+html.fx-organism-menu-open .fx-core-real3d-stage,
+body.fx-organism-panel-open .fx-core-real3d-stage{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .fx-core-real3d-canvas{
+    filter:saturate(1.38) contrast(1.30) brightness(1.34)!important;
+  }
+}

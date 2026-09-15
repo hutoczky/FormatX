@@ -1,0 +1,46 @@
+name: Debug live reference geometry r132
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/debug-layout-r132.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Inspect live 412px composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/dbg" && cd "$RUNNER_TEMP/dbg"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium >/dev/null
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:412,height:680},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await context.newPage();
+            await page.goto(`https://formatxsuite.com/?layout_debug=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreReferenceTextureR130==='ready',null,{timeout:45000});
+            await page.waitForTimeout(400);
+            const out=await page.evaluate(()=>{
+              const box=s=>{const e=document.querySelector(s),r=e?.getBoundingClientRect(),c=e?getComputedStyle(e):null;return r?{x:+r.x.toFixed(2),y:+r.y.toFixed(2),w:+r.width.toFixed(2),h:+r.height.toFixed(2),right:c.right,left:c.left,top:c.top,transform:c.transform,origin:c.transformOrigin}:null};
+              return {
+                viewport:[innerWidth,innerHeight,devicePixelRatio],
+                brand:box('.topbar .brand'),logo:box('.topbar .brand>img'),
+                mag:box('.fx-reference-mag-button'),lang:box('.fx-language-toggle'),menu:box('.fx-reference-menu-button'),
+                heroSpace:box('#hero .hero-space'),stage:box('#hero .hero-space>.fx-core-r112-stage'),detail:box('.fx-core-detail-r122'),native:box('.fx-core-r112-canvas'),
+                rail:box('#hero .fx-reference-rail'),ask:box('#hero .fx-reference-ask'),pause:box('#hero .fx-reference-pause'),heading:box('#hero .fx-reference-heading'),proof:box('#hero .fx-reference-proof'),
+                detailFrame:document.documentElement.dataset.fxCoreDetailFrame,repair:document.documentElement.dataset.fxCoreReferenceRepairR131
+              };
+            });
+            console.log('LIVE_R132',JSON.stringify(out));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE

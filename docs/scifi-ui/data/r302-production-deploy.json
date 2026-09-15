@@ -1,0 +1,7 @@
+{
+  "revision": "r302",
+  "baseQualityRevision": "r301",
+  "validatedQualityCommit": "3347bf992f4278fdd64f80c8ad19765ec786c457",
+  "liveAuditAuthority": "r285-pure-native-webgl3d",
+  "purpose": "redeploy validated production candidate with current live award audit"
+}

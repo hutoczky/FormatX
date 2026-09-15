@@ -24,6 +24,55 @@ def valid_sha256(value: object) -> bool:
     return bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(value or "")))
 
 
+def active_production_entry() -> str:
+    """Return the configured production entry only when it preserves wrapper ownership.
+
+    A versioned edge entry is valid only when it directly delegates fetch() to the
+    canonical production-content-entry.js wrapper. This keeps the semantic content
+    wrapper contract while allowing evidence-backed transport/first-paint edge layers.
+    """
+    config = module.read("billing-worker/wrangler.jsonc")
+    match = re.search(r'"main"\s*:\s*"([^"]+)"', config)
+    if not match:
+        module.fail("Production config does not declare a Worker main entry")
+        return "src/production-content-entry.js"
+
+    entry = match.group(1)
+    canonical = "src/production-content-entry.js"
+    if entry == canonical:
+        return entry
+    if not re.fullmatch(r"src/production-content-entry-r\d+\.js", entry):
+        module.fail(f"Production entry is not a canonical or versioned content wrapper: {entry}")
+        return entry
+
+    source = module.read(f"billing-worker/{entry}")
+    import_match = re.search(
+        r"import\s+([A-Za-z_$][\w$]*)\s+from\s+['\"]\./production-content-entry\.js['\"]",
+        source,
+    )
+    if not import_match:
+        module.fail(f"Versioned production entry does not delegate to the canonical content wrapper: {entry}")
+        return entry
+    delegate = re.escape(import_match.group(1))
+    if not re.search(rf"\b{delegate}\.fetch\s*\(\s*request\s*,\s*env\s*,\s*ctx\s*\)", source):
+        module.fail(f"Versioned production entry imports but does not execute the canonical content wrapper: {entry}")
+    return entry
+
+
+def production_runtime_contract() -> str:
+    """Validate the active production delegation chain, not a frozen entry filename."""
+    active = active_production_entry()
+    files = []
+    if active != "src/production-content-entry.js":
+        files.append(f"billing-worker/{active}")
+    files.extend([
+        "billing-worker/src/production-content-entry.js",
+        "billing-worker/src/production-content-entry-r369-base.js",
+        "billing-worker/src/production-content-base.js",
+    ])
+    return "\n".join(module.read(file) for file in files)
+
+
 def validate_release_metadata_v2() -> None:
     data = module.load_json(module.SCIFI / "data/current-release.json")
     public_contract = module.load_json(module.SCIFI / "data/public-platform-contract.json")
@@ -140,12 +189,14 @@ def validate_public_pages_v2() -> None:
         'href="/download/android"',
         "ANDROID TELJES VERZIÓ",
         "NATÍV BÉTA",
-        "android-native-v1.1.0-beta",
+        'href="/download/android-native-beta"',
     ]:
         if token not in android:
             module.fail(f"Android page missing channel truth contract: {token}")
+    if "android-native-v1.1.0-beta" in android:
+        module.fail("Android page must use the first-party Native beta download route instead of an upstream release URL")
 
-    production = module.read("billing-worker/src/production-content-entry.js")
+    production = production_runtime_contract()
     preview = module.read("content-preview-entry.js")
     for source, name in [(production, "production"), (preview, "preview")]:
         for token in ["formatx-public-shell.js", "formatx-content-standard.css"]:
@@ -153,8 +204,8 @@ def validate_public_pages_v2() -> None:
                 module.fail(f"{name} public-page wrapper missing {token}")
 
     sitemap = module.read("docs/sitemap.xml")
-    if "<loc>https://www.formatxsuite.com/</loc>" not in sitemap:
-        module.fail("Sitemap missing canonical root homepage")
+    if "<loc>https://formatxsuite.com/</loc>" not in sitemap:
+        module.fail("Sitemap missing canonical apex root homepage")
     for url in [
         "/scifi-ui/downloads/", "/scifi-ui/android/", "/scifi-ui/method.html",
         "/scifi-ui/verification.html", "/scifi-ui/test-matrix.html",
@@ -164,10 +215,62 @@ def validate_public_pages_v2() -> None:
     ]:
         if url not in sitemap:
             module.fail(f"Sitemap missing {url}")
-    if "Sitemap: https://www.formatxsuite.com/sitemap.xml" not in module.read("docs/robots.txt"):
-        module.fail("robots.txt does not point to the canonical sitemap")
+    if "Sitemap: https://formatxsuite.com/sitemap.xml" not in module.read("docs/robots.txt"):
+        module.fail("robots.txt does not point to the canonical apex sitemap")
+
+
+def validate_runtime_contract_v2() -> None:
+    production = production_runtime_contract()
+    preview = module.read("content-preview-entry.js")
+    required = [
+        "release-metadata.js",
+        "formatx-content-standard.js",
+        "formatx-seo.js",
+        "formatx-content-finalizer.js",
+        "formatx-platform-surface-finalizer.js",
+        "formatx-organism-trust.js",
+        "formatx-organism-semantic-state.js",
+        "single-language-toggle.js",
+        "cleanLegacyReleaseCopy",
+    ]
+    for source, name in [(production, "production"), (preview, "preview")]:
+        for token in required:
+            if token not in source:
+                module.fail(f"{name} content wrapper missing {token}")
+
+    active_production_entry()
+    if '"main": "content-preview-entry.js"' not in module.read("wrangler.jsonc"):
+        module.fail("Preview does not use the content wrapper")
+
+    release_script = module.read(module.SCIFI / "scripts/release-metadata.js")
+    for token in [
+        "current-release.json", "ready-v6", "OFFICIAL_REPOSITORY = 'hutoczky/FormatX-Updates'",
+        "isOfficialGitHubReleaseUrl", "isOfficialGitHubDownloadUrl", "isOfficialMetadata",
+        "release?.source === 'github_published_release'", "validDigest(asset.digest)",
+        "channels?.multiplatform", "data-release-download=\"multiplatform\"",
+        "setText('[data-release-version]', '', false)", "5-day trial licence", "Teljes multiplatform verzió letöltése"
+    ]:
+        if token not in release_script:
+            module.fail(f"Release metadata controller missing {token}")
+
+    platform_script = module.read(module.SCIFI / "scripts/platform-status.js")
+    for token in ["full release", "5-day trial licence", "5 napos próbalicenc"]:
+        if token.lower() not in platform_script.lower():
+            module.fail(f"Platform status controller missing full-release contract: {token}")
+
+    downloads = module.read(module.SCIFI / "downloads/index.html")
+    if 'data-release-download="multiplatform"' not in downloads:
+        module.fail("Downloads page is not driven by multiplatform release metadata")
+    for legacy in ["/releases/download/v92/", "FormatX-Suite-Pro-V92.zip", "92.00"]:
+        if legacy in downloads:
+            module.fail(f"Downloads page contains historical release copy: {legacy}")
+
+    production_lower = production.lower()
+    if ".replaceall('teljes verzió letöltése', 'multiplatform nyilvános béta letöltése')" in production_lower:
+        module.fail("Production still rewrites full release copy back to beta")
 
 
 module.validate_release_metadata = validate_release_metadata_v2
 module.validate_public_pages = validate_public_pages_v2
+module.validate_runtime_contract = validate_runtime_contract_v2
 raise SystemExit(module.main())

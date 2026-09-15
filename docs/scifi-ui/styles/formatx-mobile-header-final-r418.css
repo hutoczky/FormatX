@@ -1,0 +1,236 @@
+/* FormatX r467 — final cross-device header owner.
+   Mobile keeps one branded 72px carrier for MAG, language and menu. Desktop
+   now owns all three right-side controls as a non-overlapping cluster instead
+   of leaving MAG/menu geometry to legacy layers. The MAG control is always a
+   stable text control: MAG in Hungarian, CORE in English, never blank/star. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root body.living-architecture .topbar {
+    position:relative!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    left:auto!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    min-height:72px!important;
+    height:72px!important;
+    max-height:72px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    transform:none!important;
+    translate:none!important;
+    z-index:12060!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .brand {
+    position:absolute!important;
+    top:10px!important;
+    left:14px!important;
+    right:auto!important;
+    bottom:auto!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    gap:9px!important;
+    box-sizing:border-box!important;
+    width:auto!important;
+    max-width:118px!important;
+    height:52px!important;
+    margin:0!important;
+    overflow:hidden!important;
+    transform:none!important;
+    translate:none!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-language-toggle.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button,
+  html:root:root body.living-architecture .topbar .fx-language-toggle,
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button {
+    position:absolute!important;
+    bottom:auto!important;
+    left:auto!important;
+    margin:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+    z-index:12070!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button {
+    top:11px!important;
+    right:122px!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:48px!important;
+    min-height:48px!important;
+    max-height:48px!important;
+    padding:0!important;
+    color:rgba(239,248,253,.96)!important;
+    -webkit-text-fill-color:currentColor!important;
+    border:1px solid rgba(122,199,231,.26)!important;
+    border-radius:14px!important;
+    background:rgba(3,17,29,.90)!important;
+    background-image:none!important;
+    box-shadow:inset 0 0 22px rgba(70,191,236,.045),0 8px 24px rgba(0,0,0,.16)!important;
+    font:760 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace!important;
+    letter-spacing:.06em!important;
+    text-indent:0!important;
+    text-transform:uppercase!important;
+    text-shadow:none!important;
+    overflow:hidden!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264::before,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button.fx-control-owner-r264::after,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button::before,
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button::after {
+    content:none!important;
+    display:none!important;
+    background:none!important;
+    box-shadow:none!important;
+    filter:none!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-language-toggle.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-language-toggle {
+    top:11px!important;
+    right:70px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:44px!important;
+    min-width:44px!important;
+    max-width:44px!important;
+    height:48px!important;
+    min-height:48px!important;
+    max-height:48px!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button {
+    top:8px!important;
+    right:12px!important;
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+  }
+}
+
+@media (min-width:901px) and (pointer:fine) {
+  html:root:root body.living-architecture .topbar {
+    position:relative!important;
+    min-height:72px!important;
+    overflow:visible!important;
+  }
+
+  /* r467 desktop header geometry: 12–14px physical gaps at 1440px and the
+     same right-edge carrier logic at smaller desktop widths. */
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar > .fx-language-toggle,
+  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264,
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button.fx-control-owner-r264 {
+    position:absolute!important;
+    bottom:auto!important;
+    left:auto!important;
+    z-index:12070!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button.fx-control-owner-r264 {
+    top:8px!important;
+    right:22px!important;
+    width:58px!important;
+    min-width:58px!important;
+    max-width:58px!important;
+    height:56px!important;
+    min-height:56px!important;
+    max-height:56px!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .fx-language-toggle,
+  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264 {
+    top:14px!important;
+    right:92px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:44px!important;
+    min-width:44px!important;
+    max-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button.fx-control-owner-r264 {
+    top:14px!important;
+    right:150px!important;
+    display:grid!important;
+    place-items:center!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    color:rgba(239,248,253,.96)!important;
+    -webkit-text-fill-color:currentColor!important;
+    background-image:none!important;
+    text-indent:0!important;
+    text-transform:uppercase!important;
+    overflow:hidden!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button::before,
+  html:root:root body.living-architecture .topbar > .fx-reference-mag-button::after {
+    content:none!important;
+    display:none!important;
+  }
+}
+
+/* The architecture overlay is a user-opened interaction surface. Keeping its
+   close button in the render tree while the surface is closed creates a ghost
+   fixed control that can sit under the header and be reported as information.
+   Remove the closed surface from layout/paint entirely; restore it only for the
+   explicit open state. */
+html:not(.fx-signature-open) body.living-architecture .fx-signature-architecture {
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+html.fx-signature-open body.living-architecture .fx-signature-architecture {
+  display:grid!important;
+  visibility:visible!important;
+}
+
+/* production-r418-final-mobile-header-owner */
+/* production-r418-final-mobile-header-owner-non-occluding */
+/* production-r428-final-cross-device-header-owner-language-visible-non-occluding */
+/* production-r466-mobile-mag-text-lock-no-star-blank-state */
+/* production-r467-desktop-header-three-control-no-overlap */
+/* production-r467-release-candidate-20260831 */

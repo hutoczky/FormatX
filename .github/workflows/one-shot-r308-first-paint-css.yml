@@ -1,0 +1,124 @@
+name: One-shot r308 first-paint CSS optimizer
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r308-first-paint-css.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Move enhancement CSS out of the first-paint critical path
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          index_path = root / 'docs/scifi-ui/index.html'
+          core_path = root / 'docs/scifi-ui/styles/formatx-critical-core-r227.css'
+          real3d_path = root / 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'
+          signature_path = root / 'docs/scifi-ui/styles/formatx-critical-signature-r227.css'
+          loader_path = root / 'docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js'
+
+          index = index_path.read_text(encoding='utf-8')
+          critical = core_path.read_text(encoding='utf-8')
+          real3d = real3d_path.read_text(encoding='utf-8')
+          signature = signature_path.read_text(encoding='utf-8')
+          loader = loader_path.read_text(encoding='utf-8')
+
+          real_marker = '/* r284 — render-blocking settled geometry.'
+          sig_marker = '/* r286 — first-paint stability owner'
+          if real_marker not in real3d:
+              raise SystemExit('r284 critical marker missing from core-real3d CSS')
+          if sig_marker not in signature:
+              raise SystemExit('r286 critical marker missing from signature CSS')
+
+          real_critical = real3d[real3d.index(real_marker):].strip()
+          sig_critical = signature[signature.index(sig_marker):].strip()
+          append_marker = '/* r308 — merged first-paint geometry from deferred enhancement styles. */'
+          if append_marker not in critical:
+              critical = critical.rstrip() + '\n\n' + append_marker + '\n' + real_critical + '\n\n' + sig_critical + '\n'
+              core_path.write_text(critical, encoding='utf-8')
+
+          def replace_link(text, marker, target_media):
+              pattern = re.compile(r'<link\s+([^>]*' + re.escape(marker) + r'[^>]*)>', re.I)
+              match = pattern.search(text)
+              if not match:
+                  raise SystemExit(f'link not found: {marker}')
+              tag = match.group(0)
+              tag = re.sub(r'\s+data-fx-deferred-media-r300="[^"]*"', '', tag)
+              tag = re.sub(r'\s+media="[^"]*"', '', tag)
+              tag = tag[:-1] + f' data-fx-deferred-media-r300="{target_media}" media="not all">'
+              return text[:match.start()] + tag + text[match.end():]
+
+          # These two bundles keep their first-paint geometry through the merged
+          # critical-core tail above; their visual enhancement bodies can wait for intent.
+          index = replace_link(index, 'data-fx-core-real3d="true"', '(prefers-reduced-motion: no-preference)')
+          index = replace_link(index, 'data-fx-critical-signature-r227="true"', '(prefers-reduced-motion: no-preference)')
+
+          # Their matching runtimes already live in the interaction-gated motion template.
+          index = replace_link(index, 'data-fx-living-energy-r168="true"', '(min-width: 901px) and (prefers-reduced-motion: no-preference)')
+          index = replace_link(index, 'data-fx-critical-narrative-r227="true"', '(min-width: 901px) and (prefers-reduced-motion: no-preference)')
+          index = replace_link(index, 'data-fx-soty-continuity-r179="true"', '(min-width: 901px) and (prefers-reduced-motion: no-preference)')
+          index = replace_link(index, 'data-fx-desktop-apex-r181="true"', '(min-width: 901px) and (pointer: fine) and (prefers-reduced-motion: no-preference)')
+
+          index_path.write_text(index, encoding='utf-8')
+
+          # A direct MAG/immersive gesture is intentionally reserved by the content
+          # pointer filter. Make that explicit user intent activate the deferred CSS
+          # before motion runtimes need it.
+          hook = "addEventListener('formatx:immersiveactivate', start, { passive: true });"
+          anchor = "  if (location.hash && location.hash !== '#top' && location.hash !== '#hero') start();"
+          if hook not in loader:
+              if anchor not in loader:
+                  raise SystemExit('content loader deep-link anchor missing')
+              loader = loader.replace(anchor, "  addEventListener('formatx:immersiveactivate', start, { passive: true });\n" + anchor)
+              loader_path.write_text(loader, encoding='utf-8')
+
+          # Contract checks: first-paint should have only core + reference geometry
+          # blocking among these layers, while deferred links preserve their target media.
+          updated = index_path.read_text(encoding='utf-8')
+          for marker in [
+              'data-fx-core-real3d="true"',
+              'data-fx-critical-signature-r227="true"',
+              'data-fx-living-energy-r168="true"',
+              'data-fx-critical-narrative-r227="true"',
+              'data-fx-soty-continuity-r179="true"',
+              'data-fx-desktop-apex-r181="true"',
+          ]:
+              m = re.search(r'<link\s+[^>]*' + re.escape(marker) + r'[^>]*>', updated)
+              if not m or 'media="not all"' not in m.group(0) or 'data-fx-deferred-media-r300=' not in m.group(0):
+                  raise SystemExit(f'deferred-link contract failed: {marker}')
+          print('PASS r308 critical geometry merge + interaction-deferred enhancement CSS')
+          PY
+
+          node --check docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
+          git diff --check
+          git diff --stat
+
+      - name: Commit optimized first-paint path
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html \
+                  docs/scifi-ui/styles/formatx-critical-core-r227.css \
+                  docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
+          if git diff --cached --quiet; then
+            echo 'No r308 changes required.'
+            exit 0
+          fi
+          git commit -m 'Defer noncritical visual CSS after stable first paint'
+          git push origin HEAD:master

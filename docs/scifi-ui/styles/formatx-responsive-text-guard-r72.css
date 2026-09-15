@@ -1,0 +1,45 @@
+/* FormatX R72 responsive text guard.
+   Loaded after the reference layout so long copy can never cross the MAG
+   or sit underneath the Live OS action. */
+
+html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-copy,
+#hero .hero-copy > .hero-lead,
+#hero .hero-copy > .fx-category-definition {
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+
+#hero .hero-copy > .hero-lead {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 620px !important;
+}
+
+#hero .fx-reference-proof h2,
+#hero .fx-reference-proof p {
+  min-width: 0 !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+
+#hero .fx-reference-proof p {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-right: clamp(88px, 24vw, 104px) !important;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  #hero .fx-reference-proof h2 {
+    max-width: 72% !important;
+  }
+}
+
+@media (min-width: 901px) and (pointer: fine) {
+  #hero .fx-reference-proof p {
+    padding-right: 132px !important;
+  }
+}

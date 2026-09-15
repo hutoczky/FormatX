@@ -1,0 +1,9 @@
+{
+  "revision": "2026-08-09-sparse-hdr-mag-v21-candidate",
+  "material": "reference-glass-v21",
+  "highlight_model": "sparse-high-dynamic-facets-v21",
+  "highlight_coverage": "thresholded-facet-web-axis-ring-v21",
+  "geometry": "indexed-webgl2-mesh-v11-shape-v14-scale-v13",
+  "pixel_gate": "unchanged-reference-gate",
+  "status": "candidate-awaiting-live-chromium-validation"
+}

@@ -10,8 +10,10 @@
   },
   "public_delivery": {
     "first_party_only": true,
-    "public_origin": "https://www.formatxsuite.com",
+    "public_origin": "https://formatxsuite.com",
     "release_metadata_route": "/scifi-ui/data/current-release.json",
+    "platform_status_route": "/scifi-ui/data/platform-status.json",
+    "scroll_policy_route": "/scifi-ui/data/scroll-policy.json",
     "multiplatform_download_route": "/download/multiplatform",
     "android_download_route": "/download/android",
     "native_beta_download_route": "/download/android-native-beta",
@@ -19,24 +21,100 @@
   },
   "layout_contract": {
     "desktop_composition_preloaded": true,
-    "mobile_layout_unchanged": true,
-    "infinite_scroll_controller": "seamless-v6",
-    "scroll_controller": "native-input-seamless-cyclic",
-    "automatic_scroll_loop": true,
-    "clone_based_loop": true,
-    "clone_scope": "inert-hero-visual-only",
-    "hero_visual_bridge": true,
-    "ratio_matched_landing": true,
-    "frame_stable_landing": true,
-    "fine_pointer_scroll_mode": "native-input-seamless-cyclic",
-    "coarse_pointer_scroll_mode": "native-input-seamless-cyclic",
-    "input_event_interception": false,
-    "forced_scroll_transfer": true,
-    "automatic_page_position_changes": "loop-boundary-only",
-    "language_switch_preserves_scene_hash": true
+    "mobile_layout_unchanged": false,
+    "scroll_controller": "shared-seamless-v7-platform-input-policy",
+    "scroll_runtime_load": "critical-startup",
+    "scroll_runtime_independent_of_immersive": true,
+    "scroll_policy_source": "/scifi-ui/data/scroll-policy.json",
+    "section_scroll_snap": false,
+    "wheel_or_touch_scroll_capture": false,
+    "mobile": {
+      "controller": "seamless-v7",
+      "automatic_scroll_loop": true,
+      "visual_bridge": true,
+      "clone_based_loop": false,
+      "inert_reference_mirror": true,
+      "bridge_webgl_contexts": 0,
+      "automatic_page_position_changes": true,
+      "boundary_handoff_only": true,
+      "transfer_mode": "scrollend-or-idle",
+      "native_momentum_preserved": true,
+      "finite_document": false
+    },
+    "desktop": {
+      "controller": "seamless-v7",
+      "automatic_scroll_loop": true,
+      "visual_bridge": true,
+      "clone_based_loop": false,
+      "inert_reference_mirror": true,
+      "bridge_webgl_contexts": 0,
+      "boundary_handoff_only": true,
+      "native_wheel_input": true,
+      "transfer_mode": "scroll-idle-visual-match",
+      "native_momentum_preserved": true
+    },
+    "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
+    "language_switch_preserves_scene_hash": true,
+    "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
+    "deployment_revision": "2026-08-20-reference-loop-r246"
+  },
+  "quality_contract": {
+    "award_readiness_revision": "2026-08-11-production-audit-v53-v55-r3",
+    "market_ambition": {
+      "hungary": "top-1-target-not-claimed-without-external-ranking",
+      "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
+    },
+    "benchmark_floor": {
+      "policy": "igloo-inc-is-mandatory-minimum-reference",
+      "external_superiority_claim": false,
+      "native_first_party_procedural_gpu": true,
+      "functional_six_scene_morphing": true,
+      "adaptive_gpu_quality_from_measured_fps": true,
+      "canvas2d_safe_fallback": true,
+      "generative_audio": "explicit-user-opt-in",
+      "particle_typography_footer": true,
+      "third_party_scene_framework_required": false,
+      "scroll_ownership": "shared-seamless-v7-native-input-mobile-scrollend-handoff",
+      "section_scroll_snap": false,
+      "wheel_or_touch_scroll_capture": false
+    },
+    "native_apex_visual": "first-party-procedural-webgl2",
+    "mag_true_geometry_renderer": "desktop-v53-mobile-v55-single-webgl2",
+    "mag_image_backed": false,
+    "mag_webgl_context_count": 1,
+    "mag_paused_outside_hero": true,
+    "mag_reduced_motion_respected": true,
+    "mag_reference_validation": "live-browser-plus-source-gates-v53-v55-r3",
+    "first_response_product_positioning": true,
+    "hero_factual_trustline": true,
+    "server_rendered_software_application_schema": true,
+    "software_application_offer_price_present": true,
+    "public_proof_layer": true,
+    "proof_links": [
+      "/scifi-ui/verification.html",
+      "/scifi-ui/technical-report.html",
+      "/scifi-ui/security.html",
+      "/scifi-ui/downloads/"
+    ],
+    "proof_delivery": "first-party-only",
+    "wcag_target": "2.2-AA-plus",
+    "enhanced_key_touch_targets_css_px": 44,
+    "high_visibility_keyboard_focus": true,
+    "reduced_motion_treatment": true,
+    "lighthouse_thresholds": {
+      "performance_min": 0.9,
+      "accessibility_min": 1.0,
+      "best_practices_min": 1.0,
+      "seo_min": 1.0,
+      "lcp_max_ms": 2500,
+      "cls_max": 0.1
+    },
+    "field_inp_rum": "not_claimed_without_real_user_data",
+    "independent_professional_review": "not_published"
   },
   "source_of_truth": {
     "platform_status": "/scifi-ui/data/platform-status.json",
-    "release_metadata": "/scifi-ui/data/current-release.json"
+    "release_metadata": "/scifi-ui/data/current-release.json",
+    "scroll_policy": "/scifi-ui/data/scroll-policy.json"
   }
 }

@@ -1,120 +1,199 @@
 'use strict';
 
 const { chromium } = require('playwright');
-const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu';
 
-function assert(value, message) { if (!value) throw new Error(message); }
+const TEST_URL = process.env.FORMATX_TEST_URL
+  || 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu';
+const scriptUrl = name => new URL('./scripts/' + name, TEST_URL).href;
 
 async function installProductionCopy(page) {
-  const origin = new URL(TEST_URL).origin;
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/single-language-toggle.css?v=20260808-single-language-5' });
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1' });
-  await page.addScriptTag({ url: origin + '/scifi-ui/scripts/single-language-toggle.js?v=20260808-single-language-5' });
-  await page.addScriptTag({ url: origin + '/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1' });
-  await page.waitForFunction(() => (
-    document.documentElement.dataset.fxSingleLanguageToggle === 'ready'
-    && document.documentElement.dataset.fxCopyPolish === 'ready-v1'
-    && document.querySelectorAll('.fx-language-toggle').length === 1
-    && Boolean(document.getElementById('fx-licence-clarity'))
-    && Boolean(document.querySelector('.site-footer [data-fx-licence-link]'))
-  ), null, { timeout: 12000 });
+  await page.addScriptTag({ url: scriptUrl('single-language-toggle.js?v=ci-r247') });
+  await page.addScriptTag({ url: scriptUrl('formatx-copy-polish.js?v=ci-r247') });
+}
+
+function assert(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+const NAVIGATION = Object.freeze({
+  hu: [
+    ['Működés', 'Modulok', 'Licenc és árak', 'Biztonság', 'Letöltés'],
+    ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
+    ['Hogyan működik', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
+    ['Idegrendszer — Hogyan működik', 'Szervek — Funkciók és modulok', 'Kereskedelmi szív — Licencek és árak', 'Váz — Technológia és biztonság', 'Jeladó — Letöltés és bizonyítékok'],
+    ['Idegrendszer', 'Szervek', 'Kereskedelmi mag', 'Váz', 'Jeladó']
+  ],
+  en: [
+    ['Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads'],
+    ['How it works', 'Modules', 'Licences', 'Proof', 'Download'],
+    ['Nervous system — How it works', 'Organs — Functions and modules', 'Commerce heart — Licences and pricing', 'Skeleton — Technology and safety', 'Beacon — Downloads and evidence'],
+    ['Nervous system', 'Organs', 'Commerce core', 'Skeleton', 'Beacon']
+  ]
+});
+
+const DOWNLOAD_LABELS = Object.freeze({
+  hu: ['Teljes verzió – 5 napos próbalicenc', 'Teljes multiplatform verzió letöltése', 'Teljes multiplatform verzió'],
+  en: ['Full version – 5-day trial', 'Download full multiplatform version', 'Full multiplatform version']
+});
+
+function matchesOne(actual, expectedSets) {
+  return expectedSets.some(expected => JSON.stringify(actual) === JSON.stringify(expected));
 }
 
 async function clearIntro(page) {
+  const skip = page.locator('.fx-intro-skip');
+  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
   await page.evaluate(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
     root.classList.remove('fx-intro-running', 'fx-intro-pending', 'fx-intro-reveal');
     root.classList.add('fx-intro-complete');
-    if (overlay) { overlay.hidden = true; overlay.style.display = 'none'; overlay.setAttribute('aria-hidden', 'true'); }
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+    }
     document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
   });
 }
 
-async function waitLanguage(page, language) {
-  await page.waitForFunction(lang => {
-    const visibleControls = Array.from(document.querySelectorAll('.fx-language-toggle, [data-language], [data-language-choice]')).filter(node => {
-      const style = getComputedStyle(node);
-      const rect = node.getBoundingClientRect();
-      return !node.hidden && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > .02 && rect.width > 0 && rect.height > 0;
-    }).length;
+async function waitPublicState(page, language) {
+  await page.waitForFunction(({ lang, navigation, downloads }) => {
+    const nav = Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim());
+    const download = document.querySelector('#hero-download span')?.textContent.trim() || '';
+    const trial = lang === 'en'
+      ? /\b5-day trial(?: licence)?\b/i.test(document.body.innerText)
+      : /\b5 napos próbalicenc\b/i.test(document.body.innerText);
     return document.documentElement.lang === lang
-      && visibleControls === 1
-      && document.querySelectorAll('#fx-licence-clarity li').length === 4
-      && Boolean(document.querySelector('.site-footer [data-fx-licence-link]'));
-  }, language, { timeout: 12000 });
-  await page.waitForTimeout(300);
+      && document.documentElement.dataset.fxFixedCopyVersion === 'r210'
+      && Boolean(document.querySelector('.fx-language-toggle'))
+      && downloads.includes(download)
+      && trial
+      && navigation.some(expected => JSON.stringify(expected) === JSON.stringify(nav))
+      && Boolean(document.querySelector('.site-footer [data-fx-licence-link]'))
+      && Boolean(document.getElementById('fx-licence-clarity'));
+  }, {
+    lang: language,
+    navigation: NAVIGATION[language],
+    downloads: DOWNLOAD_LABELS[language]
+  }, { timeout: 45000 });
+  await page.waitForTimeout(250);
 }
 
-async function state(page) {
+async function readCopy(page) {
   return page.evaluate(() => ({
     lang: document.documentElement.lang,
-    body: document.body.innerText,
-    download: document.querySelector('#hero-download span')?.textContent.trim() || '',
-    trial: document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '',
+    nav: Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim()),
+    heroDownload: document.querySelector('#hero-download span')?.textContent.trim() || '',
+    hasFiveDayTrial: document.documentElement.lang === 'en'
+      ? /\b5-day trial(?: licence)?\b/i.test(document.body.innerText)
+      : /\b5 napos próbalicenc\b/i.test(document.body.innerText),
+    pricingTitle: Array.from(
+      document.querySelectorAll('#pricing-title > span, #pricing-title > em'),
+      node => node.textContent.trim()
+    ).join(' '),
     licenceTitle: document.getElementById('fx-licence-clarity-title')?.textContent.trim() || '',
-    licenceItems: Array.from(document.querySelectorAll('#fx-licence-clarity li'), node => node.textContent.trim()),
+    licenceItems: document.querySelectorAll('#fx-licence-clarity li').length,
     footerLicence: document.querySelector('.site-footer [data-fx-licence-link]')?.textContent.trim() || '',
-    visibleControls: Array.from(document.querySelectorAll('.fx-language-toggle, [data-language], [data-language-choice]')).filter(node => {
-      const style = getComputedStyle(node);
-      const rect = node.getBoundingClientRect();
-      return !node.hidden && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > .02 && rect.width > 0 && rect.height > 0;
-    }).length,
-    overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth
+    visibleLanguageButtons: Array.from(
+      document.querySelectorAll('.fx-language-toggle, .language-switch [data-language]')
+    ).filter(node => getComputedStyle(node).display !== 'none' && !node.hidden).length,
+    retiredReleaseCopy: /\bV(?:29|92|120|121)\b|92\.00|Windows nyilvános béta letöltése|Download Windows public beta|Multiplatform nyilvános béta|Multiplatform public beta|NATÍV BÉTA|NATIVE BETA/i.test(
+      document.body.innerText
+    ),
+    horizontalOverflow: Math.max(
+      document.documentElement.scrollWidth,
+      document.body.scrollWidth
+    ) - innerWidth
   }));
 }
 
-function check(value, language, label) {
-  console.log(label, JSON.stringify(value));
-  assert(value.lang === language, `${label}: language mismatch`);
-  assert(value.visibleControls === 1, `${label}: expected exactly one visible language control`);
-  assert(value.licenceItems.length === 4, `${label}: licence clarity must contain four items`);
-  assert(value.overflow <= 1, `${label}: horizontal overflow ${value.overflow}px`);
-  assert(!/\bV(?:29|92|120|121)\b|92\.00|Multiplatform nyilvános béta|Multiplatform public beta|Windows nyilvános béta|Windows public beta/i.test(value.body), `${label}: retired beta/version copy remains`);
-
-  if (language === 'hu') {
-    assert(/teljes/i.test(value.download) && !/béta/i.test(value.download), `${label}: Hungarian CTA is not full-release wording`);
-    assert(/nap/i.test(value.trial), `${label}: Hungarian trial label missing`);
-    assert(/licenc/i.test(value.licenceTitle), `${label}: Hungarian licence clarification title missing`);
-    assert(/licenc/i.test(value.footerLicence), `${label}: Hungarian footer licence label missing`);
-    assert(/5\s*nap/i.test(value.body), `${label}: 5-day trial fact missing from Hungarian public copy`);
-  } else {
-    assert(/full/i.test(value.download) && !/beta/i.test(value.download), `${label}: English CTA is not full-release wording`);
-    assert(/day/i.test(value.trial), `${label}: English trial label missing`);
-    assert(/licen[cs]e/i.test(value.licenceTitle), `${label}: English licence clarification title missing`);
-    assert(/licen[cs]e/i.test(value.footerLicence), `${label}: English footer licence label missing`);
-    assert(/5[- ]day/i.test(value.body), `${label}: 5-day trial fact missing from English public copy`);
-  }
+function assertHungarian(state, name) {
+  assert(state.lang === 'hu', name + ': Hungarian language state missing: ' + JSON.stringify(state));
+  assert(matchesOne(state.nav, NAVIGATION.hu), name + ': Hungarian navigation mismatch: ' + JSON.stringify(state));
+  assert(DOWNLOAD_LABELS.hu.includes(state.heroDownload),
+    name + ': Hungarian download label mismatch: ' + JSON.stringify(state));
+  assert(state.hasFiveDayTrial,
+    name + ': Hungarian 5-day trial copy missing: ' + JSON.stringify(state));
+  assert(state.pricingTitle === 'A licenccsomag a munkádhoz igazodik.',
+    name + ': Hungarian pricing heading mismatch: ' + JSON.stringify(state));
+  assert(state.licenceTitle === 'Mit ad a FormatX licenc?' && state.licenceItems === 4,
+    name + ': Hungarian licence clarification mismatch: ' + JSON.stringify(state));
+  assert(['Licenc', 'Licencfeltételek'].includes(state.footerLicence),
+    name + ': Hungarian footer licence mismatch: ' + JSON.stringify(state));
+  assert(state.visibleLanguageButtons === 1,
+    name + ': exactly one visible language button required: ' + JSON.stringify(state));
+  assert(!state.retiredReleaseCopy,
+    name + ': retired beta/version copy remains: ' + JSON.stringify(state));
+  assert(state.horizontalOverflow <= 1,
+    name + ': horizontal overflow: ' + JSON.stringify(state));
 }
 
-async function verify(browser, viewport, label, mobile) {
-  const context = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile, locale: 'hu-HU' });
-  await context.addInitScript(() => { try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {} });
+function assertEnglish(state, name) {
+  assert(state.lang === 'en', name + ': English language state missing: ' + JSON.stringify(state));
+  assert(matchesOne(state.nav, NAVIGATION.en), name + ': English navigation mismatch: ' + JSON.stringify(state));
+  assert(DOWNLOAD_LABELS.en.includes(state.heroDownload),
+    name + ': English download label mismatch: ' + JSON.stringify(state));
+  assert(state.hasFiveDayTrial,
+    name + ': English 5-day trial copy missing: ' + JSON.stringify(state));
+  assert(state.pricingTitle === 'The licence plan fits your work.',
+    name + ': English pricing heading mismatch: ' + JSON.stringify(state));
+  assert(state.licenceTitle === 'What does the FormatX licence grant?' && state.licenceItems === 4,
+    name + ': English licence clarification mismatch: ' + JSON.stringify(state));
+  assert(['Licence', 'Licence terms'].includes(state.footerLicence),
+    name + ': English footer licence mismatch: ' + JSON.stringify(state));
+  assert(state.visibleLanguageButtons === 1,
+    name + ': exactly one visible language button required: ' + JSON.stringify(state));
+  assert(!state.retiredReleaseCopy,
+    name + ': retired beta/version copy remains: ' + JSON.stringify(state));
+  assert(state.horizontalOverflow <= 1,
+    name + ': horizontal overflow: ' + JSON.stringify(state));
+}
+
+async function testViewport(browser, viewport, name, mobile) {
+  const context = await browser.newContext({
+    viewport,
+    isMobile: Boolean(mobile),
+    hasTouch: Boolean(mobile),
+    locale: 'hu-HU'
+  });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(String(error)));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
 
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
-  await clearIntro(page);
   await installProductionCopy(page);
-  await waitLanguage(page, 'hu');
-  check(await state(page), 'hu', label + '-hu');
+  await clearIntro(page);
+  await waitPublicState(page, 'hu');
+  assertHungarian(await readCopy(page), name);
 
-  await page.locator('.fx-language-toggle:visible').first().click();
-  await waitLanguage(page, 'en');
-  check(await state(page), 'en', label + '-en');
+  await page.locator('.fx-language-toggle').evaluate(node => node.click());
+  await waitPublicState(page, 'en');
+  assertEnglish(await readCopy(page), name);
 
-  const meaningful = errors.filter(item => !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*(?:403|404)/i.test(item));
-  assert(!meaningful.length, `${label}: browser errors: ${meaningful.join(' | ')}`);
+  const meaningful = errors.filter(item => (
+    !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*(?:403|404)/i.test(item)
+  ));
+  assert(!meaningful.length, name + ': browser errors: ' + meaningful.join(' | '));
   await context.close();
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--enable-unsafe-swiftshader']
+  });
   try {
-    await verify(browser, { width: 1440, height: 900 }, 'desktop', false);
-    await verify(browser, { width: 390, height: 844 }, 'mobile', true);
-    console.log('PASS FormatX bilingual full-release, single language control and 5-day trial licence');
-  } finally { await browser.close(); }
-})().catch(error => { console.error(error.stack || error); process.exit(1); });
+    await testViewport(browser, { width: 1440, height: 900 }, 'desktop', false);
+    await testViewport(browser, { width: 390, height: 844 }, 'mobile', true);
+    console.log('PASS FormatX bilingual full-release labels and 5-day trial licence');
+  } finally {
+    await browser.close();
+  }
+})().catch(error => {
+  console.error(error.stack || error);
+  process.exit(1);
+});

@@ -15,9 +15,13 @@ on:
       - '.github/scripts/validate-content-standard.py'
       - '.github/scripts/validate-content-standard-v2.py'
       - '.github/scripts/validate-public-release-integration.py'
+      - '.github/scripts/validate-public-canonical-hosts.cjs'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-thought-genome.cjs'
       - '.github/scripts/validate-thought-disclosure-browser.cjs'
+      - '.github/scripts/validate-real3d-core-v20.cjs'
+      - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/scripts/production-preflight.cjs'
       - '.github/workflows/sync-current-release.yml'
       - '.github/workflows/validate-website.yml'
@@ -34,15 +38,20 @@ on:
       - '.github/scripts/validate-content-standard.py'
       - '.github/scripts/validate-content-standard-v2.py'
       - '.github/scripts/validate-public-release-integration.py'
+      - '.github/scripts/validate-public-canonical-hosts.cjs'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-thought-genome.cjs'
       - '.github/scripts/validate-thought-disclosure-browser.cjs'
+      - '.github/scripts/validate-real3d-core-v20.cjs'
+      - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/scripts/production-preflight.cjs'
       - '.github/workflows/sync-current-release.yml'
       - '.github/workflows/validate-website.yml'
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: formatx-canonical-content-${{ github.ref }}
@@ -54,10 +63,10 @@ jobs:
     timeout-minutes: 55
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: npm
@@ -67,6 +76,7 @@ jobs:
         run: |
           python3 .github/scripts/validate-content-standard-v2.py
           python3 .github/scripts/validate-public-release-integration.py
+          node .github/scripts/validate-public-canonical-hosts.cjs
 
       - name: Validate JavaScript syntax
         shell: bash
@@ -88,25 +98,34 @@ jobs:
           node --check docs/scifi-ui/scripts/public-evidence-pages.js
           node --check docs/scifi-ui/scripts/formatx-seo.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-voice.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
+          node --check .github/scripts/validate-public-canonical-hosts.cjs
           node --check .github/scripts/validate-content-visuals.cjs
           node --check .github/scripts/validate-public-pages-browser.cjs
+          node --check .github/scripts/validate-thought-genome.cjs
           node --check .github/scripts/validate-thought-disclosure-browser.cjs
+          node --check .github/scripts/validate-real3d-core-v20.cjs
+          node --check .github/scripts/validate-real3d-mobile-startup-v22.cjs
           node --check .github/scripts/production-preflight.cjs
 
       - name: Validate billing Worker and production bundle
         working-directory: billing-worker
         run: |
+          set -euo pipefail
           npm ci
           npm test
           npx wrangler deploy --dry-run --outdir ../.wrangler-content-validation
 
       - name: Install Playwright browser
         run: |
+          set -euo pipefail
           npm install --prefix "$RUNNER_TEMP/formatx-browser" --no-audit --no-fund playwright@1.62.0
           "$RUNNER_TEMP/formatx-browser/node_modules/.bin/playwright" install --with-deps chromium
 
@@ -123,6 +142,7 @@ jobs:
               && curl -fsS http://127.0.0.1:4178/scifi-ui/support.html >/dev/null \
               && curl -fsS http://127.0.0.1:4178/scifi-ui/data/current-release.json >/dev/null \
               && curl -fsS http://127.0.0.1:4178/scifi-ui/data/platform-status.json >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/data/scroll-policy.json >/dev/null \
               && exit 0
             sleep 0.25
           done
@@ -142,14 +162,15 @@ jobs:
           FORMATX_PUBLIC_ORIGIN: http://127.0.0.1:4178
         run: node .github/scripts/validate-public-pages-browser.cjs
 
-      - name: Validate existing Morphing Organism and thought contracts
+      - name: Validate current production MAG and thought contracts
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
         shell: bash
         run: |
           set -euo pipefail
-          node .github/scripts/validate-three-site-v4.cjs
+          node .github/scripts/validate-real3d-core-v20.cjs
+          node .github/scripts/validate-real3d-mobile-startup-v22.cjs
           node .github/scripts/validate-thought-genome.cjs
           node .github/scripts/validate-thought-disclosure-browser.cjs
 
@@ -169,7 +190,7 @@ jobs:
 
       - name: Upload validation artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: formatx-content-and-production-readiness
           path: |
@@ -177,3 +198,23 @@ jobs:
             artifacts/production-readiness.json
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Publish full website validation status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='All public pages, browser interactions, visual and production contracts passed'
+          else
+            state='failure'
+            description='Full website browser validation failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX full website browser validation' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

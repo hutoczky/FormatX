@@ -1,0 +1,58 @@
+/* FormatX v52 mobile host correction.
+   Keeps the real WebGL2 MAG inside the hero visual ROI on physical mobile browsers. */
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html[data-fx-core-v51="ready-v51"] body.living-architecture #hero .hero-grid {
+    gap: 10px !important;
+  }
+
+  html[data-fx-core-v51="ready-v51"] body.living-architecture #hero .hero-space {
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+    min-height: clamp(360px, 48svh, 520px) !important;
+    max-height: 520px !important;
+    background:
+      radial-gradient(circle at 50% 48%, rgba(52, 217, 255, .055), transparent 34%),
+      radial-gradient(circle at 50% 50%, rgba(119, 63, 226, .035), transparent 52%) !important;
+  }
+
+  #hero .hero-space > .fx-core-v51-stage[data-fx-mobile-host="hero-space"] {
+    position: absolute !important;
+    z-index: 3 !important;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100vw !important;
+    height: 100svh !important;
+    max-width: none !important;
+    max-height: none !important;
+    transform: translate(-50%, -50%) !important;
+    transform-origin: 50% 50% !important;
+    overflow: hidden !important;
+    contain: layout paint style !important;
+    pointer-events: none !important;
+  }
+
+  #hero .hero-space > .fx-core-v51-stage[data-fx-mobile-host="hero-space"] .fx-core-v51-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+  }
+
+  html[data-fx-core-v51="ready-v51"] body.living-architecture #hero .hero-copy {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  html[data-fx-core-v51="ready-v51"] body.living-architecture #hero .hero-space {
+    min-height: clamp(340px, 46svh, 470px) !important;
+    max-height: 470px !important;
+  }
+}

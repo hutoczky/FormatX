@@ -1,0 +1,63 @@
+/* FormatX r475 — canonical ASK dialogue render-surface owner.
+   r244 intentionally retires the legacy floating Organism shell so its old
+   launcher cannot compete with the canonical ASK control. The dialogue itself,
+   however, is still the canonical response surface. Restore only an explicitly
+   open dialogue, and only while no higher-priority menu/intro/system panel owns
+   the interface. */
+
+html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+body.living-architecture:not(.fx-organism-panel-open)
+.fx-organism-dialogue.is-open {
+  position: fixed !important;
+  z-index: 12070 !important;
+  display: grid !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+body.living-architecture:not(.fx-organism-panel-open)
+.fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
+  display: grid !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+/* The canonical hero ASK button replaces the old floating thought launcher.
+   Keep that legacy trigger physically retired even while its dialogue is open. */
+body.living-architecture .fx-organism-dialogue > .fx-organism-thought-trigger {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 820px) {
+  html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+  body.living-architecture:not(.fx-organism-panel-open)
+  .fx-organism-dialogue.is-open {
+    right: max(12px, env(safe-area-inset-right)) !important;
+    left: max(12px, env(safe-area-inset-left)) !important;
+    bottom: max(20px, calc(env(safe-area-inset-bottom) + 16px)) !important;
+    width: auto !important;
+    max-height: calc(100dvh - 32px) !important;
+  }
+
+  html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+  body.living-architecture:not(.fx-organism-panel-open)
+  .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
+    max-height: min(78dvh, 620px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-organism-dialogue.is-open,
+  .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
+    animation: none !important;
+    transition: none !important;
+  }
+}

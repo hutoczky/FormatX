@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "revision": "r344",
+  "purpose": "Stable full browser and Lighthouse validation after restrained mobile MAG bloom and current quantum input contract fixes.",
+  "mobile_mag": {
+    "bloom": "restrained",
+    "edge": "softened",
+    "geometry": "unchanged-native-webgl"
+  },
+  "validation": {
+    "desktop_runs": 3,
+    "mobile_runs": 3,
+    "browser_contracts": "full"
+  }
+}

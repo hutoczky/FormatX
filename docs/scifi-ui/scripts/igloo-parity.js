@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v27') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v27';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v28') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v28';
 
   let genomeWebglRequested = false;
 
@@ -56,6 +56,15 @@
       './styles/formatx-mobile-readability.css?v=20260807-audio-slot-2',
       'fxMobileReadability',
       'FormatX mobile readability stylesheet failed to load.'
+    );
+  }
+
+  function ensureReadabilityFloorStyle() {
+    ensureStyle(
+      'data-fx-readability-floor',
+      '/scifi-ui/styles/formatx-readability-floor.css?v=20260808-a11y-floor-1',
+      'fxReadabilityFloor',
+      'FormatX readability floor stylesheet failed to load.'
     );
   }
 
@@ -114,7 +123,13 @@
         + '&lang=' + encodeURIComponent(language)
         + '&source=pricing-qr';
 
-      if (link instanceof HTMLAnchorElement) link.href = checkoutSource;
+      if (link instanceof HTMLAnchorElement) {
+        link.href = checkoutSource;
+        const planName = card.querySelector('.fx-plan-qr-copy strong')?.textContent?.trim() || plan;
+        link.setAttribute('aria-label', language === 'en'
+          ? 'QR — open ' + planName + ' payment page'
+          : 'QR — ' + planName + ' fizetési oldal megnyitása');
+      }
 
       card.classList.remove('is-qr-ready', 'is-qr-error');
       card.classList.add('is-qr-loading');
@@ -180,12 +195,13 @@
   ensureOrganismDockStyle();
   ensureOrganismSpeakingStyle();
   ensureMobileReadabilityStyle();
+  ensureReadabilityFloorStyle();
   ensureMobileHeroFlowStyle();
   ensureDesktopLayoutStyle();
   ensurePremiumFinishStyle();
   root.dataset.fxLocalQr = 'ready-v2';
   root.dataset.fxLegacyRenderer = 'retired';
-  root.dataset.fxRenderer = 'three-host-safe';
+  root.dataset.fxRenderer = 'native-apex-preferred';
   refreshQrImages();
 
   document.addEventListener('click', event => {
@@ -200,40 +216,63 @@
 
   const queue = [
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
-    './scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
+    './scripts/formatx-copy-polish.js?v=20260820-r248-footer-licence',
     './scripts/release-metadata.js?v=20260807-full-release-1',
-    './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2',
+    './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2-reference-r70',
     './scripts/platform-status.js?v=20260807-full-release-1',
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
-    './scripts/organism-core-controller.js?v=20260729-core-ui-2',
+    './scripts/organism-core-controller.js?v=20260824-menu-race-r251',
     './scripts/organism-voice.js?v=20260730-organism-voice-4',
-    './scripts/organism-voice-stability.js?v=20260731-organism-stability-1',
+    './scripts/organism-voice-stability.js?v=20260808-mobile-visual-viewport-1',
     './scripts/organism-master-sync.js?v=20260802-master-sync-1',
     './scripts/formatx-audio-repair.js?v=20260728-ambient-score-v5',
     './scripts/organism-core-interaction.js?v=20260730-core-interaction-1',
-    './scripts/synaptic-thought-genome.js?v=20260731-thought-genome-1',
+    './scripts/synaptic-thought-genome.js?v=20260811-current-host-v2',
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
-    './scripts/formatx-mobile-unified.js?v=20260731-mobile-unified-2',
-    './scripts/formatx-infinite-scroll.js?v=20260807-seamless-v6',
-    './scripts/formatx-three-host-safe.js?v=20260805-immersive-host-2',
+    './scripts/formatx-mobile-unified.js?v=20260820-reference-loop-r246',
+    './scripts/formatx-infinite-scroll.js?v=20260820-reference-loop-r246',
+    './scripts/formatx-apex-scene-stability.js?v=20260808-core-scene-1&rev=20260827-r413-single-mag-owner',
+    './scripts/formatx-apex-native.js?v=20260808-native-apex-1',
+    './scripts/formatx-three-host-safe.js?v=20260808-native-apex-fallback-1',
     './scripts/formatx-render-visibility.js?v=20260805-immersive-visibility-3',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/interaction-genome.js?v=20260728-genome-3d-1',
     './scripts/formatx-language-copy-stability.js?v=20260807-full-release-1',
-    './scripts/formatx-premium-finish.js?v=20260805-motion-gate-3'
+    './scripts/formatx-premium-finish.js?v=20260805-motion-gate-3',
+    './scripts/formatx-accessibility-finalizer.js?v=20260808-a11y-1'
   ];
 
   function load(index) {
     if (index >= queue.length) {
       root.dataset.fxTranscendProgress = '100';
-      root.dataset.fxTranscendLoader = 'safe-ready-v27';
+      root.dataset.fxTranscendLoader = 'safe-ready-v28';
+      return;
+    }
+
+    const source = queue[index];
+    const dedicatedCoreReady = /^(?:ready-v20|ready-v69)$/.test(root.dataset.fxCoreReal3d || '');
+    const dedicatedCoreSettled = dedicatedCoreReady
+      || ['context-unavailable', 'webgl2-unavailable', 'shader-failed', 'context-lost'].includes(root.dataset.fxCoreReal3d);
+    if (dedicatedCoreSettled
+      && (source.includes('formatx-apex-native.js') || source.includes('formatx-three-host-safe.js'))) {
+      root.dataset.fxNativeApex = 'retired-for-dedicated-core-v69';
+      root.dataset.fxThreeHost = dedicatedCoreReady ? 'single-real3d-v69' : 'canvas2d-safety-fallback-v22';
+      root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
+      load(index + 1);
+      return;
+    }
+
+    if (source.includes('formatx-apex-native.js') && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.dataset.fxNativeApex = 'reduced-motion-fallback';
+      root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
+      load(index + 1);
       return;
     }
 
     root.dataset.fxTranscendProgress = String(Math.round(index / queue.length * 100));
     const script = document.createElement('script');
-    script.src = queue[index];
+    script.src = source;
     script.async = false;
     script.dataset.fxTranscendModule = String(index);
 
@@ -244,8 +283,8 @@
       settled = true;
       clearTimeout(timeout);
       if (!ok) {
-        console.warn('FormatX optional module did not complete:', queue[index], reason);
-        root.dataset.fxTranscendLoader = 'safe-degraded-v27';
+        console.warn('FormatX optional module did not complete:', source, reason);
+        root.dataset.fxTranscendLoader = 'safe-degraded-v28';
       }
       root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
       load(index + 1);

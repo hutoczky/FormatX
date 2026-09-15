@@ -35,6 +35,11 @@
     );
   }
 
+  function menuIsOpen() {
+    return ROOT.classList.contains('fx-organism-menu-open')
+      && document.getElementById('main-nav')?.classList.contains('open');
+  }
+
   function closeResponsiveMenu() {
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('main-nav');
@@ -197,7 +202,8 @@
     interfaceReady = true;
     if (pendingPanel) openPanel(pendingPanel, 'deferred-navigation');
     else if (!panelIsOpen()) {
-      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+      if (menuIsOpen()) updateNavigation(0);
+      else activateCore({ scroll: false, replaceHistory: true, closePanel: false });
     }
   }
 
@@ -243,5 +249,6 @@
 
   ROOT.dataset.fxOrganismCoreController = 'ready';
   if (interfaceReady) interfaceBecameReady();
+  else if (menuIsOpen()) updateNavigation(0);
   else activateCore({ scroll: false, replaceHistory: true, closePanel: false });
 }());
