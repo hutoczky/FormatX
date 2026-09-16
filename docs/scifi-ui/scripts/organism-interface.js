@@ -364,11 +364,13 @@
   }
 
   function initialise() {
+    if (ROOT.dataset.fxOrganismInterface === 'ready') return;
     consoleRoot = buildConsole();
     SPECS.forEach(moveSectionContent);
     buildActionbar();
     ROOT.classList.add('fx-organism-interface-ready', 'fx-organism-scene-0');
     ROOT.dataset.fxOrganismInterface = 'ready';
+    ROOT.dataset.fxOrganismBootstrapR857 = 'post-intro-materialised';
     document.body.classList.add('fx-organism-shell');
 
     document.addEventListener('click', onClick, true);
@@ -387,9 +389,19 @@
     }));
   }
 
+  function initialiseAfterIntro() {
+    if (ROOT.dataset.fxOrganismInterface === 'ready') return;
+    if (ROOT.dataset.fxPreloaderR531 === 'done' || !document.getElementById('formatx-event-horizon')) {
+      initialise();
+      return;
+    }
+    ROOT.dataset.fxOrganismBootstrapR857 = 'deferred-until-preloader-complete';
+    document.addEventListener('formatx:preloadercomplete', initialise, { once: true, capture: true });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initialise, { once: true });
+    document.addEventListener('DOMContentLoaded', initialiseAfterIntro, { once: true });
   } else {
-    initialise();
+    initialiseAfterIntro();
   }
 }());
