@@ -14,6 +14,31 @@ const entry = read('billing-worker/src/production-feedback-entry.js');
 const workerConfig = read('billing-worker/wrangler.jsonc');
 const matrix = read('.github/scripts/validate-responsive-production-matrix.cjs');
 
+function validateProductionWorkerEntry(configSource) {
+  const mainMatch = configSource.match(/"main"\s*:\s*"([^"]+)"/);
+  assert.ok(mainMatch, 'production Worker main entry is missing');
+  const main = mainMatch[1];
+  if (main === 'src/production-content-entry.js') return;
+
+  assert.match(
+    main,
+    /^src\/production-content-entry-r\d+\.js$/,
+    `unexpected production Worker entry: ${main}`,
+  );
+
+  const wrapper = read(`billing-worker/${main}`);
+  const imported = wrapper.match(
+    /import\s+([A-Za-z_$][\w$]*)\s+from\s+['"]\.\/production-content-entry\.js['"]/,
+  );
+  assert.ok(imported, `${main} must import the canonical production-content-entry.js wrapper`);
+  const delegate = imported[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  assert.match(
+    wrapper,
+    new RegExp(`\\b${delegate}\\.fetch\\s*\\(\\s*request\\s*,\\s*env\\s*,\\s*ctx\\s*\\)`),
+    `${main} must delegate fetch(request, env, ctx) directly to the canonical production wrapper`,
+  );
+}
+
 assert.match(compatible, /^<svg[\s\S]*<\/svg>\s*$/, 'compatible portable installer must be a self-contained SVG');
 assert.doesNotMatch(compatible, /data:image\/webp/i, 'Android-compatible asset must not embed WebP');
 assert.doesNotMatch(compatible, /<image\b/i, 'Android-compatible asset must not rely on a nested raster image');
@@ -65,6 +90,6 @@ assert.match(api, /createFeedbackTableIfMissing/, 'feedback API must retain miss
 assert.match(api, /runWithFeedbackTable/, 'feedback API must retry a real operation after missing-table bootstrap');
 assert.doesNotMatch(entry, /ensureFeedbackSchemaCompatibility\s*\(/, 'production feedback hot path must not run schema maintenance before every request');
 assert.match(entry, /handleFeedbackRequest\(request, env\)/, 'production feedback entry must delegate current feedback handling to feedback-api');
-assert.match(workerConfig, /"main": "src\/production-content-entry\.js"/, 'unexpected production Worker entry');
+validateProductionWorkerEntry(workerConfig);
 
 console.log('FormatX mobile showcase, feedback and responsive matrix validation passed with current lazy feedback schema ownership and direct compatible asset ownership.');
