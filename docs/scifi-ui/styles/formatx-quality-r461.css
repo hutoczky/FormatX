@@ -559,4 +559,14 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
   visibility: hidden !important;
 }
 
+/* R840h — the opaque MAG-birth intro owns desktop paint, while final hero
+   geometry remains fully laid out underneath. Hide only the child paint subtree;
+   #hero itself keeps visible/display and its exact final height for the R533 contract. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed) body.living-architecture
+  #hero > .hero-grid {
+    visibility: hidden !important;
+  }
+}
+
 /* deploy-r576-first-paint-hero-reference-parity-no-manual-pause */
