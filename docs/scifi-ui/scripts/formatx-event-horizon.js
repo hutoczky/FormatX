@@ -60,6 +60,7 @@ ROOT.dataset.fxPreloaderPaintOwnerR606='bounded-raster-single-compositor-deadlin
 ROOT.dataset.fxPreloaderPaintOwnerR636='sync-no-transform-before-visual-css';ROOT.dataset.fxPreloaderPaintOwnerR641='timing-only-overlay-clock-small-energy-line';
 ROOT.dataset.fxPreloaderFinalizeR609='hide-first-no-subtree-animation-enumeration';
 ROOT.dataset.fxPreloaderVisualSequenceR635='system-wake-core-sync-ready-reveal';
+ROOT.dataset.fxIntroMagBirthR852='wake-sync-real-r326-handoff';
 ROOT.dataset.fxIntroCompletionOwnerR769='preloader-finalizer-only';
 ROOT.dataset.fxIntroNotificationR770='canonical-release-before-general-consumers';
 
@@ -93,7 +94,38 @@ function cancelReleaseWindow(){try{preloaderReleaseAbort?.abort();}catch(_){}pre
 function cancelPreloaderTimers(){if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;if(preloaderRevealTimer)clearTimeout(preloaderRevealTimer);preloaderRevealTimer=0;if(preloaderPhaseTimerA)clearTimeout(preloaderPhaseTimerA);preloaderPhaseTimerA=0;if(preloaderPhaseTimerB)clearTimeout(preloaderPhaseTimerB);preloaderPhaseTimerB=0;if(preloaderWatchdog)clearInterval(preloaderWatchdog);preloaderWatchdog=0;cancelReleaseWindow();}
 function armDeadline(callback,delay){cancelDeadline();const boundedDelay=Math.max(0,delay);const browserScheduler=globalThis.scheduler;if(browserScheduler&&typeof browserScheduler.postTask==='function'&&typeof AbortController==='function'){preloaderDeadlineAbort=new AbortController();browserScheduler.postTask(callback,{delay:boundedDelay,priority:'user-blocking',signal:preloaderDeadlineAbort.signal}).catch(()=>{});preloaderDeadlineTimer=setTimeout(callback,boundedDelay+16);ROOT.dataset.fxPreloaderDeadlineQueueR556='scheduler-user-blocking-plus-timer';return;}preloaderDeadlineTimer=setTimeout(callback,boundedDelay);ROOT.dataset.fxPreloaderDeadlineQueueR556='timer-fallback';}
 function armReleaseWindow(callback,delay){if(preloaderTimer)clearTimeout(preloaderTimer);preloaderTimer=0;cancelReleaseWindow();const boundedDelay=Math.max(0,delay);const browserScheduler=globalThis.scheduler;if(browserScheduler&&typeof browserScheduler.postTask==='function'&&typeof AbortController==='function'){preloaderReleaseAbort=new AbortController();browserScheduler.postTask(callback,{delay:boundedDelay,priority:'user-blocking',signal:preloaderReleaseAbort.signal}).catch(()=>{});preloaderTimer=setTimeout(callback,boundedDelay+16);ROOT.dataset.fxPreloaderReleaseQueueR828='scheduler-user-blocking-plus-timer';return;}preloaderTimer=setTimeout(callback,boundedDelay);ROOT.dataset.fxPreloaderReleaseQueueR828='timer-fallback';}
-function setIntroPhase(overlay,phase){if(!(overlay instanceof HTMLElement)||preloaderReleased)return;overlay.dataset.fxIntroPhaseR635=phase;const output=overlay.querySelector('[data-fx-intro-output]');const progress=overlay.querySelector('[data-fx-intro-progress]');const status=overlay.querySelector('[data-fx-intro-status]');const english=ROOT.lang==='en';const phases={wake:{out:'WAKE',value:24,en:'LIVING MAG STARTING',hu:'ÉLŐ MAG INDÍTÁSA'},sync:{out:'SYNC',value:72,en:'MAG SYNCHRONIZING',hu:'MAG SZINKRONIZÁLÁS'},ready:{out:'READY',value:100,en:'SYSTEM STABLE',hu:'RENDSZER STABIL'}};const state=phases[phase]||phases.wake;if(output instanceof HTMLOutputElement)output.value=state.out;if(progress instanceof HTMLProgressElement){progress.max=100;progress.value=state.value;progress.setAttribute('aria-label',english?state.en:state.hu);}if(status instanceof HTMLElement)status.textContent=english?state.en:state.hu;}
+function prepareMagHandoffR852(overlay){
+  if(REDUCED||preloaderReleased||!(overlay instanceof HTMLElement))return false;
+  const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+  const target=stage instanceof HTMLElement?stage:document.querySelector('#hero .hero-space');
+  if(!(target instanceof HTMLElement))return false;
+  const rect=target.getBoundingClientRect();
+  if(!(rect.width>0&&rect.height>0))return false;
+  const portal=overlay.querySelector('.fx-intro-portal');
+  const portalRect=portal instanceof HTMLElement?portal.getBoundingClientRect():null;
+  const targetX=rect.left+rect.width*.5;
+  const targetY=rect.top+rect.height*.5;
+  const baseX=innerWidth*.5;
+  const baseY=innerHeight*.48;
+  const targetSize=Math.max(120,Math.min(rect.width,rect.height)*.72);
+  const portalSize=Math.max(1,portalRect?.width||Math.min(innerWidth*.36,420));
+  const scale=Math.max(.34,Math.min(1.16,targetSize/portalSize));
+  const hole=Math.max(72,Math.min(210,targetSize*.32));
+  const feather=Math.max(hole+58,Math.min(320,targetSize*.58));
+  overlay.style.setProperty('--fx-mag-handoff-x',`${Math.round(targetX)}px`);
+  overlay.style.setProperty('--fx-mag-handoff-y',`${Math.round(targetY)}px`);
+  overlay.style.setProperty('--fx-mag-handoff-dx',`${Math.round(targetX-baseX)}px`);
+  overlay.style.setProperty('--fx-mag-handoff-dy',`${Math.round(targetY-baseY)}px`);
+  overlay.style.setProperty('--fx-mag-handoff-scale',String(scale));
+  overlay.style.setProperty('--fx-mag-handoff-hole',`${Math.round(hole)}px`);
+  overlay.style.setProperty('--fx-mag-handoff-feather',`${Math.round(feather)}px`);
+  overlay.classList.add('fx-mag-handoff-r852');
+  const ready=ROOT.dataset.fxCrystalOrganismR326==='ready'&&ROOT.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326';
+  overlay.dataset.fxIntroMagEngineR852=ready?'r326-ready':'r326-booting';
+  ROOT.dataset.fxIntroMagHandoffR852=ready?'real-r326-ready-window':'real-r326-owned-target';
+  return true;
+}
+function setIntroPhase(overlay,phase){if(!(overlay instanceof HTMLElement)||preloaderReleased)return;overlay.dataset.fxIntroPhaseR635=phase;const output=overlay.querySelector('[data-fx-intro-output]');const progress=overlay.querySelector('[data-fx-intro-progress]');const status=overlay.querySelector('[data-fx-intro-status]');const english=ROOT.lang==='en';const phases={wake:{out:'WAKE',value:24,en:'LIVING MAG STARTING',hu:'ÉLŐ MAG INDÍTÁSA'},sync:{out:'SYNC',value:72,en:'MAG SYNCHRONIZING',hu:'MAG SZINKRONIZÁLÁS'},ready:{out:'READY',value:100,en:'SYSTEM STABLE',hu:'RENDSZER STABIL'}};const state=phases[phase]||phases.wake;if(output instanceof HTMLOutputElement)output.value=state.out;if(progress instanceof HTMLProgressElement){progress.max=100;progress.value=state.value;progress.setAttribute('aria-label',english?state.en:state.hu);}if(status instanceof HTMLElement)status.textContent=english?state.en:state.hu;if(phase==='ready')prepareMagHandoffR852(overlay);}
 function startReveal(overlay){if(preloaderReleased||REDUCED||!(overlay instanceof HTMLElement))return;setIntroPhase(overlay,'ready');clear(overlay,'opacity');overlay.classList.add('fx-preloader-reveal-r635');ROOT.dataset.fxPreloaderRevealR635=`inside-window-${Math.round(performance.now()-PRELOADER_BOOT_AT)}`;}
 function finalizePreloader(source){
   if(preloaderReleased)return false;
@@ -101,7 +133,7 @@ function finalizePreloader(source){
   introMark('releaseCallbackEnteredAt');
   preloaderReleased=true;
   const overlay=document.getElementById(OVERLAY_ID);
-  if(overlay instanceof HTMLElement){overlay.hidden=true;introMark('releaseDomMutationAt');overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';overlay.classList.remove('fx-preloader-reveal-r635');for(const property of ['display','visibility','opacity','pointer-events','transform','will-change','isolation','contain'])clear(overlay,property);}
+  if(overlay instanceof HTMLElement){overlay.hidden=true;introMark('releaseDomMutationAt');overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';overlay.classList.remove('fx-preloader-reveal-r635','fx-mag-handoff-r852');for(const property of ['display','visibility','opacity','pointer-events','transform','will-change','isolation','contain','--fx-mag-handoff-x','--fx-mag-handoff-y','--fx-mag-handoff-dx','--fx-mag-handoff-dy','--fx-mag-handoff-scale','--fx-mag-handoff-hole','--fx-mag-handoff-feather'])clear(overlay,property);}
   cancelPreloaderTimers();cancelDeadline();
   const elapsed=performance.now()-PRELOADER_BOOT_AT;
   ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;ROOT.dataset.fxPreloaderReleaseElapsedR635=String(Math.round(elapsed));ROOT.dataset.fxPreloaderFinalizerR635='single-dispatch-complete';introMark('completedAt');
@@ -120,6 +152,7 @@ const preloader=PRELOADER_BOOT_AT>=PRELOADER_MAX_MS?skipLatePreloader():showPrel
 if(preloader)runPreloader(preloader);else if(!preloaderReleased){markIntroComplete('intro-unavailable-r770');complete('intro-unavailable-r770');}
 stabilize();fixLanguageAccessibleName();ROOT.dataset.fxIntroStrategy=MOBILE?'mobile-r635-three-phase-absolute-deadline':'desktop-r635-three-phase-absolute-deadline';
 for(const eventName of ['formatx:languagechange','formatx:controlownerready','pageshow'])addEventListener(eventName,()=>{stabilize();queueMicrotask(fixLanguageAccessibleName);},{passive:true});
+addEventListener('formatx:real3dready',()=>{const overlay=document.getElementById(OVERLAY_ID);if(overlay instanceof HTMLElement&&overlay.dataset.fxPreloaderR531==='active'&&overlay.dataset.fxIntroPhaseR635==='ready')prepareMagHandoffR852(overlay);},{passive:true});
 addEventListener('pagehide',()=>{cancelPreloaderTimers();cancelDeadline();if(introNotifyFrameA)cancelAnimationFrame(introNotifyFrameA);if(introNotifyFrameB)cancelAnimationFrame(introNotifyFrameB);try{audio?.pause();}catch(_){}},{once:true});
 addEventListener('error',()=>requestPreloaderRelease('runtime-error'));
 addEventListener('unhandledrejection',()=>requestPreloaderRelease('promise-error'));
