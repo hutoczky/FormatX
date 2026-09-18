@@ -103,6 +103,14 @@ html:not([data-fx-preloader-r531="done"]) body.living-architecture #hero .hero-c
   filter: none !important;
   transition: none !important;
 }
+
+/* R848: preserve the exact pre-release cascade above. When the canonical owner
+   flips to done, carry the same computed title paint forward so release does not
+   create a second LCP paint. This selector is dormant before logical release. */
+html[data-fx-preloader-r531="done"] body.living-architecture #hero .hero-copy .hero-title-main {
+  filter: none !important;
+  transition: none !important;
+}
 html:not([data-fx-preloader-r531="done"]) body.living-architecture .fx-reference-mag-button,
 html:not([data-fx-preloader-r531="done"]) body.living-architecture .fx-mini-mag-glyph-r459,
 html:not([data-fx-preloader-r531="done"]) body.living-architecture .fx-mini-mag-status-r459,
