@@ -340,3 +340,110 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R847 — MAG birth narrative.
+   Reuse the existing static intro word node as a compact compositor-owned birth core.
+   The Event Horizon runtime moves only this visual core into the settled hero MAG;
+   hero geometry and the live MAG's own animation clock remain untouched. */
+@keyframes fx-r847-mag-birth-ring {
+  0% { opacity: .18; transform: scale(.58); }
+  48% { opacity: .72; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.42); }
+}
+@keyframes fx-r847-mag-birth-heart {
+  0%,100% { opacity: .72; }
+  50% { opacity: 1; }
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center {
+  isolation: isolate !important;
+  place-items: center !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word {
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  width: clamp(138px,16vw,208px) !important;
+  height: clamp(138px,16vw,208px) !important;
+  margin: 16px auto !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 1px solid rgba(132,239,255,.58) !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 50% 45%,rgba(235,254,255,.96) 0 2%,rgba(116,236,255,.72) 5%,rgba(65,174,255,.28) 18%,transparent 43%),
+    conic-gradient(from 210deg,rgba(92,235,255,.08),rgba(115,89,255,.36),rgba(255,216,145,.17),rgba(92,235,255,.08)) !important;
+  box-shadow:
+    inset 0 0 28px rgba(139,241,255,.18),
+    0 0 26px rgba(74,215,255,.20),
+    0 0 74px rgba(100,93,255,.14) !important;
+  font-size: 0 !important;
+  letter-spacing: 0 !important;
+  line-height: 1 !important;
+  will-change: transform,opacity !important;
+  transform-origin: 50% 50% !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word > span {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  opacity: 0 !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -18% !important;
+  border: 1px solid rgba(126,232,255,.38) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 34px rgba(84,211,255,.18) !important;
+  pointer-events: none !important;
+  animation: fx-r847-mag-birth-ring 760ms cubic-bezier(.22,.61,.36,1) infinite !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word::after {
+  content: "MAG" !important;
+  position: absolute !important;
+  inset: 22% !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(208,250,255,.72) !important;
+  border-radius: 50% !important;
+  color: #effeff !important;
+  background: radial-gradient(circle,rgba(213,252,255,.28),rgba(62,190,255,.10) 48%,transparent 72%) !important;
+  box-shadow: inset 0 0 22px rgba(178,247,255,.20),0 0 18px rgba(102,223,255,.18) !important;
+  font: 900 clamp(10px,1vw,13px)/1 ui-monospace,SFMono-Regular,Consolas,monospace !important;
+  letter-spacing: .28em !important;
+  text-indent: .28em !important;
+  animation: fx-r847-mag-birth-heart 520ms ease-in-out infinite !important;
+}
+html[lang="en"] #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word::after {
+  content: "CORE" !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-word {
+  box-shadow: inset 0 0 22px rgba(139,241,255,.12),0 0 24px rgba(74,215,255,.14) !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-word {
+  border-color: rgba(184,249,255,.78) !important;
+  box-shadow: inset 0 0 34px rgba(139,241,255,.22),0 0 38px rgba(74,215,255,.28),0 0 92px rgba(116,93,255,.18) !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-word {
+  border-color: rgba(255,224,164,.76) !important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word {
+    width: clamp(128px,38vw,176px) !important;
+    height: clamp(128px,38vw,176px) !important;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word::before,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* production-r847-mag-birth-handoff */
