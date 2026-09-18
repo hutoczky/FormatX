@@ -24,7 +24,7 @@
 
 #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
   isolation: auto !important;
-  contain: none !important;
+  contain: layout paint style !important;
   background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
   transform: none !important;
   will-change: auto !important;
