@@ -386,3 +386,42 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r675-visible-hero-space-centred-desktop-actionbar */
 /* production-r681-mobile-only-intro-clamp-zero-width-core-dock */
 /* production-r685-final-box-reservation-marquee-bound */
+
+
+/* R844 — lightweight real-user first-paint sentinel.
+   It exists only before the canonical Event Horizon active contract. No intro
+   timing, active overlay, MAG, hero geometry or settled-page state is changed. */
+.fx-r844-first-paint-sentinel {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html:not([data-fx-preloader-r531]) body.living-architecture > .fx-r844-first-paint-sentinel {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147482999 !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    color: #f6fdff !important;
+    background: #01040b !important;
+    pointer-events: none !important;
+    contain: strict !important;
+  }
+  html:not([data-fx-preloader-r531]) body.living-architecture > .fx-r844-first-paint-sentinel > strong {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font: 900 clamp(112px, 10vw, 152px)/.88 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .025em !important;
+    white-space: nowrap !important;
+  }
+  html[data-fx-preloader-r531] body.living-architecture > .fx-r844-first-paint-sentinel {
+    display: none !important;
+  }
+}
+/* production-r844-lightweight-first-paint-sentinel */
