@@ -340,3 +340,110 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R840 — one living MAG from intro birth into the settled hero.
+   Desktop only: the canonical hero-space keeps its grid box throughout the intro.
+   The already-running WebGL MAG is visually lifted above the opaque Event Horizon,
+   born at viewport centre, then docks back to its unchanged hero-space coordinates.
+   Mobile stays on the proven R839 path. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  /* First paint must belong to the intro, never hero -> late intro -> hero.
+     The authored hidden attribute remains semantic; this render-only exception is
+     desktop/no-motion and ends as soon as the canonical finalizer publishes done. */
+  html.fx-intro-complete:not([data-fx-preloader-r531="done"])
+  #formatx-event-horizon.fx-intro-overlay[hidden] {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
+  }
+
+  html.fx-intro-complete:not([data-fx-preloader-r531="done"])
+  #formatx-event-horizon.fx-intro-overlay[hidden] > :is(
+    .fx-intro-curtain,.fx-intro-grid,.fx-intro-scan,.fx-intro-portal,.fx-intro-flare,.fx-intro-meta
+  ) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* FORMATX remains a large, early contentful anchor while the MAG is born. */
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center,
+  html.fx-intro-complete:not([data-fx-preloader-r531="done"])
+  #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-center {
+    top: 11svh !important;
+    left: 50% !important;
+    width: min(860px, calc(100vw - 56px)) !important;
+    transform: translateX(-50%) !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word,
+  html.fx-intro-complete:not([data-fx-preloader-r531="done"])
+  #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-word {
+    font-size: clamp(82px, 10vw, 150px) !important;
+    line-height: .88 !important;
+    letter-spacing: -.035em !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-kicker,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle {
+    letter-spacing: .18em !important;
+  }
+
+  html[data-fx-preloader-r531="active"] body.living-architecture
+  #hero .hero-space[data-fx-intro-mag-host-r840] {
+    position: relative !important;
+    z-index: 2147483001 !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+    pointer-events: none !important;
+    transform-origin: 50% 50% !important;
+    will-change: transform !important;
+    transition: transform 165ms cubic-bezier(.2,.72,.22,1) !important;
+  }
+
+  html[data-fx-preloader-r531="active"] body.living-architecture
+  #hero .hero-space[data-fx-intro-mag-host-r840="birth"] {
+    transform:
+      translate(var(--fx-intro-mag-dx,0px),var(--fx-intro-mag-dy,0px))
+      scale(var(--fx-intro-mag-scale,.62)) !important;
+  }
+
+  html[data-fx-preloader-r531="active"] body.living-architecture
+  #hero .hero-space[data-fx-intro-mag-host-r840="dock"] {
+    transform: none !important;
+  }
+
+  html[data-fx-preloader-r531="active"] body.living-architecture
+  #hero .hero-space[data-fx-intro-mag-host-r840] > :not(.fx-crystal-organism-r326-stage) {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html:root:root[data-fx-preloader-r531="active"] body.living-architecture
+  #hero .hero-space[data-fx-intro-mag-host-r840] > .fx-crystal-organism-r326-stage {
+    z-index: 2147483002 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+  }
+
+  html:root:root[data-fx-preloader-r531="active"] body.living-architecture
+  #hero .hero-space[data-fx-intro-mag-host-r840] > .fx-crystal-organism-r326-stage
+  > .fx-crystal-organism-r326-canvas {
+    visibility: visible !important;
+    opacity: .96 !important;
+    filter: none !important;
+    pointer-events: none !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"]
+  :is(.fx-intro-center,.fx-intro-progress-wrap) {
+    opacity: .12 !important;
+    transition: opacity 150ms ease-out !important;
+  }
+}
+
+/* production-r840-living-mag-intro-continuity */
