@@ -449,11 +449,9 @@ html[data-fx-story-pulse-r175="on"] .fx-organism-status i {
   }
 }
 
-/* r209 — typography stability / anti-flash pass. */
+/* r209 — typography stability / anti-flash pass.
+   R848: do not re-touch the canonical LCP title when this deferred sheet activates. */
 html[data-fx-design-system="2"] body.living-architecture :where(
-  #hero-title,
-  #hero-title .hero-title-main,
-  #hero-title .hero-title-sub,
   #hero .hero-copy .kicker,
   #hero .hero-copy .fx-category-definition,
   #hero .hero-copy .hero-lead,
