@@ -15,6 +15,7 @@ const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" 
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const INTRO_P0_PRELOAD = '</scifi-ui/styles/formatx-intro-p0-r575.css?v=20260907-r635-three-phase-absolute-reveal>; rel=preload; as=style';
+const MOBILE_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r505-mag-resume-clock';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r637.js?v=20260907-r637-post-fcp-network-restore"></script>';
@@ -261,14 +262,23 @@ async function rewriteR502DeliveryAsset(url, response, headers) {
   headers.set('X-FormatX-R505-Asset-Graph', spec.marker);
   return new Response(source, { status: response.status, statusText: response.statusText, headers });
 }
-function mergeHomepageLinkHeader(existing) {
+function isMobileNavigationRequest(request) {
+  const mobileHint = String(request.headers.get('Sec-CH-UA-Mobile') || '');
+  if (mobileHint.includes('?1')) return true;
+  const userAgent = String(request.headers.get('User-Agent') || '');
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent);
+}
+function mergeHomepageLinkHeader(existing, includeMobileFirstPaint = false) {
   const values = String(existing || '')
     .split(/,\s*(?=<)/)
     .map(value => value.trim())
     .filter(Boolean)
     .filter(value => !value.includes('/scifi-ui/styles/formatx-p0-first-paint-r490.css'))
-    .filter(value => !value.includes('/scifi-ui/styles/formatx-intro-p0-r575.css'));
-  return [...values, P0_FIRST_PAINT_PRELOAD, INTRO_P0_PRELOAD].join(', ');
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-intro-p0-r575.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-mobile-first-paint-r358.css'));
+  const criticalPreloads = [P0_FIRST_PAINT_PRELOAD, INTRO_P0_PRELOAD];
+  if (includeMobileFirstPaint) criticalPreloads.push(MOBILE_FIRST_PAINT_PRELOAD);
+  return [...values, ...criticalPreloads].join(', ');
 }
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
@@ -281,7 +291,7 @@ async function stabilizePublicResponse(request, url, response) {
   headers.set('X-FormatX-Motion-Scheduler', 'r507-single-css-animation-clock-owner');
   headers.set('X-FormatX-Mag-Clock-Owner', 'shape-sync-r476-only');
   if (HOMEPAGE_PATHS.has(url.pathname)) {
-    headers.set('Link', mergeHomepageLinkHeader(headers.get('Link')));
+    headers.set('Link', mergeHomepageLinkHeader(headers.get('Link'), isMobileNavigationRequest(request)));
   }
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
