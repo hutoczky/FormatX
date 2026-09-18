@@ -386,3 +386,15 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r675-visible-hero-space-centred-desktop-actionbar */
 /* production-r681-mobile-only-intro-clamp-zero-width-core-dock */
 /* production-r685-final-box-reservation-marquee-bound */
+
+
+/* R859 — intro-first pixel ownership without hiding semantic/layout geometry.
+   The R533 validator still sees main/hero as display:visible with settled height.
+   Only page pixels stay transparent until the canonical preloader finalizer marks
+   done, preventing a hero -> intro -> hero visual reversal before MAG birth. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html:not([data-fx-preloader-r531="done"]) body.living-architecture > :not(#formatx-event-horizon) {
+    opacity: 0 !important;
+  }
+}
+/* production-r859-desktop-mag-birth-first-pixel-owner */
