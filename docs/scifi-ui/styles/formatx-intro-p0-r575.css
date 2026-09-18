@@ -340,3 +340,68 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R849 — the intro uses the canonical R326 MAG engine, not a duplicate visual.
+   The same stage/canvas is temporarily mounted in .fx-intro-center and restored
+   to #hero .hero-space before canonical preloader release. */
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center > .fx-crystal-organism-r326-stage {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  z-index: 4 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  width: clamp(188px, 23vw, 264px) !important;
+  height: clamp(188px, 23vw, 264px) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: clip !important;
+  background: transparent !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  translate: -50% -50% !important;
+  transform-origin: 50% 50% !important;
+  contain: layout paint style !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+  background: transparent !important;
+  image-rendering: auto !important;
+  mix-blend-mode: normal !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-mag-intro-r849="live-engine"] .fx-intro-word,
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-mag-intro-r849="handoff"] .fx-intro-word {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-mag-intro-r849="handoff"] :is(
+  .fx-intro-kicker,
+  .fx-intro-subtitle
+) {
+  opacity: 0 !important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center > .fx-crystal-organism-r326-stage {
+    width: clamp(164px, 48vw, 214px) !important;
+    height: clamp(164px, 48vw, 214px) !important;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center > .fx-crystal-organism-r326-stage {
+    display: none !important;
+  }
+}
+
+/* production-r849-single-r326-mag-engine-intro-handoff */
