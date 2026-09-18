@@ -438,7 +438,7 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
   display: grid !important;
   justify-items: center !important;
   gap: 9px !important;
-  width: min(520px, calc(100vw - 40px)) !important;
+  width: min(1180px, calc(100vw - 40px)) !important;
   margin: 0 !important;
   text-align: center !important;
   transform: translate(-50%, -50%) !important;
@@ -454,8 +454,8 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
 #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word {
   margin: 0 !important;
   color: #f6fdff !important;
-  font: 900 clamp(32px, 11vw, 56px)/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
-  letter-spacing: .08em !important;
+  font: 900 clamp(58px, 15vw, 180px)/.82 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  letter-spacing: -.055em !important;
 }
 #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap {
   position: absolute !important;
