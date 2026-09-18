@@ -340,3 +340,33 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+/* R848 lab — non-occluding desktop intro.
+   Keep the canonical Event Horizon opaque/background/timing owner, but let the
+   already-settled first-frame shell remain above it. The bounded intro therefore
+   becomes a real-user background progress layer instead of repainting
+   hero -> cover -> hero. Mobile remains on its proven full-cover path. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html[data-fx-preloader-r531="active"] body.living-architecture > .topbar,
+  html[data-fx-preloader-r531="active"] body.living-architecture > .fx-rail,
+  html[data-fx-preloader-r531="active"] body.living-architecture > .fx-organism-status,
+  html[data-fx-preloader-r531="active"] body.living-architecture > main#main-content {
+    position: relative !important;
+    z-index: 2147483001 !important;
+  }
+
+  html[data-fx-preloader-r531="active"] body.living-architecture > .topbar,
+  html[data-fx-preloader-r531="active"] body.living-architecture > .fx-rail,
+  html[data-fx-preloader-r531="active"] body.living-architecture > .fx-organism-status {
+    z-index: 2147483002 !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] :is(
+    .fx-intro-center,
+    .fx-intro-meta
+  ) {
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
+/* production-r848-non-occluding-desktop-intro */
