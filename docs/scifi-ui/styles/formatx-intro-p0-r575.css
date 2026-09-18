@@ -388,3 +388,17 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
 }
 
 /* production-r842-desktop-intro-flat-opaque-paint-clamp */
+
+
+/* R844 — opaque-cover occlusion paint suppression.
+   The semantic main/hero remain display:visible with settled geometry for every
+   source/timing contract, but an exactly opaque intro means their pixels are not
+   observable. Avoid rasterising that covered surface until canonical release. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html[data-fx-preloader-r531="active"] body.living-architecture main#main-content {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+/* production-r844-desktop-covered-main-no-paint */
