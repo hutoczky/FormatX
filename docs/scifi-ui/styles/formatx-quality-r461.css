@@ -490,4 +490,61 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
   }
 }
 
+/* R840e — static authored MAG-birth first frame. This state exists only before
+   the canonical Event Horizon owner marks the overlay active. It prevents a hero
+   flash before intro boot without starting a second lifecycle or animation clock. */
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(90,216,255,.14), transparent 30%),
+    linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) > :is(
+  .fx-intro-curtain,.fx-intro-grid,.fx-intro-scan,.fx-intro-portal,.fx-intro-flare,.fx-intro-meta,.fx-intro-skip
+) {
+  display: none !important;
+}
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) .fx-intro-center {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  z-index: 2 !important;
+  width: min(1180px, calc(100vw - 40px)) !important;
+  margin: 0 !important;
+  text-align: center !important;
+  transform: translate(-50%, -50%) !important;
+}
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) .fx-intro-word {
+  display: block !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  color: #f6fdff !important;
+  font: 900 clamp(58px, 15vw, 180px)/.82 system-ui,-apple-system,"Segoe UI",sans-serif !important;
+  letter-spacing: -.055em !important;
+}
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) .fx-intro-word span {
+  display: inline-block !important;
+  padding-right: .055em !important;
+  opacity: 1 !important;
+  color: #f6fdff !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  transform: none !important;
+  filter: none !important;
+}
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) :is(
+  .fx-intro-kicker,.fx-intro-subtitle,.fx-intro-progress-wrap
+) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
 /* deploy-r576-first-paint-hero-reference-parity-no-manual-pause */
