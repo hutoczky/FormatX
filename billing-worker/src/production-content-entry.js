@@ -10,6 +10,8 @@ const STARTUP_REVISION = '20260908-r675-nonblocking-reference-and-visual-css';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
+const INTRO_P0_PATH = '/scifi-ui/styles/formatx-intro-p0-r575.css';
+const EVENT_HORIZON_SCRIPT_PATH = '/scifi-ui/scripts/formatx-event-horizon.js';
 const REFERENCE_MODE_BOOT_SCRIPT = '<script defer fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
@@ -248,6 +250,162 @@ function optimizeHomepage(html) {
 function stripNestedFirstFrameImport(css) {
   return String(css || '').replace(/^\s*@import\s+url\(["']?\.\/formatx-first-frame-stability-r283\.css[^)]*\)\s*;\s*/i, '');
 }
+function r845StaticDesktopIntroCss(source) {
+  return String(source || '') + `
+@keyframes fx-r846-mag-core-breathe {
+  0% { opacity: .18; transform: translate(-50%,-50%) scale(.72); }
+  42% { opacity: .58; transform: translate(-50%,-50%) scale(1.04); }
+  72% { opacity: .82; transform: translate(-50%,-50%) scale(.94); }
+  100% { opacity: .42; transform: translate(-50%,-50%) scale(1); }
+}
+@keyframes fx-r846-mag-portal-turn {
+  0% { transform: translate(-50%,-50%) scale(.82) rotate(-20deg); }
+  55% { transform: translate(-50%,-50%) scale(1.03) rotate(8deg); }
+  100% { transform: translate(-50%,-50%) scale(.96) rotate(24deg); }
+}
+@keyframes fx-r846-mag-scan {
+  0% { opacity: 0; transform: translate(-50%,-74px) scaleX(.18); }
+  28% { opacity: .26; }
+  62% { opacity: .72; transform: translate(-50%,0) scaleX(1); }
+  100% { opacity: 0; transform: translate(-50%,74px) scaleX(.32); }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] {
+    background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-meta {
+    position: relative !important;
+    z-index: 4 !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-grid {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    inset: 16% 18% !important;
+    z-index: 0 !important;
+    opacity: .14 !important;
+    transform: none !important;
+    filter: none !important;
+    background-image:
+      linear-gradient(rgba(124,236,255,.035) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(124,236,255,.035) 1px,transparent 1px) !important;
+    background-size: 42px 42px !important;
+    mask-image: radial-gradient(circle at 50% 50%,#000 0 30%,rgba(0,0,0,.82) 50%,transparent 76%) !important;
+    -webkit-mask-image: radial-gradient(circle at 50% 50%,#000 0 30%,rgba(0,0,0,.82) 50%,transparent 76%) !important;
+    animation: none !important;
+    transition: opacity 120ms ease !important;
+    will-change: auto !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-portal {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 48% !important;
+    inset: auto !important;
+    z-index: 1 !important;
+    width: min(38vw,390px) !important;
+    height: min(38vw,390px) !important;
+    aspect-ratio: 1 !important;
+    border-radius: 50% !important;
+    opacity: .48 !important;
+    filter: none !important;
+    box-shadow: 0 0 54px rgba(76,220,255,.08), inset 0 0 34px rgba(118,105,255,.08) !important;
+    animation: fx-r846-mag-portal-turn 1480ms cubic-bezier(.22,.61,.36,1) both !important;
+    will-change: transform,opacity !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-flare {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 48% !important;
+    inset: auto !important;
+    z-index: 2 !important;
+    width: min(25vw,250px) !important;
+    height: min(25vw,250px) !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle,rgba(235,253,255,.80) 0 3%,rgba(105,226,255,.28) 12%,rgba(104,90,255,.14) 34%,transparent 68%) !important;
+    box-shadow: 0 0 24px rgba(156,247,255,.28),0 0 72px rgba(82,121,255,.12) !important;
+    filter: none !important;
+    animation: fx-r846-mag-core-breathe 1320ms ease-in-out both !important;
+    will-change: transform,opacity !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-scan {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 48% !important;
+    inset: auto !important;
+    z-index: 3 !important;
+    width: min(46vw,520px) !important;
+    height: 2px !important;
+    opacity: 0;
+    background: linear-gradient(90deg,transparent,rgba(124,236,255,.82),rgba(143,114,255,.46),transparent) !important;
+    box-shadow: 0 0 16px rgba(124,236,255,.24) !important;
+    filter: none !important;
+    animation: fx-r846-mag-scan 1080ms cubic-bezier(.22,.61,.36,1) both !important;
+    will-change: transform,opacity !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word {
+    color: #f7fdff !important;
+    transition: color 120ms ease !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    background: none !important;
+    color: #f7fdff !important;
+    -webkit-text-fill-color: currentColor !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-grid { opacity: .08 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-portal { opacity: .34 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-flare { opacity: .28 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-grid { opacity: .16 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-portal { opacity: .62 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-flare { opacity: .56 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-grid { opacity: .20 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-portal { opacity: .78 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-flare { opacity: .72 !important; }
+}
+/* production-r846-desktop-living-mag-intro-lcp */
+`;
+}
+async function rewriteR845IntroAsset(url, response, headers) {
+  const contentType = headers.get('Content-Type') || '';
+  if (url.pathname === EVENT_HORIZON_SCRIPT_PATH && /javascript|text\/plain/i.test(contentType)) {
+    let source = await response.text();
+    const compact = "force(center,'width','min(520px, calc(100vw - 40px))');force(word,'font-size','clamp(32px,5vw,56px)');";
+    const staticDesktop = "force(center,'width',MOBILE?'min(520px, calc(100vw - 40px))':'min(700px, calc(100vw - 80px))');force(word,'font-size',MOBILE?'clamp(32px,5vw,56px)':'clamp(64px,8.8vw,124px)');";
+    if (!source.includes(compact)) return null;
+    source = source.replace(compact, staticDesktop);
+    headers.delete('Content-Length');
+    headers.delete('Content-Encoding');
+    headers.delete('ETag');
+    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.set('X-FormatX-R845-Intro-LCP', 'static-desktop-word');
+    return new Response(source, { status: response.status, statusText: response.statusText, headers });
+  }
+  if (url.pathname === INTRO_P0_PATH && contentType.includes('text/css')) {
+    const source = r845StaticDesktopIntroCss(await response.text());
+    headers.delete('Content-Length');
+    headers.delete('Content-Encoding');
+    headers.delete('ETag');
+    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.set('X-FormatX-R845-Intro-LCP', 'static-desktop-word');
+    return new Response(source, { status: response.status, statusText: response.statusText, headers });
+  }
+  return null;
+}
+
 async function rewriteR502DeliveryAsset(url, response, headers) {
   const spec = R502_ASSET_REWRITES.get(url.pathname);
   if (!spec) return null;
@@ -296,6 +454,8 @@ async function stabilizePublicResponse(request, url, response) {
     headers.set('X-FormatX-First-Frame-Import', 'removed-r499-canonical-owner');
     return new Response(css, { status: response.status, statusText: response.statusText, headers });
   }
+  const r845IntroAsset = await rewriteR845IntroAsset(url, response, headers);
+  if (r845IntroAsset) return r845IntroAsset;
   const r502Asset = await rewriteR502DeliveryAsset(url, response, headers);
   if (r502Asset) return r502Asset;
   if (!contentType.includes('text/html')) {
