@@ -341,11 +341,15 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   }
 }
 
-/* R840-LH: desktop keeps the final semantic hero copy above the opaque visual
-   intro material. The intro lifecycle, clock, background and release contract
-   remain unchanged; only paint stacking avoids hero -> cover -> hero reversal. */
+/* R840-LH2: keep the final desktop shell above the opaque intro material.
+   The overlay keeps its canonical z-index/background/timing contract; only the
+   authored final shell is promoted so first paint cannot reverse hero -> cover. */
 @media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
-  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
-    z-index: 11 !important;
+  html[data-fx-preloader-r531="active"] body.living-architecture > .topbar {
+    z-index: 2147483002 !important;
+  }
+  html[data-fx-preloader-r531="active"] body.living-architecture > main#main-content {
+    position: relative !important;
+    z-index: 2147483001 !important;
   }
 }
