@@ -388,3 +388,22 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
 }
 
 /* production-r842-desktop-intro-flat-opaque-paint-clamp */
+
+
+/* R843 — desktop intro cover stays visually viewport-filling without owning a
+   fixed-position compositor layer. Root scrolling is already locked while the
+   canonical intro runs, so absolute viewport geometry is visually equivalent. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    contain: layout paint style !important;
+    isolation: auto !important;
+  }
+}
+
+/* production-r843-desktop-intro-nonfixed-cover */
