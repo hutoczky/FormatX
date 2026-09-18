@@ -340,3 +340,50 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R843 candidate — preboot-only first-paint/LCP owner.
+   No active preloader, release timing, MAG or settled-page rule is changed. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html:not([data-fx-preloader-r531]) #formatx-event-horizon.fx-intro-overlay[hidden] {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    background: #01040b !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html:not([data-fx-preloader-r531]) #formatx-event-horizon.fx-intro-overlay[hidden] :is(
+    .fx-intro-curtain,
+    .fx-intro-grid,
+    .fx-intro-scan,
+    .fx-intro-portal,
+    .fx-intro-flare,
+    .fx-intro-meta,
+    .fx-intro-kicker,
+    .fx-intro-subtitle,
+    .fx-intro-progress-wrap
+  ) {
+    display: none !important;
+  }
+
+  html:not([data-fx-preloader-r531]) #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-center {
+    width: min(760px, calc(100vw - 80px)) !important;
+  }
+
+  html:not([data-fx-preloader-r531]) #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-word {
+    margin: 0 !important;
+    color: #f6fdff !important;
+    font: 900 clamp(84px, 8.5vw, 122px)/.9 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .035em !important;
+  }
+
+  html:not([data-fx-preloader-r531]) #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-word span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+/* production-r843-preboot-only-lcp-owner */
