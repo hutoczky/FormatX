@@ -490,4 +490,87 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
   }
 }
 
+/* R840i — desktop-only authored MAG-birth first frame.
+   The normal HTML lifecycle remains untouched. Before Event Horizon publishes the
+   canonical preloader state, expose only a static opaque FORMATX birth surface.
+   Once data-fx-preloader-r531 exists, these rules retire permanently. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])
+  #formatx-event-horizon.fx-intro-overlay[hidden] {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+  html[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])
+  #formatx-event-horizon.fx-intro-overlay::before,
+  html[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])
+  #formatx-event-horizon.fx-intro-overlay::after {
+    content: none !important;
+    display: none !important;
+    opacity: 0 !important;
+    background: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+  html[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])
+  #formatx-event-horizon > :is(.fx-intro-curtain,.fx-intro-grid,.fx-intro-scan,.fx-intro-portal,.fx-intro-flare,.fx-intro-meta,.fx-intro-skip) {
+    display: none !important;
+  }
+  html[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])
+  #formatx-event-horizon .fx-intro-center {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    z-index: 2 !important;
+    width: min(1180px, calc(100vw - 40px)) !important;
+    margin: 0 !important;
+    text-align: center !important;
+    transform: translate(-50%, -50%) !important;
+  }
+  html[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])
+  #formatx-event-horizon .fx-intro-word {
+    display: block !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    color: #f6fdff !important;
+    font: 900 clamp(72px,15vw,180px)/.82 system-ui,-apple-system,"Segoe UI",sans-serif !important;
+    letter-spacing: -.055em !important;
+  }
+  html[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])
+  #formatx-event-horizon .fx-intro-word span {
+    display: inline-block !important;
+    padding-right: .055em !important;
+    opacity: 1 !important;
+    color: #f6fdff !important;
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  html[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])
+  #formatx-event-horizon :is(.fx-intro-kicker,.fx-intro-subtitle,.fx-intro-progress-wrap) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Opaque cover owns pixels, but not layout. Skip only the covered hero subtree
+     paint; the #hero box itself stays visible with settled geometry for R533/CLS. */
+  html[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])
+  body.living-architecture #hero > .hero-grid,
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed)
+  body.living-architecture #hero > .hero-grid {
+    visibility: hidden !important;
+  }
+}
+
 /* deploy-r576-first-paint-hero-reference-parity-no-manual-pause */
