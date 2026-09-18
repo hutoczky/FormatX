@@ -340,3 +340,51 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R842 — Chrome 152 desktop intro paint clamp.
+   Preserve the opaque visual cover, readable progress copy and canonical 1640ms
+   timing animation while removing inherited blur/stroke/shadow raster work that
+   can starve the bounded release task under SwiftShader. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+    background: #01040b !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] * {
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word span {
+    color: #f6fdff !important;
+    -webkit-text-fill-color: #f6fdff !important;
+    -webkit-text-stroke: 0 transparent !important;
+    background: none !important;
+    background-image: none !important;
+    background-clip: border-box !important;
+    -webkit-background-clip: border-box !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle::before,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] progress[data-fx-intro-progress]::-webkit-progress-value,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] progress[data-fx-intro-progress]::-moz-progress-bar {
+    background: #7cecff !important;
+    box-shadow: none !important;
+  }
+}
+
+/* production-r842-desktop-intro-flat-opaque-paint-clamp */
