@@ -92,13 +92,14 @@ function configureIntroMag(stage){
   const targetCx=rect.left+rect.width*.5,targetCy=rect.top+rect.height*.5;
   const birthSize=Math.min(390,Math.max(270,Math.min(innerWidth,innerHeight)*.42));
   const scale=Math.min(.78,Math.max(.46,birthSize/Math.max(rect.width,rect.height)));
-  stage.style.setProperty('--fx-intro-mag-left',rect.left+'px');
-  stage.style.setProperty('--fx-intro-mag-top',rect.top+'px');
-  stage.style.setProperty('--fx-intro-mag-width',rect.width+'px');
-  stage.style.setProperty('--fx-intro-mag-height',rect.height+'px');
-  stage.style.setProperty('--fx-intro-mag-dx',(innerWidth*.5-targetCx)+'px');
-  stage.style.setProperty('--fx-intro-mag-dy',(innerHeight*.48-targetCy)+'px');
-  stage.style.setProperty('--fx-intro-mag-scale',String(scale));
+  const vars={
+    '--fx-intro-mag-left':rect.left+'px','--fx-intro-mag-top':rect.top+'px',
+    '--fx-intro-mag-width':rect.width+'px','--fx-intro-mag-height':rect.height+'px',
+    '--fx-intro-mag-dx':(innerWidth*.5-targetCx)+'px','--fx-intro-mag-dy':(innerHeight*.48-targetCy)+'px',
+    '--fx-intro-mag-scale':String(scale)
+  };
+  for(const [name,value] of Object.entries(vars)){stage.style.setProperty(name,value);host.style.setProperty(name,value);}
+  host.dataset.fxIntroMagHostR840='birth';
   stage.dataset.fxIntroMagR840='birth';
   introMagStage=stage;
   ROOT.dataset.fxIntroMagContinuityR840='same-webgl-canvas-birth-to-hero';
@@ -116,12 +117,14 @@ function dockIntroMag(){
   if(MOBILE||REDUCED||!(introMagStage instanceof HTMLElement)||preloaderReleased)return;
   configureIntroMag(introMagStage);
   introMagStage.dataset.fxIntroMagR840='dock';
+  const host=introMagStage.closest('.hero-space');if(host instanceof HTMLElement)host.dataset.fxIntroMagHostR840='dock';
   ROOT.dataset.fxIntroMagDockR840=String(Math.round(performance.now()-PRELOADER_BOOT_AT));
   try{window.FormatXLivingCore?.requestRender?.(18);}catch(_){}
 }
 function releaseIntroMag(){
   if(!(introMagStage instanceof HTMLElement))return;
   introMagStage.dataset.fxIntroMagR840='done';
+  const host=introMagStage.closest('.hero-space');if(host instanceof HTMLElement)host.dataset.fxIntroMagHostR840='done';
   ROOT.dataset.fxIntroMagContinuityR840='continued-in-hero-same-webgl-canvas';
 }
 function ensureP0FxStyle(){
