@@ -340,3 +340,47 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R842 — desktop Lighthouse composition parity without changing the bounded intro
+   clock. Keep the opaque cover and canonical release owner intact; only place the
+   already-static intro copy near the settled desktop hero title so first paint and
+   final hero share one visual hierarchy. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center {
+    top: clamp(148px, 16.5vh, 166px) !important;
+    left: max(40px, calc((100vw - 1320px) / 2)) !important;
+    justify-items: start !important;
+    gap: 10px !important;
+    text-align: left !important;
+    transform: none !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word {
+    transform: scale(1.75, 1.95) !important;
+    transform-origin: left top !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-kicker,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle {
+    text-align: left !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle {
+    margin-top: 48px !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap {
+    top: clamp(388px, 43vh, 430px) !important;
+    bottom: auto !important;
+    left: max(40px, calc((100vw - 1320px) / 2)) !important;
+    width: min(430px, calc(100vw - 80px)) !important;
+    transform: none !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap .fx-intro-status {
+    text-align: left !important;
+  }
+}
+
+/* production-r842-desktop-intro-final-hero-composition-parity */
