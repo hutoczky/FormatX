@@ -341,32 +341,33 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   }
 }
 
-/* R848 lab — non-occluding desktop intro.
-   Keep the canonical Event Horizon opaque/background/timing owner, but let the
-   already-settled first-frame shell remain above it. The bounded intro therefore
-   becomes a real-user background progress layer instead of repainting
-   hero -> cover -> hero. Mobile remains on its proven full-cover path. */
+/* R849 lab — bounded desktop intro as a non-blocking background layer.
+   The canonical overlay keeps its opaque background and 1640ms animation/timing
+   contract, but does not occlude the already-settled hero. No page-sized
+   foreground stacking layer is introduced. Mobile keeps the proven full cover. */
 @media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
-  html[data-fx-preloader-r531="active"] body.living-architecture > .topbar,
-  html[data-fx-preloader-r531="active"] body.living-architecture > .fx-rail,
-  html[data-fx-preloader-r531="active"] body.living-architecture > .fx-organism-status,
-  html[data-fx-preloader-r531="active"] body.living-architecture > main#main-content {
-    position: relative !important;
-    z-index: 2147483001 !important;
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+    z-index: -1 !important;
+    pointer-events: none !important;
   }
 
-  html[data-fx-preloader-r531="active"] body.living-architecture > .topbar,
-  html[data-fx-preloader-r531="active"] body.living-architecture > .fx-rail,
-  html[data-fx-preloader-r531="active"] body.living-architecture > .fx-organism-status {
-    z-index: 2147483002 !important;
-  }
-
-  #formatx-event-horizon[data-fx-preloader-r531="active"] :is(
-    .fx-intro-center,
-    .fx-intro-meta
-  ) {
-    visibility: hidden !important;
-    opacity: 0 !important;
+  html[data-fx-preloader-r531="active"]::after {
+    content: "" !important;
+    position: fixed !important;
+    z-index: 2147483000 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 2px !important;
+    transform-origin: 0 50% !important;
+    background: rgba(124,236,255,.72) !important;
+    box-shadow: 0 0 10px rgba(124,236,255,.28) !important;
+    pointer-events: none !important;
+    animation: fx-r849-desktop-progress 1.64s linear both !important;
   }
 }
-/* production-r848-non-occluding-desktop-intro */
+@keyframes fx-r849-desktop-progress {
+  from { transform: scaleX(.02); opacity: .46; }
+  to { transform: scaleX(1); opacity: .9; }
+}
+/* production-r849-nonblocking-background-intro */
