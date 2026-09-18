@@ -386,3 +386,92 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r675-visible-hero-space-centred-desktop-actionbar */
 /* production-r681-mobile-only-intro-clamp-zero-width-core-dock */
 /* production-r685-final-box-reservation-marquee-bound */
+
+
+/* R840e — desktop network-gap Event Horizon seed.
+   Preserve the current graphical MAG-birth intro and its canonical runtime/timing.
+   While the deferred Event Horizon owner has not started yet, reveal only a
+   compositor-cheap, contentful FORMATX seed from the already-authored overlay.
+   As soon as data-fx-preloader-r531 is set, these rules stop matching and the
+   existing R575/R635 graphical birth sequence owns the viewport unchanged. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html:not([data-fx-preloader-r531]) body.living-architecture > #formatx-event-horizon.fx-intro-overlay[hidden] {
+    display: grid !important;
+    place-items: center !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    background: #01040b !important;
+    animation: none !important;
+    transition: none !important;
+    isolation: auto !important;
+    contain: paint !important;
+  }
+
+  html:not([data-fx-preloader-r531]) body.living-architecture > #formatx-event-horizon.fx-intro-overlay[hidden]::before,
+  html:not([data-fx-preloader-r531]) body.living-architecture > #formatx-event-horizon.fx-intro-overlay[hidden]::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html:not([data-fx-preloader-r531]) body.living-architecture > #formatx-event-horizon.fx-intro-overlay[hidden] > :is(
+    .fx-intro-curtain,
+    .fx-intro-grid,
+    .fx-intro-scan,
+    .fx-intro-portal,
+    .fx-intro-flare,
+    .fx-intro-meta,
+    .fx-intro-progress-wrap
+  ) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+  }
+
+  html:not([data-fx-preloader-r531]) body.living-architecture > #formatx-event-horizon.fx-intro-overlay[hidden] > .fx-intro-center {
+    position: relative !important;
+    z-index: 1 !important;
+    display: block !important;
+    width: min(760px, calc(100vw - 48px)) !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  html:not([data-fx-preloader-r531]) body.living-architecture > #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-center > :not(.fx-intro-word) {
+    display: none !important;
+  }
+
+  html:not([data-fx-preloader-r531]) body.living-architecture > #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-word {
+    display: block !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    color: #f6fdff !important;
+    font: 900 clamp(84px, 9vw, 128px)/.82 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: -.055em !important;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html:not([data-fx-preloader-r531]) body.living-architecture > #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-word span {
+    display: inline-block !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    color: #f6fdff !important;
+    background: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* production-r840e-network-gap-intro-seed */
