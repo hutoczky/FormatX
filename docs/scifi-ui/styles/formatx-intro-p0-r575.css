@@ -340,3 +340,101 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R850 — MAG motor Phase 1 birth surface.
+   The context policy owns this semantic seed while GPU materialisation remains
+   intentionally post-release. Only small transform/opacity transitions run. */
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-mag-birth-seed-r850 {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  z-index: 4 !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  width: clamp(142px, 16vw, 188px) !important;
+  height: clamp(142px, 16vw, 188px) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid rgba(132,239,255,.54) !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 50% 48%,rgba(231,253,255,.92) 0 2%,rgba(101,229,255,.54) 4%,rgba(50,155,225,.18) 18%,transparent 39%),
+    conic-gradient(from 205deg,rgba(77,226,255,.05),rgba(110,78,255,.20),rgba(255,214,145,.10),rgba(77,226,255,.05)) !important;
+  box-shadow: none !important;
+  filter: none !important;
+  opacity: .58 !important;
+  translate: -50% -50% !important;
+  scale: .64 !important;
+  transform-origin: 50% 50% !important;
+  contain: layout paint style !important;
+  pointer-events: none !important;
+  will-change: transform,opacity !important;
+  transition: scale 130ms ease-out,opacity 110ms linear !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-mag-birth-seed-r850::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -13% !important;
+  border: 1px solid rgba(130,232,255,.24) !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-mag-birth-seed-r850::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 26% !important;
+  border: 1px solid rgba(221,251,255,.56) !important;
+  border-radius: 50% !important;
+  background: rgba(65,178,224,.12) !important;
+  box-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-mag-birth-label-r850 {
+  position: relative !important;
+  z-index: 2 !important;
+  color: #effeff !important;
+  font: 900 11px/1 ui-monospace,SFMono-Regular,Consolas,monospace !important;
+  letter-spacing: .24em !important;
+  text-indent: .24em !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-mag-birth-seed-r850[data-fx-mag-birth-phase="sync"] {
+  opacity: 1 !important;
+  scale: .92 !important;
+  border-color: rgba(184,249,255,.76) !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] .fx-mag-birth-seed-r850[data-fx-mag-birth-phase="ready"] {
+  opacity: 1 !important;
+  scale: 1 !important;
+  border-color: rgba(255,224,164,.70) !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-mag-birth-r850="active"] .fx-intro-word {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] :is(
+  .fx-intro-kicker,
+  .fx-intro-subtitle
+) {
+  opacity: 0 !important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-mag-birth-seed-r850 {
+    width: clamp(132px, 38vw, 164px) !important;
+    height: clamp(132px, 38vw, 164px) !important;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-mag-birth-seed-r850 {
+    transition: none !important;
+    animation: none !important;
+    will-change: auto !important;
+  }
+}
+
+/* production-r850-mag-policy-phase1-birth-seed */
