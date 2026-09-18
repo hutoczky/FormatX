@@ -108,7 +108,7 @@
     root.dataset.fxDeferredCssReasonR526 = reason;
     root.dataset.fxDeferredCssActivatedAtR651 = String(Math.round(performance.now()));
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
-      detail: { count: links.length, restored, scheduler: 'critical-core-continuous-secondary-css-plus-180ms-r837', reason }
+      detail: { count: links.length, restored, scheduler: 'critical-core-continuous-secondary-css-single-frame-r843', reason }
     }));
 
     releasePaintQuietAfterCoreCommit();
@@ -117,13 +117,8 @@
   function activateAfterCommittedFrame(reason) {
     if (activated || frame || commitTimer) return;
     frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        commitTimer = setTimeout(() => {
-          commitTimer = 0;
-          activate(reason);
-        }, 180);
-      });
+      frame = 0;
+      activate(reason);
     });
   }
 
