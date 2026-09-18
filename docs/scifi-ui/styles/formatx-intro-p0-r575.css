@@ -340,3 +340,48 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R856: tiny compositor deadline sentinel. The full-screen Event Horizon clock
+   remains paused; only this invisible 1x1 node runs a compositor-friendly clock.
+   It does not alter the 1180-1450 / 1350-1650 product windows or visible intro. */
+@keyframes fx-r856-release-sentinel {
+  from { opacity: 0; }
+  to { opacity: 0; }
+}
+#formatx-event-horizon[data-fx-preloader-r531="active"] > .fx-intro-deadline-sentinel {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  z-index: -2147480000 !important;
+  display: block !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 1px !important;
+  min-height: 1px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  contain: strict !important;
+  animation-name: fx-r856-release-sentinel !important;
+  animation-duration: 1400ms !important;
+  animation-timing-function: linear !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  animation-fill-mode: both !important;
+  animation-play-state: running !important;
+}
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] > .fx-intro-deadline-sentinel {
+    animation-duration: 1220ms !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] > .fx-intro-deadline-sentinel {
+    animation: none !important;
+  }
+}
+/* production-r856-tiny-compositor-release-sentinel */
