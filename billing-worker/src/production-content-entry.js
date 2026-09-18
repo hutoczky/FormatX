@@ -56,6 +56,8 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/formatx-content-standard.css',
   '/scifi-ui/styles/formatx-award-readiness.css',
+  '/scifi-ui/styles/formatx-critical-shell-v56.css',
+  '/scifi-ui/styles/formatx-first-paint-r206.css',
   '/scifi-ui/styles/formatx-flow-first-r74.css',
   '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
   '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
