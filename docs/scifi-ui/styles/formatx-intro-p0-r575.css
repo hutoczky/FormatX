@@ -342,50 +342,36 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
 }
 
 
-/* R852 — MAG birth intro.
-   The intro remains a visual-only owner. The real MAG stays single-renderer R326,
-   navigation-owned behind the cover. Wake/sync are compositor-only; ready opens a
-   bounded aperture over the real hero MAG target before the existing finalizer hides
-   the overlay. No second canvas, renderer, MAG clock, or release deadline is created. */
+/* R852 — MAG birth intro, compositor-only.
+   The visual birth uses only small transform/opacity layers. The real MAG remains
+   the single navigation-owned R326 WebGL renderer. At READY the birth ring moves
+   to the real hero MAG target; the existing bounded finalizer then removes the
+   overlay and leaves the already-owned MAG runtime in place. */
 @keyframes fx-r852-mag-birth-portal {
-  0% { opacity:.16; transform:translate(-50%,-50%) scale(.56) rotate(-18deg); }
-  42% { opacity:.58; transform:translate(-50%,-50%) scale(.94) rotate(5deg); }
-  72% { opacity:.84; transform:translate(-50%,-50%) scale(1.04) rotate(13deg); }
-  100% { opacity:.66; transform:translate(-50%,-50%) scale(1) rotate(18deg); }
+  0% { opacity:.14; transform:translate(-50%,-50%) scale(.56) rotate(-14deg); }
+  46% { opacity:.58; transform:translate(-50%,-50%) scale(.94) rotate(6deg); }
+  76% { opacity:.82; transform:translate(-50%,-50%) scale(1.04) rotate(13deg); }
+  100% { opacity:.64; transform:translate(-50%,-50%) scale(1) rotate(18deg); }
 }
 @keyframes fx-r852-mag-birth-core {
-  0% { opacity:.10; transform:translate(-50%,-50%) scale(.38); }
-  35% { opacity:.52; transform:translate(-50%,-50%) scale(.86); }
-  68% { opacity:.86; transform:translate(-50%,-50%) scale(1.06); }
-  100% { opacity:.58; transform:translate(-50%,-50%) scale(.92); }
+  0% { opacity:.08; transform:translate(-50%,-50%) scale(.40); }
+  40% { opacity:.50; transform:translate(-50%,-50%) scale(.88); }
+  72% { opacity:.78; transform:translate(-50%,-50%) scale(1.04); }
+  100% { opacity:.54; transform:translate(-50%,-50%) scale(.92); }
 }
 @keyframes fx-r852-mag-birth-scan {
-  0% { opacity:0; transform:translate(-50%,-92px) scaleX(.18); }
-  25% { opacity:.22; }
-  58% { opacity:.72; transform:translate(-50%,0) scaleX(1); }
-  100% { opacity:0; transform:translate(-50%,92px) scaleX(.32); }
+  0% { opacity:0; transform:translate(-50%,-72px) scaleX(.20); }
+  32% { opacity:.26; }
+  64% { opacity:.64; transform:translate(-50%,0) scaleX(1); }
+  100% { opacity:0; transform:translate(-50%,72px) scaleX(.34); }
 }
 
 @media (prefers-reduced-motion:no-preference) {
   html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] > .fx-intro-grid {
-    display:block !important;
-    visibility:visible !important;
-    position:absolute !important;
-    inset:12% 14% !important;
-    z-index:0 !important;
-    opacity:.11 !important;
-    pointer-events:none !important;
-    background-image:
-      linear-gradient(rgba(124,236,255,.036) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(124,236,255,.036) 1px,transparent 1px),
-      radial-gradient(circle at 50% 48%,rgba(73,222,255,.08),rgba(96,76,255,.035) 36%,transparent 70%) !important;
-    background-size:44px 44px,44px 44px,100% 100% !important;
-    mask-image:radial-gradient(circle at 50% 48%,#000 0 34%,rgba(0,0,0,.84) 54%,transparent 78%) !important;
-    -webkit-mask-image:radial-gradient(circle at 50% 48%,#000 0 34%,rgba(0,0,0,.84) 54%,transparent 78%) !important;
-    transform:none !important;
-    filter:none !important;
+    display:none !important;
+    visibility:hidden !important;
+    opacity:0 !important;
     animation:none !important;
-    transition:opacity 120ms ease !important;
   }
   html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] > .fx-intro-portal {
     display:block !important;
@@ -395,19 +381,18 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     top:48% !important;
     inset:auto !important;
     z-index:1 !important;
-    width:clamp(220px,36vw,420px) !important;
-    height:clamp(220px,36vw,420px) !important;
+    width:clamp(190px,30vw,340px) !important;
+    height:clamp(190px,30vw,340px) !important;
     aspect-ratio:1 !important;
     border-radius:50% !important;
-    opacity:.66 !important;
-    border:1px solid rgba(119,228,255,.16) !important;
-    background:
-      radial-gradient(circle at 50% 50%,rgba(226,252,255,.08) 0 6%,rgba(95,221,255,.05) 24%,rgba(91,74,255,.035) 52%,transparent 72%) !important;
-    box-shadow:0 0 52px rgba(77,217,255,.08),inset 0 0 46px rgba(111,89,255,.07) !important;
+    opacity:.64 !important;
+    border:1px solid rgba(125,231,255,.28) !important;
+    background:transparent !important;
+    box-shadow:none !important;
     filter:none !important;
     transform-origin:50% 50% !important;
-    animation:fx-r852-mag-birth-portal 1280ms cubic-bezier(.22,.61,.36,1) both !important;
-    transition:transform 210ms cubic-bezier(.2,.82,.2,1),opacity 210ms ease !important;
+    animation:fx-r852-mag-birth-portal 1220ms cubic-bezier(.22,.61,.36,1) both !important;
+    transition:transform 180ms cubic-bezier(.2,.82,.2,1),opacity 180ms ease !important;
     will-change:transform,opacity !important;
   }
   html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] > .fx-intro-flare {
@@ -418,16 +403,16 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     top:48% !important;
     inset:auto !important;
     z-index:2 !important;
-    width:clamp(112px,18vw,220px) !important;
-    height:clamp(112px,18vw,220px) !important;
+    width:clamp(72px,10vw,132px) !important;
+    height:clamp(72px,10vw,132px) !important;
     border-radius:50% !important;
-    opacity:.58 !important;
-    background:radial-gradient(circle,rgba(239,254,255,.88) 0 3%,rgba(104,226,255,.34) 10%,rgba(100,82,255,.16) 34%,transparent 69%) !important;
-    box-shadow:0 0 24px rgba(151,245,255,.24),0 0 72px rgba(79,117,255,.10) !important;
+    opacity:.54 !important;
+    background:radial-gradient(circle,rgba(239,254,255,.76) 0 4%,rgba(103,225,255,.26) 18%,rgba(104,84,255,.10) 48%,transparent 72%) !important;
+    box-shadow:none !important;
     filter:none !important;
     transform-origin:50% 50% !important;
-    animation:fx-r852-mag-birth-core 1180ms ease-in-out both !important;
-    transition:transform 210ms cubic-bezier(.2,.82,.2,1),opacity 210ms ease !important;
+    animation:fx-r852-mag-birth-core 1100ms ease-in-out both !important;
+    transition:transform 180ms cubic-bezier(.2,.82,.2,1),opacity 180ms ease !important;
     will-change:transform,opacity !important;
   }
   html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] > .fx-intro-scan {
@@ -438,59 +423,43 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     top:48% !important;
     inset:auto !important;
     z-index:3 !important;
-    width:min(74vw,620px) !important;
-    height:2px !important;
+    width:min(56vw,460px) !important;
+    height:1px !important;
     opacity:0;
-    background:linear-gradient(90deg,transparent,rgba(124,236,255,.82),rgba(143,114,255,.48),transparent) !important;
-    box-shadow:0 0 16px rgba(124,236,255,.22) !important;
+    background:linear-gradient(90deg,transparent,rgba(124,236,255,.78),transparent) !important;
+    box-shadow:none !important;
     filter:none !important;
-    animation:fx-r852-mag-birth-scan 980ms cubic-bezier(.22,.61,.36,1) 120ms both !important;
+    animation:fx-r852-mag-birth-scan 920ms cubic-bezier(.22,.61,.36,1) 80ms both !important;
     will-change:transform,opacity !important;
   }
 
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] > .fx-intro-grid { opacity:.07 !important; }
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] > .fx-intro-portal { opacity:.34 !important; }
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] > .fx-intro-flare { opacity:.26 !important; }
+  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] > .fx-intro-portal { opacity:.30 !important; }
+  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] > .fx-intro-flare { opacity:.20 !important; }
+  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] > .fx-intro-portal { opacity:.68 !important; }
+  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] > .fx-intro-flare { opacity:.54 !important; }
+  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] > .fx-intro-portal { opacity:.88 !important; }
+  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] > .fx-intro-flare { opacity:.72 !important; }
 
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] > .fx-intro-grid { opacity:.13 !important; }
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] > .fx-intro-portal { opacity:.72 !important; }
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] > .fx-intro-flare { opacity:.64 !important; }
-
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] > .fx-intro-grid { opacity:.16 !important; }
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] > .fx-intro-portal { opacity:.90 !important; }
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] > .fx-intro-flare { opacity:.82 !important; }
-
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx-mag-handoff-r852 {
-    background:
-      radial-gradient(circle at var(--fx-mag-handoff-x,50%) var(--fx-mag-handoff-y,48%),
-        transparent 0 var(--fx-mag-handoff-hole,96px),
-        rgba(1,4,11,.48) var(--fx-mag-handoff-feather,190px),
-        #01040b calc(var(--fx-mag-handoff-feather,190px) + 120px)) !important;
-  }
   html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx-mag-handoff-r852 > .fx-intro-portal {
     animation:none !important;
-    opacity:.92 !important;
+    opacity:.90 !important;
     transform:
       translate(calc(-50% + var(--fx-mag-handoff-dx,0px)),calc(-50% + var(--fx-mag-handoff-dy,0px)))
       scale(var(--fx-mag-handoff-scale,.72)) rotate(18deg) !important;
   }
   html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx-mag-handoff-r852 > .fx-intro-flare {
     animation:none !important;
-    opacity:.72 !important;
+    opacity:.64 !important;
     transform:
       translate(calc(-50% + var(--fx-mag-handoff-dx,0px)),calc(-50% + var(--fx-mag-handoff-dy,0px)))
-      scale(calc(var(--fx-mag-handoff-scale,.72) * .72)) !important;
+      scale(calc(var(--fx-mag-handoff-scale,.72) * .64)) !important;
   }
   html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx-mag-handoff-r852 > .fx-intro-scan {
     opacity:0 !important;
     animation:none !important;
   }
-  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx-mag-handoff-r852 > .fx-intro-grid {
-    opacity:.055 !important;
-  }
 }
 
-/* R852 keeps reduced-motion semantic and static. */
 @media (prefers-reduced-motion:reduce) {
   html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] > :is(.fx-intro-grid,.fx-intro-scan,.fx-intro-portal,.fx-intro-flare) {
     display:none !important;
