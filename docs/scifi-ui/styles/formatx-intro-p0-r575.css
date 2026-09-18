@@ -9,14 +9,6 @@
    raster animation or blend stack competes with the monotonic release owner. Desktop
    hero-copy keeps the blocking first-paint layout mode, so this late quality sheet
    cannot change the LCP box after first paint. */
-
-/* R841: keep the browser canvas on the same dark product background before any
-   contentful intro/hero pixels arrive. This changes no intro geometry or timing. */
-html {
-  background: #01040b;
-}
-/* production-r841-root-first-frame-dark */
-
 @keyframes fx-r533-preloader-visual-bound {
   from {}
   to {}
