@@ -340,3 +340,41 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R840 candidate — desktop intro raster budget.
+   Preserve the canonical opaque cover, FORMATX identity and bounded lifecycle,
+   while removing full-screen gradient/text-effect raster work from the covered
+   desktop interval. Mobile and release timing are intentionally unchanged. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+    background: #01040b !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] :is(
+    .fx-intro-kicker,
+    .fx-intro-subtitle,
+    .fx-intro-progress-wrap
+  ) {
+    display: none !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word {
+    color: #f6fdff !important;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word span {
+    color: inherit !important;
+    background: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    filter: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+  }
+}
+/* production-r840-desktop-intro-raster-budget */
