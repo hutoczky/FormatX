@@ -340,3 +340,12 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+/* R840-LH: desktop keeps the final semantic hero copy above the opaque visual
+   intro material. The intro lifecycle, clock, background and release contract
+   remain unchanged; only paint stacking avoids hero -> cover -> hero reversal. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+    z-index: 11 !important;
+  }
+}
