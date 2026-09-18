@@ -105,7 +105,7 @@ function beginMagHandoff(overlay){
   const from=birthCore.getBoundingClientRect(),to=liveCore.getBoundingClientRect();
   const dx=(to.left+to.width*.5)-(from.left+from.width*.5);
   const dy=(to.top+to.height*.5)-(from.top+from.height*.5);
-  const duration=MOBILE?190:160;
+  const duration=MOBILE?150:130;
   birthCore.dataset.fxMagBirthHandoffR847='active';
   ROOT.dataset.fxMagBirthHandoffR847='birth-core-to-hero-mag';
   animateEffect(birthCore,[
@@ -113,10 +113,6 @@ function beginMagHandoff(overlay){
     {offset:.62,transform:`translate3d(${dx*.34}px,${dy*.34}px,0) scale(.72)`,opacity:1},
     {transform:`translate3d(${dx}px,${dy}px,0) scale(.08)`,opacity:.10}
   ],{duration,easing:'cubic-bezier(.22,.78,.18,1)',fill:'forwards'});
-  for(const selector of ['.fx-intro-kicker','.fx-intro-subtitle','.fx-intro-meta','.fx-intro-progress-wrap']){
-    const node=overlay.querySelector(selector);
-    animateEffect(node,[{opacity:1},{opacity:0}],{duration:Math.min(120,duration),easing:'ease-out',fill:'forwards'});
-  }
 }
 function startReveal(overlay){if(preloaderReleased||REDUCED||!(overlay instanceof HTMLElement))return;setIntroPhase(overlay,'ready');clear(overlay,'opacity');overlay.classList.add('fx-preloader-reveal-r635');ROOT.dataset.fxPreloaderRevealR635=`inside-window-${Math.round(performance.now()-PRELOADER_BOOT_AT)}`;}
 function finalizePreloader(source){
