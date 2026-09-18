@@ -378,3 +378,85 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   }
 }
 /* production-r840-desktop-intro-raster-budget */
+
+
+/* R842 — authored pending first paint.
+   Match the already-proven R840 active raster budget before deferred JS executes,
+   so desktop cannot paint hero -> intro -> hero. Mobile keeps its own bootstrap. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay[hidden] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483000 !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100svh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    isolation: auto !important;
+    contain: none !important;
+    color: #f4fbff !important;
+    background: #01040b !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay[hidden] :is(
+    .fx-intro-curtain,
+    .fx-intro-grid,
+    .fx-intro-scan,
+    .fx-intro-portal,
+    .fx-intro-flare,
+    .fx-intro-meta,
+    .fx-intro-skip,
+    .fx-intro-kicker,
+    .fx-intro-subtitle,
+    .fx-intro-progress-wrap
+  ) {
+    display: none !important;
+  }
+
+  html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-center {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    display: grid !important;
+    justify-items: center !important;
+    width: min(520px, calc(100vw - 40px)) !important;
+    margin: 0 !important;
+    text-align: center !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-word {
+    margin: 0 !important;
+    color: #f6fdff !important;
+    font: 900 clamp(32px, 5vw, 56px)/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .08em !important;
+    text-shadow: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay[hidden] .fx-intro-word span {
+    color: inherit !important;
+    background: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* production-r842-authored-pending-first-paint */
