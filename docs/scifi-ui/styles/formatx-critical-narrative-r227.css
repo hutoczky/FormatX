@@ -449,11 +449,11 @@ html[data-fx-story-pulse-r175="on"] .fx-organism-status i {
   }
 }
 
-/* r209 — typography stability / anti-flash pass. */
+/* r209 — typography stability / anti-flash pass.
+   R846: the canonical hero title is already settled by render-blocking first-frame
+   and reference-production CSS. Do not re-touch that LCP subtree when this deferred
+   sheet activates after intro release. */
 html[data-fx-design-system="2"] body.living-architecture :where(
-  #hero-title,
-  #hero-title .hero-title-main,
-  #hero-title .hero-title-sub,
   #hero .hero-copy .kicker,
   #hero .hero-copy .fx-category-definition,
   #hero .hero-copy .hero-lead,
