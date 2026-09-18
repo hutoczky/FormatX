@@ -449,11 +449,10 @@ html[data-fx-story-pulse-r175="on"] .fx-organism-status i {
   }
 }
 
-/* r209 — typography stability / anti-flash pass. */
+/* r209 — typography stability / anti-flash pass.
+   R847: canonical hero-title geometry/paint is already owned by the blocking
+   first-frame layers; keep this deferred pass off the LCP title subtree. */
 html[data-fx-design-system="2"] body.living-architecture :where(
-  #hero-title,
-  #hero-title .hero-title-main,
-  #hero-title .hero-title-sub,
   #hero .hero-copy .kicker,
   #hero .hero-copy .fx-category-definition,
   #hero .hero-copy .hero-lead,
