@@ -493,7 +493,7 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
 /* R840e — static authored MAG-birth first frame. This state exists only before
    the canonical Event Horizon owner marks the overlay active. It prevents a hero
    flash before intro boot without starting a second lifecycle or animation clock. */
-#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) {
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531]) {
   display: grid !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -507,12 +507,12 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
   transform: none !important;
   will-change: auto !important;
 }
-#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) > :is(
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531]) > :is(
   .fx-intro-curtain,.fx-intro-grid,.fx-intro-scan,.fx-intro-portal,.fx-intro-flare,.fx-intro-meta,.fx-intro-skip
 ) {
   display: none !important;
 }
-#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) .fx-intro-center {
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531]) .fx-intro-center {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
@@ -522,7 +522,7 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
   text-align: center !important;
   transform: translate(-50%, -50%) !important;
 }
-#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) .fx-intro-word {
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531]) .fx-intro-word {
   display: block !important;
   margin: 0 !important;
   overflow: visible !important;
@@ -530,7 +530,7 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
   font: 900 clamp(58px, 15vw, 180px)/.82 system-ui,-apple-system,"Segoe UI",sans-serif !important;
   letter-spacing: -.055em !important;
 }
-#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) .fx-intro-word span {
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531]) .fx-intro-word span {
   display: inline-block !important;
   padding-right: .055em !important;
   opacity: 1 !important;
@@ -540,7 +540,7 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
   transform: none !important;
   filter: none !important;
 }
-#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531="active"]) :is(
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531]) :is(
   .fx-intro-kicker,.fx-intro-subtitle,.fx-intro-progress-wrap
 ) {
   opacity: 0 !important;
