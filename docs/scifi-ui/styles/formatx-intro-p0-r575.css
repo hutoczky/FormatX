@@ -340,3 +340,17 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R840j — tiny desktop release clock.
+   Keep the full-screen visual-bound animation paused; this zero-delta child
+   animation supplies a compositor-timed 1400ms signal without per-frame DOM work. */
+@keyframes fx-r840j-desktop-release-clock {
+  from { outline-color: transparent; }
+  to { outline-color: transparent; }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap {
+    animation: fx-r840j-desktop-release-clock 1400ms linear both !important;
+  }
+}
