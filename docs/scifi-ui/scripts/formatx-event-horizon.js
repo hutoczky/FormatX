@@ -107,22 +107,16 @@ function prepareMagHandoffR852(overlay){
   const targetY=rect.top+rect.height*.5;
   const baseX=innerWidth*.5;
   const baseY=innerHeight*.48;
-  const targetSize=Math.max(120,Math.min(rect.width,rect.height)*.72);
-  const portalSize=Math.max(1,portalRect?.width||Math.min(innerWidth*.36,420));
-  const scale=Math.max(.34,Math.min(1.16,targetSize/portalSize));
-  const hole=Math.max(72,Math.min(210,targetSize*.32));
-  const feather=Math.max(hole+58,Math.min(320,targetSize*.58));
-  overlay.style.setProperty('--fx-mag-handoff-x',`${Math.round(targetX)}px`);
-  overlay.style.setProperty('--fx-mag-handoff-y',`${Math.round(targetY)}px`);
+  const targetSize=Math.max(120,Math.min(rect.width,rect.height)*.66);
+  const portalSize=Math.max(1,portalRect?.width||Math.min(innerWidth*.30,340));
+  const scale=Math.max(.36,Math.min(1.12,targetSize/portalSize));
   overlay.style.setProperty('--fx-mag-handoff-dx',`${Math.round(targetX-baseX)}px`);
   overlay.style.setProperty('--fx-mag-handoff-dy',`${Math.round(targetY-baseY)}px`);
   overlay.style.setProperty('--fx-mag-handoff-scale',String(scale));
-  overlay.style.setProperty('--fx-mag-handoff-hole',`${Math.round(hole)}px`);
-  overlay.style.setProperty('--fx-mag-handoff-feather',`${Math.round(feather)}px`);
   overlay.classList.add('fx-mag-handoff-r852');
   const ready=ROOT.dataset.fxCrystalOrganismR326==='ready'&&ROOT.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326';
   overlay.dataset.fxIntroMagEngineR852=ready?'r326-ready':'r326-booting';
-  ROOT.dataset.fxIntroMagHandoffR852=ready?'real-r326-ready-window':'real-r326-owned-target';
+  ROOT.dataset.fxIntroMagHandoffR852=ready?'real-r326-ready-target':'real-r326-owned-target';
   return true;
 }
 function setIntroPhase(overlay,phase){if(!(overlay instanceof HTMLElement)||preloaderReleased)return;overlay.dataset.fxIntroPhaseR635=phase;const output=overlay.querySelector('[data-fx-intro-output]');const progress=overlay.querySelector('[data-fx-intro-progress]');const status=overlay.querySelector('[data-fx-intro-status]');const english=ROOT.lang==='en';const phases={wake:{out:'WAKE',value:24,en:'LIVING MAG STARTING',hu:'ÉLŐ MAG INDÍTÁSA'},sync:{out:'SYNC',value:72,en:'MAG SYNCHRONIZING',hu:'MAG SZINKRONIZÁLÁS'},ready:{out:'READY',value:100,en:'SYSTEM STABLE',hu:'RENDSZER STABIL'}};const state=phases[phase]||phases.wake;if(output instanceof HTMLOutputElement)output.value=state.out;if(progress instanceof HTMLProgressElement){progress.max=100;progress.value=state.value;progress.setAttribute('aria-label',english?state.en:state.hu);}if(status instanceof HTMLElement)status.textContent=english?state.en:state.hu;if(phase==='ready')prepareMagHandoffR852(overlay);}
@@ -133,7 +127,7 @@ function finalizePreloader(source){
   introMark('releaseCallbackEnteredAt');
   preloaderReleased=true;
   const overlay=document.getElementById(OVERLAY_ID);
-  if(overlay instanceof HTMLElement){overlay.hidden=true;introMark('releaseDomMutationAt');overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';overlay.classList.remove('fx-preloader-reveal-r635','fx-mag-handoff-r852');for(const property of ['display','visibility','opacity','pointer-events','transform','will-change','isolation','contain','--fx-mag-handoff-x','--fx-mag-handoff-y','--fx-mag-handoff-dx','--fx-mag-handoff-dy','--fx-mag-handoff-scale','--fx-mag-handoff-hole','--fx-mag-handoff-feather'])clear(overlay,property);}
+  if(overlay instanceof HTMLElement){overlay.hidden=true;introMark('releaseDomMutationAt');overlay.setAttribute('aria-hidden','true');overlay.dataset.fxPreloaderR531='done';overlay.classList.remove('fx-preloader-reveal-r635','fx-mag-handoff-r852');for(const property of ['display','visibility','opacity','pointer-events','transform','will-change','isolation','contain','--fx-mag-handoff-dx','--fx-mag-handoff-dy','--fx-mag-handoff-scale'])clear(overlay,property);}
   cancelPreloaderTimers();cancelDeadline();
   const elapsed=performance.now()-PRELOADER_BOOT_AT;
   ROOT.dataset.fxPreloaderR531='done';ROOT.dataset.fxPreloaderReleaseR531=source;ROOT.dataset.fxPreloaderReleaseElapsedR635=String(Math.round(elapsed));ROOT.dataset.fxPreloaderFinalizerR635='single-dispatch-complete';introMark('completedAt');
