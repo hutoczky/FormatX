@@ -345,6 +345,10 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
    This preserves the canonical opaque Event Horizon for the GPU-heavy right field,
    while the real final H1/copy becomes the first stable contentful surface. */
 @media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+    background: #01040b !important;
+  }
+
   html[data-fx-preloader-r531="active"] body.living-architecture
   #hero > .hero-grid > .hero-copy {
     position: relative !important;
@@ -359,4 +363,4 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     opacity: 0 !important;
   }
 }
-/* production-r850-hero-copy-first-contentful-owner */
+/* production-r851-solid-cover-hero-copy-first-contentful-owner */
