@@ -98,8 +98,14 @@ html:not([data-fx-preloader-r531="done"]) body.living-architecture .topbar {
   -webkit-backdrop-filter: none !important;
   transition: none !important;
 }
-html:not([data-fx-preloader-r531="done"]) body.living-architecture .brand img,
-html:not([data-fx-preloader-r531="done"]) body.living-architecture #hero .hero-copy .hero-title-main {
+html:not([data-fx-preloader-r531="done"]) body.living-architecture .brand img {
+  filter: none !important;
+  transition: none !important;
+}
+/* R845: preserve the exact low-cost title paint used during the bounded intro
+   after logical release as well. This removes a late H1 repaint without adding
+   any pre-release compositor work or changing intro timing. */
+html body.living-architecture #hero .hero-copy .hero-title-main {
   filter: none !important;
   transition: none !important;
 }
