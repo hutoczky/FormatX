@@ -512,6 +512,18 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
 ) {
   display: none !important;
 }
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])::before,
+#formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531])::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  background: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  animation: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
 #formatx-event-horizon[data-fx-intro-first-frame-r840="mag-birth"]:not([data-fx-preloader-r531]) .fx-intro-center {
   position: absolute !important;
   top: 50% !important;
