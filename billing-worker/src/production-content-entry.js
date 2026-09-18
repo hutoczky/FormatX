@@ -262,9 +262,81 @@ function r848FirstFrameIntroCss(source) {
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: none !important;
+    background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-center {
+    width: min(700px,calc(100vw - 80px)) !important;
+    position: relative !important;
+    z-index: 4 !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-kicker {
+    opacity: 1 !important;
+    transform: none !important;
+    color: rgba(173,242,255,.78) !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-word {
+    font-size: clamp(64px,8.8vw,124px) !important;
+    line-height: 1 !important;
+    letter-spacing: .08em !important;
+    color: #f7fdff !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-word span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    background: none !important;
+    color: #f7fdff !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-subtitle {
+    opacity: 1 !important;
+    transform: none !important;
+    font-size: 10px !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-progress-wrap {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-progress-wrap output::after {
+    content: "" !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-flare {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 48% !important;
+    inset: auto !important;
+    z-index: 2 !important;
+    width: min(25vw,250px) !important;
+    height: min(25vw,250px) !important;
+    border-radius: 50% !important;
+    opacity: .24 !important;
+    transform: translate(-50%,-50%) scale(.78) !important;
+    background: radial-gradient(circle,rgba(235,253,255,.78) 0 3%,rgba(105,226,255,.24) 12%,rgba(104,90,255,.12) 34%,transparent 68%) !important;
+    box-shadow: 0 0 22px rgba(156,247,255,.22),0 0 64px rgba(82,121,255,.10) !important;
+    filter: none !important;
+    animation: none !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-grid {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    inset: 16% 18% !important;
+    opacity: .08 !important;
+    transform: none !important;
+    filter: none !important;
+    background-image:
+      linear-gradient(rgba(124,236,255,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(124,236,255,.03) 1px,transparent 1px) !important;
+    background-size: 42px 42px !important;
+    mask-image: radial-gradient(circle at 50% 50%,#000 0 30%,rgba(0,0,0,.82) 50%,transparent 76%) !important;
+    -webkit-mask-image: radial-gradient(circle at 50% 50%,#000 0 30%,rgba(0,0,0,.82) 50%,transparent 76%) !important;
   }
 }
-/* production-r848-desktop-intro-first-frame-owner */
+/* production-r849-first-contentful-living-mag-owner */
 `;
 }
 function stripNestedFirstFrameImport(css) {
