@@ -56,8 +56,6 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/formatx-content-standard.css',
   '/scifi-ui/styles/formatx-award-readiness.css',
-  '/scifi-ui/styles/formatx-critical-shell-v56.css',
-  '/scifi-ui/styles/formatx-first-paint-r206.css',
   '/scifi-ui/styles/formatx-flow-first-r74.css',
   '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
   '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
@@ -65,6 +63,11 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/formatx-mobile-layout-r207.css',
   '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
   '/scifi-ui/styles/formatx-mobile-apex-composition.css',
+]);
+
+const DESKTOP_DEFERRED_LEGACY_PATHS = new Set([
+  '/scifi-ui/styles/formatx-critical-shell-v56.css',
+  '/scifi-ui/styles/formatx-first-paint-r206.css',
 ]);
 
 const R502_ASSET_REWRITES = new Map([
@@ -202,6 +205,25 @@ function dedupeAwardReadinessStylesheet(html) {
     return keep ? tag : '';
   });
 }
+function deferDesktopLegacyStyles(html) {
+  return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
+    const pathname = stylesheetPath(tag);
+    if (!pathname || !DESKTOP_DEFERRED_LEGACY_PATHS.has(pathname)) return tag;
+    const hrefMatch = tag.match(/\shref=(["'])(.*?)\1/i);
+    if (!hrefMatch) return tag;
+    const mediaMatch = tag.match(/\smedia=(["'])(.*?)\1/i);
+    const originalMedia = mediaMatch ? mediaMatch[2] : 'all';
+    let next = tag;
+    if (mediaMatch) next = next.replace(mediaMatch[0], '');
+    next = next.replace(/\sfetchpriority=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r487-deferred-style=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r487-media=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r637-href=(["'])(.*?)\1/i, '');
+    const close = /\/>$/.test(next) ? '/>' : '>';
+    next = next.replace(/\s*\/?>$/, '');
+    return `${next} data-fx-r487-deferred-style="true" data-fx-r487-media="${escapeAttribute(originalMedia)}" media="${MOBILE_MEDIA}"${close}`;
+  });
+}
 function deferNonCriticalStyles(html) {
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
@@ -243,6 +265,7 @@ function optimizeHomepage(html) {
   source = injectCriticalFirstPaint(source);
   source = cacheBustCriticalQuality(source);
   source = dedupeAwardReadinessStylesheet(source);
+  source = deferDesktopLegacyStyles(source);
   source = deferNonCriticalStyles(source);
   source = injectDeferredCssRuntime(source);
   return source;
