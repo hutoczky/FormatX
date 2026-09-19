@@ -84,7 +84,8 @@ jobs:
               const stage=document.querySelector('#hero .fx-core-r317-stage,#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage');
               const canvas=stage?.querySelector('canvas')||document.querySelector('#hero canvas');
               const r=canvas?.getBoundingClientRect();
-              const controls=[...document.querySelectorAll('#hero .fx-reference-controls-r204 .fx-three-sound,#hero .fx-reference-controls-r204 .fx-reference-ask,#hero .fx-reference-controls-r204 .fx-reference-pause')];
+              const controls=[...document.querySelectorAll('#hero .fx-reference-controls-r204 .fx-three-sound,#hero .fx-reference-controls-r204 .fx-reference-ask')];
+              const manualPauseCount=document.querySelectorAll('#hero .fx-reference-controls-r204 .fx-reference-pause').length;
               const architecture=document.querySelector('.fx-signature-architecture');
               return{
                 triggerCount:document.querySelectorAll('#hero>.fx-signature-core-trigger,.fx-signature-core-trigger').length,
@@ -93,6 +94,7 @@ jobs:
                 csp:root.dataset.fxSignatureCsp||'',
                 canvas:r?[r.left,r.top,r.width,r.height]:null,
                 controls:controls.map(node=>{const b=node.getBoundingClientRect();return{cls:node.className,width:b.width,height:b.height,visible:getComputedStyle(node).visibility,display:getComputedStyle(node).display}}),
+                manualPauseCount,
                 open:root.classList.contains('fx-signature-open'),
                 overlayHidden:architecture?.getAttribute('aria-hidden'),
                 overlayInert:architecture?.hasAttribute('inert')||false
@@ -106,7 +108,8 @@ jobs:
             assert.equal(base.open,false);
             assert.equal(base.overlayHidden,'true');
             assert.equal(base.overlayInert,true,'closed architecture must be inert');
-            assert.equal(base.controls.length,3,'hero control trio missing');
+            assert.equal(base.controls.length,2,'SOUND + ASK controls missing');
+            assert.equal(base.manualPauseCount,0,'obsolete manual PAUSE returned');
             assert.ok(base.controls.every(item=>item.width>=44&&item.height>=44&&item.display!=='none'&&item.visible!=='hidden'));
 
             const [x,y,w,h]=base.canvas;
@@ -115,7 +118,7 @@ jobs:
             await page.waitForTimeout(250);
             assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('fx-signature-open')),false,'touching native MAG must not open architecture overlay');
 
-            for(const selector of ['.fx-three-sound:visible','.fx-reference-ask:visible','.fx-reference-pause:visible']){
+            for(const selector of ['.fx-three-sound:visible','.fx-reference-ask:visible']){
               await page.locator(selector).first().click({trial:true,timeout:7000});
             }
 

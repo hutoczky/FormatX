@@ -255,7 +255,8 @@ jobs:
               const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
               const cs=getComputedStyle(canvas);
               const box=canvas.getBoundingClientRect();
-              const controls=[...document.querySelectorAll('#hero .fx-reference-controls-r204 .fx-three-sound,#hero .fx-reference-controls-r204 .fx-reference-ask,#hero .fx-reference-controls-r204 .fx-reference-pause')].map(el=>{const b=el.getBoundingClientRect();const s=getComputedStyle(el);return{left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width,height:b.height,display:s.display,visibility:s.visibility,opacity:Number(s.opacity)};});
+              const controls=[...document.querySelectorAll('#hero .fx-reference-controls-r204 .fx-three-sound,#hero .fx-reference-controls-r204 .fx-reference-ask')].map(el=>{const b=el.getBoundingClientRect();const s=getComputedStyle(el);return{left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width,height:b.height,display:s.display,visibility:s.visibility,opacity:Number(s.opacity)};});
+              const manualPauseCount=document.querySelectorAll('#hero .fx-reference-controls-r204 .fx-reference-pause').length;
               return{
                 renderer:root.dataset.fxCoreRenderer,
                 shapeSync:root.dataset.fxMagShapeSyncR476,
@@ -269,6 +270,7 @@ jobs:
                 scale:cs.scale,
                 canvas:{left:box.left,top:box.top,width:box.width,height:box.height},
                 controls,
+                manualPauseCount,
                 overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
               };
             });
@@ -283,11 +285,11 @@ jobs:
             assert.match(state.filter,/saturate\(1\.28\)/);
             assert.match(state.filter,/blur\(0\.3px\)/);
             assert.ok(state.animationName.includes('fx-primary-mag-mobile-heart-r483'),state.animationName);
-            assert.equal(state.controls.length,3);
+            assert.equal(state.controls.length,2);
+            assert.equal(state.manualPauseCount,0,'obsolete manual PAUSE returned');
             assert.ok(state.controls.every(c=>c.width>=44&&c.height>=44&&c.display!=='none'&&c.visibility!=='hidden'&&c.opacity>.2),JSON.stringify(state.controls));
             const overlaps=(a,b)=>!(a.right+2<=b.left||b.right+2<=a.left||a.bottom+2<=b.top||b.bottom+2<=a.top);
             assert.equal(overlaps(state.controls[0],state.controls[1]),false,JSON.stringify(state.controls));
-            assert.equal(overlaps(state.controls[1],state.controls[2]),false,JSON.stringify(state.controls));
             assert.ok(state.overflow<=2,JSON.stringify(state));
 
             const samples=[];

@@ -26,7 +26,7 @@ const CASES = [
     header: '.site-header',
     action: '.checkout-language-control button',
     sheet: 'link[data-fx-design-system]',
-    sheetPattern: /formatx-design-system\.css\?v=20260728-ds2$/
+    sheetPattern: /formatx-design-system\.css\?v=20260919-r540-font-floor$/
   },
   {
     name: 'simulator',
@@ -36,7 +36,7 @@ const CASES = [
     header: '.sim-header',
     action: '#run-simulation',
     sheet: 'link[data-fx-design-system]',
-    sheetPattern: /formatx-design-system\.css\?v=20260728-ds2$/
+    sheetPattern: /formatx-design-system\.css\?v=20260919-r540-font-floor$/
   }
 ];
 
