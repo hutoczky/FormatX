@@ -280,6 +280,43 @@ jobs:
           echo 'Production did not converge to the validated commit in time.' >&2
           exit 1
 
+      - name: Install live cinematic browser validation runtime
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-live-cinematic" --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          echo "FORMATX_LIVE_NODE_PATH=$RUNNER_TEMP/formatx-live-cinematic/node_modules" >> "$GITHUB_ENV"
+
+      - name: Verify live R533 to R536 cinematic handoff on both domains
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_INTRO_EVIDENCE_DIR: artifacts/live-r533-r536-canonical
+          FORMATX_TEST_URL: https://formatxsuite.com/
+        run: node .github/scripts/validate-r533-r536-handoff.cjs
+
+      - name: Verify www domain resolves the same live cinematic contract
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_INTRO_EVIDENCE_DIR: artifacts/live-r533-r536-www
+          FORMATX_TEST_URL: https://www.formatxsuite.com/
+        run: node .github/scripts/validate-r533-r536-handoff.cjs
+
+      - name: Upload live cinematic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-cinematic-handoff-${{ github.sha }}
+          path: |
+            artifacts/live-r533-r536-canonical/
+            artifacts/live-r533-r536-www/
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Publish deployment status
         if: always()
         continue-on-error: true
