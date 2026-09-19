@@ -340,3 +340,21 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+/* R841 — opaque desktop intro owns the viewport. Keep settled geometry in layout,
+   but skip raster for fully occluded page chrome and hero contents until release. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html:is(.fx-intro-running,.fx-intro-managed) body.living-architecture > :is(
+    #fx-apex-canvas,
+    .fx-atmosphere,
+    .topbar,
+    .fx-rail,
+    .fx-organism-status
+  ),
+  html:is(.fx-intro-running,.fx-intro-managed) body.living-architecture #hero > :is(
+    .hero-grid,
+    .scroll-cue
+  ) {
+    visibility: hidden !important;
+  }
+}
