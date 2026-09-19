@@ -240,17 +240,9 @@ async function verify(browser, name, viewport, mobile) {
     assert.ok(report.earlyChange.changed >= 8 && report.lateChange.changed >= 8, `${name}: surface energy is not visibly distinct`);
     assert.ok(Math.abs(report.lateChange.centroidY - report.earlyChange.centroidY) > 3, `${name}: light does not travel along the surface`);
 
-    const pause = page.locator('#hero .fx-reference-pause').first();
-    await pause.click();
-    await page.waitForFunction(() => document.querySelector('#hero .fx-reference-pause')?.dataset.paused === 'true');
-    await page.waitForTimeout(300);
-    const pausedCount = await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length);
-    await page.waitForTimeout(6800);
-    assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), pausedCount, `${name}: sweep ignores PAUSE`);
-    assert.equal(await page.evaluate(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484), 'suspended');
-    await pause.click();
-    await page.waitForFunction(count => __magEnergyAudit.events.filter(e => e.phase === 'start').length > count, pausedCount, { timeout: 10000 });
-    report.pauseResume = 'passed';
+    const manualPauseCount = await page.locator('#hero .fx-reference-pause').count();
+    assert.equal(manualPauseCount, 0, `${name}: obsolete manual PAUSE control returned`);
+    report.motionControl = 'automatic-lifecycle-reduced-motion-only';
 
     // Stay in a middle section. The production desktop intentionally loops
     // from the footer back to MAG, so scrolling to the bottom is not an
@@ -284,7 +276,7 @@ async function verify(browser, name, viewport, mobile) {
 
     assert.deepEqual(errors, [], `${name}: page errors`);
     report.result = 'passed';
-    console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; R486 mobile optics, pause, offscreen, reduced motion passed`);
+    console.log(`PASS ${name}: ${Math.round(report.durationMs)}ms native surface sweep / ${Math.round(report.intervalMs)}ms interval; zero idle frames; R486 mobile optics, automatic lifecycle, offscreen, reduced motion passed`);
   } catch (error) {
     report.result = 'failed';
     report.error = String(error.stack || error);
