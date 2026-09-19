@@ -28,7 +28,7 @@
   background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
   transform: none !important;
   will-change: auto !important;
-  animation-play-state: paused !important;
+  animation-play-state: running !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
