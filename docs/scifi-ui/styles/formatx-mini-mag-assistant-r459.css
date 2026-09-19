@@ -295,9 +295,12 @@
 }
 
 
-/* R539 — fixed assistant must never cover footer/resource information.
-   It remains available from the sticky MAG control and reappears outside the
-   terminal information zone. */
+/* R560 — collision-safe fixed assistant.
+   The closed launcher remains measurable while visually hidden, allowing the
+   event-driven safety probe to restore it as soon as covered content moves away.
+   The sticky/header MAG bridge remains available at all times. */
 .fx-mini-mag-assistant-r459[data-context-hidden="true"][data-open="false"] {
-  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }

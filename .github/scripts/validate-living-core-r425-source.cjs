@@ -92,7 +92,13 @@ absent(worker,['const QUALITY_RE','const QUALITY_URL','html = html.replace(QUALI
 absent(canonicalWorker,['cacheBustCriticalQuality','formatx-quality-r461.css?v=20260902-r500-canonical-hero-state'],'canonical quality cache pass-through');
 assert.match(home,/data-fx-quality-r461=["']true["'][^>]*href=["'][^"']*formatx-quality-r461\.css\?v=[^"']+["']/i,'canonical current quality link missing');
 
+has(mini,[
+  'elementsFromPoint','requestAnimationFrame','collision-information-safe',
+  "addEventListener('scroll',()=>scheduleContextSafety('scroll'),{passive:true})",
+  'fxMiniMagContextR560'
+],'R560 Mini MAG information-collision safety');
+assert.ok(!mini.includes('setInterval('),'Mini MAG collision safety must remain interval-free');
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 for(const source of [intro,motion,current,renderer,life,governor,mini])new Function(source);
 
-console.log('PASS: R543 validates one native living MAG, no manual PAUSE owner, automatic reduced/background lifecycle, bounded preloader delivery, and source-owned canonical quality cache identity.');
+console.log('PASS: R560 validates one native living MAG, no manual PAUSE owner, zero-idle lifecycle, collision-safe Mini MAG, bounded preloader delivery, and source-owned canonical quality cache identity.');

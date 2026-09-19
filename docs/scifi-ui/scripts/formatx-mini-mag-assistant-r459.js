@@ -1,11 +1,11 @@
-/* FormatX R528 — persistent Mini MAG site controller. Manual MAG pause is
+/* FormatX R560 — collision-safe persistent Mini MAG site controller. Manual MAG pause is
    intentionally absent; motion accessibility is handled by reduced-motion. */
 (function(){
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxMiniMagAssistantR459==='ready'||root.dataset.fxMiniMagAssistantR459==='booting')return;
 root.dataset.fxMiniMagAssistantR459='booting';
-const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260919-r539-context-occlusion-safe';
+const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
 const SECTION_IDS=['hero','experience','capabilities','pricing','system','resources'];
 let pendingHeroRequest=false;
 const COPY={
@@ -39,22 +39,65 @@ function install(){
   for(const action of ['ask','menu','sound','language','shape'])actions.appendChild(buildAction(action));
   const navLabel=node('span','fx-mini-mag-section-label-r459'),nav=node('div','fx-mini-mag-nav-r459');for(const id of SECTION_IDS)nav.appendChild(buildNav(id));const foot=node('div','fx-mini-mag-foot-r459');
   panel.append(head,controlLabel,actions,navLabel,nav,foot);host.append(panel,launcher);document.body.appendChild(host);
-  function setOpen(open,focusPanel=false){host.dataset.open=open?'true':'false';launcher.setAttribute('aria-expanded',String(open));panel.setAttribute('aria-hidden',String(!open));root.dataset.fxMiniMagPanelR459=open?'open':'closed';if(open){window.FormatXCoreMobileV69?.pulse?.({phase:'mini-mag-open',x:.18,y:-.12});if(focusPanel)close.focus({preventScroll:true});}else if(document.activeElement&&panel.contains(document.activeElement))launcher.focus({preventScroll:true});}
+  function setOpen(open,focusPanel=false){host.dataset.open=open?'true':'false';launcher.setAttribute('aria-expanded',String(open));panel.setAttribute('aria-hidden',String(!open));root.dataset.fxMiniMagPanelR459=open?'open':'closed';if(open){window.FormatXCoreMobileV69?.pulse?.({phase:'mini-mag-open',x:.18,y:-.12});if(focusPanel)close.focus({preventScroll:true});}else if(document.activeElement&&panel.contains(document.activeElement))launcher.focus({preventScroll:true});scheduleContextSafety('panel-state');}
   function syncCopy(){const c=COPY[language()];launcher.setAttribute('aria-label',c.launcher);launcher.title=c.launcher;title.textContent=c.title;subtitle.textContent=c.subtitle;close.setAttribute('aria-label',c.close);close.title=c.close;controlLabel.textContent=c.controls;navLabel.textContent=c.navigation;foot.textContent=c.foot;actions.querySelectorAll('[data-action]').forEach(button=>setPair(button,c[button.dataset.action]));nav.querySelectorAll('[data-section]').forEach(button=>setPair(button,c[button.dataset.section]));root.dataset.fxMiniMagLanguageR459=language();}
   launcher.addEventListener('click',()=>setOpen(host.dataset.open!=='true',true));close.addEventListener('click',()=>setOpen(false));
   actions.addEventListener('click',event=>{const button=event.target instanceof Element?event.target.closest('[data-action]'):null;if(!(button instanceof HTMLButtonElement))return;const action=button.dataset.action;let handled=false;if(action==='ask')handled=openAsk();else if(action==='menu')handled=toggleMenu();else if(action==='sound')handled=toggleSound();else if(action==='language')handled=toggleLanguage();else if(action==='shape')handled=toggleShape();root.dataset.fxMiniMagLastActionR459=handled?String(action):`${action}-unavailable`;if(action==='ask'||action==='menu')setOpen(false);});
   nav.addEventListener('click',event=>{const button=event.target instanceof Element?event.target.closest('[data-section]'):null;if(!(button instanceof HTMLButtonElement))return;if(scrollToSection(button.dataset.section||''))setOpen(false);});
   document.addEventListener('pointerdown',event=>{if(host.dataset.open!=='true'||!(event.target instanceof Node)||host.contains(event.target))return;setOpen(false);},{passive:true});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&host.dataset.open==='true'){event.preventDefault();setOpen(false);return;}if(event.altKey&&!event.ctrlKey&&!event.metaKey&&String(event.key).toLowerCase()==='m'){event.preventDefault();setOpen(host.dataset.open!=='true',true);}});
+  let terminalHidden=false,collisionHidden=false,contextFrame=0;
+  const collisionSelector='a[href],button,input,select,textarea,[role="button"],h1,h2,h3,h4,p,li,label,small,th,td,output';
+  function applyContextSafety(source='runtime'){
+    const hidden=host.dataset.open!=='true'&&(terminalHidden||collisionHidden);
+    host.dataset.contextHidden=hidden?'true':'false';
+    root.dataset.fxMiniMagContextR539=hidden?'terminal-information-safe':'normal';
+    root.dataset.fxMiniMagContextR560=hidden?(terminalHidden?'terminal-information-safe':'collision-information-safe'):'normal';
+    root.dataset.fxMiniMagContextSourceR560=source;
+  }
+  function collidesWithInformation(){
+    if(host.dataset.open==='true')return false;
+    const rect=launcher.getBoundingClientRect();
+    if(rect.width<1||rect.height<1)return false;
+    const samples=[.12,.38,.62,.88];
+    for(const fx of samples)for(const fy of samples){
+      const x=Math.max(1,Math.min(innerWidth-1,rect.left+rect.width*fx));
+      const y=Math.max(1,Math.min(innerHeight-1,rect.top+rect.height*fy));
+      for(const el of document.elementsFromPoint(x,y)){
+        if(!(el instanceof Element)||host.contains(el))continue;
+        const target=el.matches(collisionSelector)?el:el.closest(collisionSelector);
+        if(!(target instanceof Element)||host.contains(target))continue;
+        const style=getComputedStyle(target),box=target.getBoundingClientRect();
+        const visible=style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity||1)>.02&&box.width>0&&box.height>0;
+        if(visible)return true;
+      }
+    }
+    return false;
+  }
+  function updateContextSafety(source='runtime'){
+    contextFrame=0;
+    collisionHidden=collidesWithInformation();
+    applyContextSafety(source);
+  }
+  function scheduleContextSafety(source='event'){
+    if(contextFrame)return;
+    contextFrame=requestAnimationFrame(()=>updateContextSafety(source));
+  }
   const terminalZones=[document.getElementById('resources'),document.querySelector('footer.site-footer')].filter(node=>node instanceof HTMLElement);
   if('IntersectionObserver' in window&&terminalZones.length){
     const terminalObserver=new IntersectionObserver(entries=>{
-      const hidden=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.03);
-      host.dataset.contextHidden=hidden?'true':'false';
-      root.dataset.fxMiniMagContextR539=hidden?'terminal-information-safe':'normal';
+      terminalHidden=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.03);
+      scheduleContextSafety('terminal-intersection');
     },{threshold:[0,.03,.15],rootMargin:'0px 0px 0px 0px'});
     terminalZones.forEach(node=>terminalObserver.observe(node));
   }
+  addEventListener('scroll',()=>scheduleContextSafety('scroll'),{passive:true});
+  addEventListener('resize',()=>scheduleContextSafety('resize'),{passive:true});
+  addEventListener('orientationchange',()=>scheduleContextSafety('orientation'),{passive:true});
+  addEventListener('formatx:cinematicscene',()=>scheduleContextSafety('cinematic-scene'),{passive:true});
+  addEventListener('formatx:loop',()=>scheduleContextSafety('loop'),{passive:true});
+  addEventListener('pageshow',()=>scheduleContextSafety('pageshow'),{passive:true});
+  scheduleContextSafety('install');
   for(const name of ['formatx:languagechange','pageshow'])addEventListener(name,syncCopy,{passive:true});syncCopy();
   window.FormatXMiniMagR459={open:()=>setOpen(true,true),close:()=>setOpen(false),toggle:()=>setOpen(host.dataset.open!=='true',true),navigate:scrollToSection,ask:openAsk,menu:toggleMenu,sound:toggleSound,language:toggleLanguage,shape:toggleShape,element:host};
   root.dataset.fxMiniMagAssistantR459='ready';root.dataset.fxMiniMagPrimaryHeroR459='preserved-native-webgl';root.dataset.fxMiniMagHeroBridgeR460='ready';root.dataset.fxMiniMagMotionControlR528='reduced-motion-only-no-manual-pause';
