@@ -64,11 +64,13 @@ function ensureField(){
 }
 
 function mountSigil(section){
-  let sigil=section.querySelector(':scope > .fx-r179-organ-sigil');
+  const trigger=section.querySelector(':scope > .fx-organism-chapter-trigger');
+  const host=trigger instanceof HTMLElement?trigger:section;
+  let sigil=host.querySelector(':scope > .fx-r179-organ-sigil');
   if(sigil instanceof HTMLElement)return sigil;
-  sigil=document.createElement('div');sigil.className='fx-r179-organ-sigil';sigil.setAttribute('aria-hidden','true');
+  sigil=document.createElement(host===section?'div':'span');sigil.className='fx-r179-organ-sigil';sigil.setAttribute('aria-hidden','true');
   sigil.append(make('fx-r179-sigil-a'),make('fx-r179-sigil-b'),make('fx-r179-sigil-c'));
-  section.appendChild(sigil);return sigil;
+  host.appendChild(sigil);return sigil;
 }
 
 function enhanceSurface(el){

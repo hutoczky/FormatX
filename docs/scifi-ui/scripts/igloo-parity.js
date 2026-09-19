@@ -6,27 +6,67 @@
   root.dataset.fxTranscendLoader = 'safe-loading-v28';
 
   let genomeWebglRequested = false;
+  let loaderFinalising = false;
+  const styleSettles = [];
+
+  function trackStyleSettle(link, readyKey, warning) {
+    const settle = new Promise(resolve => {
+      let done = false;
+      let timeout = 0;
+      const finish = (state) => {
+        if (done) return;
+        done = true;
+        clearTimeout(timeout);
+        link.removeEventListener('load', loaded);
+        link.removeEventListener('error', failed);
+        if (readyKey) root.dataset[readyKey] = state;
+        if (state !== 'ready') console.warn(warning);
+        resolve(state);
+      };
+      const loaded = () => finish('ready');
+      const failed = () => finish('failed');
+
+      try {
+        if (link.sheet) {
+          finish('ready');
+          return;
+        }
+      } catch (_) {}
+
+      link.addEventListener('load', loaded, { once: true });
+      link.addEventListener('error', failed, { once: true });
+      timeout = setTimeout(() => {
+        try {
+          if (link.sheet) finish('ready');
+          else finish('timeout');
+        } catch (_) {
+          finish('timeout');
+        }
+      }, 3000);
+    });
+    styleSettles.push(settle);
+    return settle;
+  }
 
   function ensureStyle(marker, href, readyKey, warning) {
-    if (document.querySelector('link[' + marker + ']')) return;
-    const link = document.createElement('link');
+    let link = document.querySelector('link[' + marker + ']');
+    if (link instanceof HTMLLinkElement) {
+      trackStyleSettle(link, readyKey, warning);
+      return link;
+    }
+    link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = href;
     link.setAttribute(marker, 'true');
-    link.addEventListener('load', () => {
-      if (readyKey) root.dataset[readyKey] = 'ready';
-    }, { once: true });
-    link.addEventListener('error', () => {
-      if (readyKey) root.dataset[readyKey] = 'failed';
-      console.warn(warning);
-    }, { once: true });
+    trackStyleSettle(link, readyKey, warning);
     document.head.appendChild(link);
+    return link;
   }
 
   function ensureStabilityStyle() {
     ensureStyle(
       'data-fx-site-stability',
-      './styles/formatx-site-stability.css?v=20260807-audio-slot-2',
+      './styles/formatx-site-stability.css?v=20260908-r691-loop-geometry',
       'fxSiteStability',
       'FormatX stability stylesheet failed to load.'
     );
@@ -88,9 +128,9 @@
 
   function ensurePremiumFinishStyle() {
     const existing = document.querySelector('link[data-fx-premium-finish]');
-    if (existing) {
+    if (existing instanceof HTMLLinkElement) {
       document.head.appendChild(existing);
-      root.dataset.fxPremiumFinishStyle = 'ready';
+      trackStyleSettle(existing, 'fxPremiumFinishStyle', 'FormatX premium finish stylesheet failed to load.');
       return;
     }
     ensureStyle(
@@ -117,6 +157,7 @@
       const apiSource = '/api/checkout-qr?plan=' + encodeURIComponent(plan)
         + '&cycle=monthly&currency=' + encodeURIComponent(selectedCurrency)
         + '&v=20260730-qr1';
+      // R741: use the shipped checkout code before requesting server generation.
       const localSource = './assets/qr/' + plan + '-' + assetCurrency + '.svg?v=20260730-qr1';
       const checkoutSource = './checkout.html?plan=' + encodeURIComponent(plan)
         + '&cycle=monthly&currency=' + encodeURIComponent(selectedCurrency)
@@ -144,13 +185,13 @@
         card.classList.remove('is-qr-loading', 'is-qr-error');
         card.classList.add('is-qr-ready');
         image.dataset.fxQrSource = image.currentSrc || image.src;
-        root.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'local-fallback' : 'api';
+        root.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'api-fallback' : 'local-asset';
       };
 
       image.onerror = () => {
         if (image.dataset.fxQrFallback !== 'true') {
           image.dataset.fxQrFallback = 'true';
-          image.src = localSource;
+          image.src = apiSource;
           return;
         }
         card.classList.remove('is-qr-loading', 'is-qr-ready');
@@ -158,8 +199,8 @@
         root.dataset.fxQrDelivery = 'failed';
       };
 
-      if (image.getAttribute('src') !== apiSource || !image.complete || image.naturalWidth < 32) {
-        image.src = apiSource;
+      if (image.getAttribute('src') !== localSource || !image.complete || image.naturalWidth < 32) {
+        image.src = localSource;
       } else {
         image.onload();
       }
@@ -243,21 +284,43 @@
     './scripts/formatx-accessibility-finalizer.js?v=20260808-a11y-1'
   ];
 
+  function finaliseLoader() {
+    if (loaderFinalising) return;
+    loaderFinalising = true;
+    root.dataset.fxTranscendProgress = '100';
+    root.dataset.fxTranscendLoader = 'safe-settling-styles-r692';
+    Promise.all(styleSettles).then(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          root.dataset.fxOrganismLayoutSettledR692 = 'ready';
+          root.dataset.fxTranscendLoader = 'safe-ready-v28';
+          dispatchEvent(new CustomEvent('formatx:organismlayoutsettled', { detail: { revision: 'r692' } }));
+          dispatchEvent(new Event('resize'));
+        });
+      });
+    });
+  }
+
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendProgress = '100';
-      root.dataset.fxTranscendLoader = 'safe-ready-v28';
+      finaliseLoader();
       return;
     }
 
     const source = queue[index];
-    const dedicatedCoreReady = /^(?:ready-v20|ready-v69)$/.test(root.dataset.fxCoreReal3d || '');
+    const dedicatedCoreState = root.dataset.fxCoreReal3d || '';
+    const currentMagRuntime = root.dataset.fxCurrentMagRuntimeR422 || '';
+    const dedicatedCoreReady = /^(?:ready-v20|ready-v69)$/.test(dedicatedCoreState);
+    const dedicatedCoreBooting = dedicatedCoreState === 'booting' || currentMagRuntime === 'booting';
     const dedicatedCoreSettled = dedicatedCoreReady
-      || ['context-unavailable', 'webgl2-unavailable', 'shader-failed', 'context-lost'].includes(root.dataset.fxCoreReal3d);
+      || dedicatedCoreBooting
+      || ['context-unavailable', 'webgl2-unavailable', 'shader-failed', 'context-lost'].includes(dedicatedCoreState);
     if (dedicatedCoreSettled
       && (source.includes('formatx-apex-native.js') || source.includes('formatx-three-host-safe.js'))) {
       root.dataset.fxNativeApex = 'retired-for-dedicated-core-v69';
-      root.dataset.fxThreeHost = dedicatedCoreReady ? 'single-real3d-v69' : 'canvas2d-safety-fallback-v22';
+      root.dataset.fxThreeHost = dedicatedCoreReady
+        ? 'single-real3d-v69'
+        : (dedicatedCoreBooting ? 'reserved-for-dedicated-core-v69' : 'canvas2d-safety-fallback-v22');
       root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
       load(index + 1);
       return;

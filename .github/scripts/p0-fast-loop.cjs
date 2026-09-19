@@ -11,7 +11,7 @@ const BASE = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/ind
 const CHROME = process.env.CHROME_BIN || '/usr/bin/google-chrome';
 const OUT = process.env.FORMATX_FAST_EVIDENCE_DIR || 'artifacts/p0-fast-loop';
 const CANVAS = '#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
-const PAUSE = '#hero .fx-reference-pause';
+const HEART = '#hero .fx-mag-heart-hit-r252';
 const ASK = '#hero .fx-reference-ask';
 fs.mkdirSync(OUT, { recursive: true });
 
@@ -61,14 +61,14 @@ function maxClockRewind(before, after) {
     return typeof next === 'number' ? a.time - next : 0;
   }));
 }
-async function activateMag(page) {
-  const target = page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252').first();
-  await target.waitFor({ state: 'visible', timeout: 20000 });
-  await target.click();
-  await page.waitForFunction(sel => (
-    document.documentElement.dataset.fxCrystalOrganismR326 === 'ready'
-    && document.querySelectorAll(sel).length === 1
-  ), CANVAS, { timeout: 30000 });
+async function waitForNavigationMag(page) {
+  await page.waitForFunction(sel => {
+    const root = document.documentElement;
+    return root.dataset.fxCrystalOrganismR326 === 'ready'
+      && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
+      && document.querySelectorAll(sel).length === 1
+      && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length === 1;
+  }, CANVAS, { timeout: 30000 });
 }
 async function verifyMagContext(browser, name, viewport, mobile) {
   const context = await browser.newContext({
@@ -86,55 +86,56 @@ async function verifyMagContext(browser, name, viewport, mobile) {
   page.on('console', m => { if (m.type() === 'error' && !/WebGL|WebGPU|GPU/i.test(m.text())) errors.push(m.text()); });
   try {
     await page.goto(`${BASE}${BASE.includes('?') ? '&' : '?'}p0-fast-mag=${name}-${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await activateMag(page);
+
+    /* Authoritative P0 proof: do not click/tap/scroll/press a key before the
+       renderer is ready. MAG must be alive from navigation by itself. */
+    await waitForNavigationMag(page);
     assert.equal(await page.locator(CANVAS).count(), 1, `${name}: duplicate canvas`);
     assert.equal(await page.locator('#hero .fx-crystal-organism-r326-stage').count(), 1, `${name}: duplicate renderer stage`);
+    assert.equal(await page.locator('.fx-reference-pause').count(), 0, `${name}: obsolete manual PAUSE UI returned`);
     const renderer = await page.evaluate(() => document.documentElement.dataset.fxCoreRenderer || '');
     assert.equal(renderer, 'single-webgl-crystal-organism-r326', `${name}: non-canonical renderer ${renderer}`);
 
     const before = await animationState(page);
     await page.waitForTimeout(900);
     const running = await animationState(page);
-    assertStableAnimationIdentity(before, running, `${name}: baseline`);
+    assertStableAnimationIdentity(before, running, `${name}: navigation-autostart baseline`);
     const initialAdvance = Math.max(0, ...running.map(a => a.time - (before.find(b => b.id === a.id)?.time || 0)));
-    assert.ok(running.some(a => a.state === 'running'), `${name}: no running compositor animation`);
-    assert.ok(initialAdvance > 250, `${name}: baseline MAG clock advance ${initialAdvance}`);
+    assert.ok(running.some(a => a.state === 'running'), `${name}: no running compositor life after navigation autostart`);
+    assert.ok(initialAdvance > 250, `${name}: navigation-owned MAG clock advance ${initialAdvance}`);
 
-    const pause = page.locator(PAUSE).first();
-    assert.equal(await pause.isVisible(), true, `${name}: PAUSE missing`);
-    await pause.click();
-    await page.waitForFunction(sel => document.querySelector(sel)?.dataset.paused === 'true', PAUSE, { timeout: 3000 });
-    const p1 = await animationState(page);
-    assertStableAnimationIdentity(running, p1, `${name}: pause entry`);
-    await page.waitForTimeout(700);
-    const p2 = await animationState(page);
-    assertStableAnimationIdentity(running, p2, `${name}: paused hold`);
-    const pauseDelta = Math.max(0, ...p2.map(a => Math.abs(a.time - (p1.find(b => b.id === a.id)?.time ?? a.time))));
-    assert.ok(p2.every(a => a.state !== 'running'), `${name}: PAUSE left a compositor animation running`);
-    assert.ok(pauseDelta < 80, `${name}: PAUSE clock drift ${pauseDelta}`);
+    await page.evaluate(() => {
+      window.__fxFastCoreInteractionCount = 0;
+      addEventListener('formatx:coreinteraction', () => { window.__fxFastCoreInteractionCount += 1; }, { passive: true });
+    });
+    const heart = page.locator(HEART).first();
+    await heart.waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForFunction(sel => document.querySelector(sel)?.dataset.fxHeartBound === 'true', HEART, { timeout: 10000 });
+    await heart.click({ position: { x: 20, y: 20 }, timeout: 5000 });
+    await page.waitForFunction(() => Number(window.__fxFastCoreInteractionCount || 0) > 0, null, { timeout: 5000 });
+    await page.waitForTimeout(220);
 
-    await pause.click();
-    await page.waitForFunction(sel => document.querySelector(sel)?.dataset.paused !== 'true', PAUSE, { timeout: 3000 });
-    const resumeStart = await animationState(page);
-    assertStableAnimationIdentity(running, resumeStart, `${name}: resume entry`);
-    const resumeRewind = maxClockRewind(p2, resumeStart);
-    assert.ok(resumeRewind < 80, `${name}: RESUME rewound canonical clock ${resumeRewind}`);
-    const startById = new Map(resumeStart.map(a => [a.id, a.time]));
-    let resumeAdvance = 0;
-    let resumedState = resumeStart;
-    for (const wait of [100, 150, 250, 200, 200, 300, 400]) {
-      await page.waitForTimeout(wait);
-      resumedState = await animationState(page);
-      assertStableAnimationIdentity(running, resumedState, `${name}: resumed clock`);
-      resumeAdvance = Math.max(resumeAdvance, ...resumedState.map(a => a.time - (startById.get(a.id) ?? a.time)));
-      if (resumeAdvance > 200) break;
-    }
-    assert.ok(resumedState.some(a => a.state === 'running'), `${name}: RESUME state not running`);
-    assert.ok(resumeAdvance > 200, `${name}: RESUME clock advance ${resumeAdvance}`);
+    assert.equal(await page.locator(CANVAS).count(), 1, `${name}: interaction created duplicate canvas`);
+    assert.equal(await page.locator('#hero .fx-crystal-organism-r326-stage').count(), 1, `${name}: interaction created duplicate renderer stage`);
+    assert.equal(await page.locator('.fx-reference-pause').count(), 0, `${name}: interaction restored obsolete PAUSE UI`);
+    const afterInteraction = await animationState(page);
+    assertStableAnimationIdentity(running, afterInteraction, `${name}: interaction single-clock identity`);
+    const interactionRewind = maxClockRewind(running, afterInteraction);
+    assert.ok(interactionRewind < 80, `${name}: interaction rewound canonical MAG clock ${interactionRewind}`);
 
     const identities = animationIdentity(running);
+    const coreInteractions = await page.evaluate(() => Number(window.__fxFastCoreInteractionCount || 0));
     assert.equal(errors.length, 0, `${name}: console/page errors: ${errors.join(' | ')}`);
-    return { name, renderer, initialAdvance, pauseDelta, resumeRewind, resumeAdvance, animationIdentity: identities };
+    return {
+      name,
+      renderer,
+      autoStart: true,
+      manualPauseAbsent: true,
+      initialAdvance,
+      interactionRewind,
+      coreInteractions,
+      animationIdentity: identities,
+    };
   } finally {
     await context.close();
   }
@@ -144,7 +145,7 @@ async function verifyReducedMotion(browser) {
   const page = await context.newPage();
   try {
     await page.goto(`${BASE}?p0-fast-reduced=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1800);
+    await waitForNavigationMag(page);
     const state = await page.evaluate(sel => {
       const canvas = document.querySelector(sel);
       return {
@@ -153,12 +154,16 @@ async function verifyReducedMotion(browser) {
         overflow: Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - document.documentElement.clientWidth),
         canvasCount: document.querySelectorAll(sel).length,
         stageCount: document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
+        pauseCount: document.querySelectorAll('.fx-reference-pause').length,
+        renderer: document.documentElement.dataset.fxCoreRenderer || '',
         animations: canvas?.getAnimations().map(a => ({ name: String(a.animationName || ''), state: String(a.playState || ''), time: Number(a.currentTime || 0) })) || [],
       };
     }, CANVAS);
     assert.ok(state.hero && state.lead > 40, 'reduced-motion hero unavailable');
-    assert.ok(state.canvasCount <= 1, `reduced-motion duplicate canvas ${state.canvasCount}`);
-    assert.ok(state.stageCount <= 1, `reduced-motion duplicate renderer stage ${state.stageCount}`);
+    assert.equal(state.canvasCount, 1, `reduced-motion navigation MAG canvas count ${state.canvasCount}`);
+    assert.equal(state.stageCount, 1, `reduced-motion navigation MAG stage count ${state.stageCount}`);
+    assert.equal(state.renderer, 'single-webgl-crystal-organism-r326', `reduced-motion non-canonical renderer ${state.renderer}`);
+    assert.equal(state.pauseCount, 0, 'reduced-motion obsolete PAUSE UI returned');
     assert.ok(state.animations.every(a => a.state !== 'running'), `reduced-motion left compositor animation running: ${JSON.stringify(state.animations)}`);
     assert.ok(state.overflow <= 1, `reduced-motion overflow ${state.overflow}`);
     return state;
@@ -289,7 +294,8 @@ function verifySourceContracts() {
   assert.match(entry, /data-fx-motion-runtime-loader-r239/, 'apex: production motion runtime loader replacement anchor missing');
   assert.match(scheduler, /const SRC=['\"]\/scifi-ui\/scripts\/formatx-motion-runtime-loader-r239\.js\?v=/, 'apex: scheduler runtime loader asset missing');
   assert.match(scheduler, /prefers-reduced-motion:\s*reduce/, 'reduced-motion source contract missing media query');
-  assert.match(scheduler, /reduced-motion-static/, 'reduced-motion source contract missing static scheduler state');
+  assert.match(scheduler, /reduced-motion-critical-mag-only-r536/, 'reduced-motion source contract missing critical-MAG-only scheduler state');
+  assert.doesNotMatch(scheduler, /reduced-motion-static|lighthouse=1|force-prefers-reduced-motion/, 'obsolete reduced/audit scheduler bypass remains');
   return {
     semantic: true,
     apex: true,
