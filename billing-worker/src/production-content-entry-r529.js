@@ -13,8 +13,9 @@ import canonicalProduction from './production-content-entry.js';
      and keeps R528's mobile legacy CSS on the existing post-FCP scheduler.
    - Manual MAG pause is not a product contract. Normal MAG remains alive;
      reduced-motion/background lifecycle stays owned by the R528 runtime.
-   - R531 hotfix only refreshes the proven lightweight preloader assets; the
-     underlying R529 production/content/LCP architecture remains unchanged. */
+   - R531 hotfix refreshes only the proven lightweight preloader assets. The
+     canonical quality stylesheet revision passes through from source HTML so
+     production cannot pin a retired quality cache revision. */
 
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
@@ -141,7 +142,6 @@ export default {
     html = html.replace(DEFERRED_SCHEDULER_RE, DEFERRED_SCHEDULER_URL);
     html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL);
     html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL);
-    html = html.replace(QUALITY_RE, QUALITY_URL);
     if (HOMEPAGE_PATHS.has(url.pathname)) {
       html = stabilizeMobileFirstPaint(html);
       html = injectStaticHeart(html);
