@@ -13,6 +13,7 @@ const OUT = process.env.FORMATX_FAST_EVIDENCE_DIR || 'artifacts/p0-fast-loop';
 const CANVAS = '#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
 const PAUSE = '#hero .fx-reference-pause';
 const ASK = '#hero .fx-reference-ask';
+const SOUND = '#hero .fx-three-sound';
 fs.mkdirSync(OUT, { recursive: true });
 
 function wants(name) {
@@ -100,41 +101,23 @@ async function verifyMagContext(browser, name, viewport, mobile) {
     assert.ok(running.some(a => a.state === 'running'), `${name}: no running compositor animation`);
     assert.ok(initialAdvance > 250, `${name}: baseline MAG clock advance ${initialAdvance}`);
 
-    const pause = page.locator(PAUSE).first();
-    assert.equal(await pause.isVisible(), true, `${name}: PAUSE missing`);
-    await pause.click();
-    await page.waitForFunction(sel => document.querySelector(sel)?.dataset.paused === 'true', PAUSE, { timeout: 3000 });
-    const p1 = await animationState(page);
-    assertStableAnimationIdentity(running, p1, `${name}: pause entry`);
-    await page.waitForTimeout(700);
-    const p2 = await animationState(page);
-    assertStableAnimationIdentity(running, p2, `${name}: paused hold`);
-    const pauseDelta = Math.max(0, ...p2.map(a => Math.abs(a.time - (p1.find(b => b.id === a.id)?.time ?? a.time))));
-    assert.ok(p2.every(a => a.state !== 'running'), `${name}: PAUSE left a compositor animation running`);
-    assert.ok(pauseDelta < 80, `${name}: PAUSE clock drift ${pauseDelta}`);
-
-    await pause.click();
-    await page.waitForFunction(sel => document.querySelector(sel)?.dataset.paused !== 'true', PAUSE, { timeout: 3000 });
-    const resumeStart = await animationState(page);
-    assertStableAnimationIdentity(running, resumeStart, `${name}: resume entry`);
-    const resumeRewind = maxClockRewind(p2, resumeStart);
-    assert.ok(resumeRewind < 80, `${name}: RESUME rewound canonical clock ${resumeRewind}`);
-    const startById = new Map(resumeStart.map(a => [a.id, a.time]));
-    let resumeAdvance = 0;
-    let resumedState = resumeStart;
-    for (const wait of [100, 150, 250, 200, 200, 300, 400]) {
-      await page.waitForTimeout(wait);
-      resumedState = await animationState(page);
-      assertStableAnimationIdentity(running, resumedState, `${name}: resumed clock`);
-      resumeAdvance = Math.max(resumeAdvance, ...resumedState.map(a => a.time - (startById.get(a.id) ?? a.time)));
-      if (resumeAdvance > 200) break;
+    assert.equal(await page.locator(PAUSE).count(), 0, `${name}: obsolete manual PAUSE returned`);
+    const sound = page.locator(SOUND).first();
+    const ask = page.locator(ASK).first();
+    for (const [label, control] of [['SOUND', sound], ['ASK', ask]]) {
+      assert.equal(await control.isVisible(), true, `${name}: ${label} missing`);
+      const box = await control.boundingBox();
+      assert.ok(box && box.width >= 44 && box.height >= 44, `${name}: ${label} hit target invalid`);
     }
-    assert.ok(resumedState.some(a => a.state === 'running'), `${name}: RESUME state not running`);
-    assert.ok(resumeAdvance > 200, `${name}: RESUME clock advance ${resumeAdvance}`);
+    await ask.click();
+    await page.waitForTimeout(120);
+    assert.equal(await page.locator(CANVAS).count(), 1, `${name}: ASK duplicated canonical renderer`);
+    const afterAsk = await animationState(page);
+    assertStableAnimationIdentity(running, afterAsk, `${name}: ASK interaction`);
 
     const identities = animationIdentity(running);
     assert.equal(errors.length, 0, `${name}: console/page errors: ${errors.join(' | ')}`);
-    return { name, renderer, initialAdvance, pauseDelta, resumeRewind, resumeAdvance, animationIdentity: identities };
+    return { name, renderer, initialAdvance, manualPauseCount: 0, controls: ['SOUND','ASK'], animationIdentity: identities };
   } finally {
     await context.close();
   }
