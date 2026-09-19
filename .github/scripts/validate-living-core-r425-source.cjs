@@ -1,6 +1,6 @@
 'use strict';
 
-/* FormatX R531 — current master living-core source contract.
+/* FormatX R543 — current master living-core/source-delivery contract.
    The MAG remains the product's living core. Manual user-facing PAUSE/RESUME is
    retired; reduced-motion/background lifecycle remains automatic. R531 adds a
    bounded visual-only preloader that never owns or gates the MAG renderer. */
@@ -21,7 +21,7 @@ const life=read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
 const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
-const worker=read('billing-worker/src/production-content-entry-r529.js');
+const worker=read('billing-worker/src/production-content-entry-r529.js');\nconst canonicalWorker=read('billing-worker/src/production-content-entry.js');
 
 has(home,[
   'formatx-event-horizon.js','formatx-motion-runtime-loader-r239.js','formatx-quality-r461.css',
@@ -84,12 +84,14 @@ has(quality,[
 has(worker,[
   "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r531-preloader-effects-v2'",
   "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner'",
-  "QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r531-preloader-cls-lock'",
   "X-FormatX-Preloader', 'r531-extended-effects-navigation-owned'",
   "X-FormatX-Preloader-Cache', 'r531-effects-v2-fresh-assets'"
-],'R531 production cache/delivery contract');
+],'R531 preloader cache/delivery contract');
+absent(worker,['const QUALITY_RE','const QUALITY_URL','html = html.replace(QUALITY_RE, QUALITY_URL)'],'current quality cache pass-through');
+absent(canonicalWorker,['cacheBustCriticalQuality','formatx-quality-r461.css?v=20260902-r500-canonical-hero-state'],'canonical quality cache pass-through');
+assert.match(home,/data-fx-quality-r461=["']true["'][^>]*href=["'][^"']*formatx-quality-r461\.css\?v=[^"']+["']/i,'canonical current quality link missing');
 
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 for(const source of [intro,motion,current,renderer,life,governor,mini])new Function(source);
 
-console.log('PASS: R531 validates one native living MAG, no manual PAUSE owner, automatic reduced/background lifecycle, and the bounded extended visual-only preloader delivery contract.');
+console.log('PASS: R543 validates one native living MAG, no manual PAUSE owner, automatic reduced/background lifecycle, bounded preloader delivery, and source-owned canonical quality cache identity.');

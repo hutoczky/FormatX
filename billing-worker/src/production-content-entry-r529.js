@@ -25,8 +25,6 @@ const EVENT_HORIZON_RE = /formatx-event-horizon\.js\?v=[^"']+/g;
 const EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r531-preloader-effects-v2';
 const DEFERRED_REDUCED_RE = /formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g;
 const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner';
-const QUALITY_RE = /formatx-quality-r461\.css\?v=[^"']+/g;
-const QUALITY_URL = 'formatx-quality-r461.css?v=20260905-r531-preloader-cls-lock';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MEDIA = '(min-width: 901px) and (pointer: fine) and (min-aspect-ratio: 27/25)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';

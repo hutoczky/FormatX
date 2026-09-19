@@ -5,7 +5,7 @@ import productionBase from './production-content-entry-r369-base.js';
    the blocking path. R513 artifact 9912491940 showed critical-core-r227 as the
    sole render blocker on the fast run and the largest modeled H3 blocker on the
    slow runs. It now uses the existing R487 double-rAF post-first-paint scheduler;
-   MAG clock, PAUSE/RESUME, ASK and renderer ownership remain unchanged. */
+   MAG renderer ownership and automatic lifecycle remain unchanged; the current\n   product contract has no user-facing manual PAUSE control. */
 
 const STARTUP_REVISION = '20260903-r514-critical-core-post-first-paint';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
@@ -197,12 +197,6 @@ function injectDeferredCssRuntime(html) {
   const source = String(html || '');
   if (source.includes('data-fx-deferred-css-r487="true"')) return source;
   return source.replace('</head>', `  ${DEFERRED_CSS_SCRIPT}\n</head>`);
-}
-function cacheBustCriticalQuality(html) {
-  return String(html || '').replace(
-    /formatx-quality-r461\.css\?v=[^"']+/g,
-    'formatx-quality-r461.css?v=20260902-r500-canonical-hero-state'
-  );
 }
 function optimizeHomepage(html) {
   let source = normalizeHomepageSemantics(html);
