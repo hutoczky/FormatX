@@ -340,3 +340,44 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R860 — canonical MAG worker birth continuity.
+   Desktop normal-motion only. The exact R753/R326 OffscreenCanvas is born as a
+   small low-power surface inside Event Horizon, then the same canvas is moved
+   into the canonical hero-space on release. No duplicate renderer or second MAG. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon.fx-intro-overlay
+  > .fx-crystal-organism-r326-stage[data-fx-intro-mag-birth-r860="active"] {
+    box-sizing: border-box !important;
+    display: block !important;
+    visibility: visible !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+    contain: layout paint style !important;
+    isolation: isolate !important;
+  }
+
+  #formatx-event-horizon.fx-intro-overlay
+  > .fx-crystal-organism-r326-stage[data-fx-intro-mag-birth-r860="active"]
+  > .fx-crystal-organism-r326-canvas {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    filter: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+  }
+}
+
+/* production-r860-canonical-worker-mag-birth-same-canvas-handoff */
