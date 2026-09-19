@@ -2,13 +2,17 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'heart-core-r252';
+  const VERSION = 'heart-core-r603';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260825-r252-controls';
+  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260908-r694-release-window';
+  const MOBILE_LIFECYCLE_STYLE = '/scifi-ui/styles/formatx-mobile-lifecycle-r603.css?v=20260907-r603-loop-sheet-geometry';
   const LOOP_OVERSHOOT = 28;
+  const HEART_HIT_Z = '2147482500';
   let touchActive = false;
   let idleTimer = 0;
   let bindingFrame = 0;
+  let geometryFrame = 0;
+  let loopRecheckFrame = 0;
   let interactionCooldown = false;
 
   if (root.dataset.fxHeartCoreR252 === 'ready') return;
@@ -18,12 +22,35 @@
   }
 
   function ensureStyle() {
-    if (document.querySelector('link[data-fx-heart-core-r252]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = STYLE;
-    link.dataset.fxHeartCoreR252 = 'true';
-    document.head.appendChild(link);
+    let existing = document.querySelector('link[data-fx-heart-core-r252]');
+    if (!(existing instanceof HTMLLinkElement)) {
+      existing = document.createElement('link');
+      existing.rel = 'stylesheet';
+      existing.href = STYLE;
+      existing.dataset.fxHeartCoreR252 = 'true';
+      document.head.appendChild(existing);
+    }
+    if (!document.querySelector('link[data-fx-mobile-lifecycle-r603]')) {
+      const lifecycle = document.createElement('link');
+      lifecycle.rel = 'stylesheet';
+      lifecycle.href = MOBILE_LIFECYCLE_STYLE;
+      lifecycle.dataset.fxMobileLifecycleR603 = 'true';
+      document.head.appendChild(lifecycle);
+    }
+  }
+
+  function ensureStyleAfterFirstPaint() {
+    if (root.dataset.fxHeartStyleR551) return;
+    root.dataset.fxHeartStyleR551 = 'requested-at-heart-boot-r696';
+    ensureStyle();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      root.dataset.fxHeartStyleR551 = 'settled-post-first-paint-r696';
+    }));
+  }
+
+  function introComplete() {
+    return root.classList.contains('fx-intro-complete')
+      || root.dataset.fxPreloaderR531 === 'done';
   }
 
   function syncPureWebglComposition() {
@@ -57,7 +84,7 @@
       detail: { phase: 'activate', source, x: 0, y: 0, revision: VERSION }
     }));
     dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
-      detail: { source: `mag-${source}-r252` }
+      detail: { source: `mag-${source}-r569` }
     }));
 
     const hit = document.querySelector('.fx-mag-heart-hit-r252');
@@ -86,20 +113,90 @@
     });
   }
 
-  function installHeartHitTarget() {
+  function syncHeartGeometry(hit) {
+    if (!(hit instanceof HTMLButtonElement)) return false;
     const hero = document.getElementById('hero');
     const space = hero?.querySelector(':scope .hero-space');
-    if (!(hero instanceof HTMLElement) || !(space instanceof HTMLElement)) return false;
+    const stage = space?.querySelector(':scope > .fx-crystal-organism-r326-stage');
+    if (!(space instanceof HTMLElement)) return false;
 
-    let hit = space.querySelector(':scope > .fx-mag-heart-hit-r252');
+    let target = space;
+    let rect = null;
+    if (stage instanceof HTMLElement) {
+      const stageRect = stage.getBoundingClientRect();
+      if (stageRect.width > 80) {
+        target = stage;
+        rect = stageRect;
+      }
+    }
+    if (!rect) rect = target.getBoundingClientRect();
+
+    const visible = !document.hidden
+      && rect.width > 80
+      && rect.height > 120
+      && rect.bottom > 0
+      && rect.top < innerHeight
+      && rect.right > 0
+      && rect.left < innerWidth;
+
+    if (!visible) {
+      if (hit.dataset.fxHeartGeometrySignatureR694 !== 'offscreen') {
+        hit.style.visibility = 'hidden';
+        hit.style.setProperty('pointer-events', 'none', 'important');
+        hit.setAttribute('aria-hidden', 'true');
+        hit.dataset.fxHeartGeometrySignatureR694 = 'offscreen';
+      }
+      root.dataset.fxMagHeartHitGeometryR542 = 'offscreen-suspended';
+      return true;
+    }
+
+    const base = Math.min(rect.width, rect.height);
+    const diameter = MOBILE_QUERY.matches
+      ? Math.min(280, Math.max(176, base * .68))
+      : Math.min(360, Math.max(180, base * .58));
+    const left = rect.left + rect.width / 2;
+    const top = rect.top + rect.height / 2;
+    const signature = `${Math.round(left)}:${Math.round(top)}:${Math.round(diameter)}`;
+
+    if (hit.dataset.fxHeartGeometrySignatureR694 !== signature) {
+      hit.style.left = `${left}px`;
+      hit.style.top = `${top}px`;
+      hit.style.width = `${diameter}px`;
+      hit.style.height = `${diameter}px`;
+      hit.style.visibility = 'visible';
+      hit.style.setProperty('z-index', HEART_HIT_Z, 'important');
+      hit.style.setProperty('pointer-events', 'none', 'important');
+      hit.removeAttribute('aria-hidden');
+      hit.dataset.fxHeartGeometrySignatureR694 = signature;
+    }
+    hit.dataset.fxHeartGeometryPrimedR694 = 'true';
+    root.dataset.fxMagHeartHitGeometryR542 = 'viewport-stage-synced';
+    root.dataset.fxMagHeartHitPlaneR544 = 'body-top-interaction-below-intro';
+    root.dataset.fxMagHeartPointerPolicyR549 = 'semantic-focus-pointer-transparent-trusted-document-router';
+    return true;
+  }
+
+  function installHeartHitTarget() {
+    const body = document.body;
+    const hero = document.getElementById('hero');
+    const space = hero?.querySelector(':scope .hero-space');
+    if (!(body instanceof HTMLBodyElement) || !(hero instanceof HTMLElement) || !(space instanceof HTMLElement)) return false;
+
+    let hit = document.querySelector('.fx-mag-heart-hit-r252');
     if (!(hit instanceof HTMLButtonElement)) {
       hit = document.createElement('button');
       hit.type = 'button';
       hit.className = 'fx-mag-heart-hit-r252';
       hit.dataset.fxHeartCoreR252 = 'true';
-      space.appendChild(hit);
     }
 
+    if (hit.parentElement !== body) {
+      const main = document.getElementById('main-content');
+      if (main?.parentElement === body) body.insertBefore(hit, main);
+      else body.appendChild(hit);
+    }
+
+    hit.dataset.fxHeartOwnerR542 = 'body-fixed-stage-synced';
     hit.setAttribute('aria-label', language() === 'en'
       ? 'Activate the living FormatX core'
       : 'A FormatX élő MAG interakciójának indítása');
@@ -124,8 +221,39 @@
       headerMag.addEventListener('click', () => activateCore('header'));
     }
 
-    root.dataset.fxMagHeartHit = 'ready-r252';
+    if (introComplete() || hit.dataset.fxHeartGeometryPrimedR694 !== 'true') {
+      syncHeartGeometry(hit);
+    } else {
+      root.dataset.fxMagHeartHitGeometryR694 = 'intro-stable-no-repeat-layout';
+    }
+    root.dataset.fxMagHeartHit = 'ready-r542';
+    root.dataset.fxMagHeartHitOwnerR542 = 'body-fixed-stage-synced';
+    if (root.dataset.fxMagHeartPhysicalRouteR546 !== 'captured-stage-hit') {
+      root.dataset.fxMagHeartPhysicalRouteR546 = 'armed-trusted-stage-hit';
+    }
     return true;
+  }
+
+  function isReservedInteractiveTarget(target) {
+    return target instanceof Element
+      && Boolean(target.closest('a[href],button,input,select,textarea,[role="button"],[contenteditable="true"]'));
+  }
+
+  function routePhysicalHeartClick(event) {
+    if (!event.isTrusted) return;
+    if (isReservedInteractiveTarget(event.target)) return;
+    const hit = document.querySelector('.fx-mag-heart-hit-r252');
+    if (!(hit instanceof HTMLButtonElement) || hit.getAttribute('aria-hidden') === 'true') return;
+    const rect = hit.getBoundingClientRect();
+    if (rect.width < 80 || rect.height < 80) return;
+    const x = Number(event.clientX);
+    const y = Number(event.clientY);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return;
+    root.dataset.fxMagHeartPhysicalRouteR546 = 'captured-stage-hit';
+    root.dataset.fxMagHeartPhysicalRouteR549 = 'captured-pointer-transparent-stage-hit';
+    root.dataset.fxMagHeartTouchRouteR551 = event.defaultPrevented ? 'trusted-after-default-prevented' : 'trusted-direct';
+    activateCore('core-hit-zone');
   }
 
   function pruneMobileReferenceMirror() {
@@ -137,6 +265,20 @@
     root.dataset.fxLoopMirrorMode = 'none-mobile-r252';
   }
 
+  function scheduleGeometry() {
+    if (geometryFrame) return;
+    const hit = document.querySelector('.fx-mag-heart-hit-r252');
+    if (!introComplete() && hit instanceof HTMLButtonElement && hit.dataset.fxHeartGeometryPrimedR694 === 'true') {
+      root.dataset.fxMagHeartHitGeometryR694 = 'intro-stable-no-repeat-layout';
+      return;
+    }
+    geometryFrame = requestAnimationFrame(() => {
+      geometryFrame = 0;
+      const current = document.querySelector('.fx-mag-heart-hit-r252');
+      if (current instanceof HTMLButtonElement) syncHeartGeometry(current);
+    });
+  }
+
   function scheduleBinding() {
     if (bindingFrame) return;
     bindingFrame = requestAnimationFrame(() => {
@@ -144,47 +286,61 @@
       installHeartHitTarget();
       pruneMobileReferenceMirror();
       syncPureWebglComposition();
+      scheduleGeometry();
     });
   }
 
   function mobileLoopBoundary() {
     if (!MOBILE_QUERY.matches) return null;
     pruneMobileReferenceMirror();
-    const footer = document.querySelector('body > .site-footer');
-    const bridge = document.querySelector('.fx-loop-bridge');
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge], .fx-loop-bridge');
     const hero = document.querySelector('#main-content > #hero');
-    if (!(footer instanceof HTMLElement) || !(bridge instanceof HTMLElement) || !(hero instanceof HTMLElement)) return null;
+    if (!(bridge instanceof HTMLElement) || !(hero instanceof HTMLElement)) return null;
 
     bridge.dataset.fxHeartLoopR252 = 'true';
-    const bridgeTop = bridge.offsetTop;
+    const bridgeRect = bridge.getBoundingClientRect();
+    const bridgeTop = scrollY + bridgeRect.top;
     const viewportBottom = scrollY + innerHeight;
-    return {
-      bridge,
-      hero,
-      bridgeTop,
-      overshoot: viewportBottom - bridgeTop
-    };
+    const scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    const documentEnd = Math.max(0, scrollHeight - innerHeight);
+    const atDocumentEnd = scrollY >= documentEnd - 2;
+    const measuredOvershoot = viewportBottom - bridgeTop;
+    const overshoot = atDocumentEnd ? Math.max(LOOP_OVERSHOOT, measuredOvershoot) : measuredOvershoot;
+    root.dataset.fxHeartLoopBoundaryR603 = atDocumentEnd ? 'document-end-canonical-bridge' : 'bridge-overshoot';
+    return { bridge, hero, bridgeTop, overshoot, documentEnd, atDocumentEnd };
   }
 
   function transferToRealCore(source) {
-    if (!MOBILE_QUERY.matches || touchActive) return false;
+    if (!MOBILE_QUERY.matches || touchActive || root.classList.contains('fx-seamless-loop-transfer')) return false;
     const boundary = mobileLoopBoundary();
     if (!boundary || boundary.overshoot < LOOP_OVERSHOOT) return false;
 
-    const target = Math.max(0, boundary.hero.offsetTop);
+    const liveLandingTarget = () => {
+      const hero = document.querySelector('#main-content > #hero');
+      const owner = hero instanceof HTMLElement ? hero : boundary.hero;
+      return Math.max(0, Math.round(owner.getBoundingClientRect().top + scrollY));
+    };
+    let target = liveLandingTarget();
     const nextLoopCount = Number(root.dataset.fxLoopCount || 0) + 1;
     root.classList.add('fx-seamless-loop-transfer');
     root.dataset.fxHeartLoopTransfer = source;
     root.dataset.fxInfiniteInput = 'heart-core-transfer';
     root.dataset.fxLoopCount = String(nextLoopCount);
     root.dataset.fxLoopSource = `heart-core-${source}`;
-    root.dataset.fxLoopLanding = String(Math.round(target));
+    root.dataset.fxLoopLanding = String(target);
     root.dataset.fxLoopLandingState = 'heart-core-stabilising';
 
     window.scrollTo({ top: target, left: 0, behavior: 'auto' });
     requestAnimationFrame(() => {
+      target = liveLandingTarget();
+      root.dataset.fxLoopLanding = String(target);
       window.scrollTo({ top: target, left: 0, behavior: 'auto' });
       requestAnimationFrame(() => {
+        target = liveLandingTarget();
+        root.dataset.fxLoopLanding = String(target);
+        if (Math.abs(scrollY - target) > 1) {
+          window.scrollTo({ top: target, left: 0, behavior: 'auto' });
+        }
         root.classList.remove('fx-seamless-loop-transfer');
         root.dataset.fxInfiniteInput = 'native';
         root.dataset.fxLoopLandingState = 'heart-core-settled';
@@ -192,12 +348,23 @@
         dispatchEvent(new CustomEvent('formatx:loop', {
           detail: { count: nextLoopCount, source: `heart-core-${source}`, relative: 0, revision: VERSION }
         }));
+        scheduleGeometry();
       });
     });
     return true;
   }
 
+  function scheduleLoopBoundaryRecheck(source) {
+    if (!MOBILE_QUERY.matches || loopRecheckFrame) return;
+    loopRecheckFrame = requestAnimationFrame(() => {
+      loopRecheckFrame = 0;
+      if (touchActive) return;
+      transferToRealCore(source || 'geometry-refresh');
+    });
+  }
+
   function onScroll() {
+    scheduleGeometry();
     if (!MOBILE_QUERY.matches) return;
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => transferToRealCore('idle'), 90);
@@ -207,24 +374,42 @@
     if (!MOBILE_QUERY.matches) return;
     touchActive = true;
     clearTimeout(idleTimer);
+    if (loopRecheckFrame) cancelAnimationFrame(loopRecheckFrame);
+    loopRecheckFrame = 0;
   }
 
   function onTouchEnd() {
     if (!MOBILE_QUERY.matches) return;
     touchActive = false;
-    requestAnimationFrame(() => transferToRealCore('touchend'));
+    scheduleLoopBoundaryRecheck('touchend');
+  }
+
+  function onScrollEnd() {
+    if (MOBILE_QUERY.matches) touchActive = false;
+    transferToRealCore('scrollend');
+    scheduleGeometry();
+  }
+
+  function onLoopGeometryRefresh() {
+    scheduleBinding();
+    scheduleLoopBoundaryRecheck('geometry-refresh');
   }
 
   function boot() {
-    ensureStyle();
+    ensureStyleAfterFirstPaint();
     root.dataset.fxHeartCoreR252 = 'ready';
     root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
+    root.dataset.fxHeartLoopRecheckR771 = 'scrollend-and-settled-geometry';
     installHeartHitTarget();
     pruneMobileReferenceMirror();
     syncPureWebglComposition();
 
     addEventListener('scroll', onScroll, { passive: true });
-    addEventListener('scrollend', () => transferToRealCore('scrollend'), { passive: true });
+    addEventListener('scrollend', onScrollEnd, { passive: true });
+    addEventListener('resize', scheduleGeometry, { passive: true });
+    addEventListener('orientationchange', scheduleGeometry, { passive: true });
+    document.addEventListener('click', routePhysicalHeartClick, true);
+    document.addEventListener('visibilitychange', scheduleGeometry, { passive: true });
     document.addEventListener('touchstart', onTouchStart, { passive: true });
     document.addEventListener('touchend', onTouchEnd, { passive: true });
     document.addEventListener('touchcancel', onTouchEnd, { passive: true });
@@ -234,17 +419,21 @@
       'formatx:controlownerready',
       'formatx:mobilelayoutready',
       'formatx:languagechange',
-      'formatx:loopgeometryrefresh',
+      'formatx:preloadercomplete',
       'pageshow'
     ]) addEventListener(eventName, scheduleBinding, { passive: true });
+    addEventListener('formatx:loopgeometryrefresh', onLoopGeometryRefresh, { passive: true });
 
     addEventListener('formatx:real3dready', syncPureWebglComposition, { passive: true });
 
-    const observer = new MutationObserver(scheduleBinding);
-    observer.observe(document.body, { childList: true, subtree: true });
-    setTimeout(() => observer.disconnect(), 6500);
+    const space = document.querySelector('#hero .hero-space');
+    if (space instanceof HTMLElement) {
+      const observer = new MutationObserver(scheduleBinding);
+      observer.observe(space, { childList: true });
+      setTimeout(() => observer.disconnect(), 1800);
+    }
 
-    for (const delay of [0, 80, 220, 520, 1100, 2600]) setTimeout(scheduleBinding, delay);
+    for (const delay of [0, 80, 220, 520, 1800, 2600]) setTimeout(scheduleBinding, delay);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
@@ -253,5 +442,7 @@
   addEventListener('pagehide', () => {
     clearTimeout(idleTimer);
     cancelAnimationFrame(bindingFrame);
+    cancelAnimationFrame(geometryFrame);
+    cancelAnimationFrame(loopRecheckFrame);
   }, { once: true });
 }());

@@ -41,6 +41,53 @@ html[data-fx-performance="balanced"] .scene:not(.fx-section-active) > :is(
   contain-intrinsic-size: auto 900px;
 }
 
+/* R626: keep lazy chapter layout out of the critical first-paint window, then
+   realise the complete canonical desktop document exactly when the real
+   seamless scroll runtime is activated. The critical inline stylesheet also
+   places content-visibility:auto on each non-hero .scene, so fixing only the
+   inner flow/cards (R625) left the bridge on synthetic section heights and let
+   the document expand by ~5.5kpx during a real scroll. The bootstrap publishes
+   desktop-runtime-loading-v7 before mounting seamless-v7; that state is the
+   normal product lifecycle handoff and gives layout one frame to settle before
+   the loop owner captures bridge geometry. No audit/headless/user-agent path. */
+@media (min-width: 901px) and (pointer: fine) {
+  html[data-fx-performance="balanced"]:is(
+    [data-fx-infinite-controller="desktop-runtime-loading-v7"],
+    [data-fx-infinite-controller="seamless-v7"]
+  ) body.living-architecture main#main-content > section.scene:not(#hero),
+  html[data-fx-performance="balanced"]:is(
+    [data-fx-infinite-controller="desktop-runtime-loading-v7"],
+    [data-fx-infinite-controller="seamless-v7"]
+  ) body.living-architecture main#main-content > .fx-category-deck,
+  html[data-fx-performance="balanced"]:is(
+    [data-fx-infinite-controller="desktop-runtime-loading-v7"],
+    [data-fx-infinite-controller="seamless-v7"]
+  ) body.living-architecture main#main-content .fx-origin-proof,
+  html[data-fx-performance="balanced"]:is(
+    [data-fx-infinite-controller="desktop-runtime-loading-v7"],
+    [data-fx-infinite-controller="seamless-v7"]
+  ) body.living-architecture .site-footer {
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+  }
+
+  html[data-fx-performance="balanced"]:is(
+    [data-fx-infinite-controller="desktop-runtime-loading-v7"],
+    [data-fx-infinite-controller="seamless-v7"]
+  ) .scene:not(.fx-section-active) > :is(
+    .flow,
+    .cards,
+    .pricing,
+    .payment,
+    #formatx-plan-qr-dock,
+    .system-grid,
+    .release-layout
+  ) {
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+  }
+}
+
 html[data-fx-performance="balanced"] .hero-copy,
 html[data-fx-performance="balanced"] .section-heading,
 html[data-fx-performance="balanced"] .flow,

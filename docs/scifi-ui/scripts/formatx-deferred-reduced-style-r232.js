@@ -1,4 +1,7 @@
-/* FormatX r455/R531 — CSP-safe mobile geometry seed + interaction-gated reduced-motion stylesheet. */
+/* FormatX r455/R531/R628 — CSP-safe mobile geometry seed + interaction-gated reduced-motion stylesheet.
+   R628 also keeps the normal-motion intro task queue lightly active until the
+   canonical Event Horizon owner publishes preloadercomplete. It never releases,
+   hides or mutates the preloader and therefore does not create a second lifecycle owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -6,6 +9,25 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const stub=document.querySelector('link[data-fx-critical-reduced-r228]');
 const FULL_URL='./styles/formatx-critical-reduced-full-r298.css?v=20260822-r299-reduced-only';
 const MOBILE_FIRST_PAINT_URL='./styles/formatx-mobile-first-paint-r358.css?v=20260830-r455-csp-safe-geometry-seed';
+
+function armIntroClockKeepalive(){
+  if(reduced.matches)return;
+  let timer=0,guard=0,stopped=false;
+  const stop=source=>{
+    if(stopped)return;
+    stopped=true;
+    if(timer)clearInterval(timer);timer=0;
+    if(guard)clearTimeout(guard);guard=0;
+    root.dataset.fxPreloaderClockKeepaliveR628=`done-${source}`;
+  };
+  /* DOM-free: the host clock read is sufficient to keep a small renderer task
+     cadence while the visual intro itself remains compositor-owned. */
+  timer=setInterval(()=>{void performance.now();},80);
+  guard=setTimeout(()=>stop('guard'),2200);
+  document.addEventListener('formatx:preloadercomplete',()=>stop('canonical-release'),{once:true});
+  addEventListener('pagehide',()=>stop('pagehide'),{once:true});
+  root.dataset.fxPreloaderClockKeepaliveR628='armed-80ms-dom-free';
+}
 
 function seedMobileGeometry(){
   let firstPaint=document.querySelector('link[data-fx-mobile-first-paint-r358]');
@@ -33,6 +55,8 @@ function seedMobileGeometry(){
     root.dataset.fxMobileGeometrySeedR453='ready-external-css-csp-safe';
   }
 }
+
+armIntroClockKeepalive();
 
 if(!reduced.matches){
   const mobileDirect=matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;
@@ -79,4 +103,4 @@ if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')activate();
 else root.dataset.fxReducedStyleR233='armed-no-full-fetch-r299';
 }());
 
-/* deploy-ready-r455-csp-safe-mobile-geometry-r531-overlay-owner */
+/* deploy-ready-r455-csp-safe-mobile-geometry-r531-overlay-owner-r628-clock-keepalive */
