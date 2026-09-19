@@ -1,8 +1,8 @@
-/* FormatX R749 — intro-isolated navigation runtime bootstrap.
-   The preloader is a visual cover, never an application boot barrier.
-   SOUND ownership, the current MAG loader and lightweight MAG shape/lifecycle sync start
-   only after durable canonical preloader completion has been published. Heavy enhancement
-   runtime remains deferred. MAG startup remains automatic and has no user-intent gate.
+/* FormatX R850 — desktop navigation MAG under bounded intro, mobile invariant preserved.
+   The preloader remains a logical timing contract, never a desktop application boot barrier.
+   Desktop current MAG + shape sync start from navigation; mobile retains the proven post-intro
+   startup order. SOUND ownership and heavy enhancement runtime remain post-intro.
+   MAG startup remains automatic and has no user-intent gate.
 
    Stable semantic source contract retained: reduced-motion-critical-mag-only-r536.
    Reduced motion receives the same automatic critical MAG + shape/lifecycle readiness,
@@ -11,7 +11,8 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r749-post-intro-runtime';
+root.dataset.fxP0MotionSchedulerR490='armed-r850-desktop-mag-mobile-invariant';
+const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260906-r549-first-paint-under-intro-no-user-gate';
 const CRITICAL_MAG_SRC='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260906-r549-first-paint-yield-under-intro';
 const MAG_SHAPE_SYNC_SRC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260906-r537-automatic-lifecycle';
@@ -60,7 +61,7 @@ function startCriticalMag(){
   if(document.querySelector('script[data-fx-current-mag-loader-r422]')){
     root.dataset.fxMagNavigationBootR536='already-requested';return;
   }
-  root.dataset.fxMagNavigationBootR536='requested-navigation-post-intro-r749';
+  root.dataset.fxMagNavigationBootR536=MOBILE?'requested-navigation-post-intro-r850':'requested-navigation-under-intro-r850';
   const script=document.createElement('script');script.src=CRITICAL_MAG_SRC;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';script.dataset.fxNavigationMagR536='true';
   script.addEventListener('load',()=>{root.dataset.fxMagNavigationBootR536=/^(?:ready|booting)$/.test(root.dataset.fxCurrentMagRuntimeR422||'')?'loaded-navigation':'loaded-awaiting-current-mag';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxMagNavigationBootR536='load-failed';},{once:true});
@@ -75,7 +76,7 @@ function startShapeSync(){
   if(document.querySelector('script[data-fx-mag-shape-sync-r476]')){
     root.dataset.fxMagShapeSyncBootstrapR749='already-requested';return;
   }
-  root.dataset.fxMagShapeSyncBootstrapR749='requested-navigation-post-intro';
+  root.dataset.fxMagShapeSyncBootstrapR749=MOBILE?'requested-navigation-post-intro-r850':'requested-navigation-under-intro-r850';
   const script=document.createElement('script');script.src=MAG_SHAPE_SYNC_SRC;script.async=false;script.dataset.fxMagShapeSyncR476='true';script.dataset.fxNavigationMagShapeR749='true';
   script.addEventListener('load',()=>{root.dataset.fxMagShapeSyncBootstrapR749=root.dataset.fxMagShapeSyncR476==='ready-r634'?'ready-navigation':'loaded-awaiting-sync';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxMagShapeSyncBootstrapR749='load-failed';},{once:true});
@@ -114,13 +115,13 @@ function startPostIntroRuntime(){
   if(postIntroStarted)return;
   postIntroStarted=true;
   root.dataset.fxP0MotionSchedulerR490='post-intro-runtime-starting-r749';
-  startCriticalMag();
-  startShapeSync();
+  if(MOBILE){startCriticalMag();startShapeSync();}
   startSoundControl();
   if(document.readyState==='loading')addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
   else armLateFallback();
   for(const type of ['pointerdown','touchstart','keydown','wheel'])addEventListener(type,onIntent,{once:true,passive:true});
 }
+if(!MOBILE){startCriticalMag();startShapeSync();}
 if(isPreloaderComplete())queueMicrotask(startPostIntroRuntime);
 else addEventListener('formatx:preloadercomplete',startPostIntroRuntime,{once:true,passive:true});
 }());

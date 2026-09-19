@@ -340,3 +340,123 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R849 — lightweight MAG-birth visual owner for desktop normal motion.
+   The legacy curtain/grid/scan/flare stay retired. The bounded lifecycle and
+   opaque #01040b material remain unchanged; only a cheap contentful title and
+   one filter-free energy field paint before canonical WebGL materialisation. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-mag-birth-intro-r849="active"] {
+    place-items: stretch !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] .fx-intro-center {
+    position: absolute !important;
+    left: clamp(24px, 4vw, 72px) !important;
+    top: 46% !important;
+    z-index: 3 !important;
+    text-align: left !important;
+    transform: translateY(-50%) !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] .fx-intro-word {
+    overflow: visible !important;
+    color: #f7fdff !important;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] .fx-intro-word > span {
+    color: #f7fdff !important;
+    background: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    -webkit-text-fill-color: currentColor !important;
+    text-shadow: none !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] .fx-intro-kicker {
+    margin-bottom: 14px !important;
+    color: rgba(176, 226, 242, .78) !important;
+    text-shadow: none !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] .fx-intro-subtitle {
+    justify-content: flex-start !important;
+    margin-top: 14px !important;
+    color: rgba(205, 222, 234, .82) !important;
+    letter-spacing: .10em !important;
+    text-shadow: none !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] .fx-intro-subtitle::before,
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] .fx-intro-subtitle::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"][data-fx-mag-birth-intro-r849="active"] > .fx-intro-portal {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    inset: 50% clamp(72px, 10vw, 176px) auto auto !important;
+    z-index: 2 !important;
+    width: clamp(190px, 21vw, 310px) !important;
+    height: auto !important;
+    aspect-ratio: 1 !important;
+    border: 1px solid rgba(133, 232, 255, .28) !important;
+    border-radius: 50% !important;
+    opacity: .18 !important;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(236,253,255,.96) 0 2%, rgba(116,228,255,.22) 3% 10%, transparent 11% 27%, rgba(126,104,255,.14) 28% 29%, transparent 30% 46%, rgba(126,232,255,.09) 47% 48%, transparent 49%),
+      conic-gradient(from 18deg, transparent 0 12%, rgba(121,232,255,.22) 14% 18%, transparent 20% 48%, rgba(142,111,255,.18) 51% 55%, transparent 58% 100%) !important;
+    box-shadow: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    transform: translateY(-50%) scale(.34) rotate(-14deg) !important;
+    transform-origin: 50% 50% !important;
+    transition: opacity 180ms linear, transform 220ms cubic-bezier(.22,.61,.36,1) !important;
+    animation: none !important;
+    will-change: transform, opacity !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] > .fx-intro-portal::before,
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] > .fx-intro-portal::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"][data-fx-intro-phase-r635="sync"] > .fx-intro-portal {
+    opacity: .56 !important;
+    transform: translateY(-50%) scale(.72) rotate(-6deg) !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"][data-fx-intro-phase-r635="ready"] > .fx-intro-portal {
+    opacity: .90 !important;
+    transform: translateY(-50%) scale(1) rotate(0deg) !important;
+  }
+
+  html[data-fx-preloader-visual-owner-r849="lightweight-energy-field-to-canonical-webgl"]
+  #formatx-event-horizon[data-fx-mag-birth-intro-r849="active"] .fx-intro-progress-wrap {
+    left: clamp(24px, 4vw, 72px) !important;
+    right: auto !important;
+    bottom: clamp(24px, 4vh, 42px) !important;
+    width: min(680px, 48vw) !important;
+    text-shadow: none !important;
+  }
+}
+/* production-r849-lightweight-mag-birth-lcp-owner */

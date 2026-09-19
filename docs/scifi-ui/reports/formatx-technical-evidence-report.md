@@ -159,11 +159,12 @@ Jelenlegi P0 állapotban különösen nem állítható ellenőrzöttnek addig, a
 - teljes P0 böngésző-, accessibility-, responsive-, fallback- és regressziómátrix;
 - Safari/iOS valódi ellenőrzés.
 
+Külső szakmai elismerés: **Astonishing Awards Nominee — 74 pont, Technology kategória.**
+
 További nyílt bizonyítékhiány:
 
 - független szakmai termékteszt;
 - hitelesített ügyfélesettanulmány;
-- Awwwards- vagy más zsűridíj;
 - minden támogatott platformra és hardverre kiterjedő végponttól végpontig valós eszközteszt;
 - detached signature asset a jelenlegi kiadáshoz.
 
