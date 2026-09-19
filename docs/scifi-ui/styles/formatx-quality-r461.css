@@ -491,3 +491,15 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
 }
 
 /* deploy-r576-first-paint-hero-reference-parity-no-manual-pause */
+
+
+/* R843 — the Event Horizon is fully opaque while active. Preserve final document
+   geometry and semantic visibility, but do not raster the covered desktop main
+   surface before the bounded release. Parent opacity does not alter layout boxes. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] ~ main#main-content {
+    opacity: 0 !important;
+    visibility: visible !important;
+    transition: none !important;
+  }
+}
