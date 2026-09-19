@@ -107,56 +107,13 @@ html.fx-seamless-loop-transfer body {
 .fx-loop-reference-visual > img {
   position: absolute;
   inset: 0;
-  z-index: 2;
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0;
+  height: 97%;
+  object-fit: fill;
+  opacity: .985;
   mix-blend-mode: screen;
   filter: saturate(1.04) contrast(1.015);
-  transition: opacity .24s ease;
-}
-
-.fx-loop-reference-core-fallback {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 1;
-  width: min(48%, 300px);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%) rotate(45deg);
-  clip-path: polygon(50% 0, 88% 14%, 100% 50%, 84% 88%, 50% 100%, 14% 86%, 0 50%, 16% 14%);
-  background:
-    radial-gradient(circle at 42% 38%, rgba(230, 254, 255, .95) 0 3%, rgba(104, 235, 255, .52) 4% 13%, transparent 29%),
-    conic-gradient(from 20deg, rgba(104, 226, 255, .24), rgba(133, 94, 255, .38), rgba(80, 222, 255, .19), rgba(255, 208, 153, .25), rgba(104, 226, 255, .24));
-  border: 1px solid rgba(171, 242, 255, .58);
-  box-shadow: 0 0 34px rgba(88, 220, 255, .28), 0 0 92px rgba(126, 91, 255, .16), inset 0 0 38px rgba(187, 247, 255, .14);
-  opacity: .78;
-  transition: opacity .24s ease;
-}
-
-.fx-loop-reference-core-fallback::before,
-.fx-loop-reference-core-fallback::after {
-  content: '';
-  position: absolute;
-  inset: 16%;
-  border: 1px solid rgba(190, 246, 255, .28);
-  transform: rotate(22.5deg);
-  box-shadow: inset 0 0 22px rgba(104, 228, 255, .12);
-}
-.fx-loop-reference-core-fallback::after {
-  inset: 34%;
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff 0 7%, #aef6ff 14%, rgba(97, 221, 255, .35) 38%, transparent 70%);
-  box-shadow: 0 0 28px rgba(117, 232, 255, .46);
-}
-
-.fx-loop-reference-mirror[data-fx-loop-capture='ready-r534'] .fx-loop-reference-image {
-  opacity: .985;
-}
-.fx-loop-reference-mirror[data-fx-loop-capture='ready-r534'] .fx-loop-reference-core-fallback {
-  opacity: 0;
 }
 
 .fx-loop-reference-copy { display: none; }
