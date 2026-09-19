@@ -5,7 +5,7 @@
 const root=document.documentElement;
 if(root.dataset.fxMiniMagAssistantR459==='ready'||root.dataset.fxMiniMagAssistantR459==='booting')return;
 root.dataset.fxMiniMagAssistantR459='booting';
-const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260830-r459-persistent-site-controller';
+const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260919-r537-narrow-occlusion-safe';
 const SECTION_IDS=['hero','experience','capabilities','pricing','system','resources'];
 let pendingHeroRequest=false;
 const COPY={

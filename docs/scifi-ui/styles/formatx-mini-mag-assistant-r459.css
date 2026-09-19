@@ -260,9 +260,24 @@
 }
 
 @media (max-width: 360px) {
+  /* On very narrow phones the persistent 58px launcher can cover content while
+     scrolling. Keep the controller fully functional, but show it only when the
+     user explicitly opens it from the hero/header bridge. */
+  .fx-mini-mag-assistant-r459[data-open="false"] {
+    display: none;
+  }
+  .fx-mini-mag-assistant-r459[data-open="true"] {
+    display: block;
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
   .fx-mini-mag-actions-r459,
   .fx-mini-mag-nav-r459 { grid-template-columns: 1fr; }
-  .fx-mini-mag-panel-r459 { width: calc(100vw - 20px); }
+  .fx-mini-mag-panel-r459 {
+    right: 0;
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

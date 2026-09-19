@@ -456,19 +456,58 @@ html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
 }
 
 @media (max-width:900px),(pointer:coarse){
-  .fx-c536-stage{z-index:5}
+  .fx-c536-stage{z-index:5;overflow:clip}
   .fx-c536-hud{display:none}
-  .fx-c536-world{width:124vw;opacity:calc(.10 + var(--fx-c536-energy) * .20)}
-  .fx-c536-iris{width:88vw;opacity:calc(.10 + var(--fx-c536-energy) * .14)}
+  .fx-c536-world{
+    left:50%;
+    width:88vw;
+    max-width:88vw;
+    opacity:calc(.10 + var(--fx-c536-energy) * .20)
+  }
+  .fx-c536-iris{
+    left:50%;
+    width:72vw;
+    max-width:72vw;
+    opacity:calc(.10 + var(--fx-c536-energy) * .14)
+  }
   .fx-c536-vignette{opacity:.34}
   .fx-c536-grain{opacity:.035}
-  .fx-c536-track{left:0;right:0;opacity:calc(.035 + var(--fx-c536-energy) * .09)}
-  .fx-c536-scan{opacity:.035}
-  .fx-c536-anatomy{inset:-3% -10%;opacity:calc(.04 + var(--fx-c536-scene-energy) * .32)}
-  .fx-c536-scene[data-fx-c536-kind="organs"]>.fx-c536-anatomy::before{right:-20%;width:90vw}
-  .fx-c536-scene[data-fx-c536-kind="heart"]>.fx-c536-anatomy .a{right:-28%;width:78vw}
-  .fx-c536-scene[data-fx-c536-kind="heart"]>.fx-c536-anatomy .b{right:-8%;width:54vw}
-  .fx-c536-scene[data-fx-c536-kind="skeleton"]>.fx-c536-anatomy{background-size:42px 42px}
+  .fx-c536-track{left:2vw;right:2vw;opacity:calc(.035 + var(--fx-c536-energy) * .09)}
+  .fx-c536-scan{left:0;right:0;opacity:.035}
+  .fx-c536-anatomy{
+    inset:0;
+    width:100%;
+    max-width:100%;
+    overflow:hidden;
+    contain:paint;
+    opacity:calc(.04 + var(--fx-c536-scene-energy) * .32)
+  }
+  .fx-c536-anatomy .a,
+  .fx-c536-anatomy .b,
+  .fx-c536-anatomy .c{box-sizing:border-box;max-width:84%}
+  .fx-c536-scene[data-fx-c536-kind="mission"]>.fx-c536-anatomy .a,
+  .fx-c536-scene[data-fx-c536-kind="mission"]>.fx-c536-anatomy .b{left:22%;right:22%}
+  .fx-c536-scene[data-fx-c536-kind="nerves"]>.fx-c536-anatomy .a{left:10%;right:10%;transform:scaleX(calc(.58 + var(--fx-c536-scene-local) * .42))}
+  .fx-c536-scene[data-fx-c536-kind="nerves"]>.fx-c536-anatomy .b{
+    left:31%;
+    top:24%;
+    width:38%;
+    height:48%;
+    transform:none
+  }
+  .fx-c536-scene[data-fx-c536-kind="organs"]>.fx-c536-anatomy::before{right:5%;width:72vw;max-width:72%}
+  .fx-c536-scene[data-fx-c536-kind="heart"]>.fx-c536-anatomy .a{right:5%;width:68vw;max-width:68%}
+  .fx-c536-scene[data-fx-c536-kind="heart"]>.fx-c536-anatomy .b{right:12%;width:44vw;max-width:44%}
+  .fx-c536-scene[data-fx-c536-kind="skeleton"]>.fx-c536-anatomy{
+    background-size:42px 42px;
+    transform:none
+  }
+  .fx-c536-scene[data-fx-c536-kind="beacon"]>.fx-c536-anatomy .b{width:72%;max-width:72%}
+}
+@media (max-width:360px){
+  .fx-c536-world{width:82vw;max-width:82vw}
+  .fx-c536-iris{width:66vw;max-width:66vw}
+  .fx-c536-anatomy{opacity:calc(.025 + var(--fx-c536-scene-energy) * .22)}
 }
 
 @media (prefers-reduced-motion:reduce){
