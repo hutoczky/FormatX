@@ -5,16 +5,19 @@ on:
     branches: [master]
     paths:
       - 'docs/styles.css'
+      - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/styles/**'
       - 'docs/scifi-ui/scripts/**'
       - 'billing-worker/src/production-content-entry*.js'
       - 'billing-worker/src/production-content-base.js'
       - 'billing-worker/src/production-feedback-entry.js'
       - '.github/scripts/**'
+      - '.github/workflows/p0-fast-loop.yml'
   pull_request:
     branches: [master]
     paths:
       - 'docs/styles.css'
+      - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/styles/**'
       - 'docs/scifi-ui/scripts/**'
       - 'billing-worker/src/production-content-entry*.js'
