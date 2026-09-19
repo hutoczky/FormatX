@@ -340,3 +340,23 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R850 — keep the dominant desktop intro LCP candidate paint-stable.
+   R849 proved .fx-intro-word becomes the LCP owner. Do not repaint that owner
+   during wake/sync/ready: progress/status may update, but the main FORMATX word
+   keeps one computed color and no transition for the whole bounded intro. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-word,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-word,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-word {
+    color: #f6fdff !important;
+    transition: none !important;
+    animation: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+}
+
+/* production-r850-static-desktop-intro-lcp-paint */
