@@ -122,5 +122,11 @@
     "Safari/iOS physical or trusted Safari verification.",
     "Field INP/RUM evidence."
   ],
-  "next_phase": "FINAL_INTEGRATED_SAME_SHA_CERTIFICATION"
+  "next_phase": "FINAL_INTEGRATED_SAME_SHA_CERTIFICATION",
+  "validation": {
+    "full_integrated_ci_required": true,
+    "validation_pr": 262,
+    "temporary_validation_base": "master",
+    "rule": "After full CI evidence is collected, retarget PR #262 back to p1/award-closeout-safe before integration."
+  }
 }
