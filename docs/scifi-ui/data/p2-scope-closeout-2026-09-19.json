@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "phase": "P2",
+  "title": "Repository-truth scope closeout",
+  "updated_at": "2026-09-19",
+  "base": {
+    "p0_intro_baseline_sha": "9b35f010267fa804e42883a77552ee27f4c12f2c",
+    "p0_state": "27/28; Lighthouse deferred by user until final certification",
+    "p1_head_sha": "fa692882c89e65d4191a3c2a8bd51f283a2599c3",
+    "preservation_rule": "No P2 change may reduce the 27 existing green P0 gates."
+  },
+  "discovery_sources": [
+    "README/roadmap-equivalent documentation",
+    "docs/AWWWARDS_SOTD_DEVELOPER_TARGET.md",
+    "docs/scifi-ui/data/platform-status.json",
+    "docs/scifi-ui/data/stable-gate.json",
+    "docs/scifi-ui/data/known-issues.json",
+    "open GitHub issues",
+    "PR #218 review threads",
+    "workflow/test source",
+    "TODO/FIXME/skip searches",
+    "release/security/privacy/support/licence/deployment/download contracts"
+  ],
+  "classifications": [
+    {
+      "id": "P2-R533-MISSING-EVENT-VALIDATION",
+      "class": "REQUIRED",
+      "status": "FIXED_PENDING_CI",
+      "source": "PR #218 unresolved review thread PRRT_kwDOQB1JPc6fmlsF",
+      "problem": "Number(null) converted a missing preloadercomplete measurement to 0, weakening the evidence assertion.",
+      "fix": "Preserve null as NaN and assert the raw completion timestamp is not null before timing validation.",
+      "commit": "49ce748523931e85142daad20b2d59e33f8a27e8"
+    },
+    {
+      "id": "P2-PRODUCTION-ISSUE-114-TRACKER",
+      "class": "REQUIRED",
+      "status": "FIXED_PENDING_CI_AND_NEXT_REAL_DEPLOY",
+      "source": "GitHub issue #114 plus .github/workflows/deploy-formatx-custom-domain.yml",
+      "problem": "Issue #114 promises a PASS/FAILED deploy log with commit SHA, but the workflow only published a commit status.",
+      "fix": "Actual deploy job now also posts PASS/FAILED, SHA and workflow-run URL to issue #114; PR-only validation does not post.",
+      "commit": "47d10bb3f3dc98e2b6ac42abd66cb5ffcf24a231",
+      "verification_limit": "The issue-comment side effect is verified only on the next genuine deployment run."
+    },
+    {
+      "id": "P2-ANDROID-OLD-WORKERS-DEV-CHECK",
+      "class": "STALE",
+      "status": "CLOSED_SUPERSEDED",
+      "source": "GitHub issue #107",
+      "reason": "Old workers.dev APK path is no longer canonical; current delivery contract uses /download/android.",
+      "issue_state": "closed/not_planned",
+      "issue_comment_id": 5742888706
+    },
+    {
+      "id": "P2-ANDROID-PHYSICAL-OTG",
+      "class": "EXTERNAL",
+      "status": "OPEN_REQUIRED_EVIDENCE",
+      "source": "GitHub issue #116",
+      "reason": "Full ISO write/readback/erase testing requires a physical Android phone and supported OTG USB hardware; cannot be truthfully replaced by static or emulator evidence."
+    },
+    {
+      "id": "P2-STABLE-REAL-HARDWARE-EVIDENCE",
+      "class": "EXTERNAL",
+      "status": "OPEN_EVIDENCE_GAP",
+      "source": "stable-gate.json and known-issues.json",
+      "reason": "Stable designation requires multiple documented real-hardware environments and hardware-specific end-to-end evidence. Current product remains Full release, not evidence-gated Stable."
+    },
+    {
+      "id": "P2-WEB-NATIVE-OPERATIONS",
+      "class": "ALREADY_COMPLETE",
+      "status": "INTENTIONAL_LIMITATION",
+      "source": "known-issues.json",
+      "reason": "Browser preview intentionally does not perform native drive writes/formats/erase for safety; supported native releases are the correct route."
+    },
+    {
+      "id": "P2-MACOS-IOS",
+      "class": "OPTIONAL",
+      "status": "ROADMAP",
+      "source": "platform-status.json and known-issues.json",
+      "reason": "Native macOS and iOS/iPadOS editions are explicitly Planned with no public package; not part of current required Full release scope."
+    },
+    {
+      "id": "P2-WEBGPU-V29",
+      "class": "OPTIONAL",
+      "status": "EXPERIMENTAL_PREVIEW",
+      "source": "technical-report.html and historical production audit",
+      "reason": "Explicit ?webgpu=1 preview only; production authority remains the validated WebGL path."
+    },
+    {
+      "id": "P2-DETACHED-SIGNATURE",
+      "class": "OPTIONAL",
+      "status": "NOT_PUBLISHED_TRUTHFULLY_DISCLOSED",
+      "source": "technical evidence/public audits",
+      "reason": "Current release has public SHA-256 integrity evidence; detached signature asset is explicitly disclosed as not published and is not required by the current Full release contract."
+    },
+    {
+      "id": "P2-SOURCE-TODO-FIXME",
+      "class": "ALREADY_COMPLETE",
+      "status": "NO_MAINTAINED_SOURCE_BACKLOG_FOUND",
+      "evidence": "No active FIXME, skipped/todo tests, describe.skip/it.skip/test.skip/test.todo or @Disabled entries found. The only TODO hit was generated Android lint sample backup-rule text."
+    },
+    {
+      "id": "P2-HISTORICAL-AUDIT-THRESHOLDS",
+      "class": "STALE",
+      "status": "HISTORICAL_RECORD_DO_NOT_REWRITE",
+      "source": "production-audit-2026-08-07/08/09 historical evidence",
+      "reason": "Older Lighthouse thresholds are historical evidence, not current live contract."
+    },
+    {
+      "id": "P2-P0-LIGHTHOUSE",
+      "class": "REQUIRED",
+      "status": "DEFERRED_TO_FINAL_CERTIFICATION",
+      "reason": "User explicitly directed continuation from P0 at 27/28 and return to Lighthouse after P1/P2."
+    }
+  ],
+  "open_repository_controlled_required_after_this_branch": [
+    "P2 changes must pass CI without reducing the 27-green P0 floor.",
+    "Issue #114 logging must receive live side-effect proof on the next genuine production deploy."
+  ],
+  "external_or_hardware_required": [
+    "Issue #116 physical Android/OTG write-readback-erase verification.",
+    "Stable-gate multi-hardware end-to-end evidence.",
+    "Safari/iOS physical or trusted Safari verification.",
+    "Field INP/RUM evidence."
+  ],
+  "next_phase": "FINAL_INTEGRATED_SAME_SHA_CERTIFICATION"
+}
