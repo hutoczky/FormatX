@@ -176,7 +176,19 @@
     return true;
   }
 
+  function triggerNearViewport() {
+    const trigger = findTrigger();
+    if (!trigger) return false;
+    const rect = trigger.getBoundingClientRect();
+    return rect.bottom >= -240 && rect.top <= innerHeight + 240;
+  }
+
   function ensureArmed() {
+    if (loaded) return;
+    if (triggerNearViewport()) {
+      inject();
+      return;
+    }
     if (arm()) {
       clearInterval(targetRetry);
       targetRetry = 0;
@@ -201,6 +213,8 @@
     ensureArmed();
   }
   ['pageshow', 'formatx:livingready', 'formatx:loop'].forEach(name => addEventListener(name, ensureArmed));
+  addEventListener('scroll', ensureArmed, { passive: true });
+  addEventListener('hashchange', ensureArmed, { passive: true });
   addEventListener('pagehide', () => {
     if (observer) observer.disconnect();
     clearInterval(targetRetry);

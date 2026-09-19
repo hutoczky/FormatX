@@ -100,7 +100,7 @@
   function loadOriginProofLayer() {
     if (document.querySelector('script[data-fx-origin-proof-script]')) return;
     const script = document.createElement('script');
-    script.src = './scripts/formatx-origin-proof.js?v=20260728-origin-proof-v1';
+    script.src = './scripts/formatx-origin-proof.js?v=20260920-r567-showcase-intent-loader';
     script.async = false;
     script.dataset.fxOriginProofScript = 'true';
     script.addEventListener('load', () => {
