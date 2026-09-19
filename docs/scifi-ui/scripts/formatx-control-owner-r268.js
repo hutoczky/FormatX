@@ -42,5 +42,6 @@ addEventListener('keydown',event=>{if(event.key==='Escape')setMenuOpen(false);})
 for(const eventName of ['formatx:languagechange','formatx:real3dready','formatx:coredetailready','formatx:organisminterfaceready','formatx:mobilelayoutready','pageshow'])addEventListener(eventName,()=>schedule(eventName==='formatx:languagechange'),{passive:true});
 addEventListener('formatx:immersiveactivate',()=>schedule(true),{passive:true});addEventListener('resize',()=>schedule(true),{passive:true});addEventListener('orientationchange',()=>schedule(true),{passive:true});
 for(const delay of [250,900,2200,5000])setTimeout(()=>{if(root.dataset.fxControlOwnerR268!=='ready')schedule(true);},delay);
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+function bootWhenIntroAllows(){const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;if(mobile||root.dataset.fxPreloaderR531==='done'){boot();return;}document.addEventListener('formatx:preloadercomplete',boot,{once:true,capture:true});root.dataset.fxControlBootR840='desktop-post-intro';}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootWhenIntroAllows,{once:true});else bootWhenIntroAllows();
 }());
