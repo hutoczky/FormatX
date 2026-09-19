@@ -1,0 +1,289 @@
+{
+  "schema_version": 1,
+  "phase": "P1",
+  "title": "Award-grade premium completion closeout",
+  "updated_at": "2026-09-19",
+  "baseline": {
+    "p0_sha": "9b35f010267fa804e42883a77552ee27f4c12f2c",
+    "p0_state": "27/28",
+    "preserved_green_gates": 27,
+    "open_gate": "Lighthouse CI",
+    "intro": {
+      "status": "VERIFIED",
+      "evidence_run_id": 35448325192,
+      "timing_gate": "R557_PRELOADER_TIMING_PASS",
+      "mobile_window_ms": [
+        1180,
+        1450
+      ],
+      "desktop_window_ms": [
+        1350,
+        1650
+      ]
+    },
+    "regression_policy": "Any regression in the existing 27 green gates requires rollback to the P0 baseline SHA."
+  },
+  "scope": {
+    "unified_art_direction": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate FormatX Design System",
+          "run_id": 35448325257
+        },
+        {
+          "workflow": "Igloo-floor gate",
+          "run_id": 35448325195
+        }
+      ]
+    },
+    "continuous_cinematic_journey": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Igloo-floor gate",
+          "run_id": 35448325195
+        },
+        {
+          "workflow": "Validate platform scroll policy",
+          "run_id": 35448325166
+        }
+      ]
+    },
+    "webgl_shader_quality": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Igloo-floor gate",
+          "run_id": 35448325195
+        },
+        {
+          "workflow": "Validate no information occlusion and pure 3D MAG",
+          "run_id": 35448325170
+        },
+        {
+          "workflow": "Validate FormatX Interaction Genome",
+          "run_id": 35448325182
+        }
+      ]
+    },
+    "motion_and_reduced_motion": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate FormatX WDA 100-target r206",
+          "run_id": 35448325311
+        },
+        {
+          "workflow": "Validate FormatX Design System",
+          "run_id": 35448325257
+        },
+        {
+          "workflow": "Validate FormatX core and mobile dialogue stability",
+          "run_id": 35448325253
+        }
+      ]
+    },
+    "hero_and_mag": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate no information occlusion and pure 3D MAG",
+          "run_id": 35448325170
+        },
+        {
+          "workflow": "P0 fast source loop",
+          "run_id": 35448325192
+        }
+      ]
+    },
+    "typography_and_visual_system": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate FormatX Design System",
+          "run_id": 35448325257
+        },
+        {
+          "workflow": "Validate mobile showcase, feedback and responsive matrix",
+          "run_id": 35448325196
+        }
+      ]
+    },
+    "responsive_mobile_ultrawide_4k": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate mobile showcase, feedback and responsive matrix",
+          "run_id": 35448325196
+        },
+        {
+          "workflow": "Validate no information occlusion and pure 3D MAG",
+          "run_id": 35448325170
+        }
+      ]
+    },
+    "microinteractions": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate FormatX Interaction Genome",
+          "run_id": 35448325182
+        },
+        {
+          "workflow": "Validate hero, navigation, language and infinite scroll",
+          "run_id": 35448325172
+        }
+      ]
+    },
+    "organism_thought_dialogue": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate FormatX core and mobile dialogue stability",
+          "run_id": 35448325253
+        },
+        {
+          "workflow": "Validate FormatX Living Core laboratory",
+          "run_id": 35448325300
+        }
+      ]
+    },
+    "live_os": {
+      "status": "EXISTING_GATE_UNCHANGED",
+      "evidence": [
+        {
+          "workflow_source": ".github/workflows/validate-live-os.yml"
+        },
+        {
+          "browser_validator": ".github/scripts/validate-live-os-browser.cjs"
+        }
+      ],
+      "note": "No Live OS source changed in this P1 closeout branch; retain its dedicated existing browser gate."
+    },
+    "proof_evidence_and_trust": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate public evidence and feedback",
+          "run_id": 35448325296
+        },
+        {
+          "workflow": "Validate public site integrity",
+          "run_id": 35448325297
+        },
+        {
+          "workflow": "Validate FormatX canonical content, evidence and visual contracts",
+          "run_id": 35448325305
+        }
+      ]
+    },
+    "accessibility_and_keyboard": {
+      "status": "VERIFIED_AUTOMATED_SCOPE",
+      "evidence": [
+        {
+          "workflow": "Validate FormatX WDA 100-target r206",
+          "run_id": 35448325311
+        },
+        {
+          "workflow": "Validate FormatX Design System",
+          "run_id": 35448325257
+        }
+      ],
+      "external_limits": [
+        "Physical Safari/iOS verification remains external."
+      ]
+    },
+    "lighthouse_and_core_web_vitals": {
+      "status": "DEFERRED_P0",
+      "reason": "User-directed P0 continuation at 27/28; Lighthouse CI remains the single open P0 gate and will be revisited after P1/P2.",
+      "hard_gate": {
+        "runs_per_profile": 3,
+        "performance_min": 1,
+        "accessibility_min": 1,
+        "best_practices_min": 1,
+        "seo_min": 1,
+        "fcp_max_ms": 1800,
+        "lcp_max_ms": 1999,
+        "tbt_max_ms": 150,
+        "cls_max": 0.049,
+        "ttfb_max_ms": 500
+      },
+      "field_inp": "NOT_CLAIMED_WITHOUT_REAL_USER_DATA"
+    },
+    "seo_machine_readability": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate FormatX Living Core laboratory",
+          "run_id": 35448325300
+        },
+        {
+          "workflow": "Validate public site integrity",
+          "run_id": 35448325297
+        }
+      ]
+    },
+    "bilingual_content": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Bilingual coverage report",
+          "run_id": 35448325199
+        },
+        {
+          "workflow": "Validate bilingual labels and licence clarification",
+          "run_id": 35448325202
+        }
+      ]
+    },
+    "branding_and_audio": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Validate FormatX professional score",
+          "run_id": 35448325159
+        },
+        {
+          "workflow": "Validate FormatX Design System",
+          "run_id": 35448325257
+        }
+      ]
+    },
+    "commercial_trust": {
+      "status": "VERIFIED",
+      "evidence": [
+        {
+          "workflow": "Website License Center CI",
+          "run_id": 35448325174
+        },
+        {
+          "workflow": "Validate public site integrity",
+          "run_id": 35448325297
+        }
+      ]
+    },
+    "final_browser_qa": {
+      "status": "PARTIAL_EXTERNAL",
+      "automated": [
+        "Chromium desktop/mobile matrices",
+        "Firefox-specific validator exists in repository"
+      ],
+      "external_or_not_fresh": [
+        "Safari/iOS physical or trusted Safari environment",
+        "Microsoft Edge exact-browser evidence",
+        "fresh exact-SHA Firefox run if required for final certification"
+      ]
+    },
+    "external_credibility": {
+      "status": "EXTERNAL",
+      "not_claimed_without_evidence": [
+        "Awwwards jury award or score",
+        "independent professional review",
+        "third-party testimonials or press coverage"
+      ]
+    }
+  },
+  "closeout_status": "REPO_CONTROLLED_P1_EVIDENCE_READY_WITH_P0_LIGHTHOUSE_DEFERRED_AND_EXTERNAL_BROWSER_ITEMS_EXPLICIT",
+  "next_phase": "P2 repository-scope discovery and completion"
+}

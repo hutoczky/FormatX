@@ -2,7 +2,10 @@
   "schema_version": 4,
   "public_copy": {
     "primary_system": "linux-bazzite",
-    "supported_secondary_platforms": ["windows", "android"],
+    "supported_secondary_platforms": [
+      "windows",
+      "android"
+    ],
     "download_channel": "multiplatform",
     "public_release_version_visible": false,
     "release_maturity": "full_release",
@@ -102,12 +105,19 @@
     "high_visibility_keyboard_focus": true,
     "reduced_motion_treatment": true,
     "lighthouse_thresholds": {
-      "performance_min": 0.9,
-      "accessibility_min": 1.0,
-      "best_practices_min": 1.0,
-      "seo_min": 1.0,
-      "lcp_max_ms": 2500,
-      "cls_max": 0.1
+      "runs_per_profile": 3,
+      "performance_min": 1,
+      "accessibility_min": 1,
+      "best_practices_min": 1,
+      "seo_min": 1,
+      "fcp_max_ms": 1800,
+      "lcp_max_ms": 1999,
+      "tbt_max_ms": 150,
+      "cls_max": 0.049,
+      "ttfb_max_ms": 500,
+      "audit_only_url": false,
+      "forced_reduced_motion": false,
+      "skipped_audits": false
     },
     "field_inp_rum": "not_claimed_without_real_user_data",
     "independent_professional_review": "not_published"
