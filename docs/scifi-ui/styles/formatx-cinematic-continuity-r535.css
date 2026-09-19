@@ -1,0 +1,391 @@
+/* FormatX R535 — cinematic continuity.
+   A single film language connects the real R326 MAG to every existing product
+   chapter without replacing content, controls or document flow. */
+
+html[data-fx-cinematic-continuity-r535="ready"]{
+  --fx-cinema-accent:96,228,255;
+  --fx-cinema-secondary:143,114,255;
+  --fx-cinema-progress:0;
+  --fx-cinema-local:.18;
+  --fx-cinema-energy:.18;
+  --fx-cinema-camera-x:0px;
+  --fx-cinema-camera-y:0px;
+  --fx-cinema-shift:0px;
+  --fx-cinema-scale:1;
+  --fx-cinema-beam-y:44%;
+  --fx-cinema-lens-x:52%;
+  --fx-cinema-lens-y:44%;
+}
+
+html[data-fx-cinematic-continuity-r535="ready"] body.living-architecture{
+  position:relative;
+}
+
+.fx-cinema-r535{
+  position:fixed;
+  inset:0;
+  z-index:6;
+  pointer-events:none;
+  overflow:hidden;
+  contain:layout paint style;
+  opacity:.88;
+  transition:opacity .5s ease;
+}
+
+.fx-cinema-r535__lens,
+.fx-cinema-r535__beam,
+.fx-cinema-r535__vignette,
+.fx-cinema-r535__gate,
+.fx-cinema-r535__grain{
+  position:absolute;
+  pointer-events:none;
+}
+
+.fx-cinema-r535__lens{
+  width:min(78vw,1040px);
+  aspect-ratio:1;
+  left:var(--fx-cinema-lens-x);
+  top:var(--fx-cinema-lens-y);
+  transform:translate(-50%,-50%) translate3d(var(--fx-cinema-camera-x),var(--fx-cinema-camera-y),0) scale(calc(.88 + var(--fx-cinema-local) * .12));
+  border-radius:50%;
+  background:
+    radial-gradient(circle,rgba(245,255,255,.038) 0 3%,rgba(var(--fx-cinema-accent),.075) 9%,rgba(var(--fx-cinema-secondary),.035) 25%,transparent 59%),
+    conic-gradient(from calc(var(--fx-cinema-progress) * 260deg),transparent 0 16%,rgba(var(--fx-cinema-accent),.035) 20%,transparent 26% 54%,rgba(var(--fx-cinema-secondary),.028) 59%,transparent 66% 100%);
+  filter:blur(10px) saturate(1.08);
+  opacity:calc(.24 + var(--fx-cinema-energy) * .34);
+  mix-blend-mode:screen;
+  will-change:transform,opacity;
+}
+
+.fx-cinema-r535__beam{
+  left:6vw;
+  right:6vw;
+  top:var(--fx-cinema-beam-y);
+  height:1px;
+  transform:translate3d(0,-50%,0);
+  background:linear-gradient(90deg,transparent 0%,rgba(var(--fx-cinema-accent),.05) 20%,rgba(218,252,255,.34) 49%,rgba(var(--fx-cinema-secondary),.10) 72%,transparent 100%);
+  box-shadow:0 0 18px rgba(var(--fx-cinema-accent),.10);
+  opacity:calc(.06 + var(--fx-cinema-energy) * .16);
+}
+
+.fx-cinema-r535__beam::before{
+  content:"";
+  position:absolute;
+  left:calc(7% + var(--fx-cinema-progress) * 86%);
+  top:50%;
+  width:8px;
+  height:8px;
+  border:1px solid rgba(232,255,255,.72);
+  background:rgba(var(--fx-cinema-accent),.18);
+  box-shadow:0 0 14px rgba(var(--fx-cinema-accent),.40),0 0 30px rgba(var(--fx-cinema-secondary),.18);
+  transform:translate(-50%,-50%) rotate(45deg);
+}
+
+.fx-cinema-r535__vignette{
+  inset:0;
+  background:
+    linear-gradient(180deg,rgba(0,2,7,.24),transparent 8%,transparent 90%,rgba(0,2,8,.28)),
+    radial-gradient(ellipse at center,transparent 46%,rgba(0,2,8,.14) 78%,rgba(0,1,5,.30) 100%);
+  opacity:.58;
+}
+
+.fx-cinema-r535__grain{
+  inset:0;
+  opacity:.08;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px);
+  background-size:4px 4px;
+  mix-blend-mode:screen;
+}
+
+.fx-cinema-r535__gate{
+  inset:0;
+  opacity:0;
+}
+.fx-cinema-r535__gate::before,
+.fx-cinema-r535__gate::after{
+  content:"";
+  position:absolute;
+  left:0;
+  width:100%;
+  height:clamp(4px,.72vh,8px);
+  background:#000;
+  opacity:.92;
+}
+.fx-cinema-r535__gate::before{top:0;transform:translateY(-100%)}
+.fx-cinema-r535__gate::after{bottom:0;transform:translateY(100%)}
+
+html.fx-cinema-r535-cut .fx-cinema-r535__gate{
+  animation:fx-cinema-r535-gate .66s cubic-bezier(.24,.72,.18,1) 1;
+}
+html.fx-cinema-r535-cut .fx-cinema-r535__lens{
+  animation:fx-cinema-r535-lens-pulse .72s cubic-bezier(.2,.72,.2,1) 1;
+}
+html.fx-cinema-r535-cut .fx-cinema-r535__beam{
+  animation:fx-cinema-r535-beam-pulse .62s ease-out 1;
+}
+
+@keyframes fx-cinema-r535-gate{
+  0%{opacity:0}
+  18%{opacity:.78}
+  55%{opacity:.34}
+  100%{opacity:0}
+}
+@keyframes fx-cinema-r535-lens-pulse{
+  0%{filter:blur(10px) saturate(1.05);opacity:.28}
+  34%{filter:blur(5px) saturate(1.28) brightness(1.16);opacity:.72}
+  100%{filter:blur(10px) saturate(1.08);opacity:calc(.24 + var(--fx-cinema-energy) * .34)}
+}
+@keyframes fx-cinema-r535-beam-pulse{
+  0%{opacity:.06;filter:brightness(1)}
+  28%{opacity:.72;filter:brightness(1.6)}
+  100%{opacity:calc(.06 + var(--fx-cinema-energy) * .16);filter:brightness(1)}
+}
+
+.fx-cinema-r535__hud{
+  position:absolute;
+  right:clamp(12px,1.8vw,30px);
+  top:50%;
+  width:clamp(118px,10vw,168px);
+  transform:translateY(-50%);
+  display:grid;
+  gap:8px;
+  text-align:right;
+  color:rgba(224,248,255,.55);
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  opacity:.74;
+}
+.fx-cinema-r535__hud b{
+  color:rgba(238,254,255,.92);
+  font-size:clamp(22px,2.3vw,38px);
+  font-weight:300;
+  letter-spacing:-.05em;
+  line-height:.9;
+}
+.fx-cinema-r535__hud strong{
+  color:rgba(var(--fx-cinema-accent),.78);
+  font-size:9px;
+  font-weight:800;
+  line-height:1.35;
+}
+.fx-cinema-r535__hud span{
+  font-size:8px;
+  line-height:1.4;
+}
+.fx-cinema-r535__hud i{
+  position:relative;
+  display:block;
+  height:1px;
+  overflow:hidden;
+  background:rgba(var(--fx-cinema-accent),.12);
+}
+.fx-cinema-r535__hud i::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform-origin:left center;
+  transform:scaleX(var(--fx-cinema-progress));
+  background:linear-gradient(90deg,rgba(var(--fx-cinema-accent),.86),rgba(var(--fx-cinema-secondary),.74));
+  box-shadow:0 0 12px rgba(var(--fx-cinema-accent),.24);
+}
+
+/* Per-chapter anatomy. These layers sit behind the existing content and never
+   receive input. */
+html[data-fx-cinematic-continuity-r535="ready"] #main-content>section.scene{
+  --fx-cinema-section-local:.12;
+  --fx-cinema-section-energy:.10;
+}
+
+.fx-cinema-organ-r535{
+  position:absolute;
+  z-index:-1;
+  inset:-8% -5%;
+  pointer-events:none;
+  overflow:hidden;
+  opacity:calc(.08 + var(--fx-cinema-section-energy) * .56);
+  transition:opacity .72s ease,filter .72s ease;
+  filter:saturate(calc(1 + var(--fx-cinema-section-energy) * .2));
+}
+.fx-cinema-organ-r535>span{
+  position:absolute;
+  pointer-events:none;
+}
+
+section[data-fx-cinema-state="future"]>.fx-cinema-organ-r535{opacity:.06}
+section[data-fx-cinema-state="active"]>.fx-cinema-organ-r535{opacity:calc(.22 + var(--fx-cinema-section-energy) * .62)}
+section[data-fx-cinema-state="past"]>.fx-cinema-organ-r535{opacity:.12}
+
+/* Nervous system — signal threads converge from the core. */
+#experience>.fx-cinema-organ-r535{
+  background:
+    radial-gradient(ellipse 54% 46% at 56% 38%,rgba(96,228,255,.075),transparent 72%),
+    repeating-linear-gradient(72deg,transparent 0 39px,rgba(105,142,255,.035) 40px,transparent 41px 78px);
+}
+#experience>.fx-cinema-organ-r535 .a{
+  left:10%;right:6%;top:42%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(96,228,255,.08),rgba(230,254,255,.42) 52%,rgba(105,142,255,.08),transparent);
+  box-shadow:0 0 18px rgba(96,228,255,.10);
+  transform:rotate(-5deg) scaleX(calc(.62 + var(--fx-cinema-section-local) * .38));
+  transform-origin:center;
+}
+#experience>.fx-cinema-organ-r535 .b{
+  left:25%;top:10%;width:42%;height:72%;
+  border:1px solid rgba(96,228,255,.10);
+  border-left-color:transparent;border-bottom-color:transparent;
+  border-radius:50%;
+  transform:rotate(calc(-18deg + var(--fx-cinema-section-local) * 38deg));
+}
+
+/* Organs — six spokes appear from a common living centre. */
+#capabilities>.fx-cinema-organ-r535::before{
+  content:"";
+  position:absolute;
+  right:5%;
+  top:18%;
+  width:min(42vw,560px);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,rgba(239,255,252,.20) 0 1%,rgba(121,241,219,.08) 5%,transparent 20%),
+    conic-gradient(from calc(var(--fx-cinema-section-local) * 72deg),
+      rgba(121,241,219,.18) 0 1deg,transparent 1deg 59deg,
+      rgba(98,161,255,.14) 60deg 61deg,transparent 61deg 119deg,
+      rgba(121,241,219,.16) 120deg 121deg,transparent 121deg 179deg,
+      rgba(98,161,255,.13) 180deg 181deg,transparent 181deg 239deg,
+      rgba(121,241,219,.16) 240deg 241deg,transparent 241deg 299deg,
+      rgba(98,161,255,.13) 300deg 301deg,transparent 301deg 360deg);
+  -webkit-mask-image:radial-gradient(circle,transparent 0 15%,#000 16% 72%,transparent 82%);
+  mask-image:radial-gradient(circle,transparent 0 15%,#000 16% 72%,transparent 82%);
+}
+
+/* Commerce heart — restrained double-beat rings behind pricing. */
+#pricing>.fx-cinema-organ-r535 .a,
+#pricing>.fx-cinema-organ-r535 .b{
+  right:8%;
+  top:24%;
+  width:min(34vw,420px);
+  aspect-ratio:1;
+  border-radius:50%;
+  border:1px solid rgba(255,207,137,.17);
+  box-shadow:0 0 32px rgba(255,207,137,.05),inset 0 0 28px rgba(160,109,255,.035);
+  transform:scale(calc(.82 + var(--fx-cinema-section-local) * .14));
+}
+#pricing>.fx-cinema-organ-r535 .b{
+  right:13%;
+  top:31%;
+  width:min(24vw,300px);
+  border-color:rgba(160,109,255,.15);
+  transform:scale(calc(.76 + var(--fx-cinema-section-local) * .18));
+}
+#pricing[data-fx-cinema-state="active"]>.fx-cinema-organ-r535 .a{animation:fx-cinema-r535-heart 1.42s ease-in-out infinite}
+#pricing[data-fx-cinema-state="active"]>.fx-cinema-organ-r535 .b{animation:fx-cinema-r535-heart 1.42s .17s ease-in-out infinite}
+@keyframes fx-cinema-r535-heart{0%,100%{opacity:.32}12%{opacity:.88}28%{opacity:.38}42%{opacity:.68}62%{opacity:.30}}
+
+/* Skeleton — the system resolves into an engineering grid. */
+#system>.fx-cinema-organ-r535{
+  background:
+    linear-gradient(rgba(139,203,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(139,203,255,.04) 1px,transparent 1px);
+  background-size:54px 54px;
+  transform:perspective(1000px) rotateX(calc(1deg + var(--fx-cinema-section-local) * 3deg)) scale(1.05);
+  transform-origin:center;
+  -webkit-mask-image:radial-gradient(ellipse at 60% 48%,#000 0 42%,transparent 80%);
+  mask-image:radial-gradient(ellipse at 60% 48%,#000 0 42%,transparent 80%);
+}
+
+/* Beacon — the final chapter emits a signal that visually leads into the loop. */
+#resources>.fx-cinema-organ-r535 .a{
+  left:50%;
+  top:12%;
+  width:1px;
+  height:72%;
+  background:linear-gradient(180deg,transparent,rgba(183,244,255,.52) 42%,rgba(111,227,200,.10) 78%,transparent);
+  box-shadow:0 0 22px rgba(183,244,255,.16);
+  transform:scaleY(calc(.50 + var(--fx-cinema-section-local) * .5));
+  transform-origin:top;
+}
+#resources>.fx-cinema-organ-r535 .b{
+  left:50%;top:42%;width:min(68vw,860px);height:1px;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,rgba(111,227,200,.12),rgba(239,255,255,.50),rgba(183,244,255,.12),transparent);
+}
+
+/* Existing UI becomes the foreground of the scene instead of a set of unrelated
+   cards. Layout never changes; only composited transforms/opacity are used. */
+html[data-fx-cinematic-continuity-r535="ready"] section.scene[data-fx-cinema-state]>.section-heading,
+html[data-fx-cinematic-continuity-r535="ready"] #experience[data-fx-cinema-state]>.flow,
+html[data-fx-cinematic-continuity-r535="ready"] #capabilities[data-fx-cinema-state]>.cards,
+html[data-fx-cinematic-continuity-r535="ready"] #pricing[data-fx-cinema-state]>.pricing,
+html[data-fx-cinematic-continuity-r535="ready"] #system[data-fx-cinema-state]>.system-grid,
+html[data-fx-cinematic-continuity-r535="ready"] #resources[data-fx-cinema-state]>.release-layout{
+  transition:
+    transform .86s cubic-bezier(.2,.76,.2,1),
+    opacity .62s ease,
+    filter .72s ease;
+  transform-origin:center center;
+  will-change:transform,opacity;
+}
+
+html[data-fx-cinematic-continuity-r535="ready"] section.scene[data-fx-cinema-state="future"]>.section-heading,
+html[data-fx-cinematic-continuity-r535="ready"] #experience[data-fx-cinema-state="future"]>.flow,
+html[data-fx-cinematic-continuity-r535="ready"] #capabilities[data-fx-cinema-state="future"]>.cards,
+html[data-fx-cinematic-continuity-r535="ready"] #pricing[data-fx-cinema-state="future"]>.pricing,
+html[data-fx-cinematic-continuity-r535="ready"] #system[data-fx-cinema-state="future"]>.system-grid,
+html[data-fx-cinematic-continuity-r535="ready"] #resources[data-fx-cinema-state="future"]>.release-layout{
+  transform:translate3d(0,12px,0) scale(.992);
+  opacity:.94;
+}
+
+html[data-fx-cinematic-continuity-r535="ready"] section.scene[data-fx-cinema-state="active"]>.section-heading,
+html[data-fx-cinematic-continuity-r535="ready"] #experience[data-fx-cinema-state="active"]>.flow,
+html[data-fx-cinematic-continuity-r535="ready"] #capabilities[data-fx-cinema-state="active"]>.cards,
+html[data-fx-cinematic-continuity-r535="ready"] #pricing[data-fx-cinema-state="active"]>.pricing,
+html[data-fx-cinematic-continuity-r535="ready"] #system[data-fx-cinema-state="active"]>.system-grid,
+html[data-fx-cinematic-continuity-r535="ready"] #resources[data-fx-cinema-state="active"]>.release-layout{
+  transform:translate3d(0,var(--fx-cinema-shift),0) scale(var(--fx-cinema-scale));
+  opacity:1;
+  filter:saturate(calc(1 + var(--fx-cinema-energy) * .05));
+}
+
+html[data-fx-cinematic-continuity-r535="ready"] section.scene[data-fx-cinema-state="past"]>.section-heading,
+html[data-fx-cinematic-continuity-r535="ready"] #experience[data-fx-cinema-state="past"]>.flow,
+html[data-fx-cinematic-continuity-r535="ready"] #capabilities[data-fx-cinema-state="past"]>.cards,
+html[data-fx-cinematic-continuity-r535="ready"] #pricing[data-fx-cinema-state="past"]>.pricing,
+html[data-fx-cinematic-continuity-r535="ready"] #system[data-fx-cinema-state="past"]>.system-grid,
+html[data-fx-cinematic-continuity-r535="ready"] #resources[data-fx-cinema-state="past"]>.release-layout{
+  transform:translate3d(0,-4px,0) scale(.998);
+  opacity:1;
+}
+
+html.fx-cinema-r535-handoff .fx-cinema-r535__lens{
+  animation:fx-cinema-r535-handoff 1.05s cubic-bezier(.18,.78,.2,1) 1;
+}
+@keyframes fx-cinema-r535-handoff{
+  0%{opacity:.12;transform:translate(-50%,-50%) scale(.64)}
+  38%{opacity:.68;transform:translate(-50%,-50%) scale(.96)}
+  100%{opacity:calc(.24 + var(--fx-cinema-energy) * .34);transform:translate(-50%,-50%) scale(calc(.88 + var(--fx-cinema-local) * .12))}
+}
+
+@media (max-width:900px),(pointer:coarse){
+  .fx-cinema-r535{opacity:.58}
+  .fx-cinema-r535__hud{display:none}
+  .fx-cinema-r535__lens{width:118vw;filter:blur(14px)}
+  .fx-cinema-r535__beam{left:0;right:0;opacity:calc(.035 + var(--fx-cinema-energy) * .10)}
+  .fx-cinema-r535__vignette{opacity:.34}
+  .fx-cinema-organ-r535{inset:-4% -10%;opacity:calc(.05 + var(--fx-cinema-section-energy) * .34)}
+  #capabilities>.fx-cinema-organ-r535::before{right:-18%;top:20%;width:88vw}
+  #pricing>.fx-cinema-organ-r535 .a{right:-26%;width:74vw}
+  #pricing>.fx-cinema-organ-r535 .b{right:-9%;width:52vw}
+  #system>.fx-cinema-organ-r535{background-size:42px 42px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .fx-cinema-r535{display:none!important}
+  .fx-cinema-organ-r535{display:none!important}
+  html[data-fx-cinematic-continuity-r535] section.scene[data-fx-cinema-state]>*{
+    animation:none!important;
+  }
+}
