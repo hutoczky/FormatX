@@ -127,6 +127,7 @@ html.fx-organism-core-active .fx-three-stage-shell {
 
 #main-nav.fx-organism-system-menu {
   z-index: var(--fx-layer-menu) !important;
+  box-sizing: border-box !important;
   touch-action: pan-y;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -236,6 +237,42 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
 .loop-note {
   touch-action: pan-y;
   user-select: none;
+}
+
+/* R697: keep only the real desktop flow geometry owners materialised once the
+   Organism + seamless lifecycle is live. R691 forced every descendant visible;
+   that stabilised the bridge but created unnecessary whole-document work and
+   readiness regressions. These selectors mirror the canonical scroll bootstrap
+   owner set, so late Organism styles cannot move the footer/bridge after the
+   settled-layout handoff while unrelated lazy decoration remains lazy. */
+@media (min-width: 901px) and (pointer: fine) {
+  html.fx-organism-interface-ready[data-fx-infinite-controller="seamless-v7"] :is(
+    main#main-content > .scene:not(#hero),
+    main#main-content > .fx-category-deck,
+    main#main-content .fx-origin-proof,
+    .fx-live-os,
+    #live-os-overview,
+    .fx-static-live-os,
+    .fx-award-proof,
+    .fx-product-showcase,
+    #user-feedback,
+    .fx-feedback-public,
+    body > .site-footer,
+    body > .fx-loop-bridge
+  ),
+  html.fx-organism-interface-ready[data-fx-infinite-controller="seamless-v7"] main#main-content > .scene:not(#hero) > :is(
+    .flow,
+    .cards,
+    .pricing,
+    .payment,
+    .payment-console,
+    #formatx-plan-qr-dock,
+    .system-grid,
+    .release-layout
+  ) {
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+  }
 }
 
 @media (max-width: 900px), (pointer: coarse) {
