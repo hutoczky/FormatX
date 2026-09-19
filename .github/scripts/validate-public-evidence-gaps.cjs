@@ -86,11 +86,11 @@ assert.match(feedbackPublicCss, /contain: layout paint style/, 'approved review 
 
 assert.match(report, /Desktop és mobil minőségkapuk/, 'current technical quality-gate section missing');
 assert.match(report, /No independent professional review has been published|Nincs publikált független szakmai teszt/, 'honest external evidence gap missing');
-assert.match(report, /Még hiányzó külső bizonyíték/, 'current external evidence-gap section missing');
+assert.match(report, /class="fx-evidence-card fx-evidence-gap"[\s\S]*07 \/ EXTERNAL[\s\S]*External evidence and remaining gaps/, 'current external evidence-gap section missing');
 assert.match(report, /Seamless-v7 natív folytonos görgetés/, 'current continuous-scroll evidence section missing');
-assert.match(reportDownload, /Performance: legalább 90/, 'downloadable report gate missing');
+assert.match(reportDownload, /Lighthouse Performance: \*\*100\*\*/, 'downloadable report gate missing');
 assert.match(reportDownload, /Moderált felhasználói értékelés/, 'downloadable feedback moderation report missing');
-assert.match(reportDownload, /minden eszközre garantált 120 FPS nincs állítva|minden eszközre garantált 60 vagy 120 FPS field eredmény/, 'non-guaranteed field FPS disclosure missing');
+assert.match(reportDownload, /60 vagy 120 FPS field eredmény nem garantálható minden eszközre/, 'non-guaranteed field FPS disclosure missing');
 assert.match(sitemap, /technical-report\.html/, 'technical report is absent from sitemap');
 
 (async () => {
