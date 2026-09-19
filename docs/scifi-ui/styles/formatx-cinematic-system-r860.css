@@ -13,9 +13,23 @@
 html.fx-cinematic-ready body.living-architecture {
   background-color: #01040b;
 }
+.fx-cinematic-field-r860 {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fx-cinematic-field-r860::before,
+.fx-cinematic-field-r860::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 
-html.fx-cinematic-ready body.living-architecture::before,
-html.fx-cinematic-ready body.living-architecture::after {
+html.fx-cinematic-ready .fx-cinematic-field-r860::before,
+html.fx-cinematic-ready .fx-cinematic-field-r860::after {
   content: "";
   position: fixed;
   inset: 0;
@@ -23,7 +37,7 @@ html.fx-cinematic-ready body.living-architecture::after {
   z-index: -2;
 }
 
-html.fx-cinematic-ready body.living-architecture::before {
+html.fx-cinematic-ready .fx-cinematic-field-r860::before {
   background:
     radial-gradient(circle at 72% 28%, rgba(var(--fx-cine-accent), var(--fx-cine-field-opacity)), transparent 31%),
     radial-gradient(circle at 23% 68%, rgba(var(--fx-cine-secondary), calc(var(--fx-cine-field-opacity) * .72)), transparent 36%),
@@ -31,7 +45,7 @@ html.fx-cinematic-ready body.living-architecture::before {
   transition: background 760ms cubic-bezier(.22,.61,.36,1), opacity 520ms ease;
 }
 
-html.fx-cinematic-ready body.living-architecture::after {
+html.fx-cinematic-ready .fx-cinematic-field-r860::after {
   z-index: -1;
   opacity: var(--fx-cine-grid-opacity);
   background-image:
@@ -87,6 +101,7 @@ html[data-fx-cinematic-scene="beacon"] {
 
 html.fx-cinematic-ready main#main-content {
   position: relative;
+  z-index: 1;
   isolation: isolate;
 }
 
@@ -288,10 +303,10 @@ html.fx-cinematic-ready :is(.topbar,.fx-organism-status,.fx-organism-actionbar,.
     --fx-cine-field-opacity: .16;
     --fx-cine-grid-opacity: .025;
   }
-  html.fx-cinematic-ready body.living-architecture::before {
+  html.fx-cinematic-ready .fx-cinematic-field-r860::before {
     position: absolute;
   }
-  html.fx-cinematic-ready body.living-architecture::after {
+  html.fx-cinematic-ready .fx-cinematic-field-r860::after {
     display: none;
   }
   html.fx-cinematic-ready main#main-content > .scene::before {
@@ -317,8 +332,8 @@ html.fx-cinematic-ready :is(.topbar,.fx-organism-status,.fx-organism-actionbar,.
   html.fx-cinematic-ready *::after {
     transition-duration: .001ms !important;
   }
-  html.fx-cinematic-ready body.living-architecture::before,
-  html.fx-cinematic-ready body.living-architecture::after {
+  html.fx-cinematic-ready .fx-cinematic-field-r860::before,
+  html.fx-cinematic-ready .fx-cinematic-field-r860::after {
     display: none;
   }
   html.fx-cinematic-ready main#main-content > .scene::before {
