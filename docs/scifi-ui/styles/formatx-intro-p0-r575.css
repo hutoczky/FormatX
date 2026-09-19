@@ -340,3 +340,17 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R840b — desktop covered below-fold containment.
+   The opaque intro owns the viewport, so non-hero sections do not need layout or
+   paint work before canonical release. Preserve an intrinsic block for scroll
+   geometry; the hero/header/semantic MAG path is untouched. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html[data-fx-preloader-r531="active"] body.living-architecture main#main-content > :not(#hero) {
+    content-visibility: hidden !important;
+    contain: layout style paint !important;
+    contain-intrinsic-size: auto 900px !important;
+  }
+}
+/* production-r840-desktop-covered-belowfold-containment */
