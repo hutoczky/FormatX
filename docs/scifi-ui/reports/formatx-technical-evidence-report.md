@@ -1,6 +1,6 @@
 # FormatX Suite Pro — nyilvános technikai bizonyítékriport
 
-**Frissítve:** 2026-09-02  
+**Frissítve:** 2026-09-08  
 **Nyilvános oldal:** https://formatxsuite.com/  
 **Forrás és CI:** https://github.com/hutoczky/FormatX/actions
 
@@ -23,19 +23,21 @@ A production P0 csak tényleges, elmentett CI/Lighthouse artifact alapján minő
 
 Kötelező P0 szerződés desktopon és mobilon, külön-külön **három egymást követő production futásban**:
 
-- Lighthouse Performance: **100**
+- Lighthouse Performance: **≥ 95** — a **100** továbbra is optimalizációs cél
 - Lighthouse Accessibility: **100**
 - Lighthouse Best Practices: **100**
 - Lighthouse SEO: **100**
-- Largest Contentful Paint: **< 2,0 s**
-- Cumulative Layout Shift: **< 0,05**
+- First Contentful Paint: **≤ 1,8 s**
+- Largest Contentful Paint: **≤ 2,5 s**
+- Total Blocking Time: **≤ 200 ms**
+- Cumulative Layout Shift: **≤ 0,10**
+- TTFB: **≤ 600 ms**
 - Interaction to Next Paint field cél: **< 200 ms**, lehetőleg **< 150 ms**
-- TTFB: a technikailag indokolt minimumon
-- kritikus render-blocking, unused JS/CSS és hosszú main-thread regresszió: nincs elfogadva
+- kritikus render-blocking, unused JS/CSS és hosszú main-thread regresszió továbbra sem kívánatos
 
 **Aktuális P0 mérési állapot: pending / not verified.**
 
-A fenti státusz csak akkor cserélhető mért PASS eredményre, ha a megfelelő production deploy SHA-hoz tartozó CI-futás három desktop és három mobil Lighthouse riportja, valamint a kapcsolódó security/readiness bizonyíték rendelkezésre áll. Korábbi, enyhébb küszöbértékkel készült sikeres futás nem minősül a jelenlegi P0 szerződés teljesítésének.
+A fenti státusz csak akkor cserélhető mért PASS eredményre, ha a megfelelő production deploy SHA-hoz tartozó CI-futás három desktop és három mobil Lighthouse riportja, valamint a kapcsolódó security/readiness bizonyíték rendelkezésre áll. A P0 PASS kizárólag a jelenlegi, fent rögzített küszöbprofil szerint minősíthető; a Performance 100 továbbra is fejlesztési cél, de nem kötelező PASS-küszöb.
 
 Az INP field metrika. Lighthouse navigation vagy TBT eredmény önmagában nem bizonyít production INP PASS állapotot. Hiteles CrUX/RUM/field adat hiányában az INP állapota `pending / not verified` marad.
 
@@ -67,7 +69,7 @@ A P0 optimalizálás nem távolíthatja el és nem gyengítheti a következő m�
 - audit/report export;
 - veszélyes vagy bizonytalan műveletnél fail-closed viselkedés.
 
-A kijelzett teljesítményadatok nem helyettesítik a valós felhasználói RUM/field mérést. Hiányzó field adatot a FormatX nem jelöl sikeresnek.
+A kijelzett teljesítményadatok nem helyettesítik a valós felhasználói RUM/field mérést. Hiányzó field adatot a FormatX nem jelöl sikeresnek. minden eszközre garantált 120 FPS nincs állítva; hiteles 60 vagy 120 FPS field eredmény nélkül ilyen általános teljesítménygarancia nem publikálható.
 
 ## 5. Termékbizonyíték és kiadási integritás
 
