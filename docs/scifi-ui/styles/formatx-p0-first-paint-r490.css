@@ -386,3 +386,14 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r675-visible-hero-space-centred-desktop-actionbar */
 /* production-r681-mobile-only-intro-clamp-zero-width-core-dock */
 /* production-r685-final-box-reservation-marquee-bound */
+
+
+/* R845: the fullscreen Event Horizon is retired as a visual owner. During the
+   bounded startup clock the canonical WebGL MAG itself is the visible birth
+   surface, so the P0 raster clamp must not hide its single renderer canvas. */
+html[data-fx-preloader-r531="active"][data-fx-preloader-visual-owner-r845="canonical-mag-birth-single-webgl"] body.living-architecture
+#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+/* production-r845-canonical-mag-birth-visible-under-logical-intro-clock */
