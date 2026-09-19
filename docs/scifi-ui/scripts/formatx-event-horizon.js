@@ -124,3 +124,5 @@ addEventListener('pagehide',()=>{cancelPreloaderTimers();cancelDeadline();if(int
 addEventListener('error',()=>requestPreloaderRelease('runtime-error'));
 addEventListener('unhandledrejection',()=>requestPreloaderRelease('promise-error'));
 }());
+
+/* R851 CI trigger — Event Horizon defer ordering is authored in index.html; no runtime ownership change here. */
