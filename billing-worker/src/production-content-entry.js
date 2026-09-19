@@ -15,6 +15,7 @@ const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" 
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const INTRO_P0_PRELOAD = '</scifi-ui/styles/formatx-intro-p0-r575.css?v=20260907-r635-three-phase-absolute-reveal>; rel=preload; as=style';
+const MOBILE_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r505-mag-resume-clock';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r637.js?v=20260907-r637-post-fcp-network-restore"></script>';
@@ -156,6 +157,12 @@ function normalizeMobileStylesheetMedia(html) {
     return tag.replace(/\s*\/?>$/, close => ` media="${MOBILE_MEDIA}"${close}`);
   });
 }
+function armR862DesktopFirstFrameIntro(html) {
+  return String(html || '').replace(
+    'class="fx-intro-complete" data-fx-intro="instant-award-r251"',
+    'class="fx-intro-pending" data-fx-intro="bounded-release-pending-r862"'
+  );
+}
 function normalizeHomepageSemantics(html) {
   let source = String(html || '');
   source = source.replace(
@@ -233,7 +240,8 @@ function cacheBustCriticalQuality(html) {
   );
 }
 function optimizeHomepage(html) {
-  let source = normalizeHomepageSemantics(html);
+  let source = armR862DesktopFirstFrameIntro(html);
+  source = normalizeHomepageSemantics(source);
   source = cacheBustR502Runtime(source);
   source = scheduleMotionRuntime(source);
   source = normalizeMobileStylesheetMedia(source);
@@ -244,6 +252,51 @@ function optimizeHomepage(html) {
   source = deferNonCriticalStyles(source);
   source = injectDeferredCssRuntime(source);
   return source;
+}
+function r862FirstFrameIntroCss(source) {
+  return String(source || '') + `
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay[hidden] {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-center {
+    width: min(700px,calc(100vw - 80px)) !important;
+    position: relative !important;
+    z-index: 4 !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-kicker {
+    opacity: 1 !important;
+    transform: none !important;
+    letter-spacing: .24em !important;
+    color: rgba(173,242,255,.78) !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-word {
+    font-size: clamp(64px,8.8vw,124px) !important;
+    line-height: 1 !important;
+    letter-spacing: .08em !important;
+    color: #f7fdff !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-word span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    background: none !important;
+    color: #f7fdff !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-subtitle,
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-meta,
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-progress-wrap {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+/* production-r862-desktop-intro-first-contentful-owner */
+`;
 }
 function stripNestedFirstFrameImport(css) {
   return String(css || '').replace(/^\s*@import\s+url\(["']?\.\/formatx-first-frame-stability-r283\.css[^)]*\)\s*;\s*/i, '');
@@ -267,8 +320,9 @@ function mergeHomepageLinkHeader(existing) {
     .map(value => value.trim())
     .filter(Boolean)
     .filter(value => !value.includes('/scifi-ui/styles/formatx-p0-first-paint-r490.css'))
-    .filter(value => !value.includes('/scifi-ui/styles/formatx-intro-p0-r575.css'));
-  return [...values, P0_FIRST_PAINT_PRELOAD, INTRO_P0_PRELOAD].join(', ');
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-intro-p0-r575.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-mobile-first-paint-r358.css'));
+  return [...values, P0_FIRST_PAINT_PRELOAD, INTRO_P0_PRELOAD, MOBILE_FIRST_PAINT_PRELOAD].join(', ');
 }
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
@@ -289,7 +343,7 @@ async function stabilizePublicResponse(request, url, response) {
   }
   const contentType = headers.get('Content-Type') || '';
   if (url.pathname === EVENT_HORIZON_PATH && contentType.includes('text/css')) {
-    const css = stripNestedFirstFrameImport(await response.text());
+    const css = r862FirstFrameIntroCss(stripNestedFirstFrameImport(await response.text()));
     headers.delete('Content-Length');
     headers.delete('Content-Encoding');
     headers.delete('ETag');
