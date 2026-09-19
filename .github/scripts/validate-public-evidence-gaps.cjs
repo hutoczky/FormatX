@@ -22,6 +22,7 @@ const required = [
 required.forEach(file => assert.ok(exists(file), `Missing public evidence file: ${file}`));
 
 const contentEntry = read('billing-worker/src/production-content-entry.js');
+const contentRouting = read('billing-worker/src/production-content-entry-r369-base.js');
 const contentBase = read('billing-worker/src/production-content-base.js');
 const feedbackApi = read('billing-worker/src/feedback-api.js');
 const feedbackUi = read('docs/scifi-ui/scripts/formatx-feedback.js');
@@ -35,7 +36,8 @@ const summaryStart = feedbackApi.indexOf('async function feedbackSummary');
 const summaryEnd = feedbackApi.indexOf('async function submitFeedback');
 const publicSummary = summaryStart >= 0 && summaryEnd > summaryStart ? feedbackApi.slice(summaryStart, summaryEnd) : '';
 
-assert.match(contentEntry, /production-content-base\.js/, 'public routing wrapper is not delegating to the content pipeline');
+assert.match(contentEntry, /production-content-entry-r369-base\.js/, 'canonical production entry is not delegating to the routing owner');
+assert.match(contentRouting, /production-content-base\.js/, 'public routing owner is not delegating to the content pipeline');
 assert.match(contentBase, /production-feedback-entry\.js/, 'production feedback wrapper is not active in the content pipeline');
 assert.match(contentBase, /id=\"live-os-overview\"/, 'static indexable Live OS section missing');
 assert.match(contentBase, /itemtype=\"https:\/\/schema\.org\/SoftwareApplication\"/, 'SoftwareApplication microdata missing');
@@ -78,7 +80,10 @@ assert.match(report, /Desktop és mobil minőségkapuk/, 'current technical qual
 assert.match(report, /No independent professional review has been published|Nincs publikált független szakmai teszt/, 'honest external evidence gap missing');
 assert.match(report, /Még hiányzó külső bizonyíték/, 'current external evidence-gap section missing');
 assert.match(report, /Seamless-v7 natív folytonos görgetés/, 'current continuous-scroll evidence section missing');
-assert.match(reportDownload, /Performance: legalább 90/, 'downloadable report gate missing');
+assert.match(reportDownload, /Lighthouse Performance:\s*\*\*100\*\*/, 'downloadable report must carry the current strict P0 Performance 100 contract');
+assert.match(reportDownload, /Lighthouse Accessibility:\s*\*\*100\*\*/, 'downloadable report must carry the current strict P0 Accessibility 100 contract');
+assert.match(reportDownload, /Lighthouse Best Practices:\s*\*\*100\*\*/, 'downloadable report must carry the current strict P0 Best Practices 100 contract');
+assert.match(reportDownload, /Lighthouse SEO:\s*\*\*100\*\*/, 'downloadable report must carry the current strict P0 SEO 100 contract');
 assert.match(reportDownload, /Moderált felhasználói értékelés/, 'downloadable feedback moderation report missing');
 assert.match(reportDownload, /minden eszközre garantált 120 FPS nincs állítva|minden eszközre garantált 60 vagy 120 FPS field eredmény/, 'non-guaranteed field FPS disclosure missing');
 assert.match(sitemap, /technical-report\.html/, 'technical report is absent from sitemap');
@@ -115,7 +120,7 @@ assert.match(sitemap, /technical-report\.html/, 'technical report is absent from
   assert.ok(invalid.errors.contact_email);
   assert.ok(invalid.errors.privacy_consent);
 
-  console.log('FormatX public evidence, lazy feedback and consent-gated public comment validation passed through the current production content pipeline.');
+  console.log('FormatX public evidence, lazy feedback and consent-gated public comment validation passed through the current production content pipeline with the strict P0 100x3 evidence contract.');
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;

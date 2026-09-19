@@ -45,15 +45,16 @@
 
     nav.classList.add('fx-organism-system-menu');
 
-    // r264 is the single cross-viewport menu owner. Do not attach a second
-    // target click handler to its canonical button: doing so opens and closes
-    // the mobile menu in the same click. Legacy pages without r264 keep the
-    // original controller below.
+    // R577: r264 remains the single cross-viewport menu owner. Delegation is an
+    // ownership detail, not a non-ready lifecycle state: publish canonical READY
+    // while retaining the delegated owner in a separate diagnostic marker.
     if (r264OwnsMenu(toggle)) {
-      ROOT.dataset.fxOrganismMenu = 'delegated-r264';
+      ROOT.dataset.fxOrganismMenuOwnerR577 = 'delegated-r264-canonical-ready';
+      ROOT.dataset.fxOrganismMenu = 'ready';
       return;
     }
 
+    ROOT.dataset.fxOrganismMenuOwnerR577 = 'organism-menu-controller';
     toggle.classList.add('fx-organism-system-toggle');
     document.body.append(toggle, nav);
     setOpen(toggle, nav, false);
