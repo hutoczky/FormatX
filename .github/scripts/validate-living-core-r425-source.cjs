@@ -21,7 +21,8 @@ const life=read('docs/scifi-ui/scripts/formatx-core-life-r455.js');
 const governor=read('docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js');
 const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
-const worker=read('billing-worker/src/production-content-entry-r529.js');\nconst canonicalWorker=read('billing-worker/src/production-content-entry.js');
+const worker=read('billing-worker/src/production-content-entry-r529.js');
+const canonicalWorker=read('billing-worker/src/production-content-entry.js');
 
 has(home,[
   'formatx-event-horizon.js','formatx-motion-runtime-loader-r239.js','formatx-quality-r461.css',
