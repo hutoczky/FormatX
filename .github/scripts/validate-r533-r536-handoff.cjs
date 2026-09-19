@@ -164,7 +164,9 @@ async function verifySkip(browser){
     const aria=await skip.getAttribute('aria-label');
     assert.ok(aria&&aria.trim().length>0,'mobile-skip: skip has no accessible name');
     await markNativeIdentity(page);
-    await skip.click();
+    await skip.focus();
+    assert.equal(await skip.evaluate(el=>document.activeElement===el),true,'mobile-skip: skip cannot receive keyboard focus');
+    await page.keyboard.press('Enter');
     await page.waitForFunction(sel=>!document.querySelector(sel),OVERLAY,{timeout:3000});
     const final=await snapshot(page);
     assertStable(final,'mobile-skip');
@@ -187,7 +189,7 @@ async function verifySkip(browser){
   try{
     const desktop=await verifyFullBirth(browser);
     const mobile=await verifySkip(browser);
-    const report={base:BASE,contract:'r548-r533-native-birth-to-r536-cinematic-handoff',desktop,mobile};
+    const report={base:BASE,contract:'r550-r533-native-birth-to-r536-cinematic-handoff',desktop,mobile};
     writeJson('report.json',report);
     console.log('PASS: R533 full birth + skip + once-per-session hand off to the same single native R326 MAG and R536 journey without stuck scroll lock or duplicate preloader.');
   }finally{await browser.close();}
