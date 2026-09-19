@@ -16,6 +16,9 @@
     text-rendering:optimizeLegibility;
     -webkit-font-smoothing:antialiased;
   }
+  html[data-fx-design-system="2"] body.living-architecture :is(.fx-category-deck,.fx-origin-proof) {
+    border-radius:var(--fx-radius-lg)!important;
+  }
   html body > #fx-apex-canvas,
   html body > .fx-atmosphere {
     position:fixed!important;
