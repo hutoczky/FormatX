@@ -1,0 +1,49 @@
+name: DIAG R840 order P0
+on:
+  push:
+    branches: ['diag/r840-order-p0']
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser validation runtime
+        run: npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
+      - name: Resolve runner Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Start exact source site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/diag-http.log" 2>&1 &
+          for attempt in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.2
+          done
+          cat "$RUNNER_TEMP/diag-http.log"
+          exit 1
+      - name: R533 timing
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_R533_EVIDENCE_DIR: artifacts/r533
+          AUDITED_SHA: ${{ github.sha }}
+        run: node .github/scripts/validate-r533-preloader-timing.cjs
+      - name: R522 MAG matrix
+        if: always()
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r522
+          AUDITED_SHA: ${{ github.sha }}
+        run: node .github/scripts/validate-r522-semantic-mag.cjs
