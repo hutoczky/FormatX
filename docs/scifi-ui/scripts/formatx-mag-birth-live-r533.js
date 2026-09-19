@@ -118,17 +118,31 @@
   let lastTargetSync = 0;
   let lastMorphSync = 0;
   let ignitionDone = false;
+  let visiblePhase = 0;
+  let phaseChangedAt = 0;
+  const PHASE_MIN_HOLD_MS = 160;
 
   function clamp(value,min,max) { return Math.max(min,Math.min(max,value)); }
   function easeOutCubic(t) { return 1 - Math.pow(1-t,3); }
   function smoothstep(t) { t=clamp(t,0,1); return t*t*(3-2*t); }
 
-  function phaseFor(r) {
-    if (r < .14) return '0';
-    if (r < .30) return '1';
-    if (r < .69) return '2';
-    if (r < .84) return '3';
-    return '4';
+  function phaseTargetFor(r) {
+    if (r < .14) return 0;
+    if (r < .30) return 1;
+    if (r < .69) return 2;
+    if (r < .84) return 3;
+    return 4;
+  }
+  function phaseFor(r,now) {
+    const target=phaseTargetFor(r);
+    if (target < visiblePhase) {
+      visiblePhase=target;
+      phaseChangedAt=now;
+    } else if (target > visiblePhase && (!phaseChangedAt || now-phaseChangedAt >= PHASE_MIN_HOLD_MS)) {
+      visiblePhase+=1;
+      phaseChangedAt=now;
+    }
+    return String(visiblePhase);
   }
   function statusFor(r) {
     let value = copy.statuses[0][1];
@@ -310,7 +324,7 @@
   function render(now) {
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
-    const phase=phaseFor(r);
+    const phase=phaseFor(r,now);
     overlay.dataset.phase=phase;
     ROOT.dataset.fxMagBirthPhase=phase;
     syncTarget(false);
@@ -322,13 +336,15 @@
     status.textContent=statusFor(r);
     drawParticles(r,now);
 
-    if(r<1)raf=requestAnimationFrame(render);
+    if(r<1 || visiblePhase<4)raf=requestAnimationFrame(render);
     else finish('complete');
   }
 
   function start() {
     try { sessionStorage.setItem(KEY,'1'); } catch (_) {}
     ROOT.dataset.fxMagBirthLiveR533='active';
+    visiblePhase=0;
+    phaseChangedAt=performance.now();
     ROOT.dataset.fxMagBirthPhase='0';
     ROOT.setAttribute('data-fx-mag-birth-live','active');
     document.body.prepend(overlay);
