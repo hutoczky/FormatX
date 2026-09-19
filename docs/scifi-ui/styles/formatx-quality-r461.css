@@ -410,6 +410,7 @@ html body.living-architecture > .fx-mag-heart-hit-r252 {
     radial-gradient(circle at 50% 46%, rgba(90, 216, 255, .12), transparent 38%),
     linear-gradient(180deg, #05070a, #010204) !important;
   animation: fx-r533-preloader-visual-bound 1640ms linear both !important;
+  animation-play-state: paused !important;
   transform: none !important;
   transform-origin: 50% 50% !important;
   will-change: auto !important;
