@@ -130,9 +130,9 @@ jobs:
             assert.equal(await mini.getAttribute('data-open'),'false');
             const start={x:heroBox.cx-28,y:heroBox.cy};
             const end={x:heroBox.cx+28,y:heroBox.cy+10};
-            await page.touchscreen.touchStart(start.x,start.y);
-            await page.touchscreen.touchMove(end.x,end.y);
-            await page.touchscreen.touchEnd();
+            await stage.dispatchEvent('pointerdown',{pointerId:41,pointerType:'touch',isPrimary:true,clientX:start.x,clientY:start.y,bubbles:true,buttons:1});
+            await stage.dispatchEvent('pointermove',{pointerId:41,pointerType:'touch',isPrimary:true,clientX:end.x,clientY:end.y,bubbles:true,buttons:1});
+            await stage.dispatchEvent('pointerup',{pointerId:41,pointerType:'touch',isPrimary:true,clientX:end.x,clientY:end.y,bubbles:true,buttons:0});
             await page.waitForTimeout(350);
             assert.equal(await mini.getAttribute('data-open'),'false','MAG drag incorrectly opened site controller');
 

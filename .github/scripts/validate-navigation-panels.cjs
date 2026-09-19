@@ -47,21 +47,16 @@ async function waitForScrollShell(page) {
 async function activateAndWaitForInterface(page) {
   const referenceMenu = page.locator('.fx-reference-menu-button');
   await referenceMenu.waitFor({ state: 'visible' });
-  await referenceMenu.click();
   await page.waitForFunction(() => {
     const root = document.documentElement;
-    return root.dataset.fxOrganismInterface === 'ready'
-      && root.dataset.fxOrganismMenu === 'ready'
-      && root.dataset.fxOrganismCoreController === 'ready'
-      && root.dataset.fxOrganismConsoleState === 'ready'
-      && root.dataset.fxInteractionGenomeExport === 'ready'
-      && root.dataset.fxOrganismMasterSync === 'ready-v1'
-      && root.dataset.fxTranscendLoader === 'safe-ready-v28';
+    const controls = document.querySelector('#hero .fx-reference-controls-r204');
+    return root.dataset.fxControlOwnerR268 === 'ready'
+      && root.dataset.fxCurrentMagRuntimeR422 === 'ready'
+      && Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage'))
+      && Boolean(controls?.querySelector('.fx-three-sound'))
+      && Boolean(controls?.querySelector('.fx-reference-ask'))
+      && !controls?.querySelector('.fx-reference-pause');
   }, null, { timeout: 60000 });
-  if (await page.evaluate(() => document.getElementById('main-nav')?.classList.contains('open'))) {
-    await referenceMenu.click();
-  }
-  await page.waitForFunction(() => !document.getElementById('main-nav')?.classList.contains('open'));
 }
 
 async function assertSingleLanguageToggle(page) {
@@ -85,43 +80,27 @@ async function openMenu(page) {
   }, null, { timeout: 8000 });
 }
 
-async function assertPanel(page, id, scene) {
-  await page.waitForFunction(({ expectedId, expectedScene }) => {
-    const shell = document.getElementById('fx-organism-console');
-    const panel = document.querySelector(`[data-organism-panel="${expectedId}"]`);
-    return Boolean(
-      shell
-      && !shell.hidden
-      && shell.getAttribute('aria-hidden') === 'false'
-      && shell.classList.contains('is-authorised-open')
-      && document.body.classList.contains('fx-organism-panel-open')
-      && document.documentElement.dataset.fxScene === String(expectedScene)
-      && panel
-      && !panel.hidden
-      && panel.getAttribute('aria-hidden') === 'false'
-      && panel.textContent.trim().length > 20
-    );
-  }, { expectedId: id, expectedScene: scene }, { timeout: 10000 });
+async function assertSectionNavigation(page, href) {
+  await openMenu(page);
+  await page.locator(`#main-nav a[href="${href}"]`).click();
+  await page.waitForFunction(target => {
+    const node = document.querySelector(target);
+    if (!(node instanceof HTMLElement)) return false;
+    const r = node.getBoundingClientRect();
+    const nav = document.getElementById('main-nav');
+    return r.bottom > 80 && r.top < innerHeight * .72
+      && !nav?.classList.contains('open');
+  }, href, { timeout: 12000 });
 }
 
 async function assertCore(page) {
+  await page.locator('#hero').evaluate(node => node.scrollIntoView({block:'start',behavior:'instant'}));
   await page.waitForFunction(() => {
     const root = document.documentElement;
-    const shell = document.getElementById('fx-organism-console');
-    return root.dataset.fxScene === '0'
-      && root.dataset.fxOrganismState === 'core'
-      && root.classList.contains('fx-organism-core-active')
-      && root.dataset.fxOrganismConsole === 'closed'
-      && !document.body.classList.contains('fx-organism-panel-open')
-      && shell?.hidden === true
-      && shell?.getAttribute('aria-hidden') === 'true';
+    return Boolean(document.querySelector('#hero .fx-crystal-organism-r326-stage'))
+      && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
+      && document.querySelectorAll('#hero .fx-reference-pause').length === 0;
   }, null, { timeout: 12000 });
-}
-
-async function closePanelAndAssertCore(page) {
-  await page.locator('.fx-organism-console-close').click();
-  await assertCore(page);
-  await page.waitForTimeout(250);
 }
 
 async function assertStableOrdinaryScroll(page) {
@@ -226,20 +205,9 @@ async function testDesktop(browser) {
   await assertSingleLanguageToggle(page);
   await assertCore(page);
 
-  await openMenu(page);
-  await page.locator('#main-nav a[href="#experience"]').click();
-  await assertPanel(page, 'experience', 1);
-  await closePanelAndAssertCore(page);
-
-  await openMenu(page);
-  await page.locator('#main-nav a[href="#pricing"]').click();
-  await assertPanel(page, 'pricing', 3);
-  await closePanelAndAssertCore(page);
-
-  await openMenu(page);
-  await page.locator('#main-nav a[href="#system"]').click();
-  await assertPanel(page, 'system', 4);
-  await closePanelAndAssertCore(page);
+  await assertSectionNavigation(page, '#experience');
+  await assertSectionNavigation(page, '#pricing');
+  await assertSectionNavigation(page, '#system');
 
   await assertStableOrdinaryScroll(page);
   await assertTwoLoopCycles(page, 'desktop');
@@ -252,14 +220,8 @@ async function testMobile(browser) {
   await assertSingleLanguageToggle(page);
   await assertCore(page);
 
-  await openMenu(page);
-  await page.locator('#main-nav a[href="#capabilities"]').click();
-  await assertPanel(page, 'capabilities', 2);
-  await closePanelAndAssertCore(page);
-
-  await page.locator('.scroll-cue').evaluate(node => node.click());
-  await assertPanel(page, 'experience', 1);
-  await closePanelAndAssertCore(page);
+  await assertSectionNavigation(page, '#capabilities');
+  await assertSectionNavigation(page, '#experience');
 
   await assertStableOrdinaryScroll(page);
   await assertTwoLoopCycles(page, 'mobile');
@@ -271,7 +233,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling');
+    console.log('PASS FormatX language toggle, current section navigation, SOUND+ASK core and seamless-v7 ordinary scrolling');
   } finally {
     await browser.close();
   }
