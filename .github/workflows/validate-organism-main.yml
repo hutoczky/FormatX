@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-organism-main.cjs'
+      - '.github/scripts/diagnose-r676-desktop-geometry.cjs'
       - '.github/workflows/validate-organism-main.yml'
   workflow_dispatch:
 
@@ -32,6 +33,7 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-interface.js
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check .github/scripts/validate-organism-main.cjs
+          node --check .github/scripts/diagnose-r676-desktop-geometry.cjs
 
       - name: Install Chromium
         shell: bash
@@ -51,6 +53,12 @@ jobs:
           done
           cat "$RUNNER_TEMP/formatx-organism-http.log"
           exit 1
+
+      - name: Diagnose exact immersive desktop geometry
+        shell: bash
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html?lang=hu
+        run: node .github/scripts/diagnose-r676-desktop-geometry.cjs
 
       - name: Test desktop and mobile organism interactions
         shell: bash
