@@ -10,7 +10,11 @@ const exists = file => fs.existsSync(path.join(root, file));
 const required = [
   'billing-worker/src/feedback-api.js',
   'billing-worker/src/production-feedback-entry.js',
+  'billing-worker/src/production-content-entry-r529.js',
+  'billing-worker/src/production-content-entry.js',
+  'billing-worker/src/production-content-entry-r369-base.js',
   'billing-worker/src/production-content-base.js',
+  'billing-worker/wrangler.jsonc',
   'billing-worker/license-migrations/0002_user_feedback.sql',
   'docs/scifi-ui/scripts/formatx-feedback.js',
   'docs/scifi-ui/styles/formatx-feedback.css',
@@ -21,7 +25,10 @@ const required = [
 ];
 required.forEach(file => assert.ok(exists(file), `Missing public evidence file: ${file}`));
 
+const workerConfig = read('billing-worker/wrangler.jsonc');
+const activeEntry = read('billing-worker/src/production-content-entry-r529.js');
 const contentEntry = read('billing-worker/src/production-content-entry.js');
+const routingEntry = read('billing-worker/src/production-content-entry-r369-base.js');
 const contentBase = read('billing-worker/src/production-content-base.js');
 const feedbackApi = read('billing-worker/src/feedback-api.js');
 const feedbackUi = read('docs/scifi-ui/scripts/formatx-feedback.js');
@@ -35,8 +42,11 @@ const summaryStart = feedbackApi.indexOf('async function feedbackSummary');
 const summaryEnd = feedbackApi.indexOf('async function submitFeedback');
 const publicSummary = summaryStart >= 0 && summaryEnd > summaryStart ? feedbackApi.slice(summaryStart, summaryEnd) : '';
 
-assert.match(contentEntry, /production-content-base\.js/, 'public routing wrapper is not delegating to the content pipeline');
-assert.match(contentBase, /production-feedback-entry\.js/, 'production feedback wrapper is not active in the content pipeline');
+assert.match(workerConfig, /"main": "src\/production-content-entry-r529\.js"/, 'Wrangler is not using the current production wrapper');
+assert.match(activeEntry, /import canonicalProduction from ['"]\.\/production-content-entry\.js['"];/, 'R529 wrapper is not delegating to the canonical production entry');
+assert.match(contentEntry, /import productionBase from ['"]\.\/production-content-entry-r369-base\.js['"];/, 'canonical production entry is not delegating to the routing base');
+assert.match(routingEntry, /import contentPipeline from ['"]\.\/production-content-base\.js['"];/, 'routing base is not delegating to the public content pipeline');
+assert.match(contentBase, /import baseWorker from ['"]\.\/production-feedback-entry\.js['"];/, 'production feedback wrapper is not active in the content pipeline');
 assert.match(contentBase, /id=\"live-os-overview\"/, 'static indexable Live OS section missing');
 assert.match(contentBase, /itemtype=\"https:\/\/schema\.org\/SoftwareApplication\"/, 'SoftwareApplication microdata missing');
 assert.match(contentBase, /data-fx-live-os-cta/, 'primary Live OS CTA missing');

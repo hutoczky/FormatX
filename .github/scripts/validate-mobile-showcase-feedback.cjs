@@ -11,6 +11,9 @@ const compatible = read('docs/scifi-ui/assets/images/product-showcase/portable-i
 const schema = read('billing-worker/src/feedback-schema.js');
 const api = read('billing-worker/src/feedback-api.js');
 const entry = read('billing-worker/src/production-feedback-entry.js');
+const activeEntry = read('billing-worker/src/production-content-entry-r529.js');
+const canonicalEntry = read('billing-worker/src/production-content-entry.js');
+const routingEntry = read('billing-worker/src/production-content-entry-r369-base.js');
 const workerConfig = read('billing-worker/wrangler.jsonc');
 const matrix = read('.github/scripts/validate-responsive-production-matrix.cjs');
 
@@ -65,6 +68,9 @@ assert.match(api, /createFeedbackTableIfMissing/, 'feedback API must retain miss
 assert.match(api, /runWithFeedbackTable/, 'feedback API must retry a real operation after missing-table bootstrap');
 assert.doesNotMatch(entry, /ensureFeedbackSchemaCompatibility\s*\(/, 'production feedback hot path must not run schema maintenance before every request');
 assert.match(entry, /handleFeedbackRequest\(request, env\)/, 'production feedback entry must delegate current feedback handling to feedback-api');
-assert.match(workerConfig, /"main": "src\/production-content-entry\.js"/, 'unexpected production Worker entry');
+assert.match(workerConfig, /"main": "src\/production-content-entry-r529\.js"/, 'active production Worker must enter through the current R529 wrapper');
+assert.match(activeEntry, /import canonicalProduction from ['"]\.\/production-content-entry\.js['"];/, 'R529 wrapper must delegate directly to the canonical production entry');
+assert.match(canonicalEntry, /import productionBase from ['"]\.\/production-content-entry-r369-base\.js['"];/, 'canonical production entry must retain the current routing base');
+assert.match(routingEntry, /import contentPipeline from ['"]\.\/production-content-base\.js['"];/, 'routing base must retain the public content pipeline');
 
 console.log('FormatX mobile showcase, feedback and responsive matrix validation passed with current lazy feedback schema ownership and direct compatible asset ownership.');

@@ -6,7 +6,11 @@ on:
     paths:
       - 'billing-worker/src/feedback-api.js'
       - 'billing-worker/src/production-feedback-entry.js'
+      - 'billing-worker/src/production-content-entry-r529.js'
       - 'billing-worker/src/production-content-entry.js'
+      - 'billing-worker/src/production-content-entry-r369-base.js'
+      - 'billing-worker/src/production-content-base.js'
+      - 'billing-worker/wrangler.jsonc'
       - 'billing-worker/license-migrations/0002_user_feedback.sql'
       - 'docs/scifi-ui/scripts/formatx-feedback.js'
       - 'docs/scifi-ui/styles/formatx-feedback.css'
@@ -20,7 +24,11 @@ on:
     paths:
       - 'billing-worker/src/feedback-api.js'
       - 'billing-worker/src/production-feedback-entry.js'
+      - 'billing-worker/src/production-content-entry-r529.js'
       - 'billing-worker/src/production-content-entry.js'
+      - 'billing-worker/src/production-content-entry-r369-base.js'
+      - 'billing-worker/src/production-content-base.js'
+      - 'billing-worker/wrangler.jsonc'
       - 'billing-worker/license-migrations/0002_user_feedback.sql'
       - 'docs/scifi-ui/scripts/formatx-feedback.js'
       - 'docs/scifi-ui/styles/formatx-feedback.css'
