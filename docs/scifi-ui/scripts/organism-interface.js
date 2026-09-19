@@ -96,6 +96,8 @@
     const root = create('div', 'fx-organism-console', {
       id: 'fx-organism-console', hidden: '', 'aria-hidden': 'true'
     });
+    root.style.setProperty('z-index', '13000', 'important');
+    root.dataset.fxOrganismModalLayerR580 = 'above-mobile-header';
     const backdrop = create('button', 'fx-organism-console-backdrop', {
       type: 'button', 'data-organism-close': '',
       'aria-label': language() === 'en' ? 'Close panel' : 'Panel bezárása'

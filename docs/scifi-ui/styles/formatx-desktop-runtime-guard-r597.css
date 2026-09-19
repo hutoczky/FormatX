@@ -1,0 +1,62 @@
+/* FormatX R686 — desktop seamless-loop final-layout guard.
+   This stylesheet is loaded only after real desktop scroll intent, before
+   seamless-v7 measures/builds its bridge. At that point the scroll document
+   must have one real geometry: disable every remaining content-visibility
+   placeholder under the canonical main/footer trees so a direct or fast native
+   scroll cannot move the bridge thousands of pixels during the handoff.
+   The desktop runtime is selected by width + physical scroll intent in JS; do
+   not additionally require pointer:fine here because Chromium desktop contexts
+   can report a non-fine primary pointer while still delivering trusted wheel.
+   Initial Lighthouse/LCP remains untouched because this file is not requested
+   until desktop scroll intent. */
+@media (min-width: 901px) {
+  html:is(
+    [data-fx-infinite-controller='desktop-runtime-loading-v7'],
+    [data-fx-infinite-controller='seamless-v7']
+  ) body.living-architecture :is(
+    main#main-content,
+    main#main-content *,
+    body > footer.site-footer,
+    body > footer.site-footer *
+  ) {
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+  }
+
+  html[data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge {
+    --fx-loop-runway: max(460px, 34svh);
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) and (pointer: fine) {
+  .fx-mini-mag-assistant-r459 {
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: 48px;
+    height: 48px;
+  }
+
+  .fx-mini-mag-launcher-r459 {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 16px;
+  }
+
+  .fx-mini-mag-glyph-r459 {
+    width: 24px;
+    height: 24px;
+  }
+
+  .fx-mini-mag-status-r459 {
+    right: -2px;
+    bottom: -2px;
+    width: 11px;
+    height: 11px;
+  }
+
+  .fx-mini-mag-panel-r459 {
+    bottom: 60px;
+  }
+}
