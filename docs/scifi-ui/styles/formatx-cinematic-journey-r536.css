@@ -1,0 +1,482 @@
+/* FormatX R536 — full cinematic journey.
+   One continuous visual world connects every existing information and action
+   surface. It never duplicates the native MAG, never intercepts input and never
+   changes document geometry. Motion is scroll/interaction driven; no idle loop. */
+
+html[data-fx-cinematic-journey-r536="ready"]{
+  --fx-c536-a:96,228,255;
+  --fx-c536-b:143,114,255;
+  --fx-c536-progress:0;
+  --fx-c536-local:.12;
+  --fx-c536-energy:.16;
+  --fx-c536-velocity:0;
+  --fx-c536-x:52%;
+  --fx-c536-y:42%;
+  --fx-c536-track-y:44%;
+  --fx-c536-scene-shift:0px;
+  --fx-c536-scene-scale:1;
+}
+
+.fx-c536-stage{
+  position:fixed;
+  inset:0;
+  z-index:7;
+  overflow:hidden;
+  pointer-events:none!important;
+  contain:layout paint style;
+  isolation:isolate;
+}
+
+.fx-c536-stage>*{pointer-events:none!important}
+
+.fx-c536-world,
+.fx-c536-iris,
+.fx-c536-track,
+.fx-c536-scan,
+.fx-c536-vignette,
+.fx-c536-grain,
+.fx-c536-flare{
+  position:absolute;
+}
+
+.fx-c536-world{
+  width:min(92vw,1260px);
+  aspect-ratio:1;
+  left:var(--fx-c536-x);
+  top:var(--fx-c536-y);
+  transform:translate(-50%,-50%) translate3d(calc(var(--fx-c536-velocity) * -12px),calc(var(--fx-c536-velocity) * 7px),0) scale(calc(.86 + var(--fx-c536-local) * .12));
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(245,255,255,.042) 0 1%,rgba(var(--fx-c536-a),.072) 7%,rgba(var(--fx-c536-b),.04) 24%,transparent 58%),
+    conic-gradient(from calc(var(--fx-c536-progress) * 300deg),transparent 0 10%,rgba(var(--fx-c536-a),.036) 14%,transparent 20% 38%,rgba(var(--fx-c536-b),.03) 44%,transparent 50% 72%,rgba(237,254,255,.024) 78%,transparent 84% 100%);
+  -webkit-mask-image:radial-gradient(circle,#000 0 48%,rgba(0,0,0,.55) 66%,transparent 84%);
+  mask-image:radial-gradient(circle,#000 0 48%,rgba(0,0,0,.55) 66%,transparent 84%);
+  opacity:calc(.16 + var(--fx-c536-energy) * .36);
+  mix-blend-mode:screen;
+  will-change:transform,opacity;
+  transition:background .7s ease,opacity .5s ease;
+}
+
+.fx-c536-iris{
+  width:min(56vw,700px);
+  aspect-ratio:1;
+  left:var(--fx-c536-x);
+  top:var(--fx-c536-y);
+  transform:translate(-50%,-50%) scale(calc(.72 + var(--fx-c536-local) * .18));
+  border:1px solid rgba(var(--fx-c536-a),.075);
+  border-radius:50%;
+  box-shadow:
+    0 0 44px rgba(var(--fx-c536-a),.035),
+    inset 0 0 54px rgba(var(--fx-c536-b),.025);
+  opacity:calc(.18 + var(--fx-c536-energy) * .24);
+  transition:border-color .6s ease,box-shadow .6s ease;
+}
+
+.fx-c536-iris::before,
+.fx-c536-iris::after{
+  content:"";
+  position:absolute;
+  inset:13%;
+  border:1px solid rgba(var(--fx-c536-b),.06);
+  border-radius:50%;
+  transform:rotate(calc(var(--fx-c536-progress) * 96deg)) scaleX(1.14) scaleY(.72);
+}
+.fx-c536-iris::after{
+  inset:27%;
+  border-color:rgba(var(--fx-c536-a),.08);
+  transform:rotate(calc(var(--fx-c536-progress) * -128deg)) scaleX(.72) scaleY(1.18);
+}
+
+.fx-c536-track{
+  left:4vw;
+  right:4vw;
+  top:var(--fx-c536-track-y);
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(var(--fx-c536-a),.055) 15%,rgba(225,253,255,.28) 50%,rgba(var(--fx-c536-b),.08) 78%,transparent);
+  box-shadow:0 0 16px rgba(var(--fx-c536-a),.08);
+  opacity:calc(.05 + var(--fx-c536-energy) * .15);
+  transform:translateY(-50%);
+}
+
+.fx-c536-track::after{
+  content:"";
+  position:absolute;
+  left:calc(5% + var(--fx-c536-progress) * 90%);
+  top:50%;
+  width:7px;
+  height:7px;
+  border:1px solid rgba(235,255,255,.78);
+  background:rgba(var(--fx-c536-a),.18);
+  box-shadow:0 0 14px rgba(var(--fx-c536-a),.44),0 0 34px rgba(var(--fx-c536-b),.18);
+  transform:translate(-50%,-50%) rotate(45deg);
+}
+
+.fx-c536-scan{
+  left:0;
+  right:0;
+  height:22vh;
+  top:calc(var(--fx-c536-track-y) - 11vh);
+  background:linear-gradient(180deg,transparent,rgba(var(--fx-c536-a),.025),rgba(var(--fx-c536-b),.018),transparent);
+  opacity:calc(.04 + var(--fx-c536-energy) * .11);
+  transform:translate3d(0,calc(var(--fx-c536-velocity) * 9px),0);
+}
+
+.fx-c536-vignette{
+  inset:0;
+  background:
+    linear-gradient(180deg,rgba(0,2,7,.20),transparent 9%,transparent 90%,rgba(0,2,8,.24)),
+    radial-gradient(ellipse at center,transparent 45%,rgba(0,2,8,.08) 73%,rgba(0,1,5,.24) 100%);
+  opacity:.62;
+}
+
+.fx-c536-grain{
+  inset:0;
+  opacity:.055;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px);
+  background-size:4px 4px;
+  mix-blend-mode:screen;
+}
+
+.fx-c536-flare{
+  left:var(--fx-c536-x);
+  top:var(--fx-c536-y);
+  width:2px;
+  height:2px;
+  border-radius:50%;
+  transform:translate(-50%,-50%) scale(.01);
+  opacity:0;
+  background:#fff;
+}
+
+.fx-c536-hud{
+  position:absolute;
+  right:clamp(16px,2vw,34px);
+  top:50%;
+  width:clamp(126px,11vw,178px);
+  transform:translateY(-50%);
+  display:grid;
+  gap:7px;
+  text-align:right;
+  color:rgba(218,243,252,.52);
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  opacity:.78;
+}
+.fx-c536-hud b{
+  color:rgba(242,255,255,.94);
+  font-size:clamp(24px,2.4vw,40px);
+  font-weight:260;
+  letter-spacing:-.06em;
+  line-height:.86;
+}
+.fx-c536-hud strong{
+  color:rgba(var(--fx-c536-a),.82);
+  font-size:9px;
+  font-weight:800;
+  line-height:1.35;
+}
+.fx-c536-hud span{
+  font-size:8px;
+  line-height:1.4;
+}
+.fx-c536-hud i{
+  position:relative;
+  display:block;
+  height:1px;
+  overflow:hidden;
+  background:rgba(var(--fx-c536-a),.12);
+}
+.fx-c536-hud i::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform-origin:left;
+  transform:scaleX(var(--fx-c536-progress));
+  background:linear-gradient(90deg,rgba(var(--fx-c536-a),.86),rgba(var(--fx-c536-b),.74));
+}
+
+/* One-shot cinematic hand-off. No continuous animation is used. */
+html.fx-c536-cut .fx-c536-flare{animation:fx-c536-flare .68s ease-out 1}
+html.fx-c536-cut .fx-c536-iris{animation:fx-c536-iris .74s cubic-bezier(.18,.78,.2,1) 1}
+html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
+
+@keyframes fx-c536-flare{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.02);box-shadow:0 0 0 rgba(255,255,255,0)}
+  28%{opacity:.96;transform:translate(-50%,-50%) scale(1);box-shadow:0 0 28px 9px rgba(255,255,255,.55),0 0 90px 36px rgba(var(--fx-c536-a),.24)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(22);box-shadow:0 0 80px 30px rgba(var(--fx-c536-a),0)}
+}
+@keyframes fx-c536-iris{
+  0%{opacity:.10;transform:translate(-50%,-50%) scale(.66)}
+  38%{opacity:.64;transform:translate(-50%,-50%) scale(.98)}
+  100%{opacity:calc(.18 + var(--fx-c536-energy) * .24);transform:translate(-50%,-50%) scale(calc(.72 + var(--fx-c536-local) * .18))}
+}
+@keyframes fx-c536-track{
+  0%{filter:brightness(1);opacity:.04}
+  30%{filter:brightness(1.65);opacity:.65}
+  100%{filter:brightness(1);opacity:calc(.05 + var(--fx-c536-energy) * .15)}
+}
+
+/* Every information surface becomes a scene, but its content and controls stay
+   untouched and on top. */
+.fx-c536-scene{
+  --fx-c536-scene-local:.12;
+  --fx-c536-scene-energy:.10;
+  position:relative;
+  isolation:isolate;
+}
+
+.fx-c536-anatomy{
+  position:absolute;
+  z-index:-1;
+  inset:-7% -5%;
+  overflow:hidden;
+  pointer-events:none!important;
+  opacity:calc(.06 + var(--fx-c536-scene-energy) * .54);
+  transition:opacity .7s ease;
+}
+
+.fx-c536-anatomy>*{pointer-events:none!important}
+
+.fx-c536-anatomy .a,
+.fx-c536-anatomy .b,
+.fx-c536-anatomy .c{
+  position:absolute;
+}
+
+/* Core echo: energy leaves the real MAG; there is deliberately no duplicate core. */
+.fx-c536-scene[data-fx-c536-kind="core"]>.fx-c536-anatomy{
+  background:radial-gradient(circle at 62% 42%,rgba(96,228,255,.08),rgba(143,114,255,.028) 28%,transparent 60%);
+}
+
+/* Live OS — operational scan field. */
+.fx-c536-scene[data-fx-c536-kind="live-os"]>.fx-c536-anatomy{
+  background:
+    linear-gradient(rgba(95,228,255,.032) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(95,228,255,.028) 1px,transparent 1px);
+  background-size:38px 38px;
+  -webkit-mask-image:radial-gradient(ellipse at 56% 45%,#000 0 44%,transparent 82%);
+  mask-image:radial-gradient(ellipse at 56% 45%,#000 0 44%,transparent 82%);
+}
+.fx-c536-scene[data-fx-c536-kind="live-os"]>.fx-c536-anatomy .a{
+  left:12%;right:8%;top:46%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(95,228,255,.08),rgba(239,255,255,.38),rgba(95,228,255,.08),transparent);
+  transform:scaleX(calc(.55 + var(--fx-c536-scene-local) * .45));
+}
+
+/* Category / mission — branching blueprint. */
+.fx-c536-scene[data-fx-c536-kind="mission"]>.fx-c536-anatomy::before{
+  content:"";
+  position:absolute;
+  left:48%;top:10%;
+  width:1px;height:78%;
+  background:linear-gradient(180deg,transparent,rgba(111,229,255,.36),rgba(140,111,255,.12),transparent);
+  box-shadow:0 0 18px rgba(111,229,255,.08);
+}
+.fx-c536-scene[data-fx-c536-kind="mission"]>.fx-c536-anatomy .a,
+.fx-c536-scene[data-fx-c536-kind="mission"]>.fx-c536-anatomy .b{
+  left:18%;right:18%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(111,229,255,.14),transparent);
+  transform:rotate(calc(-7deg + var(--fx-c536-scene-local) * 14deg));
+}
+.fx-c536-scene[data-fx-c536-kind="mission"]>.fx-c536-anatomy .a{top:36%}
+.fx-c536-scene[data-fx-c536-kind="mission"]>.fx-c536-anatomy .b{top:64%;transform:rotate(calc(7deg - var(--fx-c536-scene-local) * 14deg))}
+
+/* Nervous system. */
+.fx-c536-scene[data-fx-c536-kind="nerves"]>.fx-c536-anatomy{
+  background:
+    radial-gradient(ellipse at 58% 38%,rgba(96,228,255,.07),transparent 68%),
+    repeating-linear-gradient(72deg,transparent 0 42px,rgba(105,142,255,.03) 43px,transparent 44px 84px);
+}
+.fx-c536-scene[data-fx-c536-kind="nerves"]>.fx-c536-anatomy .a{
+  left:8%;right:6%;top:43%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(96,228,255,.09),rgba(232,254,255,.44) 54%,rgba(105,142,255,.08),transparent);
+  transform:rotate(-5deg) scaleX(calc(.58 + var(--fx-c536-scene-local) * .42));
+}
+.fx-c536-scene[data-fx-c536-kind="nerves"]>.fx-c536-anatomy .b{
+  left:28%;top:10%;width:40%;height:70%;
+  border:1px solid rgba(96,228,255,.10);
+  border-left-color:transparent;border-bottom-color:transparent;border-radius:50%;
+  transform:rotate(calc(-20deg + var(--fx-c536-scene-local) * 40deg));
+}
+
+/* Six product organs. */
+.fx-c536-scene[data-fx-c536-kind="organs"]>.fx-c536-anatomy::before{
+  content:"";
+  position:absolute;
+  right:4%;top:16%;
+  width:min(44vw,570px);aspect-ratio:1;border-radius:50%;
+  background:
+    radial-gradient(circle,rgba(239,255,252,.18) 0 1%,rgba(121,241,219,.07) 5%,transparent 20%),
+    conic-gradient(from calc(var(--fx-c536-scene-local) * 68deg),
+      rgba(121,241,219,.17) 0 1deg,transparent 1deg 59deg,
+      rgba(98,161,255,.13) 60deg 61deg,transparent 61deg 119deg,
+      rgba(121,241,219,.15) 120deg 121deg,transparent 121deg 179deg,
+      rgba(98,161,255,.12) 180deg 181deg,transparent 181deg 239deg,
+      rgba(121,241,219,.15) 240deg 241deg,transparent 241deg 299deg,
+      rgba(98,161,255,.12) 300deg 301deg,transparent 301deg 360deg);
+  -webkit-mask-image:radial-gradient(circle,transparent 0 15%,#000 16% 72%,transparent 82%);
+  mask-image:radial-gradient(circle,transparent 0 15%,#000 16% 72%,transparent 82%);
+}
+
+/* Commerce heart. */
+.fx-c536-scene[data-fx-c536-kind="heart"]>.fx-c536-anatomy .a,
+.fx-c536-scene[data-fx-c536-kind="heart"]>.fx-c536-anatomy .b{
+  right:8%;top:22%;width:min(35vw,430px);aspect-ratio:1;border-radius:50%;
+  border:1px solid rgba(255,207,137,.17);
+  box-shadow:0 0 34px rgba(255,207,137,.05),inset 0 0 30px rgba(160,109,255,.035);
+  transform:scale(calc(.78 + var(--fx-c536-scene-local) * .18));
+}
+.fx-c536-scene[data-fx-c536-kind="heart"]>.fx-c536-anatomy .b{
+  right:13%;top:29%;width:min(24vw,300px);border-color:rgba(160,109,255,.14);
+  transform:scale(calc(.72 + var(--fx-c536-scene-local) * .22));
+}
+
+/* System skeleton. */
+.fx-c536-scene[data-fx-c536-kind="skeleton"]>.fx-c536-anatomy{
+  background:
+    linear-gradient(rgba(139,203,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(139,203,255,.036) 1px,transparent 1px);
+  background-size:54px 54px;
+  transform:perspective(1000px) rotateX(calc(1deg + var(--fx-c536-scene-local) * 3deg)) scale(1.05);
+  transform-origin:center;
+  -webkit-mask-image:radial-gradient(ellipse at 60% 48%,#000 0 43%,transparent 80%);
+  mask-image:radial-gradient(ellipse at 60% 48%,#000 0 43%,transparent 80%);
+}
+
+/* Proof layers — verification matrix, not decorative marketing. */
+.fx-c536-scene[data-fx-c536-kind="proof"]>.fx-c536-anatomy{
+  background:
+    repeating-linear-gradient(0deg,transparent 0 26px,rgba(183,244,255,.026) 27px,transparent 28px 54px),
+    repeating-linear-gradient(90deg,transparent 0 48px,rgba(111,227,200,.024) 49px,transparent 50px 96px);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12% 88%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 12% 88%,transparent);
+}
+.fx-c536-scene[data-fx-c536-kind="proof"]>.fx-c536-anatomy .a{
+  left:8%;right:8%;top:calc(18% + var(--fx-c536-scene-local) * 58%);height:1px;
+  background:linear-gradient(90deg,transparent,rgba(183,244,255,.08),rgba(235,255,255,.34),rgba(111,227,200,.08),transparent);
+}
+
+/* Genuine feedback — user signals join the system. */
+.fx-c536-scene[data-fx-c536-kind="feedback"]>.fx-c536-anatomy{
+  background:
+    radial-gradient(circle at 16% 38%,rgba(126,229,255,.08) 0 2px,transparent 3px),
+    radial-gradient(circle at 38% 68%,rgba(168,121,255,.07) 0 2px,transparent 3px),
+    radial-gradient(circle at 68% 24%,rgba(126,229,255,.07) 0 2px,transparent 3px),
+    radial-gradient(circle at 86% 60%,rgba(111,227,200,.07) 0 2px,transparent 3px);
+  background-size:170px 150px,230px 210px,280px 250px,320px 290px;
+}
+.fx-c536-scene[data-fx-c536-kind="feedback"]>.fx-c536-anatomy .a{
+  left:8%;right:8%;top:51%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(126,229,255,.08),rgba(168,121,255,.16),rgba(111,227,200,.08),transparent);
+  transform:scaleX(calc(.58 + var(--fx-c536-scene-local) * .42));
+}
+
+/* Beacon and final loop. */
+.fx-c536-scene[data-fx-c536-kind="beacon"]>.fx-c536-anatomy .a{
+  left:50%;top:8%;width:1px;height:78%;
+  background:linear-gradient(180deg,transparent,rgba(183,244,255,.52) 44%,rgba(111,227,200,.10) 80%,transparent);
+  box-shadow:0 0 24px rgba(183,244,255,.14);
+  transform:scaleY(calc(.48 + var(--fx-c536-scene-local) * .52));
+  transform-origin:top;
+}
+.fx-c536-scene[data-fx-c536-kind="beacon"]>.fx-c536-anatomy .b{
+  left:50%;top:44%;width:min(72vw,920px);height:1px;transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,rgba(111,227,200,.11),rgba(239,255,255,.46),rgba(183,244,255,.11),transparent);
+}
+.fx-c536-scene[data-fx-c536-kind="loop"]>.fx-c536-anatomy{
+  background:radial-gradient(ellipse at 50% 0%,rgba(183,244,255,.06),rgba(143,114,255,.025) 34%,transparent 70%);
+}
+.fx-c536-scene[data-fx-c536-kind="loop"]>.fx-c536-anatomy .a{
+  left:15%;right:15%;top:18%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(183,244,255,.10),rgba(238,255,255,.34),rgba(143,114,255,.10),transparent);
+  transform:scaleX(calc(.52 + var(--fx-c536-scene-local) * .48));
+}
+
+/* Scene choreography — all information stays readable. */
+.fx-c536-scene[data-fx-c536-state="future"]{--fx-c536-fg-opacity:.94}
+.fx-c536-scene[data-fx-c536-state="active"]{--fx-c536-fg-opacity:1}
+.fx-c536-scene[data-fx-c536-state="past"]{--fx-c536-fg-opacity:.99}
+
+.fx-c536-scene[data-fx-c536-state]>.section-heading,
+.fx-c536-scene[data-fx-c536-state]>.fx-static-live-os__head,
+.fx-c536-scene[data-fx-c536-state]>.fx-category-grid,
+.fx-c536-scene[data-fx-c536-state]>.flow,
+.fx-c536-scene[data-fx-c536-state]>.cards,
+.fx-c536-scene[data-fx-c536-state]>.pricing,
+.fx-c536-scene[data-fx-c536-state]>.system-grid,
+.fx-c536-scene[data-fx-c536-state]>.release-layout,
+.fx-c536-scene[data-fx-c536-state]>.fx-feedback-head,
+.fx-c536-scene[data-fx-c536-state]>.fx-feedback-form,
+.fx-c536-scene[data-fx-c536-state]>.fx-award-proof__head,
+.fx-c536-scene[data-fx-c536-state]>.fx-award-proof__grid{
+  transition:transform .82s cubic-bezier(.2,.76,.2,1),opacity .58s ease,filter .65s ease;
+  transform-origin:center;
+}
+
+.fx-c536-scene[data-fx-c536-state="future"]>.section-heading,
+.fx-c536-scene[data-fx-c536-state="future"]>.fx-static-live-os__head,
+.fx-c536-scene[data-fx-c536-state="future"]>.flow,
+.fx-c536-scene[data-fx-c536-state="future"]>.cards,
+.fx-c536-scene[data-fx-c536-state="future"]>.pricing,
+.fx-c536-scene[data-fx-c536-state="future"]>.system-grid,
+.fx-c536-scene[data-fx-c536-state="future"]>.release-layout,
+.fx-c536-scene[data-fx-c536-state="future"]>.fx-feedback-head,
+.fx-c536-scene[data-fx-c536-state="future"]>.fx-award-proof__head{
+  transform:translate3d(0,10px,0) scale(.994);
+  opacity:.96;
+}
+
+.fx-c536-scene[data-fx-c536-state="active"]>.section-heading,
+.fx-c536-scene[data-fx-c536-state="active"]>.fx-static-live-os__head,
+.fx-c536-scene[data-fx-c536-state="active"]>.flow,
+.fx-c536-scene[data-fx-c536-state="active"]>.cards,
+.fx-c536-scene[data-fx-c536-state="active"]>.pricing,
+.fx-c536-scene[data-fx-c536-state="active"]>.system-grid,
+.fx-c536-scene[data-fx-c536-state="active"]>.release-layout,
+.fx-c536-scene[data-fx-c536-state="active"]>.fx-feedback-head,
+.fx-c536-scene[data-fx-c536-state="active"]>.fx-award-proof__head{
+  transform:translate3d(0,var(--fx-c536-scene-shift),0) scale(var(--fx-c536-scene-scale));
+  opacity:1;
+}
+
+.fx-c536-scene[data-fx-c536-state="past"]>.section-heading,
+.fx-c536-scene[data-fx-c536-state="past"]>.fx-static-live-os__head,
+.fx-c536-scene[data-fx-c536-state="past"]>.flow,
+.fx-c536-scene[data-fx-c536-state="past"]>.cards,
+.fx-c536-scene[data-fx-c536-state="past"]>.pricing,
+.fx-c536-scene[data-fx-c536-state="past"]>.system-grid,
+.fx-c536-scene[data-fx-c536-state="past"]>.release-layout,
+.fx-c536-scene[data-fx-c536-state="past"]>.fx-feedback-head,
+.fx-c536-scene[data-fx-c536-state="past"]>.fx-award-proof__head{
+  transform:translate3d(0,-3px,0);
+  opacity:1;
+}
+
+@media (max-width:900px),(pointer:coarse){
+  .fx-c536-stage{z-index:5}
+  .fx-c536-hud{display:none}
+  .fx-c536-world{width:124vw;opacity:calc(.10 + var(--fx-c536-energy) * .20)}
+  .fx-c536-iris{width:88vw;opacity:calc(.10 + var(--fx-c536-energy) * .14)}
+  .fx-c536-vignette{opacity:.34}
+  .fx-c536-grain{opacity:.035}
+  .fx-c536-track{left:0;right:0;opacity:calc(.035 + var(--fx-c536-energy) * .09)}
+  .fx-c536-scan{opacity:.035}
+  .fx-c536-anatomy{inset:-3% -10%;opacity:calc(.04 + var(--fx-c536-scene-energy) * .32)}
+  .fx-c536-scene[data-fx-c536-kind="organs"]>.fx-c536-anatomy::before{right:-20%;width:90vw}
+  .fx-c536-scene[data-fx-c536-kind="heart"]>.fx-c536-anatomy .a{right:-28%;width:78vw}
+  .fx-c536-scene[data-fx-c536-kind="heart"]>.fx-c536-anatomy .b{right:-8%;width:54vw}
+  .fx-c536-scene[data-fx-c536-kind="skeleton"]>.fx-c536-anatomy{background-size:42px 42px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .fx-c536-stage,
+  .fx-c536-anatomy{display:none!important}
+  .fx-c536-scene[data-fx-c536-state]>*{
+    animation:none!important;
+    transition:none!important;
+    transform:none!important;
+  }
+}

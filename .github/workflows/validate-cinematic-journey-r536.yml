@@ -1,0 +1,31 @@
+name: Validate R536 full cinematic journey
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-cinematic-journey-r536.css'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'
+      - '.github/scripts/validate-cinematic-journey-r536.cjs'
+      - '.github/workflows/validate-cinematic-journey-r536.yml'
+  pull_request:
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-cinematic-journey-r536.css'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'
+      - '.github/scripts/validate-cinematic-journey-r536.cjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: node --check docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js
+      - run: node .github/scripts/validate-cinematic-journey-r536.cjs
