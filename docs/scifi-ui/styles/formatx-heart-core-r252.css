@@ -1,27 +1,84 @@
-/* FormatX r252 — MAG as the living heart of the page.
-   This layer owns only the MAG interaction hit-area and the mobile loop handoff.
-   It never paints a second fake hero after the footer. */
+/* FormatX r554 — body-level semantic MAG geometry + trusted physical router.
+   The fixed semantic button remains focusable for keyboard accessibility but is
+   pointer-transparent. Real pointer/touch events land on the actual page surface;
+   the document-level trusted router activates MAG only inside the synced geometry.
+   SOUND/ASK/nav remain interactive while the obsolete click-to-launch owner is retired. */
 
-.fx-mag-heart-hit-r252 {
-  position: absolute;
-  /* The WebGL stage is z=3. Keep the heart hit-area directly above the MAG,
-     while canonical ASK / pause / navigation controls remain above it. */
-  z-index: 4;
-  left: 50%;
-  top: 50%;
-  width: min(36vw, 430px);
-  height: min(36vw, 430px);
-  min-width: 180px;
-  min-height: 180px;
+html body.living-architecture #hero .hero-grid {
+  pointer-events: none !important;
+}
+
+html body.living-architecture #hero .hero-space {
+  position: relative !important;
+  z-index: 12080 !important;
+  isolation: isolate;
+  pointer-events: none !important;
+}
+
+/* MAG is navigation-owned. The old click-to-launch control must neither capture
+   trusted heart input nor advertise a false startup requirement. */
+html body.living-architecture #hero .hero-space > .fx-immersive-launch {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Real hero controls remain native interactive descendants. */
+html body.living-architecture #hero .hero-copy,
+html body.living-architecture #hero a,
+html body.living-architecture #hero button:not(.fx-mag-heart-hit-r252):not(.fx-immersive-launch),
+html body.living-architecture #hero input,
+html body.living-architecture #hero select,
+html body.living-architecture #hero textarea,
+html body.living-architecture #hero summary,
+html body.living-architecture #hero label,
+html body.living-architecture #hero [role='button']:not(.fx-immersive-launch),
+html body.living-architecture #hero [role='link'],
+html body.living-architecture #hero [tabindex]:not(.fx-immersive-launch),
+html body.living-architecture #hero [data-fx-live-os-launcher],
+html body.living-architecture #hero .fx-organism-thought-trigger,
+html body.living-architecture #hero .hero-space > .fx-organism-map,
+html body.living-architecture #hero .hero-space > .fx-organism-map a,
+html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+  pointer-events: auto;
+}
+
+html body.living-architecture #hero .fx-reference-controls-r204 {
+  position: relative;
+  z-index: 20 !important;
+  isolation: isolate;
+}
+
+/* R326 pointer/touch logic listens globally and reads stage geometry. The visual
+   WebGL stage never owns DOM hit-testing. */
+html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+  pointer-events: none !important;
+}
+
+/* One body child follows the current stage rect. It is semantic/focus geometry,
+   not a pointer overlay: trusted pointer routing is handled in heart-core JS. */
+body.living-architecture > .fx-mag-heart-hit-r252 {
+  position: fixed !important;
+  z-index: 12060 !important;
+  left: 50vw;
+  top: 50vh;
+  width: 220px;
+  height: 220px;
+  min-width: 160px;
+  min-height: 160px;
+  margin: 0;
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: transparent;
   color: transparent;
   cursor: pointer;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) !important;
   touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: none !important;
+  isolation: isolate;
 }
 
 .fx-mag-heart-hit-r252::before {
@@ -36,7 +93,6 @@
   pointer-events: none;
 }
 
-.fx-mag-heart-hit-r252:hover::before,
 .fx-mag-heart-hit-r252:focus-visible::before,
 .fx-mag-heart-hit-r252[data-fx-heart-active='true']::before {
   opacity: .88;
@@ -51,16 +107,23 @@
 }
 
 @media (max-width: 900px), (pointer: coarse) {
-  .fx-mag-heart-hit-r252 {
-    width: min(72vw, 330px);
-    height: min(72vw, 330px);
-    min-width: 210px;
-    min-height: 210px;
+  body.living-architecture > .fx-mag-heart-hit-r252 {
+    min-width: 176px;
+    min-height: 176px;
   }
 
-  /* r252: the footer is the last real content. The loop bridge is only a short
-     visual runway used to transfer native touch momentum back to the real hero.
-     The old full-screen reference mirror is deliberately never shown on mobile. */
+  /* Entire trust cards are real touch targets, not only their text lines. */
+  html body.living-architecture .fx-trust-grid > a.fx-trust-card {
+    box-sizing: border-box !important;
+    display: flex !important;
+    min-block-size: 96px !important;
+    min-height: 96px !important;
+    padding: 17px !important;
+    margin: 0 !important;
+    touch-action: manipulation;
+    isolation: isolate;
+  }
+
   html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'] .fx-loop-bridge,
   html[data-fx-heart-core-r252='ready'][data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
     display: block !important;
@@ -116,3 +179,5 @@
 @media (prefers-reduced-motion: reduce) {
   .fx-mag-heart-hit-r252::before { transition: none !important; }
 }
+
+/* production-r554-pointer-transparent-heart-retired-click-launch */
