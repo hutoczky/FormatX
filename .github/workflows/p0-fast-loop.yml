@@ -54,6 +54,9 @@ jobs:
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js
+          node --check .github/scripts/validate-r533-r536-handoff.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
@@ -100,6 +103,11 @@ jobs:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_VISUAL_DIR: artifacts/content-visuals
         run: node .github/scripts/validate-content-visuals.cjs
+      - name: Run R533 to R536 cinematic handoff browser proof
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_INTRO_EVIDENCE_DIR: artifacts/r533-r536-handoff
+        run: node .github/scripts/validate-r533-r536-handoff.cjs
       - name: Upload compact evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -109,5 +117,6 @@ jobs:
             artifacts/p0-fast-loop/
             artifacts/r522-semantic-mag/
             artifacts/content-visuals/
+            artifacts/r533-r536-handoff/
           if-no-files-found: warn
           retention-days: 30
