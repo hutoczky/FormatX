@@ -3,6 +3,7 @@ import productionWorker from './production-with-license.js';
 const CANONICAL_ORIGIN = 'https://formatxsuite.com';
 const LEGACY_WWW_ORIGIN = 'https://www.formatxsuite.com';
 const INLINE_CRITICAL_STYLE_HASH = "'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68='";
+const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260907-r608-source-first-paint-parity>; rel=preload; as=style';
 const SCIFI_ENTRY_PATHS = new Set(['/', '/scifi-ui/', '/scifi-ui/index.html']);
 const HOMEPAGE_ALIASES = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const LANGUAGE_PAGE_PATHS = new Set([
@@ -170,6 +171,17 @@ export default {
   },
 };
 
+function homepageLinkHeader(existing) {
+  const canonical = `<${CANONICAL_ORIGIN}/>; rel="canonical"`;
+  const retained = String(existing || '')
+    .split(/,\s*(?=<)/)
+    .map(value => value.trim())
+    .filter(Boolean)
+    .filter(value => !/\brel\s*=\s*["']?canonical["']?/i.test(value))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-p0-first-paint-r490.css'));
+  return [canonical, P0_FIRST_PAINT_PRELOAD, ...retained].join(', ');
+}
+
 async function canonicaliseApexResponse(request, url, response) {
   const isRead = request.method === 'GET' || request.method === 'HEAD';
   if (!isRead || url.hostname !== 'formatxsuite.com' || url.pathname !== '/') return response;
@@ -179,7 +191,7 @@ async function canonicaliseApexResponse(request, url, response) {
   if (csp && !csp.includes(INLINE_CRITICAL_STYLE_HASH)) {
     headers.set('Content-Security-Policy', csp.replace("style-src 'self'", `style-src 'self' ${INLINE_CRITICAL_STYLE_HASH}`));
   }
-  headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
+  headers.set('Link', homepageLinkHeader(headers.get('Link')));
   headers.set('Cache-Control', 'no-store, max-age=0');
   headers.set('Pragma', 'no-cache');
   headers.delete('Content-Length');
