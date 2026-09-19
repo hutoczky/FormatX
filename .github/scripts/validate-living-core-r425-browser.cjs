@@ -88,14 +88,14 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const controls = document.querySelector('#hero .fx-reference-controls-r204');
     const sound = controls?.querySelector('.fx-three-sound');
     const ask = controls?.querySelector('.fx-reference-ask');
-    const pause = controls?.querySelector('.fx-reference-pause');
+    const manualPauseCount = controls?.querySelectorAll('.fx-reference-pause').length || 0;
     const mag = document.querySelector('.topbar > .fx-reference-mag-button');
     const lang = document.querySelector('.topbar > .fx-language-toggle');
     const menu = document.querySelector('.topbar > .fx-reference-menu-button');
     const brand = document.querySelector('.topbar > .brand');
     const miniGlyph = document.querySelector('.fx-mini-mag-glyph-r459');
     const miniLauncher = document.querySelector('.fx-mini-mag-launcher-r459');
-    const boxes = [sound, ask, pause].map(node => node?.getBoundingClientRect()).filter(Boolean);
+    const boxes = [sound, ask].map(node => node?.getBoundingClientRect()).filter(Boolean);
     const localOverlap = (a, b, gap = 2) => a && b && !(
       a.right + gap <= b.left || b.right + gap <= a.left ||
       a.bottom + gap <= b.top || b.bottom + gap <= a.top
@@ -142,8 +142,9 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       filter: style?.filter || '',
       stageAnimation: stageStyle?.animationName || '',
       controlsVisible: visible(controls),
-      controlsOneRow: boxes.length === 3 && Math.max(...boxes.map(item => item.top)) - Math.min(...boxes.map(item => item.top)) <= 8,
-      controlsOverlap: boxes.length === 3 && (localOverlap(boxes[0], boxes[1]) || localOverlap(boxes[1], boxes[2])),
+      manualPauseCount,
+      controlsOneRow: boxes.length === 2 && Math.max(...boxes.map(item => item.top)) - Math.min(...boxes.map(item => item.top)) <= 8,
+      controlsOverlap: boxes.length === 2 && localOverlap(boxes[0], boxes[1]),
       controlBoxes: boxes.map(item => ({left:item.left,right:item.right,top:item.top,bottom:item.bottom,width:item.width,height:item.height})),
       overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
       magText: String(mag?.textContent || '').trim(),
@@ -225,6 +226,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.ok(state.height > 200, JSON.stringify(state));
   assert.ok(Number.isFinite(state.renderMs) && state.renderMs < 16.67, JSON.stringify(state));
   assert.equal(state.controlsVisible, true, JSON.stringify(state));
+  assert.equal(state.manualPauseCount, 0, JSON.stringify(state));
   assert.equal(state.controlsOneRow, true, JSON.stringify(state));
   assert.equal(state.controlsOverlap, false, JSON.stringify(state));
   assert.ok(state.overflow <= 1, JSON.stringify(state));
@@ -262,7 +264,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.equal(state.rendererSelection, 'r326-direct-r468-desktop-live-energy', JSON.stringify(state));
     assert.ok(state.opacity >= .90, JSON.stringify(state));
     assert.ok(!state.filter.includes('blur('), state.filter);
-    assert.equal(state.controlBoxes.length, 3, JSON.stringify(state));
+    assert.equal(state.controlBoxes.length, 2, JSON.stringify(state));
     assert.ok(state.controlBoxes.every(item => item.width >= 54 && item.height >= 54), JSON.stringify(state));
   }
 
