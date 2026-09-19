@@ -65,7 +65,7 @@ async function waitPublicState(page, language) {
       ? /\b5-day trial(?: licence)?\b/i.test(document.body.innerText)
       : /\b5 napos próbalicenc\b/i.test(document.body.innerText);
     return document.documentElement.lang === lang
-      && document.documentElement.dataset.fxFixedCopyVersion === 'r210'
+      && document.documentElement.dataset.fxFixedCopyVersion === 'r462'
       && Boolean(document.querySelector('.fx-language-toggle'))
       && downloads.includes(download)
       && trial
