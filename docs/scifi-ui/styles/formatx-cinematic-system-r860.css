@@ -1,0 +1,328 @@
+/* FormatX R860 — cinematic system narrative.
+   Additive presentation layer only: no scroll lock, no snap, no content hiding,
+   no control interception and no geometry ownership. */
+:root {
+  --fx-cine-accent: 116, 231, 255;
+  --fx-cine-secondary: 139, 104, 255;
+  --fx-cine-warm: 255, 207, 151;
+  --fx-cine-field-opacity: .34;
+  --fx-cine-grid-opacity: .055;
+  --fx-cine-scene-glow: .16;
+}
+
+html.fx-cinematic-ready body.living-architecture {
+  background-color: #01040b;
+}
+
+html.fx-cinematic-ready body.living-architecture::before,
+html.fx-cinematic-ready body.living-architecture::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -2;
+}
+
+html.fx-cinematic-ready body.living-architecture::before {
+  background:
+    radial-gradient(circle at 72% 28%, rgba(var(--fx-cine-accent), var(--fx-cine-field-opacity)), transparent 31%),
+    radial-gradient(circle at 23% 68%, rgba(var(--fx-cine-secondary), calc(var(--fx-cine-field-opacity) * .72)), transparent 36%),
+    linear-gradient(180deg, rgba(1,4,11,.12), rgba(1,4,11,.94));
+  transition: background 760ms cubic-bezier(.22,.61,.36,1), opacity 520ms ease;
+}
+
+html.fx-cinematic-ready body.living-architecture::after {
+  z-index: -1;
+  opacity: var(--fx-cine-grid-opacity);
+  background-image:
+    linear-gradient(rgba(var(--fx-cine-accent), .22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--fx-cine-accent), .18) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, transparent 0, #000 18%, #000 78%, transparent 100%);
+  transition: opacity 520ms ease, background-size 760ms cubic-bezier(.22,.61,.36,1);
+}
+
+html[data-fx-cinematic-scene="core"] {
+  --fx-cine-accent: 116, 231, 255;
+  --fx-cine-secondary: 139, 104, 255;
+  --fx-cine-field-opacity: .30;
+  --fx-cine-grid-opacity: .035;
+  --fx-cine-scene-glow: .18;
+}
+html[data-fx-cinematic-scene="nervous-system"] {
+  --fx-cine-accent: 94, 219, 255;
+  --fx-cine-secondary: 74, 130, 255;
+  --fx-cine-field-opacity: .34;
+  --fx-cine-grid-opacity: .075;
+  --fx-cine-scene-glow: .22;
+}
+html[data-fx-cinematic-scene="organs"] {
+  --fx-cine-accent: 117, 239, 224;
+  --fx-cine-secondary: 112, 151, 255;
+  --fx-cine-field-opacity: .31;
+  --fx-cine-grid-opacity: .055;
+  --fx-cine-scene-glow: .20;
+}
+html[data-fx-cinematic-scene="commerce-heart"] {
+  --fx-cine-accent: 255, 205, 142;
+  --fx-cine-secondary: 104, 225, 255;
+  --fx-cine-field-opacity: .24;
+  --fx-cine-grid-opacity: .035;
+  --fx-cine-scene-glow: .18;
+}
+html[data-fx-cinematic-scene="skeleton"] {
+  --fx-cine-accent: 137, 235, 255;
+  --fx-cine-secondary: 96, 126, 255;
+  --fx-cine-field-opacity: .24;
+  --fx-cine-grid-opacity: .12;
+  --fx-cine-scene-glow: .16;
+}
+html[data-fx-cinematic-scene="beacon"] {
+  --fx-cine-accent: 167, 139, 255;
+  --fx-cine-secondary: 255, 211, 148;
+  --fx-cine-field-opacity: .30;
+  --fx-cine-grid-opacity: .045;
+  --fx-cine-scene-glow: .24;
+}
+
+html.fx-cinematic-ready main#main-content {
+  position: relative;
+  isolation: isolate;
+}
+
+html.fx-cinematic-ready main#main-content > .scene {
+  position: relative;
+  isolation: isolate;
+}
+
+html.fx-cinematic-ready main#main-content > .scene::before {
+  content: "";
+  position: absolute;
+  inset: clamp(18px, 4vw, 64px) clamp(10px, 2.6vw, 42px);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: clamp(26px, 4vw, 64px);
+  opacity: .14;
+  background:
+    radial-gradient(circle at 78% 30%, rgba(var(--fx-cine-accent), .18), transparent 30%),
+    linear-gradient(145deg, rgba(var(--fx-cine-accent), .045), rgba(var(--fx-cine-secondary), .025) 52%, transparent 74%);
+  box-shadow: inset 0 0 0 1px rgba(var(--fx-cine-accent), .045);
+  transform: scale(.985);
+  transition:
+    opacity 720ms cubic-bezier(.22,.61,.36,1),
+    transform 900ms cubic-bezier(.18,.8,.2,1),
+    box-shadow 720ms ease;
+}
+
+html.fx-cinematic-ready main#main-content > .scene[data-fx-cinematic-active="true"]::before {
+  opacity: 1;
+  transform: scale(1);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--fx-cine-accent), .09),
+    0 0 120px rgba(var(--fx-cine-accent), var(--fx-cine-scene-glow));
+}
+
+html.fx-cinematic-ready .scene .section-heading,
+html.fx-cinematic-ready .scene .release-layout,
+html.fx-cinematic-ready .scene .flow,
+html.fx-cinematic-ready .scene .cards,
+html.fx-cinematic-ready .scene .pricing,
+html.fx-cinematic-ready .scene .system-grid {
+  transition:
+    transform 880ms cubic-bezier(.18,.8,.2,1),
+    opacity 680ms ease,
+    filter 680ms ease;
+}
+
+html.fx-cinematic-ready .scene:not([data-fx-cinematic-active="true"]) .section-heading {
+  transform: translateY(14px);
+  opacity: .78;
+}
+html.fx-cinematic-ready .scene[data-fx-cinematic-active="true"] .section-heading {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* CORE — the existing MAG remains the cinematic anchor. */
+html[data-fx-cinematic-scene="core"] #hero .hero-space {
+  filter: saturate(1.06) brightness(1.035);
+}
+html.fx-cinematic-ready #hero .hero-copy,
+html.fx-cinematic-ready #hero .hero-space {
+  transition: filter 760ms ease, transform 920ms cubic-bezier(.18,.8,.2,1);
+}
+html.fx-cinematic-ready #hero[data-fx-cinematic-active="true"] .hero-copy {
+  transform: translate3d(0,0,0);
+}
+html.fx-cinematic-ready #hero[data-fx-cinematic-active="true"] .hero-space {
+  transform: translate3d(0,0,0) scale(1.012);
+}
+
+/* NERVOUS SYSTEM — a diagnostic signal path rather than another card block. */
+html.fx-cinematic-ready #experience .flow {
+  position: relative;
+}
+html.fx-cinematic-ready #experience .flow::before {
+  content: "";
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 50%;
+  height: 1px;
+  pointer-events: none;
+  opacity: .18;
+  background: linear-gradient(90deg, transparent, rgba(94,219,255,.65), rgba(120,104,255,.42), transparent);
+  transform: scaleX(.6);
+  transform-origin: 50% 50%;
+  transition: opacity 700ms ease, transform 900ms cubic-bezier(.18,.8,.2,1);
+}
+html.fx-cinematic-ready #experience[data-fx-cinematic-active="true"] .flow::before {
+  opacity: .7;
+  transform: scaleX(1);
+}
+
+/* ORGANS — six functions visually unfold without changing their usable grid. */
+html.fx-cinematic-ready #capabilities .card {
+  transition:
+    transform 760ms cubic-bezier(.18,.8,.2,1),
+    border-color 520ms ease,
+    box-shadow 620ms ease,
+    background-color 520ms ease;
+}
+html.fx-cinematic-ready #capabilities[data-fx-cinematic-active="true"] .card {
+  border-color: rgba(117,239,224,.16);
+  box-shadow: 0 18px 70px rgba(72,173,188,.055);
+}
+html.fx-cinematic-ready #capabilities[data-fx-cinematic-active="true"] .card:nth-child(1),
+html.fx-cinematic-ready #capabilities[data-fx-cinematic-active="true"] .card:nth-child(4) {
+  transform: translateX(-4px);
+}
+html.fx-cinematic-ready #capabilities[data-fx-cinematic-active="true"] .card:nth-child(3),
+html.fx-cinematic-ready #capabilities[data-fx-cinematic-active="true"] .card:nth-child(6) {
+  transform: translateX(4px);
+}
+
+/* COMMERCE HEART — the system settles; plans feel like a stable control surface. */
+html.fx-cinematic-ready #pricing[data-fx-cinematic-active="true"] .price-card.featured {
+  transform: translateY(-5px) scale(1.012);
+  box-shadow: 0 24px 90px rgba(255,205,142,.08), 0 0 0 1px rgba(255,218,166,.10);
+}
+html.fx-cinematic-ready #pricing .price-card {
+  transition: transform 720ms cubic-bezier(.18,.8,.2,1), box-shadow 620ms ease;
+}
+html.fx-cinematic-ready #pricing .payment,
+html.fx-cinematic-ready #formatx-plan-qr-dock {
+  transition: border-color 620ms ease, box-shadow 720ms ease, background-color 620ms ease;
+}
+html.fx-cinematic-ready #pricing[data-fx-cinematic-active="true"] .payment,
+html.fx-cinematic-ready #pricing[data-fx-cinematic-active="true"] #formatx-plan-qr-dock {
+  border-color: rgba(255,211,148,.14);
+  box-shadow: 0 26px 100px rgba(255,193,111,.045);
+}
+
+/* SKELETON / PROOF — the environment becomes more technical and measurable. */
+html.fx-cinematic-ready #system::after {
+  content: "";
+  position: absolute;
+  inset: 8% 4%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .08;
+  background-image:
+    linear-gradient(rgba(137,235,255,.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(137,235,255,.15) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at 50% 48%, #000, transparent 74%);
+  transition: opacity 720ms ease, background-size 900ms cubic-bezier(.18,.8,.2,1);
+}
+html.fx-cinematic-ready #system[data-fx-cinematic-active="true"]::after {
+  opacity: .27;
+  background-size: 36px 36px;
+}
+html.fx-cinematic-ready #system[data-fx-cinematic-active="true"] .system-grid article {
+  border-color: rgba(137,235,255,.14);
+}
+
+/* BEACON — proof, release and support become the outgoing signal. */
+html.fx-cinematic-ready #resources .particle-footer {
+  transition: filter 900ms ease, transform 900ms cubic-bezier(.18,.8,.2,1);
+}
+html.fx-cinematic-ready #resources[data-fx-cinematic-active="true"] .particle-footer {
+  filter: saturate(1.14) brightness(1.08);
+  transform: scale(1.012);
+}
+html.fx-cinematic-ready #resources .release-card {
+  transition: box-shadow 720ms ease, border-color 620ms ease, transform 760ms cubic-bezier(.18,.8,.2,1);
+}
+html.fx-cinematic-ready #resources[data-fx-cinematic-active="true"] .release-card {
+  transform: translateY(-4px);
+  border-color: rgba(167,139,255,.18);
+  box-shadow: 0 22px 100px rgba(139,104,255,.075);
+}
+
+/* Injected production evidence blocks become diagnostic bridges, never detached pages. */
+html.fx-cinematic-ready :is(.fx-static-live-os,.fx-category-deck--standalone) {
+  position: relative;
+  isolation: isolate;
+}
+html.fx-cinematic-ready :is(.fx-static-live-os,.fx-category-deck--standalone)::before {
+  content: "";
+  position: absolute;
+  inset: 4% 2%;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 36px;
+  opacity: .22;
+  background: linear-gradient(120deg, rgba(117,231,255,.045), transparent 48%, rgba(139,104,255,.035));
+  box-shadow: inset 0 0 0 1px rgba(134,229,255,.045);
+}
+
+/* Navigation and controls remain above all cinematic decoration. */
+html.fx-cinematic-ready :is(.topbar,.fx-organism-status,.fx-organism-actionbar,.fx-organism-console,.site-footer) {
+  position: relative;
+  z-index: 20;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  :root {
+    --fx-cine-field-opacity: .16;
+    --fx-cine-grid-opacity: .025;
+  }
+  html.fx-cinematic-ready body.living-architecture::before {
+    position: absolute;
+  }
+  html.fx-cinematic-ready body.living-architecture::after {
+    display: none;
+  }
+  html.fx-cinematic-ready main#main-content > .scene::before {
+    inset: 12px 6px;
+    border-radius: 24px;
+    box-shadow: inset 0 0 0 1px rgba(var(--fx-cine-accent), .045);
+  }
+  html.fx-cinematic-ready #capabilities[data-fx-cinematic-active="true"] .card,
+  html.fx-cinematic-ready #pricing[data-fx-cinematic-active="true"] .price-card.featured,
+  html.fx-cinematic-ready #resources[data-fx-cinematic-active="true"] .release-card,
+  html.fx-cinematic-ready #resources[data-fx-cinematic-active="true"] .particle-footer,
+  html.fx-cinematic-ready #hero[data-fx-cinematic-active="true"] .hero-space {
+    transform: none;
+  }
+  html.fx-cinematic-ready #experience .flow::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.fx-cinematic-ready *,
+  html.fx-cinematic-ready *::before,
+  html.fx-cinematic-ready *::after {
+    transition-duration: .001ms !important;
+  }
+  html.fx-cinematic-ready body.living-architecture::before,
+  html.fx-cinematic-ready body.living-architecture::after {
+    display: none;
+  }
+  html.fx-cinematic-ready main#main-content > .scene::before {
+    opacity: .22;
+    transform: none;
+  }
+}
