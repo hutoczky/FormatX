@@ -36,6 +36,18 @@ async function waitGenome(page) {
   ), null, { timeout: 30000 });
 }
 
+async function ensureGenomeOpen(page) {
+  const isOpen = await page.evaluate(() => (
+    document.getElementById('fx-interaction-genome')?.dataset.open === 'true'
+  ));
+  if (!isOpen) {
+    await page.locator('.fx-genome-launcher').click();
+  }
+  await page.waitForFunction(() => (
+    document.getElementById('fx-interaction-genome')?.dataset.open === 'true'
+  ));
+}
+
 async function state(page) {
   return page.evaluate(() => {
     const api = window.FormatXInteractionGenome;
@@ -53,6 +65,27 @@ async function state(page) {
       overlayOpen: overlay?.dataset.open,
       canvas: [Math.round(rect?.width || 0), Math.round(rect?.height || 0)],
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+      overflowOwners: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > innerWidth + 1
+        ? Array.from(document.querySelectorAll('body *')).flatMap(node => {
+          const rect = node.getBoundingClientRect();
+          if (!rect.width || !rect.height || (rect.right <= innerWidth + 1 && rect.left >= -1)) return [];
+          const style = getComputedStyle(node);
+          return [{ tag: node.tagName, id: node.id, className: String(node.className),
+            left: rect.left, right: rect.right, width: rect.width, position: style.position,
+            overflow: style.overflow, parent: node.parentElement?.className || '' }];
+        }).slice(0, 20) : [],
+      scan: (() => {
+        const shell = document.querySelector('.fx-genome-shell');
+        if (!shell) return null;
+        const style = getComputedStyle(shell, '::after');
+        return { transform: style.transform, width: style.width, position: style.position };
+      })(),
+      overflowContainers: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > innerWidth + 1
+        ? Array.from(document.querySelectorAll('html,body,body *')).filter(node => node.scrollWidth > node.clientWidth + 1 && node.clientWidth > 0).slice(0, 24).map(node => {
+          const style = getComputedStyle(node);
+          const pseudo = which => { const s = getComputedStyle(node, which); return { content:s.content, width:s.width, left:s.left, right:s.right, position:s.position, transform:s.transform, padding:s.padding }; };
+          return { tag:node.tagName, id:node.id, className:String(node.className), scrollWidth:node.scrollWidth, clientWidth:node.clientWidth, overflowX:style.overflowX, overflowY:style.overflowY, before:pseudo('::before'), after:pseudo('::after') };
+        }) : [],
       lang: document.documentElement.lang,
       launcher: Boolean(document.querySelector('.fx-genome-launcher')),
       schemaReady: data.items.every(item => (
@@ -93,8 +126,9 @@ async function desktop(browser) {
     });
   });
 
-  const english = page.locator('[data-language="en"]').first();
-  if (await english.count()) await english.evaluate(node => node.click());
+  const languageToggle = page.locator('.fx-language-toggle').first();
+  assert((await languageToggle.count()) === 1, 'canonical language toggle missing');
+  await languageToggle.evaluate(node => node.click());
   await page.waitForFunction(() => document.documentElement.lang === 'en');
   await page.evaluate(() => window.FormatXInteractionGenome.record(
     'language',
@@ -106,8 +140,7 @@ async function desktop(browser) {
     }
   ));
 
-  await page.locator('.fx-genome-launcher').click();
-  await page.waitForFunction(() => document.getElementById('fx-interaction-genome')?.dataset.open === 'true');
+  await ensureGenomeOpen(page);
   await page.waitForTimeout(180);
 
   let current = await state(page);
@@ -136,7 +169,7 @@ async function desktop(browser) {
   await page.waitForFunction(() => Math.abs(scrollY - 640) < 12, null, { timeout: 5000 });
   await page.waitForFunction(() => document.documentElement.lang === 'hu', null, { timeout: 5000 });
 
-  await page.locator('.fx-genome-launcher').click();
+  await ensureGenomeOpen(page);
   const exported = await page.evaluate(() => window.FormatXExportInteractionGenome());
   assert(exported === true, 'local genome export API did not complete');
   await page.waitForFunction(() => (
@@ -179,7 +212,7 @@ async function mobile(browser) {
   await page.waitForTimeout(150);
   const current = await state(page);
   assert(current.canvas[0] >= 360 && current.canvas[1] >= 420, 'mobile canvas: ' + JSON.stringify(current));
-  assert(current.overflow <= 1, 'mobile horizontal overflow: ' + current.overflow);
+  assert(current.overflow <= 1, 'mobile horizontal overflow: ' + JSON.stringify(current));
   assert(current.launcher && current.count >= 2, 'mobile genome missing: ' + JSON.stringify(current));
   console.log(JSON.stringify({ case: 'interaction-genome-mobile', current }));
   await context.close();
@@ -187,6 +220,7 @@ async function mobile(browser) {
 
 (async () => {
   const browser = await chromium.launch({
+    executablePath: process.env.CHROME_BIN || undefined,
     headless: true,
     args: ['--enable-unsafe-swiftshader', '--disable-smooth-scrolling']
   });
