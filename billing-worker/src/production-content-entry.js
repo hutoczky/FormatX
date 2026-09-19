@@ -15,6 +15,13 @@ const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" 
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const INTRO_P0_PRELOAD = '</scifi-ui/styles/formatx-intro-p0-r575.css?v=20260907-r635-three-phase-absolute-reveal>; rel=preload; as=style';
+const MOBILE_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)"';
+const CRITICAL_SHELL_PRELOAD = '</scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint>; rel=preload; as=style';
+const QUALITY_PRELOAD = '</scifi-ui/styles/formatx-quality-r461.css?v=20260902-r500-canonical-hero-state>; rel=preload; as=style';
+const FIRST_PAINT_R206_PRELOAD = '</scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero>; rel=preload; as=style';
+const CRITICAL_CORE_PRELOAD = '</scifi-ui/styles/formatx-critical-core-r227.css?v=20260819-r227>; rel=preload; as=style; media="(prefers-reduced-motion: no-preference) and (min-width: 901px)"';
+const REFERENCE_PRODUCTION_PRELOAD = '</scifi-ui/styles/formatx-reference-production-r244.css?v=20260824-native-orb-r250>; rel=preload; as=style; media="(prefers-reduced-motion: no-preference) and (min-width: 901px)"';
+const FIRST_FRAME_STABILITY_PRELOAD = '</scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260907-r608-source-first-paint-parity>; rel=preload; as=style; media="(prefers-reduced-motion: no-preference) and (min-width: 901px)"';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r505-mag-resume-clock';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r637.js?v=20260907-r637-post-fcp-network-restore"></script>';
@@ -267,8 +274,26 @@ function mergeHomepageLinkHeader(existing) {
     .map(value => value.trim())
     .filter(Boolean)
     .filter(value => !value.includes('/scifi-ui/styles/formatx-p0-first-paint-r490.css'))
-    .filter(value => !value.includes('/scifi-ui/styles/formatx-intro-p0-r575.css'));
-  return [...values, P0_FIRST_PAINT_PRELOAD, INTRO_P0_PRELOAD].join(', ');
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-intro-p0-r575.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-mobile-first-paint-r358.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-critical-shell-v56.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-quality-r461.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-first-paint-r206.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-critical-core-r227.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-reference-production-r244.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-first-frame-stability-r283.css'));
+  return [
+    ...values,
+    P0_FIRST_PAINT_PRELOAD,
+    INTRO_P0_PRELOAD,
+    MOBILE_FIRST_PAINT_PRELOAD,
+    CRITICAL_SHELL_PRELOAD,
+    QUALITY_PRELOAD,
+    FIRST_PAINT_R206_PRELOAD,
+    CRITICAL_CORE_PRELOAD,
+    REFERENCE_PRODUCTION_PRELOAD,
+    FIRST_FRAME_STABILITY_PRELOAD,
+  ].join(', ');
 }
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
