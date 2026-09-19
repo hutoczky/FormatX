@@ -3,9 +3,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 
-function read(path) {
-  return fs.readFileSync(path, "utf8");
-}
+function read(path) { return fs.readFileSync(path, "utf8"); }
 
 const loader = read("docs/scifi-ui/scripts/igloo-parity.js");
 const language = read("docs/scifi-ui/scripts/single-language-toggle.js");
@@ -26,7 +24,7 @@ assert.ok(loader.includes("timeout = setTimeout(() => finish(false, 'timeout'), 
 assert.ok(loader.includes("root.dataset.fxTranscendProgress = '100';"), "loader completion marker is missing");
 assert.ok(loader.includes("root.dataset.fxTranscendLoader = 'safe-degraded-v28';"), "current loader degradation path is missing");
 assert.ok(loader.includes("synaptic-thought-genome.js?v=20260811-current-host-v2"), "Thought Genome cache-busted production module is missing");
-assert.ok(language.includes("if (event.target === container) toggle.click();"), "full language control is not clickable");
+assert.ok(language.includes("button.addEventListener('click',()=>{") && language.includes("persist(next);applyCopy(next);updateButton(button,next);"), "current semantic language button is not clickable");
 assert.ok(webgl.includes("this.maxCount = mobile ? 1200 : 2400;"), "WebGL particle cap regressed");
 assert.ok(webgl.includes("} else if (false && fps > 58 && this.tier < 3) {"), "WebGL upward particle scaling is enabled");
 assert.ok(webgpu.includes("this.maxCount = reduced ? 8000 : mobile ? 18000 : 32000;"), "WebGPU particle cap regressed");
@@ -50,11 +48,14 @@ assert.ok(scrollBootstrap.includes("platform-scroll-v2"), "platform scroll boots
 assert.ok(scrollBootstrap.includes("mobile-seamless-loading-v1"), "mobile seamless-v7 loading controller is missing");
 assert.ok(scrollBootstrap.includes("native-momentum-loop-v1"), "mobile native-momentum loop policy marker is missing");
 assert.ok(scrollBootstrap.includes("root.dataset.fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'"), "mobile seamless loop handoff is missing");
+assert.ok(scrollBootstrap.includes("armSeamlessRuntime(MOBILE_QUERY.matches ? 'mobile' : 'desktop')"), "R534 scroll-intent bootstrap is missing");
+assert.ok(scrollBootstrap.includes("installSeamlessRuntime(platform)"), "scroll intent no longer resolves into seamless-v7");
+assert.ok(scrollBootstrap.includes("pending-user-scroll-intent"), "seamless runtime returned to the first-load critical path");
 assert.ok(scrollBootstrap.includes("formatx-infinite-scroll-desktop-v7.js"), "shared seamless-v7 runtime loader is missing");
 assert.ok(!scrollBootstrap.includes("scrollTo(") && !scrollBootstrap.includes("scrollIntoView(") && !scrollBootstrap.includes("cloneNode("), "platform bootstrap moves or clones the page before the boundary runtime");
 assert.ok(!scrollBootstrap.includes("preventDefault"), "scroll bootstrap cancels native input");
 assert.ok(desktopScroll.includes("const VERSION = 'seamless-v7'"), "shared seamless-v7 controller is missing");
-assert.ok(desktopScroll.includes("root.dataset.fxAutomaticLoop = 'enabled'"), "automatic seamless loop is not enabled");
+assert.ok(desktopScroll.includes("root.dataset.fxAutomaticLoop = 'enabled'"), "automatic seamless loop is not enabled after intent");
 assert.ok(desktopScroll.includes("visualBridge: true") && desktopScroll.includes("inertReferenceMirror: true"), "inert visual bridge contract is missing");
 assert.ok(desktopScroll.includes("window.scrollTo(") && desktopScroll.includes("buildReferenceMirror"), "boundary transfer implementation is missing");
 assert.ok(desktopScroll.includes("static-2d-snapshot-no-webgl"), "loop bridge must not allocate a WebGL context");
@@ -81,4 +82,4 @@ assert.ok(production.includes("new URL('/scifi-ui/', request.url)"), "domain roo
 assert.ok(production.includes("['/scifi-ui', '/scifi-ui/']"), "safe legacy homepage normalisation is missing");
 assert.ok(!production.includes("['/scifi-ui/', '/']"), "redirect-loop-prone legacy homepage redirect is present");
 
-console.log("FormatX current high-finish runtime validation passed.");
+console.log("FormatX current high-finish runtime validation passed with R534 intent-loaded seamless scrolling.");
