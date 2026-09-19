@@ -101,6 +101,162 @@ jobs:
           set -o pipefail
           node .github/scripts/validate-platform-scroll-r252.cjs 2>&1 | tee platform-scroll-report.txt
 
+      - name: Diagnose desktop document-flow drift after failure
+        if: failure()
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-platform-scroll/node_modules
+        shell: bash
+        run: |
+          node <<'NODE' 2>&1 | tee -a platform-scroll-report.txt
+          'use strict';
+          const { chromium } = require('playwright');
+          const URL = 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu&scroll-test=heart-r546&flow-trace=r833';
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark' });
+            const page = await context.newPage();
+            try {
+              await page.addInitScript(() => {
+                try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+              });
+              await page.goto(URL, { waitUntil: 'domcontentloaded' });
+              await page.waitForFunction(() => Boolean(document.documentElement.dataset.fxMotionRuntimeR239)
+                && document.documentElement.dataset.fxPlatformScrollBootstrapR535 === 'armed-scroll-intent', null, { timeout: 20000 });
+              await page.mouse.wheel(0, 48);
+              await page.waitForFunction(() => document.documentElement.dataset.fxInfiniteController === 'seamless-v7'
+                && document.documentElement.dataset.fxLoopBridge === 'ready-v3'
+                && document.documentElement.dataset.fxHeartCoreR252 === 'ready'
+                && document.documentElement.dataset.fxMagHeartHitOwnerR542 === 'body-fixed-stage-synced', null, { timeout: 20000 });
+              await page.evaluate(async () => {
+                window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+                try { await document.fonts?.ready; } catch (_) {}
+                dispatchEvent(new Event('resize'));
+              });
+              await page.waitForFunction(() => document.documentElement.dataset.fxMagHeartHitGeometryR542 === 'viewport-stage-synced', null, { timeout: 10000 });
+              await sleep(400);
+
+              const hit = page.locator('.fx-mag-heart-hit-r252').first();
+              const box = await hit.boundingBox();
+              if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+              await page.waitForFunction(() => document.documentElement.dataset.fxMagHeartPhysicalRouteR546 === 'captured-stage-hit'
+                && document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
+              await page.evaluate(() => {
+                try { window.FormatXOrganismVoice?.close?.(); } catch (_) {}
+                if (document.body.classList.contains('fx-organism-panel-open')) document.querySelector('.fx-organism-console-close')?.click();
+                if (document.documentElement.classList.contains('fx-organism-menu-open')) document.querySelector('.fx-reference-menu-button')?.click();
+              });
+              await page.waitForFunction(() => {
+                const root = document.documentElement;
+                const bubble = document.querySelector('.fx-organism-thought');
+                return (!bubble || bubble.hidden || root.dataset.fxOrganismThought !== 'open')
+                  && !document.body.classList.contains('fx-organism-panel-open')
+                  && !root.classList.contains('fx-organism-menu-open');
+              }, null, { timeout: 3000 });
+
+              await page.evaluate(() => {
+                const trace = [];
+                const seen = new WeakSet();
+                const key = node => {
+                  if (!(node instanceof Element)) return String(node?.nodeName || 'node');
+                  const id = node.id ? `#${node.id}` : '';
+                  const cls = Array.from(node.classList || []).slice(0, 4).map(v => `.${v}`).join('');
+                  const panel = node.getAttribute?.('data-organism-panel');
+                  return `${node.tagName.toLowerCase()}${id}${cls}${panel ? `[panel=${panel}]` : ''}`;
+                };
+                const push = item => {
+                  trace.push({ ms: Math.round(performance.now()), ...item });
+                  if (trace.length > 500) trace.splice(0, trace.length - 500);
+                };
+                const ro = new ResizeObserver(entries => {
+                  for (const entry of entries) push({ type: 'resize', node: key(entry.target), w: Math.round(entry.contentRect.width), h: Math.round(entry.contentRect.height) });
+                });
+                const observeOwners = () => {
+                  const main = document.getElementById('main-content');
+                  const nodes = [
+                    ...Array.from(document.body.children),
+                    ...(main ? Array.from(main.children) : []),
+                    ...Array.from(document.querySelectorAll('.site-footer,.fx-loop-bridge,[data-organism-panel]'))
+                  ];
+                  for (const node of nodes) {
+                    if (!(node instanceof Element) || seen.has(node)) continue;
+                    seen.add(node);
+                    ro.observe(node);
+                    push({ type: 'observe', node: key(node) });
+                  }
+                };
+                observeOwners();
+                const mo = new MutationObserver(records => {
+                  for (const record of records) {
+                    if (record.type === 'childList' && (record.addedNodes.length || record.removedNodes.length)) {
+                      push({
+                        type: 'childList',
+                        node: key(record.target),
+                        added: Array.from(record.addedNodes).filter(n => n instanceof Element).map(key),
+                        removed: Array.from(record.removedNodes).filter(n => n instanceof Element).map(key)
+                      });
+                    } else if (record.type === 'attributes') {
+                      push({ type: 'attr', node: key(record.target), attr: record.attributeName, old: record.oldValue, now: record.target.getAttribute(record.attributeName) });
+                    }
+                  }
+                  observeOwners();
+                });
+                mo.observe(document.body, {
+                  subtree: true,
+                  childList: true,
+                  attributes: true,
+                  attributeOldValue: true,
+                  attributeFilter: ['class', 'style', 'hidden', 'data-fx-organism-thought', 'data-fx-deferred-css-r637']
+                });
+                window.__fxR833FlowTrace = { trace, ro, mo };
+              });
+
+              const snapshot = label => page.evaluate(label => {
+                const root = document.documentElement;
+                const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+                return {
+                  label,
+                  now: Math.round(performance.now()),
+                  scrollY,
+                  scrollHeight: root.scrollHeight,
+                  bodyScrollHeight: document.body.scrollHeight,
+                  bridgeTop: bridge ? bridge.getBoundingClientRect().top + scrollY : 0,
+                  bridgeHeight: bridge?.offsetHeight || 0,
+                  loopGeometry: root.dataset.fxLoopGeometryR592 || '',
+                  stableBoundary: root.dataset.fxDesktopLoopStableBoundaryR618 || '',
+                  stableSettle: root.dataset.fxDesktopLoopStableSettleR663 || '',
+                  materialize: root.dataset.fxDesktopLoopMaterializeR711 || '',
+                  documentGeometry: root.dataset.fxDesktopDocumentGeometryR634 || '',
+                  loopGeometryState: root.dataset.fxDesktopLoopGeometry || '',
+                  thought: root.dataset.fxOrganismThought || '',
+                  panelOpen: document.body.classList.contains('fx-organism-panel-open')
+                };
+              }, label);
+
+              const before = await snapshot('before-scroll');
+              await page.evaluate(() => {
+                const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+                const top = bridge ? bridge.getBoundingClientRect().top + scrollY : 0;
+                window.scrollTo({ top: top + 180, left: 0, behavior: 'auto' });
+              });
+              await sleep(1400);
+              const after = await snapshot('after-1400ms');
+              const trace = await page.evaluate(() => window.__fxR833FlowTrace?.trace || []);
+              console.log('R833_FLOW_TRACE ' + JSON.stringify({ before, after, delta: {
+                scrollHeight: after.scrollHeight - before.scrollHeight,
+                bridgeTop: after.bridgeTop - before.bridgeTop
+              }, trace }));
+            } finally {
+              await context.close();
+              await browser.close();
+            }
+          })().catch(error => {
+            console.error('R833_FLOW_TRACE_ERROR', error?.stack || error);
+            process.exitCode = 0;
+          });
+          NODE
+
       - name: Upload scroll report
         if: always()
         uses: actions/upload-artifact@v4
