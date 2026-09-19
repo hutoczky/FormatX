@@ -71,20 +71,33 @@ async function assertPure3d(page,profile){
     const heroSpace=document.querySelector('#hero .hero-space');
     const stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r120-stage');
     const canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r120-canvas');
+    const canvases=document.querySelectorAll('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r120-canvas');
     const before=heroSpace?getComputedStyle(heroSpace,'::before'):null;
     const after=heroSpace?getComputedStyle(heroSpace,'::after'):null;
     const visible=el=>{if(!(el instanceof Element))return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>.02&&r.width>0&&r.height>0;};
     const legacy=[...document.querySelectorAll('#hero .fx-core-detail-r122,#hero .fx-core-live-r147-layer,#hero .fx-r155-heartbeat-core,#hero .fx-r155-heartbeat-ring,#hero .fx-r155-heartbeat-wave,#hero [class^="fx-r168-"],#hero [class*=" fx-r168-"]')];
+    const gpuCapability=root.dataset.fxGpuCapability||'';
+    const contextPolicy=root.dataset.fxMagContextPolicyR561||'';
+    const offscreenState=root.dataset.fxMagOffscreenR571||root.dataset.fxMagOffscreenR564||'';
     let context='none';
-    try{
-      const gl=canvas?.getContext?.('webgl2')||canvas?.getContext?.('webgl');
-      if(gl)context=typeof WebGL2RenderingContext!=='undefined'&&gl instanceof WebGL2RenderingContext?'webgl2':'webgl1';
-    }catch(_){context='error';}
+    if(gpuCapability==='webgl1-offscreen'){
+      context='webgl1-offscreen';
+    }else{
+      try{
+        const gl=canvas?.getContext?.('webgl2')||canvas?.getContext?.('webgl');
+        if(gl)context=typeof WebGL2RenderingContext!=='undefined'&&gl instanceof WebGL2RenderingContext?'webgl2':'webgl1';
+      }catch(_){context='error';}
+    }
     return{
       composition:root.dataset.fxCoreCompositionR285||'',
       renderer:root.dataset.fxCoreRenderer||'',
       real3d:root.dataset.fxCoreReal3d||'',
       context,
+      contextCount:root.dataset.fxCoreContexts||'',
+      gpuCapability,
+      contextPolicy,
+      offscreenState,
+      canvasCount:canvases.length,
       stageChildren:stage?[...stage.children].map(el=>({tag:el.tagName,className:el.className,visible:visible(el)})):[],
       legacyVisible:legacy.filter(visible).map(el=>el.className),
       detailCount:document.querySelectorAll('#hero .fx-core-detail-r122').length,
@@ -95,7 +108,15 @@ async function assertPure3d(page,profile){
   });
   assert.equal(state.composition,'pure-webgl3d-no-2d-overlays',`${profile.name} pure-3D marker missing: ${JSON.stringify(state)}`);
   assert.match(state.renderer,/webgl/i,`${profile.name} renderer is not WebGL: ${JSON.stringify(state)}`);
-  assert.match(state.context,/webgl[12]/,`${profile.name} no active WebGL context: ${JSON.stringify(state)}`);
+  assert.equal(state.canvasCount,1,`${profile.name} canonical MAG canvas count changed: ${JSON.stringify(state)}`);
+  assert.equal(state.contextCount,'1',`${profile.name} canonical WebGL context count changed: ${JSON.stringify(state)}`);
+  if(state.gpuCapability==='webgl1-offscreen'){
+    assert.equal(state.context,'webgl1-offscreen',`${profile.name} worker WebGL context proof missing: ${JSON.stringify(state)}`);
+    assert.match(state.contextPolicy,/released-(?:mobile|desktop)-offscreen-worker/,`${profile.name} OffscreenCanvas policy did not reach worker-owned ready state: ${JSON.stringify(state)}`);
+    assert.match(state.offscreenState,/ready(?:-(?:mobile|desktop))?-worker-webgl1/,`${profile.name} worker WebGL ready marker missing: ${JSON.stringify(state)}`);
+  }else{
+    assert.match(state.context,/webgl[12]/,`${profile.name} no active WebGL context: ${JSON.stringify(state)}`);
+  }
   assert.deepEqual(state.legacyVisible,[],`${profile.name} visible 2D MAG layer: ${JSON.stringify(state)}`);
   assert.equal(state.detailCount,0,`${profile.name} 2D detail canvas exists`);
   assert.equal(state.liveLayerCount,0,`${profile.name} DOM live-motion layer exists`);

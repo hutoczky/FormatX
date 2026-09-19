@@ -1,22 +1,25 @@
 import productionBase from './production-content-entry-r369-base.js';
 
-/* FormatX R514 — preserve the proven R513 MAG runtime and R504/R506 first-paint
-   contracts while removing the exact R513 Lighthouse first-divergence owner from
-   the blocking path. R513 artifact 9912491940 showed critical-core-r227 as the
-   sole render blocker on the fast run and the largest modeled H3 blocker on the
-   slow runs. It now uses the existing R487 double-rAF post-first-paint scheduler;
-   MAG clock, PAUSE/RESUME, ASK and renderer ownership remain unchanged. */
+/* FormatX R720 — preserve canonical geometry through the production pipeline.
+   Critical core supplies the desktop body, hero and canvas geometry before paint.
+   Removing its href here defeated the source first-frame contract: later wrappers
+   restored its media/priority but left it unfetched until the 2100ms CSS checkpoint.
+   Only secondary styles belong to the autonomous deferred stylesheet scheduler. */
 
-const STARTUP_REVISION = '20260903-r514-critical-core-post-first-paint';
+const STARTUP_REVISION = '20260908-r675-nonblocking-reference-and-visual-css';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
-const REFERENCE_MODE_BOOT_SCRIPT = '<script fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
-const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
+const INTRO_P0_PATH = '/scifi-ui/styles/formatx-intro-p0-r575.css';
+const EVENT_HORIZON_SCRIPT_PATH = '/scifi-ui/scripts/formatx-event-horizon.js';
+const REFERENCE_MODE_BOOT_SCRIPT = '<script defer fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
+const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
+const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
+const INTRO_P0_PRELOAD = '</scifi-ui/styles/formatx-intro-p0-r575.css?v=20260907-r635-three-phase-absolute-reveal>; rel=preload; as=style';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260903-r505-mag-resume-clock';
-const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
+const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r637.js?v=20260907-r637-post-fcp-network-restore"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const META_CSP = "default-src 'self';base-uri 'self';object-src 'none';script-src 'self' https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'";
 const HEADER_CSP = [
@@ -47,9 +50,6 @@ const ROBOTS = [
 ].join('\n');
 
 const DEFERRED_STYLE_PATHS = new Set([
-  // R514: artifact-proven first-divergence owner; activate with the existing
-  // R487 double-rAF scheduler after the first painted frame.
-  '/scifi-ui/styles/formatx-critical-core-r227.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/platform-status.css',
@@ -57,6 +57,14 @@ const DEFERRED_STYLE_PATHS = new Set([
   '/scifi-ui/styles/formatx-feedback.css',
   '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/formatx-content-standard.css',
+  '/scifi-ui/styles/formatx-award-readiness.css',
+  '/scifi-ui/styles/formatx-flow-first-r74.css',
+  '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css',
+  '/scifi-ui/styles/formatx-responsive-text-guard-r72.css',
+  '/scifi-ui/styles/formatx-mobile-proof-controls-r204.css',
+  '/scifi-ui/styles/formatx-mobile-layout-r207.css',
+  '/scifi-ui/styles/formatx-native-orb-reference-r250.css',
+  '/scifi-ui/styles/formatx-mobile-apex-composition.css',
 ]);
 
 const R502_ASSET_REWRITES = new Map([
@@ -119,14 +127,27 @@ function injectReferenceModeBoot(html) {
 }
 function injectCriticalFirstPaint(html) {
   let source = String(html || '');
+  let introStyle = '';
+  let firstFrameStyle = FIRST_FRAME_STABILITY_LINK;
   source = source.replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
-    if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') return '';
+    // R761: keep the intro's settled hero geometry after the blocking P0 layer,
+    // in the same cascade slot formerly occupied by its runtime-created link.
+    if (pathname === '/scifi-ui/styles/formatx-intro-p0-r575.css') {
+      introStyle = tag;
+      return '';
+    }
+    if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') {
+      // R763: the authored stylesheet covers mouse and keyboard-only desktops.
+      // Do not replace its current media/cache contract with an older snapshot.
+      firstFrameStyle = tag;
+      return '';
+    }
     if (pathname === '/scifi-ui/styles/formatx-p0-first-paint-r490.css') return '';
     if (pathname === '/scifi-ui/styles/formatx-mobile-first-paint-r358.css' && /data-fx-production-first-paint-r370/i.test(tag)) return '';
     return tag;
   });
-  const critical = `  ${FIRST_PAINT_LINK}\n  ${FIRST_FRAME_STABILITY_LINK}\n  ${P0_FIRST_PAINT_LINK}\n`;
+  const critical = `  ${FIRST_PAINT_LINK}\n  ${firstFrameStyle}\n  ${P0_FIRST_PAINT_LINK}\n  ${introStyle}\n`;
   return source.replace('</head>', `${critical}</head>`);
 }
 function normalizeMobileStylesheetMedia(html) {
@@ -136,6 +157,12 @@ function normalizeMobileStylesheetMedia(html) {
     if (/\smedia=(["'])(.*?)\1/i.test(tag)) return tag;
     return tag.replace(/\s*\/?>$/, close => ` media="${MOBILE_MEDIA}"${close}`);
   });
+}
+function armR848DesktopFirstFrameIntro(html) {
+  return String(html || '').replace(
+    'class="fx-intro-complete" data-fx-intro="instant-award-r251"',
+    'class="fx-intro-pending" data-fx-intro="bounded-release-pending-r848"'
+  );
 }
 function normalizeHomepageSemantics(html) {
   let source = String(html || '');
@@ -185,12 +212,21 @@ function deferNonCriticalStyles(html) {
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
     if (!pathname || !DEFERRED_STYLE_PATHS.has(pathname)) return tag;
+    const hrefMatch = tag.match(/\shref=(["'])(.*?)\1/i);
+    if (!hrefMatch) return tag;
+    const deferredHref = hrefMatch[2];
     const mediaMatch = tag.match(/\smedia=(["'])(.*?)\1/i);
-    const originalMedia = mediaMatch ? mediaMatch[2] : 'all';
-    let next = mediaMatch ? tag.replace(mediaMatch[0], '') : tag;
+    const declaredDeferredMedia = tag.match(/\sdata-fx-deferred-media-r300=(["'])(.*?)\1/i);
+    const originalMedia = declaredDeferredMedia ? declaredDeferredMedia[2] : (mediaMatch ? mediaMatch[2] : 'all');
+    let next = tag.replace(hrefMatch[0], '');
+    if (mediaMatch) next = next.replace(mediaMatch[0], '');
+    next = next.replace(/\sfetchpriority=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r487-deferred-style=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r487-media=(["'])(.*?)\1/i, '');
+    next = next.replace(/\sdata-fx-r637-href=(["'])(.*?)\1/i, '');
     const close = /\/>$/.test(next) ? '/>' : '>';
     next = next.replace(/\s*\/?>$/, '');
-    return `${next} data-fx-r487-deferred-style="true" data-fx-r487-media="${escapeAttribute(originalMedia)}" media="print"${close}`;
+    return `${next} data-fx-r637-href="${escapeAttribute(deferredHref)}" data-fx-r487-deferred-style="true" data-fx-r487-media="${escapeAttribute(originalMedia)}" media="not all"${close}`;
   });
 }
 function injectDeferredCssRuntime(html) {
@@ -205,7 +241,8 @@ function cacheBustCriticalQuality(html) {
   );
 }
 function optimizeHomepage(html) {
-  let source = normalizeHomepageSemantics(html);
+  let source = armR848DesktopFirstFrameIntro(html);
+  source = normalizeHomepageSemantics(source);
   source = cacheBustR502Runtime(source);
   source = scheduleMotionRuntime(source);
   source = normalizeMobileStylesheetMedia(source);
@@ -217,9 +254,311 @@ function optimizeHomepage(html) {
   source = injectDeferredCssRuntime(source);
   return source;
 }
+function r848FirstFrameIntroCss(source) {
+  return String(source || '') + `
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay[hidden] {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-center {
+    width: min(700px,calc(100vw - 80px)) !important;
+    position: relative !important;
+    z-index: 4 !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-kicker {
+    opacity: 1 !important;
+    transform: none !important;
+    letter-spacing: .24em !important;
+    color: rgba(173,242,255,.78) !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-word {
+    font-size: clamp(64px,8.8vw,124px) !important;
+    line-height: 1 !important;
+    letter-spacing: .08em !important;
+    color: #f7fdff !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-word span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    background: none !important;
+    color: #f7fdff !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-subtitle {
+    opacity: 1 !important;
+    transform: none !important;
+    font-size: 10px !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-meta {
+    opacity: .5 !important;
+    transform: none !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-progress-wrap {
+    opacity: 1 !important;
+    transform: none !important;
+    max-width: 560px !important;
+    margin: 0 auto !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-progress-wrap output::after {
+    content: "" !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-flare {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 48% !important;
+    inset: auto !important;
+    z-index: 2 !important;
+    width: min(25vw,250px) !important;
+    height: min(25vw,250px) !important;
+    border-radius: 50% !important;
+    opacity: .24 !important;
+    transform: translate(-50%,-50%) scale(.78) !important;
+    background: radial-gradient(circle,rgba(235,253,255,.78) 0 3%,rgba(105,226,255,.24) 12%,rgba(104,90,255,.12) 34%,transparent 68%) !important;
+    box-shadow: 0 0 22px rgba(156,247,255,.22),0 0 64px rgba(82,121,255,.10) !important;
+    filter: none !important;
+    animation: none !important;
+  }
+  html.fx-intro-pending #formatx-event-horizon .fx-intro-grid {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    inset: 16% 18% !important;
+    opacity: .08 !important;
+    transform: none !important;
+    filter: none !important;
+    background-image:
+      linear-gradient(rgba(124,236,255,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(124,236,255,.03) 1px,transparent 1px) !important;
+    background-size: 42px 42px !important;
+    mask-image: radial-gradient(circle at 50% 50%,#000 0 30%,rgba(0,0,0,.82) 50%,transparent 76%) !important;
+    -webkit-mask-image: radial-gradient(circle at 50% 50%,#000 0 30%,rgba(0,0,0,.82) 50%,transparent 76%) !important;
+  }
+}
+/* production-r849-first-contentful-living-mag-owner */
+`;
+}
 function stripNestedFirstFrameImport(css) {
   return String(css || '').replace(/^\s*@import\s+url\(["']?\.\/formatx-first-frame-stability-r283\.css[^)]*\)\s*;\s*/i, '');
 }
+function r845StaticDesktopIntroCss(source) {
+  return String(source || '') + `
+@keyframes fx-r846-mag-core-breathe {
+  0% { opacity: .18; transform: translate(-50%,-50%) scale(.72); }
+  42% { opacity: .58; transform: translate(-50%,-50%) scale(1.04); }
+  72% { opacity: .82; transform: translate(-50%,-50%) scale(.94); }
+  100% { opacity: .42; transform: translate(-50%,-50%) scale(1); }
+}
+@keyframes fx-r846-mag-portal-turn {
+  0% { transform: translate(-50%,-50%) scale(.82) rotate(-20deg); }
+  55% { transform: translate(-50%,-50%) scale(1.03) rotate(8deg); }
+  100% { transform: translate(-50%,-50%) scale(.96) rotate(24deg); }
+}
+@keyframes fx-r846-mag-scan {
+  0% { opacity: 0; transform: translate(-50%,-74px) scaleX(.18); }
+  28% { opacity: .26; }
+  62% { opacity: .72; transform: translate(-50%,0) scaleX(1); }
+  100% { opacity: 0; transform: translate(-50%,74px) scaleX(.32); }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon[data-fx-preloader-r531="active"] {
+    background: linear-gradient(145deg,#01040b 0%,#030917 52%,#08051a 100%) !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center {
+    width: min(700px,calc(100vw - 80px)) !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-word,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-word,
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-word {
+    font-size: clamp(64px,8.8vw,124px) !important;
+    line-height: 1 !important;
+    letter-spacing: .08em !important;
+    color: #f7fdff !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    background: none !important;
+    color: #f7fdff !important;
+    -webkit-text-fill-color: currentColor !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-kicker {
+    opacity: 1 !important;
+    transform: none !important;
+    letter-spacing: .24em !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle {
+    opacity: 1 !important;
+    transform: none !important;
+    font-size: 10px !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-meta {
+    opacity: .5 !important;
+    transform: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap {
+    opacity: 1 !important;
+    transform: none !important;
+    max-width: 560px !important;
+    margin: 0 auto !important;
+  }
+  html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx-preloader-reveal-r635 {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-meta {
+    position: relative !important;
+    z-index: 4 !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-grid {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    inset: 16% 18% !important;
+    z-index: 0 !important;
+    opacity: .14 !important;
+    transform: none !important;
+    filter: none !important;
+    background-image:
+      linear-gradient(rgba(124,236,255,.035) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(124,236,255,.035) 1px,transparent 1px) !important;
+    background-size: 42px 42px !important;
+    mask-image: radial-gradient(circle at 50% 50%,#000 0 30%,rgba(0,0,0,.82) 50%,transparent 76%) !important;
+    -webkit-mask-image: radial-gradient(circle at 50% 50%,#000 0 30%,rgba(0,0,0,.82) 50%,transparent 76%) !important;
+    animation: none !important;
+    transition: opacity 120ms ease !important;
+    will-change: auto !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-portal {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 48% !important;
+    inset: auto !important;
+    z-index: 1 !important;
+    width: min(38vw,390px) !important;
+    height: min(38vw,390px) !important;
+    aspect-ratio: 1 !important;
+    border-radius: 50% !important;
+    opacity: .48 !important;
+    filter: none !important;
+    box-shadow: 0 0 54px rgba(76,220,255,.08), inset 0 0 34px rgba(118,105,255,.08) !important;
+    animation: fx-r846-mag-portal-turn 1480ms cubic-bezier(.22,.61,.36,1) both !important;
+    will-change: transform,opacity !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-flare {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 48% !important;
+    inset: auto !important;
+    z-index: 2 !important;
+    width: min(25vw,250px) !important;
+    height: min(25vw,250px) !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle,rgba(235,253,255,.80) 0 3%,rgba(105,226,255,.28) 12%,rgba(104,90,255,.14) 34%,transparent 68%) !important;
+    box-shadow: 0 0 24px rgba(156,247,255,.28),0 0 72px rgba(82,121,255,.12) !important;
+    filter: none !important;
+    animation: fx-r846-mag-core-breathe 1320ms ease-in-out both !important;
+    will-change: transform,opacity !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-scan {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 48% !important;
+    inset: auto !important;
+    z-index: 3 !important;
+    width: min(46vw,520px) !important;
+    height: 2px !important;
+    opacity: 0;
+    background: linear-gradient(90deg,transparent,rgba(124,236,255,.82),rgba(143,114,255,.46),transparent) !important;
+    box-shadow: 0 0 16px rgba(124,236,255,.24) !important;
+    filter: none !important;
+    animation: fx-r846-mag-scan 1080ms cubic-bezier(.22,.61,.36,1) both !important;
+    will-change: transform,opacity !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word {
+    color: #f7fdff !important;
+    transition: color 120ms ease !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    background: none !important;
+    color: #f7fdff !important;
+    -webkit-text-fill-color: currentColor !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-grid { opacity: .08 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-portal { opacity: .34 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="wake"] .fx-intro-flare { opacity: .28 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-grid { opacity: .16 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-portal { opacity: .62 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="sync"] .fx-intro-flare { opacity: .56 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-grid { opacity: .20 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-portal { opacity: .78 !important; }
+  #formatx-event-horizon[data-fx-preloader-r531="active"][data-fx-intro-phase-r635="ready"] .fx-intro-flare { opacity: .72 !important; }
+}
+/* production-r850-immutable-desktop-lcp-living-mag */
+`;
+}
+async function rewriteR845IntroAsset(url, response, headers) {
+  const contentType = headers.get('Content-Type') || '';
+  if (url.pathname === EVENT_HORIZON_SCRIPT_PATH && /javascript|text\/plain/i.test(contentType)) {
+    let source = await response.text();
+    const desktopMutationBlock = "force(center,'width','min(520px, calc(100vw - 40px))');force(word,'font-size','clamp(32px,5vw,56px)');force(word,'line-height','1');force(word,'letter-spacing','.08em');force(wordSpan,'opacity','1');force(wordSpan,'transform','none');force(wordSpan,'filter','none');force(kicker,'opacity','1');force(kicker,'transform','none');force(kicker,'letter-spacing','.24em');force(subtitle,'opacity','1');force(subtitle,'transform','none');force(subtitle,'font-size','10px');force(meta,'opacity',MOBILE?'0':'.5');force(meta,'transform','none');force(progressWrap,'opacity','1');force(progressWrap,'transform','none');force(progressWrap,'max-width','560px');force(progressWrap,'margin','0 auto');";
+    const immutableDesktop = "if(MOBILE){force(center,'width','min(520px, calc(100vw - 40px))');force(word,'font-size','clamp(32px,5vw,56px)');force(word,'line-height','1');force(word,'letter-spacing','.08em');force(wordSpan,'opacity','1');force(wordSpan,'transform','none');force(wordSpan,'filter','none');force(kicker,'opacity','1');force(kicker,'transform','none');force(kicker,'letter-spacing','.24em');force(subtitle,'opacity','1');force(subtitle,'transform','none');force(subtitle,'font-size','10px');force(meta,'opacity','0');force(meta,'transform','none');force(progressWrap,'opacity','1');force(progressWrap,'transform','none');force(progressWrap,'max-width','560px');force(progressWrap,'margin','0 auto');}";
+    if (!source.includes(desktopMutationBlock)) return null;
+    source = source.replace(desktopMutationBlock, immutableDesktop);
+    const revealBlock = "function startReveal(overlay){if(preloaderReleased||REDUCED||!(overlay instanceof HTMLElement))return;setIntroPhase(overlay,'ready');clear(overlay,'opacity');overlay.classList.add('fx-preloader-reveal-r635');ROOT.dataset.fxPreloaderRevealR635=\`inside-window-\${Math.round(performance.now()-PRELOADER_BOOT_AT)}\`;}";
+    const immutableReveal = "function startReveal(overlay){if(preloaderReleased||REDUCED||!(overlay instanceof HTMLElement))return;setIntroPhase(overlay,'ready');if(MOBILE){clear(overlay,'opacity');overlay.classList.add('fx-preloader-reveal-r635');}ROOT.dataset.fxPreloaderRevealR635=\`inside-window-\${Math.round(performance.now()-PRELOADER_BOOT_AT)}\`;}";
+    if (!source.includes(revealBlock)) return null;
+    source = source.replace(revealBlock, immutableReveal);
+    headers.delete('Content-Length');
+    headers.delete('Content-Encoding');
+    headers.delete('ETag');
+    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.set('X-FormatX-R845-Intro-LCP', 'immutable-desktop-word-r850');
+    return new Response(source, { status: response.status, statusText: response.statusText, headers });
+  }
+  if (url.pathname === INTRO_P0_PATH && contentType.includes('text/css')) {
+    const source = r845StaticDesktopIntroCss(await response.text());
+    headers.delete('Content-Length');
+    headers.delete('Content-Encoding');
+    headers.delete('ETag');
+    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.set('X-FormatX-R845-Intro-LCP', 'static-desktop-word');
+    return new Response(source, { status: response.status, statusText: response.statusText, headers });
+  }
+  return null;
+}
+
 async function rewriteR502DeliveryAsset(url, response, headers) {
   const spec = R502_ASSET_REWRITES.get(url.pathname);
   if (!spec) return null;
@@ -233,6 +572,15 @@ async function rewriteR502DeliveryAsset(url, response, headers) {
   headers.set('X-FormatX-R505-Asset-Graph', spec.marker);
   return new Response(source, { status: response.status, statusText: response.statusText, headers });
 }
+function mergeHomepageLinkHeader(existing) {
+  const values = String(existing || '')
+    .split(/,\s*(?=<)/)
+    .map(value => value.trim())
+    .filter(Boolean)
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-p0-first-paint-r490.css'))
+    .filter(value => !value.includes('/scifi-ui/styles/formatx-intro-p0-r575.css'));
+  return [...values, P0_FIRST_PAINT_PRELOAD, INTRO_P0_PRELOAD].join(', ');
+}
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
@@ -243,19 +591,24 @@ async function stabilizePublicResponse(request, url, response) {
   headers.set('X-FormatX-CSS-Scheduler', 'r514-critical-core-r487-post-first-paint-r504-prepaint');
   headers.set('X-FormatX-Motion-Scheduler', 'r507-single-css-animation-clock-owner');
   headers.set('X-FormatX-Mag-Clock-Owner', 'shape-sync-r476-only');
+  if (HOMEPAGE_PATHS.has(url.pathname)) {
+    headers.set('Link', mergeHomepageLinkHeader(headers.get('Link')));
+  }
   if (request.method === 'HEAD') {
     headers.delete('Content-Length');
     return new Response(null, { status: response.status, statusText: response.statusText, headers });
   }
   const contentType = headers.get('Content-Type') || '';
   if (url.pathname === EVENT_HORIZON_PATH && contentType.includes('text/css')) {
-    const css = stripNestedFirstFrameImport(await response.text());
+    const css = r848FirstFrameIntroCss(stripNestedFirstFrameImport(await response.text()));
     headers.delete('Content-Length');
     headers.delete('Content-Encoding');
     headers.delete('ETag');
     headers.set('X-FormatX-First-Frame-Import', 'removed-r499-canonical-owner');
     return new Response(css, { status: response.status, statusText: response.statusText, headers });
   }
+  const r845IntroAsset = await rewriteR845IntroAsset(url, response, headers);
+  if (r845IntroAsset) return r845IntroAsset;
   const r502Asset = await rewriteR502DeliveryAsset(url, response, headers);
   if (r502Asset) return r502Asset;
   if (!contentType.includes('text/html')) {

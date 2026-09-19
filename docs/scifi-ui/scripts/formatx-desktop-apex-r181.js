@@ -1,13 +1,8 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r181b-desktop-crystal-apex-pointer-capture';
+const VERSION='r181c-desktop-crystal-apex-no-audit-bypass';
 if(root.dataset.fxDesktopApexVersionR181===VERSION)return;
-if(new URLSearchParams(location.search).get('lighthouse')==='1'){
-  root.dataset.fxDesktopApexR181='audit-skip';
-  root.dataset.fxDesktopApexVersionR181=VERSION;
-  return;
-}
 root.dataset.fxDesktopApexVersionR181=VERSION;
 const desktop=matchMedia('(min-width:901px) and (pointer:fine)');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
