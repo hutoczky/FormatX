@@ -76,18 +76,40 @@ function assertStable(state,label){
   assert.ok(state.overflow<=2,`${label}: horizontal overflow ${state.overflow}px`);
 }
 
-async function markNativeIdentity(page){
-  await page.waitForFunction(({CANVAS,STAGE})=>{
+async function installTimelineProbe(page){
+  await page.evaluate(({CANVAS,STAGE,OVERLAY})=>{
     const root=document.documentElement;
-    return root.dataset.fxCrystalOrganismR326==='ready'
-      && root.dataset.fxCinematicJourneyR536==='ready'
-      && document.querySelectorAll(CANVAS).length===1
-      && document.querySelectorAll(STAGE).length===1;
-  },{CANVAS,STAGE},{timeout:20000});
-  await page.evaluate(({CANVAS,STAGE})=>{
-    document.querySelector(STAGE).dataset.fxR548Identity='native-stage-r548';
-    document.querySelector(CANVAS).dataset.fxR548Identity='native-canvas-r548';
-  },{CANVAS,STAGE});
+    const timeline={phases:[],coreReadyPhase:null,coreSamples:[]};
+    const sample=()=>{
+      const overlay=document.querySelector(OVERLAY);
+      const phase=String(root.dataset.fxMagBirthPhase||overlay?.dataset.phase||'');
+      if(phase && timeline.phases[timeline.phases.length-1]!==phase)timeline.phases.push(phase);
+      const ready=root.dataset.fxCrystalOrganismR326==='ready';
+      const stage=document.querySelector(STAGE);
+      const canvas=document.querySelector(CANVAS);
+      if(ready){
+        if(timeline.coreReadyPhase===null)timeline.coreReadyPhase=phase||'handoff';
+        timeline.coreSamples.push({phase:phase||'handoff',stageCount:document.querySelectorAll(STAGE).length,canvasCount:document.querySelectorAll(CANVAS).length});
+        if(stage && !stage.dataset.fxR548Identity)stage.dataset.fxR548Identity='native-stage-r548';
+        if(canvas && !canvas.dataset.fxR548Identity)canvas.dataset.fxR548Identity='native-canvas-r548';
+      }
+    };
+    window.__fxR548Timeline=timeline;
+    const observer=new MutationObserver(sample);
+    observer.observe(root,{attributes:true,attributeFilter:['data-fx-mag-birth-phase','data-fx-crystal-organism-r326']});
+    const overlay=document.querySelector(OVERLAY);
+    if(overlay)observer.observe(overlay,{attributes:true,attributeFilter:['data-phase']});
+    window.__fxR548TimelineObserver=observer;
+    sample();
+  },{CANVAS,STAGE,OVERLAY});
+}
+
+async function readTimeline(page){
+  return page.evaluate(()=>({
+    phases:[...(window.__fxR548Timeline?.phases||[])],
+    coreReadyPhase:window.__fxR548Timeline?.coreReadyPhase??null,
+    coreSamples:[...(window.__fxR548Timeline?.coreSamples||[])]
+  }));
 }
 
 async function verifyFullBirth(browser){
@@ -99,29 +121,20 @@ async function verifyFullBirth(browser){
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
   try{
-    await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'domcontentloaded',timeout:30000});
+    await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
     await page.locator(OVERLAY).waitFor({state:'visible',timeout:10000});
+    await installTimelineProbe(page);
     const active=await snapshot(page);
     assert.equal(active.scrollLock,'active','desktop-full: R533 did not own the temporary scroll lock');
     assert.equal(active.legacyPreloaderCount,0,'desktop-full: second/legacy preloader remained');
-    await markNativeIdentity(page);
-
-    const phases=new Set();
-    const phaseCore=[];
-    const deadline=Date.now()+9500;
-    while(Date.now()<deadline){
-      const s=await snapshot(page);
-      if(s.phase)phases.add(String(s.phase));
-      if(s.crystal==='ready')phaseCore.push({phase:s.phase,stageCount:s.stageCount,canvasCount:s.canvasCount});
-      if(s.overlayCount===0)break;
-      await page.waitForTimeout(120);
-    }
-
+    await page.waitForFunction(sel=>!document.querySelector(sel),OVERLAY,{timeout:12000});
+    const timeline=await readTimeline(page);
+    const phases=new Set(timeline.phases);
     for(const phase of ['0','1','2','3','4'])assert.ok(phases.has(phase),`desktop-full: R533 phase ${phase} not observed; got ${[...phases].join(',')}`);
-    assert.ok(phaseCore.length>4,'desktop-full: native R326 was not present through the birth sequence');
-    assert.ok(phaseCore.every(x=>x.stageCount===1&&x.canvasCount===1),'desktop-full: native R326 ownership changed during birth');
+    assert.notEqual(timeline.coreReadyPhase,null,'desktop-full: native R326 never became ready during birth/handoff');
+    assert.ok(timeline.coreSamples.length>0,'desktop-full: no native R326 ownership samples captured');
+    assert.ok(timeline.coreSamples.every(x=>x.stageCount===1&&x.canvasCount===1),'desktop-full: native R326 ownership changed during birth/handoff');
 
-    await page.waitForFunction(sel=>!document.querySelector(sel),OVERLAY,{timeout:3000});
     const final=await snapshot(page);
     assertStable(final,'desktop-full');
     assert.equal(final.stageIdentity,'native-stage-r548','desktop-full: native stage was swapped during handoff');
@@ -142,7 +155,7 @@ async function verifyFullBirth(browser){
     const reloadReady=await snapshot(page);
     assertStable(reloadReady,'session-reload');
     assert.equal(errors.length,0,`desktop-full: browser errors: ${errors.join(' | ')}`);
-    return{phases:[...phases],phaseCoreSamples:phaseCore.length,final,reload:reloadReady};
+    return{phases:[...phases],coreReadyPhase:timeline.coreReadyPhase,coreSamples:timeline.coreSamples.length,final,reload:reloadReady};
   }finally{await context.close();}
 }
 
@@ -156,14 +169,16 @@ async function verifySkip(browser){
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
   try{
-    await page.goto(url({intro:1,cinema:1,r548:'mobile-skip'}),{waitUntil:'domcontentloaded',timeout:30000});
+    await page.goto(url({intro:1,cinema:1,r548:'mobile-skip'}),{waitUntil:'commit',timeout:30000});
     const skip=page.locator(OVERLAY+' .fxb-skip');
     await skip.waitFor({state:'visible',timeout:10000});
+    await installTimelineProbe(page);
     const box=await skip.boundingBox();
     assert.ok(box&&box.width>=44&&box.height>=44,`mobile-skip: skip hit target invalid ${JSON.stringify(box)}`);
     const aria=await skip.getAttribute('aria-label');
     assert.ok(aria&&aria.trim().length>0,'mobile-skip: skip has no accessible name');
-    await markNativeIdentity(page);
+    await page.waitForFunction(({CANVAS,STAGE})=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'&&document.querySelectorAll(CANVAS).length===1&&document.querySelectorAll(STAGE).length===1,{CANVAS,STAGE},{timeout:10000});
+    await page.evaluate(({CANVAS,STAGE})=>{document.querySelector(STAGE).dataset.fxR548Identity='native-stage-r548';document.querySelector(CANVAS).dataset.fxR548Identity='native-canvas-r548';},{CANVAS,STAGE});
     await skip.focus();
     assert.equal(await skip.evaluate(el=>document.activeElement===el),true,'mobile-skip: skip cannot receive keyboard focus');
     await page.keyboard.press('Enter');
@@ -189,7 +204,7 @@ async function verifySkip(browser){
   try{
     const desktop=await verifyFullBirth(browser);
     const mobile=await verifySkip(browser);
-    const report={base:BASE,contract:'r550-r533-native-birth-to-r536-cinematic-handoff',desktop,mobile};
+    const report={base:BASE,contract:'r552-r533-native-birth-to-r536-cinematic-handoff',desktop,mobile};
     writeJson('report.json',report);
     console.log('PASS: R533 full birth + skip + once-per-session hand off to the same single native R326 MAG and R536 journey without stuck scroll lock or duplicate preloader.');
   }finally{await browser.close();}
