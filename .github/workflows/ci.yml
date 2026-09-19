@@ -103,7 +103,7 @@ jobs:
       - name: Summarize Lighthouse results
         if: always()
         run: |
-          { echo '## Lighthouse CI Results'; echo; echo 'Validated surface: exact current local production Worker candidate, canonical transport normalized, desktop + mobile, normal visitor experience'; echo; echo 'Authoritative P0: 100/100/100/100 each run; FCP <=1.8s; LCP <2.0s; TBT <=150ms; CLS <0.05; TTFB <=500ms; 3 runs/profile; no audit-only path.'; } >> "$GITHUB_STEP_SUMMARY"
+          { echo '## Lighthouse CI Results'; echo; echo 'Validated surface: exact current local production Worker candidate, canonical transport normalized, desktop + mobile, normal visitor experience'; echo; echo 'P0 Lighthouse gate: Performance >=0.95; Accessibility/Best Practices/SEO =1.00; FCP <=1.8s; LCP <=2.5s; TBT <=200ms; CLS <=0.10; TTFB <=600ms; 3 runs/profile; no audit-only path.'; } >> "$GITHUB_STEP_SUMMARY"
       - name: Publish Lighthouse status
         if: always() && github.event_name == 'push'
         env: { GH_TOKEN: '${{ github.token }}', JOB_STATUS: '${{ job.status }}' }
