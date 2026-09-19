@@ -89,12 +89,12 @@ jobs:
               const controls=document.querySelector('#hero .fx-reference-controls-r204');
               const sound=controls?.querySelector('.fx-three-sound');
               const ask=controls?.querySelector('.fx-reference-ask');
-              const pause=controls?.querySelector('.fx-reference-pause');
+              const pauseCount=controls?.querySelectorAll('.fx-reference-pause').length||0;
               const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
               const miniHost=document.querySelector('.fx-mini-mag-assistant-r459');
               const mini=document.querySelector('.fx-mini-mag-launcher-r459');
               const cs=canvas?getComputedStyle(canvas):null;
-              return{brand:rect(brand),mag:rect(mag),lang:rect(lang),menu:rect(menu),controls:rect(controls),sound:rect(sound),ask:rect(ask),pause:rect(pause),canvas:rect(canvas),miniHost:rect(miniHost),mini:rect(mini),magText:String(mag?.textContent||'').trim(),langText:String(lang?.textContent||'').trim(),magBefore:mag?getComputedStyle(mag,'::before').content:'',magAfter:mag?getComputedStyle(mag,'::after').content:'',filter:cs?.filter||'',renderer:document.documentElement.dataset.fxCoreRenderer||'',canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,miniOwner:document.documentElement.dataset.fxMiniMagPrimaryHeroR459||''};
+              return{brand:rect(brand),mag:rect(mag),lang:rect(lang),menu:rect(menu),controls:rect(controls),sound:rect(sound),ask:rect(ask),pauseCount,canvas:rect(canvas),miniHost:rect(miniHost),mini:rect(mini),magText:String(mag?.textContent||'').trim(),langText:String(lang?.textContent||'').trim(),magBefore:mag?getComputedStyle(mag,'::before').content:'',magAfter:mag?getComputedStyle(mag,'::after').content:'',filter:cs?.filter||'',renderer:document.documentElement.dataset.fxCoreRenderer||'',canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,miniOwner:document.documentElement.dataset.fxMiniMagPrimaryHeroR459||''};
             });
           }
 
@@ -104,10 +104,11 @@ jobs:
             assert(s.mag.width>=44&&s.mag.height>=44&&s.lang.width>=44&&s.lang.height>=44&&s.menu.width>=44&&s.menu.height>=44,`${label}: header target below 44px ${JSON.stringify(s)}`);
           }
           function assertRow(s,label,size){
-            for(const key of ['controls','sound','ask','pause'])assert(s[key],`${label}: missing ${key}: ${JSON.stringify(s)}`);
-            assert(s.sound.width>=size&&s.sound.height>=size&&s.ask.width>=size&&s.ask.height>=size&&s.pause.width>=size&&s.pause.height>=size,`${label}: control target too small ${JSON.stringify(s)}`);
-            assert(Math.max(s.sound.top,s.ask.top,s.pause.top)-Math.min(s.sound.top,s.ask.top,s.pause.top)<=8,`${label}: controls not one row ${JSON.stringify(s)}`);
-            assert(!overlap(s.sound,s.ask)&&!overlap(s.ask,s.pause),`${label}: controls overlap ${JSON.stringify(s)}`);
+            for(const key of ['controls','sound','ask'])assert(s[key],`${label}: missing ${key}: ${JSON.stringify(s)}`);
+            assert(s.pauseCount===0,`${label}: obsolete manual PAUSE returned ${JSON.stringify(s)}`);
+            assert(s.sound.width>=size&&s.sound.height>=size&&s.ask.width>=size&&s.ask.height>=size,`${label}: control target too small ${JSON.stringify(s)}`);
+            assert(Math.abs(s.sound.top-s.ask.top)<=8,`${label}: controls not one row ${JSON.stringify(s)}`);
+            assert(!overlap(s.sound,s.ask),`${label}: controls overlap ${JSON.stringify(s)}`);
           }
 
           (async()=>{
