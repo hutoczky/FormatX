@@ -386,3 +386,110 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 /* production-r675-visible-hero-space-centred-desktop-actionbar */
 /* production-r681-mobile-only-intro-clamp-zero-width-core-dock */
 /* production-r685-final-box-reservation-marquee-bound */
+
+
+/* R840 — V130-style desktop first-frame ownership without legacy intro raster.
+   This state exists only before Event Horizon adds fx-intro-running. It keeps the
+   required opaque #01040b cover, exposes a lightweight contentful FORMATX shell,
+   and suppresses portal/grid/flare/progress work until the canonical intro owner
+   takes over. Product timing and release ownership are unchanged. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon.fx-intro-overlay[data-fx-prepaint-r840="true"] {
+    display: grid !important;
+    place-items: stretch !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    isolation: auto !important;
+    contain: layout paint !important;
+    color: #f7fdff !important;
+    background: #01040b !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon.fx-intro-overlay[data-fx-prepaint-r840="true"]::before,
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon.fx-intro-overlay[data-fx-prepaint-r840="true"]::after {
+    content: none !important;
+    display: none !important;
+    opacity: 0 !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon[data-fx-prepaint-r840="true"] :is(
+    .fx-intro-curtain,
+    .fx-intro-grid,
+    .fx-intro-scan,
+    .fx-intro-portal,
+    .fx-intro-flare,
+    .fx-intro-meta,
+    .fx-intro-progress-wrap
+  ) {
+    display: none !important;
+    opacity: 0 !important;
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+  }
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon[data-fx-prepaint-r840="true"] .fx-intro-center {
+    position: absolute !important;
+    inset: clamp(205px, 26vh, 245px) auto auto max(40px, calc((100vw - 1320px) / 2)) !important;
+    width: min(580px, calc(100vw - 80px)) !important;
+    margin: 0 !important;
+    text-align: left !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon[data-fx-prepaint-r840="true"] .fx-intro-kicker {
+    display: block !important;
+    margin: 0 0 24px !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    color: #8fc9d9 !important;
+    font: 800 10px/1.3 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .18em !important;
+  }
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon[data-fx-prepaint-r840="true"] .fx-intro-word {
+    display: block !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    color: #f7fdff !important;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
+    font: 900 clamp(64px, 6.25vw, 92px)/.88 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: -.075em !important;
+    text-wrap: nowrap !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon[data-fx-prepaint-r840="true"] .fx-intro-word span {
+    display: inline-block !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    color: #f7fdff !important;
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon[data-fx-prepaint-r840="true"] .fx-intro-subtitle {
+    display: block !important;
+    width: 100% !important;
+    margin: 9px 0 0 !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    color: #c4d8e4 !important;
+    font: 800 clamp(18px, 1.8vw, 26px)/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .08em !important;
+    text-align: left !important;
+  }
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon[data-fx-prepaint-r840="true"] .fx-intro-subtitle::before,
+  html.fx-intro-pending:not(.fx-intro-running) #formatx-event-horizon[data-fx-prepaint-r840="true"] .fx-intro-subtitle::after {
+    content: none !important;
+    display: none !important;
+  }
+}
+
+/* production-r840-lightweight-desktop-intro-prepaint */

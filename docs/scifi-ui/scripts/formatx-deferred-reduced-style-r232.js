@@ -10,6 +10,21 @@ const stub=document.querySelector('link[data-fx-critical-reduced-r228]');
 const FULL_URL='./styles/formatx-critical-reduced-full-r298.css?v=20260822-r299-reduced-only';
 const MOBILE_FIRST_PAINT_URL='./styles/formatx-mobile-first-paint-r358.css?v=20260830-r455-csp-safe-geometry-seed';
 
+function armDesktopIntroPrepaint(){
+  if(reduced.matches)return;
+  const mobileDirect=matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;
+  if(mobileDirect||root.dataset.fxPreloaderR531==='done')return;
+  const overlay=document.getElementById('formatx-event-horizon');
+  if(!(overlay instanceof HTMLElement))return;
+  root.classList.remove('fx-intro-complete','fx-intro-reveal','fx-intro-running','fx-intro-managed');
+  root.classList.add('fx-intro-pending');
+  root.dataset.fxIntro='desktop-static-prepaint-r840';
+  root.dataset.fxIntroBootStateR840='lightweight-prepaint-before-event-horizon';
+  overlay.hidden=false;
+  overlay.setAttribute('aria-hidden','true');
+  overlay.dataset.fxPrepaintR840='true';
+}
+
 function armIntroClockKeepalive(){
   if(reduced.matches)return;
   let timer=0,guard=0,stopped=false;
@@ -56,6 +71,7 @@ function seedMobileGeometry(){
   }
 }
 
+armDesktopIntroPrepaint();
 armIntroClockKeepalive();
 
 if(!reduced.matches){
