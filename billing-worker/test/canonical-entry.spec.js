@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import canonicalWorker from '../src/production-content-entry.js';
 
+const P0_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
+
+function expectHomepageLinks(response, canonical) {
+  const link = response.headers.get('Link') || '';
+  expect(link).toContain(`<${canonical}>; rel="canonical"`);
+  expect(link).toContain(P0_PRELOAD);
+}
+
 function testEnv(onAsset) {
   return {
     ASSETS: {
@@ -39,7 +47,7 @@ describe('active production canonical gateway', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Location')).toBeNull();
-    expect(response.headers.get('Link')).toBe('<https://formatxsuite.com/>; rel="canonical"');
+    expectHomepageLinks(response, 'https://formatxsuite.com/');
     expect(assetPath).toBe('/scifi-ui/');
   });
 
@@ -157,7 +165,7 @@ describe('active production canonical gateway', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Location')).toBeNull();
-    expect(response.headers.get('Link')).toBe(`<${canonical}>; rel="canonical"`);
+    expectHomepageLinks(response, canonical);
     expect(response.headers.get('Content-Language')).toBe(language);
     expect(html).toMatch(new RegExp(`<html\\b[^>]*\\blang="${language}"(?:\\s|>)`));
     expect(html).toContain(`<title>${expected.title}</title>`);
