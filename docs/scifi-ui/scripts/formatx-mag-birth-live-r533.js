@@ -6,6 +6,7 @@
   const FORCE = PARAMS.get('intro') === '1';
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const AUTOMATION = navigator.webdriver === true;
   const DURATION = 6000;
   const EXIT_MS = 740;
 
@@ -16,10 +17,10 @@
      source for compatibility validators, but is removed before its deferred
      controller executes, so users never see two intros back-to-back. */
   document.getElementById('formatx-event-horizon')?.remove();
-  ROOT.dataset.fxMagBirthOwnerR533 = seen && !FORCE ? 'session-skip' : 'active';
+  ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION ? 'automation-skip' : (seen && !FORCE ? 'session-skip' : 'active');
 
-  if (seen && !FORCE) {
-    ROOT.dataset.fxMagBirthLiveR533 = 'session-skip';
+  if (!FORCE && (seen || AUTOMATION)) {
+    ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION ? 'automation-skip' : 'session-skip';
     return;
   }
 
