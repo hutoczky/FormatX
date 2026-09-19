@@ -66,7 +66,7 @@
     if (document.querySelector('link[data-fx-seamless-loop-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260820-reference-loop-r246';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260919-r534-live-mag-mirror';
     link.dataset.fxSeamlessLoopStyle = 'true';
     document.head.appendChild(link);
   }
@@ -258,6 +258,7 @@
     const section = document.createElement('section');
     section.className = 'fx-loop-reference-mirror';
     section.dataset.fxLoopMirror = 'reference-v8';
+    section.dataset.fxLoopCapture = 'pending-r534';
     section.setAttribute('aria-hidden', 'true');
     section.setAttribute('inert', '');
     section.innerHTML = [
@@ -266,8 +267,8 @@
       '<strong>FORMATX</strong><b>SUITE PRO</b>',
       '<p data-hu="Valós rendszerállapot, kontrollált végrehajtás és visszaellenőrizhető eredmény." data-en="Real system state, controlled execution and verifiable outcomes.">Valós rendszerállapot, kontrollált végrehajtás és visszaellenőrizhető eredmény.</p>',
       '</div>',
-      '<div class="fx-loop-reference-visual" aria-hidden="true"><img alt="" decoding="async">',
-      '<div class="fx-loop-reference-controls"><span class="fx-loop-reference-ask"><i></i><b data-hu="KÉRDEZZ" data-en="ASK">KÉRDEZZ</b></span><span class="fx-loop-reference-pause"></span></div>',
+      '<div class="fx-loop-reference-visual" aria-hidden="true"><span class="fx-loop-reference-core-fallback"></span><img class="fx-loop-reference-image" alt="" decoding="async">',
+      '<div class="fx-loop-reference-controls"><span class="fx-loop-reference-ask"><i></i><b data-hu="KÉRDEZZ" data-en="ASK">KÉRDEZZ</b></span></div>',
       '</div>',
       '<div class="fx-loop-reference-heading" data-hu="A MŰKÖDÉS MEGISMERÉSE" data-en="DISCOVER HOW IT WORKS">A MŰKÖDÉS MEGISMERÉSE</div>',
       '<article class="fx-loop-reference-proof">',
@@ -281,20 +282,49 @@
     return section;
   }
 
+  function activeCoreCanvas() {
+    const api = window.FormatXLivingCore || window.FormatXCoreMobileV69;
+    const apiCanvas = api?.canvas;
+    if (apiCanvas instanceof HTMLCanvasElement && apiCanvas.width >= 8 && apiCanvas.height >= 8) return apiCanvas;
+    const current = sourceHero?.querySelector(
+      '.fx-crystal-organism-r326-canvas, .fx-core-mobile-v55-canvas, .fx-core-real3d-canvas'
+    );
+    return current instanceof HTMLCanvasElement && current.width >= 8 && current.height >= 8 ? current : null;
+  }
+
   function captureReferenceMirror() {
     mirrorCaptureFrame = 0;
     if (!mirrorImage || !mirror?.isConnected || !sourceHero?.isConnected) return false;
-    const detail = sourceHero.querySelector('.fx-core-detail-r122');
-    if (!(detail instanceof HTMLCanvasElement) || detail.width < 8 || detail.height < 8) return false;
+    const liveCanvas = activeCoreCanvas();
+    if (!(liveCanvas instanceof HTMLCanvasElement)) {
+      mirror.dataset.fxLoopCapture = 'fallback-r534';
+      root.dataset.fxLoopMirrorFrame = 'live-canvas-unavailable';
+      return false;
+    }
+
     try {
-      const snapshot = detail.toDataURL('image/webp', .9);
-      if (!snapshot || snapshot.length < 512) return false;
+      /* The production MAG uses preserveDrawingBuffer:false. Capture it in the
+         same animation frame as a requested native render, copying into a 2D
+         bitmap so the loop bridge never exposes the obsolete blank r122 layer. */
+      const maxSide = 1100;
+      const scale = Math.min(1, maxSide / Math.max(liveCanvas.width, liveCanvas.height));
+      const snapshotCanvas = document.createElement('canvas');
+      snapshotCanvas.width = Math.max(8, Math.round(liveCanvas.width * scale));
+      snapshotCanvas.height = Math.max(8, Math.round(liveCanvas.height * scale));
+      const snapshotContext = snapshotCanvas.getContext('2d', { alpha: true });
+      if (!snapshotContext) throw new Error('2d-snapshot-context-unavailable');
+      snapshotContext.clearRect(0, 0, snapshotCanvas.width, snapshotCanvas.height);
+      snapshotContext.drawImage(liveCanvas, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
+      const snapshot = snapshotCanvas.toDataURL('image/webp', .9);
+      if (!snapshot || snapshot.length < 900) throw new Error('snapshot-empty');
+
       mirrorImage.src = snapshot;
-      mirrorImage.hidden = false;
-      root.dataset.fxLoopMirrorFrame = `${detail.width}x${detail.height}`;
+      mirror.dataset.fxLoopCapture = 'ready-r534';
+      root.dataset.fxLoopMirrorFrame = `${liveCanvas.width}x${liveCanvas.height}-native-r326`;
       return true;
     } catch (_) {
-      root.dataset.fxLoopMirrorFrame = 'capture-unavailable';
+      mirror.dataset.fxLoopCapture = 'fallback-r534';
+      root.dataset.fxLoopMirrorFrame = 'capture-unavailable-r534';
       return false;
     }
   }
@@ -303,9 +333,11 @@
     clearTimeout(mirrorCaptureTimer);
     mirrorCaptureTimer = window.setTimeout(() => {
       cancelAnimationFrame(mirrorCaptureFrame);
-      mirrorCaptureFrame = requestAnimationFrame(() => {
-        mirrorCaptureFrame = requestAnimationFrame(captureReferenceMirror);
-      });
+      const api = window.FormatXLivingCore || window.FormatXCoreMobileV69;
+      try { api?.requestRender?.(2); } catch (_) {}
+      /* requestRender queues the native MAG first; our callback then snapshots
+         that just-rendered WebGL buffer before browser compositing clears it. */
+      mirrorCaptureFrame = requestAnimationFrame(captureReferenceMirror);
     }, Math.max(0, delay));
   }
 
