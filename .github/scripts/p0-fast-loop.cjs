@@ -194,24 +194,6 @@ async function verifyOverflowContext(browser, viewport, mobile) {
       const rr = root.getBoundingClientRect();
       const fr = footer?.getBoundingClientRect();
       const tr = thought?.getBoundingClientRect();
-      const offenders = Array.from(document.querySelectorAll('body *')).map(node => {
-        const rect = node.getBoundingClientRect();
-        const style = getComputedStyle(node);
-        return {
-          tag: node.tagName.toLowerCase(),
-          id: node.id || '',
-          className: typeof node.className === 'string' ? node.className.slice(0, 160) : '',
-          left: Math.round(rect.left * 10) / 10,
-          right: Math.round(rect.right * 10) / 10,
-          width: Math.round(rect.width * 10) / 10,
-          scrollWidth: node.scrollWidth,
-          clientWidth: node.clientWidth,
-          position: style.position,
-          overflowX: style.overflowX
-        };
-      }).filter(item => item.right > root.clientWidth + 1 || item.left < -1 || item.scrollWidth > item.clientWidth + 1)
-        .sort((a, b) => Math.max(b.right - root.clientWidth, b.scrollWidth - b.clientWidth) - Math.max(a.right - root.clientWidth, a.scrollWidth - a.clientWidth))
-        .slice(0, 24);
       return {
         clientWidth: root.clientWidth,
         docWidth: root.scrollWidth,
@@ -219,7 +201,6 @@ async function verifyOverflowContext(browser, viewport, mobile) {
         rootRectWidth: rr.width,
         footer: fr ? { left: fr.left, right: fr.right, width: fr.width, box: getComputedStyle(footer).boxSizing } : null,
         thought: tr ? { left: tr.left, right: tr.right, width: tr.width, box: getComputedStyle(thought).boxSizing } : null,
-        offenders,
       };
     });
     assert.equal(state.docWidth, state.clientWidth, `${viewport.width}x${viewport.height}: document overflow ${JSON.stringify(state)}`);
