@@ -4,13 +4,34 @@
   "official_score_claimed": false,
   "purpose": "Engineering and UX target profile for Web Design Awards review; official score is determined only by the jury.",
   "categories": {
-    "user_experience_strategy": { "weight_percent": 15, "target": 10 },
-    "visual_design_branding": { "weight_percent": 15, "target": 10 },
-    "content_storytelling": { "weight_percent": 10, "target": 10 },
-    "accessibility_inclusivity": { "weight_percent": 10, "target": 10 },
-    "performance_technical": { "weight_percent": 20, "target": 10 },
-    "responsiveness_multi_device": { "weight_percent": 10, "target": 10 },
-    "innovation_future_readiness": { "weight_percent": 20, "target": 10 }
+    "user_experience_strategy": {
+      "weight_percent": 15,
+      "target": 10
+    },
+    "visual_design_branding": {
+      "weight_percent": 15,
+      "target": 10
+    },
+    "content_storytelling": {
+      "weight_percent": 10,
+      "target": 10
+    },
+    "accessibility_inclusivity": {
+      "weight_percent": 10,
+      "target": 10
+    },
+    "performance_technical": {
+      "weight_percent": 20,
+      "target": 10
+    },
+    "responsiveness_multi_device": {
+      "weight_percent": 10,
+      "target": 10
+    },
+    "innovation_future_readiness": {
+      "weight_percent": 20,
+      "target": 10
+    }
   },
   "runtime_contracts": {
     "audio_default": "muted",
@@ -28,15 +49,15 @@
   },
   "lighthouse_hard_gate": {
     "runs_per_profile": 3,
-    "performance_min": 0.9,
-    "accessibility_min": 1.0,
-    "best_practices_min": 1.0,
-    "seo_min": 1.0,
+    "performance_min": 1,
+    "accessibility_min": 1,
+    "best_practices_min": 1,
+    "seo_min": 1,
     "fcp_max_ms": 1800,
-    "lcp_max_ms": 2500,
-    "tbt_max_ms": 200,
-    "cls_max": 0.1,
-    "ttfb_max_ms": 600,
+    "lcp_max_ms": 1999,
+    "tbt_max_ms": 150,
+    "cls_max": 0.049,
+    "ttfb_max_ms": 500,
     "audit_only_url": false,
     "forced_reduced_motion": false,
     "skipped_audits": false
