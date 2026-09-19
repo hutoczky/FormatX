@@ -231,8 +231,11 @@ html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
 .fx-c536-anatomy{
   position:absolute;
   z-index:-1;
-  inset:-7% -5%;
+  inset:0;
+  width:100%;
+  max-width:100%;
   overflow:hidden;
+  contain:paint;
   pointer-events:none!important;
   opacity:calc(.06 + var(--fx-c536-scene-energy) * .54);
   transition:opacity .7s ease;
@@ -340,7 +343,7 @@ html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
     linear-gradient(rgba(139,203,255,.04) 1px,transparent 1px),
     linear-gradient(90deg,rgba(139,203,255,.036) 1px,transparent 1px);
   background-size:54px 54px;
-  transform:perspective(1000px) rotateX(calc(1deg + var(--fx-c536-scene-local) * 3deg)) scale(1.05);
+  transform:none;
   transform-origin:center;
   -webkit-mask-image:radial-gradient(ellipse at 60% 48%,#000 0 43%,transparent 80%);
   mask-image:radial-gradient(ellipse at 60% 48%,#000 0 43%,transparent 80%);

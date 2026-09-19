@@ -5,7 +5,7 @@
 const root=document.documentElement;
 if(root.dataset.fxMiniMagAssistantR459==='ready'||root.dataset.fxMiniMagAssistantR459==='booting')return;
 root.dataset.fxMiniMagAssistantR459='booting';
-const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260919-r537-narrow-occlusion-safe';
+const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260919-r539-context-occlusion-safe';
 const SECTION_IDS=['hero','experience','capabilities','pricing','system','resources'];
 let pendingHeroRequest=false;
 const COPY={
@@ -46,6 +46,15 @@ function install(){
   nav.addEventListener('click',event=>{const button=event.target instanceof Element?event.target.closest('[data-section]'):null;if(!(button instanceof HTMLButtonElement))return;if(scrollToSection(button.dataset.section||''))setOpen(false);});
   document.addEventListener('pointerdown',event=>{if(host.dataset.open!=='true'||!(event.target instanceof Node)||host.contains(event.target))return;setOpen(false);},{passive:true});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&host.dataset.open==='true'){event.preventDefault();setOpen(false);return;}if(event.altKey&&!event.ctrlKey&&!event.metaKey&&String(event.key).toLowerCase()==='m'){event.preventDefault();setOpen(host.dataset.open!=='true',true);}});
+  const terminalZones=[document.getElementById('resources'),document.querySelector('footer.site-footer')].filter(node=>node instanceof HTMLElement);
+  if('IntersectionObserver' in window&&terminalZones.length){
+    const terminalObserver=new IntersectionObserver(entries=>{
+      const hidden=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.03);
+      host.dataset.contextHidden=hidden?'true':'false';
+      root.dataset.fxMiniMagContextR539=hidden?'terminal-information-safe':'normal';
+    },{threshold:[0,.03,.15],rootMargin:'0px 0px 0px 0px'});
+    terminalZones.forEach(node=>terminalObserver.observe(node));
+  }
   for(const name of ['formatx:languagechange','pageshow'])addEventListener(name,syncCopy,{passive:true});syncCopy();
   window.FormatXMiniMagR459={open:()=>setOpen(true,true),close:()=>setOpen(false),toggle:()=>setOpen(host.dataset.open!=='true',true),navigate:scrollToSection,ask:openAsk,menu:toggleMenu,sound:toggleSound,language:toggleLanguage,shape:toggleShape,element:host};
   root.dataset.fxMiniMagAssistantR459='ready';root.dataset.fxMiniMagPrimaryHeroR459='preserved-native-webgl';root.dataset.fxMiniMagHeroBridgeR460='ready';root.dataset.fxMiniMagMotionControlR528='reduced-motion-only-no-manual-pause';

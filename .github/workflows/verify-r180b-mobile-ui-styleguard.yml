@@ -59,22 +59,21 @@ jobs:
             const mini=page.locator('.fx-mini-mag-assistant-r459').first();
             const sound=page.locator('#hero .fx-reference-controls-r204 .fx-three-sound').first();
             const ask=page.locator('#hero .fx-reference-controls-r204 .fx-reference-ask').first();
-            const pause=page.locator('#hero .fx-reference-controls-r204 .fx-reference-pause').first();
             const brand=page.locator('.topbar .brand').first();
             const magButton=page.locator('.topbar .fx-reference-mag-button').first();
             const lang=page.locator('.topbar .fx-language-toggle').first();
             const menu=page.locator('.topbar .fx-reference-menu-button').first();
 
-            for(const locator of [stage,mini,sound,ask,pause,brand,magButton,lang,menu])assert.ok(await locator.count(),'required R460 mobile UI node missing');
+            for(const locator of [stage,mini,sound,ask,brand,magButton,lang,menu])assert.ok(await locator.count(),'required R460 mobile UI node missing');
+            assert.equal(await page.locator('#hero .fx-reference-pause').count(),0,'obsolete manual PAUSE returned');
             assert.ok(await stage.isVisible(),'R326 hero MAG stage is not visible');
-            for(const locator of [sound,ask,pause,brand,magButton,lang,menu])assert.ok(await locator.isVisible(),'required R460 control is not visible');
+            for(const locator of [sound,ask,brand,magButton,lang,menu])assert.ok(await locator.isVisible(),'required R460 control is not visible');
 
-            const [s,a,p,b,m,l,n]=await Promise.all([rect(sound),rect(ask),rect(pause),rect(brand),rect(magButton),rect(lang),rect(menu)]);
+            const [s,a,b,m,l,n]=await Promise.all([rect(sound),rect(ask),rect(brand),rect(magButton),rect(lang),rect(menu)]);
             assert.ok(s.width>=44&&s.height>=44,'SOUND touch target too small');
             assert.ok(a.width>=44&&a.height>=44,'ASK touch target too small');
-            assert.ok(p.width>=44&&p.height>=44,'PAUSE touch target too small');
-            assert.ok(!overlap(s,a,2)&&!overlap(a,p,2),'hero controls overlap');
-            assert.ok(Math.abs(s.top-a.top)<=8&&Math.abs(a.top-p.top)<=8,'hero controls are not one horizontal row');
+            assert.ok(!overlap(s,a,2),'hero controls overlap');
+            assert.ok(Math.abs(s.top-a.top)<=8,'hero controls are not one horizontal row');
             assert.ok(!overlap(b,m,2),'brand overlaps MAG header button');
             assert.ok(!overlap(m,l,2),'MAG header button overlaps language');
             assert.ok(!overlap(l,n,2),'language overlaps menu');
@@ -136,14 +135,6 @@ jobs:
             await page.touchscreen.touchEnd();
             await page.waitForTimeout(350);
             assert.equal(await mini.getAttribute('data-open'),'false','MAG drag incorrectly opened site controller');
-
-            const pauseBox=await rect(pause);
-            const pausedBefore=await pause.getAttribute('data-paused');
-            await page.touchscreen.tap(pauseBox.cx,pauseBox.cy);
-            await page.waitForTimeout(180);
-            assert.equal(await mini.getAttribute('data-open'),'false','PAUSE tap leaked into hero MAG controller');
-            const pausedAfter=await pause.getAttribute('data-paused');
-            assert.notEqual(pausedAfter,pausedBefore,'PAUSE control did not toggle');
 
             await page.screenshot({path:'r460-mobile.png',fullPage:false,animations:'allow',timeout:120000});
             await browser.close();

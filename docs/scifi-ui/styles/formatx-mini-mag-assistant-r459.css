@@ -293,3 +293,11 @@
   .fx-mini-mag-panel-r459,
   .fx-mini-mag-launcher-r459 { transition: none !important; animation: none !important; }
 }
+
+
+/* R539 — fixed assistant must never cover footer/resource information.
+   It remains available from the sticky MAG control and reappears outside the
+   terminal information zone. */
+.fx-mini-mag-assistant-r459[data-context-hidden="true"][data-open="false"] {
+  display: none !important;
+}

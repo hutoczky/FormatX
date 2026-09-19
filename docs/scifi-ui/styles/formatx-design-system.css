@@ -93,6 +93,7 @@ html[data-fx-design-system="2"] {
 html[data-fx-design-system="2"] body {
   min-width: 320px;
   color: var(--fx-text);
+  font-family: var(--fx-font-sans) !important;
   background:
     radial-gradient(circle at 12% -8%, rgba(var(--fx-cyan-rgb), .095), transparent 34rem),
     radial-gradient(circle at 92% 4%, rgba(var(--fx-violet-rgb), .075), transparent 34rem),
