@@ -1,6 +1,6 @@
 # FormatX Suite Pro — nyilvános technikai bizonyítékriport
 
-**Frissítve:** 2026-09-08  
+**Frissítve:** 2026-09-02  
 **Nyilvános oldal:** https://formatxsuite.com/  
 **Forrás és CI:** https://github.com/hutoczky/FormatX/actions
 
@@ -67,7 +67,7 @@ A P0 optimalizálás nem távolíthatja el és nem gyengítheti a következő m�
 - audit/report export;
 - veszélyes vagy bizonytalan műveletnél fail-closed viselkedés.
 
-A kijelzett teljesítményadatok nem helyettesítik a valós felhasználói RUM/field mérést. Hiányzó field adatot a FormatX nem jelöl sikeresnek. minden eszközre garantált 120 FPS nincs állítva; hiteles 60 vagy 120 FPS field eredmény nélkül ilyen általános teljesítménygarancia nem publikálható.
+A kijelzett teljesítményadatok nem helyettesítik a valós felhasználói RUM/field mérést. Hiányzó field adatot a FormatX nem jelöl sikeresnek.
 
 ## 5. Termékbizonyíték és kiadási integritás
 
@@ -159,11 +159,12 @@ Jelenlegi P0 állapotban különösen nem állítható ellenőrzöttnek addig, a
 - teljes P0 böngésző-, accessibility-, responsive-, fallback- és regressziómátrix;
 - Safari/iOS valódi ellenőrzés.
 
+Külső szakmai elismerés: **Astonishing Awards Nominee — 74 pont, Technology kategória.**
+
 További nyílt bizonyítékhiány:
 
 - független szakmai termékteszt;
 - hitelesített ügyfélesettanulmány;
-- Awwwards- vagy más zsűridíj;
 - minden támogatott platformra és hardverre kiterjedő végponttól végpontig valós eszközteszt;
 - detached signature asset a jelenlegi kiadáshoz.
 
