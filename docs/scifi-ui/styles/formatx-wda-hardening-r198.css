@@ -1,6 +1,6 @@
-/* FormatX r198 — Web Design Awards 100-target hardening.
+/* FormatX r538 — Web Design Awards 100-target hardening.
    Clear audio consent, keyboard/touch affordances and inclusive media modes.
-   Strict CSP: no inline-style ownership. */
+   Strict CSP: no inline-style ownership. Manual MAG pause is retired. */
 
 html body .fx-three-sound.fx-wda-sound-toggle {
   position: fixed !important;
@@ -73,12 +73,12 @@ html body .fx-three-sound.fx-wda-sound-toggle:hover {
   }
 }
 
-/* r263 — one physical control geometry on every viewport. */
+/* R538 — one physical two-control geometry on every viewport. */
 html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 {
   box-sizing: border-box !important;
   z-index: 10030 !important;
   display: grid !important;
-  grid-template-columns: repeat(3, 54px) !important;
+  grid-template-columns: repeat(2, 54px) !important;
   grid-template-rows: minmax(78px, auto) !important;
   align-items: start !important;
   justify-content: center !important;
@@ -119,8 +119,7 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
 }
 
 html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 > .fx-three-sound.fx-wda-sound-toggle,
-html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask,
-html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-pause {
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask {
   position: relative !important;
   inset: auto !important;
   top: auto !important;
@@ -160,10 +159,6 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
 }
 html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask {
   grid-column: 2 !important;
-  grid-row: 1 !important;
-}
-html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-pause {
-  grid-column: 3 !important;
   grid-row: 1 !important;
 }
 html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask span {
@@ -274,7 +269,7 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
     right: auto !important;
     bottom: auto !important;
     left: auto !important;
-    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-columns: repeat(2, 50px) !important;
     grid-template-rows: minmax(76px, auto) !important;
     column-gap: 12px !important;
     width: max-content !important;
@@ -284,8 +279,7 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
   }
 
   html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 > .fx-three-sound.fx-wda-sound-toggle,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask,
-  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-pause {
+  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask {
     width: 50px !important;
     min-width: 50px !important;
     max-width: 50px !important;

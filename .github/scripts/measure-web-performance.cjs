@@ -7,13 +7,46 @@ const path = require('node:path');
 const url = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
 const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromium.json';
 
+function aggregateCpuProfile(profile) {
+  if (!profile || !Array.isArray(profile.nodes) || !Array.isArray(profile.samples)) return [];
+  const nodeById = new Map(profile.nodes.map(node => [node.id, node]));
+  const totals = new Map();
+  const deltas = Array.isArray(profile.timeDeltas) ? profile.timeDeltas : [];
+  for (let index = 0; index < profile.samples.length; index += 1) {
+    const node = nodeById.get(profile.samples[index]);
+    const frame = node?.callFrame || {};
+    const sourceUrl = String(frame.url || '(browser/internal)');
+    const key = sourceUrl.startsWith('http://127.0.0.1:4178/') ? sourceUrl.replace('http://127.0.0.1:4178', '') : sourceUrl;
+    const ms = Number(deltas[index] || 0) / 1000;
+    const current = totals.get(key) || { url: key, cpuMs: 0, samples: 0, functions: new Map() };
+    current.cpuMs += ms;
+    current.samples += 1;
+    const fn = String(frame.functionName || '(anonymous)');
+    current.functions.set(fn, (current.functions.get(fn) || 0) + ms);
+    totals.set(key, current);
+  }
+  return [...totals.values()]
+    .map(item => ({
+      url: item.url,
+      cpuMs: Math.round(item.cpuMs * 10) / 10,
+      samples: item.samples,
+      topFunctions: [...item.functions.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([name, cpuMs]) => ({ name, cpuMs: Math.round(cpuMs * 10) / 10 }))
+    }))
+    .filter(item => item.cpuMs >= 1)
+    .sort((a, b) => b.cpuMs - a.cpuMs)
+    .slice(0, 24);
+}
+
 (async () => {
   await fs.mkdir(path.dirname(output), { recursive: true });
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null };
+    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, longTasks: [], introComplete: null };
     try {
       new PerformanceObserver(list => {
         const entries = list.getEntries();
@@ -28,7 +61,10 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     } catch (_) {}
     try {
       new PerformanceObserver(list => {
-        for (const entry of list.getEntries()) window.__fxPerf.longTaskMs += entry.duration;
+        for (const entry of list.getEntries()) {
+          window.__fxPerf.longTaskMs += entry.duration;
+          window.__fxPerf.longTasks.push({ startTime: entry.startTime, duration: entry.duration });
+        }
       }).observe({ type: 'longtask', buffered: true });
     } catch (_) {}
     document.addEventListener('formatx:introcomplete', () => {
@@ -37,10 +73,18 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   });
 
   const page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Profiler.enable');
+  await cdp.send('Profiler.setSamplingInterval', { interval: 500 });
+  await cdp.send('Profiler.start');
+
   const started = Date.now();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#hero-title');
   await page.waitForTimeout(2500);
+  const { profile } = await cdp.send('Profiler.stop');
+  await cdp.send('Profiler.disable');
+  const startupCpuSources = aggregateCpuProfile(profile);
 
   const interaction = await page.evaluate(async () => {
     const button = document.getElementById('menu-toggle');
@@ -96,6 +140,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       largestContentfulPaint: window.__fxPerf.lcp,
       cumulativeLayoutShift: window.__fxPerf.cls,
       totalLongTaskMs: window.__fxPerf.longTaskMs,
+      longTasks: window.__fxPerf.longTasks.slice(0, 30),
       introComplete: window.__fxPerf.introComplete,
       renderer: document.documentElement.dataset.fxRenderer || null,
       mobileCoreState: document.documentElement.dataset.fxMobileCore || null,
@@ -113,17 +158,18 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   await second.close();
 
   const report = {
-    schema_version: 1,
+    schema_version: 2,
     environment: 'GitHub Actions Chromium or equivalent local CI; not physical-device evidence',
     measured_at: new Date().toISOString(),
     url,
     wall_clock_ms: Date.now() - started,
     metrics,
+    startup_cpu_sources: startupCpuSources,
     interaction_response_ms: interaction,
     scroll_sample: scrollSample,
     viewport_change: { before: beforeResize, after: afterResize },
     background_restore_ms: backgroundRestoreMs,
-    interpretation: 'Raw CI measurement only. Do not present as phone, customer or production performance without a matching environment record.'
+    interpretation: 'Raw CI measurement only. CPU attribution is sampled Chromium profiler evidence, not physical-device evidence.'
   };
 
   await fs.writeFile(output, JSON.stringify(report, null, 2) + '\n');
