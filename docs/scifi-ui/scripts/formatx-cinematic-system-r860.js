@@ -12,6 +12,14 @@
   const bridges = Array.from(document.querySelectorAll(bridgeSelector));
   const stages = [...scenes, ...bridges].filter((node, index, list) => node instanceof HTMLElement && list.indexOf(node) === index);
 
+  let field = document.querySelector('.fx-cinematic-field-r860');
+  if (!(field instanceof HTMLElement)) {
+    field = document.createElement('div');
+    field.className = 'fx-cinematic-field-r860';
+    field.setAttribute('aria-hidden', 'true');
+    document.body.prepend(field);
+  }
+
   const styleHref = new URL('../styles/formatx-cinematic-system-r860.css?v=20260919-r860-scene-director', script?.src || document.baseURI).href;
   if (!document.querySelector('link[data-fx-cinematic-system-r860]')) {
     const link = document.createElement('link');
