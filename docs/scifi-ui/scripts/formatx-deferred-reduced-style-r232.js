@@ -1,9 +1,7 @@
-/* FormatX r455/R531/R628/R841 — CSP-safe mobile geometry seed + interaction-gated reduced-motion stylesheet.
+/* FormatX r455/R531/R628 — CSP-safe mobile geometry seed + interaction-gated reduced-motion stylesheet.
    R628 also keeps the normal-motion intro task queue lightly active until the
-   canonical Event Horizon owner publishes preloadercomplete. It never releases
-   or hides the preloader and therefore does not create a second lifecycle owner.
-   R841 seeds the desktop intro pending state in the earliest defer bootstrap so
-   the authored opaque cover owns the first visible frame before Event Horizon runs. */
+   canonical Event Horizon owner publishes preloadercomplete. It never releases,
+   hides or mutates the preloader and therefore does not create a second lifecycle owner. */
 (function(){
 'use strict';
 const root=document.documentElement;
@@ -11,20 +9,6 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const stub=document.querySelector('link[data-fx-critical-reduced-r228]');
 const FULL_URL='./styles/formatx-critical-reduced-full-r298.css?v=20260822-r299-reduced-only';
 const MOBILE_FIRST_PAINT_URL='./styles/formatx-mobile-first-paint-r358.css?v=20260830-r455-csp-safe-geometry-seed';
-
-function armDesktopIntroPrepaint(){
-  if(reduced.matches)return;
-  const mobileDirect=matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;
-  if(mobileDirect||root.dataset.fxPreloaderR531==='done')return;
-  const overlay=document.getElementById('formatx-event-horizon');
-  if(!(overlay instanceof HTMLElement))return;
-  root.classList.remove('fx-intro-complete','fx-intro-reveal');
-  root.classList.add('fx-intro-pending');
-  root.dataset.fxIntro='desktop-prepaint-pending-r841';
-  root.dataset.fxIntroBootStateR841='earliest-defer-pending';
-  overlay.hidden=false;
-  overlay.setAttribute('aria-hidden','true');
-}
 
 function armIntroClockKeepalive(){
   if(reduced.matches)return;
@@ -72,7 +56,6 @@ function seedMobileGeometry(){
   }
 }
 
-armDesktopIntroPrepaint();
 armIntroClockKeepalive();
 
 if(!reduced.matches){
@@ -120,4 +103,4 @@ if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')activate();
 else root.dataset.fxReducedStyleR233='armed-no-full-fetch-r299';
 }());
 
-/* deploy-ready-r455-csp-safe-mobile-geometry-r531-overlay-owner-r628-clock-keepalive-r841-desktop-prepaint */
+/* deploy-ready-r455-csp-safe-mobile-geometry-r531-overlay-owner-r628-clock-keepalive */
