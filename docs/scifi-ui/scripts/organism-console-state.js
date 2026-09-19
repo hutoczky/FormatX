@@ -35,6 +35,29 @@
     history.replaceState({}, '', location.pathname + location.search + '#hero');
   }
 
+  function setAttributeIfChanged(node, name, value) {
+    if (node.getAttribute(name) !== value) node.setAttribute(name, value);
+  }
+
+  function setHiddenIfChanged(node, hidden) {
+    if (node.hidden !== hidden) node.hidden = hidden;
+  }
+
+  function setRootConsoleState(value) {
+    if (root.dataset.fxOrganismConsole !== value) root.dataset.fxOrganismConsole = value;
+  }
+
+  function ensureOpenShell(shell, id) {
+    if (shell.style.getPropertyValue('display')) shell.style.removeProperty('display');
+    if (!shell.classList.contains('is-authorised-open')) shell.classList.add('is-authorised-open');
+    setHiddenIfChanged(shell, false);
+    setAttributeIfChanged(shell, 'aria-hidden', 'false');
+    if (!document.body?.classList.contains('fx-organism-panel-open')) {
+      document.body?.classList.add('fx-organism-panel-open');
+    }
+    setRootConsoleState('open-' + id);
+  }
+
   function forceClosed(options) {
     const settings = Object.assign({ replaceHash: true }, options);
     if (reconciling) return;
@@ -45,23 +68,25 @@
 
     const shell = consoleRoot();
     if (shell) {
-      shell.classList.remove('is-authorised-open');
-      shell.hidden = true;
-      shell.setAttribute('aria-hidden', 'true');
-      shell.style.setProperty('display', 'none');
+      if (shell.classList.contains('is-authorised-open')) shell.classList.remove('is-authorised-open');
+      if (!shell.hidden) shell.hidden = true;
+      setAttributeIfChanged(shell, 'aria-hidden', 'true');
+      if (shell.style.getPropertyValue('display') !== 'none') shell.style.setProperty('display', 'none');
     }
 
     document.querySelectorAll('[data-organism-panel]').forEach(panel => {
-      panel.hidden = true;
-      panel.setAttribute('aria-hidden', 'true');
+      setHiddenIfChanged(panel, true);
+      setAttributeIfChanged(panel, 'aria-hidden', 'true');
     });
     document.querySelectorAll('[data-organism-tab]').forEach(tab => {
-      tab.setAttribute('aria-selected', 'false');
+      setAttributeIfChanged(tab, 'aria-selected', 'false');
     });
 
-    document.body?.classList.remove('fx-organism-panel-open');
+    if (document.body?.classList.contains('fx-organism-panel-open')) {
+      document.body.classList.remove('fx-organism-panel-open');
+    }
     if (settings.replaceHash) replaceWithHeroHash();
-    root.dataset.fxOrganismConsole = 'closed';
+    setRootConsoleState('closed');
     reconciling = false;
   }
 
@@ -84,23 +109,13 @@
 
     authorised = true;
     activeId = id;
-    shell.style.removeProperty('display');
-    shell.classList.add('is-authorised-open');
-    shell.hidden = false;
-    shell.setAttribute('aria-hidden', 'false');
-    document.body?.classList.add('fx-organism-panel-open');
-    root.dataset.fxOrganismConsole = 'open-' + id;
+    ensureOpenShell(shell, id);
   }
 
   function adoptVisibleOpen(shell, id) {
     authorised = true;
     activeId = id;
-    shell.style.removeProperty('display');
-    shell.classList.add('is-authorised-open');
-    shell.hidden = false;
-    shell.setAttribute('aria-hidden', 'false');
-    document.body?.classList.add('fx-organism-panel-open');
-    root.dataset.fxOrganismConsole = 'open-' + id;
+    ensureOpenShell(shell, id);
   }
 
   function reconcile() {
@@ -144,10 +159,11 @@
       return;
     }
 
-    shell.style.removeProperty('display');
-    shell.classList.add('is-authorised-open');
-    shell.hidden = false;
-    shell.setAttribute('aria-hidden', 'false');
+    // R804: MutationObserver is a repair trigger, not a heartbeat. Re-applying
+    // unchanged class/style/ARIA state scheduled another observer callback every
+    // frame and kept descendant controls geometrically unstable in Playwright.
+    // Only repair a real divergence; an already-canonical open console is a no-op.
+    ensureOpenShell(shell, activeId);
   }
 
   function scheduleReconcile() {
@@ -227,7 +243,10 @@
   });
   documentObserver.observe(document.documentElement, { subtree: true, childList: true });
 
+  // R800/R804: this module can legitimately load after the interface has already
+  // opened a panel. Events are notification; durable DOM state is authoritative.
+  // Reconcile first, then remain idempotent so adoption never becomes a mutation loop.
   bindConsoleObserver();
-  forceClosed({ replaceHash: true });
+  reconcile();
   root.dataset.fxOrganismConsoleState = 'ready';
 }());
