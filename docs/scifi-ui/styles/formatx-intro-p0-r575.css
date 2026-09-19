@@ -354,3 +354,16 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
   }
 }
 /* production-r840-desktop-covered-belowfold-containment */
+
+
+/* R844 — keep the R533-visible hero box while the opaque intro owns the viewport.
+   The grid's explicit production track geometry is mirrored by its intrinsic size,
+   so covered descendants do not consume desktop render work before release. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html[data-fx-preloader-r531="active"] body.living-architecture #hero > .hero-grid {
+    content-visibility: hidden !important;
+    contain: layout style paint !important;
+    contain-intrinsic-size: auto calc(clamp(520px, 42vw, 620px) + 288px) !important;
+  }
+}
+/* production-r844-covered-hero-descendant-containment */
