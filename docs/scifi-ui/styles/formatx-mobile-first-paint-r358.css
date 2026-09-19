@@ -19,7 +19,7 @@
   html[data-fx-design-system="2"] body.living-architecture :is(.fx-category-deck,.fx-origin-proof) {
     border-radius:var(--fx-radius-lg)!important;
   }
-  html[data-fx-design-system="2"] :where(a,button,input,select,textarea,[tabindex]):focus-visible {
+  html[data-fx-design-system="2"] :where(a,button,input,select,textarea,[tabindex]):is(:focus,:focus-visible) {
     outline:2px solid var(--fx-focus)!important;
     outline-offset:3px!important;
   }
