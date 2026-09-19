@@ -1,4 +1,4 @@
-/* FormatX award-quality gate — R528 living-core product contract. */
+/* FormatX award-quality gate — R542 current semantic quality contract. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -30,7 +30,9 @@ assert.ok(!motion.includes('isRetiredMagRuntime'));
 for(const token of ["const VERSION='7'",'fx-language-toggle','HU – váltás angol nyelvre','EN – switch to Hungarian','event-driven-no-document-mutation-observer',"fxSingleLanguageToggle='ready-v3'"])assert.ok(language.includes(token),`missing language contract: ${token}`);
 assert.ok(!language.includes('new MutationObserver'));
 for(const token of ['content-visibility: visible','fx-reference-liveos','.scroll-cue > span','.topbar > .header-actions','> .fx-rail','contain: layout paint','.fx-qr-placeholder','#main-nav:not(.open)','fx-reference-controls-r204.fx-reference-controls-r264'])assert.ok(quality.includes(token),`missing quality CSS: ${token}`);
-assert.match(home,/formatx-quality-r461\.css\?v=20260830-r462-mobile-a11y/);
+const qualityLinks=home.match(/<link\b[^>]*\bhref=["'][^"']*formatx-quality-r461\.css\?v=[^"']+["'][^>]*>/gi)||[];
+assert.equal(qualityLinks.length,1,'expected exactly one canonical quality stylesheet');
+assert.match(qualityLinks[0],/data-fx-quality-r461=["']true["']/,'canonical quality stylesheet marker missing');
 assert.match(home,/class="fx-language-toggle"/);
 assert.match(home,/data-fx-single-language-toggle="ready-v3"/);
 for(const retired of ['data-fx-premium-finish','data-fx-live-heartbeat-r155','data-fx-signature-system-r185','data-fx-seamless-enforcer-r159','data-fx-living-energy-r168="true" src=','data-fx-desktop-apex-r181-loader'])assert.ok(!home.includes(retired),`retired runtime remains active: ${retired}`);
