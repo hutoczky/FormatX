@@ -340,3 +340,120 @@ html #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"].fx
     will-change: auto !important;
   }
 }
+
+
+/* R841 — desktop active-intro visual parity.
+   Keep the full opaque intro and the unchanged R533/R635 release clock, but
+   place its lightweight text composition on the same visual axis as the final
+   hero. This preserves the normal visitor intro while avoiding a centered
+   intermediate composition that would become visually obsolete at release. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] {
+    place-items: stretch !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-center {
+    position: absolute !important;
+    top: 164px !important;
+    left: max(40px, calc((100vw - 1320px) / 2)) !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+    text-align: left !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-kicker {
+    display: block !important;
+    margin: 0 0 24px !important;
+    color: #8fc9d9 !important;
+    text-align: left !important;
+    text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    color: #f7fdff !important;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
+    text-align: left !important;
+    text-wrap: nowrap !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-word span {
+    display: inline-block !important;
+    padding: 0 !important;
+    color: #f7fdff !important;
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle {
+    display: block !important;
+    width: 100% !important;
+    margin: 7px 2px 0 0 !important;
+    color: #c4d8e4 !important;
+    text-align: right !important;
+    line-height: 1 !important;
+    letter-spacing: .12em !important;
+    text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle::before,
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-subtitle::after {
+    content: none !important;
+    display: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-meta {
+    top: 22px !important;
+    right: 40px !important;
+    left: 40px !important;
+    color: rgba(214,249,255,.58) !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap {
+    position: absolute !important;
+    top: 382px !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: max(40px, calc((100vw - 1320px) / 2)) !important;
+    width: min(580px, calc(100vw - 80px)) !important;
+    grid-template-columns: auto minmax(120px, 1fr) auto !important;
+    align-items: center !important;
+    gap: 14px !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap output {
+    min-width: 3ch !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: .04em !important;
+    text-shadow: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-progress-wrap progress {
+    height: 2px !important;
+    box-shadow: none !important;
+  }
+  #formatx-event-horizon[data-fx-preloader-r531="active"] .fx-intro-status {
+    max-width: 22ch !important;
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+    letter-spacing: .10em !important;
+    text-align: right !important;
+  }
+}
+
+/* production-r841-active-intro-hero-parity */
