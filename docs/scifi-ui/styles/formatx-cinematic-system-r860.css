@@ -292,10 +292,11 @@ html.fx-cinematic-ready :is(.fx-static-live-os,.fx-category-deck--standalone)::b
   box-shadow: inset 0 0 0 1px rgba(134,229,255,.045);
 }
 
-/* Navigation and controls remain above all cinematic decoration. */
-html.fx-cinematic-ready :is(.topbar,.fx-organism-status,.fx-organism-actionbar,.fx-organism-console,.site-footer) {
+/* Existing navigation/control layers retain their own positioning and z-index ownership.
+   The cinematic director must never re-position product controls. */
+html.fx-cinematic-ready .site-footer {
   position: relative;
-  z-index: 20;
+  z-index: 2;
 }
 
 @media (max-width: 900px), (pointer: coarse) {
