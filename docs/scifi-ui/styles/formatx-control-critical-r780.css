@@ -1,0 +1,197 @@
+/* FormatX R827 — restore the exact R818 timing-green render-critical scope while
+   preserving R821 live-crossing geometry and the post-intro CTA correction.
+   The bounded intro keeps its original compositor topology; no top-level Event
+   Horizon pseudo suppression or five-section containment runs inside the hard
+   R533 timing window. CTA geometry is locked only after canonical completion. */
+@media (min-width: 901px) {
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
+    position: absolute !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: 20px !important;
+    left: 50% !important;
+    z-index: 12080 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 54px) !important;
+    grid-template-rows: 76px !important;
+    align-items: start !important;
+    justify-items: center !important;
+    justify-content: center !important;
+    column-gap: 14px !important;
+    row-gap: 0 !important;
+    box-sizing: border-box !important;
+    width: 122px !important;
+    min-width: 122px !important;
+    max-width: 122px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail,
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-reference-rail-r264 {
+    display: contents !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask {
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  html:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  /* R827: keep the real post-intro overlap correction, but do not make hero CTA
+     layout participate in the opaque cover's deadline-critical composition. */
+  html.fx-intro-complete:root:root body.living-architecture #hero .hero-copy > .hero-actions,
+  html[data-fx-preloader-r531="done"]:root:root body.living-architecture #hero .hero-copy > .hero-actions {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    min-height: 106px !important;
+    margin: 22px 0 0 !important;
+    gap: 10px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+  html.fx-intro-complete:root:root body.living-architecture #hero .hero-copy > .hero-actions > .button,
+  html[data-fx-preloader-r531="done"]:root:root body.living-architecture #hero .hero-copy > .hero-actions > .button {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    min-height: 48px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
+/* R791 — the event horizon is the only visible surface during the bounded intro.
+   Keep all settled document boxes alive, but stop hidden-behind-cover effects from
+   creating animation/compositor layers. The durable startup-quiet class is removed
+   only after canonical release has committed stable frames, preventing the release
+   deadline and the first hero LCP from competing with a full-page effect burst. */
+@media (prefers-reduced-motion: no-preference) {
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon),
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *,
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *::before,
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *::after {
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    mix-blend-mode: normal !important;
+    will-change: auto !important;
+  }
+
+  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture::before {
+    content: none !important;
+    background: none !important;
+    animation: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+  }
+
+  /* R794 — keep the overlay's own empty/paused timing animation intact because it
+     is the product timing contract measured by R533. Only descendants and their
+     pseudo-elements are flattened to static paint, so text/status remain visible
+     without shadow/filter/blend/transition compositor layers. */
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] *,
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] *::before,
+  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] *::after {
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    mix-blend-mode: normal !important;
+    will-change: auto !important;
+  }
+}
+
+/* R817/R827 — seamless-v7 is armed only after trusted physical scroll intent.
+   Replace lazy intrinsic estimates with real section boxes before bridge snapshot.
+   Startup remains lazy and native scrolling remains the input owner. */
+html.fx-continuous-scroll-mode body.living-architecture main#main-content > :not(#hero) {
+  content-visibility: visible !important;
+  contain: none !important;
+  contain-intrinsic-size: none !important;
+}
+
+/* R817/R827 — constrain only the mobile Organism console's internal layout boxes
+   to its already-correct inset shell. This fixes real box geometry without root
+   overflow clipping or hiding any functional content. */
+@media (max-width: 900px), (pointer: coarse) {
+  html.fx-organism-interface-ready .fx-organism-console-shell :is(
+    .fx-organism-console-head,
+    .fx-organism-console-nav,
+    .fx-organism-console-viewport,
+    .fx-organism-panel,
+    .pricing,
+    .payment,
+    .fx-plan-qr-dock,
+    .fx-plan-qr-grid,
+    .price-card
+  ) {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
