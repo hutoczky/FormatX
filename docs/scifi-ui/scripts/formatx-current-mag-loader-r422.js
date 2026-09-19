@@ -48,6 +48,30 @@ function armPostIntroHeart(){
   root.dataset.fxHeartCorePostIntroArmR767='armed-with-navigation-mag';
 }
 function waitForRendererReady(timeout=8000){if(root.dataset.fxCrystalOrganismR326==='ready')return Promise.resolve(true);return new Promise(resolve=>{let settled=false,timer=0,observer=null;const finish=ready=>{if(settled)return;settled=true;if(timer)clearTimeout(timer);observer?.disconnect();removeEventListener('formatx:real3dready',onReady);resolve(Boolean(ready));};const onReady=()=>{if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);};addEventListener('formatx:real3dready',onReady,{passive:true});observer=new MutationObserver(()=>{if(root.dataset.fxCrystalOrganismR326==='ready')finish(true);});observer.observe(root,{attributes:true,attributeFilter:['data-fx-crystal-organism-r326']});timer=setTimeout(()=>finish(root.dataset.fxCrystalOrganismR326==='ready'),timeout);});}
+function awaitDesktopMaterialisationWindow(){
+  if(mobile||root.dataset.fxPreloaderR531!=='active'){
+    root.dataset.fxCurrentMagDesktopMaterialisationR840=mobile?'mobile-unchanged':'desktop-preloader-not-active';
+    return Promise.resolve();
+  }
+  root.dataset.fxCurrentMagDesktopMaterialisationR840='armed-until-preloader-done';
+  return new Promise(resolve=>{
+    let settled=false,guard=0,observer=null;
+    const finish=source=>{
+      if(settled)return;
+      settled=true;
+      if(guard)clearTimeout(guard);
+      observer?.disconnect();
+      root.dataset.fxCurrentMagDesktopMaterialisationR840=source;
+      resolve();
+    };
+    observer=new MutationObserver(()=>{
+      if(root.dataset.fxPreloaderR531==='done')finish('preloader-done-post-intro');
+    });
+    observer.observe(root,{attributes:true,attributeFilter:['data-fx-preloader-r531']});
+    queueMicrotask(()=>{if(root.dataset.fxPreloaderR531==='done')finish('preloader-done-post-intro');});
+    guard=setTimeout(()=>finish('guard-fail-open'),2600);
+  });
+}
 function visibleText(node){return String(node?.textContent||'').replace(/\s+/g,' ').trim();}
 function repairAccessibleNames(){const topBrand=document.querySelector('.topbar > .brand');if(topBrand instanceof HTMLAnchorElement)topBrand.removeAttribute('aria-label');const simulator=document.querySelector('[data-fx-simulator-entry="hero"]');if(simulator instanceof HTMLAnchorElement)simulator.removeAttribute('aria-label');for(const link of document.querySelectorAll('.fx-plan-qr-link')){if(!(link instanceof HTMLAnchorElement))continue;const card=link.closest('.fx-plan-qr-card'),label=visibleText(link.querySelector('.fx-qr-placeholder'))||'QR ↗',plan=visibleText(card?.querySelector('.fx-plan-qr-copy strong'))||'FormatX',action=root.lang==='en'?'open secure checkout':'biztonságos fizetési oldal megnyitása';link.setAttribute('aria-label',`${label} — ${plan} — ${action}`);}root.dataset.fxA11yNamesR422='visible-label-contained';}
 function installSoundTouchRecovery(){if(root.dataset.fxSoundTouchRecoveryR418==='ready')return;root.dataset.fxSoundTouchRecoveryR418='ready';let gesture=null,fallbackTimer=0,sequence=0;const soundFrom=target=>target instanceof Element?target.closest('.fx-three-sound'):null,cancel=()=>{if(fallbackTimer)clearTimeout(fallbackTimer);fallbackTimer=0;},clear=()=>{cancel();gesture=null;};document.addEventListener('pointerdown',event=>{const button=soundFrom(event.target);if(!(button instanceof HTMLButtonElement)||event.pointerType==='mouse')return;cancel();gesture={sequence:++sequence,pointerId:event.pointerId,x:event.clientX,y:event.clientY};root.dataset.fxSoundTouchRecoveryStateR418='armed';},true);document.addEventListener('click',event=>{const button=soundFrom(event.target);if(!(button instanceof HTMLButtonElement))return;if(gesture)clear();root.dataset.fxSoundTouchRecoveryStateR418=event.isTrusted?'native-click':'fallback-click-delivered';},true);document.addEventListener('pointerup',event=>{const button=soundFrom(event.target),current=gesture;if(!current||current.pointerId!==event.pointerId||!(button instanceof HTMLButtonElement)){clear();return;}current.x=event.clientX;current.y=event.clientY;const token=current.sequence;cancel();fallbackTimer=setTimeout(()=>{fallbackTimer=0;if(!gesture||gesture.sequence!==token)return;const hit=document.elementFromPoint(gesture.x,gesture.y),live=soundFrom(hit)||(button.isConnected?button:document.querySelector('.fx-three-sound'));gesture=null;if(!(live instanceof HTMLButtonElement)){root.dataset.fxSoundTouchRecoveryStateR418='fallback-target-missing';return;}root.dataset.fxSoundTouchRecoveryStateR418='dispatching-fallback-click';live.click();if(root.dataset.fxSoundTouchRecoveryStateR418==='dispatching-fallback-click')root.dataset.fxSoundTouchRecoveryStateR418='fallback-click-delivered';},120);},true);document.addEventListener('pointercancel',clear,true);}
@@ -67,6 +91,8 @@ async function start(){
   const rendererStart=layoutStyle.then(async()=>{
     root.dataset.fxCurrentMagRendererStartR559='starting-layout-ready-under-intro';
     root.dataset.fxCurrentMagRendererStartR561='starting-context-policy-under-intro';
+    await awaitDesktopMaterialisationWindow();
+    root.dataset.fxCurrentMagRendererWindowR840=mobile?'mobile-existing-path':'desktop-after-preloader-release';
     await addScript(CONTEXT_POLICY,'data-fx-mag-context-policy-r561');
     if(root.dataset.fxCrystalOrganismR326==='booting'){
       root.dataset.fxCurrentMagMainThreadFallbackR614='deferred-offscreen-owner-active';
