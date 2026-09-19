@@ -6,11 +6,13 @@ const {chromium}=require('playwright');
 
 const BASE=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT=process.env.FORMATX_VISUAL_DIR||'artifacts/content-visuals';
+const CANVAS='#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
+const STAGE='#hero .hero-space > .fx-crystal-organism-r326-stage';
 const VIEWPORTS=[
   {name:'phone-320',width:320,height:700,mobile:true},
   {name:'phone-360',width:360,height:800,mobile:true},
   {name:'phone-390',width:390,height:844,mobile:true},
-  {name:'phone-430',width:430,height:932,mobile:true},
+  {name:'phone-412',width:412,height:915,mobile:true},
   {name:'tablet-768',width:768,height:1024,mobile:true},
   {name:'desktop-1024',width:1024,height:768,mobile:false},
   {name:'desktop-1366',width:1366,height:768,mobile:false},
@@ -42,63 +44,72 @@ async function assertHeaderAndHeroControls(page,profile){
     assert(!overlaps(header[i][1],header[j][1],2),`${profile.name} header overlap ${header[i][0]} / ${header[j][0]}: ${JSON.stringify({a:header[i],b:header[j]})}`);
   }
 
-  const controls=await visibleBox(page,'#hero .fx-reference-controls-r204');
-  const sound=await visibleBox(page,'#hero .fx-reference-controls-r204 .fx-three-sound');
-  const ask=await visibleBox(page,'#hero .fx-reference-controls-r204 .fx-reference-ask');
-  const pause=await visibleBox(page,'#hero .fx-reference-controls-r204 .fx-reference-pause');
-  const row=[['sound',sound],['ask',ask],['pause',pause]].filter(([,v])=>v);
-  if(row.length===3){
-    for(const [,v] of row){
-      assert(v.left>=-1&&v.right<=profile.width+1,`${profile.name} hero control leaves viewport: ${JSON.stringify(v)}`);
-      assert(v.width>=44&&v.height>=44,`${profile.name} hero control below touch target: ${JSON.stringify(v)}`);
-    }
-    assert(!overlaps(sound,ask,2),`${profile.name} SOUND/ASK overlap`);
-    assert(!overlaps(ask,pause,2),`${profile.name} ASK/PAUSE overlap`);
-    assert(Math.abs(sound.top-ask.top)<=8&&Math.abs(ask.top-pause.top)<=8,`${profile.name} controls are not one row`);
-    if(controls)assert(controls.left>=-1&&controls.right<=profile.width+1,`${profile.name} control group leaves viewport`);
+  const controls=await visibleBox(page,'#hero .fx-reference-controls-r204',true);
+  const sound=await visibleBox(page,'#hero .fx-reference-controls-r204 .fx-three-sound',true);
+  const ask=await visibleBox(page,'#hero .fx-reference-controls-r204 .fx-reference-ask',true);
+  assert.equal(await page.locator('#hero .fx-reference-pause').count(),0,`${profile.name} obsolete manual PAUSE returned`);
+  for(const [label,v] of [['SOUND',sound],['ASK',ask]]){
+    assert(v.left>=-1&&v.right<=profile.width+1,`${profile.name} ${label} leaves viewport: ${JSON.stringify(v)}`);
+    assert(v.width>=44&&v.height>=44,`${profile.name} ${label} below touch target: ${JSON.stringify(v)}`);
   }
+  assert(!overlaps(sound,ask,2),`${profile.name} SOUND/ASK overlap`);
+  assert(Math.abs(sound.top-ask.top)<=8,`${profile.name} SOUND + ASK are not one row`);
+  assert(controls.left>=-1&&controls.right<=profile.width+1,`${profile.name} control group leaves viewport`);
 }
 
 async function assertPure3d(page,profile){
-  await page.waitForFunction(()=>{
+  await page.waitForFunction(({CANVAS,STAGE})=>{
     const root=document.documentElement;
-    const canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r120-canvas');
-    return root.dataset.fxCoreCompositionR285==='pure-webgl3d-no-2d-overlays'&&canvas;
-  },null,{timeout:15000});
+    return root.dataset.fxCrystalOrganismR326==='ready'
+      && root.dataset.fxPrimaryMagOwnerR460==='r326-only'
+      && root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+      && document.querySelectorAll(CANVAS).length===1
+      && document.querySelectorAll(STAGE).length===1;
+  },{CANVAS,STAGE},{timeout:20000});
 
-  const state=await page.evaluate(()=>{
+  const state=await page.evaluate(({CANVAS,STAGE})=>{
     const root=document.documentElement;
     const heroSpace=document.querySelector('#hero .hero-space');
-    const stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r120-stage');
-    const canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r120-canvas');
+    const stage=document.querySelector(STAGE);
+    const canvas=document.querySelector(CANVAS);
     const before=heroSpace?getComputedStyle(heroSpace,'::before'):null;
     const after=heroSpace?getComputedStyle(heroSpace,'::after'):null;
     const visible=el=>{if(!(el instanceof Element))return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>.02&&r.width>0&&r.height>0;};
-    const legacy=[...document.querySelectorAll('#hero .fx-core-detail-r122,#hero .fx-core-live-r147-layer,#hero .fx-r155-heartbeat-core,#hero .fx-r155-heartbeat-ring,#hero .fx-r155-heartbeat-wave,#hero [class^="fx-r168-"],#hero [class*=" fx-r168-"]')];
-    let context='none';
+    const legacy=[...document.querySelectorAll('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage,#hero .fx-core-mesh3d-stage,#hero .fx-core-fracture3d-stage,#hero .fx-core-reference-v53-stage,#hero .fx-core-mobile-v54-stage,#hero .fx-resilient-core,#hero .fx-premium-core-status,#hero .fx-three-stage-shell,#hero .fx-transcend-shell[data-fx-native-apex="true"]')].filter(el=>!el.classList.contains('fx-crystal-organism-r326-stage'));
+    let context='none',error=-1;
     try{
       const gl=canvas?.getContext?.('webgl2')||canvas?.getContext?.('webgl');
-      if(gl)context=typeof WebGL2RenderingContext!=='undefined'&&gl instanceof WebGL2RenderingContext?'webgl2':'webgl1';
+      if(gl){context=typeof WebGL2RenderingContext!=='undefined'&&gl instanceof WebGL2RenderingContext?'webgl2':'webgl1';error=gl.getError();}
     }catch(_){context='error';}
     return{
       composition:root.dataset.fxCoreCompositionR285||'',
+      crystal:root.dataset.fxCrystalOrganismR326||'',
+      owner:root.dataset.fxPrimaryMagOwnerR460||'',
       renderer:root.dataset.fxCoreRenderer||'',
-      real3d:root.dataset.fxCoreReal3d||'',
-      context,
+      contexts:root.dataset.fxCoreContexts||'',
+      scheduler:root.dataset.fxCoreScheduler||'',
+      idle:root.dataset.fxCoreIdleRenderR441||'',
+      context,error,
+      canvasCount:document.querySelectorAll(CANVAS).length,
+      stageCount:document.querySelectorAll(STAGE).length,
       stageChildren:stage?[...stage.children].map(el=>({tag:el.tagName,className:el.className,visible:visible(el)})):[],
       legacyVisible:legacy.filter(visible).map(el=>el.className),
-      detailCount:document.querySelectorAll('#hero .fx-core-detail-r122').length,
-      liveLayerCount:document.querySelectorAll('#hero .fx-core-live-r147-layer').length,
       before:{content:before?.content||'',background:before?.backgroundImage||''},
       after:{content:after?.content||'',background:after?.backgroundImage||''}
     };
-  });
+  },{CANVAS,STAGE});
+  assert.equal(state.crystal,'ready',`${profile.name} R326 not ready: ${JSON.stringify(state)}`);
+  assert.equal(state.owner,'r326-only',`${profile.name} canonical owner drift: ${JSON.stringify(state)}`);
+  assert.equal(state.renderer,'single-webgl-crystal-organism-r326',`${profile.name} renderer drift: ${JSON.stringify(state)}`);
+  assert.equal(state.contexts,'1',`${profile.name} duplicate WebGL context contract: ${JSON.stringify(state)}`);
+  assert.equal(state.canvasCount,1,`${profile.name} canonical canvas count drift`);
+  assert.equal(state.stageCount,1,`${profile.name} canonical stage count drift`);
   assert.equal(state.composition,'pure-webgl3d-no-2d-overlays',`${profile.name} pure-3D marker missing: ${JSON.stringify(state)}`);
-  assert.match(state.renderer,/webgl/i,`${profile.name} renderer is not WebGL: ${JSON.stringify(state)}`);
   assert.match(state.context,/webgl[12]/,`${profile.name} no active WebGL context: ${JSON.stringify(state)}`);
-  assert.deepEqual(state.legacyVisible,[],`${profile.name} visible 2D MAG layer: ${JSON.stringify(state)}`);
-  assert.equal(state.detailCount,0,`${profile.name} 2D detail canvas exists`);
-  assert.equal(state.liveLayerCount,0,`${profile.name} DOM live-motion layer exists`);
+  assert.equal(state.error,0,`${profile.name} WebGL error: ${JSON.stringify(state)}`);
+  assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441',`${profile.name} zero-idle scheduler drift`);
+  assert.equal(state.idle,'zero-frame',`${profile.name} zero-idle state drift`);
+  assert.deepEqual(state.legacyVisible,[],`${profile.name} visible legacy MAG layer: ${JSON.stringify(state)}`);
   for(const pseudo of [state.before,state.after]){
     assert(pseudo.content==='none'||pseudo.content==='normal'||pseudo.content==='',`${profile.name} hero-space pseudo paints content: ${JSON.stringify(state)}`);
     assert(pseudo.background==='none'||pseudo.background==='',`${profile.name} hero-space pseudo paints a 2D background: ${JSON.stringify(state)}`);
@@ -210,5 +221,5 @@ async function runProfile(browser,profile){
   await fs.mkdir(OUT,{recursive:true});
   const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});
   try{for(const profile of VIEWPORTS)await runProfile(browser,profile);}finally{await browser.close();}
-  console.log('PASS: 320–1920px browser matrix has a pure WebGL MAG and no detected information clipping or fixed/sticky occlusion.');
+  console.log('PASS: 320–1920px browser matrix has one native R326 MAG, SOUND + ASK only, zero-idle scheduling, and no detected information clipping or fixed/sticky occlusion.');
 })().catch(error=>{console.error(error.stack||error);process.exit(1);});
