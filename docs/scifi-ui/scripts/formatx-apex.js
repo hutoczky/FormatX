@@ -2,24 +2,11 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  if (AUDIT_MODE) {
-    ROOT.dataset.fxApex = 'audit-skip';
-    ROOT.dataset.fxRenderer = 'static-audit';
-    ROOT.dataset.fxScene = '0';
-    ROOT.dataset.fxFlow = '0';
-    ROOT.style.setProperty('--accent', '120,210,255');
-    ROOT.style.setProperty('--progress', '0');
-    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'static-audit', infinite: 'skipped' } }));
-    return;
-  }
 
-  // r294: on phone/coarse-pointer surfaces the current native core, canonical
-  // language control, release metadata runtime and r268 navigation already own
-  // the jobs this legacy APEX controller used to duplicate. Avoid whole-page
-  // language/link scans, reveal observers and scene/flow observers during the
-  // first-load critical window. Publish apexready only after the complete defer
-  // chain has subscribed, so final control owners never miss the event.
+  // r536: every visitor follows the same product path. On phone/coarse-pointer
+  // surfaces the current native core, canonical language control, release
+  // metadata runtime and r268 navigation already own the jobs this legacy APEX
+  // controller used to duplicate, so mobile delegates without audit detection.
   const MOBILE_NATIVE_CORE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   if (MOBILE_NATIVE_CORE) {
     ROOT.dataset.fxApex = 'controller-performance-v2';
@@ -69,10 +56,6 @@
       const stored = localStorage.getItem(LANG_KEY);
       if (stored === 'hu' || stored === 'en') return stored;
     } catch (_) {}
-    // P0 r491: the server/static shell owns first-paint language. Falling back
-    // to navigator.language here used to rewrite the already-painted hero on
-    // desktop, causing the dominant CLS and late text LCP. The explicit HU/EN
-    // toggle still persists a choice and ?lang= continues to override it.
     if (ROOT.lang === 'hu' || ROOT.lang === 'en') return ROOT.lang;
     return 'hu';
   }
@@ -319,7 +302,10 @@
 
   function initialise() {
     navigation();
-    applyLanguage(language, false);
+    // R760: deferred enhancement adopts the live language. The user may have
+    // changed it while the cover was visible; the navigation-time snapshot is
+    // no longer authoritative when this background task finally runs.
+    applyLanguage(ROOT.lang === 'en' ? 'en' : 'hu', false);
     reveal();
     scenes();
     flow();
@@ -329,9 +315,24 @@
     setScene(activeScene);
     ROOT.dataset.fxApex = 'controller-performance-v2';
     ROOT.dataset.fxRenderer = 'three-host';
+    ROOT.dataset.fxApexDesktopR759 = 'post-intro-noncritical-initialise';
     dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
-  else initialise();
+  function preloaderDone() {
+    return ROOT.dataset.fxPreloaderR531 === 'done' || window.__formatxPreloaderComplete === true || ROOT.dataset.formatxPreloader === 'complete' || ROOT.dataset.preloaderComplete === 'true';
+  }
+
+  function armInitialise() {
+    if (preloaderDone()) { initialise(); return; }
+    ROOT.dataset.fxApexDesktopR759 = 'waiting-canonical-preloadercomplete';
+    document.addEventListener('formatx:preloadercomplete', () => {
+      const browserScheduler = globalThis.scheduler;
+      if (browserScheduler && typeof browserScheduler.postTask === 'function') browserScheduler.postTask(initialise, { priority: 'background' }).catch(() => setTimeout(initialise, 0));
+      else setTimeout(initialise, 0);
+    }, { once: true, passive: true });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', armInitialise, { once: true });
+  else armInitialise();
 }());
