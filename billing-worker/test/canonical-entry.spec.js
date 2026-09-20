@@ -7,6 +7,12 @@ const SHARED_FIRST_PAINT_URLS = [
   '/scifi-ui/styles/formatx-quality-r461.css?v=20260902-r500-canonical-hero-state',
   '/scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero',
 ];
+const RESPONSIVE_FIRST_PAINT = [
+  ['/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity', '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)'],
+  ['/scifi-ui/styles/formatx-critical-core-r227.css?v=20260819-r227', '(prefers-reduced-motion: no-preference) and (min-width: 901px)'],
+  ['/scifi-ui/styles/formatx-reference-production-r244.css?v=20260824-native-orb-r250', '(min-width: 901px)'],
+  ['/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260907-r608-source-first-paint-parity', '(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)'],
+];
 
 function expectHomepageLinks(response, canonical) {
   const link = response.headers.get('Link') || '';
@@ -16,7 +22,10 @@ function expectHomepageLinks(response, canonical) {
     expect(link).toContain(`<${url}>; rel=preload; as=style`);
     expect(link.split(url.split('?')[0])).toHaveLength(2);
   }
-  expect(link).not.toContain('formatx-critical-core-r227.css');
+  for (const [url, media] of RESPONSIVE_FIRST_PAINT) {
+    expect(link).toContain(`<${url}>; rel=preload; as=style; media="${media}"`);
+    expect(link.split(url.split('?')[0])).toHaveLength(2);
+  }
   expect(link).not.toContain('as=script');
 }
 

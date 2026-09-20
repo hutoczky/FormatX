@@ -29,7 +29,24 @@ const { pathToFileURL } = require('node:url');
         const url = preloads[0].match(/^<([^>]+)>/)[1];
         assert.ok(html.includes(`href="${url}"`), `${name}: ${file} preload must match its live stylesheet URL`);
       }
+      for (const file of ['formatx-mobile-first-paint-r358.css', 'formatx-critical-core-r227.css', 'formatx-reference-production-r244.css', 'formatx-first-frame-stability-r283.css']) {
+        const pathname = `/scifi-ui/styles/${file}`;
+        const preloads = link.split(/,\s*(?=<)/).filter(value => value.includes(pathname));
+        assert.equal(preloads.length, 1, `${name}: one responsive first-paint preload for ${file}`);
+        const url = preloads[0].match(/^<([^>]+)>/)[1];
+        const styles = (html.match(/<link\b[^>]*\brel="stylesheet"[^>]*>/gi) || [])
+          .filter(tag => tag.includes(`href="${url}"`));
+        assert.equal(styles.length, 1, `${name}: ${file} preload must match its live stylesheet URL`);
+        const media = styles[0].match(/\smedia="([^"]+)"/);
+        assert.ok(media, `${name}: ${file} must retain responsive stylesheet selection`);
+        assert.ok(preloads[0].endsWith(`; media="${media[1]}"`), `${name}: ${file} preload must use the exact stylesheet media`);
+      }
     }
+    const introControllers = (html.match(/<script\b[^>]*>/gi) || [])
+      .filter(tag => /\ssrc="[^\"]*\/formatx-event-horizon\.js\?/.test(tag));
+    assert.equal(introControllers.length, 1, `${name}: one bounded intro controller`);
+    assert.match(introControllers[0], /\sdefer(?:\s|>)/, `${name}: intro remains nonblocking`);
+    assert.match(introControllers[0], /\sfetchpriority="high"/, `${name}: intro discovery must not compete at optional-script priority`);
     const tags = html.match(/<link\b[^>]*data-fx-critical-core-r227[^>]*>/gi) || [];
     assert.equal(tags.length, 1, `${name}: one canonical core stylesheet`);
     assert.match(tags[0], /\shref="\/scifi-ui\/styles\/formatx-critical-core-r227\.css\?[^" ]+"/, `${name}: critical geometry must have a real href`);

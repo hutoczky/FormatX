@@ -11,11 +11,12 @@ const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
 const REFERENCE_MODE_BOOT_SCRIPT = '<script defer fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
-const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260902-r500-canonical-hero-state">';
+const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260907-r608-source-first-paint-parity">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const INTRO_P0_PRELOAD = '</scifi-ui/styles/formatx-intro-p0-r575.css?v=20260907-r635-three-phase-absolute-reveal>; rel=preload; as=style';
-const MOBILE_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style';
+const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
+const MOBILE_FIRST_PAINT_PRELOAD = `</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="${MOBILE_MEDIA}"`;
 // These shared styles block first paint in both layouts. Discover them with the
 // document response, not after the HTML has competed with deferred scripts.
 // Keep the existing HTML cascade order and desktop-only media selection intact.
@@ -24,10 +25,17 @@ const SHARED_FIRST_PAINT_PRELOADS = [
   '</scifi-ui/styles/formatx-quality-r461.css?v=20260902-r500-canonical-hero-state>; rel=preload; as=style',
   '</scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero>; rel=preload; as=style',
 ];
+// R853's production traces retain these three desktop render blockers. Match
+// their existing media exactly: early discovery must not promote desktop-only
+// CSS on mobile, or change which rules apply during the bounded intro.
+const DESKTOP_FIRST_PAINT_PRELOADS = [
+  '</scifi-ui/styles/formatx-critical-core-r227.css?v=20260819-r227>; rel=preload; as=style; media="(prefers-reduced-motion: no-preference) and (min-width: 901px)"',
+  '</scifi-ui/styles/formatx-reference-production-r244.css?v=20260824-native-orb-r250>; rel=preload; as=style; media="(min-width: 901px)"',
+  '</scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260907-r608-source-first-paint-parity>; rel=preload; as=style; media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)"',
+];
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20260919-r850-desktop-mag-mobile-invariant';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r637.js?v=20260907-r637-post-fcp-network-restore"></script>';
-const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const META_CSP = "default-src 'self';base-uri 'self';object-src 'none';script-src 'self' https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'";
 const HEADER_CSP = [
   "default-src 'self'",
@@ -271,7 +279,7 @@ async function rewriteR502DeliveryAsset(url, response, headers) {
   return new Response(source, { status: response.status, statusText: response.statusText, headers });
 }
 function mergeHomepageLinkHeader(existing) {
-  const preloads = [P0_FIRST_PAINT_PRELOAD, INTRO_P0_PRELOAD, MOBILE_FIRST_PAINT_PRELOAD, ...SHARED_FIRST_PAINT_PRELOADS];
+  const preloads = [P0_FIRST_PAINT_PRELOAD, INTRO_P0_PRELOAD, MOBILE_FIRST_PAINT_PRELOAD, ...SHARED_FIRST_PAINT_PRELOADS, ...DESKTOP_FIRST_PAINT_PRELOADS];
   const paths = preloads.map(value => value.slice(1, value.indexOf('?')));
   const values = String(existing || '')
     .split(/,\s*(?=<)/)
