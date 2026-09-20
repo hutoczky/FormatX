@@ -903,13 +903,5 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
 .fx-mag-birth-r533 .fxb-dna{
   display:none!important;
 }
-.fx-mag-birth-r533{
-  contain:layout paint style;
-}
-.fx-mag-birth-r533 .fxb-dna-stage,
-.fx-mag-birth-r533 .fxb-embryo{
-  contain:layout paint style;
-}
-.fx-mag-birth-r533 .fxb-dna-helix{
-  will-change:transform,opacity;
-}
+/* R627: do not force containment/layer promotion on the full-screen film.
+   Trace evidence showed higher mobile main-thread cost and TBT with it. */
