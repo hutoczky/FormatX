@@ -1113,6 +1113,23 @@
     root.dataset.fxCoreSurfacePulseR454='idle';
     root.dataset.fxCoreSurfaceEnergyR484='periodic-native-surface-energy';
     root.dataset.fxCoreSurfaceCountR484='0';
+    if(constrainedMobile){
+      /* R624: the authored constrained shader already implements the R465
+         low-bloom / no-edge / no-noise material contract directly. The legacy
+         precompile hook cannot pattern-patch that intentionally smaller shader,
+         so publish the same semantic surface contract from the real renderer. */
+      root.dataset.fxCoreSurfaceR456='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics';
+      root.dataset.fxCoreMobileSurfaceR456=root.dataset.fxCoreSurfaceR456;
+      root.dataset.fxCoreNormalR456='continuous-volume-99.8-percent-smooth';
+      root.dataset.fxCoreMobileNormalR456=root.dataset.fxCoreNormalR456;
+      root.dataset.fxCoreTriangleEdgesR456='disabled';
+      root.dataset.fxCoreMobileTriangleEdgesR456='disabled';
+      root.dataset.fxCoreOuterNoiseR456='disabled-on-glass-shell';
+      root.dataset.fxCoreInnerLifeR456='preserved-low-cost-mobile-field';
+      root.dataset.fxCoreSpecularR456='soft-broad-low-gain-highlight-r465';
+      root.dataset.fxCoreMobileOpticalBalanceR465='soft-perimeter-low-bloom-low-cost-shader';
+      root.dataset.fxCoreConstrainedSurfaceOwnerR624='native-r326-equivalent-r465-contract';
+    }
     root.dataset.fxCoreMobileResolutionR424=mobile?'r619-dpr-cap-1.25-pixel-budget-460k-adaptive':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
     root.dataset.fxCoreMobileOpticsR435=mobile?'superseded-by-r454-visible-native-surface':'desktop-preserved-r454';
     root.dataset.fxCoreMobileOpticsR440=mobile?'superseded-by-r454-luminous-electric-surface':'desktop-superseded-by-r454';
