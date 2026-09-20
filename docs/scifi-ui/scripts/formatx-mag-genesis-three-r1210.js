@@ -1519,6 +1519,7 @@
   document.documentElement.dataset.fxMagBirthVisualProofR911='current-r900-reference-keyframes';
   document.documentElement.dataset.fxMagBirthProofR1204='isolated-r1200-r1151-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1206='fast-six-frame-reference-proof';
+  document.documentElement.dataset.fxMagBirthProofR1211='fast-six-frame-r1210-reference-proof';
 
   window.FormatXMagGenesisThreeR1210={
     attach,
