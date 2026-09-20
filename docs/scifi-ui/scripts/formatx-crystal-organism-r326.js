@@ -130,10 +130,10 @@
       /* R614 compatibility contract retained. R730 maps the same closed
          topology to the supplied final MAG reference: a compact, opaque,
          rounded-diamond armored pod with a tall crown and broad shoulders. */
-      const axisX = direction[0] >= 0 ? .60 : .58;
-      const axisY = direction[1] >= 0 ? .78 : .73;
-      const axisZ = direction[2] >= 0 ? .39 : .35;
-      const exponent = 1.08;
+      const axisX = direction[0] >= 0 ? .54 : .52;
+      const axisY = direction[1] >= 0 ? .74 : .69;
+      const axisZ = direction[2] >= 0 ? .38 : .34;
+      const exponent = 1.42;
       const terms = Math.pow(Math.abs(direction[0]) / axisX, exponent)
         + Math.pow(Math.abs(direction[1]) / axisY, exponent)
         + Math.pow(Math.abs(direction[2]) / axisZ, exponent);
@@ -141,18 +141,18 @@
       const equator = Math.pow(sinPhi, 1.46);
       const cardinal = Math.pow(Math.abs(Math.cos(theta * 2)), 8.0);
       const diagonal = Math.pow(Math.abs(Math.sin(theta * 2)), 5.4);
-      const shoulderBand = Math.pow(Math.max(0, 1 - Math.abs(direction[1]) * 1.52), 1.62);
-      const crown = 1 + .110 * Math.pow(Math.max(direction[1], 0), 3.5);
-      const chin = 1 + .055 * Math.pow(Math.max(-direction[1], 0), 3.0);
-      const armorLobes = 1 + equator * (.090 * cardinal - .020 * diagonal)
-        + .080 * shoulderBand * cardinal;
+      const shoulderBand = Math.pow(Math.max(0, 1 - Math.abs(direction[1]) * 1.48), 1.70);
+      const crown = 1 + .075 * Math.pow(Math.max(direction[1], 0), 3.4);
+      const chin = 1 + .038 * Math.pow(Math.max(-direction[1], 0), 3.0);
+      const armorLobes = 1 + equator * (.028 * cardinal - .010 * diagonal)
+        + .035 * shoulderBand * cardinal;
       const livingSkin = 1
         + .005 * Math.sin(theta * 4 + phi * 1.45) * Math.pow(sinPhi, 2)
         + .0020 * Math.sin(theta * 8 - phi * 3.0);
       const crystalRadius = radial * armorLobes * crown * chin * livingSkin;
       const crystalPosition = direction.map(value => value * crystalRadius);
-      crystalPosition[0] *= 1 + .075 * shoulderBand * cardinal;
-      crystalPosition[1] *= 1 + .015 * cardinal * Math.pow(Math.abs(direction[1]), 1.9);
+      crystalPosition[0] *= 1 + .035 * shoulderBand * cardinal;
+      crystalPosition[1] *= 1 + .008 * cardinal * Math.pow(Math.abs(direction[1]), 1.9);
       crystalPosition[2] *= .95 + .014 * cardinal;
       return {
         sphere: spherePosition,
@@ -201,10 +201,10 @@
       const baseAngle = index / tendrilCount * Math.PI * 2 + (index % 2 ? .075 : -.060);
       const sideAngle = baseAngle + Math.PI * .5;
       const root = .48;
-      const reach = .70 + (index % 3) * .080;
+      const reach = .66 + (index % 3) * .075;
       const radius = root + reach * t;
-      const wave = Math.sin(t * Math.PI * 1.72 + index * .73) * (.024 + .090 * t);
-      const depth = Math.sin(t * Math.PI * 1.52 + index * .91) * (.028 + .082 * t);
+      const wave = Math.sin(t * Math.PI * 1.72 + index * .73) * (.022 + .080 * t);
+      const depth = Math.sin(t * Math.PI * 1.52 + index * .91) * (.026 + .074 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -427,14 +427,14 @@
         float radial=length(heartLocal);
         float angle=atan(heartLocal.y,heartLocal.x);
         float visualEnergy=sat(.48+uEnergy*.66);
-        float heart=pow(sat(1.0-radial/.42),3.10);
-        float nucleus=pow(sat(1.0-radial/.170),4.55);
-        float ringA=1.0-smoothstep(.008,.019,abs(radial-.082));
-        float ringB=1.0-smoothstep(.009,.023,abs(radial-.140));
-        float ringC=1.0-smoothstep(.011,.028,abs(radial-.215));
+        float heart=pow(sat(1.0-radial/.40),3.15);
+        float nucleus=pow(sat(1.0-radial/.155),4.65);
+        float ringA=1.0-smoothstep(.008,.019,abs(radial-.078));
+        float ringB=1.0-smoothstep(.009,.022,abs(radial-.132));
+        float ringC=1.0-smoothstep(.010,.026,abs(radial-.198));
         float ringBreak=.42+.58*smoothstep(.22,.74,noise(vec2(angle*1.75+uTime*.025,radial*17.0-uTime*.035)));
         float rings=(ringA+.72*ringB+.42*ringC)*ringBreak*(1.0-smoothstep(.23,.39,radial));
-        float petalRadius=.248+.028*sin(angle*4.0+cloud*1.2-uTime*.10);
+        float petalRadius=.225+.026*sin(angle*4.0+cloud*1.2-uTime*.10);
         float irisBand=1.0-smoothstep(.012,.042,abs(radial-petalRadius));
         float petals=pow(.5+.5*cos(angle*4.0+warp*1.1-uTime*.15),5.0);
         float iris=irisBand*(.28+.72*petals)*(1.0-smoothstep(.34,.49,radial));
@@ -444,11 +444,11 @@
         float armorSeam=ridge(vUv.x*4.0+vUv.y*.18+uSiteProgress*.08,17.0)*(1.0-smoothstep(.62,.98,abs(vLocal.y)));
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
         float podMask=1.0-vMorph;
-        float crownMask=smoothstep(.40,.70,vLocal.y)
-          *(1.0-smoothstep(.20,.38,abs(vLocal.x)))*podMask;
-        float shoulderMask=smoothstep(.30,.40,abs(vLocal.x))
-          *(1.0-smoothstep(.50,.60,abs(vLocal.x)))
-          *(1.0-smoothstep(.14,.44,abs(vLocal.y)))*podMask;
+        float crownMask=smoothstep(.43,.71,vLocal.y)
+          *(1.0-smoothstep(.18,.34,abs(vLocal.x)))*podMask;
+        float shoulderMask=smoothstep(.31,.39,abs(vLocal.x))
+          *(1.0-smoothstep(.46,.54,abs(vLocal.x)))
+          *(1.0-smoothstep(.12,.38,abs(vLocal.y)))*podMask;
         float jawMask=smoothstep(.22,.66,-vLocal.y)
           *(1.0-smoothstep(.30,.58,abs(vLocal.x)))*podMask;
         float opticalWell=(1.0-smoothstep(.23,.43,radial))*podMask;
@@ -457,8 +457,8 @@
         vec3 cyan=vec3(.018,.56,.88);
         vec3 violet=vec3(.055,.075,.16);
         vec3 ice=vec3(.58,.72,.77);
-        vec3 gunmetal=vec3(.0045,.010,.016);
-        vec3 steel=vec3(.036,.074,.098);
+        vec3 gunmetal=vec3(.0035,.008,.013);
+        vec3 steel=vec3(.028,.058,.078);
         vec3 silver=vec3(.56,.64,.68);
         vec3 spectral=mix(cyan,ice,.10+.28*hue);
         float surfaceSweep=0.0;
@@ -503,15 +503,15 @@
         vec3 glass=mix(gunmetal,steel,.20+.32*ndl+.05*facetPulse);
         glass+=vec3(.006,.018,.025)*sideLight*.18;
         glass+=vec3(.003,.008,.012)*(.26+.20*cloud);
-        glass+=silver*crownMask*(.54+.64*ndl+.32*specular);
-        glass+=silver*shoulderMask*(.24+.34*ndl+.18*specular)+steel*shoulderMask*.52;
+        glass+=silver*crownMask*(.62+.70*ndl+.36*specular);
+        glass+=silver*shoulderMask*(.30+.38*ndl+.20*specular)+steel*shoulderMask*.44;
         glass+=gunmetal*jawMask*.82;
         glass-=vec3(.004,.006,.008)*opticalWell*.42;
-        glass+=cyan*fresnel*(.022+.030*visualEnergy);
-        glass+=cyan*veins*(.030+.025*uBreath);
-        glass+=cyan*membrane*(.020+.025*visualEnergy);
+        glass+=cyan*fresnel*(.014+.020*visualEnergy);
+        glass+=cyan*veins*(.024+.020*uBreath);
+        glass+=cyan*membrane*(.012+.016*visualEnergy);
         glass+=cyan*iris*.16;
-        glass+=cyan*(rings*.22+nucleus*4.15)+ice*(heart*.016+nucleus*.42);
+        glass+=cyan*(rings*.20+nucleus*3.72)+ice*(heart*.014+nucleus*.38);
         glass+=ice*specular*(.34+.16*visualEnergy);
         glass+=(cyan*.16+ice*.025)*(axisV*.14+axisH*.08)*visualEnergy;
         glass+=(cyan*.10+violet*.05)*dnaHelix*(.025+.045*fresnel)*genomePulse;
@@ -548,19 +548,19 @@
         vec2 heartLocal=vec2(vLocal.x,vLocal.y)-vec2(uPointer.x*.06,uPointer.y*.05);
         float radial=length(heartLocal);
         float angle=atan(heartLocal.y,heartLocal.x);
-        float heart=pow(sat(1.0-radial/.43),3.0);
-        float nucleus=pow(sat(1.0-radial/.178),4.1);
-        float ring=1.0-smoothstep(.014,.040,abs(radial-.225));
+        float heart=pow(sat(1.0-radial/.41),3.0);
+        float nucleus=pow(sat(1.0-radial/.162),4.2);
+        float ring=1.0-smoothstep(.014,.038,abs(radial-.205));
         float dnaA=pow(.5+.5*cos(angle-vLocal.y*7.2-uTime*.045),16.0);
         float dnaB=pow(.5+.5*cos(angle-vLocal.y*7.2-uTime*.045-3.14159265),16.0);
         float dna=(dnaA+dnaB)*(.32+.68*fresnel);
         float seam=pow(.5+.5*cos(vUv.x*25.1327+vUv.y*1.1),20.0)*(1.0-vMorph*.72);
         float podMask=1.0-vMorph;
-        float crownMask=smoothstep(.40,.70,vLocal.y)
-          *(1.0-smoothstep(.20,.38,abs(vLocal.x)))*podMask;
-        float shoulderMask=smoothstep(.30,.40,abs(vLocal.x))
-          *(1.0-smoothstep(.50,.60,abs(vLocal.x)))
-          *(1.0-smoothstep(.14,.44,abs(vLocal.y)))*podMask;
+        float crownMask=smoothstep(.43,.71,vLocal.y)
+          *(1.0-smoothstep(.18,.34,abs(vLocal.x)))*podMask;
+        float shoulderMask=smoothstep(.31,.39,abs(vLocal.x))
+          *(1.0-smoothstep(.46,.54,abs(vLocal.x)))
+          *(1.0-smoothstep(.12,.38,abs(vLocal.y)))*podMask;
         float tendrilMask=smoothstep(.62,.82,length(vLocal.xy))*podMask;
         float tendrilSegment=pow(.5+.5*cos(vUv.y*65.97+vUv.x*12.56),18.0)*tendrilMask;
         float pulse=0.0;
@@ -576,11 +576,11 @@
         vec3 silver=vec3(.54,.62,.67);
         vec3 metal=vec3(.004,.010,.016);
         vec3 c=metal*(1.22+ndl*.48);
-        c+=silver*crownMask*(.52+.62*ndl+.30*spec);
-        c+=silver*shoulderMask*(.22+.32*ndl+.16*spec)+vec3(.036,.074,.098)*shoulderMask*.48;
+        c+=silver*crownMask*(.60+.68*ndl+.34*spec);
+        c+=silver*shoulderMask*(.28+.36*ndl+.18*spec)+vec3(.028,.058,.078)*shoulderMask*.42;
         c+=cyan*fresnel*(.024+.028*energy);
         c+=(cyan*.12+violet*.05)*dna*(.022+.035*energy);
-        c+=cyan*(nucleus*3.90+ring*.20)+ice*(heart*.014+nucleus*.38+spec*.28);
+        c+=cyan*(nucleus*3.55+ring*.18)+ice*(heart*.012+nucleus*.34+spec*.28);
         c+=ice*seam*.08;
         c+=(ice*.48+cyan*.26)*pulse;
         c+=(cyan*.90+ice*.16)*tendrilSegment*(.46+.60*fresnel);
@@ -1088,6 +1088,7 @@
       referenceGeometryR951:'r950-matched-tall-armored-pod-large-optical-orb-native-tendrils',
       referenceGeometryR1010:'pointed-armored-diamond-pod-bright-silver-crown-large-blue-optical-core-long-segmented-tendrils',
       referenceGeometryR1030:'compact-rounded-diamond-pod-local-silver-crown-shoulders-medium-cyan-eye-segmented-tendrils',
+      referenceGeometryR1050:'closed-dark-armored-pod-small-silver-crown-shoulders-medium-optical-eye-controlled-tendrils',
       genome:'native-double-helix-energy-lattice-r614',
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
@@ -1144,6 +1145,8 @@
     root.dataset.fxCoreReferenceGeometryR951='r950-matched-tall-armored-pod-large-optical-orb-native-tendrils';
     root.dataset.fxCoreReferenceGeometryR1010='pointed-armored-diamond-pod-bright-silver-crown-large-blue-optical-core-long-segmented-tendrils';
     root.dataset.fxCoreReferenceGeometryR1030='compact-rounded-diamond-pod-local-silver-crown-shoulders-medium-cyan-eye-segmented-tendrils';
+    root.dataset.fxCoreReferenceGeometryR1050='closed-dark-armored-pod-small-silver-crown-shoulders-medium-optical-eye-controlled-tendrils';
+    root.dataset.fxCoreReferenceMaterialR1050='dark-opaque-gunmetal-local-silver-panels-local-cyan-eye';
     root.dataset.fxCoreReferenceMaterialR1030='dark-gunmetal-localized-silver-panels-controlled-cyan-optical-core';
     root.dataset.fxCoreReferenceMaterialR1010='near-opaque-gunmetal-bright-silver-panels-local-cyan-optical-core';
     root.dataset.fxCoreReferenceMaterialR910='opaque-gunmetal-shoulders-small-silver-crown-blue-optical-orb';
