@@ -113,6 +113,11 @@ jobs:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_INTRO_EVIDENCE_DIR: artifacts/r533-r536-handoff
         run: node .github/scripts/validate-r533-r536-handoff.cjs
+      - name: Capture R656 MAG intro reference keyframes
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r656-intro-keyframes
+        run: node .github/scripts/capture-mag-intro-r656.cjs
       - name: Upload compact evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -123,5 +128,6 @@ jobs:
             artifacts/r522-semantic-mag/
             artifacts/content-visuals/
             artifacts/r533-r536-handoff/
+            artifacts/r656-intro-keyframes/
           if-no-files-found: warn
           retention-days: 30
