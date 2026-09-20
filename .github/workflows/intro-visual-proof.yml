@@ -1,5 +1,5 @@
 name: FormatX MAG intro visual proof
-# R1330 visual proof: reference ratio + dark iris + readable tendrils + R1310 native MAG
+# R1340 visual proof: cortical surface + radial iris + segmented tendrils + R1310 native MAG
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
-      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1330.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1340.js'
       - 'docs/scifi-ui/scripts/three-r185.module.js'
       - '.github/scripts/capture-mag-intro-r656.cjs'
       - '.github/workflows/intro-visual-proof.yml'
@@ -41,7 +41,7 @@ jobs:
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
       - name: Validate intro source
         run: |
-          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1330.js
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1340.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
           node --check .github/scripts/capture-mag-intro-r656.cjs
       - name: Start source site
@@ -58,15 +58,14 @@ jobs:
       - name: Capture reference keyframes
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4181/scifi-ui/index.html
-          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1330-intro-keyframes
-          FORMATX_SKIP_HANDOFF: '1'
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1340-intro-keyframes
         run: node .github/scripts/capture-mag-intro-r656.cjs
       - name: Upload intro proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mag-intro-r1330-proof
-          path: artifacts/r1330-intro-keyframes/
+          name: mag-intro-r1340-proof
+          path: artifacts/r1340-intro-keyframes/
           if-no-files-found: warn
           retention-days: 14
 
@@ -79,13 +78,13 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R1330 MAG intro visual proof failed'
+          description='R1340 MAG intro visual proof failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R1330 MAG intro keyframe proof passed'
+            description='R1340 MAG intro keyframe proof passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R1330 intro visual proof' \
+            -f context='FormatX R1340 intro visual proof' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
