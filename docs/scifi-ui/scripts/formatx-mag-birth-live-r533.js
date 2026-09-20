@@ -166,6 +166,7 @@
   ROOT.dataset.fxMagBirthArtR1040 = 'curved-biotic-surface-veins-no-radial-spokes-local-cell-network';
   ROOT.dataset.fxMagBirthArtR1060 = 'larger-embedded-liquid-mag-primary-curved-veins-cellular-cortex';
   ROOT.dataset.fxMagBirthArtR1090 = 'larger-embedded-diamond-brain-lobes-thicker-cyan-veins-local-flash';
+  ROOT.dataset.fxNativeMagProofR1101 = 'r1090-intro-r1100-real-armor-browser-proof';
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
