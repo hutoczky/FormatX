@@ -168,6 +168,7 @@
   ROOT.dataset.fxMagBirthArtR1060 = 'larger-embedded-liquid-mag-primary-curved-veins-cellular-cortex';
   ROOT.dataset.fxMagBirthArtR1090 = 'larger-embedded-diamond-brain-lobes-thicker-cyan-veins-local-flash';
   ROOT.dataset.fxMagBirthArtR1110 = 'dna-cellular-mechanical-flash-three-stage-reference';
+  ROOT.dataset.fxThreeStageProofR1121 = 'r1110-intro-r1120-compact-native-mag';
   ROOT.dataset.fxNativeMagProofR1101 = 'r1090-intro-r1100-real-armor-browser-proof';
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
   overlay.setAttribute('aria-label', copy.title);
