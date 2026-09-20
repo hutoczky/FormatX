@@ -984,3 +984,346 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
     transition-property:transform,opacity;
   }
 }
+
+
+/* FormatX R645 — biotic genesis intro.
+   Reference direction: deep biological space → genome field → one spatial DNA
+   → translucent embryo → cyan iris → neural tendrils → first impulse → the
+   exact native production MAG. Phase-driven only; no new canvas and no idle JS. */
+
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"]{
+  --fxb-r645-cyan:rgba(102,235,255,.92);
+  --fxb-r645-violet:rgba(126,80,255,.78);
+  --fxb-r645-deep:#010207;
+  background:
+    radial-gradient(ellipse at 50% 48%,rgba(50,116,160,.045),transparent 34%),
+    linear-gradient(180deg,#000106 0%,#01030a 46%,#030112 100%);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"]::after{
+  opacity:.045;
+  background-size:7px 7px;
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-deep{
+  background:
+    radial-gradient(ellipse at 50% 46%,rgba(79,223,255,.055),transparent 21%),
+    radial-gradient(ellipse at 66% 60%,rgba(92,49,196,.08),transparent 31%),
+    radial-gradient(ellipse at 28% 35%,rgba(21,92,128,.055),transparent 27%),
+    linear-gradient(180deg,rgba(0,1,6,.90),rgba(2,2,12,.96));
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-veil{
+  background:
+    radial-gradient(circle at var(--fxb-x) var(--fxb-y),rgba(83,230,255,.10),transparent 18%),
+    radial-gradient(circle at var(--fxb-x) var(--fxb-y),rgba(116,69,255,.09),transparent 38%),
+    linear-gradient(180deg,rgba(0,2,8,.46),rgba(2,2,13,.68));
+}
+.fxb-biotic-field{
+  position:absolute;
+  inset:-12%;
+  z-index:-5;
+  overflow:hidden;
+  pointer-events:none;
+  opacity:.68;
+  transition:opacity 1s ease,transform 1.7s cubic-bezier(.16,.78,.18,1),filter 1s ease;
+}
+.fxb-biotic-field i{
+  position:absolute;
+  border-radius:47% 53% 61% 39% / 42% 46% 54% 58%;
+  opacity:.22;
+  background:
+    radial-gradient(circle at 34% 30%,rgba(184,252,255,.16),transparent 9%),
+    radial-gradient(circle at 50% 50%,rgba(38,166,205,.10),rgba(59,27,136,.10) 46%,transparent 72%);
+  box-shadow:inset 0 0 80px rgba(77,219,255,.055),0 0 120px rgba(77,83,255,.035);
+  transition:transform 1.8s cubic-bezier(.16,.78,.18,1),opacity 1s ease;
+}
+.fxb-biotic-field i:nth-child(1){width:44vw;aspect-ratio:1.18;left:-9%;top:1%;transform:rotate(-18deg) scale(.94)}
+.fxb-biotic-field i:nth-child(2){width:38vw;aspect-ratio:.92;right:-7%;top:18%;transform:rotate(24deg) scale(.88)}
+.fxb-biotic-field i:nth-child(3){width:52vw;aspect-ratio:1.5;left:23%;bottom:-23%;transform:rotate(-6deg) scale(.90)}
+
+.fxb-genome-field{
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  width:100%;
+  height:100%;
+  overflow:visible;
+  pointer-events:none;
+  opacity:.40;
+  transition:opacity 1s ease,transform 1.65s cubic-bezier(.16,.78,.18,1),filter .9s ease;
+}
+.fxb-genome-ghost{
+  transform-box:fill-box;
+  transform-origin:center;
+  transition:transform 1.65s cubic-bezier(.16,.78,.18,1),opacity .9s ease;
+}
+.fxb-genome-ghost .s1,
+.fxb-genome-ghost .s2{
+  fill:none;
+  stroke-width:2.4;
+  vector-effect:non-scaling-stroke;
+}
+.fxb-genome-ghost .s1{stroke:rgba(92,230,255,.42)}
+.fxb-genome-ghost .s2{stroke:rgba(145,105,255,.32)}
+.fxb-genome-ghost .r{
+  fill:none;
+  stroke:rgba(213,250,255,.20);
+  stroke-width:1.4;
+  vector-effect:non-scaling-stroke;
+}
+.fxb-genome-ghost-a{opacity:.82;transform:translate3d(-16px,-4px,0) scale(.96)}
+.fxb-genome-ghost-b{opacity:.60;transform:translate3d(14px,8px,0) scale(.92)}
+.fxb-genome-ghost-c{opacity:.45;transform:translate3d(-8px,12px,0) scale(.90)}
+.fxb-genome-ghost-d{opacity:.68;transform:translate3d(12px,-10px,0) scale(.94)}
+
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="1"] .fxb-genome-field{
+  opacity:.56;
+  transform:scale(1.035);
+  filter:brightness(1.08);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="1"] .fxb-genome-ghost-a{transform:translate3d(22px,10px,0) scale(1.03)}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="1"] .fxb-genome-ghost-b{transform:translate3d(-18px,18px,0) scale(.98)}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="1"] .fxb-genome-ghost-c{transform:translate3d(16px,-12px,0) scale(.98)}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="1"] .fxb-genome-ghost-d{transform:translate3d(-12px,-18px,0) scale(1.01)}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="2"] .fxb-genome-field{
+  opacity:.17;
+  transform:scale(1.12);
+  filter:blur(1px) brightness(.88);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-genome-field,
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-genome-field{
+  opacity:0;
+  transform:scale(1.20);
+}
+
+/* The one authored DNA collapses into the native MAG coordinate instead of
+   flying toward an arbitrary top-centre UI point. */
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="1"] .fxb-dna-stage{
+  top:51%;
+  width:min(46vw,470px);
+  height:min(72vh,690px);
+  transform:translate(-50%,-50%) perspective(1120px) rotateX(-7deg) rotateY(var(--fxb-dna-turn)) rotateZ(1deg) scale(.92);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="2"] .fxb-dna-stage{
+  left:var(--fxb-x);
+  top:var(--fxb-y);
+  width:min(30vw,300px);
+  height:min(45vh,420px);
+  opacity:.72;
+  transform:translate(-50%,-50%) perspective(1420px) rotateX(-2deg) rotateY(var(--fxb-dna-turn)) rotateZ(-8deg) scale(.54);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-dna-stage{
+  left:var(--fxb-x);
+  top:var(--fxb-y);
+  width:132px;
+  height:188px;
+  opacity:.18;
+  transform:translate(-50%,-50%) perspective(1600px) rotateX(0deg) rotateY(var(--fxb-dna-turn)) rotateZ(-16deg) scale(.20);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-dna-stage{
+  left:var(--fxb-x);
+  top:var(--fxb-y);
+  transform:translate(-50%,-50%) perspective(1800px) rotateY(var(--fxb-dna-turn)) scale(.04);
+}
+
+/* Organic shell and inner optical core. */
+.fxb-embryo-cortex{
+  position:absolute;
+  inset:10%;
+  border-radius:44% 56% 49% 51% / 58% 45% 55% 42%;
+  border:1px solid rgba(123,230,255,.10);
+  background:
+    repeating-conic-gradient(from 18deg,rgba(98,231,255,.055) 0 3deg,transparent 3deg 16deg),
+    radial-gradient(circle at 42% 38%,rgba(203,252,255,.06),transparent 22%);
+  opacity:.34;
+  transform:rotate(-8deg);
+  transition:opacity .65s ease,transform 1.15s cubic-bezier(.18,.78,.2,1);
+}
+.fxb-embryo-iris{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:34%;
+  aspect-ratio:1;
+  transform:translate(-50%,-50%) translateZ(54px) scale(.16);
+  opacity:0;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,#02050a 0 13%,#eaffff 14% 16%,#72e9ff 17% 25%,rgba(71,163,255,.34) 26% 38%,rgba(96,63,210,.12) 48%,transparent 66%);
+  border:1px solid rgba(213,252,255,.48);
+  box-shadow:0 0 16px rgba(207,252,255,.38),0 0 46px rgba(73,215,255,.22),0 0 92px rgba(113,70,255,.14);
+  transition:opacity .5s ease,transform .9s cubic-bezier(.14,.84,.18,1),filter .65s ease;
+}
+.fxb-embryo-iris::before{
+  content:"";
+  position:absolute;
+  inset:-18%;
+  border:1px solid rgba(154,239,255,.24);
+  transform:rotate(45deg);
+  box-shadow:inset 0 0 18px rgba(110,220,255,.08),0 0 26px rgba(110,82,255,.08);
+}
+.fxb-embryo-iris span,
+.fxb-embryo-iris i{
+  position:absolute;
+  inset:15%;
+  border-radius:50%;
+  border:1px solid rgba(215,252,255,.24);
+}
+.fxb-embryo-iris i{
+  inset:29%;
+  border-color:rgba(141,101,255,.34);
+}
+.fxb-embryo-iris b{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:16%;
+  aspect-ratio:1;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:#f6ffff;
+  box-shadow:0 0 15px 5px rgba(179,249,255,.52);
+}
+.fxb-neural-tendrils{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.fxb-neural-tendrils i{
+  --r:0deg;
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:58%;
+  height:18%;
+  border-top:1px solid rgba(130,238,255,.42);
+  border-radius:50% 78% 0 0;
+  transform-origin:0 50%;
+  transform:rotate(var(--r)) scaleX(.04) translateY(-50%);
+  opacity:0;
+  filter:drop-shadow(0 0 5px rgba(96,224,255,.20));
+  transition:transform .92s cubic-bezier(.12,.82,.17,1),opacity .48s ease;
+}
+.fxb-neural-tendrils i:nth-child(1){--r:-12deg}
+.fxb-neural-tendrils i:nth-child(2){--r:38deg;width:52%}
+.fxb-neural-tendrils i:nth-child(3){--r:92deg;width:46%}
+.fxb-neural-tendrils i:nth-child(4){--r:154deg;width:54%;border-top-color:rgba(153,112,255,.34)}
+.fxb-neural-tendrils i:nth-child(5){--r:214deg;width:48%;border-top-color:rgba(153,112,255,.30)}
+.fxb-neural-tendrils i:nth-child(6){--r:286deg;width:55%}
+
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="2"] .fxb-embryo{
+  opacity:.48;
+  transform:translate(-50%,-50%) scale(.46);
+  filter:brightness(1.02);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-embryo{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(.98);
+  filter:brightness(1.18) saturate(1.08);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-embryo-cortex{
+  opacity:.68;
+  transform:rotate(9deg) scale(1.03);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-embryo-iris{
+  opacity:1;
+  transform:translate(-50%,-50%) translateZ(54px) scale(1);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-neural-tendrils i{
+  opacity:.74;
+  transform:rotate(var(--r)) scaleX(1) translateY(-50%);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-embryo-iris{
+  opacity:.82;
+  transform:translate(-50%,-50%) translateZ(54px) scale(1.34);
+  filter:brightness(2.2);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-neural-tendrils i{
+  opacity:.18;
+  transform:rotate(var(--r)) scaleX(1.18) translateY(-50%);
+}
+
+/* UI recedes so the first impression is a film, not a loading screen. */
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-copy{
+  top:max(6%,calc(env(safe-area-inset-top) + 16px));
+  transition:opacity .65s ease,transform .8s cubic-bezier(.18,.78,.2,1);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-copy h1{
+  font-size:clamp(27px,4.2vw,58px);
+  letter-spacing:-.025em;
+  text-shadow:0 0 26px rgba(104,229,255,.055);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-kicker{opacity:.70}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-subtitle{opacity:.68}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-telemetry{
+  opacity:.68;
+  transition:opacity .6s ease;
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="2"] .fxb-copy{
+  opacity:.34;
+  transform:translateX(-50%) translateY(-8px);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-copy,
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-copy{
+  opacity:0;
+  transform:translateX(-50%) translateY(-18px);
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-telemetry{opacity:.34}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-telemetry{opacity:0}
+
+/* Push the final impulse toward the exact native MAG coordinates. */
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-lens{
+  animation:fxb-lens .74s cubic-bezier(.16,.76,.18,1) 1 forwards;
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-flash{
+  animation:fxb-flash .76s ease-out 1 forwards;
+}
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-biotic-field{
+  opacity:.18;
+  transform:scale(1.08);
+  filter:brightness(.80);
+}
+
+/* Mobile: preserve story beats and iris/tendrils but keep R631's compositor-only
+   clock and remove the expensive background genome field. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-genome-field{
+    display:none!important;
+  }
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-biotic-field{
+    opacity:.38;
+  }
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-biotic-field i:nth-child(1){width:78vw}
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-biotic-field i:nth-child(2){width:68vw}
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-biotic-field i:nth-child(3){width:86vw}
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="1"] .fxb-dna-stage{
+    width:min(72vw,330px);
+    height:min(65vh,560px);
+    transform:translate(-50%,-50%) perspective(900px) rotateX(-5deg) rotateY(var(--fxb-dna-turn)) rotateZ(1deg) scale(.88);
+  }
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="2"] .fxb-dna-stage{
+    left:var(--fxb-x);top:var(--fxb-y);width:180px;height:280px;transform:translate(-50%,-50%) scale(.50);
+  }
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-embryo{
+    width:min(62vw,260px);
+  }
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-copy h1{
+    font-size:clamp(24px,8vw,38px);
+  }
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-subtitle{
+    font-size:10px;
+    letter-spacing:.11em;
+  }
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-neural-tendrils i{
+    filter:none;
+  }
+}
+
+/* Reduced motion keeps a readable, immediate handoff with no decorative layers. */
+@media (prefers-reduced-motion:reduce){
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] :is(
+    .fxb-biotic-field,.fxb-genome-field,.fxb-neural-tendrils,.fxb-embryo-cortex
+  ){display:none!important}
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-embryo-iris{
+    animation:none!important;
+    transition:none!important;
+  }
+}

@@ -68,11 +68,36 @@
   overlay.className = 'fx-mag-birth-r533';
   overlay.dataset.phase = '0';
   overlay.dataset.performance = MOBILE ? 'constrained' : 'full';
+  overlay.dataset.fxIntroR645 = 'biotic-genesis';
+  ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
     <div class="fxb-veil" aria-hidden="true"></div>
     <div class="fxb-stars" aria-hidden="true"></div>
+    <div class="fxb-biotic-field" aria-hidden="true"><i></i><i></i><i></i></div>
+    <svg class="fxb-genome-field" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g transform="translate(95 65) rotate(-16) scale(.86)"><g class="fxb-genome-ghost fxb-genome-ghost-a">
+        <path class="s1" d="M30 0 C130 34 130 66 30 100 S-70 166 30 200 S130 266 30 300"/>
+        <path class="s2" d="M100 0 C0 34 0 66 100 100 S200 166 100 200 S0 266 100 300"/>
+        <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
+      </g></g>
+      <g transform="translate(755 82) rotate(21) scale(.68)"><g class="fxb-genome-ghost fxb-genome-ghost-b">
+        <path class="s1" d="M30 0 C130 34 130 66 30 100 S-70 166 30 200 S130 266 30 300"/>
+        <path class="s2" d="M100 0 C0 34 0 66 100 100 S200 166 100 200 S0 266 100 300"/>
+        <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
+      </g></g>
+      <g transform="translate(150 430) rotate(14) scale(.56)"><g class="fxb-genome-ghost fxb-genome-ghost-c">
+        <path class="s1" d="M30 0 C130 34 130 66 30 100 S-70 166 30 200 S130 266 30 300"/>
+        <path class="s2" d="M100 0 C0 34 0 66 100 100 S200 166 100 200 S0 266 100 300"/>
+        <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
+      </g></g>
+      <g transform="translate(720 410) rotate(-24) scale(.78)"><g class="fxb-genome-ghost fxb-genome-ghost-d">
+        <path class="s1" d="M30 0 C130 34 130 66 30 100 S-70 166 30 200 S130 266 30 300"/>
+        <path class="s2" d="M100 0 C0 34 0 66 100 100 S200 166 100 200 S0 266 100 300"/>
+        <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
+      </g></g>
+    </svg>
     <canvas class="fxb-particles" aria-hidden="true"></canvas>
     <div class="fxb-dna-stage" aria-hidden="true">
       <div class="fxb-dna-depth-fog"></div>
@@ -87,8 +112,11 @@
     </div>
     <div class="fxb-embryo" aria-hidden="true">
       <div class="fxb-embryo-membrane"></div>
+      <div class="fxb-embryo-cortex"></div>
       <div class="fxb-embryo-fluid"></div>
       <div class="fxb-embryo-nucleus"></div>
+      <div class="fxb-embryo-iris"><span></span><i></i><b></b></div>
+      <div class="fxb-neural-tendrils"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="fxb-embryo-filament fxb-embryo-filament-a"></div>
       <div class="fxb-embryo-filament fxb-embryo-filament-b"></div>
     </div>
@@ -597,6 +625,7 @@
     ROOT.dataset.fxMagBirthBudgetR629=MOBILE?'compositor-led-20fps-js-static-organic-microdetail':'full-cinematic-budget';
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-zero-continuous-js-render-loop':'desktop-full-native-raf';
+    ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
