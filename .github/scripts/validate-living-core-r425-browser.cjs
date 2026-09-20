@@ -250,7 +250,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.equal(state.mobileOptics, 'soft-perimeter-low-bloom-low-cost-shader', JSON.stringify(state));
     assert.equal(state.finalOptics, 'soft-bloom-soft-edge-compositor-breathe', JSON.stringify(state));
     assert.equal(state.rendererSelection, 'r326-direct-r468-soft-optics-live-energy-zero-idle', JSON.stringify(state));
-    assert.equal(state.governor, 'r465-direct-pause-flag-no-idle-redraw', JSON.stringify(state));
+    assert.equal(state.governor, 'r528-automatic-idle-flag-no-manual-pause', JSON.stringify(state));
     assert.equal(state.idlePolicy, 'periodic-surface-bursts-between-zero-idle', JSON.stringify(state));
     assert.ok(state.opacity >= .88 && state.opacity <= 1, JSON.stringify(state));
     assert.match(state.filter, /brightness\(1\.02\)/, state.filter);
