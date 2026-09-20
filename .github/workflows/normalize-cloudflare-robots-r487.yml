@@ -30,7 +30,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN"
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            echo "Cloudflare API token is not configured for this workflow run."
+            echo "Skipping the optional mutation step; the next step still verifies the canonical live robots.txt."
+            exit 0
+          fi
 
           auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
           zone_json="$(curl -fsS --retry 2 "${auth[@]}" 'https://api.cloudflare.com/client/v4/zones?name=formatxsuite.com&status=active&per_page=1')"
