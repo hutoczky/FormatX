@@ -1533,6 +1533,7 @@
   document.documentElement.dataset.fxMagBirthProofR1211='fast-six-frame-r1210-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1231='fast-six-frame-r1230-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1241='fast-six-frame-r1240-reference-proof';
+  document.documentElement.dataset.fxMagBirthProofR1252='clean-current-r1250-proof';
 
   window.FormatXMagGenesisThreeR1250={
     attach,
