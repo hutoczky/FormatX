@@ -85,6 +85,18 @@ jobs:
           done
           cat "$RUNNER_TEMP/p0-fast-http.log"
           exit 1
+      - name: Capture R658 MAG intro reference keyframes early
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r656-intro-keyframes
+        run: node .github/scripts/capture-mag-intro-r656.cjs
+      - name: Upload intro keyframes early
+        uses: actions/upload-artifact@v4
+        with:
+          name: mag-intro-keyframes-${{ github.sha }}
+          path: artifacts/r656-intro-keyframes/
+          if-no-files-found: error
+          retention-days: 14
       - name: Run retained semantic source proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
@@ -115,11 +127,6 @@ jobs:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_INTRO_EVIDENCE_DIR: artifacts/r533-r536-handoff
         run: node .github/scripts/validate-r533-r536-handoff.cjs
-      - name: Capture R656 MAG intro reference keyframes
-        env:
-          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
-          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r656-intro-keyframes
-        run: node .github/scripts/capture-mag-intro-r656.cjs
       - name: Upload compact evidence
         if: always()
         uses: actions/upload-artifact@v4
