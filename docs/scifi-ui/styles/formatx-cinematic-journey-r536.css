@@ -522,3 +522,453 @@ html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
     transform:none!important;
   }
 }
+
+
+/* FormatX R617 — cinematic biotech universe.
+   The product surfaces stop reading as unrelated landing-page cards and become
+   organs inside one continuous living-system film. No geometry ownership is
+   taken from native layouts, no input is intercepted and no idle animation loop
+   is introduced. */
+html[data-fx-cinematic-journey-r536="ready"]{
+  --fx-c617-parallax-x:0px;
+  --fx-c617-parallax-y:0px;
+  --fx-c617-depth:0;
+  --fx-c617-glass:rgba(4,15,26,.72);
+  --fx-c617-glass-strong:rgba(3,12,22,.90);
+  --fx-c617-line:rgba(151,231,255,.16);
+  --fx-c617-ice:rgba(226,252,255,.94);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world{
+  transform:
+    translate(-50%,-50%)
+    translate3d(
+      calc(var(--fx-c536-velocity) * -12px + var(--fx-c617-parallax-x)),
+      calc(var(--fx-c536-velocity) * 7px + var(--fx-c617-parallax-y)),
+      0
+    )
+    scale(calc(.86 + var(--fx-c536-local) * .12));
+  filter:saturate(1.08) contrast(1.03);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::before,
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::after{
+  content:"";
+  position:absolute;
+  pointer-events:none!important;
+  border-radius:50%;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::before{
+  inset:13%;
+  background:
+    repeating-conic-gradient(
+      from calc(var(--fx-c536-progress) * 90deg),
+      rgba(var(--fx-c536-a),.055) 0 1deg,
+      transparent 1deg 17deg
+    );
+  -webkit-mask-image:radial-gradient(circle,transparent 0 37%,#000 39% 62%,transparent 65%);
+  mask-image:radial-gradient(circle,transparent 0 37%,#000 39% 62%,transparent 65%);
+  opacity:calc(.12 + var(--fx-c536-energy) * .28);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::after{
+  inset:31%;
+  border:1px solid rgba(var(--fx-c536-a),.075);
+  box-shadow:
+    0 0 36px rgba(var(--fx-c536-a),.035),
+    inset 0 0 28px rgba(var(--fx-c536-b),.028);
+  opacity:calc(.14 + var(--fx-c536-energy) * .24);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-iris{
+  transform:
+    translate(-50%,-50%)
+    translate3d(
+      calc(var(--fx-c617-parallax-x) * .55),
+      calc(var(--fx-c617-parallax-y) * .55),
+      0
+    )
+    scale(calc(.72 + var(--fx-c536-local) * .18));
+  border-radius:48% 52% 45% 55% / 54% 46% 56% 44%;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture #main-content{
+  position:relative;
+  isolation:isolate;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture #main-content > :is(
+  #experience,#capabilities,#pricing,#system,#resources,.fx-category-deck
+){
+  background:transparent!important;
+  box-shadow:none!important;
+  border-color:transparent!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero){
+  --fx-c617-section-a:var(--fx-c536-a);
+  --fx-c617-section-b:var(--fx-c536-b);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .section-heading{
+  position:relative;
+  z-index:2;
+  max-width:min(1180px,calc(100% - 32px));
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .section-heading::after{
+  content:"";
+  display:block;
+  width:min(520px,68vw);
+  height:1px;
+  margin-top:clamp(16px,2vw,28px);
+  background:linear-gradient(90deg,rgba(var(--fx-c536-a),.56),rgba(var(--fx-c536-b),.18),transparent);
+  box-shadow:0 0 18px rgba(var(--fx-c536-a),.08);
+  transform-origin:left;
+  transform:scaleX(calc(.52 + var(--fx-c536-scene-local) * .48));
+  opacity:calc(.44 + var(--fx-c536-scene-energy) * .42);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene .section-index{
+  letter-spacing:.24em!important;
+  text-transform:uppercase;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene .section-heading h2{
+  text-wrap:balance;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-anatomy::after{
+  content:attr(data-fx-c617-code);
+  position:absolute;
+  right:clamp(18px,5vw,82px);
+  top:clamp(26px,8vw,110px);
+  color:rgba(var(--fx-c536-a),.055);
+  font:220 clamp(54px,11vw,168px)/.8 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:-.08em;
+  pointer-events:none!important;
+  user-select:none;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-anatomy .c{
+  pointer-events:none!important;
+}
+
+/* Nervous system: process stages become signal nodes rather than cards. */
+html[data-fx-cinematic-journey-r536="ready"] #experience .flow{
+  position:relative;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #experience .flow-chapters{
+  position:relative;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #experience .flow-chapters::before{
+  content:"";
+  position:absolute;
+  left:clamp(14px,2.1vw,28px);
+  top:4%;
+  bottom:4%;
+  width:1px;
+  background:linear-gradient(180deg,transparent,rgba(96,228,255,.34) 16% 84%,transparent);
+  box-shadow:0 0 18px rgba(96,228,255,.09);
+  pointer-events:none;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #experience .flow-chapters article{
+  border:0!important;
+  border-left:1px solid rgba(137,229,255,.15)!important;
+  border-radius:0 20px 20px 0!important;
+  background:
+    linear-gradient(90deg,rgba(49,199,255,.07),rgba(5,17,30,.42) 17%,rgba(3,10,18,.14) 72%,transparent)!important;
+  box-shadow:none!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #experience .flow-chapters article:is(:hover,:focus-within,.active){
+  border-left-color:rgba(181,245,255,.62)!important;
+  background:
+    linear-gradient(90deg,rgba(65,219,255,.13),rgba(6,21,36,.58) 22%,rgba(4,12,22,.18) 78%,transparent)!important;
+}
+
+/* System organs: six distinct translucent biomechanical pods. */
+html[data-fx-cinematic-journey-r536="ready"] #capabilities .card{
+  border:1px solid rgba(137,229,255,.13)!important;
+  border-radius:4px 30px 4px 30px!important;
+  background:
+    radial-gradient(circle at 86% 12%,rgba(121,241,219,.085),transparent 36%),
+    linear-gradient(145deg,rgba(5,21,34,.72),rgba(2,9,17,.56))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    inset 0 0 48px rgba(98,161,255,.022),
+    0 18px 46px rgba(0,0,0,.12)!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #capabilities .card:nth-child(even){
+  border-radius:30px 4px 30px 4px!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #capabilities .card:is(:hover,:focus-within){
+  border-color:rgba(160,244,233,.34)!important;
+  background:
+    radial-gradient(circle at 86% 12%,rgba(121,241,219,.13),transparent 40%),
+    linear-gradient(145deg,rgba(6,26,41,.78),rgba(3,11,20,.62))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 24px 64px rgba(0,0,0,.16),
+    0 0 42px rgba(121,241,219,.035)!important;
+}
+
+/* Commerce heart: keep conversion clarity, but present plans as activation tiers. */
+html[data-fx-cinematic-journey-r536="ready"] #pricing .pricing{
+  position:relative;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #pricing .pricing::before{
+  content:"";
+  position:absolute;
+  left:7%;
+  right:7%;
+  top:50%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,207,137,.13),rgba(236,252,255,.22),rgba(160,109,255,.13),transparent);
+  pointer-events:none;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card{
+  border:1px solid rgba(255,220,173,.13)!important;
+  border-radius:34px 8px 34px 8px!important;
+  background:
+    radial-gradient(circle at 50% -8%,rgba(255,207,137,.09),transparent 38%),
+    linear-gradient(155deg,rgba(18,19,31,.78),rgba(5,11,21,.82))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.028),
+    0 24px 64px rgba(0,0,0,.16)!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card:nth-child(3){
+  border-radius:8px 34px 8px 34px!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card.featured{
+  border-color:rgba(255,224,182,.30)!important;
+  background:
+    radial-gradient(circle at 50% -6%,rgba(255,215,157,.16),transparent 42%),
+    radial-gradient(circle at 86% 18%,rgba(160,109,255,.09),transparent 34%),
+    linear-gradient(155deg,rgba(22,23,38,.88),rgba(5,12,23,.90))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 28px 78px rgba(0,0,0,.22),
+    0 0 54px rgba(255,207,137,.045)!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card .price strong{
+  text-shadow:0 0 28px rgba(255,207,137,.10);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #pricing :is(.payment,.payment-console,.fx-plan-qr-dock){
+  border-color:rgba(170,224,255,.12)!important;
+  background:
+    radial-gradient(circle at 80% 0%,rgba(160,109,255,.055),transparent 38%),
+    linear-gradient(145deg,rgba(7,19,31,.68),rgba(3,10,18,.76))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.022),0 20px 56px rgba(0,0,0,.13)!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #pricing .fx-plan-qr-card{
+  border-color:rgba(166,229,255,.10)!important;
+  background:linear-gradient(145deg,rgba(6,18,30,.62),rgba(3,10,18,.48))!important;
+  box-shadow:none!important;
+}
+
+/* System skeleton: verified structure reads as ribs/struts, not tiles. */
+html[data-fx-cinematic-journey-r536="ready"] #system .system-grid{
+  position:relative;
+  border-top:1px solid rgba(139,203,255,.10)!important;
+  border-bottom:1px solid rgba(139,203,255,.10)!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #system .system-grid article{
+  border:0!important;
+  border-right:1px solid rgba(139,203,255,.10)!important;
+  border-radius:0!important;
+  background:
+    linear-gradient(180deg,rgba(139,203,255,.035),transparent 28% 72%,rgba(143,114,255,.026))!important;
+  box-shadow:none!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #system .system-grid article:last-child{
+  border-right:0!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #system .system-grid article:is(:hover,:focus-within){
+  background:
+    linear-gradient(180deg,rgba(139,203,255,.075),rgba(4,16,28,.16) 34% 68%,rgba(143,114,255,.045))!important;
+}
+
+/* Release beacon: the ending is a signal chamber, not a generic CTA box. */
+html[data-fx-cinematic-journey-r536="ready"] #resources .release-layout{
+  position:relative;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #resources .release-card{
+  border:1px solid rgba(183,244,255,.17)!important;
+  border-radius:50px 10px 50px 10px!important;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(183,244,255,.11),transparent 44%),
+    linear-gradient(155deg,rgba(5,22,34,.72),rgba(2,9,16,.80))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.03),
+    0 0 56px rgba(111,227,200,.035),
+    0 26px 70px rgba(0,0,0,.16)!important;
+}
+
+/* Shared controls keep the product commercial and trustworthy. */
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture .button{
+  border-color:rgba(var(--fx-c536-a),.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 0 0 rgba(var(--fx-c536-a),0);
+  transition:border-color .24s ease,background-color .24s ease,box-shadow .24s ease,filter .24s ease;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture .button:is(:hover,:focus-visible){
+  border-color:rgba(var(--fx-c536-a),.48);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 28px rgba(var(--fx-c536-a),.07);
+  filter:brightness(1.07);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state="active"] > .fx-c536-anatomy{
+  opacity:calc(.12 + var(--fx-c536-scene-energy) * .60);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-kind="nerves"] > .fx-c536-anatomy .c{
+  left:14%;
+  right:14%;
+  top:calc(28% + var(--fx-c536-scene-local) * 42%);
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(96,228,255,.08),rgba(232,254,255,.36),rgba(105,142,255,.08),transparent);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-kind="organs"] > .fx-c536-anatomy .c{
+  right:12%;
+  top:24%;
+  width:min(26vw,340px);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(121,241,219,.10),rgba(98,161,255,.03) 38%,transparent 70%);
+  opacity:calc(.12 + var(--fx-c536-scene-energy) * .32);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-kind="heart"] > .fx-c536-anatomy .c{
+  right:19%;
+  top:39%;
+  width:clamp(36px,5vw,70px);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:radial-gradient(circle,#fff 0 3%,rgba(255,224,181,.44) 8%,rgba(160,109,255,.10) 38%,transparent 70%);
+  box-shadow:0 0 44px rgba(255,207,137,.09);
+  transform:scale(calc(.72 + var(--fx-c536-scene-local) * .30));
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-kind="skeleton"] > .fx-c536-anatomy .c{
+  left:12%;
+  right:12%;
+  top:50%;
+  height:34%;
+  border-top:1px solid rgba(139,203,255,.12);
+  border-bottom:1px solid rgba(143,114,255,.07);
+  transform:skewY(-3deg);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-kind="beacon"] > .fx-c536-anatomy .c{
+  left:50%;
+  top:44%;
+  width:clamp(8px,1.1vw,14px);
+  aspect-ratio:1;
+  border:1px solid rgba(232,255,255,.72);
+  background:rgba(183,244,255,.22);
+  box-shadow:0 0 22px rgba(183,244,255,.28),0 0 58px rgba(111,227,200,.10);
+  transform:translate(-50%,-50%) rotate(45deg);
+}
+
+@media (min-width:901px) and (pointer:fine){
+  html[data-fx-cinematic-journey-r536="ready"] #capabilities .card:nth-child(2),
+  html[data-fx-cinematic-journey-r536="ready"] #capabilities .card:nth-child(5){
+    translate:0 18px;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card.featured{
+    translate:0 -14px;
+  }
+}
+
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-cinematic-journey-r536="ready"]{
+    --fx-c617-parallax-x:0px!important;
+    --fx-c617-parallax-y:0px!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] body.living-architecture #main-content > :is(
+    #experience,#capabilities,#pricing,#system,#resources,.fx-category-deck
+  ){
+    border-top:1px solid rgba(137,224,255,.10)!important;
+    border-bottom:1px solid rgba(137,224,255,.06)!important;
+    background:
+      radial-gradient(circle at 88% 7%,rgba(68,211,255,.045),transparent 34%),
+      linear-gradient(180deg,rgba(3,15,26,.40),rgba(2,9,17,.18))!important;
+    box-shadow:none!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-anatomy::after{
+    display:none;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .section-heading{
+    max-width:calc(100% - 24px);
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #experience .flow-chapters::before{
+    left:7px;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #experience .flow-chapters article,
+  html[data-fx-cinematic-journey-r536="ready"] #capabilities .card,
+  html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card,
+  html[data-fx-cinematic-journey-r536="ready"] #resources .release-card{
+    border-radius:20px 5px 20px 5px!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #system .system-grid{
+    border:0!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #system .system-grid article{
+    border-right:0!important;
+    border-top:1px solid rgba(139,203,255,.09)!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #system .system-grid article:last-child{
+    border-bottom:1px solid rgba(139,203,255,.09)!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-kind="heart"] > .fx-c536-anatomy .c,
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-kind="organs"] > .fx-c536-anatomy .c{
+    opacity:.14;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-cinematic-journey-r536]{
+    --fx-c617-parallax-x:0px!important;
+    --fx-c617-parallax-y:0px!important;
+  }
+
+  html[data-fx-cinematic-journey-r536] body.living-architecture :is(
+    #experience .flow-chapters article,
+    #capabilities .card,
+    #pricing .price-card,
+    #system .system-grid article,
+    #resources .release-card
+  ){
+    translate:none!important;
+    transition:none!important;
+  }
+}

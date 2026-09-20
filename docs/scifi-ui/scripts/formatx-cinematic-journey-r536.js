@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'full-cinematic-journey-r536';
+  const VERSION = 'full-cinematic-biotech-r617';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -44,6 +44,9 @@
   let lastY = scrollY;
   let lastT = performance.now();
   let velocity = 0;
+  let pointerNX = 0;
+  let pointerNY = 0;
+  const finePointer = matchMedia('(pointer:fine)').matches;
   let lastCoreKey = '';
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
@@ -94,8 +97,9 @@
       const node = document.querySelector(def.selector);
       if (!(node instanceof HTMLElement) || seen.has(node)) continue;
       seen.add(node);
-      anatomy(node,def.key);
+      const layer = anatomy(node,def.key);
       node.dataset.fxC536Code = def.code;
+      if (layer instanceof HTMLElement) layer.dataset.fxC617Code = def.code;
       next.push({def,node,index:next.length});
     }
 
@@ -217,6 +221,9 @@
     root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
     root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
     root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
+    root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10 + velocity*-1.6).toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
     scenes.forEach(scene => {
       const sr = scene.node.getBoundingClientRect();
@@ -267,6 +274,33 @@
     observer.observe(main,{childList:true,subtree:true});
   }
 
+
+  function onCinematicPointerMove(event) {
+    if (!finePointer || event.pointerType === 'touch') return;
+    pointerNX = clamp((event.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
+    pointerNY = clamp((event.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
+    root.dataset.fxCinematicPointerR617 = 'active';
+    schedule();
+  }
+
+  function onCinematicPointerLeave() {
+    if (!finePointer) return;
+    pointerNX = 0;
+    pointerNY = 0;
+    root.dataset.fxCinematicPointerR617 = 'rest';
+    schedule();
+  }
+
+  function bindCinematicInteraction() {
+    if (!finePointer) {
+      root.dataset.fxCinematicPointerR617 = 'coarse-skip';
+      return;
+    }
+    addEventListener('pointermove',onCinematicPointerMove,{passive:true});
+    addEventListener('pointerleave',onCinematicPointerLeave,{passive:true});
+    addEventListener('blur',onCinematicPointerLeave,{passive:true});
+  }
+
   function introHandoff() {
     activate(0,'intro-handoff');
     root.classList.add('fx-c536-cut');
@@ -286,6 +320,7 @@
     active=0;
     updateHud(scenes[0]);
     bindDynamicDiscovery();
+    bindCinematicInteraction();
 
     addEventListener('scroll',schedule,{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -311,6 +346,8 @@
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
+    root.dataset.fxCinematicUniverseR617='ready';
+    root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     schedule();
   }
 
@@ -322,5 +359,8 @@
     clearTimeout(cutTimer);
     clearTimeout(refreshTimer);
     observer?.disconnect?.();
+    removeEventListener('pointermove',onCinematicPointerMove);
+    removeEventListener('pointerleave',onCinematicPointerLeave);
+    removeEventListener('blur',onCinematicPointerLeave);
   },{once:true});
 })();
