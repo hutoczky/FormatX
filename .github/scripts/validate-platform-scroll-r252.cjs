@@ -103,7 +103,7 @@ async function verifyHeartInteraction(page, label) {
   const hit = page.locator('#hero .fx-mag-heart-hit-r252').first();
   assert(await hit.count() === 1, `${label} MAG heart hit target missing`);
   await hit.scrollIntoViewIfNeeded();
-  await hit.click({ position: { x: 20, y: 20 } });
+  await hit.click();
 
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
   await page.waitForFunction(() => Boolean(document.documentElement.dataset.fxCoreInteractionTarget), null, { timeout: 5000 });

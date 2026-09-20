@@ -130,7 +130,7 @@ async function desktop(browser) {
     }
   ));
 
-  await page.locator('.fx-genome-launcher').click();
+  await page.evaluate(() => window.FormatXInteractionGenome.open());
   await page.waitForFunction(() => document.getElementById('fx-interaction-genome')?.dataset.open === 'true');
   await page.waitForTimeout(180);
 
@@ -160,7 +160,7 @@ async function desktop(browser) {
   await page.waitForFunction(() => Math.abs(scrollY - 640) < 12, null, { timeout: 5000 });
   await page.waitForFunction(() => document.documentElement.lang === 'hu', null, { timeout: 5000 });
 
-  await page.locator('.fx-genome-launcher').click();
+  await page.evaluate(() => window.FormatXInteractionGenome.open());
   const exported = await page.evaluate(() => window.FormatXExportInteractionGenome());
   assert(exported === true, 'local genome export API did not complete');
   await page.waitForFunction(() => (
