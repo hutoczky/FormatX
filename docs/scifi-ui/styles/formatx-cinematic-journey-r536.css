@@ -972,3 +972,217 @@ html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-kind="b
     transition:none!important;
   }
 }
+
+
+/* FormatX R632 — award jury pass.
+   Visual polish for Design / Usability / Creativity / Content without adding
+   another renderer, blocking input, or introducing an idle animation loop. */
+html[data-fx-cinematic-journey-r536="ready"]{
+  --fx-c632-aperture:.18;
+  --fx-c632-camera-bias:0;
+  --fx-c632-edge:rgba(183,244,255,.16);
+  --fx-c632-ink:rgba(238,253,255,.95);
+}
+
+/* Film aperture: makes the full page read as one continuous directed frame. */
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::before,
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::after{
+  content:"";
+  position:absolute;
+  z-index:8;
+  left:0;
+  right:0;
+  height:clamp(22px,4.2vh,56px);
+  pointer-events:none!important;
+  opacity:calc(.16 + var(--fx-c632-aperture) * .34);
+  transition:opacity .42s ease;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::before{
+  top:0;
+  background:linear-gradient(180deg,rgba(0,2,8,.72),rgba(0,3,9,.22) 54%,transparent);
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::after{
+  bottom:0;
+  background:linear-gradient(0deg,rgba(0,2,8,.76),rgba(0,3,9,.20) 54%,transparent);
+}
+
+/* HUD becomes a quiet film slate rather than a detached debug label. */
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-hud{
+  padding:12px 12px 11px;
+  border:1px solid rgba(var(--fx-c536-a),.09);
+  border-right-color:rgba(var(--fx-c536-a),.22);
+  border-radius:2px 14px 2px 14px;
+  background:linear-gradient(145deg,rgba(3,12,22,.40),rgba(2,8,15,.12));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
+  backdrop-filter:blur(5px);
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-hud strong{
+  text-shadow:0 0 18px rgba(var(--fx-c536-a),.13);
+}
+
+/* Active chapter typography is cinematic, but remains real selectable content. */
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene{
+  --fx-c632-scene-focus:.12;
+  --fx-c632-heading-shift:0px;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .section-heading{
+  transform:translate3d(0,var(--fx-c632-heading-shift),0);
+  transition:transform .22s linear,opacity .35s ease;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state="active"] > .section-heading{
+  opacity:1;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state="future"] > .section-heading{
+  opacity:.78;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene .section-heading h2 em{
+  color:rgba(var(--fx-c536-a),.94);
+  font-style:normal;
+  text-shadow:0 0 28px rgba(var(--fx-c536-a),.08);
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene .section-index{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:rgba(var(--fx-c536-a),.72)!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene .section-index::before{
+  content:"";
+  width:clamp(18px,2.6vw,42px);
+  height:1px;
+  background:linear-gradient(90deg,rgba(var(--fx-c536-a),.82),rgba(var(--fx-c536-b),.18));
+  box-shadow:0 0 12px rgba(var(--fx-c536-a),.12);
+}
+
+/* Scene anatomy gains a restrained optical depth edge instead of more objects. */
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene > .fx-c536-anatomy{
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 7% 93%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 7% 93%,transparent 100%);
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state="active"] > .fx-c536-anatomy{
+  filter:saturate(1.08) contrast(1.025);
+}
+
+/* One material language across every product/control surface. */
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture :is(
+  #experience .flow-chapters article,
+  #capabilities .card,
+  #pricing .price-card,
+  #system .system-grid article,
+  #resources .release-card,
+  .fx-category-grid > *,
+  .fx-origin-proof article,
+  .fx-award-proof article
+){
+  outline:1px solid rgba(var(--fx-c536-a),.035);
+  outline-offset:-1px;
+  transition:
+    border-color .24s ease,
+    background-color .24s ease,
+    box-shadow .24s ease,
+    filter .24s ease,
+    outline-color .24s ease;
+}
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture :is(
+  #experience .flow-chapters article,
+  #capabilities .card,
+  #pricing .price-card,
+  #system .system-grid article,
+  #resources .release-card,
+  .fx-category-grid > *,
+  .fx-origin-proof article,
+  .fx-award-proof article
+):is(:hover,:focus-within){
+  outline-color:rgba(var(--fx-c536-a),.18);
+  filter:brightness(1.055) saturate(1.03);
+}
+
+/* High-end interaction feedback with no custom cursor and no pointer capture. */
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture :is(
+  a,button,[role="button"],[tabindex="0"]
+):focus-visible{
+  outline:2px solid rgba(var(--fx-c536-a),.72)!important;
+  outline-offset:4px!important;
+  box-shadow:0 0 0 1px rgba(4,14,24,.82),0 0 26px rgba(var(--fx-c536-a),.10)!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture .button:active{
+  filter:brightness(.98);
+}
+
+/* Commerce stays trustworthy: the highlighted plan reads as a live access node. */
+html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card.featured{
+  outline-color:rgba(255,224,182,.14);
+}
+html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card.featured header::after{
+  content:"ACCESS NODE";
+  display:inline-flex;
+  margin-top:9px;
+  padding:5px 8px;
+  border:1px solid rgba(255,224,182,.16);
+  border-radius:999px;
+  color:rgba(255,237,211,.62);
+  font:760 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.16em;
+}
+
+/* Release beacon gets a directed signal line that resolves the film at the CTA. */
+html[data-fx-cinematic-journey-r536="ready"] #resources .release-layout::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:8%;
+  right:8%;
+  top:50%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(183,244,255,.08),rgba(238,255,255,.30),rgba(111,227,200,.08),transparent);
+  box-shadow:0 0 26px rgba(183,244,255,.06);
+  transform:scaleX(calc(.48 + var(--fx-c632-scene-focus) * .52));
+  transform-origin:center;
+}
+
+/* Desktop gets the full editorial framing. */
+@media (min-width:901px) and (pointer:fine){
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero){
+    scroll-margin-top:9vh;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] #capabilities .card,
+  html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card{
+    backdrop-filter:blur(7px);
+  }
+}
+
+/* Mobile keeps the identity but avoids expensive glass stacks. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::before,
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::after{
+    height:20px;
+    opacity:.18;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-hud{
+    display:none;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .section-heading{
+    transform:none;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] body.living-architecture :is(
+    #experience .flow-chapters article,
+    #capabilities .card,
+    #pricing .price-card,
+    #system .system-grid article,
+    #resources .release-card
+  ){
+    backdrop-filter:none!important;
+  }
+}
+
+/* Functional parity without decorative motion. */
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-cinematic-journey-r536] .fx-c536-stage::before,
+  html[data-fx-cinematic-journey-r536] .fx-c536-stage::after{
+    display:none!important;
+  }
+  html[data-fx-cinematic-journey-r536] .fx-c536-scene:not(#hero) > .section-heading{
+    transform:none!important;
+    opacity:1!important;
+  }
+}

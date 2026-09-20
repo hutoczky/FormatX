@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'full-cinematic-biotech-r617';
+  const VERSION = 'award-jury-cinematic-r632';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -221,6 +221,8 @@
     root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
     root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
     root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
+    root.style.setProperty('--fx-c632-aperture',(Math.sin(local*Math.PI)*.78).toFixed(4));
+    root.style.setProperty('--fx-c632-camera-bias',((local-.5)*2).toFixed(4));
     root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10 + velocity*-1.6).toFixed(2)+'px');
     root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
     root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
@@ -231,6 +233,8 @@
       const se = scene.index===active ? clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84) : .07;
       scene.node.style.setProperty('--fx-c536-scene-local',lp.toFixed(4));
       scene.node.style.setProperty('--fx-c536-scene-energy',se.toFixed(4));
+      scene.node.style.setProperty('--fx-c632-scene-focus',(Math.sin(lp*Math.PI)).toFixed(4));
+      scene.node.style.setProperty('--fx-c632-heading-shift',(((.5-lp)*14)).toFixed(2)+'px');
     });
 
     root.dataset.fxCinematicProgressR536 = global.toFixed(3);
@@ -348,6 +352,8 @@
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
+    root.dataset.fxAwardJuryPassR632='design-usability-creativity-content-developer-no-fake-award-claims';
+    root.dataset.fxAwardMotionR632='scroll-input-one-shot-only-zero-idle-loop';
     schedule();
   }
 
