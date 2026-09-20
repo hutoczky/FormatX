@@ -1327,3 +1327,419 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
     transition:none!important;
   }
 }
+
+
+/* FormatX R646 — reference biotic film intro.
+   Removes the remaining loading-screen/HUD feel. The opening reads as a dark
+   biological film: genome depth → organic embryo → optic iris → neural growth
+   → first impulse → the exact production MAG. Phase-driven; no extra renderer. */
+
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"]{
+  background:
+    radial-gradient(ellipse at 50% 54%,rgba(36,103,142,.050),transparent 27%),
+    radial-gradient(ellipse at 54% 58%,rgba(71,34,156,.065),transparent 44%),
+    linear-gradient(180deg,#000104 0%,#01030a 52%,#02010c 100%);
+}
+
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] :is(
+  .fxb-grid,.fxb-axis,.fxb-halo-outer,.fxb-halo-inner,.fxb-scan
+){
+  display:none!important;
+}
+
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-deep{
+  background:
+    radial-gradient(ellipse at 48% 44%,rgba(83,225,255,.045),transparent 19%),
+    radial-gradient(ellipse at 62% 61%,rgba(99,58,214,.075),transparent 33%),
+    radial-gradient(ellipse at 18% 56%,rgba(19,100,126,.045),transparent 32%),
+    linear-gradient(180deg,rgba(0,1,5,.98),rgba(2,2,12,.99));
+}
+
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-veil{
+  opacity:.78;
+  background:
+    radial-gradient(ellipse at var(--fxb-x) var(--fxb-y),rgba(90,230,255,.075),transparent 13%),
+    radial-gradient(ellipse at var(--fxb-x) var(--fxb-y),rgba(111,63,255,.070),transparent 34%),
+    radial-gradient(ellipse at center,transparent 32%,rgba(0,1,5,.48) 76%,rgba(0,0,3,.88) 100%);
+}
+
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-biotic-field{
+  opacity:.72;
+  transform:scale(1.06);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-biotic-field i{
+  opacity:.20;
+  border:1px solid rgba(105,218,255,.025);
+  background:
+    radial-gradient(circle at 31% 27%,rgba(214,253,255,.11),transparent 7%),
+    radial-gradient(ellipse at 46% 48%,rgba(36,154,190,.09),rgba(61,27,135,.10) 42%,transparent 72%);
+  box-shadow:
+    inset 24px -16px 72px rgba(85,39,183,.055),
+    inset -18px 20px 68px rgba(65,221,255,.035),
+    0 0 120px rgba(65,79,255,.025);
+}
+
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-genome-field{
+  opacity:.56;
+  filter:blur(.15px) saturate(1.08);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-genome-ghost .s1{
+  stroke:rgba(81,224,255,.46);
+  filter:drop-shadow(0 0 4px rgba(74,224,255,.18));
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-genome-ghost .s2{
+  stroke:rgba(141,94,255,.38);
+  filter:drop-shadow(0 0 4px rgba(139,83,255,.15));
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-genome-ghost .r{
+  stroke:rgba(217,250,255,.18);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-genome-ghost-e{
+  opacity:.36;
+  transform:translate3d(0,14px,0) scale(.90);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-genome-ghost-f{
+  opacity:.30;
+  transform:translate3d(0,-10px,0) scale(.94);
+}
+
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="0"] .fxb-genome-field{
+  transform:scale(1.08);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="1"] .fxb-genome-field{
+  opacity:.68;
+  transform:scale(.99);
+  filter:brightness(1.12) saturate(1.10);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="2"] .fxb-genome-field{
+  opacity:.20;
+  transform:scale(.91);
+  filter:blur(1.8px) brightness(.78);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="3"] .fxb-genome-field,
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="4"] .fxb-genome-field{
+  opacity:0;
+  transform:scale(.82);
+}
+
+/* Hero DNA reads as an object floating through biological depth, not an icon. */
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-dna-stage{
+  top:52%;
+  width:min(43vw,430px);
+  height:min(70vh,670px);
+  opacity:.18;
+  filter:blur(5px) brightness(.76);
+  transform:
+    translate(-50%,-50%)
+    perspective(1200px)
+    rotateX(-14deg)
+    rotateY(-32deg)
+    rotateZ(18deg)
+    scale(1.30);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="1"] .fxb-dna-stage{
+  top:50%;
+  width:min(45vw,450px);
+  height:min(72vh,690px);
+  opacity:1;
+  filter:blur(0) brightness(1.13) saturate(1.12);
+  transform:
+    translate(-50%,-50%)
+    perspective(1050px)
+    rotateX(-9deg)
+    rotateY(var(--fxb-dna-turn))
+    rotateZ(12deg)
+    scale(.98);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="2"] .fxb-dna-stage{
+  left:var(--fxb-x);
+  top:var(--fxb-y);
+  width:min(25vw,260px);
+  height:min(40vh,390px);
+  opacity:.55;
+  filter:blur(.35px) brightness(1.28);
+  transform:
+    translate(-50%,-50%)
+    perspective(1500px)
+    rotateX(-2deg)
+    rotateY(var(--fxb-dna-turn))
+    rotateZ(-12deg)
+    scale(.46);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="3"] .fxb-dna-stage{
+  opacity:.09;
+  transform:translate(-50%,-50%) perspective(1700px) rotateY(var(--fxb-dna-turn)) rotateZ(-18deg) scale(.12);
+}
+
+/* Organic embryo: dark mass first, structure only emerges under the iris light. */
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo{
+  width:min(42vw,470px);
+  border-radius:46% 54% 49% 51% / 53% 46% 54% 47%;
+  perspective:900px;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo::before{
+  content:"";
+  position:absolute;
+  inset:-9%;
+  border-radius:47% 53% 45% 55% / 58% 43% 57% 42%;
+  background:
+    radial-gradient(circle at 34% 26%,rgba(218,253,255,.09),transparent 9%),
+    radial-gradient(ellipse at 48% 55%,rgba(49,182,213,.07),rgba(82,39,162,.12) 42%,rgba(3,5,13,.02) 68%,transparent 74%);
+  border:1px solid rgba(127,223,255,.07);
+  box-shadow:0 0 96px rgba(83,73,255,.08);
+  transform:rotate(-7deg);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo::after{
+  content:"";
+  position:absolute;
+  inset:15% 12% 17% 18%;
+  border-radius:42% 58% 54% 46% / 60% 39% 61% 40%;
+  background:
+    repeating-radial-gradient(ellipse at 47% 51%,rgba(104,228,255,.030) 0 1px,transparent 2px 13px),
+    radial-gradient(circle at 54% 48%,rgba(92,52,187,.10),transparent 58%);
+  transform:rotate(11deg) translateZ(18px);
+  opacity:.70;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-membrane{
+  inset:2%;
+  border:1px solid rgba(145,229,255,.17);
+  border-radius:47% 53% 44% 56% / 57% 43% 56% 44%;
+  background:
+    radial-gradient(circle at 31% 24%,rgba(239,255,255,.16),transparent 7%),
+    radial-gradient(ellipse at 39% 39%,rgba(64,197,225,.09),transparent 31%),
+    radial-gradient(ellipse at 61% 61%,rgba(94,52,181,.17),rgba(15,8,38,.10) 51%,transparent 72%),
+    rgba(1,8,17,.48);
+  box-shadow:
+    inset 18px -10px 58px rgba(73,39,157,.15),
+    inset -12px 18px 42px rgba(74,217,241,.07),
+    0 0 34px rgba(74,209,238,.07),
+    0 0 120px rgba(98,59,215,.08);
+  animation-duration:2.4s;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-fluid{
+  inset:12%;
+  opacity:.58;
+  filter:blur(10px);
+  background:
+    conic-gradient(from 12deg,rgba(52,204,229,.08),rgba(95,47,196,.17),rgba(35,150,187,.07),rgba(95,47,196,.12));
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-cortex{
+  inset:6%;
+  border-color:rgba(110,224,250,.07);
+  background:
+    repeating-conic-gradient(from 15deg,rgba(86,214,239,.032) 0 2deg,transparent 2deg 12deg),
+    repeating-radial-gradient(ellipse at 45% 52%,rgba(133,93,255,.028) 0 1px,transparent 2px 10px);
+  opacity:.42;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-nucleus{
+  width:18%;
+  opacity:.34;
+  background:radial-gradient(circle at 34% 30%,#eaffff 0 6%,#73dff0 14%,#3f8aa7 36%,#37257d 69%,rgba(15,7,40,.14) 100%);
+  box-shadow:0 0 18px rgba(126,237,255,.26),0 0 58px rgba(86,91,255,.14);
+}
+
+/* Optic diamond / iris: the reference's recognisable birth moment. */
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-iris{
+  width:27%;
+  background:
+    radial-gradient(circle,#00040a 0 15%,#f7ffff 16% 18%,#a5f8ff 19% 22%,#45d9f4 23% 29%,#124864 30% 37%,rgba(74,48,170,.22) 43%,transparent 66%);
+  border:1px solid rgba(221,254,255,.62);
+  box-shadow:
+    0 0 12px rgba(232,255,255,.50),
+    0 0 34px rgba(80,225,255,.30),
+    0 0 88px rgba(65,183,255,.18),
+    0 0 150px rgba(112,65,255,.11);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-iris::before{
+  inset:-31%;
+  border:1px solid rgba(164,239,255,.31);
+  border-radius:4px;
+  transform:rotate(45deg);
+  box-shadow:
+    inset 0 0 18px rgba(115,224,255,.09),
+    0 0 24px rgba(87,219,255,.10),
+    0 0 64px rgba(116,73,255,.08);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-iris::after{
+  content:"";
+  position:absolute;
+  inset:-8%;
+  border-radius:50%;
+  border:1px solid rgba(218,252,255,.20);
+  box-shadow:0 0 30px rgba(83,224,255,.13);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-iris b{
+  width:12%;
+  background:#fff;
+  box-shadow:0 0 12px 5px rgba(208,254,255,.72),0 0 36px 14px rgba(72,225,255,.18);
+}
+
+/* Neural growth reaches beyond the shell rather than reading as internal rings. */
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-neural-tendrils{
+  inset:-18%;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-neural-tendrils i{
+  left:50%;
+  top:50%;
+  width:118%;
+  height:22%;
+  border-top:1px solid rgba(114,235,255,.34);
+  border-radius:50% 84% 18% 0;
+  filter:drop-shadow(0 0 4px rgba(77,219,255,.14));
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-neural-tendrils i:nth-child(2){width:96%}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-neural-tendrils i:nth-child(3){width:108%;border-top-color:rgba(159,117,255,.27)}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-neural-tendrils i:nth-child(4){width:124%}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-neural-tendrils i:nth-child(5){width:104%}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-neural-tendrils i:nth-child(6){width:116%}
+
+/* Camera choreography. */
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="2"] .fxb-embryo{
+  opacity:.48;
+  transform:translate(-50%,-50%) scale(.52) rotate(-2deg);
+  filter:brightness(.88) saturate(.92);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="3"] .fxb-embryo{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1.02) rotate(1deg);
+  filter:brightness(1.08) saturate(1.03);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="3"] .fxb-embryo-cortex{
+  opacity:.78;
+  transform:rotate(8deg) scale(1.05);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="3"] .fxb-embryo-iris{
+  opacity:1;
+  transform:translate(-50%,-50%) translateZ(72px) scale(1.03);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="3"] .fxb-neural-tendrils i{
+  opacity:.72;
+  transform:rotate(var(--r)) scaleX(1) translateY(-50%);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="4"] .fxb-embryo{
+  opacity:.20;
+  transform:translate(-50%,-50%) scale(1.10);
+  filter:blur(3px) brightness(1.55);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="4"] .fxb-embryo-iris{
+  opacity:.96;
+  transform:translate(-50%,-50%) translateZ(72px) scale(1.52);
+  filter:brightness(2.5);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="4"] .fxb-neural-tendrils i{
+  opacity:.10;
+  transform:rotate(var(--r)) scaleX(1.28) translateY(-50%);
+}
+
+/* Stop looking like a preloader: the film gets visual priority. */
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-copy{
+  left:max(24px,5vw);
+  top:max(22px,calc(env(safe-area-inset-top) + 18px));
+  width:auto;
+  max-width:min(520px,70vw);
+  transform:none;
+  text-align:left;
+  opacity:.66;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-copy h1,
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-subtitle{
+  display:none;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-kicker{
+  margin:0;
+  font-size:9px;
+  letter-spacing:.42em;
+  color:rgba(183,243,255,.52);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-telemetry{
+  left:max(24px,5vw);
+  bottom:max(26px,calc(env(safe-area-inset-bottom) + 20px));
+  width:min(420px,calc(100vw - 48px));
+  transform:none;
+  grid-template-columns:1fr;
+  gap:0;
+  opacity:.54;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-telemetry output,
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-progress{
+  position:absolute;
+  inline-size:1px;
+  block-size:1px;
+  clip-path:inset(50%);
+  overflow:hidden;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-status{
+  grid-column:1;
+  text-align:left;
+  font-size:8px;
+  letter-spacing:.19em;
+  color:rgba(201,241,250,.46);
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="3"] .fxb-copy,
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="4"] .fxb-copy,
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="4"] .fxb-telemetry{
+  opacity:0;
+}
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-skip{
+  background:rgba(2,8,15,.24);
+  border-color:rgba(159,232,255,.14);
+  color:rgba(228,251,255,.62);
+  backdrop-filter:blur(4px);
+}
+
+/* Letterbox becomes cinematic framing, not UI chrome. */
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-letterbox{
+  height:clamp(18px,4.2vh,54px);
+  background:#000;
+}
+
+/* Mobile preserves the same film beats without expensive backdrop/filter stacks. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-biotic-field{
+    opacity:.46;
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-dna-stage{
+    width:min(70vw,320px);
+    height:min(62vh,540px);
+    filter:none!important;
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="1"] .fxb-dna-stage{
+    width:min(72vw,330px);
+    height:min(64vh,550px);
+    transform:translate(-50%,-50%) perspective(900px) rotateX(-7deg) rotateY(var(--fxb-dna-turn)) rotateZ(10deg) scale(.91);
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="2"] .fxb-dna-stage{
+    width:150px;height:240px;transform:translate(-50%,-50%) rotateZ(-10deg) scale(.44);
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo{
+    width:min(76vw,310px);
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-membrane{
+    animation:none!important;
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-embryo-fluid{
+    animation:none!important;
+    filter:blur(5px);
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-copy{
+    left:18px;top:max(16px,calc(env(safe-area-inset-top) + 10px));
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-telemetry{
+    left:18px;bottom:max(18px,calc(env(safe-area-inset-bottom) + 12px));
+    width:calc(100vw - 36px);
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-status{
+    font-size:7px;
+    letter-spacing:.14em;
+  }
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-neural-tendrils i{
+    filter:none;
+    border-top-color:rgba(114,235,255,.27);
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] :is(
+    .fxb-biotic-field,.fxb-genome-field,.fxb-neural-tendrils,.fxb-embryo-cortex
+  ){display:none!important}
+}

@@ -69,7 +69,9 @@
   overlay.dataset.phase = '0';
   overlay.dataset.performance = MOBILE ? 'constrained' : 'full';
   overlay.dataset.fxIntroR645 = 'biotic-genesis';
+  overlay.dataset.fxIntroR646 = 'reference-biotic-film';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
+  ROOT.dataset.fxMagBirthArtR646 = 'deep-genome-field-dark-organic-embryo-optic-iris-neural-bloom-native-handoff';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -93,6 +95,16 @@
         <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
       </g></g>
       <g transform="translate(720 410) rotate(-24) scale(.78)"><g class="fxb-genome-ghost fxb-genome-ghost-d">
+        <path class="s1" d="M30 0 C130 34 130 66 30 100 S-70 166 30 200 S130 266 30 300"/>
+        <path class="s2" d="M100 0 C0 34 0 66 100 100 S200 166 100 200 S0 266 100 300"/>
+        <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
+      </g></g>
+      <g transform="translate(445 -40) rotate(76) scale(.46)"><g class="fxb-genome-ghost fxb-genome-ghost-e">
+        <path class="s1" d="M30 0 C130 34 130 66 30 100 S-70 166 30 200 S130 266 30 300"/>
+        <path class="s2" d="M100 0 C0 34 0 66 100 100 S200 166 100 200 S0 266 100 300"/>
+        <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
+      </g></g>
+      <g transform="translate(425 560) rotate(104) scale(.42)"><g class="fxb-genome-ghost fxb-genome-ghost-f">
         <path class="s1" d="M30 0 C130 34 130 66 30 100 S-70 166 30 200 S130 266 30 300"/>
         <path class="s2" d="M100 0 C0 34 0 66 100 100 S200 166 100 200 S0 266 100 300"/>
         <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
