@@ -43,6 +43,8 @@ async function snapshot(page){
       owner:root.dataset.fxPrimaryMagOwnerR460||'',
       renderer:root.dataset.fxCoreRenderer||'',
       scheduler:root.dataset.fxCoreScheduler||'',
+      genome:root.dataset.fxCoreGenomeR614||'',
+      genomeContinuity:root.dataset.fxCoreGenomeContinuityR614||'',
       idle:root.dataset.fxCoreIdleRenderR441||'',
       stageCount:document.querySelectorAll(STAGE).length,
       canvasCount:document.querySelectorAll(CANVAS).length,
@@ -69,6 +71,8 @@ function assertStable(state,label){
   assert.equal(state.canvasCount,1,`${label}: expected one native R326 canvas`);
   assert.equal(state.pauseCount,0,`${label}: manual PAUSE returned`);
   assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441',`${label}: zero-idle scheduler drift`);
+  assert.equal(state.genome,'native-double-helix-energy-lattice',`${label}: native genome lattice missing`);
+  assert.equal(state.genomeContinuity,'r533-dna-genesis-to-same-r326-native-core',`${label}: DNA-to-R326 continuity drift`);
   assert.equal(state.idle,'zero-frame',`${label}: zero-idle state drift`);
   assert.ok(state.soundVisible,`${label}: SOUND is not visible`);
   assert.ok(state.askVisible,`${label}: ASK is not visible`);

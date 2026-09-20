@@ -319,6 +319,22 @@
         float cellField=noise(vec2(vLocal.x*5.1+vLocal.z*2.7,vLocal.y*5.8-vLocal.z*1.9)+vec2(uTime*.045,-uTime*.032));
         float membrane=ridge(cellField*2.2+vLocal.y*1.7-vLocal.x*.8-uTime*.055,10.0);
         membrane*=.24+.76*fresnel;
+
+        /* R614 — the native R326 MAG keeps the genetic origin visible.
+           These are shader-native double-helix filaments, not an overlay or
+           second renderer. The two strands wind around the Y axis and the
+           bridge field creates intermittent base-pair-like cross energy. */
+        float dnaAngle=atan(vLocal.z,vLocal.x);
+        float dnaPhase=dnaAngle-vLocal.y*7.65-uTime*.055;
+        float dnaStrandA=exp(-pow(sin(dnaPhase*.5)/.105,2.0));
+        float dnaStrandB=exp(-pow(sin((dnaPhase-3.14159265)*.5)/.105,2.0));
+        float dnaDepth=.34+.66*fresnel;
+        float dnaFlow=.76+.24*sin(uTime*.44+vLocal.y*10.8+vFacet*3.1);
+        float dnaHelix=(dnaStrandA+dnaStrandB)*dnaDepth*dnaFlow;
+        float dnaBridge=ridge(vLocal.y*5.45+uTime*.018,22.0)
+          *(.22+.78*pow(sat(1.0-abs(vLocal.x)*.92),2.0))
+          *(.28+.72*fresnel);
+        float genomePulse=.62+.38*sin(uTime*.23+vLocal.y*5.4+dnaAngle*2.0);
         vec2 heartOffset=vec2(uPointer.x*${mobile?'.070':'.045'},uPointer.y*${mobile?'.058':'.036'});
         vec2 heartLocal=vec2(vLocal.x,vLocal.y*1.025)-heartOffset;
         float radial=length(heartLocal);
@@ -373,8 +389,10 @@
           organ+=ice*nucleus*(3.18+1.18*visualEnergy);
           organ+=spectral*(rings*2.08+iris*2.30+veins*1.72+membrane*.74);
           organ+=(cyan*1.04+ice*.24)*(axisV*1.10+axisH*.62)*visualEnergy;
+          organ+=(cyan*1.34+violet*.56+ice*.34)*dnaHelix*(.62+.62*visualEnergy)*genomePulse;
+          organ+=(ice*.92+cyan*.40)*dnaBridge*(.48+.44*visualEnergy);
           organ+=(ice*1.52+cyan*.80+violet*.28)*surfaceSweep*(1.22+.42*visualEnergy);
-          float alpha=.16+.23*heart+.17*visualEnergy+rings*.18+iris*.17+nucleus*.36+veins*.072+surfaceSweep*.15;
+          float alpha=.16+.23*heart+.17*visualEnergy+rings*.18+iris*.17+nucleus*.36+veins*.072+dnaHelix*.055+dnaBridge*.030+surfaceSweep*.15;
           ${outputName}=vec4(filmic(organ*${optics.innerExposure}),clamp(alpha,.16,.88));
           return;
         }
@@ -389,9 +407,11 @@
         glass+=ice*(rings*.30+heart*.12+nucleus*.64);
         glass+=ice*specular*(1.76+.62*visualEnergy);
         glass+=(cyan*.90+ice*.16)*(axisV*.90+axisH*.48)*visualEnergy;
+        glass+=(cyan*.88+violet*.42+ice*.20)*dnaHelix*(.36+.62*fresnel)*genomePulse;
+        glass+=(ice*.46+cyan*.24)*dnaBridge*(.24+.54*fresnel);
         glass+=(spectral*1.02+ice*.22)*edge;
         glass+=(ice*1.28+cyan*.74+spectral*.30)*surfaceSweep*(1.20+.46*fresnel);
-        float alpha=.36+.20*ndl+.32*fresnel+edge*.072+veins*.105+rings*.060+specular*.17+surfaceSweep*.13;
+        float alpha=.36+.20*ndl+.32*fresnel+edge*.072+veins*.105+rings*.060+specular*.17+dnaHelix*.038+dnaBridge*.018+surfaceSweep*.13;
         ${outputName}=vec4(filmic(glass*${optics.outerExposure}),clamp(alpha,.34,.84));
       }`;
 
@@ -874,6 +894,7 @@
       renderer:'single-webgl-crystal-organism-r326',
       material:'translucent-living-facet-organism-r326',
       geometry:'four-direction-asymmetric-crystal-organism-r326',
+      genome:'native-double-helix-energy-lattice-r614',
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
       surfacePulse:source=>startSurfacePulse(typeof source==='string'?source:'api'),
@@ -907,6 +928,8 @@
     root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
     root.dataset.fxCoreMaterial='translucent-living-facet-organism-r326';
     root.dataset.fxCoreGeometry='four-direction-asymmetric-crystal-organism-r326';
+    root.dataset.fxCoreGenomeR614='native-double-helix-energy-lattice';
+    root.dataset.fxCoreGenomeContinuityR614='r533-dna-genesis-to-same-r326-native-core';
     root.dataset.fxCoreRendererVersion=REVISION;
     root.dataset.fxCoreGeometryTopology=geometry.topology;
     root.dataset.fxCoreVertexCount=String(geometry.count);

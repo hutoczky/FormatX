@@ -344,7 +344,8 @@
       try {
         coreApi.setMorph?.(1,'r611-living-core-ignition');
         coreApi.setShape?.('crystal','r611-living-core-ignition');
-        coreApi.rotateBy?.(.035,.055,'r611-first-living-impulse');
+        coreApi.rotateBy?.(.035,.055,'r614-genome-first-living-impulse');
+        coreApi.surfacePulse?.('r614-genome-handoff');
         coreApi.requestRender?.(2);
       } catch (_) {}
     }
