@@ -823,7 +823,13 @@
           }));
         }catch(_){}
       };
-      Promise.resolve(filmRendererPromise).then(()=>{
+      const rendererReady=filmRendererPromise
+        ? Promise.race([
+            Promise.resolve(filmRendererPromise),
+            new Promise(resolve=>setTimeout(resolve,6000))
+          ])
+        : Promise.resolve();
+      rendererReady.then(()=>{
         requestAnimationFrame(()=>requestAnimationFrame(renderFixedFrame));
       }).catch(()=>{
         requestAnimationFrame(renderFixedFrame);
