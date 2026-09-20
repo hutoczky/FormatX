@@ -83,14 +83,39 @@ async function openMenu(page) {
 async function assertSectionNavigation(page, href) {
   await openMenu(page);
   await page.locator(`#main-nav a[href="${href}"]`).click();
-  await page.waitForFunction(target => {
-    const node = document.querySelector(target);
-    if (!(node instanceof HTMLElement)) return false;
-    const r = node.getBoundingClientRect();
-    const nav = document.getElementById('main-nav');
-    return r.bottom > 80 && r.top < innerHeight * .72
-      && !nav?.classList.contains('open');
-  }, href, { timeout: 12000 });
+  try {
+    await page.waitForFunction(target => {
+      const node = document.querySelector(target);
+      if (!(node instanceof HTMLElement)) return false;
+      const r = node.getBoundingClientRect();
+      const nav = document.getElementById('main-nav');
+      return r.bottom > 80 && r.top < innerHeight * .72
+        && !nav?.classList.contains('open');
+    }, href, { timeout: 12000 });
+  } catch (error) {
+    const diag = await page.evaluate(target => {
+      const node = document.querySelector(target);
+      const nav = document.getElementById('main-nav');
+      const r = node?.getBoundingClientRect?.();
+      return {
+        target,
+        rect:r?{top:r.top,bottom:r.bottom,height:r.height}:null,
+        scrollY,
+        innerHeight,
+        scrollHeight:document.documentElement.scrollHeight,
+        navOpen:nav?.classList.contains('open')||false,
+        menuExpanded:document.getElementById('menu-toggle')?.getAttribute('aria-expanded')||'',
+        rootMenu:document.documentElement.classList.contains('fx-organism-menu-open'),
+        hash:location.hash,
+        r570:document.documentElement.dataset.fxSectionNavigationR570||'',
+        loopState:document.documentElement.dataset.fxLoopLandingState||'',
+        loopSource:document.documentElement.dataset.fxLoopSource||'',
+        loopCount:document.documentElement.dataset.fxLoopCount||'0',
+        transfer:document.documentElement.classList.contains('fx-seamless-loop-transfer')
+      };
+    }, href);
+    throw new Error(`Section navigation diagnostic ${href}: ${JSON.stringify(diag)} :: ${error.message}`);
+  }
 }
 
 async function assertCore(page) {
