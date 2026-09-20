@@ -37,6 +37,15 @@ async function clearIntro(page) {
 async function waitForProductShowcase(page) {
   const capabilities = page.locator('#capabilities').first();
   if (await capabilities.count()) await capabilities.scrollIntoViewIfNeeded();
+
+  // R589: content enhancements are intentionally user-intent deferred. A
+  // trusted keyboard event exercises the real contract; programmatic scrolling
+  // alone must not start the enhancement runtime.
+  await page.keyboard.press('Tab');
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxContentRuntimeR241 === 'requested-r497-user-intent'
+  ), null, { timeout: 10000 });
+
   await page.evaluate(() => {
     document.dispatchEvent(new CustomEvent('formatx:livingready'));
     window.dispatchEvent(new CustomEvent('formatx:livingready'));

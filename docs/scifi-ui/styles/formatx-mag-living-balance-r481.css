@@ -233,3 +233,11 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 }
 
 /* production-r4821-visible-double-heartbeat-spectrum-soft-mobile-edge-colour-synchronised-mag-family */
+
+
+/* R589: header MAG breath must never shrink the interactive hit box. */
+@media (prefers-reduced-motion: no-preference) {
+  .topbar .fx-reference-mag-button[data-fx-mag-life="breath"] {
+    scale: 1 !important;
+  }
+}
