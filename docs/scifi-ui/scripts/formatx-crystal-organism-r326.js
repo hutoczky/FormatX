@@ -261,6 +261,44 @@
       }
     }
 
+    /* R1100 — real front armor plates in the existing single native draw. */
+    function armorVertex(position, uv=[.5,.5]) {
+      const dir=normalize(position);
+      return {
+        sphere: dir.map(value => value * .91),
+        crystal: position,
+        sphereNormal: dir,
+        uv
+      };
+    }
+    function armorTri(a,b,c,facet=2.40) {
+      triangle([
+        armorVertex(a,[0,0]),
+        armorVertex(b,[1,0]),
+        armorVertex(c,[.5,1])
+      ],facet);
+    }
+    function armorQuad(a,b,c,d,facet=2.40) {
+      armorTri(a,b,c,facet);
+      armorTri(a,c,d,facet);
+    }
+
+    // Split crown.
+    armorTri([0,.78,.38],[-.16,.63,.45],[0,.31,.49],2.55);
+    armorTri([-.16,.63,.45],[-.49,.23,.40],[-.19,.09,.47],2.55);
+    armorTri([-.16,.63,.45],[-.19,.09,.47],[0,.31,.49],2.55);
+    armorTri([0,.78,.38],[0,.31,.49],[.16,.63,.45],2.55);
+    armorTri([.16,.63,.45],[.19,.09,.47],[.49,.23,.40],2.55);
+    armorTri([.16,.63,.45],[0,.31,.49],[.19,.09,.47],2.55);
+
+    // Shoulder plates.
+    armorQuad([-.18,.13,.48],[-.49,.20,.42],[-.60,-.04,.37],[-.24,-.18,.46],2.32);
+    armorQuad([.18,.13,.48],[.24,-.18,.46],[.60,-.04,.37],[.49,.20,.42],2.32);
+
+    // Lower dark jaw panels.
+    armorQuad([-.18,-.15,.47],[-.48,-.08,.40],[-.27,-.58,.35],[-.08,-.72,.34],3.10);
+    armorQuad([.18,-.15,.47],[.08,-.72,.34],[.27,-.58,.35],[.48,-.08,.40],3.10);
+
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
         .map(values => new Float32Array(values)),
@@ -447,6 +485,8 @@
         float armorSeam=ridge(vUv.x*4.0+vUv.y*.18+uSiteProgress*.08,17.0)*(1.0-smoothstep(.62,.98,abs(vLocal.y)));
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
         float podMask=1.0-vMorph;
+        float realArmorPlate=smoothstep(1.55,2.15,vFacet)*(1.0-smoothstep(2.78,2.96,vFacet))*podMask;
+        float realDarkPlate=smoothstep(2.92,3.05,vFacet)*podMask;
         float crownMask=smoothstep(.34,.68,vLocal.y)
           *(1.0-smoothstep(.27,.49,abs(vLocal.x)))*podMask;
         float shoulderMask=smoothstep(.31,.42,abs(vLocal.x))
@@ -506,9 +546,11 @@
         vec3 glass=mix(gunmetal,steel,.20+.32*ndl+.05*facetPulse);
         glass+=vec3(.006,.018,.025)*sideLight*.18;
         glass+=vec3(.003,.008,.012)*(.26+.20*cloud);
-        glass+=silver*crownMask*(.82+.84*ndl+.44*specular);
-        glass+=silver*shoulderMask*(.54+.58*ndl+.30*specular)+steel*shoulderMask*.34;
-        glass+=gunmetal*jawMask*.82;
+        glass+=silver*crownMask*(.68+.72*ndl+.38*specular);
+        glass+=silver*shoulderMask*(.38+.46*ndl+.26*specular)+steel*shoulderMask*.30;
+        glass=mix(glass,silver*(.62+.72*ndl+.48*specular),realArmorPlate*.94);
+        glass=mix(glass,gunmetal*(.78+.18*ndl)+steel*.12,realDarkPlate*.92);
+        glass+=gunmetal*jawMask*.76;
         glass-=vec3(.010,.014,.018)*opticalWell*.72;
         glass+=cyan*fresnel*(.014+.020*visualEnergy);
         glass+=cyan*veins*(.024+.020*uBreath);
@@ -523,7 +565,7 @@
         glass+=ice*(armorSeam*.16+armorRib*.09)*(1.0-vMorph*.72);
         glass+=(ice*.52+cyan*.28)*surfaceSweep*(.70+.26*fresnel);
         glass+=(cyan*1.10+ice*.20)*tendrilSegment*(.62+.84*fresnel);
-        float alpha=.945+.020*ndl+.014*fresnel+specular*.014+surfaceSweep*.018+tendrilMask*.012;
+        float alpha=.945+.020*ndl+.014*fresnel+specular*.014+surfaceSweep*.018+tendrilMask*.012+realArmorPlate*.035+realDarkPlate*.025;
         ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.54)),clamp(alpha,.90,.985));
       }`;
 
@@ -559,6 +601,8 @@
         float dna=(dnaA+dnaB)*(.32+.68*fresnel);
         float seam=pow(.5+.5*cos(vUv.x*25.1327+vUv.y*1.1),20.0)*(1.0-vMorph*.72);
         float podMask=1.0-vMorph;
+        float realArmorPlate=smoothstep(1.55,2.15,vFacet)*(1.0-smoothstep(2.78,2.96,vFacet))*podMask;
+        float realDarkPlate=smoothstep(2.92,3.05,vFacet)*podMask;
         float crownMask=smoothstep(.38,.69,vLocal.y)
           *(1.0-smoothstep(.22,.39,abs(vLocal.x)))*podMask;
         float shoulderMask=smoothstep(.26,.34,abs(vLocal.x))
@@ -579,15 +623,17 @@
         vec3 silver=vec3(.70,.77,.80);
         vec3 metal=vec3(.004,.010,.016);
         vec3 c=metal*(1.22+ndl*.48);
-        c+=silver*crownMask*(.80+.82*ndl+.42*spec);
-        c+=silver*shoulderMask*(.50+.54*ndl+.28*spec)+vec3(.028,.058,.078)*shoulderMask*.32;
+        c+=silver*crownMask*(.66+.70*ndl+.36*spec);
+        c+=silver*shoulderMask*(.36+.42*ndl+.24*spec)+vec3(.028,.058,.078)*shoulderMask*.28;
+        c=mix(c,silver*(.60+.68*ndl+.42*spec),realArmorPlate*.94);
+        c=mix(c,metal*.88+vec3(.020,.040,.052),realDarkPlate*.90);
         c+=cyan*fresnel*(.024+.028*energy);
         c+=(cyan*.12+violet*.05)*dna*(.022+.035*energy);
         c+=cyan*(nucleus*4.35+ring*.30)+ice*(heart*.014+nucleus*.42+spec*.28);
         c+=ice*seam*.08;
         c+=(ice*.48+cyan*.26)*pulse;
         c+=(cyan*1.05+ice*.18)*tendrilSegment*(.56+.72*fresnel);
-        float alpha=.945+.018*ndl+.014*fresnel+nucleus*.018+pulse*.014+tendrilMask*.010;
+        float alpha=.945+.018*ndl+.014*fresnel+nucleus*.018+pulse*.014+tendrilMask*.010+realArmorPlate*.030+realDarkPlate*.022;
         ${outputName}=vec4(filmic(c*.82),clamp(alpha,.90,.985));
       }`;
     const fragmentSource = constrainedMobile ? constrainedFragmentSource : fullFragmentSource;
@@ -1086,6 +1132,7 @@
       referenceGeometry:'unified-armored-diamond-pod-r669',
       referenceGeometryR730:'compact-dark-armored-pod-eight-radial-native-tendrils',
       referenceGeometryR1080:'tall-rhombic-armored-pod-silver-crown-large-optical-core-long-segmented-tendrils',
+      referenceGeometryR1100:'single-draw-rhombic-pod-real-silver-crown-shoulders-dark-jaw',
       referenceGeometryR810:'opaque-gunmetal-compact-pod-silver-crown-local-cyan-eye-short-tendrils',
       referenceGeometryR830:'narrow-silver-crown-compact-thick-cyan-segmented-native-tendrils-single-optical-orb',
       referenceGeometryR910:'broad-shoulder-compact-armored-pod-large-optical-orb-short-segmented-tendrils',
@@ -1145,6 +1192,7 @@
     root.dataset.fxCoreReferenceGeometryR673='convex-compact-armored-pod-no-star-silhouette';
     root.dataset.fxCoreReferenceGeometryR730='compact-dark-armored-pod-eight-radial-native-tendrils';
     root.dataset.fxCoreReferenceGeometryR1080='tall-rhombic-armored-pod-silver-crown-large-optical-core-long-segmented-tendrils';
+    root.dataset.fxCoreReferenceGeometryR1100='single-draw-rhombic-pod-real-silver-crown-shoulders-dark-jaw';
     root.dataset.fxCoreReferenceMaterialR1080='opaque-gunmetal-bright-silver-local-cyan-eye';
     root.dataset.fxCoreReferenceGeometryR810='opaque-gunmetal-compact-pod-silver-crown-local-cyan-eye-short-tendrils';
     root.dataset.fxCoreReferenceGeometryR830='narrow-silver-crown-compact-thick-cyan-segmented-native-tendrils-single-optical-orb';
