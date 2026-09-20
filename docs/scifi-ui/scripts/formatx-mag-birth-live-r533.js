@@ -530,7 +530,7 @@
       syncNativeCore(r,now);
     }
 
-    if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(MOBILE?140:80) || r>=1){
+    if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(LOW_POWER?240:MOBILE?140:80) || r>=1){
       lastTelemetryUpdate=now;
       const value=Math.min(100,Math.round(easeOutCubic(r)*100));
       const valueText=String(value).padStart(3,'0');
@@ -539,14 +539,14 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const particleCadence=LOW_POWER?240:MOBILE?130:48;
+    const particleCadence=LOW_POWER?160:MOBILE?130:48;
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
     }
 
     if(r<1 || visiblePhase<4){
-      queueRender(LOW_POWER?34:0);
+      queueRender(LOW_POWER?50:0);
       return;
     }
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
@@ -567,6 +567,7 @@
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthCapabilityR620=LOW_POWER?'mobile-constrained-cinematic':'full-cinematic';
     ROOT.dataset.fxMagBirthBudgetR625=LOW_POWER?'single-css3d-dna-30fps-reduced-composite':'full-cinematic-budget';
+    ROOT.dataset.fxMagBirthBudgetR629=LOW_POWER?'compositor-led-20fps-js-static-organic-microdetail':'full-cinematic-budget';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;

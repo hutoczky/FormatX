@@ -905,3 +905,37 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
 }
 /* R627: do not force containment/layer promotion on the full-screen film.
    Trace evidence showed higher mobile main-thread cost and TBT with it. */
+
+
+/* FormatX R629 compositor-led constrained cinematic.
+   Low-power phones keep the same phase choreography, DNA, embryo and native
+   MAG handoff. Expensive continuous micro-animation and full-screen filters
+   are replaced by phase-driven compositor transforms. */
+.fx-mag-birth-r533[data-performance="constrained"]{
+  filter:none;
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-veil{
+  -webkit-mask-image:none;
+  mask-image:none;
+  filter:none!important;
+  background:
+    radial-gradient(circle at var(--fxb-x) var(--fxb-y),rgba(80,218,255,.10),rgba(35,21,86,.08) 29%,transparent 54%),
+    linear-gradient(180deg,#01030a 0%,#020611 48%,#050315 100%);
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-embryo-membrane,
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-embryo-fluid,
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-embryo-nucleus,
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-dna-heart{
+  animation:none!important;
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-embryo-fluid{
+  background:radial-gradient(circle at 42% 38%,rgba(100,236,255,.16),rgba(132,88,255,.12) 48%,transparent 72%);
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-skip{
+  backdrop-filter:none;
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-dna-stage,
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-embryo,
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-stars{
+  will-change:auto;
+}

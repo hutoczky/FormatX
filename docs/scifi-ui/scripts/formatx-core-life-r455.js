@@ -7,7 +7,10 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let api = null, stage = null, hero = null, visible = false, observer = null, lastSurfacePulse = -Infinity;
   function fireSurfacePulse(source, force = false) {
-    if (!api || typeof api.surfacePulse !== 'function' || reduced.matches || document.hidden || !visible) return false;
+    if (!api || typeof api.surfacePulse !== 'function' || reduced.matches || document.hidden) return false;
+    /* R629: a trusted semantic activation must not be dropped while the
+       IntersectionObserver visibility flag is one task behind the click. */
+    if (!force && !visible) return false;
     const now = performance.now();
     if (!force && now - lastSurfacePulse < 2200) return false;
     if (!api.surfacePulse(source)) return false;
@@ -24,7 +27,10 @@
       root.dataset.fxCoreSemanticPulseR628 = 'activate-forced-native-sweep';
       return;
     }
-    if (phase === 'press' || phase === 'release') fireSurfacePulse(`core-${phase}`);
+    if (phase === 'press' || phase === 'release') {
+      fireSurfacePulse(`core-${phase}`, phase === 'release');
+      if (phase === 'release') root.dataset.fxCoreSemanticPulseR629 = 'release-forced-native-sweep';
+    }
   }
   function onPointerDown() { queueMicrotask(() => fireSurfacePulse('direct-interaction')); }
   function onKeyDown(event) { if (!event.isTrusted || !['Enter', ' '].includes(event.key)) return; const target = event.target instanceof Element ? event.target : null; if (!target?.closest('#hero .hero-space,.fx-reference-mag-button')) return; queueMicrotask(() => fireSurfacePulse('keyboard-interaction')); }
@@ -41,7 +47,7 @@
     document.addEventListener('keydown', onKeyDown, { passive: true });
     root.dataset.fxCoreLifeR455 = 'ready'; root.dataset.fxCoreLifeVersionR455 = VERSION;
     root.dataset.fxCoreLivingBehavior = 'native-periodic-surface-energy-and-interaction-r528';
-    root.dataset.fxCoreSemanticInteractionR628 = 'activate-refreshes-native-surface-sweep';
+    root.dataset.fxCoreSemanticInteractionR628 = 'activate-refreshes-native-surface-sweep'; root.dataset.fxCoreSemanticInteractionR629 = 'activate-or-release-never-dropped-by-stale-visibility';
     if (!root.dataset.fxCoreEnergyBoltR455?.startsWith('surface-sweep-')) root.dataset.fxCoreEnergyBoltR455 = 'armed-periodic-and-interaction-surface-energy';
     root.dataset.fxCoreIdlePolicyR455 = 'periodic-surface-bursts-between-zero-idle';
     return true;
