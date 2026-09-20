@@ -57,7 +57,7 @@
   const DIALOGUE_STYLE_URL = '/scifi-ui/styles/formatx-dialogue-open-r287.css?v=20260822-r287-open-state';
   const DIALOGUE_OWNER_URL = '/scifi-ui/scripts/formatx-dialogue-render-owner-r273.js?v=20260822-r287-open-state';
   const CORE_LIFE_STYLE_URL = '/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r455-restrained-mobile-optics';
-  const CORE_LIFE_URL = '/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r455-native-webgl-life';
+  const CORE_LIFE_URL = '/scifi-ui/scripts/formatx-core-life-r455.js?v=20260920-r628-semantic-activation-sweep';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
 

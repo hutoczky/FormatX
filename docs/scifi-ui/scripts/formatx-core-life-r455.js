@@ -6,15 +6,26 @@
   root.dataset.fxCoreLifeR455 = 'booting';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let api = null, stage = null, hero = null, visible = false, observer = null, lastSurfacePulse = -Infinity;
-  function fireSurfacePulse(source) {
+  function fireSurfacePulse(source, force = false) {
     if (!api || typeof api.surfacePulse !== 'function' || reduced.matches || document.hidden || !visible) return false;
     const now = performance.now();
-    if (now - lastSurfacePulse < 2200) return false;
+    if (!force && now - lastSurfacePulse < 2200) return false;
     if (!api.surfacePulse(source)) return false;
     lastSurfacePulse = now;
     return true;
   }
-  function onCoreInteraction(event) { const phase = event.detail?.phase || ''; if (phase === 'press' || phase === 'release') fireSurfacePulse(`core-${phase}`); }
+  function onCoreInteraction(event) {
+    const phase = event.detail?.phase || '';
+    if (phase === 'activate') {
+      /* R628: the semantic MAG/heart control is a real interaction surface.
+         It must visibly re-energize the single native renderer even if an
+         autonomous sweep happened immediately before the user action. */
+      fireSurfacePulse('direct-interaction-activate', true);
+      root.dataset.fxCoreSemanticPulseR628 = 'activate-forced-native-sweep';
+      return;
+    }
+    if (phase === 'press' || phase === 'release') fireSurfacePulse(`core-${phase}`);
+  }
   function onPointerDown() { queueMicrotask(() => fireSurfacePulse('direct-interaction')); }
   function onKeyDown(event) { if (!event.isTrusted || !['Enter', ' '].includes(event.key)) return; const target = event.target instanceof Element ? event.target : null; if (!target?.closest('#hero .hero-space,.fx-reference-mag-button')) return; queueMicrotask(() => fireSurfacePulse('keyboard-interaction')); }
   function bind() {
@@ -30,6 +41,7 @@
     document.addEventListener('keydown', onKeyDown, { passive: true });
     root.dataset.fxCoreLifeR455 = 'ready'; root.dataset.fxCoreLifeVersionR455 = VERSION;
     root.dataset.fxCoreLivingBehavior = 'native-periodic-surface-energy-and-interaction-r528';
+    root.dataset.fxCoreSemanticInteractionR628 = 'activate-refreshes-native-surface-sweep';
     if (!root.dataset.fxCoreEnergyBoltR455?.startsWith('surface-sweep-')) root.dataset.fxCoreEnergyBoltR455 = 'armed-periodic-and-interaction-surface-energy';
     root.dataset.fxCoreIdlePolicyR455 = 'periodic-surface-bursts-between-zero-idle';
     return true;

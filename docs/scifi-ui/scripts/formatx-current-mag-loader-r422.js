@@ -23,7 +23,7 @@ const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260920-r6
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260831-r484-bounded-surface-window';
-const LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-periodic-native-energy';
+const LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260920-r628-semantic-activation-sweep';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
 
