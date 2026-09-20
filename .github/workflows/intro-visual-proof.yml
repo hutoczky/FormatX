@@ -1,5 +1,5 @@
 name: FormatX MAG intro visual proof
-# R1203 isolated current visual proof
+# R1261 clean visual proof: R1250 intro + R1260 native MAG
 
 on:
   push:
