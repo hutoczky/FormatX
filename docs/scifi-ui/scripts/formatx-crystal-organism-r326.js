@@ -97,6 +97,9 @@
   function buildOrganismGeometry() {
     const latitudeSegments = auditMode ? 18 : mobile ? 18 : 30;
     const longitudeSegments = auditMode ? 32 : mobile ? 36 : 56;
+    const tendrilCount = auditMode ? 4 : mobile ? 6 : 8;
+    const tendrilSegments = auditMode ? 6 : mobile ? 8 : 10;
+    const tendrilSides = mobile ? 3 : 4;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -120,18 +123,29 @@
       const sphereRadius = .91;
       const spherePosition = direction.map(value => value * sphereRadius);
 
-      const axisX = direction[0] >= 0 ? .88 : .86;
-      const axisY = direction[1] >= 0 ? 1.09 : .97;
-      const axisZ = direction[2] >= 0 ? .64 : .43;
-      const exponent = .78;
+      /* R614: the crystal endpoint is now the mature biomechanical MAG:
+         four armored lobes, a narrow mechanical waist and a deep central core.
+         The same closed native topology still owns the sphere morph endpoint. */
+      const axisX = direction[0] >= 0 ? .84 : .82;
+      const axisY = direction[1] >= 0 ? 1.10 : 1.02;
+      const axisZ = direction[2] >= 0 ? .57 : .48;
+      const exponent = .66;
       const terms = Math.pow(Math.abs(direction[0]) / axisX, exponent)
         + Math.pow(Math.abs(direction[1]) / axisY, exponent)
         + Math.pow(Math.abs(direction[2]) / axisZ, exponent);
       const radial = 1 / Math.pow(Math.max(.0001, terms), 1 / exponent);
-      const organic = 1
-        + .022 * Math.sin(theta * 4 + phi * 1.7) * Math.pow(sinPhi, 2)
-        + .010 * Math.sin(theta * 7 - phi * 3.1);
-      const crystalPosition = direction.map(value => value * radial * organic);
+      const equator = Math.pow(sinPhi, 1.45);
+      const cardinal = Math.pow(Math.abs(Math.cos(theta * 2)), 6.5);
+      const diagonal = Math.pow(Math.abs(Math.sin(theta * 2)), 4.5);
+      const armorLobes = 1 + equator * (.23 * cardinal - .065 * diagonal);
+      const polarBlade = 1 + .10 * Math.pow(Math.abs(direction[1]), 3.1);
+      const livingSkin = 1
+        + .018 * Math.sin(theta * 4 + phi * 1.7) * Math.pow(sinPhi, 2)
+        + .007 * Math.sin(theta * 8 - phi * 3.1);
+      const crystalRadius = radial * armorLobes * polarBlade * livingSkin;
+      const crystalPosition = direction.map(value => value * crystalRadius);
+      crystalPosition[0] *= 1 + .055 * equator * cardinal;
+      crystalPosition[2] *= .94 + .035 * cardinal;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -172,12 +186,76 @@
       }
     }
 
+    /* The reference's cable/tentacle silhouette is still one native R326 draw.
+       Each appendage is appended to the same buffers and collapses back into the
+       sphere endpoint during morph, so no duplicate canvas/core is introduced. */
+    function tendrilPath(index, t) {
+      const baseAngle = index / tendrilCount * Math.PI * 2 + (index % 2 ? .12 : -.10);
+      const sideAngle = baseAngle + Math.PI * .5;
+      const lift = ((index % 3) - 1) * .115;
+      const reach = .52 + (index % 3) * .055;
+      const radius = .69 + reach * t;
+      const wave = Math.sin(t * Math.PI * (1.45 + (index % 2) * .22) + index * .73) * (.055 + .12 * t);
+      return [
+        Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
+        lift + (index % 2 ? .22 : -.18) * t + .095 * Math.sin(t * Math.PI * 2 + index * .91),
+        Math.sin(baseAngle) * radius * .68 + Math.sin(sideAngle) * wave * .72
+      ];
+    }
+
+    function tendrilRing(index, segment) {
+      const t = segment / tendrilSegments;
+      const p = tendrilPath(index, t);
+      const before = tendrilPath(index, Math.max(0, t - .015));
+      const after = tendrilPath(index, Math.min(1, t + .015));
+      const tangent = normalize(subtract(after, before));
+      const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
+      const sideA = normalize(cross(tangent, guide));
+      const sideB = normalize(cross(tangent, sideA));
+      const tubeRadius = (.036 * (1 - t * .70) + .010) * (mobile ? .88 : 1);
+      const rootDirection = normalize([p[0], p[1] * .65, p[2] / .68]);
+      return Array.from({ length: tendrilSides }, (_, sideIndex) => {
+        const a = sideIndex / tendrilSides * Math.PI * 2;
+        const offset = [
+          sideA[0] * Math.cos(a) * tubeRadius + sideB[0] * Math.sin(a) * tubeRadius,
+          sideA[1] * Math.cos(a) * tubeRadius + sideB[1] * Math.sin(a) * tubeRadius,
+          sideA[2] * Math.cos(a) * tubeRadius + sideB[2] * Math.sin(a) * tubeRadius
+        ];
+        const collapsed = [
+          rootDirection[0] * .86 + offset[0] * .30 * (1 - t),
+          rootDirection[1] * .86 + offset[1] * .30 * (1 - t),
+          rootDirection[2] * .86 + offset[2] * .30 * (1 - t)
+        ];
+        return {
+          sphere: collapsed,
+          crystal: [p[0] + offset[0], p[1] + offset[1], p[2] + offset[2]],
+          sphereNormal: normalize(collapsed),
+          uv: [(index + sideIndex / tendrilSides) / tendrilCount, t]
+        };
+      });
+    }
+
+    for (let index = 0; index < tendrilCount; index += 1) {
+      let previous = tendrilRing(index, 0);
+      for (let segment = 1; segment <= tendrilSegments; segment += 1) {
+        const current = tendrilRing(index, segment);
+        for (let side = 0; side < tendrilSides; side += 1) {
+          const next = (side + 1) % tendrilSides;
+          const facet = .20 + .78 * random(index * 17 + segment, side * 31 + index);
+          triangle([previous[side], previous[next], current[side]], facet);
+          triangle([previous[next], current[next], current[side]], facet);
+        }
+        previous = current;
+      }
+    }
+
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
         .map(values => new Float32Array(values)),
       sizes: [3, 3, 3, 3, 2, 3, 1],
       count: facets.length,
-      topology: `${latitudeSegments}x${longitudeSegments}-closed-uv-surface`
+      tendrils: tendrilCount,
+      topology: `${latitudeSegments}x${longitudeSegments}-armored-closed-core-plus-${tendrilCount}-native-tendrils-r614`
     };
   }
 
@@ -275,7 +353,7 @@
         vMorph=morph;
         float camera=3.12-world.z*.70;
         float perspective=2.76/max(1.72,camera);
-        vec2 silhouetteScale=vec2(mix(1.48,1.0,morph),mix(1.30,1.0,morph));
+        vec2 silhouetteScale=vec2(mix(1.24,1.0,morph),mix(1.16,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
         projected.y+=.010;
         gl_Position=vec4(projected,world.z*.13,1.0);
@@ -354,10 +432,14 @@
         float axisV=(1.0-smoothstep(.004,.021,abs(heartLocal.x)))*(1.0-smoothstep(.58,.96,abs(heartLocal.y)));
         float axisH=(1.0-smoothstep(.004,.020,abs(heartLocal.y)))*(1.0-smoothstep(.54,.91,abs(heartLocal.x)));
         float hue=.5+.5*sin(vFacet*7.0+uSiteProgress*9.0+uTime*.12);
-        vec3 cyan=vec3(.03,1.18,1.72);
-        vec3 violet=vec3(.98,.16,1.72);
-        vec3 ice=vec3(1.08,1.52,1.92);
-        vec3 spectral=mix(cyan,violet,.20+.46*hue);
+        float armorSeam=ridge(vUv.x*4.0+vUv.y*.18+uSiteProgress*.08,17.0)*(1.0-smoothstep(.62,.98,abs(vLocal.y)));
+        float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
+        vec3 cyan=vec3(.025,1.20,1.92);
+        vec3 violet=vec3(.16,.30,.56);
+        vec3 ice=vec3(1.05,1.60,2.14);
+        vec3 gunmetal=vec3(.012,.030,.052);
+        vec3 steel=vec3(.055,.145,.225);
+        vec3 spectral=mix(cyan,ice,.10+.28*hue);
         float surfaceSweep=0.0;
         float surfaceFilament=0.0;
         if(uSurfacePulse>=0.0){
@@ -383,11 +465,12 @@
         }
 
         if(uLayer>.5){
-          vec3 organ=mix(vec3(.045,.30,.70),spectral,.38+.32*visualEnergy);
+          vec3 organ=mix(vec3(.018,.105,.215),spectral,.34+.30*visualEnergy);
           organ*=.68+.78*cloud;
           organ+=ice*heart*(.82+.78*uBreath);
           organ+=ice*nucleus*(3.18+1.18*visualEnergy);
-          organ+=spectral*(rings*2.08+iris*2.30+veins*1.72+membrane*.74);
+          organ+=spectral*(rings*2.34+iris*2.58+veins*1.28+membrane*.52);
+          organ+=ice*(armorSeam*.36+armorRib*.18);
           organ+=(cyan*1.04+ice*.24)*(axisV*1.10+axisH*.62)*visualEnergy;
           organ+=(cyan*1.34+violet*.56+ice*.34)*dnaHelix*(.62+.62*visualEnergy)*genomePulse;
           organ+=(ice*.92+cyan*.40)*dnaBridge*(.48+.44*visualEnergy);
@@ -397,9 +480,9 @@
           return;
         }
 
-        vec3 glass=mix(vec3(.040,.205,.46),vec3(.10,.68,1.08),.28+.38*ndl+.15*facetPulse);
-        glass+=vec3(.045,.55,1.02)*sideLight*.56;
-        glass+=vec3(.025,.22,.50)*(.54+.76*cloud);
+        vec3 glass=mix(gunmetal,steel,.20+.46*ndl+.12*facetPulse);
+        glass+=vec3(.030,.31,.52)*sideLight*.48;
+        glass+=vec3(.012,.070,.120)*(.54+.58*cloud);
         glass+=spectral*fresnel*(1.22+.94*visualEnergy);
         glass+=spectral*veins*(1.24+.48*uBreath);
         glass+=spectral*membrane*(.58+.36*visualEnergy);
@@ -409,7 +492,8 @@
         glass+=(cyan*.90+ice*.16)*(axisV*.90+axisH*.48)*visualEnergy;
         glass+=(cyan*.88+violet*.42+ice*.20)*dnaHelix*(.36+.62*fresnel)*genomePulse;
         glass+=(ice*.46+cyan*.24)*dnaBridge*(.24+.54*fresnel);
-        glass+=(spectral*1.02+ice*.22)*edge;
+        glass+=(spectral*.72+ice*.20)*edge;
+        glass+=ice*(armorSeam*.74+armorRib*.34)*(1.0-vMorph*.72);
         glass+=(ice*1.28+cyan*.74+spectral*.30)*surfaceSweep*(1.20+.46*fresnel);
         float alpha=.36+.20*ndl+.32*fresnel+edge*.072+veins*.105+rings*.060+specular*.17+dnaHelix*.038+dnaBridge*.018+surfaceSweep*.13;
         ${outputName}=vec4(filmic(glass*${optics.outerExposure}),clamp(alpha,.34,.84));
@@ -892,8 +976,8 @@
       version:VERSION,
       revision:REVISION,
       renderer:'single-webgl-crystal-organism-r326',
-      material:'translucent-living-facet-organism-r326',
-      geometry:'four-direction-asymmetric-crystal-organism-r326',
+      material:'biomechanical-gunmetal-living-core-r614',
+      geometry:'armored-four-lobe-core-with-native-tendrils-r614',
       genome:'native-double-helix-energy-lattice-r614',
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
@@ -926,8 +1010,10 @@
     root.dataset.fxCoreReferenceLock=READY;
     root.dataset.fxCoreReal3d=READY;
     root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
-    root.dataset.fxCoreMaterial='translucent-living-facet-organism-r326';
-    root.dataset.fxCoreGeometry='four-direction-asymmetric-crystal-organism-r326';
+    root.dataset.fxCoreMaterial='biomechanical-gunmetal-living-core-r614';
+    root.dataset.fxCoreGeometry='armored-four-lobe-core-with-native-tendrils-r614';
+    root.dataset.fxCoreGenesisMagR614='dna-to-cell-to-biomechanical-native-mag';
+    root.dataset.fxCoreNativeTendrilsR614=String(geometry.tendrils||0);
     root.dataset.fxCoreGenomeR614='native-double-helix-energy-lattice';
     root.dataset.fxCoreGenomeContinuityR614='r533-dna-genesis-to-same-r326-native-core';
     root.dataset.fxCoreRendererVersion=REVISION;
@@ -936,8 +1022,8 @@
     root.dataset.fxCoreDimension='native-closed-3d-volume-r413';
     root.dataset.fxCoreMorphGeometryR413='closed-sphere-and-four-tip-crystal-same-topology';
     root.dataset.fxCoreMorphNormalsR413='sphere-smooth-to-crystal-faceted-native-shader';
-    root.dataset.fxCoreReferenceGeometry='closed-four-tip-crystal-and-sphere-r413';
-    root.dataset.fxCoreReferenceMaterial='living-organic-prismatic-membrane-r413';
+    root.dataset.fxCoreReferenceGeometry='armored-four-lobe-core-native-tendrils-r614';
+    root.dataset.fxCoreReferenceMaterial='dark-metal-ice-cyan-living-core-r614';
     root.dataset.fxCoreInteractionVisual='pointer-drag-tap-keyboard-scroll-site-state-r413';
     root.dataset.fxCoreLivingBehavior='interaction-and-intermittent-native-electric-surface-r454';
     root.dataset.fxCoreSiteRole='primary-living-site-interface-r413';
