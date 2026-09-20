@@ -5,6 +5,8 @@
   const PARAMS = new URLSearchParams(location.search);
   const FORCE = PARAMS.get('intro') === '1';
   const VISUAL_PROOF = PARAMS.get('visualintro') === '1';
+  const VISUAL_FRAME = Number.parseFloat(PARAMS.get('introframe') || '');
+  const HAS_VISUAL_FRAME = VISUAL_PROOF && Number.isFinite(VISUAL_FRAME);
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const AUTOMATION = navigator.webdriver === true;
@@ -731,7 +733,7 @@
     phaseChangedAt=0;
     ROOT.dataset.fxMagBirthPhase='0';
     ROOT.setAttribute('data-fx-mag-birth-live','active');
-    armPhaseTimeline();
+    if(!HAS_VISUAL_FRAME)armPhaseTimeline();
     document.body.prepend(overlay);
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
     canvas.hidden=false;
@@ -742,6 +744,42 @@
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
+    if(HAS_VISUAL_FRAME){
+      for(const timer of phaseTimers){
+        try{clearTimeout(timer);}catch(_){}
+      }
+      phaseTimers.clear();
+      const seconds=clamp(VISUAL_FRAME,0,10);
+      const fixedR=seconds/10;
+      const fixedTime=seconds*1000;
+      const renderFixedFrame=()=>{
+        if(finished||!overlay.isConnected)return;
+        try{applyPhase(phaseTargetFor(fixedR),'visual-frame-r659');}catch(_){}
+        try{
+          const value=Math.min(100,Math.round(easeOutCubic(fixedR)*100));
+          percent.value=String(value).padStart(3,'0');
+          progress.value=value;
+          status.textContent=statusFor(fixedR);
+        }catch(_){}
+        try{syncNativeCore(fixedR,fixedTime);}catch(_){}
+        try{drawParticles(fixedR,fixedTime);}catch(error){
+          console.error('FormatX R659 fixed-frame render failed:',error);
+        }
+        ROOT.dataset.fxMagBirthVisualFrameSeconds=seconds.toFixed(3);
+        ROOT.dataset.fxMagBirthVisualFrameR659='ready';
+        try{
+          document.dispatchEvent(new CustomEvent('formatx:introframe-ready',{
+            detail:{seconds,revision:'r659-deterministic-frame'}
+          }));
+        }catch(_){}
+      };
+      Promise.resolve(filmRendererPromise).then(()=>{
+        requestAnimationFrame(()=>requestAnimationFrame(renderFixedFrame));
+      }).catch(()=>{
+        requestAnimationFrame(renderFixedFrame);
+      });
+      return;
+    }
     window.setTimeout(()=>{
       if(!overlay.isConnected)return;
       try{
