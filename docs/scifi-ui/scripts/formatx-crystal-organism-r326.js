@@ -727,16 +727,22 @@
     }
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
-      const explicitInteraction=/interaction|direct|shape|tap|keyboard|r538|r619/i.test(String(source||''));
-      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
+      const explicitInteraction=/interaction|direct|shape|tap|keyboard|r538|r619|r633/i.test(String(source||''));
+      /* R633: trusted explicit interaction must not be lost because the
+         IntersectionObserver visibility bit can trail a click by one task.
+         Autonomous sweeps remain visibility-gated and zero-idle. */
+      if(disposed||contextLost||reduced.matches||document.hidden||paused
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'
+        ||(!explicitInteraction&&!visible)
         ||(!explicitInteraction&&now-lastSurfacePulseAt<2200))return false;
       // The mobile governor's idle flag is not the user's PAUSE control.
       // Reserve the full sweep before asking the single renderer to draw it.
       dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
         detail:{phase:'start',source,duration:SURFACE_PULSE_WINDOW_MS}
       }));
-      if(blocked())return false;
+      if(disposed||contextLost||document.hidden||paused
+        ||root.dataset.fxReferenceMotionPaused==='true'
+        ||(!explicitInteraction&&!visible))return false;
       surfacePulseStart=lastSurfacePulseAt=now;
       surfacePulseCount+=1;
       const pulseId=surfacePulseCount;
@@ -1112,6 +1118,7 @@
     root.dataset.fxCoreSurfaceMotionR454='intermittent-native-electric-filament-every-five-to-six-seconds';
     root.dataset.fxCoreSurfacePulseR454='idle';
     root.dataset.fxCoreSurfaceEnergyR484='periodic-native-surface-energy';
+    root.dataset.fxCoreExplicitSurfaceR633='trusted-interaction-bypasses-stale-visibility-only';
     root.dataset.fxCoreSurfaceCountR484='0';
     if(constrainedMobile){
       /* R624: the authored constrained shader already implements the R465
