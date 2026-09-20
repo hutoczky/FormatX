@@ -111,8 +111,7 @@ export default {
 
     if (url.hostname === LEGACY_WWW_HOST && HOMEPAGE_ALIASES.has(url.pathname)) {
       const target = new URL('/', CANONICAL_ORIGIN);
-      const language = supportedLanguage(url.searchParams.get('lang'));
-      if (language) target.searchParams.set('lang', language);
+      copyHomepagePublicParams(url, target);
       target.searchParams.set(RECOVERY_PARAM, '1');
       return temporaryRedirect(target.toString());
     }
@@ -165,6 +164,21 @@ export default {
 
 function supportedLanguage(value) {
   return value === 'hu' || value === 'en' ? value : '';
+}
+
+function copyHomepagePublicParams(source, target) {
+  const language = supportedLanguage(source.searchParams.get('lang'));
+  if (language) target.searchParams.set('lang', language);
+
+  // R606: keep explicit public presentation/test intent across the legacy
+  // www -> canonical hop. These parameters are client-side only and are needed
+  // for deterministic MAG-birth replay/cinematic verification; arbitrary query
+  // data is intentionally not forwarded.
+  if (source.searchParams.get('intro') === '1') target.searchParams.set('intro', '1');
+  if (source.searchParams.get('cinema') === '1') target.searchParams.set('cinema', '1');
+
+  const handoffProbe = source.searchParams.get('r548');
+  if (handoffProbe && handoffProbe.length <= 80) target.searchParams.set('r548', handoffProbe);
 }
 
 function canonicalHomepageUrl(publicUrl) {
