@@ -715,6 +715,31 @@
     ROOT.dataset.fxMagBirthRenderClockR649='deterministic-24fps-canvas-all-devices';
     ROOT.dataset.fxMagBirthRenderClockR650='r651-threejs-24fps-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
+    ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
+    window.setTimeout(()=>{
+      if(!overlay.isConnected)return;
+      try{
+        locateStage();
+        if(stage instanceof HTMLElement){
+          stage.style.removeProperty('opacity');
+          stage.style.removeProperty('transition');
+        }
+        coreApi?.setMorph?.(1,'r653-absolute-dom-watchdog');
+        coreApi?.setShape?.('crystal','r653-absolute-dom-watchdog');
+        coreApi?.requestRender?.(1);
+      }catch(_){}
+      ROOT.removeAttribute('data-fx-mag-birth-live');
+      ROOT.removeAttribute('data-fx-mag-birth-phase');
+      ROOT.dataset.fxMagBirthLiveR533='absolute-dom-watchdog-r653';
+      try{filmRenderer?.destroy?.();}catch(_){}
+      filmRenderer=null;
+      overlay.remove();
+      try{
+        document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
+          detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
+        }));
+      }catch(_){}
+    },DURATION+550);
 
     // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
     // deliberately close to the reference endpoint so a stalled GPU/import path
