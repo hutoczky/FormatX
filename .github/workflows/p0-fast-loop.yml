@@ -58,6 +58,8 @@ jobs:
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r651.js
+          node --check docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js
           node --check docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js
           node --check .github/scripts/validate-r533-r536-handoff.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
