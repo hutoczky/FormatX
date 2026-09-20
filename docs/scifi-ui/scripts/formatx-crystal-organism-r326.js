@@ -1134,7 +1134,7 @@
       referenceGeometryR1080:'tall-rhombic-armored-pod-silver-crown-large-optical-core-long-segmented-tendrils',
       referenceGeometryR1100:'single-draw-rhombic-pod-real-silver-crown-shoulders-dark-jaw',
       referenceGeometryR1120:'compact-titanium-crown-shoulders-dark-jaw-large-cyan-eye',
-      referenceGeometryR1150:'integrated-dark-titanium-armor-compact-optical-core';
+      referenceGeometryR1150:'integrated-dark-titanium-armor-compact-optical-core',
       referenceGeometryR810:'opaque-gunmetal-compact-pod-silver-crown-local-cyan-eye-short-tendrils',
       referenceGeometryR830:'narrow-silver-crown-compact-thick-cyan-segmented-native-tendrils-single-optical-orb',
       referenceGeometryR910:'broad-shoulder-compact-armored-pod-large-optical-orb-short-segmented-tendrils',
