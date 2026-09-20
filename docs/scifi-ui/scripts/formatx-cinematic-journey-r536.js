@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'award-jury-progressive-r639';
+  const VERSION = 'full-cinematic-biotech-r617';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -301,42 +301,6 @@
     addEventListener('blur',onCinematicPointerLeave,{passive:true});
   }
 
-
-  const AWARD_STYLE_R637='/scifi-ui/styles/formatx-award-jury-r637.css?v=20260920-r637-progressive-jury-layer';
-
-  function enableAwardJuryPolish(event) {
-    if (root.dataset.fxAwardJuryR637 === 'enhanced' || root.dataset.fxAwardJuryR637 === 'loading') return;
-    if (event && event.isTrusted === false) return;
-    root.dataset.fxAwardJuryR637 = 'loading';
-    const existing=document.querySelector('link[data-fx-award-jury-r637="true"]');
-    if(existing instanceof HTMLLinkElement){
-      root.dataset.fxAwardJuryR637='enhanced';
-    }else{
-      const link=document.createElement('link');
-      link.rel='stylesheet';
-      link.href=AWARD_STYLE_R637;
-      link.dataset.fxAwardJuryR637='true';
-      link.addEventListener('load',()=>{
-        root.dataset.fxAwardJuryR637='enhanced';
-        root.dataset.fxAwardJuryContractR637='real-input-progressive-stylesheet-no-audit-branch';
-      },{once:true});
-      link.addEventListener('error',()=>{
-        root.dataset.fxAwardJuryR637='style-error';
-      },{once:true});
-      document.head.appendChild(link);
-    }
-    removeEventListener('pointerdown',enableAwardJuryPolish);
-    removeEventListener('touchstart',enableAwardJuryPolish);
-    removeEventListener('keydown',enableAwardJuryPolish);
-  }
-
-  function bindAwardJuryPolish() {
-    root.dataset.fxAwardJuryR637 = 'armed';
-    addEventListener('pointerdown',enableAwardJuryPolish,{passive:true,once:false});
-    addEventListener('touchstart',enableAwardJuryPolish,{passive:true,once:false});
-    addEventListener('keydown',enableAwardJuryPolish,{passive:true,once:false});
-  }
-
   function introHandoff() {
     activate(0,'intro-handoff');
     root.classList.add('fx-c536-cut');
@@ -357,7 +321,6 @@
     updateHud(scenes[0]);
     bindDynamicDiscovery();
     bindCinematicInteraction();
-    bindAwardJuryPolish();
 
     addEventListener('scroll',schedule,{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -385,9 +348,7 @@
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
-    root.dataset.fxAwardJuryPassR635='superseded-by-r637-external-progressive-layer';
-    root.dataset.fxAwardJuryPassR637='design-usability-creativity-content-developer-external-progressive-enhancement';
-    root.dataset.fxAwardPerformanceR639='lazy-showcase-and-deliberate-input-only-jury-style';
+    root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
   }
 
@@ -402,8 +363,5 @@
     removeEventListener('pointermove',onCinematicPointerMove);
     removeEventListener('pointerleave',onCinematicPointerLeave);
     removeEventListener('blur',onCinematicPointerLeave);
-    removeEventListener('pointerdown',enableAwardJuryPolish);
-    removeEventListener('touchstart',enableAwardJuryPolish);
-    removeEventListener('keydown',enableAwardJuryPolish);
   },{once:true});
 })();

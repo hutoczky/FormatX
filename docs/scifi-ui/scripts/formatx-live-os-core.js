@@ -778,7 +778,18 @@
     setTimeout(() => input.focus({ preventScroll: true }), reducedMotion.matches ? 0 : 480);
   }
 
+  function consumePendingOpenR644() {
+    if (root.dataset.fxLiveOsOpenPendingR644 !== 'true') return false;
+    const section = makeSection();
+    if (!section) return false;
+    root.dataset.fxLiveOsOpenPendingR644 = 'consumed';
+    root.dataset.fxLiveOsOpenConsumedR644 = 'core-ready';
+    openFromLauncher();
+    return true;
+  }
+
   addEventListener('formatx:open-live-os', openFromLauncher);
+  addEventListener('formatx:open-live-os-ready', consumePendingOpenR644);
   addEventListener('formatx:languagechange', () => queueMicrotask(renderLanguage));
   const languageObserver = new MutationObserver(entries => {
     if (entries.some(entry => entry.attributeName === 'lang')) queueMicrotask(renderLanguage);
@@ -795,7 +806,11 @@
   }
 
   ensure();
-  ['DOMContentLoaded', 'pageshow', 'formatx:livingready', 'formatx:loop', 'formatx:productshowcaseready'].forEach(name => addEventListener(name, ensure));
+  queueMicrotask(consumePendingOpenR644);
+  ['DOMContentLoaded', 'pageshow', 'formatx:livingready', 'formatx:loop', 'formatx:productshowcaseready'].forEach(name => addEventListener(name, () => {
+    ensure();
+    consumePendingOpenR644();
+  }));
   addEventListener('pagehide', () => {
     clearInterval(state.demoTimer);
     clearTimeout(state.scanTimer);

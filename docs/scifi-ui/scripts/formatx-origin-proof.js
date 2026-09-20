@@ -118,6 +118,26 @@
   }, { once: true });
 }());
 
+
+(function loadAwardJuryLayerAfterIntentR644() {
+  'use strict';
+  const root=document.documentElement;
+  if (root.dataset.fxAwardJuryR644) return;
+  root.dataset.fxAwardJuryR644='loading-after-real-intent';
+  const existing=document.querySelector('link[data-fx-award-jury-r637="true"]');
+  if(existing instanceof HTMLLinkElement){
+    root.dataset.fxAwardJuryR644='ready-existing';
+    return;
+  }
+  const link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href='/scifi-ui/styles/formatx-award-jury-r637.css?v=20260920-r644-post-intent-award-layer';
+  link.dataset.fxAwardJuryR637='true';
+  link.addEventListener('load',()=>{root.dataset.fxAwardJuryR644='ready-post-intent';},{once:true});
+  link.addEventListener('error',()=>{root.dataset.fxAwardJuryR644='style-error';},{once:true});
+  document.head.appendChild(link);
+}());
+
 (function loadProductShowcaseNearViewport() {
   'use strict';
 
@@ -143,7 +163,7 @@
     document.head.appendChild(stylesheet);
 
     const script = document.createElement('script');
-    script.src = './scripts/formatx-product-showcase.js?v=20260920-r602-post-intent-eager-images';
+    script.src = './scripts/formatx-product-showcase.js?v=20260920-r644-intent-prewarm-absolute-assets';
     script.async = true;
     script.dataset.fxProductShowcaseScript = 'true';
     script.addEventListener('load', () => { root.dataset.fxProductShowcaseLoadState = 'ready'; }, { once: true });
@@ -238,6 +258,12 @@
       : 'Live OS — FormatX parancs';
   }
 
+  function requestOpenR644(source='launcher') {
+    root.dataset.fxLiveOsOpenPendingR644 = 'true';
+    root.dataset.fxLiveOsOpenSourceR644 = source;
+    inject();
+  }
+
   function ensureLauncher() {
     const control = document.querySelector('[data-fx-live-os-launcher]')
       || document.querySelector('#hero .fx-reference-liveos');
@@ -248,15 +274,15 @@
     control.dataset.fxLiveOsLauncher = 'true';
     control.setAttribute('aria-label', launcherLabel());
     control.title = launcherLabel() + ' · Ctrl/⌘ K';
-    if (control.dataset.fxLiveOsRuntimeBoundR643 !== 'true') {
-      control.dataset.fxLiveOsRuntimeBoundR643 = 'true';
+    if (control.dataset.fxLiveOsRuntimeBoundR644 !== 'true') {
+      control.dataset.fxLiveOsRuntimeBoundR644 = 'true';
       control.addEventListener('click', event => {
         event.preventDefault();
-        inject();
-        setTimeout(() => dispatchEvent(new CustomEvent('formatx:open-live-os')), 0);
+        requestOpenR644('bound-launcher-click');
       });
     }
     root.dataset.fxLiveOsLauncherR643 = 'hero-reference-cta-no-fixed-overlay';
+    root.dataset.fxLiveOsLauncherR644 = 'persistent-open-handshake';
     return control;
   }
 
@@ -310,6 +336,10 @@
   function ensureArmed() {
     ensureLauncher();
     root.dataset.fxLiveOsLauncherR641 = 'superseded-by-r643-hero-reference-cta';
+    if (root.dataset.fxLiveOsOpenPendingR644 === 'true') {
+      inject();
+      return;
+    }
     if (arm()) {
       clearInterval(retryTimer);
       retryTimer = 0;
@@ -331,9 +361,11 @@
   addEventListener('keydown', event => {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
-      inject();
-      setTimeout(() => dispatchEvent(new CustomEvent('formatx:open-live-os')), 0);
+      requestOpenR644('origin-keyboard-shortcut');
     }
+  });
+  addEventListener('formatx:request-live-os', event => {
+    requestOpenR644(String(event.detail?.source || 'runtime-request'));
   });
 
   addEventListener('formatx:languagechange', ensureLauncher);

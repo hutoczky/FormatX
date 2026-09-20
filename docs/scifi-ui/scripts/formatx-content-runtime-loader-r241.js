@@ -50,6 +50,14 @@
 
   function onIntent(event) {
     if (reservedInteraction(event)) return;
+    if (event?.type === 'keydown' && (event.ctrlKey || event.metaKey) && String(event.key || '').toLowerCase() === 'k') {
+      event.preventDefault();
+      root.dataset.fxLiveOsOpenPendingR644 = 'true';
+      root.dataset.fxLiveOsOpenSourceR644 = 'keyboard-shortcut';
+      start();
+      dispatchEvent(new CustomEvent('formatx:request-live-os',{detail:{source:'keyboard-shortcut-r644'}}));
+      return;
+    }
     start();
   }
 
@@ -66,39 +74,17 @@
     root.dataset.fxContentRuntimeR241 = 'requested-r497-user-intent';
   }
 
-  let liveOsRequestTimer = 0;
-
   function requestLiveOsRuntime(event) {
     const target = event?.target instanceof Element
       ? event.target.closest('[data-fx-live-os-launcher]')
       : null;
-    if (event && !(target instanceof HTMLElement)) return;
-    if (target?.dataset.fxLiveOsRuntimeBoundR643 === 'true') return;
-    if (event) event.preventDefault();
-
-    start();
-    clearInterval(liveOsRequestTimer);
-    let attempts = 0;
-    liveOsRequestTimer = window.setInterval(() => {
-      attempts += 1;
-      if (root.dataset.fxLiveOsLoader === 'v1') {
-        clearInterval(liveOsRequestTimer);
-        liveOsRequestTimer = 0;
-        dispatchEvent(new CustomEvent('formatx:open-live-os'));
-      } else if (attempts >= 120) {
-        clearInterval(liveOsRequestTimer);
-        liveOsRequestTimer = 0;
-        root.dataset.fxLiveOsBootstrapR643 = 'runtime-timeout';
-      }
-    }, 25);
-    root.dataset.fxLiveOsBootstrapR643 = 'existing-hero-cta-heavy-runtime-on-demand';
-  }
-
-  function onLiveOsShortcut(event) {
-    if (!((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k')) return;
-    if (root.dataset.fxLiveOsLoader === 'v1') return;
+    if (!(target instanceof HTMLElement)) return;
     event.preventDefault();
-    requestLiveOsRuntime();
+    root.dataset.fxLiveOsOpenPendingR644 = 'true';
+    root.dataset.fxLiveOsOpenSourceR644 = 'launcher-click';
+    start();
+    dispatchEvent(new CustomEvent('formatx:request-live-os',{detail:{source:'launcher-click-r644'}}));
+    root.dataset.fxLiveOsBootstrapR644 = 'persistent-open-request-no-polling';
   }
 
   // Browser-generated scroll events are not explicit intent and never activate
@@ -106,19 +92,13 @@
   // user signals, while CSS geometry stays immutable throughout the session.
   root.dataset.fxContentRuntimeR241 = 'armed-r497-user-intent';
   root.dataset.fxDeferredVisualStylesR300 = 'production-css-owned-r497';
-  root.dataset.fxLiveOsBootstrapR643 = 'hero-cta-no-fixed-overlay';
   root.dataset.fxFirstFrameStabilityR283 = 'immutable-css-r497';
   for (const [type, options] of listeners) addEventListener(type, onIntent, options);
   document.addEventListener('click', requestLiveOsRuntime);
-  addEventListener('keydown', onLiveOsShortcut);
 
   // Deep links and the explicit immersive action are deliberate navigation
   // intent, so enhancement scripts may mount without touching stylesheet media.
   addEventListener('formatx:immersiveactivate', start, { passive: true });
-  addEventListener('pagehide', () => {
-    clearInterval(liveOsRequestTimer);
-    document.removeEventListener('click', requestLiveOsRuntime);
-    removeEventListener('keydown', onLiveOsShortcut);
-  }, { once: true });
+  addEventListener('pagehide',()=>document.removeEventListener('click',requestLiveOsRuntime),{once:true});
   if (location.hash && location.hash !== '#top' && location.hash !== '#hero') start();
 }());

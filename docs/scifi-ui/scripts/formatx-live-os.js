@@ -6,7 +6,7 @@
   root.dataset.fxLiveOsBundle = 'v1';
 
   const current = document.currentScript;
-  const version = current && current.src.includes('?') ? current.src.slice(current.src.indexOf('?')) : '?v=20260806-live-os-1';
+  const version = '?v=20260920-r644-persistent-open-handshake';
 
   function load(src, marker) {
     return new Promise((resolve, reject) => {

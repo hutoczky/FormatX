@@ -5,7 +5,7 @@
   if (root.dataset.fxProductShowcase === 'v1') return;
   root.dataset.fxProductShowcase = 'v1';
 
-  const ASSET_ROOT = './assets/images/product-showcase/';
+  const ASSET_ROOT = '/scifi-ui/assets/images/product-showcase/';
   const ITEMS = [
     {
       image: 'control-center.svg',
@@ -38,6 +38,25 @@
       en: ['05 / USB CREATOR', 'Automatic source and target detection.', 'Create bootable media from an ISO with real-time progress, state feedback and logging. The image shows the empty state waiting for media.']
     }
   ];
+
+
+  const preloadedAssets = [];
+  let preloadStarted = false;
+
+  function preloadAssetsR644() {
+    if (preloadStarted) return;
+    preloadStarted = true;
+    root.dataset.fxProductShowcaseAssetsR644 = 'prewarming-post-intent';
+    for (const item of ITEMS) {
+      const image = new Image();
+      image.decoding = 'async';
+      image.fetchPriority = 'high';
+      image.src = ASSET_ROOT + item.image;
+      preloadedAssets.push(image);
+    }
+    Promise.allSettled(preloadedAssets.map(image => image.decode?.() || Promise.resolve()))
+      .then(() => { root.dataset.fxProductShowcaseAssetsR644 = 'warmed'; });
+  }
 
   const COPY = {
     hu: {
@@ -104,7 +123,7 @@
     if (index === 0) article.classList.add('fx-product-showcase__card--hero');
     article.innerHTML = [
       '<button type="button" data-showcase-index="' + index + '">',
-      '  <span class="fx-product-showcase__media"><img src="' + ASSET_ROOT + item.image + '" loading="eager" decoding="async" width="800" height="418" alt=""><i aria-hidden="true"></i></span>',
+      '  <span class="fx-product-showcase__media"><img src="' + ASSET_ROOT + item.image + '" loading="eager" decoding="async" fetchpriority="high" width="800" height="418" alt=""><i aria-hidden="true"></i></span>',
       '  <span class="fx-product-showcase__copy"><small></small><strong></strong><span></span><b aria-hidden="true">↗</b></span>',
       '</button>'
     ].join('');
@@ -164,6 +183,7 @@
   }
 
   function ensure() {
+    preloadAssetsR644();
     if (render()) return;
     let attempts = 0;
     const timer = setInterval(() => {
