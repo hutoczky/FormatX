@@ -130,7 +130,7 @@ async function assertCore(page) {
   }, null, { timeout: 12000 });
 }
 
-async function assertStableOrdinaryScroll(page) {
+async function assertStableOrdinaryScroll(page, mobile = false) {
   const before = await page.evaluate(() => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     return {
@@ -154,10 +154,16 @@ async function assertStableOrdinaryScroll(page) {
     transfer: document.documentElement.classList.contains('fx-seamless-loop-transfer'),
     runtime: document.documentElement.__FORMATX_INFINITE_SCROLL__ || null,
     rootSnap: getComputedStyle(document.documentElement).scrollSnapType,
+    mirrorMode: document.documentElement.dataset.fxLoopMirrorMode || '',
+    heartCore: document.documentElement.dataset.fxHeartCoreR252 || '',
+    heartPolicy: document.documentElement.dataset.fxHeartLoopPolicy || '',
   }));
   if (Math.abs(after.y - target) > 6) throw new Error(`Ordinary page position changed away from the loop boundary: ${JSON.stringify({ target, after })}`);
   if (after.loopCount !== before.loopCount) throw new Error(`Loop counter changed away from the visual bridge: ${JSON.stringify({ before, after })}`);
-  if (after.bridges !== 1 || after.mirrors !== 1 || after.mirrorFocusable !== 0 || after.transfer) throw new Error(`Seamless inert bridge state invalid during normal navigation: ${JSON.stringify(after)}`);
+  const mirrorContract = mobile
+    ? after.mirrors === 0 && after.mirrorMode === 'none-mobile-r252' && after.heartCore === 'ready' && after.heartPolicy === 'footer-to-real-core-no-reference-mirror'
+    : after.mirrors === 1;
+  if (after.bridges !== 1 || !mirrorContract || after.mirrorFocusable !== 0 || after.transfer) throw new Error(`Seamless inert bridge state invalid during normal navigation: ${JSON.stringify(after)}`);
   if (after.automatic !== 'enabled' || after.jumpGuard !== 'visual-match-v4' || after.runtime?.automaticLoop !== true || after.runtime?.mobileNativeMomentumPreserved !== true) {
     throw new Error(`Seamless-v7 navigation contract missing: ${JSON.stringify(after)}`);
   }
@@ -181,10 +187,12 @@ async function assertTwoLoopCycles(page, name) {
       const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
       const hero = document.querySelector('#main-content > #hero');
       const relative = Math.max(48, Math.min(innerHeight * .24, Math.max(48, hero.offsetHeight - 12)));
+      const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
       return {
         count: Number(document.documentElement.dataset.fxLoopCount || 0),
         target: bridge.offsetTop + relative,
-        expectedLanding: hero.offsetTop + relative,
+        expectedLanding: mobile ? hero.offsetTop : hero.offsetTop + relative,
+        mobile,
       };
     });
 
@@ -192,7 +200,7 @@ async function assertTwoLoopCycles(page, name) {
     await page.waitForFunction(expected => (
       Number(document.documentElement.dataset.fxLoopCount || 0) === expected
       && document.documentElement.dataset.fxInfiniteInput === 'native'
-      && document.documentElement.dataset.fxLoopLandingState === 'settled'
+      && ['settled','heart-core-settled'].includes(document.documentElement.dataset.fxLoopLandingState)
       && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
     ), before.count + 1, { timeout: 12000 });
 
@@ -236,7 +244,7 @@ async function testDesktop(browser) {
   await assertSectionNavigation(page, '#pricing');
   await assertSectionNavigation(page, '#system');
 
-  await assertStableOrdinaryScroll(page);
+  await assertStableOrdinaryScroll(page, false);
   await assertTwoLoopCycles(page, 'desktop');
   await page.close();
 }
@@ -250,7 +258,7 @@ async function testMobile(browser) {
   await assertSectionNavigation(page, '#capabilities');
   await assertSectionNavigation(page, '#experience');
 
-  await assertStableOrdinaryScroll(page);
+  await assertStableOrdinaryScroll(page, true);
   await assertTwoLoopCycles(page, 'mobile');
   await page.close();
 }
