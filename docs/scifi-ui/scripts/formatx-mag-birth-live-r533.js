@@ -133,7 +133,11 @@
     if (!(dna instanceof SVGElement) || !(dnaBridges instanceof SVGGElement) || !(dnaNodes instanceof SVGGElement)) return;
     const NS='http://www.w3.org/2000/svg';
     const samples=LOW_POWER?8:MOBILE?12:25;
-    const buildSvg=!MOBILE;
+    /* R626: the CSS3D helix is now the sole visible genome renderer.
+       The legacy SVG stays as inert compatibility markup, but is never built.
+       This removes dozens of non-composited SVG transitions while preserving
+       one physically spatial double-helix path on every device class. */
+    const buildSvg=false;
     const left=[];
     const right=[];
     const svgBridgeFragment=document.createDocumentFragment();
@@ -563,6 +567,7 @@
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthCapabilityR620=LOW_POWER?'mobile-constrained-cinematic':'full-cinematic';
     ROOT.dataset.fxMagBirthBudgetR625=LOW_POWER?'single-css3d-dna-30fps-reduced-composite':'full-cinematic-budget';
+    ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
     phaseChangedAt=0;

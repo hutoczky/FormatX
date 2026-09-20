@@ -894,3 +894,22 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
 .fx-mag-birth-r533[data-performance="constrained"] .fxb-dna-base3d{
   border-color:rgba(235,254,255,.55);
 }
+
+
+/* FormatX R626 single genome renderer.
+   The physically spatial CSS3D helix is authoritative. The former SVG trace
+   remains only as inert compatibility markup, eliminating non-composited
+   stroke/filter animation work without changing the DNA → embryo → MAG story. */
+.fx-mag-birth-r533 .fxb-dna{
+  display:none!important;
+}
+.fx-mag-birth-r533{
+  contain:layout paint style;
+}
+.fx-mag-birth-r533 .fxb-dna-stage,
+.fx-mag-birth-r533 .fxb-embryo{
+  contain:layout paint style;
+}
+.fx-mag-birth-r533 .fxb-dna-helix{
+  will-change:transform,opacity;
+}
