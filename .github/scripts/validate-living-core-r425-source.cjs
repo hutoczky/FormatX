@@ -56,7 +56,7 @@ has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry',
   'KHR_parallel_shader_compile','fxCoreShaderCompileR600','finishProgram',
   'const SURFACE_PULSE_MS = 1160','const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880','prefers-reduced-motion:reduce','document.hidden',
-  'uSurfacePulse','dnaHelix','dnaBridge','fxCoreGenomeR614','native-double-helix-energy-lattice-r614','single-luminous-webgl-material-owner'
+  'uSurfacePulse','dnaHelix','dnaBridge','fxCoreGenomeR614','native-double-helix-energy-lattice-r614','fxCoreGenesisMagR614','armored-four-lobe-core-with-native-tendrils-r614','biomechanical-gunmetal-living-core-r614','single-luminous-webgl-material-owner'
 ],'native R326 renderer');
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
 

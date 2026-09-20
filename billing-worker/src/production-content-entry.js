@@ -62,8 +62,8 @@ const DEFERRED_STYLE_PATHS = new Set([
 
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
-    marker: 'scheduler-to-loader-r594',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20260920-r594-semantic-hit-owner']],
+    marker: 'scheduler-to-loader-r615-biomechanical-genesis',
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20260920-r615-biomechanical-genesis-mag']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r589',
