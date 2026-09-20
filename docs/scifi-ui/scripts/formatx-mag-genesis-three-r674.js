@@ -354,19 +354,20 @@
       const diamondEdge=new T.LineSegments(
         new T.EdgesGeometry(new T.PlaneGeometry(.90,.90)),
         new T.LineBasicMaterial({
-          color:0xc3fbff,transparent:true,opacity:.70,
+          color:0x67dff2,transparent:true,opacity:.38,
           depthWrite:false,blending:T.AdditiveBlending
         })
       );
       diamondEdge.rotation.z=Math.PI/4;diamondEdge.position.z=.01;
       this.irisGroup.add(diamondEdge);
 
-      const ring1=new T.Mesh(new T.TorusGeometry(.185,.020,10,64),cyan.clone());
+      const ring1=new T.Mesh(new T.TorusGeometry(.185,.016,10,64),cyan.clone());
+      ring1.material.opacity=.34;
       const ring2=new T.Mesh(new T.TorusGeometry(.275,.008,8,64),cyan.clone());
-      ring2.material.opacity=.18;
+      ring2.material.opacity=.12;
       const pupil=new T.Mesh(new T.CircleGeometry(.090,48),new T.MeshBasicMaterial({color:0x01070b,side:T.DoubleSide}));
       const pupilRing=new T.Mesh(new T.RingGeometry(.096,.132,56),cyan.clone());
-      pupilRing.material.opacity=.62;
+      pupilRing.material.opacity=.38;
       this.irisGroup.add(ring2,ring1,pupil,pupilRing);
 
       const rayMat=new T.LineBasicMaterial({color:0x54dcff,transparent:true,opacity:.30,depthWrite:false,blending:T.AdditiveBlending});
@@ -396,7 +397,7 @@
       this.coreGroup.add(this.glowSprite);
 
       this.coreInner=new T.Mesh(new T.OctahedronGeometry(.17,1),new T.MeshBasicMaterial({
-        color:0x8ff7ff,transparent:true,opacity:.92,
+        color:0x35c4e6,transparent:true,opacity:.62,
         depthWrite:false,blending:T.AdditiveBlending
       }));
       this.coreInner.scale.set(.90,1.15,.55);
@@ -851,6 +852,10 @@
         color:0x8cf3ff,size:.035,transparent:true,opacity:0,
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
+      this.tentacleGlowMaterial=new T.MeshBasicMaterial({
+        color:0x43d8ef,transparent:true,opacity:0,
+        depthWrite:false,blending:T.AdditiveBlending
+      });
       this.tentacles=[];
       const count=8;
       for(let i=0;i<count;i++){
@@ -868,12 +873,14 @@
           start.clone().addScaledVector(dir,len).addScaledVector(side,-sign*(.18+r()*.26)).add(new T.Vector3(0,0,(r()-.5)*.50))
         ];
         const curve=new T.CatmullRomCurve3(points,false,'catmullrom',.54);
-        const geo=this.createTaperedTube(curve,56,8,.074+r()*.018,.008+r()*.003);
+        const geo=this.createTaperedTube(curve,56,8,.068+r()*.016,.008+r()*.003);
+        const glowGeo=this.createTaperedTube(curve,56,6,.013+r()*.003,.0035+r()*.001);
         const mesh=new T.Mesh(geo,this.tentacleMaterial);
+        const glow=new T.Mesh(glowGeo,this.tentacleGlowMaterial);
         const wire=new T.Mesh(geo,this.tentacleEdgeMaterial);
-        const nodeGeo=new T.BufferGeometry().setFromPoints(curve.getPoints(24).filter((_,idx)=>idx%2===0));
+        const nodeGeo=new T.BufferGeometry().setFromPoints(curve.getPoints(24).filter((_,idx)=>idx%3===0));
         const nodes=new T.Points(nodeGeo,this.tentacleNodeMaterial);
-        const g=new T.Group();g.add(mesh,wire,nodes);
+        const g=new T.Group();g.add(mesh,glow,wire,nodes);
         g.scale.setScalar(.001);
         g.userData.phase=r()*Math.PI*2;
         this.tentacleGroup.add(g);this.tentacles.push(g);
@@ -929,17 +936,17 @@
 
     updateCore(t,time){
       let sc=.001;
-      if(t<2.55)sc=.52+ease(t/2.55)*.08;
-      else if(t<3.35)sc=mix(.60,.64,smooth((t-2.55)/.80));
-      else if(t<5.65)sc=.64+Math.sin((t-3.35)*1.02)*.003;
-      else if(t<8.95)sc=mix(.64,.46,smooth((t-5.65)/3.30));
-      else sc=.43;
+      if(t<2.55)sc=.38+ease(t/2.55)*.06;
+      else if(t<3.35)sc=mix(.44,.46,smooth((t-2.55)/.80));
+      else if(t<5.65)sc=.46+Math.sin((t-3.35)*1.02)*.002;
+      else if(t<8.95)sc=mix(.46,.35,smooth((t-5.65)/3.30));
+      else sc=.34;
 
       const endMove=smooth((t-9.76)/.22);
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
-      const cellSurface=smooth((t-2.58)/.52)*(1-smooth((t-9.48)/.36));
-      const surfaceZ=cellSurface*1.16;
+      const cellSurface=smooth((t-2.52)/.50)*(1-smooth((t-9.48)/.36));
+      const surfaceZ=cellSurface*1.20;
 
       this.coreGroup.position.set(tx,ty,surfaceZ);
       this.organicGroup.position.set(tx,ty,0);
@@ -954,24 +961,24 @@
       const early=smooth((t-.10)/.55);
       const eye=smooth((t-2.60)/.42);
       const eyeHold=eye*(1-smooth((t-9.46)/.28));
-      const pulse=.97+.03*Math.sin(time*.0050);
+      const pulse=.975+.025*Math.sin(time*.0050);
 
-      this.coreShell.material.opacity=early*(.68+.16*eyeHold);
-      this.coreGlass.material.opacity=early*(.075+.090*eyeHold);
-      this.coreEdges.material.opacity=early*(.10+.13*eyeHold);
+      this.coreShell.material.opacity=early*(.50+.14*eyeHold);
+      this.coreGlass.material.opacity=early*(.045+.070*eyeHold);
+      this.coreEdges.material.opacity=early*(.070+.10*eyeHold);
 
-      this.irisGroup.scale.setScalar((.05+eyeHold*.96)*pulse);
-      this.irisRays.rotation.z=time*.000080;
-      this.glowSprite.material.opacity=(.002+eyeHold*.36)*pulse;
-      this.glowSprite.scale.setScalar(1.10+eyeHold*.34);
-      this.coreInner.material.opacity=.008+eyeHold*.58;
-      this.coreLight.intensity=eyeHold*(5.8+Math.sin(time*.005)*.65);
+      this.irisGroup.scale.setScalar((.05+eyeHold*.74)*pulse);
+      this.irisRays.rotation.z=time*.000075;
+      this.glowSprite.material.opacity=(.002+eyeHold*.23)*pulse;
+      this.glowSprite.scale.setScalar(1.06+eyeHold*.25);
+      this.coreInner.material.opacity=.006+eyeHold*.34;
+      this.coreLight.intensity=eyeHold*(3.6+Math.sin(time*.005)*.38);
 
-      if(this.coreLabel)this.coreLabel.material.opacity=.30*early*(1-smooth((t-2.64)/.32));
+      if(this.coreLabel)this.coreLabel.material.opacity=.22*early*(1-smooth((t-2.62)/.32));
     }
 
     updateOrganic(t,time){
-      const grow=smooth((t-2.10)/.86);
+      const grow=smooth((t-1.48)/.86);
       const fade=1-smooth((t-9.46)/.40)*.92;
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
@@ -979,8 +986,8 @@
       this.organicShellMaterial.opacity=.34*visible;
       this.organicLobeMaterial.opacity=.88*visible;
       this.organicWireMaterial.opacity=.003*visible;
-      this.organicVeinMaterial.opacity=.52*visible;
-      this.organicHoodMaterial.opacity=.74*visible;
+      this.organicVeinMaterial.opacity=.62*visible;
+      this.organicHoodMaterial.opacity=.22*visible;
       if(this.organicHoodGroup){
         this.organicHoodGroup.rotation.y=Math.sin(time*.00028)*.028;
         this.organicHoodGroup.rotation.x=Math.sin(time*.00022)*.014;
@@ -999,14 +1006,14 @@
     }
 
     updateCells(t,time){
-      const grow=smooth((t-2.24)/.82);
+      const grow=smooth((t-1.68)/.88);
       const fade=1-smooth((t-9.40)/.46)*.94;
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
       this.cellGroup.scale.setScalar(.001+visible*.99);
       this.cellMaterial.opacity=.32*visible;
       this.cellEdgeMaterial.opacity=.0015*visible;
-      this.cellVeinMaterial.opacity=.34*visible;
+      this.cellVeinMaterial.opacity=.48*visible;
       this.cells.forEach((c,i)=>{
         const q=1+Math.sin(time*.00108+c.userData.phase)*.014*visible;
         c.rotation.y+=.00016*(i%2?1:-1);
@@ -1044,8 +1051,9 @@
       const flashFade=1-smooth((t-9.50)/.30)*.14;
       this.tentacleGroup.visible=grow>.002;
       this.tentacleMaterial.opacity=.70*grow*flashFade;
-      this.tentacleEdgeMaterial.opacity=.085*grow;
-      this.tentacleNodeMaterial.opacity=.28*grow;
+      this.tentacleEdgeMaterial.opacity=.018*grow;
+      this.tentacleNodeMaterial.opacity=.10*grow;
+      if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=.42*grow;
       this.tentacles.forEach((g,i)=>{
         const wave=1+Math.sin(time*.00082+g.userData.phase)*.010*grow;
         const v=.001+grow*.999;
@@ -1056,29 +1064,29 @@
     }
 
     updateCamera(t,time){
-      let z=6.30,y=.03,x=0;
+      let z=6.45,y=.03,x=0;
       if(t<2.55){
         const k=smooth(t/2.55);
-        z=mix(5.30,5.66,k);
-        x=Math.sin(time*.00031)*.12*(1-k*.35);
-        y=.025+Math.sin(time*.00027)*.045;
+        z=mix(5.50,5.88,k);
+        x=Math.sin(time*.00031)*.11*(1-k*.35);
+        y=.024+Math.sin(time*.00027)*.040;
       }else if(t<3.40){
         const k=smooth((t-2.55)/.85);
-        z=mix(5.66,3.56,k);
-        x=mix(.05,0,k);y=mix(.04,.0,k);
+        z=mix(5.88,4.26,k);
+        x=mix(.045,0,k);y=mix(.035,0,k);
       }else if(t<5.55){
-        z=3.56+Math.sin(time*.00024)*.018;
-        x=Math.sin(time*.00018)*.014;
-        y=Math.cos(time*.00021)*.012;
+        z=4.26+Math.sin(time*.00024)*.016;
+        x=Math.sin(time*.00018)*.012;
+        y=Math.cos(time*.00021)*.010;
       }else if(t<9.10){
         const k=smooth((t-5.55)/3.55);
-        z=mix(3.56,5.38,k);
-        y=mix(0,.012,k);
+        z=mix(4.26,6.28,k);
+        y=mix(0,.010,k);
       }else{
-        z=mix(5.38,5.48,smooth((t-9.10)/.60));
-        y=.012;
+        z=mix(6.28,6.38,smooth((t-9.10)/.60));
+        y=.010;
       }
-      if(this.width<this.height)z+=1.06;
+      if(this.width<this.height)z+=1.08;
       this.camera.position.set(x,y,z);
       this.camera.lookAt(0,0,0);
     }
@@ -1100,20 +1108,20 @@
 
       const flash=smooth((t-9.15)/.10)*(1-smooth((t-9.55)/.24));
       const after=smooth((t-9.44)/.34);
-      this.renderer.toneMappingExposure=1.14+flash*.18+after*.03;
-      this.coreLight.intensity+=flash*10+after*3;
+      this.renderer.toneMappingExposure=1.13+flash*.08+after*.02;
+      this.coreLight.intensity+=flash*4+after*2;
       if(this.glowSprite){
-        const g=1+flash*3.10;
+        const g=1+flash*2.55;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(1,this.glowSprite.material.opacity+flash*.52);
+        this.glowSprite.material.opacity=Math.min(1,this.glowSprite.material.opacity+flash*.42);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.96;
-        const burstScale=3.6+flash*2.7;
+        this.flashBurst.material.opacity=flash*.82;
+        const burstScale=3.0+flash*1.8;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.78;
+        this.flashBeam.material.opacity=flash*.60;
         this.flashBeam.scale.x=1+flash*.48;
       }
 
