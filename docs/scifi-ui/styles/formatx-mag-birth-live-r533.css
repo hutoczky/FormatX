@@ -967,3 +967,20 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
     text-shadow:0 0 14px rgba(109,230,255,.10);
   }
 }
+
+
+/* FormatX R631 mobile compositor-only clock.
+   Mobile uses timed phase classes rather than a continuous JS paint loop.
+   The particle field is represented by the existing CSS star field, while DNA,
+   embryo, first impulse and native MAG handoff remain in the authored sequence. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-particles{
+    display:none!important;
+  }
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-dna-stage,
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-embryo,
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-halo-outer,
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-letterbox{
+    transition-property:transform,opacity;
+  }
+}
