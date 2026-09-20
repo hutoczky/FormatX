@@ -93,12 +93,12 @@ jobs:
           done
           cat "$RUNNER_TEMP/p0-fast-http.log"
           exit 1
-      - name: Capture R658 MAG intro reference keyframes early
+      - name: Capture current MAG intro reference keyframes early
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_INTRO_KEYFRAME_DIR: artifacts/r656-intro-keyframes
         run: node .github/scripts/capture-mag-intro-r656.cjs
-      - name: Upload intro keyframes early
+      - name: Upload current intro keyframes early
         uses: actions/upload-artifact@v4
         with:
           name: mag-intro-keyframes-${{ github.sha }}
