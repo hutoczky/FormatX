@@ -216,7 +216,7 @@ async function assertTwoLoopCycles(page, name) {
       || Math.abs(after.y - before.expectedLanding) > 8
       || Math.abs(after.landing - before.expectedLanding) > 8
       || after.bridges !== 1
-      || after.mirrors !== 1) {
+      || after.mirrors !== (before.mobile ? 0 : 1)) {
       throw new Error(`${name}: loop cycle ${cycle} failed: ${JSON.stringify({ before, after })}`);
     }
     await page.waitForTimeout(500);
