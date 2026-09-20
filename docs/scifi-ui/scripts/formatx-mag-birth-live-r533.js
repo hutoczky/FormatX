@@ -8,6 +8,9 @@
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const AUTOMATION = navigator.webdriver === true;
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
+  const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
+  const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
+  const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
   const DURATION = MOBILE ? 3600 : 5200;
   const EXIT_MS = 360;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
@@ -128,7 +131,7 @@
   function buildDna() {
     if (!(dna instanceof SVGElement) || !(dnaBridges instanceof SVGGElement) || !(dnaNodes instanceof SVGGElement)) return;
     const NS='http://www.w3.org/2000/svg';
-    const samples=MOBILE?14:25;
+    const samples=LOW_POWER?10:MOBILE?14:25;
     const left=[];
     const right=[];
     const svgBridgeFragment=document.createDocumentFragment();
@@ -369,7 +372,7 @@
   }
 
   function seedParticles(w,h) {
-    const count=MOBILE?Math.max(16,Math.min(24,Math.round((w*h)/24000))):Math.max(48,Math.min(132,Math.round((w*h)/13500)));
+    const count=LOW_POWER?Math.max(12,Math.min(18,Math.round((w*h)/30000))):MOBILE?Math.max(16,Math.min(24,Math.round((w*h)/24000))):Math.max(48,Math.min(132,Math.round((w*h)/13500)));
     particles=Array.from({length:count},(_,i)=>{
       const edge=i%4;
       let x,y;
@@ -383,7 +386,7 @@
 
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
-    const dpr=Math.min(MOBILE?1.1:1.5,devicePixelRatio||1);
+    const dpr=Math.min(LOW_POWER?1:MOBILE?1.1:1.5,devicePixelRatio||1);
     const w=innerWidth,h=innerHeight;
     canvas.width=Math.max(1,Math.floor(w*dpr));
     canvas.height=Math.max(1,Math.floor(h*dpr));
@@ -493,7 +496,7 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const particleCadence=MOBILE?120:48;
+    const particleCadence=LOW_POWER?170:MOBILE?120:48;
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
@@ -508,6 +511,7 @@
     ROOT.dataset.fxMagBirthLiveR533='active';
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
+    ROOT.dataset.fxMagBirthCapabilityR620=LOW_POWER?'mobile-constrained-cinematic':'full-cinematic';
     visiblePhase=0;
     phaseChangedAt=0;
     ROOT.dataset.fxMagBirthPhase='0';
@@ -518,7 +522,7 @@
 
     // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
     // against a renderer/driver path that starves the animation clock.
-    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r607'), REDUCED ? 900 : (MOBILE?9000:14000));
+    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r620'), REDUCED ? 900 : DURATION + (MOBILE ? 1700 : 2400));
 
     if(REDUCED){
       requestCoreWarmup('reduced-motion');

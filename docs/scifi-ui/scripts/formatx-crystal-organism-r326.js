@@ -8,6 +8,10 @@
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
+  const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
+  const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
+  const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
+  const constrainedMobile = mobile && constrained;
   const IDLE_ENERGY = mobile ? .50 : .43;
   const SURFACE_PULSE_MS = 1160;
   const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880;
@@ -95,11 +99,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 18 : mobile ? 14 : 30;
-    const longitudeSegments = auditMode ? 32 : mobile ? 28 : 56;
-    const tendrilCount = auditMode ? 4 : mobile ? 4 : 8;
-    const tendrilSegments = auditMode ? 6 : mobile ? 6 : 10;
-    const tendrilSides = mobile ? 3 : 4;
+    const latitudeSegments = auditMode ? 18 : constrainedMobile ? 10 : mobile ? 14 : constrained ? 18 : 30;
+    const longitudeSegments = auditMode ? 32 : constrainedMobile ? 22 : mobile ? 28 : constrained ? 34 : 56;
+    const tendrilCount = auditMode ? 4 : constrainedMobile ? 4 : mobile ? 4 : constrained ? 5 : 8;
+    const tendrilSegments = auditMode ? 6 : constrainedMobile ? 5 : mobile ? 6 : constrained ? 7 : 10;
+    const tendrilSides = mobile || constrained ? 3 : 4;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -569,7 +573,7 @@
     };
     const initialShape=root.dataset.fxCoreShapeR337==='sphere'?'sphere':'crystal';
     let disposed=false,contextLost=false,visible=true,paused=false;
-    let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=false;
+    let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=constrained;
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
     let morph=initialShape==='sphere'?1:0,targetMorph=morph;
@@ -587,9 +591,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:mobile?1.25:1.65;
+      const cap=auditMode?1:constrainedMobile?1:mobile?1.25:constrained?1.15:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:mobile?460000:1150000;
+      const budget=auditMode?390000:constrainedMobile?280000:mobile?460000:constrained?520000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -773,24 +777,27 @@
          drops the extra front-cull outer-glow pass, which both reduces the bloom
          seen in the physical phone capture and removes roughly one third of the
          expensive fragment work per interaction frame. */
-      gl.depthMask(false);
-      gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
-      if(!mobile&&!slowRenderer){
-        gl.cullFace(gl.FRONT);
-        gl.uniform1f(uniforms.uLayer,0);
-        gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-      }
-      gl.cullFace(gl.BACK);
-      gl.uniform1f(uniforms.uLayer,1);
-      gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-      if(!(mobile&&slowRenderer)){
+      if(mobile&&slowRenderer){
         gl.depthMask(true);
         gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+        gl.cullFace(gl.BACK);
         gl.uniform1f(uniforms.uLayer,0);
         gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       }else{
+        gl.depthMask(false);
+        gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+        if(!mobile&&!slowRenderer){
+          gl.cullFace(gl.FRONT);
+          gl.uniform1f(uniforms.uLayer,0);
+          gl.drawArrays(gl.TRIANGLES,0,geometry.count);
+        }
+        gl.cullFace(gl.BACK);
+        gl.uniform1f(uniforms.uLayer,1);
+        gl.drawArrays(gl.TRIANGLES,0,geometry.count);
         gl.depthMask(true);
         gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+        gl.uniform1f(uniforms.uLayer,0);
+        gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       }
 
       const ms=performance.now()-begin;
@@ -1016,6 +1023,8 @@
     root.dataset.fxCoreReferenceLock=READY;
     root.dataset.fxCoreReal3d=READY;
     root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
+    root.dataset.fxCoreCapabilityTierR620=constrainedMobile?'mobile-constrained-one-pass':constrained?'desktop-constrained-two-pass':mobile?'mobile-full-two-pass':'desktop-full-three-pass';
+    root.dataset.fxCoreCapabilityR620=`${hardwareConcurrency}c-${deviceMemory}gb`;
     root.dataset.fxCoreMaterial='biomechanical-gunmetal-living-core-r614';
     root.dataset.fxCoreGeometry='armored-four-lobe-core-with-native-tendrils-r614';
     root.dataset.fxCoreGenesisMagR614='dna-to-cell-to-biomechanical-native-mag';
