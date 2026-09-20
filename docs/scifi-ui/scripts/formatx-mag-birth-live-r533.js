@@ -108,6 +108,7 @@
   overlay.dataset.fxIntroR960 = 'reference-proportion-three-genesis';
   overlay.dataset.fxIntroR961 = 'reference-proportion-dark-depth-three-genesis';
   overlay.dataset.fxIntroR963 = 'organic-final-reference-three-genesis';
+  overlay.dataset.fxIntroVisualProofR964 = 'r963-frame-locked-reference-proof';
   overlay.dataset.fxIntroR970 = 'video-locked-organic-three-genesis';
   overlay.dataset.fxIntroVisualProofR962 = 'r961-frame-locked-reference-proof';
   overlay.dataset.fxIntroVisualProofR911 = 'current-r900-reference-keyframes';
