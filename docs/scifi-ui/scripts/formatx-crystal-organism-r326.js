@@ -284,20 +284,20 @@
     }
 
     // Split crown.
-    armorTri([0,.78,.38],[-.16,.63,.45],[0,.31,.49],2.55);
-    armorTri([-.16,.63,.45],[-.49,.23,.40],[-.19,.09,.47],2.55);
-    armorTri([-.16,.63,.45],[-.19,.09,.47],[0,.31,.49],2.55);
-    armorTri([0,.78,.38],[0,.31,.49],[.16,.63,.45],2.55);
-    armorTri([.16,.63,.45],[.19,.09,.47],[.49,.23,.40],2.55);
-    armorTri([.16,.63,.45],[0,.31,.49],[.19,.09,.47],2.55);
+    armorTri([0,.74,.39],[-.13,.61,.45],[0,.34,.49],2.55);
+    armorTri([-.13,.61,.45],[-.37,.27,.41],[-.16,.13,.47],2.55);
+    armorTri([-.13,.61,.45],[-.16,.13,.47],[0,.34,.49],2.55);
+    armorTri([0,.74,.39],[0,.34,.49],[.13,.61,.45],2.55);
+    armorTri([.13,.61,.45],[.16,.13,.47],[.37,.27,.41],2.55);
+    armorTri([.13,.61,.45],[0,.34,.49],[.16,.13,.47],2.55);
 
     // Shoulder plates.
-    armorQuad([-.18,.13,.48],[-.49,.20,.42],[-.60,-.04,.37],[-.24,-.18,.46],2.32);
-    armorQuad([.18,.13,.48],[.24,-.18,.46],[.60,-.04,.37],[.49,.20,.42],2.32);
+    armorQuad([-.16,.14,.48],[-.37,.19,.43],[-.48,-.02,.39],[-.23,-.15,.46],2.32);
+    armorQuad([.16,.14,.48],[.23,-.15,.46],[.48,-.02,.39],[.37,.19,.43],2.32);
 
     // Lower dark jaw panels.
-    armorQuad([-.18,-.15,.47],[-.48,-.08,.40],[-.27,-.58,.35],[-.08,-.72,.34],3.10);
-    armorQuad([.18,-.15,.47],[.08,-.72,.34],[.27,-.58,.35],[.48,-.08,.40],3.10);
+    armorQuad([-.15,-.14,.47],[-.36,-.07,.41],[-.23,-.53,.36],[-.07,-.66,.35],3.10);
+    armorQuad([.15,-.14,.47],[.07,-.66,.35],[.23,-.53,.36],[.36,-.07,.41],3.10);
 
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
@@ -502,7 +502,7 @@
         vec3 ice=vec3(.58,.72,.77);
         vec3 gunmetal=vec3(.003,.007,.011);
         vec3 steel=vec3(.028,.058,.078);
-        vec3 silver=vec3(.74,.80,.82);
+        vec3 silver=vec3(.48,.56,.60);
         vec3 spectral=mix(cyan,ice,.10+.28*hue);
         float surfaceSweep=0.0;
         float surfaceFilament=0.0;
@@ -548,7 +548,7 @@
         glass+=vec3(.003,.008,.012)*(.26+.20*cloud);
         glass+=silver*crownMask*(.68+.72*ndl+.38*specular);
         glass+=silver*shoulderMask*(.38+.46*ndl+.26*specular)+steel*shoulderMask*.30;
-        glass=mix(glass,silver*(.62+.72*ndl+.48*specular),realArmorPlate*.94);
+        glass=mix(glass,silver*(.50+.58*ndl+.34*specular),realArmorPlate*.86);
         glass=mix(glass,gunmetal*(.78+.18*ndl)+steel*.12,realDarkPlate*.92);
         glass+=gunmetal*jawMask*.76;
         glass-=vec3(.010,.014,.018)*opticalWell*.72;
@@ -556,7 +556,7 @@
         glass+=cyan*veins*(.024+.020*uBreath);
         glass+=cyan*membrane*(.012+.016*visualEnergy);
         glass+=cyan*iris*.16;
-        glass+=cyan*(rings*.34+nucleus*4.65)+ice*(heart*.014+nucleus*.46);
+        glass+=cyan*(rings*.38+nucleus*5.10)+ice*(heart*.014+nucleus*.50);
         glass+=ice*specular*(.34+.16*visualEnergy);
         glass+=(cyan*.16+ice*.025)*(axisV*.14+axisH*.08)*visualEnergy;
         glass+=(cyan*.10+violet*.05)*dnaHelix*(.025+.045*fresnel)*genomePulse;
@@ -620,16 +620,16 @@
         vec3 cyan=vec3(.018,.54,.84);
         vec3 violet=vec3(.05,.07,.15);
         vec3 ice=vec3(.56,.70,.76);
-        vec3 silver=vec3(.70,.77,.80);
+        vec3 silver=vec3(.46,.54,.58);
         vec3 metal=vec3(.004,.010,.016);
         vec3 c=metal*(1.22+ndl*.48);
         c+=silver*crownMask*(.66+.70*ndl+.36*spec);
         c+=silver*shoulderMask*(.36+.42*ndl+.24*spec)+vec3(.028,.058,.078)*shoulderMask*.28;
-        c=mix(c,silver*(.60+.68*ndl+.42*spec),realArmorPlate*.94);
+        c=mix(c,silver*(.48+.56*ndl+.32*spec),realArmorPlate*.86);
         c=mix(c,metal*.88+vec3(.020,.040,.052),realDarkPlate*.90);
         c+=cyan*fresnel*(.024+.028*energy);
         c+=(cyan*.12+violet*.05)*dna*(.022+.035*energy);
-        c+=cyan*(nucleus*4.35+ring*.30)+ice*(heart*.014+nucleus*.42+spec*.28);
+        c+=cyan*(nucleus*4.75+ring*.34)+ice*(heart*.014+nucleus*.46+spec*.28);
         c+=ice*seam*.08;
         c+=(ice*.48+cyan*.26)*pulse;
         c+=(cyan*1.05+ice*.18)*tendrilSegment*(.56+.72*fresnel);
@@ -1133,6 +1133,7 @@
       referenceGeometryR730:'compact-dark-armored-pod-eight-radial-native-tendrils',
       referenceGeometryR1080:'tall-rhombic-armored-pod-silver-crown-large-optical-core-long-segmented-tendrils',
       referenceGeometryR1100:'single-draw-rhombic-pod-real-silver-crown-shoulders-dark-jaw',
+      referenceGeometryR1120:'compact-titanium-crown-shoulders-dark-jaw-large-cyan-eye',
       referenceGeometryR810:'opaque-gunmetal-compact-pod-silver-crown-local-cyan-eye-short-tendrils',
       referenceGeometryR830:'narrow-silver-crown-compact-thick-cyan-segmented-native-tendrils-single-optical-orb',
       referenceGeometryR910:'broad-shoulder-compact-armored-pod-large-optical-orb-short-segmented-tendrils',
@@ -1193,6 +1194,7 @@
     root.dataset.fxCoreReferenceGeometryR730='compact-dark-armored-pod-eight-radial-native-tendrils';
     root.dataset.fxCoreReferenceGeometryR1080='tall-rhombic-armored-pod-silver-crown-large-optical-core-long-segmented-tendrils';
     root.dataset.fxCoreReferenceGeometryR1100='single-draw-rhombic-pod-real-silver-crown-shoulders-dark-jaw';
+    root.dataset.fxCoreReferenceGeometryR1120='compact-titanium-crown-shoulders-dark-jaw-large-cyan-eye';
     root.dataset.fxCoreReferenceMaterialR1080='opaque-gunmetal-bright-silver-local-cyan-eye';
     root.dataset.fxCoreReferenceGeometryR810='opaque-gunmetal-compact-pod-silver-crown-local-cyan-eye-short-tendrils';
     root.dataset.fxCoreReferenceGeometryR830='narrow-silver-crown-compact-thick-cyan-segmented-native-tendrils-single-optical-orb';
