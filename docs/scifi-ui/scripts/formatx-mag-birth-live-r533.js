@@ -174,6 +174,7 @@
   ROOT.dataset.fxMagBirthArtR1130 = 'stage1-liquid-metal-stage2-compact-embedded-core-stage3-mechanical-pod';
   ROOT.dataset.fxMagBirthArtR1140 = 'smaller-cellular-core-muted-veins-compact-final-eye-titanium-pod';
   ROOT.dataset.fxMagBirthArtR1200 = 'dna-only-opening-large-cellular-body-organic-tendrils-through-flash-native-mechanical-handoff';
+  ROOT.dataset.fxFinalProofR1152 = 'r1140-intro-r1151-native-mag-clean-proof';
   ROOT.dataset.fxThreeStageProofR1121 = 'r1110-intro-r1120-compact-native-mag';
   ROOT.dataset.fxNativeMagProofR1101 = 'r1090-intro-r1100-real-armor-browser-proof';
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
