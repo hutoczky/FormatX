@@ -174,7 +174,7 @@ async function inspect(browser, config, viewport) {
   assert.equal(result.violet.toLowerCase(), '#8f72ff');
   assert.equal(result.radius, '30px 7px 30px 7px');
   assert.match(result.bodyFont, /Inter|system-ui/i);
-  const expectedPanelRadii = viewport.width <= 900
+  const expectedPanelRadii = config.name === 'main' && viewport.width <= 900
     ? ['24px', '24px', '24px', '24px']
     : ['30px', '7px', '30px', '7px'];
   assert.deepEqual(result.panelRadii, expectedPanelRadii);
