@@ -58,6 +58,7 @@ jobs:
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4181/scifi-ui/index.html
           FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1200-intro-keyframes
+          FORMATX_SKIP_HANDOFF: '1'
         run: node .github/scripts/capture-mag-intro-r656.cjs
       - name: Upload intro proof
         if: always()
