@@ -57,12 +57,20 @@ async function waitForProductShowcase(page) {
     ['loading','ready'].includes(document.documentElement.dataset.fxProductShowcaseLoadState || '')
   ), null, { timeout: 10000 });
   await page.waitForSelector('#product-showcase .fx-product-showcase__card', { timeout: 30000 });
-  await page.locator('#product-showcase').scrollIntoViewIfNeeded();
+  await page.evaluate(() => {
+    const showcase = document.getElementById('product-showcase');
+    if (showcase) window.scrollTo({ top: Math.max(0, showcase.offsetTop - 96), left: 0, behavior: 'auto' });
+  });
+  await page.waitForTimeout(120);
   const showcaseImages = page.locator('#product-showcase img');
   const imageCount = await showcaseImages.count();
   assert(imageCount >= 5, `product showcase image count ${imageCount}`);
   for (let index = 0; index < imageCount; index += 1) {
-    await showcaseImages.nth(index).scrollIntoViewIfNeeded();
+    await page.evaluate(i => {
+      const image = document.querySelectorAll('#product-showcase img')[i];
+      if (image instanceof HTMLElement) image.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
+    }, index);
+    await page.waitForTimeout(40);
   }
   await page.waitForFunction(() => {
     const images = Array.from(document.querySelectorAll('#product-showcase img'));
