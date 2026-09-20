@@ -759,20 +759,20 @@
         y=.05+Math.sin(time*.00034)*.11;
       }else if(t<3.40){
         const k=smooth((t-2.50)/.90);
-        z=mix(6.32,3.82,k);
+        z=mix(6.32,4.72,k);
         x=mix(.12,0,k);
         y=mix(.09,.01,k);
       }else if(t<5.45){
-        z=3.82+Math.sin(time*.00031)*.036;
+        z=4.72+Math.sin(time*.00031)*.036;
         x=Math.sin(time*.00022)*.036;
         y=Math.cos(time*.00025)*.028;
       }else if(t<8.90){
         const k=smooth((t-5.45)/3.45);
-        z=mix(3.82,6.68,k);
+        z=mix(4.72,8.18,k);
         x=Math.sin(time*.00019)*.030*(1-k);
         y=mix(.01,.025,k);
       }else{
-        z=mix(6.68,7.02,smooth((t-8.90)/.88));
+        z=mix(8.18,8.34,smooth((t-8.90)/.88));
         y=.025;
       }
       const portrait=this.width<this.height;
