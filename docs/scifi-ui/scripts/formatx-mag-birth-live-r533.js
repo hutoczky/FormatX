@@ -4,6 +4,7 @@
   const ROOT = document.documentElement;
   const PARAMS = new URLSearchParams(location.search);
   const FORCE = PARAMS.get('intro') === '1';
+  const VISUAL_PROOF = PARAMS.get('visualintro') === '1';
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const AUTOMATION = navigator.webdriver === true;
@@ -521,7 +522,7 @@
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
     syncTarget(true);
-    if(AUTOMATION && FORCE){
+    if(AUTOMATION && FORCE && !VISUAL_PROOF){
       ROOT.dataset.fxMagBirthRendererR651='automation-handoff-lightweight';
       canvas.hidden=true;
       return;
@@ -738,7 +739,7 @@
     ROOT.dataset.fxMagBirthRenderClockR650='r651-threejs-24fps-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
-    ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE)?'lightweight-handoff-proof':'production-renderer';
+    ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
     window.setTimeout(()=>{
       if(!overlay.isConnected)return;
       try{
