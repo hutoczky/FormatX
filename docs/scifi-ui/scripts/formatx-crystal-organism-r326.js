@@ -9,7 +9,7 @@
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   const IDLE_ENERGY = mobile ? .50 : .43;
-  const SURFACE_PULSE_MS = 1160;
+  const SURFACE_PULSE_MS = mobile ? 820 : 1160;
   const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const optics = mobile ? Object.freeze({
@@ -95,10 +95,10 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 18 : mobile ? 18 : 30;
-    const longitudeSegments = auditMode ? 32 : mobile ? 36 : 56;
-    const tendrilCount = auditMode ? 4 : mobile ? 6 : 8;
-    const tendrilSegments = auditMode ? 6 : mobile ? 8 : 10;
+    const latitudeSegments = auditMode ? 18 : mobile ? 14 : 30;
+    const longitudeSegments = auditMode ? 32 : mobile ? 28 : 56;
+    const tendrilCount = auditMode ? 4 : mobile ? 4 : 8;
+    const tendrilSegments = auditMode ? 6 : mobile ? 6 : 10;
     const tendrilSides = mobile ? 3 : 4;
     const sphere = [];
     const crystal = [];
@@ -587,9 +587,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:mobile?1.75:1.65;
+      const cap=auditMode?1:mobile?1.25:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:mobile?920000:1150000;
+      const budget=auditMode?390000:mobile?460000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -616,7 +616,7 @@
     }
     function schedule(frames=1){
       if(blocked())return;
-      const frameCap=mobile?8:24;
+      const frameCap=mobile?4:24;
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       queueFrame(0);
     }
@@ -670,9 +670,10 @@
     }
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
+      const explicitInteraction=/interaction|direct|shape|tap|keyboard|r538|r619/i.test(String(source||''));
       if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'
-        ||now-lastSurfacePulseAt<2200)return false;
+        ||(!explicitInteraction&&now-lastSurfacePulseAt<2200))return false;
       // The mobile governor's idle flag is not the user's PAUSE control.
       // Reserve the full sweep before asking the single renderer to draw it.
       dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
@@ -782,18 +783,23 @@
       gl.cullFace(gl.BACK);
       gl.uniform1f(uniforms.uLayer,1);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-      gl.depthMask(true);
-      gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-      gl.uniform1f(uniforms.uLayer,0);
-      gl.drawArrays(gl.TRIANGLES,0,geometry.count);
+      if(!(mobile&&slowRenderer)){
+        gl.depthMask(true);
+        gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+        gl.uniform1f(uniforms.uLayer,0);
+        gl.drawArrays(gl.TRIANGLES,0,geometry.count);
+      }else{
+        gl.depthMask(true);
+        gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+      }
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
-      if(!mobile&&renderAverage>42){
+      if(renderAverage>(mobile?24:42)){
         slowRenderer=true;
-        root.dataset.fxCoreAdaptiveOpticsR588='two-pass-slow-renderer';
+        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'two-pass-slow-renderer';
       }else if(!slowRenderer){
-        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'two-pass-mobile':'three-pass-capable';
+        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'two-pass-mobile-capable':'three-pass-capable';
       }
       root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
       root.dataset.fxCoreFrameMs=dt.toFixed(2);
@@ -1045,10 +1051,10 @@
     root.dataset.fxCoreSurfacePulseR454='idle';
     root.dataset.fxCoreSurfaceEnergyR484='periodic-native-surface-energy';
     root.dataset.fxCoreSurfaceCountR484='0';
-    root.dataset.fxCoreMobileResolutionR424=mobile?'r454-dpr-cap-1.75-pixel-budget-920k':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
+    root.dataset.fxCoreMobileResolutionR424=mobile?'r619-dpr-cap-1.25-pixel-budget-460k-adaptive':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
     root.dataset.fxCoreMobileOpticsR435=mobile?'superseded-by-r454-visible-native-surface':'desktop-preserved-r454';
     root.dataset.fxCoreMobileOpticsR440=mobile?'superseded-by-r454-luminous-electric-surface':'desktop-superseded-by-r454';
-    root.dataset.fxCoreMobilePerformanceR442=mobile?'18x36-two-pass-intermittent-pulse-idle-zero':'desktop-three-pass-intermittent-pulse-idle-zero';
+    root.dataset.fxCoreMobilePerformanceR442=mobile?'14x28-adaptive-one-two-pass-intermittent-pulse-idle-zero':'desktop-three-pass-intermittent-pulse-idle-zero';
     root.dataset.fxGpuCapability=webgl2?'webgl2':'webgl1';
     root.dataset.fxCoreReal3dTargetFps='interaction-60-idle-zero-r441';
     root.dataset.fxCoreIdleRenderR441='zero-frame';

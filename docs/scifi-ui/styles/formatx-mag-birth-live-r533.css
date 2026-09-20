@@ -843,3 +843,12 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
     transform:translate3d(-50%,calc(-50% - 32vh),0) perspective(1600px) rotateY(var(--fxb-dna-turn)) rotateZ(-15deg) scale(.04);
   }
 }
+
+
+/* R619 mobile cinematic budget: one DNA renderer, fewer raster layers. */
+@media (max-width:700px),(pointer:coarse){
+  .fxb-dna{display:none!important}
+  .fxb-dna-depth-fog{opacity:.34}
+  .fxb-particles{opacity:.72}
+  .fxb-dna-pair3d{filter:none}
+}

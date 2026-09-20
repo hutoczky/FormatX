@@ -8,9 +8,9 @@
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const AUTOMATION = navigator.webdriver === true;
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
-  const DURATION = 5200;
+  const DURATION = MOBILE ? 3600 : 5200;
   const EXIT_MS = 360;
-  const CORE_WARMUP_PROGRESS = MOBILE ? .54 : .58;
+  const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
 
   let seen = false;
   try { seen = sessionStorage.getItem(KEY) === '1'; } catch (_) {}
@@ -128,9 +128,11 @@
   function buildDna() {
     if (!(dna instanceof SVGElement) || !(dnaBridges instanceof SVGGElement) || !(dnaNodes instanceof SVGGElement)) return;
     const NS='http://www.w3.org/2000/svg';
-    const samples=25;
+    const samples=MOBILE?14:25;
     const left=[];
     const right=[];
+    const svgBridgeFragment=document.createDocumentFragment();
+    const svgNodeFragment=document.createDocumentFragment();
     for(let i=0;i<samples;i+=1){
       const y=38+i*27;
       const wave=Math.sin(i*.72);
@@ -148,7 +150,7 @@
         bridge.setAttribute('class','fxb-dna-bridge');
         bridge.style.setProperty('--fxb-dna-delay',(i*34)+'ms');
         bridge.style.setProperty('--fxb-dna-depth',depth.toFixed(3));
-        dnaBridges.appendChild(bridge);
+        svgBridgeFragment.appendChild(bridge);
       }
       if(i%2===0){
         for(const [x,side] of [[xA,'a'],[xB,'b']]){
@@ -159,19 +161,21 @@
           node.setAttribute('class','fxb-dna-node fxb-dna-node-'+side);
           node.style.setProperty('--fxb-dna-delay',(i*30)+'ms');
           node.style.setProperty('--fxb-dna-depth',depth.toFixed(3));
-          dnaNodes.appendChild(node);
+          svgNodeFragment.appendChild(node);
         }
       }
     }
+    dnaBridges.replaceChildren(svgBridgeFragment);
+    dnaNodes.replaceChildren(svgNodeFragment);
     const toPath=points=>points.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)).join(' ');
     dna.querySelector('.fxb-dna-strand-a')?.setAttribute('d',toPath(left));
     dna.querySelector('.fxb-dna-strand-b')?.setAttribute('d',toPath(right));
     dnaStage?.style.setProperty('--fxb-dna-pairs',String(samples));
 
     if (dnaHelix instanceof HTMLElement) {
-      dnaHelix.replaceChildren();
-      const radius=74;
-      const depth=58;
+      const helixFragment=document.createDocumentFragment();
+      const radius=MOBILE?68:74;
+      const depth=MOBILE?48:58;
       for(let i=0;i<samples;i+=1){
         const angle=i*.72;
         const y=38+i*27;
@@ -208,8 +212,9 @@
         b.style.setProperty('--fxb-scale',(.80+depthB*.30).toFixed(3));
 
         pair.append(bridge3d,a,b);
-        dnaHelix.appendChild(pair);
+        helixFragment.appendChild(pair);
       }
+      dnaHelix.replaceChildren(helixFragment);
     }
   }
 
@@ -237,13 +242,12 @@
   let lastMorphSync = 0;
   let lastNativeSync = 0;
   let lastParticleDraw = 0;
-  let lastDnaUpdate = 0;
   let lastTelemetryUpdate = 0;
   let warmupDispatched = false;
   let ignitionDone = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
-  const PHASE_HOLD_MS = [620, 1180, 920, 680, 0];
+  const PHASE_HOLD_MS = MOBILE ? [360, 620, 500, 340, 0] : [620, 1180, 920, 680, 0];
 
   function clamp(value,min,max) { return Math.max(min,Math.min(max,value)); }
   function easeOutCubic(t) { return 1 - Math.pow(1-t,3); }
@@ -359,13 +363,13 @@
         coreApi.setShape?.('crystal','r611-living-core-ignition');
         coreApi.rotateBy?.(.035,.055,'r614-genome-first-living-impulse');
         coreApi.surfacePulse?.('r614-genome-handoff');
-        coreApi.requestRender?.(2);
+        coreApi.requestRender?.(MOBILE?1:2);
       } catch (_) {}
     }
   }
 
   function seedParticles(w,h) {
-    const count=Math.max(48,Math.min(132,Math.round((w*h)/13500)));
+    const count=MOBILE?Math.max(16,Math.min(24,Math.round((w*h)/24000))):Math.max(48,Math.min(132,Math.round((w*h)/13500)));
     particles=Array.from({length:count},(_,i)=>{
       const edge=i%4;
       let x,y;
@@ -464,7 +468,13 @@
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
     const phase=phaseFor(r,now);
-    if(overlay.dataset.phase!==phase)overlay.dataset.phase=phase;
+    if(overlay.dataset.phase!==phase){
+      overlay.dataset.phase=phase;
+      if(dnaStage instanceof HTMLElement){
+        const turns=['-24deg','18deg','46deg','72deg','86deg'];
+        dnaStage.style.setProperty('--fxb-dna-turn',turns[Number(phase)]||'86deg');
+      }
+    }
     if(ROOT.dataset.fxMagBirthPhase!==phase)ROOT.dataset.fxMagBirthPhase=phase;
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
@@ -474,18 +484,7 @@
       syncNativeCore(r,now);
     }
 
-    const dnaCadence=MOBILE?72:48;
-    if (dnaStage instanceof HTMLElement && (!lastDnaUpdate || now-lastDnaUpdate>=dnaCadence || r>=1)) {
-      lastDnaUpdate=now;
-      const dnaProgress=clamp((r-.04)/.58,0,1);
-      const dnaTurn=-24 + dnaProgress*92 + Math.sin(now*.0016)*4.5;
-      const breathe=1+Math.sin(now*.0044)*.018;
-      dnaStage.style.setProperty('--fxb-dna-turn',dnaTurn.toFixed(2)+'deg');
-      dnaStage.style.setProperty('--fxb-dna-breathe',breathe.toFixed(4));
-      dnaStage.style.setProperty('--fxb-dna-life',dnaProgress.toFixed(4));
-    }
-
-    if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=80 || r>=1){
+    if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(MOBILE?140:80) || r>=1){
       lastTelemetryUpdate=now;
       const value=Math.min(100,Math.round(easeOutCubic(r)*100));
       const valueText=String(value).padStart(3,'0');
@@ -494,7 +493,7 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const particleCadence=MOBILE?72:48;
+    const particleCadence=MOBILE?120:48;
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
@@ -519,7 +518,7 @@
 
     // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
     // against a renderer/driver path that starves the animation clock.
-    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r607'), REDUCED ? 900 : 14000);
+    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r607'), REDUCED ? 900 : (MOBILE?9000:14000));
 
     if(REDUCED){
       requestCoreWarmup('reduced-motion');
