@@ -1,5 +1,5 @@
 name: FormatX MAG intro visual proof
-# R1290 visual proof: supplied-video timeline lock + native final MAG
+# R1291 clean visual proof of live R1290 timeline + native final MAG
 
 on:
   push:
