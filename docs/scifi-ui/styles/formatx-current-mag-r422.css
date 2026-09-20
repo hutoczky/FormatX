@@ -10,7 +10,7 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   position:absolute!important;inset:0!important;z-index:3!important;display:block!important;
   box-sizing:border-box!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;
   overflow:clip!important;background:transparent!important;opacity:1!important;visibility:visible!important;
-  pointer-events:auto!important;transform:none!important;transform-origin:50% 50%!important;
+  pointer-events:none!important;transform:none!important;transform-origin:50% 50%!important;
 }
 
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {

@@ -55,7 +55,10 @@ async function state(page) {
     const mirror = bridge?.querySelector('[data-fx-loop-mirror]');
     const hero = document.querySelector('#main-content > #hero');
     const hit = document.querySelector('#hero .fx-mag-heart-hit-r252');
+    const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
     const bridgeStyle = bridge ? getComputedStyle(bridge) : null;
+    const hitStyle = hit ? getComputedStyle(hit) : null;
+    const stageStyle = stage ? getComputedStyle(stage) : null;
     const hitRect = hit?.getBoundingClientRect();
     return {
       controller: root.dataset.fxInfiniteController || '',
@@ -79,6 +82,8 @@ async function state(page) {
       hitWidth: hitRect?.width || 0,
       hitHeight: hitRect?.height || 0,
       hitLabel: hit?.getAttribute('aria-label') || '',
+      hitPointerEvents: hitStyle?.pointerEvents || '',
+      stagePointerEvents: stageStyle?.pointerEvents || '',
       interactionMode: root.dataset.fxCoreInteractionMode || '',
       interactionTarget: root.dataset.fxCoreInteractionTarget || '',
       overflow: root.scrollWidth - root.clientWidth,
@@ -139,6 +144,7 @@ async function verifyMobile(browser) {
   assert(initial.bridgeDisplay !== 'none', `mobile handoff bridge is hidden: ${JSON.stringify(initial)}`);
   assert(initial.bridgeHeight >= 80 && initial.bridgeHeight <= Math.max(180, initial.viewportHeight * .24), `mobile bridge is not a short handoff runway: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180 && initial.hitLabel.length > 8, `mobile MAG is not a semantic interactive target: ${JSON.stringify(initial)}`);
+  assert(initial.stagePointerEvents === 'none' && initial.hitPointerEvents !== 'none', `mobile native MAG visual still intercepts the semantic hit target: ${JSON.stringify(initial)}`);
   assert(initial.snapRoot === 'none' && initial.snapBody === 'none', `mobile scroll snapping active: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
@@ -173,6 +179,7 @@ async function verifyDesktop(browser) {
   assert(initial.controller === 'seamless-v7', `desktop seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, `desktop inert reference mirror contract changed: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG interaction target missing: ${JSON.stringify(initial)}`);
+  assert(initial.stagePointerEvents === 'none' && initial.hitPointerEvents !== 'none', `desktop native MAG visual still intercepts the semantic hit target: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
 

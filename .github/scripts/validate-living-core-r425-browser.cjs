@@ -14,6 +14,19 @@ const overlap = (a, b, gap = 2) => Boolean(a && b) && !(
   a.bottom + gap <= b.top || b.bottom + gap <= a.top
 );
 
+async function activateImmersiveRuntime(page, source) {
+  await page.evaluate(value => {
+    const root = document.documentElement;
+    root.dataset.fxImmersive = 'active';
+    root.dataset.fxImmersiveSource = value;
+    dispatchEvent(new CustomEvent('formatx:immersiveactivate', { detail: { source: value } }));
+  }, source);
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+    || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+  ), null, { timeout: 10000 });
+}
+
 async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   const context = await browser.newContext({
     viewport,
@@ -62,8 +75,20 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
       && header.dataset.fxCoreShape === root.dataset.fxCoreShapeR337;
   }, null, { timeout: 30000 });
 
-  const stageLocator = page.locator('#hero .fx-crystal-organism-r326-stage').first();
-  await stageLocator.click({ position: { x: Math.max(20, Math.floor(viewport.width * .26)), y: 160 } });
+  await activateImmersiveRuntime(page, 'living-core-semantic-hit-validation');
+  const hitLocator = page.locator('#hero .fx-mag-heart-hit-r252').first();
+  await hitLocator.waitFor({ state: 'visible', timeout: 30000 });
+  const pointerOwnership = await page.evaluate(() => {
+    const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
+    const hit = document.querySelector('#hero .fx-mag-heart-hit-r252');
+    return {
+      stage: stage ? getComputedStyle(stage).pointerEvents : '',
+      hit: hit ? getComputedStyle(hit).pointerEvents : ''
+    };
+  });
+  assert.equal(pointerOwnership.stage, 'none', `${name}: R326 visual stage must be pointer-transparent`);
+  assert.notEqual(pointerOwnership.hit, 'none', `${name}: semantic MAG hit target is inert`);
+  await hitLocator.click({ position: { x: 20, y: 20 } });
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreEnergyBoltR455?.startsWith('surface-sweep-'));
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreSurfacePulseR454?.startsWith('sweep-'));
   await page.waitForTimeout(260);

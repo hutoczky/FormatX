@@ -1,12 +1,11 @@
-/* FormatX r467 — the one native WebGL MAG optical + final hero-control display owner.
-   The shader owns geometry and living light. CSS preserves the touch surface
-   and applies only final display tone. Mobile keeps the balanced low-bloom
-   finish from r466. Desktop now also owns one canonical horizontal
-   SOUND | ASK | PAUSE row under the full-size MAG, retiring the legacy vertical
-   right-side control stack without changing the desktop crystal material. */
+/* FormatX r594 — the one native WebGL MAG optical + final hero-control display owner.
+   The shader owns geometry and living light. The native stage is visual-only and
+   never captures clicks; the semantic heart hit-target owns direct MAG input.
+   Mobile keeps the balanced low-bloom finish. Desktop keeps the canonical
+   SOUND + ASK controls with no retired manual PAUSE surface. */
 
 html[data-fx-core-shape-r337] #hero .hero-space > .fx-crystal-organism-r326-stage {
-  pointer-events: auto !important;
+  pointer-events: none !important;
 }
 
 html[data-fx-core-shape-r337] #hero .fx-crystal-organism-r326-canvas {
