@@ -57,7 +57,7 @@ const SHOTS=[
       await page.waitForTimeout(150);
 
       const state=await page.evaluate(()=>({
-        renderer:document.documentElement.dataset.fxMagBirthRendererR664||document.documentElement.dataset.fxMagBirthRendererR663||document.documentElement.dataset.fxMagBirthRendererR662||'',
+        renderer:document.documentElement.dataset.fxMagBirthRendererR665||document.documentElement.dataset.fxMagBirthRendererR664||document.documentElement.dataset.fxMagBirthRendererR663||'',
         three:document.documentElement.dataset.fxMagBirthThreeR658||'',
         proof:document.documentElement.dataset.fxMagBirthVisualFrameR659||'',
         seconds:document.documentElement.dataset.fxMagBirthVisualFrameSeconds||'',
