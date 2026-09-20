@@ -66,11 +66,59 @@
     root.dataset.fxContentRuntimeR241 = 'requested-r497-user-intent';
   }
 
+  function ensureLiveOsBootstrap() {
+    let button = document.querySelector('[data-fx-live-os-launcher]');
+    if (!(button instanceof HTMLButtonElement)) {
+      button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.fxLiveOsLauncher = 'true';
+      button.innerHTML = '<span>Live OS</span>';
+      Object.assign(button.style, {
+        position: 'fixed',
+        right: '18px',
+        bottom: '18px',
+        zIndex: '2147482000',
+        minWidth: '54px',
+        minHeight: '54px',
+        padding: '0 14px',
+        border: '1px solid rgba(44,231,243,.68)',
+        borderRadius: '999px',
+        background: 'rgba(5,18,31,.92)',
+        color: '#effcff',
+        boxShadow: '0 16px 50px rgba(0,0,0,.4),0 0 28px rgba(44,231,243,.12)',
+        cursor: 'pointer',
+        font: '800 12px/1 system-ui,sans-serif',
+        letterSpacing: '.04em'
+      });
+      document.body.appendChild(button);
+    }
+    const label = root.lang === 'en' ? 'Live OS — FormatX command' : 'Live OS — FormatX parancs';
+    button.setAttribute('aria-label', label);
+    button.title = label + ' · Ctrl/⌘ K';
+    if (button.dataset.fxLiveOsBootstrapR642 === 'ready') return button;
+    button.dataset.fxLiveOsBootstrapR642 = 'ready';
+    button.addEventListener('click', () => {
+      if (root.dataset.fxLiveOsLoader === 'v1') return;
+      start();
+      let attempts = 0;
+      const timer = setInterval(() => {
+        attempts += 1;
+        if (root.dataset.fxLiveOsLoader === 'v1') {
+          clearInterval(timer);
+          button.click();
+        } else if (attempts >= 80) clearInterval(timer);
+      }, 25);
+    });
+    root.dataset.fxLiveOsBootstrapR642 = 'visible-lightweight-launcher-heavy-runtime-on-demand';
+    return button;
+  }
+
   // Browser-generated scroll events are not explicit intent and never activate
   // enhancements. Wheel, pointer/touch and keyboard actions remain deliberate
   // user signals, while CSS geometry stays immutable throughout the session.
   root.dataset.fxContentRuntimeR241 = 'armed-r497-user-intent';
   root.dataset.fxDeferredVisualStylesR300 = 'production-css-owned-r497';
+  ensureLiveOsBootstrap();
   root.dataset.fxFirstFrameStabilityR283 = 'immutable-css-r497';
   for (const [type, options] of listeners) addEventListener(type, onIntent, options);
 

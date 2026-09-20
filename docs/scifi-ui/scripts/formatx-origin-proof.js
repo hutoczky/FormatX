@@ -243,6 +243,13 @@
     if (button instanceof HTMLButtonElement) {
       button.setAttribute('aria-label', launcherLabel());
       button.title = launcherLabel() + ' · Ctrl/⌘ K';
+      if (button.dataset.fxLiveOsRuntimeBoundR642 !== 'true') {
+        button.dataset.fxLiveOsRuntimeBoundR642 = 'true';
+        button.addEventListener('click', () => {
+          inject();
+          setTimeout(() => dispatchEvent(new CustomEvent('formatx:open-live-os')), 0);
+        });
+      }
       return;
     }
     button = document.createElement('button');
@@ -268,6 +275,7 @@
       font: '800 12px/1 system-ui,sans-serif',
       letterSpacing: '.04em'
     });
+    button.dataset.fxLiveOsRuntimeBoundR642 = 'true';
     button.addEventListener('click', () => {
       inject();
       setTimeout(() => dispatchEvent(new CustomEvent('formatx:open-live-os')), 0);
