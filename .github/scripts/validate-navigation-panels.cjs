@@ -90,7 +90,8 @@ async function assertSectionNavigation(page, href) {
       const r = node.getBoundingClientRect();
       const nav = document.getElementById('main-nav');
       return r.bottom > 80 && r.top < innerHeight * .72
-        && !nav?.classList.contains('open');
+        && !nav?.classList.contains('open')
+        && document.documentElement.dataset.fxSectionNavigationSettledR581 === target;
     }, href, { timeout: 12000 });
   } catch (error) {
     const diag = await page.evaluate(target => {
@@ -107,7 +108,8 @@ async function assertSectionNavigation(page, href) {
         menuExpanded:document.getElementById('menu-toggle')?.getAttribute('aria-expanded')||'',
         rootMenu:document.documentElement.classList.contains('fx-organism-menu-open'),
         hash:location.hash,
-        r580:document.documentElement.dataset.fxSectionNavigationR580||'',
+        r581:document.documentElement.dataset.fxSectionNavigationR581||'',
+        settledR581:document.documentElement.dataset.fxSectionNavigationSettledR581||'',
         loopState:document.documentElement.dataset.fxLoopLandingState||'',
         loopSource:document.documentElement.dataset.fxLoopSource||'',
         loopCount:document.documentElement.dataset.fxLoopCount||'0',
