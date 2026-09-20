@@ -61,7 +61,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mag-intro-r657-\${{ github.sha }}
+          name: mag-intro-r657-${{ github.sha }}
           path: artifacts/r657-intro-keyframes/
           if-no-files-found: warn
           retention-days: 14
