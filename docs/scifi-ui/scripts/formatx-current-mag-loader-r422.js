@@ -19,7 +19,7 @@ const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=2026
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260920-r560-context-collision-safe';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260920-r830-segmented-armored-pod';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260920-r910-broad-armored-pod';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260831-r484-bounded-surface-window';
