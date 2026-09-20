@@ -122,8 +122,8 @@ async function verifyFullBirth(browser){
   page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
   try{
     await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
-    await page.locator(OVERLAY).waitFor({state:'visible',timeout:10000});
     await installTimelineProbe(page);
+    await page.locator(OVERLAY).waitFor({state:'visible',timeout:10000});
     const active=await snapshot(page);
     assert.equal(active.scrollLock,'active','desktop-full: R533 did not own the temporary scroll lock');
     assert.equal(active.legacyPreloaderCount,0,'desktop-full: second/legacy preloader remained');
