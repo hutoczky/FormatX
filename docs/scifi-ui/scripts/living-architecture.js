@@ -117,7 +117,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260920-r591-mobile-box-model';
+      script.src = './scripts/igloo-parity.js?v=20260920-r609-semantic-mobile-surface';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);

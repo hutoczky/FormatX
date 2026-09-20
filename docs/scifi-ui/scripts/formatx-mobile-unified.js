@@ -25,12 +25,12 @@
   function ensureStyle() {
     appendStyle(
       'data-fx-mobile-unified-style',
-      './styles/formatx-mobile-unified.css?v=20260920-r591-mobile-box-model',
+      './styles/formatx-mobile-unified.css?v=20260920-r609-semantic-mobile-surface',
       'fxMobileUnifiedStyle'
     );
     appendStyle(
       'data-fx-mobile-production-r5',
-      './styles/formatx-mobile-production-r5.css?v=20260920-r591-mobile-box-model',
+      './styles/formatx-mobile-production-r5.css?v=20260920-r609-semantic-mobile-surface',
       'fxMobileProductionR5'
     );
   }
