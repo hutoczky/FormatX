@@ -18,6 +18,7 @@ on:
       - 'wrangler.jsonc'
       - '.github/scripts/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
+      - '.github/workflows/normalize-cloudflare-robots-r487.yml'
   push:
     branches: [master]
     paths:
@@ -27,6 +28,7 @@ on:
       - 'wrangler.jsonc'
       - '.github/scripts/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
+      - '.github/workflows/normalize-cloudflare-robots-r487.yml'
 
 permissions:
   contents: read
