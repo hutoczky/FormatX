@@ -19,6 +19,7 @@ concurrency:
 
 permissions:
   contents: read
+  statuses: write
 
 jobs:
   intro-proof:
@@ -68,3 +69,23 @@ jobs:
           path: artifacts/r1290-intro-keyframes/
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Publish intro visual proof status
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ job.status }}
+        shell: bash
+        run: |
+          state=failure
+          description='R1290 MAG intro visual proof failed'
+          if [[ "$RESULT" == success ]]; then
+            state=success
+            description='R1290 MAG intro keyframe proof passed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX R1290 intro visual proof' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
