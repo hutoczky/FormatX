@@ -298,3 +298,14 @@ html body.living-architecture .topbar > .fx-language-toggle {
 }
 
 /* deploy-r531-preloader-hotfix */
+
+
+/* R587 desktop MAG hit-target floor: animation may breathe visually but never shrink the interactive box below WCAG 44px. */
+@media (min-width: 901px) and (pointer: fine) {
+  html:root:root:root body.living-architecture .topbar > .fx-reference-mag-button {
+    box-sizing: border-box !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+  }
+}
