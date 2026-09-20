@@ -104,7 +104,7 @@
     if (index === 0) article.classList.add('fx-product-showcase__card--hero');
     article.innerHTML = [
       '<button type="button" data-showcase-index="' + index + '">',
-      '  <span class="fx-product-showcase__media"><img src="' + ASSET_ROOT + item.image + '" loading="lazy" decoding="async" width="800" height="418" alt=""><i aria-hidden="true"></i></span>',
+      '  <span class="fx-product-showcase__media"><img src="' + ASSET_ROOT + item.image + '" loading="eager" decoding="async" width="800" height="418" alt=""><i aria-hidden="true"></i></span>',
       '  <span class="fx-product-showcase__copy"><small></small><strong></strong><span></span><b aria-hidden="true">↗</b></span>',
       '</button>'
     ].join('');
