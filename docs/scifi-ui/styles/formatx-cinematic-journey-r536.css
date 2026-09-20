@@ -1186,3 +1186,49 @@ html[data-fx-cinematic-journey-r536="ready"] #resources .release-layout::before{
     opacity:1!important;
   }
 }
+
+
+/* FormatX R634 — award polish performance lock.
+   Preserve the R632 editorial language while keeping Lighthouse-critical paint
+   static. Dynamic scene energy remains owned by the pre-existing R536 vars. */
+html[data-fx-cinematic-journey-r536="ready"]{
+  --fx-c632-aperture:.22;
+  --fx-c632-camera-bias:0;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene{
+  --fx-c632-scene-focus:.28;
+  --fx-c632-heading-shift:0px;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-hud{
+  backdrop-filter:none!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene > .fx-c536-anatomy{
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state="active"] > .fx-c536-anatomy{
+  filter:none!important;
+}
+@media (min-width:901px) and (pointer:fine){
+  html[data-fx-cinematic-journey-r536="ready"] #capabilities .card,
+  html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card{
+    backdrop-filter:none!important;
+  }
+}
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::before,
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::after{
+    display:none!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] body.living-architecture :is(
+    #experience .flow-chapters article,
+    #capabilities .card,
+    #pricing .price-card,
+    #system .system-grid article,
+    #resources .release-card,
+    .fx-category-grid > *
+  ){
+    outline-color:transparent!important;
+    filter:none!important;
+  }
+}
