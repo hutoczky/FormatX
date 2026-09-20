@@ -107,6 +107,7 @@
   overlay.dataset.fxIntroR952 = 'reference-material-depth-three-genesis';
   overlay.dataset.fxIntroR960 = 'reference-proportion-three-genesis';
   overlay.dataset.fxIntroR961 = 'reference-proportion-dark-depth-three-genesis';
+  overlay.dataset.fxIntroR963 = 'organic-final-reference-three-genesis';
   overlay.dataset.fxIntroR970 = 'video-locked-organic-three-genesis';
   overlay.dataset.fxIntroVisualProofR962 = 'r961-frame-locked-reference-proof';
   overlay.dataset.fxIntroVisualProofR911 = 'current-r900-reference-keyframes';
@@ -145,6 +146,7 @@
   ROOT.dataset.fxMagBirthArtR952 = 'dark-liquid-core-embedded-cellular-eye-silver-black-armored-final-pod';
   ROOT.dataset.fxMagBirthArtR960 = 'smaller-cellular-core-neural-folds-large-final-eye-thin-cyan-seams';
   ROOT.dataset.fxMagBirthArtR961 = 'r960-proportions-dark-liquid-core-embedded-cellular-eye-silver-black-final-pod';
+  ROOT.dataset.fxMagBirthArtR963 = 'dark-liquid-dna-cellular-eye-organic-final-sphere-silver-crown-segmented-tendrils';
   ROOT.dataset.fxMagBirthArtR970 = 'dna-organic-cellular-sphere-embedded-eye-tendrils-local-flash-native-handoff';
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
   overlay.setAttribute('aria-label', copy.title);
