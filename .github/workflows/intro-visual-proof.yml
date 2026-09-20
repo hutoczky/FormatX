@@ -1,0 +1,67 @@
+name: FormatX MAG intro visual proof
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r657.js'
+      - '.github/scripts/capture-mag-intro-r656.cjs'
+      - '.github/workflows/intro-visual-proof.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: formatx-mag-intro-visual-proof
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  intro-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install visual proof runtime
+        run: npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
+      - name: Resolve Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Validate intro source
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r657.js
+          node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check .github/scripts/capture-mag-intro-r656.cjs
+      - name: Start source site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4181 --directory docs > "$RUNNER_TEMP/intro-proof-http.log" 2>&1 &
+          for attempt in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4181/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.2
+          done
+          cat "$RUNNER_TEMP/intro-proof-http.log"
+          exit 1
+      - name: Capture reference keyframes
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4181/scifi-ui/index.html
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r657-intro-keyframes
+        run: node .github/scripts/capture-mag-intro-r656.cjs
+      - name: Upload intro proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mag-intro-r657-\${{ github.sha }}
+          path: artifacts/r657-intro-keyframes/
+          if-no-files-found: warn
+          retention-days: 14
