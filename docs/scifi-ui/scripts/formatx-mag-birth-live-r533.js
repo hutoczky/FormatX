@@ -70,8 +70,10 @@
   overlay.dataset.performance = MOBILE ? 'constrained' : 'full';
   overlay.dataset.fxIntroR645 = 'biotic-genesis';
   overlay.dataset.fxIntroR646 = 'reference-biotic-film';
+  overlay.dataset.fxIntroR647 = 'shot-match-biotic-genesis';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
   ROOT.dataset.fxMagBirthArtR646 = 'deep-genome-field-dark-organic-embryo-optic-iris-neural-bloom-native-handoff';
+  ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -125,6 +127,8 @@
     <div class="fxb-embryo" aria-hidden="true">
       <div class="fxb-embryo-membrane"></div>
       <div class="fxb-embryo-cortex"></div>
+      <div class="fxb-shell-lobes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="fxb-tentacle-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="fxb-embryo-fluid"></div>
       <div class="fxb-embryo-nucleus"></div>
       <div class="fxb-embryo-iris"><span></span><i></i><b></b></div>
@@ -307,10 +311,10 @@
   function smoothstep(t) { t=clamp(t,0,1); return t*t*(3-2*t); }
 
   function phaseTargetFor(r) {
-    if (r < .18) return 0;
-    if (r < .43) return 1;
-    if (r < .68) return 2;
-    if (r < .86) return 3;
+    if (r < .22) return 0;
+    if (r < .30) return 1;
+    if (r < .55) return 2;
+    if (r < .90) return 3;
     return 4;
   }
   function applyPhase(next,source='timeline') {
@@ -358,7 +362,7 @@
   function armPhaseTimeline(){
     for(const timer of phaseTimers)clearTimeout(timer);
     phaseTimers.clear();
-    for(const [phase,ratio] of [[1,.18],[2,.43],[3,.68],[4,.86]]){
+    for(const [phase,ratio] of [[1,.22],[2,.30],[3,.55],[4,.90]]){
       const timer=setTimeout(()=>{
         phaseTimers.delete(timer);
         if(!finished)applyPhase(phase,'timer-r621');
