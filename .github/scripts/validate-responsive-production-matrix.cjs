@@ -35,21 +35,27 @@ async function clearIntro(page) {
 }
 
 async function waitForProductShowcase(page) {
-  const capabilities = page.locator('#capabilities').first();
-  if (await capabilities.count()) await capabilities.scrollIntoViewIfNeeded();
-
-  // R589: content enhancements are intentionally user-intent deferred. A
-  // trusted keyboard event exercises the real contract; programmatic scrolling
-  // alone must not start the enhancement runtime.
+  // R590: first mount the intent-deferred origin/showcase loader, then move its
+  // real IntersectionObserver target into view. Scrolling before the loader
+  // exists cannot be observed and is not representative of an actual user
+  // session where the intent event and subsequent navigation are ordered.
   await page.keyboard.press('Tab');
   await page.waitForFunction(() => (
     document.documentElement.dataset.fxContentRuntimeR241 === 'requested-r497-user-intent'
   ), null, { timeout: 10000 });
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxProductShowcaseLoader === 'v2'
+  ), null, { timeout: 10000 });
 
+  const capabilities = page.locator('#capabilities').first();
+  if (await capabilities.count()) await capabilities.scrollIntoViewIfNeeded();
   await page.evaluate(() => {
     document.dispatchEvent(new CustomEvent('formatx:livingready'));
     window.dispatchEvent(new CustomEvent('formatx:livingready'));
   });
+  await page.waitForFunction(() => (
+    ['loading','ready'].includes(document.documentElement.dataset.fxProductShowcaseLoadState || '')
+  ), null, { timeout: 10000 });
   await page.waitForSelector('#product-showcase .fx-product-showcase__card', { timeout: 30000 });
   await page.locator('#product-showcase').scrollIntoViewIfNeeded();
   await page.waitForFunction(() => {

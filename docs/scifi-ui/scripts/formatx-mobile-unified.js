@@ -30,7 +30,7 @@
     );
     appendStyle(
       'data-fx-mobile-production-r5',
-      './styles/formatx-mobile-production-r5.css?v=20260920-r586-mobile-surface-cohesion',
+      './styles/formatx-mobile-production-r5.css?v=20260920-r590-mobile-surface-containment',
       'fxMobileProductionR5'
     );
   }

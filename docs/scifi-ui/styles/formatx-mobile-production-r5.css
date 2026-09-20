@@ -367,3 +367,27 @@
     border-radius: 14px !important;
   }
 }
+
+
+/* R590 nervous-system viewport containment.
+   This is a geometry contract, not overflow masking: the chapter cards remain
+   inside the framed section even if another compatibility layer widens .flow. */
+@media (max-width:900px), (pointer:coarse) {
+  html[data-fx-mobile-unified^='ready-'] #experience .flow,
+  html[data-fx-mobile-unified^='ready-'] #experience .flow-chapters {
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #experience .flow-chapters article {
+    width:100%!important;
+    max-width:calc(100vw - 48px)!important;
+    min-width:0!important;
+    margin-inline:auto!important;
+    justify-self:center!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+}
