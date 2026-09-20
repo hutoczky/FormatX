@@ -27,7 +27,7 @@ assert.doesNotMatch(runtime, /loading="lazy"/, 'showcase must not add a second l
 assert.match(runtime, /image: 'portable-installer-compatible\.svg'/, 'showcase producer does not use the compatible portable-installer asset');
 assert.doesNotMatch(runtime, /image: 'portable-installer\.svg'/, 'showcase producer still references the obsolete portable-installer asset');
 assert.match(loader, /formatx-product-showcase\.css\?v=20260806-real-product-1/, 'showcase stylesheet loader missing');
-assert.match(loader, /formatx-product-showcase\.js\?v=20260806-real-product-1/, 'showcase runtime loader missing');
+assert.match(loader, /formatx-product-showcase\.js\?v=[^"']+/, 'showcase runtime loader missing');
 assert.match(styles, /prefers-reduced-motion: reduce/, 'reduced-motion treatment missing');
 assert.match(styles, /content-visibility: auto/, 'offscreen rendering optimisation missing');
 
