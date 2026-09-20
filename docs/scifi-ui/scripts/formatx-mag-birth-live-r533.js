@@ -112,6 +112,7 @@
   let startedAt = 0;
   let finished = false;
   let exitTimer = 0;
+  let hardFinishTimer = 0;
   let targetX = innerWidth * .5;
   let targetY = innerHeight * .48;
   let stage = null;
@@ -299,6 +300,7 @@
     finished=true;
     cancelAnimationFrame(raf);
     clearTimeout(exitTimer);
+    clearTimeout(hardFinishTimer);
 
     try {
       coreApi?.setMorph?.(1,'r533-final-handoff');
@@ -315,16 +317,17 @@
 
     /* The underlying MAG is already the production MAG at its production
        coordinates. Fading only this film layer creates the zero-cut handoff. */
-    requestAnimationFrame(()=>{
-      overlay.classList.add('is-leaving');
-      exitTimer=window.setTimeout(()=>{
-        releaseStageStyle();
-        ROOT.removeAttribute('data-fx-mag-birth-live');
-        ROOT.removeAttribute('data-fx-mag-birth-phase');
-        overlay.remove();
-        document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{detail:{source,revision:'r533-native-core-handoff'}}));
-      }, REDUCED ? 20 : EXIT_MS);
-    });
+    // R607: removal must not depend on one more animation frame. Native WebGL
+    // startup can temporarily starve rAF on software/slow GPU paths; the film
+    // still has to fail open deterministically once finish() has been reached.
+    overlay.classList.add('is-leaving');
+    exitTimer=window.setTimeout(()=>{
+      releaseStageStyle();
+      ROOT.removeAttribute('data-fx-mag-birth-live');
+      ROOT.removeAttribute('data-fx-mag-birth-phase');
+      overlay.remove();
+      document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{detail:{source,revision:'r607-bounded-native-core-handoff'}}));
+    }, REDUCED ? 20 : EXIT_MS);
   }
 
   function render(now) {
@@ -367,6 +370,10 @@
     document.body.prepend(overlay);
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
     sizeCanvas();
+
+    // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
+    // against a renderer/driver path that starves the animation clock.
+    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r607'), REDUCED ? 900 : 9000);
 
     if(REDUCED){
       overlay.dataset.phase='4';
