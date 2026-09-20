@@ -10,6 +10,7 @@
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const DURATION = 5200;
   const EXIT_MS = 360;
+  const CORE_WARMUP_PROGRESS = MOBILE ? .54 : .58;
 
   let seen = false;
   try { seen = sessionStorage.getItem(KEY) === '1'; } catch (_) {}
@@ -236,6 +237,9 @@
   let lastMorphSync = 0;
   let lastNativeSync = 0;
   let lastParticleDraw = 0;
+  let lastDnaUpdate = 0;
+  let lastTelemetryUpdate = 0;
+  let warmupDispatched = false;
   let ignitionDone = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
@@ -310,6 +314,15 @@
     if (!(stage instanceof HTMLElement)) return;
     stage.style.removeProperty('opacity');
     stage.style.removeProperty('transition');
+  }
+
+  function requestCoreWarmup(source='timeline') {
+    if (warmupDispatched) return;
+    warmupDispatched = true;
+    ROOT.dataset.fxMagBirthCoreWarmupR618 = source;
+    document.dispatchEvent(new CustomEvent('formatx:magbirthcorewarmup',{
+      detail:{source,revision:'r618-intro-aware-core-warmup'}
+    }));
   }
 
   function syncNativeCore(r, now) {
@@ -418,6 +431,7 @@
     clearTimeout(exitTimer);
     clearTimeout(hardFinishTimer);
 
+    requestCoreWarmup('finish-'+String(source||'unknown'));
     try {
       coreApi?.setMorph?.(1,'r611-final-living-handoff');
       coreApi?.setShape?.('crystal','r611-final-living-handoff');
@@ -452,7 +466,7 @@
     const phase=phaseFor(r,now);
     if(overlay.dataset.phase!==phase)overlay.dataset.phase=phase;
     if(ROOT.dataset.fxMagBirthPhase!==phase)ROOT.dataset.fxMagBirthPhase=phase;
-    syncTarget(false);
+    if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
     if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
@@ -460,7 +474,9 @@
       syncNativeCore(r,now);
     }
 
-    if (dnaStage instanceof HTMLElement) {
+    const dnaCadence=MOBILE?72:48;
+    if (dnaStage instanceof HTMLElement && (!lastDnaUpdate || now-lastDnaUpdate>=dnaCadence || r>=1)) {
+      lastDnaUpdate=now;
       const dnaProgress=clamp((r-.04)/.58,0,1);
       const dnaTurn=-24 + dnaProgress*92 + Math.sin(now*.0016)*4.5;
       const breathe=1+Math.sin(now*.0044)*.018;
@@ -469,13 +485,16 @@
       dnaStage.style.setProperty('--fxb-dna-life',dnaProgress.toFixed(4));
     }
 
-    const value=Math.min(100,Math.round(easeOutCubic(r)*100));
-    const valueText=String(value).padStart(3,'0');
-    if(percent.value!==valueText)percent.value=valueText;
-    if(progress.value!==value)progress.value=value;
-    const nextStatus=statusFor(r);
-    if(status.textContent!==nextStatus)status.textContent=nextStatus;
-    const particleCadence=MOBILE?34:24;
+    if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=80 || r>=1){
+      lastTelemetryUpdate=now;
+      const value=Math.min(100,Math.round(easeOutCubic(r)*100));
+      const valueText=String(value).padStart(3,'0');
+      if(percent.value!==valueText)percent.value=valueText;
+      if(progress.value!==value)progress.value=value;
+      const nextStatus=statusFor(r);
+      if(status.textContent!==nextStatus)status.textContent=nextStatus;
+    }
+    const particleCadence=MOBILE?72:48;
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
@@ -503,6 +522,7 @@
     hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r607'), REDUCED ? 900 : 14000);
 
     if(REDUCED){
+      requestCoreWarmup('reduced-motion');
       overlay.dataset.phase='4';
       ROOT.dataset.fxMagBirthPhase='4';
       locateStage();

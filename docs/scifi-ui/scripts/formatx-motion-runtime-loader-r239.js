@@ -39,7 +39,7 @@ const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false;
+let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,magRuntimeActivated=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function mount(spec){
@@ -108,6 +108,22 @@ function ensureCurrentMag(){
   const script=document.createElement('script');script.src=CURRENT_MAG;script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
+function magBirthActive(){
+  return root.getAttribute('data-fx-mag-birth-live')==='active'
+    || root.dataset.fxMagBirthOwnerR533==='active'
+    || document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
+}
+function activateMagRuntime(source='startup'){
+  if(magRuntimeActivated)return;
+  magRuntimeActivated=true;
+  root.dataset.fxIntroAwareMagR618='starting-'+source;
+  ensureMagShapeSync();
+  ensureCurrentMag();
+}
+function onMagBirthWarmup(event){
+  activateMagRuntime(String(event?.detail?.source||'cinematic-warmup'));
+}
+
 function ensureStaticMotionCss(){
   const existing=document.getElementById('fx-r170-mobile-seam-override');
   if(existing instanceof HTMLLinkElement){
@@ -174,9 +190,14 @@ root.dataset.fxMotionRuntimeR239=reduced.matches?'reduced-motion-static-core-r46
 root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-energy-zero-idle';
 warmCriticalOwners();
 ensureDialogueSurface();
-ensureMagShapeSync();
 ensureLanguageToggle();
-ensureCurrentMag();
+if(magBirthActive()){
+  root.dataset.fxIntroAwareMagR618='waiting-for-core-formation';
+  document.addEventListener('formatx:magbirthcorewarmup',onMagBirthWarmup,{once:true,passive:true});
+  document.addEventListener('formatx:magbirthcomplete',()=>activateMagRuntime('cinematic-complete-failsafe'),{once:true,passive:true});
+}else{
+  activateMagRuntime('startup-no-cinematic');
+}
 
 document.addEventListener('click',activateCanonicalAsk,true);
 for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfaceready','formatx:thoughtgenomeready'])addEventListener(eventName,openPendingCanonicalAsk,{passive:true});

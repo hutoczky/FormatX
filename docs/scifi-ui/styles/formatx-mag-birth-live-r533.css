@@ -788,3 +788,58 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
 .fx-mag-birth-r533[data-phase="3"] .fxb-copy { opacity:.68; transform:translateX(-50%) translateY(-12px) scale(.97); }
 .fx-mag-birth-r533[data-phase="4"] .fxb-copy { opacity:.54; transform:translateX(-50%) translateY(-18px) scale(.955); }
 .fxb-copy { transition:opacity .7s ease,transform 1.35s cubic-bezier(.16,.78,.18,1); }
+
+
+/* FormatX R618 — transform-only DNA camera.
+   The stage keeps one layout box for the whole birth sequence. Camera motion,
+   zoom and recession happen only through compositor-friendly transforms, so the
+   cinematic no longer creates viewport layout shifts while retaining the same
+   zoom-out/up narrative. */
+.fxb-dna-stage{
+  left:50%;
+  top:50%;
+  width:min(58vw,560px);
+  height:min(78vh,760px);
+  transform:translate3d(-50%,-50%,0) perspective(1100px) rotateX(-7deg) rotateY(var(--fxb-dna-turn)) rotateZ(-3deg) scale(1.34);
+  transition:transform 1.55s cubic-bezier(.16,.78,.18,1),opacity .78s ease,filter .9s ease;
+  will-change:transform,opacity,filter;
+}
+.fx-mag-birth-r533[data-phase="1"] .fxb-dna-stage{
+  left:50%;top:50%;width:min(58vw,560px);height:min(78vh,760px);
+  transform:translate3d(-50%,-50%,0) perspective(1050px) rotateX(-6deg) rotateY(var(--fxb-dna-turn)) rotateZ(2deg) scale(1.08);
+}
+.fx-mag-birth-r533[data-phase="2"] .fxb-dna-stage{
+  left:50%;top:50%;width:min(58vw,560px);height:min(78vh,760px);
+  transform:translate3d(-50%,calc(-50% - 16vh),0) perspective(1350px) rotateX(-2deg) rotateY(var(--fxb-dna-turn)) rotateZ(-7deg) scale(.35);
+}
+.fx-mag-birth-r533[data-phase="3"] .fxb-dna-stage{
+  left:50%;top:50%;width:min(58vw,560px);height:min(78vh,760px);
+  transform:translate3d(-50%,calc(-50% - 25vh),0) perspective(1500px) rotateX(0deg) rotateY(var(--fxb-dna-turn)) rotateZ(-13deg) scale(.085);
+}
+.fx-mag-birth-r533[data-phase="4"] .fxb-dna-stage{
+  left:50%;top:50%;width:min(58vw,560px);height:min(78vh,760px);
+  transform:translate3d(-50%,calc(-50% - 32vh),0) perspective(1700px) rotateX(2deg) rotateY(var(--fxb-dna-turn)) rotateZ(-16deg) scale(.045);
+}
+@media (max-width:700px){
+  .fxb-dna-stage{
+    left:50%;top:50%;
+    width:min(82vw,410px);height:min(64vh,600px);
+    transform:translate3d(-50%,-50%,0) perspective(950px) rotateX(-5deg) rotateY(var(--fxb-dna-turn)) rotateZ(-3deg) scale(1.24);
+  }
+  .fx-mag-birth-r533[data-phase="1"] .fxb-dna-stage{
+    left:50%;top:50%;width:min(82vw,410px);height:min(64vh,600px);
+    transform:translate3d(-50%,-50%,0) perspective(950px) rotateX(-5deg) rotateY(var(--fxb-dna-turn)) rotateZ(2deg) scale(1.02);
+  }
+  .fx-mag-birth-r533[data-phase="2"] .fxb-dna-stage{
+    left:50%;top:50%;width:min(82vw,410px);height:min(64vh,600px);
+    transform:translate3d(-50%,calc(-50% - 17vh),0) perspective(1200px) rotateX(-2deg) rotateY(var(--fxb-dna-turn)) rotateZ(-7deg) scale(.255);
+  }
+  .fx-mag-birth-r533[data-phase="3"] .fxb-dna-stage{
+    left:50%;top:50%;width:min(82vw,410px);height:min(64vh,600px);
+    transform:translate3d(-50%,calc(-50% - 26vh),0) perspective(1400px) rotateY(var(--fxb-dna-turn)) rotateZ(-12deg) scale(.082);
+  }
+  .fx-mag-birth-r533[data-phase="4"] .fxb-dna-stage{
+    left:50%;top:50%;width:min(82vw,410px);height:min(64vh,600px);
+    transform:translate3d(-50%,calc(-50% - 32vh),0) perspective(1600px) rotateY(var(--fxb-dna-turn)) rotateZ(-15deg) scale(.04);
+  }
+}

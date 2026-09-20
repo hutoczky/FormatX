@@ -8,8 +8,8 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r605';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260920-r615-biomechanical-genesis-mag';
+root.dataset.fxP0MotionSchedulerR490='armed-r618';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260920-r618-intro-aware-mag';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
