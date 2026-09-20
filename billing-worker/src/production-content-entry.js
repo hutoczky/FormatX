@@ -71,11 +71,14 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/living-architecture.js', {
     marker: 'living-to-igloo',
-    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20260920-r570-navigation-authority']],
+    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20260920-r586-mobile-surface-cohesion']],
   }],
   ['/scifi-ui/scripts/igloo-parity.js', {
-    marker: 'igloo-to-site-stability',
-    rewrites: [[/formatx-site-stability\.css\?v=[^"']+/g, 'formatx-site-stability.css?v=20260903-r502-mobile-box-model']],
+    marker: 'igloo-to-site-stability-and-mobile-surface-r586',
+    rewrites: [
+      [/formatx-site-stability\.css\?v=[^"']+/g, 'formatx-site-stability.css?v=20260903-r502-mobile-box-model'],
+      [/formatx-mobile-unified\.js\?v=[^"']+/g, 'formatx-mobile-unified.js?v=20260920-r586-mobile-surface-cohesion'],
+    ],
   }],
 ]);
 
@@ -161,7 +164,7 @@ function cacheBustR502Runtime(html) {
     .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260903-r507-mag-single-clock-owner')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260902-r497-no-late-layout')
     .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock')
-    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260920-r570-navigation-authority')
+    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260920-r586-mobile-surface-cohesion')
     .replace(/platform-status\.js\?v=[^"']+/g, 'platform-status.js?v=20260902-r500-canonical-hero-state')
     .replace(/platform-status\.css\?v=[^"']+/g, 'platform-status.css?v=20260902-r500-canonical-hero-state');
 }

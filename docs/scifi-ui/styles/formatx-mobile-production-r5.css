@@ -2,29 +2,29 @@
    Scope: mobile document composition only. The dedicated 3D MAG renderer is not modified. */
 
 @media (max-width: 900px), (pointer: coarse) {
-  html[data-fx-mobile-unified='ready-v1'] {
+  html[data-fx-mobile-unified^='ready-'] {
     scroll-padding-top: 92px !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] body {
+  html[data-fx-mobile-unified^='ready-'] body {
     overflow-x: clip !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .topbar {
+  html[data-fx-mobile-unified^='ready-'] .topbar {
     z-index: 1200 !important;
     top: 0 !important;
     transform: none !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] main > section,
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof,
-  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os,
-  html[data-fx-mobile-unified='ready-v1'] #user-feedback {
+  html[data-fx-mobile-unified^='ready-'] main > section,
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof,
+  html[data-fx-mobile-unified^='ready-'] .fx-static-live-os,
+  html[data-fx-mobile-unified^='ready-'] #user-feedback {
     scroll-margin-top: 92px !important;
   }
 
   /* Public proof layer: never render link title and description as one inline run. */
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof {
     position: relative !important;
     inset: auto !important;
     display: block !important;
@@ -40,7 +40,7 @@
     transform: none !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__head {
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 18px !important;
@@ -48,20 +48,20 @@
     margin: 0 0 24px !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head > div {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__head > div {
     display: grid !important;
     gap: 12px !important;
     min-width: 0 !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head .section-index {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__head .section-index {
     margin: 0 !important;
     font-size: 12px !important;
     line-height: 1.35 !important;
     letter-spacing: .11em !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head h2 {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__head h2 {
     margin: 0 !important;
     max-width: 100% !important;
     font-size: clamp(34px, 10.5vw, 52px) !important;
@@ -70,7 +70,7 @@
     overflow-wrap: break-word !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head > p {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__head > p {
     margin: 0 !important;
     max-width: 100% !important;
     font-size: 16px !important;
@@ -78,7 +78,7 @@
     overflow-wrap: break-word !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__grid {
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 12px !important;
@@ -86,7 +86,7 @@
     min-width: 0 !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__grid > a {
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 8px !important;
@@ -103,8 +103,8 @@
     overflow: hidden !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a > strong,
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a > span {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__grid > a > strong,
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__grid > a > span {
     display: block !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -113,57 +113,57 @@
     overflow-wrap: break-word !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a > strong {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__grid > a > strong {
     font-size: 18px !important;
     line-height: 1.25 !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a > span {
+  html[data-fx-mobile-unified^='ready-'] .fx-award-proof__grid > a > span {
     color: rgba(218, 235, 244, .72) !important;
     font-size: 14px !important;
     line-height: 1.55 !important;
   }
 
   /* Static operating-layer block injected by the production Worker. */
-  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__head,
-  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__grid,
-  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__actions {
+  html[data-fx-mobile-unified^='ready-'] .fx-static-live-os__head,
+  html[data-fx-mobile-unified^='ready-'] .fx-static-live-os__grid,
+  html[data-fx-mobile-unified^='ready-'] .fx-static-live-os__actions {
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 16px !important;
     width: 100% !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__head > *,
-  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__grid > *,
-  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__actions > * {
+  html[data-fx-mobile-unified^='ready-'] .fx-static-live-os__head > *,
+  html[data-fx-mobile-unified^='ready-'] .fx-static-live-os__grid > *,
+  html[data-fx-mobile-unified^='ready-'] .fx-static-live-os__actions > * {
     min-width: 0 !important;
     max-width: 100% !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__actions .button,
-  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__actions a {
+  html[data-fx-mobile-unified^='ready-'] .fx-static-live-os__actions .button,
+  html[data-fx-mobile-unified^='ready-'] .fx-static-live-os__actions a {
     width: 100% !important;
     min-height: 54px !important;
     white-space: normal !important;
   }
 
   /* Category deck keeps the same visual language instead of falling back to raw text. */
-  html[data-fx-mobile-unified='ready-v1'] .fx-category-deck > header {
+  html[data-fx-mobile-unified^='ready-'] .fx-category-deck > header {
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 12px !important;
     width: 100% !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-category-grid {
+  html[data-fx-mobile-unified^='ready-'] .fx-category-grid {
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 14px !important;
     width: 100% !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-category-grid > article {
+  html[data-fx-mobile-unified^='ready-'] .fx-category-grid > article {
     width: 100% !important;
     min-width: 0 !important;
     margin: 0 !important;
@@ -171,42 +171,199 @@
   }
 
   /* QR images have no visible broken-image/alt fallback while JS is resolving API/local source. */
-  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-card:not(.is-qr-ready) .fx-plan-qr-link img,
-  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-link img:not([src]),
-  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-link img[src=''] {
+  html[data-fx-mobile-unified^='ready-'] .fx-plan-qr-card:not(.is-qr-ready) .fx-plan-qr-link img,
+  html[data-fx-mobile-unified^='ready-'] .fx-plan-qr-link img:not([src]),
+  html[data-fx-mobile-unified^='ready-'] .fx-plan-qr-link img[src=''] {
     opacity: 0 !important;
     visibility: hidden !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-card.is-qr-ready .fx-plan-qr-link img {
+  html[data-fx-mobile-unified^='ready-'] .fx-plan-qr-card.is-qr-ready .fx-plan-qr-link img {
     opacity: 1 !important;
     visibility: visible !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-card:not(.is-qr-ready) .fx-qr-placeholder {
+  html[data-fx-mobile-unified^='ready-'] .fx-plan-qr-card:not(.is-qr-ready) .fx-qr-placeholder {
     opacity: 1 !important;
     visibility: visible !important;
   }
 
   /* Mobile has a finite native document; the visual bridge and its cycle cue are desktop-only. */
-  html[data-fx-mobile-unified='ready-v1'] .fx-loop-bridge,
-  html[data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
-  html[data-fx-mobile-unified='ready-v1'] [data-fx-loop-clone='true'],
-  html[data-fx-mobile-unified='ready-v1'] #resources .loop-note,
-  html[data-fx-mobile-unified='ready-v1'] #resources .particle-footer {
+  html[data-fx-mobile-unified^='ready-'] .fx-loop-bridge,
+  html[data-fx-mobile-unified^='ready-'] .fx-loop-hero-clone,
+  html[data-fx-mobile-unified^='ready-'] [data-fx-loop-clone='true'],
+  html[data-fx-mobile-unified^='ready-'] #resources .loop-note,
+  html[data-fx-mobile-unified^='ready-'] #resources .particle-footer {
     display: none !important;
   }
 
   /* Avoid raw inline concatenation in footer navigation. */
-  html[data-fx-mobile-unified='ready-v1'] .site-footer nav {
+  html[data-fx-mobile-unified^='ready-'] .site-footer nav {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 10px 16px !important;
   }
 
-  html[data-fx-mobile-unified='ready-v1'] .site-footer nav a {
+  html[data-fx-mobile-unified^='ready-'] .site-footer nav a {
     display: inline-flex !important;
     width: auto !important;
     margin: 0 !important;
+  }
+}
+
+  
+/* R586 unified mobile surface cohesion contract. */
+@media (max-width: 900px), (pointer: coarse) {
+  html[data-fx-mobile-unified^='ready-'] {
+    --fx-r586-panel-edge: 12px;
+    --fx-r586-panel-radius: 24px;
+    --fx-r586-panel-border: rgba(118, 221, 255, .18);
+    --fx-r586-panel-bg:
+      radial-gradient(circle at 88% 8%, rgba(69, 205, 255, .065), transparent 34%),
+      linear-gradient(148deg, rgba(5, 27, 42, .92), rgba(2, 15, 27, .94) 64%, rgba(3, 12, 23, .97));
+    --fx-r586-card-bg:
+      linear-gradient(145deg, rgba(8, 22, 37, .94), rgba(3, 9, 17, .985));
+  }
+
+  html[data-fx-mobile-unified^='ready-'] body.living-architecture #main-content > #experience,
+  html[data-fx-mobile-unified^='ready-'] body.living-architecture #main-content > #capabilities,
+  html[data-fx-mobile-unified^='ready-'] body.living-architecture #main-content > #pricing,
+  html[data-fx-mobile-unified^='ready-'] body.living-architecture #main-content > #system,
+  html[data-fx-mobile-unified^='ready-'] body.living-architecture #main-content > #resources,
+  html[data-fx-mobile-unified^='ready-'] body.living-architecture #main-content > .fx-category-deck {
+    position: relative !important;
+    width: calc(100% - (var(--fx-r586-panel-edge) * 2)) !important;
+    max-width: 700px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 18px auto !important;
+    padding: clamp(30px, 7vw, 44px) clamp(20px, 5.5vw, 30px) !important;
+    border: 1px solid var(--fx-r586-panel-border) !important;
+    border-radius: var(--fx-r586-panel-radius) !important;
+    background: var(--fx-r586-panel-bg) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.035),
+      inset 0 0 34px rgba(59,199,255,.022),
+      0 22px 70px rgba(0,0,0,.24) !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] body.living-architecture #main-content > :is(#experience,#capabilities,#pricing,#system,#resources,.fx-category-deck) > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] :is(
+    #experience .flow-chapters article,
+    #capabilities .card,
+    #pricing .price-card,
+    #pricing .payment,
+    #formatx-plan-qr-dock,
+    #formatx-plan-qr-dock .fx-plan-qr-card,
+    #system .system-grid article,
+    #resources .release-card,
+    .fx-category-grid > article
+  ) {
+    border: 1px solid rgba(139, 219, 255, .16) !important;
+    border-radius: 20px !important;
+    background: var(--fx-r586-card-bg) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 16px 42px rgba(0,0,0,.17) !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #pricing .payment-console {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #pricing .payment-console > :is(span,strong,small,b,a) {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    white-space: normal !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #pricing .payment-console #preview-main-price {
+    font-size: clamp(30px, 8.6vw, 40px) !important;
+    line-height: 1.05 !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #pricing .payment-console #preview-secondary-label {
+    margin-top: 6px !important;
+    color: rgba(199, 221, 232, .68) !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #pricing .payment-console #preview-secondary-price {
+    font-size: clamp(22px, 6.4vw, 30px) !important;
+    line-height: 1.1 !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #pricing .currency-tabs {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #pricing .currency-tabs > button {
+    min-width: 72px !important;
+    min-height: 48px !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #formatx-plan-qr-dock .fx-plan-qr-card {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 92px !important;
+    align-items: center !important;
+    gap: 14px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 18px !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #formatx-plan-qr-dock .fx-plan-qr-copy {
+    min-width: 0 !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #formatx-plan-qr-dock .fx-plan-qr-copy > * {
+    display: block !important;
+    width: 100% !important;
+    margin-inline: 0 !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #formatx-plan-qr-dock .fx-plan-qr-link {
+    position: relative !important;
+    width: 92px !important;
+    min-width: 92px !important;
+    max-width: 92px !important;
+    height: 92px !important;
+    min-height: 92px !important;
+    max-height: 92px !important;
+    justify-self: end !important;
+    overflow: hidden !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #formatx-plan-qr-dock .fx-plan-qr-link img {
+    position: absolute !important;
+    inset: 5px !important;
+    width: 82px !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
+    height: 82px !important;
+    min-height: 82px !important;
+    max-height: 82px !important;
+    object-fit: contain !important;
+  }
+
+  html[data-fx-mobile-unified^='ready-'] #system .marquee {
+    margin-inline: 0 !important;
+    border-radius: 14px !important;
   }
 }

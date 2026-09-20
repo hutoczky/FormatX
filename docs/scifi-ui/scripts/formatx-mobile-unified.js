@@ -25,12 +25,12 @@
   function ensureStyle() {
     appendStyle(
       'data-fx-mobile-unified-style',
-      './styles/formatx-mobile-unified.css?v=20260811-production-stability-r4',
+      './styles/formatx-mobile-unified.css?v=20260920-r586-mobile-surface-cohesion',
       'fxMobileUnifiedStyle'
     );
     appendStyle(
       'data-fx-mobile-production-r5',
-      './styles/formatx-mobile-production-r5.css?v=20260811-production-r5',
+      './styles/formatx-mobile-production-r5.css?v=20260920-r586-mobile-surface-cohesion',
       'fxMobileProductionR5'
     );
   }
