@@ -822,10 +822,28 @@
     }
   }
 
+  function isSoftwareWebGL(){
+    try{
+      const probe=document.createElement('canvas');
+      const gl=probe.getContext('webgl2',{powerPreference:'high-performance'})||probe.getContext('webgl',{powerPreference:'high-performance'});
+      if(!gl)return true;
+      const ext=gl.getExtension('WEBGL_debug_renderer_info');
+      const renderer=String(ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
+      return /swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(renderer);
+    }catch(_){
+      return true;
+    }
+  }
+
   let loader=null;
   async function attach(canvas,getTarget){
     if(!(canvas instanceof HTMLCanvasElement))return null;
     try{
+      const visualProof=new URLSearchParams(location.search).get('visualintro')==='1';
+      if(!visualProof && isSoftwareWebGL()){
+        document.documentElement.dataset.fxMagBirthR657='software-webgl-r649-fallback';
+        return null;
+      }
       loader ||= loadThree();
       const THREE=await loader;
       const engine=new FormatXGenesisThree(THREE,canvas,getTarget);
