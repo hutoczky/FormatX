@@ -54,7 +54,7 @@ has(current,[
 
 has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry',
-  'const SURFACE_PULSE_MS = 1160','prefers-reduced-motion:reduce','document.hidden',
+  'const SURFACE_PULSE_MS = 1160','const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880','prefers-reduced-motion:reduce','document.hidden',
   'uSurfacePulse','single-luminous-webgl-material-owner'
 ],'native R326 renderer');
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);

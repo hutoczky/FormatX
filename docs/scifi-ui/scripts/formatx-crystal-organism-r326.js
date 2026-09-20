@@ -10,6 +10,7 @@
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   const IDLE_ENERGY = mobile ? .50 : .43;
   const SURFACE_PULSE_MS = 1160;
+  const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const optics = mobile ? Object.freeze({
     fresnelPower: '1.56',
@@ -524,7 +525,7 @@
       // The mobile governor's idle flag is not the user's PAUSE control.
       // Reserve the full sweep before asking the single renderer to draw it.
       dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
-        detail:{phase:'start',source,duration:SURFACE_PULSE_MS}
+        detail:{phase:'start',source,duration:SURFACE_PULSE_WINDOW_MS}
       }));
       if(blocked())return false;
       surfacePulseStart=lastSurfacePulseAt=now;
@@ -544,9 +545,9 @@
         root.dataset.fxCoreSurfacePulseR454='idle';
         schedule(1);
         dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
-          detail:{phase:'end',source,duration:SURFACE_PULSE_MS}
+          detail:{phase:'end',source,duration:SURFACE_PULSE_WINDOW_MS}
         }));
-      },SURFACE_PULSE_MS);
+      },SURFACE_PULSE_WINDOW_MS);
       return true;
     }
     function scheduleSurfacePulse(){
@@ -608,7 +609,7 @@
       gl.uniform3f(uniforms.uRotation,rotationX,rotationY,rotationZ);
       gl.uniform1f(uniforms.uAspect,aspect);
       gl.uniform1f(uniforms.uSiteProgress,siteProgress);
-      const surfacePulseElapsed=(now-surfacePulseStart)/SURFACE_PULSE_MS;
+      const surfacePulseElapsed=(now-surfacePulseStart)/SURFACE_PULSE_WINDOW_MS;
       const surfacePulse=surfacePulseElapsed>=0&&surfacePulseElapsed<=1?surfacePulseElapsed:-1;
       gl.uniform1f(uniforms.uSurfacePulse,surfacePulse);
 
@@ -660,7 +661,7 @@
     function frame(now){
       raf=0;if(blocked())return;
       render(now);burstFrames=Math.max(0,burstFrames-1);
-      const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_MS;
+      const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0||surfacePulseActive)raf=requestAnimationFrame(frame);
       else settleAfterBurst();
     }
@@ -813,7 +814,7 @@
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
       surfacePulse:source=>startSurfacePulse(typeof source==='string'?source:'api'),
-      surfacePulseDurationMs:SURFACE_PULSE_MS,
+      surfacePulseDurationMs:SURFACE_PULSE_WINDOW_MS,
       setMorph:(value,source)=>setMorph(value,source||'api-morph',true),
       setShape:(shape,source)=>setShape(shape,source||'api-set'),
       toggleShape:source=>toggleShape(source||'api-toggle'),
