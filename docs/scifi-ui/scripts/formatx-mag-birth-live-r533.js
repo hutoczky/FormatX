@@ -103,6 +103,7 @@
   overlay.dataset.fxIntroR800 = 'reference-locked-three-genesis';
   overlay.dataset.fxIntroR820 = 'material-locked-three-genesis';
   overlay.dataset.fxIntroR900 = 'three-stage-reference-genesis';
+  overlay.dataset.fxIntroVisualProofR911 = 'current-r900-reference-keyframes';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
   ROOT.dataset.fxMagBirthArtR646 = 'deep-genome-field-dark-organic-embryo-optic-iris-neural-bloom-native-handoff';
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
