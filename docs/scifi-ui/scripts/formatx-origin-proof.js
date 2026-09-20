@@ -239,48 +239,25 @@
   }
 
   function ensureLauncher() {
-    let button = document.querySelector('[data-fx-live-os-launcher]');
-    if (button instanceof HTMLButtonElement) {
-      button.setAttribute('aria-label', launcherLabel());
-      button.title = launcherLabel() + ' · Ctrl/⌘ K';
-      if (button.dataset.fxLiveOsRuntimeBoundR642 !== 'true') {
-        button.dataset.fxLiveOsRuntimeBoundR642 = 'true';
-        button.addEventListener('click', () => {
-          inject();
-          setTimeout(() => dispatchEvent(new CustomEvent('formatx:open-live-os')), 0);
-        });
-      }
-      return;
+    const control = document.querySelector('[data-fx-live-os-launcher]')
+      || document.querySelector('#hero .fx-reference-liveos');
+    if (!(control instanceof HTMLElement)) {
+      root.dataset.fxLiveOsLauncherR643 = 'awaiting-reference-cta';
+      return null;
     }
-    button = document.createElement('button');
-    button.type = 'button';
-    button.dataset.fxLiveOsLauncher = 'true';
-    button.setAttribute('aria-label', launcherLabel());
-    button.title = launcherLabel() + ' · Ctrl/⌘ K';
-    button.innerHTML = '<span>Live OS</span>';
-    Object.assign(button.style, {
-      position: 'fixed',
-      right: '18px',
-      bottom: '18px',
-      zIndex: '2147482000',
-      minWidth: '54px',
-      minHeight: '54px',
-      padding: '0 14px',
-      border: '1px solid rgba(44,231,243,.68)',
-      borderRadius: '999px',
-      background: 'rgba(5,18,31,.92)',
-      color: '#effcff',
-      boxShadow: '0 16px 50px rgba(0,0,0,.4),0 0 28px rgba(44,231,243,.12)',
-      cursor: 'pointer',
-      font: '800 12px/1 system-ui,sans-serif',
-      letterSpacing: '.04em'
-    });
-    button.dataset.fxLiveOsRuntimeBoundR642 = 'true';
-    button.addEventListener('click', () => {
-      inject();
-      setTimeout(() => dispatchEvent(new CustomEvent('formatx:open-live-os')), 0);
-    });
-    document.body.appendChild(button);
+    control.dataset.fxLiveOsLauncher = 'true';
+    control.setAttribute('aria-label', launcherLabel());
+    control.title = launcherLabel() + ' · Ctrl/⌘ K';
+    if (control.dataset.fxLiveOsRuntimeBoundR643 !== 'true') {
+      control.dataset.fxLiveOsRuntimeBoundR643 = 'true';
+      control.addEventListener('click', event => {
+        event.preventDefault();
+        inject();
+        setTimeout(() => dispatchEvent(new CustomEvent('formatx:open-live-os')), 0);
+      });
+    }
+    root.dataset.fxLiveOsLauncherR643 = 'hero-reference-cta-no-fixed-overlay';
+    return control;
   }
 
   function inject() {
@@ -332,7 +309,7 @@
 
   function ensureArmed() {
     ensureLauncher();
-    root.dataset.fxLiveOsLauncherR641 = 'canonical-command-surface-visible';
+    root.dataset.fxLiveOsLauncherR641 = 'superseded-by-r643-hero-reference-cta';
     if (arm()) {
       clearInterval(retryTimer);
       retryTimer = 0;

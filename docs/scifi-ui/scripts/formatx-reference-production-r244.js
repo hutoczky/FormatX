@@ -100,7 +100,7 @@
     proofs.forEach(node => node.remove());
     proof.className = 'fx-reference-proof';
     if (!proof.querySelector('.fx-reference-proof-kicker, h2, p, .fx-reference-liveos')) {
-      proof.innerHTML = '<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2></h2><p></p><a class="fx-reference-liveos" href="#experience">Live OS</a>';
+      proof.innerHTML = '<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2></h2><p></p><a class="fx-reference-liveos" data-fx-live-os-launcher="true" href="#experience">Live OS</a>';
     }
 
     const kicker = proof.querySelector('.fx-reference-proof-kicker');
@@ -113,6 +113,8 @@
     if (live instanceof HTMLAnchorElement) {
       live.textContent = 'Live OS';
       live.href = '#experience';
+      live.dataset.fxLiveOsLauncher = 'true';
+      live.dataset.fxLiveOsSurfaceR643 = 'canonical-hero-command-surface';
       live.setAttribute('aria-label', root.lang === 'en' ? 'Open Live OS' : 'Live OS megnyitása');
     }
 

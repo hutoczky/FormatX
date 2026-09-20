@@ -66,51 +66,39 @@
     root.dataset.fxContentRuntimeR241 = 'requested-r497-user-intent';
   }
 
-  function ensureLiveOsBootstrap() {
-    let button = document.querySelector('[data-fx-live-os-launcher]');
-    if (!(button instanceof HTMLButtonElement)) {
-      button = document.createElement('button');
-      button.type = 'button';
-      button.dataset.fxLiveOsLauncher = 'true';
-      button.innerHTML = '<span>Live OS</span>';
-      Object.assign(button.style, {
-        position: 'fixed',
-        right: '18px',
-        bottom: '18px',
-        zIndex: '2147482000',
-        minWidth: '54px',
-        minHeight: '54px',
-        padding: '0 14px',
-        border: '1px solid rgba(44,231,243,.68)',
-        borderRadius: '999px',
-        background: 'rgba(5,18,31,.92)',
-        color: '#effcff',
-        boxShadow: '0 16px 50px rgba(0,0,0,.4),0 0 28px rgba(44,231,243,.12)',
-        cursor: 'pointer',
-        font: '800 12px/1 system-ui,sans-serif',
-        letterSpacing: '.04em'
-      });
-      document.body.appendChild(button);
-    }
-    const label = root.lang === 'en' ? 'Live OS — FormatX command' : 'Live OS — FormatX parancs';
-    button.setAttribute('aria-label', label);
-    button.title = label + ' · Ctrl/⌘ K';
-    if (button.dataset.fxLiveOsBootstrapR642 === 'ready') return button;
-    button.dataset.fxLiveOsBootstrapR642 = 'ready';
-    button.addEventListener('click', () => {
-      if (root.dataset.fxLiveOsLoader === 'v1') return;
-      start();
-      let attempts = 0;
-      const timer = setInterval(() => {
-        attempts += 1;
-        if (root.dataset.fxLiveOsLoader === 'v1') {
-          clearInterval(timer);
-          button.click();
-        } else if (attempts >= 80) clearInterval(timer);
-      }, 25);
-    });
-    root.dataset.fxLiveOsBootstrapR642 = 'visible-lightweight-launcher-heavy-runtime-on-demand';
-    return button;
+  let liveOsRequestTimer = 0;
+
+  function requestLiveOsRuntime(event) {
+    const target = event?.target instanceof Element
+      ? event.target.closest('[data-fx-live-os-launcher]')
+      : null;
+    if (event && !(target instanceof HTMLElement)) return;
+    if (target?.dataset.fxLiveOsRuntimeBoundR643 === 'true') return;
+    if (event) event.preventDefault();
+
+    start();
+    clearInterval(liveOsRequestTimer);
+    let attempts = 0;
+    liveOsRequestTimer = window.setInterval(() => {
+      attempts += 1;
+      if (root.dataset.fxLiveOsLoader === 'v1') {
+        clearInterval(liveOsRequestTimer);
+        liveOsRequestTimer = 0;
+        dispatchEvent(new CustomEvent('formatx:open-live-os'));
+      } else if (attempts >= 120) {
+        clearInterval(liveOsRequestTimer);
+        liveOsRequestTimer = 0;
+        root.dataset.fxLiveOsBootstrapR643 = 'runtime-timeout';
+      }
+    }, 25);
+    root.dataset.fxLiveOsBootstrapR643 = 'existing-hero-cta-heavy-runtime-on-demand';
+  }
+
+  function onLiveOsShortcut(event) {
+    if (!((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k')) return;
+    if (root.dataset.fxLiveOsLoader === 'v1') return;
+    event.preventDefault();
+    requestLiveOsRuntime();
   }
 
   // Browser-generated scroll events are not explicit intent and never activate
@@ -118,12 +106,19 @@
   // user signals, while CSS geometry stays immutable throughout the session.
   root.dataset.fxContentRuntimeR241 = 'armed-r497-user-intent';
   root.dataset.fxDeferredVisualStylesR300 = 'production-css-owned-r497';
-  ensureLiveOsBootstrap();
+  root.dataset.fxLiveOsBootstrapR643 = 'hero-cta-no-fixed-overlay';
   root.dataset.fxFirstFrameStabilityR283 = 'immutable-css-r497';
   for (const [type, options] of listeners) addEventListener(type, onIntent, options);
+  document.addEventListener('click', requestLiveOsRuntime);
+  addEventListener('keydown', onLiveOsShortcut);
 
   // Deep links and the explicit immersive action are deliberate navigation
   // intent, so enhancement scripts may mount without touching stylesheet media.
   addEventListener('formatx:immersiveactivate', start, { passive: true });
+  addEventListener('pagehide', () => {
+    clearInterval(liveOsRequestTimer);
+    document.removeEventListener('click', requestLiveOsRuntime);
+    removeEventListener('keydown', onLiveOsShortcut);
+  }, { once: true });
   if (location.hash && location.hash !== '#top' && location.hash !== '#hero') start();
 }());

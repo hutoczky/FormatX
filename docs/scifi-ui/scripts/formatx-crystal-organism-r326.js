@@ -893,8 +893,11 @@
         const burstDelay=renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
-        const sweepDelay=renderAverage>34?Math.min(520,Math.max(100,renderAverage*3.8)):0;
+        const sweepDelay=mobile
+          ? (renderAverage>34?Math.min(520,Math.max(100,renderAverage*3.8)):0)
+          : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0);
         root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
+        root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
         queueFrame(sweepDelay);
       }else settleAfterBurst();
     }
