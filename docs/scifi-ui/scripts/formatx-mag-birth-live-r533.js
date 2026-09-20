@@ -11,7 +11,7 @@
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
-  const DURATION = LOW_POWER ? 3000 : MOBILE ? 3600 : 5200;
+  const DURATION = MOBILE ? 3600 : 5200;
   const EXIT_MS = 360;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
 
@@ -498,13 +498,8 @@
   }
 
   function queueRender() {
-    if(finished||raf||frameTimer)return;
-    if(LOW_POWER){
-      frameTimer=window.setTimeout(()=>{
-        frameTimer=0;
-        if(!finished)raf=requestAnimationFrame(render);
-      },72);
-    }else raf=requestAnimationFrame(render);
+    if(finished||raf)return;
+    raf=requestAnimationFrame(render);
   }
 
   function render(now) {
@@ -545,7 +540,7 @@
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthCapabilityR620=LOW_POWER?'mobile-constrained-cinematic':'full-cinematic';
-    ROOT.dataset.fxMagBirthSchedulerR621=LOW_POWER?'paced-72ms-plus-css-timeline':'native-raf-plus-css-timeline';
+    ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
     phaseChangedAt=0;
     ROOT.dataset.fxMagBirthPhase='0';

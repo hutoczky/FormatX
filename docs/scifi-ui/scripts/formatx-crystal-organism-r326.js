@@ -290,7 +290,7 @@
 
     const options = {
       alpha:true,
-      antialias:true,
+      antialias:!constrainedMobile,
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
@@ -363,7 +363,7 @@
         gl_Position=vec4(projected,world.z*.13,1.0);
       }`;
 
-    const fragmentSource = `${versionLine}precision highp float;
+    const fullFragmentSource = `${versionLine}precision highp float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
       ${fragmentIn} vec3 vNormal;
@@ -503,6 +503,59 @@
         ${outputName}=vec4(filmic(glass*${optics.outerExposure}),clamp(alpha,.34,.84));
       }`;
 
+    /* R622 constrained-mobile material: same biomechanical identity with a
+       cheaper fragment path on low-core / low-memory phones. */
+    const constrainedFragmentSource = `${versionLine}precision highp float;
+      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
+      uniform vec2 uPointer;
+      ${fragmentIn} vec3 vNormal;
+      ${fragmentIn} vec3 vLocal;
+      ${fragmentIn} vec2 vUv;
+      ${fragmentIn} vec3 vBary;
+      ${fragmentIn} float vFacet;
+      ${fragmentIn} float vMorph;
+      ${webgl2 ? 'out vec4 outColor;' : ''}
+      float sat(float v){return clamp(v,0.,1.);}
+      vec3 filmic(vec3 c){return 1.0-exp(-max(c,vec3(0.)));}
+      void main(){
+        vec3 n=normalize(vNormal);
+        vec3 view=normalize(vec3(-vLocal.xy,2.85-vLocal.z));
+        vec3 key=normalize(vec3(-.42,.72,.55));
+        float ndl=max(dot(n,key),0.);
+        float fresnel=pow(1.0-sat(abs(dot(n,view))),1.55);
+        float spec=pow(max(dot(n,normalize(key+view)),0.),24.0);
+        vec2 heartLocal=vec2(vLocal.x,vLocal.y)-vec2(uPointer.x*.06,uPointer.y*.05);
+        float radial=length(heartLocal);
+        float angle=atan(heartLocal.y,heartLocal.x);
+        float heart=pow(sat(1.0-radial/.40),3.0);
+        float nucleus=pow(sat(1.0-radial/.13),4.2);
+        float ring=1.0-smoothstep(.012,.034,abs(radial-.20));
+        float dnaA=pow(.5+.5*cos(angle-vLocal.y*7.2-uTime*.045),16.0);
+        float dnaB=pow(.5+.5*cos(angle-vLocal.y*7.2-uTime*.045-3.14159265),16.0);
+        float dna=(dnaA+dnaB)*(.32+.68*fresnel);
+        float seam=pow(.5+.5*cos(vUv.x*25.1327+vUv.y*1.1),20.0)*(1.0-vMorph*.72);
+        float pulse=0.0;
+        if(uSurfacePulse>=0.0){
+          float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
+          float head=mix(-.18,1.18,sat(uSurfacePulse));
+          pulse=exp(-pow((coordinate-head)/.065,2.0))*(.35+.65*fresnel);
+        }
+        float energy=sat(.45+uEnergy*.72);
+        vec3 cyan=vec3(.025,1.12,1.82);
+        vec3 violet=vec3(.15,.27,.54);
+        vec3 ice=vec3(1.02,1.52,2.02);
+        vec3 metal=vec3(.016,.055,.095);
+        vec3 c=metal*(.76+ndl*.72);
+        c+=cyan*fresnel*(.82+.72*energy);
+        c+=(cyan*.70+violet*.36)*dna*(.28+.50*energy);
+        c+=ice*(heart*.52+nucleus*2.25+ring*.62+spec*1.18);
+        c+=ice*seam*.24;
+        c+=(ice*1.10+cyan*.72)*pulse;
+        float alpha=.38+.22*ndl+.30*fresnel+nucleus*.28+heart*.12+dna*.025+pulse*.10;
+        ${outputName}=vec4(filmic(c*2.20),clamp(alpha,.34,.86));
+      }`;
+    const fragmentSource = constrainedMobile ? constrainedFragmentSource : fullFragmentSource;
+
     let pendingProgram;
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
     catch(error){
@@ -591,9 +644,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:constrainedMobile?1:mobile?1.25:constrained?1.15:1.65;
+      const cap=auditMode?1:constrainedMobile?.88:mobile?1.25:constrained?1.15:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:constrainedMobile?280000:mobile?460000:constrained?520000:1150000;
+      const budget=auditMode?390000:constrainedMobile?190000:mobile?460000:constrained?520000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
