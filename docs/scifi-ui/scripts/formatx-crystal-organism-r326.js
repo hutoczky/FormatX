@@ -9,7 +9,7 @@
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   const IDLE_ENERGY = mobile ? .50 : .43;
-  const SURFACE_PULSE_MS = mobile ? 820 : 1160;
+  const SURFACE_PULSE_MS = 1160;
   const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const optics = mobile ? Object.freeze({
