@@ -14,7 +14,7 @@ const REFERENCE_MODE_BOOT_SCRIPT = '<script defer fetchpriority="high" data-fx-r
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine), (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: none)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260907-r608-source-first-paint-parity">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame">';
 const P0_FIRST_PAINT_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
-const INTRO_P0_PRELOAD = '</scifi-ui/styles/formatx-intro-p0-r575.css?v=20260907-r635-three-phase-absolute-reveal>; rel=preload; as=style';
+const INTRO_P0_PRELOAD = '</scifi-ui/styles/formatx-intro-p0-r575.css?v=20260920-r856-first-paint-covered-rules>; rel=preload; as=style';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const MOBILE_FIRST_PAINT_PRELOAD = `</scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260827-r407-static-parity>; rel=preload; as=style; media="${MOBILE_MEDIA}"`;
 // These shared styles block first paint in both layouts. Discover them with the

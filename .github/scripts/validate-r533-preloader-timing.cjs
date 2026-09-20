@@ -56,6 +56,11 @@ async function verify(browser, spec) {
       if (evidence.activeContract) return;
       const overlay = document.getElementById('formatx-event-horizon'); if (!(overlay instanceof HTMLElement) || overlay.dataset.fxPreloaderR531 !== 'active') return;
       const main = document.querySelector('main'); const hero = document.getElementById('hero'); const s = getComputedStyle(overlay);
+      const word = overlay.querySelector('.fx-intro-word');
+      if (word) {
+        const textStyle = getComputedStyle(word);
+        evidence.introTextPaint = { transitionDuration: textStyle.transitionDuration, animationName: textStyle.animationName, filter: textStyle.filter };
+      }
       evidence.activeContract = { capturedAt: now, animationName: s.animationName, animationDuration: s.animationDuration, animationFillMode: s.animationFillMode, mainVisibility: main ? getComputedStyle(main).visibility : '', mainDisplay: main ? getComputedStyle(main).display : '', heroVisibility: hero ? getComputedStyle(hero).visibility : '', heroDisplay: hero ? getComputedStyle(hero).display : '', heroHeight: hero?.getBoundingClientRect().height || 0 };
       mark('preloader-active');
     };
@@ -107,6 +112,13 @@ async function verify(browser, spec) {
       assert.ok(Number.isFinite(completeAt)); assert.ok(Number.isFinite(state.bootAt)); assert.equal(state.timing,spec.timing); assert.equal(state.clock,'navigation-script-boot-single-deadline'); assert.equal(state.preloader,'done'); assert.equal(state.overlayHidden,true); assert.equal(state.heroVisible,true); assert.equal(state.pauseCount,0); assert.ok(state.overflow<=2); assert.ok(!/runtime-error|promise-error/.test(source));
       if (source==='late-boot-skip') { assert.equal(state.lateSkip,true); assert.ok(state.bootAt>=spec.max-20); assert.ok(duration>=0&&duration<=180); assert.equal(state.overlayDisplay,'none'); }
       else { assert.equal(state.lateSkip,false); assert.ok(active); assert.match(String(active.animationName),/fx-r533-preloader-visual-bound/); const animationMs=cssTimeToMs(active.animationDuration); assert.ok(Number.isFinite(animationMs)&&Math.abs(animationMs-spec.visualMax)<=20,`${spec.name}: wrong compositor bound ${active.animationDuration}`); assert.match(String(active.animationFillMode),/both/); assert.notEqual(active.mainVisibility,'hidden'); assert.notEqual(active.mainDisplay,'none'); assert.notEqual(active.heroVisibility,'hidden'); assert.notEqual(active.heroDisplay,'none'); assert.ok(active.heroHeight>0); assert.ok(duration>=spec.min,`${spec.name}: intro released early ${duration}ms`); assert.ok(duration<=spec.max,`${spec.name}: logical release exceeded product maximum ${duration}ms`); if(Number.isFinite(state.evidence.magReadyAt)) assert.ok(state.evidence.magReadyAt<=completeAt,`${spec.name}: MAG started after intro release`); }
+      if (!spec.mobile && source !== 'late-boot-skip') {
+        const textPaint = state.evidence.introTextPaint;
+        assert.ok(textPaint, 'desktop: capture the visible intro text before deferred control CSS');
+        assert.ok(textPaint.transitionDuration.split(',').every(value => cssTimeToMs(value) === 0), `desktop: intro text must paint immediately, not transition from invisible ink (${textPaint.transitionDuration})`);
+        assert.equal(textPaint.animationName, 'none', 'desktop: intro text has no independent animation owner');
+        assert.equal(textPaint.filter, 'none', 'desktop: intro text has no startup raster filter');
+      }
       assert.equal(errors.length,0,`${spec.name}: browser errors ${errors.join(' | ')}`);
     } catch (error) {
       error.fxEvidence = { spec, state, errors, computed: { completeAt, source, duration } };

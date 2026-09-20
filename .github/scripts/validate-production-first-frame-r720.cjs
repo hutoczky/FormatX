@@ -22,7 +22,7 @@ const { pathToFileURL } = require('node:url');
       // Exercise the real homepage rather than the gateway's minimal fixture:
       // a preload with an obsolete query string creates a second fetch.
       const link = response.headers.get('Link') || '';
-      for (const file of ['formatx-critical-shell-v56.css', 'formatx-quality-r461.css', 'formatx-first-paint-r206.css']) {
+      for (const file of ['formatx-critical-shell-v56.css', 'formatx-quality-r461.css', 'formatx-first-paint-r206.css', 'formatx-intro-p0-r575.css']) {
         const path = `/scifi-ui/styles/${file}`;
         const preloads = link.split(/,\s*(?=<)/).filter(value => value.includes(path));
         assert.equal(preloads.length, 1, `${name}: one shared first-paint preload for ${file}`);

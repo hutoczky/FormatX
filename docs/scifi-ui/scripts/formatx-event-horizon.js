@@ -12,7 +12,7 @@ const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27
 const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const OVERLAY_ID='formatx-event-horizon';
 const AUDIO_URL='./assets/audio/formatx-audio-test.wav?v=20260728-professional-score-v6';
-const P0_FX_STYLE='./styles/formatx-intro-p0-r575.css?v=20260907-r635-three-phase-absolute-reveal';
+const P0_FX_STYLE='./styles/formatx-intro-p0-r575.css?v=20260920-r856-first-paint-covered-rules';
 const PRELOADER_MIN_MS=REDUCED?180:(MOBILE?1180:1350);
 const PRELOADER_MAX_MS=REDUCED?520:(MOBILE?1450:1650);
 const PRELOADER_TICK_MS=80;

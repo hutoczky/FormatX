@@ -116,55 +116,8 @@
   }
 }
 
-/* R791 — the event horizon is the only visible surface during the bounded intro.
-   Keep all settled document boxes alive, but stop hidden-behind-cover effects from
-   creating animation/compositor layers. The durable startup-quiet class is removed
-   only after canonical release has committed stable frames, preventing the release
-   deadline and the first hero LCP from competing with a full-page effect burst. */
-@media (prefers-reduced-motion: no-preference) {
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon),
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *,
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *::before,
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture > :not(#formatx-event-horizon) *::after {
-    animation: none !important;
-    transition: none !important;
-    filter: none !important;
-    -webkit-filter: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    mix-blend-mode: normal !important;
-    will-change: auto !important;
-  }
-
-  html:is(.fx-intro-pending,.fx-intro-running,.fx-intro-managed,.fx-startup-paint-quiet-r791) body.living-architecture::before {
-    content: none !important;
-    background: none !important;
-    animation: none !important;
-    filter: none !important;
-    box-shadow: none !important;
-  }
-
-  /* R794 — keep the overlay's own empty/paused timing animation intact because it
-     is the product timing contract measured by R533. Only descendants and their
-     pseudo-elements are flattened to static paint, so text/status remain visible
-     without shadow/filter/blend/transition compositor layers. */
-  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] *,
-  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] *::before,
-  #formatx-event-horizon.fx-intro-overlay[data-fx-preloader-r531="active"] *::after {
-    animation: none !important;
-    transition: none !important;
-    filter: none !important;
-    -webkit-filter: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    mix-blend-mode: normal !important;
-    will-change: auto !important;
-  }
-}
+/* R856: covered-startup and intro paint rules live in the render-blocking
+   formatx-intro-p0-r575.css. This late control sheet owns geometry only. */
 
 /* R817/R827 — seamless-v7 is armed only after trusted physical scroll intent.
    Replace lazy intrinsic estimates with real section boxes before bridge snapshot.
