@@ -465,6 +465,7 @@
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const anchor = event.target instanceof Element ? event.target.closest('a[href^="#"]') : null;
     if (!(anchor instanceof HTMLAnchorElement)) return;
+    if (anchor.closest('#main-nav') && root.dataset.fxControlOwnerR268) return;
     const hash = anchor.getAttribute('href');
     if (!hash || hash === '#') return;
     let target = null;

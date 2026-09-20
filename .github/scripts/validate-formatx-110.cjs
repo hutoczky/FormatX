@@ -31,7 +31,7 @@ assert.ok(webgl.includes("this.maxCount = mobile ? 1200 : 2400;"), "WebGL partic
 assert.ok(webgl.includes("} else if (false && fps > 58 && this.tier < 3) {"), "WebGL upward particle scaling is enabled");
 assert.ok(webgpu.includes("this.maxCount = reduced ? 8000 : mobile ? 18000 : 32000;"), "WebGPU particle cap regressed");
 assert.ok(webgpu.includes("} else if (false && fps > 108 && this.tier < 3) {"), "WebGPU upward particle scaling is enabled");
-assert.ok(loader.includes("formatx-premium-finish.js?v=20260805-motion-gate-3"), "premium finish runtime is missing");
+assert.ok(loader.includes("formatx-premium-finish.js?v=20260920-r570-main-nav-delegated"), "premium finish runtime is missing");
 assert.ok(premium.includes("a[href^=\"#\"]"), "root-safe hash navigation is missing");
 assert.ok(premium.includes("root.dataset.fxGpuCapability = rendererCapability()"), "WebGL2 capability gate is missing");
 assert.ok(premium.includes("canvas2d-living-core-v2"), "resilient Canvas2D living core is missing");

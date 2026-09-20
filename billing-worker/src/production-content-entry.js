@@ -71,7 +71,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/living-architecture.js', {
     marker: 'living-to-igloo',
-    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20260903-r502-mobile-box-model']],
+    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20260920-r570-navigation-authority']],
   }],
   ['/scifi-ui/scripts/igloo-parity.js', {
     marker: 'igloo-to-site-stability',
@@ -161,7 +161,7 @@ function cacheBustR502Runtime(html) {
     .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260903-r507-mag-single-clock-owner')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260902-r497-no-late-layout')
     .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock')
-    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260903-r502-mobile-box-model')
+    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260920-r570-navigation-authority')
     .replace(/platform-status\.js\?v=[^"']+/g, 'platform-status.js?v=20260902-r500-canonical-hero-state')
     .replace(/platform-status\.css\?v=[^"']+/g, 'platform-status.css?v=20260902-r500-canonical-hero-state');
 }
