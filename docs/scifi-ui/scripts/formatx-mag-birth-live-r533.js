@@ -7,8 +7,9 @@
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const AUTOMATION = navigator.webdriver === true;
-  const DURATION = 6000;
-  const EXIT_MS = 740;
+  const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
+  const DURATION = 2400;
+  const EXIT_MS = 360;
 
   let seen = false;
   try { seen = sessionStorage.getItem(KEY) === '1'; } catch (_) {}
@@ -117,10 +118,12 @@
   let coreApi = null;
   let lastTargetSync = 0;
   let lastMorphSync = 0;
+  let lastNativeSync = 0;
+  let lastParticleDraw = 0;
   let ignitionDone = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
-  const PHASE_HOLD_MS = [720, 440, 220, 190, 0];
+  const PHASE_HOLD_MS = [300, 250, 210, 180, 0];
 
   function clamp(value,min,max) { return Math.max(min,Math.min(max,value)); }
   function easeOutCubic(t) { return 1 - Math.pow(1-t,3); }
@@ -225,9 +228,8 @@
       try {
         coreApi.setMorph?.(1,'r533-ignition');
         coreApi.setShape?.('crystal','r533-ignition');
-        coreApi.surfacePulse?.('r533-first-impulse');
         coreApi.rotateBy?.(.035,.055,'r533-first-impulse');
-        coreApi.requestRender?.(6);
+        coreApi.requestRender?.(2);
       } catch (_) {}
     }
   }
@@ -247,7 +249,7 @@
 
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
-    const dpr=Math.min(2,devicePixelRatio||1);
+    const dpr=Math.min(MOBILE?1.1:1.5,devicePixelRatio||1);
     const w=innerWidth,h=innerHeight;
     canvas.width=Math.max(1,Math.floor(w*dpr));
     canvas.height=Math.max(1,Math.floor(h*dpr));
@@ -301,7 +303,7 @@
     try {
       coreApi?.setMorph?.(1,'r533-final-handoff');
       coreApi?.setShape?.('crystal','r533-final-handoff');
-      coreApi?.requestRender?.(4);
+      coreApi?.requestRender?.(2);
     } catch (_) {}
     setStageOpacity(1);
 
@@ -329,16 +331,27 @@
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
     const phase=phaseFor(r,now);
-    overlay.dataset.phase=phase;
-    ROOT.dataset.fxMagBirthPhase=phase;
+    if(overlay.dataset.phase!==phase)overlay.dataset.phase=phase;
+    if(ROOT.dataset.fxMagBirthPhase!==phase)ROOT.dataset.fxMagBirthPhase=phase;
     syncTarget(false);
-    syncNativeCore(r,now);
+    const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
+    const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
+    if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
+      lastNativeSync=now;
+      syncNativeCore(r,now);
+    }
 
     const value=Math.min(100,Math.round(easeOutCubic(r)*100));
-    percent.value=String(value).padStart(3,'0');
-    progress.value=value;
-    status.textContent=statusFor(r);
-    drawParticles(r,now);
+    const valueText=String(value).padStart(3,'0');
+    if(percent.value!==valueText)percent.value=valueText;
+    if(progress.value!==value)progress.value=value;
+    const nextStatus=statusFor(r);
+    if(status.textContent!==nextStatus)status.textContent=nextStatus;
+    const particleCadence=MOBILE?34:24;
+    if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
+      lastParticleDraw=now;
+      drawParticles(r,now);
+    }
 
     if(r<1 || visiblePhase<4)raf=requestAnimationFrame(render);
     else finish('complete');

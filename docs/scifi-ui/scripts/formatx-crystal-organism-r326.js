@@ -431,7 +431,7 @@
     };
     const initialShape=root.dataset.fxCoreShapeR337==='sphere'?'sphere':'crystal';
     let disposed=false,contextLost=false,visible=true,paused=false;
-    let raf=0,burstFrames=0,width=0,height=0,aspect=1;
+    let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=false;
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
     let morph=initialShape==='sphere'?1:0,targetMorph=morph;
@@ -464,11 +464,23 @@
     }
 
     function blocked(){return disposed||contextLost||document.hidden||!visible||paused||root.dataset.fxReferenceMotionPaused==='true';}
+    function queueFrame(delay=0){
+      if(blocked()||raf)return;
+      if(delay<=0){
+        if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}
+        last=performance.now();raf=requestAnimationFrame(frame);return;
+      }
+      if(surfaceFrameTimer)return;
+      surfaceFrameTimer=later(()=>{
+        surfaceFrameTimer=0;
+        if(!blocked()&&!raf){last=performance.now();raf=requestAnimationFrame(frame);}
+      },delay);
+    }
     function schedule(frames=1){
       if(blocked())return;
       const frameCap=mobile?8:24;
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
-      if(!raf){last=performance.now();raf=requestAnimationFrame(frame);}
+      queueFrame(0);
     }
     function boost(value=.84,frames=8){
       targetEnergy=Math.max(targetEnergy,value);
@@ -494,7 +506,8 @@
       if(/mag-button|api|keyboard|core-tap/.test(source))shapeLockUntil=performance.now()+7600;
       if(reduced.matches)morph=targetMorph;
       publishShape(source);
-      boost(changed?1.04:.68,changed?8:3);
+      const cinematicBirth=/^r533-/.test(source);
+      boost(changed?1.04:.68,cinematicBirth?1:(changed?8:3));
       if(changed&&announce)dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{
         shape:shapeName(next),source,revision:'r413',renderer:VERSION,geometry:'closed-3d-volume'
       }}));
@@ -542,6 +555,7 @@
       later(()=>{
         if(pulseId!==surfacePulseCount)return;
         surfacePulseStart=-Infinity;
+        if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}
         root.dataset.fxCoreSurfacePulseR454='idle';
         schedule(1);
         dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
@@ -557,8 +571,11 @@
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
         return;
       }
+      // R588: the first autonomous sweep is a post-interactive warm-up.
+      // The CSS heartbeat and direct interaction remain immediate, while the
+      // expensive native sweep no longer competes with first-load interactivity.
       const delay=surfacePulseCount===0
-        ? (mobile?3400:3000)
+        ? 13000
         : (mobile?5400:4900)+(surfacePulseCount%3)*520;
       root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';
       surfacePulseTimer=setTimeout(()=>{
@@ -619,7 +636,7 @@
          expensive fragment work per interaction frame. */
       gl.depthMask(false);
       gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
-      if(!mobile){
+      if(!mobile&&!slowRenderer){
         gl.cullFace(gl.FRONT);
         gl.uniform1f(uniforms.uLayer,0);
         gl.drawArrays(gl.TRIANGLES,0,geometry.count);
@@ -634,6 +651,12 @@
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
+      if(!mobile&&renderAverage>42){
+        slowRenderer=true;
+        root.dataset.fxCoreAdaptiveOpticsR588='two-pass-slow-renderer';
+      }else if(!slowRenderer){
+        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'two-pass-mobile':'three-pass-capable';
+      }
       root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
       root.dataset.fxCoreFrameMs=dt.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,renderAverage))));
@@ -662,8 +685,14 @@
       raf=0;if(blocked())return;
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
-      if(burstFrames>0||surfacePulseActive)raf=requestAnimationFrame(frame);
-      else settleAfterBurst();
+      if(burstFrames>0){
+        const burstDelay=renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
+        queueFrame(burstDelay);
+      }else if(surfacePulseActive){
+        const sweepDelay=renderAverage>34?Math.min(520,Math.max(100,renderAverage*3.8)):0;
+        root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
+        queueFrame(sweepDelay);
+      }else settleAfterBurst();
     }
 
     function point(event){
