@@ -62,6 +62,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js
           node --check docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js
           node --check .github/scripts/validate-r533-r536-handoff.cjs
+          node --check .github/scripts/capture-mag-intro-r656.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
