@@ -73,10 +73,12 @@
   overlay.dataset.fxIntroR647 = 'shot-match-biotic-genesis';
   overlay.dataset.fxIntroR648 = 'exact-10s-runtime';
   overlay.dataset.fxIntroR649 = 'native-canvas-reference-rotoscope';
+  overlay.dataset.fxIntroR650 = 'three-genesis-dna-cellular-living';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
   ROOT.dataset.fxMagBirthArtR646 = 'deep-genome-field-dark-organic-embryo-optic-iris-neural-bloom-native-handoff';
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
   ROOT.dataset.fxMagBirthArtR649 = 'reference-geometry-24fps-native-canvas-no-video';
+  ROOT.dataset.fxMagBirthArtR650 = 'threejs-dna-cellular-living-architecture-one-continuous-mag';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -287,6 +289,8 @@
 
   let ctx = null;
   let filmRenderer = null;
+  let filmRendererPromise = null;
+  let filmRendererFallbackStarted = false;
   let particles = [];
   let raf = 0;
   let startedAt = 0;
@@ -493,17 +497,13 @@
     });
   }
 
-  function sizeCanvas() {
-    if (!(canvas instanceof HTMLCanvasElement)) return;
-    syncTarget(true);
-    if (window.FormatXMagReferenceFilmR649?.attach) {
-      if (!filmRenderer) {
-        filmRenderer = window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
-        ROOT.dataset.fxMagBirthRendererR649 = filmRenderer ? 'native-canvas-reference-film' : 'fallback-particles';
-      } else {
-        filmRenderer.resize?.();
-      }
-      return;
+  function startR649Fallback(){
+    if(filmRendererFallbackStarted || filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
+    filmRendererFallbackStarted=true;
+    if(window.FormatXMagReferenceFilmR649?.attach){
+      filmRenderer=window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
+      ROOT.dataset.fxMagBirthRendererR649=filmRenderer?'native-canvas-reference-film':'fallback-particles';
+      if(filmRenderer)return;
     }
     const dpr=Math.min(MOBILE?1:1.5,devicePixelRatio||1);
     const w=innerWidth,h=innerHeight;
@@ -516,8 +516,48 @@
     seedParticles(w,h);
   }
 
+  function sizeCanvas() {
+    if (!(canvas instanceof HTMLCanvasElement)) return;
+    syncTarget(true);
+    if(filmRenderer){
+      filmRenderer.resize?.();
+      return;
+    }
+    if(window.FormatXMagGenesisThreeR650?.attach){
+      if(!filmRendererPromise){
+        ROOT.dataset.fxMagBirthRendererR650='loading-threejs';
+        filmRendererPromise=Promise.resolve(
+          window.FormatXMagGenesisThreeR650.attach(canvas,()=>({x:targetX,y:targetY}))
+        ).then(renderer=>{
+          filmRendererPromise=null;
+          if(finished){
+            renderer?.destroy?.();
+            return null;
+          }
+          if(renderer){
+            filmRenderer=renderer;
+            ROOT.dataset.fxMagBirthRendererR650='threejs-active';
+            renderer.resize?.();
+            return renderer;
+          }
+          ROOT.dataset.fxMagBirthRendererR650='threejs-failed-r649-fallback';
+          startR649Fallback();
+          return null;
+        }).catch(error=>{
+          filmRendererPromise=null;
+          ROOT.dataset.fxMagBirthRendererR650='threejs-error-r649-fallback';
+          console.error('FormatX R650 intro attach failed:',error);
+          startR649Fallback();
+        });
+      }
+      return;
+    }
+    startR649Fallback();
+  }
+
   function drawParticles(r,time) {
     if(filmRenderer){ filmRenderer.draw?.(r,time); return; }
+    if(filmRendererPromise)return;
     if(!ctx)return;
     const w=innerWidth,h=innerHeight;
     ctx.clearRect(0,0,w,h);
@@ -580,6 +620,8 @@
     // R607: removal must not depend on one more animation frame. Native WebGL
     // startup can temporarily starve rAF on software/slow GPU paths; the film
     // still has to fail open deterministically once finish() has been reached.
+    try{ filmRenderer?.destroy?.(); }catch(_){}
+    filmRenderer=null;
     overlay.classList.add('is-leaving');
     exitTimer=window.setTimeout(()=>{
       releaseStageStyle();
@@ -624,7 +666,7 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const particleCadence=filmRenderer?42:(MOBILE?84:48);
+    const particleCadence=filmRenderer?42:(filmRendererPromise?84:(MOBILE?84:48));
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
@@ -669,6 +711,7 @@
     sizeCanvas();
     ROOT.dataset.fxMagBirthRenderClockR631='native-reference-film-24fps-all-devices';
     ROOT.dataset.fxMagBirthRenderClockR649='deterministic-24fps-canvas-all-devices';
+    ROOT.dataset.fxMagBirthRenderClockR650='threejs-24fps-primary-r649-fallback';
 
     // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
     // against a renderer/driver path that starves the animation clock.
