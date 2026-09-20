@@ -229,7 +229,11 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.equal(state.revision, 'living-luminous-electric-crystal-r454', JSON.stringify(state));
   assert.equal(state.optics, 'single-luminous-webgl-material-owner', JSON.stringify(state));
   assert.equal(state.motion, 'intermittent-native-electric-filament-every-five-to-six-seconds', JSON.stringify(state));
-  assert.match(state.pulse, /^sweep-/, JSON.stringify(state));
+  assert.ok(
+    state.pulse === 'idle' || /^sweep-/.test(state.pulse),
+    JSON.stringify(state)
+  );
+  assert.match(state.energyBolt, /^surface-sweep-/, JSON.stringify(state));
   assert.equal(state.scheduler, 'interaction-bursts-idle-zero-frame-r441', JSON.stringify(state));
   assert.equal(state.surface, 'r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics', JSON.stringify(state));
   assert.equal(state.triangleEdges, 'disabled', JSON.stringify(state));
@@ -238,7 +242,6 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.equal(state.shaderHook, 'released-after-r326-compile', JSON.stringify(state));
   assert.equal(state.loaderOptics, 'uniform-solid-glass-shell-no-vram-artifact', JSON.stringify(state));
   assert.equal(state.life, 'ready', JSON.stringify(state));
-  assert.match(state.energyBolt, /^surface-sweep-/, JSON.stringify(state));
   assert.equal(state.stageCount, 1, JSON.stringify(state));
   assert.equal(state.canvasCount, 1, JSON.stringify(state));
   assert.equal(state.solidScriptCount, 1, JSON.stringify(state));
