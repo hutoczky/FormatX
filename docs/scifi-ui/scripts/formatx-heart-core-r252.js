@@ -51,6 +51,7 @@
     root.dataset.fxImmersive = 'active';
     root.dataset.fxCoreInteractionMode = 'active-r252';
     root.dataset.fxCoreInteractionSource = source;
+    root.dataset.fxCoreInteractionTarget = 'native-core-pulse';
 
     window.FormatXCoreMobileV69?.pulse?.({ phase: 'activate', source });
     dispatchEvent(new CustomEvent('formatx:coreinteraction', {
