@@ -9,7 +9,7 @@
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
 root.dataset.fxP0MotionSchedulerR490='armed-r618';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260920-r619-mobile-runtime-budget';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260920-r620-capability-runtime-budget';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
