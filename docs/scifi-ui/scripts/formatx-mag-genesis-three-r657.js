@@ -860,6 +860,8 @@
     }
   }
 
+  document.documentElement.dataset.fxMagBirthThreeR658='r658-csp-local-three-proof';
+
   window.FormatXMagGenesisThreeR657={
     attach,
     revision:'r657-reference-geometry-three-genesis-dna-cellular-living-architecture'
