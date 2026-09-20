@@ -1545,6 +1545,7 @@
   document.documentElement.dataset.fxMagBirthProofR1204='isolated-r1200-r1151-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1206='fast-six-frame-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1211='fast-six-frame-r1210-reference-proof';
+  document.documentElement.dataset.fxMagBirthProofR1231='fast-six-frame-r1230-reference-proof';
 
   window.FormatXMagGenesisThreeR1230={
     attach,
