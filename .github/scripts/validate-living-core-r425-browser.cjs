@@ -54,7 +54,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const root = document.documentElement;
     const glyph = document.querySelector('.fx-mini-mag-glyph-r459');
     const header = document.querySelector('.topbar > .fx-reference-mag-button');
-    return root.dataset.fxMagShapeSyncR476 === 'ready-r482'
+    return root.dataset.fxMagShapeSyncR476 === 'ready-r528'
       && root.dataset.fxMiniMagShapeSyncR476?.startsWith('ready-')
       && glyph instanceof HTMLElement
       && header instanceof HTMLElement
