@@ -67,6 +67,7 @@
   const overlay = document.createElement('section');
   overlay.className = 'fx-mag-birth-r533';
   overlay.dataset.phase = '0';
+  overlay.dataset.performance = LOW_POWER ? 'constrained' : 'full';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -131,7 +132,8 @@
   function buildDna() {
     if (!(dna instanceof SVGElement) || !(dnaBridges instanceof SVGGElement) || !(dnaNodes instanceof SVGGElement)) return;
     const NS='http://www.w3.org/2000/svg';
-    const samples=LOW_POWER?10:MOBILE?14:25;
+    const samples=LOW_POWER?8:MOBILE?12:25;
+    const buildSvg=!MOBILE;
     const left=[];
     const right=[];
     const svgBridgeFragment=document.createDocumentFragment();
@@ -144,7 +146,7 @@
       const xB=160-wave*76;
       left.push([xA,y]);
       right.push([xB,y]);
-      if(i>0&&i<samples-1){
+      if(buildSvg&&i>0&&i<samples-1){
         const bridge=document.createElementNS(NS,'line');
         bridge.setAttribute('x1',xA.toFixed(2));
         bridge.setAttribute('y1',y.toFixed(2));
@@ -155,7 +157,7 @@
         bridge.style.setProperty('--fxb-dna-depth',depth.toFixed(3));
         svgBridgeFragment.appendChild(bridge);
       }
-      if(i%2===0){
+      if(buildSvg&&i%2===0){
         for(const [x,side] of [[xA,'a'],[xB,'b']]){
           const node=document.createElementNS(NS,'circle');
           node.setAttribute('cx',x.toFixed(2));
@@ -171,8 +173,10 @@
     dnaBridges.replaceChildren(svgBridgeFragment);
     dnaNodes.replaceChildren(svgNodeFragment);
     const toPath=points=>points.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)).join(' ');
-    dna.querySelector('.fxb-dna-strand-a')?.setAttribute('d',toPath(left));
-    dna.querySelector('.fxb-dna-strand-b')?.setAttribute('d',toPath(right));
+    if(buildSvg){
+      dna.querySelector('.fxb-dna-strand-a')?.setAttribute('d',toPath(left));
+      dna.querySelector('.fxb-dna-strand-b')?.setAttribute('d',toPath(right));
+    }
     dnaStage?.style.setProperty('--fxb-dna-pairs',String(samples));
 
     if (dnaHelix instanceof HTMLElement) {
@@ -398,7 +402,7 @@
   }
 
   function seedParticles(w,h) {
-    const count=LOW_POWER?Math.max(12,Math.min(18,Math.round((w*h)/30000))):MOBILE?Math.max(16,Math.min(24,Math.round((w*h)/24000))):Math.max(48,Math.min(132,Math.round((w*h)/13500)));
+    const count=LOW_POWER?Math.max(8,Math.min(12,Math.round((w*h)/36000))):MOBILE?Math.max(14,Math.min(22,Math.round((w*h)/26000))):Math.max(48,Math.min(132,Math.round((w*h)/13500)));
     particles=Array.from({length:count},(_,i)=>{
       const edge=i%4;
       let x,y;
@@ -531,14 +535,14 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const particleCadence=LOW_POWER?170:MOBILE?120:48;
+    const particleCadence=LOW_POWER?240:MOBILE?130:48;
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
     }
 
     if(r<1 || visiblePhase<4){
-      queueRender();
+      queueRender(LOW_POWER?34:0);
       return;
     }
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
@@ -558,6 +562,7 @@
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthCapabilityR620=LOW_POWER?'mobile-constrained-cinematic':'full-cinematic';
+    ROOT.dataset.fxMagBirthBudgetR625=LOW_POWER?'single-css3d-dna-30fps-reduced-composite':'full-cinematic-budget';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
     phaseChangedAt=0;

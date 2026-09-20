@@ -852,3 +852,45 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   .fxb-particles{opacity:.72}
   .fxb-dna-pair3d{filter:none}
 }
+
+
+/* FormatX R625 constrained cinematic.
+   Same DNA → embryo → living MAG narrative, with a smaller compositing graph
+   only on capability-detected low-power mobile devices. */
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-grid,
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-axis,
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-scan,
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-halo-inner,
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-dna-depth-fog{
+  display:none!important;
+}
+.fx-mag-birth-r533[data-performance="constrained"]::after{
+  opacity:.045;
+  background-size:8px 8px;
+  mix-blend-mode:normal;
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-stars{
+  opacity:.27;
+  filter:none!important;
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-halo-outer{
+  box-shadow:0 0 54px rgba(77,197,255,.045),inset 0 0 32px rgba(118,89,255,.035);
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-embryo-membrane{
+  box-shadow:inset 0 0 24px rgba(111,235,255,.11),0 0 42px rgba(109,89,255,.07);
+  animation-duration:2.25s;
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-embryo-fluid{
+  filter:blur(4px);
+  animation-duration:3.2s;
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-embryo-nucleus{
+  box-shadow:0 0 16px rgba(174,249,255,.58),0 0 52px rgba(92,225,255,.24);
+  animation-duration:1.05s;
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-dna-rung3d{
+  box-shadow:0 0 5px rgba(157,240,255,.18);
+}
+.fx-mag-birth-r533[data-performance="constrained"] .fxb-dna-base3d{
+  border-color:rgba(235,254,255,.55);
+}
