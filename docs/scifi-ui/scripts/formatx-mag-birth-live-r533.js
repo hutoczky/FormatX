@@ -74,11 +74,13 @@
   overlay.dataset.fxIntroR648 = 'exact-10s-runtime';
   overlay.dataset.fxIntroR649 = 'native-canvas-reference-rotoscope';
   overlay.dataset.fxIntroR650 = 'three-genesis-dna-cellular-living';
+  overlay.dataset.fxIntroR651 = 'frame-matched-three-genesis';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
   ROOT.dataset.fxMagBirthArtR646 = 'deep-genome-field-dark-organic-embryo-optic-iris-neural-bloom-native-handoff';
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
   ROOT.dataset.fxMagBirthArtR649 = 'reference-geometry-24fps-native-canvas-no-video';
   ROOT.dataset.fxMagBirthArtR650 = 'threejs-dna-cellular-living-architecture-one-continuous-mag';
+  ROOT.dataset.fxMagBirthArtR651 = 'frame-matched-10s-dna-cellular-tentacle-flash-handoff';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -523,11 +525,11 @@
       filmRenderer.resize?.();
       return;
     }
-    if(window.FormatXMagGenesisThreeR650?.attach){
+    if(window.FormatXMagGenesisThreeR651?.attach){
       if(!filmRendererPromise){
-        ROOT.dataset.fxMagBirthRendererR650='loading-threejs';
+        ROOT.dataset.fxMagBirthRendererR651='loading-threejs';
         filmRendererPromise=Promise.resolve(
-          window.FormatXMagGenesisThreeR650.attach(canvas,()=>({x:targetX,y:targetY}))
+          window.FormatXMagGenesisThreeR651.attach(canvas,()=>({x:targetX,y:targetY}))
         ).then(renderer=>{
           filmRendererPromise=null;
           if(finished){
@@ -536,17 +538,17 @@
           }
           if(renderer){
             filmRenderer=renderer;
-            ROOT.dataset.fxMagBirthRendererR650='threejs-active';
+            ROOT.dataset.fxMagBirthRendererR651='threejs-active';
             renderer.resize?.();
             return renderer;
           }
-          ROOT.dataset.fxMagBirthRendererR650='threejs-failed-r649-fallback';
+          ROOT.dataset.fxMagBirthRendererR651='threejs-failed-r649-fallback';
           startR649Fallback();
           return null;
         }).catch(error=>{
           filmRendererPromise=null;
-          ROOT.dataset.fxMagBirthRendererR650='threejs-error-r649-fallback';
-          console.error('FormatX R650 intro attach failed:',error);
+          ROOT.dataset.fxMagBirthRendererR651='threejs-error-r649-fallback';
+          console.error('FormatX R651 intro attach failed:',error);
           startR649Fallback();
         });
       }
@@ -711,7 +713,7 @@
     sizeCanvas();
     ROOT.dataset.fxMagBirthRenderClockR631='native-reference-film-24fps-all-devices';
     ROOT.dataset.fxMagBirthRenderClockR649='deterministic-24fps-canvas-all-devices';
-    ROOT.dataset.fxMagBirthRenderClockR650='threejs-24fps-primary-r649-fallback';
+    ROOT.dataset.fxMagBirthRenderClockR650='r651-threejs-24fps-primary-r649-fallback';
 
     // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
     // against a renderer/driver path that starves the animation clock.
