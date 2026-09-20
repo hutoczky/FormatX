@@ -1,4 +1,5 @@
 name: P0 fast source loop
+# R1202 clean proof rerun after R1151 syntax fix
 
 on:
   push:
