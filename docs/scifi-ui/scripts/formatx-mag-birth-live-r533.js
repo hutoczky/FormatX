@@ -95,6 +95,7 @@
   overlay.dataset.fxIntroR674 = 'reference-proportion-three-genesis';
   overlay.dataset.fxIntroR675 = 'neural-fold-three-genesis';
   overlay.dataset.fxIntroR680 = 'reference-ratio-three-genesis';
+  overlay.dataset.fxIntroR681 = 'reference-locked-three-genesis';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
   ROOT.dataset.fxMagBirthArtR646 = 'deep-genome-field-dark-organic-embryo-optic-iris-neural-bloom-native-handoff';
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
@@ -118,6 +119,7 @@
   ROOT.dataset.fxMagBirthArtR674 = 'thick-rung-dna-large-dark-pod-brain-lobes-organic-tendrils-radial-burst';
   ROOT.dataset.fxMagBirthArtR675 = 'neural-fold-cell-surface-fluid-nine-tendrils-expanded-blue-iris';
   ROOT.dataset.fxMagBirthArtR680 = 'large-front-mag-brain-lobes-3d-veins-dense-dna-rungs-near-camera-pullback';
+  ROOT.dataset.fxMagBirthArtR681 = 'reference-locked-dna-brain-folds-cyan-iris-fluid-nine-tendrils';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -541,7 +543,7 @@
     filmRendererFallbackStarted=true;
     if(window.FormatXMagReferenceFilmR649?.attach){
       filmRenderer=window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
-      ROOT.dataset.fxMagBirthRendererR680=filmRenderer?'native-canvas-reference-film':'fallback-particles';
+      ROOT.dataset.fxMagBirthRendererR681=filmRenderer?'native-canvas-reference-film':'fallback-particles';
       if(filmRenderer)return;
     }
     const dpr=Math.min(MOBILE?1:1.5,devicePixelRatio||1);
@@ -559,7 +561,7 @@
     if (!(canvas instanceof HTMLCanvasElement)) return;
     syncTarget(true);
     if(AUTOMATION && FORCE && !VISUAL_PROOF){
-      ROOT.dataset.fxMagBirthRendererR680='automation-handoff-lightweight';
+      ROOT.dataset.fxMagBirthRendererR681='automation-handoff-lightweight';
       canvas.hidden=true;
       return;
     }
@@ -567,11 +569,11 @@
       filmRenderer.resize?.();
       return;
     }
-    if(window.FormatXMagGenesisThreeR680?.attach){
+    if(window.FormatXMagGenesisThreeR681?.attach){
       if(!filmRendererPromise){
-        ROOT.dataset.fxMagBirthRendererR680='loading-threejs';
+        ROOT.dataset.fxMagBirthRendererR681='loading-threejs';
         filmRendererPromise=Promise.resolve(
-          window.FormatXMagGenesisThreeR680.attach(canvas,()=>({x:targetX,y:targetY}))
+          window.FormatXMagGenesisThreeR681.attach(canvas,()=>({x:targetX,y:targetY}))
         ).then(renderer=>{
           filmRendererPromise=null;
           if(finished){
@@ -580,16 +582,16 @@
           }
           if(renderer){
             filmRenderer=renderer;
-            ROOT.dataset.fxMagBirthRendererR680='threejs-active';
+            ROOT.dataset.fxMagBirthRendererR681='threejs-active';
             renderer.resize?.();
             return renderer;
           }
-          ROOT.dataset.fxMagBirthRendererR680='threejs-failed-r649-fallback';
+          ROOT.dataset.fxMagBirthRendererR681='threejs-failed-r649-fallback';
           startR649Fallback();
           return null;
         }).catch(error=>{
           filmRendererPromise=null;
-          ROOT.dataset.fxMagBirthRendererR680='threejs-error-r649-fallback';
+          ROOT.dataset.fxMagBirthRendererR681='threejs-error-r649-fallback';
           console.error('FormatX R680 intro attach failed:',error);
           startR649Fallback();
         });
@@ -641,7 +643,7 @@
     try { overlay.remove(); } catch (_) {}
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
-        detail:{source,revision:'r680-reference-ratio-three-genesis-handoff'}
+        detail:{source,revision:'r681-reference-locked-three-genesis-handoff'}
       }));
     } catch (_) {}
   }
