@@ -76,12 +76,14 @@
   overlay.dataset.fxIntroR649 = 'native-canvas-reference-rotoscope';
   overlay.dataset.fxIntroR650 = 'three-genesis-dna-cellular-living';
   overlay.dataset.fxIntroR651 = 'frame-matched-three-genesis';
+  overlay.dataset.fxIntroR657 = 'reference-geometry-three-genesis';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
   ROOT.dataset.fxMagBirthArtR646 = 'deep-genome-field-dark-organic-embryo-optic-iris-neural-bloom-native-handoff';
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
   ROOT.dataset.fxMagBirthArtR649 = 'reference-geometry-24fps-native-canvas-no-video';
   ROOT.dataset.fxMagBirthArtR650 = 'threejs-dna-cellular-living-architecture-one-continuous-mag';
   ROOT.dataset.fxMagBirthArtR651 = 'frame-matched-10s-dna-cellular-tentacle-flash-handoff';
+  ROOT.dataset.fxMagBirthArtR657 = 'tubular-dna-diamond-iris-organic-shell-tapered-tendrils-reference-match';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -523,7 +525,7 @@
     if (!(canvas instanceof HTMLCanvasElement)) return;
     syncTarget(true);
     if(AUTOMATION && FORCE && !VISUAL_PROOF){
-      ROOT.dataset.fxMagBirthRendererR651='automation-handoff-lightweight';
+      ROOT.dataset.fxMagBirthRendererR657='automation-handoff-lightweight';
       canvas.hidden=true;
       return;
     }
@@ -531,11 +533,11 @@
       filmRenderer.resize?.();
       return;
     }
-    if(window.FormatXMagGenesisThreeR651?.attach){
+    if(window.FormatXMagGenesisThreeR657?.attach){
       if(!filmRendererPromise){
-        ROOT.dataset.fxMagBirthRendererR651='loading-threejs';
+        ROOT.dataset.fxMagBirthRendererR657='loading-threejs';
         filmRendererPromise=Promise.resolve(
-          window.FormatXMagGenesisThreeR651.attach(canvas,()=>({x:targetX,y:targetY}))
+          window.FormatXMagGenesisThreeR657.attach(canvas,()=>({x:targetX,y:targetY}))
         ).then(renderer=>{
           filmRendererPromise=null;
           if(finished){
@@ -544,17 +546,17 @@
           }
           if(renderer){
             filmRenderer=renderer;
-            ROOT.dataset.fxMagBirthRendererR651='threejs-active';
+            ROOT.dataset.fxMagBirthRendererR657='threejs-active';
             renderer.resize?.();
             return renderer;
           }
-          ROOT.dataset.fxMagBirthRendererR651='threejs-failed-r649-fallback';
+          ROOT.dataset.fxMagBirthRendererR657='threejs-failed-r649-fallback';
           startR649Fallback();
           return null;
         }).catch(error=>{
           filmRendererPromise=null;
-          ROOT.dataset.fxMagBirthRendererR651='threejs-error-r649-fallback';
-          console.error('FormatX R651 intro attach failed:',error);
+          ROOT.dataset.fxMagBirthRendererR657='threejs-error-r649-fallback';
+          console.error('FormatX R657 intro attach failed:',error);
           startR649Fallback();
         });
       }
@@ -736,7 +738,7 @@
     sizeCanvas();
     ROOT.dataset.fxMagBirthRenderClockR631='native-reference-film-24fps-all-devices';
     ROOT.dataset.fxMagBirthRenderClockR649='deterministic-24fps-canvas-all-devices';
-    ROOT.dataset.fxMagBirthRenderClockR650='r651-threejs-24fps-primary-r649-fallback';
+    ROOT.dataset.fxMagBirthRenderClockR650='r657-threejs-reference-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
