@@ -10,7 +10,18 @@ on:
   push:
     branches:
       - master
+      - fix/r533-p0-intro-lcp
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - "docs/**"
       - "tools/validate-site-i18n.py"
       - "tools/validate-site-i18n-three.py"

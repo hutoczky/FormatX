@@ -3,8 +3,19 @@ name: Validate semantic first paint
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js'
       - 'docs/scifi-ui/scripts/formatx-category-positioning.js'

@@ -19,8 +19,19 @@ on:
       - '.github/scripts/validate-formatx-110.cjs'
       - '.github/workflows/validate-formatx-110.yml'
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/scripts/webgl-fallback-loader.js'

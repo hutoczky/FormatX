@@ -4,8 +4,19 @@ run-name: Validate platform scroll policy from ${{ github.sha }}
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
       - 'docs/scifi-ui/scripts/formatx-heart-core-r252.js'

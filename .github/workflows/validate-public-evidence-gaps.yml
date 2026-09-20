@@ -16,8 +16,19 @@ on:
       - '.github/scripts/validate-public-evidence-gaps.cjs'
       - '.github/workflows/validate-public-evidence-gaps.yml'
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'billing-worker/src/feedback-api.js'
       - 'billing-worker/src/production-feedback-entry.js'
       - 'billing-worker/src/production-content-entry.js'

@@ -6,7 +6,28 @@ on:
   push:
     # Keep source measurements available when a PR merge conflict blocks pull_request runs.
     branches: [master, fix/r533-p0-intro-lcp]
-    paths: ['docs/scifi-ui/**','billing-worker/src/production-content-entry*.js','billing-worker/wrangler.jsonc','billing-worker/package.json','billing-worker/package-lock.json','lighthouserc.json','lighthouserc.mobile.json','.github/scripts/lighthouse-production-candidate-proxy.cjs','.github/scripts/summarize-p0-lighthouse*.cjs','.github/workflows/ci.yml']
+    paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - 'docs/scifi-ui/**'
+      - 'billing-worker/src/production-content-entry*.js'
+      - 'billing-worker/wrangler.jsonc'
+      - 'billing-worker/package.json'
+      - 'billing-worker/package-lock.json'
+      - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
+      - '.github/scripts/lighthouse-production-candidate-proxy.cjs'
+      - '.github/scripts/summarize-p0-lighthouse*.cjs'
+      - '.github/workflows/ci.yml'
   workflow_dispatch:
 permissions: { contents: read, statuses: write }
 concurrency: { group: 'lighthouse-${{ github.ref }}', cancel-in-progress: true }

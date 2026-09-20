@@ -20,8 +20,19 @@ on:
       - '.github/scripts/validate-audio.cjs'
       - '.github/workflows/validate-audio.yml'
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
       - 'docs/scifi-ui/scripts/formatx-nextgen-controls.js'
       - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'

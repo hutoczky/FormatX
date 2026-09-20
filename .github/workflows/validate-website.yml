@@ -26,8 +26,12 @@ on:
       - '.github/workflows/sync-current-release.yml'
       - '.github/workflows/validate-website.yml'
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
       - 'README.md'
       - 'RELEASE_NOTES.md'
       - 'worker.js'

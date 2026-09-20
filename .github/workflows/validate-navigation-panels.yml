@@ -2,8 +2,19 @@ name: Validate hero, navigation, language and infinite scroll
 
 on:
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/styles/single-language-toggle.css'

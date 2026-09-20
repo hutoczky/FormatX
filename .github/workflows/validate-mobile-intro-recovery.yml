@@ -3,8 +3,14 @@ name: Validate unified FormatX mobile and production architecture
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
       - 'README.md'
       - 'RELEASE_NOTES.md'
       - 'worker.js'

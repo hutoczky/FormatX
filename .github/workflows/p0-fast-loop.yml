@@ -5,6 +5,16 @@ on:
     # Preserve source sentinels while merge conflicts block the synthetic PR candidate.
     branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'docs/styles.css'
       - 'docs/scifi-ui/styles/**'
       - 'docs/scifi-ui/scripts/**'

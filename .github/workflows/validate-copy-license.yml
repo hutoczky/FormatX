@@ -2,8 +2,17 @@ name: Validate bilingual labels and licence clarification
 
 on:
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
       - 'docs/scifi-ui/Licenc.txt'
       - 'docs/scifi-ui/scripts/formatx-copy-polish.js'
       - 'docs/scifi-ui/styles/formatx-copy-polish.css'

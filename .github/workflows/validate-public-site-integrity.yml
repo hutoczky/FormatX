@@ -14,8 +14,18 @@ on:
       - '.github/scripts/validate-award-narrative-r175.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
   push:
-    branches: [master]
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
+      # Complete exact-SHA candidate validation does not depend on a merge ref.
+      - 'billing-worker/**'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - 'lighthouserc*.json'
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'content-preview-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'docs/**'
       - 'billing-worker/src/**'
       - '.github/scripts/validate-public-site-integrity.cjs'
