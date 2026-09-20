@@ -1,5 +1,5 @@
 name: FormatX MAG intro visual proof
-# R1291 clean visual proof of live R1290 timeline + native final MAG
+# R1300 clean visual proof: video-locked timeline + cellular material lock + R1310 native MAG
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
-      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1290.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1300.js'
       - 'docs/scifi-ui/scripts/three-r185.module.js'
       - '.github/scripts/capture-mag-intro-r656.cjs'
       - '.github/workflows/intro-visual-proof.yml'
@@ -41,7 +41,7 @@ jobs:
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
       - name: Validate intro source
         run: |
-          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1290.js
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1300.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
           node --check .github/scripts/capture-mag-intro-r656.cjs
       - name: Start source site
@@ -58,15 +58,15 @@ jobs:
       - name: Capture reference keyframes
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4181/scifi-ui/index.html
-          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1290-intro-keyframes
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1300-intro-keyframes
           FORMATX_SKIP_HANDOFF: '1'
         run: node .github/scripts/capture-mag-intro-r656.cjs
       - name: Upload intro proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mag-intro-r1290-proof
-          path: artifacts/r1290-intro-keyframes/
+          name: mag-intro-r1300-proof
+          path: artifacts/r1300-intro-keyframes/
           if-no-files-found: warn
           retention-days: 14
 
