@@ -11,7 +11,7 @@
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
-  const DURATION = MOBILE ? 3600 : 5200;
+  const DURATION = 10000;
   const EXIT_MS = 360;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
 
@@ -71,6 +71,7 @@
   overlay.dataset.fxIntroR645 = 'biotic-genesis';
   overlay.dataset.fxIntroR646 = 'reference-biotic-film';
   overlay.dataset.fxIntroR647 = 'shot-match-biotic-genesis';
+  overlay.dataset.fxIntroR648 = 'exact-10s-runtime';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
   ROOT.dataset.fxMagBirthArtR646 = 'deep-genome-field-dark-organic-embryo-optic-iris-neural-bloom-native-handoff';
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
