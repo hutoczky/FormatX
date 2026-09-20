@@ -27,22 +27,15 @@
   root.dataset.fxCoreMobileV55 = 'booting-v55';
   root.dataset.fxCoreMobileV69 = 'booting-v69';
 
-  function compile(gl, type, source) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      const message = gl.getShaderInfoLog(shader) || 'crystal organism shader compile failed';
-      gl.deleteShader(shader);
-      throw new Error(message);
-    }
-    return shader;
-  }
-
-  function link(gl, vertexSource, fragmentSource) {
+  function beginProgram(gl, vertexSource, fragmentSource) {
+    const parallel = gl.getExtension('KHR_parallel_shader_compile');
     const program = gl.createProgram();
-    const vertex = compile(gl, gl.VERTEX_SHADER, vertexSource);
-    const fragment = compile(gl, gl.FRAGMENT_SHADER, fragmentSource);
+    const vertex = gl.createShader(gl.VERTEX_SHADER);
+    const fragment = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(vertex, vertexSource);
+    gl.shaderSource(fragment, fragmentSource);
+    gl.compileShader(vertex);
+    gl.compileShader(fragment);
     gl.attachShader(program, vertex);
     gl.attachShader(program, fragment);
     gl.bindAttribLocation(program, 0, 'aSphere');
@@ -53,13 +46,27 @@
     gl.bindAttribLocation(program, 5, 'aBary');
     gl.bindAttribLocation(program, 6, 'aFacet');
     gl.linkProgram(program);
-    gl.deleteShader(vertex);
-    gl.deleteShader(fragment);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      const message = gl.getProgramInfoLog(program) || 'crystal organism program link failed';
+    return { program, vertex, fragment, parallel };
+  }
+
+  function finishProgram(gl, pending) {
+    const { program, vertex, fragment, parallel } = pending;
+    if (parallel && !gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)) return null;
+    const vertexOk = gl.getShaderParameter(vertex, gl.COMPILE_STATUS);
+    const fragmentOk = gl.getShaderParameter(fragment, gl.COMPILE_STATUS);
+    const linkOk = gl.getProgramParameter(program, gl.LINK_STATUS);
+    if (!vertexOk || !fragmentOk || !linkOk) {
+      const message = (!vertexOk && gl.getShaderInfoLog(vertex))
+        || (!fragmentOk && gl.getShaderInfoLog(fragment))
+        || gl.getProgramInfoLog(program)
+        || 'crystal organism shader compile/link failed';
+      gl.deleteShader(vertex);
+      gl.deleteShader(fragment);
       gl.deleteProgram(program);
       throw new Error(message);
     }
+    gl.deleteShader(vertex);
+    gl.deleteShader(fragment);
     return program;
   }
 
@@ -388,8 +395,8 @@
         ${outputName}=vec4(filmic(glass*${optics.outerExposure}),clamp(alpha,.34,.84));
       }`;
 
-    let program;
-    try { program=link(gl,vertexSource,fragmentSource); }
+    let pendingProgram;
+    try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
     catch(error){
       console.warn('FormatX crystal organism unavailable:',error);
       stage.remove();
@@ -398,6 +405,33 @@
       return;
     }
 
+    root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-pending' : 'sync-pending';
+    let shaderPollCount = 0;
+    function failShader(error) {
+      console.warn('FormatX crystal organism unavailable:',error);
+      if(stage.isConnected)stage.remove();
+      root.dataset.fxCoreShaderCompileR600='failed';
+      root.dataset.fxCrystalOrganismR326='shader-failed';
+      root.dataset.fxCoreReal3d='shader-failed';
+    }
+    function finishWhenReady() {
+      if(!stage.isConnected)return;
+      let program;
+      try { program=finishProgram(gl,pendingProgram); }
+      catch(error){ failShader(error); return; }
+      if(!program){
+        shaderPollCount+=1;
+        if(shaderPollCount>750){failShader(new Error('crystal organism parallel shader compile timeout'));return;}
+        setTimeout(finishWhenReady,16);
+        return;
+      }
+      root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-ready' : 'sync-ready';
+      finishBoot(program);
+    }
+    finishWhenReady();
+    return;
+
+    function finishBoot(program) {
     const geometry=buildOrganismGeometry();
     const buffers=geometry.arrays.map(()=>gl.createBuffer());
     const attributeNames=['aSphere','aCrystal','aSphereNormal','aCrystalNormal','aUv','aBary','aFacet'];
@@ -922,6 +956,7 @@
       geometry:'closed-3d-volume',morph:'crystal-sphere-native-webgl',interactive:true,organism:true,legacyFallback:false
     }}));
     listen(window,'pagehide',destroy,{once:true});
+    }
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>boot(),{once:true});
