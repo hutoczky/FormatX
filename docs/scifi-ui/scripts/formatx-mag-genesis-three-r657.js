@@ -861,6 +861,7 @@
   }
 
   document.documentElement.dataset.fxMagBirthThreeR658='r658-csp-local-three-proof';
+  document.documentElement.dataset.fxMagBirthProofR658='r658-early-keyframe-proof';
 
   window.FormatXMagGenesisThreeR657={
     attach,
