@@ -2,8 +2,7 @@
   'use strict';
 
   const THREE_SOURCES = [
-    'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.min.js',
-    'https://unpkg.com/three@0.185.1/build/three.module.js?module'
+    new URL('./scripts/three-r185.module.js', location.href).href
   ];
 
   const clamp = (v,a=0,b=1) => Math.max(a,Math.min(b,v));
