@@ -521,6 +521,11 @@
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
     syncTarget(true);
+    if(AUTOMATION && FORCE){
+      ROOT.dataset.fxMagBirthRendererR651='automation-handoff-lightweight';
+      canvas.hidden=true;
+      return;
+    }
     if(filmRenderer){
       filmRenderer.resize?.();
       return;
@@ -675,7 +680,7 @@
     }
 
     if(r<1 || visiblePhase<4){
-      queueRender(filmRenderer?42:(MOBILE?50:0));
+      queueRender((AUTOMATION&&FORCE)?50:(filmRenderer?42:(MOBILE?50:0)));
       return;
     }
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
@@ -716,6 +721,7 @@
     ROOT.dataset.fxMagBirthRenderClockR650='r651-threejs-24fps-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
+    ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE)?'lightweight-handoff-proof':'production-renderer';
     window.setTimeout(()=>{
       if(!overlay.isConnected)return;
       try{
