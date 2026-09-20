@@ -143,7 +143,7 @@
     document.head.appendChild(stylesheet);
 
     const script = document.createElement('script');
-    script.src = './scripts/formatx-product-showcase.js?v=20260920-r602-post-intent-eager-images';
+    script.src = './scripts/formatx-product-showcase.js?v=20260920-r635-intent-preload-absolute-assets';
     script.async = true;
     script.dataset.fxProductShowcaseScript = 'true';
     script.addEventListener('load', () => { root.dataset.fxProductShowcaseLoadState = 'ready'; }, { once: true });

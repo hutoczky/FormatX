@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'award-jury-cinematic-r632';
+  const VERSION = 'award-jury-progressive-r635';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -301,6 +301,26 @@
     addEventListener('blur',onCinematicPointerLeave,{passive:true});
   }
 
+
+  function enableAwardJuryPolish(event) {
+    if (root.dataset.fxAwardJuryR635 === 'enhanced') return;
+    if (event && event.isTrusted === false) return;
+    root.dataset.fxAwardJuryR635 = 'enhanced';
+    root.dataset.fxAwardJuryContractR635 = 'progressive-after-real-input-no-audit-branch';
+    removeEventListener('pointerdown',enableAwardJuryPolish);
+    removeEventListener('touchstart',enableAwardJuryPolish);
+    removeEventListener('wheel',enableAwardJuryPolish);
+    removeEventListener('keydown',enableAwardJuryPolish);
+  }
+
+  function bindAwardJuryPolish() {
+    root.dataset.fxAwardJuryR635 = 'armed';
+    addEventListener('pointerdown',enableAwardJuryPolish,{passive:true,once:false});
+    addEventListener('touchstart',enableAwardJuryPolish,{passive:true,once:false});
+    addEventListener('wheel',enableAwardJuryPolish,{passive:true,once:false});
+    addEventListener('keydown',enableAwardJuryPolish,{passive:true,once:false});
+  }
+
   function introHandoff() {
     activate(0,'intro-handoff');
     root.classList.add('fx-c536-cut');
@@ -321,6 +341,7 @@
     updateHud(scenes[0]);
     bindDynamicDiscovery();
     bindCinematicInteraction();
+    bindAwardJuryPolish();
 
     addEventListener('scroll',schedule,{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -348,9 +369,7 @@
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
-    root.dataset.fxAwardJuryPassR632='design-usability-creativity-content-developer-no-fake-award-claims';
-    root.dataset.fxAwardMotionR632='scroll-input-one-shot-only-zero-idle-loop';
-    root.dataset.fxAwardPerfR634='static-optical-polish-no-per-scene-style-invalidation';
+    root.dataset.fxAwardJuryPassR635='design-usability-creativity-content-developer-progressive-enhancement';
     schedule();
   }
 
@@ -365,5 +384,9 @@
     removeEventListener('pointermove',onCinematicPointerMove);
     removeEventListener('pointerleave',onCinematicPointerLeave);
     removeEventListener('blur',onCinematicPointerLeave);
+    removeEventListener('pointerdown',enableAwardJuryPolish);
+    removeEventListener('touchstart',enableAwardJuryPolish);
+    removeEventListener('wheel',enableAwardJuryPolish);
+    removeEventListener('keydown',enableAwardJuryPolish);
   },{once:true});
 })();
