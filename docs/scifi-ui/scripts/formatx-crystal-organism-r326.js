@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const root = .49;
+  const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
   const REVISION = 'living-luminous-electric-crystal-r454';
   const READY = 'ready-v69';
