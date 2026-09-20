@@ -120,7 +120,7 @@
   let ignitionDone = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
-  const PHASE_MIN_HOLD_MS = 160;
+  const PHASE_HOLD_MS = [720, 440, 220, 190, 0];
 
   function clamp(value,min,max) { return Math.max(min,Math.min(max,value)); }
   function easeOutCubic(t) { return 1 - Math.pow(1-t,3); }
@@ -135,10 +135,14 @@
   }
   function phaseFor(r,now) {
     const target=phaseTargetFor(r);
+    if (!phaseChangedAt) {
+      phaseChangedAt=now;
+      return String(visiblePhase);
+    }
     if (target < visiblePhase) {
       visiblePhase=target;
       phaseChangedAt=now;
-    } else if (target > visiblePhase && (!phaseChangedAt || now-phaseChangedAt >= PHASE_MIN_HOLD_MS)) {
+    } else if (target > visiblePhase && now-phaseChangedAt >= (PHASE_HOLD_MS[visiblePhase] ?? 190)) {
       visiblePhase+=1;
       phaseChangedAt=now;
     }
@@ -344,7 +348,7 @@
     try { sessionStorage.setItem(KEY,'1'); } catch (_) {}
     ROOT.dataset.fxMagBirthLiveR533='active';
     visiblePhase=0;
-    phaseChangedAt=performance.now();
+    phaseChangedAt=0;
     ROOT.dataset.fxMagBirthPhase='0';
     ROOT.setAttribute('data-fx-mag-birth-live','active');
     document.body.prepend(overlay);
