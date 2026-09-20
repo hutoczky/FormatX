@@ -200,11 +200,11 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + (index % 2 ? .075 : -.060);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .46;
-      const reach = .64 + (index % 3) * .075;
+      const root = .45;
+      const reach = .52 + (index % 3) * .055;
       const radius = root + reach * t;
-      const wave = Math.sin(t * Math.PI * 1.72 + index * .73) * (.024 + .082 * t);
-      const depth = Math.sin(t * Math.PI * 1.48 + index * .91) * (.028 + .080 * t);
+      const wave = Math.sin(t * Math.PI * 1.68 + index * .73) * (.020 + .066 * t);
+      const depth = Math.sin(t * Math.PI * 1.44 + index * .91) * (.024 + .062 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -221,7 +221,7 @@
       const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
-      const tubeRadius = (.026 * (1 - t * .72) + .0075) * (mobile ? .94 : 1);
+      const tubeRadius = (.031 * (1 - t * .66) + .0085) * (mobile ? .94 : 1);
       const rootDirection = normalize([p[0], p[1], p[2] * .72]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
@@ -444,14 +444,16 @@
         float armorSeam=ridge(vUv.x*4.0+vUv.y*.18+uSiteProgress*.08,17.0)*(1.0-smoothstep(.62,.98,abs(vLocal.y)));
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
         float podMask=1.0-vMorph;
-        float crownMask=smoothstep(.18,.64,vLocal.y)
-          *(1.0-smoothstep(.28,.56,abs(vLocal.x)))*podMask;
+        float crownMask=smoothstep(.42,.72,vLocal.y)
+          *(1.0-smoothstep(.18,.40,abs(vLocal.x)))*podMask;
         float shoulderMask=smoothstep(.26,.46,abs(vLocal.x))
           *(1.0-smoothstep(.52,.68,abs(vLocal.x)))
           *(1.0-smoothstep(.20,.54,abs(vLocal.y)))*podMask;
         float jawMask=smoothstep(.22,.66,-vLocal.y)
           *(1.0-smoothstep(.30,.58,abs(vLocal.x)))*podMask;
         float opticalWell=(1.0-smoothstep(.23,.43,radial))*podMask;
+        float tendrilMask=smoothstep(.62,.82,length(vLocal.xy))*podMask;
+        float tendrilSegment=(.16+.84*ridge(vUv.y*10.5+vUv.x*2.0,18.0))*tendrilMask;
         vec3 cyan=vec3(.012,.38,.58);
         vec3 violet=vec3(.055,.075,.16);
         vec3 ice=vec3(.48,.66,.73);
@@ -509,7 +511,7 @@
         glass+=cyan*veins*(.045+.035*uBreath);
         glass+=cyan*membrane*(.020+.025*visualEnergy);
         glass+=cyan*iris*.10;
-        glass+=cyan*(rings*.16+nucleus*1.82)+ice*(heart*.022+nucleus*.18);
+        glass+=cyan*(rings*.055+nucleus*2.55)+ice*(heart*.012+nucleus*.26);
         glass+=ice*specular*(.34+.16*visualEnergy);
         glass+=(cyan*.16+ice*.025)*(axisV*.14+axisH*.08)*visualEnergy;
         glass+=(cyan*.10+violet*.05)*dnaHelix*(.025+.045*fresnel)*genomePulse;
@@ -517,7 +519,8 @@
         glass+=(cyan*.08+ice*.025)*edge;
         glass+=ice*(armorSeam*.16+armorRib*.09)*(1.0-vMorph*.72);
         glass+=(ice*.52+cyan*.28)*surfaceSweep*(.70+.26*fresnel);
-        float alpha=.91+.035*ndl+.022*fresnel+specular*.018+surfaceSweep*.025;
+        glass+=(cyan*.62+ice*.10)*tendrilSegment*(.34+.66*fresnel);
+        float alpha=.92+.030*ndl+.020*fresnel+specular*.016+surfaceSweep*.022+tendrilMask*.018;
         ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.54)),clamp(alpha,.90,.985));
       }`;
 
@@ -553,11 +556,13 @@
         float dna=(dnaA+dnaB)*(.32+.68*fresnel);
         float seam=pow(.5+.5*cos(vUv.x*25.1327+vUv.y*1.1),20.0)*(1.0-vMorph*.72);
         float podMask=1.0-vMorph;
-        float crownMask=smoothstep(.18,.64,vLocal.y)
-          *(1.0-smoothstep(.28,.56,abs(vLocal.x)))*podMask;
+        float crownMask=smoothstep(.42,.72,vLocal.y)
+          *(1.0-smoothstep(.18,.40,abs(vLocal.x)))*podMask;
         float shoulderMask=smoothstep(.26,.46,abs(vLocal.x))
           *(1.0-smoothstep(.52,.68,abs(vLocal.x)))
           *(1.0-smoothstep(.20,.54,abs(vLocal.y)))*podMask;
+        float tendrilMask=smoothstep(.62,.82,length(vLocal.xy))*podMask;
+        float tendrilSegment=pow(.5+.5*cos(vUv.y*65.97+vUv.x*12.56),18.0)*tendrilMask;
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
@@ -575,10 +580,11 @@
         c+=vec3(.030,.050,.064)*shoulderMask*(.58+.30*ndl);
         c+=cyan*fresnel*(.045+.050*energy);
         c+=(cyan*.12+violet*.05)*dna*(.022+.035*energy);
-        c+=cyan*(nucleus*1.90+ring*.18)+ice*(heart*.020+nucleus*.18+spec*.30);
+        c+=cyan*(nucleus*2.40+ring*.055)+ice*(heart*.012+nucleus*.22+spec*.30);
         c+=ice*seam*.08;
         c+=(ice*.48+cyan*.26)*pulse;
-        float alpha=.92+.025*ndl+.020*fresnel+nucleus*.020+pulse*.018;
+        c+=(cyan*.58+ice*.10)*tendrilSegment*(.24+.38*fresnel);
+        float alpha=.92+.025*ndl+.020*fresnel+nucleus*.020+pulse*.018+tendrilMask*.012;
         ${outputName}=vec4(filmic(c*.82),clamp(alpha,.90,.985));
       }`;
     const fragmentSource = constrainedMobile ? constrainedFragmentSource : fullFragmentSource;
@@ -1077,6 +1083,7 @@
       referenceGeometry:'unified-armored-diamond-pod-r669',
       referenceGeometryR730:'compact-dark-armored-pod-eight-radial-native-tendrils',
       referenceGeometryR810:'opaque-gunmetal-compact-pod-silver-crown-local-cyan-eye-short-tendrils',
+      referenceGeometryR830:'narrow-silver-crown-compact-thick-cyan-segmented-native-tendrils-single-optical-orb',
       genome:'native-double-helix-energy-lattice-r614',
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
@@ -1128,6 +1135,8 @@
     root.dataset.fxCoreReferenceGeometryR673='convex-compact-armored-pod-no-star-silhouette';
     root.dataset.fxCoreReferenceGeometryR730='compact-dark-armored-pod-eight-radial-native-tendrils';
     root.dataset.fxCoreReferenceGeometryR810='opaque-gunmetal-compact-pod-silver-crown-local-cyan-eye-short-tendrils';
+    root.dataset.fxCoreReferenceGeometryR830='narrow-silver-crown-compact-thick-cyan-segmented-native-tendrils-single-optical-orb';
+    root.dataset.fxCoreReferenceMaterialR830='opaque-gunmetal-local-blue-optical-core-segmented-tendril-energy';
     root.dataset.fxCoreReferenceMaterialR810='near-opaque-dark-armor-silver-crown-local-cyan-optical-core';
     root.dataset.fxCoreReferenceMaterialR730='opaque-gunmetal-silver-crown-local-cyan-optical-core';
     root.dataset.fxCoreReferenceMaterial='dark-metal-ice-cyan-living-core-r614';
