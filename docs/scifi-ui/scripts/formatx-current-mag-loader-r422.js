@@ -94,7 +94,7 @@ function addScript(src,attr){
   });
 }
 
-function waitForRendererReady(timeout=8000){
+function waitForRendererReady(timeout=mobile?20000:12000){
   if(root.dataset.fxCrystalOrganismR326==='ready')return Promise.resolve(true);
   return new Promise(resolve=>{
     let settled=false,timer=0,observer=null;
@@ -204,7 +204,19 @@ async function start(){
     root.dataset.fxCoreRendererSelection=mobile?'r326-direct-r468-soft-optics-live-energy-zero-idle':'r326-direct-r468-desktop-live-energy';
     root.dataset.fxCoreReferenceLockLoad='ready-v69-r468';
     root.dataset.fxCurrentMagRuntimeR422='ready';
-  }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
+  }else {
+    root.dataset.fxCurrentMagRuntimeR422='renderer-timeout-awaiting-late-ready';
+    addEventListener('formatx:real3dready',async()=>{
+      if(root.dataset.fxCurrentMagRuntimeR422==='ready')return;
+      if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
+      await addScript(LIFE,'data-fx-core-life-r455');
+      root.dataset.fxCoreRendererSelection=mobile?'r326-direct-r468-soft-optics-live-energy-zero-idle':'r326-direct-r468-desktop-live-energy';
+      root.dataset.fxCoreReferenceLockLoad='ready-v69-r468';
+      root.dataset.fxCurrentMagRuntimeR422='ready';
+      root.dataset.fxCurrentMagLateReadyR623='recovered';
+      dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady:true,lateRecovery:true,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r474'}}));
+    },{once:true,passive:true});
+  }
 
   root.dataset.fxCoreCriticalPathR422=mobile
     ?'direct-r326-r468-soft-optics-live-energy-zero-idle-native-touch'

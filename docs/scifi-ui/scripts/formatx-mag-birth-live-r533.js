@@ -497,8 +497,15 @@
     }, REDUCED ? 20 : EXIT_MS);
   }
 
-  function queueRender() {
-    if(finished||raf)return;
+  function queueRender(delay=0) {
+    if(finished||raf||frameTimer)return;
+    if(delay>0){
+      frameTimer=setTimeout(()=>{
+        frameTimer=0;
+        if(!finished&&!raf)raf=requestAnimationFrame(render);
+      },delay);
+      return;
+    }
     raf=requestAnimationFrame(render);
   }
 
@@ -530,8 +537,19 @@
       drawParticles(r,now);
     }
 
-    if(r<1 || visiblePhase<4)queueRender();
-    else finish('complete');
+    if(r<1 || visiblePhase<4){
+      queueRender();
+      return;
+    }
+    const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
+    if(MOBILE && FORCE && !nativeReady && now-startedAt<10500){
+      requestCoreWarmup('forced-mobile-handoff-wait');
+      ROOT.dataset.fxMagBirthHandoffR623='waiting-for-native-core';
+      queueRender(120);
+      return;
+    }
+    ROOT.dataset.fxMagBirthHandoffR623=nativeReady?'native-ready':'bounded-static-fail-open';
+    finish('complete');
   }
 
   function start() {
@@ -552,7 +570,10 @@
 
     // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
     // against a renderer/driver path that starves the animation clock.
-    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r621'), REDUCED ? 900 : DURATION + (MOBILE ? 1300 : 1800));
+    hardFinishTimer=window.setTimeout(
+      ()=>finish('bounded-failsafe-r623'),
+      REDUCED ? 900 : (MOBILE && FORCE ? 12000 : DURATION + (MOBILE ? 1300 : 1800))
+    );
 
     if(REDUCED){
       requestCoreWarmup('reduced-motion');
