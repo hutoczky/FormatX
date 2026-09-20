@@ -88,7 +88,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   });
   assert.equal(pointerOwnership.stage, 'none', `${name}: R326 visual stage must be pointer-transparent`);
   assert.notEqual(pointerOwnership.hit, 'none', `${name}: semantic MAG hit target is inert`);
-  await hitLocator.click({ position: { x: 20, y: 20 } });
+  await hitLocator.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreEnergyBoltR455?.startsWith('surface-sweep-'));
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreSurfacePulseR454?.startsWith('sweep-'));
   await page.waitForTimeout(260);
