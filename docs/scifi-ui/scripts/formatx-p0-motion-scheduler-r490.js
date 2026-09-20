@@ -1,4 +1,4 @@
-/* FormatX R493 — deterministic post-first-paint MAG scheduler.
+/* FormatX R605 — deterministic post-first-paint MAG scheduler with cinematic birth priority.
    The static MAG shell is part of first paint. Heavy R326/WebGL enhancement is
    never triggered by ambient startup events: explicit interaction starts it
    immediately, otherwise a genuinely late visible-tab fallback starts it.
@@ -8,7 +8,7 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r493';
+root.dataset.fxP0MotionSchedulerR490='armed-r605';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260920-r594-semantic-hit-owner';
 const AUTO_DELAY_MS=6500;
 let started=false;
@@ -65,6 +65,21 @@ function armLateFallback(){
   }));
 }
 
+function magBirthActive(){
+  return root.getAttribute('data-fx-mag-birth-live')==='active'
+    || root.dataset.fxMagBirthOwnerR533==='active'
+    || document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
+}
+
+function armStartup(){
+  if(magBirthActive()){
+    root.dataset.fxP0MotionSchedulerR490='mag-birth-priority-r605';
+    requestAnimationFrame(()=>start('mag-birth-r605'));
+    return;
+  }
+  armLateFallback();
+}
+
 function onIntent(event){
   if(event&&event.isTrusted===false)return;
   start(`user-${event?.type||'intent'}-r493`);
@@ -78,8 +93,8 @@ for(const type of ['pointerdown','touchstart','keydown','wheel']){
 }
 
 if(document.readyState==='loading'){
-  addEventListener('DOMContentLoaded',armLateFallback,{once:true,passive:true});
+  addEventListener('DOMContentLoaded',armStartup,{once:true,passive:true});
 }else{
-  armLateFallback();
+  armStartup();
 }
 }());
