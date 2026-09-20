@@ -83,6 +83,7 @@
       this.world.add(this.dnaGroup,this.organicGroup,this.cellGroup,this.tentacleGroup,this.mechanicalGroup,this.coreGroup);
 
       this.makeLights();
+      this.makeChamber();
       this.makeParticles();
       this.makeDebris();
       this.makeDNAField();
@@ -112,6 +113,61 @@
       this.mechLight=new T.PointLight(0xc8f4ff,0,9,2);
       this.mechLight.position.set(-2.4,2.8,4.2);
       this.scene.add(this.mechLight);
+    }
+
+    makeChamber(){
+      const T=this.THREE;
+      const group=new T.Group();
+      group.position.z=-3.05;
+
+      const backMat=new T.MeshStandardMaterial({
+        color:0x050d13,metalness:.52,roughness:.78,
+        emissive:0x030b12,emissiveIntensity:.22,
+        side:T.DoubleSide
+      });
+      const ringMat=new T.MeshStandardMaterial({
+        color:0x0b1922,metalness:.78,roughness:.44,
+        emissive:0x061722,emissiveIntensity:.28
+      });
+      const ribMat=new T.MeshStandardMaterial({
+        color:0x08151e,metalness:.74,roughness:.50,
+        emissive:0x04121b,emissiveIntensity:.24
+      });
+
+      const back=new T.Mesh(new T.CircleGeometry(5.55,72),backMat);
+      back.position.z=-.18;
+      group.add(back);
+
+      const outer=new T.Mesh(new T.TorusGeometry(4.08,.16,8,112),ringMat);
+      const middle=new T.Mesh(new T.TorusGeometry(3.34,.075,7,96),ringMat);
+      middle.material=ringMat.clone();
+      middle.material.emissiveIntensity=.18;
+      group.add(outer,middle);
+
+      const ribGeo=new T.BoxGeometry(.12,1.32,.15);
+      const ribs=new T.InstancedMesh(ribGeo,ribMat,12);
+      const dummy=new T.Object3D();
+      for(let i=0;i<12;i++){
+        const a=i/12*Math.PI*2;
+        const radius=3.69;
+        dummy.position.set(Math.cos(a)*radius,Math.sin(a)*radius,.02);
+        dummy.rotation.set(0,0,a-Math.PI/2);
+        dummy.scale.set(1,1,1);
+        dummy.updateMatrix();
+        ribs.setMatrixAt(i,dummy.matrix);
+      }
+      ribs.instanceMatrix.needsUpdate=true;
+      group.add(ribs);
+
+      const sideGeo=new T.BoxGeometry(.16,3.15,.18);
+      for(const x of [-3.18,3.18]){
+        const rail=new T.Mesh(sideGeo,ribMat);
+        rail.position.set(x,0,.10);
+        group.add(rail);
+      }
+
+      this.chamber=group;
+      this.scene.add(group);
     }
 
     makeParticles(){
@@ -1227,7 +1283,7 @@
     }
 
     updateDNA(t,time){
-      const fade=1-smooth((t-2.70)/.78);
+      const fade=1-smooth((t-2.76)/.46);
       const intro=ease(t/.42);
       this.dnaGroup.visible=fade>.002;
       this.dnas.forEach((h,i)=>{
@@ -1250,11 +1306,11 @@
     updateCore(t,time){
       // R1290 — the reference film has no visible core at frame zero.
       // The liquid MAG emerges only after the DNA field has established.
-      const birth=smooth((t-2.12)/.68);
+      const birth=smooth((t-2.42)/.48);
       let sc=.001;
-      if(t<2.12) sc=.001;
-      else if(t<2.78) sc=mix(.34,.68,ease((t-2.12)/.66));
-      else if(t<3.30) sc=mix(.68,.36,smooth((t-2.78)/.52));
+      if(t<2.42) sc=.001;
+      else if(t<2.90) sc=mix(.22,.66,ease((t-2.42)/.48));
+      else if(t<3.30) sc=mix(.66,.36,smooth((t-2.90)/.40));
       else if(t<5.58) sc=.36+Math.sin((t-3.28)*1.02)*.002;
       else if(t<7.20) sc=mix(.36,.30,smooth((t-5.58)/1.62));
       else sc=.30;
@@ -1301,10 +1357,8 @@
 
     updateOrganic(t,time){
       const grow=smooth((t-2.48)/.72);
-      // R1290: the biological shell remains dominant until the 9.2 s flash,
-      // matching the supplied film instead of disappearing around 6 s.
-      const lateFade=smooth((t-9.28)/.72);
-      const visible=grow*(1-lateFade*.18);
+      // Reference lock: the biological shell is still present at 9.9 s.
+      const visible=grow;
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
       this.organicGroup.scale.set(bodyScale*1.12,bodyScale*1.08,bodyScale*1.02);
@@ -1346,8 +1400,7 @@
 
     updateCells(t,time){
       const grow=smooth((t-2.60)/.70);
-      const lateFade=smooth((t-9.30)/.70);
-      const visible=grow*(1-lateFade*.28);
+      const visible=grow;
       this.cellGroup.visible=visible>.002;
       const cellScale=.001+visible*.99;
       this.cellGroup.scale.set(cellScale*1.10,cellScale*1.06,cellScale);
@@ -1368,8 +1421,8 @@
     updateMechanical(t,time){
       // The silver crown is already visible in the middle film section.
       // The complete mechanical pod is deliberately delayed until the final flash.
-      const crownGrow=smooth((t-4.85)/1.15);
-      const bodyGrow=smooth((t-9.34)/.46);
+      const crownGrow=smooth((t-5.78)/1.05);
+      const bodyGrow=0;
       const groupGrow=Math.max(crownGrow,bodyGrow);
       this.mechanicalReveal=bodyGrow;
       this.mechanicalGroup.visible=groupGrow>.002;
@@ -1398,12 +1451,12 @@
 
     updateTentacles(t,time){
       const grow=smooth((t-5.55)/1.00);
-      const flashFade=1-smooth((t-9.70)/.20)*.08;
+      const afterGlow=smooth((t-9.42)/.42);
       this.tentacleGroup.visible=grow>.002;
-      this.tentacleMaterial.opacity=.82*grow*flashFade;
-      this.tentacleEdgeMaterial.opacity=.010*grow;
+      this.tentacleMaterial.opacity=(.82+.08*afterGlow)*grow;
+      this.tentacleEdgeMaterial.opacity=(.010+.020*afterGlow)*grow;
       this.tentacleNodeMaterial.opacity=.96*grow;
-      if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=.22*grow;
+      if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=(.22+.62*afterGlow)*grow;
       if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=1.00*grow;
       this.tentacles.forEach((g,i)=>{
         const wave=1+Math.sin(time*.00062+g.userData.phase)*.006*grow;
@@ -1456,6 +1509,7 @@
       this.updateMechanical(t,time);
       this.updateTentacles(t,time);
 
+      if(this.chamber)this.chamber.rotation.z=Math.sin(time*.000025)*.0035;
       this.particles.rotation.z=time*.000018;
       this.particles.rotation.y=time*.000012;
       if(this.debris){
@@ -1464,7 +1518,7 @@
       }
       this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
 
-      const flash=smooth((t-9.12)/.10)*(1-smooth((t-9.58)/.24));
+      const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
       this.renderer.toneMappingExposure=1.12+flash*.06+after*.010;
       this.coreLight.intensity+=flash*5+after*1.5;
@@ -1536,7 +1590,7 @@
         draw:(r,time)=>engine.render(r,time),
         destroy:()=>engine.destroy(),
         engine,
-        revision:'r1290-video-timeline-final-core-lock'
+        revision:'r1290b-pixel-timeline-final-core-lock'
       };
     }catch(error){
       console.error('FormatX R1290 genesis renderer failed:',error);
@@ -1558,6 +1612,6 @@
 
   window.FormatXMagGenesisThreeR1290={
     attach,
-    revision:'r1290-video-timeline-final-core-lock-dna-cellular-living-architecture'
+    revision:'r1290b-pixel-timeline-final-core-lock-dna-cellular-living-architecture'
   };
 })();
