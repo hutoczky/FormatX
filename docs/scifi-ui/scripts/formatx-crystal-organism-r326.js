@@ -130,9 +130,9 @@
       /* R614 compatibility contract retained. R730 maps the same closed
          topology to the supplied final MAG reference: a compact, opaque,
          rounded-diamond armored pod with a tall crown and broad shoulders. */
-      const axisX = direction[0] >= 0 ? .57 : .55;
-      const axisY = direction[1] >= 0 ? .76 : .70;
-      const axisZ = direction[2] >= 0 ? .40 : .35;
+      const axisX = direction[0] >= 0 ? .50 : .48;
+      const axisY = direction[1] >= 0 ? .76 : .71;
+      const axisZ = direction[2] >= 0 ? .38 : .34;
       const exponent = 1.18;
       const terms = Math.pow(Math.abs(direction[0]) / axisX, exponent)
         + Math.pow(Math.abs(direction[1]) / axisY, exponent)
@@ -200,11 +200,11 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + (index % 2 ? .075 : -.060);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .50;
-      const reach = .88 + (index % 3) * .10;
+      const root = .46;
+      const reach = .64 + (index % 3) * .075;
       const radius = root + reach * t;
-      const wave = Math.sin(t * Math.PI * 1.85 + index * .73) * (.030 + .105 * t);
-      const depth = Math.sin(t * Math.PI * 1.55 + index * .91) * (.035 + .105 * t);
+      const wave = Math.sin(t * Math.PI * 1.72 + index * .73) * (.024 + .082 * t);
+      const depth = Math.sin(t * Math.PI * 1.48 + index * .91) * (.028 + .080 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -452,12 +452,12 @@
         float jawMask=smoothstep(.22,.66,-vLocal.y)
           *(1.0-smoothstep(.30,.58,abs(vLocal.x)))*podMask;
         float opticalWell=(1.0-smoothstep(.23,.43,radial))*podMask;
-        vec3 cyan=vec3(.018,.76,1.28);
-        vec3 violet=vec3(.10,.18,.40);
-        vec3 ice=vec3(.62,1.12,1.48);
-        vec3 gunmetal=vec3(.006,.018,.030);
-        vec3 steel=vec3(.028,.085,.145);
-        vec3 silver=vec3(.22,.36,.44);
+        vec3 cyan=vec3(.012,.38,.58);
+        vec3 violet=vec3(.055,.075,.16);
+        vec3 ice=vec3(.48,.66,.73);
+        vec3 gunmetal=vec3(.0045,.010,.016);
+        vec3 steel=vec3(.030,.050,.064);
+        vec3 silver=vec3(.44,.52,.55);
         vec3 spectral=mix(cyan,ice,.10+.28*hue);
         float surfaceSweep=0.0;
         float surfaceFilament=0.0;
@@ -484,42 +484,41 @@
         }
 
         if(uLayer>.5){
-          vec3 organ=mix(vec3(.018,.105,.215),spectral,.34+.30*visualEnergy);
-          organ*=.68+.78*cloud;
-          organ+=ice*heart*(.82+.78*uBreath);
-          organ+=ice*nucleus*(3.18+1.18*visualEnergy);
-          organ+=spectral*(rings*2.34+iris*2.58+veins*1.28+membrane*.52);
-          organ+=ice*(armorSeam*.36+armorRib*.18);
-          organ+=(cyan*1.04+ice*.24)*(axisV*1.10+axisH*.62)*visualEnergy;
-          organ+=(cyan*1.34+violet*.56+ice*.34)*dnaHelix*(.62+.62*visualEnergy)*genomePulse;
-          organ+=(ice*.92+cyan*.40)*dnaBridge*(.48+.44*visualEnergy);
-          organ+=(ice*1.52+cyan*.80+violet*.28)*surfaceSweep*(1.22+.42*visualEnergy);
-          float alpha=.16+.23*heart+.17*visualEnergy+rings*.18+iris*.17+nucleus*.36+veins*.072+dnaHelix*.055+dnaBridge*.030+surfaceSweep*.15;
-          ${outputName}=vec4(filmic(organ*${optics.innerExposure}),clamp(alpha,.16,.88));
+          vec3 organ=mix(vec3(.007,.020,.030),steel,.16+.18*visualEnergy);
+          organ*=.78+.34*cloud;
+          organ+=cyan*heart*(.10+.10*uBreath);
+          organ+=ice*nucleus*(1.78+.62*visualEnergy);
+          organ+=cyan*(rings*.32+iris*.42+veins*.12);
+          organ+=ice*(armorSeam*.10+armorRib*.06);
+          organ+=(cyan*.22+ice*.06)*(axisV*.22+axisH*.12)*visualEnergy;
+          organ+=(cyan*.16+violet*.08)*dnaHelix*(.07+.10*visualEnergy)*genomePulse;
+          organ+=(ice*.58+cyan*.30)*surfaceSweep*(.72+.30*visualEnergy);
+          float alpha=.10+.10*heart+.08*visualEnergy+rings*.045+iris*.040+nucleus*.20+veins*.022+surfaceSweep*.08;
+          ${outputName}=vec4(filmic(organ*(${optics.innerExposure}*.62)),clamp(alpha,.10,.46));
           return;
         }
 
-        vec3 glass=mix(gunmetal,steel,.13+.34*ndl+.06*facetPulse);
-        glass+=vec3(.012,.085,.125)*sideLight*.30;
-        glass+=vec3(.006,.026,.042)*(.38+.34*cloud);
-        glass+=silver*crownMask*(.46+.72*ndl+.48*specular);
-        glass+=steel*shoulderMask*(.40+.36*sideLight);
-        glass+=gunmetal*jawMask*.58;
-        glass-=vec3(.010,.014,.018)*opticalWell*.72;
-        glass+=spectral*fresnel*(.22+.25*visualEnergy);
-        glass+=spectral*veins*(.18+.14*uBreath);
-        glass+=spectral*membrane*(.10+.10*visualEnergy);
-        glass+=spectral*iris*.34;
-        glass+=cyan*(rings*.72+nucleus*2.70)+ice*(heart*.045+nucleus*.34);
-        glass+=ice*specular*(.58+.22*visualEnergy);
-        glass+=(cyan*.78+ice*.12)*(axisV*.66+axisH*.42)*visualEnergy;
-        glass+=(cyan*.72+violet*.34+ice*.12)*dnaHelix*(.10+.20*fresnel)*genomePulse;
-        glass+=(ice*.26+cyan*.18)*dnaBridge*(.08+.16*visualEnergy);
-        glass+=(spectral*.45+ice*.12)*edge;
-        glass+=ice*(armorSeam*.46+armorRib*.24)*(1.0-vMorph*.72);
-        glass+=(ice*1.16+cyan*.70+spectral*.24)*surfaceSweep*(1.08+.38*fresnel);
-        float alpha=.72+.12*ndl+.10*fresnel+edge*.030+rings*.075+specular*.08+surfaceSweep*.08;
-        ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.68)),clamp(alpha,.46,.86));
+        vec3 glass=mix(gunmetal,steel,.20+.32*ndl+.05*facetPulse);
+        glass+=vec3(.006,.018,.025)*sideLight*.18;
+        glass+=vec3(.003,.008,.012)*(.26+.20*cloud);
+        glass+=silver*crownMask*(.64+.72*ndl+.38*specular);
+        glass+=steel*shoulderMask*(.74+.42*sideLight);
+        glass+=gunmetal*jawMask*.82;
+        glass-=vec3(.004,.006,.008)*opticalWell*.42;
+        glass+=cyan*fresnel*(.045+.055*visualEnergy);
+        glass+=cyan*veins*(.045+.035*uBreath);
+        glass+=cyan*membrane*(.020+.025*visualEnergy);
+        glass+=cyan*iris*.10;
+        glass+=cyan*(rings*.16+nucleus*1.82)+ice*(heart*.022+nucleus*.18);
+        glass+=ice*specular*(.34+.16*visualEnergy);
+        glass+=(cyan*.16+ice*.025)*(axisV*.14+axisH*.08)*visualEnergy;
+        glass+=(cyan*.10+violet*.05)*dnaHelix*(.025+.045*fresnel)*genomePulse;
+        glass+=(ice*.06+cyan*.05)*dnaBridge*(.025+.035*visualEnergy);
+        glass+=(cyan*.08+ice*.025)*edge;
+        glass+=ice*(armorSeam*.16+armorRib*.09)*(1.0-vMorph*.72);
+        glass+=(ice*.52+cyan*.28)*surfaceSweep*(.70+.26*fresnel);
+        float alpha=.91+.035*ndl+.022*fresnel+specular*.018+surfaceSweep*.025;
+        ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.54)),clamp(alpha,.90,.985));
       }`;
 
     /* R622 constrained-mobile material: same biomechanical identity with a
@@ -566,21 +565,21 @@
           pulse=exp(-pow((coordinate-head)/.065,2.0))*(.35+.65*fresnel);
         }
         float energy=sat(.45+uEnergy*.72);
-        vec3 cyan=vec3(.018,.72,1.20);
-        vec3 violet=vec3(.10,.17,.36);
-        vec3 ice=vec3(.58,1.04,1.40);
-        vec3 silver=vec3(.20,.33,.41);
-        vec3 metal=vec3(.007,.022,.038);
-        vec3 c=metal*(1.05+ndl*.50);
-        c+=silver*crownMask*(.30+.60*ndl+.30*spec);
-        c+=vec3(.022,.085,.125)*shoulderMask*(.22+.28*ndl);
-        c+=cyan*fresnel*(.16+.18*energy);
-        c+=(cyan*.62+violet*.30)*dna*(.08+.16*energy);
-        c+=cyan*(nucleus*2.80+ring*.78)+ice*(heart*.06+nucleus*.32+spec*.38);
-        c+=ice*seam*.14;
-        c+=(ice*.92+cyan*.68)*pulse;
-        float alpha=.74+.10*ndl+.08*fresnel+nucleus*.08+pulse*.06;
-        ${outputName}=vec4(filmic(c*1.20),clamp(alpha,.72,.94));
+        vec3 cyan=vec3(.012,.36,.55);
+        vec3 violet=vec3(.05,.07,.15);
+        vec3 ice=vec3(.46,.63,.70);
+        vec3 silver=vec3(.42,.50,.53);
+        vec3 metal=vec3(.004,.010,.016);
+        vec3 c=metal*(1.22+ndl*.48);
+        c+=silver*crownMask*(.58+.66*ndl+.30*spec);
+        c+=vec3(.030,.050,.064)*shoulderMask*(.58+.30*ndl);
+        c+=cyan*fresnel*(.045+.050*energy);
+        c+=(cyan*.12+violet*.05)*dna*(.022+.035*energy);
+        c+=cyan*(nucleus*1.90+ring*.18)+ice*(heart*.020+nucleus*.18+spec*.30);
+        c+=ice*seam*.08;
+        c+=(ice*.48+cyan*.26)*pulse;
+        float alpha=.92+.025*ndl+.020*fresnel+nucleus*.020+pulse*.018;
+        ${outputName}=vec4(filmic(c*.82),clamp(alpha,.90,.985));
       }`;
     const fragmentSource = constrainedMobile ? constrainedFragmentSource : fullFragmentSource;
 
@@ -1077,6 +1076,7 @@
       geometry:'armored-four-lobe-core-with-native-tendrils-r614',
       referenceGeometry:'unified-armored-diamond-pod-r669',
       referenceGeometryR730:'compact-dark-armored-pod-eight-radial-native-tendrils',
+      referenceGeometryR810:'opaque-gunmetal-compact-pod-silver-crown-local-cyan-eye-short-tendrils',
       genome:'native-double-helix-energy-lattice-r614',
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
@@ -1127,6 +1127,8 @@
     root.dataset.fxCoreReferenceGeometryR669='unified-armored-diamond-pod-silver-crown-cyan-optical-well-native-tendrils';
     root.dataset.fxCoreReferenceGeometryR673='convex-compact-armored-pod-no-star-silhouette';
     root.dataset.fxCoreReferenceGeometryR730='compact-dark-armored-pod-eight-radial-native-tendrils';
+    root.dataset.fxCoreReferenceGeometryR810='opaque-gunmetal-compact-pod-silver-crown-local-cyan-eye-short-tendrils';
+    root.dataset.fxCoreReferenceMaterialR810='near-opaque-dark-armor-silver-crown-local-cyan-optical-core';
     root.dataset.fxCoreReferenceMaterialR730='opaque-gunmetal-silver-crown-local-cyan-optical-core';
     root.dataset.fxCoreReferenceMaterial='dark-metal-ice-cyan-living-core-r614';
     root.dataset.fxCoreReferenceMaterialR669='gunmetal-silver-cyan-armored-living-pod';
