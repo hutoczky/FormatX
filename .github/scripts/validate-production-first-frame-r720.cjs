@@ -18,6 +18,18 @@ const { pathToFileURL } = require('node:url');
     const response = await entry.fetch(new Request('https://formatxsuite.com/'), env, {});
     assert.equal(response.status, 200, name);
     const html = await response.text();
+    if (name === 'production-content-entry.js') {
+      // Exercise the real homepage rather than the gateway's minimal fixture:
+      // a preload with an obsolete query string creates a second fetch.
+      const link = response.headers.get('Link') || '';
+      for (const file of ['formatx-critical-shell-v56.css', 'formatx-quality-r461.css', 'formatx-first-paint-r206.css']) {
+        const path = `/scifi-ui/styles/${file}`;
+        const preloads = link.split(/,\s*(?=<)/).filter(value => value.includes(path));
+        assert.equal(preloads.length, 1, `${name}: one shared first-paint preload for ${file}`);
+        const url = preloads[0].match(/^<([^>]+)>/)[1];
+        assert.ok(html.includes(`href="${url}"`), `${name}: ${file} preload must match its live stylesheet URL`);
+      }
+    }
     const tags = html.match(/<link\b[^>]*data-fx-critical-core-r227[^>]*>/gi) || [];
     assert.equal(tags.length, 1, `${name}: one canonical core stylesheet`);
     assert.match(tags[0], /\shref="\/scifi-ui\/styles\/formatx-critical-core-r227\.css\?[^" ]+"/, `${name}: critical geometry must have a real href`);

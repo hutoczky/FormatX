@@ -2,11 +2,22 @@ import { describe, expect, it } from 'vitest';
 import canonicalWorker from '../src/production-content-entry.js';
 
 const P0_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
+const SHARED_FIRST_PAINT_URLS = [
+  '/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint',
+  '/scifi-ui/styles/formatx-quality-r461.css?v=20260902-r500-canonical-hero-state',
+  '/scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero',
+];
 
 function expectHomepageLinks(response, canonical) {
   const link = response.headers.get('Link') || '';
   expect(link).toContain(`<${canonical}>; rel="canonical"`);
   expect(link).toContain(P0_PRELOAD);
+  for (const url of SHARED_FIRST_PAINT_URLS) {
+    expect(link).toContain(`<${url}>; rel=preload; as=style`);
+    expect(link.split(url.split('?')[0])).toHaveLength(2);
+  }
+  expect(link).not.toContain('formatx-critical-core-r227.css');
+  expect(link).not.toContain('as=script');
 }
 
 function testEnv(onAsset) {
@@ -49,6 +60,14 @@ describe('active production canonical gateway', () => {
     expect(response.headers.get('Location')).toBeNull();
     expectHomepageLinks(response, 'https://formatxsuite.com/');
     expect(assetPath).toBe('/scifi-ui/');
+  });
+
+  it('preserves the same canonical and critical preload headers for HEAD without a body', async () => {
+    const request = new Request('https://formatxsuite.com/', { method: 'HEAD' });
+    const response = await canonicalWorker.fetch(request, testEnv(), {});
+    expect(response.status).toBe(200);
+    expectHomepageLinks(response, 'https://formatxsuite.com/');
+    expect(await response.text()).toBe('');
   });
 
   it('keeps dynamic homepage assets rooted in /scifi-ui without moving hash navigation', async () => {
