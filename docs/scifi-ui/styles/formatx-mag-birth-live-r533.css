@@ -110,7 +110,7 @@ html[data-fx-mag-birth-live="active"] {
   z-index: 1;
   width: min(54vw, 520px);
   height: min(74vh, 720px);
-  transform: translate(-50%,-50%) perspective(1100px) rotateX(-7deg) rotateY(var(--fxb-dna-turn)) rotateZ(-3deg) scale(calc(1.34 * var(--fxb-dna-breathe)));
+  transform: translate(-50%,-50%) perspective(1100px) rotateX(-7deg) rotateY(var(--fxb-dna-turn)) rotateZ(-3deg) scale(1.34);
   transform-origin: 50% 50%;
   transform-style: preserve-3d;
   perspective: 1100px;
@@ -283,7 +283,7 @@ html[data-fx-mag-birth-live="active"] {
 }
 .fx-mag-birth-r533[data-phase="1"] .fxb-dna-bridge,
 .fx-mag-birth-r533[data-phase="1"] .fxb-dna-node {
-  opacity: calc(.52 + (var(--fxb-dna-depth) * .44));
+  opacity: .84;
   transform: scale(1);
 }
 .fx-mag-birth-r533[data-phase="1"] .fxb-dna-heart {
