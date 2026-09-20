@@ -7,6 +7,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
       - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r657.js'
+      - 'docs/scifi-ui/scripts/three-r185.module.js'
       - '.github/scripts/capture-mag-intro-r656.cjs'
       - '.github/workflows/intro-visual-proof.yml'
   workflow_dispatch:
@@ -61,7 +62,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mag-intro-r657-${{ github.sha }}
+          name: mag-intro-r657-proof
           path: artifacts/r657-intro-keyframes/
           if-no-files-found: warn
           retention-days: 14
