@@ -1386,3 +1386,18 @@
     transition: none !important;
   }
 }
+
+
+/* FormatX R640 — Live OS command surface.
+   The canonical desktop reference layout must not hide the real operational
+   launcher; Live OS is a first-class organ of the product experience. */
+@media (min-width:901px){
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture [data-fx-live-os-launcher]{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+  }
+}
