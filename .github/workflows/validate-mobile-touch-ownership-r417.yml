@@ -94,7 +94,7 @@ jobs:
               const miniHost=document.querySelector('.fx-mini-mag-assistant-r459');
               const mini=document.querySelector('.fx-mini-mag-launcher-r459');
               const cs=canvas?getComputedStyle(canvas):null;
-              return{brand:rect(brand),mag:rect(mag),lang:rect(lang),menu:rect(menu),controls:rect(controls),sound:rect(sound),ask:rect(ask),pauseCount,canvas:rect(canvas),miniHost:rect(miniHost),mini:rect(mini),magText:String(mag?.textContent||'').trim(),langText:String(lang?.textContent||'').trim(),magBefore:mag?getComputedStyle(mag,'::before').content:'',magAfter:mag?getComputedStyle(mag,'::after').content:'',filter:cs?.filter||'',renderer:document.documentElement.dataset.fxCoreRenderer||'',canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,miniOwner:document.documentElement.dataset.fxMiniMagPrimaryHeroR459||''};
+              return{brand:rect(brand),mag:rect(mag),lang:rect(lang),menu:rect(menu),controls:rect(controls),sound:rect(sound),ask:rect(ask),pauseCount,canvas:rect(canvas),miniHost:rect(miniHost),mini:rect(mini),magText:String(mag?.textContent||'').trim(),langText:String(lang?.textContent||'').trim(),magBefore:mag?getComputedStyle(mag,'::before').content:'',magAfter:mag?getComputedStyle(mag,'::after').content:'',filter:cs?.filter||'',renderer:document.documentElement.dataset.fxCoreRenderer||'',canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,miniOwner:document.documentElement.dataset.fxMiniMagPrimaryHeroR459||'',miniContext:document.documentElement.dataset.fxMiniMagContextR560||'',miniContextHidden:miniHost?.dataset.contextHidden||'false'};
             });
           }
 
@@ -130,7 +130,14 @@ jobs:
 
             const mini=page.locator('.fx-mini-mag-launcher-r459').first();
             const miniBox=await mini.boundingBox();assert(miniBox&&miniBox.width>=54&&miniBox.height>=54,'mobile: Mini MAG target too small');
-            await mini.tap();
+            const miniSafeHidden=mobile.miniHost?.visibility==='hidden'||mobile.miniHost?.opacity<=.02||mobile.miniContextHidden==='true';
+            if(miniSafeHidden){
+              assert(['collision-information-safe','terminal-information-safe'].includes(mobile.miniContext),'mobile: hidden Mini MAG lacks R560 information-safety contract '+JSON.stringify(mobile));
+              assert(mobile.mag?.visibility==='visible'&&mobile.mag?.opacity>.02&&mobile.mag?.width>=44&&mobile.mag?.height>=44,'mobile: collision-safe Mini MAG has no visible header MAG control '+JSON.stringify(mobile));
+              await page.evaluate(()=>window.FormatXMiniMagR459?.open?.());
+            }else{
+              await mini.tap();
+            }
             await page.waitForFunction(()=>document.querySelector('.fx-mini-mag-assistant-r459')?.dataset.open==='true',null,{timeout:5000});
             await page.locator('.fx-mini-mag-nav-r459 [data-section="pricing"]').tap();
             await page.waitForFunction(()=>document.documentElement.dataset.fxMiniMagLastNavigationR459==='pricing',null,{timeout:5000});
