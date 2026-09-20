@@ -7,6 +7,7 @@ const {chromium}=require('playwright');
 const BASE=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT=process.env.FORMATX_INTRO_KEYFRAME_DIR||'artifacts/r659-intro-keyframes';
 const CHROME=process.env.CHROME_BIN||undefined;
+const SKIP_HANDOFF=process.env.FORMATX_SKIP_HANDOFF==='1';
 fs.mkdirSync(OUT,{recursive:true});
 
 const SHOTS=[
@@ -77,55 +78,58 @@ const SHOTS=[
       await page.close();
     }
 
-    // Capture the real post-intro handoff and the one permanent native hero MAG.
-    // This lives in the early artifact so visual continuity remains inspectable
-    // even when a later workflow run is superseded by another master commit.
-    {
-      const page=await context.newPage();
-      const errors=[];
-      page.on('pageerror',e=>errors.push(String(e)));
-      page.on('console',m=>{
-        if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());
-      });
-
-      const u=new URL(BASE);
-      u.searchParams.set('intro','1');
-      u.searchParams.set('visualintro','1');
-      u.searchParams.set('r720handoff','1');
-
-      await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
-      await page.locator('.fx-mag-birth-r533').waitFor({state:'visible',timeout:10000});
-      await page.waitForFunction(
-        ()=>document.querySelectorAll('.fx-mag-birth-r533').length===0
-          && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1,
-        null,
-        {timeout:30000}
-      );
-      await page.waitForTimeout(350);
-
-      const state=await page.evaluate(()=>{
-        const root=document.documentElement;
-        return {
-          overlay:document.querySelectorAll('.fx-mag-birth-r533').length,
-          stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
-          canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
-          coreRenderer:root.dataset.fxCoreRenderer||'',
-          coreRevision:root.dataset.fxCoreRendererVersion||'',
-          referenceGeometry:root.dataset.fxCoreReferenceGeometryR669
-            ||root.dataset.fxCoreReferenceGeometry
-            ||'',
-          coreGeometry:root.dataset.fxCoreGeometry||'',
-          handoff:root.dataset.fxMagBirthHandoff||root.dataset.fxMagBirthLive||''
-        };
-      });
-
-      await page.screenshot({path:path.join(OUT,'06-post-intro-handoff.png'),fullPage:false});
-      const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
-      if(await stage.count()){
-        await stage.screenshot({path:path.join(OUT,'07-native-hero-mag.png')});
+    if(!SKIP_HANDOFF){
+      // Capture the real post-intro handoff and the one permanent native hero MAG.
+      // This lives in the early artifact so visual continuity remains inspectable
+      // even when a later workflow run is superseded by another master commit.
+      {
+        const page=await context.newPage();
+        const errors=[];
+        page.on('pageerror',e=>errors.push(String(e)));
+        page.on('console',m=>{
+          if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());
+        });
+  
+        const u=new URL(BASE);
+        u.searchParams.set('intro','1');
+        u.searchParams.set('visualintro','1');
+        u.searchParams.set('r720handoff','1');
+  
+        await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
+        await page.locator('.fx-mag-birth-r533').waitFor({state:'visible',timeout:10000});
+        await page.waitForFunction(
+          ()=>document.querySelectorAll('.fx-mag-birth-r533').length===0
+            && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1,
+          null,
+          {timeout:30000}
+        );
+        await page.waitForTimeout(350);
+  
+        const state=await page.evaluate(()=>{
+          const root=document.documentElement;
+          return {
+            overlay:document.querySelectorAll('.fx-mag-birth-r533').length,
+            stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
+            canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
+            coreRenderer:root.dataset.fxCoreRenderer||'',
+            coreRevision:root.dataset.fxCoreRendererVersion||'',
+            referenceGeometry:root.dataset.fxCoreReferenceGeometryR669
+              ||root.dataset.fxCoreReferenceGeometry
+              ||'',
+            coreGeometry:root.dataset.fxCoreGeometry||'',
+            handoff:root.dataset.fxMagBirthHandoff||root.dataset.fxMagBirthLive||''
+          };
+        });
+  
+        await page.screenshot({path:path.join(OUT,'06-post-intro-handoff.png'),fullPage:false});
+        const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
+        if(await stage.count()){
+          await stage.screenshot({path:path.join(OUT,'07-native-hero-mag.png')});
+        }
+        report.push({seconds:'post-intro',name:'06-post-intro-handoff',state,errors});
+        await page.close();
       }
-      report.push({seconds:'post-intro',name:'06-post-intro-handoff',state,errors});
-      await page.close();
+  
     }
 
     fs.writeFileSync(path.join(OUT,'state.json'),JSON.stringify({report},null,2)+'\n');
