@@ -1380,6 +1380,7 @@
   document.documentElement.dataset.fxMagBirthThreeR658='r658-csp-local-three-proof';
   document.documentElement.dataset.fxMagBirthProofR658='r658-early-keyframe-proof';
   document.documentElement.dataset.fxMagBirthReferenceR721='frame-locked-source-video-proof';
+  document.documentElement.dataset.fxMagBirthVisualProofR911='current-r900-reference-keyframes';
 
   window.FormatXMagGenesisThreeR900={
     attach,
