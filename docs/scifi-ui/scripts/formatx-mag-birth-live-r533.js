@@ -111,6 +111,7 @@
   overlay.dataset.fxIntroVisualProofR964 = 'r963-frame-locked-reference-proof';
   overlay.dataset.fxIntroR970 = 'video-locked-organic-three-genesis';
   overlay.dataset.fxIntroR980 = 'neural-surface-three-genesis';
+  overlay.dataset.fxIntroVisualProofR981 = 'r980-frame-locked-reference-proof';
   overlay.dataset.fxIntroVisualProofR962 = 'r961-frame-locked-reference-proof';
   overlay.dataset.fxIntroVisualProofR911 = 'current-r900-reference-keyframes';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
