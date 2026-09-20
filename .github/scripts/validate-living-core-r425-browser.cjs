@@ -252,11 +252,11 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.equal(state.rendererSelection, 'r326-direct-r468-soft-optics-live-energy-zero-idle', JSON.stringify(state));
     assert.equal(state.governor, 'r528-automatic-idle-flag-no-manual-pause', JSON.stringify(state));
     assert.equal(state.idlePolicy, 'periodic-surface-bursts-between-zero-idle', JSON.stringify(state));
-    assert.ok(state.opacity >= .88 && state.opacity <= 1, JSON.stringify(state));
-    assert.match(state.filter, /brightness\(1\.02\)/, state.filter);
-    assert.match(state.filter, /contrast\(0?\.98\)/, state.filter);
-    assert.match(state.filter, /saturate\(1\.28\)/, state.filter);
-    assert.match(state.filter, /blur\(0?\.3px\)/, state.filter);
+    assert.ok(state.opacity >= .80 && state.opacity <= .82, JSON.stringify(state));
+    assert.match(state.filter, /brightness\(0?\.895\)/, state.filter);
+    assert.match(state.filter, /contrast\(0?\.805\)/, state.filter);
+    assert.match(state.filter, /saturate\(0?\.975\)/, state.filter);
+    assert.match(state.filter, /blur\(0?\.82px\)/, state.filter);
     assert.equal(state.stageAnimation, 'none', JSON.stringify(state));
   } else {
     assert.equal(state.normal, 'continuous-volume-93-percent-smooth', JSON.stringify(state));
