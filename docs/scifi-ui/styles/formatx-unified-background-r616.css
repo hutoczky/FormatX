@@ -1,0 +1,218 @@
+/* FormatX R616 — canonical site-wide background and surface cohesion.
+   One static visual language across desktop/mobile, derived from the final
+   dark cyan/ice reference surface. No animation loop, no extra canvas. */
+
+:root {
+  --fx-r616-bg-0:#01050c;
+  --fx-r616-bg-1:#03101c;
+  --fx-r616-bg-2:#061827;
+  --fx-r616-cyan:rgba(64,214,255,.18);
+  --fx-r616-cyan-soft:rgba(76,206,255,.075);
+  --fx-r616-violet-soft:rgba(118,100,255,.055);
+  --fx-r616-line:rgba(137,224,255,.15);
+  --fx-r616-panel:rgba(4,15,26,.78);
+  --fx-r616-panel-strong:rgba(4,13,23,.91);
+  --fx-r616-card:rgba(5,16,28,.86);
+}
+
+html {
+  background:var(--fx-r616-bg-0)!important;
+}
+
+html body.living-architecture {
+  position:relative;
+  isolation:isolate;
+  color:#eefaff;
+  background:
+    radial-gradient(1200px 760px at 82% 8%, rgba(48,191,255,.115), transparent 64%),
+    radial-gradient(900px 720px at 8% 38%, rgba(58,149,255,.070), transparent 68%),
+    radial-gradient(900px 720px at 76% 72%, rgba(112,78,255,.045), transparent 70%),
+    linear-gradient(180deg,#020812 0%,#03111d 26%,#020b14 58%,#01060c 100%)!important;
+  background-attachment:fixed!important;
+}
+
+html body.living-architecture::before {
+  content:"";
+  position:fixed;
+  z-index:-20;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(102,213,255,.026) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(102,213,255,.026) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.50),rgba(0,0,0,.16) 68%,transparent 100%);
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.50),rgba(0,0,0,.16) 68%,transparent 100%);
+}
+
+html body.living-architecture::after {
+  content:"";
+  position:fixed;
+  z-index:-19;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 7%,rgba(152,235,255,.055),transparent 20%),
+    radial-gradient(circle at 50% 54%,transparent 38%,rgba(0,0,0,.22) 82%,rgba(0,0,0,.48) 118%);
+}
+
+html body.living-architecture > .fx-atmosphere {
+  opacity:.55!important;
+}
+
+html body.living-architecture #main-content,
+html body.living-architecture #main-content > section,
+html body.living-architecture #main-content > .scene,
+html body.living-architecture #main-content > .fx-category-deck,
+html body.living-architecture .site-footer {
+  background-color:transparent!important;
+}
+
+html body.living-architecture #main-content > section.scene:not(#hero),
+html body.living-architecture #main-content > .fx-category-deck {
+  border-color:rgba(137,224,255,.09)!important;
+}
+
+html body.living-architecture :is(
+  .hero-copy,
+  .flow-stage,
+  .flow-chapters article,
+  .card,
+  .price-card,
+  .payment,
+  .payment-console,
+  .system-grid article,
+  .release-card,
+  .fx-category-deck,
+  .fx-category-grid > article,
+  .fx-origin-proof,
+  .fx-origin-proof article,
+  .fx-award-proof,
+  #user-feedback,
+  .fx-plan-qr-card,
+  .fx-platform-card,
+  .fx-organism-console,
+  .fx-thought-genome-disclosure
+) {
+  border-color:var(--fx-r616-line)!important;
+  background:
+    radial-gradient(circle at 88% 7%,rgba(73,216,255,.052),transparent 34%),
+    linear-gradient(145deg,rgba(7,22,36,.89),rgba(3,10,18,.94))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    inset 0 0 38px rgba(57,196,255,.018),
+    0 20px 62px rgba(0,0,0,.19)!important;
+}
+
+html body.living-architecture :is(
+  .price-card.featured,
+  .fx-platform-card.is-active,
+  .fx-category-grid > article:hover,
+  .release-card
+) {
+  border-color:rgba(148,230,255,.22)!important;
+  background:
+    radial-gradient(circle at 82% 8%,rgba(77,222,255,.085),transparent 38%),
+    linear-gradient(145deg,rgba(8,28,45,.92),rgba(3,12,22,.96))!important;
+}
+
+html body.living-architecture .topbar {
+  border-bottom-color:rgba(132,220,255,.10)!important;
+  background:linear-gradient(180deg,rgba(2,8,15,.88),rgba(3,12,20,.68))!important;
+}
+
+html.fx-page-scrolled body.living-architecture .topbar {
+  background:rgba(3,12,21,.90)!important;
+  border-bottom-color:rgba(141,225,255,.15)!important;
+}
+
+html body.living-architecture .site-footer {
+  border-top-color:rgba(139,224,255,.12)!important;
+  background:
+    radial-gradient(850px 430px at 50% 0%,rgba(45,190,255,.070),transparent 68%),
+    linear-gradient(180deg,rgba(3,12,21,.72),rgba(1,5,10,.94))!important;
+}
+
+html body.living-architecture :is(
+  .marquee,
+  .footer-bottom,
+  .system-grid,
+  .fx-organism-actionbar,
+  .fx-platform-status,
+  .fx-proof-status
+) {
+  border-color:rgba(137,224,255,.11)!important;
+}
+
+html body.living-architecture :is(
+  .section-index,
+  .eyebrow,
+  .kicker,
+  .fx-organism-console-kicker,
+  .fx-platform-card header small,
+  .price-card header,
+  .release-card > small
+) {
+  color:rgba(157,224,244,.72)!important;
+}
+
+html body.living-architecture :is(h1,h2,h3,strong,.hero-title-main) {
+  text-shadow:0 0 28px rgba(82,204,255,.055);
+}
+
+@media (max-width:900px), (pointer:coarse) {
+  html body.living-architecture {
+    background:
+      radial-gradient(640px 520px at 86% 5%,rgba(51,194,255,.13),transparent 64%),
+      radial-gradient(560px 600px at 7% 43%,rgba(66,151,255,.075),transparent 70%),
+      radial-gradient(540px 500px at 78% 78%,rgba(112,78,255,.048),transparent 72%),
+      linear-gradient(180deg,#020812 0%,#03111d 28%,#020a13 62%,#01060c 100%)!important;
+    background-attachment:scroll!important;
+  }
+
+  html body.living-architecture::before {
+    background-size:32px 32px;
+    opacity:.72;
+  }
+
+  html body.living-architecture #main-content > :is(
+    #experience,#capabilities,#pricing,#system,#resources,.fx-category-deck
+  ) {
+    border-color:rgba(137,224,255,.15)!important;
+    background:
+      radial-gradient(circle at 86% 7%,rgba(68,211,255,.055),transparent 35%),
+      linear-gradient(148deg,rgba(5,22,36,.87),rgba(2,11,20,.93))!important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.028),
+      0 20px 62px rgba(0,0,0,.20)!important;
+  }
+
+  html body.living-architecture :is(
+    .flow-chapters article,
+    .card,
+    .price-card,
+    .payment,
+    .payment-console,
+    .system-grid article,
+    .release-card,
+    .fx-category-grid > article,
+    .fx-origin-proof article,
+    .fx-plan-qr-card
+  ) {
+    background:
+      linear-gradient(145deg,rgba(7,23,38,.92),rgba(3,11,19,.97))!important;
+  }
+
+  html body.living-architecture .site-footer {
+    background:
+      radial-gradient(560px 300px at 50% 0%,rgba(55,201,255,.075),transparent 70%),
+      linear-gradient(180deg,rgba(3,13,22,.82),rgba(1,5,10,.97))!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html body.living-architecture,
+  html body.living-architecture #main-content {
+    background-color:transparent!important;
+  }
+}
