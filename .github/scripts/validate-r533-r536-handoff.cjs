@@ -125,6 +125,16 @@ async function verifyFullBirth(browser){
     await installTimelineProbe(page);
     await page.locator(OVERLAY).waitFor({state:'visible',timeout:10000});
     const active=await snapshot(page);
+    const dnaGenesis=await page.evaluate(()=>({
+      genome:document.documentElement.dataset.fxMagBirthGenomeR611||'',
+      helixCount:document.querySelectorAll('[data-fx-dna-3d-r611="true"]').length,
+      embryoCount:document.querySelectorAll('.fxb-embryo').length,
+      nativeCanvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length
+    }));
+    assert.equal(dnaGenesis.genome,'realistic-css-3d-double-helix-embryo-one-native-r326','desktop-full: realistic R611 DNA genesis marker missing');
+    assert.equal(dnaGenesis.helixCount,1,'desktop-full: CSS 3D DNA helix must be unique');
+    assert.equal(dnaGenesis.embryoCount,1,'desktop-full: living embryo stage must be unique');
+    assert.ok(dnaGenesis.nativeCanvasCount<=1,'desktop-full: DNA intro created a duplicate native canvas');
     assert.equal(active.scrollLock,'active','desktop-full: R533 did not own the temporary scroll lock');
     assert.equal(active.legacyPreloaderCount,0,'desktop-full: second/legacy preloader remained');
     await page.waitForFunction(sel=>!document.querySelector(sel),OVERLAY,{timeout:12000});
@@ -204,7 +214,7 @@ async function verifySkip(browser){
   try{
     const desktop=await verifyFullBirth(browser);
     const mobile=await verifySkip(browser);
-    const report={base:BASE,contract:'r552-r533-native-birth-to-r536-cinematic-handoff',desktop,mobile};
+    const report={base:BASE,contract:'r611-realistic-css3d-dna-genesis-to-single-native-r326-handoff',desktop,mobile};
     writeJson('report.json',report);
     console.log('PASS: R533 full birth + skip + once-per-session hand off to the same single native R326 MAG and R536 journey without stuck scroll lock or duplicate preloader.');
   }finally{await browser.close();}
