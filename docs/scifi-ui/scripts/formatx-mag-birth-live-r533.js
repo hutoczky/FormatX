@@ -111,6 +111,7 @@
   overlay.dataset.fxIntroVisualProofR964 = 'r963-frame-locked-reference-proof';
   overlay.dataset.fxIntroR970 = 'video-locked-organic-three-genesis';
   overlay.dataset.fxIntroR980 = 'neural-surface-three-genesis';
+  overlay.dataset.fxIntroR982 = 'reference-balance-three-genesis';
   overlay.dataset.fxIntroR990 = 'biotic-tissue-three-genesis';
   overlay.dataset.fxIntroVisualProofR981 = 'r980-frame-locked-reference-proof';
   overlay.dataset.fxIntroVisualProofR962 = 'r961-frame-locked-reference-proof';
@@ -153,6 +154,7 @@
   ROOT.dataset.fxMagBirthArtR963 = 'dark-liquid-dna-cellular-eye-organic-final-sphere-silver-crown-segmented-tendrils';
   ROOT.dataset.fxMagBirthArtR970 = 'dna-organic-cellular-sphere-embedded-eye-tendrils-local-flash-native-handoff';
   ROOT.dataset.fxMagBirthArtR980 = 'balanced-brain-folds-surface-veins-reference-iris-dark-segmented-tendrils';
+  ROOT.dataset.fxMagBirthArtR982 = 'flesh-lobes-large-embedded-iris-early-silver-crown-dark-segmented-tendrils';
   ROOT.dataset.fxMagBirthArtR990 = 'dense-cellular-lobes-thin-neural-folds-surface-veins-segmented-tendril-light';
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
   overlay.setAttribute('aria-label', copy.title);
