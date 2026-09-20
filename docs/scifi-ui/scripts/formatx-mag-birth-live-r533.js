@@ -597,46 +597,63 @@
     ctx.globalCompositeOperation='source-over';
   }
 
+  function safeTeardownOverlay(source) {
+    try { releaseStageStyle(); } catch (_) {}
+    try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
+    try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
+    try { overlay.remove(); } catch (_) {}
+    try {
+      document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
+        detail:{source,revision:'r655-exception-safe-three-genesis-handoff'}
+      }));
+    } catch (_) {}
+  }
+
   function finish(source) {
     if(finished)return;
     finished=true;
-    cancelAnimationFrame(raf);
-    clearTimeout(frameTimer);
+
+    try { cancelAnimationFrame(raf); } catch (_) {}
+    try { clearTimeout(frameTimer); } catch (_) {}
     frameTimer=0;
-    clearTimeout(exitTimer);
-    clearTimeout(hardFinishTimer);
-    for(const timer of phaseTimers)clearTimeout(timer);
+    try { clearTimeout(exitTimer); } catch (_) {}
+    try { clearTimeout(hardFinishTimer); } catch (_) {}
+    for(const timer of phaseTimers){
+      try { clearTimeout(timer); } catch (_) {}
+    }
     phaseTimers.clear();
 
-    requestCoreWarmup('finish-'+String(source||'unknown'));
+    try { requestCoreWarmup('finish-'+String(source||'unknown')); } catch (_) {}
     try {
       coreApi?.setMorph?.(1,'r611-final-living-handoff');
       coreApi?.setShape?.('crystal','r611-final-living-handoff');
       coreApi?.requestRender?.(2);
     } catch (_) {}
-    setStageOpacity(1);
+    try { setStageOpacity(1); } catch (_) {}
 
-    percent.value='100';
-    progress.value=100;
-    status.textContent=copy.statuses[copy.statuses.length-1][1];
-    overlay.dataset.phase='4';
-    ROOT.dataset.fxMagBirthLiveR533=source;
+    try { percent.value='100'; } catch (_) {}
+    try { progress.value=100; } catch (_) {}
+    try { status.textContent=copy.statuses[copy.statuses.length-1][1]; } catch (_) {}
+    try { overlay.dataset.phase='4'; } catch (_) {}
+    try { ROOT.dataset.fxMagBirthLiveR533=source; } catch (_) {}
+    try { ROOT.dataset.fxMagBirthHandoffR655='exception-safe-overlay-teardown'; } catch (_) {}
 
-    /* The underlying MAG is already the production MAG at its production
-       coordinates. Fading only this film layer creates the zero-cut handoff. */
-    // R607: removal must not depend on one more animation frame. Native WebGL
-    // startup can temporarily starve rAF on software/slow GPU paths; the film
-    // still has to fail open deterministically once finish() has been reached.
-    try{ filmRenderer?.destroy?.(); }catch(_){}
+    try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
-    overlay.classList.add('is-leaving');
-    exitTimer=window.setTimeout(()=>{
-      releaseStageStyle();
-      ROOT.removeAttribute('data-fx-mag-birth-live');
-      ROOT.removeAttribute('data-fx-mag-birth-phase');
-      overlay.remove();
-      document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{detail:{source,revision:'r611-realistic-css3d-dna-embryo-native-core-handoff'}}));
-    }, REDUCED ? 20 : EXIT_MS);
+    try { overlay.classList.add('is-leaving'); } catch (_) {}
+
+    exitTimer=window.setTimeout(
+      ()=>safeTeardownOverlay(source),
+      REDUCED ? 20 : EXIT_MS
+    );
+
+    // Independent final DOM guarantee. This timer intentionally does not call
+    // finish() again, because finish() owns a one-shot guard. If any browser or
+    // extension interrupts the graceful branch, the film layer still cannot
+    // survive past the reference endpoint + exit allowance.
+    window.setTimeout(()=>{
+      if(overlay.isConnected) safeTeardownOverlay('forced-overlay-cleanup-r655');
+    },(REDUCED ? 20 : EXIT_MS)+140);
   }
 
   function queueRender(delay=0) {
