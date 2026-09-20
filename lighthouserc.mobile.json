@@ -6,6 +6,7 @@
       ],
       "numberOfRuns": 3,
       "settings": {
+        "saveAssets": true,
         "chromeFlags": "--headless=new --no-sandbox --disable-dev-shm-usage",
         "throttlingMethod": "devtools",
         "maxWaitForLoad": 60000,

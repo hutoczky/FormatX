@@ -79,6 +79,16 @@ jobs:
           set -o pipefail; rm -rf .lighthouseci; set +e; lhci autorun --config=./lighthouserc.json 2>&1 | tee lighthouse-desktop-output.txt; s=${PIPESTATUS[0]}; set -e
           grep -Fq 'Running Lighthouse 3 time(s) on http://127.0.0.1:8788/' lighthouse-desktop-output.txt; mkdir -p lighthouse-results/desktop; cp -a .lighthouseci/. lighthouse-results/desktop/; exit "$s"
         env: { LHCI_GITHUB_APP_TOKEN: '${{ secrets.LHCI_GITHUB_APP_TOKEN }}' }
+      - name: Retain all desktop browser traces
+        if: always() && steps.candidate.outcome == 'success'
+        shell: bash
+        run: |
+          # Lighthouse names saved assets by URL + collection time. Preserve
+          # every run, including failed audits, before starting another profile.
+          shopt -s nullglob
+          assets=(*.trace.json *.devtoolslog.json)
+          mkdir -p lighthouse-results/desktop/traces
+          if ((${#assets[@]})); then mv -- "${assets[@]}" lighthouse-results/desktop/traces/; fi
       - name: Run mobile Lighthouse CI on the real production candidate
         id: lighthouse_mobile
         if: always() && steps.candidate.outcome == 'success'
@@ -87,6 +97,14 @@ jobs:
           set -o pipefail; rm -rf .lighthouseci; set +e; lhci autorun --config=./lighthouserc.mobile.json 2>&1 | tee lighthouse-mobile-output.txt; s=${PIPESTATUS[0]}; set -e
           grep -Fq 'Running Lighthouse 3 time(s) on http://127.0.0.1:8788/' lighthouse-mobile-output.txt; mkdir -p lighthouse-results/mobile; cp -a .lighthouseci/. lighthouse-results/mobile/; exit "$s"
         env: { LHCI_GITHUB_APP_TOKEN: '${{ secrets.LHCI_GITHUB_APP_TOKEN }}' }
+      - name: Retain all mobile browser traces
+        if: always() && steps.candidate.outcome == 'success'
+        shell: bash
+        run: |
+          shopt -s nullglob
+          assets=(*.trace.json *.devtoolslog.json)
+          mkdir -p lighthouse-results/mobile/traces
+          if ((${#assets[@]})); then mv -- "${assets[@]}" lighthouse-results/mobile/traces/; fi
       - name: Enforce every desktop and mobile Lighthouse run
         if: always() && steps.candidate.outcome == 'success'
         env:
