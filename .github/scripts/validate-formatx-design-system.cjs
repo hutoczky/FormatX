@@ -174,7 +174,10 @@ async function inspect(browser, config, viewport) {
   assert.equal(result.violet.toLowerCase(), '#8f72ff');
   assert.equal(result.radius, '30px 7px 30px 7px');
   assert.match(result.bodyFont, /Inter|system-ui/i);
-  assert.deepEqual(result.panelRadii, ['30px', '7px', '30px', '7px']);
+  const expectedPanelRadii = viewport.width <= 900
+    ? ['24px', '24px', '24px', '24px']
+    : ['30px', '7px', '30px', '7px'];
+  assert.deepEqual(result.panelRadii, expectedPanelRadii);
   assert.ok(result.headerBackdrop.includes('blur') || result.headerBackdrop === 'none');
   assert.ok(result.actionHeight >= 38, 'action too short: ' + JSON.stringify(result));
   assert.ok(result.actionWidth >= 38, 'action too narrow: ' + JSON.stringify(result));

@@ -58,6 +58,12 @@ async function waitForProductShowcase(page) {
   ), null, { timeout: 10000 });
   await page.waitForSelector('#product-showcase .fx-product-showcase__card', { timeout: 30000 });
   await page.locator('#product-showcase').scrollIntoViewIfNeeded();
+  const showcaseImages = page.locator('#product-showcase img');
+  const imageCount = await showcaseImages.count();
+  assert(imageCount >= 5, `product showcase image count ${imageCount}`);
+  for (let index = 0; index < imageCount; index += 1) {
+    await showcaseImages.nth(index).scrollIntoViewIfNeeded();
+  }
   await page.waitForFunction(() => {
     const images = Array.from(document.querySelectorAll('#product-showcase img'));
     return images.length >= 5 && images.every(image => image.complete && image.naturalWidth > 0);
