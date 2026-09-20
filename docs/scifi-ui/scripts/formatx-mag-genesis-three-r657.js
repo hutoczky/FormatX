@@ -640,8 +640,8 @@
     }
 
     updateCore(t,time){
-      let s=.001;
-      if(t>=2.28 && t<3.12)s=.08+ease((t-2.28)/.84)*.93;
+      let s=.66+smooth(t/2.28)*.06;
+      if(t>=2.28 && t<3.12)s=.72+ease((t-2.28)/.84)*.29;
       else if(t>=3.12 && t<5.55)s=1.01+Math.sin((t-3.12)*1.35)*.016;
       else if(t>=5.55 && t<8.95)s=mix(1.01,.73,smooth((t-5.55)/3.40));
       else if(t>=8.95)s=.73+smooth((t-8.95)/.75)*.06;
@@ -661,6 +661,9 @@
       this.coreGroup.rotation.x=Math.sin(time*.00037)*.036;
       this.coreShell.rotation.z=Math.PI/4+Math.sin(time*.00047)*.014;
       this.coreGlass.rotation.z=Math.PI/4-Math.sin(time*.00053)*.019;
+      const dormant=smooth(t/2.35);
+      this.coreShell.material.opacity=mix(.34,.99,dormant);
+      this.coreGlass.material.opacity=mix(.06,.23,dormant);
 
       const eye=smooth((t-2.55)/.38);
       const peak=smooth((t-3.10)/.36)*(1-smooth((t-5.62)/1.22));
@@ -674,11 +677,11 @@
     }
 
     updateOrganic(t,time){
-      const grow=smooth((t-2.42)/.68);
+      const grow=smooth((t-2.18)/.62);
       const hold=1-smooth((t-9.18)/.68)*.28;
       const visible=grow*hold;
       this.organicGroup.visible=visible>.002;
-      this.organicGroup.scale.setScalar(.001+visible*.999);
+      this.organicGroup.scale.setScalar(.001+visible*1.075);
       this.organicMaterial.opacity=.74*visible;
       this.organicWireMaterial.opacity=.045*visible;
       this.organicVeinMaterial.opacity=.22*visible;
@@ -698,11 +701,11 @@
     }
 
     updateCells(t,time){
-      const grow=smooth((t-2.68)/.62);
+      const grow=smooth((t-2.34)/.60);
       const fade=1-smooth((t-8.98)/.62)*.72;
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
-      this.cellGroup.scale.setScalar(.001+visible*.99);
+      this.cellGroup.scale.setScalar(.001+visible*1.045);
       this.cellMaterial.opacity=.62*visible;
       this.cellEdgeMaterial.opacity=.055*visible;
       this.cellVeinMaterial.opacity=.24*visible;
@@ -715,7 +718,7 @@
     }
 
     updateMechanical(t,time){
-      const pre=smooth((t-7.45)/1.10);
+      const pre=smooth((t-6.80)/1.30);
       const flashReveal=smooth((t-9.05)/.34);
       const grow=Math.min(1,pre*.64+flashReveal*.36);
       this.mechanicalGroup.visible=grow>.002;
@@ -733,7 +736,7 @@
     }
 
     updateTentacles(t,time){
-      const grow=smooth((t-5.35)/1.04);
+      const grow=smooth((t-5.68)/1.18);
       const settle=1-smooth((t-9.45)/.42)*.06;
       this.tentacleGroup.visible=grow>.002;
       this.tentacleMaterial.opacity=.76*grow*settle;
@@ -793,10 +796,15 @@
       this.particles.rotation.y=time*.000012;
       this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
 
-      const flash=smooth((t-9.18)/.10)*(1-smooth((t-9.55)/.24));
-      const after=smooth((t-9.44)/.34);
-      this.renderer.toneMappingExposure=1.16+flash*3.15+after*.18;
-      this.coreLight.intensity+=flash*46+after*7;
+      const flash=smooth((t-9.12)/.10)*(1-smooth((t-9.58)/.25));
+      const after=smooth((t-9.46)/.32);
+      this.renderer.toneMappingExposure=1.16+flash*3.65+after*.20;
+      this.coreLight.intensity+=flash*54+after*8;
+      if(this.glowSprite){
+        const g=1+flash*1.85;
+        this.glowSprite.scale.multiplyScalar(g);
+        this.glowSprite.material.opacity=Math.min(1,this.glowSprite.material.opacity+flash*.18);
+      }
 
       this.renderer.render(this.scene,this.camera);
     }
