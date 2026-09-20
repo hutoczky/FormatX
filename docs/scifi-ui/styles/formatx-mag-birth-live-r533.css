@@ -939,3 +939,31 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
 .fx-mag-birth-r533[data-performance="constrained"] .fxb-stars{
   will-change:auto;
 }
+
+
+/* FormatX R630 mobile-first cinematic budget.
+   Every phone receives the compositor-safe cinematic contract. Visual story
+   and phase choreography stay intact; desktop retains the full film stack. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-particles{
+    opacity:.50;
+  }
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-dna-stage{
+    filter:none!important;
+  }
+  .fx-mag-birth-r533[data-performance="constrained"][data-phase="1"] .fxb-dna-stage{
+    opacity:.94;
+  }
+  .fx-mag-birth-r533[data-performance="constrained"][data-phase="2"] .fxb-dna-stage{
+    opacity:.82;
+  }
+  .fx-mag-birth-r533[data-performance="constrained"][data-phase="3"] .fxb-dna-stage{
+    opacity:.30;
+  }
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-copy h1{
+    text-shadow:none;
+  }
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-telemetry output{
+    text-shadow:0 0 14px rgba(109,230,255,.10);
+  }
+}

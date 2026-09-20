@@ -67,7 +67,7 @@
   const overlay = document.createElement('section');
   overlay.className = 'fx-mag-birth-r533';
   overlay.dataset.phase = '0';
-  overlay.dataset.performance = LOW_POWER ? 'constrained' : 'full';
+  overlay.dataset.performance = MOBILE ? 'constrained' : 'full';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -132,7 +132,7 @@
   function buildDna() {
     if (!(dna instanceof SVGElement) || !(dnaBridges instanceof SVGGElement) || !(dnaNodes instanceof SVGGElement)) return;
     const NS='http://www.w3.org/2000/svg';
-    const samples=LOW_POWER?8:MOBILE?12:25;
+    const samples=MOBILE?8:25;
     /* R626: the CSS3D helix is now the sole visible genome renderer.
        The legacy SVG stays as inert compatibility markup, but is never built.
        This removes dozens of non-composited SVG transitions while preserving
@@ -406,7 +406,7 @@
   }
 
   function seedParticles(w,h) {
-    const count=LOW_POWER?Math.max(8,Math.min(12,Math.round((w*h)/36000))):MOBILE?Math.max(14,Math.min(22,Math.round((w*h)/26000))):Math.max(48,Math.min(132,Math.round((w*h)/13500)));
+    const count=MOBILE?Math.max(8,Math.min(12,Math.round((w*h)/36000))):Math.max(48,Math.min(132,Math.round((w*h)/13500)));
     particles=Array.from({length:count},(_,i)=>{
       const edge=i%4;
       let x,y;
@@ -420,7 +420,7 @@
 
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
-    const dpr=Math.min(LOW_POWER?1:MOBILE?1.1:1.5,devicePixelRatio||1);
+    const dpr=Math.min(MOBILE?1:1.5,devicePixelRatio||1);
     const w=innerWidth,h=innerHeight;
     canvas.width=Math.max(1,Math.floor(w*dpr));
     canvas.height=Math.max(1,Math.floor(h*dpr));
@@ -530,7 +530,7 @@
       syncNativeCore(r,now);
     }
 
-    if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(LOW_POWER?240:MOBILE?140:80) || r>=1){
+    if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(MOBILE?240:80) || r>=1){
       lastTelemetryUpdate=now;
       const value=Math.min(100,Math.round(easeOutCubic(r)*100));
       const valueText=String(value).padStart(3,'0');
@@ -539,14 +539,14 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const particleCadence=LOW_POWER?160:MOBILE?130:48;
+    const particleCadence=MOBILE?180:48;
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
     }
 
     if(r<1 || visiblePhase<4){
-      queueRender(LOW_POWER?50:0);
+      queueRender(MOBILE?50:0);
       return;
     }
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
@@ -567,7 +567,8 @@
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthCapabilityR620=LOW_POWER?'mobile-constrained-cinematic':'full-cinematic';
     ROOT.dataset.fxMagBirthBudgetR625=LOW_POWER?'single-css3d-dna-30fps-reduced-composite':'full-cinematic-budget';
-    ROOT.dataset.fxMagBirthBudgetR629=LOW_POWER?'compositor-led-20fps-js-static-organic-microdetail':'full-cinematic-budget';
+    ROOT.dataset.fxMagBirthBudgetR629=MOBILE?'compositor-led-20fps-js-static-organic-microdetail':'full-cinematic-budget';
+    ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
