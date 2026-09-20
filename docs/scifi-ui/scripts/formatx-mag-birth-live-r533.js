@@ -8,7 +8,7 @@
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const AUTOMATION = navigator.webdriver === true;
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
-  const DURATION = 2400;
+  const DURATION = 4400;
   const EXIT_MS = 360;
 
   let seen = false;
@@ -33,13 +33,14 @@
     skip: 'SKIP',
     skipAria: 'Skip the FormatX core birth sequence',
     statuses: [
-      [0.00, 'AWAKENING ENERGY FIELD'],
-      [0.14, 'CAPTURING SIGNAL SEEDS'],
-      [0.30, 'FORMING NATIVE CORE'],
-      [0.55, 'CRYSTAL STRUCTURE CONVERGING'],
-      [0.69, 'FIRST IMPULSE'],
-      [0.82, 'SYNCHRONIZING NERVOUS SYSTEM'],
-      [0.94, 'CORE ONLINE']
+      [0.00, 'AWAKENING GENETIC ENERGY FIELD'],
+      [0.10, 'CAPTURING SIGNAL NUCLEOTIDES'],
+      [0.22, 'ASSEMBLING DNA DOUBLE HELIX'],
+      [0.38, 'LIVING GENOME STABILIZING'],
+      [0.52, 'CAMERA PULLING BACK / EMBRYO FOCUS'],
+      [0.68, 'NATIVE CORE GESTATION'],
+      [0.82, 'FIRST IMPULSE'],
+      [0.94, 'CORE ALIVE']
     ]
   } : {
     kicker: 'FORMATX / MAG GENESIS',
@@ -48,13 +49,14 @@
     skip: 'ÁTUGRÁS',
     skipAria: 'A FormatX MAG születése animáció átugrása',
     statuses: [
-      [0.00, 'ENERGIAMEZŐ ÉBRESZTÉSE'],
-      [0.14, 'JELMAGOK BEFOGÁSA'],
-      [0.30, 'NATÍV MAG FORMÁLÁSA'],
-      [0.55, 'KRISTÁLYSTRUKTÚRA ÖSSZEÁLLÍTÁSA'],
-      [0.69, 'ELSŐ IMPULZUS'],
-      [0.82, 'IDEGRENDSZER SZINKRONIZÁLÁSA'],
-      [0.94, 'MAG ONLINE']
+      [0.00, 'GENETIKAI ENERGIAMEZŐ ÉBRESZTÉSE'],
+      [0.10, 'JEL-NUKLEOTIDOK BEFOGÁSA'],
+      [0.22, 'DNS KETTŐS SPIRÁL ÖSSZEÁLLÍTÁSA'],
+      [0.38, 'ÉLŐ GENOM STABILIZÁLÁSA'],
+      [0.52, 'KAMERA KIZOOM / EMBRIÓ FÓKUSZ'],
+      [0.68, 'NATÍV MAG SZÜLETÉSE'],
+      [0.82, 'ELSŐ IMPULZUS'],
+      [0.94, 'MAG ÉL']
     ]
   };
 
@@ -67,6 +69,15 @@
     <div class="fxb-veil" aria-hidden="true"></div>
     <div class="fxb-stars" aria-hidden="true"></div>
     <canvas class="fxb-particles" aria-hidden="true"></canvas>
+    <div class="fxb-dna-stage" aria-hidden="true">
+      <svg class="fxb-dna" viewBox="0 0 320 720" preserveAspectRatio="xMidYMid meet">
+        <g class="fxb-dna-bridges"></g>
+        <path class="fxb-dna-strand fxb-dna-strand-a" pathLength="1"></path>
+        <path class="fxb-dna-strand fxb-dna-strand-b" pathLength="1"></path>
+        <g class="fxb-dna-nodes"></g>
+      </svg>
+      <div class="fxb-dna-heart"></div>
+    </div>
     <div class="fxb-grid" aria-hidden="true"></div>
     <div class="fxb-halo fxb-halo-outer" aria-hidden="true"></div>
     <div class="fxb-halo fxb-halo-inner" aria-hidden="true"></div>
@@ -98,6 +109,56 @@
   const progress = overlay.querySelector('.fxb-progress');
   const status = overlay.querySelector('.fxb-status');
   const canvas = overlay.querySelector('.fxb-particles');
+  const dnaStage = overlay.querySelector('.fxb-dna-stage');
+  const dna = overlay.querySelector('.fxb-dna');
+  const dnaBridges = overlay.querySelector('.fxb-dna-bridges');
+  const dnaNodes = overlay.querySelector('.fxb-dna-nodes');
+
+  function buildDna() {
+    if (!(dna instanceof SVGElement) || !(dnaBridges instanceof SVGGElement) || !(dnaNodes instanceof SVGGElement)) return;
+    const NS='http://www.w3.org/2000/svg';
+    const samples=25;
+    const left=[];
+    const right=[];
+    for(let i=0;i<samples;i+=1){
+      const y=38+i*27;
+      const wave=Math.sin(i*.72);
+      const depth=(Math.cos(i*.72)+1)*.5;
+      const xA=160+wave*76;
+      const xB=160-wave*76;
+      left.push([xA,y]);
+      right.push([xB,y]);
+      if(i>0&&i<samples-1){
+        const bridge=document.createElementNS(NS,'line');
+        bridge.setAttribute('x1',xA.toFixed(2));
+        bridge.setAttribute('y1',y.toFixed(2));
+        bridge.setAttribute('x2',xB.toFixed(2));
+        bridge.setAttribute('y2',y.toFixed(2));
+        bridge.setAttribute('class','fxb-dna-bridge');
+        bridge.style.setProperty('--fxb-dna-delay',(i*34)+'ms');
+        bridge.style.setProperty('--fxb-dna-depth',depth.toFixed(3));
+        dnaBridges.appendChild(bridge);
+      }
+      if(i%2===0){
+        for(const [x,side] of [[xA,'a'],[xB,'b']]){
+          const node=document.createElementNS(NS,'circle');
+          node.setAttribute('cx',x.toFixed(2));
+          node.setAttribute('cy',y.toFixed(2));
+          node.setAttribute('r',i%4===0?'5.2':'3.8');
+          node.setAttribute('class','fxb-dna-node fxb-dna-node-'+side);
+          node.style.setProperty('--fxb-dna-delay',(i*30)+'ms');
+          node.style.setProperty('--fxb-dna-depth',depth.toFixed(3));
+          dnaNodes.appendChild(node);
+        }
+      }
+    }
+    const toPath=points=>points.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)).join(' ');
+    dna.querySelector('.fxb-dna-strand-a')?.setAttribute('d',toPath(left));
+    dna.querySelector('.fxb-dna-strand-b')?.setAttribute('d',toPath(right));
+    dnaStage?.style.setProperty('--fxb-dna-pairs',String(samples));
+  }
+
+  buildDna();
 
   kicker.textContent = copy.kicker;
   title.textContent = copy.title;
@@ -124,17 +185,17 @@
   let ignitionDone = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
-  const PHASE_HOLD_MS = [300, 250, 210, 180, 0];
+  const PHASE_HOLD_MS = [520, 900, 650, 420, 0];
 
   function clamp(value,min,max) { return Math.max(min,Math.min(max,value)); }
   function easeOutCubic(t) { return 1 - Math.pow(1-t,3); }
   function smoothstep(t) { t=clamp(t,0,1); return t*t*(3-2*t); }
 
   function phaseTargetFor(r) {
-    if (r < .14) return 0;
-    if (r < .30) return 1;
-    if (r < .69) return 2;
-    if (r < .84) return 3;
+    if (r < .18) return 0;
+    if (r < .43) return 1;
+    if (r < .68) return 2;
+    if (r < .86) return 3;
     return 4;
   }
   function phaseFor(r,now) {
@@ -201,23 +262,23 @@
     locateStage();
     if (!coreApi) return;
 
-    if (r < .18) {
-      setStageOpacity(Math.max(.02,r*.25));
-      if (now-lastMorphSync > 180) {
+    if (r < .42) {
+      setStageOpacity(Math.max(.012,r*.06));
+      if (now-lastMorphSync > 360) {
         lastMorphSync=now;
-        try { coreApi.setMorph?.(.02,'r533-dormant'); coreApi.requestRender?.(2); } catch (_) {}
+        try { coreApi.setMorph?.(.02,'r610-genome-dormant'); coreApi.requestRender?.(1); } catch (_) {}
       }
       return;
     }
 
-    if (r < .69) {
-      const t=smoothstep((r-.18)/.51);
-      setStageOpacity(.10 + t*.90);
-      if (now-lastMorphSync > 92) {
+    if (r < .78) {
+      const t=smoothstep((r-.42)/.36);
+      setStageOpacity(.04 + t*.96);
+      if (now-lastMorphSync > 150) {
         lastMorphSync=now;
         try {
-          coreApi.setMorph?.(.04 + t*.96,'r533-native-assembly');
-          coreApi.requestRender?.(2);
+          coreApi.setMorph?.(.06 + t*.94,'r610-dna-to-native-core');
+          coreApi.requestRender?.(1);
         } catch (_) {}
       }
       return;
@@ -227,9 +288,9 @@
     if (!ignitionDone) {
       ignitionDone=true;
       try {
-        coreApi.setMorph?.(1,'r533-ignition');
-        coreApi.setShape?.('crystal','r533-ignition');
-        coreApi.rotateBy?.(.035,.055,'r533-first-impulse');
+        coreApi.setMorph?.(1,'r610-living-core-ignition');
+        coreApi.setShape?.('crystal','r610-living-core-ignition');
+        coreApi.rotateBy?.(.035,.055,'r610-first-living-impulse');
         coreApi.requestRender?.(2);
       } catch (_) {}
     }
@@ -266,9 +327,9 @@
     if(!ctx)return;
     const w=innerWidth,h=innerHeight;
     ctx.clearRect(0,0,w,h);
-    const gather=clamp((r-.04)/.52,0,1);
-    const burst=clamp((r-.65)/.16,0,1);
-    const settle=clamp((r-.82)/.18,0,1);
+    const gather=clamp((r-.30)/.44,0,1);
+    const burst=clamp((r-.76)/.14,0,1);
+    const settle=clamp((r-.88)/.12,0,1);
     ctx.globalCompositeOperation='lighter';
 
     for(const p of particles){
@@ -303,8 +364,8 @@
     clearTimeout(hardFinishTimer);
 
     try {
-      coreApi?.setMorph?.(1,'r533-final-handoff');
-      coreApi?.setShape?.('crystal','r533-final-handoff');
+      coreApi?.setMorph?.(1,'r610-final-living-handoff');
+      coreApi?.setShape?.('crystal','r610-final-living-handoff');
       coreApi?.requestRender?.(2);
     } catch (_) {}
     setStageOpacity(1);
@@ -326,7 +387,7 @@
       ROOT.removeAttribute('data-fx-mag-birth-live');
       ROOT.removeAttribute('data-fx-mag-birth-phase');
       overlay.remove();
-      document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{detail:{source,revision:'r607-bounded-native-core-handoff'}}));
+      document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{detail:{source,revision:'r610-dna-genesis-native-core-handoff'}}));
     }, REDUCED ? 20 : EXIT_MS);
   }
 
@@ -363,6 +424,7 @@
   function start() {
     try { sessionStorage.setItem(KEY,'1'); } catch (_) {}
     ROOT.dataset.fxMagBirthLiveR533='active';
+    ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     visiblePhase=0;
     phaseChangedAt=0;
     ROOT.dataset.fxMagBirthPhase='0';
@@ -373,7 +435,7 @@
 
     // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
     // against a renderer/driver path that starves the animation clock.
-    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r607'), REDUCED ? 900 : 9000);
+    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r607'), REDUCED ? 900 : 12000);
 
     if(REDUCED){
       overlay.dataset.phase='4';

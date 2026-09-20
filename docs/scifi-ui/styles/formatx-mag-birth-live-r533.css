@@ -89,7 +89,8 @@ html[data-fx-mag-birth-live="active"] {
     radial-gradient(circle at 70% 22%,rgba(255,211,149,.7) 0 .65px,transparent .95px),
     radial-gradient(circle at 89% 64%,rgba(143,104,255,.8) 0 .75px,transparent 1.05px);
   background-size: 137px 121px,193px 171px,229px 207px,281px 253px;
-  transform: rotate(-6deg) scale(1.08);
+  transform: rotate(-6deg) scale(1.18);
+  transition: transform 1.35s cubic-bezier(.18,.78,.18,1), opacity .8s ease;
 }
 .fxb-particles {
   position: absolute;
@@ -98,6 +99,147 @@ html[data-fx-mag-birth-live="active"] {
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+.fxb-dna-stage {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  z-index: 1;
+  width: min(54vw, 520px);
+  height: min(74vh, 720px);
+  transform: translate(-50%,-50%) scale(1.34) rotate(-3deg);
+  transform-origin: 50% 50%;
+  opacity: .10;
+  filter: blur(9px) brightness(.72);
+  pointer-events: none;
+  transition:
+    left 1.35s cubic-bezier(.18,.78,.18,1),
+    top 1.35s cubic-bezier(.18,.78,.18,1),
+    width 1.35s cubic-bezier(.18,.78,.18,1),
+    height 1.35s cubic-bezier(.18,.78,.18,1),
+    transform 1.35s cubic-bezier(.18,.78,.18,1),
+    opacity .7s ease,
+    filter .8s ease;
+}
+.fxb-dna {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 10px rgba(105,234,255,.26)) drop-shadow(0 0 28px rgba(132,91,255,.14));
+}
+.fxb-dna-strand {
+  fill: none;
+  stroke-width: 4.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: .18;
+  transition: stroke-dashoffset 1.28s cubic-bezier(.2,.72,.18,1), opacity .7s ease;
+}
+.fxb-dna-strand-a { stroke: #79efff; }
+.fxb-dna-strand-b { stroke: #9b7cff; }
+.fxb-dna-bridge {
+  stroke: rgba(196,248,255,.78);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scaleX(.06);
+  transition:
+    transform .44s cubic-bezier(.18,.82,.18,1) var(--fxb-dna-delay),
+    opacity .36s ease var(--fxb-dna-delay);
+}
+.fxb-dna-node {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(.08);
+  transition:
+    transform .42s cubic-bezier(.16,.84,.2,1) var(--fxb-dna-delay),
+    opacity .34s ease var(--fxb-dna-delay);
+}
+.fxb-dna-node-a { fill: #78efff; }
+.fxb-dna-node-b { fill: #a77cff; }
+.fxb-dna-heart {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  transform: translate(-50%,-50%) scale(.1);
+  opacity: 0;
+  background: #f8ffff;
+  box-shadow: 0 0 22px 8px rgba(127,239,255,.64), 0 0 74px 24px rgba(131,83,255,.26);
+  transition: transform .72s cubic-bezier(.16,.82,.18,1), opacity .4s ease;
+}
+.fx-mag-birth-r533[data-phase="1"] .fxb-dna-stage {
+  opacity: .96;
+  filter: blur(0) brightness(1.10);
+  transform: translate(-50%,-50%) scale(1) rotate(2deg);
+}
+.fx-mag-birth-r533[data-phase="1"] .fxb-dna-strand {
+  stroke-dashoffset: 0;
+  opacity: .94;
+}
+.fx-mag-birth-r533[data-phase="1"] .fxb-dna-bridge,
+.fx-mag-birth-r533[data-phase="1"] .fxb-dna-node {
+  opacity: calc(.52 + (var(--fxb-dna-depth) * .44));
+  transform: scale(1);
+}
+.fx-mag-birth-r533[data-phase="1"] .fxb-dna-heart {
+  opacity: .52;
+  transform: translate(-50%,-50%) scale(.7);
+  animation: fxb-dna-heart 1.08s ease-in-out infinite alternate;
+}
+.fx-mag-birth-r533[data-phase="2"] .fxb-dna-stage {
+  left: var(--fxb-x);
+  top: var(--fxb-y);
+  width: min(24vw, 220px);
+  height: min(34vh, 320px);
+  opacity: .78;
+  filter: blur(.15px) brightness(1.38);
+  transform: translate(-50%,-50%) scale(.58) rotate(-10deg);
+}
+.fx-mag-birth-r533[data-phase="2"] .fxb-dna-strand {
+  stroke-dashoffset: 0;
+  opacity: .88;
+}
+.fx-mag-birth-r533[data-phase="2"] .fxb-dna-bridge,
+.fx-mag-birth-r533[data-phase="2"] .fxb-dna-node {
+  opacity: .72;
+  transform: scale(.92);
+}
+.fx-mag-birth-r533[data-phase="2"] .fxb-dna-heart {
+  opacity: .9;
+  transform: translate(-50%,-50%) scale(1.25);
+}
+.fx-mag-birth-r533[data-phase="3"] .fxb-dna-stage {
+  left: var(--fxb-x);
+  top: var(--fxb-y);
+  width: 118px;
+  height: 164px;
+  opacity: .24;
+  filter: blur(1.7px) brightness(1.7);
+  transform: translate(-50%,-50%) scale(.24) rotate(-18deg);
+}
+.fx-mag-birth-r533[data-phase="3"] .fxb-dna-heart {
+  opacity: 1;
+  transform: translate(-50%,-50%) scale(2.6);
+}
+.fx-mag-birth-r533[data-phase="4"] .fxb-dna-stage {
+  left: var(--fxb-x);
+  top: var(--fxb-y);
+  opacity: 0;
+  filter: blur(5px) brightness(2);
+  transform: translate(-50%,-50%) scale(.06) rotate(-24deg);
+}
+@keyframes fxb-dna-heart {
+  from { transform: translate(-50%,-50%) scale(.62); filter: brightness(.92); }
+  to { transform: translate(-50%,-50%) scale(1.08); filter: brightness(1.36); }
 }
 .fxb-grid {
   position: absolute;
@@ -370,6 +512,8 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
 }
 
 @media (max-width:700px) {
+  .fxb-dna-stage { width: min(78vw,390px); height: min(62vh,580px); top: 51%; }
+  .fx-mag-birth-r533[data-phase="2"] .fxb-dna-stage { width: 148px; height: 226px; transform: translate(-50%,-50%) scale(.58) rotate(-10deg); }
   .fxb-copy { top: max(5%,calc(env(safe-area-inset-top) + 12px)); }
   .fxb-copy h1 { font-size: clamp(28px,10vw,46px); }
   .fxb-subtitle { font-size: 10px; letter-spacing: .12em; }
@@ -388,3 +532,6 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   .fxb-halo-outer { opacity: .26 !important; transform: translate(-50%,-50%) scale(.94) !important; }
   .fxb-halo-inner { opacity: .30 !important; transform: translate(-50%,-50%) scale(.82) !important; }
 }
+
+.fx-mag-birth-r533[data-phase="2"] .fxb-stars { transform: rotate(-6deg) scale(.98); opacity: .48; }
+.fx-mag-birth-r533[data-phase="3"] .fxb-stars { transform: rotate(-6deg) scale(.94); opacity: .40; }
