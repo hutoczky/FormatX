@@ -12,7 +12,7 @@
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
   const DURATION = 10000;
-  const EXIT_MS = 360;
+  const EXIT_MS = 180;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
 
   let seen = false;
@@ -714,12 +714,14 @@
     ROOT.dataset.fxMagBirthRenderClockR631='native-reference-film-24fps-all-devices';
     ROOT.dataset.fxMagBirthRenderClockR649='deterministic-24fps-canvas-all-devices';
     ROOT.dataset.fxMagBirthRenderClockR650='r651-threejs-24fps-primary-r649-fallback';
+    ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
 
-    // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
-    // against a renderer/driver path that starves the animation clock.
+    // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
+    // deliberately close to the reference endpoint so a stalled GPU/import path
+    // can never strand the cinematic overlay beyond the finished shot.
     hardFinishTimer=window.setTimeout(
-      ()=>finish('bounded-failsafe-r623'),
-      REDUCED ? 900 : (MOBILE && FORCE ? 12000 : DURATION + (MOBILE ? 1300 : 1800))
+      ()=>finish('bounded-failsafe-r652'),
+      REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220)
     );
 
     if(REDUCED){
