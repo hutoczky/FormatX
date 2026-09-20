@@ -72,9 +72,11 @@
   overlay.dataset.fxIntroR646 = 'reference-biotic-film';
   overlay.dataset.fxIntroR647 = 'shot-match-biotic-genesis';
   overlay.dataset.fxIntroR648 = 'exact-10s-runtime';
+  overlay.dataset.fxIntroR649 = 'native-canvas-reference-rotoscope';
   ROOT.dataset.fxMagBirthArtR645 = 'biotic-dna-iris-neural-tendrils-native-handoff';
   ROOT.dataset.fxMagBirthArtR646 = 'deep-genome-field-dark-organic-embryo-optic-iris-neural-bloom-native-handoff';
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
+  ROOT.dataset.fxMagBirthArtR649 = 'reference-geometry-24fps-native-canvas-no-video';
   overlay.setAttribute('aria-label', copy.title);
   overlay.innerHTML = `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -284,6 +286,7 @@
   status.textContent = copy.statuses[0][1];
 
   let ctx = null;
+  let filmRenderer = null;
   let particles = [];
   let raf = 0;
   let startedAt = 0;
@@ -312,10 +315,10 @@
   function smoothstep(t) { t=clamp(t,0,1); return t*t*(3-2*t); }
 
   function phaseTargetFor(r) {
-    if (r < .22) return 0;
-    if (r < .30) return 1;
-    if (r < .55) return 2;
-    if (r < .90) return 3;
+    if (r < .245) return 0;
+    if (r < .315) return 1;
+    if (r < .572) return 2;
+    if (r < .928) return 3;
     return 4;
   }
   function applyPhase(next,source='timeline') {
@@ -363,7 +366,7 @@
   function armPhaseTimeline(){
     for(const timer of phaseTimers)clearTimeout(timer);
     phaseTimers.clear();
-    for(const [phase,ratio] of [[1,.22],[2,.30],[3,.55],[4,.90]]){
+    for(const [phase,ratio] of [[1,.245],[2,.315],[3,.572],[4,.928]]){
       const timer=setTimeout(()=>{
         phaseTimers.delete(timer);
         if(!finished)applyPhase(phase,'timer-r621');
@@ -492,6 +495,16 @@
 
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
+    syncTarget(true);
+    if (window.FormatXMagReferenceFilmR649?.attach) {
+      if (!filmRenderer) {
+        filmRenderer = window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
+        ROOT.dataset.fxMagBirthRendererR649 = filmRenderer ? 'native-canvas-reference-film' : 'fallback-particles';
+      } else {
+        filmRenderer.resize?.();
+      }
+      return;
+    }
     const dpr=Math.min(MOBILE?1:1.5,devicePixelRatio||1);
     const w=innerWidth,h=innerHeight;
     canvas.width=Math.max(1,Math.floor(w*dpr));
@@ -501,10 +514,10 @@
     ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
     if(ctx)ctx.setTransform(dpr,0,0,dpr,0,0);
     seedParticles(w,h);
-    syncTarget(true);
   }
 
   function drawParticles(r,time) {
+    if(filmRenderer){ filmRenderer.draw?.(r,time); return; }
     if(!ctx)return;
     const w=innerWidth,h=innerHeight;
     ctx.clearRect(0,0,w,h);
@@ -611,14 +624,14 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const particleCadence=MOBILE?180:48;
+    const particleCadence=filmRenderer?42:(MOBILE?84:48);
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
     }
 
     if(r<1 || visiblePhase<4){
-      queueRender(MOBILE?50:0);
+      queueRender(filmRenderer?42:(MOBILE?50:0));
       return;
     }
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
@@ -652,14 +665,10 @@
     armPhaseTimeline();
     document.body.prepend(overlay);
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
-    if(MOBILE){
-      canvas.hidden=true;
-      syncTarget(true);
-      ROOT.dataset.fxMagBirthRenderClockR631='mobile-css-timers-no-continuous-js-loop';
-    }else{
-      sizeCanvas();
-      ROOT.dataset.fxMagBirthRenderClockR631='desktop-native-raf';
-    }
+    canvas.hidden=false;
+    sizeCanvas();
+    ROOT.dataset.fxMagBirthRenderClockR631='native-reference-film-24fps-all-devices';
+    ROOT.dataset.fxMagBirthRenderClockR649='deterministic-24fps-canvas-all-devices';
 
     // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
     // against a renderer/driver path that starves the animation clock.
@@ -683,15 +692,7 @@
       return;
     }
 
-    if(MOBILE){
-      const completeTimer=setTimeout(()=>{
-        phaseTimers.delete(completeTimer);
-        if(!finished)finish('mobile-css-timeline-complete-r631');
-      },DURATION);
-      phaseTimers.add(completeTimer);
-    }else{
-      queueRender();
-    }
+    queueRender();
   }
 
   skip.addEventListener('click',()=>finish('user-skip'));
@@ -700,7 +701,7 @@
     syncTarget(true);
     coreApi=window.FormatXLivingCore||window.FormatXCoreMobileV69||coreApi;
   },{passive:true});
-  addEventListener('resize',()=>{if(!MOBILE)sizeCanvas();syncTarget(true);},{passive:true});
+  addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},{passive:true});
   addEventListener('orientationchange',()=>setTimeout(()=>syncTarget(true),120),{passive:true});
   addEventListener('pagehide',()=>finish('pagehide'),{once:true});
 
