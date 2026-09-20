@@ -86,6 +86,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r900.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r950.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r952.js
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r960.js
           node --check docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js
           node --check docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js
           node --check .github/scripts/validate-r533-r536-handoff.cjs
