@@ -107,7 +107,7 @@ async function assertSectionNavigation(page, href) {
         menuExpanded:document.getElementById('menu-toggle')?.getAttribute('aria-expanded')||'',
         rootMenu:document.documentElement.classList.contains('fx-organism-menu-open'),
         hash:location.hash,
-        r570:document.documentElement.dataset.fxSectionNavigationR570||'',
+        r580:document.documentElement.dataset.fxSectionNavigationR580||'',
         loopState:document.documentElement.dataset.fxLoopLandingState||'',
         loopSource:document.documentElement.dataset.fxLoopSource||'',
         loopCount:document.documentElement.dataset.fxLoopCount||'0',
