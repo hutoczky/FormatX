@@ -324,6 +324,7 @@
 
   function ensureArmed() {
     ensureLauncher();
+    root.dataset.fxLiveOsLauncherR641 = 'canonical-command-surface-visible';
     if (arm()) {
       clearInterval(retryTimer);
       retryTimer = 0;
