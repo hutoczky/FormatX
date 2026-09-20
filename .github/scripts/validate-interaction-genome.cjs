@@ -27,6 +27,28 @@ async function clearIntro(page) {
   }, null, { timeout: 8000 });
 }
 
+async function activateImmersiveRuntime(page, source) {
+  const launch = page.locator('.fx-immersive-launch').first();
+  if (await launch.count() && await launch.isVisible().catch(() => false)) {
+    await launch.click().catch(() => {});
+    const activated = await page.waitForFunction(() => (
+      document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+      || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+    ), null, { timeout: 1500 }).then(() => true).catch(() => false);
+    if (activated) return;
+  }
+  await page.evaluate(value => {
+    const root = document.documentElement;
+    root.dataset.fxImmersive = 'active';
+    root.dataset.fxImmersiveSource = value;
+    dispatchEvent(new CustomEvent('formatx:immersiveactivate', { detail: { source: value } }));
+  }, source);
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+    || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+  ), null, { timeout: 10000 });
+}
+
 async function waitGenome(page) {
   await page.waitForFunction(() => (
     document.documentElement.dataset.fxInteractionGenome === 'ready'
@@ -80,6 +102,7 @@ async function desktop(browser) {
 
   await page.goto(URL + '?lang=hu&genome-test=1', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
+  await activateImmersiveRuntime(page, 'interaction-genome-validation');
   await waitGenome(page);
 
   await page.evaluate(() => {
@@ -168,6 +191,7 @@ async function mobile(browser) {
   const page = await context.newPage();
   await page.goto(URL + '?lang=hu&genome-test=1', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
+  await activateImmersiveRuntime(page, 'interaction-genome-validation');
   await waitGenome(page);
   await page.evaluate(() => {
     window.FormatXInteractionGenome.record('click', 'Mobile checkpoint', {

@@ -25,6 +25,28 @@ async function clearIntro(page) {
   }, null, { timeout: 12000 });
 }
 
+async function activateImmersiveRuntime(page, source) {
+  const launch = page.locator('.fx-immersive-launch').first();
+  if (await launch.count() && await launch.isVisible().catch(() => false)) {
+    await launch.click().catch(() => {});
+    const activated = await page.waitForFunction(() => (
+      document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+      || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+    ), null, { timeout: 1500 }).then(() => true).catch(() => false);
+    if (activated) return;
+  }
+  await page.evaluate(value => {
+    const root = document.documentElement;
+    root.dataset.fxImmersive = 'active';
+    root.dataset.fxImmersiveSource = value;
+    dispatchEvent(new CustomEvent('formatx:immersiveactivate', { detail: { source: value } }));
+  }, source);
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+    || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+  ), null, { timeout: 10000 });
+}
+
 async function openGenome(page) {
   await page.waitForFunction(() => window.FormatXInteractionGenome
     && document.querySelector('.fx-genome-launcher'), null, { timeout: 90000 });
@@ -133,6 +155,7 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
 
   await page.goto(TEST_URL + '?lang=hu&genome-cinematic-test=1', { waitUntil: 'domcontentloaded', timeout: 90000 });
   await clearIntro(page);
+  await activateImmersiveRuntime(page, 'interaction-genome-webgl-validation');
   await openGenome(page);
   await exerciseDrag(page);
 

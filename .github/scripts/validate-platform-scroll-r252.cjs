@@ -7,11 +7,34 @@ function assert(value, message) {
   if (!value) throw new Error(message);
 }
 
+async function activateImmersiveRuntime(page, source) {
+  const launch = page.locator('.fx-immersive-launch').first();
+  if (await launch.count() && await launch.isVisible().catch(() => false)) {
+    await launch.click().catch(() => {});
+    const activated = await page.waitForFunction(() => (
+      document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+      || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+    ), null, { timeout: 1500 }).then(() => true).catch(() => false);
+    if (activated) return;
+  }
+  await page.evaluate(value => {
+    const root = document.documentElement;
+    root.dataset.fxImmersive = 'active';
+    root.dataset.fxImmersiveSource = value;
+    dispatchEvent(new CustomEvent('formatx:immersiveactivate', { detail: { source: value } }));
+  }, source);
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+    || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+  ), null, { timeout: 10000 });
+}
+
 async function prepare(page) {
   await page.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
   await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252', { waitUntil: 'domcontentloaded' });
+  await activateImmersiveRuntime(page, 'platform-scroll-validation');
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxInfiniteController === 'seamless-v7'

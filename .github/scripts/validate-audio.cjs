@@ -34,6 +34,28 @@ async function clearIntro(page) {
   });
 }
 
+async function activateImmersiveRuntime(page, source) {
+  const launch = page.locator('.fx-immersive-launch').first();
+  if (await launch.count() && await launch.isVisible().catch(() => false)) {
+    await launch.click().catch(() => {});
+    const activated = await page.waitForFunction(() => (
+      document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+      || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+    ), null, { timeout: 1500 }).then(() => true).catch(() => false);
+    if (activated) return;
+  }
+  await page.evaluate(value => {
+    const root = document.documentElement;
+    root.dataset.fxImmersive = 'active';
+    root.dataset.fxImmersiveSource = value;
+    dispatchEvent(new CustomEvent('formatx:immersiveactivate', { detail: { source: value } }));
+  }, source);
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+    || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+  ), null, { timeout: 10000 });
+}
+
 async function activationSnapshot(page) {
   return page.evaluate(() => {
     const root = document.documentElement;
@@ -144,6 +166,7 @@ async function runCase(browser, name, contextOptions) {
 
   await page.goto(TEST_URL + '?lang=hu&audio-test=1&score=v6', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
+  await activateImmersiveRuntime(page, 'audio-validation');
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'professional-v6', null, { timeout: 45000 });
   await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 20000 });
 

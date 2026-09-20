@@ -57,6 +57,28 @@ async function clearIntro(page) {
   });
 }
 
+async function activateImmersiveRuntime(page, source) {
+  const launch = page.locator('.fx-immersive-launch').first();
+  if (await launch.count() && await launch.isVisible().catch(() => false)) {
+    await launch.click().catch(() => {});
+    const activated = await page.waitForFunction(() => (
+      document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+      || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+    ), null, { timeout: 1500 }).then(() => true).catch(() => false);
+    if (activated) return;
+  }
+  await page.evaluate(value => {
+    const root = document.documentElement;
+    root.dataset.fxImmersive = 'active';
+    root.dataset.fxImmersiveSource = value;
+    dispatchEvent(new CustomEvent('formatx:immersiveactivate', { detail: { source: value } }));
+  }, source);
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxThreeLoader === 'requested-on-demand'
+    || Boolean(document.querySelector('script[data-fx-cryosphere-script]'))
+  ), null, { timeout: 10000 });
+}
+
 async function waitPublicState(page, language) {
   await page.waitForFunction(({ lang, navigation, downloads }) => {
     const nav = Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim());
@@ -167,6 +189,7 @@ async function testViewport(browser, viewport, name, mobile) {
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await installProductionCopy(page);
   await clearIntro(page);
+  await activateImmersiveRuntime(page, 'copy-license-validation');
   await waitPublicState(page, 'hu');
   assertHungarian(await readCopy(page), name);
 
