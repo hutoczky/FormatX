@@ -11,7 +11,7 @@
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
-  const DURATION = MOBILE ? 3600 : 5200;
+  const DURATION = LOW_POWER ? 3000 : MOBILE ? 3600 : 5200;
   const EXIT_MS = 360;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
 
@@ -237,6 +237,8 @@
   let finished = false;
   let exitTimer = 0;
   let hardFinishTimer = 0;
+  let frameTimer = 0;
+  const phaseTimers = new Set();
   let targetX = innerWidth * .5;
   let targetY = innerHeight * .48;
   let stage = null;
@@ -263,20 +265,44 @@
     if (r < .86) return 3;
     return 4;
   }
-  function phaseFor(r,now) {
+  function applyPhase(next,source='timeline') {
+    const value=clamp(Number(next)||0,0,4);
+    if(value===visiblePhase && overlay.dataset.phase===String(value))return false;
+    visiblePhase=value;
+    phaseChangedAt=performance.now();
+    const phase=String(value);
+    overlay.dataset.phase=phase;
+    ROOT.dataset.fxMagBirthPhase=phase;
+    ROOT.dataset.fxMagBirthPhaseSourceR621=source;
+    if(dnaStage instanceof HTMLElement){
+      const turns=['-24deg','18deg','46deg','72deg','86deg'];
+      dnaStage.style.setProperty('--fxb-dna-turn',turns[value]||'86deg');
+    }
+    return true;
+  }
+  function armPhaseTimeline(){
+    for(const timer of phaseTimers)clearTimeout(timer);
+    phaseTimers.clear();
+    for(const [phase,ratio] of [[1,.18],[2,.43],[3,.68],[4,.86]]){
+      const timer=setTimeout(()=>{
+        phaseTimers.delete(timer);
+        if(!finished)applyPhase(phase,'timer-r621');
+      },Math.max(120,Math.round(DURATION*ratio)));
+      phaseTimers.add(timer);
+    }
+  }
+  function catchUpPhase(r){
     const target=phaseTargetFor(r);
-    if (!phaseChangedAt) {
-      phaseChangedAt=now;
-      return String(visiblePhase);
-    }
-    if (target < visiblePhase) {
-      visiblePhase=target;
-      phaseChangedAt=now;
-    } else if (target > visiblePhase && now-phaseChangedAt >= (PHASE_HOLD_MS[visiblePhase] ?? 190)) {
-      visiblePhase+=1;
-      phaseChangedAt=now;
-    }
-    return String(visiblePhase);
+    if(target<=visiblePhase)return;
+    const next=visiblePhase+1;
+    const timer=setTimeout(()=>{
+      phaseTimers.delete(timer);
+      if(!finished){
+        applyPhase(next,'catchup-r621');
+        if(target>next)catchUpPhase(r);
+      }
+    },0);
+    phaseTimers.add(timer);
   }
   function statusFor(r) {
     let value = copy.statuses[0][1];
@@ -435,8 +461,12 @@
     if(finished)return;
     finished=true;
     cancelAnimationFrame(raf);
+    clearTimeout(frameTimer);
+    frameTimer=0;
     clearTimeout(exitTimer);
     clearTimeout(hardFinishTimer);
+    for(const timer of phaseTimers)clearTimeout(timer);
+    phaseTimers.clear();
 
     requestCoreWarmup('finish-'+String(source||'unknown'));
     try {
@@ -467,18 +497,21 @@
     }, REDUCED ? 20 : EXIT_MS);
   }
 
+  function queueRender() {
+    if(finished||raf||frameTimer)return;
+    if(LOW_POWER){
+      frameTimer=window.setTimeout(()=>{
+        frameTimer=0;
+        if(!finished)raf=requestAnimationFrame(render);
+      },72);
+    }else raf=requestAnimationFrame(render);
+  }
+
   function render(now) {
+    raf=0;
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
-    const phase=phaseFor(r,now);
-    if(overlay.dataset.phase!==phase){
-      overlay.dataset.phase=phase;
-      if(dnaStage instanceof HTMLElement){
-        const turns=['-24deg','18deg','46deg','72deg','86deg'];
-        dnaStage.style.setProperty('--fxb-dna-turn',turns[Number(phase)]||'86deg');
-      }
-    }
-    if(ROOT.dataset.fxMagBirthPhase!==phase)ROOT.dataset.fxMagBirthPhase=phase;
+    catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
@@ -502,7 +535,7 @@
       drawParticles(r,now);
     }
 
-    if(r<1 || visiblePhase<4)raf=requestAnimationFrame(render);
+    if(r<1 || visiblePhase<4)queueRender();
     else finish('complete');
   }
 
@@ -512,17 +545,19 @@
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthCapabilityR620=LOW_POWER?'mobile-constrained-cinematic':'full-cinematic';
+    ROOT.dataset.fxMagBirthSchedulerR621=LOW_POWER?'paced-72ms-plus-css-timeline':'native-raf-plus-css-timeline';
     visiblePhase=0;
     phaseChangedAt=0;
     ROOT.dataset.fxMagBirthPhase='0';
     ROOT.setAttribute('data-fx-mag-birth-live','active');
+    armPhaseTimeline();
     document.body.prepend(overlay);
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
     sizeCanvas();
 
     // Absolute fail-open. Normal completion remains ~2.4 s; this only protects
     // against a renderer/driver path that starves the animation clock.
-    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r620'), REDUCED ? 900 : DURATION + (MOBILE ? 1700 : 2400));
+    hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r621'), REDUCED ? 900 : DURATION + (MOBILE ? 1300 : 1800));
 
     if(REDUCED){
       requestCoreWarmup('reduced-motion');
@@ -539,7 +574,7 @@
       return;
     }
 
-    raf=requestAnimationFrame(render);
+    queueRender();
   }
 
   skip.addEventListener('click',()=>finish('user-skip'));
