@@ -2,7 +2,8 @@ name: P0 fast source loop
 
 on:
   push:
-    branches: [master]
+    # Preserve source sentinels while merge conflicts block the synthetic PR candidate.
+    branches: [master, fix/r533-p0-intro-lcp]
     paths:
       - 'docs/styles.css'
       - 'docs/scifi-ui/styles/**'
@@ -11,6 +12,7 @@ on:
       - 'billing-worker/src/production-content-base.js'
       - 'billing-worker/src/production-feedback-entry.js'
       - '.github/scripts/**'
+      - '.github/workflows/p0-fast-loop.yml'
   pull_request:
     branches: [master]
     paths:

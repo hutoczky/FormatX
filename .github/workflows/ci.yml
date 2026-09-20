@@ -2,10 +2,11 @@ name: Lighthouse CI
 on:
   pull_request:
     branches: [master]
-    paths: ['docs/scifi-ui/**','billing-worker/src/production-content-entry*.js','billing-worker/wrangler.jsonc','billing-worker/package.json','billing-worker/package-lock.json','lighthouserc.json','lighthouserc.mobile.json','.github/scripts/lighthouse-production-candidate-proxy.cjs','.github/workflows/ci.yml']
+    paths: ['docs/scifi-ui/**','billing-worker/src/production-content-entry*.js','billing-worker/wrangler.jsonc','billing-worker/package.json','billing-worker/package-lock.json','lighthouserc.json','lighthouserc.mobile.json','.github/scripts/lighthouse-production-candidate-proxy.cjs','.github/scripts/summarize-p0-lighthouse*.cjs','.github/workflows/ci.yml']
   push:
-    branches: [master]
-    paths: ['docs/scifi-ui/**','billing-worker/src/production-content-entry*.js','billing-worker/wrangler.jsonc','billing-worker/package.json','billing-worker/package-lock.json','lighthouserc.json','lighthouserc.mobile.json','.github/scripts/lighthouse-production-candidate-proxy.cjs','.github/workflows/ci.yml']
+    # Keep source measurements available when a PR merge conflict blocks pull_request runs.
+    branches: [master, fix/r533-p0-intro-lcp]
+    paths: ['docs/scifi-ui/**','billing-worker/src/production-content-entry*.js','billing-worker/wrangler.jsonc','billing-worker/package.json','billing-worker/package-lock.json','lighthouserc.json','lighthouserc.mobile.json','.github/scripts/lighthouse-production-candidate-proxy.cjs','.github/scripts/summarize-p0-lighthouse*.cjs','.github/workflows/ci.yml']
   workflow_dispatch:
 permissions: { contents: read, statuses: write }
 concurrency: { group: 'lighthouse-${{ github.ref }}', cancel-in-progress: true }
@@ -23,6 +24,8 @@ jobs:
         run: |
           npm install -g @lhci/cli@0.13.x
           npm ci --prefix billing-worker
+      - name: Validate individual-run Lighthouse checker
+        run: node --test .github/scripts/summarize-p0-lighthouse.test.cjs
       - name: Start exact current production candidate Worker
         id: candidate
         shell: bash
@@ -84,6 +87,17 @@ jobs:
           set -o pipefail; rm -rf .lighthouseci; set +e; lhci autorun --config=./lighthouserc.mobile.json 2>&1 | tee lighthouse-mobile-output.txt; s=${PIPESTATUS[0]}; set -e
           grep -Fq 'Running Lighthouse 3 time(s) on http://127.0.0.1:8788/' lighthouse-mobile-output.txt; mkdir -p lighthouse-results/mobile; cp -a .lighthouseci/. lighthouse-results/mobile/; exit "$s"
         env: { LHCI_GITHUB_APP_TOKEN: '${{ secrets.LHCI_GITHUB_APP_TOKEN }}' }
+      - name: Enforce every desktop and mobile Lighthouse run
+        if: always() && steps.candidate.outcome == 'success'
+        env:
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        shell: bash
+        run: |
+          status=0
+          for profile in desktop mobile; do
+            PROFILE="$profile" node .github/scripts/summarize-p0-lighthouse.cjs "lighthouse-results/$profile" || status=1
+          done
+          exit "$status"
       - name: Upload Lighthouse results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
