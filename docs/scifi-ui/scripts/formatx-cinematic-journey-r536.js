@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'award-jury-progressive-r637';
+  const VERSION = 'award-jury-progressive-r639';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -327,7 +327,6 @@
     }
     removeEventListener('pointerdown',enableAwardJuryPolish);
     removeEventListener('touchstart',enableAwardJuryPolish);
-    removeEventListener('wheel',enableAwardJuryPolish);
     removeEventListener('keydown',enableAwardJuryPolish);
   }
 
@@ -335,7 +334,6 @@
     root.dataset.fxAwardJuryR637 = 'armed';
     addEventListener('pointerdown',enableAwardJuryPolish,{passive:true,once:false});
     addEventListener('touchstart',enableAwardJuryPolish,{passive:true,once:false});
-    addEventListener('wheel',enableAwardJuryPolish,{passive:true,once:false});
     addEventListener('keydown',enableAwardJuryPolish,{passive:true,once:false});
   }
 
@@ -389,6 +387,7 @@
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxAwardJuryPassR635='superseded-by-r637-external-progressive-layer';
     root.dataset.fxAwardJuryPassR637='design-usability-creativity-content-developer-external-progressive-enhancement';
+    root.dataset.fxAwardPerformanceR639='lazy-showcase-and-deliberate-input-only-jury-style';
     schedule();
   }
 
@@ -405,7 +404,6 @@
     removeEventListener('blur',onCinematicPointerLeave);
     removeEventListener('pointerdown',enableAwardJuryPolish);
     removeEventListener('touchstart',enableAwardJuryPolish);
-    removeEventListener('wheel',enableAwardJuryPolish);
     removeEventListener('keydown',enableAwardJuryPolish);
   },{once:true});
 })();
