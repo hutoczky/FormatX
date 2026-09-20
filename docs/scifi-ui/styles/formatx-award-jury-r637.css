@@ -1,0 +1,103 @@
+/* FormatX R637 — progressive Awwwards jury layer.
+   Loaded only after real user input. No idle loop, no audit-only branch,
+   no backdrop-filter, no full-screen filter, no geometry ownership. */
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::before,
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::after{
+  content:"";
+  position:absolute;
+  z-index:8;
+  left:0;
+  right:0;
+  height:clamp(14px,2.6vh,34px);
+  pointer-events:none!important;
+  opacity:.28;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::before{
+  top:0;
+  background:linear-gradient(180deg,rgba(0,2,8,.66),transparent);
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::after{
+  bottom:0;
+  background:linear-gradient(0deg,rgba(0,2,8,.70),transparent);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-hud{
+  padding:11px 12px;
+  border:1px solid rgba(var(--fx-c536-a),.10);
+  border-right-color:rgba(var(--fx-c536-a),.26);
+  border-radius:2px 14px 2px 14px;
+  background:linear-gradient(145deg,rgba(3,12,22,.46),rgba(2,8,15,.16));
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene .section-heading h2 em{
+  color:rgba(var(--fx-c536-a),.94);
+  font-style:normal;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene .section-index{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:rgba(var(--fx-c536-a),.74)!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene .section-index::before{
+  content:"";
+  width:clamp(18px,2.6vw,42px);
+  height:1px;
+  flex:0 0 auto;
+  background:linear-gradient(90deg,rgba(var(--fx-c536-a),.86),rgba(var(--fx-c536-b),.20));
+}
+
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture :is(
+  #experience .flow-chapters article,
+  #capabilities .card,
+  #pricing .price-card,
+  #system .system-grid article,
+  #resources .release-card
+):is(:hover,:focus-within){
+  border-color:rgba(var(--fx-c536-a),.32)!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture :is(
+  a,button,[role="button"],[tabindex="0"]
+):focus-visible{
+  outline:2px solid rgba(var(--fx-c536-a),.74)!important;
+  outline-offset:4px!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card.featured header::after{
+  content:"ACCESS NODE";
+  display:inline-flex;
+  margin-top:9px;
+  padding:5px 8px;
+  border:1px solid rgba(255,224,182,.18);
+  border-radius:999px;
+  color:rgba(255,237,211,.66);
+  font:760 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.16em;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] #resources .release-layout::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:8%;
+  right:8%;
+  top:50%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(183,244,255,.08),rgba(238,255,255,.32),rgba(111,227,200,.08),transparent);
+}
+
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::before,
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::after,
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-hud{
+    display:none!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::before,
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage::after{
+    display:none!important;
+  }
+}

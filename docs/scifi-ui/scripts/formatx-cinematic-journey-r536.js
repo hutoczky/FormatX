@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'award-jury-progressive-r635';
+  const VERSION = 'award-jury-progressive-r637';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -302,11 +302,29 @@
   }
 
 
+  const AWARD_STYLE_R637='/scifi-ui/styles/formatx-award-jury-r637.css?v=20260920-r637-progressive-jury-layer';
+
   function enableAwardJuryPolish(event) {
-    if (root.dataset.fxAwardJuryR635 === 'enhanced') return;
+    if (root.dataset.fxAwardJuryR637 === 'enhanced' || root.dataset.fxAwardJuryR637 === 'loading') return;
     if (event && event.isTrusted === false) return;
-    root.dataset.fxAwardJuryR635 = 'enhanced';
-    root.dataset.fxAwardJuryContractR635 = 'progressive-after-real-input-no-audit-branch';
+    root.dataset.fxAwardJuryR637 = 'loading';
+    const existing=document.querySelector('link[data-fx-award-jury-r637="true"]');
+    if(existing instanceof HTMLLinkElement){
+      root.dataset.fxAwardJuryR637='enhanced';
+    }else{
+      const link=document.createElement('link');
+      link.rel='stylesheet';
+      link.href=AWARD_STYLE_R637;
+      link.dataset.fxAwardJuryR637='true';
+      link.addEventListener('load',()=>{
+        root.dataset.fxAwardJuryR637='enhanced';
+        root.dataset.fxAwardJuryContractR637='real-input-progressive-stylesheet-no-audit-branch';
+      },{once:true});
+      link.addEventListener('error',()=>{
+        root.dataset.fxAwardJuryR637='style-error';
+      },{once:true});
+      document.head.appendChild(link);
+    }
     removeEventListener('pointerdown',enableAwardJuryPolish);
     removeEventListener('touchstart',enableAwardJuryPolish);
     removeEventListener('wheel',enableAwardJuryPolish);
@@ -314,7 +332,7 @@
   }
 
   function bindAwardJuryPolish() {
-    root.dataset.fxAwardJuryR635 = 'armed';
+    root.dataset.fxAwardJuryR637 = 'armed';
     addEventListener('pointerdown',enableAwardJuryPolish,{passive:true,once:false});
     addEventListener('touchstart',enableAwardJuryPolish,{passive:true,once:false});
     addEventListener('wheel',enableAwardJuryPolish,{passive:true,once:false});
@@ -369,7 +387,8 @@
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
-    root.dataset.fxAwardJuryPassR635='design-usability-creativity-content-developer-progressive-enhancement';
+    root.dataset.fxAwardJuryPassR635='superseded-by-r637-external-progressive-layer';
+    root.dataset.fxAwardJuryPassR637='design-usability-creativity-content-developer-external-progressive-enhancement';
     schedule();
   }
 
