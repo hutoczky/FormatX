@@ -34,8 +34,9 @@ const SHOTS=[
 
   const report=[];
   try{
+    const shotBrowser=await launchBrowser();
+    try{
     for(const [seconds,name] of SHOTS){
-      const shotBrowser=await launchBrowser();
       const shotContext=await shotBrowser.newContext(contextOptions);
       const page=await shotContext.newPage();
       await page.addInitScript(()=>{try{sessionStorage.clear();localStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}});
@@ -97,6 +98,8 @@ const SHOTS=[
       report.push({seconds,name,state,errors});
       await page.close();
       await shotContext.close();
+    }
+    }finally{
       await shotBrowser.close();
     }
 
@@ -249,8 +252,8 @@ const SHOTS=[
       process.exitCode=1;
     }
   }finally{
-    // Each proof frame owns and closes its browser process so WebGL/session
-    // state cannot leak between deterministic keyframes.
+    // R1405 reuses one browser for deterministic intro frames while each frame
+    // still owns an isolated context. Handoff and mobile proof stay separate.
   }
 })().catch(error=>{
   fs.writeFileSync(path.join(OUT,'failure.txt'),String(error?.stack||error)+'\n');
