@@ -1,4 +1,4 @@
-/* FormatX R488/R502 — restrained mobile luminance, softer silhouette and compositor-safe pulse.
+/* FormatX R1401 — crisp mobile crystal optics and compositor-safe pulse.
    R326 remains the single WebGL/material owner and R484 keeps the periodic native
    surface-energy sweep. R502 keeps the canonical CSSAnimation declared across
    PAUSE so the root playback governor freezes/resumes the same timeline object. */
@@ -19,19 +19,19 @@
      and razor-cut OLED edge visible in physical mobile captures. */
   html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .805 !important;
+    opacity: .965 !important;
     filter:
-      brightness(.895)
-      contrast(.805)
-      saturate(.975)
+      brightness(.99)
+      contrast(1.18)
+      saturate(1.06)
       hue-rotate(-1deg)
-      blur(.82px) !important;
+      blur(0) !important;
     -webkit-filter:
-      brightness(.895)
-      contrast(.805)
-      saturate(.975)
+      brightness(.99)
+      contrast(1.18)
+      saturate(1.06)
       hue-rotate(-1deg)
-      blur(.82px) !important;
+      blur(0) !important;
     mix-blend-mode: normal !important;
     transform-origin: 50% 50% !important;
     scale: .992 !important;
@@ -140,3 +140,4 @@
 /* production-r488-mobile-optics-restrained-glow-soft-edge-compositor-pulse */
 /* production-r502-mobile-pause-stable-animation-identity */
 /* deploy-r488-live-proof */
+/* production-r1401-mobile-crystal-no-blur-crisp-facets */
