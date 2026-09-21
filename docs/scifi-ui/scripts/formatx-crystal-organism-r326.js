@@ -40,6 +40,7 @@
   root.dataset.fxNativeMagVisualR1401 = 'sharp-asymmetric-crystal-black-gunmetal-optical-iris-eight-tendrils-mobile';
   root.dataset.fxNativeMagVisualR1410 = 'sculpted-asymmetric-shard-crystal-visible-metal-facets-optical-iris-eight-tendrils';
   root.dataset.fxNativeMagVisualR1412 = 'vertical-asymmetric-black-crystal-offset-shards-silver-crown-cyan-optic';
+  root.dataset.fxNativeMagVisualR1414 = 'premium-asymmetric-shard-cluster-titanium-facets-glass-optic-smooth-tendrils';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -110,11 +111,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 11 : mobile ? 14 : constrained ? 18 : 30;
-    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 22 : mobile ? 28 : constrained ? 36 : 56;
+    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 13 : mobile ? 15 : constrained ? 18 : 30;
+    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 26 : mobile ? 30 : constrained ? 36 : 56;
     const tendrilCount = auditMode ? 4 : 8;
-    const tendrilSegments = auditMode ? 4 : constrainedMobile ? 8 : mobile ? 16 : constrained ? 18 : 28;
-    const tendrilSides = auditMode ? 3 : constrainedMobile ? 4 : mobile || constrained ? 6 : 8;
+    const tendrilSegments = auditMode ? 4 : constrainedMobile ? 12 : mobile ? 18 : constrained ? 18 : 28;
+    const tendrilSides = auditMode ? 3 : constrainedMobile ? 5 : mobile || constrained ? 6 : 8;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -565,7 +566,7 @@
           *(1.0-smoothstep(.30,.58,abs(vLocal.x)))*podMask;
         float opticalWell=(1.0-smoothstep(.22,.43,radial))*podMask;
         float tendrilMask=smoothstep(.62,.82,length(vLocal.xy))*podMask;
-        float tendrilSegment=(.30+.70*ridge(vUv.y*7.4+vUv.x*1.65,12.0))*tendrilMask;
+        float tendrilSegment=(.58+.42*ridge(vUv.y*4.8+vUv.x*1.15,7.0))*tendrilMask;
         vec3 cyan=vec3(.018,.62,.94);
         vec3 violet=vec3(.055,.075,.16);
         vec3 ice=vec3(.64,.80,.84);
@@ -708,7 +709,7 @@
           *(1.0-smoothstep(.44,.52,abs(vLocal.x)))
           *(1.0-smoothstep(.10,.36,abs(vLocal.y)))*podMask;
         float tendrilMask=smoothstep(.62,.82,length(vLocal.xy))*podMask;
-        float tendrilSegment=pow(.5+.5*cos(vUv.y*65.97+vUv.x*12.56),18.0)*tendrilMask;
+        float tendrilSegment=(.58+.42*(.5+.5*cos(vUv.y*18.85+vUv.x*3.14)))*tendrilMask;
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
@@ -716,34 +717,35 @@
           pulse=exp(-pow((coordinate-head)/.065,2.0))*(.35+.65*fresnel);
         }
         float energy=sat(.45+uEnergy*.72);
-        vec3 cyan=vec3(.018,.56,.88);
-        vec3 violet=vec3(.080,.026,.120);
-        vec3 ice=vec3(.58,.74,.80);
-        vec3 silver=vec3(.32,.39,.42);
-        vec3 metal=vec3(.010,.004,.018);
-        vec3 tissue=mix(vec3(.013,.004,.022),vec3(.105,.026,.132),.24+.42*ndl);
-        tissue*=1.0-.34*cortexGroove;
-        tissue+=violet*cortex*.12;
-        vec3 c=mix(metal,tissue,.76*(1.0-realArmorPlate)*(1.0-realDarkPlate));
-        c+=silver*crownMask*(.56+.48*ndl+.22*spec);
-        c+=vec3(.034,.060,.075)*shoulderMask*(.46+.42*ndl+.16*spec);
-        c=mix(c,silver*(.62+.60*ndl+.34*spec),realArmorPlate*.88);
-        c=mix(c,metal*.82+vec3(.025,.046,.060),realDarkPlate*.90);
-        c=mix(c,metal*.72+vec3(.028,.052,.070),diamondFace*.88);
-        c=mix(c,silver*.52+metal*.32,diamondFrame*.80);
-        c+=(ice*.28+cyan*.36)*diamondRim;
+        vec3 cyan=vec3(.018,.60,.94);
+        vec3 violet=vec3(.040,.050,.120);
+        vec3 ice=vec3(.68,.84,.88);
+        vec3 silver=vec3(.50,.58,.62);
+        vec3 steel=vec3(.055,.105,.128);
+        vec3 metal=vec3(.006,.014,.024);
+        vec3 tissue=mix(vec3(.008,.020,.032),vec3(.075,.135,.160),.26+.48*ndl+.14*fresnel);
+        tissue*=1.0-.22*cortexGroove;
+        tissue+=steel*cortex*.16;
+        vec3 c=mix(metal,tissue,.90*(1.0-realArmorPlate)*(1.0-realDarkPlate));
+        c+=silver*crownMask*(.88+.66*ndl+.38*spec);
+        c+=steel*shoulderMask*(.72+.52*ndl+.28*spec);
+        c=mix(c,silver*(.86+.76*ndl+.50*spec)+ice*.06*spec,realArmorPlate*.94);
+        c=mix(c,metal*.72+steel*.46,realDarkPlate*.90);
+        c=mix(c,metal*.66+steel*.34,diamondFace*.90);
+        c=mix(c,silver*.70+steel*.18,diamondFrame*.88);
+        c+=(ice*.38+cyan*.42)*diamondRim;
         c+=cyan*fresnel*(.026+.030*energy);
         c+=(cyan*.10+violet*.05)*dna*(.020+.030*energy);
-        c+=cyan*(nucleus*2.45+ring*.16)+ice*(heart*.010+nucleus*.24+coreRing*.62+spec*.22);
+        c+=cyan*(nucleus*2.85+ring*.12)+ice*(heart*.012+nucleus*.30+coreRing*.72+spec*.30);
         c=mix(c,metal,pupil*.42);
-        c+=cyan*coreDisc*1.12+ice*coreDisc*.30;
-        c+=cyan*coreRing*.78;
+        c+=cyan*coreDisc*1.40+ice*coreDisc*.42;
+        c+=cyan*coreRing*.92;
         c+=ice*seam*.06;
         c+=(ice*.48+cyan*.26)*pulse;
-        c=mix(c,vec3(.007,.038,.054),tendrilMask*.76);
-        c+=(cyan*.60+ice*.10)*tendrilSegment*(.50+.60*fresnel);
+        c=mix(c,vec3(.012,.055,.072),tendrilMask*.78);
+        c+=(cyan*.54+ice*.14)*tendrilSegment*(.44+.56*fresnel);
         float alpha=.955+.016*ndl+.014*fresnel+nucleus*.016+pulse*.014+tendrilMask*.012+realArmorPlate*.030+realDarkPlate*.022;
-        ${outputName}=vec4(filmic(c*.88),clamp(alpha,.92,.990));
+        ${outputName}=vec4(filmic(c*1.16),clamp(alpha,.94,.992));
       }`;
     const fragmentSource = (constrainedMobile || auditMode) ? constrainedFragmentSource : fullFragmentSource;
 
@@ -837,9 +839,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:constrainedMobile?.88:mobile?1.50:constrained?1.15:1.65;
+      const cap=auditMode?1:constrainedMobile?1.12:mobile?1.50:constrained?1.15:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:constrainedMobile?190000:mobile?760000:constrained?520000:1150000;
+      const budget=auditMode?390000:constrainedMobile?340000:mobile?760000:constrained?520000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
