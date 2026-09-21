@@ -780,7 +780,9 @@
       delayed.add(timer);
       return timer;
     };
-    const initialShape=root.dataset.fxCoreShapeR337==='sphere'?'sphere':'crystal';
+    const initialShape='crystal';
+    root.dataset.fxCoreShapeR337='crystal';
+    root.dataset.fxCoreDefaultShapeR1401='irregular-crystal';
     let disposed=false,contextLost=false,visible=true,paused=false;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=constrained;
     let px=0,py=0,tx=0,ty=0;
