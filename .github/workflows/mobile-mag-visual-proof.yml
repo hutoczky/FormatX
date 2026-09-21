@@ -74,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mobile-mag-r1412-proof
-          path: artifacts/r1408-mobile-mag/
+          path: artifacts/r1412-mobile-mag/
           if-no-files-found: warn
           retention-days: 14
 
