@@ -10,6 +10,7 @@
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
+  if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
   const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
