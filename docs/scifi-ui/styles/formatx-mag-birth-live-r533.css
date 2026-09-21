@@ -2064,3 +2064,33 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   z-index:70!important;
   opacity:.22!important;
 }
+
+
+/* R1420 — when the real Three.js genesis renderer is active, it owns every
+   visual DNA/cellular form. Retire the old CSS/SVG proxy artwork so users never
+   see neon diagram DNA, translucent bubble lobes or circular target rings mixed
+   over the real 3D scene. Text/progress/skip UI remains intact. */
+html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 :is(
+  .fxb-genome-field,
+  .fxb-dna-stage,
+  .fxb-biotic-field
+) {
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+}
+html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-veil {
+  opacity:.08!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+  background:linear-gradient(180deg,rgba(1,4,10,.06),rgba(1,4,10,.12))!important;
+}
+html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-deep {
+  opacity:.18!important;
+  background:linear-gradient(180deg,rgba(1,4,10,.12),rgba(2,5,12,.18))!important;
+}
+html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-particles {
+  opacity:1!important;
+  filter:none!important;
+}
+/* production-r1420-threejs-owns-intro-art */
