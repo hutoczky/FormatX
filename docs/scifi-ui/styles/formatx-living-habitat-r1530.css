@@ -181,3 +181,51 @@ html:root:root:root:root:root:root:root:root:root:root body.living-architecture 
 }
 
 /* production-r1530-photoreal-continuous-living-habitat */
+
+/* R1531 — proof-corrected final MAG optics owner.
+   The captured phone render proved that older high-specificity optics were still
+   winning. Remove every local stage plate/ring and keep the mineral renderer
+   crisp, neutral and materially readable. */
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-crystal-organism-r326-stage::before,
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-crystal-organism-r326-stage::after {
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  background:none!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  pointer-events:none!important;
+}
+
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  opacity:1!important;
+  image-rendering:auto!important;
+  filter:brightness(1.045) contrast(1.075) saturate(.90) drop-shadow(0 19px 25px rgba(0,0,0,.32))!important;
+  -webkit-filter:brightness(1.045) contrast(1.075) saturate(.90) drop-shadow(0 19px 25px rgba(0,0,0,.32))!important;
+  mix-blend-mode:normal!important;
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:1!important;
+    filter:brightness(1.075) contrast(1.065) saturate(.91) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
+    -webkit-filter:brightness(1.075) contrast(1.065) saturate(.91) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
+  }
+}
+/* production-r1531-proof-corrected-photoreal-mag-owner */
