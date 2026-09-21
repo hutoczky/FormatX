@@ -161,7 +161,7 @@ const SHOTS=[
         await handoffBrowser.close();
       }
 
-      // R1404: capture the exact phone layout the user sees. The normal intro is
+      // R1405: capture the exact phone layout the user sees. The normal intro is
       // intentionally skipped by Playwright automation; this proves the permanent
       // native MAG, full-page chamber, controls and copy together at 390x844.
       {
@@ -182,7 +182,7 @@ const SHOTS=[
           if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());
         });
         const u=new URL(BASE);
-        u.searchParams.set('mobileproof','r1404');
+        u.searchParams.set('mobileproof','r1405');
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
         await page.waitForFunction(
           ()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'
@@ -199,7 +199,7 @@ const SHOTS=[
             stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
             canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             renderer:root.dataset.fxCoreRenderer||'',
-            visual:root.dataset.fxNativeMagVisualR1404||'',
+            visual:root.dataset.fxNativeMagVisualR1405||'',
             optics:root.dataset.fxPrimaryMagOpticsR1383||'',
             resolution:root.dataset.fxCoreReal3dResolution||'',
             shape:root.dataset.fxCoreShapeR337||'',
@@ -219,8 +219,8 @@ const SHOTS=[
         if(await stage.count()){
           await stage.screenshot({path:path.join(OUT,'09-mobile-native-mag.png')});
         }
-        if(state.visual!=='irregular-crystal-only-no-round-endpoint-crisp-mobile'){
-          errors.push('R1404 native crystal visual marker missing: '+state.visual);
+        if(state.visual!=='smaller-elevated-irregular-crystal-compact-optical-cradle-refined-eight-tendrils'){
+          errors.push('R1405 native crystal visual marker missing: '+state.visual);
         }
         if(state.shape!=='crystal'){
           errors.push('Mobile MAG is not in crystal state: '+state.shape);
