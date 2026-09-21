@@ -76,18 +76,21 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   }, null, { timeout: 30000 });
 
   await activateImmersiveRuntime(page, 'living-core-semantic-hit-validation');
-  const hitLocator = page.locator('#hero .fx-mag-heart-hit-r252').first();
+  const hitLocator = page.locator('#hero .fx-reference-mag-button, #hero .fx-reference-ask, #hero .fx-mag-heart-hit-r252').first();
   await hitLocator.waitFor({ state: 'visible', timeout: 30000 });
   const pointerOwnership = await page.evaluate(() => {
     const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
-    const hit = document.querySelector('#hero .fx-mag-heart-hit-r252');
+    const hit = document.querySelector('#hero .fx-reference-mag-button')
+      || document.querySelector('#hero .fx-reference-ask')
+      || document.querySelector('#hero .fx-mag-heart-hit-r252');
     return {
       stage: stage ? getComputedStyle(stage).pointerEvents : '',
-      hit: hit ? getComputedStyle(hit).pointerEvents : ''
+      hit: hit ? getComputedStyle(hit).pointerEvents : '',
+      owner: hit?.className || ''
     };
   });
   assert.equal(pointerOwnership.stage, 'none', `${name}: R326 visual stage must be pointer-transparent`);
-  assert.notEqual(pointerOwnership.hit, 'none', `${name}: semantic MAG hit target is inert`);
+  assert.notEqual(pointerOwnership.hit, 'none', `${name}: current MAG interaction target is inert ${JSON.stringify(pointerOwnership)}`);
   await hitLocator.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreEnergyBoltR455?.startsWith('surface-sweep-'));
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreSurfacePulseR454?.startsWith('sweep-'));
