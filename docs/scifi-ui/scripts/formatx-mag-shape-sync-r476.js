@@ -8,7 +8,7 @@ const root=document.documentElement;
 if(root.dataset.fxMagShapeSyncR476==='ready-r528')return;
 root.dataset.fxMagShapeSyncR476='booting-r528';
 const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
-const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260921-r1401-crisp-irregular-crystal';
+const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260921-r1402-zero-blur-crystal';
 const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260921-r1401-sharp-irregular-crystal';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null,pulseTimer=0,lastEnergyBolt='';
