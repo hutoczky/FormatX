@@ -806,3 +806,93 @@ html:root:root:root:root:root:root:root:root:root body.living-architecture::afte
 }
 
 /* production-r1420-continuous-chamber-no-local-hud */
+
+
+/* R1480 — cinematic material chamber.
+   Retire the diagram-like radial spokes/grid as the dominant background. The
+   page now reads as a dark physical chamber with broad metal walls, light wells,
+   floor haze and a restrained cyan/violet atmosphere. */
+html:root:root:root:root:root:root:root body.living-architecture {
+  background:
+    radial-gradient(1150px 720px at 66% 9%,rgba(82,203,240,.105),transparent 62%),
+    radial-gradient(1000px 840px at 92% 42%,rgba(26,86,132,.070),transparent 70%),
+    radial-gradient(1080px 900px at 7% 62%,rgba(31,73,126,.050),transparent 74%),
+    radial-gradient(900px 760px at 74% 90%,rgba(82,52,143,.045),transparent 74%),
+    linear-gradient(180deg,#01050a 0%,#03101a 24%,#020912 59%,#01050a 100%)!important;
+}
+
+html:root:root:root:root:root:root:root body.living-architecture::before {
+  inset:-6vh -7vw!important;
+  background:
+    linear-gradient(104deg,
+      rgba(0,0,0,.36) 0 13%,
+      rgba(16,43,58,.18) 13.4% 14.2%,
+      transparent 14.6% 31%,
+      rgba(34,92,118,.055) 31.4% 32.0%,
+      transparent 32.4% 68%,
+      rgba(34,92,118,.055) 68.2% 68.8%,
+      transparent 69.2% 85%,
+      rgba(16,43,58,.18) 85.4% 86.2%,
+      rgba(0,0,0,.36) 86.6% 100%),
+    radial-gradient(ellipse 58% 42% at 50% 18%,rgba(56,160,198,.070),transparent 67%),
+    radial-gradient(ellipse 78% 72% at 50% 58%,transparent 0 55%,rgba(11,37,52,.20) 76%,rgba(0,0,0,.48) 100%)!important;
+  background-size:auto,auto,auto!important;
+  opacity:1!important;
+  mask-image:none!important;
+  -webkit-mask-image:none!important;
+  filter:none!important;
+}
+
+html:root:root:root:root:root:root:root body.living-architecture::after {
+  inset:0!important;
+  background:
+    linear-gradient(180deg,rgba(117,221,244,.035),transparent 20% 74%,rgba(43,92,124,.020)),
+    radial-gradient(ellipse 26% 46% at 66% 0%,rgba(126,229,247,.085),transparent 72%),
+    radial-gradient(ellipse 44% 24% at 50% 100%,rgba(23,84,115,.065),transparent 72%),
+    radial-gradient(circle,rgba(167,228,244,.12) 0 1px,transparent 1.2px)!important;
+  background-size:auto,auto,auto,110px 110px!important;
+  background-position:center,center,center,19px 31px!important;
+  opacity:.92!important;
+}
+
+html:root:root:root:root:root:root:root body.living-architecture > .fx-atmosphere {
+  opacity:.30!important;
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root body.living-architecture {
+    background:
+      radial-gradient(740px 580px at 50% 3%,rgba(72,196,231,.105),transparent 65%),
+      radial-gradient(650px 700px at 4% 50%,rgba(28,73,125,.050),transparent 75%),
+      radial-gradient(640px 620px at 92% 78%,rgba(75,50,137,.042),transparent 76%),
+      linear-gradient(180deg,#01050a 0%,#03101a 27%,#020912 64%,#01050a 100%)!important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture::before {
+    inset:-3vh -18vw!important;
+    background:
+      linear-gradient(102deg,
+        rgba(0,0,0,.34) 0 11%,
+        rgba(17,48,64,.17) 11.4% 12.2%,
+        transparent 12.6% 36%,
+        rgba(26,82,108,.040) 36.4% 37%,
+        transparent 37.4% 63%,
+        rgba(26,82,108,.040) 63.4% 64%,
+        transparent 64.4% 87%,
+        rgba(17,48,64,.17) 87.4% 88.2%,
+        rgba(0,0,0,.34) 88.6% 100%),
+      radial-gradient(ellipse 82% 44% at 50% 15%,rgba(53,159,198,.055),transparent 70%),
+      radial-gradient(ellipse 110% 78% at 50% 56%,transparent 0 58%,rgba(6,27,40,.24) 82%,rgba(0,0,0,.48) 100%)!important;
+    opacity:1!important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture::after {
+    background:
+      linear-gradient(180deg,rgba(117,221,244,.025),transparent 21% 78%,rgba(43,92,124,.016)),
+      radial-gradient(ellipse 42% 42% at 50% 0%,rgba(116,223,242,.062),transparent 76%),
+      radial-gradient(circle,rgba(167,228,244,.085) 0 1px,transparent 1.15px)!important;
+    background-size:auto,auto,92px 92px!important;
+    background-position:center,center,14px 27px!important;
+  }
+}
+/* production-r1480-cinematic-material-chamber */
