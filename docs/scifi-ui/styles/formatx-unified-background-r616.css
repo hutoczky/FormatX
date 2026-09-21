@@ -322,4 +322,33 @@ html body.living-architecture :is(h1,h2,h3,strong,.hero-title-main) {
   }
 }
 
+/* R1381: the full-page chamber replaces every old hero-local circular HUD
+   plate. Keep the MAG interaction target, but do not draw a ring around it. */
+html:root:root:root:root:root:root body.living-architecture #hero::before,
+html:root:root:root:root:root:root body.living-architecture #hero::after,
+html:root:root:root:root:root:root body.living-architecture #hero .hero-ring,
+html:root:root:root:root:root:root body.living-architecture #hero .hero-label {
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  background:none!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  pointer-events:none!important;
+}
+
+html:root:root:root:root:root:root body.living-architecture #hero > .fx-signature-core-trigger::before,
+html:root:root:root:root:root:root body.living-architecture #hero > .fx-signature-core-trigger::after {
+  content:none!important;
+  display:none!important;
+  opacity:0!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+/* production-r1381-remove-local-hero-rings */
+
 /* production-r1371-continuous-world-sharp-native-mag */
