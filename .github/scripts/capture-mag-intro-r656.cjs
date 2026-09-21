@@ -43,6 +43,68 @@ const SHOTS=[
 
   const report=[];
   try{
+    // R1408 early mobile proof: capture the user's actual 390x844 composition
+    // before the slower intro keyframe suite, so a later intro failure never
+    // hides the permanent mobile MAG evidence.
+    {
+      const mobileBrowser=await launchBrowser();
+      const mobileContext=await mobileBrowser.newContext({
+        viewport:{width:390,height:844},
+        isMobile:true,
+        hasTouch:true,
+        deviceScaleFactor:2,
+        colorScheme:'dark',
+        reducedMotion:'no-preference',
+        locale:'hu-HU'
+      });
+      const page=await mobileContext.newPage();
+      const errors=[];
+      page.on('pageerror',e=>errors.push(String(e)));
+      page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());});
+      const u=new URL(BASE);
+      u.searchParams.set('mobileproof','r1408');
+      await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
+      const mobileReady=await pollPage(
+        page,
+        ()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'
+          && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1,
+        30000,
+        120
+      );
+      if(!mobileReady)throw new Error('R1408 early mobile native MAG did not become ready');
+      await page.waitForTimeout(700);
+      const state=await page.evaluate(()=>{
+        const root=document.documentElement;
+        const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+        const box=canvas?.getBoundingClientRect();
+        const ring=document.querySelector('#hero .hero-ring');
+        const ringStyle=ring?getComputedStyle(ring):null;
+        return {
+          stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
+          canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
+          renderer:root.dataset.fxCoreRenderer||'',
+          visual:root.dataset.fxNativeMagVisualR1405||'',
+          shape:root.dataset.fxCoreShapeR337||'',
+          canvasFilter:canvas?getComputedStyle(canvas).filter:'',
+          heroRing:ring?{present:true,display:ringStyle.display,visibility:ringStyle.visibility,opacity:Number(ringStyle.opacity||0)}:{present:false,display:'none',visibility:'hidden',opacity:0},
+          canvas:{x:box?.x||0,y:box?.y||0,width:box?.width||0,height:box?.height||0},
+          overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
+        };
+      });
+      await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
+      const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
+      if(await stage.count())await stage.screenshot({path:path.join(OUT,'09-mobile-native-mag.png')});
+      if(state.visual!=='smaller-elevated-irregular-crystal-compact-optical-cradle-refined-eight-tendrils')errors.push('R1408 visual marker missing: '+state.visual);
+      if(state.shape!=='crystal')errors.push('R1408 mobile MAG shape is not crystal: '+state.shape);
+      if(/blur\((?!0(?:px)?\))/i.test(state.canvasFilter||''))errors.push('R1408 mobile MAG still has blur: '+state.canvasFilter);
+      if(state.heroRing.present&&state.heroRing.display!=='none'&&state.heroRing.visibility!=='hidden'&&state.heroRing.opacity>.01)errors.push('R1408 legacy hero ring visible: '+JSON.stringify(state.heroRing));
+      if(state.overflow>2)errors.push('R1408 horizontal overflow: '+state.overflow);
+      report.push({seconds:'mobile-native-early',name:'08-mobile-native-hero',state,errors});
+      await page.close();
+      await mobileContext.close();
+      await mobileBrowser.close();
+    }
+
     const shotBrowser=await launchBrowser();
     try{
     for(const [seconds,name] of SHOTS){
