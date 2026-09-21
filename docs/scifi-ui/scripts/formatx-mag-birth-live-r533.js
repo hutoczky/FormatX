@@ -136,6 +136,7 @@
   overlay.dataset.fxIntroR1340 = 'reference-surface-radial-iris-lock-three-genesis';
   overlay.dataset.fxIntroR1350 = 'video-proportion-organic-final-lock-three-genesis';
   overlay.dataset.fxIntroR1360 = 'integrated-cortical-organic-final-lock-three-genesis';
+  overlay.dataset.fxIntroR1400 = 'irregular-crystal-final-handoff-three-genesis';
   overlay.dataset.fxIntroR1300 = 'cellular-material-lock-three-genesis';
   overlay.dataset.fxIntroVisualProofR981 = 'r980-frame-locked-reference-proof';
   overlay.dataset.fxIntroVisualProofR962 = 'r961-frame-locked-reference-proof';
