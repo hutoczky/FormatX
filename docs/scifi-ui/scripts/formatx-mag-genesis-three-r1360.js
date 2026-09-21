@@ -1113,15 +1113,22 @@
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.44,.44,1);
-      this.mechEyeCorona.position.set(0,.01,.665);
+      this.mechEyeCorona.scale.set(.36,.36,1);
+      this.mechEyeCorona.position.set(0,.01,.672);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
+      // R1505 — shallow physical optical lens instead of a flat self-lit HUD disc.
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.074,64),
-        new T.MeshBasicMaterial({color:0x74eeff,transparent:true,opacity:.90,side:T.DoubleSide})
+        new T.SphereGeometry(.086,36,22),
+        new T.MeshPhysicalMaterial({
+          color:0x17343a,metalness:.10,roughness:.16,
+          clearcoat:1,clearcoatRoughness:.08,
+          emissive:0x123d46,emissiveIntensity:.34,
+          transparent:true,opacity:.94,depthWrite:true
+        })
       );
-      this.mechEyeCore.position.set(0,.01,.675);
+      this.mechEyeCore.scale.set(1,1,.30);
+      this.mechEyeCore.position.set(0,.01,.686);
       this.mechanicalGroup.add(this.mechEyeCore);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
@@ -1129,10 +1136,10 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.142,.007,8,72),
+        new T.TorusGeometry(.128,.006,8,72),
         this.mechInnerMaterial
       );
-      this.mechInnerRing.position.set(0,.01,.670);
+      this.mechInnerRing.position.set(0,.01,.681);
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechLight=new T.PointLight(0x6eeeff,0,3.6,2);
@@ -1180,8 +1187,8 @@
     makeTentacles(){
       const T=this.THREE,r=this.rand;
       this.tentacleMaterial=new T.MeshStandardMaterial({
-        color:0x17313a,metalness:.48,roughness:.34,
-        emissive:0x093842,emissiveIntensity:.34,
+        color:0x182429,metalness:.20,roughness:.56,
+        emissive:0x061216,emissiveIntensity:.11,
         transparent:true,opacity:0
       });
       this.tentacleEdgeMaterial=new T.MeshBasicMaterial({
@@ -1406,9 +1413,9 @@
       this.silverMaterial.opacity=.18*bodyGrow;
       if(this.crownMaterial)this.crownMaterial.opacity=.24*crownGrow;
       this.mechEdgeMaterial.opacity=.065*bodyGrow;
-      this.mechInnerMaterial.opacity=.30*bodyGrow;
+      this.mechInnerMaterial.opacity=.22*bodyGrow;
       if(this.seamMaterial)this.seamMaterial.opacity=.075*bodyGrow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.72*bodyGrow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.56*bodyGrow;
       this.mechInnerRing.rotation.z=time*.00012;
       if(this.mechLight)this.mechLight.intensity=1.55*bodyGrow;
 
@@ -1427,10 +1434,10 @@
       const afterGlow=smooth((t-9.42)/.42);
       this.tentacleGroup.visible=grow>.002;
       this.tentacleMaterial.opacity=(.96+.02*afterGlow)*grow;
-      this.tentacleEdgeMaterial.opacity=(.014+.018*afterGlow)*grow;
-      this.tentacleNodeMaterial.opacity=.10*grow;
-      if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=(.025+.060*afterGlow)*grow;
-      if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=.08*grow;
+      this.tentacleEdgeMaterial.opacity=(.005+.007*afterGlow)*grow;
+      this.tentacleNodeMaterial.opacity=.032*grow;
+      if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=(.008+.022*afterGlow)*grow;
+      if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=.022*grow;
       this.tentacles.forEach((g,i)=>{
         const wave=1+Math.sin(time*.00062+g.userData.phase)*.006*grow;
         const v=.001+grow*.999;
@@ -1511,8 +1518,8 @@
       }
       if(this.mechEyeCorona){
         const mechanicalReveal=this.mechanicalReveal||0;
-        this.mechEyeCorona.material.opacity=Math.min(1,mechanicalReveal*(.88+flash*.12));
-        const q=.76+flash*.18;
+        this.mechEyeCorona.material.opacity=Math.min(.68,mechanicalReveal*(.56+flash*.08));
+        const q=.36+flash*.07;
         this.mechEyeCorona.scale.set(q,q,1);
       }
       if(this.mechLight)this.mechLight.intensity+=flash*5.5*(this.mechanicalReveal||0);
