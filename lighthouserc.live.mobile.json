@@ -13,14 +13,60 @@
     },
     "assert": {
       "assertions": {
-        "categories:performance": ["error", { "minScore": 1.0 }],
-        "categories:accessibility": ["error", { "minScore": 1.0 }],
-        "categories:best-practices": ["error", { "minScore": 1.0 }],
-        "categories:seo": ["error", { "minScore": 1.0 }],
-        "largest-contentful-paint": ["error", { "maxNumericValue": 1999 }],
-        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.049 }],
-        "total-blocking-time": ["error", { "maxNumericValue": 150 }],
-        "server-response-time": ["error", { "maxNumericValue": 500 }]
+        "categories:performance": [
+          "error",
+          {
+            "minScore": 1
+          }
+        ],
+        "categories:accessibility": [
+          "error",
+          {
+            "minScore": 1
+          }
+        ],
+        "categories:best-practices": [
+          "error",
+          {
+            "minScore": 1
+          }
+        ],
+        "categories:seo": [
+          "error",
+          {
+            "minScore": 1
+          }
+        ],
+        "first-contentful-paint": [
+          "error",
+          {
+            "maxNumericValue": 1800
+          }
+        ],
+        "largest-contentful-paint": [
+          "error",
+          {
+            "maxNumericValue": 1999
+          }
+        ],
+        "cumulative-layout-shift": [
+          "error",
+          {
+            "maxNumericValue": 0.049
+          }
+        ],
+        "total-blocking-time": [
+          "error",
+          {
+            "maxNumericValue": 150
+          }
+        ],
+        "server-response-time": [
+          "error",
+          {
+            "maxNumericValue": 500
+          }
+        ]
       }
     },
     "upload": {
