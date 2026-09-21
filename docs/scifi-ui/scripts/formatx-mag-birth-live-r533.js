@@ -634,8 +634,10 @@
     if(filmRendererFallbackStarted || filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
     filmRendererFallbackStarted=true;
     if(window.FormatXMagReferenceFilmR649?.attach){
+      overlay.dataset.fxRenderer='fallback';
       filmRenderer=window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
       ROOT.dataset.fxMagBirthRendererR1360=filmRenderer?'native-canvas-reference-film':'fallback-particles';
+      ROOT.dataset.fxMagBirthRendererR1430=filmRenderer?'fallback-only-after-three-unavailable':'fallback-particles';
       if(filmRenderer)return;
     }
     const dpr=Math.min(MOBILE?1:1.5,devicePixelRatio||1);
@@ -680,6 +682,8 @@
           if(renderer){
             filmRenderer=renderer;
             ROOT.dataset.fxMagBirthRendererR1360='threejs-active';
+            ROOT.dataset.fxMagBirthRendererR1430='threejs-active-production-path';
+            overlay.dataset.fxRenderer='three';
             renderer.resize?.();
             return renderer;
           }
