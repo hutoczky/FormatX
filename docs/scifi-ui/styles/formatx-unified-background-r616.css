@@ -1,6 +1,6 @@
-/* FormatX R616 — canonical site-wide background and surface cohesion.
-   One static visual language across desktop/mobile, derived from the final
-   dark cyan/ice reference surface. No animation loop, no extra canvas. */
+/* FormatX R1370 — full-page living chamber background.
+   The MAG now inhabits one continuous biotech/sci-fi environment from hero
+   through footer. Static CSS only: no extra canvas, loop or LCP dependency. */
 
 :root {
   --fx-r616-bg-0:#01050c;
@@ -24,10 +24,11 @@ html body.living-architecture {
   isolation:isolate;
   color:#eefaff;
   background:
-    radial-gradient(1200px 760px at 82% 8%, rgba(48,191,255,.115), transparent 64%),
-    radial-gradient(900px 720px at 8% 38%, rgba(58,149,255,.070), transparent 68%),
-    radial-gradient(900px 720px at 76% 72%, rgba(112,78,255,.045), transparent 70%),
-    linear-gradient(180deg,#020812 0%,#03111d 26%,#020b14 58%,#01060c 100%)!important;
+    radial-gradient(1100px 760px at 50% 4%,rgba(98,220,255,.120),transparent 62%),
+    radial-gradient(860px 680px at 84% 24%,rgba(45,173,255,.085),transparent 68%),
+    radial-gradient(900px 720px at 11% 52%,rgba(48,124,226,.065),transparent 70%),
+    radial-gradient(980px 760px at 78% 82%,rgba(104,69,214,.050),transparent 72%),
+    linear-gradient(180deg,#020812 0%,#03111d 24%,#020b14 58%,#01060c 100%)!important;
   background-attachment:fixed!important;
 }
 
@@ -35,14 +36,19 @@ html body.living-architecture::before {
   content:"";
   position:fixed;
   z-index:-20;
-  inset:0;
+  inset:-8vh -6vw;
   pointer-events:none;
-  background-image:
-    linear-gradient(rgba(102,213,255,.026) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(102,213,255,.026) 1px,transparent 1px);
-  background-size:42px 42px;
-  mask-image:linear-gradient(to bottom,rgba(0,0,0,.50),rgba(0,0,0,.16) 68%,transparent 100%);
-  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.50),rgba(0,0,0,.16) 68%,transparent 100%);
+  background:
+    radial-gradient(ellipse 68% 48% at 50% 19%,transparent 0 53%,rgba(116,220,255,.105) 53.35%,rgba(14,55,78,.24) 53.7%,transparent 54.25%),
+    radial-gradient(ellipse 84% 60% at 50% 43%,transparent 0 62%,rgba(102,207,244,.070) 62.3%,rgba(10,38,57,.22) 62.65%,transparent 63.2%),
+    radial-gradient(ellipse 104% 75% at 50% 70%,transparent 0 70%,rgba(93,185,225,.050) 70.25%,rgba(7,31,48,.24) 70.6%,transparent 71.1%),
+    repeating-conic-gradient(from 7deg at 50% 34%,rgba(105,211,248,.036) 0deg 1.15deg,transparent 1.15deg 14deg),
+    linear-gradient(90deg,transparent 0 8%,rgba(91,198,235,.028) 8.15% 8.35%,transparent 8.5% 91.5%,rgba(91,198,235,.028) 91.65% 91.85%,transparent 92% 100%),
+    linear-gradient(rgba(102,213,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(102,213,255,.018) 1px,transparent 1px);
+  background-size:auto,auto,auto,auto,auto,48px 48px,48px 48px;
+  mask-image:radial-gradient(ellipse 110% 105% at 50% 44%,#000 0 64%,rgba(0,0,0,.60) 78%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 110% 105% at 50% 44%,#000 0 64%,rgba(0,0,0,.60) 78%,transparent 100%);
 }
 
 html body.living-architecture::after {
@@ -52,8 +58,13 @@ html body.living-architecture::after {
   inset:0;
   pointer-events:none;
   background:
-    radial-gradient(circle at 50% 7%,rgba(152,235,255,.055),transparent 20%),
-    radial-gradient(circle at 50% 54%,transparent 38%,rgba(0,0,0,.22) 82%,rgba(0,0,0,.48) 118%);
+    radial-gradient(ellipse 34% 22% at 50% -2%,rgba(205,248,255,.115),rgba(80,204,255,.040) 44%,transparent 76%),
+    linear-gradient(102deg,transparent 0 35%,rgba(94,211,255,.018) 43%,transparent 51%),
+    linear-gradient(78deg,transparent 0 49%,rgba(114,202,255,.014) 56%,transparent 64%),
+    radial-gradient(circle at 50% 46%,transparent 25%,rgba(0,0,0,.18) 72%,rgba(0,0,0,.58) 118%),
+    radial-gradient(circle,rgba(173,236,255,.16) 0 1px,transparent 1.3px);
+  background-size:auto,auto,auto,auto,86px 86px;
+  background-position:center,center,center,center,13px 21px;
 }
 
 html body.living-architecture > .fx-atmosphere {
@@ -71,6 +82,9 @@ html body.living-architecture .site-footer {
 html body.living-architecture #main-content > section.scene:not(#hero),
 html body.living-architecture #main-content > .fx-category-deck {
   border-color:rgba(137,224,255,.09)!important;
+  background:
+    radial-gradient(ellipse 72% 60% at 78% 16%,rgba(70,202,255,.035),transparent 68%),
+    linear-gradient(180deg,rgba(3,13,23,.16),rgba(1,7,13,.08))!important;
 }
 
 html body.living-architecture :is(
@@ -163,16 +177,31 @@ html body.living-architecture :is(h1,h2,h3,strong,.hero-title-main) {
 @media (max-width:900px), (pointer:coarse) {
   html body.living-architecture {
     background:
-      radial-gradient(640px 520px at 86% 5%,rgba(51,194,255,.13),transparent 64%),
-      radial-gradient(560px 600px at 7% 43%,rgba(66,151,255,.075),transparent 70%),
-      radial-gradient(540px 500px at 78% 78%,rgba(112,78,255,.048),transparent 72%),
+      radial-gradient(720px 560px at 50% 2%,rgba(74,205,255,.125),transparent 65%),
+      radial-gradient(600px 660px at 5% 44%,rgba(55,139,236,.070),transparent 72%),
+      radial-gradient(620px 560px at 82% 80%,rgba(102,72,224,.050),transparent 74%),
       linear-gradient(180deg,#020812 0%,#03111d 28%,#020a13 62%,#01060c 100%)!important;
     background-attachment:scroll!important;
   }
 
   html body.living-architecture::before {
-    background-size:32px 32px;
+    inset:-4vh -18vw;
     opacity:.72;
+    background:
+      radial-gradient(ellipse 92% 42% at 50% 17%,transparent 0 58%,rgba(99,210,247,.085) 58.4%,transparent 59.0%),
+      radial-gradient(ellipse 118% 64% at 50% 50%,transparent 0 70%,rgba(83,177,220,.050) 70.4%,transparent 71.1%),
+      repeating-conic-gradient(from 7deg at 50% 33%,rgba(105,211,248,.026) 0deg 1deg,transparent 1deg 18deg),
+      linear-gradient(rgba(102,213,255,.014) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(102,213,255,.014) 1px,transparent 1px);
+    background-size:auto,auto,auto,38px 38px,38px 38px;
+  }
+
+  html body.living-architecture::after {
+    background:
+      radial-gradient(ellipse 58% 20% at 50% -2%,rgba(181,242,255,.095),transparent 74%),
+      radial-gradient(circle at 50% 44%,transparent 28%,rgba(0,0,0,.20) 74%,rgba(0,0,0,.56) 118%),
+      radial-gradient(circle,rgba(173,236,255,.12) 0 1px,transparent 1.2px);
+    background-size:auto,auto,72px 72px;
   }
 
   html body.living-architecture #main-content > :is(
@@ -181,7 +210,7 @@ html body.living-architecture :is(h1,h2,h3,strong,.hero-title-main) {
     border-color:rgba(137,224,255,.15)!important;
     background:
       radial-gradient(circle at 86% 7%,rgba(68,211,255,.055),transparent 35%),
-      linear-gradient(148deg,rgba(5,22,36,.87),rgba(2,11,20,.93))!important;
+      linear-gradient(148deg,rgba(5,22,36,.72),rgba(2,11,20,.84))!important;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.028),
       0 20px 62px rgba(0,0,0,.20)!important;
