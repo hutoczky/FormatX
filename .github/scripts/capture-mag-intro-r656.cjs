@@ -42,6 +42,24 @@ const SHOTS=[
     return false;
   }
 
+  async function captureLocatorClip(page,locator,fileName){
+    if(!await locator.count())return false;
+    const box=await locator.boundingBox();
+    const viewport=page.viewportSize();
+    if(!box||!viewport)return false;
+    const x=Math.max(0,box.x);
+    const y=Math.max(0,box.y);
+    const width=Math.min(box.width,viewport.width-x);
+    const height=Math.min(box.height,viewport.height-y);
+    if(width<2||height<2)return false;
+    await page.screenshot({
+      path:path.join(OUT,fileName),
+      clip:{x,y,width,height},
+      animations:'allow'
+    });
+    return true;
+  }
+
   async function captureMobileNativePreflight(){
     const mobileBrowser=await launchBrowser();
     const mobileContext=await mobileBrowser.newContext({
@@ -93,7 +111,7 @@ const SHOTS=[
       });
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
-      if(await stage.count())await stage.screenshot({path:path.join(OUT,'09-mobile-native-mag.png')});
+      await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
       if(state.shape!=='crystal')errors.push('R1412 preflight shape is not crystal: '+state.shape);
       if(/blur\((?!0(?:px)?\))/i.test(state.filter||''))errors.push('R1412 preflight still blurred: '+state.filter);
       if(state.ring.display!=='none'&&state.ring.visibility!=='hidden'&&state.ring.opacity>.01)errors.push('R1412 preflight hero ring visible: '+JSON.stringify(state.ring));
@@ -111,6 +129,15 @@ const SHOTS=[
     // Always capture the exact phone hero first. Even if an intro-keyframe
     // renderer later fails, the artifact still contains the user-facing MAG.
     await captureMobileNativePreflight();
+    if(MOBILE_ONLY){
+      fs.writeFileSync(path.join(OUT,'state.json'),JSON.stringify({report},null,2)+'\n');
+      const mobileErrors=report.flatMap(x=>x.errors);
+      if(mobileErrors.length){
+        console.error(mobileErrors.join('\n'));
+        process.exitCode=1;
+      }
+      return;
+    }
     // R1412 early mobile proof: capture the user's actual 390x844 composition
     // before the slower intro keyframe suite, so a later intro failure never
     // hides the permanent mobile MAG evidence.
@@ -161,7 +188,7 @@ const SHOTS=[
       });
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
-      if(await stage.count())await stage.screenshot({path:path.join(OUT,'09-mobile-native-mag.png')});
+      await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
       if(state.visual!=='smaller-elevated-irregular-crystal-compact-optical-cradle-refined-eight-tendrils')errors.push('R1408 visual marker missing: '+state.visual);
       if(state.shape!=='crystal')errors.push('R1408 mobile MAG shape is not crystal: '+state.shape);
       if(/blur\((?!0(?:px)?\))/i.test(state.canvasFilter||''))errors.push('R1408 mobile MAG still has blur: '+state.canvasFilter);
@@ -308,9 +335,7 @@ const SHOTS=[
   
         await page.screenshot({path:path.join(OUT,'06-post-intro-handoff.png'),fullPage:false});
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
-        if(await stage.count()){
-          await stage.screenshot({path:path.join(OUT,'07-native-hero-mag.png')});
-        }
+        await captureLocatorClip(page,stage,'07-native-hero-mag.png');
         report.push({seconds:'post-intro',name:'06-post-intro-handoff',state,errors});
         await page.close();
         await handoffContext.close();
@@ -374,9 +399,7 @@ const SHOTS=[
         });
         await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
-        if(await stage.count()){
-          await stage.screenshot({path:path.join(OUT,'09-mobile-native-mag.png')});
-        }
+        await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
         if(state.visual!=='smaller-elevated-irregular-crystal-compact-optical-cradle-refined-eight-tendrils'){
           errors.push('R1405 native crystal visual marker missing: '+state.visual);
         }
