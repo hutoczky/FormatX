@@ -643,7 +643,7 @@
         glass+=(ice*.034+cyan*.016)*dnaBridge*(.010+.014*visualEnergy);
         glass+=(cyan*.016+ice*.018)*edge*(.18+.22*(1.0-vMorph));
         glass+=ice*(armorSeam*.050+armorRib*.034)*(1.0-vMorph*.72);
-        glass+=(ice*.22+cyan*.11)*surfaceSweep*(.36+.16*fresnel);
+        glass+=(ice*.40+cyan*.18)*surfaceSweep*(.68+.24*fresnel);
         glass=mix(glass,vec3(.008,.020,.024)+steel*.18,tendrilMask*.80);
         glass+=(cyan*.14+ice*.08)*tendrilSegment*(.22+.28*fresnel);
         float alpha=.982+.008*ndl+.005*fresnel+specular*.004+surfaceSweep*.006+tendrilMask*.005;
@@ -1301,6 +1301,7 @@
     root.dataset.fxCoreReferenceGeometryR1500='single-asymmetric-faceted-mineral-body-integrated-lens-eight-tendrils';
     root.dataset.fxCoreReferenceMaterialR1500='photoreal-obsidian-mineral-localized-optical-emission';
     root.dataset.fxCoreOpticsR1500='neutral-mineral-keylight-local-emission-no-css-glow';
+    root.dataset.fxCoreSurfaceEnergyR1503='localized-travelling-electric-sweep-visible-then-zero-idle';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
     root.dataset.fxCoreReferenceMaterialR1220='opaque-gunmetal-bright-titanium-armor-local-blue-optic-dark-tendrils';
