@@ -22,6 +22,7 @@ const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=202608
 const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260921-r1390-premium-organic';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
+// compatibility-contract: r484-bounded-surface-window
 const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260921-r1383-full-surface-window';
 const LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260920-r629-deterministic-semantic-sweep';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
