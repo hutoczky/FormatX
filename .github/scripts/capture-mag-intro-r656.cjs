@@ -8,6 +8,7 @@ const BASE=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.h
 const OUT=process.env.FORMATX_INTRO_KEYFRAME_DIR||'artifacts/r659-intro-keyframes';
 const CHROME=process.env.CHROME_BIN||undefined;
 const SKIP_HANDOFF=process.env.FORMATX_SKIP_HANDOFF==='1';
+const MOBILE_ONLY=process.env.FORMATX_MOBILE_ONLY==='1';
 fs.mkdirSync(OUT,{recursive:true});
 
 const SHOTS=[
@@ -103,6 +104,16 @@ const SHOTS=[
       await page.close();
       await mobileContext.close();
       await mobileBrowser.close();
+    }
+
+    if(MOBILE_ONLY){
+      fs.writeFileSync(path.join(OUT,'state.json'),JSON.stringify({report},null,2)+'\n');
+      const mobileErrors=report.flatMap(x=>x.errors);
+      if(mobileErrors.length){
+        console.error(mobileErrors.join('\n'));
+        process.exitCode=1;
+      }
+      return;
     }
 
     const shotBrowser=await launchBrowser();
