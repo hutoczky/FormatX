@@ -35,6 +35,7 @@
   root.dataset.fxNativeMagVisualR1380 = 'premium-organic-cortex-defined-diamond-iris-smooth-glass-tendrils';
   root.dataset.fxNativeMagVisualR1390 = 'premium-cortical-biomech-broad-metal-cradle-optical-iris-eight-tendrils';
   root.dataset.fxNativeMagVisualR1400 = 'irregular-crystal-biomech-cortex-optical-iris-eight-tendrils';
+  root.dataset.fxNativeMagVisualR1404 = 'irregular-crystal-only-no-round-endpoint-crisp-mobile';
   root.dataset.fxNativeMagVisualR1401 = 'sharp-asymmetric-crystal-black-gunmetal-optical-iris-eight-tendrils-mobile';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
@@ -131,8 +132,20 @@
       const theta = longitude * Math.PI * 2;
       const sinPhi = Math.sin(phi);
       const direction = [sinPhi * Math.cos(theta), Math.cos(phi), sinPhi * Math.sin(theta)];
-      const sphereRadius = .91;
-      const spherePosition = direction.map(value => value * sphereRadius);
+      /* R1404 compatibility endpoint: internal id remains "sphere" for
+         existing controls/tests, but visually it is a softer irregular crystal.
+         The hero therefore never falls back to a round/egg silhouette. */
+      const softAx=.82,softAy=.88,softAz=.72;
+      const softL1=Math.abs(direction[0])/softAx+Math.abs(direction[1])/softAy+Math.abs(direction[2])/softAz;
+      const softRadius=1/Math.max(.001,softL1);
+      const softBias=1
+        +Math.sin(theta*2.73+phi*1.17)*.032
+        +Math.cos(theta*4.61-phi*2.09)*.020;
+      const spherePosition=[
+        direction[0]*softRadius*1.04*softBias,
+        direction[1]*softRadius*1.06*softBias+Math.pow(Math.max(direction[1],0),6.0)*.045,
+        direction[2]*softRadius*.96*softBias
+      ];
 
       /* R614 compatibility contract retained. R730 maps the same closed
          topology to the supplied final MAG reference: a compact, opaque,
