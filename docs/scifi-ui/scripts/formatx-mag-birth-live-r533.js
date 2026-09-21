@@ -139,6 +139,7 @@
   overlay.dataset.fxIntroR1360 = 'integrated-cortical-organic-final-lock-three-genesis';
   overlay.dataset.fxIntroR1460 = 'cinematic-dna-organic-cut-crystal-three-genesis';
   overlay.dataset.fxIntroR1470 = 'cinematic-dna-cortical-organic-obsidian-cut-crystal-three-genesis';
+  overlay.dataset.fxIntroR1490 = 'realistic-dna-solid-organism-obsidian-crystal-cinematic-three-genesis';
   overlay.dataset.fxIntroR1400 = 'irregular-crystal-final-handoff-three-genesis';
   overlay.dataset.fxIntroR1412 = 'vertical-asymmetric-crystal-final-handoff-three-genesis';
   overlay.dataset.fxIntroR1420 = 'real-three-solid-cortical-reference-dna-dark-shard-final-handoff';
@@ -693,6 +694,7 @@
             ROOT.dataset.fxMagBirthRendererR1450='three-primary-active';
             ROOT.dataset.fxMagBirthRendererR1460='cinematic-three-active';
             ROOT.dataset.fxMagBirthRendererR1470='cinematic-cortical-three-active';
+            ROOT.dataset.fxMagBirthRendererR1490='realistic-cinematic-three-active';
             overlay.dataset.fxRenderer='three';
             renderer.resize?.();
             return renderer;
