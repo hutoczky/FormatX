@@ -229,3 +229,60 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   }
 }
 /* production-r1531-proof-corrected-photoreal-mag-owner */
+
+
+/* R1532 — native MAG only. Keep semantic/interactivity owners, remove their
+   legacy visible ring/orbit artwork so the crystal lives directly in habitat. */
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero > .fx-signature-core-trigger::before,
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero > .fx-signature-core-trigger::after,
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space::before,
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space::after,
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-ring {
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  outline:0!important;
+  background:none!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+  animation:none!important;
+}
+
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero :is(
+  .fx-r155-heartbeat-core,
+  .fx-r155-heartbeat-ring,
+  .fx-r155-heartbeat-wave,
+  .fx-core-live-r147-orbit,
+  .fx-core-live-r147-orbit-b,
+  .fx-core-live-r147-orbit-c
+) {
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  animation:none!important;
+}
+
+/* Habitat cards remain translucent without per-card backdrop blur; this keeps
+   mobile scrolling/compositing cheap while preserving the same visual depth. */
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture :is(
+  .hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+  .payment-console,.system-grid article,.release-card,.fx-category-grid > article,
+  .fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,
+  .fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure
+) {
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+/* production-r1532-no-local-hud-rings */
