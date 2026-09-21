@@ -8,6 +8,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
       - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js'
+      - 'docs/scifi-ui/styles/formatx-unified-background-r616.css'
       - 'docs/scifi-ui/scripts/three-r185.module.js'
       - '.github/scripts/capture-mag-intro-r656.cjs'
       - '.github/workflows/intro-visual-proof.yml'
