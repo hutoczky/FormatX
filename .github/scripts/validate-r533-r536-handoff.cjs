@@ -116,6 +116,8 @@ async function readTimeline(page){
   }));
 }
 
+// R1405 live handoff tolerance: the film remains 10.0s; this wider CI wait only
+// tolerates slow remote script/bootstrap scheduling and does not alter product timing.
 async function verifyFullBirth(browser){
   const context=await browser.newContext({
     viewport:{width:1440,height:900},colorScheme:'dark',reducedMotion:'no-preference',locale:'hu-HU'
@@ -141,7 +143,7 @@ async function verifyFullBirth(browser){
     assert.ok(dnaGenesis.nativeCanvasCount<=1,'desktop-full: DNA intro created a duplicate native canvas');
     assert.equal(active.scrollLock,'active','desktop-full: R533 did not own the temporary scroll lock');
     assert.equal(active.legacyPreloaderCount,0,'desktop-full: second/legacy preloader remained');
-    await page.waitForFunction(sel=>!document.querySelector(sel),OVERLAY,{timeout:12000});
+    await page.waitForFunction(sel=>!document.querySelector(sel),OVERLAY,{timeout:18000});
     const timeline=await readTimeline(page);
     const phases=new Set(timeline.phases);
     for(const phase of ['0','1','2','3','4'])assert.ok(phases.has(phase),`desktop-full: R533 phase ${phase} not observed; got ${[...phases].join(',')}`);
