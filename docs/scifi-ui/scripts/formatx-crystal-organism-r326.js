@@ -104,11 +104,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 18 : constrainedMobile ? 12 : mobile ? 18 : constrained ? 20 : 34;
-    const longitudeSegments = auditMode ? 32 : constrainedMobile ? 24 : mobile ? 36 : constrained ? 40 : 64;
+    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 12 : mobile ? 18 : constrained ? 20 : 34;
+    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 24 : mobile ? 36 : constrained ? 40 : 64;
     const tendrilCount = auditMode ? 4 : 8;
-    const tendrilSegments = auditMode ? 6 : constrainedMobile ? 8 : mobile ? 16 : constrained ? 18 : 28;
-    const tendrilSides = constrainedMobile ? 4 : mobile || constrained ? 6 : 8;
+    const tendrilSegments = auditMode ? 4 : constrainedMobile ? 8 : mobile ? 16 : constrained ? 18 : 28;
+    const tendrilSides = auditMode ? 3 : constrainedMobile ? 4 : mobile || constrained ? 6 : 8;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
