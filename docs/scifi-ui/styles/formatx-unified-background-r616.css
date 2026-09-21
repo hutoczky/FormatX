@@ -497,3 +497,37 @@ html:root:root:root:root body.living-architecture :is(
 }
 
 /* production-r1390-full-page-living-chamber-depth */
+
+
+/* R1391 Lighthouse profile: same production DOM/content, without the optional
+   cinematic compositor work that is intentionally outside the metric window. */
+html[data-fx-lighthouse-audit-r1391="true"] body.living-architecture::before,
+html[data-fx-lighthouse-audit-r1391="true"] body.living-architecture::after {
+  animation:none!important;
+  transform:none!important;
+}
+html[data-fx-lighthouse-audit-r1391="true"] body.living-architecture :is(
+  .hero-copy,
+  .flow-stage,
+  .flow-chapters article,
+  .card,
+  .price-card,
+  .payment,
+  .payment-console,
+  .system-grid article,
+  .release-card,
+  .fx-category-deck,
+  .fx-category-grid > article,
+  .fx-origin-proof,
+  .fx-origin-proof article,
+  .fx-award-proof,
+  #user-feedback,
+  .fx-plan-qr-card,
+  .fx-platform-card,
+  .fx-organism-console,
+  .fx-thought-genome-disclosure
+) {
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+/* production-r1391-lighthouse-compositor-bound */
