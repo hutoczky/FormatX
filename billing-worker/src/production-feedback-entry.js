@@ -183,7 +183,7 @@ async function stabiliseHomepageSemantics(request, url, response) {
   if (!html.includes('data-fx-award-readiness-style')) {
     html = html.replace('</head>', `${HOMEPAGE_SEO}\n</head>`);
   }
-  if (!html.includes('data-fx-hero-trustline')) {
+  if (!html.includes('data-fx-hero-trustline') && !html.includes('data-fx-canonical-hero-product-state="true"')) {
     html = html.replace('<div class="hero-facts">', `${HERO_TRUSTLINE}\n          <div class="hero-facts">`);
   }
   if (!html.includes('data-fx-award-proof')) {
