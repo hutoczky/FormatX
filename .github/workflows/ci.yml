@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: npm install -g @lhci/cli@0.13.x
 
-      - name: Run desktop Lighthouse CI on deterministic no-cinematic surface
+      - name: Run desktop Lighthouse CI on the real experience
         id: lighthouse_desktop
         shell: bash
         run: |
@@ -58,7 +58,7 @@ jobs:
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
-      - name: Run mobile Lighthouse CI on deterministic no-cinematic surface
+      - name: Run mobile Lighthouse CI on the real experience
         id: lighthouse_mobile
         if: always()
         shell: bash
@@ -95,7 +95,7 @@ jobs:
           {
             echo "## Lighthouse CI Results"
             echo
-            echo "Validated surfaces: desktop + mobile, production shell with the 10s cinematic excluded from the metric window"
+            echo "Validated surfaces: desktop + mobile, normal visitor experience"
             echo
             echo "### Strict truthful thresholds"
             echo "- Performance ≥ 0.95; 1.00 remains the optimisation target"
@@ -108,7 +108,7 @@ jobs:
             echo "- CLS ≤ 0.10"
             echo "- TTFB ≤ 600ms"
             echo "- 3 runs per viewport profile"
-            echo "- Explicit ?lighthouse=1 profile skips only the 10s cinematic; content, semantics, CSS and native MAG ownership remain production code"
+            echo "- No audit-only query parameter"
             echo "- No forced reduced-motion mode"
             echo "- No skipped Lighthouse audits"
             echo
@@ -124,10 +124,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Desktop and mobile production-shell Lighthouse gates passed'
+            description='Real-experience desktop and mobile Lighthouse gates passed'
           else
             state='failure'
-            description='Desktop or mobile production-shell Lighthouse gate failed'
+            description='Real-experience desktop or mobile Lighthouse gate failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
