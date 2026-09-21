@@ -1588,7 +1588,7 @@
         document.documentElement.dataset.fxMagBirthR1360='explicit-r649-fallback';
         return null;
       }
-      document.documentElement.dataset.fxMagBirthR1430='prefer-real-three-webgl';
+      document.documentElement.dataset.fxMagBirthR1460='prefer-local-three-webgl-cinematic';
       loader ||= loadThree();
       const THREE=await loader;
       const engine=new FormatXGenesisThree(THREE,canvas,getTarget);
@@ -1623,6 +1623,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1430-production-three-reference-dna-solid-cortex-compact-shard'
+    revision:'r1460-cinematic-dna-organic-coherent-cut-crystal'
   };
 })();
