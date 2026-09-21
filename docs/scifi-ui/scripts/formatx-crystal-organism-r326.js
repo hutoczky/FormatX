@@ -637,8 +637,8 @@
         tissue+=(steel*.42+ice*.060)*brightShard*(.28+.62*ndl);
         tissue+=(steel*.30+cyan*.030)*fresnel*tissueMask;
         glass=mix(glass,tissue,tissueMask*.97);
-        glass+=silver*crownMask*(.56+.54*ndl+.30*specular);
-        glass+=steel*shoulderMask*(.50+.48*ndl+.24*specular);
+        glass+=steel*crownMask*(.18+.20*ndl+.08*specular);
+        glass+=steel*shoulderMask*(.30+.30*ndl+.12*specular);
         glass=mix(glass,silver*(.64+.64*ndl+.36*specular)+ice*.045*specular,realArmorPlate*.94);
         glass=mix(glass,steel*(.72+.36*ndl)+gunmetal*.26+silver*.14*specular,realDarkPlate*.92);
         glass=mix(glass,vec3(.009,.015,.024)+steel*.24,diamondFace*.88);
