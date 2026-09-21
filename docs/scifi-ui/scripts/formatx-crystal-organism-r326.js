@@ -46,6 +46,7 @@
   root.dataset.fxNativeMagVisualR1450 = 'asymmetric-shard-cluster-solid-gunmetal-cyan-optic-long-smooth-eight-tendrils';
   root.dataset.fxNativeMagVisualR1460 = 'coherent-cut-crystal-asymmetric-gunmetal-silver-cyan-optic-eight-tendrils';
   root.dataset.fxNativeMagVisualR1470 = 'obsidian-cut-crystal-broad-facets-titanium-cradle-cyan-iris-controlled-eight-tendrils';
+  root.dataset.fxNativeMagVisualR1480 = 'realistic-obsidian-crystal-broad-cut-facets-integrated-cradle-lens-eight-tendrils';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -116,8 +117,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 9 : constrainedMobile ? 8 : mobile ? 9 : constrained ? 11 : 13;
-    const longitudeSegments = auditMode ? 16 : constrainedMobile ? 16 : mobile ? 18 : constrained ? 22 : 26;
+    const latitudeSegments = auditMode ? 8 : constrainedMobile ? 7 : mobile ? 8 : constrained ? 9 : 10;
+    const longitudeSegments = auditMode ? 14 : constrainedMobile ? 14 : mobile ? 16 : constrained ? 18 : 20;
     const tendrilCount = auditMode ? 4 : 8;
     const tendrilSegments = auditMode ? 5 : constrainedMobile ? 18 : mobile ? 28 : constrained ? 26 : 36;
     const tendrilSides = auditMode ? 3 : constrainedMobile ? 5 : mobile || constrained ? 7 : 9;
@@ -176,7 +177,7 @@
       const ax=upper?(right?.72:.78):(right?.76:.69);
       const ay=upper?(right?.86:.91):(right?.78:.73);
       const az=front?(right?.58:.63):(right?.61:.66);
-      const p=1.06;
+      const p=1.00;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -184,8 +185,8 @@
       const baseRadius=1/Math.pow(Math.max(.001,lp),1/p);
       const broadBias=
         1
-        +Math.sin(theta*2.05+phi*.93)*.030
-        +Math.cos(theta*3.17-phi*1.41)*.018;
+        +Math.sin(theta*2.05+phi*.93)*.018
+        +Math.cos(theta*3.17-phi*1.41)*.011;
       const plane=(x,y,z,power,amount)=>
         Math.pow(Math.max(0,direction[0]*x+direction[1]*y+direction[2]*z),power)*amount;
       const mass=
@@ -249,12 +250,12 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.16 + (index % 2 ? .045 : -.035);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .46;
-      const reach = .43 + ((index*3)%5) * .026;
+      const root = .44;
+      const reach = .31 + ((index*3)%5) * .022;
       const radius = root + reach * t;
-      const wave = (Math.sin(t * Math.PI * 1.58 + index * .83)*(.016+.060*t))
-        +Math.sin(t*Math.PI*.66+index*.47)*.018*t;
-      const depth = Math.sin(t * Math.PI * 1.42 + index * .97) * (.018 + .048 * t);
+      const wave = (Math.sin(t * Math.PI * 1.46 + index * .83)*(.010+.040*t))
+        +Math.sin(t*Math.PI*.62+index*.47)*.011*t;
+      const depth = Math.sin(t * Math.PI * 1.32 + index * .97) * (.012 + .034 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -271,7 +272,7 @@
       const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
-      const tubeRadius = (.0118 * (1 - t * .84) + .0028) * (mobile ? .94 : 1);
+      const tubeRadius = (.0092 * (1 - t * .86) + .0022) * (mobile ? .92 : 1);
       const rootDirection = normalize([p[0], p[1], p[2] * .72]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
@@ -330,13 +331,12 @@
       armorTri(a,c,d,facet);
     }
 
-    // R1440 — restrained biomechanical frame: six broad plates, no shredded shard pile.
-    armorTri([-.08,.70,.46],[-.31,.53,.43],[-.18,.19,.57],2.62);
-    armorTri([.05,.64,.47],[.30,.48,.44],[.18,.18,.57],2.66);
-    armorQuad([-.31,.28,.44],[-.53,.06,.36],[-.34,-.13,.45],[-.16,.10,.56],2.72);
-    armorQuad([.28,.24,.45],[.50,.03,.37],[.32,-.15,.46],[.15,.09,.56],2.76);
-    armorTri([-.22,-.13,.45],[-.30,-.42,.37],[-.08,-.48,.48],3.10);
-    armorTri([.20,-.14,.46],[.27,-.38,.38],[.07,-.48,.48],3.12);
+    // R1480 — integrated biomechanical facets. These plates sit flush with the
+    // obsidian body so no detached side shard can appear at phone or desktop angles.
+    armorTri([-.05,.58,.48],[-.22,.43,.46],[-.13,.20,.55],2.62);
+    armorTri([.04,.56,.49],[.22,.42,.46],[.13,.19,.55],2.66);
+    armorQuad([-.20,.20,.47],[-.34,.04,.43],[-.24,-.10,.48],[-.12,.08,.55],2.72);
+    armorQuad([.20,.19,.47],[.34,.03,.43],[.24,-.11,.48],[.12,.08,.55],2.76);
 
     // R1390 — compact dark four-petal optical cradle around the central iris.
     armorTri([0,.54,.53],[-.30,.09,.55],[0,.15,.60],3.34);
@@ -614,14 +614,14 @@
         glass+=vec3(.006,.020,.030)*sideLight*.12;
         float armorBlock=sat(realArmorPlate+realDarkPlate+crownMask+shoulderMask+jawMask+diamondFace);
         float tissueMask=podMask*(1.0-sat(armorBlock))*(1.0-tendrilMask);
-        vec3 tissue=mix(vec3(.003,.010,.016),vec3(.030,.058,.070),.18+.50*ndl+.18*sideLight);
-        tissue+=vec3(.004,.010,.018)*(.10+.12*cloud);
+        vec3 tissue=mix(vec3(.004,.008,.012),vec3(.040,.067,.078),.24+.54*ndl+.20*sideLight);
+        tissue+=vec3(.006,.012,.020)*(.10+.10*cloud);
         float bodyFacetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
-        tissue*=.88+.16*bodyFacetRand;
-        tissue+=steel*(.10+.20*ndl)+ice*.010*specular;
-        tissue+=cyan*fresnel*(.006+.008*visualEnergy);
+        tissue*=.90+.18*bodyFacetRand;
+        tissue+=steel*(.14+.24*ndl)+ice*.016*specular;
+        tissue+=cyan*fresnel*(.004+.006*visualEnergy);
         glass=mix(glass,tissue,tissueMask*.985);
-        glass+=gunmetal*crownMask*(.20+.18*ndl);
+        glass+=steel*crownMask*(.18+.30*ndl+.08*specular);
         glass+=steel*shoulderMask*(.24+.26*ndl+.08*specular);
         glass=mix(glass,steel*(.76+.24*ndl)+silver*.22+ice*.012*specular,realArmorPlate*.94);
         glass=mix(glass,steel*(.72+.36*ndl)+gunmetal*.26+silver*.14*specular,realDarkPlate*.92);
@@ -635,9 +635,9 @@
         glass+=cyan*veins*(.004+.004*uBreath);
         glass+=cyan*membrane*(.002+.003*visualEnergy);
         glass+=cyan*iris*.12;
-        glass+=cyan*(rings*.14+nucleus*1.34+irisRays*.18)+ice*(heart*.004+nucleus*.10+coreRing*.44);
+        glass+=cyan*(rings*.10+nucleus*1.72+irisRays*.11)+ice*(heart*.003+nucleus*.14+coreRing*.34);
         glass=mix(glass,vec3(.001,.003,.005),pupil*.78);
-        glass+=cyan*coreDisc*.72+ice*coreDisc*.16;
+        glass+=cyan*coreDisc*.92+ice*coreDisc*.22;
         glass+=cyan*coreRing*.78;
         glass+=ice*specular*(.080+.050*visualEnergy);
         glass+=(cyan*.14+ice*.022)*(axisV*.12+axisH*.07)*visualEnergy;
@@ -647,7 +647,7 @@
         glass+=ice*(armorSeam*.12+armorRib*.07)*(1.0-vMorph*.72);
         glass+=(ice*.18+cyan*.14)*surfaceSweep*(.44+.18*fresnel);
         glass=mix(glass,vec3(.006,.036,.052)+steel*.14,tendrilMask*.76);
-        glass+=(cyan*.46+ice*.08)*tendrilSegment*(.40+.48*fresnel);
+        glass+=(cyan*.30+ice*.06)*tendrilSegment*(.34+.42*fresnel);
         float alpha=.952+.020*ndl+.014*fresnel+specular*.012+surfaceSweep*.018+tendrilMask*.014;
         ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.48)),clamp(alpha,.960,.997));
       }`;
