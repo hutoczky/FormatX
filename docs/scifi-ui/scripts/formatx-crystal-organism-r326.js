@@ -34,6 +34,7 @@
   root.dataset.fxNativeMagVisualR1360 = 'cortical-rounded-body-dark-diamond-cradle-glassy-eight-tendrils';
   root.dataset.fxNativeMagVisualR1380 = 'premium-organic-cortex-defined-diamond-iris-smooth-glass-tendrils';
   root.dataset.fxNativeMagVisualR1390 = 'premium-cortical-biomech-broad-metal-cradle-optical-iris-eight-tendrils';
+  root.dataset.fxNativeMagVisualR1400 = 'irregular-crystal-biomech-cortex-optical-iris-eight-tendrils';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -138,19 +139,34 @@
       /* R1080: reference-locked closed armored diamond-pod.
          Keep one native topology, but use a sub-L1 superellipsoid so the hero
          reads as the supplied tall rhombic machine rather than an egg. */
-      const lowBand=Math.sin(phi*3.0+theta*2.0)*.016;
-      const corticalA=Math.sin(theta*4.0+phi*1.35)*.064;
-      const corticalB=Math.sin(theta*7.0-phi*2.4)*.034;
-      const corticalC=Math.sin(theta*2.0+phi*5.2)*.020;
-      const corticalD=Math.sin(theta*3.0-phi*6.4)*.012;
-      const shoulder=.030*Math.pow(Math.max(0,1-Math.abs(direction[1])*1.42),1.8);
-      const organicRadius=.565+lowBand+corticalA+corticalB+corticalC+corticalD+shoulder;
+      /* R1400 — irregular crystal, not an orb.
+         The closed sphere topology intersects an asymmetric octahedral envelope,
+         then receives restrained biological distortion. This keeps the MAG alive
+         while the silhouette reads as a unique faceted crystal from every angle. */
+      const ax=.76, ay=.90, az=.64;
+      const l1=Math.abs(direction[0])/ax+Math.abs(direction[1])/ay+Math.abs(direction[2])/az;
+      const octaRadius=1/Math.max(.001,l1);
+      const shardBias=
+        1
+        +Math.sin(theta*3.17+phi*1.31)*.055
+        +Math.sin(theta*5.83-phi*2.27)*.030
+        +Math.cos(theta*2.11+phi*4.43)*.022;
+      const cortical=
+        Math.sin(theta*4.0+phi*1.35)*.022
+        +Math.sin(theta*7.0-phi*2.4)*.014
+        +Math.sin(theta*2.0+phi*5.2)*.010;
+      const organicRadius=.545+cortical;
+      const crystalRadius=(octaRadius*.80+organicRadius*.20)*shardBias;
+      const topShard=Math.pow(Math.max(direction[1],0),7.0)*.095;
+      const lowerShard=Math.pow(Math.max(-direction[1],0),6.0)*.052;
+      const sideShard=Math.pow(Math.abs(direction[0]),5.0)*.028*(direction[0]>0?1.16:.84);
       const crystalPosition=[
-        direction[0]*organicRadius*1.05,
-        direction[1]*organicRadius*1.08,
-        direction[2]*organicRadius*.76
+        direction[0]*(crystalRadius+sideShard)*1.08,
+        direction[1]*crystalRadius*1.04+topShard-lowerShard,
+        direction[2]*crystalRadius*.92
       ];
-      crystalPosition[1]+=Math.pow(Math.max(direction[1],0),4.0)*.045;
+      crystalPosition[0]+=direction[2]*direction[1]*.026;
+      crystalPosition[2]+=direction[0]*direction[1]*.018;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -408,7 +424,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.76':'.82'};
+        projected*= ${mobile?'.80':'.84'};
         projected.y+=.010;
         gl_Position=vec4(projected,world.z*.13,1.0);
       }`;
@@ -497,10 +513,10 @@
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
         float podMask=1.0-vMorph;
         float diamondCoord=abs(heartLocal.x)+abs(heartLocal.y*1.035);
-        float diamondFace=(1.0-smoothstep(.282,.338,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondFace=(1.0-smoothstep(.268,.332,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
         float diamondInner=(1.0-smoothstep(.180,.218,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
         float diamondFrame=max(0.0,diamondFace-diamondInner);
-        float diamondRim=(1.0-smoothstep(.007,.022,abs(diamondCoord-.310)))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondRim=(1.0-smoothstep(.006,.020,abs(diamondCoord-.300)))*smoothstep(.18,.46,vLocal.z)*podMask;
         float cradlePlate=smoothstep(3.28,3.33,vFacet)*podMask;
         float pupil=1.0-smoothstep(.018,.038,radial);
         float coreDisc=1.0-smoothstep(.038,.078,radial);
@@ -596,7 +612,7 @@
         glass+=(cyan*.14+ice*.022)*(axisV*.12+axisH*.07)*visualEnergy;
         glass+=(cyan*.08+violet*.045)*dnaHelix*(.020+.036*fresnel)*genomePulse;
         glass+=(ice*.05+cyan*.04)*dnaBridge*(.020+.028*visualEnergy);
-        glass+=(cyan*.06+ice*.020)*edge;
+        glass+=(cyan*.11+ice*.040)*edge*(.42+.58*(1.0-vMorph));
         glass+=ice*(armorSeam*.12+armorRib*.07)*(1.0-vMorph*.72);
         glass+=(ice*.52+cyan*.28)*surfaceSweep*(.70+.26*fresnel);
         glass=mix(glass,vec3(.006,.036,.052)+steel*.14,tendrilMask*.76);
@@ -640,10 +656,10 @@
         float cortex=.5+.5*sin(vUv.x*31.4+sin(vUv.y*18.8)*1.35+vUv.y*10.2);
         float cortexGroove=pow(1.0-abs(sin(vUv.x*32.0+vUv.y*12.0)),6.0);
         float diamondCoord=abs(heartLocal.x)+abs(heartLocal.y*1.035);
-        float diamondFace=(1.0-smoothstep(.282,.338,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondFace=(1.0-smoothstep(.268,.332,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
         float diamondInner=(1.0-smoothstep(.180,.218,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
         float diamondFrame=max(0.0,diamondFace-diamondInner);
-        float diamondRim=(1.0-smoothstep(.008,.023,abs(diamondCoord-.310)))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondRim=(1.0-smoothstep(.007,.021,abs(diamondCoord-.300)))*smoothstep(.18,.46,vLocal.z)*podMask;
         float pupil=1.0-smoothstep(.018,.038,radial);
         float coreDisc=1.0-smoothstep(.038,.078,radial);
         float coreRing=1.0-smoothstep(.006,.016,abs(radial-.072));
