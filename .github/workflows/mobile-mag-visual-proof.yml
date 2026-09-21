@@ -1,0 +1,99 @@
+name: FormatX mobile MAG visual proof
+# R1408 fast phone-only proof for the permanent irregular crystal hero.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
+      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
+      - 'docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'
+      - 'docs/scifi-ui/styles/formatx-unified-background-r616.css'
+      - '.github/scripts/capture-mag-intro-r656.cjs'
+      - '.github/workflows/mobile-mag-visual-proof.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: formatx-mobile-mag-visual-proof
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  mobile-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install mobile proof runtime
+        run: npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
+
+      - name: Resolve Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+
+      - name: Validate mobile visual source
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check .github/scripts/capture-mag-intro-r656.cjs
+
+      - name: Start exact source site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4181 --directory docs > "$RUNNER_TEMP/mobile-mag-proof-http.log" 2>&1 &
+          for attempt in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4181/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.2
+          done
+          cat "$RUNNER_TEMP/mobile-mag-proof-http.log"
+          exit 1
+
+      - name: Capture 390x844 mobile hero
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4181/scifi-ui/index.html
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1408-mobile-mag
+          FORMATX_MOBILE_ONLY: '1'
+        run: node .github/scripts/capture-mag-intro-r656.cjs
+
+      - name: Upload mobile MAG proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-mag-r1408-proof
+          path: artifacts/r1408-mobile-mag/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Publish mobile visual status
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ job.status }}
+        shell: bash
+        run: |
+          state=failure
+          description='R1408 mobile irregular crystal proof failed'
+          if [[ "$RESULT" == success ]]; then
+            state=success
+            description='R1408 mobile irregular crystal proof passed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX R1408 mobile MAG visual proof' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
