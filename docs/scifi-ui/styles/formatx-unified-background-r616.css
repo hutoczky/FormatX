@@ -351,4 +351,30 @@ html:root:root:root:root:root:root body.living-architecture #hero > .fx-signatur
 
 /* production-r1381-remove-local-hero-rings */
 
+/* R1382: the same world continues behind navigation and footer.
+   Keep enough opacity for text contrast, but remove the detached black slabs. */
+html:root:root:root:root:root body.living-architecture .topbar {
+  background:
+    linear-gradient(180deg,rgba(1,7,13,.88),rgba(2,10,18,.72))!important;
+  border-bottom-color:rgba(93,216,255,.14)!important;
+  box-shadow:
+    0 12px 40px rgba(0,0,0,.16),
+    inset 0 -1px 0 rgba(116,227,255,.035)!important;
+}
+
+html:root:root:root:root:root body.living-architecture footer.site-footer {
+  background:
+    linear-gradient(180deg,rgba(2,9,16,.34),rgba(1,5,10,.66))!important;
+  border-top-color:rgba(93,216,255,.11)!important;
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root body.living-architecture .topbar {
+    background:
+      linear-gradient(180deg,rgba(1,7,13,.92),rgba(2,10,18,.78))!important;
+  }
+}
+
+/* production-r1382-chamber-through-header-footer */
+
 /* production-r1371-continuous-world-sharp-native-mag */
