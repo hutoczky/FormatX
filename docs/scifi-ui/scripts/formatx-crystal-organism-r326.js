@@ -36,6 +36,7 @@
   root.dataset.fxNativeMagVisualR1390 = 'premium-cortical-biomech-broad-metal-cradle-optical-iris-eight-tendrils';
   root.dataset.fxNativeMagVisualR1400 = 'irregular-crystal-biomech-cortex-optical-iris-eight-tendrils';
   root.dataset.fxNativeMagVisualR1404 = 'irregular-crystal-only-no-round-endpoint-crisp-mobile';
+  root.dataset.fxNativeMagVisualR1405 = 'smaller-elevated-irregular-crystal-compact-optical-cradle-refined-eight-tendrils';
   root.dataset.fxNativeMagVisualR1401 = 'sharp-asymmetric-crystal-black-gunmetal-optical-iris-eight-tendrils-mobile';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
@@ -229,11 +230,11 @@
       const baseAngle = index / tendrilCount * Math.PI * 2 + (index % 2 ? .075 : -.060);
       const sideAngle = baseAngle + Math.PI * .5;
       const root = .50;
-      const reach = .76 + (index % 3) * .095;
+      const reach = .62 + (index % 3) * .075;
       const radius = root + reach * t;
-      const wave = (Math.sin(t * Math.PI * 2.05 + index * .79)*(.030+.145*t))
-        +Math.sin(t*Math.PI*.86+index*.51)*.045*t;
-      const depth = Math.sin(t * Math.PI * 1.72 + index * .91) * (.032 + .115 * t);
+      const wave = (Math.sin(t * Math.PI * 1.78 + index * .79)*(.024+.105*t))
+        +Math.sin(t*Math.PI*.72+index*.51)*.030*t;
+      const depth = Math.sin(t * Math.PI * 1.48 + index * .91) * (.026 + .082 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -250,7 +251,7 @@
       const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
-      const tubeRadius = (.025 * (1 - t * .72) + .0058) * (mobile ? .94 : 1);
+      const tubeRadius = (.021 * (1 - t * .74) + .0049) * (mobile ? .94 : 1);
       const rootDirection = normalize([p[0], p[1], p[2] * .72]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
@@ -439,8 +440,8 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.84':'.86'};
-        projected.y+=.010;
+        projected*= ${mobile?'.735':'.84'};
+        projected.y+=${mobile?'.060':'.018'};
         gl_Position=vec4(projected,world.z*.13,1.0);
       }`;
 
@@ -528,10 +529,10 @@
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
         float podMask=1.0-vMorph;
         float diamondCoord=abs(heartLocal.x)+abs(heartLocal.y*1.035);
-        float diamondFace=(1.0-smoothstep(.268,.332,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
-        float diamondInner=(1.0-smoothstep(.180,.218,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondFace=(1.0-smoothstep(.222,.286,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondInner=(1.0-smoothstep(.142,.178,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
         float diamondFrame=max(0.0,diamondFace-diamondInner);
-        float diamondRim=(1.0-smoothstep(.006,.020,abs(diamondCoord-.300)))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondRim=(1.0-smoothstep(.006,.018,abs(diamondCoord-.254)))*smoothstep(.18,.46,vLocal.z)*podMask;
         float cradlePlate=smoothstep(3.28,3.33,vFacet)*podMask;
         float pupil=1.0-smoothstep(.018,.038,radial);
         float coreDisc=1.0-smoothstep(.038,.078,radial);
@@ -671,10 +672,10 @@
         float cortex=.5+.5*sin(vUv.x*31.4+sin(vUv.y*18.8)*1.35+vUv.y*10.2);
         float cortexGroove=pow(1.0-abs(sin(vUv.x*32.0+vUv.y*12.0)),6.0);
         float diamondCoord=abs(heartLocal.x)+abs(heartLocal.y*1.035);
-        float diamondFace=(1.0-smoothstep(.268,.332,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
-        float diamondInner=(1.0-smoothstep(.180,.218,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondFace=(1.0-smoothstep(.222,.286,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondInner=(1.0-smoothstep(.142,.178,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
         float diamondFrame=max(0.0,diamondFace-diamondInner);
-        float diamondRim=(1.0-smoothstep(.007,.021,abs(diamondCoord-.300)))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondRim=(1.0-smoothstep(.007,.019,abs(diamondCoord-.254)))*smoothstep(.18,.46,vLocal.z)*podMask;
         float pupil=1.0-smoothstep(.018,.038,radial);
         float coreDisc=1.0-smoothstep(.038,.078,radial);
         float coreRing=1.0-smoothstep(.006,.016,abs(radial-.072));
