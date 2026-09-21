@@ -8,8 +8,8 @@ const root=document.documentElement;
 if(root.dataset.fxMagShapeSyncR476==='ready-r528')return;
 root.dataset.fxMagShapeSyncR476='booting-r528';
 const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
-const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260901-r488-restrained-glow-soft-edge-compositor-pulse';
-const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260921-r1383-sharp-premium-mobile-mag';
+const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260921-r1401-crisp-irregular-crystal';
+const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260921-r1401-sharp-irregular-crystal';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null,pulseTimer=0,lastEnergyBolt='';
 function ensureStyle(){let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r4791-user-pause-aware'))link.href=STYLE;return link;}link=document.createElement('link');link.rel='stylesheet';link.href=STYLE;link.dataset.fxMagVisualSyncR476='true';document.head.appendChild(link);return link;}
