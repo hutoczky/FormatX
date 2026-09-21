@@ -1,4 +1,4 @@
-/* FormatX R528 — mobile WebGL resource governor. This is automatic lifecycle/
+/* FormatX R1383 — mobile WebGL resource governor. This is automatic lifecycle/
    zero-idle management, not a user-facing MAG pause feature. */
 (function(){
 'use strict';
@@ -16,7 +16,7 @@ function idle(source='idle-r528'){clearSettle();const remaining=surfaceDeadline-
 function shapeState(){const core=renderer();const target=root.dataset.fxCoreTargetShape||root.dataset.fxCoreShapeR337||core?.shape||'';const settled=root.dataset.fxCoreShape||'';const morph=Number(core?.morph);const targetMorph=target==='sphere'?1:target==='crystal'?0:NaN;return{core,target,settled,morph,targetMorph,ready:Boolean(core)&&Number.isFinite(morph)&&Number.isFinite(targetMorph)&&settled===target&&Math.abs(morph-targetMorph)<.015};}
 function userShapeSource(source){return /core-tap|mag-button|controller|keyboard|pointer|touch|user|api-(?:set|morph|toggle|rotate)/i.test(String(source||''));}
 function settleShape(source='shape-change-r528'){clearSettle();const started=performance.now();root.dataset.fxMobileRenderGovernorSettleR433='waiting-user-shape-r528';const probe=()=>{settleTimer=0;const state=shapeState();if(state.ready){root.dataset.fxMobileRenderGovernorSettleR433=`settled-${state.target}-r528`;idle('shape-settled-r528');return;}if(performance.now()-started>=shapeSettleDeadlineMs){root.dataset.fxMobileRenderGovernorSettleR433='deadline-idle-r528';idle('shape-deadline-r528');return;}setRendererSuspended(false,source);state.core?.requestRender?.(2);settleTimer=setTimeout(probe,shapeProbeMs);};settleTimer=setTimeout(probe,shapeProbeMs);}
-function active(source='interaction-r528',frames=4,delay=activeWindowMs,waitForShape=false){clearSettle();setRendererSuspended(false,source);renderer()?.requestRender?.(frames);root.dataset.fxMobileRenderGovernorR426='explicit-interaction-burst-r528';if(waitForShape){settleShape(source);return;}settleTimer=setTimeout(()=>idle('settled-r528'),delay);}
+function active(source='interaction-r528',frames=4,delay=activeWindowMs,waitForShape=false){clearSettle();setRendererSuspended(false,source);renderer()?.requestRender?.(frames);root.dataset.fxMobileRenderGovernorR426='explicit-interaction-burst-r528';if(waitForShape){settleShape(source);return;}const protectedSweep=Math.max(0,surfaceDeadline-performance.now());const hold=Math.max(delay,protectedSweep);settleTimer=setTimeout(()=>idle('settled-r528'),hold);}
 function guardPassiveState(source){if(!armed||root.dataset.fxReferenceMotionPaused==='true')return;idle(source);}
 function arm(){if(armed)return;armed=true;root.dataset.fxMobileRenderGovernorR426='ready';root.dataset.fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle';root.dataset.fxMobileRenderGovernorRevisionR433='r528-automatic-idle-flag-no-manual-pause';root.dataset.fxMobileSurfaceBudgetR484='full-1160ms-sweep-then-zero-idle';requestAnimationFrame(()=>idle('startup-painted-r528'));}
 addEventListener('formatx:real3dready',arm,{passive:true});
@@ -29,3 +29,5 @@ document.addEventListener('keydown',event=>{if(!event.isTrusted)return;const tar
 addEventListener('visibilitychange',()=>{if(document.hidden)idle('background-r528');},{passive:true});
 if(root.dataset.fxCoreReal3d==='ready-v69'||root.dataset.fxCrystalOrganismR326==='ready')arm();else setTimeout(()=>{if(renderer())arm();},900);
 }());
+
+// production-r1383-surface-window-cannot-be-shortened-by-secondary-bursts
