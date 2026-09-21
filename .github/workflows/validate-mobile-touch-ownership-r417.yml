@@ -34,10 +34,10 @@ jobs:
           grep -q 'production-r467-desktop-three-cell-control-row' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           grep -q 'production-r467-desktop-header-three-control-no-overlap' docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
           grep -q 'production-r488-mobile-optics-restrained-glow-soft-edge-compositor-pulse' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
-          grep -q 'brightness(.895)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
-          grep -q 'contrast(.805)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
-          grep -q 'saturate(.975)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
-          grep -q 'blur(.82px)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
+          grep -q 'brightness(.99)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
+          grep -q 'contrast(1.18)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
+          grep -q 'saturate(1.06)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
+          grep -q 'blur(0)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
       - name: Install Chromium runtime
         shell: bash
         run: |
@@ -126,7 +126,7 @@ jobs:
             assert(mobile.miniOwner==='preserved-native-webgl','mobile: Mini MAG primary owner changed');
             assert(mobile.magText==='MAG'&&mobile.langText==='HU','mobile: HU/MAG text invalid '+JSON.stringify(mobile));
             assert(mobile.magBefore==='none'&&mobile.magAfter==='none','mobile: MAG pseudo-art returned '+JSON.stringify(mobile));
-            assert(/brightness\(0?\.895\)/.test(mobile.filter)&&/contrast\(0?\.805\)/.test(mobile.filter)&&/saturate\(0?\.975\)/.test(mobile.filter)&&/hue-rotate\(-1deg\)/.test(mobile.filter)&&/blur\(0?\.82px\)/.test(mobile.filter),'mobile: current R488/R502 canonical optics missing '+mobile.filter);
+            assert(/brightness\(0?\.99\)/.test(mobile.filter)&&/contrast\(1\.18\)/.test(mobile.filter)&&/saturate\(1\.06\)/.test(mobile.filter)&&/hue-rotate\(-1deg\)/.test(mobile.filter)&&/blur\(0(?:px)?\)/.test(mobile.filter),'mobile: current R1401 crisp crystal optics missing '+mobile.filter);
 
             const mini=page.locator('.fx-mini-mag-launcher-r459').first();
             const miniBox=await mini.boundingBox();assert(miniBox&&miniBox.width>=54&&miniBox.height>=54,'mobile: Mini MAG target too small');
