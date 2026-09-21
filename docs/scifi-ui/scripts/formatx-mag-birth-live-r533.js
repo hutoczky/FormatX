@@ -137,6 +137,7 @@
   overlay.dataset.fxIntroR1340 = 'reference-surface-radial-iris-lock-three-genesis';
   overlay.dataset.fxIntroR1350 = 'video-proportion-organic-final-lock-three-genesis';
   overlay.dataset.fxIntroR1360 = 'integrated-cortical-organic-final-lock-three-genesis';
+  overlay.dataset.fxIntroR1460 = 'cinematic-dna-organic-cut-crystal-three-genesis';
   overlay.dataset.fxIntroR1400 = 'irregular-crystal-final-handoff-three-genesis';
   overlay.dataset.fxIntroR1412 = 'vertical-asymmetric-crystal-final-handoff-three-genesis';
   overlay.dataset.fxIntroR1420 = 'real-three-solid-cortical-reference-dna-dark-shard-final-handoff';
@@ -689,6 +690,7 @@
             ROOT.dataset.fxMagBirthRendererR1360='threejs-active';
             ROOT.dataset.fxMagBirthRendererR1430='threejs-active-production-path';
             ROOT.dataset.fxMagBirthRendererR1450='three-primary-active';
+            ROOT.dataset.fxMagBirthRendererR1460='cinematic-three-active';
             overlay.dataset.fxRenderer='three';
             renderer.resize?.();
             return renderer;
@@ -715,7 +717,7 @@
     const now=performance.now();
     if(!threeWaitStartedAt)threeWaitStartedAt=now;
     const waited=now-threeWaitStartedAt;
-    if(waited<2400){
+    if(waited<4800){
       ROOT.dataset.fxMagBirthRendererR1450='waiting-for-three-owner';
       overlay.dataset.fxRenderer='three-loading';
       if(!threeWaitTimer){
