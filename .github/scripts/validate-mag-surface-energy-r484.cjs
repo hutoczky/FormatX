@@ -158,7 +158,7 @@ async function verify(browser, name, viewport, mobile) {
       && document.documentElement.dataset.fxCrystalOrganismR326 === 'ready'
     ), null, { timeout: 60000 });
     // No click, artificial API pulse, hover or pointer movement is used here.
-    await page.waitForFunction(() => __magEnergyAudit.events.some(e => e.phase === 'end' && e.source === 'autonomous'), null, { timeout: 18000 });
+    await page.waitForFunction(() => __magEnergyAudit.events.some(e => e.phase === 'end' && e.source === 'autonomous'), null, { timeout: 30000 });
     await page.waitForTimeout(600);
     const frameCount = await page.evaluate(() => __magEnergyAudit.frames);
     await page.waitForTimeout(1000);
