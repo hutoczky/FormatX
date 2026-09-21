@@ -47,35 +47,35 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
     --fx-mag-life-opacity: .975;
   }
   72% {
-    --fx-mag-life-scale: .992;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .935;
   }
 }
 
 @keyframes fx-primary-mag-living-mobile-r482 {
   0%, 100% {
-    --fx-mag-life-scale: .992;
-    --fx-mag-life-opacity: .94;
+    --fx-mag-life-scale: 1;
+    --fx-mag-life-opacity: .945;
   }
   24% {
-    --fx-mag-life-scale: 1.006;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .975;
   }
   32% {
-    --fx-mag-life-scale: .998;
-    --fx-mag-life-opacity: .955;
+    --fx-mag-life-scale: 1;
+    --fx-mag-life-opacity: .960;
   }
   41% {
-    --fx-mag-life-scale: 1.012;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: 1;
   }
   53% {
-    --fx-mag-life-scale: 1.003;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .982;
   }
   72% {
-    --fx-mag-life-scale: .996;
-    --fx-mag-life-opacity: .958;
+    --fx-mag-life-scale: 1;
+    --fx-mag-life-opacity: .955;
   }
 }
 
@@ -95,7 +95,7 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"] {
     animation: fx-primary-mag-living-desktop-r482 4.25s cubic-bezier(.36,0,.20,1) infinite !important;
-    will-change: scale, opacity !important;
+    will-change: opacity !important;
   }
 }
 
@@ -166,7 +166,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"] {
     animation: fx-primary-mag-living-mobile-r482 3.95s cubic-bezier(.36,0,.20,1) infinite !important;
-    will-change: scale, opacity !important;
+    will-change: opacity !important;
   }
 
   /* Spectral depth without an oversized surrounding glow. These low-alpha
@@ -275,3 +275,5 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 /* production-r1361-crisp-mobile-mag-no-blur */
 
 /* production-r1404-crystal-only-mobile-balance */
+
+/* production-r1408-mobile-crystal-opacity-breath-no-resample */
