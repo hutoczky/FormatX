@@ -32,7 +32,7 @@ const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260920-r629-deterministic-semantic-sweep';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260831-r475-canonical-ask-surface';
-const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260921-r1401-crisp-irregular-crystal';
+const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260921-r1402-zero-blur-crystal';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
