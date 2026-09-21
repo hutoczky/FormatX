@@ -1021,6 +1021,7 @@
         slowRenderer=true;
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'two-pass-slow-renderer';
         root.dataset.fxCoreSurfaceCadenceR1392=mobile?'bounded-slow-renderer-full-window':'desktop-bounded';
+        root.dataset.fxCoreSurfaceCadenceR1403=mobile?'full-window-fast-cadence':'desktop-bounded';
       }else if(!slowRenderer){
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'two-pass-mobile-capable':'three-pass-capable';
       }
@@ -1057,7 +1058,7 @@
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
         const sweepDelay=mobile
-          ? (renderAverage>34?Math.min(280,Math.max(72,renderAverage*2.25)):0)
+          ? (renderAverage>34?Math.min(110,Math.max(36,renderAverage*.55)):0)
           : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0);
         root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
         root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
