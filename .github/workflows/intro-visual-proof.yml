@@ -44,6 +44,7 @@ jobs:
       - name: Validate intro source
         run: |
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
           node --check .github/scripts/capture-mag-intro-r656.cjs
       - name: Start source site
