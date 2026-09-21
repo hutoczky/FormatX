@@ -49,7 +49,7 @@ const SHOTS=[
       u.searchParams.set('r659','deterministic-frame');
 
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
-      await page.locator('.fx-mag-birth-r533').waitFor({state:'visible',timeout:10000});
+      await page.locator('.fx-mag-birth-r533').waitFor({state:'attached',timeout:10000});
       await page.waitForFunction(
         ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
         null,
@@ -96,7 +96,7 @@ const SHOTS=[
         u.searchParams.set('r720handoff','1');
   
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
-        await page.locator('.fx-mag-birth-r533').waitFor({state:'visible',timeout:10000});
+        await page.locator('.fx-mag-birth-r533').waitFor({state:'attached',timeout:10000});
         await page.waitForFunction(
           ()=>document.querySelectorAll('.fx-mag-birth-r533').length===0
             && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1,
