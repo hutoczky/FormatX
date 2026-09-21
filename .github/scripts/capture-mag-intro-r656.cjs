@@ -376,7 +376,7 @@ const SHOTS=[
           30000,
           120
         );
-        if(!mobileReady)throw new Error('R1440 mobile native MAG did not become ready');
+        if(!mobileReady)throw new Error('R1500 mobile native MAG did not become ready');
         await page.waitForTimeout(700);
         const state=await page.evaluate(()=>{
           const root=document.documentElement;
@@ -404,8 +404,8 @@ const SHOTS=[
         await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
-        if(state.visual!=='single-body-asymmetric-obsidian-crystal-no-detached-armor-optical-lens-eight-tendrils'){
-          errors.push('R1470 native crystal visual marker missing: '+state.visual);
+        if(state.visual!=='photoreal-asymmetric-obsidian-mineral-local-optical-lens-eight-tendrils'){
+          errors.push('R1500 native crystal visual marker missing: '+state.visual);
         }
         if(state.shape!=='crystal'){
           errors.push('Mobile MAG is not in crystal state: '+state.shape);
