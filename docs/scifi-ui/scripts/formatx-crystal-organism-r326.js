@@ -31,6 +31,7 @@
   root.dataset.fxCoreMobileV55 = 'booting-v55';
   root.dataset.fxCoreMobileV69 = 'booting-v69';
   root.dataset.fxNativeMagVisualR1350 = 'organic-video-final-silhouette-dark-crown-large-iris-smooth-eight-tendrils';
+  root.dataset.fxNativeMagVisualR1360 = 'cortical-rounded-body-dark-diamond-cradle-glassy-eight-tendrils';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
@@ -103,8 +104,8 @@
     const latitudeSegments = auditMode ? 18 : constrainedMobile ? 10 : mobile ? 14 : constrained ? 18 : 30;
     const longitudeSegments = auditMode ? 32 : constrainedMobile ? 22 : mobile ? 28 : constrained ? 34 : 56;
     const tendrilCount = auditMode ? 4 : 8;
-    const tendrilSegments = auditMode ? 6 : constrainedMobile ? 6 : mobile ? 9 : constrained ? 10 : 14;
-    const tendrilSides = constrainedMobile ? 3 : mobile || constrained ? 4 : 6;
+    const tendrilSegments = auditMode ? 6 : constrainedMobile ? 8 : mobile ? 12 : constrained ? 14 : 24;
+    const tendrilSides = constrainedMobile ? 4 : mobile || constrained ? 5 : 8;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -135,8 +136,8 @@
          Keep one native topology, but use a sub-L1 superellipsoid so the hero
          reads as the supplied tall rhombic machine rather than an egg. */
       const lowBand=Math.sin(phi*3.0+theta*2.0)*.020;
-      const corticalA=Math.sin(theta*4.0+phi*1.35)*.030;
-      const corticalB=Math.sin(theta*7.0-phi*2.4)*.014;
+      const corticalA=Math.sin(theta*4.0+phi*1.35)*.045;
+      const corticalB=Math.sin(theta*7.0-phi*2.4)*.022;
       const shoulder=.020*Math.pow(Math.max(0,1-Math.abs(direction[1])*1.45),1.8);
       const organicRadius=.585+lowBand+corticalA+corticalB+shoulder;
       const crystalPosition=[
@@ -284,6 +285,16 @@
     // Lower dark jaw panels with twin lower spine.
     armorQuad([-.15,-.13,.48],[-.36,-.05,.42],[-.24,-.52,.36],[-.07,-.66,.35],3.10);
     armorQuad([.15,-.13,.48],[.07,-.66,.35],[.24,-.52,.36],[.36,-.05,.42],3.10);
+
+    // R1360 — central dark diamond cradle, matching the final video frame.
+    armorTri([0,.58,.50],[-.34,.10,.52],[0,.16,.57],3.34);
+    armorTri([0,.58,.50],[0,.16,.57],[.34,.10,.52],3.34);
+    armorTri([-.34,.10,.52],[-.28,-.36,.48],[0,-.12,.57],3.34);
+    armorTri([-.34,.10,.52],[0,-.12,.57],[0,.16,.57],3.34);
+    armorTri([.34,.10,.52],[0,.16,.57],[0,-.12,.57],3.34);
+    armorTri([.34,.10,.52],[0,-.12,.57],[.28,-.36,.48],3.34);
+    armorTri([0,-.12,.57],[-.28,-.36,.48],[0,-.56,.42],3.34);
+    armorTri([0,-.12,.57],[0,-.56,.42],[.28,-.36,.48],3.34);
 
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
@@ -533,10 +544,10 @@
         vec3 glass=mix(vec3(.010,.005,.016),vec3(.070,.024,.088),.30+.34*ndl+.08*facetPulse);
         glass+=vec3(.010,.018,.032)*sideLight*.14;
         glass+=vec3(.014,.006,.020)*(.34+.28*cloud);
-        glass+=silver*crownMask*(.72+.74*ndl+.38*specular);
+        glass+=silver*crownMask*(.54+.48*ndl+.22*specular);
         glass+=steel*shoulderMask*(.38+.46*ndl+.20*specular);
         glass=mix(glass,silver*(.58+.60*ndl+.32*specular),realArmorPlate*.84);
-        glass=mix(glass,gunmetal*(.78+.18*ndl)+steel*.12,realDarkPlate*.92);
+        glass=mix(glass,steel*(.64+.30*ndl)+gunmetal*.28+silver*.08*specular,realDarkPlate*.92);
         glass+=gunmetal*jawMask*.76;
         glass-=vec3(.010,.014,.018)*opticalWell*.72;
         glass+=cyan*fresnel*(.014+.020*visualEnergy);
@@ -551,7 +562,7 @@
         glass+=(cyan*.08+ice*.025)*edge;
         glass+=ice*(armorSeam*.16+armorRib*.09)*(1.0-vMorph*.72);
         glass+=(ice*.52+cyan*.28)*surfaceSweep*(.70+.26*fresnel);
-        glass=mix(glass,gunmetal*.94+steel*.10,tendrilMask*.72);
+        glass=mix(glass,vec3(.012,.052,.064)+steel*.18,tendrilMask*.72);
         glass+=(cyan*.56+ice*.10)*tendrilSegment*(.48+.60*fresnel);
         float alpha=.94+.022*ndl+.016*fresnel+specular*.012+surfaceSweep*.018+tendrilMask*.012;
         ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.50)),clamp(alpha,.92,.988));
@@ -611,7 +622,7 @@
         vec3 silver=vec3(.28,.34,.37);
         vec3 metal=vec3(.012,.006,.018);
         vec3 c=mix(metal,vec3(.065,.024,.082),.30+.30*ndl);
-        c+=silver*crownMask*(.56+.60*ndl+.32*spec);
+        c+=silver*crownMask*(.48+.42*ndl+.18*spec);
         c+=vec3(.030,.055,.070)*shoulderMask*(.44+.38*ndl+.14*spec);
         c=mix(c,silver*(.56+.58*ndl+.30*spec),realArmorPlate*.84);
         c=mix(c,metal*.88+vec3(.020,.040,.052),realDarkPlate*.90);
@@ -620,7 +631,7 @@
         c+=cyan*(nucleus*4.20+ring*.28)+ice*(heart*.014+nucleus*.38+spec*.20);
         c+=ice*seam*.08;
         c+=(ice*.48+cyan*.26)*pulse;
-        c=mix(c,metal*.94+vec3(.020,.040,.052),tendrilMask*.72);
+        c=mix(c,vec3(.012,.050,.062),tendrilMask*.72);
         c+=(cyan*.54+ice*.09)*tendrilSegment*(.46+.56*fresnel);
         float alpha=.945+.018*ndl+.014*fresnel+nucleus*.018+pulse*.014+tendrilMask*.010+realArmorPlate*.030+realDarkPlate*.022;
         ${outputName}=vec4(filmic(c*.82),clamp(alpha,.90,.985));
