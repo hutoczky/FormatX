@@ -424,6 +424,8 @@
   let filmRenderer = null;
   let filmRendererPromise = null;
   let filmRendererFallbackStarted = false;
+  let threeWaitStartedAt = 0;
+  let threeWaitTimer = 0;
   let particles = [];
   let raf = 0;
   let startedAt = 0;
@@ -669,8 +671,11 @@
       return;
     }
     if(window.FormatXMagGenesisThreeR1360?.attach){
+      if(threeWaitTimer){clearTimeout(threeWaitTimer);threeWaitTimer=0;}
       if(!filmRendererPromise){
         ROOT.dataset.fxMagBirthRendererR1360='loading-threejs';
+        ROOT.dataset.fxMagBirthRendererR1450='three-primary-loading';
+        overlay.dataset.fxRenderer='three-loading';
         filmRendererPromise=Promise.resolve(
           window.FormatXMagGenesisThreeR1360.attach(canvas,()=>({x:targetX,y:targetY}))
         ).then(renderer=>{
@@ -683,22 +688,46 @@
             filmRenderer=renderer;
             ROOT.dataset.fxMagBirthRendererR1360='threejs-active';
             ROOT.dataset.fxMagBirthRendererR1430='threejs-active-production-path';
+            ROOT.dataset.fxMagBirthRendererR1450='three-primary-active';
             overlay.dataset.fxRenderer='three';
             renderer.resize?.();
             return renderer;
           }
           ROOT.dataset.fxMagBirthRendererR1360='threejs-failed-r649-fallback';
+          ROOT.dataset.fxMagBirthRendererR1450='three-explicit-failure-fallback';
           startR649Fallback();
           return null;
         }).catch(error=>{
           filmRendererPromise=null;
           ROOT.dataset.fxMagBirthRendererR1360='threejs-error-r649-fallback';
+          ROOT.dataset.fxMagBirthRendererR1450='three-error-fallback';
           console.error('FormatX R1360 intro attach failed:',error);
           startR649Fallback();
         });
       }
       return;
     }
+
+    /* R1450 — never lock the production intro into the 2D fallback because
+       the deferred Three owner is a few milliseconds late. Wait for the real
+       renderer for a bounded window; only an actual missing/failed Three path
+       is allowed to fall back. */
+    const now=performance.now();
+    if(!threeWaitStartedAt)threeWaitStartedAt=now;
+    const waited=now-threeWaitStartedAt;
+    if(waited<2400){
+      ROOT.dataset.fxMagBirthRendererR1450='waiting-for-three-owner';
+      overlay.dataset.fxRenderer='three-loading';
+      if(!threeWaitTimer){
+        threeWaitTimer=setTimeout(()=>{
+          threeWaitTimer=0;
+          sizeCanvas();
+        },80);
+      }
+      return;
+    }
+    ROOT.dataset.fxMagBirthRendererR1450='three-owner-timeout-fallback';
+    overlay.dataset.fxRenderer='fallback';
     startR649Fallback();
   }
 
@@ -780,6 +809,7 @@
 
     try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
+    if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
     try { overlay.classList.add('is-leaving'); } catch (_) {}
 
     exitTimer=window.setTimeout(
