@@ -1,5 +1,5 @@
 name: FormatX MAG intro visual proof
-# R1360 visual proof: integrated cortical shell + dark diamond + R1360 native MAG
+# R1380 visual proof: R1360 intro + premium organic R1380 native MAG + full-page chamber
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
       - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/styles/formatx-unified-background-r616.css'
       - 'docs/scifi-ui/scripts/three-r185.module.js'
       - '.github/scripts/capture-mag-intro-r656.cjs'
@@ -79,13 +80,13 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R1360 MAG intro visual proof failed'
+          description='R1380 MAG visual proof failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R1360 MAG intro keyframe proof passed'
+            description='R1380 MAG intro/final proof passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R1360 intro visual proof' \
+            -f context='FormatX R1380 MAG visual proof' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
