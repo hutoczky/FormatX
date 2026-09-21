@@ -313,9 +313,35 @@ html:root:root:root:root:root:root body.living-architecture #hero :is(.hero-ring
 
   html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.985!important;
-    filter:brightness(1.04) contrast(1.14) saturate(1.10) drop-shadow(0 0 5px rgba(76,211,242,.07))!important;
-    -webkit-filter:brightness(1.04) contrast(1.14) saturate(1.10) drop-shadow(0 0 5px rgba(76,211,242,.07))!important;
+    opacity:.99!important;
+    filter:brightness(.92) contrast(1.20) saturate(1.02) drop-shadow(0 0 4px rgba(68,202,230,.035))!important;
+    -webkit-filter:brightness(.92) contrast(1.20) saturate(1.02) drop-shadow(0 0 4px rgba(68,202,230,.035))!important;
   }
 }
 /* production-r1440-clean-crystal-desktop-owner */
+
+
+/* R1470 — obsidian crystal compositor owner.
+   Preserve material-defined highlights; never bleach or blur the broad facets. */
+html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+  filter:none!important;
+  -webkit-filter:none!important;
+}
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.98!important;
+    filter:brightness(.96) contrast(1.22) saturate(1.01)!important;
+    -webkit-filter:brightness(.96) contrast(1.22) saturate(1.01)!important;
+  }
+}
+@media (min-width:901px) and (pointer:fine) {
+  html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.99!important;
+    filter:brightness(.90) contrast(1.22) saturate(1.00)!important;
+    -webkit-filter:brightness(.90) contrast(1.22) saturate(1.00)!important;
+  }
+}
+/* production-r1470-obsidian-cut-crystal-optics */
