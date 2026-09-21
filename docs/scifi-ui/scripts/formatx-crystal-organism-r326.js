@@ -33,6 +33,7 @@
   root.dataset.fxNativeMagVisualR1350 = 'organic-video-final-silhouette-dark-crown-large-iris-smooth-eight-tendrils';
   root.dataset.fxNativeMagVisualR1360 = 'cortical-rounded-body-dark-diamond-cradle-glassy-eight-tendrils';
   root.dataset.fxNativeMagVisualR1380 = 'premium-organic-cortex-defined-diamond-iris-smooth-glass-tendrils';
+  root.dataset.fxNativeMagVisualR1390 = 'premium-cortical-biomech-broad-metal-cradle-optical-iris-eight-tendrils';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
@@ -136,12 +137,13 @@
       /* R1080: reference-locked closed armored diamond-pod.
          Keep one native topology, but use a sub-L1 superellipsoid so the hero
          reads as the supplied tall rhombic machine rather than an egg. */
-      const lowBand=Math.sin(phi*3.0+theta*2.0)*.018;
-      const corticalA=Math.sin(theta*4.0+phi*1.35)*.058;
-      const corticalB=Math.sin(theta*7.0-phi*2.4)*.030;
-      const corticalC=Math.sin(theta*2.0+phi*5.2)*.018;
-      const shoulder=.026*Math.pow(Math.max(0,1-Math.abs(direction[1])*1.45),1.8);
-      const organicRadius=.575+lowBand+corticalA+corticalB+corticalC+shoulder;
+      const lowBand=Math.sin(phi*3.0+theta*2.0)*.016;
+      const corticalA=Math.sin(theta*4.0+phi*1.35)*.064;
+      const corticalB=Math.sin(theta*7.0-phi*2.4)*.034;
+      const corticalC=Math.sin(theta*2.0+phi*5.2)*.020;
+      const corticalD=Math.sin(theta*3.0-phi*6.4)*.012;
+      const shoulder=.030*Math.pow(Math.max(0,1-Math.abs(direction[1])*1.42),1.8);
+      const organicRadius=.565+lowBand+corticalA+corticalB+corticalC+corticalD+shoulder;
       const crystalPosition=[
         direction[0]*organicRadius*1.05,
         direction[1]*organicRadius*1.08,
@@ -275,11 +277,11 @@
       armorTri(a,c,d,facet);
     }
 
-    // R1220 — broad split titanium crown and integrated shoulder armor.
-    armorTri([0,.77,.39],[-.12,.70,.44],[0,.31,.50],2.55);
-    armorQuad([-.12,.70,.44],[-.42,.31,.42],[-.20,.02,.48],[0,.31,.50],2.55);
-    armorTri([0,.77,.39],[0,.31,.50],[.12,.70,.44],2.55);
-    armorQuad([.12,.70,.44],[0,.31,.50],[.20,.02,.48],[.42,.31,.42],2.55);
+    // R1390 — broad split titanium crown and shoulder wings wrapping the organic shell.
+    armorTri([0,.82,.42],[-.15,.68,.49],[0,.28,.57],2.55);
+    armorQuad([-.15,.68,.49],[-.49,.28,.43],[-.25,-.01,.51],[0,.28,.57],2.55);
+    armorTri([0,.82,.42],[0,.28,.57],[.15,.68,.49],2.55);
+    armorQuad([.15,.68,.49],[0,.28,.57],[.25,-.01,.51],[.49,.28,.43],2.55);
 
     // R1310 — compact dark shoulder armor. Silver remains localized to crown.
     armorQuad([-.16,.20,.49],[-.35,.24,.44],[-.44,-.01,.40],[-.23,-.14,.46],3.12);
@@ -289,15 +291,15 @@
     armorQuad([-.15,-.13,.48],[-.36,-.05,.42],[-.24,-.52,.36],[-.07,-.66,.35],3.10);
     armorQuad([.15,-.13,.48],[.07,-.66,.35],[.24,-.52,.36],[.36,-.05,.42],3.10);
 
-    // R1360 — central dark diamond cradle, matching the final video frame.
-    armorTri([0,.58,.50],[-.34,.10,.52],[0,.16,.57],3.34);
-    armorTri([0,.58,.50],[0,.16,.57],[.34,.10,.52],3.34);
-    armorTri([-.34,.10,.52],[-.28,-.36,.48],[0,-.12,.57],3.34);
-    armorTri([-.34,.10,.52],[0,-.12,.57],[0,.16,.57],3.34);
-    armorTri([.34,.10,.52],[0,.16,.57],[0,-.12,.57],3.34);
-    armorTri([.34,.10,.52],[0,-.12,.57],[.28,-.36,.48],3.34);
-    armorTri([0,-.12,.57],[-.28,-.36,.48],[0,-.56,.42],3.34);
-    armorTri([0,-.12,.57],[0,-.56,.42],[.28,-.36,.48],3.34);
+    // R1390 — compact dark four-petal optical cradle around the central iris.
+    armorTri([0,.54,.53],[-.30,.09,.55],[0,.15,.60],3.34);
+    armorTri([0,.54,.53],[0,.15,.60],[.30,.09,.55],3.34);
+    armorTri([-.30,.09,.55],[-.25,-.31,.51],[0,-.10,.60],3.34);
+    armorTri([-.30,.09,.55],[0,-.10,.60],[0,.15,.60],3.34);
+    armorTri([.30,.09,.55],[0,.15,.60],[0,-.10,.60],3.34);
+    armorTri([.30,.09,.55],[0,-.10,.60],[.25,-.31,.51],3.34);
+    armorTri([0,-.10,.60],[-.25,-.31,.51],[0,-.50,.46],3.34);
+    armorTri([0,-.10,.60],[0,-.50,.46],[.25,-.31,.51],3.34);
 
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
@@ -494,12 +496,15 @@
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
         float podMask=1.0-vMorph;
         float diamondCoord=abs(heartLocal.x)+abs(heartLocal.y*1.035);
-        float diamondFace=(1.0-smoothstep(.300,.355,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
-        float diamondRim=(1.0-smoothstep(.006,.020,abs(diamondCoord-.323)))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondFace=(1.0-smoothstep(.282,.338,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondInner=(1.0-smoothstep(.180,.218,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondFrame=max(0.0,diamondFace-diamondInner);
+        float diamondRim=(1.0-smoothstep(.007,.022,abs(diamondCoord-.310)))*smoothstep(.18,.46,vLocal.z)*podMask;
         float cradlePlate=smoothstep(3.28,3.33,vFacet)*podMask;
-        float pupil=1.0-smoothstep(.026,.048,radial);
-        float coreRing=1.0-smoothstep(.005,.014,abs(radial-.062));
-        float irisRays=pow(.5+.5*cos(angle*36.0+uTime*.06),10.0)*smoothstep(.075,.105,radial)*(1.0-smoothstep(.205,.285,radial));
+        float pupil=1.0-smoothstep(.018,.038,radial);
+        float coreDisc=1.0-smoothstep(.038,.078,radial);
+        float coreRing=1.0-smoothstep(.006,.016,abs(radial-.072));
+        float irisRays=pow(.5+.5*cos(angle*18.0+uTime*.04),9.0)*smoothstep(.080,.105,radial)*(1.0-smoothstep(.145,.185,radial));
         float realArmorPlate=smoothstep(1.55,2.15,vFacet)*(1.0-smoothstep(2.78,2.96,vFacet))*podMask;
         float realDarkPlate=smoothstep(2.92,3.05,vFacet)*podMask;
         float crownMask=smoothstep(.34,.68,vLocal.y)
@@ -511,7 +516,7 @@
           *(1.0-smoothstep(.30,.58,abs(vLocal.x)))*podMask;
         float opticalWell=(1.0-smoothstep(.22,.43,radial))*podMask;
         float tendrilMask=smoothstep(.62,.82,length(vLocal.xy))*podMask;
-        float tendrilSegment=(.16+.84*ridge(vUv.y*10.5+vUv.x*2.0,18.0))*tendrilMask;
+        float tendrilSegment=(.30+.70*ridge(vUv.y*7.4+vUv.x*1.65,12.0))*tendrilMask;
         vec3 cyan=vec3(.018,.62,.94);
         vec3 violet=vec3(.055,.075,.16);
         vec3 ice=vec3(.64,.80,.84);
@@ -564,25 +569,28 @@
         float tissueMask=podMask*(1.0-sat(armorBlock))*(1.0-tendrilMask);
         vec3 tissue=mix(vec3(.012,.003,.022),vec3(.118,.030,.145),.22+.46*ndl+.18*sideLight);
         tissue+=vec3(.025,.006,.045)*(.28+.38*cloud);
-        tissue*=1.0-.42*cortexGroove;
-        tissue+=vec3(.050,.016,.072)*cortexLobe*(.20+.32*ndl);
+        tissue*=1.0-.52*cortexGroove;
+        tissue+=vec3(.070,.018,.090)*cortexLobe*(.24+.38*ndl);
+        tissue+=vec3(.018,.006,.030)*(1.0-cortexGroove)*fresnel*.20;
         glass=mix(glass,tissue,tissueMask*.92);
-        glass+=silver*crownMask*(.62+.56*ndl+.30*specular);
-        glass+=steel*shoulderMask*(.42+.50*ndl+.24*specular);
-        glass=mix(glass,silver*(.62+.66*ndl+.38*specular),realArmorPlate*.90);
-        glass=mix(glass,steel*(.70+.34*ndl)+gunmetal*.30+silver*.12*specular,realDarkPlate*.90);
-        glass=mix(glass,vec3(.010,.018,.026)+steel*.28+silver*.08*specular,diamondFace*.92);
-        glass=mix(glass,vec3(.008,.013,.020)+steel*.18,cradlePlate*.76);
+        glass+=silver*crownMask*(.72+.62*ndl+.34*specular);
+        glass+=steel*shoulderMask*(.50+.54*ndl+.28*specular);
+        glass=mix(glass,silver*(.70+.70*ndl+.42*specular),realArmorPlate*.92);
+        glass=mix(glass,steel*(.72+.36*ndl)+gunmetal*.26+silver*.14*specular,realDarkPlate*.92);
+        glass=mix(glass,vec3(.009,.015,.024)+steel*.24,diamondFace*.88);
+        glass=mix(glass,steel*.58+silver*.20*specular,diamondFrame*.86);
+        glass=mix(glass,vec3(.007,.012,.019)+steel*.20,cradlePlate*.80);
         glass+=gunmetal*jawMask*.76;
         glass-=vec3(.010,.014,.018)*opticalWell*.72;
-        glass+=(ice*.30+cyan*.42)*diamondRim*(.44+.30*specular);
+        glass+=(ice*.38+cyan*.38)*diamondRim*(.40+.26*specular);
         glass+=cyan*fresnel*(.018+.024*visualEnergy);
-        glass+=cyan*veins*(.018+.017*uBreath);
-        glass+=cyan*membrane*(.008+.012*visualEnergy);
-        glass+=cyan*iris*.18;
-        glass+=cyan*(rings*.22+nucleus*3.05+irisRays*.30)+ice*(heart*.012+nucleus*.31+coreRing*.88);
-        glass=mix(glass,gunmetal,pupil*.84);
-        glass+=cyan*coreRing*.95;
+        glass+=cyan*veins*(.014+.014*uBreath);
+        glass+=cyan*membrane*(.006+.010*visualEnergy);
+        glass+=cyan*iris*.12;
+        glass+=cyan*(rings*.14+nucleus*2.50+irisRays*.16)+ice*(heart*.010+nucleus*.24+coreRing*.66);
+        glass=mix(glass,gunmetal,pupil*.44);
+        glass+=cyan*coreDisc*1.20+ice*coreDisc*.34;
+        glass+=cyan*coreRing*.82;
         glass+=ice*specular*(.40+.18*visualEnergy);
         glass+=(cyan*.14+ice*.022)*(axisV*.12+axisH*.07)*visualEnergy;
         glass+=(cyan*.08+violet*.045)*dnaHelix*(.020+.036*fresnel)*genomePulse;
@@ -631,10 +639,13 @@
         float cortex=.5+.5*sin(vUv.x*31.4+sin(vUv.y*18.8)*1.35+vUv.y*10.2);
         float cortexGroove=pow(1.0-abs(sin(vUv.x*32.0+vUv.y*12.0)),6.0);
         float diamondCoord=abs(heartLocal.x)+abs(heartLocal.y*1.035);
-        float diamondFace=(1.0-smoothstep(.300,.355,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
-        float diamondRim=(1.0-smoothstep(.007,.021,abs(diamondCoord-.323)))*smoothstep(.18,.46,vLocal.z)*podMask;
-        float pupil=1.0-smoothstep(.026,.048,radial);
-        float coreRing=1.0-smoothstep(.006,.015,abs(radial-.062));
+        float diamondFace=(1.0-smoothstep(.282,.338,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondInner=(1.0-smoothstep(.180,.218,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondFrame=max(0.0,diamondFace-diamondInner);
+        float diamondRim=(1.0-smoothstep(.008,.023,abs(diamondCoord-.310)))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float pupil=1.0-smoothstep(.018,.038,radial);
+        float coreDisc=1.0-smoothstep(.038,.078,radial);
+        float coreRing=1.0-smoothstep(.006,.016,abs(radial-.072));
         float realArmorPlate=smoothstep(1.55,2.15,vFacet)*(1.0-smoothstep(2.78,2.96,vFacet))*podMask;
         float realDarkPlate=smoothstep(2.92,3.05,vFacet)*podMask;
         float crownMask=smoothstep(.38,.69,vLocal.y)
@@ -664,13 +675,15 @@
         c+=vec3(.034,.060,.075)*shoulderMask*(.46+.42*ndl+.16*spec);
         c=mix(c,silver*(.62+.60*ndl+.34*spec),realArmorPlate*.88);
         c=mix(c,metal*.82+vec3(.025,.046,.060),realDarkPlate*.90);
-        c=mix(c,metal*.72+vec3(.028,.052,.070),diamondFace*.92);
-        c+=(ice*.26+cyan*.42)*diamondRim;
+        c=mix(c,metal*.72+vec3(.028,.052,.070),diamondFace*.88);
+        c=mix(c,silver*.52+metal*.32,diamondFrame*.80);
+        c+=(ice*.28+cyan*.36)*diamondRim;
         c+=cyan*fresnel*(.026+.030*energy);
         c+=(cyan*.10+violet*.05)*dna*(.020+.030*energy);
-        c+=cyan*(nucleus*3.10+ring*.24)+ice*(heart*.012+nucleus*.30+coreRing*.82+spec*.22);
-        c=mix(c,metal,pupil*.82);
-        c+=cyan*coreRing*.90;
+        c+=cyan*(nucleus*2.45+ring*.16)+ice*(heart*.010+nucleus*.24+coreRing*.62+spec*.22);
+        c=mix(c,metal,pupil*.42);
+        c+=cyan*coreDisc*1.12+ice*coreDisc*.30;
+        c+=cyan*coreRing*.78;
         c+=ice*seam*.06;
         c+=(ice*.48+cyan*.26)*pulse;
         c=mix(c,vec3(.007,.038,.054),tendrilMask*.76);
