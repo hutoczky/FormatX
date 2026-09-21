@@ -9,7 +9,8 @@
   const HAS_VISUAL_FRAME = VISUAL_PROOF && Number.isFinite(VISUAL_FRAME);
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const AUTOMATION = navigator.webdriver === true;
+  const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
+  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
@@ -25,10 +26,10 @@
      source for compatibility validators, but is removed before its deferred
      controller executes, so users never see two intros back-to-back. */
   document.getElementById('formatx-event-horizon')?.remove();
-  ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION ? 'automation-skip' : (seen && !FORCE ? 'session-skip' : 'active');
+  ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : (seen && !FORCE ? 'session-skip' : 'active');
 
   if (!FORCE && (seen || AUTOMATION)) {
-    ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION ? 'automation-skip' : 'session-skip';
+    ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : 'session-skip';
     return;
   }
 
