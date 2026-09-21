@@ -1,5 +1,5 @@
 name: FormatX MAG intro visual proof
-# R1380 visual proof: R1360 intro + premium organic R1380 native MAG + full-page chamber
+# R1390 visual proof: R1360 intro + sculpted premium R1390 native MAG + full-page living chamber + mobile proof
 
 on:
   push:
@@ -61,14 +61,14 @@ jobs:
       - name: Capture reference keyframes
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4181/scifi-ui/index.html
-          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1360-intro-keyframes
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1390-intro-keyframes
         run: node .github/scripts/capture-mag-intro-r656.cjs
       - name: Upload intro proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mag-intro-r1360-proof
-          path: artifacts/r1360-intro-keyframes/
+          name: mag-intro-r1390-proof
+          path: artifacts/r1390-intro-keyframes/
           if-no-files-found: warn
           retention-days: 14
 
@@ -81,13 +81,13 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R1380 MAG visual proof failed'
+          description='R1390 MAG visual proof failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R1380 MAG intro/final proof passed'
+            description='R1390 MAG intro/final/mobile proof passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R1380 MAG visual proof' \
+            -f context='FormatX R1390 MAG visual proof' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
