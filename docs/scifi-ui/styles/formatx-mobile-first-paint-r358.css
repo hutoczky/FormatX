@@ -683,3 +683,22 @@
     object-fit:contain!important;
   }
 }
+
+
+/* R1401 — the native irregular crystal is the hero. The legacy circular HUD
+   must never cover it on phones, including the first paint before runtime flags. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root body.living-architecture #hero .hero-ring,
+  html:root:root:root:root:root body.living-architecture #hero .hero-label {
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+  html:root:root:root:root:root body.living-architecture #hero .hero-space {
+    background:transparent!important;
+    background-image:none!important;
+    box-shadow:none!important;
+  }
+}
+/* production-r1401-mobile-no-hero-ring */
