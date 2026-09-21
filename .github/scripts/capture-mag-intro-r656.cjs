@@ -53,7 +53,11 @@ const SHOTS=[
 
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       try{
-        await page.locator('.fx-mag-birth-r533').waitFor({state:'attached',timeout:15000});
+        await page.waitForFunction(
+          ()=>document.querySelectorAll('.fx-mag-birth-r533').length===1,
+          null,
+          {timeout:15000}
+        );
       }catch(error){
         const debug=await page.evaluate(()=>({
           href:location.href,
@@ -117,7 +121,11 @@ const SHOTS=[
         u.searchParams.set('r720handoff','1');
   
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
-        await page.locator('.fx-mag-birth-r533').waitFor({state:'attached',timeout:10000});
+        await page.waitForFunction(
+          ()=>document.querySelectorAll('.fx-mag-birth-r533').length===1,
+          null,
+          {timeout:15000}
+        );
         await page.waitForFunction(
           ()=>document.querySelectorAll('.fx-mag-birth-r533').length===0
             && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1,
