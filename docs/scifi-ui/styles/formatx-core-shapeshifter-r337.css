@@ -27,17 +27,17 @@ html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-m
   transform-origin: 50% 50% !important;
   mix-blend-mode: normal !important;
   filter:
-    brightness(1.36)
-    contrast(1.18)
-    saturate(1.50)
-    drop-shadow(0 0 1px rgba(106,236,255,.18))
-    drop-shadow(0 0 8px rgba(99,72,255,.10)) !important;
+    brightness(1.04)
+    contrast(1.14)
+    saturate(1.10)
+    drop-shadow(0 0 1px rgba(106,236,255,.10))
+    drop-shadow(0 0 6px rgba(62,151,214,.07)) !important;
   -webkit-filter:
-    brightness(1.36)
-    contrast(1.18)
-    saturate(1.50)
-    drop-shadow(0 0 1px rgba(106,236,255,.18))
-    drop-shadow(0 0 8px rgba(99,72,255,.10)) !important;
+    brightness(1.04)
+    contrast(1.14)
+    saturate(1.10)
+    drop-shadow(0 0 1px rgba(106,236,255,.10))
+    drop-shadow(0 0 6px rgba(62,151,214,.07)) !important;
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
@@ -280,3 +280,42 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
   }
 }
 /* production-r1404-irregular-crystal-mobile-final */
+
+
+/* R1440 — clean desktop/mobile crystal owner.
+   No targeting ring around the MAG, no overexposed compositor pass, and the hero
+   keeps enough vertical room that controls/copy cannot collide with the next section. */
+html:root:root:root:root:root:root body.living-architecture #hero :is(.hero-ring,.hero-label) {
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+@media (min-width:901px) and (pointer:fine) {
+  html:root:root:root:root body.living-architecture #hero.scene.hero {
+    min-height:calc(100svh - 78px)!important;
+    padding-bottom:96px!important;
+    overflow:visible!important;
+  }
+
+  html:root:root:root:root body.living-architecture #hero .hero-grid {
+    min-height:680px!important;
+    align-items:center!important;
+  }
+
+  html:root:root:root:root body.living-architecture #hero .hero-space {
+    min-height:620px!important;
+    background:transparent!important;
+    background-image:none!important;
+    box-shadow:none!important;
+  }
+
+  html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.985!important;
+    filter:brightness(1.04) contrast(1.14) saturate(1.10) drop-shadow(0 0 5px rgba(76,211,242,.07))!important;
+    -webkit-filter:brightness(1.04) contrast(1.14) saturate(1.10) drop-shadow(0 0 5px rgba(76,211,242,.07))!important;
+  }
+}
+/* production-r1440-clean-crystal-desktop-owner */
