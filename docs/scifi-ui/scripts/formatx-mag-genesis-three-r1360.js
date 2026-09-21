@@ -97,12 +97,12 @@
 
     makeLights(){
       const T=this.THREE;
-      // R1500 — filmic neutral lighting. Cyan now comes from the organism itself.
-      this.scene.add(new T.HemisphereLight(0x91aeb8,0x020305,0.30));
-      const key=new T.DirectionalLight(0xf2f5f3,2.24);
+      // R1520 — brighter neutral studio key while preserving a black chamber.
+      this.scene.add(new T.HemisphereLight(0xa6bac0,0x020305,0.38));
+      const key=new T.DirectionalLight(0xf6f4ef,2.78);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
-      const rim=new T.PointLight(0x69aebe,7.2,12,2);
+      const rim=new T.PointLight(0x7fb6bf,9.0,12,2);
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
       const bioticFill=new T.PointLight(0x62566f,3.0,10,2);
@@ -1004,9 +1004,9 @@
       const T=this.THREE;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x090d10,metalness:.62,roughness:.34,
-        emissive:0x010304,emissiveIntensity:.014,
-        clearcoat:.20,clearcoatRoughness:.34,
+        color:0x171b1d,metalness:.56,roughness:.38,
+        emissive:0x010203,emissiveIntensity:.010,
+        clearcoat:.14,clearcoatRoughness:.42,
         flatShading:true,transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
@@ -1044,18 +1044,18 @@
         pnt.fromBufferAttribute(basePos,i).normalize();
         const theta=Math.atan2(pnt.z,pnt.x);
         const upper=pnt.y>=0,right=pnt.x>=0,front=pnt.z>=0;
-        const ax=upper?(right?.74:.80):(right?.78:.71);
-        const ay=upper?(right?.91:.95):(right?.81:.77);
-        const az=front?(right?.62:.67):(right?.65:.70);
-        const power=1.14;
+        const ax=upper?(right?.70:.83):(right?.79:.67);
+        const ay=upper?(right?.96:.88):(right?.83:.73);
+        const az=front?(right?.58:.71):(right?.63:.74);
+        const power=1.16;
         const lp=Math.pow(Math.abs(pnt.x)/ax,power)+Math.pow(Math.abs(pnt.y)/ay,power)+Math.pow(Math.abs(pnt.z)/az,power);
         const radius=1/Math.pow(Math.max(.001,lp),1/power);
-        const mineralBias=1+Math.sin(theta*2.13+pnt.y*2.7)*.024+Math.cos(theta*3.31-pnt.y*3.9)*.014;
+        const mineralBias=1+Math.sin(theta*2.13+pnt.y*2.7)*.058+Math.cos(theta*3.31-pnt.y*3.9)*.034+Math.sin(theta*4.67-pnt.y*1.9)*.016;
         pnt.multiplyScalar(radius*mineralBias);
         pnt.x*=1.08;pnt.y*=1.05;pnt.z*=.96;
-        pnt.x+=pnt.y*-.014+pnt.z*pnt.y*.010;
-        pnt.y+=Math.pow(Math.max(pnt.y,0),5)*.030;
-        pnt.z+=pnt.x*pnt.y*.006;
+        pnt.x+=pnt.y*-.032+pnt.z*pnt.y*.020-Math.pow(Math.max(-pnt.x,0),4)*.020;
+        pnt.y+=Math.pow(Math.max(pnt.y,0),5)*.056-Math.pow(Math.max(-pnt.y,0),4)*.016;
+        pnt.z+=pnt.x*pnt.y*.016+Math.pow(Math.max(pnt.z,0),4)*.010;
         basePos.setXYZ(i,pnt.x,pnt.y,pnt.z);
       }
       baseGeo.computeVertexNormals();
@@ -1537,7 +1537,7 @@
         draw:(r,time)=>engine.render(r,time),
         destroy:()=>engine.destroy(),
         engine,
-        revision:'r1510-photoreal-physical-lens-mineral-handoff'
+        revision:'r1520-visible-irregular-photoreal-mineral-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1563,11 +1563,12 @@
   document.documentElement.dataset.fxMagBirthProofR1490='realistic-tunnel-solid-organism-obsidian-crystal-handoff';
   document.documentElement.dataset.fxMagBirthProofR1500='photoreal-closed-volume-obsidian-mineral-handoff';
   document.documentElement.dataset.fxMagBirthProofR1510='physical-lens-no-hud-rails-organic-tendrils-handoff';
+  document.documentElement.dataset.fxMagBirthProofR1520='visible-irregular-obsidian-facets-no-orbit-ring-handoff';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1510-photoreal-closed-volume-physical-lens-obsidian-crystal'
+    revision:'r1520-photoreal-visible-irregular-physical-lens-obsidian-crystal'
   };
 })();
