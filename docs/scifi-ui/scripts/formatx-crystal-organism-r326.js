@@ -51,6 +51,7 @@
   root.dataset.fxNativeMagVisualR1500 = 'photoreal-asymmetric-obsidian-mineral-local-optical-lens-eight-tendrils';
   root.dataset.fxNativeMagVisualR1510 = 'photoreal-obsidian-physical-lens-no-hud-rings-organic-tendrils';
   root.dataset.fxNativeMagVisualR1520 = 'photoreal-irregular-obsidian-visible-facets-no-orbit-ring';
+  root.dataset.fxNativeMagVisualR1530 = 'photoreal-microfacet-obsidian-physical-lens-living-habitat';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -468,13 +469,42 @@
       float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
       float ridge(float v,float p){return pow(sat(1.-abs(fract(v)-.5)*2.),p);}
       vec3 filmic(vec3 c){return 1.0-exp(-max(c,vec3(0.)));}
+      vec3 fresnelSchlick(float cosTheta,vec3 F0){
+        return F0+(1.0-F0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);
+      }
+      float distributionGGX(vec3 N,vec3 H,float roughness){
+        float a=roughness*roughness;
+        float a2=a*a;
+        float ndh=max(dot(N,H),0.0);
+        float ndh2=ndh*ndh;
+        float denom=ndh2*(a2-1.0)+1.0;
+        return a2/max(3.14159265*denom*denom,.0001);
+      }
+      float geometrySchlickGGX(float ndv,float roughness){
+        float r=roughness+1.0;
+        float k=(r*r)/8.0;
+        return ndv/max(ndv*(1.0-k)+k,.0001);
+      }
+      float geometrySmith(vec3 N,vec3 V,vec3 L,float roughness){
+        return geometrySchlickGGX(max(dot(N,V),0.0),roughness)
+          *geometrySchlickGGX(max(dot(N,L),0.0),roughness);
+      }
       void main(){
         vec3 n=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.9-vLocal.z));
         vec3 key=normalize(vec3(-.42,.73,.54));
         vec3 side=normalize(vec3(.72,-.18,.66));
+        float facetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
         float ndl=max(dot(n,key),0.);
         float sideLight=max(dot(n,side),0.);
+        float ndv=max(dot(n,view),0.0);
+        vec3 halfKey=normalize(key+view);
+        float roughness=mix(.17,.43,facetRand);
+        vec3 mineralF0=mix(vec3(.034),vec3(.30,.35,.37),.82);
+        float microD=distributionGGX(n,halfKey,roughness);
+        float microG=geometrySmith(n,view,key,roughness);
+        vec3 microF=fresnelSchlick(max(dot(halfKey,view),0.0),mineralF0);
+        vec3 microSpec=min(vec3(2.4),(microD*microG*microF)/max(4.0*ndl*ndv,.001));
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,${optics.fresnelPower});
         float specular=pow(max(dot(n,normalize(key+view)),0.),42.0);
@@ -602,14 +632,15 @@
         float broadSpec=pow(max(dot(n,normalize(key+view)),0.),12.0);
         float mineralLift=.18+.68*ndl+.34*sideLight+.17*fresnel;
         vec3 glass=mix(vec3(.006,.009,.011),vec3(.052,.069,.076),mineralLift);
-        glass+=vec3(.110,.118,.116)*broadSpec*.30;
-        glass+=vec3(.040,.047,.049)*sideLight*.30;
-        glass+=ice*fresnel*.030;
+        glass+=vec3(.110,.118,.116)*broadSpec*.24;
+        glass+=vec3(.040,.047,.049)*sideLight*.28;
+        glass+=microSpec*(.075+.050*sideLight);
+        glass+=ice*fresnel*.024;
         float armorBlock=sat(realArmorPlate+realDarkPlate+crownMask+shoulderMask+jawMask+diamondFace);
         float tissueMask=podMask*(1.0-sat(armorBlock))*(1.0-tendrilMask);
         vec3 tissue=mix(vec3(.008,.011,.014),vec3(.065,.088,.098),.22+.62*ndl+.28*sideLight);
         tissue+=vec3(.010,.013,.015)*(.10+.12*cloud);
-        float bodyFacetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
+        float bodyFacetRand=facetRand;
         float mineralGrain=noise(field*5.8+vec2(vFacet*.17,-vFacet*.11));
         tissue*=.82+.30*bodyFacetRand;
         tissue*=.90+.18*mineralGrain;
@@ -1306,6 +1337,8 @@
     root.dataset.fxCoreSurfaceEnergyR1503='localized-travelling-electric-sweep-visible-then-zero-idle';
     root.dataset.fxCoreOpticsR1510='physical-lens-no-hud-rings-no-crosshair-mineral-dominant';
     root.dataset.fxCoreOpticsR1520='visible-neutral-mineral-facets-irregular-silhouette-no-orbit-ring';
+    root.dataset.fxCoreOpticsR1530='ggx-microfacet-obsidian-physical-lens-controlled-fresnel';
+    root.dataset.fxCoreHabitatR1530='continuous-page-living-habitat-integration';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
     root.dataset.fxCoreReferenceMaterialR1220='opaque-gunmetal-bright-titanium-armor-local-blue-optic-dark-tendrils';
