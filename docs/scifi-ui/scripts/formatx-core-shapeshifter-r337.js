@@ -4,7 +4,7 @@ const root=document.documentElement;
 if(root.dataset.fxCoreShapeshifterR337==='ready')return;
 root.dataset.fxCoreShapeshifterR337='booting';
 
-const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260921-r1404-crisp-irregular-crystal';
+const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260921-r1440-clean-crystal';
 const SHAPES=['crystal','sphere'];
 const LABELS={
   hu:{crystal:'szabálytalan kristály',sphere:'lágy kristály'},
