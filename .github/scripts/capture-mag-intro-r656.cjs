@@ -140,7 +140,7 @@ const SHOTS=[
         await handoffBrowser.close();
       }
 
-      // R1400: capture the exact phone layout the user sees. The normal intro is
+      // R1401: capture the exact phone layout the user sees. The normal intro is
       // intentionally skipped by Playwright automation; this proves the permanent
       // native MAG, full-page chamber, controls and copy together at 390x844.
       {
@@ -161,7 +161,7 @@ const SHOTS=[
           if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());
         });
         const u=new URL(BASE);
-        u.searchParams.set('mobileproof','r1400');
+        u.searchParams.set('mobileproof','r1401');
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
         await page.waitForFunction(
           ()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'
@@ -178,9 +178,17 @@ const SHOTS=[
             stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
             canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             renderer:root.dataset.fxCoreRenderer||'',
-            visual:root.dataset.fxNativeMagVisualR1400||'',
+            visual:root.dataset.fxNativeMagVisualR1401||'',
             optics:root.dataset.fxPrimaryMagOpticsR1383||'',
             resolution:root.dataset.fxCoreReal3dResolution||'',
+            shape:root.dataset.fxCoreShapeR337||'',
+            canvasFilter:canvas?getComputedStyle(canvas).filter:'',
+            heroRing:(()=>{
+              const el=document.querySelector('#hero .hero-ring');
+              if(!el)return {present:false,display:'none',visibility:'hidden',opacity:0};
+              const s=getComputedStyle(el);
+              return {present:true,display:s.display,visibility:s.visibility,opacity:Number(s.opacity||0)};
+            })(),
             canvas:{x:box?.x||0,y:box?.y||0,width:box?.width||0,height:box?.height||0},
             overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
           };
@@ -189,6 +197,21 @@ const SHOTS=[
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         if(await stage.count()){
           await stage.screenshot({path:path.join(OUT,'09-mobile-native-mag.png')});
+        }
+        if(state.visual!=='sharp-asymmetric-crystal-black-gunmetal-optical-iris-eight-tendrils-mobile'){
+          errors.push('R1401 native crystal visual marker missing: '+state.visual);
+        }
+        if(state.shape!=='crystal'){
+          errors.push('Mobile MAG is not in crystal state: '+state.shape);
+        }
+        if(/blur\((?!0(?:px)?\))/i.test(state.canvasFilter||'')){
+          errors.push('Mobile MAG still has blur: '+state.canvasFilter);
+        }
+        if(state.heroRing.present && state.heroRing.display!=='none' && state.heroRing.visibility!=='hidden' && state.heroRing.opacity>.01){
+          errors.push('Legacy hero ring still visible: '+JSON.stringify(state.heroRing));
+        }
+        if(state.overflow>2){
+          errors.push('Mobile horizontal overflow: '+state.overflow);
         }
         report.push({seconds:'mobile-native',name:'08-mobile-native-hero',state,errors});
         await page.close();
