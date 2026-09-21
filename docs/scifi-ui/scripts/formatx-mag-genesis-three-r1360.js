@@ -97,20 +97,24 @@
 
     makeLights(){
       const T=this.THREE;
-      this.scene.add(new T.HemisphereLight(0x8dc8d6,0x03050a,0.48));
-      const key=new T.DirectionalLight(0xe8f8ff,2.55);
-      key.position.set(-3.2,4.8,6.8);
+      // R1500 — filmic neutral lighting. Cyan now comes from the organism itself.
+      this.scene.add(new T.HemisphereLight(0x91aeb8,0x020305,0.30));
+      const key=new T.DirectionalLight(0xf2f5f3,2.24);
+      key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
-      const rim=new T.PointLight(0x4aa9ff,15,12,2);
-      rim.position.set(3.2,-1.5,3.8);
+      const rim=new T.PointLight(0x69aebe,7.2,12,2);
+      rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
-      const bioticFill=new T.PointLight(0x5d3b86,9,10,2);
-      bioticFill.position.set(-2.6,-.8,3.0);
+      const bioticFill=new T.PointLight(0x62566f,3.0,10,2);
+      bioticFill.position.set(-2.7,-.9,2.8);
       this.scene.add(bioticFill);
-      this.coreLight=new T.PointLight(0x6feeff,0,8,2);
+      const warmBounce=new T.PointLight(0xb8a58e,1.20,8,2);
+      warmBounce.position.set(2.4,2.1,1.1);
+      this.scene.add(warmBounce);
+      this.coreLight=new T.PointLight(0x79dbe7,0,7,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
-      this.mechLight=new T.PointLight(0xc8f4ff,0,9,2);
+      this.mechLight=new T.PointLight(0xd5e7e8,0,8,2);
       this.mechLight.position.set(-2.4,2.8,4.2);
       this.scene.add(this.mechLight);
     }
@@ -680,17 +684,17 @@
       const T=this.THREE,r=this.rand;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x17101f,roughness:.58,metalness:.018,
-        clearcoat:.18,clearcoatRoughness:.42,
+        color:0x141319,roughness:.78,metalness:.004,
+        clearcoat:.045,clearcoatRoughness:.72,
         transparent:false,opacity:1,
-        emissive:0x0d0714,emissiveIntensity:.075,
+        emissive:0x05070a,emissiveIntensity:.024,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
-        color:0x21152a,roughness:.64,metalness:.012,
-        clearcoat:.08,clearcoatRoughness:.58,
+        color:0x1a171f,roughness:.82,metalness:.003,
+        clearcoat:.025,clearcoatRoughness:.80,
         transparent:false,opacity:1,
-        emissive:0x100719,emissiveIntensity:.060,
+        emissive:0x06060a,emissiveIntensity:.020,
         depthWrite:true
       });
       this.organicWireMaterial=new T.MeshBasicMaterial({
@@ -744,8 +748,8 @@
       }
 
       this.organicFoldMaterial=new T.MeshPhysicalMaterial({
-        color:0x24172d,roughness:.72,metalness:.002,
-        emissive:0x0b121a,emissiveIntensity:.035,
+        color:0x201d24,roughness:.88,metalness:.001,
+        emissive:0x06090b,emissiveIntensity:.018,
         transparent:true,opacity:0,depthWrite:true
       });
       this.organicFoldGlowMaterial=new T.MeshBasicMaterial({
@@ -1000,21 +1004,21 @@
       const T=this.THREE;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x07131b,metalness:.90,roughness:.19,
-        emissive:0x03131d,emissiveIntensity:.070,
-        clearcoat:.84,clearcoatRoughness:.11,
-        transparent:true,opacity:0
+        color:0x090d10,metalness:.62,roughness:.34,
+        emissive:0x010304,emissiveIntensity:.014,
+        clearcoat:.20,clearcoatRoughness:.34,
+        flatShading:true,transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x0b202b,metalness:.88,roughness:.22,
-        emissive:0x041722,emissiveIntensity:.075,
-        clearcoat:.78,clearcoatRoughness:.13,
+        color:0x111a1e,metalness:.72,roughness:.31,
+        emissive:0x010405,emissiveIntensity:.012,
+        clearcoat:.18,clearcoatRoughness:.38,
         transparent:true,opacity:0
       });
       this.silverMaterial=new T.MeshPhysicalMaterial({
-        color:0x5b6970,metalness:.96,roughness:.34,
-        emissive:0x041117,emissiveIntensity:.020,
-        clearcoat:.50,clearcoatRoughness:.22,
+        color:0x6f7475,metalness:.88,roughness:.36,
+        emissive:0x000000,emissiveIntensity:0,
+        clearcoat:.12,clearcoatRoughness:.46,
         transparent:true,opacity:0
       });
       this.crownMaterial=this.silverMaterial.clone();
@@ -1029,128 +1033,55 @@
       this.silverParts=[];
       this.mechBodyParts=[];
 
-      // R1470 — compact asymmetric obsidian cut crystal.
-      const baseShape=new T.Shape();
-      baseShape.moveTo(-.03,.91);
-      baseShape.lineTo(.20,.66);
-      baseShape.lineTo(.50,.40);
-      baseShape.lineTo(.66,.08);
-      baseShape.lineTo(.48,-.20);
-      baseShape.lineTo(.25,-.58);
-      baseShape.lineTo(-.04,-.79);
-      baseShape.lineTo(-.28,-.57);
-      baseShape.lineTo(-.60,-.25);
-      baseShape.lineTo(-.64,.08);
-      baseShape.lineTo(-.42,.45);
-      baseShape.lineTo(-.17,.73);
-      baseShape.closePath();
-      const baseGeo=new T.ExtrudeGeometry(baseShape,{
-        depth:.34,bevelEnabled:true,bevelSegments:2,steps:1,
-        bevelSize:.028,bevelThickness:.044,curveSegments:2
-      });
-      baseGeo.center();
+      // R1500 — true closed 3D obsidian mineral body.
+      // The old shallow polygon extrusion is replaced with a deformed closed
+      // volume, so side planes and specular response remain physically coherent.
+      let baseGeo=new T.IcosahedronGeometry(1,2);
+      if(baseGeo.index)baseGeo=baseGeo.toNonIndexed();
+      const basePos=baseGeo.attributes.position;
+      const pnt=new T.Vector3();
+      for(let i=0;i<basePos.count;i++){
+        pnt.fromBufferAttribute(basePos,i).normalize();
+        const theta=Math.atan2(pnt.z,pnt.x);
+        const upper=pnt.y>=0,right=pnt.x>=0,front=pnt.z>=0;
+        const ax=upper?(right?.74:.80):(right?.78:.71);
+        const ay=upper?(right?.91:.95):(right?.81:.77);
+        const az=front?(right?.62:.67):(right?.65:.70);
+        const power=1.14;
+        const lp=Math.pow(Math.abs(pnt.x)/ax,power)+Math.pow(Math.abs(pnt.y)/ay,power)+Math.pow(Math.abs(pnt.z)/az,power);
+        const radius=1/Math.pow(Math.max(.001,lp),1/power);
+        const mineralBias=1+Math.sin(theta*2.13+pnt.y*2.7)*.024+Math.cos(theta*3.31-pnt.y*3.9)*.014;
+        pnt.multiplyScalar(radius*mineralBias);
+        pnt.x*=1.08;pnt.y*=1.05;pnt.z*=.96;
+        pnt.x+=pnt.y*-.014+pnt.z*pnt.y*.010;
+        pnt.y+=Math.pow(Math.max(pnt.y,0),5)*.030;
+        pnt.z+=pnt.x*pnt.y*.006;
+        basePos.setXYZ(i,pnt.x,pnt.y,pnt.z);
+      }
+      baseGeo.computeVertexNormals();
       this.mechBody=new T.Mesh(baseGeo,this.mechMaterial);
-      this.mechBody.scale.set(1.04,1.02,.98);
-      this.mechBody.position.z=-.02;
+      this.mechBody.scale.set(1.02,1.02,1.00);
+      this.mechBody.position.z=-.01;
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
 
-      // Central recessed diamond cradle.
+      // Recessed optical cradle is attached to the front plane; no detached
+      // crown/side shards are used in the final silhouette.
       const cradleShape=new T.Shape();
-      cradleShape.moveTo(0,.66);
-      cradleShape.lineTo(.58,0);
-      cradleShape.lineTo(0,-.66);
-      cradleShape.lineTo(-.58,0);
+      cradleShape.moveTo(0,.42);
+      cradleShape.lineTo(.36,0);
+      cradleShape.lineTo(0,-.42);
+      cradleShape.lineTo(-.36,0);
       cradleShape.closePath();
       const cradleGeo=new T.ExtrudeGeometry(cradleShape,{
-        depth:.16,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.028,bevelThickness:.036,curveSegments:10
+        depth:.090,bevelEnabled:true,bevelSegments:2,steps:1,
+        bevelSize:.018,bevelThickness:.022,curveSegments:6
       });
       cradleGeo.center();
       this.mechCradle=new T.Mesh(cradleGeo,this.mechMidMaterial);
-      this.mechCradle.scale.set(.92,.92,.74);
-      this.mechCradle.position.z=.22;
+      this.mechCradle.scale.set(.92,.92,.78);
+      this.mechCradle.position.z=.58;
       this.mechanicalGroup.add(this.mechCradle);
-
-      // Four armor petals around the optical core.
-      const topPlateShape=new T.Shape();
-      topPlateShape.moveTo(0,.76);
-      topPlateShape.lineTo(.10,.58);
-      topPlateShape.lineTo(.52,.10);
-      topPlateShape.lineTo(.18,-.04);
-      topPlateShape.lineTo(0,.16);
-      topPlateShape.lineTo(-.18,-.04);
-      topPlateShape.lineTo(-.52,.10);
-      topPlateShape.lineTo(-.10,.58);
-      topPlateShape.closePath();
-      const topPlateGeo=new T.ExtrudeGeometry(topPlateShape,{
-        depth:.14,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.030,bevelThickness:.040,curveSegments:8
-      });
-      topPlateGeo.center();
-
-      const crownL=new T.Mesh(topPlateGeo,this.crownMaterial);
-      crownL.scale.set(.78,1.08,.90);
-      crownL.position.set(-.23,.39,.35);
-      crownL.rotation.z=-.15;
-      this.mechanicalGroup.add(crownL);
-      this.silverParts.push(crownL);
-
-      const crownR=new T.Mesh(topPlateGeo,this.crownMaterial);
-      crownR.scale.set(-.56,.86,.82);
-      crownR.position.set(.20,.31,.33);
-      crownR.rotation.z=.07;
-      this.mechanicalGroup.add(crownR);
-      this.silverParts.push(crownR);
-      this.crown=crownL;
-
-      const sideShape=new T.Shape();
-      sideShape.moveTo(0,.46);
-      sideShape.lineTo(.54,.12);
-      sideShape.lineTo(.46,-.20);
-      sideShape.lineTo(.16,-.08);
-      sideShape.lineTo(-.04,.10);
-      sideShape.closePath();
-      const sideGeo=new T.ExtrudeGeometry(sideShape,{
-        depth:.14,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.026,bevelThickness:.034,curveSegments:8
-      });
-      sideGeo.center();
-
-      const left=new T.Mesh(sideGeo,this.silverMaterial);
-      left.scale.set(.84,.83,.88);
-      left.position.set(-.46,.04,.31);
-      left.rotation.z=.10;
-      this.mechanicalGroup.add(left);
-      this.plates.push(left);
-
-      const right=new T.Mesh(sideGeo,this.silverMaterial);
-      right.scale.set(-.62,.70,.82);
-      right.position.set(.40,-.01,.29);
-      right.rotation.z=-.02;
-      this.mechanicalGroup.add(right);
-      this.plates.push(right);
-
-      const lowerShape=new T.Shape();
-      lowerShape.moveTo(0,.24);
-      lowerShape.lineTo(.34,.04);
-      lowerShape.lineTo(.22,-.54);
-      lowerShape.lineTo(.08,-.80);
-      lowerShape.lineTo(-.08,-.80);
-      lowerShape.lineTo(-.22,-.54);
-      lowerShape.lineTo(-.34,.04);
-      lowerShape.closePath();
-      const lowerGeo=new T.ExtrudeGeometry(lowerShape,{
-        depth:.15,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.025,bevelThickness:.034,curveSegments:8
-      });
-      lowerGeo.center();
-      this.jaw=new T.Mesh(lowerGeo,this.mechMaterial);
-      this.jaw.scale.set(.92,.96,.86);
-      this.jaw.position.set(-.035,-.35,.30);
-      this.jaw.rotation.z=-.035;
-      this.mechanicalGroup.add(this.jaw);
-      this.plates.push(this.jaw);
 
       // Horizontal shoulder rails with cyan seams.
       this.seamMaterial=new T.MeshBasicMaterial({
@@ -1182,15 +1113,15 @@
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.54,.54,1);
-      this.mechEyeCorona.position.set(0,.01,.48);
+      this.mechEyeCorona.scale.set(.44,.44,1);
+      this.mechEyeCorona.position.set(0,.01,.665);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
         new T.CircleGeometry(.074,64),
         new T.MeshBasicMaterial({color:0x74eeff,transparent:true,opacity:.90,side:T.DoubleSide})
       );
-      this.mechEyeCore.position.set(0,.01,.50);
+      this.mechEyeCore.position.set(0,.01,.675);
       this.mechanicalGroup.add(this.mechEyeCore);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
@@ -1198,14 +1129,14 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.172,.009,8,72),
+        new T.TorusGeometry(.142,.007,8,72),
         this.mechInnerMaterial
       );
-      this.mechInnerRing.position.set(0,.01,.49);
+      this.mechInnerRing.position.set(0,.01,.670);
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechLight=new T.PointLight(0x6eeeff,0,3.6,2);
-      this.mechLight.position.set(0,0,.90);
+      this.mechLight.position.set(0,0,.84);
       this.mechanicalGroup.add(this.mechLight);
 
       this.mechanicalGroup.scale.setScalar(.001);
@@ -1475,11 +1406,11 @@
       this.silverMaterial.opacity=.18*bodyGrow;
       if(this.crownMaterial)this.crownMaterial.opacity=.24*crownGrow;
       this.mechEdgeMaterial.opacity=.065*bodyGrow;
-      this.mechInnerMaterial.opacity=.48*bodyGrow;
-      if(this.seamMaterial)this.seamMaterial.opacity=.20*bodyGrow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=1.00*bodyGrow;
+      this.mechInnerMaterial.opacity=.30*bodyGrow;
+      if(this.seamMaterial)this.seamMaterial.opacity=.075*bodyGrow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.72*bodyGrow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=2.8*bodyGrow;
+      if(this.mechLight)this.mechLight.intensity=1.55*bodyGrow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*bodyGrow;
@@ -1633,7 +1564,7 @@
         draw:(r,time)=>engine.render(r,time),
         destroy:()=>engine.destroy(),
         engine,
-        revision:'r1490-realistic-dna-solid-organism-obsidian-crystal'
+        revision:'r1500-photoreal-dna-solid-organism-obsidian-crystal'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1657,11 +1588,12 @@
   document.documentElement.dataset.fxMagBirthProofR1480='volumetric-dna-solid-cortex-realistic-obsidian-handoff';
   document.documentElement.dataset.fxMagBirthProofR1400='irregular-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1490='realistic-tunnel-solid-organism-obsidian-crystal-handoff';
+  document.documentElement.dataset.fxMagBirthProofR1500='photoreal-closed-volume-obsidian-mineral-handoff';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1480-volumetric-dna-solid-cortex-realistic-obsidian-crystal'
+    revision:'r1500-photoreal-closed-volume-obsidian-crystal'
   };
 })();

@@ -277,3 +277,18 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 /* production-r1404-crystal-only-mobile-balance */
 
 /* production-r1408-mobile-crystal-opacity-breath-no-resample */
+
+
+/* R1500 — photoreal optical finish.
+   The WebGL shader owns the MAG light. CSS must not paint a synthetic neon
+   silhouette; compositor heartbeat remains opacity-only and zero-idle. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root:root:root[data-fx-native-mag-visual-r1500]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:var(--fx-mag-life-opacity,.98)!important;
+    filter:brightness(.98) contrast(1.14) saturate(.95)!important;
+    -webkit-filter:brightness(.98) contrast(1.14) saturate(.95)!important;
+    mix-blend-mode:normal!important;
+  }
+}
+/* production-r1500-photoreal-mineral-no-css-halo */
