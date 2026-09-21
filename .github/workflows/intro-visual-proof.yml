@@ -1,5 +1,5 @@
 name: FormatX MAG intro visual proof
-# R1401 visual proof: sharp asymmetric crystal MAG + no mobile HUD ring + full-page living chamber
+# R1403 visual proof: sharp asymmetric crystal MAG + no mobile HUD ring + full-page living chamber + full sweep
 
 on:
   push:
@@ -61,14 +61,14 @@ jobs:
       - name: Capture reference keyframes
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4181/scifi-ui/index.html
-          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1401-intro-keyframes
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1403-intro-keyframes
         run: node .github/scripts/capture-mag-intro-r656.cjs
       - name: Upload intro proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mag-intro-r1401-proof
-          path: artifacts/r1401-intro-keyframes/
+          name: mag-intro-r1403-proof
+          path: artifacts/r1403-intro-keyframes/
           if-no-files-found: warn
           retention-days: 14
 
@@ -81,13 +81,13 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R1401 mobile crystal visual proof failed'
+          description='R1403 mobile crystal visual proof failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R1401 crystal intro/final/mobile proof passed'
+            description='R1403 crystal intro/final/mobile proof passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R1401 MAG visual proof' \
+            -f context='FormatX R1403 MAG visual proof' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
