@@ -215,12 +215,19 @@ async function verify(browser, name, viewport, mobile) {
     assert.equal(report.dom.glError, 0, `${name}: WebGL error`);
     assert.ok(report.dom.overflow <= 1, `${name}: horizontal overflow`);
     if (mobile) {
-      for (const token of EXPECTED_MOBILE_FILTER) {
-        assert.ok(
-          report.dom.filter.includes(token),
-          `${name}: canonical mobile optics token missing ${token}; computed=${report.dom.filter}`,
-        );
-      }
+      const filter = String(report.dom.filter || '');
+      const numberOf = token => {
+        const match = filter.match(new RegExp(token + '\\(([-\\d.]+)'));
+        return match ? Number(match[1]) : NaN;
+      };
+      assert.ok(!/blur\((?!0(?:px)?\))/i.test(filter),
+        `${name}: final mobile compositor reintroduced blur; computed=${filter}`);
+      assert.ok(numberOf('brightness') >= .95,
+        `${name}: final mobile crystal is too dim; computed=${filter}`);
+      assert.ok(numberOf('contrast') >= 1.10,
+        `${name}: final mobile crystal lacks facet contrast; computed=${filter}`);
+      assert.ok(numberOf('saturate') >= 1.0,
+        `${name}: final mobile crystal is desaturated; computed=${filter}`);
       assert.equal(report.dom.optics, 'calmer-luminance-feathered-mobile-silhouette');
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');
     }
