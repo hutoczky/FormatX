@@ -1,4 +1,4 @@
-/* FormatX R1370 — full-page living chamber background.
+/* FormatX R1371 — full-page living chamber + sharp native MAG integration.
    The MAG now inhabits one continuous biotech/sci-fi environment from hero
    through footer. Static CSS only: no extra canvas, loop or LCP dependency. */
 
@@ -71,6 +71,24 @@ html body.living-architecture > .fx-atmosphere {
   opacity:.55!important;
 }
 
+
+/* R1371: one continuous world from the topbar through the footer.
+   Historical hero-local fills are explicitly retired here in external CSS so
+   strict CSP never depends on an inline style exception. */
+html:root:root:root:root:root:root body.living-architecture #hero,
+html:root:root:root:root:root:root body.living-architecture #hero .hero-grid,
+html:root:root:root:root:root:root body.living-architecture #hero .hero-space,
+html:root:root:root:root:root:root body.living-architecture #main-content {
+  background:transparent!important;
+  background-image:none!important;
+}
+html:root:root:root:root:root:root body.living-architecture #hero .hero-space {
+  box-shadow:none!important;
+  border-color:transparent!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
 html body.living-architecture #main-content,
 html body.living-architecture #main-content > section,
 html body.living-architecture #main-content > .scene,
@@ -111,7 +129,7 @@ html body.living-architecture :is(
   border-color:var(--fx-r616-line)!important;
   background:
     radial-gradient(circle at 88% 7%,rgba(73,216,255,.052),transparent 34%),
-    linear-gradient(145deg,rgba(7,22,36,.89),rgba(3,10,18,.94))!important;
+    linear-gradient(145deg,rgba(7,22,36,.80),rgba(3,10,18,.88))!important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.025),
     inset 0 0 38px rgba(57,196,255,.018),
@@ -127,7 +145,7 @@ html body.living-architecture :is(
   border-color:rgba(148,230,255,.22)!important;
   background:
     radial-gradient(circle at 82% 8%,rgba(77,222,255,.085),transparent 38%),
-    linear-gradient(145deg,rgba(8,28,45,.92),rgba(3,12,22,.96))!important;
+    linear-gradient(145deg,rgba(8,28,45,.84),rgba(3,12,22,.91))!important;
 }
 
 html body.living-architecture .topbar {
@@ -229,7 +247,7 @@ html body.living-architecture :is(h1,h2,h3,strong,.hero-title-main) {
     .fx-plan-qr-card
   ) {
     background:
-      linear-gradient(145deg,rgba(7,23,38,.92),rgba(3,11,19,.97))!important;
+      linear-gradient(145deg,rgba(7,23,38,.84),rgba(3,11,19,.91))!important;
   }
 
   html body.living-architecture .site-footer {
@@ -245,3 +263,63 @@ html body.living-architecture :is(h1,h2,h3,strong,.hero-title-main) {
     background-color:transparent!important;
   }
 }
+
+
+/* R1371 final mobile optics owner.
+   Old soft-edge layers remain for historical contracts, but the current native
+   MAG must render as crisp 3D metal/organic geometry on real phones. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    filter:none!important;
+    -webkit-filter:none!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.96!important;
+    image-rendering:auto!important;
+    filter:
+      brightness(.99)
+      contrast(1.20)
+      saturate(1.10)
+      drop-shadow(0 0 7px rgba(72,226,255,.15))
+      drop-shadow(0 0 18px rgba(93,73,255,.07))!important;
+    -webkit-filter:
+      brightness(.99)
+      contrast(1.20)
+      saturate(1.10)
+      drop-shadow(0 0 7px rgba(72,226,255,.15))
+      drop-shadow(0 0 18px rgba(93,73,255,.07))!important;
+    mix-blend-mode:normal!important;
+  }
+}
+
+/* The chamber itself breathes very slowly through compositor-only opacity.
+   No background-position animation, no JS loop, and reduced-motion is static. */
+@media (prefers-reduced-motion:no-preference) {
+  html body.living-architecture::before {
+    animation:fx-living-chamber-breath-r1371 12s ease-in-out infinite;
+  }
+  html body.living-architecture::after {
+    animation:fx-living-chamber-light-r1371 9.5s ease-in-out infinite;
+  }
+}
+@keyframes fx-living-chamber-breath-r1371 {
+  0%,100% { opacity:.82; transform:translate3d(0,0,0) scale(1); }
+  48% { opacity:.96; transform:translate3d(0,-.3%,0) scale(1.012); }
+  64% { opacity:.91; transform:translate3d(0,-.12%,0) scale(1.007); }
+}
+@keyframes fx-living-chamber-light-r1371 {
+  0%,100% { opacity:.90; }
+  50% { opacity:1; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html body.living-architecture::before,
+  html body.living-architecture::after {
+    animation:none!important;
+    transform:none!important;
+  }
+}
+
+/* production-r1371-continuous-world-sharp-native-mag */
