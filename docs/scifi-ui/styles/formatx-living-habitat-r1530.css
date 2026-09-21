@@ -224,8 +224,8 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:1!important;
-    filter:brightness(1.075) contrast(1.065) saturate(.91) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
-    -webkit-filter:brightness(1.075) contrast(1.065) saturate(.91) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
+    filter:brightness(1.07) contrast(1.11) saturate(1) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
+    -webkit-filter:brightness(1.07) contrast(1.11) saturate(1) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
   }
 }
 /* production-r1531-proof-corrected-photoreal-mag-owner */
@@ -286,3 +286,5 @@ body.living-architecture :is(
   -webkit-backdrop-filter:none!important;
 }
 /* production-r1532-no-local-hud-rings */
+
+/* production-r1533-mobile-visible-contract-neutral-photoreal-filter */
