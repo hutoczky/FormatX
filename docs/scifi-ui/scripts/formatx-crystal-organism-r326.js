@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
-  const REVISION = 'living-biomechanical-reference-r1350';
+  const REVISION = 'living-luminous-electric-crystal-r454';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
@@ -30,6 +30,7 @@
   root.dataset.fxCrystalOrganismR326 = 'booting';
   root.dataset.fxCoreMobileV55 = 'booting-v55';
   root.dataset.fxCoreMobileV69 = 'booting-v69';
+  root.dataset.fxNativeMagVisualR1350 = 'organic-video-final-silhouette-dark-crown-large-iris-smooth-eight-tendrils';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
