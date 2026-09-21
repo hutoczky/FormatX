@@ -378,3 +378,122 @@ html:root:root:root:root:root body.living-architecture footer.site-footer {
 /* production-r1382-chamber-through-header-footer */
 
 /* production-r1371-continuous-world-sharp-native-mag */
+
+
+/* R1390 — cinematic living chamber depth.
+   The environment is page-wide and continuous; the MAG appears to inhabit it,
+   rather than sitting on a separate hero rectangle. */
+html:root:root:root:root:root:root body.living-architecture {
+  background:
+    radial-gradient(1100px 760px at 68% 5%,rgba(74,216,255,.145),transparent 64%),
+    radial-gradient(1000px 820px at 91% 31%,rgba(43,142,228,.080),transparent 70%),
+    radial-gradient(980px 820px at 7% 54%,rgba(48,108,210,.055),transparent 72%),
+    radial-gradient(940px 760px at 74% 84%,rgba(116,72,238,.050),transparent 74%),
+    linear-gradient(180deg,#01050c 0%,#03111d 24%,#020a13 58%,#01060d 100%)!important;
+}
+
+html:root:root:root:root:root:root body.living-architecture::before {
+  background:
+    radial-gradient(ellipse 54% 34% at 68% 15%,transparent 0 57%,rgba(117,229,255,.105) 57.25%,rgba(15,63,88,.22) 57.60%,transparent 58.15%),
+    radial-gradient(ellipse 72% 48% at 68% 35%,transparent 0 64%,rgba(90,198,238,.068) 64.25%,rgba(10,43,63,.21) 64.62%,transparent 65.15%),
+    radial-gradient(ellipse 92% 68% at 66% 62%,transparent 0 72%,rgba(72,165,216,.045) 72.18%,rgba(6,31,49,.22) 72.55%,transparent 73.05%),
+    repeating-conic-gradient(from 6deg at 68% 27%,rgba(102,216,248,.032) 0deg 1.05deg,transparent 1.05deg 15deg),
+    linear-gradient(rgba(102,213,255,.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(102,213,255,.016) 1px,transparent 1px)!important;
+  background-size:auto,auto,auto,auto,48px 48px,48px 48px!important;
+  opacity:.92!important;
+}
+
+html:root:root:root:root:root:root body.living-architecture::after {
+  background:
+    radial-gradient(ellipse 18% 44% at 68% 8%,rgba(130,235,255,.115),rgba(64,183,239,.040) 42%,transparent 78%),
+    radial-gradient(ellipse 32% 18% at 68% 18%,transparent 0 58%,rgba(94,216,255,.070) 58.4%,transparent 59.4%),
+    radial-gradient(ellipse 46% 38% at 68% 36%,rgba(41,126,193,.030),transparent 72%),
+    linear-gradient(102deg,transparent 0 49%,rgba(95,215,255,.018) 58%,transparent 67%),
+    linear-gradient(78deg,transparent 0 53%,rgba(132,202,255,.014) 60%,transparent 68%),
+    radial-gradient(circle at 50% 48%,transparent 24%,rgba(0,0,0,.16) 72%,rgba(0,0,0,.56) 118%),
+    radial-gradient(circle,rgba(173,236,255,.15) 0 1px,transparent 1.25px)!important;
+  background-size:auto,auto,auto,auto,auto,auto,84px 84px!important;
+  background-position:center,center,center,center,center,center,11px 19px!important;
+}
+
+/* Keep the content readable while exposing more of the chamber through panels. */
+html:root:root:root:root body.living-architecture :is(
+  .hero-copy,
+  .flow-stage,
+  .flow-chapters article,
+  .card,
+  .price-card,
+  .payment,
+  .payment-console,
+  .system-grid article,
+  .release-card,
+  .fx-category-deck,
+  .fx-category-grid > article,
+  .fx-origin-proof,
+  .fx-origin-proof article,
+  .fx-award-proof,
+  #user-feedback,
+  .fx-plan-qr-card,
+  .fx-platform-card,
+  .fx-organism-console,
+  .fx-thought-genome-disclosure
+) {
+  background:
+    radial-gradient(circle at 88% 7%,rgba(73,216,255,.046),transparent 34%),
+    linear-gradient(145deg,rgba(6,20,33,.74),rgba(2,9,17,.84))!important;
+  backdrop-filter:blur(7px) saturate(108%)!important;
+  -webkit-backdrop-filter:blur(7px) saturate(108%)!important;
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root body.living-architecture {
+    background:
+      radial-gradient(720px 600px at 50% 1%,rgba(72,214,255,.145),transparent 65%),
+      radial-gradient(660px 700px at 4% 46%,rgba(55,134,232,.064),transparent 74%),
+      radial-gradient(620px 600px at 88% 78%,rgba(111,73,234,.050),transparent 75%),
+      linear-gradient(180deg,#01050c 0%,#03111d 27%,#020a13 62%,#01060c 100%)!important;
+  }
+
+  html:root:root:root:root:root:root body.living-architecture::before {
+    inset:-5vh -22vw!important;
+    background:
+      radial-gradient(ellipse 96% 38% at 50% 13%,transparent 0 60%,rgba(104,220,252,.080) 60.35%,transparent 61.05%),
+      radial-gradient(ellipse 126% 60% at 50% 45%,transparent 0 70%,rgba(84,181,224,.048) 70.35%,transparent 71.0%),
+      repeating-conic-gradient(from 5deg at 50% 29%,rgba(102,216,248,.024) 0deg 1deg,transparent 1deg 18deg),
+      linear-gradient(rgba(102,213,255,.012) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(102,213,255,.012) 1px,transparent 1px)!important;
+    background-size:auto,auto,auto,36px 36px,36px 36px!important;
+    opacity:.78!important;
+  }
+
+  html:root:root:root:root:root:root body.living-architecture::after {
+    background:
+      radial-gradient(ellipse 30% 36% at 50% 8%,rgba(128,234,255,.090),rgba(54,165,224,.030) 42%,transparent 76%),
+      radial-gradient(ellipse 72% 22% at 50% 18%,transparent 0 60%,rgba(91,210,250,.052) 60.5%,transparent 61.4%),
+      radial-gradient(circle at 50% 45%,transparent 28%,rgba(0,0,0,.18) 74%,rgba(0,0,0,.54) 118%),
+      radial-gradient(circle,rgba(173,236,255,.11) 0 1px,transparent 1.2px)!important;
+    background-size:auto,auto,auto,70px 70px!important;
+  }
+
+  html:root:root:root:root body.living-architecture :is(
+    .hero-copy,
+    .flow-stage,
+    .flow-chapters article,
+    .card,
+    .price-card,
+    .payment,
+    .payment-console,
+    .system-grid article,
+    .release-card,
+    .fx-category-grid > article,
+    .fx-origin-proof article,
+    .fx-plan-qr-card
+  ) {
+    background:linear-gradient(145deg,rgba(6,21,35,.79),rgba(2,10,18,.88))!important;
+    backdrop-filter:blur(5px) saturate(106%)!important;
+    -webkit-backdrop-filter:blur(5px) saturate(106%)!important;
+  }
+}
+
+/* production-r1390-full-page-living-chamber-depth */
