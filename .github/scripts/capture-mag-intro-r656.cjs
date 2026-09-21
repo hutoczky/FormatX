@@ -79,7 +79,7 @@ const SHOTS=[
     });
     try{
       const u=new URL(BASE);
-      u.searchParams.set('mobileproof','r1412-preflight');
+      u.searchParams.set('mobileproof','r1414-preflight');
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const ready=await pollPage(
         page,
@@ -97,7 +97,7 @@ const SHOTS=[
         const ring=document.querySelector('#hero .hero-ring');
         const ringStyle=ring?getComputedStyle(ring):null;
         return {
-          visual:root.dataset.fxNativeMagVisualR1412||root.dataset.fxNativeMagVisualR1410||root.dataset.fxNativeMagVisualR1408||'',
+          visual:root.dataset.fxNativeMagVisualR1414||root.dataset.fxNativeMagVisualR1412||root.dataset.fxNativeMagVisualR1410||'',
           shape:root.dataset.fxCoreShapeR337||'',
           renderer:root.dataset.fxCoreRenderer||'',
           resolution:root.dataset.fxCoreReal3dResolution||'',
