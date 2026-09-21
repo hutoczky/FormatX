@@ -980,20 +980,20 @@
       this.silverParts=[];
       this.mechBodyParts=[];
 
-      // R1400 — irregular faceted support crystal. No circular/egg silhouette.
+      // R1412 — vertical asymmetric faceted support crystal. No mirrored rhombus.
       const baseShape=new T.Shape();
-      baseShape.moveTo(.03,1.04);
-      baseShape.lineTo(.25,.72);
-      baseShape.lineTo(.54,.48);
-      baseShape.lineTo(.70,.13);
-      baseShape.lineTo(.59,-.20);
-      baseShape.lineTo(.37,-.54);
-      baseShape.lineTo(.07,-.90);
-      baseShape.lineTo(-.18,-.76);
-      baseShape.lineTo(-.49,-.50);
-      baseShape.lineTo(-.68,-.11);
-      baseShape.lineTo(-.56,.31);
-      baseShape.lineTo(-.28,.69);
+      baseShape.moveTo(-.03,1.10);
+      baseShape.lineTo(.18,.80);
+      baseShape.lineTo(.49,.57);
+      baseShape.lineTo(.63,.18);
+      baseShape.lineTo(.52,-.15);
+      baseShape.lineTo(.31,-.54);
+      baseShape.lineTo(-.02,-.94);
+      baseShape.lineTo(-.24,-.73);
+      baseShape.lineTo(-.53,-.46);
+      baseShape.lineTo(-.69,-.04);
+      baseShape.lineTo(-.54,.36);
+      baseShape.lineTo(-.35,.73);
       baseShape.closePath();
       const baseGeo=new T.ExtrudeGeometry(baseShape,{
         depth:.38,bevelEnabled:true,bevelSegments:2,steps:1,
@@ -1001,7 +1001,7 @@
       });
       baseGeo.center();
       this.mechBody=new T.Mesh(baseGeo,this.mechMaterial);
-      this.mechBody.scale.set(1.08,1.08,.94);
+      this.mechBody.scale.set(.98,1.14,.96);
       this.mechBody.position.z=-.02;
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
@@ -1041,16 +1041,16 @@
       topPlateGeo.center();
 
       const crownL=new T.Mesh(topPlateGeo,this.crownMaterial);
-      crownL.scale.set(.70,.98,.86);
-      crownL.position.set(-.18,.36,.34);
-      crownL.rotation.z=-.10;
+      crownL.scale.set(.78,1.08,.90);
+      crownL.position.set(-.23,.39,.35);
+      crownL.rotation.z=-.15;
       this.mechanicalGroup.add(crownL);
       this.silverParts.push(crownL);
 
       const crownR=new T.Mesh(topPlateGeo,this.crownMaterial);
-      crownR.scale.set(-.70,.98,.86);
-      crownR.position.set(.18,.36,.34);
-      crownR.rotation.z=.10;
+      crownR.scale.set(-.56,.86,.82);
+      crownR.position.set(.20,.31,.33);
+      crownR.rotation.z=.07;
       this.mechanicalGroup.add(crownR);
       this.silverParts.push(crownR);
       this.crown=crownL;
@@ -1069,16 +1069,16 @@
       sideGeo.center();
 
       const left=new T.Mesh(sideGeo,this.silverMaterial);
-      left.scale.set(.76,.78,.84);
-      left.position.set(-.44,.02,.30);
-      left.rotation.z=.05;
+      left.scale.set(.84,.83,.88);
+      left.position.set(-.46,.04,.31);
+      left.rotation.z=.10;
       this.mechanicalGroup.add(left);
       this.plates.push(left);
 
       const right=new T.Mesh(sideGeo,this.silverMaterial);
-      right.scale.set(-.76,.78,.84);
-      right.position.set(.44,.02,.30);
-      right.rotation.z=-.05;
+      right.scale.set(-.62,.70,.82);
+      right.position.set(.40,-.01,.29);
+      right.rotation.z=-.02;
       this.mechanicalGroup.add(right);
       this.plates.push(right);
 
@@ -1097,8 +1097,9 @@
       });
       lowerGeo.center();
       this.jaw=new T.Mesh(lowerGeo,this.mechMaterial);
-      this.jaw.scale.set(1.00,.92,.84);
-      this.jaw.position.set(0,-.34,.30);
+      this.jaw.scale.set(.92,.96,.86);
+      this.jaw.position.set(-.035,-.35,.30);
+      this.jaw.rotation.z=-.035;
       this.mechanicalGroup.add(this.jaw);
       this.plates.push(this.jaw);
 
@@ -1616,9 +1617,10 @@
   document.documentElement.dataset.fxMagBirthProofR1241='fast-six-frame-r1240-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1252='clean-current-r1250-proof';
   document.documentElement.dataset.fxMagBirthProofR1400='irregular-crystal-final-handoff';
+  document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1400-irregular-crystal-final-handoff-dna-cellular-living-architecture'
+    revision:'r1412-vertical-asymmetric-crystal-final-handoff-dna-cellular-living-architecture'
   };
 })();
