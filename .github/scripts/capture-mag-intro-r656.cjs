@@ -36,6 +36,7 @@ const SHOTS=[
   try{
     for(const [seconds,name] of SHOTS){
       const page=await context.newPage();
+      await page.addInitScript(()=>{try{sessionStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}});
       const errors=[];
       page.on('pageerror',e=>errors.push(String(e)));
       page.on('console',m=>{
@@ -84,6 +85,7 @@ const SHOTS=[
       // even when a later workflow run is superseded by another master commit.
       {
         const page=await context.newPage();
+      await page.addInitScript(()=>{try{sessionStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}});
         const errors=[];
         page.on('pageerror',e=>errors.push(String(e)));
         page.on('console',m=>{
