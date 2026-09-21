@@ -32,6 +32,7 @@
   root.dataset.fxCoreMobileV69 = 'booting-v69';
   root.dataset.fxNativeMagVisualR1350 = 'organic-video-final-silhouette-dark-crown-large-iris-smooth-eight-tendrils';
   root.dataset.fxNativeMagVisualR1360 = 'cortical-rounded-body-dark-diamond-cradle-glassy-eight-tendrils';
+  root.dataset.fxNativeMagVisualR1380 = 'premium-organic-cortex-defined-diamond-iris-smooth-glass-tendrils';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
@@ -101,11 +102,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 18 : constrainedMobile ? 10 : mobile ? 14 : constrained ? 18 : 30;
-    const longitudeSegments = auditMode ? 32 : constrainedMobile ? 22 : mobile ? 28 : constrained ? 34 : 56;
+    const latitudeSegments = auditMode ? 18 : constrainedMobile ? 12 : mobile ? 18 : constrained ? 20 : 34;
+    const longitudeSegments = auditMode ? 32 : constrainedMobile ? 24 : mobile ? 36 : constrained ? 40 : 64;
     const tendrilCount = auditMode ? 4 : 8;
-    const tendrilSegments = auditMode ? 6 : constrainedMobile ? 8 : mobile ? 12 : constrained ? 14 : 24;
-    const tendrilSides = constrainedMobile ? 4 : mobile || constrained ? 5 : 8;
+    const tendrilSegments = auditMode ? 6 : constrainedMobile ? 8 : mobile ? 16 : constrained ? 18 : 28;
+    const tendrilSides = constrainedMobile ? 4 : mobile || constrained ? 6 : 8;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -135,11 +136,12 @@
       /* R1080: reference-locked closed armored diamond-pod.
          Keep one native topology, but use a sub-L1 superellipsoid so the hero
          reads as the supplied tall rhombic machine rather than an egg. */
-      const lowBand=Math.sin(phi*3.0+theta*2.0)*.020;
-      const corticalA=Math.sin(theta*4.0+phi*1.35)*.045;
-      const corticalB=Math.sin(theta*7.0-phi*2.4)*.022;
-      const shoulder=.020*Math.pow(Math.max(0,1-Math.abs(direction[1])*1.45),1.8);
-      const organicRadius=.585+lowBand+corticalA+corticalB+shoulder;
+      const lowBand=Math.sin(phi*3.0+theta*2.0)*.018;
+      const corticalA=Math.sin(theta*4.0+phi*1.35)*.058;
+      const corticalB=Math.sin(theta*7.0-phi*2.4)*.030;
+      const corticalC=Math.sin(theta*2.0+phi*5.2)*.018;
+      const shoulder=.026*Math.pow(Math.max(0,1-Math.abs(direction[1])*1.45),1.8);
+      const organicRadius=.575+lowBand+corticalA+corticalB+corticalC+shoulder;
       const crystalPosition=[
         direction[0]*organicRadius*1.05,
         direction[1]*organicRadius*1.08,
@@ -193,10 +195,11 @@
       const baseAngle = index / tendrilCount * Math.PI * 2 + (index % 2 ? .075 : -.060);
       const sideAngle = baseAngle + Math.PI * .5;
       const root = .50;
-      const reach = .72 + (index % 3) * .085;
+      const reach = .76 + (index % 3) * .095;
       const radius = root + reach * t;
-      const wave = Math.sin(t * Math.PI * 1.82 + index * .73) * (.028 + .115 * t);
-      const depth = Math.sin(t * Math.PI * 1.60 + index * .91) * (.030 + .095 * t);
+      const wave = (Math.sin(t * Math.PI * 2.05 + index * .79)*(.030+.145*t))
+        +Math.sin(t*Math.PI*.86+index*.51)*.045*t;
+      const depth = Math.sin(t * Math.PI * 1.72 + index * .91) * (.032 + .115 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -213,7 +216,7 @@
       const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
-      const tubeRadius = (.030 * (1 - t * .70) + .0068) * (mobile ? .94 : 1);
+      const tubeRadius = (.025 * (1 - t * .72) + .0058) * (mobile ? .94 : 1);
       const rootDirection = normalize([p[0], p[1], p[2] * .72]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
@@ -402,7 +405,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.90':'.82'};
+        projected*= ${mobile?'.76':'.82'};
         projected.y+=.010;
         gl_Position=vec4(projected,world.z*.13,1.0);
       }`;
@@ -445,6 +448,13 @@
         float cellField=noise(vec2(vLocal.x*5.1+vLocal.z*2.7,vLocal.y*5.8-vLocal.z*1.9)+vec2(uTime*.045,-uTime*.032));
         float membrane=ridge(cellField*2.2+vLocal.y*1.7-vLocal.x*.8-uTime*.055,10.0);
         membrane*=.24+.76*fresnel;
+        /* R1380 broad cortical folds: dark valleys + soft violet lobe tops. */
+        float cortexPhase=vUv.x*37.70+sin(vUv.y*18.85)*1.65+vUv.y*11.20+cloud*.65;
+        float cortexPhase2=vUv.y*28.30-vUv.x*12.40+warp*1.10;
+        float cortexGroove=pow(1.0-abs(sin(cortexPhase)),7.0);
+        cortexGroove+=.58*pow(1.0-abs(sin(cortexPhase2)),8.0);
+        cortexGroove=sat(cortexGroove);
+        float cortexLobe=sat(.55+.34*sin(cortexPhase*.50)+.22*sin(cortexPhase2*.62));
 
         /* R614 — the native R326 MAG keeps the genetic origin visible.
            These are shader-native double-helix filaments, not an overlay or
@@ -483,6 +493,13 @@
         float armorSeam=ridge(vUv.x*4.0+vUv.y*.18+uSiteProgress*.08,17.0)*(1.0-smoothstep(.62,.98,abs(vLocal.y)));
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
         float podMask=1.0-vMorph;
+        float diamondCoord=abs(heartLocal.x)+abs(heartLocal.y*1.035);
+        float diamondFace=(1.0-smoothstep(.300,.355,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondRim=(1.0-smoothstep(.006,.020,abs(diamondCoord-.323)))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float cradlePlate=smoothstep(3.28,3.33,vFacet)*podMask;
+        float pupil=1.0-smoothstep(.026,.048,radial);
+        float coreRing=1.0-smoothstep(.005,.014,abs(radial-.062));
+        float irisRays=pow(.5+.5*cos(angle*36.0+uTime*.06),10.0)*smoothstep(.075,.105,radial)*(1.0-smoothstep(.205,.285,radial));
         float realArmorPlate=smoothstep(1.55,2.15,vFacet)*(1.0-smoothstep(2.78,2.96,vFacet))*podMask;
         float realDarkPlate=smoothstep(2.92,3.05,vFacet)*podMask;
         float crownMask=smoothstep(.34,.68,vLocal.y)
@@ -543,29 +560,40 @@
 
         vec3 glass=mix(vec3(.010,.005,.016),vec3(.070,.024,.088),.30+.34*ndl+.08*facetPulse);
         glass+=vec3(.010,.018,.032)*sideLight*.14;
-        glass+=vec3(.014,.006,.020)*(.34+.28*cloud);
-        glass+=silver*crownMask*(.54+.48*ndl+.22*specular);
-        glass+=steel*shoulderMask*(.38+.46*ndl+.20*specular);
-        glass=mix(glass,silver*(.58+.60*ndl+.32*specular),realArmorPlate*.84);
-        glass=mix(glass,steel*(.64+.30*ndl)+gunmetal*.28+silver*.08*specular,realDarkPlate*.92);
+        float armorBlock=sat(realArmorPlate+realDarkPlate+crownMask+shoulderMask+jawMask+diamondFace);
+        float tissueMask=podMask*(1.0-sat(armorBlock))*(1.0-tendrilMask);
+        vec3 tissue=mix(vec3(.012,.003,.022),vec3(.118,.030,.145),.22+.46*ndl+.18*sideLight);
+        tissue+=vec3(.025,.006,.045)*(.28+.38*cloud);
+        tissue*=1.0-.42*cortexGroove;
+        tissue+=vec3(.050,.016,.072)*cortexLobe*(.20+.32*ndl);
+        glass=mix(glass,tissue,tissueMask*.92);
+        glass+=silver*crownMask*(.62+.56*ndl+.30*specular);
+        glass+=steel*shoulderMask*(.42+.50*ndl+.24*specular);
+        glass=mix(glass,silver*(.62+.66*ndl+.38*specular),realArmorPlate*.90);
+        glass=mix(glass,steel*(.70+.34*ndl)+gunmetal*.30+silver*.12*specular,realDarkPlate*.90);
+        glass=mix(glass,vec3(.010,.018,.026)+steel*.28+silver*.08*specular,diamondFace*.92);
+        glass=mix(glass,vec3(.008,.013,.020)+steel*.18,cradlePlate*.76);
         glass+=gunmetal*jawMask*.76;
         glass-=vec3(.010,.014,.018)*opticalWell*.72;
-        glass+=cyan*fresnel*(.014+.020*visualEnergy);
-        glass+=cyan*veins*(.024+.020*uBreath);
-        glass+=cyan*membrane*(.012+.016*visualEnergy);
-        glass+=cyan*iris*.16;
-        glass+=cyan*(rings*.28+nucleus*4.20)+ice*(heart*.014+nucleus*.38);
-        glass+=ice*specular*(.34+.16*visualEnergy);
-        glass+=(cyan*.16+ice*.025)*(axisV*.14+axisH*.08)*visualEnergy;
-        glass+=(cyan*.10+violet*.05)*dnaHelix*(.025+.045*fresnel)*genomePulse;
-        glass+=(ice*.06+cyan*.05)*dnaBridge*(.025+.035*visualEnergy);
-        glass+=(cyan*.08+ice*.025)*edge;
-        glass+=ice*(armorSeam*.16+armorRib*.09)*(1.0-vMorph*.72);
+        glass+=(ice*.30+cyan*.42)*diamondRim*(.44+.30*specular);
+        glass+=cyan*fresnel*(.018+.024*visualEnergy);
+        glass+=cyan*veins*(.018+.017*uBreath);
+        glass+=cyan*membrane*(.008+.012*visualEnergy);
+        glass+=cyan*iris*.18;
+        glass+=cyan*(rings*.22+nucleus*3.05+irisRays*.30)+ice*(heart*.012+nucleus*.31+coreRing*.88);
+        glass=mix(glass,gunmetal,pupil*.84);
+        glass+=cyan*coreRing*.95;
+        glass+=ice*specular*(.40+.18*visualEnergy);
+        glass+=(cyan*.14+ice*.022)*(axisV*.12+axisH*.07)*visualEnergy;
+        glass+=(cyan*.08+violet*.045)*dnaHelix*(.020+.036*fresnel)*genomePulse;
+        glass+=(ice*.05+cyan*.04)*dnaBridge*(.020+.028*visualEnergy);
+        glass+=(cyan*.06+ice*.020)*edge;
+        glass+=ice*(armorSeam*.12+armorRib*.07)*(1.0-vMorph*.72);
         glass+=(ice*.52+cyan*.28)*surfaceSweep*(.70+.26*fresnel);
-        glass=mix(glass,vec3(.012,.052,.064)+steel*.18,tendrilMask*.72);
-        glass+=(cyan*.56+ice*.10)*tendrilSegment*(.48+.60*fresnel);
-        float alpha=.94+.022*ndl+.016*fresnel+specular*.012+surfaceSweep*.018+tendrilMask*.012;
-        ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.50)),clamp(alpha,.92,.988));
+        glass=mix(glass,vec3(.006,.036,.052)+steel*.14,tendrilMask*.76);
+        glass+=(cyan*.62+ice*.12)*tendrilSegment*(.52+.64*fresnel);
+        float alpha=.952+.020*ndl+.014*fresnel+specular*.012+surfaceSweep*.018+tendrilMask*.014;
+        ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.54)),clamp(alpha,.935,.992));
       }`;
 
     /* R622 constrained-mobile material: same biomechanical identity with a
@@ -600,6 +628,13 @@
         float dna=(dnaA+dnaB)*(.32+.68*fresnel);
         float seam=pow(.5+.5*cos(vUv.x*25.1327+vUv.y*1.1),20.0)*(1.0-vMorph*.72);
         float podMask=1.0-vMorph;
+        float cortex=.5+.5*sin(vUv.x*31.4+sin(vUv.y*18.8)*1.35+vUv.y*10.2);
+        float cortexGroove=pow(1.0-abs(sin(vUv.x*32.0+vUv.y*12.0)),6.0);
+        float diamondCoord=abs(heartLocal.x)+abs(heartLocal.y*1.035);
+        float diamondFace=(1.0-smoothstep(.300,.355,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondRim=(1.0-smoothstep(.007,.021,abs(diamondCoord-.323)))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float pupil=1.0-smoothstep(.026,.048,radial);
+        float coreRing=1.0-smoothstep(.006,.015,abs(radial-.062));
         float realArmorPlate=smoothstep(1.55,2.15,vFacet)*(1.0-smoothstep(2.78,2.96,vFacet))*podMask;
         float realDarkPlate=smoothstep(2.92,3.05,vFacet)*podMask;
         float crownMask=smoothstep(.38,.69,vLocal.y)
@@ -616,25 +651,32 @@
           pulse=exp(-pow((coordinate-head)/.065,2.0))*(.35+.65*fresnel);
         }
         float energy=sat(.45+uEnergy*.72);
-        vec3 cyan=vec3(.018,.54,.84);
-        vec3 violet=vec3(.05,.07,.15);
-        vec3 ice=vec3(.56,.70,.76);
-        vec3 silver=vec3(.28,.34,.37);
-        vec3 metal=vec3(.012,.006,.018);
-        vec3 c=mix(metal,vec3(.065,.024,.082),.30+.30*ndl);
-        c+=silver*crownMask*(.48+.42*ndl+.18*spec);
-        c+=vec3(.030,.055,.070)*shoulderMask*(.44+.38*ndl+.14*spec);
-        c=mix(c,silver*(.56+.58*ndl+.30*spec),realArmorPlate*.84);
-        c=mix(c,metal*.88+vec3(.020,.040,.052),realDarkPlate*.90);
-        c+=cyan*fresnel*(.024+.028*energy);
-        c+=(cyan*.12+violet*.05)*dna*(.022+.035*energy);
-        c+=cyan*(nucleus*4.20+ring*.28)+ice*(heart*.014+nucleus*.38+spec*.20);
-        c+=ice*seam*.08;
+        vec3 cyan=vec3(.018,.56,.88);
+        vec3 violet=vec3(.080,.026,.120);
+        vec3 ice=vec3(.58,.74,.80);
+        vec3 silver=vec3(.32,.39,.42);
+        vec3 metal=vec3(.010,.004,.018);
+        vec3 tissue=mix(vec3(.013,.004,.022),vec3(.105,.026,.132),.24+.42*ndl);
+        tissue*=1.0-.34*cortexGroove;
+        tissue+=violet*cortex*.12;
+        vec3 c=mix(metal,tissue,.76*(1.0-realArmorPlate)*(1.0-realDarkPlate));
+        c+=silver*crownMask*(.56+.48*ndl+.22*spec);
+        c+=vec3(.034,.060,.075)*shoulderMask*(.46+.42*ndl+.16*spec);
+        c=mix(c,silver*(.62+.60*ndl+.34*spec),realArmorPlate*.88);
+        c=mix(c,metal*.82+vec3(.025,.046,.060),realDarkPlate*.90);
+        c=mix(c,metal*.72+vec3(.028,.052,.070),diamondFace*.92);
+        c+=(ice*.26+cyan*.42)*diamondRim;
+        c+=cyan*fresnel*(.026+.030*energy);
+        c+=(cyan*.10+violet*.05)*dna*(.020+.030*energy);
+        c+=cyan*(nucleus*3.10+ring*.24)+ice*(heart*.012+nucleus*.30+coreRing*.82+spec*.22);
+        c=mix(c,metal,pupil*.82);
+        c+=cyan*coreRing*.90;
+        c+=ice*seam*.06;
         c+=(ice*.48+cyan*.26)*pulse;
-        c=mix(c,vec3(.012,.050,.062),tendrilMask*.72);
-        c+=(cyan*.54+ice*.09)*tendrilSegment*(.46+.56*fresnel);
-        float alpha=.945+.018*ndl+.014*fresnel+nucleus*.018+pulse*.014+tendrilMask*.010+realArmorPlate*.030+realDarkPlate*.022;
-        ${outputName}=vec4(filmic(c*.82),clamp(alpha,.90,.985));
+        c=mix(c,vec3(.007,.038,.054),tendrilMask*.76);
+        c+=(cyan*.60+ice*.10)*tendrilSegment*(.50+.60*fresnel);
+        float alpha=.955+.016*ndl+.014*fresnel+nucleus*.016+pulse*.014+tendrilMask*.012+realArmorPlate*.030+realDarkPlate*.022;
+        ${outputName}=vec4(filmic(c*.88),clamp(alpha,.92,.990));
       }`;
     const fragmentSource = constrainedMobile ? constrainedFragmentSource : fullFragmentSource;
 
@@ -726,9 +768,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:constrainedMobile?.88:mobile?1.25:constrained?1.15:1.65;
+      const cap=auditMode?1:constrainedMobile?.88:mobile?1.50:constrained?1.15:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:constrainedMobile?190000:mobile?460000:constrained?520000:1150000;
+      const budget=auditMode?390000:constrainedMobile?190000:mobile?760000:constrained?520000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
