@@ -951,13 +951,13 @@
       const T=this.THREE;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x07131d,metalness:.92,roughness:.18,
+        color:0x050a12,metalness:.94,roughness:.14,
         emissive:0x061923,emissiveIntensity:.16,
         clearcoat:.84,clearcoatRoughness:.10,
         transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x102c38,metalness:.84,roughness:.20,
+        color:0x0b1b27,metalness:.90,roughness:.16,
         emissive:0x082b35,emissiveIntensity:.22,
         clearcoat:.76,clearcoatRoughness:.12,
         transparent:true,opacity:0
@@ -980,18 +980,24 @@
       this.silverParts=[];
       this.mechBodyParts=[];
 
-      // Compact support body, mostly hidden by layered armor.
+      // R1400 — irregular faceted support crystal. No circular/egg silhouette.
       const baseShape=new T.Shape();
-      baseShape.moveTo(0,.96);
-      baseShape.bezierCurveTo(.20,.82,.50,.54,.64,.30);
-      baseShape.bezierCurveTo(.72,.12,.66,-.16,.54,-.38);
-      baseShape.bezierCurveTo(.40,-.58,.18,-.76,0,-.86);
-      baseShape.bezierCurveTo(-.18,-.76,-.40,-.58,-.54,-.38);
-      baseShape.bezierCurveTo(-.66,-.16,-.72,.12,-.64,.30);
-      baseShape.bezierCurveTo(-.50,.54,-.20,.82,0,.96);
+      baseShape.moveTo(.03,1.04);
+      baseShape.lineTo(.25,.72);
+      baseShape.lineTo(.54,.48);
+      baseShape.lineTo(.70,.13);
+      baseShape.lineTo(.59,-.20);
+      baseShape.lineTo(.37,-.54);
+      baseShape.lineTo(.07,-.90);
+      baseShape.lineTo(-.18,-.76);
+      baseShape.lineTo(-.49,-.50);
+      baseShape.lineTo(-.68,-.11);
+      baseShape.lineTo(-.56,.31);
+      baseShape.lineTo(-.28,.69);
+      baseShape.closePath();
       const baseGeo=new T.ExtrudeGeometry(baseShape,{
-        depth:.34,bevelEnabled:true,bevelSegments:4,steps:1,
-        bevelSize:.055,bevelThickness:.070,curveSegments:20
+        depth:.38,bevelEnabled:true,bevelSegments:2,steps:1,
+        bevelSize:.034,bevelThickness:.052,curveSegments:2
       });
       baseGeo.center();
       this.mechBody=new T.Mesh(baseGeo,this.mechMaterial);
@@ -1355,8 +1361,9 @@
 
     updateOrganic(t,time){
       const grow=smooth((t-2.48)/.72);
-      // Reference lock: the biological shell is still present at 9.9 s.
-      const visible=grow;
+      const crystallise=smooth((t-9.18)/.62);
+      // R1400 keeps the cellular phase intact, then hands it to the irregular crystal.
+      const visible=grow*(1-crystallise*.82);
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
       this.organicGroup.scale.set(bodyScale*1.13,bodyScale*1.10,bodyScale*.98);
@@ -1398,7 +1405,8 @@
 
     updateCells(t,time){
       const grow=smooth((t-2.60)/.70);
-      const visible=grow;
+      const crystallise=smooth((t-9.16)/.64);
+      const visible=grow*(1-crystallise*.88);
       this.cellGroup.visible=visible>.002;
       const cellScale=.001+visible*.99;
       this.cellGroup.scale.set(cellScale*1.10,cellScale*1.06,cellScale);
@@ -1420,11 +1428,11 @@
       // The silver crown is already visible in the middle film section.
       // The complete mechanical pod is deliberately delayed until the final flash.
       const crownGrow=smooth((t-5.78)/1.05);
-      const bodyGrow=0;
+      const bodyGrow=smooth((t-9.18)/.58);
       const groupGrow=Math.max(crownGrow,bodyGrow);
       this.mechanicalReveal=bodyGrow;
       this.mechanicalGroup.visible=groupGrow>.002;
-      this.mechanicalGroup.scale.set(.001+groupGrow*1.12,.001+groupGrow*1.27,.001+groupGrow*1.10);
+      this.mechanicalGroup.scale.set(.001+groupGrow*1.02,.001+groupGrow*1.10,.001+groupGrow*1.06);
 
       this.mechMaterial.opacity=.995*bodyGrow;
       this.mechMidMaterial.opacity=.985*bodyGrow;
@@ -1607,9 +1615,10 @@
   document.documentElement.dataset.fxMagBirthProofR1231='fast-six-frame-r1230-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1241='fast-six-frame-r1240-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1252='clean-current-r1250-proof';
+  document.documentElement.dataset.fxMagBirthProofR1400='irregular-crystal-final-handoff';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1360-integrated-cortical-organic-final-lock-dna-cellular-living-architecture'
+    revision:'r1400-irregular-crystal-final-handoff-dna-cellular-living-architecture'
   };
 })();
