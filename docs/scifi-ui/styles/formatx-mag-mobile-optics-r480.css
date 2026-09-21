@@ -1,15 +1,15 @@
-/* FormatX R1401 — crisp mobile crystal optics and compositor-safe pulse.
+/* FormatX R1408 — pixel-stable mobile crystal optics and opacity-only pulse.
    R326 remains the single WebGL/material owner and R484 keeps the periodic native
    surface-energy sweep. R502 keeps the canonical CSSAnimation declared across
    PAUSE so the root playback governor freezes/resumes the same timeline object. */
 
 @keyframes fx-primary-mag-mobile-heart-r488 {
-  0%,100% { scale: .987; opacity: .790; }
-  24% { scale: 1.000; opacity: .825; }
-  33% { scale: .994; opacity: .810; }
-  43% { scale: 1.006; opacity: .845; }
-  54% { scale: 1.000; opacity: .828; }
-  73% { scale: .990; opacity: .802; }
+  0%,100% { scale: 1; opacity: .945; }
+  24% { scale: 1; opacity: .975; }
+  33% { scale: 1; opacity: .960; }
+  43% { scale: 1; opacity: 1; }
+  54% { scale: 1; opacity: .982; }
+  73% { scale: 1; opacity: .955; }
 }
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
@@ -34,7 +34,7 @@
       blur(0px) !important;
     mix-blend-mode: normal !important;
     transform-origin: 50% 50% !important;
-    scale: .992 !important;
+    scale: 1 !important;
     backface-visibility: hidden !important;
   }
 
@@ -58,7 +58,7 @@
   html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"]:not([data-fx-primary-mag-life-r482="steady"]) body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     animation: fx-primary-mag-mobile-heart-r488 4.8s cubic-bezier(.36,0,.20,1) infinite !important;
-    will-change: scale, opacity !important;
+    will-change: opacity !important;
   }
 }
 
@@ -141,3 +141,5 @@
 /* production-r502-mobile-pause-stable-animation-identity */
 /* deploy-r488-live-proof */
 /* production-r1401-mobile-crystal-no-blur-crisp-facets */
+
+/* production-r1408-mobile-crystal-pixel-stable-no-canvas-scale */
