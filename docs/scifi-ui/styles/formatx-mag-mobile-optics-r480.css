@@ -25,13 +25,13 @@
       contrast(1.18)
       saturate(1.06)
       hue-rotate(-1deg)
-      blur(0) !important;
+      blur(0px) !important;
     -webkit-filter:
       brightness(.99)
       contrast(1.18)
       saturate(1.06)
       hue-rotate(-1deg)
-      blur(0) !important;
+      blur(0px) !important;
     mix-blend-mode: normal !important;
     transform-origin: 50% 50% !important;
     scale: .992 !important;
