@@ -9,7 +9,7 @@
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
 root.dataset.fxP0MotionSchedulerR490='armed-r618';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260921-r1450-solid-shard-cluster';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260921-r1460-coherent-cut-crystal';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
