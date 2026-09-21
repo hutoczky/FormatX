@@ -591,3 +591,82 @@ html[data-fx-lighthouse-audit-r1391="true"] body.living-architecture :is(
   }
 }
 /* production-r1401-mobile-continuous-living-chamber */
+
+
+/* R1410 — mobile chamber depth tuned around the asymmetric crystal.
+   No circular plate is drawn around the MAG. The environment uses a central
+   light shaft, angled wall reflections and sparse particles so the core feels
+   embedded in a real space rather than pasted onto a flat radial graphic. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root body.living-architecture {
+    background:
+      radial-gradient(760px 620px at 52% 2%,rgba(81,222,255,.155),transparent 62%),
+      radial-gradient(680px 760px at 2% 48%,rgba(41,112,213,.070),transparent 72%),
+      radial-gradient(690px 700px at 96% 74%,rgba(94,66,222,.055),transparent 74%),
+      linear-gradient(180deg,#01050b 0%,#02111c 27%,#020a13 61%,#01050a 100%)!important;
+  }
+
+  html:root:root:root:root:root:root:root:root body.living-architecture::before {
+    inset:-6vh -22vw!important;
+    background:
+      linear-gradient(90deg,
+        transparent 0 42%,
+        rgba(62,192,235,.018) 45%,
+        rgba(116,230,255,.058) 49.2%,
+        rgba(188,249,255,.082) 50%,
+        rgba(116,230,255,.055) 50.8%,
+        rgba(62,192,235,.016) 55%,
+        transparent 59% 100%),
+      linear-gradient(112deg,rgba(69,176,220,.040) 0 1.2%,transparent 1.2% 19%,rgba(54,138,192,.020) 19.3% 19.8%,transparent 20.1% 100%),
+      linear-gradient(68deg,transparent 0 75%,rgba(70,167,220,.028) 75.2% 75.8%,transparent 76.1% 100%),
+      repeating-conic-gradient(from 11deg at 51% 31%,rgba(93,202,238,.018) 0deg .7deg,transparent .7deg 22deg),
+      linear-gradient(rgba(102,213,255,.010) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(102,213,255,.010) 1px,transparent 1px)!important;
+    background-size:auto,auto,auto,auto,38px 38px,38px 38px!important;
+    opacity:.86!important;
+    mask-image:linear-gradient(180deg,#000 0 72%,rgba(0,0,0,.72) 88%,transparent 100%)!important;
+    -webkit-mask-image:linear-gradient(180deg,#000 0 72%,rgba(0,0,0,.72) 88%,transparent 100%)!important;
+  }
+
+  html:root:root:root:root:root:root:root:root body.living-architecture::after {
+    inset:-2% -10%!important;
+    background:
+      linear-gradient(90deg,rgba(0,0,0,.44),transparent 15% 85%,rgba(0,0,0,.44)),
+      radial-gradient(ellipse 24% 42% at 52% 5%,rgba(122,232,255,.105),rgba(47,162,218,.030) 46%,transparent 79%),
+      linear-gradient(100deg,transparent 0 44%,rgba(91,210,249,.018) 51%,transparent 58%),
+      linear-gradient(80deg,transparent 0 47%,rgba(103,192,245,.014) 54%,transparent 61%),
+      radial-gradient(circle,rgba(170,235,255,.11) 0 1px,transparent 1.25px)!important;
+    background-size:auto,auto,auto,auto,72px 72px!important;
+    background-position:center,center,center,center,17px 23px!important;
+    opacity:.96!important;
+  }
+
+  html:root:root:root:root:root:root:root:root body.living-architecture #hero,
+  html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-grid,
+  html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-space {
+    background:transparent!important;
+    background-image:none!important;
+    box-shadow:none!important;
+  }
+
+  html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-ring,
+  html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-label {
+    content:none!important;
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    border:0!important;
+    box-shadow:none!important;
+    background:none!important;
+  }
+
+  html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-copy {
+    background:
+      radial-gradient(circle at 88% 4%,rgba(65,213,255,.036),transparent 36%),
+      linear-gradient(145deg,rgba(4,19,31,.64),rgba(2,9,17,.75))!important;
+    backdrop-filter:blur(3px) saturate(106%)!important;
+    -webkit-backdrop-filter:blur(3px) saturate(106%)!important;
+  }
+}
+
+/* production-r1410-asymmetric-chamber-depth */
