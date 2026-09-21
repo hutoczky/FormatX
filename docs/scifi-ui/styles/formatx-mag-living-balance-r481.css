@@ -292,3 +292,70 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   }
 }
 /* production-r1510-photoreal-mineral-physical-lens-no-css-halo */
+
+
+/* R1520 — screenshot-driven mobile closeout.
+   No circular frame, heartbeat orbit or signature halo may surround the primary MAG.
+   The canvas itself gets a neutral exposure lift so facets remain visible on OLED. */
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space,
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-crystal-organism-r326-stage,
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero > .fx-signature-core-trigger {
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero :is(
+  .hero-ring,
+  .fx-r155-heartbeat-core,
+  .fx-r155-heartbeat-ring,
+  .fx-r155-heartbeat-wave
+) {
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:none!important;
+  pointer-events:none!important;
+}
+
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space::before,
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space::after,
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-crystal-organism-r326-stage::before,
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-crystal-organism-r326-stage::after,
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero > .fx-signature-core-trigger::before,
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero > .fx-signature-core-trigger::after {
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root:root:root:root[data-fx-native-mag-visual-r1520]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:var(--fx-mag-life-opacity,.99)!important;
+    filter:brightness(1.12) contrast(1.06) saturate(.91)!important;
+    -webkit-filter:brightness(1.12) contrast(1.06) saturate(.91)!important;
+    mix-blend-mode:normal!important;
+  }
+}
+/* production-r1520-no-orbit-ring-visible-photoreal-facets */
