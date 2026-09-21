@@ -60,6 +60,7 @@ const SHOTS=[
       u.searchParams.set('visualintro','1');
       u.searchParams.set('introframe',String(seconds));
       u.searchParams.set('r659','deterministic-frame');
+      u.searchParams.set('proofrenderer','reference');
 
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const overlayReady=await pollPage(
