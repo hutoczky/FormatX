@@ -73,15 +73,15 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     translate: none !important;
     rotate: none !important;
     filter:
-      brightness(1.065)
-      contrast(.89)
-      saturate(1.10)
-      blur(.82px) !important;
+      brightness(1.00)
+      contrast(1.20)
+      saturate(1.06)
+      blur(0) !important;
     -webkit-filter:
-      brightness(1.065)
-      contrast(.89)
-      saturate(1.10)
-      blur(.82px) !important;
+      brightness(1.00)
+      contrast(1.20)
+      saturate(1.06)
+      blur(0) !important;
   }
 
   html:root:root body.living-architecture .topbar .fx-reference-mag-button {
@@ -241,3 +241,42 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
    production-r465-soft-perimeter-low-bloom-mobile-display
    production-r466-balanced-mobile-luminance-soft-edge-display
    production-r467-desktop-three-cell-control-row · deploy-ready-r467 */
+
+/* R1404 final phone composition owner: no circular HUD, no local hero plate,
+   no compositor fog. The page-wide chamber remains visible behind the crystal. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-ring,
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-label {
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space {
+    background:transparent!important;
+    background-image:none!important;
+    box-shadow:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+
+  html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
+  html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    filter:none!important;
+    -webkit-filter:none!important;
+  }
+
+  html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.97!important;
+    filter:brightness(1) contrast(1.20) saturate(1.06) drop-shadow(0 0 5px rgba(74,225,255,.10))!important;
+    -webkit-filter:brightness(1) contrast(1.20) saturate(1.06) drop-shadow(0 0 5px rgba(74,225,255,.10))!important;
+  }
+}
+/* production-r1404-irregular-crystal-mobile-final */
