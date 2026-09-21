@@ -1,4 +1,4 @@
-/* FormatX R482.1 — restrained spectrum, softer phone edge and visibly living MAG family.
+/* FormatX R1361 — crisp premium mobile MAG, restrained spectrum and visibly living MAG family.
    R326 remains the single WebGL/material owner. This late optical layer keeps
    large, mini and header MAG surfaces visually related while preserving the
    interaction-burst / zero-idle WebGL contract. The living motion is compositor
@@ -54,28 +54,28 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
 
 @keyframes fx-primary-mag-living-mobile-r482 {
   0%, 100% {
-    --fx-mag-life-scale: .982;
-    --fx-mag-life-opacity: .80;
+    --fx-mag-life-scale: .992;
+    --fx-mag-life-opacity: .94;
   }
   24% {
-    --fx-mag-life-scale: 1.012;
-    --fx-mag-life-opacity: .91;
+    --fx-mag-life-scale: 1.006;
+    --fx-mag-life-opacity: .975;
   }
   32% {
-    --fx-mag-life-scale: .996;
-    --fx-mag-life-opacity: .85;
+    --fx-mag-life-scale: .998;
+    --fx-mag-life-opacity: .955;
   }
   41% {
-    --fx-mag-life-scale: 1.024;
-    --fx-mag-life-opacity: .98;
+    --fx-mag-life-scale: 1.012;
+    --fx-mag-life-opacity: 1;
   }
   53% {
-    --fx-mag-life-scale: 1.005;
-    --fx-mag-life-opacity: .90;
+    --fx-mag-life-scale: 1.003;
+    --fx-mag-life-opacity: .982;
   }
   72% {
-    --fx-mag-life-scale: .989;
-    --fx-mag-life-opacity: .83;
+    --fx-mag-life-scale: .996;
+    --fx-mag-life-opacity: .958;
   }
 }
 
@@ -137,25 +137,26 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   html:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    --fx-mag-life-scale: .982;
-    --fx-mag-life-opacity: .80;
+    --fx-mag-life-scale: .992;
+    --fx-mag-life-opacity: .94;
     opacity: var(--fx-mag-life-opacity) !important;
+    image-rendering: auto !important;
     filter:
-      brightness(.66)
-      contrast(.61)
-      saturate(1.45)
-      hue-rotate(-5deg)
-      blur(1.28px)
-      drop-shadow(0 0 4px rgba(46,218,255,.050))
-      drop-shadow(0 0 9px rgba(104,69,255,.026)) !important;
+      brightness(.965)
+      contrast(1.16)
+      saturate(1.12)
+      hue-rotate(-2deg)
+      blur(0)
+      drop-shadow(0 0 8px rgba(54,222,255,.16))
+      drop-shadow(0 0 20px rgba(87,69,255,.075)) !important;
     -webkit-filter:
-      brightness(.66)
-      contrast(.61)
-      saturate(1.45)
-      hue-rotate(-5deg)
-      blur(1.28px)
-      drop-shadow(0 0 4px rgba(46,218,255,.050))
-      drop-shadow(0 0 9px rgba(104,69,255,.026)) !important;
+      brightness(.965)
+      contrast(1.16)
+      saturate(1.12)
+      hue-rotate(-2deg)
+      blur(0)
+      drop-shadow(0 0 8px rgba(54,222,255,.16))
+      drop-shadow(0 0 20px rgba(87,69,255,.075)) !important;
     mix-blend-mode: normal !important;
     scale: var(--fx-mag-life-scale) !important;
   }
@@ -172,10 +173,11 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
      chambers colour the black around the crystal rather than whitening it. */
   html:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space {
     background:
-      radial-gradient(circle at 43% 43%, rgba(27,192,235,.047) 0, rgba(15,91,161,.026) 27%, transparent 41%),
-      radial-gradient(circle at 61% 48%, rgba(42,92,226,.032) 0, transparent 38%),
-      radial-gradient(circle at 58% 57%, rgba(119,57,217,.026) 0, transparent 39%),
-      linear-gradient(180deg, rgba(0,4,13,.02) 0%, rgba(1,7,18,.14) 58%, rgba(2,13,31,.38) 100%) !important;
+      radial-gradient(circle at 50% 47%, rgba(44,214,255,.050) 0 12%, rgba(23,104,176,.026) 28%, transparent 48%),
+      radial-gradient(circle at 58% 54%, rgba(112,76,255,.024), transparent 46%) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 
@@ -241,3 +243,33 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
     scale: 1 !important;
   }
 }
+
+
+/* R1361: final anti-fog override. Late historical optical layers may still be
+   present in the runtime, but the active R326 canvas must remain optically sharp. */
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root:root:root:root:root:root:root:root:root[data-fx-native-mag-visual-r1350]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    filter: none !important;
+    -webkit-filter: none !important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root[data-fx-native-mag-visual-r1350]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity: var(--fx-mag-life-opacity, .96) !important;
+    filter:
+      brightness(.98)
+      contrast(1.20)
+      saturate(1.10)
+      drop-shadow(0 0 7px rgba(72,226,255,.15))
+      drop-shadow(0 0 18px rgba(93,73,255,.07)) !important;
+    -webkit-filter:
+      brightness(.98)
+      contrast(1.20)
+      saturate(1.10)
+      drop-shadow(0 0 7px rgba(72,226,255,.15))
+      drop-shadow(0 0 18px rgba(93,73,255,.07)) !important;
+  }
+}
+
+/* production-r1361-crisp-mobile-mag-no-blur */
