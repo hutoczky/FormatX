@@ -17,13 +17,13 @@
   const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const optics = mobile ? Object.freeze({
-    fresnelPower: '1.56',
-    innerExposure: '2.92',
-    outerExposure: '2.66'
+    fresnelPower: '1.62',
+    innerExposure: '2.58',
+    outerExposure: '2.28'
   }) : Object.freeze({
-    fresnelPower: '1.68',
-    innerExposure: '2.62',
-    outerExposure: '2.38'
+    fresnelPower: '1.74',
+    innerExposure: '2.40',
+    outerExposure: '2.12'
   });
 
   if (root.dataset.fxCrystalOrganismR326 === 'ready' || root.dataset.fxCrystalOrganismR326 === 'booting') return;
@@ -45,6 +45,7 @@
   root.dataset.fxNativeMagVisualR1440 = 'coherent-irregular-crystal-broad-facets-dark-glass-clean-titanium-cradle-cyan-reactor';
   root.dataset.fxNativeMagVisualR1450 = 'asymmetric-shard-cluster-solid-gunmetal-cyan-optic-long-smooth-eight-tendrils';
   root.dataset.fxNativeMagVisualR1460 = 'coherent-cut-crystal-asymmetric-gunmetal-silver-cyan-optic-eight-tendrils';
+  root.dataset.fxNativeMagVisualR1470 = 'obsidian-cut-crystal-broad-facets-titanium-cradle-cyan-iris-controlled-eight-tendrils';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -115,8 +116,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 10 : mobile ? 12 : constrained ? 14 : 18;
-    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 20 : mobile ? 24 : constrained ? 28 : 34;
+    const latitudeSegments = auditMode ? 9 : constrainedMobile ? 8 : mobile ? 9 : constrained ? 11 : 13;
+    const longitudeSegments = auditMode ? 16 : constrainedMobile ? 16 : mobile ? 18 : constrained ? 22 : 26;
     const tendrilCount = auditMode ? 4 : 8;
     const tendrilSegments = auditMode ? 5 : constrainedMobile ? 18 : mobile ? 28 : constrained ? 26 : 36;
     const tendrilSides = auditMode ? 3 : constrainedMobile ? 5 : mobile || constrained ? 7 : 9;
@@ -165,42 +166,43 @@
          The closed sphere topology intersects an asymmetric octahedral envelope,
          then receives restrained biological distortion. This keeps the MAG alive
          while the silhouette reads as a unique faceted crystal from every angle. */
-      /* R1440 — coherent irregular crystal.
-         Broad facets and unequal quadrants create identity without the torn,
-         spear-like silhouette of the previous shard cluster. */
+      /* R1470 — coherent obsidian cut crystal.
+         p≈1 keeps a true rhombic/crystalline silhouette. Broad low-frequency
+         asymmetry prevents a logo-perfect diamond without falling back to a
+         swollen egg or a pile of torn shards. */
       const upper=direction[1]>=0;
       const right=direction[0]>=0;
-      const ax=upper?(right?.75:.82):(right?.79:.72);
-      const ay=upper?(right?.82:.88):(right?.76:.71);
-      const az=right?.60:.66;
-      const p=1.52;
+      const front=direction[2]>=0;
+      const ax=upper?(right?.72:.78):(right?.76:.69);
+      const ay=upper?(right?.86:.91):(right?.78:.73);
+      const az=front?(right?.58:.63):(right?.61:.66);
+      const p=1.06;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
         Math.pow(Math.abs(direction[2])/az,p);
       const baseRadius=1/Math.pow(Math.max(.001,lp),1/p);
-      const facetBias=
+      const broadBias=
         1
-        +Math.sin(theta*2.31+phi*1.07)*.026
-        +Math.sin(theta*4.27-phi*1.91)*.017
-        +Math.cos(theta*1.43+phi*3.17)*.012;
-      const shard=(x,y,z,power,amount)=>
+        +Math.sin(theta*2.05+phi*.93)*.030
+        +Math.cos(theta*3.17-phi*1.41)*.018;
+      const plane=(x,y,z,power,amount)=>
         Math.pow(Math.max(0,direction[0]*x+direction[1]*y+direction[2]*z),power)*amount;
       const mass=
-        shard(-.64,.70,.18,6.0,.040)+
-        shard(.74,.54,-.08,6.0,.034)+
-        shard(-.84,-.08,.18,7.0,.030)+
-        shard(.86,-.16,.08,7.0,.036)+
-        shard(-.18,-.86,.14,7.0,.032);
-      const crystalRadius=baseRadius*facetBias+mass;
+        plane(-.62,.72,.22,5.0,.030)+
+        plane(.76,.49,-.05,5.0,.026)+
+        plane(-.88,-.05,.16,6.0,.024)+
+        plane(.86,-.20,.10,6.0,.028)+
+        plane(-.10,-.88,.18,6.0,.024);
+      const crystalRadius=baseRadius*broadBias+mass;
       const crystalPosition=[
-        direction[0]*crystalRadius*1.07,
-        direction[1]*crystalRadius*1.03,
-        direction[2]*crystalRadius*.94
+        direction[0]*crystalRadius*1.08,
+        direction[1]*crystalRadius*1.05,
+        direction[2]*crystalRadius*.95
       ];
-      crystalPosition[0]+=direction[1]*-.022+direction[2]*direction[1]*.018;
-      crystalPosition[1]+=Math.pow(Math.max(direction[1],0),5.0)*.042+direction[0]*direction[2]*.010;
-      crystalPosition[2]+=direction[0]*direction[1]*.014;
+      crystalPosition[0]+=direction[1]*-.018+direction[2]*direction[1]*.012;
+      crystalPosition[1]+=Math.pow(Math.max(direction[1],0),5.0)*.026+direction[0]*direction[2]*.008;
+      crystalPosition[2]+=direction[0]*direction[1]*.010;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -247,12 +249,12 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.16 + (index % 2 ? .045 : -.035);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .48;
-      const reach = .54 + ((index*3)%5) * .030;
+      const root = .46;
+      const reach = .43 + ((index*3)%5) * .026;
       const radius = root + reach * t;
-      const wave = (Math.sin(t * Math.PI * 1.72 + index * .83)*(.020+.084*t))
-        +Math.sin(t*Math.PI*.72+index*.47)*.026*t;
-      const depth = Math.sin(t * Math.PI * 1.50 + index * .97) * (.022 + .064 * t);
+      const wave = (Math.sin(t * Math.PI * 1.58 + index * .83)*(.016+.060*t))
+        +Math.sin(t*Math.PI*.66+index*.47)*.018*t;
+      const depth = Math.sin(t * Math.PI * 1.42 + index * .97) * (.018 + .048 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -269,7 +271,7 @@
       const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
-      const tubeRadius = (.0148 * (1 - t * .82) + .0036) * (mobile ? .94 : 1);
+      const tubeRadius = (.0118 * (1 - t * .84) + .0028) * (mobile ? .94 : 1);
       const rootDirection = normalize([p[0], p[1], p[2] * .72]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
@@ -452,7 +454,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.620':'.645'};
+        projected*= ${mobile?'.635':'.655'};
         projected.y+=${mobile?'.055':'.028'};
         gl_Position=vec4(projected,world.z*.13,1.0);
       }`;
@@ -608,20 +610,20 @@
           return;
         }
 
-        vec3 glass=mix(vec3(.010,.005,.016),vec3(.070,.024,.088),.30+.34*ndl+.08*facetPulse);
-        glass+=vec3(.010,.018,.032)*sideLight*.14;
+        vec3 glass=mix(vec3(.003,.008,.013),vec3(.022,.046,.060),.24+.42*ndl+.06*facetPulse);
+        glass+=vec3(.006,.020,.030)*sideLight*.12;
         float armorBlock=sat(realArmorPlate+realDarkPlate+crownMask+shoulderMask+jawMask+diamondFace);
         float tissueMask=podMask*(1.0-sat(armorBlock))*(1.0-tendrilMask);
-        vec3 tissue=mix(vec3(.006,.011,.017),vec3(.050,.078,.094),.22+.52*ndl+.20*sideLight);
-        tissue+=vec3(.006,.014,.024)*(.14+.18*cloud);
+        vec3 tissue=mix(vec3(.003,.010,.016),vec3(.030,.058,.070),.18+.50*ndl+.18*sideLight);
+        tissue+=vec3(.004,.010,.018)*(.10+.12*cloud);
         float bodyFacetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
-        tissue*=.91+.13*bodyFacetRand;
-        tissue+=steel*(.08+.17*ndl)+ice*.018*specular;
-        tissue+=cyan*fresnel*(.008+.010*visualEnergy);
+        tissue*=.88+.16*bodyFacetRand;
+        tissue+=steel*(.10+.20*ndl)+ice*.010*specular;
+        tissue+=cyan*fresnel*(.006+.008*visualEnergy);
         glass=mix(glass,tissue,tissueMask*.985);
-        glass+=steel*crownMask*(.28+.28*ndl+.12*specular);
-        glass+=steel*shoulderMask*(.38+.34*ndl+.16*specular);
-        glass=mix(glass,steel*(.80+.28*ndl)+silver*.34+ice*.022*specular,realArmorPlate*.96);
+        glass+=gunmetal*crownMask*(.20+.18*ndl);
+        glass+=steel*shoulderMask*(.24+.26*ndl+.08*specular);
+        glass=mix(glass,steel*(.76+.24*ndl)+silver*.22+ice*.012*specular,realArmorPlate*.94);
         glass=mix(glass,steel*(.72+.36*ndl)+gunmetal*.26+silver*.14*specular,realDarkPlate*.92);
         glass=mix(glass,vec3(.009,.015,.024)+steel*.24,diamondFace*.88);
         glass=mix(glass,steel*.58+silver*.20*specular,diamondFrame*.86);
@@ -633,19 +635,19 @@
         glass+=cyan*veins*(.004+.004*uBreath);
         glass+=cyan*membrane*(.002+.003*visualEnergy);
         glass+=cyan*iris*.12;
-        glass+=cyan*(rings*.10+nucleus*1.86+irisRays*.12)+ice*(heart*.006+nucleus*.14+coreRing*.50);
-        glass=mix(glass,gunmetal,pupil*.44);
-        glass+=cyan*coreDisc*.98+ice*coreDisc*.24;
+        glass+=cyan*(rings*.14+nucleus*1.34+irisRays*.18)+ice*(heart*.004+nucleus*.10+coreRing*.44);
+        glass=mix(glass,vec3(.001,.003,.005),pupil*.78);
+        glass+=cyan*coreDisc*.72+ice*coreDisc*.16;
         glass+=cyan*coreRing*.78;
-        glass+=ice*specular*(.22+.12*visualEnergy);
+        glass+=ice*specular*(.080+.050*visualEnergy);
         glass+=(cyan*.14+ice*.022)*(axisV*.12+axisH*.07)*visualEnergy;
         glass+=(cyan*.035+ice*.010)*dnaHelix*(.010+.016*fresnel)*genomePulse;
         glass+=(ice*.05+cyan*.04)*dnaBridge*(.020+.028*visualEnergy);
         glass+=(cyan*.055+ice*.030)*edge*(.34+.40*(1.0-vMorph));
         glass+=ice*(armorSeam*.12+armorRib*.07)*(1.0-vMorph*.72);
-        glass+=(ice*.52+cyan*.28)*surfaceSweep*(.70+.26*fresnel);
+        glass+=(ice*.18+cyan*.14)*surfaceSweep*(.44+.18*fresnel);
         glass=mix(glass,vec3(.006,.036,.052)+steel*.14,tendrilMask*.76);
-        glass+=(cyan*.62+ice*.12)*tendrilSegment*(.52+.64*fresnel);
+        glass+=(cyan*.46+ice*.08)*tendrilSegment*(.40+.48*fresnel);
         float alpha=.952+.020*ndl+.014*fresnel+specular*.012+surfaceSweep*.018+tendrilMask*.014;
         ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.48)),clamp(alpha,.960,.997));
       }`;
