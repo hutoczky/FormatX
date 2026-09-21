@@ -20,7 +20,7 @@ const SHOTS=[
 ];
 
 (async()=>{
-  const browser=await chromium.launch({
+  const launchBrowser=()=>chromium.launch({
     headless:true,
     executablePath:CHROME,
     args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--no-sandbox']
@@ -35,7 +35,8 @@ const SHOTS=[
   const report=[];
   try{
     for(const [seconds,name] of SHOTS){
-      const shotContext=await browser.newContext(contextOptions);
+      const shotBrowser=await launchBrowser();
+      const shotContext=await shotBrowser.newContext(contextOptions);
       const page=await shotContext.newPage();
       await page.addInitScript(()=>{try{sessionStorage.clear();localStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}});
       const errors=[];
@@ -79,6 +80,7 @@ const SHOTS=[
       report.push({seconds,name,state,errors});
       await page.close();
       await shotContext.close();
+      await shotBrowser.close();
     }
 
     if(!SKIP_HANDOFF){
@@ -86,7 +88,8 @@ const SHOTS=[
       // This lives in the early artifact so visual continuity remains inspectable
       // even when a later workflow run is superseded by another master commit.
       {
-        const handoffContext=await browser.newContext(contextOptions);
+        const handoffBrowser=await launchBrowser();
+        const handoffContext=await handoffBrowser.newContext(contextOptions);
         const page=await handoffContext.newPage();
         await page.addInitScript(()=>{try{sessionStorage.clear();localStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}});
         const errors=[];
@@ -134,6 +137,7 @@ const SHOTS=[
         report.push({seconds:'post-intro',name:'06-post-intro-handoff',state,errors});
         await page.close();
         await handoffContext.close();
+        await handoffBrowser.close();
       }
   
     }
@@ -145,7 +149,8 @@ const SHOTS=[
       process.exitCode=1;
     }
   }finally{
-    await browser.close();
+    // Each proof frame owns and closes its browser process so WebGL/session
+    // state cannot leak between deterministic keyframes.
   }
 })().catch(error=>{
   fs.writeFileSync(path.join(OUT,'failure.txt'),String(error?.stack||error)+'\n');
