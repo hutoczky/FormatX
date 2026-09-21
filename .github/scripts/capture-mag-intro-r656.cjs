@@ -139,6 +139,62 @@ const SHOTS=[
         await handoffContext.close();
         await handoffBrowser.close();
       }
+
+      // R1390: capture the exact phone layout the user sees. The normal intro is
+      // intentionally skipped by Playwright automation; this proves the permanent
+      // native MAG, full-page chamber, controls and copy together at 390x844.
+      {
+        const mobileBrowser=await launchBrowser();
+        const mobileContext=await mobileBrowser.newContext({
+          viewport:{width:390,height:844},
+          isMobile:true,
+          hasTouch:true,
+          deviceScaleFactor:2,
+          colorScheme:'dark',
+          reducedMotion:'no-preference',
+          locale:'hu-HU'
+        });
+        const page=await mobileContext.newPage();
+        const errors=[];
+        page.on('pageerror',e=>errors.push(String(e)));
+        page.on('console',m=>{
+          if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());
+        });
+        const u=new URL(BASE);
+        u.searchParams.set('mobileproof','r1390');
+        await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
+        await page.waitForFunction(
+          ()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'
+            && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1,
+          null,
+          {timeout:30000}
+        );
+        await page.waitForTimeout(700);
+        const state=await page.evaluate(()=>{
+          const root=document.documentElement;
+          const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+          const box=canvas?.getBoundingClientRect();
+          return {
+            stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
+            canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
+            renderer:root.dataset.fxCoreRenderer||'',
+            visual:root.dataset.fxNativeMagVisualR1390||'',
+            optics:root.dataset.fxPrimaryMagOpticsR1383||'',
+            resolution:root.dataset.fxCoreReal3dResolution||'',
+            canvas:{x:box?.x||0,y:box?.y||0,width:box?.width||0,height:box?.height||0},
+            overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
+          };
+        });
+        await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
+        const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
+        if(await stage.count()){
+          await stage.screenshot({path:path.join(OUT,'09-mobile-native-mag.png')});
+        }
+        report.push({seconds:'mobile-native',name:'08-mobile-native-hero',state,errors});
+        await page.close();
+        await mobileContext.close();
+        await mobileBrowser.close();
+      }
   
     }
 
