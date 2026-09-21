@@ -81,7 +81,7 @@ const SHOTS=[
     });
     try{
       const u=new URL(BASE);
-      u.searchParams.set('mobileproof','r1460-preflight');
+      u.searchParams.set('mobileproof','r1490-preflight');
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const ready=await pollPage(
         page,
@@ -90,7 +90,7 @@ const SHOTS=[
         30000,
         120
       );
-      if(!ready)throw new Error('R1460 mobile preflight MAG did not become ready');
+      if(!ready)throw new Error('R1490 mobile preflight MAG did not become ready');
       await page.waitForTimeout(650);
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
@@ -99,7 +99,7 @@ const SHOTS=[
         const ring=document.querySelector('#hero .hero-ring');
         const ringStyle=ring?getComputedStyle(ring):null;
         return {
-          visual:root.dataset.fxNativeMagVisualR1460||root.dataset.fxNativeMagVisualR1450||root.dataset.fxNativeMagVisualR1414||'',
+          visual:root.dataset.fxNativeMagVisualR1490||root.dataset.fxNativeMagVisualR1480||root.dataset.fxNativeMagVisualR1470||'',
           shape:root.dataset.fxCoreShapeR337||'',
           renderer:root.dataset.fxCoreRenderer||'',
           resolution:root.dataset.fxCoreReal3dResolution||'',
@@ -114,10 +114,10 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
-      if(state.shape!=='crystal')errors.push('R1450 preflight shape is not crystal: '+state.shape);
-      if(/blur\((?!0(?:px)?\))/i.test(state.filter||''))errors.push('R1450 preflight still blurred: '+state.filter);
-      if(state.ring.display!=='none'&&state.ring.visibility!=='hidden'&&state.ring.opacity>.01)errors.push('R1450 preflight hero ring visible: '+JSON.stringify(state.ring));
-      if(state.overflow>2)errors.push('R1450 preflight overflow: '+state.overflow);
+      if(state.shape!=='crystal')errors.push('R1490 preflight shape is not crystal: '+state.shape);
+      if(/blur\((?!0(?:px)?\))/i.test(state.filter||''))errors.push('R1490 preflight still blurred: '+state.filter);
+      if(state.ring.display!=='none'&&state.ring.visibility!=='hidden'&&state.ring.opacity>.01)errors.push('R1490 preflight hero ring visible: '+JSON.stringify(state.ring));
+      if(state.overflow>2)errors.push('R1490 preflight overflow: '+state.overflow);
       report.push({seconds:'mobile-preflight',name:'08-mobile-native-hero',state,errors});
     }finally{
       await page.close();
@@ -159,7 +159,7 @@ const SHOTS=[
       page.on('pageerror',e=>errors.push(String(e)));
       page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());});
       const u=new URL(BASE);
-      u.searchParams.set('mobileproof','r1450');
+      u.searchParams.set('mobileproof','r1490');
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const mobileReady=await pollPage(
         page,
@@ -168,7 +168,7 @@ const SHOTS=[
         30000,
         120
       );
-      if(!mobileReady)throw new Error('R1450 early mobile native MAG did not become ready');
+      if(!mobileReady)throw new Error('R1490 early mobile native MAG did not become ready');
       await page.waitForTimeout(700);
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
@@ -180,7 +180,7 @@ const SHOTS=[
           stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
           canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
           renderer:root.dataset.fxCoreRenderer||'',
-          visual:root.dataset.fxNativeMagVisualR1470||root.dataset.fxNativeMagVisualR1470||root.dataset.fxNativeMagVisualR1460||'',
+          visual:root.dataset.fxNativeMagVisualR1490||root.dataset.fxNativeMagVisualR1480||root.dataset.fxNativeMagVisualR1470||'',
           shape:root.dataset.fxCoreShapeR337||'',
           canvasFilter:canvas?getComputedStyle(canvas).filter:'',
           heroRing:ring?{present:true,display:ringStyle.display,visibility:ringStyle.visibility,opacity:Number(ringStyle.opacity||0)}:{present:false,display:'none',visibility:'hidden',opacity:0},
@@ -191,11 +191,11 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
-      if(state.visual!=='obsidian-cut-crystal-broad-facets-titanium-cradle-cyan-iris-controlled-eight-tendrils')errors.push('R1470 visual marker missing: '+state.visual);
-      if(state.shape!=='crystal')errors.push('R1470 mobile MAG shape is not crystal: '+state.shape);
-      if(/blur\((?!0(?:px)?\))/i.test(state.canvasFilter||''))errors.push('R1470 mobile MAG still has blur: '+state.canvasFilter);
-      if(state.heroRing.present&&state.heroRing.display!=='none'&&state.heroRing.visibility!=='hidden'&&state.heroRing.opacity>.01)errors.push('R1470 legacy hero ring visible: '+JSON.stringify(state.heroRing));
-      if(state.overflow>2)errors.push('R1470 horizontal overflow: '+state.overflow);
+      if(state.visual!=='single-body-asymmetric-obsidian-crystal-no-detached-armor-optical-lens-eight-tendrils')errors.push('R1490 visual marker missing: '+state.visual);
+      if(state.shape!=='crystal')errors.push('R1490 mobile MAG shape is not crystal: '+state.shape);
+      if(/blur\((?!0(?:px)?\))/i.test(state.canvasFilter||''))errors.push('R1490 mobile MAG still has blur: '+state.canvasFilter);
+      if(state.heroRing.present&&state.heroRing.display!=='none'&&state.heroRing.visibility!=='hidden'&&state.heroRing.opacity>.01)errors.push('R1490 legacy hero ring visible: '+JSON.stringify(state.heroRing));
+      if(state.overflow>2)errors.push('R1490 horizontal overflow: '+state.overflow);
       report.push({seconds:'mobile-native-early',name:'08-mobile-native-hero',state,errors});
       await page.close();
       await mobileContext.close();
@@ -247,7 +247,7 @@ const SHOTS=[
           genesisScript:[...document.scripts].find(s=>/formatx-mag-genesis-three-r1360\.js/.test(s.src))?.src||'',
           ready:document.readyState
         }));
-        throw new Error('R1470 intro overlay missing '+JSON.stringify({debug,errors}));
+        throw new Error('R1490 intro overlay missing '+JSON.stringify({debug,errors}));
       }
       const frameReady=await pollPage(
         page,
@@ -255,7 +255,7 @@ const SHOTS=[
         30000,
         100
       );
-      if(!frameReady)throw new Error('R1470 deterministic intro frame did not become ready at '+seconds+'s');
+      if(!frameReady)throw new Error('R1490 deterministic intro frame did not become ready at '+seconds+'s');
       await page.waitForTimeout(150);
 
       const state=await page.evaluate(()=>{
@@ -367,7 +367,7 @@ const SHOTS=[
           if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());
         });
         const u=new URL(BASE);
-        u.searchParams.set('mobileproof','r1450');
+        u.searchParams.set('mobileproof','r1490');
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
         const mobileReady=await pollPage(
           page,
@@ -386,7 +386,7 @@ const SHOTS=[
             stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
             canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             renderer:root.dataset.fxCoreRenderer||'',
-            visual:root.dataset.fxNativeMagVisualR1470||root.dataset.fxNativeMagVisualR1470||root.dataset.fxNativeMagVisualR1460||'',
+            visual:root.dataset.fxNativeMagVisualR1490||root.dataset.fxNativeMagVisualR1480||root.dataset.fxNativeMagVisualR1470||'',
             optics:root.dataset.fxPrimaryMagOpticsR1383||'',
             resolution:root.dataset.fxCoreReal3dResolution||'',
             shape:root.dataset.fxCoreShapeR337||'',
@@ -404,7 +404,7 @@ const SHOTS=[
         await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
-        if(state.visual!=='obsidian-cut-crystal-broad-facets-titanium-cradle-cyan-iris-controlled-eight-tendrils'){
+        if(state.visual!=='single-body-asymmetric-obsidian-crystal-no-detached-armor-optical-lens-eight-tendrils'){
           errors.push('R1470 native crystal visual marker missing: '+state.visual);
         }
         if(state.shape!=='crystal'){
