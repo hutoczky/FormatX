@@ -61,7 +61,7 @@ const SHOTS=[
     });
     try{
       const u=new URL(BASE);
-      u.searchParams.set('mobileproof','r1408-preflight');
+      u.searchParams.set('mobileproof','r1412-preflight');
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const ready=await pollPage(
         page,
@@ -70,7 +70,7 @@ const SHOTS=[
         30000,
         120
       );
-      if(!ready)throw new Error('R1408 mobile preflight MAG did not become ready');
+      if(!ready)throw new Error('R1412 mobile preflight MAG did not become ready');
       await page.waitForTimeout(650);
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
@@ -79,11 +79,11 @@ const SHOTS=[
         const ring=document.querySelector('#hero .hero-ring');
         const ringStyle=ring?getComputedStyle(ring):null;
         return {
-          visual:root.dataset.fxNativeMagVisualR1405||root.dataset.fxNativeMagVisualR1404||'',
+          visual:root.dataset.fxNativeMagVisualR1412||root.dataset.fxNativeMagVisualR1410||root.dataset.fxNativeMagVisualR1408||'',
           shape:root.dataset.fxCoreShapeR337||'',
           renderer:root.dataset.fxCoreRenderer||'',
           resolution:root.dataset.fxCoreReal3dResolution||'',
-          optics:root.dataset.fxPrimaryMagOpticsR1408||root.dataset.fxPrimaryMagOpticsR1383||'',
+          optics:root.dataset.fxPrimaryMagOpticsR1410||root.dataset.fxPrimaryMagOpticsR1408||root.dataset.fxPrimaryMagOpticsR1383||'',
           filter:canvas?getComputedStyle(canvas).filter:'',
           animation:canvas?getComputedStyle(canvas).animationName:'',
           ring:ring?{display:ringStyle.display,visibility:ringStyle.visibility,opacity:Number(ringStyle.opacity||0)}:{display:'none',visibility:'hidden',opacity:0},
@@ -94,10 +94,10 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       if(await stage.count())await stage.screenshot({path:path.join(OUT,'09-mobile-native-mag.png')});
-      if(state.shape!=='crystal')errors.push('R1408 preflight shape is not crystal: '+state.shape);
-      if(/blur\((?!0(?:px)?\))/i.test(state.filter||''))errors.push('R1408 preflight still blurred: '+state.filter);
-      if(state.ring.display!=='none'&&state.ring.visibility!=='hidden'&&state.ring.opacity>.01)errors.push('R1408 preflight hero ring visible: '+JSON.stringify(state.ring));
-      if(state.overflow>2)errors.push('R1408 preflight overflow: '+state.overflow);
+      if(state.shape!=='crystal')errors.push('R1412 preflight shape is not crystal: '+state.shape);
+      if(/blur\((?!0(?:px)?\))/i.test(state.filter||''))errors.push('R1412 preflight still blurred: '+state.filter);
+      if(state.ring.display!=='none'&&state.ring.visibility!=='hidden'&&state.ring.opacity>.01)errors.push('R1412 preflight hero ring visible: '+JSON.stringify(state.ring));
+      if(state.overflow>2)errors.push('R1412 preflight overflow: '+state.overflow);
       report.push({seconds:'mobile-preflight',name:'08-mobile-native-hero',state,errors});
     }finally{
       await page.close();
@@ -111,7 +111,7 @@ const SHOTS=[
     // Always capture the exact phone hero first. Even if an intro-keyframe
     // renderer later fails, the artifact still contains the user-facing MAG.
     await captureMobileNativePreflight();
-    // R1408 early mobile proof: capture the user's actual 390x844 composition
+    // R1412 early mobile proof: capture the user's actual 390x844 composition
     // before the slower intro keyframe suite, so a later intro failure never
     // hides the permanent mobile MAG evidence.
     {
