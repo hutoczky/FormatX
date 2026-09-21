@@ -52,7 +52,20 @@ const SHOTS=[
       u.searchParams.set('r659','deterministic-frame');
 
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
-      await page.locator('.fx-mag-birth-r533').waitFor({state:'attached',timeout:10000});
+      try{
+        await page.locator('.fx-mag-birth-r533').waitFor({state:'attached',timeout:15000});
+      }catch(error){
+        const debug=await page.evaluate(()=>({
+          href:location.href,
+          owner:document.documentElement.dataset.fxMagBirthOwnerR533||'',
+          live:document.documentElement.dataset.fxMagBirthLiveR533||'',
+          overlayCount:document.querySelectorAll('.fx-mag-birth-r533').length,
+          birthScript:[...document.scripts].find(s=>/formatx-mag-birth-live-r533\.js/.test(s.src))?.src||'',
+          genesisScript:[...document.scripts].find(s=>/formatx-mag-genesis-three-r1360\.js/.test(s.src))?.src||'',
+          ready:document.readyState
+        }));
+        throw new Error('R1404 intro overlay missing '+JSON.stringify({debug,errors})+' :: '+String(error));
+      }
       await page.waitForFunction(
         ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
         null,
