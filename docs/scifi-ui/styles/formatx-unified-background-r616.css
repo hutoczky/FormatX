@@ -670,3 +670,43 @@ html[data-fx-lighthouse-audit-r1391="true"] body.living-architecture :is(
 }
 
 /* production-r1410-asymmetric-chamber-depth */
+
+
+/* R1414 — remove diagram-like radial spokes from the phone hero.
+   Chamber depth comes from architectural side planes and a vertical light shaft. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root:root body.living-architecture::before {
+    background:
+      linear-gradient(90deg,
+        transparent 0 43%,
+        rgba(58,170,220,.012) 46%,
+        rgba(105,220,252,.050) 49.2%,
+        rgba(180,245,255,.070) 50%,
+        rgba(105,220,252,.046) 50.8%,
+        rgba(58,170,220,.010) 54%,
+        transparent 58% 100%),
+      linear-gradient(108deg,
+        rgba(62,155,201,.030) 0 1%,
+        transparent 1.1% 18%,
+        rgba(51,126,176,.018) 18.2% 18.8%,
+        transparent 19% 100%),
+      linear-gradient(72deg,
+        transparent 0 78%,
+        rgba(60,150,205,.020) 78.2% 78.8%,
+        transparent 79% 100%),
+      linear-gradient(rgba(102,213,255,.009) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(102,213,255,.009) 1px,transparent 1px)!important;
+    background-size:auto,auto,auto,40px 40px,40px 40px!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root body.living-architecture::after {
+    background:
+      linear-gradient(90deg,rgba(0,0,0,.46),transparent 16% 84%,rgba(0,0,0,.46)),
+      radial-gradient(ellipse 25% 43% at 51% 3%,rgba(126,235,255,.110),rgba(47,162,218,.028) 46%,transparent 79%),
+      linear-gradient(101deg,transparent 0 45%,rgba(91,210,249,.014) 52%,transparent 59%),
+      linear-gradient(79deg,transparent 0 47%,rgba(103,192,245,.012) 54%,transparent 61%),
+      radial-gradient(circle,rgba(170,235,255,.095) 0 1px,transparent 1.2px)!important;
+    background-size:auto,auto,auto,auto,76px 76px!important;
+  }
+}
+/* production-r1414-chamber-no-radial-spokes */
