@@ -1306,10 +1306,10 @@
       root.dataset.fxCoreMobileOpticalBalanceR465='soft-perimeter-low-bloom-low-cost-shader';
       root.dataset.fxCoreConstrainedSurfaceOwnerR624='native-r326-equivalent-r465-contract';
     }
-    root.dataset.fxCoreMobileResolutionR424=mobile?'r619-dpr-cap-1.25-pixel-budget-460k-adaptive':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
+    root.dataset.fxCoreMobileResolutionR424=mobile?'r1383-dpr-cap-1.50-pixel-budget-760k-adaptive':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
     root.dataset.fxCoreMobileOpticsR435=mobile?'superseded-by-r454-visible-native-surface':'desktop-preserved-r454';
     root.dataset.fxCoreMobileOpticsR440=mobile?'superseded-by-r454-luminous-electric-surface':'desktop-superseded-by-r454';
-    root.dataset.fxCoreMobilePerformanceR442=mobile?'14x28-adaptive-one-two-pass-intermittent-pulse-idle-zero':'desktop-three-pass-intermittent-pulse-idle-zero';
+    root.dataset.fxCoreMobilePerformanceR442=mobile?'18x36-capable-12x24-constrained-adaptive-intermittent-pulse-idle-zero':'desktop-three-pass-intermittent-pulse-idle-zero';
     root.dataset.fxGpuCapability=webgl2?'webgl2':'webgl1';
     root.dataset.fxCoreReal3dTargetFps='interaction-60-idle-zero-r441';
     root.dataset.fxCoreIdleRenderR441='zero-frame';
