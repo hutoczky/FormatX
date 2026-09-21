@@ -32,6 +32,15 @@ const SHOTS=[
     locale:'hu-HU'
   };
 
+  async function pollPage(page,predicate,timeout=30000,interval=100){
+    const deadline=Date.now()+timeout;
+    while(Date.now()<deadline){
+      try{if(await page.evaluate(predicate))return true;}catch(_){}
+      await page.waitForTimeout(interval);
+    }
+    return false;
+  }
+
   const report=[];
   try{
     const shotBrowser=await launchBrowser();
@@ -53,13 +62,13 @@ const SHOTS=[
       u.searchParams.set('r659','deterministic-frame');
 
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
-      try{
-        await page.waitForFunction(
-          ()=>document.querySelectorAll('.fx-mag-birth-r533').length===1,
-          null,
-          {timeout:15000}
-        );
-      }catch(error){
+      const overlayReady=await pollPage(
+        page,
+        ()=>document.querySelectorAll('.fx-mag-birth-r533').length===1,
+        15000,
+        100
+      );
+      if(!overlayReady){
         const debug=await page.evaluate(()=>({
           href:location.href,
           owner:document.documentElement.dataset.fxMagBirthOwnerR533||'',
@@ -69,13 +78,15 @@ const SHOTS=[
           genesisScript:[...document.scripts].find(s=>/formatx-mag-genesis-three-r1360\.js/.test(s.src))?.src||'',
           ready:document.readyState
         }));
-        throw new Error('R1406 intro overlay missing '+JSON.stringify({debug,errors})+' :: '+String(error));
+        throw new Error('R1407 intro overlay missing '+JSON.stringify({debug,errors}));
       }
-      await page.waitForFunction(
+      const frameReady=await pollPage(
+        page,
         ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
-        null,
-        {timeout:30000}
+        30000,
+        100
       );
+      if(!frameReady)throw new Error('R1407 deterministic intro frame did not become ready at '+seconds+'s');
       await page.waitForTimeout(150);
 
       const state=await page.evaluate(()=>{
@@ -127,13 +138,15 @@ const SHOTS=[
         // R1406: deterministic intro keyframes above already prove the overlay.
         // The handoff proof must tolerate fast automation teardown and only require
         // the one permanent native MAG to own the final state.
-        await page.waitForFunction(
+        const handoffReady=await pollPage(
+          page,
           ()=>document.querySelectorAll('.fx-mag-birth-r533').length===0
             && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1
             && document.documentElement.dataset.fxCrystalOrganismR326==='ready',
-          null,
-          {timeout:30000}
+          30000,
+          120
         );
+        if(!handoffReady)throw new Error('R1407 post-intro native handoff did not settle');
         await page.waitForTimeout(350);
   
         const state=await page.evaluate(()=>{
@@ -186,12 +199,14 @@ const SHOTS=[
         const u=new URL(BASE);
         u.searchParams.set('mobileproof','r1405');
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
-        await page.waitForFunction(
+        const mobileReady=await pollPage(
+          page,
           ()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'
             && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1,
-          null,
-          {timeout:30000}
+          30000,
+          120
         );
+        if(!mobileReady)throw new Error('R1407 mobile native MAG did not become ready');
         await page.waitForTimeout(700);
         const state=await page.evaluate(()=>{
           const root=document.documentElement;
