@@ -44,6 +44,7 @@
   root.dataset.fxNativeMagVisualR1420 = 'dark-irregular-shard-cluster-no-kite-silhouette-controlled-titanium-cyan-optic';
   root.dataset.fxNativeMagVisualR1440 = 'coherent-irregular-crystal-broad-facets-dark-glass-clean-titanium-cradle-cyan-reactor';
   root.dataset.fxNativeMagVisualR1450 = 'asymmetric-shard-cluster-solid-gunmetal-cyan-optic-long-smooth-eight-tendrils';
+  root.dataset.fxNativeMagVisualR1460 = 'coherent-cut-crystal-asymmetric-gunmetal-silver-cyan-optic-eight-tendrils';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -114,8 +115,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 10 : mobile ? 12 : constrained ? 15 : 20;
-    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 20 : mobile ? 24 : constrained ? 30 : 38;
+    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 10 : mobile ? 12 : constrained ? 14 : 18;
+    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 20 : mobile ? 24 : constrained ? 28 : 34;
     const tendrilCount = auditMode ? 4 : 8;
     const tendrilSegments = auditMode ? 5 : constrainedMobile ? 18 : mobile ? 28 : constrained ? 26 : 36;
     const tendrilSides = auditMode ? 3 : constrainedMobile ? 5 : mobile || constrained ? 7 : 9;
@@ -169,10 +170,10 @@
          spear-like silhouette of the previous shard cluster. */
       const upper=direction[1]>=0;
       const right=direction[0]>=0;
-      const ax=upper?(right?.72:.79):(right?.77:.70);
-      const ay=upper?(right?.69:.75):(right?.68:.64);
-      const az=right?.58:.63;
-      const p=1.34;
+      const ax=upper?(right?.75:.82):(right?.79:.72);
+      const ay=upper?(right?.82:.88):(right?.76:.71);
+      const az=right?.60:.66;
+      const p=1.52;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -180,28 +181,26 @@
       const baseRadius=1/Math.pow(Math.max(.001,lp),1/p);
       const facetBias=
         1
-        +Math.sin(theta*2.37+phi*1.13)*.050
-        +Math.sin(theta*4.61-phi*2.19)*.034
-        +Math.cos(theta*1.57+phi*3.47)*.024;
+        +Math.sin(theta*2.31+phi*1.07)*.026
+        +Math.sin(theta*4.27-phi*1.91)*.017
+        +Math.cos(theta*1.43+phi*3.17)*.012;
       const shard=(x,y,z,power,amount)=>
         Math.pow(Math.max(0,direction[0]*x+direction[1]*y+direction[2]*z),power)*amount;
       const mass=
-        shard(-.72,.64,.18,7.0,.115)+
-        shard(.82,.46,-.12,7.0,.086)+
-        shard(-.90,-.04,.24,8.0,.078)+
-        shard(.92,-.14,.10,8.0,.092)+
-        shard(-.26,-.88,.18,7.0,.074)+
-        shard(.18,-.76,-.34,8.0,.050)+
-        shard(.04,.91,.30,9.0,.058);
+        shard(-.64,.70,.18,6.0,.040)+
+        shard(.74,.54,-.08,6.0,.034)+
+        shard(-.84,-.08,.18,7.0,.030)+
+        shard(.86,-.16,.08,7.0,.036)+
+        shard(-.18,-.86,.14,7.0,.032);
       const crystalRadius=baseRadius*facetBias+mass;
       const crystalPosition=[
-        direction[0]*crystalRadius*1.10,
-        direction[1]*crystalRadius*.96,
-        direction[2]*crystalRadius*.96
+        direction[0]*crystalRadius*1.07,
+        direction[1]*crystalRadius*1.03,
+        direction[2]*crystalRadius*.94
       ];
-      crystalPosition[0]+=direction[1]*-.036+direction[2]*direction[1]*.036;
-      crystalPosition[1]+=direction[0]*direction[2]*.025;
-      crystalPosition[2]+=direction[0]*direction[1]*.034;
+      crystalPosition[0]+=direction[1]*-.022+direction[2]*direction[1]*.018;
+      crystalPosition[1]+=Math.pow(Math.max(direction[1],0),5.0)*.042+direction[0]*direction[2]*.010;
+      crystalPosition[2]+=direction[0]*direction[1]*.014;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -248,12 +247,12 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.16 + (index % 2 ? .045 : -.035);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .46;
-      const reach = .64 + ((index*3)%5) * .038;
+      const root = .48;
+      const reach = .54 + ((index*3)%5) * .030;
       const radius = root + reach * t;
-      const wave = (Math.sin(t * Math.PI * 1.88 + index * .83)*(.028+.118*t))
-        +Math.sin(t*Math.PI*.76+index*.47)*.044*t;
-      const depth = Math.sin(t * Math.PI * 1.58 + index * .97) * (.030 + .092 * t);
+      const wave = (Math.sin(t * Math.PI * 1.72 + index * .83)*(.020+.084*t))
+        +Math.sin(t*Math.PI*.72+index*.47)*.026*t;
+      const depth = Math.sin(t * Math.PI * 1.50 + index * .97) * (.022 + .064 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -270,7 +269,7 @@
       const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
-      const tubeRadius = (.0178 * (1 - t * .80) + .0042) * (mobile ? .94 : 1);
+      const tubeRadius = (.0148 * (1 - t * .82) + .0036) * (mobile ? .94 : 1);
       const rootDirection = normalize([p[0], p[1], p[2] * .72]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
@@ -453,7 +452,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.615':'.625'};
+        projected*= ${mobile?'.620':'.645'};
         projected.y+=${mobile?'.055':'.028'};
         gl_Position=vec4(projected,world.z*.13,1.0);
       }`;
@@ -613,17 +612,15 @@
         glass+=vec3(.010,.018,.032)*sideLight*.14;
         float armorBlock=sat(realArmorPlate+realDarkPlate+crownMask+shoulderMask+jawMask+diamondFace);
         float tissueMask=podMask*(1.0-sat(armorBlock))*(1.0-tendrilMask);
-        vec3 tissue=mix(vec3(.006,.014,.024),vec3(.070,.125,.150),.22+.50*ndl+.22*sideLight);
-        tissue+=vec3(.008,.018,.030)*(.18+.24*cloud);
-        tissue*=1.0-.34*cortexGroove;
-        tissue+=vec3(.020,.052,.070)*cortexLobe*(.22+.34*ndl);
-        tissue+=vec3(.010,.022,.038)*(1.0-cortexGroove)*fresnel*.28;
+        vec3 tissue=mix(vec3(.006,.011,.017),vec3(.050,.078,.094),.22+.52*ndl+.20*sideLight);
+        tissue+=vec3(.006,.014,.024)*(.14+.18*cloud);
         float bodyFacetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
-        tissue*=.94+.10*bodyFacetRand;
-        tissue+=(steel*.18+cyan*.018)*fresnel*tissueMask;
-        glass=mix(glass,tissue,tissueMask*.97);
-        glass+=steel*crownMask*(.18+.20*ndl+.08*specular);
-        glass+=steel*shoulderMask*(.30+.30*ndl+.12*specular);
+        tissue*=.91+.13*bodyFacetRand;
+        tissue+=steel*(.08+.17*ndl)+ice*.018*specular;
+        tissue+=cyan*fresnel*(.008+.010*visualEnergy);
+        glass=mix(glass,tissue,tissueMask*.985);
+        glass+=steel*crownMask*(.28+.28*ndl+.12*specular);
+        glass+=steel*shoulderMask*(.38+.34*ndl+.16*specular);
         glass=mix(glass,steel*(.80+.28*ndl)+silver*.34+ice*.022*specular,realArmorPlate*.96);
         glass=mix(glass,steel*(.72+.36*ndl)+gunmetal*.26+silver*.14*specular,realDarkPlate*.92);
         glass=mix(glass,vec3(.009,.015,.024)+steel*.24,diamondFace*.88);
@@ -633,16 +630,16 @@
         glass-=vec3(.018,.024,.032)*opticalWell*.92;
         glass+=(ice*.20+cyan*.34)*diamondRim*(.30+.20*specular);
         glass+=cyan*fresnel*(.018+.024*visualEnergy);
-        glass+=cyan*veins*(.014+.014*uBreath);
-        glass+=cyan*membrane*(.006+.010*visualEnergy);
+        glass+=cyan*veins*(.004+.004*uBreath);
+        glass+=cyan*membrane*(.002+.003*visualEnergy);
         glass+=cyan*iris*.12;
-        glass+=cyan*(rings*.14+nucleus*2.50+irisRays*.16)+ice*(heart*.010+nucleus*.24+coreRing*.66);
+        glass+=cyan*(rings*.10+nucleus*1.86+irisRays*.12)+ice*(heart*.006+nucleus*.14+coreRing*.50);
         glass=mix(glass,gunmetal,pupil*.44);
-        glass+=cyan*coreDisc*1.36+ice*coreDisc*.42;
-        glass+=cyan*coreRing*.94;
+        glass+=cyan*coreDisc*.98+ice*coreDisc*.24;
+        glass+=cyan*coreRing*.78;
         glass+=ice*specular*(.22+.12*visualEnergy);
         glass+=(cyan*.14+ice*.022)*(axisV*.12+axisH*.07)*visualEnergy;
-        glass+=(cyan*.08+violet*.045)*dnaHelix*(.020+.036*fresnel)*genomePulse;
+        glass+=(cyan*.035+ice*.010)*dnaHelix*(.010+.016*fresnel)*genomePulse;
         glass+=(ice*.05+cyan*.04)*dnaBridge*(.020+.028*visualEnergy);
         glass+=(cyan*.055+ice*.030)*edge*(.34+.40*(1.0-vMorph));
         glass+=ice*(armorSeam*.12+armorRib*.07)*(1.0-vMorph*.72);
