@@ -816,7 +816,7 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const particleCadence=filmRenderer?42:(filmRendererPromise?84:(MOBILE?84:48));
+    const particleCadence=filmRenderer?Math.max(42,Number(filmRenderer.minimumFrameMs)||0):(filmRendererPromise?84:(MOBILE?84:48));
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
