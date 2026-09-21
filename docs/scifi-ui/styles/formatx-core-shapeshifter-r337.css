@@ -345,3 +345,55 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   }
 }
 /* production-r1470-obsidian-cut-crystal-optics */
+
+
+/* R1480 — final realistic crystal owner.
+   The old circular targeting plates and pseudo-elements are not part of the MAG.
+   Keep the WebGL crystal sharp and readable on both phone and desktop. */
+html:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space::before,
+html:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space::after,
+html:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-ring,
+html:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-label {
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  background:none!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+  -webkit-filter:none!important;
+  pointer-events:none!important;
+}
+
+html:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+  filter:none!important;
+  -webkit-filter:none!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:1!important;
+    filter:brightness(1.08) contrast(1.13) saturate(1.02) drop-shadow(0 0 5px rgba(74,220,255,.09))!important;
+    -webkit-filter:brightness(1.08) contrast(1.13) saturate(1.02) drop-shadow(0 0 5px rgba(74,220,255,.09))!important;
+  }
+}
+
+@media (min-width:901px) and (pointer:fine) {
+  html:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:1!important;
+    filter:brightness(1.03) contrast(1.13) saturate(1.01) drop-shadow(0 0 4px rgba(72,210,242,.06))!important;
+    -webkit-filter:brightness(1.03) contrast(1.13) saturate(1.01) drop-shadow(0 0 4px rgba(72,210,242,.06))!important;
+  }
+}
+/* production-r1480-realistic-crystal-optics */
