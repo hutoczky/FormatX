@@ -37,7 +37,7 @@ jobs:
           grep -q 'brightness(.99)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
           grep -q 'contrast(1.18)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
           grep -q 'saturate(1.06)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
-          grep -q 'blur(0)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
+          grep -q 'blur(0px)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
       - name: Install Chromium runtime
         shell: bash
         run: |
