@@ -1,0 +1,183 @@
+/* FormatX R1530 — continuous living habitat.
+   The MAG is no longer staged on a detached hero plate: the whole site is its
+   physical chamber. This is the final visual owner after R616. */
+
+:root {
+  --fx-habitat-cyan: rgba(112,224,244,.12);
+  --fx-habitat-steel: rgba(46,76,88,.22);
+  --fx-habitat-glass: rgba(3,11,18,.58);
+  --fx-habitat-glass-strong: rgba(2,9,15,.74);
+  --fx-habitat-line: rgba(155,224,238,.115);
+}
+
+html { background:#010306!important; }
+
+html body.living-architecture {
+  min-height:100%;
+  background:
+    radial-gradient(1100px 840px at 68% -2%,rgba(154,224,235,.080),transparent 64%),
+    radial-gradient(920px 760px at 9% 38%,rgba(29,73,91,.070),transparent 72%),
+    radial-gradient(900px 780px at 92% 70%,rgba(34,54,74,.060),transparent 74%),
+    linear-gradient(180deg,#010306 0%,#041017 23%,#02090e 58%,#010305 100%)!important;
+  background-attachment:fixed!important;
+}
+
+html:root:root:root:root:root:root:root:root:root body.living-architecture::before {
+  inset:-5vh -5vw!important;
+  background:
+    linear-gradient(103deg,rgba(0,0,0,.62) 0 8%,rgba(25,42,49,.32) 8.2% 8.8%,rgba(7,20,27,.11) 9.1% 20%,transparent 20.5% 79.5%,rgba(7,20,27,.11) 80% 90.9%,rgba(25,42,49,.32) 91.2% 91.8%,rgba(0,0,0,.62) 92% 100%),
+    linear-gradient(180deg,rgba(167,230,239,.035) 0,rgba(55,120,141,.014) 18%,transparent 42% 74%,rgba(23,52,61,.055) 100%),
+    linear-gradient(78deg,transparent 0 27%,rgba(151,218,230,.018) 27.2% 27.45%,transparent 27.7% 72%,rgba(151,218,230,.014) 72.2% 72.45%,transparent 72.7% 100%)!important;
+  background-size:auto!important;
+  opacity:.96!important;
+  filter:none!important;
+  mask-image:none!important;
+  -webkit-mask-image:none!important;
+}
+
+html:root:root:root:root:root:root:root:root:root body.living-architecture::after {
+  inset:0!important;
+  background:
+    radial-gradient(ellipse 18% 58% at 67% -4%,rgba(199,245,250,.082),rgba(82,163,181,.025) 42%,transparent 78%),
+    radial-gradient(ellipse 48% 18% at 52% 101%,rgba(52,105,119,.050),transparent 74%),
+    linear-gradient(90deg,rgba(0,0,0,.42),transparent 14% 86%,rgba(0,0,0,.42)),
+    radial-gradient(ellipse 76% 62% at 50% 48%,transparent 42%,rgba(0,0,0,.13) 76%,rgba(0,0,0,.50) 118%)!important;
+  background-size:auto!important;
+  background-position:center!important;
+  opacity:.98!important;
+  transform:none;
+}
+
+.fx-living-habitat-r1530 {
+  position:fixed;
+  z-index:-18;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  opacity:.70;
+  mix-blend-mode:screen;
+  filter:saturate(.82) contrast(1.05);
+  contain:strict;
+}
+
+html:root:root:root:root:root:root:root:root:root body.living-architecture :is(#main-content,#hero,#hero .hero-grid,#hero .hero-space) {
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+
+html:root:root:root:root:root:root:root:root body.living-architecture #hero :is(.hero-ring,.hero-label),
+html:root:root:root:root:root:root:root:root body.living-architecture #hero::before,
+html:root:root:root:root:root:root:root:root body.living-architecture #hero::after,
+html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-space::before,
+html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-space::after {
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  pointer-events:none!important;
+}
+
+html:root:root:root:root:root:root body.living-architecture #main-content > section.scene:not(#hero),
+html:root:root:root:root:root:root body.living-architecture #main-content > .fx-category-deck {
+  border-color:rgba(145,214,229,.075)!important;
+  background:
+    radial-gradient(ellipse 65% 54% at 82% 4%,rgba(105,204,225,.020),transparent 68%),
+    linear-gradient(180deg,rgba(2,10,16,.10),rgba(1,7,12,.045))!important;
+  box-shadow:none!important;
+}
+
+html:root:root:root:root:root body.living-architecture :is(.hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,.payment-console,.system-grid article,.release-card,.fx-category-grid > article,.fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,.fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure) {
+  border-color:var(--fx-habitat-line)!important;
+  background:
+    radial-gradient(circle at 84% 8%,rgba(122,219,236,.025),transparent 36%),
+    linear-gradient(146deg,rgba(5,17,25,.66),rgba(2,8,13,.74))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.020),0 18px 54px rgba(0,0,0,.15)!important;
+  backdrop-filter:blur(5px) saturate(106%);
+  -webkit-backdrop-filter:blur(5px) saturate(106%);
+}
+
+html:root:root:root:root:root body.living-architecture .topbar {
+  background:linear-gradient(180deg,rgba(1,6,10,.80),rgba(2,9,14,.57))!important;
+  border-bottom-color:rgba(148,221,234,.095)!important;
+  backdrop-filter:blur(12px) saturate(108%);
+  -webkit-backdrop-filter:blur(12px) saturate(108%);
+}
+
+html:root:root:root:root:root body.living-architecture footer.site-footer {
+  background:
+    radial-gradient(700px 320px at 50% 0%,rgba(75,160,180,.035),transparent 72%),
+    linear-gradient(180deg,rgba(2,9,14,.31),rgba(1,4,7,.66))!important;
+  border-top-color:rgba(140,211,226,.08)!important;
+}
+
+.fx-mag-birth-r533 {
+  background:
+    radial-gradient(ellipse 28% 62% at 50% -8%,rgba(182,237,245,.055),transparent 76%),
+    radial-gradient(ellipse 84% 72% at 50% 50%,rgba(12,28,35,.16),rgba(1,4,7,.96) 78%),
+    #010306!important;
+}
+.fx-mag-birth-r533 .fxb-deep { opacity:.62!important; filter:saturate(.74) contrast(1.07)!important; }
+.fx-mag-birth-r533 .fxb-veil { opacity:.42!important; }
+.fx-mag-birth-r533 .fxb-stars { opacity:.34!important; }
+.fx-mag-birth-r533 .fxb-genome-field { opacity:.14!important; filter:blur(.2px) saturate(.72)!important; }
+.fx-mag-birth-r533 .fxb-biotic-field { opacity:.30!important; }
+.fx-mag-birth-r533 .fxb-particles { opacity:.64!important; }
+
+html:root:root:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+  filter:none!important;
+  -webkit-filter:none!important;
+  background:transparent!important;
+}
+html:root:root:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  opacity:1!important;
+  image-rendering:auto!important;
+  filter:brightness(.985) contrast(1.10) saturate(.94) drop-shadow(0 18px 24px rgba(0,0,0,.34))!important;
+  -webkit-filter:brightness(.985) contrast(1.10) saturate(.94) drop-shadow(0 18px 24px rgba(0,0,0,.34))!important;
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html body.living-architecture {
+    background:
+      radial-gradient(660px 520px at 50% -2%,rgba(130,216,230,.070),transparent 68%),
+      radial-gradient(620px 720px at 3% 51%,rgba(28,67,82,.055),transparent 76%),
+      radial-gradient(600px 650px at 96% 84%,rgba(29,43,61,.050),transparent 78%),
+      linear-gradient(180deg,#010306 0%,#041017 27%,#02090e 66%,#010305 100%)!important;
+    background-attachment:scroll!important;
+  }
+  html:root:root:root:root:root:root:root body.living-architecture::before {
+    inset:-2vh -16vw!important;
+    background:
+      linear-gradient(100deg,rgba(0,0,0,.54) 0 5%,rgba(20,39,48,.23) 5.3% 6.0%,transparent 6.4% 93.6%,rgba(20,39,48,.23) 94% 94.7%,rgba(0,0,0,.54) 95% 100%),
+      linear-gradient(180deg,rgba(151,224,235,.025),transparent 22% 80%,rgba(24,58,69,.030))!important;
+  }
+  html:root:root:root:root:root:root:root body.living-architecture::after {
+    background:
+      radial-gradient(ellipse 34% 50% at 50% -5%,rgba(170,231,239,.055),transparent 78%),
+      linear-gradient(90deg,rgba(0,0,0,.33),transparent 11% 89%,rgba(0,0,0,.33)),
+      radial-gradient(ellipse 95% 72% at 50% 48%,transparent 44%,rgba(0,0,0,.13) 78%,rgba(0,0,0,.48) 120%)!important;
+  }
+  .fx-living-habitat-r1530 { opacity:.53; filter:saturate(.78) contrast(1.03); }
+  html:root:root:root:root body.living-architecture :is(.hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,.payment-console,.system-grid article,.release-card,.fx-category-grid > article,.fx-origin-proof article,.fx-plan-qr-card,.fx-platform-card) {
+    background:linear-gradient(148deg,rgba(5,18,27,.72),rgba(2,9,15,.81))!important;
+    backdrop-filter:blur(3px) saturate(104%);
+    -webkit-backdrop-filter:blur(3px) saturate(104%);
+  }
+  html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    filter:brightness(1.01) contrast(1.11) saturate(.96) drop-shadow(0 13px 18px rgba(0,0,0,.30))!important;
+    -webkit-filter:brightness(1.01) contrast(1.11) saturate(.96) drop-shadow(0 13px 18px rgba(0,0,0,.30))!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .fx-living-habitat-r1530 { opacity:.34; }
+  html body.living-architecture::before,
+  html body.living-architecture::after { animation:none!important; transform:none!important; }
+}
+
+/* production-r1530-photoreal-continuous-living-habitat */
