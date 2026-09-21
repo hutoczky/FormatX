@@ -896,3 +896,118 @@ html:root:root:root:root:root:root:root body.living-architecture > .fx-atmospher
   }
 }
 /* production-r1480-cinematic-material-chamber */
+
+
+/* R1490 — realistic full-page chamber, no diagram rings.
+   The page is one dark physical environment. Legacy circular hero ornaments are
+   explicitly retired because they make the MAG look like a HUD diagram instead
+   of an object suspended in a real chamber. */
+html:root:root:root:root:root:root:root:root body.living-architecture #hero::after,
+html:root:root:root:root:root:root:root:root body.living-architecture #hero::before,
+html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-ring,
+html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-label {
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  background:none!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+  pointer-events:none!important;
+}
+
+html:root:root:root:root:root:root:root:root body.living-architecture {
+  background:
+    radial-gradient(880px 680px at 70% 5%,rgba(72,183,222,.105),transparent 66%),
+    radial-gradient(760px 760px at 10% 54%,rgba(27,73,112,.055),transparent 75%),
+    radial-gradient(720px 660px at 88% 82%,rgba(74,54,128,.040),transparent 78%),
+    linear-gradient(180deg,#010409 0%,#02101a 27%,#020911 64%,#010409 100%)!important;
+}
+
+html:root:root:root:root:root:root:root:root body.living-architecture::before {
+  inset:-4vh -4vw!important;
+  background:
+    linear-gradient(90deg,
+      rgba(0,0,0,.46) 0 7%,
+      rgba(16,37,48,.22) 7.2% 7.7%,
+      rgba(4,18,28,.05) 8.0% 18%,
+      transparent 18.5% 81.5%,
+      rgba(4,18,28,.05) 82% 92%,
+      rgba(16,37,48,.22) 92.3% 92.8%,
+      rgba(0,0,0,.46) 93% 100%),
+    linear-gradient(180deg,
+      rgba(93,196,220,.030) 0,
+      transparent 18% 72%,
+      rgba(22,62,81,.045) 100%),
+    linear-gradient(104deg,
+      transparent 0 22%,
+      rgba(82,183,211,.025) 22.2% 22.45%,
+      transparent 22.7% 76%,
+      rgba(82,183,211,.020) 76.2% 76.45%,
+      transparent 76.7% 100%)!important;
+  background-size:auto!important;
+  opacity:1!important;
+  mask-image:none!important;
+  -webkit-mask-image:none!important;
+  transform:none!important;
+  filter:none!important;
+}
+
+html:root:root:root:root:root:root:root:root body.living-architecture::after {
+  inset:0!important;
+  background:
+    linear-gradient(180deg,rgba(124,225,241,.032),transparent 23% 78%,rgba(45,89,111,.018)),
+    radial-gradient(ellipse 16% 54% at 69% 0%,rgba(112,214,235,.080),transparent 76%),
+    radial-gradient(ellipse 34% 18% at 52% 100%,rgba(30,89,112,.050),transparent 74%),
+    radial-gradient(circle,rgba(171,229,241,.10) 0 1px,transparent 1.2px)!important;
+  background-size:auto,auto,auto,116px 116px!important;
+  background-position:center,center,center,23px 37px!important;
+  opacity:.90!important;
+  transform:none!important;
+}
+
+/* Hero is a transparent window into the same chamber. */
+html:root:root:root:root:root:root:root:root body.living-architecture #hero,
+html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-grid,
+html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-space {
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root body.living-architecture {
+    background:
+      radial-gradient(650px 520px at 50% 0%,rgba(67,189,222,.100),transparent 68%),
+      radial-gradient(620px 680px at 4% 52%,rgba(26,73,116,.050),transparent 76%),
+      radial-gradient(590px 620px at 94% 82%,rgba(70,50,126,.038),transparent 78%),
+      linear-gradient(180deg,#010409 0%,#02101a 28%,#020911 66%,#010409 100%)!important;
+  }
+
+  html:root:root:root:root:root:root:root:root body.living-architecture::before {
+    inset:-2vh -14vw!important;
+    background:
+      linear-gradient(90deg,
+        rgba(0,0,0,.43) 0 5%,
+        rgba(15,39,52,.18) 5.3% 6.0%,
+        transparent 6.4% 93.6%,
+        rgba(15,39,52,.18) 94% 94.7%,
+        rgba(0,0,0,.43) 95% 100%),
+      linear-gradient(180deg,rgba(104,207,228,.026),transparent 22% 78%,rgba(24,66,86,.030))!important;
+    opacity:1!important;
+  }
+
+  html:root:root:root:root:root:root:root:root body.living-architecture::after {
+    background:
+      linear-gradient(180deg,rgba(116,216,236,.026),transparent 24% 82%,rgba(38,83,105,.016)),
+      radial-gradient(ellipse 26% 46% at 50% 0%,rgba(105,210,232,.060),transparent 78%),
+      radial-gradient(circle,rgba(170,228,240,.075) 0 1px,transparent 1.15px)!important;
+    background-size:auto,auto,96px 96px!important;
+    background-position:center,center,17px 29px!important;
+  }
+}
+/* production-r1490-realistic-full-page-chamber */
