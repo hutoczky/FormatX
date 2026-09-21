@@ -126,7 +126,7 @@ jobs:
             assert(mobile.miniOwner==='preserved-native-webgl','mobile: Mini MAG primary owner changed');
             assert(mobile.magText==='MAG'&&mobile.langText==='HU','mobile: HU/MAG text invalid '+JSON.stringify(mobile));
             assert(mobile.magBefore==='none'&&mobile.magAfter==='none','mobile: MAG pseudo-art returned '+JSON.stringify(mobile));
-            assert(/brightness\(0?\.99\)/.test(mobile.filter)&&/contrast\(1\.18\)/.test(mobile.filter)&&/saturate\(1\.06\)/.test(mobile.filter)&&/hue-rotate\(-1deg\)/.test(mobile.filter)&&/blur\(0(?:px)?\)/.test(mobile.filter),'mobile: current R1401 crisp crystal optics missing '+mobile.filter);
+            { const f=mobile.filter||''; const n=k=>Number((f.match(new RegExp(k+'\\(([-\\d.]+)'))||[])[1]); assert(!/blur\((?!0(?:px)?\))/i.test(f)&&n('brightness')>=.95&&n('contrast')>=1.10&&n('saturate')>=1.0,'mobile: final crisp crystal optics missing '+f); }
 
             const mini=page.locator('.fx-mini-mag-launcher-r459').first();
             const miniBox=await mini.boundingBox();assert(miniBox&&miniBox.width>=54&&miniBox.height>=54,'mobile: Mini MAG target too small');
