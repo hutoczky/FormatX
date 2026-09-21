@@ -2100,7 +2100,7 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
    The historical CSS/SVG simulation remains only as an emergency fallback.
    When Three is active it must not composite a second DNA field, embryo,
    biological bubble shell or decorative target ring over the real scene. */
-.fx-mag-birth-r533[data-fx-renderer="three"] :is(
+.fx-mag-birth-r533:is([data-fx-renderer="three"],[data-fx-renderer="three-loading"]) :is(
   .fxb-genome-field,
   .fxb-dna-stage,
   .fxb-embryo,
@@ -2114,12 +2114,12 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   transition:none!important;
 }
 
-.fx-mag-birth-r533[data-fx-renderer="three"]::after {
+.fx-mag-birth-r533:is([data-fx-renderer="three"],[data-fx-renderer="three-loading"])::after {
   opacity:.025!important;
   background-size:8px 8px!important;
 }
 
-.fx-mag-birth-r533[data-fx-renderer="three"] .fxb-veil {
+.fx-mag-birth-r533:is([data-fx-renderer="three"],[data-fx-renderer="three-loading"]) .fxb-veil {
   background:
     radial-gradient(ellipse 34% 42% at var(--fxb-x) var(--fxb-y),rgba(47,157,199,.055),transparent 67%),
     linear-gradient(180deg,#01050b 0%,#020913 54%,#020610 100%)!important;
@@ -2128,23 +2128,23 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   opacity:.34!important;
 }
 
-.fx-mag-birth-r533[data-fx-renderer="three"] .fxb-deep {
+.fx-mag-birth-r533:is([data-fx-renderer="three"],[data-fx-renderer="three-loading"]) .fxb-deep {
   background:
     radial-gradient(ellipse 28% 48% at var(--fxb-x) var(--fxb-y),rgba(85,209,241,.045),transparent 72%),
     linear-gradient(180deg,rgba(1,5,11,.20),rgba(1,5,11,.34))!important;
 }
 
-.fx-mag-birth-r533[data-fx-renderer="three"] .fxb-stars {
+.fx-mag-birth-r533:is([data-fx-renderer="three"],[data-fx-renderer="three-loading"]) .fxb-stars {
   opacity:.14!important;
   filter:none!important;
 }
 
-.fx-mag-birth-r533[data-fx-renderer="three"] .fxb-particles {
+.fx-mag-birth-r533:is([data-fx-renderer="three"],[data-fx-renderer="three-loading"]) .fxb-particles {
   opacity:.20!important;
 }
 
 /* No local circular target/HUD around the intro core. */
-.fx-mag-birth-r533[data-fx-renderer="three"] :is(
+.fx-mag-birth-r533:is([data-fx-renderer="three"],[data-fx-renderer="three-loading"]) :is(
   .fxb-ring,
   .fxb-orbit,
   .fxb-heart-ring,
@@ -2154,3 +2154,14 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   opacity:0!important;
 }
 /* production-r1430-three-only-intro-visual-owner */
+
+
+/* R1450 — while the real Three owner is resolving, show only the cinematic
+   chamber/particles. Never flash the retired SVG/bubble simulation first. */
+.fx-mag-birth-r533[data-fx-renderer="three-loading"] .fxb-particles {
+  opacity:.12!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="three-loading"] .fxb-flash {
+  opacity:0!important;
+}
+/* production-r1450-three-loading-no-legacy-flash */
