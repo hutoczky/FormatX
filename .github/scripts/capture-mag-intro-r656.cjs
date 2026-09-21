@@ -25,18 +25,19 @@ const SHOTS=[
     executablePath:CHROME,
     args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--no-sandbox']
   });
-  const context=await browser.newContext({
+  const contextOptions={
     viewport:{width:1280,height:720},
     colorScheme:'dark',
     reducedMotion:'no-preference',
     locale:'hu-HU'
-  });
+  };
 
   const report=[];
   try{
     for(const [seconds,name] of SHOTS){
-      const page=await context.newPage();
-      await page.addInitScript(()=>{try{sessionStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}});
+      const shotContext=await browser.newContext(contextOptions);
+      const page=await shotContext.newPage();
+      await page.addInitScript(()=>{try{sessionStorage.clear();localStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}});
       const errors=[];
       page.on('pageerror',e=>errors.push(String(e)));
       page.on('console',m=>{
@@ -77,6 +78,7 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});
       await page.close();
+      await shotContext.close();
     }
 
     if(!SKIP_HANDOFF){
@@ -84,8 +86,9 @@ const SHOTS=[
       // This lives in the early artifact so visual continuity remains inspectable
       // even when a later workflow run is superseded by another master commit.
       {
-        const page=await context.newPage();
-      await page.addInitScript(()=>{try{sessionStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}});
+        const handoffContext=await browser.newContext(contextOptions);
+        const page=await handoffContext.newPage();
+        await page.addInitScript(()=>{try{sessionStorage.clear();localStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}});
         const errors=[];
         page.on('pageerror',e=>errors.push(String(e)));
         page.on('console',m=>{
@@ -130,6 +133,7 @@ const SHOTS=[
         }
         report.push({seconds:'post-intro',name:'06-post-intro-handoff',state,errors});
         await page.close();
+        await handoffContext.close();
       }
   
     }
@@ -141,7 +145,6 @@ const SHOTS=[
       process.exitCode=1;
     }
   }finally{
-    await context.close();
     await browser.close();
   }
 })().catch(error=>{
