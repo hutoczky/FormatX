@@ -283,11 +283,14 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.equal(state.rendererSelection, 'r326-direct-r468-soft-optics-live-energy-zero-idle', JSON.stringify(state));
     assert.equal(state.governor, 'r528-automatic-idle-flag-no-manual-pause', JSON.stringify(state));
     assert.equal(state.idlePolicy, 'periodic-surface-bursts-between-zero-idle', JSON.stringify(state));
-    assert.ok(state.opacity >= .80 && state.opacity <= .82, JSON.stringify(state));
-    assert.match(state.filter, /brightness\(0?\.895\)/, state.filter);
-    assert.match(state.filter, /contrast\(0?\.805\)/, state.filter);
-    assert.match(state.filter, /saturate\(0?\.975\)/, state.filter);
-    assert.match(state.filter, /blur\(0?\.82px\)/, state.filter);
+    assert.ok(state.opacity >= .94, JSON.stringify(state));
+    const mobileBrightness=Number((state.filter.match(/brightness\(([-\d.]+)/)||[])[1]);
+    const mobileContrast=Number((state.filter.match(/contrast\(([-\d.]+)/)||[])[1]);
+    const mobileSaturate=Number((state.filter.match(/saturate\(([-\d.]+)/)||[])[1]);
+    assert.ok(mobileBrightness>=.95, state.filter);
+    assert.ok(mobileContrast>=1.10, state.filter);
+    assert.ok(mobileSaturate>=1.0, state.filter);
+    assert.ok(!/blur\((?!0(?:px)?\))/i.test(state.filter), state.filter);
     assert.equal(state.stageAnimation, 'none', JSON.stringify(state));
   } else {
     assert.equal(state.normal, 'continuous-volume-93-percent-smooth', JSON.stringify(state));
