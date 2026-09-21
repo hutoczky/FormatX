@@ -81,7 +81,7 @@ const SHOTS=[
     });
     try{
       const u=new URL(BASE);
-      u.searchParams.set('mobileproof','r1450-preflight');
+      u.searchParams.set('mobileproof','r1460-preflight');
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const ready=await pollPage(
         page,
@@ -90,7 +90,7 @@ const SHOTS=[
         30000,
         120
       );
-      if(!ready)throw new Error('R1450 mobile preflight MAG did not become ready');
+      if(!ready)throw new Error('R1460 mobile preflight MAG did not become ready');
       await page.waitForTimeout(650);
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
@@ -99,7 +99,7 @@ const SHOTS=[
         const ring=document.querySelector('#hero .hero-ring');
         const ringStyle=ring?getComputedStyle(ring):null;
         return {
-          visual:root.dataset.fxNativeMagVisualR1450||root.dataset.fxNativeMagVisualR1414||root.dataset.fxNativeMagVisualR1412||'',
+          visual:root.dataset.fxNativeMagVisualR1460||root.dataset.fxNativeMagVisualR1450||root.dataset.fxNativeMagVisualR1414||'',
           shape:root.dataset.fxCoreShapeR337||'',
           renderer:root.dataset.fxCoreRenderer||'',
           resolution:root.dataset.fxCoreReal3dResolution||'',
@@ -180,7 +180,7 @@ const SHOTS=[
           stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
           canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
           renderer:root.dataset.fxCoreRenderer||'',
-          visual:root.dataset.fxNativeMagVisualR1450||'',
+          visual:root.dataset.fxNativeMagVisualR1460||root.dataset.fxNativeMagVisualR1450||'',
           shape:root.dataset.fxCoreShapeR337||'',
           canvasFilter:canvas?getComputedStyle(canvas).filter:'',
           heroRing:ring?{present:true,display:ringStyle.display,visibility:ringStyle.visibility,opacity:Number(ringStyle.opacity||0)}:{present:false,display:'none',visibility:'hidden',opacity:0},
@@ -386,7 +386,7 @@ const SHOTS=[
             stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
             canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             renderer:root.dataset.fxCoreRenderer||'',
-            visual:root.dataset.fxNativeMagVisualR1450||'',
+            visual:root.dataset.fxNativeMagVisualR1460||root.dataset.fxNativeMagVisualR1450||'',
             optics:root.dataset.fxPrimaryMagOpticsR1383||'',
             resolution:root.dataset.fxCoreReal3dResolution||'',
             shape:root.dataset.fxCoreShapeR337||'',
