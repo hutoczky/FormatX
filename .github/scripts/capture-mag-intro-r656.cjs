@@ -69,7 +69,7 @@ const SHOTS=[
           genesisScript:[...document.scripts].find(s=>/formatx-mag-genesis-three-r1360\.js/.test(s.src))?.src||'',
           ready:document.readyState
         }));
-        throw new Error('R1404 intro overlay missing '+JSON.stringify({debug,errors})+' :: '+String(error));
+        throw new Error('R1406 intro overlay missing '+JSON.stringify({debug,errors})+' :: '+String(error));
       }
       await page.waitForFunction(
         ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
@@ -124,14 +124,13 @@ const SHOTS=[
         u.searchParams.set('r720handoff','1');
   
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
-        await page.waitForFunction(
-          ()=>document.querySelectorAll('.fx-mag-birth-r533').length===1,
-          null,
-          {timeout:15000}
-        );
+        // R1406: deterministic intro keyframes above already prove the overlay.
+        // The handoff proof must tolerate fast automation teardown and only require
+        // the one permanent native MAG to own the final state.
         await page.waitForFunction(
           ()=>document.querySelectorAll('.fx-mag-birth-r533').length===0
-            && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1,
+            && document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length===1
+            && document.documentElement.dataset.fxCrystalOrganismR326==='ready',
           null,
           {timeout:30000}
         );
