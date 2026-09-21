@@ -43,6 +43,7 @@
   root.dataset.fxNativeMagVisualR1414 = 'premium-asymmetric-shard-cluster-titanium-facets-glass-optic-smooth-tendrils';
   root.dataset.fxNativeMagVisualR1420 = 'dark-irregular-shard-cluster-no-kite-silhouette-controlled-titanium-cyan-optic';
   root.dataset.fxNativeMagVisualR1440 = 'coherent-irregular-crystal-broad-facets-dark-glass-clean-titanium-cradle-cyan-reactor';
+  root.dataset.fxNativeMagVisualR1450 = 'asymmetric-shard-cluster-solid-gunmetal-cyan-optic-long-smooth-eight-tendrils';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -113,11 +114,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 10 : mobile ? 13 : constrained ? 16 : 22;
-    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 20 : mobile ? 26 : constrained ? 32 : 42;
+    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 10 : mobile ? 12 : constrained ? 15 : 20;
+    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 20 : mobile ? 24 : constrained ? 30 : 38;
     const tendrilCount = auditMode ? 4 : 8;
-    const tendrilSegments = auditMode ? 4 : constrainedMobile ? 12 : mobile ? 18 : constrained ? 18 : 28;
-    const tendrilSides = auditMode ? 3 : constrainedMobile ? 5 : mobile || constrained ? 6 : 8;
+    const tendrilSegments = auditMode ? 5 : constrainedMobile ? 18 : mobile ? 28 : constrained ? 26 : 36;
+    const tendrilSides = auditMode ? 3 : constrainedMobile ? 5 : mobile || constrained ? 7 : 9;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -168,10 +169,10 @@
          spear-like silhouette of the previous shard cluster. */
       const upper=direction[1]>=0;
       const right=direction[0]>=0;
-      const ax=upper?(right?.78:.84):(right?.81:.74);
-      const ay=upper?(right?.76:.82):(right?.74:.70);
-      const az=right?.60:.66;
-      const p=1.16;
+      const ax=upper?(right?.72:.79):(right?.77:.70);
+      const ay=upper?(right?.69:.75):(right?.68:.64);
+      const az=right?.58:.63;
+      const p=1.34;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -179,25 +180,28 @@
       const baseRadius=1/Math.pow(Math.max(.001,lp),1/p);
       const facetBias=
         1
-        +Math.sin(theta*2.71+phi*1.19)*.040
-        +Math.sin(theta*4.83-phi*2.07)*.025
-        +Math.cos(theta*1.73+phi*3.61)*.018;
-      const shoulderL=Math.pow(Math.max(0,-direction[0]*.88+direction[1]*.14+direction[2]*.12),7.0)*.060;
-      const shoulderR=Math.pow(Math.max(0, direction[0]*.82+direction[1]*.06-direction[2]*.08),7.0)*.046;
-      const crownL=Math.pow(Math.max(0,-direction[0]*.28+direction[1]*.86+direction[2]*.10),8.0)*.052;
-      const crownR=Math.pow(Math.max(0, direction[0]*.42+direction[1]*.78-direction[2]*.08),8.0)*.034;
-      const lowerL=Math.pow(Math.max(0,-direction[0]*.34-direction[1]*.82+direction[2]*.10),8.0)*.040;
-      const lowerR=Math.pow(Math.max(0, direction[0]*.22-direction[1]*.88-direction[2]*.06),8.0)*.028;
-      const mass=shoulderL+shoulderR+crownL+crownR+lowerL+lowerR;
+        +Math.sin(theta*2.37+phi*1.13)*.050
+        +Math.sin(theta*4.61-phi*2.19)*.034
+        +Math.cos(theta*1.57+phi*3.47)*.024;
+      const shard=(x,y,z,power,amount)=>
+        Math.pow(Math.max(0,direction[0]*x+direction[1]*y+direction[2]*z),power)*amount;
+      const mass=
+        shard(-.72,.64,.18,7.0,.115)+
+        shard(.82,.46,-.12,7.0,.086)+
+        shard(-.90,-.04,.24,8.0,.078)+
+        shard(.92,-.14,.10,8.0,.092)+
+        shard(-.26,-.88,.18,7.0,.074)+
+        shard(.18,-.76,-.34,8.0,.050)+
+        shard(.04,.91,.30,9.0,.058);
       const crystalRadius=baseRadius*facetBias+mass;
       const crystalPosition=[
-        direction[0]*crystalRadius*1.08,
-        direction[1]*crystalRadius*.98,
-        direction[2]*crystalRadius*.94
+        direction[0]*crystalRadius*1.10,
+        direction[1]*crystalRadius*.96,
+        direction[2]*crystalRadius*.96
       ];
-      crystalPosition[0]+=direction[1]*-.026+direction[2]*direction[1]*.026;
-      crystalPosition[1]+=direction[0]*direction[2]*.018;
-      crystalPosition[2]+=direction[0]*direction[1]*.022;
+      crystalPosition[0]+=direction[1]*-.036+direction[2]*direction[1]*.036;
+      crystalPosition[1]+=direction[0]*direction[2]*.025;
+      crystalPosition[2]+=direction[0]*direction[1]*.034;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -244,12 +248,12 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.16 + (index % 2 ? .045 : -.035);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .50;
-      const reach = .44 + ((index*3)%5) * .026;
+      const root = .46;
+      const reach = .64 + ((index*3)%5) * .038;
       const radius = root + reach * t;
-      const wave = (Math.sin(t * Math.PI * 1.72 + index * .83)*(.020+.082*t))
-        +Math.sin(t*Math.PI*.70+index*.47)*.026*t;
-      const depth = Math.sin(t * Math.PI * 1.48 + index * .97) * (.022 + .066 * t);
+      const wave = (Math.sin(t * Math.PI * 1.88 + index * .83)*(.028+.118*t))
+        +Math.sin(t*Math.PI*.76+index*.47)*.044*t;
+      const depth = Math.sin(t * Math.PI * 1.58 + index * .97) * (.030 + .092 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -266,7 +270,7 @@
       const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
-      const tubeRadius = (.0145 * (1 - t * .78) + .0038) * (mobile ? .92 : 1);
+      const tubeRadius = (.0178 * (1 - t * .80) + .0042) * (mobile ? .94 : 1);
       const rootDirection = normalize([p[0], p[1], p[2] * .72]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
@@ -449,7 +453,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.675':'.675'};
+        projected*= ${mobile?'.615':'.625'};
         projected.y+=${mobile?'.055':'.028'};
         gl_Position=vec4(projected,world.z*.13,1.0);
       }`;
@@ -538,10 +542,10 @@
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
         float podMask=1.0-vMorph;
         float diamondCoord=abs(heartLocal.x)+abs(heartLocal.y*1.035);
-        float diamondFace=(1.0-smoothstep(.222,.286,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
-        float diamondInner=(1.0-smoothstep(.142,.178,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondFace=(1.0-smoothstep(.198,.252,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondInner=(1.0-smoothstep(.135,.166,diamondCoord))*smoothstep(.18,.46,vLocal.z)*podMask;
         float diamondFrame=max(0.0,diamondFace-diamondInner);
-        float diamondRim=(1.0-smoothstep(.006,.018,abs(diamondCoord-.254)))*smoothstep(.18,.46,vLocal.z)*podMask;
+        float diamondRim=(1.0-smoothstep(.005,.016,abs(diamondCoord-.226)))*smoothstep(.18,.46,vLocal.z)*podMask;
         float cradlePlate=smoothstep(3.28,3.33,vFacet)*podMask;
         float pupil=1.0-smoothstep(.018,.038,radial);
         float coreDisc=1.0-smoothstep(.038,.078,radial);
@@ -564,7 +568,7 @@
         vec3 ice=vec3(.46,.62,.68);
         vec3 gunmetal=vec3(.003,.007,.011);
         vec3 steel=vec3(.020,.038,.052);
-        vec3 silver=vec3(.22,.27,.30);
+        vec3 silver=vec3(.135,.175,.205);
         vec3 spectral=mix(cyan,ice,.10+.28*hue);
         float surfaceSweep=0.0;
         float surfaceFilament=0.0;
@@ -620,14 +624,14 @@
         glass=mix(glass,tissue,tissueMask*.97);
         glass+=steel*crownMask*(.18+.20*ndl+.08*specular);
         glass+=steel*shoulderMask*(.30+.30*ndl+.12*specular);
-        glass=mix(glass,silver*(.64+.64*ndl+.36*specular)+ice*.045*specular,realArmorPlate*.94);
+        glass=mix(glass,steel*(.80+.28*ndl)+silver*.34+ice*.022*specular,realArmorPlate*.96);
         glass=mix(glass,steel*(.72+.36*ndl)+gunmetal*.26+silver*.14*specular,realDarkPlate*.92);
         glass=mix(glass,vec3(.009,.015,.024)+steel*.24,diamondFace*.88);
         glass=mix(glass,steel*.58+silver*.20*specular,diamondFrame*.86);
         glass=mix(glass,vec3(.007,.012,.019)+steel*.20,cradlePlate*.80);
         glass+=gunmetal*jawMask*.76;
         glass-=vec3(.018,.024,.032)*opticalWell*.92;
-        glass+=(ice*.38+cyan*.38)*diamondRim*(.40+.26*specular);
+        glass+=(ice*.20+cyan*.34)*diamondRim*(.30+.20*specular);
         glass+=cyan*fresnel*(.018+.024*visualEnergy);
         glass+=cyan*veins*(.014+.014*uBreath);
         glass+=cyan*membrane*(.006+.010*visualEnergy);
@@ -1015,32 +1019,16 @@
       const surfacePulse=surfacePulseElapsed>=0&&surfacePulseElapsed<=1?surfacePulseElapsed:-1;
       gl.uniform1f(uniforms.uSurfacePulse,surfacePulse);
 
-      /* r442 phone budget: desktop keeps the three-pass optical depth. Mobile
-         drops the extra front-cull outer-glow pass, which both reduces the bloom
-         seen in the physical phone capture and removes roughly one third of the
-         expensive fragment work per interaction frame. */
-      if(mobile&&slowRenderer){
-        gl.depthMask(true);
-        gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-        gl.cullFace(gl.BACK);
-        gl.uniform1f(uniforms.uLayer,0);
-        gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-      }else{
-        gl.depthMask(false);
-        gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
-        if(!mobile&&!slowRenderer){
-          gl.cullFace(gl.FRONT);
-          gl.uniform1f(uniforms.uLayer,0);
-          gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-        }
-        gl.cullFace(gl.BACK);
-        gl.uniform1f(uniforms.uLayer,1);
-        gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-        gl.depthMask(true);
-        gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-        gl.uniform1f(uniforms.uLayer,0);
-        gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-      }
+      /* R1450 — one solid outer pass on every device.
+         The old additive inner/front passes made the crystal look translucent,
+         bruised and overexposed on desktop. All optical detail now lives in the
+         physically coherent outer shader, which is also cheaper and crisper. */
+      gl.depthMask(true);
+      gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+      gl.cullFace(gl.BACK);
+      gl.uniform1f(uniforms.uLayer,0);
+      gl.drawArrays(gl.TRIANGLES,0,geometry.count);
+      root.dataset.fxCorePassModelR1450='single-solid-outer-pass';
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
