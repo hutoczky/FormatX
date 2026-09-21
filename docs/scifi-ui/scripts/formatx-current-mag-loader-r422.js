@@ -13,13 +13,13 @@ if(reduced)root.dataset.fxCurrentMagMotionR424='r468-static-render-explicit-inte
 root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
-const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260921-r1503-photoreal-obsidian';
+const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260921-r1510-photoreal-physical-lens';
 const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260920-r560-context-collision-safe';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260921-r1503-photoreal-obsidian';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260921-r1510-photoreal-physical-lens';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
 // compatibility-contract: r484-bounded-surface-window

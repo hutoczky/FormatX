@@ -286,9 +286,9 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   html:root:root:root:root:root:root:root:root:root:root[data-fx-native-mag-visual-r1500]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:var(--fx-mag-life-opacity,.98)!important;
-    filter:brightness(.98) contrast(1.14) saturate(1.00)!important;
-    -webkit-filter:brightness(.98) contrast(1.14) saturate(1.00)!important;
+    filter:brightness(.985) contrast(1.12) saturate(.94)!important;
+    -webkit-filter:brightness(.985) contrast(1.12) saturate(.94)!important;
     mix-blend-mode:normal!important;
   }
 }
-/* production-r1503-photoreal-mineral-visible-local-sweep-no-css-halo */
+/* production-r1510-photoreal-mineral-physical-lens-no-css-halo */

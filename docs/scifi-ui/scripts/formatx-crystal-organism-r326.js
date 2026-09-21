@@ -49,6 +49,7 @@
   root.dataset.fxNativeMagVisualR1480 = 'realistic-obsidian-crystal-broad-cut-facets-integrated-cradle-lens-eight-tendrils';
   root.dataset.fxNativeMagVisualR1490 = 'single-body-asymmetric-obsidian-crystal-no-detached-armor-optical-lens-eight-tendrils';
   root.dataset.fxNativeMagVisualR1500 = 'photoreal-asymmetric-obsidian-mineral-local-optical-lens-eight-tendrils';
+  root.dataset.fxNativeMagVisualR1510 = 'photoreal-obsidian-physical-lens-no-hud-rings-organic-tendrils';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -518,17 +519,11 @@
         float visualEnergy=sat(.36+uEnergy*.48);
         float heart=pow(sat(1.0-radial/.45),3.05);
         float nucleus=pow(sat(1.0-radial/.185),4.35);
-        float ringA=1.0-smoothstep(.007,.019,abs(radial-.090));
-        float ringB=1.0-smoothstep(.009,.023,abs(radial-.155));
-        float ringC=1.0-smoothstep(.011,.029,abs(radial-.235));
-        float ringBreak=.42+.58*smoothstep(.22,.74,noise(vec2(angle*1.75+uTime*.025,radial*17.0-uTime*.035)));
-        float rings=(ringA+.72*ringB+.42*ringC)*ringBreak*(1.0-smoothstep(.22,.36,radial));
-        float petalRadius=.225+.026*sin(angle*4.0+cloud*1.2-uTime*.10);
-        float irisBand=1.0-smoothstep(.012,.042,abs(radial-petalRadius));
-        float petals=pow(.5+.5*cos(angle*4.0+warp*1.1-uTime*.15),5.0);
-        float iris=irisBand*(.28+.72*petals)*(1.0-smoothstep(.34,.49,radial));
-        float axisV=(1.0-smoothstep(.004,.021,abs(heartLocal.x)))*(1.0-smoothstep(.24,.48,abs(heartLocal.y)));
-        float axisH=(1.0-smoothstep(.004,.020,abs(heartLocal.y)))*(1.0-smoothstep(.22,.46,abs(heartLocal.x)));
+        // R1510 — physical lens, not a HUD iris.
+        float rings=0.0;
+        float iris=0.0;
+        float axisV=0.0;
+        float axisH=0.0;
         float hue=.5+.5*sin(vFacet*7.0+uSiteProgress*9.0+uTime*.12);
         float armorSeam=ridge(vUv.x*4.0+vUv.y*.18+uSiteProgress*.08,17.0)*(1.0-smoothstep(.62,.98,abs(vLocal.y)));
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
@@ -539,10 +534,11 @@
         float diamondFrame=max(0.0,diamondFace-diamondInner);
         float diamondRim=(1.0-smoothstep(.005,.016,abs(diamondCoord-.226)))*smoothstep(.18,.46,vLocal.z)*podMask;
         float cradlePlate=diamondFrame*podMask;
-        float pupil=1.0-smoothstep(.018,.038,radial);
-        float coreDisc=1.0-smoothstep(.038,.078,radial);
-        float coreRing=1.0-smoothstep(.006,.016,abs(radial-.072));
-        float irisRays=pow(.5+.5*cos(angle*18.0+uTime*.04),9.0)*smoothstep(.080,.105,radial)*(1.0-smoothstep(.145,.185,radial));
+        float pupil=1.0-smoothstep(.016,.034,radial);
+        float coreDisc=1.0-smoothstep(.050,.104,radial);
+        float coreRing=1.0-smoothstep(.007,.019,abs(radial-.098));
+        float irisRays=0.0;
+        float lensCaustic=exp(-pow(length(heartLocal-vec2(-.030,.034))/.036,2.0))*coreDisc;
         float realArmorPlate=0.0;
         float realDarkPlate=0.0;
         float crownMask=smoothstep(.34,.68,vLocal.y)
@@ -617,14 +613,14 @@
         tissue+=steel*(.16+.28*ndl)+ice*.040*specular;
         tissue+=cyan*fresnel*(.003+.005*visualEnergy);
         glass=mix(glass,tissue,tissueMask*.992);
-        glass+=mix(steel,silver,.28)*crownMask*(.38+.46*ndl+.18*specular);
-        glass+=mix(steel,silver,.18)*shoulderMask*(.30+.38*ndl+.14*specular);
+        glass+=mix(steel,silver,.28)*crownMask*(.11+.16*ndl+.08*specular);
+        glass+=mix(steel,silver,.18)*shoulderMask*(.08+.13*ndl+.06*specular);
         glass=mix(glass,steel*(.76+.24*ndl)+silver*.22+ice*.012*specular,realArmorPlate*.94);
         glass=mix(glass,steel*(.72+.36*ndl)+gunmetal*.26+silver*.14*specular,realDarkPlate*.92);
         glass=mix(glass,vec3(.004,.010,.017)+steel*.18,diamondFace*.94);
         glass=mix(glass,steel*.68+silver*.34+ice*.08*specular,diamondFrame*.92);
         glass=mix(glass,steel*.62+silver*.18*specular,cradlePlate*.74);
-        glass+=gunmetal*jawMask*.76;
+        glass+=gunmetal*jawMask*.34;
         glass-=vec3(.018,.024,.032)*opticalWell*.92;
         glass+=(ice*.18+cyan*.16)*diamondRim*(.24+.18*specular);
         glass+=cyan*fresnel*(.005+.007*visualEnergy);
@@ -636,7 +632,8 @@
         glass=mix(glass,vec3(.001,.002,.003),pupil*.76);
         glass+=cyan*coreDisc*.82+ice*coreDisc*.26;
         glass+=ice*lensGlint*.76;
-        glass+=cyan*coreRing*.56;
+        glass+=(ice*.30+cyan*.08)*lensCaustic;
+        glass+=mix(steel,ice,.28)*coreRing*.34;
         glass+=ice*specular*(.096+.042*visualEnergy);
         glass+=(cyan*.045+ice*.018)*(axisV*.045+axisH*.028)*visualEnergy;
         glass+=(cyan*.014+ice*.008)*dnaHelix*(.006+.008*fresnel)*genomePulse;
@@ -676,7 +673,7 @@
         float angle=atan(heartLocal.y,heartLocal.x);
         float heart=pow(sat(1.0-radial/.45),3.0);
         float nucleus=pow(sat(1.0-radial/.185),4.15);
-        float ring=1.0-smoothstep(.012,.032,abs(radial-.225));
+        float ring=0.0;
         float dnaA=pow(.5+.5*cos(angle-vLocal.y*7.2-uTime*.045),16.0);
         float dnaB=pow(.5+.5*cos(angle-vLocal.y*7.2-uTime*.045-3.14159265),16.0);
         float dna=(dnaA+dnaB)*(.32+.68*fresnel);
@@ -718,8 +715,8 @@
         tissue*=1.0-.14*cortexGroove;
         tissue+=steel*cortex*.20;
         vec3 c=mix(metal,tissue,.96);
-        c+=silver*crownMask*(.46+.52*ndl+.26*spec);
-        c+=steel*shoulderMask*(.40+.44*ndl+.20*spec);
+        c+=silver*crownMask*(.14+.18*ndl+.08*spec);
+        c+=steel*shoulderMask*(.11+.15*ndl+.07*spec);
         c=mix(c,silver*(.86+.76*ndl+.50*spec)+ice*.06*spec,realArmorPlate*.94);
         c=mix(c,metal*.72+steel*.46,realDarkPlate*.90);
         c=mix(c,metal*.66+steel*.34,diamondFace*.90);
@@ -1302,6 +1299,7 @@
     root.dataset.fxCoreReferenceMaterialR1500='photoreal-obsidian-mineral-localized-optical-emission';
     root.dataset.fxCoreOpticsR1500='neutral-mineral-keylight-local-emission-no-css-glow';
     root.dataset.fxCoreSurfaceEnergyR1503='localized-travelling-electric-sweep-visible-then-zero-idle';
+    root.dataset.fxCoreOpticsR1510='physical-lens-no-hud-rings-no-crosshair-mineral-dominant';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
     root.dataset.fxCoreReferenceMaterialR1220='opaque-gunmetal-bright-titanium-armor-local-blue-optic-dark-tendrils';
