@@ -4,11 +4,11 @@ const root=document.documentElement;
 if(root.dataset.fxCoreShapeshifterR337==='ready')return;
 root.dataset.fxCoreShapeshifterR337='booting';
 
-const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260920-r594-semantic-hit-owner';
+const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260921-r1404-crisp-irregular-crystal';
 const SHAPES=['crystal','sphere'];
 const LABELS={
-  hu:{crystal:'kristály',sphere:'gömb'},
-  en:{crystal:'crystal',sphere:'sphere'}
+  hu:{crystal:'szabálytalan kristály',sphere:'lágy kristály'},
+  en:{crystal:'irregular crystal',sphere:'soft crystal'}
 };
 let index=0;
 
@@ -50,11 +50,10 @@ function apply(nextIndex,source){
 function next(source){return apply(index+1,source||'mag-button');}
 
 ensureStyle();
-try{
-  const saved=sessionStorage.getItem('formatx-core-shape-r337');
-  const savedIndex=SHAPES.indexOf(saved||'');
-  if(savedIndex>=0)index=savedIndex;
-}catch(_){}
+/* R1404: every navigation starts from the selected brand silhouette. A user may
+   still morph to the compatible soft-crystal state during the current page. */
+index=0;
+root.dataset.fxCoreDefaultShapeR1404='irregular-crystal';
 apply(index,'boot');
 
 document.addEventListener('click',event=>{
