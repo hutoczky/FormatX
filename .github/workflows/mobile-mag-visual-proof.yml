@@ -1,5 +1,5 @@
 name: FormatX mobile MAG visual proof
-# R1412 fast phone-only proof for the sculpted asymmetric crystal hero.
+# R1420 fast phone-only proof for the dark irregular shard hero.
 
 on:
   push:
@@ -65,7 +65,7 @@ jobs:
       - name: Capture 390x844 mobile hero
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4181/scifi-ui/index.html
-          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1412-mobile-mag
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r1420-mobile-mag
           FORMATX_MOBILE_ONLY: '1'
         run: node .github/scripts/capture-mag-intro-r656.cjs
 
@@ -73,8 +73,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mobile-mag-r1412-proof
-          path: artifacts/r1412-mobile-mag/
+          name: mobile-mag-r1420-proof
+          path: artifacts/r1420-mobile-mag/
           if-no-files-found: warn
           retention-days: 14
 
@@ -87,13 +87,13 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R1412 mobile sculpted crystal proof failed'
+          description='R1420 mobile dark shard proof failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R1412 mobile sculpted crystal proof passed'
+            description='R1420 mobile dark shard proof passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R1412 mobile MAG visual proof' \
+            -f context='FormatX R1420 mobile MAG visual proof' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
