@@ -34,6 +34,7 @@
   root.dataset.fxNativeMagVisualR1360 = 'cortical-rounded-body-dark-diamond-cradle-glassy-eight-tendrils';
   root.dataset.fxNativeMagVisualR1380 = 'premium-organic-cortex-defined-diamond-iris-smooth-glass-tendrils';
   root.dataset.fxNativeMagVisualR1390 = 'premium-cortical-biomech-broad-metal-cradle-optical-iris-eight-tendrils';
+  root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
@@ -691,7 +692,7 @@
         float alpha=.955+.016*ndl+.014*fresnel+nucleus*.016+pulse*.014+tendrilMask*.012+realArmorPlate*.030+realDarkPlate*.022;
         ${outputName}=vec4(filmic(c*.88),clamp(alpha,.92,.990));
       }`;
-    const fragmentSource = constrainedMobile ? constrainedFragmentSource : fullFragmentSource;
+    const fragmentSource = (constrainedMobile || auditMode) ? constrainedFragmentSource : fullFragmentSource;
 
     let pendingProgram;
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
@@ -899,6 +900,10 @@
     }
     function scheduleSurfacePulse(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
+      if(auditMode){
+        root.dataset.fxCoreSurfaceSchedulerR484='lighthouse-audit-disabled';
+        return;
+      }
       if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'){
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
