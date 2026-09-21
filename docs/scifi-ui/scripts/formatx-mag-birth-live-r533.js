@@ -7,6 +7,7 @@
   const VISUAL_PROOF = PARAMS.get('visualintro') === '1';
   const VISUAL_FRAME = Number.parseFloat(PARAMS.get('introframe') || '');
   const HAS_VISUAL_FRAME = VISUAL_PROOF && Number.isFinite(VISUAL_FRAME);
+  const PROOF_REFERENCE_RENDERER = VISUAL_PROOF && PARAMS.get('proofrenderer') === 'reference';
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
@@ -651,6 +652,11 @@
     if(AUTOMATION && FORCE && !VISUAL_PROOF){
       ROOT.dataset.fxMagBirthRendererR1360='automation-handoff-lightweight';
       canvas.hidden=true;
+      return;
+    }
+    if(PROOF_REFERENCE_RENDERER){
+      ROOT.dataset.fxMagBirthProofRendererR1407='reference-film-no-swiftshader-block';
+      startR649Fallback();
       return;
     }
     if(filmRenderer){
