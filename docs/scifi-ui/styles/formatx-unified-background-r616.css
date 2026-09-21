@@ -531,3 +531,63 @@ html[data-fx-lighthouse-audit-r1391="true"] body.living-architecture :is(
   -webkit-backdrop-filter:none!important;
 }
 /* production-r1391-lighthouse-compositor-bound */
+
+
+/* R1401 — stronger continuous mobile chamber. Panels remain readable but are
+   translucent enough that the MAG feels embedded in one page-wide environment. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root body.living-architecture {
+    background:
+      radial-gradient(760px 620px at 50% 4%,rgba(65,220,255,.16),transparent 64%),
+      radial-gradient(720px 720px at 6% 48%,rgba(45,116,216,.075),transparent 72%),
+      radial-gradient(680px 640px at 91% 77%,rgba(101,67,232,.060),transparent 74%),
+      linear-gradient(180deg,#01050b 0%,#02121e 27%,#020a13 62%,#01050b 100%)!important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture::before {
+    opacity:.88!important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture::after {
+    opacity:.96!important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture #hero,
+  html:root:root:root:root:root:root:root body.living-architecture #hero .hero-grid,
+  html:root:root:root:root:root:root:root body.living-architecture #hero .hero-space {
+    background:transparent!important;
+    background-image:none!important;
+    box-shadow:none!important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture #hero .hero-copy {
+    background:
+      radial-gradient(circle at 84% 4%,rgba(65,213,255,.040),transparent 34%),
+      linear-gradient(145deg,rgba(5,22,36,.68),rgba(2,10,18,.78))!important;
+    backdrop-filter:blur(4px) saturate(108%)!important;
+    -webkit-backdrop-filter:blur(4px) saturate(108%)!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    filter:none!important;
+    -webkit-filter:none!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    opacity:.97!important;
+    filter:brightness(1.0) contrast(1.20) saturate(1.06) drop-shadow(0 0 6px rgba(72,226,255,.12))!important;
+    -webkit-filter:brightness(1.0) contrast(1.20) saturate(1.06) drop-shadow(0 0 6px rgba(72,226,255,.12))!important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture #hero .hero-ring,
+  html:root:root:root:root:root:root:root body.living-architecture #hero .hero-label {
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+  }
+}
+/* production-r1401-mobile-continuous-living-chamber */
