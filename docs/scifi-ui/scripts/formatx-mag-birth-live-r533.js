@@ -140,6 +140,8 @@
   overlay.dataset.fxIntroR1460 = 'cinematic-dna-organic-cut-crystal-three-genesis';
   overlay.dataset.fxIntroR1470 = 'cinematic-dna-cortical-organic-obsidian-cut-crystal-three-genesis';
   overlay.dataset.fxIntroR1490 = 'realistic-dna-solid-organism-obsidian-crystal-cinematic-three-genesis';
+  overlay.dataset.fxIntroR1530 = 'photoreal-microfacet-mag-continuous-living-habitat-three-genesis';
+  ROOT.dataset.fxMagBirthArtR1530 = 'physical-studio-light-microtextured-mineral-continuous-habitat-handoff';
   overlay.dataset.fxIntroR1400 = 'irregular-crystal-final-handoff-three-genesis';
   overlay.dataset.fxIntroR1412 = 'vertical-asymmetric-crystal-final-handoff-three-genesis';
   overlay.dataset.fxIntroR1420 = 'real-three-solid-cortical-reference-dna-dark-shard-final-handoff';
