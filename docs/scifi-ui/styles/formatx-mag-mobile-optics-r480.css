@@ -1,4 +1,4 @@
-/* FormatX R1408 — pixel-stable mobile crystal optics and opacity-only pulse.
+/* FormatX R1410 — pixel-stable sculpted-crystal optics and opacity-only pulse.
    R326 remains the single WebGL/material owner and R484 keeps the periodic native
    surface-energy sweep. R502 keeps the canonical CSSAnimation declared across
    PAUSE so the root playback governor freezes/resumes the same timeline object. */
@@ -22,14 +22,14 @@
     opacity: .965 !important;
     filter:
       brightness(.99)
-      contrast(1.18)
-      saturate(1.06)
+      contrast(1.24)
+      saturate(1.03)
       hue-rotate(-1deg)
       blur(0px) !important;
     -webkit-filter:
       brightness(.99)
-      contrast(1.18)
-      saturate(1.06)
+      contrast(1.24)
+      saturate(1.03)
       hue-rotate(-1deg)
       blur(0px) !important;
     mix-blend-mode: normal !important;
@@ -143,3 +143,5 @@
 /* production-r1401-mobile-crystal-no-blur-crisp-facets */
 
 /* production-r1408-mobile-crystal-pixel-stable-no-canvas-scale */
+
+/* production-r1410-sculpted-mobile-crystal-optics */
