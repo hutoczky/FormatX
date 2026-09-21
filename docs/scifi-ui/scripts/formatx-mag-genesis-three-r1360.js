@@ -48,6 +48,8 @@
       this.height=1;
       this.lastRender=0;
       this.disposed=false;
+      this.highDetail=matchMedia('(min-width:901px) and (pointer:fine)').matches
+        && Number(navigator.hardwareConcurrency||8)>4;
 
       this.renderer=new THREE.WebGLRenderer({
         canvas,
@@ -61,11 +63,11 @@
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.04;
+      this.renderer.toneMappingExposure=1.00;
 
       this.scene=new THREE.Scene();
-      this.scene.background=new THREE.Color(0x020811);
-      this.scene.fog=new THREE.FogExp2(0x020811,0.032);
+      this.scene.background=new THREE.Color(0x010407);
+      this.scene.fog=new THREE.FogExp2(0x010407,0.027);
 
       this.camera=new THREE.PerspectiveCamera(42,1,0.05,80);
       this.camera.position.set(0,0.12,7.25);
@@ -102,15 +104,25 @@
       const key=new T.DirectionalLight(0xf6f4ef,2.78);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
-      const rim=new T.PointLight(0x7fb6bf,9.0,12,2);
+      const rim=new T.PointLight(0x9abfc5,5.8,12,2);
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
-      const bioticFill=new T.PointLight(0x62566f,3.0,10,2);
+      const bioticFill=new T.PointLight(0x62566f,2.15,10,2);
       bioticFill.position.set(-2.7,-.9,2.8);
       this.scene.add(bioticFill);
-      const warmBounce=new T.PointLight(0xb8a58e,1.20,8,2);
+      const warmBounce=new T.PointLight(0xb8a58e,.82,8,2);
       warmBounce.position.set(2.4,2.1,1.1);
       this.scene.add(warmBounce);
+
+      const softbox=new T.SpotLight(0xe7f6f6,6.4,15,Math.PI*.24,.74,1.75);
+      softbox.position.set(-4.5,5.6,6.2);
+      softbox.target.position.set(.25,.12,0);
+      this.scene.add(softbox,softbox.target);
+
+      const edgeSoftbox=new T.SpotLight(0x8497aa,3.6,13,Math.PI*.28,.82,1.9);
+      edgeSoftbox.position.set(4.8,1.5,4.1);
+      edgeSoftbox.target.position.set(-.18,-.08,.1);
+      this.scene.add(edgeSoftbox,edgeSoftbox.target);
       this.coreLight=new T.PointLight(0x79dbe7,0,7,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
@@ -1000,8 +1012,42 @@
       this.cellGroup.scale.setScalar(.001);
     }
 
+    makeMineralRoughnessTexture(){
+      const T=this.THREE;
+      const c=document.createElement('canvas');
+      c.width=c.height=128;
+      const x=c.getContext('2d');
+      const image=x.createImageData(128,128);
+      const data=image.data;
+      for(let i=0;i<128*128;i++){
+        const grain=.64+this.rand()*.28;
+        const value=Math.max(0,Math.min(255,Math.round(grain*255)));
+        const p=i*4;
+        data[p]=value;data[p+1]=value;data[p+2]=value;data[p+3]=255;
+      }
+      x.putImageData(image,0,0);
+      x.globalAlpha=.13;
+      x.strokeStyle='#202020';
+      for(let i=0;i<18;i++){
+        const y=this.rand()*128;
+        x.lineWidth=.35+this.rand()*.7;
+        x.beginPath();
+        x.moveTo(-8,y);
+        x.lineTo(136,y+(this.rand()-.5)*12);
+        x.stroke();
+      }
+      x.globalAlpha=1;
+      const texture=new T.CanvasTexture(c);
+      texture.wrapS=texture.wrapT=T.RepeatWrapping;
+      texture.repeat.set(2.35,2.85);
+      texture.anisotropy=Math.min(4,this.renderer.capabilities.getMaxAnisotropy?.()||1);
+      return texture;
+    }
+
     makeMechanicalLayer(){
       const T=this.THREE;
+      const mineralRoughness=this.makeMineralRoughnessTexture();
+      this.mineralRoughnessTexture=mineralRoughness;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
         color:0x171b1d,metalness:.56,roughness:.38,
@@ -1023,6 +1069,15 @@
       });
       this.crownMaterial=this.silverMaterial.clone();
       this.crownMaterial.opacity=0;
+
+      for(const material of [this.mechMaterial,this.mechMidMaterial,this.silverMaterial,this.crownMaterial]){
+        material.roughnessMap=mineralRoughness;
+        if(this.highDetail){
+          material.bumpMap=mineralRoughness;
+          material.bumpScale=.0065;
+        }
+        material.needsUpdate=true;
+      }
 
       this.mechEdgeMaterial=new T.LineBasicMaterial({
         color:0x9bd8e1,transparent:true,opacity:0,
@@ -1502,6 +1557,7 @@
         if(Array.isArray(m))m.forEach(x=>x?.dispose?.());
         else m?.dispose?.();
       });
+      this.mineralRoughnessTexture?.dispose?.();
       this.renderer.dispose();
     }
   }
@@ -1564,11 +1620,12 @@
   document.documentElement.dataset.fxMagBirthProofR1500='photoreal-closed-volume-obsidian-mineral-handoff';
   document.documentElement.dataset.fxMagBirthProofR1510='physical-lens-no-hud-rails-organic-tendrils-handoff';
   document.documentElement.dataset.fxMagBirthProofR1520='visible-irregular-obsidian-facets-no-orbit-ring-handoff';
+  document.documentElement.dataset.fxMagBirthProofR1530='microtextured-obsidian-physical-studio-light-living-habitat-handoff';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1520-photoreal-visible-irregular-physical-lens-obsidian-crystal'
+    revision:'r1530-photoreal-microtextured-obsidian-physical-lens-studio-light'
   };
 })();
