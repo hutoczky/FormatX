@@ -35,6 +35,7 @@
   root.dataset.fxNativeMagVisualR1380 = 'premium-organic-cortex-defined-diamond-iris-smooth-glass-tendrils';
   root.dataset.fxNativeMagVisualR1390 = 'premium-cortical-biomech-broad-metal-cradle-optical-iris-eight-tendrils';
   root.dataset.fxNativeMagVisualR1400 = 'irregular-crystal-biomech-cortex-optical-iris-eight-tendrils';
+  root.dataset.fxNativeMagVisualR1401 = 'sharp-asymmetric-crystal-black-gunmetal-optical-iris-eight-tendrils-mobile';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -105,8 +106,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 12 : mobile ? 18 : constrained ? 20 : 34;
-    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 24 : mobile ? 36 : constrained ? 40 : 64;
+    const latitudeSegments = auditMode ? 10 : constrainedMobile ? 11 : mobile ? 14 : constrained ? 18 : 30;
+    const longitudeSegments = auditMode ? 18 : constrainedMobile ? 22 : mobile ? 28 : constrained ? 36 : 56;
     const tendrilCount = auditMode ? 4 : 8;
     const tendrilSegments = auditMode ? 4 : constrainedMobile ? 8 : mobile ? 16 : constrained ? 18 : 28;
     const tendrilSides = auditMode ? 3 : constrainedMobile ? 4 : mobile || constrained ? 6 : 8;
@@ -143,30 +144,31 @@
          The closed sphere topology intersects an asymmetric octahedral envelope,
          then receives restrained biological distortion. This keeps the MAG alive
          while the silhouette reads as a unique faceted crystal from every angle. */
-      const ax=.76, ay=.90, az=.64;
+      const ax=.70, ay=.88, az=.57;
       const l1=Math.abs(direction[0])/ax+Math.abs(direction[1])/ay+Math.abs(direction[2])/az;
       const octaRadius=1/Math.max(.001,l1);
       const shardBias=
         1
-        +Math.sin(theta*3.17+phi*1.31)*.055
-        +Math.sin(theta*5.83-phi*2.27)*.030
-        +Math.cos(theta*2.11+phi*4.43)*.022;
+        +Math.sin(theta*3.17+phi*1.31)*.082
+        +Math.sin(theta*5.83-phi*2.27)*.047
+        +Math.cos(theta*2.11+phi*4.43)*.034
+        +Math.sin(theta*9.31+phi*.73)*.018;
       const cortical=
-        Math.sin(theta*4.0+phi*1.35)*.022
-        +Math.sin(theta*7.0-phi*2.4)*.014
-        +Math.sin(theta*2.0+phi*5.2)*.010;
-      const organicRadius=.545+cortical;
-      const crystalRadius=(octaRadius*.80+organicRadius*.20)*shardBias;
-      const topShard=Math.pow(Math.max(direction[1],0),7.0)*.095;
-      const lowerShard=Math.pow(Math.max(-direction[1],0),6.0)*.052;
-      const sideShard=Math.pow(Math.abs(direction[0]),5.0)*.028*(direction[0]>0?1.16:.84);
+        Math.sin(theta*4.0+phi*1.35)*.012
+        +Math.sin(theta*7.0-phi*2.4)*.008;
+      const organicRadius=.525+cortical;
+      const crystalRadius=(octaRadius*.92+organicRadius*.08)*shardBias;
+      const topShard=Math.pow(Math.max(direction[1],0),6.0)*.145;
+      const lowerShard=Math.pow(Math.max(-direction[1],0),5.0)*.082;
+      const sideShard=Math.pow(Math.abs(direction[0]),4.0)*.050*(direction[0]>0?1.24:.76);
       const crystalPosition=[
-        direction[0]*(crystalRadius+sideShard)*1.08,
-        direction[1]*crystalRadius*1.04+topShard-lowerShard,
-        direction[2]*crystalRadius*.92
+        direction[0]*(crystalRadius+sideShard)*1.11,
+        direction[1]*crystalRadius*1.08+topShard-lowerShard,
+        direction[2]*crystalRadius*.88
       ];
-      crystalPosition[0]+=direction[2]*direction[1]*.026;
-      crystalPosition[2]+=direction[0]*direction[1]*.018;
+      crystalPosition[0]+=direction[2]*direction[1]*.038;
+      crystalPosition[1]+=direction[0]*direction[2]*.018;
+      crystalPosition[2]+=direction[0]*direction[1]*.028;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -424,7 +426,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.80':'.84'};
+        projected*= ${mobile?'.84':'.86'};
         projected.y+=.010;
         gl_Position=vec4(projected,world.z*.13,1.0);
       }`;
@@ -584,12 +586,12 @@
         glass+=vec3(.010,.018,.032)*sideLight*.14;
         float armorBlock=sat(realArmorPlate+realDarkPlate+crownMask+shoulderMask+jawMask+diamondFace);
         float tissueMask=podMask*(1.0-sat(armorBlock))*(1.0-tendrilMask);
-        vec3 tissue=mix(vec3(.012,.003,.022),vec3(.118,.030,.145),.22+.46*ndl+.18*sideLight);
-        tissue+=vec3(.025,.006,.045)*(.28+.38*cloud);
-        tissue*=1.0-.52*cortexGroove;
-        tissue+=vec3(.070,.018,.090)*cortexLobe*(.24+.38*ndl);
-        tissue+=vec3(.018,.006,.030)*(1.0-cortexGroove)*fresnel*.20;
-        glass=mix(glass,tissue,tissueMask*.92);
+        vec3 tissue=mix(vec3(.004,.009,.016),vec3(.038,.080,.102),.24+.48*ndl+.20*sideLight);
+        tissue+=vec3(.010,.020,.034)*(.24+.30*cloud);
+        tissue*=1.0-.34*cortexGroove;
+        tissue+=vec3(.020,.052,.070)*cortexLobe*(.22+.34*ndl);
+        tissue+=vec3(.010,.022,.038)*(1.0-cortexGroove)*fresnel*.28;
+        glass=mix(glass,tissue,tissueMask*.97);
         glass+=silver*crownMask*(.72+.62*ndl+.34*specular);
         glass+=steel*shoulderMask*(.50+.54*ndl+.28*specular);
         glass=mix(glass,silver*(.70+.70*ndl+.42*specular),realArmorPlate*.92);
