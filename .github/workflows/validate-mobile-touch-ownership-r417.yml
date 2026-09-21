@@ -33,10 +33,10 @@ jobs:
           node .github/scripts/validate-living-core-r425-source.cjs
           grep -q 'production-r467-desktop-three-cell-control-row' docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css
           grep -q 'production-r467-desktop-header-three-control-no-overlap' docs/scifi-ui/styles/formatx-mobile-header-final-r418.css
-          grep -q 'production-r488-mobile-optics-restrained-glow-soft-edge-compositor-pulse' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
+          grep -q 'production-r1410-sculpted-mobile-crystal-optics' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
           grep -q 'brightness(.99)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
-          grep -q 'contrast(1.18)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
-          grep -q 'saturate(1.06)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
+          grep -q 'contrast(1.24)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
+          grep -q 'saturate(1.03)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
           grep -q 'blur(0px)' docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css
       - name: Install Chromium runtime
         shell: bash
