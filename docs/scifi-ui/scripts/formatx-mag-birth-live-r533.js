@@ -457,7 +457,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = './scripts/formatx-mag-genesis-three-r1360.js?v=20260922-r1609-hand-hewn-photoreal';
+  const THREE_OWNER_SRC = './scripts/formatx-mag-genesis-three-r1360.js?v=20260922-r1612-natural-obsidian-photoreal';
   let particles = [];
   let raf = 0;
   let startedAt = 0;
