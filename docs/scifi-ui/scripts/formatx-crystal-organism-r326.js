@@ -81,6 +81,7 @@
   root.dataset.fxNativeMagVisualR1584 = 'hand-hewn-asymmetric-obsidian-crystal-dark-glass-narrow-studio-ribbons-smooth-large-planes';
   root.dataset.fxNativeMagVisualR1585 = 'photographic-living-obsidian-crystal-recessed-cyan-energy-chamber-organic-metal-ribs-short-tendrils';
   root.dataset.fxNativeMagVisualR1586 = 'three-quarter-hand-cut-living-obsidian-large-energy-chamber-visible-faceted-depth-reference-lab-scale';
+  root.dataset.fxNativeMagVisualR1587 = 'photographic-hand-cut-smoky-obsidian-broad-readable-facets-subtle-mineral-fissure-no-eye';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -314,17 +315,15 @@
          A small set of offset polygonal rings creates intentional broad mineral
          planes. This removes the rounded-pot/egg silhouette produced by a
          latitude sphere while preserving the same single WebGL draw and morph. */
-      const sideCount = mobile ? 20 : 24;
+      const sideCount = mobile ? 12 : 14;
       const ringDefs = [
-        [.78,.10,.075,-.155,-.030,.120],
-        [.65,.27,.185,-.215,-.020,.100],
-        [.47,.43,.305,-.135,.010,.060],
-        [.24,.49,.360,-.045,.015,.020],
-        [.02,.44,.350,.040,.000,-.020],
-        [-.22,.47,.320,.085,.010,.000],
-        [-.44,.35,.245,.120,.020,.050],
-        [-.62,.22,.150,.090,.020,.090],
-        [-.75,.08,.060,.030,.010,.120]
+        [.79,.075,.052,-.145,-.028,.110],
+        [.58,.325,.235,-.180,-.012,.082],
+        [.31,.500,.345,-.092,.018,.040],
+        [.03,.465,.355,.018,.006,-.018],
+        [-.27,.485,.335,.072,.012,.008],
+        [-.55,.305,.218,.082,.018,.060],
+        [-.76,.070,.050,.018,.008,.102]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -348,8 +347,8 @@
           const a=sideIndex/sideCount*Math.PI*2+phase;
           const irregular=
             1
-            +Math.sin(sideIndex*2.31+ringIndex*.91)*.036
-            +Math.cos(sideIndex*1.37-ringIndex*.73)*.018;
+            +Math.sin(sideIndex*1.73+ringIndex*.91)*.024
+            +Math.cos(sideIndex*.91-ringIndex*.73)*.012;
           const cutFront=1-.120*Math.pow(Math.max(0,Math.cos(a-.52)),4.0);
           const cutRear=1-.075*Math.pow(Math.max(0,Math.cos(a+2.18)),5.0);
           const cutSide=1-.055*Math.pow(Math.max(0,Math.cos(a-2.54)),6.0);
@@ -521,7 +520,7 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.045) contrast(1.12) saturate(1.00)','important');
+    canvas.style.setProperty('filter','brightness(1.10) contrast(1.07) saturate(.92)','important');
     canvas.style.setProperty('-webkit-filter','brightness(1.045) contrast(1.12) saturate(1.00)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
@@ -648,19 +647,19 @@
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.11+ndl*.56+sideLight*.43+fillLight*.20);
+        float lift=sat(.22+ndl*.64+sideLight*.50+fillLight*.28);
         float facetTone=mix(.985,1.015,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
-        vec3 mineral=mix(vec3(.0018,.0028,.0034),vec3(.020,.028,.031),lift)*facetTone;
+        vec3 mineral=mix(vec3(.0060,.0085,.0100),vec3(.052,.065,.070),lift)*facetTone;
         mineral*=.965+.030*smokyDepth+.008*mineralGrain;
-        mineral+=vec3(.58,.56,.51)*keySpec*.060;
+        mineral+=vec3(.62,.60,.55)*keySpec*.105;
         mineral+=vec3(.14,.14,.13)*keySoft*.026;
         mineral+=vec3(.24,.29,.30)*sideSpec*.070;
-        mineral+=vec3(.20,.22,.21)*softboxA*.050;
-        mineral+=vec3(.12,.15,.16)*softboxB*.040;
-        mineral+=vec3(.56,.57,.53)*studioRibbonA*.170;
-        mineral+=vec3(.31,.27,.22)*studioRibbonB*.078;
+        mineral+=vec3(.24,.27,.26)*softboxA*.085;
+        mineral+=vec3(.15,.18,.19)*softboxB*.060;
+        mineral+=vec3(.48,.50,.47)*studioRibbonA*.120;
+        mineral+=vec3(.25,.22,.19)*studioRibbonB*.060;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.052,.066,.066)*horizonBand*.125;
         mineral+=vec3(.040,.062,.068)*fresnel*.18;
@@ -684,12 +683,12 @@
            irregular: an embedded source inside the mineral, never a HUD/eye. */
         float chamberWarp=.009*sin(q.y*21.0+vLocal.z*7.0)+.004*sin(q.x*31.0-q.y*9.0);
         vec2 cq=vec2(q.x+chamberWarp,(q.y-.010)*.92);
-        float chamberD=abs(cq.x)/.130+abs(cq.y)/.165;
-        float chamber=(1.0-smoothstep(.76,1.04,chamberD))*front;
-        float chamberInner=(1.0-smoothstep(.34,.64,chamberD))*front;
+        float chamberD=abs(cq.x)/.050+abs(cq.y)/.142;
+        float chamber=(1.0-smoothstep(.80,1.08,chamberD))*front;
+        float chamberInner=(1.0-smoothstep(.42,.70,chamberD))*front;
         float chamberRim=max(0.0,chamber-chamberInner);
-        float chamberAura=(1.0-smoothstep(.54,1.36,chamberD))*front;
-        float nucleus=exp(-pow(length(vec2(cq.x*1.08,cq.y))/.044,2.0))*front;
+        float chamberAura=(1.0-smoothstep(.62,1.30,chamberD))*front;
+        float nucleus=exp(-pow(length(vec2(cq.x*1.65,cq.y))/.020,2.0))*front;
         float energyPulse=.94+.06*sin(uTime*.82+uBreath*.65);
 
         float ribWarp=.010*sin(q.y*17.0+q.x*8.0);
@@ -700,13 +699,13 @@
           *(1.0-smoothstep(.34,.47,abs(q.y)))*front;
         float ribs=sat(upperRib+lowerRib+sideRib);
 
-        mineral=mix(mineral,vec3(.0015,.0035,.0042),chamber*.72);
-        mineral+=vec3(.018,.090,.110)*chamberAura*.20;
-        mineral+=vec3(.18,.30,.31)*chamberRim*(.10+.22*sideLight+.12*fresnel);
-        mineral+=vec3(.040,.46,.64)*nucleus*energyPulse*1.05;
-        mineral+=vec3(.66,.96,.98)*nucleus*energyPulse*.50;
-        mineral=mix(mineral,vec3(.003,.006,.007),ribs*.52);
-        mineral+=vec3(.24,.27,.26)*ribs*(.030+.18*keySoft+.16*sideSpec);
+        mineral=mix(mineral,vec3(.004,.008,.009),chamber*.28);
+        mineral+=vec3(.018,.060,.070)*chamberAura*.070;
+        mineral+=vec3(.22,.28,.28)*chamberRim*(.035+.08*sideLight+.05*fresnel);
+        mineral+=vec3(.040,.24,.30)*nucleus*energyPulse*.22;
+        mineral+=vec3(.52,.64,.62)*nucleus*energyPulse*.10;
+        mineral=mix(mineral,vec3(.008,.011,.012),ribs*.18);
+        mineral+=vec3(.20,.22,.21)*ribs*(.018+.07*keySoft+.06*sideSpec);
         mineral+=vec3(.012,.080,.095)*ribs*chamberAura*.10;
 
         float pulse=0.0;
@@ -728,7 +727,7 @@
           ${outputName}=vec4(vec3(.004,.009,.011),.16);
           return;
         }
-        ${outputName}=vec4(filmic(mineral*2.96),1.0);
+        ${outputName}=vec4(filmic(mineral*3.18),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -774,15 +773,15 @@
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.10+ndl*.54+sideLight*.42+fillLight*.19);
+        float lift=sat(.22+ndl*.62+sideLight*.49+fillLight*.27);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
-        vec3 col=mix(vec3(.0018,.0028,.0034),vec3(.020,.028,.031),lift);
+        vec3 col=mix(vec3(.0060,.0085,.0100),vec3(.050,.063,.068),lift);
         col*=.966+.030*smoke;
-        col+=vec3(.54,.53,.49)*keySpec*.070;
+        col+=vec3(.60,.59,.54)*keySpec*.110;
         col+=vec3(.24,.29,.30)*sideSpec*.078;
-        col+=vec3(.18,.20,.19)*softboxA*.045;
+        col+=vec3(.23,.26,.25)*softboxA*.080;
         col+=vec3(.11,.14,.15)*softboxB*.036;
-        col+=vec3(.54,.55,.51)*studioRibbonA*.165;
+        col+=vec3(.46,.48,.45)*studioRibbonA*.115;
         col+=vec3(.30,.26,.21)*studioRibbonB*.074;
         col+=vec3(.052,.066,.066)*horizonBand*.120;
         col+=vec3(.040,.062,.068)*fresnel*.18;
@@ -802,12 +801,12 @@
 
         float chamberWarp=.009*sin(q.y*21.0+vLocal.z*7.0)+.004*sin(q.x*31.0-q.y*9.0);
         vec2 cq=vec2(q.x+chamberWarp,(q.y-.010)*.92);
-        float chamberD=abs(cq.x)/.130+abs(cq.y)/.165;
-        float chamber=(1.0-smoothstep(.76,1.04,chamberD))*front;
-        float chamberInner=(1.0-smoothstep(.34,.64,chamberD))*front;
+        float chamberD=abs(cq.x)/.050+abs(cq.y)/.142;
+        float chamber=(1.0-smoothstep(.80,1.08,chamberD))*front;
+        float chamberInner=(1.0-smoothstep(.42,.70,chamberD))*front;
         float chamberRim=max(0.0,chamber-chamberInner);
-        float chamberAura=(1.0-smoothstep(.54,1.36,chamberD))*front;
-        float nucleus=exp(-pow(length(vec2(cq.x*1.08,cq.y))/.044,2.0))*front;
+        float chamberAura=(1.0-smoothstep(.62,1.30,chamberD))*front;
+        float nucleus=exp(-pow(length(vec2(cq.x*1.65,cq.y))/.020,2.0))*front;
         float energyPulse=.94+.06*sin(uTime*.82+uBreath*.65);
 
         float ribWarp=.010*sin(q.y*17.0+q.x*8.0);
@@ -818,13 +817,13 @@
           *(1.0-smoothstep(.34,.47,abs(q.y)))*front;
         float ribs=sat(upperRib+lowerRib+sideRib);
 
-        col=mix(col,vec3(.0015,.0035,.0042),chamber*.72);
-        col+=vec3(.018,.090,.110)*chamberAura*.20;
-        col+=vec3(.18,.30,.31)*chamberRim*(.08+.18*sideLight+.10*fresnel);
-        col+=vec3(.040,.46,.64)*nucleus*energyPulse*1.02;
-        col+=vec3(.66,.96,.98)*nucleus*energyPulse*.47;
-        col=mix(col,vec3(.003,.006,.007),ribs*.50);
-        col+=vec3(.22,.25,.24)*ribs*(.025+.13*keySpec+.14*sideSpec);
+        col=mix(col,vec3(.004,.008,.009),chamber*.28);
+        col+=vec3(.018,.060,.070)*chamberAura*.070;
+        col+=vec3(.22,.28,.28)*chamberRim*(.030+.07*sideLight+.045*fresnel);
+        col+=vec3(.040,.24,.30)*nucleus*energyPulse*.20;
+        col+=vec3(.52,.64,.62)*nucleus*energyPulse*.09;
+        col=mix(col,vec3(.008,.011,.012),ribs*.18);
+        col+=vec3(.20,.22,.21)*ribs*(.016+.055*keySpec+.055*sideSpec);
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
@@ -840,7 +839,7 @@
         col=mix(col,tendon,tendrilMask*.995);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
-        ${outputName}=vec4(filmic(col*2.94),1.0);
+        ${outputName}=vec4(filmic(col*3.16),1.0);
       }`;
 
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
