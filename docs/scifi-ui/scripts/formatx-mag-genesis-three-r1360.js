@@ -60,7 +60,7 @@
       this.renderAverage=0;
       this.frameIntervalAverage=this.targetFrameMs;
       this.previousFrameTime=0;
-      this.qualityScale=this.lowPowerProfile?.68:(this.mobileProfile?.78:.92);
+      this.qualityScale=this.lowPowerProfile?.58:(this.mobileProfile?.70:.88);
       this.lastQualityAdjust=0;
 
       this.renderer=new THREE.WebGLRenderer({
@@ -1389,7 +1389,7 @@
           ? Math.min(devicePixelRatio||1,this.width<900 ? 0.58 : 0.54)
           : Math.min(
               devicePixelRatio||1,
-              (this.mobileProfile?.92:1.05)*this.qualityScale
+              (this.mobileProfile?.86:1.00)*this.qualityScale
             );
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
@@ -1655,21 +1655,29 @@
         this.renderAverage=this.renderAverage
           ? this.renderAverage*.84+renderCost*.16
           : renderCost;
-        if(time-this.lastQualityAdjust>520){
+        if(time-this.lastQualityAdjust>260){
           const previous=this.qualityScale;
-          const framePressure=this.frameIntervalAverage>18.4;
-          const severeFramePressure=this.frameIntervalAverage>22.0;
-          if(severeFramePressure||this.renderAverage>15.2)this.qualityScale=Math.max(.46,this.qualityScale-(severeFramePressure?.12:.08));
-          else if(framePressure||this.renderAverage>13.8)this.qualityScale=Math.max(.46,this.qualityScale-.045);
-          else if(this.frameIntervalAverage<17.2&&this.renderAverage<9.2)this.qualityScale=Math.min(1,this.qualityScale+.025);
+          const framePressure=this.frameIntervalAverage>17.6;
+          const severeFramePressure=this.frameIntervalAverage>19.2;
+          const renderPressure=this.renderAverage>12.2;
+          const severeRenderPressure=this.renderAverage>14.0;
+          if(severeFramePressure||severeRenderPressure){
+            this.qualityScale=Math.max(.36,this.qualityScale-.12);
+          }else if(framePressure||renderPressure){
+            this.qualityScale=Math.max(.36,this.qualityScale-.065);
+          }else if(this.frameIntervalAverage<16.95&&this.renderAverage<8.2){
+            this.qualityScale=Math.min(1,this.qualityScale+.015);
+          }
           if(Math.abs(previous-this.qualityScale)>.001){
             this.lastQualityAdjust=time;
             this.resize();
-            const secondary=this.qualityScale<.70;
-            const emergency=this.qualityScale<.56;
+            const secondary=this.qualityScale<.66;
+            const emergency=this.qualityScale<.50;
             if(this.particles)this.particles.visible=!secondary;
             if(this.debris)this.debris.visible=!secondary;
             if(this.chamber)this.chamber.visible=!emergency;
+            document.documentElement.dataset.fxMagBirthGovernorR1606=
+              this.qualityScale<previous?'degrade-before-frame-drop':'slow-recovery';
           }
         }
         document.documentElement.dataset.fxMagBirthTargetFpsR1600='60';
@@ -1764,7 +1772,7 @@
         engine,
         minimumFrameMs: 16.67,
         targetFps:60,
-        revision:'r1602-real-frame-budget-adaptive-60fps-photographic-core'
+        revision:'r1606-16-67ms-budget-adaptive-60fps-photographic-core'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1803,6 +1811,7 @@
   document.documentElement.dataset.fxMagBirthProofR1588='dark-wet-bioceramic-seed-natural-veins-to-polished-obsidian-cinematic-handoff';
   document.documentElement.dataset.fxMagBirthPerformanceR1541='superseded-by-r1600-adaptive-60fps';
   document.documentElement.dataset.fxMagBirthPerformanceR1600='60fps-target-adaptive-resolution-quality-first-frame-budget';
+  document.documentElement.dataset.fxMagBirthPerformanceR1606='16-67ms-frame-budget-aggressive-adaptive-resolution';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
   document.documentElement.dataset.fxMagBirthProofR1560='smooth-biogenic-shell-no-white-facet-overlay-obsidian-seed-handoff';
@@ -1828,6 +1837,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1600-adaptive-60fps-photographic-dark-chamber-core'
+    revision:'r1606-adaptive-60fps-photographic-dark-chamber-core'
   };
 })();
