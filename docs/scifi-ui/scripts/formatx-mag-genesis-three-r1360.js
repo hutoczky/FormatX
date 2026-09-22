@@ -84,7 +84,7 @@
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.24;
+      this.renderer.toneMappingExposure=1.06;
 
       this.scene=new THREE.Scene();
       this.scene.background=new THREE.Color(0x010304);
@@ -138,15 +138,15 @@
         x.restore();
       };
       glow(190,122,128,230,[
-        [0,'rgba(235,244,240,.82)'],
-        [.20,'rgba(188,208,205,.48)'],
-        [.56,'rgba(70,92,94,.16)'],
+        [0,'rgba(205,222,217,.34)'],
+        [.24,'rgba(146,167,164,.22)'],
+        [.62,'rgba(63,82,84,.10)'],
         [1,'rgba(0,0,0,0)']
       ]);
       glow(570,188,90,190,[
-        [0,'rgba(210,218,208,.46)'],
-        [.24,'rgba(134,143,136,.22)'],
-        [.62,'rgba(55,63,61,.08)'],
+        [0,'rgba(177,188,181,.24)'],
+        [.28,'rgba(111,124,120,.14)'],
+        [.66,'rgba(48,58,57,.06)'],
         [1,'rgba(0,0,0,0)']
       ]);
       glow(470,324,240,70,[
@@ -169,26 +169,26 @@
     makeLights(){
       const T=this.THREE;
       // R1583 — softer photographic studio lighting plus procedural environment reflections.
-      this.scene.add(new T.HemisphereLight(0xc6d0cf,0x030405,0.58));
-      const key=new T.DirectionalLight(0xfffbf3,3.45);
+      this.scene.add(new T.HemisphereLight(0xc6d0cf,0x030405,0.48));
+      const key=new T.DirectionalLight(0xfffbf3,1.85);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
-      const rim=new T.PointLight(0xb8cfd1,5.65,12,2);
+      const rim=new T.PointLight(0xb8cfd1,2.35,12,2);
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
-      const bioticFill=new T.PointLight(0x6f6972,2.20,10,2);
+      const bioticFill=new T.PointLight(0x6f6972,1.05,10,2);
       bioticFill.position.set(-2.7,-.9,2.8);
       this.scene.add(bioticFill);
-      const warmBounce=new T.PointLight(0xc3a17e,.76,8,2);
+      const warmBounce=new T.PointLight(0xc3a17e,.38,8,2);
       warmBounce.position.set(2.4,2.1,1.1);
       this.scene.add(warmBounce);
 
-      const softbox=new T.SpotLight(0xf7f6ef,7.55,15,Math.PI*.34,.91,1.58);
+      const softbox=new T.SpotLight(0xe8efec,2.85,15,Math.PI*.40,.96,1.45);
       softbox.position.set(-4.5,5.6,6.2);
       softbox.target.position.set(.25,.12,0);
       this.scene.add(softbox,softbox.target);
 
-      const edgeSoftbox=new T.SpotLight(0xa8bac0,4.75,13,Math.PI*.35,.92,1.68);
+      const edgeSoftbox=new T.SpotLight(0x87999d,1.55,13,Math.PI*.42,.97,1.58);
       edgeSoftbox.position.set(4.8,1.5,4.1);
       edgeSoftbox.target.position.set(-.18,-.08,.1);
       this.scene.add(edgeSoftbox,edgeSoftbox.target);
@@ -568,29 +568,28 @@
         transmission:.08,thickness:.12,ior:1.43
       });
 
-      const shape=new T.Shape();
-      shape.moveTo(0,1.10);
-      shape.bezierCurveTo(.12,.92,.31,.66,.42,.42);
-      shape.bezierCurveTo(.56,.18,.72,.10,.80,0);
-      shape.bezierCurveTo(.70,-.12,.53,-.24,.42,-.44);
-      shape.bezierCurveTo(.28,-.70,.13,-.91,0,-1.05);
-      shape.bezierCurveTo(-.13,-.91,-.28,-.70,-.42,-.44);
-      shape.bezierCurveTo(-.53,-.24,-.70,-.12,-.80,0);
-      shape.bezierCurveTo(-.72,.10,-.56,.18,-.42,.42);
-      shape.bezierCurveTo(-.31,.66,-.12,.92,0,1.10);
-      const extrude=new T.ExtrudeGeometry(shape,{
-        depth:.24,bevelEnabled:true,bevelSegments:5,steps:1,
-        bevelSize:.052,bevelThickness:.060,curveSegments:28
-      });
-      extrude.center();
+      const seedGeo=new T.IcosahedronGeometry(.84,this.deterministicFrame?3:2);
+      const seedPos=seedGeo.attributes.position;
+      const seedV=new T.Vector3();
+      for(let i=0;i<seedPos.count;i++){
+        seedV.fromBufferAttribute(seedPos,i);
+        const n=seedV.clone().normalize();
+        const a=Math.atan2(n.z,n.x);
+        const warp=1+Math.sin(a*2.4+n.y*3.2)*.045+Math.cos(a*4.1-n.y*1.7)*.024;
+        seedV.multiplyScalar(warp);
+        seedV.x*=.78;seedV.y*=1.02;seedV.z*=.60;
+        seedV.x+=n.y*.035;seedV.z-=n.x*.018;
+        seedPos.setXYZ(i,seedV.x,seedV.y,seedV.z);
+      }
+      seedGeo.computeVertexNormals();
 
-      this.coreShell=new T.Mesh(extrude,shellMat);
-      this.coreShell.scale.set(.82,.82,.92);
+      this.coreShell=new T.Mesh(seedGeo,shellMat);
+      this.coreShell.scale.set(.82,.82,.82);
       this.coreGroup.add(this.coreShell);
 
-      this.coreGlass=new T.Mesh(extrude.clone(),shellGlass);
-      this.coreGlass.scale.set(.86,.86,.98);
-      this.coreGlass.position.z=.055;
+      this.coreGlass=new T.Mesh(seedGeo.clone(),shellGlass);
+      this.coreGlass.scale.set(.84,.84,.84);
+      this.coreGlass.position.z=.018;
       this.coreGroup.add(this.coreGlass);
 
       this.corePetalMaterial=new T.MeshPhysicalMaterial({
@@ -651,10 +650,10 @@
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x1e6574,metalness:.015,roughness:.075,
-        clearcoat:1,clearcoatRoughness:.025,
-        transmission:.13,thickness:.16,ior:1.46,
-        emissive:0x073e4c,emissiveIntensity:.44,
+        color:0x14272b,metalness:.010,roughness:.10,
+        clearcoat:.92,clearcoatRoughness:.045,
+        transmission:.10,thickness:.14,ior:1.45,
+        emissive:0x031014,emissiveIntensity:.055,
         transparent:true,opacity:.97
       });
       const lens=new T.Mesh(new T.SphereGeometry(.142,72,42),lensMat);
@@ -675,10 +674,10 @@
       const glassRing=new T.Mesh(
         new T.TorusGeometry(.119,.0085,16,112),
         new T.MeshPhysicalMaterial({
-          color:0x9ddce2,metalness:.03,roughness:.08,
-          clearcoat:1,clearcoatRoughness:.025,
-          emissive:0x0d7184,emissiveIntensity:.26,
-          transparent:true,opacity:.78
+          color:0x60787c,metalness:.08,roughness:.16,
+          clearcoat:.82,clearcoatRoughness:.08,
+          emissive:0x02090b,emissiveIntensity:.018,
+          transparent:true,opacity:.16
         })
       );
       glassRing.position.z=.376;
@@ -781,21 +780,21 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x211d2a,roughness:.46,metalness:.002,
-        clearcoat:.24,clearcoatRoughness:.28,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0064,
+        color:0x202628,roughness:.39,metalness:.002,
+        clearcoat:.34,clearcoatRoughness:.20,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0080,
         transparent:true,opacity:0,
-        emissive:0x10091a,emissiveIntensity:.045,
-        envMapIntensity:.72,
-        depthWrite:false
+        emissive:0x020405,emissiveIntensity:.006,
+        envMapIntensity:.88,
+        depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
-        color:0x33243f,roughness:.43,metalness:.004,
-        clearcoat:.22,clearcoatRoughness:.30,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.009,
+        color:0x2c3233,roughness:.48,metalness:.002,
+        clearcoat:.18,clearcoatRoughness:.34,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.006,
         transparent:true,opacity:0,
-        emissive:0x160b24,emissiveIntensity:.085,
-        envMapIntensity:.58,
+        emissive:0x010203,emissiveIntensity:.004,
+        envMapIntensity:.66,
         depthWrite:true
       });
       this.organicWireMaterial=new T.MeshBasicMaterial({
@@ -803,7 +802,7 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
 
-      const shellGeo=new T.SphereGeometry(1.38,this.deterministicFrame||this.highDetail?64:40,this.deterministicFrame||this.highDetail?40:26);
+      const shellGeo=new T.SphereGeometry(1.38,this.deterministicFrame||this.highDetail?48:32,this.deterministicFrame||this.highDetail?30:20);
       const shellPos=shellGeo.attributes.position;
       for(let i=0;i<shellPos.count;i++){
         const p=new T.Vector3().fromBufferAttribute(shellPos,i);
@@ -856,8 +855,8 @@
       this.organicGroup.add(this.organicMembrane);
 
       this.organicLobes=[];
-      const lobeGeo=new T.SphereGeometry(.165,20,14);
-      const count=innerWidth<900?32:42;
+      const lobeGeo=new T.SphereGeometry(.145,12,8);
+      const count=innerWidth<900?8:12;
       for(let i=0;i<count;i++){
         const phi=Math.acos(1-2*(i+.5)/count);
         const theta=Math.PI*(1+Math.sqrt(5))*i;
@@ -893,7 +892,7 @@
       this.organicFolds=new T.Group();
 
       const frontRadius=1.355;
-      for(let i=0;i<24;i++){
+      for(let i=0;i<10;i++){
         let cx=(r()-.5)*2.05;
         let cy=(r()-.5)*2.05;
         const d=Math.hypot(cx,cy);
@@ -1174,7 +1173,7 @@
         color:0x070a0c,metalness:.08,roughness:.22,
         emissive:0x000102,emissiveIntensity:.002,
         clearcoat:.74,clearcoatRoughness:.10,
-        envMapIntensity:1.62,flatShading:true,transparent:true,opacity:0
+        envMapIntensity:1.20,flatShading:false,transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
         color:0x0c1114,metalness:.16,roughness:.26,
@@ -1448,8 +1447,8 @@
 
     updateCore(t,time){
       const birth=smooth((t-.12)/.72);
-      const mineralTakeover=smooth((t-6.18)/1.25);
-      const coreLife=birth*(1-mineralTakeover*.90);
+      const seedHandoff=smooth((t-2.18)/.82);
+      const coreLife=birth*(1-seedHandoff*.995);
       let sc=.001;
       if(t<.12)sc=.001;
       else if(t<1.10)sc=mix(.42,.72,ease((t-.12)/.98));
@@ -1473,7 +1472,7 @@
       const pulse=.988+.012*Math.sin(time*.0042);
       this.coreShell.material.opacity=.94*coreLife;
       this.coreGlass.material.opacity=.040*coreLife;
-      if(this.corePetalMaterial)this.corePetalMaterial.opacity=.10*coreLife;
+      if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=coreLife>.005;
       this.irisGroup.scale.setScalar((.84+irisAwake*.05)*pulse);
       if(this.irisCorona)this.irisCorona.material.opacity=.012*coreLife+.022*irisAwake;
@@ -1537,7 +1536,7 @@
       if(this.mechPetalMaterial)this.mechPetalMaterial.opacity=0;
       this.mechEdgeMaterial.opacity=0;
       this.mechInnerMaterial.opacity=.10*irisGrow;
-      if(this.mechSocketBack?.material)this.mechSocketBack.material.opacity=.98*irisGrow;
+      if(this.mechSocketBack?.material)this.mechSocketBack.material.opacity=.18*irisGrow;
       if(this.mechEnergyMaterial){
         this.mechEnergyMaterial.opacity=.92*irisGrow;
         this.mechEnergyMaterial.emissiveIntensity=.035+.008*Math.sin(time*.0044);
@@ -1545,14 +1544,14 @@
       if(this.mechAperture?.material)this.mechAperture.material.opacity=.72*irisGrow;
       if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=.92*irisGrow;
       if(this.seamMaterial)this.seamMaterial.opacity=0;
-      this.mechInnerRing.visible=irisGrow>.02;
+      this.mechInnerRing.visible=false;
       this.mechInnerRing.rotation.z=0;
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=.006*irisGrow;
+        this.mechEyeCorona.material.opacity=0;
         const q=.28+.004*Math.sin(time*.0042);
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity=.18*irisGrow;
+      if(this.mechLight)this.mechLight.intensity=.045*irisGrow;
       this.mechanicalGroup.rotation.y=.08*bodyGrow+Math.sin(time*.00014)*.010*bodyGrow;
       this.mechanicalGroup.rotation.x=-.035*bodyGrow+Math.sin(time*.00012)*.006*bodyGrow;
       this.mechanicalGroup.rotation.z=-.012*bodyGrow+Math.sin(time*.00010)*.004*bodyGrow;
@@ -1638,7 +1637,7 @@
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.46+flash*.34+after*.055;
+      this.renderer.toneMappingExposure=1.10+flash*.10+after*.025;
       this.coreLight.intensity+=flash*4.8+after*.62;
       if(this.glowSprite){
         const g=1+flash*.72;
@@ -1660,7 +1659,7 @@
         const q=.34+flash*.050;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*.90*(this.mechanicalReveal||0);
+      if(this.mechLight)this.mechLight.intensity+=flash*.12*(this.mechanicalReveal||0);
 
       this.renderer.render(this.scene,this.camera);
 
@@ -1786,7 +1785,7 @@
         engine,
         minimumFrameMs: 16.67,
         targetFps:60,
-        revision:'r1609-hand-hewn-obsidian-dark-smoked-dome-60fps-core'
+        revision:'r1612-natural-obsidian-neutral-bioceramic-smoked-dome-60fps-core'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1849,10 +1848,11 @@
   document.documentElement.dataset.fxMagBirthProofR1586='integrated-three-quarter-living-crystal-ribs-and-energy-chamber-reference-scale';
   document.documentElement.dataset.fxMagBirthProofR1607='single-asymmetric-obsidian-body-smoked-physical-dome-bioglass-tendrils-no-cgi-petals';
   document.documentElement.dataset.fxMagBirthProofR1609='hand-hewn-faceted-obsidian-wet-bioceramic-transition-dark-smoked-dome-no-eye-glow';
+  document.documentElement.dataset.fxMagBirthProofR1612='neutral-wet-bioceramic-seed-handoff-natural-obsidian-reflection-smoked-dome-no-hud';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1609-hand-hewn-obsidian-dark-smoked-dome-bioglass-dark-chamber-core'
+    revision:'r1612-natural-obsidian-neutral-bioceramic-smoked-dome-dark-chamber-core'
   };
 })();
