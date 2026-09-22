@@ -67,13 +67,12 @@
       '<div class="fx-c536-scan"></div>',
       '<div class="fx-c536-vignette"></div>',
       '<div class="fx-c536-grain"></div>',
-      '<div class="fx-c536-flare"></div>',
-      '<div class="fx-c536-hud"><b>01</b><strong></strong><span></span><i></i></div>'
+      '<div class="fx-c536-flare"></div>'
     ].join('');
     document.body.appendChild(stage);
-    hudCode = stage.querySelector('.fx-c536-hud b');
-    hudTitle = stage.querySelector('.fx-c536-hud strong');
-    hudMeta = stage.querySelector('.fx-c536-hud span');
+    hudCode = null;
+    hudTitle = null;
+    hudMeta = null;
     return true;
   }
 
@@ -354,6 +353,7 @@
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
+    root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
   }
