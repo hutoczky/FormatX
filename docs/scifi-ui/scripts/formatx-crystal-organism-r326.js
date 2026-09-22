@@ -55,6 +55,7 @@
   root.dataset.fxNativeMagVisualR1531 = 'exposed-obsidian-facets-round-recessed-physical-lens-no-local-hud';
   root.dataset.fxNativeMagVisualR1551 = 'photographic-smoky-obsidian-tall-coherent-mineral-small-glass-optic';
   root.dataset.fxNativeMagVisualR1552 = 'natural-smoky-obsidian-monolith-soft-facet-transitions-subtle-smoked-glass-aperture';
+  root.dataset.fxNativeMagVisualR1553 = 'polished-volcanic-glass-monolith-smooth-optics-mineral-fissure-no-eye-no-zfight-tendrils';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
@@ -126,8 +127,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 8 : constrainedMobile ? 9 : mobile ? 10 : constrained ? 10 : 12;
-    const longitudeSegments = auditMode ? 14 : constrainedMobile ? 18 : mobile ? 20 : constrained ? 20 : 24;
+    const latitudeSegments = auditMode ? 8 : constrainedMobile ? 14 : mobile ? 16 : constrained ? 14 : 18;
+    const longitudeSegments = auditMode ? 14 : constrainedMobile ? 28 : mobile ? 32 : constrained ? 28 : 36;
     const tendrilCount = auditMode ? 4 : 8;
     const tendrilSegments = auditMode ? 5 : constrainedMobile ? 18 : mobile ? 28 : constrained ? 26 : 36;
     const tendrilSides = auditMode ? 3 : constrainedMobile ? 5 : mobile || constrained ? 7 : 9;
@@ -263,8 +264,8 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.16 + (index % 2 ? .045 : -.035);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .48;
-      const reach = .29 + ((index*3)%5) * .020;
+      const root = .69;
+      const reach = .20 + ((index*3)%5) * .016;
       const radius = root + reach * t;
       const wave = (Math.sin(t * Math.PI * 1.62 + index * .83)*(.014+.070*t))
         +Math.sin(t*Math.PI*.72+index*.47)*.018*t;
@@ -436,7 +437,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.24));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.78));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -566,7 +567,11 @@
         float angle=atan(heartLocal.y,heartLocal.x);
         float visualEnergy=sat(.36+uEnergy*.48);
         float heart=pow(sat(1.0-radial/.45),3.05);
-        float nucleus=pow(sat(1.0-radial/.105),4.35);
+        float frontMask=smoothstep(.20,.48,vLocal.z)*(1.0-vMorph);
+        float crackX=heartLocal.x+.008*sin(heartLocal.y*31.0+vLocal.z*9.0);
+        float fissureHalo=exp(-pow(crackX/.026,2.0))*exp(-pow(heartLocal.y/.115,4.0))*frontMask;
+        float fissure=exp(-pow(crackX/.0065,2.0))*exp(-pow(heartLocal.y/.095,4.0))*frontMask;
+        float nucleus=fissureHalo;
         // R1510 — physical lens, not a HUD iris.
         float rings=0.0;
         float iris=0.0;
@@ -576,17 +581,17 @@
         float armorSeam=ridge(vUv.x*4.0+vUv.y*.18+uSiteProgress*.08,17.0)*(1.0-smoothstep(.62,.98,abs(vLocal.y)));
         float armorRib=ridge(vUv.y*3.0+vUv.x*.11,20.0)*(.32+.68*fresnel);
         float podMask=1.0-vMorph;
-        float diamondCoord=length(vec2(heartLocal.x,heartLocal.y*1.035));
-        float diamondFace=(1.0-smoothstep(.048,.084,diamondCoord))*smoothstep(.20,.48,vLocal.z)*podMask;
-        float diamondInner=(1.0-smoothstep(.022,.046,diamondCoord))*smoothstep(.20,.48,vLocal.z)*podMask;
-        float diamondFrame=max(0.0,diamondFace-diamondInner);
-        float diamondRim=(1.0-smoothstep(.003,.008,abs(diamondCoord-.066)))*smoothstep(.20,.48,vLocal.z)*podMask;
-        float cradlePlate=diamondFrame*podMask;
-        float pupil=1.0-smoothstep(.006,.014,radial);
-        float coreDisc=1.0-smoothstep(.018,.043,radial);
-        float coreRing=1.0-smoothstep(.004,.009,abs(radial-.041));
+        float diamondCoord=radial;
+        float diamondFace=0.0;
+        float diamondInner=0.0;
+        float diamondFrame=0.0;
+        float diamondRim=0.0;
+        float cradlePlate=0.0;
+        float pupil=0.0;
+        float coreDisc=fissure;
+        float coreRing=0.0;
         float irisRays=0.0;
-        float lensCaustic=exp(-pow(length(heartLocal-vec2(-.012,.016))/.018,2.0))*coreDisc;
+        float lensCaustic=fissure*exp(-pow((heartLocal.y-.030)/.030,2.0));
         float realArmorPlate=0.0;
         float realDarkPlate=0.0;
         float crownMask=smoothstep(.34,.68,vLocal.y)
@@ -596,7 +601,7 @@
           *(1.0-smoothstep(.16,.50,abs(vLocal.y)))*podMask;
         float jawMask=smoothstep(.22,.66,-vLocal.y)
           *(1.0-smoothstep(.30,.58,abs(vLocal.x)))*podMask;
-        float opticalWell=(1.0-smoothstep(.080,.145,radial))*podMask;
+        float opticalWell=fissureHalo*.34;
         float tendrilMask=smoothstep(.62,.82,length(vLocal.xy))*podMask;
         float tendrilSegment=(.58+.42*ridge(vUv.y*4.8+vUv.x*1.15,7.0))*tendrilMask;
         vec3 cyan=vec3(.012,.34,.52);
@@ -651,17 +656,17 @@
         float environmentSide=smoothstep(.18,.94,abs(reflection.x));
         float environmentBand=pow(sat(1.0-abs(reflection.y-.18)),8.0);
         float mineralLift=.22+1.02*ndl+.66*sideLight+.34*fillLight+.20*floorBounce+.24*fresnel;
-        float facetTone=mix(.72,1.20,facetRand);
-        vec3 glass=mix(vec3(.008,.011,.013),vec3(.086,.099,.105),sat(mineralLift*.72))*facetTone;
-        glass+=vec3(.290,.300,.296)*broadSpec*.23;
-        glass+=vec3(.105,.118,.120)*sideLight*.34;
-        glass+=vec3(.056,.064,.068)*fillLight*.24;
-        glass+=vec3(.045,.037,.030)*floorBounce*.18;
-        glass+=microSpec*(.28+.16*sideLight);
-        glass+=ice*fresnel*.060;
-        glass+=vec3(.070,.086,.090)*environmentTop;
-        glass+=vec3(.040,.052,.057)*environmentSide;
-        glass+=vec3(.102,.108,.103)*environmentBand*.46;
+        float facetTone=mix(.94,1.06,facetRand);
+        vec3 glass=mix(vec3(.0035,.0050,.0060),vec3(.038,.048,.052),sat(mineralLift*.68))*facetTone;
+        glass+=vec3(.390,.400,.392)*broadSpec*.30;
+        glass+=vec3(.115,.132,.136)*sideLight*.30;
+        glass+=vec3(.052,.060,.064)*fillLight*.18;
+        glass+=vec3(.050,.038,.028)*floorBounce*.14;
+        glass+=microSpec*(.42+.22*sideLight);
+        glass+=ice*fresnel*.072;
+        glass+=vec3(.050,.067,.073)*environmentTop;
+        glass+=vec3(.032,.044,.050)*environmentSide;
+        glass+=vec3(.118,.122,.113)*environmentBand*.52;
         float thinTransmission=pow(1.0-facing,2.1)*(1.0-sat(ndl*.72));
         glass+=vec3(.018,.050,.056)*thinTransmission*.46;
         float armorBlock=sat(realArmorPlate+realDarkPlate+crownMask+shoulderMask+jawMask+diamondFace);
@@ -675,7 +680,7 @@
         tissue+=steel*(.18+.30*ndl+.12*fillLight)+ice*.060*specular;
         tissue+=ice*smoothstep(.76,.98,bodyFacetRand)*(.012+.020*ndl);
         tissue+=cyan*fresnel*(.001+.002*visualEnergy);
-        glass=mix(glass,tissue,tissueMask*.40);
+        glass=mix(glass,tissue,tissueMask*.12);
         glass+=mix(steel,silver,.28)*crownMask*(.11+.16*ndl+.08*specular);
         glass+=mix(steel,silver,.18)*shoulderMask*(.08+.13*ndl+.06*specular);
         glass=mix(glass,steel*(.76+.24*ndl)+silver*.22+ice*.012*specular,realArmorPlate*.94);
@@ -691,12 +696,10 @@
         glass+=cyan*membrane*(.0008+.0012*visualEnergy);
         glass+=cyan*iris*.035;
         float lensGlint=pow(max(dot(n,normalize(vec3(-.28,.62,.73)+view)),0.),54.0)*coreDisc;
-        glass+=cyan*(nucleus*.08)+ice*(nucleus*.26+coreRing*.055);
-        glass=mix(glass,vec3(.0015,.0025,.0030),pupil*.82);
-        glass+=cyan*coreDisc*.055+ice*coreDisc*.20;
-        glass+=ice*lensGlint*.62;
-        glass+=(ice*.30+cyan*.012)*lensCaustic;
-        glass+=mix(steel,ice,.16)*coreRing*.055;
+        glass+=vec3(.006,.014,.017)*fissureHalo*.30;
+        glass+=cyan*coreDisc*.050+ice*coreDisc*.080;
+        glass+=ice*lensGlint*.16;
+        glass+=(ice*.15+cyan*.020)*lensCaustic;
         glass+=ice*specular*(.096+.042*visualEnergy);
         glass+=(cyan*.045+ice*.018)*(axisV*.045+axisH*.028)*visualEnergy;
         glass+=(cyan*.014+ice*.008)*dnaHelix*(.006+.008*fresnel)*genomePulse;
@@ -704,8 +707,9 @@
         glass+=(cyan*.016+ice*.018)*edge*(.18+.22*(1.0-vMorph));
         glass+=ice*(armorSeam*.050+armorRib*.034)*(1.0-vMorph*.72);
         glass+=(ice*.40+cyan*.18)*surfaceSweep*(.68+.24*fresnel);
-        glass=mix(glass,vec3(.008,.020,.024)+steel*.18,tendrilMask*.80);
-        glass+=(cyan*.025+ice*.050)*tendrilSegment*(.10+.16*fresnel);
+        vec3 tendon=vec3(.0045,.007,.008)+steel*(.08+.10*fresnel)+ice*specular*.022;
+        glass=mix(glass,tendon,tendrilMask*.96);
+        glass+=(ice*.018+cyan*.004)*tendrilSegment*(.025+.050*fresnel);
         float alpha=.982+.008*ndl+.005*fresnel+specular*.004+surfaceSweep*.006+tendrilMask*.005;
         ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.96)),clamp(alpha,.990,.999));
       }`;
@@ -727,57 +731,57 @@
       void main(){
         vec3 n=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.85-vLocal.z));
-        vec3 key=normalize(vec3(-.48,.78,.40));
-        vec3 side=normalize(vec3(.76,.06,.64));
-        vec3 fill=normalize(vec3(-.62,-.30,.72));
+        vec3 key=normalize(vec3(-.50,.80,.34));
+        vec3 side=normalize(vec3(.78,.08,.61));
+        vec3 fill=normalize(vec3(-.62,-.28,.73));
         float ndl=max(dot(n,key),0.);
         float sideLight=max(dot(n,side),0.);
         float fillLight=max(dot(n,fill),0.);
         float facing=sat(abs(dot(n,view)));
-        float fresnel=pow(1.0-facing,1.65);
-        float spec=pow(max(dot(n,normalize(key+view)),0.),34.0)
-          +.52*pow(max(dot(n,normalize(side+view)),0.),20.0);
+        float fresnel=pow(1.0-facing,1.68);
+        float spec=pow(max(dot(n,normalize(key+view)),0.),42.0)
+          +.62*pow(max(dot(n,normalize(side+view)),0.),24.0);
         float facetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
-        vec2 heartLocal=vec2(vLocal.x,vLocal.y)-vec2(uPointer.x*.035,uPointer.y*.030);
-        float radial=length(heartLocal);
+        float facetTone=mix(.95,1.05,facetRand);
+
+        vec2 heartLocal=vec2(vLocal.x,vLocal.y)-vec2(uPointer.x*.028,uPointer.y*.024);
         float podMask=1.0-vMorph;
         float frontMask=smoothstep(.20,.48,vLocal.z)*podMask;
-        float socket=(1.0-smoothstep(.050,.086,radial))*frontMask;
-        float lens=(1.0-smoothstep(.018,.043,radial))*frontMask;
-        float pupil=(1.0-smoothstep(.006,.014,radial))*frontMask;
-        float lensRim=(1.0-smoothstep(.003,.008,abs(radial-.041)))*frontMask;
-        float lensGlint=exp(-pow(length(heartLocal-vec2(-.012,.015))/.017,2.0))*lens;
-        float crownMask=smoothstep(.42,.73,vLocal.y)
-          *(1.0-smoothstep(.16,.34,abs(vLocal.x)))*podMask;
-        float tendrilMask=smoothstep(.62,.82,length(vLocal.xy))*podMask;
-        float tendrilSegment=(.58+.42*(.5+.5*cos(vUv.y*18.85+vUv.x*3.14)))*tendrilMask;
+        float crackX=heartLocal.x+.008*sin(heartLocal.y*31.0+vLocal.z*9.0);
+        float fissureHalo=exp(-pow(crackX/.026,2.0))*exp(-pow(heartLocal.y/.115,4.0))*frontMask;
+        float fissure=exp(-pow(crackX/.0065,2.0))*exp(-pow(heartLocal.y/.095,4.0))*frontMask;
+        float crownMask=smoothstep(.46,.76,vLocal.y)
+          *(1.0-smoothstep(.14,.31,abs(vLocal.x)))*podMask;
+        float tendrilMask=smoothstep(.64,.83,length(vLocal.xy))*podMask;
+
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
           float head=mix(-.18,1.18,sat(uSurfacePulse));
-          pulse=exp(-pow((coordinate-head)/.065,2.0))*(.30+.70*fresnel);
+          pulse=exp(-pow((coordinate-head)/.062,2.0))*(.28+.72*fresnel);
         }
-        vec3 cyan=vec3(.010,.28,.42);
-        vec3 ice=vec3(.52,.58,.59);
-        vec3 steel=vec3(.050,.060,.064);
-        vec3 nearBlack=vec3(.004,.006,.007);
-        float facetTone=mix(.68,1.20,facetRand);
-        vec3 c=mix(vec3(.008,.011,.013),vec3(.080,.092,.098),sat(.18+ndl*.92+sideLight*.58+fillLight*.28))*facetTone;
-        c+=vec3(.19,.20,.20)*spec*.38;
-        c+=vec3(.080,.092,.095)*sideLight*.28;
-        c+=vec3(.045,.050,.052)*fillLight*.20;
-        c+=ice*fresnel*.050;
-        c+=mix(steel,ice,.22)*crownMask*(.055+.095*ndl+.035*spec);
-        c=mix(c,nearBlack+steel*.18,socket*.58);
-        c+=ice*lens*.18+cyan*lens*.045;
-        c=mix(c,nearBlack,pupil*.88);
-        c+=(ice*.34+cyan*.010)*lensGlint;
-        c+=mix(steel,ice,.16)*lensRim*.055;
-        c+=(ice*.38+cyan*.09)*pulse;
-        c=mix(c,vec3(.006,.014,.016),tendrilMask*.88);
-        c+=(ice*.045+cyan*.020)*tendrilSegment*(.10+.14*fresnel);
-        float alpha=.986+.006*ndl+.004*fresnel+pulse*.004+tendrilMask*.004;
-        ${outputName}=vec4(filmic(c*1.92),clamp(alpha,.990,.999));
+
+        vec3 cyan=vec3(.008,.24,.35);
+        vec3 ice=vec3(.55,.60,.60);
+        vec3 steel=vec3(.043,.052,.055);
+        vec3 c=mix(vec3(.003,.0045,.0055),vec3(.034,.043,.047),
+          sat(.12+ndl*.92+sideLight*.62+fillLight*.24))*facetTone;
+        c+=vec3(.36,.37,.36)*spec*.31;
+        c+=vec3(.078,.093,.098)*sideLight*.24;
+        c+=vec3(.038,.044,.047)*fillLight*.16;
+        c+=ice*fresnel*.060;
+        c+=vec3(.070,.055,.040)*max(0.0,-n.y)*.055;
+        c+=mix(steel,ice,.18)*crownMask*(.035+.070*ndl+.025*spec);
+
+        c-=vec3(.010,.013,.014)*fissureHalo*.34;
+        c+=vec3(.008,.018,.021)*fissureHalo*.28;
+        c+=(ice*.075+cyan*.050)*fissure;
+        c+=(ice*.34+cyan*.060)*pulse;
+
+        vec3 tendon=vec3(.0035,.006,.007)+steel*(.08+.12*fresnel)+ice*spec*.018;
+        c=mix(c,tendon,tendrilMask*.97);
+        float alpha=.988+.005*ndl+.004*fresnel+pulse*.004+tendrilMask*.003;
+        ${outputName}=vec4(filmic(c*2.08),clamp(alpha,.992,.999));
       }`;
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
 
@@ -1352,6 +1356,8 @@
     root.dataset.fxCoreShapeR1551='taller-coherent-natural-crystal-mass-reduced-shard-chaos';
     root.dataset.fxCoreOpticsR1552='subtle-smoked-glass-aperture-no-eye-ring-higher-contrast-mineral-reflection';
     root.dataset.fxCoreShapeR1552='leaning-asymmetric-monolithic-obsidian-softened-large-facets-shorter-tendrils';
+    root.dataset.fxCoreOpticsR1553='polished-volcanic-glass-no-round-optic-subtle-internal-mineral-fissure';
+    root.dataset.fxCoreShapeR1553='high-density-smooth-shaded-asymmetric-monolith-clean-perimeter-tendrils';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
     root.dataset.fxCoreReferenceMaterialR1220='opaque-gunmetal-bright-titanium-armor-local-blue-optic-dark-tendrils';
@@ -1415,7 +1421,7 @@
       root.dataset.fxCoreSoftwareSurfaceOwnerR1543=softwareRenderer?'native-r326-software-equivalent-r465-contract':'not-software';
       root.dataset.fxCoreSoftwareDesktopContractR1544=softwareRenderer&&!mobile?'desktop-r465-semantics-preserved':'not-software-desktop';
     }
-    root.dataset.fxCoreMobileResolutionR424=softwareRenderer?'r1552-software-dpr-cap-0.94-pixel-budget-260k':mobile?'r1552-mobile-higher-detail-adaptive':'r1552-desktop-high-detail-adaptive';
+    root.dataset.fxCoreMobileResolutionR424=softwareRenderer?'r1553-software-dpr-cap-0.94-pixel-budget-260k':mobile?'r1553-mobile-smooth-high-density-adaptive':'r1553-desktop-smooth-high-density-adaptive';
     root.dataset.fxCoreMobileOpticsR435=mobile?'superseded-by-r454-visible-native-surface':'desktop-preserved-r454';
     root.dataset.fxCoreMobileOpticsR440=mobile?'superseded-by-r454-luminous-electric-surface':'desktop-superseded-by-r454';
     root.dataset.fxCoreMobilePerformanceR442=mobile?'18x36-capable-12x24-constrained-adaptive-intermittent-pulse-idle-zero':'desktop-three-pass-intermittent-pulse-idle-zero';
