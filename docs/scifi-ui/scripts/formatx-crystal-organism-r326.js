@@ -1065,16 +1065,16 @@
         ${outputName}=vec4(filmic(col*2.60),clamp(outAlpha,.70,1.0));
       }`;
 
-    const softwareFragmentSource = \`\${versionLine}precision mediump float;
+    const softwareFragmentSource = `${versionLine}precision mediump float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
-      \${fragmentIn} vec3 vNormal;
-      \${fragmentIn} vec3 vLocal;
-      \${fragmentIn} vec2 vUv;
-      \${fragmentIn} vec3 vBary;
-      \${fragmentIn} float vFacet;
-      \${fragmentIn} float vMorph;
-      \${webgl2 ? 'out vec4 outColor;' : ''}
+      ${fragmentIn} vec3 vNormal;
+      ${fragmentIn} vec3 vLocal;
+      ${fragmentIn} vec2 vUv;
+      ${fragmentIn} vec3 vBary;
+      ${fragmentIn} float vFacet;
+      ${fragmentIn} float vMorph;
+      ${webgl2 ? 'out vec4 outColor;' : ''}
       float sat(float v){return clamp(v,0.,1.);}
       void main(){
         vec3 n=normalize(vNormal);
@@ -1136,11 +1136,11 @@
         vec3 physicalLens=vec3(.002,.008,.011)+vec3(.018,.085,.10)*lensInner+vec3(.24,.30,.29)*softA*.10;
         col=mix(col,physicalLens,isLensMesh*.99);
 
-        if(uLayer>.5){\${outputName}=vec4(vec3(.004,.009,.011),.15);return;}
+        if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.15);return;}
         col=col/(vec3(1.0)+col*1.35);
         float alpha=1.0-tendrilMask*.30-isGlassFin*.60;
-        \${outputName}=vec4(col*2.35,clamp(alpha,.72,1.0));
-      }\`;
+        ${outputName}=vec4(col*2.35,clamp(alpha,.72,1.0));
+      }`;
 
     const fragmentSource = softwareRenderer
       ? softwareFragmentSource
