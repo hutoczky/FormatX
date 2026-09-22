@@ -873,7 +873,7 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:softwareRenderer?.90:constrainedMobile?1.12:mobile?1.50:constrained?1.15:1.65;
+      const cap=auditMode?1:softwareRenderer ? 0.90:constrainedMobile?1.12:mobile?1.50:constrained?1.15:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const budget=auditMode?390000:softwareRenderer?360000:constrainedMobile?340000:mobile?760000:constrained?520000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
