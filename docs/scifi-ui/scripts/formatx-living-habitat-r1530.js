@@ -57,8 +57,8 @@
       y:.16+random()*.58,
       reach:.18+random()*.18,
       bend:.10+random()*.18,
-      alpha:.020+random()*.018,
-      width:.75+random()*1.20,
+      alpha:.036+random()*.026,
+      width:.90+random()*1.45,
       phase:random()*Math.PI*2
     }));
     const spireCount=LOW_POWER?3:MOBILE.matches?4:7;
@@ -69,7 +69,7 @@
       w:.055+random()*.085,
       h:.12+random()*.30,
       lean:(random()-.5)*.055,
-      alpha:.10+random()*.12,
+      alpha:.16+random()*.14,
       warm:random()>.72
     }));
   }
@@ -274,6 +274,7 @@
   ROOT.dataset.fxLivingHabitatR1584=MOBILE.matches?'mobile-volumetric-no-filament-beams':'desktop-short-organic-filaments';
   ROOT.dataset.fxLivingHabitatR1585='dark-laboratory-side-masses-overhead-haze-floor-reflection-no-rings';
   ROOT.dataset.fxLivingHabitatR1593='physical-mineral-spires-clear-bioglass-arches-whole-page-depth';
+  ROOT.dataset.fxLivingHabitatR1594='visible-bioglass-arches-mineral-spires-reflective-floor-depth-without-hud-rings';
   ROOT.dataset.fxLivingHabitatSchedulerR1541='interaction-driven-zero-idle-raf';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
 })();
