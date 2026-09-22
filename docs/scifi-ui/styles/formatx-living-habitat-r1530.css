@@ -751,3 +751,47 @@ body.living-architecture::after{
   .fx-living-habitat-r1530{opacity:.52!important;}
 }
 /* production-r1575-soft-volumetric-habitat-no-stage-light-bars */
+
+
+/* R1580 — photographic living habitat. Keep the whole page in one physical
+   environment: soft volumetric shafts, mineral haze and sparse depth dust.
+   No local HUD ring is painted around the MAG. */
+html body.living-architecture{
+  background:
+    radial-gradient(ellipse 72% 34% at 50% -4%,rgba(155,191,197,.055),transparent 72%),
+    radial-gradient(ellipse 34% 72% at 8% 42%,rgba(55,92,99,.040),transparent 70%),
+    radial-gradient(ellipse 30% 66% at 94% 58%,rgba(72,63,84,.032),transparent 74%),
+    linear-gradient(180deg,#010407 0%,#02070a 46%,#010406 100%)!important;
+}
+html body.living-architecture::before{
+  content:""!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:-3!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(104deg,transparent 0 20%,rgba(178,205,207,.018) 36%,transparent 53%),
+    linear-gradient(76deg,transparent 0 58%,rgba(118,145,151,.014) 69%,transparent 83%)!important;
+  opacity:.72!important;
+  filter:blur(14px)!important;
+}
+html body.living-architecture::after{
+  content:""!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:-2!important;
+  pointer-events:none!important;
+  background-image:
+    radial-gradient(circle at 9% 17%,rgba(235,246,246,.14) 0 .55px,transparent .8px),
+    radial-gradient(circle at 31% 68%,rgba(159,191,195,.10) 0 .55px,transparent .85px),
+    radial-gradient(circle at 72% 29%,rgba(227,218,206,.09) 0 .5px,transparent .8px),
+    radial-gradient(circle at 91% 78%,rgba(177,163,190,.08) 0 .55px,transparent .85px)!important;
+  background-size:211px 197px,263px 241px,317px 293px,359px 337px!important;
+  opacity:.34!important;
+}
+html body.living-architecture #hero .hero-space{
+  background:
+    radial-gradient(ellipse 44% 55% at 50% 46%,rgba(122,157,162,.025),transparent 70%),
+    linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.08))!important;
+}
+/* production-r1580-photographic-living-habitat */
