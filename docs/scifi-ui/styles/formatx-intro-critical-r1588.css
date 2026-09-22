@@ -1,0 +1,26 @@
+/* FormatX R1588 — critical cinematic ownership geometry.
+   Loaded synchronously because the full birth stylesheet is intentionally deferred.
+   The intro shell must never enter normal flow or move the hero while its full
+   visual layer is still loading. */
+.fx-mag-birth-r533{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+  min-height:100vh!important;
+  margin:0!important;
+  overflow:hidden!important;
+  z-index:2147483000!important;
+  isolation:isolate!important;
+  contain:layout paint size!important;
+}
+html[data-fx-mag-birth-live="active"] body>.topbar,
+html[data-fx-mag-birth-live="active"] body>.fx-organism-status,
+html[data-fx-mag-birth-live="active"] body>#main-content,
+html[data-fx-mag-birth-live="active"] body>footer.site-footer{
+  visibility:hidden!important;
+}
+html[data-fx-mag-birth-live="active"] body>.fx-mag-birth-r533{
+  visibility:visible!important;
+}
+/* production-r1588-intro-fixed-before-deferred-film-css */
