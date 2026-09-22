@@ -1615,6 +1615,30 @@
       if(this.mechLight)this.mechLight.intensity+=flash*2.1*(this.mechanicalReveal||0);
 
       this.renderer.render(this.scene,this.camera);
+      if(this.deterministicFrame){
+        /* R1557 visual proof must wait for SwiftShader/ANGLE to finish the real
+           Three frame before Playwright captures it. Production never pays for
+           this synchronization or readback. */
+        const gl=this.renderer.getContext();
+        try{gl.finish();}catch(_){}
+        try{
+          const w=gl.drawingBufferWidth,h=gl.drawingBufferHeight;
+          const px=new Uint8Array(4);
+          let peak=0;
+          for(const uv of [[.50,.50],[.38,.50],[.62,.50],[.50,.36],[.50,.64],[.30,.32],[.70,.32],[.30,.68],[.70,.68]]){
+            gl.readPixels(
+              Math.max(0,Math.min(w-1,Math.floor(w*uv[0]))),
+              Math.max(0,Math.min(h-1,Math.floor(h*uv[1]))),
+              1,1,gl.RGBA,gl.UNSIGNED_BYTE,px
+            );
+            peak=Math.max(peak,px[0],px[1],px[2]);
+          }
+          document.documentElement.dataset.fxMagBirthFramePeakR1557=String(peak);
+          document.documentElement.dataset.fxMagBirthFrameR1557='render-finished-readback-complete';
+        }catch(_){
+          document.documentElement.dataset.fxMagBirthFrameR1557='render-finished-readback-unavailable';
+        }
+      }
     }
 
     destroy(){
@@ -1702,6 +1726,7 @@
   document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
+  document.documentElement.dataset.fxMagBirthProofR1557='double-render-gl-finish-and-readback-before-proof-ready';
   document.documentElement.dataset.fxMagBirthVisualR1555='smooth-indexed-volcanic-glass-mineral-fissure-no-circular-eye';
   document.documentElement.dataset.fxMagBirthPerformanceR1545='hardware-three-software-reference-film-no-parallel-webgl';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
@@ -1709,6 +1734,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1555-photoreal-volcanic-glass-no-eye-positive-stack'
+    revision:'r1557-photographic-volcanic-glass-double-render-proof-sync'
   };
 })();
