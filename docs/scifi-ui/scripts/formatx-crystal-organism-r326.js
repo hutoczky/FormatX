@@ -71,6 +71,7 @@
   root.dataset.fxNativeMagVisualR1574 = 'irregular-smoky-volcanic-glass-broad-facets-no-diamond-no-pinhole-no-eye';
   root.dataset.fxNativeMagVisualR1575 = 'truncated-asymmetric-smoky-obsidian-crystal-studio-softboxes-no-egg-no-eye';
   root.dataset.fxNativeMagVisualR1576 = 'hand-cut-asymmetric-obsidian-shard-broad-natural-facets-no-egg-no-pot';
+  root.dataset.fxNativeMagVisualR1577 = 'canonical-neutral-hand-cut-obsidian-shard-surface-energy-compliant';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -502,8 +503,8 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.025) contrast(1.16) saturate(.88)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.025) contrast(1.16) saturate(.88)','important');
+    canvas.style.setProperty('filter','brightness(1.025) contrast(1.16) saturate(1.00)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.025) contrast(1.16) saturate(1.00)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -1364,6 +1365,7 @@
     root.dataset.fxCoreShapeR1575='asymmetric-truncated-crystal-seed-oblique-cap-facets-no-egg-no-logo-diamond';
     root.dataset.fxCoreShapeR1576='five-offset-rings-nine-to-eleven-sided-hand-cut-obsidian-shard-broad-facets';
     root.dataset.fxCoreOpticsR1576='broad-flat-mineral-planes-rectangular-studio-softboxes-dark-obsidian';
+    root.dataset.fxCoreOpticsR1577='neutral-saturation-canonical-surface-energy-photographic-obsidian';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
