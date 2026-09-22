@@ -59,7 +59,7 @@
   function resize(){
     width=Math.max(1,innerWidth);
     height=Math.max(1,innerHeight);
-    dpr=Math.min(devicePixelRatio||1,LOW_POWER?.75:MOBILE.matches?.82:1);
+    dpr=Math.min(devicePixelRatio||1,LOW_POWER ? 0.75 : MOBILE.matches ? 0.82 : 1);
     canvas.width=Math.max(1,Math.round(width*dpr));
     canvas.height=Math.max(1,Math.round(height*dpr));
     canvas.style.width=width+'px';
@@ -86,7 +86,7 @@
     ctx.clearRect(0,0,width,height);
     const breath=.50+.50*Math.sin(now*.00022);
 
-    const shaftX=width*(MOBILE.matches?.50:.66)+pointerX*width*.010;
+    const shaftX=width*(MOBILE.matches ? 0.50 : 0.66)+pointerX*width*.010;
     const shaftY=-height*.04+pointerY*height*.006;
     const shaftR=Math.max(width,height)*(.44+breath*.009);
     ctx.fillStyle=radial(shaftX,shaftY,shaftR,[
