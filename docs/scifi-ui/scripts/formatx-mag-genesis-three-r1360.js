@@ -196,7 +196,7 @@
 
       const wallMat=new T.MeshPhysicalMaterial({
         color:0x03070a,metalness:.26,roughness:.62,
-        emissive:0x010406,emissiveIntensity:.035,
+        emissive:0x01080a,emissiveIntensity:.075,
         clearcoat:.08,clearcoatRoughness:.58,
         side:T.BackSide
       });
@@ -204,15 +204,15 @@
         color:0x071014,metalness:.12,roughness:.78,
         emissive:0x010304,emissiveIntensity:.006,
         clearcoat:.02,clearcoatRoughness:.72,
-        transparent:true,opacity:.030
+        transparent:true,opacity:.095
       });
       const darkPanelMat=new T.MeshPhysicalMaterial({
         color:0x010203,metalness:.02,roughness:.95,
         emissive:0x000000,emissiveIntensity:0,
-        transparent:true,opacity:.018
+        transparent:true,opacity:.055
       });
       const lightMat=new T.MeshBasicMaterial({
-        color:0xb5d3d4,transparent:true,opacity:.006,
+        color:0xb5d3d4,transparent:true,opacity:.024,
         depthWrite:false,blending:T.AdditiveBlending
       });
 
@@ -223,7 +223,7 @@
         wallMat
       );
       tunnel.position.set(0,0,-.62);
-      tunnel.visible=false;
+      tunnel.visible=true;
       group.add(tunnel);
 
       const floor=new T.Mesh(
@@ -244,7 +244,7 @@
         darkPanelMat
       );
       bulkhead.position.z=-3.02;
-      bulkhead.visible=false;
+      bulkhead.visible=true;
       group.add(bulkhead);
 
       // Asymmetric wall ribs. They establish scale and depth without forming a ring.
@@ -294,7 +294,7 @@
 
     makeParticles(){
       const T=this.THREE,r=this.rand;
-      const count=90;
+      const count=180;
       const pos=new Float32Array(count*3);
       const size=new Float32Array(count);
       for(let i=0;i<count;i++){
@@ -309,7 +309,7 @@
       const g=new T.BufferGeometry();
       g.setAttribute('position',new T.BufferAttribute(pos,3));
       const m=new T.PointsMaterial({
-        color:0xa8c4c7,size:.018,transparent:true,opacity:.12,
+        color:0xa8c4c7,size:.020,transparent:true,opacity:.19,
         depthWrite:false,blending:T.NormalBlending,sizeAttenuation:true
       });
       this.particles=new T.Points(g,m);
@@ -1189,8 +1189,8 @@
         const a=Math.atan2(n.z,n.x);
         const lobe=1+Math.sin(a*4.0+n.y*1.2)*.035+Math.cos(a*3.0-n.y*2.4)*.018;
         pv.multiplyScalar(lobe);
-        pv.x*=.76;pv.y*=.84;pv.z*=.52;
-        pv.y+=Math.pow(Math.max(n.y,0),4.0)*.075;
+        pv.x*=.52;pv.y*=.60;pv.z*=.38;
+        pv.y+=Math.pow(Math.max(n.y,0),4.0)*.045;
         bp.setXYZ(i,pv.x,pv.y,pv.z);
       }
       bodyGeo.computeVertexNormals();
@@ -1199,10 +1199,10 @@
       this.mechBodyParts.push(this.mechBody);
 
       this.mechPetalMaterial=new T.MeshPhysicalMaterial({
-        color:0x151f25,metalness:.68,roughness:.25,
-        emissive:0x010507,emissiveIntensity:.012,
-        clearcoat:.34,clearcoatRoughness:.15,
-        envMapIntensity:1.46,transparent:true,opacity:0
+        color:0x10181d,metalness:.52,roughness:.18,
+        emissive:0x010405,emissiveIntensity:.010,
+        clearcoat:.68,clearcoatRoughness:.085,
+        envMapIntensity:1.72,transparent:true,opacity:0
       });
       const petalShape=new T.Shape();
       petalShape.moveTo(0,-.16);
@@ -1214,15 +1214,17 @@
       });
       petalGeo.center();
       const petalDefs=[
-        [0,.17,.60,0,.90,.90],
-        [.17,0,.60,-Math.PI/2,.90,.90],
-        [0,-.17,.60,Math.PI,.90,.90],
-        [-.17,0,.60,Math.PI/2,.90,.90]
+        [0,.17,.60,0,.96,.98,-.070,0],
+        [.17,0,.60,-Math.PI/2,.96,.98,0,.070],
+        [0,-.17,.60,Math.PI,.96,.98,.070,0],
+        [-.17,0,.60,Math.PI/2,.96,.98,0,-.070]
       ];
-      for(const [x,y,z,rz,sx,sy] of petalDefs){
+      for(const [x,y,z,rz,sx,sy,rx,ry] of petalDefs){
         const p=new T.Mesh(petalGeo,this.mechPetalMaterial);
-        p.position.set(x,y,z);p.rotation.z=rz;p.scale.set(sx,sy,.76);
-        p.userData.baseRz=rz;
+        p.position.set(x,y,z);
+        p.rotation.set(rx,ry,rz);
+        p.scale.set(sx,sy,.88);
+        p.userData.baseRz=rz;p.userData.baseRx=rx;p.userData.baseRy=ry;
         this.mechanicalGroup.add(p);this.mechPetals.push(p);
       }
 
@@ -1246,7 +1248,7 @@
         clearcoat:.36,clearcoatRoughness:.14,
         transparent:true,opacity:0,depthWrite:true
       });
-      this.mechInnerRing=new T.Mesh(new T.TorusGeometry(.205,.023,18,112),this.mechInnerMaterial);
+      this.mechInnerRing=new T.Mesh(new T.TorusGeometry(.185,.021,18,112),this.mechInnerMaterial);
       this.mechInnerRing.position.z=.716;
       this.mechanicalGroup.add(this.mechInnerRing);
 
@@ -1257,7 +1259,7 @@
         transmission:.10,thickness:.16,ior:1.46,
         transparent:true,opacity:0,depthWrite:false
       });
-      this.mechEyeCore=new T.Mesh(new T.SphereGeometry(.145,72,42),this.mechEnergyMaterial);
+      this.mechEyeCore=new T.Mesh(new T.SphereGeometry(.126,72,42),this.mechEnergyMaterial);
       this.mechEyeCore.scale.set(1,1,.30);
       this.mechEyeCore.position.z=.754;
       this.mechanicalGroup.add(this.mechEyeCore);
@@ -1276,7 +1278,7 @@
         map:this.makeGlowTexture(),color:0x78ebff,
         transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.62,.62,1);
+      this.mechEyeCorona.scale.set(.50,.50,1);
       this.mechEyeCorona.position.z=.70;
       this.mechanicalGroup.add(this.mechEyeCorona);
 
@@ -1496,7 +1498,7 @@
       this.mechanicalReveal=bodyGrow;
       this.mechanicalGroup.visible=bodyGrow>.002;
       this.mechanicalGroup.scale.set(.001+bodyGrow*1.28,.001+bodyGrow*1.30,.001+bodyGrow*1.24);
-      this.mechMaterial.opacity=.78*bodyGrow;
+      this.mechMaterial.opacity=.38*bodyGrow;
       this.mechMidMaterial.opacity=.86*bodyGrow;
       this.silverMaterial.opacity=.20*bodyGrow;
       if(this.crownMaterial)this.crownMaterial.opacity=.16*bodyGrow;
@@ -1525,6 +1527,8 @@
       this.mechPetals?.forEach((p,index)=>{
         const open=(1-bodyGrow)*.08;
         p.rotation.z=p.userData.baseRz+(index%2?open:-open);
+        p.rotation.x=p.userData.baseRx+Math.sin(time*.00016+index)*.010*bodyGrow;
+        p.rotation.y=p.userData.baseRy+Math.cos(time*.00014+index)*.010*bodyGrow;
       });
     }
 
@@ -1559,13 +1563,13 @@
         y=Math.cos(time*.00018)*.003;
       }else if(t<7.25){
         const k=smooth((t-5.55)/1.70);
-        z=mix(5.70,5.80,k);
+        z=mix(5.70,5.18,k);
         y=mix(0,.002,k);
       }else if(t<9.10){
-        z=5.80+Math.sin(time*.00018)*.006;
+        z=5.18+Math.sin(time*.00018)*.006;
         y=.002;
       }else{
-        z=mix(5.80,5.72,smooth((t-9.10)/.60));
+        z=mix(5.18,5.08,smooth((t-9.10)/.60));
         y=.002;
       }
       if(this.width<this.height)z+=.44;
@@ -1593,11 +1597,11 @@
         this.debris.rotation.y=time*.000018;
         this.debris.rotation.z=Math.sin(time*.00011)*.022;
       }
-      this.particles.material.opacity=.24+.05*Math.sin(time*.00045);
+      this.particles.material.opacity=.31+.07*Math.sin(time*.00045);
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.38+flash*.34+after*.055;
+      this.renderer.toneMappingExposure=1.46+flash*.34+after*.055;
       this.coreLight.intensity+=flash*4.8+after*.62;
       if(this.glowSprite){
         const g=1+flash*.72;
@@ -1702,7 +1706,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1594-dense-cellular-four-petal-physical-iris-eight-glass-tendril-flash-handoff'
+        revision:'r1599-photographic-dark-chamber-four-petal-core-glass-tendril-reference-scale'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1752,6 +1756,7 @@
   document.documentElement.dataset.fxMagBirthProofR1591='brighter-wet-bioceramic-readable-obsidian-broad-studio-reflection-organic-fissure';
   document.documentElement.dataset.fxMagBirthProofR1593='reference-video-dna-cellular-armored-iris-eight-tendril-cinematic-handoff';
   document.documentElement.dataset.fxMagBirthProofR1594='dense-cellular-shell-four-petal-armored-core-bright-physical-iris-eight-glass-tendrils';
+  document.documentElement.dataset.fxMagBirthProofR1599='photographic-dark-chamber-floating-armored-core-glass-tendrils-scaled-reference-stage';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1580='photographic-bioceramic-seed-sculpted-obsidian-handoff-soft-studio-light';
   document.documentElement.dataset.fxMagBirthProofR1581='truncated-smooth-obsidian-no-box-reflections-bioceramic-handoff';
@@ -1764,6 +1769,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1594-dense-cellular-four-petal-physical-iris-eight-glass-tendril'
+    revision:'r1599-photographic-dark-chamber-four-petal-core-glass-tendril-reference-scale'
   };
 })();
