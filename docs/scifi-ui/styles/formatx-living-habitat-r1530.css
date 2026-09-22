@@ -954,3 +954,33 @@ body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-
   }
 }
 /* production-r1594-control-hud-cleanup */
+
+
+/* R1595 — retire the old R179 circular/conic energy field. The new habitat
+   canvas owns environmental depth; this prevents the large faint HUD circle
+   seen around the mobile hero controls. */
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture .fx-r179-field::before{
+  content:none!important;
+  display:none!important;
+  width:0!important;
+  height:0!important;
+  opacity:0!important;
+  background:none!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+  filter:none!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero.hero::after{
+  content:none!important;
+  display:none!important;
+  width:0!important;
+  height:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  opacity:0!important;
+}
+/* production-r1595-retire-r179-circular-field */
