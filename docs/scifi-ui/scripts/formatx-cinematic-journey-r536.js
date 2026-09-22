@@ -58,6 +58,7 @@
     stage = document.createElement('div');
     stage.className = 'fx-c536-stage';
     stage.setAttribute('aria-hidden','true');
+    stage.dataset.fxC536Primed='false';
     stage.style.cssText='position:fixed;inset:0;z-index:7;overflow:hidden;pointer-events:none;contain:layout paint style;isolation:isolate;width:100%;height:100%;';
     stage.innerHTML = [
       '<div class="fx-c536-world"></div>',
@@ -236,6 +237,10 @@
 
     root.dataset.fxCinematicProgressR536 = global.toFixed(3);
     root.dataset.fxCinematicLocalR536 = local.toFixed(3);
+    if(stage?.dataset.fxC536Primed!=='true'){
+      stage.dataset.fxC536Primed='true';
+      root.dataset.fxCinematicPrimingR1546='first-frame-position-locked';
+    }
   }
 
   function schedule() {
