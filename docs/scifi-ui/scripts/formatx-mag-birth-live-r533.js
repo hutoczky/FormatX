@@ -18,7 +18,9 @@
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
-  const DURATION = LOW_POWER ? 4200 : 10000;
+  const DURATION = LOW_POWER ? 3000 : 10000;
+  const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
+  const prepaintOverlay = document.getElementById(PREPAINT_ID);
   const EXIT_MS = 180;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
 
@@ -32,6 +34,7 @@
   ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : (seen && !FORCE ? 'session-skip' : 'active');
 
   if (!FORCE && (seen || AUTOMATION)) {
+    prepaintOverlay?.remove();
     ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : 'session-skip';
     return;
   }
@@ -71,8 +74,9 @@
     ]
   };
 
-  const overlay = document.createElement('section');
+  const overlay = prepaintOverlay instanceof HTMLElement ? prepaintOverlay : document.createElement('section');
   overlay.className = 'fx-mag-birth-r533';
+  overlay.dataset.fxPrepaintR1606 = prepaintOverlay instanceof HTMLElement ? 'adopted-static-lcp-shell' : 'dynamic-fallback';
   overlay.dataset.phase = '0';
   overlay.dataset.performance = MOBILE ? 'constrained' : 'full';
   overlay.dataset.fxIntroR645 = 'biotic-genesis';
@@ -221,7 +225,8 @@
   ROOT.dataset.fxNativeMagProofR1101 = 'r1090-intro-r1100-real-armor-browser-proof';
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
   overlay.setAttribute('aria-label', copy.title);
-  overlay.innerHTML = `
+  const prepaintBrand = overlay.querySelector('.fxb-lcp-brand-r1603');
+  overlay.insertAdjacentHTML('beforeend', `
     <div class="fxb-deep" aria-hidden="true"></div>
     <div class="fxb-veil" aria-hidden="true"></div>
     <div class="fxb-stars" aria-hidden="true"></div>
@@ -292,7 +297,6 @@
     <div class="fxb-scan" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-top" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-bottom" aria-hidden="true"></div>
-    <div class="fxb-lcp-brand-r1603" aria-hidden="true">FORMATX</div>
     <header class="fxb-copy">
       <p class="fxb-kicker"></p>
       <h1></h1>
@@ -304,7 +308,24 @@
       <span class="fxb-status"></span>
     </div>
     <button class="fxb-skip" type="button"></button>
-  `;
+  `);
+
+  if (!(prepaintBrand instanceof HTMLElement)) {
+    const brand=document.createElement('div');
+    brand.className='fxb-lcp-brand-r1603';
+    brand.setAttribute('aria-hidden','true');
+    brand.textContent='FORMATX';
+    overlay.prepend(brand);
+  }
+
+  if (MOBILE && !HAS_VISUAL_FRAME) {
+    overlay.querySelectorAll(
+      '.fxb-genome-field,.fxb-biotic-field,.fxb-embryo,.fxb-grid,.fxb-halo,.fxb-axis,.fxb-lens,.fxb-scan'
+    ).forEach(node=>node.remove());
+    ROOT.dataset.fxMagBirthDomBudgetR1606='mobile-lean-real-renderer-no-legacy-decorative-tree';
+  } else {
+    ROOT.dataset.fxMagBirthDomBudgetR1606='full-reference-tree';
+  }
 
   const kicker = overlay.querySelector('.fxb-kicker');
   const title = overlay.querySelector('h1');
@@ -958,7 +979,8 @@
     ROOT.dataset.fxMagBirthPerformanceR1601='60hz-target-adaptive-quality-no-artificial-frame-cap';
     ROOT.dataset.fxMagBirthPerformanceR1602='exclusive-intro-layout-plus-real-frame-budget-target-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1603='early-cinematic-lcp-brand-plus-adaptive-60fps';
-    ROOT.dataset.fxMagBirthDurationR1549=LOW_POWER?'4200ms-adaptive':'10000ms-full';
+    ROOT.dataset.fxMagBirthPerformanceR1606='static-lcp-shell-mobile-lean-dom-handoff-first-permanent-webgl-60fps';
+    ROOT.dataset.fxMagBirthDurationR1549=LOW_POWER?'3000ms-adaptive-60fps':'10000ms-full';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
