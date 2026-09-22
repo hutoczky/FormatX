@@ -60,6 +60,7 @@
   root.dataset.fxNativeMagVisualR1556 = 'winding-correct-obsidian-conchoidal-softbox-reflections-clean-solid-shell';
   root.dataset.fxNativeMagVisualR1557 = 'solid-black-volcanic-glass-broad-mineral-planes-neutral-studio-reflections-no-eye-no-hud';
   root.dataset.fxNativeMagVisualR1558 = 'smoky-obsidian-continuous-asymmetric-crystal-visible-studio-planes-clean-silhouette-no-eye';
+  root.dataset.fxNativeMagVisualR1559 = 'photographic-smoky-obsidian-irregular-monolith-antialiased-clean-surface-visible-dark-glass';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
@@ -219,9 +220,9 @@
       ];
       const topLean=Math.pow(Math.max(direction[1],0),2.4);
       const lowerMass=Math.pow(Math.max(-direction[1],0),2.0);
-      crystalPosition[0]+=-.072*topLean+.026*lowerMass+direction[2]*direction[1]*.010-Math.pow(Math.max(-direction[0],0),4.0)*.008;
-      crystalPosition[1]+=Math.pow(Math.max(direction[1],0),5.0)*.090-Math.pow(Math.max(-direction[1],0),4.0)*.010+direction[0]*direction[2]*.005;
-      crystalPosition[2]+=direction[0]*direction[1]*.008+Math.pow(Math.max(direction[2],0),4.0)*.010;
+      crystalPosition[0]+=-.090*topLean+.040*lowerMass+direction[2]*direction[1]*.014-Math.pow(Math.max(-direction[0],0),4.0)*.010+direction[1]*.018;
+      crystalPosition[1]+=Math.pow(Math.max(direction[1],0),5.0)*.104-Math.pow(Math.max(-direction[1],0),4.0)*.012+direction[0]*direction[2]*.008+direction[0]*.018;
+      crystalPosition[2]+=direction[0]*direction[1]*.012+Math.pow(Math.max(direction[2],0),4.0)*.012-direction[0]*.010;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -397,10 +398,15 @@
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
     stage.appendChild(canvas);
+    /* R1559 owns the final compositor treatment inline so dynamically loaded
+       legacy CSS cannot restore synthetic drop-shadow/contrast optics. */
+    canvas.style.setProperty('filter','brightness(1.01) contrast(1.025) saturate(.90)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.01) contrast(1.025) saturate(.90)','important');
+    canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
       alpha:true,
-      antialias:!constrainedMobile,
+      antialias:!auditMode,
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
@@ -517,8 +523,8 @@
         float facetTone=mix(.982,1.018,facetRand);
         float mineralWave=.985+.015*sin(vLocal.y*7.6+vLocal.x*4.1-vLocal.z*3.3);
 
-        float lift=sat(.18+ndl*.82+sideLight*.52+fillLight*.24);
-        vec3 glass=mix(vec3(.0065,.0080,.0090),vec3(.060,.070,.074),lift);
+        float lift=sat(.25+ndl*.78+sideLight*.50+fillLight*.22);
+        vec3 glass=mix(vec3(.016,.020,.022),vec3(.072,.082,.086),lift);
         glass*=facetTone*mineralWave;
         glass+=vec3(.54,.56,.55)*keySpec*.30;
         glass+=vec3(.22,.25,.26)*keySoft*.070;
@@ -554,7 +560,7 @@
           ${outputName}=vec4(filmic(inner*1.10),.18);
           return;
         }
-        ${outputName}=vec4(filmic(glass*1.88),1.0);
+        ${outputName}=vec4(filmic(glass*1.72),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -596,8 +602,8 @@
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
         float facetTone=mix(.984,1.016,facetRand);
 
-        float lift=sat(.18+ndl*.84+sideLight*.54+fillLight*.24);
-        vec3 c=mix(vec3(.0065,.0080,.0090),vec3(.060,.070,.074),lift)*facetTone;
+        float lift=sat(.25+ndl*.80+sideLight*.52+fillLight*.22);
+        vec3 c=mix(vec3(.016,.020,.022),vec3(.072,.082,.086),lift)*facetTone;
         c+=vec3(.55,.57,.56)*keySpec*.29;
         c+=vec3(.22,.25,.26)*keySoft*.068;
         c+=vec3(.36,.41,.42)*sideSpec*.20;
@@ -624,7 +630,7 @@
         tendon+=vec3(.26,.29,.29)*sideSpec*.055;
         c=mix(c,tendon,tendrilMask*.985);
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.18);return;}
-        ${outputName}=vec4(filmic(c*1.92),1.0);
+        ${outputName}=vec4(filmic(c*1.76),1.0);
       }`;
 
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
@@ -1212,6 +1218,8 @@
     root.dataset.fxCoreShapeR1557='asymmetric-pointed-broad-plane-monolith-six-short-recessed-tendrils';
     root.dataset.fxCoreOpticsR1558='smoky-obsidian-visible-neutral-studio-planes-no-compositor-glow';
     root.dataset.fxCoreShapeR1558='continuous-asymmetric-superellipsoid-no-equator-seam-clean-buried-tendril-roots';
+    root.dataset.fxCoreOpticsR1559='antialiased-opaque-smoky-glass-no-drop-shadow-no-black-facet-voids';
+    root.dataset.fxCoreShapeR1559='leaning-irregular-monolith-continuous-envelope-buried-legacy-tendrils';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
