@@ -85,6 +85,7 @@
   root.dataset.fxNativeMagVisualR1588 = 'cinematic-polished-smoky-obsidian-three-quarter-soft-facet-transitions-studio-reflections-subtle-fissure';
   root.dataset.fxNativeMagVisualR1589 = 'intro-matched-polished-obsidian-hand-cut-twenty-side-mineral-planes-three-quarter-subtle-fissure';
   root.dataset.fxNativeMagVisualR1590 = 'cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure';
+  root.dataset.fxNativeMagVisualR1591 = 'photographic-smoky-obsidian-crease-aware-cut-planes-clouded-inclusions-broad-softbox-subtle-living-fissure';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -295,7 +296,13 @@
         sphere.push(...item.sphere);
         crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
-        crystalNormals.push(...(item.crystalNormal || crystalNormal));
+        const smoothNormal=item.crystalNormal||crystalNormal;
+        const hybridNormal=normalize([
+          smoothNormal[0]*.68+crystalNormal[0]*.32,
+          smoothNormal[1]*.68+crystalNormal[1]*.32,
+          smoothNormal[2]*.68+crystalNormal[2]*.32
+        ]);
+        crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
         barycentrics.push(...barycentric[index]);
         facets.push(facet);
@@ -561,8 +568,8 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.08) contrast(1.14) saturate(.90)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.08) contrast(1.14) saturate(.90)','important');
+    canvas.style.setProperty('filter','brightness(1.13) contrast(1.08) saturate(.92)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.13) contrast(1.08) saturate(.92)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -617,7 +624,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.10));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.055));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -673,37 +680,41 @@
         float floorBounce=max(0.0,-n.y);
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,2.05);
-        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),128.0);
-        float keySoft=pow(max(dot(n,normalize(key+view)),0.0),8.0);
-        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),68.0);
+        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),88.0);
+        float keySoft=pow(max(dot(n,normalize(key+view)),0.0),5.6);
+        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),42.0);
         vec3 refl=reflect(-view,n);
         float softboxA=exp(-pow((refl.x+.28)/.58,2.0)-pow((refl.y-.34)/.74,2.0))*smoothstep(-.30,.44,refl.z);
         float softboxB=exp(-pow((refl.x-.40)/.52,2.0)-pow((refl.y-.02)/.78,2.0))*smoothstep(-.36,.50,refl.z);
         float ceilingBand=exp(-pow((refl.y-.72)/.30,4.0))*smoothstep(.02,.68,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
-        float studioRibbonA=exp(-pow((refl.x+.16)/.115,2.0)-pow((refl.y-.16)/.72,2.0))*smoothstep(-.22,.62,refl.z);
-        float studioRibbonB=exp(-pow((refl.x-.31)/.090,2.0)-pow((refl.y+.08)/.58,2.0))*smoothstep(-.18,.64,refl.z);
+        float studioRibbonA=exp(-pow((refl.x+.16)/.205,2.0)-pow((refl.y-.16)/.78,2.0))*smoothstep(-.22,.62,refl.z);
+        float studioRibbonB=exp(-pow((refl.x-.31)/.155,2.0)-pow((refl.y+.08)/.66,2.0))*smoothstep(-.18,.64,refl.z);
 
         float isTendril=step(2.0,vFacet);
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.12+ndl*.48+sideLight*.34+fillLight*.18);
-        float facetTone=mix(.985,1.015,facetRand);
+        float lift=sat(.20+ndl*.46+sideLight*.36+fillLight*.22);
+        float facetTone=mix(.972,1.028,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
-        vec3 mineral=mix(vec3(.0028,.0045,.0056),vec3(.032,.042,.046),lift)*facetTone;
-        mineral*=.965+.030*smokyDepth+.008*mineralGrain;
-        mineral+=vec3(.78,.76,.70)*keySpec*.185;
-        mineral+=vec3(.18,.18,.17)*keySoft*.034;
-        mineral+=vec3(.34,.39,.40)*sideSpec*.120;
-        mineral+=vec3(.36,.39,.37)*softboxA*.120;
-        mineral+=vec3(.22,.26,.27)*softboxB*.082;
-        mineral+=vec3(.58,.59,.54)*studioRibbonA*.190;
-        mineral+=vec3(.39,.29,.20)*studioRibbonB*.095;
+        float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
+        float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
+        vec3 mineral=mix(vec3(.0055,.0075,.0088),vec3(.046,.057,.061),lift)*facetTone;
+        mineral*=.955+.045*smokyDepth+.012*mineralGrain;
+        mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
+        mineral-=vec3(.0035,.0048,.0052)*inclusion;
+        mineral+=vec3(.82,.80,.75)*keySpec*.145;
+        mineral+=vec3(.22,.22,.21)*keySoft*.046;
+        mineral+=vec3(.38,.43,.44)*sideSpec*.105;
+        mineral+=vec3(.42,.44,.41)*softboxA*.135;
+        mineral+=vec3(.26,.30,.30)*softboxB*.094;
+        mineral+=vec3(.60,.61,.56)*studioRibbonA*.132;
+        mineral+=vec3(.40,.31,.22)*studioRibbonB*.070;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.072,.086,.085)*horizonBand*.145;
-        mineral+=vec3(.055,.078,.083)*fresnel*.22;
+        mineral+=vec3(.062,.088,.094)*fresnel*.26;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -712,7 +723,7 @@
         mineral+=vec3(.042,.036,.031)*pow(planeFill,.82)*.11;
         mineral+=vec3(.003,.011,.013)*smokyDepth*(.30+.70*(1.0-facing));
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
-        mineral+=vec3(.014,.032,.037)*edgeTransmission*.28;
+        mineral+=vec3(.018,.040,.046)*edgeTransmission*.40;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -721,8 +732,8 @@
         float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
         float fissure=exp(-pow(crackX/.0058,2.0))*fissureEnvelope;
         mineral=mix(mineral,vec3(.003,.008,.010),fissureHalo*.10);
-        mineral+=vec3(.18,.28,.29)*fissure*.055;
-        mineral+=vec3(.62,.64,.60)*fissure*.024;
+        mineral+=vec3(.18,.30,.31)*fissure*.072;
+        mineral+=vec3(.66,.67,.62)*fissure*.030;
 
         /* R1585 — recessed living energy chamber. It is deliberately small and
            irregular: an embedded source inside the mineral, never a HUD/eye. */
@@ -772,7 +783,7 @@
           ${outputName}=vec4(vec3(.004,.009,.011),.16);
           return;
         }
-        ${outputName}=vec4(filmic(mineral*3.10),1.0);
+        ${outputName}=vec4(filmic(mineral*2.78),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -806,30 +817,34 @@
         float fillLight=max(dot(n,fill),0.0);
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,2.05);
-        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),96.0);
-        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),54.0);
+        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),72.0);
+        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),38.0);
         vec3 refl=reflect(-view,n);
         float softboxA=exp(-pow((refl.x+.28)/.58,2.0)-pow((refl.y-.34)/.74,2.0))*smoothstep(-.30,.44,refl.z);
         float softboxB=exp(-pow((refl.x-.40)/.52,2.0)-pow((refl.y-.02)/.78,2.0))*smoothstep(-.36,.50,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
-        float studioRibbonA=exp(-pow((refl.x+.16)/.115,2.0)-pow((refl.y-.16)/.72,2.0))*smoothstep(-.22,.62,refl.z);
-        float studioRibbonB=exp(-pow((refl.x-.31)/.090,2.0)-pow((refl.y+.08)/.58,2.0))*smoothstep(-.18,.64,refl.z);
+        float studioRibbonA=exp(-pow((refl.x+.16)/.205,2.0)-pow((refl.y-.16)/.78,2.0))*smoothstep(-.22,.62,refl.z);
+        float studioRibbonB=exp(-pow((refl.x-.31)/.155,2.0)-pow((refl.y+.08)/.66,2.0))*smoothstep(-.18,.64,refl.z);
         float isTendril=step(2.0,vFacet);
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.12+ndl*.47+sideLight*.33+fillLight*.17);
+        float lift=sat(.20+ndl*.46+sideLight*.35+fillLight*.21);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
-        vec3 col=mix(vec3(.0028,.0045,.0056),vec3(.031,.041,.045),lift);
-        col*=.966+.030*smoke;
-        col+=vec3(.76,.74,.69)*keySpec*.180;
-        col+=vec3(.34,.39,.40)*sideSpec*.118;
-        col+=vec3(.35,.38,.36)*softboxA*.116;
-        col+=vec3(.21,.25,.26)*softboxB*.078;
-        col+=vec3(.56,.57,.53)*studioRibbonA*.184;
-        col+=vec3(.38,.29,.21)*studioRibbonB*.092;
+        float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
+        float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
+        vec3 col=mix(vec3(.0055,.0075,.0088),vec3(.045,.056,.060),lift);
+        col*=.956+.044*smoke;
+        col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
+        col-=vec3(.0033,.0045,.0049)*inclusion;
+        col+=vec3(.80,.78,.73)*keySpec*.142;
+        col+=vec3(.38,.43,.44)*sideSpec*.103;
+        col+=vec3(.41,.43,.40)*softboxA*.132;
+        col+=vec3(.25,.29,.30)*softboxB*.090;
+        col+=vec3(.58,.59,.55)*studioRibbonA*.128;
+        col+=vec3(.39,.30,.22)*studioRibbonB*.068;
         col+=vec3(.070,.084,.083)*horizonBand*.140;
-        col+=vec3(.054,.077,.082)*fresnel*.215;
+        col+=vec3(.061,.087,.093)*fresnel*.255;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -837,7 +852,7 @@
         col+=vec3(.068,.076,.075)*pow(planeKey,.72)*.21;
         col+=vec3(.040,.034,.030)*pow(planeFill,.82)*.10;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
-        col+=vec3(.014,.032,.037)*edgeTransmission*.28;
+        col+=vec3(.018,.040,.046)*edgeTransmission*.39;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -846,7 +861,7 @@
         float halo=exp(-pow(crackX/.026,2.0))*env;
         float fissure=exp(-pow(crackX/.0062,2.0))*env;
         col=mix(col,vec3(.003,.008,.010),halo*.10);
-        col+=vec3(.18,.28,.29)*fissure*.055;
+        col+=vec3(.18,.30,.31)*fissure*.070;
 
         float chamberWarp=.009*sin(q.y*21.0+vLocal.z*7.0)+.004*sin(q.x*31.0-q.y*9.0);
         vec2 cq=vec2(q.x+chamberWarp,(q.y-.010)*.92);
@@ -888,7 +903,7 @@
         col=mix(col,tendon,tendrilMask*.995);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
-        ${outputName}=vec4(filmic(col*3.08),1.0);
+        ${outputName}=vec4(filmic(col*2.78),1.0);
       }`;
 
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
@@ -1067,7 +1082,8 @@
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
       const explicitInteraction=/interaction|direct|shape|tap|keyboard|r538|r619/i.test(String(source||''));
-      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
+      if(disposed||contextLost||reduced.matches||document.hidden||paused
+        ||(!visible&&!explicitInteraction)
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'
         ||(!explicitInteraction&&now-lastSurfacePulseAt<2200))return false;
       // The mobile governor's idle flag is not the user's PAUSE control.
@@ -1075,7 +1091,7 @@
       dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
         detail:{phase:'start',source,duration:SURFACE_PULSE_WINDOW_MS}
       }));
-      if(blocked())return false;
+      if(blocked()&&!explicitInteraction)return false;
       surfacePulseStart=lastSurfacePulseAt=now;
       surfacePulseCount+=1;
       const pulseId=surfacePulseCount;
@@ -1086,7 +1102,7 @@
       root.dataset.fxCoreSurfaceCountR484=String(surfacePulseCount);
       // surfacePulseActive keeps RAF alive for the bounded duration. Do not
       // leave a second frame quota behind it on slower desktop renderers.
-      schedule(1);
+      if(!blocked())schedule(1);
       later(()=>{
         if(pulseId!==surfacePulseCount)return;
         surfacePulseStart=-Infinity;
