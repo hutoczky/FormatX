@@ -122,8 +122,13 @@ function activateMagRuntime(source='startup'){
   ensureCurrentMag();
 }
 function onMagBirthWarmup(event){
-  const source=String(event?.detail?.source||'cinematic-warmup');
-  root.dataset.fxIntroAwareMagR618='warmup-received-deferred-'+source;
+  const source=String(event?.detail?.source||root.dataset.fxMagBirthCoreWarmupR618||'cinematic-warmup');
+  root.dataset.fxIntroAwareMagR618='warmup-received-starting-'+source;
+  /* R1560: warmup means mount the canonical R326 renderer during the film.
+     The old handler only recorded the event, so forced mobile skip validation
+     could wait forever for a renderer that was deliberately deferred until
+     after the overlay it was waiting to skip. */
+  activateMagRuntime('cinematic-warmup-'+source);
 }
 
 function ensureStaticMotionCss(){
@@ -197,6 +202,11 @@ if(magBirthActive()){
   root.dataset.fxIntroAwareMagR618='waiting-for-core-formation';
   document.addEventListener('formatx:magbirthcorewarmup',onMagBirthWarmup,{once:true,passive:true});
   document.addEventListener('formatx:magbirthcomplete',()=>activateMagRuntime('cinematic-complete'),{once:true,passive:true});
+  /* The intro shell is deliberately mounted before this loader. If its warmup
+     event already fired, consume the published latch instead of losing it. */
+  if(root.dataset.fxMagBirthCoreWarmupR618){
+    queueMicrotask(()=>onMagBirthWarmup({detail:{source:root.dataset.fxMagBirthCoreWarmupR618}}));
+  }
 }else{
   activateMagRuntime('startup-no-cinematic');
 }
