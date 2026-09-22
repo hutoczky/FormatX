@@ -168,13 +168,13 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
 
-      // Physical tunnel around the camera axis; this replaces the flat HUD-like disc.
+      // R1563 — physical rectangular habitat, not a circular bore.
+      // A shallow room gives the birth film perspective without reading as a HUD ring.
       const tunnel=new T.Mesh(
-        new T.CylinderGeometry(4.55,4.25,5.6,28,1,true),
+        new T.BoxGeometry(9.6,7.2,7.0,1,1,1),
         wallMat
       );
-      tunnel.rotation.x=Math.PI/2;
-      tunnel.position.z=-.20;
+      tunnel.position.set(0,0,-.62);
       group.add(tunnel);
 
       // Deep rear bulkhead.
@@ -185,25 +185,30 @@
       bulkhead.position.z=-3.02;
       group.add(bulkhead);
 
-      // Segmented structural wall plates.
-      const panelGeo=new T.BoxGeometry(.54,1.55,.22);
-      const lightGeo=new T.BoxGeometry(.055,.88,.035);
-      for(let i=0;i<6;i++){
-        const a=i/10*Math.PI*2;
-        const radius=4.06;
+      // Asymmetric wall ribs. They establish scale and depth without forming a ring.
+      const panelGeo=new T.BoxGeometry(.46,1.72,.18);
+      const lightGeo=new T.BoxGeometry(.045,1.10,.025);
+      const panelDefs=[
+        [-3.78, 1.76,-.34,-.12,1.02],
+        [-3.92,-1.48,-.52, .10,.84],
+        [ 3.66, 1.18,-.42, .14,.92],
+        [ 3.86,-1.80,-.30,-.09,1.06],
+        [-2.20, 2.84,-.78, 1.48,.72],
+        [ 2.46,-2.92,-.66, 1.62,.66]
+      ];
+      panelDefs.forEach(([x,y,z,rz,sy],i)=>{
         const panel=new T.Mesh(panelGeo,i%3===0?panelMat:darkPanelMat);
-        panel.position.set(Math.cos(a)*radius,Math.sin(a)*radius,-.28-(i%2)*.12);
-        panel.rotation.set(0,0,a-Math.PI/2);
-        panel.scale.y=.76+(i%4)*.055;
+        panel.position.set(x,y,z);
+        panel.rotation.z=rz;
+        panel.scale.y=sy;
         group.add(panel);
-
-        if(i%3===0){
+        if(i===0||i===2){
           const light=new T.Mesh(lightGeo,lightMat);
-          light.position.set(Math.cos(a)*3.72,Math.sin(a)*3.72,.06);
-          light.rotation.z=a-Math.PI/2;
+          light.position.set(x*.94,y*.94,z+.17);
+          light.rotation.z=rz;
           group.add(light);
         }
-      }
+      });
 
       // R1540 — no concentric tunnel rings. The intro must read as a physical
       // dark habitat, not a targeting reticle or circular HUD.
@@ -294,29 +299,29 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const ma=new T.MeshPhysicalMaterial({
-        color:0x5f9ca8,emissive:0x06141d,emissiveIntensity:.08,
-        roughness:.26,metalness:.18,transparent:true,opacity:.96,
-        depthWrite:true,clearcoat:.90,clearcoatRoughness:.10,
-        transmission:.08,thickness:.18
+        color:0x718689,emissive:0x030708,emissiveIntensity:.025,
+        roughness:.38,metalness:.06,transparent:true,opacity:.90,
+        depthWrite:true,clearcoat:.42,clearcoatRoughness:.24,
+        transmission:.025,thickness:.14
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0x51466f,emissive:0x0b0717,emissiveIntensity:.09,
-        roughness:.28,metalness:.16,transparent:true,opacity:.95,
-        depthWrite:true,clearcoat:.88,clearcoatRoughness:.11,
-        transmission:.07,thickness:.18
+        color:0x625e69,emissive:0x040405,emissiveIntensity:.022,
+        roughness:.40,metalness:.05,transparent:true,opacity:.88,
+        depthWrite:true,clearcoat:.38,clearcoatRoughness:.27,
+        transmission:.020,thickness:.14
       });
       const ga=new T.MeshBasicMaterial({
-        color:0x4bdfff,transparent:true,opacity:.020,depthWrite:false,
-        blending:T.AdditiveBlending
+        color:0x9ec7ca,transparent:true,opacity:.006,depthWrite:false,
+        blending:T.NormalBlending
       });
       const gb=new T.MeshBasicMaterial({
-        color:0x785cff,transparent:true,opacity:.018,depthWrite:false,
-        blending:T.AdditiveBlending
+        color:0x9994a0,transparent:true,opacity:.005,depthWrite:false,
+        blending:T.NormalBlending
       });
       const rungMat=new T.MeshPhysicalMaterial({
-        color:0xa8cfd8,emissive:0x172c36,emissiveIntensity:.18,
-        roughness:.40,metalness:.025,transparent:true,opacity:.80,depthWrite:true,
-        clearcoat:.34,clearcoatRoughness:.24
+        color:0x98a7a9,emissive:0x030607,emissiveIntensity:.025,
+        roughness:.48,metalness:.015,transparent:true,opacity:.68,depthWrite:true,
+        clearcoat:.22,clearcoatRoughness:.32
       });
       const mpa=new T.PointsMaterial({
         color:0xb7f3ff,size:.034,transparent:true,opacity:.42,
@@ -352,7 +357,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.94,.92,.020,.018,.80,.28,.25];
+      group.userData.baseOpacity=[.86,.84,.006,.005,.66,.12,.11];
       return group;
     }
 
@@ -1446,7 +1451,7 @@
       const grow=smooth((t-2.48)/.72);
       const crystallise=smooth((t-7.72)/.92);
       // R1400 keeps the cellular phase intact, then hands it to the irregular crystal.
-      const visible=grow*(1-crystallise*.82);
+      const visible=grow*(1-crystallise*.98);
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
       this.organicGroup.scale.set(bodyScale*.84,bodyScale*.92,bodyScale*.86);
@@ -1504,7 +1509,7 @@
       const groupGrow=bodyGrow;
       this.mechanicalReveal=bodyGrow;
       this.mechanicalGroup.visible=groupGrow>.002;
-      this.mechanicalGroup.scale.set(.001+groupGrow*.88,.001+groupGrow*.92,.001+groupGrow*.94);
+      this.mechanicalGroup.scale.set(.001+groupGrow*.94,.001+groupGrow*.99,.001+groupGrow*.98);
 
       this.mechMaterial.opacity=.995*bodyGrow;
       this.mechMidMaterial.opacity=0;
@@ -1531,49 +1536,51 @@
 
     updateTentacles(t,time){
       const grow=smooth((t-5.55)/1.00);
+      const crystallise=smooth((t-7.45)/1.30);
+      const visible=grow*(1-crystallise*.78);
       const afterGlow=smooth((t-9.42)/.42);
-      this.tentacleGroup.visible=grow>.002;
-      this.tentacleMaterial.opacity=(.42+.06*afterGlow)*grow;
+      this.tentacleGroup.visible=visible>.002;
+      this.tentacleMaterial.opacity=(.25+.025*afterGlow)*visible;
       this.tentacleEdgeMaterial.opacity=0;
       this.tentacleNodeMaterial.opacity=0;
       if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
       if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=0;
       this.tentacles.forEach((g,i)=>{
-        const wave=1+Math.sin(time*.00062+g.userData.phase)*.006*grow;
-        const v=.001+grow*.999;
+        const wave=1+Math.sin(time*.00062+g.userData.phase)*.004*visible;
+        const v=.001+visible*.86;
         g.scale.set(v*wave,v*wave,v*wave);
-        g.rotation.z=Math.sin(time*.00030+g.userData.phase)*.011*grow;
-        g.rotation.x=Math.sin(time*.00024+g.userData.phase)*.007*grow;
+        g.rotation.z=Math.sin(time*.00030+g.userData.phase)*.008*visible;
+        g.rotation.x=Math.sin(time*.00024+g.userData.phase)*.005*visible;
       });
     }
 
     updateCamera(t,time){
-      let z=5.34,y=.012,x=0;
+      let z=5.72,y=.012,x=0;
       if(t<2.70){
         const k=smooth(t/2.70);
-        z=mix(5.40,5.18,k);
-        x=Math.sin(time*.00027)*.032*(1-k*.35);
-        y=.010+Math.sin(time*.00024)*.013;
+        z=mix(5.78,5.50,k);
+        x=Math.sin(time*.00027)*.026*(1-k*.35);
+        y=.010+Math.sin(time*.00024)*.010;
       }else if(t<3.30){
         const k=smooth((t-2.70)/.60);
-        z=mix(5.18,5.08,k);
-        x=mix(.012,0,k);y=mix(.008,0,k);
+        z=mix(5.50,5.56,k);
+        x=mix(.010,0,k);y=mix(.007,0,k);
       }else if(t<5.55){
-        z=5.08+Math.sin(time*.00020)*.006;
-        x=Math.sin(time*.00015)*.003;
-        y=Math.cos(time*.00018)*.003;
-      }else if(t<7.15){
-        const k=smooth((t-5.55)/1.60);
-        z=mix(5.08,8.25,k);
-        y=mix(0,.003,k);
+        z=5.56+Math.sin(time*.00020)*.005;
+        x=Math.sin(time*.00015)*.0025;
+        y=Math.cos(time*.00018)*.0025;
+      }else if(t<7.35){
+        const k=smooth((t-5.55)/1.80);
+        z=mix(5.56,6.48,k);
+        y=mix(0,.002,k);
       }else if(t<9.10){
-        z=8.25+Math.sin(time*.00018)*.010;
-        y=.003;
+        z=6.48+Math.sin(time*.00018)*.007;
+        y=.002;
       }else{
-        z=mix(8.25,8.05,smooth((t-9.10)/.60));
-        y=.003;
+        z=mix(6.48,6.30,smooth((t-9.10)/.60));
+        y=.002;
       }
-      if(this.width<this.height)z+=.90;
+      if(this.width<this.height)z+=.62;
       this.camera.position.set(x,y,z);
       this.camera.lookAt(0,0,0);
     }
@@ -1742,12 +1749,13 @@
   document.documentElement.dataset.fxMagBirthProofR1557='double-render-gl-finish-and-readback-before-proof-ready';
   document.documentElement.dataset.fxMagBirthVisualR1555='smooth-indexed-volcanic-glass-mineral-fissure-no-circular-eye';
   document.documentElement.dataset.fxMagBirthVisualR1561='elongated-bioceramic-seed-to-smoky-crystal-no-orb-no-hud-readable-studio-light';
+  document.documentElement.dataset.fxMagBirthVisualR1563='rectangular-physical-habitat-dry-bioceramic-seed-readable-final-crystal-fading-roots';
   document.documentElement.dataset.fxMagBirthPerformanceR1545='hardware-three-software-reference-film-no-parallel-webgl';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1561-bioceramic-seed-to-smoky-crystal-readable-cinematic-light'
+    revision:'r1563-rectangular-habitat-bioceramic-to-readable-crystal'
   };
 })();
