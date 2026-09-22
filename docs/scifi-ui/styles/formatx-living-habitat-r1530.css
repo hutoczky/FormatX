@@ -840,3 +840,71 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   }
 }
 /* production-r1591-photographic-habitat-depth */
+
+
+/* R1593 — physical habitat integration. The page is one continuous dark
+   material environment around the MAG: glassy depth, mineral side structures
+   and reflective panels without circular HUD graphics or expensive blur. */
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture{
+  background:
+    radial-gradient(ellipse 34% 72% at 68% -8%,rgba(190,222,222,.065),transparent 74%),
+    radial-gradient(ellipse 28% 62% at 8% 42%,rgba(55,88,92,.055),transparent 72%),
+    radial-gradient(ellipse 26% 58% at 96% 68%,rgba(81,66,82,.040),transparent 74%),
+    radial-gradient(ellipse 70% 18% at 50% 103%,rgba(104,82,61,.025),transparent 82%),
+    linear-gradient(180deg,#010406 0%,#031015 38%,#02080b 72%,#010305 100%)!important;
+}
+html:root:root:root:root:root:root:root:root
+body.living-architecture :is(
+  .hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+  .payment-console,.system-grid article,.release-card,.fx-category-grid > article,
+  .fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,
+  .fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure
+){
+  background:
+    radial-gradient(circle at 78% 8%,rgba(178,225,229,.030),transparent 34%),
+    linear-gradient(146deg,rgba(4,15,21,.50),rgba(1,7,10,.64))!important;
+  border-color:rgba(154,218,224,.095)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 26px 70px rgba(0,0,0,.18)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+html:root:root:root:root:root:root:root
+body.living-architecture .topbar{
+  background:linear-gradient(180deg,rgba(1,6,9,.72),rgba(2,9,13,.46))!important;
+  border-bottom-color:rgba(159,222,228,.10)!important;
+}
+html:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space{
+  background:
+    radial-gradient(ellipse 42% 54% at 50% 43%,rgba(112,151,156,.030),transparent 68%),
+    radial-gradient(ellipse 72% 20% at 50% 92%,rgba(88,113,109,.022),transparent 76%),
+    linear-gradient(180deg,rgba(0,0,0,.010),rgba(0,0,0,.040))!important;
+}
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  filter:brightness(1.10) contrast(1.10) saturate(.90) drop-shadow(0 22px 31px rgba(0,0,0,.30))!important;
+  -webkit-filter:brightness(1.10) contrast(1.10) saturate(.90) drop-shadow(0 22px 31px rgba(0,0,0,.30))!important;
+}
+.fx-living-habitat-r1530{
+  opacity:.70!important;
+  mix-blend-mode:normal!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space{
+    background:
+      radial-gradient(ellipse 58% 52% at 50% 42%,rgba(115,154,159,.032),transparent 69%),
+      radial-gradient(ellipse 88% 20% at 50% 92%,rgba(82,106,104,.024),transparent 78%),
+      linear-gradient(180deg,rgba(0,0,0,.006),rgba(0,0,0,.034))!important;
+  }
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.14) contrast(1.08) saturate(.91) drop-shadow(0 17px 24px rgba(0,0,0,.28))!important;
+    -webkit-filter:brightness(1.14) contrast(1.08) saturate(.91) drop-shadow(0 17px 24px rgba(0,0,0,.28))!important;
+  }
+  .fx-living-habitat-r1530{opacity:.66!important;}
+}
+/* production-r1593-physical-habitat-integration */
