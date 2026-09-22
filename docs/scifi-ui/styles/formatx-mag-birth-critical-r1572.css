@@ -1,0 +1,98 @@
+/* FormatX R1572 — tiny first-paint shell for the Three.js MAG genesis.
+   The historical R533 stylesheet is loaded after FCP; this file prevents any
+   unstyled overlay flash while keeping the initial render path small. */
+
+html[data-fx-mag-birth-live="active"]{
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+
+.fx-mag-birth-r533{
+  --fxb-x:50vw;
+  --fxb-y:48vh;
+  position:fixed;
+  inset:0;
+  z-index:2147483000;
+  width:100vw;
+  height:100dvh;
+  min-height:100svh;
+  overflow:hidden;
+  isolation:isolate;
+  pointer-events:none;
+  opacity:1;
+  color:#eefcff;
+  background:
+    radial-gradient(ellipse 32% 70% at 54% -8%,rgba(191,232,233,.055),transparent 74%),
+    linear-gradient(180deg,#020507 0%,#03090c 48%,#010304 100%);
+  transition:opacity .42s ease,filter .42s ease;
+}
+.fx-mag-birth-r533.is-leaving{opacity:0;filter:brightness(1.04)}
+
+.fx-mag-birth-r533>.fxb-particles{
+  display:block;
+  position:absolute;
+  inset:0;
+  z-index:20;
+  width:100%;
+  height:100%;
+  opacity:1;
+  visibility:visible;
+  pointer-events:none;
+  background:#020507;
+}
+
+/* Until the full fallback stylesheet becomes active, only the real render
+   surface and skip control are allowed to paint. */
+.fx-mag-birth-r533 :is(
+  .fxb-deep,.fxb-veil,.fxb-stars,.fxb-biotic-field,.fxb-genome-field,
+  .fxb-dna-stage,.fxb-embryo,.fxb-grid,.fxb-halo,.fxb-axis,.fxb-lens,
+  .fxb-flash,.fxb-scan,.fxb-letterbox,.fxb-copy,.fxb-telemetry
+){
+  display:none;
+}
+
+.fx-mag-birth-r533>.fxb-skip{
+  position:absolute;
+  top:max(18px,env(safe-area-inset-top));
+  right:max(18px,env(safe-area-inset-right));
+  z-index:70;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:92px;
+  min-height:46px;
+  padding:0 18px;
+  border:1px solid rgba(175,220,225,.24);
+  border-radius:999px;
+  color:rgba(235,248,249,.82);
+  background:rgba(3,9,12,.52);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  font:700 12px/1 Inter,ui-sans-serif,system-ui,sans-serif;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  pointer-events:auto;
+  cursor:pointer;
+  opacity:.76;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+.fx-mag-birth-r533>.fxb-skip:focus-visible{
+  outline:2px solid rgba(190,236,239,.72);
+  outline-offset:3px;
+  opacity:1;
+}
+
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-mag-birth-r533>.fxb-skip{
+    top:max(14px,env(safe-area-inset-top));
+    right:max(14px,env(safe-area-inset-right));
+    min-width:86px;
+    min-height:44px;
+    padding:0 15px;
+    font-size:11px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .fx-mag-birth-r533{transition:none}
+}
