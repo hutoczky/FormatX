@@ -110,6 +110,48 @@
     floor.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=floor;ctx.fillRect(0,0,width,height);
 
+    /* R1585: near the top of the page, imply a real dark laboratory around
+       the core using only broad volumetric masses. No target rings or hard
+       beams: side architecture, overhead haze and a low reflected floor pool. */
+    const heroPresence=Math.max(0,1-scrollValue*4.2);
+    if(heroPresence>.01){
+      const leftMass=ctx.createLinearGradient(0,0,width*.30,0);
+      leftMass.addColorStop(0,'rgba(0,0,0,'+(.42*heroPresence)+')');
+      leftMass.addColorStop(.36,'rgba(4,10,13,'+(.22*heroPresence)+')');
+      leftMass.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=leftMass;ctx.fillRect(0,0,width*.34,height);
+
+      const rightMass=ctx.createLinearGradient(width,0,width*.70,0);
+      rightMass.addColorStop(0,'rgba(0,0,0,'+(.46*heroPresence)+')');
+      rightMass.addColorStop(.38,'rgba(4,10,13,'+(.20*heroPresence)+')');
+      rightMass.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=rightMass;ctx.fillRect(width*.66,0,width*.34,height);
+
+      const overhead=radial(
+        width*(.51+pointerX*.004),height*.03,
+        Math.max(width,height)*.45,
+        [
+          [0,'rgba(205,229,230,'+(.030*heroPresence)+')'],
+          [.23,'rgba(112,154,161,'+(.016*heroPresence)+')'],
+          [.62,'rgba(35,65,72,'+(.006*heroPresence)+')'],
+          [1,'rgba(0,0,0,0)']
+        ]
+      );
+      ctx.fillStyle=overhead;ctx.fillRect(0,0,width,height);
+
+      ctx.save();
+      ctx.translate(width*.51,height*.86);
+      ctx.scale(1,.25);
+      const floorPool=ctx.createRadialGradient(0,0,0,0,0,width*.46);
+      floorPool.addColorStop(0,'rgba(128,190,198,'+(.032*heroPresence)+')');
+      floorPool.addColorStop(.28,'rgba(48,97,106,'+(.018*heroPresence)+')');
+      floorPool.addColorStop(.68,'rgba(18,47,55,'+(.007*heroPresence)+')');
+      floorPool.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=floorPool;
+      ctx.fillRect(-width*.55,-height*1.5,width*1.1,height*3);
+      ctx.restore();
+    }
+
     for(const f of filaments){
       const sway=Math.sin(time*.00012+f.phase)*width*.004;
       const y=f.y*height+(scrollValue-.5)*height*.020*f.dir;
@@ -161,6 +203,7 @@
   draw(performance.now());
   ROOT.dataset.fxLivingHabitatR1530='active-scroll-pointer-atmosphere';
   ROOT.dataset.fxLivingHabitatR1584=MOBILE.matches?'mobile-volumetric-no-filament-beams':'desktop-short-organic-filaments';
+  ROOT.dataset.fxLivingHabitatR1585='dark-laboratory-side-masses-overhead-haze-floor-reflection-no-rings';
   ROOT.dataset.fxLivingHabitatSchedulerR1541='interaction-driven-zero-idle-raf';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
 })();
