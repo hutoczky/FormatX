@@ -57,6 +57,7 @@
   root.dataset.fxNativeMagVisualR1552 = 'natural-smoky-obsidian-monolith-soft-facet-transitions-subtle-smoked-glass-aperture';
   root.dataset.fxNativeMagVisualR1553 = 'polished-volcanic-glass-monolith-smooth-optics-mineral-fissure-no-eye-no-zfight-tendrils';
   root.dataset.fxNativeMagVisualR1555 = 'camera-correct-polished-obsidian-broad-monolith-clean-hidden-root-tendrils-no-eye';
+  root.dataset.fxNativeMagVisualR1556 = 'winding-correct-obsidian-conchoidal-softbox-reflections-clean-solid-shell';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
@@ -235,7 +236,14 @@
       const centre = [0, 1, 2].map(index => (
         vertices[0].crystal[index] + vertices[1].crystal[index] + vertices[2].crystal[index]
       ) / 3);
-      if (dot(crystalNormal, centre) < 0) crystalNormal = crystalNormal.map(value => -value);
+      /* R1556 — normal correction alone was not enough: BACK-face culling uses
+         vertex winding, not the supplied normal. Reverse inward triangles so the
+         closed mineral shell cannot develop the black pin-holes seen in real
+         mobile captures. */
+      if (dot(crystalNormal, centre) < 0) {
+        [vertices[1], vertices[2]] = [vertices[2], vertices[1]];
+        crystalNormal = crystalNormal.map(value => -value);
+      }
       const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
       vertices.forEach((item, index) => {
         sphere.push(...item.sphere);
@@ -662,6 +670,12 @@
         float environmentTop=smoothstep(-.52,.82,reflection.y);
         float environmentSide=smoothstep(.18,.94,abs(reflection.x));
         float environmentBand=pow(sat(1.0-abs(reflection.y-.18)),8.0);
+        float softboxTall=pow(sat(1.0-abs(reflection.x+.28)),18.0)
+          *smoothstep(-.72,.76,reflection.y);
+        float softboxSide=pow(sat(1.0-abs(reflection.x-.62)),26.0)
+          *smoothstep(-.52,.66,reflection.y);
+        float conchoidalBand=pow(sat(1.0-abs(reflection.y-.36)),18.0)
+          *smoothstep(.10,.92,-reflection.x);
         float mineralLift=.22+1.02*ndl+.66*sideLight+.34*fillLight+.20*floorBounce+.24*fresnel;
         float facetTone=mix(.94,1.06,facetRand);
         vec3 glass=mix(vec3(.0045,.0060,.0070),vec3(.062,.073,.077),sat(mineralLift*.72))*facetTone;
@@ -674,6 +688,9 @@
         glass+=vec3(.070,.089,.096)*environmentTop;
         glass+=vec3(.046,.060,.067)*environmentSide;
         glass+=vec3(.148,.151,.139)*environmentBand*.58;
+        glass+=vec3(.58,.61,.60)*softboxTall*.125;
+        glass+=vec3(.37,.43,.45)*softboxSide*.105;
+        glass+=vec3(.24,.21,.17)*conchoidalBand*.050;
         float thinTransmission=pow(1.0-facing,2.1)*(1.0-sat(ndl*.72));
         glass+=vec3(.018,.050,.056)*thinTransmission*.46;
         float armorBlock=sat(realArmorPlate+realDarkPlate+crownMask+shoulderMask+jawMask+diamondFace);
@@ -748,6 +765,13 @@
         float fresnel=pow(1.0-facing,1.68);
         float spec=pow(max(dot(n,normalize(key+view)),0.),42.0)
           +.62*pow(max(dot(n,normalize(side+view)),0.),24.0);
+        vec3 reflection=reflect(-view,n);
+        float softboxTall=pow(sat(1.0-abs(reflection.x+.28)),18.0)
+          *smoothstep(-.72,.76,reflection.y);
+        float softboxSide=pow(sat(1.0-abs(reflection.x-.62)),26.0)
+          *smoothstep(-.52,.66,reflection.y);
+        float conchoidalBand=pow(sat(1.0-abs(reflection.y-.36)),18.0)
+          *smoothstep(.10,.92,-reflection.x);
         float isTendril=step(2.0,vFacet);
         float facetKey=fract(vFacet);
         float facetRand=fract(sin(facetKey*91.73+13.17)*43758.5453);
@@ -779,6 +803,9 @@
         c+=vec3(.108,.124,.128)*sideLight*.28;
         c+=vec3(.052,.060,.063)*fillLight*.20;
         c+=ice*fresnel*.076;
+        c+=vec3(.58,.61,.60)*softboxTall*.120;
+        c+=vec3(.36,.42,.44)*softboxSide*.100;
+        c+=vec3(.24,.21,.17)*conchoidalBand*.046;
         c+=vec3(.070,.055,.040)*max(0.0,-n.y)*.055;
         c+=mix(steel,ice,.18)*crownMask*(.035+.070*ndl+.025*spec);
 
@@ -1369,6 +1396,8 @@
     root.dataset.fxCoreShapeR1553='high-density-smooth-shaded-asymmetric-monolith-clean-perimeter-tendrils';
     root.dataset.fxCoreOpticsR1555='camera-correct-obsidian-reflection-no-eye-actual-tendril-classification';
     root.dataset.fxCoreShapeR1555='broad-asymmetric-volcanic-monolith-filaments-hidden-behind-shell';
+    root.dataset.fxCoreOpticsR1556='studio-softbox-conchoidal-reflections-no-eye-neutral-volcanic-glass';
+    root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
     root.dataset.fxCoreReferenceMaterialR1220='opaque-gunmetal-bright-titanium-armor-local-blue-optic-dark-tendrils';
