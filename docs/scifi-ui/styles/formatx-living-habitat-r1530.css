@@ -601,3 +601,61 @@ body.living-architecture #hero > .fx-signature-core-trigger::after{
   filter:none!important;
 }
 /* production-r1563-no-circular-cinematic-lens-no-signature-ring */
+
+
+/* R1564 — R326 deliberately reuses the historical fx-core-mobile-v55-stage
+   class for compatibility. Old award-material styles therefore matched the
+   *real* native stage and repainted their circular scanner/prism pseudos around
+   it. Neutralize every inherited stage surface while leaving only the R326
+   canvas alive. */
+html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+  background:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  -webkit-filter:none!important;
+  clip-path:none!important;
+  -webkit-clip-path:none!important;
+  mask:none!important;
+  -webkit-mask:none!important;
+}
+html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::before,
+html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  width:0!important;
+  height:0!important;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  animation:none!important;
+}
+/* Retired R147 compositor art must also stay paint-dead; its glow/prism field
+   was another possible circular carrier around the mobile controls. */
+html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root
+body.living-architecture #hero :is(
+  .fx-core-live-r147-layer::before,.fx-core-live-r147-layer::after,
+  .fx-core-live-r147-glow,.fx-core-live-r147-flare,.fx-core-live-r147-beam,
+  .fx-core-live-r147-orbit,.fx-core-live-r147-orbit-b,.fx-core-live-r147-orbit-c,
+  .fx-core-live-r147-prism,.fx-core-live-r147-shock,.fx-core-live-r147-spark
+){
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  animation:none!important;
+}
+/* production-r1564-r326-stage-no-legacy-circular-paint */
