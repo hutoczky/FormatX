@@ -53,6 +53,7 @@
   root.dataset.fxNativeMagVisualR1520 = 'photoreal-irregular-obsidian-visible-facets-no-orbit-ring';
   root.dataset.fxNativeMagVisualR1530 = 'photoreal-microfacet-obsidian-physical-lens-living-habitat';
   root.dataset.fxNativeMagVisualR1531 = 'exposed-obsidian-facets-round-recessed-physical-lens-no-local-hud';
+  root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -398,6 +399,11 @@
       dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'r326-webgl-unavailable',fallback:'none'}}));
       return;
     }
+
+    const debugInfo=gl.getExtension('WEBGL_debug_renderer_info');
+    const rendererName=String(debugInfo?gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
+    const softwareRenderer=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(rendererName);
+    root.dataset.fxCoreRendererClassR1541=softwareRenderer?'software-adaptive':'hardware-full';
 
     const vertexIn = webgl2 ? 'in' : 'attribute';
     const vertexOut = webgl2 ? 'out' : 'varying';
@@ -775,7 +781,7 @@
         float alpha=.982+.007*ndl+.005*fresnel+nucleus*.006+pulse*.006+tendrilMask*.005+realArmorPlate*.012+realDarkPlate*.010;
         ${outputName}=vec4(filmic(c*1.28),clamp(alpha,.986,.999));
       }`;
-    const fragmentSource = (constrainedMobile || auditMode) ? constrainedFragmentSource : fullFragmentSource;
+    const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
 
     let pendingProgram;
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
@@ -867,9 +873,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:constrainedMobile?1.12:mobile?1.50:constrained?1.15:1.65;
+      const cap=auditMode?1:softwareRenderer?.90:constrainedMobile?1.12:mobile?1.50:constrained?1.15:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:constrainedMobile?340000:mobile?760000:constrained?520000:1150000;
+      const budget=auditMode?390000:softwareRenderer?360000:constrainedMobile?340000:mobile?760000:constrained?520000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -1405,7 +1411,7 @@
       root.dataset.fxCoreMobileOpticalBalanceR465='soft-perimeter-low-bloom-low-cost-shader';
       root.dataset.fxCoreConstrainedSurfaceOwnerR624='native-r326-equivalent-r465-contract';
     }
-    root.dataset.fxCoreMobileResolutionR424=mobile?'r1383-dpr-cap-1.50-pixel-budget-760k-adaptive':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
+    root.dataset.fxCoreMobileResolutionR424=softwareRenderer?'r1541-software-dpr-cap-0.90-pixel-budget-360k':mobile?'r1383-dpr-cap-1.50-pixel-budget-760k-adaptive':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
     root.dataset.fxCoreMobileOpticsR435=mobile?'superseded-by-r454-visible-native-surface':'desktop-preserved-r454';
     root.dataset.fxCoreMobileOpticsR440=mobile?'superseded-by-r454-luminous-electric-surface':'desktop-superseded-by-r454';
     root.dataset.fxCoreMobilePerformanceR442=mobile?'18x36-capable-12x24-constrained-adaptive-intermittent-pulse-idle-zero':'desktop-three-pass-intermittent-pulse-idle-zero';
