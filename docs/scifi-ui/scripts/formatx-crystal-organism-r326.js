@@ -99,6 +99,7 @@
   root.dataset.fxNativeMagPerformanceR1603 = 'software-lite-shader-and-geometry-hardware-photographic-adaptive-60fps';
   root.dataset.fxNativeMagPerformanceR1605 = 'proven-constrained-shader-software-lite-geometry-resolution';
   root.dataset.fxNativeMagPerformanceR1606 = 'aggressive-16-67ms-governor-hardware-adaptive-resolution';
+  root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -1283,6 +1284,11 @@
         dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
           detail:{phase:'end',source,duration:SURFACE_PULSE_WINDOW_MS}
         }));
+        /* R1610: arm the next autonomous sweep only after this sweep has
+           actually ended. On slow/software renderers, scheduling from the
+           start event allowed the next timer to expire while the current
+           sweep was still rendering, eliminating the promised idle gap. */
+        if(source==='autonomous')scheduleSurfacePulse();
       },SURFACE_PULSE_WINDOW_MS);
       return true;
     }
@@ -1306,8 +1312,8 @@
       root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';
       surfacePulseTimer=setTimeout(()=>{
         surfacePulseTimer=0;
-        startSurfacePulse('autonomous');
-        scheduleSurfacePulse();
+        const started=startSurfacePulse('autonomous');
+        if(!started)scheduleSurfacePulse();
       },delay);
     }
     function scheduleAutonomousMorph(){
