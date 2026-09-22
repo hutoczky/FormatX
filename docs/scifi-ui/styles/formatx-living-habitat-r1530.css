@@ -329,3 +329,26 @@ html { scrollbar-gutter:stable; }
 }
 body.living-architecture{overflow-anchor:auto;}
 /* production-r1545-compositor-light-habitat */
+
+
+/* R1541 performance/CLS owner: no delayed content translation, habitat is a
+   transparent physical atmosphere without full-screen blend compositing. */
+.fx-living-habitat-r1530{
+  mix-blend-mode:normal!important;
+  filter:none!important;
+  will-change:auto!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state] > :is(
+  .section-heading,.fx-static-live-os__head,.flow,.cards,.pricing,.system-grid,
+  .release-layout,.fx-feedback-head,.fx-award-proof__head
+){
+  transform:none!important;
+}
+@media (min-width:901px) and (pointer:fine){
+  html[data-fx-cinematic-journey-r536="ready"] #capabilities .card:nth-child(2),
+  html[data-fx-cinematic-journey-r536="ready"] #capabilities .card:nth-child(5),
+  html[data-fx-cinematic-journey-r536="ready"] #pricing .price-card.featured{
+    translate:none!important;
+  }
+}
+/* production-r1541-zero-idle-habitat-zero-cls-content */
