@@ -48,14 +48,23 @@
       this.height=1;
       this.lastRender=0;
       this.disposed=false;
+      this.mobileProfile=matchMedia('(max-width:900px),(pointer:coarse)').matches;
+      this.lowPowerProfile=(
+        Number(navigator.hardwareConcurrency||8)<=4 ||
+        Number(navigator.deviceMemory||8)<=4
+      );
       this.highDetail=matchMedia('(min-width:901px) and (pointer:fine)').matches
-        && Number(navigator.hardwareConcurrency||8)>4;
+        && !this.lowPowerProfile;
       this.deterministicFrame=new URLSearchParams(location.search).has('introframe');
+      this.targetFrameMs=1000/60;
+      this.renderAverage=0;
+      this.qualityScale=this.lowPowerProfile?.68:(this.mobileProfile?.78:.92);
+      this.lastQualityAdjust=0;
 
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:true,
+        antialias:this.highDetail,
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
@@ -294,7 +303,7 @@
 
     makeParticles(){
       const T=this.THREE,r=this.rand;
-      const count=180;
+      const count=this.lowPowerProfile?72:(this.mobileProfile?108:144);
       const pos=new Float32Array(count*3);
       const size=new Float32Array(count);
       for(let i=0;i<count;i++){
@@ -342,7 +351,9 @@
         createHelix(length=4.7,radius=.28,turns=4.1){
       const T=this.THREE;
       const group=new T.Group();
-      const seg=84;
+      const seg=this.lowPowerProfile?44:(this.mobileProfile?56:68);
+      const tubeRadial=this.lowPowerProfile?6:(this.mobileProfile?8:10);
+      const auraRadial=this.lowPowerProfile?5:(this.mobileProfile?6:7);
       const aPts=[],bPts=[],rungPairs=[],beadA=[],beadB=[];
       for(let i=0;i<=seg;i++){
         const u=i/seg;
@@ -394,10 +405,10 @@
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
 
-      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.023,12,false),ma);
-      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.023,12,false),mb);
-      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.029,9,false),ga);
-      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.029,9,false),gb);
+      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.023,tubeRadial,false),ma);
+      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.023,tubeRadial,false),mb);
+      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.029,auraRadial,false),ga);
+      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.029,auraRadial,false),gb);
 
       const rungGeo=new T.CylinderGeometry(.0065,.0065,1,8,1,false);
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
@@ -1337,7 +1348,9 @@
       this.tentacleGlowMaterial=new T.MeshBasicMaterial({transparent:true,opacity:0});
       this.tentacleDashMaterial=new T.LineDashedMaterial({transparent:true,opacity:0});
       this.tentacles=[];
-      const count=8;
+      const count=this.lowPowerProfile?4:(this.mobileProfile?6:8);
+      const tendrilSegments=this.lowPowerProfile?34:(this.mobileProfile?42:50);
+      const tendrilRadial=this.lowPowerProfile?5:(this.mobileProfile?6:7);
       for(let i=0;i<count;i++){
         const base=i/count*Math.PI*2+(r()-.5)*.16;
         const sign=i%2?1:-1;
@@ -1357,7 +1370,7 @@
           ));
         }
         const curve=new T.CatmullRomCurve3(pts,false,'centripetal');
-        const geo=this.createTaperedTube(curve,56,8,.044+r()*.006,.0055+r()*.0012);
+        const geo=this.createTaperedTube(curve,tendrilSegments,tendrilRadial,.044+r()*.006,.0055+r()*.0012);
         const mesh=new T.Mesh(geo,this.tentacleMaterial);
         const g=new T.Group();g.add(mesh);g.scale.setScalar(.001);g.userData.phase=phase;
         this.tentacleGroup.add(g);this.tentacles.push(g);
@@ -1372,7 +1385,10 @@
         ? Math.min(devicePixelRatio||1,1.00)
         : this.softwareRenderer
           ? Math.min(devicePixelRatio||1,this.width<900 ? 0.58 : 0.54)
-          : Math.min(devicePixelRatio||1,this.width<900?1.00:1.18);
+          : Math.min(
+              devicePixelRatio||1,
+              (this.mobileProfile?.92:1.05)*this.qualityScale
+            );
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
       this.camera.aspect=this.width/this.height;
@@ -1579,8 +1595,8 @@
 
     render(r,time){
       if(this.disposed)return;
-      if(this.softwareRenderer&&!this.deterministicFrame&&this.lastRender&&time-this.lastRender<92)return;
       this.lastRender=time;
+      const renderStarted=performance.now();
       const t=clamp(r)*10;
       this.updateCamera(t,time);
       this.updateDNA(t,time);
@@ -1626,6 +1642,32 @@
       if(this.mechLight)this.mechLight.intensity+=flash*5.2*(this.mechanicalReveal||0);
 
       this.renderer.render(this.scene,this.camera);
+
+      if(!this.deterministicFrame && !this.softwareRenderer){
+        const renderCost=performance.now()-renderStarted;
+        this.renderAverage=this.renderAverage
+          ? this.renderAverage*.84+renderCost*.16
+          : renderCost;
+        if(time-this.lastQualityAdjust>650){
+          const previous=this.qualityScale;
+          if(this.renderAverage>15.2)this.qualityScale=Math.max(.50,this.qualityScale-.08);
+          else if(this.renderAverage<9.4)this.qualityScale=Math.min(1,this.qualityScale+.035);
+          if(Math.abs(previous-this.qualityScale)>.001){
+            this.lastQualityAdjust=time;
+            this.resize();
+            const secondary=this.qualityScale<.62;
+            if(this.particles)this.particles.visible=!secondary;
+            if(this.debris)this.debris.visible=!secondary;
+          }
+        }
+        document.documentElement.dataset.fxMagBirthTargetFpsR1600='60';
+        document.documentElement.dataset.fxMagBirthRenderMsR1600=this.renderAverage.toFixed(2);
+        document.documentElement.dataset.fxMagBirthQualityScaleR1600=this.qualityScale.toFixed(2);
+        document.documentElement.dataset.fxMagBirthEstimatedFpsR1600=String(
+          Math.min(60,Math.max(1,Math.round(1000/Math.max(16.67,this.renderAverage))))
+        );
+      }
+
       if(this.deterministicFrame){
         /* R1557 visual proof must wait for SwiftShader/ANGLE to finish the real
            Three frame before Playwright captures it. Production never pays for
@@ -1705,8 +1747,9 @@
         draw:(r,time)=>engine.render(r,time),
         destroy:()=>engine.destroy(),
         engine,
-        minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1599-photographic-dark-chamber-four-petal-core-glass-tendril-reference-scale'
+        minimumFrameMs: 16.67,
+        targetFps:60,
+        revision:'r1600-adaptive-60fps-photographic-dark-chamber-core'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1743,7 +1786,8 @@
   document.documentElement.dataset.fxMagBirthProofR1578='tall-seven-ring-obsidian-final-act-readable-studio-lit-no-egg';
   document.documentElement.dataset.fxMagBirthProofR1587='single-biogenic-shell-no-floating-orbs-readable-obsidian-subtle-fissure-no-eye';
   document.documentElement.dataset.fxMagBirthProofR1588='dark-wet-bioceramic-seed-natural-veins-to-polished-obsidian-cinematic-handoff';
-  document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
+  document.documentElement.dataset.fxMagBirthPerformanceR1541='superseded-by-r1600-adaptive-60fps';
+  document.documentElement.dataset.fxMagBirthPerformanceR1600='60fps-target-adaptive-resolution-quality-first-frame-budget';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
   document.documentElement.dataset.fxMagBirthProofR1560='smooth-biogenic-shell-no-white-facet-overlay-obsidian-seed-handoff';
@@ -1769,6 +1813,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1599-photographic-dark-chamber-four-petal-core-glass-tendril-reference-scale'
+    revision:'r1600-adaptive-60fps-photographic-dark-chamber-core'
   };
 })();
