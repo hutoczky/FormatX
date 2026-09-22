@@ -73,6 +73,7 @@
   root.dataset.fxNativeMagVisualR1576 = 'hand-cut-asymmetric-obsidian-shard-broad-natural-facets-no-egg-no-pot';
   root.dataset.fxNativeMagVisualR1577 = 'canonical-neutral-hand-cut-obsidian-shard-surface-energy-compliant';
   root.dataset.fxNativeMagVisualR1578 = 'tall-seven-ring-asymmetric-obsidian-seed-readable-planes-photographic-lighting';
+  root.dataset.fxNativeMagVisualR1579 = 'softbox-feathered-tall-obsidian-seed-integrated-tendrils-natural-facet-transitions';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -382,12 +383,12 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.13 + (index % 2 ? .035 : -.025);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .74;
-      const reach = .22 + ((index*3)%5) * .026;
+      const root = .54;
+      const reach = .30 + ((index*3)%5) * .024;
       const radius = root + reach * t;
       const wave = Math.sin(t*Math.PI*1.36+index*.83)*(.010+.055*t)
         +Math.sin(t*Math.PI*.72+index*.47)*.018*t;
-      const depth = -.34 + Math.sin(t*Math.PI*1.24+index*.97)*(.008+.020*t);
+      const depth = -.30 + Math.sin(t*Math.PI*1.24+index*.97)*(.010+.024*t);
       return [
         Math.cos(baseAngle)*radius + Math.cos(sideAngle)*wave,
         Math.sin(baseAngle)*radius + Math.sin(sideAngle)*wave,
@@ -562,7 +563,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.16));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.27));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -587,7 +588,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.550':'.575'};
+        projected*= ${mobile?'.620':'.625'};
         projected.y+=${mobile?'.055':'.028'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
@@ -622,11 +623,9 @@
         float keySoft=pow(max(dot(n,normalize(key+view)),0.0),14.0);
         float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),38.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=(1.0-smoothstep(.08,.30,abs(refl.x+.34)))
-          *(1.0-smoothstep(.11,.40,abs(refl.y-.43)))*smoothstep(-.18,.52,refl.z);
-        float softboxB=(1.0-smoothstep(.07,.25,abs(refl.x-.48)))
-          *(1.0-smoothstep(.16,.48,abs(refl.y-.02)))*smoothstep(-.28,.58,refl.z);
-        float ceilingBand=(1.0-smoothstep(.06,.28,abs(refl.y-.72)))*smoothstep(.05,.72,refl.z);
+        float softboxA=exp(-pow((refl.x+.34)/.32,4.0)-pow((refl.y-.43)/.44,4.0))*smoothstep(-.24,.48,refl.z);
+        float softboxB=exp(-pow((refl.x-.48)/.28,4.0)-pow((refl.y-.02)/.52,4.0))*smoothstep(-.32,.54,refl.z);
+        float ceilingBand=exp(-pow((refl.y-.72)/.30,4.0))*smoothstep(.02,.68,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
 
         float isTendril=step(2.0,vFacet);
@@ -641,9 +640,9 @@
         mineral+=vec3(.72,.72,.68)*keySpec*.40;
         mineral+=vec3(.20,.20,.18)*keySoft*.040;
         mineral+=vec3(.42,.47,.47)*sideSpec*.25;
-        mineral+=vec3(.72,.72,.67)*softboxA*.42;
-        mineral+=vec3(.38,.46,.48)*softboxB*.30;
-        mineral+=vec3(.32,.34,.32)*ceilingBand*.16;
+        mineral+=vec3(.54,.55,.52)*softboxA*.27;
+        mineral+=vec3(.31,.38,.40)*softboxB*.22;
+        mineral+=vec3(.24,.26,.25)*ceilingBand*.11;
         mineral+=vec3(.090,.104,.101)*horizonBand*.19;
         mineral+=vec3(.070,.095,.102)*fresnel*.30;
         mineral+=vec3(.050,.034,.023)*floorBounce*.12;
@@ -717,10 +716,8 @@
         float keySpec=pow(max(dot(n,normalize(key+view)),0.0),58.0);
         float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),32.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=(1.0-smoothstep(.08,.30,abs(refl.x+.34)))
-          *(1.0-smoothstep(.11,.40,abs(refl.y-.43)))*smoothstep(-.18,.52,refl.z);
-        float softboxB=(1.0-smoothstep(.07,.25,abs(refl.x-.48)))
-          *(1.0-smoothstep(.16,.48,abs(refl.y-.02)))*smoothstep(-.28,.58,refl.z);
+        float softboxA=exp(-pow((refl.x+.34)/.32,4.0)-pow((refl.y-.43)/.44,4.0))*smoothstep(-.24,.48,refl.z);
+        float softboxB=exp(-pow((refl.x-.48)/.28,4.0)-pow((refl.y-.02)/.52,4.0))*smoothstep(-.32,.54,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
         float isTendril=step(2.0,vFacet);
         float bodyMask=1.0-isTendril;
@@ -732,8 +729,8 @@
         col*=.95+.050*smoke;
         col+=vec3(.68,.68,.64)*keySpec*.35;
         col+=vec3(.40,.46,.47)*sideSpec*.22;
-        col+=vec3(.68,.69,.65)*softboxA*.36;
-        col+=vec3(.35,.43,.45)*softboxB*.27;
+        col+=vec3(.52,.54,.51)*softboxA*.25;
+        col+=vec3(.30,.37,.39)*softboxB*.20;
         col+=vec3(.086,.100,.098)*horizonBand*.18;
         col+=vec3(.070,.096,.104)*fresnel*.28;
         col+=vec3(.050,.034,.023)*max(0.0,-n.y)*.12;
@@ -1375,6 +1372,8 @@
     root.dataset.fxCoreOpticsR1577='neutral-saturation-canonical-surface-energy-photographic-obsidian';
     root.dataset.fxCoreShapeR1578='seven-offset-rings-twelve-to-fourteen-sided-tall-asymmetric-obsidian-seed';
     root.dataset.fxCoreOpticsR1578='readable-shadow-planes-neutral-studio-fill-rectangular-softbox-reflections';
+    root.dataset.fxCoreShapeR1579='tall-hand-cut-seed-integrated-six-rooted-tendrils-larger-hero-presence';
+    root.dataset.fxCoreOpticsR1579='feathered-studio-reflections-natural-facet-transition-no-white-rectangles';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
