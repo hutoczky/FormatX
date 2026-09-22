@@ -2139,8 +2139,11 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   filter:none!important;
 }
 
-.fx-mag-birth-r533:is([data-fx-renderer="three"],[data-fx-renderer="three-loading"]) .fxb-particles {
-  opacity:.20!important;
+.fx-mag-birth-r533[data-fx-renderer="three"] .fxb-particles {
+  opacity:1!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="three-loading"] .fxb-particles {
+  opacity:.16!important;
 }
 
 /* No local circular target/HUD around the intro core. */
@@ -2165,3 +2168,13 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   opacity:0!important;
 }
 /* production-r1450-three-loading-no-legacy-flash */
+
+
+/* R1553 — Three.js is the cinematic image owner. Do not attenuate its rendered
+   pixels after composition; the previous 20% rule made validated keyframes look black. */
+.fx-mag-birth-r533[data-fx-renderer="three"] > .fxb-particles{
+  opacity:1!important;
+  visibility:visible!important;
+  mix-blend-mode:normal!important;
+}
+/* production-r1553-three-photometric-visibility */
