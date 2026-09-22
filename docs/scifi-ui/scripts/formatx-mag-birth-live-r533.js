@@ -292,6 +292,7 @@
     <div class="fxb-scan" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-top" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-bottom" aria-hidden="true"></div>
+    <div class="fxb-lcp-brand-r1603" aria-hidden="true">FORMATX</div>
     <header class="fxb-copy">
       <p class="fxb-kicker"></p>
       <h1></h1>
@@ -956,6 +957,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1541='superseded-by-r1601-adaptive-60hz';
     ROOT.dataset.fxMagBirthPerformanceR1601='60hz-target-adaptive-quality-no-artificial-frame-cap';
     ROOT.dataset.fxMagBirthPerformanceR1602='exclusive-intro-layout-plus-real-frame-budget-target-60fps';
+    ROOT.dataset.fxMagBirthPerformanceR1603='early-cinematic-lcp-brand-plus-adaptive-60fps';
     ROOT.dataset.fxMagBirthDurationR1549=LOW_POWER?'4200ms-adaptive':'10000ms-full';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
