@@ -1041,9 +1041,9 @@
       this.mineralRoughnessTexture=mineralRoughness;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x151d20,metalness:.018,roughness:.18,
+        color:0x192124,metalness:.014,roughness:.19,
         emissive:0x000102,emissiveIntensity:.001,
-        clearcoat:.88,clearcoatRoughness:.060,
+        clearcoat:.84,clearcoatRoughness:.070,
         transmission:.006,thickness:.22,ior:1.45,
         flatShading:false,
         transparent:false,opacity:1
@@ -1079,17 +1079,19 @@
       /* R1576 — hand-cut obsidian body matching the native R326 hero.
          Broad offset polygonal rings create natural mineral planes instead of
          another deformed sphere, so the late intro cannot regress to an egg/pot. */
-      const sideCount=(this.deterministicFrame||this.highDetail)?22:18;
+      const sideCount=(this.deterministicFrame||this.highDetail)?32:26;
       const ringDefs=[
-        [.78,.20,.17,-.20,-.015,.11],
-        [.64,.32,.26,-.17,-.002,.08],
-        [.46,.45,.34,-.12,.010,.045],
-        [.24,.55,.41,-.055,.005,.000],
-        [.00,.60,.45,.015,.000,-.035],
-        [-.22,.58,.43,.060,.008,-.005],
-        [-.42,.50,.36,.095,.015,.035],
-        [-.60,.37,.27,.115,.018,.075],
-        [-.76,.22,.16,.095,.010,.12]
+        [.76,.24,.19,-.18,-.014,.10],
+        [.62,.35,.28,-.16,-.004,.075],
+        [.46,.46,.35,-.115,.008,.045],
+        [.30,.54,.40,-.065,.006,.018],
+        [.14,.59,.44,-.018,.002,-.012],
+        [-.04,.61,.46,.020,.000,-.034],
+        [-.22,.59,.44,.058,.006,-.010],
+        [-.40,.52,.38,.090,.012,.028],
+        [-.56,.42,.30,.110,.016,.062],
+        [-.68,.31,.23,.112,.014,.092],
+        [-.75,.23,.17,.095,.008,.115]
       ];
       const positions=[];
       const indices=[];
@@ -1115,8 +1117,8 @@
         }
         ringIndices.push(ring);
       });
-      const topIndex=pushVertex(-.245,.945,-.055);
-      const bottomIndex=pushVertex(.155,-.925,.050);
+      const topIndex=pushVertex(-.175,.815,-.045);
+      const bottomIndex=pushVertex(.125,-.805,.040);
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
         indices.push(topIndex,ringIndices[0][next],ringIndices[0][side]);
@@ -1616,7 +1618,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1580-photographic-bioceramic-sculpted-obsidian-soft-studio-handoff'
+        revision:'r1581-photographic-bioceramic-truncated-smooth-obsidian-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1663,10 +1665,11 @@
   document.documentElement.dataset.fxMagBirthPerformanceR1545='hardware-three-software-reference-film-no-parallel-webgl';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1580='photographic-bioceramic-seed-sculpted-obsidian-handoff-soft-studio-light';
+  document.documentElement.dataset.fxMagBirthProofR1581='truncated-smooth-obsidian-no-box-reflections-bioceramic-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1580-three-act-photographic-bioceramic-to-sculpted-obsidian'
+    revision:'r1581-three-act-photographic-bioceramic-to-truncated-obsidian'
   };
 })();
