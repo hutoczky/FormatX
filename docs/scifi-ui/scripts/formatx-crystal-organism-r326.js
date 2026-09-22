@@ -59,6 +59,7 @@
   root.dataset.fxNativeMagVisualR1555 = 'camera-correct-polished-obsidian-broad-monolith-clean-hidden-root-tendrils-no-eye';
   root.dataset.fxNativeMagVisualR1556 = 'winding-correct-obsidian-conchoidal-softbox-reflections-clean-solid-shell';
   root.dataset.fxNativeMagVisualR1557 = 'solid-black-volcanic-glass-broad-mineral-planes-neutral-studio-reflections-no-eye-no-hud';
+  root.dataset.fxNativeMagVisualR1558 = 'smoky-obsidian-continuous-asymmetric-crystal-visible-studio-planes-clean-silhouette-no-eye';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
@@ -184,13 +185,13 @@
          p≈1 keeps a true rhombic/crystalline silhouette. Broad low-frequency
          asymmetry prevents a logo-perfect diamond without falling back to a
          swollen egg or a pile of torn shards. */
-      const upper=direction[1]>=0;
-      const right=direction[0]>=0;
-      const front=direction[2]>=0;
-      // R1520 — deliberately uneven mineral envelope, not a logo-perfect kite.
-      const ax=upper?(right?.72:.80):(right?.79:.66);
-      const ay=upper?(right?.94:.90):(right?.88:.78);
-      const az=front?(right?.64:.72):(right?.69:.76);
+      /* R1558 — continuous anisotropic envelope. The previous upper/lower
+         quadrant switch created a visible equatorial seam. These radii vary
+         smoothly with direction so the body keeps broad mineral planes without
+         looking like two diamond halves joined together. */
+      const ax=.755 + direction[0]*.035 - direction[1]*.018 + direction[2]*.010;
+      const ay=.900 + Math.max(direction[1],0)*.075 - Math.max(-direction[1],0)*.025 + direction[0]*.012;
+      const az=.685 + direction[2]*.035 - direction[0]*.018 + direction[1]*.010;
       const p=1.10;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
@@ -274,14 +275,14 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.16 + (index % 2 ? .045 : -.035);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .69;
-      const reach = .24 + ((index*3)%5) * .018;
+      const root = .30;
+      const reach = .075 + ((index*3)%5) * .006;
       const radius = root + reach * t;
       const wave = (Math.sin(t * Math.PI * 1.46 + index * .83)*(.012+.096*t))
         +Math.sin(t*Math.PI*.68+index*.47)*.024*t;
       /* Keep filaments behind the front mineral shell so their roots disappear
          into the body and emerge only beyond the silhouette. */
-      const depth = -.205 + Math.sin(t * Math.PI * 1.34 + index * .97) * (.008 + .018 * t);
+      const depth = -.32 + Math.sin(t * Math.PI * 1.34 + index * .97) * (.004 + .008 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -513,18 +514,18 @@
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetKey=fract(vFacet);
         float facetRand=fract(sin(facetKey*91.73+13.17)*43758.5453);
-        float facetTone=mix(.965,1.035,facetRand);
+        float facetTone=mix(.982,1.018,facetRand);
         float mineralWave=.985+.015*sin(vLocal.y*7.6+vLocal.x*4.1-vLocal.z*3.3);
 
-        float lift=sat(.10+ndl*.76+sideLight*.38+fillLight*.16);
-        vec3 glass=mix(vec3(.0025,.0032,.0038),vec3(.030,.036,.039),lift);
+        float lift=sat(.18+ndl*.82+sideLight*.52+fillLight*.24);
+        vec3 glass=mix(vec3(.0065,.0080,.0090),vec3(.060,.070,.074),lift);
         glass*=facetTone*mineralWave;
         glass+=vec3(.54,.56,.55)*keySpec*.30;
-        glass+=vec3(.19,.22,.23)*keySoft*.055;
-        glass+=vec3(.33,.38,.39)*sideSpec*.18;
-        glass+=vec3(.13,.14,.14)*fillSpec*.080;
-        glass+=vec3(.105,.125,.132)*fresnel*.24;
-        glass+=vec3(.035,.027,.020)*floorBounce*.12;
+        glass+=vec3(.22,.25,.26)*keySoft*.070;
+        glass+=vec3(.36,.41,.42)*sideSpec*.20;
+        glass+=vec3(.15,.16,.16)*fillSpec*.095;
+        glass+=vec3(.115,.135,.142)*fresnel*.25;
+        glass+=vec3(.042,.032,.024)*floorBounce*.14;
 
         vec2 fissureLocal=vec2(vLocal.x+.040,vLocal.y*1.02);
         float front=smoothstep(.28,.56,vLocal.z)*(1.0-vMorph)*(1.0-isTendril);
@@ -553,7 +554,7 @@
           ${outputName}=vec4(filmic(inner*1.10),.18);
           return;
         }
-        ${outputName}=vec4(filmic(glass*2.18),1.0);
+        ${outputName}=vec4(filmic(glass*1.88),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -593,15 +594,15 @@
         float isTendril=step(2.0,vFacet);
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float facetTone=mix(.968,1.032,facetRand);
+        float facetTone=mix(.984,1.016,facetRand);
 
-        float lift=sat(.10+ndl*.78+sideLight*.40+fillLight*.16);
-        vec3 c=mix(vec3(.0025,.0032,.0038),vec3(.030,.036,.039),lift)*facetTone;
+        float lift=sat(.18+ndl*.84+sideLight*.54+fillLight*.24);
+        vec3 c=mix(vec3(.0065,.0080,.0090),vec3(.060,.070,.074),lift)*facetTone;
         c+=vec3(.55,.57,.56)*keySpec*.29;
-        c+=vec3(.18,.21,.22)*keySoft*.052;
-        c+=vec3(.32,.37,.38)*sideSpec*.18;
-        c+=vec3(.105,.125,.132)*fresnel*.23;
-        c+=vec3(.035,.027,.020)*max(0.0,-n.y)*.11;
+        c+=vec3(.22,.25,.26)*keySoft*.068;
+        c+=vec3(.36,.41,.42)*sideSpec*.20;
+        c+=vec3(.115,.135,.142)*fresnel*.24;
+        c+=vec3(.042,.032,.024)*max(0.0,-n.y)*.13;
 
         vec2 f=vec2(vLocal.x+.040,vLocal.y*1.02);
         float front=smoothstep(.28,.56,vLocal.z)*(1.0-vMorph)*(1.0-isTendril);
@@ -623,7 +624,7 @@
         tendon+=vec3(.26,.29,.29)*sideSpec*.055;
         c=mix(c,tendon,tendrilMask*.985);
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.18);return;}
-        ${outputName}=vec4(filmic(c*2.22),1.0);
+        ${outputName}=vec4(filmic(c*1.92),1.0);
       }`;
 
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
@@ -1209,6 +1210,8 @@
     root.dataset.fxCoreOpticsR1556='studio-softbox-conchoidal-reflections-no-eye-neutral-volcanic-glass';
     root.dataset.fxCoreOpticsR1557='opaque-black-volcanic-glass-neutral-studio-highlights-subtle-mineral-fissure';
     root.dataset.fxCoreShapeR1557='asymmetric-pointed-broad-plane-monolith-six-short-recessed-tendrils';
+    root.dataset.fxCoreOpticsR1558='smoky-obsidian-visible-neutral-studio-planes-no-compositor-glow';
+    root.dataset.fxCoreShapeR1558='continuous-asymmetric-superellipsoid-no-equator-seam-clean-buried-tendril-roots';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
