@@ -92,6 +92,7 @@
   root.dataset.fxNativeMagVisualR1595 = 'four-petal-black-glass-armor-smoked-iris-metal-bezel-clear-living-glass-appendages';
   root.dataset.fxNativeMagVisualR1596 = 'subdivided-curved-armor-petals-swept-bioglass-membranes-convex-smoked-lens-visible-tendrils';
   root.dataset.fxNativeMagVisualR1597 = 'asymmetric-obsidian-organism-thin-clear-glass-membranes-dark-optical-dome-front-living-tendrils';
+  root.dataset.fxNativeMagVisualR1598 = 'single-sculpted-black-glass-mineral-dark-dome-lens-front-clear-tendrils-no-cgi-wings';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -334,21 +335,25 @@
       /* R1589 — use the same hand-cut mineral envelope as the successful late
          Three.js birth frames. The permanent MAG and cinematic handoff now share
          one silhouette language instead of drifting into a rounded pebble. */
-      const sideCount = mobile ? 40 : 48;
+      const sideCount = mobile ? 52 : 60;
       const ringDefs = [
-        [.82,.060,.050,-.105,-.012,.090],
-        [.70,.225,.155,-.165,-.004,.074],
-        [.57,.390,.250,-.095,.016,.052],
-        [.45,.505,.330,-.145,.028,.034],
-        [.31,.420,.405,-.025,.020,.018],
-        [.17,.570,.360,.060,.000,.002],
-        [.02,.505,.430,.102,-.004,-.012],
-        [-.14,.585,.350,.012,.006,-.022],
-        [-.30,.430,.390,.094,.018,-.012],
-        [-.46,.495,.285,.020,.020,.006],
-        [-.60,.315,.235,.072,.012,.030],
-        [-.73,.220,.140,.018,.004,.060],
-        [-.83,.055,.050,-.014,-.004,.090]
+        [.84,.045,.040,-.085,-.010,.090],
+        [.77,.120,.090,-.135,-.006,.080],
+        [.68,.270,.175,-.175,.000,.068],
+        [.59,.395,.245,-.105,.014,.054],
+        [.50,.515,.315,-.145,.026,.040],
+        [.40,.455,.365,-.045,.028,.028],
+        [.30,.585,.350,.040,.018,.016],
+        [.19,.505,.415,.092,.006,.006],
+        [.08,.610,.370,.050,-.004,-.006],
+        [-.04,.535,.445,.112,-.004,-.014],
+        [-.16,.595,.365,.010,.006,-.022],
+        [-.29,.455,.405,.092,.016,-.016],
+        [-.42,.515,.315,.025,.022,-.002],
+        [-.55,.365,.265,.075,.014,.018],
+        [-.67,.295,.195,.025,.008,.040],
+        [-.77,.155,.105,-.008,.002,.066],
+        [-.85,.045,.040,-.020,-.004,.090]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -514,9 +519,10 @@
       }
     }
 
-    /* R1597 — the permanent MAG follows the photoreal habitat reference:
-       one asymmetric smoky-obsidian organism, a real optical dome, and thin
-       clear bio-glass membranes. No broad armor propeller shapes. */
+    /* R1598 — permanent hero simplification. The organism is one sculpted
+       black-glass mineral with a physical optical dome and thin glass tendrils.
+       Flat/wing surfaces are deliberately absent because they read as CGI horns
+       rather than the photographic liquid-glass appendages in the reference. */
     function surfaceVertex(position, normal=null, uv=[.5,.5], sphereRadius=.91) {
       const dir=normalize(position);
       const item={
@@ -542,61 +548,10 @@
       armorTri(a,b,c,facet);
       armorTri(a,c,d,facet);
     }
-    function appendSurfaceGrid(rows, facetBase){
-      for(let y=0;y<rows.length-1;y+=1){
-        const a=rows[y],b=rows[y+1];
-        for(let x=0;x<a.length-1;x+=1){
-          const p0=a[x],p1=a[x+1],p2=b[x],p3=b[x+1];
-          const facet=facetBase+y*.008+x*.003;
-          triangle([p0,p1,p3],facet);
-          triangle([p0,p3,p2],facet+.0015);
-        }
-      }
-    }
 
     if(!auditMode){
       const centreX=.012,centreY=-.020;
-      const wingAngles=[.28,1.18,2.16,3.18,4.14,5.24];
-      const wingLength=[.57,.46,.60,.50,.56,.48];
-      for(let wing=0;wing<wingAngles.length;wing+=1){
-        const radialSteps=7;
-        const widthSteps=4;
-        const rows=[];
-        const direction=wing%2?1:-1;
-        for(let ri=0;ri<=radialSteps;ri+=1){
-          const u=ri/radialSteps;
-          const centreRadius=.405+wingLength[wing]*u;
-          const sweep=direction*(.12+.04*(wing%3))*Math.sin(Math.PI*u)
-            +(.018*(wing-2.5))*u;
-          const halfWidth=(.075*(1-u*.66)+.018)*(1+.10*Math.sin(wing*1.7));
-          const row=[];
-          for(let wi=0;wi<=widthSteps;wi+=1){
-            const v=wi/widthSteps*2-1;
-            const angle=wingAngles[wing]+sweep+v*halfWidth;
-            const radial=centreRadius*(1-.018*v*v);
-            const z=.405
-              +.090*Math.sin(Math.PI*u)*(1-.38*v*v)
-              -.055*u
-              +direction*.012*v*Math.sin(Math.PI*u);
-            const position=[
-              centreX+Math.cos(angle)*radial,
-              centreY+Math.sin(angle)*radial,
-              z
-            ];
-            const normal=normalize([
-              Math.cos(angle)*.095,
-              Math.sin(angle)*.095,
-              1.0
-            ]);
-            row.push(surfaceVertex(position,normal,[wi/widthSteps,u],.88));
-          }
-          rows.push(row);
-        }
-        appendSurfaceGrid(rows,4.18+wing*.10);
-      }
-
-      /* Physical metal bezel around a convex smoked-glass lens. */
-      const bezelInner=.158,bezelOuter=.202,bezelSteps=40,bezelZ=.535;
+      const bezelInner=.154,bezelOuter=.198,bezelSteps=44,bezelZ=.535;
       for(let side=0;side<bezelSteps;side+=1){
         const a=side/bezelSteps*Math.PI*2;
         const b=(side+1)/bezelSteps*Math.PI*2;
@@ -607,11 +562,11 @@
         armorQuad(p0,p1,p2,p3,5.74);
       }
 
-      const lensCenter=[centreX,centreY,.542];
-      const lensRadius=.151;
-      const lensDepth=.082;
-      const radialSteps=7;
-      const angularSteps=36;
+      const lensCenter=[centreX,centreY,.541];
+      const lensRadius=.147;
+      const lensDepth=.078;
+      const radialSteps=8;
+      const angularSteps=40;
       function lensVertex(radial,angle){
         const rr=lensRadius*radial;
         const nx=radial*Math.cos(angle);
@@ -622,7 +577,7 @@
           lensCenter[1]+rr*Math.sin(angle),
           lensCenter[2]+lensDepth*nz
         ];
-        const normal=normalize([nx,ny,nz*1.78]);
+        const normal=normalize([nx,ny,nz*1.86]);
         const dir=normalize(crystalPosition);
         return {
           sphere:dir.map(value=>value*.88),
@@ -747,7 +702,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.24));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.66));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -824,13 +779,13 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.12+ndl*.34+sideLight*.28+fillLight*.14);
+        float lift=sat(.068+ndl*.195+sideLight*.145+fillLight*.08);
         float facetTone=mix(.982,1.018,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.0028,.0042,.0052),vec3(.026,.034,.038),lift)*facetTone;
+        vec3 mineral=mix(vec3(.0015,.0024,.0030),vec3(.015,.020,.023),lift)*facetTone;
         mineral*=.955+.045*smokyDepth+.012*mineralGrain;
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
@@ -921,30 +876,32 @@
         mineral=mix(mineral,armorGlass,armorMask*.995);
 
         float lensRadial=length(vUv-vec2(.5));
-        float lensInner=1.0-smoothstep(.045,.235,lensRadial);
-        float lensHot=pow(sat(1.0-lensRadial/.22),3.2);
-        vec3 physicalLens=vec3(.0008,.0028,.0042);
-        physicalLens+=vec3(.006,.030,.038)*(.14+.16*uEnergy);
-        physicalLens+=vec3(.92,.97,.94)*softboxA*.30;
-        physicalLens+=vec3(.48,.58,.58)*sideSpec*.17;
-        physicalLens+=vec3(.12,.23,.27)*fresnel*.20;
-        physicalLens+=vec3(.018,.15,.19)*lensInner*(.10+.12*uEnergy);
-        physicalLens+=vec3(.78,.94,.94)*lensHot*.13;
+        float lensInner=1.0-smoothstep(.055,.205,lensRadial);
+        float lensRing=exp(-pow((lensRadial-.155)/.026,2.0));
+        float lensHot=pow(sat(1.0-lensRadial/.17),5.0);
+        vec3 physicalLens=vec3(.0004,.0012,.0018);
+        physicalLens+=vec3(.003,.012,.016)*(.10+.12*uEnergy);
+        physicalLens+=vec3(.94,.98,.95)*softboxA*.20;
+        physicalLens+=vec3(.46,.55,.55)*sideSpec*.11;
+        physicalLens+=vec3(.09,.17,.20)*fresnel*.14;
+        physicalLens+=vec3(.008,.055,.070)*lensInner*.050;
+        physicalLens+=vec3(.030,.20,.24)*lensRing*(.08+.08*uEnergy);
+        physicalLens+=vec3(.84,.96,.95)*lensHot*.18;
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
-        vec3 tendon=vec3(.020,.038,.043)+vec3(.14,.18,.19)*(.20*sideLight+.12*ndl+.30*fresnel);
-        tendon+=vec3(.030,.17,.20)*cableSegment*.052;
-        tendon+=vec3(.66,.72,.68)*sideSpec*.095;
-        tendon+=vec3(.52,.57,.54)*softboxA*.082;
-        tendon+=vec3(.20,.30,.31)*edgeTransmission*.20;
+        vec3 tendon=vec3(.006,.016,.019)+vec3(.10,.16,.17)*(.14*sideLight+.08*ndl+.42*fresnel);
+        tendon+=vec3(.018,.10,.12)*cableSegment*.030;
+        tendon+=vec3(.82,.87,.82)*sideSpec*.12;
+        tendon+=vec3(.76,.80,.75)*softboxA*.11;
+        tendon+=vec3(.28,.46,.47)*edgeTransmission*.30;
         mineral=mix(mineral,tendon,tendrilMask*.995);
 
         if(uLayer>.5){
           ${outputName}=vec4(vec3(.004,.009,.011),.16);
           return;
         }
-        float outAlpha=1.0-tendrilMask*.10-glassFinMask*.56;
+        float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
         ${outputName}=vec4(filmic(mineral*2.60),clamp(outAlpha,.68,1.0));
       }`;
@@ -998,11 +955,11 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.12+ndl*.34+sideLight*.28+fillLight*.14);
+        float lift=sat(.068+ndl*.195+sideLight*.145+fillLight*.08);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0028,.0042,.0052),vec3(.027,.035,.039),lift);
+        vec3 col=mix(vec3(.0015,.0024,.0030),vec3(.016,.021,.024),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
@@ -1080,26 +1037,28 @@
         col=mix(col,armorGlass,armorMask*.995);
 
         float lensRadial=length(vUv-vec2(.5));
-        float lensInner=1.0-smoothstep(.045,.235,lensRadial);
-        float lensHot=pow(sat(1.0-lensRadial/.22),3.2);
-        vec3 physicalLens=vec3(.0008,.0028,.0042)
-          +vec3(.005,.028,.035)*(.14+.15*uEnergy)
-          +vec3(.82,.89,.86)*softboxA*.27
-          +vec3(.39,.49,.50)*sideSpec*.15
-          +vec3(.10,.21,.25)*fresnel*.18
-          +vec3(.016,.14,.18)*lensInner*(.09+.11*uEnergy)
-          +vec3(.70,.90,.91)*lensHot*.12;
+        float lensInner=1.0-smoothstep(.055,.205,lensRadial);
+        float lensRing=exp(-pow((lensRadial-.155)/.026,2.0));
+        float lensHot=pow(sat(1.0-lensRadial/.17),5.0);
+        vec3 physicalLens=vec3(.0004,.0012,.0018)
+          +vec3(.003,.011,.015)*(.10+.11*uEnergy)
+          +vec3(.84,.90,.87)*softboxA*.18
+          +vec3(.36,.44,.45)*sideSpec*.10
+          +vec3(.08,.15,.18)*fresnel*.12
+          +vec3(.007,.050,.064)*lensInner*.046
+          +vec3(.026,.18,.22)*lensRing*(.07+.07*uEnergy)
+          +vec3(.76,.91,.91)*lensHot*.16;
         col=mix(col,physicalLens,lensMeshMask*.997);
 
         float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
-        vec3 tendon=vec3(.020,.036,.041)+vec3(.13,.17,.18)*(.20*sideLight+.12*ndl+.29*fresnel);
-        tendon+=vec3(.028,.16,.19)*segment*.050;
-        tendon+=vec3(.58,.65,.63)*sideSpec*.088;
-        tendon+=vec3(.42,.48,.46)*softboxA*.070;
+        vec3 tendon=vec3(.006,.015,.018)+vec3(.09,.15,.16)*(.14*sideLight+.08*ndl+.40*fresnel);
+        tendon+=vec3(.016,.09,.11)*segment*.028;
+        tendon+=vec3(.72,.78,.75)*sideSpec*.11;
+        tendon+=vec3(.64,.69,.65)*softboxA*.095;
         col=mix(col,tendon,tendrilMask*.995);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
-        float outAlpha=1.0-tendrilMask*.09-glassFinMask*.52;
+        float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
         ${outputName}=vec4(filmic(col*2.60),clamp(outAlpha,.70,1.0));
       }`;
@@ -1396,7 +1355,7 @@
       gl.disable(gl.CULL_FACE);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-      root.dataset.fxCorePassModelR1450='single-asymmetric-obsidian-thin-bioglass-smoked-optic-front-tendrils-r1597';
+      root.dataset.fxCorePassModelR1450='single-sculpted-black-glass-dark-dome-clear-front-tendrils-no-wings-r1598';
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
