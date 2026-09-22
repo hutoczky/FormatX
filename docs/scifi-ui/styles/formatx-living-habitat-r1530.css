@@ -404,20 +404,53 @@ body.living-architecture .fx-r179-field{
 
 /* Photographic mineral presentation: no compositor halo or artificial drop
    shadow around the native WebGL object. Light response is shader-owned. */
-html:root:root:root:root:root:root:root:root:root:root:root:root
-[data-fx-crystal-organism-r326="ready"] body.living-architecture
-#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
-  filter:brightness(1.01) contrast(1.06) saturate(.92)!important;
-  -webkit-filter:brightness(1.01) contrast(1.06) saturate(.92)!important;
+html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  filter:brightness(1.01) contrast(1.04) saturate(.90)!important;
+  -webkit-filter:brightness(1.01) contrast(1.04) saturate(.90)!important;
   box-shadow:none!important;
   text-shadow:none!important;
 }
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
-  html:root:root:root:root:root:root:root:root:root:root:root:root
-  [data-fx-crystal-organism-r326="ready"] body.living-architecture
-  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
-    filter:brightness(1.015) contrast(1.055) saturate(.90)!important;
-    -webkit-filter:brightness(1.015) contrast(1.055) saturate(.90)!important;
+  html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.015) contrast(1.035) saturate(.88)!important;
+    -webkit-filter:brightness(1.015) contrast(1.035) saturate(.88)!important;
   }
 }
 /* production-r1557-habitat-no-radial-hud-no-compositor-halo */
+
+
+/* R1558 — once R326 is ready, every retired 3D/proxy stage is paint-dead.
+   This removes the large circular chamber/scan disc still visible behind the
+   mobile controls in real proof captures. */
+html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root
+body.living-architecture #hero :is(
+  .fx-core-real3d-stage,
+  .fx-core-fracture3d-stage,
+  .fx-core-rayglass-r91-stage,
+  .fx-core-r120-stage,
+  .fx-transcend-shell,
+  .fx-transcend-lens
+){
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  background:none!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root
+body.living-architecture #hero :is(
+  .fx-core-real3d-stage::before,.fx-core-real3d-stage::after,
+  .fx-core-fracture3d-stage::before,.fx-core-fracture3d-stage::after,
+  .fx-transcend-shell::before,.fx-transcend-shell::after
+){
+  content:none!important;
+  display:none!important;
+  opacity:0!important;
+}
+/* production-r1558-native-r326-only-clean-hero */
