@@ -544,11 +544,11 @@
       const T=this.THREE;
 
       const shellMat=new T.MeshPhysicalMaterial({
-        color:0x455052,metalness:.012,roughness:.34,
-        emissive:0x020405,emissiveIntensity:.003,
-        clearcoat:.42,clearcoatRoughness:.18,
-        envMapIntensity:.78,
-        transparent:true,opacity:.98
+        color:0x263033,metalness:.010,roughness:.38,
+        emissive:0x010304,emissiveIntensity:.002,
+        clearcoat:.34,clearcoatRoughness:.22,
+        envMapIntensity:.96,
+        transparent:true,opacity:.985
       });
       const shellGlass=new T.MeshPhysicalMaterial({
         color:0x4f5c60,metalness:.008,roughness:.24,
@@ -728,12 +728,12 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x465052,roughness:.46,metalness:.001,
-        clearcoat:.22,clearcoatRoughness:.30,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.006,
+        color:0x222b2d,roughness:.40,metalness:.001,
+        clearcoat:.27,clearcoatRoughness:.24,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0075,
         transparent:false,opacity:1,
-        emissive:0x010203,emissiveIntensity:.0008,
-        envMapIntensity:.72,
+        emissive:0x010203,emissiveIntensity:.0005,
+        envMapIntensity:.92,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -791,11 +791,11 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x7b8586,roughness:.31,metalness:.001,
-        clearcoat:.34,clearcoatRoughness:.22,
-        transmission:.004,thickness:.05,ior:1.34,
+        color:0x566365,roughness:.28,metalness:.001,
+        clearcoat:.42,clearcoatRoughness:.18,
+        transmission:.003,thickness:.05,ior:1.34,
         transparent:true,opacity:0,depthWrite:false,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0012,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0014,
         side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
@@ -829,8 +829,8 @@
       }
 
       this.organicFoldMaterial=new T.MeshPhysicalMaterial({
-        color:0x111719,roughness:.64,metalness:.003,
-        emissive:0x030708,emissiveIntensity:.010,
+        color:0x0b1113,roughness:.58,metalness:.002,
+        emissive:0x020506,emissiveIntensity:.004,
         transparent:true,opacity:0,depthWrite:true
       });
       this.organicFoldGlowMaterial=new T.MeshBasicMaterial({
@@ -881,7 +881,7 @@
       this.organicGroup.add(this.organicFolds);;;
 
       this.organicVeinMaterial=new T.MeshBasicMaterial({
-        color:0x89c4c7,transparent:true,opacity:0,
+        color:0x6f8e91,transparent:true,opacity:0,
         depthWrite:false,depthTest:true,blending:T.AdditiveBlending
       });
       this.organicVeins=[];
@@ -1497,11 +1497,11 @@
 
       this.organicShellMaterial.opacity=1;
       this.organicLobeMaterial.opacity=0;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.008*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.014*visible;
       this.organicWireMaterial.opacity=0;
-      this.organicVeinMaterial.opacity=.016*visible;
+      this.organicVeinMaterial.opacity=.030*visible;
       this.organicHoodMaterial.opacity=0;
-      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.095*visible;
+      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.145*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.0008*visible;
 
       if(this.organicHoodGroup){
@@ -1511,7 +1511,7 @@
       this.organicShell.rotation.y=Math.sin(time*.00010)*.008;
       this.organicShell.rotation.x=Math.sin(time*.00013)*.004;
       if(this.organicMembrane)this.organicMembrane.rotation.copy(this.organicShell.rotation);
-      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.011*visible;
+      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.020*visible;
       if(this.organicFolds){
         this.organicFolds.rotation.y=Math.sin(time*.00012)*.006;
         this.organicFolds.rotation.x=Math.sin(time*.00010)*.003;
@@ -1641,7 +1641,7 @@
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.48+flash*.006+after*.002;
+      this.renderer.toneMappingExposure=1.52+flash*.005+after*.002;
       this.coreLight.intensity+=flash*.035+after*.010;
       if(this.glowSprite){
         const g=1+flash*.72;
@@ -1744,7 +1744,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1587-biogenic-shell-to-readable-obsidian-subtle-fissure-handoff'
+        revision:'r1588-dark-wet-bioceramic-to-polished-obsidian-cinematic-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1780,6 +1780,7 @@
   document.documentElement.dataset.fxMagBirthProofR1576='hand-cut-broad-facet-obsidian-final-act-matches-native-shard-no-pot';
   document.documentElement.dataset.fxMagBirthProofR1578='tall-seven-ring-obsidian-final-act-readable-studio-lit-no-egg';
   document.documentElement.dataset.fxMagBirthProofR1587='single-biogenic-shell-no-floating-orbs-readable-obsidian-subtle-fissure-no-eye';
+  document.documentElement.dataset.fxMagBirthProofR1588='dark-wet-bioceramic-seed-natural-veins-to-polished-obsidian-cinematic-handoff';
   document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
