@@ -1492,10 +1492,10 @@
       const visible=grow*(1-crystallise*.96);
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
-      this.organicGroup.scale.set(bodyScale*.64,bodyScale*.69,bodyScale*.66);
+      this.organicGroup.scale.set(bodyScale*.61,bodyScale*.65,bodyScale*.63);
 
       this.organicShellMaterial.opacity=1;
-      this.organicLobeMaterial.opacity=0;
+      this.organicLobeMaterial.opacity=.74*visible*(1-crystallise*.82);
       if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.008*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=.016*visible;
@@ -1541,15 +1541,23 @@
       this.silverMaterial.opacity=0;
       if(this.crownMaterial)this.crownMaterial.opacity=0;
       this.mechEdgeMaterial.opacity=0;
-      this.mechInnerMaterial.opacity=.16*fissureGrow;
-      if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=.16*fissureGrow;
+      this.mechInnerMaterial.opacity=.84*fissureGrow;
+      if(this.mechRibMaterial)this.mechRibMaterial.opacity=.82*fissureGrow;
+      if(this.mechEnergyMaterial){
+        this.mechEnergyMaterial.opacity=.96*fissureGrow;
+        this.mechEnergyMaterial.emissiveIntensity=1.85+.24*Math.sin(time*.0038);
+      }
+      if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=.96*fissureGrow;
       if(this.seamMaterial)this.seamMaterial.opacity=0;
       this.mechInnerRing.visible=false;
       if(this.mechCradle)this.mechCradle.visible=false;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=0;
-      if(this.mechLight)this.mechLight.intensity=fissureGrow*(.035+settle*.020);
+      if(this.mechEyeCorona){
+        this.mechEyeCorona.material.opacity=.16*fissureGrow;
+        this.mechEyeCorona.scale.set(.22,.22,1);
+      }
+      if(this.mechLight)this.mechLight.intensity=.62*fissureGrow;
       this.mechFissureBranches?.forEach(branch=>{
-        if(branch.material)branch.material.opacity=.070*fissureGrow;
+        if(branch.material)branch.material.opacity=.28*fissureGrow;
       });
 
       if(this.mechBody){
@@ -1557,6 +1565,9 @@
         this.mechBody.rotation.x=Math.sin(time*.00012)*.005*bodyGrow;
         this.mechBody.rotation.z=-.055*bodyGrow+Math.sin(time*.00010)*.004*bodyGrow;
       }
+      this.mechRibs?.forEach((rib,index)=>{
+        rib.rotation.z=Math.sin(time*.00020+index*.73)*.0035*bodyGrow;
+      });
     }
 
     updateTentacles(t,time){
@@ -1731,7 +1742,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1584-porous-biogenic-seed-to-hand-hewn-obsidian-handoff'
+        revision:'r1585-dna-cell-cluster-to-living-obsidian-energy-chamber-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1782,10 +1793,11 @@
   document.documentElement.dataset.fxMagBirthProofR1582='scaled-bioceramic-seed-dark-habitat-slender-satin-obsidian-continuous-size-handoff';
   document.documentElement.dataset.fxMagBirthProofR1583='asymmetric-biogenic-seed-procedural-studio-environment-geological-obsidian-handoff-no-room-box';
   document.documentElement.dataset.fxMagBirthProofR1584='porous-biogenic-seed-surface-folds-hand-hewn-obsidian-crystal-larger-continuous-handoff';
+  document.documentElement.dataset.fxMagBirthProofR1585='dna-to-cell-cluster-to-living-obsidian-energy-chamber-and-organic-rib-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1584-three-act-porous-biogenic-seed-to-hand-hewn-obsidian'
+    revision:'r1585-three-act-dna-cellular-living-obsidian-energy-core'
   };
 })();
