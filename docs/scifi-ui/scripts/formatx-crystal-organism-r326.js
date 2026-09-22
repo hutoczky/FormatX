@@ -80,6 +80,7 @@
   root.dataset.fxNativeMagVisualR1583 = 'geological-smoky-obsidian-seed-asymmetric-fracture-cuts-studio-ribbon-reflections-deep-black-glass';
   root.dataset.fxNativeMagVisualR1584 = 'hand-hewn-asymmetric-obsidian-crystal-dark-glass-narrow-studio-ribbons-smooth-large-planes';
   root.dataset.fxNativeMagVisualR1585 = 'photographic-living-obsidian-crystal-recessed-cyan-energy-chamber-organic-metal-ribs-short-tendrils';
+  root.dataset.fxNativeMagVisualR1586 = 'three-quarter-hand-cut-living-obsidian-large-energy-chamber-visible-faceted-depth-reference-lab-scale';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -576,7 +577,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.88));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.68));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -586,9 +587,9 @@
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.018);
         vec3 local=(base+normal*living)*layerScale*heartbeat;
         local.xy+=uPointer*.038*uLayer;
-        float yaw=.08+uRotation.y+uPointer.x*.23+uTime*.021;
-        float pitch=-.055+uRotation.x-uPointer.y*.16+.014*sin(uTime*.19);
-        float roll=uRotation.z+uPointer.x*uPointer.y*.035+.010*sin(uTime*.23);
+        float yaw=.22+uRotation.y+uPointer.x*.20+uTime*.018;
+        float pitch=-.075+uRotation.x-uPointer.y*.14+.012*sin(uTime*.19);
+        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*.030+.008*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
@@ -601,8 +602,8 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.650':'.650'};
-        projected.y+=${mobile?'.055':'.028'};
+        projected*= ${mobile?'.720':'.690'};
+        projected.y+=${mobile?'.042':'.024'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -648,7 +649,7 @@
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
         float lift=sat(.11+ndl*.56+sideLight*.43+fillLight*.20);
-        float facetTone=mix(.997,1.003,facetRand);
+        float facetTone=mix(.985,1.015,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         vec3 mineral=mix(vec3(.0018,.0028,.0034),vec3(.020,.028,.031),lift)*facetTone;
@@ -683,27 +684,27 @@
            irregular: an embedded source inside the mineral, never a HUD/eye. */
         float chamberWarp=.009*sin(q.y*21.0+vLocal.z*7.0)+.004*sin(q.x*31.0-q.y*9.0);
         vec2 cq=vec2(q.x+chamberWarp,(q.y-.010)*.92);
-        float chamberD=abs(cq.x)/.092+abs(cq.y)/.120;
+        float chamberD=abs(cq.x)/.130+abs(cq.y)/.165;
         float chamber=(1.0-smoothstep(.76,1.04,chamberD))*front;
         float chamberInner=(1.0-smoothstep(.34,.64,chamberD))*front;
         float chamberRim=max(0.0,chamber-chamberInner);
         float chamberAura=(1.0-smoothstep(.54,1.36,chamberD))*front;
-        float nucleus=exp(-pow(length(vec2(cq.x*1.08,cq.y))/.030,2.0))*front;
+        float nucleus=exp(-pow(length(vec2(cq.x*1.08,cq.y))/.044,2.0))*front;
         float energyPulse=.94+.06*sin(uTime*.82+uBreath*.65);
 
         float ribWarp=.010*sin(q.y*17.0+q.x*8.0);
-        float ribGate=smoothstep(.055,.30,abs(q.x))*(1.0-smoothstep(.39,.48,abs(q.x)))*front;
-        float upperRib=exp(-pow((q.y-(.225-.73*abs(q.x))+ribWarp)/.015,2.0))*ribGate;
-        float lowerRib=exp(-pow((q.y+(.215-.68*abs(q.x))-ribWarp)/.014,2.0))*ribGate;
-        float sideRib=exp(-pow((abs(q.x)-(.145+.20*abs(q.y)+.006*sin(q.y*19.0)))/.014,2.0))
+        float ribGate=smoothstep(.070,.33,abs(q.x))*(1.0-smoothstep(.43,.50,abs(q.x)))*front;
+        float upperRib=exp(-pow((q.y-(.265-.76*abs(q.x))+ribWarp)/.017,2.0))*ribGate;
+        float lowerRib=exp(-pow((q.y+(.250-.70*abs(q.x))-ribWarp)/.016,2.0))*ribGate;
+        float sideRib=exp(-pow((abs(q.x)-(.185+.19*abs(q.y)+.006*sin(q.y*19.0)))/.016,2.0))
           *(1.0-smoothstep(.34,.47,abs(q.y)))*front;
         float ribs=sat(upperRib+lowerRib+sideRib);
 
         mineral=mix(mineral,vec3(.0015,.0035,.0042),chamber*.72);
         mineral+=vec3(.018,.090,.110)*chamberAura*.20;
         mineral+=vec3(.18,.30,.31)*chamberRim*(.10+.22*sideLight+.12*fresnel);
-        mineral+=vec3(.045,.40,.56)*nucleus*energyPulse*.95;
-        mineral+=vec3(.62,.92,.94)*nucleus*energyPulse*.42;
+        mineral+=vec3(.040,.46,.64)*nucleus*energyPulse*1.05;
+        mineral+=vec3(.66,.96,.98)*nucleus*energyPulse*.50;
         mineral=mix(mineral,vec3(.003,.006,.007),ribs*.52);
         mineral+=vec3(.24,.27,.26)*ribs*(.030+.18*keySoft+.16*sideSpec);
         mineral+=vec3(.012,.080,.095)*ribs*chamberAura*.10;
@@ -801,27 +802,27 @@
 
         float chamberWarp=.009*sin(q.y*21.0+vLocal.z*7.0)+.004*sin(q.x*31.0-q.y*9.0);
         vec2 cq=vec2(q.x+chamberWarp,(q.y-.010)*.92);
-        float chamberD=abs(cq.x)/.092+abs(cq.y)/.120;
+        float chamberD=abs(cq.x)/.130+abs(cq.y)/.165;
         float chamber=(1.0-smoothstep(.76,1.04,chamberD))*front;
         float chamberInner=(1.0-smoothstep(.34,.64,chamberD))*front;
         float chamberRim=max(0.0,chamber-chamberInner);
         float chamberAura=(1.0-smoothstep(.54,1.36,chamberD))*front;
-        float nucleus=exp(-pow(length(vec2(cq.x*1.08,cq.y))/.030,2.0))*front;
+        float nucleus=exp(-pow(length(vec2(cq.x*1.08,cq.y))/.044,2.0))*front;
         float energyPulse=.94+.06*sin(uTime*.82+uBreath*.65);
 
         float ribWarp=.010*sin(q.y*17.0+q.x*8.0);
-        float ribGate=smoothstep(.055,.30,abs(q.x))*(1.0-smoothstep(.39,.48,abs(q.x)))*front;
-        float upperRib=exp(-pow((q.y-(.225-.73*abs(q.x))+ribWarp)/.015,2.0))*ribGate;
-        float lowerRib=exp(-pow((q.y+(.215-.68*abs(q.x))-ribWarp)/.014,2.0))*ribGate;
-        float sideRib=exp(-pow((abs(q.x)-(.145+.20*abs(q.y)+.006*sin(q.y*19.0)))/.014,2.0))
+        float ribGate=smoothstep(.070,.33,abs(q.x))*(1.0-smoothstep(.43,.50,abs(q.x)))*front;
+        float upperRib=exp(-pow((q.y-(.265-.76*abs(q.x))+ribWarp)/.017,2.0))*ribGate;
+        float lowerRib=exp(-pow((q.y+(.250-.70*abs(q.x))-ribWarp)/.016,2.0))*ribGate;
+        float sideRib=exp(-pow((abs(q.x)-(.185+.19*abs(q.y)+.006*sin(q.y*19.0)))/.016,2.0))
           *(1.0-smoothstep(.34,.47,abs(q.y)))*front;
         float ribs=sat(upperRib+lowerRib+sideRib);
 
         col=mix(col,vec3(.0015,.0035,.0042),chamber*.72);
         col+=vec3(.018,.090,.110)*chamberAura*.20;
         col+=vec3(.18,.30,.31)*chamberRim*(.08+.18*sideLight+.10*fresnel);
-        col+=vec3(.045,.40,.56)*nucleus*energyPulse*.92;
-        col+=vec3(.62,.92,.94)*nucleus*energyPulse*.38;
+        col+=vec3(.040,.46,.64)*nucleus*energyPulse*1.02;
+        col+=vec3(.66,.96,.98)*nucleus*energyPulse*.47;
         col=mix(col,vec3(.003,.006,.007),ribs*.50);
         col+=vec3(.22,.25,.24)*ribs*(.025+.13*keySpec+.14*sideSpec);
 
@@ -1466,6 +1467,8 @@
     root.dataset.fxCoreOpticsR1584='deep-obsidian-narrow-cool-warm-studio-ribbons-matched-full-and-constrained-shaders';
     root.dataset.fxCoreShapeR1585='hand-hewn-living-crystal-with-four-short-integrated-tendrils';
     root.dataset.fxCoreOpticsR1585='recessed-irregular-cyan-energy-chamber-organic-metal-ribs-deep-photographic-obsidian';
+    root.dataset.fxCoreShapeR1586='three-quarter-hand-cut-faceted-obsidian-reference-lab-scale';
+    root.dataset.fxCoreOpticsR1586='larger-recessed-energy-chamber-visible-organic-ribs-high-contrast-black-glass';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
