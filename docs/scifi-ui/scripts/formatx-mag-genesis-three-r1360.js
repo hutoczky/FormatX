@@ -73,7 +73,7 @@
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.08;
+      this.renderer.toneMappingExposure=1.16;
 
       this.scene=new THREE.Scene();
       this.scene.background=new THREE.Color(0x020507);
@@ -733,11 +733,11 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x1b2022,roughness:.34,metalness:.018,
-        clearcoat:.48,clearcoatRoughness:.18,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.010,
+        color:0x2a3032,roughness:.38,metalness:.010,
+        clearcoat:.58,clearcoatRoughness:.16,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.007,
         transparent:false,opacity:1,
-        emissive:0x020405,emissiveIntensity:.010,
+        emissive:0x030506,emissiveIntensity:.008,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -760,31 +760,36 @@
         const n=p.clone().normalize();
         const az=Math.atan2(n.z,n.x), el=Math.acos(Math.max(-1,Math.min(1,n.y)));
         const fold=
-          Math.sin(az*3.7+el*1.8)*.026+
-          Math.sin(az*6.2-el*3.1)*.012+
-          Math.cos(az*2.4+el*5.2)*.009;
-        const asym=1+n.x*.030+n.y*.018-n.z*.012;
+          Math.sin(az*3.7+el*1.8)*.016+
+          Math.sin(az*6.2-el*3.1)*.008+
+          Math.cos(az*2.4+el*5.2)*.006;
+        const asym=1+n.x*.026+n.y*.016-n.z*.010;
         p.multiplyScalar((1+fold)*asym);
-        p.x+=n.y*.055-n.z*.018;
-        p.y+=n.x*.032;
+        const taper=.74+.26*Math.pow(Math.abs(n.y),.72);
+        p.x*=.79*taper;
+        p.y*=1.18;
+        p.z*=.68*(.88+.12*Math.abs(n.y));
+        p.x+=n.y*.050-n.z*.014;
+        p.y+=n.x*.030+Math.pow(Math.max(n.y,0),4.0)*.065;
+        p.z-=n.x*.020;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
       const shell=new T.Mesh(shellGeo,this.organicShellMaterial);
-      shell.scale.set(.93,1.09,.76);
+      shell.scale.set(.94,1.00,.96);
       this.organicShell=shell;
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x657176,roughness:.24,metalness:.004,
-        clearcoat:.62,clearcoatRoughness:.12,
-        transmission:.035,thickness:.12,ior:1.39,
+        color:0x7b878b,roughness:.26,metalness:.003,
+        clearcoat:.66,clearcoatRoughness:.11,
+        transmission:.028,thickness:.10,ior:1.38,
         transparent:true,opacity:0,depthWrite:false,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.004,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.003,
         side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.936,1.096,.766);
+      this.organicMembrane.scale.set(.948,1.008,.968);
       this.organicGroup.add(this.organicMembrane);
 
       this.organicLobes=[];
@@ -1104,9 +1109,9 @@
       this.mineralRoughnessTexture=mineralRoughness;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x050708,metalness:.055,roughness:.17,
-        emissive:0x010203,emissiveIntensity:.004,
-        clearcoat:.94,clearcoatRoughness:.055,
+        color:0x0b1012,metalness:.035,roughness:.23,
+        emissive:0x010203,emissiveIntensity:.003,
+        clearcoat:.78,clearcoatRoughness:.085,
         transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
@@ -1152,20 +1157,20 @@
         pnt.fromBufferAttribute(basePos,i).normalize();
         const theta=Math.atan2(pnt.z,pnt.x);
         const upper=pnt.y>=0,right=pnt.x>=0,front=pnt.z>=0;
-        const ax=upper?(right?.75:.82):(right?.80:.67);
-        const ay=upper?(right?.99:.92):(right?.90:.80);
-        const az=front?(right?.66:.73):(right?.70:.77);
-        const power=1.62;
+        const ax=upper?(right?.70:.78):(right?.76:.64);
+        const ay=upper?(right?1.06:.98):(right?.92:.80);
+        const az=front?(right?.61:.69):(right?.66:.73);
+        const power=1.34;
         const lp=Math.pow(Math.abs(pnt.x)/ax,power)+Math.pow(Math.abs(pnt.y)/ay,power)+Math.pow(Math.abs(pnt.z)/az,power);
         const radius=1/Math.pow(Math.max(.001,lp),1/power);
         const mineralBias=1
-          +Math.sin(theta*2.05+pnt.y*2.55)*.020
-          +Math.cos(theta*3.17-pnt.y*3.60)*.013
-          +Math.sin(theta*4.73-pnt.y*1.75)*.006;
+          +Math.sin(theta*2.05+pnt.y*2.55)*.014
+          +Math.cos(theta*3.17-pnt.y*3.60)*.009
+          +Math.sin(theta*4.73-pnt.y*1.75)*.004;
         pnt.multiplyScalar(radius*mineralBias);
         const topLean=Math.pow(Math.max(pnt.y,0),2.4);
         const lowerMass=Math.pow(Math.max(-pnt.y,0),2.0);
-        pnt.x*=1.07;pnt.y*=1.17;pnt.z*=.985;
+        pnt.x*=1.00;pnt.y*=1.23;pnt.z*=.94;
         pnt.x+=-.115*topLean+.020*lowerMass+pnt.z*pnt.y*.014-Math.pow(Math.max(-pnt.x,0),4)*.012+pnt.y*.008;
         pnt.y+=Math.pow(Math.max(pnt.y,0),5)*.078-Math.pow(Math.max(-pnt.y,0),4)*.014+pnt.x*pnt.z*.007+pnt.x*.018;
         pnt.z+=pnt.x*pnt.y*.012+Math.pow(Math.max(pnt.z,0),4)*.010-pnt.x*.012;
@@ -1439,12 +1444,12 @@
 
     updateOrganic(t,time){
       const grow=smooth((t-2.48)/.72);
-      const crystallise=smooth((t-8.34)/.78);
+      const crystallise=smooth((t-7.72)/.92);
       // R1400 keeps the cellular phase intact, then hands it to the irregular crystal.
       const visible=grow*(1-crystallise*.82);
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
-      this.organicGroup.scale.set(bodyScale*.96,bodyScale*1.08,bodyScale*.91);
+      this.organicGroup.scale.set(bodyScale*.84,bodyScale*.92,bodyScale*.86);
 
       this.organicShellMaterial.opacity=1;
       this.organicLobeMaterial.opacity=1;
@@ -1495,11 +1500,11 @@
     updateMechanical(t,time){
       // R1510 — final mineral body appears as one object at the handoff.
       const crownGrow=smooth((t-5.78)/1.05);
-      const bodyGrow=smooth((t-8.26)/.78);
+      const bodyGrow=smooth((t-7.72)/.92);
       const groupGrow=bodyGrow;
       this.mechanicalReveal=bodyGrow;
       this.mechanicalGroup.visible=groupGrow>.002;
-      this.mechanicalGroup.scale.set(.001+groupGrow*.82,.001+groupGrow*.86,.001+groupGrow*.90);
+      this.mechanicalGroup.scale.set(.001+groupGrow*.88,.001+groupGrow*.92,.001+groupGrow*.94);
 
       this.mechMaterial.opacity=.995*bodyGrow;
       this.mechMidMaterial.opacity=0;
@@ -1528,7 +1533,7 @@
       const grow=smooth((t-5.55)/1.00);
       const afterGlow=smooth((t-9.42)/.42);
       this.tentacleGroup.visible=grow>.002;
-      this.tentacleMaterial.opacity=(.96+.02*afterGlow)*grow;
+      this.tentacleMaterial.opacity=(.42+.06*afterGlow)*grow;
       this.tentacleEdgeMaterial.opacity=0;
       this.tentacleNodeMaterial.opacity=0;
       if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
@@ -1736,12 +1741,13 @@
   document.documentElement.dataset.fxMagBirthProofR1560='smooth-biogenic-shell-no-white-facet-overlay-obsidian-seed-handoff';
   document.documentElement.dataset.fxMagBirthProofR1557='double-render-gl-finish-and-readback-before-proof-ready';
   document.documentElement.dataset.fxMagBirthVisualR1555='smooth-indexed-volcanic-glass-mineral-fissure-no-circular-eye';
+  document.documentElement.dataset.fxMagBirthVisualR1561='elongated-bioceramic-seed-to-smoky-crystal-no-orb-no-hud-readable-studio-light';
   document.documentElement.dataset.fxMagBirthPerformanceR1545='hardware-three-software-reference-film-no-parallel-webgl';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1557-photographic-volcanic-glass-double-render-proof-sync-r1560-smooth-biogenic-shell'
+    revision:'r1561-bioceramic-seed-to-smoky-crystal-readable-cinematic-light'
   };
 })();
