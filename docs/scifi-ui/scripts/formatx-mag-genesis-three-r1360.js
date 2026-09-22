@@ -1255,10 +1255,10 @@
         transparent:true,opacity:0,depthWrite:false
       });
       this.mechEyeCore=new T.Mesh(
-        new T.OctahedronGeometry(.072,2),
+        new T.OctahedronGeometry(.096,2),
         this.mechEnergyMaterial
       );
-      this.mechEyeCore.scale.set(.82,1.05,.46);
+      this.mechEyeCore.scale.set(.84,1.08,.50);
       this.mechEyeCore.rotation.set(.08,-.12,.16);
       this.mechEyeCore.position.set(.004,.006,.650);
       this.mechanicalGroup.add(this.mechEyeCore);
@@ -1303,7 +1303,7 @@
         transparent:true,opacity:0,depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.25,.25,1);
+      this.mechEyeCorona.scale.set(.30,.30,1);
       this.mechEyeCorona.position.set(.004,.006,.642);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
@@ -1553,20 +1553,21 @@
       if(this.mechCradle)this.mechCradle.visible=false;
       if(this.mechEyeCorona){
         this.mechEyeCorona.material.opacity=.16*fissureGrow;
-        this.mechEyeCorona.scale.set(.22,.22,1);
+        this.mechEyeCorona.scale.set(.28,.28,1);
       }
       if(this.mechLight)this.mechLight.intensity=.62*fissureGrow;
       this.mechFissureBranches?.forEach(branch=>{
         if(branch.material)branch.material.opacity=.28*fissureGrow;
       });
 
+      this.mechanicalGroup.rotation.y=.18*bodyGrow+Math.sin(time*.00014)*.010*bodyGrow;
+      this.mechanicalGroup.rotation.x=-.055*bodyGrow+Math.sin(time*.00012)*.005*bodyGrow;
+      this.mechanicalGroup.rotation.z=-.045*bodyGrow+Math.sin(time*.00010)*.004*bodyGrow;
       if(this.mechBody){
-        this.mechBody.rotation.y=Math.sin(time*.00014)*.010*bodyGrow;
-        this.mechBody.rotation.x=Math.sin(time*.00012)*.005*bodyGrow;
-        this.mechBody.rotation.z=-.055*bodyGrow+Math.sin(time*.00010)*.004*bodyGrow;
+        this.mechBody.rotation.set(0,0,0);
       }
       this.mechRibs?.forEach((rib,index)=>{
-        rib.rotation.z=Math.sin(time*.00020+index*.73)*.0035*bodyGrow;
+        rib.rotation.z=Math.sin(time*.00020+index*.73)*.0025*bodyGrow;
       });
     }
 
@@ -1742,7 +1743,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1585-dna-cell-cluster-to-living-obsidian-energy-chamber-handoff'
+        revision:'r1586-integrated-three-quarter-living-obsidian-reference-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1794,10 +1795,11 @@
   document.documentElement.dataset.fxMagBirthProofR1583='asymmetric-biogenic-seed-procedural-studio-environment-geological-obsidian-handoff-no-room-box';
   document.documentElement.dataset.fxMagBirthProofR1584='porous-biogenic-seed-surface-folds-hand-hewn-obsidian-crystal-larger-continuous-handoff';
   document.documentElement.dataset.fxMagBirthProofR1585='dna-to-cell-cluster-to-living-obsidian-energy-chamber-and-organic-rib-handoff';
+  document.documentElement.dataset.fxMagBirthProofR1586='integrated-three-quarter-living-crystal-ribs-and-energy-chamber-reference-scale';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1585-three-act-dna-cellular-living-obsidian-energy-core'
+    revision:'r1586-three-act-dna-cellular-integrated-living-obsidian'
   };
 })();
