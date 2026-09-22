@@ -1145,6 +1145,8 @@
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0;
+    let qualityScale=auditMode?1:(softwareRenderer ? .72 : (constrainedMobile ? .74 : (mobile ? .82 : (constrained ? .84 : .94))));
+    let lastQualityAdjust=0,qualityResizeTimer=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
@@ -1155,9 +1157,11 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:softwareRenderer ? 0.82:constrainedMobile?1.18:mobile?1.50:constrained?1.18:1.65;
+      const baseCap=auditMode?1:softwareRenderer ? 0.82:constrainedMobile?1.18:mobile?1.50:constrained?1.18:1.65;
+      const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:softwareRenderer?190000:constrainedMobile?390000:mobile?760000:constrained?560000:1150000;
+      const baseBudget=auditMode?390000:softwareRenderer?190000:constrainedMobile?390000:mobile?760000:constrained?560000:1150000;
+      const budget=Math.max(145000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -1359,17 +1363,34 @@
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
-      if(renderAverage>(mobile?24:42)){
+      if(renderAverage>(mobile?15.5:15.8)){
         slowRenderer=true;
-        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'two-pass-slow-renderer';
+        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
         root.dataset.fxCoreSurfaceCadenceR1392=mobile?'bounded-slow-renderer-full-window':'desktop-bounded';
         root.dataset.fxCoreSurfaceCadenceR1403=mobile?'full-window-fast-cadence':'desktop-bounded';
         root.dataset.fxCoreSurfaceCadenceR1441=mobile?'midpoint-safe-68ms-cap':'desktop-bounded';
       }else if(!slowRenderer){
-        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'two-pass-mobile-capable':'three-pass-capable';
+        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
+
+      if(!auditMode && now-lastQualityAdjust>700){
+        const previous=qualityScale;
+        if(renderAverage>15.4)qualityScale=Math.max(.50,qualityScale-.07);
+        else if(renderAverage<9.8)qualityScale=Math.min(1,qualityScale+.025);
+        if(Math.abs(previous-qualityScale)>.001){
+          lastQualityAdjust=now;
+          if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
+          qualityResizeTimer=later(()=>{
+            qualityResizeTimer=0;
+            if(!disposed&&!contextLost&&resize())schedule(1);
+          },0);
+        }
+      }
+
       root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
       root.dataset.fxCoreFrameMs=dt.toFixed(2);
+      root.dataset.fxCoreReal3dTargetFps='60-adaptive-resolution-r1600';
+      root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,renderAverage))));
     }
 
@@ -1397,14 +1418,18 @@
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
-        const burstDelay=renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
+        const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
+        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
-        const sweepDelay=mobile
-          ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
-          : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0);
+        const sweepDelay=auditMode
+          ? (mobile
+              ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
+              : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0))
+          : 0;
         root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
         root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
+        root.dataset.fxCoreAnimationCadenceR1600='production-native-60hz-target-audit-contract-preserved';
         queueFrame(sweepDelay);
       }else settleAfterBurst();
     }
