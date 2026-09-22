@@ -58,6 +58,8 @@
       this.deterministicFrame=new URLSearchParams(location.search).has('introframe');
       this.targetFrameMs=1000/60;
       this.renderAverage=0;
+      this.frameIntervalAverage=this.targetFrameMs;
+      this.previousFrameTime=0;
       this.qualityScale=this.lowPowerProfile?.68:(this.mobileProfile?.78:.92);
       this.lastQualityAdjust=0;
 
@@ -1595,6 +1597,11 @@
 
     render(r,time){
       if(this.disposed)return;
+      if(this.previousFrameTime>0){
+        const interval=Math.max(1,Math.min(50,time-this.previousFrameTime));
+        this.frameIntervalAverage=this.frameIntervalAverage*.86+interval*.14;
+      }
+      this.previousFrameTime=time;
       this.lastRender=time;
       const renderStarted=performance.now();
       const t=clamp(r)*10;
@@ -1648,20 +1655,28 @@
         this.renderAverage=this.renderAverage
           ? this.renderAverage*.84+renderCost*.16
           : renderCost;
-        if(time-this.lastQualityAdjust>650){
+        if(time-this.lastQualityAdjust>520){
           const previous=this.qualityScale;
-          if(this.renderAverage>15.2)this.qualityScale=Math.max(.50,this.qualityScale-.08);
-          else if(this.renderAverage<9.4)this.qualityScale=Math.min(1,this.qualityScale+.035);
+          const framePressure=this.frameIntervalAverage>18.4;
+          const severeFramePressure=this.frameIntervalAverage>22.0;
+          if(severeFramePressure||this.renderAverage>15.2)this.qualityScale=Math.max(.46,this.qualityScale-(severeFramePressure?.12:.08));
+          else if(framePressure||this.renderAverage>13.8)this.qualityScale=Math.max(.46,this.qualityScale-.045);
+          else if(this.frameIntervalAverage<17.2&&this.renderAverage<9.2)this.qualityScale=Math.min(1,this.qualityScale+.025);
           if(Math.abs(previous-this.qualityScale)>.001){
             this.lastQualityAdjust=time;
             this.resize();
-            const secondary=this.qualityScale<.62;
+            const secondary=this.qualityScale<.70;
+            const emergency=this.qualityScale<.56;
             if(this.particles)this.particles.visible=!secondary;
             if(this.debris)this.debris.visible=!secondary;
+            if(this.chamber)this.chamber.visible=!emergency;
           }
         }
         document.documentElement.dataset.fxMagBirthTargetFpsR1600='60';
+        document.documentElement.dataset.fxMagBirthTargetFpsR1602='60-real-frame-budget';
         document.documentElement.dataset.fxMagBirthRenderMsR1600=this.renderAverage.toFixed(2);
+        document.documentElement.dataset.fxMagBirthFrameIntervalR1602=this.frameIntervalAverage.toFixed(2);
+        document.documentElement.dataset.fxMagBirthMeasuredFpsR1602=String(Math.min(60,Math.round(1000/Math.max(16.67,this.frameIntervalAverage))));
         document.documentElement.dataset.fxMagBirthQualityScaleR1600=this.qualityScale.toFixed(2);
         document.documentElement.dataset.fxMagBirthEstimatedFpsR1600=String(
           Math.min(60,Math.max(1,Math.round(1000/Math.max(16.67,this.renderAverage))))
@@ -1749,7 +1764,7 @@
         engine,
         minimumFrameMs: 16.67,
         targetFps:60,
-        revision:'r1600-adaptive-60fps-photographic-dark-chamber-core'
+        revision:'r1602-real-frame-budget-adaptive-60fps-photographic-core'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
