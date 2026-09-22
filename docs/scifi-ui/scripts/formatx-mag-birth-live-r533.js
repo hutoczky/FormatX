@@ -555,7 +555,17 @@
     const node = stage || document.querySelector('#hero .hero-space');
     if (!(node instanceof HTMLElement)) return;
     const rect = node.getBoundingClientRect();
-    if (rect.width < 8 || rect.height < 8) return;
+    if (rect.width < 8 || rect.height < 8) {
+      const mobileSpace=Math.min(470,Math.max(350,innerWidth*.976));
+      targetX=MOBILE ? innerWidth*.5 : innerWidth*.714;
+      targetY=MOBILE
+        ? Math.min(innerHeight*.44,72+mobileSpace*.47)
+        : Math.min(innerHeight*.47,36+Math.min(620,Math.max(520,innerWidth*.42))*.47);
+      overlay.style.setProperty('--fxb-x',targetX.toFixed(1)+'px');
+      overlay.style.setProperty('--fxb-y',targetY.toFixed(1)+'px');
+      ROOT.dataset.fxMagBirthTargetR1602='reserved-final-hero-geometry';
+      return;
+    }
     targetX = clamp(rect.left + rect.width*.5, 0, innerWidth);
     targetY = clamp(rect.top + rect.height*.47, 0, innerHeight);
     const basis = clamp(Math.min(rect.width,rect.height), 260, 720);
@@ -945,6 +955,7 @@
     ROOT.dataset.fxMagBirthRenderClockR649='adaptive-60hz-target-fallback-canvas';
     ROOT.dataset.fxMagBirthPerformanceR1541='superseded-by-r1601-adaptive-60hz';
     ROOT.dataset.fxMagBirthPerformanceR1601='60hz-target-adaptive-quality-no-artificial-frame-cap';
+    ROOT.dataset.fxMagBirthPerformanceR1602='exclusive-intro-layout-plus-real-frame-budget-target-60fps';
     ROOT.dataset.fxMagBirthDurationR1549=LOW_POWER?'4200ms-adaptive':'10000ms-full';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
