@@ -15,11 +15,12 @@ html { background:#010306!important; }
 html body.living-architecture {
   min-height:100%;
   background:
-    radial-gradient(1120px 860px at 68% -2%,rgba(166,226,234,.105),transparent 65%),
-    radial-gradient(980px 800px at 5% 36%,rgba(39,88,102,.085),transparent 72%),
-    radial-gradient(940px 820px at 96% 72%,rgba(45,63,79,.070),transparent 75%),
-    radial-gradient(760px 1280px at 50% 43%,rgba(18,42,48,.115),transparent 68%),
-    linear-gradient(180deg,#020407 0%,#07151b 24%,#041015 59%,#010305 100%)!important;
+    radial-gradient(1180px 900px at 66% -4%,rgba(184,231,236,.125),transparent 66%),
+    radial-gradient(1040px 840px at 4% 34%,rgba(47,98,111,.095),transparent 73%),
+    radial-gradient(980px 860px at 98% 73%,rgba(54,72,88,.080),transparent 76%),
+    radial-gradient(820px 1360px at 50% 42%,rgba(24,53,59,.145),transparent 69%),
+    radial-gradient(620px 760px at 50% 22%,rgba(106,160,169,.035),transparent 70%),
+    linear-gradient(180deg,#020507 0%,#08171d 24%,#051218 59%,#010305 100%)!important;
   background-attachment:fixed!important;
 }
 
@@ -39,9 +40,10 @@ html:root:root:root:root:root:root:root:root:root body.living-architecture::befo
 html:root:root:root:root:root:root:root:root:root body.living-architecture::after {
   inset:0!important;
   background:
-    radial-gradient(ellipse 20% 62% at 68% -5%,rgba(210,244,244,.100),rgba(94,168,178,.030) 43%,transparent 78%),
-    radial-gradient(ellipse 52% 20% at 50% 101%,rgba(64,122,130,.060),transparent 76%),
-    linear-gradient(102deg,transparent 0 36%,rgba(188,230,231,.020) 42%,transparent 49% 63%,rgba(151,198,202,.014) 69%,transparent 76%),
+    radial-gradient(ellipse 22% 64% at 68% -5%,rgba(222,247,246,.115),rgba(100,176,184,.036) 43%,transparent 78%),
+    radial-gradient(ellipse 40% 36% at 50% 28%,rgba(99,151,160,.038),transparent 76%),
+    radial-gradient(ellipse 54% 21% at 50% 101%,rgba(69,129,136,.070),transparent 76%),
+    linear-gradient(102deg,transparent 0 36%,rgba(198,235,235,.024) 42%,transparent 49% 63%,rgba(157,203,206,.017) 69%,transparent 76%),
     linear-gradient(90deg,rgba(0,0,0,.36),transparent 13% 87%,rgba(0,0,0,.36)),
     radial-gradient(ellipse 82% 66% at 50% 48%,transparent 39%,rgba(0,0,0,.10) 74%,rgba(0,0,0,.45) 118%)!important;
   background-size:auto!important;
@@ -120,8 +122,9 @@ html:root:root:root:root:root body.living-architecture footer.site-footer {
 
 .fx-mag-birth-r533 {
   background:
-    radial-gradient(ellipse 28% 62% at 50% -8%,rgba(182,237,245,.055),transparent 76%),
-    radial-gradient(ellipse 84% 72% at 50% 50%,rgba(12,28,35,.16),rgba(1,4,7,.96) 78%),
+    radial-gradient(ellipse 30% 64% at 50% -8%,rgba(201,242,246,.072),transparent 76%),
+    radial-gradient(ellipse 42% 44% at 50% 46%,rgba(64,101,108,.060),transparent 74%),
+    radial-gradient(ellipse 86% 74% at 50% 50%,rgba(15,33,40,.20),rgba(1,4,7,.95) 80%),
     #010306!important;
 }
 .fx-mag-birth-r533 .fxb-deep { opacity:.62!important; filter:saturate(.74) contrast(1.07)!important; }
@@ -146,11 +149,12 @@ html:root:root:root:root:root:root:root:root:root:root body.living-architecture 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html body.living-architecture {
     background:
-      radial-gradient(700px 560px at 50% -3%,rgba(145,220,230,.088),transparent 69%),
-      radial-gradient(650px 760px at 2% 49%,rgba(37,78,90,.070),transparent 76%),
-      radial-gradient(640px 690px at 98% 83%,rgba(38,51,66,.060),transparent 79%),
-      radial-gradient(520px 900px at 51% 44%,rgba(16,39,45,.080),transparent 70%),
-      linear-gradient(180deg,#020407 0%,#06131a 28%,#030d12 67%,#010305 100%)!important;
+      radial-gradient(740px 590px at 50% -4%,rgba(164,227,234,.105),transparent 69%),
+      radial-gradient(680px 790px at 2% 48%,rgba(43,87,98,.078),transparent 76%),
+      radial-gradient(670px 720px at 98% 82%,rgba(45,59,73,.068),transparent 79%),
+      radial-gradient(560px 930px at 51% 43%,rgba(20,47,53,.100),transparent 70%),
+      radial-gradient(390px 520px at 50% 25%,rgba(86,141,151,.032),transparent 72%),
+      linear-gradient(180deg,#020507 0%,#07151b 28%,#041015 67%,#010305 100%)!important;
     background-attachment:scroll!important;
   }
   html:root:root:root:root:root:root:root body.living-architecture::before {
@@ -819,3 +823,20 @@ body.living-architecture #hero .hero-space{
   }
 }
 /* production-r1583-broad-volumetric-habitat-no-diagonal-stage-beams */
+
+
+/* R1591 — photographic habitat pass. Static volumetric pools replace empty
+   black stage space without introducing hero rings, idle animation or blur-heavy layers. */
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  filter:brightness(1.08) contrast(1.07) saturate(.92) drop-shadow(0 20px 28px rgba(0,0,0,.30))!important;
+  -webkit-filter:brightness(1.08) contrast(1.07) saturate(.92) drop-shadow(0 20px 28px rgba(0,0,0,.30))!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.11) contrast(1.06) saturate(.93) drop-shadow(0 15px 21px rgba(0,0,0,.28))!important;
+    -webkit-filter:brightness(1.11) contrast(1.06) saturate(.93) drop-shadow(0 15px 21px rgba(0,0,0,.28))!important;
+  }
+}
+/* production-r1591-photographic-habitat-depth */
