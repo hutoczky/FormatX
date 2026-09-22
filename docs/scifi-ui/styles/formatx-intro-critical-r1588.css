@@ -69,3 +69,26 @@ html[data-fx-mag-birth-live="active"] body>.fx-mag-birth-r533{
   .fxb-lcp-brand-r1603{opacity:.26!important;transform:translateX(-50%)!important}
 }
 /* production-r1603-cinematic-early-lcp-brand */
+
+
+/* R1606 — parser-visible first intro frame.
+   The real cinematic adopts this exact node, so the LCP brand can paint before
+   the large runtime constructs the photoreal scene. Returning-session JS removes
+   it before replay. */
+#fx-mag-birth-prepaint-r1606{
+  display:block;
+  visibility:visible;
+  background:
+    radial-gradient(ellipse 42% 42% at 50% 46%,rgba(54,96,106,.10),transparent 72%),
+    linear-gradient(180deg,#010305 0%,#02070b 58%,#010204 100%);
+}
+#fx-mag-birth-prepaint-r1606>.fxb-lcp-brand-r1603{
+  opacity:0;
+  animation:fxb-r1606-first-brand .001s 80ms forwards;
+}
+html[data-fx-mag-birth-live="active"] #fx-mag-birth-prepaint-r1606>.fxb-lcp-brand-r1603{
+  opacity:.78;
+  animation:none;
+}
+@keyframes fxb-r1606-first-brand{to{opacity:.78}}
+/* production-r1606-static-prepaint-lcp-shell */
