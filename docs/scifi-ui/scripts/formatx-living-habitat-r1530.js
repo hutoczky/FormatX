@@ -28,7 +28,7 @@
   let width=1,height=1,dpr=1,raf=0;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
-  let particles=[],filaments=[];
+  let particles=[],filaments=[],glassArcs=[],mineralSpires=[];
 
   function seeded(seed=0xF04A1530){
     let s=seed>>>0;
@@ -50,6 +50,27 @@
       x:.14+random()*.72,y:.12+random()*.76,len:.08+random()*.08,
       bend:(random()-.5)*.065,phase:random()*Math.PI*2,
       alpha:.005+random()*.006,width:.32+random()*.28,dir:index%2?1:-1
+    }));
+    const arcCount=LOW_POWER?2:MOBILE.matches?3:5;
+    glassArcs=Array.from({length:arcCount},(_,index)=>({
+      side:index%2?-1:1,
+      y:.16+random()*.58,
+      reach:.18+random()*.18,
+      bend:.10+random()*.18,
+      alpha:.020+random()*.018,
+      width:.75+random()*1.20,
+      phase:random()*Math.PI*2
+    }));
+    const spireCount=LOW_POWER?3:MOBILE.matches?4:7;
+    mineralSpires=Array.from({length:spireCount},(_,index)=>({
+      side:index%2?-1:1,
+      x:.04+random()*.24,
+      y:.54+random()*.42,
+      w:.055+random()*.085,
+      h:.12+random()*.30,
+      lean:(random()-.5)*.055,
+      alpha:.10+random()*.12,
+      warm:random()>.72
     }));
   }
 
@@ -150,6 +171,54 @@
       ctx.fillStyle=floorPool;
       ctx.fillRect(-width*.55,-height*1.5,width*1.1,height*3);
       ctx.restore();
+
+      /* R1593: real environmental structure. Dark mineral spires and clear
+         bio-glass arches frame the MAG without becoming HUD graphics. */
+      const structuralPresence=.18+.82*heroPresence;
+      for(const s of mineralSpires){
+        const baseX=s.side>0?width*(1-s.x):width*s.x;
+        const baseY=height*s.y;
+        const spireW=width*s.w;
+        const spireH=height*s.h;
+        const tipX=baseX+s.lean*width;
+        const g=ctx.createLinearGradient(baseX-spireW,baseY,baseX+spireW*.4,baseY-spireH);
+        const tint=s.warm?'86,69,54':'37,56,61';
+        g.addColorStop(0,'rgba(0,0,0,'+(s.alpha*.72*structuralPresence)+')');
+        g.addColorStop(.46,'rgba('+tint+','+(s.alpha*.34*structuralPresence)+')');
+        g.addColorStop(.74,'rgba(74,98,101,'+(s.alpha*.18*structuralPresence)+')');
+        g.addColorStop(1,'rgba(4,8,9,0)');
+        ctx.fillStyle=g;
+        ctx.beginPath();
+        ctx.moveTo(baseX-spireW,baseY);
+        ctx.lineTo(tipX-spireW*.15,baseY-spireH);
+        ctx.lineTo(tipX+spireW*.22,baseY-spireH*.72);
+        ctx.lineTo(baseX+spireW*.72,baseY);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      for(const a of glassArcs){
+        const edge=a.side>0?width*.90:width*.10;
+        const y=height*a.y;
+        const endX=width*(.50+a.side*a.reach);
+        const endY=y+Math.sin(time*.00010+a.phase)*height*.012;
+        const cp1x=edge-a.side*width*a.bend;
+        const cp2x=endX+a.side*width*a.bend*.42;
+        const alpha=a.alpha*structuralPresence;
+        ctx.save();
+        ctx.lineCap='round';
+        ctx.strokeStyle='rgba(194,224,225,'+(alpha*.28)+')';
+        ctx.lineWidth=a.width*3.6;
+        ctx.beginPath();ctx.moveTo(edge,y);
+        ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
+        ctx.stroke();
+        ctx.strokeStyle='rgba(222,241,239,'+(alpha*.92)+')';
+        ctx.lineWidth=a.width;
+        ctx.beginPath();ctx.moveTo(edge,y);
+        ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
+        ctx.stroke();
+        ctx.restore();
+      }
     }
 
     for(const f of filaments){
@@ -204,6 +273,7 @@
   ROOT.dataset.fxLivingHabitatR1530='active-scroll-pointer-atmosphere';
   ROOT.dataset.fxLivingHabitatR1584=MOBILE.matches?'mobile-volumetric-no-filament-beams':'desktop-short-organic-filaments';
   ROOT.dataset.fxLivingHabitatR1585='dark-laboratory-side-masses-overhead-haze-floor-reflection-no-rings';
+  ROOT.dataset.fxLivingHabitatR1593='physical-mineral-spires-clear-bioglass-arches-whole-page-depth';
   ROOT.dataset.fxLivingHabitatSchedulerR1541='interaction-driven-zero-idle-raf';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
 })();
