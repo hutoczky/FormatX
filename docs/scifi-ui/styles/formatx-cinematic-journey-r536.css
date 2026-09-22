@@ -972,3 +972,27 @@ html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-kind="b
     transition:none!important;
   }
 }
+
+
+/* R1541 — stable cinematic field.
+   Fixed decorative geometry no longer changes left/top after first paint.
+   Depth still reacts through scale, opacity, colour and section-local energy. */
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world,
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-iris{
+  left:50%!important;
+  top:50%!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-track{
+  top:50%!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{
+  top:39vh!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world,
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{
+  mix-blend-mode:normal!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{
+  opacity:.022!important;
+}
+/* production-r1541-stable-cinematic-field */
