@@ -50,6 +50,7 @@
       this.disposed=false;
       this.highDetail=matchMedia('(min-width:901px) and (pointer:fine)').matches
         && Number(navigator.hardwareConcurrency||8)>4;
+      this.deterministicFrame=new URLSearchParams(location.search).has('introframe');
 
       this.renderer=new THREE.WebGLRenderer({
         canvas,
@@ -58,13 +59,15 @@
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
-        preserveDrawingBuffer:false
+        /* R1554: deterministic visual-proof pages render one frame and wait for
+           screenshot capture. Retain that buffer only there; production keeps
+           the cheaper discard path. */
+        preserveDrawingBuffer:this.deterministicFrame
       });
       const gl=this.renderer.getContext();
       const debugInfo=gl.getExtension('WEBGL_debug_renderer_info');
       const rendererName=String(debugInfo?gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
       this.softwareRenderer=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(rendererName);
-      this.deterministicFrame=new URLSearchParams(location.search).has('introframe');
       if(this.softwareRenderer)this.highDetail=false;
       document.documentElement.dataset.fxMagBirthGpuR1541=this.softwareRenderer?'software-adaptive':'hardware-full';
       this.renderer.setClearColor(0x020811,1);
@@ -1347,9 +1350,11 @@
       if(this.disposed)return;
       this.width=Math.max(1,innerWidth);
       this.height=Math.max(1,innerHeight);
-      const dpr=this.softwareRenderer
-        ? Math.min(devicePixelRatio||1,this.width<900 ? 0.58 : 0.54)
-        : Math.min(devicePixelRatio||1,this.width<900?1.00:1.18);
+      const dpr=this.deterministicFrame
+        ? Math.min(devicePixelRatio||1,1.00)
+        : this.softwareRenderer
+          ? Math.min(devicePixelRatio||1,this.width<900 ? 0.58 : 0.54)
+          : Math.min(devicePixelRatio||1,this.width<900?1.00:1.18);
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
       this.camera.aspect=this.width/this.height;
@@ -1711,12 +1716,13 @@
   document.documentElement.dataset.fxMagBirthProofR1540='physical-bioceramic-organism-round-optic-ringless-habitat-crystal-handoff';
   document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
+  document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
   document.documentElement.dataset.fxMagBirthPerformanceR1545='hardware-three-software-reference-film-no-parallel-webgl';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1541-photoreal-bioceramic-bounded-cadence-zero-hud-habitat'
+    revision:'r1554-deterministic-proof-buffer-retention-production-discard-path'
   };
 })();
