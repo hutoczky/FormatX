@@ -456,6 +456,8 @@
   let filmRendererFallbackStarted = false;
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
+  let threeOwnerRequested = false;
+  const THREE_OWNER_SRC = './scripts/formatx-mag-genesis-three-r1360.js?v=20260922-r1608-lazy-photoreal-60fps';
   let particles = [];
   let raf = 0;
   let startedAt = 0;
@@ -693,6 +695,32 @@
     seedParticles(w,h);
   }
 
+  function ensureThreeOwner(){
+    if(window.FormatXMagGenesisThreeR1360?.attach)return;
+    if(threeOwnerRequested)return;
+    threeOwnerRequested=true;
+    const existing=[...document.scripts].find(s=>/formatx-mag-genesis-three-r1360\.js/.test(s.src));
+    if(existing){
+      ROOT.dataset.fxMagBirthThreeLoaderR1608='existing-owner-wait';
+      existing.addEventListener?.('load',()=>sizeCanvas(),{once:true});
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=THREE_OWNER_SRC;
+    script.async=true;
+    script.dataset.fxMagGenesisLazyR1608='true';
+    script.addEventListener('load',()=>{
+      ROOT.dataset.fxMagBirthThreeLoaderR1608='lazy-owner-loaded';
+      sizeCanvas();
+    },{once:true});
+    script.addEventListener('error',()=>{
+      ROOT.dataset.fxMagBirthThreeLoaderR1608='lazy-owner-failed';
+      startR649Fallback();
+    },{once:true});
+    document.head.appendChild(script);
+    ROOT.dataset.fxMagBirthThreeLoaderR1608='lazy-owner-requested-only-for-active-intro';
+  }
+
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
     syncTarget(true);
@@ -706,6 +734,7 @@
       startR649Fallback();
       return;
     }
+    ensureThreeOwner();
     if(filmRenderer){
       filmRenderer.resize?.();
       return;
@@ -980,6 +1009,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1602='exclusive-intro-layout-plus-real-frame-budget-target-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1603='early-cinematic-lcp-brand-plus-adaptive-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1606='static-lcp-shell-mobile-lean-dom-handoff-first-permanent-webgl-60fps';
+    ROOT.dataset.fxMagBirthPerformanceR1608='lazy-three-owner-zero-parse-cost-when-intro-skipped';
     ROOT.dataset.fxMagBirthDurationR1549=LOW_POWER?'3000ms-adaptive-60fps':'10000ms-full';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
