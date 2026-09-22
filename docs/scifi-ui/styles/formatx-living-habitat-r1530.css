@@ -504,3 +504,56 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   }
 }
 /* production-r1560-invisible-heart-hit-continuous-cinematic-habitat */
+
+
+/* R1562 — the semantic MAG hit surface must remain completely invisible.
+   The previous focus/active compatibility ring was still visible in mobile proof captures. */
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-mag-heart-hit-r252{
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  border:0!important;
+  outline:0!important;
+  outline-offset:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  filter:none!important;
+  color:transparent!important;
+  text-shadow:none!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-mag-heart-hit-r252::before,
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-mag-heart-hit-r252::after{
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  outline:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+
+/* The habitat is a physical dark chamber, not an empty black canvas:
+   broad ceiling light, mineral side bounce and floor haze remain static and cheap. */
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture{
+  background:
+    linear-gradient(103deg,rgba(0,0,0,.48) 0 6%,rgba(76,109,116,.055) 6.35% 6.62%,transparent 7.1% 65%,rgba(126,157,160,.040) 65.3% 65.58%,transparent 66.1% 100%),
+    radial-gradient(ellipse 30% 74% at 68% -12%,rgba(195,228,229,.100),rgba(96,153,162,.030) 43%,transparent 76%),
+    radial-gradient(ellipse 54% 26% at 17% 101%,rgba(51,91,99,.070),transparent 76%),
+    radial-gradient(ellipse 78% 62% at 50% 43%,rgba(14,31,36,.20),rgba(3,10,14,.12) 54%,transparent 78%),
+    linear-gradient(180deg,#010305 0%,#061319 28%,#02090e 64%,#010305 100%)!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root body.living-architecture{
+    background:
+      linear-gradient(101deg,rgba(0,0,0,.42) 0 4%,rgba(71,103,111,.046) 4.35% 4.60%,transparent 5.1% 94.9%,rgba(71,103,111,.040) 95.3% 95.55%,rgba(0,0,0,.42) 96% 100%),
+      radial-gradient(ellipse 46% 64% at 64% -10%,rgba(184,223,226,.085),rgba(87,145,154,.025) 46%,transparent 78%),
+      radial-gradient(ellipse 72% 28% at 14% 99%,rgba(46,85,94,.060),transparent 78%),
+      linear-gradient(180deg,#010305 0%,#051218 30%,#02090e 68%,#010305 100%)!important;
+  }
+}
+/* production-r1562-no-hit-ring-photographic-habitat */
