@@ -876,7 +876,12 @@
     }
 
     if(r<1 || visiblePhase<4){
-      queueRender((AUTOMATION&&FORCE)?50:(filmRenderer?42:(MOBILE?50:0)));
+      const cadence=(AUTOMATION&&FORCE)
+        ? 72
+        : filmRenderer
+          ? Math.max(72,Number(filmRenderer.minimumFrameMs)||0)
+          : (MOBILE?92:84);
+      queueRender(cadence);
       return;
     }
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
@@ -914,7 +919,8 @@
     canvas.hidden=false;
     sizeCanvas();
     ROOT.dataset.fxMagBirthRenderClockR631='native-reference-film-24fps-all-devices';
-    ROOT.dataset.fxMagBirthRenderClockR649='deterministic-24fps-canvas-all-devices';
+    ROOT.dataset.fxMagBirthRenderClockR649='deterministic-bounded-cadence-canvas-all-devices';
+    ROOT.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-no-zero-delay-raf-loop';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
