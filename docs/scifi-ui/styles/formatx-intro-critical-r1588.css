@@ -76,15 +76,15 @@ html[data-fx-mag-birth-live="active"] body>.fx-mag-birth-r533{
    the large runtime constructs the photoreal scene. Returning-session JS removes
    it before replay. */
 #fx-mag-birth-prepaint-r1606{
-  display:none;
-  visibility:hidden;
+  display:none!important;
+  visibility:hidden!important;
   background:
     radial-gradient(ellipse 42% 42% at 50% 46%,rgba(54,96,106,.10),transparent 72%),
     linear-gradient(180deg,#010305 0%,#02070b 58%,#010204 100%);
 }
 html[data-fx-intro-prepaint-r1611="show"] #fx-mag-birth-prepaint-r1606{
-  display:block;
-  visibility:visible;
+  display:block!important;
+  visibility:visible!important;
 }
 #fx-mag-birth-prepaint-r1606>.fxb-lcp-brand-r1603{
   opacity:0;
@@ -98,3 +98,5 @@ html[data-fx-mag-birth-live="active"] #fx-mag-birth-prepaint-r1606>.fxb-lcp-bran
 /* production-r1606-static-prepaint-lcp-shell */
 
 /* production-r1611-deterministic-prepaint-no-skip-flash */
+
+/* production-r1615-prepaint-important-owner */
