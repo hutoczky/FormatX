@@ -908,3 +908,49 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   .fx-living-habitat-r1530{opacity:.66!important;}
 }
 /* production-r1593-physical-habitat-integration */
+
+
+/* R1594 — remove the last circular control-container/rail decoration. The
+   individual sound/ASK controls stay intact; only their obsolete outer HUD is gone. */
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-reference-controls-r204,
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail,
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-r264{
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:none!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-reference-controls-r204::before,
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-reference-controls-r204::after,
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail::before,
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail::after,
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-r264::before,
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-r264::after{
+  content:none!important;
+  display:none!important;
+  opacity:0!important;
+  border:0!important;
+  background:none!important;
+  box-shadow:none!important;
+}
+/* Keep the canonical compositor contract at/above its mobile validation floor. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.14) contrast(1.12) saturate(1.02)!important;
+    -webkit-filter:brightness(1.14) contrast(1.12) saturate(1.02)!important;
+  }
+}
+/* production-r1594-control-hud-cleanup */
