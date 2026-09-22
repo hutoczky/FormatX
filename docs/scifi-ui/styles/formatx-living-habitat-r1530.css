@@ -770,10 +770,11 @@ html body.living-architecture::before{
   z-index:-3!important;
   pointer-events:none!important;
   background:
-    linear-gradient(104deg,transparent 0 20%,rgba(178,205,207,.018) 36%,transparent 53%),
-    linear-gradient(76deg,transparent 0 58%,rgba(118,145,151,.014) 69%,transparent 83%)!important;
-  opacity:.72!important;
-  filter:blur(14px)!important;
+    radial-gradient(ellipse 15% 88% at 22% 14%,rgba(194,218,219,.028),rgba(101,136,140,.010) 48%,transparent 82%),
+    radial-gradient(ellipse 14% 86% at 78% 24%,rgba(142,167,171,.020),rgba(67,89,96,.008) 52%,transparent 82%),
+    radial-gradient(ellipse 58% 17% at 50% 104%,rgba(110,86,66,.018),transparent 82%)!important;
+  opacity:.58!important;
+  filter:blur(26px)!important;
 }
 html body.living-architecture::after{
   content:""!important;
@@ -795,3 +796,26 @@ html body.living-architecture #hero .hero-space{
     linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.08))!important;
 }
 /* production-r1580-photographic-living-habitat */
+
+
+/* R1583 — photographic habitat uses broad volumetric pools instead of visible
+   diagonal stage beams. The page remains one dark physical environment around
+   the MAG with restrained depth dust and a weak warm floor bounce. */
+html:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space{
+  background:
+    radial-gradient(ellipse 38% 62% at 44% 43%,rgba(107,137,140,.020),transparent 72%),
+    radial-gradient(ellipse 24% 50% at 72% 40%,rgba(71,91,98,.013),transparent 76%),
+    linear-gradient(180deg,rgba(0,0,0,.015),rgba(0,0,0,.055))!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html body.living-architecture::before{
+    background:
+      radial-gradient(ellipse 22% 82% at 20% 12%,rgba(188,214,217,.024),transparent 82%),
+      radial-gradient(ellipse 19% 82% at 82% 26%,rgba(116,143,149,.017),transparent 84%),
+      radial-gradient(ellipse 70% 16% at 50% 104%,rgba(101,78,60,.016),transparent 82%)!important;
+    opacity:.50!important;
+    filter:blur(24px)!important;
+  }
+}
+/* production-r1583-broad-volumetric-habitat-no-diagonal-stage-beams */
