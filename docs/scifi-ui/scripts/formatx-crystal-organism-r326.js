@@ -56,6 +56,7 @@
   root.dataset.fxNativeMagVisualR1551 = 'photographic-smoky-obsidian-tall-coherent-mineral-small-glass-optic';
   root.dataset.fxNativeMagVisualR1552 = 'natural-smoky-obsidian-monolith-soft-facet-transitions-subtle-smoked-glass-aperture';
   root.dataset.fxNativeMagVisualR1553 = 'polished-volcanic-glass-monolith-smooth-optics-mineral-fissure-no-eye-no-zfight-tendrils';
+  root.dataset.fxNativeMagVisualR1555 = 'camera-correct-polished-obsidian-broad-monolith-clean-hidden-root-tendrils-no-eye';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
@@ -185,10 +186,10 @@
       const right=direction[0]>=0;
       const front=direction[2]>=0;
       // R1520 — deliberately uneven mineral envelope, not a logo-perfect kite.
-      const ax=upper?(right?.66:.75):(right?.77:.62);
-      const ay=upper?(right?1.08:.98):(right?.94:.80);
-      const az=front?(right?.60:.70):(right?.67:.74);
-      const p=1.12;
+      const ax=upper?(right?.72:.80):(right?.79:.66);
+      const ay=upper?(right?.94:.90):(right?.88:.78);
+      const az=front?(right?.64:.72):(right?.69:.76);
+      const p=1.38;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -209,14 +210,14 @@
         plane(-.10,-.88,.18,5.6,.026);
       const crystalRadius=baseRadius*broadBias+mass;
       const crystalPosition=[
-        direction[0]*crystalRadius*1.03,
-        direction[1]*crystalRadius*1.10,
-        direction[2]*crystalRadius*.98
+        direction[0]*crystalRadius*1.04,
+        direction[1]*crystalRadius*1.13,
+        direction[2]*crystalRadius*.99
       ];
       const topLean=Math.pow(Math.max(direction[1],0),2.4);
       const lowerMass=Math.pow(Math.max(-direction[1],0),2.0);
-      crystalPosition[0]+=-.050*topLean+.026*lowerMass+direction[2]*direction[1]*.010-Math.pow(Math.max(-direction[0],0),4.0)*.010;
-      crystalPosition[1]+=Math.pow(Math.max(direction[1],0),5.0)*.108-Math.pow(Math.max(-direction[1],0),4.0)*.014+direction[0]*direction[2]*.006;
+      crystalPosition[0]+=-.058*topLean+.030*lowerMass+direction[2]*direction[1]*.012-Math.pow(Math.max(-direction[0],0),4.0)*.010;
+      crystalPosition[1]+=Math.pow(Math.max(direction[1],0),5.0)*.062-Math.pow(Math.max(-direction[1],0),4.0)*.012+direction[0]*direction[2]*.006;
       crystalPosition[2]+=direction[0]*direction[1]*.008+Math.pow(Math.max(direction[2],0),4.0)*.010;
       return {
         sphere: spherePosition,
@@ -264,12 +265,14 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.16 + (index % 2 ? .045 : -.035);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .69;
-      const reach = .20 + ((index*3)%5) * .016;
+      const root = .57;
+      const reach = .38 + ((index*3)%5) * .022;
       const radius = root + reach * t;
-      const wave = (Math.sin(t * Math.PI * 1.62 + index * .83)*(.014+.070*t))
-        +Math.sin(t*Math.PI*.72+index*.47)*.018*t;
-      const depth = Math.sin(t * Math.PI * 1.42 + index * .97) * (.018 + .060 * t);
+      const wave = (Math.sin(t * Math.PI * 1.46 + index * .83)*(.012+.096*t))
+        +Math.sin(t*Math.PI*.68+index*.47)*.024*t;
+      /* Keep filaments behind the front mineral shell so their roots disappear
+         into the body and emerge only beyond the silhouette. */
+      const depth = -.145 + Math.sin(t * Math.PI * 1.34 + index * .97) * (.010 + .030 * t);
       return [
         Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
         Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
@@ -286,7 +289,7 @@
       const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
-      const tubeRadius = (.0108 * (1 - t * .84) + .0025) * (mobile ? .94 : 1);
+      const tubeRadius = (.0132 * (1 - t * .86) + .0024) * (mobile ? .94 : 1);
       const rootDirection = normalize([p[0], p[1], p[2] * .72]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
@@ -315,7 +318,7 @@
         const current = tendrilRing(index, segment);
         for (let side = 0; side < tendrilSides; side += 1) {
           const next = (side + 1) % tendrilSides;
-          const facet = .20 + .78 * random(index * 17 + segment, side * 31 + index);
+          const facet = 3.20 + .78 * random(index * 17 + segment, side * 31 + index);
           triangle([previous[side], previous[next], current[side]], facet);
           triangle([previous[next], current[next], current[side]], facet);
         }
@@ -437,7 +440,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.78));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.84));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -464,7 +467,9 @@
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
         projected*= ${mobile?'.600':'.625'};
         projected.y+=${mobile?'.055':'.028'};
-        gl_Position=vec4(projected,world.z*.13,1.0);
+        /* world.z grows toward the virtual camera in the perspective term.
+           NDC depth grows away from camera, therefore the sign must be inverted. */
+        gl_Position=vec4(projected,-world.z*.13,1.0);
       }`;
 
     const fullFragmentSource = `${versionLine}precision highp float;
@@ -509,7 +514,9 @@
         vec3 side=normalize(vec3(.78,.04,.62));
         vec3 fill=normalize(vec3(-.58,-.34,.74));
         vec3 floorLight=normalize(vec3(.08,-.82,.56));
-        float facetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
+        float isTendril=step(2.0,vFacet);
+        float facetKey=fract(vFacet);
+        float facetRand=fract(sin(facetKey*91.73+13.17)*43758.5453);
         float ndl=max(dot(n,key),0.);
         float sideLight=max(dot(n,side),0.);
         float fillLight=max(dot(n,fill),0.);
@@ -602,7 +609,7 @@
         float jawMask=smoothstep(.22,.66,-vLocal.y)
           *(1.0-smoothstep(.30,.58,abs(vLocal.x)))*podMask;
         float opticalWell=fissureHalo*.34;
-        float tendrilMask=smoothstep(.62,.82,length(vLocal.xy))*podMask;
+        float tendrilMask=isTendril*podMask;
         float tendrilSegment=(.58+.42*ridge(vUv.y*4.8+vUv.x*1.15,7.0))*tendrilMask;
         vec3 cyan=vec3(.012,.34,.52);
         vec3 violet=vec3(.024,.030,.060);
@@ -657,16 +664,16 @@
         float environmentBand=pow(sat(1.0-abs(reflection.y-.18)),8.0);
         float mineralLift=.22+1.02*ndl+.66*sideLight+.34*fillLight+.20*floorBounce+.24*fresnel;
         float facetTone=mix(.94,1.06,facetRand);
-        vec3 glass=mix(vec3(.0035,.0050,.0060),vec3(.038,.048,.052),sat(mineralLift*.68))*facetTone;
-        glass+=vec3(.390,.400,.392)*broadSpec*.30;
-        glass+=vec3(.115,.132,.136)*sideLight*.30;
+        vec3 glass=mix(vec3(.0045,.0060,.0070),vec3(.062,.073,.077),sat(mineralLift*.72))*facetTone;
+        glass+=vec3(.430,.440,.430)*broadSpec*.34;
+        glass+=vec3(.128,.146,.150)*sideLight*.34;
         glass+=vec3(.052,.060,.064)*fillLight*.18;
         glass+=vec3(.050,.038,.028)*floorBounce*.14;
         glass+=microSpec*(.42+.22*sideLight);
         glass+=ice*fresnel*.072;
-        glass+=vec3(.050,.067,.073)*environmentTop;
-        glass+=vec3(.032,.044,.050)*environmentSide;
-        glass+=vec3(.118,.122,.113)*environmentBand*.52;
+        glass+=vec3(.070,.089,.096)*environmentTop;
+        glass+=vec3(.046,.060,.067)*environmentSide;
+        glass+=vec3(.148,.151,.139)*environmentBand*.58;
         float thinTransmission=pow(1.0-facing,2.1)*(1.0-sat(ndl*.72));
         glass+=vec3(.018,.050,.056)*thinTransmission*.46;
         float armorBlock=sat(realArmorPlate+realDarkPlate+crownMask+shoulderMask+jawMask+diamondFace);
@@ -707,9 +714,9 @@
         glass+=(cyan*.016+ice*.018)*edge*(.18+.22*(1.0-vMorph));
         glass+=ice*(armorSeam*.050+armorRib*.034)*(1.0-vMorph*.72);
         glass+=(ice*.40+cyan*.18)*surfaceSweep*(.68+.24*fresnel);
-        vec3 tendon=vec3(.0045,.007,.008)+steel*(.08+.10*fresnel)+ice*specular*.022;
-        glass=mix(glass,tendon,tendrilMask*.96);
-        glass+=(ice*.018+cyan*.004)*tendrilSegment*(.025+.050*fresnel);
+        vec3 tendon=vec3(.006,.010,.011)+steel*(.12+.12*fresnel)+ice*specular*.030;
+        glass=mix(glass,tendon,tendrilMask*.985);
+        glass+=(ice*.024+cyan*.003)*tendrilSegment*(.035+.060*fresnel);
         float alpha=.982+.008*ndl+.005*fresnel+specular*.004+surfaceSweep*.006+tendrilMask*.005;
         ${outputName}=vec4(filmic(glass*(${optics.outerExposure}*.96)),clamp(alpha,.990,.999));
       }`;
@@ -741,7 +748,9 @@
         float fresnel=pow(1.0-facing,1.68);
         float spec=pow(max(dot(n,normalize(key+view)),0.),42.0)
           +.62*pow(max(dot(n,normalize(side+view)),0.),24.0);
-        float facetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
+        float isTendril=step(2.0,vFacet);
+        float facetKey=fract(vFacet);
+        float facetRand=fract(sin(facetKey*91.73+13.17)*43758.5453);
         float facetTone=mix(.95,1.05,facetRand);
 
         vec2 heartLocal=vec2(vLocal.x,vLocal.y)-vec2(uPointer.x*.028,uPointer.y*.024);
@@ -752,7 +761,7 @@
         float fissure=exp(-pow(crackX/.0065,2.0))*exp(-pow(heartLocal.y/.095,4.0))*frontMask;
         float crownMask=smoothstep(.46,.76,vLocal.y)
           *(1.0-smoothstep(.14,.31,abs(vLocal.x)))*podMask;
-        float tendrilMask=smoothstep(.64,.83,length(vLocal.xy))*podMask;
+        float tendrilMask=isTendril*podMask;
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
@@ -764,12 +773,12 @@
         vec3 cyan=vec3(.008,.24,.35);
         vec3 ice=vec3(.55,.60,.60);
         vec3 steel=vec3(.043,.052,.055);
-        vec3 c=mix(vec3(.003,.0045,.0055),vec3(.034,.043,.047),
-          sat(.12+ndl*.92+sideLight*.62+fillLight*.24))*facetTone;
-        c+=vec3(.36,.37,.36)*spec*.31;
-        c+=vec3(.078,.093,.098)*sideLight*.24;
-        c+=vec3(.038,.044,.047)*fillLight*.16;
-        c+=ice*fresnel*.060;
+        vec3 c=mix(vec3(.0045,.0060,.0070),vec3(.070,.081,.085),
+          sat(.17+ndl*.96+sideLight*.66+fillLight*.30))*facetTone;
+        c+=vec3(.46,.47,.45)*spec*.34;
+        c+=vec3(.108,.124,.128)*sideLight*.28;
+        c+=vec3(.052,.060,.063)*fillLight*.20;
+        c+=ice*fresnel*.076;
         c+=vec3(.070,.055,.040)*max(0.0,-n.y)*.055;
         c+=mix(steel,ice,.18)*crownMask*(.035+.070*ndl+.025*spec);
 
@@ -778,8 +787,8 @@
         c+=(ice*.075+cyan*.050)*fissure;
         c+=(ice*.34+cyan*.060)*pulse;
 
-        vec3 tendon=vec3(.0035,.006,.007)+steel*(.08+.12*fresnel)+ice*spec*.018;
-        c=mix(c,tendon,tendrilMask*.97);
+        vec3 tendon=vec3(.005,.009,.010)+steel*(.12+.14*fresnel)+ice*spec*.024;
+        c=mix(c,tendon,tendrilMask*.985);
         float alpha=.988+.005*ndl+.004*fresnel+pulse*.004+tendrilMask*.003;
         ${outputName}=vec4(filmic(c*2.08),clamp(alpha,.992,.999));
       }`;
@@ -1358,6 +1367,8 @@
     root.dataset.fxCoreShapeR1552='leaning-asymmetric-monolithic-obsidian-softened-large-facets-shorter-tendrils';
     root.dataset.fxCoreOpticsR1553='polished-volcanic-glass-no-round-optic-subtle-internal-mineral-fissure';
     root.dataset.fxCoreShapeR1553='high-density-smooth-shaded-asymmetric-monolith-clean-perimeter-tendrils';
+    root.dataset.fxCoreOpticsR1555='camera-correct-obsidian-reflection-no-eye-actual-tendril-classification';
+    root.dataset.fxCoreShapeR1555='broad-asymmetric-volcanic-monolith-filaments-hidden-behind-shell';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
     root.dataset.fxCoreReferenceMaterialR1220='opaque-gunmetal-bright-titanium-armor-local-blue-optic-dark-tendrils';
@@ -1421,7 +1432,7 @@
       root.dataset.fxCoreSoftwareSurfaceOwnerR1543=softwareRenderer?'native-r326-software-equivalent-r465-contract':'not-software';
       root.dataset.fxCoreSoftwareDesktopContractR1544=softwareRenderer&&!mobile?'desktop-r465-semantics-preserved':'not-software-desktop';
     }
-    root.dataset.fxCoreMobileResolutionR424=softwareRenderer?'r1553-software-dpr-cap-0.94-pixel-budget-260k':mobile?'r1553-mobile-smooth-high-density-adaptive':'r1553-desktop-smooth-high-density-adaptive';
+    root.dataset.fxCoreMobileResolutionR424=softwareRenderer?'r1555-software-dpr-cap-0.94-pixel-budget-260k':mobile?'r1555-mobile-camera-correct-smooth-adaptive':'r1555-desktop-camera-correct-smooth-adaptive';
     root.dataset.fxCoreMobileOpticsR435=mobile?'superseded-by-r454-visible-native-surface':'desktop-preserved-r454';
     root.dataset.fxCoreMobileOpticsR440=mobile?'superseded-by-r454-luminous-electric-surface':'desktop-superseded-by-r454';
     root.dataset.fxCoreMobilePerformanceR442=mobile?'18x36-capable-12x24-constrained-adaptive-intermittent-pulse-idle-zero':'desktop-three-pass-intermittent-pulse-idle-zero';
