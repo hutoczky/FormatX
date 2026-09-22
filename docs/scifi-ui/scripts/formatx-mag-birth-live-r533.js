@@ -871,7 +871,9 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const particleCadence=filmRenderer?Math.max(42,Number(filmRenderer.minimumFrameMs)||0):(filmRendererPromise?84:(MOBILE?84:48));
+    const particleCadence=filmRenderer
+      ? Math.max(16.67,Number(filmRenderer.minimumFrameMs)||16.67)
+      : (filmRendererPromise?34:(MOBILE?34:16.67));
     if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
@@ -881,9 +883,9 @@
       const cadence=(AUTOMATION&&FORCE)
         ? 72
         : filmRenderer
-          ? Math.max(72,Number(filmRenderer.minimumFrameMs)||0)
-          : (MOBILE?92:84);
-      queueRender(cadence);
+          ? Math.max(0,Number(filmRenderer.minimumFrameMs)||16.67)-16.67
+          : (MOBILE?16.67:0);
+      queueRender(Math.max(0,cadence));
       return;
     }
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
@@ -916,8 +918,8 @@
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthCapabilityR620=LOW_POWER?'mobile-constrained-cinematic':'full-cinematic';
-    ROOT.dataset.fxMagBirthBudgetR625=LOW_POWER?'single-css3d-dna-30fps-reduced-composite':'full-cinematic-budget';
-    ROOT.dataset.fxMagBirthBudgetR629=MOBILE?'compositor-led-20fps-js-static-organic-microdetail':'full-cinematic-budget';
+    ROOT.dataset.fxMagBirthBudgetR625=LOW_POWER?'adaptive-detail-60hz-target-low-power':'adaptive-detail-60hz-target';
+    ROOT.dataset.fxMagBirthBudgetR629=MOBILE?'mobile-adaptive-resolution-60hz-target':'desktop-adaptive-resolution-60hz-target';
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-zero-continuous-js-render-loop':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
@@ -939,9 +941,10 @@
       requestCoreWarmup('validated-skip-bootstrap-r1560');
       ROOT.dataset.fxMagBirthSkipBootstrapR1560='canonical-mag-warmup-requested';
     }
-    ROOT.dataset.fxMagBirthRenderClockR631='native-reference-film-24fps-all-devices';
-    ROOT.dataset.fxMagBirthRenderClockR649='deterministic-bounded-cadence-canvas-all-devices';
-    ROOT.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-no-zero-delay-raf-loop';
+    ROOT.dataset.fxMagBirthRenderClockR631='superseded-by-r1601-adaptive-60hz';
+    ROOT.dataset.fxMagBirthRenderClockR649='adaptive-60hz-target-fallback-canvas';
+    ROOT.dataset.fxMagBirthPerformanceR1541='superseded-by-r1601-adaptive-60hz';
+    ROOT.dataset.fxMagBirthPerformanceR1601='60hz-target-adaptive-quality-no-artificial-frame-cap';
     ROOT.dataset.fxMagBirthDurationR1549=LOW_POWER?'4200ms-adaptive':'10000ms-full';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
