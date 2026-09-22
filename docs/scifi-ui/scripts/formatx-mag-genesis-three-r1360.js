@@ -1104,15 +1104,15 @@
       this.mineralRoughnessTexture=mineralRoughness;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x070a0c,metalness:.10,roughness:.20,
-        emissive:0x010304,emissiveIntensity:.006,
-        clearcoat:.82,clearcoatRoughness:.075,
+        color:0x050708,metalness:.055,roughness:.17,
+        emissive:0x010203,emissiveIntensity:.004,
+        clearcoat:.94,clearcoatRoughness:.055,
         transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x05090b,metalness:.08,roughness:.24,
-        emissive:0x010405,emissiveIntensity:.008,
-        clearcoat:.66,clearcoatRoughness:.10,
+        color:0x06090a,metalness:.04,roughness:.26,
+        emissive:0x010203,emissiveIntensity:.003,
+        clearcoat:.58,clearcoatRoughness:.12,
         transparent:true,opacity:0
       });
       this.silverMaterial=new T.MeshPhysicalMaterial({
@@ -1145,36 +1145,36 @@
       // R1555 — smooth indexed volcanic-glass body.
       // Keep shared vertices so computeVertexNormals() produces continuous,
       // photographic reflections instead of one normal per triangle.
-      let baseGeo=new T.IcosahedronGeometry(1,(this.highDetail||this.deterministicFrame)?4:3);
+      let baseGeo=new T.IcosahedronGeometry(1,(this.highDetail||this.deterministicFrame)?5:4);
       const basePos=baseGeo.attributes.position;
       const pnt=new T.Vector3();
       for(let i=0;i<basePos.count;i++){
         pnt.fromBufferAttribute(basePos,i).normalize();
         const theta=Math.atan2(pnt.z,pnt.x);
         const upper=pnt.y>=0,right=pnt.x>=0,front=pnt.z>=0;
-        const ax=upper?(right?.72:.80):(right?.79:.66);
-        const ay=upper?(right?.94:.90):(right?.88:.78);
-        const az=front?(right?.64:.72):(right?.69:.76);
-        const power=1.38;
+        const ax=upper?(right?.75:.82):(right?.80:.67);
+        const ay=upper?(right?.99:.92):(right?.90:.80);
+        const az=front?(right?.66:.73):(right?.70:.77);
+        const power=1.62;
         const lp=Math.pow(Math.abs(pnt.x)/ax,power)+Math.pow(Math.abs(pnt.y)/ay,power)+Math.pow(Math.abs(pnt.z)/az,power);
         const radius=1/Math.pow(Math.max(.001,lp),1/power);
         const mineralBias=1
-          +Math.sin(theta*2.05+pnt.y*2.55)*.026
-          +Math.cos(theta*3.17-pnt.y*3.60)*.017
-          +Math.sin(theta*4.73-pnt.y*1.75)*.008;
+          +Math.sin(theta*2.05+pnt.y*2.55)*.020
+          +Math.cos(theta*3.17-pnt.y*3.60)*.013
+          +Math.sin(theta*4.73-pnt.y*1.75)*.006;
         pnt.multiplyScalar(radius*mineralBias);
         const topLean=Math.pow(Math.max(pnt.y,0),2.4);
         const lowerMass=Math.pow(Math.max(-pnt.y,0),2.0);
-        pnt.x*=1.04;pnt.y*=1.13;pnt.z*=.99;
-        pnt.x+=-.058*topLean+.030*lowerMass+pnt.z*pnt.y*.012-Math.pow(Math.max(-pnt.x,0),4)*.010;
-        pnt.y+=Math.pow(Math.max(pnt.y,0),5)*.062-Math.pow(Math.max(-pnt.y,0),4)*.012+pnt.x*pnt.z*.006;
-        pnt.z+=pnt.x*pnt.y*.008+Math.pow(Math.max(pnt.z,0),4)*.010;
+        pnt.x*=1.07;pnt.y*=1.17;pnt.z*=.985;
+        pnt.x+=-.115*topLean+.020*lowerMass+pnt.z*pnt.y*.014-Math.pow(Math.max(-pnt.x,0),4)*.012+pnt.y*.008;
+        pnt.y+=Math.pow(Math.max(pnt.y,0),5)*.078-Math.pow(Math.max(-pnt.y,0),4)*.014+pnt.x*pnt.z*.007+pnt.x*.018;
+        pnt.z+=pnt.x*pnt.y*.012+Math.pow(Math.max(pnt.z,0),4)*.010-pnt.x*.012;
         basePos.setXYZ(i,pnt.x,pnt.y,pnt.z);
       }
       basePos.needsUpdate=true;
       baseGeo.computeVertexNormals();
       this.mechBody=new T.Mesh(baseGeo,this.mechMaterial);
-      this.mechBody.scale.set(1.02,1.02,1.00);
+      this.mechBody.scale.set(1.00,1.02,1.00);
       this.mechBody.position.z=-.01;
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
@@ -1500,15 +1500,17 @@
       this.mechanicalGroup.scale.set(.001+groupGrow*.82,.001+groupGrow*.86,.001+groupGrow*.90);
 
       this.mechMaterial.opacity=.995*bodyGrow;
-      this.mechMidMaterial.opacity=.985*bodyGrow;
-      this.silverMaterial.opacity=.10*bodyGrow;
+      this.mechMidMaterial.opacity=0;
+      this.silverMaterial.opacity=0;
       if(this.crownMaterial)this.crownMaterial.opacity=0;
-      this.mechEdgeMaterial.opacity=.018*bodyGrow;
-      this.mechInnerMaterial.opacity=.075*bodyGrow;
-      if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=.085*bodyGrow;
+      this.mechEdgeMaterial.opacity=.006*bodyGrow;
+      this.mechInnerMaterial.opacity=0;
+      if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=0;
       if(this.seamMaterial)this.seamMaterial.opacity=0;
-      this.mechInnerRing.rotation.z=.58+Math.sin(time*.000035)*.018;
-      if(this.mechLight)this.mechLight.intensity=.16*bodyGrow;
+      this.mechInnerRing.visible=false;
+      if(this.mechCradle)this.mechCradle.visible=false;
+      if(this.mechEyeCore)this.mechEyeCore.visible=false;
+      if(this.mechLight)this.mechLight.intensity=.10*bodyGrow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*bodyGrow;
