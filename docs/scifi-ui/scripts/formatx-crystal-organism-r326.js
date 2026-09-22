@@ -399,9 +399,11 @@
     canvas.setAttribute('aria-hidden','true');
     stage.appendChild(canvas);
     /* R1559 owns the final compositor treatment inline so dynamically loaded
-       legacy CSS cannot restore synthetic drop-shadow/contrast optics. */
-    canvas.style.setProperty('filter','brightness(1.01) contrast(1.025) saturate(.90)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.01) contrast(1.025) saturate(.90)','important');
+       legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
+       deliberately mild, but preserve enough tonal separation for real mineral
+       planes on OLED/mobile displays and the canonical surface-energy contract. */
+    canvas.style.setProperty('filter','brightness(1.04) contrast(1.16) saturate(1.01)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.04) contrast(1.16) saturate(1.01)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
