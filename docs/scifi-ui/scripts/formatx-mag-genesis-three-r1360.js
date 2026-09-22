@@ -1079,13 +1079,15 @@
       /* R1576 — hand-cut obsidian body matching the native R326 hero.
          Broad offset polygonal rings create natural mineral planes instead of
          another deformed sphere, so the late intro cannot regress to an egg/pot. */
-      const sideCount=(this.deterministicFrame||this.highDetail)?11:9;
+      const sideCount=(this.deterministicFrame||this.highDetail)?14:12;
       const ringDefs=[
-        [.67,.46,.34,-.12,-.018,.10],
-        [.38,.67,.48,-.060,.012,.02],
-        [.03,.77,.55,.012,.000,-.04],
-        [-.33,.69,.49,.060,-.006,.03],
-        [-.59,.51,.36,.082,.016,.11]
+        [.72,.28,.23,-.18,-.010,.14],
+        [.50,.44,.34,-.13,.010,.07],
+        [.24,.57,.42,-.06,.000,-.01],
+        [-.06,.62,.46,.020,.000,-.05],
+        [-.32,.56,.40,.080,.010,.02],
+        [-.56,.43,.31,.120,.020,.09],
+        [-.72,.27,.20,.100,.010,.16]
       ];
       const positions=[];
       const indices=[];
@@ -1111,8 +1113,8 @@
         }
         ringIndices.push(ring);
       });
-      const topIndex=pushVertex(-.145,.855,-.035);
-      const bottomIndex=pushVertex(.105,-.805,.028);
+      const topIndex=pushVertex(-.215,.915,-.040);
+      const bottomIndex=pushVertex(.145,-.895,.045);
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
         indices.push(topIndex,ringIndices[0][next],ringIndices[0][side]);
@@ -1612,7 +1614,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1576-opaque-bioceramic-hand-cut-obsidian-photoreal-handoff'
+        revision:'r1578-opaque-bioceramic-tall-seven-ring-obsidian-photoreal-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1646,6 +1648,7 @@
   document.documentElement.dataset.fxMagBirthProofR1574='single-continuous-bioceramic-organism-rounded-irregular-volcanic-glass-no-dumbbell-no-diamond';
   document.documentElement.dataset.fxMagBirthProofR1575='opaque-bioceramic-seed-to-truncated-obsidian-crystal-no-translucent-lowpoly-shells';
   document.documentElement.dataset.fxMagBirthProofR1576='hand-cut-broad-facet-obsidian-final-act-matches-native-shard-no-pot';
+  document.documentElement.dataset.fxMagBirthProofR1578='tall-seven-ring-obsidian-final-act-readable-studio-lit-no-egg';
   document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
@@ -1661,6 +1664,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1576-three-act-opaque-bioceramic-to-hand-cut-obsidian'
+    revision:'r1578-three-act-opaque-bioceramic-to-tall-seven-ring-obsidian'
   };
 })();
