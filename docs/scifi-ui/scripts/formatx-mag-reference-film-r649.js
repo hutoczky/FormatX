@@ -252,8 +252,11 @@
   function attach(canvas,getTarget){
     if(!(canvas instanceof HTMLCanvasElement))return null;
     let ctx=null,dpr=1,sw=0,sh=0,scale=1,ox=0,oy=0;
+    let qualityScale=sw<900?.72:.82,renderAverage=0,lastQualityAdjust=0;
     function resize(){
-      sw=innerWidth;sh=innerHeight;dpr=Math.min(devicePixelRatio||1,sw<900?1:1.15);
+      sw=innerWidth;sh=innerHeight;
+      const baseDpr=sw<900?.86:.96;
+      dpr=Math.min(devicePixelRatio||1,baseDpr*qualityScale);
       canvas.width=Math.max(1,Math.round(sw*dpr));canvas.height=Math.max(1,Math.round(sh*dpr));canvas.style.width=sw+'px';canvas.style.height=sh+'px';
       ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});ctx.setTransform(dpr,0,0,dpr,0,0);
       scale=Math.max(sw/W,sh/H);ox=(sw-W*scale)*.5;oy=(sh-H*scale)*.5;
@@ -263,11 +266,32 @@
       ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,sw,sh);ctx.translate(ox,oy);ctx.scale(scale,scale);
       let target=null;
       try{const p=getTarget?.();if(p)target={x:(p.x-ox)/scale,y:(p.y-oy)/scale}}catch(_){}
-      if(sw<900) drawLiteScene(ctx,r,time,target);
-      else drawScene(ctx,r,time,target);
+      const started=performance.now();
+      drawLiteScene(ctx,r,time,target);
       ctx.restore();
+
+      const cost=performance.now()-started;
+      renderAverage=renderAverage?renderAverage*.82+cost*.18:cost;
+      if(time-lastQualityAdjust>700){
+        const previous=qualityScale;
+        if(renderAverage>15.0)qualityScale=Math.max(.48,qualityScale-.08);
+        else if(renderAverage<8.5)qualityScale=Math.min(.90,qualityScale+.025);
+        if(Math.abs(previous-qualityScale)>.001){
+          lastQualityAdjust=time;
+          resize();
+        }
+      }
+      document.documentElement.dataset.fxMagFallbackTargetFpsR1601='60';
+      document.documentElement.dataset.fxMagFallbackRenderMsR1601=renderAverage.toFixed(2);
+      document.documentElement.dataset.fxMagFallbackQualityScaleR1601=qualityScale.toFixed(2);
     }
-    resize();return{resize,draw,minimumFrameMs:sw<900?110:72,quality:sw<900?'adaptive-lite-physical-reference-r1548':'software-webgl-fallback-r1392'};
+    resize();return{
+      resize,draw,minimumFrameMs:16.67,targetFps:60,
+      quality:'adaptive-lite-60hz-physical-reference-r1601'
+    };
   }
-  window.FormatXMagReferenceFilmR649={attach,revision:'r1548-adaptive-lite-physical-reference-fallback'};
+  window.FormatXMagReferenceFilmR649={
+    attach,
+    revision:'r1601-adaptive-lite-60hz-physical-reference-fallback'
+  };
 })();
