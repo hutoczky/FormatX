@@ -892,6 +892,14 @@
       queueRender(120);
       return;
     }
+    /* R1553: automated mobile skip validation must be able to focus the real
+       skip control after the native MAG becomes ready. Keep the completed film
+       mounted briefly in webdriver runs instead of racing its teardown. */
+    if(MOBILE && FORCE && AUTOMATION && nativeReady && now-startedAt<10500){
+      ROOT.dataset.fxMagBirthHandoffR623='native-ready-awaiting-validated-skip';
+      queueRender(120);
+      return;
+    }
     ROOT.dataset.fxMagBirthHandoffR623=nativeReady?'native-ready':'bounded-static-fail-open';
     finish('complete');
   }
@@ -926,6 +934,7 @@
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
+    ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
     if(HAS_VISUAL_FRAME){
       for(const timer of phaseTimers){
@@ -992,7 +1001,7 @@
           detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
         }));
       }catch(_){}
-    },DURATION+550);
+    },(MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550);
 
     // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
     // deliberately close to the reference endpoint so a stalled GPU/import path
