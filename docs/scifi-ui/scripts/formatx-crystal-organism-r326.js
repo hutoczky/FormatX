@@ -72,6 +72,7 @@
   root.dataset.fxNativeMagVisualR1575 = 'truncated-asymmetric-smoky-obsidian-crystal-studio-softboxes-no-egg-no-eye';
   root.dataset.fxNativeMagVisualR1576 = 'hand-cut-asymmetric-obsidian-shard-broad-natural-facets-no-egg-no-pot';
   root.dataset.fxNativeMagVisualR1577 = 'canonical-neutral-hand-cut-obsidian-shard-surface-energy-compliant';
+  root.dataset.fxNativeMagVisualR1578 = 'tall-seven-ring-asymmetric-obsidian-seed-readable-planes-photographic-lighting';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -305,13 +306,15 @@
          A small set of offset polygonal rings creates intentional broad mineral
          planes. This removes the rounded-pot/egg silhouette produced by a
          latitude sphere while preserving the same single WebGL draw and morph. */
-      const sideCount = mobile ? 9 : 11;
+      const sideCount = mobile ? 12 : 14;
       const ringDefs = [
-        [.67,.46,.34,-.12,-.018,.10],
-        [.38,.67,.48,-.060,.012,.02],
-        [.03,.77,.55,.012,.000,-.04],
-        [-.33,.69,.49,.060,-.006,.03],
-        [-.59,.51,.36,.082,.016,.11]
+        [.72,.28,.23,-.18,-.010,.14],
+        [.50,.44,.34,-.13,.010,.07],
+        [.24,.57,.42,-.06,.000,-.01],
+        [-.06,.62,.46,.020,.000,-.05],
+        [-.32,.56,.40,.080,.010,.02],
+        [-.56,.43,.31,.120,.020,.09],
+        [-.72,.27,.20,.100,.010,.16]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -342,8 +345,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.145,.855,-.035],[.5,0]);
-      const bottom=bodyVertex([.105,-.805,.028],[.5,1]);
+      const top=bodyVertex([-.215,.915,-.040],[.5,0]);
+      const bottom=bodyVertex([.145,-.895,.045],[.5,1]);
 
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
@@ -644,6 +647,9 @@
         mineral+=vec3(.090,.104,.101)*horizonBand*.19;
         mineral+=vec3(.070,.095,.102)*fresnel*.30;
         mineral+=vec3(.050,.034,.023)*floorBounce*.12;
+        /* Keep shadow planes readable like photographed black glass: a neutral
+           studio fill lifts structure without turning the body gray. */
+        mineral+=vec3(.030,.035,.036)*(.18+.26*fillLight+.12*floorBounce);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -731,6 +737,7 @@
         col+=vec3(.086,.100,.098)*horizonBand*.18;
         col+=vec3(.070,.096,.104)*fresnel*.28;
         col+=vec3(.050,.034,.023)*max(0.0,-n.y)*.12;
+        col+=vec3(.030,.035,.036)*(.18+.26*fillLight+.12*max(0.0,-n.y));
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1366,6 +1373,8 @@
     root.dataset.fxCoreShapeR1576='five-offset-rings-nine-to-eleven-sided-hand-cut-obsidian-shard-broad-facets';
     root.dataset.fxCoreOpticsR1576='broad-flat-mineral-planes-rectangular-studio-softboxes-dark-obsidian';
     root.dataset.fxCoreOpticsR1577='neutral-saturation-canonical-surface-energy-photographic-obsidian';
+    root.dataset.fxCoreShapeR1578='seven-offset-rings-twelve-to-fourteen-sided-tall-asymmetric-obsidian-seed';
+    root.dataset.fxCoreOpticsR1578='readable-shadow-planes-neutral-studio-fill-rectangular-softbox-reflections';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
