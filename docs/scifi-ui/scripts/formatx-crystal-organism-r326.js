@@ -67,6 +67,7 @@
   root.dataset.fxNativeMagVisualR1562 = 'photographic-cut-smoky-obsidian-readable-broad-planes-no-plastic-softbox-halo-no-hud';
   root.dataset.fxNativeMagVisualR1571 = 'reference-four-petal-gunmetal-pod-physical-cyan-energy-lens-ten-living-cables-no-hud';
   root.dataset.fxNativeMagVisualR1572 = 'photographic-smoky-obsidian-seed-no-eye-no-petals-subtle-mineral-fissure-six-buried-tendrils';
+  root.dataset.fxNativeMagVisualR1573 = 'readable-polished-obsidian-asymmetric-broad-cut-planes-neutral-fissure-no-eye';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -210,7 +211,7 @@
         + Math.cos(theta*1.72-phi*1.09)*.009;
       const az=.585 + shoulderBase*.070 + direction[2]*.026 - direction[0]*.014
         + Math.sin(theta*2.82+phi*.59)*.008;
-      const p=1.42;
+      const p=1.32;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -218,26 +219,29 @@
       const baseRadius=1/Math.pow(Math.max(.001,lp),1/p);
       const broadBias=
         1
-        +Math.sin(theta*2.03+phi*.86)*.018
-        +Math.cos(theta*3.11-phi*1.23)*.011
-        +Math.sin(theta*4.42+phi*.48)*.005;
-      const crystalRadius=baseRadius*broadBias;
+        +Math.sin(theta*2.03+phi*.86)*.022
+        +Math.cos(theta*3.11-phi*1.23)*.013
+        +Math.sin(theta*4.42+phi*.48)*.006;
+      const cutA=Math.pow(Math.max(0,direction[0]*.74+direction[1]*.44+direction[2]*.18),5.0);
+      const cutB=Math.pow(Math.max(0,-direction[0]*.66+direction[1]*.24+direction[2]*.52),5.0);
+      const cutC=Math.pow(Math.max(0,direction[0]*.18-direction[1]*.72+direction[2]*.46),5.0);
+      const crystalRadius=baseRadius*broadBias*(1-.050*cutA-.040*cutB-.030*cutC);
       const crystalPosition=[
         direction[0]*crystalRadius*1.04,
         direction[1]*crystalRadius*1.10,
         direction[2]*crystalRadius*.98
       ];
       const shoulder=Math.pow(shoulderBase,1.38);
-      crystalPosition[0]+=-.052*Math.pow(smoothUp,2.0)+.026*Math.pow(smoothDown,1.65)
-        +Math.sin(theta*1.64+phi*.77)*.012*shoulder
-        +direction[2]*y*.007;
-      crystalPosition[1]+=Math.pow(smoothUp,4.1)*.080
-        -Math.pow(smoothDown,3.5)*.015
-        +direction[0]*direction[2]*.006
-        +Math.sin(theta*2.38+phi*.48)*.010*shoulder;
-      crystalPosition[2]+=direction[0]*y*.007
-        +Math.pow(Math.max(direction[2],0),4.0)*.010
-        -direction[0]*.010;
+      crystalPosition[0]+=-.078*Math.pow(smoothUp,2.0)+.034*Math.pow(smoothDown,1.65)
+        +Math.sin(theta*1.64+phi*.77)*.018*shoulder
+        +direction[2]*y*.009;
+      crystalPosition[1]+=Math.pow(smoothUp,4.1)*.078
+        -Math.pow(smoothDown,3.5)*.017
+        +direction[0]*direction[2]*.007
+        +Math.sin(theta*2.38+phi*.48)*.013*shoulder;
+      crystalPosition[2]+=direction[0]*y*.009
+        +Math.pow(Math.max(direction[2],0),4.0)*.011
+        -direction[0]*.015;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -415,8 +419,8 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.08) contrast(1.10) saturate(1.02)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.08) contrast(1.10) saturate(1.02)','important');
+    canvas.style.setProperty('filter','brightness(1.10) contrast(1.05) saturate(.92)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.10) contrast(1.05) saturate(.92)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -471,7 +475,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.84));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.70));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -539,17 +543,17 @@
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.18+ndl*.82+sideLight*.55+fillLight*.30);
-        float facetTone=mix(.955,1.050,facetRand);
-        vec3 mineral=mix(vec3(.006,.009,.011),vec3(.062,.073,.077),lift)*facetTone;
-        mineral+=vec3(.50,.52,.51)*keySpec*.24;
-        mineral+=vec3(.17,.18,.18)*keySoft*.035;
-        mineral+=vec3(.29,.34,.35)*sideSpec*.16;
-        mineral+=vec3(.43,.46,.45)*softboxA*.14;
-        mineral+=vec3(.25,.30,.31)*softboxB*.11;
-        mineral+=vec3(.085,.094,.094)*horizonBand*.17;
-        mineral+=vec3(.067,.084,.090)*fresnel*.18;
-        mineral+=vec3(.045,.035,.026)*floorBounce*.13;
+        float lift=sat(.24+ndl*.86+sideLight*.60+fillLight*.34);
+        float facetTone=mix(.972,1.032,facetRand);
+        vec3 mineral=mix(vec3(.008,.012,.014),vec3(.088,.101,.105),lift)*facetTone;
+        mineral+=vec3(.62,.63,.61)*keySpec*.30;
+        mineral+=vec3(.21,.22,.21)*keySoft*.050;
+        mineral+=vec3(.36,.41,.42)*sideSpec*.20;
+        mineral+=vec3(.55,.57,.54)*softboxA*.19;
+        mineral+=vec3(.31,.36,.37)*softboxB*.15;
+        mineral+=vec3(.105,.116,.114)*horizonBand*.20;
+        mineral+=vec3(.080,.100,.105)*fresnel*.22;
+        mineral+=vec3(.055,.042,.030)*floorBounce*.15;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -557,9 +561,9 @@
         float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
         float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
         float fissure=exp(-pow(crackX/.0058,2.0))*fissureEnvelope;
-        mineral=mix(mineral,vec3(.005,.011,.013),fissureHalo*.22);
-        mineral+=vec3(.24,.36,.38)*fissure*.090;
-        mineral+=vec3(.58,.63,.61)*fissure*.038;
+        mineral=mix(mineral,vec3(.007,.014,.016),fissureHalo*.20);
+        mineral+=vec3(.30,.43,.44)*fissure*.120;
+        mineral+=vec3(.66,.69,.66)*fissure*.050;
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
@@ -572,7 +576,7 @@
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
         vec3 tendon=vec3(.003,.007,.009)+vec3(.042,.055,.059)*(.16*sideLight+.12*ndl+.18*fresnel);
-        tendon+=vec3(.018,.16,.20)*cableSegment*.055;
+        tendon+=vec3(.018,.11,.14)*cableSegment*.028;
         tendon+=vec3(.16,.19,.19)*sideSpec*.025;
         mineral=mix(mineral,tendon,tendrilMask*.995);
 
@@ -580,7 +584,7 @@
           ${outputName}=vec4(vec3(.004,.009,.011),.16);
           return;
         }
-        ${outputName}=vec4(filmic(mineral*2.38),1.0);
+        ${outputName}=vec4(filmic(mineral*2.52),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -620,12 +624,12 @@
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.18+ndl*.80+sideLight*.52+fillLight*.28);
-        vec3 col=mix(vec3(.006,.009,.011),vec3(.060,.071,.075),lift);
-        col+=vec3(.46,.48,.47)*keySpec*.22;
-        col+=vec3(.27,.31,.32)*sideSpec*.14;
-        col+=vec3(.065,.082,.088)*fresnel*.19;
-        col+=vec3(.042,.033,.025)*max(0.0,-n.y)*.13;
+        float lift=sat(.24+ndl*.84+sideLight*.57+fillLight*.31);
+        vec3 col=mix(vec3(.008,.012,.014),vec3(.086,.098,.102),lift);
+        col+=vec3(.56,.58,.56)*keySpec*.27;
+        col+=vec3(.34,.38,.39)*sideSpec*.18;
+        col+=vec3(.078,.097,.102)*fresnel*.22;
+        col+=vec3(.052,.040,.029)*max(0.0,-n.y)*.15;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -633,8 +637,8 @@
         float env=exp(-pow(q.y/.31,4.0))*front;
         float halo=exp(-pow(crackX/.026,2.0))*env;
         float fissure=exp(-pow(crackX/.0062,2.0))*env;
-        col=mix(col,vec3(.005,.010,.012),halo*.20);
-        col+=vec3(.23,.35,.37)*fissure*.080;
+        col=mix(col,vec3(.007,.013,.015),halo*.18);
+        col+=vec3(.29,.42,.43)*fissure*.110;
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
@@ -650,7 +654,7 @@
         col=mix(col,tendon,tendrilMask*.995);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
-        ${outputName}=vec4(filmic(col*2.40),1.0);
+        ${outputName}=vec4(filmic(col*2.55),1.0);
       }`;
 
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
@@ -1253,6 +1257,8 @@
     root.dataset.fxCoreShapeR1571='compact-four-petal-mechanical-pod-ten-living-cables-reference-final-stage';
     root.dataset.fxCoreOpticsR1572='smoky-obsidian-neutral-softbox-subtle-mineral-fissure-no-eye-no-petal-seams';
     root.dataset.fxCoreShapeR1572='asymmetric-elongated-volcanic-glass-seed-six-short-buried-tendrils';
+    root.dataset.fxCoreOpticsR1573='readable-polished-obsidian-broad-neutral-reflections-visible-mineral-fracture-no-eye';
+    root.dataset.fxCoreShapeR1573='asymmetric-seed-with-three-broad-natural-cuts-no-logo-diamond';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
