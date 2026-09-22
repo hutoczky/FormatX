@@ -374,3 +374,17 @@ body.living-architecture #hero :is(
   filter:none!important;animation:none!important;
 }
 /* production-r1553-native-mag-only-no-legacy-orbit */
+
+
+/* R1555 — the signature trigger remains interactive but must never draw a
+   visible hit-area ring around the MAG controls. */
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero > .fx-signature-core-trigger{
+  border:0!important;
+  outline:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+/* production-r1555-invisible-signature-hit-area */
