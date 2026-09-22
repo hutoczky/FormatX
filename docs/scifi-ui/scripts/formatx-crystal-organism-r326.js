@@ -76,6 +76,7 @@
   root.dataset.fxNativeMagVisualR1579 = 'softbox-feathered-tall-obsidian-seed-integrated-tendrils-natural-facet-transitions';
   root.dataset.fxNativeMagVisualR1580 = 'photographic-smoky-obsidian-sculpture-smooth-broad-facets-soft-mineral-depth-no-eye-short-rooted-tendrils';
   root.dataset.fxNativeMagVisualR1581 = 'rounded-truncated-smoky-obsidian-monolith-gaussian-studio-reflection-smooth-silhouette';
+  root.dataset.fxNativeMagVisualR1582 = 'slender-asymmetric-smoky-obsidian-seed-satin-softbox-reflections-no-pot-no-spikes';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -150,7 +151,7 @@
   function buildOrganismGeometry() {
     const latitudeSegments = auditMode ? 8 : constrainedMobile ? 14 : mobile ? 16 : constrained ? 16 : 20;
     const longitudeSegments = auditMode ? 14 : constrainedMobile ? 28 : mobile ? 32 : constrained ? 32 : 40;
-    const tendrilCount = auditMode ? 4 : 6;
+    const tendrilCount = auditMode ? 4 : mobile ? 4 : 6;
     const tendrilSegments = auditMode ? 5 : constrainedMobile ? 14 : mobile ? 18 : constrained ? 20 : 26;
     const tendrilSides = auditMode ? 3 : constrainedMobile ? 4 : mobile || constrained ? 5 : 7;
     const sphere = [];
@@ -309,19 +310,20 @@
          A small set of offset polygonal rings creates intentional broad mineral
          planes. This removes the rounded-pot/egg silhouette produced by a
          latitude sphere while preserving the same single WebGL draw and morph. */
-      const sideCount = mobile ? 26 : 32;
+      const sideCount = mobile ? 32 : 40;
       const ringDefs = [
-        [.76,.24,.19,-.18,-.014,.10],
-        [.62,.35,.28,-.16,-.004,.075],
-        [.46,.46,.35,-.115,.008,.045],
-        [.30,.54,.40,-.065,.006,.018],
-        [.14,.59,.44,-.018,.002,-.012],
-        [-.04,.61,.46,.020,.000,-.034],
-        [-.22,.59,.44,.058,.006,-.010],
-        [-.40,.52,.38,.090,.012,.028],
-        [-.56,.42,.30,.110,.016,.062],
-        [-.68,.31,.23,.112,.014,.092],
-        [-.75,.23,.17,.095,.008,.115]
+        [.79,.12,.10,-.150,-.025,.120],
+        [.70,.24,.18,-.180,-.016,.100],
+        [.58,.34,.25,-.160,-.004,.078],
+        [.44,.40,.31,-.110,.008,.050],
+        [.29,.44,.35,-.060,.012,.024],
+        [.13,.46,.36,-.010,.008,-.002],
+        [-.04,.45,.35,.035,.002,-.026],
+        [-.20,.42,.32,.070,.006,-.018],
+        [-.36,.36,.28,.095,.012,.022],
+        [-.51,.29,.22,.102,.018,.060],
+        [-.64,.20,.16,.085,.015,.090],
+        [-.73,.12,.10,.060,.008,.112]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -345,15 +347,15 @@
           const a=sideIndex/sideCount*Math.PI*2+phase;
           const irregular=
             1
-            +Math.sin(sideIndex*2.31+ringIndex*.91)*.038
-            +Math.cos(sideIndex*1.37-ringIndex*.73)*.020;
+            +Math.sin(sideIndex*2.31+ringIndex*.91)*.020
+            +Math.cos(sideIndex*1.37-ringIndex*.73)*.011;
           const x=ox+Math.cos(a)*rx*irregular;
-          const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.032);
+          const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018);
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.175,.815,-.045],[.5,0]);
-      const bottom=bodyVertex([.125,-.805,.040],[.5,1]);
+      const top=bodyVertex([-.165,.845,-.040],[.5,0]);
+      const bottom=bodyVertex([.060,-.795,.020],[.5,1]);
 
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
@@ -389,12 +391,12 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.13 + (index % 2 ? .035 : -.025);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .61;
-      const reach = .20 + ((index*3)%5) * .016;
+      const root = .49;
+      const reach = .13 + ((index*3)%5) * .012;
       const radius = root + reach * t;
       const wave = Math.sin(t*Math.PI*1.36+index*.83)*(.010+.055*t)
         +Math.sin(t*Math.PI*.72+index*.47)*.018*t;
-      const depth = -.30 + Math.sin(t*Math.PI*1.24+index*.97)*(.010+.024*t);
+      const depth = -.38 + Math.sin(t*Math.PI*1.24+index*.97)*(.008+.018*t);
       return [
         Math.cos(baseAngle)*radius + Math.cos(sideAngle)*wave,
         Math.sin(baseAngle)*radius + Math.sin(sideAngle)*wave,
@@ -569,7 +571,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.58));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.82));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -624,13 +626,13 @@
         float fillLight=max(dot(n,fill),0.0);
         float floorBounce=max(0.0,-n.y);
         float facing=sat(abs(dot(n,view)));
-        float fresnel=pow(1.0-facing,1.85);
-        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),72.0);
-        float keySoft=pow(max(dot(n,normalize(key+view)),0.0),14.0);
-        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),38.0);
+        float fresnel=pow(1.0-facing,2.05);
+        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),110.0);
+        float keySoft=pow(max(dot(n,normalize(key+view)),0.0),9.0);
+        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),58.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.30)/.43,2.0)-pow((refl.y-.38)/.58,2.0))*smoothstep(-.24,.48,refl.z);
-        float softboxB=exp(-pow((refl.x-.44)/.38,2.0)-pow((refl.y-.01)/.62,2.0))*smoothstep(-.32,.54,refl.z);
+        float softboxA=exp(-pow((refl.x+.28)/.58,2.0)-pow((refl.y-.34)/.74,2.0))*smoothstep(-.30,.44,refl.z);
+        float softboxB=exp(-pow((refl.x-.40)/.52,2.0)-pow((refl.y-.02)/.78,2.0))*smoothstep(-.36,.50,refl.z);
         float ceilingBand=exp(-pow((refl.y-.72)/.30,4.0))*smoothstep(.02,.68,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
 
@@ -638,23 +640,24 @@
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.16+ndl*.62+sideLight*.48+fillLight*.24);
-        float facetTone=mix(.994,1.006,facetRand);
-        float smokyDepth=.5+.5*sin(vLocal.x*3.2+vLocal.y*2.1-vLocal.z*2.8);
-        vec3 mineral=mix(vec3(.0055,.0080,.0095),vec3(.046,.055,.058),lift)*facetTone;
-        mineral*=.965+.040*smokyDepth;
-        mineral+=vec3(.62,.62,.59)*keySpec*.30;
-        mineral+=vec3(.24,.24,.22)*keySoft*.055;
-        mineral+=vec3(.38,.43,.44)*sideSpec*.21;
-        mineral+=vec3(.32,.34,.33)*softboxA*.12;
-        mineral+=vec3(.22,.27,.28)*softboxB*.11;
-        mineral+=vec3(.22,.24,.23)*ceilingBand*.13;
-        mineral+=vec3(.090,.104,.101)*horizonBand*.19;
-        mineral+=vec3(.070,.095,.102)*fresnel*.30;
-        mineral+=vec3(.050,.034,.023)*floorBounce*.12;
-        /* Keep shadow planes readable like photographed black glass: a neutral
-           studio fill lifts structure without turning the body gray. */
-        mineral+=vec3(.044,.048,.049)*(.24+.34*fillLight+.14*floorBounce);
+        float lift=sat(.11+ndl*.56+sideLight*.43+fillLight*.20);
+        float facetTone=mix(.997,1.003,facetRand);
+        float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
+        float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
+        vec3 mineral=mix(vec3(.0028,.0042,.0050),vec3(.030,.038,.041),lift)*facetTone;
+        mineral*=.970+.030*smokyDepth+.010*mineralGrain;
+        mineral+=vec3(.62,.61,.57)*keySpec*.12;
+        mineral+=vec3(.18,.18,.17)*keySoft*.034;
+        mineral+=vec3(.30,.34,.35)*sideSpec*.105;
+        mineral+=vec3(.30,.32,.31)*softboxA*.18;
+        mineral+=vec3(.20,.24,.25)*softboxB*.15;
+        mineral+=vec3(.17,.18,.17)*ceilingBand*.10;
+        mineral+=vec3(.070,.084,.084)*horizonBand*.16;
+        mineral+=vec3(.052,.076,.082)*fresnel*.22;
+        mineral+=vec3(.042,.028,.020)*floorBounce*.08;
+        mineral+=vec3(.020,.023,.024)*(.18+.28*fillLight+.10*floorBounce);
+        float edgeTransmission=pow(1.0-facing,2.8)*(1.0-sat(ndl*.58));
+        mineral+=vec3(.018,.038,.043)*edgeTransmission*.34;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -662,9 +665,9 @@
         float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
         float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
         float fissure=exp(-pow(crackX/.0058,2.0))*fissureEnvelope;
-        mineral=mix(mineral,vec3(.004,.010,.012),fissureHalo*.16);
-        mineral+=vec3(.26,.39,.40)*fissure*.095;
-        mineral+=vec3(.72,.73,.68)*fissure*.038;
+        mineral=mix(mineral,vec3(.003,.008,.010),fissureHalo*.10);
+        mineral+=vec3(.18,.28,.29)*fissure*.055;
+        mineral+=vec3(.62,.64,.60)*fissure*.024;
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
@@ -685,7 +688,7 @@
           ${outputName}=vec4(vec3(.004,.009,.011),.16);
           return;
         }
-        ${outputName}=vec4(filmic(mineral*2.72),1.0);
+        ${outputName}=vec4(filmic(mineral*3.08),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -722,8 +725,8 @@
         float keySpec=pow(max(dot(n,normalize(key+view)),0.0),58.0);
         float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),32.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.30)/.43,2.0)-pow((refl.y-.38)/.58,2.0))*smoothstep(-.24,.48,refl.z);
-        float softboxB=exp(-pow((refl.x-.44)/.38,2.0)-pow((refl.y-.01)/.62,2.0))*smoothstep(-.32,.54,refl.z);
+        float softboxA=exp(-pow((refl.x+.28)/.58,2.0)-pow((refl.y-.34)/.74,2.0))*smoothstep(-.30,.44,refl.z);
+        float softboxB=exp(-pow((refl.x-.40)/.52,2.0)-pow((refl.y-.02)/.78,2.0))*smoothstep(-.36,.50,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
         float isTendril=step(2.0,vFacet);
         float bodyMask=1.0-isTendril;
@@ -1384,6 +1387,8 @@
     root.dataset.fxCoreOpticsR1580='lifted-black-glass-midtones-soft-feathered-reflections-smooth-normals-subtle-fissure';
     root.dataset.fxCoreShapeR1581='eleven-offset-rings-twenty-six-to-thirty-two-sided-truncated-natural-monolith';
     root.dataset.fxCoreOpticsR1581='gaussian-non-rectangular-studio-reflections-canonical-mobile-contrast-saturation';
+    root.dataset.fxCoreShapeR1582='twelve-offset-rings-thirty-two-to-forty-sided-slender-asymmetric-seed-buried-mobile-tendrils';
+    root.dataset.fxCoreOpticsR1582='satin-smoky-volcanic-glass-broad-softboxes-subtle-fissure-no-cgi-hotspots';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
