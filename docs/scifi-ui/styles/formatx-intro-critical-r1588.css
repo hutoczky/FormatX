@@ -16,11 +16,22 @@
 }
 html[data-fx-mag-birth-live="active"] body>.topbar,
 html[data-fx-mag-birth-live="active"] body>.fx-organism-status,
+html[data-fx-mag-birth-live="active"] body>.fx-rail,
 html[data-fx-mag-birth-live="active"] body>#main-content,
-html[data-fx-mag-birth-live="active"] body>footer.site-footer{
-  visibility:hidden!important;
+html[data-fx-mag-birth-live="active"] body>footer.site-footer,
+html[data-fx-mag-birth-live="active"] body>#fx-apex-canvas,
+html[data-fx-mag-birth-live="active"] body>.fx-atmosphere,
+html[data-fx-mag-birth-live="active"] body>.skip-link{
+  display:none!important;
+}
+html[data-fx-mag-birth-live="active"] body{
+  overflow:hidden!important;
 }
 html[data-fx-mag-birth-live="active"] body>.fx-mag-birth-r533{
+  display:block!important;
   visibility:visible!important;
 }
-/* production-r1588-intro-fixed-before-deferred-film-css */
+/* R1602: while the cinematic owns the viewport, the underlying page does not
+   participate in intermediate layout. It is restored atomically with teardown,
+   eliminating hidden hero/header CLS and reducing competing paint work. */
+/* production-r1602-intro-exclusive-layout-owner */
