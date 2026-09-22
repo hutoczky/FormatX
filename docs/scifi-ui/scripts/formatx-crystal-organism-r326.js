@@ -70,6 +70,7 @@
   root.dataset.fxNativeMagVisualR1573 = 'readable-polished-obsidian-asymmetric-broad-cut-planes-neutral-fissure-no-eye';
   root.dataset.fxNativeMagVisualR1574 = 'irregular-smoky-volcanic-glass-broad-facets-no-diamond-no-pinhole-no-eye';
   root.dataset.fxNativeMagVisualR1575 = 'truncated-asymmetric-smoky-obsidian-crystal-studio-softboxes-no-egg-no-eye';
+  root.dataset.fxNativeMagVisualR1576 = 'hand-cut-asymmetric-obsidian-shard-broad-natural-facets-no-egg-no-pot';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -287,14 +288,87 @@
       });
     }
 
-    for (let latitude = 0; latitude < latitudeSegments; latitude += 1) {
-      for (let longitude = 0; longitude < longitudeSegments; longitude += 1) {
-        const a = vertex(latitude, longitude);
-        const b = vertex(latitude, longitude + 1);
-        const c = vertex(latitude + 1, longitude);
-        const d = vertex(latitude + 1, longitude + 1);
-        if (latitude > 0) triangle([a, b, c], .08 + .92 * random(longitude, latitude * 2));
-        if (latitude < latitudeSegments - 1) triangle([b, d, c], .08 + .92 * random(longitude + 37, latitude * 2 + 1));
+    if (auditMode) {
+      for (let latitude = 0; latitude < latitudeSegments; latitude += 1) {
+        for (let longitude = 0; longitude < longitudeSegments; longitude += 1) {
+          const a = vertex(latitude, longitude);
+          const b = vertex(latitude, longitude + 1);
+          const c = vertex(latitude + 1, longitude);
+          const d = vertex(latitude + 1, longitude + 1);
+          if (latitude > 0) triangle([a, b, c], .08 + .92 * random(longitude, latitude * 2));
+          if (latitude < latitudeSegments - 1) triangle([b, d, c], .08 + .92 * random(longitude + 37, latitude * 2 + 1));
+        }
+      }
+    } else {
+      /* R1576 — hand-cut production body.
+         A small set of offset polygonal rings creates intentional broad mineral
+         planes. This removes the rounded-pot/egg silhouette produced by a
+         latitude sphere while preserving the same single WebGL draw and morph. */
+      const sideCount = mobile ? 9 : 11;
+      const ringDefs = [
+        [.67,.46,.34,-.12,-.018,.10],
+        [.38,.67,.48,-.060,.012,.02],
+        [.03,.77,.55,.012,.000,-.04],
+        [-.33,.69,.49,.060,-.006,.03],
+        [-.59,.51,.36,.082,.016,.11]
+      ];
+      function bodyVertex(position, uv) {
+        const dir=normalize(position);
+        const phi=Math.acos(Math.max(-1,Math.min(1,dir[1])));
+        let theta=Math.atan2(dir[2],dir[0]);
+        if(theta<0)theta+=Math.PI*2;
+        const sphereSample=vertex(
+          phi/Math.PI*latitudeSegments,
+          theta/(Math.PI*2)*longitudeSegments
+        );
+        return {
+          sphere:sphereSample.sphere,
+          crystal:position,
+          sphereNormal:dir,
+          uv
+        };
+      }
+      const rings=ringDefs.map((def,ringIndex)=>{
+        const [y,rx,rz,ox,oz,phase]=def;
+        return Array.from({length:sideCount},(_,sideIndex)=>{
+          const a=sideIndex/sideCount*Math.PI*2+phase;
+          const irregular=
+            1
+            +Math.sin(sideIndex*2.31+ringIndex*.91)*.038
+            +Math.cos(sideIndex*1.37-ringIndex*.73)*.020;
+          const x=ox+Math.cos(a)*rx*irregular;
+          const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.032);
+          return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
+        });
+      });
+      const top=bodyVertex([-.145,.855,-.035],[.5,0]);
+      const bottom=bodyVertex([.105,-.805,.028],[.5,1]);
+
+      for(let side=0;side<sideCount;side+=1){
+        const next=(side+1)%sideCount;
+        triangle([top,rings[0][next],rings[0][side]],.16+.72*random(side,701));
+      }
+      for(let ring=0;ring<rings.length-1;ring+=1){
+        for(let side=0;side<sideCount;side+=1){
+          const next=(side+1)%sideCount;
+          const a=rings[ring][side];
+          const b=rings[ring][next];
+          const c=rings[ring+1][side];
+          const d=rings[ring+1][next];
+          const facet=.14+.76*random(side+ring*17,ring*43+side);
+          if((side+ring)%2===0){
+            triangle([a,b,d],facet);
+            triangle([a,d,c],facet+.013);
+          }else{
+            triangle([a,b,c],facet);
+            triangle([b,d,c],facet+.013);
+          }
+        }
+      }
+      const last=rings[rings.length-1];
+      for(let side=0;side<sideCount;side+=1){
+        const next=(side+1)%sideCount;
+        triangle([last[side],last[next],bottom],.16+.72*random(side,907));
       }
     }
 
@@ -484,7 +558,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.40));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.16));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -1288,6 +1362,8 @@
     root.dataset.fxCoreShapeR1574='irregular-rounded-mineral-four-broad-cuts-no-diamond-silhouette-no-pinhole-culling';
     root.dataset.fxCoreOpticsR1575='dark-volcanic-glass-rectangular-studio-reflections-low-diffuse-high-specular';
     root.dataset.fxCoreShapeR1575='asymmetric-truncated-crystal-seed-oblique-cap-facets-no-egg-no-logo-diamond';
+    root.dataset.fxCoreShapeR1576='five-offset-rings-nine-to-eleven-sided-hand-cut-obsidian-shard-broad-facets';
+    root.dataset.fxCoreOpticsR1576='broad-flat-mineral-planes-rectangular-studio-softboxes-dark-obsidian';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
