@@ -736,11 +736,12 @@
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
-        color:0x2a3032,roughness:.42,metalness:.004,
-        clearcoat:.30,clearcoatRoughness:.24,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.010,
-        transparent:true,opacity:1,
-        emissive:0x0b0717,emissiveIntensity:.050,
+        color:0x292431,roughness:.54,metalness:.003,
+        clearcoat:.10,clearcoatRoughness:.46,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.008,
+        transparent:true,opacity:0,
+        emissive:0x10091a,emissiveIntensity:.060,
+        envMapIntensity:.34,
         depthWrite:true
       });
       this.organicWireMaterial=new T.MeshBasicMaterial({
@@ -801,23 +802,23 @@
       this.organicGroup.add(this.organicMembrane);
 
       this.organicLobes=[];
-      const lobeGeo=new T.IcosahedronGeometry(.20,2);
-      const count=0;
+      const lobeGeo=new T.SphereGeometry(.16,18,12);
+      const count=this.softwareRenderer?14:(this.highDetail||this.deterministicFrame?24:18);
       for(let i=0;i<count;i++){
         const phi=Math.acos(1-2*(i+.5)/count);
         const theta=Math.PI*(1+Math.sqrt(5))*i;
-        const rr=.94+(r()-.5)*.085;
+        const rr=.96+(r()-.5)*.12;
         const lobe=new T.Mesh(lobeGeo,this.organicLobeMaterial);
         lobe.position.set(
           Math.sin(phi)*Math.cos(theta)*rr,
           Math.cos(phi)*rr,
           Math.sin(phi)*Math.sin(theta)*rr*.71
         );
-        const k=.72+r()*.38;
+        const k=.78+r()*.38;
         lobe.scale.set(
-          k*(.86+r()*.38),
-          k*(.90+r()*.42),
-          k*(.78+r()*.30)
+          k*(.88+r()*.30),
+          k*(.90+r()*.34),
+          k*(.82+r()*.26)
         );
         lobe.rotation.set(r()*2.4,r()*2.4,r()*2.4);
         lobe.userData.phase=r()*Math.PI*2;
@@ -1239,25 +1240,55 @@
       this.seams=[];
 
       this.mechInnerMaterial=new T.MeshPhysicalMaterial({
-        color:0x7b8582,metalness:.018,roughness:.26,
-        emissive:0x030708,emissiveIntensity:.012,
-        clearcoat:.58,clearcoatRoughness:.14,
+        color:0x11191b,metalness:.54,roughness:.24,
+        emissive:0x020607,emissiveIntensity:.010,
+        clearcoat:.34,clearcoatRoughness:.22,
+        envMapIntensity:.86,
+        transparent:true,opacity:0,depthWrite:true
+      });
+
+      this.mechEnergyMaterial=new T.MeshPhysicalMaterial({
+        color:0x1b7890,metalness:.015,roughness:.10,
+        emissive:0x0bcdf4,emissiveIntensity:2.2,
+        clearcoat:1,clearcoatRoughness:.035,
+        transmission:.10,thickness:.10,ior:1.42,
         transparent:true,opacity:0,depthWrite:false
       });
       this.mechEyeCore=new T.Mesh(
-        new T.PlaneGeometry(.008,.40,1,1),
-        this.mechInnerMaterial
+        new T.OctahedronGeometry(.072,2),
+        this.mechEnergyMaterial
       );
-      this.mechEyeCore.rotation.z=.028;
-      this.mechEyeCore.position.set(.002,.008,.625);
+      this.mechEyeCore.scale.set(.82,1.05,.46);
+      this.mechEyeCore.rotation.set(.08,-.12,.16);
+      this.mechEyeCore.position.set(.004,.006,.650);
       this.mechanicalGroup.add(this.mechEyeCore);
+
+      this.mechRibMaterial=this.mechInnerMaterial.clone();
+      this.mechRibs=[];
+      const ribDefs=[
+        [[-.28,.27,.585],[-.18,.16,.625],[-.095,.060,.652]],
+        [[ .25,.25,.592],[ .16,.15,.630],[ .092,.055,.654]],
+        [[-.26,-.24,.590],[-.17,-.15,.628],[-.090,-.050,.653]],
+        [[ .27,-.22,.586],[ .17,-.14,.628],[ .092,-.047,.653]],
+        [[-.31,.035,.575],[-.22,.020,.612],[-.115,.014,.646]],
+        [[ .30,-.020,.578],[ .21,-.005,.615],[ .112,.008,.646]]
+      ];
+      ribDefs.forEach((pts,index)=>{
+        const curve=new T.CatmullRomCurve3(pts.map(p=>new T.Vector3(...p)),false,'centripetal');
+        const rib=new T.Mesh(
+          new T.TubeGeometry(curve,22,index<4?.014:.010,7,false),
+          this.mechRibMaterial
+        );
+        this.mechanicalGroup.add(rib);
+        this.mechRibs.push(rib);
+      });
 
       const branchMat=this.mechInnerMaterial.clone();
       this.mechFissureBranches=[];
-      for(const [y,rz,s] of [[.10,.68,.36],[-.07,-.62,.28]]){
-        const branch=new T.Mesh(new T.CylinderGeometry(.004,.0018,.16,7,1),branchMat.clone());
+      for(const [y,rz,s] of [[.12,.68,.42],[-.09,-.62,.34],[.03,1.05,.28]]){
+        const branch=new T.Mesh(new T.CylinderGeometry(.0045,.0018,.17,7,1),branchMat.clone());
         branch.rotation.z=rz;
-        branch.position.set(rz>0?.024:-.022,y,.632);
+        branch.position.set(rz>0?.024:-.020,y,.638);
         branch.scale.setScalar(s);
         this.mechanicalGroup.add(branch);
         this.mechFissureBranches.push(branch);
@@ -1268,16 +1299,16 @@
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechEyeCorona=new T.Sprite(new T.SpriteMaterial({
-        map:this.makeGlowTexture(),color:0xa8c9c9,
+        map:this.makeGlowTexture(),color:0x51e6ff,
         transparent:true,opacity:0,depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.07,.48,1);
-      this.mechEyeCorona.position.set(0,.006,.625);
+      this.mechEyeCorona.scale.set(.25,.25,1);
+      this.mechEyeCorona.position.set(.004,.006,.642);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
-      this.mechLight=new T.PointLight(0xc2d0cc,0,2.1,2);
-      this.mechLight.position.set(0,.006,.76);
+      this.mechLight=new T.PointLight(0x35dfff,0,2.6,2);
+      this.mechLight.position.set(.004,.006,.80);
       this.mechanicalGroup.add(this.mechLight);
       this.mechanicalGroup.scale.setScalar(.001);
     }
