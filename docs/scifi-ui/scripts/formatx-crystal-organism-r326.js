@@ -84,6 +84,7 @@
   root.dataset.fxNativeMagVisualR1587 = 'photographic-hand-cut-smoky-obsidian-broad-readable-facets-subtle-mineral-fissure-no-eye';
   root.dataset.fxNativeMagVisualR1588 = 'cinematic-polished-smoky-obsidian-three-quarter-soft-facet-transitions-studio-reflections-subtle-fissure';
   root.dataset.fxNativeMagVisualR1589 = 'intro-matched-polished-obsidian-hand-cut-twenty-side-mineral-planes-three-quarter-subtle-fissure';
+  root.dataset.fxNativeMagVisualR1590 = 'cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -294,7 +295,7 @@
         sphere.push(...item.sphere);
         crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
-        crystalNormals.push(...crystalNormal);
+        crystalNormals.push(...(item.crystalNormal || crystalNormal));
         uvs.push(...item.uv);
         barycentrics.push(...barycentric[index]);
         facets.push(facet);
@@ -369,32 +370,65 @@
       const top=bodyVertex([-.145,.845,-.045],[.5,0]);
       const bottom=bodyVertex([.020,-.805,.015],[.5,1]);
 
+      /* R1590 — reproduce Three.js-style averaged vertex normals on the native
+         hand-cut body. The geometry remains faceted, but polished reflections
+         now travel continuously across neighbouring mineral planes instead of
+         breaking into a low-poly game asset. */
+      const bodyFaces=[];
+      const queueBodyFace=(vertices,facet)=>{
+        let faceNormal=normalize(cross(
+          subtract(vertices[1].crystal,vertices[0].crystal),
+          subtract(vertices[2].crystal,vertices[0].crystal)
+        ));
+        const centre=[0,1,2].map(axis=>
+          (vertices[0].crystal[axis]+vertices[1].crystal[axis]+vertices[2].crystal[axis])/3
+        );
+        if(dot(faceNormal,centre)<0){
+          vertices=[vertices[0],vertices[2],vertices[1]];
+          faceNormal=faceNormal.map(value=>-value);
+        }
+        bodyFaces.push({vertices,facet,faceNormal});
+      };
+
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
-        triangle([top,rings[0][next],rings[0][side]],.16+.72*random(side,701));
+        queueBodyFace([top,rings[0][next],rings[0][side]],.16+.72*random(side,701));
       }
       for(let ring=0;ring<rings.length-1;ring+=1){
         for(let side=0;side<sideCount;side+=1){
           const next=(side+1)%sideCount;
           const a=rings[ring][side];
           const b=rings[ring][next];
-          const c=rings[ring+1][side];
+          const cc=rings[ring+1][side];
           const d=rings[ring+1][next];
           const facet=.14+.76*random(side+ring*17,ring*43+side);
           if((side+ring)%2===0){
-            triangle([a,b,d],facet);
-            triangle([a,d,c],facet+.013);
+            queueBodyFace([a,b,d],facet);
+            queueBodyFace([a,d,cc],facet+.013);
           }else{
-            triangle([a,b,c],facet);
-            triangle([b,d,c],facet+.013);
+            queueBodyFace([a,b,cc],facet);
+            queueBodyFace([b,d,cc],facet+.013);
           }
         }
       }
       const last=rings[rings.length-1];
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
-        triangle([last[side],last[next],bottom],.16+.72*random(side,907));
+        queueBodyFace([last[side],last[next],bottom],.16+.72*random(side,907));
       }
+
+      const normalSums=new Map();
+      for(const face of bodyFaces){
+        for(const vertexRef of face.vertices){
+          const sum=normalSums.get(vertexRef)||[0,0,0];
+          sum[0]+=face.faceNormal[0];
+          sum[1]+=face.faceNormal[1];
+          sum[2]+=face.faceNormal[2];
+          normalSums.set(vertexRef,sum);
+        }
+      }
+      for(const [vertexRef,sum] of normalSums)vertexRef.crystalNormal=normalize(sum);
+      for(const face of bodyFaces)triangle(face.vertices,face.facet);
     }
 
     /* The reference's cable/tentacle silhouette is still one native R326 draw.
@@ -403,12 +437,12 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.13 + (index % 2 ? .035 : -.025);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .44;
-      const reach = .070 + ((index*3)%5) * .008;
+      const root = .435;
+      const reach = .030 + ((index*3)%5) * .005;
       const radius = root + reach * t;
       const wave = Math.sin(t*Math.PI*1.36+index*.83)*(.010+.055*t)
         +Math.sin(t*Math.PI*.72+index*.47)*.018*t;
-      const depth = -.31 + Math.sin(t*Math.PI*1.24+index*.97)*(.007+.017*t);
+      const depth = -.39 + Math.sin(t*Math.PI*1.24+index*.97)*(.004+.010*t);
       return [
         Math.cos(baseAngle)*radius + Math.cos(sideAngle)*wave,
         Math.sin(baseAngle)*radius + Math.sin(sideAngle)*wave,
@@ -583,7 +617,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.58));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.10));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -671,7 +705,11 @@
         mineral+=vec3(.072,.086,.085)*horizonBand*.145;
         mineral+=vec3(.055,.078,.083)*fresnel*.22;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
+        float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
+        float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
         mineral+=vec3(.012,.015,.016)*(.14+.22*fillLight+.08*floorBounce);
+        mineral+=vec3(.070,.078,.077)*pow(planeKey,.72)*.22;
+        mineral+=vec3(.042,.036,.031)*pow(planeFill,.82)*.11;
         mineral+=vec3(.003,.011,.013)*smokyDepth*(.30+.70*(1.0-facing));
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         mineral+=vec3(.014,.032,.037)*edgeTransmission*.28;
@@ -793,7 +831,11 @@
         col+=vec3(.070,.084,.083)*horizonBand*.140;
         col+=vec3(.054,.077,.082)*fresnel*.215;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
+        float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
+        float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
         col+=vec3(.012,.015,.016)*(.14+.22*fillLight+.08*max(0.0,-n.y));
+        col+=vec3(.068,.076,.075)*pow(planeKey,.72)*.21;
+        col+=vec3(.040,.034,.030)*pow(planeFill,.82)*.10;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         col+=vec3(.014,.032,.037)*edgeTransmission*.28;
 
