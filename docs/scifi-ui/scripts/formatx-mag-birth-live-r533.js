@@ -962,15 +962,26 @@
         }catch(_){}
         try{syncNativeCore(fixedR,fixedTime);}catch(_){}
         try{drawParticles(fixedR,fixedTime);}catch(error){
-          console.error('FormatX R659 fixed-frame render failed:',error);
+          console.error('FormatX R1557 first fixed-frame render failed:',error);
         }
-        ROOT.dataset.fxMagBirthVisualFrameSeconds=seconds.toFixed(3);
-        ROOT.dataset.fxMagBirthVisualFrameR659='ready';
-        try{
-          document.dispatchEvent(new CustomEvent('formatx:introframe-ready',{
-            detail:{seconds,revision:'r659-deterministic-frame'}
-          }));
-        }catch(_){}
+        /* R1557: do not publish proof-ready in the same task that submitted the
+           WebGL work. A second browser frame gives ANGLE/SwiftShader one full
+           compositor turn, then the Three renderer draws the exact same fixed
+           timestamp again before the screenshot harness is released. */
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          if(finished||!overlay.isConnected)return;
+          try{drawParticles(fixedR,fixedTime);}catch(error){
+            console.error('FormatX R1557 second fixed-frame render failed:',error);
+          }
+          ROOT.dataset.fxMagBirthVisualFrameSeconds=seconds.toFixed(3);
+          ROOT.dataset.fxMagBirthVisualFrameR1557='double-render-compositor-synchronized';
+          ROOT.dataset.fxMagBirthVisualFrameR659='ready';
+          try{
+            document.dispatchEvent(new CustomEvent('formatx:introframe-ready',{
+              detail:{seconds,revision:'r1557-double-render-deterministic-frame'}
+            }));
+          }catch(_){}
+        }));
       };
       const rendererReady=filmRendererPromise
         ? Promise.race([
