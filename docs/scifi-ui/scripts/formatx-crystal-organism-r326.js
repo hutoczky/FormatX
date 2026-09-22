@@ -63,6 +63,7 @@
   root.dataset.fxNativeMagVisualR1559 = 'photographic-smoky-obsidian-irregular-monolith-antialiased-clean-surface-visible-dark-glass';
   root.dataset.fxNativeMagVisualR1560 = 'cinematic-obsidian-seed-asymmetric-smooth-volcanic-glass-local-softbox-reflections-subtle-mineral-vein';
   root.dataset.fxNativeMagVisualR1561 = 'photographic-smoky-crystal-seed-readable-mineral-planes-narrow-studio-reflections-silver-fissure';
+  root.dataset.fxNativeMagVisualR1562 = 'photographic-cut-smoky-obsidian-readable-broad-planes-no-plastic-softbox-halo-no-hud';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
@@ -475,7 +476,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.58));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.38));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -546,23 +547,25 @@
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetKey=fract(vFacet);
         float facetRand=fract(sin(facetKey*91.73+13.17)*43758.5453);
-        float facetTone=mix(.955,1.055,facetRand);
+        float facetTone=mix(.92,1.10,facetRand);
         float mineralWave=.972+.028*sin(vLocal.y*7.6+vLocal.x*4.1-vLocal.z*3.3);
 
-        float lift=sat(.24+ndl*.76+sideLight*.52+fillLight*.26);
-        vec3 glass=mix(vec3(.006,.008,.009),vec3(.072,.082,.086),lift);
+        float lift=sat(.30+ndl*.72+sideLight*.48+fillLight*.30);
+        vec3 glass=mix(vec3(.008,.011,.013),vec3(.075,.086,.090),lift);
         glass*=mix(.982,1.018,facetTone)*mineralWave*(.986+.020*micro);
-        glass+=vec3(.72,.73,.70)*keySpec*.30;
-        glass+=vec3(.22,.235,.235)*keySoft*.040;
-        glass+=vec3(.46,.50,.50)*sideSpec*.20;
+        glass+=vec3(.72,.73,.70)*keySpec*.24;
+        glass+=vec3(.22,.235,.235)*keySoft*.018;
+        glass+=vec3(.46,.50,.50)*sideSpec*.16;
         glass+=vec3(.14,.15,.145)*fillSpec*.060;
-        glass+=vec3(.62,.63,.59)*softboxA*.16;
-        glass+=vec3(.36,.42,.42)*softboxB*.15;
-        glass+=vec3(.26,.28,.27)*softboxC*.085;
-        glass+=vec3(.090,.095,.088)*horizonBand*.11;
-        glass+=vec3(.082,.104,.110)*fresnel*.24;
-        glass+=vec3(.040,.026,.018)*floorBounce*.12;
-        glass+=vec3(.013,.016,.017)*(conchoid-.5)*(.18+.82*lift);
+        glass+=vec3(.62,.63,.59)*softboxA*.11;
+        glass+=vec3(.36,.42,.42)*softboxB*.10;
+        glass+=vec3(.26,.28,.27)*softboxC*.055;
+        glass+=vec3(.095,.102,.096)*horizonBand*.14;
+        glass+=vec3(.082,.104,.110)*fresnel*.22;
+        glass+=vec3(.048,.034,.024)*floorBounce*.18;
+        float macroPlane=.5+.5*sin(atan(n.z,n.x)*5.0+n.y*2.2);
+        glass*=.95+.08*macroPlane;
+        glass+=vec3(.015,.018,.019)*(conchoid-.5)*(.10+.34*lift);
 
         vec2 fissureLocal=vec2(vLocal.x+.115,vLocal.y*1.02);
         float front=smoothstep(.28,.56,vLocal.z)*(1.0-vMorph)*(1.0-isTendril);
@@ -593,7 +596,7 @@
           ${outputName}=vec4(filmic(inner*1.10),.18);
           return;
         }
-        ${outputName}=vec4(filmic(glass*2.34),1.0);
+        ${outputName}=vec4(filmic(glass*2.26),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -638,19 +641,21 @@
         float isTendril=step(2.0,vFacet);
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float facetTone=mix(.958,1.052,facetRand);
+        float facetTone=mix(.93,1.09,facetRand);
 
-        float lift=sat(.24+ndl*.76+sideLight*.52+fillLight*.25);
-        vec3 c=mix(vec3(.006,.008,.009),vec3(.068,.078,.082),lift)*mix(.988,1.012,facetTone);
-        c+=vec3(.70,.71,.69)*keySpec*.29;
-        c+=vec3(.21,.225,.225)*keySoft*.038;
-        c+=vec3(.44,.48,.48)*sideSpec*.19;
-        c+=vec3(.60,.61,.58)*softboxA*.15;
-        c+=vec3(.34,.40,.40)*softboxB*.14;
-        c+=vec3(.24,.27,.26)*softboxC*.078;
-        c+=vec3(.086,.092,.086)*horizonBand*.105;
-        c+=vec3(.080,.102,.108)*fresnel*.235;
-        c+=vec3(.050,.036,.025)*max(0.0,-n.y)*.15;
+        float lift=sat(.30+ndl*.72+sideLight*.48+fillLight*.29);
+        vec3 c=mix(vec3(.008,.011,.013),vec3(.071,.081,.085),lift)*mix(.982,1.018,facetTone);
+        c+=vec3(.70,.71,.69)*keySpec*.23;
+        c+=vec3(.21,.225,.225)*keySoft*.018;
+        c+=vec3(.44,.48,.48)*sideSpec*.15;
+        c+=vec3(.60,.61,.58)*softboxA*.105;
+        c+=vec3(.34,.40,.40)*softboxB*.095;
+        c+=vec3(.24,.27,.26)*softboxC*.050;
+        c+=vec3(.090,.097,.091)*horizonBand*.135;
+        c+=vec3(.080,.102,.108)*fresnel*.22;
+        c+=vec3(.052,.038,.026)*max(0.0,-n.y)*.18;
+        float macroPlane=.5+.5*sin(atan(n.z,n.x)*5.0+n.y*2.2);
+        c*=.95+.075*macroPlane;
 
         vec2 f=vec2(vLocal.x+.115,vLocal.y*1.02);
         float front=smoothstep(.28,.56,vLocal.z)*(1.0-vMorph)*(1.0-isTendril);
@@ -674,7 +679,7 @@
         tendon+=vec3(.26,.29,.29)*sideSpec*.055;
         c=mix(c,tendon,tendrilMask*.985);
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.18);return;}
-        ${outputName}=vec4(filmic(c*2.36),1.0);
+        ${outputName}=vec4(filmic(c*2.28),1.0);
       }`;
 
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
@@ -1268,6 +1273,8 @@
     root.dataset.fxCoreShapeR1560='asymmetric-cinematic-seed-smoother-monolith-offset-apex-natural-shoulders';
     root.dataset.fxCoreOpticsR1561='readable-smoky-obsidian-narrow-studio-reflections-neutral-silver-fissure';
     root.dataset.fxCoreShapeR1561='elongated-irregular-crystal-seed-broad-natural-planes-no-egg-silhouette';
+    root.dataset.fxCoreOpticsR1562='broad-cut-plane-smoky-obsidian-reduced-plastic-softbox-readable-dark-mineral';
+    root.dataset.fxCoreShapeR1562='elongated-asymmetric-seed-with-readable-mineral-planes';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
