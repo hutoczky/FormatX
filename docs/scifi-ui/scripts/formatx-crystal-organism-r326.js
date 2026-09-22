@@ -96,6 +96,7 @@
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagPerformanceR1602 = 'real-frame-interval-governed-adaptive-60fps';
+  root.dataset.fxNativeMagPerformanceR1603 = 'software-lite-shader-and-geometry-hardware-photographic-adaptive-60fps';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -165,12 +166,12 @@
   /* One closed topology owns both endpoints. r442 uses a lighter phone mesh:
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
-  function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 8 : constrainedMobile ? 14 : mobile ? 16 : constrained ? 16 : 20;
-    const longitudeSegments = auditMode ? 14 : constrainedMobile ? 28 : mobile ? 32 : constrained ? 32 : 40;
-    const tendrilCount = auditMode ? 3 : mobile ? 5 : 7;
-    const tendrilSegments = auditMode ? 5 : constrainedMobile ? 14 : mobile ? 18 : constrained ? 20 : 26;
-    const tendrilSides = auditMode ? 3 : constrainedMobile ? 4 : mobile || constrained ? 5 : 7;
+  function buildOrganismGeometry(software=false) {
+    const latitudeSegments = auditMode ? 8 : software ? 10 : constrainedMobile ? 14 : mobile ? 16 : constrained ? 16 : 20;
+    const longitudeSegments = auditMode ? 14 : software ? 20 : constrainedMobile ? 28 : mobile ? 32 : constrained ? 32 : 40;
+    const tendrilCount = auditMode ? 3 : software ? 4 : mobile ? 5 : 7;
+    const tendrilSegments = auditMode ? 5 : software ? 10 : constrainedMobile ? 14 : mobile ? 18 : constrained ? 20 : 26;
+    const tendrilSides = auditMode ? 3 : software ? 4 : constrainedMobile ? 4 : mobile || constrained ? 5 : 7;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -336,7 +337,7 @@
       /* R1589 — use the same hand-cut mineral envelope as the successful late
          Three.js birth frames. The permanent MAG and cinematic handoff now share
          one silhouette language instead of drifting into a rounded pebble. */
-      const sideCount = mobile ? 52 : 60;
+      const sideCount = software ? 30 : mobile ? 46 : 60;
       const ringDefs = [
         [.84,.045,.040,-.085,-.010,.090],
         [.77,.120,.090,-.135,-.006,.080],
@@ -552,7 +553,7 @@
 
     if(!auditMode){
       const centreX=.012,centreY=-.020;
-      const bezelInner=.154,bezelOuter=.198,bezelSteps=44,bezelZ=.535;
+      const bezelInner=.154,bezelOuter=.198,bezelSteps=software?24:44,bezelZ=.535;
       for(let side=0;side<bezelSteps;side+=1){
         const a=side/bezelSteps*Math.PI*2;
         const b=(side+1)/bezelSteps*Math.PI*2;
@@ -566,8 +567,8 @@
       const lensCenter=[centreX,centreY,.541];
       const lensRadius=.147;
       const lensDepth=.078;
-      const radialSteps=8;
-      const angularSteps=40;
+      const radialSteps=software?4:8;
+      const angularSteps=software?24:40;
       function lensVertex(radial,angle){
         const rr=lensRadius*radial;
         const nx=radial*Math.cos(angle);
@@ -1064,7 +1065,87 @@
         ${outputName}=vec4(filmic(col*2.60),clamp(outAlpha,.70,1.0));
       }`;
 
-    const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
+    const softwareFragmentSource = \`\${versionLine}precision mediump float;
+      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
+      uniform vec2 uPointer;
+      \${fragmentIn} vec3 vNormal;
+      \${fragmentIn} vec3 vLocal;
+      \${fragmentIn} vec2 vUv;
+      \${fragmentIn} vec3 vBary;
+      \${fragmentIn} float vFacet;
+      \${fragmentIn} float vMorph;
+      \${webgl2 ? 'out vec4 outColor;' : ''}
+      float sat(float v){return clamp(v,0.,1.);}
+      void main(){
+        vec3 n=normalize(vNormal);
+        vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
+        vec3 key=normalize(vec3(-.53,.79,.31));
+        vec3 side=normalize(vec3(.77,.06,.64));
+        float ndl=max(dot(n,key),0.0);
+        float sideLight=max(dot(n,side),0.0);
+        float facing=sat(abs(dot(n,view)));
+        float fresnel=1.0-facing;
+        fresnel*=fresnel;
+        vec3 halfKey=normalize(key+view);
+        float spec=smoothstep(.90,.995,max(dot(n,halfKey),0.0));
+        vec3 refl=reflect(-view,n);
+        float softA=smoothstep(.55,.92,dot(refl,normalize(vec3(-.30,.42,.86))));
+        float softB=smoothstep(.60,.94,dot(refl,normalize(vec3(.68,-.18,.71))));
+
+        float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
+        float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
+        float isArmor=step(5.0,vFacet)*(1.0-step(6.0,vFacet));
+        float isLensMesh=step(6.0,vFacet);
+        float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
+        float tendrilMask=isTendril*(1.0-vMorph);
+
+        float lift=sat(.06+ndl*.30+sideLight*.22);
+        vec3 col=mix(vec3(.0015,.0025,.0032),vec3(.020,.027,.030),lift);
+        col+=vec3(.54,.57,.54)*spec*.18;
+        col+=vec3(.24,.28,.28)*softA*.16;
+        col+=vec3(.10,.13,.13)*softB*.10;
+        col+=vec3(.035,.070,.076)*fresnel*.34;
+
+        vec2 q=vLocal.xy;
+        float front=smoothstep(.18,.52,vLocal.z)*(1.0-vMorph)*bodyMask;
+        vec2 lq=vec2(q.x,(q.y-.010)*1.08);
+        float lensD=length(lq);
+        float lensOuter=(1.0-smoothstep(.128,.154,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.078,.126,lensD))*front;
+        float lensCore=(1.0-smoothstep(.028,.066,lensD))*front;
+        col=mix(col,vec3(.001,.004,.005),lensOuter*.66);
+        col+=vec3(.14,.18,.18)*(lensOuter-lensGlass)*(.08+.10*sideLight);
+        col+=vec3(.020,.055,.062)*lensGlass*(.12+.18*softA);
+        col+=vec3(.010,.060,.072)*lensCore*(.10+.18*uEnergy);
+
+        float pulse=0.0;
+        if(uSurfacePulse>=0.0){
+          float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
+          float head=mix(-.18,1.18,sat(uSurfacePulse));
+          pulse=1.0-smoothstep(.04,.10,abs(coordinate-head));
+        }
+        col+=vec3(.10,.28,.32)*pulse*(.28+.52*fresnel);
+
+        vec3 tendon=vec3(.005,.014,.017)+vec3(.07,.13,.14)*(.18*sideLight+.44*fresnel)+vec3(.30,.34,.32)*spec*.08;
+        col=mix(col,tendon,tendrilMask*.99);
+        col=mix(col,vec3(.010,.020,.023)+vec3(.15,.21,.21)*fresnel,isGlassFin*.82);
+        col=mix(col,vec3(.008,.012,.014)+vec3(.22,.24,.22)*spec*.12,isArmor*.88);
+
+        float lensRadial=length(vUv-vec2(.5));
+        float lensInner=1.0-smoothstep(.06,.20,lensRadial);
+        vec3 physicalLens=vec3(.002,.008,.011)+vec3(.018,.085,.10)*lensInner+vec3(.24,.30,.29)*softA*.10;
+        col=mix(col,physicalLens,isLensMesh*.99);
+
+        if(uLayer>.5){\${outputName}=vec4(vec3(.004,.009,.011),.15);return;}
+        col=col/(vec3(1.0)+col*1.35);
+        float alpha=1.0-tendrilMask*.30-isGlassFin*.60;
+        \${outputName}=vec4(col*2.35,clamp(alpha,.72,1.0));
+      }\`;
+
+    const fragmentSource = softwareRenderer
+      ? softwareFragmentSource
+      : (constrainedMobile || auditMode) ? constrainedFragmentSource : fullFragmentSource;
+    root.dataset.fxCoreShaderProfileR1603=softwareRenderer?'software-lite-physical-60fps':'photographic-full-or-constrained';
 
     let pendingProgram;
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
@@ -1103,7 +1184,8 @@
     return;
 
     function finishBoot(program) {
-    const geometry=buildOrganismGeometry();
+    const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreGeometryProfileR1603=softwareRenderer?'software-lite-photographic':'hardware-full-photographic';
     const buffers=geometry.arrays.map(()=>gl.createBuffer());
     const attributeNames=['aSphere','aCrystal','aSphereNormal','aCrystalNormal','aUv','aBary','aFacet'];
     const attributes=attributeNames.map(name=>gl.getAttribLocation(program,name));
@@ -1158,10 +1240,10 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=auditMode?1:softwareRenderer ? 0.82:constrainedMobile?1.18:mobile?1.50:constrained?1.18:1.65;
+      const baseCap=auditMode?1:softwareRenderer ? 0.62:constrainedMobile?1.18:mobile?1.50:constrained?1.18:1.65;
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=auditMode?390000:softwareRenderer?190000:constrainedMobile?390000:mobile?760000:constrained?560000:1150000;
+      const baseBudget=auditMode?390000:softwareRenderer?115000:constrainedMobile?390000:mobile?760000:constrained?560000:1150000;
       const budget=Math.max(145000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
