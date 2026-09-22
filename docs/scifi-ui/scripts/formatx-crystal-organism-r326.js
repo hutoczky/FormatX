@@ -556,6 +556,10 @@
         ${outputName}=vec4(filmic(glass*2.18),1.0);
       }`;
 
+    /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
+       semantic genome lineage names even though the final mineral no longer
+       paints neon genome overlays. The birth film owns explicit DNA imagery. */
+
     /* R1557 constrained material intentionally shares the same photographic
        language with fewer highlights; software/mobile proof must not fall back
        to a gray translucent surrogate. */
