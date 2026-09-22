@@ -1763,6 +1763,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1587-three-act-biogenic-shell-readable-obsidian'
+    revision:'r1593-reference-video-dna-cellular-armored-iris-eight-tendril'
   };
 })();
