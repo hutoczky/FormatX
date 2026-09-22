@@ -83,6 +83,7 @@
   root.dataset.fxNativeMagVisualR1586 = 'three-quarter-hand-cut-living-obsidian-large-energy-chamber-visible-faceted-depth-reference-lab-scale';
   root.dataset.fxNativeMagVisualR1587 = 'photographic-hand-cut-smoky-obsidian-broad-readable-facets-subtle-mineral-fissure-no-eye';
   root.dataset.fxNativeMagVisualR1588 = 'cinematic-polished-smoky-obsidian-three-quarter-soft-facet-transitions-studio-reflections-subtle-fissure';
+  root.dataset.fxNativeMagVisualR1589 = 'intro-matched-polished-obsidian-hand-cut-twenty-side-mineral-planes-three-quarter-subtle-fissure';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -157,7 +158,7 @@
   function buildOrganismGeometry() {
     const latitudeSegments = auditMode ? 8 : constrainedMobile ? 14 : mobile ? 16 : constrained ? 16 : 20;
     const longitudeSegments = auditMode ? 14 : constrainedMobile ? 28 : mobile ? 32 : constrained ? 32 : 40;
-    const tendrilCount = auditMode ? 4 : mobile ? 4 : 6;
+    const tendrilCount = auditMode ? 3 : mobile ? 3 : 4;
     const tendrilSegments = auditMode ? 5 : constrainedMobile ? 14 : mobile ? 18 : constrained ? 20 : 26;
     const tendrilSides = auditMode ? 3 : constrainedMobile ? 4 : mobile || constrained ? 5 : 7;
     const sphere = [];
@@ -316,15 +317,20 @@
          A small set of offset polygonal rings creates intentional broad mineral
          planes. This removes the rounded-pot/egg silhouette produced by a
          latitude sphere while preserving the same single WebGL draw and morph. */
-      const sideCount = mobile ? 12 : 14;
+      /* R1589 — use the same hand-cut mineral envelope as the successful late
+         Three.js birth frames. The permanent MAG and cinematic handoff now share
+         one silhouette language instead of drifting into a rounded pebble. */
+      const sideCount = mobile ? 20 : 24;
       const ringDefs = [
-        [.79,.075,.052,-.145,-.028,.110],
-        [.58,.325,.235,-.180,-.012,.082],
-        [.31,.500,.345,-.092,.018,.040],
-        [.03,.465,.355,.018,.006,-.018],
-        [-.27,.485,.335,.072,.012,.008],
-        [-.55,.305,.218,.082,.018,.060],
-        [-.76,.070,.050,.018,.008,.102]
+        [.78,.10,.075,-.155,-.030,.120],
+        [.65,.27,.185,-.215,-.020,.100],
+        [.47,.43,.305,-.135,.010,.060],
+        [.24,.49,.360,-.045,.015,.020],
+        [.02,.44,.350,.040,.000,-.020],
+        [-.22,.47,.320,.085,.010,.000],
+        [-.44,.35,.245,.120,.020,.050],
+        [-.62,.22,.150,.090,.020,.090],
+        [-.75,.08,.060,.030,.010,.120]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -348,8 +354,8 @@
           const a=sideIndex/sideCount*Math.PI*2+phase;
           const irregular=
             1
-            +Math.sin(sideIndex*1.73+ringIndex*.91)*.024
-            +Math.cos(sideIndex*.91-ringIndex*.73)*.012;
+            +Math.sin(sideIndex*2.31+ringIndex*.91)*.036
+            +Math.cos(sideIndex*1.37-ringIndex*.73)*.018;
           const cutFront=1-.120*Math.pow(Math.max(0,Math.cos(a-.52)),4.0);
           const cutRear=1-.075*Math.pow(Math.max(0,Math.cos(a+2.18)),5.0);
           const cutSide=1-.055*Math.pow(Math.max(0,Math.cos(a-2.54)),6.0);
@@ -397,8 +403,8 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.13 + (index % 2 ? .035 : -.025);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .46;
-      const reach = .14 + ((index*3)%5) * .012;
+      const root = .44;
+      const reach = .070 + ((index*3)%5) * .008;
       const radius = root + reach * t;
       const wave = Math.sin(t*Math.PI*1.36+index*.83)*(.010+.055*t)
         +Math.sin(t*Math.PI*.72+index*.47)*.018*t;
@@ -521,8 +527,8 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.10) contrast(1.07) saturate(.92)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.10) contrast(1.07) saturate(.92)','important');
+    canvas.style.setProperty('filter','brightness(1.08) contrast(1.14) saturate(.90)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.08) contrast(1.14) saturate(.90)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -577,7 +583,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.82));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.58));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
