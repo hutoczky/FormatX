@@ -12,6 +12,16 @@
     Number(navigator.deviceMemory || 8) <= 4
   );
 
+  /* R1603 — mobile/coarse pointers use the same full-page habitat through
+     compositor-owned CSS layers. A full-viewport Canvas2D redraw is visually
+     redundant there and can monopolise the main thread on weak/software GPUs. */
+  if (MOBILE.matches) {
+    ROOT.dataset.fxLivingHabitatR1530='css-compositor-mobile-habitat';
+    ROOT.dataset.fxLivingHabitatSchedulerR1603='zero-main-thread-mobile-compositor';
+    ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-css':'mobile-css';
+    return;
+  }
+
   const canvas = document.createElement('canvas');
   canvas.className = 'fx-living-habitat-r1530';
   canvas.setAttribute('aria-hidden','true');
