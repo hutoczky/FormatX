@@ -4,6 +4,13 @@
    hero copy, MAG stage and controls from changing layout after first paint. */
 
 @media (min-width: 901px) {
+  /* R1611: final r244 desktop state already hides this legacy action cluster.
+     Match that state on the first paint so the topbar never shifts later. */
+  html body.living-architecture .topbar > .header-actions {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
   html body.living-architecture main#main-content section#hero.scene.hero {
     position: relative !important;
     display: block !important;
@@ -233,3 +240,5 @@
     gap: 26px 30px !important;
   }
 }
+
+/* production-r1611-zero-cls-desktop-header-actions */
