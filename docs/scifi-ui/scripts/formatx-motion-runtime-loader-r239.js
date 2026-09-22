@@ -18,6 +18,7 @@ root.dataset.fxFullSuiteR474='r474-mobile-mag';
 root.dataset.fxDialogueSurfaceR475='booting';
 root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
+root.dataset.fxIntroAwareMagR1541='no-concurrent-intro-and-permanent-webgl';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -121,7 +122,8 @@ function activateMagRuntime(source='startup'){
   ensureCurrentMag();
 }
 function onMagBirthWarmup(event){
-  activateMagRuntime(String(event?.detail?.source||'cinematic-warmup'));
+  const source=String(event?.detail?.source||'cinematic-warmup');
+  root.dataset.fxIntroAwareMagR618='warmup-received-deferred-'+source;
 }
 
 function ensureStaticMotionCss(){
@@ -194,7 +196,7 @@ ensureLanguageToggle();
 if(magBirthActive()){
   root.dataset.fxIntroAwareMagR618='waiting-for-core-formation';
   document.addEventListener('formatx:magbirthcorewarmup',onMagBirthWarmup,{once:true,passive:true});
-  document.addEventListener('formatx:magbirthcomplete',()=>activateMagRuntime('cinematic-complete-failsafe'),{once:true,passive:true});
+  document.addEventListener('formatx:magbirthcomplete',()=>activateMagRuntime('cinematic-complete'),{once:true,passive:true});
 }else{
   activateMagRuntime('startup-no-cinematic');
 }
