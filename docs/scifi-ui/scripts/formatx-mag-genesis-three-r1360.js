@@ -76,8 +76,10 @@
       this.renderer.toneMappingExposure=1.24;
 
       this.scene=new THREE.Scene();
-      this.scene.background=new THREE.Color(0x030608);
-      this.scene.fog=new THREE.FogExp2(0x030608,0.018);
+      this.scene.background=new THREE.Color(0x010304);
+      this.scene.fog=new THREE.FogExp2(0x010304,0.021);
+      this.studioEnvironment=this.makeStudioEnvironment();
+      this.scene.environment=this.studioEnvironment;
 
       this.camera=new THREE.PerspectiveCamera(42,1,0.05,80);
       this.camera.position.set(0,0.12,7.25);
@@ -107,29 +109,75 @@
       this.resize();
     }
 
+    makeStudioEnvironment(){
+      const T=this.THREE;
+      const c=document.createElement('canvas');
+      c.width=768;c.height=384;
+      const x=c.getContext('2d');
+      x.fillStyle='#010304';
+      x.fillRect(0,0,c.width,c.height);
+      const glow=(cx,cy,rx,ry,stops)=>{
+        x.save();
+        x.translate(cx,cy);
+        x.scale(rx,ry);
+        const g=x.createRadialGradient(0,0,0,0,0,1);
+        stops.forEach(([p,color])=>g.addColorStop(p,color));
+        x.fillStyle=g;
+        x.fillRect(-1,-1,2,2);
+        x.restore();
+      };
+      glow(190,122,128,230,[
+        [0,'rgba(235,244,240,.82)'],
+        [.20,'rgba(188,208,205,.48)'],
+        [.56,'rgba(70,92,94,.16)'],
+        [1,'rgba(0,0,0,0)']
+      ]);
+      glow(570,188,90,190,[
+        [0,'rgba(210,218,208,.46)'],
+        [.24,'rgba(134,143,136,.22)'],
+        [.62,'rgba(55,63,61,.08)'],
+        [1,'rgba(0,0,0,0)']
+      ]);
+      glow(470,324,240,70,[
+        [0,'rgba(118,91,68,.22)'],
+        [.42,'rgba(61,47,37,.10)'],
+        [1,'rgba(0,0,0,0)']
+      ]);
+      const ceiling=x.createLinearGradient(0,0,0,120);
+      ceiling.addColorStop(0,'rgba(170,190,188,.16)');
+      ceiling.addColorStop(1,'rgba(0,0,0,0)');
+      x.fillStyle=ceiling;
+      x.fillRect(0,0,c.width,120);
+      const tex=new T.CanvasTexture(c);
+      tex.mapping=T.EquirectangularReflectionMapping;
+      tex.colorSpace=T.SRGBColorSpace;
+      tex.needsUpdate=true;
+      return tex;
+    }
+
     makeLights(){
       const T=this.THREE;
-      // R1520 — brighter neutral studio key while preserving a black chamber.
-      this.scene.add(new T.HemisphereLight(0xc6d0d0,0x050607,0.62));
-      const key=new T.DirectionalLight(0xfffbf4,3.85);
+      // R1583 — softer photographic studio lighting plus procedural environment reflections.
+      this.scene.add(new T.HemisphereLight(0xb8c4c4,0x030405,0.46));
+      const key=new T.DirectionalLight(0xfffbf3,3.10);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
-      const rim=new T.PointLight(0xb3cbd0,7.4,12,2);
+      const rim=new T.PointLight(0xaec6ca,5.0,12,2);
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
-      const bioticFill=new T.PointLight(0x756f79,3.20,10,2);
+      const bioticFill=new T.PointLight(0x6f6972,2.20,10,2);
       bioticFill.position.set(-2.7,-.9,2.8);
       this.scene.add(bioticFill);
-      const warmBounce=new T.PointLight(0xc9aa87,1.10,8,2);
+      const warmBounce=new T.PointLight(0xc3a17e,.76,8,2);
       warmBounce.position.set(2.4,2.1,1.1);
       this.scene.add(warmBounce);
 
-      const softbox=new T.SpotLight(0xf5f7f2,9.4,15,Math.PI*.31,.84,1.60);
+      const softbox=new T.SpotLight(0xf4f5ef,6.8,15,Math.PI*.31,.88,1.62);
       softbox.position.set(-4.5,5.6,6.2);
       softbox.target.position.set(.25,.12,0);
       this.scene.add(softbox,softbox.target);
 
-      const edgeSoftbox=new T.SpotLight(0xa1b5bd,5.4,13,Math.PI*.33,.88,1.72);
+      const edgeSoftbox=new T.SpotLight(0x9bafb7,4.0,13,Math.PI*.33,.90,1.74);
       edgeSoftbox.position.set(4.8,1.5,4.1);
       edgeSoftbox.target.position.set(-.18,-.08,.1);
       this.scene.add(edgeSoftbox,edgeSoftbox.target);
@@ -175,7 +223,20 @@
         wallMat
       );
       tunnel.position.set(0,0,-.62);
+      tunnel.visible=false;
       group.add(tunnel);
+
+      const floor=new T.Mesh(
+        new T.PlaneGeometry(12,10,1,1),
+        new T.MeshPhysicalMaterial({
+          color:0x020405,metalness:.04,roughness:.82,
+          clearcoat:.04,clearcoatRoughness:.72,
+          transparent:true,opacity:.62,envMapIntensity:.28
+        })
+      );
+      floor.rotation.x=-Math.PI/2;
+      floor.position.set(0,-2.20,-1.25);
+      group.add(floor);
 
       // Deep rear bulkhead.
       const bulkhead=new T.Mesh(
@@ -666,11 +727,12 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x394142,roughness:.48,metalness:.003,
-        clearcoat:.24,clearcoatRoughness:.30,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.004,
+        color:0x343d3e,roughness:.44,metalness:.002,
+        clearcoat:.18,clearcoatRoughness:.34,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.006,
         transparent:false,opacity:1,
-        emissive:0x010203,emissiveIntensity:.002,
+        emissive:0x010203,emissiveIntensity:.0015,
+        envMapIntensity:.72,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -699,18 +761,21 @@
         const asym=1+n.x*.026+n.y*.016-n.z*.010;
         p.multiplyScalar((1+fold)*asym);
         const taper=1.02-.16*Math.pow(Math.abs(n.y),.76);
-        p.x*=.76*taper;
-        p.y*=1.18;
-        p.z*=.64*(1.0-.09*Math.abs(n.y));
-        p.x+=n.y*.082-n.z*.020;
-        p.y+=n.x*.042+Math.pow(Math.max(n.y,0),4.0)*.054;
-        p.z-=n.x*.024;
-        const frontDent=Math.pow(Math.max(n.z,0),2.4)*(.030+.018*Math.max(-n.x,0));
-        p.z-=frontDent;
-        const topCap=1.08+p.x*.10-p.z*.035;
-        const bottomCap=-1.10-p.x*.045+p.z*.028;
-        if(p.y>topCap)p.y=topCap+(p.y-topCap)*.18;
-        if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.20;
+        p.x*=.72*taper;
+        p.y*=1.12;
+        p.z*=.60*(1.0-.08*Math.abs(n.y));
+        p.x+=n.y*.105-n.z*.022;
+        p.y+=n.x*.034+Math.pow(Math.max(n.y,0),4.0)*.040;
+        p.z-=n.x*.026;
+        const equator=Math.pow(Math.max(0,1-n.y*n.y),.72);
+        const lobeA=Math.sin(az*3.0+el*.62)*.060*equator;
+        const lobeB=Math.cos(az*2.0-el*.86)*.030*equator;
+        p.x*=1+lobeA*.58;
+        p.z*=1-lobeA*.34+lobeB*.38;
+        const sideDent=Math.pow(Math.max(0,Math.cos(az-.74)),4.0)*equator;
+        p.x-=n.x*sideDent*.070;
+        p.z-=n.z*sideDent*.055;
+        p.y+=Math.sin(az*1.70)*.032*equator;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
@@ -1048,10 +1113,11 @@
       this.mineralRoughnessTexture=mineralRoughness;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x101719,metalness:.010,roughness:.32,
-        emissive:0x000101,emissiveIntensity:.0005,
-        clearcoat:.52,clearcoatRoughness:.18,
-        transmission:.010,thickness:.24,ior:1.46,
+        color:0x0a1113,metalness:.008,roughness:.26,
+        emissive:0x000101,emissiveIntensity:.0004,
+        clearcoat:.60,clearcoatRoughness:.14,
+        transmission:.012,thickness:.26,ior:1.47,
+        envMapIntensity:1.05,
         flatShading:false,
         transparent:false,opacity:1
       });
@@ -1088,18 +1154,17 @@
          another deformed sphere, so the late intro cannot regress to an egg/pot. */
       const sideCount=(this.deterministicFrame||this.highDetail)?40:32;
       const ringDefs=[
-        [.79,.12,.10,-.150,-.025,.120],
-        [.70,.24,.18,-.180,-.016,.100],
-        [.58,.34,.25,-.160,-.004,.078],
-        [.44,.40,.31,-.110,.008,.050],
-        [.29,.44,.35,-.060,.012,.024],
-        [.13,.46,.36,-.010,.008,-.002],
-        [-.04,.45,.35,.035,.002,-.026],
-        [-.20,.42,.32,.070,.006,-.018],
-        [-.36,.36,.28,.095,.012,.022],
-        [-.51,.29,.22,.102,.018,.060],
-        [-.64,.20,.16,.085,.015,.090],
-        [-.73,.12,.10,.060,.008,.112]
+        [.80,.10,.08,-.175,-.030,.126],
+        [.69,.23,.17,-.205,-.020,.106],
+        [.55,.37,.27,-.175,-.004,.080],
+        [.38,.44,.34,-.105,.010,.050],
+        [.19,.46,.37,-.040,.012,.018],
+        [.00,.43,.36,.025,.004,-.014],
+        [-.18,.39,.32,.074,.008,-.016],
+        [-.36,.34,.27,.105,.016,.024],
+        [-.52,.27,.21,.112,.024,.060],
+        [-.65,.18,.14,.090,.020,.092],
+        [-.75,.08,.065,.040,.010,.118]
       ];
       const positions=[];
       const indices=[];
@@ -1117,16 +1182,20 @@
             1
             +Math.sin(sideIndex*2.31+ringIndex*.91)*.020
             +Math.cos(sideIndex*1.37-ringIndex*.73)*.011;
+          const cutFront=1-.080*Math.pow(Math.max(0,Math.cos(a-.52)),4.0);
+          const cutRear=1-.050*Math.pow(Math.max(0,Math.cos(a+2.18)),5.0);
+          const cutSide=1-.035*Math.pow(Math.max(0,Math.cos(a-2.54)),6.0);
+          const radialCut=cutFront*cutRear*cutSide;
           ring.push(pushVertex(
-            ox+Math.cos(a)*rx*irregular,
+            ox+Math.cos(a)*rx*irregular*radialCut,
             y,
-            oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)
+            oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut
           ));
         }
         ringIndices.push(ring);
       });
-      const topIndex=pushVertex(-.165,.845,-.040);
-      const bottomIndex=pushVertex(.060,-.795,.020);
+      const topIndex=pushVertex(-.185,.855,-.050);
+      const bottomIndex=pushVertex(.035,-.805,.018);
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
         indices.push(topIndex,ringIndices[0][next],ringIndices[0][side]);
@@ -1438,15 +1507,15 @@
       this.silverMaterial.opacity=0;
       if(this.crownMaterial)this.crownMaterial.opacity=0;
       this.mechEdgeMaterial.opacity=0;
-      this.mechInnerMaterial.opacity=.11*fissureGrow;
-      if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=.11*fissureGrow;
+      this.mechInnerMaterial.opacity=.16*fissureGrow;
+      if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=.16*fissureGrow;
       if(this.seamMaterial)this.seamMaterial.opacity=0;
       this.mechInnerRing.visible=false;
       if(this.mechCradle)this.mechCradle.visible=false;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=0;
       if(this.mechLight)this.mechLight.intensity=fissureGrow*(.035+settle*.020);
       this.mechFissureBranches?.forEach(branch=>{
-        if(branch.material)branch.material.opacity=.055*fissureGrow;
+        if(branch.material)branch.material.opacity=.070*fissureGrow;
       });
 
       if(this.mechBody){
@@ -1524,7 +1593,7 @@
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.38+flash*.008+after*.003;
+      this.renderer.toneMappingExposure=1.30+flash*.008+after*.003;
       this.coreLight.intensity+=flash*.10+after*.025;
       if(this.glowSprite){
         const g=1+flash*.72;
@@ -1584,6 +1653,7 @@
       });
       this.mineralRoughnessTexture?.dispose?.();
       this.organicSurfaceTexture?.dispose?.();
+      this.studioEnvironment?.dispose?.();
       this.renderer.dispose();
     }
   }
@@ -1626,7 +1696,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1582-scaled-bioceramic-to-slender-satin-obsidian-handoff'
+        revision:'r1583-biogenic-seed-to-geological-studio-obsidian-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1675,10 +1745,11 @@
   document.documentElement.dataset.fxMagBirthProofR1580='photographic-bioceramic-seed-sculpted-obsidian-handoff-soft-studio-light';
   document.documentElement.dataset.fxMagBirthProofR1581='truncated-smooth-obsidian-no-box-reflections-bioceramic-handoff';
   document.documentElement.dataset.fxMagBirthProofR1582='scaled-bioceramic-seed-dark-habitat-slender-satin-obsidian-continuous-size-handoff';
+  document.documentElement.dataset.fxMagBirthProofR1583='asymmetric-biogenic-seed-procedural-studio-environment-geological-obsidian-handoff-no-room-box';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1582-three-act-scaled-bioceramic-to-slender-satin-obsidian'
+    revision:'r1583-three-act-biogenic-seed-to-geological-studio-obsidian'
   };
 })();
