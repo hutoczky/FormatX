@@ -153,15 +153,15 @@
         side:T.BackSide
       });
       const panelMat=new T.MeshPhysicalMaterial({
-        color:0x071014,metalness:.34,roughness:.64,
-        emissive:0x010304,emissiveIntensity:.012,
-        clearcoat:.04,clearcoatRoughness:.66,
-        transparent:true,opacity:.070
+        color:0x071014,metalness:.12,roughness:.78,
+        emissive:0x010304,emissiveIntensity:.006,
+        clearcoat:.02,clearcoatRoughness:.72,
+        transparent:true,opacity:.030
       });
       const darkPanelMat=new T.MeshPhysicalMaterial({
-        color:0x020405,metalness:.18,roughness:.78,
+        color:0x010203,metalness:.02,roughness:.95,
         emissive:0x000000,emissiveIntensity:0,
-        transparent:true,opacity:.055
+        transparent:true,opacity:.018
       });
       const lightMat=new T.MeshBasicMaterial({
         color:0xb5d3d4,transparent:true,opacity:.006,
@@ -183,6 +183,7 @@
         darkPanelMat
       );
       bulkhead.position.z=-3.02;
+      bulkhead.visible=false;
       group.add(bulkhead);
 
       // Asymmetric wall ribs. They establish scale and depth without forming a ring.
@@ -665,11 +666,11 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x30383a,roughness:.32,metalness:.004,
-        clearcoat:.50,clearcoatRoughness:.15,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.007,
+        color:0x394142,roughness:.48,metalness:.003,
+        clearcoat:.24,clearcoatRoughness:.30,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.004,
         transparent:false,opacity:1,
-        emissive:0x010304,emissiveIntensity:.004,
+        emissive:0x010203,emissiveIntensity:.002,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -699,11 +700,17 @@
         p.multiplyScalar((1+fold)*asym);
         const taper=1.02-.16*Math.pow(Math.abs(n.y),.76);
         p.x*=.76*taper;
-        p.y*=1.22;
-        p.z*=.65*(1.0-.09*Math.abs(n.y));
-        p.x+=n.y*.070-n.z*.016;
-        p.y+=n.x*.034+Math.pow(Math.max(n.y,0),4.0)*.080;
-        p.z-=n.x*.020;
+        p.y*=1.18;
+        p.z*=.64*(1.0-.09*Math.abs(n.y));
+        p.x+=n.y*.082-n.z*.020;
+        p.y+=n.x*.042+Math.pow(Math.max(n.y,0),4.0)*.054;
+        p.z-=n.x*.024;
+        const frontDent=Math.pow(Math.max(n.z,0),2.4)*(.030+.018*Math.max(-n.x,0));
+        p.z-=frontDent;
+        const topCap=1.08+p.x*.10-p.z*.035;
+        const bottomCap=-1.10-p.x*.045+p.z*.028;
+        if(p.y>topCap)p.y=topCap+(p.y-topCap)*.18;
+        if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.20;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
@@ -713,11 +720,11 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x667175,roughness:.25,metalness:.002,
-        clearcoat:.56,clearcoatRoughness:.13,
-        transmission:.010,thickness:.08,ior:1.36,
+        color:0x697274,roughness:.36,metalness:.001,
+        clearcoat:.30,clearcoatRoughness:.26,
+        transmission:.006,thickness:.06,ior:1.34,
         transparent:true,opacity:0,depthWrite:false,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.002,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0015,
         side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
@@ -1041,10 +1048,10 @@
       this.mineralRoughnessTexture=mineralRoughness;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x192124,metalness:.014,roughness:.19,
-        emissive:0x000102,emissiveIntensity:.001,
-        clearcoat:.84,clearcoatRoughness:.070,
-        transmission:.006,thickness:.22,ior:1.45,
+        color:0x101719,metalness:.010,roughness:.32,
+        emissive:0x000101,emissiveIntensity:.0005,
+        clearcoat:.52,clearcoatRoughness:.18,
+        transmission:.010,thickness:.24,ior:1.46,
         flatShading:false,
         transparent:false,opacity:1
       });
@@ -1065,7 +1072,7 @@
         material.roughnessMap=mineralRoughness;
         if(this.highDetail||this.deterministicFrame){
           material.bumpMap=mineralRoughness;
-          material.bumpScale=.0032;
+          material.bumpScale=.0020;
         }
         material.needsUpdate=true;
       }
@@ -1079,19 +1086,20 @@
       /* R1576 — hand-cut obsidian body matching the native R326 hero.
          Broad offset polygonal rings create natural mineral planes instead of
          another deformed sphere, so the late intro cannot regress to an egg/pot. */
-      const sideCount=(this.deterministicFrame||this.highDetail)?32:26;
+      const sideCount=(this.deterministicFrame||this.highDetail)?40:32;
       const ringDefs=[
-        [.76,.24,.19,-.18,-.014,.10],
-        [.62,.35,.28,-.16,-.004,.075],
-        [.46,.46,.35,-.115,.008,.045],
-        [.30,.54,.40,-.065,.006,.018],
-        [.14,.59,.44,-.018,.002,-.012],
-        [-.04,.61,.46,.020,.000,-.034],
-        [-.22,.59,.44,.058,.006,-.010],
-        [-.40,.52,.38,.090,.012,.028],
-        [-.56,.42,.30,.110,.016,.062],
-        [-.68,.31,.23,.112,.014,.092],
-        [-.75,.23,.17,.095,.008,.115]
+        [.79,.12,.10,-.150,-.025,.120],
+        [.70,.24,.18,-.180,-.016,.100],
+        [.58,.34,.25,-.160,-.004,.078],
+        [.44,.40,.31,-.110,.008,.050],
+        [.29,.44,.35,-.060,.012,.024],
+        [.13,.46,.36,-.010,.008,-.002],
+        [-.04,.45,.35,.035,.002,-.026],
+        [-.20,.42,.32,.070,.006,-.018],
+        [-.36,.36,.28,.095,.012,.022],
+        [-.51,.29,.22,.102,.018,.060],
+        [-.64,.20,.16,.085,.015,.090],
+        [-.73,.12,.10,.060,.008,.112]
       ];
       const positions=[];
       const indices=[];
@@ -1107,18 +1115,18 @@
           const a=sideIndex/sideCount*Math.PI*2+phase;
           const irregular=
             1
-            +Math.sin(sideIndex*2.31+ringIndex*.91)*.038
-            +Math.cos(sideIndex*1.37-ringIndex*.73)*.020;
+            +Math.sin(sideIndex*2.31+ringIndex*.91)*.020
+            +Math.cos(sideIndex*1.37-ringIndex*.73)*.011;
           ring.push(pushVertex(
             ox+Math.cos(a)*rx*irregular,
             y,
-            oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.032)
+            oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)
           ));
         }
         ringIndices.push(ring);
       });
-      const topIndex=pushVertex(-.175,.815,-.045);
-      const bottomIndex=pushVertex(.125,-.805,.040);
+      const topIndex=pushVertex(-.165,.845,-.040);
+      const bottomIndex=pushVertex(.060,-.795,.020);
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
         indices.push(topIndex,ringIndices[0][next],ringIndices[0][side]);
@@ -1381,11 +1389,11 @@
       const visible=grow*(1-crystallise*.96);
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
-      this.organicGroup.scale.set(bodyScale*.94,bodyScale*1.00,bodyScale*.96);
+      this.organicGroup.scale.set(bodyScale*.64,bodyScale*.69,bodyScale*.66);
 
       this.organicShellMaterial.opacity=1;
       this.organicLobeMaterial.opacity=0;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.022*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.012*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=.006*visible;
       this.organicHoodMaterial.opacity=0;
@@ -1420,9 +1428,9 @@
       this.mechanicalReveal=bodyGrow;
       this.mechanicalGroup.visible=bodyGrow>.002;
       this.mechanicalGroup.scale.set(
-        .001+bodyGrow*.82,
-        .001+bodyGrow*.90,
-        .001+bodyGrow*.86
+        .001+bodyGrow*1.02,
+        .001+bodyGrow*1.10,
+        .001+bodyGrow*1.04
       );
 
       this.mechMaterial.opacity=1;
@@ -1478,13 +1486,13 @@
         y=Math.cos(time*.00018)*.003;
       }else if(t<7.25){
         const k=smooth((t-5.55)/1.70);
-        z=mix(5.70,6.08,k);
+        z=mix(5.70,5.80,k);
         y=mix(0,.002,k);
       }else if(t<9.10){
-        z=6.08+Math.sin(time*.00018)*.008;
+        z=5.80+Math.sin(time*.00018)*.006;
         y=.002;
       }else{
-        z=mix(6.08,5.94,smooth((t-9.10)/.60));
+        z=mix(5.80,5.72,smooth((t-9.10)/.60));
         y=.002;
       }
       if(this.width<this.height)z+=.58;
@@ -1618,7 +1626,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1581-photographic-bioceramic-truncated-smooth-obsidian-handoff'
+        revision:'r1582-scaled-bioceramic-to-slender-satin-obsidian-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1666,10 +1674,11 @@
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1580='photographic-bioceramic-seed-sculpted-obsidian-handoff-soft-studio-light';
   document.documentElement.dataset.fxMagBirthProofR1581='truncated-smooth-obsidian-no-box-reflections-bioceramic-handoff';
+  document.documentElement.dataset.fxMagBirthProofR1582='scaled-bioceramic-seed-dark-habitat-slender-satin-obsidian-continuous-size-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1581-three-act-photographic-bioceramic-to-truncated-obsidian'
+    revision:'r1582-three-act-scaled-bioceramic-to-slender-satin-obsidian'
   };
 })();
