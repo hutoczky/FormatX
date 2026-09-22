@@ -82,6 +82,7 @@
   root.dataset.fxNativeMagVisualR1585 = 'photographic-living-obsidian-crystal-recessed-cyan-energy-chamber-organic-metal-ribs-short-tendrils';
   root.dataset.fxNativeMagVisualR1586 = 'three-quarter-hand-cut-living-obsidian-large-energy-chamber-visible-faceted-depth-reference-lab-scale';
   root.dataset.fxNativeMagVisualR1587 = 'photographic-hand-cut-smoky-obsidian-broad-readable-facets-subtle-mineral-fissure-no-eye';
+  root.dataset.fxNativeMagVisualR1588 = 'cinematic-polished-smoky-obsidian-three-quarter-soft-facet-transitions-studio-reflections-subtle-fissure';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -521,7 +522,7 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     canvas.style.setProperty('filter','brightness(1.10) contrast(1.07) saturate(.92)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.045) contrast(1.12) saturate(1.00)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.10) contrast(1.07) saturate(.92)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -576,7 +577,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.68));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.82));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -586,9 +587,9 @@
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.018);
         vec3 local=(base+normal*living)*layerScale*heartbeat;
         local.xy+=uPointer*.038*uLayer;
-        float yaw=.22+uRotation.y+uPointer.x*.20+uTime*.018;
-        float pitch=-.075+uRotation.x-uPointer.y*.14+.012*sin(uTime*.19);
-        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*.030+.008*sin(uTime*.23);
+        float yaw=.34+uRotation.y+uPointer.x*.18+uTime*.014;
+        float pitch=-.058+uRotation.x-uPointer.y*.12+.010*sin(uTime*.19);
+        float roll=-.058+uRotation.z+uPointer.x*uPointer.y*.026+.006*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
@@ -647,22 +648,22 @@
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.22+ndl*.64+sideLight*.50+fillLight*.28);
+        float lift=sat(.12+ndl*.48+sideLight*.34+fillLight*.18);
         float facetTone=mix(.985,1.015,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
-        vec3 mineral=mix(vec3(.0060,.0085,.0100),vec3(.052,.065,.070),lift)*facetTone;
+        vec3 mineral=mix(vec3(.0028,.0045,.0056),vec3(.032,.042,.046),lift)*facetTone;
         mineral*=.965+.030*smokyDepth+.008*mineralGrain;
-        mineral+=vec3(.62,.60,.55)*keySpec*.105;
-        mineral+=vec3(.14,.14,.13)*keySoft*.026;
-        mineral+=vec3(.24,.29,.30)*sideSpec*.070;
-        mineral+=vec3(.24,.27,.26)*softboxA*.085;
-        mineral+=vec3(.15,.18,.19)*softboxB*.060;
-        mineral+=vec3(.48,.50,.47)*studioRibbonA*.120;
-        mineral+=vec3(.25,.22,.19)*studioRibbonB*.060;
+        mineral+=vec3(.78,.76,.70)*keySpec*.185;
+        mineral+=vec3(.18,.18,.17)*keySoft*.034;
+        mineral+=vec3(.34,.39,.40)*sideSpec*.120;
+        mineral+=vec3(.36,.39,.37)*softboxA*.120;
+        mineral+=vec3(.22,.26,.27)*softboxB*.082;
+        mineral+=vec3(.58,.59,.54)*studioRibbonA*.190;
+        mineral+=vec3(.39,.29,.20)*studioRibbonB*.095;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
-        mineral+=vec3(.052,.066,.066)*horizonBand*.125;
-        mineral+=vec3(.040,.062,.068)*fresnel*.18;
+        mineral+=vec3(.072,.086,.085)*horizonBand*.145;
+        mineral+=vec3(.055,.078,.083)*fresnel*.22;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         mineral+=vec3(.012,.015,.016)*(.14+.22*fillLight+.08*floorBounce);
         mineral+=vec3(.003,.011,.013)*smokyDepth*(.30+.70*(1.0-facing));
@@ -727,7 +728,7 @@
           ${outputName}=vec4(vec3(.004,.009,.011),.16);
           return;
         }
-        ${outputName}=vec4(filmic(mineral*3.18),1.0);
+        ${outputName}=vec4(filmic(mineral*3.10),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -773,18 +774,18 @@
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.22+ndl*.62+sideLight*.49+fillLight*.27);
+        float lift=sat(.12+ndl*.47+sideLight*.33+fillLight*.17);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
-        vec3 col=mix(vec3(.0060,.0085,.0100),vec3(.050,.063,.068),lift);
+        vec3 col=mix(vec3(.0028,.0045,.0056),vec3(.031,.041,.045),lift);
         col*=.966+.030*smoke;
-        col+=vec3(.60,.59,.54)*keySpec*.110;
-        col+=vec3(.24,.29,.30)*sideSpec*.078;
-        col+=vec3(.23,.26,.25)*softboxA*.080;
-        col+=vec3(.11,.14,.15)*softboxB*.036;
-        col+=vec3(.46,.48,.45)*studioRibbonA*.115;
-        col+=vec3(.30,.26,.21)*studioRibbonB*.074;
-        col+=vec3(.052,.066,.066)*horizonBand*.120;
-        col+=vec3(.040,.062,.068)*fresnel*.18;
+        col+=vec3(.76,.74,.69)*keySpec*.180;
+        col+=vec3(.34,.39,.40)*sideSpec*.118;
+        col+=vec3(.35,.38,.36)*softboxA*.116;
+        col+=vec3(.21,.25,.26)*softboxB*.078;
+        col+=vec3(.56,.57,.53)*studioRibbonA*.184;
+        col+=vec3(.38,.29,.21)*studioRibbonB*.092;
+        col+=vec3(.070,.084,.083)*horizonBand*.140;
+        col+=vec3(.054,.077,.082)*fresnel*.215;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
         col+=vec3(.012,.015,.016)*(.14+.22*fillLight+.08*max(0.0,-n.y));
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
@@ -839,7 +840,7 @@
         col=mix(col,tendon,tendrilMask*.995);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
-        ${outputName}=vec4(filmic(col*3.16),1.0);
+        ${outputName}=vec4(filmic(col*3.08),1.0);
       }`;
 
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
