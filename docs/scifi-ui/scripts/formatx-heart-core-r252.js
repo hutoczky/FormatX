@@ -4,7 +4,7 @@
   const root = document.documentElement;
   const VERSION = 'heart-core-r252';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260920-r595-semantic-hit-owner';
+  const STYLE = '/scifi-ui/styles/formatx-heart-core-r252.css?v=20260920-r595-semantic-hit-owner-r1562-no-circular-hud';
   const LOOP_OVERSHOOT = 28;
   let touchActive = false;
   let idleTimer = 0;
