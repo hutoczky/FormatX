@@ -74,6 +74,7 @@
   root.dataset.fxNativeMagVisualR1577 = 'canonical-neutral-hand-cut-obsidian-shard-surface-energy-compliant';
   root.dataset.fxNativeMagVisualR1578 = 'tall-seven-ring-asymmetric-obsidian-seed-readable-planes-photographic-lighting';
   root.dataset.fxNativeMagVisualR1579 = 'softbox-feathered-tall-obsidian-seed-integrated-tendrils-natural-facet-transitions';
+  root.dataset.fxNativeMagVisualR1580 = 'photographic-smoky-obsidian-sculpture-smooth-broad-facets-soft-mineral-depth-no-eye-short-rooted-tendrils';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -307,15 +308,17 @@
          A small set of offset polygonal rings creates intentional broad mineral
          planes. This removes the rounded-pot/egg silhouette produced by a
          latitude sphere while preserving the same single WebGL draw and morph. */
-      const sideCount = mobile ? 12 : 14;
+      const sideCount = mobile ? 18 : 22;
       const ringDefs = [
-        [.72,.28,.23,-.18,-.010,.14],
-        [.50,.44,.34,-.13,.010,.07],
-        [.24,.57,.42,-.06,.000,-.01],
-        [-.06,.62,.46,.020,.000,-.05],
-        [-.32,.56,.40,.080,.010,.02],
-        [-.56,.43,.31,.120,.020,.09],
-        [-.72,.27,.20,.100,.010,.16]
+        [.78,.20,.17,-.20,-.015,.11],
+        [.64,.32,.26,-.17,-.002,.08],
+        [.46,.45,.34,-.12,.010,.045],
+        [.24,.55,.41,-.055,.005,.000],
+        [.00,.60,.45,.015,.000,-.035],
+        [-.22,.58,.43,.060,.008,-.005],
+        [-.42,.50,.36,.095,.015,.035],
+        [-.60,.37,.27,.115,.018,.075],
+        [-.76,.22,.16,.095,.010,.12]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -346,8 +349,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.215,.915,-.040],[.5,0]);
-      const bottom=bodyVertex([.145,-.895,.045],[.5,1]);
+      const top=bodyVertex([-.245,.945,-.055],[.5,0]);
+      const bottom=bodyVertex([.155,-.925,.050],[.5,1]);
 
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
@@ -383,8 +386,8 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.13 + (index % 2 ? .035 : -.025);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .54;
-      const reach = .30 + ((index*3)%5) * .024;
+      const root = .61;
+      const reach = .20 + ((index*3)%5) * .016;
       const radius = root + reach * t;
       const wave = Math.sin(t*Math.PI*1.36+index*.83)*(.010+.055*t)
         +Math.sin(t*Math.PI*.72+index*.47)*.018*t;
@@ -405,7 +408,7 @@
       const guide = Math.abs(tangent[1]) > .86 ? [1, 0, 0] : [0, 1, 0];
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
-      const tubeRadius = (.020 * (1 - t * .82) + .0032) * (mobile ? .92 : 1);
+      const tubeRadius = (.016 * (1 - t * .84) + .0026) * (mobile ? .90 : 1);
       const rootDirection = normalize([p[0], p[1], p[2] * .72]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
@@ -507,8 +510,8 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.025) contrast(1.16) saturate(1.00)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.025) contrast(1.16) saturate(1.00)','important');
+    canvas.style.setProperty('filter','brightness(1.055) contrast(1.075) saturate(.96)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.055) contrast(1.075) saturate(.96)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -563,7 +566,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.27));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.58));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -588,7 +591,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.620':'.625'};
+        projected*= ${mobile?'.650':'.650'};
         projected.y+=${mobile?'.055':'.028'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
@@ -632,23 +635,23 @@
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.10+ndl*.60+sideLight*.44+fillLight*.20);
-        float facetTone=mix(.988,1.012,facetRand);
-        float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
-        vec3 mineral=mix(vec3(.0025,.0040,.0050),vec3(.030,.038,.041),lift)*facetTone;
-        mineral*=.94+.055*smokyDepth;
-        mineral+=vec3(.72,.72,.68)*keySpec*.40;
-        mineral+=vec3(.20,.20,.18)*keySoft*.040;
-        mineral+=vec3(.42,.47,.47)*sideSpec*.25;
-        mineral+=vec3(.54,.55,.52)*softboxA*.27;
-        mineral+=vec3(.31,.38,.40)*softboxB*.22;
-        mineral+=vec3(.24,.26,.25)*ceilingBand*.11;
+        float lift=sat(.16+ndl*.62+sideLight*.48+fillLight*.24);
+        float facetTone=mix(.994,1.006,facetRand);
+        float smokyDepth=.5+.5*sin(vLocal.x*3.2+vLocal.y*2.1-vLocal.z*2.8);
+        vec3 mineral=mix(vec3(.0055,.0080,.0095),vec3(.046,.055,.058),lift)*facetTone;
+        mineral*=.965+.040*smokyDepth;
+        mineral+=vec3(.62,.62,.59)*keySpec*.30;
+        mineral+=vec3(.24,.24,.22)*keySoft*.055;
+        mineral+=vec3(.38,.43,.44)*sideSpec*.21;
+        mineral+=vec3(.44,.46,.44)*softboxA*.20;
+        mineral+=vec3(.28,.34,.35)*softboxB*.17;
+        mineral+=vec3(.22,.24,.23)*ceilingBand*.13;
         mineral+=vec3(.090,.104,.101)*horizonBand*.19;
         mineral+=vec3(.070,.095,.102)*fresnel*.30;
         mineral+=vec3(.050,.034,.023)*floorBounce*.12;
         /* Keep shadow planes readable like photographed black glass: a neutral
            studio fill lifts structure without turning the body gray. */
-        mineral+=vec3(.030,.035,.036)*(.18+.26*fillLight+.12*floorBounce);
+        mineral+=vec3(.044,.048,.049)*(.24+.34*fillLight+.14*floorBounce);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -679,7 +682,7 @@
           ${outputName}=vec4(vec3(.004,.009,.011),.16);
           return;
         }
-        ${outputName}=vec4(filmic(mineral*3.08),1.0);
+        ${outputName}=vec4(filmic(mineral*2.72),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -723,10 +726,10 @@
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.11+ndl*.62+sideLight*.45+fillLight*.20);
-        float smoke=.5+.5*sin(vLocal.x*4.0+vLocal.y*2.6-vLocal.z*3.4);
-        vec3 col=mix(vec3(.0025,.0040,.0050),vec3(.031,.039,.042),lift);
-        col*=.95+.050*smoke;
+        float lift=sat(.16+ndl*.64+sideLight*.48+fillLight*.24);
+        float smoke=.5+.5*sin(vLocal.x*3.2+vLocal.y*2.1-vLocal.z*2.8);
+        vec3 col=mix(vec3(.0055,.0080,.0095),vec3(.047,.056,.059),lift);
+        col*=.968+.038*smoke;
         col+=vec3(.68,.68,.64)*keySpec*.35;
         col+=vec3(.40,.46,.47)*sideSpec*.22;
         col+=vec3(.52,.54,.51)*softboxA*.25;
@@ -734,7 +737,7 @@
         col+=vec3(.086,.100,.098)*horizonBand*.18;
         col+=vec3(.070,.096,.104)*fresnel*.28;
         col+=vec3(.050,.034,.023)*max(0.0,-n.y)*.12;
-        col+=vec3(.030,.035,.036)*(.18+.26*fillLight+.12*max(0.0,-n.y));
+        col+=vec3(.044,.048,.049)*(.24+.34*fillLight+.14*max(0.0,-n.y));
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -759,7 +762,7 @@
         col=mix(col,tendon,tendrilMask*.995);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
-        ${outputName}=vec4(filmic(col*3.10),1.0);
+        ${outputName}=vec4(filmic(col*2.74),1.0);
       }`;
 
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
@@ -1374,6 +1377,8 @@
     root.dataset.fxCoreOpticsR1578='readable-shadow-planes-neutral-studio-fill-rectangular-softbox-reflections';
     root.dataset.fxCoreShapeR1579='tall-hand-cut-seed-integrated-six-rooted-tendrils-larger-hero-presence';
     root.dataset.fxCoreOpticsR1579='feathered-studio-reflections-natural-facet-transition-no-white-rectangles';
+    root.dataset.fxCoreShapeR1580='nine-offset-rings-eighteen-to-twenty-two-sided-sculpted-tall-obsidian-form-short-rooted-tendrils';
+    root.dataset.fxCoreOpticsR1580='lifted-black-glass-midtones-soft-feathered-reflections-smooth-normals-subtle-fissure';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
