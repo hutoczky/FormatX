@@ -454,3 +454,53 @@ body.living-architecture #hero :is(
   opacity:0!important;
 }
 /* production-r1558-native-r326-only-clean-hero */
+
+
+/* R1560 — the MAG interaction surface is invisible. It remains a large touch
+   target, but never paints a circular active/hover target around the mineral. */
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .fx-mag-heart-hit-r252::before{
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:none!important;
+  filter:none!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root body.living-architecture
+  #hero .fx-mag-heart-hit-r252:focus-visible{
+    outline:0!important;
+    box-shadow:none!important;
+  }
+}
+
+/* The chamber reads as one continuous physical environment: broad off-axis
+   softboxes, shallow mineral haze and no radial target graphics. */
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture{
+  background:
+    linear-gradient(104deg,rgba(0,0,0,.44) 0 7%,rgba(73,108,116,.055) 7.35% 7.65%,transparent 8.2% 64%,rgba(105,139,145,.040) 64.35% 64.65%,transparent 65.2% 100%),
+    linear-gradient(76deg,transparent 0 29%,rgba(177,213,218,.025) 29.3% 29.55%,transparent 29.85% 80%,rgba(129,169,179,.022) 80.2% 80.45%,transparent 80.8% 100%),
+    radial-gradient(ellipse 68% 46% at 72% -6%,rgba(150,205,211,.080),transparent 72%),
+    radial-gradient(ellipse 72% 36% at 18% 92%,rgba(40,82,92,.052),transparent 76%),
+    linear-gradient(180deg,#010305 0%,#031016 27%,#02090e 61%,#010305 100%)!important;
+}
+
+/* Final photometric trim: retain true black obsidian while making its physical
+   planes readable on OLED/mobile without restoring the gray CGI look. */
+html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  filter:brightness(1.075) contrast(1.075) saturate(.92)!important;
+  -webkit-filter:brightness(1.075) contrast(1.075) saturate(.92)!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html[data-fx-crystal-organism-r326="ready"]:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.10) contrast(1.065) saturate(.90)!important;
+    -webkit-filter:brightness(1.10) contrast(1.065) saturate(.90)!important;
+  }
+}
+/* production-r1560-invisible-heart-hit-continuous-cinematic-habitat */
