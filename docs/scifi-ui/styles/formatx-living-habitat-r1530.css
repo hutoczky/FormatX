@@ -263,7 +263,15 @@ body.living-architecture #hero :is(
   .fx-r155-heartbeat-wave,
   .fx-core-live-r147-orbit,
   .fx-core-live-r147-orbit-b,
-  .fx-core-live-r147-orbit-c
+  .fx-core-live-r147-orbit-c,
+  .fx-r168-orbit,
+  .fx-r168-orbit-b,
+  .fx-r168-caustic,
+  .fx-r168-spectrum,
+  .fx-r168-flare,
+  .fx-r168-shockwave,
+  .fx-r168-interaction-wave,
+  .fx-r168-spark
 ) {
   display:none!important;
   visibility:hidden!important;
@@ -352,3 +360,17 @@ html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state] 
   }
 }
 /* production-r1541-zero-idle-habitat-zero-cls-content */
+
+
+/* R1553 — the native mineral is the only local MAG visual owner. Remove the
+   remaining R168 orbital/caustic compatibility layers from the photographic habitat. */
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero :is(
+  .fx-r168-orbit,.fx-r168-orbit-b,.fx-r168-caustic,.fx-r168-spectrum,
+  .fx-r168-flare,.fx-r168-shockwave,.fx-r168-interaction-wave,.fx-r168-spark
+){
+  display:none!important;visibility:hidden!important;opacity:0!important;
+  border:0!important;background:none!important;box-shadow:none!important;
+  filter:none!important;animation:none!important;
+}
+/* production-r1553-native-mag-only-no-legacy-orbit */
