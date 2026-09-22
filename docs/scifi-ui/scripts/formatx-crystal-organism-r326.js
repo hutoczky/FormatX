@@ -90,6 +90,7 @@
   root.dataset.fxNativeMagVisualR1593 = 'photoreal-black-glass-organism-broad-irregular-mineral-clear-glass-lens-seven-living-tendrils';
   root.dataset.fxNativeMagVisualR1594 = 'sculpted-black-glass-core-physical-dome-lens-clear-bioglass-fins-visible-living-tendrils';
   root.dataset.fxNativeMagVisualR1595 = 'four-petal-black-glass-armor-smoked-iris-metal-bezel-clear-living-glass-appendages';
+  root.dataset.fxNativeMagVisualR1596 = 'subdivided-curved-armor-petals-swept-bioglass-membranes-convex-smoked-lens-visible-tendrils';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -510,15 +511,23 @@
       }
     }
 
-    /* R1100 — real front armor plates in the existing single native draw. */
-    function armorVertex(position, uv=[.5,.5]) {
+    /* R1596 — sculpted physical front architecture. The old broad triangle
+       plates read as a low-poly propeller in real phone captures. Build four
+       curved, subdivided armor petals plus four swept bio-glass membranes
+       instead; all remain inside the single canonical R326 WebGL draw. */
+    function surfaceVertex(position, normal=null, uv=[.5,.5], sphereRadius=.91) {
       const dir=normalize(position);
-      return {
-        sphere: dir.map(value => value * .91),
-        crystal: position,
-        sphereNormal: dir,
+      const item={
+        sphere:dir.map(value=>value*sphereRadius),
+        crystal:position,
+        sphereNormal:dir,
         uv
       };
+      if(normal)item.crystalNormal=normalize(normal);
+      return item;
+    }
+    function armorVertex(position, uv=[.5,.5]) {
+      return surfaceVertex(position,null,uv,.91);
     }
     function armorTri(a,b,c,facet=2.40) {
       triangle([
@@ -531,46 +540,119 @@
       armorTri(a,b,c,facet);
       armorTri(a,c,d,facet);
     }
+    function appendSurfaceGrid(rows, facetBase){
+      for(let y=0;y<rows.length-1;y+=1){
+        const a=rows[y],b=rows[y+1];
+        for(let x=0;x<a.length-1;x+=1){
+          const p0=a[x],p1=a[x+1],p2=b[x],p3=b[x+1];
+          const facet=facetBase+y*.009+x*.004;
+          triangle([p0,p1,p3],facet);
+          triangle([p0,p3,p2],facet+.002);
+        }
+      }
+    }
 
-    /* R1594 — physical clear bio-glass fins and a real convex lens are appended
-       to the same native geometry. Material ids live in vFacet:
-       0..1 body, 3.x tendrils, 4.x clear fins, 6.x physical lens. */
     if(!auditMode){
-      const finFacet=4.35;
-      armorQuad([-.39,.49,.30],[-.88,.76,.18],[-.78,.16,.29],[-.43,.11,.43],finFacet);
-      armorQuad([ .43,.44,.29],[ .89,.66,.14],[ .78,.08,.30],[ .42,.06,.43],finFacet+.08);
-      armorQuad([-.48,.08,.34],[-1.00,.18,.18],[-.89,-.30,.22],[-.43,-.26,.40],finFacet+.16);
-      armorQuad([ .49,.02,.34],[ .98,.12,.16],[ .86,-.38,.22],[ .42,-.28,.40],finFacet+.24);
-      armorQuad([-.38,-.34,.30],[-.72,-.70,.16],[-.34,-.82,.14],[-.20,-.47,.42],finFacet+.32);
-      armorQuad([ .35,-.34,.30],[ .76,-.72,.15],[ .36,-.86,.13],[ .18,-.48,.42],finFacet+.40);
+      const centreX=.015,centreY=-.018;
 
-      /* Four front armor petals create the reference's purposeful organism-device
-         silhouette while the closed obsidian body remains behind them. */
-      const armorFacet=5.24;
-      const hub=[.015,-.018,.525];
-      armorTri(hub,[-.285,.13,.485],[-.045,.79,.360],armorFacet);
-      armorTri(hub,[-.045,.79,.360],[.285,.15,.485],armorFacet+.04);
-      armorTri(hub,[.285,.15,.485],[.79,-.015,.355],[.20,-.275,.485],armorFacet+.08);
-      armorTri(hub,[.20,-.275,.485],[.045,-.80,.355],[-.20,-.285,.485],armorFacet+.12);
-      armorTri(hub,[-.20,-.285,.485],[-.77,-.06,.355],[-.285,.13,.485],armorFacet+.16);
+      const petalLength=[.64,.58,.61,.56];
+      const petalSweep=[-.065,.055,-.045,.070];
+      const petalTwist=[.018,-.024,.026,-.014];
+      for(let petal=0;petal<4;petal+=1){
+        const baseAngle=Math.PI*.5-petal*Math.PI*.5;
+        const radialSteps=7;
+        const widthSteps=6;
+        const rows=[];
+        for(let ri=0;ri<=radialSteps;ri+=1){
+          const u=ri/radialSteps;
+          const centreRadius=.155+petalLength[petal]*u;
+          const width=.50*(1-u*.70)+.075;
+          const bend=petalSweep[petal]*Math.sin(Math.PI*u);
+          const row=[];
+          for(let wi=0;wi<=widthSteps;wi+=1){
+            const v=wi/widthSteps*2-1;
+            const angle=baseAngle+bend+v*width*(.52+.34*(1-u));
+            const radial=centreRadius*(1-.055*v*v)+.015*Math.sin(v*Math.PI)*Math.sin(Math.PI*u);
+            const z=.535
+              +.105*Math.sin(Math.PI*u)*(1-.42*v*v)
+              -.105*u
+              +petalTwist[petal]*v*Math.sin(Math.PI*u);
+            const position=[
+              centreX+Math.cos(angle)*radial,
+              centreY+Math.sin(angle)*radial,
+              z
+            ];
+            const normal=normalize([
+              Math.cos(angle)*(.16+.08*u),
+              Math.sin(angle)*(.16+.08*u),
+              1.0
+            ]);
+            row.push(surfaceVertex(position,normal,[wi/widthSteps,u],.90));
+          }
+          rows.push(row);
+        }
+        appendSurfaceGrid(rows,5.20+petal*.10);
+      }
 
-      /* Physical metal bezel around the true lens dome. */
-      const bezelInner=.146,bezelOuter=.184,bezelSteps=32,bezelZ=.520;
+      const glassBaseAngles=[
+        Math.PI*.25,
+        Math.PI*.75,
+        Math.PI*1.25,
+        Math.PI*1.75
+      ];
+      for(let wing=0;wing<glassBaseAngles.length;wing+=1){
+        const radialSteps=6;
+        const widthSteps=4;
+        const rows=[];
+        const direction=wing%2?1:-1;
+        for(let ri=0;ri<=radialSteps;ri+=1){
+          const u=ri/radialSteps;
+          const centreRadius=.43+.56*u;
+          const sweep=direction*.20*Math.sin(Math.PI*u)+(.025*(wing-1.5))*u;
+          const halfWidth=.16*(1-u*.54)+.035;
+          const row=[];
+          for(let wi=0;wi<=widthSteps;wi+=1){
+            const v=wi/widthSteps*2-1;
+            const angle=glassBaseAngles[wing]+sweep+v*halfWidth;
+            const radial=centreRadius*(1-.028*v*v);
+            const z=.405
+              +.115*Math.sin(Math.PI*u)*(1-.34*v*v)
+              -.100*u
+              +direction*.018*v*Math.sin(Math.PI*u);
+            const position=[
+              centreX+Math.cos(angle)*radial,
+              centreY+Math.sin(angle)*radial,
+              z
+            ];
+            const normal=normalize([
+              Math.cos(angle)*.13,
+              Math.sin(angle)*.13,
+              1.0
+            ]);
+            row.push(surfaceVertex(position,normal,[wi/widthSteps,u],.88));
+          }
+          rows.push(row);
+        }
+        appendSurfaceGrid(rows,4.20+wing*.11);
+      }
+
+      /* Physical metal bezel around a real convex smoked-glass dome. */
+      const bezelInner=.154,bezelOuter=.196,bezelSteps=40,bezelZ=.535;
       for(let side=0;side<bezelSteps;side+=1){
         const a=side/bezelSteps*Math.PI*2;
         const b=(side+1)/bezelSteps*Math.PI*2;
-        const p0=[.015+Math.cos(a)*bezelInner,-.018+Math.sin(a)*bezelInner,bezelZ];
-        const p1=[.015+Math.cos(b)*bezelInner,-.018+Math.sin(b)*bezelInner,bezelZ];
-        const p2=[.015+Math.cos(b)*bezelOuter,-.018+Math.sin(b)*bezelOuter,bezelZ];
-        const p3=[.015+Math.cos(a)*bezelOuter,-.018+Math.sin(a)*bezelOuter,bezelZ];
+        const p0=[centreX+Math.cos(a)*bezelInner,centreY+Math.sin(a)*bezelInner,bezelZ];
+        const p1=[centreX+Math.cos(b)*bezelInner,centreY+Math.sin(b)*bezelInner,bezelZ];
+        const p2=[centreX+Math.cos(b)*bezelOuter,centreY+Math.sin(b)*bezelOuter,bezelZ];
+        const p3=[centreX+Math.cos(a)*bezelOuter,centreY+Math.sin(a)*bezelOuter,bezelZ];
         armorQuad(p0,p1,p2,p3,5.74);
       }
 
-      const lensCenter=[.015,-.018,.525];
-      const lensRadius=.135;
-      const lensDepth=.070;
-      const radialSteps=6;
-      const angularSteps=28;
+      const lensCenter=[centreX,centreY,.540];
+      const lensRadius=.148;
+      const lensDepth=.086;
+      const radialSteps=7;
+      const angularSteps=36;
       function lensVertex(radial,angle){
         const rr=lensRadius*radial;
         const nx=radial*Math.cos(angle);
@@ -581,7 +663,7 @@
           lensCenter[1]+rr*Math.sin(angle),
           lensCenter[2]+lensDepth*nz
         ];
-        const normal=normalize([nx,ny,nz*1.9]);
+        const normal=normalize([nx,ny,nz*1.72]);
         const dir=normalize(crystalPosition);
         return {
           sphere:dir.map(value=>value*.88),
@@ -591,7 +673,7 @@
           uv:[.5+.5*nx,.5+.5*ny]
         };
       }
-      const centre=lensVertex(0,0);
+      const lensCentre=lensVertex(0,0);
       let previous=null;
       for(let ring=1;ring<=radialSteps;ring+=1){
         const radial=ring/radialSteps;
@@ -599,7 +681,7 @@
         if(ring===1){
           for(let side=0;side<angularSteps;side+=1){
             const next=(side+1)%angularSteps;
-            triangle([centre,current[next],current[side]],6.42);
+            triangle([lensCentre,current[next],current[side]],6.42);
           }
         }else{
           for(let side=0;side<angularSteps;side+=1){
@@ -892,17 +974,18 @@
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
-        vec3 tendon=vec3(.010,.018,.022)+vec3(.090,.112,.116)*(.18*sideLight+.10*ndl+.24*fresnel);
-        tendon+=vec3(.022,.13,.16)*cableSegment*.040;
-        tendon+=vec3(.42,.48,.47)*sideSpec*.065;
-        tendon+=vec3(.30,.34,.33)*softboxA*.050;
+        vec3 tendon=vec3(.020,.038,.043)+vec3(.14,.18,.19)*(.20*sideLight+.12*ndl+.30*fresnel);
+        tendon+=vec3(.030,.17,.20)*cableSegment*.052;
+        tendon+=vec3(.66,.72,.68)*sideSpec*.095;
+        tendon+=vec3(.52,.57,.54)*softboxA*.082;
+        tendon+=vec3(.20,.30,.31)*edgeTransmission*.20;
         mineral=mix(mineral,tendon,tendrilMask*.995);
 
         if(uLayer>.5){
           ${outputName}=vec4(vec3(.004,.009,.011),.16);
           return;
         }
-        float outAlpha=1.0-tendrilMask*.28-glassFinMask*.22;
+        float outAlpha=1.0-tendrilMask*.16-glassFinMask*.34;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
         ${outputName}=vec4(filmic(mineral*2.60),clamp(outAlpha,.68,1.0));
       }`;
@@ -1050,13 +1133,14 @@
         col=mix(col,physicalLens,lensMeshMask*.997);
 
         float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
-        vec3 tendon=vec3(.010,.018,.022)+vec3(.088,.110,.114)*(.18*sideLight+.10*ndl+.24*fresnel);
-        tendon+=vec3(.020,.13,.16)*segment*.040;
-        tendon+=vec3(.38,.44,.43)*sideSpec*.060;
+        vec3 tendon=vec3(.020,.036,.041)+vec3(.13,.17,.18)*(.20*sideLight+.12*ndl+.29*fresnel);
+        tendon+=vec3(.028,.16,.19)*segment*.050;
+        tendon+=vec3(.58,.65,.63)*sideSpec*.088;
+        tendon+=vec3(.42,.48,.46)*softboxA*.070;
         col=mix(col,tendon,tendrilMask*.995);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
-        float outAlpha=1.0-tendrilMask*.26-glassFinMask*.20;
+        float outAlpha=1.0-tendrilMask*.15-glassFinMask*.32;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
         ${outputName}=vec4(filmic(col*2.60),clamp(outAlpha,.70,1.0));
       }`;
@@ -1353,7 +1437,7 @@
       gl.disable(gl.CULL_FACE);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-      root.dataset.fxCorePassModelR1450='single-four-petal-armor-smoked-lens-bioglass-fins-and-tendrils-r1595';
+      root.dataset.fxCorePassModelR1450='single-subdivided-curved-petals-swept-bioglass-smoked-lens-tendrils-r1596';
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
