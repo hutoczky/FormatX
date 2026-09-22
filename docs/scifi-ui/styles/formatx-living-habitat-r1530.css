@@ -984,3 +984,29 @@ body.living-architecture #hero.hero::after{
   opacity:0!important;
 }
 /* production-r1595-retire-r179-circular-field */
+
+
+/* R1603 — mobile habitat remains alive without a full-screen JS canvas.
+   Only transform/opacity animate, so the compositor can keep the background
+   breathing without consuming the main-thread 60 Hz frame budget. */
+@keyframes fxHabitatAmbientR1603{
+  0%{transform:translate3d(-.35%,0,0) scale(1.006);opacity:.92}
+  50%{transform:translate3d(.25%,-.18%,0) scale(1.012);opacity:1}
+  100%{transform:translate3d(.42%,.10%,0) scale(1.008);opacity:.95}
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html body.living-architecture::after{
+    animation:fxHabitatAmbientR1603 12s ease-in-out infinite alternate!important;
+    will-change:transform,opacity;
+    transform-origin:50% 44%;
+  }
+  .fx-living-habitat-r1530{display:none!important}
+}
+@media (prefers-reduced-motion:reduce){
+  html body.living-architecture::after{
+    animation:none!important;
+    transform:none!important;
+    will-change:auto!important;
+  }
+}
+/* production-r1603-mobile-compositor-habitat */
