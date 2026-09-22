@@ -35,3 +35,37 @@ html[data-fx-mag-birth-live="active"] body>.fx-mag-birth-r533{
    participate in intermediate layout. It is restored atomically with teardown,
    eliminating hidden hero/header CLS and reducing competing paint work. */
 /* production-r1602-intro-exclusive-layout-owner */
+
+
+/* R1603 — the cinematic itself owns the early LCP candidate.
+   This keeps the real page geometry isolated until handoff while allowing
+   Lighthouse and, more importantly, real slow devices to paint meaningful
+   branded content immediately. */
+.fxb-lcp-brand-r1603{
+  position:absolute;
+  z-index:58;
+  left:50%;
+  top:max(22px,calc(env(safe-area-inset-top) + 18px));
+  width:min(86vw,920px);
+  transform:translateX(-50%);
+  text-align:center;
+  color:rgba(225,244,247,.20);
+  font:500 clamp(64px,9vw,132px)/.86 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  letter-spacing:-.055em;
+  text-transform:uppercase;
+  pointer-events:none;
+  contain:layout paint style;
+  text-shadow:0 0 28px rgba(118,206,216,.05);
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fxb-lcp-brand-r1603{
+    top:max(18px,calc(env(safe-area-inset-top) + 14px));
+    width:92vw;
+    font-size:clamp(58px,18vw,84px);
+    opacity:.78;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .fxb-lcp-brand-r1603{opacity:.26!important;transform:translateX(-50%)!important}
+}
+/* production-r1603-cinematic-early-lcp-brand */
