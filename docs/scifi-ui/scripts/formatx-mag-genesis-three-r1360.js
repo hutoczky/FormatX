@@ -60,6 +60,13 @@
         powerPreference:'high-performance',
         preserveDrawingBuffer:false
       });
+      const gl=this.renderer.getContext();
+      const debugInfo=gl.getExtension('WEBGL_debug_renderer_info');
+      const rendererName=String(debugInfo?gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
+      this.softwareRenderer=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(rendererName);
+      this.deterministicFrame=new URLSearchParams(location.search).has('introframe');
+      if(this.softwareRenderer)this.highDetail=false;
+      document.documentElement.dataset.fxMagBirthGpuR1541=this.softwareRenderer?'software-adaptive':'hardware-full';
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -1340,7 +1347,9 @@
       if(this.disposed)return;
       this.width=Math.max(1,innerWidth);
       this.height=Math.max(1,innerHeight);
-      const dpr=Math.min(devicePixelRatio||1,this.width<900?1.30:1.75);
+      const dpr=this.softwareRenderer
+        ? Math.min(devicePixelRatio||1,this.width<900?.62:.58)
+        : Math.min(devicePixelRatio||1,this.width<900?1.30:1.75);
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
       this.camera.aspect=this.width/this.height;
@@ -1569,6 +1578,8 @@
 
     render(r,time){
       if(this.disposed)return;
+      if(this.softwareRenderer&&!this.deterministicFrame&&this.lastRender&&time-this.lastRender<92)return;
+      this.lastRender=time;
       const t=clamp(r)*10;
       this.updateCamera(t,time);
       this.updateDNA(t,time);
@@ -1691,6 +1702,7 @@
   document.documentElement.dataset.fxMagBirthProofR1520='visible-irregular-obsidian-facets-no-orbit-ring-handoff';
   document.documentElement.dataset.fxMagBirthProofR1530='microtextured-obsidian-physical-studio-light-living-habitat-handoff';
   document.documentElement.dataset.fxMagBirthProofR1540='physical-bioceramic-organism-round-optic-ringless-habitat-crystal-handoff';
+  document.documentElement.dataset.fxMagBirthPerformanceR1541='hardware-full-software-11fps-adaptive';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
