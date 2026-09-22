@@ -64,6 +64,7 @@
   root.dataset.fxNativeMagVisualR1560 = 'cinematic-obsidian-seed-asymmetric-smooth-volcanic-glass-local-softbox-reflections-subtle-mineral-vein';
   root.dataset.fxNativeMagVisualR1561 = 'photographic-smoky-crystal-seed-readable-mineral-planes-narrow-studio-reflections-silver-fissure';
   root.dataset.fxNativeMagVisualR1562 = 'photographic-cut-smoky-obsidian-readable-broad-planes-no-plastic-softbox-halo-no-hud';
+  root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
@@ -193,13 +194,17 @@
          quadrant switch created a visible equatorial seam. These radii vary
          smoothly with direction so the body keeps broad mineral planes without
          looking like two diamond halves joined together. */
-      const ax=.715 + direction[0]*.052 - direction[1]*.024 + direction[2]*.020
-        + Math.sin(theta*2.20+phi*.74)*.012;
-      const ay=.945 + Math.max(direction[1],0)*.128 - Math.max(-direction[1],0)*.038
-        + direction[0]*.022 + Math.cos(theta*1.70-phi*1.30)*.014;
-      const az=.645 + direction[2]*.046 - direction[0]*.028 + direction[1]*.018
-        + Math.sin(theta*3.10+phi*.70)*.011;
-      const p=1.34;
+      const y=direction[1];
+      const shoulderBase=Math.max(0,1-y*y);
+      const smoothUp=.5*(y+Math.sqrt(y*y+.0025));
+      const smoothDown=.5*(-y+Math.sqrt(y*y+.0025));
+      const ax=.695 + shoulderBase*.060 + direction[0]*.035 - y*.016 + direction[2]*.016
+        + Math.sin(theta*2.20+phi*.74)*.010;
+      const ay=.965 + y*.075 + y*y*.035 + direction[0]*.018
+        + Math.cos(theta*1.70-phi*1.30)*.012;
+      const az=.620 + shoulderBase*.055 + direction[2]*.028 - direction[0]*.022 + y*.012
+        + Math.sin(theta*3.10+phi*.70)*.009;
+      const p=1.26;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -224,23 +229,23 @@
         direction[1]*crystalRadius*1.22,
         direction[2]*crystalRadius*.94
       ];
-      const topLean=Math.pow(Math.max(direction[1],0),2.30);
-      const lowerMass=Math.pow(Math.max(-direction[1],0),1.90);
-      const shoulder=Math.pow(Math.max(0,1-Math.abs(direction[1])),2.0);
-      crystalPosition[0]+=-.165*topLean+.024*lowerMass
-        +Math.sin(theta*1.72+phi*.82)*.034*shoulder
-        +direction[2]*direction[1]*.018
-        -Math.pow(Math.max(-direction[0],0),4.0)*.015
-        +direction[1]*.010;
-      crystalPosition[1]+=Math.pow(Math.max(direction[1],0),4.8)*.098
-        -Math.pow(Math.max(-direction[1],0),4.0)*.018
-        +direction[0]*direction[2]*.010
-        +direction[0]*.030
-        +Math.sin(theta*2.65+phi*.55)*.026*shoulder;
-      crystalPosition[2]+=direction[0]*direction[1]*.020
-        +Math.pow(Math.max(direction[2],0),4.0)*.012
-        -direction[0]*.020
-        +Math.cos(theta*2.15+phi*1.08)*.023*shoulder;
+      const topLean=Math.pow(smoothUp,2.20);
+      const lowerMass=Math.pow(smoothDown,1.90);
+      const shoulder=Math.pow(shoulderBase,1.70);
+      crystalPosition[0]+=-.148*topLean+.018*lowerMass
+        +Math.sin(theta*1.72+phi*.82)*.026*shoulder
+        +direction[2]*y*.014
+        -Math.pow(Math.max(-direction[0],0),4.0)*.012
+        +y*.009;
+      crystalPosition[1]+=Math.pow(smoothUp,4.4)*.102
+        -Math.pow(smoothDown,3.8)*.015
+        +direction[0]*direction[2]*.008
+        +direction[0]*.026
+        +Math.sin(theta*2.65+phi*.55)*.018*shoulder;
+      crystalPosition[2]+=direction[0]*y*.015
+        +Math.pow(Math.max(direction[2],0),4.0)*.010
+        -direction[0]*.017
+        +Math.cos(theta*2.15+phi*1.08)*.017*shoulder;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -563,6 +568,8 @@
         glass+=vec3(.095,.102,.096)*horizonBand*.14;
         glass+=vec3(.082,.104,.110)*fresnel*.22;
         glass+=vec3(.048,.034,.024)*floorBounce*.18;
+        float lowerFill=smoothstep(.02,.82,-vLocal.y);
+        glass+=vec3(.030,.038,.040)*lowerFill;
         float macroPlane=.5+.5*sin(atan(n.z,n.x)*5.0+n.y*2.2);
         glass*=.95+.08*macroPlane;
         glass+=vec3(.015,.018,.019)*(conchoid-.5)*(.10+.34*lift);
@@ -654,6 +661,8 @@
         c+=vec3(.090,.097,.091)*horizonBand*.135;
         c+=vec3(.080,.102,.108)*fresnel*.22;
         c+=vec3(.052,.038,.026)*max(0.0,-n.y)*.18;
+        float lowerFill=smoothstep(.02,.82,-vLocal.y);
+        c+=vec3(.030,.038,.040)*lowerFill;
         float macroPlane=.5+.5*sin(atan(n.z,n.x)*5.0+n.y*2.2);
         c*=.95+.075*macroPlane;
 
@@ -1275,6 +1284,8 @@
     root.dataset.fxCoreShapeR1561='elongated-irregular-crystal-seed-broad-natural-planes-no-egg-silhouette';
     root.dataset.fxCoreOpticsR1562='broad-cut-plane-smoky-obsidian-reduced-plastic-softbox-readable-dark-mineral';
     root.dataset.fxCoreShapeR1562='elongated-asymmetric-seed-with-readable-mineral-planes';
+    root.dataset.fxCoreOpticsR1564='balanced-upper-lower-smoky-obsidian-with-natural-broad-plane-reflection';
+    root.dataset.fxCoreShapeR1564='continuous-smooth-envelope-no-equator-derivative-seam-asymmetric-seed';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
