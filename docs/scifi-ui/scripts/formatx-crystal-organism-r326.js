@@ -873,9 +873,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:softwareRenderer ? 0.90:constrainedMobile?1.12:mobile?1.50:constrained?1.15:1.65;
+      const cap=auditMode?1:softwareRenderer ? 0.68:constrainedMobile?1.12:mobile?1.50:constrained?1.15:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:softwareRenderer?360000:constrainedMobile?340000:mobile?760000:constrained?520000:1150000;
+      const budget=auditMode?390000:softwareRenderer?190000:constrainedMobile?340000:mobile?760000:constrained?520000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -1413,7 +1413,7 @@
       root.dataset.fxCoreSoftwareSurfaceOwnerR1543=softwareRenderer?'native-r326-software-equivalent-r465-contract':'not-software';
       root.dataset.fxCoreSoftwareDesktopContractR1544=softwareRenderer&&!mobile?'desktop-r465-semantics-preserved':'not-software-desktop';
     }
-    root.dataset.fxCoreMobileResolutionR424=softwareRenderer?'r1541-software-dpr-cap-0.90-pixel-budget-360k':mobile?'r1383-dpr-cap-1.50-pixel-budget-760k-adaptive':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
+    root.dataset.fxCoreMobileResolutionR424=softwareRenderer?'r1545-software-dpr-cap-0.68-pixel-budget-190k':mobile?'r1383-dpr-cap-1.50-pixel-budget-760k-adaptive':'r454-desktop-dpr-cap-1.65-pixel-budget-1150k';
     root.dataset.fxCoreMobileOpticsR435=mobile?'superseded-by-r454-visible-native-surface':'desktop-preserved-r454';
     root.dataset.fxCoreMobileOpticsR440=mobile?'superseded-by-r454-luminous-electric-surface':'desktop-superseded-by-r454';
     root.dataset.fxCoreMobilePerformanceR442=mobile?'18x36-capable-12x24-constrained-adaptive-intermittent-pulse-idle-zero':'desktop-three-pass-intermittent-pulse-idle-zero';
@@ -1422,6 +1422,7 @@
     root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
+    root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'190k-adaptive-sweep-complete':'hardware-budget-unchanged';
 
     publishShape('initial');
     schedule(1);
