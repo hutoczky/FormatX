@@ -701,3 +701,53 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   box-shadow:none!important;
 }
 /* production-r1572-photographic-living-habitat */
+
+
+/* R1575 — quieter photographic habitat. Replace the remaining hard diagonal
+   light-bars with broad volumetric pools so the whole page reads as one physical
+   chamber around the mineral, not a stage graphic behind it. */
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture{
+  background:
+    radial-gradient(ellipse 38% 72% at 72% -12%,rgba(188,224,226,.090),rgba(83,138,147,.030) 45%,transparent 80%),
+    radial-gradient(ellipse 62% 34% at 12% 100%,rgba(47,85,94,.060),transparent 80%),
+    radial-gradient(ellipse 74% 54% at 50% 46%,rgba(13,31,37,.18),rgba(4,12,16,.09) 58%,transparent 82%),
+    linear-gradient(180deg,#010305 0%,#051118 31%,#02090e 69%,#010305 100%)!important;
+}
+html:root:root:root:root:root:root:root:root
+body.living-architecture::before{
+  background:
+    radial-gradient(ellipse 22% 70% at 70% -8%,rgba(206,237,238,.070),transparent 76%),
+    radial-gradient(ellipse 18% 58% at 8% 44%,rgba(44,82,92,.050),transparent 80%),
+    radial-gradient(ellipse 24% 66% at 94% 70%,rgba(40,72,83,.042),transparent 82%)!important;
+  opacity:.92!important;
+}
+html:root:root:root:root:root:root:root:root
+body.living-architecture::after{
+  background:
+    radial-gradient(ellipse 72% 66% at 50% 46%,transparent 36%,rgba(0,0,0,.11) 75%,rgba(0,0,0,.43) 118%),
+    radial-gradient(ellipse 54% 20% at 50% 102%,rgba(56,103,111,.045),transparent 78%)!important;
+  opacity:.96!important;
+}
+.fx-living-habitat-r1530{opacity:.58!important;}
+
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture{
+    background:
+      radial-gradient(ellipse 58% 58% at 68% -8%,rgba(179,220,224,.078),rgba(79,133,142,.024) 48%,transparent 82%),
+      radial-gradient(ellipse 84% 30% at 10% 100%,rgba(43,81,90,.052),transparent 80%),
+      radial-gradient(ellipse 94% 58% at 50% 48%,rgba(12,29,35,.14),transparent 76%),
+      linear-gradient(180deg,#010305 0%,#041017 32%,#02090e 70%,#010305 100%)!important;
+  }
+  html:root:root:root:root:root:root:root
+  body.living-architecture::before{
+    inset:0!important;
+    background:
+      radial-gradient(ellipse 30% 68% at 72% -8%,rgba(198,232,234,.060),transparent 78%),
+      radial-gradient(ellipse 26% 58% at 4% 54%,rgba(36,72,82,.046),transparent 82%),
+      radial-gradient(ellipse 26% 62% at 98% 78%,rgba(34,63,74,.038),transparent 84%)!important;
+  }
+  .fx-living-habitat-r1530{opacity:.52!important;}
+}
+/* production-r1575-soft-volumetric-habitat-no-stage-light-bars */
