@@ -17,7 +17,7 @@
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
-  const DURATION = 10000;
+  const DURATION = LOW_POWER ? 4200 : 10000;
   const EXIT_MS = 180;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
 
@@ -78,6 +78,7 @@
   overlay.dataset.fxIntroR646 = 'reference-biotic-film';
   overlay.dataset.fxIntroR647 = 'shot-match-biotic-genesis';
   overlay.dataset.fxIntroR648 = 'exact-10s-runtime';
+  overlay.dataset.fxIntroAdaptiveR1549 = LOW_POWER ? 'condensed-4.2s-low-power-mobile' : 'full-10s-cinematic';
   overlay.dataset.fxIntroR649 = 'native-canvas-reference-rotoscope';
   overlay.dataset.fxIntroR650 = 'three-genesis-dna-cellular-living';
   overlay.dataset.fxIntroR651 = 'frame-matched-three-genesis';
@@ -921,6 +922,7 @@
     ROOT.dataset.fxMagBirthRenderClockR631='native-reference-film-24fps-all-devices';
     ROOT.dataset.fxMagBirthRenderClockR649='deterministic-bounded-cadence-canvas-all-devices';
     ROOT.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-no-zero-delay-raf-loop';
+    ROOT.dataset.fxMagBirthDurationR1549=LOW_POWER?'4200ms-adaptive':'10000ms-full';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
