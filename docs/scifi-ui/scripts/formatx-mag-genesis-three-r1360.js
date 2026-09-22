@@ -1348,7 +1348,7 @@
       this.width=Math.max(1,innerWidth);
       this.height=Math.max(1,innerHeight);
       const dpr=this.softwareRenderer
-        ? Math.min(devicePixelRatio||1,this.width<900?.62:.58)
+        ? Math.min(devicePixelRatio||1,this.width<900 ? 0.62 : 0.58)
         : Math.min(devicePixelRatio||1,this.width<900?1.30:1.75);
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
