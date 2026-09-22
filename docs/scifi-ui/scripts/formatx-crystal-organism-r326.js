@@ -13,7 +13,7 @@
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
   const constrainedMobile = mobile && constrained;
   const IDLE_ENERGY = mobile ? .50 : .43;
-  const SURFACE_PULSE_MS = 1160;
+  const SURFACE_PULSE_MS = 1320;
   const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const optics = mobile ? Object.freeze({
@@ -66,6 +66,7 @@
   root.dataset.fxNativeMagVisualR1561 = 'photographic-smoky-crystal-seed-readable-mineral-planes-narrow-studio-reflections-silver-fissure';
   root.dataset.fxNativeMagVisualR1562 = 'photographic-cut-smoky-obsidian-readable-broad-planes-no-plastic-softbox-halo-no-hud';
   root.dataset.fxNativeMagVisualR1571 = 'reference-four-petal-gunmetal-pod-physical-cyan-energy-lens-ten-living-cables-no-hud';
+  root.dataset.fxNativeMagVisualR1572 = 'photographic-smoky-obsidian-seed-no-eye-no-petals-subtle-mineral-fissure-six-buried-tendrils';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -138,11 +139,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry() {
-    const latitudeSegments = auditMode ? 8 : constrainedMobile ? 16 : mobile ? 18 : constrained ? 16 : 20;
-    const longitudeSegments = auditMode ? 14 : constrainedMobile ? 32 : mobile ? 36 : constrained ? 32 : 40;
-    const tendrilCount = auditMode ? 4 : constrainedMobile ? 8 : 10;
-    const tendrilSegments = auditMode ? 5 : constrainedMobile ? 18 : mobile ? 28 : constrained ? 26 : 36;
-    const tendrilSides = auditMode ? 3 : constrainedMobile ? 5 : mobile || constrained ? 7 : 9;
+    const latitudeSegments = auditMode ? 8 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 14 : 18;
+    const longitudeSegments = auditMode ? 14 : constrainedMobile ? 24 : mobile ? 28 : constrained ? 28 : 36;
+    const tendrilCount = auditMode ? 4 : 6;
+    const tendrilSegments = auditMode ? 5 : constrainedMobile ? 14 : mobile ? 18 : constrained ? 20 : 26;
+    const tendrilSides = auditMode ? 3 : constrainedMobile ? 4 : mobile || constrained ? 5 : 7;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -200,16 +201,16 @@
       const shoulderBase=Math.max(0,1-y*y);
       const smoothUp=.5*(y+Math.sqrt(y*y+.0036));
       const smoothDown=.5*(-y+Math.sqrt(y*y+.0036));
-      // R1571 — compact four-petal reference pod. The closed shell is broad
-      // and mechanical rather than a tall crystal; shader grooves split the
-      // front face into four physical armor petals.
-      const ax=.800 + shoulderBase*.105 + direction[0]*.025 + direction[2]*.018
-        + Math.sin(theta*2.10+phi*.71)*.008;
-      const ay=.790 + shoulderBase*.055 + y*.020 + direction[0]*.014
-        + Math.cos(theta*1.80-phi*1.16)*.008;
-      const az=.605 + shoulderBase*.050 + direction[2]*.025 - direction[0]*.018
-        + Math.sin(theta*3.05+phi*.63)*.007;
-      const p=1.10;
+      // R1572 — photographic smoky-obsidian seed. One continuous asymmetric
+      // mineral volume replaces the four-petal mechanical pod. The silhouette
+      // is elongated, subtly leaning and never resolves into a logo-perfect diamond.
+      const ax=.690 + shoulderBase*.095 + direction[0]*.032 - direction[2]*.012
+        + Math.sin(theta*2.08+phi*.74)*.010;
+      const ay=.965 + shoulderBase*.040 + y*.048 + direction[0]*.014
+        + Math.cos(theta*1.72-phi*1.09)*.009;
+      const az=.585 + shoulderBase*.070 + direction[2]*.026 - direction[0]*.014
+        + Math.sin(theta*2.82+phi*.59)*.008;
+      const p=1.42;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -217,25 +218,25 @@
       const baseRadius=1/Math.pow(Math.max(.001,lp),1/p);
       const broadBias=
         1
-        +Math.sin(theta*2.12+phi*.88)*.013
-        +Math.cos(theta*3.08-phi*1.27)*.009
-        +Math.sin(theta*4.56+phi*.52)*.004;
+        +Math.sin(theta*2.03+phi*.86)*.018
+        +Math.cos(theta*3.11-phi*1.23)*.011
+        +Math.sin(theta*4.42+phi*.48)*.005;
       const crystalRadius=baseRadius*broadBias;
       const crystalPosition=[
-        direction[0]*crystalRadius*1.16,
+        direction[0]*crystalRadius*1.04,
         direction[1]*crystalRadius*1.10,
-        direction[2]*crystalRadius*.93
+        direction[2]*crystalRadius*.98
       ];
-      const shoulder=Math.pow(shoulderBase,1.45);
-      crystalPosition[0]+=-.045*Math.pow(smoothUp,2.1)+.012*Math.pow(smoothDown,1.8)
-        +Math.sin(theta*1.72+phi*.82)*.015*shoulder
-        +direction[2]*y*.008;
-      crystalPosition[1]+=Math.pow(smoothUp,4.0)*.030
-        -Math.pow(smoothDown,3.8)*.010
+      const shoulder=Math.pow(shoulderBase,1.38);
+      crystalPosition[0]+=-.052*Math.pow(smoothUp,2.0)+.026*Math.pow(smoothDown,1.65)
+        +Math.sin(theta*1.64+phi*.77)*.012*shoulder
+        +direction[2]*y*.007;
+      crystalPosition[1]+=Math.pow(smoothUp,4.1)*.080
+        -Math.pow(smoothDown,3.5)*.015
         +direction[0]*direction[2]*.006
-        +Math.sin(theta*2.55+phi*.52)*.012*shoulder;
-      crystalPosition[2]+=direction[0]*y*.008
-        +Math.pow(Math.max(direction[2],0),4.0)*.008
+        +Math.sin(theta*2.38+phi*.48)*.010*shoulder;
+      crystalPosition[2]+=direction[0]*y*.007
+        +Math.pow(Math.max(direction[2],0),4.0)*.010
         -direction[0]*.010;
       return {
         sphere: spherePosition,
@@ -288,19 +289,17 @@
        Each appendage is appended to the same buffers and collapses back into the
        sphere endpoint during morph, so no duplicate canvas/core is introduced. */
     function tendrilPath(index, t) {
-      const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.16 + (index % 2 ? .045 : -.035);
+      const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.13 + (index % 2 ? .035 : -.025);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .69;
-      const reach = .44 + ((index*3)%5) * .075;
+      const root = .74;
+      const reach = .22 + ((index*3)%5) * .026;
       const radius = root + reach * t;
-      const wave = (Math.sin(t * Math.PI * 1.46 + index * .83)*(.018+.145*t))
-        +Math.sin(t*Math.PI*.68+index*.47)*.042*t;
-      /* Keep filaments behind the front mineral shell so their roots disappear
-         into the body and emerge only beyond the silhouette. */
-      const depth = -.28 + Math.sin(t * Math.PI * 1.34 + index * .97) * (.012 + .038 * t);
+      const wave = Math.sin(t*Math.PI*1.36+index*.83)*(.010+.055*t)
+        +Math.sin(t*Math.PI*.72+index*.47)*.018*t;
+      const depth = -.34 + Math.sin(t*Math.PI*1.24+index*.97)*(.008+.020*t);
       return [
-        Math.cos(baseAngle) * radius + Math.cos(sideAngle) * wave,
-        Math.sin(baseAngle) * radius + Math.sin(sideAngle) * wave,
+        Math.cos(baseAngle)*radius + Math.cos(sideAngle)*wave,
+        Math.sin(baseAngle)*radius + Math.sin(sideAngle)*wave,
         depth
       ];
     }
@@ -472,7 +471,7 @@
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
         float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.76));
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.84));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
         vec3 base=mix(aCrystal,aSphere,morph);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -497,7 +496,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.565':'.590'};
+        projected*= ${mobile?'.550':'.575'};
         projected.y+=${mobile?'.055':'.028'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
@@ -518,87 +517,70 @@
       vec3 filmic(vec3 c){return 1.0-exp(-max(c,vec3(0.)));}
       void main(){
         vec3 n=normalize(vNormal);
-        vec3 view=normalize(vec3(-vLocal.xy,2.90-vLocal.z));
-        vec3 key=normalize(vec3(-.52,.78,.35));
-        vec3 side=normalize(vec3(.74,.10,.66));
-        vec3 fill=normalize(vec3(-.62,-.30,.72));
+        vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
+        vec3 key=normalize(vec3(-.53,.79,.31));
+        vec3 side=normalize(vec3(.77,.06,.64));
+        vec3 fill=normalize(vec3(-.61,-.31,.73));
         float ndl=max(dot(n,key),0.0);
         float sideLight=max(dot(n,side),0.0);
         float fillLight=max(dot(n,fill),0.0);
         float floorBounce=max(0.0,-n.y);
         float facing=sat(abs(dot(n,view)));
-        float fresnel=pow(1.0-facing,2.0);
-        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),64.0);
-        float keySoft=pow(max(dot(n,normalize(key+view)),0.0),12.0);
-        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),34.0);
+        float fresnel=pow(1.0-facing,1.85);
+        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),72.0);
+        float keySoft=pow(max(dot(n,normalize(key+view)),0.0),14.0);
+        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),38.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=smoothstep(.73,.968,dot(refl,normalize(vec3(-.62,.74,.25))));
-        float softboxB=smoothstep(.75,.970,dot(refl,normalize(vec3(.74,.08,.66))));
-        float horizonBand=exp(-pow((refl.y+.04)/.27,2.0))*smoothstep(.08,.84,facing);
+        float softboxA=smoothstep(.70,.965,dot(refl,normalize(vec3(-.62,.75,.23))));
+        float softboxB=smoothstep(.72,.968,dot(refl,normalize(vec3(.74,.06,.67))));
+        float horizonBand=exp(-pow((refl.y+.03)/.25,2.0))*smoothstep(.06,.88,facing);
 
         float isTendril=step(2.0,vFacet);
-        float bodyMask=(1.0-isTendril);
+        float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.28+ndl*.74+sideLight*.46+fillLight*.28);
-        vec3 metal=mix(vec3(.010,.015,.018),vec3(.080,.094,.102),lift);
-        metal*=mix(.94,1.07,facetRand);
-        metal+=vec3(.55,.58,.58)*keySpec*.22;
-        metal+=vec3(.18,.20,.20)*keySoft*.030;
-        metal+=vec3(.34,.39,.40)*sideSpec*.15;
-        metal+=vec3(.46,.50,.49)*softboxA*.11;
-        metal+=vec3(.26,.32,.33)*softboxB*.095;
-        metal+=vec3(.090,.102,.104)*horizonBand*.15;
-        metal+=vec3(.074,.095,.104)*fresnel*.20;
-        metal+=vec3(.042,.034,.026)*floorBounce*.15;
+        float lift=sat(.18+ndl*.82+sideLight*.55+fillLight*.30);
+        float facetTone=mix(.955,1.050,facetRand);
+        vec3 mineral=mix(vec3(.006,.009,.011),vec3(.062,.073,.077),lift)*facetTone;
+        mineral+=vec3(.50,.52,.51)*keySpec*.24;
+        mineral+=vec3(.17,.18,.18)*keySoft*.035;
+        mineral+=vec3(.29,.34,.35)*sideSpec*.16;
+        mineral+=vec3(.43,.46,.45)*softboxA*.14;
+        mineral+=vec3(.25,.30,.31)*softboxB*.11;
+        mineral+=vec3(.085,.094,.094)*horizonBand*.17;
+        mineral+=vec3(.067,.084,.090)*fresnel*.18;
+        mineral+=vec3(.045,.035,.026)*floorBounce*.13;
 
-        // Four beveled armor petals: diagonal grooves divide the front shell,
-        // and each quadrant receives a slightly different physical response.
         vec2 q=vLocal.xy;
-        float radial=length(q);
-        float front=smoothstep(.18,.52,vLocal.z)*(1.0-vMorph)*bodyMask;
-        float diag=abs(abs(q.x)-abs(q.y));
-        float seam=exp(-pow(diag/.022,2.0))*smoothstep(.16,.72,radial)*front;
-        float angle=atan(q.y,q.x);
-        float petalTone=.96+.055*cos(angle*4.0+.35);
-        metal*=mix(1.0,petalTone,front);
-        metal=mix(metal,vec3(.004,.008,.010),seam*.72);
-
-        // Physical energy assembly: dark socket, metallic bezel, glass lens,
-        // and a small white-hot nucleus. It is attached to the body, never a HUD.
-        float socket=(1.0-smoothstep(.145,.220,radial))*front;
-        float bezel=(1.0-smoothstep(.008,.018,abs(radial-.150)))*front;
-        float lens=(1.0-smoothstep(.060,.118,radial))*front;
-        float nucleus=(1.0-smoothstep(.012,.038,radial))*front;
-        float lensGlint=exp(-pow(length(q-vec2(-.030,.035))/.028,2.0))*lens;
-        metal=mix(metal,vec3(.002,.006,.009),socket*.86);
-        metal+=vec3(.35,.44,.47)*bezel*.22;
-        metal+=vec3(.020,.38,.54)*lens*.46;
-        metal+=vec3(.20,.78,.94)*lens*.20;
-        metal+=vec3(.78,.96,1.0)*nucleus*.88;
-        metal+=vec3(.82,.96,1.0)*lensGlint*.52;
+        float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
+        float crackX=q.x+.010*sin(q.y*19.0+vLocal.z*8.0)+.004*sin(q.y*43.0);
+        float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
+        float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
+        float fissure=exp(-pow(crackX/.0058,2.0))*fissureEnvelope;
+        mineral=mix(mineral,vec3(.005,.011,.013),fissureHalo*.22);
+        mineral+=vec3(.24,.36,.38)*fissure*.090;
+        mineral+=vec3(.58,.63,.61)*fissure*.038;
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
           float head=mix(-.18,1.18,sat(uSurfacePulse));
-          pulse=exp(-pow((coordinate-head)/.055,2.0))*(.22+.78*fresnel);
+          pulse=exp(-pow((coordinate-head)/.060,2.0))*(.25+.75*fresnel);
         }
-        metal+=vec3(.05,.20,.26)*pulse*.32;
+        mineral+=vec3(.045,.16,.19)*pulse*.25;
+        mineral+=vec3(.16,.23,.24)*pulse*softboxA*.07;
 
-        // Dark living cables with segmented internal cyan energy.
-        float cableSegment=pow(.5+.5*cos(vUv.y*56.55+vUv.x*18.85+uTime*.32),12.0);
-        float cableFlow=.35+.65*(.5+.5*sin(vUv.y*14.0-uTime*.55+vUv.x*6.0));
-        vec3 tendon=vec3(.004,.009,.012)+vec3(.052,.071,.078)*(.20*sideLight+.15*ndl+.22*fresnel);
-        tendon+=vec3(.025,.36,.49)*cableSegment*cableFlow*.18;
-        tendon+=vec3(.22,.28,.29)*sideSpec*.050;
-        metal=mix(metal,tendon,tendrilMask*.995);
+        float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
+        vec3 tendon=vec3(.003,.007,.009)+vec3(.042,.055,.059)*(.16*sideLight+.12*ndl+.18*fresnel);
+        tendon+=vec3(.018,.16,.20)*cableSegment*.055;
+        tendon+=vec3(.16,.19,.19)*sideSpec*.025;
+        mineral=mix(mineral,tendon,tendrilMask*.995);
 
         if(uLayer>.5){
-          ${outputName}=vec4(vec3(.004,.012,.016),.18);
+          ${outputName}=vec4(vec3(.004,.009,.011),.16);
           return;
         }
-        ${outputName}=vec4(filmic(metal*2.18),1.0);
+        ${outputName}=vec4(filmic(mineral*2.38),1.0);
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -623,54 +605,52 @@
       vec3 filmic(vec3 c){return 1.0-exp(-max(c,vec3(0.)));}
       void main(){
         vec3 n=normalize(vNormal);
-        vec3 view=normalize(vec3(-vLocal.xy,2.90-vLocal.z));
-        vec3 key=normalize(vec3(-.52,.78,.35));
-        vec3 side=normalize(vec3(.74,.10,.66));
-        vec3 fill=normalize(vec3(-.62,-.30,.72));
+        vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
+        vec3 key=normalize(vec3(-.53,.79,.31));
+        vec3 side=normalize(vec3(.77,.06,.64));
+        vec3 fill=normalize(vec3(-.61,-.31,.73));
         float ndl=max(dot(n,key),0.0);
         float sideLight=max(dot(n,side),0.0);
         float fillLight=max(dot(n,fill),0.0);
         float facing=sat(abs(dot(n,view)));
-        float fresnel=pow(1.0-facing,2.0);
+        float fresnel=pow(1.0-facing,1.85);
         float keySpec=pow(max(dot(n,normalize(key+view)),0.0),52.0);
-        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),28.0);
+        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),30.0);
         float isTendril=step(2.0,vFacet);
         float bodyMask=1.0-isTendril;
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.28+ndl*.72+sideLight*.45+fillLight*.27);
-        vec3 c=mix(vec3(.010,.015,.018),vec3(.076,.090,.097),lift);
-        c+=vec3(.50,.53,.53)*keySpec*.20;
-        c+=vec3(.30,.35,.36)*sideSpec*.14;
-        c+=vec3(.073,.094,.102)*fresnel*.20;
-        c+=vec3(.040,.032,.024)*max(0.0,-n.y)*.16;
+        float lift=sat(.18+ndl*.80+sideLight*.52+fillLight*.28);
+        vec3 col=mix(vec3(.006,.009,.011),vec3(.060,.071,.075),lift);
+        col+=vec3(.46,.48,.47)*keySpec*.22;
+        col+=vec3(.27,.31,.32)*sideSpec*.14;
+        col+=vec3(.065,.082,.088)*fresnel*.19;
+        col+=vec3(.042,.033,.025)*max(0.0,-n.y)*.13;
 
         vec2 q=vLocal.xy;
-        float radial=length(q);
-        float front=smoothstep(.18,.52,vLocal.z)*(1.0-vMorph)*bodyMask;
-        float diag=abs(abs(q.x)-abs(q.y));
-        float seam=exp(-pow(diag/.024,2.0))*smoothstep(.16,.72,radial)*front;
-        c*=mix(1.0,.95+.050*cos(atan(q.y,q.x)*4.0+.35),front);
-        c=mix(c,vec3(.004,.008,.010),seam*.70);
+        float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
+        float crackX=q.x+.010*sin(q.y*19.0+vLocal.z*8.0)+.004*sin(q.y*43.0);
+        float env=exp(-pow(q.y/.31,4.0))*front;
+        float halo=exp(-pow(crackX/.026,2.0))*env;
+        float fissure=exp(-pow(crackX/.0062,2.0))*env;
+        col=mix(col,vec3(.005,.010,.012),halo*.20);
+        col+=vec3(.23,.35,.37)*fissure*.080;
 
-        float socket=(1.0-smoothstep(.145,.220,radial))*front;
-        float bezel=(1.0-smoothstep(.009,.019,abs(radial-.150)))*front;
-        float lens=(1.0-smoothstep(.060,.118,radial))*front;
-        float nucleus=(1.0-smoothstep(.012,.038,radial))*front;
-        c=mix(c,vec3(.002,.006,.009),socket*.86);
-        c+=vec3(.34,.43,.46)*bezel*.20;
-        c+=vec3(.020,.37,.53)*lens*.43;
-        c+=vec3(.19,.74,.91)*lens*.18;
-        c+=vec3(.78,.96,1.0)*nucleus*.84;
+        float pulse=0.0;
+        if(uSurfacePulse>=0.0){
+          float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
+          float head=mix(-.18,1.18,sat(uSurfacePulse));
+          pulse=exp(-pow((coordinate-head)/.064,2.0))*(.28+.72*fresnel);
+        }
+        col+=vec3(.040,.15,.18)*pulse*.22;
 
-        float cableSegment=pow(.5+.5*cos(vUv.y*56.55+vUv.x*18.85+uTime*.32),12.0);
-        vec3 tendon=vec3(.004,.009,.012)+vec3(.050,.068,.075)*(.20*sideLight+.14*ndl+.22*fresnel);
-        tendon+=vec3(.024,.34,.47)*cableSegment*.13;
-        tendon+=vec3(.20,.26,.27)*sideSpec*.045;
-        c=mix(c,tendon,tendrilMask*.995);
+        float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
+        vec3 tendon=vec3(.003,.007,.009)+vec3(.040,.053,.057)*(.16*sideLight+.12*ndl+.18*fresnel);
+        tendon+=vec3(.016,.14,.18)*segment*.045;
+        col=mix(col,tendon,tendrilMask*.995);
 
-        if(uLayer>.5){${outputName}=vec4(vec3(.004,.010,.013),.18);return;}
-        ${outputName}=vec4(filmic(c*2.20),1.0);
+        if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
+        ${outputName}=vec4(filmic(col*2.40),1.0);
       }`;
 
     const fragmentSource = (constrainedMobile || auditMode || softwareRenderer) ? constrainedFragmentSource : fullFragmentSource;
@@ -765,9 +745,9 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const cap=auditMode?1:softwareRenderer ? 0.94:constrainedMobile?1.18:mobile?1.50:constrained?1.18:1.65;
+      const cap=auditMode?1:softwareRenderer ? 0.82:constrainedMobile?1.18:mobile?1.50:constrained?1.18:1.65;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const budget=auditMode?390000:softwareRenderer?260000:constrainedMobile?390000:mobile?760000:constrained?560000:1150000;
+      const budget=auditMode?390000:softwareRenderer?190000:constrainedMobile?390000:mobile?760000:constrained?560000:1150000;
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -960,7 +940,8 @@
          back-face culling means bad mobile winding can never punch black holes
          through the body, while the depth buffer still resolves the front shell. */
       gl.disable(gl.BLEND);
-      gl.disable(gl.CULL_FACE);
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       root.dataset.fxCorePassModelR1450='single-solid-outer-pass';
@@ -1270,6 +1251,8 @@
     root.dataset.fxCoreShapeR1564='continuous-smooth-envelope-no-equator-derivative-seam-asymmetric-seed';
     root.dataset.fxCoreOpticsR1571='physical-cyan-glass-energy-lens-four-petal-gunmetal-no-hud-segmented-cables';
     root.dataset.fxCoreShapeR1571='compact-four-petal-mechanical-pod-ten-living-cables-reference-final-stage';
+    root.dataset.fxCoreOpticsR1572='smoky-obsidian-neutral-softbox-subtle-mineral-fissure-no-eye-no-petal-seams';
+    root.dataset.fxCoreShapeR1572='asymmetric-elongated-volcanic-glass-seed-six-short-buried-tendrils';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
@@ -1343,7 +1326,7 @@
     root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
-    root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'260k-r1552-visual-proof-cap-audit-mode-unchanged':'hardware-budget-unchanged';
+    root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'190k-r1572-sweep-safe-software-only':'hardware-budget-unchanged';
 
     publishShape('initial');
     schedule(1);
