@@ -79,6 +79,7 @@
   root.dataset.fxNativeMagVisualR1582 = 'slender-asymmetric-smoky-obsidian-seed-satin-softbox-reflections-no-pot-no-spikes';
   root.dataset.fxNativeMagVisualR1583 = 'geological-smoky-obsidian-seed-asymmetric-fracture-cuts-studio-ribbon-reflections-deep-black-glass';
   root.dataset.fxNativeMagVisualR1584 = 'hand-hewn-asymmetric-obsidian-crystal-dark-glass-narrow-studio-ribbons-smooth-large-planes';
+  root.dataset.fxNativeMagVisualR1585 = 'photographic-living-obsidian-crystal-recessed-cyan-energy-chamber-organic-metal-ribs-short-tendrils';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -395,12 +396,12 @@
     function tendrilPath(index, t) {
       const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.13 + (index % 2 ? .035 : -.025);
       const sideAngle = baseAngle + Math.PI * .5;
-      const root = .44;
-      const reach = .085 + ((index*3)%5) * .010;
+      const root = .46;
+      const reach = .14 + ((index*3)%5) * .012;
       const radius = root + reach * t;
       const wave = Math.sin(t*Math.PI*1.36+index*.83)*(.010+.055*t)
         +Math.sin(t*Math.PI*.72+index*.47)*.018*t;
-      const depth = -.43 + Math.sin(t*Math.PI*1.24+index*.97)*(.006+.014*t);
+      const depth = -.31 + Math.sin(t*Math.PI*1.24+index*.97)*(.007+.017*t);
       return [
         Math.cos(baseAngle)*radius + Math.cos(sideAngle)*wave,
         Math.sin(baseAngle)*radius + Math.sin(sideAngle)*wave,
@@ -678,6 +679,35 @@
         mineral+=vec3(.18,.28,.29)*fissure*.055;
         mineral+=vec3(.62,.64,.60)*fissure*.024;
 
+        /* R1585 — recessed living energy chamber. It is deliberately small and
+           irregular: an embedded source inside the mineral, never a HUD/eye. */
+        float chamberWarp=.009*sin(q.y*21.0+vLocal.z*7.0)+.004*sin(q.x*31.0-q.y*9.0);
+        vec2 cq=vec2(q.x+chamberWarp,(q.y-.010)*.92);
+        float chamberD=abs(cq.x)/.092+abs(cq.y)/.120;
+        float chamber=(1.0-smoothstep(.76,1.04,chamberD))*front;
+        float chamberInner=(1.0-smoothstep(.34,.64,chamberD))*front;
+        float chamberRim=max(0.0,chamber-chamberInner);
+        float chamberAura=(1.0-smoothstep(.54,1.36,chamberD))*front;
+        float nucleus=exp(-pow(length(vec2(cq.x*1.08,cq.y))/.030,2.0))*front;
+        float energyPulse=.94+.06*sin(uTime*.82+uBreath*.65);
+
+        float ribWarp=.010*sin(q.y*17.0+q.x*8.0);
+        float ribGate=smoothstep(.055,.30,abs(q.x))*(1.0-smoothstep(.39,.48,abs(q.x)))*front;
+        float upperRib=exp(-pow((q.y-(.225-.73*abs(q.x))+ribWarp)/.015,2.0))*ribGate;
+        float lowerRib=exp(-pow((q.y+(.215-.68*abs(q.x))-ribWarp)/.014,2.0))*ribGate;
+        float sideRib=exp(-pow((abs(q.x)-(.145+.20*abs(q.y)+.006*sin(q.y*19.0)))/.014,2.0))
+          *(1.0-smoothstep(.34,.47,abs(q.y)))*front;
+        float ribs=sat(upperRib+lowerRib+sideRib);
+
+        mineral=mix(mineral,vec3(.0015,.0035,.0042),chamber*.72);
+        mineral+=vec3(.018,.090,.110)*chamberAura*.20;
+        mineral+=vec3(.18,.30,.31)*chamberRim*(.10+.22*sideLight+.12*fresnel);
+        mineral+=vec3(.045,.40,.56)*nucleus*energyPulse*.95;
+        mineral+=vec3(.62,.92,.94)*nucleus*energyPulse*.42;
+        mineral=mix(mineral,vec3(.003,.006,.007),ribs*.52);
+        mineral+=vec3(.24,.27,.26)*ribs*(.030+.18*keySoft+.16*sideSpec);
+        mineral+=vec3(.012,.080,.095)*ribs*chamberAura*.10;
+
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
@@ -768,6 +798,32 @@
         float fissure=exp(-pow(crackX/.0062,2.0))*env;
         col=mix(col,vec3(.003,.008,.010),halo*.10);
         col+=vec3(.18,.28,.29)*fissure*.055;
+
+        float chamberWarp=.009*sin(q.y*21.0+vLocal.z*7.0)+.004*sin(q.x*31.0-q.y*9.0);
+        vec2 cq=vec2(q.x+chamberWarp,(q.y-.010)*.92);
+        float chamberD=abs(cq.x)/.092+abs(cq.y)/.120;
+        float chamber=(1.0-smoothstep(.76,1.04,chamberD))*front;
+        float chamberInner=(1.0-smoothstep(.34,.64,chamberD))*front;
+        float chamberRim=max(0.0,chamber-chamberInner);
+        float chamberAura=(1.0-smoothstep(.54,1.36,chamberD))*front;
+        float nucleus=exp(-pow(length(vec2(cq.x*1.08,cq.y))/.030,2.0))*front;
+        float energyPulse=.94+.06*sin(uTime*.82+uBreath*.65);
+
+        float ribWarp=.010*sin(q.y*17.0+q.x*8.0);
+        float ribGate=smoothstep(.055,.30,abs(q.x))*(1.0-smoothstep(.39,.48,abs(q.x)))*front;
+        float upperRib=exp(-pow((q.y-(.225-.73*abs(q.x))+ribWarp)/.015,2.0))*ribGate;
+        float lowerRib=exp(-pow((q.y+(.215-.68*abs(q.x))-ribWarp)/.014,2.0))*ribGate;
+        float sideRib=exp(-pow((abs(q.x)-(.145+.20*abs(q.y)+.006*sin(q.y*19.0)))/.014,2.0))
+          *(1.0-smoothstep(.34,.47,abs(q.y)))*front;
+        float ribs=sat(upperRib+lowerRib+sideRib);
+
+        col=mix(col,vec3(.0015,.0035,.0042),chamber*.72);
+        col+=vec3(.018,.090,.110)*chamberAura*.20;
+        col+=vec3(.18,.30,.31)*chamberRim*(.08+.18*sideLight+.10*fresnel);
+        col+=vec3(.045,.40,.56)*nucleus*energyPulse*.92;
+        col+=vec3(.62,.92,.94)*nucleus*energyPulse*.38;
+        col=mix(col,vec3(.003,.006,.007),ribs*.50);
+        col+=vec3(.22,.25,.24)*ribs*(.025+.13*keySpec+.14*sideSpec);
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
@@ -1408,6 +1464,8 @@
     root.dataset.fxCoreOpticsR1583='deep-black-smoky-obsidian-studio-ribbon-reflections-warm-cool-balance-subtle-fissure';
     root.dataset.fxCoreShapeR1584='nine-ring-twenty-to-twenty-four-sided-hand-hewn-asymmetric-crystal-four-fracture-cuts';
     root.dataset.fxCoreOpticsR1584='deep-obsidian-narrow-cool-warm-studio-ribbons-matched-full-and-constrained-shaders';
+    root.dataset.fxCoreShapeR1585='hand-hewn-living-crystal-with-four-short-integrated-tendrils';
+    root.dataset.fxCoreOpticsR1585='recessed-irregular-cyan-energy-chamber-organic-metal-ribs-deep-photographic-obsidian';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
