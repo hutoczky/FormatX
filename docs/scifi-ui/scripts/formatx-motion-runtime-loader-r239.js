@@ -20,6 +20,7 @@ root.dataset.fxMagShapeSyncR476='booting';
 root.dataset.fxCanonicalAskActivationR477='armed';
 root.dataset.fxIntroAwareMagR1541='no-concurrent-intro-and-permanent-webgl';
 root.dataset.fxPerformancePolicyR1600='60hz-target-adaptive-resolution-effects-degrade-before-cadence';
+root.dataset.fxPerformancePolicyR1606='exclusive-mobile-intro-budget-then-permanent-mag-60hz';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -27,7 +28,7 @@ const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
 const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260922-r1605-proven-constrained-software';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260922-r1605-proven-constrained-software';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260922-r1606-aggressive-60fps-governor';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260921-r1520-visible-irregular-mineral';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
@@ -124,11 +125,16 @@ function activateMagRuntime(source='startup'){
 }
 function onMagBirthWarmup(event){
   const source=String(event?.detail?.source||root.dataset.fxMagBirthCoreWarmupR618||'cinematic-warmup');
+  const validationWarmup=/validated-skip|mobile-skip|automation|webdriver/i.test(source);
+  if(mobile.matches && !validationWarmup){
+    /* R1606: do not compile/link the permanent R326 WebGL program while the
+       mobile intro is still animating. The intro owns the frame budget until
+       handoff; R326 starts from formatx:magbirthcomplete. */
+    root.dataset.fxIntroAwareMagR618='warmup-deferred-until-handoff-'+source;
+    root.dataset.fxIntroAwareMagR1606='mobile-exclusive-intro-frame-budget';
+    return;
+  }
   root.dataset.fxIntroAwareMagR618='warmup-received-starting-'+source;
-  /* R1560: warmup means mount the canonical R326 renderer during the film.
-     The old handler only recorded the event, so forced mobile skip validation
-     could wait forever for a renderer that was deliberately deferred until
-     after the overlay it was waiting to skip. */
   activateMagRuntime('cinematic-warmup-'+source);
 }
 
