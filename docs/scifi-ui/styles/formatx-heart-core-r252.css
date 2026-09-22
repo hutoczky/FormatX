@@ -1,4 +1,4 @@
-/* FormatX r252 — MAG as the living heart of the page.
+/* FormatX r252 / R1562 — MAG as the living heart of the page.
    This layer owns only the MAG interaction hit-area and the mobile loop handoff.
    It never paints a second fake hero after the footer. */
 
@@ -26,29 +26,41 @@
 }
 
 .fx-mag-heart-hit-r252::before {
-  content: '';
-  position: absolute;
-  inset: 12%;
-  border: 1px solid transparent;
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(.9);
-  transition: opacity .22s ease, transform .28s ease, border-color .22s ease, box-shadow .28s ease;
-  pointer-events: none;
+  content: none;
+  display: none;
 }
 
+/* R1562: the large semantic hit target never paints its geometry. Active/touch
+   feedback belongs to the real R326 mineral, not to a circular HUD overlay. */
 .fx-mag-heart-hit-r252:hover::before,
 .fx-mag-heart-hit-r252:focus-visible::before,
 .fx-mag-heart-hit-r252[data-fx-heart-active='true']::before {
-  opacity: .88;
-  transform: scale(1);
-  border-color: rgba(103, 232, 249, .44);
-  box-shadow: 0 0 34px rgba(34, 211, 238, .18), inset 0 0 28px rgba(129, 92, 246, .10);
+  content: none;
+  display: none;
 }
 
 .fx-mag-heart-hit-r252:focus-visible {
-  outline: 2px solid rgba(103, 232, 249, .9);
-  outline-offset: 4px;
+  outline: 0;
+  box-shadow: none;
+}
+.fx-mag-heart-hit-r252:focus-visible::after {
+  content: 'MAG';
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  translate: -50% 0;
+  min-width: 44px;
+  min-height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 4px 8px;
+  border: 1px solid rgba(137,225,240,.38);
+  border-radius: 8px;
+  color: rgba(226,248,251,.92);
+  background: rgba(2,12,18,.86);
+  font: 700 9px/1 ui-monospace,monospace;
+  letter-spacing: .12em;
+  pointer-events: none;
 }
 
 @media (max-width: 900px), (pointer: coarse) {
