@@ -1419,18 +1419,20 @@
       const lateDim=1-smooth((t-9.08)/.34)*.28;
       const pulse=.988+.012*Math.sin(time*.0046);
 
-      this.coreShell.material.opacity=.88*stage1+.018*reveal*lateDim;
-      this.coreGlass.material.opacity=.035*stage1+.003*reveal*lateDim;
-      this.coreEdges.material.opacity=.080*stage1+.006*reveal*lateDim;
-      if(this.corePetalMaterial)this.corePetalMaterial.opacity=.12*stage1+.025*reveal*lateDim;
+      this.coreShell.material.opacity=.78*stage1;
+      this.coreGlass.material.opacity=.025*stage1;
+      this.coreEdges.material.opacity=.050*stage1;
+      if(this.corePetalMaterial)this.corePetalMaterial.opacity=.070*stage1;
+      this.coreContours?.forEach((m,i)=>{m.material.opacity=(i?.018:.026)*stage1;});
 
-      this.irisGroup.scale.setScalar((.026+eyeHold*.76)*pulse);
+      this.irisGroup.visible=stage1>.010;
+      this.irisGroup.scale.setScalar((.018+stage1*.40)*pulse);
       this.irisRays.rotation.z=0;
-      if(this.irisCorona)this.irisCorona.material.opacity=.028*eyeHold;
-      this.glowSprite.material.opacity=(.001+eyeHold*.009)*pulse;
-      this.glowSprite.scale.set(.28+eyeHold*.05,1.18+eyeHold*.10,1);
-      this.coreInner.material.opacity=.003+eyeHold*.018;
-      this.coreLight.intensity=eyeHold*(.42+Math.sin(time*.0046)*.025);
+      if(this.irisCorona)this.irisCorona.material.opacity=.018*stage1;
+      this.glowSprite.material.opacity=(.001+stage1*.006)*pulse;
+      this.glowSprite.scale.set(.22+stage1*.04,.72+stage1*.10,1);
+      this.coreInner.material.opacity=.002+stage1*.010;
+      this.coreLight.intensity=stage1*(.28+Math.sin(time*.0046)*.018);
 
       if(this.coreLabel)this.coreLabel.material.opacity=.52*stage1+.028*reveal*(1-smooth((t-3.08)/.32));
     }
@@ -1442,16 +1444,16 @@
       const visible=grow*(1-crystallise*.82);
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
-      this.organicGroup.scale.set(bodyScale*1.04,bodyScale*1.02,bodyScale*.94);
+      this.organicGroup.scale.set(bodyScale*.96,bodyScale*1.08,bodyScale*.91);
 
       this.organicShellMaterial.opacity=1;
       this.organicLobeMaterial.opacity=1;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.12*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.075*visible;
       this.organicWireMaterial.opacity=0;
-      this.organicVeinMaterial.opacity=.009*visible;
-      this.organicHoodMaterial.opacity=.16*visible;
-      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.18*visible;
-      if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.002*visible;
+      this.organicVeinMaterial.opacity=.028*visible;
+      this.organicHoodMaterial.opacity=.055*visible;
+      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.11*visible;
+      if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.006*visible;
 
       if(this.organicHoodGroup){
         this.organicHoodGroup.scale.setScalar(.72);
@@ -1473,7 +1475,7 @@
       this.organicVeins.forEach(vein=>{
         vein.rotation.z=Math.sin(time*.00025+vein.userData.phase)*.007;
       });
-      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.010*visible;
+      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.022*visible;
       this.organicPrimaryVeins?.forEach((vein,i)=>{
         vein.rotation.z=Math.sin(time*.00019+(vein.userData.phase||i))*.0035;
       });
@@ -1591,11 +1593,11 @@
         this.debris.rotation.y=time*.000018;
         this.debris.rotation.z=Math.sin(time*.00011)*.022;
       }
-      this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
+      this.particles.material.opacity=.18+.035*Math.sin(time*.00045);
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.10+flash*.045+after*.010;
+      this.renderer.toneMappingExposure=1.16+flash*.035+after*.015;
       this.coreLight.intensity+=flash*5+after*1.5;
       if(this.glowSprite){
         const g=1+flash*.72;
@@ -1603,8 +1605,8 @@
         this.glowSprite.material.opacity=Math.min(1,this.glowSprite.material.opacity+flash*.42);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.075;
-        const burstScale=1.34+flash*.30;
+        this.flashBurst.material.opacity=flash*.032;
+        const burstScale=1.18+flash*.18;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
@@ -1731,6 +1733,7 @@
   document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
+  document.documentElement.dataset.fxMagBirthProofR1560='smooth-biogenic-shell-no-white-facet-overlay-obsidian-seed-handoff';
   document.documentElement.dataset.fxMagBirthProofR1557='double-render-gl-finish-and-readback-before-proof-ready';
   document.documentElement.dataset.fxMagBirthVisualR1555='smooth-indexed-volcanic-glass-mineral-fissure-no-circular-eye';
   document.documentElement.dataset.fxMagBirthPerformanceR1545='hardware-three-software-reference-film-no-parallel-webgl';
@@ -1739,6 +1742,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1557-photographic-volcanic-glass-double-render-proof-sync'
+    revision:'r1557-photographic-volcanic-glass-double-render-proof-sync-r1560-smooth-biogenic-shell'
   };
 })();
