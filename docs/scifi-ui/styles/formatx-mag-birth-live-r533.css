@@ -2178,3 +2178,19 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   mix-blend-mode:normal!important;
 }
 /* production-r1553-three-photometric-visibility */
+
+
+/* R1555 — the Three canvas used to sit at z-index:-2. Because the intro shell
+   paints an opaque background, that put the real WebGL film behind its own
+   container and every deterministic proof captured only the dark shell. Three
+   is the image owner, so keep its canvas in the positive visual stack. */
+.fx-mag-birth-r533[data-fx-renderer="three"] > .fxb-particles{
+  z-index:5!important;
+  opacity:1!important;
+  visibility:visible!important;
+  display:block!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="three-loading"] > .fxb-particles{
+  z-index:0!important;
+}
+/* production-r1555-three-canvas-positive-stack */
