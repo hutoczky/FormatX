@@ -659,3 +659,31 @@ body.living-architecture #hero :is(
   animation:none!important;
 }
 /* production-r1564-r326-stage-no-legacy-circular-paint */
+
+
+/* R1571 — final hero has one physical native MAG only. Retire every historical
+   ring/orbit/lens compatibility object inside #hero; interactions remain on
+   their semantic controls and the WebGL canvas is unaffected. */
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero :is(
+  [class*="ring"],
+  [class*="orbit"],
+  [class*="lens"],
+  [class*="halo"],
+  [class*="wave"],
+  [class*="caustic"],
+  [class*="spectrum"],
+  [class*="shock"]
+){
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  outline:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+  animation:none!important;
+  pointer-events:none!important;
+}
+/* production-r1571-zero-hero-target-rings */
