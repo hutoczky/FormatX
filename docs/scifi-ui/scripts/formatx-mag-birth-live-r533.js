@@ -13,6 +13,7 @@
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
   if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
   const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
+  const VALIDATED_SKIP_MODE = AUTOMATION && PARAMS.get('r548') === 'mobile-skip';
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
@@ -895,8 +896,13 @@
     /* R1553: automated mobile skip validation must be able to focus the real
        skip control after the native MAG becomes ready. Keep the completed film
        mounted briefly in webdriver runs instead of racing its teardown. */
+    if(VALIDATED_SKIP_MODE && nativeReady){
+      ROOT.dataset.fxMagBirthHandoffR623='native-ready-awaiting-validated-skip-r1557';
+      queueRender(120);
+      return;
+    }
     if(MOBILE && FORCE && AUTOMATION && nativeReady && now-startedAt<10500){
-      ROOT.dataset.fxMagBirthHandoffR623='native-ready-awaiting-validated-skip';
+      ROOT.dataset.fxMagBirthHandoffR623='native-ready-awaiting-automation-handoff';
       queueRender(120);
       return;
     }
@@ -935,6 +941,7 @@
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
     ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
+    ROOT.dataset.fxMagBirthHandoffR1557=VALIDATED_SKIP_MODE?'webdriver-skip-remains-mounted-until-explicit-enter':'normal-product-handoff';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
     if(HAS_VISUAL_FRAME){
       for(const timer of phaseTimers){
@@ -1001,14 +1008,14 @@
           detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
         }));
       }catch(_){}
-    },(MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550);
+    },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550));
 
     // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
     // deliberately close to the reference endpoint so a stalled GPU/import path
     // can never strand the cinematic overlay beyond the finished shot.
     hardFinishTimer=window.setTimeout(
-      ()=>finish('bounded-failsafe-r652'),
-      REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220)
+      ()=>finish(VALIDATED_SKIP_MODE?'validated-skip-timeout-r1557':'bounded-failsafe-r652'),
+      VALIDATED_SKIP_MODE ? 35000 : (REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220))
     );
 
     if(REDUCED){
