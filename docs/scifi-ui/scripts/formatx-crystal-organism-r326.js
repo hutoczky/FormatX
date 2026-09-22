@@ -98,6 +98,7 @@
   root.dataset.fxNativeMagPerformanceR1602 = 'real-frame-interval-governed-adaptive-60fps';
   root.dataset.fxNativeMagPerformanceR1603 = 'software-lite-shader-and-geometry-hardware-photographic-adaptive-60fps';
   root.dataset.fxNativeMagPerformanceR1605 = 'proven-constrained-shader-software-lite-geometry-resolution';
+  root.dataset.fxNativeMagPerformanceR1606 = 'aggressive-16-67ms-governor-hardware-adaptive-resolution';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -1154,7 +1155,7 @@
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
-    let qualityScale=auditMode?1:(softwareRenderer ? .72 : (constrainedMobile ? .74 : (mobile ? .82 : (constrained ? .84 : .94))));
+    let qualityScale=auditMode?1:(softwareRenderer ? .72 : (constrainedMobile ? .66 : (mobile ? .76 : (constrained ? .78 : .90))));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
@@ -1166,10 +1167,10 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=auditMode?1:softwareRenderer ? 0.62:constrainedMobile?1.18:mobile?1.50:constrained?1.18:1.65;
+      const baseCap=auditMode?1:softwareRenderer ? 0.62:constrainedMobile?1.08:mobile?1.35:constrained?1.10:1.50;
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=auditMode?390000:softwareRenderer?115000:constrainedMobile?390000:mobile?760000:constrained?560000:1150000;
+      const baseBudget=auditMode?390000:softwareRenderer?115000:constrainedMobile?330000:mobile?600000:constrained?480000:950000;
       const budget=Math.max(145000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1384,15 +1385,22 @@
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
-      if(!auditMode && now-lastQualityAdjust>520){
+      if(!auditMode && now-lastQualityAdjust>280){
         const previous=qualityScale;
-        const framePressure=frameIntervalAverage>18.4;
-        const severeFramePressure=frameIntervalAverage>22.0;
-        if(severeFramePressure||renderAverage>15.4)qualityScale=Math.max(.46,qualityScale-(severeFramePressure?.10:.07));
-        else if(framePressure||renderAverage>13.8)qualityScale=Math.max(.46,qualityScale-.04);
-        else if(frameIntervalAverage<17.2&&renderAverage<9.6)qualityScale=Math.min(1,qualityScale+.02);
+        const framePressure=frameIntervalAverage>17.6;
+        const severeFramePressure=frameIntervalAverage>19.2;
+        const renderPressure=renderAverage>12.4;
+        const severeRenderPressure=renderAverage>14.2;
+        if(severeFramePressure||severeRenderPressure){
+          qualityScale=Math.max(.38,qualityScale-.12);
+        }else if(framePressure||renderPressure){
+          qualityScale=Math.max(.38,qualityScale-.065);
+        }else if(frameIntervalAverage<16.95&&renderAverage<8.5){
+          qualityScale=Math.min(1,qualityScale+.015);
+        }
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=now;
+          root.dataset.fxCoreGovernorR1606=qualityScale<previous?'degrade-before-frame-drop':'slow-recovery';
           if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
           qualityResizeTimer=later(()=>{
             qualityResizeTimer=0;
@@ -1404,7 +1412,7 @@
       root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
       root.dataset.fxCoreFrameMs=dt.toFixed(2);
       root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
-      root.dataset.fxCoreReal3dTargetFps='60-real-frame-budget-r1602';
+      root.dataset.fxCoreReal3dTargetFps='60-real-frame-budget-r1606';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
     }
