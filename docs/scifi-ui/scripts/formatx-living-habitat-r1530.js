@@ -42,11 +42,14 @@
       x:random(),y:random(),z:.18+random()*.82,size:.45+random()*1.30,
       phase:random()*Math.PI*2,alpha:.12+random()*.30
     }));
-    const lines=LOW_POWER?2:MOBILE.matches?3:5;
+    /* R1584: long diagonal lines read as stage beams on phones. Keep the
+       mobile habitat purely volumetric and reserve only a few short, dim
+       biological filaments for fine-pointer desktop depth. */
+    const lines=LOW_POWER||MOBILE.matches?0:3;
     filaments=Array.from({length:lines},(_,index)=>({
-      x:.10+random()*.80,y:.08+random()*.84,len:.18+random()*.26,
-      bend:(random()-.5)*.22,phase:random()*Math.PI*2,
-      alpha:.014+random()*.018,width:.45+random()*.45,dir:index%2?1:-1
+      x:.14+random()*.72,y:.12+random()*.76,len:.08+random()*.08,
+      bend:(random()-.5)*.065,phase:random()*Math.PI*2,
+      alpha:.005+random()*.006,width:.32+random()*.28,dir:index%2?1:-1
     }));
   }
 
@@ -157,6 +160,7 @@
   updateScroll();
   draw(performance.now());
   ROOT.dataset.fxLivingHabitatR1530='active-scroll-pointer-atmosphere';
+  ROOT.dataset.fxLivingHabitatR1584=MOBILE.matches?'mobile-volumetric-no-filament-beams':'desktop-short-organic-filaments';
   ROOT.dataset.fxLivingHabitatSchedulerR1541='interaction-driven-zero-idle-raf';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
 })();
