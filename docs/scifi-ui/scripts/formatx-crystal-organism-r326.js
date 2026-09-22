@@ -95,6 +95,7 @@
   root.dataset.fxNativeMagVisualR1598 = 'single-sculpted-black-glass-mineral-dark-dome-lens-front-clear-tendrils-no-cgi-wings';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
+  root.dataset.fxNativeMagPerformanceR1602 = 'real-frame-interval-governed-adaptive-60fps';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -1144,7 +1145,7 @@
     let rotationX=-.090,rotationY=-.235,rotationZ=.024;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
-    let last=performance.now(),simulationTime=0,renderAverage=0;
+    let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let qualityScale=auditMode?1:(softwareRenderer ? .72 : (constrainedMobile ? .74 : (mobile ? .82 : (constrained ? .84 : .94))));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1308,6 +1309,8 @@
     function render(now){
       const begin=performance.now();
       const dt=Math.min(48,Math.max(1,now-last));last=now;
+      if(dt<=34)frameIntervalAverage=frameIntervalAverage*.86+dt*.14;
+      else frameIntervalAverage=frameIntervalAverage*.92+34*.08;
       if(!reduced.matches)simulationTime+=dt*.001;
       const pointerEase=1-Math.exp(-dt*.018);
       const rotationEase=1-Math.exp(-dt*.011);
@@ -1373,10 +1376,13 @@
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
-      if(!auditMode && now-lastQualityAdjust>700){
+      if(!auditMode && now-lastQualityAdjust>520){
         const previous=qualityScale;
-        if(renderAverage>15.4)qualityScale=Math.max(.50,qualityScale-.07);
-        else if(renderAverage<9.8)qualityScale=Math.min(1,qualityScale+.025);
+        const framePressure=frameIntervalAverage>18.4;
+        const severeFramePressure=frameIntervalAverage>22.0;
+        if(severeFramePressure||renderAverage>15.4)qualityScale=Math.max(.46,qualityScale-(severeFramePressure?.10:.07));
+        else if(framePressure||renderAverage>13.8)qualityScale=Math.max(.46,qualityScale-.04);
+        else if(frameIntervalAverage<17.2&&renderAverage<9.6)qualityScale=Math.min(1,qualityScale+.02);
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=now;
           if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
@@ -1389,9 +1395,10 @@
 
       root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
       root.dataset.fxCoreFrameMs=dt.toFixed(2);
-      root.dataset.fxCoreReal3dTargetFps='60-adaptive-resolution-r1600';
+      root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
+      root.dataset.fxCoreReal3dTargetFps='60-real-frame-budget-r1602';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
-      root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,renderAverage))));
+      root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
     }
 
     function settleAfterBurst(){
