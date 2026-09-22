@@ -100,6 +100,7 @@
   root.dataset.fxNativeMagPerformanceR1605 = 'proven-constrained-shader-software-lite-geometry-resolution';
   root.dataset.fxNativeMagPerformanceR1606 = 'aggressive-16-67ms-governor-hardware-adaptive-resolution';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
+  root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -555,8 +556,8 @@
     }
 
     if(!auditMode){
-      const centreX=.012,centreY=-.020;
-      const bezelInner=.154,bezelOuter=.198,bezelSteps=software?24:44,bezelZ=.535;
+      const centreX=.010,centreY=-.018;
+      const bezelInner=.096,bezelOuter=.132,bezelSteps=software?18:32,bezelZ=.535;
       for(let side=0;side<bezelSteps;side+=1){
         const a=side/bezelSteps*Math.PI*2;
         const b=(side+1)/bezelSteps*Math.PI*2;
@@ -568,10 +569,10 @@
       }
 
       const lensCenter=[centreX,centreY,.541];
-      const lensRadius=.147;
-      const lensDepth=.078;
-      const radialSteps=software?4:8;
-      const angularSteps=software?24:40;
+      const lensRadius=.098;
+      const lensDepth=.046;
+      const radialSteps=software?3:6;
+      const angularSteps=software?18:30;
       function lensVertex(radial,angle){
         const rr=lensRadius*radial;
         const nx=radial*Math.cos(angle);
@@ -651,8 +652,8 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.14) contrast(1.12) saturate(1.02)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.14) contrast(1.12) saturate(1.02)','important');
+    canvas.style.setProperty('filter','brightness(1.10) contrast(1.10) saturate(1.00)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.10) contrast(1.10) saturate(1.00)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -784,23 +785,23 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.068+ndl*.195+sideLight*.145+fillLight*.08);
+        float lift=sat(.095+ndl*.205+sideLight*.155+fillLight*.090);
         float facetTone=mix(.982,1.018,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.0015,.0024,.0030),vec3(.015,.020,.023),lift)*facetTone;
+        vec3 mineral=mix(vec3(.0024,.0035,.0042),vec3(.022,.029,.032),lift)*facetTone;
         mineral*=.955+.045*smokyDepth+.012*mineralGrain;
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
-        mineral+=vec3(.92,.90,.84)*keySpec*.185;
-        mineral+=vec3(.25,.26,.25)*keySoft*.052;
-        mineral+=vec3(.52,.58,.59)*sideSpec*.142;
-        mineral+=vec3(.66,.69,.66)*softboxA*.190;
-        mineral+=vec3(.38,.43,.43)*softboxB*.122;
-        mineral+=vec3(.82,.82,.74)*studioRibbonA*.172;
-        mineral+=vec3(.48,.36,.24)*studioRibbonB*.078;
+        mineral+=vec3(.92,.90,.84)*keySpec*.105;
+        mineral+=vec3(.25,.26,.25)*keySoft*.040;
+        mineral+=vec3(.52,.58,.59)*sideSpec*.096;
+        mineral+=vec3(.66,.69,.66)*softboxA*.128;
+        mineral+=vec3(.38,.43,.43)*softboxB*.086;
+        mineral+=vec3(.82,.82,.74)*studioRibbonA*.104;
+        mineral+=vec3(.48,.36,.24)*studioRibbonB*.050;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.072,.086,.085)*horizonBand*.145;
         mineral+=vec3(.062,.088,.094)*fresnel*.26;
@@ -830,13 +831,13 @@
            Its shading is driven by the same studio reflections as the obsidian. */
         vec2 lq=vec2(q.x,(q.y-.010)*1.08);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.128,.154,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.082,.126,lensD))*front;
-        float lensCore=(1.0-smoothstep(.030,.070,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.082,.108,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.050,.080,lensD))*front;
+        float lensCore=(1.0-smoothstep(.018,.042,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensLower=exp(-pow((lq.x-.026)/.052,2.0)-pow((lq.y+.052)/.036,2.0))*lensGlass;
-        float lensDepth=sat(1.0-lensD/.126);
+        float lensDepth=sat(1.0-lensD/.080);
 
         float ribWarp=.010*sin(q.y*15.0+q.x*7.0);
         float ribGate=smoothstep(.13,.34,abs(q.x))*(1.0-smoothstep(.44,.53,abs(q.x)))*front;
@@ -847,11 +848,11 @@
         float ribs=sat(upperRib+lowerRib+sideRib);
 
         mineral=mix(mineral,vec3(.0012,.0025,.0032),lensOuter*.62);
-        mineral+=vec3(.25,.30,.30)*lensRim*(.045+.08*sideLight+.060*fresnel);
-        mineral+=vec3(.018,.030,.034)*lensGlass*(.045+.07*softboxA+.05*sideSpec);
-        mineral+=vec3(.48,.54,.53)*lensHighlight*.12;
-        mineral+=vec3(.12,.15,.15)*lensLower*.045;
-        mineral+=vec3(.004,.013,.016)*lensCore*lensDepth*.040;
+        mineral+=vec3(.20,.24,.24)*lensRim*(.022+.040*sideLight+.030*fresnel);
+        mineral+=vec3(.012,.022,.025)*lensGlass*(.030+.035*softboxA+.030*sideSpec);
+        mineral+=vec3(.42,.47,.46)*lensHighlight*.060;
+        mineral+=vec3(.10,.12,.12)*lensLower*.025;
+        mineral+=vec3(.003,.009,.011)*lensCore*lensDepth*.020;
         mineral=mix(mineral,vec3(.006,.009,.010),ribs*.16);
         mineral+=vec3(.27,.29,.28)*ribs*(.022+.075*keySoft+.065*sideSpec);
         mineral+=vec3(.018,.058,.064)*ribs*lensOuter*.055;
@@ -886,12 +887,12 @@
         float lensHot=pow(sat(1.0-lensRadial/.17),5.0);
         vec3 physicalLens=vec3(.0004,.0012,.0018);
         physicalLens+=vec3(.003,.012,.016)*(.10+.12*uEnergy);
-        physicalLens+=vec3(.94,.98,.95)*softboxA*.20;
-        physicalLens+=vec3(.46,.55,.55)*sideSpec*.11;
-        physicalLens+=vec3(.09,.17,.20)*fresnel*.14;
-        physicalLens+=vec3(.008,.055,.070)*lensInner*.050;
-        physicalLens+=vec3(.030,.20,.24)*lensRing*(.08+.08*uEnergy);
-        physicalLens+=vec3(.84,.96,.95)*lensHot*.18;
+        physicalLens+=vec3(.82,.87,.84)*softboxA*.095;
+        physicalLens+=vec3(.38,.44,.44)*sideSpec*.060;
+        physicalLens+=vec3(.065,.105,.115)*fresnel*.090;
+        physicalLens+=vec3(.006,.022,.027)*lensInner*.026;
+        physicalLens+=vec3(.015,.055,.064)*lensRing*(.025+.020*uEnergy);
+        physicalLens+=vec3(.64,.72,.70)*lensHot*.055;
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -960,20 +961,20 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.068+ndl*.195+sideLight*.145+fillLight*.08);
+        float lift=sat(.095+ndl*.205+sideLight*.155+fillLight*.090);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0015,.0024,.0030),vec3(.016,.021,.024),lift);
+        vec3 col=mix(vec3(.0024,.0035,.0042),vec3(.023,.030,.033),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
-        col+=vec3(.90,.88,.82)*keySpec*.178;
-        col+=vec3(.50,.56,.57)*sideSpec*.136;
-        col+=vec3(.62,.65,.62)*softboxA*.184;
-        col+=vec3(.36,.41,.42)*softboxB*.116;
-        col+=vec3(.78,.79,.72)*studioRibbonA*.166;
-        col+=vec3(.39,.30,.22)*studioRibbonB*.068;
+        col+=vec3(.90,.88,.82)*keySpec*.102;
+        col+=vec3(.50,.56,.57)*sideSpec*.092;
+        col+=vec3(.62,.65,.62)*softboxA*.124;
+        col+=vec3(.36,.41,.42)*softboxB*.082;
+        col+=vec3(.78,.79,.72)*studioRibbonA*.102;
+        col+=vec3(.39,.30,.22)*studioRibbonB*.046;
         col+=vec3(.070,.084,.083)*horizonBand*.140;
         col+=vec3(.061,.087,.093)*fresnel*.255;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
@@ -996,12 +997,12 @@
 
         vec2 lq=vec2(q.x,(q.y-.010)*1.08);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.128,.154,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.082,.126,lensD))*front;
-        float lensCore=(1.0-smoothstep(.030,.070,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.082,.108,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.050,.080,lensD))*front;
+        float lensCore=(1.0-smoothstep(.018,.042,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
-        float lensDepth=sat(1.0-lensD/.126);
+        float lensDepth=sat(1.0-lensD/.080);
 
         float ribWarp=.010*sin(q.y*15.0+q.x*7.0);
         float ribGate=smoothstep(.13,.34,abs(q.x))*(1.0-smoothstep(.44,.53,abs(q.x)))*front;
