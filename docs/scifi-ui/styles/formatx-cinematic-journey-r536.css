@@ -996,3 +996,15 @@ html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{
   opacity:.022!important;
 }
 /* production-r1541-stable-cinematic-field */
+
+
+/* R1546 — prevent initial fixed-world coordinate jump from contributing CLS. */
+.fx-c536-stage[data-fx-c536-primed="false"]{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+.fx-c536-stage[data-fx-c536-primed="true"]{
+  opacity:1;
+  visibility:visible;
+}
+/* production-r1546-cinematic-cls-prime */
