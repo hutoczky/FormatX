@@ -727,12 +727,12 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x343d3e,roughness:.44,metalness:.002,
-        clearcoat:.18,clearcoatRoughness:.34,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.006,
+        color:0x2d3536,roughness:.58,metalness:.002,
+        clearcoat:.10,clearcoatRoughness:.46,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.009,
         transparent:false,opacity:1,
-        emissive:0x010203,emissiveIntensity:.0015,
-        envMapIntensity:.72,
+        emissive:0x010203,emissiveIntensity:.0012,
+        envMapIntensity:.46,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -755,9 +755,9 @@
         const n=p.clone().normalize();
         const az=Math.atan2(n.z,n.x), el=Math.acos(Math.max(-1,Math.min(1,n.y)));
         const fold=
-          Math.sin(az*3.7+el*1.8)*.016+
-          Math.sin(az*6.2-el*3.1)*.008+
-          Math.cos(az*2.4+el*5.2)*.006;
+          Math.sin(az*2.7+el*1.55)*.036+
+          Math.sin(az*5.3-el*2.9)*.014+
+          Math.cos(az*3.8+el*4.6)*.010;
         const asym=1+n.x*.026+n.y*.016-n.z*.010;
         p.multiplyScalar((1+fold)*asym);
         const taper=1.02-.16*Math.pow(Math.abs(n.y),.76);
@@ -768,14 +768,18 @@
         p.y+=n.x*.034+Math.pow(Math.max(n.y,0),4.0)*.040;
         p.z-=n.x*.026;
         const equator=Math.pow(Math.max(0,1-n.y*n.y),.72);
-        const lobeA=Math.sin(az*3.0+el*.62)*.060*equator;
-        const lobeB=Math.cos(az*2.0-el*.86)*.030*equator;
-        p.x*=1+lobeA*.58;
-        p.z*=1-lobeA*.34+lobeB*.38;
+        const lobeA=Math.sin(az*3.0+el*.62)*.078*equator;
+        const lobeB=Math.cos(az*2.0-el*.86)*.044*equator;
+        const lobeC=Math.sin(az*1.35+el*2.10)*.024*equator;
+        p.x*=1+lobeA*.66+lobeC*.34;
+        p.z*=1-lobeA*.40+lobeB*.48;
         const sideDent=Math.pow(Math.max(0,Math.cos(az-.74)),4.0)*equator;
-        p.x-=n.x*sideDent*.070;
-        p.z-=n.z*sideDent*.055;
-        p.y+=Math.sin(az*1.70)*.032*equator;
+        const rearDent=Math.pow(Math.max(0,Math.cos(az+2.15)),5.0)*equator;
+        p.x-=n.x*sideDent*.085;
+        p.z-=n.z*sideDent*.070;
+        p.x-=n.x*rearDent*.040;
+        p.z-=n.z*rearDent*.050;
+        p.y+=Math.sin(az*1.70)*.044*equator;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
@@ -1152,19 +1156,17 @@
       /* R1576 — hand-cut obsidian body matching the native R326 hero.
          Broad offset polygonal rings create natural mineral planes instead of
          another deformed sphere, so the late intro cannot regress to an egg/pot. */
-      const sideCount=(this.deterministicFrame||this.highDetail)?40:32;
+      const sideCount=(this.deterministicFrame||this.highDetail)?24:20;
       const ringDefs=[
-        [.80,.10,.08,-.175,-.030,.126],
-        [.69,.23,.17,-.205,-.020,.106],
-        [.55,.37,.27,-.175,-.004,.080],
-        [.38,.44,.34,-.105,.010,.050],
-        [.19,.46,.37,-.040,.012,.018],
-        [.00,.43,.36,.025,.004,-.014],
-        [-.18,.39,.32,.074,.008,-.016],
-        [-.36,.34,.27,.105,.016,.024],
-        [-.52,.27,.21,.112,.024,.060],
-        [-.65,.18,.14,.090,.020,.092],
-        [-.75,.08,.065,.040,.010,.118]
+        [.78,.10,.075,-.155,-.030,.120],
+        [.65,.27,.185,-.215,-.020,.100],
+        [.47,.43,.305,-.135,.010,.060],
+        [.24,.49,.360,-.045,.015,.020],
+        [.02,.44,.350,.040,.000,-.020],
+        [-.22,.47,.320,.085,.010,.000],
+        [-.44,.35,.245,.120,.020,.050],
+        [-.62,.22,.150,.090,.020,.090],
+        [-.75,.08,.060,.030,.010,.120]
       ];
       const positions=[];
       const indices=[];
@@ -1180,12 +1182,13 @@
           const a=sideIndex/sideCount*Math.PI*2+phase;
           const irregular=
             1
-            +Math.sin(sideIndex*2.31+ringIndex*.91)*.020
-            +Math.cos(sideIndex*1.37-ringIndex*.73)*.011;
-          const cutFront=1-.080*Math.pow(Math.max(0,Math.cos(a-.52)),4.0);
-          const cutRear=1-.050*Math.pow(Math.max(0,Math.cos(a+2.18)),5.0);
-          const cutSide=1-.035*Math.pow(Math.max(0,Math.cos(a-2.54)),6.0);
-          const radialCut=cutFront*cutRear*cutSide;
+            +Math.sin(sideIndex*2.31+ringIndex*.91)*.036
+            +Math.cos(sideIndex*1.37-ringIndex*.73)*.018;
+          const cutFront=1-.120*Math.pow(Math.max(0,Math.cos(a-.52)),4.0);
+          const cutRear=1-.075*Math.pow(Math.max(0,Math.cos(a+2.18)),5.0);
+          const cutSide=1-.055*Math.pow(Math.max(0,Math.cos(a-2.54)),6.0);
+          const cutNotch=1-.040*Math.pow(Math.max(0,Math.cos(a+1.18)),8.0);
+          const radialCut=cutFront*cutRear*cutSide*cutNotch;
           ring.push(pushVertex(
             ox+Math.cos(a)*rx*irregular*radialCut,
             y,
@@ -1194,8 +1197,8 @@
         }
         ringIndices.push(ring);
       });
-      const topIndex=pushVertex(-.185,.855,-.050);
-      const bottomIndex=pushVertex(.035,-.805,.018);
+      const topIndex=pushVertex(-.145,.845,-.045);
+      const bottomIndex=pushVertex(.020,-.805,.015);
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
         indices.push(topIndex,ringIndices[0][next],ringIndices[0][side]);
@@ -1462,12 +1465,12 @@
 
       this.organicShellMaterial.opacity=1;
       this.organicLobeMaterial.opacity=0;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.012*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.008*visible;
       this.organicWireMaterial.opacity=0;
-      this.organicVeinMaterial.opacity=.006*visible;
+      this.organicVeinMaterial.opacity=.016*visible;
       this.organicHoodMaterial.opacity=0;
-      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.014*visible;
-      if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.001*visible;
+      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.095*visible;
+      if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.0008*visible;
 
       if(this.organicHoodGroup){
         this.organicHoodGroup.visible=false;
@@ -1476,7 +1479,7 @@
       this.organicShell.rotation.y=Math.sin(time*.00010)*.008;
       this.organicShell.rotation.x=Math.sin(time*.00013)*.004;
       if(this.organicMembrane)this.organicMembrane.rotation.copy(this.organicShell.rotation);
-      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.004*visible;
+      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.011*visible;
       if(this.organicFolds){
         this.organicFolds.rotation.y=Math.sin(time*.00012)*.006;
         this.organicFolds.rotation.x=Math.sin(time*.00010)*.003;
@@ -1497,9 +1500,9 @@
       this.mechanicalReveal=bodyGrow;
       this.mechanicalGroup.visible=bodyGrow>.002;
       this.mechanicalGroup.scale.set(
-        .001+bodyGrow*1.02,
-        .001+bodyGrow*1.10,
-        .001+bodyGrow*1.04
+        .001+bodyGrow*1.25,
+        .001+bodyGrow*1.34,
+        .001+bodyGrow*1.29
       );
 
       this.mechMaterial.opacity=1;
@@ -1519,8 +1522,9 @@
       });
 
       if(this.mechBody){
-        this.mechBody.rotation.y=Math.sin(time*.00014)*.008*bodyGrow;
-        this.mechBody.rotation.x=Math.sin(time*.00012)*.004*bodyGrow;
+        this.mechBody.rotation.y=Math.sin(time*.00014)*.010*bodyGrow;
+        this.mechBody.rotation.x=Math.sin(time*.00012)*.005*bodyGrow;
+        this.mechBody.rotation.z=-.055*bodyGrow+Math.sin(time*.00010)*.004*bodyGrow;
       }
     }
 
@@ -1696,7 +1700,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1583-biogenic-seed-to-geological-studio-obsidian-handoff'
+        revision:'r1584-porous-biogenic-seed-to-hand-hewn-obsidian-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1746,10 +1750,11 @@
   document.documentElement.dataset.fxMagBirthProofR1581='truncated-smooth-obsidian-no-box-reflections-bioceramic-handoff';
   document.documentElement.dataset.fxMagBirthProofR1582='scaled-bioceramic-seed-dark-habitat-slender-satin-obsidian-continuous-size-handoff';
   document.documentElement.dataset.fxMagBirthProofR1583='asymmetric-biogenic-seed-procedural-studio-environment-geological-obsidian-handoff-no-room-box';
+  document.documentElement.dataset.fxMagBirthProofR1584='porous-biogenic-seed-surface-folds-hand-hewn-obsidian-crystal-larger-continuous-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1583-three-act-biogenic-seed-to-geological-studio-obsidian'
+    revision:'r1584-three-act-porous-biogenic-seed-to-hand-hewn-obsidian'
   };
 })();
