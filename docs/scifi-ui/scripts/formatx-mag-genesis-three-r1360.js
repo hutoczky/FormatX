@@ -1045,6 +1045,7 @@
         emissive:0x000102,emissiveIntensity:.002,
         clearcoat:.84,clearcoatRoughness:.075,
         transmission:.004,thickness:.20,ior:1.45,
+        flatShading:true,
         transparent:false,opacity:1
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
@@ -1075,48 +1076,66 @@
       this.mechBodyParts=[];
       this.mechPetals=[];
 
-      const seg=this.deterministicFrame||this.highDetail?56:34;
-      const rings=this.deterministicFrame||this.highDetail?38:24;
-      const baseGeo=new T.SphereGeometry(1,seg,rings);
-      const basePos=baseGeo.attributes.position;
-      const pnt=new T.Vector3();
-      for(let i=0;i<basePos.count;i++){
-        pnt.fromBufferAttribute(basePos,i).normalize();
-        const theta=Math.atan2(pnt.z,pnt.x);
-        const y=pnt.y;
-        const shoulder=Math.max(0,1-y*y);
-        const up=.5*(y+Math.sqrt(y*y+.0036));
-        const down=.5*(-y+Math.sqrt(y*y+.0036));
-        const ax=.735+shoulder*.080+pnt.x*.050-pnt.z*.018;
-        const ay=.965+shoulder*.055+y*.036+pnt.x*.020;
-        const az=.625+shoulder*.060+pnt.z*.034-pnt.x*.020;
-        const power=1.62;
-        const lp=
-          Math.pow(Math.abs(pnt.x)/ax,power)+
-          Math.pow(Math.abs(pnt.y)/ay,power)+
-          Math.pow(Math.abs(pnt.z)/az,power);
-        const radius=1/Math.pow(Math.max(.001,lp),1/power);
-        const mineralBias=1
-          +Math.sin(theta*2.05+y*2.2)*.022
-          +Math.cos(theta*3.15-y*3.3)*.013;
-        const cutA=Math.pow(Math.max(0,pnt.x*.74+pnt.y*.44+pnt.z*.18),3.1);
-        const cutB=Math.pow(Math.max(0,-pnt.x*.66+pnt.y*.24+pnt.z*.52),3.3);
-        const cutC=Math.pow(Math.max(0,pnt.x*.18-pnt.y*.72+pnt.z*.46),3.5);
-        const cutD=Math.pow(Math.max(0,-pnt.x*.36-pnt.y*.18+pnt.z*.80),3.6);
-        pnt.multiplyScalar(radius*mineralBias*(1-.080*cutA-.066*cutB-.052*cutC-.040*cutD));
-        pnt.x*=1.06;pnt.y*=1.08;pnt.z*=.99;
-        pnt.x+=-.108*Math.pow(up,1.85)+.052*Math.pow(down,1.55)+pnt.z*y*.013
-          +Math.sin(theta*1.45+y*.8)*.028*shoulder;
-        pnt.y+=Math.pow(up,3.9)*.060-Math.pow(down,3.25)*.022+pnt.x*pnt.z*.010
-          +Math.cos(theta*2.15-y*.6)*.020*shoulder;
-        pnt.z-=pnt.x*.022+Math.sin(theta*2.7+y)*.015*shoulder;
-        const topCap=.755+pnt.x*.105-pnt.z*.040;
-        const bottomCap=-.775-pnt.x*.050+pnt.z*.030;
-        if(pnt.y>topCap)pnt.y=topCap+(pnt.y-topCap)*.075;
-        if(pnt.y<bottomCap)pnt.y=bottomCap+(pnt.y-bottomCap)*.075;
-        basePos.setXYZ(i,pnt.x,pnt.y,pnt.z);
+      /* R1576 — hand-cut obsidian body matching the native R326 hero.
+         Broad offset polygonal rings create natural mineral planes instead of
+         another deformed sphere, so the late intro cannot regress to an egg/pot. */
+      const sideCount=(this.deterministicFrame||this.highDetail)?11:9;
+      const ringDefs=[
+        [.67,.46,.34,-.12,-.018,.10],
+        [.38,.67,.48,-.060,.012,.02],
+        [.03,.77,.55,.012,.000,-.04],
+        [-.33,.69,.49,.060,-.006,.03],
+        [-.59,.51,.36,.082,.016,.11]
+      ];
+      const positions=[];
+      const indices=[];
+      const ringIndices=[];
+      const pushVertex=(x,y,z)=>{
+        positions.push(x,y,z);
+        return positions.length/3-1;
+      };
+      ringDefs.forEach((def,ringIndex)=>{
+        const [y,rx,rz,ox,oz,phase]=def;
+        const ring=[];
+        for(let sideIndex=0;sideIndex<sideCount;sideIndex+=1){
+          const a=sideIndex/sideCount*Math.PI*2+phase;
+          const irregular=
+            1
+            +Math.sin(sideIndex*2.31+ringIndex*.91)*.038
+            +Math.cos(sideIndex*1.37-ringIndex*.73)*.020;
+          ring.push(pushVertex(
+            ox+Math.cos(a)*rx*irregular,
+            y,
+            oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.032)
+          ));
+        }
+        ringIndices.push(ring);
+      });
+      const topIndex=pushVertex(-.145,.855,-.035);
+      const bottomIndex=pushVertex(.105,-.805,.028);
+      for(let side=0;side<sideCount;side+=1){
+        const next=(side+1)%sideCount;
+        indices.push(topIndex,ringIndices[0][next],ringIndices[0][side]);
       }
-      basePos.needsUpdate=true;
+      for(let ring=0;ring<ringIndices.length-1;ring+=1){
+        for(let side=0;side<sideCount;side+=1){
+          const next=(side+1)%sideCount;
+          const a=ringIndices[ring][side];
+          const b=ringIndices[ring][next];
+          const cc=ringIndices[ring+1][side];
+          const d=ringIndices[ring+1][next];
+          if((side+ring)%2===0)indices.push(a,b,d,a,d,cc);
+          else indices.push(a,b,cc,b,d,cc);
+        }
+      }
+      const last=ringIndices[ringIndices.length-1];
+      for(let side=0;side<sideCount;side+=1){
+        const next=(side+1)%sideCount;
+        indices.push(last[side],last[next],bottomIndex);
+      }
+      const baseGeo=new T.BufferGeometry();
+      baseGeo.setAttribute('position',new T.Float32BufferAttribute(positions,3));
+      baseGeo.setIndex(indices);
       baseGeo.computeVertexNormals();
 
       this.mechBody=new T.Mesh(baseGeo,this.mechMaterial);
@@ -1593,7 +1612,7 @@
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: innerWidth<900 ? 92 : 76,
-        revision:'r1575-opaque-bioceramic-truncated-obsidian-photoreal-handoff'
+        revision:'r1576-opaque-bioceramic-hand-cut-obsidian-photoreal-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1626,6 +1645,7 @@
   document.documentElement.dataset.fxMagBirthProofR1573='waist-corrected-single-seed-readable-volcanic-glass-material-fracture-no-central-flash';
   document.documentElement.dataset.fxMagBirthProofR1574='single-continuous-bioceramic-organism-rounded-irregular-volcanic-glass-no-dumbbell-no-diamond';
   document.documentElement.dataset.fxMagBirthProofR1575='opaque-bioceramic-seed-to-truncated-obsidian-crystal-no-translucent-lowpoly-shells';
+  document.documentElement.dataset.fxMagBirthProofR1576='hand-cut-broad-facet-obsidian-final-act-matches-native-shard-no-pot';
   document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
@@ -1641,6 +1661,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1575-three-act-opaque-bioceramic-to-truncated-obsidian'
+    revision:'r1576-three-act-opaque-bioceramic-to-hand-cut-obsidian'
   };
 })();
