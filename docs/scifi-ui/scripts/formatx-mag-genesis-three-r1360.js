@@ -1665,6 +1665,12 @@
         return null;
       }
       document.documentElement.dataset.fxMagBirthR1460='prefer-local-three-webgl-cinematic';
+      const deterministicFrame=params.has('introframe');
+      if(isSoftwareWebGL() && !deterministicFrame){
+        document.documentElement.dataset.fxMagBirthR1545='software-webgl-reference-film-fallback';
+        document.documentElement.dataset.fxMagBirthGpuR1545='software-fallback-no-continuous-three';
+        return null;
+      }
       loader ||= loadThree();
       const THREE=await loader;
       const engine=new FormatXGenesisThree(THREE,canvas,getTarget);
@@ -1702,7 +1708,8 @@
   document.documentElement.dataset.fxMagBirthProofR1520='visible-irregular-obsidian-facets-no-orbit-ring-handoff';
   document.documentElement.dataset.fxMagBirthProofR1530='microtextured-obsidian-physical-studio-light-living-habitat-handoff';
   document.documentElement.dataset.fxMagBirthProofR1540='physical-bioceramic-organism-round-optic-ringless-habitat-crystal-handoff';
-  document.documentElement.dataset.fxMagBirthPerformanceR1541='hardware-full-software-11fps-adaptive';
+  document.documentElement.dataset.fxMagBirthPerformanceR1541='hardware-full-software-reference-film-adaptive';
+  document.documentElement.dataset.fxMagBirthPerformanceR1545='hardware-three-software-reference-film-no-parallel-webgl';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
