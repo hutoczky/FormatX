@@ -1348,8 +1348,8 @@
       this.width=Math.max(1,innerWidth);
       this.height=Math.max(1,innerHeight);
       const dpr=this.softwareRenderer
-        ? Math.min(devicePixelRatio||1,this.width<900 ? 0.62 : 0.58)
-        : Math.min(devicePixelRatio||1,this.width<900?1.30:1.75);
+        ? Math.min(devicePixelRatio||1,this.width<900 ? 0.58 : 0.54)
+        : Math.min(devicePixelRatio||1,this.width<900?1.00:1.18);
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
       this.camera.aspect=this.width/this.height;
@@ -1679,7 +1679,8 @@
         draw:(r,time)=>engine.render(r,time),
         destroy:()=>engine.destroy(),
         engine,
-        revision:'r1540-bioceramic-organic-round-optic-photoreal-mineral-handoff'
+        minimumFrameMs: innerWidth<900 ? 92 : 76,
+        revision:'r1541-bounded-cadence-bioceramic-round-optic-photoreal-mineral-handoff'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1708,6 +1709,7 @@
   document.documentElement.dataset.fxMagBirthProofR1520='visible-irregular-obsidian-facets-no-orbit-ring-handoff';
   document.documentElement.dataset.fxMagBirthProofR1530='microtextured-obsidian-physical-studio-light-living-habitat-handoff';
   document.documentElement.dataset.fxMagBirthProofR1540='physical-bioceramic-organism-round-optic-ringless-habitat-crystal-handoff';
+  document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
   document.documentElement.dataset.fxMagBirthPerformanceR1541='hardware-full-software-reference-film-adaptive';
   document.documentElement.dataset.fxMagBirthPerformanceR1545='hardware-three-software-reference-film-no-parallel-webgl';
   document.documentElement.dataset.fxMagBirthProofR1412='vertical-asymmetric-crystal-final-handoff';
@@ -1715,6 +1717,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1540-photoreal-bioceramic-organism-round-lens-ringless-habitat'
+    revision:'r1541-photoreal-bioceramic-bounded-cadence-zero-hud-habitat'
   };
 })();
