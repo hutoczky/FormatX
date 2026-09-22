@@ -557,3 +557,47 @@ body.living-architecture{
   }
 }
 /* production-r1562-no-hit-ring-photographic-habitat */
+
+
+/* R1563 — no circular UI lens may sit around the real MAG.
+   Keep the interaction and cinematic systems functional, but remove their
+   target/sigil paint so the hero reads as a photographed object in one habitat. */
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture .fx-cinema-r535__lens,
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture .fx-cinema-r535__beam{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero > .fx-signature-core-trigger{
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  border:0!important;
+  outline:0!important;
+  outline-offset:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  filter:none!important;
+  color:transparent!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero > .fx-signature-core-trigger::before,
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero > .fx-signature-core-trigger::after{
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  border:0!important;
+  outline:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+/* production-r1563-no-circular-cinematic-lens-no-signature-ring */
