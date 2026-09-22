@@ -288,3 +288,32 @@ body.living-architecture :is(
 /* production-r1532-no-local-hud-rings */
 
 /* production-r1533-mobile-visible-contract-neutral-photoreal-filter */
+
+
+/* R1541 — zero-idle habitat compositor.
+   The environmental canvas is ordinary alpha compositing; no full-screen
+   screen-blend or per-card backdrop blur is required for the same physical depth. */
+.fx-living-habitat-r1530{
+  mix-blend-mode:normal!important;
+  filter:none!important;
+  opacity:.54!important;
+  will-change:auto!important;
+}
+html body.living-architecture .topbar{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture :is(
+  .hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+  .payment-console,.system-grid article,.release-card,.fx-category-grid > article,
+  .fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,
+  .fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure
+){
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-living-habitat-r1530{opacity:.42!important}
+}
+/* production-r1541-zero-idle-habitat-compositor */
