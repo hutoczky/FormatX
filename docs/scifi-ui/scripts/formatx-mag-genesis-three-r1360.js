@@ -1802,6 +1802,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1586-three-act-dna-cellular-integrated-living-obsidian'
+    revision:'r1587-three-act-biogenic-shell-readable-obsidian'
   };
 })();
