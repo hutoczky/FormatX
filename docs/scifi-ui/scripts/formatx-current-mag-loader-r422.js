@@ -177,6 +177,9 @@ async function start(){
     root.dataset.fxMobileHeroRingR1410='removed-dom';
   }
   repairAccessibleNames();installSoundTouchRecovery();
+  const introWarmup=Boolean(root.dataset.fxMagBirthCoreWarmupR618);
+  const earlyRenderer=introWarmup?addScript(RENDERER,'data-fx-current-r326-r422'):null;
+  if(introWarmup)root.dataset.fxCurrentMagWarmupR1588='renderer-requested-in-parallel-with-styles';
   await Promise.all([
     addStyle(STYLE,'data-fx-current-mag-r422'),
     addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
@@ -200,8 +203,9 @@ async function start(){
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
 
-  await addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
-  await addScript(RENDERER,'data-fx-current-r326-r422');
+  const solidGlassPromise=addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
+  if(earlyRenderer)await Promise.all([solidGlassPromise,earlyRenderer]);
+  else{await solidGlassPromise;await addScript(RENDERER,'data-fx-current-r326-r422');}
   await addScript(NATIVE_TOUCH,'data-fx-native-mag-touch-r434');
   await addScript(TOUCH,'data-fx-core-touch-pulse-r99');
   root.dataset.fxCurrentMagTouchBootstrapR435='native-owner-installed-before-ready-check';
