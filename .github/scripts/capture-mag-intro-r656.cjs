@@ -99,7 +99,7 @@ const SHOTS=[
         const ring=document.querySelector('#hero .hero-ring');
         const ringStyle=ring?getComputedStyle(ring):null;
         return {
-          visual:root.dataset.fxNativeMagVisualR1557||root.dataset.fxNativeMagVisualR1556||root.dataset.fxNativeMagVisualR1555||root.dataset.fxNativeMagVisualR1553||root.dataset.fxNativeMagVisualR1500||'',
+          visual:root.dataset.fxNativeMagVisualR1558||root.dataset.fxNativeMagVisualR1557||root.dataset.fxNativeMagVisualR1556||root.dataset.fxNativeMagVisualR1555||root.dataset.fxNativeMagVisualR1553||root.dataset.fxNativeMagVisualR1500||'',
           shape:root.dataset.fxCoreShapeR337||'',
           renderer:root.dataset.fxCoreRenderer||'',
           resolution:root.dataset.fxCoreReal3dResolution||'',
@@ -180,7 +180,7 @@ const SHOTS=[
           stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
           canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
           renderer:root.dataset.fxCoreRenderer||'',
-          visual:root.dataset.fxNativeMagVisualR1557||root.dataset.fxNativeMagVisualR1556||root.dataset.fxNativeMagVisualR1555||root.dataset.fxNativeMagVisualR1553||root.dataset.fxNativeMagVisualR1500||'',
+          visual:root.dataset.fxNativeMagVisualR1558||root.dataset.fxNativeMagVisualR1557||root.dataset.fxNativeMagVisualR1556||root.dataset.fxNativeMagVisualR1555||root.dataset.fxNativeMagVisualR1553||root.dataset.fxNativeMagVisualR1500||'',
           shape:root.dataset.fxCoreShapeR337||'',
           canvasFilter:canvas?getComputedStyle(canvas).filter:'',
           heroRing:ring?{present:true,display:ringStyle.display,visibility:ringStyle.visibility,opacity:Number(ringStyle.opacity||0)}:{present:false,display:'none',visibility:'hidden',opacity:0},
@@ -191,7 +191,7 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
-      if(state.visual!=='solid-black-volcanic-glass-broad-mineral-planes-neutral-studio-reflections-no-eye-no-hud')errors.push('R1557 visual marker missing: '+state.visual);
+      if(state.visual!=='smoky-obsidian-continuous-asymmetric-crystal-visible-studio-planes-clean-silhouette-no-eye')errors.push('R1558 visual marker missing: '+state.visual);
       if(state.shape!=='crystal')errors.push('R1500 mobile MAG shape is not crystal: '+state.shape);
       if(/blur\((?!0(?:px)?\))/i.test(state.canvasFilter||''))errors.push('R1500 mobile MAG still has blur: '+state.canvasFilter);
       if(state.heroRing.present&&state.heroRing.display!=='none'&&state.heroRing.visibility!=='hidden'&&state.heroRing.opacity>.01)errors.push('R1500 legacy hero ring visible: '+JSON.stringify(state.heroRing));
@@ -389,7 +389,7 @@ const SHOTS=[
             stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
             canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             renderer:root.dataset.fxCoreRenderer||'',
-            visual:root.dataset.fxNativeMagVisualR1557||root.dataset.fxNativeMagVisualR1556||root.dataset.fxNativeMagVisualR1555||root.dataset.fxNativeMagVisualR1553||root.dataset.fxNativeMagVisualR1500||'',
+            visual:root.dataset.fxNativeMagVisualR1558||root.dataset.fxNativeMagVisualR1557||root.dataset.fxNativeMagVisualR1556||root.dataset.fxNativeMagVisualR1555||root.dataset.fxNativeMagVisualR1553||root.dataset.fxNativeMagVisualR1500||'',
             optics:root.dataset.fxPrimaryMagOpticsR1383||'',
             resolution:root.dataset.fxCoreReal3dResolution||'',
             shape:root.dataset.fxCoreShapeR337||'',
@@ -407,8 +407,8 @@ const SHOTS=[
         await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
-        if(state.visual!=='solid-black-volcanic-glass-broad-mineral-planes-neutral-studio-reflections-no-eye-no-hud'){
-          errors.push('R1557 native crystal visual marker missing: '+state.visual);
+        if(state.visual!=='smoky-obsidian-continuous-asymmetric-crystal-visible-studio-planes-clean-silhouette-no-eye'){
+          errors.push('R1558 native crystal visual marker missing: '+state.visual);
         }
         if(state.shape!=='crystal'){
           errors.push('Mobile MAG is not in crystal state: '+state.shape);
