@@ -665,8 +665,8 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x30383a,roughness:.34,metalness:.006,
-        clearcoat:.48,clearcoatRoughness:.18,
+        color:0x3a4345,roughness:.42,metalness:.004,
+        clearcoat:.32,clearcoatRoughness:.24,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.010,
         transparent:true,opacity:1,
         emissive:0x020405,emissiveIntensity:.006,
@@ -697,10 +697,10 @@
           Math.cos(az*2.4+el*5.2)*.006;
         const asym=1+n.x*.026+n.y*.016-n.z*.010;
         p.multiplyScalar((1+fold)*asym);
-        const taper=.74+.26*Math.pow(Math.abs(n.y),.72);
-        p.x*=.79*taper;
-        p.y*=1.18;
-        p.z*=.68*(.88+.12*Math.abs(n.y));
+        const taper=1.02-.16*Math.pow(Math.abs(n.y),.76);
+        p.x*=.82*taper;
+        p.y*=1.12;
+        p.z*=.70*(1.0-.07*Math.abs(n.y));
         p.x+=n.y*.050-n.z*.014;
         p.y+=n.x*.030+Math.pow(Math.max(n.y,0),4.0)*.065;
         p.z-=n.x*.020;
@@ -1087,25 +1087,29 @@
         const shoulder=Math.max(0,1-y*y);
         const up=.5*(y+Math.sqrt(y*y+.0036));
         const down=.5*(-y+Math.sqrt(y*y+.0036));
-        const ax=.70+shoulder*.10+pnt.x*.032-pnt.z*.010;
-        const ay=.98+shoulder*.035+y*.045+pnt.x*.012;
-        const az=.59+shoulder*.072+pnt.z*.026-pnt.x*.012;
-        const power=1.48;
+        const ax=.735+shoulder*.080+pnt.x*.050-pnt.z*.018;
+        const ay=.965+shoulder*.055+y*.036+pnt.x*.020;
+        const az=.625+shoulder*.060+pnt.z*.034-pnt.x*.020;
+        const power=2.16;
         const lp=
           Math.pow(Math.abs(pnt.x)/ax,power)+
           Math.pow(Math.abs(pnt.y)/ay,power)+
           Math.pow(Math.abs(pnt.z)/az,power);
         const radius=1/Math.pow(Math.max(.001,lp),1/power);
         const mineralBias=1
-          +Math.sin(theta*2.05+y*2.2)*.016
-          +Math.cos(theta*3.15-y*3.3)*.009;
-        pnt.multiplyScalar(radius*mineralBias);
-        pnt.x*=1.04;pnt.y*=1.10;pnt.z*=.98;
-        pnt.x+=-.082*Math.pow(up,2.0)+.035*Math.pow(down,1.7)+pnt.z*y*.008
-          +Math.sin(theta*1.45+y*.8)*.020*shoulder;
-        pnt.y+=Math.pow(up,4.0)*.072-Math.pow(down,3.5)*.016+pnt.x*pnt.z*.006
-          +Math.cos(theta*2.15-y*.6)*.010*shoulder;
-        pnt.z-=pnt.x*.015+Math.sin(theta*2.7+y)*.010*shoulder;
+          +Math.sin(theta*2.05+y*2.2)*.022
+          +Math.cos(theta*3.15-y*3.3)*.013;
+        const cutA=Math.pow(Math.max(0,pnt.x*.74+pnt.y*.44+pnt.z*.18),3.6);
+        const cutB=Math.pow(Math.max(0,-pnt.x*.66+pnt.y*.24+pnt.z*.52),3.9);
+        const cutC=Math.pow(Math.max(0,pnt.x*.18-pnt.y*.72+pnt.z*.46),4.0);
+        const cutD=Math.pow(Math.max(0,-pnt.x*.36-pnt.y*.18+pnt.z*.80),4.2);
+        pnt.multiplyScalar(radius*mineralBias*(1-.105*cutA-.080*cutB-.060*cutC-.050*cutD));
+        pnt.x*=1.06;pnt.y*=1.08;pnt.z*=.99;
+        pnt.x+=-.108*Math.pow(up,1.85)+.052*Math.pow(down,1.55)+pnt.z*y*.013
+          +Math.sin(theta*1.45+y*.8)*.028*shoulder;
+        pnt.y+=Math.pow(up,3.9)*.060-Math.pow(down,3.25)*.022+pnt.x*pnt.z*.010
+          +Math.cos(theta*2.15-y*.6)*.020*shoulder;
+        pnt.z-=pnt.x*.022+Math.sin(theta*2.7+y)*.015*shoulder;
         basePos.setXYZ(i,pnt.x,pnt.y,pnt.z);
       }
       basePos.needsUpdate=true;
@@ -1348,21 +1352,20 @@
       const visible=grow*(1-crystallise*.96);
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
-      this.organicGroup.scale.set(bodyScale*.91,bodyScale*1.02,bodyScale*.94);
+      this.organicGroup.scale.set(bodyScale*.94,bodyScale*1.00,bodyScale*.96);
 
       this.organicShellMaterial.opacity=.90*visible;
       this.organicLobeMaterial.opacity=0;
       if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.10*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=.018*visible;
-      this.organicHoodMaterial.opacity=.020*visible;
+      this.organicHoodMaterial.opacity=0;
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.042*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.002*visible;
 
       if(this.organicHoodGroup){
-        this.organicHoodGroup.scale.setScalar(.68);
-        this.organicHoodGroup.rotation.y=Math.sin(time*.00018)*.009;
-        this.organicHoodGroup.rotation.x=Math.sin(time*.00015)*.005;
+        this.organicHoodGroup.visible=false;
+        this.organicHoodGroup.scale.setScalar(.001);
       }
       this.organicShell.rotation.y=Math.sin(time*.00010)*.008;
       this.organicShell.rotation.x=Math.sin(time*.00013)*.004;
@@ -1484,7 +1487,7 @@
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.24+flash*.018+after*.006;
+      this.renderer.toneMappingExposure=1.28+flash*.010+after*.004;
       this.coreLight.intensity+=flash*.10+after*.025;
       if(this.glowSprite){
         const g=1+flash*.72;
@@ -1617,6 +1620,7 @@
   document.documentElement.dataset.fxMagBirthProofR1540='physical-bioceramic-organism-round-optic-ringless-habitat-crystal-handoff';
   document.documentElement.dataset.fxMagBirthProofR1572='single-bioceramic-seed-to-smoky-obsidian-no-lobe-cloud-no-eye-no-petal-hud';
   document.documentElement.dataset.fxMagBirthProofR1573='waist-corrected-single-seed-readable-volcanic-glass-material-fracture-no-central-flash';
+  document.documentElement.dataset.fxMagBirthProofR1574='single-continuous-bioceramic-organism-rounded-irregular-volcanic-glass-no-dumbbell-no-diamond';
   document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
