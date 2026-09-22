@@ -75,6 +75,7 @@
   root.dataset.fxNativeMagVisualR1578 = 'tall-seven-ring-asymmetric-obsidian-seed-readable-planes-photographic-lighting';
   root.dataset.fxNativeMagVisualR1579 = 'softbox-feathered-tall-obsidian-seed-integrated-tendrils-natural-facet-transitions';
   root.dataset.fxNativeMagVisualR1580 = 'photographic-smoky-obsidian-sculpture-smooth-broad-facets-soft-mineral-depth-no-eye-short-rooted-tendrils';
+  root.dataset.fxNativeMagVisualR1581 = 'rounded-truncated-smoky-obsidian-monolith-gaussian-studio-reflection-smooth-silhouette';
   root.dataset.fxNativeMagVisualR1564 = 'continuous-asymmetric-smoky-crystal-no-equator-seam-readable-lower-mineral-fill';
   root.dataset.fxNativeMagPerformanceR1541 = 'hardware-full-software-adaptive-native-webgl';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -308,17 +309,19 @@
          A small set of offset polygonal rings creates intentional broad mineral
          planes. This removes the rounded-pot/egg silhouette produced by a
          latitude sphere while preserving the same single WebGL draw and morph. */
-      const sideCount = mobile ? 18 : 22;
+      const sideCount = mobile ? 26 : 32;
       const ringDefs = [
-        [.78,.20,.17,-.20,-.015,.11],
-        [.64,.32,.26,-.17,-.002,.08],
-        [.46,.45,.34,-.12,.010,.045],
-        [.24,.55,.41,-.055,.005,.000],
-        [.00,.60,.45,.015,.000,-.035],
-        [-.22,.58,.43,.060,.008,-.005],
-        [-.42,.50,.36,.095,.015,.035],
-        [-.60,.37,.27,.115,.018,.075],
-        [-.76,.22,.16,.095,.010,.12]
+        [.76,.24,.19,-.18,-.014,.10],
+        [.62,.35,.28,-.16,-.004,.075],
+        [.46,.46,.35,-.115,.008,.045],
+        [.30,.54,.40,-.065,.006,.018],
+        [.14,.59,.44,-.018,.002,-.012],
+        [-.04,.61,.46,.020,.000,-.034],
+        [-.22,.59,.44,.058,.006,-.010],
+        [-.40,.52,.38,.090,.012,.028],
+        [-.56,.42,.30,.110,.016,.062],
+        [-.68,.31,.23,.112,.014,.092],
+        [-.75,.23,.17,.095,.008,.115]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -349,8 +352,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.245,.945,-.055],[.5,0]);
-      const bottom=bodyVertex([.155,-.925,.050],[.5,1]);
+      const top=bodyVertex([-.175,.815,-.045],[.5,0]);
+      const bottom=bodyVertex([.125,-.805,.040],[.5,1]);
 
       for(let side=0;side<sideCount;side+=1){
         const next=(side+1)%sideCount;
@@ -510,8 +513,8 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.055) contrast(1.075) saturate(.96)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.055) contrast(1.075) saturate(.96)','important');
+    canvas.style.setProperty('filter','brightness(1.045) contrast(1.12) saturate(1.00)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.045) contrast(1.12) saturate(1.00)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -626,8 +629,8 @@
         float keySoft=pow(max(dot(n,normalize(key+view)),0.0),14.0);
         float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),38.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.34)/.32,4.0)-pow((refl.y-.43)/.44,4.0))*smoothstep(-.24,.48,refl.z);
-        float softboxB=exp(-pow((refl.x-.48)/.28,4.0)-pow((refl.y-.02)/.52,4.0))*smoothstep(-.32,.54,refl.z);
+        float softboxA=exp(-pow((refl.x+.30)/.43,2.0)-pow((refl.y-.38)/.58,2.0))*smoothstep(-.24,.48,refl.z);
+        float softboxB=exp(-pow((refl.x-.44)/.38,2.0)-pow((refl.y-.01)/.62,2.0))*smoothstep(-.32,.54,refl.z);
         float ceilingBand=exp(-pow((refl.y-.72)/.30,4.0))*smoothstep(.02,.68,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
 
@@ -643,8 +646,8 @@
         mineral+=vec3(.62,.62,.59)*keySpec*.30;
         mineral+=vec3(.24,.24,.22)*keySoft*.055;
         mineral+=vec3(.38,.43,.44)*sideSpec*.21;
-        mineral+=vec3(.44,.46,.44)*softboxA*.20;
-        mineral+=vec3(.28,.34,.35)*softboxB*.17;
+        mineral+=vec3(.32,.34,.33)*softboxA*.12;
+        mineral+=vec3(.22,.27,.28)*softboxB*.11;
         mineral+=vec3(.22,.24,.23)*ceilingBand*.13;
         mineral+=vec3(.090,.104,.101)*horizonBand*.19;
         mineral+=vec3(.070,.095,.102)*fresnel*.30;
@@ -719,8 +722,8 @@
         float keySpec=pow(max(dot(n,normalize(key+view)),0.0),58.0);
         float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),32.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.34)/.32,4.0)-pow((refl.y-.43)/.44,4.0))*smoothstep(-.24,.48,refl.z);
-        float softboxB=exp(-pow((refl.x-.48)/.28,4.0)-pow((refl.y-.02)/.52,4.0))*smoothstep(-.32,.54,refl.z);
+        float softboxA=exp(-pow((refl.x+.30)/.43,2.0)-pow((refl.y-.38)/.58,2.0))*smoothstep(-.24,.48,refl.z);
+        float softboxB=exp(-pow((refl.x-.44)/.38,2.0)-pow((refl.y-.01)/.62,2.0))*smoothstep(-.32,.54,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
         float isTendril=step(2.0,vFacet);
         float bodyMask=1.0-isTendril;
@@ -732,8 +735,8 @@
         col*=.968+.038*smoke;
         col+=vec3(.68,.68,.64)*keySpec*.35;
         col+=vec3(.40,.46,.47)*sideSpec*.22;
-        col+=vec3(.52,.54,.51)*softboxA*.25;
-        col+=vec3(.30,.37,.39)*softboxB*.20;
+        col+=vec3(.32,.34,.33)*softboxA*.13;
+        col+=vec3(.22,.27,.28)*softboxB*.12;
         col+=vec3(.086,.100,.098)*horizonBand*.18;
         col+=vec3(.070,.096,.104)*fresnel*.28;
         col+=vec3(.050,.034,.023)*max(0.0,-n.y)*.12;
@@ -1379,6 +1382,8 @@
     root.dataset.fxCoreOpticsR1579='feathered-studio-reflections-natural-facet-transition-no-white-rectangles';
     root.dataset.fxCoreShapeR1580='nine-offset-rings-eighteen-to-twenty-two-sided-sculpted-tall-obsidian-form-short-rooted-tendrils';
     root.dataset.fxCoreOpticsR1580='lifted-black-glass-midtones-soft-feathered-reflections-smooth-normals-subtle-fissure';
+    root.dataset.fxCoreShapeR1581='eleven-offset-rings-twenty-six-to-thirty-two-sided-truncated-natural-monolith';
+    root.dataset.fxCoreOpticsR1581='gaussian-non-rectangular-studio-reflections-canonical-mobile-contrast-saturation';
     root.dataset.fxCoreShapeR1556='closed-outward-winding-solid-obsidian-shell-no-pinholes';
     root.dataset.fxCoreReferenceGeometryR1260='tall-narrow-armored-pod-bright-titanium-crown-large-blue-optical-core-reference-tendrils';
     root.dataset.fxCoreReferenceMaterialR1260='opaque-gunmetal-bright-titanium-panels-local-blue-optical-core';
