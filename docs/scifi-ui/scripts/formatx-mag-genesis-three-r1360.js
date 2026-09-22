@@ -505,10 +505,10 @@
           +Math.sin(theta*2.15+n.y*2.3)*.018
           +Math.cos(theta*3.4-n.y*3.2)*.009;
         p.multiplyScalar(fold);
-        const taper=.78+.22*Math.pow(Math.abs(n.y),.70);
-        p.x*=.78*taper;
-        p.y*=1.18;
-        p.z*=.68*(.91+.09*Math.abs(n.y));
+        const taper=1.02-.18*Math.pow(Math.abs(n.y),.78);
+        p.x*=.82*taper;
+        p.y*=1.14;
+        p.z*=.70*(1.0-.08*Math.abs(n.y));
         p.x+=n.y*.050-n.z*.012;
         p.y+=Math.pow(Math.max(n.y,0),4.0)*.055+n.x*.018;
         p.z-=n.x*.016;
@@ -1041,10 +1041,10 @@
       this.mineralRoughnessTexture=mineralRoughness;
 
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x11191c,metalness:.025,roughness:.22,
-        emissive:0x010304,emissiveIntensity:.004,
-        clearcoat:.82,clearcoatRoughness:.08,
-        transmission:.018,thickness:.26,ior:1.44,
+        color:0x273134,metalness:.020,roughness:.28,
+        emissive:0x010304,emissiveIntensity:.003,
+        clearcoat:.66,clearcoatRoughness:.12,
+        transmission:.008,thickness:.22,ior:1.44,
         transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
@@ -1101,9 +1101,11 @@
           +Math.cos(theta*3.15-y*3.3)*.009;
         pnt.multiplyScalar(radius*mineralBias);
         pnt.x*=1.04;pnt.y*=1.10;pnt.z*=.98;
-        pnt.x+=-.050*Math.pow(up,2.0)+.024*Math.pow(down,1.7)+pnt.z*y*.006;
-        pnt.y+=Math.pow(up,4.0)*.075-Math.pow(down,3.5)*.014+pnt.x*pnt.z*.005;
-        pnt.z-=pnt.x*.010;
+        pnt.x+=-.082*Math.pow(up,2.0)+.035*Math.pow(down,1.7)+pnt.z*y*.008
+          +Math.sin(theta*1.45+y*.8)*.020*shoulder;
+        pnt.y+=Math.pow(up,4.0)*.072-Math.pow(down,3.5)*.016+pnt.x*pnt.z*.006
+          +Math.cos(theta*2.15-y*.6)*.010*shoulder;
+        pnt.z-=pnt.x*.015+Math.sin(theta*2.7+y)*.010*shoulder;
         basePos.setXYZ(i,pnt.x,pnt.y,pnt.z);
       }
       basePos.needsUpdate=true;
@@ -1124,17 +1126,17 @@
       this.seams=[];
 
       this.mechInnerMaterial=new T.MeshPhysicalMaterial({
-        color:0x70888a,metalness:.04,roughness:.16,
-        emissive:0x061417,emissiveIntensity:.045,
-        clearcoat:.88,clearcoatRoughness:.06,
+        color:0x8a9998,metalness:.025,roughness:.22,
+        emissive:0x071315,emissiveIntensity:.028,
+        clearcoat:.72,clearcoatRoughness:.10,
         transparent:true,opacity:0,depthWrite:false
       });
       this.mechEyeCore=new T.Mesh(
-        new T.CylinderGeometry(.009,.0045,.48,10,2),
+        new T.PlaneGeometry(.012,.46,1,1),
         this.mechInnerMaterial
       );
-      this.mechEyeCore.rotation.z=.030;
-      this.mechEyeCore.position.set(.002,.006,.635);
+      this.mechEyeCore.rotation.z=.028;
+      this.mechEyeCore.position.set(.002,.008,.625);
       this.mechanicalGroup.add(this.mechEyeCore);
 
       const branchMat=this.mechInnerMaterial.clone();
@@ -1157,11 +1159,11 @@
         transparent:true,opacity:0,depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.11,.58,1);
+      this.mechEyeCorona.scale.set(.07,.48,1);
       this.mechEyeCorona.position.set(0,.006,.625);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
-      this.mechLight=new T.PointLight(0xa8d0cf,0,2.6,2);
+      this.mechLight=new T.PointLight(0xc2d0cc,0,2.1,2);
       this.mechLight.position.set(0,.006,.76);
       this.mechanicalGroup.add(this.mechLight);
       this.mechanicalGroup.scale.setScalar(.001);
@@ -1301,7 +1303,7 @@
       const cellular=smooth((t-2.40)/.92);
       const organicTakeover=smooth((t-2.58)/1.05);
       const mineralTakeover=smooth((t-6.10)/1.15);
-      const coreLife=birth*(1-organicTakeover*.82)*(1-mineralTakeover*.96);
+      const coreLife=birth*(1-organicTakeover)*(1-mineralTakeover*.98);
       let sc=.001;
       if(t<.14)sc=.001;
       else if(t<1.20)sc=mix(.30,.58,ease((t-.14)/1.06));
@@ -1401,8 +1403,8 @@
       if(this.seamMaterial)this.seamMaterial.opacity=0;
       this.mechInnerRing.visible=false;
       if(this.mechCradle)this.mechCradle.visible=false;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.012+.012*settle)*fissureGrow;
-      if(this.mechLight)this.mechLight.intensity=fissureGrow*(.16+settle*.08);
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=0;
+      if(this.mechLight)this.mechLight.intensity=fissureGrow*(.035+settle*.020);
       this.mechFissureBranches?.forEach(branch=>{
         if(branch.material)branch.material.opacity=.14*fissureGrow;
       });
@@ -1482,8 +1484,8 @@
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.16+flash*.035+after*.015;
-      this.coreLight.intensity+=flash*5+after*1.5;
+      this.renderer.toneMappingExposure=1.24+flash*.018+after*.006;
+      this.coreLight.intensity+=flash*.10+after*.025;
       if(this.glowSprite){
         const g=1+flash*.72;
         this.glowSprite.scale.multiplyScalar(g);
@@ -1499,12 +1501,10 @@
         this.flashBeam.scale.x=1;
       }
       if(this.mechEyeCorona){
-        const mechanicalReveal=this.mechanicalReveal||0;
-        this.mechEyeCorona.material.opacity=Math.min(.68,mechanicalReveal*(.56+flash*.08));
-        const q=.36+flash*.07;
-        this.mechEyeCorona.scale.set(q,q,1);
+        this.mechEyeCorona.material.opacity=0;
+        this.mechEyeCorona.scale.set(.07,.48,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*2.1*(this.mechanicalReveal||0);
+      if(this.mechLight)this.mechLight.intensity+=flash*.055*(this.mechanicalReveal||0);
 
       this.renderer.render(this.scene,this.camera);
       if(this.deterministicFrame){
@@ -1616,6 +1616,7 @@
   document.documentElement.dataset.fxMagBirthProofR1530='microtextured-obsidian-physical-studio-light-living-habitat-handoff';
   document.documentElement.dataset.fxMagBirthProofR1540='physical-bioceramic-organism-round-optic-ringless-habitat-crystal-handoff';
   document.documentElement.dataset.fxMagBirthProofR1572='single-bioceramic-seed-to-smoky-obsidian-no-lobe-cloud-no-eye-no-petal-hud';
+  document.documentElement.dataset.fxMagBirthProofR1573='waist-corrected-single-seed-readable-volcanic-glass-material-fracture-no-central-flash';
   document.documentElement.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-pbr-render-low-dpr';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
