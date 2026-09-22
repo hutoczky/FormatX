@@ -933,6 +933,12 @@
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
     canvas.hidden=false;
     sizeCanvas();
+    if(VALIDATED_SKIP_MODE){
+      /* Publish the warmup latch immediately in the forced skip contract.
+         The runtime loader consumes the latch even if it loads after this shell. */
+      requestCoreWarmup('validated-skip-bootstrap-r1560');
+      ROOT.dataset.fxMagBirthSkipBootstrapR1560='canonical-mag-warmup-requested';
+    }
     ROOT.dataset.fxMagBirthRenderClockR631='native-reference-film-24fps-all-devices';
     ROOT.dataset.fxMagBirthRenderClockR649='deterministic-bounded-cadence-canvas-all-devices';
     ROOT.dataset.fxMagBirthPerformanceR1541='bounded-11-to-13fps-no-zero-delay-raf-loop';
@@ -941,6 +947,7 @@
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
     ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
+    ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
     ROOT.dataset.fxMagBirthHandoffR1557=VALIDATED_SKIP_MODE?'webdriver-skip-remains-mounted-until-explicit-enter':'normal-product-handoff';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
     if(HAS_VISUAL_FRAME){
@@ -964,24 +971,34 @@
         try{drawParticles(fixedR,fixedTime);}catch(error){
           console.error('FormatX R1557 first fixed-frame render failed:',error);
         }
-        /* R1557: do not publish proof-ready in the same task that submitted the
-           WebGL work. A second browser frame gives ANGLE/SwiftShader one full
-           compositor turn, then the Three renderer draws the exact same fixed
-           timestamp again before the screenshot harness is released. */
-        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        /* R1560: deterministic proof pages are allowed to wait a few compositor
+           turns for ANGLE/SwiftShader. R1557 published "ready" even when the
+           retained framebuffer still read as black, which made valid Three
+           geometry look absent in screenshot evidence. */
+        let proofAttempts=0;
+        const settleProof=()=>{
           if(finished||!overlay.isConnected)return;
+          proofAttempts+=1;
           try{drawParticles(fixedR,fixedTime);}catch(error){
-            console.error('FormatX R1557 second fixed-frame render failed:',error);
+            console.error('FormatX R1560 fixed-frame settle render failed:',error);
+          }
+          const peak=Number(ROOT.dataset.fxMagBirthFramePeakR1557||0);
+          if(peak<8 && proofAttempts<8){
+            requestAnimationFrame(()=>requestAnimationFrame(settleProof));
+            return;
           }
           ROOT.dataset.fxMagBirthVisualFrameSeconds=seconds.toFixed(3);
           ROOT.dataset.fxMagBirthVisualFrameR1557='double-render-compositor-synchronized';
+          ROOT.dataset.fxMagBirthVisualFrameR1560=peak>=8?'readback-visible':'bounded-readback-fail-open';
+          ROOT.dataset.fxMagBirthVisualFrameAttemptsR1560=String(proofAttempts);
           ROOT.dataset.fxMagBirthVisualFrameR659='ready';
           try{
             document.dispatchEvent(new CustomEvent('formatx:introframe-ready',{
-              detail:{seconds,revision:'r1557-double-render-deterministic-frame'}
+              detail:{seconds,revision:'r1560-readback-verified-deterministic-frame',peak,attempts:proofAttempts}
             }));
           }catch(_){}
-        }));
+        };
+        requestAnimationFrame(()=>requestAnimationFrame(settleProof));
       };
       const rendererReady=filmRendererPromise
         ? Promise.race([
