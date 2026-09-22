@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'full-cinematic-biotech-r617';
+  const VERSION = 'full-cinematic-biotech-r1541';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -58,6 +58,7 @@
     stage = document.createElement('div');
     stage.className = 'fx-c536-stage';
     stage.setAttribute('aria-hidden','true');
+    stage.style.cssText='position:fixed;inset:0;z-index:7;overflow:hidden;pointer-events:none;contain:layout paint style;isolation:isolate;width:100%;height:100%;';
     stage.innerHTML = [
       '<div class="fx-c536-world"></div>',
       '<div class="fx-c536-iris"></div>',
