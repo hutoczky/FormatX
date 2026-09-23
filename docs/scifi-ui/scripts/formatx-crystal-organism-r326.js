@@ -106,6 +106,7 @@
   root.dataset.fxNativeMagPerformanceR1632 = 'mobile-startup-lod-30-side-body-4-tendrils-compact-lens-60fps-first';
   root.dataset.fxNativeMagPerformanceR1666 = 'mobile-24-side-3-tendril-compact-lens-lower-pixel-budget-60fps-headroom';
   root.dataset.fxNativeMagQualityR1668 = 'hardware-mobile-073x-sharp-software-fallback-low-res-60fps-priority';
+  root.dataset.fxNativeMagControlR1669 = 'user-shape-priority-blocks-automatic-cinematic-overwrite';
   root.dataset.fxNativeMagVisualR1619 = 'readable-smoky-obsidian-broad-softbox-midtones-single-pass';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
@@ -1249,10 +1250,16 @@
       stage.dataset.shape=root.dataset.fxCoreShape;
     }
     function setMorph(value,source='api-morph',announce=true){
+      const now=performance.now();
+      const userDirected=/mag-button|api|keyboard|core-tap/.test(source);
+      if(!userDirected && now<shapeLockUntil){
+        root.dataset.fxCoreShapeAutoSyncR1669='blocked-during-user-shape-lock:'+String(source||'unknown');
+        return targetMorph;
+      }
       const next=clamp(Number(value)||0,0,1);
       const changed=Math.abs(next-targetMorph)>.001;
       targetMorph=next;
-      if(/mag-button|api|keyboard|core-tap/.test(source))shapeLockUntil=performance.now()+1400;
+      if(userDirected)shapeLockUntil=now+7600;
       if(reduced.matches)morph=targetMorph;
       publishShape(source);
       const cinematicBirth=/^r533-/.test(source);
