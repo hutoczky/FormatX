@@ -117,7 +117,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260923-r1666-deterministic-runtime';
+      script.src = './scripts/igloo-parity.js?v=20260924-r1712-single-organism-runtime';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
