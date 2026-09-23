@@ -78,6 +78,10 @@
       this.interactionImpulse=0;
       this.interactionScroll=0;
       this.interactionSpin=0;
+      this.interactionPress=0;
+      this.interactionSemantic=0;
+      this.interactionVelocityX=0;
+      this.interactionVelocityY=0;
       this.interactionKind='idle';
 
       this.renderer=new THREE.WebGLRenderer({
@@ -1467,16 +1471,28 @@
       const clampInput=v=>Math.max(-1,Math.min(1,Number(v)||0));
       const kind=String(detail.kind||detail.phase||'pulse');
       const strength=Math.max(0,Math.min(1.5,Number(detail.strength)||.35));
-      this.interactionTargetX=clampInput(detail.x);
-      this.interactionTargetY=clampInput(detail.y);
+      const nextX=clampInput(detail.x);
+      const nextY=clampInput(detail.y);
+      const dx=Number.isFinite(Number(detail.dx))?Number(detail.dx):(nextX-this.interactionTargetX)*120;
+      const dy=Number.isFinite(Number(detail.dy))?Number(detail.dy):(nextY-this.interactionTargetY)*120;
+      this.interactionVelocityX=Math.max(-1,Math.min(1,dx/180));
+      this.interactionVelocityY=Math.max(-1,Math.min(1,dy/180));
+      this.interactionTargetX=nextX;
+      this.interactionTargetY=nextY;
       this.interactionImpulse=Math.max(this.interactionImpulse,strength);
       this.interactionScroll=Math.max(-1,Math.min(1,(Number(detail.dy)||0)/140));
-      this.interactionSpin+=((Number(detail.dx)||0)/160)+(kind==='wheel'?this.interactionScroll*.025:0);
+      this.interactionSpin+=this.interactionVelocityX*.018+(kind==='wheel'?this.interactionScroll*.025:0);
+      if(/press|down|touch|drag/.test(kind))this.interactionPress=Math.max(this.interactionPress,strength);
+      if(/release|cancel/.test(kind))this.interactionPress=Math.min(this.interactionPress,.18);
+      if(/menu|language|scene|section|story|question|response|download|loop|focus|key|system/.test(kind)){
+        this.interactionSemantic=Math.max(this.interactionSemantic,strength);
+      }
       this.interactionKind=kind;
-      /* R1695 — interaction is expressed as physical inertia/material response,
-         never as an extra HUD layer or a second animation loop. */
+      /* R1701 — all input classes share one physical response state. No extra
+         renderer, HUD animation or secondary RAF is created by interaction. */
       document.documentElement.dataset.fxMagBirthInteractionR1690=kind;
       document.documentElement.dataset.fxMagBirthInteractionR1695='inertial-camera-light-lens-material-response';
+      document.documentElement.dataset.fxMagBirthInteractionR1701='pointer-touch-drag-scroll-wheel-click-key-focus-menu-language-scene-system-physical-response';
     }
 
     targetWorld(){
@@ -1677,9 +1693,13 @@
       // Physical parallax: the camera moves millimetres, never like a HUD.
       x+=ix*(this.mobileProfile?.025:.055)*(1+.18*impulse);
       y+=iy*(this.mobileProfile?.018:.038)*(1+.14*impulse);
-      z+=Math.abs(this.interactionScroll)*.018;
+      z+=Math.abs(this.interactionScroll)*.018-this.interactionPress*.026-this.interactionSemantic*.010;
       this.camera.position.set(x,y,z);
-      this.camera.lookAt(ix*.026,-iy*.020,0);
+      this.camera.lookAt(
+        ix*.026+this.interactionVelocityX*.006,
+        -iy*.020-this.interactionVelocityY*.005,
+        0
+      );
     }
 
     render(r,time){
@@ -1688,14 +1708,26 @@
       const responseEase=1-Math.exp(-Math.max(1,Math.min(34,time-(this.previousFrameTime||time-16.67)))*.020);
       this.interactionX+=(this.interactionTargetX-this.interactionX)*responseEase;
       this.interactionY+=(this.interactionTargetY-this.interactionY)*responseEase;
-      this.interactionImpulse*=.965;
-      this.interactionScroll*=.90;
-      this.interactionSpin*=.92;
+      this.interactionImpulse*=.955;
+      this.interactionScroll*=.88;
+      this.interactionSpin*=.91;
+      this.interactionPress*=.88;
+      this.interactionSemantic*=.92;
+      this.interactionVelocityX*=.84;
+      this.interactionVelocityY*=.84;
+
+      /* R1701 — the entire photographed world responds with millimetre-scale
+         inertia. This is scene-space parallax, not a UI transform. */
+      this.world.position.x=this.interactionX*.012+this.interactionVelocityX*.006;
+      this.world.position.y=-this.interactionY*.009-this.interactionVelocityY*.004;
+      this.world.rotation.x=-this.interactionY*.004;
+      this.world.rotation.y=this.interactionX*.006;
+      this.scene.fog.density=.021+Math.min(1,this.interactionImpulse)*.00045;
 
       /* R1695 — physically plausible input response. Existing lights move by
          centimetres in scene-space and material parameters change only within
          subtle photographic ranges. This costs no extra draw calls. */
-      const physicalImpulse=Math.min(1,this.interactionImpulse);
+      const physicalImpulse=Math.min(1,this.interactionImpulse+this.interactionPress*.18+this.interactionSemantic*.12);
       if(this.keyLight){
         this.keyLight.position.x=-3.4+this.interactionX*.22;
         this.keyLight.position.y=4.9-this.interactionY*.14;
@@ -1722,6 +1754,16 @@
       if(this.mechEnergyMaterial){
         this.mechEnergyMaterial.roughness=.060+Math.abs(this.interactionY)*.009;
         this.mechEnergyMaterial.envMapIntensity=1.76+physicalImpulse*.11;
+      }
+      if(this.organicShellMaterial){
+        this.organicShellMaterial.roughness=.40+Math.abs(this.interactionY)*.018;
+        this.organicShellMaterial.clearcoatRoughness=.22+Math.abs(this.interactionX)*.012;
+        this.organicShellMaterial.envMapIntensity=1.12+physicalImpulse*.08;
+      }
+      if(this.mechMaterial){
+        this.mechMaterial.roughness=.18+Math.abs(this.interactionY)*.014;
+        this.mechMaterial.clearcoatRoughness=.070+Math.abs(this.interactionX)*.008;
+        this.mechMaterial.envMapIntensity=1.72+physicalImpulse*.10;
       }
 
       if(this.previousFrameTime>0){
@@ -1757,7 +1799,7 @@
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.10+flash*.10+after*.025;
+      this.renderer.toneMappingExposure=1.10+flash*.10+after*.025+physicalImpulse*.010;
       this.coreLight.intensity+=flash*1.10+after*.18;
       if(this.glowSprite){
         const g=1+flash*.72;
@@ -1790,7 +1832,7 @@
           : renderCost;
         this.renderPeak=Math.max(renderCost,this.renderPeak*.86);
         this.framePeak=Math.max(this.frameIntervalAverage,this.framePeak*.90);
-        const panicFrame=this.frameIntervalAverage>18.8||renderCost>9.0||this.framePeak>19.4;
+        const panicFrame=this.frameIntervalAverage>17.9||renderCost>8.4||this.framePeak>18.6;
         if(panicFrame && time-this.lastQualityAdjust>24){
           const previous=this.qualityScale;
           this.qualityScale=Math.max(.14,this.qualityScale-(this.framePeak>24||renderCost>12?.22:.13));
@@ -1809,8 +1851,8 @@
              requires sustained headroom to avoid oscillation. */
           const framePressure=this.frameIntervalAverage>16.38||this.framePeak>16.95;
           const severeFramePressure=this.frameIntervalAverage>16.72||this.framePeak>17.85;
-          const renderPressure=this.renderAverage>5.6||this.renderPeak>7.4;
-          const severeRenderPressure=this.renderAverage>7.0||this.renderPeak>8.9;
+          const renderPressure=this.renderAverage>5.2||this.renderPeak>6.9;
+          const severeRenderPressure=this.renderAverage>6.5||this.renderPeak>8.2;
           if(severeFramePressure||severeRenderPressure){
             this.qualityScale=Math.max(.16,this.qualityScale-.20);
             this.stableBudgetFrames=0;
@@ -1934,7 +1976,7 @@
         engine,
         minimumFrameMs: 16.67,
         targetFps:60,
-        revision:'r1695-photoreal-inertial-material-light-response-60fps-single-loop'
+        revision:'r1701-photoreal-whole-scene-inertia-all-input-60fps-quality-first'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -2011,8 +2053,10 @@
   document.documentElement.dataset.fxMagBirthInteractionR1690='all-input-physical-response-single-render-loop';
   document.documentElement.dataset.fxMagBirthVisualR1691='physically-based-obsidian-bioceramic-glass-low-emission-natural-studio-response';
   document.documentElement.dataset.fxMagBirthVisualR1695='photoreal-physical-inertia-light-lens-response-all-input-single-loop';
+  document.documentElement.dataset.fxMagBirthVisualR1701='photoreal-whole-scene-parallax-physical-material-response-no-hud';
+  document.documentElement.dataset.fxMagBirthPerformanceR1701='quality-sheds-before-cadence-60fps-animation-target';
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1695-physically-based-photoreal-inertial-all-input-stable-60fps'
+    revision:'r1701-physically-based-whole-scene-reactive-quality-first-60fps'
   };
 })();
