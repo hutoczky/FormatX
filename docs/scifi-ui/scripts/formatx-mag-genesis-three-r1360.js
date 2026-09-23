@@ -60,8 +60,11 @@
       this.renderAverage=0;
       this.frameIntervalAverage=this.targetFrameMs;
       this.previousFrameTime=0;
-      this.qualityScale=this.lowPowerProfile?.52:(this.mobileProfile?.64:.80);
+      this.qualityScale=this.lowPowerProfile?.46:(this.mobileProfile?.58:.74);
       this.lastQualityAdjust=0;
+      this.renderPeak=0;
+      this.framePeak=this.targetFrameMs;
+      this.stableBudgetFrames=0;
 
       this.renderer=new THREE.WebGLRenderer({
         canvas,
@@ -1402,7 +1405,7 @@
           ? Math.min(devicePixelRatio||1,this.width<900 ? 0.58 : 0.54)
           : Math.min(
               devicePixelRatio||1,
-              (this.mobileProfile?.86:1.00)*this.qualityScale
+              (this.mobileProfile?.80:.94)*this.qualityScale
             );
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
@@ -1668,36 +1671,48 @@
         this.renderAverage=this.renderAverage
           ? this.renderAverage*.84+renderCost*.16
           : renderCost;
-        if(time-this.lastQualityAdjust>180){
+        this.renderPeak=Math.max(renderCost,this.renderPeak*.86);
+        this.framePeak=Math.max(this.frameIntervalAverage,this.framePeak*.90);
+        if(time-this.lastQualityAdjust>120){
           const previous=this.qualityScale;
-          /* R1617 — preserve the cinematic at native 60 Hz where the display
-             can present it. Reduce render scale and secondary detail first. */
-          const framePressure=this.frameIntervalAverage>16.74;
-          const severeFramePressure=this.frameIntervalAverage>17.10;
-          const renderPressure=this.renderAverage>9.4;
-          const severeRenderPressure=this.renderAverage>11.0;
+          /* R1627 — hard 60 FPS cinematic guard. The intro gives secondary
+             particles, debris, chamber detail and resolution away before it
+             gives away the 16.67 ms presentation cadence. */
+          const framePressure=this.frameIntervalAverage>16.72||this.framePeak>18.2;
+          const severeFramePressure=this.frameIntervalAverage>17.25||this.framePeak>21.0;
+          const renderPressure=this.renderAverage>8.6||this.renderPeak>11.2;
+          const severeRenderPressure=this.renderAverage>10.6||this.renderPeak>13.0;
           if(severeFramePressure||severeRenderPressure){
-            this.qualityScale=Math.max(.30,this.qualityScale-.16);
+            this.qualityScale=Math.max(.22,this.qualityScale-.18);
+            this.stableBudgetFrames=0;
           }else if(framePressure||renderPressure){
-            this.qualityScale=Math.max(.30,this.qualityScale-.085);
-          }else if(this.frameIntervalAverage<16.70&&this.renderAverage<6.6){
-            this.qualityScale=Math.min(1,this.qualityScale+.006);
+            this.qualityScale=Math.max(.22,this.qualityScale-.09);
+            this.stableBudgetFrames=0;
+          }else{
+            this.stableBudgetFrames+=1;
+            if(this.stableBudgetFrames>24&&this.frameIntervalAverage<16.69&&this.renderAverage<6.0&&this.renderPeak<8.0){
+              this.qualityScale=Math.min(1,this.qualityScale+.004);
+              this.stableBudgetFrames=0;
+            }
           }
           if(Math.abs(previous-this.qualityScale)>.001){
             this.lastQualityAdjust=time;
             this.resize();
-            const secondary=this.qualityScale<.66;
-            const emergency=this.qualityScale<.50;
+            const secondary=this.qualityScale<.62;
+            const emergency=this.qualityScale<.44;
             if(this.particles)this.particles.visible=!secondary;
             if(this.debris)this.debris.visible=!secondary;
             if(this.chamber)this.chamber.visible=!emergency;
-            document.documentElement.dataset.fxMagBirthGovernorR1606=
-              this.qualityScale<previous?'degrade-before-frame-drop':'slow-recovery';
+            document.documentElement.dataset.fxMagBirthGovernorR1627=
+              this.qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
           }
         }
         document.documentElement.dataset.fxMagBirthTargetFpsR1600='60';
         document.documentElement.dataset.fxMagBirthTargetFpsR1602='60-real-frame-budget';
+        document.documentElement.dataset.fxMagBirthTargetFpsR1627='60fps-hard-budget-secondary-detail-first';
         document.documentElement.dataset.fxMagBirthRenderMsR1600=this.renderAverage.toFixed(2);
+        document.documentElement.dataset.fxMagBirthRenderPeakR1627=this.renderPeak.toFixed(2);
+        document.documentElement.dataset.fxMagBirthFramePeakR1627=this.framePeak.toFixed(2);
         document.documentElement.dataset.fxMagBirthFrameIntervalR1602=this.frameIntervalAverage.toFixed(2);
         document.documentElement.dataset.fxMagBirthMeasuredFpsR1602=String(Math.min(60,Math.round(1000/Math.max(16.67,this.frameIntervalAverage))));
         document.documentElement.dataset.fxMagBirthQualityScaleR1600=this.qualityScale.toFixed(2);
@@ -1787,7 +1802,7 @@
         engine,
         minimumFrameMs: 16.67,
         targetFps:60,
-        revision:'r1612-natural-obsidian-neutral-bioceramic-smoked-dome-60fps-core'
+        revision:'r1627-natural-obsidian-hard-60fps-adaptive-cinematic-core'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1829,6 +1844,7 @@
   document.documentElement.dataset.fxMagBirthPerformanceR1606='16-67ms-frame-budget-aggressive-adaptive-resolution';
   document.documentElement.dataset.fxMagBirthPerformanceR1617='preemptive-16-67ms-budget-secondary-detail-then-resolution';
   document.documentElement.dataset.fxMagBirthPerformanceR1620='60hz-ceiling-13ms-headroom-adaptive-resolution-secondary-detail-first';
+  document.documentElement.dataset.fxMagBirthPerformanceR1627='hard-60fps-spike-guard-secondary-detail-resolution-before-cadence';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
   document.documentElement.dataset.fxMagBirthProofR1560='smooth-biogenic-shell-no-white-facet-overlay-obsidian-seed-handoff';
@@ -1857,6 +1873,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1612-natural-obsidian-neutral-bioceramic-smoked-dome-dark-chamber-core'
+    revision:'r1627-natural-obsidian-hard-60fps-adaptive-dark-chamber-core'
   };
 })();
