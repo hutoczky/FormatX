@@ -61,3 +61,33 @@ body.living-architecture .fx-organism-dialogue > .fx-organism-thought-trigger {
     transition: none !important;
   }
 }
+
+
+/* R1698 — canonical explicit-open ownership.
+   The dialogue's own open state outranks body panel bookkeeping. */
+html body.living-architecture .fx-organism-dialogue.is-open {
+  position:fixed!important;
+  z-index:12070!important;
+  display:grid!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+  transform:none!important;
+}
+html body.living-architecture .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
+  display:grid!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:none!important;
+}
+@media (max-width:820px){
+  html body.living-architecture .fx-organism-dialogue.is-open {
+    right:max(12px,env(safe-area-inset-right))!important;
+    left:max(12px,env(safe-area-inset-left))!important;
+    bottom:max(20px,calc(env(safe-area-inset-bottom) + 16px))!important;
+    width:auto!important;
+    max-height:calc(100dvh - 32px)!important;
+  }
+}
+/* production-r1698-dialogue-explicit-open-owner */
