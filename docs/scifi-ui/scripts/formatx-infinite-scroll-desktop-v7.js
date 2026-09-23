@@ -19,6 +19,7 @@
   let landingFrame = 0;
   let activityTimer = 0;
   let mobileSettleTimer = 0;
+  let desktopGuardRetryTimer = 0;
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
   let touchActive = false;
@@ -507,6 +508,8 @@
     if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return false;
 
     transferLockedUntil = Date.now() + LOOP_GUARD_MS;
+    clearTimeout(desktopGuardRetryTimer);
+    desktopGuardRetryTimer = 0;
     pendingMobileRelative = null;
     pendingDesktopRelative = null;
     clearTimeout(mobileSettleTimer);
@@ -527,7 +530,13 @@
 
   function commitMobileTransfer() {
     mobileSettleTimer = 0;
-    if (touchActive || Date.now() < transferLockedUntil) return;
+    if (touchActive) return;
+    const guardRemaining = transferLockedUntil - Date.now();
+    if (guardRemaining > 0) {
+      mobileSettleTimer = window.setTimeout(commitMobileTransfer, guardRemaining + 20);
+      root.dataset.fxLoopGuardRetryR1711 = 'mobile-retry-armed';
+      return;
+    }
 
     // r306: r305 intentionally removes large mobile placeholder heights. Any
     // late content/font/layout settling can therefore move the loop bridge after
@@ -551,7 +560,17 @@
   }
 
   function commitDesktopTransfer() {
-    if (isMobileFlow() || pendingDesktopRelative == null || Date.now() < transferLockedUntil) return;
+    if (isMobileFlow() || pendingDesktopRelative == null) return;
+    const guardRemaining = transferLockedUntil - Date.now();
+    if (guardRemaining > 0) {
+      clearTimeout(desktopGuardRetryTimer);
+      desktopGuardRetryTimer = window.setTimeout(() => {
+        desktopGuardRetryTimer = 0;
+        commitDesktopTransfer();
+      }, guardRemaining + 20);
+      root.dataset.fxLoopGuardRetryR1711 = 'desktop-retry-armed';
+      return;
+    }
     const relative = bridgeRelative();
     if (relative == null) {
       pendingDesktopRelative = null;
@@ -720,6 +739,7 @@
     cancelAnimationFrame(mirrorCaptureFrame);
     clearTimeout(activityTimer);
     clearTimeout(mobileSettleTimer);
+    clearTimeout(desktopGuardRetryTimer);
     clearTimeout(repairTimer);
     clearTimeout(mirrorCaptureTimer);
     geometryObserver?.disconnect();
