@@ -1164,11 +1164,11 @@
         float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.12+ndl*.34+sideLight*.24);
-        vec3 col=mix(vec3(.005,.007,.008),vec3(.050,.059,.061),lift);
-        col+=vec3(.54,.57,.54)*keySpec*.13;
-        col+=vec3(.28,.34,.34)*sideSpec*.11;
-        col+=vec3(.055,.080,.084)*fresnel*.31;
+        float lift=sat(.18+ndl*.42+sideLight*.30);
+        vec3 col=mix(vec3(.008,.011,.012),vec3(.072,.083,.085),lift);
+        col+=vec3(.62,.65,.61)*keySpec*.15;
+        col+=vec3(.34,.40,.40)*sideSpec*.13;
+        col+=vec3(.070,.100,.104)*fresnel*.34;
         col+=vec3(.014,.017,.018)*max(0.0,-n.y);
 
         vec2 q=vLocal.xy;
@@ -1217,7 +1217,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*2.75),clamp(alpha,.70,1.0));
+        ${outputName}=vec4(tone(col*3.15),clamp(alpha,.70,1.0));
       }`;
 
     const fragmentSource = softwareRenderer
@@ -1229,6 +1229,9 @@
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
+      : 'hardware-photographic-material-preserved';
+    root.dataset.fxNativeMagVisualR1697=softwareRenderer
+      ? 'software-smoky-obsidian-readable-facets-physical-lens-no-glow-cheat'
       : 'hardware-photographic-material-preserved';
 
     let pendingProgram;
