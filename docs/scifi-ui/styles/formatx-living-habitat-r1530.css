@@ -1033,3 +1033,44 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   }
 }
 /* production-r1628-60fps-webgl-compositor */
+
+
+/* R1630 — compositor-only interaction transitions for a 60 FPS-first UI.
+   Border/background/shadow/filter changes remain visually available, but they
+   snap to their state instead of being interpolated on the paint pipeline. */
+html body.living-architecture :is(
+  .button,.header-support,.main-nav a,.fx-language-toggle,
+  .fx-reference-mag-button,.fx-reference-menu-button,
+  #hero .fx-reference-ask,#hero .fx-reference-liveos,
+  .scene .card,.scene article,.fx-category-deck article,
+  .price-card,.release-card,.fx-platform-card
+){
+  transition-property:transform,opacity,color!important;
+  transition-duration:.18s!important;
+  transition-timing-function:ease!important;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world{
+  transition:opacity .20s ease!important;
+  will-change:transform,opacity;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-iris{
+  transition:transform .20s ease,opacity .20s ease!important;
+  will-change:transform,opacity;
+}
+html[data-fx-cinematic-journey-r536="ready"] body.living-architecture .button{
+  transition:transform .18s ease,opacity .18s ease,color .18s ease!important;
+  filter:none!important;
+}
+@media (pointer:coarse),(max-width:900px){
+  html body.living-architecture :is(
+    .scene .card,.scene article,.fx-category-deck article,
+    .price-card,.release-card,.fx-platform-card,
+    .button,.header-support,.main-nav a,.fx-language-toggle,
+    .fx-reference-mag-button,.fx-reference-menu-button,
+    #hero .fx-reference-ask,#hero .fx-reference-liveos
+  ){
+    transition:none!important;
+  }
+}
+/* production-r1630-compositor-only-transitions */
