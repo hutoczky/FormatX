@@ -240,7 +240,7 @@
 
   html[data-fx-reference-production-r244="ready"] body.living-architecture #hero :is(.fx-core-mobile-v55-canvas, .fx-core-r112-canvas) {
     opacity: .99 !important;
-    filter: brightness(1.04) contrast(1.12) saturate(1.16) drop-shadow(0 0 10px rgba(47, 223, 255, .18)) !important;
+    filter: brightness(1.14) contrast(1.10) saturate(1.10) drop-shadow(0 0 10px rgba(47, 223, 255, .16)) !important;
   }
 
   html[data-fx-reference-production-r244="ready"] body.living-architecture #hero :is(.fx-core-biolume-r323, .fx-quantum-field-r335) {
