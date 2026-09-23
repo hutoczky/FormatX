@@ -54,6 +54,7 @@ ensureStyle();
    still morph to the compatible soft-crystal state during the current page. */
 index=0;
 root.dataset.fxCoreDefaultShapeR1404='irregular-crystal';
+root.dataset.fxCoreControlR1666='deterministic-repeat-click-shape-confirm';
 apply(index,'boot');
 
 document.addEventListener('click',event=>{
@@ -63,6 +64,14 @@ document.addEventListener('click',event=>{
   event.stopImmediatePropagation();
   const shape=next('mag-button');
   try{sessionStorage.setItem('formatx-core-shape-r337',shape);}catch(_){}
+  queueMicrotask(()=>{
+    try{
+      const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
+      core?.setShape?.(shape,'mag-button-r1666-confirm');
+      root.dataset.fxCoreShapeR337=shape;
+      syncButton();
+    }catch(_){}
+  });
 },true);
 
 addEventListener('formatx:coreshapechange',event=>{
