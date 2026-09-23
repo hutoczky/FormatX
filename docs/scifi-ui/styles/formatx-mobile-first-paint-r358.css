@@ -69,8 +69,8 @@
   /* One deterministic mobile header from the very first paint. Controls are
      absolute children of this carrier, never viewport-fixed detached siblings. */
   html body.living-architecture .topbar {
-    position:sticky!important;
-    top:0!important;
+    position:relative!important;
+    top:auto!important;
     right:auto!important;
     bottom:auto!important;
     left:auto!important;
@@ -119,8 +119,15 @@
     max-height:34px!important;
     flex:0 0 34px!important;
   }
+  html body.living-architecture .topbar>.brand strong {
+    font:780 12.2px/1 system-ui,-apple-system,"Segoe UI",sans-serif!important;
+    letter-spacing:.145em!important;
+  }
   html body.living-architecture .topbar>.brand small {
-    display:none!important;
+    display:block!important;
+    margin-top:5px!important;
+    font:650 6.5px/1 system-ui,-apple-system,"Segoe UI",sans-serif!important;
+    letter-spacing:.21em!important;
   }
   html body.living-architecture .topbar .fx-reference-mag-button,
   html body.living-architecture .topbar .fx-language-toggle,
@@ -160,9 +167,9 @@
     width:42px!important;
     min-width:42px!important;
     max-width:42px!important;
-    height:48px!important;
-    min-height:48px!important;
-    max-height:48px!important;
+    height:40px!important;
+    min-height:40px!important;
+    max-height:40px!important;
     padding:0!important;
   }
   html body.living-architecture .topbar .fx-reference-menu-button {
