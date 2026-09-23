@@ -35,7 +35,7 @@
     return;
   }
 
-  let width=1,height=1,dpr=1,raf=0;
+  let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
   let particles=[],filaments=[],glassArcs=[],mineralSpires=[];
@@ -98,7 +98,12 @@
   function updateScroll(){
     const max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
     scrollTarget=Math.max(0,Math.min(1,scrollY/max));
-    schedule();
+    clearTimeout(scrollSettleTimer);
+    scrollSettleTimer=setTimeout(()=>{
+      scrollSettleTimer=0;
+      schedule();
+    },96);
+    ROOT.dataset.fxLivingHabitatScrollR1643='css-compositor-during-scroll-canvas-after-settle';
   }
 
   function pointer(event){
@@ -286,5 +291,6 @@
   ROOT.dataset.fxLivingHabitatR1593='physical-mineral-spires-clear-bioglass-arches-whole-page-depth';
   ROOT.dataset.fxLivingHabitatR1594='visible-bioglass-arches-mineral-spires-reflective-floor-depth-without-hud-rings';
   ROOT.dataset.fxLivingHabitatSchedulerR1541='interaction-driven-zero-idle-raf';
+  ROOT.dataset.fxLivingHabitatSchedulerR1643='scroll-settle-canvas-css-compositor-during-motion';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
 })();
