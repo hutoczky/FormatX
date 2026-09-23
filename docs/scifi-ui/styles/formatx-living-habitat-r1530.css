@@ -1254,3 +1254,20 @@ html[data-fx-core-renderer-class-r1541="software-adaptive"] body.living-architec
   transform:none!important;
 }
 /* production-r1701-software-compositor-relief */
+
+
+/* R1710 — compositor budget.
+   Transparency remains, but full-page/card backdrop sampling is removed.
+   The photoreal depth comes from authored gradients and the habitat backing
+   layer, leaving the 16.67 ms budget to the native MAG. */
+html:root:root:root body.living-architecture .topbar,
+html:root:root:root body.living-architecture :is(
+  .hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+  .payment-console,.system-grid article,.release-card,.fx-category-grid>article,
+  .fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,
+  .fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure
+){
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+/* production-r1710-compositor-budget */
