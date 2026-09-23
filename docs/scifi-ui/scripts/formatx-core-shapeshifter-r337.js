@@ -42,7 +42,7 @@ function apply(nextIndex,source){
   root.dataset.fxCoreShapeModeR413='native-webgl-closed-geometry-morph';
   root.dataset.fxCoreShapeshifterR337='ready';
   syncButton();
-  const core=window.FormatXCoreMobileV69;
+  const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
   if(typeof core?.setShape==='function')core.setShape(shape,source||'shape-controller-r413');
   else core?.pulse?.();
   return shape;
@@ -55,6 +55,7 @@ ensureStyle();
 index=0;
 root.dataset.fxCoreDefaultShapeR1404='irregular-crystal';
 root.dataset.fxCoreControlR1666='deterministic-repeat-click-shape-confirm';
+root.dataset.fxCoreControlR1669='canonical-living-core-api-user-shape-priority';
 apply(index,'boot');
 
 document.addEventListener('click',event=>{
