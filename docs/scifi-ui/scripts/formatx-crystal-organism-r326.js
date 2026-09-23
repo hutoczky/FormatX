@@ -99,6 +99,7 @@
   root.dataset.fxNativeMagPerformanceR1603 = 'software-lite-shader-and-geometry-hardware-photographic-adaptive-60fps';
   root.dataset.fxNativeMagPerformanceR1605 = 'proven-constrained-shader-software-lite-geometry-resolution';
   root.dataset.fxNativeMagPerformanceR1606 = 'aggressive-16-67ms-governor-hardware-adaptive-resolution';
+  root.dataset.fxNativeMagPerformanceR1617 = 'preemptive-16-67ms-budget-resolution-before-cadence-drop';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -1392,18 +1393,20 @@
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
-      if(!auditMode && now-lastQualityAdjust>280){
+      if(!auditMode && now-lastQualityAdjust>180){
         const previous=qualityScale;
-        const framePressure=frameIntervalAverage>17.6;
-        const severeFramePressure=frameIntervalAverage>19.2;
-        const renderPressure=renderAverage>12.4;
-        const severeRenderPressure=renderAverage>14.2;
+        /* R1617 — defend the 16.67 ms budget before visible cadence drops.
+           Resolution/effect quality yields first; frame cadence remains native rAF. */
+        const framePressure=frameIntervalAverage>16.82;
+        const severeFramePressure=frameIntervalAverage>17.55;
+        const renderPressure=renderAverage>10.8;
+        const severeRenderPressure=renderAverage>12.6;
         if(severeFramePressure||severeRenderPressure){
-          qualityScale=Math.max(.38,qualityScale-.12);
+          qualityScale=Math.max(.36,qualityScale-.14);
         }else if(framePressure||renderPressure){
-          qualityScale=Math.max(.38,qualityScale-.065);
-        }else if(frameIntervalAverage<16.95&&renderAverage<8.5){
-          qualityScale=Math.min(1,qualityScale+.015);
+          qualityScale=Math.max(.36,qualityScale-.075);
+        }else if(frameIntervalAverage<16.74&&renderAverage<7.8){
+          qualityScale=Math.min(1,qualityScale+.010);
         }
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=now;
