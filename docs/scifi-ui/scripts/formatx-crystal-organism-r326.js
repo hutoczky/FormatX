@@ -115,6 +115,7 @@
   root.dataset.fxNativeMagInteractionR1692 = 'sitewide-pointer-touch-press-release-drag-scroll-wheel-click-key-focus-menu-language-section';
   root.dataset.fxNativeMagVisualR1693 = 'mobile-readable-smoky-obsidian-smaller-smoked-optic-adaptive-sharp-60fps';
   root.dataset.fxNativeMagVisualR1694 = 'photoreal-physical-response-capability-aware-adaptive-60hz';
+  root.dataset.fxNativeMagVisualR1696 = 'readable-smoky-obsidian-software-floor-photoreal-edge-preservation';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -1317,8 +1318,8 @@
        creates artificial 200ms+ frames and is the opposite of the production
        60 Hz policy. Hardware keeps the photographic path, software keeps the
        same visual identity through the lite shader at a smaller backing store. */
-    let qualityScale=softwareRenderer ? .34 : (auditMode ? .72 : (constrainedMobile ? .44 : (mobile ? .56 : (constrained ? .46 : .58))));
-    const qualityCeiling=softwareRenderer ? .48 : (auditMode ? .80 : (mobile?.72:(constrained?.70:.80)));
+    let qualityScale=softwareRenderer ? .52 : (auditMode ? .72 : (constrainedMobile ? .44 : (mobile ? .56 : (constrained ? .46 : .58))));
+    const qualityCeiling=softwareRenderer ? .62 : (auditMode ? .80 : (mobile?.72:(constrained?.70:.80)));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1331,10 +1332,10 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=softwareRenderer ? .70 : (auditMode ? .92 : constrainedMobile?.98:mobile?1.18:constrained?1.04:1.42);
+      const baseCap=softwareRenderer ? .84 : (auditMode ? .92 : constrainedMobile?.98:mobile?1.18:constrained?1.04:1.42);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=softwareRenderer ? 132000 : (auditMode ? 300000 : constrainedMobile?260000:mobile?430000:constrained?420000:820000);
+      const baseBudget=softwareRenderer ? 172000 : (auditMode ? 300000 : constrainedMobile?260000:mobile?430000:constrained?420000:820000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1632,6 +1633,7 @@
       root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';
       root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
       root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
+      root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
     }
