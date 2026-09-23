@@ -1406,3 +1406,29 @@
 /* production-r1631-stable-desktop-hero-reservation */
 
 /* production-r1634-final-hero-row-lock */
+
+
+/* R1666 — WebGL-unavailable fallback remains fully operable on mobile.
+   Normal mobile reference mode keeps the launcher suppressed; only the explicit
+   renderer fallback restores this canonical command surface. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html[data-fx-core-real3d="context-unavailable"] body.living-architecture #hero [data-fx-live-os-launcher].fx-reference-liveos,
+  html[data-fx-crystal-organism-r326="context-unavailable"] body.living-architecture #hero [data-fx-live-os-launcher].fx-reference-liveos{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+    position:relative!important;
+    inset:auto!important;
+    width:auto!important;
+    min-width:74px!important;
+    max-width:none!important;
+    height:53px!important;
+    min-height:53px!important;
+    max-height:53px!important;
+    overflow:visible!important;
+  }
+}
+/* production-r1666-webgl-fallback-liveos */
