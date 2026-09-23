@@ -465,6 +465,9 @@
   const THREE_OWNER_SRC = './scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1620-60hz-headroom';
   let particles = [];
   let raf = 0;
+  let schedulerLastFrame = 0;
+  let schedulerRefreshMs = 1000/60;
+  let schedulerTick = 0;
   let startedAt = 0;
   let finished = false;
   let exitTimer = 0;
@@ -917,6 +920,27 @@
 
   function render(now) {
     raf=0;
+
+    /* R1622 — stable display divisor with a 60 FPS floor target.
+       The accepted render cadence is always an integer divisor of the actual
+       display refresh and never deliberately below 60 Hz on >=60 Hz panels. */
+    if(!(AUTOMATION&&FORCE)){
+      if(schedulerLastFrame>0){
+        const rawRefresh=Math.max(2,Math.min(40,now-schedulerLastFrame));
+        schedulerRefreshMs=schedulerRefreshMs*.82+rawRefresh*.18;
+      }
+      schedulerLastFrame=now;
+      const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
+      const divisor=Math.max(1,Math.floor(estimatedHz/60));
+      schedulerTick=(schedulerTick+1)%divisor;
+      ROOT.dataset.fxMagBirthRefreshHzR1622=estimatedHz.toFixed(1);
+      ROOT.dataset.fxMagBirthRenderDivisorR1622=String(divisor);
+      if(divisor>1 && schedulerTick!==0){
+        raf=requestAnimationFrame(render);
+        return;
+      }
+    }
+
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
@@ -938,20 +962,16 @@
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
     const particleCadence=filmRenderer
-      ? Math.max(16.67,Number(filmRenderer.minimumFrameMs)||16.67)
+      ? 0
       : (filmRendererPromise?34:(MOBILE?34:16.67));
-    if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
+    if(filmRenderer||!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
     }
 
     if(r<1 || visiblePhase<4){
-      const cadence=(AUTOMATION&&FORCE)
-        ? 72
-        : filmRenderer
-          ? Math.max(0,Number(filmRenderer.minimumFrameMs)||16.67)-16.67
-          : (MOBILE?16.67:0);
-      queueRender(Math.max(0,cadence));
+      const cadence=(AUTOMATION&&FORCE)?72:0;
+      queueRender(cadence);
       return;
     }
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
@@ -986,6 +1006,7 @@
     ROOT.dataset.fxMagBirthCapabilityR620=LOW_POWER?'mobile-constrained-cinematic':'full-cinematic';
     ROOT.dataset.fxMagBirthBudgetR625=LOW_POWER?'adaptive-detail-60hz-target-low-power':'adaptive-detail-60hz-target';
     ROOT.dataset.fxMagBirthBudgetR629=MOBILE?'mobile-adaptive-resolution-60hz-target':'desktop-adaptive-resolution-60hz-target';
+    ROOT.dataset.fxMagBirthPerformanceR1622='refresh-divisor-never-intentionally-below-60fps';
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-zero-continuous-js-render-loop':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
