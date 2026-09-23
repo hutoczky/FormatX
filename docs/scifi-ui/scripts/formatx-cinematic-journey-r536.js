@@ -52,6 +52,21 @@
   let pointerNY = 0;
   const finePointer = matchMedia('(pointer:fine)').matches;
   let lastCoreKey = '';
+  let paintSerial = 0;
+  const rootVarCache = new Map();
+
+  function setRootVar(name,value){
+    if(rootVarCache.get(name)===value)return;
+    rootVarCache.set(name,value);
+    root.style.setProperty(name,value);
+  }
+
+  function setSceneVar(scene,name,value){
+    const key='__fx'+name;
+    if(scene[key]===value)return;
+    scene[key]=value;
+    scene.node.style.setProperty(name,value);
+  }
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
   function coreApi() { return window.FormatXLivingCore || window.FormatXCoreMobileV69 || null; }
@@ -202,8 +217,8 @@
     const scene = scenes[index];
     root.dataset.fxCinematicSceneR536 = scene.def.key;
     root.dataset.fxCinematicSceneCodeR536 = scene.def.code;
-    root.style.setProperty('--fx-c536-a',scene.def.a);
-    root.style.setProperty('--fx-c536-b',scene.def.b);
+    setRootVar('--fx-c536-a',scene.def.a);
+    setRootVar('--fx-c536-b',scene.def.b);
     updateHud(scene);
 
     if (changed) {
@@ -256,27 +271,36 @@
     const yy = clamp(27 + active*(54/Math.max(1,scenes.length-1)) + (local-.5)*7,18,84);
     const trackY = clamp(20 + active*(62/Math.max(1,scenes.length-1)) + local*5,16,88);
 
-    root.style.setProperty('--fx-c536-progress',global.toFixed(4));
-    root.style.setProperty('--fx-c536-local',local.toFixed(4));
-    root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
-    root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
-    root.style.setProperty('--fx-c536-x',x.toFixed(2)+'%');
-    root.style.setProperty('--fx-c536-y',yy.toFixed(2)+'%');
-    root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
-    root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
-    root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
-    root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10 + velocity*-1.6).toFixed(2)+'px');
-    root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
-    root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
+    paintSerial++;
+    const fastScroll=Math.abs(velocity)>.28;
+    const detailFrame=!fastScroll || (paintSerial&1)===0;
 
-    scenes.forEach(scene=>{
-      if(Math.abs(scene.index-active)>1)return;
-      const sceneTop=scene.top-y;
-      const lp=clamp((innerHeight*.72-sceneTop)/Math.max(1,scene.height+innerHeight*.36),0,1);
-      const se=scene.index===active?clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84):.07;
-      scene.node.style.setProperty('--fx-c536-scene-local',lp.toFixed(4));
-      scene.node.style.setProperty('--fx-c536-scene-energy',se.toFixed(4));
-    });
+    setRootVar('--fx-c536-progress',global.toFixed(4));
+    setRootVar('--fx-c536-local',local.toFixed(4));
+    setRootVar('--fx-c536-energy',energy.toFixed(4));
+    setRootVar('--fx-c536-velocity',velocity.toFixed(4));
+
+    if(detailFrame){
+      setRootVar('--fx-c536-x',x.toFixed(2)+'%');
+      setRootVar('--fx-c536-y',yy.toFixed(2)+'%');
+      setRootVar('--fx-c536-track-y',trackY.toFixed(2)+'%');
+      setRootVar('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
+      setRootVar('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
+      setRootVar('--fx-c617-parallax-x',(pointerNX*10 + velocity*-1.6).toFixed(2)+'px');
+      setRootVar('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
+      setRootVar('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
+
+      scenes.forEach(scene=>{
+        if(Math.abs(scene.index-active)>1)return;
+        const sceneTop=scene.top-y;
+        const lp=clamp((innerHeight*.72-sceneTop)/Math.max(1,scene.height+innerHeight*.36),0,1);
+        const se=scene.index===active?clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84):.07;
+        setSceneVar(scene,'--fx-c536-scene-local',lp.toFixed(4));
+        setSceneVar(scene,'--fx-c536-scene-energy',se.toFixed(4));
+      });
+    }
+
+    root.dataset.fxCinematicStyleBudgetR1648=fastScroll?'fast-scroll-half-detail-writes':'full-detail-deduplicated-writes';
 
     root.dataset.fxCinematicProgressR536 = global.toFixed(3);
     root.dataset.fxCinematicLocalR536 = local.toFixed(3);
@@ -407,6 +431,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
     root.dataset.fxCinematicJourneyPerformanceR1643='fast-scroll-zero-mag-burst-deferred-final-scene-handoff';
+    root.dataset.fxCinematicJourneyPerformanceR1648='deduplicated-style-writes-half-detail-fast-scroll-60fps-headroom';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
