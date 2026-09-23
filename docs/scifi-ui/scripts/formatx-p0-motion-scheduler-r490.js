@@ -8,10 +8,11 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r1704';
+root.dataset.fxP0MotionSchedulerR490='armed-r1705';
 root.dataset.fxP0MotionCacheR1703='motion-loader-r1703-sharp-photoreal-mobile';
 root.dataset.fxP0MotionCacheR1704='motion-loader-r1704-software-mobile-photoreal-lens';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260923-r1704-software-mobile-photoreal-lens';
+root.dataset.fxP0MotionCacheR1705='motion-loader-r1705-single-living-organism';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1705-single-living-organism';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
