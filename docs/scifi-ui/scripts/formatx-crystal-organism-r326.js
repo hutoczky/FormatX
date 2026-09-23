@@ -1095,12 +1095,109 @@
         ${outputName}=vec4(filmic(col*2.60),clamp(outAlpha,.70,1.0));
       }`;
 
-    const fragmentSource = (constrainedMobile || auditMode || softwareRenderer)
-      ? constrainedFragmentSource
-      : fullFragmentSource;
+    /* R1678 — true software/very-low-GPU material.
+       Keep the same smoky obsidian + recessed optical lens identity, but remove
+       the high-cost per-fragment Gaussian studio reflections, procedural strata
+       and repeated transcendental micro-detail. Hardware retains the full
+       photographic shader. */
+    const softwareFragmentSource = `${versionLine}precision highp float;
+      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
+      uniform vec2 uPointer;
+      ${fragmentIn} vec3 vNormal;
+      ${fragmentIn} vec3 vLocal;
+      ${fragmentIn} vec2 vUv;
+      ${fragmentIn} vec3 vBary;
+      ${fragmentIn} float vFacet;
+      ${fragmentIn} float vMorph;
+      ${webgl2 ? 'out vec4 outColor;' : ''}
+      float sat(float v){return clamp(v,0.,1.);}
+      vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
+      void main(){
+        vec3 n=normalize(vNormal);
+        vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
+        vec3 key=normalize(vec3(-.53,.79,.31));
+        vec3 side=normalize(vec3(.77,.06,.64));
+        float ndl=max(dot(n,key),0.0);
+        float sideLight=max(dot(n,side),0.0);
+        float facing=sat(abs(dot(n,view)));
+        float fresnel=(1.0-facing);fresnel*=fresnel;
+        float keySpec=max(dot(n,normalize(key+view)),0.0);
+        keySpec*=keySpec;keySpec*=keySpec;
+        float sideSpec=max(dot(n,normalize(side+view)),0.0);
+        sideSpec*=sideSpec;sideSpec*=sideSpec;
+
+        float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
+        float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
+        float isArmor=step(5.0,vFacet)*(1.0-step(6.0,vFacet));
+        float isLensMesh=step(6.0,vFacet);
+        float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
+        float tendrilMask=isTendril*(1.0-vMorph);
+
+        float lift=sat(.12+ndl*.34+sideLight*.24);
+        vec3 col=mix(vec3(.005,.007,.008),vec3(.050,.059,.061),lift);
+        col+=vec3(.54,.57,.54)*keySpec*.13;
+        col+=vec3(.28,.34,.34)*sideSpec*.11;
+        col+=vec3(.055,.080,.084)*fresnel*.31;
+        col+=vec3(.014,.017,.018)*max(0.0,-n.y);
+
+        vec2 q=vLocal.xy;
+        float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
+        float crack=1.0-smoothstep(.003,.014,abs(q.x+.010*q.y));
+        crack*=1.0-smoothstep(.31,.40,abs(q.y));
+        col+=vec3(.13,.20,.20)*crack*front*.08;
+
+        vec2 lq=vec2(q.x,(q.y-.010)*1.08);
+        float lensD=length(lq);
+        float lensOuter=(1.0-smoothstep(.082,.108,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.046,.079,lensD))*front;
+        float lensCore=(1.0-smoothstep(.018,.041,lensD))*front;
+        float lensRim=max(0.0,lensOuter-lensGlass);
+        vec3 lens=vec3(.001,.005,.007)
+          +vec3(.06,.105,.112)*fresnel
+          +vec3(.33,.39,.38)*keySpec*.18
+          +vec3(.012,.045,.052)*lensGlass;
+        lens=mix(lens,vec3(.0015,.006,.008),lensCore*.80);
+        lens+=vec3(.23,.31,.31)*lensRim*.10;
+        col=mix(col,lens,lensOuter*.96);
+
+        float pulse=0.0;
+        if(uSurfacePulse>=0.0){
+          float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
+          float head=mix(-.18,1.18,sat(uSurfacePulse));
+          pulse=1.0-smoothstep(.045,.115,abs(coordinate-head));
+          pulse*=.30+.70*fresnel;
+        }
+        col+=vec3(.11,.28,.33)*pulse*.64;
+        col+=vec3(.34,.40,.39)*pulse*keySpec*.16;
+
+        vec3 tendon=vec3(.006,.014,.016)+vec3(.075,.12,.13)*(.20*sideLight+.48*fresnel);
+        tendon+=vec3(.34,.39,.37)*sideSpec*.12;
+        col=mix(col,tendon,tendrilMask*.995);
+
+        vec3 simpleGlass=vec3(.002,.007,.009)+vec3(.10,.16,.17)*(.20*ndl+.50*fresnel)+vec3(.42,.46,.43)*keySpec*.12;
+        col=mix(col,simpleGlass,isGlassFin*.985);
+        col=mix(col,simpleGlass*.82,isArmor*.990);
+
+        float lensRadial=length(vUv-vec2(.5));
+        float lensInner=1.0-smoothstep(.06,.21,lensRadial);
+        vec3 optical=vec3(.001,.004,.006)+vec3(.015,.075,.086)*lensInner+vec3(.44,.51,.49)*keySpec*.10;
+        col=mix(col,optical,isLensMesh*.997);
+
+        if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
+        float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
+        alpha=mix(alpha,.92,isLensMesh);
+        ${outputName}=vec4(tone(col*2.75),clamp(alpha,.70,1.0));
+      }`;
+
+    const fragmentSource = softwareRenderer
+      ? softwareFragmentSource
+      : ((constrainedMobile || auditMode) ? constrainedFragmentSource : fullFragmentSource);
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
-      ? 'constrained-photographic-software-lower-resolution'
+      ? 'r1678-software-obsidian-lite-physical-lens'
       : 'photographic-full-or-constrained';
+    root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
+      ? 'software-fragment-cost-cut-physical-identity-preserved'
+      : 'hardware-photographic-material-preserved';
 
     let pendingProgram;
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
