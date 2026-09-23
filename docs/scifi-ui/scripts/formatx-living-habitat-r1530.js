@@ -35,7 +35,7 @@
     return;
   }
 
-  let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0;
+  let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,lastDrawAt=0;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
   let particles=[],filaments=[],glassArcs=[],mineralSpires=[];
@@ -121,6 +121,13 @@
 
   function draw(time=performance.now()){
     raf=0;
+    /* R1670: desktop habitat is decorative, not the motion owner. On high-refresh
+       panels skip redundant Canvas2D paints while keeping a >=60Hz presentation
+       path: 60Hz paints every frame, 120Hz every second frame, 144Hz ~72Hz. */
+    if(lastDrawAt && time-lastDrawAt<11){
+      return;
+    }
+    lastDrawAt=time;
     pointerX+=(targetX-pointerX)*.45;
     pointerY+=(targetY-pointerY)*.45;
     scrollValue+=(scrollTarget-scrollValue)*.45;
@@ -292,5 +299,6 @@
   ROOT.dataset.fxLivingHabitatR1594='visible-bioglass-arches-mineral-spires-reflective-floor-depth-without-hud-rings';
   ROOT.dataset.fxLivingHabitatSchedulerR1541='interaction-driven-zero-idle-raf';
   ROOT.dataset.fxLivingHabitatSchedulerR1643='scroll-settle-canvas-css-compositor-during-motion';
+  ROOT.dataset.fxLivingHabitatSchedulerR1670='desktop-canvas-60hz-floor-high-refresh-divisor-zero-idle';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
 })();
