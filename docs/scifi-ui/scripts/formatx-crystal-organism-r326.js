@@ -100,6 +100,7 @@
   root.dataset.fxNativeMagPerformanceR1605 = 'proven-constrained-shader-software-lite-geometry-resolution';
   root.dataset.fxNativeMagPerformanceR1606 = 'aggressive-16-67ms-governor-hardware-adaptive-resolution';
   root.dataset.fxNativeMagPerformanceR1617 = 'preemptive-16-67ms-budget-resolution-before-cadence-drop';
+  root.dataset.fxNativeMagVisualR1619 = 'readable-smoky-obsidian-broad-softbox-midtones-single-pass';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -653,8 +654,8 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.10) contrast(1.10) saturate(1.00)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.10) contrast(1.10) saturate(1.00)','important');
+    canvas.style.setProperty('filter','brightness(1.15) contrast(1.10) saturate(1.00)','important');
+    canvas.style.setProperty('-webkit-filter','brightness(1.15) contrast(1.10) saturate(1.00)','important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -786,32 +787,32 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float lift=sat(.095+ndl*.205+sideLight*.155+fillLight*.090);
+        float lift=sat(.140+ndl*.250+sideLight*.190+fillLight*.120);
         float facetTone=mix(.982,1.018,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.0024,.0035,.0042),vec3(.022,.029,.032),lift)*facetTone;
+        vec3 mineral=mix(vec3(.0058,.0075,.0085),vec3(.038,.046,.049),lift)*facetTone;
         mineral*=.955+.045*smokyDepth+.012*mineralGrain;
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
         mineral+=vec3(.92,.90,.84)*keySpec*.105;
-        mineral+=vec3(.25,.26,.25)*keySoft*.040;
+        mineral+=vec3(.27,.28,.27)*keySoft*.055;
         mineral+=vec3(.52,.58,.59)*sideSpec*.096;
-        mineral+=vec3(.66,.69,.66)*softboxA*.128;
-        mineral+=vec3(.38,.43,.43)*softboxB*.086;
+        mineral+=vec3(.69,.72,.69)*softboxA*.170;
+        mineral+=vec3(.42,.47,.47)*softboxB*.110;
         mineral+=vec3(.82,.82,.74)*studioRibbonA*.104;
         mineral+=vec3(.48,.36,.24)*studioRibbonB*.050;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
-        mineral+=vec3(.072,.086,.085)*horizonBand*.145;
-        mineral+=vec3(.062,.088,.094)*fresnel*.26;
+        mineral+=vec3(.080,.096,.095)*horizonBand*.170;
+        mineral+=vec3(.068,.096,.102)*fresnel*.30;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
         mineral+=vec3(.012,.015,.016)*(.14+.22*fillLight+.08*floorBounce);
-        mineral+=vec3(.070,.078,.077)*pow(planeKey,.72)*.22;
-        mineral+=vec3(.042,.036,.031)*pow(planeFill,.82)*.11;
+        mineral+=vec3(.090,.098,.096)*pow(planeKey,.72)*.27;
+        mineral+=vec3(.052,.045,.039)*pow(planeFill,.82)*.14;
         mineral+=vec3(.003,.011,.013)*smokyDepth*(.30+.70*(1.0-facing));
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         mineral+=vec3(.032,.066,.072)*edgeTransmission*.54;
@@ -962,28 +963,28 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.095+ndl*.205+sideLight*.155+fillLight*.090);
+        float lift=sat(.140+ndl*.250+sideLight*.190+fillLight*.120);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0024,.0035,.0042),vec3(.023,.030,.033),lift);
+        vec3 col=mix(vec3(.0058,.0075,.0085),vec3(.039,.047,.050),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
         col+=vec3(.90,.88,.82)*keySpec*.102;
         col+=vec3(.50,.56,.57)*sideSpec*.092;
-        col+=vec3(.62,.65,.62)*softboxA*.124;
-        col+=vec3(.36,.41,.42)*softboxB*.082;
+        col+=vec3(.68,.71,.68)*softboxA*.166;
+        col+=vec3(.42,.47,.48)*softboxB*.108;
         col+=vec3(.78,.79,.72)*studioRibbonA*.102;
         col+=vec3(.39,.30,.22)*studioRibbonB*.046;
-        col+=vec3(.070,.084,.083)*horizonBand*.140;
-        col+=vec3(.061,.087,.093)*fresnel*.255;
+        col+=vec3(.080,.096,.095)*horizonBand*.168;
+        col+=vec3(.068,.096,.102)*fresnel*.295;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
         col+=vec3(.012,.015,.016)*(.14+.22*fillLight+.08*max(0.0,-n.y));
-        col+=vec3(.068,.076,.075)*pow(planeKey,.72)*.21;
-        col+=vec3(.040,.034,.030)*pow(planeFill,.82)*.10;
+        col+=vec3(.088,.096,.094)*pow(planeKey,.72)*.265;
+        col+=vec3(.052,.045,.039)*pow(planeFill,.82)*.135;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         col+=vec3(.018,.040,.046)*edgeTransmission*.39;
 
