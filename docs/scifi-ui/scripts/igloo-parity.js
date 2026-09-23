@@ -231,7 +231,7 @@
     './scripts/synaptic-thought-genome.js?v=20260923-r1666-deterministic-fingerprint-submit',
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
     './scripts/formatx-mobile-unified.js?v=20260920-r609-semantic-mobile-surface',
-    './scripts/formatx-infinite-scroll.js?v=20260820-reference-loop-r246',
+    './scripts/formatx-infinite-scroll.js?v=20260924-r1712-transfer-guard-retry',
     './scripts/formatx-apex-scene-stability.js?v=20260808-core-scene-1&rev=20260827-r413-single-mag-owner',
     './scripts/formatx-apex-native.js?v=20260808-native-apex-1',
     './scripts/formatx-three-host-safe.js?v=20260808-native-apex-fallback-1',
