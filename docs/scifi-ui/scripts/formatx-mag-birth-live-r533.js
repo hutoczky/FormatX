@@ -76,6 +76,11 @@
 
   const overlay = prepaintOverlay instanceof HTMLElement ? prepaintOverlay : document.createElement('section');
   overlay.className = 'fx-mag-birth-r533';
+  /* R1618 — once the cinematic contains a real Skip control it cannot remain
+     aria-hidden. Decorative descendants keep their own aria-hidden markers. */
+  overlay.removeAttribute('aria-hidden');
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
   overlay.dataset.fxPrepaintR1606 = prepaintOverlay instanceof HTMLElement ? 'adopted-static-lcp-shell' : 'dynamic-fallback';
   overlay.dataset.phase = '0';
   overlay.dataset.performance = MOBILE ? 'constrained' : 'full';
@@ -1009,6 +1014,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1602='exclusive-intro-layout-plus-real-frame-budget-target-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1603='early-cinematic-lcp-brand-plus-adaptive-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1606='static-lcp-shell-mobile-lean-dom-handoff-first-permanent-webgl-60fps';
+    ROOT.dataset.fxMagBirthPerformanceR1618='stable-canonical-underlay-no-delayed-lcp-aria-dialog';
     ROOT.dataset.fxMagBirthPerformanceR1608='lazy-three-owner-zero-parse-cost-when-intro-skipped';
     ROOT.dataset.fxMagBirthDurationR1549=LOW_POWER?'3000ms-adaptive-60fps':'10000ms-full';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
