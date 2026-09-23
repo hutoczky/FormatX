@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'full-cinematic-biotech-r1624';
+  const VERSION = 'single-living-organism-cinematic-r1705';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -155,11 +155,14 @@
     const api = coreApi();
     if (!api) return;
     try {
-      api.setShape?.(scene.def.shape,'r536-'+scene.def.key);
+      /* R1705 — section changes are nervous-system stimuli, not body swaps.
+         One organism persists through the whole document and responds through
+         posture, surface conduction and energy only. */
       api.rotateBy?.((scene.index%2?1:-1)*.018,.026 + scene.index*.002,'r536-camera');
       api.surfacePulse?.('r536-'+scene.def.key);
       api.requestRender?.(3);
-      root.dataset.fxCinematicCoreBudgetR1643='settled-scene-three-render';
+      root.dataset.fxCinematicCoreBudgetR1643='settled-scene-single-organism-three-render';
+      root.dataset.fxCinematicLivingFormR1705='one-organism-state-response';
     } catch (_) {}
   }
 
@@ -488,6 +491,7 @@
 
     root.dataset.fxCinematicJourneyR536='ready';
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
+    root.dataset.fxCinematicLivingIdentityR1705='single-organism-no-scene-shape-swap';
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
