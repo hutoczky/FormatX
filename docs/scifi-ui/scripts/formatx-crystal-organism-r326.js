@@ -1170,9 +1170,9 @@
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    let qualityScale=auditMode?1:(softwareRenderer ? .48 : (constrainedMobile ? .46 : (mobile ? .58 : (constrained ? .60 : .72))));
+    let qualityScale=auditMode?1:(softwareRenderer ? .44 : (constrainedMobile ? .44 : (mobile ? .52 : (constrained ? .56 : .66))));
     let lastQualityAdjust=0,qualityResizeTimer=0;
-    let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0;
+    let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
@@ -1408,41 +1408,58 @@
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
-      if(!auditMode && now-lastQualityAdjust>120){
-        const previous=qualityScale;
-        /* R1626 — hard 60 FPS guard. A frame has 16.67 ms total, so the MAG
-           is kept around a 12.5 ms render ceiling to leave composition/input
-           headroom. Short spikes are acted on immediately instead of waiting
-           for an EMA to deteriorate. Quality/resolution yields before cadence. */
-        const renderPressure=renderAverage>7.4 || renderPeak>9.6;
-        const severeRenderPressure=renderAverage>9.0 || renderPeak>11.2;
-        const framePressure=frameIntervalAverage>16.55 || framePeak>17.5;
-        const severeFramePressure=frameIntervalAverage>16.95 || framePeak>19.4;
-
-        if(severeFramePressure||severeRenderPressure){
-          qualityScale=Math.max(.18,qualityScale-.22);
+      if(!auditMode){
+        const panicFrame=dt>20.5 || ms>10.8;
+        if(panicFrame && now-lastQualityAdjust>24){
+          const previous=qualityScale;
+          qualityScale=Math.max(.16,qualityScale-(dt>28||ms>14?.24:.16));
+          panicFrames=24;
           stableBudgetFrames=0;
-        }else if(framePressure||renderPressure){
-          qualityScale=Math.max(.18,qualityScale-.11);
-          stableBudgetFrames=0;
-        }else{
-          stableBudgetFrames+=1;
-          /* Recovery is deliberately slow: never trade a stable 60 FPS
-             cadence for a quick resolution increase. */
-          if(stableBudgetFrames>90 && frameIntervalAverage<16.50 && renderAverage<5.5 && renderPeak<7.2){
-            qualityScale=Math.min(.82,qualityScale+.003);
-            stableBudgetFrames=0;
+          if(Math.abs(previous-qualityScale)>.001){
+            lastQualityAdjust=now;
+            root.dataset.fxCoreGovernorR1660='panic-lod-one-frame-spike';
+            if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
+            qualityResizeTimer=later(()=>{
+              qualityResizeTimer=0;
+              if(!disposed&&!contextLost&&resize())schedule(1);
+            },0);
           }
-        }
+        }else if(now-lastQualityAdjust>120){
+          const previous=qualityScale;
+          /* R1660 — preserve the 16.67 ms presentation budget. Resolution
+             and secondary optical detail yield before cadence. Recovery waits
+             until the renderer has sustained real headroom for long enough. */
+          const renderPressure=renderAverage>6.8 || renderPeak>8.8;
+          const severeRenderPressure=renderAverage>8.2 || renderPeak>10.4;
+          const framePressure=frameIntervalAverage>16.45 || framePeak>17.2;
+          const severeFramePressure=frameIntervalAverage>16.82 || framePeak>18.8;
 
-        if(Math.abs(previous-qualityScale)>.001){
-          lastQualityAdjust=now;
-          root.dataset.fxCoreGovernorR1626=qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
-          if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
-          qualityResizeTimer=later(()=>{
-            qualityResizeTimer=0;
-            if(!disposed&&!contextLost&&resize())schedule(1);
-          },0);
+          if(severeFramePressure||severeRenderPressure){
+            qualityScale=Math.max(.16,qualityScale-.20);
+            stableBudgetFrames=0;
+            panicFrames=Math.max(panicFrames,12);
+          }else if(framePressure||renderPressure){
+            qualityScale=Math.max(.16,qualityScale-.09);
+            stableBudgetFrames=0;
+          }else{
+            if(panicFrames>0)panicFrames-=1;
+            else stableBudgetFrames+=1;
+            if(stableBudgetFrames>150 && frameIntervalAverage<16.35 && renderAverage<4.8 && renderPeak<6.4){
+              qualityScale=Math.min(.78,qualityScale+.002);
+              stableBudgetFrames=0;
+            }
+          }
+
+          if(Math.abs(previous-qualityScale)>.001){
+            lastQualityAdjust=now;
+            root.dataset.fxCoreGovernorR1626=qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
+            root.dataset.fxCoreGovernorR1660=qualityScale<previous?'preemptive-frame-budget-shed':'guarded-quality-recovery';
+            if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
+            qualityResizeTimer=later(()=>{
+              qualityResizeTimer=0;
+              if(!disposed&&!contextLost&&resize())schedule(1);
+            },0);
+          }
         }
       }
 
@@ -1454,6 +1471,7 @@
       root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';
       root.dataset.fxCoreReal3dTargetFpsR1642='60fps-preemptive-headroom-quality-before-cadence';
       root.dataset.fxNativeMagPerformanceR1642='lower-start-resolution-fast-shedding-slow-recovery-zero-idle';
+      root.dataset.fxNativeMagPerformanceR1660='panic-lod-single-frame-spike-guard-minimum-60fps-target';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
     }
