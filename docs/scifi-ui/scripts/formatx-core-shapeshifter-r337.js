@@ -5,10 +5,10 @@ if(root.dataset.fxCoreShapeshifterR337==='ready')return;
 root.dataset.fxCoreShapeshifterR337='booting';
 
 const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260921-r1520-visible-irregular-mineral';
-const SHAPES=['crystal','sphere'];
+const SHAPES=['crystal'];
 const LABELS={
-  hu:{crystal:'szabálytalan kristály',sphere:'lágy kristály'},
-  en:{crystal:'irregular crystal',sphere:'soft crystal'}
+  hu:{crystal:'élő organizmus'},
+  en:{crystal:'living organism'}
 };
 let index=0;
 
@@ -26,20 +26,22 @@ function button(){return document.querySelector('.fx-reference-mag-button');}
 function syncButton(){
   const b=button();
   if(!(b instanceof HTMLButtonElement))return;
-  const current=SHAPES[index],next=SHAPES[(index+1)%SHAPES.length],lang=language();
+  const current='crystal',lang=language();
   b.dataset.fxCoreShape=current;
+  b.dataset.fxLivingResponseR1711='single-organism';
   b.setAttribute('aria-label',lang==='en'
-    ? `CORE shape: ${LABELS.en[current]}. Activate for ${LABELS.en[next]}.`
-    : `MAG alak: ${LABELS.hu[current]}. Aktiváld a következőhöz: ${LABELS.hu[next]}.`);
+    ? 'CORE living organism. Activate a physiological response.'
+    : 'MAG élő organizmus. Aktiváld az élő reakciót.');
   b.title=lang==='en'
-    ? `CORE · shape shift → ${LABELS.en[next]}`
-    : `MAG · alakváltás → ${LABELS.hu[next]}`;
+    ? 'CORE · living response'
+    : 'MAG · élő reakció';
 }
 function apply(nextIndex,source){
   index=(nextIndex+SHAPES.length)%SHAPES.length;
   const shape=SHAPES[index];
   root.dataset.fxCoreShapeR337=shape;
-  root.dataset.fxCoreShapeModeR413='native-webgl-closed-geometry-morph';
+  root.dataset.fxCoreShapeModeR413='single-living-organism-fixed-anatomy-r1711';
+  root.dataset.fxCoreLivingControlR1711='reaction-not-shape-switch';
   root.dataset.fxCoreShapeshifterR337='ready';
   syncButton();
   const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
@@ -47,11 +49,19 @@ function apply(nextIndex,source){
   else core?.pulse?.();
   return shape;
 }
-function next(source){return apply(index+1,source||'mag-button');}
+function next(source){
+  const shape=apply(index,source||'mag-button-living-response');
+  try{
+    const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
+    core?.toggleShape?.((source||'mag-button')+'-living-response-r1711');
+  }catch(_){}
+  return shape;
+}
 
 ensureStyle();
-/* R1404: every navigation starts from the selected brand silhouette. A user may
-   still morph to the compatible soft-crystal state during the current page. */
+/* R1711: one persistent organism. The legacy shape controller remains only as
+   a compatibility surface; activation now stimulates the organism instead of
+   replacing its anatomy. */
 index=0;
 root.dataset.fxCoreDefaultShapeR1404='irregular-crystal';
 root.dataset.fxCoreControlR1666='deterministic-repeat-click-shape-confirm';
