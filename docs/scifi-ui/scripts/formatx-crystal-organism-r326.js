@@ -668,8 +668,11 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    canvas.style.setProperty('filter','brightness(1.15) contrast(1.10) saturate(1.00)','important');
-    canvas.style.setProperty('-webkit-filter','brightness(1.15) contrast(1.10) saturate(1.00)','important');
+    const compositorFilter=mobile
+      ? 'brightness(1.07) contrast(1.12) saturate(1.00)'
+      : 'brightness(1.10) contrast(1.10) saturate(1.00)';
+    canvas.style.setProperty('filter',compositorFilter,'important');
+    canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
@@ -1162,11 +1165,11 @@
         float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.18+ndl*.42+sideLight*.30);
-        vec3 col=mix(vec3(.008,.011,.012),vec3(.072,.083,.085),lift);
-        col+=vec3(.62,.65,.61)*keySpec*.15;
-        col+=vec3(.34,.40,.40)*sideSpec*.13;
-        col+=vec3(.070,.100,.104)*fresnel*.34;
+        float lift=sat(.14+ndl*.40+sideLight*.27);
+        vec3 col=mix(vec3(.0055,.0070,.0080),vec3(.044,.051,.053),lift);
+        col+=vec3(.72,.73,.68)*keySpec*.17;
+        col+=vec3(.40,.46,.46)*sideSpec*.14;
+        col+=vec3(.060,.090,.096)*fresnel*.29;
         col+=vec3(.014,.017,.018)*max(0.0,-n.y);
 
         vec2 q=vLocal.xy;
@@ -1181,12 +1184,12 @@
         float lensGlass=(1.0-smoothstep(.046,.079,lensD))*front;
         float lensCore=(1.0-smoothstep(.018,.041,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
-        vec3 lens=vec3(.001,.005,.007)
-          +vec3(.06,.105,.112)*fresnel
-          +vec3(.33,.39,.38)*keySpec*.18
-          +vec3(.012,.045,.052)*lensGlass;
-        lens=mix(lens,vec3(.0015,.006,.008),lensCore*.80);
-        lens+=vec3(.23,.31,.31)*lensRim*.10;
+        vec3 lens=vec3(.006,.014,.017)
+          +vec3(.055,.105,.115)*fresnel
+          +vec3(.42,.48,.46)*keySpec*.20
+          +vec3(.025,.078,.087)*lensGlass;
+        lens=mix(lens,vec3(.006,.024,.029),lensCore*.68);
+        lens+=vec3(.31,.39,.38)*lensRim*.12;
         col=mix(col,lens,lensOuter*.96);
 
         float pulse=0.0;
@@ -1209,13 +1212,13 @@
 
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.06,.21,lensRadial);
-        vec3 optical=vec3(.001,.004,.006)+vec3(.015,.075,.086)*lensInner+vec3(.44,.51,.49)*keySpec*.10;
+        vec3 optical=vec3(.007,.017,.021)+vec3(.020,.095,.108)*lensInner+vec3(.52,.59,.56)*keySpec*.115+vec3(.055,.090,.098)*fresnel*.10;
         col=mix(col,optical,isLensMesh*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*3.15),clamp(alpha,.70,1.0));
+        ${outputName}=vec4(tone(col*2.72),clamp(alpha,.70,1.0));
       }`;
 
     const fragmentSource = softwareRenderer
@@ -1274,6 +1277,8 @@
     root.dataset.fxCoreGeometryProofParityR1699='audit-and-production-share-hand-cut-mineral-silhouette';
     root.dataset.fxNativeMagVisualR1700='software-faceted-depth-angle-hardware-smooth-photographic-obsidian';
     root.dataset.fxNativeMagVisualR1701='continuous-asymmetric-obsidian-silhouette-faceted-depth-no-sawtooth';
+    root.dataset.fxNativeMagVisualR1704='mobile-software-smoked-obsidian-readable-glass-lens-sharpness-floor';
+    root.dataset.fxNativeMagPerformanceR1704='mobile-software-resolution-floor-with-lite-shader-60fps-priority';
     const buffers=geometry.arrays.map(()=>gl.createBuffer());
     const attributeNames=['aSphere','aCrystal','aSphereNormal','aCrystalNormal','aUv','aBary','aFacet'];
     const attributes=attributeNames.map(name=>gl.getAttribLocation(program,name));
@@ -1326,8 +1331,9 @@
        The strict R1701 frame governor is still allowed to shed resolution on
        real pressure; we no longer begin every constrained phone permanently
        blurred before measuring its actual GPU budget. */
-    let qualityScale=softwareRenderer ? .52 : (auditMode ? .72 : (constrainedMobile ? .66 : (mobile ? .70 : (constrained ? .50 : .60))));
-    const qualityCeiling=softwareRenderer ? .62 : (auditMode ? .80 : (mobile?.78:(constrained?.72:.82)));
+    let qualityScale=softwareRenderer ? (mobile?.67:.50) : (auditMode ? .72 : (constrainedMobile ? .66 : (mobile ? .70 : (constrained ? .50 : .60))));
+    const qualityCeiling=softwareRenderer ? (mobile?.72:.60) : (auditMode ? .80 : (mobile?.78:(constrained?.72:.82)));
+    const qualityFloor=softwareRenderer ? (mobile?.54:.22) : (mobile?.36:.16);
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1340,10 +1346,10 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=softwareRenderer ? .84 : (auditMode ? .92 : constrainedMobile?1.06:mobile?1.18:constrained?1.04:1.42);
+      const baseCap=softwareRenderer ? (mobile?1.00:.82) : (auditMode ? .92 : constrainedMobile?1.06:mobile?1.18:constrained?1.04:1.42);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=softwareRenderer ? 172000 : (auditMode ? 300000 : constrainedMobile?340000:mobile?470000:constrained?420000:820000);
+      const baseBudget=softwareRenderer ? (mobile?300000:160000) : (auditMode ? 300000 : constrainedMobile?340000:mobile?470000:constrained?420000:820000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1577,7 +1583,7 @@
         const panicFrame=dt>17.9 || ms>8.4;
         if(panicFrame && now-lastQualityAdjust>24){
           const previous=qualityScale;
-          qualityScale=Math.max(.16,qualityScale-(dt>24||ms>12?.22:.13));
+          qualityScale=Math.max(qualityFloor,qualityScale-(dt>24||ms>12?.22:.13));
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
@@ -1600,11 +1606,11 @@
           const severeFramePressure=frameIntervalAverage>16.62 || framePeak>17.45;
 
           if(severeFramePressure||severeRenderPressure){
-            qualityScale=Math.max(.16,qualityScale-.20);
+            qualityScale=Math.max(qualityFloor,qualityScale-.20);
             stableBudgetFrames=0;
             panicFrames=Math.max(panicFrames,12);
           }else if(framePressure||renderPressure){
-            qualityScale=Math.max(.16,qualityScale-.09);
+            qualityScale=Math.max(qualityFloor,qualityScale-.09);
             stableBudgetFrames=0;
           }else{
             if(panicFrames>0)panicFrames-=1;
