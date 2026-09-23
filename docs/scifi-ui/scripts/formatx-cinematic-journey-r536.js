@@ -39,6 +39,8 @@
   let hudMeta = null;
   let raf = 0;
   let cutTimer = 0;
+  let coreSettleTimer = 0;
+  let pendingCoreScene = null;
   let refreshTimer = 0;
   let observer = null;
   let geometryObserver = null;
@@ -138,7 +140,7 @@
     if (hudMeta) hudMeta.textContent = language()==='en' ? 'LIVING SYSTEM / ONE CONTINUOUS SCENE' : 'ÉLŐ RENDSZER / EGY FOLYAMATOS JELENET';
   }
 
-  function signalCore(scene,reason) {
+  function applyCoreScene(scene,reason='settled-scroll') {
     if (!scene) return;
     const key = scene.def.key + ':' + reason;
     if (key === lastCoreKey) return;
@@ -148,11 +150,32 @@
     try {
       api.setShape?.(scene.def.shape,'r536-'+scene.def.key);
       api.rotateBy?.((scene.index%2?1:-1)*.018,.026 + scene.index*.002,'r536-camera');
-      const fastScroll=reason==='scroll'&&Math.abs(velocity)>.62;
-      if(!fastScroll)api.surfacePulse?.('r536-'+scene.def.key);
-      api.requestRender?.(fastScroll?1:3);
-      root.dataset.fxCinematicCoreBudgetR1625=fastScroll?'fast-scroll-single-render':'normal-scene-three-render';
+      api.surfacePulse?.('r536-'+scene.def.key);
+      api.requestRender?.(3);
+      root.dataset.fxCinematicCoreBudgetR1643='settled-scene-three-render';
     } catch (_) {}
+  }
+
+  function signalCore(scene,reason) {
+    if (!scene) return;
+    const fastScroll=reason==='scroll'&&Math.abs(velocity)>.36;
+    if(fastScroll){
+      pendingCoreScene=scene;
+      clearTimeout(coreSettleTimer);
+      coreSettleTimer=setTimeout(()=>{
+        coreSettleTimer=0;
+        const target=pendingCoreScene;
+        pendingCoreScene=null;
+        applyCoreScene(target,'scroll-settled-r1643');
+      },140);
+      root.dataset.fxCinematicCoreBudgetR1625='fast-scroll-zero-render';
+      root.dataset.fxCinematicCoreBudgetR1643='deferred-until-scroll-settle';
+      return;
+    }
+    pendingCoreScene=null;
+    clearTimeout(coreSettleTimer);
+    coreSettleTimer=0;
+    applyCoreScene(scene,reason);
   }
 
   function cut(){
@@ -184,7 +207,7 @@
     updateHud(scene);
 
     if (changed) {
-      cut();
+      if(reason!=='scroll'||Math.abs(velocity)<=.36)cut();
       signalCore(scene,reason);
       dispatchEvent(new CustomEvent('formatx:cinematicscene',{
         detail:{index,kind:scene.def.key,code:scene.def.code,reason,revision:VERSION}
@@ -383,6 +406,7 @@
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
+    root.dataset.fxCinematicJourneyPerformanceR1643='fast-scroll-zero-mag-burst-deferred-final-scene-handoff';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
@@ -398,6 +422,7 @@
     if(raf)cancelAnimationFrame(raf);
     if(cutRaf)cancelAnimationFrame(cutRaf);
     clearTimeout(cutTimer);
+    clearTimeout(coreSettleTimer);
     clearTimeout(refreshTimer);
     observer?.disconnect?.();
     geometryObserver?.disconnect?.();
