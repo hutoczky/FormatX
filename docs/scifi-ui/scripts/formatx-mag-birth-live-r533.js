@@ -464,11 +464,12 @@
   let ctx = null;
   let filmRenderer = null;
   let filmRendererPromise = null;
+  let pendingRendererInteraction = null;
   let filmRendererFallbackStarted = false;
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1695-physical-inertia-all-input';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1701-whole-scene-reactive-60fps';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -769,6 +770,10 @@
           }
           if(renderer){
             filmRenderer=renderer;
+            if(pendingRendererInteraction){
+              try{filmRenderer.interact?.(pendingRendererInteraction);}catch(_){}
+              pendingRendererInteraction=null;
+            }
             ROOT.dataset.fxMagBirthRendererR1360='threejs-active';
             ROOT.dataset.fxMagBirthRendererR1430='threejs-active-production-path';
             ROOT.dataset.fxMagBirthRendererR1450='three-primary-active';
@@ -870,7 +875,8 @@
 
     try { cancelAnimationFrame(raf); } catch (_) {}
     try { cancelAnimationFrame(interactionMoveRaf); } catch (_) {}
-    interactionMoveRaf=0;pendingInteraction=null;
+    interactionMoveRaf=0;pendingInteraction=null;pendingRendererInteraction=null;
+    try { interactionController.abort(); } catch (_) {}
     try { clearTimeout(frameTimer); } catch (_) {}
     frameTimer=0;
     try { clearTimeout(exitTimer); } catch (_) {}
@@ -1169,42 +1175,78 @@
     queueRender();
   }
 
-  /* R1690 — every meaningful input modulates the same Three.js physical scene.
-     Pointer motion is RAF-coalesced to one update per display frame; scroll,
-     wheel, click, focus and keyboard are event bursts only. */
+  /* R1701 — all meaningful input reaches the same physical Three scene.
+     Move/drag is RAF-coalesced; semantic events are one-shot impulses. The
+     AbortController guarantees that the intro leaves zero input work behind. */
+  const interactionController=new AbortController();
+  const interactionOptions={passive:true,signal:interactionController.signal};
   let interactionMoveRaf=0;
   let pendingInteraction=null;
+  let previousInteractionX=innerWidth*.5;
+  let previousInteractionY=innerHeight*.5;
+  let previousIntroScrollY=scrollY;
   const interactionPoint=event=>({
     x:clamp((((event?.clientX??innerWidth*.5)/Math.max(1,innerWidth))-.5)*2,-1,1),
     y:clamp(-((((event?.clientY??innerHeight*.5)/Math.max(1,innerHeight))-.5)*2),-1,1)
   });
   const feedInteraction=(kind,event,extra={})=>{
-    if(finished||!filmRenderer?.interact)return;
+    if(finished)return;
     const p=interactionPoint(event);
-    filmRenderer.interact({
+    const clientX=Number(event?.clientX);
+    const clientY=Number(event?.clientY);
+    const dx=Number.isFinite(Number(extra.dx))
+      ? Number(extra.dx)
+      : Number.isFinite(clientX) ? clientX-previousInteractionX : 0;
+    const dy=Number.isFinite(Number(extra.dy))
+      ? Number(extra.dy)
+      : Number.isFinite(clientY) ? clientY-previousInteractionY : 0;
+    if(Number.isFinite(clientX))previousInteractionX=clientX;
+    if(Number.isFinite(clientY))previousInteractionY=clientY;
+    const payload={
       kind,phase:extra.phase||kind,x:p.x,y:p.y,
-      dx:Number(extra.dx)||0,dy:Number(extra.dy)||0,
-      strength:Number(extra.strength)||.35
-    });
+      dx,dy,strength:Number(extra.strength)||.35
+    };
+    if(filmRenderer?.interact)filmRenderer.interact(payload);
+    else pendingRendererInteraction=payload;
     ROOT.dataset.fxMagBirthInteractionR1690=kind;
+    ROOT.dataset.fxMagBirthInteractionR1701=kind;
   };
+  const semanticInteraction=(kind,strength=.5,extra={})=>
+    feedInteraction(kind,null,{phase:kind,strength,...extra});
   addEventListener('pointermove',event=>{
     pendingInteraction=event;
     if(interactionMoveRaf)return;
     interactionMoveRaf=requestAnimationFrame(()=>{
       interactionMoveRaf=0;
       const current=pendingInteraction;pendingInteraction=null;
-      if(current)feedInteraction('move',current,{strength:.24});
+      if(current)feedInteraction(
+        current.pointerType==='touch'?'touch-drag':'move',
+        current,
+        {strength:current.buttons?.26:.20}
+      );
     });
-  },{passive:true});
-  addEventListener('pointerdown',event=>feedInteraction('press',event,{strength:.86}),{passive:true});
-  addEventListener('pointerup',event=>feedInteraction('release',event,{strength:.62}),{passive:true});
-  addEventListener('pointercancel',event=>feedInteraction('cancel',event,{strength:.18}),{passive:true});
-  addEventListener('click',event=>feedInteraction('click',event,{phase:'pulse',strength:.96}),{passive:true});
-  addEventListener('wheel',event=>feedInteraction('wheel',event,{dy:clamp(event.deltaY,-160,160),strength:.42}),{passive:true});
-  addEventListener('scroll',()=>filmRenderer?.interact?.({kind:'scroll',phase:'scroll',x:0,y:0,dy:clamp(scrollY,-180,180),strength:.30}),{passive:true});
-  addEventListener('keydown',event=>{if(!event.repeat)feedInteraction('key',event,{strength:.58});},{passive:true});
-  addEventListener('focusin',event=>feedInteraction('focus',event,{strength:.34}),{passive:true});
+  },interactionOptions);
+  addEventListener('pointerdown',event=>feedInteraction(event.pointerType==='touch'?'touch-press':'press',event,{strength:.86}),interactionOptions);
+  addEventListener('pointerup',event=>feedInteraction(event.pointerType==='touch'?'touch-release':'release',event,{strength:.62}),interactionOptions);
+  addEventListener('pointercancel',event=>feedInteraction('cancel',event,{strength:.18}),interactionOptions);
+  addEventListener('click',event=>feedInteraction('click',event,{phase:'pulse',strength:.96}),interactionOptions);
+  addEventListener('wheel',event=>feedInteraction('wheel',event,{dy:clamp(event.deltaY,-160,160),strength:.42}),interactionOptions);
+  addEventListener('scroll',()=>{
+    const next=scrollY;
+    const dy=clamp(next-previousIntroScrollY,-180,180);
+    previousIntroScrollY=next;
+    semanticInteraction('scroll',.30,{dy});
+  },interactionOptions);
+  addEventListener('keydown',event=>{if(!event.repeat)semanticInteraction('key',.58,{dx:event.key==='ArrowLeft'?-28:event.key==='ArrowRight'?28:0,dy:event.key==='ArrowUp'?-22:event.key==='ArrowDown'?22:0});},interactionOptions);
+  addEventListener('focusin',()=>semanticInteraction('focus',.34),interactionOptions);
+  addEventListener('formatx:menustatechange',event=>semanticInteraction(event.detail?.open?'menu-open':'menu-close',.54),interactionOptions);
+  addEventListener('formatx:languagechange',()=>semanticInteraction('language',.46),interactionOptions);
+  addEventListener('formatx:cinematicscene',event=>semanticInteraction('scene',.62,{dx:(Number(event.detail?.index)||0)%2?18:-18}),interactionOptions);
+  addEventListener('formatx:storychapter',()=>semanticInteraction('story',.58),interactionOptions);
+  addEventListener('formatx:organismpanelopen',()=>semanticInteraction('question',.66),interactionOptions);
+  addEventListener('formatx:organismresponse',()=>semanticInteraction('response',.72),interactionOptions);
+  addEventListener('formatx:open-live-os',()=>semanticInteraction('system-open',.64),interactionOptions);
+  addEventListener('formatx:loop',()=>semanticInteraction('loop',.78),interactionOptions);
 
   skip.addEventListener('click',()=>finish('user-skip'));
   addEventListener('formatx:real3dready',()=>{
