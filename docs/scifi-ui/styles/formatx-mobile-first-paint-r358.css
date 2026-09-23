@@ -867,3 +867,39 @@
   }
 }
 /* production-r1640-mobile-viewport-hard-containment */
+
+
+/* R1641 — 320px information-preservation lock.
+   The four canonical workflow steps must never use the wider two-column hero
+   geometry on narrow phones. Keep every label fully inside the viewport. */
+@media (max-width:360px) {
+  html:root:root:root:root body.living-architecture
+  #hero .hero-copy > .fx-method-inline {
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-auto-flow:row!important;
+    gap:8px!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    box-sizing:border-box!important;
+    margin:18px 0 0!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+
+  html:root:root:root:root body.living-architecture
+  #hero .hero-copy > .fx-method-inline > li {
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    overflow-wrap:anywhere!important;
+    word-break:normal!important;
+  }
+}
+/* production-r1641-320-method-stack */
