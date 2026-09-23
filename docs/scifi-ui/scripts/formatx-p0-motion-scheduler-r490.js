@@ -8,12 +8,13 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r1711';
+root.dataset.fxP0MotionSchedulerR490='armed-r1712';
 root.dataset.fxP0MotionCacheR1703='motion-loader-r1703-sharp-photoreal-mobile';
 root.dataset.fxP0MotionCacheR1704='motion-loader-r1704-software-mobile-photoreal-lens';
 root.dataset.fxP0MotionCacheR1710='motion-loader-r1710-60fps-frame-budget';
 root.dataset.fxP0MotionCacheR1711='motion-loader-r1711-single-living-organism';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1711-single-living-organism';
+root.dataset.fxP0MotionCacheR1712='motion-loader-r1712-single-organism-intent-handoff';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1712-single-organism-intent-handoff';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
