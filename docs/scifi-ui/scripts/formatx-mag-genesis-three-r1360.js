@@ -60,7 +60,7 @@
       this.renderAverage=0;
       this.frameIntervalAverage=this.targetFrameMs;
       this.previousFrameTime=0;
-      this.qualityScale=this.lowPowerProfile?.34:(this.mobileProfile?.46:.60);
+      this.qualityScale=this.lowPowerProfile?.30:(this.mobileProfile?.40:.54);
       this.lastQualityAdjust=0;
       this.renderPeak=0;
       this.framePeak=this.targetFrameMs;
@@ -1200,7 +1200,7 @@
 
       const bodyGeo=new T.IcosahedronGeometry(
         1.0,
-        this.deterministicFrame?4:(this.lowPowerProfile?2:3)
+        this.deterministicFrame?4:(this.lowPowerProfile||this.mobileProfile?2:3)
       );
       const bp=bodyGeo.attributes.position;
       const pv=new T.Vector3();
@@ -1870,6 +1870,7 @@
   document.documentElement.dataset.fxMagBirthPerformanceR1627='hard-60fps-spike-guard-secondary-detail-resolution-before-cadence';
   document.documentElement.dataset.fxMagBirthPerformanceR1633='mobile-startup-lod-dna-organic-cells-tendrils-before-first-frame';
   document.documentElement.dataset.fxMagBirthPerformanceR1640='preemptive-60fps-governor-lower-start-resolution-fast-quality-shedding';
+  document.documentElement.dataset.fxMagBirthPerformanceR1670='lower-start-resolution-mobile-geometry-lod-stable-60fps-headroom';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
   document.documentElement.dataset.fxMagBirthProofR1560='smooth-biogenic-shell-no-white-facet-overlay-obsidian-seed-handoff';
@@ -1898,6 +1899,6 @@
 
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1627-natural-obsidian-hard-60fps-adaptive-dark-chamber-core'
+    revision:'r1670-natural-obsidian-stable-60fps-headroom-dark-chamber-core'
   };
 })();
