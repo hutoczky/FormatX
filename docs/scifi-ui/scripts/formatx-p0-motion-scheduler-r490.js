@@ -8,8 +8,9 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r1672';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260923-r1693-mobile-photoreal-optic';
+root.dataset.fxP0MotionSchedulerR490='armed-r1703';
+root.dataset.fxP0MotionCacheR1703='motion-loader-r1703-sharp-photoreal-mobile';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260923-r1703-sharp-photoreal-mobile';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
