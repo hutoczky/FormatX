@@ -68,6 +68,18 @@
       this.stableBudgetFrames=0;
       this.panicFrames=0;
 
+      // R1690 — one low-cost physical response state for every input source.
+      // Inputs never spawn extra render loops; they only modulate the existing
+      // 60 Hz cinematic frame, so interaction cannot create a second GPU owner.
+      this.interactionX=0;
+      this.interactionY=0;
+      this.interactionTargetX=0;
+      this.interactionTargetY=0;
+      this.interactionImpulse=0;
+      this.interactionScroll=0;
+      this.interactionSpin=0;
+      this.interactionKind='idle';
+
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
@@ -1435,6 +1447,20 @@
       this.camera.updateProjectionMatrix();
     }
 
+    interact(detail={}){
+      if(this.disposed)return;
+      const clampInput=v=>Math.max(-1,Math.min(1,Number(v)||0));
+      const kind=String(detail.kind||detail.phase||'pulse');
+      const strength=Math.max(0,Math.min(1.5,Number(detail.strength)||.35));
+      this.interactionTargetX=clampInput(detail.x);
+      this.interactionTargetY=clampInput(detail.y);
+      this.interactionImpulse=Math.max(this.interactionImpulse,strength);
+      this.interactionScroll=Math.max(-1,Math.min(1,(Number(detail.dy)||0)/140));
+      this.interactionSpin+=((Number(detail.dx)||0)/160)+(kind==='wheel'?this.interactionScroll*.025:0);
+      this.interactionKind=kind;
+      document.documentElement.dataset.fxMagBirthInteractionR1690=kind;
+    }
+
     targetWorld(){
       const T=this.THREE;
       let p=null;
@@ -1488,8 +1514,8 @@
       this.mechanicalGroup.position.set(tx,ty,.02);
       this.tentacleGroup.position.set(tx,ty,-.04);
       this.coreGroup.scale.setScalar(sc*mix(1,.90,endMove));
-      this.coreGroup.rotation.y=Math.sin(time*.00016)*.012;
-      this.coreGroup.rotation.x=Math.sin(time*.00019)*.008;
+      this.coreGroup.rotation.y=Math.sin(time*.00016)*.012+this.interactionX*.030+this.interactionSpin;
+      this.coreGroup.rotation.x=Math.sin(time*.00019)*.008-this.interactionY*.022;
 
       const irisAwake=smooth((t-.70)/.80)*coreLife;
       const pulse=.988+.012*Math.sin(time*.0042);
@@ -1523,8 +1549,9 @@
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.075*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.003*visible;
       if(this.organicHoodGroup){this.organicHoodGroup.visible=false;this.organicHoodGroup.scale.setScalar(.001);}
-      this.organicShell.rotation.y=Math.sin(time*.00014)*.010;
-      this.organicShell.rotation.x=Math.sin(time*.00016)*.006;
+      this.organicShell.rotation.y=Math.sin(time*.00014)*.010+this.interactionX*.022;
+      this.organicShell.rotation.x=Math.sin(time*.00016)*.006-this.interactionY*.016;
+      this.organicShell.scale.setScalar(1+this.interactionImpulse*.006);
       if(this.organicMembrane)this.organicMembrane.rotation.copy(this.organicShell.rotation);
       this.organicLobes.forEach((lobe,i)=>{
         const q=1+Math.sin(time*.00082+lobe.userData.phase)*.018*visible;
@@ -1574,10 +1601,10 @@
         const q=.28+.004*Math.sin(time*.0042);
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity=.022*irisGrow;
-      this.mechanicalGroup.rotation.y=.08*bodyGrow+Math.sin(time*.00014)*.010*bodyGrow;
-      this.mechanicalGroup.rotation.x=-.035*bodyGrow+Math.sin(time*.00012)*.006*bodyGrow;
-      this.mechanicalGroup.rotation.z=-.012*bodyGrow+Math.sin(time*.00010)*.004*bodyGrow;
+      if(this.mechLight)this.mechLight.intensity=(.022+this.interactionImpulse*.040)*irisGrow;
+      this.mechanicalGroup.rotation.y=.08*bodyGrow+Math.sin(time*.00014)*.010*bodyGrow+this.interactionX*.032*bodyGrow+this.interactionSpin;
+      this.mechanicalGroup.rotation.x=-.035*bodyGrow+Math.sin(time*.00012)*.006*bodyGrow-this.interactionY*.024*bodyGrow;
+      this.mechanicalGroup.rotation.z=-.012*bodyGrow+Math.sin(time*.00010)*.004*bodyGrow+this.interactionScroll*.008*bodyGrow;
       this.mechPetals?.forEach((p,index)=>{
         const open=(1-bodyGrow)*.08;
         p.rotation.z=p.userData.baseRz+(index%2?open:-open);
@@ -1605,6 +1632,8 @@
     }
 
     updateCamera(t,time){
+      const ix=this.interactionX,iy=this.interactionY;
+      const impulse=this.interactionImpulse;
       let z=5.86,y=.012,x=0;
       if(t<2.70){
         const k=smooth(t/2.70);
@@ -1627,12 +1656,24 @@
         y=.002;
       }
       if(this.width<this.height)z+=.44;
+      // Physical parallax: the camera moves millimetres, never like a HUD.
+      x+=ix*(this.mobileProfile?.025:.055)*(1+.18*impulse);
+      y+=iy*(this.mobileProfile?.018:.038)*(1+.14*impulse);
+      z+=Math.abs(this.interactionScroll)*.018;
       this.camera.position.set(x,y,z);
-      this.camera.lookAt(0,0,0);
+      this.camera.lookAt(ix*.026,-iy*.020,0);
     }
 
     render(r,time){
       if(this.disposed)return;
+
+      const responseEase=1-Math.exp(-Math.max(1,Math.min(34,time-(this.previousFrameTime||time-16.67)))*.020);
+      this.interactionX+=(this.interactionTargetX-this.interactionX)*responseEase;
+      this.interactionY+=(this.interactionTargetY-this.interactionY)*responseEase;
+      this.interactionImpulse*=.965;
+      this.interactionScroll*=.90;
+      this.interactionSpin*=.92;
+
       if(this.previousFrameTime>0){
         const interval=Math.max(1,Math.min(50,time-this.previousFrameTime));
         this.frameIntervalAverage=this.frameIntervalAverage*.86+interval*.14;
@@ -1838,11 +1879,12 @@
       return {
         resize:()=>engine.resize(),
         draw:(r,time)=>engine.render(r,time),
+        interact:detail=>engine.interact(detail),
         destroy:()=>engine.destroy(),
         engine,
         minimumFrameMs: 16.67,
         targetFps:60,
-        revision:'r1676-phase-gated-photoreal-minimum-60fps-target'
+        revision:'r1690-photoreal-all-input-physical-response-60fps-single-loop'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1916,8 +1958,9 @@
   document.documentElement.dataset.fxMagBirthProofR1612='neutral-wet-bioceramic-seed-handoff-natural-obsidian-reflection-smoked-dome-no-hud';
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
+  document.documentElement.dataset.fxMagBirthInteractionR1690='all-input-physical-response-single-render-loop';
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1672-photographic-material-lighting-stable-60fps-dark-chamber-core'
+    revision:'r1690-photographic-physical-all-input-interaction-stable-60fps'
   };
 })();
