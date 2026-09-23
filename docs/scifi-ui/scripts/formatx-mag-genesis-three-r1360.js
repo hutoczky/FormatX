@@ -101,7 +101,7 @@
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.14;
+      this.renderer.toneMappingExposure=1.06;
 
       this.scene=new THREE.Scene();
       this.scene.background=new THREE.Color(0x010304);
@@ -589,16 +589,19 @@
     makeCore(){
       const T=this.THREE;
       const shellMat=new T.MeshPhysicalMaterial({
-        color:0x151c20,metalness:.34,roughness:.28,
-        emissive:0x010304,emissiveIntensity:.008,
-        clearcoat:.44,clearcoatRoughness:.16,
-        envMapIntensity:1.34,transparent:true,opacity:.98
+        color:0x111719,metalness:.06,roughness:.22,
+        emissive:0x000101,emissiveIntensity:.002,
+        clearcoat:.58,clearcoatRoughness:.12,
+        envMapIntensity:1.52,transparent:true,opacity:.99,
+        ior:1.49,specularIntensity:.92,specularColor:new T.Color(0xcbd4d2)
       });
       const shellGlass=new T.MeshPhysicalMaterial({
-        color:0x435b61,metalness:.02,roughness:.13,
-        transparent:true,opacity:.075,depthWrite:false,
-        clearcoat:.98,clearcoatRoughness:.040,
-        transmission:.08,thickness:.12,ior:1.43
+        color:0x506367,metalness:.0,roughness:.085,
+        transparent:true,opacity:.050,depthWrite:false,
+        clearcoat:1,clearcoatRoughness:.028,
+        transmission:.16,thickness:.18,ior:1.47,
+        attenuationColor:new T.Color(0x22383c),attenuationDistance:1.8,
+        envMapIntensity:1.34
       });
 
       const seedGeo=new T.IcosahedronGeometry(.84,this.deterministicFrame?3:2);
@@ -683,11 +686,13 @@
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x14272b,metalness:.010,roughness:.10,
-        clearcoat:.92,clearcoatRoughness:.045,
-        transmission:.10,thickness:.14,ior:1.45,
-        emissive:0x031014,emissiveIntensity:.055,
-        transparent:true,opacity:.97
+        color:0x162529,metalness:0,roughness:.065,
+        clearcoat:1,clearcoatRoughness:.025,
+        transmission:.24,thickness:.23,ior:1.49,
+        attenuationColor:new T.Color(0x15363d),attenuationDistance:.72,
+        emissive:0x010405,emissiveIntensity:.012,
+        envMapIntensity:1.62,
+        transparent:true,opacity:.985
       });
       const lens=new T.Mesh(new T.SphereGeometry(.142,72,42),lensMat);
       lens.scale.set(1,1,.30);
@@ -719,9 +724,9 @@
       this.irisRays=new T.Object3D();
       this.irisGroup.add(this.irisRays);
       this.irisCorona=new T.Sprite(new T.SpriteMaterial({
-        map:this.makeGlowTexture(),color:0x7aefff,
-        transparent:true,opacity:.10,depthWrite:false,
-        blending:T.AdditiveBlending
+        map:this.makeGlowTexture(),color:0xa8c9cc,
+        transparent:true,opacity:.018,depthWrite:false,
+        blending:T.NormalBlending
       }));
       this.irisCorona.scale.set(.62,.62,1);
       this.irisCorona.position.z=.305;
@@ -729,8 +734,8 @@
       this.coreGroup.add(this.irisGroup);
 
       this.glowSprite=new T.Sprite(new T.SpriteMaterial({
-        map:this.makeGlowTexture(),color:0x64e6ff,
-        transparent:true,opacity:.05,blending:T.AdditiveBlending,depthWrite:false
+        map:this.makeGlowTexture(),color:0x9fc8cc,
+        transparent:true,opacity:.012,blending:T.NormalBlending,depthWrite:false
       }));
       this.glowSprite.scale.set(.86,.86,1);
       this.glowSprite.position.z=.29;
@@ -813,12 +818,13 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x30383a,roughness:.34,metalness:.002,
-        clearcoat:.38,clearcoatRoughness:.18,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0080,
+        color:0x2d3434,roughness:.40,metalness:0,
+        clearcoat:.26,clearcoatRoughness:.22,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0070,
         transparent:true,opacity:0,
-        emissive:0x020405,emissiveIntensity:.006,
-        envMapIntensity:1.16,
+        emissive:0x000101,emissiveIntensity:.001,
+        envMapIntensity:1.12,
+        ior:1.38,specularIntensity:.58,specularColor:new T.Color(0xaebbbb),
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -878,12 +884,13 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x6a787a,roughness:.22,metalness:.001,
-        clearcoat:.54,clearcoatRoughness:.13,
-        transmission:.007,thickness:.055,ior:1.35,
+        color:0x667273,roughness:.19,metalness:0,
+        clearcoat:.48,clearcoatRoughness:.11,
+        transmission:.035,thickness:.075,ior:1.36,
+        attenuationColor:new T.Color(0x38494a),attenuationDistance:1.1,
         transparent:true,opacity:0,depthWrite:false,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0011,
-        side:T.FrontSide
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0010,
+        envMapIntensity:.92,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
       this.organicMembrane.scale.set(.948,1.008,.968);
@@ -1205,10 +1212,11 @@
       const mineralRoughness=this.makeMineralRoughnessTexture();
       this.mineralRoughnessTexture=mineralRoughness;
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x111719,metalness:.10,roughness:.19,
-        emissive:0x010203,emissiveIntensity:.003,
-        clearcoat:.78,clearcoatRoughness:.085,
-        envMapIntensity:1.58,flatShading:false,transparent:true,opacity:0
+        color:0x0e1416,metalness:.035,roughness:.18,
+        emissive:0x000101,emissiveIntensity:.001,
+        clearcoat:.84,clearcoatRoughness:.070,
+        envMapIntensity:1.72,flatShading:false,transparent:true,opacity:0,
+        ior:1.50,specularIntensity:.96,specularColor:new T.Color(0xc9d0cd)
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
         color:0x171e21,metalness:.18,roughness:.23,
@@ -1314,10 +1322,12 @@
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechEnergyMaterial=new T.MeshPhysicalMaterial({
-        color:0x29474b,metalness:.008,roughness:.11,
-        emissive:0x020a0c,emissiveIntensity:.045,
-        clearcoat:1,clearcoatRoughness:.045,
-        transmission:.11,thickness:.20,ior:1.47,
+        color:0x22383b,metalness:0,roughness:.060,
+        emissive:0x010304,emissiveIntensity:.010,
+        clearcoat:1,clearcoatRoughness:.024,
+        transmission:.28,thickness:.24,ior:1.49,
+        attenuationColor:new T.Color(0x143239),attenuationDistance:.64,
+        envMapIntensity:1.76,
         transparent:true,opacity:0,depthWrite:false
       });
       this.mechEyeCore=new T.Mesh(new T.SphereGeometry(.150,48,28),this.mechEnergyMaterial);
@@ -1589,7 +1599,7 @@
       if(this.mechSocketBack?.material)this.mechSocketBack.material.opacity=.18*irisGrow;
       if(this.mechEnergyMaterial){
         this.mechEnergyMaterial.opacity=.62*irisGrow;
-        this.mechEnergyMaterial.emissiveIntensity=.018+.004*Math.sin(time*.0044);
+        this.mechEnergyMaterial.emissiveIntensity=.006+.002*Math.sin(time*.0044)+this.interactionImpulse*.006;
       }
       if(this.mechAperture?.material)this.mechAperture.material.opacity=.72*irisGrow;
       if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=.62*irisGrow;
@@ -1708,20 +1718,20 @@
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
       this.renderer.toneMappingExposure=1.10+flash*.10+after*.025;
-      this.coreLight.intensity+=flash*4.8+after*.62;
+      this.coreLight.intensity+=flash*1.10+after*.18;
       if(this.glowSprite){
         const g=1+flash*.72;
         this.glowSprite.scale.multiplyScalar(g);
         this.glowSprite.material.opacity=Math.min(.88,this.glowSprite.material.opacity+flash*.34);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.78;
-        const burstScale=1.46+flash*.60;
+        this.flashBurst.material.opacity=flash*.22;
+        const burstScale=1.26+flash*.24;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.20;
-        this.flashBeam.scale.x=1+flash*.28;
+        this.flashBeam.material.opacity=0;
+        this.flashBeam.scale.x=1;
       }
       if(this.mechEyeCorona){
         const mechanicalReveal=this.mechanicalReveal||0;
@@ -1959,8 +1969,9 @@
   document.documentElement.dataset.fxMagBirthProofR1430='real-three-solid-cortical-reference-dna-controlled-titanium';
 
   document.documentElement.dataset.fxMagBirthInteractionR1690='all-input-physical-response-single-render-loop';
+  document.documentElement.dataset.fxMagBirthVisualR1691='physically-based-obsidian-bioceramic-glass-low-emission-natural-studio-response';
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1690-photographic-physical-all-input-interaction-stable-60fps'
+    revision:'r1691-physically-based-photoreal-all-input-interaction-stable-60fps'
   };
 })();
