@@ -186,11 +186,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = auditMode ? 8 : software ? 8 : constrainedMobile ? 10 : mobile ? 12 : constrained ? 14 : 18;
-    const longitudeSegments = auditMode ? 14 : software ? 16 : constrainedMobile ? 18 : mobile ? 22 : constrained ? 28 : 36;
-    const tendrilCount = auditMode ? 3 : software ? 3 : mobile ? 3 : 7;
-    const tendrilSegments = auditMode ? 5 : software ? 6 : constrainedMobile ? 7 : mobile ? 8 : constrained ? 14 : 22;
-    const tendrilSides = auditMode ? 3 : software ? 3 : mobile || constrained ? 3 : 6;
+    const latitudeSegments = software ? 8 : constrainedMobile ? 10 : mobile ? 12 : constrained ? 14 : 18;
+    const longitudeSegments = software ? 16 : constrainedMobile ? 18 : mobile ? 22 : constrained ? 28 : 36;
+    const tendrilCount = software ? 3 : mobile ? 3 : 7;
+    const tendrilSegments = software ? 6 : constrainedMobile ? 7 : mobile ? 8 : constrained ? 14 : 22;
+    const tendrilSides = software ? 3 : mobile || constrained ? 3 : 6;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -337,18 +337,10 @@
       });
     }
 
-    if (auditMode) {
-      for (let latitude = 0; latitude < latitudeSegments; latitude += 1) {
-        for (let longitude = 0; longitude < longitudeSegments; longitude += 1) {
-          const a = vertex(latitude, longitude);
-          const b = vertex(latitude, longitude + 1);
-          const c = vertex(latitude + 1, longitude);
-          const d = vertex(latitude + 1, longitude + 1);
-          if (latitude > 0) triangle([a, b, c], .08 + .92 * random(longitude, latitude * 2));
-          if (latitude < latitudeSegments - 1) triangle([b, d, c], .08 + .92 * random(longitude + 37, latitude * 2 + 1));
-        }
-      }
-    } else {
+    /* R1699 — validation renders the same hand-cut production mineral body.
+       Audit/proof mode may lower backing resolution through the capability
+       governor, but it must never substitute a different low-poly silhouette. */
+    {
       /* R1576 — hand-cut production body.
          A small set of offset polygonal rings creates intentional broad mineral
          planes. This removes the rounded-pot/egg silhouette produced by a
@@ -1273,6 +1265,7 @@
     function finishBoot(program) {
     const geometry=buildOrganismGeometry(softwareRenderer);
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer?'software-lite-photographic':'hardware-full-photographic';
+    root.dataset.fxCoreGeometryProofParityR1699='audit-and-production-share-hand-cut-mineral-silhouette';
     const buffers=geometry.arrays.map(()=>gl.createBuffer());
     const attributeNames=['aSphere','aCrystal','aSphereNormal','aCrystalNormal','aUv','aBary','aFacet'];
     const attributes=attributeNames.map(name=>gl.getAttribLocation(program,name));
