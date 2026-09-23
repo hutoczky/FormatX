@@ -71,7 +71,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/living-architecture.js', {
     marker: 'living-to-igloo',
-    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20260920-r609-semantic-mobile-surface']],
+    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20260923-r1666-deterministic-runtime']],
   }],
   ['/scifi-ui/scripts/igloo-parity.js', {
     marker: 'igloo-to-site-stability-and-mobile-surface-r609',
@@ -164,7 +164,7 @@ function cacheBustR502Runtime(html) {
     .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260903-r507-mag-single-clock-owner')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260920-r644-persistent-open')
     .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260921-r1520-visible-irregular-mineral')
-    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260920-r609-semantic-mobile-surface')
+    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260923-r1666-deterministic-runtime')
     .replace(/platform-status\.js\?v=[^"']+/g, 'platform-status.js?v=20260902-r500-canonical-hero-state')
     .replace(/platform-status\.css\?v=[^"']+/g, 'platform-status.css?v=20260902-r500-canonical-hero-state');
 }
