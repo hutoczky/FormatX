@@ -1195,6 +1195,7 @@
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1678-software-obsidian-lite-physical-lens'
       : 'photographic-full-or-constrained';
+    root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
       : 'hardware-photographic-material-preserved';
@@ -1441,7 +1442,9 @@
       // expensive native sweep no longer competes with first-load interactivity.
       const delay=surfacePulseCount===0
         ? 13000
-        : (mobile?5400:4900)+(surfacePulseCount%3)*520;
+        : mobile
+          ? 5400+(surfacePulseCount%3)*520
+          : 4100+(surfacePulseCount%3)*360;
       root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';
       surfacePulseTimer=setTimeout(()=>{
         surfacePulseTimer=0;
