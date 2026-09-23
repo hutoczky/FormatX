@@ -299,8 +299,11 @@
     const yy = clamp(27 + active*(54/Math.max(1,scenes.length-1)) + (local-.5)*7,18,84);
     const trackY = clamp(20 + active*(62/Math.max(1,scenes.length-1)) + local*5,16,88);
 
-    const fastScroll=Math.abs(velocity)>.28;
-    setScrollBudget(fastScroll?'fast':'settled');
+    /* R1662 — the scroll budget is latched by real scroll events and released
+       only by the quiet-period timer. Do not flip a document-level data
+       attribute from instantaneous velocity inside every RAF; that invalidated
+       broad selectors and caused repeated full-page style recalculation. */
+    const fastScroll=scrollBudgetState==='fast';
     root.style.setProperty('--fx-c536-progress',global.toFixed(4));
     root.style.setProperty('--fx-c536-local',local.toFixed(4));
 
@@ -498,6 +501,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1653='fast-scroll-scene-commit-deferred-until-settle';
     root.dataset.fxCinematicJourneyPerformanceR1655='fast-scroll-two-css-vars-full-detail-on-settle';
     root.dataset.fxCinematicJourneyPerformanceR1660='fast-scroll-compositor-lite-full-detail-after-120ms-settle';
+    root.dataset.fxCinematicJourneyPerformanceR1662='latched-scroll-budget-no-per-frame-global-style-thrash';
     setScrollBudget('settled');
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
