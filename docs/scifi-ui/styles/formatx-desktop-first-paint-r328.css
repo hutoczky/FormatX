@@ -262,3 +262,81 @@
 /* production-r1634-desktop-first-final-geometry-lock */
 
 /* production-r1637-desktop-header-final-76-lock */
+
+
+/* R1647 — first paint must already use the final r244 control geometry.
+   This removes the 206x82 bottom-center -> 54px top-right relocation that
+   Lighthouse reported as a dominant desktop layout shift. */
+@media (min-width:901px) {
+  html:root:root:root:root:root body.living-architecture
+  #hero .fx-reference-controls-r204 {
+    position:absolute!important;
+    inset:18px 18px auto auto!important;
+    z-index:10020!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    pointer-events:none!important;
+    transform:none!important;
+    translate:none!important;
+  }
+
+  html:root:root:root:root:root body.living-architecture
+  #hero .fx-reference-controls-r204 > .fx-reference-rail,
+  html:root:root:root:root:root body.living-architecture
+  #hero .fx-reference-controls-r204 > .fx-reference-rail-r264 {
+    position:relative!important;
+    inset:auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:12px!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    pointer-events:none!important;
+    transform:none!important;
+  }
+
+  html:root:root:root:root:root body.living-architecture
+  #hero .fx-reference-controls-r204 > .fx-three-sound {
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+
+  html:root:root:root:root:root body.living-architecture
+  #hero .fx-reference-controls-r204 :is(.fx-reference-ask,.fx-reference-pause) {
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+  }
+}
+/* production-r1647-desktop-controls-final-first-frame */
