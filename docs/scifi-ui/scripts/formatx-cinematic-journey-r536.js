@@ -40,7 +40,6 @@
   let raf = 0;
   let cutTimer = 0;
   let coreSettleTimer = 0;
-  let scrollVisualSettleTimer = 0;
   let pendingCoreScene = null;
   let refreshTimer = 0;
   let observer = null;
@@ -197,8 +196,7 @@
     active = index;
 
     scenes.forEach((scene,i) => {
-      const nextState=i<index?'past':i===index?'active':'future';
-      if(scene.node.dataset.fxC536State!==nextState)scene.node.dataset.fxC536State=nextState;
+      scene.node.dataset.fxC536State = i < index ? 'past' : i === index ? 'active' : 'future';
     });
 
     const scene = scenes[index];
@@ -258,36 +256,30 @@
     const yy = clamp(27 + active*(54/Math.max(1,scenes.length-1)) + (local-.5)*7,18,84);
     const trackY = clamp(20 + active*(62/Math.max(1,scenes.length-1)) + local*5,16,88);
 
-    const fastMotion=Math.abs(velocity)>.36;
-    if(!fastMotion){
-      root.style.setProperty('--fx-c536-progress',global.toFixed(4));
-      root.style.setProperty('--fx-c536-local',local.toFixed(4));
-      root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
-      root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
-      root.style.setProperty('--fx-c536-x',x.toFixed(2)+'%');
-      root.style.setProperty('--fx-c536-y',yy.toFixed(2)+'%');
-      root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
-      root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
-      root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
-      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10 + velocity*-1.6).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
+    root.style.setProperty('--fx-c536-progress',global.toFixed(4));
+    root.style.setProperty('--fx-c536-local',local.toFixed(4));
+    root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
+    root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
+    root.style.setProperty('--fx-c536-x',x.toFixed(2)+'%');
+    root.style.setProperty('--fx-c536-y',yy.toFixed(2)+'%');
+    root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
+    root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
+    root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
+    root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10 + velocity*-1.6).toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
-      scenes.forEach(scene=>{
-        if(Math.abs(scene.index-active)>1)return;
-        const sceneTop=scene.top-y;
-        const lp=clamp((innerHeight*.72-sceneTop)/Math.max(1,scene.height+innerHeight*.36),0,1);
-        const se=scene.index===active?clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84):.07;
-        scene.node.style.setProperty('--fx-c536-scene-local',lp.toFixed(4));
-        scene.node.style.setProperty('--fx-c536-scene-energy',se.toFixed(4));
-      });
+    scenes.forEach(scene=>{
+      if(Math.abs(scene.index-active)>1)return;
+      const sceneTop=scene.top-y;
+      const lp=clamp((innerHeight*.72-sceneTop)/Math.max(1,scene.height+innerHeight*.36),0,1);
+      const se=scene.index===active?clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84):.07;
+      scene.node.style.setProperty('--fx-c536-scene-local',lp.toFixed(4));
+      scene.node.style.setProperty('--fx-c536-scene-energy',se.toFixed(4));
+    });
 
-      root.dataset.fxCinematicProgressR536=global.toFixed(3);
-      root.dataset.fxCinematicLocalR536=local.toFixed(3);
-      root.dataset.fxCinematicScrollBudgetR1644='settled-full-style-update';
-    }else{
-      root.dataset.fxCinematicScrollBudgetR1644='fast-scroll-style-coast';
-    }
+    root.dataset.fxCinematicProgressR536 = global.toFixed(3);
+    root.dataset.fxCinematicLocalR536 = local.toFixed(3);
     if(stage?.dataset.fxC536Primed!=='true'){
       stage.dataset.fxC536Primed='true';
       root.dataset.fxCinematicPrimingR1546='first-frame-position-locked';
@@ -297,18 +289,6 @@
   function schedule() {
     if (raf) return;
     raf = requestAnimationFrame(paint);
-  }
-
-  function onScroll(){
-    schedule();
-    clearTimeout(scrollVisualSettleTimer);
-    scrollVisualSettleTimer=setTimeout(()=>{
-      scrollVisualSettleTimer=0;
-      velocity=0;
-      lastY=scrollY;
-      lastT=performance.now();
-      schedule();
-    },96);
   }
 
   function refresh(reason='dom') {
@@ -401,7 +381,7 @@
     bindDynamicDiscovery();
     bindCinematicInteraction();
 
-    addEventListener('scroll',onScroll,{passive:true});
+    addEventListener('scroll',schedule,{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
     addEventListener('orientationchange',()=>refresh('orientation'),{passive:true});
     addEventListener('formatx:languagechange',()=>updateHud(scenes[active]),{passive:true});
@@ -427,7 +407,6 @@
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
     root.dataset.fxCinematicJourneyPerformanceR1643='fast-scroll-zero-mag-burst-deferred-final-scene-handoff';
-    root.dataset.fxCinematicJourneyPerformanceR1644='fast-scroll-root-style-coast-incremental-scene-state-settle-frame';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
@@ -444,7 +423,6 @@
     if(cutRaf)cancelAnimationFrame(cutRaf);
     clearTimeout(cutTimer);
     clearTimeout(coreSettleTimer);
-    clearTimeout(scrollVisualSettleTimer);
     clearTimeout(refreshTimer);
     observer?.disconnect?.();
     geometryObserver?.disconnect?.();
