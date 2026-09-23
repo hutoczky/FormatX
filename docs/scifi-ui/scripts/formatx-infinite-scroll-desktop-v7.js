@@ -64,11 +64,16 @@
   }
 
   function ensureStyle() {
-    if (document.querySelector('link[data-fx-seamless-loop-style]')) return;
+    const existing=document.querySelector('link[data-fx-seamless-loop-style]');
+    if(existing instanceof HTMLLinkElement){
+      if(!existing.sheet)existing.addEventListener('load',scheduleGeometryRefresh,{once:true,passive:true});
+      return;
+    }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260919-r534-live-mag-mirror';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260924-r1715-idle-geometry-refresh';
     link.dataset.fxSeamlessLoopStyle = 'true';
+    link.addEventListener('load',scheduleGeometryRefresh,{once:true,passive:true});
     document.head.appendChild(link);
   }
 
@@ -571,7 +576,12 @@
       root.dataset.fxLoopGuardRetryR1711 = 'desktop-retry-armed';
       return;
     }
+    /* R1715: desktop now mirrors the mobile idle contract. Re-measure only
+       after scrolling has settled so late CSS/fonts/hero geometry cannot leave
+       the cached bridge threshold stale, while the scroll hot path stays read-free. */
+    refreshGeometry();
     const relative = bridgeRelative();
+    root.dataset.fxLoopDesktopGeometryR1715 = loopGeometry.ready ? 'fresh-idle-sample' : 'unavailable';
     if (relative == null) {
       pendingDesktopRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
@@ -705,6 +715,7 @@
     // One late snapshot is enough. 4.6 s stays outside the startup/scroll hot path.
     scheduleMirrorCapture(4600);
     root.dataset.fxLoopMirrorSchedulerR1679='single-post-startup-scroll-safe-capture';
+    root.dataset.fxLoopRuntimeR1715='idle-fresh-geometry-guard-retry-two-cycle-safe';
   }
 
   addEventListener('scroll', onScroll, { passive: true });
