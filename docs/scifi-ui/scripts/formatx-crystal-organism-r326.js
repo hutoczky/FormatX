@@ -102,6 +102,7 @@
   root.dataset.fxNativeMagPerformanceR1617 = 'preemptive-16-67ms-budget-resolution-before-cadence-drop';
   root.dataset.fxNativeMagPerformanceR1620 = 'hard-60hz-ceiling-preemptive-resolution-13ms-render-headroom';
   root.dataset.fxNativeMagPerformanceR1622 = 'refresh-divisor-never-intentionally-below-60fps-adaptive-quality';
+  root.dataset.fxNativeMagPerformanceR1626 = 'hard-60fps-frame-budget-spike-guard-quality-before-cadence';
   root.dataset.fxNativeMagVisualR1619 = 'readable-smoky-obsidian-broad-softbox-midtones-single-pass';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
@@ -662,7 +663,10 @@
 
     const options = {
       alpha:true,
-      antialias:!auditMode,
+      /* R1626: mobile/coarse displays get temporal smoothness from native
+         device density; MSAA costs frame budget twice (raster + resolve).
+         Preserve desktop MSAA only where headroom is normally available. */
+      antialias:!auditMode && !mobile && !constrained,
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
@@ -1162,8 +1166,9 @@
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    let qualityScale=auditMode?1:(softwareRenderer ? .62 : (constrainedMobile ? .58 : (mobile ? .68 : (constrained ? .70 : .82))));
+    let qualityScale=auditMode?1:(softwareRenderer ? .56 : (constrainedMobile ? .54 : (mobile ? .64 : (constrained ? .66 : .78))));
     let lastQualityAdjust=0,qualityResizeTimer=0;
+    let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
@@ -1174,11 +1179,11 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=auditMode?1:softwareRenderer ? 0.62:constrainedMobile?1.08:mobile?1.35:constrained?1.10:1.50;
+      const baseCap=auditMode?1:softwareRenderer ? 0.58:constrainedMobile?1.00:mobile?1.22:constrained?1.04:1.42;
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=auditMode?390000:softwareRenderer?115000:constrainedMobile?330000:mobile?600000:constrained?480000:950000;
-      const budget=Math.max(145000,Math.round(baseBudget*qualityScale*qualityScale));
+      const baseBudget=auditMode?390000:softwareRenderer?105000:constrainedMobile?285000:mobile?470000:constrained?420000:820000;
+      const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -1387,6 +1392,8 @@
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
+      renderPeak=Math.max(ms,renderPeak*.86);
+      framePeak=Math.max(dt,framePeak*.90);
       if(renderAverage>(mobile?15.5:15.8)){
         slowRenderer=true;
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
@@ -1397,24 +1404,36 @@
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
-      if(!auditMode && now-lastQualityAdjust>180){
+      if(!auditMode && now-lastQualityAdjust>120){
         const previous=qualityScale;
-        /* R1617 — defend the 16.67 ms budget before visible cadence drops.
-           Resolution/effect quality yields first; frame cadence remains native rAF. */
-        const framePressure=frameIntervalAverage>16.74;
-        const severeFramePressure=frameIntervalAverage>17.10;
-        const renderPressure=renderAverage>9.6;
-        const severeRenderPressure=renderAverage>11.2;
+        /* R1626 — hard 60 FPS guard. A frame has 16.67 ms total, so the MAG
+           is kept around a 12.5 ms render ceiling to leave composition/input
+           headroom. Short spikes are acted on immediately instead of waiting
+           for an EMA to deteriorate. Quality/resolution yields before cadence. */
+        const renderPressure=renderAverage>8.8 || renderPeak>11.4;
+        const severeRenderPressure=renderAverage>10.8 || renderPeak>13.2;
+        const framePressure=frameIntervalAverage>16.72 || framePeak>18.2;
+        const severeFramePressure=frameIntervalAverage>17.25 || framePeak>21.0;
+
         if(severeFramePressure||severeRenderPressure){
-          qualityScale=Math.max(.32,qualityScale-.16);
+          qualityScale=Math.max(.24,qualityScale-.18);
+          stableBudgetFrames=0;
         }else if(framePressure||renderPressure){
-          qualityScale=Math.max(.32,qualityScale-.085);
-        }else if(frameIntervalAverage<16.70&&renderAverage<6.8){
-          qualityScale=Math.min(1,qualityScale+.006);
+          qualityScale=Math.max(.24,qualityScale-.09);
+          stableBudgetFrames=0;
+        }else{
+          stableBudgetFrames+=1;
+          /* Recovery is deliberately slow: never trade a stable 60 FPS
+             cadence for a quick resolution increase. */
+          if(stableBudgetFrames>24 && frameIntervalAverage<16.69 && renderAverage<6.2 && renderPeak<8.2){
+            qualityScale=Math.min(1,qualityScale+.004);
+            stableBudgetFrames=0;
+          }
         }
+
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=now;
-          root.dataset.fxCoreGovernorR1606=qualityScale<previous?'degrade-before-frame-drop':'slow-recovery';
+          root.dataset.fxCoreGovernorR1626=qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
           if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
           qualityResizeTimer=later(()=>{
             qualityResizeTimer=0;
@@ -1426,7 +1445,9 @@
       root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
       root.dataset.fxCoreFrameMs=dt.toFixed(2);
       root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
-      root.dataset.fxCoreReal3dTargetFps='60-real-frame-budget-r1606';
+      root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
+      root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
+      root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
     }
