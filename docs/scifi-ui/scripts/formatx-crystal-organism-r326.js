@@ -355,23 +355,23 @@
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
       const sideCount = software ? 22 : mobile ? 24 : constrained ? 44 : 60;
       const ringDefs = [
-        [.84,.045,.040,-.085,-.010,.090],
-        [.77,.120,.090,-.135,-.006,.080],
-        [.68,.270,.175,-.175,.000,.068],
+        [.84,.045,.040,-.055,-.010,.090],
+        [.77,.120,.090,-.075,-.006,.080],
+        [.68,.270,.175,-.095,.000,.068],
         [.59,.395,.245,-.105,.014,.054],
-        [.50,.515,.315,-.145,.026,.040],
-        [.40,.455,.365,-.045,.028,.028],
-        [.30,.585,.350,.040,.018,.016],
-        [.19,.505,.415,.092,.006,.006],
-        [.08,.610,.370,.050,-.004,-.006],
-        [-.04,.535,.445,.112,-.004,-.014],
-        [-.16,.595,.365,.010,.006,-.022],
-        [-.29,.455,.405,.092,.016,-.016],
-        [-.42,.515,.315,.025,.022,-.002],
-        [-.55,.365,.265,.075,.014,.018],
-        [-.67,.295,.195,.025,.008,.040],
-        [-.77,.155,.105,-.008,.002,.066],
-        [-.85,.045,.040,-.020,-.004,.090]
+        [.50,.515,.315,-.090,.026,.040],
+        [.40,.455,.365,-.055,.028,.028],
+        [.30,.585,.350,-.010,.018,.016],
+        [.19,.505,.415,.025,.006,.006],
+        [.08,.610,.370,.045,-.004,-.006],
+        [-.04,.535,.445,.055,-.004,-.014],
+        [-.16,.595,.365,.045,.006,-.022],
+        [-.29,.455,.405,.040,.016,-.016],
+        [-.42,.515,.315,.028,.022,-.002],
+        [-.55,.365,.265,.018,.014,.018],
+        [-.67,.295,.195,.006,.008,.040],
+        [-.77,.155,.105,-.004,.002,.066],
+        [-.85,.045,.040,-.012,-.004,.090]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -395,9 +395,9 @@
           const a=sideIndex/sideCount*Math.PI*2+phase;
           const irregular=
             1
-            +Math.sin(a*2.0+ringIndex*.71)*.060
-            +Math.cos(a*3.0-ringIndex*.54)*.032
-            +Math.sin(a+ringIndex*.39)*.022;
+            +Math.sin(a*2.0+ringIndex*.71)*.036
+            +Math.cos(a*3.0-ringIndex*.54)*.020
+            +Math.sin(a+ringIndex*.39)*.014;
           const cutFront=1-.095*Math.pow(Math.max(0,Math.cos(a-.52)),4.0);
           const cutRear=1-.060*Math.pow(Math.max(0,Math.cos(a+2.18)),5.0);
           const cutSide=1-.045*Math.pow(Math.max(0,Math.cos(a-2.54)),6.0);
@@ -1269,6 +1269,7 @@
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer?'software-lite-photographic':'hardware-full-photographic';
     root.dataset.fxCoreGeometryProofParityR1699='audit-and-production-share-hand-cut-mineral-silhouette';
     root.dataset.fxNativeMagVisualR1700='software-faceted-depth-angle-hardware-smooth-photographic-obsidian';
+    root.dataset.fxNativeMagVisualR1701='continuous-asymmetric-obsidian-silhouette-faceted-depth-no-sawtooth';
     const buffers=geometry.arrays.map(()=>gl.createBuffer());
     const attributeNames=['aSphere','aCrystal','aSphereNormal','aCrystalNormal','aUv','aBary','aFacet'];
     const attributes=attributeNames.map(name=>gl.getAttribLocation(program,name));
@@ -1632,6 +1633,7 @@
       root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';
       root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
       root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
+      root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
