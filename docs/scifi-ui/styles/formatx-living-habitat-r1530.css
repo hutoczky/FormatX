@@ -1220,3 +1220,37 @@ body.living-architecture.fx-habitat-react-r1695::after{
   }
 }
 /* production-r1695-all-input-habitat-response */
+
+
+/* R1701 — software/very-low-GPU compositor relief.
+   Keep the same photographic habitat as static paint while the native MAG owns
+   the frame budget. No layout changes, no visual fallback to a plain page. */
+html[data-fx-core-renderer-class-r1541="software-adaptive"] .fx-living-habitat-r1530{
+  display:none!important;
+}
+html[data-fx-core-renderer-class-r1541="software-adaptive"] body.living-architecture::before,
+html[data-fx-core-renderer-class-r1541="software-adaptive"] body.living-architecture::after{
+  animation:none!important;
+  transition:none!important;
+  transform:none!important;
+  filter:none!important;
+  will-change:auto!important;
+}
+html[data-fx-core-renderer-class-r1541="software-adaptive"] .fx-c536-stage{
+  display:none!important;
+}
+html[data-fx-core-renderer-class-r1541="software-adaptive"] body.living-architecture :is(
+  .topbar,.hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+  .payment-console,.system-grid article,.release-card,.fx-category-grid > article,
+  .fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,
+  .fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure
+){
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+html[data-fx-core-renderer-class-r1541="software-adaptive"] body.living-architecture.fx-habitat-react-r1695::before,
+html[data-fx-core-renderer-class-r1541="software-adaptive"] body.living-architecture.fx-habitat-react-r1695::after{
+  filter:none!important;
+  transform:none!important;
+}
+/* production-r1701-software-compositor-relief */
