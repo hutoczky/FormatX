@@ -1010,3 +1010,26 @@ body.living-architecture #hero.hero::after{
   }
 }
 /* production-r1603-mobile-compositor-habitat */
+
+
+/* R1628 — 60 FPS compositor owner.
+   The animated WebGL MAG already carries physical shadow/reflection in-shader.
+   CSS drop-shadow forced an extra offscreen pass every frame; remove it while
+   retaining the visibility/contrast contract used by mobile validation. */
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  filter:brightness(1.10) contrast(1.10) saturate(1)!important;
+  -webkit-filter:brightness(1.10) contrast(1.10) saturate(1)!important;
+  box-shadow:none!important;
+  will-change:auto!important;
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.08) contrast(1.11) saturate(1)!important;
+    -webkit-filter:brightness(1.08) contrast(1.11) saturate(1)!important;
+  }
+}
+/* production-r1628-60fps-webgl-compositor */
