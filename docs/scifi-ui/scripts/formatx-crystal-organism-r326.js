@@ -742,13 +742,17 @@
       mat3 ry(float a){float c=cos(a),s=sin(a);return mat3(c,0.,s,0.,1.,0.,-s,0.,c);}
       mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,-s,0.,s,c,0.,0.,0.,1.);}
       void main(){
-        float morph=uMorph*uMorph*(3.0-2.0*uMorph);
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.66));
-        vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,morph));
-        vec3 base=mix(aCrystal,aSphere,morph);
+        /* R1711 — fixed anatomy: the old morph uniform is compatibility input only.
+           A small constant organic blend softens the mineral seed into one asymmetric
+           living body while preserving its recognisable silhouette on every scene. */
+        float morph=0.0;
+        float organicBlend=.18;
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.74));
+        vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
+        vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
-        float living=(cell*.018+membrane*.009)*(.42+.58*uEnergy)*mix(.72,1.34,morph);
+        float living=(cell*.020+membrane*.0105)*(.46+.54*uEnergy);
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.018);
         vec3 local=(base+normal*living)*layerScale*heartbeat;
