@@ -1221,12 +1221,17 @@
         ${outputName}=vec4(tone(col*2.72),clamp(alpha,.70,1.0));
       }`;
 
-    const fragmentSource = softwareRenderer
+    /* R1710 — phones and software GPUs share the physically-authored lite
+       material. Photographic identity stays in the shader/lens response while
+       fragment cost and overdraw yield first to the 16.67 ms presentation budget. */
+    const performanceLite = softwareRenderer || mobile || constrainedMobile;
+    const fragmentSource = performanceLite
       ? softwareFragmentSource
-      : ((constrainedMobile || auditMode) ? constrainedFragmentSource : fullFragmentSource);
-    root.dataset.fxCoreShaderProfileR1605=softwareRenderer
-      ? 'r1678-software-obsidian-lite-physical-lens'
-      : 'photographic-full-or-constrained';
+      : (auditMode ? constrainedFragmentSource : fullFragmentSource);
+    root.dataset.fxCoreShaderProfileR1605=performanceLite
+      ? (softwareRenderer?'r1710-software-obsidian-lite-physical-lens':'r1710-mobile-photoreal-lite-physical-lens')
+      : 'photographic-full-desktop';
+    root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-mobile-lite-shader-adaptive-resolution-zero-idle';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
@@ -1272,8 +1277,10 @@
     return;
 
     function finishBoot(program) {
-    const geometry=buildOrganismGeometry(softwareRenderer);
-    root.dataset.fxCoreGeometryProfileR1603=softwareRenderer?'software-lite-photographic':'hardware-full-photographic';
+    const geometry=buildOrganismGeometry(performanceLite);
+    root.dataset.fxCoreGeometryProfileR1603=performanceLite
+      ? (softwareRenderer?'software-lite-photographic':'mobile-lite-photographic')
+      : 'hardware-full-photographic';
     root.dataset.fxCoreGeometryProofParityR1699='audit-and-production-share-hand-cut-mineral-silhouette';
     root.dataset.fxNativeMagVisualR1700='software-faceted-depth-angle-hardware-smooth-photographic-obsidian';
     root.dataset.fxNativeMagVisualR1701='continuous-asymmetric-obsidian-silhouette-faceted-depth-no-sawtooth';
@@ -1331,9 +1338,15 @@
        The strict R1701 frame governor is still allowed to shed resolution on
        real pressure; we no longer begin every constrained phone permanently
        blurred before measuring its actual GPU budget. */
-    let qualityScale=softwareRenderer ? (mobile?.67:.50) : (auditMode ? .72 : (constrainedMobile ? .66 : (mobile ? .70 : (constrained ? .50 : .60))));
-    const qualityCeiling=softwareRenderer ? (mobile?.72:.60) : (auditMode ? .80 : (mobile?.78:(constrained?.72:.82)));
-    const qualityFloor=softwareRenderer ? (mobile?.54:.22) : (mobile?.36:.16);
+    let qualityScale=softwareRenderer
+      ? (mobile?.60:.46)
+      : (mobile ? .62 : (auditMode ? .68 : (constrained ? .48 : .56)));
+    const qualityCeiling=softwareRenderer
+      ? (mobile?.68:.56)
+      : (mobile?.72:(auditMode?.76:(constrained?.66:.78)));
+    const qualityFloor=softwareRenderer
+      ? (mobile?.48:.20)
+      : (mobile?.34:.16);
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1462,9 +1475,12 @@
       later(()=>{
         if(pulseId!==surfacePulseCount)return;
         surfacePulseStart=-Infinity;
+        burstFrames=0;
         if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}
+        if(raf){cancelAnimationFrame(raf);raf=0;}
+        settleAfterBurst();
         root.dataset.fxCoreSurfacePulseR454='idle';
-        schedule(1);
+        root.dataset.fxCoreIdleBoundaryR1710='hard-zero-frame-after-sweep';
         dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
           detail:{phase:'end',source,duration:SURFACE_PULSE_WINDOW_MS}
         }));
@@ -1580,10 +1596,10 @@
       }
 
       if(!auditMode){
-        const panicFrame=dt>17.9 || ms>8.4;
-        if(panicFrame && now-lastQualityAdjust>24){
+        const panicFrame=dt>16.75 || ms>6.4;
+        if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
-          qualityScale=Math.max(qualityFloor,qualityScale-(dt>24||ms>12?.22:.13));
+          qualityScale=Math.max(qualityFloor,qualityScale-(dt>20||ms>9?.22:.12));
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
@@ -1600,10 +1616,10 @@
           /* R1660 — preserve the 16.67 ms presentation budget. Resolution
              and secondary optical detail yield before cadence. Recovery waits
              until the renderer has sustained real headroom for long enough. */
-          const renderPressure=renderAverage>5.2 || renderPeak>6.9;
-          const severeRenderPressure=renderAverage>6.6 || renderPeak>8.2;
-          const framePressure=frameIntervalAverage>16.28 || framePeak>16.82;
-          const severeFramePressure=frameIntervalAverage>16.62 || framePeak>17.45;
+          const renderPressure=renderAverage>4.4 || renderPeak>5.8;
+          const severeRenderPressure=renderAverage>5.8 || renderPeak>7.4;
+          const framePressure=frameIntervalAverage>16.08 || framePeak>16.55;
+          const severeFramePressure=frameIntervalAverage>16.42 || framePeak>17.05;
 
           if(severeFramePressure||severeRenderPressure){
             qualityScale=Math.max(qualityFloor,qualityScale-.20);
@@ -1615,7 +1631,7 @@
           }else{
             if(panicFrames>0)panicFrames-=1;
             else stableBudgetFrames+=1;
-            if(stableBudgetFrames>240 && frameIntervalAverage<16.08 && renderAverage<4.0 && renderPeak<5.4){
+            if(stableBudgetFrames>360 && frameIntervalAverage<15.92 && renderAverage<3.4 && renderPeak<4.8){
               qualityScale=Math.min(qualityCeiling,qualityScale+.0015);
               stableBudgetFrames=0;
             }
@@ -1648,6 +1664,7 @@
       root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
       root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
       root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
+      root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
