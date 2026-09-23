@@ -8,12 +8,13 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r1666';
+root.dataset.fxP0MotionSchedulerR490='armed-r1669';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260923-r1668-sharp-mobile-60fps';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
 let timer=0;
+let pendingCanonicalAsk=false;
 
 function clearPending(){
   if(timer){clearTimeout(timer);timer=0;}
@@ -34,7 +35,17 @@ function start(reason){
   script.async=true;
   script.dataset.fxMotionRuntimeLoaderR239='true';
   script.dataset.fxP0PostPaintR490='true';
-  script.addEventListener('load',()=>{root.dataset.fxP0MotionSchedulerR490=`loaded:${reason}`;},{once:true});
+  script.addEventListener('load',()=>{
+    root.dataset.fxP0MotionSchedulerR490=`loaded:${reason}`;
+    if(pendingCanonicalAsk){
+      pendingCanonicalAsk=false;
+      const ask=document.querySelector('#hero .fx-reference-ask');
+      if(ask instanceof HTMLButtonElement){
+        root.dataset.fxP0CanonicalAskR1669='replayed-after-runtime-mount';
+        queueMicrotask(()=>ask.click());
+      }
+    }
+  },{once:true});
   script.addEventListener('error',()=>{root.dataset.fxP0MotionSchedulerR490='load-failed';},{once:true});
   document.head.appendChild(script);
 }
@@ -84,6 +95,11 @@ function armStartup(){
 
 function onIntent(event){
   if(event&&event.isTrusted===false)return;
+  const target=event?.target instanceof Element?event.target:null;
+  if(target?.closest('#hero .fx-reference-ask')){
+    pendingCanonicalAsk=true;
+    root.dataset.fxP0CanonicalAskR1669='pending-runtime-mount';
+  }
   start(`user-${event?.type||'intent'}-r493`);
 }
 
