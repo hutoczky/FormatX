@@ -43,6 +43,7 @@
   let pendingCoreScene = null;
   let sceneCommitTimer = 0;
   let pendingSceneIndex = -1;
+  let committedSceneIndex = 0;
   let refreshTimer = 0;
   let observer = null;
   let geometryObserver = null;
@@ -204,6 +205,7 @@
     if(!scenes.length)return;
     index=clamp(index,0,scenes.length-1);
     previous=clamp(previous,0,scenes.length-1);
+    committedSceneIndex=index;
     const from=Math.min(previous,index);
     const to=Math.max(previous,index);
     for(let i=from;i<=to;i++){
@@ -222,17 +224,13 @@
   }
 
   function scheduleSceneCommit(index,previous){
+    /* R1664 — fast scroll only records the latest logical scene. The single
+       scroll-settle timer owns the eventual DOM/core handoff; no per-boundary
+       timers or document-level dataset churn occur while frames are moving. */
     pendingSceneIndex=index;
-    clearTimeout(sceneCommitTimer);
-    sceneCommitTimer=setTimeout(()=>{
-      sceneCommitTimer=0;
-      const target=pendingSceneIndex;
-      pendingSceneIndex=-1;
-      if(target<0||!scenes[target])return;
-      commitScene(target,previous,'scroll-settled-r1653');
-      root.dataset.fxCinematicSceneCommitR1653='settled';
-    },150);
-    root.dataset.fxCinematicSceneCommitR1653='deferred-fast-scroll';
+    if(root.dataset.fxCinematicSceneCommitR1664!=='pending'){
+      root.dataset.fxCinematicSceneCommitR1664='pending';
+    }
   }
 
   function activate(index,reason='scroll') {
@@ -352,6 +350,12 @@
     scrollBudgetTimer=setTimeout(()=>{
       scrollBudgetTimer=0;
       velocity=0;
+      const target=pendingSceneIndex;
+      pendingSceneIndex=-1;
+      if(target>=0&&scenes[target]&&target!==committedSceneIndex){
+        commitScene(target,committedSceneIndex,'scroll-settled-r1664');
+      }
+      root.dataset.fxCinematicSceneCommitR1664='settled';
       setScrollBudget('settled');
       schedule();
     },120);
@@ -449,6 +453,7 @@
 
     scenes.forEach((scene,i)=>scene.node.dataset.fxC536State=i===0?'active':'future');
     active=0;
+    committedSceneIndex=0;
     updateHud(scenes[0]);
     bindDynamicDiscovery();
     bindCinematicInteraction();
@@ -457,20 +462,6 @@
       setScrollBudget('fast');
       scheduleScrollSettle();
       schedule();
-      if(pendingSceneIndex>=0){
-        clearTimeout(sceneCommitTimer);
-        const previousCommitted=scenes.findIndex(scene=>scene.node.dataset.fxC536State==='active');
-        sceneCommitTimer=setTimeout(()=>{
-          sceneCommitTimer=0;
-          const target=pendingSceneIndex;
-          pendingSceneIndex=-1;
-          if(target<0||!scenes[target])return;
-          commitScene(target,previousCommitted>=0?previousCommitted:target,'scroll-settled-r1653');
-          velocity=0;
-          root.dataset.fxCinematicSceneCommitR1653='settled';
-          schedule();
-        },150);
-      }
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
     addEventListener('orientationchange',()=>refresh('orientation'),{passive:true});
@@ -504,6 +495,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1660='fast-scroll-compositor-lite-full-detail-after-120ms-settle';
     root.dataset.fxCinematicJourneyPerformanceR1662='latched-scroll-budget-no-per-frame-global-style-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1663='fast-scroll-zero-css-write-zero-layout-read-settle-resync';
+    root.dataset.fxCinematicJourneyPerformanceR1664='single-scroll-settle-owner-no-scene-timer-churn';
     setScrollBudget('settled');
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
