@@ -350,12 +350,14 @@
     scrollBudgetTimer=setTimeout(()=>{
       scrollBudgetTimer=0;
       velocity=0;
-      const target=pendingSceneIndex;
       pendingSceneIndex=-1;
-      if(target>=0&&scenes[target]&&target!==committedSceneIndex){
-        commitScene(target,committedSceneIndex,'scroll-settled-r1664');
+      const target=pickActive(scrollY);
+      if(target!==active)active=target;
+      if(target!==committedSceneIndex){
+        commitScene(target,committedSceneIndex,'scroll-settled-r1665');
       }
       root.dataset.fxCinematicSceneCommitR1664='settled';
+      root.dataset.fxCinematicSceneCommitR1665='single-post-scroll-sync';
       setScrollBudget('settled');
       schedule();
     },120);
@@ -459,9 +461,11 @@
     bindCinematicInteraction();
 
     addEventListener('scroll',()=>{
+      /* R1665 — the browser/compositor owns active scrolling. No cinematic RAF
+         is scheduled here. One settle pass updates scene state and visual depth
+         after 120 ms without scroll input. */
       setScrollBudget('fast');
       scheduleScrollSettle();
-      schedule();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
     addEventListener('orientationchange',()=>refresh('orientation'),{passive:true});
@@ -496,6 +500,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1662='latched-scroll-budget-no-per-frame-global-style-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1663='fast-scroll-zero-css-write-zero-layout-read-settle-resync';
     root.dataset.fxCinematicJourneyPerformanceR1664='single-scroll-settle-owner-no-scene-timer-churn';
+    root.dataset.fxCinematicJourneyPerformanceR1665='zero-cinematic-raf-during-scroll-single-post-scroll-sync';
     setScrollBudget('settled');
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
