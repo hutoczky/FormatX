@@ -148,8 +148,10 @@
     try {
       api.setShape?.(scene.def.shape,'r536-'+scene.def.key);
       api.rotateBy?.((scene.index%2?1:-1)*.018,.026 + scene.index*.002,'r536-camera');
-      api.surfacePulse?.('r536-'+scene.def.key);
-      api.requestRender?.(5);
+      const fastScroll=reason==='scroll'&&Math.abs(velocity)>.62;
+      if(!fastScroll)api.surfacePulse?.('r536-'+scene.def.key);
+      api.requestRender?.(fastScroll?1:3);
+      root.dataset.fxCinematicCoreBudgetR1625=fastScroll?'fast-scroll-single-render':'normal-scene-three-render';
     } catch (_) {}
   }
 
@@ -380,6 +382,7 @@
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
+    root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
