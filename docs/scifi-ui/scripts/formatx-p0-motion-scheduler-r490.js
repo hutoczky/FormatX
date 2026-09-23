@@ -66,9 +66,11 @@ function armLateFallback(){
 }
 
 function magBirthActive(){
+  const owner=String(root.dataset.fxMagBirthOwnerR533||'');
+  if(owner && owner!=='active')return false;
   return root.getAttribute('data-fx-mag-birth-live')==='active'
-    || root.dataset.fxMagBirthOwnerR533==='active'
-    || document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
+    || owner==='active'
+    || document.querySelector('.fx-mag-birth-r533:not(.fx-mag-birth-prepaint-r1606)') instanceof HTMLElement;
 }
 
 function armStartup(){
