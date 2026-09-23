@@ -105,11 +105,11 @@
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.06;
+      this.renderer.toneMappingExposure=1.20;
 
       this.scene=new THREE.Scene();
-      this.scene.background=new THREE.Color(0x010304);
-      this.scene.fog=new THREE.FogExp2(0x010304,0.021);
+      this.scene.background=new THREE.Color(0x020608);
+      this.scene.fog=new THREE.FogExp2(0x020608,0.015);
       this.studioEnvironment=this.makeStudioEnvironment();
       this.scene.environment=this.studioEnvironment;
 
@@ -203,30 +203,30 @@
     makeLights(){
       const T=this.THREE;
       // R1583 — softer photographic studio lighting plus procedural environment reflections.
-      this.scene.add(new T.HemisphereLight(0xd0d8d6,0x040506,0.62));
-      const key=new T.DirectionalLight(0xfffbf3,2.38);
+      this.scene.add(new T.HemisphereLight(0xd9e1df,0x050708,0.88));
+      const key=new T.DirectionalLight(0xfffbf3,2.86);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
       this.keyLight=key;
-      const rim=new T.PointLight(0xb8cfd1,this.mobileProfile||this.lowPowerProfile?1.72:3.05,12,2);
+      const rim=new T.PointLight(0xbfdadd,this.mobileProfile||this.lowPowerProfile?2.05:3.48,12,2);
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
       this.rimLight=rim;
       if(!this.mobileProfile&&!this.lowPowerProfile){
-        const bioticFill=new T.PointLight(0x7e787f,1.34,10,2);
+        const bioticFill=new T.PointLight(0x929095,1.68,10,2);
         bioticFill.position.set(-2.7,-.9,2.8);
         this.scene.add(bioticFill);
-        const warmBounce=new T.PointLight(0xc9a681,.56,8,2);
+        const warmBounce=new T.PointLight(0xc9a681,.74,8,2);
         warmBounce.position.set(2.4,2.1,1.1);
         this.scene.add(warmBounce);
 
-        const softbox=new T.SpotLight(0xe8efec,3.62,15,Math.PI*.40,.96,1.45);
+        const softbox=new T.SpotLight(0xeaf2ef,4.18,15,Math.PI*.40,.96,1.45);
         softbox.position.set(-4.5,5.6,6.2);
         softbox.target.position.set(.25,.12,0);
         this.scene.add(softbox,softbox.target);
         this.softboxLight=softbox;
 
-        const edgeSoftbox=new T.SpotLight(0x93a7aa,2.16,13,Math.PI*.42,.97,1.58);
+        const edgeSoftbox=new T.SpotLight(0xa6b9bb,2.62,13,Math.PI*.42,.97,1.58);
         edgeSoftbox.position.set(4.8,1.5,4.1);
         edgeSoftbox.target.position.set(-.18,-.08,.1);
         this.scene.add(edgeSoftbox,edgeSoftbox.target);
@@ -246,24 +246,24 @@
       group.position.z=-3.65;
 
       const wallMat=new T.MeshPhysicalMaterial({
-        color:0x03070a,metalness:.26,roughness:.62,
-        emissive:0x01080a,emissiveIntensity:.075,
+        color:0x081014,metalness:.22,roughness:.58,
+        emissive:0x02090b,emissiveIntensity:.055,
         clearcoat:.08,clearcoatRoughness:.58,
         side:T.BackSide
       });
       const panelMat=new T.MeshPhysicalMaterial({
-        color:0x071014,metalness:.12,roughness:.78,
-        emissive:0x010304,emissiveIntensity:.006,
-        clearcoat:.02,clearcoatRoughness:.72,
-        transparent:true,opacity:.095
+        color:0x101c20,metalness:.10,roughness:.72,
+        emissive:0x010405,emissiveIntensity:.005,
+        clearcoat:.04,clearcoatRoughness:.64,
+        transparent:true,opacity:.18
       });
       const darkPanelMat=new T.MeshPhysicalMaterial({
-        color:0x010203,metalness:.02,roughness:.95,
+        color:0x04090c,metalness:.02,roughness:.90,
         emissive:0x000000,emissiveIntensity:0,
-        transparent:true,opacity:.055
+        transparent:true,opacity:.11
       });
       const lightMat=new T.MeshBasicMaterial({
-        color:0xb5d3d4,transparent:true,opacity:.024,
+        color:0xc2dcdd,transparent:true,opacity:.052,
         depthWrite:false,blending:T.AdditiveBlending
       });
 
@@ -280,9 +280,9 @@
       const floor=new T.Mesh(
         new T.PlaneGeometry(12,10,1,1),
         new T.MeshPhysicalMaterial({
-          color:0x020405,metalness:.04,roughness:.82,
-          clearcoat:.04,clearcoatRoughness:.72,
-          transparent:true,opacity:.62,envMapIntensity:.28
+          color:0x071013,metalness:.04,roughness:.74,
+          clearcoat:.10,clearcoatRoughness:.60,
+          transparent:true,opacity:.76,envMapIntensity:.46
         })
       );
       floor.rotation.x=-Math.PI/2;
@@ -415,14 +415,14 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const ma=new T.MeshPhysicalMaterial({
-        color:0x718689,emissive:0x030708,emissiveIntensity:.025,
-        roughness:.38,metalness:.06,transparent:true,opacity:.90,
+        color:0x92a8a9,emissive:0x030708,emissiveIntensity:.018,
+        roughness:.34,metalness:.04,transparent:true,opacity:.96,
         depthWrite:true,clearcoat:.42,clearcoatRoughness:.24,
         transmission:.025,thickness:.14
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0x625e69,emissive:0x040405,emissiveIntensity:.022,
-        roughness:.40,metalness:.05,transparent:true,opacity:.88,
+        color:0x817b86,emissive:0x040405,emissiveIntensity:.016,
+        roughness:.36,metalness:.04,transparent:true,opacity:.95,
         depthWrite:true,clearcoat:.38,clearcoatRoughness:.27,
         transmission:.020,thickness:.14
       });
@@ -435,8 +435,8 @@
         blending:T.NormalBlending
       });
       const rungMat=new T.MeshPhysicalMaterial({
-        color:0x98a7a9,emissive:0x030607,emissiveIntensity:.025,
-        roughness:.48,metalness:.015,transparent:true,opacity:.68,depthWrite:true,
+        color:0xb6c2c2,emissive:0x030607,emissiveIntensity:.014,
+        roughness:.43,metalness:.01,transparent:true,opacity:.82,depthWrite:true,
         clearcoat:.22,clearcoatRoughness:.32
       });
       const mpa=new T.PointsMaterial({
@@ -448,12 +448,12 @@
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
 
-      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.023,tubeRadial,false),ma);
-      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.023,tubeRadial,false),mb);
-      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.029,auraRadial,false),ga);
-      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.029,auraRadial,false),gb);
+      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.034,tubeRadial,false),ma);
+      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.034,tubeRadial,false),mb);
+      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.040,auraRadial,false),ga);
+      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.040,auraRadial,false),gb);
 
-      const rungGeo=new T.CylinderGeometry(.0065,.0065,1,8,1,false);
+      const rungGeo=new T.CylinderGeometry(.010,.010,1,8,1,false);
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
       const dummy=new T.Object3D();
       const up=new T.Vector3(0,1,0);
@@ -473,7 +473,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.86,.84,.006,.005,.66,.12,.11];
+      group.userData.baseOpacity=[.96,.95,.008,.007,.82,.15,.14];
       return group;
     }
 
@@ -597,10 +597,10 @@
     makeCore(){
       const T=this.THREE;
       const shellMat=new T.MeshPhysicalMaterial({
-        color:0x111719,metalness:.06,roughness:.22,
+        color:0x253033,metalness:.05,roughness:.20,
         emissive:0x000101,emissiveIntensity:.002,
         clearcoat:.58,clearcoatRoughness:.12,
-        envMapIntensity:1.52,transparent:true,opacity:.99,
+        envMapIntensity:1.88,transparent:true,opacity:.99,
         ior:1.49,specularIntensity:.92,specularColor:new T.Color(0xcbd4d2)
       });
       const shellGlass=new T.MeshPhysicalMaterial({
@@ -827,22 +827,22 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x2d3434,roughness:.40,metalness:0,
-        clearcoat:.26,clearcoatRoughness:.22,
+        color:0x465253,roughness:.34,metalness:0,
+        clearcoat:.32,clearcoatRoughness:.18,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0070,
         transparent:true,opacity:0,
         emissive:0x000101,emissiveIntensity:.001,
-        envMapIntensity:1.12,
+        envMapIntensity:1.46,
         ior:1.38,specularIntensity:.58,specularColor:new T.Color(0xaebbbb),
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
-        color:0x343c3e,roughness:.43,metalness:.002,
+        color:0x455054,roughness:.38,metalness:.002,
         clearcoat:.22,clearcoatRoughness:.30,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.006,
         transparent:true,opacity:0,
         emissive:0x010203,emissiveIntensity:.004,
-        envMapIntensity:.90,
+        envMapIntensity:1.24,
         depthWrite:true
       });
       this.organicWireMaterial=new T.MeshBasicMaterial({
@@ -1221,18 +1221,18 @@
       const mineralRoughness=this.makeMineralRoughnessTexture();
       this.mineralRoughnessTexture=mineralRoughness;
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x0e1416,metalness:.035,roughness:.18,
+        color:0x202b2e,metalness:.035,roughness:.17,
         emissive:0x000101,emissiveIntensity:.001,
         clearcoat:.84,clearcoatRoughness:.070,
-        envMapIntensity:1.72,flatShading:false,transparent:true,opacity:0,
+        envMapIntensity:2.05,flatShading:false,transparent:true,opacity:0,
         ior:1.50,specularIntensity:.96,specularColor:new T.Color(0xc9d0cd)
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x171e21,metalness:.18,roughness:.23,
+        color:0x2b3639,metalness:.16,roughness:.22,
         clearcoat:.64,clearcoatRoughness:.11,transparent:true,opacity:0
       });
       this.silverMaterial=new T.MeshPhysicalMaterial({
-        color:0x4a5659,metalness:.66,roughness:.29,
+        color:0x69777a,metalness:.62,roughness:.27,
         clearcoat:.24,clearcoatRoughness:.22,transparent:true,opacity:0
       });
       this.crownMaterial=this.silverMaterial.clone();
@@ -1277,7 +1277,7 @@
       this.mechBodyParts.push(this.mechBody);
 
       this.mechPetalMaterial=new T.MeshPhysicalMaterial({
-        color:0x080b0d,metalness:.10,roughness:.28,
+        color:0x171d20,metalness:.09,roughness:.26,
         emissive:0x000000,emissiveIntensity:0,
         clearcoat:.54,clearcoatRoughness:.14,
         envMapIntensity:1.48,transparent:true,opacity:0
@@ -2053,6 +2053,7 @@
   document.documentElement.dataset.fxMagBirthInteractionR1690='all-input-physical-response-single-render-loop';
   document.documentElement.dataset.fxMagBirthVisualR1691='physically-based-obsidian-bioceramic-glass-low-emission-natural-studio-response';
   document.documentElement.dataset.fxMagBirthVisualR1695='photoreal-physical-inertia-light-lens-response-all-input-single-loop';
+  document.documentElement.dataset.fxMagBirthVisualR1702='photographic-exposure-readable-bioceramic-obsidian-physical-dna-dark-habitat';
   document.documentElement.dataset.fxMagBirthVisualR1701='photoreal-whole-scene-parallax-physical-material-response-no-hud';
   document.documentElement.dataset.fxMagBirthPerformanceR1701='quality-sheds-before-cadence-60fps-animation-target';
   window.FormatXMagGenesisThreeR1360={
