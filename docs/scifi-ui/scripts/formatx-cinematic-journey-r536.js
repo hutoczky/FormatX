@@ -54,6 +54,8 @@
   let pointerNY = 0;
   const finePointer = matchMedia('(pointer:fine)').matches;
   let lastCoreKey = '';
+  let scrollBudgetState='';
+  let scrollBudgetTimer=0;
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
   function coreApi() { return window.FormatXLivingCore || window.FormatXCoreMobileV69 || null; }
@@ -298,6 +300,7 @@
     const trackY = clamp(20 + active*(62/Math.max(1,scenes.length-1)) + local*5,16,88);
 
     const fastScroll=Math.abs(velocity)>.28;
+    setScrollBudget(fastScroll?'fast':'settled');
     root.style.setProperty('--fx-c536-progress',global.toFixed(4));
     root.style.setProperty('--fx-c536-local',local.toFixed(4));
 
@@ -331,6 +334,25 @@
     }
   }
 
+  function setScrollBudget(state){
+    if(scrollBudgetState===state)return;
+    scrollBudgetState=state;
+    root.dataset.fxScrollBudgetR1660=state;
+    root.dataset.fxCinematicPerformanceR1660=state==='fast'
+      ? 'compositor-lite-fast-scroll'
+      : 'full-detail-settled';
+  }
+
+  function scheduleScrollSettle(){
+    clearTimeout(scrollBudgetTimer);
+    scrollBudgetTimer=setTimeout(()=>{
+      scrollBudgetTimer=0;
+      velocity=0;
+      setScrollBudget('settled');
+      schedule();
+    },120);
+  }
+
   function schedule() {
     if (raf) return;
     raf = requestAnimationFrame(paint);
@@ -338,6 +360,7 @@
 
   function refresh(reason='dom') {
     clearTimeout(refreshTimer);
+    clearTimeout(scrollBudgetTimer);
     refreshTimer = setTimeout(() => {
       const previousKey=scenes[active]?.def.key||'';
       if(!discover())return;
@@ -427,6 +450,8 @@
     bindCinematicInteraction();
 
     addEventListener('scroll',()=>{
+      setScrollBudget('fast');
+      scheduleScrollSettle();
       schedule();
       if(pendingSceneIndex>=0){
         clearTimeout(sceneCommitTimer);
@@ -472,6 +497,8 @@
     root.dataset.fxCinematicJourneyPerformanceR1652='incremental-scene-state-mutations-no-full-scene-restyle';
     root.dataset.fxCinematicJourneyPerformanceR1653='fast-scroll-scene-commit-deferred-until-settle';
     root.dataset.fxCinematicJourneyPerformanceR1655='fast-scroll-two-css-vars-full-detail-on-settle';
+    root.dataset.fxCinematicJourneyPerformanceR1660='fast-scroll-compositor-lite-full-detail-after-120ms-settle';
+    setScrollBudget('settled');
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
