@@ -1153,3 +1153,44 @@ html[data-fx-scroll-budget-r1660="fast"] body.living-architecture :is(
   box-shadow:none!important;
 }
 /* production-r1677-scroll-paint-headroom */
+
+
+/* R1680 — raster-lite active-scroll mode.
+   Readable content remains present. Only expensive paint/compositor decoration
+   is simplified while the pointer/finger/wheel is moving. */
+@media (min-width:901px) {
+  html[data-fx-scroll-budget-r1660="fast"] body.living-architecture
+  #main-content > :is(section.scene:not(#hero),.fx-category-deck,.fx-origin-proof,.fx-award-proof,#user-feedback) {
+    content-visibility:auto!important;
+    contain:layout paint style!important;
+    contain-intrinsic-size:auto 900px!important;
+    background:transparent!important;
+    background-image:none!important;
+    box-shadow:none!important;
+    filter:none!important;
+  }
+
+  html[data-fx-scroll-budget-r1660="fast"] body.living-architecture :is(
+    .hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+    .payment-console,.system-grid article,.release-card,.fx-category-grid > article,
+    .fx-origin-proof article,.fx-plan-qr-card,.fx-platform-card
+  ) {
+    background:rgba(3,11,18,.92)!important;
+    background-image:none!important;
+    box-shadow:none!important;
+    filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    transition:none!important;
+    animation:none!important;
+    will-change:auto!important;
+  }
+
+  html[data-fx-scroll-budget-r1660="fast"] body.living-architecture
+  #main-content > :is(section.scene:not(#hero),.fx-category-deck,.fx-origin-proof,.fx-award-proof,#user-feedback)
+  :is(::before,::after) {
+    animation:none!important;
+    transition:none!important;
+  }
+}
+/* production-r1680-fast-scroll-raster-lite */
