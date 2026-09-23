@@ -356,11 +356,21 @@
       return;
     }
     const classification = classify(question);
-    pendingThought = {
+    const thought = {
       fingerprint: fingerprint(question),
       scene: classification.scene,
       intent: classification.intent
     };
+    pendingThought = thought;
+
+    /* R1666 — the privacy-safe fingerprint belongs to the user's local submit,
+       not to network/assistant response latency. A synchronous local response may
+       consume pendingThought first; otherwise this microtask records it once. */
+    queueMicrotask(() => {
+      if (pendingThought !== thought) return;
+      pendingThought = null;
+      recordThought(thought);
+    });
   }
 
   function onResponse(event) {
@@ -516,6 +526,7 @@
     ROOT.dataset.fxThoughtGenomePrivacy = 'fingerprint-only';
     ROOT.dataset.fxThoughtGenomeForms = '6';
     ROOT.dataset.fxThoughtGenomePaint = 'external-css-tone-r3';
+    ROOT.dataset.fxThoughtGenomeSubmitR1666 = 'fingerprint-on-local-submit-response-latency-independent';
     dispatchEvent(new CustomEvent('formatx:thoughtgenomeready', {
       detail: {
         enabled,
