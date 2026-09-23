@@ -112,6 +112,7 @@
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
   root.dataset.fxNativeMagVisualR1690 = 'photoreal-ggx-obsidian-physical-lens-all-input-reactive-single-renderer';
   root.dataset.fxNativeMagInteractionR1690 = 'pointer-touch-drag-scroll-wheel-click-key-focus-section-physical-response';
+  root.dataset.fxNativeMagInteractionR1692 = 'sitewide-pointer-touch-press-release-drag-scroll-wheel-click-key-focus-menu-language-section';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -1766,13 +1767,28 @@
       };
     }
     function onAmbientMove(event){
-      if(event.pointerType==='touch')return;
       const q=globalPoint(event);
-      tx=q.x*.72;ty=q.y*.72;
-      targetRotationY+=q.x*.0018;
-      targetRotationX=clamp(targetRotationX-q.y*.0012,-1.02,1.02);
-      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.055);
+      const touch=event.pointerType==='touch';
+      tx=q.x*(touch?.46:.72);ty=q.y*(touch?.46:.72);
+      targetRotationY+=q.x*(touch?.0010:.0018);
+      targetRotationX=clamp(targetRotationX-q.y*(touch?.0008:.0012),-1.02,1.02);
+      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+(touch?.075:.055));
       schedule(mobile?1:2);
+    }
+    function onAmbientPress(event){
+      const q=globalPoint(event);
+      tx=q.x*.70;ty=q.y*.70;
+      targetEnergy=Math.max(targetEnergy,.72);
+      targetBreath=Math.max(targetBreath,.64);
+      targetRotationY+=q.x*.010;
+      targetRotationX=clamp(targetRotationX-q.y*.008,-1.02,1.02);
+      schedule(mobile?3:5);
+    }
+    function onAmbientRelease(event){
+      const q=globalPoint(event);
+      tx=q.x*.58;ty=q.y*.58;
+      targetEnergy=Math.max(targetEnergy,.58);
+      schedule(mobile?2:3);
     }
     function onAmbientWheel(event){
       const impulse=clamp(event.deltaY/180,-1,1);
@@ -1797,6 +1813,9 @@
     listen(hero,'pointermove',onMove,{passive:true});
     listen(hero,'pointerdown',onDown,{passive:true});
     listen(window,'pointermove',onAmbientMove,{passive:true});
+    listen(window,'pointerdown',onAmbientPress,{passive:true});
+    listen(window,'pointerup',onAmbientRelease,{passive:true});
+    listen(window,'pointercancel',onAmbientRelease,{passive:true});
     listen(window,'wheel',onAmbientWheel,{passive:true});
     listen(window,'keydown',onAmbientKey,{passive:true});
     listen(hero,'pointerleave',onLeave,{passive:true});
