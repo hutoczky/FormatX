@@ -105,6 +105,7 @@
   root.dataset.fxNativeMagPerformanceR1626 = 'hard-60fps-frame-budget-spike-guard-quality-before-cadence';
   root.dataset.fxNativeMagPerformanceR1632 = 'mobile-startup-lod-30-side-body-4-tendrils-compact-lens-60fps-first';
   root.dataset.fxNativeMagPerformanceR1666 = 'mobile-24-side-3-tendril-compact-lens-lower-pixel-budget-60fps-headroom';
+  root.dataset.fxNativeMagQualityR1668 = 'hardware-mobile-073x-sharp-software-fallback-low-res-60fps-priority';
   root.dataset.fxNativeMagVisualR1619 = 'readable-smoky-obsidian-broad-softbox-midtones-single-pass';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
@@ -1182,7 +1183,7 @@
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    let qualityScale=auditMode?1:(softwareRenderer ? .42 : (constrainedMobile ? .42 : (mobile ? .48 : (constrained ? .56 : .66))));
+    let qualityScale=auditMode?1:(softwareRenderer ? .42 : (constrainedMobile ? .50 : (mobile ? .62 : (constrained ? .56 : .66))));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1195,7 +1196,7 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=auditMode?1:softwareRenderer ? 0.54:constrainedMobile?.92:mobile?1.08:constrained?1.04:1.42;
+      const baseCap=auditMode?1:softwareRenderer ? 0.54:constrainedMobile?.98:mobile?1.18:constrained?1.04:1.42;
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=auditMode?390000:softwareRenderer?98000:constrainedMobile?235000:mobile?380000:constrained?420000:820000;
