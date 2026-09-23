@@ -1832,10 +1832,10 @@
           : renderCost;
         this.renderPeak=Math.max(renderCost,this.renderPeak*.86);
         this.framePeak=Math.max(this.frameIntervalAverage,this.framePeak*.90);
-        const panicFrame=this.frameIntervalAverage>17.9||renderCost>8.4||this.framePeak>18.6;
-        if(panicFrame && time-this.lastQualityAdjust>24){
+        const panicFrame=this.frameIntervalAverage>16.75||renderCost>6.4||this.framePeak>17.05;
+        if(panicFrame && time-this.lastQualityAdjust>18){
           const previous=this.qualityScale;
-          this.qualityScale=Math.max(.14,this.qualityScale-(this.framePeak>24||renderCost>12?.22:.13));
+          this.qualityScale=Math.max(.14,this.qualityScale-(this.framePeak>20||renderCost>9?.22:.12));
           this.panicFrames=24;
           this.stableBudgetFrames=0;
           if(Math.abs(previous-this.qualityScale)>.001){
@@ -1849,10 +1849,10 @@
           /* R1660 — intro quality yields before cadence. One bad presentation
              frame immediately drops resolution/secondary detail, while recovery
              requires sustained headroom to avoid oscillation. */
-          const framePressure=this.frameIntervalAverage>16.38||this.framePeak>16.95;
-          const severeFramePressure=this.frameIntervalAverage>16.72||this.framePeak>17.85;
-          const renderPressure=this.renderAverage>5.2||this.renderPeak>6.9;
-          const severeRenderPressure=this.renderAverage>6.5||this.renderPeak>8.2;
+          const framePressure=this.frameIntervalAverage>16.08||this.framePeak>16.55;
+          const severeFramePressure=this.frameIntervalAverage>16.42||this.framePeak>17.05;
+          const renderPressure=this.renderAverage>4.4||this.renderPeak>5.8;
+          const severeRenderPressure=this.renderAverage>5.8||this.renderPeak>7.4;
           if(severeFramePressure||severeRenderPressure){
             this.qualityScale=Math.max(.16,this.qualityScale-.20);
             this.stableBudgetFrames=0;
@@ -1863,7 +1863,7 @@
           }else{
             if(this.panicFrames>0)this.panicFrames-=1;
             else this.stableBudgetFrames+=1;
-            if(this.stableBudgetFrames>240&&this.frameIntervalAverage<16.08&&this.renderAverage<3.9&&this.renderPeak<5.2){
+            if(this.stableBudgetFrames>360&&this.frameIntervalAverage<15.92&&this.renderAverage<3.4&&this.renderPeak<4.8){
               this.qualityScale=Math.min(this.qualityCeiling,this.qualityScale+.0015);
               this.stableBudgetFrames=0;
             }
@@ -1883,6 +1883,7 @@
         document.documentElement.dataset.fxMagBirthTargetFpsR1627='60fps-hard-budget-secondary-detail-first';
         document.documentElement.dataset.fxMagBirthTargetFpsR1640='60fps-priority-preemptive-quality-shedding';
         document.documentElement.dataset.fxMagBirthTargetFpsR1660='minimum-60fps-target-panic-lod-quality-before-cadence';
+        document.documentElement.dataset.fxMagBirthPerformanceR1713='16-67ms-first-intro-quality-yields-before-cadence';
         document.documentElement.dataset.fxMagBirthRenderMsR1600=this.renderAverage.toFixed(2);
         document.documentElement.dataset.fxMagBirthRenderPeakR1627=this.renderPeak.toFixed(2);
         document.documentElement.dataset.fxMagBirthFramePeakR1627=this.framePeak.toFixed(2);
