@@ -1225,17 +1225,19 @@
         ${outputName}=vec4(tone(col*2.72),clamp(alpha,.70,1.0));
       }`;
 
-    /* R1710 — phones and software GPUs share the physically-authored lite
-       material. Photographic identity stays in the shader/lens response while
-       fragment cost and overdraw yield first to the 16.67 ms presentation budget. */
-    const performanceLite = softwareRenderer || mobile || constrainedMobile;
-    const fragmentSource = performanceLite
+    /* R1716 — preserve photographic mobile geometry.
+       Software rendering keeps the ultra-lite material/mesh, but real mobile
+       GPUs use the medium physical shader and the normal mobile topology.
+       Dynamic resolution still yields before the 16.67 ms cadence. */
+    const mobilePhysical = mobile || constrainedMobile || auditMode;
+    const fragmentSource = softwareRenderer
       ? softwareFragmentSource
-      : (auditMode ? constrainedFragmentSource : fullFragmentSource);
-    root.dataset.fxCoreShaderProfileR1605=performanceLite
-      ? (softwareRenderer?'r1710-software-obsidian-lite-physical-lens':'r1710-mobile-photoreal-lite-physical-lens')
-      : 'photographic-full-desktop';
-    root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-mobile-lite-shader-adaptive-resolution-zero-idle';
+      : (mobilePhysical ? constrainedFragmentSource : fullFragmentSource);
+    root.dataset.fxCoreShaderProfileR1605=softwareRenderer
+      ? 'r1716-software-obsidian-lite-physical-lens'
+      : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
+    root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-adaptive-resolution-zero-idle';
+    root.dataset.fxNativeMagVisualR1716='mobile-normal-topology-physical-shader-photoreal-60fps-first';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
@@ -1281,10 +1283,10 @@
     return;
 
     function finishBoot(program) {
-    const geometry=buildOrganismGeometry(performanceLite);
-    root.dataset.fxCoreGeometryProfileR1603=performanceLite
-      ? (softwareRenderer?'software-lite-photographic':'mobile-lite-photographic')
-      : 'hardware-full-photographic';
+    const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
+      ? 'software-lite-photographic'
+      : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
     root.dataset.fxCoreGeometryProofParityR1699='audit-and-production-share-hand-cut-mineral-silhouette';
     root.dataset.fxNativeMagVisualR1700='software-faceted-depth-angle-hardware-smooth-photographic-obsidian';
     root.dataset.fxNativeMagVisualR1701='continuous-asymmetric-obsidian-silhouette-faceted-depth-no-sawtooth';
