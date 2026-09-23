@@ -297,30 +297,34 @@
     const yy = clamp(27 + active*(54/Math.max(1,scenes.length-1)) + (local-.5)*7,18,84);
     const trackY = clamp(20 + active*(62/Math.max(1,scenes.length-1)) + local*5,16,88);
 
+    const fastScroll=Math.abs(velocity)>.28;
     root.style.setProperty('--fx-c536-progress',global.toFixed(4));
     root.style.setProperty('--fx-c536-local',local.toFixed(4));
-    root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
-    root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
-    root.style.setProperty('--fx-c536-x',x.toFixed(2)+'%');
-    root.style.setProperty('--fx-c536-y',yy.toFixed(2)+'%');
-    root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
-    root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
-    root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
-    root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10 + velocity*-1.6).toFixed(2)+'px');
-    root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
-    root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
-    scenes.forEach(scene=>{
-      if(Math.abs(scene.index-active)>1)return;
-      const sceneTop=scene.top-y;
-      const lp=clamp((innerHeight*.72-sceneTop)/Math.max(1,scene.height+innerHeight*.36),0,1);
-      const se=scene.index===active?clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84):.07;
-      scene.node.style.setProperty('--fx-c536-scene-local',lp.toFixed(4));
-      scene.node.style.setProperty('--fx-c536-scene-energy',se.toFixed(4));
-    });
+    if(!fastScroll){
+      root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
+      root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
+      root.style.setProperty('--fx-c536-x',x.toFixed(2)+'%');
+      root.style.setProperty('--fx-c536-y',yy.toFixed(2)+'%');
+      root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
+      root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
+      root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
+      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10 + velocity*-1.6).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
-    root.dataset.fxCinematicProgressR536 = global.toFixed(3);
-    root.dataset.fxCinematicLocalR536 = local.toFixed(3);
+      scenes.forEach(scene=>{
+        if(Math.abs(scene.index-active)>1)return;
+        const sceneTop=scene.top-y;
+        const lp=clamp((innerHeight*.72-sceneTop)/Math.max(1,scene.height+innerHeight*.36),0,1);
+        const se=scene.index===active?clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84):.07;
+        scene.node.style.setProperty('--fx-c536-scene-local',lp.toFixed(4));
+        scene.node.style.setProperty('--fx-c536-scene-energy',se.toFixed(4));
+      });
+
+      root.dataset.fxCinematicProgressR536=global.toFixed(3);
+      root.dataset.fxCinematicLocalR536=local.toFixed(3);
+    }
     if(stage?.dataset.fxC536Primed!=='true'){
       stage.dataset.fxC536Primed='true';
       root.dataset.fxCinematicPrimingR1546='first-frame-position-locked';
@@ -433,7 +437,9 @@
           pendingSceneIndex=-1;
           if(target<0||!scenes[target])return;
           commitScene(target,previousCommitted>=0?previousCommitted:target,'scroll-settled-r1653');
+          velocity=0;
           root.dataset.fxCinematicSceneCommitR1653='settled';
+          schedule();
         },150);
       }
     },{passive:true});
@@ -465,6 +471,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1651='stable-r1643-scroll-cadence-restored-after-r1649-regression';
     root.dataset.fxCinematicJourneyPerformanceR1652='incremental-scene-state-mutations-no-full-scene-restyle';
     root.dataset.fxCinematicJourneyPerformanceR1653='fast-scroll-scene-commit-deferred-until-settle';
+    root.dataset.fxCinematicJourneyPerformanceR1655='fast-scroll-two-css-vars-full-detail-on-settle';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
