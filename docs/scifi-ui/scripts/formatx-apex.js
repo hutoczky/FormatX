@@ -78,25 +78,36 @@
   }
 
   function applyLanguage(next, persist) {
+    const previous = ROOT.lang === 'en' ? 'en' : 'hu';
     language = next === 'en' ? 'en' : 'hu';
+    const changed = previous !== language;
     ROOT.lang = language;
-    document.querySelectorAll('[data-hu][data-en]').forEach(element => {
-      const value = element.dataset[language];
-      if (element.textContent !== value) element.textContent = value;
-    });
-    document.querySelectorAll('[data-language]').forEach(button => {
-      button.setAttribute('aria-pressed', String(button.dataset.language === language));
-    });
+
+    /* R1647 — the static shell already ships in the requested first-paint
+       language. Do not rescan/rewrite every bilingual node on startup when
+       nothing changed; that was a large desktop main-thread task. */
+    if (changed || persist) {
+      document.querySelectorAll('[data-hu][data-en]').forEach(element => {
+        const value = element.dataset[language];
+        if (element.textContent !== value) element.textContent = value;
+      });
+      document.querySelectorAll('[data-language]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.language === language));
+      });
+      updateLinks();
+    }
+
     if (persist) {
       try { localStorage.setItem(LANG_KEY, language); } catch (_) {}
       const url = new URL(location.href);
       url.searchParams.set('lang', language);
       history.replaceState({}, '', url.pathname + url.search + url.hash);
     }
-    updateLinks();
+
     updatePrice();
     updateFlow(activeFlow);
-    dispatchEvent(new CustomEvent('formatx:languagechange'));
+    if (changed || persist) dispatchEvent(new CustomEvent('formatx:languagechange'));
+    ROOT.dataset.fxApexLanguageStartupR1647 = changed ? 'translated' : 'static-shell-reused-zero-scan';
   }
 
   function updateLinks() {
