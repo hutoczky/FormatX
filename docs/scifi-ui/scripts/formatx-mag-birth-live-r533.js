@@ -462,7 +462,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = './scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1633-mobile-startup-lod';
+  const THREE_OWNER_SRC = './scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1640-preemptive-60fps-governor';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -1007,6 +1007,7 @@
     ROOT.dataset.fxMagBirthBudgetR625=LOW_POWER?'adaptive-detail-60hz-target-low-power':'adaptive-detail-60hz-target';
     ROOT.dataset.fxMagBirthBudgetR629=MOBILE?'mobile-adaptive-resolution-60hz-target':'desktop-adaptive-resolution-60hz-target';
     ROOT.dataset.fxMagBirthPerformanceR1622='refresh-divisor-never-intentionally-below-60fps';
+    ROOT.dataset.fxMagBirthPerformanceR1640='60fps-priority-three-owner-preemptive-quality-shedding';
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-zero-continuous-js-render-loop':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
