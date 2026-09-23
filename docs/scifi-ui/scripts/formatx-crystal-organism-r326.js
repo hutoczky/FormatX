@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
-  const REVISION = 'living-luminous-electric-crystal-r454';
+  const REVISION = 'photoreal-single-living-organism-r1705';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
@@ -118,6 +118,8 @@
   root.dataset.fxNativeMagVisualR1696 = 'readable-smoky-obsidian-software-floor-photoreal-edge-preservation';
   root.dataset.fxNativeMagInteractionR1701 = 'all-site-input-plus-cinematic-scene-physical-response';
   root.dataset.fxNativeMagPerformanceR1701 = 'quality-first-60fps-animation-budget-stricter-spike-guard';
+  root.dataset.fxNativeMagVisualR1705 = 'single-photoreal-living-organism-fixed-body-physical-optics-responsive-tendrils';
+  root.dataset.fxNativeMagInteractionR1705 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
@@ -1386,40 +1388,48 @@
       targetBreath=Math.max(targetBreath,.38+value*.48);
       schedule(reduced.matches?1:frames);
     }
-    function shapeName(value=targetMorph){return value>=.5?'sphere':'crystal';}
+    function shapeName(){return 'crystal';}
     function publishShape(source='renderer'){
-      const target=shapeName();
-      const settled=Math.abs(morph-targetMorph)<.008;
-      root.dataset.fxCoreShapeR337=target;
-      root.dataset.fxCoreTargetShape=target;
-      root.dataset.fxCoreShape=settled?target:`morphing-to-${target}`;
-      root.dataset.fxCoreMorph=morph.toFixed(3);
+      /* R1705 — one organism, one body. Legacy "crystal" is kept only as the
+         compatibility token consumed by existing icon/sync code; the rendered
+         geometry never morphs into a second sphere/crystal identity. */
+      root.dataset.fxCoreShapeR337='crystal';
+      root.dataset.fxCoreTargetShape='crystal';
+      root.dataset.fxCoreShape='crystal';
+      root.dataset.fxCoreMorph='0.000';
       root.dataset.fxCoreMorphSource=source;
-      root.dataset.fxCoreMorphEngine='native-webgl-closed-volume-r413';
-      stage.dataset.shape=root.dataset.fxCoreShape;
+      root.dataset.fxCoreMorphEngine='single-living-organism-fixed-topology-r1705';
+      root.dataset.fxCoreLivingFormR1705='single-organism';
+      stage.dataset.shape='organism';
     }
     function setMorph(value,source='api-morph',announce=true){
-      const now=performance.now();
-      const userDirected=/mag-button|api|keyboard|core-tap/.test(source);
-      if(!userDirected && now<shapeLockUntil){
-        root.dataset.fxCoreShapeAutoSyncR1669='blocked-during-user-shape-lock:'+String(source||'unknown');
-        return targetMorph;
-      }
-      const next=clamp(Number(value)||0,0,1);
-      const changed=Math.abs(next-targetMorph)>.001;
-      targetMorph=next;
-      if(userDirected)shapeLockUntil=now+7600;
-      if(reduced.matches)morph=targetMorph;
+      const requested=clamp(Number(value)||0,0,1);
+      targetMorph=0;
+      if(reduced.matches)morph=0;
+      root.dataset.fxCoreRequestedMorphR1705=requested.toFixed(3);
       publishShape(source);
       const cinematicBirth=/^r533-/.test(source);
-      boost(changed?1.04:.68,cinematicBirth?1:(changed?8:3));
-      if(changed&&announce)dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{
-        shape:shapeName(next),source,revision:'r413',renderer:VERSION,geometry:'closed-3d-volume'
+      boost(requested>.5?.88:.72,cinematicBirth?1:(mobile?3:5));
+      if(announce)dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{
+        shape:'crystal',
+        requestedShape:requested>.5?'sphere':'crystal',
+        visualForm:'single-organism',
+        source,
+        revision:'r1705',
+        renderer:VERSION,
+        geometry:'single-fixed-living-3d-volume'
       }}));
-      return targetMorph;
+      return 0;
     }
-    function setShape(shape,source='api'){return setMorph(shape==='sphere'||shape===1||shape===true?1:0,source,true);}
-    function toggleShape(source='interaction'){return setShape(targetMorph>=.5?'crystal':'sphere',source);}
+    function setShape(shape,source='api'){
+      return setMorph(shape==='sphere'||shape===1||shape===true?1:0,source,true);
+    }
+    function toggleShape(source='interaction'){
+      startSurfacePulse(String(source||'interaction')+'-living-response');
+      boost(.86,mobile?4:6);
+      publishShape(source);
+      return 0;
+    }
     function rotateBy(x,y,source='api-rotate'){
       targetRotationX=clamp(targetRotationX+x,-1.02,1.02);
       targetRotationY+=y;
@@ -1930,6 +1940,7 @@
       version:VERSION,
       revision:REVISION,
       renderer:'single-webgl-crystal-organism-r326',
+      livingForm:'single-photoreal-organism-r1705',
       material:'biomechanical-gunmetal-living-core-r614',
       geometry:'armored-four-lobe-core-with-native-tendrils-r614',
       referenceGeometry:'unified-armored-diamond-pod-r669',
@@ -1993,8 +2004,9 @@
     root.dataset.fxCoreGeometryTopology=geometry.topology;
     root.dataset.fxCoreVertexCount=String(geometry.count);
     root.dataset.fxCoreDimension='native-closed-3d-volume-r413';
-    root.dataset.fxCoreMorphGeometryR413='closed-sphere-and-four-tip-crystal-same-topology';
-    root.dataset.fxCoreMorphNormalsR413='sphere-smooth-to-crystal-faceted-native-shader';
+    root.dataset.fxCoreMorphGeometryR413='single-fixed-living-organism-topology-r1705';
+    root.dataset.fxCoreMorphNormalsR413='single-organism-photographic-surface-normals-r1705';
+    root.dataset.fxCoreLivingIdentityR1705='same-organism-intro-to-site-no-form-swap';
     root.dataset.fxCoreReferenceGeometry='armored-four-lobe-core-native-tendrils-r614';
     root.dataset.fxCoreReferenceGeometryR669='unified-armored-diamond-pod-silver-crown-cyan-optical-well-native-tendrils';
     root.dataset.fxCoreReferenceGeometryR673='convex-compact-armored-pod-no-star-silhouette';
@@ -2151,7 +2163,7 @@
     scheduleAutonomousMorph();
     dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
       version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
-      geometry:'closed-3d-volume',morph:'crystal-sphere-native-webgl',interactive:true,organism:true,legacyFallback:false
+      geometry:'single-fixed-living-3d-volume',morph:'disabled-single-organism-r1705',interactive:true,organism:true,legacyFallback:false
     }}));
     listen(window,'pagehide',destroy,{once:true});
     }
