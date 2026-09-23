@@ -81,6 +81,18 @@ html[data-fx-mag-birth-live="active"] body>.fx-mag-birth-r533{
 #fx-mag-birth-prepaint-r1606{
   display:none!important;
   visibility:hidden!important;
+  position:fixed!important;
+  inset:0!important;
+  box-sizing:border-box!important;
+  width:100vw!important;
+  height:100dvh!important;
+  min-height:100svh!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  contain:strict!important;
+  isolation:isolate!important;
+  z-index:2147483000!important;
   background:
     radial-gradient(ellipse 42% 42% at 50% 46%,rgba(54,96,106,.10),transparent 72%),
     linear-gradient(180deg,#010305 0%,#02070b 58%,#010204 100%);
@@ -146,3 +158,5 @@ html[data-fx-mag-birth-live="active"] body>.topbar{
   }
 }
 /* production-r1620-mobile-early-contentful-prepaint */
+
+/* production-r1679-prepaint-fixed-from-first-byte-zero-flow-cls */
