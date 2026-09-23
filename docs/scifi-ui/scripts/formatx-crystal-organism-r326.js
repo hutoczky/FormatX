@@ -103,6 +103,7 @@
   root.dataset.fxNativeMagPerformanceR1620 = 'hard-60hz-ceiling-preemptive-resolution-13ms-render-headroom';
   root.dataset.fxNativeMagPerformanceR1622 = 'refresh-divisor-never-intentionally-below-60fps-adaptive-quality';
   root.dataset.fxNativeMagPerformanceR1626 = 'hard-60fps-frame-budget-spike-guard-quality-before-cadence';
+  root.dataset.fxNativeMagPerformanceR1632 = 'mobile-startup-lod-30-side-body-4-tendrils-compact-lens-60fps-first';
   root.dataset.fxNativeMagVisualR1619 = 'readable-smoky-obsidian-broad-softbox-midtones-single-pass';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
@@ -178,9 +179,9 @@
   function buildOrganismGeometry(software=false) {
     const latitudeSegments = auditMode ? 8 : software ? 10 : constrainedMobile ? 14 : mobile ? 16 : constrained ? 16 : 20;
     const longitudeSegments = auditMode ? 14 : software ? 20 : constrainedMobile ? 28 : mobile ? 32 : constrained ? 32 : 40;
-    const tendrilCount = auditMode ? 3 : software ? 4 : mobile ? 5 : 7;
-    const tendrilSegments = auditMode ? 5 : software ? 10 : constrainedMobile ? 14 : mobile ? 18 : constrained ? 20 : 26;
-    const tendrilSides = auditMode ? 3 : software ? 4 : constrainedMobile ? 4 : mobile || constrained ? 5 : 7;
+    const tendrilCount = auditMode ? 3 : software ? 4 : mobile ? 4 : 7;
+    const tendrilSegments = auditMode ? 5 : software ? 10 : constrainedMobile ? 10 : mobile ? 13 : constrained ? 18 : 26;
+    const tendrilSides = auditMode ? 3 : software ? 4 : mobile || constrained ? 4 : 7;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -346,7 +347,10 @@
       /* R1589 — use the same hand-cut mineral envelope as the successful late
          Three.js birth frames. The permanent MAG and cinematic handoff now share
          one silhouette language instead of drifting into a rounded pebble. */
-      const sideCount = software ? 30 : mobile ? 46 : 60;
+      /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
+         so 46 circumferential body slices add startup cost without visible
+         silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
+      const sideCount = software ? 24 : mobile ? 30 : constrained ? 44 : 60;
       const ringDefs = [
         [.84,.045,.040,-.085,-.010,.090],
         [.77,.120,.090,-.135,-.006,.080],
@@ -562,7 +566,7 @@
 
     if(!auditMode){
       const centreX=.010,centreY=-.018;
-      const bezelInner=.096,bezelOuter=.132,bezelSteps=software?18:32,bezelZ=.535;
+      const bezelInner=.096,bezelOuter=.132,bezelSteps=software?16:mobile?20:32,bezelZ=.535;
       for(let side=0;side<bezelSteps;side+=1){
         const a=side/bezelSteps*Math.PI*2;
         const b=(side+1)/bezelSteps*Math.PI*2;
@@ -576,8 +580,8 @@
       const lensCenter=[centreX,centreY,.541];
       const lensRadius=.098;
       const lensDepth=.046;
-      const radialSteps=software?3:6;
-      const angularSteps=software?18:30;
+      const radialSteps=software?3:mobile?4:6;
+      const angularSteps=software?16:mobile?20:30;
       function lensVertex(radial,angle){
         const rr=lensRadius*radial;
         const nx=radial*Math.cos(angle);
