@@ -803,7 +803,7 @@
     width: min(1320px, calc(100% - 80px)) !important;
     max-width: 1320px !important;
     height: auto !important;
-    min-height: 0 !important;
+    min-height: 808px !important;
     margin: 0 auto !important;
     padding: 0 !important;
     gap: 30px 56px !important;
@@ -1401,3 +1401,5 @@
     pointer-events:auto!important;
   }
 }
+
+/* production-r1631-stable-desktop-hero-reservation */
