@@ -231,6 +231,12 @@
 
   function scenes() {
     const sceneSections = SCENES.map(scene => document.getElementById(scene[0])).filter(Boolean);
+    if(document.querySelector('script[data-fx-cinematic-journey-r536]')){
+      ROOT.dataset.fxApexScrollPerformanceR1646='r536-owner-no-legacy-progress-raf';
+      ROOT.style.setProperty('--progress','0');
+      setScene(activeScene);
+      return;
+    }
     if ('IntersectionObserver' in window) {
       const observer = new IntersectionObserver(entries => {
         let best = null;
