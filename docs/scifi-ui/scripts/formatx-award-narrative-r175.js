@@ -121,6 +121,17 @@ function boot(){
     root.dataset.fxAwardNarrativeR175='incomplete-dom';
     return;
   }
+  const cinematicOwner=document.querySelector('script[data-fx-cinematic-journey-r536]');
+  if(cinematicOwner){
+    for(const item of sections)item.section.dataset.fxStoryState='active';
+    root.dataset.fxAwardNarrativeR175=VERSION;
+    root.dataset.fxActiveOrganR175='core';
+    root.dataset.fxActiveChapterR175='01';
+    root.dataset.fxNarrativeMotionR175='delegated-r536-no-parallel-scroll-raf';
+    root.dataset.fxAwardNarrativePerformanceR1646='semantic-compatibility-only-r536-visual-owner';
+    root.dataset.fxStoryPulseR175='off';
+    return;
+  }
   if(reduced.matches||audit){
     setStaticState();
     return;
