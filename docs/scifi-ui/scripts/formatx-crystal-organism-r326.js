@@ -116,6 +116,8 @@
   root.dataset.fxNativeMagVisualR1693 = 'mobile-readable-smoky-obsidian-smaller-smoked-optic-adaptive-sharp-60fps';
   root.dataset.fxNativeMagVisualR1694 = 'photoreal-physical-response-capability-aware-adaptive-60hz';
   root.dataset.fxNativeMagVisualR1696 = 'readable-smoky-obsidian-software-floor-photoreal-edge-preservation';
+  root.dataset.fxNativeMagInteractionR1701 = 'all-site-input-plus-cinematic-scene-physical-response';
+  root.dataset.fxNativeMagPerformanceR1701 = 'quality-first-60fps-animation-budget-stricter-spike-guard';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -1566,7 +1568,7 @@
       }
 
       if(!auditMode){
-        const panicFrame=dt>18.8 || ms>9.2;
+        const panicFrame=dt>17.9 || ms>8.4;
         if(panicFrame && now-lastQualityAdjust>24){
           const previous=qualityScale;
           qualityScale=Math.max(.16,qualityScale-(dt>24||ms>12?.22:.13));
@@ -1586,10 +1588,10 @@
           /* R1660 — preserve the 16.67 ms presentation budget. Resolution
              and secondary optical detail yield before cadence. Recovery waits
              until the renderer has sustained real headroom for long enough. */
-          const renderPressure=renderAverage>5.8 || renderPeak>7.6;
-          const severeRenderPressure=renderAverage>7.2 || renderPeak>9.0;
-          const framePressure=frameIntervalAverage>16.38 || framePeak>16.95;
-          const severeFramePressure=frameIntervalAverage>16.72 || framePeak>17.85;
+          const renderPressure=renderAverage>5.2 || renderPeak>6.9;
+          const severeRenderPressure=renderAverage>6.6 || renderPeak>8.2;
+          const framePressure=frameIntervalAverage>16.28 || framePeak>16.82;
+          const severeFramePressure=frameIntervalAverage>16.62 || framePeak>17.45;
 
           if(severeFramePressure||severeRenderPressure){
             qualityScale=Math.max(.16,qualityScale-.20);
@@ -1820,6 +1822,19 @@
       if(performance.now()<shapeLockUntil)return;
       setShape(shape,source);
     }
+    function onCinematicScene(event){
+      const detail=event.detail||{};
+      const index=Number(detail.index);
+      if(Number.isFinite(index)){
+        targetSiteProgress=clamp(index/Math.max(1,11),0,1);
+        targetRotationY+=(index%2?1:-1)*.014;
+        targetRotationZ=clamp(targetRotationZ+(index%3-1)*.004,-.16,.16);
+      }
+      targetEnergy=Math.max(targetEnergy,.68);
+      targetBreath=Math.max(targetBreath,.48);
+      root.dataset.fxCoreCinematicReactionR1701=String(detail.kind||detail.code||'scene');
+      schedule(mobile?2:4);
+    }
 
     listen(hero,'pointermove',onMove,{passive:true});
     listen(hero,'pointerdown',onDown,{passive:true});
@@ -1842,6 +1857,8 @@
     listen(window,'formatx:loop',()=>{signalShape('crystal','site-loop');boost(.92,mobile?4:6);},{passive:true});
     listen(window,'formatx:menustatechange',event=>{boost(event.detail?.open ? .76 : .52,mobile?2:4);},{passive:true});
     listen(window,'formatx:languagechange',()=>boost(.62,mobile?2:3),{passive:true});
+    listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
+    listen(window,'formatx:storychapter',()=>boost(.64,mobile?2:4),{passive:true});
     listen(document,'visibilitychange',()=>{
       if(!document.hidden)schedule(1);
       scheduleSurfacePulse();
