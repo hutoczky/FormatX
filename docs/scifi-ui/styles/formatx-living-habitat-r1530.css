@@ -1194,3 +1194,29 @@ html[data-fx-scroll-budget-r1660="fast"] body.living-architecture :is(
   }
 }
 /* production-r1680-fast-scroll-raster-lite */
+
+
+/* R1695 — all-input physical habitat response.
+   Mobile remains compositor-only; desktop canvas and these fixed atmosphere
+   layers share one short optical pulse without geometry/layout mutation. */
+body.living-architecture::after{
+  transition:opacity .16s ease,filter .16s ease!important;
+}
+body.living-architecture.fx-habitat-react-r1695::after{
+  opacity:1!important;
+  filter:brightness(1.055) saturate(1.025)!important;
+}
+@media (max-width:900px),(pointer:coarse){
+  body.living-architecture::before,
+  body.living-architecture::after{
+    will-change:transform,opacity;
+  }
+  body.living-architecture.fx-habitat-react-r1695::before{
+    transform:translate3d(.12%,0,0) scale(1.004)!important;
+    opacity:1!important;
+  }
+  body.living-architecture.fx-habitat-react-r1695::after{
+    filter:brightness(1.045) saturate(1.018)!important;
+  }
+}
+/* production-r1695-all-input-habitat-response */
