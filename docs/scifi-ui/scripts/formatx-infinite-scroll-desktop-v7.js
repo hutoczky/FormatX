@@ -329,13 +329,25 @@
 
   function scheduleMirrorCapture(delay = 0) {
     clearTimeout(mirrorCaptureTimer);
-    mirrorCaptureTimer = window.setTimeout(() => {
+    mirrorCaptureTimer = window.setTimeout(function attemptMirrorCapture() {
+      mirrorCaptureTimer=0;
+      const activeScroll = root.dataset.fxScrollBudgetR1660 === 'fast'
+        || root.dataset.fxScrollActivity === 'scrolling'
+        || root.classList.contains('fx-page-scrolling');
+      if(activeScroll){
+        root.dataset.fxLoopMirrorCaptureR1679='deferred-active-scroll';
+        mirrorCaptureTimer=window.setTimeout(attemptMirrorCapture,360);
+        return;
+      }
       cancelAnimationFrame(mirrorCaptureFrame);
       const api = window.FormatXLivingCore || window.FormatXCoreMobileV69;
-      try { api?.requestRender?.(2); } catch (_) {}
-      /* requestRender queues the native MAG first; our callback then snapshots
-         that just-rendered WebGL buffer before browser compositing clears it. */
-      mirrorCaptureFrame = requestAnimationFrame(captureReferenceMirror);
+      try { api?.requestRender?.(1); } catch (_) {}
+      /* Snapshot work is strictly post-scroll. It must never steal a frame from
+         the native scroll path or the 60 Hz compositor budget. */
+      mirrorCaptureFrame = requestAnimationFrame(()=>{
+        captureReferenceMirror();
+        root.dataset.fxLoopMirrorCaptureR1679='post-scroll-single-frame';
+      });
     }, Math.max(0, delay));
   }
 
@@ -671,7 +683,9 @@
     if (document.fonts?.ready) {
       document.fonts.ready.then(scheduleGeometryRefresh).catch(() => {});
     }
-    for (const delay of [320, 900, 2200]) scheduleMirrorCapture(delay);
+    // One late snapshot is enough. 4.6 s stays outside the startup/scroll hot path.
+    scheduleMirrorCapture(4600);
+    root.dataset.fxLoopMirrorSchedulerR1679='single-post-startup-scroll-safe-capture';
   }
 
   addEventListener('scroll', onScroll, { passive: true });
