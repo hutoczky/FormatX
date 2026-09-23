@@ -41,6 +41,8 @@
   let cutTimer = 0;
   let coreSettleTimer = 0;
   let pendingCoreScene = null;
+  let sceneCommitTimer = 0;
+  let pendingSceneIndex = -1;
   let refreshTimer = 0;
   let observer = null;
   let geometryObserver = null;
@@ -194,37 +196,64 @@
     scene.node.dataset.fxC536State=state;
   }
 
+  function commitScene(index,previous,reason='scroll-settled-r1653'){
+    if(!scenes.length)return;
+    index=clamp(index,0,scenes.length-1);
+    previous=clamp(previous,0,scenes.length-1);
+    const from=Math.min(previous,index);
+    const to=Math.max(previous,index);
+    for(let i=from;i<=to;i++){
+      setSceneState(scenes[i],i<index?'past':i===index?'active':'future');
+    }
+    const scene=scenes[index];
+    root.dataset.fxCinematicSceneR536=scene.def.key;
+    root.dataset.fxCinematicSceneCodeR536=scene.def.code;
+    root.style.setProperty('--fx-c536-a',scene.def.a);
+    root.style.setProperty('--fx-c536-b',scene.def.b);
+    updateHud(scene);
+    signalCore(scene,reason);
+    dispatchEvent(new CustomEvent('formatx:cinematicscene',{
+      detail:{index,kind:scene.def.key,code:scene.def.code,reason,revision:VERSION}
+    }));
+  }
+
+  function scheduleSceneCommit(index,previous){
+    pendingSceneIndex=index;
+    clearTimeout(sceneCommitTimer);
+    sceneCommitTimer=setTimeout(()=>{
+      sceneCommitTimer=0;
+      const target=pendingSceneIndex;
+      pendingSceneIndex=-1;
+      if(target<0||!scenes[target])return;
+      commitScene(target,previous,'scroll-settled-r1653');
+      root.dataset.fxCinematicSceneCommitR1653='settled';
+    },150);
+    root.dataset.fxCinematicSceneCommitR1653='deferred-fast-scroll';
+  }
+
   function activate(index,reason='scroll') {
     if (!scenes.length) return;
     index = clamp(index,0,scenes.length-1);
     const previous=active;
     const changed = index !== previous || !root.dataset.fxCinematicSceneR536;
+    const fastScroll=reason==='scroll'&&Math.abs(velocity)>.28;
+    active=index;
 
-    if(changed){
-      const from=Math.min(previous,index);
-      const to=Math.max(previous,index);
-      for(let i=from;i<=to;i++){
-        setSceneState(scenes[i],i<index?'past':i===index?'active':'future');
-      }
-    }else{
-      setSceneState(scenes[index],'active');
+    if(!changed){
+      if(!fastScroll)setSceneState(scenes[index],'active');
+      return;
     }
-    active = index;
 
-    const scene = scenes[index];
-    root.dataset.fxCinematicSceneR536 = scene.def.key;
-    root.dataset.fxCinematicSceneCodeR536 = scene.def.code;
-    root.style.setProperty('--fx-c536-a',scene.def.a);
-    root.style.setProperty('--fx-c536-b',scene.def.b);
-    updateHud(scene);
-
-    if (changed) {
-      if(reason!=='scroll'||Math.abs(velocity)<=.36)cut();
-      signalCore(scene,reason);
-      dispatchEvent(new CustomEvent('formatx:cinematicscene',{
-        detail:{index,kind:scene.def.key,code:scene.def.code,reason,revision:VERSION}
-      }));
+    if(fastScroll){
+      scheduleSceneCommit(index,previous);
+      return;
     }
+
+    clearTimeout(sceneCommitTimer);
+    sceneCommitTimer=0;
+    pendingSceneIndex=-1;
+    commitScene(index,previous,reason);
+    if(reason!=='scroll'||Math.abs(velocity)<=.36)cut();
   }
 
   function pickActive(y=scrollY){
@@ -393,7 +422,21 @@
     bindDynamicDiscovery();
     bindCinematicInteraction();
 
-    addEventListener('scroll',schedule,{passive:true});
+    addEventListener('scroll',()=>{
+      schedule();
+      if(pendingSceneIndex>=0){
+        clearTimeout(sceneCommitTimer);
+        const previousCommitted=scenes.findIndex(scene=>scene.node.dataset.fxC536State==='active');
+        sceneCommitTimer=setTimeout(()=>{
+          sceneCommitTimer=0;
+          const target=pendingSceneIndex;
+          pendingSceneIndex=-1;
+          if(target<0||!scenes[target])return;
+          commitScene(target,previousCommitted>=0?previousCommitted:target,'scroll-settled-r1653');
+          root.dataset.fxCinematicSceneCommitR1653='settled';
+        },150);
+      }
+    },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
     addEventListener('orientationchange',()=>refresh('orientation'),{passive:true});
     addEventListener('formatx:languagechange',()=>updateHud(scenes[active]),{passive:true});
@@ -421,6 +464,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1643='fast-scroll-zero-mag-burst-deferred-final-scene-handoff';
     root.dataset.fxCinematicJourneyPerformanceR1651='stable-r1643-scroll-cadence-restored-after-r1649-regression';
     root.dataset.fxCinematicJourneyPerformanceR1652='incremental-scene-state-mutations-no-full-scene-restyle';
+    root.dataset.fxCinematicJourneyPerformanceR1653='fast-scroll-scene-commit-deferred-until-settle';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
@@ -437,6 +481,7 @@
     if(cutRaf)cancelAnimationFrame(cutRaf);
     clearTimeout(cutTimer);
     clearTimeout(coreSettleTimer);
+    clearTimeout(sceneCommitTimer);
     clearTimeout(refreshTimer);
     observer?.disconnect?.();
     geometryObserver?.disconnect?.();
