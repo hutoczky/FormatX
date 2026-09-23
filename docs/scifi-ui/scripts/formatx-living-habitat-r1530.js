@@ -12,13 +12,31 @@
     Number(navigator.deviceMemory || 8) <= 4
   );
 
-  /* R1603 — mobile/coarse pointers use the same full-page habitat through
-     compositor-owned CSS layers. A full-viewport Canvas2D redraw is visually
-     redundant there and can monopolise the main thread on weak/software GPUs. */
+  /* R1695 — every meaningful input reaches the habitat. Mobile/coarse devices
+     stay compositor-only: interaction toggles a CSS-owned physical light pulse,
+     never a full-viewport Canvas2D loop. */
+  let mobilePulseTimer=0;
+  function habitatInput(kind='input'){
+    ROOT.dataset.fxHabitatInputR1695=kind;
+    BODY.classList.add('fx-habitat-react-r1695');
+    clearTimeout(mobilePulseTimer);
+    mobilePulseTimer=setTimeout(()=>BODY.classList.remove('fx-habitat-react-r1695'),180);
+  }
   if (MOBILE.matches) {
+    const passive={passive:true};
+    addEventListener('pointerdown',()=>habitatInput('touch-press'),passive);
+    addEventListener('pointerup',()=>habitatInput('touch-release'),passive);
+    addEventListener('click',()=>habitatInput('click'),passive);
+    addEventListener('scroll',()=>habitatInput('scroll'),passive);
+    addEventListener('wheel',()=>habitatInput('wheel'),passive);
+    addEventListener('keydown',event=>{if(!event.repeat)habitatInput('key');},passive);
+    addEventListener('focusin',()=>habitatInput('focus'),passive);
+    addEventListener('formatx:languagechange',()=>habitatInput('language'),passive);
+    addEventListener('formatx:cinematicscene',()=>habitatInput('section'),passive);
     ROOT.dataset.fxLivingHabitatR1530='css-compositor-mobile-habitat';
     ROOT.dataset.fxLivingHabitatSchedulerR1603='zero-main-thread-mobile-compositor';
     ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-css':'mobile-css';
+    ROOT.dataset.fxLivingHabitatInteractionR1695='all-input-compositor-pulse-zero-canvas';
     return;
   }
 
@@ -276,16 +294,28 @@
     raf=requestAnimationFrame(draw);
   }
 
-  function pulse(){
-    impulse=1;
+  function pulse(kind='pulse',strength=1){
+    impulse=Math.max(impulse,Math.max(0,Math.min(1.4,strength)));
+    ROOT.dataset.fxHabitatInputR1695=kind;
+    BODY.classList.add('fx-habitat-react-r1695');
+    clearTimeout(mobilePulseTimer);
+    mobilePulseTimer=setTimeout(()=>BODY.classList.remove('fx-habitat-react-r1695'),180);
     schedule();
   }
 
   addEventListener('resize',resize,{passive:true});
-  addEventListener('scroll',updateScroll,{passive:true});
+  addEventListener('scroll',()=>{updateScroll();pulse('scroll',.32);},{passive:true});
   addEventListener('pointermove',pointer,{passive:true});
-  addEventListener('formatx:coretouchpulse',pulse,{passive:true});
-  document.addEventListener('formatx:magbirthcomplete',pulse,{passive:true});
+  addEventListener('pointerdown',()=>pulse('press',.82),{passive:true});
+  addEventListener('pointerup',()=>pulse('release',.52),{passive:true});
+  addEventListener('click',()=>pulse('click',.92),{passive:true});
+  addEventListener('wheel',()=>pulse('wheel',.44),{passive:true});
+  addEventListener('keydown',event=>{if(!event.repeat)pulse('key',.56);},{passive:true});
+  addEventListener('focusin',()=>pulse('focus',.34),{passive:true});
+  addEventListener('formatx:languagechange',()=>pulse('language',.44),{passive:true});
+  addEventListener('formatx:cinematicscene',()=>pulse('section',.56),{passive:true});
+  addEventListener('formatx:coretouchpulse',()=>pulse('core-touch',1),{passive:true});
+  document.addEventListener('formatx:magbirthcomplete',()=>pulse('intro-handoff',1),{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
   MOBILE.addEventListener?.('change',resize);
 
@@ -300,5 +330,6 @@
   ROOT.dataset.fxLivingHabitatSchedulerR1541='interaction-driven-zero-idle-raf';
   ROOT.dataset.fxLivingHabitatSchedulerR1643='scroll-settle-canvas-css-compositor-during-motion';
   ROOT.dataset.fxLivingHabitatSchedulerR1670='desktop-canvas-60hz-floor-high-refresh-divisor-zero-idle';
+  ROOT.dataset.fxLivingHabitatInteractionR1695='pointer-touch-scroll-wheel-click-key-focus-language-section-physical-light-response';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
 })();
