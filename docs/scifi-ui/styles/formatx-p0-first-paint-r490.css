@@ -1,3 +1,11 @@
+/* R1714 — tokens required before deferred quality/design enhancement. */
+:root{
+  --fx-cyan:#7cecff;
+  --fx-violet:#8f72ff;
+  --fx-radius-lg:30px 7px 30px 7px;
+}
+/* production-r1714-critical-design-tokens */
+
 /* FormatX R503 — deterministic first-paint safety from measured final geometry.
    Canonical hero geometry remains owned by formatx-first-frame-stability-r283.css.
    R503 mirrors only the measured desktop hero ancestor boxes in the already
