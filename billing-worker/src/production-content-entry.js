@@ -8,7 +8,7 @@ import productionBase from './production-content-entry-r369-base.js';
    MAG renderer ownership and automatic lifecycle remain unchanged; the current
    product contract has no user-facing manual PAUSE control. */
 
-const STARTUP_REVISION = '20260923-r1672-photoreal-stable-60fps-production';
+const STARTUP_REVISION = '20260923-r1675-final-r1674-intro-paths-photoreal-60fps';
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
