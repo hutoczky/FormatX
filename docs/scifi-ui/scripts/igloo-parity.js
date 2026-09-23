@@ -228,7 +228,7 @@
     './scripts/organism-master-sync.js?v=20260802-master-sync-1',
     './scripts/formatx-audio-repair.js?v=20260728-ambient-score-v5',
     './scripts/organism-core-interaction.js?v=20260730-core-interaction-1',
-    './scripts/synaptic-thought-genome.js?v=20260811-current-host-v2',
+    './scripts/synaptic-thought-genome.js?v=20260923-r1666-deterministic-fingerprint-submit',
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
     './scripts/formatx-mobile-unified.js?v=20260920-r609-semantic-mobile-surface',
     './scripts/formatx-infinite-scroll.js?v=20260820-reference-loop-r246',
