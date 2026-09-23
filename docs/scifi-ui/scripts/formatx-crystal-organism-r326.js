@@ -180,11 +180,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = auditMode ? 8 : software ? 10 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 16 : 20;
-    const longitudeSegments = auditMode ? 14 : software ? 20 : constrainedMobile ? 22 : mobile ? 24 : constrained ? 32 : 40;
+    const latitudeSegments = auditMode ? 8 : software ? 8 : constrainedMobile ? 10 : mobile ? 12 : constrained ? 14 : 18;
+    const longitudeSegments = auditMode ? 14 : software ? 16 : constrainedMobile ? 18 : mobile ? 22 : constrained ? 28 : 36;
     const tendrilCount = auditMode ? 3 : software ? 3 : mobile ? 3 : 7;
-    const tendrilSegments = auditMode ? 5 : software ? 8 : constrainedMobile ? 8 : mobile ? 10 : constrained ? 18 : 26;
-    const tendrilSides = auditMode ? 3 : software ? 4 : mobile || constrained ? 4 : 7;
+    const tendrilSegments = auditMode ? 5 : software ? 6 : constrainedMobile ? 7 : mobile ? 8 : constrained ? 14 : 22;
+    const tendrilSides = auditMode ? 3 : software ? 3 : mobile || constrained ? 3 : 6;
     const sphere = [];
     const crystal = [];
     const sphereNormals = [];
@@ -1184,7 +1184,8 @@
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    let qualityScale=auditMode?1:(softwareRenderer ? .64 : (constrainedMobile ? .44 : (mobile ? .56 : (constrained ? .50 : .62))));
+    let qualityScale=auditMode?1:(softwareRenderer ? .58 : (constrainedMobile ? .40 : (mobile ? .50 : (constrained ? .46 : .58))));
+    const qualityCeiling=auditMode?1:(softwareRenderer?.64:(mobile?.68:(constrained?.70:.80)));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1429,10 +1430,10 @@
       }
 
       if(!auditMode){
-        const panicFrame=dt>20.5 || ms>10.8;
+        const panicFrame=dt>18.8 || ms>9.2;
         if(panicFrame && now-lastQualityAdjust>24){
           const previous=qualityScale;
-          qualityScale=Math.max(.16,qualityScale-(dt>28||ms>14?.24:.16));
+          qualityScale=Math.max(.16,qualityScale-(dt>24||ms>12?.22:.13));
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
@@ -1449,10 +1450,10 @@
           /* R1660 — preserve the 16.67 ms presentation budget. Resolution
              and secondary optical detail yield before cadence. Recovery waits
              until the renderer has sustained real headroom for long enough. */
-          const renderPressure=renderAverage>6.8 || renderPeak>8.8;
-          const severeRenderPressure=renderAverage>8.2 || renderPeak>10.4;
-          const framePressure=frameIntervalAverage>16.45 || framePeak>17.2;
-          const severeFramePressure=frameIntervalAverage>16.82 || framePeak>18.8;
+          const renderPressure=renderAverage>5.8 || renderPeak>7.6;
+          const severeRenderPressure=renderAverage>7.2 || renderPeak>9.0;
+          const framePressure=frameIntervalAverage>16.38 || framePeak>16.95;
+          const severeFramePressure=frameIntervalAverage>16.72 || framePeak>17.85;
 
           if(severeFramePressure||severeRenderPressure){
             qualityScale=Math.max(.16,qualityScale-.20);
@@ -1464,8 +1465,8 @@
           }else{
             if(panicFrames>0)panicFrames-=1;
             else stableBudgetFrames+=1;
-            if(stableBudgetFrames>150 && frameIntervalAverage<16.35 && renderAverage<4.8 && renderPeak<6.4){
-              qualityScale=Math.min(.78,qualityScale+.002);
+            if(stableBudgetFrames>240 && frameIntervalAverage<16.08 && renderAverage<4.0 && renderPeak<5.4){
+              qualityScale=Math.min(qualityCeiling,qualityScale+.0015);
               stableBudgetFrames=0;
             }
           }
@@ -1494,6 +1495,7 @@
       root.dataset.fxNativeMagPerformanceR1660='panic-lod-single-frame-spike-guard-minimum-60fps-target';
       root.dataset.fxNativeMagPerformanceR1670='lower-initial-resolution-recovery-only-after-sustained-60fps-headroom';
       root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';
+      root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
     }
