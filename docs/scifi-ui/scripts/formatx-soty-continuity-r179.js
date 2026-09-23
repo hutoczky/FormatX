@@ -235,6 +235,17 @@ function requestPaint(frames=1,needsLayout=false){
 function start(){
   chooseMode();
   if(!ensureField()||!discover()){root.dataset.fxSotyContinuityR179='incomplete-dom';return;}
+  const cinematicOwner=document.querySelector('script[data-fx-cinematic-journey-r536]');
+  if(cinematicOwner){
+    field?.remove?.();
+    field=null;aurora=null;carrier=null;
+    root.dataset.fxSotyContinuityR179='ready';
+    root.dataset.fxSotyVersionR179=VERSION;
+    root.dataset.fxSotySystemR179='core-nerves-organs-heart-skeleton-beacon';
+    root.dataset.fxSotySchedulingR263='delegated-r536-zero-parallel-scroll-paint';
+    root.dataset.fxSotyPerformanceR1646='semantic-compatibility-only-r536-visual-owner';
+    return;
+  }
   bindInput();
   activeChangedAt=performance.now();
   root.dataset.fxSotyContinuityR179='ready';
