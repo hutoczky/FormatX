@@ -21,7 +21,7 @@ html body.living-architecture {
     radial-gradient(820px 1360px at 50% 42%,rgba(24,53,59,.145),transparent 69%),
     radial-gradient(620px 760px at 50% 22%,rgba(106,160,169,.035),transparent 70%),
     linear-gradient(180deg,#020507 0%,#08171d 24%,#051218 59%,#010305 100%)!important;
-  background-attachment:fixed!important;
+  background-attachment:scroll!important;
 }
 
 html:root:root:root:root:root:root:root:root:root body.living-architecture::before {
@@ -1117,3 +1117,39 @@ body.living-architecture :is(
   }
 }
 /* production-r1670-60fps-compositor-headroom */
+
+
+/* R1677 — scroll paint headroom.
+   The habitat itself is already owned by fixed compositor layers. Repainting a
+   full-page fixed CSS background during every scroll frame is redundant.
+   During active scroll, suspend decorative fixed layers completely; readable
+   content and the native MAG remain untouched. */
+html[data-fx-scroll-budget-r1660="fast"] body.living-architecture::before,
+html[data-fx-scroll-budget-r1660="fast"] body.living-architecture::after,
+html[data-fx-scroll-budget-r1660="fast"] .fx-living-habitat-r1530{
+  visibility:hidden!important;
+  opacity:0!important;
+  animation:none!important;
+  filter:none!important;
+  transform:none!important;
+}
+
+html[data-fx-scroll-budget-r1660="fast"] body.living-architecture{
+  background:
+    linear-gradient(180deg,#010306 0%,#041017 23%,#02090e 58%,#010305 100%)!important;
+  background-attachment:scroll!important;
+}
+
+html[data-fx-scroll-budget-r1660="fast"] body.living-architecture :is(
+  .topbar,.hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,
+  .payment,.payment-console,.system-grid article,.release-card,
+  .fx-category-grid > article,.fx-origin-proof,.fx-origin-proof article,
+  .fx-award-proof,#user-feedback,.fx-plan-qr-card,.fx-platform-card,
+  .fx-organism-console,.fx-thought-genome-disclosure
+){
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  filter:none!important;
+  box-shadow:none!important;
+}
+/* production-r1677-scroll-paint-headroom */
