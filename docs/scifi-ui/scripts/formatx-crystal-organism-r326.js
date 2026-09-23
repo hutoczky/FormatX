@@ -101,6 +101,7 @@
   root.dataset.fxNativeMagPerformanceR1606 = 'aggressive-16-67ms-governor-hardware-adaptive-resolution';
   root.dataset.fxNativeMagPerformanceR1617 = 'preemptive-16-67ms-budget-resolution-before-cadence-drop';
   root.dataset.fxNativeMagPerformanceR1620 = 'hard-60hz-ceiling-preemptive-resolution-13ms-render-headroom';
+  root.dataset.fxNativeMagPerformanceR1622 = 'refresh-divisor-never-intentionally-below-60fps-adaptive-quality';
   root.dataset.fxNativeMagVisualR1619 = 'readable-smoky-obsidian-broad-softbox-midtones-single-pass';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
@@ -1159,7 +1160,8 @@
     let rotationX=-.090,rotationY=-.235,rotationZ=.024;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
-    let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60,lastPresentedAt=0;
+    let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
+    let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
     let qualityScale=auditMode?1:(softwareRenderer ? .62 : (constrainedMobile ? .58 : (mobile ? .68 : (constrained ? .70 : .82))));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1450,18 +1452,27 @@
 
     function frame(now){
       raf=0;if(blocked())return;
-      /* R1620 — hard 60 Hz render ceiling. High-refresh displays keep their
-         compositor cadence, but the MAG never burns 120/144 WebGL frames.
-         Resolution degrades before a 16.67 ms presentation deadline is missed. */
-      if(!auditMode && lastPresentedAt>0){
-        const elapsed=now-lastPresentedAt;
-        if(elapsed<15.7){
-          root.dataset.fxCoreRenderCeilingR1620='60hz-capped';
-          queueFrame(Math.max(1,15.7-elapsed));
+      /* R1622 — refresh-divisor scheduler.
+         Use a stable display divisor that never intentionally targets below
+         60 FPS: 60->60, 120->60, 144->72, 165->82.5, 180->60, 240->60.
+         This avoids the 144 Hz / 48 FPS failure mode of a fixed 16.67 ms gate. */
+      if(!auditMode){
+        if(schedulerLastFrame>0){
+          const rawRefresh=Math.max(2,Math.min(40,now-schedulerLastFrame));
+          schedulerRefreshMs=schedulerRefreshMs*.82+rawRefresh*.18;
+        }
+        schedulerLastFrame=now;
+        const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
+        const divisor=Math.max(1,Math.floor(estimatedHz/60));
+        schedulerTick=(schedulerTick+1)%divisor;
+        root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);
+        root.dataset.fxCoreRenderDivisorR1622=String(divisor);
+        root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        if(divisor>1 && schedulerTick!==0){
+          raf=requestAnimationFrame(frame);
           return;
         }
       }
-      lastPresentedAt=now;
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
