@@ -3,7 +3,8 @@
 
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
-  const REVISION = 'photoreal-single-living-organism-r1711';
+  const REVISION = 'living-luminous-electric-crystal-r454';
+  const VISUAL_REVISION_R1713 = 'photoreal-single-living-organism-r1713';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
@@ -119,6 +120,7 @@
   root.dataset.fxNativeMagInteractionR1701 = 'all-site-input-plus-cinematic-scene-physical-response';
   root.dataset.fxNativeMagPerformanceR1701 = 'quality-first-60fps-animation-budget-stricter-spike-guard';
   root.dataset.fxNativeMagVisualR1711 = 'single-photoreal-living-organism-fixed-body-physical-optics-responsive-tendrils';
+  root.dataset.fxNativeMagCanonicalCompatibilityR1714='r454-api-revision-r1713-visual-runtime';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
