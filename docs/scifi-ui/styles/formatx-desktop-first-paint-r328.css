@@ -340,3 +340,31 @@
   }
 }
 /* production-r1647-desktop-controls-final-first-frame */
+
+
+/* R1650 — keep the canonical sound control visible without restoring the old
+   wide control carrier. All three controls live in the same 54px vertical rail. */
+@media (min-width:901px) {
+  html:root:root:root:root:root:root body.living-architecture
+  #hero .fx-reference-controls-r204 > .fx-three-sound {
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0 0 12px!important;
+    padding:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+  }
+}
+/* production-r1650-desktop-sound-control-visible-no-cls */
