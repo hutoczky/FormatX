@@ -1668,18 +1668,20 @@
         this.renderAverage=this.renderAverage
           ? this.renderAverage*.84+renderCost*.16
           : renderCost;
-        if(time-this.lastQualityAdjust>260){
+        if(time-this.lastQualityAdjust>180){
           const previous=this.qualityScale;
-          const framePressure=this.frameIntervalAverage>17.6;
-          const severeFramePressure=this.frameIntervalAverage>19.2;
-          const renderPressure=this.renderAverage>12.2;
-          const severeRenderPressure=this.renderAverage>14.0;
+          /* R1617 — preserve the cinematic at native 60 Hz where the display
+             can present it. Reduce render scale and secondary detail first. */
+          const framePressure=this.frameIntervalAverage>16.82;
+          const severeFramePressure=this.frameIntervalAverage>17.55;
+          const renderPressure=this.renderAverage>10.6;
+          const severeRenderPressure=this.renderAverage>12.4;
           if(severeFramePressure||severeRenderPressure){
-            this.qualityScale=Math.max(.36,this.qualityScale-.12);
+            this.qualityScale=Math.max(.34,this.qualityScale-.14);
           }else if(framePressure||renderPressure){
-            this.qualityScale=Math.max(.36,this.qualityScale-.065);
-          }else if(this.frameIntervalAverage<16.95&&this.renderAverage<8.2){
-            this.qualityScale=Math.min(1,this.qualityScale+.015);
+            this.qualityScale=Math.max(.34,this.qualityScale-.075);
+          }else if(this.frameIntervalAverage<16.74&&this.renderAverage<7.5){
+            this.qualityScale=Math.min(1,this.qualityScale+.010);
           }
           if(Math.abs(previous-this.qualityScale)>.001){
             this.lastQualityAdjust=time;
@@ -1825,6 +1827,7 @@
   document.documentElement.dataset.fxMagBirthPerformanceR1541='superseded-by-r1600-adaptive-60fps';
   document.documentElement.dataset.fxMagBirthPerformanceR1600='60fps-target-adaptive-resolution-quality-first-frame-budget';
   document.documentElement.dataset.fxMagBirthPerformanceR1606='16-67ms-frame-budget-aggressive-adaptive-resolution';
+  document.documentElement.dataset.fxMagBirthPerformanceR1617='preemptive-16-67ms-budget-secondary-detail-then-resolution';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
   document.documentElement.dataset.fxMagBirthProofR1560='smooth-biogenic-shell-no-white-facet-overlay-obsidian-seed-handoff';
