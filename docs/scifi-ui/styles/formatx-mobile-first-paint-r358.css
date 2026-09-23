@@ -766,3 +766,104 @@
   }
 }
 /* production-r1637-hide-legacy-status-first-paint */
+
+
+/* R1640 — hard mobile viewport containment.
+   No decorative/proof/runtime descendant may widen the document. The visual
+   layers can still paint inside their local panels, but horizontal document
+   geometry remains exactly one viewport wide. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html,
+  html body {
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow-x:clip!important;
+  }
+
+  html body.living-architecture > :is(
+    header.topbar,
+    main#main-content,
+    footer.site-footer
+  ),
+  html body.living-architecture main#main-content > * {
+    box-sizing:border-box!important;
+    min-width:0!important;
+    max-width:100vw!important;
+  }
+
+  html body.living-architecture main#main-content {
+    width:100%!important;
+    overflow-x:clip!important;
+    contain:inline-size;
+  }
+
+  html body.living-architecture main#main-content > :is(
+    section.scene,
+    .fx-category-deck,
+    .fx-static-live-os,
+    .fx-origin-proof,
+    .fx-award-proof,
+    #user-feedback
+  ) {
+    min-width:0!important;
+    max-width:100%!important;
+    overflow-x:clip!important;
+  }
+
+  html body.living-architecture :is(
+    .section-heading,
+    .flow,
+    .flow-chapters,
+    .cards,
+    .pricing,
+    .payment,
+    .payment-console,
+    .system-grid,
+    .release-layout,
+    .fx-category-grid,
+    .fx-proof-grid,
+    .fx-feedback-ratings,
+    .fx-static-live-os__grid
+  ) {
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  html body.living-architecture :is(
+    .section-heading,
+    .flow-chapters article,
+    .card,
+    .price-card,
+    .payment,
+    .payment-console,
+    .system-grid article,
+    .release-card,
+    .fx-category-grid > article,
+    .fx-origin-proof article,
+    .fx-award-proof article,
+    .fx-feedback-card
+  ) {
+    overflow-wrap:anywhere;
+  }
+
+  html body.living-architecture #system .marquee {
+    width:100%!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    contain:paint!important;
+  }
+
+  html body.living-architecture #system .marquee span {
+    max-width:none!important;
+    transform:translateZ(0);
+  }
+
+  html body.living-architecture .fx-c536-stage {
+    width:100vw!important;
+    max-width:100vw!important;
+    overflow:clip!important;
+    contain:strict!important;
+  }
+}
+/* production-r1640-mobile-viewport-hard-containment */
