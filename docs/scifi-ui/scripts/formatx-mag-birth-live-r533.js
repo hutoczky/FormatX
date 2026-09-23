@@ -963,7 +963,7 @@
     }
     const particleCadence=filmRenderer
       ? 0
-      : (filmRendererPromise?34:(MOBILE?34:16.67));
+      : 16.67;
     if(filmRenderer||!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
@@ -1008,6 +1008,7 @@
     ROOT.dataset.fxMagBirthBudgetR629=MOBILE?'mobile-adaptive-resolution-60hz-target':'desktop-adaptive-resolution-60hz-target';
     ROOT.dataset.fxMagBirthPerformanceR1622='refresh-divisor-never-intentionally-below-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1640='60fps-priority-three-owner-preemptive-quality-shedding';
+    ROOT.dataset.fxMagBirthPerformanceR1667='no-30fps-fallback-user-path-60fps-minimum-target';
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-zero-continuous-js-render-loop':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
