@@ -33,6 +33,12 @@
     addEventListener('focusin',()=>habitatInput('focus'),passive);
     addEventListener('formatx:languagechange',()=>habitatInput('language'),passive);
     addEventListener('formatx:cinematicscene',()=>habitatInput('section'),passive);
+    addEventListener('formatx:menustatechange',event=>habitatInput(event.detail?.open?'menu-open':'menu-close'),passive);
+    addEventListener('formatx:storychapter',()=>habitatInput('story'),passive);
+    addEventListener('formatx:organismpanelopen',()=>habitatInput('question'),passive);
+    addEventListener('formatx:organismresponse',()=>habitatInput('response'),passive);
+    addEventListener('formatx:open-live-os',()=>habitatInput('system-open'),passive);
+    addEventListener('formatx:loop',()=>habitatInput('loop'),passive);
     ROOT.dataset.fxLivingHabitatR1530='css-compositor-mobile-habitat';
     ROOT.dataset.fxLivingHabitatSchedulerR1603='zero-main-thread-mobile-compositor';
     ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-css':'mobile-css';
@@ -314,6 +320,12 @@
   addEventListener('focusin',()=>pulse('focus',.34),{passive:true});
   addEventListener('formatx:languagechange',()=>pulse('language',.44),{passive:true});
   addEventListener('formatx:cinematicscene',()=>pulse('section',.56),{passive:true});
+  addEventListener('formatx:menustatechange',event=>pulse(event.detail?.open?'menu-open':'menu-close',.48),{passive:true});
+  addEventListener('formatx:storychapter',()=>pulse('story',.52),{passive:true});
+  addEventListener('formatx:organismpanelopen',()=>pulse('question',.62),{passive:true});
+  addEventListener('formatx:organismresponse',()=>pulse('response',.68),{passive:true});
+  addEventListener('formatx:open-live-os',()=>pulse('system-open',.58),{passive:true});
+  addEventListener('formatx:loop',()=>pulse('loop',.74),{passive:true});
   addEventListener('formatx:coretouchpulse',()=>pulse('core-touch',1),{passive:true});
   document.addEventListener('formatx:magbirthcomplete',()=>pulse('intro-handoff',1),{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
@@ -331,5 +343,6 @@
   ROOT.dataset.fxLivingHabitatSchedulerR1643='scroll-settle-canvas-css-compositor-during-motion';
   ROOT.dataset.fxLivingHabitatSchedulerR1670='desktop-canvas-60hz-floor-high-refresh-divisor-zero-idle';
   ROOT.dataset.fxLivingHabitatInteractionR1695='pointer-touch-scroll-wheel-click-key-focus-language-section-physical-light-response';
+  ROOT.dataset.fxLivingHabitatInteractionR1701='all-site-input-menu-language-story-question-response-system-loop-physical-pulse-zero-idle';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
 })();
