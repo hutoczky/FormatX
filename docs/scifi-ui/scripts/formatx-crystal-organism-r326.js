@@ -685,7 +685,18 @@
       stage.remove();
       root.dataset.fxCrystalOrganismR326 = 'context-unavailable';
       root.dataset.fxCoreReal3d = 'context-unavailable';
-      dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'r326-webgl-unavailable',fallback:'none'}}));
+      root.dataset.fxCoreFallbackR1666 = 'semantic-live-os-command-restored';
+      const liveOsLauncher=document.querySelector('#hero [data-fx-live-os-launcher].fx-reference-liveos');
+      if(liveOsLauncher instanceof HTMLElement){
+        for(const [name,value] of [
+          ['display','inline-flex'],['visibility','visible'],['opacity','1'],
+          ['pointer-events','auto'],['position','relative'],['inset','auto'],
+          ['min-width','74px'],['width','auto'],['max-width','none'],
+          ['min-height','53px'],['height','53px'],['max-height','53px'],
+          ['overflow','visible']
+        ])liveOsLauncher.style.setProperty(name,value,'important');
+      }
+      dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'r326-webgl-unavailable',fallback:'semantic-live-os'}}));
       return;
     }
 
