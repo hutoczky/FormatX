@@ -110,6 +110,8 @@
   root.dataset.fxNativeMagVisualR1619 = 'readable-smoky-obsidian-broad-softbox-midtones-single-pass';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
+  root.dataset.fxNativeMagVisualR1690 = 'photoreal-ggx-obsidian-physical-lens-all-input-reactive-single-renderer';
+  root.dataset.fxNativeMagInteractionR1690 = 'pointer-touch-drag-scroll-wheel-click-key-focus-section-physical-response';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -778,6 +780,20 @@
       ${webgl2 ? 'out vec4 outColor;' : ''}
       float sat(float v){return clamp(v,0.,1.);}
       vec3 filmic(vec3 c){return 1.0-exp(-max(c,vec3(0.)));}
+      vec3 fresnelSchlick(float cosTheta,vec3 F0){
+        return F0+(1.0-F0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);
+      }
+      float distributionGGX(float NoH,float roughness){
+        float a=roughness*roughness;
+        float a2=a*a;
+        float d=(NoH*NoH)*(a2-1.0)+1.0;
+        return a2/max(3.14159265*d*d,.0002);
+      }
+      float geometrySchlickGGX(float NoV,float roughness){
+        float r=roughness+1.0;
+        float k=(r*r)/8.0;
+        return NoV/max(NoV*(1.0-k)+k,.0002);
+      }
       void main(){
         vec3 n=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
@@ -790,8 +806,11 @@
         float floorBounce=max(0.0,-n.y);
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,2.05);
-        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),88.0);
-        float keySoft=pow(max(dot(n,normalize(key+view)),0.0),5.6);
+        vec3 halfKey=normalize(key+view);
+        float NoV=max(dot(n,view),.001);
+        float NoH=max(dot(n,halfKey),0.0);
+        float keySpec=pow(NoH,88.0);
+        float keySoft=pow(NoH,5.6);
         float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),42.0);
         vec3 refl=reflect(-view,n);
         float softboxA=exp(-pow((refl.x+.28)/.58,2.0)-pow((refl.y-.34)/.74,2.0))*smoothstep(-.30,.44,refl.z);
@@ -811,6 +830,11 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
+        float microRoughness=mix(.16,.34,facetRand);
+        float microD=distributionGGX(NoH,microRoughness);
+        float microG=geometrySchlickGGX(NoV,microRoughness)*geometrySchlickGGX(max(ndl,.001),microRoughness);
+        vec3 microF=fresnelSchlick(max(dot(halfKey,view),0.0),vec3(.039,.041,.043));
+        vec3 microSpec=min(vec3(1.8),(microD*microG*microF)/max(4.0*NoV*max(ndl,.001),.001));
         float lift=sat(.140+ndl*.250+sideLight*.190+fillLight*.120);
         float facetTone=mix(.982,1.018,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
@@ -821,8 +845,9 @@
         mineral*=.955+.045*smokyDepth+.012*mineralGrain;
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
-        mineral+=vec3(.92,.90,.84)*keySpec*.105;
-        mineral+=vec3(.27,.28,.27)*keySoft*.055;
+        mineral+=vec3(.92,.90,.84)*keySpec*.074;
+        mineral+=microSpec*ndl*.22;
+        mineral+=vec3(.27,.28,.27)*keySoft*.045;
         mineral+=vec3(.52,.58,.59)*sideSpec*.096;
         mineral+=vec3(.69,.72,.69)*softboxA*.170;
         mineral+=vec3(.42,.47,.47)*softboxB*.110;
@@ -838,6 +863,8 @@
         mineral+=vec3(.090,.098,.096)*pow(planeKey,.72)*.27;
         mineral+=vec3(.052,.045,.039)*pow(planeFill,.82)*.14;
         mineral+=vec3(.003,.011,.013)*smokyDepth*(.30+.70*(1.0-facing));
+        vec3 mineralAbsorption=exp(-vec3(.34,.22,.16)*(0.18+0.44*smokyDepth)*(1.0-facing));
+        mineral*=mix(vec3(1.0),mineralAbsorption,.22);
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         mineral+=vec3(.032,.066,.072)*edgeTransmission*.54;
         float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
@@ -1714,16 +1741,53 @@
       scheduleSurfacePulse();
       schedule(1);
     }
+    let previousScrollY=scrollY;
     function onScroll(){
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
         scrollFrame=0;
+        const currentY=scrollY;
+        const velocity=clamp((currentY-previousScrollY)/120,-1,1);
+        previousScrollY=currentY;
         const range=Math.max(1,document.documentElement.scrollHeight-innerHeight);
-        targetSiteProgress=clamp(scrollY/range,0,1);
+        targetSiteProgress=clamp(currentY/range,0,1);
         root.dataset.fxCoreSiteProgress=targetSiteProgress.toFixed(3);
-        targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12);
+        targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
+        targetRotationY+=velocity*.016;
+        targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
         schedule(mobile?1:2);
       });
+    }
+
+    function globalPoint(event){
+      return {
+        x:clamp((((Number(event?.clientX)||innerWidth*.5)/Math.max(1,innerWidth))-.5)*2,-1,1),
+        y:clamp(-((((Number(event?.clientY)||innerHeight*.5)/Math.max(1,innerHeight))-.5)*2),-1,1)
+      };
+    }
+    function onAmbientMove(event){
+      if(event.pointerType==='touch')return;
+      const q=globalPoint(event);
+      tx=q.x*.72;ty=q.y*.72;
+      targetRotationY+=q.x*.0018;
+      targetRotationX=clamp(targetRotationX-q.y*.0012,-1.02,1.02);
+      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.055);
+      schedule(mobile?1:2);
+    }
+    function onAmbientWheel(event){
+      const impulse=clamp(event.deltaY/180,-1,1);
+      targetRotationY+=impulse*.018;
+      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.12);
+      targetBreath=Math.max(targetBreath,.34);
+      schedule(mobile?1:3);
+    }
+    function onAmbientKey(event){
+      if(event.repeat)return;
+      const horizontal=event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:0;
+      const vertical=event.key==='ArrowUp'?1:event.key==='ArrowDown'?-1:0;
+      targetRotationY+=horizontal*.055;
+      targetRotationX=clamp(targetRotationX+vertical*.040,-1.02,1.02);
+      boost(.66,mobile?2:4);
     }
     function signalShape(shape,source){
       if(performance.now()<shapeLockUntil)return;
@@ -1732,6 +1796,9 @@
 
     listen(hero,'pointermove',onMove,{passive:true});
     listen(hero,'pointerdown',onDown,{passive:true});
+    listen(window,'pointermove',onAmbientMove,{passive:true});
+    listen(window,'wheel',onAmbientWheel,{passive:true});
+    listen(window,'keydown',onAmbientKey,{passive:true});
     listen(hero,'pointerleave',onLeave,{passive:true});
     listen(window,'formatx:coreinteraction',onCoreInteraction,{passive:true});
     listen(window,'formatx:referencepause',onPause,{passive:true});
@@ -1967,7 +2034,7 @@
     root.dataset.fxCoreReferenceMaterial='dark-metal-ice-cyan-living-core-r614';
     root.dataset.fxCoreReferenceMaterialR669='gunmetal-silver-cyan-armored-living-pod';
     root.dataset.fxCoreReferenceMaterialR673='dark-gunmetal-local-cyan-optical-core';
-    root.dataset.fxCoreInteractionVisual='pointer-drag-tap-keyboard-scroll-site-state-r413';
+    root.dataset.fxCoreInteractionVisual='pointer-touch-drag-scroll-wheel-click-keyboard-focus-menu-language-section-site-state-r1690';
     root.dataset.fxCoreLivingBehavior='interaction-and-intermittent-native-electric-surface-r454';
     root.dataset.fxCoreSiteRole='primary-living-site-interface-r413';
     root.dataset.fxCoreContexts='1';
