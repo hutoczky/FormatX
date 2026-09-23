@@ -1008,3 +1008,53 @@ html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{
   visibility:visible;
 }
 /* production-r1546-cinematic-cls-prime */
+
+
+/* R1660 — frame-budget protection during fast scroll.
+   Keep content fully interactive, but temporarily remove expensive decorative
+   compositor work until scroll settles. Geometry and readable content never move. */
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-world,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-iris,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-track,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-scan,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-grain,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-flare{
+  transition:none!important;
+  filter:none!important;
+  box-shadow:none!important;
+}
+
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-world::before,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-world::after,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-iris::before,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-iris::after,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-grain,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-scan,
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-flare{
+  visibility:hidden!important;
+  opacity:0!important;
+}
+
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-world{
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+  opacity:.10!important;
+}
+
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-iris{
+  opacity:.08!important;
+}
+
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-anatomy{
+  visibility:hidden!important;
+  opacity:0!important;
+}
+
+html[data-fx-scroll-budget-r1660="fast"] body.living-architecture :is(
+  .card,.price-card,.payment,.payment-console,.system-grid article,
+  .release-card,.fx-category-grid > article,.fx-origin-proof article,
+  .fx-plan-qr-card,.fx-platform-card
+){
+  box-shadow:none!important;
+}
+/* production-r1660-fast-scroll-compositor-lite */
