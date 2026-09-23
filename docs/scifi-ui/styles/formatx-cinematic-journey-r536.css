@@ -1058,3 +1058,16 @@ html[data-fx-scroll-budget-r1660="fast"] body.living-architecture :is(
   box-shadow:none!important;
 }
 /* production-r1660-fast-scroll-compositor-lite */
+
+
+/* R1677 — active scroll has one job: preserve input/frame cadence.
+   The fixed cinematic atmosphere returns 120 ms after scrolling settles. */
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-stage{
+  visibility:hidden!important;
+  opacity:0!important;
+  contain:strict!important;
+}
+html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
+  visibility:visible;
+}
+/* production-r1677-zero-fixed-cinematic-paint */
