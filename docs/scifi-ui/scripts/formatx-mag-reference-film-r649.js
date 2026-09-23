@@ -185,8 +185,9 @@
 
     const grow=smooth((t-2.42)/.70);
     if(grow>.002){
-      const crystallise=smooth((t-8.25)/.82);
-      const R=42+grow*178-crystallise*30;
+      /* R1705 — maturation is biological, never a crystal/object swap. */
+      const maturity=smooth((t-7.45)/1.55),crystallise=0;
+      const R=(42+grow*178)*(1+.015*Math.sin(time*.0022));
       ctx.save();ctx.translate(cx,cy);
       if(crystallise<.72){
         const body=ctx.createRadialGradient(-R*.20,-R*.24,4,0,0,R*1.02);
@@ -196,7 +197,7 @@
         body.addColorStop(1,'rgba(4,7,9,.98)');
         ctx.fillStyle=body;
         ctx.beginPath();
-        ctx.ellipse(0,0,R,R*.92,Math.sin(time*.00012)*.025,0,TAU);
+        ctx.ellipse(-R*.025*maturity,R*.015*maturity,R*(1+.04*maturity),R*(.92-.025*maturity),Math.sin(time*.00012)*.025+.035*maturity,0,TAU);
         ctx.fill();
         ctx.strokeStyle='rgba(157,190,195,.20)';ctx.lineWidth=1.2;
         for(let i=0;i<7;i++){
@@ -292,6 +293,6 @@
   }
   window.FormatXMagReferenceFilmR649={
     attach,
-    revision:'r1601-adaptive-lite-60hz-physical-reference-fallback'
+    revision:'r1705-photoreal-single-living-organism-adaptive-60hz'
   };
 })();
