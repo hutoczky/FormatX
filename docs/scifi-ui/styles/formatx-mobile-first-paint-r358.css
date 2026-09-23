@@ -742,3 +742,27 @@
 /* production-r1634-mobile-first-final-header-geometry-lock */
 
 /* production-r1636-mobile-hero-final-geometry-lock */
+
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html body.living-architecture :is(
+    .fx-organism-status,
+    .fx-organism-actionbar,
+    .fx-organism-dialogue,
+    .fx-genome-launcher,
+    .fx-living-core-launcher,
+    .fx-premium-core-status,
+    .fx-organism-system-toggle,
+    .fx-organism-thought-trigger,
+    [data-fx-live-os-launcher]
+  ){
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    position:absolute!important;
+    max-width:0!important;
+    max-height:0!important;
+    overflow:hidden!important;
+  }
+}
+/* production-r1637-hide-legacy-status-first-paint */
