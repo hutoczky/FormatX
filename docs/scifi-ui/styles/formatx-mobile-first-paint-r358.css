@@ -215,6 +215,10 @@
     min-height:0!important;
     overflow:visible!important;
   }
+  html body.living-architecture #hero {
+    margin:0!important;
+    padding:0 0 56px!important;
+  }
 
   html body.living-architecture #hero>.hero-grid {
     position:relative!important;
@@ -233,12 +237,12 @@
     align-self:stretch!important;
     width:100%!important;
     max-width:100%!important;
-    height:clamp(350px,97.6vw,470px)!important;
-    min-height:clamp(350px,97.6vw,470px)!important;
-    max-height:470px!important;
-    margin:0 auto!important;
+    height:100vw!important;
+    min-height:100vw!important;
+    max-height:500px!important;
+    margin:0!important;
     padding:0!important;
-    overflow:hidden!important;
+    overflow:visible!important;
     isolation:isolate!important;
     transform:none!important;
     translate:none!important;
@@ -246,38 +250,32 @@
 
   html body.living-architecture #hero .hero-copy {
     order:2!important;
-    position:relative!important;
+    position:absolute!important;
     inset:auto!important;
-    display:grid!important;
+    display:block!important;
     box-sizing:border-box!important;
-    align-self:center!important;
-    width:calc(100% - 24px)!important;
+    width:1px!important;
     min-width:0!important;
-    max-width:700px!important;
-    height:auto!important;
+    max-width:1px!important;
+    height:1px!important;
     min-height:0!important;
-    max-height:none!important;
-    margin:0 auto 16px!important;
-    padding:clamp(24px,6vw,34px) clamp(20px,5.5vw,30px) clamp(26px,6.5vw,38px)!important;
-    border:1px solid rgba(118,221,255,.17)!important;
-    border-radius:24px!important;
-    overflow:visible!important;
-    clip:auto!important;
-    clip-path:none!important;
-    white-space:normal!important;
-    color:#eefaff!important;
-    background:radial-gradient(circle at 88% 8%,rgba(69,205,255,.075),transparent 34%),linear-gradient(148deg,rgba(5,27,42,.92),rgba(2,15,27,.94) 64%,rgba(3,12,23,.96))!important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.035),inset 0 0 34px rgba(59,199,255,.025),0 22px 70px rgba(0,0,0,.26)!important;
-    transform:none!important;
-    translate:none!important;
+    max-height:1px!important;
+    margin:-1px!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    overflow:hidden!important;
+    clip:rect(0 0 0 0)!important;
+    clip-path:inset(50%)!important;
+    white-space:nowrap!important;
     opacity:1!important;
     visibility:visible!important;
-    pointer-events:auto!important;
-    z-index:20!important;
+    pointer-events:none!important;
+    transform:none!important;
+    translate:none!important;
     animation:none!important;
     transition:none!important;
   }
-
   html body.living-architecture #hero .hero-copy>* {
     position:relative!important;
     inset:auto!important;
@@ -742,3 +740,5 @@
 /* production-r1631-mobile-header-size-lock */
 
 /* production-r1634-mobile-first-final-header-geometry-lock */
+
+/* production-r1636-mobile-hero-final-geometry-lock */
