@@ -9,7 +9,7 @@
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
 root.dataset.fxP0MotionSchedulerR490='armed-r1672';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260923-r1676-preemptive-60fps-headroom';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260923-r1678-software-mag-fastpath';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
