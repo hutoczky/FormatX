@@ -25,6 +25,7 @@ root.dataset.fxPerformancePolicyR1620='hard-60hz-webgl-ceiling-preemptive-resolu
 root.dataset.fxPerformancePolicyR1622='stable-refresh-divisor-never-intentionally-below-60fps';
 root.dataset.fxPerformancePolicyR1642='preemptive-headroom-quality-resolution-degrade-before-cadence';
 root.dataset.fxPerformancePolicyR1660='single-frame-panic-lod-global-minimum-60fps-target';
+root.dataset.fxPerformancePolicyR1661='scroll-never-mounts-deferred-enhancements-click-keyboard-only';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -45,7 +46,7 @@ if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239=
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
-const intentListeners=[['pointerdown',passive],['touchstart',passive],['wheel',passive],['scroll',passive],['keydown',false]];
+const intentListeners=[['click',false],['keydown',false]];
 let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,magRuntimeActivated=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
