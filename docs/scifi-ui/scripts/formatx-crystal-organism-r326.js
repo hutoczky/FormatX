@@ -325,10 +325,12 @@
         crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
+        const smoothWeight=software?.36:.68;
+        const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
-          smoothNormal[0]*.68+crystalNormal[0]*.32,
-          smoothNormal[1]*.68+crystalNormal[1]*.32,
-          smoothNormal[2]*.68+crystalNormal[2]*.32
+          smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
+          smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
+          smoothNormal[2]*smoothWeight+crystalNormal[2]*faceWeight
         ]);
         crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
@@ -1266,6 +1268,7 @@
     const geometry=buildOrganismGeometry(softwareRenderer);
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer?'software-lite-photographic':'hardware-full-photographic';
     root.dataset.fxCoreGeometryProofParityR1699='audit-and-production-share-hand-cut-mineral-silhouette';
+    root.dataset.fxNativeMagVisualR1700='software-faceted-depth-angle-hardware-smooth-photographic-obsidian';
     const buffers=geometry.arrays.map(()=>gl.createBuffer());
     const attributeNames=['aSphere','aCrystal','aSphereNormal','aCrystalNormal','aUv','aBary','aFacet'];
     const attributes=attributeNames.map(name=>gl.getAttribLocation(program,name));
@@ -1304,7 +1307,7 @@
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
     let morph=initialShape==='sphere'?1:0,targetMorph=morph;
-    let rotationX=-.090,rotationY=-.235,rotationZ=.024;
+    let rotationX=softwareRenderer?-.115:-.090,rotationY=softwareRenderer?-.385:-.235,rotationZ=.024;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
