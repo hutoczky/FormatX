@@ -797,6 +797,7 @@
     position: relative !important;
     display: grid !important;
     grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
     grid-template-areas: "copy space" "heading proof" !important;
     align-items: center !important;
     box-sizing: border-box !important;
@@ -1403,3 +1404,5 @@
 }
 
 /* production-r1631-stable-desktop-hero-reservation */
+
+/* production-r1634-final-hero-row-lock */
