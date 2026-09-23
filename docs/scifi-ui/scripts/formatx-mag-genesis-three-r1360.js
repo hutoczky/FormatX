@@ -60,7 +60,8 @@
       this.renderAverage=0;
       this.frameIntervalAverage=this.targetFrameMs;
       this.previousFrameTime=0;
-      this.qualityScale=this.lowPowerProfile?.30:(this.mobileProfile?.40:.54);
+      this.qualityScale=this.lowPowerProfile?.26:(this.mobileProfile?.36:.50);
+      this.qualityCeiling=this.lowPowerProfile?.44:(this.mobileProfile?.62:.74);
       this.lastQualityAdjust=0;
       this.renderPeak=0;
       this.framePeak=this.targetFrameMs;
@@ -121,7 +122,20 @@
       this.makeCellularLayer();
       this.makeMechanicalLayer();
       this.makeTentacles();
+      this.applyQualityTier(true);
       this.resize();
+    }
+
+    applyQualityTier(initial=false){
+      const secondary=this.lowPowerProfile||this.mobileProfile||this.qualityScale<.50;
+      const emergency=this.lowPowerProfile||this.qualityScale<.28;
+      if(this.particles)this.particles.visible=!secondary;
+      if(this.debris)this.debris.visible=!secondary;
+      if(this.chamber)this.chamber.visible=!emergency;
+      if(this.qualityScale<.34 && this.organicMembrane)this.organicMembrane.visible=false;
+      else if(this.organicMembrane)this.organicMembrane.visible=true;
+      document.documentElement.dataset.fxMagBirthQualityTierR1676=emergency?'emergency-60fps':secondary?'lean-60fps':'photoreal-60fps';
+      if(initial)document.documentElement.dataset.fxMagBirthStartupTierR1676=document.documentElement.dataset.fxMagBirthQualityTierR1676;
     }
 
     makeStudioEnvironment(){
@@ -177,25 +191,27 @@
       const key=new T.DirectionalLight(0xfffbf3,2.38);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
-      const rim=new T.PointLight(0xb8cfd1,3.05,12,2);
+      const rim=new T.PointLight(0xb8cfd1,this.mobileProfile||this.lowPowerProfile?1.72:3.05,12,2);
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
-      const bioticFill=new T.PointLight(0x7e787f,1.34,10,2);
-      bioticFill.position.set(-2.7,-.9,2.8);
-      this.scene.add(bioticFill);
-      const warmBounce=new T.PointLight(0xc9a681,.56,8,2);
-      warmBounce.position.set(2.4,2.1,1.1);
-      this.scene.add(warmBounce);
+      if(!this.mobileProfile&&!this.lowPowerProfile){
+        const bioticFill=new T.PointLight(0x7e787f,1.34,10,2);
+        bioticFill.position.set(-2.7,-.9,2.8);
+        this.scene.add(bioticFill);
+        const warmBounce=new T.PointLight(0xc9a681,.56,8,2);
+        warmBounce.position.set(2.4,2.1,1.1);
+        this.scene.add(warmBounce);
 
-      const softbox=new T.SpotLight(0xe8efec,3.62,15,Math.PI*.40,.96,1.45);
-      softbox.position.set(-4.5,5.6,6.2);
-      softbox.target.position.set(.25,.12,0);
-      this.scene.add(softbox,softbox.target);
+        const softbox=new T.SpotLight(0xe8efec,3.62,15,Math.PI*.40,.96,1.45);
+        softbox.position.set(-4.5,5.6,6.2);
+        softbox.target.position.set(.25,.12,0);
+        this.scene.add(softbox,softbox.target);
 
-      const edgeSoftbox=new T.SpotLight(0x93a7aa,2.16,13,Math.PI*.42,.97,1.58);
-      edgeSoftbox.position.set(4.8,1.5,4.1);
-      edgeSoftbox.target.position.set(-.18,-.08,.1);
-      this.scene.add(edgeSoftbox,edgeSoftbox.target);
+        const edgeSoftbox=new T.SpotLight(0x93a7aa,2.16,13,Math.PI*.42,.97,1.58);
+        edgeSoftbox.position.set(4.8,1.5,4.1);
+        edgeSoftbox.target.position.set(-.18,-.08,.1);
+        this.scene.add(edgeSoftbox,edgeSoftbox.target);
+      }
       this.coreLight=new T.PointLight(0x79dbe7,0,7,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
@@ -309,7 +325,7 @@
 
     makeParticles(){
       const T=this.THREE,r=this.rand;
-      const count=this.lowPowerProfile?40:(this.mobileProfile?64:144);
+      const count=this.lowPowerProfile?18:(this.mobileProfile?32:96);
       const pos=new Float32Array(count*3);
       const size=new Float32Array(count);
       for(let i=0;i<count;i++){
@@ -339,9 +355,10 @@
         emissive:0x06090a,emissiveIntensity:.04,
         transparent:true,opacity:.08,depthWrite:false
       });
-      const mesh=new T.InstancedMesh(geo,mat,8);
+      const debrisCount=this.lowPowerProfile?2:(this.mobileProfile?4:8);
+      const mesh=new T.InstancedMesh(geo,mat,debrisCount);
       const dummy=new T.Object3D();
-      for(let i=0;i<8;i++){
+      for(let i=0;i<debrisCount;i++){
         const a=r()*Math.PI*2, rr=1.55+r()*3.8, sc=.42+r()*1.8;
         dummy.position.set(Math.cos(a)*rr,(r()-.5)*4.3,-1.15+(r()-.5)*3.2);
         dummy.rotation.set(r()*3,r()*3,r()*3);
@@ -357,9 +374,9 @@
         createHelix(length=4.7,radius=.28,turns=4.1){
       const T=this.THREE;
       const group=new T.Group();
-      const seg=this.lowPowerProfile?30:(this.mobileProfile?40:68);
-      const tubeRadial=this.lowPowerProfile?5:(this.mobileProfile?6:10);
-      const auraRadial=this.lowPowerProfile?4:(this.mobileProfile?5:7);
+      const seg=this.lowPowerProfile?22:(this.mobileProfile?30:58);
+      const tubeRadial=this.lowPowerProfile?4:(this.mobileProfile?5:8);
+      const auraRadial=this.lowPowerProfile?3:(this.mobileProfile?4:6);
       const aPts=[],bPts=[],rungPairs=[],beadA=[],beadB=[];
       for(let i=0;i<=seg;i++){
         const u=i/seg;
@@ -450,7 +467,7 @@
         [.62,-2.18,-.82,1.56,.58,-.52,-.16]
       ];
       this.dnas=[];
-      for(const [x,y,z,rz,sc,rx,ry] of placements){
+      for(const [x,y,z,rz,sc,rx,ry] of placements.slice(0,this.lowPowerProfile?3:(this.mobileProfile?4:placements.length))){
         const h=this.createHelix(3.34,.220,3.18);
         h.position.set(x,y,z);
         h.rotation.set(rx,ry,rz);
@@ -1369,9 +1386,9 @@
       this.tentacleGlowMaterial=new T.MeshBasicMaterial({transparent:true,opacity:0});
       this.tentacleDashMaterial=new T.LineDashedMaterial({transparent:true,opacity:0});
       this.tentacles=[];
-      const count=this.lowPowerProfile?4:(this.mobileProfile?5:8);
-      const tendrilSegments=this.lowPowerProfile?24:(this.mobileProfile?30:50);
-      const tendrilRadial=this.lowPowerProfile?5:(this.mobileProfile?6:7);
+      const count=this.lowPowerProfile?3:(this.mobileProfile?4:7);
+      const tendrilSegments=this.lowPowerProfile?16:(this.mobileProfile?22:40);
+      const tendrilRadial=this.lowPowerProfile?4:(this.mobileProfile?5:6);
       for(let i=0;i<count;i++){
         const base=i/count*Math.PI*2+(r()-.5)*.16;
         const sign=i%2?1:-1;
@@ -1625,21 +1642,27 @@
       const renderStarted=performance.now();
       const t=clamp(r)*10;
       this.updateCamera(t,time);
-      this.updateDNA(t,time);
+      if(t<3.34)this.updateDNA(t,time);
+      else if(this.dnaGroup.visible)this.dnaGroup.visible=false;
       this.updateCore(t,time);
-      this.updateOrganic(t,time);
-      this.updateCells(t,time);
-      this.updateMechanical(t,time);
-      this.updateTentacles(t,time);
+      if(t>1.86&&t<8.72)this.updateOrganic(t,time);
+      else if(this.organicGroup.visible)this.organicGroup.visible=false;
+      if(t>5.00)this.updateMechanical(t,time);
+      else if(this.mechanicalGroup.visible)this.mechanicalGroup.visible=false;
+      if(t>4.95)this.updateTentacles(t,time);
+      else if(this.tentacleGroup.visible)this.tentacleGroup.visible=false;
+      this.cellGroup.visible=false;
 
-      if(this.chamber)this.chamber.rotation.z=Math.sin(time*.000025)*.0035;
-      this.particles.rotation.z=time*.000018;
-      this.particles.rotation.y=time*.000012;
-      if(this.debris){
+      if(this.chamber?.visible)this.chamber.rotation.z=Math.sin(time*.000025)*.0035;
+      if(this.particles?.visible){
+        this.particles.rotation.z=time*.000018;
+        this.particles.rotation.y=time*.000012;
+        this.particles.material.opacity=.31+.07*Math.sin(time*.00045);
+      }
+      if(this.debris?.visible){
         this.debris.rotation.y=time*.000018;
         this.debris.rotation.z=Math.sin(time*.00011)*.022;
       }
-      this.particles.material.opacity=.31+.07*Math.sin(time*.00045);
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
@@ -1676,18 +1699,16 @@
           : renderCost;
         this.renderPeak=Math.max(renderCost,this.renderPeak*.86);
         this.framePeak=Math.max(this.frameIntervalAverage,this.framePeak*.90);
-        const panicFrame=this.frameIntervalAverage>20.5||renderCost>10.8||this.framePeak>22;
+        const panicFrame=this.frameIntervalAverage>18.8||renderCost>9.0||this.framePeak>19.4;
         if(panicFrame && time-this.lastQualityAdjust>24){
           const previous=this.qualityScale;
-          this.qualityScale=Math.max(.16,this.qualityScale-(this.framePeak>28||renderCost>14?.24:.16));
+          this.qualityScale=Math.max(.14,this.qualityScale-(this.framePeak>24||renderCost>12?.22:.13));
           this.panicFrames=24;
           this.stableBudgetFrames=0;
           if(Math.abs(previous-this.qualityScale)>.001){
             this.lastQualityAdjust=time;
             this.resize();
-            if(this.particles)this.particles.visible=false;
-            if(this.debris)this.debris.visible=false;
-            if(this.qualityScale<.34&&this.chamber)this.chamber.visible=false;
+            this.applyQualityTier();
             document.documentElement.dataset.fxMagBirthGovernorR1660='panic-lod-one-frame-spike';
           }
         }else if(time-this.lastQualityAdjust>120){
@@ -1695,10 +1716,10 @@
           /* R1660 — intro quality yields before cadence. One bad presentation
              frame immediately drops resolution/secondary detail, while recovery
              requires sustained headroom to avoid oscillation. */
-          const framePressure=this.frameIntervalAverage>16.45||this.framePeak>17.2;
-          const severeFramePressure=this.frameIntervalAverage>16.82||this.framePeak>18.8;
-          const renderPressure=this.renderAverage>6.6||this.renderPeak>8.6;
-          const severeRenderPressure=this.renderAverage>8.0||this.renderPeak>10.2;
+          const framePressure=this.frameIntervalAverage>16.38||this.framePeak>16.95;
+          const severeFramePressure=this.frameIntervalAverage>16.72||this.framePeak>17.85;
+          const renderPressure=this.renderAverage>5.6||this.renderPeak>7.4;
+          const severeRenderPressure=this.renderAverage>7.0||this.renderPeak>8.9;
           if(severeFramePressure||severeRenderPressure){
             this.qualityScale=Math.max(.16,this.qualityScale-.20);
             this.stableBudgetFrames=0;
@@ -1709,19 +1730,15 @@
           }else{
             if(this.panicFrames>0)this.panicFrames-=1;
             else this.stableBudgetFrames+=1;
-            if(this.stableBudgetFrames>150&&this.frameIntervalAverage<16.35&&this.renderAverage<4.6&&this.renderPeak<6.2){
-              this.qualityScale=Math.min(.76,this.qualityScale+.002);
+            if(this.stableBudgetFrames>240&&this.frameIntervalAverage<16.08&&this.renderAverage<3.9&&this.renderPeak<5.2){
+              this.qualityScale=Math.min(this.qualityCeiling,this.qualityScale+.0015);
               this.stableBudgetFrames=0;
             }
           }
           if(Math.abs(previous-this.qualityScale)>.001){
             this.lastQualityAdjust=time;
             this.resize();
-            const secondary=this.qualityScale<.56;
-            const emergency=this.qualityScale<.34;
-            if(this.particles)this.particles.visible=!secondary;
-            if(this.debris)this.debris.visible=!secondary;
-            if(this.chamber)this.chamber.visible=!emergency;
+            this.applyQualityTier();
             document.documentElement.dataset.fxMagBirthGovernorR1627=
               this.qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
             document.documentElement.dataset.fxMagBirthGovernorR1660=
@@ -1825,7 +1842,7 @@
         engine,
         minimumFrameMs: 16.67,
         targetFps:60,
-        revision:'r1660-panic-lod-natural-obsidian-minimum-60fps-target'
+        revision:'r1676-phase-gated-photoreal-minimum-60fps-target'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1871,6 +1888,7 @@
   document.documentElement.dataset.fxMagBirthPerformanceR1633='mobile-startup-lod-dna-organic-cells-tendrils-before-first-frame';
   document.documentElement.dataset.fxMagBirthPerformanceR1640='preemptive-60fps-governor-lower-start-resolution-fast-quality-shedding';
   document.documentElement.dataset.fxMagBirthPerformanceR1670='lower-start-resolution-mobile-geometry-lod-stable-60fps-headroom';
+  document.documentElement.dataset.fxMagBirthPerformanceR1676='phase-gated-mobile-light-budget-preemptive-60fps-headroom';
   document.documentElement.dataset.fxMagBirthVisualR1672='brighter-photographic-material-response-subdued-physical-optic-no-extra-geometry';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
