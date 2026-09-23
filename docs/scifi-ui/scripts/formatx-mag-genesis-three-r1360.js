@@ -203,9 +203,11 @@
       const key=new T.DirectionalLight(0xfffbf3,2.38);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
+      this.keyLight=key;
       const rim=new T.PointLight(0xb8cfd1,this.mobileProfile||this.lowPowerProfile?1.72:3.05,12,2);
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
+      this.rimLight=rim;
       if(!this.mobileProfile&&!this.lowPowerProfile){
         const bioticFill=new T.PointLight(0x7e787f,1.34,10,2);
         bioticFill.position.set(-2.7,-.9,2.8);
@@ -218,11 +220,13 @@
         softbox.position.set(-4.5,5.6,6.2);
         softbox.target.position.set(.25,.12,0);
         this.scene.add(softbox,softbox.target);
+        this.softboxLight=softbox;
 
         const edgeSoftbox=new T.SpotLight(0x93a7aa,2.16,13,Math.PI*.42,.97,1.58);
         edgeSoftbox.position.set(4.8,1.5,4.1);
         edgeSoftbox.target.position.set(-.18,-.08,.1);
         this.scene.add(edgeSoftbox,edgeSoftbox.target);
+        this.edgeSoftboxLight=edgeSoftbox;
       }
       this.coreLight=new T.PointLight(0x79dbe7,0,7,2);
       this.coreLight.position.set(0,0,2.0);
@@ -694,6 +698,7 @@
         envMapIntensity:1.62,
         transparent:true,opacity:.985
       });
+      this.introLensMaterial=lensMat;
       const lens=new T.Mesh(new T.SphereGeometry(.142,72,42),lensMat);
       lens.scale.set(1,1,.30);
       lens.position.z=.337;
@@ -1468,7 +1473,10 @@
       this.interactionScroll=Math.max(-1,Math.min(1,(Number(detail.dy)||0)/140));
       this.interactionSpin+=((Number(detail.dx)||0)/160)+(kind==='wheel'?this.interactionScroll*.025:0);
       this.interactionKind=kind;
+      /* R1695 — interaction is expressed as physical inertia/material response,
+         never as an extra HUD layer or a second animation loop. */
       document.documentElement.dataset.fxMagBirthInteractionR1690=kind;
+      document.documentElement.dataset.fxMagBirthInteractionR1695='inertial-camera-light-lens-material-response';
     }
 
     targetWorld(){
@@ -1684,6 +1692,38 @@
       this.interactionScroll*=.90;
       this.interactionSpin*=.92;
 
+      /* R1695 — physically plausible input response. Existing lights move by
+         centimetres in scene-space and material parameters change only within
+         subtle photographic ranges. This costs no extra draw calls. */
+      const physicalImpulse=Math.min(1,this.interactionImpulse);
+      if(this.keyLight){
+        this.keyLight.position.x=-3.4+this.interactionX*.22;
+        this.keyLight.position.y=4.9-this.interactionY*.14;
+        this.keyLight.intensity=2.38+physicalImpulse*.10;
+      }
+      if(this.rimLight){
+        this.rimLight.position.x=3.4-this.interactionX*.16;
+        this.rimLight.position.y=-1.7+this.interactionY*.10;
+        this.rimLight.intensity=(this.mobileProfile||this.lowPowerProfile?1.72:3.05)+physicalImpulse*.08;
+      }
+      if(this.softboxLight){
+        this.softboxLight.position.x=-4.5+this.interactionX*.18;
+        this.softboxLight.intensity=3.62+physicalImpulse*.12;
+      }
+      if(this.edgeSoftboxLight){
+        this.edgeSoftboxLight.position.x=4.8-this.interactionX*.14;
+        this.edgeSoftboxLight.intensity=2.16+physicalImpulse*.09;
+      }
+      if(this.introLensMaterial){
+        this.introLensMaterial.roughness=.065+Math.abs(this.interactionY)*.010;
+        this.introLensMaterial.clearcoatRoughness=.025+Math.abs(this.interactionX)*.008;
+        this.introLensMaterial.envMapIntensity=1.62+physicalImpulse*.10;
+      }
+      if(this.mechEnergyMaterial){
+        this.mechEnergyMaterial.roughness=.060+Math.abs(this.interactionY)*.009;
+        this.mechEnergyMaterial.envMapIntensity=1.76+physicalImpulse*.11;
+      }
+
       if(this.previousFrameTime>0){
         const interval=Math.max(1,Math.min(50,time-this.previousFrameTime));
         this.frameIntervalAverage=this.frameIntervalAverage*.86+interval*.14;
@@ -1894,7 +1934,7 @@
         engine,
         minimumFrameMs: 16.67,
         targetFps:60,
-        revision:'r1690-photoreal-all-input-physical-response-60fps-single-loop'
+        revision:'r1695-photoreal-inertial-material-light-response-60fps-single-loop'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
@@ -1970,8 +2010,9 @@
 
   document.documentElement.dataset.fxMagBirthInteractionR1690='all-input-physical-response-single-render-loop';
   document.documentElement.dataset.fxMagBirthVisualR1691='physically-based-obsidian-bioceramic-glass-low-emission-natural-studio-response';
+  document.documentElement.dataset.fxMagBirthVisualR1695='photoreal-physical-inertia-light-lens-response-all-input-single-loop';
   window.FormatXMagGenesisThreeR1360={
     attach,
-    revision:'r1691-physically-based-photoreal-all-input-interaction-stable-60fps'
+    revision:'r1695-physically-based-photoreal-inertial-all-input-stable-60fps'
   };
 })();
