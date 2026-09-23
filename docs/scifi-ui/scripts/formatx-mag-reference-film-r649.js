@@ -253,10 +253,10 @@
   function attach(canvas,getTarget){
     if(!(canvas instanceof HTMLCanvasElement))return null;
     let ctx=null,dpr=1,sw=0,sh=0,scale=1,ox=0,oy=0;
-    let qualityScale=sw<900?.72:.82,renderAverage=0,lastQualityAdjust=0;
+    let qualityScale=innerWidth<900?.58:.68,renderAverage=0,lastQualityAdjust=0;
     function resize(){
       sw=innerWidth;sh=innerHeight;
-      const baseDpr=sw<900?.86:.96;
+      const baseDpr=sw<900?.80:.90;
       dpr=Math.min(devicePixelRatio||1,baseDpr*qualityScale);
       canvas.width=Math.max(1,Math.round(sw*dpr));canvas.height=Math.max(1,Math.round(sh*dpr));canvas.style.width=sw+'px';canvas.style.height=sh+'px';
       ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -275,8 +275,9 @@
       renderAverage=renderAverage?renderAverage*.82+cost*.18:cost;
       if(time-lastQualityAdjust>700){
         const previous=qualityScale;
-        if(renderAverage>15.0)qualityScale=Math.max(.48,qualityScale-.08);
-        else if(renderAverage<8.5)qualityScale=Math.min(.90,qualityScale+.025);
+        if(renderAverage>12.0)qualityScale=Math.max(.38,qualityScale-.12);
+        else if(renderAverage>8.0)qualityScale=Math.max(.38,qualityScale-.05);
+        else if(renderAverage<6.0)qualityScale=Math.min(.82,qualityScale+.015);
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=time;
           resize();
@@ -288,11 +289,11 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'adaptive-lite-60hz-physical-reference-r1601'
+      quality:'adaptive-lite-60hz-physical-reference-r1713'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
-    revision:'r1711-photoreal-single-living-organism-adaptive-60hz'
+    revision:'r1713-photoreal-single-living-organism-16-67ms-first'
   };
 })();
