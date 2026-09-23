@@ -4,6 +4,20 @@
    hero copy, MAG stage and controls from changing layout after first paint. */
 
 @media (min-width: 901px) {
+  /* R1631 — match the final desktop header carrier before any deferred owner
+     arrives. Absolute controls then cannot change the document flow later. */
+  html body.living-architecture .topbar {
+    position:relative!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+
   /* R1611: final r244 desktop state already hides this legacy action cluster.
      Match that state on the first paint so the topbar never shifts later. */
   html body.living-architecture .topbar > .header-actions {
@@ -242,3 +256,5 @@
 }
 
 /* production-r1611-zero-cls-desktop-header-actions */
+
+/* production-r1631-desktop-first-frame-geometry-lock */
