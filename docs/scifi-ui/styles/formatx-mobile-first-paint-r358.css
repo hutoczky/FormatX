@@ -79,9 +79,9 @@
     width:100%!important;
     min-width:0!important;
     max-width:100%!important;
-    min-height:72px!important;
-    height:72px!important;
-    max-height:72px!important;
+    min-height:70px!important;
+    height:70px!important;
+    max-height:70px!important;
     margin:0!important;
     padding:0!important;
     border-bottom:1px solid rgba(116,206,242,.18)!important;
@@ -94,30 +94,30 @@
   }
   html body.living-architecture .topbar>.brand {
     position:absolute!important;
-    top:10px!important;
-    left:14px!important;
+    top:18px!important;
+    left:18px!important;
     right:auto!important;
     bottom:auto!important;
     display:inline-flex!important;
     align-items:center!important;
-    gap:9px!important;
+    gap:12px!important;
     box-sizing:border-box!important;
     width:auto!important;
-    max-width:118px!important;
-    height:52px!important;
+    max-width:none!important;
+    height:34px!important;
     margin:0!important;
     overflow:hidden!important;
     transform:none!important;
     translate:none!important;
   }
   html body.living-architecture .topbar>.brand img {
-    width:38px!important;
-    min-width:38px!important;
-    max-width:38px!important;
-    height:38px!important;
-    min-height:38px!important;
-    max-height:38px!important;
-    flex:0 0 38px!important;
+    width:34px!important;
+    min-width:34px!important;
+    max-width:34px!important;
+    height:34px!important;
+    min-height:34px!important;
+    max-height:34px!important;
+    flex:0 0 34px!important;
   }
   html body.living-architecture .topbar>.brand small {
     display:none!important;
@@ -137,29 +137,29 @@
     z-index:12070!important;
   }
   html body.living-architecture .topbar .fx-reference-mag-button {
-    top:11px!important;
-    right:122px!important;
+    top:15px!important;
+    right:calc(clamp(16px,6.5vw,28px) + 113px)!important;
     display:grid!important;
     place-items:center!important;
     box-sizing:border-box!important;
     width:50px!important;
     min-width:50px!important;
     max-width:50px!important;
-    height:48px!important;
-    min-height:48px!important;
-    max-height:48px!important;
+    height:40px!important;
+    min-height:40px!important;
+    max-height:40px!important;
     padding:0!important;
   }
   html body.living-architecture .topbar .fx-language-toggle {
-    top:11px!important;
-    right:70px!important;
+    top:15px!important;
+    right:calc(clamp(16px,6.5vw,28px) + 58px)!important;
     display:inline-flex!important;
     align-items:center!important;
     justify-content:center!important;
     box-sizing:border-box!important;
-    width:44px!important;
-    min-width:44px!important;
-    max-width:44px!important;
+    width:42px!important;
+    min-width:42px!important;
+    max-width:42px!important;
     height:48px!important;
     min-height:48px!important;
     max-height:48px!important;
@@ -167,7 +167,7 @@
   }
   html body.living-architecture .topbar .fx-reference-menu-button {
     top:8px!important;
-    right:12px!important;
+    right:clamp(16px,6.5vw,28px)!important;
     box-sizing:border-box!important;
     width:50px!important;
     min-width:50px!important;
@@ -439,9 +439,9 @@
   html:root:root:root body.living-architecture .topbar {
     position:sticky!important;
     top:0!important;
-    height:72px!important;
-    min-height:72px!important;
-    max-height:72px!important;
+    height:70px!important;
+    min-height:70px!important;
+    max-height:70px!important;
     padding:0!important;
   }
   html:root:root:root body.living-architecture main#main-content section#hero.scene.hero {
@@ -733,3 +733,5 @@
 /* production-r1401-mobile-no-hero-ring */
 
 /* production-r1631-mobile-header-size-lock */
+
+/* production-r1634-mobile-first-final-header-geometry-lock */
