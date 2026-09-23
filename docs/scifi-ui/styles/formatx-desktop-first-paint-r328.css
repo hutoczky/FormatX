@@ -10,9 +10,9 @@
     position:relative!important;
     box-sizing:border-box!important;
     width:100%!important;
-    height:76px!important;
-    min-height:76px!important;
-    max-height:76px!important;
+    height:70px!important;
+    min-height:70px!important;
+    max-height:70px!important;
     margin:0!important;
     padding:0!important;
     overflow:visible!important;
@@ -258,3 +258,5 @@
 /* production-r1611-zero-cls-desktop-header-actions */
 
 /* production-r1631-desktop-first-frame-geometry-lock */
+
+/* production-r1634-desktop-first-final-geometry-lock */
