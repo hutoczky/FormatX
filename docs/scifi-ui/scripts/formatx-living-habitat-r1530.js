@@ -59,7 +59,7 @@
     return;
   }
 
-  let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,lastDrawAt=0;
+  let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,pointerSettleTimer=0,lastDrawAt=0;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
   let particles=[],filaments=[],glassArcs=[],mineralSpires=[];
@@ -134,7 +134,10 @@
     if(MOBILE.matches)return;
     targetX=(event.clientX/Math.max(1,width)-.5)*2;
     targetY=(event.clientY/Math.max(1,height)-.5)*2;
-    schedule();
+    /* R1710: pointer tracking stays compositor-cheap while the MAG owns 60 Hz.
+       Repaint the atmospheric backing store only after pointer movement settles. */
+    clearTimeout(pointerSettleTimer);
+    pointerSettleTimer=setTimeout(()=>{pointerSettleTimer=0;schedule();},96);
   }
 
   function radial(x,y,radius,stops){
@@ -310,12 +313,12 @@
   }
 
   addEventListener('resize',resize,{passive:true});
-  addEventListener('scroll',()=>{updateScroll();pulse('scroll',.32);},{passive:true});
+  addEventListener('scroll',()=>{updateScroll();habitatInput('scroll');},{passive:true});
   addEventListener('pointermove',pointer,{passive:true});
   addEventListener('pointerdown',()=>pulse('press',.82),{passive:true});
   addEventListener('pointerup',()=>pulse('release',.52),{passive:true});
   addEventListener('click',()=>pulse('click',.92),{passive:true});
-  addEventListener('wheel',()=>pulse('wheel',.44),{passive:true});
+  addEventListener('wheel',()=>habitatInput('wheel'),{passive:true});
   addEventListener('keydown',event=>{if(!event.repeat)pulse('key',.56);},{passive:true});
   addEventListener('focusin',()=>pulse('focus',.34),{passive:true});
   addEventListener('formatx:languagechange',()=>pulse('language',.44),{passive:true});
@@ -344,5 +347,6 @@
   ROOT.dataset.fxLivingHabitatSchedulerR1670='desktop-canvas-60hz-floor-high-refresh-divisor-zero-idle';
   ROOT.dataset.fxLivingHabitatInteractionR1695='pointer-touch-scroll-wheel-click-key-focus-language-section-physical-light-response';
   ROOT.dataset.fxLivingHabitatInteractionR1701='all-site-input-menu-language-story-question-response-system-loop-physical-pulse-zero-idle';
+  ROOT.dataset.fxLivingHabitatPerformanceR1710='static-backing-compositor-response-mag-60hz-priority';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
 })();
