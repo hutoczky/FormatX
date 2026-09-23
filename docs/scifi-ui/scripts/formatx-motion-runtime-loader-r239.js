@@ -26,6 +26,7 @@ root.dataset.fxPerformancePolicyR1622='stable-refresh-divisor-never-intentionall
 root.dataset.fxPerformancePolicyR1642='preemptive-headroom-quality-resolution-degrade-before-cadence';
 root.dataset.fxPerformancePolicyR1660='single-frame-panic-lod-global-minimum-60fps-target';
 root.dataset.fxPerformancePolicyR1710='16-67ms-first-mobile-lite-shader-zero-idle-compositor-relief';
+root.dataset.fxPerformancePolicyR1711='single-organism-fixed-anatomy-60hz-adaptive-resolution';
 root.dataset.fxPerformancePolicyR1711='single-organism-physiology-preserves-r1710-60fps-budget';
 root.dataset.fxPerformancePolicyR1661='scroll-never-mounts-deferred-enhancements-click-keyboard-only';
 root.dataset.fxPerformancePolicyR1676='phase-gated-intro-lighter-mobile-geometry-preemptive-60fps-headroom';
