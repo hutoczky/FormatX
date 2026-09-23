@@ -1028,11 +1028,11 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.142+ndl*.305+sideLight*.220+fillLight*.128);
+        float lift=sat(.205+ndl*.330+sideLight*.245+fillLight*.165);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0058,.0072,.0082),vec3(.041,.048,.050),lift);
+        vec3 col=mix(vec3(.0085,.0105,.0120),vec3(.058,.068,.071),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
@@ -1133,7 +1133,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.58),clamp(outAlpha,.70,1.0));
+        ${outputName}=vec4(filmic(col*3.08),clamp(outAlpha,.72,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1174,8 +1174,8 @@
         float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.14+ndl*.40+sideLight*.27);
-        vec3 col=mix(vec3(.0055,.0070,.0080),vec3(.044,.051,.053),lift);
+        float lift=sat(.20+ndl*.43+sideLight*.31);
+        vec3 col=mix(vec3(.008,.010,.012),vec3(.060,.069,.072),lift);
         col+=vec3(.72,.73,.68)*keySpec*.17;
         col+=vec3(.40,.46,.46)*sideSpec*.14;
         col+=vec3(.060,.090,.096)*fresnel*.29;
@@ -1227,7 +1227,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*2.72),clamp(alpha,.70,1.0));
+        ${outputName}=vec4(tone(col*3.18),clamp(alpha,.72,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1243,6 +1243,8 @@
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
     root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-adaptive-resolution-zero-idle';
     root.dataset.fxNativeMagVisualR1716='mobile-normal-topology-physical-shader-photoreal-60fps-first';
+    root.dataset.fxNativeMagVisualR1718='mobile-sharp-readable-midtone-photoreal-organism';
+    root.dataset.fxNativeMagQualityR1718='higher-resolution-floor-gradual-pressure-shedding';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
@@ -1349,15 +1351,19 @@
        The strict R1701 frame governor is still allowed to shed resolution on
        real pressure; we no longer begin every constrained phone permanently
        blurred before measuring its actual GPU budget. */
+    /* R1718 — mobile clarity floor. The previous ~0.46-0.73 effective
+       backing-store scale visibly pixelated the organism on high-DPI phones.
+       Start near native CSS resolution and shed quality gradually only under
+       measured pressure. */
     let qualityScale=softwareRenderer
-      ? (mobile?.60:.46)
-      : (mobile ? .62 : (auditMode ? .68 : (constrained ? .48 : .56)));
+      ? (mobile?.80:.48)
+      : (mobile ? .84 : (auditMode ? .70 : (constrained ? .50 : .58)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?.68:.56)
-      : (mobile?.72:(auditMode?.76:(constrained?.66:.78)));
+      ? (mobile?.94:.58)
+      : (mobile?.98:(auditMode?.78:(constrained?.68:.80)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.48:.20)
-      : (mobile?.34:.16);
+      ? (mobile?.66:.22)
+      : (mobile?.60:.18);
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1370,10 +1376,10 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=softwareRenderer ? (mobile?1.00:.82) : (auditMode ? .92 : constrainedMobile?1.06:mobile?1.18:constrained?1.04:1.42);
+      const baseCap=softwareRenderer ? (mobile?1.18:.82) : (auditMode ? .94 : constrainedMobile?1.18:mobile?1.30:constrained?1.04:1.42);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=softwareRenderer ? (mobile?300000:160000) : (auditMode ? 300000 : constrainedMobile?340000:mobile?470000:constrained?420000:820000);
+      const baseBudget=softwareRenderer ? (mobile?430000:160000) : (auditMode ? 320000 : constrainedMobile?560000:mobile?680000:constrained?420000:820000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1616,7 +1622,7 @@
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
-          qualityScale=Math.max(qualityFloor,qualityScale-(dt>20||ms>9?.22:.12));
+          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
@@ -1639,11 +1645,11 @@
           const severeFramePressure=frameIntervalAverage>16.42 || framePeak>17.05;
 
           if(severeFramePressure||severeRenderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-.20);
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.20));
             stableBudgetFrames=0;
             panicFrames=Math.max(panicFrames,12);
           }else if(framePressure||renderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-.09);
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.035:.09));
             stableBudgetFrames=0;
           }else{
             if(panicFrames>0)panicFrames-=1;
