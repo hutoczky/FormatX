@@ -462,7 +462,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = './scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1620-60hz-headroom';
+  const THREE_OWNER_SRC = './scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1627-hard-60fps-adaptive';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
