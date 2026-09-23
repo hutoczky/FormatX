@@ -1170,7 +1170,7 @@
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    let qualityScale=auditMode?1:(softwareRenderer ? .56 : (constrainedMobile ? .54 : (mobile ? .64 : (constrained ? .66 : .78))));
+    let qualityScale=auditMode?1:(softwareRenderer ? .48 : (constrainedMobile ? .46 : (mobile ? .58 : (constrained ? .60 : .72))));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1414,23 +1414,23 @@
            is kept around a 12.5 ms render ceiling to leave composition/input
            headroom. Short spikes are acted on immediately instead of waiting
            for an EMA to deteriorate. Quality/resolution yields before cadence. */
-        const renderPressure=renderAverage>8.8 || renderPeak>11.4;
-        const severeRenderPressure=renderAverage>10.8 || renderPeak>13.2;
-        const framePressure=frameIntervalAverage>16.72 || framePeak>18.2;
-        const severeFramePressure=frameIntervalAverage>17.25 || framePeak>21.0;
+        const renderPressure=renderAverage>7.4 || renderPeak>9.6;
+        const severeRenderPressure=renderAverage>9.0 || renderPeak>11.2;
+        const framePressure=frameIntervalAverage>16.55 || framePeak>17.5;
+        const severeFramePressure=frameIntervalAverage>16.95 || framePeak>19.4;
 
         if(severeFramePressure||severeRenderPressure){
-          qualityScale=Math.max(.24,qualityScale-.18);
+          qualityScale=Math.max(.18,qualityScale-.22);
           stableBudgetFrames=0;
         }else if(framePressure||renderPressure){
-          qualityScale=Math.max(.24,qualityScale-.09);
+          qualityScale=Math.max(.18,qualityScale-.11);
           stableBudgetFrames=0;
         }else{
           stableBudgetFrames+=1;
           /* Recovery is deliberately slow: never trade a stable 60 FPS
              cadence for a quick resolution increase. */
-          if(stableBudgetFrames>24 && frameIntervalAverage<16.69 && renderAverage<6.2 && renderPeak<8.2){
-            qualityScale=Math.min(1,qualityScale+.004);
+          if(stableBudgetFrames>90 && frameIntervalAverage<16.50 && renderAverage<5.5 && renderPeak<7.2){
+            qualityScale=Math.min(.82,qualityScale+.003);
             stableBudgetFrames=0;
           }
         }
@@ -1452,6 +1452,8 @@
       root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
       root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
       root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';
+      root.dataset.fxCoreReal3dTargetFpsR1642='60fps-preemptive-headroom-quality-before-cadence';
+      root.dataset.fxNativeMagPerformanceR1642='lower-start-resolution-fast-shedding-slow-recovery-zero-idle';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
     }
