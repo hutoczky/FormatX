@@ -100,6 +100,7 @@
   root.dataset.fxNativeMagPerformanceR1605 = 'proven-constrained-shader-software-lite-geometry-resolution';
   root.dataset.fxNativeMagPerformanceR1606 = 'aggressive-16-67ms-governor-hardware-adaptive-resolution';
   root.dataset.fxNativeMagPerformanceR1617 = 'preemptive-16-67ms-budget-resolution-before-cadence-drop';
+  root.dataset.fxNativeMagPerformanceR1620 = 'hard-60hz-ceiling-preemptive-resolution-13ms-render-headroom';
   root.dataset.fxNativeMagVisualR1619 = 'readable-smoky-obsidian-broad-softbox-midtones-single-pass';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
@@ -1158,8 +1159,8 @@
     let rotationX=-.090,rotationY=-.235,rotationZ=.024;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
-    let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
-    let qualityScale=auditMode?1:(softwareRenderer ? .72 : (constrainedMobile ? .66 : (mobile ? .76 : (constrained ? .78 : .90))));
+    let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60,lastPresentedAt=0;
+    let qualityScale=auditMode?1:(softwareRenderer ? .62 : (constrainedMobile ? .58 : (mobile ? .68 : (constrained ? .70 : .82))));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
@@ -1398,16 +1399,16 @@
         const previous=qualityScale;
         /* R1617 — defend the 16.67 ms budget before visible cadence drops.
            Resolution/effect quality yields first; frame cadence remains native rAF. */
-        const framePressure=frameIntervalAverage>16.82;
-        const severeFramePressure=frameIntervalAverage>17.55;
-        const renderPressure=renderAverage>10.8;
-        const severeRenderPressure=renderAverage>12.6;
+        const framePressure=frameIntervalAverage>16.74;
+        const severeFramePressure=frameIntervalAverage>17.10;
+        const renderPressure=renderAverage>9.6;
+        const severeRenderPressure=renderAverage>11.2;
         if(severeFramePressure||severeRenderPressure){
-          qualityScale=Math.max(.36,qualityScale-.14);
+          qualityScale=Math.max(.32,qualityScale-.16);
         }else if(framePressure||renderPressure){
-          qualityScale=Math.max(.36,qualityScale-.075);
-        }else if(frameIntervalAverage<16.74&&renderAverage<7.8){
-          qualityScale=Math.min(1,qualityScale+.010);
+          qualityScale=Math.max(.32,qualityScale-.085);
+        }else if(frameIntervalAverage<16.70&&renderAverage<6.8){
+          qualityScale=Math.min(1,qualityScale+.006);
         }
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=now;
@@ -1449,6 +1450,18 @@
 
     function frame(now){
       raf=0;if(blocked())return;
+      /* R1620 — hard 60 Hz render ceiling. High-refresh displays keep their
+         compositor cadence, but the MAG never burns 120/144 WebGL frames.
+         Resolution degrades before a 16.67 ms presentation deadline is missed. */
+      if(!auditMode && lastPresentedAt>0){
+        const elapsed=now-lastPresentedAt;
+        if(elapsed<15.7){
+          root.dataset.fxCoreRenderCeilingR1620='60hz-capped';
+          queueFrame(Math.max(1,15.7-elapsed));
+          return;
+        }
+      }
+      lastPresentedAt=now;
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
