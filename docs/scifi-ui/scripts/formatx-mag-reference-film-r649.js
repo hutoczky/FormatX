@@ -191,15 +191,24 @@
       ctx.save();ctx.translate(cx,cy);
       if(crystallise<.72){
         const body=ctx.createRadialGradient(-R*.20,-R*.24,4,0,0,R*1.02);
-        body.addColorStop(0,'rgba(184,202,202,.62)');
-        body.addColorStop(.28,'rgba(82,96,99,.92)');
-        body.addColorStop(.68,'rgba(30,37,40,.98)');
-        body.addColorStop(1,'rgba(4,7,9,.98)');
+        body.addColorStop(0,'rgba(214,232,231,.72)');
+        body.addColorStop(.24,'rgba(108,132,136,.96)');
+        body.addColorStop(.62,'rgba(34,48,53,.99)');
+        body.addColorStop(1,'rgba(5,10,13,.99)');
         ctx.fillStyle=body;
+        /* R1719: smooth tensioned living seed, matching the permanent MAG.
+           No egg/blob and no torn crystal silhouette. */
+        const breathe=1+.010*Math.sin(time*.0024);
+        ctx.scale(breathe,breathe);
         ctx.beginPath();
-        ctx.ellipse(-R*.025*maturity,R*.015*maturity,R*(1+.04*maturity),R*(.92-.025*maturity),Math.sin(time*.00012)*.025+.035*maturity,0,TAU);
+        ctx.moveTo(-R*.07,-R*1.02);
+        ctx.bezierCurveTo(R*.34,-R*.90,R*.67,-R*.52,R*.69,-R*.08);
+        ctx.bezierCurveTo(R*.72,R*.34,R*.48,R*.77,R*.08,R*.96);
+        ctx.bezierCurveTo(-R*.28,R*.88,-R*.61,R*.56,-R*.67,R*.12);
+        ctx.bezierCurveTo(-R*.72,-R*.30,-R*.48,-R*.72,-R*.07,-R*1.02);
+        ctx.closePath();
         ctx.fill();
-        ctx.strokeStyle='rgba(176,211,214,.30)';ctx.lineWidth=1.35;
+        ctx.strokeStyle='rgba(190,226,228,.38)';ctx.lineWidth=1.5;
         for(let i=0;i<7;i++){
           const a=i/7*TAU+.18;
           ctx.beginPath();ctx.moveTo(Math.cos(a)*R*.22,Math.sin(a)*R*.18);
@@ -223,26 +232,29 @@
         ctx.stroke();
       }
 
-      const lensR=Math.max(20,R*.18);
+      const lensR=Math.max(24,R*.245);
       const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
-      lens.addColorStop(0,'rgba(223,249,249,.82)');
-      lens.addColorStop(.16,'rgba(70,146,156,.78)');
-      lens.addColorStop(.48,'rgba(20,62,69,.96)');
-      lens.addColorStop(.76,'rgba(4,17,20,1)');
-      lens.addColorStop(1,'rgba(1,6,8,1)');
+      lens.addColorStop(0,'rgba(245,255,255,.98)');
+      lens.addColorStop(.12,'rgba(109,235,248,.96)');
+      lens.addColorStop(.36,'rgba(24,137,160,.98)');
+      lens.addColorStop(.68,'rgba(5,42,51,1)');
+      lens.addColorStop(1,'rgba(1,10,14,1)');
       ctx.fillStyle=lens;ctx.beginPath();ctx.arc(0,0,lensR,0,TAU);ctx.fill();
-      ctx.strokeStyle='rgba(126,166,171,.52)';ctx.lineWidth=3;ctx.stroke();
-      ctx.fillStyle='rgba(0,5,7,.92)';ctx.beginPath();ctx.arc(0,0,lensR*.34,0,TAU);ctx.fill();
+      ctx.strokeStyle='rgba(137,231,242,.72)';ctx.lineWidth=3.4;ctx.stroke();
+      ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(66,226,255,.72)';ctx.shadowBlur=18;
+      ctx.fillStyle='rgba(47,209,235,.34)';ctx.beginPath();ctx.arc(0,0,lensR*.36,0,TAU);ctx.fill();ctx.restore();
+      ctx.fillStyle='rgba(2,18,23,.90)';ctx.beginPath();ctx.arc(0,0,lensR*.23,0,TAU);ctx.fill();
       ctx.restore();
 
       if(t>5.65&&crystallise<.85){
         const tg=smooth((t-5.65)/1.0)*(1-crystallise);
-        ctx.save();ctx.strokeStyle='rgba(83,122,129,'+(.34*tg)+')';ctx.lineWidth=4;
-        for(let i=0;i<4;i++){
-          const a=i/4*TAU+.35;
+        ctx.save();ctx.strokeStyle='rgba(104,209,222,'+(.58*tg)+')';ctx.lineWidth=3.2;ctx.shadowColor='rgba(55,209,236,.54)';ctx.shadowBlur=7;
+        for(let i=0;i<5;i++){
+          const a=i/5*TAU+.28;
+          const sway=Math.sin(time*.0016+i*.91)*.08;
           ctx.beginPath();
-          ctx.moveTo(cx+Math.cos(a)*R*.72,cy+Math.sin(a)*R*.68);
-          ctx.bezierCurveTo(cx+Math.cos(a+.22)*R*1.2,cy+Math.sin(a+.22)*R*1.15,cx+Math.cos(a-.16)*R*1.65,cy+Math.sin(a-.16)*R*1.55,cx+Math.cos(a)*R*2.0,cy+Math.sin(a)*R*1.85);
+          ctx.moveTo(cx+Math.cos(a)*R*.66,cy+Math.sin(a)*R*.62);
+          ctx.bezierCurveTo(cx+Math.cos(a+.18+sway)*R*1.12,cy+Math.sin(a+.18+sway)*R*1.08,cx+Math.cos(a-.14-sway)*R*1.62,cy+Math.sin(a-.14-sway)*R*1.50,cx+Math.cos(a+sway*.45)*R*2.02,cy+Math.sin(a+sway*.45)*R*1.84);
           ctx.stroke();
         }
         ctx.restore();
@@ -294,6 +306,6 @@
   }
   window.FormatXMagReferenceFilmR649={
     attach,
-    revision:'r1718-photoreal-single-living-organism-mobile-sharp-bright'
+    revision:'r1719-healthy-living-biomechanical-birth-mobile-sharp'
   };
 })();
