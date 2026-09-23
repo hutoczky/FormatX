@@ -22,14 +22,15 @@ root.dataset.fxIntroAwareMagR1541='no-concurrent-intro-and-permanent-webgl';
 root.dataset.fxPerformancePolicyR1600='60hz-target-adaptive-resolution-effects-degrade-before-cadence';
 root.dataset.fxPerformancePolicyR1606='exclusive-mobile-intro-budget-then-permanent-mag-60hz';
 root.dataset.fxPerformancePolicyR1620='hard-60hz-webgl-ceiling-preemptive-resolution-headroom';
+root.dataset.fxPerformancePolicyR1622='stable-refresh-divisor-never-intentionally-below-60fps';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260923-r1620-hard-60hz-headroom';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260923-r1622-stable-display-divisor';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260923-r1620-hard-60hz-headroom';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260923-r1622-stable-display-divisor';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260921-r1520-visible-irregular-mineral';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow';
