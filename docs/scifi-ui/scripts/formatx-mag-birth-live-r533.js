@@ -469,7 +469,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1702-photographic-exposure-physical-dna';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1713-16-67ms-first-single-organism';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
