@@ -1,5 +1,4 @@
-@import url("./formatx-first-frame-stability-r283.css?v=20260823-r320-render-blocking");
-
+/* R1666: R283 is linked directly in index.html; no nested import/late geometry swap. */
 /* FormatX Event Horizon v3
    Deterministic first-load presentation. Motion is driven by one WAAPI controller;
    CSS supplies stable first-paint states and a no-JavaScript failsafe only. */
@@ -461,3 +460,5 @@ html.fx-intro-managed .fx-intro-overlay {
     filter: none;
   }
 }
+
+/* r1666-direct-first-frame-owner */
