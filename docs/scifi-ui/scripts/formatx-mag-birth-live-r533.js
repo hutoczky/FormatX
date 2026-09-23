@@ -23,6 +23,7 @@
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
   const EXIT_MS = 180;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
+  ROOT.dataset.fxMagBirthProductionPathR1674='absolute-scifi-ui-runtime-assets';
 
   let seen = false;
   try { seen = sessionStorage.getItem(KEY) === '1'; } catch (_) {}
@@ -467,7 +468,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = './scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1672-photographic-material-light';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1674-production-absolute-owner';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
