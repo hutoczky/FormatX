@@ -237,5 +237,15 @@ if(deferred.length){
   for(const [type,options] of intentListeners)addEventListener(type,onIntent,options);
   addEventListener('formatx:immersiveactivate',mountEnhancements,{passive:true});
   if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')mountEnhancements();
+
+  /* R1711 — the P0 scheduler can be loaded by the user's first key/click.
+     That event happened before this file existed, so consume the scheduler's
+     trusted launch latch instead of requiring a second user action. */
+  const inheritedIntent=String(root.dataset.fxP0MotionSchedulerR490||'');
+  if(/^(?:starting|loaded):user-(?:click|keydown|pointerdown|touchstart|wheel)-/.test(inheritedIntent)
+    || /^(?:starting|loaded):user-(?:click|keydown|pointerdown|touchstart|wheel)$/.test(inheritedIntent)){
+    root.dataset.fxMotionInheritedIntentR1711=inheritedIntent;
+    queueMicrotask(mountEnhancements);
+  }
 }
 }());
