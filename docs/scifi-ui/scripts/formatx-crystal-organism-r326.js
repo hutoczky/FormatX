@@ -104,6 +104,7 @@
   root.dataset.fxNativeMagPerformanceR1622 = 'refresh-divisor-never-intentionally-below-60fps-adaptive-quality';
   root.dataset.fxNativeMagPerformanceR1626 = 'hard-60fps-frame-budget-spike-guard-quality-before-cadence';
   root.dataset.fxNativeMagPerformanceR1632 = 'mobile-startup-lod-30-side-body-4-tendrils-compact-lens-60fps-first';
+  root.dataset.fxNativeMagPerformanceR1666 = 'mobile-24-side-3-tendril-compact-lens-lower-pixel-budget-60fps-headroom';
   root.dataset.fxNativeMagVisualR1619 = 'readable-smoky-obsidian-broad-softbox-midtones-single-pass';
   root.dataset.fxNativeMagPerformanceR1610 = 'non-overlapping-sweeps-true-zero-idle-gap';
   root.dataset.fxNativeMagVisualR1613 = 'natural-smoky-obsidian-midtones-small-integrated-smoked-dome-feathered-studio-reflections';
@@ -177,10 +178,10 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = auditMode ? 8 : software ? 10 : constrainedMobile ? 14 : mobile ? 16 : constrained ? 16 : 20;
-    const longitudeSegments = auditMode ? 14 : software ? 20 : constrainedMobile ? 28 : mobile ? 32 : constrained ? 32 : 40;
-    const tendrilCount = auditMode ? 3 : software ? 4 : mobile ? 4 : 7;
-    const tendrilSegments = auditMode ? 5 : software ? 10 : constrainedMobile ? 10 : mobile ? 13 : constrained ? 18 : 26;
+    const latitudeSegments = auditMode ? 8 : software ? 10 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 16 : 20;
+    const longitudeSegments = auditMode ? 14 : software ? 20 : constrainedMobile ? 22 : mobile ? 24 : constrained ? 32 : 40;
+    const tendrilCount = auditMode ? 3 : software ? 3 : mobile ? 3 : 7;
+    const tendrilSegments = auditMode ? 5 : software ? 8 : constrainedMobile ? 8 : mobile ? 10 : constrained ? 18 : 26;
     const tendrilSides = auditMode ? 3 : software ? 4 : mobile || constrained ? 4 : 7;
     const sphere = [];
     const crystal = [];
@@ -350,7 +351,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 24 : mobile ? 30 : constrained ? 44 : 60;
+      const sideCount = software ? 22 : mobile ? 24 : constrained ? 44 : 60;
       const ringDefs = [
         [.84,.045,.040,-.085,-.010,.090],
         [.77,.120,.090,-.135,-.006,.080],
@@ -566,7 +567,7 @@
 
     if(!auditMode){
       const centreX=.010,centreY=-.018;
-      const bezelInner=.096,bezelOuter=.132,bezelSteps=software?16:mobile?20:32,bezelZ=.535;
+      const bezelInner=.096,bezelOuter=.132,bezelSteps=software?14:mobile?16:32,bezelZ=.535;
       for(let side=0;side<bezelSteps;side+=1){
         const a=side/bezelSteps*Math.PI*2;
         const b=(side+1)/bezelSteps*Math.PI*2;
@@ -580,8 +581,8 @@
       const lensCenter=[centreX,centreY,.541];
       const lensRadius=.098;
       const lensDepth=.046;
-      const radialSteps=software?3:mobile?4:6;
-      const angularSteps=software?16:mobile?20:30;
+      const radialSteps=software?3:mobile?3:6;
+      const angularSteps=software?14:mobile?16:30;
       function lensVertex(radial,angle){
         const rr=lensRadius*radial;
         const nx=radial*Math.cos(angle);
@@ -1170,7 +1171,7 @@
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    let qualityScale=auditMode?1:(softwareRenderer ? .44 : (constrainedMobile ? .44 : (mobile ? .52 : (constrained ? .56 : .66))));
+    let qualityScale=auditMode?1:(softwareRenderer ? .42 : (constrainedMobile ? .42 : (mobile ? .48 : (constrained ? .56 : .66))));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1183,10 +1184,10 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=auditMode?1:softwareRenderer ? 0.58:constrainedMobile?1.00:mobile?1.22:constrained?1.04:1.42;
+      const baseCap=auditMode?1:softwareRenderer ? 0.54:constrainedMobile?.92:mobile?1.08:constrained?1.04:1.42;
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=auditMode?390000:softwareRenderer?105000:constrainedMobile?285000:mobile?470000:constrained?420000:820000;
+      const baseBudget=auditMode?390000:softwareRenderer?98000:constrainedMobile?235000:mobile?380000:constrained?420000:820000;
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1239,7 +1240,7 @@
       const next=clamp(Number(value)||0,0,1);
       const changed=Math.abs(next-targetMorph)>.001;
       targetMorph=next;
-      if(/mag-button|api|keyboard|core-tap/.test(source))shapeLockUntil=performance.now()+7600;
+      if(/mag-button|api|keyboard|core-tap/.test(source))shapeLockUntil=performance.now()+1400;
       if(reduced.matches)morph=targetMorph;
       publishShape(source);
       const cinematicBirth=/^r533-/.test(source);
