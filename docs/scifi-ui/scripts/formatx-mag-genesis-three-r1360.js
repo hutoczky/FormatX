@@ -308,7 +308,7 @@
 
     makeParticles(){
       const T=this.THREE,r=this.rand;
-      const count=this.lowPowerProfile?72:(this.mobileProfile?108:144);
+      const count=this.lowPowerProfile?40:(this.mobileProfile?64:144);
       const pos=new Float32Array(count*3);
       const size=new Float32Array(count);
       for(let i=0;i<count;i++){
@@ -356,9 +356,9 @@
         createHelix(length=4.7,radius=.28,turns=4.1){
       const T=this.THREE;
       const group=new T.Group();
-      const seg=this.lowPowerProfile?44:(this.mobileProfile?56:68);
-      const tubeRadial=this.lowPowerProfile?6:(this.mobileProfile?8:10);
-      const auraRadial=this.lowPowerProfile?5:(this.mobileProfile?6:7);
+      const seg=this.lowPowerProfile?30:(this.mobileProfile?40:68);
+      const tubeRadial=this.lowPowerProfile?5:(this.mobileProfile?6:10);
+      const auraRadial=this.lowPowerProfile?4:(this.mobileProfile?5:7);
       const aPts=[],bPts=[],rungPairs=[],beadA=[],beadB=[];
       for(let i=0;i<=seg;i++){
         const u=i/seg;
@@ -805,7 +805,9 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
 
-      const shellGeo=new T.SphereGeometry(1.38,this.deterministicFrame||this.highDetail?48:32,this.deterministicFrame||this.highDetail?30:20);
+      const shellWidth=this.deterministicFrame||this.highDetail?48:(this.lowPowerProfile?20:(this.mobileProfile?24:32));
+      const shellHeight=this.deterministicFrame||this.highDetail?30:(this.lowPowerProfile?12:(this.mobileProfile?16:20));
+      const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
       for(let i=0;i<shellPos.count;i++){
         const p=new T.Vector3().fromBufferAttribute(shellPos,i);
@@ -1086,7 +1088,7 @@
       const blobGeo=new T.IcosahedronGeometry(.090,2);
       const edgeGeo=new T.IcosahedronGeometry(.093,1);
       this.cells=[];
-      const count=42;
+      const count=this.lowPowerProfile?18:(this.mobileProfile?24:42);
       for(let i=0;i<count;i++){
         const phi=Math.acos(1-2*(i+.5)/count);
         const theta=Math.PI*(1+Math.sqrt(5))*i;
@@ -1366,8 +1368,8 @@
       this.tentacleGlowMaterial=new T.MeshBasicMaterial({transparent:true,opacity:0});
       this.tentacleDashMaterial=new T.LineDashedMaterial({transparent:true,opacity:0});
       this.tentacles=[];
-      const count=this.lowPowerProfile?4:(this.mobileProfile?6:8);
-      const tendrilSegments=this.lowPowerProfile?34:(this.mobileProfile?42:50);
+      const count=this.lowPowerProfile?4:(this.mobileProfile?5:8);
+      const tendrilSegments=this.lowPowerProfile?24:(this.mobileProfile?30:50);
       const tendrilRadial=this.lowPowerProfile?5:(this.mobileProfile?6:7);
       for(let i=0;i<count;i++){
         const base=i/count*Math.PI*2+(r()-.5)*.16;
@@ -1845,6 +1847,7 @@
   document.documentElement.dataset.fxMagBirthPerformanceR1617='preemptive-16-67ms-budget-secondary-detail-then-resolution';
   document.documentElement.dataset.fxMagBirthPerformanceR1620='60hz-ceiling-13ms-headroom-adaptive-resolution-secondary-detail-first';
   document.documentElement.dataset.fxMagBirthPerformanceR1627='hard-60fps-spike-guard-secondary-detail-resolution-before-cadence';
+  document.documentElement.dataset.fxMagBirthPerformanceR1633='mobile-startup-lod-dna-organic-cells-tendrils-before-first-frame';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
   document.documentElement.dataset.fxMagBirthProofR1560='smooth-biogenic-shell-no-white-facet-overlay-obsidian-seed-handoff';
