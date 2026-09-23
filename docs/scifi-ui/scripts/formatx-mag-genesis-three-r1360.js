@@ -60,7 +60,7 @@
       this.renderAverage=0;
       this.frameIntervalAverage=this.targetFrameMs;
       this.previousFrameTime=0;
-      this.qualityScale=this.lowPowerProfile?.46:(this.mobileProfile?.58:.74);
+      this.qualityScale=this.lowPowerProfile?.40:(this.mobileProfile?.52:.68);
       this.lastQualityAdjust=0;
       this.renderPeak=0;
       this.framePeak=this.targetFrameMs;
@@ -1680,28 +1680,28 @@
           /* R1627 — hard 60 FPS cinematic guard. The intro gives secondary
              particles, debris, chamber detail and resolution away before it
              gives away the 16.67 ms presentation cadence. */
-          const framePressure=this.frameIntervalAverage>16.72||this.framePeak>18.2;
-          const severeFramePressure=this.frameIntervalAverage>17.25||this.framePeak>21.0;
-          const renderPressure=this.renderAverage>8.6||this.renderPeak>11.2;
-          const severeRenderPressure=this.renderAverage>10.6||this.renderPeak>13.0;
+          const framePressure=this.frameIntervalAverage>16.55||this.framePeak>17.4;
+          const severeFramePressure=this.frameIntervalAverage>16.95||this.framePeak>19.2;
+          const renderPressure=this.renderAverage>7.2||this.renderPeak>9.4;
+          const severeRenderPressure=this.renderAverage>8.8||this.renderPeak>11.0;
           if(severeFramePressure||severeRenderPressure){
-            this.qualityScale=Math.max(.22,this.qualityScale-.18);
+            this.qualityScale=Math.max(.18,this.qualityScale-.22);
             this.stableBudgetFrames=0;
           }else if(framePressure||renderPressure){
-            this.qualityScale=Math.max(.22,this.qualityScale-.09);
+            this.qualityScale=Math.max(.18,this.qualityScale-.11);
             this.stableBudgetFrames=0;
           }else{
             this.stableBudgetFrames+=1;
-            if(this.stableBudgetFrames>24&&this.frameIntervalAverage<16.69&&this.renderAverage<6.0&&this.renderPeak<8.0){
-              this.qualityScale=Math.min(1,this.qualityScale+.004);
+            if(this.stableBudgetFrames>90&&this.frameIntervalAverage<16.50&&this.renderAverage<5.4&&this.renderPeak<7.0){
+              this.qualityScale=Math.min(.82,this.qualityScale+.003);
               this.stableBudgetFrames=0;
             }
           }
           if(Math.abs(previous-this.qualityScale)>.001){
             this.lastQualityAdjust=time;
             this.resize();
-            const secondary=this.qualityScale<.62;
-            const emergency=this.qualityScale<.44;
+            const secondary=this.qualityScale<.58;
+            const emergency=this.qualityScale<.38;
             if(this.particles)this.particles.visible=!secondary;
             if(this.debris)this.debris.visible=!secondary;
             if(this.chamber)this.chamber.visible=!emergency;
@@ -1712,6 +1712,7 @@
         document.documentElement.dataset.fxMagBirthTargetFpsR1600='60';
         document.documentElement.dataset.fxMagBirthTargetFpsR1602='60-real-frame-budget';
         document.documentElement.dataset.fxMagBirthTargetFpsR1627='60fps-hard-budget-secondary-detail-first';
+        document.documentElement.dataset.fxMagBirthTargetFpsR1640='60fps-priority-preemptive-quality-shedding';
         document.documentElement.dataset.fxMagBirthRenderMsR1600=this.renderAverage.toFixed(2);
         document.documentElement.dataset.fxMagBirthRenderPeakR1627=this.renderPeak.toFixed(2);
         document.documentElement.dataset.fxMagBirthFramePeakR1627=this.framePeak.toFixed(2);
@@ -1848,6 +1849,7 @@
   document.documentElement.dataset.fxMagBirthPerformanceR1620='60hz-ceiling-13ms-headroom-adaptive-resolution-secondary-detail-first';
   document.documentElement.dataset.fxMagBirthPerformanceR1627='hard-60fps-spike-guard-secondary-detail-resolution-before-cadence';
   document.documentElement.dataset.fxMagBirthPerformanceR1633='mobile-startup-lod-dna-organic-cells-tendrils-before-first-frame';
+  document.documentElement.dataset.fxMagBirthPerformanceR1640='preemptive-60fps-governor-lower-start-resolution-fast-quality-shedding';
   document.documentElement.dataset.fxMagBirthPerformanceR1547='hardware-three-software-reference-film-adaptive-cache-safe';
   document.documentElement.dataset.fxMagBirthProofR1554='deterministic-frame-buffer-retained-at-1x-for-real-visual-review';
   document.documentElement.dataset.fxMagBirthProofR1560='smooth-biogenic-shell-no-white-facet-overlay-obsidian-seed-handoff';
