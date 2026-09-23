@@ -119,3 +119,30 @@ html[data-fx-mag-birth-live="active"] body>.topbar{
   visibility:hidden!important;
 }
 /* production-r1618-stable-underlay-no-delayed-lcp-owner */
+
+
+/* R1620 — mobile first-paint performance without removing the cinematic.
+   The parser-visible FORMATX mark is a stable fixed child of the intro shell,
+   so it can become FCP/LCP immediately while the photoreal renderer warms.
+   It never participates in document layout and never moves at handoff. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html[data-fx-intro-prepaint-r1611="show"] #fx-mag-birth-prepaint-r1606 > .fxb-lcp-brand-r1603{
+    display:block!important;
+    visibility:visible!important;
+    opacity:.72!important;
+    animation:none!important;
+    top:max(18px,calc(env(safe-area-inset-top) + 14px))!important;
+    width:92vw!important;
+    transform:translateX(-50%)!important;
+    font-size:clamp(58px,18vw,84px)!important;
+    contain:layout paint style!important;
+  }
+  html[data-fx-mag-birth-live="active"] body > .fx-mag-birth-r533 > .fxb-lcp-brand-r1603{
+    display:block!important;
+    visibility:visible!important;
+    opacity:.18!important;
+    animation:none!important;
+    pointer-events:none!important;
+  }
+}
+/* production-r1620-mobile-early-contentful-prepaint */
