@@ -53,6 +53,7 @@
   const finePointer = matchMedia('(pointer:fine)').matches;
   let lastCoreKey = '';
   let paintSerial = 0;
+  let lastTelemetryAt = 0;
   const rootVarCache = new Map();
 
   function setRootVar(name,value){
@@ -277,10 +278,10 @@
 
     setRootVar('--fx-c536-progress',global.toFixed(4));
     setRootVar('--fx-c536-local',local.toFixed(4));
-    setRootVar('--fx-c536-energy',energy.toFixed(4));
-    setRootVar('--fx-c536-velocity',velocity.toFixed(4));
 
     if(detailFrame){
+      setRootVar('--fx-c536-energy',energy.toFixed(4));
+      setRootVar('--fx-c536-velocity',velocity.toFixed(4));
       setRootVar('--fx-c536-x',x.toFixed(2)+'%');
       setRootVar('--fx-c536-y',yy.toFixed(2)+'%');
       setRootVar('--fx-c536-track-y',trackY.toFixed(2)+'%');
@@ -302,8 +303,11 @@
 
     root.dataset.fxCinematicStyleBudgetR1648=fastScroll?'fast-scroll-half-detail-writes':'full-detail-deduplicated-writes';
 
-    root.dataset.fxCinematicProgressR536 = global.toFixed(3);
-    root.dataset.fxCinematicLocalR536 = local.toFixed(3);
+    if(!lastTelemetryAt || now-lastTelemetryAt>=120){
+      lastTelemetryAt=now;
+      root.dataset.fxCinematicProgressR536=global.toFixed(3);
+      root.dataset.fxCinematicLocalR536=local.toFixed(3);
+    }
     if(stage?.dataset.fxC536Primed!=='true'){
       stage.dataset.fxC536Primed='true';
       root.dataset.fxCinematicPrimingR1546='first-frame-position-locked';
@@ -432,6 +436,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
     root.dataset.fxCinematicJourneyPerformanceR1643='fast-scroll-zero-mag-burst-deferred-final-scene-handoff';
     root.dataset.fxCinematicJourneyPerformanceR1648='deduplicated-style-writes-half-detail-fast-scroll-60fps-headroom';
+    root.dataset.fxCinematicJourneyPerformanceR1649='telemetry-120ms-fast-scroll-two-critical-vars-per-frame';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
