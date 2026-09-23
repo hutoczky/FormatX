@@ -309,3 +309,28 @@ html body.living-architecture .topbar > .fx-language-toggle {
     max-height: 48px !important;
   }
 }
+
+
+/* R1625 — reserve the living habitat pseudo-layers from first paint.
+   The photographic background stylesheet may replace paint values later, but
+   it must never create/reposition a viewport-sized generated box after FCP. */
+html body.living-architecture::before,
+html body.living-architecture::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100dvh;
+  max-width:none;
+  max-height:none;
+  margin:0;
+  padding:0;
+  pointer-events:none;
+  transform:none;
+  transform-origin:center;
+  box-sizing:border-box;
+  contain:strict;
+}
+html body.living-architecture::before{z-index:-3}
+html body.living-architecture::after{z-index:-2}
+/* production-r1625-stable-habitat-pseudo-first-paint */
