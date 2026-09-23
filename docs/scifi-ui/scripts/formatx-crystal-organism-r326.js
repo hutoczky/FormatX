@@ -852,13 +852,13 @@
         float microG=geometrySchlickGGX(NoV,microRoughness)*geometrySchlickGGX(max(ndl,.001),microRoughness);
         vec3 microF=fresnelSchlick(max(dot(halfKey,view),0.0),vec3(.039,.041,.043));
         vec3 microSpec=min(vec3(1.8),(microD*microG*microF)/max(4.0*NoV*max(ndl,.001),.001));
-        float lift=sat(.140+ndl*.250+sideLight*.190+fillLight*.120);
+        float lift=sat(.215+ndl*.285+sideLight*.225+fillLight*.155);
         float facetTone=mix(.982,1.018,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.0058,.0075,.0085),vec3(.038,.046,.049),lift)*facetTone;
+        vec3 mineral=mix(vec3(.011,.014,.017),vec3(.070,.082,.086),lift)*facetTone;
         mineral*=.955+.045*smokyDepth+.012*mineralGrain;
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
@@ -872,7 +872,7 @@
         mineral+=vec3(.48,.36,.24)*studioRibbonB*.050;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
-        mineral+=vec3(.068,.096,.102)*fresnel*.30;
+        mineral+=vec3(.090,.155,.170)*fresnel*.38;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -901,9 +901,9 @@
            Its shading is driven by the same studio reflections as the obsidian. */
         vec2 lq=vec2(q.x,(q.y-.010)*1.08);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.066,.092,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.040,.066,lensD))*front;
-        float lensCore=(1.0-smoothstep(.013,.031,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.112,.155,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.070,.114,lensD))*front;
+        float lensCore=(1.0-smoothstep(.026,.060,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensLower=exp(-pow((lq.x-.026)/.052,2.0)-pow((lq.y+.052)/.036,2.0))*lensGlass;
@@ -955,14 +955,14 @@
         float lensInner=1.0-smoothstep(.055,.205,lensRadial);
         float lensRing=exp(-pow((lensRadial-.155)/.026,2.0));
         float lensHot=pow(sat(1.0-lensRadial/.17),5.0);
-        vec3 physicalLens=vec3(.0004,.0012,.0018);
-        physicalLens+=vec3(.003,.012,.016)*(.10+.12*uEnergy);
-        physicalLens+=vec3(.82,.87,.84)*softboxA*.095;
-        physicalLens+=vec3(.38,.44,.44)*sideSpec*.060;
-        physicalLens+=vec3(.065,.105,.115)*fresnel*.090;
-        physicalLens+=vec3(.006,.022,.027)*lensInner*.026;
-        physicalLens+=vec3(.015,.055,.064)*lensRing*(.025+.020*uEnergy);
-        physicalLens+=vec3(.64,.72,.70)*lensHot*.055;
+        vec3 physicalLens=vec3(.008,.026,.034);
+        physicalLens+=vec3(.018,.090,.112)*(.24+.30*uEnergy);
+        physicalLens+=vec3(.94,.99,.96)*softboxA*.18;
+        physicalLens+=vec3(.48,.58,.60)*sideSpec*.10;
+        physicalLens+=vec3(.12,.28,.34)*fresnel*.18;
+        physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
+        physicalLens+=vec3(.050,.36,.48)*lensRing*(.10+.10*uEnergy);
+        physicalLens+=vec3(.84,.98,1.00)*lensHot*(.18+.08*uEnergy);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -979,7 +979,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.60),clamp(outAlpha,.68,1.0));
+        ${outputName}=vec4(filmic(mineral*3.12),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1607,7 +1607,7 @@
       gl.disable(gl.CULL_FACE);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-      root.dataset.fxCorePassModelR1450='single-sculpted-black-glass-dark-dome-clear-front-tendrils-no-wings-r1598';
+      root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
