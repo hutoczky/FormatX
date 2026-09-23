@@ -41,6 +41,8 @@
   let cutTimer = 0;
   let refreshTimer = 0;
   let observer = null;
+  let geometryObserver = null;
+  let cutRaf = 0;
   let lastY = scrollY;
   let lastT = performance.now();
   let velocity = 0;
@@ -101,19 +103,31 @@
       const layer = anatomy(node,def.key);
       node.dataset.fxC536Code = def.code;
       if (layer instanceof HTMLElement) layer.dataset.fxC617Code = def.code;
-      next.push({def,node,index:next.length});
+      const rect=node.getBoundingClientRect();
+      next.push({
+        def,node,index:next.length,
+        top:rect.top+scrollY,
+        height:Math.max(1,rect.height),
+        bottom:rect.bottom+scrollY
+      });
     }
 
-    if (!next.length) return false;
-
-    scenes = next.sort((x,y) => {
-      const ax = x.node.getBoundingClientRect().top + scrollY;
-      const ay = y.node.getBoundingClientRect().top + scrollY;
-      return ax-ay;
-    }).map((item,index) => ({...item,index}));
-
-    if (active >= scenes.length) active = scenes.length-1;
+    if(!next.length)return false;
+    scenes=next.sort((x,y)=>x.top-y.top).map((item,index)=>({...item,index}));
+    if(active>=scenes.length)active=scenes.length-1;
+    root.dataset.fxCinematicGeometryR1624='cached-document-space';
     return true;
+  }
+
+  function cacheGeometry(reason='refresh'){
+    const y=scrollY;
+    for(const scene of scenes){
+      const rect=scene.node.getBoundingClientRect();
+      scene.top=rect.top+y;
+      scene.height=Math.max(1,rect.height);
+      scene.bottom=scene.top+scene.height;
+    }
+    root.dataset.fxCinematicGeometryReasonR1624=reason;
   }
 
   function updateHud(scene) {
@@ -139,12 +153,15 @@
     } catch (_) {}
   }
 
-  function cut() {
+  function cut(){
     root.classList.remove('fx-c536-cut');
-    void root.offsetWidth;
-    root.classList.add('fx-c536-cut');
-    clearTimeout(cutTimer);
-    cutTimer = setTimeout(() => root.classList.remove('fx-c536-cut'),760);
+    if(cutRaf)cancelAnimationFrame(cutRaf);
+    cutRaf=requestAnimationFrame(()=>{
+      cutRaf=0;
+      root.classList.add('fx-c536-cut');
+      clearTimeout(cutTimer);
+      cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),760);
+    });
   }
 
   function activate(index,reason='scroll') {
@@ -173,18 +190,19 @@
     }
   }
 
-  function pickActive() {
-    if (!scenes.length) return 0;
-    const anchor = innerHeight*.43;
-    let best = active;
-    let bestScore = Infinity;
-    scenes.forEach((scene,i) => {
-      const r = scene.node.getBoundingClientRect();
-      if (r.bottom < -innerHeight*.2 || r.top > innerHeight*1.25) return;
-      const center = clamp((r.top+r.bottom)*.5,-innerHeight,innerHeight*2);
-      const visible = Math.max(0,Math.min(innerHeight,r.bottom)-Math.max(0,r.top));
-      const score = Math.abs(center-anchor) - visible*.18;
-      if (score < bestScore) { bestScore = score; best = i; }
+  function pickActive(y=scrollY){
+    if(!scenes.length)return 0;
+    const viewportTop=y;
+    const viewportBottom=y+innerHeight;
+    const anchor=y+innerHeight*.43;
+    let best=active;
+    let bestScore=Infinity;
+    scenes.forEach((scene,i)=>{
+      if(scene.bottom<y-innerHeight*.2||scene.top>y+innerHeight*1.25)return;
+      const center=(scene.top+scene.bottom)*.5;
+      const visible=Math.max(0,Math.min(viewportBottom,scene.bottom)-Math.max(viewportTop,scene.top));
+      const score=Math.abs(center-anchor)-visible*.18;
+      if(score<bestScore){bestScore=score;best=i;}
     });
     return best;
   }
@@ -200,12 +218,12 @@
     lastY = y;
     lastT = now;
 
-    const next = pickActive();
-    if (next !== active || !root.dataset.fxCinematicSceneR536) activate(next,'scroll');
+    const next=pickActive(y);
+    if(next!==active||!root.dataset.fxCinematicSceneR536)activate(next,'scroll');
 
-    const current = scenes[active];
-    const r = current.node.getBoundingClientRect();
-    const local = clamp((innerHeight*.78-r.top)/Math.max(1,r.height+innerHeight*.42),0,1);
+    const current=scenes[active];
+    const currentTop=current.top-y;
+    const local=clamp((innerHeight*.78-currentTop)/Math.max(1,current.height+innerHeight*.42),0,1);
     const max = Math.max(1,document.documentElement.scrollHeight-innerHeight);
     const global = clamp(y/max,0,1);
     const energy = clamp(.14 + Math.sin(local*Math.PI)*.46 + Math.min(.08,Math.abs(velocity)*.05),.12,.68);
@@ -226,10 +244,11 @@
     root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
     root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
-    scenes.forEach(scene => {
-      const sr = scene.node.getBoundingClientRect();
-      const lp = clamp((innerHeight*.72-sr.top)/Math.max(1,sr.height+innerHeight*.36),0,1);
-      const se = scene.index===active ? clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84) : .07;
+    scenes.forEach(scene=>{
+      if(Math.abs(scene.index-active)>1)return;
+      const sceneTop=scene.top-y;
+      const lp=clamp((innerHeight*.72-sceneTop)/Math.max(1,scene.height+innerHeight*.36),0,1);
+      const se=scene.index===active?clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84):.07;
       scene.node.style.setProperty('--fx-c536-scene-local',lp.toFixed(4));
       scene.node.style.setProperty('--fx-c536-scene-energy',se.toFixed(4));
     });
