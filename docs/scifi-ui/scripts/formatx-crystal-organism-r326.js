@@ -113,6 +113,7 @@
   root.dataset.fxNativeMagVisualR1690 = 'photoreal-ggx-obsidian-physical-lens-all-input-reactive-single-renderer';
   root.dataset.fxNativeMagInteractionR1690 = 'pointer-touch-drag-scroll-wheel-click-key-focus-section-physical-response';
   root.dataset.fxNativeMagInteractionR1692 = 'sitewide-pointer-touch-press-release-drag-scroll-wheel-click-key-focus-menu-language-section';
+  root.dataset.fxNativeMagVisualR1693 = 'mobile-readable-smoky-obsidian-smaller-smoked-optic-adaptive-sharp-60fps';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
@@ -885,9 +886,9 @@
            Its shading is driven by the same studio reflections as the obsidian. */
         vec2 lq=vec2(q.x,(q.y-.010)*1.08);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.082,.108,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.050,.080,lensD))*front;
-        float lensCore=(1.0-smoothstep(.018,.042,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.066,.092,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.040,.066,lensD))*front;
+        float lensCore=(1.0-smoothstep(.013,.031,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensLower=exp(-pow((lq.x-.026)/.052,2.0)-pow((lq.y+.052)/.036,2.0))*lensGlass;
@@ -1015,11 +1016,11 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.140+ndl*.250+sideLight*.190+fillLight*.120);
+        float lift=sat(.185+ndl*.285+sideLight*.215+fillLight*.145);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0058,.0075,.0085),vec3(.039,.047,.050),lift);
+        vec3 col=mix(vec3(.0085,.0105,.0118),vec3(.056,.064,.067),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
@@ -1066,11 +1067,11 @@
           *(1.0-smoothstep(.36,.50,abs(q.y)))*front;
         float ribs=sat(upperRib+lowerRib+sideRib);
 
-        col=mix(col,vec3(.0012,.0025,.0032),lensOuter*.62);
-        col+=vec3(.24,.29,.29)*lensRim*(.042+.075*sideLight+.055*fresnel);
-        col+=vec3(.016,.028,.032)*lensGlass*(.040+.065*softboxA+.045*sideSpec);
-        col+=vec3(.44,.50,.49)*lensHighlight*.11;
-        col+=vec3(.004,.012,.015)*lensCore*lensDepth*.038;
+        col=mix(col,vec3(.0045,.0075,.0088),lensOuter*.38);
+        col+=vec3(.30,.34,.33)*lensRim*(.052+.082*sideLight+.064*fresnel);
+        col+=vec3(.026,.044,.048)*lensGlass*(.052+.085*softboxA+.055*sideSpec);
+        col+=vec3(.56,.60,.57)*lensHighlight*.15;
+        col+=vec3(.009,.022,.026)*lensCore*lensDepth*.030;
         col=mix(col,vec3(.006,.009,.010),ribs*.16);
         col+=vec3(.26,.28,.27)*ribs*(.020+.060*keySpec+.060*sideSpec);
 
@@ -1120,7 +1121,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.60),clamp(outAlpha,.70,1.0));
+        ${outputName}=vec4(filmic(col*2.78),clamp(outAlpha,.70,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1310,8 +1311,8 @@
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    let qualityScale=auditMode?1:(softwareRenderer ? .58 : (constrainedMobile ? .40 : (mobile ? .50 : (constrained ? .46 : .58))));
-    const qualityCeiling=auditMode?1:(softwareRenderer?.64:(mobile?.68:(constrained?.70:.80)));
+    let qualityScale=auditMode?1:(softwareRenderer ? .58 : (constrainedMobile ? .44 : (mobile ? .56 : (constrained ? .46 : .58))));
+    const qualityCeiling=auditMode?1:(softwareRenderer?.64:(mobile?.72:(constrained?.70:.80)));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1327,7 +1328,7 @@
       const baseCap=auditMode?1:softwareRenderer ? 0.82:constrainedMobile?.98:mobile?1.18:constrained?1.04:1.42;
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=auditMode?390000:softwareRenderer?190000:constrainedMobile?235000:mobile?380000:constrained?420000:820000;
+      const baseBudget=auditMode?390000:softwareRenderer?190000:constrainedMobile?260000:mobile?430000:constrained?420000:820000;
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
