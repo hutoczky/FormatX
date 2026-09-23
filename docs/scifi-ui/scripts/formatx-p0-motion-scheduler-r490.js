@@ -9,7 +9,7 @@
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
 root.dataset.fxP0MotionSchedulerR490='armed-r1666';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260923-r1667-mobile-60fps-fallback';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260923-r1668-sharp-mobile-60fps';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
