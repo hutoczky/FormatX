@@ -269,11 +269,12 @@
   function refresh(reason='dom') {
     clearTimeout(refreshTimer);
     refreshTimer = setTimeout(() => {
-      const previousKey = scenes[active]?.def.key || '';
-      if (!discover()) return;
-      const found = scenes.findIndex(scene => scene.def.key===previousKey);
-      if (found>=0) active=found;
-      activate(pickActive(),reason);
+      const previousKey=scenes[active]?.def.key||'';
+      if(!discover())return;
+      cacheGeometry(reason);
+      const found=scenes.findIndex(scene=>scene.def.key===previousKey);
+      if(found>=0)active=found;
+      activate(pickActive(scrollY),reason);
       schedule();
     },80);
   }
@@ -296,6 +297,14 @@
       if (relevant) refresh('dynamic');
     });
     observer.observe(main,{childList:true,subtree:true});
+
+    if('ResizeObserver' in window){
+      geometryObserver=new ResizeObserver(()=>refresh('resize-observer'));
+      geometryObserver.observe(main);
+      for(const scene of scenes)geometryObserver.observe(scene.node);
+    }
+    addEventListener('formatx:deferredcssready',()=>refresh('deferred-css'),{passive:true});
+    addEventListener('load',()=>refresh('window-load'),{once:true,passive:true});
   }
 
 
@@ -335,12 +344,13 @@
 
   function boot() {
     root.dataset.fxCinematicJourneyR536 = 'booting';
-    if (!ensureStage() || !discover()) {
-      root.dataset.fxCinematicJourneyR536 = 'incomplete-dom';
+    if(!ensureStage()||!discover()){
+      root.dataset.fxCinematicJourneyR536='incomplete-dom';
       return;
     }
+    cacheGeometry('boot');
 
-    scenes.forEach((scene,i) => scene.node.dataset.fxC536State = i===0 ? 'active' : 'future');
+    scenes.forEach((scene,i)=>scene.node.dataset.fxC536State=i===0?'active':'future');
     active=0;
     updateHud(scenes[0]);
     bindDynamicDiscovery();
@@ -369,6 +379,7 @@
     root.dataset.fxCinematicJourneyR536='ready';
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
+    root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
@@ -382,9 +393,11 @@
 
   addEventListener('pagehide',()=>{
     if(raf)cancelAnimationFrame(raf);
+    if(cutRaf)cancelAnimationFrame(cutRaf);
     clearTimeout(cutTimer);
     clearTimeout(refreshTimer);
     observer?.disconnect?.();
+    geometryObserver?.disconnect?.();
     removeEventListener('pointermove',onCinematicPointerMove);
     removeEventListener('pointerleave',onCinematicPointerLeave);
     removeEventListener('blur',onCinematicPointerLeave);
