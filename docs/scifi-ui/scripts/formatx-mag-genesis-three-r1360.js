@@ -60,16 +60,17 @@
       this.renderAverage=0;
       this.frameIntervalAverage=this.targetFrameMs;
       this.previousFrameTime=0;
-      this.qualityScale=this.lowPowerProfile?.40:(this.mobileProfile?.52:.68);
+      this.qualityScale=this.lowPowerProfile?.34:(this.mobileProfile?.46:.60);
       this.lastQualityAdjust=0;
       this.renderPeak=0;
       this.framePeak=this.targetFrameMs;
       this.stableBudgetFrames=0;
+      this.panicFrames=0;
 
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:this.highDetail,
+        antialias:this.highDetail && (devicePixelRatio||1)<=1.5,
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
@@ -1675,44 +1676,63 @@
           : renderCost;
         this.renderPeak=Math.max(renderCost,this.renderPeak*.86);
         this.framePeak=Math.max(this.frameIntervalAverage,this.framePeak*.90);
-        if(time-this.lastQualityAdjust>120){
+        const panicFrame=this.frameIntervalAverage>20.5||renderCost>10.8||this.framePeak>22;
+        if(panicFrame && time-this.lastQualityAdjust>24){
           const previous=this.qualityScale;
-          /* R1627 — hard 60 FPS cinematic guard. The intro gives secondary
-             particles, debris, chamber detail and resolution away before it
-             gives away the 16.67 ms presentation cadence. */
-          const framePressure=this.frameIntervalAverage>16.55||this.framePeak>17.4;
-          const severeFramePressure=this.frameIntervalAverage>16.95||this.framePeak>19.2;
-          const renderPressure=this.renderAverage>7.2||this.renderPeak>9.4;
-          const severeRenderPressure=this.renderAverage>8.8||this.renderPeak>11.0;
+          this.qualityScale=Math.max(.16,this.qualityScale-(this.framePeak>28||renderCost>14?.24:.16));
+          this.panicFrames=24;
+          this.stableBudgetFrames=0;
+          if(Math.abs(previous-this.qualityScale)>.001){
+            this.lastQualityAdjust=time;
+            this.resize();
+            if(this.particles)this.particles.visible=false;
+            if(this.debris)this.debris.visible=false;
+            if(this.qualityScale<.34&&this.chamber)this.chamber.visible=false;
+            document.documentElement.dataset.fxMagBirthGovernorR1660='panic-lod-one-frame-spike';
+          }
+        }else if(time-this.lastQualityAdjust>120){
+          const previous=this.qualityScale;
+          /* R1660 — intro quality yields before cadence. One bad presentation
+             frame immediately drops resolution/secondary detail, while recovery
+             requires sustained headroom to avoid oscillation. */
+          const framePressure=this.frameIntervalAverage>16.45||this.framePeak>17.2;
+          const severeFramePressure=this.frameIntervalAverage>16.82||this.framePeak>18.8;
+          const renderPressure=this.renderAverage>6.6||this.renderPeak>8.6;
+          const severeRenderPressure=this.renderAverage>8.0||this.renderPeak>10.2;
           if(severeFramePressure||severeRenderPressure){
-            this.qualityScale=Math.max(.18,this.qualityScale-.22);
+            this.qualityScale=Math.max(.16,this.qualityScale-.20);
             this.stableBudgetFrames=0;
+            this.panicFrames=Math.max(this.panicFrames,12);
           }else if(framePressure||renderPressure){
-            this.qualityScale=Math.max(.18,this.qualityScale-.11);
+            this.qualityScale=Math.max(.16,this.qualityScale-.09);
             this.stableBudgetFrames=0;
           }else{
-            this.stableBudgetFrames+=1;
-            if(this.stableBudgetFrames>90&&this.frameIntervalAverage<16.50&&this.renderAverage<5.4&&this.renderPeak<7.0){
-              this.qualityScale=Math.min(.82,this.qualityScale+.003);
+            if(this.panicFrames>0)this.panicFrames-=1;
+            else this.stableBudgetFrames+=1;
+            if(this.stableBudgetFrames>150&&this.frameIntervalAverage<16.35&&this.renderAverage<4.6&&this.renderPeak<6.2){
+              this.qualityScale=Math.min(.76,this.qualityScale+.002);
               this.stableBudgetFrames=0;
             }
           }
           if(Math.abs(previous-this.qualityScale)>.001){
             this.lastQualityAdjust=time;
             this.resize();
-            const secondary=this.qualityScale<.58;
-            const emergency=this.qualityScale<.38;
+            const secondary=this.qualityScale<.56;
+            const emergency=this.qualityScale<.34;
             if(this.particles)this.particles.visible=!secondary;
             if(this.debris)this.debris.visible=!secondary;
             if(this.chamber)this.chamber.visible=!emergency;
             document.documentElement.dataset.fxMagBirthGovernorR1627=
               this.qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
+            document.documentElement.dataset.fxMagBirthGovernorR1660=
+              this.qualityScale<previous?'preemptive-frame-budget-shed':'guarded-quality-recovery';
           }
         }
         document.documentElement.dataset.fxMagBirthTargetFpsR1600='60';
         document.documentElement.dataset.fxMagBirthTargetFpsR1602='60-real-frame-budget';
         document.documentElement.dataset.fxMagBirthTargetFpsR1627='60fps-hard-budget-secondary-detail-first';
         document.documentElement.dataset.fxMagBirthTargetFpsR1640='60fps-priority-preemptive-quality-shedding';
+        document.documentElement.dataset.fxMagBirthTargetFpsR1660='minimum-60fps-target-panic-lod-quality-before-cadence';
         document.documentElement.dataset.fxMagBirthRenderMsR1600=this.renderAverage.toFixed(2);
         document.documentElement.dataset.fxMagBirthRenderPeakR1627=this.renderPeak.toFixed(2);
         document.documentElement.dataset.fxMagBirthFramePeakR1627=this.framePeak.toFixed(2);
@@ -1805,7 +1825,7 @@
         engine,
         minimumFrameMs: 16.67,
         targetFps:60,
-        revision:'r1627-natural-obsidian-hard-60fps-adaptive-cinematic-core'
+        revision:'r1660-panic-lod-natural-obsidian-minimum-60fps-target'
       };
     }catch(error){
       console.error('FormatX R1360 genesis renderer failed:',error);
