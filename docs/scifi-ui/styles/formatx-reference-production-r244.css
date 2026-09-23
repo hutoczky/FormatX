@@ -1432,3 +1432,23 @@
   }
 }
 /* production-r1666-webgl-fallback-liveos */
+
+
+/* R1710 — keep final production geometry identical to blocking first paint. */
+@media (min-width:901px){
+  html:root:root[data-fx-reference-production-r244="desktop"] body.living-architecture main#main-content section#hero.scene.hero,
+  html:root:root[data-fx-reference-production-r244="ready"] body.living-architecture main#main-content section#hero.scene.hero{
+    height:calc(clamp(520px,42vw,620px) + 416px)!important;
+    min-height:calc(clamp(520px,42vw,620px) + 416px)!important;
+    max-height:calc(clamp(520px,42vw,620px) + 416px)!important;
+  }
+  html:root:root[data-fx-reference-production-r244] body.living-architecture #hero>.hero-grid{
+    height:calc(clamp(520px,42vw,620px) + 288px)!important;
+    min-height:calc(clamp(520px,42vw,620px) + 288px)!important;
+    max-height:calc(clamp(520px,42vw,620px) + 288px)!important;
+  }
+  html:root:root[data-fx-reference-production-r244] body.living-architecture #hero>.hero-grid>.hero-copy{
+    min-height:575px!important;
+  }
+}
+/* production-r1710-final-hero-geometry-lock */
