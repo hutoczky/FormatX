@@ -27,6 +27,7 @@ root.dataset.fxPerformancePolicyR1642='preemptive-headroom-quality-resolution-de
 root.dataset.fxPerformancePolicyR1660='single-frame-panic-lod-global-minimum-60fps-target';
 root.dataset.fxPerformancePolicyR1661='scroll-never-mounts-deferred-enhancements-click-keyboard-only';
 root.dataset.fxPerformancePolicyR1670='stable-60fps-headroom-no-fullscreen-blur-lower-start-resolution';
+root.dataset.fxPerformancePolicyR1672='photoreal-material-lighting-no-extra-geometry-adaptive-60fps';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
