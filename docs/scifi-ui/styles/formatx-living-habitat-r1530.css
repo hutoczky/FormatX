@@ -1074,3 +1074,46 @@ html[data-fx-cinematic-journey-r536="ready"] body.living-architecture .button{
   }
 }
 /* production-r1630-compositor-only-transitions */
+
+
+/* R1670 — stable-60 compositor headroom.
+   Preserve the photographic habitat using gradients and in-shader lighting,
+   but remove the remaining full-viewport blur/backdrop/fixed-background passes
+   that can trigger repaint/compositing spikes during scroll and MAG animation. */
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture{
+  background-attachment:scroll!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture::before,
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture::after{
+  filter:none!important;
+  -webkit-filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture .topbar{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  contain:layout style paint;
+}
+html:root:root:root:root:root:root:root:root:root:root
+body.living-architecture :is(
+  .hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+  .payment-console,.system-grid article,.release-card,.fx-category-grid > article,
+  .fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,
+  .fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure
+){
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture::after{
+    filter:none!important;
+    -webkit-filter:none!important;
+  }
+}
+/* production-r1670-60fps-compositor-headroom */
