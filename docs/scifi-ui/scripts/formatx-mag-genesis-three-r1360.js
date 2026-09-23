@@ -1731,20 +1731,20 @@
       if(this.keyLight){
         this.keyLight.position.x=-3.4+this.interactionX*.22;
         this.keyLight.position.y=4.9-this.interactionY*.14;
-        this.keyLight.intensity=2.38+physicalImpulse*.10;
+        this.keyLight.intensity=2.86+physicalImpulse*.12;
       }
       if(this.rimLight){
         this.rimLight.position.x=3.4-this.interactionX*.16;
         this.rimLight.position.y=-1.7+this.interactionY*.10;
-        this.rimLight.intensity=(this.mobileProfile||this.lowPowerProfile?1.72:3.05)+physicalImpulse*.08;
+        this.rimLight.intensity=(this.mobileProfile||this.lowPowerProfile?2.05:3.48)+physicalImpulse*.10;
       }
       if(this.softboxLight){
         this.softboxLight.position.x=-4.5+this.interactionX*.18;
-        this.softboxLight.intensity=3.62+physicalImpulse*.12;
+        this.softboxLight.intensity=4.18+physicalImpulse*.14;
       }
       if(this.edgeSoftboxLight){
         this.edgeSoftboxLight.position.x=4.8-this.interactionX*.14;
-        this.edgeSoftboxLight.intensity=2.16+physicalImpulse*.09;
+        this.edgeSoftboxLight.intensity=2.62+physicalImpulse*.11;
       }
       if(this.introLensMaterial){
         this.introLensMaterial.roughness=.065+Math.abs(this.interactionY)*.010;
@@ -1799,7 +1799,7 @@
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.10+flash*.10+after*.025+physicalImpulse*.010;
+      this.renderer.toneMappingExposure=1.20+flash*.08+after*.020+physicalImpulse*.010;
       this.coreLight.intensity+=flash*1.10+after*.18;
       if(this.glowSprite){
         const g=1+flash*.72;
