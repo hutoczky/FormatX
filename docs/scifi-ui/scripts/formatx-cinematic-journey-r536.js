@@ -56,6 +56,7 @@
   let lastCoreKey = '';
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
+  let scrollRange=Math.max(1,document.documentElement.scrollHeight-innerHeight);
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
   function coreApi() { return window.FormatXLivingCore || window.FormatXCoreMobileV69 || null; }
@@ -127,6 +128,7 @@
 
   function cacheGeometry(reason='refresh'){
     const y=scrollY;
+    scrollRange=Math.max(1,document.documentElement.scrollHeight-innerHeight);
     for(const scene of scenes){
       const rect=scene.node.getBoundingClientRect();
       scene.top=rect.top+y;
@@ -292,8 +294,7 @@
     const current=scenes[active];
     const currentTop=current.top-y;
     const local=clamp((innerHeight*.78-currentTop)/Math.max(1,current.height+innerHeight*.42),0,1);
-    const max = Math.max(1,document.documentElement.scrollHeight-innerHeight);
-    const global = clamp(y/max,0,1);
+    const global = clamp(y/scrollRange,0,1);
     const energy = clamp(.14 + Math.sin(local*Math.PI)*.46 + Math.min(.08,Math.abs(velocity)*.05),.12,.68);
     const x = clamp(54 + (active%2 ? -5.5 : 4.5) + (local-.5)*5 + velocity*2,39,66);
     const yy = clamp(27 + active*(54/Math.max(1,scenes.length-1)) + (local-.5)*7,18,84);
@@ -304,10 +305,10 @@
        attribute from instantaneous velocity inside every RAF; that invalidated
        broad selectors and caused repeated full-page style recalculation. */
     const fastScroll=scrollBudgetState==='fast';
-    root.style.setProperty('--fx-c536-progress',global.toFixed(4));
-    root.style.setProperty('--fx-c536-local',local.toFixed(4));
 
     if(!fastScroll){
+      root.style.setProperty('--fx-c536-progress',global.toFixed(4));
+      root.style.setProperty('--fx-c536-local',local.toFixed(4));
       root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
       root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
       root.style.setProperty('--fx-c536-x',x.toFixed(2)+'%');
@@ -502,6 +503,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1655='fast-scroll-two-css-vars-full-detail-on-settle';
     root.dataset.fxCinematicJourneyPerformanceR1660='fast-scroll-compositor-lite-full-detail-after-120ms-settle';
     root.dataset.fxCinematicJourneyPerformanceR1662='latched-scroll-budget-no-per-frame-global-style-thrash';
+    root.dataset.fxCinematicJourneyPerformanceR1663='fast-scroll-zero-css-write-zero-layout-read-settle-resync';
     setScrollBudget('settled');
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
