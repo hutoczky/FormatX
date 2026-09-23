@@ -468,7 +468,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1676-phase-gated-60fps-headroom';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260923-r1690-photoreal-all-input-response';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -869,6 +869,8 @@
     finished=true;
 
     try { cancelAnimationFrame(raf); } catch (_) {}
+    try { cancelAnimationFrame(interactionMoveRaf); } catch (_) {}
+    interactionMoveRaf=0;pendingInteraction=null;
     try { clearTimeout(frameTimer); } catch (_) {}
     frameTimer=0;
     try { clearTimeout(exitTimer); } catch (_) {}
@@ -1166,6 +1168,43 @@
 
     queueRender();
   }
+
+  /* R1690 — every meaningful input modulates the same Three.js physical scene.
+     Pointer motion is RAF-coalesced to one update per display frame; scroll,
+     wheel, click, focus and keyboard are event bursts only. */
+  let interactionMoveRaf=0;
+  let pendingInteraction=null;
+  const interactionPoint=event=>({
+    x:clamp((((event?.clientX??innerWidth*.5)/Math.max(1,innerWidth))-.5)*2,-1,1),
+    y:clamp(-((((event?.clientY??innerHeight*.5)/Math.max(1,innerHeight))-.5)*2),-1,1)
+  });
+  const feedInteraction=(kind,event,extra={})=>{
+    if(finished||!filmRenderer?.interact)return;
+    const p=interactionPoint(event);
+    filmRenderer.interact({
+      kind,phase:extra.phase||kind,x:p.x,y:p.y,
+      dx:Number(extra.dx)||0,dy:Number(extra.dy)||0,
+      strength:Number(extra.strength)||.35
+    });
+    ROOT.dataset.fxMagBirthInteractionR1690=kind;
+  };
+  addEventListener('pointermove',event=>{
+    pendingInteraction=event;
+    if(interactionMoveRaf)return;
+    interactionMoveRaf=requestAnimationFrame(()=>{
+      interactionMoveRaf=0;
+      const current=pendingInteraction;pendingInteraction=null;
+      if(current)feedInteraction('move',current,{strength:.24});
+    });
+  },{passive:true});
+  addEventListener('pointerdown',event=>feedInteraction('press',event,{strength:.86}),{passive:true});
+  addEventListener('pointerup',event=>feedInteraction('release',event,{strength:.62}),{passive:true});
+  addEventListener('pointercancel',event=>feedInteraction('cancel',event,{strength:.18}),{passive:true});
+  addEventListener('click',event=>feedInteraction('click',event,{phase:'pulse',strength:.96}),{passive:true});
+  addEventListener('wheel',event=>feedInteraction('wheel',event,{dy:clamp(event.deltaY,-160,160),strength:.42}),{passive:true});
+  addEventListener('scroll',()=>filmRenderer?.interact?.({kind:'scroll',phase:'scroll',x:0,y:0,dy:clamp(scrollY,-180,180),strength:.30}),{passive:true});
+  addEventListener('keydown',event=>{if(!event.repeat)feedInteraction('key',event,{strength:.58});},{passive:true});
+  addEventListener('focusin',event=>feedInteraction('focus',event,{strength:.34}),{passive:true});
 
   skip.addEventListener('click',()=>finish('user-skip'));
   addEventListener('formatx:real3dready',()=>{
