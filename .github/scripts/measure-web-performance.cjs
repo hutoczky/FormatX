@@ -13,7 +13,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null };
+    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
     try {
       new PerformanceObserver(list => {
         const entries = list.getEntries();
@@ -23,7 +23,25 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     } catch (_) {}
     try {
       new PerformanceObserver(list => {
-        for (const entry of list.getEntries()) if (!entry.hadRecentInput) window.__fxPerf.cls += entry.value;
+        const selector = node => {
+          if (!(node instanceof Element)) return '';
+          if (node.id) return '#' + node.id;
+          const classes = [...node.classList].slice(0, 3);
+          return node.tagName.toLowerCase() + (classes.length ? '.' + classes.join('.') : '');
+        };
+        for (const entry of list.getEntries()) {
+          if (entry.hadRecentInput) continue;
+          window.__fxPerf.cls += entry.value;
+          window.__fxPerf.shifts.push({
+            at: entry.startTime,
+            value: entry.value,
+            sources: (entry.sources || []).map(source => ({
+              selector: selector(source.node),
+              previousRect: source.previousRect,
+              currentRect: source.currentRect
+            }))
+          });
+        }
       }).observe({ type: 'layout-shift', buffered: true });
     } catch (_) {}
     try {
@@ -55,17 +73,37 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
 
   const scrollSample = await page.evaluate(async () => {
     let frames = 0;
+    let previous = 0;
+    const deltas = [];
     const start = performance.now();
     const duration = 1200;
     return new Promise(resolve => {
       function frame(now) {
         frames += 1;
+        if (previous) deltas.push(now - previous);
+        previous = now;
         const progress = Math.min(1, (now - start) / duration);
         scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * progress);
         if (progress < 1) requestAnimationFrame(frame);
         else {
           scrollTo(0, 0);
-          resolve({ frames, durationMs: now - start, estimatedFps: frames / ((now - start) / 1000) });
+          const ordered = deltas.slice().sort((a,b) => a-b);
+          const percentile = p => ordered.length ? ordered[Math.min(ordered.length - 1, Math.floor((ordered.length - 1) * p))] : 0;
+          resolve({
+            frames,
+            durationMs: now - start,
+            estimatedFps: frames / ((now - start) / 1000),
+            frameDeltaMs: {
+              median: percentile(.50),
+              p90: percentile(.90),
+              p95: percentile(.95),
+              p99: percentile(.99),
+              max: ordered[ordered.length - 1] || 0,
+              over20ms: ordered.filter(v => v > 20).length,
+              over25ms: ordered.filter(v => v > 25).length,
+              over33ms: ordered.filter(v => v > 33.34).length
+            }
+          });
         }
       }
       requestAnimationFrame(frame);
@@ -95,6 +133,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       firstContentfulPaint: paint['first-contentful-paint'] ?? null,
       largestContentfulPaint: window.__fxPerf.lcp,
       cumulativeLayoutShift: window.__fxPerf.cls,
+      layoutShifts: window.__fxPerf.shifts,
       totalLongTaskMs: window.__fxPerf.longTaskMs,
       introComplete: window.__fxPerf.introComplete,
       renderer: document.documentElement.dataset.fxRenderer || null,
