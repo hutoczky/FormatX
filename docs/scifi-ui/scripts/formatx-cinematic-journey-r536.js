@@ -189,15 +189,27 @@
     });
   }
 
+  function setSceneState(scene,state){
+    if(!scene || scene.node.dataset.fxC536State===state)return;
+    scene.node.dataset.fxC536State=state;
+  }
+
   function activate(index,reason='scroll') {
     if (!scenes.length) return;
     index = clamp(index,0,scenes.length-1);
-    const changed = index !== active || !root.dataset.fxCinematicSceneR536;
-    active = index;
+    const previous=active;
+    const changed = index !== previous || !root.dataset.fxCinematicSceneR536;
 
-    scenes.forEach((scene,i) => {
-      scene.node.dataset.fxC536State = i < index ? 'past' : i === index ? 'active' : 'future';
-    });
+    if(changed){
+      const from=Math.min(previous,index);
+      const to=Math.max(previous,index);
+      for(let i=from;i<=to;i++){
+        setSceneState(scenes[i],i<index?'past':i===index?'active':'future');
+      }
+    }else{
+      setSceneState(scenes[index],'active');
+    }
+    active = index;
 
     const scene = scenes[index];
     root.dataset.fxCinematicSceneR536 = scene.def.key;
@@ -408,6 +420,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
     root.dataset.fxCinematicJourneyPerformanceR1643='fast-scroll-zero-mag-burst-deferred-final-scene-handoff';
     root.dataset.fxCinematicJourneyPerformanceR1651='stable-r1643-scroll-cadence-restored-after-r1649-regression';
+    root.dataset.fxCinematicJourneyPerformanceR1652='incremental-scene-state-mutations-no-full-scene-restyle';
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
