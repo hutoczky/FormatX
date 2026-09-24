@@ -7,12 +7,12 @@
 const root=document.documentElement;
 if(root.dataset.fxMagShapeSyncR476==='ready-r528')return;
 root.dataset.fxMagShapeSyncR476='booting-r528';
-const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260831-r479-colour-depth-soft-living-primary-r4791-user-pause-aware';
+const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260924-r1723-canonical-organism-glyph';
 const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260924-r1723-canonical-organism';
 const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260924-r1723-canonical-organism';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null,pulseTimer=0,lastEnergyBolt='';
-function ensureStyle(){let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r4791-user-pause-aware'))link.href=STYLE;return link;}link=document.createElement('link');link.rel='stylesheet';link.href=STYLE;link.dataset.fxMagVisualSyncR476='true';document.head.appendChild(link);return link;}
+function ensureStyle(){let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r1723-canonical-organism-glyph'))link.href=STYLE;return link;}link=document.createElement('link');link.rel='stylesheet';link.href=STYLE;link.dataset.fxMagVisualSyncR476='true';document.head.appendChild(link);return link;}
 function ensureMobileOptics(){let link=document.querySelector('link[data-fx-mag-mobile-optics-r480]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r1723-canonical-organism'))link.href=MOBILE_OPTICS;return link;}link=document.createElement('link');link.rel='stylesheet';link.href=MOBILE_OPTICS;link.dataset.fxMagMobileOpticsR480='true';document.head.appendChild(link);return link;}
 function ensureLivingBalance(){let link=document.querySelector('link[data-fx-mag-living-balance-r481]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r1723-canonical-organism'))link.href=LIVING_BALANCE;return link;}link=document.createElement('link');link.rel='stylesheet';link.href=LIVING_BALANCE;link.dataset.fxMagLivingBalanceR481='true';document.head.appendChild(link);return link;}
 function currentShape(){const apiShape=typeof window.FormatXCoreShapeR337?.get==='function'?window.FormatXCoreShapeR337.get():'';const state=String(apiShape||root.dataset.fxCoreShapeR337||'organism');return state==='organism'?'organism':'organism';}
