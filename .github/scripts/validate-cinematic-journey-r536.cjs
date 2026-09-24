@@ -22,16 +22,19 @@ for (const token of [
 
 for (const token of [
   'window.FormatXLivingCore || window.FormatXCoreMobileV69',
-  'setShape?.','surfacePulse?.','requestRender?.',
+  'surfacePulse?.','requestRender?.',
   'MutationObserver','formatx:magbirthcomplete','formatx:loop',
   'all-content-actions-preserved-one-native-mag',
-  'scroll-interaction-driven-no-idle-raf'
+  'scroll-interaction-driven-no-idle-raf',
+  'fxCinematicLivingIdentityR1723',
+  'canonical-organism-scene-physiology-only'
 ]) assert.ok(js.includes(token),'R536 runtime contract missing '+token);
 
+assert.ok(!js.includes('setShape?.'),'R1723 cinematic journey must not request alternate body shapes');
 assert.ok(!js.includes('setInterval('),'R536 must not use an idle interval');
 assert.ok(!js.includes("createElement('canvas')"),'R536 must not create or duplicate a MAG canvas');
 assert.ok(css.includes('pointer-events:none!important'),'R536 film layer must not intercept user input');
 assert.ok(css.includes('@media (prefers-reduced-motion:reduce)'),'R536 reduced-motion fail-open missing');
 assert.ok(!/animation:[^;]*infinite/.test(css),'R536 must not run infinite CSS animations');
 
-console.log('PASS: R536 full cinematic journey preserves content/actions, covers every major product surface, keeps one native MAG and uses event-driven motion.');
+console.log('PASS: R1723 cinematic journey preserves every surface/action while one canonical organism responds physiologically without shape swapping.');
