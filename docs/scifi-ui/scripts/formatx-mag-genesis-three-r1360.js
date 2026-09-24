@@ -111,6 +111,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism';
       document.documentElement.dataset.fxMagBirthGuardianR1724='same-feline-dragon-anatomy-ivory-black-cyan-gold';
       document.documentElement.dataset.fxMagBirthGuardianMotionR1724='chest-core-streaming-glass-ribbons-interactive';
+      document.documentElement.dataset.fxMagBirthCellsR1724='anatomy-bound-dark-tissue-no-spherical-cell-shell';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,1);
@@ -1254,10 +1255,10 @@
     makeCellularLayer(){
       const T=this.THREE,r=this.rand;
       this.cellMaterial=new T.MeshPhysicalMaterial({
-        color:0x573866,roughness:.42,metalness:.002,
-        emissive:0x10283a,emissiveIntensity:.18,
-        clearcoat:.30,clearcoatRoughness:.24,
-        sheen:.22,sheenColor:new T.Color(0x376a83),sheenRoughness:.48,
+        color:0x0b1524,roughness:.40,metalness:.001,
+        emissive:0x06314a,emissiveIntensity:.24,
+        clearcoat:.26,clearcoatRoughness:.26,
+        sheen:.20,sheenColor:new T.Color(0x3c9db8),sheenRoughness:.44,
         transparent:true,opacity:0
       });
       this.cellEdgeMaterial=new T.MeshBasicMaterial({
@@ -1267,24 +1268,36 @@
       const blobGeo=new T.IcosahedronGeometry(.090,2);
       const edgeGeo=new T.IcosahedronGeometry(.093,1);
       this.cells=[];
-      const count=this.lowPowerProfile?22:(this.mobileProfile?34:52);
+      const count=this.lowPowerProfile?16:(this.mobileProfile?24:36);
+      const tissueAnchors=[
+        {c:[-.18,.02,0],r:[.88,.54,.56],w:5},
+        {c:[.34,.27,.02],r:[.34,.29,.28],w:3},
+        {c:[.48,.47,.01],r:[.23,.34,.22],w:2},
+        {c:[.73,.66,.04],r:[.30,.23,.24],w:3}
+      ];
+      const weighted=[];
+      tissueAnchors.forEach((a,index)=>{for(let k=0;k<a.w;k++)weighted.push(index);});
       for(let i=0;i<count;i++){
-        const phi=Math.acos(1-2*(i+.5)/count);
+        const anchor=tissueAnchors[weighted[i%weighted.length]];
+        const phi=Math.acos(1-2*((i+.5)/count));
         const theta=Math.PI*(1+Math.sqrt(5))*i;
-        const rr=1.34+(r()-.5)*.13;
+        const nx=Math.sin(phi)*Math.cos(theta);
+        const ny=Math.cos(phi);
+        const nz=Math.sin(phi)*Math.sin(theta);
+        const jitter=.92+r()*.12;
         const g=new T.Group();
         const b=new T.Mesh(blobGeo,this.cellMaterial);
         const e=new T.Mesh(edgeGeo,this.cellEdgeMaterial);
         g.add(b,e);
         g.position.set(
-          Math.sin(phi)*Math.cos(theta)*rr,
-          Math.cos(phi)*rr,
-          Math.sin(phi)*Math.sin(theta)*rr*.70
+          anchor.c[0]+nx*anchor.r[0]*jitter,
+          anchor.c[1]+ny*anchor.r[1]*jitter,
+          anchor.c[2]+nz*anchor.r[2]*jitter
         );
-        const sc=.70+r()*.30;
-        const sx=sc*(.48+r()*.28);
-        const sy=sc*(1.05+r()*.46);
-        const sz=sc*(.54+r()*.28);
+        const sc=.58+r()*.22;
+        const sx=sc*(.44+r()*.22);
+        const sy=sc*(.88+r()*.32);
+        const sz=sc*(.48+r()*.24);
         g.scale.set(sx,sy,sz);
         g.rotation.set(r()*2.8,r()*2.8,r()*2.8);
         g.userData.phase=r()*Math.PI*2;
@@ -1756,9 +1769,9 @@
       this.cellGroup.visible=visible>.002;
       const base=.001+visible*.999;
       this.cellGroup.scale.setScalar(base*.96);
-      this.cellMaterial.opacity=(.26+.24*awake)*visible;
-      this.cellEdgeMaterial.opacity=(.035+.045*awake)*visible;
-      this.cellVeinMaterial.opacity=(.18+.24*awake)*visible;
+      this.cellMaterial.opacity=(.10+.12*awake)*visible;
+      this.cellEdgeMaterial.opacity=(.025+.035*awake)*visible;
+      this.cellVeinMaterial.opacity=(.20+.30*awake)*visible;
       this.cells.forEach((g,i)=>{
         const breath=1+Math.sin(time*.00125+g.userData.phase)*(.018+.012*awake);
         const b=g.userData.baseScale;
