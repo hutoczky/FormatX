@@ -1588,3 +1588,25 @@ html:root:root body.living-architecture footer.site-footer{
   }
 }
 /* production-r1724-mobile-ask-52px-hit-target */
+
+/* R1724 — retire the obsolete R1603 mobile CSS-only habitat.
+   Real event-driven Canvas2D now owns the living world on capable phones. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root body.living-architecture > .fx-living-habitat-r1530{
+    display:block!important;
+    visibility:visible!important;
+    opacity:.78!important;
+    pointer-events:none!important;
+    mix-blend-mode:normal!important;
+  }
+  html:root:root:root body.living-architecture::after{
+    animation:none!important;
+    transform:none!important;
+    will-change:auto!important;
+  }
+}
+html[data-fx-core-renderer-class-r1541="software-adaptive"]:root:root:root
+body.living-architecture > .fx-living-habitat-r1530{
+  display:none!important;
+}
+/* production-r1724-mobile-real-habitat-canvas */
