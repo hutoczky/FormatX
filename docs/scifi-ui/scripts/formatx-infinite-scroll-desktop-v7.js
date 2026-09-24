@@ -55,6 +55,7 @@
   root.dataset.fxLoopDesktopSettleR1724='scrollend-primary-idle-timer-fallback';
   root.dataset.fxLoopVisualContinuityR1724='scroll-frame-relative-authoritative-through-reflow';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
+  root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -791,7 +792,17 @@
   addEventListener('resize', onResize, { passive: true });
   addEventListener('load', scheduleGeometryRefresh, { once: true, passive: true });
   addEventListener('formatx:loopgeometryrefresh',event=>{
+    const hadDesktopIntent=!isMobileFlow()&&Number.isFinite(pendingDesktopRelative);
     refreshGeometry();
+    if(hadDesktopIntent){
+      const corrected=bridgeRelative();
+      if(corrected!=null){
+        pendingDesktopRelative=corrected;
+        root.dataset.fxLoopPendingCorrectionR1724='fresh-geometry-relative';
+      }else{
+        root.dataset.fxLoopPendingCorrectionR1724='preserved-cached-intent';
+      }
+    }
     root.dataset.fxLoopGeometryEventR1724=String(event.detail?.source||'external-refresh');
   },{passive:true});
   addEventListener('pageshow', () => scheduleRepair(true), { passive: true });
