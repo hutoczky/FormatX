@@ -889,7 +889,10 @@
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         mineral+=vec3(.032,.066,.072)*edgeTransmission*.54;
         float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
+        float subsurface=pow(max(0.0,dot(-n,key)),1.65)*(1.0-facing);
         mineral+=vec3(.025,.052,.058)*backScatter*.36;
+        mineral+=vec3(.115,.040,.145)*subsurface*(.055+.055*uEnergy);
+        mineral+=vec3(.018,.085,.105)*subsurface*fresnel*.20;
         float vesselA=pow(.5+.5*sin(vLocal.y*18.0+sin(vLocal.x*9.0)*2.2+vLocal.z*6.0),16.0);
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
@@ -939,9 +942,9 @@
         mineral+=vec3(.42,.47,.46)*lensHighlight*.060;
         mineral+=vec3(.10,.12,.12)*lensLower*.025;
         mineral+=vec3(.003,.009,.011)*lensCore*lensDepth*.020;
-        mineral=mix(mineral,vec3(.006,.009,.010),ribs*.16);
-        mineral+=vec3(.27,.29,.28)*ribs*(.022+.075*keySoft+.065*sideSpec);
-        mineral+=vec3(.018,.058,.064)*ribs*lensOuter*.055;
+        mineral=mix(mineral,vec3(.018,.009,.026),ribs*.24);
+        mineral+=vec3(.090,.120,.145)*ribs*(.018+.055*keySoft+.050*sideSpec);
+        mineral+=vec3(.025,.18,.22)*ribs*lensOuter*(.050+.060*uEnergy);
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
@@ -952,20 +955,22 @@
         mineral+=vec3(.18,.42,.47)*pulse*.55;
         mineral+=vec3(.58,.64,.62)*pulse*(.10+.24*softboxA);
 
-        vec3 clearGlass=vec3(.002,.008,.010);
-        clearGlass+=vec3(.14,.22,.23)*(.12*ndl+.22*sideLight+.62*fresnel);
-        clearGlass+=vec3(.94,.98,.94)*softboxA*.42;
-        clearGlass+=vec3(.66,.75,.74)*softboxB*.28;
-        clearGlass+=vec3(.30,.52,.54)*edgeTransmission*.72;
-        clearGlass+=vec3(.72,.54,.32)*studioRibbonB*.060;
-        mineral=mix(mineral,clearGlass,glassFinMask*.992);
+        vec3 livingMembrane=vec3(.008,.022,.030);
+        livingMembrane+=vec3(.085,.175,.205)*(.12*ndl+.22*sideLight+.58*fresnel);
+        livingMembrane+=vec3(.66,.87,.88)*softboxA*.24;
+        livingMembrane+=vec3(.32,.52,.57)*softboxB*.18;
+        livingMembrane+=vec3(.10,.52,.62)*edgeTransmission*.58;
+        livingMembrane+=vec3(.22,.075,.30)*subsurface*.34;
+        mineral=mix(mineral,livingMembrane,glassFinMask*.965);
 
-        vec3 armorGlass=vec3(.003,.006,.008);
-        armorGlass+=vec3(.13,.16,.16)*(.14*ndl+.22*sideLight);
-        armorGlass+=vec3(.78,.80,.75)*softboxA*.20;
-        armorGlass+=vec3(.46,.52,.51)*sideSpec*.15;
-        armorGlass+=vec3(.08,.13,.14)*fresnel*.24;
-        mineral=mix(mineral,armorGlass,armorMask*.995);
+        vec3 cartilage=vec3(.020,.012,.031);
+        cartilage+=vec3(.095,.080,.125)*(.18*ndl+.24*sideLight);
+        cartilage+=vec3(.38,.48,.50)*softboxA*.12;
+        cartilage+=vec3(.20,.33,.38)*sideSpec*.10;
+        cartilage+=vec3(.035,.20,.25)*fresnel*.28;
+        cartilage+=vec3(.12,.035,.16)*subsurface*.30;
+        cartilage+=vec3(.020,.18,.22)*vascular*.20;
+        mineral=mix(mineral,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.055,.205,lensRadial);
@@ -1134,18 +1139,21 @@
         col+=vec3(.16,.38,.44)*pulse*.52;
         col+=vec3(.48,.55,.54)*pulse*(.08+.18*softboxA);
 
-        vec3 clearGlass=vec3(.002,.008,.010)
-          +vec3(.13,.21,.22)*(.12*ndl+.21*sideLight+.58*fresnel)
-          +vec3(.86,.91,.87)*softboxA*.36
-          +vec3(.56,.65,.64)*softboxB*.23;
-        col=mix(col,clearGlass,glassFinMask*.992);
+        float subsurface=pow(max(0.0,dot(-n,key)),1.7)*(1.0-facing);
+        vec3 livingMembrane=vec3(.008,.022,.030)
+          +vec3(.080,.17,.20)*(.12*ndl+.21*sideLight+.55*fresnel)
+          +vec3(.58,.78,.80)*softboxA*.24
+          +vec3(.26,.46,.51)*softboxB*.16
+          +vec3(.20,.07,.28)*subsurface*.28;
+        col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 armorGlass=vec3(.003,.006,.008)
-          +vec3(.12,.15,.15)*(.14*ndl+.21*sideLight)
-          +vec3(.70,.73,.69)*softboxA*.18
-          +vec3(.39,.45,.45)*sideSpec*.14
-          +vec3(.07,.12,.13)*fresnel*.22;
-        col=mix(col,armorGlass,armorMask*.995);
+        vec3 cartilage=vec3(.020,.012,.031)
+          +vec3(.090,.075,.12)*(.16*ndl+.22*sideLight)
+          +vec3(.32,.43,.46)*softboxA*.11
+          +vec3(.17,.30,.34)*sideSpec*.09
+          +vec3(.032,.18,.22)*fresnel*.26
+          +vec3(.11,.032,.15)*subsurface*.27;
+        col=mix(col,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.055,.205,lensRadial);
@@ -1298,6 +1306,7 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
+    root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
     root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
