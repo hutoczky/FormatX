@@ -2189,8 +2189,24 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   opacity:1!important;
   visibility:visible!important;
   display:block!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  transform:none!important;
+  translate:none!important;
+  rotate:none!important;
+  scale:1!important;
+  filter:none!important;
+  -webkit-filter:none!important;
+  image-rendering:auto!important;
+  mix-blend-mode:normal!important;
+  backface-visibility:hidden!important;
 }
 .fx-mag-birth-r533[data-fx-renderer="three-loading"] > .fxb-particles{
   z-index:0!important;
 }
 /* production-r1555-three-canvas-positive-stack */
+
+/* production-r1723-three-native-pixel-no-css-resample */
