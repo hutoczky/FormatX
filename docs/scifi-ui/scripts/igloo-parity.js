@@ -230,7 +230,7 @@
     './scripts/organism-core-interaction.js?v=20260730-core-interaction-1',
     './scripts/synaptic-thought-genome.js?v=20260923-r1666-deterministic-fingerprint-submit',
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
-    './scripts/formatx-mobile-unified.js?v=20260924-r1723-reachable-threshold',
+    './scripts/formatx-mobile-unified.js?v=20260924-r1724-final-viewport-safe-living-habitat',
     './scripts/formatx-infinite-scroll.js?v=20260924-r1724-final-viewport-safe',
     './scripts/formatx-apex-scene-stability.js?v=20260808-core-scene-1&rev=20260827-r413-single-mag-owner',
     './scripts/formatx-apex-native.js?v=20260808-native-apex-1',
