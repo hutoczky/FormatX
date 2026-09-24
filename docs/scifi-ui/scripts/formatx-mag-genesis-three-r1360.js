@@ -110,6 +110,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1722='fully-living-cortical-cellular-neural-studio-organism';
       document.documentElement.dataset.fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism';
       document.documentElement.dataset.fxMagBirthGuardianR1724='same-feline-dragon-anatomy-ivory-black-cyan-gold';
+      document.documentElement.dataset.fxMagBirthGuardianMotionR1724='chest-core-streaming-glass-ribbons-interactive';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,1);
@@ -754,13 +755,13 @@
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x162529,metalness:0,roughness:.065,
-        clearcoat:1,clearcoatRoughness:.025,
-        transmission:.24,thickness:.23,ior:1.49,
-        attenuationColor:new T.Color(0x15363d),attenuationDistance:.72,
-        emissive:0x010405,emissiveIntensity:.012,
-        envMapIntensity:1.62,
-        transparent:true,opacity:.985
+        color:0x0a4760,metalness:0,roughness:.052,
+        clearcoat:1,clearcoatRoughness:.020,
+        transmission:.34,thickness:.26,ior:1.46,
+        attenuationColor:new T.Color(0x0a5f79),attenuationDistance:.54,
+        emissive:0x0a83a8,emissiveIntensity:.42,
+        envMapIntensity:1.82,
+        transparent:true,opacity:.995
       });
       this.introLensMaterial=lensMat;
       const lens=new T.Mesh(new T.SphereGeometry(.142,72,42),lensMat);
@@ -781,10 +782,10 @@
       const glassRing=new T.Mesh(
         new T.TorusGeometry(.119,.0085,16,112),
         new T.MeshPhysicalMaterial({
-          color:0x60787c,metalness:.08,roughness:.16,
-          clearcoat:.82,clearcoatRoughness:.08,
-          emissive:0x02090b,emissiveIntensity:.018,
-          transparent:true,opacity:.16
+          color:0xc99552,metalness:.24,roughness:.13,
+          clearcoat:.88,clearcoatRoughness:.055,
+          emissive:0x7a3908,emissiveIntensity:.22,
+          transparent:true,opacity:.42
         })
       );
       glassRing.position.z=.376;
@@ -813,7 +814,7 @@
       this.coreInner=new T.Mesh(
         new T.IcosahedronGeometry(.105,2),
         new T.MeshBasicMaterial({
-          color:0xb6f8ff,transparent:true,opacity:.10,
+          color:0xe8ffff,transparent:true,opacity:.34,
           depthWrite:false,blending:T.AdditiveBlending
         })
       );
@@ -1538,12 +1539,14 @@
     makeTentacles(){
       const T=this.THREE,r=this.rand;
       this.tentacleMaterial=new T.MeshPhysicalMaterial({
-        color:0x244652,metalness:.002,roughness:.20,
-        emissive:0x063247,emissiveIntensity:.16,
-        clearcoat:.72,clearcoatRoughness:.08,
-        transmission:.18,thickness:.12,ior:1.39,
-        sheen:.18,sheenColor:new T.Color(0x56d9ef),sheenRoughness:.36,
-        transparent:true,opacity:0,depthWrite:false
+        color:0x124f69,metalness:.002,roughness:.105,
+        emissive:0x087fa7,emissiveIntensity:.42,
+        clearcoat:.92,clearcoatRoughness:.038,
+        transmission:.52,thickness:.16,ior:1.36,
+        attenuationColor:new T.Color(0x157da0),attenuationDistance:.74,
+        sheen:.30,sheenColor:new T.Color(0xb9f6ff),sheenRoughness:.22,
+        transparent:true,opacity:0,depthWrite:false,
+        envMapIntensity:1.72
       });
       this.tentacleEdgeMaterial=new T.MeshBasicMaterial({transparent:true,opacity:0});
       this.tentacleNodeMaterial=new T.PointsMaterial({transparent:true,opacity:0});
@@ -1554,21 +1557,18 @@
       const tendrilSegments=this.lowPowerProfile?18:(this.mobileProfile?30:48);
       const tendrilRadial=this.lowPowerProfile?5:(this.mobileProfile?6:7);
       for(let i=0;i<count;i++){
-        const base=i/count*Math.PI*2+(r()-.5)*.16;
-        const sign=i%2?1:-1;
-        const len=1.18+r()*.52;
+        const lane=(i-(count-1)*.5)/Math.max(1,count-1);
+        const len=1.20+r()*.64;
         const phase=r()*Math.PI*2;
         const pts=[];
         for(let j=0;j<11;j++){
           const u=j/10;
-          const radius=.72+len*u;
-          const curl=sign*Math.sin(u*Math.PI*1.58+phase*.16)*(.035+.16*u);
-          const a=base+curl;
-          const sideWave=Math.sin(u*Math.PI*2.05+phase)*(.020+.060*u);
+          const wave=Math.sin(u*Math.PI*1.65+phase)*(.04+.17*u);
+          const rise=Math.sin(u*Math.PI*.92+phase*.55)*(.03+.12*u);
           pts.push(new T.Vector3(
-            Math.cos(a)*radius-Math.sin(a)*sideWave,
-            Math.sin(a)*radius+Math.cos(a)*sideWave,
-            -.18+Math.sin(u*Math.PI*1.52+phase)*(.025+.095*u)
+            -.56-len*u-.24*u*u,
+            .10+lane*.72+rise+wave*.25,
+            -.05+Math.sin(u*Math.PI+phase)*(.035+.13*u)+wave
           ));
         }
         const curve=new T.CatmullRomCurve3(pts,false,'centripetal');
@@ -1670,13 +1670,14 @@
       if(t<.12)sc=.001;
       else if(t<1.10)sc=mix(.42,.72,ease((t-.12)/.98));
       else if(t<5.90)sc=.72+Math.sin(time*.0010)*.004;
-      else sc=mix(.72,.62,smooth((t-5.90)/1.40));
+      else sc=mix(.72,.56,smooth((t-5.90)/1.40));
 
       const endMove=smooth((t-9.78)/.20);
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
+      const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx,ty,.42);
+      this.coreGroup.position.set(tx+.16*chestEmbed,ty+.045*chestEmbed,.42+.12*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
@@ -1801,12 +1802,15 @@
       this.tentacleNodeMaterial.opacity=0;
       if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
       if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=0;
-      this.tentacles.forEach(g=>{
-        const wave=1+Math.sin(time*.00056+g.userData.phase)*.009*visible;
+      this.tentacles.forEach((g,index)=>{
+        const wave=1+Math.sin(time*.00056+g.userData.phase)*(.010+.008*this.interactionImpulse)*visible;
         const v=.001+visible*.999;
         g.scale.set(v*wave,v*wave,v*wave);
-        g.rotation.z=Math.sin(time*.00030+g.userData.phase)*.018*visible;
-        g.rotation.x=Math.sin(time*.00024+g.userData.phase)*.009*visible;
+        g.rotation.z=Math.sin(time*.00030+g.userData.phase)*.022*visible
+          +this.interactionY*.018*(.35+index/Math.max(1,this.tentacles.length));
+        g.rotation.x=Math.sin(time*.00024+g.userData.phase)*.012*visible
+          -this.interactionX*.015;
+        g.rotation.y=this.interactionX*.020;
       });
     }
 
