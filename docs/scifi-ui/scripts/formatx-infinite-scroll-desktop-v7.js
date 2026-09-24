@@ -52,6 +52,7 @@
   root.dataset.fxMobileScrollMode = 'native-momentum-loop';
   root.dataset.fxInitialHeroGuard = 'pending';
   root.dataset.fxLoopEndIntentPolicyR1724='cached-end-latched-through-idle-reflow';
+  root.dataset.fxLoopDesktopSettleR1724='scrollend-primary-idle-timer-fallback';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -699,9 +700,32 @@
   }
 
   function onScrollEnd() {
-    if (!isMobileFlow() || touchActive) return;
-    clearTimeout(mobileSettleTimer);
-    mobileSettleTimer = window.setTimeout(commitMobileTransfer, 0);
+    if (touchActive) return;
+    if (isMobileFlow()) {
+      clearTimeout(mobileSettleTimer);
+      mobileSettleTimer = window.setTimeout(commitMobileTransfer, 0);
+      return;
+    }
+
+    /* R1724 — desktop browsers expose scrollend as the strongest signal that
+       the native scroll gesture has really settled. Re-sample geometry here,
+       outside the scroll hot path, preserve any cached bridge-relative intent,
+       then commit immediately. The existing ACTIVITY_IDLE_MS timer remains the
+       compatibility fallback for browsers without scrollend. */
+    clearTimeout(activityTimer);
+    activityTimer = 0;
+    root.dataset.fxScrollActivity = 'idle';
+    root.classList.remove('fx-page-scrolling');
+    const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
+    refreshGeometry();
+    let relative=bridgeRelative();
+    if(relative==null&&cachedRelative!=null&&loopGeometry.ready){
+      relative=Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)));
+      root.dataset.fxLoopDesktopScrollEndRecoveryR1724='cached-relative';
+    }
+    if(relative!=null)pendingDesktopRelative=relative;
+    root.dataset.fxLoopDesktopScrollEndR1724=relative==null?'no-boundary':'boundary-commit';
+    commitDesktopTransfer();
   }
 
   function onPanelOpen(event) {
