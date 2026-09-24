@@ -5,7 +5,7 @@
 'use strict';
 const root=document.documentElement;
 const REFERENCE_STYLE='/scifi-ui/styles/formatx-native-orb-reference-r250.css?v=20260824-native-orb-r250';
-const SHAPESHIFTER_URL='/scifi-ui/scripts/formatx-core-shapeshifter-r337.js?v=20260924-r1723-canonical-organism';
+const SHAPESHIFTER_URL='/scifi-ui/scripts/formatx-core-shapeshifter-r337.js?v=20260924-r1723-physiology-v2';
 if(root.dataset.fxControlOwnerR268==='ready')return;
 root.dataset.fxControlOwnerR268='booting';root.dataset.fxControlOwnerR264='booting';
 const mobileQuery=matchMedia('(max-width:900px)');
