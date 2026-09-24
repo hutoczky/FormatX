@@ -293,7 +293,7 @@
     const worldPresence=.26+.74*heroFocus;
     if(worldPresence>.01){
       /* R1724 — cinematic FormatX world behind the organism. A distant planet,
-         monumental luminous arch and reflective horizon bring the guardian into
+         monumental luminous arch and reflective horizon bring the living crystal into
          a coherent place without adding another animation loop or bitmap. */
       const worldAlpha=worldPresence*(.72+.28*vitality);
       ctx.save();
