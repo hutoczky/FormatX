@@ -30,7 +30,7 @@
     );
     appendStyle(
       'data-fx-mobile-production-r5',
-      './styles/formatx-mobile-production-r5.css?v=20260920-r609-semantic-mobile-surface',
+      './styles/formatx-mobile-production-r5.css?v=20260924-r1724-living-habitat-panels',
       'fxMobileProductionR5'
     );
   }
