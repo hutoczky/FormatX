@@ -1381,7 +1381,7 @@ html:root:root body.living-architecture #hero .hero-copy{
   }
   html[data-fx-crystal-organism-r326="ready"]:root:root:root
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
-    transform:scale(1.045)!important;
+    transform:none!important;
     transform-origin:50% 48%!important;
   }
 }
@@ -1396,3 +1396,5 @@ html:root:root body.living-architecture #hero .hero-copy{
   }
 }
 /* production-r1721-cortical-living-world */
+
+/* production-r1723-native-pixel-stage-no-resample */
