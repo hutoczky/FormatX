@@ -29,6 +29,14 @@
   content: none;
   display: none;
 }
+/* R1723: semantic heart hit-target owns input. The native WebGL organism is
+   visual-only for hit testing, even when it mounts after the heart control. */
+#hero .hero-space > .fx-crystal-organism-r326-stage,
+#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+  pointer-events: none !important;
+}
+/* production-r1723-heart-hit-semantic-pointer-owner */
+
 
 /* R1562: the large semantic hit target never paints its geometry. Active/touch
    feedback belongs to the real R326 mineral, not to a circular HUD overlay. */
