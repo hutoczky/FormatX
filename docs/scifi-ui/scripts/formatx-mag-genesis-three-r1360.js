@@ -109,6 +109,7 @@
       document.documentElement.dataset.fxMagBirthQualityR1722='primary-three-hidpi-msaa-gradual-adaptive-60hz';
       document.documentElement.dataset.fxMagBirthVisualR1722='fully-living-cortical-cellular-neural-studio-organism';
       document.documentElement.dataset.fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism';
+      document.documentElement.dataset.fxMagBirthSilhouetteR1724='same-asymmetric-living-crystal-organism-as-hero';
       document.documentElement.dataset.fxMagBirthGuardianR1724='faceted-pearl-cyan-crystal-organic-guardian';
       document.documentElement.dataset.fxMagBirthCoreR1724='biocrystal-cartilage-cyan-energy-warm-rim';
       document.documentElement.dataset.fxMagBirthGuardianR1724='same-feline-dragon-anatomy-ivory-black-cyan-gold';
@@ -1759,12 +1760,23 @@
       }
       if(this.guardianAnatomy){
         this.guardianAnatomy.visible=visible>.002;
-        this.guardianAnatomy.rotation.y=-.06+Math.sin(time*.00018)*.014+this.interactionX*.038;
-        this.guardianAnatomy.rotation.x=Math.sin(time*.00015)*.008-this.interactionY*.025;
-        this.guardianAnatomy.rotation.z=Math.sin(time*.00012)*.006+this.interactionSpin*.18;
+        this.guardianAnatomy.rotation.y=-.04+Math.sin(time*.00018)*.016+this.interactionX*.042;
+        this.guardianAnatomy.rotation.x=Math.sin(time*.00015)*.010-this.interactionY*.028;
+        this.guardianAnatomy.rotation.z=Math.sin(time*.00012)*.007+this.interactionSpin*.16;
+        this.guardianParts?.forEach((part,i)=>{
+          const base=part.userData.baseScale;
+          const q=1+Math.sin(time*.0010+part.userData.phase+i*.31)*(.010+.008*maturity)+this.interactionImpulse*.010;
+          if(base)part.scale.set(base.x*q,base.y*q,base.z*q);
+        });
+        this.guardianMembranes?.forEach((membrane,i)=>{
+          const base=membrane.userData.baseScale;
+          const q=1+Math.sin(time*.0014+membrane.userData.phase+i*.47)*(.018+.010*maturity)+this.interactionImpulse*.018;
+          if(base)membrane.scale.set(base.x*q,base.y*q,1);
+        });
       }
-      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=(.86+.12*maturity)*visible;
-      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=(.30+.22*maturity)*visible;
+      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=(.54+.20*maturity)*visible;
+      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=(.10+.08*maturity)*visible;
+      if(this.guardianMembraneMaterial)this.guardianMembraneMaterial.opacity=(.20+.14*maturity)*visible;
       this.organicLobes.forEach((lobe,i)=>{
         const q=1+Math.sin(time*.00082+lobe.userData.phase)*.018*visible;
         const b=lobe.userData.baseScale;
