@@ -10,6 +10,7 @@
   let idleTimer = 0;
   let bindingFrame = 0;
   let interactionCooldown = false;
+  let delegatedInputBound = false;
 
   if (root.dataset.fxHeartCoreR252 === 'ready') return;
 
@@ -85,6 +86,25 @@
         root.dataset.fxCoreInteractionTarget = 'thought-trigger';
       }
     });
+  }
+
+  function bindDelegatedHeartInput() {
+    if (delegatedInputBound) return;
+    delegatedInputBound = true;
+    document.addEventListener('click', event => {
+      const target = event.target instanceof Element ? event.target.closest('.fx-mag-heart-hit-r252') : null;
+      if (!(target instanceof HTMLButtonElement)) return;
+      event.preventDefault();
+      activateCore('core');
+    }, true);
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      const target = event.target instanceof Element ? event.target.closest('.fx-mag-heart-hit-r252') : null;
+      if (!(target instanceof HTMLButtonElement)) return;
+      event.preventDefault();
+      activateCore('keyboard');
+    }, true);
+    root.dataset.fxHeartDelegatedR1723 = 'ready';
   }
 
   function installHeartHitTarget() {
@@ -218,6 +238,7 @@
 
   function boot() {
     ensureStyle();
+    bindDelegatedHeartInput();
     root.dataset.fxHeartCoreR252 = 'ready';
     root.dataset.fxHeartLoopPolicy = 'footer-to-real-core-no-reference-mirror';
     installHeartHitTarget();
