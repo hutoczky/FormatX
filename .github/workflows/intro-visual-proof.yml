@@ -54,6 +54,11 @@ jobs:
           grep -Fq "production-r1722-no-softening" docs/scifi-ui/styles/formatx-core-life-r455.css
           grep -Fq "blur(0)" docs/scifi-ui/styles/formatx-core-life-r455.css
           ! grep -Fq "blur(.30px)" docs/scifi-ui/styles/formatx-core-life-r455.css
+          grep -Fq "fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism'" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff'" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "if(t>3.00)this.updateCells(t,time)" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "this.mechanicalGroup.visible=false" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "fxIntroR1723='same-canonical-organism-birth-to-site-handoff'" docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
       - name: Start source site
         shell: bash
         run: |
