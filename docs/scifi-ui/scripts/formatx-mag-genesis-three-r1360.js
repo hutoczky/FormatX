@@ -1014,7 +1014,7 @@
         color:0x606f73,roughness:.31,metalness:0,
         clearcoat:.56,clearcoatRoughness:.16,
         emissive:0x04161c,emissiveIntensity:.030,
-        envMapIntensity:1.52;
+        envMapIntensity:1.52,
         sheen:.16,sheenColor:new T.Color(0x89ced8),sheenRoughness:.46,
         specularIntensity:.92,specularColor:new T.Color(0xecf8f8),
         transparent:true,opacity:0,depthWrite:true,
