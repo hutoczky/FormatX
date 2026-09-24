@@ -4,7 +4,7 @@
   const root = document.documentElement;
   const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260924-r1724-scrollend-settle';
+  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260924-r1724-exact-relative-landing';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
   const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260924-r1723-delegated-semantic-hit';
   let mobileGeometryTimer = 0;
@@ -12,7 +12,7 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
-  root.dataset.fxScrollBootstrapRevision = 'r1724-scrollend-settle';
+  root.dataset.fxScrollBootstrapRevision = 'r1724-exact-relative-landing';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
