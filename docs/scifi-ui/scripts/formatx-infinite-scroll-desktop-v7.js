@@ -638,11 +638,16 @@
        at that point changes the user's landing by the same layout delta. Fresh
        geometry is used only to clamp the cached gesture intent. */
     const freshRelative=bridgeRelative();
-    let relative=cachedRelative!=null
-      ? Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)))
+    const hasGestureSnapshot=Number.isFinite(desktopGestureAnchorY);
+    let relative=hasGestureSnapshot
+      ? (cachedRelative!=null
+          ? Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)))
+          : null)
       : freshRelative;
-    if(cachedRelative!=null){
-      root.dataset.fxLoopDesktopRecoveryR1724='cached-gesture-relative-authoritative';
+    if(hasGestureSnapshot && cachedRelative!=null){
+      root.dataset.fxLoopDesktopRecoveryR1724='gesture-snapshot-inside-authoritative';
+    }else if(hasGestureSnapshot){
+      root.dataset.fxLoopDesktopRecoveryR1724='gesture-snapshot-outside-authoritative';
     }else if(freshRelative!=null){
       root.dataset.fxLoopDesktopRecoveryR1724='fresh-idle-relative-fallback';
     }else{
