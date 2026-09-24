@@ -919,8 +919,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.855':'.805'};
-        projected.y+=${mobile?'.042':'.024'};
+        projected*= ${mobile?'.690':'.748'};
+        projected.x+=${mobile?'.035':'.105'};
+        projected.y+=${mobile?'.018':'.006'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1043,6 +1044,23 @@
         mineral+=vec3(.080,.105,.145)*cortexRidge*.105;
         mineral+=vec3(.025,.135,.165)*cortexRidge*vascular*.44;
 
+        /* R1724 FormatX guardian material — pearlescent living bioceramic
+           plates ride above dark cortical tissue. The plate field is broad,
+           irregular and organic; it is not a metallic armour texture. */
+        float plateField=.5+.5*sin(vUv.x*18.1+sin(vUv.y*12.6)*1.85+sin(vLocal.y*5.2)*.55);
+        float plateCross=.5+.5*sin(vUv.y*16.4-vUv.x*7.2+sin(vUv.x*9.7)*1.35);
+        float plateMask=smoothstep(.54,.78,max(plateField,plateCross*.86))*bodyMask;
+        plateMask*=.64+.36*smoothstep(-.45,.82,n.z);
+        float livingSeam=pow(1.0-max(plateField*.82,plateCross*.76),3.4)*bodyMask;
+        vec3 ivory=vec3(.50,.59,.62)
+          +vec3(.34,.37,.34)*(.28*ndl+.20*sideLight+.18*softboxA)
+          +vec3(.18,.29,.32)*fresnel*.22;
+        ivory+=vec3(.96,.54,.16)*studioRibbonB*.12;
+        mineral=mix(mineral,ivory,plateMask*.76);
+        mineral=mix(mineral,vec3(.004,.008,.015),livingSeam*.68);
+        mineral+=vec3(.12,.66,.86)*vascular*(.22+.34*uEnergy);
+        mineral+=vec3(1.00,.57,.16)*vascular*studioRibbonB*.16;
+
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
         float crackX=q.x+.010*sin(q.y*19.0+vLocal.z*8.0)+.004*sin(q.y*43.0);
@@ -1127,16 +1145,18 @@
         physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
         physicalLens+=vec3(.050,.36,.48)*lensRing*(.10+.10*uEnergy);
         physicalLens+=vec3(.84,.98,1.00)*lensHot*(.18+.08*uEnergy);
-        physicalLens+=vec3(.18,.82,1.00)*electric*(.30+.30*uEnergy);
-        physicalLens+=vec3(.92,1.00,1.00)*coreFlash*.58;
+        physicalLens+=vec3(.18,.86,1.00)*electric*(.48+.34*uEnergy);
+        physicalLens+=vec3(.96,1.00,1.00)*coreFlash*.78;
+        physicalLens+=vec3(1.00,.45,.10)*lensRing*(.10+.10*studioRibbonB);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
-        vec3 tendon=vec3(.006,.016,.019)+vec3(.10,.16,.17)*(.14*sideLight+.08*ndl+.42*fresnel);
-        tendon+=vec3(.018,.10,.12)*cableSegment*.030;
-        tendon+=vec3(.82,.87,.82)*sideSpec*.12;
-        tendon+=vec3(.76,.80,.75)*softboxA*.11;
-        tendon+=vec3(.28,.46,.47)*edgeTransmission*.30;
+        vec3 tendon=vec3(.006,.025,.036)+vec3(.07,.18,.24)*(.14*sideLight+.08*ndl+.46*fresnel);
+        tendon+=vec3(.030,.40,.62)*cableSegment*(.08+.08*uEnergy);
+        tendon+=vec3(.78,.96,1.00)*sideSpec*.20;
+        tendon+=vec3(.58,.88,.98)*softboxA*.16;
+        tendon+=vec3(.22,.64,.78)*edgeTransmission*.42;
+        tendon+=vec3(1.00,.48,.12)*studioRibbonB*(.11+.08*cableSegment);
         mineral=mix(mineral,tendon,tendrilMask*.995);
 
         if(uLayer>.5){
@@ -1232,6 +1252,15 @@
         float cortexRidge=pow(max(cortexWave,cortexCross),4.0)*bodyMask;
         col=mix(col,vec3(.020,.010,.032),cortexValley*.34);
         col+=vec3(.070,.098,.135)*cortexRidge*.095;
+        float plateField=.5+.5*sin(vUv.x*18.1+sin(vUv.y*12.6)*1.65);
+        float plateCross=.5+.5*sin(vUv.y*16.4-vUv.x*7.2);
+        float plateMask=smoothstep(.55,.79,max(plateField,plateCross*.84))*bodyMask;
+        float livingSeam=pow(1.0-max(plateField*.82,plateCross*.74),3.2)*bodyMask;
+        vec3 ivory=vec3(.48,.57,.60)+vec3(.30,.34,.32)*(.26*ndl+.18*sideLight+.15*softboxA);
+        ivory+=vec3(.90,.46,.13)*studioRibbonB*.10;
+        col=mix(col,ivory,plateMask*.72);
+        col=mix(col,vec3(.004,.008,.014),livingSeam*.62);
+        col+=vec3(.11,.61,.80)*vascular*(.20+.30*uEnergy);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1453,6 +1482,7 @@
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
     root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
     root.dataset.fxNativeMagGuardianR1724='feline-dragon-head-neck-limbs-crown-streaming-ribbons-one-draw';
+    root.dataset.fxNativeMagLookR1724='ivory-bioceramic-black-tissue-cyan-energy-gold-studio-ribbons';
     root.dataset.fxNativeMagPhysiologyR1723='differentiated-attention-response-activation-heartbeat-curiosity-stability-renewal';
     root.dataset.fxNativeMagPhysiologyApiR1723='public-physiology-event-habitat-sync';
     root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
