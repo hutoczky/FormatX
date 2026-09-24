@@ -72,6 +72,7 @@ async function state(page) {
     actionLinks: document.querySelectorAll('.fx-organism-actionbar a').length,
     overlayHidden: document.getElementById('fx-organism-console')?.hidden,
     pricingChildren: document.getElementById('pricing')?.children.length,
+    pricingTriggers: document.querySelectorAll('#pricing > [data-organism-open="pricing"]').length,
     pricingCards: document.querySelectorAll('[data-organism-panel="pricing"] [data-plan-id]').length,
     qrCards: document.querySelectorAll('[data-organism-panel="pricing"] [data-plan-qr]').length,
     overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
@@ -96,7 +97,7 @@ async function validateDesktop() {
     assert(current.triggers === 5 && current.panels === 5, 'chapter/panel count: ' + JSON.stringify(current));
     assert(current.actionLinks === 3, 'action bar links: ' + JSON.stringify(current));
     assert(current.overlayHidden === true, 'console must start hidden');
-    assert(current.pricingChildren === 1, 'pricing section should contain only its interactive trigger');
+    assert(current.pricingTriggers === 1, 'pricing section must expose exactly one organism trigger: ' + JSON.stringify(current));
     assert(current.pricingCards === 3 && current.qrCards === 3, 'commerce content was not moved intact');
     assert(current.footerInResources, 'footer must be inside the release/support console');
     assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
