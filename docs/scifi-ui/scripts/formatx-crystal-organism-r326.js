@@ -1334,6 +1334,7 @@
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
     root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
+    root.dataset.fxNativeMagPhysiologyR1723='differentiated-attention-response-activation-heartbeat-curiosity-stability-renewal';
     root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
@@ -1971,10 +1972,49 @@
       boost(.66,mobile?2:4);
     }
     function signalPhysiology(kind,source){
-      if(performance.now()<shapeLockUntil)return;
-      root.dataset.fxCorePhysiologyR1723=String(kind||'stimulus');
-      startSurfacePulse(String(source||kind||'stimulus')+'-physiology');
-      setShape('organism',source||kind||'physiology');
+      const state=String(kind||'stimulus');
+      root.dataset.fxCorePhysiologyR1723=state;
+      if(state==='attention'){
+        targetEnergy=Math.max(targetEnergy,.76);
+        targetBreath=Math.max(targetBreath,.46);
+        targetRotationY+=tx*.012;
+        targetRotationX=clamp(targetRotationX-ty*.008,-1.02,1.02);
+      }else if(state==='response'){
+        targetEnergy=Math.max(targetEnergy,.94);
+        targetBreath=Math.max(targetBreath,.74);
+        angularVelocityY+=.004;
+      }else if(state==='activation'){
+        targetEnergy=Math.max(targetEnergy,.98);
+        targetBreath=Math.max(targetBreath,.78);
+        targetRotationZ=clamp(targetRotationZ+.010,-.16,.16);
+      }else if(state==='heartbeat'){
+        targetEnergy=Math.max(targetEnergy,.84);
+        targetBreath=Math.max(targetBreath,.96);
+      }else if(state==='curiosity'){
+        targetEnergy=Math.max(targetEnergy,.78);
+        targetBreath=Math.max(targetBreath,.54);
+        targetRotationY+=.026;
+      }else if(state==='stability'){
+        targetEnergy=Math.max(targetEnergy,.58);
+        targetBreath=Math.max(targetBreath,.26);
+        targetRotationZ*=.55;
+      }else if(state==='renewal'){
+        targetEnergy=Math.max(targetEnergy,.96);
+        targetBreath=Math.max(targetBreath,.90);
+        targetRotationY+=.020;
+      }else if(state==='system-attention'){
+        targetEnergy=Math.max(targetEnergy,.72);
+        targetBreath=Math.max(targetBreath,.40);
+        targetRotationX=clamp(targetRotationX-.018,-1.02,1.02);
+      }else{
+        targetEnergy=Math.max(targetEnergy,.66);
+        targetBreath=Math.max(targetBreath,.36);
+      }
+      root.dataset.fxCorePhysiologyEnergyR1723=targetEnergy.toFixed(2);
+      root.dataset.fxCorePhysiologyBreathR1723=targetBreath.toFixed(2);
+      startSurfacePulse(String(source||state)+'-physiology');
+      setShape('organism',source||state||'physiology');
+      schedule(mobile?3:5);
     }
     function onCinematicScene(event){
       const detail=event.detail||{};
@@ -2009,13 +2049,13 @@
     listen(window,'formatx:organismresponse',()=>signalPhysiology('response','organism-response'),{passive:true});
     listen(window,'formatx:open-live-os',()=>signalPhysiology('system-attention','live-os-open'),{passive:true});
     listen(window,'formatx:loop',()=>{signalPhysiology('renewal','site-loop');boost(.92,mobile?4:6);},{passive:true});
-    listen(window,'formatx:menustatechange',event=>{boost(event.detail?.open ? .76 : .52,mobile?2:4);},{passive:true});
-    listen(window,'formatx:languagechange',()=>boost(.62,mobile?2:3),{passive:true});
+    listen(window,'formatx:menustatechange',event=>signalPhysiology(event.detail?.open?'attention':'stability',event.detail?.open?'menu-open':'menu-close'),{passive:true});
+    listen(window,'formatx:languagechange',()=>signalPhysiology('curiosity','language-change'),{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
-    listen(window,'formatx:storychapter',()=>boost(.64,mobile?2:4),{passive:true});
-    listen(document,'input',()=>boost(.34,mobile?1:2),{passive:true});
-    listen(document,'change',()=>boost(.42,mobile?1:2),{passive:true});
-    listen(document,'submit',()=>{boost(.78,mobile?3:5);startSurfacePulse('form-submit');},{passive:true});
+    listen(window,'formatx:storychapter',()=>signalPhysiology('curiosity','story-chapter'),{passive:true});
+    listen(document,'input',()=>{targetEnergy=Math.max(targetEnergy,.60);targetBreath=Math.max(targetBreath,.30);schedule(mobile?1:2);},{passive:true});
+    listen(document,'change',()=>signalPhysiology('activation','form-change'),{passive:true});
+    listen(document,'submit',()=>signalPhysiology('activation','form-submit'),{passive:true});
     listen(window,'pointerenter',()=>boost(.22,mobile?1:2),{passive:true});
     listen(window,'pointerleave',()=>boost(.16,mobile?1:2),{passive:true});
     listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
@@ -2032,7 +2072,7 @@
       boost(action.matches('a[href*="download"],[data-release-download]') ? .92 : .62,mobile?2:4);
     },{passive:true});
     listen(document,'focusin',event=>{
-      if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))boost(.48,mobile?1:2);
+      if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))signalPhysiology('attention','focus');
     },{passive:true});
     listen(canvas,'webglcontextlost',event=>{
       event.preventDefault();contextLost=true;if(raf)cancelAnimationFrame(raf);raf=0;
