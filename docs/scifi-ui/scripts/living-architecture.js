@@ -113,7 +113,7 @@
     if (!document.querySelector('link[data-fx-organism-layering-style]')) {
       const organismLayering = document.createElement('link');
       organismLayering.rel = 'stylesheet';
-      organismLayering.href = './styles/organism-interface-layering.css?v=20260727-fullscreen-1';
+      organismLayering.href = './styles/organism-interface-layering.css?v=20260924-r1724-mobile-border-box';
       organismLayering.dataset.fxOrganismLayeringStyle = 'true';
       document.head.appendChild(organismLayering);
     }
