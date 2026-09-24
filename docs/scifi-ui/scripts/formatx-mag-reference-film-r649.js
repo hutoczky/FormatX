@@ -229,11 +229,10 @@
 
     const grow=smooth((t-2.42)/.70);
     if(grow>.002){
-      /* R1711: maturation stays biological; the organism never hardens into a separate object. */
-      const maturity=smooth((t-7.45)/1.55),crystallise=0;
+      /* R1723: one biological body from seed through final handoff. */
       const R=(42+grow*196)*(1+.017*Math.sin(time*.0022));
       ctx.save();ctx.translate(cx,cy);
-      if(crystallise<.72){
+      {
         const body=ctx.createRadialGradient(-R*.20,-R*.24,4,0,0,R*1.02);
         body.addColorStop(0,'rgba(232,248,246,.84)');
         body.addColorStop(.20,'rgba(126,170,178,.98)');
@@ -282,22 +281,6 @@
           ctx.stroke();
         }
       }
-      if(crystallise>.02){
-        const q=crystallise,rr=R*(.88+.12*q);
-        const mineral=ctx.createLinearGradient(-rr,-rr,rr,rr);
-        mineral.addColorStop(0,'rgba(126,145,149,.92)');
-        mineral.addColorStop(.22,'rgba(32,39,42,.98)');
-        mineral.addColorStop(.58,'rgba(5,9,11,1)');
-        mineral.addColorStop(.82,'rgba(68,81,84,.95)');
-        mineral.addColorStop(1,'rgba(13,18,20,.98)');
-        ctx.globalAlpha=q;ctx.fillStyle=mineral;
-        ctx.beginPath();
-        const pts=[[-.08,-1], [.58,-.70],[.82,-.10],[.56,.72],[-.12,.98],[-.70,.60],[-.88,-.06],[-.57,-.66]];
-        pts.forEach(([x,y],i)=>i?ctx.lineTo(x*rr,y*rr):ctx.moveTo(x*rr,y*rr));ctx.closePath();ctx.fill();
-        ctx.strokeStyle='rgba(183,211,214,.24)';ctx.lineWidth=1;
-        ctx.stroke();
-      }
-
       const lensR=Math.max(30,R*.315);
       const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
       lens.addColorStop(0,'rgba(255,255,255,1)');
@@ -323,8 +306,8 @@
       ctx.restore();
       ctx.restore();
 
-      if(t>5.65&&crystallise<.85){
-        const tg=smooth((t-5.65)/1.0)*(1-crystallise);
+      if(t>5.65){
+        const tg=smooth((t-5.65)/1.0);
         ctx.save();ctx.strokeStyle='rgba(104,209,222,'+(.58*tg)+')';ctx.lineWidth=3.2;ctx.shadowColor='rgba(55,209,236,.54)';ctx.shadowBlur=7;
         for(let i=0;i<7;i++){
           const a=i/7*TAU+.24;
@@ -378,11 +361,11 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-cortical-living-world-mobile-60hz-r1721'
+      quality:'hidpi-canonical-living-organism-mobile-60hz-r1723'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
-    revision:'r1721-hidpi-cortical-living-world-birth'
+    revision:'r1723-canonical-living-organism-birth'
   };
 })();
