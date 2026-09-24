@@ -1429,12 +1429,29 @@ html:root:root body.living-architecture > .fx-living-habitat-r1530{
   mix-blend-mode:screen!important;
   filter:none!important;
 }
-html:root:root body.living-architecture > :is(
-  .topbar,.fx-rail,.fx-organism-status,main#main-content,footer.site-footer,
-  .fx-mini-mag-assistant-r459,.fx-organism-dialogue,.fx-organism-panel
-){
+html:root:root body.living-architecture > :is(main#main-content,footer.site-footer){
   position:relative!important;
   z-index:2!important;
+}
+html:root:root body.living-architecture > :is(
+  .topbar,.fx-rail,.fx-organism-status,.fx-mini-mag-assistant-r459,
+  .fx-organism-dialogue,.fx-organism-panel,.fx-organism-thought
+){
+  z-index:4!important;
+}
+html:root:root body.living-architecture::before,
+html:root:root body.living-architecture::after,
+html:root:root body.living-architecture.fx-habitat-react-r1695::before,
+html:root:root body.living-architecture.fx-habitat-react-r1695::after,
+html:root:root body.living-architecture > .fx-living-habitat-r1530{
+  pointer-events:none!important;
+}
+html:root:root body.living-architecture :is(
+  .fx-organism-dialogue,.fx-organism-panel,.fx-organism-thought,
+  .fx-organism-thought-close,.fx-thought-genome-disclosure,
+  .fx-mini-mag-assistant-r459
+){
+  pointer-events:auto!important;
 }
 
 /* Every main scene reveals the same organism habitat. */
@@ -1538,3 +1555,5 @@ html:root:root body.living-architecture footer.site-footer{
   }
 }
 /* production-r1724-sitewide-living-habitat */
+
+/* production-r1724-overlay-pointer-safe */
