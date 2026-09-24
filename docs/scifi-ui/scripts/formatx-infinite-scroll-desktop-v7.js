@@ -612,6 +612,8 @@
     if(root.classList.contains('fx-section-navigation-active')){
       pendingDesktopRelative=null;
       pendingDesktopSourceTop=null;
+      desktopGestureAnchorY=null;
+      desktopGestureAnchorRelative=null;
       root.dataset.fxLoopLandingState='section-navigation';
       return;
     }
@@ -674,6 +676,8 @@
     if(root.classList.contains('fx-section-navigation-active')){
       pendingDesktopRelative=null;
       pendingDesktopSourceTop=null;
+      desktopGestureAnchorY=null;
+      desktopGestureAnchorRelative=null;
       pendingMobileRelative=null;
       root.dataset.fxLoopLandingState='section-navigation';
       return;
@@ -752,6 +756,7 @@
        deltas only, so there is no per-frame layout read. */
     if(!isMobileFlow()
       && !root.classList.contains('fx-seamless-loop-transfer')
+      && !root.classList.contains('fx-section-navigation-active')
       && bridge?.isConnected){
       if(!Number.isFinite(desktopGestureAnchorY)){
         const eventBridgeTop=Number(bridge.offsetTop);
