@@ -682,16 +682,20 @@
     // gesture, not a per-frame layout query.
     let relative = bridgeRelative();
     const cachedGeometry=loopGeometry;
-    if(startingDesktopGesture && bridge?.isConnected){
+    if(startingDesktopGesture && relative==null && bridge?.isConnected){
       const liveRect=bridge.getBoundingClientRect();
       const liveBridgeTop=scrollY+liveRect.top;
       const liveRelative=scrollY-liveBridgeTop;
       const liveSourceHeight=Math.max(0,cachedGeometry.sourceHeight||sourceHero?.offsetHeight||0);
       if(liveRelative>=-2){
         relative=Math.max(0,Math.min(liveRelative,Math.max(0,liveSourceHeight-2)));
-        root.dataset.fxLoopGestureGeometryR1725='live-first-frame-relative-captured';
+        root.dataset.fxLoopGestureGeometryR1725='live-first-frame-fallback-only';
         root.dataset.fxLoopGestureRelativeR1725=String(Math.round(relative));
       }
+    }
+    if(startingDesktopGesture && relative!=null){
+      root.dataset.fxLoopGestureGeometryR1727='cached-boundary-relative-authoritative';
+      root.dataset.fxLoopGestureRelativeR1727=String(Math.round(relative));
     }
     /* R1724 — preserve the user's boundary intent across late layout reflow.
        If the scroll reached the cached document end, latch the corresponding
