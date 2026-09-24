@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'return-state-v2';
-  const LOOP_RUNTIME = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260924-r1727c-document-end-recovery';
+  const LOOP_RUNTIME = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260924-r1727d-document-rect-loop';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
 
   if (root.dataset.fxReturnStateRecovery === VERSION) return;
