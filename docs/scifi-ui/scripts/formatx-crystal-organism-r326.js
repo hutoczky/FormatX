@@ -127,6 +127,8 @@
   root.dataset.fxNativeMagMaterialR1725='low-emission-mineral-diffuse-ggx-reflection-facet-tonal-variation';
   root.dataset.fxNativeMagVisualR1726='cinematic-photographic-smoky-pearl-biocrystal-neutral-studio-response';
   root.dataset.fxNativeMagMaterialR1726='neutral-mineral-ggx-softbox-restrained-vascular-emission-physical-edge-transmission';
+  root.dataset.fxNativeMagVisualR1727='photographic-biocrystal-continuity-neutral-cortex-smoked-optic';
+  root.dataset.fxNativeMagMaterialR1727='compile-safe-facet-tones-neutral-subsurface-low-emission-studio-reflection';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -1065,8 +1067,8 @@
         float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
         float subsurface=pow(max(0.0,dot(-n,key)),1.65)*(1.0-facing);
         mineral+=vec3(.025,.052,.058)*backScatter*.36;
-        mineral+=vec3(.115,.040,.145)*subsurface*(.055+.055*uEnergy);
-        mineral+=vec3(.018,.085,.105)*subsurface*fresnel*.20;
+        mineral+=vec3(.066,.050,.074)*subsurface*(.038+.042*uEnergy);
+        mineral+=vec3(.018,.060,.072)*subsurface*fresnel*.14;
         float vesselA=pow(.5+.5*sin(vLocal.y*18.0+sin(vLocal.x*9.0)*2.2+vLocal.z*6.0),16.0);
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
@@ -1076,9 +1078,9 @@
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
         float cortexRidge=pow(max(cortexWave,cortexCross),4.2)*bodyMask;
-        mineral=mix(mineral,vec3(.020,.010,.032),cortexValley*.38);
-        mineral+=vec3(.080,.105,.145)*cortexRidge*.105;
-        mineral+=vec3(.025,.135,.165)*cortexRidge*vascular*.44;
+        mineral=mix(mineral,vec3(.012,.015,.019),cortexValley*.31);
+        mineral+=vec3(.072,.090,.098)*cortexRidge*.082;
+        mineral+=vec3(.022,.092,.108)*cortexRidge*vascular*.31;
 
         /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
            plates ride above dark cortical tissue. The plate field is broad,
@@ -1088,12 +1090,12 @@
         float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
         plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
-        float facetTone=.90+.14*fract(vFacet*7.13+.19);
+        float plateFacetTone=.90+.14*fract(vFacet*7.13+.19);
         vec3 ivory=vec3(.24,.31,.33)
           +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
           +vec3(.16,.25,.27)*fresnel*.18;
         ivory+=vec3(.72,.39,.12)*studioRibbonB*.070;
-        mineral*=mix(1.0,facetTone,bodyMask*.42);
+        mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
         mineral=mix(mineral,ivory,plateMask*.58);
         mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
         mineral+=vec3(.070,.42,.54)*vascular*(.16+.24*uEnergy);
@@ -1111,11 +1113,11 @@
 
         /* R1593 — a physical smoked-glass lens, not a glowing eye or HUD.
            Its shading is driven by the same studio reflections as the obsidian. */
-        vec2 lq=vec2(q.x,(q.y-.010)*1.08);
+        vec2 lq=vec2((q.x+.012)*1.16,(q.y-.018)*.96);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.155,.225,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.095,.165,lensD))*front;
-        float lensCore=(1.0-smoothstep(.034,.082,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.145,.205,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.092,.150,lensD))*front;
+        float lensCore=(1.0-smoothstep(.030,.067,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensLower=exp(-pow((lq.x-.026)/.052,2.0)-pow((lq.y+.052)/.036,2.0))*lensGlass;
