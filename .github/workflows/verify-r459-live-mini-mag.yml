@@ -65,6 +65,8 @@ jobs:
           grep -Fq 'formatx:minimagready' "$SYNC"
 
           grep -Fq 'data-fx-core-shape="sphere"' "$SYNC_CSS"
+          grep -Fq 'data-fx-core-shape="organism"' "$SYNC_CSS"
+          grep -Fq 'production-r1723-canonical-organism-glyph' "$SYNC_CSS"
           grep -Fq 'brightness(.99)' "$SYNC_CSS"
           grep -Fq 'contrast(1.18)' "$SYNC_CSS"
           grep -Fq 'saturate(1.06)' "$SYNC_CSS"
@@ -276,6 +278,7 @@ jobs:
             });
             assert.equal(state.renderer,'single-webgl-crystal-organism-r326');
             assert.equal(state.shapeSync,'ready-r528');
+            assert.equal(document.documentElement.dataset.fxCoreShapeR337,'organism');
             assert.ok(['breath','pulse'].includes(state.life),JSON.stringify(state));
             assert.equal(state.lifeContract,'primary-and-mini-compositor-breath-colour-depth-zero-js-idle');
             assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441');
