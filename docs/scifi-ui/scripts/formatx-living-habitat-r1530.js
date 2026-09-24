@@ -47,7 +47,7 @@
   let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,pointerSettleTimer=0,lastDrawAt=0;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
-  let physiologyEnergy=.34,physiologyBreath=.12,physiologyKind='homeostasis';
+  let physiologyEnergy=.34,physiologyBreath=.12,physiologyKind='homeostasis',habitatZone='core';
   let particles=[],filaments=[],glassArcs=[],mineralSpires=[],tissueBands=[],cellPods=[],capillaries=[],membranePockets=[],neuralRoots=[];
 
   function seeded(seed=0xF04A1530){
@@ -288,15 +288,16 @@
     /* R1585: near the top of the page, imply a real dark laboratory around
        the core using only broad volumetric masses. No target rings or hard
        beams: side architecture, overhead haze and a low reflected floor pool. */
-    const heroPresence=Math.max(0,1-scrollValue*4.2);
-    if(heroPresence>.01){
+    const heroFocus=Math.max(0,1-scrollValue*4.2);
+    const worldPresence=.26+.74*heroFocus;
+    if(worldPresence>.01){
       /* R1724 — cinematic FormatX world behind the organism. A distant planet,
          monumental luminous arch and reflective horizon bring the guardian into
          a coherent place without adding another animation loop or bitmap. */
-      const worldAlpha=heroPresence*(.72+.28*vitality);
+      const worldAlpha=worldPresence*(.72+.28*vitality);
       ctx.save();
 
-      const planetX=width*(MOBILE.matches?.20:.18);
+      const planetX=width*(MOBILE.matches?.20:.18)+pointerX*width*.026;
       const planetY=height*(MOBILE.matches?.16:.18);
       const planetR=Math.min(width,height)*(MOBILE.matches?.18:.16);
       const planet=ctx.createRadialGradient(
@@ -313,7 +314,7 @@
       ctx.lineWidth=Math.max(1,planetR*.012);
       ctx.beginPath();ctx.arc(planetX,planetY,planetR*.96,Math.PI*.94,Math.PI*1.92);ctx.stroke();
 
-      const archCx=width*(MOBILE.matches?.52:.55);
+      const archCx=width*(MOBILE.matches?.52:.55)+pointerX*width*.018;
       const archCy=height*.50;
       const archRx=width*(MOBILE.matches?.58:.48);
       const archRy=height*.66;
@@ -353,14 +354,14 @@
       ctx.restore();
 
       const leftMass=ctx.createLinearGradient(0,0,width*.30,0);
-      leftMass.addColorStop(0,'rgba(0,0,0,'+(.42*heroPresence)+')');
-      leftMass.addColorStop(.36,'rgba(4,10,13,'+(.22*heroPresence)+')');
+      leftMass.addColorStop(0,'rgba(0,0,0,'+(.42*worldPresence)+')');
+      leftMass.addColorStop(.36,'rgba(4,10,13,'+(.22*worldPresence)+')');
       leftMass.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=leftMass;ctx.fillRect(0,0,width*.34,height);
 
       const rightMass=ctx.createLinearGradient(width,0,width*.70,0);
-      rightMass.addColorStop(0,'rgba(0,0,0,'+(.46*heroPresence)+')');
-      rightMass.addColorStop(.38,'rgba(4,10,13,'+(.20*heroPresence)+')');
+      rightMass.addColorStop(0,'rgba(0,0,0,'+(.46*worldPresence)+')');
+      rightMass.addColorStop(.38,'rgba(4,10,13,'+(.20*worldPresence)+')');
       rightMass.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=rightMass;ctx.fillRect(width*.66,0,width*.34,height);
 
@@ -368,9 +369,9 @@
         width*(.51+pointerX*.004),height*.03,
         Math.max(width,height)*.45,
         [
-          [0,'rgba(205,229,230,'+(.030*heroPresence)+')'],
-          [.23,'rgba(112,154,161,'+(.016*heroPresence)+')'],
-          [.62,'rgba(35,65,72,'+(.006*heroPresence)+')'],
+          [0,'rgba(205,229,230,'+(.030*worldPresence)+')'],
+          [.23,'rgba(112,154,161,'+(.016*worldPresence)+')'],
+          [.62,'rgba(35,65,72,'+(.006*worldPresence)+')'],
           [1,'rgba(0,0,0,0)']
         ]
       );
@@ -380,9 +381,9 @@
       ctx.translate(width*.51,height*.86);
       ctx.scale(1,.25);
       const floorPool=ctx.createRadialGradient(0,0,0,0,0,width*.46);
-      floorPool.addColorStop(0,'rgba(128,190,198,'+(.032*heroPresence)+')');
-      floorPool.addColorStop(.28,'rgba(48,97,106,'+(.018*heroPresence)+')');
-      floorPool.addColorStop(.68,'rgba(18,47,55,'+(.007*heroPresence)+')');
+      floorPool.addColorStop(0,'rgba(128,190,198,'+(.032*worldPresence)+')');
+      floorPool.addColorStop(.28,'rgba(48,97,106,'+(.018*worldPresence)+')');
+      floorPool.addColorStop(.68,'rgba(18,47,55,'+(.007*worldPresence)+')');
       floorPool.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=floorPool;
       ctx.fillRect(-width*.55,-height*1.5,width*1.1,height*3);
@@ -390,7 +391,7 @@
 
       /* R1593: real environmental structure. Dark mineral spires and clear
          bio-glass arches frame the MAG without becoming HUD graphics. */
-      const structuralPresence=.18+.82*heroPresence;
+      const structuralPresence=.18+.82*worldPresence;
       for(const s of mineralSpires){
         const baseX=s.side>0?width*(1-s.x):width*s.x;
         const baseY=height*s.y;
@@ -500,7 +501,30 @@
   addEventListener('keydown',event=>{if(!event.repeat)pulse('key',.56);},{passive:true});
   addEventListener('focusin',()=>pulse('focus',.34),{passive:true});
   addEventListener('formatx:languagechange',()=>pulse('language',.44),{passive:true});
-  addEventListener('formatx:cinematicscene',()=>pulse('section',.56),{passive:true});
+  addEventListener('formatx:cinematicscene',event=>{
+    const kind=String(event.detail?.kind||'core');
+    const zones={
+      core:[.18,-.18,.52],
+      'live-os':[.34,-.08,.62],
+      mission:[-.24,.06,.58],
+      nerves:[-.46,-.12,.70],
+      organs:[.38,.04,.78],
+      heart:[-.22,.18,.92],
+      skeleton:[.44,-.02,.68],
+      proof:[-.12,.22,.72],
+      feedback:[.24,.28,.66],
+      beacon:[-.38,.12,.80],
+      loop:[.02,-.06,.74]
+    };
+    const zone=zones[kind]||zones.core;
+    habitatZone=kind;
+    targetX=Math.max(-1,Math.min(1,zone[0]));
+    targetY=Math.max(-1,Math.min(1,zone[1]));
+    physiologyEnergy=Math.max(physiologyEnergy,zone[2]);
+    ROOT.dataset.fxLivingHabitatZoneR1724=kind;
+    ROOT.dataset.fxLivingHabitatZoneEnergyR1724=zone[2].toFixed(2);
+    pulse('section-'+kind,.56+zone[2]*.34);
+  },{passive:true});
   addEventListener('formatx:menustatechange',event=>pulse(event.detail?.open?'menu-open':'menu-close',.48),{passive:true});
   addEventListener('formatx:storychapter',()=>pulse('story',.52),{passive:true});
   addEventListener('formatx:organismpanelopen',()=>pulse('question',.62),{passive:true});
@@ -549,6 +573,7 @@
   ROOT.dataset.fxLivingHabitatPerformanceR1721='event-driven-hidpi-sharp-background-zero-idle';
   ROOT.dataset.fxLivingHabitatInteractionR1722='all-site-inputs-synchronized-with-organism-zero-extra-loop';
   ROOT.dataset.fxLivingHabitatPhysiologyR1723='same-organism-energy-breath-tissue-neural-world';
+  ROOT.dataset.fxLivingHabitatR1724='sitewide-persistent-world-section-zones';
   ROOT.dataset.fxLivingHabitatWorldR1724='planet-monumental-arch-spires-reflective-horizon-blue-gold';
   ROOT.dataset.fxLivingHabitatWorldR1723='organic-pillars-membranes-cells-capillaries-neural-roots-no-mineral-stage';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
