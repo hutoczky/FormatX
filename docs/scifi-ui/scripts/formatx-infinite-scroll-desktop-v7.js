@@ -56,6 +56,7 @@
   root.dataset.fxLoopDesktopSettleR1724='scrollend-primary-idle-timer-fallback';
   root.dataset.fxLoopVisualContinuityR1724='scroll-frame-relative-authoritative-through-reflow';
   root.dataset.fxLoopSourceTopContinuityR1724='scroll-frame-source-top-authoritative-through-idle-reflow';
+  root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
   root.classList.add('fx-continuous-scroll-mode');
@@ -529,7 +530,7 @@
   function performTransfer(relative, source, sourceTopOverride=null) {
     if (relative == null || Date.now() < transferLockedUntil) return false;
     if (document.body.classList.contains('fx-organism-panel-open')) return false;
-    if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return false;
+    if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running') || root.classList.contains('fx-section-navigation-active')) return false;
 
     transferLockedUntil = Date.now() + LOOP_GUARD_MS;
     clearTimeout(desktopGuardRetryTimer);
@@ -586,6 +587,12 @@
 
   function commitDesktopTransfer() {
     if (isMobileFlow()) return;
+    if(root.classList.contains('fx-section-navigation-active')){
+      pendingDesktopRelative=null;
+      pendingDesktopSourceTop=null;
+      root.dataset.fxLoopLandingState='section-navigation';
+      return;
+    }
     const guardRemaining = transferLockedUntil - Date.now();
     if (guardRemaining > 0) {
       clearTimeout(desktopGuardRetryTimer);
@@ -629,6 +636,13 @@
 
   function transferIfNeeded() {
     scrollFrame = 0;
+    if(root.classList.contains('fx-section-navigation-active')){
+      pendingDesktopRelative=null;
+      pendingDesktopSourceTop=null;
+      pendingMobileRelative=null;
+      root.dataset.fxLoopLandingState='section-navigation';
+      return;
+    }
 
     // Read the cached transfer position before mutating classes/data attributes.
     // The scroll frame therefore contains no layout-dependent DOM reads.
