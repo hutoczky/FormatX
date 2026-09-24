@@ -20,6 +20,7 @@
   let activityTimer = 0;
   let mobileSettleTimer = 0;
   let desktopGuardRetryTimer = 0;
+  let idleGeometryResampleTimer = 0;
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
   let pendingDesktopSourceTop = null;
@@ -59,7 +60,7 @@
   root.dataset.fxLoopSourceTopContinuityR1724='scroll-frame-source-top-authoritative-through-idle-reflow';
   root.dataset.fxLoopSourceTopContinuityR1725='hero-local-loop-origin-zero-active-scroll-offsetparent-proof';
   root.dataset.fxLoopLandingSpaceR1725='hero-local-coordinate-space';
-  root.dataset.fxLoopGestureGeometryR1725='single-live-read-at-desktop-scroll-start-then-cache';
+  root.dataset.fxLoopGestureGeometryR1725='idle-settle-resample-then-cache-only-during-scroll';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -510,6 +511,18 @@
     captureCanonicalLandingOrigin();
     if (isMobileFlow()) scheduleMobileTransfer();
     else commitDesktopTransfer();
+    /* R1725f — content-visibility and deferred first-paint CSS can finish their
+       layout after the normal 170 ms scroll-idle boundary. Re-sample once more
+       while fully idle so the next gesture starts from the same bridge geometry
+       the user can actually see. No continuous polling and no scroll-frame read. */
+    clearTimeout(idleGeometryResampleTimer);
+    idleGeometryResampleTimer=window.setTimeout(()=>{
+      idleGeometryResampleTimer=0;
+      if(root.dataset.fxScrollActivity==='idle'&&!root.classList.contains('fx-seamless-loop-transfer')){
+        refreshGeometry();
+        root.dataset.fxLoopIdleGeometryR1725='late-idle-resampled';
+      }
+    },280);
   }
 
   function landingTarget(relative, sourceTopOverride=null) {
@@ -626,22 +639,20 @@
        the cached bridge threshold stale, while the scroll hot path stays read-free. */
     const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
     refreshGeometry();
-    /* R1725d — idle geometry is authoritative once layout has settled.
-       A scroll-frame relative value may have been measured against an older
-       bridgeTop and can therefore be hundreds of pixels stale. Use the fresh
-       bridge-relative coordinate first; retain the cached intent only when the
-       refreshed bridge is no longer reachable at the document end. */
-    let relative=bridgeRelative();
-    if(relative!=null){
-      root.dataset.fxLoopDesktopRecoveryR1724='fresh-idle-relative-authoritative';
-    }else if(cachedRelative!=null && loopGeometry.ready && scrollY>=Math.max(0,loopGeometry.documentEnd-4)){
+    /* R1725f — preserve the bridge-relative position captured from the latest
+       idle-settled geometry. A fresh read at commit time is too late because
+       content-visibility may already have reflowed the document underneath the
+       user's scroll position. */
+    let relative=null;
+    if(cachedRelative!=null&&loopGeometry.ready){
       relative=Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)));
-      root.dataset.fxLoopDesktopRecoveryR1724='cached-end-intent-fallback';
+      root.dataset.fxLoopDesktopRecoveryR1724='settled-cache-relative-authoritative';
     }else{
-      root.dataset.fxLoopDesktopRecoveryR1724='no-boundary';
+      relative=bridgeRelative();
+      root.dataset.fxLoopDesktopRecoveryR1724=relative==null?'no-boundary':'fresh-relative-no-cache';
     }
     root.dataset.fxLoopDesktopGeometryR1715 = loopGeometry.ready ? 'fresh-idle-sample' : 'unavailable';
-    root.dataset.fxLoopDesktopRecoveryR1723 = 'fresh-idle-relative-with-cached-end-fallback';
+    root.dataset.fxLoopDesktopRecoveryR1723 = 'idle-settled-cache-preserved-across-commit-reflow';
     if (relative == null) {
       pendingDesktopRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
@@ -659,7 +670,7 @@
     const heroLoopOrigin=0;
     root.dataset.fxLoopDesktopSourceTopR1724='0';
     root.dataset.fxLoopDesktopLandingR1725='cached-relative-hero-local-origin';
-    performTransfer(relative,'visual-bridge-desktop-idle-r1725e',heroLoopOrigin);
+    performTransfer(relative,'visual-bridge-desktop-idle-r1725f',heroLoopOrigin);
   }
 
   function transferIfNeeded() {
@@ -672,24 +683,13 @@
       return;
     }
 
-    const startingDesktopGesture=!isMobileFlow() && root.dataset.fxScrollActivity!=='scrolling';
-    // Normal frames stay cache-only. At the first desktop scroll frame we allow
-    // one live bridge read so late font/Guardian/layout shifts cannot poison the
-    // entire gesture with an obsolete bridgeTop. This is a single read per
-    // gesture, not a per-frame layout query.
+    clearTimeout(idleGeometryResampleTimer);
+    idleGeometryResampleTimer=0;
+    // Scroll frames stay strictly cache-only. The late-idle resample above keeps
+    // this geometry aligned with the visible bridge before a new gesture begins.
     let relative = bridgeRelative();
     const cachedGeometry=loopGeometry;
-    if(startingDesktopGesture && bridge?.isConnected){
-      const liveRect=bridge.getBoundingClientRect();
-      const liveBridgeTop=scrollY+liveRect.top;
-      const liveRelative=scrollY-liveBridgeTop;
-      const liveSourceHeight=Math.max(0,cachedGeometry.sourceHeight||sourceHero?.offsetHeight||0);
-      if(liveRelative>=-2){
-        relative=Math.max(0,Math.min(liveRelative,Math.max(0,liveSourceHeight-2)));
-        root.dataset.fxLoopGestureGeometryR1725='live-first-frame-relative-captured';
-        root.dataset.fxLoopGestureRelativeR1725=String(Math.round(relative));
-      }
-    }
+    if(relative!=null)root.dataset.fxLoopGestureRelativeR1725=String(Math.round(relative));
     /* R1724 — preserve the user's boundary intent across late layout reflow.
        If the scroll reached the cached document end, latch the corresponding
        bridge-relative position so an image/font/Guardian reflow cannot cancel
