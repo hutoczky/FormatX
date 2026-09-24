@@ -19,11 +19,11 @@ const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=2026
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260924-r1723-living-response';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260924-r1723-canonical-living-organism';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260924-r1723-physiology-v2';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
 // compatibility-contract: r484-bounded-surface-window
-const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260921-r1383-full-surface-window';
+const GOVERNOR='/scifi-ui/scripts/formatx-mobile-render-governor-r426.js?v=20260924-r1723-organism-settle';
 const LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260920-r629-deterministic-semantic-sweep';
 const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 let started=false;
