@@ -17,7 +17,8 @@
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
-  const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
+  const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
+  const LOW_POWER = MOBILE && CONSTRAINED;
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
@@ -750,6 +751,17 @@
       startR649Fallback();
       return;
     }
+    /* R1727c — never force a heavyweight continuous Three intro onto a
+       constrained CPU/GPU path. The existing R649 cinematic keeps the same
+       10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
+       proof frames remain on the Three owner so design evidence stays exact. */
+    if(CONSTRAINED && !HAS_VISUAL_FRAME){
+      ROOT.dataset.fxMagBirthRendererR1727='constrained-reference-film';
+      overlay.dataset.fxRenderer='fallback-constrained';
+      startR649Fallback();
+      if(filmRenderer)filmRenderer.resize?.();
+      return;
+    }
     ensureThreeOwner();
     if(filmRenderer){
       filmRenderer.resize?.();
@@ -1025,7 +1037,8 @@
     ROOT.dataset.fxMagBirthPerformanceR1640='60fps-priority-three-owner-preemptive-quality-shedding';
     ROOT.dataset.fxMagBirthPerformanceR1667='no-30fps-fallback-user-path-60fps-minimum-target';
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
-    ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-zero-continuous-js-render-loop':'desktop-full-native-raf';
+    ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-adaptive-cinematic':'desktop-full-native-raf';
+    ROOT.dataset.fxMagBirthPerformanceR1727=CONSTRAINED?'constrained-reference-film-no-heavy-three-loop':'hardware-three-adaptive-quality';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
