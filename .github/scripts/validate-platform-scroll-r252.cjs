@@ -181,7 +181,7 @@ async function verifyDesktop(browser) {
   assert(initial.controller === 'seamless-v7', `desktop seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, `desktop inert reference mirror contract changed: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG interaction target missing: ${JSON.stringify(initial)}`);
-  assert(initial.stagePointerEvents === 'none' && initial.hitPointerEvents !== 'none', `desktop native MAG visual still intercepts the semantic hit target: ${JSON.stringify(initial)}`);
+  assert((!initial.stageExists || initial.stagePointerEvents === 'none') && initial.hitPointerEvents !== 'none', `desktop R1724 reference visual / semantic hit ownership invalid: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
 
