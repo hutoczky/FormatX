@@ -51,7 +51,8 @@ function next(source){
   const shape=apply(index,source||'mag-button-living-response');
   try{
     const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
-    core?.toggleShape?.((source||'mag-button')+'-living-response-r1717');
+    core?.surfacePulse?.((source||'mag-button')+'-physiology-r1723');
+    core?.requestRender?.(3);
   }catch(_){}
   return shape;
 }
@@ -74,12 +75,8 @@ document.addEventListener('click',event=>{
   const shape=next('mag-button');
   try{sessionStorage.setItem('formatx-core-shape-r337',shape);}catch(_){}
   queueMicrotask(()=>{
-    try{
-      const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
-      core?.setShape?.(shape,'mag-button-r1666-confirm');
-      root.dataset.fxCoreShapeR337=shape;
-      syncButton();
-    }catch(_){}
+    root.dataset.fxCoreShapeR337='organism';
+    syncButton();
   });
 },true);
 
