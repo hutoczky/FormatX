@@ -22,18 +22,12 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
 
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .970 !important;
+    opacity: 1 !important;
     image-rendering: auto !important;
     filter:
-      brightness(.985)
-      contrast(.855)
-      saturate(1.010)
-      blur(.30px) !important;
+      brightness(1.12) contrast(1.055) saturate(1.12) blur(0) !important;
     -webkit-filter:
-      brightness(.985)
-      contrast(.855)
-      saturate(1.010)
-      blur(.30px) !important;
+      brightness(1.12) contrast(1.055) saturate(1.12) blur(0) !important;
   }
 
   /* Keep the skip-navigation link fully accessible to keyboard users without
@@ -82,3 +76,5 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
 
 /* production-r474-softer-mobile-glow-feathered-facets */
 /* deploy-r474-live-proof */
+
+/* production-r1722-no-softening */
