@@ -101,6 +101,20 @@ html[data-fx-intro-prepaint-r1611="show"] #fx-mag-birth-prepaint-r1606{
   display:block!important;
   visibility:visible!important;
 }
+#fx-mag-birth-prepaint-r1606>.fxb-particles{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:none!important;
+  background:#020507!important;
+  contain:strict!important;
+}
 #fx-mag-birth-prepaint-r1606>.fxb-lcp-brand-r1603{
   opacity:0;
   animation:fxb-r1606-first-brand .001s 80ms forwards;
@@ -159,4 +173,7 @@ html[data-fx-mag-birth-live="active"] body>.topbar{
 }
 /* production-r1620-mobile-early-contentful-prepaint */
 
-/* production-r1679-prepaint-fixed-from-first-byte-zero-flow-cls */
+/* R1727d — parser-owned canvas keeps the cinematic surface at identical
+   viewport geometry before and after the live intro runtime adopts the shell. */
+/* production-r1727d-parser-canvas-zero-appearance-cls */
+
