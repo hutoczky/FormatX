@@ -60,8 +60,12 @@
       this.renderAverage=0;
       this.frameIntervalAverage=this.targetFrameMs;
       this.previousFrameTime=0;
-      this.qualityScale=this.lowPowerProfile?.26:(this.mobileProfile?.36:.50);
-      this.qualityCeiling=this.lowPowerProfile?.44:(this.mobileProfile?.62:.74);
+      /* R1722 — the primary intro renderer must begin at genuinely sharp
+         mobile resolution. The former 0.36× quality and 0.80 DPR cap yielded
+         only ~0.29 effective DPR on phones. */
+      this.qualityScale=this.lowPowerProfile?.66:(this.mobileProfile?.92:.94);
+      this.qualityCeiling=this.lowPowerProfile?.82:(this.mobileProfile?1.00:1.00);
+      this.qualityFloor=this.lowPowerProfile?.56:(this.mobileProfile?.72:.42);
       this.lastQualityAdjust=0;
       this.renderPeak=0;
       this.framePeak=this.targetFrameMs;
@@ -87,7 +91,7 @@
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:this.highDetail && (devicePixelRatio||1)<=1.5,
+        antialias:!this.lowPowerProfile && (this.mobileProfile ? (devicePixelRatio||1)<=3.5 : true),
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
@@ -102,6 +106,7 @@
       this.softwareRenderer=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(rendererName);
       if(this.softwareRenderer)this.highDetail=false;
       document.documentElement.dataset.fxMagBirthGpuR1541=this.softwareRenderer?'software-adaptive':'hardware-full';
+      document.documentElement.dataset.fxMagBirthQualityR1722='primary-three-hidpi-msaa-gradual-adaptive-60hz';
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -1453,10 +1458,10 @@
       const dpr=this.deterministicFrame
         ? Math.min(devicePixelRatio||1,1.00)
         : this.softwareRenderer
-          ? Math.min(devicePixelRatio||1,this.width<900 ? 0.58 : 0.54)
+          ? Math.min(devicePixelRatio||1,this.width<900 ? Math.max(.82,.98*this.qualityScale) : Math.max(.70,.90*this.qualityScale))
           : Math.min(
               devicePixelRatio||1,
-              (this.mobileProfile?.80:.94)*this.qualityScale
+              (this.mobileProfile?2.00:1.55)*this.qualityScale
             );
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
@@ -1835,7 +1840,7 @@
         const panicFrame=this.frameIntervalAverage>16.75||renderCost>6.4||this.framePeak>17.05;
         if(panicFrame && time-this.lastQualityAdjust>18){
           const previous=this.qualityScale;
-          this.qualityScale=Math.max(.14,this.qualityScale-(this.framePeak>20||renderCost>9?.22:.12));
+          this.qualityScale=Math.max(this.qualityFloor,this.qualityScale-(this.mobileProfile?(this.framePeak>20||renderCost>9?.10:.055):(this.framePeak>20||renderCost>9?.18:.10)));
           this.panicFrames=24;
           this.stableBudgetFrames=0;
           if(Math.abs(previous-this.qualityScale)>.001){
@@ -1854,11 +1859,11 @@
           const renderPressure=this.renderAverage>4.4||this.renderPeak>5.8;
           const severeRenderPressure=this.renderAverage>5.8||this.renderPeak>7.4;
           if(severeFramePressure||severeRenderPressure){
-            this.qualityScale=Math.max(.16,this.qualityScale-.20);
+            this.qualityScale=Math.max(this.qualityFloor,this.qualityScale-(this.mobileProfile?.075:.16));
             this.stableBudgetFrames=0;
             this.panicFrames=Math.max(this.panicFrames,12);
           }else if(framePressure||renderPressure){
-            this.qualityScale=Math.max(.16,this.qualityScale-.09);
+            this.qualityScale=Math.max(this.qualityFloor,this.qualityScale-(this.mobileProfile?.032:.075));
             this.stableBudgetFrames=0;
           }else{
             if(this.panicFrames>0)this.panicFrames-=1;
