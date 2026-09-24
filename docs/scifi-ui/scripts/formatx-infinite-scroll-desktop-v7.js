@@ -811,7 +811,12 @@
            live in the same layout state as scrollY. A previously idle snapshot
            can be stale after font/deferred-style reflow and miss a programmatic
            or real fast boundary crossing. We still read it only once per gesture. */
-        const liveEventBridgeTop=Number(bridge.offsetTop);
+        /* R1727d — offsetTop can change coordinate space while scroll-time
+           containing blocks/compositor classes are active. rect.top + scrollY
+           remains a document coordinate, so a normal mid-page scroll can never
+           be mistaken for entering the loop bridge. */
+        const liveRect=bridge.getBoundingClientRect();
+        const liveEventBridgeTop=Number(scrollY+liveRect.top);
         const eventBridgeTop=Number.isFinite(liveEventBridgeTop)
           ? liveEventBridgeTop
           : stableDesktopBridgeTop;
@@ -823,7 +828,7 @@
           pendingDesktopRelative=projected>=-2
             ? Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)))
             : null;
-          root.dataset.fxLoopGestureGeometryR1727='single-live-bridge-snapshot-per-gesture';
+          root.dataset.fxLoopGestureGeometryR1727='single-live-document-rect-snapshot-per-gesture';
           root.dataset.fxLoopGestureBridgeTopR1727=String(Math.round(eventBridgeTop));
           root.dataset.fxLoopGestureRelativeR1727=String(Math.round(projected));
         }
