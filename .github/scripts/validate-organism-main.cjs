@@ -124,6 +124,9 @@ async function validateDesktop() {
     await page.waitForTimeout(550);
     mark('desktop: close-control-passed');
 
+    const menuToggle=page.locator('#menu-toggle');
+    await menuToggle.click();
+    await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
     const pricingNav=page.locator('#main-nav a[href="#pricing"]');
     await pricingNav.click();
     await page.waitForFunction(() => !document.querySelector('[data-organism-panel="pricing"]').hidden);
