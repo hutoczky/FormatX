@@ -348,19 +348,20 @@
       Number(navigator.hardwareConcurrency||8)<=4 ||
       Number(navigator.deviceMemory||8)<=4
     );
+    let runtimeConstrained=constrained;
     let qualityScale=proofFrame
       ? 1
-      : constrained
-        ? (innerWidth<900?.68:.62)
-        : (innerWidth<900?.98:.82);
-    let renderAverage=0,lastQualityAdjust=0;
+      : runtimeConstrained
+        ? (innerWidth<900?.58:.56)
+        : (innerWidth<900?.92:.78);
+    let renderAverage=0,lastQualityAdjust=0,panicSamples=0;
     function resize(){
       sw=innerWidth;sh=innerHeight;
       const baseDpr=proofFrame
         ? (sw<900?2.05:1.45)
-        : constrained
-          ? (sw<900?1.45:1.15)
-          : (sw<900?2.05:1.45);
+        : runtimeConstrained
+          ? (sw<900?1.18:1.05)
+          : (sw<900?1.78:1.34);
       dpr=Math.min(devicePixelRatio||1,baseDpr*qualityScale);
       canvas.width=Math.max(1,Math.round(sw*dpr));canvas.height=Math.max(1,Math.round(sh*dpr));canvas.style.width=sw+'px';canvas.style.height=sh+'px';
       ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -377,20 +378,48 @@
 
       const cost=performance.now()-started;
       renderAverage=renderAverage?renderAverage*.82+cost*.18:cost;
-      if(time-lastQualityAdjust>700){
+
+      /* R1727g — capability hints are not enough: emulated, VM and thermally
+         constrained devices can report many CPU cores while a canvas frame is
+         still far over budget. The first expensive real frame immediately
+         switches to the low-DPR path so repeated 100–250 ms tasks cannot build
+         up through the 10 s cinematic. */
+      if(!proofFrame && cost>24){
+        panicSamples+=1;
+        if(panicSamples>=1){
+          const previous=qualityScale;
+          runtimeConstrained=true;
+          qualityScale=Math.min(qualityScale,sw<900?.34:.38);
+          if(Math.abs(previous-qualityScale)>.001 || cost>42){
+            lastQualityAdjust=time;
+            resize();
+          }
+        }
+      }else if(cost<9){
+        panicSamples=Math.max(0,panicSamples-1);
+      }
+
+      if(time-lastQualityAdjust>520){
         const previous=qualityScale;
-        if(renderAverage>14.8)qualityScale=Math.max(sw<900?.76:.48,qualityScale-(sw<900?.045:.08));
-        else if(renderAverage>10.5)qualityScale=Math.max(sw<900?.76:.48,qualityScale-(sw<900?.020:.03));
-        else if(renderAverage<7.0)qualityScale=Math.min(sw<900?1.00:.92,qualityScale+.012);
+        const floor=runtimeConstrained
+          ? (sw<900?.28:.30)
+          : (sw<900?.58:.42);
+        const ceiling=runtimeConstrained
+          ? (sw<900?.62:.64)
+          : (sw<900?.96:.88);
+        if(renderAverage>16.0)qualityScale=Math.max(floor,qualityScale-(sw<900?.10:.12));
+        else if(renderAverage>10.5)qualityScale=Math.max(floor,qualityScale-(sw<900?.050:.060));
+        else if(renderAverage<6.5)qualityScale=Math.min(ceiling,qualityScale+.010);
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=time;
           resize();
         }
       }
       document.documentElement.dataset.fxMagFallbackTargetFpsR1601='60';
-      document.documentElement.dataset.fxMagFallbackBudgetR1727=constrained
-        ? 'constrained-low-dpr-adaptive-recovery'
+      document.documentElement.dataset.fxMagFallbackBudgetR1727=runtimeConstrained
+        ? 'measured-constrained-low-dpr-fast-panic-recovery'
         : 'full-photographic-adaptive';
+      document.documentElement.dataset.fxMagFallbackFramePanicR1727=String(panicSamples);
       document.documentElement.dataset.fxMagFallbackRenderMsR1601=renderAverage.toFixed(2);
       document.documentElement.dataset.fxMagFallbackQualityScaleR1601=qualityScale.toFixed(2);
     }
