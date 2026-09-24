@@ -79,7 +79,8 @@ jobs:
                 shape:document.documentElement.dataset.fxCoreShapeR337||'',
                 morph:Number(window.FormatXCoreMobileV69?.morph),
                 source:document.documentElement.dataset.fxCoreMorphSource||'',
-                pulse:document.documentElement.dataset.fxCoreSurfacePulseR454||''
+                pulse:document.documentElement.dataset.fxCoreSurfacePulseR454||'',
+                token:document.documentElement.dataset.fxCoreLivingResponseTokenR1723||'0'
               }));
               const mag=page.locator('.fx-reference-mag-button').first();
               assert(await mag.isVisible(),'MAG control is not visible');
@@ -91,19 +92,20 @@ jobs:
                   && root.dataset.fxCoreShape==='organism'
                   && Number.isFinite(morph)
                   && Math.abs(morph)<.001
-                  && (root.dataset.fxCoreMorphSource||'')!==previous.source;
+                  && (root.dataset.fxCoreLivingResponseTokenR1723||'0')!==previous.token;
               },before,{timeout:10000});
               const after=await page.evaluate(()=>({
                 shape:document.documentElement.dataset.fxCoreShapeR337||'',
                 settled:document.documentElement.dataset.fxCoreShape||'',
                 morph:Number(window.FormatXCoreMobileV69?.morph),
                 source:document.documentElement.dataset.fxCoreMorphSource||'',
-                pulse:document.documentElement.dataset.fxCoreSurfacePulseR454||''
+                pulse:document.documentElement.dataset.fxCoreSurfacePulseR454||'',
+                token:document.documentElement.dataset.fxCoreLivingResponseTokenR1723||'0'
               }));
               samples.push({before,after});
               assert(after.shape==='organism'&&after.settled==='organism','MAG left canonical organism state: '+JSON.stringify(samples));
               assert(Math.abs(after.morph)<.001,'canonical organism morph changed: '+JSON.stringify(samples));
-              assert(after.source!==before.source,'MAG activation produced no physiological source change: '+JSON.stringify(samples));
+              assert(after.token!==before.token,'MAG activation produced no living-response token change: '+JSON.stringify(samples));
             }
             const finalShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
             assert(finalShape==='organism','MAG activation changed canonical identity: '+JSON.stringify({startShape,finalShape,samples}));
