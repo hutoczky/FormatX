@@ -1297,6 +1297,7 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
+    root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
@@ -2037,8 +2038,8 @@
     const publicApi={
       version:VERSION,
       revision:REVISION,
-      renderer:'single-webgl-crystal-organism-r326',
-      livingForm:'single-photoreal-organism-r1711',
+      renderer:'single-webgl-living-organism-r326',
+      livingForm:'single-photoreal-organism-r1723',
       material:'biomechanical-gunmetal-living-core-r614',
       geometry:'armored-four-lobe-core-with-native-tendrils-r614',
       referenceGeometry:'unified-armored-diamond-pod-r669',
@@ -2089,12 +2090,12 @@
     root.dataset.fxCoreMobileV55='ready-v55';
     root.dataset.fxCoreReferenceLock=READY;
     root.dataset.fxCoreReal3d=READY;
-    root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
+    root.dataset.fxCoreRenderer='single-webgl-living-organism-r326';
     root.dataset.fxCoreCapabilityTierR620=constrainedMobile?'mobile-constrained-one-pass':constrained?'desktop-constrained-two-pass':mobile?'mobile-full-two-pass':'desktop-full-three-pass';
     root.dataset.fxCoreCapabilityR620=`${hardwareConcurrency}c-${deviceMemory}gb`;
-    root.dataset.fxCoreMaterial='biomechanical-gunmetal-living-core-r614';
-    root.dataset.fxCoreGeometry='armored-four-lobe-core-with-native-tendrils-r614';
-    root.dataset.fxCoreGenesisMagR614='dna-to-cell-to-biomechanical-native-mag';
+    root.dataset.fxCoreMaterial='cortical-bioceramic-living-tissue-r1723';
+    root.dataset.fxCoreGeometry='cortical-cellular-organism-with-native-tendrils-r1723';
+    root.dataset.fxCoreGenesisMagR614='dna-to-cell-to-cortical-living-organism-r1723';
     root.dataset.fxCoreNativeTendrilsR614=String(geometry.tendrils||0);
     root.dataset.fxCoreGenomeR614='native-double-helix-energy-lattice';
     root.dataset.fxCoreGenomeContinuityR614='r533-dna-genesis-to-same-r326-native-core';
@@ -2102,9 +2103,10 @@
     root.dataset.fxCoreGeometryTopology=geometry.topology;
     root.dataset.fxCoreVertexCount=String(geometry.count);
     root.dataset.fxCoreDimension='native-closed-3d-volume-r413';
-    root.dataset.fxCoreMorphGeometryR413='single-fixed-living-organism-topology-r1711';
-    root.dataset.fxCoreMorphNormalsR413='single-organism-photographic-surface-normals-r1711';
+    root.dataset.fxCoreMorphGeometryR413='single-fixed-living-organism-topology-r1723';
+    root.dataset.fxCoreMorphNormalsR413='single-organism-photographic-surface-normals-r1723';
     root.dataset.fxCoreLivingIdentityR1711='same-organism-intro-to-site-no-form-swap';
+    root.dataset.fxCoreLivingIdentityR1723='canonical-organism-cortical-cellular-neural-no-alternate-form';
     root.dataset.fxCoreReferenceGeometry='armored-four-lobe-core-native-tendrils-r614';
     root.dataset.fxCoreReferenceGeometryR669='unified-armored-diamond-pod-silver-crown-cyan-optical-well-native-tendrils';
     root.dataset.fxCoreReferenceGeometryR673='convex-compact-armored-pod-no-star-silhouette';
