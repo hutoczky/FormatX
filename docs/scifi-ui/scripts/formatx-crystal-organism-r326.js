@@ -335,7 +335,7 @@
         crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.72:.90;
+        const smoothWeight=software?.68:(mobile?.80:.84);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -601,9 +601,9 @@
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||faceNormal;
         const hybridNormal=normalize([
-          smoothNormal[0]*.94+faceNormal[0]*.06,
-          smoothNormal[1]*.94+faceNormal[1]*.06,
-          smoothNormal[2]*.94+faceNormal[2]*.06
+          smoothNormal[0]*.78+faceNormal[0]*.22,
+          smoothNormal[1]*.78+faceNormal[1]*.22,
+          smoothNormal[2]*.78+faceNormal[2]*.22
         ]);
         crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
@@ -1533,6 +1533,7 @@
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
     root.dataset.fxNativeMagGuardianR1724='asymmetric-crystal-organic-feline-dragon-biocrystal-silhouette';
+    root.dataset.fxNativeMagFacetR1724='polished-crystal-planes-preserved-with-hybrid-normals';
     root.dataset.fxNativeMagPaletteR1724='pearl-cyan-indigo-warm-studio-rim';
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
     root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
