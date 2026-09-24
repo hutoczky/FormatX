@@ -31,6 +31,9 @@
   let repairTimer = 0;
   let geometryFrame = 0;
   let geometryObserver = null;
+  let sectionSettledObserver = null;
+  let stableDesktopBridgeTop = null;
+  let stableDesktopSourceHeight = 0;
   let layoutWidth = innerWidth;
   let initialHeroGuardApplied = false;
   let loopGeometry = Object.freeze({
@@ -418,17 +421,38 @@
     return true;
   }
 
+  function captureStableDesktopGeometry(reason='idle') {
+    if (isMobileFlow() || !bridge?.isConnected || !sourceHero?.isConnected) return false;
+    const top=Number(bridge.offsetTop);
+    const sourceHeight=Number(sourceHero.offsetHeight);
+    if(!Number.isFinite(top) || !Number.isFinite(sourceHeight))return false;
+    stableDesktopBridgeTop=Math.max(0,top);
+    stableDesktopSourceHeight=Math.max(0,sourceHeight);
+    root.dataset.fxLoopStableBridgeTopR1727=String(Math.round(stableDesktopBridgeTop));
+    root.dataset.fxLoopStableSourceHeightR1727=String(Math.round(stableDesktopSourceHeight));
+    root.dataset.fxLoopStableGeometrySourceR1727=reason;
+    return true;
+  }
+
   function scheduleGeometryRefresh() {
     if (geometryFrame) return;
     geometryFrame = requestAnimationFrame(() => {
       geometryFrame = 0;
       refreshGeometry();
+      const quiet=root.dataset.fxScrollActivity!=='scrolling'
+        && !root.classList.contains('fx-page-scrolling')
+        && !root.classList.contains('fx-seamless-loop-transfer')
+        && !root.classList.contains('fx-section-navigation-active')
+        && !Number.isFinite(desktopGestureAnchorY);
+      if(quiet)captureStableDesktopGeometry('idle-geometry-refresh');
     });
   }
 
   function observeGeometry() {
     geometryObserver?.disconnect();
     geometryObserver = null;
+    sectionSettledObserver?.disconnect();
+    sectionSettledObserver = null;
     if (!('ResizeObserver' in window) || !bridge || !sourceHero) return;
 
     geometryObserver = new ResizeObserver(() => scheduleGeometryRefresh());
@@ -439,11 +463,27 @@
     if (footer) geometryObserver.observe(footer);
     geometryObserver.observe(sourceHero);
     geometryObserver.observe(bridge);
+
+    if('MutationObserver' in window){
+      sectionSettledObserver=new MutationObserver(records=>{
+        if(!records.some(record=>record.attributeName==='data-fx-section-navigation-settled-r581'))return;
+        captureStableDesktopGeometry('section-navigation-settled');
+        requestAnimationFrame(()=>{
+          if(!root.classList.contains('fx-page-scrolling')
+            && !root.classList.contains('fx-section-navigation-active')){
+            captureStableDesktopGeometry('section-navigation-settled-raf');
+          }
+        });
+      });
+      sectionSettledObserver.observe(root,{attributes:true,attributeFilter:['data-fx-section-navigation-settled-r581']});
+    }
   }
 
   function removeBridge() {
     geometryObserver?.disconnect();
     geometryObserver = null;
+    sectionSettledObserver?.disconnect();
+    sectionSettledObserver = null;
     bridge?.remove();
     document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"],[data-fx-loop-mirror]').forEach(element => {
       if (element !== bridge) element.remove();
@@ -478,6 +518,7 @@
     // Geometry is deliberately sampled outside the scroll hot path. This avoids
     // style writes followed by offset/scrollHeight reads on every animation frame.
     refreshGeometry();
+    captureStableDesktopGeometry('bridge-build');
     observeGeometry();
     scheduleGeometryRefresh();
     scheduleMirrorCapture(80);
@@ -766,8 +807,10 @@
       && !root.classList.contains('fx-section-navigation-active')
       && bridge?.isConnected){
       if(!Number.isFinite(desktopGestureAnchorY)){
-        const eventBridgeTop=Number(bridge.offsetTop);
-        const eventSourceHeight=Math.max(0,loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
+        const eventBridgeTop=Number.isFinite(stableDesktopBridgeTop)
+          ? stableDesktopBridgeTop
+          : Number(bridge.offsetTop);
+        const eventSourceHeight=Math.max(0,stableDesktopSourceHeight||loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
         if(Number.isFinite(eventBridgeTop)){
           desktopGestureAnchorY=scrollY;
           desktopGestureAnchorRelative=scrollY-eventBridgeTop;
@@ -780,7 +823,7 @@
           root.dataset.fxLoopGestureRelativeR1727=String(Math.round(projected));
         }
       }else{
-        const eventSourceHeight=Math.max(0,loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
+        const eventSourceHeight=Math.max(0,stableDesktopSourceHeight||loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
         const projected=desktopGestureAnchorRelative+(scrollY-desktopGestureAnchorY);
         pendingDesktopRelative=projected>=-2
           ? Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)))
