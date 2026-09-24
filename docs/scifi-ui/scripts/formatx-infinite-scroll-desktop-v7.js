@@ -59,6 +59,7 @@
   root.dataset.fxLoopSourceTopContinuityR1724='scroll-frame-source-top-authoritative-through-idle-reflow';
   root.dataset.fxLoopSourceTopContinuityR1725='hero-local-loop-origin-zero-active-scroll-offsetparent-proof';
   root.dataset.fxLoopLandingSpaceR1725='hero-local-coordinate-space';
+  root.dataset.fxLoopGestureGeometryR1725='single-live-read-at-desktop-scroll-start-then-cache';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -658,7 +659,7 @@
     const heroLoopOrigin=0;
     root.dataset.fxLoopDesktopSourceTopR1724='0';
     root.dataset.fxLoopDesktopLandingR1725='cached-relative-hero-local-origin';
-    performTransfer(relative,'visual-bridge-desktop-idle-r1725d',heroLoopOrigin);
+    performTransfer(relative,'visual-bridge-desktop-idle-r1725e',heroLoopOrigin);
   }
 
   function transferIfNeeded() {
@@ -671,15 +672,28 @@
       return;
     }
 
-    // Read the cached transfer position before mutating classes/data attributes.
-    // The scroll frame therefore contains no layout-dependent DOM reads.
+    const startingDesktopGesture=!isMobileFlow() && root.dataset.fxScrollActivity!=='scrolling';
+    // Normal frames stay cache-only. At the first desktop scroll frame we allow
+    // one live bridge read so late font/Guardian/layout shifts cannot poison the
+    // entire gesture with an obsolete bridgeTop. This is a single read per
+    // gesture, not a per-frame layout query.
     let relative = bridgeRelative();
+    const cachedGeometry=loopGeometry;
+    if(startingDesktopGesture && bridge?.isConnected){
+      const liveRect=bridge.getBoundingClientRect();
+      const liveBridgeTop=scrollY+liveRect.top;
+      const liveRelative=scrollY-liveBridgeTop;
+      const liveSourceHeight=Math.max(0,cachedGeometry.sourceHeight||sourceHero?.offsetHeight||0);
+      if(liveRelative>=-2){
+        relative=Math.max(0,Math.min(liveRelative,Math.max(0,liveSourceHeight-2)));
+        root.dataset.fxLoopGestureGeometryR1725='live-first-frame-relative-captured';
+        root.dataset.fxLoopGestureRelativeR1725=String(Math.round(relative));
+      }
+    }
     /* R1724 — preserve the user's boundary intent across late layout reflow.
-       This uses only cached geometry in the scroll hot path: no new layout read.
        If the scroll reached the cached document end, latch the corresponding
        bridge-relative position so an image/font/Guardian reflow cannot cancel
        the already-entered seamless-loop gesture before idle commit. */
-    const cachedGeometry=loopGeometry;
     const cachedEndIntent=cachedGeometry.ready
       && scrollY>=Math.max(0,cachedGeometry.documentEnd-4);
     if(relative==null&&cachedEndIntent){
