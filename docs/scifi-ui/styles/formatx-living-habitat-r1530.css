@@ -1559,3 +1559,32 @@ html:root:root body.living-architecture footer.site-footer{
 /* production-r1724-overlay-pointer-safe */
 
 /* production-r1724-zero-blend-sitewide-habitat */
+
+/* R1724 — canonical mobile ASK interaction floor.
+   Late owner defeats retired 46px reference-layout compatibility rules. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204{
+    pointer-events:auto!important;
+    overflow:visible!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    min-width:52px!important;
+    overflow:visible!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask{
+    width:52px!important;
+    min-width:52px!important;
+    max-width:52px!important;
+    height:52px!important;
+    min-height:52px!important;
+    max-height:52px!important;
+    flex-basis:52px!important;
+    transform:none!important;
+    translate:none!important;
+    scale:1!important;
+    pointer-events:auto!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+}
+/* production-r1724-mobile-ask-52px-hit-target */
