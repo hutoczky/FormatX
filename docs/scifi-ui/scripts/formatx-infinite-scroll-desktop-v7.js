@@ -585,17 +585,26 @@
     /* R1715: desktop now mirrors the mobile idle contract. Re-measure only
        after scrolling has settled so late CSS/fonts/hero geometry cannot leave
        the cached bridge threshold stale, while the scroll hot path stays read-free. */
+    const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
     refreshGeometry();
-    const relative = bridgeRelative();
+    let relative = bridgeRelative();
     root.dataset.fxLoopDesktopGeometryR1715 = loopGeometry.ready ? 'fresh-idle-sample' : 'unavailable';
     root.dataset.fxLoopDesktopRecoveryR1723 = 'idle-live-geometry-can-recover-stale-scroll-cache';
+    /* R1724: preserve a valid scroll-frame bridge position across the idle
+       geometry refresh. Late font/CSS/guardian layout may move documentEnd by a
+       few pixels after the scroll event; that must not cancel an already-entered
+       visual bridge. */
+    if(relative==null && cachedRelative!=null && loopGeometry.ready){
+      relative=Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)));
+      root.dataset.fxLoopDesktopRecoveryR1724='cached-relative-preserved-after-idle-reflow';
+    }
     if (relative == null) {
       pendingDesktopRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
       return;
     }
     pendingDesktopRelative = relative;
-    performTransfer(relative, 'visual-bridge-desktop-idle');
+    performTransfer(relative, 'visual-bridge-desktop-idle-r1724');
   }
 
   function transferIfNeeded() {
