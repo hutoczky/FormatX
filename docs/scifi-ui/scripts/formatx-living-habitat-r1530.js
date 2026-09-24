@@ -432,6 +432,12 @@
   addEventListener('formatx:open-live-os',()=>pulse('system-open',.58),{passive:true});
   addEventListener('formatx:loop',()=>pulse('loop',.74),{passive:true});
   addEventListener('formatx:coretouchpulse',()=>pulse('core-touch',1),{passive:true});
+  addEventListener('input',()=>pulse('input',.32),{passive:true});
+  addEventListener('change',()=>pulse('change',.40),{passive:true});
+  addEventListener('submit',()=>pulse('submit',.74),{passive:true});
+  addEventListener('pointerenter',()=>pulse('enter',.22),{passive:true});
+  addEventListener('pointerleave',()=>pulse('leave',.16),{passive:true});
+  addEventListener('orientationchange',()=>{resize();pulse('orientation',.48);},{passive:true});
   document.addEventListener('formatx:magbirthcomplete',()=>pulse('intro-handoff',1),{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
   MOBILE.addEventListener?.('change',resize);
@@ -454,5 +460,6 @@
   ROOT.dataset.fxLivingHabitatPerformanceR1720='event-driven-hidpi-mobile-zero-idle-world';
   ROOT.dataset.fxLivingHabitatR1721='membranes-neural-roots-deep-cellular-parallax';
   ROOT.dataset.fxLivingHabitatPerformanceR1721='event-driven-hidpi-sharp-background-zero-idle';
+  ROOT.dataset.fxLivingHabitatInteractionR1722='all-site-inputs-synchronized-with-organism-zero-extra-loop';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
 })();
