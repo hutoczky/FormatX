@@ -21,7 +21,8 @@ root.dataset.fxP0MotionCacheR1720='motion-loader-r1720-ultra-sharp-living-world'
 root.dataset.fxP0MotionCacheR1721='motion-loader-r1721-cortical-living-world';
 root.dataset.fxP0MotionCacheR1722='motion-loader-r1722-fully-living-studio-hidpi';
 root.dataset.fxP0MotionCacheR1723='motion-loader-r1723-canonical-living-organism';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1723-canonical-living-organism';
+root.dataset.fxP0MotionCacheR1723V2='motion-loader-r1723-physiology-v2';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1723-physiology-v2';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
