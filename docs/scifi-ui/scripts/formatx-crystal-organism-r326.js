@@ -3,7 +3,8 @@
 
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
-  const REVISION = 'fully-living-organism-r1723';
+  const REVISION = 'living-luminous-electric-crystal-r454';
+  const CANONICAL_REVISION = 'fully-living-organism-r1723';
   const VISUAL_REVISION_R1713 = 'photoreal-single-living-organism-r1713';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
@@ -1297,6 +1298,7 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
+    root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
@@ -2041,7 +2043,9 @@
     const publicApi={
       version:VERSION,
       revision:REVISION,
-      renderer:'single-webgl-living-organism-r326',
+      renderer:'single-webgl-crystal-organism-r326',
+      canonicalRenderer:'single-webgl-living-organism-r326',
+      canonicalRevision:CANONICAL_REVISION,
       livingForm:'single-photoreal-organism-r1723',
       material:'cortical-bioceramic-living-tissue-r1723',
       geometry:'cortical-cellular-organism-with-native-tendrils-r1723',
@@ -2093,7 +2097,8 @@
     root.dataset.fxCoreMobileV55='ready-v55';
     root.dataset.fxCoreReferenceLock=READY;
     root.dataset.fxCoreReal3d=READY;
-    root.dataset.fxCoreRenderer='single-webgl-living-organism-r326';
+    root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
+    root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreCapabilityTierR620=constrainedMobile?'mobile-constrained-one-pass':constrained?'desktop-constrained-two-pass':mobile?'mobile-full-two-pass':'desktop-full-three-pass';
     root.dataset.fxCoreCapabilityR620=`${hardwareConcurrency}c-${deviceMemory}gb`;
     root.dataset.fxCoreMaterial='cortical-bioceramic-living-tissue-r1723';
