@@ -51,6 +51,7 @@
   root.dataset.fxScrollSnap = 'disabled';
   root.dataset.fxMobileScrollMode = 'native-momentum-loop';
   root.dataset.fxInitialHeroGuard = 'pending';
+  root.dataset.fxLoopEndIntentPolicyR1724='cached-end-latched-through-idle-reflow';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -616,7 +617,22 @@
 
     // Read the cached transfer position before mutating classes/data attributes.
     // The scroll frame therefore contains no layout-dependent DOM reads.
-    const relative = bridgeRelative();
+    let relative = bridgeRelative();
+    /* R1724 — preserve the user's boundary intent across late layout reflow.
+       This uses only cached geometry in the scroll hot path: no new layout read.
+       If the scroll reached the cached document end, latch the corresponding
+       bridge-relative position so an image/font/Guardian reflow cannot cancel
+       the already-entered seamless-loop gesture before idle commit. */
+    const cachedGeometry=loopGeometry;
+    const cachedEndIntent=cachedGeometry.ready
+      && scrollY>=Math.max(0,cachedGeometry.documentEnd-4);
+    if(relative==null&&cachedEndIntent){
+      relative=Math.max(0,Math.min(
+        scrollY-cachedGeometry.bridgeTop,
+        Math.max(0,cachedGeometry.sourceHeight-2)
+      ));
+      root.dataset.fxLoopEndIntentR1724='latched-cached-end';
+    }
 
     root.dataset.fxScrollActivity = 'scrolling';
     root.classList.add('fx-page-scrolling');
