@@ -384,6 +384,7 @@
   }
   window.FormatXMagReferenceFilmR649={
     attach,
-    revision:'r1727-photographic-biocrystal-continuity-birth'
+    revision:'r1724-formatx-living-crystal-organism-birth',
+    visualRevision:'r1727-photographic-biocrystal-continuity-birth'
   };
 })();
