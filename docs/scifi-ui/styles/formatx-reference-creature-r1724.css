@@ -1,0 +1,51 @@
+/* FormatX R1724 — reference creature / living world hero */
+#hero{position:relative;isolation:isolate;overflow:hidden}
+#hero .fx-r1724-world{
+  position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  --fx-px:0;--fx-py:0;--fx-energy:.78;--fx-breath:.28;--fx-scroll:0;
+  background:#020711;
+}
+#hero .fx-r1724-world>svg{width:100%;height:100%;display:block;object-fit:cover;transform:translate3d(calc(var(--fx-px)*-5px),calc(var(--fx-py)*-3px),0) scale(1.012);transform-origin:54% 50%;transition:transform .22s ease-out}
+#hero .fx-r1724-world .fx-r1724-planet{transform:translate3d(calc(var(--fx-px)*-8px),calc(var(--fx-py)*-5px),0);transform-origin:center}
+#hero .fx-r1724-world .fx-r1724-far{transform:translate3d(calc(var(--fx-px)*-5px),calc(var(--fx-py)*-2px),0)}
+#hero .fx-r1724-world .fx-r1724-creature{transform:translate3d(calc(var(--fx-px)*12px),calc(var(--fx-py)*8px),0) scale(calc(1 + var(--fx-breath)*.018));transform-origin:70% 55%;transition:transform .16s ease-out}
+#hero .fx-r1724-world .fx-r1724-tail-a{transform:rotate(calc(var(--fx-px)*1.8deg));transform-origin:1040px 585px}
+#hero .fx-r1724-world .fx-r1724-tail-b{transform:rotate(calc(var(--fx-py)*-2.2deg));transform-origin:1060px 610px}
+#hero .fx-r1724-world .fx-r1724-tail-c{transform:rotate(calc(var(--fx-px)*-1.3deg));transform-origin:1080px 620px}
+#hero .fx-r1724-world .fx-r1724-core{opacity:calc(.72 + var(--fx-energy)*.28);transform:scale(calc(.94 + var(--fx-energy)*.08));transform-origin:1185px 520px}
+#hero .fx-r1724-world .fx-r1724-electric{opacity:calc(.32 + var(--fx-energy)*.68)}
+#hero .fx-r1724-world .fx-r1724-gold{opacity:calc(.34 + var(--fx-energy)*.46)}
+#hero .hero-grid{position:relative;z-index:4}
+#hero .hero-copy{background:linear-gradient(145deg,rgba(2,12,21,.86),rgba(2,8,15,.72))!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(111,218,238,.18)!important}
+#hero .hero-space{position:relative;z-index:5;background:transparent!important}
+html[data-fx-r1724-world="ready"] #hero .fx-crystal-organism-r326-stage{opacity:0!important;filter:none!important;-webkit-filter:none!important;pointer-events:none!important}
+html[data-fx-r1724-world="ready"] #hero .hero-label{opacity:.18!important}
+html[data-fx-r1724-world="ready"] #hero .fx-organism-map{opacity:.12!important}
+html[data-fx-r1724-world="ready"] #hero .fx-reference-controls-r204{z-index:20!important}
+html[data-fx-r1724-world="ready"] #hero::after{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(0,5,12,.18) 0%,rgba(0,5,12,.05) 36%,transparent 58%),
+    radial-gradient(ellipse 58% 72% at 73% 52%,transparent 48%,rgba(0,4,10,.22) 100%);
+}
+@media (max-width:900px),(pointer:coarse){
+  #hero{min-height:1280px!important}
+  #hero .fx-r1724-world{height:760px;bottom:auto}
+  #hero .fx-r1724-world>svg{width:150%;max-width:none;transform:translate3d(calc(-24% + var(--fx-px)*-4px),calc(var(--fx-py)*-2px),0) scale(1.02);transform-origin:65% 42%}
+  #hero .hero-grid{padding-top:610px!important}
+  #hero .hero-copy{margin-top:0!important}
+  #hero .hero-space{position:absolute!important;top:0;left:0;right:0;height:620px!important;min-height:620px!important;pointer-events:none}
+  #hero .hero-space .fx-reference-controls-r204{pointer-events:auto}
+  #hero::after{background:linear-gradient(180deg,rgba(0,4,10,.02) 0%,rgba(0,4,10,.10) 56%,rgba(0,4,10,.78) 82%,rgba(0,4,10,.96) 100%)}
+}
+@media (max-width:540px){
+  #hero{min-height:1220px!important}
+  #hero .fx-r1724-world{height:700px}
+  #hero .fx-r1724-world>svg{width:176%;transform:translate3d(calc(-37% + var(--fx-px)*-3px),calc(-12px + var(--fx-py)*-2px),0) scale(1.02)}
+  #hero .hero-grid{padding-top:560px!important}
+  #hero .hero-space{height:580px!important;min-height:580px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  #hero .fx-r1724-world>svg,#hero .fx-r1724-world .fx-r1724-creature,#hero .fx-r1724-world [class*="fx-r1724-tail"]{transition:none!important;transform:none!important}
+}
+/* production-r1724-reference-creature-world */
