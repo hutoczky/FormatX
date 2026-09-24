@@ -24,7 +24,7 @@ root.dataset.fxP0MotionCacheR1723='motion-loader-r1723-canonical-living-organism
 root.dataset.fxP0MotionCacheR1723V2='motion-loader-r1723-physiology-v2';
 root.dataset.fxP0MotionCacheR1724='motion-loader-r1724-living-crystal-organism';
 root.dataset.fxP0MotionCacheR1725='motion-loader-r1725-photoreal-living-biocrystal';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1726-cinematic-photographic-living-biocrystal';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1727-photographic-biocrystal-continuity';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
