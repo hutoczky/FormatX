@@ -807,9 +807,14 @@
       && !root.classList.contains('fx-section-navigation-active')
       && bridge?.isConnected){
       if(!Number.isFinite(desktopGestureAnchorY)){
-        const eventBridgeTop=Number.isFinite(stableDesktopBridgeTop)
-          ? stableDesktopBridgeTop
-          : Number(bridge.offsetTop);
+        /* R1727b — the first scroll event must use the bridge position that is
+           live in the same layout state as scrollY. A previously idle snapshot
+           can be stale after font/deferred-style reflow and miss a programmatic
+           or real fast boundary crossing. We still read it only once per gesture. */
+        const liveEventBridgeTop=Number(bridge.offsetTop);
+        const eventBridgeTop=Number.isFinite(liveEventBridgeTop)
+          ? liveEventBridgeTop
+          : stableDesktopBridgeTop;
         const eventSourceHeight=Math.max(0,stableDesktopSourceHeight||loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
         if(Number.isFinite(eventBridgeTop)){
           desktopGestureAnchorY=scrollY;
