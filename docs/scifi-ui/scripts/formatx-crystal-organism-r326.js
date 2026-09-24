@@ -1403,6 +1403,7 @@
     root.dataset.fxCoreShapeR337='organism';
     root.dataset.fxCoreDefaultShapeR1401='organism';
     root.dataset.fxCoreCanonicalIdentityR1723='one-living-organism-no-alternate-shapes';
+    root.dataset.fxCoreShapeModeR413='single-living-organism-fixed-anatomy-r1723';
     let disposed=false,contextLost=false,visible=true,paused=false;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=constrained;
     let px=0,py=0,tx=0,ty=0;
