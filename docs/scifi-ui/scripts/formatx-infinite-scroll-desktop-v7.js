@@ -652,6 +652,8 @@
     root.dataset.fxLoopDesktopRecoveryR1723 = 'fresh-idle-relative-with-cached-end-fallback';
     if (relative == null) {
       pendingDesktopRelative = null;
+      desktopGestureAnchorY = null;
+      desktopGestureAnchorRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
       return;
     }
@@ -688,11 +690,11 @@
     // one live bridge read so late font/Guardian/layout shifts cannot poison the
     // entire gesture with an obsolete bridgeTop. This is a single read per
     // gesture, not a per-frame layout query.
-    let relative = (!isMobileFlow() && Number.isFinite(pendingDesktopRelative))
-      ? pendingDesktopRelative
+    let relative = (!isMobileFlow() && Number.isFinite(desktopGestureAnchorY))
+      ? (Number.isFinite(pendingDesktopRelative) ? pendingDesktopRelative : null)
       : bridgeRelative();
     const cachedGeometry=loopGeometry;
-    if(startingDesktopGesture && relative==null && bridge?.isConnected){
+    if(startingDesktopGesture && relative==null && !Number.isFinite(desktopGestureAnchorY) && bridge?.isConnected){
       const liveRect=bridge.getBoundingClientRect();
       const liveBridgeTop=scrollY+liveRect.top;
       const liveRelative=scrollY-liveBridgeTop;
@@ -761,25 +763,24 @@
       if(!Number.isFinite(desktopGestureAnchorY)){
         const eventBridgeTop=Number(bridge.offsetTop);
         const eventSourceHeight=Math.max(0,loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
-        const eventRelative=scrollY-eventBridgeTop;
-        if(Number.isFinite(eventBridgeTop) && eventRelative>=-2){
+        if(Number.isFinite(eventBridgeTop)){
           desktopGestureAnchorY=scrollY;
-          desktopGestureAnchorRelative=Math.max(0,Math.min(eventRelative,Math.max(0,eventSourceHeight-2)));
-          pendingDesktopRelative=desktopGestureAnchorRelative;
-          root.dataset.fxLoopGestureGeometryR1727='scroll-event-entry-anchor';
-          root.dataset.fxLoopGestureRelativeR1727=String(Math.round(pendingDesktopRelative));
+          desktopGestureAnchorRelative=scrollY-eventBridgeTop;
+          const projected=desktopGestureAnchorRelative;
+          pendingDesktopRelative=projected>=-2
+            ? Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)))
+            : null;
+          root.dataset.fxLoopGestureGeometryR1727='single-live-bridge-snapshot-per-gesture';
+          root.dataset.fxLoopGestureBridgeTopR1727=String(Math.round(eventBridgeTop));
+          root.dataset.fxLoopGestureRelativeR1727=String(Math.round(projected));
         }
       }else{
-        const eventSourceHeight=Math.max(0,loopGeometry.sourceHeight||0);
+        const eventSourceHeight=Math.max(0,loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
         const projected=desktopGestureAnchorRelative+(scrollY-desktopGestureAnchorY);
-        if(projected<-2){
-          desktopGestureAnchorY=null;
-          desktopGestureAnchorRelative=null;
-          pendingDesktopRelative=null;
-        }else{
-          pendingDesktopRelative=Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)));
-          root.dataset.fxLoopGestureRelativeR1727=String(Math.round(pendingDesktopRelative));
-        }
+        pendingDesktopRelative=projected>=-2
+          ? Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)))
+          : null;
+        root.dataset.fxLoopGestureRelativeR1727=String(Math.round(projected));
       }
     }
     if (scrollFrame) return;
