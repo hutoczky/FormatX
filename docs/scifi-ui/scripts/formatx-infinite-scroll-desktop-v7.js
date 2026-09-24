@@ -626,17 +626,19 @@
        the cached bridge threshold stale, while the scroll hot path stays read-free. */
     const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
     refreshGeometry();
-    /* R1725d — idle geometry is authoritative once layout has settled.
-       A scroll-frame relative value may have been measured against an older
-       bridgeTop and can therefore be hundreds of pixels stale. Use the fresh
-       bridge-relative coordinate first; retain the cached intent only when the
-       refreshed bridge is no longer reachable at the document end. */
-    let relative=bridgeRelative();
-    if(relative!=null){
-      root.dataset.fxLoopDesktopRecoveryR1724='fresh-idle-relative-authoritative';
-    }else if(cachedRelative!=null && loopGeometry.ready && scrollY>=Math.max(0,loopGeometry.documentEnd-4)){
-      relative=Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)));
-      root.dataset.fxLoopDesktopRecoveryR1724='cached-end-intent-fallback';
+    /* R1727 — preserve the gesture-relative coordinate captured while the
+       user actually crossed the bridge. Late font/intro/layout settling may move
+       bridgeTop before the 170 ms idle commit; re-deriving the relative position
+       at that point changes the user's landing by the same layout delta. Fresh
+       geometry is used only to clamp the cached gesture intent. */
+    const freshRelative=bridgeRelative();
+    let relative=cachedRelative!=null
+      ? Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)))
+      : freshRelative;
+    if(cachedRelative!=null){
+      root.dataset.fxLoopDesktopRecoveryR1724='cached-gesture-relative-authoritative';
+    }else if(freshRelative!=null){
+      root.dataset.fxLoopDesktopRecoveryR1724='fresh-idle-relative-fallback';
     }else{
       root.dataset.fxLoopDesktopRecoveryR1724='no-boundary';
     }
@@ -659,7 +661,8 @@
     const heroLoopOrigin=0;
     root.dataset.fxLoopDesktopSourceTopR1724='0';
     root.dataset.fxLoopDesktopLandingR1725='cached-relative-hero-local-origin';
-    performTransfer(relative,'visual-bridge-desktop-idle-r1725e',heroLoopOrigin);
+    root.dataset.fxLoopDesktopLandingR1727='gesture-relative-preserved-through-idle-layout-shift';
+    performTransfer(relative,'visual-bridge-desktop-idle-r1727',heroLoopOrigin);
   }
 
   function transferIfNeeded() {
