@@ -1338,6 +1338,7 @@
     root.dataset.fxNativeMagPhysiologyApiR1723='public-physiology-event-habitat-sync';
     root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
+    root.dataset.fxCorePhysiologyApiR1723='public-differentiated-physiology-event-v1';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
