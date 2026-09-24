@@ -842,11 +842,14 @@
     root.dataset.fxScrollActivity = 'idle';
     root.classList.remove('fx-page-scrolling');
     const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
-    if(cachedRelative==null){
+    const hasGestureSnapshot=Number.isFinite(desktopGestureAnchorY);
+    if(cachedRelative==null && !hasGestureSnapshot){
       refreshGeometry();
       const liveRelative=bridgeRelative();
       if(liveRelative!=null)pendingDesktopRelative=liveRelative;
-      root.dataset.fxLoopDesktopScrollEndRecoveryR1724=liveRelative==null?'no-live-boundary':'fresh-relative-no-cache';
+      root.dataset.fxLoopDesktopScrollEndRecoveryR1724=liveRelative==null?'no-live-boundary':'fresh-relative-no-snapshot';
+    }else if(cachedRelative==null){
+      root.dataset.fxLoopDesktopScrollEndRecoveryR1724='gesture-snapshot-outside-no-live-recovery';
     }else{
       root.dataset.fxLoopDesktopScrollEndRecoveryR1724='cached-relative-preserved';
     }
