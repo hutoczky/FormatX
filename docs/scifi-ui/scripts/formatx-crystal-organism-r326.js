@@ -1076,7 +1076,7 @@
         mineral+=vec3(.080,.105,.145)*cortexRidge*.105;
         mineral+=vec3(.025,.135,.165)*cortexRidge*vascular*.44;
 
-        /* R1724 FormatX guardian material — pearlescent living bioceramic
+        /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
            plates ride above dark cortical tissue. The plate field is broad,
            irregular and organic; it is not a metallic armour texture. */
         float plateField=.5+.5*sin(vUv.x*18.1+sin(vUv.y*12.6)*1.85+sin(vLocal.y*5.2)*.55);
@@ -1510,7 +1510,7 @@
       ? softwareFragmentSource
       : (mobilePhysical ? constrainedFragmentSource : fullFragmentSource);
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
-      ? 'r1724-software-guardian-ivory-black-cyan-gold-lite'
+      ? 'r1724-software-living-crystal-cyan-indigo-lite'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
     root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-adaptive-resolution-zero-idle';
     root.dataset.fxNativeMagVisualR1716='mobile-normal-topology-physical-shader-photoreal-60fps-first';
@@ -1526,16 +1526,16 @@
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
-    root.dataset.fxNativeMagGuardianR1724='asymmetric-crystal-organic-feline-dragon-biocrystal-silhouette';
+    root.dataset.fxNativeMagOrganismR1724='asymmetric-living-crystal-rhombic-cortical-silhouette';
     root.dataset.fxNativeMagFacetR1724='polished-crystal-planes-preserved-with-hybrid-normals';
     root.dataset.fxNativeMagPaletteR1724='pearl-cyan-indigo-warm-studio-rim';
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
     root.dataset.fxNativeMagSilhouetteR1724='asymmetric-living-crystal-rhombic-body-cortical-lobes';
     root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
-    root.dataset.fxNativeMagGuardianR1724='feline-dragon-head-neck-limbs-crown-streaming-ribbons-one-draw';
-    root.dataset.fxNativeMagTopologyR1724='local-origin-winding-safe-guardian-anatomy';
-    root.dataset.fxNativeMagLookR1724='ivory-bioceramic-black-tissue-cyan-energy-gold-studio-ribbons';
-    root.dataset.fxNativeMagFallbackR1724='same-guardian-look-on-software-renderer';
+    root.dataset.fxNativeMagAnatomyR1724='cortical-lobes-living-membranes-energy-core-tendrils-one-draw';
+    root.dataset.fxNativeMagTopologyR1724='winding-safe-rhombic-living-crystal-anatomy';
+    root.dataset.fxNativeMagLookR1724='pearl-cortical-tissue-cyan-energy-indigo-depth-warm-studio-rim';
+    root.dataset.fxNativeMagFallbackR1724='same-living-crystal-look-on-software-renderer';
     root.dataset.fxNativeMagPhysiologyR1723='differentiated-attention-response-activation-heartbeat-curiosity-stability-renewal';
     root.dataset.fxNativeMagPhysiologyApiR1723='public-physiology-event-habitat-sync';
     root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
