@@ -1,4 +1,4 @@
-name: FormatX R1722 living organism visual proof
+name: FormatX R1724 Crystal Guardian visual proof
 # R1490 visual proof: realistic DNA / solid organism / coherent obsidian crystal + full-page chamber
 
 on:
@@ -59,6 +59,11 @@ jobs:
           grep -Fq "if(t>3.00)this.updateCells(t,time)" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
           grep -Fq "this.mechanicalGroup.visible=false" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
           grep -Fq "fxIntroR1723='same-canonical-organism-birth-to-site-handoff'" docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          grep -Fq "fxMagBirthGuardianR1724='faceted-pearl-cyan-crystal-organic-guardian'" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "fxMagBirthCoreR1724='biocrystal-cartilage-cyan-energy-warm-rim'" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "fxNativeMagGuardianR1724='asymmetric-crystal-organic-feline-dragon-biocrystal-silhouette'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -Fq "fxNativeMagFacetR1724='polished-crystal-planes-preserved-with-hybrid-normals'" docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          grep -Fq "revision:'r1724-formatx-crystal-guardian-birth'" docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js
       - name: Start source site
         shell: bash
         run: |
@@ -93,13 +98,13 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R1722 living organism / HiDPI visual proof failed'
+          description='R1724 Crystal Guardian / HiDPI visual proof failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R1722 living organism / HiDPI mobile proof passed'
+            description='R1724 Crystal Guardian / HiDPI mobile proof passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R1722 living organism proof' \
+            -f context='FormatX R1724 Crystal Guardian proof' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
