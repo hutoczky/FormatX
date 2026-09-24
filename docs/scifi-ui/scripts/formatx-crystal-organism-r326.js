@@ -367,20 +367,20 @@
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
+      /* R1724 — compact guardian torso. The old tall egg envelope is gone:
+         the main mass is a low, muscular rib-cage/abdomen that leaves room for
+         a real neck, head and limbs appended below in the same WebGL draw. */
       const ringDefs = [
-        [.78,.245,.185,-.020,-.010,.050],
-        [.70,.405,.305,-.034,-.004,.044],
-        [.60,.535,.405,-.040,.006,.036],
-        [.48,.635,.485,-.038,.014,.028],
-        [.34,.705,.540,-.026,.018,.020],
-        [.18,.748,.574,-.010,.018,.012],
-        [.02,.762,.588,.010,.010,.004],
-        [-.14,.748,.575,.022,.002,-.004],
-        [-.30,.704,.540,.026,.002,-.008],
-        [-.45,.625,.475,.022,.008,-.002],
-        [-.58,.515,.385,.014,.010,.008],
-        [-.69,.390,.285,.006,.006,.020],
-        [-.78,.235,.165,-.002,.000,.034]
+        [.52,.300,.210,-.120,-.004,.045],
+        [.45,.475,.300,-.085,.004,.038],
+        [.35,.620,.380,-.035,.008,.030],
+        [.23,.705,.430,.025,.014,.022],
+        [.09,.748,.455,.070,.016,.014],
+        [-.05,.735,.452,.090,.012,.004],
+        [-.19,.675,.420,.070,.004,-.006],
+        [-.32,.565,.350,.015,-.002,-.014],
+        [-.43,.410,.255,-.060,-.004,-.022],
+        [-.50,.250,.160,-.115,-.006,-.030]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -418,8 +418,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.020,.845,-.015],[.5,0]);
-      const bottom=bodyVertex([.018,-.835,.012],[.5,1]);
+      const top=bodyVertex([-.120,.585,-.010],[.5,0]);
+      const bottom=bodyVertex([-.115,-.555,.008],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -486,18 +486,18 @@
        Each appendage is appended to the same buffers and collapses back into the
        sphere endpoint during morph, so no duplicate canvas/core is introduced. */
     function tendrilPath(index, t) {
-      const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.13 + (index % 2 ? .035 : -.025);
-      const sideAngle = baseAngle + Math.PI * .5;
-      const root = .515;
-      const reach = .48 + ((index*3)%5) * .030;
-      const radius = root + reach * t;
-      const wave = Math.sin(t*Math.PI*1.36+index*.83)*(.010+.058*t)
-        +Math.sin(t*Math.PI*.72+index*.47)*.020*t;
-      const depth = .155 + Math.sin(t*Math.PI*1.14+index*.97)*(.012+.048*t);
+      const lane=(index-(tendrilCount-1)*.5)/Math.max(1,tendrilCount-1);
+      const rootX=-.56+.040*Math.sin(index*1.71);
+      const rootY=.12+lane*.54+.035*Math.cos(index*1.13);
+      const rootZ=.04+.10*Math.sin(index*.91);
+      const sweep=.52+.34*(.5+.5*Math.sin(index*1.37));
+      const wave=Math.sin(t*Math.PI*1.55+index*.83)*(.025+.095*t)
+        +Math.sin(t*Math.PI*.72+index*.47)*.028*t;
+      const rise=Math.sin(t*Math.PI*.92+index*.73)*(.035+.10*t);
       return [
-        Math.cos(baseAngle)*radius + Math.cos(sideAngle)*wave,
-        Math.sin(baseAngle)*radius + Math.sin(sideAngle)*wave,
-        depth
+        rootX-(.30+sweep)*t-.18*t*t,
+        rootY+rise+lane*.12*t+wave*.34,
+        rootZ+.10*Math.sin(t*Math.PI+index*.61)+wave
       ];
     }
 
@@ -511,7 +511,7 @@
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
       const tubeRadius = (.024 * (1 - t * .84) + .0042) * (mobile ? .96 : 1);
-      const rootDirection = normalize([p[0], p[1], p[2] * .72]);
+      const rootDirection = normalize([p[0]-.08, p[1], p[2]*.72+.02]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
         const offset = [
@@ -576,6 +576,124 @@
       armorTri(a,b,c,facet);
       armorTri(a,c,d,facet);
     }
+
+    /* R1724 — additional living anatomy is appended to the same attribute
+       buffers. No second canvas, model loader or image asset is introduced. */
+    function appendEllipsoid(center,radii,facetBase=.72,latSteps=8,lonSteps=14,rotZ=0){
+      const [cx,cy,cz]=center,[rx0,ry0,rz0]=radii;
+      const czr=Math.cos(rotZ),szr=Math.sin(rotZ);
+      const grid=[];
+      for(let iy=0;iy<=latSteps;iy++){
+        const v=iy/latSteps;
+        const phi=v*Math.PI;
+        const sp=Math.sin(phi),cp=Math.cos(phi);
+        const row=[];
+        for(let ix=0;ix<lonSteps;ix++){
+          const u=ix/lonSteps;
+          const th=u*Math.PI*2;
+          const lx=Math.cos(th)*sp*rx0;
+          const ly=cp*ry0;
+          const lz=Math.sin(th)*sp*rz0;
+          const x=cx+lx*czr-ly*szr;
+          const y=cy+lx*szr+ly*czr;
+          const z=cz+lz;
+          const nLocal=normalize([
+            (Math.cos(th)*sp)/Math.max(.001,rx0),
+            cp/Math.max(.001,ry0),
+            (Math.sin(th)*sp)/Math.max(.001,rz0)
+          ]);
+          const nx=nLocal[0]*czr-nLocal[1]*szr;
+          const ny=nLocal[0]*szr+nLocal[1]*czr;
+          const normal=normalize([nx,ny,nLocal[2]]);
+          const dir=normalize([x,y,z]);
+          row.push({
+            sphere:dir.map(value=>value*.88),
+            crystal:[x,y,z],
+            sphereNormal:dir,
+            crystalNormal:normal,
+            uv:[u,v]
+          });
+        }
+        grid.push(row);
+      }
+      for(let iy=0;iy<latSteps;iy++){
+        for(let ix=0;ix<lonSteps;ix++){
+          const nx=(ix+1)%lonSteps;
+          const facet=facetBase+.18*random(ix+iy*13,iy*29+ix);
+          triangle([grid[iy][ix],grid[iy][nx],grid[iy+1][ix]],facet);
+          triangle([grid[iy][nx],grid[iy+1][nx],grid[iy+1][ix]],facet+.007);
+        }
+      }
+    }
+    function appendLimb(start,end,r0,r1,facetBase=.86,segments=7,sides=8){
+      const a=start,b=end;
+      const tangent=normalize(subtract(b,a));
+      const guide=Math.abs(tangent[1])>.86?[1,0,0]:[0,1,0];
+      const sideA=normalize(cross(tangent,guide));
+      const sideB=normalize(cross(tangent,sideA));
+      const rings=[];
+      for(let segment=0;segment<=segments;segment++){
+        const t=segment/segments;
+        const eased=t*t*(3-2*t);
+        const p=[
+          a[0]+(b[0]-a[0])*t,
+          a[1]+(b[1]-a[1])*t,
+          a[2]+(b[2]-a[2])*t
+        ];
+        const radius=r0+(r1-r0)*eased;
+        rings.push(Array.from({length:sides},(_,side)=>{
+          const angle=side/sides*Math.PI*2;
+          const offset=[
+            sideA[0]*Math.cos(angle)*radius+sideB[0]*Math.sin(angle)*radius,
+            sideA[1]*Math.cos(angle)*radius+sideB[1]*Math.sin(angle)*radius,
+            sideA[2]*Math.cos(angle)*radius+sideB[2]*Math.sin(angle)*radius
+          ];
+          const pos=[p[0]+offset[0],p[1]+offset[1],p[2]+offset[2]];
+          const dir=normalize(pos);
+          return {
+            sphere:dir.map(value=>value*.86),
+            crystal:pos,
+            sphereNormal:dir,
+            crystalNormal:normalize(offset),
+            uv:[side/sides,t]
+          };
+        }));
+      }
+      for(let segment=0;segment<segments;segment++){
+        for(let side=0;side<sides;side++){
+          const next=(side+1)%sides;
+          const facet=facetBase+.12*random(segment*17+side,side*31+segment);
+          triangle([rings[segment][side],rings[segment][next],rings[segment+1][side]],facet);
+          triangle([rings[segment][next],rings[segment+1][next],rings[segment+1][side]],facet+.006);
+        }
+      }
+    }
+    function appendMembraneTri(a,b,c,facet=4.42){
+      triangle([
+        surfaceVertex(a,null,[0,0],.86),
+        surfaceVertex(b,null,[1,0],.86),
+        surfaceVertex(c,null,[.5,1],.86)
+      ],facet);
+    }
+
+    /* FormatX Guardian anatomy: feline/dragon posture in a 3/4 hero view. */
+    appendEllipsoid([.42,.36,.035],[.34,.29,.29],.68,mobile?7:9,mobile?12:16,-.18);   // shoulder
+    appendEllipsoid([.68,.63,.055],[.28,.235,.245],.64,mobile?7:9,mobile?12:16,-.22); // head
+    appendEllipsoid([.88,.57,.075],[.22,.105,.155],.70,mobile?6:8,mobile?10:14,-.10); // muzzle
+    appendEllipsoid([.28,.48,.025],[.25,.34,.24],.76,mobile?7:9,mobile?12:16,-.26);   // neck
+
+    /* Four athletic limbs; the front pair is intentionally brighter/frontmost
+       through z placement so the silhouette reads immediately on phones. */
+    appendLimb([.42,.08,.10],[.60,-.66,.16],.105,.060,.82,mobile?6:8,mobile?7:9);
+    appendLimb([.18,-.02,-.08],[.25,-.66,-.02],.120,.065,.90,mobile?6:8,mobile?7:9);
+    appendLimb([-.34,-.12,.055],[-.48,-.64,.11],.125,.070,.94,mobile?6:8,mobile?7:9);
+    appendLimb([-.12,-.17,-.13],[-.08,-.62,-.08],.115,.064,1.00,mobile?6:8,mobile?7:9);
+
+    /* Living crown/ears: translucent cartilage membranes, not metal spikes. */
+    appendMembraneTri([.56,.79,.03],[.46,1.05,.01],[.70,.88,.08],4.34);
+    appendMembraneTri([.69,.80,.02],[.72,1.08,.00],[.84,.84,.08],4.38);
+    appendMembraneTri([.45,.72,-.02],[.30,.96,-.06],[.59,.82,.02],4.46);
+    appendMembraneTri([.39,.63,-.10],[.16,.79,-.14],[.49,.74,-.06],4.52);
 
     if(!auditMode){
       const centreX=.008,centreY=-.006;
@@ -1334,6 +1452,7 @@
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
     root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
+    root.dataset.fxNativeMagGuardianR1724='feline-dragon-head-neck-limbs-crown-streaming-ribbons-one-draw';
     root.dataset.fxNativeMagPhysiologyR1723='differentiated-attention-response-activation-heartbeat-curiosity-stability-renewal';
     root.dataset.fxNativeMagPhysiologyApiR1723='public-physiology-event-habitat-sync';
     root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
