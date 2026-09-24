@@ -10,7 +10,7 @@ const LABELS={
   hu:{organism:'élő organizmus'},
   en:{organism:'living organism'}
 };
-let index=0;
+let index=0,responseSequence=0;
 
 function language(){return root.lang==='en'?'en':'hu';}
 function ensureStyle(){
@@ -48,11 +48,20 @@ function apply(nextIndex,source){
   return shape;
 }
 function next(source){
-  const shape=apply(index,source||'mag-button-living-response');
+  const shape=SHAPES[index];
+  root.dataset.fxCoreShapeR337='organism';
+  root.dataset.fxCoreShapeModeR413='single-living-organism-fixed-anatomy-r1723';
+  syncButton();
+  const token=String(++responseSequence);
+  const responseSource=(source||'mag-button')+'-living-response-r1723-'+token;
+  root.dataset.fxCoreLivingResponseTokenR1723=token;
   try{
     const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
-    core?.surfacePulse?.((source||'mag-button')+'-physiology-r1723');
-    core?.requestRender?.(3);
+    if(typeof core?.physiology==='function')core.physiology('response',responseSource);
+    else{
+      core?.surfacePulse?.(responseSource);
+      core?.requestRender?.(3);
+    }
   }catch(_){}
   return shape;
 }
@@ -65,6 +74,7 @@ root.dataset.fxCoreDefaultShapeR1404='organism';
 root.dataset.fxCoreControlR1666='deterministic-repeat-click-shape-confirm';
 root.dataset.fxCoreControlR1669='canonical-living-core-api-user-shape-priority';
 root.dataset.fxCoreCanonicalIdentityR1723='organism-only-physiology-control';
+root.dataset.fxCoreLivingResponseTokenR1723='0';
 apply(index,'boot');
 
 document.addEventListener('click',event=>{
