@@ -59,6 +59,7 @@ async function enterSite(page, label) {
   }
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => ['ready','delegated-r264'].includes(document.documentElement.dataset.fxOrganismMenu || ''), null, { timeout: 30000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxControlOwnerR268 === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
   mark(label + ': site-ready');
 }
@@ -123,10 +124,8 @@ async function validateDesktop() {
     await page.waitForTimeout(550);
     mark('desktop: close-control-passed');
 
-    await page.locator('#menu-toggle').evaluate(node => node.click());
-    await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
-    assert(await page.locator('#main-nav').evaluate(node => node.classList.contains('open')), 'interactive system menu did not open');
-    await page.locator('#main-nav a[href="#pricing"]').evaluate(node => node.click());
+    const pricingNav=page.locator('#main-nav a[href="#pricing"]');
+    await pricingNav.click();
     await page.waitForFunction(() => !document.querySelector('[data-organism-panel="pricing"]').hidden);
     mark('desktop: header-navigation-passed');
 
@@ -176,7 +175,7 @@ async function validateMobile() {
     await page.locator('.fx-organism-console-close').tap();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
 
-    await page.locator('#menu-toggle').evaluate(node => node.click());
+    await page.locator('#menu-toggle').tap();
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
 
     const meaningful = meaningfulDiagnostics(errors);
