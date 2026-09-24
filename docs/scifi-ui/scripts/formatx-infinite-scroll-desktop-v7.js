@@ -680,19 +680,30 @@
        geometry is used only to clamp the cached gesture intent. */
     const freshRelative=bridgeRelative();
     const hasGestureSnapshot=Number.isFinite(desktopGestureAnchorY);
-    let relative=hasGestureSnapshot
-      ? (cachedRelative!=null
-          ? Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)))
-          : null)
-      : freshRelative;
-    if(hasGestureSnapshot && cachedRelative!=null){
-      root.dataset.fxLoopDesktopRecoveryR1724='gesture-snapshot-inside-authoritative';
-    }else if(hasGestureSnapshot){
-      root.dataset.fxLoopDesktopRecoveryR1724='gesture-snapshot-outside-authoritative';
-    }else if(freshRelative!=null){
-      root.dataset.fxLoopDesktopRecoveryR1724='fresh-idle-relative-fallback';
+    const reachedDocumentEnd=loopGeometry.ready
+      && scrollY>=Math.max(0,loopGeometry.documentEnd-4);
+    let relative=null;
+    if(freshRelative!=null){
+      relative=cachedRelative!=null
+        ? Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)))
+        : freshRelative;
+      root.dataset.fxLoopDesktopRecoveryR1724=cachedRelative!=null
+        ? 'fresh-boundary-validates-cached-relative'
+        : 'fresh-idle-relative-fallback';
+    }else if(reachedDocumentEnd){
+      relative=0;
+      root.dataset.fxLoopDesktopRecoveryR1724=hasGestureSnapshot
+        ? 'fresh-document-end-validates-snapshot-zero'
+        : 'fresh-document-end-zero';
     }else{
-      root.dataset.fxLoopDesktopRecoveryR1724='no-boundary';
+      /* R1727e — a scroll-time bridge snapshot is intent evidence only.
+         If the settled document says the user is neither in the bridge nor at
+         the physical end, the snapshot was created during layout reflow and
+         must not trigger a false loop. */
+      relative=null;
+      root.dataset.fxLoopDesktopRecoveryR1724=hasGestureSnapshot
+        ? 'stale-gesture-snapshot-rejected-by-fresh-geometry'
+        : 'no-boundary';
     }
     root.dataset.fxLoopDesktopGeometryR1715 = loopGeometry.ready ? 'fresh-idle-sample' : 'unavailable';
     root.dataset.fxLoopDesktopRecoveryR1723 = 'fresh-idle-relative-with-cached-end-fallback';
