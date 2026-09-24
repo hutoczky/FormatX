@@ -53,7 +53,7 @@ has(current,[
 ],'single current MAG loader');
 
 has(renderer,[
-  "const REVISION = 'fully-living-organism-r1723'",'buildOrganismGeometry',
+  "const REVISION = 'living-luminous-electric-crystal-r454'","const CANONICAL_REVISION = 'fully-living-organism-r1723'",'buildOrganismGeometry',
   'KHR_parallel_shader_compile','fxCoreShaderCompileR600','finishProgram',
   'const SURFACE_PULSE_MS = 1160','const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880','prefers-reduced-motion:reduce','document.hidden',
   'uSurfacePulse','dnaHelix','dnaBridge','fxCoreGenomeR614','native-double-helix-energy-lattice-r614','fxCoreGenesisMagR614','armored-four-lobe-core-with-native-tendrils-r614','biomechanical-gunmetal-living-core-r614','single-luminous-webgl-material-owner','fxCoreCanonicalIdentityR1723','fxNativeMagIdentityR1723'
