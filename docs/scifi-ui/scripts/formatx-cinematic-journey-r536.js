@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'single-living-organism-cinematic-r1711';
+  const VERSION = 'single-living-organism-cinematic-r1723';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -489,6 +489,7 @@
     root.dataset.fxCinematicJourneyR536='ready';
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicLivingIdentityR1711='single-organism-no-scene-shape-swap';
+    root.dataset.fxCinematicLivingIdentityR1723='canonical-organism-scene-physiology-only';
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
