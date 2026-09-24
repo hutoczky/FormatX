@@ -22,6 +22,7 @@
   let desktopGuardRetryTimer = 0;
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
+  let pendingDesktopSourceTop = null;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
@@ -54,6 +55,7 @@
   root.dataset.fxLoopEndIntentPolicyR1724='cached-end-latched-through-idle-reflow';
   root.dataset.fxLoopDesktopSettleR1724='scrollend-primary-idle-timer-fallback';
   root.dataset.fxLoopVisualContinuityR1724='scroll-frame-relative-authoritative-through-reflow';
+  root.dataset.fxLoopSourceTopContinuityR1724='scroll-frame-source-top-authoritative-through-idle-reflow';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
   root.classList.add('fx-continuous-scroll-mode');
@@ -491,7 +493,7 @@
     else commitDesktopTransfer();
   }
 
-  function landingTarget(relative) {
+  function landingTarget(relative, sourceTopOverride=null) {
     let geometry = loopGeometry;
     if (!geometry.ready) {
       refreshGeometry();
@@ -499,21 +501,22 @@
     }
     if (!geometry.ready) return null;
     const bounded = Math.max(0, Math.min(relative, Math.max(0, geometry.sourceHeight - 2)));
-    return geometry.sourceTop + bounded;
+    const sourceTop=Number.isFinite(sourceTopOverride)?sourceTopOverride:geometry.sourceTop;
+    return Math.max(0,sourceTop + bounded);
   }
 
-  function landAt(relative) {
-    const target = landingTarget(relative);
+  function landAt(relative, sourceTopOverride=null) {
+    const target = landingTarget(relative,sourceTopOverride);
     if (target == null) return;
     window.scrollTo({ top: target, left: 0, behavior: 'auto' });
     root.dataset.fxLoopLanding = String(Math.round(target));
   }
 
-  function finishLanding(relative) {
+  function finishLanding(relative, sourceTopOverride=null) {
     cancelAnimationFrame(landingFrame);
-    landAt(relative);
+    landAt(relative,sourceTopOverride);
     landingFrame = requestAnimationFrame(() => {
-      landAt(relative);
+      landAt(relative,sourceTopOverride);
       landingFrame = requestAnimationFrame(() => {
         root.classList.remove('fx-seamless-loop-transfer');
         root.dataset.fxInfiniteInput = 'native';
@@ -523,7 +526,7 @@
     });
   }
 
-  function performTransfer(relative, source) {
+  function performTransfer(relative, source, sourceTopOverride=null) {
     if (relative == null || Date.now() < transferLockedUntil) return false;
     if (document.body.classList.contains('fx-organism-panel-open')) return false;
     if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return false;
@@ -533,6 +536,7 @@
     desktopGuardRetryTimer = 0;
     pendingMobileRelative = null;
     pendingDesktopRelative = null;
+    pendingDesktopSourceTop = null;
     clearTimeout(mobileSettleTimer);
     mobileSettleTimer = 0;
     root.classList.add('fx-seamless-loop-transfer');
@@ -543,9 +547,9 @@
     root.dataset.fxLoopSource = source;
 
     dispatchEvent(new CustomEvent('formatx:loop', {
-      detail: { count: loopCount, source, relative }
+      detail: { count: loopCount, source, relative, sourceTop:sourceTopOverride }
     }));
-    finishLanding(relative);
+    finishLanding(relative,sourceTopOverride);
     return true;
   }
 
@@ -596,6 +600,7 @@
        after scrolling has settled so late CSS/fonts/hero geometry cannot leave
        the cached bridge threshold stale, while the scroll hot path stays read-free. */
     const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
+    const cachedSourceTop=Number.isFinite(pendingDesktopSourceTop)?pendingDesktopSourceTop:null;
     refreshGeometry();
     /* R1724 — visual continuity owns the landing coordinate. The relative
        position sampled in the scroll frame is what the user actually saw when
@@ -618,7 +623,8 @@
       return;
     }
     pendingDesktopRelative = relative;
-    performTransfer(relative, 'visual-bridge-desktop-idle-r1724');
+    root.dataset.fxLoopDesktopSourceTopR1724=String(Math.round(cachedSourceTop??loopGeometry.sourceTop));
+    performTransfer(relative,'visual-bridge-desktop-idle-r1724',cachedSourceTop);
   }
 
   function transferIfNeeded() {
@@ -666,6 +672,7 @@
     }
 
     pendingDesktopRelative = relative;
+    pendingDesktopSourceTop = cachedGeometry.sourceTop;
     root.dataset.fxInfiniteInput = 'native-wheel';
     root.dataset.fxLoopLandingState = 'waiting-wheel-idle';
   }
