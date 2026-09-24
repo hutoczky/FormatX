@@ -49,8 +49,8 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
           node --check .github/scripts/capture-mag-intro-r656.cjs
-          grep -Fq "this.qualityScale=this.lowPowerProfile?.66:(this.mobileProfile?.92:.94)" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
-          grep -Fq "(this.mobileProfile?2.00:1.55)*this.qualityScale" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "this.qualityScale=this.lowPowerProfile?.74:(this.mobileProfile?1.00:.96)" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "(this.mobileProfile?2.15:1.72)*this.qualityScale" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
           grep -Fq "production-r1722-no-softening" docs/scifi-ui/styles/formatx-core-life-r455.css
           grep -Fq "blur(0)" docs/scifi-ui/styles/formatx-core-life-r455.css
           ! grep -Fq "blur(.30px)" docs/scifi-ui/styles/formatx-core-life-r455.css
