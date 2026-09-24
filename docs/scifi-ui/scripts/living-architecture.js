@@ -119,7 +119,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260924-r1715-single-organism-loop-stability';
+      script.src = './scripts/igloo-parity.js?v=20260924-r1723-idle-live-geometry-recovery';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
