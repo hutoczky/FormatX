@@ -110,10 +110,10 @@
       document.documentElement.dataset.fxMagBirthVisualR1722='fully-living-cortical-cellular-neural-studio-organism';
       document.documentElement.dataset.fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism';
       document.documentElement.dataset.fxMagBirthSilhouetteR1724='same-asymmetric-living-crystal-organism-as-hero';
-      document.documentElement.dataset.fxMagBirthGuardianR1724='faceted-pearl-cyan-crystal-organic-guardian';
+      document.documentElement.dataset.fxMagBirthOrganismR1724='faceted-pearl-cyan-living-crystal-organism';
       document.documentElement.dataset.fxMagBirthCoreR1724='biocrystal-cartilage-cyan-energy-warm-rim';
-      document.documentElement.dataset.fxMagBirthGuardianR1724='same-feline-dragon-anatomy-ivory-black-cyan-gold';
-      document.documentElement.dataset.fxMagBirthGuardianMotionR1724='chest-core-streaming-glass-ribbons-interactive';
+      document.documentElement.dataset.fxMagBirthAnatomyR1724='same-rhombic-cortical-lobes-membranes-energy-core-as-hero';
+      document.documentElement.dataset.fxMagBirthMotionR1724='energy-core-living-membranes-tendrils-interactive';
       document.documentElement.dataset.fxMagBirthCellsR1724='anatomy-bound-dark-tissue-no-spherical-cell-shell';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
