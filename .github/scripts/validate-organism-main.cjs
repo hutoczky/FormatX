@@ -183,7 +183,7 @@ async function validateMobile() {
 
     const shell = await page.locator('.fx-organism-console-shell').boundingBox();
     mark('mobile: sheet-box', shell);
-    assert(shell && shell.y > 0 && shell.height <= 845, 'mobile sheet geometry: ' + JSON.stringify(shell));
+    assert(shell && shell.x >= 0 && shell.y >= 0 && shell.x + shell.width <= 391 && shell.y + shell.height <= 845, 'mobile sheet geometry: ' + JSON.stringify(shell));
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-id]').count() === 3, 'mobile pricing cards missing');
 
     const overflow = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth);
