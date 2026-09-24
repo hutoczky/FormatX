@@ -1335,6 +1335,7 @@
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
     root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
     root.dataset.fxNativeMagPhysiologyR1723='differentiated-attention-response-activation-heartbeat-curiosity-stability-renewal';
+    root.dataset.fxNativeMagPhysiologyApiR1723='public-physiology-event-habitat-sync';
     root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
@@ -2155,6 +2156,7 @@
       genome:'native-double-helix-energy-lattice-r614',
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
+      physiology:(kind,source)=>signalPhysiology(String(kind||'response'),String(source||'api-physiology')),
       surfacePulse:source=>startSurfacePulse(typeof source==='string'?source:'api'),
       surfacePulseDurationMs:SURFACE_PULSE_WINDOW_MS,
       setMorph:(value,source)=>setMorph(value,source||'api-morph',true),
