@@ -117,12 +117,14 @@
       document.documentElement.dataset.fxMagBirthCellsR1724='anatomy-bound-dark-tissue-no-spherical-cell-shell';
       document.documentElement.dataset.fxMagBirthVisualR1725='studio-photoreal-smoky-pearl-living-biocrystal';
       document.documentElement.dataset.fxMagBirthMaterialR1725='desaturated-mineral-clearcoat-low-emission-warm-rim';
+      document.documentElement.dataset.fxMagBirthVisualR1726='cinematic-photographic-smoky-pearl-living-biocrystal';
+      document.documentElement.dataset.fxMagBirthMaterialR1726='neutral-studio-softbox-physical-clearcoat-restrained-cyan-physiology';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.32;
+      this.renderer.toneMappingExposure=1.24;
 
       this.scene=new THREE.Scene();
       this.scene.background=new THREE.Color(0x020608);
@@ -902,24 +904,24 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x1d3038,roughness:.29,metalness:0,
+        color:0x293236,roughness:.34,metalness:0,
         clearcoat:.54,clearcoatRoughness:.16,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0048,
         transparent:true,opacity:0,
-        emissive:0x03131c,emissiveIntensity:.055,
+        emissive:0x02090d,emissiveIntensity:.026,
         envMapIntensity:1.54,
         ior:1.39,specularIntensity:.88,specularColor:new T.Color(0xe8f6f7),
-        sheen:.15,sheenColor:new T.Color(0x6eb9c4),sheenRoughness:.46,
+        sheen:.11,sheenColor:new T.Color(0x8aa6a8),sheenRoughness:.52,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
-        color:0x39586b,roughness:.24,metalness:.001,
+        color:0x46575c,roughness:.30,metalness:.001,
         clearcoat:.56,clearcoatRoughness:.14,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0075,
         transparent:true,opacity:0,
-        emissive:0x0a4560,emissiveIntensity:.15,
+        emissive:0x063044,emissiveIntensity:.075,
         envMapIntensity:1.72,
-        sheen:.26,sheenColor:new T.Color(0x68d5ec),sheenRoughness:.38,
+        sheen:.16,sheenColor:new T.Color(0x88c3ca),sheenRoughness:.46,
         specularIntensity:.82,specularColor:new T.Color(0xdffbff),
         depthWrite:true
       });
@@ -962,7 +964,7 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x78aeb8,roughness:.18,metalness:0,
+        color:0x81999c,roughness:.22,metalness:0,
         clearcoat:.68,clearcoatRoughness:.080,
         transmission:.24,thickness:.080,ior:1.38,
         attenuationColor:new T.Color(0x174c5b),attenuationDistance:1.9,
@@ -1047,10 +1049,10 @@
       addFacet('root',[.03,-.70,-.02],[.22,.38,.18],[0,-.06,-.06],true);
 
       const livingCrystalMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x75b8c2,roughness:.16,metalness:0,
+        color:0x829da0,roughness:.20,metalness:0,
         clearcoat:.72,clearcoatRoughness:.075,
         transmission:.34,thickness:.065,ior:1.38,
-        emissive:0x073240,emissiveIntensity:.070,
+        emissive:0x05252d,emissiveIntensity:.036,
         transparent:true,opacity:0,depthWrite:false,
         side:T.DoubleSide
       });
@@ -1992,7 +1994,7 @@
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.30+flash*.10+after*.025+physicalImpulse*.012;
+      this.renderer.toneMappingExposure=1.24+flash*.075+after*.018+physicalImpulse*.009;
       this.coreLight.intensity+=flash*1.10+after*.18;
       if(this.glowSprite){
         const g=1+flash*.72;
