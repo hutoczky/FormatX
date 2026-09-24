@@ -114,7 +114,7 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
-      if(state.shape!=='crystal')errors.push('R1500 preflight shape is not crystal: '+state.shape);
+      if(state.shape!=='organism')errors.push('R1500 preflight shape is not organism: '+state.shape);
       if(/blur\((?!0(?:px)?\))/i.test(state.filter||''))errors.push('R1500 preflight still blurred: '+state.filter);
       if(state.ring.display!=='none'&&state.ring.visibility!=='hidden'&&state.ring.opacity>.01)errors.push('R1500 preflight hero ring visible: '+JSON.stringify(state.ring));
       if(state.overflow>2)errors.push('R1500 preflight overflow: '+state.overflow);
@@ -191,8 +191,8 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
-      if(state.visual!=='cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure')errors.push('R1590 visual marker missing: '+state.visual);
-      if(state.shape!=='crystal')errors.push('R1500 mobile MAG shape is not crystal: '+state.shape);
+      if(state.visual!=='cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure')errors.push('R1723 living organism visual marker missing: '+state.visual);
+      if(state.shape!=='organism')errors.push('R1500 mobile MAG shape is not organism: '+state.shape);
       if(/blur\((?!0(?:px)?\))/i.test(state.canvasFilter||''))errors.push('R1500 mobile MAG still has blur: '+state.canvasFilter);
       if(state.heroRing.present&&state.heroRing.display!=='none'&&state.heroRing.visibility!=='hidden'&&state.heroRing.opacity>.01)errors.push('R1500 legacy hero ring visible: '+JSON.stringify(state.heroRing));
       if(state.overflow>2)errors.push('R1500 horizontal overflow: '+state.overflow);
@@ -408,10 +408,10 @@ const SHOTS=[
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
         if(state.visual!=='cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure'){
-          errors.push('R1590 native crystal visual marker missing: '+state.visual);
+          errors.push('R1723 living organism visual marker missing: '+state.visual);
         }
-        if(state.shape!=='crystal'){
-          errors.push('Mobile MAG is not in crystal state: '+state.shape);
+        if(state.shape!=='organism'){
+          errors.push('Mobile MAG is not in organism state: '+state.shape);
         }
         if(/blur\((?!0(?:px)?\))/i.test(state.canvasFilter||'')){
           errors.push('Mobile MAG still has blur: '+state.canvasFilter);
