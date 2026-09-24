@@ -674,8 +674,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.07) contrast(1.12) saturate(1.00)'
-      : 'brightness(1.10) contrast(1.10) saturate(1.00)';
+      ? 'brightness(1.12) contrast(1.055) saturate(1.12)'
+      : 'brightness(1.10) contrast(1.06) saturate(1.08)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -685,7 +685,7 @@
       /* R1626: mobile/coarse displays get temporal smoothness from native
          device density; MSAA costs frame budget twice (raster + resolve).
          Preserve desktop MSAA only where headroom is normally available. */
-      antialias:!auditMode && !mobile && !constrained,
+      antialias:!auditMode && !constrained && (!mobile || (devicePixelRatio||1)<=3.5),
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
@@ -1294,6 +1294,8 @@
     root.dataset.fxNativeMagQualityR1720='hidpi-mobile-1260k-pixel-budget-adaptive-60hz';
     root.dataset.fxNativeMagVisualR1721='cortical-lobes-electric-neural-core-subdermal-vascular-detail';
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
+    root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
+    root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
@@ -1405,14 +1407,14 @@
        Start near native CSS resolution and shed quality gradually only under
        measured pressure. */
     let qualityScale=softwareRenderer
-      ? (mobile?.92:.52)
-      : (mobile ? .98 : (auditMode ? .76 : (constrained ? .56 : .64)));
+      ? (mobile?.94:.54)
+      : (mobile ? 1.00 : (auditMode ? .78 : (constrained ? .58 : .68)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.64)
-      : (mobile?1.06:(auditMode?.84:(constrained?.76:.90)));
+      ? (mobile?1.00:.66)
+      : (mobile?1.08:(auditMode?.86:(constrained?.78:.94)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.76:.24)
-      : (mobile?.76:.20);
+      ? (mobile?.80:.26)
+      : (mobile?.80:.22);
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
@@ -1425,10 +1427,10 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=softwareRenderer ? (mobile?1.48:.86) : (auditMode ? 1.02 : constrainedMobile?1.58:mobile?1.78:constrained?1.12:1.52);
+      const baseCap=softwareRenderer ? (mobile?1.58:.90) : (auditMode ? 1.06 : constrainedMobile?1.72:mobile?2.00:constrained?1.16:1.60);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=softwareRenderer ? (mobile?760000:180000) : (auditMode ? 420000 : constrainedMobile?960000:mobile?1260000:constrained?520000:980000);
+      const baseBudget=softwareRenderer ? (mobile?920000:200000) : (auditMode ? 480000 : constrainedMobile?1280000:mobile?1900000:constrained?580000:1120000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1950,8 +1952,8 @@
     listen(window,'formatx:referencepause',onPause,{passive:true});
     listen(reduced,'change',onReducedMotionChange,{passive:true});
     listen(window,'scroll',onScroll,{passive:true});
-    listen(window,'resize',resize,{passive:true});
-    listen(window,'orientationchange',resize,{passive:true});
+    listen(window,'resize',()=>{resize();boost(.30,mobile?1:2);startSurfacePulse('resize');},{passive:true});
+    listen(window,'orientationchange',()=>{resize();boost(.52,mobile?2:3);startSurfacePulse('orientation');},{passive:true});
     listen(window,'formatx:organismpanelopen',()=>signalShape('sphere','organism-listening'),{passive:true});
     listen(window,'formatx:organismresponse',()=>signalShape('crystal','organism-response'),{passive:true});
     listen(window,'formatx:open-live-os',()=>signalShape('sphere','live-os-open'),{passive:true});
@@ -1960,6 +1962,12 @@
     listen(window,'formatx:languagechange',()=>boost(.62,mobile?2:3),{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
     listen(window,'formatx:storychapter',()=>boost(.64,mobile?2:4),{passive:true});
+    listen(document,'input',()=>boost(.34,mobile?1:2),{passive:true});
+    listen(document,'change',()=>boost(.42,mobile?1:2),{passive:true});
+    listen(document,'submit',()=>{boost(.78,mobile?3:5);startSurfacePulse('form-submit');},{passive:true});
+    listen(window,'pointerenter',()=>boost(.22,mobile?1:2),{passive:true});
+    listen(window,'pointerleave',()=>boost(.16,mobile?1:2),{passive:true});
+    listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
     listen(document,'visibilitychange',()=>{
       if(!document.hidden)schedule(1);
       scheduleSurfacePulse();

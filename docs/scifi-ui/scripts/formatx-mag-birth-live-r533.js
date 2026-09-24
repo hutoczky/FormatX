@@ -18,7 +18,7 @@
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
-  const DURATION = LOW_POWER ? 3000 : 10000;
+  const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
   const EXIT_MS = 180;
@@ -94,7 +94,7 @@
   overlay.dataset.fxIntroR646 = 'reference-biotic-film';
   overlay.dataset.fxIntroR647 = 'shot-match-biotic-genesis';
   overlay.dataset.fxIntroR648 = 'exact-10s-runtime';
-  overlay.dataset.fxIntroAdaptiveR1549 = LOW_POWER ? 'condensed-4.2s-low-power-mobile' : 'full-10s-cinematic';
+  overlay.dataset.fxIntroAdaptiveR1549 = LOW_POWER ? 'full-10s-low-power-sharp-adaptive' : 'full-10s-studio-cinematic';
   overlay.dataset.fxIntroR649 = 'native-canvas-reference-rotoscope';
   overlay.dataset.fxIntroR650 = 'three-genesis-dna-cellular-living';
   overlay.dataset.fxIntroR651 = 'frame-matched-three-genesis';
@@ -469,7 +469,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1713-16-67ms-first-single-organism';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1722-fully-living-studio-hidpi';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -1053,7 +1053,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1606='static-lcp-shell-mobile-lean-dom-handoff-first-permanent-webgl-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1618='stable-canonical-underlay-no-delayed-lcp-aria-dialog';
     ROOT.dataset.fxMagBirthPerformanceR1608='lazy-three-owner-zero-parse-cost-when-intro-skipped';
-    ROOT.dataset.fxMagBirthDurationR1549=LOW_POWER?'3000ms-adaptive-60fps':'10000ms-full';
+    ROOT.dataset.fxMagBirthDurationR1549='10000ms-full-studio-adaptive-60fps';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
@@ -1247,6 +1247,14 @@
   addEventListener('formatx:organismresponse',()=>semanticInteraction('response',.72),interactionOptions);
   addEventListener('formatx:open-live-os',()=>semanticInteraction('system-open',.64),interactionOptions);
   addEventListener('formatx:loop',()=>semanticInteraction('loop',.78),interactionOptions);
+  addEventListener('input',()=>semanticInteraction('input',.36),interactionOptions);
+  addEventListener('change',()=>semanticInteraction('change',.42),interactionOptions);
+  addEventListener('submit',()=>semanticInteraction('submit',.72),interactionOptions);
+  addEventListener('pointerenter',event=>feedInteraction('enter',event,{strength:.22}),interactionOptions);
+  addEventListener('pointerleave',event=>feedInteraction('leave',event,{strength:.18}),interactionOptions);
+  addEventListener('resize',()=>semanticInteraction('resize',.30),interactionOptions);
+  addEventListener('orientationchange',()=>semanticInteraction('orientation',.52),interactionOptions);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)semanticInteraction('visibility-return',.38);},{passive:true});
 
   skip.addEventListener('click',()=>finish('user-skip'));
   addEventListener('formatx:real3dready',()=>{

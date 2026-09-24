@@ -82,7 +82,7 @@ jobs:
 
           grep -Fq "const VERSION='direct-r326-r468-soft-optics-live-energy-zero-idle'" "$CURRENT"
           grep -Eq "const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459\\.js\\?v=[^']+'" "$CURRENT"
-          grep -Fq 'formatx-core-life-r455.css?v=20260831-r474-softer-mobile-glow' "$CURRENT"
+          grep -Fq 'formatx-core-life-r455.css?v=20260924-r1722-zero-blur-hidpi' "$CURRENT"
           grep -Fq 'formatx-current-mag-loader-r422.js?v=' "$MOTION"
           grep -Fq 'formatx-mag-shape-sync-r476.js?v=' "$MOTION"
 

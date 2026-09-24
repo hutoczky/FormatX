@@ -1,4 +1,4 @@
-name: FormatX MAG intro visual proof
+name: FormatX R1722 living organism visual proof
 # R1490 visual proof: realistic DNA / solid organism / coherent obsidian crystal + full-page chamber
 
 on:
@@ -49,6 +49,11 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
           node --check .github/scripts/capture-mag-intro-r656.cjs
+          grep -Fq "this.qualityScale=this.lowPowerProfile?.66:(this.mobileProfile?.92:.94)" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "(this.mobileProfile?2.00:1.55)*this.qualityScale" docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js
+          grep -Fq "production-r1722-no-softening" docs/scifi-ui/styles/formatx-core-life-r455.css
+          grep -Fq "blur(0)" docs/scifi-ui/styles/formatx-core-life-r455.css
+          ! grep -Fq "blur(.30px)" docs/scifi-ui/styles/formatx-core-life-r455.css
       - name: Start source site
         shell: bash
         run: |
@@ -83,13 +88,13 @@ jobs:
         shell: bash
         run: |
           state=failure
-          description='R1490 realistic intro / coherent crystal visual proof failed'
+          description='R1722 living organism / HiDPI visual proof failed'
           if [[ "$RESULT" == success ]]; then
             state=success
-            description='R1490 realistic intro / coherent crystal final/mobile proof passed'
+            description='R1722 living organism / HiDPI mobile proof passed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX R1490 MAG visual proof' \
+            -f context='FormatX R1722 living organism proof' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
