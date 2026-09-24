@@ -469,7 +469,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1713-16-67ms-first-single-organism';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1722-fully-living-studio-hidpi';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -1247,6 +1247,14 @@
   addEventListener('formatx:organismresponse',()=>semanticInteraction('response',.72),interactionOptions);
   addEventListener('formatx:open-live-os',()=>semanticInteraction('system-open',.64),interactionOptions);
   addEventListener('formatx:loop',()=>semanticInteraction('loop',.78),interactionOptions);
+  addEventListener('input',()=>semanticInteraction('input',.36),interactionOptions);
+  addEventListener('change',()=>semanticInteraction('change',.42),interactionOptions);
+  addEventListener('submit',()=>semanticInteraction('submit',.72),interactionOptions);
+  addEventListener('pointerenter',event=>feedInteraction('enter',event,{strength:.22}),interactionOptions);
+  addEventListener('pointerleave',event=>feedInteraction('leave',event,{strength:.18}),interactionOptions);
+  addEventListener('resize',()=>semanticInteraction('resize',.30),interactionOptions);
+  addEventListener('orientationchange',()=>semanticInteraction('orientation',.52),interactionOptions);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)semanticInteraction('visibility-return',.38);},{passive:true});
 
   skip.addEventListener('click',()=>finish('user-skip'));
   addEventListener('formatx:real3dready',()=>{
