@@ -22,28 +22,13 @@
     clearTimeout(mobilePulseTimer);
     mobilePulseTimer=setTimeout(()=>BODY.classList.remove('fx-habitat-react-r1695'),180);
   }
+  /* R1720: mobile now receives the real event-driven living habitat too.
+     It paints only on resize/settled scroll/interaction, so the MAG remains
+     the 60 Hz motion owner while the world is no longer a flat CSS backdrop. */
   if (MOBILE.matches) {
-    const passive={passive:true};
-    addEventListener('pointerdown',()=>habitatInput('touch-press'),passive);
-    addEventListener('pointerup',()=>habitatInput('touch-release'),passive);
-    addEventListener('click',()=>habitatInput('click'),passive);
-    addEventListener('scroll',()=>habitatInput('scroll'),passive);
-    addEventListener('wheel',()=>habitatInput('wheel'),passive);
-    addEventListener('keydown',event=>{if(!event.repeat)habitatInput('key');},passive);
-    addEventListener('focusin',()=>habitatInput('focus'),passive);
-    addEventListener('formatx:languagechange',()=>habitatInput('language'),passive);
-    addEventListener('formatx:cinematicscene',()=>habitatInput('section'),passive);
-    addEventListener('formatx:menustatechange',event=>habitatInput(event.detail?.open?'menu-open':'menu-close'),passive);
-    addEventListener('formatx:storychapter',()=>habitatInput('story'),passive);
-    addEventListener('formatx:organismpanelopen',()=>habitatInput('question'),passive);
-    addEventListener('formatx:organismresponse',()=>habitatInput('response'),passive);
-    addEventListener('formatx:open-live-os',()=>habitatInput('system-open'),passive);
-    addEventListener('formatx:loop',()=>habitatInput('loop'),passive);
-    ROOT.dataset.fxLivingHabitatR1530='css-compositor-mobile-habitat';
-    ROOT.dataset.fxLivingHabitatSchedulerR1603='zero-main-thread-mobile-compositor';
-    ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-css':'mobile-css';
-    ROOT.dataset.fxLivingHabitatInteractionR1695='all-input-compositor-pulse-zero-canvas';
-    return;
+    ROOT.dataset.fxLivingHabitatR1530='event-driven-mobile-living-world';
+    ROOT.dataset.fxLivingHabitatSchedulerR1603='mobile-event-driven-zero-idle-canvas';
+    ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-event-driven':'mobile-event-driven';
   }
 
   const canvas = document.createElement('canvas');
@@ -62,7 +47,7 @@
   let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,pointerSettleTimer=0,lastDrawAt=0;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
-  let particles=[],filaments=[],glassArcs=[],mineralSpires=[];
+  let particles=[],filaments=[],glassArcs=[],mineralSpires=[],tissueBands=[],cellPods=[],capillaries=[];
 
   function seeded(seed=0xF04A1530){
     let s=seed>>>0;
@@ -71,7 +56,7 @@
   const random=seeded();
 
   function seedScene(){
-    const count=LOW_POWER?12:MOBILE.matches?18:28;
+    const count=LOW_POWER?22:MOBILE.matches?38:46;
     particles=Array.from({length:count},()=>({
       x:random(),y:random(),z:.18+random()*.82,size:.45+random()*1.30,
       phase:random()*Math.PI*2,alpha:.12+random()*.30
@@ -79,11 +64,11 @@
     /* R1584: long diagonal lines read as stage beams on phones. Keep the
        mobile habitat purely volumetric and reserve only a few short, dim
        biological filaments for fine-pointer desktop depth. */
-    const lines=LOW_POWER||MOBILE.matches?0:3;
+    const lines=LOW_POWER?4:MOBILE.matches?7:9;
     filaments=Array.from({length:lines},(_,index)=>({
-      x:.14+random()*.72,y:.12+random()*.76,len:.08+random()*.08,
-      bend:(random()-.5)*.065,phase:random()*Math.PI*2,
-      alpha:.005+random()*.006,width:.32+random()*.28,dir:index%2?1:-1
+      x:.08+random()*.84,y:.08+random()*.84,len:.12+random()*.18,
+      bend:(random()-.5)*.12,phase:random()*Math.PI*2,
+      alpha:.020+random()*.024,width:.55+random()*.70,dir:index%2?1:-1
     }));
     const arcCount=LOW_POWER?2:MOBILE.matches?3:5;
     glassArcs=Array.from({length:arcCount},(_,index)=>({
@@ -95,22 +80,45 @@
       width:.90+random()*1.45,
       phase:random()*Math.PI*2
     }));
-    const spireCount=LOW_POWER?3:MOBILE.matches?4:7;
+    const spireCount=LOW_POWER?2:MOBILE.matches?3:5;
     mineralSpires=Array.from({length:spireCount},(_,index)=>({
       side:index%2?-1:1,
-      x:.04+random()*.24,
-      y:.54+random()*.42,
-      w:.055+random()*.085,
-      h:.12+random()*.30,
-      lean:(random()-.5)*.055,
-      alpha:.16+random()*.14,
-      warm:random()>.72
+      x:.04+random()*.22,
+      y:.60+random()*.36,
+      w:.050+random()*.070,
+      h:.10+random()*.24,
+      lean:(random()-.5)*.050,
+      alpha:.10+random()*.10,
+      warm:false
+    }));
+    const bandCount=LOW_POWER?5:MOBILE.matches?8:11;
+    tissueBands=Array.from({length:bandCount},(_,index)=>({
+      side:index%2?-1:1,
+      y:.04+random()*.90,
+      reach:.16+random()*.26,
+      bend:.08+random()*.20,
+      width:(LOW_POWER?34:44)+random()*(MOBILE.matches?76:108),
+      alpha:.055+random()*.075,
+      phase:random()*Math.PI*2
+    }));
+    const podCount=LOW_POWER?8:MOBILE.matches?14:18;
+    cellPods=Array.from({length:podCount},()=>({
+      x:.03+random()*.94,y:.05+random()*.90,
+      r:(MOBILE.matches?12:14)+random()*(MOBILE.matches?34:48),
+      stretch:.65+random()*.72,
+      alpha:.07+random()*.12,phase:random()*Math.PI*2
+    }));
+    const capillaryCount=LOW_POWER?5:MOBILE.matches?9:13;
+    capillaries=Array.from({length:capillaryCount},(_,index)=>({
+      side:index%2?-1:1,y:.10+random()*.80,len:.18+random()*.28,
+      bend:(random()-.5)*.16,alpha:.025+random()*.035,
+      phase:random()*Math.PI*2,width:.55+random()*.85
     }));
   }
 
   function resize(){
     width=Math.max(1,innerWidth);height=Math.max(1,innerHeight);
-    dpr=Math.min(devicePixelRatio||1,LOW_POWER?1:MOBILE.matches?1:1.12);
+    dpr=Math.min(devicePixelRatio||1,LOW_POWER?(MOBILE.matches?1.25:1):MOBILE.matches?1.55:1.18);
     canvas.width=Math.max(1,Math.round(width*dpr));
     canvas.height=Math.max(1,Math.round(height*dpr));
     canvas.style.width=width+'px';canvas.style.height=height+'px';
@@ -175,10 +183,60 @@
     ctx.fillRect(0,0,width,height);
 
     const floor=ctx.createRadialGradient(width*.52,height*1.04,0,width*.52,height*1.04,Math.max(width,height)*.52);
-    floor.addColorStop(0,'rgba(68,130,142,.018)');
-    floor.addColorStop(.48,'rgba(23,68,79,.008)');
+    floor.addColorStop(0,'rgba(68,130,142,.030)');
+    floor.addColorStop(.48,'rgba(23,68,79,.014)');
     floor.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=floor;ctx.fillRect(0,0,width,height);
+
+    /* R1720 — complete living-world layer. Thick translucent tissue folds,
+       cell pods and capillary traces create an ecosystem around the MAG.
+       All of this is one event-driven Canvas2D paint, not a continuous loop. */
+    for(const b of tissueBands){
+      const edge=b.side>0?width*1.06:-width*.06;
+      const y=height*b.y+Math.sin(time*.00016+b.phase)*height*.012;
+      const endX=width*(.50+b.side*b.reach);
+      const endY=y+Math.sin(b.phase)*height*.08;
+      const cp1x=edge-b.side*width*b.bend;
+      const cp2x=endX+b.side*width*b.bend*.46;
+      ctx.save();ctx.lineCap='round';
+      ctx.strokeStyle='rgba(4,14,24,'+(b.alpha*2.5)+')';
+      ctx.lineWidth=b.width;
+      ctx.beginPath();ctx.moveTo(edge,y);
+      ctx.bezierCurveTo(cp1x,y-height*.20,cp2x,endY+height*.15,endX,endY);ctx.stroke();
+      ctx.strokeStyle='rgba(35,89,119,'+(b.alpha*.82)+')';
+      ctx.lineWidth=Math.max(2,b.width*.12);
+      ctx.beginPath();ctx.moveTo(edge,y);
+      ctx.bezierCurveTo(cp1x,y-height*.20,cp2x,endY+height*.15,endX,endY);ctx.stroke();
+      ctx.strokeStyle='rgba(103,216,236,'+(b.alpha*.42)+')';
+      ctx.lineWidth=Math.max(.8,b.width*.025);
+      ctx.beginPath();ctx.moveTo(edge,y);
+      ctx.bezierCurveTo(cp1x,y-height*.20,cp2x,endY+height*.15,endX,endY);ctx.stroke();
+      ctx.restore();
+    }
+    for(const p of cellPods){
+      const x=p.x*width+Math.sin(time*.00010+p.phase)*4;
+      const y=p.y*height+Math.cos(time*.00012+p.phase)*4;
+      ctx.save();ctx.translate(x,y);ctx.rotate(p.phase*.12);ctx.scale(1,p.stretch);
+      const g=ctx.createRadialGradient(-p.r*.20,-p.r*.18,1,0,0,p.r);
+      g.addColorStop(0,'rgba(104,191,210,'+(p.alpha*.72)+')');
+      g.addColorStop(.34,'rgba(43,73,107,'+(p.alpha*.68)+')');
+      g.addColorStop(.70,'rgba(65,37,91,'+(p.alpha*.54)+')');
+      g.addColorStop(1,'rgba(2,8,15,0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(95,211,233,'+(p.alpha*.46)+')';ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(0,0,p.r*.78,0,Math.PI*2);ctx.stroke();ctx.restore();
+    }
+    for(const c of capillaries){
+      const edge=c.side>0?width*.98:width*.02;
+      const y=height*c.y;
+      const ex=edge-c.side*width*c.len;
+      const ey=y+Math.sin(time*.00015+c.phase)*height*.025;
+      ctx.save();ctx.lineCap='round';
+      ctx.strokeStyle='rgba(63,190,220,'+c.alpha+')';ctx.lineWidth=c.width;
+      ctx.beginPath();ctx.moveTo(edge,y);
+      ctx.bezierCurveTo(edge-c.side*width*.08,y-height*c.bend,ex+c.side*width*.06,ey+height*c.bend*.4,ex,ey);ctx.stroke();
+      ctx.restore();
+    }
 
     /* R1585: near the top of the page, imply a real dark laboratory around
        the core using only broad volumetric masses. No target rings or hard
@@ -348,5 +406,7 @@
   ROOT.dataset.fxLivingHabitatInteractionR1695='pointer-touch-scroll-wheel-click-key-focus-language-section-physical-light-response';
   ROOT.dataset.fxLivingHabitatInteractionR1701='all-site-input-menu-language-story-question-response-system-loop-physical-pulse-zero-idle';
   ROOT.dataset.fxLivingHabitatPerformanceR1710='static-backing-compositor-response-mag-60hz-priority';
-  ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained':MOBILE.matches?'mobile':'full';
+  ROOT.dataset.fxLivingHabitatR1720='complete-biological-ecosystem-tissue-cells-capillaries';
+  ROOT.dataset.fxLivingHabitatPerformanceR1720='event-driven-hidpi-mobile-zero-idle-world';
+  ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
 })();

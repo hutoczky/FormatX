@@ -1271,3 +1271,74 @@ html:root:root:root body.living-architecture :is(
   -webkit-backdrop-filter:none!important;
 }
 /* production-r1710-compositor-budget */
+
+
+/* R1720 — complete living-world visual owner.
+   The habitat is no longer a nearly black chamber: broad biological folds,
+   cyan vascular light and violet cellular depth remain visible behind the MAG.
+   The Canvas2D world is event-driven/zero-idle; CSS supplies static continuity. */
+html:root:root body.living-architecture{
+  background:
+    radial-gradient(ellipse 54% 44% at 72% 9%,rgba(49,163,197,.18),transparent 64%),
+    radial-gradient(ellipse 42% 50% at 16% 40%,rgba(70,43,116,.14),transparent 67%),
+    radial-gradient(ellipse 48% 42% at 88% 72%,rgba(25,119,153,.13),transparent 68%),
+    radial-gradient(ellipse 62% 48% at 48% 56%,rgba(29,73,102,.12),transparent 72%),
+    linear-gradient(180deg,#020713 0%,#061522 30%,#05121d 68%,#01050b 100%)!important;
+}
+html:root:root body.living-architecture::before{
+  background:
+    radial-gradient(ellipse 16% 70% at 3% 28%,rgba(18,52,74,.58),rgba(8,20,33,.26) 54%,transparent 82%),
+    radial-gradient(ellipse 18% 76% at 98% 58%,rgba(23,61,86,.56),rgba(9,22,36,.24) 52%,transparent 82%),
+    radial-gradient(ellipse 13% 44% at 25% 92%,rgba(60,38,89,.24),transparent 75%),
+    radial-gradient(ellipse 14% 48% at 76% 8%,rgba(35,115,142,.24),transparent 76%),
+    linear-gradient(180deg,rgba(86,197,220,.045),transparent 23% 78%,rgba(33,104,133,.045))!important;
+  opacity:1!important;
+}
+html:root:root body.living-architecture::after{
+  background:
+    radial-gradient(ellipse 31% 25% at 51% 18%,rgba(93,211,231,.105),transparent 72%),
+    radial-gradient(ellipse 26% 30% at 18% 63%,rgba(72,44,121,.095),transparent 75%),
+    radial-gradient(ellipse 24% 32% at 84% 42%,rgba(39,137,166,.095),transparent 75%),
+    radial-gradient(ellipse 72% 54% at 50% 48%,transparent 40%,rgba(0,0,0,.10) 78%,rgba(0,0,0,.34) 118%)!important;
+  opacity:1!important;
+}
+.fx-living-habitat-r1530{
+  opacity:.78!important;
+  image-rendering:auto!important;
+  mix-blend-mode:screen!important;
+}
+.fx-mag-birth-r533{
+  background:
+    radial-gradient(ellipse 38% 52% at 50% 45%,rgba(48,151,181,.18),transparent 68%),
+    radial-gradient(ellipse 26% 58% at 8% 42%,rgba(56,37,96,.20),transparent 72%),
+    radial-gradient(ellipse 28% 62% at 94% 55%,rgba(31,104,139,.20),transparent 72%),
+    linear-gradient(180deg,#020713 0%,#061521 56%,#01050b 100%)!important;
+}
+html[data-fx-crystal-organism-r326="ready"]:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  image-rendering:auto!important;
+  filter:brightness(1.12) contrast(1.045) saturate(1.09)!important;
+  -webkit-filter:brightness(1.12) contrast(1.045) saturate(1.09)!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-living-habitat-r1530{
+    opacity:.72!important;
+    mix-blend-mode:screen!important;
+  }
+  html:root:root body.living-architecture{
+    background:
+      radial-gradient(ellipse 74% 34% at 50% 4%,rgba(48,164,196,.16),transparent 69%),
+      radial-gradient(ellipse 54% 44% at 0% 44%,rgba(66,43,111,.13),transparent 72%),
+      radial-gradient(ellipse 56% 46% at 100% 68%,rgba(25,122,151,.13),transparent 73%),
+      linear-gradient(180deg,#020713 0%,#061521 38%,#04111b 72%,#01050a 100%)!important;
+  }
+  html[data-fx-crystal-organism-r326="ready"]:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.15) contrast(1.035) saturate(1.12)!important;
+    -webkit-filter:brightness(1.15) contrast(1.035) saturate(1.12)!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .fx-living-habitat-r1530{opacity:.62!important}
+}
+/* production-r1720-complete-living-world */
