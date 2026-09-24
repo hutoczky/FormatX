@@ -1426,7 +1426,7 @@ html:root:root body.living-architecture > .fx-living-habitat-r1530{
   height:100vh!important;
   opacity:.82!important;
   pointer-events:none!important;
-  mix-blend-mode:screen!important;
+  mix-blend-mode:normal!important;
   filter:none!important;
 }
 html:root:root body.living-architecture > :is(main#main-content,footer.site-footer){
@@ -1524,7 +1524,7 @@ html:root:root body.living-architecture footer.site-footer{
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   html:root:root body.living-architecture > .fx-living-habitat-r1530{
     opacity:.78!important;
-    mix-blend-mode:screen!important;
+    mix-blend-mode:normal!important;
   }
   html:root:root:root:root body.living-architecture main#main-content > :is(
     section.scene,.fx-category-deck,#user-feedback,.fx-static-live-os,
@@ -1557,3 +1557,5 @@ html:root:root body.living-architecture footer.site-footer{
 /* production-r1724-sitewide-living-habitat */
 
 /* production-r1724-overlay-pointer-safe */
+
+/* production-r1724-zero-blend-sitewide-habitat */
