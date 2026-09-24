@@ -119,6 +119,8 @@
       document.documentElement.dataset.fxMagBirthMaterialR1725='desaturated-mineral-clearcoat-low-emission-warm-rim';
       document.documentElement.dataset.fxMagBirthVisualR1726='cinematic-photographic-smoky-pearl-living-biocrystal';
       document.documentElement.dataset.fxMagBirthMaterialR1726='neutral-studio-softbox-physical-clearcoat-restrained-cyan-physiology';
+      document.documentElement.dataset.fxMagBirthVisualR1727='photographic-single-biocrystal-continuity-no-neon-wing-read';
+      document.documentElement.dataset.fxMagBirthMotionR1727='slow-biological-inertia-subtle-membrane-tension-matched-hero';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,1);
@@ -919,8 +921,8 @@
         clearcoat:.56,clearcoatRoughness:.14,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0075,
         transparent:true,opacity:0,
-        emissive:0x063044,emissiveIntensity:.075,
-        envMapIntensity:1.72,
+        emissive:0x05222d,emissiveIntensity:.046,
+        envMapIntensity:1.58,
         sheen:.16,sheenColor:new T.Color(0x88c3ca),sheenRoughness:.46,
         specularIntensity:.82,specularColor:new T.Color(0xdffbff),
         depthWrite:true
@@ -957,8 +959,8 @@
       }
       shellGeo.computeVertexNormals();
       const shell=new T.Mesh(shellGeo,this.organicShellMaterial);
-      shell.scale.set(.82,.78,.70);
-      shell.position.set(-.03,.00,-.015);
+      shell.scale.set(.78,.91,.68);
+      shell.position.set(-.055,.012,-.018);
       shell.userData.baseScale=shell.scale.clone();
       this.organicShell=shell;
       this.organicGroup.add(shell);
@@ -973,8 +975,8 @@
         envMapIntensity:1.28,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.836,.796,.714);
-      this.organicMembrane.position.set(-.03,.00,.000);
+      this.organicMembrane.scale.set(.795,.928,.695);
+      this.organicMembrane.position.set(-.055,.012,-.002);
       this.organicMembrane.userData.baseScale=this.organicMembrane.scale.clone();
       this.organicGroup.add(this.organicMembrane);
 
@@ -1009,10 +1011,10 @@
          faceted cortical lobes, translucent membranes and one energy organ.
          No animal head, paws, limbs or robotic armour. */
       this.guardianPlateMaterial=new T.MeshPhysicalMaterial({
-        color:0x667b82,roughness:.27,metalness:0,
-        clearcoat:.68,clearcoatRoughness:.12,
-        emissive:0x06222d,emissiveIntensity:.075,
-        envMapIntensity:1.72,
+        color:0x606f73,roughness:.31,metalness:0,
+        clearcoat:.56,clearcoatRoughness:.16,
+        emissive:0x04161c,emissiveIntensity:.030,
+        envMapIntensity:1.52;
         sheen:.16,sheenColor:new T.Color(0x89ced8),sheenRoughness:.46,
         specularIntensity:.92,specularColor:new T.Color(0xecf8f8),
         transparent:true,opacity:0,depthWrite:true,
