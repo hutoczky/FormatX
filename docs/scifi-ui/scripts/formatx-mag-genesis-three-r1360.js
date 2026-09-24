@@ -238,6 +238,13 @@
         this.scene.add(edgeSoftbox,edgeSoftbox.target);
         this.edgeSoftboxLight=edgeSoftbox;
       }
+      if(this.mobileProfile&&!this.lowPowerProfile){
+        const mobileSoftbox=new T.SpotLight(0xdff9fb,2.10,12,Math.PI*.44,.98,1.55);
+        mobileSoftbox.position.set(-3.2,4.2,5.4);
+        mobileSoftbox.target.position.set(.18,.10,0);
+        this.scene.add(mobileSoftbox,mobileSoftbox.target);
+        this.softboxLight=mobileSoftbox;
+      }
       this.coreLight=new T.PointLight(0x79dbe7,0,7,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
@@ -252,16 +259,18 @@
       group.position.z=-3.65;
 
       const wallMat=new T.MeshPhysicalMaterial({
-        color:0x081014,metalness:.22,roughness:.58,
-        emissive:0x02090b,emissiveIntensity:.055,
-        clearcoat:.08,clearcoatRoughness:.58,
+        color:0x0b1420,metalness:.015,roughness:.54,
+        emissive:0x071321,emissiveIntensity:.13,
+        clearcoat:.16,clearcoatRoughness:.46,
+        sheen:.18,sheenColor:new T.Color(0x153f52),sheenRoughness:.60,
         side:T.BackSide
       });
       const panelMat=new T.MeshPhysicalMaterial({
-        color:0x101c20,metalness:.10,roughness:.72,
-        emissive:0x010405,emissiveIntensity:.005,
-        clearcoat:.04,clearcoatRoughness:.64,
-        transparent:true,opacity:.18
+        color:0x213042,metalness:.005,roughness:.56,
+        emissive:0x0a1d2e,emissiveIntensity:.10,
+        clearcoat:.14,clearcoatRoughness:.48,
+        transparent:true,opacity:.24,
+        sheen:.15,sheenColor:new T.Color(0x244d61),sheenRoughness:.58
       });
       const darkPanelMat=new T.MeshPhysicalMaterial({
         color:0x04090c,metalness:.02,roughness:.90,
@@ -344,6 +353,47 @@
       const bottomWell=topWell.clone();
       bottomWell.position.y=-2.18;
       group.add(topWell,bottomWell);
+
+      /* R1722 — living chamber. Reused geometry/materials keep draw cost bounded
+         while the birth environment reads as a biological ecosystem, not a room. */
+      const tissueMat=new T.MeshPhysicalMaterial({
+        color:0x3b2948,roughness:.46,metalness:0,
+        emissive:0x0d2030,emissiveIntensity:.13,
+        clearcoat:.24,clearcoatRoughness:.34,
+        transparent:true,opacity:.42,
+        sheen:.22,sheenColor:new T.Color(0x286078),sheenRoughness:.56
+      });
+      const vesselMat=new T.MeshPhysicalMaterial({
+        color:0x1d5666,roughness:.28,metalness:0,
+        emissive:0x08748b,emissiveIntensity:.38,
+        clearcoat:.38,clearcoatRoughness:.18,
+        transparent:true,opacity:.58
+      });
+      const sacGeo=new T.SphereGeometry(1,18,12);
+      const sacDefs=[
+        [-4.15,1.85,-1.55,1.45,2.25,.68,.18],
+        [-4.35,-1.55,-1.10,1.25,1.85,.62,-.24],
+        [4.18,1.42,-1.32,1.36,2.05,.66,-.18],
+        [4.34,-1.72,-1.48,1.44,2.16,.70,.22],
+        [-2.20,3.28,-1.82,1.70,.82,.58,.08],
+        [2.48,-3.22,-1.72,1.65,.86,.60,-.08]
+      ];
+      sacDefs.forEach(([x,y,z,sx,sy,sz,rz])=>{
+        const sac=new T.Mesh(sacGeo,tissueMat);
+        sac.position.set(x,y,z);sac.scale.set(sx,sy,sz);sac.rotation.z=rz;group.add(sac);
+      });
+      const vesselCurves=[
+        [[-4.0,2.7,-.70],[-2.5,1.9,-.25],[-1.35,2.55,.05]],
+        [[4.0,2.5,-.72],[2.55,1.65,-.18],[1.40,2.30,.02]],
+        [[-4.1,-2.7,-.80],[-2.6,-1.9,-.30],[-1.45,-2.45,.00]],
+        [[4.1,-2.6,-.82],[2.7,-1.75,-.25],[1.50,-2.35,.00]]
+      ];
+      vesselCurves.forEach(points=>{
+        const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)),false,'centripetal');
+        group.add(new T.Mesh(new T.TubeGeometry(curve,24,.028,6,false),vesselMat));
+      });
+      this.chamberTissueMaterial=tissueMat;
+      this.chamberVesselMaterial=vesselMat;
 
       this.chamber=group;
       this.scene.add(group);
