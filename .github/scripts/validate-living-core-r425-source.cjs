@@ -59,7 +59,7 @@ has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'","const CANONICAL_REVISION = 'fully-living-organism-r1723'",'buildOrganismGeometry',
   'KHR_parallel_shader_compile','fxCoreShaderCompileR600','finishProgram',
   'const SURFACE_PULSE_MS = 1160','const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880','prefers-reduced-motion:reduce','document.hidden',
-  'uSurfacePulse','dnaHelix','dnaBridge','fxCoreGenomeR614','native-double-helix-energy-lattice-r614','fxCoreGenesisMagR614','cortical-cellular-organism-with-native-tendrils-r1723','cortical-bioceramic-living-tissue-r1723','single-luminous-webgl-material-owner','fxCoreCanonicalIdentityR1723','fxNativeMagIdentityR1723','fxNativeMagMaterialR1723','fxNativeMagTendrilsR1723','fxNativeMagPhysiologyR1723','fxNativeMagPhysiologyApiR1723','physiology:(kind,source)=>signalPhysiology','formatx:organismphysiology','fxNativeMagGuardianR1724','fxNativeMagLookR1724','fxNativeMagTopologyR1724','fxNativeMagPaletteR1724','fxNativeMagFacetR1724'
+  'uSurfacePulse','dnaHelix','dnaBridge','fxCoreGenomeR614','native-double-helix-energy-lattice-r614','fxCoreGenesisMagR614','cortical-cellular-organism-with-native-tendrils-r1723','cortical-bioceramic-living-tissue-r1723','single-luminous-webgl-material-owner','fxCoreCanonicalIdentityR1723','fxNativeMagIdentityR1723','fxNativeMagMaterialR1723','fxNativeMagTendrilsR1723','fxNativeMagPhysiologyR1723','fxNativeMagPhysiologyApiR1723','physiology:(kind,source)=>signalPhysiology','formatx:organismphysiology','fxNativeMagOrganismR1724','fxNativeMagLookR1724','fxNativeMagTopologyR1724','fxNativeMagPaletteR1724','fxNativeMagFacetR1724'
 ],'native R326 renderer');
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
 assert.ok(!renderer.includes("shape:'crystal'"),'R1723 renderer must not publish crystal as active shape');
@@ -67,11 +67,11 @@ assert.ok(!renderer.includes("shape:'sphere'"),'R1723 renderer must not publish 
 assert.ok(!home.includes('formatx-reference-creature-r1724'),'static R1724 creature image/script takeover must not be loaded');
 
 has(birth,[
-  "fxMagBirthGuardianR1724='faceted-pearl-cyan-crystal-organic-guardian'",
+  "fxMagBirthOrganismR1724='faceted-pearl-cyan-living-crystal-organism'",
   "fxMagBirthCoreR1724='biocrystal-cartilage-cyan-energy-warm-rim'",
   "fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive'",
   'this.mechanicalGroup.visible=false'
-],'R1724 Three.js Guardian birth');
+],'R1724 Three.js living crystal birth');
 has(fallback,[
   "revision:'r1724-formatx-living-crystal-organism-birth'",
   'FormatX Living Crystal Organism fallback silhouette'
@@ -129,4 +129,4 @@ assert.ok(!mini.includes('setInterval('),'Mini MAG collision safety must remain 
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
 for(const source of [intro,motion,current,renderer,life,governor,mini,birth,fallback,habitat])new Function(source);
 
-console.log('PASS: R1724 validates one procedural interactive FormatX guardian, no static creature takeover, no alternate shape state, zero-idle lifecycle, and source-owned adaptive quality.');
+console.log('PASS: R1724 validates one procedural interactive FormatX living crystal organism, no static creature takeover, no alternate shape state, zero-idle lifecycle, and source-owned adaptive quality.');
