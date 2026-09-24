@@ -54,6 +54,7 @@
   root.dataset.fxLoopEndIntentPolicyR1724='cached-end-latched-through-idle-reflow';
   root.dataset.fxLoopDesktopSettleR1724='scrollend-primary-idle-timer-fallback';
   root.dataset.fxLoopVisualContinuityR1724='scroll-frame-relative-authoritative-through-reflow';
+  root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -423,6 +424,7 @@
     geometryObserver = new ResizeObserver(() => scheduleGeometryRefresh());
     const main = document.getElementById('main-content');
     const footer = document.querySelector('body > .site-footer');
+    if (document.body) geometryObserver.observe(document.body);
     if (main) geometryObserver.observe(main);
     if (footer) geometryObserver.observe(footer);
     geometryObserver.observe(sourceHero);
@@ -788,6 +790,10 @@
   addEventListener('scrollend', onScrollEnd, { passive: true });
   addEventListener('resize', onResize, { passive: true });
   addEventListener('load', scheduleGeometryRefresh, { once: true, passive: true });
+  addEventListener('formatx:loopgeometryrefresh',event=>{
+    refreshGeometry();
+    root.dataset.fxLoopGeometryEventR1724=String(event.detail?.source||'external-refresh');
+  },{passive:true});
   addEventListener('pageshow', () => scheduleRepair(true), { passive: true });
   addEventListener('formatx:organisminterfaceready', () => scheduleRepair(true));
   addEventListener('formatx:organismpanelopen', onPanelOpen);
