@@ -47,7 +47,7 @@
   let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,pointerSettleTimer=0,lastDrawAt=0;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
-  let particles=[],filaments=[],glassArcs=[],mineralSpires=[],tissueBands=[],cellPods=[],capillaries=[];
+  let particles=[],filaments=[],glassArcs=[],mineralSpires=[],tissueBands=[],cellPods=[],capillaries=[],membranePockets=[],neuralRoots=[];
 
   function seeded(seed=0xF04A1530){
     let s=seed>>>0;
@@ -114,11 +114,25 @@
       bend:(random()-.5)*.16,alpha:.025+random()*.035,
       phase:random()*Math.PI*2,width:.55+random()*.85
     }));
+    const pocketCount=LOW_POWER?4:MOBILE.matches?7:10;
+    membranePockets=Array.from({length:pocketCount},()=>({
+      x:.06+random()*.88,y:.07+random()*.86,
+      rx:.08+random()*.14,ry:.05+random()*.12,
+      rot:(random()-.5)*1.2,alpha:.035+random()*.055,
+      phase:random()*Math.PI*2
+    }));
+    const rootCount=LOW_POWER?5:MOBILE.matches?9:12;
+    neuralRoots=Array.from({length:rootCount},(_,index)=>({
+      side:index%2?-1:1,y:.05+random()*.88,
+      reach:.22+random()*.30,bend:(random()-.5)*.22,
+      alpha:.032+random()*.046,width:.75+random()*1.20,
+      phase:random()*Math.PI*2
+    }));
   }
 
   function resize(){
     width=Math.max(1,innerWidth);height=Math.max(1,innerHeight);
-    dpr=Math.min(devicePixelRatio||1,LOW_POWER?(MOBILE.matches?1.25:1):MOBILE.matches?1.55:1.18);
+    dpr=Math.min(devicePixelRatio||1,LOW_POWER?(MOBILE.matches?1.35:1):MOBILE.matches?1.80:1.24);
     canvas.width=Math.max(1,Math.round(width*dpr));
     canvas.height=Math.max(1,Math.round(height*dpr));
     canvas.style.width=width+'px';canvas.style.height=height+'px';
@@ -235,6 +249,36 @@
       ctx.strokeStyle='rgba(63,190,220,'+c.alpha+')';ctx.lineWidth=c.width;
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(edge-c.side*width*.08,y-height*c.bend,ex+c.side*width*.06,ey+height*c.bend*.4,ex,ey);ctx.stroke();
+      ctx.restore();
+    }
+    for(const p of membranePockets){
+      const x=p.x*width+Math.sin(time*.00008+p.phase)*width*.004;
+      const y=p.y*height+Math.cos(time*.00009+p.phase)*height*.004;
+      const rx=p.rx*width,ry=p.ry*height;
+      ctx.save();ctx.translate(x,y);ctx.rotate(p.rot);
+      const g=ctx.createRadialGradient(-rx*.18,-ry*.20,2,0,0,Math.max(rx,ry));
+      g.addColorStop(0,'rgba(126,216,226,'+(p.alpha*.55)+')');
+      g.addColorStop(.28,'rgba(73,112,143,'+(p.alpha*.52)+')');
+      g.addColorStop(.62,'rgba(67,41,104,'+(p.alpha*.44)+')');
+      g.addColorStop(1,'rgba(3,10,18,0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(116,226,239,'+(p.alpha*.50)+')';ctx.lineWidth=1.1;
+      ctx.beginPath();ctx.ellipse(0,0,rx*.82,ry*.82,0,0,Math.PI*2);ctx.stroke();
+      ctx.restore();
+    }
+    for(const n of neuralRoots){
+      const edge=n.side>0?width*1.02:-width*.02;
+      const y=height*n.y;
+      const ex=edge-n.side*width*n.reach;
+      const ey=y+Math.sin(time*.00013+n.phase)*height*.035;
+      const bend=n.bend*height;
+      ctx.save();ctx.lineCap='round';
+      ctx.strokeStyle='rgba(7,18,31,'+(n.alpha*2.4)+')';ctx.lineWidth=n.width*8;
+      ctx.beginPath();ctx.moveTo(edge,y);
+      ctx.bezierCurveTo(edge-n.side*width*.08,y-bend,ex+n.side*width*.08,ey+bend*.42,ex,ey);ctx.stroke();
+      ctx.strokeStyle='rgba(74,209,235,'+(n.alpha*.82)+')';ctx.lineWidth=n.width;
+      ctx.beginPath();ctx.moveTo(edge,y);
+      ctx.bezierCurveTo(edge-n.side*width*.08,y-bend,ex+n.side*width*.08,ey+bend*.42,ex,ey);ctx.stroke();
       ctx.restore();
     }
 
@@ -408,5 +452,7 @@
   ROOT.dataset.fxLivingHabitatPerformanceR1710='static-backing-compositor-response-mag-60hz-priority';
   ROOT.dataset.fxLivingHabitatR1720='complete-biological-ecosystem-tissue-cells-capillaries';
   ROOT.dataset.fxLivingHabitatPerformanceR1720='event-driven-hidpi-mobile-zero-idle-world';
+  ROOT.dataset.fxLivingHabitatR1721='membranes-neural-roots-deep-cellular-parallax';
+  ROOT.dataset.fxLivingHabitatPerformanceR1721='event-driven-hidpi-sharp-background-zero-idle';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
 })();

@@ -756,9 +756,15 @@
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
         float living=(cell*.020+membrane*.0105)*(.46+.54*uEnergy);
+        float bodyVertexMask=1.0-step(2.0,aFacet);
+        float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
+        float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
+        float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
+        float cortex=(cortexA*.62+cortexB*.38)*.028*cortexEnvelope;
+        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0065*cortexEnvelope;
         float layerScale=uLayer>.5?.50:1.0;
-        float heartbeat=1.0+uBreath*(uLayer>.5?.040:.018);
-        vec3 local=(base+normal*living)*layerScale*heartbeat;
+        float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
+        vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
         local.xy+=uPointer*.038*uLayer;
         float yaw=.34+uRotation.y+uPointer.x*.18+uTime*.014;
         float pitch=-.058+uRotation.x-uPointer.y*.12+.010*sin(uTime*.19);
@@ -775,7 +781,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.825':'.770'};
+        projected*= ${mobile?'.855':'.805'};
         projected.y+=${mobile?'.042':'.024'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
@@ -885,8 +891,16 @@
         mineral+=vec3(.025,.052,.058)*backScatter*.36;
         float vesselA=pow(.5+.5*sin(vLocal.y*18.0+sin(vLocal.x*9.0)*2.2+vLocal.z*6.0),16.0);
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
-        float vascular=max(vesselA,vesselB)*bodyMask;
-        mineral+=vec3(.028,.25,.32)*vascular*(.15+.25*uEnergy);
+        float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
+        float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
+        mineral+=vec3(.030,.30,.38)*vascular*(.17+.29*uEnergy);
+        float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
+        float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
+        float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
+        float cortexRidge=pow(max(cortexWave,cortexCross),4.2)*bodyMask;
+        mineral=mix(mineral,vec3(.020,.010,.032),cortexValley*.38);
+        mineral+=vec3(.080,.105,.145)*cortexRidge*.105;
+        mineral+=vec3(.025,.135,.165)*cortexRidge*vascular*.44;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -956,6 +970,12 @@
         float lensInner=1.0-smoothstep(.055,.205,lensRadial);
         float lensRing=exp(-pow((lensRadial-.155)/.026,2.0));
         float lensHot=pow(sat(1.0-lensRadial/.17),5.0);
+        vec2 lensVector=vUv-vec2(.5);
+        float lensAngle=atan(lensVector.y,lensVector.x);
+        float electricBranch=pow(.5+.5*sin(lensAngle*14.0+lensRadial*86.0-uTime*2.3+sin(lensAngle*5.0)*1.7),18.0)*lensInner;
+        float electricBranch2=pow(.5+.5*sin(lensAngle*9.0-lensRadial*67.0+uTime*1.7),22.0)*lensInner;
+        float electric=max(electricBranch,electricBranch2);
+        float coreFlash=exp(-pow(lensRadial/.050,2.0))*(.62+.38*sin(uTime*4.0));
         vec3 physicalLens=vec3(.008,.026,.034);
         physicalLens+=vec3(.018,.090,.112)*(.24+.30*uEnergy);
         physicalLens+=vec3(.94,.99,.96)*softboxA*.18;
@@ -964,6 +984,8 @@
         physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
         physicalLens+=vec3(.050,.36,.48)*lensRing*(.10+.10*uEnergy);
         physicalLens+=vec3(.84,.98,1.00)*lensHot*(.18+.08*uEnergy);
+        physicalLens+=vec3(.18,.82,1.00)*electric*(.30+.30*uEnergy);
+        physicalLens+=vec3(.92,1.00,1.00)*coreFlash*.58;
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -1058,8 +1080,15 @@
         col+=vec3(.018,.040,.046)*edgeTransmission*.39;
         float vesselA=pow(.5+.5*sin(vLocal.y*18.0+sin(vLocal.x*9.0)*2.2+vLocal.z*6.0),16.0);
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
-        float vascular=max(vesselA,vesselB)*bodyMask;
-        col+=vec3(.025,.24,.31)*vascular*(.14+.24*uEnergy);
+        float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0),22.0);
+        float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
+        col+=vec3(.028,.29,.37)*vascular*(.16+.27*uEnergy);
+        float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.55+vUv.y*5.2);
+        float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133);
+        float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.2)*bodyMask;
+        float cortexRidge=pow(max(cortexWave,cortexCross),4.0)*bodyMask;
+        col=mix(col,vec3(.020,.010,.032),cortexValley*.34);
+        col+=vec3(.070,.098,.135)*cortexRidge*.095;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1121,6 +1150,10 @@
         float lensInner=1.0-smoothstep(.055,.205,lensRadial);
         float lensRing=exp(-pow((lensRadial-.155)/.026,2.0));
         float lensHot=pow(sat(1.0-lensRadial/.17),5.0);
+        vec2 lensVector=vUv-vec2(.5);
+        float lensAngle=atan(lensVector.y,lensVector.x);
+        float electric=pow(.5+.5*sin(lensAngle*12.0+lensRadial*72.0-uTime*2.0),16.0)*lensInner;
+        float coreFlash=exp(-pow(lensRadial/.055,2.0))*(.66+.34*sin(uTime*3.8));
         vec3 physicalLens=vec3(.010,.030,.038)
           +vec3(.018,.095,.116)*(.28+.32*uEnergy)
           +vec3(.94,1.00,.98)*softboxA*.24
@@ -1128,7 +1161,9 @@
           +vec3(.12,.30,.36)*fresnel*.20
           +vec3(.020,.19,.25)*lensInner*(.10+.10*uEnergy)
           +vec3(.060,.42,.54)*lensRing*(.12+.12*uEnergy)
-          +vec3(.82,.98,1.00)*lensHot*(.24+.10*uEnergy);
+          +vec3(.82,.98,1.00)*lensHot*(.24+.10*uEnergy)
+          +vec3(.16,.78,1.00)*electric*(.28+.26*uEnergy)
+          +vec3(.92,1.00,1.00)*coreFlash*.52;
         col=mix(col,physicalLens,lensMeshMask*.997);
 
         float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -1257,6 +1292,8 @@
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
     root.dataset.fxNativeMagQualityR1720='hidpi-mobile-1260k-pixel-budget-adaptive-60hz';
+    root.dataset.fxNativeMagVisualR1721='cortical-lobes-electric-neural-core-subdermal-vascular-detail';
+    root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'

@@ -1342,3 +1342,57 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   .fx-living-habitat-r1530{opacity:.62!important}
 }
 /* production-r1720-complete-living-world */
+
+
+/* R1721 — cortical living-world finish.
+   Preserve legibility, but make the hero read as one inhabited biological space:
+   layered membranes, neural light and cellular depth remain visible at the edges
+   instead of collapsing into a black void. */
+html:root:root body.living-architecture{
+  background:
+    radial-gradient(ellipse 58% 46% at 72% 10%,rgba(49,173,207,.205),transparent 63%),
+    radial-gradient(ellipse 44% 52% at 13% 42%,rgba(81,48,128,.165),transparent 68%),
+    radial-gradient(ellipse 50% 44% at 91% 72%,rgba(28,133,165,.155),transparent 68%),
+    radial-gradient(ellipse 64% 52% at 49% 55%,rgba(31,82,111,.145),transparent 72%),
+    linear-gradient(180deg,#020713 0%,#071725 30%,#05131f 68%,#01050b 100%)!important;
+}
+.fx-living-habitat-r1530{
+  opacity:.84!important;
+  mix-blend-mode:screen!important;
+  filter:none!important;
+}
+html[data-fx-crystal-organism-r326="ready"]:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  opacity:1!important;
+  image-rendering:auto!important;
+  filter:brightness(1.145) contrast(1.055) saturate(1.14)!important;
+  -webkit-filter:brightness(1.145) contrast(1.055) saturate(1.14)!important;
+}
+html:root:root body.living-architecture #hero .hero-copy{
+  background:
+    radial-gradient(circle at 88% 8%,rgba(84,187,213,.060),transparent 38%),
+    linear-gradient(146deg,rgba(4,18,28,.70),rgba(2,9,15,.78))!important;
+  border-color:rgba(118,224,240,.13)!important;
+  box-shadow:inset 0 1px 0 rgba(231,253,255,.035),0 22px 72px rgba(0,0,0,.19)!important;
+}
+@media (min-width:901px) and (pointer:fine){
+  html:root:root body.living-architecture #hero .hero-space{
+    overflow:visible!important;
+  }
+  html[data-fx-crystal-organism-r326="ready"]:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+    transform:scale(1.045)!important;
+    transform-origin:50% 48%!important;
+  }
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-living-habitat-r1530{
+    opacity:.80!important;
+  }
+  html[data-fx-crystal-organism-r326="ready"]:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.17) contrast(1.045) saturate(1.16)!important;
+    -webkit-filter:brightness(1.17) contrast(1.045) saturate(1.16)!important;
+  }
+}
+/* production-r1721-cortical-living-world */
