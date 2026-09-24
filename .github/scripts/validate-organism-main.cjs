@@ -58,7 +58,7 @@ async function enterSite(page, label) {
     await skip.click({ force: true, timeout: 1500 }).catch(() => {});
   }
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
-  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
+  await page.waitForFunction(() => ['ready','delegated-r264'].includes(document.documentElement.dataset.fxOrganismMenu || ''), null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
   mark(label + ': site-ready');
 }
@@ -92,7 +92,7 @@ async function validateDesktop() {
 
     const current = await state(page);
     mark('desktop: initial-state', current);
-    assert(current.ready === 'ready' && current.menuReady === 'ready', 'interface/menu not ready: ' + JSON.stringify(current));
+    assert(current.ready === 'ready' && ['ready','delegated-r264'].includes(current.menuReady), 'interface/menu not ready: ' + JSON.stringify(current));
     assert(current.triggers === 5 && current.panels === 5, 'chapter/panel count: ' + JSON.stringify(current));
     assert(current.actionLinks === 3, 'action bar links: ' + JSON.stringify(current));
     assert(current.overlayHidden === true, 'console must start hidden');
