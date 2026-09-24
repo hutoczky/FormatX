@@ -580,13 +580,25 @@
     if(!auditMode){
       const centreX=.008,centreY=-.006;
       const bezelInner=.168,bezelOuter=.238,bezelSteps=software?20:mobile?30:42,bezelZ=.635;
+      const cartilagePoint=(angle,radius,outer=false)=>{
+        const lobe=1
+          +(outer?.050:.038)*Math.sin(angle*3.0+.34)
+          +(outer?.026:.018)*Math.sin(angle*5.0-.72)
+          +.012*Math.cos(angle*7.0+.18);
+        const yStretch=outer?1.035:1.025;
+        return [
+          centreX+Math.cos(angle)*radius*lobe,
+          centreY+Math.sin(angle)*radius*lobe*yStretch,
+          bezelZ+.007*Math.sin(angle*4.0+.40)+.004*Math.cos(angle*3.0)
+        ];
+      };
       for(let side=0;side<bezelSteps;side+=1){
         const a=side/bezelSteps*Math.PI*2;
         const b=(side+1)/bezelSteps*Math.PI*2;
-        const p0=[centreX+Math.cos(a)*bezelInner,centreY+Math.sin(a)*bezelInner,bezelZ];
-        const p1=[centreX+Math.cos(b)*bezelInner,centreY+Math.sin(b)*bezelInner,bezelZ];
-        const p2=[centreX+Math.cos(b)*bezelOuter,centreY+Math.sin(b)*bezelOuter,bezelZ];
-        const p3=[centreX+Math.cos(a)*bezelOuter,centreY+Math.sin(a)*bezelOuter,bezelZ];
+        const p0=cartilagePoint(a,bezelInner,false);
+        const p1=cartilagePoint(b,bezelInner,false);
+        const p2=cartilagePoint(b,bezelOuter,true);
+        const p3=cartilagePoint(a,bezelOuter,true);
         armorQuad(p0,p1,p2,p3,5.74);
       }
 
@@ -642,7 +654,7 @@
       sizes: [3, 3, 3, 3, 2, 3, 1],
       count: facets.length,
       tendrils: tendrilCount,
-      topology: `${latitudeSegments}x${longitudeSegments}-armored-closed-core-plus-${tendrilCount}-native-tendrils-r614`
+      topology: `${latitudeSegments}x${longitudeSegments}-cortical-organic-core-plus-${tendrilCount}-native-tendrils-r1723`
     };
   }
 
@@ -1313,6 +1325,7 @@
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
+    root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
     root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
