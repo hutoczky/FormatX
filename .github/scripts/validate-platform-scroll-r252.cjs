@@ -184,6 +184,15 @@ async function verifyDesktop(browser) {
   assert((!initial.stageExists || initial.stagePointerEvents === 'none') && initial.hitPointerEvents !== 'none', `desktop R1724 reference visual / semantic hit ownership invalid: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
+  /* Match the mobile path: scrolling is intentionally blocked while the
+     organism dialogue/panel owns focus. Close it before validating the
+     document-level seamless loop. */
+  await page.keyboard.press('Escape').catch(() => {});
+  await page.waitForFunction(() => (
+    !document.body.classList.contains('fx-organism-panel-open')
+    && !document.documentElement.classList.contains('fx-organism-menu-open')
+  ), null, { timeout: 3000 }).catch(() => {});
+  await page.waitForTimeout(200);
 
   const before = await state(page);
   const relative = Math.min(220, Math.max(120, (before.runtime && 180) || 180));
