@@ -4,11 +4,11 @@ const root=document.documentElement;
 if(root.dataset.fxCoreShapeshifterR337==='ready')return;
 root.dataset.fxCoreShapeshifterR337='booting';
 
-const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260921-r1520-visible-irregular-mineral';
-const SHAPES=['crystal'];
+const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260924-r1723-canonical-organism';
+const SHAPES=['organism'];
 const LABELS={
-  hu:{crystal:'élő organizmus'},
-  en:{crystal:'living organism'}
+  hu:{organism:'élő organizmus'},
+  en:{organism:'living organism'}
 };
 let index=0;
 
@@ -27,7 +27,7 @@ function syncButton(){
   const b=button();
   if(!(b instanceof HTMLButtonElement))return;
   const lang=language();
-  b.dataset.fxCoreShape='crystal';
+  b.dataset.fxCoreShape='organism';
   b.dataset.fxLivingResponseR1717='single-organism';
   b.setAttribute('aria-label',lang==='en'
     ? 'CORE living organism. Activate a physiological response.'
@@ -38,7 +38,7 @@ function apply(nextIndex,source){
   index=(nextIndex+SHAPES.length)%SHAPES.length;
   const shape=SHAPES[index];
   root.dataset.fxCoreShapeR337=shape;
-  root.dataset.fxCoreShapeModeR413='single-living-organism-fixed-anatomy-r1717';
+  root.dataset.fxCoreShapeModeR413='single-living-organism-fixed-anatomy-r1723';
   root.dataset.fxCoreLivingControlR1717='reaction-not-shape-switch';
   root.dataset.fxCoreShapeshifterR337='ready';
   syncButton();
@@ -60,9 +60,10 @@ ensureStyle();
 /* R1717: one persistent organism. This compatibility controller stimulates
    physiology instead of replacing the organism with a second shape. */
 index=0;
-root.dataset.fxCoreDefaultShapeR1404='irregular-crystal';
+root.dataset.fxCoreDefaultShapeR1404='organism';
 root.dataset.fxCoreControlR1666='deterministic-repeat-click-shape-confirm';
 root.dataset.fxCoreControlR1669='canonical-living-core-api-user-shape-priority';
+root.dataset.fxCoreCanonicalIdentityR1723='organism-only-physiology-control';
 apply(index,'boot');
 
 document.addEventListener('click',event=>{
