@@ -371,16 +371,18 @@
          the main mass is a low, muscular rib-cage/abdomen that leaves room for
          a real neck, head and limbs appended below in the same WebGL draw. */
       const ringDefs = [
-        [.52,.300,.210,-.120,-.004,.045],
-        [.45,.475,.300,-.085,.004,.038],
-        [.35,.620,.380,-.035,.008,.030],
-        [.23,.705,.430,.025,.014,.022],
-        [.09,.748,.455,.070,.016,.014],
-        [-.05,.735,.452,.090,.012,.004],
-        [-.19,.675,.420,.070,.004,-.006],
-        [-.32,.565,.350,.015,-.002,-.014],
-        [-.43,.410,.255,-.060,-.004,-.022],
-        [-.50,.250,.160,-.115,-.006,-.030]
+        [.60,.185,.150,-.155,-.012,.060],
+        [.52,.390,.255,-.115,.000,.050],
+        [.42,.585,.350,-.050,.010,.040],
+        [.31,.725,.435,.035,.020,.030],
+        [.18,.785,.470,.090,.024,.018],
+        [.05,.748,.462,.112,.018,.006],
+        [-.08,.705,.438,.100,.008,-.006],
+        [-.20,.650,.392,.058,-.004,-.018],
+        [-.32,.565,.332,-.005,-.012,-.030],
+        [-.43,.445,.260,-.082,-.014,-.042],
+        [-.52,.285,.175,-.145,-.010,-.054],
+        [-.59,.125,.090,-.175,-.004,-.066]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -405,21 +407,21 @@
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
           const irregular=
             1
-            +Math.sin(a*5.0+ringIndex*.43)*.026*mid
-            +Math.cos(a*3.0-ringIndex*.37)*.014*mid
-            +Math.sin(a*2.0+ringIndex*.61)*.008;
-          const cutFront=1-.024*Math.pow(Math.max(0,Math.cos(a-.52)),4.0);
-          const cutRear=1-.016*Math.pow(Math.max(0,Math.cos(a+2.18)),5.0);
-          const cutSide=1-.012*Math.pow(Math.max(0,Math.cos(a-2.54)),6.0);
-          const cutNotch=1-.008*Math.pow(Math.max(0,Math.cos(a+1.18)),8.0);
+            +Math.sin(a*4.0+ringIndex*.43)*.052*mid
+            +Math.cos(a*6.0-ringIndex*.37)*.026*mid
+            +Math.sin(a*2.0+ringIndex*.61)*.014;
+          const cutFront=1-.045*Math.pow(Math.max(0,Math.cos(a-.48)),4.0);
+          const cutRear=1-.028*Math.pow(Math.max(0,Math.cos(a+2.12)),5.0);
+          const cutSide=1-.030*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
+          const cutNotch=1-.022*Math.pow(Math.max(0,Math.cos(a+1.20)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const x=ox+Math.cos(a)*rx*irregular*radialCut;
           const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.120,.585,-.010],[.5,0]);
-      const bottom=bodyVertex([-.115,-.555,.008],[.5,1]);
+      const top=bodyVertex([-.185,.690,-.018],[.5,0]);
+      const bottom=bodyVertex([-.205,-.680,.014],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -711,10 +713,10 @@
     }
 
     /* FormatX Guardian anatomy: feline/dragon posture in a 3/4 hero view. */
-    appendEllipsoid([.42,.36,.035],[.34,.29,.29],.68,mobile?7:9,mobile?12:16,-.18);   // shoulder
-    appendEllipsoid([.68,.63,.055],[.28,.235,.245],.64,mobile?7:9,mobile?12:16,-.22); // head
-    appendEllipsoid([.88,.57,.075],[.22,.105,.155],.70,mobile?6:8,mobile?10:14,-.10); // muzzle
-    appendEllipsoid([.28,.48,.025],[.25,.34,.24],.76,mobile?7:9,mobile?12:16,-.26);   // neck
+    appendEllipsoid([.40,.34,.045],[.36,.27,.30],.68,mobile?7:9,mobile?12:16,-.20);   // shoulder crystal
+    appendEllipsoid([.69,.64,.075],[.30,.215,.235],.64,mobile?6:8,mobile?10:14,-.24); // angular head mass
+    appendEllipsoid([.94,.58,.095],[.235,.090,.135],.70,mobile?5:7,mobile?9:12,-.10); // tapered muzzle
+    appendEllipsoid([.27,.48,.035],[.235,.355,.225],.76,mobile?7:9,mobile?12:16,-.28); // arched neck
 
     /* Four athletic limbs; the front pair is intentionally brighter/frontmost
        through z placement so the silhouette reads immediately on phones. */
@@ -724,10 +726,12 @@
     appendLimb([-.12,-.17,-.13],[-.08,-.62,-.08],.115,.064,1.00,mobile?6:8,mobile?7:9);
 
     /* Living crown/ears: translucent cartilage membranes, not metal spikes. */
-    appendMembraneTri([.56,.79,.03],[.46,1.05,.01],[.70,.88,.08],4.34);
-    appendMembraneTri([.69,.80,.02],[.72,1.08,.00],[.84,.84,.08],4.38);
-    appendMembraneTri([.45,.72,-.02],[.30,.96,-.06],[.59,.82,.02],4.46);
-    appendMembraneTri([.39,.63,-.10],[.16,.79,-.14],[.49,.74,-.06],4.52);
+    appendMembraneTri([.55,.78,.04],[.42,1.13,.00],[.71,.87,.10],4.34);
+    appendMembraneTri([.69,.82,.03],[.76,1.17,.00],[.86,.84,.10],4.38);
+    appendMembraneTri([.47,.72,-.02],[.26,1.04,-.08],[.60,.82,.03],4.46);
+    appendMembraneTri([.37,.62,-.10],[.08,.83,-.17],[.50,.74,-.05],4.52);
+    appendMembraneTri([.25,.48,-.15],[-.06,.63,-.24],[.34,.63,-.10],4.56);
+    appendMembraneTri([.18,.28,-.12],[-.18,.31,-.22],[.29,.43,-.08],4.60);
 
     if(!auditMode){
       const centreX=.008,centreY=-.006;
@@ -953,8 +957,8 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.690':'.748'};
-        projected.x+=${mobile?'.035':'.105'};
+        projected*= ${mobile?'.742':'.790'};
+        projected.x+=${mobile?'.010':'.082'};
         projected.y+=${mobile?'.018':'.006'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
@@ -1034,7 +1038,7 @@
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.015,.020,.029),vec3(.108,.082,.130),lift)*facetTone;
+        vec3 mineral=mix(vec3(.020,.032,.052),vec3(.205,.270,.310),lift)*facetTone;
         mineral*=.955+.045*smokyDepth+.012*mineralGrain;
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
@@ -1044,11 +1048,11 @@
         mineral+=vec3(.52,.58,.59)*sideSpec*.096;
         mineral+=vec3(.69,.72,.69)*softboxA*.170;
         mineral+=vec3(.42,.47,.47)*softboxB*.110;
-        mineral+=vec3(.82,.82,.74)*studioRibbonA*.104;
-        mineral+=vec3(.48,.36,.24)*studioRibbonB*.050;
+        mineral+=vec3(.88,.94,.94)*studioRibbonA*.145;
+        mineral+=vec3(.76,.43,.16)*studioRibbonB*.092;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
-        mineral+=vec3(.090,.155,.170)*fresnel*.38;
+        mineral+=vec3(.110,.290,.360)*fresnel*.48;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1255,7 +1259,7 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.016,.021,.030),vec3(.112,.082,.135),lift);
+        vec3 col=mix(vec3(.020,.032,.052),vec3(.190,.250,.290),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
@@ -1263,10 +1267,10 @@
         col+=vec3(.52,.59,.60)*sideSpec*.105;
         col+=vec3(.72,.75,.72)*softboxA*.194;
         col+=vec3(.44,.50,.51)*softboxB*.118;
-        col+=vec3(.78,.79,.72)*studioRibbonA*.102;
-        col+=vec3(.39,.30,.22)*studioRibbonB*.046;
+        col+=vec3(.84,.92,.93)*studioRibbonA*.135;
+        col+=vec3(.68,.39,.15)*studioRibbonB*.078;
         col+=vec3(.080,.096,.095)*horizonBand*.168;
-        col+=vec3(.080,.145,.158)*fresnel*.36;
+        col+=vec3(.105,.265,.330)*fresnel*.46;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1427,7 +1431,7 @@
         float tendrilMask=isTendril*(1.0-vMorph);
 
         float lift=sat(.25+ndl*.45+sideLight*.34);
-        vec3 col=mix(vec3(.006,.012,.021),vec3(.036,.070,.095),lift);
+        vec3 col=mix(vec3(.016,.028,.046),vec3(.155,.215,.255),lift);
         col+=vec3(.74,.77,.73)*keySpec*.16;
         col+=vec3(.36,.48,.51)*sideSpec*.13;
         col+=vec3(.050,.15,.19)*fresnel*.31;
@@ -1439,7 +1443,7 @@
         float plateField=.5+.5*sin(vUv.x*16.8+sin(vUv.y*11.8)*1.4);
         float plateCross=.5+.5*sin(vUv.y*15.2-vUv.x*6.4);
         float plateMask=smoothstep(.56,.80,max(plateField,plateCross*.84))*bodyMask;
-        vec3 ivory=vec3(.48,.58,.62)+vec3(.30,.32,.28)*(.30*ndl+.18*sideLight);
+        vec3 ivory=vec3(.58,.70,.74)+vec3(.34,.31,.24)*(.30*ndl+.18*sideLight);
         ivory+=vec3(.20,.35,.38)*fresnel*.14;
         col=mix(col,ivory,plateMask*.70);
         col+=vec3(.10,.61,.82)*vascular*(.22+.30*uEnergy);
@@ -1528,6 +1532,8 @@
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
+    root.dataset.fxNativeMagGuardianR1724='asymmetric-crystal-organic-feline-dragon-biocrystal-silhouette';
+    root.dataset.fxNativeMagPaletteR1724='pearl-cyan-indigo-warm-studio-rim';
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
     root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
     root.dataset.fxNativeMagGuardianR1724='feline-dragon-head-neck-limbs-crown-streaming-ribbons-one-draw';
