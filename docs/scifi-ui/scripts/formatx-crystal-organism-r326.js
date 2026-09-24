@@ -1267,13 +1267,19 @@
         tendon+=vec3(.34,.39,.37)*sideSpec*.12;
         col=mix(col,tendon,tendrilMask*.995);
 
-        vec3 simpleGlass=vec3(.002,.007,.009)+vec3(.10,.16,.17)*(.20*ndl+.50*fresnel)+vec3(.42,.46,.43)*keySpec*.12;
-        col=mix(col,simpleGlass,isGlassFin*.985);
-        col=mix(col,simpleGlass*.82,isArmor*.990);
+        float subsurface=pow(max(0.0,dot(-n,key)),1.7)*(1.0-facing);
+        vec3 simpleMembrane=vec3(.007,.020,.028)+vec3(.070,.16,.19)*(.20*ndl+.48*fresnel)+vec3(.32,.48,.50)*keySpec*.10;
+        simpleMembrane+=vec3(.16,.055,.22)*subsurface*.24;
+        col=mix(col,simpleMembrane,isGlassFin*.965);
+        vec3 simpleCartilage=vec3(.018,.011,.029)+vec3(.075,.065,.105)*(.20*ndl+.34*sideLight)+vec3(.025,.15,.19)*fresnel*.25;
+        simpleCartilage+=vec3(.10,.030,.14)*subsurface*.24;
+        col=mix(col,simpleCartilage,isArmor*.985);
 
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.06,.21,lensRadial);
-        vec3 optical=vec3(.012,.035,.043)+vec3(.040,.24,.30)*lensInner+vec3(.72,.84,.82)*keySpec*.17+vec3(.080,.18,.21)*fresnel*.15;
+        float electric=pow(.5+.5*sin(atan(vUv.y-.5,vUv.x-.5)*10.0+lensRadial*64.0-uTime*1.8),14.0)*lensInner;
+        vec3 optical=vec3(.012,.035,.043)+vec3(.040,.27,.34)*lensInner+vec3(.72,.84,.82)*keySpec*.17+vec3(.080,.20,.24)*fresnel*.15;
+        optical+=vec3(.12,.64,.82)*electric*(.18+.20*uEnergy);
         col=mix(col,optical,isLensMesh*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
@@ -1291,7 +1297,7 @@
       ? softwareFragmentSource
       : (mobilePhysical ? constrainedFragmentSource : fullFragmentSource);
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
-      ? 'r1716-software-obsidian-lite-physical-lens'
+      ? 'r1723-software-living-tissue-lite-energy-organ'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
     root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-adaptive-resolution-zero-idle';
     root.dataset.fxNativeMagVisualR1716='mobile-normal-topology-physical-shader-photoreal-60fps-first';
@@ -1314,7 +1320,7 @@
       ? 'software-fragment-cost-cut-physical-identity-preserved'
       : 'hardware-photographic-material-preserved';
     root.dataset.fxNativeMagVisualR1697=softwareRenderer
-      ? 'software-smoky-obsidian-readable-facets-physical-lens-no-glow-cheat'
+      ? 'software-cortical-tissue-membrane-cartilage-energy-organ'
       : 'hardware-photographic-material-preserved';
 
     let pendingProgram;
