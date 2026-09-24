@@ -907,32 +907,27 @@
     root.classList.remove('fx-page-scrolling');
     const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
     const hasGestureSnapshot=Number.isFinite(desktopGestureAnchorY);
-    if(cachedRelative==null){
-      refreshGeometry();
-      const liveRelative=bridgeRelative();
-      const reachedDocumentEnd=loopGeometry.ready
-        && scrollY>=Math.max(0,loopGeometry.documentEnd-4);
-      if(liveRelative!=null){
-        pendingDesktopRelative=liveRelative;
-        root.dataset.fxLoopDesktopScrollEndRecoveryR1724=hasGestureSnapshot
-          ? 'fresh-relative-after-outside-snapshot'
-          : 'fresh-relative-no-snapshot';
-      }else if(reachedDocumentEnd){
-        /* R1727c — bridgeTop may sit below the final reachable scroll
-           coordinate. Reaching the physical document end is still explicit
-           loop intent. Map that unreachable bridge segment to local relative
-           zero instead of leaving the gesture permanently uncommitted. */
-        pendingDesktopRelative=0;
-        root.dataset.fxLoopDesktopScrollEndRecoveryR1724=hasGestureSnapshot
-          ? 'document-end-zero-after-outside-snapshot'
-          : 'document-end-zero-no-snapshot';
-      }else{
-        root.dataset.fxLoopDesktopScrollEndRecoveryR1724=hasGestureSnapshot
-          ? 'gesture-snapshot-outside-no-boundary'
-          : 'no-live-boundary';
-      }
+    refreshGeometry();
+    const liveRelative=bridgeRelative();
+    const reachedDocumentEnd=loopGeometry.ready
+      && scrollY>=Math.max(0,loopGeometry.documentEnd-4);
+    if(liveRelative!=null){
+      pendingDesktopRelative=cachedRelative!=null
+        ? Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)))
+        : liveRelative;
+      root.dataset.fxLoopDesktopScrollEndRecoveryR1724=cachedRelative!=null
+        ? 'fresh-boundary-validates-cached-relative'
+        : 'fresh-relative-no-snapshot';
+    }else if(reachedDocumentEnd){
+      pendingDesktopRelative=0;
+      root.dataset.fxLoopDesktopScrollEndRecoveryR1724=hasGestureSnapshot
+        ? 'fresh-document-end-validates-snapshot-zero'
+        : 'fresh-document-end-zero';
     }else{
-      root.dataset.fxLoopDesktopScrollEndRecoveryR1724='cached-relative-preserved';
+      pendingDesktopRelative=null;
+      root.dataset.fxLoopDesktopScrollEndRecoveryR1724=hasGestureSnapshot
+        ? 'stale-gesture-snapshot-rejected-by-fresh-geometry'
+        : 'no-live-boundary';
     }
     root.dataset.fxLoopDesktopScrollEndR1724=Number.isFinite(pendingDesktopRelative)?'boundary-commit':'no-boundary';
     commitDesktopTransfer();
