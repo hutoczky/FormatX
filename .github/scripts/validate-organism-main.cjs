@@ -129,8 +129,21 @@ async function validateDesktop() {
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
     const pricingNav=page.locator('#main-nav a[href="#pricing"]');
     await pricingNav.click();
-    await page.waitForFunction(() => !document.querySelector('[data-organism-panel="pricing"]').hidden);
-    mark('desktop: header-navigation-passed');
+    await page.waitForFunction(() => {
+      const nav=document.getElementById('main-nav');
+      const pricing=document.getElementById('pricing');
+      return location.hash==='#pricing'
+        && !nav?.classList.contains('open')
+        && pricing instanceof HTMLElement;
+    });
+    const navState=await page.evaluate(()=>({
+      hash:location.hash,
+      navOpen:document.getElementById('main-nav')?.classList.contains('open')||false,
+      pricingTop:document.getElementById('pricing')?.getBoundingClientRect().top??null
+    }));
+    assert.equal(navState.hash,'#pricing','canonical header navigation did not land on pricing');
+    assert.equal(navState.navOpen,false,'canonical header navigation did not close menu');
+    mark('desktop: header-navigation-passed',navState);
 
     await page.waitForFunction(() => Array.from(document.querySelectorAll('[data-plan-qr-image]')).every(image => image.complete && image.naturalWidth >= 32), null, { timeout: 15000 });
     const qrReady = await page.locator('[data-plan-qr-image]').evaluateAll(images => images.map(image => ({ width: image.naturalWidth, src: image.currentSrc || image.src })));
