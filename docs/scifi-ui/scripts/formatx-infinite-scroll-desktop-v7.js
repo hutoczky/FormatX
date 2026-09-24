@@ -855,15 +855,16 @@
   addEventListener('load', scheduleGeometryRefresh, { once: true, passive: true });
   addEventListener('formatx:loopgeometryrefresh',event=>{
     const hadDesktopIntent=!isMobileFlow()&&Number.isFinite(pendingDesktopRelative);
+    const capturedIntent=hadDesktopIntent?pendingDesktopRelative:null;
     refreshGeometry();
     if(hadDesktopIntent){
-      const corrected=bridgeRelative();
-      if(corrected!=null){
-        pendingDesktopRelative=corrected;
-        root.dataset.fxLoopPendingCorrectionR1724='fresh-geometry-relative';
-      }else{
-        root.dataset.fxLoopPendingCorrectionR1724='preserved-cached-intent';
-      }
+      /* R1727 — never rewrite an in-flight visual intent with geometry sampled
+         after content-visibility/deferred layout has already reflowed. The
+         90 ms bootstrap refresh is useful for the NEXT gesture, but the current
+         gesture must land at the bridge-relative coordinate the user entered. */
+      pendingDesktopRelative=capturedIntent;
+      root.dataset.fxLoopPendingCorrectionR1724='preserved-cached-intent';
+      root.dataset.fxLoopPendingCorrectionR1727='post-scroll-refresh-cannot-rewrite-active-intent';
     }
     root.dataset.fxLoopGeometryEventR1724=String(event.detail?.source||'external-refresh');
   },{passive:true});
