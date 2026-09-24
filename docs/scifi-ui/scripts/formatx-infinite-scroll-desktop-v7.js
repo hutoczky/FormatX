@@ -23,6 +23,8 @@
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
   let pendingDesktopSourceTop = null;
+  let desktopGestureAnchorY = null;
+  let desktopGestureAnchorRelative = null;
   let canonicalLandingSourceTop = 0;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
@@ -556,6 +558,8 @@
     pendingMobileRelative = null;
     pendingDesktopRelative = null;
     pendingDesktopSourceTop = null;
+    desktopGestureAnchorY = null;
+    desktopGestureAnchorRelative = null;
     clearTimeout(mobileSettleTimer);
     mobileSettleTimer = 0;
     root.classList.add('fx-seamless-loop-transfer');
@@ -680,7 +684,9 @@
     // one live bridge read so late font/Guardian/layout shifts cannot poison the
     // entire gesture with an obsolete bridgeTop. This is a single read per
     // gesture, not a per-frame layout query.
-    let relative = bridgeRelative();
+    let relative = (!isMobileFlow() && Number.isFinite(pendingDesktopRelative))
+      ? pendingDesktopRelative
+      : bridgeRelative();
     const cachedGeometry=loopGeometry;
     if(startingDesktopGesture && relative==null && bridge?.isConnected){
       const liveRect=bridge.getBoundingClientRect();
@@ -740,6 +746,37 @@
   }
 
   function onScroll() {
+    /* R1727 — capture desktop bridge entry synchronously once. Deferred CSS,
+       fonts or intro teardown can move bridge.offsetTop before the rAF/idle
+       phase. After this anchor is taken, continue the gesture using scroll
+       deltas only, so there is no per-frame layout read. */
+    if(!isMobileFlow()
+      && !root.classList.contains('fx-seamless-loop-transfer')
+      && bridge?.isConnected){
+      if(!Number.isFinite(desktopGestureAnchorY)){
+        const eventBridgeTop=Number(bridge.offsetTop);
+        const eventSourceHeight=Math.max(0,loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
+        const eventRelative=scrollY-eventBridgeTop;
+        if(Number.isFinite(eventBridgeTop) && eventRelative>=-2){
+          desktopGestureAnchorY=scrollY;
+          desktopGestureAnchorRelative=Math.max(0,Math.min(eventRelative,Math.max(0,eventSourceHeight-2)));
+          pendingDesktopRelative=desktopGestureAnchorRelative;
+          root.dataset.fxLoopGestureGeometryR1727='scroll-event-entry-anchor';
+          root.dataset.fxLoopGestureRelativeR1727=String(Math.round(pendingDesktopRelative));
+        }
+      }else{
+        const eventSourceHeight=Math.max(0,loopGeometry.sourceHeight||0);
+        const projected=desktopGestureAnchorRelative+(scrollY-desktopGestureAnchorY);
+        if(projected<-2){
+          desktopGestureAnchorY=null;
+          desktopGestureAnchorRelative=null;
+          pendingDesktopRelative=null;
+        }else{
+          pendingDesktopRelative=Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)));
+          root.dataset.fxLoopGestureRelativeR1727=String(Math.round(pendingDesktopRelative));
+        }
+      }
+    }
     if (scrollFrame) return;
     scrollFrame = requestAnimationFrame(transferIfNeeded);
   }
