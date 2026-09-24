@@ -565,7 +565,7 @@
   }
 
   function commitDesktopTransfer() {
-    if (isMobileFlow() || pendingDesktopRelative == null) return;
+    if (isMobileFlow()) return;
     const guardRemaining = transferLockedUntil - Date.now();
     if (guardRemaining > 0) {
       clearTimeout(desktopGuardRetryTimer);
@@ -582,6 +582,7 @@
     refreshGeometry();
     const relative = bridgeRelative();
     root.dataset.fxLoopDesktopGeometryR1715 = loopGeometry.ready ? 'fresh-idle-sample' : 'unavailable';
+    root.dataset.fxLoopDesktopRecoveryR1723 = 'idle-live-geometry-can-recover-stale-scroll-cache';
     if (relative == null) {
       pendingDesktopRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
