@@ -470,7 +470,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1725-photoreal-living-biocrystal';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1726-cinematic-photographic-living-biocrystal';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
