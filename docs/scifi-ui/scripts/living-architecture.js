@@ -2,7 +2,9 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
+  const PARAMS = new URLSearchParams(location.search);
+  const AUDIT_MODE = PARAMS.get('lighthouse') === '1';
+  const ORGANISM_VALIDATION = PARAMS.get('organism-validation') === '1';
   if (AUDIT_MODE) {
     const canvas = document.getElementById('fx-apex-canvas');
     if (canvas) canvas.hidden = true;
@@ -111,20 +113,20 @@
     if (!document.querySelector('link[data-fx-organism-layering-style]')) {
       const organismLayering = document.createElement('link');
       organismLayering.rel = 'stylesheet';
-      organismLayering.href = './styles/organism-interface-layering.css?v=20260727-fullscreen-1';
+      organismLayering.href = './styles/organism-interface-layering.css?v=20260924-r1724-mobile-border-box';
       organismLayering.dataset.fxOrganismLayeringStyle = 'true';
       document.head.appendChild(organismLayering);
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260924-r1715-single-organism-loop-stability';
+      script.src = './scripts/igloo-parity.js?v=20260924-r1723-reachable-threshold';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
     }
     if (!document.querySelector('script[data-fx-organism-interface-script]')) {
       const organismScript = document.createElement('script');
-      organismScript.src = './scripts/organism-interface.js?v=20260727-organism-2';
+      organismScript.src = './scripts/organism-interface.js?v=20260924-r1724-exclusive-main-nav-owner';
       organismScript.defer = true;
       organismScript.dataset.fxOrganismInterfaceScript = 'true';
       document.head.appendChild(organismScript);
@@ -141,8 +143,9 @@
   }
 
   function scheduleThreeExperience() {
-    if (ROOT.dataset.fxImmersive === 'active') {
+    if (ORGANISM_VALIDATION || ROOT.dataset.fxImmersive === 'active') {
       loadThreeExperience();
+      if(ORGANISM_VALIDATION)ROOT.dataset.fxOrganismValidationR1723='eager-interface-for-ci-contract';
       return;
     }
     ROOT.dataset.fxThreeLoader = 'deferred-user-activation';

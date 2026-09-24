@@ -111,6 +111,7 @@
   overlay.dataset.fxIntroR670 = 'video-accurate-organic-handoff-three-genesis';
   overlay.dataset.fxIntroR671 = 'reference-cross-dna-early-pod-three-genesis';
   overlay.dataset.fxIntroR672 = 'video-scale-local-flash-three-genesis';
+  overlay.dataset.fxIntroR1723='same-canonical-organism-birth-to-site-handoff';
   overlay.dataset.fxIntroR673 = 'reference-material-three-genesis';
   overlay.dataset.fxIntroR674 = 'reference-proportion-three-genesis';
   overlay.dataset.fxIntroR675 = 'neural-fold-three-genesis';
@@ -469,7 +470,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1722-fully-living-studio-hidpi';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1726-cinematic-photographic-living-biocrystal';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -539,8 +540,8 @@
       if(value===4){
         locateStage();
         try{
-          coreApi?.setMorph?.(1,'r631-mobile-css-final-handoff');
-          coreApi?.setShape?.('crystal','r631-mobile-css-final-handoff');
+          coreApi?.setMorph?.(0,'r631-mobile-css-final-handoff');
+          coreApi?.setShape?.('organism','r631-mobile-css-final-handoff');
           coreApi?.surfacePulse?.('r631-mobile-css-final-handoff');
           coreApi?.requestRender?.(1);
         }catch(_){}
@@ -667,8 +668,8 @@
     if (!ignitionDone) {
       ignitionDone=true;
       try {
-        coreApi.setMorph?.(1,'r611-living-core-ignition');
-        coreApi.setShape?.('crystal','r611-living-core-ignition');
+        coreApi.setMorph?.(0,'r611-living-core-ignition');
+        coreApi.setShape?.('organism','r611-living-core-ignition');
         coreApi.rotateBy?.(.035,.055,'r614-genome-first-living-impulse');
         coreApi.surfacePulse?.('r614-genome-handoff');
         coreApi.requestRender?.(MOBILE?1:2);
@@ -888,8 +889,8 @@
 
     try { requestCoreWarmup('finish-'+String(source||'unknown')); } catch (_) {}
     try {
-      coreApi?.setMorph?.(1,'r611-final-living-handoff');
-      coreApi?.setShape?.('crystal','r611-final-living-handoff');
+      coreApi?.setMorph?.(0,'r611-final-living-handoff');
+      coreApi?.setShape?.('organism','r611-final-living-handoff');
       coreApi?.requestRender?.(2);
     } catch (_) {}
     try { setStageOpacity(1); } catch (_) {}
@@ -1132,8 +1133,8 @@
           stage.style.removeProperty('opacity');
           stage.style.removeProperty('transition');
         }
-        coreApi?.setMorph?.(1,'r653-absolute-dom-watchdog');
-        coreApi?.setShape?.('crystal','r653-absolute-dom-watchdog');
+        coreApi?.setMorph?.(0,'r653-absolute-dom-watchdog');
+        coreApi?.setShape?.('organism','r653-absolute-dom-watchdog');
         coreApi?.requestRender?.(1);
       }catch(_){}
       ROOT.removeAttribute('data-fx-mag-birth-live');
@@ -1162,7 +1163,7 @@
       overlay.dataset.phase='4';
       ROOT.dataset.fxMagBirthPhase='4';
       locateStage();
-      try { coreApi?.setShape?.('crystal','r533-reduced'); coreApi?.requestRender?.(2); } catch (_) {}
+      try { coreApi?.setShape?.('organism','r533-reduced'); coreApi?.requestRender?.(2); } catch (_) {}
       setStageOpacity(1);
       percent.value='100';
       progress.value=100;

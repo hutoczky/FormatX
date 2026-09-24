@@ -219,10 +219,10 @@
     --fx-r586-panel-radius: 24px;
     --fx-r586-panel-border: rgba(118, 221, 255, .18);
     --fx-r586-panel-bg:
-      radial-gradient(circle at 88% 8%, rgba(69, 205, 255, .065), transparent 34%),
-      linear-gradient(148deg, rgba(5, 27, 42, .92), rgba(2, 15, 27, .94) 64%, rgba(3, 12, 23, .97));
+      radial-gradient(circle at 88% 8%, rgba(69, 205, 255, .080), transparent 34%),
+      linear-gradient(148deg, rgba(5, 27, 42, .42), rgba(2, 15, 27, .48) 64%, rgba(3, 12, 23, .56));
     --fx-r586-card-bg:
-      linear-gradient(145deg, rgba(8, 22, 37, .94), rgba(3, 9, 17, .985));
+      linear-gradient(145deg, rgba(8, 22, 37, .54), rgba(3, 9, 17, .64));
   }
 
   html[data-fx-mobile-unified^='ready-'] body.living-architecture #main-content > #experience,
@@ -446,3 +446,5 @@
     box-sizing:border-box!important;
   }
 }
+
+/* production-r1724-living-habitat-through-mobile-panels */

@@ -39,7 +39,8 @@ async function prepare(page) {
     const root = document.documentElement;
     return root.dataset.fxInfiniteController === 'seamless-v7'
       && root.dataset.fxLoopBridge === 'ready-v3'
-      && root.dataset.fxHeartCoreR252 === 'ready';
+      && root.dataset.fxHeartCoreR252 === 'ready'
+      && root.dataset.fxHeartDelegatedR1723 === 'ready';
   }, null, { timeout: 20000 });
   await page.evaluate(async () => {
     try { await document.fonts?.ready; } catch (_) {}
@@ -83,6 +84,7 @@ async function state(page) {
       hitHeight: hitRect?.height || 0,
       hitLabel: hit?.getAttribute('aria-label') || '',
       hitPointerEvents: hitStyle?.pointerEvents || '',
+      stageExists: stage instanceof HTMLElement,
       stagePointerEvents: stageStyle?.pointerEvents || '',
       interactionMode: root.dataset.fxCoreInteractionMode || '',
       interactionTarget: root.dataset.fxCoreInteractionTarget || '',
@@ -144,7 +146,7 @@ async function verifyMobile(browser) {
   assert(initial.bridgeDisplay !== 'none', `mobile handoff bridge is hidden: ${JSON.stringify(initial)}`);
   assert(initial.bridgeHeight >= 80 && initial.bridgeHeight <= Math.max(180, initial.viewportHeight * .24), `mobile bridge is not a short handoff runway: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180 && initial.hitLabel.length > 8, `mobile MAG is not a semantic interactive target: ${JSON.stringify(initial)}`);
-  assert(initial.stagePointerEvents === 'none' && initial.hitPointerEvents !== 'none', `mobile native MAG visual still intercepts the semantic hit target: ${JSON.stringify(initial)}`);
+  assert((!initial.stageExists || initial.stagePointerEvents === 'none') && initial.hitPointerEvents !== 'none', `mobile native MAG visual still intercepts the semantic hit target: ${JSON.stringify(initial)}`);
   assert(initial.snapRoot === 'none' && initial.snapBody === 'none', `mobile scroll snapping active: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
@@ -179,9 +181,18 @@ async function verifyDesktop(browser) {
   assert(initial.controller === 'seamless-v7', `desktop seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, `desktop inert reference mirror contract changed: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180, `desktop MAG interaction target missing: ${JSON.stringify(initial)}`);
-  assert(initial.stagePointerEvents === 'none' && initial.hitPointerEvents !== 'none', `desktop native MAG visual still intercepts the semantic hit target: ${JSON.stringify(initial)}`);
+  assert((!initial.stageExists || initial.stagePointerEvents === 'none') && initial.hitPointerEvents !== 'none', `desktop R1724 reference visual / semantic hit ownership invalid: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
+  /* Match the mobile path: scrolling is intentionally blocked while the
+     organism dialogue/panel owns focus. Close it before validating the
+     document-level seamless loop. */
+  await page.keyboard.press('Escape').catch(() => {});
+  await page.waitForFunction(() => (
+    !document.body.classList.contains('fx-organism-panel-open')
+    && !document.documentElement.classList.contains('fx-organism-menu-open')
+  ), null, { timeout: 3000 }).catch(() => {});
+  await page.waitForTimeout(200);
 
   const before = await state(page);
   const relative = Math.min(220, Math.max(120, (before.runtime && 180) || 180));

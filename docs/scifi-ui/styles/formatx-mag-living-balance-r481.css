@@ -27,23 +27,23 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
    at zero frames and the animation stays compositor-friendly. */
 @keyframes fx-primary-mag-living-desktop-r482 {
   0%, 100% {
-    --fx-mag-life-scale: .986;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .91;
   }
   25% {
-    --fx-mag-life-scale: 1.009;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .975;
   }
   33% {
-    --fx-mag-life-scale: .997;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .945;
   }
   42% {
-    --fx-mag-life-scale: 1.018;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: 1;
   }
   54% {
-    --fx-mag-life-scale: 1.004;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .975;
   }
   72% {
@@ -82,7 +82,7 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
 @media (min-width: 901px) {
   html:root:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    --fx-mag-life-scale: .986;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .91;
     opacity: var(--fx-mag-life-opacity) !important;
     scale: var(--fx-mag-life-scale) !important;
@@ -137,7 +137,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   html:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    --fx-mag-life-scale: .992;
+    --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .94;
     opacity: var(--fx-mag-life-opacity) !important;
     image-rendering: auto !important;
@@ -359,3 +359,18 @@ body.living-architecture #hero > .fx-signature-core-trigger::after {
   }
 }
 /* production-r1520-no-orbit-ring-visible-photoreal-facets */
+
+/* R1723 canonical living family — no crystal-shaped Mini MAG fallback. */
+.fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="organism"]{
+  border-color:rgba(142,238,249,.50)!important;
+  background:
+    radial-gradient(circle at 50% 49%,rgba(243,255,255,.90) 0 3%,rgba(70,222,252,.56) 4% 9%,rgba(8,67,91,.64) 10% 18%,transparent 19%),
+    radial-gradient(ellipse at 31% 26%,rgba(118,205,220,.28),transparent 36%),
+    radial-gradient(ellipse at 72% 61%,rgba(111,65,145,.38),transparent 43%),
+    radial-gradient(ellipse at 42% 76%,rgba(35,131,159,.25),transparent 39%),
+    linear-gradient(145deg,rgba(47,75,100,.94),rgba(72,42,90,.91) 56%,rgba(4,15,26,.98))!important;
+  box-shadow:inset 3px 2px 9px rgba(169,236,241,.11),inset -4px -5px 11px rgba(13,6,25,.52),0 0 6px rgba(61,215,240,.09)!important;
+}
+/* production-r1723-canonical-organism-glyph */
+
+/* production-r1723-primary-native-pixel-heartbeat */

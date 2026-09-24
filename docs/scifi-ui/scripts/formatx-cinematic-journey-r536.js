@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'single-living-organism-cinematic-r1711';
+  const VERSION = 'single-living-organism-cinematic-r1723';
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -17,18 +17,18 @@
 
   const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
   const definitions = [
-    {selector:'#hero',key:'core',code:'01',hu:'MAG / SZÜLETÉS',en:'CORE / GENESIS',a:'96,228,255',b:'143,114,255',shape:'crystal'},
-    {selector:'#live-os-overview',key:'live-os',code:'01.5',hu:'ÉLŐ OPERÁCIÓS RÉTEG',en:'LIVE OPERATING LAYER',a:'95,228,255',b:'111,183,255',shape:'sphere'},
-    {selector:'.fx-category-deck--standalone',key:'mission',code:'01.8',hu:'KÜLDETÉS / MÓDSZER',en:'MISSION / METHOD',a:'111,229,255',b:'140,111,255',shape:'crystal'},
-    {selector:'#experience',key:'nerves',code:'02',hu:'IDEGRENDSZER',en:'NERVOUS SYSTEM',a:'96,228,255',b:'105,142,255',shape:'sphere'},
-    {selector:'#capabilities',key:'organs',code:'03',hu:'RENDSZERSZERVEK',en:'SYSTEM ORGANS',a:'121,241,219',b:'98,161,255',shape:'crystal'},
-    {selector:'#pricing',key:'heart',code:'04',hu:'KERESKEDELMI SZÍV',en:'COMMERCE HEART',a:'255,207,137',b:'160,109,255',shape:'sphere'},
-    {selector:'#system',key:'skeleton',code:'05',hu:'RENDSZERVÁZ',en:'SYSTEM SKELETON',a:'139,203,255',b:'143,114,255',shape:'crystal'},
-    {selector:'.fx-origin-proof',key:'proof',code:'05.5',hu:'ELLENŐRIZHETŐSÉG',en:'VERIFIABILITY',a:'183,244,255',b:'111,227,200',shape:'crystal'},
-    {selector:'.fx-award-proof',key:'proof',code:'05.8',hu:'PUBLIC PROOF LAYER',en:'PUBLIC PROOF LAYER',a:'183,244,255',b:'111,227,200',shape:'crystal'},
-    {selector:'#user-feedback',key:'feedback',code:'06.5',hu:'VALÓDI VISSZAJELZÉS',en:'GENUINE FEEDBACK',a:'126,229,255',b:'168,121,255',shape:'sphere'},
-    {selector:'#resources',key:'beacon',code:'06',hu:'KIADÁSI JELADÓ',en:'RELEASE BEACON',a:'183,244,255',b:'111,227,200',shape:'crystal'},
-    {selector:'footer.site-footer',key:'loop',code:'∞',hu:'ÚJ CIKLUS',en:'NEW CYCLE',a:'160,231,255',b:'143,114,255',shape:'sphere'}
+    {selector:'#hero',key:'core',code:'01',hu:'MAG / SZÜLETÉS',en:'CORE / GENESIS',a:'96,228,255',b:'143,114,255',shape:'organism'},
+    {selector:'#live-os-overview',key:'live-os',code:'01.5',hu:'ÉLŐ OPERÁCIÓS RÉTEG',en:'LIVE OPERATING LAYER',a:'95,228,255',b:'111,183,255',shape:'organism'},
+    {selector:'.fx-category-deck--standalone',key:'mission',code:'01.8',hu:'KÜLDETÉS / MÓDSZER',en:'MISSION / METHOD',a:'111,229,255',b:'140,111,255',shape:'organism'},
+    {selector:'#experience',key:'nerves',code:'02',hu:'IDEGRENDSZER',en:'NERVOUS SYSTEM',a:'96,228,255',b:'105,142,255',shape:'organism'},
+    {selector:'#capabilities',key:'organs',code:'03',hu:'RENDSZERSZERVEK',en:'SYSTEM ORGANS',a:'121,241,219',b:'98,161,255',shape:'organism'},
+    {selector:'#pricing',key:'heart',code:'04',hu:'KERESKEDELMI SZÍV',en:'COMMERCE HEART',a:'255,207,137',b:'160,109,255',shape:'organism'},
+    {selector:'#system',key:'skeleton',code:'05',hu:'RENDSZERVÁZ',en:'SYSTEM SKELETON',a:'139,203,255',b:'143,114,255',shape:'organism'},
+    {selector:'.fx-origin-proof',key:'proof',code:'05.5',hu:'ELLENŐRIZHETŐSÉG',en:'VERIFIABILITY',a:'183,244,255',b:'111,227,200',shape:'organism'},
+    {selector:'.fx-award-proof',key:'proof',code:'05.8',hu:'PUBLIC PROOF LAYER',en:'PUBLIC PROOF LAYER',a:'183,244,255',b:'111,227,200',shape:'organism'},
+    {selector:'#user-feedback',key:'feedback',code:'06.5',hu:'VALÓDI VISSZAJELZÉS',en:'GENUINE FEEDBACK',a:'126,229,255',b:'168,121,255',shape:'organism'},
+    {selector:'#resources',key:'beacon',code:'06',hu:'KIADÁSI JELADÓ',en:'RELEASE BEACON',a:'183,244,255',b:'111,227,200',shape:'organism'},
+    {selector:'footer.site-footer',key:'loop',code:'∞',hu:'ÚJ CIKLUS',en:'NEW CYCLE',a:'160,231,255',b:'143,114,255',shape:'organism'}
   ];
 
   let scenes = [];
@@ -489,6 +489,7 @@
     root.dataset.fxCinematicJourneyR536='ready';
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicLivingIdentityR1711='single-organism-no-scene-shape-swap';
+    root.dataset.fxCinematicLivingIdentityR1723='canonical-organism-scene-physiology-only';
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';

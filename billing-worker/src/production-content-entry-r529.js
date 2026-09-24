@@ -29,7 +29,7 @@ const DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const DESKTOP_MEDIA = '(min-width: 901px) and (pointer: fine) and (min-aspect-ratio: 27/25)';
 const HEART_STYLE_PATH = '/scifi-ui/styles/formatx-heart-core-r252.css';
-const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260920-r595-semantic-hit-owner-r1562-no-circular-hud">';
+const HEART_STYLE_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-heart-core-r252="true" href="/scifi-ui/styles/formatx-heart-core-r252.css?v=20260924-r1723-semantic-pointer-owner">';
 const HEART_BUTTON = '<button type="button" class="fx-mag-heart-hit-r252" data-fx-heart-core-r252="true" aria-label="A FormatX élő MAG interakciójának indítása"></button>';
 
 const MOBILE_LEGACY_PATHS = new Set([

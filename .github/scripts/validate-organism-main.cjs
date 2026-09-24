@@ -58,7 +58,8 @@ async function enterSite(page, label) {
     await skip.click({ force: true, timeout: 1500 }).catch(() => {});
   }
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
-  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
+  await page.waitForFunction(() => ['ready','delegated-r264'].includes(document.documentElement.dataset.fxOrganismMenu || ''), null, { timeout: 30000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxControlOwnerR268 === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
   mark(label + ': site-ready');
 }
@@ -72,6 +73,7 @@ async function state(page) {
     actionLinks: document.querySelectorAll('.fx-organism-actionbar a').length,
     overlayHidden: document.getElementById('fx-organism-console')?.hidden,
     pricingChildren: document.getElementById('pricing')?.children.length,
+    pricingTriggers: document.querySelectorAll('#pricing > [data-organism-open="pricing"]').length,
     pricingCards: document.querySelectorAll('[data-organism-panel="pricing"] [data-plan-id]').length,
     qrCards: document.querySelectorAll('[data-organism-panel="pricing"] [data-plan-qr]').length,
     overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
@@ -92,11 +94,11 @@ async function validateDesktop() {
 
     const current = await state(page);
     mark('desktop: initial-state', current);
-    assert(current.ready === 'ready' && current.menuReady === 'ready', 'interface/menu not ready: ' + JSON.stringify(current));
+    assert(current.ready === 'ready' && ['ready','delegated-r264'].includes(current.menuReady), 'interface/menu not ready: ' + JSON.stringify(current));
     assert(current.triggers === 5 && current.panels === 5, 'chapter/panel count: ' + JSON.stringify(current));
     assert(current.actionLinks === 3, 'action bar links: ' + JSON.stringify(current));
     assert(current.overlayHidden === true, 'console must start hidden');
-    assert(current.pricingChildren === 1, 'pricing section should contain only its interactive trigger');
+    assert(current.pricingTriggers === 1, 'pricing section must expose exactly one organism trigger: ' + JSON.stringify(current));
     assert(current.pricingCards === 3 && current.qrCards === 3, 'commerce content was not moved intact');
     assert(current.footerInResources, 'footer must be inside the release/support console');
     assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
@@ -122,12 +124,26 @@ async function validateDesktop() {
     await page.waitForTimeout(550);
     mark('desktop: close-control-passed');
 
-    await page.locator('#menu-toggle').evaluate(node => node.click());
+    const menuToggle=page.locator('#menu-toggle');
+    await menuToggle.click();
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
-    assert(await page.locator('#main-nav').evaluate(node => node.classList.contains('open')), 'interactive system menu did not open');
-    await page.locator('#main-nav a[href="#pricing"]').evaluate(node => node.click());
-    await page.waitForFunction(() => !document.querySelector('[data-organism-panel="pricing"]').hidden);
-    mark('desktop: header-navigation-passed');
+    const pricingNav=page.locator('#main-nav a[href="#pricing"]');
+    await pricingNav.click();
+    await page.waitForFunction(() => {
+      const nav=document.getElementById('main-nav');
+      const pricing=document.getElementById('pricing');
+      return location.hash==='#pricing'
+        && !nav?.classList.contains('open')
+        && pricing instanceof HTMLElement;
+    });
+    const navState=await page.evaluate(()=>({
+      hash:location.hash,
+      navOpen:document.getElementById('main-nav')?.classList.contains('open')||false,
+      pricingTop:document.getElementById('pricing')?.getBoundingClientRect().top??null
+    }));
+    assert(navState.hash==='#pricing','canonical header navigation did not land on pricing: '+JSON.stringify(navState));
+    assert(navState.navOpen===false,'canonical header navigation did not close menu: '+JSON.stringify(navState));
+    mark('desktop: header-navigation-passed',navState);
 
     await page.waitForFunction(() => Array.from(document.querySelectorAll('[data-plan-qr-image]')).every(image => image.complete && image.naturalWidth >= 32), null, { timeout: 15000 });
     const qrReady = await page.locator('[data-plan-qr-image]').evaluateAll(images => images.map(image => ({ width: image.naturalWidth, src: image.currentSrc || image.src })));
@@ -167,7 +183,7 @@ async function validateMobile() {
 
     const shell = await page.locator('.fx-organism-console-shell').boundingBox();
     mark('mobile: sheet-box', shell);
-    assert(shell && shell.y > 0 && shell.height <= 845, 'mobile sheet geometry: ' + JSON.stringify(shell));
+    assert(shell && shell.x >= 0 && shell.y >= 0 && shell.x + shell.width <= 391 && shell.y + shell.height <= 845, 'mobile sheet geometry: ' + JSON.stringify(shell));
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-id]').count() === 3, 'mobile pricing cards missing');
 
     const overflow = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth);
@@ -175,7 +191,7 @@ async function validateMobile() {
     await page.locator('.fx-organism-console-close').tap();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
 
-    await page.locator('#menu-toggle').evaluate(node => node.click());
+    await page.locator('#menu-toggle').tap();
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
 
     const meaningful = meaningfulDiagnostics(errors);

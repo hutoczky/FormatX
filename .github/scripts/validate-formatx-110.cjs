@@ -25,7 +25,7 @@ const production = read("billing-worker/src/production-with-license.js");
 assert.ok(loader.includes("timeout = setTimeout(() => finish(false, 'timeout'), 9000);"), "module timeout is missing");
 assert.ok(loader.includes("root.dataset.fxTranscendProgress = '100';"), "loader completion marker is missing");
 assert.ok(loader.includes("root.dataset.fxTranscendLoader = 'safe-degraded-v28';"), "current loader degradation path is missing");
-assert.ok(loader.includes("synaptic-thought-genome.js?v=20260811-current-host-v2"), "Thought Genome cache-busted production module is missing");
+assert.ok(loader.includes("synaptic-thought-genome.js?v=20260923-r1666-deterministic-fingerprint-submit"), "Current deterministic Thought Genome production module is missing");
 assert.ok(language.includes("button.type='button'") && language.includes("button.addEventListener('click'") && language.includes("publish(next)"), "canonical language button click owner is missing");
 assert.ok(webgl.includes("this.maxCount = mobile ? 1200 : 2400;"), "WebGL particle cap regressed");
 assert.ok(webgl.includes("} else if (false && fps > 58 && this.tier < 3) {"), "WebGL upward particle scaling is enabled");

@@ -67,7 +67,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
    internal depth, reduces the clipped cyan centre through lower luminance, and
    moves softness to alpha-aware drop shadows around the actual crystal edge. */
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  html:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"][data-fx-crystal-organism-r326="ready"] body.living-architecture
+  html:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: .965 !important;
     filter:
@@ -177,3 +177,37 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
    production-r479-colour-depth-soft-alpha-edge-living-primary-mag
    production-r4791-user-pause-aware-compositor-life-zero-webgl-idle */
 /* production-r1408-no-round-icon-no-primary-canvas-resample */
+
+/* R1723 — canonical organism glyph. This late owner deliberately overrides the
+   historical crystal/sphere icon rules without disturbing their compatibility. */
+html:root:root:root:root body.living-architecture
+.topbar .fx-reference-mag-button[data-fx-core-shape="organism"]{
+  background-size:27px 27px!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='o' cx='43%25' cy='36%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23efffff'/%3E%3Cstop offset='.16' stop-color='%2379eaff'/%3E%3Cstop offset='.38' stop-color='%233c8fb3'/%3E%3Cstop offset='.63' stop-color='%23633f78'/%3E%3Cstop offset='.84' stop-color='%2328193c'/%3E%3Cstop offset='1' stop-color='%23050d16'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M16 2.8c4.8-.5 9.7 2.6 11.5 7 1.8 4.2.7 9.8-2.4 13.2-3 3.4-8.2 6.6-12.9 5.2-4.6-1.3-8.3-5.3-8.7-10.1-.4-4.7 1.8-9.8 5.8-12.5 1.9-1.3 4.2-2.5 6.7-2.8Z' fill='url(%23o)' stroke='%238defff' stroke-opacity='.58' stroke-width='.8'/%3E%3Cpath d='M7.9 13.2c3.1.5 4.8 2 7.8 2.7m8.1-6.3c-2.3 2.7-3.9 4.2-7.8 6.3m7.5 6.3c-2.8-1.8-4.1-3.5-7.5-6.3m-3 10.2c.3-3.4 1.2-6.8 3-10.2' fill='none' stroke='%236ee8ff' stroke-opacity='.42' stroke-width='.65' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='4.25' fill='%230a3240' stroke='%237deeff' stroke-opacity='.66'/%3E%3Ccircle cx='16' cy='16' r='2.05' fill='%23eaffff'/%3E%3Ccircle cx='16' cy='16' r='1.12' fill='%2357ddff'/%3E%3C/svg%3E")!important;
+}
+.fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="organism"]{
+  transform:none!important;
+  border-radius:46% 54% 49% 51% / 43% 48% 52% 57%!important;
+  border-color:rgba(142,238,249,.48)!important;
+  background:
+    radial-gradient(circle at 50% 49%,rgba(239,255,255,.90) 0 3%,rgba(75,226,255,.55) 4% 9%,rgba(10,79,99,.62) 10% 17%,transparent 18%),
+    radial-gradient(ellipse at 32% 27%,rgba(126,207,222,.26),transparent 34%),
+    radial-gradient(ellipse at 69% 64%,rgba(104,63,139,.35),transparent 42%),
+    radial-gradient(ellipse at 42% 72%,rgba(38,129,157,.22),transparent 37%),
+    linear-gradient(145deg,rgba(49,77,103,.92),rgba(74,43,91,.88) 54%,rgba(5,16,27,.98))!important;
+  box-shadow:
+    inset 3px 2px 8px rgba(169,236,241,.10),
+    inset -4px -5px 10px rgba(13,6,25,.50),
+    0 0 7px rgba(62,218,242,.10)!important;
+}
+.fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="organism"]::before{
+  width:72%!important;height:1px!important;opacity:.38!important;
+  background:linear-gradient(90deg,transparent,rgba(104,229,244,.72),transparent)!important;
+  transform:translate(-50%,-50%) rotate(23deg)!important;
+}
+.fx-mini-mag-assistant-r459 .fx-mini-mag-glyph-r459[data-fx-core-shape="organism"]::after{
+  width:1px!important;height:68%!important;opacity:.30!important;
+  background:linear-gradient(180deg,transparent,rgba(112,232,246,.68),transparent)!important;
+  transform:translate(-50%,-50%) rotate(-31deg)!important;
+}
+/* production-r1723-canonical-organism-glyph */

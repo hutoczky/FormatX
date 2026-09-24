@@ -23,6 +23,9 @@ const quality=read('docs/scifi-ui/styles/formatx-quality-r461.css');
 const mini=read('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js');
 const worker=read('billing-worker/src/production-content-entry-r529.js');
 const canonicalWorker=read('billing-worker/src/production-content-entry.js');
+const birth=read('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js');
+const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
+const habitat=read('docs/scifi-ui/scripts/formatx-living-habitat-r1530.js');
 
 has(home,[
   'formatx-event-horizon.js','formatx-motion-runtime-loader-r239.js','formatx-quality-r461.css',
@@ -53,12 +56,34 @@ has(current,[
 ],'single current MAG loader');
 
 has(renderer,[
-  "const REVISION = 'living-luminous-electric-crystal-r454'",'buildOrganismGeometry',
+  "const REVISION = 'living-luminous-electric-crystal-r454'","const CANONICAL_REVISION = 'fully-living-organism-r1723'",'buildOrganismGeometry',
   'KHR_parallel_shader_compile','fxCoreShaderCompileR600','finishProgram',
   'const SURFACE_PULSE_MS = 1160','const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880','prefers-reduced-motion:reduce','document.hidden',
-  'uSurfacePulse','dnaHelix','dnaBridge','fxCoreGenomeR614','native-double-helix-energy-lattice-r614','fxCoreGenesisMagR614','armored-four-lobe-core-with-native-tendrils-r614','biomechanical-gunmetal-living-core-r614','single-luminous-webgl-material-owner'
+  'uSurfacePulse','dnaHelix','dnaBridge','fxCoreGenomeR614','native-double-helix-energy-lattice-r614','fxCoreGenesisMagR614','cortical-cellular-organism-with-native-tendrils-r1723','cortical-bioceramic-living-tissue-r1723','single-luminous-webgl-material-owner','fxCoreCanonicalIdentityR1723','fxNativeMagIdentityR1723','fxNativeMagMaterialR1723','fxNativeMagTendrilsR1723','fxNativeMagPhysiologyR1723','fxNativeMagPhysiologyApiR1723','physiology:(kind,source)=>signalPhysiology','formatx:organismphysiology','fxNativeMagOrganismR1724','fxNativeMagLookR1724','fxNativeMagTopologyR1724','fxNativeMagPaletteR1724','fxNativeMagFacetR1724'
 ],'native R326 renderer');
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
+assert.ok(!renderer.includes("shape:'crystal'"),'R1723 renderer must not publish crystal as active shape');
+assert.ok(!renderer.includes("shape:'sphere'"),'R1723 renderer must not publish sphere as active shape');
+assert.ok(!home.includes('formatx-reference-creature-r1724'),'static R1724 creature image/script takeover must not be loaded');
+
+has(birth,[
+  "fxMagBirthOrganismR1724='faceted-pearl-cyan-living-crystal-organism'",
+  "fxMagBirthCoreR1724='biocrystal-cartilage-cyan-energy-warm-rim'",
+  "fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive'",
+  'this.mechanicalGroup.visible=false'
+],'R1724 Three.js living crystal birth');
+has(fallback,[
+  "revision:'r1724-formatx-living-crystal-organism-birth'",
+  'FormatX Living Crystal Organism fallback silhouette'
+],'R1724 2D living crystal fallback');
+has(habitat,[
+  "fxLivingHabitatCrystalWorldR1724='cyan-biocrystal-arches-spires-warm-studio-rim'",
+  'formatx:organismphysiology'
+],'R1724 synchronized biocrystal world');
+has(home,[
+  'procedural-interactive-living-crystal-organism-r1724',
+  'r1724-living-crystal-organism'
+],'R1724 living crystal static entry contract');
 
 has(life,[
   "const VERSION = 'native-webgl-periodic-and-interaction-life-r528'",'prefers-reduced-motion: reduce',
@@ -71,9 +96,11 @@ assert.ok(!life.includes('requestAnimationFrame('),'living-core life owner must 
 has(governor,[
   'automatic lifecycle','not a user-facing MAG pause feature','activeWindowMs=240',
   "fxMobileRenderGovernorRevisionR433='r528-automatic-idle-flag-no-manual-pause'",
+  "fxMobileRenderGovernorOrganismR1723='fixed-organism-morph-zero-settle'",
+  "target==='crystal'||target==='organism'?0:NaN",
   "fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'",
   'idle-zero-frame','visibilitychange','document.hidden'
-],'R528 mobile lifecycle governor');
+],'R1723 mobile lifecycle governor');
 assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepause'"),'automatic governor must not dispatch the retired manual PAUSE event');
 
 has(quality,[
@@ -100,6 +127,6 @@ has(mini,[
 ],'R560 Mini MAG information-collision safety');
 assert.ok(!mini.includes('setInterval('),'Mini MAG collision safety must remain interval-free');
 assert.doesNotMatch(mini,/getContext\(|createElement\(['"]canvas|WebGLRenderingContext|WebGL2RenderingContext/);
-for(const source of [intro,motion,current,renderer,life,governor,mini])new Function(source);
+for(const source of [intro,motion,current,renderer,life,governor,mini,birth,fallback,habitat])new Function(source);
 
-console.log('PASS: R560 validates one native living MAG, no manual PAUSE owner, zero-idle lifecycle, collision-safe Mini MAG, bounded preloader delivery, and source-owned canonical quality cache identity.');
+console.log('PASS: R1724 validates one procedural interactive FormatX living crystal organism, no static creature takeover, no alternate shape state, zero-idle lifecycle, and source-owned adaptive quality.');

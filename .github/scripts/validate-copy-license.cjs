@@ -87,7 +87,7 @@ async function waitPublicState(page, language) {
       ? /\b5-day trial(?: licence)?\b/i.test(document.body.innerText)
       : /\b5 napos próbalicenc\b/i.test(document.body.innerText);
     return document.documentElement.lang === lang
-      && document.documentElement.dataset.fxFixedCopyVersion === 'r210'
+      && document.documentElement.dataset.fxFixedCopyVersion === 'r462'
       && Boolean(document.querySelector('.fx-language-toggle'))
       && downloads.includes(download)
       && trial
@@ -126,7 +126,22 @@ async function readCopy(page) {
     horizontalOverflow: Math.max(
       document.documentElement.scrollWidth,
       document.body.scrollWidth
-    ) - innerWidth
+    ) - innerWidth,
+    overflowNodes: Array.from(document.querySelectorAll('body *')).map(node => {
+      const r=node.getBoundingClientRect();
+      return {
+        tag:node.tagName.toLowerCase(),
+        id:node.id||'',
+        cls:String(node.className||'').slice(0,120),
+        left:Math.round(r.left),
+        right:Math.round(r.right),
+        width:Math.round(r.width),
+        display:getComputedStyle(node).display,
+        visibility:getComputedStyle(node).visibility
+      };
+    }).filter(item=>item.display!=='none'&&item.visibility!=='hidden'&&(item.left<-1||item.right>innerWidth+1))
+      .sort((a,b)=>Math.max(Math.abs(b.left),Math.abs(b.right-innerWidth))-Math.max(Math.abs(a.left),Math.abs(a.right-innerWidth)))
+      .slice(0,12)
   }));
 }
 

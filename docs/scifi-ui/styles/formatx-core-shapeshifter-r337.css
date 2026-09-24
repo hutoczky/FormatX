@@ -17,7 +17,7 @@ html[data-fx-core-shape-r337] #hero .fx-reference-controls-r204 :is(button,.fx-t
   pointer-events: auto !important;
 }
 
-html:root:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
+html:root:root:root[data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
 #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
   opacity: 1 !important;
   scale: 1 !important;
@@ -65,7 +65,7 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
      and the overly dark r465 pass. The shader still owns the soft perimeter;
      this display pass restores midtone body and restrained spectral colour while
      a sub-pixel feather removes staircase/razor edges without smearing facets. */
-  html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
+  html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: .965 !important;
     scale: 1 !important;
@@ -225,11 +225,11 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
+  html:root:root[data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"]
   body.living-architecture #hero .hero-grid > .hero-space,
-  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
+  html:root:root[data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
-  html:root:root[data-fx-core-shape-mode-r413="native-webgl-closed-geometry-morph"]
+  html:root:root[data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"]
   body.living-architecture #hero .fx-reference-controls-r204 {
     display: block !important;
     visibility: visible !important;

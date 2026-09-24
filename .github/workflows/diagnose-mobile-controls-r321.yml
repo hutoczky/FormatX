@@ -72,30 +72,47 @@ jobs:
             assert(frames.every(v=>v.w>=44&&v.h>=44&&v.hit),'SOUND control is not continuously actionable');
 
             const startShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
+            assert(startShape==='organism','canonical MAG state is not organism: '+startShape);
             const samples=[];
             for(let i=0;i<2;i++){
-              const before=await page.evaluate(()=>({shape:document.documentElement.dataset.fxCoreShapeR337||'',morph:Number(window.FormatXCoreMobileV69?.morph)}));
+              const before=await page.evaluate(()=>({
+                shape:document.documentElement.dataset.fxCoreShapeR337||'',
+                morph:Number(window.FormatXCoreMobileV69?.morph),
+                source:document.documentElement.dataset.fxCoreMorphSource||'',
+                pulse:document.documentElement.dataset.fxCoreSurfacePulseR454||'',
+                token:document.documentElement.dataset.fxCoreLivingResponseTokenR1723||'0'
+              }));
               const mag=page.locator('.fx-reference-mag-button').first();
               assert(await mag.isVisible(),'MAG control is not visible');
               await mag.click();
-              await page.waitForFunction(previous=>document.documentElement.dataset.fxCoreShapeR337!==previous,before.shape,{timeout:3000});
-              const targetShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
-              const target=targetShape==='sphere'?1:0;
-              await page.waitForFunction(({target,targetShape})=>{
+              await page.waitForFunction(previous=>{
+                const root=document.documentElement;
                 const morph=Number(window.FormatXCoreMobileV69?.morph);
-                const settled=document.documentElement.dataset.fxCoreShape;
-                return settled===targetShape&&Number.isFinite(morph)&&Math.abs(morph-target)<.07;
-              },{target,targetShape},{timeout:10000});
-              const after=await page.evaluate(()=>({shape:document.documentElement.dataset.fxCoreShapeR337||'',settled:document.documentElement.dataset.fxCoreShape||'',morph:Number(window.FormatXCoreMobileV69?.morph)}));
-              samples.push({before,after,target});
-              assert(Math.abs(after.morph-target)<.07,'native WebGL MAG did not settle at target: '+JSON.stringify(samples));
+                return root.dataset.fxCoreShapeR337==='organism'
+                  && root.dataset.fxCoreShape==='organism'
+                  && Number.isFinite(morph)
+                  && Math.abs(morph)<.001
+                  && (root.dataset.fxCoreLivingResponseTokenR1723||'0')!==previous.token;
+              },before,{timeout:10000});
+              const after=await page.evaluate(()=>({
+                shape:document.documentElement.dataset.fxCoreShapeR337||'',
+                settled:document.documentElement.dataset.fxCoreShape||'',
+                morph:Number(window.FormatXCoreMobileV69?.morph),
+                source:document.documentElement.dataset.fxCoreMorphSource||'',
+                pulse:document.documentElement.dataset.fxCoreSurfacePulseR454||'',
+                token:document.documentElement.dataset.fxCoreLivingResponseTokenR1723||'0'
+              }));
+              samples.push({before,after});
+              assert(after.shape==='organism'&&after.settled==='organism','MAG left canonical organism state: '+JSON.stringify(samples));
+              assert(Math.abs(after.morph)<.001,'canonical organism morph changed: '+JSON.stringify(samples));
+              assert(after.token!==before.token,'MAG activation produced no living-response token change: '+JSON.stringify(samples));
             }
             const finalShape=await page.evaluate(()=>document.documentElement.dataset.fxCoreShapeR337||'');
-            assert(finalShape===startShape,'two MAG activations did not return to the starting shape: '+JSON.stringify({startShape,finalShape,samples}));
-            console.log('MAG_NATIVE_WEBGL_SHAPE_SHIFT','PASS',JSON.stringify(samples));
+            assert(finalShape==='organism','MAG activation changed canonical identity: '+JSON.stringify({startShape,finalShape,samples}));
+            console.log('MAG_NATIVE_WEBGL_ORGANISM_RESPONSE','PASS',JSON.stringify(samples));
 
             const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
-            assert(overflow<=2,'shape shift introduced horizontal overflow: '+overflow);
+            assert(overflow<=2,'organism response introduced horizontal overflow: '+overflow);
             await ctx.close();await browser.close();
           })().catch(error=>{console.error(error);process.exit(1);});
           NODE
@@ -106,5 +123,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r432 controls, direct MAG runtime and settled WebGL morph passed'; else state=failure; description='r432 mobile control or native MAG morph diagnostic failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='R1723 controls and canonical living-organism response passed'; else state=failure; description='R1723 mobile control or living-organism response diagnostic failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile control motion diagnostic' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

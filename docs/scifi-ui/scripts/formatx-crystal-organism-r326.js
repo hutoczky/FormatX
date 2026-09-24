@@ -4,6 +4,7 @@
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
   const REVISION = 'living-luminous-electric-crystal-r454';
+  const CANONICAL_REVISION = 'fully-living-organism-r1723';
   const VISUAL_REVISION_R1713 = 'photoreal-single-living-organism-r1713';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
@@ -122,6 +123,10 @@
   root.dataset.fxNativeMagVisualR1711 = 'single-photoreal-living-organism-fixed-body-physical-optics-responsive-tendrils';
   root.dataset.fxNativeMagCanonicalCompatibilityR1714='r454-api-revision-r1713-visual-runtime';
   root.dataset.fxNativeMagVisualR1717='photoreal-fixed-anatomy-organic-surface-physiology';
+  root.dataset.fxNativeMagVisualR1725='studio-photoreal-smoky-pearl-biocrystal-broad-facets-subtle-physiology';
+  root.dataset.fxNativeMagMaterialR1725='low-emission-mineral-diffuse-ggx-reflection-facet-tonal-variation';
+  root.dataset.fxNativeMagVisualR1726='cinematic-photographic-smoky-pearl-biocrystal-neutral-studio-response';
+  root.dataset.fxNativeMagMaterialR1726='neutral-mineral-ggx-softbox-restrained-vascular-emission-physical-edge-transmission';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -334,7 +339,7 @@
         crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.72:.90;
+        const smoothWeight=software?.68:(mobile?.80:.84);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -366,20 +371,21 @@
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
+      /* R1724 — FormatX living crystal body.
+         A tall asymmetric rhombic envelope replaces the swollen torso. The
+         silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.78,.245,.185,-.020,-.010,.050],
-        [.70,.405,.305,-.034,-.004,.044],
-        [.60,.535,.405,-.040,.006,.036],
-        [.48,.635,.485,-.038,.014,.028],
-        [.34,.705,.540,-.026,.018,.020],
-        [.18,.748,.574,-.010,.018,.012],
-        [.02,.762,.588,.010,.010,.004],
-        [-.14,.748,.575,.022,.002,-.004],
-        [-.30,.704,.540,.026,.002,-.008],
-        [-.45,.625,.475,.022,.008,-.002],
-        [-.58,.515,.385,.014,.010,.008],
-        [-.69,.390,.285,.006,.006,.020],
-        [-.78,.235,.165,-.002,.000,.034]
+        [.88,.070,.060,-.090,-.008,.080],
+        [.76,.225,.150,-.075,.000,.068],
+        [.60,.430,.285,-.050,.010,.056],
+        [.40,.655,.405,-.018,.020,.040],
+        [.18,.810,.495,.028,.028,.022],
+        [.00,.855,.520,.055,.022,.000],
+        [-.18,.795,.485,.040,.012,-.020],
+        [-.40,.640,.392,.005,.002,-.038],
+        [-.60,.410,.260,-.040,-.004,-.052],
+        [-.76,.215,.140,-.075,-.008,-.064],
+        [-.88,.065,.055,-.095,-.010,-.076]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -404,21 +410,21 @@
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
           const irregular=
             1
-            +Math.sin(a*5.0+ringIndex*.43)*.026*mid
-            +Math.cos(a*3.0-ringIndex*.37)*.014*mid
-            +Math.sin(a*2.0+ringIndex*.61)*.008;
-          const cutFront=1-.024*Math.pow(Math.max(0,Math.cos(a-.52)),4.0);
-          const cutRear=1-.016*Math.pow(Math.max(0,Math.cos(a+2.18)),5.0);
-          const cutSide=1-.012*Math.pow(Math.max(0,Math.cos(a-2.54)),6.0);
-          const cutNotch=1-.008*Math.pow(Math.max(0,Math.cos(a+1.18)),8.0);
+            +Math.sin(a*4.0+ringIndex*.43)*.028*mid
+            +Math.cos(a*6.0-ringIndex*.37)*.014*mid
+            +Math.sin(a*2.0+ringIndex*.61)*.010;
+          const cutFront=1-.075*Math.pow(Math.max(0,Math.cos(a-.48)),4.0);
+          const cutRear=1-.048*Math.pow(Math.max(0,Math.cos(a+2.12)),5.0);
+          const cutSide=1-.050*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
+          const cutNotch=1-.038*Math.pow(Math.max(0,Math.cos(a+1.20)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const x=ox+Math.cos(a)*rx*irregular*radialCut;
           const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.020,.845,-.015],[.5,0]);
-      const bottom=bodyVertex([.018,-.835,.012],[.5,1]);
+      const top=bodyVertex([-.105,.980,-.015],[.5,0]);
+      const bottom=bodyVertex([-.115,-.965,.010],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -485,18 +491,18 @@
        Each appendage is appended to the same buffers and collapses back into the
        sphere endpoint during morph, so no duplicate canvas/core is introduced. */
     function tendrilPath(index, t) {
-      const baseAngle = index / tendrilCount * Math.PI * 2 + Math.sin(index*2.17)*.13 + (index % 2 ? .035 : -.025);
-      const sideAngle = baseAngle + Math.PI * .5;
-      const root = .515;
-      const reach = .48 + ((index*3)%5) * .030;
-      const radius = root + reach * t;
-      const wave = Math.sin(t*Math.PI*1.36+index*.83)*(.010+.058*t)
-        +Math.sin(t*Math.PI*.72+index*.47)*.020*t;
-      const depth = .155 + Math.sin(t*Math.PI*1.14+index*.97)*(.012+.048*t);
+      const lane=(index-(tendrilCount-1)*.5)/Math.max(1,tendrilCount-1);
+      const rootX=-.56+.040*Math.sin(index*1.71);
+      const rootY=.12+lane*.54+.035*Math.cos(index*1.13);
+      const rootZ=.04+.10*Math.sin(index*.91);
+      const sweep=.52+.34*(.5+.5*Math.sin(index*1.37));
+      const wave=Math.sin(t*Math.PI*1.55+index*.83)*(.025+.095*t)
+        +Math.sin(t*Math.PI*.72+index*.47)*.028*t;
+      const rise=Math.sin(t*Math.PI*.92+index*.73)*(.035+.10*t);
       return [
-        Math.cos(baseAngle)*radius + Math.cos(sideAngle)*wave,
-        Math.sin(baseAngle)*radius + Math.sin(sideAngle)*wave,
-        depth
+        rootX-(.30+sweep)*t-.18*t*t,
+        rootY+rise+lane*.12*t+wave*.34,
+        rootZ+.10*Math.sin(t*Math.PI+index*.61)+wave
       ];
     }
 
@@ -510,7 +516,7 @@
       const sideA = normalize(cross(tangent, guide));
       const sideB = normalize(cross(tangent, sideA));
       const tubeRadius = (.024 * (1 - t * .84) + .0042) * (mobile ? .96 : 1);
-      const rootDirection = normalize([p[0], p[1], p[2] * .72]);
+      const rootDirection = normalize([p[0]-.08, p[1], p[2]*.72+.02]);
       return Array.from({ length: tendrilSides }, (_, sideIndex) => {
         const a = sideIndex / tendrilSides * Math.PI * 2;
         const offset = [
@@ -576,16 +582,177 @@
       armorTri(a,c,d,facet);
     }
 
+    /* R1724 — additional living anatomy is appended to the same attribute
+       buffers. No second canvas, model loader or image asset is introduced. */
+    function guardianTriangle(vertices,facet,origin=[0,0,0]){
+      let faceNormal=normalize(cross(
+        subtract(vertices[1].crystal,vertices[0].crystal),
+        subtract(vertices[2].crystal,vertices[0].crystal)
+      ));
+      const centre=[0,1,2].map(axis=>
+        (vertices[0].crystal[axis]+vertices[1].crystal[axis]+vertices[2].crystal[axis])/3
+      );
+      const localCentre=subtract(centre,origin);
+      if(dot(faceNormal,localCentre)<0){
+        [vertices[1],vertices[2]]=[vertices[2],vertices[1]];
+        faceNormal=faceNormal.map(value=>-value);
+      }
+      const barycentric=[[1,0,0],[0,1,0],[0,0,1]];
+      vertices.forEach((item,index)=>{
+        sphere.push(...item.sphere);
+        crystal.push(...item.crystal);
+        sphereNormals.push(...item.sphereNormal);
+        const smoothNormal=item.crystalNormal||faceNormal;
+        const hybridNormal=normalize([
+          smoothNormal[0]*.78+faceNormal[0]*.22,
+          smoothNormal[1]*.78+faceNormal[1]*.22,
+          smoothNormal[2]*.78+faceNormal[2]*.22
+        ]);
+        crystalNormals.push(...hybridNormal);
+        uvs.push(...item.uv);
+        barycentrics.push(...barycentric[index]);
+        facets.push(facet);
+      });
+    }
+    function appendEllipsoid(center,radii,facetBase=.72,latSteps=8,lonSteps=14,rotZ=0){
+      const [cx,cy,cz]=center,[rx0,ry0,rz0]=radii;
+      const czr=Math.cos(rotZ),szr=Math.sin(rotZ);
+      const grid=[];
+      for(let iy=0;iy<=latSteps;iy++){
+        const v=iy/latSteps;
+        const phi=v*Math.PI;
+        const sp=Math.sin(phi),cp=Math.cos(phi);
+        const row=[];
+        for(let ix=0;ix<lonSteps;ix++){
+          const u=ix/lonSteps;
+          const th=u*Math.PI*2;
+          const lx=Math.cos(th)*sp*rx0;
+          const ly=cp*ry0;
+          const lz=Math.sin(th)*sp*rz0;
+          const x=cx+lx*czr-ly*szr;
+          const y=cy+lx*szr+ly*czr;
+          const z=cz+lz;
+          const nLocal=normalize([
+            (Math.cos(th)*sp)/Math.max(.001,rx0),
+            cp/Math.max(.001,ry0),
+            (Math.sin(th)*sp)/Math.max(.001,rz0)
+          ]);
+          const nx=nLocal[0]*czr-nLocal[1]*szr;
+          const ny=nLocal[0]*szr+nLocal[1]*czr;
+          const normal=normalize([nx,ny,nLocal[2]]);
+          const dir=normalize([x,y,z]);
+          row.push({
+            sphere:dir.map(value=>value*.88),
+            crystal:[x,y,z],
+            sphereNormal:dir,
+            crystalNormal:normal,
+            uv:[u,v]
+          });
+        }
+        grid.push(row);
+      }
+      for(let iy=0;iy<latSteps;iy++){
+        for(let ix=0;ix<lonSteps;ix++){
+          const nx=(ix+1)%lonSteps;
+          const facet=facetBase+.18*random(ix+iy*13,iy*29+ix);
+          guardianTriangle([grid[iy][ix],grid[iy][nx],grid[iy+1][ix]],facet,center);
+          guardianTriangle([grid[iy][nx],grid[iy+1][nx],grid[iy+1][ix]],facet+.007,center);
+        }
+      }
+    }
+    function appendLimb(start,end,r0,r1,facetBase=.86,segments=7,sides=8){
+      const a=start,b=end;
+      const tangent=normalize(subtract(b,a));
+      const guide=Math.abs(tangent[1])>.86?[1,0,0]:[0,1,0];
+      const sideA=normalize(cross(tangent,guide));
+      const sideB=normalize(cross(tangent,sideA));
+      const rings=[];
+      for(let segment=0;segment<=segments;segment++){
+        const t=segment/segments;
+        const eased=t*t*(3-2*t);
+        const p=[
+          a[0]+(b[0]-a[0])*t,
+          a[1]+(b[1]-a[1])*t,
+          a[2]+(b[2]-a[2])*t
+        ];
+        const radius=r0+(r1-r0)*eased;
+        rings.push(Array.from({length:sides},(_,side)=>{
+          const angle=side/sides*Math.PI*2;
+          const offset=[
+            sideA[0]*Math.cos(angle)*radius+sideB[0]*Math.sin(angle)*radius,
+            sideA[1]*Math.cos(angle)*radius+sideB[1]*Math.sin(angle)*radius,
+            sideA[2]*Math.cos(angle)*radius+sideB[2]*Math.sin(angle)*radius
+          ];
+          const pos=[p[0]+offset[0],p[1]+offset[1],p[2]+offset[2]];
+          const dir=normalize(pos);
+          return {
+            sphere:dir.map(value=>value*.86),
+            crystal:pos,
+            sphereNormal:dir,
+            crystalNormal:normalize(offset),
+            uv:[side/sides,t]
+          };
+        }));
+      }
+      for(let segment=0;segment<segments;segment++){
+        for(let side=0;side<sides;side++){
+          const next=(side+1)%sides;
+          const facet=facetBase+.12*random(segment*17+side,side*31+segment);
+          const centre=[(a[0]+b[0])*.5,(a[1]+b[1])*.5,(a[2]+b[2])*.5];
+          guardianTriangle([rings[segment][side],rings[segment][next],rings[segment+1][side]],facet,centre);
+          guardianTriangle([rings[segment][next],rings[segment+1][next],rings[segment+1][side]],facet+.006,centre);
+        }
+      }
+    }
+    function appendMembraneTri(a,b,c,facet=4.42){
+      let vertices=[
+        surfaceVertex(a,null,[0,0],.86),
+        surfaceVertex(b,null,[1,0],.86),
+        surfaceVertex(c,null,[.5,1],.86)
+      ];
+      const face=normalize(cross(subtract(vertices[1].crystal,vertices[0].crystal),subtract(vertices[2].crystal,vertices[0].crystal)));
+      if(face[2]<0)[vertices[1],vertices[2]]=[vertices[2],vertices[1]];
+      guardianTriangle(vertices,facet,[.62,.90,-.24]);
+    }
+
+    /* R1724 — unique FormatX crystal creature anatomy.
+       Living cortical lobes and membranes replace animal limbs and robotic armour. */
+    appendEllipsoid([-.34,.34,.075],[.26,.38,.22],.74,mobile?6:8,mobile?10:14,.34);
+    appendEllipsoid([ .38,.26,.090],[.29,.34,.24],.70,mobile?6:8,mobile?10:14,-.28);
+    appendEllipsoid([-.30,-.30,.040],[.25,.33,.20],.78,mobile?6:8,mobile?10:14,-.22);
+    appendEllipsoid([ .32,-.36,.055],[.24,.31,.21],.76,mobile?6:8,mobile?10:14,.26);
+
+    /* Living crystalline membranes: a crown/facet silhouette that bends and
+       breathes instead of reading as horns, wings or metal fins. */
+    appendMembraneTri([-.22,.66,-.04],[-.50,1.06,-.10],[.02,.83,.06],4.34);
+    appendMembraneTri([ .18,.70,.02],[ .44,1.02,-.05],[.05,.86,.08],4.38);
+    appendMembraneTri([-.52,.22,-.10],[-.93,.46,-.18],[-.62,-.02,.02],4.46);
+    appendMembraneTri([ .56,.16,-.08],[ .96,.34,-.16],[ .62,-.08,.04],4.48);
+    appendMembraneTri([-.42,-.46,-.06],[-.68,-.88,-.12],[-.12,-.68,.02],4.52);
+    appendMembraneTri([ .38,-.48,-.05],[ .61,-.91,-.10],[ .10,-.72,.03],4.56);
+
     if(!auditMode){
       const centreX=.008,centreY=-.006;
       const bezelInner=.168,bezelOuter=.238,bezelSteps=software?20:mobile?30:42,bezelZ=.635;
+      const cartilagePoint=(angle,radius,outer=false)=>{
+        const lobe=1
+          +(outer?.050:.038)*Math.sin(angle*3.0+.34)
+          +(outer?.026:.018)*Math.sin(angle*5.0-.72)
+          +.012*Math.cos(angle*7.0+.18);
+        const yStretch=outer?1.035:1.025;
+        return [
+          centreX+Math.cos(angle)*radius*lobe,
+          centreY+Math.sin(angle)*radius*lobe*yStretch,
+          bezelZ+.007*Math.sin(angle*4.0+.40)+.004*Math.cos(angle*3.0)
+        ];
+      };
       for(let side=0;side<bezelSteps;side+=1){
         const a=side/bezelSteps*Math.PI*2;
         const b=(side+1)/bezelSteps*Math.PI*2;
-        const p0=[centreX+Math.cos(a)*bezelInner,centreY+Math.sin(a)*bezelInner,bezelZ];
-        const p1=[centreX+Math.cos(b)*bezelInner,centreY+Math.sin(b)*bezelInner,bezelZ];
-        const p2=[centreX+Math.cos(b)*bezelOuter,centreY+Math.sin(b)*bezelOuter,bezelZ];
-        const p3=[centreX+Math.cos(a)*bezelOuter,centreY+Math.sin(a)*bezelOuter,bezelZ];
+        const p0=cartilagePoint(a,bezelInner,false);
+        const p1=cartilagePoint(b,bezelInner,false);
+        const p2=cartilagePoint(b,bezelOuter,true);
+        const p3=cartilagePoint(a,bezelOuter,true);
         armorQuad(p0,p1,p2,p3,5.74);
       }
 
@@ -641,7 +808,7 @@
       sizes: [3, 3, 3, 3, 2, 3, 1],
       count: facets.length,
       tendrils: tendrilCount,
-      topology: `${latitudeSegments}x${longitudeSegments}-armored-closed-core-plus-${tendrilCount}-native-tendrils-r614`
+      topology: `${latitudeSegments}x${longitudeSegments}-cortical-organic-core-plus-${tendrilCount}-native-tendrils-r1723`
     };
   }
 
@@ -749,22 +916,29 @@
            compatible but never replaces the body. Constant organic smoothing plus
            physiological deformation keeps the asymmetric silhouette alive. */
         float morph=0.0;
-        float organicBlend=.18;
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.74));
+        float organicBlend=.045;
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.54));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
-        float living=(cell*.020+membrane*.0105)*(.46+.54*uEnergy);
+        float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy);
         float bodyVertexMask=1.0-step(2.0,aFacet);
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
         float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
-        float cortex=(cortexA*.62+cortexB*.38)*.028*cortexEnvelope;
-        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0065*cortexEnvelope;
+        float cortex=(cortexA*.62+cortexB*.38)*.018*cortexEnvelope;
+        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0032*cortexEnvelope;
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
         vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
+        float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
+        float tendrilTip=tendrilVertex*smoothstep(.10,1.0,aUv.y);
+        float tendrilWave=sin(uTime*(1.18+.16*fract(aFacet)) + aUv.y*9.4 + aFacet*2.7);
+        float tendrilWave2=cos(uTime*.83 + aUv.y*7.2 - aFacet*1.9);
+        local.x+=tendrilTip*(uPointer.x*.060 + tendrilWave*(.012+.020*uEnergy));
+        local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
+        local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*.038*uLayer;
         float yaw=.34+uRotation.y+uPointer.x*.18+uTime*.014;
         float pitch=-.058+uRotation.x-uPointer.y*.12+.010*sin(uTime*.19);
@@ -781,8 +955,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.855':'.805'};
-        projected.y+=${mobile?'.042':'.024'};
+        projected*= ${mobile?'.790':'.825'};
+        projected.x+=${mobile?'.006':'.052'};
+        projected.y+=${mobile?'.006':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -861,7 +1036,7 @@
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.015,.020,.029),vec3(.108,.082,.130),lift)*facetTone;
+        vec3 mineral=mix(vec3(.024,.030,.037),vec3(.188,.214,.221),lift)*facetTone;
         mineral*=.955+.045*smokyDepth+.012*mineralGrain;
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
@@ -871,11 +1046,11 @@
         mineral+=vec3(.52,.58,.59)*sideSpec*.096;
         mineral+=vec3(.69,.72,.69)*softboxA*.170;
         mineral+=vec3(.42,.47,.47)*softboxB*.110;
-        mineral+=vec3(.82,.82,.74)*studioRibbonA*.104;
-        mineral+=vec3(.48,.36,.24)*studioRibbonB*.050;
+        mineral+=vec3(.88,.91,.90)*studioRibbonA*.126;
+        mineral+=vec3(.52,.34,.22)*studioRibbonB*.052;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
-        mineral+=vec3(.090,.155,.170)*fresnel*.38;
+        mineral+=vec3(.100,.205,.235)*fresnel*.34;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -888,12 +1063,15 @@
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         mineral+=vec3(.032,.066,.072)*edgeTransmission*.54;
         float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
+        float subsurface=pow(max(0.0,dot(-n,key)),1.65)*(1.0-facing);
         mineral+=vec3(.025,.052,.058)*backScatter*.36;
+        mineral+=vec3(.115,.040,.145)*subsurface*(.055+.055*uEnergy);
+        mineral+=vec3(.018,.085,.105)*subsurface*fresnel*.20;
         float vesselA=pow(.5+.5*sin(vLocal.y*18.0+sin(vLocal.x*9.0)*2.2+vLocal.z*6.0),16.0);
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        mineral+=vec3(.030,.30,.38)*vascular*(.17+.29*uEnergy);
+        mineral+=vec3(.026,.205,.245)*vascular*(.115+.205*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
@@ -901,6 +1079,25 @@
         mineral=mix(mineral,vec3(.020,.010,.032),cortexValley*.38);
         mineral+=vec3(.080,.105,.145)*cortexRidge*.105;
         mineral+=vec3(.025,.135,.165)*cortexRidge*vascular*.44;
+
+        /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
+           plates ride above dark cortical tissue. The plate field is broad,
+           irregular and organic; it is not a metallic armour texture. */
+        float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.42+sin(vLocal.y*4.1)*.38);
+        float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1+sin(vUv.x*8.2)*1.08);
+        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
+        plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
+        float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
+        float facetTone=.90+.14*fract(vFacet*7.13+.19);
+        vec3 ivory=vec3(.24,.31,.33)
+          +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
+          +vec3(.16,.25,.27)*fresnel*.18;
+        ivory+=vec3(.72,.39,.12)*studioRibbonB*.070;
+        mineral*=mix(1.0,facetTone,bodyMask*.42);
+        mineral=mix(mineral,ivory,plateMask*.58);
+        mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
+        mineral+=vec3(.070,.42,.54)*vascular*(.16+.24*uEnergy);
+        mineral+=vec3(.72,.38,.12)*vascular*studioRibbonB*.085;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -938,9 +1135,9 @@
         mineral+=vec3(.42,.47,.46)*lensHighlight*.060;
         mineral+=vec3(.10,.12,.12)*lensLower*.025;
         mineral+=vec3(.003,.009,.011)*lensCore*lensDepth*.020;
-        mineral=mix(mineral,vec3(.006,.009,.010),ribs*.16);
-        mineral+=vec3(.27,.29,.28)*ribs*(.022+.075*keySoft+.065*sideSpec);
-        mineral+=vec3(.018,.058,.064)*ribs*lensOuter*.055;
+        mineral=mix(mineral,vec3(.018,.009,.026),ribs*.24);
+        mineral+=vec3(.090,.120,.145)*ribs*(.018+.055*keySoft+.050*sideSpec);
+        mineral+=vec3(.025,.18,.22)*ribs*lensOuter*(.050+.060*uEnergy);
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
@@ -951,20 +1148,22 @@
         mineral+=vec3(.18,.42,.47)*pulse*.55;
         mineral+=vec3(.58,.64,.62)*pulse*(.10+.24*softboxA);
 
-        vec3 clearGlass=vec3(.002,.008,.010);
-        clearGlass+=vec3(.14,.22,.23)*(.12*ndl+.22*sideLight+.62*fresnel);
-        clearGlass+=vec3(.94,.98,.94)*softboxA*.42;
-        clearGlass+=vec3(.66,.75,.74)*softboxB*.28;
-        clearGlass+=vec3(.30,.52,.54)*edgeTransmission*.72;
-        clearGlass+=vec3(.72,.54,.32)*studioRibbonB*.060;
-        mineral=mix(mineral,clearGlass,glassFinMask*.992);
+        vec3 livingMembrane=vec3(.008,.022,.030);
+        livingMembrane+=vec3(.085,.175,.205)*(.12*ndl+.22*sideLight+.58*fresnel);
+        livingMembrane+=vec3(.66,.87,.88)*softboxA*.24;
+        livingMembrane+=vec3(.32,.52,.57)*softboxB*.18;
+        livingMembrane+=vec3(.10,.52,.62)*edgeTransmission*.58;
+        livingMembrane+=vec3(.22,.075,.30)*subsurface*.34;
+        mineral=mix(mineral,livingMembrane,glassFinMask*.965);
 
-        vec3 armorGlass=vec3(.003,.006,.008);
-        armorGlass+=vec3(.13,.16,.16)*(.14*ndl+.22*sideLight);
-        armorGlass+=vec3(.78,.80,.75)*softboxA*.20;
-        armorGlass+=vec3(.46,.52,.51)*sideSpec*.15;
-        armorGlass+=vec3(.08,.13,.14)*fresnel*.24;
-        mineral=mix(mineral,armorGlass,armorMask*.995);
+        vec3 cartilage=vec3(.020,.012,.031);
+        cartilage+=vec3(.095,.080,.125)*(.18*ndl+.24*sideLight);
+        cartilage+=vec3(.38,.48,.50)*softboxA*.12;
+        cartilage+=vec3(.20,.33,.38)*sideSpec*.10;
+        cartilage+=vec3(.035,.20,.25)*fresnel*.28;
+        cartilage+=vec3(.12,.035,.16)*subsurface*.30;
+        cartilage+=vec3(.020,.18,.22)*vascular*.20;
+        mineral=mix(mineral,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.055,.205,lensRadial);
@@ -984,16 +1183,18 @@
         physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
         physicalLens+=vec3(.050,.36,.48)*lensRing*(.10+.10*uEnergy);
         physicalLens+=vec3(.84,.98,1.00)*lensHot*(.18+.08*uEnergy);
-        physicalLens+=vec3(.18,.82,1.00)*electric*(.30+.30*uEnergy);
-        physicalLens+=vec3(.92,1.00,1.00)*coreFlash*.58;
+        physicalLens+=vec3(.16,.72,.88)*electric*(.34+.28*uEnergy);
+        physicalLens+=vec3(.92,.99,1.00)*coreFlash*.56;
+        physicalLens+=vec3(1.00,.45,.10)*lensRing*(.10+.10*studioRibbonB);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
-        vec3 tendon=vec3(.006,.016,.019)+vec3(.10,.16,.17)*(.14*sideLight+.08*ndl+.42*fresnel);
-        tendon+=vec3(.018,.10,.12)*cableSegment*.030;
-        tendon+=vec3(.82,.87,.82)*sideSpec*.12;
-        tendon+=vec3(.76,.80,.75)*softboxA*.11;
-        tendon+=vec3(.28,.46,.47)*edgeTransmission*.30;
+        vec3 tendon=vec3(.006,.025,.036)+vec3(.07,.18,.24)*(.14*sideLight+.08*ndl+.46*fresnel);
+        tendon+=vec3(.030,.40,.62)*cableSegment*(.08+.08*uEnergy);
+        tendon+=vec3(.78,.96,1.00)*sideSpec*.20;
+        tendon+=vec3(.58,.88,.98)*softboxA*.16;
+        tendon+=vec3(.22,.64,.78)*edgeTransmission*.42;
+        tendon+=vec3(1.00,.48,.12)*studioRibbonB*(.11+.08*cableSegment);
         mineral=mix(mineral,tendon,tendrilMask*.995);
 
         if(uLayer>.5){
@@ -1002,7 +1203,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*3.12),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(mineral*2.82),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1058,7 +1259,7 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.016,.021,.030),vec3(.112,.082,.135),lift);
+        vec3 col=mix(vec3(.020,.032,.052),vec3(.190,.250,.290),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
@@ -1066,10 +1267,10 @@
         col+=vec3(.52,.59,.60)*sideSpec*.105;
         col+=vec3(.72,.75,.72)*softboxA*.194;
         col+=vec3(.44,.50,.51)*softboxB*.118;
-        col+=vec3(.78,.79,.72)*studioRibbonA*.102;
-        col+=vec3(.39,.30,.22)*studioRibbonB*.046;
+        col+=vec3(.84,.92,.93)*studioRibbonA*.135;
+        col+=vec3(.68,.39,.15)*studioRibbonB*.078;
         col+=vec3(.080,.096,.095)*horizonBand*.168;
-        col+=vec3(.080,.145,.158)*fresnel*.36;
+        col+=vec3(.105,.265,.330)*fresnel*.46;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1089,6 +1290,17 @@
         float cortexRidge=pow(max(cortexWave,cortexCross),4.0)*bodyMask;
         col=mix(col,vec3(.020,.010,.032),cortexValley*.34);
         col+=vec3(.070,.098,.135)*cortexRidge*.095;
+        float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.35);
+        float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1);
+        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
+        float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.7)*bodyMask;
+        float facetTone=.91+.13*fract(vFacet*7.13+.19);
+        vec3 ivory=vec3(.23,.30,.32)+vec3(.36,.38,.35)*(.20*ndl+.15*sideLight+.18*softboxA);
+        ivory+=vec3(.68,.35,.11)*studioRibbonB*.065;
+        col*=mix(1.0,facetTone,bodyMask*.40);
+        col=mix(col,ivory,plateMask*.56);
+        col=mix(col,vec3(.004,.008,.014),livingSeam*.52);
+        col+=vec3(.070,.40,.52)*vascular*(.15+.23*uEnergy);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1133,18 +1345,21 @@
         col+=vec3(.16,.38,.44)*pulse*.52;
         col+=vec3(.48,.55,.54)*pulse*(.08+.18*softboxA);
 
-        vec3 clearGlass=vec3(.002,.008,.010)
-          +vec3(.13,.21,.22)*(.12*ndl+.21*sideLight+.58*fresnel)
-          +vec3(.86,.91,.87)*softboxA*.36
-          +vec3(.56,.65,.64)*softboxB*.23;
-        col=mix(col,clearGlass,glassFinMask*.992);
+        float subsurface=pow(max(0.0,dot(-n,key)),1.7)*(1.0-facing);
+        vec3 livingMembrane=vec3(.008,.022,.030)
+          +vec3(.080,.17,.20)*(.12*ndl+.21*sideLight+.55*fresnel)
+          +vec3(.58,.78,.80)*softboxA*.24
+          +vec3(.26,.46,.51)*softboxB*.16
+          +vec3(.20,.07,.28)*subsurface*.28;
+        col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 armorGlass=vec3(.003,.006,.008)
-          +vec3(.12,.15,.15)*(.14*ndl+.21*sideLight)
-          +vec3(.70,.73,.69)*softboxA*.18
-          +vec3(.39,.45,.45)*sideSpec*.14
-          +vec3(.07,.12,.13)*fresnel*.22;
-        col=mix(col,armorGlass,armorMask*.995);
+        vec3 cartilage=vec3(.020,.012,.031)
+          +vec3(.090,.075,.12)*(.16*ndl+.22*sideLight)
+          +vec3(.32,.43,.46)*softboxA*.11
+          +vec3(.17,.30,.34)*sideSpec*.09
+          +vec3(.032,.18,.22)*fresnel*.26
+          +vec3(.11,.032,.15)*subsurface*.27;
+        col=mix(col,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.055,.205,lensRadial);
@@ -1176,7 +1391,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*3.24),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(col*2.92),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1218,11 +1433,23 @@
         float tendrilMask=isTendril*(1.0-vMorph);
 
         float lift=sat(.25+ndl*.45+sideLight*.34);
-        vec3 col=mix(vec3(.015,.020,.029),vec3(.106,.080,.128),lift);
-        col+=vec3(.72,.73,.68)*keySpec*.17;
-        col+=vec3(.40,.46,.46)*sideSpec*.14;
-        col+=vec3(.060,.090,.096)*fresnel*.29;
-        col+=vec3(.014,.017,.018)*max(0.0,-n.y);
+        vec3 col=mix(vec3(.016,.028,.046),vec3(.155,.215,.255),lift);
+        col+=vec3(.74,.77,.73)*keySpec*.16;
+        col+=vec3(.36,.48,.51)*sideSpec*.13;
+        col+=vec3(.050,.15,.19)*fresnel*.31;
+        col+=vec3(.012,.017,.021)*max(0.0,-n.y);
+
+        float vesselA=pow(.5+.5*sin(vLocal.y*17.0+vLocal.x*8.0+vLocal.z*5.0),14.0);
+        float vesselB=pow(.5+.5*sin(vLocal.x*20.0-vLocal.y*6.0+vLocal.z*9.0),17.0);
+        float vascular=max(vesselA,vesselB)*bodyMask;
+        float plateField=.5+.5*sin(vUv.x*16.8+sin(vUv.y*11.8)*1.4);
+        float plateCross=.5+.5*sin(vUv.y*15.2-vUv.x*6.4);
+        float plateMask=smoothstep(.56,.80,max(plateField,plateCross*.84))*bodyMask;
+        vec3 ivory=vec3(.58,.70,.74)+vec3(.34,.31,.24)*(.30*ndl+.18*sideLight);
+        ivory+=vec3(.20,.35,.38)*fresnel*.14;
+        col=mix(col,ivory,plateMask*.70);
+        col+=vec3(.10,.61,.82)*vascular*(.22+.30*uEnergy);
+        col+=vec3(1.00,.43,.09)*plateMask*sideSpec*.055;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1254,17 +1481,26 @@
         col+=vec3(.11,.28,.33)*pulse*.64;
         col+=vec3(.34,.40,.39)*pulse*keySpec*.16;
 
-        vec3 tendon=vec3(.006,.014,.016)+vec3(.075,.12,.13)*(.20*sideLight+.48*fresnel);
-        tendon+=vec3(.34,.39,.37)*sideSpec*.12;
+        float cableSegment=pow(.5+.5*cos(vUv.y*26.0+vUv.x*9.0+uTime*.20),12.0);
+        vec3 tendon=vec3(.006,.024,.034)+vec3(.060,.17,.23)*(.20*sideLight+.50*fresnel);
+        tendon+=vec3(.020,.40,.62)*cableSegment*(.08+.08*uEnergy);
+        tendon+=vec3(.42,.72,.82)*sideSpec*.18;
+        tendon+=vec3(1.00,.42,.08)*sideSpec*cableSegment*.060;
         col=mix(col,tendon,tendrilMask*.995);
 
-        vec3 simpleGlass=vec3(.002,.007,.009)+vec3(.10,.16,.17)*(.20*ndl+.50*fresnel)+vec3(.42,.46,.43)*keySpec*.12;
-        col=mix(col,simpleGlass,isGlassFin*.985);
-        col=mix(col,simpleGlass*.82,isArmor*.990);
+        float subsurface=pow(max(0.0,dot(-n,key)),1.7)*(1.0-facing);
+        vec3 simpleMembrane=vec3(.007,.020,.028)+vec3(.070,.16,.19)*(.20*ndl+.48*fresnel)+vec3(.32,.48,.50)*keySpec*.10;
+        simpleMembrane+=vec3(.16,.055,.22)*subsurface*.24;
+        col=mix(col,simpleMembrane,isGlassFin*.965);
+        vec3 simpleCartilage=vec3(.018,.011,.029)+vec3(.075,.065,.105)*(.20*ndl+.34*sideLight)+vec3(.025,.15,.19)*fresnel*.25;
+        simpleCartilage+=vec3(.10,.030,.14)*subsurface*.24;
+        col=mix(col,simpleCartilage,isArmor*.985);
 
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.06,.21,lensRadial);
-        vec3 optical=vec3(.012,.035,.043)+vec3(.040,.24,.30)*lensInner+vec3(.72,.84,.82)*keySpec*.17+vec3(.080,.18,.21)*fresnel*.15;
+        float electric=pow(.5+.5*sin(atan(vUv.y-.5,vUv.x-.5)*10.0+lensRadial*64.0-uTime*1.8),14.0)*lensInner;
+        vec3 optical=vec3(.012,.035,.043)+vec3(.040,.27,.34)*lensInner+vec3(.72,.84,.82)*keySpec*.17+vec3(.080,.20,.24)*fresnel*.15;
+        optical+=vec3(.12,.64,.82)*electric*(.18+.20*uEnergy);
         col=mix(col,optical,isLensMesh*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
@@ -1282,7 +1518,7 @@
       ? softwareFragmentSource
       : (mobilePhysical ? constrainedFragmentSource : fullFragmentSource);
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
-      ? 'r1716-software-obsidian-lite-physical-lens'
+      ? 'r1724-software-living-crystal-cyan-indigo-lite'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
     root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-adaptive-resolution-zero-idle';
     root.dataset.fxNativeMagVisualR1716='mobile-normal-topology-physical-shader-photoreal-60fps-first';
@@ -1296,12 +1532,29 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
+    root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
+    root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
+    root.dataset.fxNativeMagOrganismR1724='asymmetric-living-crystal-rhombic-cortical-silhouette';
+    root.dataset.fxNativeMagFacetR1724='polished-crystal-planes-preserved-with-hybrid-normals';
+    root.dataset.fxNativeMagPaletteR1724='pearl-cyan-indigo-warm-studio-rim';
+    root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
+    root.dataset.fxNativeMagSilhouetteR1724='asymmetric-living-crystal-rhombic-body-cortical-lobes';
+    root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
+    root.dataset.fxNativeMagAnatomyR1724='cortical-lobes-living-membranes-energy-core-tendrils-one-draw';
+    root.dataset.fxNativeMagTopologyR1724='winding-safe-rhombic-living-crystal-anatomy';
+    root.dataset.fxNativeMagLookR1724='pearl-cortical-tissue-cyan-energy-indigo-depth-warm-studio-rim';
+    root.dataset.fxNativeMagFallbackR1724='same-living-crystal-look-on-software-renderer';
+    root.dataset.fxNativeMagPhysiologyR1723='differentiated-attention-response-activation-heartbeat-curiosity-stability-renewal';
+    root.dataset.fxNativeMagPhysiologyApiR1723='public-physiology-event-habitat-sync';
+    root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
+    root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
+    root.dataset.fxCorePhysiologyApiR1723='public-differentiated-physiology-event-v1';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
       : 'hardware-photographic-material-preserved';
     root.dataset.fxNativeMagVisualR1697=softwareRenderer
-      ? 'software-smoky-obsidian-readable-facets-physical-lens-no-glow-cheat'
+      ? 'software-cortical-tissue-membrane-cartilage-energy-organ'
       : 'hardware-photographic-material-preserved';
 
     let pendingProgram;
@@ -1380,14 +1633,16 @@
       delayed.add(timer);
       return timer;
     };
-    const initialShape='crystal';
-    root.dataset.fxCoreShapeR337='crystal';
-    root.dataset.fxCoreDefaultShapeR1401='irregular-crystal';
+    const initialShape='organism';
+    root.dataset.fxCoreShapeR337='organism';
+    root.dataset.fxCoreDefaultShapeR1401='organism';
+    root.dataset.fxCoreCanonicalIdentityR1723='one-living-organism-no-alternate-shapes';
+    root.dataset.fxCoreShapeModeR413='single-living-organism-fixed-anatomy-r1723';
     let disposed=false,contextLost=false,visible=true,paused=false;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=constrained;
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
-    let morph=initialShape==='sphere'?1:0,targetMorph=morph;
+    let morph=0,targetMorph=0;
     let rotationX=softwareRenderer?-.115:-.090,rotationY=softwareRenderer?-.385:-.235,rotationZ=.024;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
@@ -1467,44 +1722,51 @@
       targetBreath=Math.max(targetBreath,.38+value*.48);
       schedule(reduced.matches?1:frames);
     }
-    function shapeName(){return 'crystal';}
+    function shapeName(){return 'organism';}
     function publishShape(source='renderer'){
-      /* R1711: one organism, one persistent body. Existing "crystal" tokens are
-         compatibility-only so old controls/icons keep working without creating
-         a second visual identity. */
-      root.dataset.fxCoreShapeR337='crystal';
-      root.dataset.fxCoreTargetShape='crystal';
-      root.dataset.fxCoreShape='crystal';
+      root.dataset.fxCoreShapeR337='organism';
+      root.dataset.fxCoreTargetShape='organism';
+      root.dataset.fxCoreShape='organism';
       root.dataset.fxCoreMorph='0.000';
       root.dataset.fxCoreMorphSource=source;
-      root.dataset.fxCoreMorphEngine='single-living-organism-fixed-topology-r1711';
+      root.dataset.fxCoreMorphEngine='single-living-organism-fixed-topology-r1723';
       root.dataset.fxCoreLivingFormR1711='single-organism';
+      root.dataset.fxCoreLivingFormR1723='canonical-organism';
       stage.dataset.shape='organism';
     }
     function setMorph(value,source='api-morph',announce=true){
       const requested=clamp(Number(value)||0,0,1);
       targetMorph=0;
-      if(reduced.matches)morph=0;
+      morph=0;
       root.dataset.fxCoreRequestedMorphR1711=requested.toFixed(3);
+      root.dataset.fxCoreLegacyShapeRequestR1723=requested>.5?'sphere':'crystal';
       publishShape(source);
       const cinematicBirth=/^r533-/.test(source);
       boost(requested>.5?.88:.72,cinematicBirth?1:(mobile?3:5));
       if(announce)dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{
-        shape:'crystal',
-        requestedShape:requested>.5?'sphere':'crystal',
+        shape:'organism',
+        requestedShape:'organism',
+        legacyRequestedShape:requested>.5?'sphere':'crystal',
         visualForm:'single-organism',
         source,
-        revision:'r1711',
+        revision:'r1723',
         renderer:VERSION,
         geometry:'single-fixed-living-3d-volume'
       }}));
       return 0;
     }
-    function setShape(shape,source='api'){return setMorph(shape==='sphere'||shape===1||shape===true?1:0,source,true);}
+    function setShape(shape,source='api'){
+      const legacyRequested=shape==='sphere'||shape===1||shape===true?1:0;
+      return setMorph(legacyRequested,source,true);
+    }
     function toggleShape(source='interaction'){
       startSurfacePulse(String(source||'interaction')+'-living-response');
       boost(.86,mobile?4:6);
       publishShape(source);
+      dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{
+        shape:'organism',requestedShape:'organism',visualForm:'single-organism',
+        source,revision:'r1723',renderer:VERSION,geometry:'single-fixed-living-3d-volume'
+      }}));
       return 0;
     }
     function rotateBy(x,y,source='api-rotate'){
@@ -1921,9 +2183,59 @@
       targetRotationX=clamp(targetRotationX+vertical*.040,-1.02,1.02);
       boost(.66,mobile?2:4);
     }
-    function signalShape(shape,source){
-      if(performance.now()<shapeLockUntil)return;
-      setShape(shape,source);
+    function signalPhysiology(kind,source){
+      const state=String(kind||'stimulus');
+      root.dataset.fxCorePhysiologyR1723=state;
+      if(state==='attention'){
+        targetEnergy=Math.max(targetEnergy,.76);
+        targetBreath=Math.max(targetBreath,.46);
+        targetRotationY+=tx*.012;
+        targetRotationX=clamp(targetRotationX-ty*.008,-1.02,1.02);
+      }else if(state==='response'){
+        targetEnergy=Math.max(targetEnergy,.94);
+        targetBreath=Math.max(targetBreath,.74);
+        angularVelocityY+=.004;
+      }else if(state==='activation'){
+        targetEnergy=Math.max(targetEnergy,.98);
+        targetBreath=Math.max(targetBreath,.78);
+        targetRotationZ=clamp(targetRotationZ+.010,-.16,.16);
+      }else if(state==='heartbeat'){
+        targetEnergy=Math.max(targetEnergy,.84);
+        targetBreath=Math.max(targetBreath,.96);
+      }else if(state==='curiosity'){
+        targetEnergy=Math.max(targetEnergy,.78);
+        targetBreath=Math.max(targetBreath,.54);
+        targetRotationY+=.026;
+      }else if(state==='stability'){
+        targetEnergy=Math.max(targetEnergy,.58);
+        targetBreath=Math.max(targetBreath,.26);
+        targetRotationZ*=.55;
+      }else if(state==='renewal'){
+        targetEnergy=Math.max(targetEnergy,.96);
+        targetBreath=Math.max(targetBreath,.90);
+        targetRotationY+=.020;
+      }else if(state==='system-attention'){
+        targetEnergy=Math.max(targetEnergy,.72);
+        targetBreath=Math.max(targetBreath,.40);
+        targetRotationX=clamp(targetRotationX-.018,-1.02,1.02);
+      }else{
+        targetEnergy=Math.max(targetEnergy,.66);
+        targetBreath=Math.max(targetBreath,.36);
+      }
+      root.dataset.fxCorePhysiologyEnergyR1723=targetEnergy.toFixed(2);
+      root.dataset.fxCorePhysiologyBreathR1723=targetBreath.toFixed(2);
+      dispatchEvent(new CustomEvent('formatx:organismphysiology',{detail:{
+        kind:state,
+        source:String(source||state),
+        energy:targetEnergy,
+        breath:targetBreath,
+        x:tx,
+        y:ty,
+        revision:'r1723'
+      }}));
+      startSurfacePulse(String(source||state)+'-physiology');
+      setShape('organism',source||state||'physiology');
+      schedule(mobile?3:5);
     }
     function onCinematicScene(event){
       const detail=event.detail||{};
@@ -1954,17 +2266,17 @@
     listen(window,'scroll',onScroll,{passive:true});
     listen(window,'resize',()=>{resize();boost(.30,mobile?1:2);startSurfacePulse('resize');},{passive:true});
     listen(window,'orientationchange',()=>{resize();boost(.52,mobile?2:3);startSurfacePulse('orientation');},{passive:true});
-    listen(window,'formatx:organismpanelopen',()=>signalShape('sphere','organism-listening'),{passive:true});
-    listen(window,'formatx:organismresponse',()=>signalShape('crystal','organism-response'),{passive:true});
-    listen(window,'formatx:open-live-os',()=>signalShape('sphere','live-os-open'),{passive:true});
-    listen(window,'formatx:loop',()=>{signalShape('crystal','site-loop');boost(.92,mobile?4:6);},{passive:true});
-    listen(window,'formatx:menustatechange',event=>{boost(event.detail?.open ? .76 : .52,mobile?2:4);},{passive:true});
-    listen(window,'formatx:languagechange',()=>boost(.62,mobile?2:3),{passive:true});
+    listen(window,'formatx:organismpanelopen',()=>signalPhysiology('attention','organism-listening'),{passive:true});
+    listen(window,'formatx:organismresponse',()=>signalPhysiology('response','organism-response'),{passive:true});
+    listen(window,'formatx:open-live-os',()=>signalPhysiology('system-attention','live-os-open'),{passive:true});
+    listen(window,'formatx:loop',()=>{signalPhysiology('renewal','site-loop');boost(.92,mobile?4:6);},{passive:true});
+    listen(window,'formatx:menustatechange',event=>signalPhysiology(event.detail?.open?'attention':'stability',event.detail?.open?'menu-open':'menu-close'),{passive:true});
+    listen(window,'formatx:languagechange',()=>signalPhysiology('curiosity','language-change'),{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
-    listen(window,'formatx:storychapter',()=>boost(.64,mobile?2:4),{passive:true});
-    listen(document,'input',()=>boost(.34,mobile?1:2),{passive:true});
-    listen(document,'change',()=>boost(.42,mobile?1:2),{passive:true});
-    listen(document,'submit',()=>{boost(.78,mobile?3:5);startSurfacePulse('form-submit');},{passive:true});
+    listen(window,'formatx:storychapter',()=>signalPhysiology('curiosity','story-chapter'),{passive:true});
+    listen(document,'input',()=>{targetEnergy=Math.max(targetEnergy,.60);targetBreath=Math.max(targetBreath,.30);schedule(mobile?1:2);},{passive:true});
+    listen(document,'change',()=>signalPhysiology('activation','form-change'),{passive:true});
+    listen(document,'submit',()=>signalPhysiology('activation','form-submit'),{passive:true});
     listen(window,'pointerenter',()=>boost(.22,mobile?1:2),{passive:true});
     listen(window,'pointerleave',()=>boost(.16,mobile?1:2),{passive:true});
     listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
@@ -1976,12 +2288,12 @@
       if(!(event.target instanceof Element))return;
       const action=event.target.closest('a,button,[role="button"]');
       if(!action||action.closest('.fx-reference-mag-button'))return;
-      if(action.matches('.fx-reference-ask,[data-fx-organism-question]'))signalShape('sphere','site-question');
-      else if(action.matches('a[href*="download"],[data-release-download]'))signalShape('crystal','release-action');
+      if(action.matches('.fx-reference-ask,[data-fx-organism-question]'))signalPhysiology('attention','site-question');
+      else if(action.matches('a[href*="download"],[data-release-download]'))signalPhysiology('activation','release-action');
       boost(action.matches('a[href*="download"],[data-release-download]') ? .92 : .62,mobile?2:4);
     },{passive:true});
     listen(document,'focusin',event=>{
-      if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))boost(.48,mobile?1:2);
+      if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))signalPhysiology('attention','focus');
     },{passive:true});
     listen(canvas,'webglcontextlost',event=>{
       event.preventDefault();contextLost=true;if(raf)cancelAnimationFrame(raf);raf=0;
@@ -2000,13 +2312,16 @@
       scheduleSurfacePulse();
     },{threshold:[0,.04]});
     io.observe(stage);
-    const sectionShapes={hero:'crystal',experience:'sphere',capabilities:'crystal',pricing:'sphere',system:'crystal',resources:'sphere'};
+    const sectionPhysiology={
+      hero:'homeostasis',experience:'attention',capabilities:'activation',
+      pricing:'heartbeat',system:'stability',resources:'curiosity'
+    };
     const organObserver=new IntersectionObserver(entries=>{
       const candidate=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
       const id=candidate?.target?.id;
       if(!id||id===activeOrgan)return;
       activeOrgan=id;root.dataset.fxCoreActiveOrgan=id;cinematic.activeOrgan=id;
-      if(sectionShapes[id])signalShape(sectionShapes[id],'site-section');
+      signalPhysiology(sectionPhysiology[id]||'attention','site-section-'+id);
       boost(.54,mobile?2:3);
     },{rootMargin:'-22% 0px -54% 0px',threshold:[0,.15,.35,.6]});
     document.querySelectorAll('main > section[id],main section.scene[id]').forEach(section=>organObserver.observe(section));
@@ -2027,10 +2342,12 @@
       version:VERSION,
       revision:REVISION,
       renderer:'single-webgl-crystal-organism-r326',
-      livingForm:'single-photoreal-organism-r1711',
-      material:'biomechanical-gunmetal-living-core-r614',
-      geometry:'armored-four-lobe-core-with-native-tendrils-r614',
-      referenceGeometry:'unified-armored-diamond-pod-r669',
+      canonicalRenderer:'single-webgl-living-organism-r326',
+      canonicalRevision:CANONICAL_REVISION,
+      livingForm:'single-photoreal-organism-r1723',
+      material:'cortical-bioceramic-living-tissue-r1723',
+      geometry:'cortical-cellular-organism-with-native-tendrils-r1723',
+      referenceGeometry:'single-cortical-living-organism-r1723',
       referenceGeometryR730:'compact-dark-armored-pod-eight-radial-native-tendrils',
       referenceGeometryR1080:'tall-rhombic-armored-pod-silver-crown-large-optical-core-long-segmented-tendrils',
       referenceGeometryR1100:'single-draw-rhombic-pod-real-silver-crown-shoulders-dark-jaw',
@@ -2050,6 +2367,7 @@
       genome:'native-double-helix-energy-lattice-r614',
       scheduler:'interaction-bursts-idle-zero-frame-r441',
       pulse,
+      physiology:(kind,source)=>signalPhysiology(String(kind||'response'),String(source||'api-physiology')),
       surfacePulse:source=>startSurfacePulse(typeof source==='string'?source:'api'),
       surfacePulseDurationMs:SURFACE_PULSE_WINDOW_MS,
       setMorph:(value,source)=>setMorph(value,source||'api-morph',true),
@@ -2079,11 +2397,12 @@
     root.dataset.fxCoreReferenceLock=READY;
     root.dataset.fxCoreReal3d=READY;
     root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
+    root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreCapabilityTierR620=constrainedMobile?'mobile-constrained-one-pass':constrained?'desktop-constrained-two-pass':mobile?'mobile-full-two-pass':'desktop-full-three-pass';
     root.dataset.fxCoreCapabilityR620=`${hardwareConcurrency}c-${deviceMemory}gb`;
-    root.dataset.fxCoreMaterial='biomechanical-gunmetal-living-core-r614';
-    root.dataset.fxCoreGeometry='armored-four-lobe-core-with-native-tendrils-r614';
-    root.dataset.fxCoreGenesisMagR614='dna-to-cell-to-biomechanical-native-mag';
+    root.dataset.fxCoreMaterial='cortical-bioceramic-living-tissue-r1723';
+    root.dataset.fxCoreGeometry='cortical-cellular-organism-with-native-tendrils-r1723';
+    root.dataset.fxCoreGenesisMagR614='dna-to-cell-to-cortical-living-organism-r1723';
     root.dataset.fxCoreNativeTendrilsR614=String(geometry.tendrils||0);
     root.dataset.fxCoreGenomeR614='native-double-helix-energy-lattice';
     root.dataset.fxCoreGenomeContinuityR614='r533-dna-genesis-to-same-r326-native-core';
@@ -2091,9 +2410,10 @@
     root.dataset.fxCoreGeometryTopology=geometry.topology;
     root.dataset.fxCoreVertexCount=String(geometry.count);
     root.dataset.fxCoreDimension='native-closed-3d-volume-r413';
-    root.dataset.fxCoreMorphGeometryR413='single-fixed-living-organism-topology-r1711';
-    root.dataset.fxCoreMorphNormalsR413='single-organism-photographic-surface-normals-r1711';
+    root.dataset.fxCoreMorphGeometryR413='single-fixed-living-organism-topology-r1723';
+    root.dataset.fxCoreMorphNormalsR413='single-organism-photographic-surface-normals-r1723';
     root.dataset.fxCoreLivingIdentityR1711='same-organism-intro-to-site-no-form-swap';
+    root.dataset.fxCoreLivingIdentityR1723='canonical-organism-cortical-cellular-neural-no-alternate-form';
     root.dataset.fxCoreReferenceGeometry='armored-four-lobe-core-native-tendrils-r614';
     root.dataset.fxCoreReferenceGeometryR669='unified-armored-diamond-pod-silver-crown-cyan-optical-well-native-tendrils';
     root.dataset.fxCoreReferenceGeometryR673='convex-compact-armored-pod-no-star-silhouette';

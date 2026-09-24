@@ -22,6 +22,8 @@
   let desktopGuardRetryTimer = 0;
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
+  let pendingDesktopSourceTop = null;
+  let canonicalLandingSourceTop = 0;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
@@ -51,6 +53,16 @@
   root.dataset.fxScrollSnap = 'disabled';
   root.dataset.fxMobileScrollMode = 'native-momentum-loop';
   root.dataset.fxInitialHeroGuard = 'pending';
+  root.dataset.fxLoopEndIntentPolicyR1724='cached-end-latched-through-idle-reflow';
+  root.dataset.fxLoopDesktopSettleR1724='scrollend-primary-idle-timer-fallback';
+  root.dataset.fxLoopVisualContinuityR1724='scroll-frame-relative-authoritative-through-reflow';
+  root.dataset.fxLoopSourceTopContinuityR1724='scroll-frame-source-top-authoritative-through-idle-reflow';
+  root.dataset.fxLoopSourceTopContinuityR1725='hero-local-loop-origin-zero-active-scroll-offsetparent-proof';
+  root.dataset.fxLoopLandingSpaceR1725='hero-local-coordinate-space';
+  root.dataset.fxLoopGestureGeometryR1725='single-live-read-at-desktop-scroll-start-then-cache';
+  root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
+  root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
+  root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -380,17 +392,27 @@
     const sourceTop = sourceHero.offsetTop;
     const sourceHeight = sourceHero.offsetHeight;
     const documentEnd = Math.max(0, document.documentElement.scrollHeight - viewportHeight);
+    const desiredThreshold = bridgeTop + Math.max(36, Math.min(viewportHeight * .18, 180));
+    /* R1724: the bridge may begin inside the final viewport, so bridgeTop can
+       legitimately be greater than the maximum scroll position. Never clamp
+       the trigger back up to an unreachable bridgeTop; use the last reachable
+       document coordinate instead. bridgeRelative() then resolves this case to
+       relative=0, which lands on the real hero without a dead scroll zone. */
+    const reachableLimit = Math.max(0, documentEnd - 2);
+    const reachableThreshold = Math.max(0, Math.min(desiredThreshold, reachableLimit));
 
     bridge.style.setProperty('--fx-loop-source-height', `${Math.round(sourceHeight)}px`);
 
     loopGeometry = Object.freeze({
       ready: true,
       bridgeTop,
-      bridgeThreshold: bridgeTop + Math.max(36, Math.min(viewportHeight * .18, 180)),
+      bridgeThreshold: reachableThreshold,
       sourceTop,
       sourceHeight,
       documentEnd,
     });
+    root.dataset.fxLoopReachableThresholdR1723 = String(Math.round(reachableThreshold));
+    root.dataset.fxLoopReachableThresholdR1724 = documentEnd < bridgeTop ? 'final-viewport-safe' : 'bridge-relative-safe';
     return true;
   }
 
@@ -410,6 +432,7 @@
     geometryObserver = new ResizeObserver(() => scheduleGeometryRefresh());
     const main = document.getElementById('main-content');
     const footer = document.querySelector('body > .site-footer');
+    if (document.body) geometryObserver.observe(document.body);
     if (main) geometryObserver.observe(main);
     if (footer) geometryObserver.observe(footer);
     geometryObserver.observe(sourceHero);
@@ -448,6 +471,7 @@
     bridge.appendChild(mirror);
     footer.insertAdjacentElement('afterend', bridge);
     root.dataset.fxLoopBridge = 'ready-v3';
+    captureCanonicalLandingOrigin();
 
     // Geometry is deliberately sampled outside the scroll hot path. This avoids
     // style writes followed by offset/scrollHeight reads on every animation frame.
@@ -466,16 +490,29 @@
     return Math.max(0, Math.min(y - geometry.bridgeTop, Math.max(0, geometry.sourceHeight - 2)));
   }
 
+  function captureCanonicalLandingOrigin() {
+    if (!sourceHero || !sourceHero.isConnected) return;
+    /* offsetTop is sampled only after scrolling settles and while the real hero
+       is still the active scene. This prevents active-scroll offsetParent/layout
+       changes from contaminating the loop destination. */
+    if (scrollY > Math.max(innerHeight * 1.10, sourceHero.offsetHeight + 160)) return;
+    const measured = Number(sourceHero.offsetTop);
+    if (!Number.isFinite(measured)) return;
+    canonicalLandingSourceTop = Math.max(0, measured);
+    root.dataset.fxLoopCanonicalSourceTopR1725 = String(Math.round(canonicalLandingSourceTop));
+  }
+
   function markIdle() {
     clearTimeout(activityTimer);
     activityTimer = 0;
     root.dataset.fxScrollActivity = 'idle';
     root.classList.remove('fx-page-scrolling');
+    captureCanonicalLandingOrigin();
     if (isMobileFlow()) scheduleMobileTransfer();
     else commitDesktopTransfer();
   }
 
-  function landingTarget(relative) {
+  function landingTarget(relative, sourceTopOverride=null) {
     let geometry = loopGeometry;
     if (!geometry.ready) {
       refreshGeometry();
@@ -483,21 +520,22 @@
     }
     if (!geometry.ready) return null;
     const bounded = Math.max(0, Math.min(relative, Math.max(0, geometry.sourceHeight - 2)));
-    return geometry.sourceTop + bounded;
+    const sourceTop=Number.isFinite(sourceTopOverride)?sourceTopOverride:geometry.sourceTop;
+    return Math.max(0,sourceTop + bounded);
   }
 
-  function landAt(relative) {
-    const target = landingTarget(relative);
+  function landAt(relative, sourceTopOverride=null) {
+    const target = landingTarget(relative,sourceTopOverride);
     if (target == null) return;
     window.scrollTo({ top: target, left: 0, behavior: 'auto' });
     root.dataset.fxLoopLanding = String(Math.round(target));
   }
 
-  function finishLanding(relative) {
+  function finishLanding(relative, sourceTopOverride=null) {
     cancelAnimationFrame(landingFrame);
-    landAt(relative);
+    landAt(relative,sourceTopOverride);
     landingFrame = requestAnimationFrame(() => {
-      landAt(relative);
+      landAt(relative,sourceTopOverride);
       landingFrame = requestAnimationFrame(() => {
         root.classList.remove('fx-seamless-loop-transfer');
         root.dataset.fxInfiniteInput = 'native';
@@ -507,16 +545,17 @@
     });
   }
 
-  function performTransfer(relative, source) {
+  function performTransfer(relative, source, sourceTopOverride=null) {
     if (relative == null || Date.now() < transferLockedUntil) return false;
     if (document.body.classList.contains('fx-organism-panel-open')) return false;
-    if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return false;
+    if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running') || root.classList.contains('fx-section-navigation-active')) return false;
 
     transferLockedUntil = Date.now() + LOOP_GUARD_MS;
     clearTimeout(desktopGuardRetryTimer);
     desktopGuardRetryTimer = 0;
     pendingMobileRelative = null;
     pendingDesktopRelative = null;
+    pendingDesktopSourceTop = null;
     clearTimeout(mobileSettleTimer);
     mobileSettleTimer = 0;
     root.classList.add('fx-seamless-loop-transfer');
@@ -527,9 +566,9 @@
     root.dataset.fxLoopSource = source;
 
     dispatchEvent(new CustomEvent('formatx:loop', {
-      detail: { count: loopCount, source, relative }
+      detail: { count: loopCount, source, relative, sourceTop:sourceTopOverride }
     }));
-    finishLanding(relative);
+    finishLanding(relative,sourceTopOverride);
     return true;
   }
 
@@ -565,7 +604,13 @@
   }
 
   function commitDesktopTransfer() {
-    if (isMobileFlow() || pendingDesktopRelative == null) return;
+    if (isMobileFlow()) return;
+    if(root.classList.contains('fx-section-navigation-active')){
+      pendingDesktopRelative=null;
+      pendingDesktopSourceTop=null;
+      root.dataset.fxLoopLandingState='section-navigation';
+      return;
+    }
     const guardRemaining = transferLockedUntil - Date.now();
     if (guardRemaining > 0) {
       clearTimeout(desktopGuardRetryTimer);
@@ -579,24 +624,85 @@
     /* R1715: desktop now mirrors the mobile idle contract. Re-measure only
        after scrolling has settled so late CSS/fonts/hero geometry cannot leave
        the cached bridge threshold stale, while the scroll hot path stays read-free. */
+    const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
     refreshGeometry();
-    const relative = bridgeRelative();
+    /* R1725d — idle geometry is authoritative once layout has settled.
+       A scroll-frame relative value may have been measured against an older
+       bridgeTop and can therefore be hundreds of pixels stale. Use the fresh
+       bridge-relative coordinate first; retain the cached intent only when the
+       refreshed bridge is no longer reachable at the document end. */
+    let relative=bridgeRelative();
+    if(relative!=null){
+      root.dataset.fxLoopDesktopRecoveryR1724='fresh-idle-relative-authoritative';
+    }else if(cachedRelative!=null && loopGeometry.ready && scrollY>=Math.max(0,loopGeometry.documentEnd-4)){
+      relative=Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)));
+      root.dataset.fxLoopDesktopRecoveryR1724='cached-end-intent-fallback';
+    }else{
+      root.dataset.fxLoopDesktopRecoveryR1724='no-boundary';
+    }
     root.dataset.fxLoopDesktopGeometryR1715 = loopGeometry.ready ? 'fresh-idle-sample' : 'unavailable';
+    root.dataset.fxLoopDesktopRecoveryR1723 = 'fresh-idle-relative-with-cached-end-fallback';
     if (relative == null) {
       pendingDesktopRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
       return;
     }
     pendingDesktopRelative = relative;
-    performTransfer(relative, 'visual-bridge-desktop-idle');
+    /* R1725 — the bridge-relative coordinate remains authoritative, but the
+       destination hero origin must come from the fresh idle geometry. A cached
+       sourceTop can belong to pre-font/pre-layout geometry and creates a visible
+       vertical jump on the next cycle. */
+    /* R1725c — the reference mirror contains the hero scene itself, not the
+       document chrome preceding #main-content. Its local y=0 therefore maps to
+       window scroll y=0. Adding offsetParent/document chrome here duplicates
+       the top offset and creates the exact visible 225px jump caught by CI. */
+    const heroLoopOrigin=0;
+    root.dataset.fxLoopDesktopSourceTopR1724='0';
+    root.dataset.fxLoopDesktopLandingR1725='cached-relative-hero-local-origin';
+    performTransfer(relative,'visual-bridge-desktop-idle-r1725e',heroLoopOrigin);
   }
 
   function transferIfNeeded() {
     scrollFrame = 0;
+    if(root.classList.contains('fx-section-navigation-active')){
+      pendingDesktopRelative=null;
+      pendingDesktopSourceTop=null;
+      pendingMobileRelative=null;
+      root.dataset.fxLoopLandingState='section-navigation';
+      return;
+    }
 
-    // Read the cached transfer position before mutating classes/data attributes.
-    // The scroll frame therefore contains no layout-dependent DOM reads.
-    const relative = bridgeRelative();
+    const startingDesktopGesture=!isMobileFlow() && root.dataset.fxScrollActivity!=='scrolling';
+    // Normal frames stay cache-only. At the first desktop scroll frame we allow
+    // one live bridge read so late font/Guardian/layout shifts cannot poison the
+    // entire gesture with an obsolete bridgeTop. This is a single read per
+    // gesture, not a per-frame layout query.
+    let relative = bridgeRelative();
+    const cachedGeometry=loopGeometry;
+    if(startingDesktopGesture && bridge?.isConnected){
+      const liveRect=bridge.getBoundingClientRect();
+      const liveBridgeTop=scrollY+liveRect.top;
+      const liveRelative=scrollY-liveBridgeTop;
+      const liveSourceHeight=Math.max(0,cachedGeometry.sourceHeight||sourceHero?.offsetHeight||0);
+      if(liveRelative>=-2){
+        relative=Math.max(0,Math.min(liveRelative,Math.max(0,liveSourceHeight-2)));
+        root.dataset.fxLoopGestureGeometryR1725='live-first-frame-relative-captured';
+        root.dataset.fxLoopGestureRelativeR1725=String(Math.round(relative));
+      }
+    }
+    /* R1724 — preserve the user's boundary intent across late layout reflow.
+       If the scroll reached the cached document end, latch the corresponding
+       bridge-relative position so an image/font/Guardian reflow cannot cancel
+       the already-entered seamless-loop gesture before idle commit. */
+    const cachedEndIntent=cachedGeometry.ready
+      && scrollY>=Math.max(0,cachedGeometry.documentEnd-4);
+    if(relative==null&&cachedEndIntent){
+      relative=Math.max(0,Math.min(
+        scrollY-cachedGeometry.bridgeTop,
+        Math.max(0,cachedGeometry.sourceHeight-2)
+      ));
+      root.dataset.fxLoopEndIntentR1724='latched-cached-end';
+    }
 
     root.dataset.fxScrollActivity = 'scrolling';
     root.classList.add('fx-page-scrolling');
@@ -621,6 +727,7 @@
     }
 
     pendingDesktopRelative = relative;
+    pendingDesktopSourceTop = cachedGeometry.sourceTop;
     root.dataset.fxInfiniteInput = 'native-wheel';
     root.dataset.fxLoopLandingState = 'waiting-wheel-idle';
   }
@@ -663,9 +770,33 @@
   }
 
   function onScrollEnd() {
-    if (!isMobileFlow() || touchActive) return;
-    clearTimeout(mobileSettleTimer);
-    mobileSettleTimer = window.setTimeout(commitMobileTransfer, 0);
+    if (touchActive) return;
+    if (isMobileFlow()) {
+      clearTimeout(mobileSettleTimer);
+      mobileSettleTimer = window.setTimeout(commitMobileTransfer, 0);
+      return;
+    }
+
+    /* R1724 — desktop browsers expose scrollend as the strongest signal that
+       the native scroll gesture has really settled. Re-sample geometry here,
+       outside the scroll hot path, preserve any cached bridge-relative intent,
+       then commit immediately. The existing ACTIVITY_IDLE_MS timer remains the
+       compatibility fallback for browsers without scrollend. */
+    clearTimeout(activityTimer);
+    activityTimer = 0;
+    root.dataset.fxScrollActivity = 'idle';
+    root.classList.remove('fx-page-scrolling');
+    const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
+    if(cachedRelative==null){
+      refreshGeometry();
+      const liveRelative=bridgeRelative();
+      if(liveRelative!=null)pendingDesktopRelative=liveRelative;
+      root.dataset.fxLoopDesktopScrollEndRecoveryR1724=liveRelative==null?'no-live-boundary':'fresh-relative-no-cache';
+    }else{
+      root.dataset.fxLoopDesktopScrollEndRecoveryR1724='cached-relative-preserved';
+    }
+    root.dataset.fxLoopDesktopScrollEndR1724=Number.isFinite(pendingDesktopRelative)?'boundary-commit':'no-boundary';
+    commitDesktopTransfer();
   }
 
   function onPanelOpen(event) {
@@ -722,6 +853,20 @@
   addEventListener('scrollend', onScrollEnd, { passive: true });
   addEventListener('resize', onResize, { passive: true });
   addEventListener('load', scheduleGeometryRefresh, { once: true, passive: true });
+  addEventListener('formatx:loopgeometryrefresh',event=>{
+    const hadDesktopIntent=!isMobileFlow()&&Number.isFinite(pendingDesktopRelative);
+    refreshGeometry();
+    if(hadDesktopIntent){
+      const corrected=bridgeRelative();
+      if(corrected!=null){
+        pendingDesktopRelative=corrected;
+        root.dataset.fxLoopPendingCorrectionR1724='fresh-geometry-relative';
+      }else{
+        root.dataset.fxLoopPendingCorrectionR1724='preserved-cached-intent';
+      }
+    }
+    root.dataset.fxLoopGeometryEventR1724=String(event.detail?.source||'external-refresh');
+  },{passive:true});
   addEventListener('pageshow', () => scheduleRepair(true), { passive: true });
   addEventListener('formatx:organisminterfaceready', () => scheduleRepair(true));
   addEventListener('formatx:organismpanelopen', onPanelOpen);

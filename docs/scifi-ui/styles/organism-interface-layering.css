@@ -157,9 +157,12 @@ html.fx-organism-menu-open body {
   position: fixed !important;
   inset: 0 !important;
   z-index: 1200 !important;
-  width: 100vw !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
   height: 100dvh !important;
   min-width: 0 !important;
+  overflow-x: hidden !important;
   padding: clamp(104px, 14vh, 150px) clamp(24px, 8vw, 150px) clamp(42px, 8vh, 90px) !important;
   display: grid !important;
   grid-template-columns: 1fr !important;
@@ -445,3 +448,5 @@ html.fx-organism-menu-open body {
     animation: none !important;
   }
 }
+
+/* production-r1724-organism-menu-border-box */

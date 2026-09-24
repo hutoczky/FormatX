@@ -1381,7 +1381,7 @@ html:root:root body.living-architecture #hero .hero-copy{
   }
   html[data-fx-crystal-organism-r326="ready"]:root:root:root
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
-    transform:scale(1.045)!important;
+    transform:none!important;
     transform-origin:50% 48%!important;
   }
 }
@@ -1396,3 +1396,217 @@ html:root:root body.living-architecture #hero .hero-copy{
   }
 }
 /* production-r1721-cortical-living-world */
+
+/* production-r1723-native-pixel-stage-no-resample */
+
+
+/* R1724 — SITEWIDE LIVING HABITAT OWNER
+   One continuous biological world now exists behind every homepage surface.
+   Sections are architectural windows into that world, never opaque scene plates. */
+html:root:root body.living-architecture{
+  position:relative!important;
+  isolation:isolate!important;
+  background:
+    radial-gradient(ellipse 64% 44% at 72% 4%,rgba(46,164,198,.20),transparent 66%),
+    radial-gradient(ellipse 50% 56% at 8% 34%,rgba(84,48,126,.15),transparent 70%),
+    radial-gradient(ellipse 54% 48% at 96% 66%,rgba(27,128,163,.14),transparent 72%),
+    radial-gradient(ellipse 70% 58% at 48% 54%,rgba(26,73,104,.13),transparent 74%),
+    linear-gradient(180deg,#020713 0%,#071724 26%,#061520 62%,#020811 100%)!important;
+}
+html:root:root body.living-architecture::before,
+html:root:root body.living-architecture::after{
+  z-index:-3!important;
+  pointer-events:none!important;
+}
+html:root:root body.living-architecture > .fx-living-habitat-r1530{
+  position:fixed!important;
+  inset:0!important;
+  z-index:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  opacity:.82!important;
+  pointer-events:none!important;
+  mix-blend-mode:normal!important;
+  filter:none!important;
+}
+html:root:root body.living-architecture > :is(main#main-content,footer.site-footer){
+  position:relative!important;
+  z-index:2!important;
+}
+html:root:root body.living-architecture > :is(
+  .topbar,.fx-rail,.fx-organism-status,.fx-mini-mag-assistant-r459,
+  .fx-organism-dialogue,.fx-organism-panel,.fx-organism-thought
+){
+  z-index:4!important;
+}
+html:root:root body.living-architecture::before,
+html:root:root body.living-architecture::after,
+html:root:root body.living-architecture.fx-habitat-react-r1695::before,
+html:root:root body.living-architecture.fx-habitat-react-r1695::after,
+html:root:root body.living-architecture > .fx-living-habitat-r1530{
+  pointer-events:none!important;
+}
+html:root:root body.living-architecture :is(
+  .fx-organism-dialogue,.fx-organism-panel,.fx-organism-thought,
+  .fx-organism-thought-close,.fx-thought-genome-disclosure,
+  .fx-mini-mag-assistant-r459
+){
+  pointer-events:auto!important;
+}
+
+/* Every main scene reveals the same organism habitat. */
+html:root:root:root body.living-architecture main#main-content > :is(
+  section.scene,.fx-category-deck,#user-feedback,.fx-static-live-os,
+  .fx-award-proof,.fx-origin-proof
+){
+  position:relative!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  isolation:isolate!important;
+}
+html:root:root:root body.living-architecture main#main-content > :is(
+  section.scene,.fx-category-deck,#user-feedback,.fx-static-live-os,
+  .fx-award-proof,.fx-origin-proof
+)::before{
+  content:""!important;
+  position:absolute!important;
+  inset:-1px!important;
+  z-index:-1!important;
+  pointer-events:none!important;
+  background:
+    radial-gradient(ellipse 46% 36% at var(--fx-world-x,78%) 8%,rgba(75,196,222,.050),transparent 70%),
+    radial-gradient(ellipse 40% 42% at calc(100% - var(--fx-world-x,78%)) 74%,rgba(82,47,125,.045),transparent 74%),
+    linear-gradient(180deg,rgba(2,10,17,.018),rgba(2,8,14,.006))!important;
+  border:0!important;
+  box-shadow:none!important;
+  opacity:1!important;
+}
+
+/* Different organs reveal different zones of the SAME ecosystem. */
+html:root:root body.living-architecture #hero{--fx-world-x:72%}
+html:root:root body.living-architecture #experience{--fx-world-x:22%}
+html:root:root body.living-architecture #capabilities{--fx-world-x:78%}
+html:root:root body.living-architecture #pricing{--fx-world-x:35%}
+html:root:root body.living-architecture #system{--fx-world-x:82%}
+html:root:root body.living-architecture #resources{--fx-world-x:28%}
+
+/* Content surfaces remain readable but translucent enough for the living world
+   to remain visibly continuous behind them. */
+html:root:root:root body.living-architecture :is(
+  .hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+  .payment-console,.system-grid article,.release-card,.fx-category-grid > article,
+  .fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,
+  .fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure,
+  .fx-static-live-os__inner,.fx-feedback-form,.fx-feedback-list
+){
+  background:
+    radial-gradient(circle at 84% 8%,rgba(104,214,235,.045),transparent 38%),
+    linear-gradient(148deg,rgba(4,18,29,.55),rgba(2,9,16,.66))!important;
+  border-color:rgba(119,222,239,.12)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(224,251,255,.028),
+    0 18px 52px rgba(0,0,0,.12)!important;
+}
+
+/* Footer belongs to the same world instead of becoming a separate dark plate. */
+html:root:root body.living-architecture footer.site-footer{
+  position:relative!important;
+  z-index:2!important;
+  background:
+    radial-gradient(ellipse 62% 52% at 50% 0%,rgba(50,153,183,.075),transparent 72%),
+    linear-gradient(180deg,rgba(3,13,21,.22),rgba(1,7,12,.48))!important;
+  border-top-color:rgba(120,218,236,.10)!important;
+}
+
+/* Mobile must keep the world visible too. Older mobile scene owners used opaque
+   plates; this late owner intentionally defeats them. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root body.living-architecture > .fx-living-habitat-r1530{
+    opacity:.78!important;
+    mix-blend-mode:normal!important;
+  }
+  html:root:root:root:root body.living-architecture main#main-content > :is(
+    section.scene,.fx-category-deck,#user-feedback,.fx-static-live-os,
+    .fx-award-proof,.fx-origin-proof
+  ){
+    background:transparent!important;
+    background-image:none!important;
+  }
+  html:root:root:root body.living-architecture :is(
+    .hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+    .payment-console,.system-grid article,.release-card,.fx-category-grid > article,
+    .fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,
+    .fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure,
+    .fx-static-live-os__inner,.fx-feedback-form,.fx-feedback-list
+  ){
+    background:
+      radial-gradient(circle at 84% 8%,rgba(103,218,238,.045),transparent 38%),
+      linear-gradient(150deg,rgba(4,18,29,.60),rgba(2,9,16,.70))!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+}
+
+/* Reduced motion keeps the SAME world, only without animated response. */
+@media (prefers-reduced-motion:reduce){
+  html:root:root body.living-architecture > .fx-living-habitat-r1530{
+    opacity:.70!important;
+  }
+}
+/* production-r1724-sitewide-living-habitat */
+
+/* production-r1724-overlay-pointer-safe */
+
+/* production-r1724-zero-blend-sitewide-habitat */
+
+/* R1724 — canonical mobile ASK interaction floor.
+   Late owner defeats retired 46px reference-layout compatibility rules. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204{
+    pointer-events:auto!important;
+    overflow:visible!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    min-width:52px!important;
+    overflow:visible!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask{
+    width:52px!important;
+    min-width:52px!important;
+    max-width:52px!important;
+    height:52px!important;
+    min-height:52px!important;
+    max-height:52px!important;
+    flex-basis:52px!important;
+    transform:none!important;
+    translate:none!important;
+    scale:1!important;
+    pointer-events:auto!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+}
+/* production-r1724-mobile-ask-52px-hit-target */
+
+/* R1724 — retire the obsolete R1603 mobile CSS-only habitat.
+   Real event-driven Canvas2D now owns the living world on capable phones. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root body.living-architecture > .fx-living-habitat-r1530{
+    display:block!important;
+    visibility:visible!important;
+    opacity:.78!important;
+    pointer-events:none!important;
+    mix-blend-mode:normal!important;
+  }
+  html:root:root:root body.living-architecture::after{
+    animation:none!important;
+    transform:none!important;
+    will-change:auto!important;
+  }
+}
+html[data-fx-core-renderer-class-r1541="software-adaptive"]:root:root:root
+body.living-architecture > .fx-living-habitat-r1530{
+  display:none!important;
+}
+/* production-r1724-mobile-real-habitat-canvas */

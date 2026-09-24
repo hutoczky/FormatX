@@ -47,6 +47,7 @@
   let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,pointerSettleTimer=0,lastDrawAt=0;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
+  let physiologyEnergy=.34,physiologyBreath=.12,physiologyKind='homeostasis',habitatZone='core';
   let particles=[],filaments=[],glassArcs=[],mineralSpires=[],tissueBands=[],cellPods=[],capillaries=[],membranePockets=[],neuralRoots=[];
 
   function seeded(seed=0xF04A1530){
@@ -70,17 +71,18 @@
       bend:(random()-.5)*.12,phase:random()*Math.PI*2,
       alpha:.020+random()*.024,width:.55+random()*.70,dir:index%2?1:-1
     }));
-    const arcCount=LOW_POWER?2:MOBILE.matches?3:5;
+    const arcCount=LOW_POWER?3:MOBILE.matches?5:7;
     glassArcs=Array.from({length:arcCount},(_,index)=>({
       side:index%2?-1:1,
       y:.16+random()*.58,
       reach:.18+random()*.18,
       bend:.10+random()*.18,
-      alpha:.036+random()*.026,
-      width:.90+random()*1.45,
-      phase:random()*Math.PI*2
+      alpha:.040+random()*.032,
+      width:.95+random()*1.55,
+      phase:random()*Math.PI*2,
+      warm:index%3===1
     }));
-    const spireCount=LOW_POWER?2:MOBILE.matches?3:5;
+    const spireCount=LOW_POWER?3:MOBILE.matches?5:7;
     mineralSpires=Array.from({length:spireCount},(_,index)=>({
       side:index%2?-1:1,
       x:.04+random()*.22,
@@ -89,7 +91,7 @@
       h:.10+random()*.24,
       lean:(random()-.5)*.050,
       alpha:.10+random()*.10,
-      warm:false
+      warm:index%3===0
     }));
     const bandCount=LOW_POWER?5:MOBILE.matches?8:11;
     tissueBands=Array.from({length:bandCount},(_,index)=>({
@@ -184,14 +186,16 @@
 
     ctx.clearRect(0,0,width,height);
     const breath=.5+.5*Math.sin(time*.00024);
+    const vitality=Math.max(0,Math.min(1.25,physiologyEnergy*.72+physiologyBreath*.28));
+    const habitatBreath=Math.max(.35,Math.min(1.35,.62+breath*.22+physiologyBreath*.28));
 
     const sx=width*(MOBILE.matches?.50:.66)+pointerX*width*.009;
     const sy=-height*.04+pointerY*height*.004;
     const radius=Math.max(width,height)*.44;
     ctx.fillStyle=radial(sx,sy,radius,[
-      [0,'rgba(214,248,251,'+(.026+breath*.004+impulse*.008)+')'],
-      [.20,'rgba(112,204,220,.018)'],
-      [.58,'rgba(42,104,122,.008)'],
+      [0,'rgba(214,248,251,'+(.020+habitatBreath*.005+impulse*.008+vitality*.010)+')'],
+      [.20,'rgba(112,204,220,'+(.014+vitality*.010)+')'],
+      [.58,'rgba(42,104,122,'+(.006+vitality*.005)+')'],
       [1,'rgba(0,0,0,0)']
     ]);
     ctx.fillRect(0,0,width,height);
@@ -213,15 +217,15 @@
       const cp1x=edge-b.side*width*b.bend;
       const cp2x=endX+b.side*width*b.bend*.46;
       ctx.save();ctx.lineCap='round';
-      ctx.strokeStyle='rgba(4,14,24,'+(b.alpha*2.5)+')';
+      ctx.strokeStyle='rgba(4,14,24,'+(b.alpha*(2.15+vitality*.70))+')';
       ctx.lineWidth=b.width;
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(cp1x,y-height*.20,cp2x,endY+height*.15,endX,endY);ctx.stroke();
-      ctx.strokeStyle='rgba(35,89,119,'+(b.alpha*.82)+')';
+      ctx.strokeStyle='rgba(35,89,119,'+(b.alpha*(.70+vitality*.30))+')';
       ctx.lineWidth=Math.max(2,b.width*.12);
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(cp1x,y-height*.20,cp2x,endY+height*.15,endX,endY);ctx.stroke();
-      ctx.strokeStyle='rgba(103,216,236,'+(b.alpha*.42)+')';
+      ctx.strokeStyle='rgba(103,216,236,'+(b.alpha*(.34+vitality*.26))+')';
       ctx.lineWidth=Math.max(.8,b.width*.025);
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(cp1x,y-height*.20,cp2x,endY+height*.15,endX,endY);ctx.stroke();
@@ -246,7 +250,7 @@
       const ex=edge-c.side*width*c.len;
       const ey=y+Math.sin(time*.00015+c.phase)*height*.025;
       ctx.save();ctx.lineCap='round';
-      ctx.strokeStyle='rgba(63,190,220,'+c.alpha+')';ctx.lineWidth=c.width;
+      ctx.strokeStyle='rgba(63,190,220,'+(c.alpha*(.76+vitality*.62))+')';ctx.lineWidth=c.width;
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(edge-c.side*width*.08,y-height*c.bend,ex+c.side*width*.06,ey+height*c.bend*.4,ex,ey);ctx.stroke();
       ctx.restore();
@@ -273,10 +277,10 @@
       const ey=y+Math.sin(time*.00013+n.phase)*height*.035;
       const bend=n.bend*height;
       ctx.save();ctx.lineCap='round';
-      ctx.strokeStyle='rgba(7,18,31,'+(n.alpha*2.4)+')';ctx.lineWidth=n.width*8;
+      ctx.strokeStyle='rgba(7,18,31,'+(n.alpha*(2.00+vitality*.86))+')';ctx.lineWidth=n.width*8;
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(edge-n.side*width*.08,y-bend,ex+n.side*width*.08,ey+bend*.42,ex,ey);ctx.stroke();
-      ctx.strokeStyle='rgba(74,209,235,'+(n.alpha*.82)+')';ctx.lineWidth=n.width;
+      ctx.strokeStyle='rgba(74,209,235,'+(n.alpha*(.68+vitality*.36))+')';ctx.lineWidth=n.width;
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(edge-n.side*width*.08,y-bend,ex+n.side*width*.08,ey+bend*.42,ex,ey);ctx.stroke();
       ctx.restore();
@@ -285,17 +289,80 @@
     /* R1585: near the top of the page, imply a real dark laboratory around
        the core using only broad volumetric masses. No target rings or hard
        beams: side architecture, overhead haze and a low reflected floor pool. */
-    const heroPresence=Math.max(0,1-scrollValue*4.2);
-    if(heroPresence>.01){
+    const heroFocus=Math.max(0,1-scrollValue*4.2);
+    const worldPresence=.26+.74*heroFocus;
+    if(worldPresence>.01){
+      /* R1724 — cinematic FormatX world behind the organism. A distant planet,
+         monumental luminous arch and reflective horizon bring the living crystal into
+         a coherent place without adding another animation loop or bitmap. */
+      const worldAlpha=worldPresence*(.72+.28*vitality);
+      ctx.save();
+
+      const planetX=width*(MOBILE.matches?.20:.18)+pointerX*width*.026;
+      const planetY=height*(MOBILE.matches?.16:.18);
+      const planetR=Math.min(width,height)*(MOBILE.matches?.18:.16);
+      const planet=ctx.createRadialGradient(
+        planetX-planetR*.32,planetY-planetR*.30,planetR*.05,
+        planetX,planetY,planetR
+      );
+      planet.addColorStop(0,'rgba(98,188,228,'+(.18*worldAlpha)+')');
+      planet.addColorStop(.42,'rgba(28,78,132,'+(.14*worldAlpha)+')');
+      planet.addColorStop(.76,'rgba(7,23,54,'+(.18*worldAlpha)+')');
+      planet.addColorStop(1,'rgba(2,7,18,0)');
+      ctx.fillStyle=planet;
+      ctx.beginPath();ctx.arc(planetX,planetY,planetR,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(104,201,238,'+(.14*worldAlpha)+')';
+      ctx.lineWidth=Math.max(1,planetR*.012);
+      ctx.beginPath();ctx.arc(planetX,planetY,planetR*.96,Math.PI*.94,Math.PI*1.92);ctx.stroke();
+
+      const archCx=width*(MOBILE.matches?.52:.55)+pointerX*width*.018;
+      const archCy=height*.50;
+      const archRx=width*(MOBILE.matches?.58:.48);
+      const archRy=height*.66;
+      ctx.lineCap='round';
+      ctx.strokeStyle='rgba(3,12,24,'+(.72*worldAlpha)+')';
+      ctx.lineWidth=MOBILE.matches?26:34;
+      ctx.beginPath();ctx.ellipse(archCx,archCy,archRx,archRy,0,Math.PI*1.03,Math.PI*1.97);ctx.stroke();
+      ctx.strokeStyle='rgba(255,171,72,'+(.16*worldAlpha)+')';
+      ctx.lineWidth=MOBILE.matches?4.2:5.2;
+      ctx.beginPath();ctx.ellipse(archCx,archCy,archRx,archRy,0,Math.PI*1.03,Math.PI*1.97);ctx.stroke();
+      ctx.strokeStyle='rgba(71,198,244,'+(.12*worldAlpha)+')';
+      ctx.lineWidth=MOBILE.matches?1.2:1.7;
+      ctx.beginPath();ctx.ellipse(archCx,archCy,archRx*.965,archRy*.965,0,Math.PI*1.03,Math.PI*1.97);ctx.stroke();
+
+      const horizonY=height*.79;
+      const horizon=ctx.createLinearGradient(0,horizonY,width,horizonY);
+      horizon.addColorStop(0,'rgba(20,129,182,0)');
+      horizon.addColorStop(.28,'rgba(37,182,235,'+(.08*worldAlpha)+')');
+      horizon.addColorStop(.64,'rgba(255,165,66,'+(.055*worldAlpha)+')');
+      horizon.addColorStop(1,'rgba(20,129,182,0)');
+      ctx.strokeStyle=horizon;ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.moveTo(0,horizonY);ctx.lineTo(width,horizonY);ctx.stroke();
+
+      const reflectionCount=MOBILE.matches?8:14;
+      for(let i=0;i<reflectionCount;i++){
+        const x=width*(.08+i/(reflectionCount-1)*.84);
+        const jitter=Math.sin(i*2.17+physiologyEnergy*1.7)*width*.008;
+        const len=height*(.025+.070*((i*7)%11)/10);
+        const alpha=(.018+.030*((i*5)%9)/8)*worldAlpha;
+        const warm=i%3===0;
+        const g=ctx.createLinearGradient(x,horizonY,x,horizonY+len);
+        g.addColorStop(0,warm?'rgba(255,185,92,'+alpha+')':'rgba(70,209,249,'+alpha+')');
+        g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.strokeStyle=g;ctx.lineWidth=warm?2.2:1.4;
+        ctx.beginPath();ctx.moveTo(x+jitter,horizonY);ctx.lineTo(x-jitter*.4,horizonY+len);ctx.stroke();
+      }
+      ctx.restore();
+
       const leftMass=ctx.createLinearGradient(0,0,width*.30,0);
-      leftMass.addColorStop(0,'rgba(0,0,0,'+(.42*heroPresence)+')');
-      leftMass.addColorStop(.36,'rgba(4,10,13,'+(.22*heroPresence)+')');
+      leftMass.addColorStop(0,'rgba(0,0,0,'+(.42*worldPresence)+')');
+      leftMass.addColorStop(.36,'rgba(4,10,13,'+(.22*worldPresence)+')');
       leftMass.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=leftMass;ctx.fillRect(0,0,width*.34,height);
 
       const rightMass=ctx.createLinearGradient(width,0,width*.70,0);
-      rightMass.addColorStop(0,'rgba(0,0,0,'+(.46*heroPresence)+')');
-      rightMass.addColorStop(.38,'rgba(4,10,13,'+(.20*heroPresence)+')');
+      rightMass.addColorStop(0,'rgba(0,0,0,'+(.46*worldPresence)+')');
+      rightMass.addColorStop(.38,'rgba(4,10,13,'+(.20*worldPresence)+')');
       rightMass.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=rightMass;ctx.fillRect(width*.66,0,width*.34,height);
 
@@ -303,9 +370,9 @@
         width*(.51+pointerX*.004),height*.03,
         Math.max(width,height)*.45,
         [
-          [0,'rgba(205,229,230,'+(.030*heroPresence)+')'],
-          [.23,'rgba(112,154,161,'+(.016*heroPresence)+')'],
-          [.62,'rgba(35,65,72,'+(.006*heroPresence)+')'],
+          [0,'rgba(205,229,230,'+(.030*worldPresence)+')'],
+          [.23,'rgba(112,154,161,'+(.016*worldPresence)+')'],
+          [.62,'rgba(35,65,72,'+(.006*worldPresence)+')'],
           [1,'rgba(0,0,0,0)']
         ]
       );
@@ -315,9 +382,9 @@
       ctx.translate(width*.51,height*.86);
       ctx.scale(1,.25);
       const floorPool=ctx.createRadialGradient(0,0,0,0,0,width*.46);
-      floorPool.addColorStop(0,'rgba(128,190,198,'+(.032*heroPresence)+')');
-      floorPool.addColorStop(.28,'rgba(48,97,106,'+(.018*heroPresence)+')');
-      floorPool.addColorStop(.68,'rgba(18,47,55,'+(.007*heroPresence)+')');
+      floorPool.addColorStop(0,'rgba(128,190,198,'+(.032*worldPresence)+')');
+      floorPool.addColorStop(.28,'rgba(48,97,106,'+(.018*worldPresence)+')');
+      floorPool.addColorStop(.68,'rgba(18,47,55,'+(.007*worldPresence)+')');
       floorPool.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=floorPool;
       ctx.fillRect(-width*.55,-height*1.5,width*1.1,height*3);
@@ -325,7 +392,7 @@
 
       /* R1593: real environmental structure. Dark mineral spires and clear
          bio-glass arches frame the MAG without becoming HUD graphics. */
-      const structuralPresence=.18+.82*heroPresence;
+      const structuralPresence=.18+.82*worldPresence;
       for(const s of mineralSpires){
         const baseX=s.side>0?width*(1-s.x):width*s.x;
         const baseY=height*s.y;
@@ -333,19 +400,29 @@
         const spireH=height*s.h;
         const tipX=baseX+s.lean*width;
         const g=ctx.createLinearGradient(baseX-spireW,baseY,baseX+spireW*.4,baseY-spireH);
-        const tint=s.warm?'86,69,54':'37,56,61';
-        g.addColorStop(0,'rgba(0,0,0,'+(s.alpha*.72*structuralPresence)+')');
-        g.addColorStop(.46,'rgba('+tint+','+(s.alpha*.34*structuralPresence)+')');
-        g.addColorStop(.74,'rgba(74,98,101,'+(s.alpha*.18*structuralPresence)+')');
-        g.addColorStop(1,'rgba(4,8,9,0)');
+        const vascular=.45+.55*vitality;
+        g.addColorStop(0,'rgba(2,7,14,'+(s.alpha*.78*structuralPresence)+')');
+        g.addColorStop(.34,'rgba(24,53,78,'+(s.alpha*.46*structuralPresence)+')');
+        g.addColorStop(.66,s.warm
+          ?'rgba(116,69,28,'+(s.alpha*.30*structuralPresence)+')'
+          :'rgba(38,64,112,'+(s.alpha*.30*structuralPresence)+')');
+        g.addColorStop(.84,s.warm
+          ?'rgba(214,147,67,'+(s.alpha*.20*structuralPresence*vascular)+')'
+          :'rgba(42,166,194,'+(s.alpha*.19*structuralPresence*vascular)+')');
+        g.addColorStop(1,'rgba(4,10,16,0)');
         ctx.fillStyle=g;
         ctx.beginPath();
         ctx.moveTo(baseX-spireW,baseY);
-        ctx.lineTo(tipX-spireW*.15,baseY-spireH);
-        ctx.lineTo(tipX+spireW*.22,baseY-spireH*.72);
-        ctx.lineTo(baseX+spireW*.72,baseY);
+        ctx.bezierCurveTo(baseX-spireW*.65,baseY-spireH*.38,tipX-spireW*.20,baseY-spireH*.78,tipX,baseY-spireH);
+        ctx.bezierCurveTo(tipX+spireW*.22,baseY-spireH*.74,baseX+spireW*.78,baseY-spireH*.34,baseX+spireW*.72,baseY);
         ctx.closePath();
         ctx.fill();
+        ctx.strokeStyle=(s.warm?'rgba(243,181,90,':'rgba(91,222,243,')+(s.alpha*.24*structuralPresence*vascular)+')';
+        ctx.lineWidth=Math.max(.7,spireW*.018);
+        ctx.beginPath();
+        ctx.moveTo(baseX,baseY);
+        ctx.bezierCurveTo(baseX+s.side*spireW*.08,baseY-spireH*.34,tipX-s.side*spireW*.06,baseY-spireH*.68,tipX,baseY-spireH*.96);
+        ctx.stroke();
       }
 
       for(const a of glassArcs){
@@ -358,13 +435,18 @@
         const alpha=a.alpha*structuralPresence;
         ctx.save();
         ctx.lineCap='round';
-        ctx.strokeStyle='rgba(194,224,225,'+(alpha*.28)+')';
-        ctx.lineWidth=a.width*3.6;
+        ctx.strokeStyle='rgba(20,33,48,'+(alpha*(1.65+vitality*.35))+')';
+        ctx.lineWidth=a.width*5.1;
         ctx.beginPath();ctx.moveTo(edge,y);
         ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
         ctx.stroke();
-        ctx.strokeStyle='rgba(222,241,239,'+(alpha*.92)+')';
-        ctx.lineWidth=a.width;
+        ctx.strokeStyle=(a.warm?'rgba(206,137,62,':'rgba(76,190,218,')+(alpha*(.52+vitality*.30))+')';
+        ctx.lineWidth=a.width*1.65;
+        ctx.beginPath();ctx.moveTo(edge,y);
+        ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
+        ctx.stroke();
+        ctx.strokeStyle=(a.warm?'rgba(255,214,145,':'rgba(181,241,247,')+(alpha*.40)+')';
+        ctx.lineWidth=Math.max(.5,a.width*.42);
         ctx.beginPath();ctx.moveTo(edge,y);
         ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
         ctx.stroke();
@@ -424,11 +506,45 @@
   addEventListener('keydown',event=>{if(!event.repeat)pulse('key',.56);},{passive:true});
   addEventListener('focusin',()=>pulse('focus',.34),{passive:true});
   addEventListener('formatx:languagechange',()=>pulse('language',.44),{passive:true});
-  addEventListener('formatx:cinematicscene',()=>pulse('section',.56),{passive:true});
+  addEventListener('formatx:cinematicscene',event=>{
+    const kind=String(event.detail?.kind||'core');
+    const zones={
+      core:[.18,-.18,.52],
+      'live-os':[.34,-.08,.62],
+      mission:[-.24,.06,.58],
+      nerves:[-.46,-.12,.70],
+      organs:[.38,.04,.78],
+      heart:[-.22,.18,.92],
+      skeleton:[.44,-.02,.68],
+      proof:[-.12,.22,.72],
+      feedback:[.24,.28,.66],
+      beacon:[-.38,.12,.80],
+      loop:[.02,-.06,.74]
+    };
+    const zone=zones[kind]||zones.core;
+    habitatZone=kind;
+    targetX=Math.max(-1,Math.min(1,zone[0]));
+    targetY=Math.max(-1,Math.min(1,zone[1]));
+    physiologyEnergy=Math.max(physiologyEnergy,zone[2]);
+    ROOT.dataset.fxLivingHabitatZoneR1724=kind;
+    ROOT.dataset.fxLivingHabitatZoneEnergyR1724=zone[2].toFixed(2);
+    pulse('section-'+kind,.56+zone[2]*.34);
+  },{passive:true});
   addEventListener('formatx:menustatechange',event=>pulse(event.detail?.open?'menu-open':'menu-close',.48),{passive:true});
   addEventListener('formatx:storychapter',()=>pulse('story',.52),{passive:true});
   addEventListener('formatx:organismpanelopen',()=>pulse('question',.62),{passive:true});
   addEventListener('formatx:organismresponse',()=>pulse('response',.68),{passive:true});
+  addEventListener('formatx:organismphysiology',event=>{
+    const detail=event.detail||{};
+    physiologyKind=String(detail.kind||'stimulus');
+    physiologyEnergy=Math.max(.10,Math.min(1.20,Number(detail.energy)||.34));
+    physiologyBreath=Math.max(.04,Math.min(1.20,Number(detail.breath)||.12));
+    if(Number.isFinite(Number(detail.x)))targetX=Math.max(-1,Math.min(1,Number(detail.x)));
+    if(Number.isFinite(Number(detail.y)))targetY=Math.max(-1,Math.min(1,Number(detail.y)));
+    ROOT.dataset.fxLivingHabitatPhysiologyR1723=physiologyKind;
+    ROOT.dataset.fxLivingHabitatVitalityR1723=physiologyEnergy.toFixed(2);
+    pulse('organism-'+physiologyKind,Math.min(1.35,.34+physiologyEnergy*.72));
+  },{passive:true});
   addEventListener('formatx:open-live-os',()=>pulse('system-open',.58),{passive:true});
   addEventListener('formatx:loop',()=>pulse('loop',.74),{passive:true});
   addEventListener('formatx:coretouchpulse',()=>pulse('core-touch',1),{passive:true});
@@ -448,8 +564,8 @@
   ROOT.dataset.fxLivingHabitatR1530='active-scroll-pointer-atmosphere';
   ROOT.dataset.fxLivingHabitatR1584=MOBILE.matches?'mobile-volumetric-no-filament-beams':'desktop-short-organic-filaments';
   ROOT.dataset.fxLivingHabitatR1585='dark-laboratory-side-masses-overhead-haze-floor-reflection-no-rings';
-  ROOT.dataset.fxLivingHabitatR1593='physical-mineral-spires-clear-bioglass-arches-whole-page-depth';
-  ROOT.dataset.fxLivingHabitatR1594='visible-bioglass-arches-mineral-spires-reflective-floor-depth-without-hud-rings';
+  ROOT.dataset.fxLivingHabitatR1593='organic-tissue-pillars-living-membrane-arches-whole-page-depth';
+  ROOT.dataset.fxLivingHabitatR1594='visible-living-membrane-arches-tissue-pillars-reflective-depth-without-hud-rings';
   ROOT.dataset.fxLivingHabitatSchedulerR1541='interaction-driven-zero-idle-raf';
   ROOT.dataset.fxLivingHabitatSchedulerR1643='scroll-settle-canvas-css-compositor-during-motion';
   ROOT.dataset.fxLivingHabitatSchedulerR1670='desktop-canvas-60hz-floor-high-refresh-divisor-zero-idle';
@@ -461,5 +577,10 @@
   ROOT.dataset.fxLivingHabitatR1721='membranes-neural-roots-deep-cellular-parallax';
   ROOT.dataset.fxLivingHabitatPerformanceR1721='event-driven-hidpi-sharp-background-zero-idle';
   ROOT.dataset.fxLivingHabitatInteractionR1722='all-site-inputs-synchronized-with-organism-zero-extra-loop';
+  ROOT.dataset.fxLivingHabitatPhysiologyR1723='same-organism-energy-breath-tissue-neural-world';
+  ROOT.dataset.fxLivingHabitatCrystalWorldR1724='cyan-biocrystal-arches-spires-warm-studio-rim';
+  ROOT.dataset.fxLivingHabitatR1724='sitewide-persistent-world-section-zones';
+  ROOT.dataset.fxLivingHabitatWorldR1724='planet-monumental-arch-spires-reflective-horizon-blue-gold';
+  ROOT.dataset.fxLivingHabitatWorldR1723='organic-pillars-membranes-cells-capillaries-neural-roots-no-mineral-stage';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
 })();

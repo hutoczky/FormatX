@@ -52,6 +52,8 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     return root.dataset.fxCoreMobileV69 === 'ready-v69'
       && root.dataset.fxCrystalOrganismR326 === 'ready'
       && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
+      && root.dataset.fxCoreRendererCanonicalR1723 === 'single-webgl-living-organism-r326'
+      && root.dataset.fxCoreCanonicalIdentityR1723 === 'one-living-organism-no-alternate-shapes'
       && root.dataset.fxCoreOpticsR454 === 'single-luminous-webgl-material-owner'
       && surface === 'r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'
       && root.dataset.fxCoreTriangleEdgesR456 === 'disabled'
@@ -135,7 +137,9 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     };
     return {
       renderer: root.dataset.fxCoreRenderer || '',
+      canonicalRenderer: root.dataset.fxCoreRendererCanonicalR1723 || '',
       revision: root.dataset.fxCoreRendererVersion || '',
+      canonicalRevision: root.dataset.fxCoreCanonicalRevisionR1723 || '',
       optics: root.dataset.fxCoreOpticsR454 || '',
       motion: root.dataset.fxCoreSurfaceMotionR454 || '',
       pulse: root.dataset.fxCoreSurfacePulseR454 || '',
@@ -189,30 +193,20 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   });
 
   const shapeBefore = state.magShape;
+  assert.equal(shapeBefore,'organism',JSON.stringify(state));
   await page.locator('.topbar > .fx-reference-mag-button').click();
-  await page.waitForFunction(before => {
-    const root = document.documentElement;
-    const next = root.dataset.fxCoreShapeR337 || '';
-    const glyph = document.querySelector('.fx-mini-mag-glyph-r459');
-    const launcher = document.querySelector('.fx-mini-mag-launcher-r459');
-    const header = document.querySelector('.topbar > .fx-reference-mag-button');
-    return next && next !== before
-      && glyph?.dataset.fxCoreShape === next
-      && launcher?.dataset.fxCoreShape === next
-      && header?.dataset.fxCoreShape === next;
-  }, shapeBefore, { timeout: 10000 });
+  await page.waitForTimeout(120);
   const shapeAfter = await page.evaluate(() => ({
     primary: document.documentElement.dataset.fxCoreShapeR337 || '',
     mini: document.querySelector('.fx-mini-mag-glyph-r459')?.dataset.fxCoreShape || '',
     launcher: document.querySelector('.fx-mini-mag-launcher-r459')?.dataset.fxCoreShape || '',
-    header: document.querySelector('.topbar > .fx-reference-mag-button')?.dataset.fxCoreShape || ''
+    header: document.querySelector('.topbar > .fx-reference-mag-button')?.dataset.fxCoreShape || '',
+    physiology: document.documentElement.dataset.fxCorePhysiologyR1723 || ''
   }));
-  assert.notEqual(shapeAfter.primary, shapeBefore, JSON.stringify(shapeAfter));
+  assert.equal(shapeAfter.primary,'organism',JSON.stringify(shapeAfter));
   assert.equal(shapeAfter.mini, shapeAfter.primary, JSON.stringify(shapeAfter));
   assert.equal(shapeAfter.launcher, shapeAfter.primary, JSON.stringify(shapeAfter));
   assert.equal(shapeAfter.header, shapeAfter.primary, JSON.stringify(shapeAfter));
-  await page.locator('.topbar > .fx-reference-mag-button').click();
-  await page.waitForFunction(before => document.documentElement.dataset.fxCoreShapeR337 === before, shapeBefore, { timeout: 10000 });
 
   const viewportShot = await page.screenshot({
     path: path.join(output, `${name}-r476-current-viewport.png`),
@@ -229,7 +223,9 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.ok(viewportShot.length > 50000, `${name}: viewport capture is unexpectedly empty`);
   assert.ok(magShot.length > 5000, `${name}: MAG-only composited capture is unexpectedly empty`);
   assert.equal(state.renderer, 'single-webgl-crystal-organism-r326', JSON.stringify(state));
+  assert.equal(state.canonicalRenderer, 'single-webgl-living-organism-r326', JSON.stringify(state));
   assert.equal(state.revision, 'living-luminous-electric-crystal-r454', JSON.stringify(state));
+  assert.equal(state.canonicalRevision, 'fully-living-organism-r1723', JSON.stringify(state));
   assert.equal(state.optics, 'single-luminous-webgl-material-owner', JSON.stringify(state));
   assert.equal(state.motion, 'intermittent-native-electric-filament-every-five-to-six-seconds', JSON.stringify(state));
   assert.ok(
@@ -269,7 +265,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
   assert.match(state.magBackgroundImage, /data:image\/svg\+xml/i, state.magBackgroundImage);
   assert.equal(state.magShape, state.miniShape, JSON.stringify(state));
   assert.equal(state.magShape, state.miniLauncherShape, JSON.stringify(state));
-  assert.match(state.miniShapeSync, /^ready-(crystal|sphere)$/, JSON.stringify(state));
+  assert.equal(state.miniShapeSync, 'ready-organism', JSON.stringify(state));
   assert.ok(state.brandBox && state.magBox && state.langBox && state.menuBox, JSON.stringify(state));
   assert.equal(overlap(state.brandBox, state.magBox), false, JSON.stringify(state));
   assert.equal(overlap(state.magBox, state.langBox), false, JSON.stringify(state));

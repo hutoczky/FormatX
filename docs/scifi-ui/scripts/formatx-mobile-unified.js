@@ -5,7 +5,7 @@
   if (root.dataset.fxMobileUnified === 'ready-v3') return;
   root.dataset.fxMobileUnified = 'loading-v3';
 
-  const SEAMLESS_BOOTSTRAP = './scripts/formatx-infinite-scroll.js?v=20260820-reference-loop-r247';
+  const SEAMLESS_BOOTSTRAP = './scripts/formatx-infinite-scroll.js?v=20260924-r1724-final-viewport-safe';
 
   function appendStyle(marker, href, readyKey) {
     if (document.querySelector('link[' + marker + ']')) return;
@@ -30,7 +30,7 @@
     );
     appendStyle(
       'data-fx-mobile-production-r5',
-      './styles/formatx-mobile-production-r5.css?v=20260920-r609-semantic-mobile-surface',
+      './styles/formatx-mobile-production-r5.css?v=20260924-r1724-living-habitat-panels',
       'fxMobileProductionR5'
     );
   }

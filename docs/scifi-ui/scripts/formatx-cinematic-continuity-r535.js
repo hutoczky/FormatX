@@ -3,6 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'cinematic-continuity-r535';
+  root.dataset.fxCinematicContinuityIdentityR1723='one-organism-anatomy-chapters';
   if (root.dataset.fxCinematicContinuityR535 === 'ready') return;
 
   const params = new URLSearchParams(location.search);
@@ -17,12 +18,12 @@
 
   const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
   const chapters = [
-    {id:'hero',code:'01',hu:'MAG / SZÜLETÉS',en:'CORE / GENESIS',accent:'96,228,255',secondary:'143,114,255',shape:'crystal',kind:'core'},
-    {id:'experience',code:'02',hu:'IDEGRENDSZER',en:'NERVOUS SYSTEM',accent:'96,228,255',secondary:'105,142,255',shape:'sphere',kind:'nerves'},
-    {id:'capabilities',code:'03',hu:'SZERVEK',en:'SYSTEM ORGANS',accent:'121,241,219',secondary:'98,161,255',shape:'crystal',kind:'organs'},
-    {id:'pricing',code:'04',hu:'KERESKEDELMI SZÍV',en:'COMMERCE HEART',accent:'255,207,137',secondary:'160,109,255',shape:'sphere',kind:'heart'},
-    {id:'system',code:'05',hu:'RENDSZERVÁZ',en:'SYSTEM SKELETON',accent:'139,203,255',secondary:'143,114,255',shape:'crystal',kind:'skeleton'},
-    {id:'resources',code:'06',hu:'JELADÓ',en:'RELEASE BEACON',accent:'183,244,255',secondary:'111,227,200',shape:'sphere',kind:'beacon'}
+    {id:'hero',code:'01',hu:'MAG / SZÜLETÉS',en:'CORE / GENESIS',accent:'96,228,255',secondary:'143,114,255',shape:'organism',kind:'core'},
+    {id:'experience',code:'02',hu:'IDEGRENDSZER',en:'NERVOUS SYSTEM',accent:'96,228,255',secondary:'105,142,255',shape:'organism',kind:'nerves'},
+    {id:'capabilities',code:'03',hu:'SZERVEK',en:'SYSTEM ORGANS',accent:'121,241,219',secondary:'98,161,255',shape:'organism',kind:'organs'},
+    {id:'pricing',code:'04',hu:'KERESKEDELMI SZÍV',en:'COMMERCE HEART',accent:'255,207,137',secondary:'160,109,255',shape:'organism',kind:'heart'},
+    {id:'system',code:'05',hu:'RENDSZERVÁZ',en:'SYSTEM SKELETON',accent:'139,203,255',secondary:'143,114,255',shape:'organism',kind:'skeleton'},
+    {id:'resources',code:'06',hu:'JELADÓ',en:'RELEASE BEACON',accent:'183,244,255',secondary:'111,227,200',shape:'organism',kind:'beacon'}
   ];
 
   let items = [];
@@ -103,7 +104,7 @@
     if (!api) return;
     const chapter = chapters[index] || chapters[0];
     try {
-      api.setShape?.(chapter.shape,'r535-'+chapter.id);
+      api.setShape?.('organism','r535-'+chapter.id);
       const direction = index % 2 ? 1 : -1;
       api.rotateBy?.(.018 * direction,.032 * (index + 1) / chapters.length,'r535-camera');
       api.requestRender?.(index === 0 ? 4 : 6);

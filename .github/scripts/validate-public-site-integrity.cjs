@@ -98,6 +98,8 @@ const scrollBootstrap = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js')
 const seamlessScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
 const mobileCss = read('docs/scifi-ui/styles/formatx-mobile-production-r5.css');
 const mobileLoopCss = read('docs/scifi-ui/styles/formatx-mobile-seamless-loop.css');
+const livingHabitatCss = read('docs/scifi-ui/styles/formatx-living-habitat-r1530.css');
+const livingHabitatJs = read('docs/scifi-ui/scripts/formatx-living-habitat-r1530.js');
 const platformStatus = json('docs/scifi-ui/data/platform-status.json');
 const currentRelease = json('docs/scifi-ui/data/current-release.json');
 const scrollPolicy = json('docs/scifi-ui/data/scroll-policy.json');
@@ -105,6 +107,16 @@ const productionConfig = json('billing-worker/wrangler.jsonc');
 
 if ((homepage.match(/<h1\b/gi) || []).length !== 1) report('homepage: exactly one h1 is required');
 if (!homepage.includes('id="resources"')) report('homepage: release section missing');
+if (!homepage.includes('data-fx-sitewide-living-habitat-r1724="true"')) report('homepage: sitewide living habitat activation marker missing');
+if (!homepage.includes('formatx-living-habitat-r1530.css?v=20260924-r1724-real-mobile-living-habitat')) report('homepage: sitewide living habitat CSS cache identity missing');
+if (!homepage.includes('formatx-living-habitat-r1530.js?v=20260924-r1724-sitewide-living-world')) report('homepage: sitewide living habitat runtime cache identity missing');
+if (!livingHabitatCss.includes('production-r1724-sitewide-living-habitat')) report('living habitat: sitewide CSS owner missing');
+if (!livingHabitatCss.includes('production-r1724-zero-blend-sitewide-habitat') || !livingHabitatCss.includes('mix-blend-mode:normal!important')) report('living habitat: zero-blend compositor contract missing');
+if (!livingHabitatCss.includes('production-r1724-mobile-ask-52px-hit-target') || !livingHabitatCss.includes('min-width:52px!important')) report('living habitat: canonical mobile ASK hit target missing');
+if (!livingHabitatCss.includes('production-r1724-mobile-real-habitat-canvas') || !livingHabitatCss.includes('display:block!important')) report('living habitat: real mobile habitat canvas contract missing');
+if (!livingHabitatCss.includes('main#main-content > :is(') || !livingHabitatCss.includes('background:transparent!important')) report('living habitat: scene transparency contract missing');
+if (!livingHabitatJs.includes("fxLivingHabitatR1724='sitewide-persistent-world-section-zones'")) report('living habitat: persistent-world runtime marker missing');
+if (!livingHabitatJs.includes("formatx:organismphysiology") || !livingHabitatJs.includes("formatx:cinematicscene")) report('living habitat: organism/section physiological synchronization missing');
 if (!homepage.includes('Teljes multiplatform verzió letöltése') || !homepage.includes('Download full multiplatform version')) report('homepage: full-release CTA copy missing');
 if (/\b(?:nyilvános béta|public beta)\b/i.test(homepage)) report('homepage: retired generic beta wording remains');
 if (!downloads.includes('FormatX-Updates/releases/latest')) report('downloads: JavaScript-free latest release fallback missing');
