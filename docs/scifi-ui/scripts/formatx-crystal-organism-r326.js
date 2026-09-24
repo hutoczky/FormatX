@@ -2012,13 +2012,16 @@
       scheduleSurfacePulse();
     },{threshold:[0,.04]});
     io.observe(stage);
-    const sectionShapes={hero:'crystal',experience:'sphere',capabilities:'crystal',pricing:'sphere',system:'crystal',resources:'sphere'};
+    const sectionPhysiology={
+      hero:'homeostasis',experience:'attention',capabilities:'activation',
+      pricing:'heartbeat',system:'stability',resources:'curiosity'
+    };
     const organObserver=new IntersectionObserver(entries=>{
       const candidate=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
       const id=candidate?.target?.id;
       if(!id||id===activeOrgan)return;
       activeOrgan=id;root.dataset.fxCoreActiveOrgan=id;cinematic.activeOrgan=id;
-      if(sectionShapes[id])signalShape(sectionShapes[id],'site-section');
+      signalPhysiology(sectionPhysiology[id]||'attention','site-section-'+id);
       boost(.54,mobile?2:3);
     },{rootMargin:'-22% 0px -54% 0px',threshold:[0,.15,.35,.6]});
     document.querySelectorAll('main > section[id],main section.scene[id]').forEach(section=>organObserver.observe(section));
@@ -2040,9 +2043,9 @@
       revision:REVISION,
       renderer:'single-webgl-living-organism-r326',
       livingForm:'single-photoreal-organism-r1723',
-      material:'biomechanical-gunmetal-living-core-r614',
-      geometry:'armored-four-lobe-core-with-native-tendrils-r614',
-      referenceGeometry:'unified-armored-diamond-pod-r669',
+      material:'cortical-bioceramic-living-tissue-r1723',
+      geometry:'cortical-cellular-organism-with-native-tendrils-r1723',
+      referenceGeometry:'single-cortical-living-organism-r1723',
       referenceGeometryR730:'compact-dark-armored-pod-eight-radial-native-tendrils',
       referenceGeometryR1080:'tall-rhombic-armored-pod-silver-crown-large-optical-core-long-segmented-tendrils',
       referenceGeometryR1100:'single-draw-rhombic-pod-real-silver-crown-shoulders-dark-jaw',
