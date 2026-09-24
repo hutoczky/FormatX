@@ -107,6 +107,7 @@
       if(this.softwareRenderer)this.highDetail=false;
       document.documentElement.dataset.fxMagBirthGpuR1541=this.softwareRenderer?'software-adaptive':'hardware-full';
       document.documentElement.dataset.fxMagBirthQualityR1722='primary-three-hidpi-msaa-gradual-adaptive-60hz';
+      document.documentElement.dataset.fxMagBirthVisualR1722='fully-living-cortical-cellular-neural-studio-organism';
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -832,22 +833,24 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x465253,roughness:.34,metalness:0,
-        clearcoat:.32,clearcoatRoughness:.18,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0070,
+        color:0x513b63,roughness:.30,metalness:0,
+        clearcoat:.46,clearcoatRoughness:.16,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0105,
         transparent:true,opacity:0,
-        emissive:0x000101,emissiveIntensity:.001,
-        envMapIntensity:1.46,
-        ior:1.38,specularIntensity:.58,specularColor:new T.Color(0xaebbbb),
+        emissive:0x071322,emissiveIntensity:.035,
+        envMapIntensity:1.62,
+        ior:1.39,specularIntensity:.72,specularColor:new T.Color(0xc8e9ed),
+        sheen:0.28,sheenColor:new T.Color(0x284e64),sheenRoughness:.46,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
-        color:0x455054,roughness:.38,metalness:.002,
-        clearcoat:.22,clearcoatRoughness:.30,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.006,
+        color:0x6a456d,roughness:.34,metalness:.001,
+        clearcoat:.34,clearcoatRoughness:.24,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.009,
         transparent:true,opacity:0,
-        emissive:0x010203,emissiveIntensity:.004,
-        envMapIntensity:1.24,
+        emissive:0x0a1425,emissiveIntensity:.055,
+        envMapIntensity:1.42,
+        sheen:.22,sheenColor:new T.Color(0x3b7790),sheenRoughness:.52,
         depthWrite:true
       });
       this.organicWireMaterial=new T.MeshBasicMaterial({
@@ -1127,9 +1130,11 @@
 
     makeCellularLayer(){
       const T=this.THREE,r=this.rand;
-      this.cellMaterial=new T.MeshStandardMaterial({
-        color:0x1c1028,roughness:.74,metalness:.015,
-        emissive:0x13091d,emissiveIntensity:.12,
+      this.cellMaterial=new T.MeshPhysicalMaterial({
+        color:0x573866,roughness:.42,metalness:.002,
+        emissive:0x10283a,emissiveIntensity:.18,
+        clearcoat:.30,clearcoatRoughness:.24,
+        sheen:.22,sheenColor:new T.Color(0x376a83),sheenRoughness:.48,
         transparent:true,opacity:0
       });
       this.cellEdgeMaterial=new T.MeshBasicMaterial({
@@ -1139,7 +1144,7 @@
       const blobGeo=new T.IcosahedronGeometry(.090,2);
       const edgeGeo=new T.IcosahedronGeometry(.093,1);
       this.cells=[];
-      const count=this.lowPowerProfile?18:(this.mobileProfile?24:42);
+      const count=this.lowPowerProfile?22:(this.mobileProfile?34:52);
       for(let i=0;i<count;i++){
         const phi=Math.acos(1-2*(i+.5)/count);
         const theta=Math.PI*(1+Math.sqrt(5))*i;
@@ -1168,7 +1173,7 @@
         blending:T.AdditiveBlending,depthWrite:false
       });
       this.cellVeins=[];
-      for(let i=0;i<38;i++){
+      for(let i=0;i<64;i++){
         const a=this.cells[(i*11)%this.cells.length];
         const b=this.cells[(i*11+7+(i%5))%this.cells.length];
         const start=a.position.clone();
@@ -1411,10 +1416,11 @@
     makeTentacles(){
       const T=this.THREE,r=this.rand;
       this.tentacleMaterial=new T.MeshPhysicalMaterial({
-        color:0x26383b,metalness:.010,roughness:.13,
-        emissive:0x031216,emissiveIntensity:.055,
-        clearcoat:.96,clearcoatRoughness:.045,
-        transmission:.34,thickness:.10,ior:1.41,
+        color:0x244652,metalness:.002,roughness:.20,
+        emissive:0x063247,emissiveIntensity:.16,
+        clearcoat:.72,clearcoatRoughness:.08,
+        transmission:.18,thickness:.12,ior:1.39,
+        sheen:.18,sheenColor:new T.Color(0x56d9ef),sheenRoughness:.36,
         transparent:true,opacity:0,depthWrite:false
       });
       this.tentacleEdgeMaterial=new T.MeshBasicMaterial({transparent:true,opacity:0});
@@ -1422,9 +1428,9 @@
       this.tentacleGlowMaterial=new T.MeshBasicMaterial({transparent:true,opacity:0});
       this.tentacleDashMaterial=new T.LineDashedMaterial({transparent:true,opacity:0});
       this.tentacles=[];
-      const count=this.lowPowerProfile?3:(this.mobileProfile?4:7);
-      const tendrilSegments=this.lowPowerProfile?16:(this.mobileProfile?22:40);
-      const tendrilRadial=this.lowPowerProfile?4:(this.mobileProfile?5:6);
+      const count=this.lowPowerProfile?4:(this.mobileProfile?7:10);
+      const tendrilSegments=this.lowPowerProfile?18:(this.mobileProfile?30:48);
+      const tendrilRadial=this.lowPowerProfile?5:(this.mobileProfile?6:7);
       for(let i=0;i<count;i++){
         const base=i/count*Math.PI*2+(r()-.5)*.16;
         const sign=i%2?1:-1;
@@ -1573,17 +1579,17 @@
 
     updateOrganic(t,time){
       const grow=smooth((t-2.20)/.88);
-      const crystallise=smooth((t-6.10)/1.18);
-      const visible=grow*(1-crystallise*.92);
+      const maturity=smooth((t-5.60)/1.45);
+      const visible=grow;
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
       this.organicGroup.scale.set(bodyScale*.84,bodyScale*.84,bodyScale*.84);
 
-      this.organicShellMaterial.opacity=.88*visible;
-      this.organicLobeMaterial.opacity=.14*visible;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=.16*visible;
+      this.organicShellMaterial.opacity=(.88+.08*maturity)*visible;
+      this.organicLobeMaterial.opacity=(.24+.18*maturity)*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.20+.12*maturity)*visible;
       this.organicWireMaterial.opacity=0;
-      this.organicVeinMaterial.opacity=.050*visible;
+      this.organicVeinMaterial.opacity=(.12+.12*maturity)*visible;
       this.organicHoodMaterial.opacity=0;
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.075*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.003*visible;
@@ -1598,7 +1604,7 @@
         if(b)lobe.scale.set(b.x*q,b.y*q,b.z*q);
         lobe.rotation.y+=.00005*(i%2?1:-1);
       });
-      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.035*visible;
+      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=(.12+.14*maturity)*visible;
       if(this.organicFolds){
         this.organicFolds.rotation.y=Math.sin(time*.00012)*.008;
         this.organicFolds.rotation.x=Math.sin(time*.00010)*.004;
@@ -1606,10 +1612,23 @@
     }
 
     updateCells(t,time){
-      this.cellGroup.visible=false;
-      this.cellMaterial.opacity=0;
-      this.cellEdgeMaterial.opacity=0;
-      this.cellVeinMaterial.opacity=0;
+      const grow=smooth((t-3.10)/1.20);
+      const awake=smooth((t-5.35)/1.35);
+      const visible=grow;
+      this.cellGroup.visible=visible>.002;
+      const base=.001+visible*.999;
+      this.cellGroup.scale.setScalar(base*.96);
+      this.cellMaterial.opacity=(.26+.24*awake)*visible;
+      this.cellEdgeMaterial.opacity=(.035+.045*awake)*visible;
+      this.cellVeinMaterial.opacity=(.18+.24*awake)*visible;
+      this.cells.forEach((g,i)=>{
+        const breath=1+Math.sin(time*.00125+g.userData.phase)*(.018+.012*awake);
+        const b=g.userData.baseScale;
+        if(b)g.scale.set(b.x*breath,b.y*breath,b.z*breath);
+        g.rotation.y+=.00006*(i%2?1:-1);
+      });
+      this.cellGroup.rotation.y=Math.sin(time*.00016)*.012+this.interactionX*.030;
+      this.cellGroup.rotation.x=Math.sin(time*.00013)*.007-this.interactionY*.020;
     }
 
     updateMechanical(t,time){
@@ -1618,14 +1637,15 @@
       this.mechanicalReveal=bodyGrow;
       this.mechanicalGroup.visible=bodyGrow>.002;
       this.mechanicalGroup.scale.set(.001+bodyGrow*1.28,.001+bodyGrow*1.30,.001+bodyGrow*1.24);
-      this.mechMaterial.opacity=.98*bodyGrow;
-      this.mechMidMaterial.opacity=.22*bodyGrow;
-      this.silverMaterial.opacity=.10*bodyGrow;
-      if(this.crownMaterial)this.crownMaterial.opacity=.08*bodyGrow;
+      /* R1722: bioceramic support only. The organism remains visibly biological. */
+      this.mechMaterial.opacity=.10*bodyGrow;
+      this.mechMidMaterial.opacity=.07*bodyGrow;
+      this.silverMaterial.opacity=.035*bodyGrow;
+      if(this.crownMaterial)this.crownMaterial.opacity=.025*bodyGrow;
       if(this.mechPetalMaterial)this.mechPetalMaterial.opacity=0;
       this.mechEdgeMaterial.opacity=0;
-      this.mechInnerMaterial.opacity=.10*irisGrow;
-      if(this.mechSocketBack?.material)this.mechSocketBack.material.opacity=.18*irisGrow;
+      this.mechInnerMaterial.opacity=.06*irisGrow;
+      if(this.mechSocketBack?.material)this.mechSocketBack.material.opacity=.08*irisGrow;
       if(this.mechEnergyMaterial){
         this.mechEnergyMaterial.opacity=.62*irisGrow;
         this.mechEnergyMaterial.emissiveIntensity=.006+.002*Math.sin(time*.0044)+this.interactionImpulse*.006;
@@ -1656,7 +1676,7 @@
       const grow=smooth((t-5.42)/1.05);
       const visible=grow;
       this.tentacleGroup.visible=visible>.002;
-      this.tentacleMaterial.opacity=.58*visible;
+      this.tentacleMaterial.opacity=.82*visible;
       this.tentacleEdgeMaterial.opacity=0;
       this.tentacleNodeMaterial.opacity=0;
       if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
