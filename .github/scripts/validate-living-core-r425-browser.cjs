@@ -51,7 +51,9 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const surface = root.dataset.fxCoreSurfaceR456 || '';
     return root.dataset.fxCoreMobileV69 === 'ready-v69'
       && root.dataset.fxCrystalOrganismR326 === 'ready'
-      && root.dataset.fxCoreRenderer === 'single-webgl-living-organism-r326'
+      && root.dataset.fxCoreRenderer === 'single-webgl-crystal-organism-r326'
+      && root.dataset.fxCoreRendererCanonicalR1723 === 'single-webgl-living-organism-r326'
+      && root.dataset.fxCoreCanonicalIdentityR1723 === 'one-living-organism-no-alternate-shapes'
       && root.dataset.fxCoreOpticsR454 === 'single-luminous-webgl-material-owner'
       && surface === 'r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'
       && root.dataset.fxCoreTriangleEdgesR456 === 'disabled'
@@ -135,7 +137,9 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     };
     return {
       renderer: root.dataset.fxCoreRenderer || '',
+      canonicalRenderer: root.dataset.fxCoreRendererCanonicalR1723 || '',
       revision: root.dataset.fxCoreRendererVersion || '',
+      canonicalRevision: root.dataset.fxCoreCanonicalRevisionR1723 || '',
       optics: root.dataset.fxCoreOpticsR454 || '',
       motion: root.dataset.fxCoreSurfaceMotionR454 || '',
       pulse: root.dataset.fxCoreSurfacePulseR454 || '',
@@ -218,8 +222,10 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
 
   assert.ok(viewportShot.length > 50000, `${name}: viewport capture is unexpectedly empty`);
   assert.ok(magShot.length > 5000, `${name}: MAG-only composited capture is unexpectedly empty`);
-  assert.equal(state.renderer, 'single-webgl-living-organism-r326', JSON.stringify(state));
-  assert.equal(state.revision, 'fully-living-organism-r1723', JSON.stringify(state));
+  assert.equal(state.renderer, 'single-webgl-crystal-organism-r326', JSON.stringify(state));
+  assert.equal(state.canonicalRenderer, 'single-webgl-living-organism-r326', JSON.stringify(state));
+  assert.equal(state.revision, 'living-luminous-electric-crystal-r454', JSON.stringify(state));
+  assert.equal(state.canonicalRevision, 'fully-living-organism-r1723', JSON.stringify(state));
   assert.equal(state.optics, 'single-luminous-webgl-material-owner', JSON.stringify(state));
   assert.equal(state.motion, 'intermittent-native-electric-filament-every-five-to-six-seconds', JSON.stringify(state));
   assert.ok(
