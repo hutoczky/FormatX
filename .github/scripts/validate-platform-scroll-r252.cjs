@@ -39,7 +39,8 @@ async function prepare(page) {
     const root = document.documentElement;
     return root.dataset.fxInfiniteController === 'seamless-v7'
       && root.dataset.fxLoopBridge === 'ready-v3'
-      && root.dataset.fxHeartCoreR252 === 'ready';
+      && root.dataset.fxHeartCoreR252 === 'ready'
+      && root.dataset.fxHeartDelegatedR1723 === 'ready';
   }, null, { timeout: 20000 });
   await page.evaluate(async () => {
     try { await document.fonts?.ready; } catch (_) {}
