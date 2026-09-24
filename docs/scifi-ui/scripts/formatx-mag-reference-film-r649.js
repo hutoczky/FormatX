@@ -11,6 +11,14 @@
   const lobes=Array.from({length:22},(_,i)=>({a:i/22*TAU+(rnd()-.5)*.09,k:.72+rnd()*.34,q:.78+rnd()*.34,p:rnd()*TAU}));
   const veins=Array.from({length:16},()=>({a:rnd()*TAU,len:.2+rnd()*.72,b:(rnd()-.5)*.8}));
   const tentacles=Array.from({length:8},(_,i)=>({a:i/8*TAU+(rnd()-.5)*.14,len:.83+rnd()*.40,b:(rnd()-.5)*.85,w:1.6+rnd()*2.4,p:rnd()*TAU}));
+  const ecosystemBands=Array.from({length:9},(_,i)=>({
+    side:i%2?-1:1,y:.06+rnd()*.88,reach:.18+rnd()*.22,bend:.10+rnd()*.22,
+    width:34+rnd()*72,phase:rnd()*TAU,alpha:.08+rnd()*.08
+  }));
+  const ecosystemCells=Array.from({length:16},()=>({
+    x:rnd(),y:rnd(),r:12+rnd()*42,stretch:.65+rnd()*.65,
+    phase:rnd()*TAU,alpha:.10+rnd()*.16
+  }));
   const dna=[
     {x:192,y:92,l:610,a:57,r:-.34,p:.2,s:1.20,o:1},
     {x:1005,y:81,l:570,a:50,r:.33,p:1.2,s:1.08,o:.92},
@@ -134,10 +142,45 @@
     ctx.globalAlpha=u*.88;ctx.fillStyle='rgba(198,249,255,.78)';ctx.fillRect(0,cy-1.2,W,2.4);
     ctx.globalAlpha=u*.28;ctx.fillRect(0,cy-8,W,16);ctx.restore();
   }
+  function drawLivingWorld(ctx,time,alpha=1){
+    ctx.save();
+    ctx.globalCompositeOperation='source-over';
+    for(const b of ecosystemBands){
+      const edge=b.side>0?W*1.04:-W*.04;
+      const y=b.y*H+Math.sin(time*.00018+b.phase)*14;
+      const endX=W*(.50+b.side*b.reach);
+      const cp1x=edge-b.side*W*b.bend;
+      const cp2x=endX+b.side*W*b.bend*.48;
+      ctx.lineCap='round';
+      ctx.strokeStyle='rgba(6,18,29,'+(b.alpha*2.2*alpha)+')';
+      ctx.lineWidth=b.width;
+      ctx.beginPath();ctx.moveTo(edge,y);
+      ctx.bezierCurveTo(cp1x,y-H*.18,cp2x,y+H*.16,endX,y+Math.sin(b.phase)*H*.06);ctx.stroke();
+      ctx.strokeStyle='rgba(78,178,206,'+(b.alpha*.42*alpha)+')';
+      ctx.lineWidth=Math.max(1.2,b.width*.055);
+      ctx.beginPath();ctx.moveTo(edge,y);
+      ctx.bezierCurveTo(cp1x,y-H*.18,cp2x,y+H*.16,endX,y+Math.sin(b.phase)*H*.06);ctx.stroke();
+    }
+    for(const c of ecosystemCells){
+      const x=c.x*W+Math.sin(time*.00013+c.phase)*10;
+      const y=c.y*H+Math.cos(time*.00011+c.phase)*8;
+      ctx.save();ctx.translate(x,y);ctx.rotate(c.phase*.18);ctx.scale(1,c.stretch);
+      const g=ctx.createRadialGradient(-c.r*.22,-c.r*.20,2,0,0,c.r);
+      g.addColorStop(0,'rgba(94,191,215,'+(c.alpha*.58*alpha)+')');
+      g.addColorStop(.36,'rgba(45,74,112,'+(c.alpha*.54*alpha)+')');
+      g.addColorStop(.72,'rgba(53,31,79,'+(c.alpha*.44*alpha)+')');
+      g.addColorStop(1,'rgba(3,10,17,0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,c.r,0,TAU);ctx.fill();
+      ctx.strokeStyle='rgba(102,221,239,'+(c.alpha*.34*alpha)+')';ctx.lineWidth=1.1;
+      ctx.beginPath();ctx.arc(0,0,c.r*.78,0,TAU);ctx.stroke();ctx.restore();
+    }
+    ctx.restore();
+  }
   function drawBackground(ctx,t,time){
     ctx.fillStyle='#02070d';ctx.fillRect(0,0,W,H);
     let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(3,14,23,.95)');g.addColorStop(.55,'rgba(3,12,20,.95)');g.addColorStop(1,'rgba(2,7,13,.98)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     const rg=makeGradient(ctx,W*.50,H*.49,0,W*.50,H*.49,W*.68,[[0,'rgba(32,91,114,.10)'],[.36,'rgba(22,50,75,.08)'],[.72,'rgba(38,23,76,.08)'],[1,'rgba(0,0,0,0)']]);ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+    drawLivingWorld(ctx,time,.92);
     for(const s of stars){const tw=.68+.32*Math.sin(time*.001*s.d+s.x);ctx.fillStyle='rgba(182,224,236,'+(s.a*tw)+')';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,TAU);ctx.fill()}
     for(const d of debris){const yy=(d.y+time*.006*(.5+d.s*.1))%H;ctx.save();ctx.translate(d.x,yy);ctx.rotate(d.p+time*.00015);ctx.globalAlpha=d.a;ctx.strokeStyle='rgba(149,206,221,.65)';ctx.strokeRect(-d.s,-d.s*.45,d.s*2,d.s*.9);ctx.restore()}
   }
@@ -162,6 +205,7 @@
     chamber.addColorStop(.72,'rgba(12,20,29,.08)');
     chamber.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=chamber;ctx.fillRect(0,0,W,H);
+    drawLivingWorld(ctx,time,.86);
 
     const dnaFade=1-smooth((t-2.65)/1.45);
     if(dnaFade>.002){
@@ -208,6 +252,18 @@
         ctx.bezierCurveTo(-R*.72,-R*.30,-R*.48,-R*.72,-R*.07,-R*1.02);
         ctx.closePath();
         ctx.fill();
+        ctx.save();ctx.globalCompositeOperation='screen';
+        for(let i=0;i<12;i++){
+          const a=i/12*TAU+.12;
+          const rr=R*(.48+.045*Math.sin(time*.0011+i*.72));
+          const lx=Math.cos(a)*rr,ly=Math.sin(a)*rr;
+          const lg=ctx.createRadialGradient(lx-R*.035,ly-R*.040,1,lx,ly,R*.23);
+          lg.addColorStop(0,'rgba(126,183,203,.18)');
+          lg.addColorStop(.48,'rgba(75,53,118,.16)');
+          lg.addColorStop(1,'rgba(5,15,23,0)');
+          ctx.fillStyle=lg;ctx.beginPath();ctx.ellipse(lx,ly,R*.18,R*.27,a+.45,0,TAU);ctx.fill();
+        }
+        ctx.restore();
         ctx.strokeStyle='rgba(190,226,228,.38)';ctx.lineWidth=1.5;
         for(let i=0;i<7;i++){
           const a=i/7*TAU+.18;
@@ -244,6 +300,16 @@
       ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(66,226,255,.72)';ctx.shadowBlur=18;
       ctx.fillStyle='rgba(47,209,235,.34)';ctx.beginPath();ctx.arc(0,0,lensR*.36,0,TAU);ctx.fill();ctx.restore();
       ctx.fillStyle='rgba(2,18,23,.90)';ctx.beginPath();ctx.arc(0,0,lensR*.23,0,TAU);ctx.fill();
+      ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(116,239,255,.72)';ctx.lineCap='round';
+      for(let i=0;i<18;i++){
+        const a=i/18*TAU+Math.sin(time*.001+i*.7)*.018;
+        const r0=lensR*.18,r1=lensR*(.62+.22*Math.sin(i*1.71+time*.0013));
+        ctx.globalAlpha=.34+.34*(.5+.5*Math.sin(time*.003+i));
+        ctx.lineWidth=i%3===0?1.8:1.0;
+        ctx.beginPath();ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0);
+        ctx.quadraticCurveTo(Math.cos(a+.10)*r1*.60,Math.sin(a+.10)*r1*.60,Math.cos(a)*r1,Math.sin(a)*r1);ctx.stroke();
+      }
+      ctx.restore();
       ctx.restore();
 
       if(t>5.65&&crystallise<.85){
@@ -265,13 +331,13 @@
   function attach(canvas,getTarget){
     if(!(canvas instanceof HTMLCanvasElement))return null;
     let ctx=null,dpr=1,sw=0,sh=0,scale=1,ox=0,oy=0;
-    let qualityScale=innerWidth<900?.88:.72,renderAverage=0,lastQualityAdjust=0;
+    let qualityScale=innerWidth<900?.98:.82,renderAverage=0,lastQualityAdjust=0;
     function resize(){
       sw=innerWidth;sh=innerHeight;
-      const baseDpr=sw<900?1.15:.96;
+      const baseDpr=sw<900?2.05:1.45;
       dpr=Math.min(devicePixelRatio||1,baseDpr*qualityScale);
       canvas.width=Math.max(1,Math.round(sw*dpr));canvas.height=Math.max(1,Math.round(sh*dpr));canvas.style.width=sw+'px';canvas.style.height=sh+'px';
-      ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(dpr,0,0,dpr,0,0);
       scale=Math.max(sw/W,sh/H);ox=(sw-W*scale)*.5;oy=(sh-H*scale)*.5;
     }
     function draw(r,time){
@@ -287,9 +353,9 @@
       renderAverage=renderAverage?renderAverage*.82+cost*.18:cost;
       if(time-lastQualityAdjust>700){
         const previous=qualityScale;
-        if(renderAverage>13.5)qualityScale=Math.max(sw<900?.72:.42,qualityScale-(sw<900?.06:.10));
-        else if(renderAverage>9.5)qualityScale=Math.max(sw<900?.72:.42,qualityScale-(sw<900?.025:.04));
-        else if(renderAverage<6.5)qualityScale=Math.min(sw<900?.96:.86,qualityScale+.015);
+        if(renderAverage>14.8)qualityScale=Math.max(sw<900?.76:.48,qualityScale-(sw<900?.045:.08));
+        else if(renderAverage>10.5)qualityScale=Math.max(sw<900?.76:.48,qualityScale-(sw<900?.020:.03));
+        else if(renderAverage<7.0)qualityScale=Math.min(sw<900?1.00:.92,qualityScale+.012);
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=time;
           resize();
@@ -301,11 +367,11 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'adaptive-sharp-mobile-60hz-physical-reference-r1718'
+      quality:'hidpi-living-world-mobile-60hz-r1720'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
-    revision:'r1719-healthy-living-biomechanical-birth-mobile-sharp'
+    revision:'r1720-hidpi-complete-living-world-birth'
   };
 })();
