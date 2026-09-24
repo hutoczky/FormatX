@@ -71,17 +71,18 @@
       bend:(random()-.5)*.12,phase:random()*Math.PI*2,
       alpha:.020+random()*.024,width:.55+random()*.70,dir:index%2?1:-1
     }));
-    const arcCount=LOW_POWER?2:MOBILE.matches?3:5;
+    const arcCount=LOW_POWER?3:MOBILE.matches?5:7;
     glassArcs=Array.from({length:arcCount},(_,index)=>({
       side:index%2?-1:1,
       y:.16+random()*.58,
       reach:.18+random()*.18,
       bend:.10+random()*.18,
-      alpha:.036+random()*.026,
-      width:.90+random()*1.45,
-      phase:random()*Math.PI*2
+      alpha:.040+random()*.032,
+      width:.95+random()*1.55,
+      phase:random()*Math.PI*2,
+      warm:index%3===1
     }));
-    const spireCount=LOW_POWER?2:MOBILE.matches?3:5;
+    const spireCount=LOW_POWER?3:MOBILE.matches?5:7;
     mineralSpires=Array.from({length:spireCount},(_,index)=>({
       side:index%2?-1:1,
       x:.04+random()*.22,
@@ -90,7 +91,7 @@
       h:.10+random()*.24,
       lean:(random()-.5)*.050,
       alpha:.10+random()*.10,
-      warm:false
+      warm:index%3===0
     }));
     const bandCount=LOW_POWER?5:MOBILE.matches?8:11;
     tissueBands=Array.from({length:bandCount},(_,index)=>({
@@ -400,11 +401,15 @@
         const tipX=baseX+s.lean*width;
         const g=ctx.createLinearGradient(baseX-spireW,baseY,baseX+spireW*.4,baseY-spireH);
         const vascular=.45+.55*vitality;
-        g.addColorStop(0,'rgba(2,5,10,'+(s.alpha*.72*structuralPresence)+')');
-        g.addColorStop(.36,'rgba(35,42,64,'+(s.alpha*.40*structuralPresence)+')');
-        g.addColorStop(.67,'rgba(60,31,76,'+(s.alpha*.27*structuralPresence)+')');
-        g.addColorStop(.84,'rgba(37,125,145,'+(s.alpha*.15*structuralPresence*vascular)+')');
-        g.addColorStop(1,'rgba(4,8,12,0)');
+        g.addColorStop(0,'rgba(2,7,14,'+(s.alpha*.78*structuralPresence)+')');
+        g.addColorStop(.34,'rgba(24,53,78,'+(s.alpha*.46*structuralPresence)+')');
+        g.addColorStop(.66,s.warm
+          ?'rgba(116,69,28,'+(s.alpha*.30*structuralPresence)+')'
+          :'rgba(38,64,112,'+(s.alpha*.30*structuralPresence)+')');
+        g.addColorStop(.84,s.warm
+          ?'rgba(214,147,67,'+(s.alpha*.20*structuralPresence*vascular)+')'
+          :'rgba(42,166,194,'+(s.alpha*.19*structuralPresence*vascular)+')');
+        g.addColorStop(1,'rgba(4,10,16,0)');
         ctx.fillStyle=g;
         ctx.beginPath();
         ctx.moveTo(baseX-spireW,baseY);
@@ -412,7 +417,7 @@
         ctx.bezierCurveTo(tipX+spireW*.22,baseY-spireH*.74,baseX+spireW*.78,baseY-spireH*.34,baseX+spireW*.72,baseY);
         ctx.closePath();
         ctx.fill();
-        ctx.strokeStyle='rgba(79,202,222,'+(s.alpha*.20*structuralPresence*vascular)+')';
+        ctx.strokeStyle=(s.warm?'rgba(243,181,90,':'rgba(91,222,243,')+(s.alpha*.24*structuralPresence*vascular)+')';
         ctx.lineWidth=Math.max(.7,spireW*.018);
         ctx.beginPath();
         ctx.moveTo(baseX,baseY);
@@ -435,12 +440,12 @@
         ctx.beginPath();ctx.moveTo(edge,y);
         ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
         ctx.stroke();
-        ctx.strokeStyle='rgba(87,180,199,'+(alpha*(.48+vitality*.28))+')';
+        ctx.strokeStyle=(a.warm?'rgba(206,137,62,':'rgba(76,190,218,')+(alpha*(.52+vitality*.30))+')';
         ctx.lineWidth=a.width*1.65;
         ctx.beginPath();ctx.moveTo(edge,y);
         ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
         ctx.stroke();
-        ctx.strokeStyle='rgba(165,226,231,'+(alpha*.36)+')';
+        ctx.strokeStyle=(a.warm?'rgba(255,214,145,':'rgba(181,241,247,')+(alpha*.40)+')';
         ctx.lineWidth=Math.max(.5,a.width*.42);
         ctx.beginPath();ctx.moveTo(edge,y);
         ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
@@ -573,6 +578,7 @@
   ROOT.dataset.fxLivingHabitatPerformanceR1721='event-driven-hidpi-sharp-background-zero-idle';
   ROOT.dataset.fxLivingHabitatInteractionR1722='all-site-inputs-synchronized-with-organism-zero-extra-loop';
   ROOT.dataset.fxLivingHabitatPhysiologyR1723='same-organism-energy-breath-tissue-neural-world';
+  ROOT.dataset.fxLivingHabitatCrystalWorldR1724='cyan-biocrystal-arches-spires-warm-studio-rim';
   ROOT.dataset.fxLivingHabitatR1724='sitewide-persistent-world-section-zones';
   ROOT.dataset.fxLivingHabitatWorldR1724='planet-monumental-arch-spires-reflective-horizon-blue-gold';
   ROOT.dataset.fxLivingHabitatWorldR1723='organic-pillars-membranes-cells-capillaries-neural-roots-no-mineral-stage';
