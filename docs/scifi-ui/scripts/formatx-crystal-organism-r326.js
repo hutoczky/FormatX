@@ -367,22 +367,21 @@
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
-      /* R1724 — compact guardian torso. The old tall egg envelope is gone:
-         the main mass is a low, muscular rib-cage/abdomen that leaves room for
-         a real neck, head and limbs appended below in the same WebGL draw. */
+      /* R1724 — FormatX living crystal body.
+         A tall asymmetric rhombic envelope replaces the swollen torso. The
+         silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.60,.185,.150,-.155,-.012,.060],
-        [.52,.390,.255,-.115,.000,.050],
-        [.42,.585,.350,-.050,.010,.040],
-        [.31,.725,.435,.035,.020,.030],
-        [.18,.785,.470,.090,.024,.018],
-        [.05,.748,.462,.112,.018,.006],
-        [-.08,.705,.438,.100,.008,-.006],
-        [-.20,.650,.392,.058,-.004,-.018],
-        [-.32,.565,.332,-.005,-.012,-.030],
-        [-.43,.445,.260,-.082,-.014,-.042],
-        [-.52,.285,.175,-.145,-.010,-.054],
-        [-.59,.125,.090,-.175,-.004,-.066]
+        [.88,.070,.060,-.090,-.008,.080],
+        [.76,.225,.150,-.075,.000,.068],
+        [.60,.430,.285,-.050,.010,.056],
+        [.40,.655,.405,-.018,.020,.040],
+        [.18,.810,.495,.028,.028,.022],
+        [.00,.855,.520,.055,.022,.000],
+        [-.18,.795,.485,.040,.012,-.020],
+        [-.40,.640,.392,.005,.002,-.038],
+        [-.60,.410,.260,-.040,-.004,-.052],
+        [-.76,.215,.140,-.075,-.008,-.064],
+        [-.88,.065,.055,-.095,-.010,-.076]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -407,21 +406,21 @@
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
           const irregular=
             1
-            +Math.sin(a*4.0+ringIndex*.43)*.052*mid
-            +Math.cos(a*6.0-ringIndex*.37)*.026*mid
-            +Math.sin(a*2.0+ringIndex*.61)*.014;
-          const cutFront=1-.045*Math.pow(Math.max(0,Math.cos(a-.48)),4.0);
-          const cutRear=1-.028*Math.pow(Math.max(0,Math.cos(a+2.12)),5.0);
-          const cutSide=1-.030*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
-          const cutNotch=1-.022*Math.pow(Math.max(0,Math.cos(a+1.20)),8.0);
+            +Math.sin(a*4.0+ringIndex*.43)*.028*mid
+            +Math.cos(a*6.0-ringIndex*.37)*.014*mid
+            +Math.sin(a*2.0+ringIndex*.61)*.010;
+          const cutFront=1-.075*Math.pow(Math.max(0,Math.cos(a-.48)),4.0);
+          const cutRear=1-.048*Math.pow(Math.max(0,Math.cos(a+2.12)),5.0);
+          const cutSide=1-.050*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
+          const cutNotch=1-.038*Math.pow(Math.max(0,Math.cos(a+1.20)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const x=ox+Math.cos(a)*rx*irregular*radialCut;
           const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.185,.690,-.018],[.5,0]);
-      const bottom=bodyVertex([-.205,-.680,.014],[.5,1]);
+      const top=bodyVertex([-.105,.980,-.015],[.5,0]);
+      const bottom=bodyVertex([-.115,-.965,.010],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -712,26 +711,21 @@
       guardianTriangle(vertices,facet,[.62,.90,-.24]);
     }
 
-    /* FormatX Guardian anatomy: feline/dragon posture in a 3/4 hero view. */
-    appendEllipsoid([.40,.34,.045],[.36,.27,.30],.68,mobile?7:9,mobile?12:16,-.20);   // shoulder crystal
-    appendEllipsoid([.69,.64,.075],[.30,.215,.235],.64,mobile?6:8,mobile?10:14,-.24); // angular head mass
-    appendEllipsoid([.94,.58,.095],[.235,.090,.135],.70,mobile?5:7,mobile?9:12,-.10); // tapered muzzle
-    appendEllipsoid([.27,.48,.035],[.235,.355,.225],.76,mobile?7:9,mobile?12:16,-.28); // arched neck
+    /* R1724 — unique FormatX crystal creature anatomy.
+       Living cortical lobes and membranes replace animal limbs and robotic armour. */
+    appendEllipsoid([-.34,.34,.075],[.26,.38,.22],.74,mobile?6:8,mobile?10:14,.34);
+    appendEllipsoid([ .38,.26,.090],[.29,.34,.24],.70,mobile?6:8,mobile?10:14,-.28);
+    appendEllipsoid([-.30,-.30,.040],[.25,.33,.20],.78,mobile?6:8,mobile?10:14,-.22);
+    appendEllipsoid([ .32,-.36,.055],[.24,.31,.21],.76,mobile?6:8,mobile?10:14,.26);
 
-    /* Four athletic limbs; the front pair is intentionally brighter/frontmost
-       through z placement so the silhouette reads immediately on phones. */
-    appendLimb([.42,.08,.10],[.60,-.66,.16],.105,.060,.82,mobile?6:8,mobile?7:9);
-    appendLimb([.18,-.02,-.08],[.25,-.66,-.02],.120,.065,.90,mobile?6:8,mobile?7:9);
-    appendLimb([-.34,-.12,.055],[-.48,-.64,.11],.125,.070,.94,mobile?6:8,mobile?7:9);
-    appendLimb([-.12,-.17,-.13],[-.08,-.62,-.08],.115,.064,1.00,mobile?6:8,mobile?7:9);
-
-    /* Living crown/ears: translucent cartilage membranes, not metal spikes. */
-    appendMembraneTri([.55,.78,.04],[.42,1.13,.00],[.71,.87,.10],4.34);
-    appendMembraneTri([.69,.82,.03],[.76,1.17,.00],[.86,.84,.10],4.38);
-    appendMembraneTri([.47,.72,-.02],[.26,1.04,-.08],[.60,.82,.03],4.46);
-    appendMembraneTri([.37,.62,-.10],[.08,.83,-.17],[.50,.74,-.05],4.52);
-    appendMembraneTri([.25,.48,-.15],[-.06,.63,-.24],[.34,.63,-.10],4.56);
-    appendMembraneTri([.18,.28,-.12],[-.18,.31,-.22],[.29,.43,-.08],4.60);
+    /* Living crystalline membranes: a crown/facet silhouette that bends and
+       breathes instead of reading as horns, wings or metal fins. */
+    appendMembraneTri([-.22,.66,-.04],[-.50,1.06,-.10],[.02,.83,.06],4.34);
+    appendMembraneTri([ .18,.70,.02],[ .44,1.02,-.05],[.05,.86,.08],4.38);
+    appendMembraneTri([-.52,.22,-.10],[-.93,.46,-.18],[-.62,-.02,.02],4.46);
+    appendMembraneTri([ .56,.16,-.08],[ .96,.34,-.16],[ .62,-.08,.04],4.48);
+    appendMembraneTri([-.42,-.46,-.06],[-.68,-.88,-.12],[-.12,-.68,.02],4.52);
+    appendMembraneTri([ .38,-.48,-.05],[ .61,-.91,-.10],[ .10,-.72,.03],4.56);
 
     if(!auditMode){
       const centreX=.008,centreY=-.006;
@@ -918,8 +912,8 @@
            compatible but never replaces the body. Constant organic smoothing plus
            physiological deformation keeps the asymmetric silhouette alive. */
         float morph=0.0;
-        float organicBlend=.18;
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.74));
+        float organicBlend=.045;
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.54));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -957,9 +951,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.742':'.790'};
-        projected.x+=${mobile?'.010':'.082'};
-        projected.y+=${mobile?'.018':'.006'};
+        projected*= ${mobile?'.790':'.825'};
+        projected.x+=${mobile?'.006':'.052'};
+        projected.y+=${mobile?'.006':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1536,6 +1530,7 @@
     root.dataset.fxNativeMagFacetR1724='polished-crystal-planes-preserved-with-hybrid-normals';
     root.dataset.fxNativeMagPaletteR1724='pearl-cyan-indigo-warm-studio-rim';
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
+    root.dataset.fxNativeMagSilhouetteR1724='asymmetric-living-crystal-rhombic-body-cortical-lobes';
     root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
     root.dataset.fxNativeMagGuardianR1724='feline-dragon-head-neck-limbs-crown-streaming-ribbons-one-draw';
     root.dataset.fxNativeMagTopologyR1724='local-origin-winding-safe-guardian-anatomy';
