@@ -83,6 +83,7 @@ async function state(page) {
       hitHeight: hitRect?.height || 0,
       hitLabel: hit?.getAttribute('aria-label') || '',
       hitPointerEvents: hitStyle?.pointerEvents || '',
+      stageExists: stage instanceof HTMLElement,
       stagePointerEvents: stageStyle?.pointerEvents || '',
       interactionMode: root.dataset.fxCoreInteractionMode || '',
       interactionTarget: root.dataset.fxCoreInteractionTarget || '',
@@ -144,7 +145,7 @@ async function verifyMobile(browser) {
   assert(initial.bridgeDisplay !== 'none', `mobile handoff bridge is hidden: ${JSON.stringify(initial)}`);
   assert(initial.bridgeHeight >= 80 && initial.bridgeHeight <= Math.max(180, initial.viewportHeight * .24), `mobile bridge is not a short handoff runway: ${JSON.stringify(initial)}`);
   assert(initial.hitExists && initial.hitWidth >= 180 && initial.hitHeight >= 180 && initial.hitLabel.length > 8, `mobile MAG is not a semantic interactive target: ${JSON.stringify(initial)}`);
-  assert(initial.stagePointerEvents === 'none' && initial.hitPointerEvents !== 'none', `mobile native MAG visual still intercepts the semantic hit target: ${JSON.stringify(initial)}`);
+  assert((!initial.stageExists || initial.stagePointerEvents === 'none') && initial.hitPointerEvents !== 'none', `mobile native MAG visual still intercepts the semantic hit target: ${JSON.stringify(initial)}`);
   assert(initial.snapRoot === 'none' && initial.snapBody === 'none', `mobile scroll snapping active: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
