@@ -123,6 +123,8 @@
   root.dataset.fxNativeMagVisualR1711 = 'single-photoreal-living-organism-fixed-body-physical-optics-responsive-tendrils';
   root.dataset.fxNativeMagCanonicalCompatibilityR1714='r454-api-revision-r1713-visual-runtime';
   root.dataset.fxNativeMagVisualR1717='photoreal-fixed-anatomy-organic-surface-physiology';
+  root.dataset.fxNativeMagVisualR1725='studio-photoreal-smoky-pearl-biocrystal-broad-facets-subtle-physiology';
+  root.dataset.fxNativeMagMaterialR1725='low-emission-mineral-diffuse-ggx-reflection-facet-tonal-variation';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -918,13 +920,13 @@
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
-        float living=(cell*.020+membrane*.0105)*(.46+.54*uEnergy);
+        float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy);
         float bodyVertexMask=1.0-step(2.0,aFacet);
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
         float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
-        float cortex=(cortexA*.62+cortexB*.38)*.028*cortexEnvelope;
-        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0065*cortexEnvelope;
+        float cortex=(cortexA*.62+cortexB*.38)*.018*cortexEnvelope;
+        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0032*cortexEnvelope;
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
         vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
@@ -1079,19 +1081,21 @@
         /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
            plates ride above dark cortical tissue. The plate field is broad,
            irregular and organic; it is not a metallic armour texture. */
-        float plateField=.5+.5*sin(vUv.x*18.1+sin(vUv.y*12.6)*1.85+sin(vLocal.y*5.2)*.55);
-        float plateCross=.5+.5*sin(vUv.y*16.4-vUv.x*7.2+sin(vUv.x*9.7)*1.35);
-        float plateMask=smoothstep(.54,.78,max(plateField,plateCross*.86))*bodyMask;
-        plateMask*=.64+.36*smoothstep(-.45,.82,n.z);
-        float livingSeam=pow(1.0-max(plateField*.82,plateCross*.76),3.4)*bodyMask;
-        vec3 ivory=vec3(.50,.59,.62)
-          +vec3(.34,.37,.34)*(.28*ndl+.20*sideLight+.18*softboxA)
-          +vec3(.18,.29,.32)*fresnel*.22;
-        ivory+=vec3(.96,.54,.16)*studioRibbonB*.12;
-        mineral=mix(mineral,ivory,plateMask*.76);
-        mineral=mix(mineral,vec3(.004,.008,.015),livingSeam*.68);
-        mineral+=vec3(.12,.66,.86)*vascular*(.22+.34*uEnergy);
-        mineral+=vec3(1.00,.57,.16)*vascular*studioRibbonB*.16;
+        float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.42+sin(vLocal.y*4.1)*.38);
+        float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1+sin(vUv.x*8.2)*1.08);
+        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
+        plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
+        float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
+        float facetTone=.90+.14*fract(vFacet*7.13+.19);
+        vec3 ivory=vec3(.24,.31,.33)
+          +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
+          +vec3(.16,.25,.27)*fresnel*.18;
+        ivory+=vec3(.72,.39,.12)*studioRibbonB*.070;
+        mineral*=mix(1.0,facetTone,bodyMask*.42);
+        mineral=mix(mineral,ivory,plateMask*.58);
+        mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
+        mineral+=vec3(.070,.42,.54)*vascular*(.16+.24*uEnergy);
+        mineral+=vec3(.72,.38,.12)*vascular*studioRibbonB*.085;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1177,8 +1181,8 @@
         physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
         physicalLens+=vec3(.050,.36,.48)*lensRing*(.10+.10*uEnergy);
         physicalLens+=vec3(.84,.98,1.00)*lensHot*(.18+.08*uEnergy);
-        physicalLens+=vec3(.18,.86,1.00)*electric*(.48+.34*uEnergy);
-        physicalLens+=vec3(.96,1.00,1.00)*coreFlash*.78;
+        physicalLens+=vec3(.16,.72,.88)*electric*(.34+.28*uEnergy);
+        physicalLens+=vec3(.92,.99,1.00)*coreFlash*.56;
         physicalLens+=vec3(1.00,.45,.10)*lensRing*(.10+.10*studioRibbonB);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
@@ -1197,7 +1201,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*3.12),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(mineral*2.82),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1284,15 +1288,17 @@
         float cortexRidge=pow(max(cortexWave,cortexCross),4.0)*bodyMask;
         col=mix(col,vec3(.020,.010,.032),cortexValley*.34);
         col+=vec3(.070,.098,.135)*cortexRidge*.095;
-        float plateField=.5+.5*sin(vUv.x*18.1+sin(vUv.y*12.6)*1.65);
-        float plateCross=.5+.5*sin(vUv.y*16.4-vUv.x*7.2);
-        float plateMask=smoothstep(.55,.79,max(plateField,plateCross*.84))*bodyMask;
-        float livingSeam=pow(1.0-max(plateField*.82,plateCross*.74),3.2)*bodyMask;
-        vec3 ivory=vec3(.48,.57,.60)+vec3(.30,.34,.32)*(.26*ndl+.18*sideLight+.15*softboxA);
-        ivory+=vec3(.90,.46,.13)*studioRibbonB*.10;
-        col=mix(col,ivory,plateMask*.72);
-        col=mix(col,vec3(.004,.008,.014),livingSeam*.62);
-        col+=vec3(.11,.61,.80)*vascular*(.20+.30*uEnergy);
+        float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.35);
+        float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1);
+        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
+        float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.7)*bodyMask;
+        float facetTone=.91+.13*fract(vFacet*7.13+.19);
+        vec3 ivory=vec3(.23,.30,.32)+vec3(.36,.38,.35)*(.20*ndl+.15*sideLight+.18*softboxA);
+        ivory+=vec3(.68,.35,.11)*studioRibbonB*.065;
+        col*=mix(1.0,facetTone,bodyMask*.40);
+        col=mix(col,ivory,plateMask*.56);
+        col=mix(col,vec3(.004,.008,.014),livingSeam*.52);
+        col+=vec3(.070,.40,.52)*vascular*(.15+.23*uEnergy);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1383,7 +1389,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*3.24),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(col*2.92),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
