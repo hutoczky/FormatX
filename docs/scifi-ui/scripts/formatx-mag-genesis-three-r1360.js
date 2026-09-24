@@ -933,38 +933,27 @@
         const p=new T.Vector3().fromBufferAttribute(shellPos,i);
         const n=p.clone().normalize();
         const az=Math.atan2(n.z,n.x), el=Math.acos(Math.max(-1,Math.min(1,n.y)));
-        const fold=
-          Math.sin(az*2.7+el*1.55)*.036+
-          Math.sin(az*5.3-el*2.9)*.014+
-          Math.cos(az*3.8+el*4.6)*.010;
-        const asym=1+n.x*.026+n.y*.016-n.z*.010;
-        p.multiplyScalar((1+fold)*asym);
-        const taper=1.02-.16*Math.pow(Math.abs(n.y),.76);
-        p.x*=.92*taper;
-        p.y*=.97;
-        p.z*=.82*(1.0-.05*Math.abs(n.y));
-        p.x+=n.y*.040-n.z*.012;
-        p.y+=n.x*.018+Math.pow(Math.max(n.y,0),4.0)*.018;
-        p.z-=n.x*.012;
-        const equator=Math.pow(Math.max(0,1-n.y*n.y),.72);
-        const lobeA=Math.sin(az*3.0+el*.62)*.078*equator;
-        const lobeB=Math.cos(az*2.0-el*.86)*.044*equator;
-        const lobeC=Math.sin(az*1.35+el*2.10)*.024*equator;
-        p.x*=1+lobeA*.66+lobeC*.34;
-        p.z*=1-lobeA*.40+lobeB*.48;
-        const sideDent=Math.pow(Math.max(0,Math.cos(az-.74)),4.0)*equator;
-        const rearDent=Math.pow(Math.max(0,Math.cos(az+2.15)),5.0)*equator;
-        p.x-=n.x*sideDent*.085;
-        p.z-=n.z*sideDent*.070;
-        p.x-=n.x*rearDent*.040;
-        p.z-=n.z*rearDent*.050;
-        p.y+=Math.sin(az*1.70)*.044*equator;
+        const shoulder=Math.max(0,1-n.y*n.y);
+        const ax=.78+shoulder*.08+n.x*.035-n.z*.018;
+        const ay=1.10+shoulder*.04+n.y*.025+n.x*.015;
+        const azr=.67+shoulder*.06+n.z*.025-n.x*.015;
+        const exponent=1.24;
+        const lp=
+          Math.pow(Math.abs(n.x)/ax,exponent)+
+          Math.pow(Math.abs(n.y)/ay,exponent)+
+          Math.pow(Math.abs(n.z)/azr,exponent);
+        const radius=1/Math.pow(Math.max(.001,lp),1/exponent);
+        const livingBias=1+Math.sin(az*2.1+el*.8)*.020+Math.cos(az*4.0-el*1.3)*.010;
+        p.set(n.x*radius*livingBias,n.y*radius*livingBias,n.z*radius*livingBias);
+        p.x+=-.055*Math.pow(Math.max(n.y,0),1.7)+.028*Math.pow(Math.max(-n.y,0),1.4);
+        p.y+=Math.sin(az*2.2+el*.5)*.018*shoulder;
+        p.z-=n.x*.018;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
       const shell=new T.Mesh(shellGeo,this.organicShellMaterial);
-      shell.scale.set(.78,.50,.60);
-      shell.position.set(-.22,.01,-.015);
+      shell.scale.set(.82,.78,.70);
+      shell.position.set(-.03,.00,-.015);
       shell.userData.baseScale=shell.scale.clone();
       this.organicShell=shell;
       this.organicGroup.add(shell);
@@ -979,8 +968,8 @@
         envMapIntensity:1.38,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.792,.508,.612);
-      this.organicMembrane.position.set(-.22,.01,.000);
+      this.organicMembrane.scale.set(.836,.796,.714);
+      this.organicMembrane.position.set(-.03,.00,.000);
       this.organicMembrane.userData.baseScale=this.organicMembrane.scale.clone();
       this.organicGroup.add(this.organicMembrane);
 
