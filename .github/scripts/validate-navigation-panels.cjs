@@ -210,14 +210,25 @@ async function assertTwoLoopCycles(page, name) {
       && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
     ), before.count + 1, { timeout: 12000 });
 
-    const after = await page.evaluate(() => ({
-      count: Number(document.documentElement.dataset.fxLoopCount || 0),
-      y: window.scrollY,
-      landing: Number(document.documentElement.dataset.fxLoopLanding || NaN),
-      source: document.documentElement.dataset.fxLoopSource,
-      bridges: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
-      mirrors: document.querySelectorAll('[data-fx-loop-mirror]').length,
-    }));
+    const after = await page.evaluate(() => {
+      const root=document.documentElement;
+      const bridge=document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+      return {
+        count: Number(root.dataset.fxLoopCount || 0),
+        y: window.scrollY,
+        landing: Number(root.dataset.fxLoopLanding || NaN),
+        source: root.dataset.fxLoopSource,
+        bridges: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
+        mirrors: document.querySelectorAll('[data-fx-loop-mirror]').length,
+        bridgeTop: bridge instanceof HTMLElement ? bridge.offsetTop : null,
+        documentEnd: Math.max(0,root.scrollHeight-innerHeight),
+        gestureRelative: root.dataset.fxLoopGestureRelativeR1725 || '',
+        idleGeometry: root.dataset.fxLoopIdleGeometryR1725 || '',
+        correctionR1724: root.dataset.fxLoopPendingCorrectionR1724 || '',
+        correctionR1727: root.dataset.fxLoopPendingCorrectionR1727 || '',
+        geometryEvent: root.dataset.fxLoopGeometryEventR1724 || '',
+      };
+    });
     if (after.count !== before.count + 1
       || Math.abs(after.y - before.expectedLanding) > 8
       || Math.abs(after.landing - before.expectedLanding) > 8
