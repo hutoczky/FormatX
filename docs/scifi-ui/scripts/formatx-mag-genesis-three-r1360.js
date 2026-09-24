@@ -63,9 +63,9 @@
       /* R1722 — the primary intro renderer must begin at genuinely sharp
          mobile resolution. The former 0.36× quality and 0.80 DPR cap yielded
          only ~0.29 effective DPR on phones. */
-      this.qualityScale=this.lowPowerProfile?.66:(this.mobileProfile?.92:.94);
-      this.qualityCeiling=this.lowPowerProfile?.82:(this.mobileProfile?1.00:1.00);
-      this.qualityFloor=this.lowPowerProfile?.56:(this.mobileProfile?.72:.42);
+      this.qualityScale=this.lowPowerProfile?.74:(this.mobileProfile?1.00:.96);
+      this.qualityCeiling=this.lowPowerProfile?.86:(this.mobileProfile?1.00:1.00);
+      this.qualityFloor=this.lowPowerProfile?.62:(this.mobileProfile?.76:.44);
       this.lastQualityAdjust=0;
       this.renderPeak=0;
       this.framePeak=this.targetFrameMs;
@@ -91,7 +91,7 @@
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:!this.lowPowerProfile && (this.mobileProfile ? (devicePixelRatio||1)<=3.5 : true),
+        antialias:!this.mobileProfile && !this.lowPowerProfile,
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
@@ -109,6 +109,7 @@
       document.documentElement.dataset.fxMagBirthQualityR1722='primary-three-hidpi-msaa-gradual-adaptive-60hz';
       document.documentElement.dataset.fxMagBirthVisualR1722='fully-living-cortical-cellular-neural-studio-organism';
       document.documentElement.dataset.fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism';
+      document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -1519,7 +1520,7 @@
           ? Math.min(devicePixelRatio||1,this.width<900 ? Math.max(.82,.98*this.qualityScale) : Math.max(.70,.90*this.qualityScale))
           : Math.min(
               devicePixelRatio||1,
-              (this.mobileProfile?2.00:1.55)*this.qualityScale
+              (this.mobileProfile?2.15:1.72)*this.qualityScale
             );
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
