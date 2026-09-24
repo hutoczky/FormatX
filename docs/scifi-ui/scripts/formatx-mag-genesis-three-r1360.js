@@ -108,6 +108,7 @@
       document.documentElement.dataset.fxMagBirthGpuR1541=this.softwareRenderer?'software-adaptive':'hardware-full';
       document.documentElement.dataset.fxMagBirthQualityR1722='primary-three-hidpi-msaa-gradual-adaptive-60hz';
       document.documentElement.dataset.fxMagBirthVisualR1722='fully-living-cortical-cellular-neural-studio-organism';
+      document.documentElement.dataset.fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism';
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -1683,44 +1684,27 @@
     }
 
     updateMechanical(t,time){
-      const bodyGrow=smooth((t-5.72)/1.08);
-      const irisGrow=smooth((t-6.18)/.72);
-      this.mechanicalReveal=bodyGrow;
-      this.mechanicalGroup.visible=bodyGrow>.002;
-      this.mechanicalGroup.scale.set(.001+bodyGrow*1.28,.001+bodyGrow*1.30,.001+bodyGrow*1.24);
-      /* R1722: bioceramic support only. The organism remains visibly biological. */
-      this.mechMaterial.opacity=.10*bodyGrow;
-      this.mechMidMaterial.opacity=.07*bodyGrow;
-      this.silverMaterial.opacity=.035*bodyGrow;
-      if(this.crownMaterial)this.crownMaterial.opacity=.025*bodyGrow;
+      /* R1723 — no robotic/armoured handoff. The same cortical organism stays
+         visible from birth to site handoff; the persistent coreGroup owns the
+         energy organ, so the old mechanical shell is deliberately not painted. */
+      this.mechanicalReveal=0;
+      this.mechanicalGroup.visible=false;
+      this.mechanicalGroup.scale.setScalar(.001);
+      this.mechMaterial.opacity=0;
+      this.mechMidMaterial.opacity=0;
+      this.silverMaterial.opacity=0;
+      if(this.crownMaterial)this.crownMaterial.opacity=0;
       if(this.mechPetalMaterial)this.mechPetalMaterial.opacity=0;
       this.mechEdgeMaterial.opacity=0;
-      this.mechInnerMaterial.opacity=.06*irisGrow;
-      if(this.mechSocketBack?.material)this.mechSocketBack.material.opacity=.08*irisGrow;
-      if(this.mechEnergyMaterial){
-        this.mechEnergyMaterial.opacity=.62*irisGrow;
-        this.mechEnergyMaterial.emissiveIntensity=.006+.002*Math.sin(time*.0044)+this.interactionImpulse*.006;
-      }
-      if(this.mechAperture?.material)this.mechAperture.material.opacity=.72*irisGrow;
-      if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=.62*irisGrow;
+      this.mechInnerMaterial.opacity=0;
+      if(this.mechSocketBack?.material)this.mechSocketBack.material.opacity=0;
+      if(this.mechEnergyMaterial)this.mechEnergyMaterial.opacity=0;
+      if(this.mechAperture?.material)this.mechAperture.material.opacity=0;
+      if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=0;
       if(this.seamMaterial)this.seamMaterial.opacity=0;
-      this.mechInnerRing.visible=false;
-      this.mechInnerRing.rotation.z=0;
-      if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=0;
-        const q=.28+.004*Math.sin(time*.0042);
-        this.mechEyeCorona.scale.set(q,q,1);
-      }
-      if(this.mechLight)this.mechLight.intensity=(.022+this.interactionImpulse*.040)*irisGrow;
-      this.mechanicalGroup.rotation.y=.08*bodyGrow+Math.sin(time*.00014)*.010*bodyGrow+this.interactionX*.032*bodyGrow+this.interactionSpin;
-      this.mechanicalGroup.rotation.x=-.035*bodyGrow+Math.sin(time*.00012)*.006*bodyGrow-this.interactionY*.024*bodyGrow;
-      this.mechanicalGroup.rotation.z=-.012*bodyGrow+Math.sin(time*.00010)*.004*bodyGrow+this.interactionScroll*.008*bodyGrow;
-      this.mechPetals?.forEach((p,index)=>{
-        const open=(1-bodyGrow)*.08;
-        p.rotation.z=p.userData.baseRz+(index%2?open:-open);
-        p.rotation.x=p.userData.baseRx+Math.sin(time*.00016+index)*.010*bodyGrow;
-        p.rotation.y=p.userData.baseRy+Math.cos(time*.00014+index)*.010*bodyGrow;
-      });
+      if(this.mechInnerRing)this.mechInnerRing.visible=false;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=0;
+      if(this.mechLight)this.mechLight.intensity=0;
     }
 
     updateTentacles(t,time){
