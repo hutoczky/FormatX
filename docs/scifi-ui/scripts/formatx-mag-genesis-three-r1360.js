@@ -111,11 +111,11 @@
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.20;
+      this.renderer.toneMappingExposure=1.32;
 
       this.scene=new THREE.Scene();
       this.scene.background=new THREE.Color(0x020608);
-      this.scene.fog=new THREE.FogExp2(0x020608,0.015);
+      this.scene.fog=new THREE.FogExp2(0x02080d,0.0115);
       this.studioEnvironment=this.makeStudioEnvironment();
       this.scene.environment=this.studioEnvironment;
 
@@ -1542,7 +1542,8 @@
     updateCore(t,time){
       const birth=smooth((t-.12)/.72);
       const seedHandoff=smooth((t-2.18)/.82);
-      const coreLife=birth*(1-seedHandoff*.995);
+      const coreLife=birth;
+      const seedShellLife=birth*(1-seedHandoff*.94);
       let sc=.001;
       if(t<.12)sc=.001;
       else if(t<1.10)sc=mix(.42,.72,ease((t-.12)/.98));
@@ -1564,16 +1565,16 @@
 
       const irisAwake=smooth((t-.70)/.80)*coreLife;
       const pulse=.988+.012*Math.sin(time*.0042);
-      this.coreShell.material.opacity=.94*coreLife;
-      this.coreGlass.material.opacity=.040*coreLife;
+      this.coreShell.material.opacity=.82*seedShellLife;
+      this.coreGlass.material.opacity=.030*seedShellLife;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=coreLife>.005;
       this.irisGroup.scale.setScalar((.84+irisAwake*.05)*pulse);
-      if(this.irisCorona)this.irisCorona.material.opacity=.012*coreLife+.022*irisAwake;
-      this.glowSprite.material.opacity=(.004*coreLife+.010*irisAwake)*pulse;
-      this.glowSprite.scale.setScalar(.62+irisAwake*.04);
-      this.coreInner.material.opacity=.008*coreLife+.018*irisAwake;
-      this.coreLight.intensity=.12*coreLife+irisAwake*.34;
+      if(this.irisCorona)this.irisCorona.material.opacity=.030*coreLife+.050*irisAwake;
+      this.glowSprite.material.opacity=(.012*coreLife+.028*irisAwake)*pulse;
+      this.glowSprite.scale.setScalar(.66+irisAwake*.08+this.interactionImpulse*.025);
+      this.coreInner.material.opacity=.022*coreLife+.044*irisAwake;
+      this.coreLight.intensity=.28*coreLife+irisAwake*.64+this.interactionImpulse*.16;
       if(this.coreLabel)this.coreLabel.material.opacity=0;
     }
 
