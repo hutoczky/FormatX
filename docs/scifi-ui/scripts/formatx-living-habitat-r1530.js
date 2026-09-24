@@ -290,6 +290,68 @@
        beams: side architecture, overhead haze and a low reflected floor pool. */
     const heroPresence=Math.max(0,1-scrollValue*4.2);
     if(heroPresence>.01){
+      /* R1724 — cinematic FormatX world behind the organism. A distant planet,
+         monumental luminous arch and reflective horizon bring the guardian into
+         a coherent place without adding another animation loop or bitmap. */
+      const worldAlpha=heroPresence*(.72+.28*vitality);
+      ctx.save();
+
+      const planetX=width*(MOBILE.matches?.20:.18);
+      const planetY=height*(MOBILE.matches?.16:.18);
+      const planetR=Math.min(width,height)*(MOBILE.matches?.18:.16);
+      const planet=ctx.createRadialGradient(
+        planetX-planetR*.32,planetY-planetR*.30,planetR*.05,
+        planetX,planetY,planetR
+      );
+      planet.addColorStop(0,'rgba(98,188,228,'+(.18*worldAlpha)+')');
+      planet.addColorStop(.42,'rgba(28,78,132,'+(.14*worldAlpha)+')');
+      planet.addColorStop(.76,'rgba(7,23,54,'+(.18*worldAlpha)+')');
+      planet.addColorStop(1,'rgba(2,7,18,0)');
+      ctx.fillStyle=planet;
+      ctx.beginPath();ctx.arc(planetX,planetY,planetR,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(104,201,238,'+(.14*worldAlpha)+')';
+      ctx.lineWidth=Math.max(1,planetR*.012);
+      ctx.beginPath();ctx.arc(planetX,planetY,planetR*.96,Math.PI*.94,Math.PI*1.92);ctx.stroke();
+
+      const archCx=width*(MOBILE.matches?.52:.55);
+      const archCy=height*.50;
+      const archRx=width*(MOBILE.matches?.58:.48);
+      const archRy=height*.66;
+      ctx.lineCap='round';
+      ctx.strokeStyle='rgba(3,12,24,'+(.72*worldAlpha)+')';
+      ctx.lineWidth=MOBILE.matches?26:34;
+      ctx.beginPath();ctx.ellipse(archCx,archCy,archRx,archRy,0,Math.PI*1.03,Math.PI*1.97);ctx.stroke();
+      ctx.strokeStyle='rgba(255,171,72,'+(.16*worldAlpha)+')';
+      ctx.lineWidth=MOBILE.matches?4.2:5.2;
+      ctx.beginPath();ctx.ellipse(archCx,archCy,archRx,archRy,0,Math.PI*1.03,Math.PI*1.97);ctx.stroke();
+      ctx.strokeStyle='rgba(71,198,244,'+(.12*worldAlpha)+')';
+      ctx.lineWidth=MOBILE.matches?1.2:1.7;
+      ctx.beginPath();ctx.ellipse(archCx,archCy,archRx*.965,archRy*.965,0,Math.PI*1.03,Math.PI*1.97);ctx.stroke();
+
+      const horizonY=height*.79;
+      const horizon=ctx.createLinearGradient(0,horizonY,width,horizonY);
+      horizon.addColorStop(0,'rgba(20,129,182,0)');
+      horizon.addColorStop(.28,'rgba(37,182,235,'+(.08*worldAlpha)+')');
+      horizon.addColorStop(.64,'rgba(255,165,66,'+(.055*worldAlpha)+')');
+      horizon.addColorStop(1,'rgba(20,129,182,0)');
+      ctx.strokeStyle=horizon;ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.moveTo(0,horizonY);ctx.lineTo(width,horizonY);ctx.stroke();
+
+      const reflectionCount=MOBILE.matches?8:14;
+      for(let i=0;i<reflectionCount;i++){
+        const x=width*(.08+i/(reflectionCount-1)*.84);
+        const jitter=Math.sin(i*2.17+physiologyEnergy*1.7)*width*.008;
+        const len=height*(.025+.070*((i*7)%11)/10);
+        const alpha=(.018+.030*((i*5)%9)/8)*worldAlpha;
+        const warm=i%3===0;
+        const g=ctx.createLinearGradient(x,horizonY,x,horizonY+len);
+        g.addColorStop(0,warm?'rgba(255,185,92,'+alpha+')':'rgba(70,209,249,'+alpha+')');
+        g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.strokeStyle=g;ctx.lineWidth=warm?2.2:1.4;
+        ctx.beginPath();ctx.moveTo(x+jitter,horizonY);ctx.lineTo(x-jitter*.4,horizonY+len);ctx.stroke();
+      }
+      ctx.restore();
+
       const leftMass=ctx.createLinearGradient(0,0,width*.30,0);
       leftMass.addColorStop(0,'rgba(0,0,0,'+(.42*heroPresence)+')');
       leftMass.addColorStop(.36,'rgba(4,10,13,'+(.22*heroPresence)+')');
@@ -487,6 +549,7 @@
   ROOT.dataset.fxLivingHabitatPerformanceR1721='event-driven-hidpi-sharp-background-zero-idle';
   ROOT.dataset.fxLivingHabitatInteractionR1722='all-site-inputs-synchronized-with-organism-zero-extra-loop';
   ROOT.dataset.fxLivingHabitatPhysiologyR1723='same-organism-energy-breath-tissue-neural-world';
+  ROOT.dataset.fxLivingHabitatWorldR1724='planet-monumental-arch-spires-reflective-horizon-blue-gold';
   ROOT.dataset.fxLivingHabitatWorldR1723='organic-pillars-membranes-cells-capillaries-neural-roots-no-mineral-stage';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
 })();
