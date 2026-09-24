@@ -8,7 +8,7 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r1720';
+root.dataset.fxP0MotionSchedulerR490='armed-r1721';
 root.dataset.fxP0MotionCacheR1703='motion-loader-r1703-sharp-photoreal-mobile';
 root.dataset.fxP0MotionCacheR1704='motion-loader-r1704-software-mobile-photoreal-lens';
 root.dataset.fxP0MotionCacheR1710='motion-loader-r1710-60fps-frame-budget';
@@ -18,7 +18,8 @@ root.dataset.fxP0MotionCacheR1717='motion-loader-r1717-fixed-living-anatomy';
 root.dataset.fxP0MotionCacheR1718='motion-loader-r1718-mobile-sharp-bright';
 root.dataset.fxP0MotionCacheR1719='motion-loader-r1719-healthy-living-mag';
 root.dataset.fxP0MotionCacheR1720='motion-loader-r1720-ultra-sharp-living-world';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1720-ultra-sharp-living-world';
+root.dataset.fxP0MotionCacheR1721='motion-loader-r1721-cortical-living-world';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1721-cortical-living-world';
 const AUTO_DELAY_MS=6500;
 let started=false;
 let idleId=0;
