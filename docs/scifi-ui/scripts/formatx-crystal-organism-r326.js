@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
-  const REVISION = 'living-luminous-electric-crystal-r454';
+  const REVISION = 'fully-living-organism-r1723';
   const VISUAL_REVISION_R1713 = 'photoreal-single-living-organism-r1713';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
@@ -1296,6 +1296,7 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
+    root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
@@ -1380,14 +1381,15 @@
       delayed.add(timer);
       return timer;
     };
-    const initialShape='crystal';
-    root.dataset.fxCoreShapeR337='crystal';
-    root.dataset.fxCoreDefaultShapeR1401='irregular-crystal';
+    const initialShape='organism';
+    root.dataset.fxCoreShapeR337='organism';
+    root.dataset.fxCoreDefaultShapeR1401='organism';
+    root.dataset.fxCoreCanonicalIdentityR1723='one-living-organism-no-alternate-shapes';
     let disposed=false,contextLost=false,visible=true,paused=false;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=constrained;
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
-    let morph=initialShape==='sphere'?1:0,targetMorph=morph;
+    let morph=0,targetMorph=0;
     let rotationX=softwareRenderer?-.115:-.090,rotationY=softwareRenderer?-.385:-.235,rotationZ=.024;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
@@ -1467,44 +1469,51 @@
       targetBreath=Math.max(targetBreath,.38+value*.48);
       schedule(reduced.matches?1:frames);
     }
-    function shapeName(){return 'crystal';}
+    function shapeName(){return 'organism';}
     function publishShape(source='renderer'){
-      /* R1711: one organism, one persistent body. Existing "crystal" tokens are
-         compatibility-only so old controls/icons keep working without creating
-         a second visual identity. */
-      root.dataset.fxCoreShapeR337='crystal';
-      root.dataset.fxCoreTargetShape='crystal';
-      root.dataset.fxCoreShape='crystal';
+      root.dataset.fxCoreShapeR337='organism';
+      root.dataset.fxCoreTargetShape='organism';
+      root.dataset.fxCoreShape='organism';
       root.dataset.fxCoreMorph='0.000';
       root.dataset.fxCoreMorphSource=source;
-      root.dataset.fxCoreMorphEngine='single-living-organism-fixed-topology-r1711';
+      root.dataset.fxCoreMorphEngine='single-living-organism-fixed-topology-r1723';
       root.dataset.fxCoreLivingFormR1711='single-organism';
+      root.dataset.fxCoreLivingFormR1723='canonical-organism';
       stage.dataset.shape='organism';
     }
     function setMorph(value,source='api-morph',announce=true){
       const requested=clamp(Number(value)||0,0,1);
       targetMorph=0;
-      if(reduced.matches)morph=0;
+      morph=0;
       root.dataset.fxCoreRequestedMorphR1711=requested.toFixed(3);
+      root.dataset.fxCoreLegacyShapeRequestR1723=requested>.5?'sphere':'crystal';
       publishShape(source);
       const cinematicBirth=/^r533-/.test(source);
       boost(requested>.5?.88:.72,cinematicBirth?1:(mobile?3:5));
       if(announce)dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{
-        shape:'crystal',
-        requestedShape:requested>.5?'sphere':'crystal',
+        shape:'organism',
+        requestedShape:'organism',
+        legacyRequestedShape:requested>.5?'sphere':'crystal',
         visualForm:'single-organism',
         source,
-        revision:'r1711',
+        revision:'r1723',
         renderer:VERSION,
         geometry:'single-fixed-living-3d-volume'
       }}));
       return 0;
     }
-    function setShape(shape,source='api'){return setMorph(shape==='sphere'||shape===1||shape===true?1:0,source,true);}
+    function setShape(shape,source='api'){
+      const legacyRequested=shape==='sphere'||shape===1||shape===true?1:0;
+      return setMorph(legacyRequested,source,true);
+    }
     function toggleShape(source='interaction'){
       startSurfacePulse(String(source||'interaction')+'-living-response');
       boost(.86,mobile?4:6);
       publishShape(source);
+      dispatchEvent(new CustomEvent('formatx:coreshapechange',{detail:{
+        shape:'organism',requestedShape:'organism',visualForm:'single-organism',
+        source,revision:'r1723',renderer:VERSION,geometry:'single-fixed-living-3d-volume'
+      }}));
       return 0;
     }
     function rotateBy(x,y,source='api-rotate'){
@@ -1921,9 +1930,11 @@
       targetRotationX=clamp(targetRotationX+vertical*.040,-1.02,1.02);
       boost(.66,mobile?2:4);
     }
-    function signalShape(shape,source){
+    function signalPhysiology(kind,source){
       if(performance.now()<shapeLockUntil)return;
-      setShape(shape,source);
+      root.dataset.fxCorePhysiologyR1723=String(kind||'stimulus');
+      startSurfacePulse(String(source||kind||'stimulus')+'-physiology');
+      setShape('organism',source||kind||'physiology');
     }
     function onCinematicScene(event){
       const detail=event.detail||{};
@@ -1954,10 +1965,10 @@
     listen(window,'scroll',onScroll,{passive:true});
     listen(window,'resize',()=>{resize();boost(.30,mobile?1:2);startSurfacePulse('resize');},{passive:true});
     listen(window,'orientationchange',()=>{resize();boost(.52,mobile?2:3);startSurfacePulse('orientation');},{passive:true});
-    listen(window,'formatx:organismpanelopen',()=>signalShape('sphere','organism-listening'),{passive:true});
-    listen(window,'formatx:organismresponse',()=>signalShape('crystal','organism-response'),{passive:true});
-    listen(window,'formatx:open-live-os',()=>signalShape('sphere','live-os-open'),{passive:true});
-    listen(window,'formatx:loop',()=>{signalShape('crystal','site-loop');boost(.92,mobile?4:6);},{passive:true});
+    listen(window,'formatx:organismpanelopen',()=>signalPhysiology('attention','organism-listening'),{passive:true});
+    listen(window,'formatx:organismresponse',()=>signalPhysiology('response','organism-response'),{passive:true});
+    listen(window,'formatx:open-live-os',()=>signalPhysiology('system-attention','live-os-open'),{passive:true});
+    listen(window,'formatx:loop',()=>{signalPhysiology('renewal','site-loop');boost(.92,mobile?4:6);},{passive:true});
     listen(window,'formatx:menustatechange',event=>{boost(event.detail?.open ? .76 : .52,mobile?2:4);},{passive:true});
     listen(window,'formatx:languagechange',()=>boost(.62,mobile?2:3),{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
@@ -1976,8 +1987,8 @@
       if(!(event.target instanceof Element))return;
       const action=event.target.closest('a,button,[role="button"]');
       if(!action||action.closest('.fx-reference-mag-button'))return;
-      if(action.matches('.fx-reference-ask,[data-fx-organism-question]'))signalShape('sphere','site-question');
-      else if(action.matches('a[href*="download"],[data-release-download]'))signalShape('crystal','release-action');
+      if(action.matches('.fx-reference-ask,[data-fx-organism-question]'))signalPhysiology('attention','site-question');
+      else if(action.matches('a[href*="download"],[data-release-download]'))signalPhysiology('activation','release-action');
       boost(action.matches('a[href*="download"],[data-release-download]') ? .92 : .62,mobile?2:4);
     },{passive:true});
     listen(document,'focusin',event=>{
