@@ -56,7 +56,7 @@ has(renderer,[
   "const REVISION = 'living-luminous-electric-crystal-r454'","const CANONICAL_REVISION = 'fully-living-organism-r1723'",'buildOrganismGeometry',
   'KHR_parallel_shader_compile','fxCoreShaderCompileR600','finishProgram',
   'const SURFACE_PULSE_MS = 1160','const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880','prefers-reduced-motion:reduce','document.hidden',
-  'uSurfacePulse','dnaHelix','dnaBridge','fxCoreGenomeR614','native-double-helix-energy-lattice-r614','fxCoreGenesisMagR614','cortical-cellular-organism-with-native-tendrils-r1723','cortical-bioceramic-living-tissue-r1723','single-luminous-webgl-material-owner','fxCoreCanonicalIdentityR1723','fxNativeMagIdentityR1723','fxNativeMagMaterialR1723','fxNativeMagTendrilsR1723','fxNativeMagPhysiologyR1723','formatx:organismphysiology'
+  'uSurfacePulse','dnaHelix','dnaBridge','fxCoreGenomeR614','native-double-helix-energy-lattice-r614','fxCoreGenesisMagR614','cortical-cellular-organism-with-native-tendrils-r1723','cortical-bioceramic-living-tissue-r1723','single-luminous-webgl-material-owner','fxCoreCanonicalIdentityR1723','fxNativeMagIdentityR1723','fxNativeMagMaterialR1723','fxNativeMagTendrilsR1723','fxNativeMagPhysiologyR1723','fxNativeMagPhysiologyApiR1723','physiology:(kind,source)=>signalPhysiology','formatx:organismphysiology'
 ],'native R326 renderer');
 assert.doesNotMatch(renderer,/new\s+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer/);
 assert.ok(!renderer.includes("shape:'crystal'"),'R1723 renderer must not publish crystal as active shape');
@@ -73,9 +73,11 @@ assert.ok(!life.includes('requestAnimationFrame('),'living-core life owner must 
 has(governor,[
   'automatic lifecycle','not a user-facing MAG pause feature','activeWindowMs=240',
   "fxMobileRenderGovernorRevisionR433='r528-automatic-idle-flag-no-manual-pause'",
+  "fxMobileRenderGovernorOrganismR1723='fixed-organism-morph-zero-settle'",
+  "target==='crystal'||target==='organism'?0:NaN",
   "fxCoreMobileIdlePolicyR426='periodic-surface-bursts-between-zero-idle'",
   'idle-zero-frame','visibilitychange','document.hidden'
-],'R528 mobile lifecycle governor');
+],'R1723 mobile lifecycle governor');
 assert.ok(!governor.includes("dispatchEvent(new CustomEvent('formatx:referencepause'"),'automatic governor must not dispatch the retired manual PAUSE event');
 
 has(quality,[
