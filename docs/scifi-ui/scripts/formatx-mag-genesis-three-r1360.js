@@ -115,6 +115,8 @@
       document.documentElement.dataset.fxMagBirthAnatomyR1724='same-rhombic-cortical-lobes-membranes-energy-core-as-hero';
       document.documentElement.dataset.fxMagBirthMotionR1724='energy-core-living-membranes-tendrils-interactive';
       document.documentElement.dataset.fxMagBirthCellsR1724='anatomy-bound-dark-tissue-no-spherical-cell-shell';
+      document.documentElement.dataset.fxMagBirthVisualR1725='studio-photoreal-smoky-pearl-living-biocrystal';
+      document.documentElement.dataset.fxMagBirthMaterialR1725='desaturated-mineral-clearcoat-low-emission-warm-rim';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,1);
@@ -900,14 +902,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x244858,roughness:.20,metalness:0,
-        clearcoat:.72,clearcoatRoughness:.10,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0085,
+        color:0x1d3038,roughness:.29,metalness:0,
+        clearcoat:.54,clearcoatRoughness:.16,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0048,
         transparent:true,opacity:0,
-        emissive:0x073149,emissiveIntensity:.13,
-        envMapIntensity:1.92,
-        ior:1.40,specularIntensity:.92,specularColor:new T.Color(0xe9ffff),
-        sheen:.32,sheenColor:new T.Color(0x4fc4e1),sheenRoughness:.34,
+        emissive:0x03131c,emissiveIntensity:.055,
+        envMapIntensity:1.54,
+        ior:1.39,specularIntensity:.88,specularColor:new T.Color(0xe8f6f7),
+        sheen:.15,sheenColor:new T.Color(0x6eb9c4),sheenRoughness:.46,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -926,8 +928,8 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
 
-      const shellWidth=this.deterministicFrame||this.highDetail?48:(this.lowPowerProfile?20:(this.mobileProfile?24:32));
-      const shellHeight=this.deterministicFrame||this.highDetail?30:(this.lowPowerProfile?12:(this.mobileProfile?16:20));
+      const shellWidth=this.deterministicFrame||this.highDetail?42:(this.lowPowerProfile?18:(this.mobileProfile?24:32));
+      const shellHeight=this.deterministicFrame||this.highDetail?26:(this.lowPowerProfile?12:(this.mobileProfile?16:20));
       const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
       for(let i=0;i<shellPos.count;i++){
@@ -938,7 +940,7 @@
         const ax=.78+shoulder*.08+n.x*.035-n.z*.018;
         const ay=1.10+shoulder*.04+n.y*.025+n.x*.015;
         const azr=.67+shoulder*.06+n.z*.025-n.x*.015;
-        const exponent=1.24;
+        const exponent=1.18;
         const lp=
           Math.pow(Math.abs(n.x)/ax,exponent)+
           Math.pow(Math.abs(n.y)/ay,exponent)+
@@ -960,13 +962,13 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x9bc9d4,roughness:.12,metalness:0,
-        clearcoat:.78,clearcoatRoughness:.055,
-        transmission:.14,thickness:.095,ior:1.39,
-        attenuationColor:new T.Color(0x1c758d),attenuationDistance:1.5,
+        color:0x78aeb8,roughness:.18,metalness:0,
+        clearcoat:.68,clearcoatRoughness:.080,
+        transmission:.24,thickness:.080,ior:1.38,
+        attenuationColor:new T.Color(0x174c5b),attenuationDistance:1.9,
         transparent:true,opacity:0,depthWrite:false,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0008,
-        envMapIntensity:1.38,side:T.FrontSide
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00045,
+        envMapIntensity:1.28,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
       this.organicMembrane.scale.set(.836,.796,.714);
@@ -1005,25 +1007,25 @@
          faceted cortical lobes, translucent membranes and one energy organ.
          No animal head, paws, limbs or robotic armour. */
       this.guardianPlateMaterial=new T.MeshPhysicalMaterial({
-        color:0x5f82a0,roughness:.20,metalness:0,
-        clearcoat:.76,clearcoatRoughness:.085,
-        emissive:0x0b4b66,emissiveIntensity:.18,
-        envMapIntensity:2.06,
-        sheen:.30,sheenColor:new T.Color(0x7fe8ff),sheenRoughness:.34,
-        specularIntensity:.96,specularColor:new T.Color(0xe9ffff),
+        color:0x667b82,roughness:.27,metalness:0,
+        clearcoat:.68,clearcoatRoughness:.12,
+        emissive:0x06222d,emissiveIntensity:.075,
+        envMapIntensity:1.72,
+        sheen:.16,sheenColor:new T.Color(0x89ced8),sheenRoughness:.46,
+        specularIntensity:.92,specularColor:new T.Color(0xecf8f8),
         transparent:true,opacity:0,depthWrite:true,
         flatShading:true
       });
       this.guardianGoldMaterial=new T.MeshPhysicalMaterial({
-        color:0x9f6d54,roughness:.24,metalness:.02,
-        clearcoat:.54,clearcoatRoughness:.12,
-        emissive:0x6d2b16,emissiveIntensity:.08,
-        envMapIntensity:1.38,specularIntensity:.72,specularColor:new T.Color(0xffdbc8),
+        color:0x6c5549,roughness:.31,metalness:.015,
+        clearcoat:.42,clearcoatRoughness:.17,
+        emissive:0x2b120a,emissiveIntensity:.025,
+        envMapIntensity:1.28,specularIntensity:.70,specularColor:new T.Color(0xf2d8c7),
         transparent:true,opacity:0,flatShading:true
       });
       this.guardianAnatomy=new T.Group();
       this.guardianParts=[];
-      const facetDetail=this.lowPowerProfile?1:(this.mobileProfile?2:3);
+      const facetDetail=this.lowPowerProfile?1:2;
       const facetGeo=new T.IcosahedronGeometry(1,facetDetail);
       const addFacet=(name,pos,scale,rot=[0,0,0],warm=false)=>{
         const mesh=new T.Mesh(facetGeo.clone(),warm?this.guardianGoldMaterial:this.guardianPlateMaterial);
@@ -1045,10 +1047,10 @@
       addFacet('root',[.03,-.70,-.02],[.22,.38,.18],[0,-.06,-.06],true);
 
       const livingCrystalMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x8bd9eb,roughness:.10,metalness:0,
-        clearcoat:.82,clearcoatRoughness:.045,
-        transmission:.26,thickness:.07,ior:1.38,
-        emissive:0x0b5d77,emissiveIntensity:.18,
+        color:0x75b8c2,roughness:.16,metalness:0,
+        clearcoat:.72,clearcoatRoughness:.075,
+        transmission:.34,thickness:.065,ior:1.38,
+        emissive:0x073240,emissiveIntensity:.070,
         transparent:true,opacity:0,depthWrite:false,
         side:T.DoubleSide
       });
@@ -1739,9 +1741,9 @@
       const bodyScale=.001+visible*.999;
       this.organicGroup.scale.set(bodyScale*.84,bodyScale*.84,bodyScale*.84);
 
-      this.organicShellMaterial.opacity=(.52+.12*maturity)*visible;
-      this.organicLobeMaterial.opacity=(.18+.12*maturity)*visible;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.16+.10*maturity)*visible;
+      this.organicShellMaterial.opacity=(.36+.08*maturity)*visible;
+      this.organicLobeMaterial.opacity=(.14+.08*maturity)*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.12+.07*maturity)*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=(.12+.12*maturity)*visible;
       this.organicHoodMaterial.opacity=0;
@@ -1774,9 +1776,9 @@
           if(base)membrane.scale.set(base.x*q,base.y*q,1);
         });
       }
-      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=(.54+.20*maturity)*visible;
-      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=(.10+.08*maturity)*visible;
-      if(this.guardianMembraneMaterial)this.guardianMembraneMaterial.opacity=(.20+.14*maturity)*visible;
+      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=(.66+.18*maturity)*visible;
+      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=(.07+.05*maturity)*visible;
+      if(this.guardianMembraneMaterial)this.guardianMembraneMaterial.opacity=(.16+.10*maturity)*visible;
       this.organicLobes.forEach((lobe,i)=>{
         const q=1+Math.sin(time*.00082+lobe.userData.phase)*.018*visible;
         const b=lobe.userData.baseScale;
@@ -1946,9 +1948,9 @@
         this.mechEnergyMaterial.envMapIntensity=1.76+physicalImpulse*.11;
       }
       if(this.organicShellMaterial){
-        this.organicShellMaterial.roughness=.40+Math.abs(this.interactionY)*.018;
-        this.organicShellMaterial.clearcoatRoughness=.22+Math.abs(this.interactionX)*.012;
-        this.organicShellMaterial.envMapIntensity=1.12+physicalImpulse*.08;
+        this.organicShellMaterial.roughness=.29+Math.abs(this.interactionY)*.016;
+        this.organicShellMaterial.clearcoatRoughness=.16+Math.abs(this.interactionX)*.010;
+        this.organicShellMaterial.envMapIntensity=1.54+physicalImpulse*.07;
       }
       if(this.mechMaterial){
         this.mechMaterial.roughness=.18+Math.abs(this.interactionY)*.014;
