@@ -343,10 +343,24 @@
   function attach(canvas,getTarget){
     if(!(canvas instanceof HTMLCanvasElement))return null;
     let ctx=null,dpr=1,sw=0,sh=0,scale=1,ox=0,oy=0;
-    let qualityScale=innerWidth<900?.98:.82,renderAverage=0,lastQualityAdjust=0;
+    const proofFrame=new URLSearchParams(location.search).has('introframe');
+    const constrained=!proofFrame&&(
+      Number(navigator.hardwareConcurrency||8)<=4 ||
+      Number(navigator.deviceMemory||8)<=4
+    );
+    let qualityScale=proofFrame
+      ? 1
+      : constrained
+        ? (innerWidth<900?.68:.62)
+        : (innerWidth<900?.98:.82);
+    let renderAverage=0,lastQualityAdjust=0;
     function resize(){
       sw=innerWidth;sh=innerHeight;
-      const baseDpr=sw<900?2.05:1.45;
+      const baseDpr=proofFrame
+        ? (sw<900?2.05:1.45)
+        : constrained
+          ? (sw<900?1.45:1.15)
+          : (sw<900?2.05:1.45);
       dpr=Math.min(devicePixelRatio||1,baseDpr*qualityScale);
       canvas.width=Math.max(1,Math.round(sw*dpr));canvas.height=Math.max(1,Math.round(sh*dpr));canvas.style.width=sw+'px';canvas.style.height=sh+'px';
       ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -374,6 +388,9 @@
         }
       }
       document.documentElement.dataset.fxMagFallbackTargetFpsR1601='60';
+      document.documentElement.dataset.fxMagFallbackBudgetR1727=constrained
+        ? 'constrained-low-dpr-adaptive-recovery'
+        : 'full-photographic-adaptive';
       document.documentElement.dataset.fxMagFallbackRenderMsR1601=renderAverage.toFixed(2);
       document.documentElement.dataset.fxMagFallbackQualityScaleR1601=qualityScale.toFixed(2);
     }
