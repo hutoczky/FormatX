@@ -23,6 +23,7 @@
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
   let pendingDesktopSourceTop = null;
+  let canonicalLandingSourceTop = 0;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
@@ -56,6 +57,7 @@
   root.dataset.fxLoopDesktopSettleR1724='scrollend-primary-idle-timer-fallback';
   root.dataset.fxLoopVisualContinuityR1724='scroll-frame-relative-authoritative-through-reflow';
   root.dataset.fxLoopSourceTopContinuityR1724='scroll-frame-source-top-authoritative-through-idle-reflow';
+  root.dataset.fxLoopSourceTopContinuityR1725='hero-idle-origin-authoritative-active-scroll-offsetparent-proof';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -467,6 +469,7 @@
     bridge.appendChild(mirror);
     footer.insertAdjacentElement('afterend', bridge);
     root.dataset.fxLoopBridge = 'ready-v3';
+    captureCanonicalLandingOrigin();
 
     // Geometry is deliberately sampled outside the scroll hot path. This avoids
     // style writes followed by offset/scrollHeight reads on every animation frame.
@@ -485,11 +488,24 @@
     return Math.max(0, Math.min(y - geometry.bridgeTop, Math.max(0, geometry.sourceHeight - 2)));
   }
 
+  function captureCanonicalLandingOrigin() {
+    if (!sourceHero || !sourceHero.isConnected) return;
+    /* offsetTop is sampled only after scrolling settles and while the real hero
+       is still the active scene. This prevents active-scroll offsetParent/layout
+       changes from contaminating the loop destination. */
+    if (scrollY > Math.max(innerHeight * 1.10, sourceHero.offsetHeight + 160)) return;
+    const measured = Number(sourceHero.offsetTop);
+    if (!Number.isFinite(measured)) return;
+    canonicalLandingSourceTop = Math.max(0, measured);
+    root.dataset.fxLoopCanonicalSourceTopR1725 = String(Math.round(canonicalLandingSourceTop));
+  }
+
   function markIdle() {
     clearTimeout(activityTimer);
     activityTimer = 0;
     root.dataset.fxScrollActivity = 'idle';
     root.classList.remove('fx-page-scrolling');
+    captureCanonicalLandingOrigin();
     if (isMobileFlow()) scheduleMobileTransfer();
     else commitDesktopTransfer();
   }
@@ -634,10 +650,10 @@
        destination hero origin must come from the fresh idle geometry. A cached
        sourceTop can belong to pre-font/pre-layout geometry and creates a visible
        vertical jump on the next cycle. */
-    const freshSourceTop=loopGeometry.sourceTop;
-    root.dataset.fxLoopDesktopSourceTopR1724=String(Math.round(freshSourceTop));
-    root.dataset.fxLoopDesktopLandingR1725='cached-relative-fresh-source-top';
-    performTransfer(relative,'visual-bridge-desktop-idle-r1725',freshSourceTop);
+    const stableSourceTop=canonicalLandingSourceTop;
+    root.dataset.fxLoopDesktopSourceTopR1724=String(Math.round(stableSourceTop));
+    root.dataset.fxLoopDesktopLandingR1725='cached-relative-stable-hero-origin';
+    performTransfer(relative,'visual-bridge-desktop-idle-r1725b',stableSourceTop);
   }
 
   function transferIfNeeded() {
