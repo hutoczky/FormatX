@@ -336,19 +336,25 @@
         const spireH=height*s.h;
         const tipX=baseX+s.lean*width;
         const g=ctx.createLinearGradient(baseX-spireW,baseY,baseX+spireW*.4,baseY-spireH);
-        const tint=s.warm?'86,69,54':'37,56,61';
-        g.addColorStop(0,'rgba(0,0,0,'+(s.alpha*.72*structuralPresence)+')');
-        g.addColorStop(.46,'rgba('+tint+','+(s.alpha*.34*structuralPresence)+')');
-        g.addColorStop(.74,'rgba(74,98,101,'+(s.alpha*.18*structuralPresence)+')');
-        g.addColorStop(1,'rgba(4,8,9,0)');
+        const vascular=.45+.55*vitality;
+        g.addColorStop(0,'rgba(2,5,10,'+(s.alpha*.72*structuralPresence)+')');
+        g.addColorStop(.36,'rgba(35,42,64,'+(s.alpha*.40*structuralPresence)+')');
+        g.addColorStop(.67,'rgba(60,31,76,'+(s.alpha*.27*structuralPresence)+')');
+        g.addColorStop(.84,'rgba(37,125,145,'+(s.alpha*.15*structuralPresence*vascular)+')');
+        g.addColorStop(1,'rgba(4,8,12,0)');
         ctx.fillStyle=g;
         ctx.beginPath();
         ctx.moveTo(baseX-spireW,baseY);
-        ctx.lineTo(tipX-spireW*.15,baseY-spireH);
-        ctx.lineTo(tipX+spireW*.22,baseY-spireH*.72);
-        ctx.lineTo(baseX+spireW*.72,baseY);
+        ctx.bezierCurveTo(baseX-spireW*.65,baseY-spireH*.38,tipX-spireW*.20,baseY-spireH*.78,tipX,baseY-spireH);
+        ctx.bezierCurveTo(tipX+spireW*.22,baseY-spireH*.74,baseX+spireW*.78,baseY-spireH*.34,baseX+spireW*.72,baseY);
         ctx.closePath();
         ctx.fill();
+        ctx.strokeStyle='rgba(79,202,222,'+(s.alpha*.20*structuralPresence*vascular)+')';
+        ctx.lineWidth=Math.max(.7,spireW*.018);
+        ctx.beginPath();
+        ctx.moveTo(baseX,baseY);
+        ctx.bezierCurveTo(baseX+s.side*spireW*.08,baseY-spireH*.34,tipX-s.side*spireW*.06,baseY-spireH*.68,tipX,baseY-spireH*.96);
+        ctx.stroke();
       }
 
       for(const a of glassArcs){
@@ -361,13 +367,18 @@
         const alpha=a.alpha*structuralPresence;
         ctx.save();
         ctx.lineCap='round';
-        ctx.strokeStyle='rgba(194,224,225,'+(alpha*.28)+')';
-        ctx.lineWidth=a.width*3.6;
+        ctx.strokeStyle='rgba(20,33,48,'+(alpha*(1.65+vitality*.35))+')';
+        ctx.lineWidth=a.width*5.1;
         ctx.beginPath();ctx.moveTo(edge,y);
         ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
         ctx.stroke();
-        ctx.strokeStyle='rgba(222,241,239,'+(alpha*.92)+')';
-        ctx.lineWidth=a.width;
+        ctx.strokeStyle='rgba(87,180,199,'+(alpha*(.48+vitality*.28))+')';
+        ctx.lineWidth=a.width*1.65;
+        ctx.beginPath();ctx.moveTo(edge,y);
+        ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
+        ctx.stroke();
+        ctx.strokeStyle='rgba(165,226,231,'+(alpha*.36)+')';
+        ctx.lineWidth=Math.max(.5,a.width*.42);
         ctx.beginPath();ctx.moveTo(edge,y);
         ctx.bezierCurveTo(cp1x,y-height*.12,cp2x,endY+height*.10,endX,endY);
         ctx.stroke();
@@ -462,8 +473,8 @@
   ROOT.dataset.fxLivingHabitatR1530='active-scroll-pointer-atmosphere';
   ROOT.dataset.fxLivingHabitatR1584=MOBILE.matches?'mobile-volumetric-no-filament-beams':'desktop-short-organic-filaments';
   ROOT.dataset.fxLivingHabitatR1585='dark-laboratory-side-masses-overhead-haze-floor-reflection-no-rings';
-  ROOT.dataset.fxLivingHabitatR1593='physical-mineral-spires-clear-bioglass-arches-whole-page-depth';
-  ROOT.dataset.fxLivingHabitatR1594='visible-bioglass-arches-mineral-spires-reflective-floor-depth-without-hud-rings';
+  ROOT.dataset.fxLivingHabitatR1593='organic-tissue-pillars-living-membrane-arches-whole-page-depth';
+  ROOT.dataset.fxLivingHabitatR1594='visible-living-membrane-arches-tissue-pillars-reflective-depth-without-hud-rings';
   ROOT.dataset.fxLivingHabitatSchedulerR1541='interaction-driven-zero-idle-raf';
   ROOT.dataset.fxLivingHabitatSchedulerR1643='scroll-settle-canvas-css-compositor-during-motion';
   ROOT.dataset.fxLivingHabitatSchedulerR1670='desktop-canvas-60hz-floor-high-refresh-divisor-zero-idle';
@@ -476,5 +487,6 @@
   ROOT.dataset.fxLivingHabitatPerformanceR1721='event-driven-hidpi-sharp-background-zero-idle';
   ROOT.dataset.fxLivingHabitatInteractionR1722='all-site-inputs-synchronized-with-organism-zero-extra-loop';
   ROOT.dataset.fxLivingHabitatPhysiologyR1723='same-organism-energy-breath-tissue-neural-world';
+  ROOT.dataset.fxLivingHabitatWorldR1723='organic-pillars-membranes-cells-capillaries-neural-roots-no-mineral-stage';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
 })();
