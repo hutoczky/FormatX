@@ -1295,7 +1295,7 @@
     root.dataset.fxNativeMagVisualR1721='cortical-lobes-electric-neural-core-subdermal-vascular-detail';
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
-    root.dataset.fxNativeMagInteractionR1722='all-site-input-one-physiology-render-loop';
+    root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxCoreSurfaceCadenceR1679='desktop-overhead-safe-interval-mobile-unchanged';
     root.dataset.fxNativeMagPerformanceR1678=softwareRenderer
       ? 'software-fragment-cost-cut-physical-identity-preserved'
@@ -1962,6 +1962,12 @@
     listen(window,'formatx:languagechange',()=>boost(.62,mobile?2:3),{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
     listen(window,'formatx:storychapter',()=>boost(.64,mobile?2:4),{passive:true});
+    listen(document,'input',()=>boost(.34,mobile?1:2),{passive:true});
+    listen(document,'change',()=>boost(.42,mobile?1:2),{passive:true});
+    listen(document,'submit',()=>{boost(.78,mobile?3:5);startSurfacePulse('form-submit');},{passive:true});
+    listen(window,'pointerenter',()=>boost(.22,mobile?1:2),{passive:true});
+    listen(window,'pointerleave',()=>boost(.16,mobile?1:2),{passive:true});
+    listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
     listen(document,'visibilitychange',()=>{
       if(!document.hidden)schedule(1);
       scheduleSurfacePulse();
