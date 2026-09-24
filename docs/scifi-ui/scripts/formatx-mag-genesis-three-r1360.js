@@ -63,9 +63,13 @@
       /* R1722 — the primary intro renderer must begin at genuinely sharp
          mobile resolution. The former 0.36× quality and 0.80 DPR cap yielded
          only ~0.29 effective DPR on phones. */
-      this.qualityScale=this.lowPowerProfile?.74:(this.mobileProfile?1.00:.96);
-      this.qualityCeiling=this.lowPowerProfile?.86:(this.mobileProfile?1.00:1.00);
-      this.qualityFloor=this.lowPowerProfile?.62:(this.mobileProfile?.76:.44);
+      /* R1727c — low-power hardware previously had almost no resolution
+         headroom (.74 -> .62), so a slow GPU could remain trapped in 70–200 ms
+         frames. Start leaner and allow the governor to shed enough pixels to
+         protect interaction before sacrificing the 3D identity. */
+      this.qualityScale=this.lowPowerProfile?.52:(this.mobileProfile?1.00:.96);
+      this.qualityCeiling=this.lowPowerProfile?.72:(this.mobileProfile?1.00:1.00);
+      this.qualityFloor=this.lowPowerProfile?.28:(this.mobileProfile?.62:.34);
       this.lastQualityAdjust=0;
       this.renderPeak=0;
       this.framePeak=this.targetFrameMs;
@@ -2254,6 +2258,7 @@
   document.documentElement.dataset.fxMagBirthVisualR1702='photographic-exposure-readable-bioceramic-obsidian-physical-dna-dark-habitat';
   document.documentElement.dataset.fxMagBirthVisualR1701='photoreal-whole-scene-parallax-physical-material-response-no-hud';
   document.documentElement.dataset.fxMagBirthPerformanceR1701='quality-sheds-before-cadence-60fps-animation-target';
+  document.documentElement.dataset.fxMagBirthPerformanceR1727='constrained-low-resolution-headroom-before-frame-cadence-loss';
   window.FormatXMagGenesisThreeR1360={
     attach,
     revision:'r1701-physically-based-whole-scene-reactive-quality-first-60fps'
