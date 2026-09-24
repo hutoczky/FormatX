@@ -2012,6 +2012,15 @@
       }
       root.dataset.fxCorePhysiologyEnergyR1723=targetEnergy.toFixed(2);
       root.dataset.fxCorePhysiologyBreathR1723=targetBreath.toFixed(2);
+      dispatchEvent(new CustomEvent('formatx:organismphysiology',{detail:{
+        kind:state,
+        source:String(source||state),
+        energy:targetEnergy,
+        breath:targetBreath,
+        x:tx,
+        y:ty,
+        revision:'r1723'
+      }}));
       startSurfacePulse(String(source||state)+'-physiology');
       setShape('organism',source||state||'physiology');
       schedule(mobile?3:5);
