@@ -999,80 +999,84 @@
         this.organicLobes.push(lobe);
       }
 
-      /* R1724 — FormatX Guardian anatomy. The intro now grows the same
-         quadruped/feline-dragon organism that remains in the hero after handoff. */
+      /* R1724 — FormatX living-crystal anatomy.
+         The intro grows the same unique crystalline organism used by the hero:
+         faceted cortical lobes, translucent membranes and one energy organ.
+         No animal head, paws, limbs or robotic armour. */
       this.guardianPlateMaterial=new T.MeshPhysicalMaterial({
-        color:0xe7f2f3,roughness:.14,metalness:.010,
-        clearcoat:.82,clearcoatRoughness:.070,
-        emissive:0x0b3c55,emissiveIntensity:.11,
-        envMapIntensity:2.12,
-        sheen:.34,sheenColor:new T.Color(0x8beaff),sheenRoughness:.30,
-        specularIntensity:.98,specularColor:new T.Color(0xffffff),
+        color:0x5f82a0,roughness:.20,metalness:0,
+        clearcoat:.76,clearcoatRoughness:.085,
+        emissive:0x0b4b66,emissiveIntensity:.18,
+        envMapIntensity:2.06,
+        sheen:.30,sheenColor:new T.Color(0x7fe8ff),sheenRoughness:.34,
+        specularIntensity:.96,specularColor:new T.Color(0xe9ffff),
         transparent:true,opacity:0,depthWrite:true,
         flatShading:true
       });
       this.guardianGoldMaterial=new T.MeshPhysicalMaterial({
-        color:0xb58448,roughness:.16,metalness:.18,
-        clearcoat:.78,clearcoatRoughness:.07,
-        emissive:0xb74d09,emissiveIntensity:.22,
-        envMapIntensity:1.92,specularIntensity:.92,specularColor:new T.Color(0xffe5bd),
+        color:0x9f6d54,roughness:.24,metalness:.02,
+        clearcoat:.54,clearcoatRoughness:.12,
+        emissive:0x6d2b16,emissiveIntensity:.08,
+        envMapIntensity:1.38,specularIntensity:.72,specularColor:new T.Color(0xffdbc8),
         transparent:true,opacity:0,flatShading:true
       });
       this.guardianAnatomy=new T.Group();
       this.guardianParts=[];
-      const guardianDetail=this.lowPowerProfile?1:(this.mobileProfile?2:3);
-      const guardianSphere=new T.IcosahedronGeometry(1,guardianDetail);
-      const addPart=(name,pos,scale,material=this.guardianPlateMaterial,rot=[0,0,0])=>{
-        const mesh=new T.Mesh(guardianSphere.clone(),material);
-        mesh.name=name;mesh.position.set(...pos);mesh.scale.set(...scale);mesh.rotation.set(...rot);
-        mesh.userData.baseScale=mesh.scale.clone();
-        this.guardianAnatomy.add(mesh);this.guardianParts.push(mesh);return mesh;
-      };
-      addPart('shoulder',[.34,.27,.02],[.38,.29,.31],this.guardianPlateMaterial,[0,0,-.14]);
-      addPart('neck',[.48,.47,.01],[.245,.37,.235],this.guardianPlateMaterial,[0,0,-.28]);
-      addPart('head',[.73,.66,.04],[.32,.225,.245],this.guardianPlateMaterial,[0,0,-.19]);
-      addPart('muzzle',[.99,.595,.09],[.255,.088,.135],this.guardianPlateMaterial,[0,0,-.075]);
-      addPart('chestPlate',[.16,.08,.54],[.48,.42,.15],this.guardianPlateMaterial,[0,0,.05]);
-      addPart('hipPlate',[-.43,-.02,.20],[.34,.27,.18],this.guardianPlateMaterial,[0,0,.12]);
-
-      const limbMat=this.guardianPlateMaterial;
-      const limbGeo=new T.CylinderGeometry(1,1,1,this.lowPowerProfile?7:10,1,false);
-      const addLimb=(name,a,b,r0,r1)=>{
-        const start=new T.Vector3(...a),end=new T.Vector3(...b);
-        const dir=end.clone().sub(start);const len=dir.length();
-        const mesh=new T.Mesh(limbGeo.clone(),limbMat);
+      const facetDetail=this.lowPowerProfile?1:(this.mobileProfile?2:3);
+      const facetGeo=new T.IcosahedronGeometry(1,facetDetail);
+      const addFacet=(name,pos,scale,rot=[0,0,0],warm=false)=>{
+        const mesh=new T.Mesh(facetGeo.clone(),warm?this.guardianGoldMaterial:this.guardianPlateMaterial);
         mesh.name=name;
-        mesh.position.copy(start.clone().add(end).multiplyScalar(.5));
-        mesh.scale.set((r0+r1)*.5,len,(r0+r1)*.5);
-        mesh.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),dir.normalize());
+        mesh.position.set(...pos);
+        mesh.scale.set(...scale);
+        mesh.rotation.set(...rot);
         mesh.userData.baseScale=mesh.scale.clone();
-        this.guardianAnatomy.add(mesh);this.guardianParts.push(mesh);
-        const paw=addPart(name+'Paw',[b[0],b[1],b[2]],[r1*1.35,r1*.62,r1*1.42],limbMat,[0,0,0]);
-        return [mesh,paw];
+        mesh.userData.phase=r()*Math.PI*2;
+        this.guardianAnatomy.add(mesh);
+        this.guardianParts.push(mesh);
+        return mesh;
       };
-      addLimb('frontNear',[.42,.05,.15],[.61,-.66,.20],.11,.075);
-      addLimb('frontFar',[.20,-.01,-.10],[.27,-.64,-.05],.105,.068);
-      addLimb('rearNear',[-.36,-.10,.08],[-.52,-.64,.14],.13,.080);
-      addLimb('rearFar',[-.18,-.14,-.14],[-.12,-.61,-.10],.115,.070);
+      addFacet('upperLeft',[-.36,.34,.02],[.30,.42,.24],[.05,.08,.30]);
+      addFacet('upperRight',[.38,.28,.04],[.33,.38,.26],[-.03,-.08,-.27]);
+      addFacet('lowerLeft',[-.31,-.33,.00],[.28,.36,.22],[-.04,.05,-.22]);
+      addFacet('lowerRight',[.34,-.38,.03],[.27,.34,.23],[.04,-.05,.25]);
+      addFacet('crown',[-.06,.69,-.03],[.24,.42,.19],[0,.08,.08]);
+      addFacet('root',[.03,-.70,-.02],[.22,.38,.18],[0,-.06,-.06],true);
 
-      const earGeo=new T.ConeGeometry(.13,.42,5,1,false);
-      [[.61,.94,.02,-.22],[.76,.97,.00,.14],[.48,.86,-.05,-.44]].forEach((d,i)=>{
-        const ear=new T.Mesh(earGeo.clone(),i===1?this.guardianGoldMaterial:this.guardianPlateMaterial);
-        ear.position.set(d[0],d[1],d[2]);ear.rotation.z=d[3];ear.rotation.x=.06;
-        ear.userData.baseScale=ear.scale.clone();
-        this.guardianAnatomy.add(ear);this.guardianParts.push(ear);
+      const livingCrystalMembraneMaterial=new T.MeshPhysicalMaterial({
+        color:0x8bd9eb,roughness:.10,metalness:0,
+        clearcoat:.82,clearcoatRoughness:.045,
+        transmission:.26,thickness:.07,ior:1.38,
+        emissive:0x0b5d77,emissiveIntensity:.18,
+        transparent:true,opacity:0,depthWrite:false,
+        side:T.DoubleSide
       });
-      const spineGeo=new T.ConeGeometry(.075,.34,5,1,false);
-      [
-        [-.30,.30,-.22,-.64],[-.10,.43,-.24,-.50],[.10,.54,-.20,-.34],
-        [.30,.66,-.14,-.20],[.50,.77,-.08,-.08]
-      ].forEach((d,i)=>{
-        const spine=new T.Mesh(spineGeo.clone(),i%3===1?this.guardianGoldMaterial:this.guardianPlateMaterial);
-        spine.position.set(d[0],d[1],d[2]);spine.rotation.z=d[3];spine.rotation.x=-.14;
-        spine.scale.set(1,1+.16*i,1);spine.userData.baseScale=spine.scale.clone();
-        this.guardianAnatomy.add(spine);this.guardianParts.push(spine);
+      this.guardianMembraneMaterial=livingCrystalMembraneMaterial;
+      const livingCrystalMembraneShape=new T.Shape();
+      livingCrystalMembraneShape.moveTo(0,0);
+      livingCrystalMembraneShape.bezierCurveTo(.16,.10,.27,.32,.08,.62);
+      livingCrystalMembraneShape.bezierCurveTo(-.06,.42,-.15,.18,0,0);
+      const livingCrystalMembraneGeo=new T.ShapeGeometry(livingCrystalMembraneShape,12);
+      const membraneDefs=[
+        [-.28,.63,.00,-.62,1.00,.72],
+        [ .25,.65,.02,.58,1.00,.68],
+        [-.52,.18,-.06,-1.10,.90,.62],
+        [ .52,.14,-.05,1.08,.92,.62],
+        [-.36,-.50,-.04,-2.38,.82,.58],
+        [ .34,-.52,-.03,2.34,.82,.58]
+      ];
+      this.guardianMembranes=[];
+      membraneDefs.forEach((d,index)=>{
+        const m=new T.Mesh(livingCrystalMembraneGeo.clone(),livingCrystalMembraneMaterial);
+        m.position.set(d[0],d[1],d[2]);
+        m.rotation.z=d[3];
+        m.scale.set(d[4],d[5],1);
+        m.userData.baseScale=m.scale.clone();
+        m.userData.phase=index*.87+r();
+        this.guardianAnatomy.add(m);
+        this.guardianMembranes.push(m);
       });
-      this.guardianAnatomy.rotation.y=-.06;
+      this.guardianAnatomy.rotation.y=-.04;
       this.organicGroup.add(this.guardianAnatomy);
 
       this.organicFoldMaterial=new T.MeshPhysicalMaterial({
