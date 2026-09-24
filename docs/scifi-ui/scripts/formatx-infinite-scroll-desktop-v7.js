@@ -57,7 +57,8 @@
   root.dataset.fxLoopDesktopSettleR1724='scrollend-primary-idle-timer-fallback';
   root.dataset.fxLoopVisualContinuityR1724='scroll-frame-relative-authoritative-through-reflow';
   root.dataset.fxLoopSourceTopContinuityR1724='scroll-frame-source-top-authoritative-through-idle-reflow';
-  root.dataset.fxLoopSourceTopContinuityR1725='hero-idle-origin-authoritative-active-scroll-offsetparent-proof';
+  root.dataset.fxLoopSourceTopContinuityR1725='hero-local-loop-origin-zero-active-scroll-offsetparent-proof';
+  root.dataset.fxLoopLandingSpaceR1725='hero-local-coordinate-space';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -650,10 +651,14 @@
        destination hero origin must come from the fresh idle geometry. A cached
        sourceTop can belong to pre-font/pre-layout geometry and creates a visible
        vertical jump on the next cycle. */
-    const stableSourceTop=canonicalLandingSourceTop;
-    root.dataset.fxLoopDesktopSourceTopR1724=String(Math.round(stableSourceTop));
-    root.dataset.fxLoopDesktopLandingR1725='cached-relative-stable-hero-origin';
-    performTransfer(relative,'visual-bridge-desktop-idle-r1725b',stableSourceTop);
+    /* R1725c — the reference mirror contains the hero scene itself, not the
+       document chrome preceding #main-content. Its local y=0 therefore maps to
+       window scroll y=0. Adding offsetParent/document chrome here duplicates
+       the top offset and creates the exact visible 225px jump caught by CI. */
+    const heroLoopOrigin=0;
+    root.dataset.fxLoopDesktopSourceTopR1724='0';
+    root.dataset.fxLoopDesktopLandingR1725='cached-relative-hero-local-origin';
+    performTransfer(relative,'visual-bridge-desktop-idle-r1725c',heroLoopOrigin);
   }
 
   function transferIfNeeded() {
