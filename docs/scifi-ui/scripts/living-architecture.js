@@ -126,7 +126,7 @@
     }
     if (!document.querySelector('script[data-fx-organism-interface-script]')) {
       const organismScript = document.createElement('script');
-      organismScript.src = './scripts/organism-interface.js?v=20260727-organism-2';
+      organismScript.src = './scripts/organism-interface.js?v=20260924-r1724-exclusive-main-nav-owner';
       organismScript.defer = true;
       organismScript.dataset.fxOrganismInterfaceScript = 'true';
       document.head.appendChild(organismScript);
