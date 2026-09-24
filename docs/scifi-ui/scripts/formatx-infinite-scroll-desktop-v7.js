@@ -380,17 +380,23 @@
     const sourceTop = sourceHero.offsetTop;
     const sourceHeight = sourceHero.offsetHeight;
     const documentEnd = Math.max(0, document.documentElement.scrollHeight - viewportHeight);
+    const desiredThreshold = bridgeTop + Math.max(36, Math.min(viewportHeight * .18, 180));
+    const reachableThreshold = Math.max(
+      bridgeTop,
+      Math.min(desiredThreshold, Math.max(bridgeTop, documentEnd - 2))
+    );
 
     bridge.style.setProperty('--fx-loop-source-height', `${Math.round(sourceHeight)}px`);
 
     loopGeometry = Object.freeze({
       ready: true,
       bridgeTop,
-      bridgeThreshold: bridgeTop + Math.max(36, Math.min(viewportHeight * .18, 180)),
+      bridgeThreshold: reachableThreshold,
       sourceTop,
       sourceHeight,
       documentEnd,
     });
+    root.dataset.fxLoopReachableThresholdR1723 = String(Math.round(reachableThreshold));
     return true;
   }
 
