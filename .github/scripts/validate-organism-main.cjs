@@ -141,8 +141,8 @@ async function validateDesktop() {
       navOpen:document.getElementById('main-nav')?.classList.contains('open')||false,
       pricingTop:document.getElementById('pricing')?.getBoundingClientRect().top??null
     }));
-    assert.equal(navState.hash,'#pricing','canonical header navigation did not land on pricing');
-    assert.equal(navState.navOpen,false,'canonical header navigation did not close menu');
+    assert(navState.hash==='#pricing','canonical header navigation did not land on pricing: '+JSON.stringify(navState));
+    assert(navState.navOpen===false,'canonical header navigation did not close menu: '+JSON.stringify(navState));
     mark('desktop: header-navigation-passed',navState);
 
     await page.waitForFunction(() => Array.from(document.querySelectorAll('[data-plan-qr-image]')).every(image => image.complete && image.naturalWidth >= 32), null, { timeout: 15000 });
