@@ -188,10 +188,16 @@ async function assertTwoLoopCycles(page, name) {
       const hero = document.querySelector('#main-content > #hero');
       const relative = Math.max(48, Math.min(innerHeight * .24, Math.max(48, hero.offsetHeight - 12)));
       const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
+      const documentEnd=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+      const target=Math.min(bridge.offsetTop+relative,documentEnd);
+      const reachableRelative=Math.max(0,target-bridge.offsetTop);
       return {
         count: Number(document.documentElement.dataset.fxLoopCount || 0),
-        target: bridge.offsetTop + relative,
-        expectedLanding: mobile ? hero.offsetTop : hero.offsetTop + relative,
+        target,
+        requestedRelative:relative,
+        reachableRelative,
+        expectedLanding: mobile ? hero.offsetTop : hero.offsetTop + reachableRelative,
+        documentEnd,
         mobile,
       };
     });
