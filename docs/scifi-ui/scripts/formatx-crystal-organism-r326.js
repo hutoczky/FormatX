@@ -579,6 +579,36 @@
 
     /* R1724 — additional living anatomy is appended to the same attribute
        buffers. No second canvas, model loader or image asset is introduced. */
+    function guardianTriangle(vertices,facet,origin=[0,0,0]){
+      let faceNormal=normalize(cross(
+        subtract(vertices[1].crystal,vertices[0].crystal),
+        subtract(vertices[2].crystal,vertices[0].crystal)
+      ));
+      const centre=[0,1,2].map(axis=>
+        (vertices[0].crystal[axis]+vertices[1].crystal[axis]+vertices[2].crystal[axis])/3
+      );
+      const localCentre=subtract(centre,origin);
+      if(dot(faceNormal,localCentre)<0){
+        [vertices[1],vertices[2]]=[vertices[2],vertices[1]];
+        faceNormal=faceNormal.map(value=>-value);
+      }
+      const barycentric=[[1,0,0],[0,1,0],[0,0,1]];
+      vertices.forEach((item,index)=>{
+        sphere.push(...item.sphere);
+        crystal.push(...item.crystal);
+        sphereNormals.push(...item.sphereNormal);
+        const smoothNormal=item.crystalNormal||faceNormal;
+        const hybridNormal=normalize([
+          smoothNormal[0]*.94+faceNormal[0]*.06,
+          smoothNormal[1]*.94+faceNormal[1]*.06,
+          smoothNormal[2]*.94+faceNormal[2]*.06
+        ]);
+        crystalNormals.push(...hybridNormal);
+        uvs.push(...item.uv);
+        barycentrics.push(...barycentric[index]);
+        facets.push(facet);
+      });
+    }
     function appendEllipsoid(center,radii,facetBase=.72,latSteps=8,lonSteps=14,rotZ=0){
       const [cx,cy,cz]=center,[rx0,ry0,rz0]=radii;
       const czr=Math.cos(rotZ),szr=Math.sin(rotZ);
@@ -620,8 +650,8 @@
         for(let ix=0;ix<lonSteps;ix++){
           const nx=(ix+1)%lonSteps;
           const facet=facetBase+.18*random(ix+iy*13,iy*29+ix);
-          triangle([grid[iy][ix],grid[iy][nx],grid[iy+1][ix]],facet);
-          triangle([grid[iy][nx],grid[iy+1][nx],grid[iy+1][ix]],facet+.007);
+          guardianTriangle([grid[iy][ix],grid[iy][nx],grid[iy+1][ix]],facet,center);
+          guardianTriangle([grid[iy][nx],grid[iy+1][nx],grid[iy+1][ix]],facet+.007,center);
         }
       }
     }
@@ -663,17 +693,21 @@
         for(let side=0;side<sides;side++){
           const next=(side+1)%sides;
           const facet=facetBase+.12*random(segment*17+side,side*31+segment);
-          triangle([rings[segment][side],rings[segment][next],rings[segment+1][side]],facet);
-          triangle([rings[segment][next],rings[segment+1][next],rings[segment+1][side]],facet+.006);
+          const centre=[(a[0]+b[0])*.5,(a[1]+b[1])*.5,(a[2]+b[2])*.5];
+          guardianTriangle([rings[segment][side],rings[segment][next],rings[segment+1][side]],facet,centre);
+          guardianTriangle([rings[segment][next],rings[segment+1][next],rings[segment+1][side]],facet+.006,centre);
         }
       }
     }
     function appendMembraneTri(a,b,c,facet=4.42){
-      triangle([
+      let vertices=[
         surfaceVertex(a,null,[0,0],.86),
         surfaceVertex(b,null,[1,0],.86),
         surfaceVertex(c,null,[.5,1],.86)
-      ],facet);
+      ];
+      const face=normalize(cross(subtract(vertices[1].crystal,vertices[0].crystal),subtract(vertices[2].crystal,vertices[0].crystal)));
+      if(face[2]<0)[vertices[1],vertices[2]]=[vertices[2],vertices[1]];
+      guardianTriangle(vertices,facet,[.62,.90,-.24]);
     }
 
     /* FormatX Guardian anatomy: feline/dragon posture in a 3/4 hero view. */
@@ -1482,6 +1516,7 @@
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
     root.dataset.fxNativeMagTendrilsR1723='pointer-touch-energy-tip-weighted-living-flex';
     root.dataset.fxNativeMagGuardianR1724='feline-dragon-head-neck-limbs-crown-streaming-ribbons-one-draw';
+    root.dataset.fxNativeMagTopologyR1724='local-origin-winding-safe-guardian-anatomy';
     root.dataset.fxNativeMagLookR1724='ivory-bioceramic-black-tissue-cyan-energy-gold-studio-ribbons';
     root.dataset.fxNativeMagPhysiologyR1723='differentiated-attention-response-activation-heartbeat-curiosity-stability-renewal';
     root.dataset.fxNativeMagPhysiologyApiR1723='public-physiology-event-habitat-sync';
