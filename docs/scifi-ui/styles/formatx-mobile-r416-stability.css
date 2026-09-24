@@ -10,11 +10,11 @@
 
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.70 !important;
+    opacity:1 !important;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
-    filter:brightness(.66) contrast(.36) saturate(.58) blur(.96px) !important;
-    -webkit-filter:brightness(.66) contrast(.36) saturate(.58) blur(.96px) !important;
+    filter:brightness(1.12) contrast(1.055) saturate(1.12) blur(0) !important;
+    -webkit-filter:brightness(1.12) contrast(1.055) saturate(1.12) blur(0) !important;
   }
 
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
@@ -167,9 +167,9 @@
 @media (max-width:430px) {
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.68 !important;
-    filter:brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
-    -webkit-filter:brightness(.65) contrast(.35) saturate(.56) blur(.99px) !important;
+    opacity:1 !important;
+    filter:brightness(1.14) contrast(1.05) saturate(1.14) blur(0) !important;
+    -webkit-filter:brightness(1.14) contrast(1.05) saturate(1.14) blur(0) !important;
   }
 
   html body.living-architecture .topbar > .brand {
@@ -184,11 +184,11 @@
 @media (min-width:901px) and (pointer:fine) {
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.91 !important;
+    opacity:1 !important;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
-    filter:brightness(.86) contrast(.68) saturate(.82) blur(.28px) !important;
-    -webkit-filter:brightness(.86) contrast(.68) saturate(.82) blur(.28px) !important;
+    filter:brightness(1.08) contrast(1.05) saturate(1.08) blur(0) !important;
+    -webkit-filter:brightness(1.08) contrast(1.05) saturate(1.08) blur(0) !important;
   }
 }
 
@@ -196,3 +196,5 @@
 /* production-r421-cross-device-restrained-mag */
 /* production-r423-unified-mobile-mag-optics */
 /* production-r430-mobile-header-normal-flow-no-information-occlusion */
+
+/* production-r1722-zero-blur-hidpi-mag */
