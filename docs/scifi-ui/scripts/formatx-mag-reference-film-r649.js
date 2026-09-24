@@ -234,41 +234,59 @@
       ctx.save();ctx.translate(cx,cy);
       {
         const body=ctx.createRadialGradient(-R*.20,-R*.24,4,0,0,R*1.02);
-        body.addColorStop(0,'rgba(232,248,246,.84)');
-        body.addColorStop(.20,'rgba(126,170,178,.98)');
-        body.addColorStop(.46,'rgba(77,82,119,.99)');
-        body.addColorStop(.70,'rgba(68,39,94,.99)');
-        body.addColorStop(1,'rgba(5,11,17,1)');
+        body.addColorStop(0,'rgba(250,255,255,.94)');
+        body.addColorStop(.18,'rgba(188,231,238,.98)');
+        body.addColorStop(.42,'rgba(89,151,176,.98)');
+        body.addColorStop(.68,'rgba(48,62,113,.99)');
+        body.addColorStop(1,'rgba(5,12,24,1)');
         ctx.fillStyle=body;
-        /* R1719: smooth tensioned living seed, matching the permanent MAG.
-           No egg/blob and no torn crystal silhouette. */
-        const breathe=1+.010*Math.sin(time*.0024);
+        /* R1724: FormatX Crystal Guardian fallback silhouette.
+           Angular living anatomy replaces the old egg/blob body. */
+        const breathe=1+.008*Math.sin(time*.0024);
         ctx.scale(breathe,breathe);
         ctx.beginPath();
-        ctx.moveTo(-R*.05,-R*.94);
-        ctx.bezierCurveTo(R*.36,-R*.96,R*.76,-R*.68,R*.84,-R*.24);
-        ctx.bezierCurveTo(R*.92,R*.16,R*.72,R*.64,R*.34,R*.86);
-        ctx.bezierCurveTo(R*.06,R*.99,-R*.35,R*.92,-R*.61,R*.68);
-        ctx.bezierCurveTo(-R*.88,R*.43,-R*.92,R*.02,-R*.80,-R*.35);
-        ctx.bezierCurveTo(-R*.66,-R*.72,-R*.36,-R*.93,-R*.05,-R*.94);
+        ctx.moveTo(-R*.84,R*.10);
+        ctx.bezierCurveTo(-R*.93,-R*.16,-R*.78,-R*.46,-R*.53,-R*.56);
+        ctx.lineTo(-R*.64,-R*.80);
+        ctx.lineTo(-R*.38,-R*.66);
+        ctx.lineTo(-R*.25,-R*.94);
+        ctx.lineTo(-R*.02,-R*.68);
+        ctx.bezierCurveTo(R*.14,-R*.73,R*.26,-R*.82,R*.42,-R*.74);
+        ctx.lineTo(R*.48,-R*1.02);
+        ctx.lineTo(R*.59,-R*.77);
+        ctx.lineTo(R*.72,-R*.96);
+        ctx.lineTo(R*.74,-R*.69);
+        ctx.bezierCurveTo(R*.90,-R*.64,R*1.06,-R*.56,R*1.08,-R*.43);
+        ctx.bezierCurveTo(R*1.00,-R*.32,R*.82,-R*.29,R*.66,-R*.26);
+        ctx.lineTo(R*.54,-R*.04);
+        ctx.bezierCurveTo(R*.47,R*.20,R*.53,R*.46,R*.40,R*.70);
+        ctx.lineTo(R*.25,R*.90);
+        ctx.lineTo(R*.14,R*.70);
+        ctx.bezierCurveTo(R*.02,R*.58,-R*.14,R*.56,-R*.27,R*.72);
+        ctx.lineTo(-R*.49,R*.88);
+        ctx.lineTo(-R*.52,R*.63);
+        ctx.bezierCurveTo(-R*.69,R*.50,-R*.82,R*.37,-R*.84,R*.10);
         ctx.closePath();
         ctx.fill();
         ctx.save();ctx.globalCompositeOperation='screen';
-        for(let i=0;i<18;i++){
-          const ring=i%3;
-          const a=i/18*TAU+.10+ring*.07;
-          const rr=R*(.36+ring*.13+.030*Math.sin(time*.0011+i*.72));
-          const lx=Math.cos(a)*rr,ly=Math.sin(a)*rr;
-          const lg=ctx.createRadialGradient(lx-R*.035,ly-R*.040,1,lx,ly,R*(.18+ring*.018));
-          lg.addColorStop(0,'rgba(178,224,229,.25)');
-          lg.addColorStop(.34,'rgba(94,117,158,.24)');
-          lg.addColorStop(.70,'rgba(91,47,126,.25)');
-          lg.addColorStop(1,'rgba(5,15,23,0)');
-          ctx.fillStyle=lg;
-          ctx.beginPath();ctx.ellipse(lx,ly,R*(.14+ring*.012),R*(.20+ring*.015),a+.40,0,TAU);ctx.fill();
+        for(let i=0;i<14;i++){
+          const a=i/14*TAU+.08;
+          const rr=R*(.28+(i%3)*.13);
+          const lx=Math.cos(a)*rr,ly=Math.sin(a)*rr*.78;
+          const pr=R*(.12+(i%4)*.010);
+          const warm=i%5===2;
+          ctx.fillStyle=warm?'rgba(255,189,96,.11)':'rgba(178,239,249,.16)';
+          ctx.strokeStyle=warm?'rgba(255,215,147,.20)':'rgba(124,226,244,.25)';
+          ctx.lineWidth=1;
+          ctx.beginPath();
+          ctx.moveTo(lx,ly-pr*.72);
+          ctx.lineTo(lx+pr*.78,ly-pr*.05);
+          ctx.lineTo(lx+pr*.18,ly+pr*.82);
+          ctx.lineTo(lx-pr*.72,ly+pr*.18);
+          ctx.closePath();ctx.fill();ctx.stroke();
         }
         ctx.restore();
-        ctx.strokeStyle='rgba(137,229,242,.58)';ctx.lineWidth=1.45;ctx.shadowColor='rgba(65,214,241,.36)';ctx.shadowBlur=4;
+        ctx.strokeStyle='rgba(112,232,252,.70)';ctx.lineWidth=1.55;ctx.shadowColor='rgba(65,214,241,.48)';ctx.shadowBlur=5;
         for(let i=0;i<14;i++){
           const a=i/14*TAU+.14;
           const bend=.16*Math.sin(i*1.37+time*.0008);
@@ -281,7 +299,7 @@
           ctx.stroke();
         }
       }
-      const lensR=Math.max(30,R*.315);
+      const lensR=Math.max(30,R*.285);
       const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
       lens.addColorStop(0,'rgba(255,255,255,1)');
       lens.addColorStop(.10,'rgba(188,250,255,1)');
@@ -366,6 +384,6 @@
   }
   window.FormatXMagReferenceFilmR649={
     attach,
-    revision:'r1723-canonical-living-organism-birth'
+    revision:'r1724-formatx-crystal-guardian-birth'
   };
 })();
