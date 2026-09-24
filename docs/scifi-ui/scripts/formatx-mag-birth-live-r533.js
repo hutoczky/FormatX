@@ -239,6 +239,7 @@
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
   overlay.setAttribute('aria-label', copy.title);
   const prepaintBrand = overlay.querySelector('.fxb-lcp-brand-r1603');
+  let prepaintCanvas = overlay.querySelector('.fxb-particles');
   overlay.insertAdjacentHTML('beforeend', `
     <div class="fxb-deep" aria-hidden="true"></div>
     <div class="fxb-veil" aria-hidden="true"></div>
@@ -276,7 +277,6 @@
         <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
       </g></g>
     </svg>
-    <canvas class="fxb-particles" aria-hidden="true"></canvas>
     <div class="fxb-dna-stage" aria-hidden="true">
       <div class="fxb-dna-depth-fog"></div>
       <div class="fxb-dna-helix" data-fx-dna-3d-r611="true"></div>
@@ -323,6 +323,13 @@
     <button class="fxb-skip" type="button"></button>
   `);
 
+  if (!(prepaintCanvas instanceof HTMLCanvasElement)) {
+    prepaintCanvas=document.createElement('canvas');
+    prepaintCanvas.className='fxb-particles';
+    prepaintCanvas.setAttribute('aria-hidden','true');
+    overlay.prepend(prepaintCanvas);
+  }
+
   if (!(prepaintBrand instanceof HTMLElement)) {
     const brand=document.createElement('div');
     brand.className='fxb-lcp-brand-r1603';
@@ -347,7 +354,7 @@
   const percent = overlay.querySelector('.fxb-percent');
   const progress = overlay.querySelector('.fxb-progress');
   const status = overlay.querySelector('.fxb-status');
-  const canvas = overlay.querySelector('.fxb-particles');
+  const canvas = prepaintCanvas;
   const dnaStage = overlay.querySelector('.fxb-dna-stage');
   const dnaHelix = overlay.querySelector('.fxb-dna-helix');
   const dna = overlay.querySelector('.fxb-dna');
