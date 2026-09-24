@@ -2,7 +2,9 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
+  const PARAMS = new URLSearchParams(location.search);
+  const AUDIT_MODE = PARAMS.get('lighthouse') === '1';
+  const ORGANISM_VALIDATION = PARAMS.get('organism-validation') === '1';
   if (AUDIT_MODE) {
     const canvas = document.getElementById('fx-apex-canvas');
     if (canvas) canvas.hidden = true;
@@ -141,8 +143,9 @@
   }
 
   function scheduleThreeExperience() {
-    if (ROOT.dataset.fxImmersive === 'active') {
+    if (ORGANISM_VALIDATION || ROOT.dataset.fxImmersive === 'active') {
       loadThreeExperience();
+      if(ORGANISM_VALIDATION)ROOT.dataset.fxOrganismValidationR1723='eager-interface-for-ci-contract';
       return;
     }
     ROOT.dataset.fxThreeLoader = 'deferred-user-activation';
