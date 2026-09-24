@@ -47,6 +47,7 @@
   let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,pointerSettleTimer=0,lastDrawAt=0;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
+  let physiologyEnergy=.34,physiologyBreath=.12,physiologyKind='homeostasis';
   let particles=[],filaments=[],glassArcs=[],mineralSpires=[],tissueBands=[],cellPods=[],capillaries=[],membranePockets=[],neuralRoots=[];
 
   function seeded(seed=0xF04A1530){
@@ -184,14 +185,16 @@
 
     ctx.clearRect(0,0,width,height);
     const breath=.5+.5*Math.sin(time*.00024);
+    const vitality=Math.max(0,Math.min(1.25,physiologyEnergy*.72+physiologyBreath*.28));
+    const habitatBreath=Math.max(.35,Math.min(1.35,.62+breath*.22+physiologyBreath*.28));
 
     const sx=width*(MOBILE.matches?.50:.66)+pointerX*width*.009;
     const sy=-height*.04+pointerY*height*.004;
     const radius=Math.max(width,height)*.44;
     ctx.fillStyle=radial(sx,sy,radius,[
-      [0,'rgba(214,248,251,'+(.026+breath*.004+impulse*.008)+')'],
-      [.20,'rgba(112,204,220,.018)'],
-      [.58,'rgba(42,104,122,.008)'],
+      [0,'rgba(214,248,251,'+(.020+habitatBreath*.005+impulse*.008+vitality*.010)+')'],
+      [.20,'rgba(112,204,220,'+(.014+vitality*.010)+')'],
+      [.58,'rgba(42,104,122,'+(.006+vitality*.005)+')'],
       [1,'rgba(0,0,0,0)']
     ]);
     ctx.fillRect(0,0,width,height);
@@ -213,15 +216,15 @@
       const cp1x=edge-b.side*width*b.bend;
       const cp2x=endX+b.side*width*b.bend*.46;
       ctx.save();ctx.lineCap='round';
-      ctx.strokeStyle='rgba(4,14,24,'+(b.alpha*2.5)+')';
+      ctx.strokeStyle='rgba(4,14,24,'+(b.alpha*(2.15+vitality*.70))+')';
       ctx.lineWidth=b.width;
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(cp1x,y-height*.20,cp2x,endY+height*.15,endX,endY);ctx.stroke();
-      ctx.strokeStyle='rgba(35,89,119,'+(b.alpha*.82)+')';
+      ctx.strokeStyle='rgba(35,89,119,'+(b.alpha*(.70+vitality*.30))+')';
       ctx.lineWidth=Math.max(2,b.width*.12);
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(cp1x,y-height*.20,cp2x,endY+height*.15,endX,endY);ctx.stroke();
-      ctx.strokeStyle='rgba(103,216,236,'+(b.alpha*.42)+')';
+      ctx.strokeStyle='rgba(103,216,236,'+(b.alpha*(.34+vitality*.26))+')';
       ctx.lineWidth=Math.max(.8,b.width*.025);
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(cp1x,y-height*.20,cp2x,endY+height*.15,endX,endY);ctx.stroke();
@@ -246,7 +249,7 @@
       const ex=edge-c.side*width*c.len;
       const ey=y+Math.sin(time*.00015+c.phase)*height*.025;
       ctx.save();ctx.lineCap='round';
-      ctx.strokeStyle='rgba(63,190,220,'+c.alpha+')';ctx.lineWidth=c.width;
+      ctx.strokeStyle='rgba(63,190,220,'+(c.alpha*(.76+vitality*.62))+')';ctx.lineWidth=c.width;
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(edge-c.side*width*.08,y-height*c.bend,ex+c.side*width*.06,ey+height*c.bend*.4,ex,ey);ctx.stroke();
       ctx.restore();
@@ -273,10 +276,10 @@
       const ey=y+Math.sin(time*.00013+n.phase)*height*.035;
       const bend=n.bend*height;
       ctx.save();ctx.lineCap='round';
-      ctx.strokeStyle='rgba(7,18,31,'+(n.alpha*2.4)+')';ctx.lineWidth=n.width*8;
+      ctx.strokeStyle='rgba(7,18,31,'+(n.alpha*(2.00+vitality*.86))+')';ctx.lineWidth=n.width*8;
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(edge-n.side*width*.08,y-bend,ex+n.side*width*.08,ey+bend*.42,ex,ey);ctx.stroke();
-      ctx.strokeStyle='rgba(74,209,235,'+(n.alpha*.82)+')';ctx.lineWidth=n.width;
+      ctx.strokeStyle='rgba(74,209,235,'+(n.alpha*(.68+vitality*.36))+')';ctx.lineWidth=n.width;
       ctx.beginPath();ctx.moveTo(edge,y);
       ctx.bezierCurveTo(edge-n.side*width*.08,y-bend,ex+n.side*width*.08,ey+bend*.42,ex,ey);ctx.stroke();
       ctx.restore();
@@ -429,6 +432,17 @@
   addEventListener('formatx:storychapter',()=>pulse('story',.52),{passive:true});
   addEventListener('formatx:organismpanelopen',()=>pulse('question',.62),{passive:true});
   addEventListener('formatx:organismresponse',()=>pulse('response',.68),{passive:true});
+  addEventListener('formatx:organismphysiology',event=>{
+    const detail=event.detail||{};
+    physiologyKind=String(detail.kind||'stimulus');
+    physiologyEnergy=Math.max(.10,Math.min(1.20,Number(detail.energy)||.34));
+    physiologyBreath=Math.max(.04,Math.min(1.20,Number(detail.breath)||.12));
+    if(Number.isFinite(Number(detail.x)))targetX=Math.max(-1,Math.min(1,Number(detail.x)));
+    if(Number.isFinite(Number(detail.y)))targetY=Math.max(-1,Math.min(1,Number(detail.y)));
+    ROOT.dataset.fxLivingHabitatPhysiologyR1723=physiologyKind;
+    ROOT.dataset.fxLivingHabitatVitalityR1723=physiologyEnergy.toFixed(2);
+    pulse('organism-'+physiologyKind,Math.min(1.35,.34+physiologyEnergy*.72));
+  },{passive:true});
   addEventListener('formatx:open-live-os',()=>pulse('system-open',.58),{passive:true});
   addEventListener('formatx:loop',()=>pulse('loop',.74),{passive:true});
   addEventListener('formatx:coretouchpulse',()=>pulse('core-touch',1),{passive:true});
@@ -461,5 +475,6 @@
   ROOT.dataset.fxLivingHabitatR1721='membranes-neural-roots-deep-cellular-parallax';
   ROOT.dataset.fxLivingHabitatPerformanceR1721='event-driven-hidpi-sharp-background-zero-idle';
   ROOT.dataset.fxLivingHabitatInteractionR1722='all-site-inputs-synchronized-with-organism-zero-extra-loop';
+  ROOT.dataset.fxLivingHabitatPhysiologyR1723='same-organism-energy-breath-tissue-neural-world';
   ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
 })();
