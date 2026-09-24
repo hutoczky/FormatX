@@ -1427,11 +1427,23 @@
         float tendrilMask=isTendril*(1.0-vMorph);
 
         float lift=sat(.25+ndl*.45+sideLight*.34);
-        vec3 col=mix(vec3(.015,.020,.029),vec3(.106,.080,.128),lift);
-        col+=vec3(.72,.73,.68)*keySpec*.17;
-        col+=vec3(.40,.46,.46)*sideSpec*.14;
-        col+=vec3(.060,.090,.096)*fresnel*.29;
-        col+=vec3(.014,.017,.018)*max(0.0,-n.y);
+        vec3 col=mix(vec3(.006,.012,.021),vec3(.036,.070,.095),lift);
+        col+=vec3(.74,.77,.73)*keySpec*.16;
+        col+=vec3(.36,.48,.51)*sideSpec*.13;
+        col+=vec3(.050,.15,.19)*fresnel*.31;
+        col+=vec3(.012,.017,.021)*max(0.0,-n.y);
+
+        float vesselA=pow(.5+.5*sin(vLocal.y*17.0+vLocal.x*8.0+vLocal.z*5.0),14.0);
+        float vesselB=pow(.5+.5*sin(vLocal.x*20.0-vLocal.y*6.0+vLocal.z*9.0),17.0);
+        float vascular=max(vesselA,vesselB)*bodyMask;
+        float plateField=.5+.5*sin(vUv.x*16.8+sin(vUv.y*11.8)*1.4);
+        float plateCross=.5+.5*sin(vUv.y*15.2-vUv.x*6.4);
+        float plateMask=smoothstep(.56,.80,max(plateField,plateCross*.84))*bodyMask;
+        vec3 ivory=vec3(.48,.58,.62)+vec3(.30,.32,.28)*(.30*ndl+.18*sideLight);
+        ivory+=vec3(.20,.35,.38)*fresnel*.14;
+        col=mix(col,ivory,plateMask*.70);
+        col+=vec3(.10,.61,.82)*vascular*(.22+.30*uEnergy);
+        col+=vec3(1.00,.43,.09)*plateMask*sideSpec*.055;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1463,8 +1475,11 @@
         col+=vec3(.11,.28,.33)*pulse*.64;
         col+=vec3(.34,.40,.39)*pulse*keySpec*.16;
 
-        vec3 tendon=vec3(.006,.014,.016)+vec3(.075,.12,.13)*(.20*sideLight+.48*fresnel);
-        tendon+=vec3(.34,.39,.37)*sideSpec*.12;
+        float cableSegment=pow(.5+.5*cos(vUv.y*26.0+vUv.x*9.0+uTime*.20),12.0);
+        vec3 tendon=vec3(.006,.024,.034)+vec3(.060,.17,.23)*(.20*sideLight+.50*fresnel);
+        tendon+=vec3(.020,.40,.62)*cableSegment*(.08+.08*uEnergy);
+        tendon+=vec3(.42,.72,.82)*sideSpec*.18;
+        tendon+=vec3(1.00,.42,.08)*sideSpec*cableSegment*.060;
         col=mix(col,tendon,tendrilMask*.995);
 
         float subsurface=pow(max(0.0,dot(-n,key)),1.7)*(1.0-facing);
@@ -1497,7 +1512,7 @@
       ? softwareFragmentSource
       : (mobilePhysical ? constrainedFragmentSource : fullFragmentSource);
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
-      ? 'r1723-software-living-tissue-lite-energy-organ'
+      ? 'r1724-software-guardian-ivory-black-cyan-gold-lite'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
     root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-adaptive-resolution-zero-idle';
     root.dataset.fxNativeMagVisualR1716='mobile-normal-topology-physical-shader-photoreal-60fps-first';
@@ -1518,6 +1533,7 @@
     root.dataset.fxNativeMagGuardianR1724='feline-dragon-head-neck-limbs-crown-streaming-ribbons-one-draw';
     root.dataset.fxNativeMagTopologyR1724='local-origin-winding-safe-guardian-anatomy';
     root.dataset.fxNativeMagLookR1724='ivory-bioceramic-black-tissue-cyan-energy-gold-studio-ribbons';
+    root.dataset.fxNativeMagFallbackR1724='same-guardian-look-on-software-renderer';
     root.dataset.fxNativeMagPhysiologyR1723='differentiated-attention-response-activation-heartbeat-curiosity-stability-renewal';
     root.dataset.fxNativeMagPhysiologyApiR1723='public-physiology-event-habitat-sync';
     root.dataset.fxCoreCanonicalRevisionR1723=CANONICAL_REVISION;
