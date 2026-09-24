@@ -550,7 +550,7 @@
     .fx-rail,
     .fx-organism-status,
     .fx-organism-actionbar,
-    .fx-organism-dialogue,
+    .fx-organism-dialogue:not(.is-open),
     .fx-genome-launcher,
     .fx-living-core-launcher,
     .fx-three-sound,
@@ -1315,7 +1315,7 @@
     pointer-events: none !important;
   }
 
-  html[data-fx-reference-production-r244="desktop"] body.living-architecture :is(.fx-rail, .fx-organism-status, .fx-organism-actionbar, .fx-organism-dialogue, .fx-genome-launcher, .fx-living-core-launcher, .fx-three-sound, [data-fx-live-os-launcher], .fx-loop-hero-clone) {
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture :is(.fx-rail, .fx-organism-status, .fx-organism-actionbar, .fx-organism-dialogue:not(.is-open), .fx-genome-launcher, .fx-living-core-launcher, .fx-three-sound, [data-fx-live-os-launcher], .fx-loop-hero-clone) {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
