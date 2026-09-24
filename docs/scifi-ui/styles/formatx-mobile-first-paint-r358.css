@@ -389,6 +389,23 @@
     transition:none!important;
   }
 
+  /* R1725c — canonical controls must be tappable before deferred control CSS.
+     The ASK button is visible during P0, so its production hit target must also
+     be valid during P0 instead of growing from an undersized legacy default. */
+  html body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
+    box-sizing:border-box!important;
+    width:48px!important;
+    min-width:48px!important;
+    max-width:48px!important;
+    height:48px!important;
+    min-height:48px!important;
+    max-height:48px!important;
+    margin:0!important;
+    padding:0!important;
+    pointer-events:auto!important;
+  }
+
   html body.living-architecture #hero>.hero-grid>.fx-reference-heading {
     order:3!important;
     position:relative!important;
