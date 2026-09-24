@@ -73,17 +73,17 @@ has(birth,[
   'this.mechanicalGroup.visible=false'
 ],'R1724 Three.js Guardian birth');
 has(fallback,[
-  "revision:'r1724-formatx-crystal-guardian-birth'",
-  'FormatX Crystal Guardian fallback silhouette'
-],'R1724 2D Guardian fallback');
+  "revision:'r1724-formatx-living-crystal-organism-birth'",
+  'FormatX Living Crystal Organism fallback silhouette'
+],'R1724 2D living crystal fallback');
 has(habitat,[
   "fxLivingHabitatCrystalWorldR1724='cyan-biocrystal-arches-spires-warm-studio-rim'",
   'formatx:organismphysiology'
 ],'R1724 synchronized biocrystal world');
 has(home,[
-  'procedural-interactive-formatx-guardian-r1724',
-  'r1724-crystal-guardian'
-],'R1724 static entry contract');
+  'procedural-interactive-living-crystal-organism-r1724',
+  'r1724-living-crystal-organism'
+],'R1724 living crystal static entry contract');
 
 has(life,[
   "const VERSION = 'native-webgl-periodic-and-interaction-life-r528'",'prefers-reduced-motion: reduce',
