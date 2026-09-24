@@ -109,6 +109,7 @@
       document.documentElement.dataset.fxMagBirthQualityR1722='primary-three-hidpi-msaa-gradual-adaptive-60hz';
       document.documentElement.dataset.fxMagBirthVisualR1722='fully-living-cortical-cellular-neural-studio-organism';
       document.documentElement.dataset.fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism';
+      document.documentElement.dataset.fxMagBirthGuardianR1724='faceted-pearl-cyan-crystal-organic-guardian';
       document.documentElement.dataset.fxMagBirthGuardianR1724='same-feline-dragon-anatomy-ivory-black-cyan-gold';
       document.documentElement.dataset.fxMagBirthGuardianMotionR1724='chest-core-streaming-glass-ribbons-interactive';
       document.documentElement.dataset.fxMagBirthCellsR1724='anatomy-bound-dark-tissue-no-spherical-cell-shell';
@@ -889,24 +890,25 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x07111d,roughness:.28,metalness:0,
-        clearcoat:.42,clearcoatRoughness:.17,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0105,
+        color:0x244858,roughness:.20,metalness:0,
+        clearcoat:.72,clearcoatRoughness:.10,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0085,
         transparent:true,opacity:0,
-        emissive:0x031827,emissiveIntensity:.075,
-        envMapIntensity:1.68,
-        ior:1.39,specularIntensity:.76,specularColor:new T.Color(0xaeeaf2),
-        sheen:.24,sheenColor:new T.Color(0x174d64),sheenRoughness:.44,
+        emissive:0x073149,emissiveIntensity:.13,
+        envMapIntensity:1.92,
+        ior:1.40,specularIntensity:.92,specularColor:new T.Color(0xe9ffff),
+        sheen:.32,sheenColor:new T.Color(0x4fc4e1),sheenRoughness:.34,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
-        color:0x111b2a,roughness:.32,metalness:.001,
-        clearcoat:.32,clearcoatRoughness:.23,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.009,
+        color:0x39586b,roughness:.24,metalness:.001,
+        clearcoat:.56,clearcoatRoughness:.14,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0075,
         transparent:true,opacity:0,
-        emissive:0x06263a,emissiveIntensity:.10,
-        envMapIntensity:1.46,
-        sheen:.20,sheenColor:new T.Color(0x2d7892),sheenRoughness:.48,
+        emissive:0x0a4560,emissiveIntensity:.15,
+        envMapIntensity:1.72,
+        sheen:.26,sheenColor:new T.Color(0x68d5ec),sheenRoughness:.38,
+        specularIntensity:.82,specularColor:new T.Color(0xdffbff),
         depthWrite:true
       });
       this.organicWireMaterial=new T.MeshBasicMaterial({
@@ -952,24 +954,24 @@
       }
       shellGeo.computeVertexNormals();
       const shell=new T.Mesh(shellGeo,this.organicShellMaterial);
-      shell.scale.set(.94,.62,.72);
-      shell.position.set(-.18,.02,0);
+      shell.scale.set(.78,.50,.60);
+      shell.position.set(-.22,.01,-.015);
       shell.userData.baseScale=shell.scale.clone();
       this.organicShell=shell;
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x667273,roughness:.19,metalness:0,
-        clearcoat:.48,clearcoatRoughness:.11,
-        transmission:.035,thickness:.075,ior:1.36,
-        attenuationColor:new T.Color(0x38494a),attenuationDistance:1.1,
+        color:0x9bc9d4,roughness:.12,metalness:0,
+        clearcoat:.78,clearcoatRoughness:.055,
+        transmission:.14,thickness:.095,ior:1.39,
+        attenuationColor:new T.Color(0x1c758d),attenuationDistance:1.5,
         transparent:true,opacity:0,depthWrite:false,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0010,
-        envMapIntensity:.92,side:T.FrontSide
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0008,
+        envMapIntensity:1.38,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.954,.628,.728);
-      this.organicMembrane.position.set(-.18,.02,.008);
+      this.organicMembrane.scale.set(.792,.508,.612);
+      this.organicMembrane.position.set(-.22,.01,.000);
       this.organicMembrane.userData.baseScale=this.organicMembrane.scale.clone();
       this.organicGroup.add(this.organicMembrane);
 
@@ -1002,34 +1004,36 @@
       /* R1724 — FormatX Guardian anatomy. The intro now grows the same
          quadruped/feline-dragon organism that remains in the hero after handoff. */
       this.guardianPlateMaterial=new T.MeshPhysicalMaterial({
-        color:0xd9e7e8,roughness:.22,metalness:.015,
-        clearcoat:.62,clearcoatRoughness:.12,
-        emissive:0x071a23,emissiveIntensity:.060,
-        envMapIntensity:1.88,
-        sheen:.28,sheenColor:new T.Color(0x7cdff0),sheenRoughness:.38,
-        specularIntensity:.86,specularColor:new T.Color(0xf5ffff),
-        transparent:true,opacity:0,depthWrite:true
+        color:0xe7f2f3,roughness:.14,metalness:.010,
+        clearcoat:.82,clearcoatRoughness:.070,
+        emissive:0x0b3c55,emissiveIntensity:.11,
+        envMapIntensity:2.12,
+        sheen:.34,sheenColor:new T.Color(0x8beaff),sheenRoughness:.30,
+        specularIntensity:.98,specularColor:new T.Color(0xffffff),
+        transparent:true,opacity:0,depthWrite:true,
+        flatShading:true
       });
       this.guardianGoldMaterial=new T.MeshPhysicalMaterial({
-        color:0x7a5630,roughness:.20,metalness:.22,
-        clearcoat:.66,clearcoatRoughness:.10,
-        emissive:0x7d3605,emissiveIntensity:.15,
-        envMapIntensity:1.72,transparent:true,opacity:0
+        color:0xb58448,roughness:.16,metalness:.18,
+        clearcoat:.78,clearcoatRoughness:.07,
+        emissive:0xb74d09,emissiveIntensity:.22,
+        envMapIntensity:1.92,specularIntensity:.92,specularColor:new T.Color(0xffe5bd),
+        transparent:true,opacity:0,flatShading:true
       });
       this.guardianAnatomy=new T.Group();
       this.guardianParts=[];
-      const guardianSeg=this.lowPowerProfile?12:(this.mobileProfile?16:22);
-      const guardianSphere=new T.SphereGeometry(1,guardianSeg,Math.max(8,Math.round(guardianSeg*.65)));
+      const guardianDetail=this.lowPowerProfile?1:(this.mobileProfile?2:3);
+      const guardianSphere=new T.IcosahedronGeometry(1,guardianDetail);
       const addPart=(name,pos,scale,material=this.guardianPlateMaterial,rot=[0,0,0])=>{
         const mesh=new T.Mesh(guardianSphere.clone(),material);
         mesh.name=name;mesh.position.set(...pos);mesh.scale.set(...scale);mesh.rotation.set(...rot);
         mesh.userData.baseScale=mesh.scale.clone();
         this.guardianAnatomy.add(mesh);this.guardianParts.push(mesh);return mesh;
       };
-      addPart('shoulder',[.34,.27,.02],[.36,.31,.31],this.organicLobeMaterial,[0,0,-.14]);
-      addPart('neck',[.48,.47,.01],[.24,.36,.24],this.organicLobeMaterial,[0,0,-.28]);
-      addPart('head',[.73,.66,.04],[.31,.24,.25],this.guardianPlateMaterial,[0,0,-.18]);
-      addPart('muzzle',[.96,.60,.08],[.23,.105,.155],this.guardianPlateMaterial,[0,0,-.08]);
+      addPart('shoulder',[.34,.27,.02],[.38,.29,.31],this.guardianPlateMaterial,[0,0,-.14]);
+      addPart('neck',[.48,.47,.01],[.245,.37,.235],this.guardianPlateMaterial,[0,0,-.28]);
+      addPart('head',[.73,.66,.04],[.32,.225,.245],this.guardianPlateMaterial,[0,0,-.19]);
+      addPart('muzzle',[.99,.595,.09],[.255,.088,.135],this.guardianPlateMaterial,[0,0,-.075]);
       addPart('chestPlate',[.16,.08,.54],[.48,.42,.15],this.guardianPlateMaterial,[0,0,.05]);
       addPart('hipPlate',[-.43,-.02,.20],[.34,.27,.18],this.guardianPlateMaterial,[0,0,.12]);
 
@@ -1059,6 +1063,16 @@
         ear.position.set(d[0],d[1],d[2]);ear.rotation.z=d[3];ear.rotation.x=.06;
         ear.userData.baseScale=ear.scale.clone();
         this.guardianAnatomy.add(ear);this.guardianParts.push(ear);
+      });
+      const spineGeo=new T.ConeGeometry(.075,.34,5,1,false);
+      [
+        [-.30,.30,-.22,-.64],[-.10,.43,-.24,-.50],[.10,.54,-.20,-.34],
+        [.30,.66,-.14,-.20],[.50,.77,-.08,-.08]
+      ].forEach((d,i)=>{
+        const spine=new T.Mesh(spineGeo.clone(),i%3===1?this.guardianGoldMaterial:this.guardianPlateMaterial);
+        spine.position.set(d[0],d[1],d[2]);spine.rotation.z=d[3];spine.rotation.x=-.14;
+        spine.scale.set(1,1+.16*i,1);spine.userData.baseScale=spine.scale.clone();
+        this.guardianAnatomy.add(spine);this.guardianParts.push(spine);
       });
       this.guardianAnatomy.rotation.y=-.06;
       this.organicGroup.add(this.guardianAnatomy);
@@ -1722,9 +1736,9 @@
       const bodyScale=.001+visible*.999;
       this.organicGroup.scale.set(bodyScale*.84,bodyScale*.84,bodyScale*.84);
 
-      this.organicShellMaterial.opacity=(.88+.08*maturity)*visible;
-      this.organicLobeMaterial.opacity=(.24+.18*maturity)*visible;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.20+.12*maturity)*visible;
+      this.organicShellMaterial.opacity=(.52+.12*maturity)*visible;
+      this.organicLobeMaterial.opacity=(.18+.12*maturity)*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.16+.10*maturity)*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=(.12+.12*maturity)*visible;
       this.organicHoodMaterial.opacity=0;
@@ -1747,8 +1761,8 @@
         this.guardianAnatomy.rotation.x=Math.sin(time*.00015)*.008-this.interactionY*.025;
         this.guardianAnatomy.rotation.z=Math.sin(time*.00012)*.006+this.interactionSpin*.18;
       }
-      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=(.72+.22*maturity)*visible;
-      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=(.42+.28*maturity)*visible;
+      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=(.86+.12*maturity)*visible;
+      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=(.30+.22*maturity)*visible;
       this.organicLobes.forEach((lobe,i)=>{
         const q=1+Math.sin(time*.00082+lobe.userData.phase)*.018*visible;
         const b=lobe.userData.baseScale;
