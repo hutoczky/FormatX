@@ -630,8 +630,14 @@
       return;
     }
     pendingDesktopRelative = relative;
-    root.dataset.fxLoopDesktopSourceTopR1724=String(Math.round(cachedSourceTop??loopGeometry.sourceTop));
-    performTransfer(relative,'visual-bridge-desktop-idle-r1724',cachedSourceTop);
+    /* R1725 — the bridge-relative coordinate remains authoritative, but the
+       destination hero origin must come from the fresh idle geometry. A cached
+       sourceTop can belong to pre-font/pre-layout geometry and creates a visible
+       vertical jump on the next cycle. */
+    const freshSourceTop=loopGeometry.sourceTop;
+    root.dataset.fxLoopDesktopSourceTopR1724=String(Math.round(freshSourceTop));
+    root.dataset.fxLoopDesktopLandingR1725='cached-relative-fresh-source-top';
+    performTransfer(relative,'visual-bridge-desktop-idle-r1725',freshSourceTop);
   }
 
   function transferIfNeeded() {
