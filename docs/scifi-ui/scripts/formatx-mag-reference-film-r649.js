@@ -240,7 +240,7 @@
         body.addColorStop(.68,'rgba(48,62,113,.99)');
         body.addColorStop(1,'rgba(5,12,24,1)');
         ctx.fillStyle=body;
-        /* R1724: FormatX Crystal Guardian fallback silhouette.
+        /* R1724: FormatX Living Crystal Organism fallback silhouette.
            Angular living anatomy replaces the old egg/blob body. */
         const breathe=1+.008*Math.sin(time*.0024);
         ctx.scale(breathe,breathe);
@@ -384,6 +384,6 @@
   }
   window.FormatXMagReferenceFilmR649={
     attach,
-    revision:'r1724-formatx-crystal-guardian-birth'
+    revision:'r1724-formatx-living-crystal-organism-birth'
   };
 })();
