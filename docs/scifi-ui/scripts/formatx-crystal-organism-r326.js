@@ -1952,8 +1952,8 @@
     listen(window,'formatx:referencepause',onPause,{passive:true});
     listen(reduced,'change',onReducedMotionChange,{passive:true});
     listen(window,'scroll',onScroll,{passive:true});
-    listen(window,'resize',resize,{passive:true});
-    listen(window,'orientationchange',resize,{passive:true});
+    listen(window,'resize',()=>{resize();boost(.30,mobile?1:2);startSurfacePulse('resize');},{passive:true});
+    listen(window,'orientationchange',()=>{resize();boost(.52,mobile?2:3);startSurfacePulse('orientation');},{passive:true});
     listen(window,'formatx:organismpanelopen',()=>signalShape('sphere','organism-listening'),{passive:true});
     listen(window,'formatx:organismresponse',()=>signalShape('crystal','organism-response'),{passive:true});
     listen(window,'formatx:open-live-os',()=>signalShape('sphere','live-os-open'),{passive:true});
