@@ -381,10 +381,13 @@
     const sourceHeight = sourceHero.offsetHeight;
     const documentEnd = Math.max(0, document.documentElement.scrollHeight - viewportHeight);
     const desiredThreshold = bridgeTop + Math.max(36, Math.min(viewportHeight * .18, 180));
-    const reachableThreshold = Math.max(
-      bridgeTop,
-      Math.min(desiredThreshold, Math.max(bridgeTop, documentEnd - 2))
-    );
+    /* R1724: the bridge may begin inside the final viewport, so bridgeTop can
+       legitimately be greater than the maximum scroll position. Never clamp
+       the trigger back up to an unreachable bridgeTop; use the last reachable
+       document coordinate instead. bridgeRelative() then resolves this case to
+       relative=0, which lands on the real hero without a dead scroll zone. */
+    const reachableLimit = Math.max(0, documentEnd - 2);
+    const reachableThreshold = Math.max(0, Math.min(desiredThreshold, reachableLimit));
 
     bridge.style.setProperty('--fx-loop-source-height', `${Math.round(sourceHeight)}px`);
 
@@ -397,6 +400,7 @@
       documentEnd,
     });
     root.dataset.fxLoopReachableThresholdR1723 = String(Math.round(reachableThreshold));
+    root.dataset.fxLoopReachableThresholdR1724 = documentEnd < bridgeTop ? 'final-viewport-safe' : 'bridge-relative-safe';
     return true;
   }
 
