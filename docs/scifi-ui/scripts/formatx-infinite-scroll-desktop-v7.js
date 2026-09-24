@@ -624,23 +624,23 @@
        after scrolling has settled so late CSS/fonts/hero geometry cannot leave
        the cached bridge threshold stale, while the scroll hot path stays read-free. */
     const cachedRelative=Number.isFinite(pendingDesktopRelative)?pendingDesktopRelative:null;
-    const cachedSourceTop=Number.isFinite(pendingDesktopSourceTop)?pendingDesktopSourceTop:null;
     refreshGeometry();
-    /* R1724 — visual continuity owns the landing coordinate. The relative
-       position sampled in the scroll frame is what the user actually saw when
-       entering the bridge, so a late Guardian/font/layout reflow must never
-       replace it with a different freshly measured offset. Fresh geometry is
-       only used when there was no valid cached bridge-relative position. */
-    let relative=null;
-    if(cachedRelative!=null&&loopGeometry.ready){
+    /* R1725d — idle geometry is authoritative once layout has settled.
+       A scroll-frame relative value may have been measured against an older
+       bridgeTop and can therefore be hundreds of pixels stale. Use the fresh
+       bridge-relative coordinate first; retain the cached intent only when the
+       refreshed bridge is no longer reachable at the document end. */
+    let relative=bridgeRelative();
+    if(relative!=null){
+      root.dataset.fxLoopDesktopRecoveryR1724='fresh-idle-relative-authoritative';
+    }else if(cachedRelative!=null && loopGeometry.ready && scrollY>=Math.max(0,loopGeometry.documentEnd-4)){
       relative=Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)));
-      root.dataset.fxLoopDesktopRecoveryR1724='cached-relative-authoritative-after-idle-reflow';
+      root.dataset.fxLoopDesktopRecoveryR1724='cached-end-intent-fallback';
     }else{
-      relative=bridgeRelative();
-      root.dataset.fxLoopDesktopRecoveryR1724=relative==null?'no-boundary':'fresh-relative-no-cache';
+      root.dataset.fxLoopDesktopRecoveryR1724='no-boundary';
     }
     root.dataset.fxLoopDesktopGeometryR1715 = loopGeometry.ready ? 'fresh-idle-sample' : 'unavailable';
-    root.dataset.fxLoopDesktopRecoveryR1723 = 'scroll-frame-relative-preserved-across-idle-reflow';
+    root.dataset.fxLoopDesktopRecoveryR1723 = 'fresh-idle-relative-with-cached-end-fallback';
     if (relative == null) {
       pendingDesktopRelative = null;
       root.dataset.fxLoopLandingState = 'native-desktop';
@@ -658,7 +658,7 @@
     const heroLoopOrigin=0;
     root.dataset.fxLoopDesktopSourceTopR1724='0';
     root.dataset.fxLoopDesktopLandingR1725='cached-relative-hero-local-origin';
-    performTransfer(relative,'visual-bridge-desktop-idle-r1725c',heroLoopOrigin);
+    performTransfer(relative,'visual-bridge-desktop-idle-r1725d',heroLoopOrigin);
   }
 
   function transferIfNeeded() {
