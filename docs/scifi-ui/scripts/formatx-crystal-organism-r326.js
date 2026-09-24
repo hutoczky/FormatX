@@ -1261,7 +1261,7 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.020,.032,.052),vec3(.190,.250,.290),lift);
+        vec3 col=mix(vec3(.024,.030,.037),vec3(.182,.207,.214),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
@@ -1269,10 +1269,10 @@
         col+=vec3(.52,.59,.60)*sideSpec*.105;
         col+=vec3(.72,.75,.72)*softboxA*.194;
         col+=vec3(.44,.50,.51)*softboxB*.118;
-        col+=vec3(.84,.92,.93)*studioRibbonA*.135;
-        col+=vec3(.68,.39,.15)*studioRibbonB*.078;
+        col+=vec3(.84,.88,.87)*studioRibbonA*.118;
+        col+=vec3(.48,.32,.21)*studioRibbonB*.048;
         col+=vec3(.080,.096,.095)*horizonBand*.168;
-        col+=vec3(.105,.265,.330)*fresnel*.46;
+        col+=vec3(.094,.190,.218)*fresnel*.31;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1285,24 +1285,24 @@
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0),22.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        col+=vec3(.028,.29,.37)*vascular*(.16+.27*uEnergy);
+        col+=vec3(.024,.195,.232)*vascular*(.105+.195*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.55+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.2)*bodyMask;
         float cortexRidge=pow(max(cortexWave,cortexCross),4.0)*bodyMask;
-        col=mix(col,vec3(.020,.010,.032),cortexValley*.34);
-        col+=vec3(.070,.098,.135)*cortexRidge*.095;
+        col=mix(col,vec3(.012,.015,.019),cortexValley*.28);
+        col+=vec3(.068,.084,.091)*cortexRidge*.075;
         float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.35);
         float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1);
         float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.7)*bodyMask;
         float facetTone=.91+.13*fract(vFacet*7.13+.19);
         vec3 ivory=vec3(.23,.30,.32)+vec3(.36,.38,.35)*(.20*ndl+.15*sideLight+.18*softboxA);
-        ivory+=vec3(.68,.35,.11)*studioRibbonB*.065;
+        ivory+=vec3(.48,.31,.20)*studioRibbonB*.045;
         col*=mix(1.0,facetTone,bodyMask*.40);
         col=mix(col,ivory,plateMask*.56);
         col=mix(col,vec3(.004,.008,.014),livingSeam*.52);
-        col+=vec3(.070,.40,.52)*vascular*(.15+.23*uEnergy);
+        col+=vec3(.055,.265,.315)*vascular*(.10+.18*uEnergy);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1313,11 +1313,11 @@
         col=mix(col,vec3(.003,.008,.010),halo*.10);
         col+=vec3(.18,.30,.31)*fissure*.070;
 
-        vec2 lq=vec2(q.x,(q.y-.010)*1.08);
+        vec2 lq=vec2((q.x+.012)*1.16,(q.y-.018)*.96);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.155,.225,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.095,.165,lensD))*front;
-        float lensCore=(1.0-smoothstep(.034,.082,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.145,.205,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.092,.150,lensD))*front;
+        float lensCore=(1.0-smoothstep(.030,.067,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensDepth=sat(1.0-lensD/.080);
@@ -1344,7 +1344,7 @@
           float head=mix(-.18,1.18,sat(uSurfacePulse));
           pulse=exp(-pow((coordinate-head)/.064,2.0))*(.28+.72*fresnel);
         }
-        col+=vec3(.16,.38,.44)*pulse*.52;
+        col+=vec3(.12,.27,.30)*pulse*.36;
         col+=vec3(.48,.55,.54)*pulse*(.08+.18*softboxA);
 
         float subsurface=pow(max(0.0,dot(-n,key)),1.7)*(1.0-facing);
@@ -1352,7 +1352,7 @@
           +vec3(.080,.17,.20)*(.12*ndl+.21*sideLight+.55*fresnel)
           +vec3(.58,.78,.80)*softboxA*.24
           +vec3(.26,.46,.51)*softboxB*.16
-          +vec3(.20,.07,.28)*subsurface*.28;
+          +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
         vec3 cartilage=vec3(.020,.012,.031)
