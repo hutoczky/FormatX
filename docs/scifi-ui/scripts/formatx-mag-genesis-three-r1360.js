@@ -109,6 +109,7 @@
       document.documentElement.dataset.fxMagBirthQualityR1722='primary-three-hidpi-msaa-gradual-adaptive-60hz';
       document.documentElement.dataset.fxMagBirthVisualR1722='fully-living-cortical-cellular-neural-studio-organism';
       document.documentElement.dataset.fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism';
+      document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -1838,13 +1839,14 @@
       if(t<3.34)this.updateDNA(t,time);
       else if(this.dnaGroup.visible)this.dnaGroup.visible=false;
       this.updateCore(t,time);
-      if(t>1.86&&t<8.72)this.updateOrganic(t,time);
+      if(t>1.86)this.updateOrganic(t,time);
       else if(this.organicGroup.visible)this.organicGroup.visible=false;
+      if(t>3.00)this.updateCells(t,time);
+      else if(this.cellGroup.visible)this.cellGroup.visible=false;
       if(t>5.00)this.updateMechanical(t,time);
       else if(this.mechanicalGroup.visible)this.mechanicalGroup.visible=false;
       if(t>4.95)this.updateTentacles(t,time);
       else if(this.tentacleGroup.visible)this.tentacleGroup.visible=false;
-      this.cellGroup.visible=false;
 
       if(this.chamber?.visible)this.chamber.rotation.z=Math.sin(time*.000025)*.0035;
       if(this.particles?.visible){
@@ -1859,7 +1861,7 @@
 
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.20+flash*.08+after*.020+physicalImpulse*.010;
+      this.renderer.toneMappingExposure=1.30+flash*.10+after*.025+physicalImpulse*.012;
       this.coreLight.intensity+=flash*1.10+after*.18;
       if(this.glowSprite){
         const g=1+flash*.72;
