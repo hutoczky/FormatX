@@ -305,7 +305,14 @@
     }
 
     const anchor = target.closest('a[href^="#"]');
-    if (!anchor || anchor.closest('.fx-organism-panel') || anchor.matches('.scroll-cue') || anchor.closest('.fx-rail')) return;
+    /* R1724: #main-nav belongs exclusively to control-owner-r268. Opening an
+       organism console panel from the same navigation click leaves
+       fx-organism-panel-open set and correctly blocks seamless loop transfer. */
+    if (!anchor
+      || anchor.closest('.fx-organism-panel')
+      || anchor.closest('#main-nav')
+      || anchor.matches('.scroll-cue')
+      || anchor.closest('.fx-rail')) return;
     const id = anchor.getAttribute('href').slice(1);
     if (!SPECS.some(spec => spec.id === id)) return;
     event.preventDefault();
@@ -367,11 +374,17 @@
     buildActionbar();
     ROOT.classList.add('fx-organism-interface-ready', 'fx-organism-scene-0');
     ROOT.dataset.fxOrganismInterface = 'ready';
+    ROOT.dataset.fxOrganismMenuAnchorPolicyR1724='main-nav-never-opens-console-panel';
     document.body.classList.add('fx-organism-shell');
 
     document.addEventListener('click', onClick, true);
     addEventListener('keydown', onKeydown);
     addEventListener('formatx:languagechange', syncConsoleLanguage);
+    addEventListener('formatx:sectionnavigation',()=>{
+      if(activeId)closePanel(false);
+      document.body.classList.remove('fx-organism-panel-open');
+      ROOT.dataset.fxOrganismNavigationOwnershipR1724='main-nav-control-owner-r268';
+    },{passive:true});
     observeChapters();
     syncConsoleLanguage();
 
