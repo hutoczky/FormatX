@@ -93,11 +93,25 @@ function warmCriticalOwners(){
   warmAsset(MAG_SHAPE_SYNC,'script');
 }
 function ensureDialogueSurface(){
+  const activate=link=>{
+    if(!(link instanceof HTMLLinkElement))return false;
+    link.media='all';
+    link.dataset.fxR487Media='all';
+    link.removeAttribute('data-fx-r487-deferred-style');
+    return true;
+  };
+  const openStyle=document.querySelector('link[data-fx-dialogue-open-critical-r1727]');
+  activate(openStyle);
   let link=document.querySelector('link[data-fx-dialogue-surface-r475]');
-  if(link instanceof HTMLLinkElement){root.dataset.fxDialogueSurfaceR475=link.sheet?'ready':'loading';return;}
+  if(link instanceof HTMLLinkElement){
+    activate(link);
+    root.dataset.fxDialogueSurfaceR475=link.sheet?'ready':'loading';
+    return;
+  }
   link=document.createElement('link');
   link.rel='stylesheet';
   link.href=DIALOGUE_STYLE;
+  link.media='all';
   link.dataset.fxDialogueSurfaceR475='true';
   link.addEventListener('load',()=>{root.dataset.fxDialogueSurfaceR475='ready';},{once:true});
   link.addEventListener('error',()=>{root.dataset.fxDialogueSurfaceR475='load-failed';},{once:true});
