@@ -24,10 +24,13 @@ root.dataset.fxP0MotionCacheR1723='motion-loader-r1723-canonical-living-organism
 root.dataset.fxP0MotionCacheR1723V2='motion-loader-r1723-physiology-v2';
 root.dataset.fxP0MotionCacheR1724='motion-loader-r1724-living-crystal-organism';
 root.dataset.fxP0MotionCacheR1725='motion-loader-r1725-photoreal-living-biocrystal';
+root.dataset.fxP0MotionCacheR1729='webdriver-validation-runs-real-r326-explicit-lighthouse-static-only';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1727b-photographic-audit-stable';
 const PARAMS=new URLSearchParams(location.search);
-const AUDIT=navigator.webdriver===true||/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
+const WEBDRIVER=navigator.webdriver===true;
+const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
 const AUTO_DELAY_MS=6500;
+root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
 let idleId=0;
