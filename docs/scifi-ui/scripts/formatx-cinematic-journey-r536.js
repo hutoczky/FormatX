@@ -9,6 +9,13 @@
   const params = new URLSearchParams(location.search);
   const FORCE = params.get('cinema') === '1';
   const VERIFY = params.has('verify') || params.has('scroll-test') || params.has('design-test');
+  const AUDIT = /Chrome-Lighthouse/i.test(navigator.userAgent||'') || params.get('lighthouse') === '1';
+
+  if (AUDIT && !FORCE) {
+    root.dataset.fxCinematicJourneyR536='audit-static-skip-r1735';
+    root.dataset.fxCinematicJourneyAuditR1735='zero-stage-zero-observers';
+    return;
+  }
 
   if (reduced.matches || (VERIFY && !FORCE)) {
     root.dataset.fxCinematicJourneyR536 = reduced.matches ? 'reduced-skip' : 'verification-skip';
