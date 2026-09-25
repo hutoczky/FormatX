@@ -811,7 +811,38 @@
     root.dataset.fxLoopLandingState = 'waiting-wheel-idle';
   }
 
+  function materializeDesktopLoopTail() {
+    if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || !bridge?.isConnected) return false;
+    const bridgeTop = Number(loopGeometry.ready ? loopGeometry.bridgeTop : bridge.offsetTop);
+    if (!Number.isFinite(bridgeTop) || scrollY < Math.max(0, bridgeTop - innerHeight * 6.5)) return false;
+
+    document.querySelectorAll([
+      '#main-content > section.scene:not(#hero)',
+      '#main-content .fx-category-deck',
+      '#main-content .fx-static-live-os',
+      '#main-content .fx-award-proof',
+      '#main-content .fx-origin-proof',
+      '#main-content .fx-product-showcase',
+      '#user-feedback'
+    ].join(',')).forEach(node => {
+      if (!(node instanceof HTMLElement)) return;
+      node.style.setProperty('content-visibility','visible','important');
+      node.style.setProperty('contain-intrinsic-size','none','important');
+    });
+
+    root.dataset.fxLoopTailMaterializedR1727 = 'ready';
+    /* Force this one intentional tail-layout realization before capturing the
+       boundary gesture. It happens several viewports before the bridge, not at
+       the handoff, so the bridge coordinate no longer changes under the user. */
+    void document.documentElement.offsetHeight;
+    refreshGeometry();
+    captureStableDesktopGeometry('desktop-tail-materialized-r1727');
+    root.dataset.fxLoopTailGeometryR1727 = String(Math.round(loopGeometry.bridgeTop));
+    return true;
+  }
+
   function onScroll() {
+    materializeDesktopLoopTail();
     /* R1727 — capture desktop bridge entry synchronously once. Deferred CSS,
        fonts or intro teardown can move bridge.offsetTop before the rAF/idle
        phase. After this anchor is taken, continue the gesture using scroll
