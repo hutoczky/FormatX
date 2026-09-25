@@ -426,13 +426,13 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-photographic-biocrystal-fallback-mobile-transparent-r1745'
+      quality:'hidpi-photographic-biocrystal-fallback-mobile-transparent-r1749'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1727-photographic-biocrystal-continuity-birth'
+    visualRevision:'r1749-final-photoreal-mag-intro-material-parity'
   };
 })();
