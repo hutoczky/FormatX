@@ -44,29 +44,21 @@
   }
 
   function activateCore(source) {
-    if (interactionCooldown) return;
-    interactionCooldown = true;
-    setTimeout(() => { interactionCooldown = false; }, 240);
+    const visualCooldown = interactionCooldown;
+    if (!visualCooldown) {
+      interactionCooldown = true;
+      setTimeout(() => { interactionCooldown = false; }, 240);
+    }
 
+    /* R1736 — semantic activation is never throttled. A preceding header/core
+       pulse may still be inside the short visual cooldown, but a real click or
+       keyboard activation must publish its state and canonical ASK target
+       immediately. Only duplicate visual energy/pulse work is suppressed. */
     closeConflictingUi();
     root.dataset.fxImmersive = 'active';
     root.dataset.fxCoreInteractionMode = 'active-r252';
     root.dataset.fxCoreInteractionSource = source;
     root.dataset.fxCoreInteractionTarget = 'native-core-pulse';
-
-    window.FormatXCoreMobileV69?.pulse?.({ phase: 'activate', source });
-    dispatchEvent(new CustomEvent('formatx:coreinteraction', {
-      detail: { phase: 'activate', source, x: 0, y: 0, revision: VERSION }
-    }));
-    dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
-      detail: { source: `mag-${source}-r252` }
-    }));
-
-    const hit = document.querySelector('.fx-mag-heart-hit-r252');
-    if (hit instanceof HTMLElement) {
-      hit.dataset.fxHeartActive = 'true';
-      setTimeout(() => { if (hit.isConnected) delete hit.dataset.fxHeartActive; }, 720);
-    }
 
     queueMicrotask(() => {
       if (window.FormatXOrganismVoice?.open) {
@@ -86,6 +78,25 @@
         root.dataset.fxCoreInteractionTarget = 'thought-trigger';
       }
     });
+
+    if (visualCooldown) {
+      root.dataset.fxCoreInteractionCooldownR1736 = 'semantic-accepted-visual-suppressed';
+      return;
+    }
+
+    window.FormatXCoreMobileV69?.pulse?.({ phase: 'activate', source });
+    dispatchEvent(new CustomEvent('formatx:coreinteraction', {
+      detail: { phase: 'activate', source, x: 0, y: 0, revision: VERSION }
+    }));
+    dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
+      detail: { source: `mag-${source}-r252` }
+    }));
+
+    const hit = document.querySelector('.fx-mag-heart-hit-r252');
+    if (hit instanceof HTMLElement) {
+      hit.dataset.fxHeartActive = 'true';
+      setTimeout(() => { if (hit.isConnected) delete hit.dataset.fxHeartActive; }, 720);
+    }
   }
 
   function bindDelegatedHeartInput() {
