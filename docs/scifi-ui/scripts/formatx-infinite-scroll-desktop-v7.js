@@ -932,6 +932,9 @@
         desktopGestureBoundaryLatched=true;
         root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
         root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
+        clearTimeout(activityTimer);
+        activityTimer=window.setTimeout(markIdle,32);
+        root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
       }
     }
 
