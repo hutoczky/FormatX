@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const W=1280,H=720,TAU=Math.PI*2;
+  const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
   const smooth=v=>{v=clamp(v);return v*v*(3-2*v)};
   const ease=v=>1-Math.pow(1-clamp(v),3);
@@ -198,14 +199,14 @@
   }
   function drawLiteScene(ctx,r,time,target){
     const t=r*10,cx=640+(target?.x!=null?(target.x-640)*smooth((t-9.72)/.28):0),cy=360+(target?.y!=null?(target.y-360)*smooth((t-9.72)/.28):0);
-    ctx.fillStyle='#02070d';ctx.fillRect(0,0,W,H);
+    if(!MOBILE){ctx.fillStyle='#02070d';ctx.fillRect(0,0,W,H);}
     const chamber=ctx.createRadialGradient(cx,cy,12,cx,cy,560);
     chamber.addColorStop(0,'rgba(88,154,169,.23)');
     chamber.addColorStop(.34,'rgba(28,66,78,.15)');
     chamber.addColorStop(.72,'rgba(12,20,29,.08)');
     chamber.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=chamber;ctx.fillRect(0,0,W,H);
-    drawLivingWorld(ctx,time,.86);
+    if(!MOBILE)drawLivingWorld(ctx,time,.86);
 
     const dnaFade=1-smooth((t-2.65)/1.45);
     if(dnaFade>.002){
@@ -364,7 +365,7 @@
           : (sw<900?1.78:1.34);
       dpr=Math.min(devicePixelRatio||1,baseDpr*qualityScale);
       canvas.width=Math.max(1,Math.round(sw*dpr));canvas.height=Math.max(1,Math.round(sh*dpr));canvas.style.width=sw+'px';canvas.style.height=sh+'px';
-      ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx=canvas.getContext('2d',{alpha:MOBILE,desynchronized:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(dpr,0,0,dpr,0,0);
       scale=Math.max(sw/W,sh/H);ox=(sw-W*scale)*.5;oy=(sh-H*scale)*.5;
     }
     function draw(r,time){
@@ -425,7 +426,7 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-photographic-biocrystal-fallback-mobile-60hz-r1727'
+      quality:'hidpi-photographic-biocrystal-fallback-mobile-transparent-r1745'
     };
   }
   window.FormatXMagReferenceFilmR649={
