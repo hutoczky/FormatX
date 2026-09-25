@@ -54,6 +54,7 @@ jobs:
           grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html$' lighthouse-desktop-output.txt
           mkdir -p lighthouse-results/desktop
           cp -a .lighthouseci/. lighthouse-results/desktop/
+          PROFILE=desktop node .github/scripts/summarize-p0-lighthouse.cjs lighthouse-results/desktop | tee -a lighthouse-desktop-output.txt
           exit "$lhci_status"
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
@@ -72,6 +73,7 @@ jobs:
           grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html$' lighthouse-mobile-output.txt
           mkdir -p lighthouse-results/mobile
           cp -a .lighthouseci/. lighthouse-results/mobile/
+          PROFILE=mobile node .github/scripts/summarize-p0-lighthouse.cjs lighthouse-results/mobile | tee -a lighthouse-mobile-output.txt
           exit "$lhci_status"
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
