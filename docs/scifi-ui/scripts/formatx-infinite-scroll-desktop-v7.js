@@ -833,10 +833,12 @@
            the loop boundary was genuinely reached. */
         const liveRect=bridge.getBoundingClientRect();
         const liveEventBridgeTop=Number(scrollY+liveRect.top);
-        const eventBridgeTop=Number.isFinite(stableDesktopBridgeTop)
-          ? stableDesktopBridgeTop
-          : liveEventBridgeTop;
-        const eventSourceHeight=Math.max(0,stableDesktopSourceHeight||loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
+        /* R1727h — the first scroll event and scrollY belong to the same live
+           layout snapshot, therefore that live bridge coordinate is authoritative.
+           A pre-gesture stable snapshot can be stale after deferred layout work
+           and previously injected an exact +225px landing error. */
+        const eventBridgeTop=liveEventBridgeTop;
+        const eventSourceHeight=Math.max(0,sourceHero?.offsetHeight||loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
         if(Number.isFinite(eventBridgeTop)){
           desktopGestureAnchorY=scrollY;
           desktopGestureAnchorRelative=scrollY-eventBridgeTop;
