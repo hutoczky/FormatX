@@ -231,3 +231,33 @@ html[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
   }
 }
 /* production-r1743-parser-owned-skip-zero-cls */
+
+
+/* R1745 — mobile keeps the full 10 s cinematic, but it no longer hides the
+   canonical page behind an opaque black viewport. The intro and permanent MAG
+   now share one hero-space perception from the first meaningful paint. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root[data-fx-mag-birth-live="active"] body>.topbar,
+  html:root:root[data-fx-mag-birth-live="active"] body>.fx-organism-status,
+  html:root:root[data-fx-mag-birth-live="active"] body>.fx-rail,
+  html:root:root[data-fx-mag-birth-live="active"] body>#main-content,
+  html:root:root[data-fx-mag-birth-live="active"] body>footer.site-footer,
+  html:root:root[data-fx-mag-birth-live="active"] body>#fx-apex-canvas,
+  html:root:root[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  html:root:root #fx-mag-birth-prepaint-r1606,
+  html:root:root body>.fx-mag-birth-r533{
+    background:transparent!important;
+  }
+  html:root:root #fx-mag-birth-prepaint-r1606>.fxb-particles,
+  html:root:root body>.fx-mag-birth-r533>.fxb-particles{
+    background:transparent!important;
+  }
+  html:root:root body>.fx-mag-birth-r533::after{
+    opacity:.12!important;
+    background:radial-gradient(ellipse 56% 52% at 50% 42%,rgba(18,42,50,.16),transparent 74%)!important;
+  }
+}
+/* production-r1745-mobile-hero-integrated-ten-second-intro */
