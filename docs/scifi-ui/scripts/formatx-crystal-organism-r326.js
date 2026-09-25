@@ -129,6 +129,8 @@
   root.dataset.fxNativeMagMaterialR1726='neutral-mineral-ggx-softbox-restrained-vascular-emission-physical-edge-transmission';
   root.dataset.fxNativeMagVisualR1727='photographic-biocrystal-continuity-neutral-cortex-smoked-optic';
   root.dataset.fxNativeMagMaterialR1727='compile-safe-facet-tones-neutral-subsurface-low-emission-studio-reflection';
+  root.dataset.fxNativeMagVisualR1749='final-photographic-smoky-pearl-biocrystal-integrated-optic';
+  root.dataset.fxNativeMagMaterialR1749='neutral-mineral-softbox-low-cyan-no-neon-rib-physical-smoked-glass';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -1073,7 +1075,7 @@
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        mineral+=vec3(.026,.205,.245)*vascular*(.115+.205*uEnergy);
+        mineral+=vec3(.024,.165,.190)*vascular*(.090+.170*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
@@ -1094,12 +1096,12 @@
         vec3 ivory=vec3(.24,.31,.33)
           +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
           +vec3(.16,.25,.27)*fresnel*.18;
-        ivory+=vec3(.72,.39,.12)*studioRibbonB*.070;
+        ivory+=vec3(.54,.36,.24)*studioRibbonB*.050;
         mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
         mineral=mix(mineral,ivory,plateMask*.58);
         mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
-        mineral+=vec3(.070,.42,.54)*vascular*(.16+.24*uEnergy);
-        mineral+=vec3(.72,.38,.12)*vascular*studioRibbonB*.085;
+        mineral+=vec3(.050,.275,.325)*vascular*(.11+.19*uEnergy);
+        mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1137,9 +1139,9 @@
         mineral+=vec3(.42,.47,.46)*lensHighlight*.060;
         mineral+=vec3(.10,.12,.12)*lensLower*.025;
         mineral+=vec3(.003,.009,.011)*lensCore*lensDepth*.020;
-        mineral=mix(mineral,vec3(.018,.009,.026),ribs*.24);
-        mineral+=vec3(.090,.120,.145)*ribs*(.018+.055*keySoft+.050*sideSpec);
-        mineral+=vec3(.025,.18,.22)*ribs*lensOuter*(.050+.060*uEnergy);
+        mineral=mix(mineral,vec3(.010,.013,.016),ribs*.18);
+        mineral+=vec3(.080,.096,.102)*ribs*(.014+.044*keySoft+.038*sideSpec);
+        mineral+=vec3(.020,.115,.135)*ribs*lensOuter*(.035+.045*uEnergy);
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){

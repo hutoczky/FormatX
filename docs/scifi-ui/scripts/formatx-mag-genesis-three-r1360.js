@@ -129,6 +129,8 @@
       document.documentElement.dataset.fxMagBirthMobileContinuityR1745=this.mobileProfile?'transparent-hero-integrated-ten-second-cinematic':'desktop-full-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1727='photographic-single-biocrystal-continuity-no-neon-wing-read';
       document.documentElement.dataset.fxMagBirthMotionR1727='slow-biological-inertia-subtle-membrane-tension-matched-hero';
+      document.documentElement.dataset.fxMagBirthVisualR1749='final-photographic-smoky-pearl-biocrystal-matched-to-hero';
+      document.documentElement.dataset.fxMagBirthMaterialR1749='restrained-transmission-low-emission-neutral-studio-physiology';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,this.mobileProfile?0:1);
@@ -974,10 +976,10 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x81999c,roughness:.22,metalness:0,
-        clearcoat:.68,clearcoatRoughness:.080,
-        transmission:.24,thickness:.080,ior:1.38,
-        attenuationColor:new T.Color(0x174c5b),attenuationDistance:1.9,
+        color:0x7d8f91,roughness:.26,metalness:0,
+        clearcoat:.58,clearcoatRoughness:.11,
+        transmission:.16,thickness:.090,ior:1.39,
+        attenuationColor:new T.Color(0x27444a),attenuationDistance:1.65,
         transparent:true,opacity:0,depthWrite:false,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00045,
         envMapIntensity:1.28,side:T.FrontSide
@@ -1059,10 +1061,10 @@
       addFacet('root',[.03,-.70,-.02],[.22,.38,.18],[0,-.06,-.06],true);
 
       const livingCrystalMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x829da0,roughness:.20,metalness:0,
-        clearcoat:.72,clearcoatRoughness:.075,
-        transmission:.34,thickness:.065,ior:1.38,
-        emissive:0x05252d,emissiveIntensity:.036,
+        color:0x7f9395,roughness:.24,metalness:0,
+        clearcoat:.60,clearcoatRoughness:.105,
+        transmission:.22,thickness:.075,ior:1.39,
+        emissive:0x04171b,emissiveIntensity:.018,
         transparent:true,opacity:0,depthWrite:false,
         side:T.DoubleSide
       });
@@ -1583,14 +1585,14 @@
     makeTentacles(){
       const T=this.THREE,r=this.rand;
       this.tentacleMaterial=new T.MeshPhysicalMaterial({
-        color:0x34555e,metalness:.001,roughness:.18,
-        emissive:0x064150,emissiveIntensity:.12,
-        clearcoat:.72,clearcoatRoughness:.085,
-        transmission:.27,thickness:.14,ior:1.37,
-        attenuationColor:new T.Color(0x157da0),attenuationDistance:.74,
-        sheen:.14,sheenColor:new T.Color(0xa7c7ca),sheenRoughness:.40,
+        color:0x43585d,metalness:.001,roughness:.24,
+        emissive:0x042a31,emissiveIntensity:.055,
+        clearcoat:.60,clearcoatRoughness:.12,
+        transmission:.17,thickness:.15,ior:1.38,
+        attenuationColor:new T.Color(0x315f68),attenuationDistance:.68,
+        sheen:.09,sheenColor:new T.Color(0x9fb1b1),sheenRoughness:.50,
         transparent:true,opacity:0,depthWrite:false,
-        envMapIntensity:1.72
+        envMapIntensity:1.54
       });
       this.tentacleEdgeMaterial=new T.MeshBasicMaterial({transparent:true,opacity:0});
       this.tentacleNodeMaterial=new T.PointsMaterial({transparent:true,opacity:0});
