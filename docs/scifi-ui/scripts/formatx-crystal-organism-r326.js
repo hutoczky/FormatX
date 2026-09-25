@@ -1073,11 +1073,11 @@
         mineral+=vec3(.025,.052,.058)*backScatter*.36;
         mineral+=vec3(.066,.050,.074)*subsurface*(.038+.042*uEnergy);
         mineral+=vec3(.018,.060,.072)*subsurface*fresnel*.14;
-        float vesselA=pow(.5+.5*sin(vLocal.y*18.0+sin(vLocal.x*9.0)*2.2+vLocal.z*6.0),16.0);
-        float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
-        float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
+        float vesselA=pow(.5+.5*sin(vLocal.y*31.0+sin(vLocal.x*8.0)*2.6+vLocal.z*13.0),34.0);
+        float vesselB=pow(.5+.5*sin(vLocal.x*37.0-vLocal.y*11.0+sin(vLocal.z*10.0)*2.1),38.0);
+        float vesselC=pow(.5+.5*sin(vLocal.x*19.0+vLocal.y*41.0-vLocal.z*17.0+sin(vLocal.y*13.0)*2.4),42.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        mineral+=vec3(.024,.165,.190)*vascular*(.090+.170*uEnergy);
+        mineral+=vec3(.020,.115,.132)*vascular*(.045+.090*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
@@ -1102,7 +1102,7 @@
         mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
         mineral=mix(mineral,ivory,plateMask*.28);
         mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
-        mineral+=vec3(.050,.275,.325)*vascular*(.11+.19*uEnergy);
+        mineral+=vec3(.038,.170,.198)*vascular*(.045+.095*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
 
         vec2 q=vLocal.xy;
@@ -1285,11 +1285,11 @@
         col+=vec3(.052,.045,.039)*pow(planeFill,.82)*.135;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         col+=vec3(.018,.040,.046)*edgeTransmission*.39;
-        float vesselA=pow(.5+.5*sin(vLocal.y*18.0+sin(vLocal.x*9.0)*2.2+vLocal.z*6.0),16.0);
-        float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
-        float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0),22.0);
+        float vesselA=pow(.5+.5*sin(vLocal.y*31.0+sin(vLocal.x*8.0)*2.5+vLocal.z*13.0),32.0);
+        float vesselB=pow(.5+.5*sin(vLocal.x*37.0-vLocal.y*11.0+sin(vLocal.z*10.0)*2.0),36.0);
+        float vesselC=pow(.5+.5*sin(vLocal.x*19.0+vLocal.y*39.0-vLocal.z*17.0),40.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        col+=vec3(.024,.195,.232)*vascular*(.105+.195*uEnergy);
+        col+=vec3(.020,.120,.140)*vascular*(.050+.095*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.55+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.2)*bodyMask;
@@ -1306,7 +1306,7 @@
         col*=mix(1.0,facetTone,bodyMask*.40);
         col=mix(col,ivory,plateMask*.27);
         col=mix(col,vec3(.004,.008,.014),livingSeam*.52);
-        col+=vec3(.055,.265,.315)*vascular*(.10+.18*uEnergy);
+        col+=vec3(.038,.165,.192)*vascular*(.045+.085*uEnergy);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1445,8 +1445,8 @@
         col+=vec3(.042,.105,.125)*fresnel*.20;
         col+=vec3(.012,.017,.021)*max(0.0,-n.y);
 
-        float vesselA=pow(.5+.5*sin(vLocal.y*17.0+vLocal.x*8.0+vLocal.z*5.0),14.0);
-        float vesselB=pow(.5+.5*sin(vLocal.x*20.0-vLocal.y*6.0+vLocal.z*9.0),17.0);
+        float vesselA=pow(.5+.5*sin(vLocal.y*33.0+sin(vLocal.x*7.0)*2.2+vLocal.z*13.0),36.0);
+        float vesselB=pow(.5+.5*sin(vLocal.x*39.0-vLocal.y*12.0+sin(vLocal.z*9.0)*1.8),40.0);
         float vascular=max(vesselA,vesselB)*bodyMask;
         float plateField=.5+.5*sin(vUv.x*16.8+sin(vUv.y*11.8)*1.4);
         float plateCross=.5+.5*sin(vUv.y*15.2-vUv.x*6.4);
@@ -1454,8 +1454,8 @@
         vec3 ivory=vec3(.075,.098,.106)+vec3(.18,.19,.17)*(.24*ndl+.14*sideLight);
         ivory+=vec3(.085,.14,.15)*fresnel*.10;
         col=mix(col,ivory,plateMask*.24);
-        col+=vec3(.035,.22,.28)*vascular*(.10+.17*uEnergy);
-        col+=vec3(1.00,.43,.09)*plateMask*sideSpec*.055;
+        col+=vec3(.026,.115,.135)*vascular*(.040+.075*uEnergy);
+        col+=vec3(.62,.32,.14)*plateMask*sideSpec*.025;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
