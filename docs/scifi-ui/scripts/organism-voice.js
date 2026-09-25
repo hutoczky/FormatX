@@ -195,6 +195,11 @@
   }
 
   function buildInterface() {
+    /* R1728 — keep exactly one canonical dialogue surface. Deferred legacy
+       initialisers can otherwise leave an older hidden bubble earlier in DOM
+       order; automation and assistive technology then resolve that stale node
+       instead of the visible ASK-owned dialogue. */
+    document.querySelectorAll('.fx-organism-dialogue').forEach(node => node.remove());
     shell = create('aside', 'fx-organism-dialogue', { 'aria-label': copy().region, 'data-fx-organism-dialogue': 'ready-v4' });
     bubble = create('section', 'fx-organism-thought', { hidden: '', 'aria-hidden': 'true', 'aria-live': 'polite', 'aria-atomic': 'true' });
     const head = create('header', 'fx-organism-thought-head');
