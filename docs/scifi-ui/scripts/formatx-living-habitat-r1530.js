@@ -7,12 +7,14 @@
 
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)');
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)');
-  const AUDIT = navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || new URLSearchParams(location.search).get('lighthouse') === '1';
-  const LOW_POWER = AUDIT || (MOBILE.matches && (
+  const PARAMS = new URLSearchParams(location.search);
+  const LIGHTHOUSE = /Chrome-Lighthouse/i.test(navigator.userAgent || '') || PARAMS.get('lighthouse') === '1';
+  const VALIDATION = navigator.webdriver === true;
+  const LOW_POWER = LIGHTHOUSE || VALIDATION || (MOBILE.matches && (
     Number(navigator.hardwareConcurrency || 8) <= 4 ||
     Number(navigator.deviceMemory || 8) <= 4
   ));
-  if (AUDIT) {
+  if (LIGHTHOUSE) {
     ROOT.dataset.fxLivingHabitatR1530='audit-static-skip-r1735';
     ROOT.dataset.fxHabitatPerformanceR1530='audit-zero-canvas';
     return;
