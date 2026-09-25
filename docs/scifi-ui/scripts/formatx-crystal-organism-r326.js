@@ -127,6 +127,8 @@
   root.dataset.fxNativeMagMaterialR1725='low-emission-mineral-diffuse-ggx-reflection-facet-tonal-variation';
   root.dataset.fxNativeMagVisualR1726='cinematic-photographic-smoky-pearl-biocrystal-neutral-studio-response';
   root.dataset.fxNativeMagMaterialR1726='neutral-mineral-ggx-softbox-restrained-vascular-emission-physical-edge-transmission';
+  root.dataset.fxNativeMagVisualR1750='dark-smoky-obsidian-asymmetric-crystal-body-large-facet-photographic';
+  root.dataset.fxNativeMagMaterialR1750='low-ivory-coverage-dark-mineral-softbox-edge-transmission';
   root.dataset.fxNativeMagVisualR1727='photographic-biocrystal-continuity-neutral-cortex-smoked-optic';
   root.dataset.fxNativeMagMaterialR1727='compile-safe-facet-tones-neutral-subsurface-low-emission-studio-reflection';
   root.dataset.fxNativeMagVisualR1749='final-photographic-smoky-pearl-biocrystal-integrated-optic';
@@ -379,17 +381,17 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.88,.070,.060,-.090,-.008,.080],
-        [.76,.225,.150,-.075,.000,.068],
-        [.60,.430,.285,-.050,.010,.056],
-        [.40,.655,.405,-.018,.020,.040],
-        [.18,.810,.495,.028,.028,.022],
-        [.00,.855,.520,.055,.022,.000],
-        [-.18,.795,.485,.040,.012,-.020],
-        [-.40,.640,.392,.005,.002,-.038],
-        [-.60,.410,.260,-.040,-.004,-.052],
-        [-.76,.215,.140,-.075,-.008,-.064],
-        [-.88,.065,.055,-.095,-.010,-.076]
+        [.94,.045,.040,-.125,-.014,.092],
+        [.82,.145,.105,-.105,-.004,.078],
+        [.64,.300,.205,-.072,.010,.060],
+        [.43,.485,.300,-.020,.026,.042],
+        [.20,.620,.365,.045,.035,.020],
+        [-.04,.595,.350,.070,.026,-.004],
+        [-.28,.495,.300,.038,.012,-.026],
+        [-.50,.350,.225,-.010,-.002,-.046],
+        [-.69,.225,.145,-.060,-.010,-.064],
+        [-.84,.115,.078,-.095,-.014,-.078],
+        [-.95,.040,.034,-.118,-.016,-.092]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -427,8 +429,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.105,.980,-.015],[.5,0]);
-      const bottom=bodyVertex([-.115,-.965,.010],[.5,1]);
+      const top=bodyVertex([-.145,1.045,-.022],[.5,0]);
+      const bottom=bodyVertex([-.135,-1.035,.006],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -721,19 +723,19 @@
 
     /* R1724 — unique FormatX crystal creature anatomy.
        Living cortical lobes and membranes replace animal limbs and robotic armour. */
-    appendEllipsoid([-.34,.34,.075],[.26,.38,.22],.74,mobile?6:8,mobile?10:14,.34);
-    appendEllipsoid([ .38,.26,.090],[.29,.34,.24],.70,mobile?6:8,mobile?10:14,-.28);
-    appendEllipsoid([-.30,-.30,.040],[.25,.33,.20],.78,mobile?6:8,mobile?10:14,-.22);
-    appendEllipsoid([ .32,-.36,.055],[.24,.31,.21],.76,mobile?6:8,mobile?10:14,.26);
+    appendEllipsoid([-.30,.35,.060],[.145,.285,.125],.74,mobile?6:8,mobile?10:14,.38);
+    appendEllipsoid([ .31,.24,.075],[.155,.250,.135],.70,mobile?6:8,mobile?10:14,-.32);
+    appendEllipsoid([-.27,-.31,.030],[.135,.245,.115],.78,mobile?6:8,mobile?10:14,-.26);
+    appendEllipsoid([ .28,-.37,.045],[.140,.235,.120],.76,mobile?6:8,mobile?10:14,.30);
 
     /* Living crystalline membranes: a crown/facet silhouette that bends and
        breathes instead of reading as horns, wings or metal fins. */
-    appendMembraneTri([-.22,.66,-.04],[-.50,1.06,-.10],[.02,.83,.06],4.34);
-    appendMembraneTri([ .18,.70,.02],[ .44,1.02,-.05],[.05,.86,.08],4.38);
-    appendMembraneTri([-.52,.22,-.10],[-.93,.46,-.18],[-.62,-.02,.02],4.46);
-    appendMembraneTri([ .56,.16,-.08],[ .96,.34,-.16],[ .62,-.08,.04],4.48);
-    appendMembraneTri([-.42,-.46,-.06],[-.68,-.88,-.12],[-.12,-.68,.02],4.52);
-    appendMembraneTri([ .38,-.48,-.05],[ .61,-.91,-.10],[ .10,-.72,.03],4.56);
+    appendMembraneTri([-.18,.67,-.04],[-.42,1.10,-.09],[-.01,.84,.05],4.34);
+    appendMembraneTri([ .15,.69,.01],[ .38,1.04,-.04],[.04,.85,.06],4.38);
+    appendMembraneTri([-.43,.19,-.08],[-.72,.38,-.14],[-.50,-.03,.01],4.46);
+    appendMembraneTri([ .46,.14,-.07],[ .76,.29,-.13],[ .52,-.07,.03],4.48);
+    appendMembraneTri([-.35,-.45,-.05],[-.57,-.84,-.10],[-.12,-.66,.02],4.52);
+    appendMembraneTri([ .33,-.47,-.04],[ .52,-.86,-.09],[ .10,-.69,.02],4.56);
 
     if(!auditMode){
       const centreX=.008,centreY=-.006;
@@ -845,8 +847,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.12) contrast(1.055) saturate(1.12)'
-      : 'brightness(1.10) contrast(1.06) saturate(1.08)';
+      ? 'brightness(1.04) contrast(1.08) saturate(1.03)'
+      : 'brightness(1.03) contrast(1.085) saturate(1.02)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1040,7 +1042,7 @@
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.024,.030,.037),vec3(.188,.214,.221),lift)*facetTone;
+        vec3 mineral=mix(vec3(.010,.015,.021),vec3(.105,.126,.133),lift)*facetTone;
         mineral*=.955+.045*smokyDepth+.012*mineralGrain;
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
@@ -1048,9 +1050,9 @@
         mineral+=microSpec*ndl*.22;
         mineral+=vec3(.27,.28,.27)*keySoft*.045;
         mineral+=vec3(.52,.58,.59)*sideSpec*.096;
-        mineral+=vec3(.69,.72,.69)*softboxA*.170;
-        mineral+=vec3(.42,.47,.47)*softboxB*.110;
-        mineral+=vec3(.88,.91,.90)*studioRibbonA*.126;
+        mineral+=vec3(.64,.68,.67)*softboxA*.118;
+        mineral+=vec3(.38,.43,.43)*softboxB*.078;
+        mineral+=vec3(.82,.86,.85)*studioRibbonA*.092;
         mineral+=vec3(.52,.34,.22)*studioRibbonB*.052;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
@@ -1093,12 +1095,12 @@
         plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
         float plateFacetTone=.90+.14*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.24,.31,.33)
-          +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
-          +vec3(.16,.25,.27)*fresnel*.18;
+        vec3 ivory=vec3(.095,.125,.132)
+          +vec3(.24,.26,.24)*(.18*ndl+.12*sideLight+.18*softboxA)
+          +vec3(.10,.17,.18)*fresnel*.14;
         ivory+=vec3(.54,.36,.24)*studioRibbonB*.050;
         mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
-        mineral=mix(mineral,ivory,plateMask*.58);
+        mineral=mix(mineral,ivory,plateMask*.28);
         mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
         mineral+=vec3(.050,.275,.325)*vascular*(.11+.19*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
