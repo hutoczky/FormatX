@@ -45,8 +45,6 @@
   canvas.className = 'fx-living-habitat-r1530';
   canvas.setAttribute('aria-hidden','true');
   canvas.dataset.renderer = 'canvas2d-event-driven-atmospheric-habitat';
-  BODY.prepend(canvas);
-
   const ctx = canvas.getContext('2d',{alpha:true,desynchronized:true});
   if (!ctx) {
     canvas.remove();
@@ -55,6 +53,7 @@
   }
 
   let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,pointerSettleTimer=0,lastDrawAt=0;
+  let started=false;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
   let physiologyEnergy=.34,physiologyBreath=.12,physiologyKind='homeostasis',habitatZone='core';
@@ -143,6 +142,7 @@
   }
 
   function resize(){
+    if(!started)return;
     width=Math.max(1,innerWidth);height=Math.max(1,innerHeight);
     dpr=Math.min(devicePixelRatio||1,AUDIT?.72:LOW_POWER?(MOBILE.matches?1.20:1):MOBILE.matches?1.80:1.24);
     canvas.width=Math.max(1,Math.round(width*dpr));
@@ -493,12 +493,13 @@
   }
 
   function schedule(){
-    if(raf||document.hidden)return;
+    if(!started||raf||document.hidden)return;
     raf=requestAnimationFrame(draw);
   }
 
   function pulse(kind='pulse',strength=1){
     if(AUDIT)return;
+    if(!started)startHabitat('pulse-'+kind);
     impulse=Math.max(impulse,Math.max(0,Math.min(1.4,strength)));
     ROOT.dataset.fxHabitatInputR1695=kind;
     BODY.classList.add('fx-habitat-react-r1695');
@@ -507,14 +508,25 @@
     schedule();
   }
 
+  function startHabitat(source='intent'){
+    if(started||LIGHTHOUSE)return;
+    started=true;
+    ROOT.dataset.fxLivingHabitatStartR1737=source;
+    ROOT.dataset.fxLivingHabitatFirstPaintR1737='post-intent-no-initial-layout-work';
+    if(!canvas.isConnected)BODY.prepend(canvas);
+    resize();
+    updateScroll();
+    draw(performance.now());
+  }
+
   addEventListener('resize',resize,{passive:true});
-  addEventListener('scroll',()=>{updateScroll();habitatInput('scroll');},{passive:true});
+  addEventListener('scroll',()=>{if(!started)startHabitat('scroll');updateScroll();habitatInput('scroll');},{passive:true});
   addEventListener('pointermove',pointer,{passive:true});
-  addEventListener('pointerdown',()=>pulse('press',.82),{passive:true});
+  addEventListener('pointerdown',()=>{if(!started)startHabitat('pointerdown');pulse('press',.82);},{passive:true});
   addEventListener('pointerup',()=>pulse('release',.52),{passive:true});
   addEventListener('click',()=>pulse('click',.92),{passive:true});
-  addEventListener('wheel',()=>habitatInput('wheel'),{passive:true});
-  addEventListener('keydown',event=>{if(!event.repeat)pulse('key',.56);},{passive:true});
+  addEventListener('wheel',()=>{if(!started)startHabitat('wheel');habitatInput('wheel');},{passive:true});
+  addEventListener('keydown',event=>{if(!event.repeat){if(!started)startHabitat('keydown');pulse('key',.56);}},{passive:true});
   addEventListener('focusin',()=>pulse('focus',.34),{passive:true});
   addEventListener('formatx:languagechange',()=>pulse('language',.44),{passive:true});
   addEventListener('formatx:cinematicscene',event=>{
@@ -565,14 +577,12 @@
   addEventListener('pointerenter',()=>pulse('enter',.22),{passive:true});
   addEventListener('pointerleave',()=>pulse('leave',.16),{passive:true});
   addEventListener('orientationchange',()=>{resize();pulse('orientation',.48);},{passive:true});
-  document.addEventListener('formatx:magbirthcomplete',()=>pulse('intro-handoff',1),{passive:true});
+  document.addEventListener('formatx:magbirthcomplete',()=>{if(!started)startHabitat('mag-birth-handoff');pulse('intro-handoff',1);},{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
   MOBILE.addEventListener?.('change',resize);
 
-  resize();
-  updateScroll();
-  draw(performance.now());
-  ROOT.dataset.fxLivingHabitatR1530='active-scroll-pointer-atmosphere';
+  ROOT.dataset.fxLivingHabitatR1530='deferred-first-paint-r1737';
+  ROOT.dataset.fxLivingHabitatFirstPaintR1737='zero-canvas-layout-before-intent';
   ROOT.dataset.fxLivingHabitatR1584=MOBILE.matches?'mobile-volumetric-no-filament-beams':'desktop-short-organic-filaments';
   ROOT.dataset.fxLivingHabitatR1585='dark-laboratory-side-masses-overhead-haze-floor-reflection-no-rings';
   ROOT.dataset.fxLivingHabitatR1593='organic-tissue-pillars-living-membrane-arches-whole-page-depth';
