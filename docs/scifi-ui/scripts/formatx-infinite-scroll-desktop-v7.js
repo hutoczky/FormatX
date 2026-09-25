@@ -67,6 +67,7 @@
   root.dataset.fxLoopLandingSpaceR1725='hero-local-coordinate-space';
   root.dataset.fxLoopGestureGeometryR1725='single-live-read-at-desktop-scroll-start-then-cache';
   root.dataset.fxLoopScrollEndContinuityR1731='latched-boundary-survives-fresh-geometry-reflow';
+  root.dataset.fxLoopMobileContinuityR1733='cached-boundary-intent-survives-late-content-growth';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -637,15 +638,33 @@
     // late content/font/layout settling can therefore move the loop bridge after
     // the scroll hot path cached its position. Re-sample only at the idle/end
     // boundary, never on an active scroll frame, then decide from live geometry.
+    const cachedRelative=Number.isFinite(pendingMobileRelative)?pendingMobileRelative:null;
     refreshGeometry();
-    const relative = bridgeRelative();
-    if (relative == null) {
-      pendingMobileRelative = null;
-      root.dataset.fxLoopLandingState = 'native-mobile';
+    const freshRelative=bridgeRelative();
+    const reachedDocumentEnd=loopGeometry.ready
+      && scrollY>=Math.max(0,loopGeometry.documentEnd-4);
+    let relative=null;
+    if(freshRelative!=null){
+      relative=cachedRelative!=null
+        ? Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)))
+        : freshRelative;
+      root.dataset.fxLoopMobileRecoveryR1733=cachedRelative!=null
+        ? 'fresh-boundary-validates-cached-relative'
+        : 'fresh-idle-relative';
+    }else if(cachedRelative!=null){
+      relative=Math.max(0,Math.min(cachedRelative,Math.max(0,loopGeometry.sourceHeight-2)));
+      root.dataset.fxLoopMobileRecoveryR1733='latched-boundary-survives-late-layout-growth';
+    }else if(reachedDocumentEnd){
+      relative=0;
+      root.dataset.fxLoopMobileRecoveryR1733='fresh-document-end-zero';
+    }
+    if(relative==null){
+      pendingMobileRelative=null;
+      root.dataset.fxLoopLandingState='native-mobile';
       return;
     }
-    pendingMobileRelative = relative;
-    performTransfer(relative, 'visual-bridge-mobile-idle');
+    pendingMobileRelative=relative;
+    performTransfer(relative,'visual-bridge-mobile-idle-r1733');
   }
 
   function scheduleMobileTransfer() {
