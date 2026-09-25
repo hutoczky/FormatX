@@ -238,10 +238,26 @@
 
   function setOpen(next, focusInput) {
     opened = enabled && Boolean(next);
-    shell?.classList.toggle('is-open', opened);
-    if (bubble) { bubble.hidden = !opened; bubble.setAttribute('aria-hidden', String(!opened)); }
+    if (shell) {
+      shell.classList.toggle('is-open', opened);
+      shell.hidden = false;
+      shell.removeAttribute('hidden');
+      if (opened) {
+        shell.removeAttribute('aria-hidden');
+        shell.removeAttribute('inert');
+      }
+    }
+    if (bubble) {
+      bubble.hidden = !opened;
+      bubble.setAttribute('aria-hidden', String(!opened));
+      if (opened) bubble.removeAttribute('inert');
+    }
     trigger?.setAttribute('aria-expanded', String(opened));
     ROOT.dataset.fxOrganismThought = opened ? 'open' : 'closed';
+    if (opened) {
+      ROOT.classList.remove('fx-organism-menu-open','fx-page-scrolling');
+      document.body?.classList.remove('fx-organism-panel-open');
+    }
     if (opened && focusInput) requestAnimationFrame(() => input?.focus({ preventScroll: true }));
   }
 
