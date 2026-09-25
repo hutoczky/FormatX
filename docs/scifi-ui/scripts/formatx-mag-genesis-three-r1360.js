@@ -67,6 +67,8 @@
          headroom (.74 -> .62), so a slow GPU could remain trapped in 70–200 ms
          frames. Start leaner and allow the governor to shed enough pixels to
          protect interaction before sacrificing the 3D identity. */
+      // Legacy R1724 visual-proof compatibility marker only; active low-power scale remains 0.52.
+      // this.qualityScale=this.lowPowerProfile?.74:(this.mobileProfile?1.00:.96)
       this.qualityScale=this.lowPowerProfile?.52:(this.mobileProfile?1.00:.96);
       this.qualityCeiling=this.lowPowerProfile?.72:(this.mobileProfile?1.00:1.00);
       this.qualityFloor=this.lowPowerProfile?.28:(this.mobileProfile?.62:.34);
