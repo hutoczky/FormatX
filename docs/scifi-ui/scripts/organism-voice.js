@@ -492,7 +492,13 @@
     setEnabled(enabled, false);
     setOpen(false, false);
     document.addEventListener('pointerdown', noteUserGesture, { capture: true, passive: true });
-    document.addEventListener('keydown', noteUserGesture, true);
+    document.addEventListener('keydown', event => {
+      noteUserGesture();
+      if (event.key === 'Escape' && opened) {
+        setOpen(false, false);
+        ROOT.dataset.fxOrganismEscapeCloseR1741 = 'closed';
+      }
+    }, true);
     addEventListener('formatx:organismstatechange', handleStateChange);
     addEventListener('formatx:languagechange', () => { stopSpeech(); currentText = SCENES[currentScene].response[language()]; updateLanguage(); });
     addEventListener('pagehide', stopSpeech);
