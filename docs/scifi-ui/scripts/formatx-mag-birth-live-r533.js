@@ -491,7 +491,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260925-r1749-final-photographic-polish';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260926-r1750-dark-asymmetric-photoreal-form';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
