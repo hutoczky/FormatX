@@ -1811,13 +1811,14 @@
     updateCells(t,time){
       const grow=smooth((t-3.10)/1.20);
       const awake=smooth((t-5.35)/1.35);
-      const visible=grow;
+      const integrate=1-smooth((t-6.55)/1.35);
+      const visible=grow*integrate;
       this.cellGroup.visible=visible>.002;
       const base=.001+visible*.999;
       this.cellGroup.scale.setScalar(base*.96);
       this.cellMaterial.opacity=(.10+.12*awake)*visible;
-      this.cellEdgeMaterial.opacity=(.025+.035*awake)*visible;
-      this.cellVeinMaterial.opacity=(.20+.30*awake)*visible;
+      this.cellEdgeMaterial.opacity=(.012+.018*awake)*visible;
+      this.cellVeinMaterial.opacity=(.10+.16*awake)*visible;
       this.cells.forEach((g,i)=>{
         const breath=1+Math.sin(time*.00125+g.userData.phase)*(.018+.012*awake);
         const b=g.userData.baseScale;
