@@ -477,6 +477,8 @@
   let filmRendererPromise = null;
   let pendingRendererInteraction = null;
   let filmRendererFallbackStarted = false;
+  let softwareFallbackActive = SOFTWARE_SAFE;
+  let lastSoftwareFallbackPhase = -1;
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
@@ -703,6 +705,10 @@
   function startR649Fallback(){
     if(filmRendererFallbackStarted || filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
     filmRendererFallbackStarted=true;
+    if(ROOT.dataset.fxMagBirthR1545==='software-webgl-reference-film-fallback')softwareFallbackActive=true;
+    ROOT.dataset.fxMagBirthFallbackPolicyR1730=softwareFallbackActive
+      ? 'phase-driven-reference-film'
+      : 'adaptive-reference-film';
     if(window.FormatXMagReferenceFilmR649?.attach){
       overlay.dataset.fxRenderer='fallback';
       filmRenderer=window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
@@ -808,6 +814,7 @@
           }
           ROOT.dataset.fxMagBirthRendererR1360='threejs-failed-r649-fallback';
           ROOT.dataset.fxMagBirthRendererR1450='three-explicit-failure-fallback';
+          if(ROOT.dataset.fxMagBirthR1545==='software-webgl-reference-film-fallback')softwareFallbackActive=true;
           startR649Fallback();
           return null;
         }).catch(error=>{
@@ -997,16 +1004,25 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
+    const phaseDrivenFallback=Boolean(filmRenderer)
+      && softwareFallbackActive
+      && !HAS_VISUAL_FRAME;
     const particleCadence=filmRenderer
-      ? (SOFTWARE_SAFE?50:16.67)
+      ? (softwareFallbackActive?125:16.67)
       : 16.67;
-    if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
+    const shouldDraw=phaseDrivenFallback
+      ? (lastSoftwareFallbackPhase!==visiblePhase || r>=1)
+      : (!lastParticleDraw || now-lastParticleDraw>=particleCadence || r>=1);
+    if(shouldDraw){
       lastParticleDraw=now;
+      if(phaseDrivenFallback)lastSoftwareFallbackPhase=visiblePhase;
       drawParticles(r,now);
     }
 
     if(r<1 || visiblePhase<4){
-      const cadence=SOFTWARE_SAFE?50:((AUTOMATION&&FORCE)?72:0);
+      /* Software fallback keeps the 10 s semantic timeline, but the expensive
+         raster only changes at the five cinematic phase boundaries. */
+      const cadence=softwareFallbackActive?125:((AUTOMATION&&FORCE)?72:0);
       queueRender(cadence);
       return;
     }
@@ -1048,8 +1064,9 @@
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-adaptive-cinematic':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthPerformanceR1727=CONSTRAINED?'constrained-reference-film-no-heavy-three-loop':'hardware-three-adaptive-quality';
-    ROOT.dataset.fxMagBirthPerformanceR1729=SOFTWARE_SAFE?'software-safe-reference-film-20hz-render-timeline':'hardware-three-adaptive-60hz';
+    ROOT.dataset.fxMagBirthPerformanceR1729=SOFTWARE_SAFE?'software-safe-reference-film-phase-driven-raster':'hardware-three-adaptive-60hz';
     ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
+    ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
