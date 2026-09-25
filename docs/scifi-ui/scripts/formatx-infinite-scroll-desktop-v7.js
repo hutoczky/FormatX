@@ -25,6 +25,7 @@
   let pendingDesktopSourceTop = null;
   let desktopGestureAnchorY = null;
   let desktopGestureAnchorRelative = null;
+  let desktopGestureBoundaryLatched = false;
   let canonicalLandingSourceTop = 0;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
@@ -604,6 +605,7 @@
     pendingDesktopSourceTop = null;
     desktopGestureAnchorY = null;
     desktopGestureAnchorRelative = null;
+    desktopGestureBoundaryLatched = false;
     clearTimeout(mobileSettleTimer);
     mobileSettleTimer = 0;
     root.classList.add('fx-seamless-loop-transfer');
@@ -658,6 +660,7 @@
       pendingDesktopSourceTop=null;
       desktopGestureAnchorY=null;
       desktopGestureAnchorRelative=null;
+      desktopGestureBoundaryLatched=false;
       root.dataset.fxLoopLandingState='section-navigation';
       return;
     }
@@ -698,14 +701,19 @@
       root.dataset.fxLoopDesktopRecoveryR1724=hasGestureSnapshot
         ? 'fresh-document-end-validates-snapshot-zero'
         : 'fresh-document-end-zero';
+    }else if(hasGestureSnapshot && desktopGestureBoundaryLatched){
+      /* R1729 — the user crossed the boundary in the geometry that was visible
+         at gesture start. Tail materialisation may legitimately move the live
+         bridge before idle commit, so retain that already-observed intent. */
+      const intended=cachedRelative!=null
+        ? cachedRelative
+        : Math.max(0,desktopGestureAnchorRelative||0);
+      relative=Math.max(0,Math.min(intended,Math.max(0,loopGeometry.sourceHeight-2)));
+      root.dataset.fxLoopDesktopRecoveryR1724='pre-materialisation-boundary-latch-valid';
     }else{
-      /* R1727e — a scroll-time bridge snapshot is intent evidence only.
-         If the settled document says the user is neither in the bridge nor at
-         the physical end, the snapshot was created during layout reflow and
-         must not trigger a false loop. */
       relative=null;
       root.dataset.fxLoopDesktopRecoveryR1724=hasGestureSnapshot
-        ? 'stale-gesture-snapshot-rejected-by-fresh-geometry'
+        ? 'stale-non-boundary-snapshot-rejected'
         : 'no-boundary';
     }
     root.dataset.fxLoopDesktopGeometryR1715 = loopGeometry.ready ? 'fresh-idle-sample' : 'unavailable';
@@ -714,6 +722,7 @@
       pendingDesktopRelative = null;
       desktopGestureAnchorY = null;
       desktopGestureAnchorRelative = null;
+      desktopGestureBoundaryLatched = false;
       root.dataset.fxLoopLandingState = 'native-desktop';
       return;
     }
@@ -849,40 +858,23 @@
   }
 
   function onScroll() {
-    materializeDesktopLoopTail();
-    /* R1727 — capture desktop bridge entry synchronously once. Deferred CSS,
-       fonts or intro teardown can move bridge.offsetTop before the rAF/idle
-       phase. After this anchor is taken, continue the gesture using scroll
-       deltas only, so there is no per-frame layout read. */
+    /* R1729 — capture the geometry the user actually saw before any lazy tail
+       materialisation is allowed to change document height or bridge.offsetTop. */
     if(!isMobileFlow()
       && !root.classList.contains('fx-seamless-loop-transfer')
       && !root.classList.contains('fx-section-navigation-active')
       && bridge?.isConnected){
       if(!Number.isFinite(desktopGestureAnchorY)){
-        /* R1727b — the first scroll event must use the bridge position that is
-           live in the same layout state as scrollY. A previously idle snapshot
-           can be stale after font/deferred-style reflow and miss a programmatic
-           or real fast boundary crossing. We still read it only once per gesture. */
-        /* R1727f — the idle bridge snapshot is the geometry the user saw
-           before this gesture started. During the gesture content-visibility,
-           font settling or compositor containment may move the live bridge by
-           hundreds of pixels. Preserve the pre-gesture coordinate for relative
-           intent; settled live geometry is still used later to validate that
-           the loop boundary was genuinely reached. */
-        /* R1727j — scrolling itself can activate deferred/content-visibility
-           layout and move bridge.offsetTop before the first scroll callback.
-           The last pre-scroll loopGeometry sample is therefore authoritative for
-           user intent. This matches the geometry visible when the gesture began. */
         const eventBridgeTop=Number(
           loopGeometry.ready && Number.isFinite(loopGeometry.bridgeTop)
             ? loopGeometry.bridgeTop
-            : bridge.offsetTop
+            : (Number.isFinite(stableDesktopBridgeTop)?stableDesktopBridgeTop:bridge.offsetTop)
         );
         const eventSourceHeight=Math.max(
           0,
-          loopGeometry.sourceHeight||sourceHero?.offsetHeight||stableDesktopSourceHeight||0
+          loopGeometry.sourceHeight||stableDesktopSourceHeight||sourceHero?.offsetHeight||0
         );
-        root.dataset.fxLoopGesturePreScrollBridgeTopR1727=String(Math.round(eventBridgeTop));
+        root.dataset.fxLoopGesturePreScrollBridgeTopR1729=String(Math.round(eventBridgeTop));
         if(Number.isFinite(eventBridgeTop)){
           desktopGestureAnchorY=scrollY;
           desktopGestureAnchorRelative=scrollY-eventBridgeTop;
@@ -890,19 +882,26 @@
           pendingDesktopRelative=projected>=-2
             ? Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)))
             : null;
-          root.dataset.fxLoopGestureGeometryR1727='stable-idle-bridge-snapshot-per-gesture';
-          root.dataset.fxLoopGestureBridgeTopR1727=String(Math.round(eventBridgeTop));
-          root.dataset.fxLoopGestureRelativeR1727=String(Math.round(projected));
+          desktopGestureBoundaryLatched=projected>=-2;
+          root.dataset.fxLoopGestureGeometryR1729='pre-materialisation-idle-snapshot';
+          root.dataset.fxLoopGestureRelativeR1729=String(Math.round(projected));
         }
       }else{
-        const eventSourceHeight=Math.max(0,stableDesktopSourceHeight||loopGeometry.sourceHeight||sourceHero?.offsetHeight||0);
+        const eventSourceHeight=Math.max(
+          0,
+          stableDesktopSourceHeight||loopGeometry.sourceHeight||sourceHero?.offsetHeight||0
+        );
         const projected=desktopGestureAnchorRelative+(scrollY-desktopGestureAnchorY);
         pendingDesktopRelative=projected>=-2
           ? Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)))
           : null;
-        root.dataset.fxLoopGestureRelativeR1727=String(Math.round(projected));
+        if(projected>=-2)desktopGestureBoundaryLatched=true;
+        root.dataset.fxLoopGestureRelativeR1729=String(Math.round(projected));
       }
     }
+
+    materializeDesktopLoopTail();
+
     if (scrollFrame) return;
     scrollFrame = requestAnimationFrame(transferIfNeeded);
   }
