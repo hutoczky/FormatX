@@ -208,7 +208,7 @@
   function buildOrganismGeometry(software=false) {
     const latitudeSegments = software ? 12 : constrainedMobile ? 16 : mobile ? 18 : constrained ? 20 : 24;
     const longitudeSegments = software ? 24 : constrainedMobile ? 32 : mobile ? 40 : constrained ? 42 : 52;
-    const tendrilCount = software ? 5 : mobile ? 7 : 10;
+    const tendrilCount = software ? 4 : mobile ? 5 : 6;
     const tendrilSegments = software ? 10 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 18 : 26;
     const tendrilSides = software ? 4 : mobile || constrained ? 4 : 6;
     const sphere = [];
@@ -734,8 +734,8 @@
     appendMembraneTri([ .15,.69,.01],[ .38,1.04,-.04],[.04,.85,.06],4.38);
     appendMembraneTri([-.43,.19,-.08],[-.72,.38,-.14],[-.50,-.03,.01],4.46);
     appendMembraneTri([ .46,.14,-.07],[ .76,.29,-.13],[ .52,-.07,.03],4.48);
-    appendMembraneTri([-.35,-.45,-.05],[-.57,-.84,-.10],[-.12,-.66,.02],4.52);
-    appendMembraneTri([ .33,-.47,-.04],[ .52,-.86,-.09],[ .10,-.69,.02],4.56);
+    /* Lower fins are intentionally absent in R1750: the permanent organism
+       keeps a crystalline crown/side silhouette instead of a radial star. */
 
     if(!auditMode){
       const centreX=.008,centreY=-.006;
@@ -1089,11 +1089,12 @@
         /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
            plates ride above dark cortical tissue. The plate field is broad,
            irregular and organic; it is not a metallic armour texture. */
-        float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.42+sin(vLocal.y*4.1)*.38);
-        float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1+sin(vUv.x*8.2)*1.08);
-        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
-        plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
-        float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
+        float plateField=.5+.5*sin(vLocal.x*8.7+vLocal.y*5.1-vLocal.z*7.3+sin(vLocal.y*3.6)*1.4);
+        float plateCross=.5+.5*sin(vLocal.x*4.3-vLocal.y*7.9+vLocal.z*6.1+sin(vLocal.z*4.8)*1.2);
+        float plateBlend=plateField*.62+plateCross*.38;
+        float plateMask=smoothstep(.74,.93,plateBlend)*bodyMask;
+        plateMask*=.50+.30*smoothstep(-.45,.82,n.z);
+        float livingSeam=pow(1.0-plateBlend,5.0)*bodyMask;
         float plateFacetTone=.90+.14*fract(vFacet*7.13+.19);
         vec3 ivory=vec3(.095,.125,.132)
           +vec3(.24,.26,.24)*(.18*ndl+.12*sideLight+.18*softboxA)
@@ -1296,10 +1297,11 @@
         float cortexRidge=pow(max(cortexWave,cortexCross),4.0)*bodyMask;
         col=mix(col,vec3(.012,.015,.019),cortexValley*.28);
         col+=vec3(.068,.084,.091)*cortexRidge*.075;
-        float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.35);
-        float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1);
-        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
-        float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.7)*bodyMask;
+        float plateField=.5+.5*sin(vLocal.x*8.7+vLocal.y*5.1-vLocal.z*7.3+sin(vLocal.y*3.6)*1.35);
+        float plateCross=.5+.5*sin(vLocal.x*4.3-vLocal.y*7.9+vLocal.z*6.1+sin(vLocal.z*4.8)*1.15);
+        float plateBlend=plateField*.62+plateCross*.38;
+        float plateMask=smoothstep(.74,.93,plateBlend)*bodyMask;
+        float livingSeam=pow(1.0-plateBlend,5.0)*bodyMask;
         float facetTone=.91+.13*fract(vFacet*7.13+.19);
         vec3 ivory=vec3(.090,.120,.128)+vec3(.22,.24,.22)*(.18*ndl+.12*sideLight+.15*softboxA);
         ivory+=vec3(.48,.31,.20)*studioRibbonB*.045;
@@ -1448,9 +1450,10 @@
         float vesselA=pow(.5+.5*sin(vLocal.y*33.0+sin(vLocal.x*7.0)*2.2+vLocal.z*13.0),36.0);
         float vesselB=pow(.5+.5*sin(vLocal.x*39.0-vLocal.y*12.0+sin(vLocal.z*9.0)*1.8),40.0);
         float vascular=max(vesselA,vesselB)*bodyMask;
-        float plateField=.5+.5*sin(vUv.x*16.8+sin(vUv.y*11.8)*1.4);
-        float plateCross=.5+.5*sin(vUv.y*15.2-vUv.x*6.4);
-        float plateMask=smoothstep(.56,.80,max(plateField,plateCross*.84))*bodyMask;
+        float plateField=.5+.5*sin(vLocal.x*8.7+vLocal.y*5.1-vLocal.z*7.3+sin(vLocal.y*3.6)*1.3);
+        float plateCross=.5+.5*sin(vLocal.x*4.3-vLocal.y*7.9+vLocal.z*6.1+sin(vLocal.z*4.8)*1.1);
+        float plateBlend=plateField*.62+plateCross*.38;
+        float plateMask=smoothstep(.76,.94,plateBlend)*bodyMask;
         vec3 ivory=vec3(.075,.098,.106)+vec3(.18,.19,.17)*(.24*ndl+.14*sideLight);
         ivory+=vec3(.085,.14,.15)*fresnel*.10;
         col=mix(col,ivory,plateMask*.24);
