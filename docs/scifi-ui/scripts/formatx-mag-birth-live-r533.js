@@ -88,6 +88,7 @@
   /* R1618 — once the cinematic contains a real Skip control it cannot remain
      aria-hidden. Decorative descendants keep their own aria-hidden markers. */
   overlay.removeAttribute('aria-hidden');
+  overlay.removeAttribute('inert');
   overlay.setAttribute('role','dialog');
   overlay.setAttribute('aria-modal','true');
   overlay.dataset.fxPrepaintR1606 = prepaintOverlay instanceof HTMLElement ? 'adopted-static-lcp-shell' : 'dynamic-fallback';
