@@ -994,15 +994,19 @@
   addEventListener('load', scheduleGeometryRefresh, { once: true, passive: true });
   addEventListener('formatx:loopgeometryrefresh',event=>{
     const hadDesktopIntent=!isMobileFlow()&&Number.isFinite(pendingDesktopRelative);
+    const cachedIntent=hadDesktopIntent?pendingDesktopRelative:null;
     refreshGeometry();
     if(hadDesktopIntent){
-      const corrected=bridgeRelative();
-      if(corrected!=null){
-        pendingDesktopRelative=corrected;
-        root.dataset.fxLoopPendingCorrectionR1724='fresh-geometry-relative';
-      }else{
-        root.dataset.fxLoopPendingCorrectionR1724='preserved-cached-intent';
-      }
+      /* R1727g — geometry refresh may validate/clamp a gesture, but it must
+         never replace the user's already captured bridge-relative coordinate.
+         Recomputing it after a 225px layout shift caused the exact same 225px
+         landing error on the first seamless loop cycle. */
+      pendingDesktopRelative=Math.max(
+        0,
+        Math.min(cachedIntent,Math.max(0,loopGeometry.sourceHeight-2))
+      );
+      root.dataset.fxLoopPendingCorrectionR1724='preserved-cached-intent';
+      root.dataset.fxLoopPendingCorrectionR1727='gesture-relative-never-rederived';
     }
     root.dataset.fxLoopGeometryEventR1724=String(event.detail?.source||'external-refresh');
   },{passive:true});
