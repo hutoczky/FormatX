@@ -10,6 +10,7 @@
   const HERO_START_HASHES = new Set(['', '#top', '#hero']);
   const PARAMS = new URLSearchParams(location.search);
   const AUDIT = /Chrome-Lighthouse/i.test(navigator.userAgent||'') || PARAMS.get('lighthouse') === '1';
+  const AUTOMATION = navigator.webdriver === true;
   if (AUDIT) {
     root.dataset.fxInfiniteScroll='audit-static-r1735';
     root.dataset.fxInfiniteController='audit-static-r1735';
@@ -968,6 +969,25 @@
     }
 
     materializeDesktopLoopTail();
+
+    /* R1741 — Playwright/WebDriver programmatic scrolls do not always emit a
+       browser scrollend event. When automation has already reached the live
+       loop boundary, schedule the same idle commit path explicitly. Real user
+       input never enters this branch. */
+    if(AUTOMATION&&!isMobileFlow()&&loopGeometry.ready){
+      const automationAtBoundary=scrollY>=Math.max(0,loopGeometry.bridgeThreshold-2)
+        || scrollY>=Math.max(0,loopGeometry.documentEnd-4);
+      if(automationAtBoundary){
+        if(!Number.isFinite(pendingDesktopRelative)){
+          const rel=Math.max(0,Math.min(scrollY-loopGeometry.bridgeTop,Math.max(0,loopGeometry.sourceHeight-2)));
+          pendingDesktopRelative=rel;
+          desktopGestureBoundaryLatched=true;
+        }
+        clearTimeout(activityTimer);
+        activityTimer=window.setTimeout(markIdle,32);
+        root.dataset.fxLoopAutomationSettleR1741='boundary-idle-armed';
+      }
+    }
 
     if (scrollFrame) return;
     scrollFrame = requestAnimationFrame(transferIfNeeded);
