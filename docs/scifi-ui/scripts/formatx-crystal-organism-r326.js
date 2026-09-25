@@ -1265,15 +1265,15 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.024,.030,.037),vec3(.182,.207,.214),lift);
+        vec3 col=mix(vec3(.010,.015,.021),vec3(.102,.122,.130),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
         col+=vec3(.94,.92,.86)*keySpec*.118;
         col+=vec3(.52,.59,.60)*sideSpec*.105;
-        col+=vec3(.72,.75,.72)*softboxA*.194;
-        col+=vec3(.44,.50,.51)*softboxB*.118;
-        col+=vec3(.84,.88,.87)*studioRibbonA*.118;
+        col+=vec3(.64,.68,.67)*softboxA*.126;
+        col+=vec3(.38,.43,.44)*softboxB*.082;
+        col+=vec3(.80,.84,.83)*studioRibbonA*.086;
         col+=vec3(.48,.32,.21)*studioRibbonB*.048;
         col+=vec3(.080,.096,.095)*horizonBand*.168;
         col+=vec3(.094,.190,.218)*fresnel*.31;
@@ -1301,10 +1301,10 @@
         float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.7)*bodyMask;
         float facetTone=.91+.13*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.23,.30,.32)+vec3(.36,.38,.35)*(.20*ndl+.15*sideLight+.18*softboxA);
+        vec3 ivory=vec3(.090,.120,.128)+vec3(.22,.24,.22)*(.18*ndl+.12*sideLight+.15*softboxA);
         ivory+=vec3(.48,.31,.20)*studioRibbonB*.045;
         col*=mix(1.0,facetTone,bodyMask*.40);
-        col=mix(col,ivory,plateMask*.56);
+        col=mix(col,ivory,plateMask*.27);
         col=mix(col,vec3(.004,.008,.014),livingSeam*.52);
         col+=vec3(.055,.265,.315)*vascular*(.10+.18*uEnergy);
 
