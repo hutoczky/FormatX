@@ -102,13 +102,18 @@
   function bindDelegatedHeartInput() {
     if (delegatedInputBound) return;
     delegatedInputBound = true;
-    document.addEventListener('click', event => {
+    /* R1744 — semantic MAG activation owns the earliest capture phase.
+       Desktop control/navigation owners can legitimately stop propagation on
+       document capture; window capture runs before them, so a real MAG click
+       always publishes the canonical interaction state. Visual duplicates are
+       still absorbed by the short interaction cooldown. */
+    window.addEventListener('click', event => {
       const target = event.target instanceof Element ? event.target.closest('.fx-mag-heart-hit-r252') : null;
       if (!(target instanceof HTMLButtonElement)) return;
       event.preventDefault();
       activateCore('core');
     }, true);
-    document.addEventListener('keydown', event => {
+    window.addEventListener('keydown', event => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       const target = event.target instanceof Element ? event.target.closest('.fx-mag-heart-hit-r252') : null;
       if (!(target instanceof HTMLButtonElement)) return;
@@ -116,6 +121,7 @@
       activateCore('keyboard');
     }, true);
     root.dataset.fxHeartDelegatedR1723 = 'ready';
+    root.dataset.fxHeartDelegatedR1744 = 'window-capture-semantic-owner';
   }
 
   function installHeartHitTarget() {
