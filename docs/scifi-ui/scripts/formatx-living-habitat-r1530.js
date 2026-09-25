@@ -12,6 +12,11 @@
     Number(navigator.hardwareConcurrency || 8) <= 4 ||
     Number(navigator.deviceMemory || 8) <= 4
   ));
+  if (AUDIT) {
+    ROOT.dataset.fxLivingHabitatR1530='audit-static-skip-r1735';
+    ROOT.dataset.fxHabitatPerformanceR1530='audit-zero-canvas';
+    return;
+  }
 
   /* R1695 — every meaningful input reaches the habitat. Mobile/coarse devices
      stay compositor-only: interaction toggles a CSS-owned physical light pulse,
