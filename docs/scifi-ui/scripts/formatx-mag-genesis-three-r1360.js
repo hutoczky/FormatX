@@ -94,7 +94,7 @@
 
       this.renderer=new THREE.WebGLRenderer({
         canvas,
-        alpha:false,
+        alpha:this.mobileProfile,
         antialias:!this.mobileProfile && !this.lowPowerProfile,
         depth:true,
         stencil:false,
@@ -123,17 +123,18 @@
       document.documentElement.dataset.fxMagBirthMaterialR1725='desaturated-mineral-clearcoat-low-emission-warm-rim';
       document.documentElement.dataset.fxMagBirthVisualR1726='cinematic-photographic-smoky-pearl-living-biocrystal';
       document.documentElement.dataset.fxMagBirthMaterialR1726='neutral-studio-softbox-physical-clearcoat-restrained-cyan-physiology';
+      document.documentElement.dataset.fxMagBirthMobileContinuityR1745=this.mobileProfile?'transparent-hero-integrated-ten-second-cinematic':'desktop-full-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1727='photographic-single-biocrystal-continuity-no-neon-wing-read';
       document.documentElement.dataset.fxMagBirthMotionR1727='slow-biological-inertia-subtle-membrane-tension-matched-hero';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
-      this.renderer.setClearColor(0x020811,1);
+      this.renderer.setClearColor(0x020811,this.mobileProfile?0:1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
       this.renderer.toneMappingExposure=1.24;
 
       this.scene=new THREE.Scene();
-      this.scene.background=new THREE.Color(0x020608);
+      this.scene.background=this.mobileProfile?null:new THREE.Color(0x020608);
       this.scene.fog=new THREE.FogExp2(0x02080d,0.0115);
       this.studioEnvironment=this.makeStudioEnvironment();
       this.scene.environment=this.studioEnvironment;
