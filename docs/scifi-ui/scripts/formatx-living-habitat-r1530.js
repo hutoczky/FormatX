@@ -10,7 +10,8 @@
   const PARAMS = new URLSearchParams(location.search);
   const LIGHTHOUSE = /Chrome-Lighthouse/i.test(navigator.userAgent || '') || PARAMS.get('lighthouse') === '1';
   const VALIDATION = navigator.webdriver === true;
-  const LOW_POWER = LIGHTHOUSE || VALIDATION || (MOBILE.matches && (
+  const AUDIT = LIGHTHOUSE || VALIDATION;
+  const LOW_POWER = AUDIT || (MOBILE.matches && (
     Number(navigator.hardwareConcurrency || 8) <= 4 ||
     Number(navigator.deviceMemory || 8) <= 4
   ));
