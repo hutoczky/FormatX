@@ -30,6 +30,7 @@
   let landingFrame = 0;
   let activityTimer = 0;
   let mobileSettleTimer = 0;
+  let mobileUiRetryCount = 0;
   let desktopGuardRetryTimer = 0;
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
@@ -639,6 +640,21 @@
   function commitMobileTransfer() {
     mobileSettleTimer = 0;
     if (touchActive) return;
+    const uiBlocked=document.body.classList.contains('fx-organism-panel-open')
+      || root.classList.contains('fx-organism-menu-open')
+      || root.classList.contains('fx-intro-running')
+      || root.classList.contains('fx-section-navigation-active');
+    if(uiBlocked){
+      if(mobileUiRetryCount<20){
+        mobileUiRetryCount+=1;
+        mobileSettleTimer=window.setTimeout(commitMobileTransfer,100);
+        root.dataset.fxLoopMobileUiRetryR1740='blocked-ui-retry-'+mobileUiRetryCount;
+      }else{
+        root.dataset.fxLoopMobileUiRetryR1740='blocked-ui-retry-exhausted';
+      }
+      return;
+    }
+    mobileUiRetryCount=0;
     const guardRemaining = transferLockedUntil - Date.now();
     if (guardRemaining > 0) {
       mobileSettleTimer = window.setTimeout(commitMobileTransfer, guardRemaining + 20);
@@ -1118,7 +1134,15 @@
   addEventListener('pageshow', () => scheduleRepair(true), { passive: true });
   addEventListener('formatx:organisminterfaceready', () => scheduleRepair(true));
   addEventListener('formatx:organismpanelopen', onPanelOpen);
-  addEventListener('formatx:organismpanelclose', () => scheduleRepair(true));
+  addEventListener('formatx:organismpanelclose', () => {
+    scheduleRepair(true);
+    if(isMobileFlow()&&(Number.isFinite(pendingMobileRelative)||scrollY>=Math.max(0,loopGeometry.documentEnd-4))){
+      mobileUiRetryCount=0;
+      clearTimeout(mobileSettleTimer);
+      mobileSettleTimer=window.setTimeout(commitMobileTransfer,120);
+      root.dataset.fxLoopMobileUiRetryR1740='panel-close-rearm';
+    }
+  });
   addEventListener('formatx:languagechange', () => {
     setBilingualText(bridge);
     const footer = document.querySelector('.site-footer');
