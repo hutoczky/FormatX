@@ -481,3 +481,40 @@ html:root:root[data-fx-organism-thought="open"] body.living-architecture > .fx-o
 /* production-r1729-canonical-ask-visible-open-owner */
 
 /* production-r1732-critical-dialogue-surface-merged */
+
+
+/* R1741 — one environmental owner from first paint.
+   The living-habitat canvas owns depth and atmosphere. Retire the legacy hero
+   pseudo-field in the render-blocking layer so a late stylesheet cannot resize
+   a full-viewport pseudo-element and generate a near-1.0 desktop CLS event. */
+html:root:root body.living-architecture #hero::before,
+html:root:root body.living-architecture #hero::after,
+html:root:root body.living-architecture #hero .hero-space::before,
+html:root:root body.living-architecture #hero .hero-space::after{
+  content:none!important;
+  display:none!important;
+  width:0!important;
+  height:0!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:0!important;
+  max-height:0!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  transform:none!important;
+  filter:none!important;
+}
+
+/* Keep header controls on one immutable first-paint box. */
+@media (min-width:901px) and (pointer:fine){
+  html:root:root body.living-architecture #menu-toggle{
+    box-sizing:border-box!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+  }
+}
+/* production-r1741-single-environment-owner-zero-pseudo-cls */
