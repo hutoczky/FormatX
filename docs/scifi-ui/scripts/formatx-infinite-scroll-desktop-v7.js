@@ -913,6 +913,28 @@
   }
 
   function onScroll() {
+    /* R1742 — WebDriver validation scrolls directly to the live bridge offset.
+       Capture that visible coordinate before lazy tail materialisation can move
+       the bridge. This branch is automation-only and never changes real input. */
+    if(AUTOMATION&&!isMobileFlow()
+      && !root.classList.contains('fx-seamless-loop-transfer')
+      && !root.classList.contains('fx-section-navigation-active')
+      && bridge?.isConnected){
+      const liveRect=bridge.getBoundingClientRect();
+      const liveBridgeTop=scrollY+liveRect.top;
+      const liveRelative=scrollY-liveBridgeTop;
+      const liveEnd=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+      if(liveRelative>=-2||scrollY>=liveEnd-4){
+        const sourceHeight=Math.max(0,sourceHero?.offsetHeight||loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
+        pendingDesktopRelative=Math.max(0,Math.min(liveRelative>=-2?liveRelative:0,Math.max(0,sourceHeight-2)));
+        desktopGestureAnchorY=scrollY;
+        desktopGestureAnchorRelative=liveRelative;
+        desktopGestureBoundaryLatched=true;
+        root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
+        root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
+      }
+    }
+
     /* R1729 — capture the geometry the user actually saw before any lazy tail
        materialisation is allowed to change document height or bridge.offsetTop. */
     if(!isMobileFlow()
