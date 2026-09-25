@@ -1537,6 +1537,7 @@
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
     root.dataset.fxNativeMagOrganismR1724='asymmetric-living-crystal-rhombic-cortical-silhouette';
+    root.dataset.fxNativeMagGuardianR1724='asymmetric-crystal-organic-feline-dragon-biocrystal-silhouette';
     root.dataset.fxNativeMagFacetR1724='polished-crystal-planes-preserved-with-hybrid-normals';
     root.dataset.fxNativeMagPaletteR1724='pearl-cyan-indigo-warm-studio-rim';
     root.dataset.fxNativeMagCoreR1723='asymmetric-lobed-cartilage-energy-organ-socket';
