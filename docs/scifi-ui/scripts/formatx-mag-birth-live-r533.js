@@ -19,18 +19,7 @@
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
   const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
-  const softwareRendererProbe=(()=>{
-    try{
-      const probe=document.createElement('canvas');
-      const gl=probe.getContext('webgl',{alpha:false,antialias:false,powerPreference:'low-power'});
-      if(!gl)return false;
-      const ext=gl.getExtension('WEBGL_debug_renderer_info');
-      const renderer=String(ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'');
-      try{gl.getExtension('WEBGL_lose_context')?.loseContext();}catch(_){}
-      return /swiftshader|llvmpipe|software|softpipe|mesa offscreen/i.test(renderer);
-    }catch(_){return false;}
-  })();
-  const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE || softwareRendererProbe;
+  const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
   const LOW_POWER = MOBILE && CONSTRAINED;
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
@@ -776,7 +765,7 @@
        10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
        proof frames remain on the Three owner so design evidence stays exact. */
     if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME){
-      ROOT.dataset.fxMagBirthRendererR1729=softwareRendererProbe?'software-gpu-reference-film':(HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film');
+      ROOT.dataset.fxMagBirthRendererR1729=HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film';
       overlay.dataset.fxRenderer=HEADLESS_SOFTWARE?'fallback-software':'fallback-constrained';
       startR649Fallback();
       if(filmRenderer)filmRenderer.resize?.();
@@ -1060,7 +1049,7 @@
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-adaptive-cinematic':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthPerformanceR1727=CONSTRAINED?'constrained-reference-film-no-heavy-three-loop':'hardware-three-adaptive-quality';
     ROOT.dataset.fxMagBirthPerformanceR1729=SOFTWARE_SAFE?'software-safe-reference-film-20hz-render-timeline':'hardware-three-adaptive-60hz';
-    ROOT.dataset.fxMagBirthSoftwareProbeR1729=softwareRendererProbe?'software-renderer':'hardware-or-unreported';
+    ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
