@@ -75,6 +75,11 @@ jobs:
                       t:+e.startTime.toFixed(1),v:e.value,
                       sources:(e.sources||[]).map(s=>({
                         n:sel(s.node),
+                        nodeName:String(s.node?.nodeName||''),
+                        parent:sel(s.node?.parentElement||s.node?.parentNode),
+                        host:sel(s.node?.host||s.node?.parentElement||s.node?.parentNode),
+                        id:String(s.node?.id||''),
+                        cls:String(s.node?.className||''),
                         p:s.previousRect?{x:s.previousRect.x,y:s.previousRect.y,w:s.previousRect.width,h:s.previousRect.height}:null,
                         c:s.currentRect?{x:s.currentRect.x,y:s.currentRect.y,w:s.currentRect.width,h:s.currentRect.height}:null
                       }))
