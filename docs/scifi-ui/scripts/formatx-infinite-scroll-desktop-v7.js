@@ -775,12 +775,19 @@
        the already-entered seamless-loop gesture before idle commit. */
     const cachedEndIntent=cachedGeometry.ready
       && scrollY>=Math.max(0,cachedGeometry.documentEnd-4);
-    if(relative==null&&cachedEndIntent){
+    /* R1728 — deterministic end-of-document fallback. Programmatic navigation,
+       keyboard paging and very fast wheel gestures can jump directly to the
+       reachable document end before the bridge-relative snapshot is populated.
+       Treat that physical boundary as loop intent without adding per-frame
+       layout reads. */
+    const reachableBoundaryIntent=cachedGeometry.ready
+      && scrollY>=Math.max(0,cachedGeometry.bridgeThreshold-2);
+    if(relative==null&&(cachedEndIntent||reachableBoundaryIntent)){
       relative=Math.max(0,Math.min(
         scrollY-cachedGeometry.bridgeTop,
         Math.max(0,cachedGeometry.sourceHeight-2)
       ));
-      root.dataset.fxLoopEndIntentR1724='latched-cached-end';
+      root.dataset.fxLoopEndIntentR1724=cachedEndIntent?'latched-cached-end':'latched-reachable-boundary';
     }
 
     root.dataset.fxScrollActivity = 'scrolling';
