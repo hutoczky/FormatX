@@ -5,7 +5,7 @@
   if (root.dataset.fxMobileUnified === 'ready-v3') return;
   root.dataset.fxMobileUnified = 'loading-v3';
 
-  const SEAMLESS_BOOTSTRAP = './scripts/formatx-infinite-scroll.js?v=20260925-r1733-cross-platform-boundary-intent';
+  const SEAMLESS_BOOTSTRAP = './scripts/formatx-infinite-scroll.js?v=20260925-r1734-mobile-null-frame-latch';
 
   function appendStyle(marker, href, readyKey) {
     if (document.querySelector('link[' + marker + ']')) return;
