@@ -260,4 +260,16 @@ html[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
     background:radial-gradient(ellipse 56% 52% at 50% 42%,rgba(18,42,50,.16),transparent 74%)!important;
   }
 }
+  html:root:root body>.fx-mag-birth-r533 .fxb-deep{
+    opacity:.28!important;
+    background:radial-gradient(ellipse 58% 48% at 50% 42%,rgba(21,62,72,.18),transparent 74%)!important;
+  }
+  html:root:root body>.fx-mag-birth-r533 .fxb-veil{
+    opacity:.16!important;
+    background:
+      radial-gradient(circle at 50% 42%,rgba(74,184,201,.13),transparent 32%),
+      radial-gradient(circle at 50% 56%,rgba(74,91,123,.08),transparent 60%)!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+  }
 /* production-r1745-mobile-hero-integrated-ten-second-intro */
