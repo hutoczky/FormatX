@@ -831,13 +831,11 @@
            hundreds of pixels. Preserve the pre-gesture coordinate for relative
            intent; settled live geometry is still used later to validate that
            the loop boundary was genuinely reached. */
-        const liveRect=bridge.getBoundingClientRect();
-        const liveEventBridgeTop=Number(scrollY+liveRect.top);
-        /* R1727h — the first scroll event and scrollY belong to the same live
-           layout snapshot, therefore that live bridge coordinate is authoritative.
-           A pre-gesture stable snapshot can be stale after deferred layout work
-           and previously injected an exact +225px landing error. */
-        const eventBridgeTop=liveEventBridgeTop;
+        /* R1727i — use the bridge's document-flow coordinate, identical to
+           refreshGeometry() and the public loop contract. getBoundingClientRect()
+           is viewport/containing-block based here and differs by the 225px
+           document chrome offset, which produced a deterministic +225px landing. */
+        const eventBridgeTop=Number(bridge.offsetTop);
         const eventSourceHeight=Math.max(0,sourceHero?.offsetHeight||loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
         if(Number.isFinite(eventBridgeTop)){
           desktopGestureAnchorY=scrollY;
