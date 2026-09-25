@@ -952,7 +952,10 @@
         root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
         root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
         clearTimeout(activityTimer);
-        activityTimer=window.setTimeout(markIdle,32);
+        activityTimer=window.setTimeout(()=>{
+          root.dataset.fxLoopAutomationSettleR1748='deterministic-idle-commit';
+          markIdle();
+        },24);
         root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
       }
     }
@@ -1028,7 +1031,10 @@
           desktopGestureBoundaryLatched=true;
         }
         clearTimeout(activityTimer);
-        activityTimer=window.setTimeout(markIdle,32);
+        activityTimer=window.setTimeout(()=>{
+          root.dataset.fxLoopAutomationSettleR1748='deterministic-boundary-idle-commit';
+          markIdle();
+        },24);
         root.dataset.fxLoopAutomationSettleR1741='boundary-idle-armed';
       }
     }
