@@ -18,6 +18,8 @@
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
+  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
+  const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
   const LOW_POWER = MOBILE && CONSTRAINED;
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
@@ -762,9 +764,9 @@
        constrained CPU/GPU path. The existing R649 cinematic keeps the same
        10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
        proof frames remain on the Three owner so design evidence stays exact. */
-    if(CONSTRAINED && !HAS_VISUAL_FRAME){
-      ROOT.dataset.fxMagBirthRendererR1727='constrained-reference-film';
-      overlay.dataset.fxRenderer='fallback-constrained';
+    if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME){
+      ROOT.dataset.fxMagBirthRendererR1729=HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film';
+      overlay.dataset.fxRenderer=HEADLESS_SOFTWARE?'fallback-software':'fallback-constrained';
       startR649Fallback();
       if(filmRenderer)filmRenderer.resize?.();
       return;
@@ -996,9 +998,9 @@
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
     const particleCadence=filmRenderer
-      ? 0
+      ? (SOFTWARE_SAFE?50:16.67)
       : 16.67;
-    if(filmRenderer||!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
+    if(!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
       lastParticleDraw=now;
       drawParticles(r,now);
     }
@@ -1046,6 +1048,7 @@
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-adaptive-cinematic':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthPerformanceR1727=CONSTRAINED?'constrained-reference-film-no-heavy-three-loop':'hardware-three-adaptive-quality';
+    ROOT.dataset.fxMagBirthPerformanceR1729=SOFTWARE_SAFE?'software-safe-reference-film-20hz-render-60hz-timeline':'hardware-three-adaptive-60hz';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
