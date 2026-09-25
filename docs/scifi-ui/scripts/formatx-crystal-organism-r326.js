@@ -1439,10 +1439,10 @@
         float tendrilMask=isTendril*(1.0-vMorph);
 
         float lift=sat(.25+ndl*.45+sideLight*.34);
-        vec3 col=mix(vec3(.016,.028,.046),vec3(.155,.215,.255),lift);
-        col+=vec3(.74,.77,.73)*keySpec*.16;
-        col+=vec3(.36,.48,.51)*sideSpec*.13;
-        col+=vec3(.050,.15,.19)*fresnel*.31;
+        vec3 col=mix(vec3(.008,.013,.019),vec3(.082,.103,.112),lift);
+        col+=vec3(.56,.60,.58)*keySpec*.095;
+        col+=vec3(.28,.36,.38)*sideSpec*.085;
+        col+=vec3(.042,.105,.125)*fresnel*.20;
         col+=vec3(.012,.017,.021)*max(0.0,-n.y);
 
         float vesselA=pow(.5+.5*sin(vLocal.y*17.0+vLocal.x*8.0+vLocal.z*5.0),14.0);
@@ -1451,10 +1451,10 @@
         float plateField=.5+.5*sin(vUv.x*16.8+sin(vUv.y*11.8)*1.4);
         float plateCross=.5+.5*sin(vUv.y*15.2-vUv.x*6.4);
         float plateMask=smoothstep(.56,.80,max(plateField,plateCross*.84))*bodyMask;
-        vec3 ivory=vec3(.58,.70,.74)+vec3(.34,.31,.24)*(.30*ndl+.18*sideLight);
-        ivory+=vec3(.20,.35,.38)*fresnel*.14;
-        col=mix(col,ivory,plateMask*.70);
-        col+=vec3(.10,.61,.82)*vascular*(.22+.30*uEnergy);
+        vec3 ivory=vec3(.075,.098,.106)+vec3(.18,.19,.17)*(.24*ndl+.14*sideLight);
+        ivory+=vec3(.085,.14,.15)*fresnel*.10;
+        col=mix(col,ivory,plateMask*.24);
+        col+=vec3(.035,.22,.28)*vascular*(.10+.17*uEnergy);
         col+=vec3(1.00,.43,.09)*plateMask*sideSpec*.055;
 
         vec2 q=vLocal.xy;
@@ -1512,7 +1512,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*3.42),clamp(alpha,.76,1.0));
+        ${outputName}=vec4(tone(col*1.88),clamp(alpha,.76,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1524,7 +1524,7 @@
       ? softwareFragmentSource
       : (mobilePhysical ? constrainedFragmentSource : fullFragmentSource);
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
-      ? 'r1724-software-living-crystal-cyan-indigo-lite'
+      ? 'r1750-software-dark-smoky-obsidian-biocrystal-lite'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
     root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-adaptive-resolution-zero-idle';
     root.dataset.fxNativeMagVisualR1716='mobile-normal-topology-physical-shader-photoreal-60fps-first';
