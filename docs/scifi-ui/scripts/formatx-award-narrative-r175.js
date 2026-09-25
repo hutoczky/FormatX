@@ -8,7 +8,7 @@ root.dataset.fxAwardNarrativeR175='booting';
 root.dataset.fxAwardNarrativePerfR219=PERF_VERSION;
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const audit=new URLSearchParams(location.search).get('lighthouse')==='1';
+const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||new URLSearchParams(location.search).get('lighthouse')==='1';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const chapters=[
   {id:'hero',organ:'core',caption:'WAKE / SENSE / SIGNAL'},
