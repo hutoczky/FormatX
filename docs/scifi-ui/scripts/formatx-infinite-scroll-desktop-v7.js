@@ -831,12 +831,20 @@
            hundreds of pixels. Preserve the pre-gesture coordinate for relative
            intent; settled live geometry is still used later to validate that
            the loop boundary was genuinely reached. */
-        /* R1727i — use the bridge's document-flow coordinate, identical to
-           refreshGeometry() and the public loop contract. getBoundingClientRect()
-           is viewport/containing-block based here and differs by the 225px
-           document chrome offset, which produced a deterministic +225px landing. */
-        const eventBridgeTop=Number(bridge.offsetTop);
-        const eventSourceHeight=Math.max(0,sourceHero?.offsetHeight||loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
+        /* R1727j — scrolling itself can activate deferred/content-visibility
+           layout and move bridge.offsetTop before the first scroll callback.
+           The last pre-scroll loopGeometry sample is therefore authoritative for
+           user intent. This matches the geometry visible when the gesture began. */
+        const eventBridgeTop=Number(
+          loopGeometry.ready && Number.isFinite(loopGeometry.bridgeTop)
+            ? loopGeometry.bridgeTop
+            : bridge.offsetTop
+        );
+        const eventSourceHeight=Math.max(
+          0,
+          loopGeometry.sourceHeight||sourceHero?.offsetHeight||stableDesktopSourceHeight||0
+        );
+        root.dataset.fxLoopGesturePreScrollBridgeTopR1727=String(Math.round(eventBridgeTop));
         if(Number.isFinite(eventBridgeTop)){
           desktopGestureAnchorY=scrollY;
           desktopGestureAnchorRelative=scrollY-eventBridgeTop;
