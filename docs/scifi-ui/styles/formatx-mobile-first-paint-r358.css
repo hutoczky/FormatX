@@ -764,7 +764,7 @@
   html body.living-architecture :is(
     .fx-organism-status,
     .fx-organism-actionbar,
-    .fx-organism-dialogue,
+    .fx-organism-dialogue:not(.is-open),
     .fx-genome-launcher,
     .fx-living-core-launcher,
     .fx-premium-core-status,
