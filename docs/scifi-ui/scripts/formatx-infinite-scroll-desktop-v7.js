@@ -66,6 +66,7 @@
   root.dataset.fxLoopSourceTopContinuityR1725='hero-local-loop-origin-zero-active-scroll-offsetparent-proof';
   root.dataset.fxLoopLandingSpaceR1725='hero-local-coordinate-space';
   root.dataset.fxLoopGestureGeometryR1725='single-live-read-at-desktop-scroll-start-then-cache';
+  root.dataset.fxLoopScrollEndContinuityR1731='latched-boundary-survives-fresh-geometry-reflow';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -973,10 +974,19 @@
       root.dataset.fxLoopDesktopScrollEndRecoveryR1724=hasGestureSnapshot
         ? 'fresh-document-end-validates-snapshot-zero'
         : 'fresh-document-end-zero';
+    }else if(hasGestureSnapshot&&desktopGestureBoundaryLatched){
+      const intended=Number.isFinite(cachedRelative)
+        ? cachedRelative
+        : Math.max(0,desktopGestureAnchorRelative||0);
+      pendingDesktopRelative=Math.max(0,Math.min(
+        intended,
+        Math.max(0,loopGeometry.sourceHeight-2)
+      ));
+      root.dataset.fxLoopDesktopScrollEndRecoveryR1724='latched-gesture-boundary-preserved';
     }else{
       pendingDesktopRelative=null;
       root.dataset.fxLoopDesktopScrollEndRecoveryR1724=hasGestureSnapshot
-        ? 'stale-gesture-snapshot-rejected-by-fresh-geometry'
+        ? 'stale-non-boundary-snapshot-rejected'
         : 'no-live-boundary';
     }
     root.dataset.fxLoopDesktopScrollEndR1724=Number.isFinite(pendingDesktopRelative)?'boundary-commit':'no-boundary';
