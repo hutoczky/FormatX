@@ -1715,7 +1715,7 @@
     }
     function schedule(frames=1){
       if(blocked())return;
-      const frameCap=mobile?4:24;
+      const frameCap=auditMode?1:(mobile?4:24);
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       queueFrame(0);
     }
