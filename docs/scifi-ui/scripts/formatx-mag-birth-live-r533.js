@@ -322,8 +322,16 @@
       <progress class="fxb-progress" max="100" value="0">0%</progress>
       <span class="fxb-status"></span>
     </div>
-    <button class="fxb-skip" type="button"></button>
   `);
+
+  let liveSkip=overlay.querySelector('.fxb-skip');
+  if (!(liveSkip instanceof HTMLButtonElement)) {
+    liveSkip=document.createElement('button');
+    liveSkip.className='fxb-skip';
+    liveSkip.type='button';
+    overlay.appendChild(liveSkip);
+  }
+  liveSkip.removeAttribute('tabindex');
 
   if (!(prepaintCanvas instanceof HTMLCanvasElement)) {
     prepaintCanvas=document.createElement('canvas');
@@ -352,7 +360,7 @@
   const kicker = overlay.querySelector('.fxb-kicker');
   const title = overlay.querySelector('h1');
   const subtitle = overlay.querySelector('.fxb-subtitle');
-  const skip = overlay.querySelector('.fxb-skip');
+  const skip = liveSkip;
   const percent = overlay.querySelector('.fxb-percent');
   const progress = overlay.querySelector('.fxb-progress');
   const status = overlay.querySelector('.fxb-status');
