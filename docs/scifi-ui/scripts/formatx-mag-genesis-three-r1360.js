@@ -1601,18 +1601,18 @@
       this.tentacleGlowMaterial=new T.MeshBasicMaterial({transparent:true,opacity:0});
       this.tentacleDashMaterial=new T.LineDashedMaterial({transparent:true,opacity:0});
       this.tentacles=[];
-      const count=this.lowPowerProfile?4:(this.mobileProfile?7:10);
+      const count=this.lowPowerProfile?3:(this.mobileProfile?4:5);
       const tendrilSegments=this.lowPowerProfile?18:(this.mobileProfile?30:48);
       const tendrilRadial=this.lowPowerProfile?5:(this.mobileProfile?6:7);
       for(let i=0;i<count;i++){
         const lane=(i-(count-1)*.5)/Math.max(1,count-1);
-        const len=1.20+r()*.64;
+        const len=.82+r()*.38;
         const phase=r()*Math.PI*2;
         const pts=[];
         for(let j=0;j<11;j++){
           const u=j/10;
-          const wave=Math.sin(u*Math.PI*1.65+phase)*(.04+.17*u);
-          const rise=Math.sin(u*Math.PI*.92+phase*.55)*(.03+.12*u);
+          const wave=Math.sin(u*Math.PI*1.35+phase)*(.025+.105*u);
+          const rise=Math.sin(u*Math.PI*.88+phase*.55)*(.025+.080*u);
           pts.push(new T.Vector3(
             -.56-len*u-.24*u*u,
             .10+lane*.72+rise+wave*.25,
@@ -1620,7 +1620,7 @@
           ));
         }
         const curve=new T.CatmullRomCurve3(pts,false,'centripetal');
-        const geo=this.createTaperedTube(curve,tendrilSegments,tendrilRadial,.044+r()*.006,.0055+r()*.0012);
+        const geo=this.createTaperedTube(curve,tendrilSegments,tendrilRadial,.052+r()*.006,.009+r()*.0014);
         const mesh=new T.Mesh(geo,this.tentacleMaterial);
         const g=new T.Group();g.add(mesh);g.scale.setScalar(.001);g.userData.phase=phase;
         this.tentacleGroup.add(g);this.tentacles.push(g);
@@ -1761,7 +1761,7 @@
       this.organicLobeMaterial.opacity=(.055+.035*maturity)*visible;
       if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.075+.040*maturity)*visible;
       this.organicWireMaterial.opacity=0;
-      this.organicVeinMaterial.opacity=(.12+.12*maturity)*visible;
+      this.organicVeinMaterial.opacity=(.018+.018*maturity)*visible;
       this.organicHoodMaterial.opacity=0;
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.075*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.003*visible;
@@ -1801,7 +1801,7 @@
         if(b)lobe.scale.set(b.x*q,b.y*q,b.z*q);
         lobe.rotation.y+=.00005*(i%2?1:-1);
       });
-      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=(.12+.14*maturity)*visible;
+      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=(.022+.020*maturity)*visible;
       if(this.organicFolds){
         this.organicFolds.rotation.y=Math.sin(time*.00012)*.008;
         this.organicFolds.rotation.x=Math.sin(time*.00010)*.004;
@@ -1857,7 +1857,7 @@
       const grow=smooth((t-5.42)/1.05);
       const visible=grow;
       this.tentacleGroup.visible=visible>.002;
-      this.tentacleMaterial.opacity=.82*visible;
+      this.tentacleMaterial.opacity=.58*visible;
       this.tentacleEdgeMaterial.opacity=0;
       this.tentacleNodeMaterial.opacity=0;
       if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
