@@ -223,7 +223,7 @@
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
     './scripts/organism-core-controller.js?v=20260824-menu-race-r251',
-    './scripts/organism-voice.js?v=20260730-organism-voice-4',
+    './scripts/organism-voice.js?v=20260925-r1727-visible-dialogue-open',
     './scripts/organism-voice-stability.js?v=20260808-mobile-visual-viewport-1',
     './scripts/organism-master-sync.js?v=20260802-master-sync-1',
     './scripts/formatx-audio-repair.js?v=20260728-ambient-score-v5',
