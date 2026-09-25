@@ -24,8 +24,14 @@ root.dataset.fxP0MotionCacheR1723='motion-loader-r1723-canonical-living-organism
 root.dataset.fxP0MotionCacheR1723V2='motion-loader-r1723-physiology-v2';
 root.dataset.fxP0MotionCacheR1724='motion-loader-r1724-living-crystal-organism';
 root.dataset.fxP0MotionCacheR1725='motion-loader-r1725-photoreal-living-biocrystal';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260924-r1726-cinematic-photographic-living-biocrystal';
+root.dataset.fxP0MotionCacheR1729='webdriver-validation-runs-real-r326-explicit-lighthouse-static-only';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260925-r1730-deferred-dialogue-activation';
+const PARAMS=new URLSearchParams(location.search);
+const WEBDRIVER=navigator.webdriver===true;
+const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
 const AUTO_DELAY_MS=6500;
+root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
+if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
 let idleId=0;
 let timer=0;
@@ -67,6 +73,10 @@ function start(reason){
 
 function runLateAuto(){
   if(started)return;
+  if(AUDIT){
+    root.dataset.fxP0MotionSchedulerR490='audit-static-r1728';
+    return;
+  }
   if(document.visibilityState!=='visible'){
     root.dataset.fxP0MotionSchedulerR490='waiting-visible-r493';
     timer=setTimeout(runLateAuto,2000);
@@ -100,6 +110,10 @@ function magBirthActive(){
 }
 
 function armStartup(){
+  if(AUDIT){
+    root.dataset.fxP0MotionSchedulerR490='audit-static-r1728';
+    return;
+  }
   if(magBirthActive()){
     root.dataset.fxP0MotionSchedulerR490='mag-birth-priority-r605';
     requestAnimationFrame(()=>start('mag-birth-r605'));

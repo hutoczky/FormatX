@@ -101,6 +101,20 @@ html[data-fx-intro-prepaint-r1611="show"] #fx-mag-birth-prepaint-r1606{
   display:block!important;
   visibility:visible!important;
 }
+#fx-mag-birth-prepaint-r1606>.fxb-particles{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:none!important;
+  background:#020507!important;
+  contain:strict!important;
+}
 #fx-mag-birth-prepaint-r1606>.fxb-lcp-brand-r1603{
   opacity:0;
   animation:fxb-r1606-first-brand .001s 80ms forwards;
@@ -117,13 +131,19 @@ html[data-fx-mag-birth-live="active"] #fx-mag-birth-prepaint-r1606>.fxb-lcp-bran
 /* production-r1615-prepaint-important-owner */
 
 
-/* R1618 — cinematic overlays must never become the page's delayed LCP owner.
-   The photoreal canvas remains visible; canonical page text keeps first-paint
-   ownership behind it and therefore does not shift at handoff. */
+/* R1730 — keep canonical page geometry fully laid out while the fixed
+   cinematic owns the viewport, but suppress its paint. Geometry can settle
+   behind the intro without contributing visible layout shifts; handoff only
+   restores paint and does not add/remove document boxes. */
 html[data-fx-mag-birth-live="active"] body>#main-content,
-html[data-fx-mag-birth-live="active"] body>.topbar{
-  visibility:visible!important;
-  opacity:1!important;
+html[data-fx-mag-birth-live="active"] body>.topbar,
+html[data-fx-mag-birth-live="active"] body>.fx-rail,
+html[data-fx-mag-birth-live="active"] body>.fx-organism-status,
+html[data-fx-mag-birth-live="active"] body>footer.site-footer,
+html[data-fx-mag-birth-live="active"] body>#fx-apex-canvas,
+html[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
+  visibility:hidden!important;
+  opacity:0!important;
 }
 #fx-mag-birth-prepaint-r1606>.fxb-lcp-brand-r1603,
 .fx-mag-birth-r533>.fxb-lcp-brand-r1603{
@@ -159,4 +179,97 @@ html[data-fx-mag-birth-live="active"] body>.topbar{
 }
 /* production-r1620-mobile-early-contentful-prepaint */
 
-/* production-r1679-prepaint-fixed-from-first-byte-zero-flow-cls */
+/* R1727d — parser-owned canvas keeps the cinematic surface at identical
+   viewport geometry before and after the live intro runtime adopts the shell. */
+/* production-r1727d-parser-canvas-zero-appearance-cls */
+
+
+
+/* production-r1730-fixed-intro-hidden-underlay-zero-visible-cls */
+
+
+/* R1743 — the parser-owned skip control keeps its final fixed geometry before
+   the intro runtime adopts the shell. No 0x0 -> button-size layout transition. */
+#fx-mag-birth-prepaint-r1606 > .fxb-skip,
+.fx-mag-birth-r533 > .fxb-skip{
+  position:absolute!important;
+  top:max(18px,env(safe-area-inset-top))!important;
+  right:max(18px,env(safe-area-inset-right))!important;
+  z-index:70!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  width:auto!important;
+  min-width:92px!important;
+  height:46px!important;
+  min-height:46px!important;
+  max-height:46px!important;
+  margin:0!important;
+  padding:0 18px!important;
+  border:1px solid rgba(175,220,225,.24)!important;
+  border-radius:999px!important;
+  color:rgba(235,248,249,.82)!important;
+  background:rgba(3,9,12,.52)!important;
+  font:700 12px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  letter-spacing:.10em!important;
+  text-transform:uppercase!important;
+  pointer-events:auto!important;
+  transform:none!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  #fx-mag-birth-prepaint-r1606 > .fxb-skip,
+  .fx-mag-birth-r533 > .fxb-skip{
+    top:max(14px,env(safe-area-inset-top))!important;
+    right:max(14px,env(safe-area-inset-right))!important;
+    min-width:86px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    padding:0 15px!important;
+    font-size:11px!important;
+  }
+}
+/* production-r1743-parser-owned-skip-zero-cls */
+
+
+/* R1745 — mobile keeps the full 10 s cinematic, but it no longer hides the
+   canonical page behind an opaque black viewport. The intro and permanent MAG
+   now share one hero-space perception from the first meaningful paint. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root[data-fx-mag-birth-live="active"] body>.topbar,
+  html:root:root[data-fx-mag-birth-live="active"] body>.fx-organism-status,
+  html:root:root[data-fx-mag-birth-live="active"] body>.fx-rail,
+  html:root:root[data-fx-mag-birth-live="active"] body>#main-content,
+  html:root:root[data-fx-mag-birth-live="active"] body>footer.site-footer,
+  html:root:root[data-fx-mag-birth-live="active"] body>#fx-apex-canvas,
+  html:root:root[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  html:root:root #fx-mag-birth-prepaint-r1606,
+  html:root:root body>.fx-mag-birth-r533{
+    background:transparent!important;
+  }
+  html:root:root #fx-mag-birth-prepaint-r1606>.fxb-particles,
+  html:root:root body>.fx-mag-birth-r533>.fxb-particles{
+    background:transparent!important;
+  }
+  html:root:root body>.fx-mag-birth-r533::after{
+    opacity:.12!important;
+    background:radial-gradient(ellipse 56% 52% at 50% 42%,rgba(18,42,50,.16),transparent 74%)!important;
+  }
+}
+  html:root:root body>.fx-mag-birth-r533 .fxb-deep{
+    opacity:.28!important;
+    background:radial-gradient(ellipse 58% 48% at 50% 42%,rgba(21,62,72,.18),transparent 74%)!important;
+  }
+  html:root:root body>.fx-mag-birth-r533 .fxb-veil{
+    opacity:.16!important;
+    background:
+      radial-gradient(circle at 50% 42%,rgba(74,184,201,.13),transparent 32%),
+      radial-gradient(circle at 50% 56%,rgba(74,91,123,.08),transparent 60%)!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+  }
+/* production-r1745-mobile-hero-integrated-ten-second-intro */

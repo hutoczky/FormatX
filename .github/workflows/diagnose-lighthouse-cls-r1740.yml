@@ -1,0 +1,125 @@
+name: Diagnose Lighthouse-like CLS r1740
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/diagnose-lighthouse-cls-r1740.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cls-r1740"
+          cd "$RUNNER_TEMP/cls-r1740"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Serve current source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs >"$RUNNER_TEMP/cls-r1740-http.log" 2>&1 &
+          for i in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep .2
+          done
+          cat "$RUNNER_TEMP/cls-r1740-http.log" || true
+          exit 1
+
+      - name: Trace desktop and mobile first visit
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/cls-r1740/node_modules
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/cls-r1740"
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs');
+          const profiles=[
+            {name:'desktop',viewport:{width:1350,height:940},deviceScaleFactor:1,isMobile:false,hasTouch:false,userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'},
+            {name:'mobile',viewport:{width:412,height:823},deviceScaleFactor:1.75,isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36'}
+          ];
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});
+            for(const profile of profiles){
+              const context=await browser.newContext(profile);
+              const page=await context.newPage();
+              await page.addInitScript(()=>{
+                try{Object.defineProperty(Navigator.prototype,'webdriver',{get:()=>false,configurable:true});}catch(_){}
+                window.__fxShiftTrace=[];
+                window.__fxMutationTrace=[];
+                const sel=node=>{
+                  if(!(node instanceof Element))return '';
+                  if(node.id)return '#'+node.id;
+                  const cls=[...node.classList].slice(0,4).join('.');
+                  return node.tagName.toLowerCase()+(cls?'.'+cls:'');
+                };
+                new PerformanceObserver(list=>{
+                  for(const e of list.getEntries()){
+                    if(e.hadRecentInput)continue;
+                    window.__fxShiftTrace.push({
+                      t:+e.startTime.toFixed(1),v:e.value,
+                      sources:(e.sources||[]).map(s=>({
+                        n:sel(s.node),
+                        nodeName:String(s.node?.nodeName||''),
+                        parent:sel(s.node?.parentElement||s.node?.parentNode),
+                        host:sel(s.node?.host||s.node?.parentElement||s.node?.parentNode),
+                        id:String(s.node?.id||''),
+                        cls:String(s.node?.className||''),
+                        p:s.previousRect?{x:s.previousRect.x,y:s.previousRect.y,w:s.previousRect.width,h:s.previousRect.height}:null,
+                        c:s.currentRect?{x:s.currentRect.x,y:s.currentRect.y,w:s.currentRect.width,h:s.currentRect.height}:null
+                      }))
+                    });
+                  }
+                }).observe({type:'layout-shift',buffered:true});
+                const started=performance.now();
+                new MutationObserver(records=>{
+                  if(performance.now()-started>12000)return;
+                  for(const r of records)window.__fxMutationTrace.push({t:+performance.now().toFixed(1),type:r.type,target:sel(r.target),attr:r.attributeName||'',add:r.addedNodes?.length||0,rem:r.removedNodes?.length||0});
+                }).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden']});
+              });
+              const samples=[];
+              const sample=async label=>{
+                samples.push(await page.evaluate(label=>{
+                  const box=q=>{const e=document.querySelector(q);if(!e)return null;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),d:s.display,p:s.position,o:s.opacity,v:s.visibility,t:s.transform}};
+                  return{label,t:+performance.now().toFixed(1),scrollY,rootClass:document.documentElement.className,bodyClass:document.body?.className||'',introOwner:document.documentElement.dataset.fxIntroPrepaintOwnerR1611||'',introState:document.documentElement.dataset.fxMagBirthLiveR533||'',prepaint:box('#fx-mag-birth-prepaint-r1606'),skip:box('#fx-mag-birth-prepaint-r1606 .fxb-skip'),topbar:box('header.topbar'),main:box('#main-content'),hero:box('#hero'),grid:box('#hero>.hero-grid'),copy:box('#hero .hero-copy'),space:box('#hero .hero-space'),footer:box('body>.site-footer')};
+                },label));
+              };
+              await page.goto('http://127.0.0.1:4178/scifi-ui/index.html',{waitUntil:'domcontentloaded',timeout:45000});
+              await sample('dcl');
+              let elapsed=0;
+              for(const delay of [100,150,250,500,1000,1000,2000,3000,3500]){await page.waitForTimeout(delay);elapsed+=delay;await sample(elapsed+'ms');}
+              const final=await page.evaluate(()=>({cls:window.__fxShiftTrace.reduce((n,e)=>n+e.v,0),shifts:window.__fxShiftTrace,mutations:window.__fxMutationTrace}));
+              const out={profile:profile.name,samples,...final};
+              fs.writeFileSync('cls-'+profile.name+'.json',JSON.stringify(out,null,2));
+              console.log('R1740_CLS',profile.name,final.cls.toFixed(6),JSON.stringify(final.shifts));
+              await context.close();
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Upload CLS traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-like-cls-r1740-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/cls-r1740/cls-desktop.json
+            ${{ runner.temp }}/cls-r1740/cls-mobile.json
+            ${{ runner.temp }}/cls-r1740-http.log
+          retention-days: 3

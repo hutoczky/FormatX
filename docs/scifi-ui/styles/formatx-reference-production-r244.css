@@ -212,21 +212,26 @@
     overflow: visible !important;
   }
 
+  /* R1738 — canonical mobile reference geometry must match the blocking R1647
+     first paint. The old 100vw/500px carrier caused a second layout state after
+     FCP and amplified CLS before the modern mobile owners settled. */
   html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .hero-grid > .hero-space {
     position: relative !important;
     inset: auto !important;
-    order: 0 !important;
+    order: 1 !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     align-self: stretch !important;
+    flex: 0 0 auto !important;
     box-sizing: border-box !important;
     width: 100% !important;
+    min-width: 0 !important;
     max-width: 100% !important;
-    height: 100vw !important;
-    min-height: 100vw !important;
-    max-height: 500px !important;
-    margin: 0 !important;
+    height: clamp(350px,97.6vw,470px) !important;
+    min-height: clamp(350px,97.6vw,470px) !important;
+    max-height: 470px !important;
+    margin: 0 auto !important;
     padding: 0 !important;
     overflow: visible !important;
     border: 0 !important;
@@ -255,20 +260,33 @@
     filter: brightness(.82) contrast(1.32) saturate(1.03) !important;
   }
 
+  /* R1738 — retire the legacy 1px hidden mobile hero copy. The readable hero
+     information panel is canonical and remains in normal flow from first paint. */
   html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .hero-grid > .hero-copy {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: calc(100% - 24px) !important;
+    min-width: 0 !important;
+    max-width: 700px !important;
+    height: auto !important;
     min-height: 0 !important;
-    margin: -1px !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    clip: rect(0 0 0 0) !important;
-    clip-path: inset(50%) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
+    max-height: none !important;
+    margin: 0 auto 16px !important;
+    padding: clamp(24px,6vw,34px) clamp(20px,5.5vw,30px) clamp(26px,6.5vw,38px) !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    border: 1px solid rgba(151,224,255,.12) !important;
+    border-radius: 24px !important;
     opacity: 1 !important;
     visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
   }
 
   html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-controls-r204 {
@@ -550,7 +568,7 @@
     .fx-rail,
     .fx-organism-status,
     .fx-organism-actionbar,
-    .fx-organism-dialogue,
+    .fx-organism-dialogue:not(.is-open),
     .fx-genome-launcher,
     .fx-living-core-launcher,
     .fx-three-sound,
@@ -1315,7 +1333,7 @@
     pointer-events: none !important;
   }
 
-  html[data-fx-reference-production-r244="desktop"] body.living-architecture :is(.fx-rail, .fx-organism-status, .fx-organism-actionbar, .fx-organism-dialogue, .fx-genome-launcher, .fx-living-core-launcher, .fx-three-sound, [data-fx-live-os-launcher], .fx-loop-hero-clone) {
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture :is(.fx-rail, .fx-organism-status, .fx-organism-actionbar, .fx-organism-dialogue:not(.is-open), .fx-genome-launcher, .fx-living-core-launcher, .fx-three-sound, [data-fx-live-os-launcher], .fx-loop-hero-clone) {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;

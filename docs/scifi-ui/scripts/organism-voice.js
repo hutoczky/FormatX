@@ -195,6 +195,11 @@
   }
 
   function buildInterface() {
+    /* R1728 — keep exactly one canonical dialogue surface. Deferred legacy
+       initialisers can otherwise leave an older hidden bubble earlier in DOM
+       order; automation and assistive technology then resolve that stale node
+       instead of the visible ASK-owned dialogue. */
+    document.querySelectorAll('.fx-organism-dialogue').forEach(node => node.remove());
     shell = create('aside', 'fx-organism-dialogue', { 'aria-label': copy().region, 'data-fx-organism-dialogue': 'ready-v4' });
     bubble = create('section', 'fx-organism-thought', { hidden: '', 'aria-hidden': 'true', 'aria-live': 'polite', 'aria-atomic': 'true' });
     const head = create('header', 'fx-organism-thought-head');
@@ -238,10 +243,26 @@
 
   function setOpen(next, focusInput) {
     opened = enabled && Boolean(next);
-    shell?.classList.toggle('is-open', opened);
-    if (bubble) { bubble.hidden = !opened; bubble.setAttribute('aria-hidden', String(!opened)); }
+    if (shell) {
+      shell.classList.toggle('is-open', opened);
+      shell.hidden = false;
+      shell.removeAttribute('hidden');
+      if (opened) {
+        shell.removeAttribute('aria-hidden');
+        shell.removeAttribute('inert');
+      }
+    }
+    if (bubble) {
+      bubble.hidden = !opened;
+      bubble.setAttribute('aria-hidden', String(!opened));
+      if (opened) bubble.removeAttribute('inert');
+    }
     trigger?.setAttribute('aria-expanded', String(opened));
     ROOT.dataset.fxOrganismThought = opened ? 'open' : 'closed';
+    if (opened) {
+      ROOT.classList.remove('fx-organism-menu-open','fx-page-scrolling');
+      document.body?.classList.remove('fx-organism-panel-open');
+    }
     if (opened && focusInput) requestAnimationFrame(() => input?.focus({ preventScroll: true }));
   }
 
@@ -471,7 +492,13 @@
     setEnabled(enabled, false);
     setOpen(false, false);
     document.addEventListener('pointerdown', noteUserGesture, { capture: true, passive: true });
-    document.addEventListener('keydown', noteUserGesture, true);
+    document.addEventListener('keydown', event => {
+      noteUserGesture();
+      if (event.key === 'Escape' && opened) {
+        setOpen(false, false);
+        ROOT.dataset.fxOrganismEscapeCloseR1741 = 'closed';
+      }
+    }, true);
     addEventListener('formatx:organismstatechange', handleStateChange);
     addEventListener('formatx:languagechange', () => { stopSpeech(); currentText = SCENES[currentScene].response[language()]; updateLanguage(); });
     addEventListener('pagehide', stopSpeech);

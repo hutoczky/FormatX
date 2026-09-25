@@ -253,3 +253,297 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
   }
 }
 /* production-r1710-desktop-hero-geometry-lock */
+
+
+/* R1732 — ASK dialogue critical surface merged into the existing P0 request.
+   The standalone files remain canonical/runtime-compatible, but first paint no
+   longer spends two extra network round trips before ASK can render. */
+/* FormatX r287 — authoritative physical open state for ASK/Thought dialogue.
+   Semantic state already lives on data-fx-organism-thought. This layer only
+   guarantees that legacy menu/panel/scroll opacity rules cannot hide an
+   explicitly open dialogue. */
+
+html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:none!important;
+  z-index:2147481600!important;
+}
+
+html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open .fx-organism-thought:not([hidden]){
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:none!important;
+}
+
+html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open .fx-organism-thought-trigger{
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open,
+  html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open .fx-organism-thought{
+    animation:none!important;
+    transition:none!important;
+  }
+}
+
+/* FormatX r475 — canonical ASK dialogue render-surface owner.
+   r244 intentionally retires the legacy floating Organism shell so its old
+   launcher cannot compete with the canonical ASK control. The dialogue itself,
+   however, is still the canonical response surface. Restore only an explicitly
+   open dialogue, and only while no higher-priority menu/intro/system panel owns
+   the interface. */
+
+html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+body.living-architecture:not(.fx-organism-panel-open)
+.fx-organism-dialogue.is-open {
+  position: fixed !important;
+  z-index: 12070 !important;
+  display: grid !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+body.living-architecture:not(.fx-organism-panel-open)
+.fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
+  display: grid !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+/* The canonical hero ASK button replaces the old floating thought launcher.
+   Keep that legacy trigger physically retired even while its dialogue is open. */
+body.living-architecture .fx-organism-dialogue > .fx-organism-thought-trigger {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 820px) {
+  html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+  body.living-architecture:not(.fx-organism-panel-open)
+  .fx-organism-dialogue.is-open {
+    right: max(12px, env(safe-area-inset-right)) !important;
+    left: max(12px, env(safe-area-inset-left)) !important;
+    bottom: max(20px, calc(env(safe-area-inset-bottom) + 16px)) !important;
+    width: auto !important;
+    max-height: calc(100dvh - 32px) !important;
+  }
+
+  html:not(.fx-organism-menu-open):not(.fx-intro-pending):not(.fx-intro-running):not(.fx-intro-reveal)
+  body.living-architecture:not(.fx-organism-panel-open)
+  .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
+    max-height: min(78dvh, 620px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-organism-dialogue.is-open,
+  .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* R1698 — canonical explicit-open ownership.
+   The dialogue's own open state outranks body panel bookkeeping. */
+html body.living-architecture .fx-organism-dialogue.is-open {
+  position:fixed!important;
+  z-index:12070!important;
+  display:grid!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+  transform:none!important;
+}
+html body.living-architecture .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]) {
+  display:grid!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:none!important;
+}
+@media (max-width:820px){
+  html body.living-architecture .fx-organism-dialogue.is-open {
+    right:max(12px,env(safe-area-inset-right))!important;
+    left:max(12px,env(safe-area-inset-left))!important;
+    bottom:max(20px,calc(env(safe-area-inset-bottom) + 16px))!important;
+    width:auto!important;
+    max-height:calc(100dvh - 32px)!important;
+  }
+}
+/* production-r1698-dialogue-explicit-open-owner */
+
+
+/* R1711 — explicit dialogue is self-contained.
+   It must not depend on the timing of legacy organism-voice.css to have a
+   measurable viewport box after canonical ASK opens it. */
+html:root:root body.living-architecture .fx-organism-dialogue.is-open{
+  right:clamp(16px,2.4vw,34px)!important;
+  bottom:max(94px,calc(env(safe-area-inset-bottom) + 82px))!important;
+  width:min(380px,calc(100vw - 32px))!important;
+  max-width:calc(100vw - 32px)!important;
+  min-width:0!important;
+  height:auto!important;
+  max-height:calc(100dvh - 116px)!important;
+  justify-items:stretch!important;
+  gap:13px!important;
+}
+html:root:root body.living-architecture .fx-organism-dialogue.is-open>.fx-organism-thought:not([hidden]){
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:180px!important;
+  max-height:min(68dvh,570px)!important;
+  overflow:auto!important;
+}
+@media(max-width:820px){
+  html:root:root body.living-architecture .fx-organism-dialogue.is-open{
+    top:auto!important;
+    right:max(12px,env(safe-area-inset-right))!important;
+    bottom:max(20px,calc(env(safe-area-inset-bottom) + 16px))!important;
+    left:max(12px,env(safe-area-inset-left))!important;
+    width:auto!important;
+    max-width:none!important;
+  }
+}
+/* production-r1711-dialogue-complete-geometry-owner */
+
+
+/* R1729 — canonical ASK explicit-open hard owner.
+   Mobile first-paint intentionally retires the dormant dialogue surface with
+   zero geometry. Once the canonical ASK has semantically opened it, this
+   selector restores a real fixed viewport box deterministically. */
+html:root:root[data-fx-organism-thought="open"] body.living-architecture > .fx-organism-dialogue.is-open{
+  position:fixed!important;
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  right:clamp(16px,2.4vw,34px)!important;
+  bottom:max(94px,calc(env(safe-area-inset-bottom) + 82px))!important;
+  left:auto!important;
+  width:min(380px,calc(100vw - 32px))!important;
+  min-width:0!important;
+  max-width:calc(100vw - 32px)!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:calc(100dvh - 116px)!important;
+  overflow:visible!important;
+  pointer-events:none!important;
+  transform:none!important;
+  clip:auto!important;
+  clip-path:none!important;
+  z-index:2147481600!important;
+}
+html:root:root[data-fx-organism-thought="open"] body.living-architecture > .fx-organism-dialogue.is-open > .fx-organism-thought:not([hidden]){
+  box-sizing:border-box!important;
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:relative!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:auto!important;
+  min-height:180px!important;
+  max-height:min(68dvh,570px)!important;
+  overflow:auto!important;
+  pointer-events:auto!important;
+  transform:none!important;
+  clip:auto!important;
+  clip-path:none!important;
+}
+@media(max-width:820px),(pointer:coarse){
+  html:root:root[data-fx-organism-thought="open"] body.living-architecture > .fx-organism-dialogue.is-open{
+    top:auto!important;
+    right:max(12px,env(safe-area-inset-right))!important;
+    bottom:max(20px,calc(env(safe-area-inset-bottom) + 16px))!important;
+    left:max(12px,env(safe-area-inset-left))!important;
+    width:auto!important;
+    max-width:none!important;
+    max-height:calc(100dvh - 32px)!important;
+  }
+}
+/* production-r1729-canonical-ask-visible-open-owner */
+
+/* production-r1732-critical-dialogue-surface-merged */
+
+
+/* R1741 — one environmental owner from first paint.
+   The living-habitat canvas owns depth and atmosphere. Retire the legacy hero
+   pseudo-field in the render-blocking layer so a late stylesheet cannot resize
+   a full-viewport pseudo-element and generate a near-1.0 desktop CLS event. */
+html:root:root body.living-architecture #hero::before,
+html:root:root body.living-architecture #hero::after,
+html:root:root body.living-architecture #hero .hero-space::before,
+html:root:root body.living-architecture #hero .hero-space::after{
+  content:none!important;
+  display:none!important;
+  width:0!important;
+  height:0!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:0!important;
+  max-height:0!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  transform:none!important;
+  filter:none!important;
+}
+
+/* Keep header controls on one immutable first-paint box. */
+@media (min-width:901px) and (pointer:fine){
+  html:root:root body.living-architecture #menu-toggle{
+    box-sizing:border-box!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+  }
+}
+/* production-r1741-single-environment-owner-zero-pseudo-cls */
+
+
+/* R1742 — global background pseudos were the remaining desktop CLS owner.
+   Their deferred R616/R1530 geometry changed after first paint. The real
+   living-habitat canvas plus the body background now own the same world depth. */
+html:root:root:root:root:root:root:root:root:root:root:root:root body.living-architecture::before,
+html:root:root:root:root:root:root:root:root:root:root:root:root body.living-architecture::after{
+  content:none!important;
+  display:none!important;
+  position:fixed!important;
+  inset:0!important;
+  width:0!important;
+  height:0!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
+/* production-r1742-canvas-only-global-environment-owner */

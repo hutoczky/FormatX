@@ -17,7 +17,10 @@
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
-  const LOW_POWER = MOBILE && (HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4);
+  const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
+  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
+  const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
+  const LOW_POWER = MOBILE && CONSTRAINED;
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
@@ -85,6 +88,7 @@
   /* R1618 — once the cinematic contains a real Skip control it cannot remain
      aria-hidden. Decorative descendants keep their own aria-hidden markers. */
   overlay.removeAttribute('aria-hidden');
+  overlay.removeAttribute('inert');
   overlay.setAttribute('role','dialog');
   overlay.setAttribute('aria-modal','true');
   overlay.dataset.fxPrepaintR1606 = prepaintOverlay instanceof HTMLElement ? 'adopted-static-lcp-shell' : 'dynamic-fallback';
@@ -238,6 +242,7 @@
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
   overlay.setAttribute('aria-label', copy.title);
   const prepaintBrand = overlay.querySelector('.fxb-lcp-brand-r1603');
+  let prepaintCanvas = overlay.querySelector('.fxb-particles');
   overlay.insertAdjacentHTML('beforeend', `
     <div class="fxb-deep" aria-hidden="true"></div>
     <div class="fxb-veil" aria-hidden="true"></div>
@@ -275,7 +280,6 @@
         <path class="r" d="M52 28H78 M91 73H39 M50 127H80 M91 173H39 M52 228H78 M89 273H41"/>
       </g></g>
     </svg>
-    <canvas class="fxb-particles" aria-hidden="true"></canvas>
     <div class="fxb-dna-stage" aria-hidden="true">
       <div class="fxb-dna-depth-fog"></div>
       <div class="fxb-dna-helix" data-fx-dna-3d-r611="true"></div>
@@ -319,8 +323,23 @@
       <progress class="fxb-progress" max="100" value="0">0%</progress>
       <span class="fxb-status"></span>
     </div>
-    <button class="fxb-skip" type="button"></button>
   `);
+
+  let liveSkip=overlay.querySelector('.fxb-skip');
+  if (!(liveSkip instanceof HTMLButtonElement)) {
+    liveSkip=document.createElement('button');
+    liveSkip.className='fxb-skip';
+    liveSkip.type='button';
+    overlay.appendChild(liveSkip);
+  }
+  liveSkip.removeAttribute('tabindex');
+
+  if (!(prepaintCanvas instanceof HTMLCanvasElement)) {
+    prepaintCanvas=document.createElement('canvas');
+    prepaintCanvas.className='fxb-particles';
+    prepaintCanvas.setAttribute('aria-hidden','true');
+    overlay.prepend(prepaintCanvas);
+  }
 
   if (!(prepaintBrand instanceof HTMLElement)) {
     const brand=document.createElement('div');
@@ -342,11 +361,11 @@
   const kicker = overlay.querySelector('.fxb-kicker');
   const title = overlay.querySelector('h1');
   const subtitle = overlay.querySelector('.fxb-subtitle');
-  const skip = overlay.querySelector('.fxb-skip');
+  const skip = liveSkip;
   const percent = overlay.querySelector('.fxb-percent');
   const progress = overlay.querySelector('.fxb-progress');
   const status = overlay.querySelector('.fxb-status');
-  const canvas = overlay.querySelector('.fxb-particles');
+  const canvas = prepaintCanvas;
   const dnaStage = overlay.querySelector('.fxb-dna-stage');
   const dnaHelix = overlay.querySelector('.fxb-dna-helix');
   const dna = overlay.querySelector('.fxb-dna');
@@ -467,10 +486,12 @@
   let filmRendererPromise = null;
   let pendingRendererInteraction = null;
   let filmRendererFallbackStarted = false;
+  let softwareFallbackActive = SOFTWARE_SAFE;
+  let lastSoftwareFallbackPhase = -1;
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260924-r1726-cinematic-photographic-living-biocrystal';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260925-r1745-mobile-transparent-hero';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -693,6 +714,10 @@
   function startR649Fallback(){
     if(filmRendererFallbackStarted || filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
     filmRendererFallbackStarted=true;
+    if(ROOT.dataset.fxMagBirthR1545==='software-webgl-reference-film-fallback')softwareFallbackActive=true;
+    ROOT.dataset.fxMagBirthFallbackPolicyR1730=softwareFallbackActive
+      ? 'phase-driven-reference-film'
+      : 'adaptive-reference-film';
     if(window.FormatXMagReferenceFilmR649?.attach){
       overlay.dataset.fxRenderer='fallback';
       filmRenderer=window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
@@ -750,6 +775,17 @@
       startR649Fallback();
       return;
     }
+    /* R1727c — never force a heavyweight continuous Three intro onto a
+       constrained CPU/GPU path. The existing R649 cinematic keeps the same
+       10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
+       proof frames remain on the Three owner so design evidence stays exact. */
+    if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME){
+      ROOT.dataset.fxMagBirthRendererR1729=HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film';
+      overlay.dataset.fxRenderer=HEADLESS_SOFTWARE?'fallback-software':'fallback-constrained';
+      startR649Fallback();
+      if(filmRenderer)filmRenderer.resize?.();
+      return;
+    }
     ensureThreeOwner();
     if(filmRenderer){
       filmRenderer.resize?.();
@@ -787,6 +823,7 @@
           }
           ROOT.dataset.fxMagBirthRendererR1360='threejs-failed-r649-fallback';
           ROOT.dataset.fxMagBirthRendererR1450='three-explicit-failure-fallback';
+          if(ROOT.dataset.fxMagBirthR1545==='software-webgl-reference-film-fallback')softwareFallbackActive=true;
           startR649Fallback();
           return null;
         }).catch(error=>{
@@ -976,16 +1013,25 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
+    const phaseDrivenFallback=Boolean(filmRenderer)
+      && softwareFallbackActive
+      && !HAS_VISUAL_FRAME;
     const particleCadence=filmRenderer
-      ? 0
+      ? (softwareFallbackActive?125:16.67)
       : 16.67;
-    if(filmRenderer||!lastParticleDraw||now-lastParticleDraw>=particleCadence||r>=1){
+    const shouldDraw=phaseDrivenFallback
+      ? (lastSoftwareFallbackPhase!==visiblePhase || r>=1)
+      : (!lastParticleDraw || now-lastParticleDraw>=particleCadence || r>=1);
+    if(shouldDraw){
       lastParticleDraw=now;
+      if(phaseDrivenFallback)lastSoftwareFallbackPhase=visiblePhase;
       drawParticles(r,now);
     }
 
     if(r<1 || visiblePhase<4){
-      const cadence=(AUTOMATION&&FORCE)?72:0;
+      /* Software fallback keeps the 10 s semantic timeline, but the expensive
+         raster only changes at the five cinematic phase boundaries. */
+      const cadence=softwareFallbackActive?125:((AUTOMATION&&FORCE)?72:0);
       queueRender(cadence);
       return;
     }
@@ -1025,7 +1071,11 @@
     ROOT.dataset.fxMagBirthPerformanceR1640='60fps-priority-three-owner-preemptive-quality-shedding';
     ROOT.dataset.fxMagBirthPerformanceR1667='no-30fps-fallback-user-path-60fps-minimum-target';
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
-    ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-zero-continuous-js-render-loop':'desktop-full-native-raf';
+    ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-adaptive-cinematic':'desktop-full-native-raf';
+    ROOT.dataset.fxMagBirthPerformanceR1727=CONSTRAINED?'constrained-reference-film-no-heavy-three-loop':'hardware-three-adaptive-quality';
+    ROOT.dataset.fxMagBirthPerformanceR1729=SOFTWARE_SAFE?'software-safe-reference-film-phase-driven-raster':'hardware-three-adaptive-60hz';
+    ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
+    ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';

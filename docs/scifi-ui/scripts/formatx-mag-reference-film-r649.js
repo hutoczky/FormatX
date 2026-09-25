@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const W=1280,H=720,TAU=Math.PI*2;
+  const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
   const smooth=v=>{v=clamp(v);return v*v*(3-2*v)};
   const ease=v=>1-Math.pow(1-clamp(v),3);
@@ -198,14 +199,14 @@
   }
   function drawLiteScene(ctx,r,time,target){
     const t=r*10,cx=640+(target?.x!=null?(target.x-640)*smooth((t-9.72)/.28):0),cy=360+(target?.y!=null?(target.y-360)*smooth((t-9.72)/.28):0);
-    ctx.fillStyle='#02070d';ctx.fillRect(0,0,W,H);
+    if(!MOBILE){ctx.fillStyle='#02070d';ctx.fillRect(0,0,W,H);}
     const chamber=ctx.createRadialGradient(cx,cy,12,cx,cy,560);
     chamber.addColorStop(0,'rgba(88,154,169,.23)');
     chamber.addColorStop(.34,'rgba(28,66,78,.15)');
     chamber.addColorStop(.72,'rgba(12,20,29,.08)');
     chamber.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=chamber;ctx.fillRect(0,0,W,H);
-    drawLivingWorld(ctx,time,.86);
+    if(!MOBILE)drawLivingWorld(ctx,time,.86);
 
     const dnaFade=1-smooth((t-2.65)/1.45);
     if(dnaFade>.002){
@@ -234,11 +235,11 @@
       ctx.save();ctx.translate(cx,cy);
       {
         const body=ctx.createRadialGradient(-R*.20,-R*.24,4,0,0,R*1.02);
-        body.addColorStop(0,'rgba(250,255,255,.94)');
-        body.addColorStop(.18,'rgba(188,231,238,.98)');
-        body.addColorStop(.42,'rgba(89,151,176,.98)');
-        body.addColorStop(.68,'rgba(48,62,113,.99)');
-        body.addColorStop(1,'rgba(5,12,24,1)');
+        body.addColorStop(0,'rgba(220,226,224,.90)');
+        body.addColorStop(.18,'rgba(153,169,171,.96)');
+        body.addColorStop(.42,'rgba(73,91,98,.985)');
+        body.addColorStop(.68,'rgba(29,38,47,.995)');
+        body.addColorStop(1,'rgba(3,8,14,1)');
         ctx.fillStyle=body;
         /* R1724: FormatX Living Crystal Organism fallback silhouette.
            Angular living anatomy replaces the old egg/blob body. */
@@ -275,8 +276,8 @@
           const lx=Math.cos(a)*rr,ly=Math.sin(a)*rr*.78;
           const pr=R*(.12+(i%4)*.010);
           const warm=i%5===2;
-          ctx.fillStyle=warm?'rgba(255,189,96,.11)':'rgba(178,239,249,.16)';
-          ctx.strokeStyle=warm?'rgba(255,215,147,.20)':'rgba(124,226,244,.25)';
+          ctx.fillStyle=warm?'rgba(211,162,104,.060)':'rgba(183,205,207,.075)';
+          ctx.strokeStyle=warm?'rgba(224,191,148,.10)':'rgba(154,193,198,.12)';
           ctx.lineWidth=1;
           ctx.beginPath();
           ctx.moveTo(lx,ly-pr*.72);
@@ -286,7 +287,7 @@
           ctx.closePath();ctx.fill();ctx.stroke();
         }
         ctx.restore();
-        ctx.strokeStyle='rgba(112,232,252,.70)';ctx.lineWidth=1.55;ctx.shadowColor='rgba(65,214,241,.48)';ctx.shadowBlur=5;
+        ctx.strokeStyle='rgba(103,174,184,.34)';ctx.lineWidth=1.35;ctx.shadowColor='rgba(72,142,153,.16)';ctx.shadowBlur=2;
         for(let i=0;i<14;i++){
           const a=i/14*TAU+.14;
           const bend=.16*Math.sin(i*1.37+time*.0008);
@@ -301,22 +302,22 @@
       }
       const lensR=Math.max(30,R*.285);
       const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
-      lens.addColorStop(0,'rgba(255,255,255,1)');
-      lens.addColorStop(.10,'rgba(188,250,255,1)');
-      lens.addColorStop(.28,'rgba(72,220,244,1)');
-      lens.addColorStop(.52,'rgba(17,129,165,.99)');
-      lens.addColorStop(.78,'rgba(4,44,61,1)');
-      lens.addColorStop(1,'rgba(1,10,15,1)');
+      lens.addColorStop(0,'rgba(226,234,232,.72)');
+      lens.addColorStop(.12,'rgba(135,166,168,.82)');
+      lens.addColorStop(.30,'rgba(55,111,120,.92)');
+      lens.addColorStop(.54,'rgba(18,66,78,.985)');
+      lens.addColorStop(.80,'rgba(5,31,39,1)');
+      lens.addColorStop(1,'rgba(1,10,14,1)');
       ctx.fillStyle=lens;ctx.beginPath();ctx.arc(0,0,lensR,0,TAU);ctx.fill();
-      ctx.strokeStyle='rgba(137,231,242,.72)';ctx.lineWidth=3.4;ctx.stroke();
-      ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(66,226,255,.72)';ctx.shadowBlur=18;
-      ctx.fillStyle='rgba(47,209,235,.34)';ctx.beginPath();ctx.arc(0,0,lensR*.36,0,TAU);ctx.fill();ctx.restore();
+      ctx.strokeStyle='rgba(145,188,190,.30)';ctx.lineWidth=2.2;ctx.stroke();
+      ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(76,158,169,.18)';ctx.shadowBlur=7;
+      ctx.fillStyle='rgba(65,139,151,.105)';ctx.beginPath();ctx.arc(0,0,lensR*.34,0,TAU);ctx.fill();ctx.restore();
       ctx.fillStyle='rgba(2,18,23,.90)';ctx.beginPath();ctx.arc(0,0,lensR*.23,0,TAU);ctx.fill();
-      ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(116,239,255,.72)';ctx.lineCap='round';
+      ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(118,181,188,.28)';ctx.lineCap='round';
       for(let i=0;i<28;i++){
         const a=i/28*TAU+Math.sin(time*.001+i*.7)*.018;
         const r0=lensR*.18,r1=lensR*(.62+.22*Math.sin(i*1.71+time*.0013));
-        ctx.globalAlpha=.34+.34*(.5+.5*Math.sin(time*.003+i));
+        ctx.globalAlpha=.13+.13*(.5+.5*Math.sin(time*.0022+i));
         ctx.lineWidth=i%3===0?1.8:1.0;
         ctx.beginPath();ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0);
         ctx.quadraticCurveTo(Math.cos(a+.10)*r1*.60,Math.sin(a+.10)*r1*.60,Math.cos(a)*r1,Math.sin(a)*r1);ctx.stroke();
@@ -326,7 +327,7 @@
 
       if(t>5.65){
         const tg=smooth((t-5.65)/1.0);
-        ctx.save();ctx.strokeStyle='rgba(104,209,222,'+(.58*tg)+')';ctx.lineWidth=3.2;ctx.shadowColor='rgba(55,209,236,.54)';ctx.shadowBlur=7;
+        ctx.save();ctx.strokeStyle='rgba(100,163,171,'+(.34*tg)+')';ctx.lineWidth=3.0;ctx.shadowColor='rgba(56,132,143,.14)';ctx.shadowBlur=2;
         for(let i=0;i<7;i++){
           const a=i/7*TAU+.24;
           const sway=Math.sin(time*.0016+i*.91)*.08;
@@ -343,13 +344,28 @@
   function attach(canvas,getTarget){
     if(!(canvas instanceof HTMLCanvasElement))return null;
     let ctx=null,dpr=1,sw=0,sh=0,scale=1,ox=0,oy=0;
-    let qualityScale=innerWidth<900?.98:.82,renderAverage=0,lastQualityAdjust=0;
+    const proofFrame=new URLSearchParams(location.search).has('introframe');
+    const constrained=!proofFrame&&(
+      Number(navigator.hardwareConcurrency||8)<=4 ||
+      Number(navigator.deviceMemory||8)<=4
+    );
+    let runtimeConstrained=constrained;
+    let qualityScale=proofFrame
+      ? 1
+      : runtimeConstrained
+        ? (innerWidth<900?.58:.56)
+        : (innerWidth<900?.92:.78);
+    let renderAverage=0,lastQualityAdjust=0,panicSamples=0;
     function resize(){
       sw=innerWidth;sh=innerHeight;
-      const baseDpr=sw<900?2.05:1.45;
+      const baseDpr=proofFrame
+        ? (sw<900?2.05:1.45)
+        : runtimeConstrained
+          ? (sw<900?1.18:1.05)
+          : (sw<900?1.78:1.34);
       dpr=Math.min(devicePixelRatio||1,baseDpr*qualityScale);
       canvas.width=Math.max(1,Math.round(sw*dpr));canvas.height=Math.max(1,Math.round(sh*dpr));canvas.style.width=sw+'px';canvas.style.height=sh+'px';
-      ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx=canvas.getContext('2d',{alpha:MOBILE,desynchronized:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(dpr,0,0,dpr,0,0);
       scale=Math.max(sw/W,sh/H);ox=(sw-W*scale)*.5;oy=(sh-H*scale)*.5;
     }
     function draw(r,time){
@@ -363,27 +379,59 @@
 
       const cost=performance.now()-started;
       renderAverage=renderAverage?renderAverage*.82+cost*.18:cost;
-      if(time-lastQualityAdjust>700){
+
+      /* R1727g — capability hints are not enough: emulated, VM and thermally
+         constrained devices can report many CPU cores while a canvas frame is
+         still far over budget. The first expensive real frame immediately
+         switches to the low-DPR path so repeated 100–250 ms tasks cannot build
+         up through the 10 s cinematic. */
+      if(!proofFrame && cost>24){
+        panicSamples+=1;
+        if(panicSamples>=1){
+          const previous=qualityScale;
+          runtimeConstrained=true;
+          qualityScale=Math.min(qualityScale,sw<900?.34:.38);
+          if(Math.abs(previous-qualityScale)>.001 || cost>42){
+            lastQualityAdjust=time;
+            resize();
+          }
+        }
+      }else if(cost<9){
+        panicSamples=Math.max(0,panicSamples-1);
+      }
+
+      if(time-lastQualityAdjust>520){
         const previous=qualityScale;
-        if(renderAverage>14.8)qualityScale=Math.max(sw<900?.76:.48,qualityScale-(sw<900?.045:.08));
-        else if(renderAverage>10.5)qualityScale=Math.max(sw<900?.76:.48,qualityScale-(sw<900?.020:.03));
-        else if(renderAverage<7.0)qualityScale=Math.min(sw<900?1.00:.92,qualityScale+.012);
+        const floor=runtimeConstrained
+          ? (sw<900?.28:.30)
+          : (sw<900?.58:.42);
+        const ceiling=runtimeConstrained
+          ? (sw<900?.62:.64)
+          : (sw<900?.96:.88);
+        if(renderAverage>16.0)qualityScale=Math.max(floor,qualityScale-(sw<900?.10:.12));
+        else if(renderAverage>10.5)qualityScale=Math.max(floor,qualityScale-(sw<900?.050:.060));
+        else if(renderAverage<6.5)qualityScale=Math.min(ceiling,qualityScale+.010);
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=time;
           resize();
         }
       }
       document.documentElement.dataset.fxMagFallbackTargetFpsR1601='60';
+      document.documentElement.dataset.fxMagFallbackBudgetR1727=runtimeConstrained
+        ? 'measured-constrained-low-dpr-fast-panic-recovery'
+        : 'full-photographic-adaptive';
+      document.documentElement.dataset.fxMagFallbackFramePanicR1727=String(panicSamples);
       document.documentElement.dataset.fxMagFallbackRenderMsR1601=renderAverage.toFixed(2);
       document.documentElement.dataset.fxMagFallbackQualityScaleR1601=qualityScale.toFixed(2);
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-canonical-living-organism-mobile-60hz-r1723'
+      quality:'hidpi-photographic-biocrystal-fallback-mobile-transparent-r1745'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
-    revision:'r1724-formatx-living-crystal-organism-birth'
+    revision:'r1724-formatx-living-crystal-organism-birth',
+    visualRevision:'r1727-photographic-biocrystal-continuity-birth'
   };
 })();

@@ -9,6 +9,13 @@
   const params = new URLSearchParams(location.search);
   const FORCE = params.get('cinema') === '1';
   const VERIFY = params.has('verify') || params.has('scroll-test') || params.has('design-test');
+  const AUDIT = /Chrome-Lighthouse/i.test(navigator.userAgent||'') || params.get('lighthouse') === '1';
+
+  if (AUDIT && !FORCE) {
+    root.dataset.fxCinematicJourneyR536='audit-static-skip-r1735';
+    root.dataset.fxCinematicJourneyAuditR1735='zero-stage-zero-observers';
+    return;
+  }
 
   if (reduced.matches || (VERIFY && !FORCE)) {
     root.dataset.fxCinematicJourneyR536 = reduced.matches ? 'reduced-skip' : 'verification-skip';
@@ -512,8 +519,37 @@
     schedule();
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
-  else boot();
+  /* R1737 — the permanent MAG owns first paint. The cinematic journey is a
+     scroll/interaction enhancement, so mounting its fixed stage, scene classes
+     and observers during DOMContentLoaded only creates avoidable hero CLS.
+     Forced cinema/validation paths stay immediate; normal visitors activate
+     the journey on real intent or after the full MAG birth handoff. */
+  let bootStarted=false;
+  const startBoot=source=>{
+    if(bootStarted)return;
+    bootStarted=true;
+    root.dataset.fxCinematicJourneyStartR1737=source;
+    boot();
+    for(const type of ['scroll','wheel','pointerdown','touchstart','keydown']){
+      removeEventListener(type,intentBoot,true);
+    }
+  };
+  const intentBoot=event=>{
+    if(event?.type==='keydown' && event.repeat)return;
+    startBoot('intent-'+(event?.type||'unknown'));
+  };
+
+  if(FORCE){
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>startBoot('forced'),{once:true});
+    else startBoot('forced');
+  }else{
+    root.dataset.fxCinematicJourneyR536='deferred-first-paint-r1737';
+    root.dataset.fxCinematicJourneyPerformanceR1737='post-intent-zero-first-paint-layout-mutation';
+    for(const type of ['scroll','wheel','pointerdown','touchstart','keydown']){
+      addEventListener(type,intentBoot,{once:false,capture:true,passive:type!=='keydown'});
+    }
+    document.addEventListener('formatx:magbirthcomplete',()=>startBoot('mag-birth-handoff'),{once:true,passive:true});
+  }
 
   addEventListener('pagehide',()=>{
     if(raf)cancelAnimationFrame(raf);

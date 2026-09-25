@@ -44,15 +44,15 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260924-r1726-cinematic-photographic-living-biocrystal';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260925-r1741-lighthouse-static-shell';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260924-r1726-cinematic-photographic-living-biocrystal';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260924-r1727b-photographic-audit-stable';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260924-r1723-canonical-organism';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260924-r1722-zero-blur-hidpi';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260920-r629-deterministic-semantic-sweep';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
-const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260924-r1711-complete-open-geometry';
+const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260925-r1729-explicit-open-owner';
 const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260924-r1723-canonical-organism';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
@@ -93,11 +93,25 @@ function warmCriticalOwners(){
   warmAsset(MAG_SHAPE_SYNC,'script');
 }
 function ensureDialogueSurface(){
+  const activate=link=>{
+    if(!(link instanceof HTMLLinkElement))return false;
+    link.media='all';
+    link.dataset.fxR487Media='all';
+    link.removeAttribute('data-fx-r487-deferred-style');
+    return true;
+  };
+  const openStyle=document.querySelector('link[data-fx-dialogue-open-critical-r1727]');
+  activate(openStyle);
   let link=document.querySelector('link[data-fx-dialogue-surface-r475]');
-  if(link instanceof HTMLLinkElement){root.dataset.fxDialogueSurfaceR475=link.sheet?'ready':'loading';return;}
+  if(link instanceof HTMLLinkElement){
+    activate(link);
+    root.dataset.fxDialogueSurfaceR475=link.sheet?'ready':'loading';
+    return;
+  }
   link=document.createElement('link');
   link.rel='stylesheet';
   link.href=DIALOGUE_STYLE;
+  link.media='all';
   link.dataset.fxDialogueSurfaceR475='true';
   link.addEventListener('load',()=>{root.dataset.fxDialogueSurfaceR475='ready';},{once:true});
   link.addEventListener('error',()=>{root.dataset.fxDialogueSurfaceR475='load-failed';},{once:true});
