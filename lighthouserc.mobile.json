@@ -3,7 +3,7 @@
     "collect": {
       "staticDistDir": "./docs",
       "url": [
-        "./scifi-ui/index.html?lighthouse=1"
+        "./scifi-ui/index.html"
       ],
       "numberOfRuns": 3,
       "settings": {
