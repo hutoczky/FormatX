@@ -18,10 +18,14 @@ function clearBlockers(){
 
 function ownOpenState(){
   queued=false;
-  const shell=document.querySelector('.fx-organism-dialogue');
-  const bubble=shell?.querySelector('.fx-organism-thought');
-  const open=root.dataset.fxOrganismThought==='open'||shell?.classList.contains('is-open');
-  if(!(shell instanceof HTMLElement)||!(bubble instanceof HTMLElement))return false;
+  const shells=[...document.querySelectorAll('.fx-organism-dialogue')].filter(node=>node instanceof HTMLElement);
+  const shell=shells.find(node=>node.dataset.fxOrganismDialogue==='ready-v4')||shells.at(-1)||null;
+  if(!(shell instanceof HTMLElement))return false;
+  for(const stale of shells){if(stale!==shell)stale.remove();}
+  const bubble=shell.querySelector('.fx-organism-thought');
+  const open=root.dataset.fxOrganismThought==='open'||shell.classList.contains('is-open');
+  if(!(bubble instanceof HTMLElement))return false;
+  root.dataset.fxDialogueSingletonR1741='canonical-single-instance';
 
   /* r319: CSS is the sole render-geometry owner. The previous generation wrote
      inline display/visibility/opacity/transform declarations, which strict
