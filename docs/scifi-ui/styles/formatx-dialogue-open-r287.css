@@ -33,3 +33,53 @@ html[data-fx-organism-thought="open"] body .fx-organism-dialogue.is-open .fx-org
     transition:none!important;
   }
 }
+
+/* R1748 — P0 explicit-open geometry is independent of DOM promotion timing.
+   The render owner adds this class synchronously after canonical ASK opens. */
+html body .fx-organism-dialogue.fx-dialogue-render-owner-open-r319.is-open{
+  position:fixed!important;
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  right:clamp(16px,2.4vw,34px)!important;
+  bottom:max(94px,calc(env(safe-area-inset-bottom) + 82px))!important;
+  left:auto!important;
+  width:min(380px,calc(100vw - 32px))!important;
+  min-width:0!important;
+  max-width:calc(100vw - 32px)!important;
+  min-height:0!important;
+  max-height:calc(100dvh - 116px)!important;
+  overflow:visible!important;
+  pointer-events:none!important;
+  transform:none!important;
+  clip:auto!important;
+  clip-path:none!important;
+  z-index:2147481600!important;
+}
+html body .fx-organism-dialogue.fx-dialogue-render-owner-open-r319.is-open .fx-organism-thought:not([hidden]){
+  box-sizing:border-box!important;
+  position:relative!important;
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:180px!important;
+  max-height:min(68dvh,570px)!important;
+  overflow:auto!important;
+  pointer-events:auto!important;
+  transform:none!important;
+  clip:auto!important;
+  clip-path:none!important;
+}
+@media(max-width:820px),(pointer:coarse){
+  html body .fx-organism-dialogue.fx-dialogue-render-owner-open-r319.is-open{
+    right:max(12px,env(safe-area-inset-right))!important;
+    bottom:max(20px,calc(env(safe-area-inset-bottom) + 16px))!important;
+    left:max(12px,env(safe-area-inset-left))!important;
+    width:auto!important;
+    max-width:none!important;
+    max-height:calc(100dvh - 32px)!important;
+  }
+}
+/* production-r1748-dialogue-render-owner-open-geometry */
