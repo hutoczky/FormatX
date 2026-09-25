@@ -131,13 +131,19 @@ html[data-fx-mag-birth-live="active"] #fx-mag-birth-prepaint-r1606>.fxb-lcp-bran
 /* production-r1615-prepaint-important-owner */
 
 
-/* R1618 — cinematic overlays must never become the page's delayed LCP owner.
-   The photoreal canvas remains visible; canonical page text keeps first-paint
-   ownership behind it and therefore does not shift at handoff. */
+/* R1730 — keep canonical page geometry fully laid out while the fixed
+   cinematic owns the viewport, but suppress its paint. Geometry can settle
+   behind the intro without contributing visible layout shifts; handoff only
+   restores paint and does not add/remove document boxes. */
 html[data-fx-mag-birth-live="active"] body>#main-content,
-html[data-fx-mag-birth-live="active"] body>.topbar{
-  visibility:visible!important;
-  opacity:1!important;
+html[data-fx-mag-birth-live="active"] body>.topbar,
+html[data-fx-mag-birth-live="active"] body>.fx-rail,
+html[data-fx-mag-birth-live="active"] body>.fx-organism-status,
+html[data-fx-mag-birth-live="active"] body>footer.site-footer,
+html[data-fx-mag-birth-live="active"] body>#fx-apex-canvas,
+html[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
+  visibility:hidden!important;
+  opacity:0!important;
 }
 #fx-mag-birth-prepaint-r1606>.fxb-lcp-brand-r1603,
 .fx-mag-birth-r533>.fxb-lcp-brand-r1603{
@@ -177,3 +183,6 @@ html[data-fx-mag-birth-live="active"] body>.topbar{
    viewport geometry before and after the live intro runtime adopts the shell. */
 /* production-r1727d-parser-canvas-zero-appearance-cls */
 
+
+
+/* production-r1730-fixed-intro-hidden-underlay-zero-visible-cls */
