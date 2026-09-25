@@ -518,3 +518,32 @@ html:root:root body.living-architecture #hero .hero-space::after{
   }
 }
 /* production-r1741-single-environment-owner-zero-pseudo-cls */
+
+
+/* R1742 — global background pseudos were the remaining desktop CLS owner.
+   Their deferred R616/R1530 geometry changed after first paint. The real
+   living-habitat canvas plus the body background now own the same world depth. */
+html:root:root:root:root:root:root:root:root:root:root:root:root body.living-architecture::before,
+html:root:root:root:root:root:root:root:root:root:root:root:root body.living-architecture::after{
+  content:none!important;
+  display:none!important;
+  position:fixed!important;
+  inset:0!important;
+  width:0!important;
+  height:0!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
+/* production-r1742-canvas-only-global-environment-owner */
