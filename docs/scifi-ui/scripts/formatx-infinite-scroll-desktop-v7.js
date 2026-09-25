@@ -912,16 +912,29 @@
           0,
           loopGeometry.sourceHeight||stableDesktopSourceHeight||sourceHero?.offsetHeight||0
         );
+        const eventReachableThreshold=Number(
+          loopGeometry.ready && Number.isFinite(loopGeometry.bridgeThreshold)
+            ? loopGeometry.bridgeThreshold
+            : eventBridgeTop
+        );
         root.dataset.fxLoopGesturePreScrollBridgeTopR1729=String(Math.round(eventBridgeTop));
+        root.dataset.fxLoopGesturePreScrollThresholdR1737=Number.isFinite(eventReachableThreshold)
+          ? String(Math.round(eventReachableThreshold))
+          : 'unavailable';
         if(Number.isFinite(eventBridgeTop)){
           desktopGestureAnchorY=scrollY;
           desktopGestureAnchorRelative=scrollY-eventBridgeTop;
           const projected=desktopGestureAnchorRelative;
-          pendingDesktopRelative=projected>=-2
-            ? Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)))
+          const reachedReachableBoundary=Number.isFinite(eventReachableThreshold)
+            && scrollY>=Math.max(0,eventReachableThreshold-2);
+          desktopGestureBoundaryLatched=projected>=-2||reachedReachableBoundary;
+          pendingDesktopRelative=desktopGestureBoundaryLatched
+            ? Math.max(0,Math.min(projected>=-2?projected:0,Math.max(0,eventSourceHeight-2)))
             : null;
-          desktopGestureBoundaryLatched=projected>=-2;
           root.dataset.fxLoopGestureGeometryR1729='pre-materialisation-idle-snapshot';
+          root.dataset.fxLoopGestureBoundaryR1737=reachedReachableBoundary
+            ? 'reachable-threshold-latched-before-tail-materialisation'
+            : (projected>=-2?'physical-bridge-latched':'not-reached');
           root.dataset.fxLoopGestureRelativeR1729=String(Math.round(projected));
         }
       }else{
