@@ -186,3 +186,48 @@ html[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
 
 
 /* production-r1730-fixed-intro-hidden-underlay-zero-visible-cls */
+
+
+/* R1743 — the parser-owned skip control keeps its final fixed geometry before
+   the intro runtime adopts the shell. No 0x0 -> button-size layout transition. */
+#fx-mag-birth-prepaint-r1606 > .fxb-skip,
+.fx-mag-birth-r533 > .fxb-skip{
+  position:absolute!important;
+  top:max(18px,env(safe-area-inset-top))!important;
+  right:max(18px,env(safe-area-inset-right))!important;
+  z-index:70!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  width:auto!important;
+  min-width:92px!important;
+  height:46px!important;
+  min-height:46px!important;
+  max-height:46px!important;
+  margin:0!important;
+  padding:0 18px!important;
+  border:1px solid rgba(175,220,225,.24)!important;
+  border-radius:999px!important;
+  color:rgba(235,248,249,.82)!important;
+  background:rgba(3,9,12,.52)!important;
+  font:700 12px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  letter-spacing:.10em!important;
+  text-transform:uppercase!important;
+  pointer-events:auto!important;
+  transform:none!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  #fx-mag-birth-prepaint-r1606 > .fxb-skip,
+  .fx-mag-birth-r533 > .fxb-skip{
+    top:max(14px,env(safe-area-inset-top))!important;
+    right:max(14px,env(safe-area-inset-right))!important;
+    min-width:86px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    padding:0 15px!important;
+    font-size:11px!important;
+  }
+}
+/* production-r1743-parser-owned-skip-zero-cls */
