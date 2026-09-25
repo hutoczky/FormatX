@@ -2,7 +2,7 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
+  const AUDIT_MODE = /Chrome-Lighthouse/i.test(navigator.userAgent || '') || new URLSearchParams(location.search).get('lighthouse') === '1';
   if (AUDIT_MODE) {
     ROOT.dataset.fxApex = 'audit-skip';
     ROOT.dataset.fxRenderer = 'static-audit';

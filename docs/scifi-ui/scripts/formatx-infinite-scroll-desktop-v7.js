@@ -33,6 +33,8 @@
   let mobileSettleTimer = 0;
   let mobileUiRetryCount = 0;
   let desktopGuardRetryTimer = 0;
+  let tailMaterializeTask = 0;
+  let tailMaterializeScheduled = false;
   let pendingMobileRelative = null;
   let pendingDesktopRelative = null;
   let pendingDesktopSourceTop = null;
@@ -82,6 +84,7 @@
   root.dataset.fxLoopScrollEndContinuityR1731='latched-boundary-survives-fresh-geometry-reflow';
   root.dataset.fxLoopMobileContinuityR1733='cached-boundary-intent-survives-late-content-growth';
   root.dataset.fxLoopMobileContinuityR1734='latched-relative-never-cleared-by-null-reflow-frame';
+  root.dataset.fxLoopTailMaterializeR1746='idle-scheduled-no-forced-layout-in-scroll';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -882,10 +885,10 @@
     root.dataset.fxLoopLandingState = 'waiting-wheel-idle';
   }
 
-  function materializeDesktopLoopTail() {
+  function materializeDesktopLoopTailNow() {
+    tailMaterializeScheduled = false;
+    tailMaterializeTask = 0;
     if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || !bridge?.isConnected) return false;
-    const bridgeTop = Number(loopGeometry.ready ? loopGeometry.bridgeTop : bridge.offsetTop);
-    if (!Number.isFinite(bridgeTop) || scrollY < Math.max(0, bridgeTop - innerHeight * 6.5)) return false;
 
     document.querySelectorAll([
       '#main-content > section.scene:not(#hero)',
@@ -902,13 +905,29 @@
     });
 
     root.dataset.fxLoopTailMaterializedR1727 = 'ready';
-    /* Force this one intentional tail-layout realization before capturing the
-       boundary gesture. It happens several viewports before the bridge, not at
-       the handoff, so the bridge coordinate no longer changes under the user. */
-    void document.documentElement.offsetHeight;
-    refreshGeometry();
-    captureStableDesktopGeometry('desktop-tail-materialized-r1727');
-    root.dataset.fxLoopTailGeometryR1727 = String(Math.round(loopGeometry.bridgeTop));
+    root.dataset.fxLoopTailMaterializeR1746 = 'idle-outside-scroll-hot-path';
+    scheduleGeometryRefresh();
+    requestAnimationFrame(() => {
+      if(root.dataset.fxScrollActivity==='scrolling'||root.classList.contains('fx-seamless-loop-transfer'))return;
+      captureStableDesktopGeometry('desktop-tail-idle-materialized-r1746');
+      root.dataset.fxLoopTailGeometryR1727 = String(Math.round(loopGeometry.bridgeTop));
+    });
+    return true;
+  }
+
+  function materializeDesktopLoopTail() {
+    if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || tailMaterializeScheduled || !bridge?.isConnected) return false;
+    const bridgeTop = Number(loopGeometry.ready ? loopGeometry.bridgeTop : bridge.offsetTop);
+    if (!Number.isFinite(bridgeTop) || scrollY < Math.max(0, bridgeTop - innerHeight * 7.5)) return false;
+
+    tailMaterializeScheduled = true;
+    root.dataset.fxLoopTailMaterializeR1746 = 'scheduled-idle';
+    const run=()=>materializeDesktopLoopTailNow();
+    if('requestIdleCallback' in window){
+      tailMaterializeTask=requestIdleCallback(run,{timeout:260});
+    }else{
+      tailMaterializeTask=window.setTimeout(run,0);
+    }
     return true;
   }
 
