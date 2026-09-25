@@ -432,6 +432,7 @@
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
+    guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
     visualRevision:'r1727-photographic-biocrystal-continuity-birth'
   };
 })();

@@ -115,6 +115,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1723='zero-robotic-shell-one-cortical-living-organism';
       document.documentElement.dataset.fxMagBirthSilhouetteR1724='same-asymmetric-living-crystal-organism-as-hero';
       document.documentElement.dataset.fxMagBirthOrganismR1724='faceted-pearl-cyan-living-crystal-organism';
+      document.documentElement.dataset.fxMagBirthGuardianR1724='faceted-pearl-cyan-crystal-organic-guardian';
       document.documentElement.dataset.fxMagBirthCoreR1724='biocrystal-cartilage-cyan-energy-warm-rim';
       document.documentElement.dataset.fxMagBirthAnatomyR1724='same-rhombic-cortical-lobes-membranes-energy-core-as-hero';
       document.documentElement.dataset.fxMagBirthMotionR1724='energy-core-living-membranes-tendrils-interactive';
