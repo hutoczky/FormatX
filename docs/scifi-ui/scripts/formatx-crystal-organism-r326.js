@@ -739,7 +739,7 @@
 
     if(!auditMode){
       const centreX=.008,centreY=-.006;
-      const bezelInner=.168,bezelOuter=.238,bezelSteps=software?20:mobile?30:42,bezelZ=.635;
+      const bezelInner=.125,bezelOuter=.180,bezelSteps=software?20:mobile?30:42,bezelZ=.635;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.050:.038)*Math.sin(angle*3.0+.34)
@@ -763,7 +763,7 @@
       }
 
       const lensCenter=[centreX,centreY,.646];
-      const lensRadius=.198;
+      const lensRadius=.148;
       const lensDepth=.094;
       const radialSteps=software?4:mobile?5:8;
       const angularSteps=software?20:mobile?30:42;
@@ -1188,10 +1188,10 @@
         physicalLens+=vec3(.12,.28,.34)*fresnel*.18;
         physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
         physicalLens+=vec3(.050,.36,.48)*lensRing*(.10+.10*uEnergy);
-        physicalLens+=vec3(.84,.98,1.00)*lensHot*(.18+.08*uEnergy);
-        physicalLens+=vec3(.16,.72,.88)*electric*(.34+.28*uEnergy);
-        physicalLens+=vec3(.92,.99,1.00)*coreFlash*.56;
-        physicalLens+=vec3(1.00,.45,.10)*lensRing*(.10+.10*studioRibbonB);
+        physicalLens+=vec3(.72,.84,.86)*lensHot*(.080+.045*uEnergy);
+        physicalLens+=vec3(.12,.48,.56)*electric*(.18+.16*uEnergy);
+        physicalLens+=vec3(.78,.86,.86)*coreFlash*.24;
+        physicalLens+=vec3(.72,.36,.14)*lensRing*(.050+.055*studioRibbonB);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -1209,7 +1209,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.82),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(mineral*1.85),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1397,7 +1397,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.92),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(col*1.92),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
