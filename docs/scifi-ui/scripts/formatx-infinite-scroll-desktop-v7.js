@@ -68,6 +68,7 @@
   root.dataset.fxLoopGestureGeometryR1725='single-live-read-at-desktop-scroll-start-then-cache';
   root.dataset.fxLoopScrollEndContinuityR1731='latched-boundary-survives-fresh-geometry-reflow';
   root.dataset.fxLoopMobileContinuityR1733='cached-boundary-intent-survives-late-content-growth';
+  root.dataset.fxLoopMobileContinuityR1734='latched-relative-never-cleared-by-null-reflow-frame';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -824,12 +825,18 @@
     clearTimeout(activityTimer);
     activityTimer = window.setTimeout(markIdle, ACTIVITY_IDLE_MS);
 
-    if (relative == null) {
-      if (isMobileFlow()) {
-        pendingMobileRelative = null;
-        clearTimeout(mobileSettleTimer);
-        mobileSettleTimer = 0;
-      } else pendingDesktopRelative = null;
+    if(relative==null){
+      if(isMobileFlow()){
+        if(Number.isFinite(pendingMobileRelative)){
+          root.dataset.fxLoopMobileFrameLatchR1734='preserved-across-null-reflow-frame';
+          root.dataset.fxLoopLandingState=touchActive?'waiting-touch-end':'waiting-momentum-end';
+          scheduleMobileTransfer();
+        }else{
+          pendingMobileRelative=null;
+          clearTimeout(mobileSettleTimer);
+          mobileSettleTimer=0;
+        }
+      }else pendingDesktopRelative=null;
       return;
     }
 
