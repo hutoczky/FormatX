@@ -212,12 +212,39 @@ async function assertTwoLoopCycles(page, name) {
     });
 
     await page.evaluate(target => window.scrollTo({ top: target, left: 0, behavior: 'auto' }), before.target);
-    await page.waitForFunction(expected => (
-      Number(document.documentElement.dataset.fxLoopCount || 0) === expected
-      && document.documentElement.dataset.fxInfiniteInput === 'native'
-      && ['settled','heart-core-settled'].includes(document.documentElement.dataset.fxLoopLandingState)
-      && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
-    ), before.count + 1, { timeout: 12000 });
+    try {
+      await page.waitForFunction(expected => (
+        Number(document.documentElement.dataset.fxLoopCount || 0) === expected
+        && document.documentElement.dataset.fxInfiniteInput === 'native'
+        && ['settled','heart-core-settled'].includes(document.documentElement.dataset.fxLoopLandingState)
+        && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
+      ), before.count + 1, { timeout: 12000 });
+    } catch (error) {
+      const diag = await page.evaluate(() => ({
+        y: scrollY,
+        end: Math.max(0, document.documentElement.scrollHeight-innerHeight),
+        count: Number(document.documentElement.dataset.fxLoopCount || 0),
+        input: document.documentElement.dataset.fxInfiniteInput || '',
+        landingState: document.documentElement.dataset.fxLoopLandingState || '',
+        loopSource: document.documentElement.dataset.fxLoopSource || '',
+        bridgeState: document.documentElement.dataset.fxLoopBridge || '',
+        bridgeTop: document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]')?.offsetTop || 0,
+        sectionActive: document.documentElement.classList.contains('fx-section-navigation-active'),
+        sectionSettled: document.documentElement.dataset.fxSectionNavigationSettledR581 || '',
+        menuOpen: document.documentElement.classList.contains('fx-organism-menu-open'),
+        introRunning: document.documentElement.classList.contains('fx-intro-running'),
+        panelOpen: document.body.classList.contains('fx-organism-panel-open'),
+        pageScrolling: document.documentElement.classList.contains('fx-page-scrolling'),
+        transfer: document.documentElement.classList.contains('fx-seamless-loop-transfer'),
+        pendingPolicy: document.documentElement.dataset.fxLoopEndIntentPolicyR1724 || '',
+        endIntent: document.documentElement.dataset.fxLoopEndIntentR1724 || '',
+        desktopRecovery: document.documentElement.dataset.fxLoopDesktopRecoveryR1724 || '',
+        scrollEndRecovery: document.documentElement.dataset.fxLoopDesktopScrollEndRecoveryR1724 || '',
+        gestureRelative: document.documentElement.dataset.fxLoopGestureRelativeR1727 || '',
+        gestureGeometry: document.documentElement.dataset.fxLoopGestureGeometryR1727 || ''
+      }));
+      throw new Error(`${name}: loop cycle ${cycle} timeout: ${JSON.stringify({before,diag})} :: ${error.message}`);
+    }
 
     const after = await page.evaluate(() => ({
       count: Number(document.documentElement.dataset.fxLoopCount || 0),
