@@ -584,6 +584,9 @@
         root.dataset.fxInfiniteInput = 'native';
         root.dataset.fxLoopLandingState = 'settled';
         landingFrame = 0;
+        refreshGeometry();
+        captureStableDesktopGeometry('post-loop-landing');
+        root.dataset.fxLoopPostLandingGeometryR1727='refreshed';
       });
     });
   }
