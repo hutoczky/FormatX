@@ -10,7 +10,7 @@ root.dataset.fxSiteSensoryR1755='booting';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const coarse=matchMedia('(max-width:900px),(pointer:coarse)');
 const STYLE='/scifi-ui/styles/formatx-site-sensory-r1755.css?v=20260927-r1755-photoreal-60fps';
-let field=null,raf=0,actionTimer=0,lastX=innerWidth*.5,lastY=innerHeight*.38,lastScroll=scrollY||0;
+let field=null,raf=0,actionTimer=0,scrollSettleTimer=0,lastX=innerWidth*.5,lastY=innerHeight*.38,lastScroll=scrollY||0;
 const state={x:0,y:.12,vx:0,vy:0,energy:.18,press:0,scroll:0};
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
@@ -103,7 +103,16 @@ function onScroll(){
   state.scroll=clamp(current/range,0,1);
   state.vy=state.vy*.5+delta*.5;
   state.energy=Math.max(state.energy,.24+Math.abs(delta)*.18);
-  queue();
+  /* R1755c: the canonical MAG already consumes scroll as a physical stimulus.
+     Do not schedule a second visual frame here. Pause non-essential atmosphere
+     while scroll is hot, then restore it after the gesture settles. */
+  if(root.dataset.fxScrollPressureR1755!=='true')root.dataset.fxScrollPressureR1755='true';
+  clearTimeout(scrollSettleTimer);
+  scrollSettleTimer=setTimeout(()=>{
+    root.dataset.fxScrollPressureR1755='false';
+    state.energy=Math.max(.18,state.energy*.72);
+    queue();
+  },120);
 }
 function semantic(kind,energy){
   pulse(kind,energy);
@@ -134,7 +143,7 @@ ensureStyle();
 ensureField();
 root.dataset.fxSiteSensoryR1755='ready';
 root.dataset.fxSiteSensorySchedulerR1755='single-coalesced-raf-zero-idle';
-root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only';
+root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only-scroll-atmosphere-shed';
 root.dataset.fxSiteSensoryInputR1755='pointer-touch-scroll-wheel-key-focus-click-input-change-submit-orientation';
 
 addEventListener('pointermove',onPointerMove,{passive:true});
