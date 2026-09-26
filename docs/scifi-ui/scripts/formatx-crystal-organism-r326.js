@@ -1198,11 +1198,11 @@
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
         vec3 tendon=vec3(.006,.025,.036)+vec3(.07,.18,.24)*(.14*sideLight+.08*ndl+.46*fresnel);
-        tendon+=vec3(.030,.40,.62)*cableSegment*(.08+.08*uEnergy);
-        tendon+=vec3(.78,.96,1.00)*sideSpec*.20;
-        tendon+=vec3(.58,.88,.98)*softboxA*.16;
-        tendon+=vec3(.22,.64,.78)*edgeTransmission*.42;
-        tendon+=vec3(1.00,.48,.12)*studioRibbonB*(.11+.08*cableSegment);
+        tendon+=vec3(.018,.16,.21)*cableSegment*(.045+.045*uEnergy);
+        tendon+=vec3(.40,.47,.46)*sideSpec*.11;
+        tendon+=vec3(.30,.39,.40)*softboxA*.09;
+        tendon+=vec3(.10,.27,.31)*edgeTransmission*.20;
+        tendon+=vec3(.30,.19,.10)*studioRibbonB*(.040+.030*cableSegment);
         mineral=mix(mineral,tendon,tendrilMask*.995);
 
         if(uLayer>.5){
@@ -1377,16 +1377,16 @@
         float lensAngle=atan(lensVector.y,lensVector.x);
         float electric=pow(.5+.5*sin(lensAngle*12.0+lensRadial*72.0-uTime*2.0),16.0)*lensInner;
         float coreFlash=exp(-pow(lensRadial/.055,2.0))*(.66+.34*sin(uTime*3.8));
-        vec3 physicalLens=vec3(.010,.030,.038)
-          +vec3(.018,.095,.116)*(.28+.32*uEnergy)
-          +vec3(.94,1.00,.98)*softboxA*.24
-          +vec3(.48,.62,.66)*sideSpec*.14
-          +vec3(.12,.30,.36)*fresnel*.20
-          +vec3(.020,.19,.25)*lensInner*(.10+.10*uEnergy)
-          +vec3(.060,.42,.54)*lensRing*(.12+.12*uEnergy)
-          +vec3(.82,.98,1.00)*lensHot*(.24+.10*uEnergy)
-          +vec3(.16,.78,1.00)*electric*(.28+.26*uEnergy)
-          +vec3(.92,1.00,1.00)*coreFlash*.52;
+        vec3 physicalLens=vec3(.006,.014,.017)
+          +vec3(.010,.040,.048)*(.18+.20*uEnergy)
+          +vec3(.30,.34,.33)*softboxA*.075
+          +vec3(.18,.22,.23)*sideSpec*.045
+          +vec3(.038,.082,.092)*fresnel*.060
+          +vec3(.008,.045,.054)*lensInner*(.035+.040*uEnergy)
+          +vec3(.016,.072,.084)*lensRing*(.030+.035*uEnergy)
+          +vec3(.30,.35,.34)*lensHot*(.045+.025*uEnergy)
+          +vec3(.030,.105,.120)*electric*(.045+.040*uEnergy)
+          +vec3(.28,.33,.32)*coreFlash*.070;
         col=mix(col,physicalLens,lensMeshMask*.997);
 
         float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
