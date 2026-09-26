@@ -1,7 +1,19 @@
 (() => {
   'use strict';
 
+  /* R1755 — hard idempotence at the cinematic owner itself.
+     The production rescue bootstrap and the first-paint bootstrap may race on
+     DOMContentLoaded under CSP/network timing. Script-node presence alone is
+     not a sufficient ownership lock, so publish the latch synchronously before
+     any overlay/DNA DOM is created. A second execution becomes a strict no-op. */
+  if (window.__formatxMagBirthR533Owner === true) {
+    document.documentElement.dataset.fxMagBirthDuplicateGuardR1755 = 'blocked-second-execution';
+    return;
+  }
+  window.__formatxMagBirthR533Owner = true;
+
   const ROOT = document.documentElement;
+  ROOT.dataset.fxMagBirthDuplicateGuardR1755 = 'canonical-owner';
   const PARAMS = new URLSearchParams(location.search);
   const FORCE = PARAMS.get('intro') === '1';
   const VISUAL_PROOF = PARAMS.get('visualintro') === '1';
