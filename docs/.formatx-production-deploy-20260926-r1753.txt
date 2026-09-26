@@ -1,0 +1,7 @@
+FormatX production deployment trigger
+requested_at=2026-09-26
+source_master=bdfce6d51dc4a1e26493d8268b568d4d560d563f
+release_line=R1753
+purpose=deploy deterministic live forced-intro style ownership on top of the validated R1752 photoreal MAG/intro line
+visual=unchanged R1750/R1751 photoreal living biocrystal; R1753 only fixes forced live intro style ownership
+validation=PR296 all gates green including Lighthouse, P0 R533-R536 handoff, pure 3D MAG, canonical visual contracts, hero loop, production and public integrity
