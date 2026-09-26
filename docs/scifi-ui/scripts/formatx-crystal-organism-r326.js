@@ -133,6 +133,8 @@
   root.dataset.fxNativeMagMaterialR1727='compile-safe-facet-tones-neutral-subsurface-low-emission-studio-reflection';
   root.dataset.fxNativeMagVisualR1749='final-photographic-smoky-pearl-biocrystal-integrated-optic';
   root.dataset.fxNativeMagMaterialR1749='neutral-mineral-softbox-low-cyan-no-neon-rib-physical-smoked-glass';
+  root.dataset.fxNativeMagVisualR1754='dark-integrated-photographic-biocrystal-low-plate-low-optic-read';
+  root.dataset.fxNativeMagMaterialR1754='higher-roughness-smoky-mineral-reduced-ivory-low-cyan-physical-reflection';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -1031,7 +1033,7 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
         float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float microRoughness=mix(.16,.34,facetRand);
+        float microRoughness=mix(.22,.40,facetRand);
         float microD=distributionGGX(NoH,microRoughness);
         float microG=geometrySchlickGGX(NoV,microRoughness)*geometrySchlickGGX(max(ndl,.001),microRoughness);
         vec3 microF=fresnelSchlick(max(dot(halfKey,view),0.0),vec3(.039,.041,.043));
@@ -1091,18 +1093,18 @@
            irregular and organic; it is not a metallic armour texture. */
         float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.42+sin(vLocal.y*4.1)*.38);
         float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1+sin(vUv.x*8.2)*1.08);
-        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
-        plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
+        float plateMask=smoothstep(.67,.89,max(plateField,plateCross*.82))*bodyMask;
+        plateMask*=.42+.24*smoothstep(-.45,.82,n.z);
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
         float plateFacetTone=.90+.14*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.24,.31,.33)
-          +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
-          +vec3(.16,.25,.27)*fresnel*.18;
+        vec3 ivory=vec3(.17,.22,.23)
+          +vec3(.29,.31,.29)*(.18*ndl+.13*sideLight+.18*softboxA)
+          +vec3(.11,.18,.19)*fresnel*.13;
         ivory+=vec3(.54,.36,.24)*studioRibbonB*.050;
         mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
-        mineral=mix(mineral,ivory,plateMask*.58);
+        mineral=mix(mineral,ivory,plateMask*.42);
         mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
-        mineral+=vec3(.050,.275,.325)*vascular*(.11+.19*uEnergy);
+        mineral+=vec3(.044,.225,.260)*vascular*(.085+.155*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
 
         vec2 q=vLocal.xy;
@@ -1117,11 +1119,11 @@
 
         /* R1593 — a physical smoked-glass lens, not a glowing eye or HUD.
            Its shading is driven by the same studio reflections as the obsidian. */
-        vec2 lq=vec2((q.x+.012)*1.16,(q.y-.018)*.96);
+        vec2 lq=vec2((q.x+.018)*1.34,(q.y-.020)*.92);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.145,.205,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.092,.150,lensD))*front;
-        float lensCore=(1.0-smoothstep(.030,.067,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.126,.184,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.080,.132,lensD))*front;
+        float lensCore=(1.0-smoothstep(.024,.052,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensLower=exp(-pow((lq.x-.026)/.052,2.0)-pow((lq.y+.052)/.036,2.0))*lensGlass;
@@ -1138,7 +1140,7 @@
         mineral=mix(mineral,vec3(.0012,.0025,.0032),lensOuter*.62);
         mineral+=vec3(.20,.24,.24)*lensRim*(.022+.040*sideLight+.030*fresnel);
         mineral+=vec3(.012,.022,.025)*lensGlass*(.030+.035*softboxA+.030*sideSpec);
-        mineral+=vec3(.42,.47,.46)*lensHighlight*.060;
+        mineral+=vec3(.36,.40,.39)*lensHighlight*.042;
         mineral+=vec3(.10,.12,.12)*lensLower*.025;
         mineral+=vec3(.003,.009,.011)*lensCore*lensDepth*.020;
         mineral=mix(mineral,vec3(.010,.013,.016),ribs*.18);
