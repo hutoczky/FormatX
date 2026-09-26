@@ -2251,3 +2251,55 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1555-three-canvas-positive-stack */
 
 /* production-r1723-three-native-pixel-no-css-resample */
+
+
+/* ==========================================================================
+   FormatX R1756 — final cinematic habitat compositor.
+   The active Three.js film is transparent by design. Restore only the neutral
+   physical environment layers behind it; retired DNA/embryo proxies stay hidden.
+   ========================================================================== */
+.fx-mag-birth-r533[data-fx-intro-r650="three-genesis-dna-cellular-living"]:is(
+  [data-fx-renderer="three"],
+  [data-fx-renderer="three-loading"]
+){
+  background:rgba(1,5,8,.82)!important;
+}
+.fx-mag-birth-r533[data-fx-intro-r650="three-genesis-dna-cellular-living"]:is(
+  [data-fx-renderer="three"],
+  [data-fx-renderer="three-loading"]
+) :is(.fxb-deep,.fxb-veil,.fxb-stars){
+  display:block!important;
+  visibility:visible!important;
+}
+.fx-mag-birth-r533[data-fx-intro-r650="three-genesis-dna-cellular-living"]:is(
+  [data-fx-renderer="three"],
+  [data-fx-renderer="three-loading"]
+) .fxb-deep{
+  opacity:1!important;
+  background:
+    radial-gradient(ellipse at 42% 37%,rgba(101,153,159,.065),transparent 29%),
+    radial-gradient(ellipse at 76% 31%,rgba(184,137,91,.040),transparent 30%),
+    linear-gradient(180deg,rgba(3,9,12,.58),rgba(1,5,8,.82))!important;
+}
+.fx-mag-birth-r533[data-fx-intro-r650="three-genesis-dna-cellular-living"]:is(
+  [data-fx-renderer="three"],
+  [data-fx-renderer="three-loading"]
+) .fxb-veil{
+  opacity:.22!important;
+  background:
+    radial-gradient(ellipse at var(--fxb-x) var(--fxb-y),rgba(113,165,170,.060),transparent 31%),
+    linear-gradient(180deg,rgba(4,10,13,.16),rgba(1,5,8,.38))!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+.fx-mag-birth-r533[data-fx-intro-r650="three-genesis-dna-cellular-living"]:is(
+  [data-fx-renderer="three"],
+  [data-fx-renderer="three-loading"]
+) .fxb-stars{
+  opacity:.085!important;
+  filter:none!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="three"] > .fxb-particles{
+  background:transparent!important;
+}
+/* production-r1756-transparent-three-over-physical-habitat */
