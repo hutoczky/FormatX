@@ -1,0 +1,7 @@
+FormatX production deployment trigger
+requested_at=2026-09-26
+source_master=51b931cd6d1f51f94dc4c84bff056c706a7a86b1
+release_line=R1754
+purpose=deploy final photoreal intro/MAG world continuity after all-green PR298 validation
+visual=single asymmetric smoky-pearl living biocrystal; neutral low-chroma habitat; matched filmic intro; integrated non-eye fallback optic; validated permanent MAG shader unchanged
+validation=PR298 all 15 workflows green including Lighthouse desktop/mobile, P0 intro keyframes/CLS/hero/handoff, pure 3D MAG, canonical visual contracts, hero loop, organism interactions, production and public integrity
