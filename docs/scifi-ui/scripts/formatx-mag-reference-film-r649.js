@@ -301,6 +301,7 @@
         }
       }
       const lensR=Math.max(30,R*.285);
+      const lensRx=lensR*.82,lensRy=lensR*.66;
       const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
       lens.addColorStop(0,'rgba(226,234,232,.72)');
       lens.addColorStop(.12,'rgba(135,166,168,.82)');
@@ -308,19 +309,19 @@
       lens.addColorStop(.54,'rgba(18,66,78,.985)');
       lens.addColorStop(.80,'rgba(5,31,39,1)');
       lens.addColorStop(1,'rgba(1,10,14,1)');
-      ctx.fillStyle=lens;ctx.beginPath();ctx.arc(0,0,lensR,0,TAU);ctx.fill();
-      ctx.strokeStyle='rgba(145,188,190,.30)';ctx.lineWidth=2.2;ctx.stroke();
+      ctx.fillStyle=lens;ctx.beginPath();ctx.ellipse(-lensR*.025,lensR*.015,lensRx,lensRy,-.08,0,TAU);ctx.fill();
+      ctx.strokeStyle='rgba(145,188,190,.24)';ctx.lineWidth=1.8;ctx.stroke();
       ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(76,158,169,.18)';ctx.shadowBlur=7;
-      ctx.fillStyle='rgba(65,139,151,.105)';ctx.beginPath();ctx.arc(0,0,lensR*.34,0,TAU);ctx.fill();ctx.restore();
-      ctx.fillStyle='rgba(2,18,23,.90)';ctx.beginPath();ctx.arc(0,0,lensR*.23,0,TAU);ctx.fill();
+      ctx.fillStyle='rgba(65,139,151,.085)';ctx.beginPath();ctx.ellipse(-lensR*.018,lensR*.010,lensRx*.34,lensRy*.34,-.08,0,TAU);ctx.fill();ctx.restore();
+      ctx.fillStyle='rgba(2,18,23,.90)';ctx.beginPath();ctx.ellipse(-lensR*.010,lensR*.008,lensRx*.23,lensRy*.23,-.08,0,TAU);ctx.fill();
       ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(118,181,188,.28)';ctx.lineCap='round';
-      for(let i=0;i<28;i++){
-        const a=i/28*TAU+Math.sin(time*.001+i*.7)*.018;
-        const r0=lensR*.18,r1=lensR*(.62+.22*Math.sin(i*1.71+time*.0013));
-        ctx.globalAlpha=.13+.13*(.5+.5*Math.sin(time*.0022+i));
-        ctx.lineWidth=i%3===0?1.8:1.0;
-        ctx.beginPath();ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0);
-        ctx.quadraticCurveTo(Math.cos(a+.10)*r1*.60,Math.sin(a+.10)*r1*.60,Math.cos(a)*r1,Math.sin(a)*r1);ctx.stroke();
+      for(let i=0;i<14;i++){
+        const a=i/14*TAU+Math.sin(time*.0009+i*.7)*.012;
+        const r0=lensR*.18,r1=lensR*(.52+.16*Math.sin(i*1.71+time*.0011));
+        ctx.globalAlpha=.08+.08*(.5+.5*Math.sin(time*.0018+i));
+        ctx.lineWidth=i%3===0?1.35:.8;
+        ctx.beginPath();ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0*.78);
+        ctx.quadraticCurveTo(Math.cos(a+.10)*r1*.60,Math.sin(a+.10)*r1*.47,Math.cos(a)*r1,Math.sin(a)*r1*.78);ctx.stroke();
       }
       ctx.restore();
       ctx.restore();
@@ -426,13 +427,13 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-photographic-biocrystal-fallback-mobile-transparent-r1749'
+      quality:'hidpi-photographic-biocrystal-fallback-mobile-transparent-r1754'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1749-final-photoreal-mag-intro-material-parity'
+    visualRevision:'r1754-neutral-filmic-mag-intro-world-parity'
   };
 })();
