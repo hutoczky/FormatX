@@ -8,6 +8,7 @@ const { pathToFileURL } = require('node:url');
 (async () => {
   const repo = path.resolve(__dirname, '../..');
   const source = await fs.readFile(path.join(repo, 'docs/scifi-ui/index.html'), 'utf8');
+  const introRevision = source.match(/formatx-event-horizon\.js\?v=[^"']+/)[0];
   const env = { ASSETS: { fetch: async () => new Response(source, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
   }) } };
@@ -45,6 +46,7 @@ const { pathToFileURL } = require('node:url');
     const introControllers = (html.match(/<script\b[^>]*>/gi) || [])
       .filter(tag => /\ssrc="[^\"]*\/formatx-event-horizon\.js\?/.test(tag));
     assert.equal(introControllers.length, 1, `${name}: one bounded intro controller`);
+    assert.ok(introControllers[0].includes(introRevision), `${name}: preserve the current intro controller cache identity`);
     assert.match(introControllers[0], /\sdefer(?:\s|>)/, `${name}: intro remains nonblocking`);
     assert.match(introControllers[0], /\sfetchpriority="high"/, `${name}: intro discovery must not compete at optional-script priority`);
     const tags = html.match(/<link\b[^>]*data-fx-critical-core-r227[^>]*>/gi) || [];

@@ -23,7 +23,7 @@ const CONTENT_STANDARD_URL='formatx-content-standard.css?v=20260906-r538-mobile-
 const DEFERRED_SCHEDULER_RE=/formatx-deferred-css-r487\.js\?v=[^"']+/g;
 const DEFERRED_SCHEDULER_URL='formatx-deferred-css-r487.js?v=20260906-r535-mobile-scroll-intent-v2';
 const EVENT_HORIZON_RE=/formatx-event-horizon\.js\?v=[^"']+/g;
-const EVENT_HORIZON_URL='formatx-event-horizon.js?v=20260906-r549-extended-static-intro-fade-deadline';
+const EVENT_HORIZON_URL='formatx-event-horizon.js?v=20260926-r858-adopt-critical-stylesheet';
 const DEFERRED_REDUCED_RE=/formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g;
 const DEFERRED_REDUCED_URL='formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner';
 const QUALITY_RE=/formatx-quality-r461\.css\?v=[^"']+/g;

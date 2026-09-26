@@ -85,7 +85,9 @@ function clear(node,property){if(node instanceof HTMLElement)node.style.removePr
 function animateEffect(node,keyframes,options){if(REDUCED||!(node instanceof HTMLElement)||typeof node.animate!=='function')return;try{node.animate(keyframes,options);}catch(_){} }
 function ensureP0FxStyle(){
   let link=document.querySelector('link[data-fx-intro-p0-r575]');
-  if(link instanceof HTMLLinkElement){if(!link.href.includes('r635-three-phase-absolute-reveal'))link.href=P0_FX_STYLE;return link;}
+  // Adopt the blocking sheet without withdrawing it from the cascade. Assigning
+  // even the same href starts a stylesheet reload and can paint legacy geometry.
+  if(link instanceof HTMLLinkElement){if(link.href!==new URL(P0_FX_STYLE,document.baseURI).href)link.href=P0_FX_STYLE;return link;}
   link=document.createElement('link');link.rel='stylesheet';link.href=P0_FX_STYLE;link.dataset.fxIntroP0R575='true';document.head.appendChild(link);return link;
 }
 function cancelDeadline(){if(preloaderDeadlineTimer)clearTimeout(preloaderDeadlineTimer);preloaderDeadlineTimer=0;try{preloaderDeadlineAbort?.abort();}catch(_){}preloaderDeadlineAbort=null;}

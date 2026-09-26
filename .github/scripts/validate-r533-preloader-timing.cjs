@@ -22,7 +22,7 @@ async function verify(browser, spec) {
   await page.addInitScript(() => {
     const evidence = window.__fxR544PreloaderEvidence = {
       completeAt: null, source: null, activeContract: null, magReadyAt: null,
-      events: [], longTasks: [], paints: [], introVisibleAt: null, introActuallyHiddenAt: null
+      events: [], longTasks: [], paints: [], redundantIntroStyleWrites: [], introVisibleAt: null, introActuallyHiddenAt: null
     };
     const mark = (name, detail = '') => {
       if (evidence.events.some(event => event.name === name)) return;
@@ -64,7 +64,16 @@ async function verify(browser, spec) {
       evidence.activeContract = { capturedAt: now, animationName: s.animationName, animationDuration: s.animationDuration, animationFillMode: s.animationFillMode, mainVisibility: main ? getComputedStyle(main).visibility : '', mainDisplay: main ? getComputedStyle(main).display : '', heroVisibility: hero ? getComputedStyle(hero).visibility : '', heroDisplay: hero ? getComputedStyle(hero).display : '', heroHeight: hero?.getBoundingClientRect().height || 0 };
       mark('preloader-active');
     };
-    const observer = new MutationObserver(capture); observer.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-fx-preloader-r531','data-fx-crystal-organism-r326','data-fx-current-mag-request-r530','data-fx-core-renderer','data-fx-preloader-boot-r533'] });
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        if (record.attributeName !== 'href' || !record.oldValue || !record.target.matches?.('link[data-fx-intro-p0-r575]')) continue;
+        if (new URL(record.oldValue, document.baseURI).href === record.target.href) {
+          evidence.redundantIntroStyleWrites.push({ at: performance.now(), href: record.target.href });
+        }
+      }
+      capture();
+    });
+    observer.observe(document, { subtree: true, childList: true, attributes: true, attributeOldValue: true, attributeFilter: ['href','data-fx-preloader-r531','data-fx-crystal-organism-r326','data-fx-current-mag-request-r530','data-fx-core-renderer','data-fx-preloader-boot-r533'] });
     const observeCover = () => {
       const overlay = document.getElementById('formatx-event-horizon');
       if (overlay instanceof HTMLElement) {
@@ -112,6 +121,7 @@ async function verify(browser, spec) {
       assert.ok(Number.isFinite(completeAt)); assert.ok(Number.isFinite(state.bootAt)); assert.equal(state.timing,spec.timing); assert.equal(state.clock,'navigation-script-boot-single-deadline'); assert.equal(state.preloader,'done'); assert.equal(state.overlayHidden,true); assert.equal(state.heroVisible,true); assert.equal(state.pauseCount,0); assert.ok(state.overflow<=2); assert.ok(!/runtime-error|promise-error/.test(source));
       if (source==='late-boot-skip') { assert.equal(state.lateSkip,true); assert.ok(state.bootAt>=spec.max-20); assert.ok(duration>=0&&duration<=180); assert.equal(state.overlayDisplay,'none'); }
       else { assert.equal(state.lateSkip,false); assert.ok(active); assert.match(String(active.animationName),/fx-r533-preloader-visual-bound/); const animationMs=cssTimeToMs(active.animationDuration); assert.ok(Number.isFinite(animationMs)&&Math.abs(animationMs-spec.visualMax)<=20,`${spec.name}: wrong compositor bound ${active.animationDuration}`); assert.match(String(active.animationFillMode),/both/); assert.notEqual(active.mainVisibility,'hidden'); assert.notEqual(active.mainDisplay,'none'); assert.notEqual(active.heroVisibility,'hidden'); assert.notEqual(active.heroDisplay,'none'); assert.ok(active.heroHeight>0); assert.ok(duration>=spec.min,`${spec.name}: intro released early ${duration}ms`); assert.ok(duration<=spec.max,`${spec.name}: logical release exceeded product maximum ${duration}ms`); if(Number.isFinite(state.evidence.magReadyAt)) assert.ok(state.evidence.magReadyAt<=completeAt,`${spec.name}: MAG started after intro release`); }
+      assert.deepEqual(state.evidence.redundantIntroStyleWrites, [], 'intro: adopting the current critical stylesheet must not reload and withdraw its geometry');
       if (!spec.mobile && source !== 'late-boot-skip') {
         const textPaint = state.evidence.introTextPaint;
         assert.ok(textPaint, 'desktop: capture the visible intro text before deferred control CSS');
