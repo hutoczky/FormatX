@@ -121,7 +121,7 @@ jobs:
           node <<'NODE' 2>&1 | tee -a platform-scroll-report.txt
           'use strict';
           const { chromium } = require('playwright');
-          const URL = 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu&scroll-test=heart-r546&flow-trace=r833';
+          const TEST_URL = 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu&scroll-test=heart-r546&flow-trace=r833';
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
           (async () => {
@@ -132,7 +132,7 @@ jobs:
               await page.addInitScript(() => {
                 try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
               });
-              await page.goto(URL, { waitUntil: 'domcontentloaded' });
+              await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
               await page.waitForFunction(() => Boolean(document.documentElement.dataset.fxMotionRuntimeR239)
                 && document.documentElement.dataset.fxPlatformScrollBootstrapR535 === 'armed-scroll-intent', null, { timeout: 20000 });
               await page.mouse.wheel(0, 48);
@@ -226,8 +226,20 @@ jobs:
               const snapshot = label => page.evaluate(label => {
                 const root = document.documentElement;
                 const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+                const owners = Array.from(document.querySelectorAll('#main-content,#main-content > *,body > .site-footer,.fx-loop-bridge,#fx-organism-console')).map(node => {
+                  const box = node.getBoundingClientRect(), style = getComputedStyle(node);
+                  return {
+                    node: node.id || node.className,
+                    top: box.top + scrollY, height: box.height, width: box.width,
+                    display: style.display, position: style.position, transform: style.transform,
+                    contentVisibility: style.contentVisibility, contain: style.contain,
+                    intrinsicSize: style.containIntrinsicSize, transition: style.transition,
+                    hidden: node.hidden, inlineStyle: node.getAttribute('style') || ''
+                  };
+                });
                 return {
                   label,
+                  owners,
                   now: Math.round(performance.now()),
                   scrollY,
                   scrollHeight: root.scrollHeight,
