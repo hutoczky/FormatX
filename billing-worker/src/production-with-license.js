@@ -50,6 +50,12 @@ const HOMEPAGE_PATHS = new Set([
   '/scifi-ui/index.html',
 ]);
 
+const HOMEPAGE_INLINE_SCRIPT_HASHES = [
+  "'sha256-PN7ce6wLHzYfaM5x2Yit/pXw7QTtpmxU/QAjMpG2PLw='",
+  "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='",
+  "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='",
+].join(' ');
+
 const CANONICAL_PAGE_REDIRECTS = new Map([
   ['/index.html', '/'],
   ['/scifi-ui', '/scifi-ui/'],
@@ -62,7 +68,7 @@ const CONTENT_SECURITY_POLICY = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "script-src 'self' https://static.cloudflareinsights.com",
+  `script-src 'self' ${HOMEPAGE_INLINE_SCRIPT_HASHES} https://static.cloudflareinsights.com`,
   "style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68='",
   "img-src 'self' data:",
   "font-src 'self'",
