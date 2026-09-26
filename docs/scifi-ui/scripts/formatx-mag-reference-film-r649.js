@@ -243,7 +243,7 @@
         ctx.fillStyle=body;
         /* R1724: FormatX Living Crystal Organism fallback silhouette.
            Angular living anatomy replaces the old egg/blob body. */
-        const breathe=1+.008*Math.sin(time*.0024);
+        const breathe=1+.0045*Math.sin(time*.0020);
         ctx.scale(breathe,breathe);
         ctx.beginPath();
         ctx.moveTo(-R*.84,R*.10);
@@ -300,7 +300,7 @@
           ctx.stroke();
         }
       }
-      const lensR=Math.max(30,R*.285);
+      const lensR=Math.max(24,R*.205);
       const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
       lens.addColorStop(0,'rgba(226,234,232,.72)');
       lens.addColorStop(.12,'rgba(135,166,168,.82)');
@@ -309,15 +309,15 @@
       lens.addColorStop(.80,'rgba(5,31,39,1)');
       lens.addColorStop(1,'rgba(1,10,14,1)');
       ctx.fillStyle=lens;ctx.beginPath();ctx.arc(0,0,lensR,0,TAU);ctx.fill();
-      ctx.strokeStyle='rgba(145,188,190,.30)';ctx.lineWidth=2.2;ctx.stroke();
+      ctx.strokeStyle='rgba(126,165,168,.20)';ctx.lineWidth=1.6;ctx.stroke();
       ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(76,158,169,.18)';ctx.shadowBlur=7;
-      ctx.fillStyle='rgba(65,139,151,.105)';ctx.beginPath();ctx.arc(0,0,lensR*.34,0,TAU);ctx.fill();ctx.restore();
-      ctx.fillStyle='rgba(2,18,23,.90)';ctx.beginPath();ctx.arc(0,0,lensR*.23,0,TAU);ctx.fill();
-      ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(118,181,188,.28)';ctx.lineCap='round';
+      ctx.fillStyle='rgba(61,125,136,.060)';ctx.beginPath();ctx.arc(0,0,lensR*.30,0,TAU);ctx.fill();ctx.restore();
+      ctx.fillStyle='rgba(3,15,19,.94)';ctx.beginPath();ctx.arc(0,0,lensR*.18,0,TAU);ctx.fill();
+      ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(109,158,164,.18)';ctx.lineCap='round';
       for(let i=0;i<28;i++){
         const a=i/28*TAU+Math.sin(time*.001+i*.7)*.018;
         const r0=lensR*.18,r1=lensR*(.62+.22*Math.sin(i*1.71+time*.0013));
-        ctx.globalAlpha=.13+.13*(.5+.5*Math.sin(time*.0022+i));
+        ctx.globalAlpha=.08+.08*(.5+.5*Math.sin(time*.0018+i));
         ctx.lineWidth=i%3===0?1.8:1.0;
         ctx.beginPath();ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0);
         ctx.quadraticCurveTo(Math.cos(a+.10)*r1*.60,Math.sin(a+.10)*r1*.60,Math.cos(a)*r1,Math.sin(a)*r1);ctx.stroke();
@@ -327,7 +327,7 @@
 
       if(t>5.65){
         const tg=smooth((t-5.65)/1.0);
-        ctx.save();ctx.strokeStyle='rgba(100,163,171,'+(.34*tg)+')';ctx.lineWidth=3.0;ctx.shadowColor='rgba(56,132,143,.14)';ctx.shadowBlur=2;
+        ctx.save();ctx.strokeStyle='rgba(91,145,151,'+(.25*tg)+')';ctx.lineWidth=2.6;ctx.shadowColor='rgba(56,120,129,.09)';ctx.shadowBlur=1;
         for(let i=0;i<7;i++){
           const a=i/7*TAU+.24;
           const sway=Math.sin(time*.0016+i*.91)*.08;
@@ -433,6 +433,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1749-final-photoreal-mag-intro-material-parity'
+    visualRevision:'r1754-dark-integrated-photoreal-mag-intro-convergence'
   };
 })();
