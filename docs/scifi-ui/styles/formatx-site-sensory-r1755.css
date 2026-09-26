@@ -1,0 +1,110 @@
+/* FormatX R1755 — sitewide sensory field.
+   One compositor-friendly visual layer reacts to input without adding a WebGL
+   context or a continuous JavaScript animation loop. */
+.fx-site-sensory-field-r1755{
+  --fx-sense-x:50%;
+  --fx-sense-y:38%;
+  --fx-sense-x2:58%;
+  --fx-sense-y2:64%;
+  --fx-sense-dx:0px;
+  --fx-sense-dy:0px;
+  --fx-sense-energy:.18;
+  --fx-sense-press:0;
+  position:fixed;
+  inset:-12vh -10vw;
+  z-index:-18;
+  pointer-events:none;
+  contain:strict;
+  opacity:calc(.20 + var(--fx-sense-energy) * .28);
+  transform:translate3d(var(--fx-sense-dx),var(--fx-sense-dy),0)
+    scale(calc(1 + var(--fx-sense-energy) * .008));
+  transform-origin:center;
+  background:
+    radial-gradient(42rem 34rem at var(--fx-sense-x) var(--fx-sense-y),
+      rgba(93,220,239,calc(.035 + var(--fx-sense-energy) * .070)),
+      rgba(42,113,135,calc(.018 + var(--fx-sense-energy) * .026)) 34%,
+      transparent 73%),
+    radial-gradient(34rem 28rem at var(--fx-sense-x2) var(--fx-sense-y2),
+      rgba(122,96,182,calc(.018 + var(--fx-sense-energy) * .038)),
+      transparent 72%);
+  transition:opacity 180ms ease,transform 160ms cubic-bezier(.2,.8,.2,1);
+  will-change:transform,opacity;
+}
+.fx-site-sensory-field-r1755::before,
+.fx-site-sensory-field-r1755::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.fx-site-sensory-field-r1755::before{
+  opacity:calc(.12 + var(--fx-sense-energy) * .16);
+  background:
+    linear-gradient(112deg,transparent 0 42%,rgba(195,238,239,.040) 48%,transparent 55%),
+    radial-gradient(ellipse 64% 44% at var(--fx-sense-x) var(--fx-sense-y),
+      transparent 48%,rgba(134,225,235,.045) 49%,transparent 51%);
+  mix-blend-mode:screen;
+}
+.fx-site-sensory-field-r1755::after{
+  opacity:calc(.06 + var(--fx-sense-press) * .16);
+  background:
+    radial-gradient(circle at var(--fx-sense-x) var(--fx-sense-y),
+      rgba(220,250,248,.11) 0,
+      rgba(74,207,225,.040) 8%,
+      transparent 24%);
+}
+html[data-fx-sensory-action-r1755="true"] .fx-site-sensory-field-r1755{
+  opacity:calc(.28 + var(--fx-sense-energy) * .34);
+}
+html body.living-architecture :is(
+  a,button,[role="button"],input,select,textarea
+):focus-visible{
+  outline:1px solid rgba(155,232,239,.74)!important;
+  outline-offset:3px!important;
+  box-shadow:0 0 0 4px rgba(63,185,207,.075),0 0 24px rgba(72,203,220,.10)!important;
+}
+html body.living-architecture :is(
+  .card,.price-card,.release-card,.fx-platform-card,.fx-category-grid>article,.fx-plan-qr-card
+){
+  transition:border-color 150ms ease,box-shadow 180ms ease,translate 150ms ease;
+}
+@media (hover:hover) and (pointer:fine){
+  html body.living-architecture :is(
+    .card,.price-card,.release-card,.fx-platform-card,.fx-category-grid>article,.fx-plan-qr-card
+  ):hover{
+    translate:0 -1px;
+    border-color:rgba(158,231,238,.24)!important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.035),
+      inset 0 0 38px rgba(57,196,255,.024),
+      0 22px 66px rgba(0,0,0,.22),
+      0 0 26px rgba(68,196,218,.045)!important;
+  }
+}
+@media (max-width:900px),(pointer:coarse){
+  .fx-site-sensory-field-r1755{
+    inset:-8vh -24vw;
+    opacity:calc(.14 + var(--fx-sense-energy) * .20);
+    background:
+      radial-gradient(30rem 26rem at var(--fx-sense-x) var(--fx-sense-y),
+        rgba(84,210,230,calc(.030 + var(--fx-sense-energy) * .050)),
+        transparent 72%),
+      radial-gradient(24rem 22rem at var(--fx-sense-x2) var(--fx-sense-y2),
+        rgba(110,91,176,calc(.014 + var(--fx-sense-energy) * .026)),
+        transparent 75%);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .fx-site-sensory-field-r1755{
+    opacity:.14!important;
+    transform:none!important;
+    transition:none!important;
+  }
+  html body.living-architecture :is(
+    .card,.price-card,.release-card,.fx-platform-card,.fx-category-grid>article,.fx-plan-qr-card
+  ){
+    transition:none!important;
+    translate:none!important;
+  }
+}
+/* production-r1755-single-sensory-compositor-layer */
