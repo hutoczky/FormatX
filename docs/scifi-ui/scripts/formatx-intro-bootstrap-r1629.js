@@ -20,7 +20,12 @@ r.dataset.fxIntroPrepaintOwnerR1611=o;
 r.dataset.fxMagBirthOwnerR533=v?'active':o;
 
 function activateStyles(){
-  for(const selector of ['link[data-fx-mag-birth-live-r533]','link[data-fx-mag-birth-critical-r1572]']){
+  for(const selector of [
+    'link[data-fx-mag-birth-live-r533]',
+    'link[data-fx-mag-birth-critical-r1572]',
+    'link[data-fx-living-habitat-r1530]',
+    'link[data-fx-site-background-r616]'
+  ]){
     const style=document.querySelector(selector);
     if(style instanceof HTMLLinkElement){
       style.media='all';
