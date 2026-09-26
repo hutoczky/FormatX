@@ -79,6 +79,18 @@ const previewWrapper = read('content-preview-entry.js');
 const previewWorker = read('worker.js');
 const sitemap = read('docs/sitemap.xml');
 const robots = read('docs/robots.txt');
+const productionContentEntry = read('billing-worker/src/production-content-entry.js');
+const productionLicenseEntry = read('billing-worker/src/production-with-license.js');
+const homeMetaCsp = home.match(/<meta\b[^>]*http-equiv=["']Content-Security-Policy["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1] || '';
+const homeScriptDirective = homeMetaCsp.match(/(?:^|;)\s*script-src\s+([^;]+)/i)?.[1] || '';
+const homeInlineScriptHashes = [...homeScriptDirective.matchAll(/'sha256-[^']+'/g)].map(match => match[0]);
+
+check(
+  'production-inline-bootstrap-csp',
+  homeInlineScriptHashes.length >= 3
+    && homeInlineScriptHashes.every(hash => productionContentEntry.includes(hash) && productionLicenseEntry.includes(hash)),
+  'Production HTTP/meta CSP dropped one or more exact homepage inline bootstrap hashes'
+);
 
 check(
   'production-worker',
