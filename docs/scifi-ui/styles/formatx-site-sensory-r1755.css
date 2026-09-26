@@ -20,12 +20,12 @@
     scale(calc(1 + var(--fx-sense-energy) * .008));
   transform-origin:center;
   background:
-    radial-gradient(42rem 34rem at var(--fx-sense-x) var(--fx-sense-y),
-      rgba(93,220,239,calc(.035 + var(--fx-sense-energy) * .070)),
-      rgba(42,113,135,calc(.018 + var(--fx-sense-energy) * .026)) 34%,
+    radial-gradient(42rem 34rem at 50% 38%,
+      rgba(93,220,239,.082),
+      rgba(42,113,135,.028) 34%,
       transparent 73%),
-    radial-gradient(34rem 28rem at var(--fx-sense-x2) var(--fx-sense-y2),
-      rgba(122,96,182,calc(.018 + var(--fx-sense-energy) * .038)),
+    radial-gradient(34rem 28rem at 58% 64%,
+      rgba(122,96,182,.032),
       transparent 72%);
   transition:opacity 180ms ease,transform 160ms cubic-bezier(.2,.8,.2,1);
   will-change:transform,opacity;
@@ -41,14 +41,14 @@
   opacity:calc(.12 + var(--fx-sense-energy) * .16);
   background:
     linear-gradient(112deg,transparent 0 42%,rgba(195,238,239,.040) 48%,transparent 55%),
-    radial-gradient(ellipse 64% 44% at var(--fx-sense-x) var(--fx-sense-y),
+    radial-gradient(ellipse 64% 44% at 50% 38%,
       transparent 48%,rgba(134,225,235,.045) 49%,transparent 51%);
   mix-blend-mode:screen;
 }
 .fx-site-sensory-field-r1755::after{
   opacity:calc(.06 + var(--fx-sense-press) * .16);
   background:
-    radial-gradient(circle at var(--fx-sense-x) var(--fx-sense-y),
+    radial-gradient(circle at 50% 38%,
       rgba(220,250,248,.11) 0,
       rgba(74,207,225,.040) 8%,
       transparent 24%);
@@ -86,11 +86,11 @@ html body.living-architecture :is(
     inset:-8vh -24vw;
     opacity:calc(.14 + var(--fx-sense-energy) * .20);
     background:
-      radial-gradient(30rem 26rem at var(--fx-sense-x) var(--fx-sense-y),
-        rgba(84,210,230,calc(.030 + var(--fx-sense-energy) * .050)),
+      radial-gradient(30rem 26rem at 50% 38%,
+        rgba(84,210,230,.064),
         transparent 72%),
-      radial-gradient(24rem 22rem at var(--fx-sense-x2) var(--fx-sense-y2),
-        rgba(110,91,176,calc(.014 + var(--fx-sense-energy) * .026)),
+      radial-gradient(24rem 22rem at 58% 64%,
+        rgba(110,91,176,.030),
         transparent 75%);
   }
 }
@@ -107,4 +107,4 @@ html body.living-architecture :is(
     translate:none!important;
   }
 }
-/* production-r1755-single-sensory-compositor-layer */
+/* production-r1755-single-sensory-compositor-layer-static-paint-transform-only-input */
