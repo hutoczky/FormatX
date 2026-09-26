@@ -135,7 +135,7 @@
   root.dataset.fxNativeMagMaterialR1749='neutral-mineral-softbox-low-cyan-no-neon-rib-physical-smoked-glass';
   root.dataset.fxNativeMagVisualR1755='photographic-living-biocrystal-dermal-depth-microvascular-response';
   root.dataset.fxNativeMagMaterialR1755='smoky-pearl-bioglass-ggx-dermal-transmission-restrained-emission';
-  root.dataset.fxNativeMagPerformanceR1755='single-webgl-60hz-quality-shed-before-cadence';
+  root.dataset.fxNativeMagPerformanceR1755='single-webgl-60hz-quality-shed-before-cadence-scroll-one-frame-no-section-sweep';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -2145,7 +2145,7 @@
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
         targetRotationY+=velocity*.016;
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        schedule(mobile?1:2);
+        schedule(1);
       });
     }
 
@@ -2194,7 +2194,7 @@
       targetRotationX=clamp(targetRotationX+vertical*.040,-1.02,1.02);
       boost(.66,mobile?2:4);
     }
-    function signalPhysiology(kind,source){
+    function signalPhysiology(kind,source,surfaceResponse=true){
       const state=String(kind||'stimulus');
       root.dataset.fxCorePhysiologyR1723=state;
       if(state==='attention'){
@@ -2244,9 +2244,9 @@
         y:ty,
         revision:'r1723'
       }}));
-      startSurfacePulse(String(source||state)+'-physiology');
+      if(surfaceResponse)startSurfacePulse(String(source||state)+'-physiology');
       setShape('organism',source||state||'physiology');
-      schedule(mobile?3:5);
+      schedule(surfaceResponse?(mobile?3:5):1);
     }
     function onCinematicScene(event){
       const detail=event.detail||{};
@@ -2332,8 +2332,7 @@
       const id=candidate?.target?.id;
       if(!id||id===activeOrgan)return;
       activeOrgan=id;root.dataset.fxCoreActiveOrgan=id;cinematic.activeOrgan=id;
-      signalPhysiology(sectionPhysiology[id]||'attention','site-section-'+id);
-      boost(.54,mobile?2:3);
+      signalPhysiology(sectionPhysiology[id]||'attention','site-section-'+id,false);
     },{rootMargin:'-22% 0px -54% 0px',threshold:[0,.15,.35,.6]});
     document.querySelectorAll('main > section[id],main section.scene[id]').forEach(section=>organObserver.observe(section));
 
