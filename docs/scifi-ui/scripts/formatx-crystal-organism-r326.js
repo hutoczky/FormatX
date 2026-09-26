@@ -383,17 +383,17 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.88,.070,.060,-.090,-.008,.080],
-        [.76,.225,.150,-.075,.000,.068],
-        [.60,.430,.285,-.050,.010,.056],
-        [.40,.655,.405,-.018,.020,.040],
-        [.18,.810,.495,.028,.028,.022],
-        [.00,.855,.520,.055,.022,.000],
-        [-.18,.795,.485,.040,.012,-.020],
-        [-.40,.640,.392,.005,.002,-.038],
-        [-.60,.410,.260,-.040,-.004,-.052],
-        [-.76,.215,.140,-.075,-.008,-.064],
-        [-.88,.065,.055,-.095,-.010,-.076]
+        [.92,.050,.040,-.135,-.012,.090],
+        [.78,.155,.105,-.112,-.004,.074],
+        [.62,.305,.215,-.078,.010,.058],
+        [.43,.485,.335,-.028,.024,.042],
+        [.20,.625,.425,.050,.034,.022],
+        [.00,.670,.455,.092,.028,.000],
+        [-.18,.600,.415,.052,.016,-.020],
+        [-.40,.470,.322,-.012,.004,-.040],
+        [-.60,.292,.198,-.074,-.006,-.056],
+        [-.77,.148,.098,-.112,-.012,-.072],
+        [-.92,.044,.034,-.145,-.014,-.088]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -431,8 +431,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.105,.980,-.015],[.5,0]);
-      const bottom=bodyVertex([-.115,-.965,.010],[.5,1]);
+      const top=bodyVertex([-.155,1.025,-.020],[.5,0]);
+      const bottom=bodyVertex([-.165,-1.010,.006],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -725,10 +725,10 @@
 
     /* R1724 — unique FormatX crystal creature anatomy.
        Living cortical lobes and membranes replace animal limbs and robotic armour. */
-    appendEllipsoid([-.34,.34,.075],[.26,.38,.22],.74,mobile?6:8,mobile?10:14,.34);
-    appendEllipsoid([ .38,.26,.090],[.29,.34,.24],.70,mobile?6:8,mobile?10:14,-.28);
-    appendEllipsoid([-.30,-.30,.040],[.25,.33,.20],.78,mobile?6:8,mobile?10:14,-.22);
-    appendEllipsoid([ .32,-.36,.055],[.24,.31,.21],.76,mobile?6:8,mobile?10:14,.26);
+    appendEllipsoid([-.22,.31,.050],[.13,.275,.120],.74,mobile?6:8,mobile?10:14,.30);
+    appendEllipsoid([ .24,.22,.060],[.14,.245,.125],.70,mobile?6:8,mobile?10:14,-.25);
+    appendEllipsoid([-.18,-.29,.030],[.12,.235,.110],.78,mobile?6:8,mobile?10:14,-.20);
+    appendEllipsoid([ .20,-.34,.040],[.12,.225,.115],.76,mobile?6:8,mobile?10:14,.23);
 
     /* Living crystalline membranes: a crown/facet silhouette that bends and
        breathes instead of reading as horns, wings or metal fins. */
@@ -741,7 +741,7 @@
 
     if(!auditMode){
       const centreX=.008,centreY=-.006;
-      const bezelInner=.168,bezelOuter=.238,bezelSteps=software?20:mobile?30:42,bezelZ=.635;
+      const bezelInner=.105,bezelOuter=.154,bezelSteps=software?18:mobile?26:34,bezelZ=.635;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.050:.038)*Math.sin(angle*3.0+.34)
@@ -765,8 +765,8 @@
       }
 
       const lensCenter=[centreX,centreY,.646];
-      const lensRadius=.198;
-      const lensDepth=.094;
+      const lensRadius=.112;
+      const lensDepth=.046;
       const radialSteps=software?4:mobile?5:8;
       const angularSteps=software?20:mobile?30:42;
       function lensVertex(radial,angle){
@@ -849,8 +849,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.12) contrast(1.055) saturate(1.12)'
-      : 'brightness(1.10) contrast(1.06) saturate(1.08)';
+      ? 'brightness(.90) contrast(1.12) saturate(.94)'
+      : 'brightness(.92) contrast(1.10) saturate(.96)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1086,15 +1086,15 @@
         float cortexRidge=pow(max(cortexWave,cortexCross),4.2)*bodyMask;
         mineral=mix(mineral,vec3(.012,.015,.019),cortexValley*.31);
         mineral+=vec3(.072,.090,.098)*cortexRidge*.082;
-        mineral+=vec3(.022,.092,.108)*cortexRidge*vascular*.31;
+        mineral+=vec3(.016,.045,.052)*cortexRidge*vascular*.12;
 
         /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
            plates ride above dark cortical tissue. The plate field is broad,
            irregular and organic; it is not a metallic armour texture. */
         float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.42+sin(vLocal.y*4.1)*.38);
         float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1+sin(vUv.x*8.2)*1.08);
-        float plateMask=smoothstep(.67,.89,max(plateField,plateCross*.82))*bodyMask;
-        plateMask*=.42+.24*smoothstep(-.45,.82,n.z);
+        float plateMask=smoothstep(.80,.96,max(plateField,plateCross*.82))*bodyMask;
+        plateMask*=.30+.18*smoothstep(-.45,.82,n.z);
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
         float plateFacetTone=.90+.14*fract(vFacet*7.13+.19);
         vec3 ivory=vec3(.17,.22,.23)
@@ -1102,9 +1102,9 @@
           +vec3(.11,.18,.19)*fresnel*.13;
         ivory+=vec3(.54,.36,.24)*studioRibbonB*.050;
         mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
-        mineral=mix(mineral,ivory,plateMask*.42);
+        mineral=mix(mineral,ivory,plateMask*.18);
         mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
-        mineral+=vec3(.044,.225,.260)*vascular*(.085+.155*uEnergy);
+        mineral+=vec3(.026,.105,.120)*vascular*(.050+.090*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
 
         vec2 q=vLocal.xy;
@@ -1121,9 +1121,9 @@
            Its shading is driven by the same studio reflections as the obsidian. */
         vec2 lq=vec2((q.x+.018)*1.34,(q.y-.020)*.92);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.126,.184,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.080,.132,lensD))*front;
-        float lensCore=(1.0-smoothstep(.024,.052,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.110,.158,lensD))*front*.16;
+        float lensGlass=(1.0-smoothstep(.070,.112,lensD))*front*.13;
+        float lensCore=(1.0-smoothstep(.020,.042,lensD))*front*.08;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensLower=exp(-pow((lq.x-.026)/.052,2.0)-pow((lq.y+.052)/.036,2.0))*lensGlass;
@@ -1188,12 +1188,12 @@
         physicalLens+=vec3(.94,.99,.96)*softboxA*.18;
         physicalLens+=vec3(.48,.58,.60)*sideSpec*.10;
         physicalLens+=vec3(.12,.28,.34)*fresnel*.18;
-        physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
-        physicalLens+=vec3(.050,.36,.48)*lensRing*(.10+.10*uEnergy);
-        physicalLens+=vec3(.84,.98,1.00)*lensHot*(.18+.08*uEnergy);
-        physicalLens+=vec3(.16,.72,.88)*electric*(.34+.28*uEnergy);
-        physicalLens+=vec3(.92,.99,1.00)*coreFlash*.56;
-        physicalLens+=vec3(1.00,.45,.10)*lensRing*(.10+.10*studioRibbonB);
+        physicalLens+=vec3(.014,.065,.078)*lensInner*(.035+.040*uEnergy);
+        physicalLens+=vec3(.025,.105,.125)*lensRing*(.035+.040*uEnergy);
+        physicalLens+=vec3(.36,.42,.41)*lensHot*(.045+.025*uEnergy);
+        physicalLens+=vec3(.045,.16,.19)*electric*(.060+.055*uEnergy);
+        physicalLens+=vec3(.32,.38,.37)*coreFlash*.075;
+        physicalLens+=vec3(.28,.16,.08)*lensRing*(.018+.020*studioRibbonB);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -1211,7 +1211,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.82),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(mineral*1.48),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
