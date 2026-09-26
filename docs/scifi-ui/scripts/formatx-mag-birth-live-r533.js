@@ -39,7 +39,9 @@
   if (FORCE || VISUAL_PROOF) {
     for (const selector of [
       'link[data-fx-mag-birth-live-r533]',
-      'link[data-fx-mag-birth-critical-r1572]'
+      'link[data-fx-mag-birth-critical-r1572]',
+      'link[data-fx-living-habitat-r1530]',
+      'link[data-fx-site-background-r616]'
     ]) {
       const style = document.querySelector(selector);
       if (style instanceof HTMLLinkElement) {
