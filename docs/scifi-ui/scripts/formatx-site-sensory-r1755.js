@@ -79,7 +79,7 @@ function pulse(kind='action',energy=.68){
   clearTimeout(actionTimer);
   actionTimer=setTimeout(()=>{
     root.dataset.fxSensoryActionR1755='false';
-    state.energy=reduced.matches?.14:.20;
+    state.energy=reduced.matches ? .14 : .20;
     state.press=0;
     queue();
   },210);
@@ -88,7 +88,7 @@ function pulse(kind='action',energy=.68){
 function onPointerMove(event){
   const batch=typeof event.getCoalescedEvents==='function'?event.getCoalescedEvents():null;
   const sample=batch?.length?batch[batch.length-1]:event;
-  point(Number(sample.clientX)||innerWidth*.5,Number(sample.clientY)||innerHeight*.4,event.pointerType==='touch'?.28:.22);
+  point(Number(sample.clientX)||innerWidth*.5,Number(sample.clientY)||innerHeight*.4,event.pointerType==='touch' ? .28 : .22);
 }
 function onPointerDown(event){
   state.press=1;
@@ -119,12 +119,12 @@ function onFocus(event){
 function onClick(event){
   if(!(event.target instanceof Element))return;
   const action=event.target.closest('a,button,[role="button"],input,select,textarea,label');
-  if(action)semantic('action',action.matches('a[href*="download"],[data-release-download]')?.90:.66);
+  if(action)semantic('action',action.matches('a[href*="download"],[data-release-download]') ? .90 : .66);
 }
 function onInput(){semantic('input',.48);}
 function onChange(){semantic('change',.62);}
 function onSubmit(){semantic('submit',.92);}
-function onKey(event){if(!event.repeat)semantic('key',event.key==='Enter'||event.key===' '?.62:.42);}
+function onKey(event){if(!event.repeat)semantic('key',(event.key==='Enter'||event.key===' ') ? .62 : .42);}
 function onOrientation(event){
   if(reduced.matches)return;
   const gamma=Number(event.gamma),beta=Number(event.beta);
