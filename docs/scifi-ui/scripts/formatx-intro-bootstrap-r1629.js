@@ -20,7 +20,12 @@ r.dataset.fxIntroPrepaintOwnerR1611=o;
 r.dataset.fxMagBirthOwnerR533=v?'active':o;
 
 function activateStyles(){
-  for(const selector of ['link[data-fx-mag-birth-live-r533]','link[data-fx-mag-birth-critical-r1572]']){
+  for(const selector of [
+    'link[data-fx-mag-birth-live-r533]',
+    'link[data-fx-mag-birth-critical-r1572]',
+    'link[data-fx-living-habitat-r1530]',
+    'link[data-fx-site-background-r616]'
+  ]){
     const style=document.querySelector(selector);
     if(style instanceof HTMLLinkElement){
       style.media='all';
@@ -42,7 +47,7 @@ function b(){
     return;
   }
   const e=document.createElement('script');
-  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260926-r1754-final-photoreal-continuity';
+  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260926-r1756-irregular-photoreal-biocrystal';
   e.async=false;
   e.dataset.fxMagBirthLiveR533='true';
   e.dataset.fxIntroRescueR1755='true';

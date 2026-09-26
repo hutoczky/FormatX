@@ -246,27 +246,24 @@
         const breathe=1+.008*Math.sin(time*.0024);
         ctx.scale(breathe,breathe);
         ctx.beginPath();
-        ctx.moveTo(-R*.84,R*.10);
-        ctx.bezierCurveTo(-R*.93,-R*.16,-R*.78,-R*.46,-R*.53,-R*.56);
-        ctx.lineTo(-R*.64,-R*.80);
-        ctx.lineTo(-R*.38,-R*.66);
-        ctx.lineTo(-R*.25,-R*.94);
-        ctx.lineTo(-R*.02,-R*.68);
-        ctx.bezierCurveTo(R*.14,-R*.73,R*.26,-R*.82,R*.42,-R*.74);
-        ctx.lineTo(R*.48,-R*1.02);
-        ctx.lineTo(R*.59,-R*.77);
-        ctx.lineTo(R*.72,-R*.96);
-        ctx.lineTo(R*.74,-R*.69);
-        ctx.bezierCurveTo(R*.90,-R*.64,R*1.06,-R*.56,R*1.08,-R*.43);
-        ctx.bezierCurveTo(R*1.00,-R*.32,R*.82,-R*.29,R*.66,-R*.26);
-        ctx.lineTo(R*.54,-R*.04);
-        ctx.bezierCurveTo(R*.47,R*.20,R*.53,R*.46,R*.40,R*.70);
-        ctx.lineTo(R*.25,R*.90);
-        ctx.lineTo(R*.14,R*.70);
-        ctx.bezierCurveTo(R*.02,R*.58,-R*.14,R*.56,-R*.27,R*.72);
-        ctx.lineTo(-R*.49,R*.88);
-        ctx.lineTo(-R*.52,R*.63);
-        ctx.bezierCurveTo(-R*.69,R*.50,-R*.82,R*.37,-R*.84,R*.10);
+        ctx.moveTo(-R*.58,R*.12);
+        ctx.bezierCurveTo(-R*.69,-R*.12,-R*.61,-R*.42,-R*.46,-R*.56);
+        ctx.lineTo(-R*.38,-R*.84);
+        ctx.lineTo(-R*.18,-R*.67);
+        ctx.lineTo(-R*.08,-R*1.10);
+        ctx.lineTo(R*.10,-R*.78);
+        ctx.bezierCurveTo(R*.22,-R*.80,R*.34,-R*.72,R*.42,-R*.62);
+        ctx.lineTo(R*.52,-R*.87);
+        ctx.lineTo(R*.61,-R*.58);
+        ctx.bezierCurveTo(R*.72,-R*.43,R*.76,-R*.25,R*.66,-R*.10);
+        ctx.lineTo(R*.54,R*.10);
+        ctx.bezierCurveTo(R*.48,R*.34,R*.39,R*.56,R*.28,R*.74);
+        ctx.lineTo(R*.12,R*1.05);
+        ctx.lineTo(-R*.02,R*.76);
+        ctx.bezierCurveTo(-R*.14,R*.61,-R*.25,R*.58,-R*.32,R*.72);
+        ctx.lineTo(-R*.46,R*.92);
+        ctx.lineTo(-R*.50,R*.62);
+        ctx.bezierCurveTo(-R*.61,R*.48,-R*.66,R*.31,-R*.58,R*.12);
         ctx.closePath();
         ctx.fill();
         ctx.save();ctx.globalCompositeOperation='screen';
@@ -300,28 +297,35 @@
           ctx.stroke();
         }
       }
-      const lensR=Math.max(30,R*.285);
-      const lensRx=lensR*.82,lensRy=lensR*.66;
-      const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
+      const lensR=Math.max(16,R*.115);
+      const lensRx=lensR*.88,lensRy=lensR*.70;
+      const lensCx=R*.12,lensCy=-R*.055;
+      const lens=ctx.createRadialGradient(
+        lensCx-lensR*.25,lensCy-lensR*.28,1,
+        lensCx,lensCy,lensR
+      );
       lens.addColorStop(0,'rgba(226,234,232,.72)');
       lens.addColorStop(.12,'rgba(135,166,168,.82)');
       lens.addColorStop(.30,'rgba(55,111,120,.92)');
       lens.addColorStop(.54,'rgba(18,66,78,.985)');
       lens.addColorStop(.80,'rgba(5,31,39,1)');
       lens.addColorStop(1,'rgba(1,10,14,1)');
-      ctx.fillStyle=lens;ctx.beginPath();ctx.ellipse(-lensR*.025,lensR*.015,lensRx,lensRy,-.08,0,TAU);ctx.fill();
+      ctx.fillStyle=lens;ctx.beginPath();ctx.ellipse(lensCx,lensCy,lensRx,lensRy,-.10,0,TAU);ctx.fill();
       ctx.strokeStyle='rgba(145,188,190,.24)';ctx.lineWidth=1.8;ctx.stroke();
       ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(76,158,169,.18)';ctx.shadowBlur=7;
-      ctx.fillStyle='rgba(65,139,151,.085)';ctx.beginPath();ctx.ellipse(-lensR*.018,lensR*.010,lensRx*.34,lensRy*.34,-.08,0,TAU);ctx.fill();ctx.restore();
-      ctx.fillStyle='rgba(2,18,23,.90)';ctx.beginPath();ctx.ellipse(-lensR*.010,lensR*.008,lensRx*.23,lensRy*.23,-.08,0,TAU);ctx.fill();
+      ctx.fillStyle='rgba(65,139,151,.060)';ctx.beginPath();ctx.ellipse(lensCx,lensCy,lensRx*.32,lensRy*.32,-.10,0,TAU);ctx.fill();ctx.restore();
+      ctx.fillStyle='rgba(2,12,16,.92)';ctx.beginPath();ctx.ellipse(lensCx,lensCy,lensRx*.20,lensRy*.20,-.10,0,TAU);ctx.fill();
       ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(118,181,188,.28)';ctx.lineCap='round';
       for(let i=0;i<14;i++){
         const a=i/14*TAU+Math.sin(time*.0009+i*.7)*.012;
         const r0=lensR*.18,r1=lensR*(.52+.16*Math.sin(i*1.71+time*.0011));
         ctx.globalAlpha=.08+.08*(.5+.5*Math.sin(time*.0018+i));
         ctx.lineWidth=i%3===0?1.35:.8;
-        ctx.beginPath();ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0*.78);
-        ctx.quadraticCurveTo(Math.cos(a+.10)*r1*.60,Math.sin(a+.10)*r1*.47,Math.cos(a)*r1,Math.sin(a)*r1*.78);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(lensCx+Math.cos(a)*r0,lensCy+Math.sin(a)*r0*.78);
+        ctx.quadraticCurveTo(
+          lensCx+Math.cos(a+.10)*r1*.60,lensCy+Math.sin(a+.10)*r1*.47,
+          lensCx+Math.cos(a)*r1,lensCy+Math.sin(a)*r1*.78
+        );ctx.stroke();
       }
       ctx.restore();
       ctx.restore();
@@ -329,12 +333,17 @@
       if(t>5.65){
         const tg=smooth((t-5.65)/1.0);
         ctx.save();ctx.strokeStyle='rgba(100,163,171,'+(.34*tg)+')';ctx.lineWidth=3.0;ctx.shadowColor='rgba(56,132,143,.14)';ctx.shadowBlur=2;
-        for(let i=0;i<7;i++){
-          const a=i/7*TAU+.24;
-          const sway=Math.sin(time*.0016+i*.91)*.08;
+        for(let i=0;i<5;i++){
+          const lane=(i-2)/2;
+          const sway=Math.sin(time*.00125+i*.91)*.045;
+          const sy=cy+lane*R*.28;
           ctx.beginPath();
-          ctx.moveTo(cx+Math.cos(a)*R*.66,cy+Math.sin(a)*R*.62);
-          ctx.bezierCurveTo(cx+Math.cos(a+.18+sway)*R*1.12,cy+Math.sin(a+.18+sway)*R*1.08,cx+Math.cos(a-.14-sway)*R*1.62,cy+Math.sin(a-.14-sway)*R*1.50,cx+Math.cos(a+sway*.45)*R*2.02,cy+Math.sin(a+sway*.45)*R*1.84);
+          ctx.moveTo(cx-R*.46,sy);
+          ctx.bezierCurveTo(
+            cx-R*(.78+sway),sy+lane*R*.10,
+            cx-R*(1.10-sway),sy-lane*R*.06,
+            cx-R*(1.48+.08*Math.abs(lane)),sy+lane*R*.16
+          );
           ctx.stroke();
         }
         ctx.restore();
@@ -427,13 +436,13 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-photographic-biocrystal-fallback-mobile-transparent-r1754'
+      quality:'hidpi-irregular-dark-biocrystal-fallback-mobile-transparent-r1756'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1754-neutral-filmic-mag-intro-world-parity'
+    visualRevision:'r1756-irregular-dark-biocrystal-intro-world-parity'
   };
 })();

@@ -8,8 +8,8 @@ import productionBase from './production-content-entry-r369-base.js';
    MAG renderer ownership and automatic lifecycle remain unchanged; the current
    product contract has no user-facing manual PAUSE control. */
 
-const STARTUP_REVISION = '20260926-r1754-live-intro-csp';
-const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-2VCarYAXTVvEdhyfRuOR04VCG+ohgz8OrM9945qE2W4='";
+const STARTUP_REVISION = '20260926-r1756-irregular-photoreal-biocrystal';
+const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-5rdoXFoKRb0cVHwNieKN8h699RJuUoT9L2731J+OTmE='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -63,8 +63,8 @@ const DEFERRED_STYLE_PATHS = new Set([
 
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
-    marker: 'scheduler-to-loader-r1725-photoreal-living-biocrystal',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20260924-r1727b-photographic-audit-stable']],
+    marker: 'scheduler-to-loader-r1756-irregular-photoreal-biocrystal',
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20260926-r1756-irregular-photoreal-biocrystal']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',

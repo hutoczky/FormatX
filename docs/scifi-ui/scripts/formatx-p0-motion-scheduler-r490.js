@@ -26,7 +26,7 @@ root.dataset.fxP0MotionCacheR1724='motion-loader-r1724-living-crystal-organism';
 root.dataset.fxP0MotionCacheR1725='motion-loader-r1725-photoreal-living-biocrystal';
 root.dataset.fxP0MotionCacheR1729='webdriver-validation-runs-real-r326-explicit-lighthouse-static-only';
 root.dataset.fxP0MotionCacheR1749='final-photoreal-mag-intro-material-parity';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260926-r1752-mag-functional-validation';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260926-r1756-irregular-photoreal-biocrystal';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
