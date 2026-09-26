@@ -286,20 +286,20 @@
     makeChamber(){
       const T=this.THREE;
       const group=new T.Group();
-      group.position.z=-3.65;
+      group.position.z=-3.05;
 
       const wallMat=new T.MeshPhysicalMaterial({
-        color:0x0b1420,metalness:.015,roughness:.54,
-        emissive:0x071321,emissiveIntensity:.13,
+        color:0x111a20,metalness:.010,roughness:.66,
+        emissive:0x071317,emissiveIntensity:.065,
         clearcoat:.16,clearcoatRoughness:.46,
         sheen:.18,sheenColor:new T.Color(0x153f52),sheenRoughness:.60,
         side:T.BackSide
       });
       const panelMat=new T.MeshPhysicalMaterial({
-        color:0x213042,metalness:.005,roughness:.56,
-        emissive:0x0a1d2e,emissiveIntensity:.10,
+        color:0x263039,metalness:.004,roughness:.64,
+        emissive:0x09161c,emissiveIntensity:.050,
         clearcoat:.14,clearcoatRoughness:.48,
-        transparent:true,opacity:.24,
+        transparent:true,opacity:.36,
         sheen:.15,sheenColor:new T.Color(0x244d61),sheenRoughness:.58
       });
       const darkPanelMat=new T.MeshPhysicalMaterial({
@@ -308,7 +308,7 @@
         transparent:true,opacity:.11
       });
       const lightMat=new T.MeshBasicMaterial({
-        color:0xc2dcdd,transparent:true,opacity:.052,
+        color:0xb9c9c7,transparent:true,opacity:.085,
         depthWrite:false,blending:T.AdditiveBlending
       });
 
@@ -325,9 +325,9 @@
       const floor=new T.Mesh(
         new T.PlaneGeometry(12,10,1,1),
         new T.MeshPhysicalMaterial({
-          color:0x071013,metalness:.04,roughness:.74,
-          clearcoat:.10,clearcoatRoughness:.60,
-          transparent:true,opacity:.76,envMapIntensity:.46
+          color:0x0d1518,metalness:.025,roughness:.52,
+          clearcoat:.20,clearcoatRoughness:.38,
+          transparent:true,opacity:.90,envMapIntensity:.62
         })
       );
       floor.rotation.x=-Math.PI/2;
@@ -387,17 +387,17 @@
       /* R1722 — living chamber. Reused geometry/materials keep draw cost bounded
          while the birth environment reads as a biological ecosystem, not a room. */
       const tissueMat=new T.MeshPhysicalMaterial({
-        color:0x3b2948,roughness:.46,metalness:0,
-        emissive:0x0d2030,emissiveIntensity:.13,
+        color:0x28292d,roughness:.58,metalness:0,
+        emissive:0x071317,emissiveIntensity:.045,
         clearcoat:.24,clearcoatRoughness:.34,
-        transparent:true,opacity:.42,
-        sheen:.22,sheenColor:new T.Color(0x286078),sheenRoughness:.56
+        transparent:true,opacity:.32,
+        sheen:.12,sheenColor:new T.Color(0x53686a),sheenRoughness:.66
       });
       const vesselMat=new T.MeshPhysicalMaterial({
-        color:0x1d5666,roughness:.28,metalness:0,
-        emissive:0x08748b,emissiveIntensity:.38,
-        clearcoat:.38,clearcoatRoughness:.18,
-        transparent:true,opacity:.58
+        color:0x2a4549,roughness:.38,metalness:0,
+        emissive:0x0a3941,emissiveIntensity:.10,
+        clearcoat:.24,clearcoatRoughness:.30,
+        transparent:true,opacity:.30
       });
       const sacGeo=new T.SphereGeometry(1,18,12);
       const sacDefs=[
@@ -446,7 +446,7 @@
       const g=new T.BufferGeometry();
       g.setAttribute('position',new T.BufferAttribute(pos,3));
       const m=new T.PointsMaterial({
-        color:0xa8c4c7,size:.020,transparent:true,opacity:.19,
+        color:0xa8b8b8,size:.018,transparent:true,opacity:.13,
         depthWrite:false,blending:T.NormalBlending,sizeAttenuation:true
       });
       this.particles=new T.Points(g,m);
