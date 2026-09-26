@@ -1,0 +1,7 @@
+FormatX production deployment trigger
+requested_at=2026-09-26
+source_master=671fae0238724dde93eacdfba9939736be5098b9
+release_line=R1752
+purpose=publish the fully validated R1750/R1751 photoreal MAG and intro plus R1752 functional validation fixes to the FormatX production custom domains
+visual=single dark asymmetric smoky-pearl living biocrystal; restrained cyan physiology; matched cinematic intro; no alternate mascot/sphere/animal state
+validation=production,lighthouse,hero-loop,canonical-contract,pure-3d-mag,p0,mobile-architecture all green on PR 295
