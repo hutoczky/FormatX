@@ -135,7 +135,7 @@
   root.dataset.fxNativeMagMaterialR1749='neutral-mineral-softbox-low-cyan-no-neon-rib-physical-smoked-glass';
   root.dataset.fxNativeMagVisualR1755='photographic-living-biocrystal-dermal-depth-microvascular-response';
   root.dataset.fxNativeMagMaterialR1755='smoky-pearl-bioglass-ggx-dermal-transmission-restrained-emission';
-  root.dataset.fxNativeMagPerformanceR1755='single-webgl-60hz-quality-shed-before-cadence-scroll-one-frame-no-section-sweep';
+  root.dataset.fxNativeMagPerformanceR1755='single-webgl-60hz-quality-shed-before-cadence-scroll-compositor-settle-redraw';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -1683,7 +1683,7 @@
       : (mobile?.80:.22);
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
-    let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,tapCandidate=null;
+    let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
@@ -2145,7 +2145,10 @@
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
         targetRotationY+=velocity*.016;
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        schedule(1);
+        /* R1755d — native compositor owns the hot scroll path. Keep the
+           organism state live, but defer shader redraw until the gesture settles. */
+        clearTimeout(scrollSettleTimer);
+        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
       });
     }
 
@@ -2194,7 +2197,7 @@
       targetRotationX=clamp(targetRotationX+vertical*.040,-1.02,1.02);
       boost(.66,mobile?2:4);
     }
-    function signalPhysiology(kind,source,surfaceResponse=true){
+    function signalPhysiology(kind,source,surfaceResponse=true,renderResponse=true){
       const state=String(kind||'stimulus');
       root.dataset.fxCorePhysiologyR1723=state;
       if(state==='attention'){
@@ -2246,7 +2249,7 @@
       }}));
       if(surfaceResponse)startSurfacePulse(String(source||state)+'-physiology');
       setShape('organism',source||state||'physiology');
-      schedule(surfaceResponse?(mobile?3:5):1);
+      if(renderResponse)schedule(surfaceResponse?(mobile?3:5):1);
     }
     function onCinematicScene(event){
       const detail=event.detail||{};
@@ -2332,13 +2335,13 @@
       const id=candidate?.target?.id;
       if(!id||id===activeOrgan)return;
       activeOrgan=id;root.dataset.fxCoreActiveOrgan=id;cinematic.activeOrgan=id;
-      signalPhysiology(sectionPhysiology[id]||'attention','site-section-'+id,false);
+      signalPhysiology(sectionPhysiology[id]||'attention','site-section-'+id,false,false);
     },{rootMargin:'-22% 0px -54% 0px',threshold:[0,.15,.35,.6]});
     document.querySelectorAll('main > section[id],main section.scene[id]').forEach(section=>organObserver.observe(section));
 
     function destroy(){
       if(disposed)return;disposed=true;
-      clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);delayed.forEach(clearTimeout);delayed.clear();
+      clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
       controller.abort();ro.disconnect();io.disconnect();organObserver.disconnect();
       if(!contextLost){buffers.forEach(buffer=>gl.deleteBuffer(buffer));gl.deleteProgram(program);}
