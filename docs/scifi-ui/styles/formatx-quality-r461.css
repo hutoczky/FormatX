@@ -2,6 +2,14 @@
    R576 locks the Lighthouse-observed hero/reference geometry before deferred runtime
    activation while preserving the transform-only intro hard bound and SOUND + ASK. */
 
+/* R860: award-readiness applies these inherited text metrics later. Establish
+   them with the blocking quality layer so loading that enhancement cannot
+   reshape every text descendant after the first frame. */
+html {
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
 html body.living-architecture #hero .hero-copy,
 html body.living-architecture #hero .fx-category-definition,
 html body.living-architecture #hero #hero-title,

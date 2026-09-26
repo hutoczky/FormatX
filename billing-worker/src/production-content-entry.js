@@ -22,7 +22,7 @@ const MOBILE_FIRST_PAINT_PRELOAD = `</scifi-ui/styles/formatx-mobile-first-paint
 // Keep the existing HTML cascade order and desktop-only media selection intact.
 const SHARED_FIRST_PAINT_PRELOADS = [
   '</scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint>; rel=preload; as=style',
-  '</scifi-ui/styles/formatx-quality-r461.css?v=20260902-r500-canonical-hero-state>; rel=preload; as=style',
+  '</scifi-ui/styles/formatx-quality-r461.css?v=20260927-r860-first-paint-text-metrics>; rel=preload; as=style',
   '</scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero>; rel=preload; as=style',
 ];
 // R853's production traces retain these three desktop render blockers. Match
@@ -246,7 +246,7 @@ function injectDeferredCssRuntime(html) {
 function cacheBustCriticalQuality(html) {
   return String(html || '').replace(
     /formatx-quality-r461\.css\?v=[^"']+/g,
-    'formatx-quality-r461.css?v=20260902-r500-canonical-hero-state'
+    'formatx-quality-r461.css?v=20260927-r860-first-paint-text-metrics'
   );
 }
 function optimizeHomepage(html) {

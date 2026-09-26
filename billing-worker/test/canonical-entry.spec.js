@@ -4,7 +4,7 @@ import canonicalWorker from '../src/production-content-entry.js';
 const P0_PRELOAD = '</scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260903-r503-hero-ancestor-first-frame>; rel=preload; as=style';
 const SHARED_FIRST_PAINT_URLS = [
   '/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint',
-  '/scifi-ui/styles/formatx-quality-r461.css?v=20260902-r500-canonical-hero-state',
+  '/scifi-ui/styles/formatx-quality-r461.css?v=20260927-r860-first-paint-text-metrics',
   '/scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero',
 ];
 const RESPONSIVE_FIRST_PAINT = [
