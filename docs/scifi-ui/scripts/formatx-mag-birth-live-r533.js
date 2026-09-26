@@ -522,7 +522,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260926-r1754-final-photoreal-continuity';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260926-r1756-irregular-photoreal-biocrystal';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
