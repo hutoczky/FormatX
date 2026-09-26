@@ -1119,7 +1119,7 @@
 
         /* R1593 — a physical smoked-glass lens, not a glowing eye or HUD.
            Its shading is driven by the same studio reflections as the obsidian. */
-        vec2 lq=vec2((q.x+.018)*1.34,(q.y-.020)*.92);
+        vec2 lq=vec2((q.x+.022)*1.46,(q.y-.022)*.90);
         float lensD=length(lq);
         float lensOuter=(1.0-smoothstep(.110,.158,lensD))*front*.16;
         float lensGlass=(1.0-smoothstep(.070,.112,lensD))*front*.13;
@@ -1300,15 +1300,15 @@
         col+=vec3(.068,.084,.091)*cortexRidge*.075;
         float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.35);
         float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1);
-        float plateMask=smoothstep(.67,.89,max(plateField,plateCross*.82))*bodyMask;
+        float plateMask=smoothstep(.80,.96,max(plateField,plateCross*.82))*bodyMask;
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.7)*bodyMask;
         float facetTone=.91+.13*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.17,.22,.23)+vec3(.29,.31,.29)*(.18*ndl+.13*sideLight+.15*softboxA);
+        vec3 ivory=vec3(.135,.170,.178)+vec3(.215,.235,.225)*(.16*ndl+.11*sideLight+.12*softboxA);
         ivory+=vec3(.48,.31,.20)*studioRibbonB*.045;
         col*=mix(1.0,facetTone,bodyMask*.40);
-        col=mix(col,ivory,plateMask*.42);
+        col=mix(col,ivory,plateMask*.16);
         col=mix(col,vec3(.004,.008,.014),livingSeam*.52);
-        col+=vec3(.044,.225,.260)*vascular*(.085+.155*uEnergy);
+        col+=vec3(.020,.082,.096)*vascular*(.035+.065*uEnergy);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1321,9 +1321,9 @@
 
         vec2 lq=vec2((q.x+.018)*1.34,(q.y-.020)*.92);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.126,.184,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.080,.132,lensD))*front;
-        float lensCore=(1.0-smoothstep(.024,.052,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.105,.150,lensD))*front*.12;
+        float lensGlass=(1.0-smoothstep(.066,.104,lensD))*front*.10;
+        float lensCore=(1.0-smoothstep(.018,.038,lensD))*front*.055;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensDepth=sat(1.0-lensD/.080);
@@ -1337,10 +1337,10 @@
         float ribs=sat(upperRib+lowerRib+sideRib);
 
         col=mix(col,vec3(.007,.013,.015),lensOuter*.30);
-        col+=vec3(.36,.41,.40)*lensRim*(.052+.090*sideLight+.070*fresnel);
-        col+=vec3(.040,.073,.078)*lensGlass*(.060+.100*softboxA+.065*sideSpec);
-        col+=vec3(.54,.58,.56)*lensHighlight*.090;
-        col+=vec3(.010,.030,.035)*lensCore*lensDepth*.024;
+        col+=vec3(.19,.22,.22)*lensRim*(.018+.035*sideLight+.025*fresnel);
+        col+=vec3(.018,.030,.033)*lensGlass*(.025+.040*softboxA+.025*sideSpec);
+        col+=vec3(.28,.30,.29)*lensHighlight*.035;
+        col+=vec3(.006,.016,.018)*lensCore*lensDepth*.012;
         col=mix(col,vec3(.006,.009,.010),ribs*.16);
         col+=vec3(.26,.28,.27)*ribs*(.020+.060*keySpec+.060*sideSpec);
 
@@ -1354,11 +1354,11 @@
         col+=vec3(.48,.55,.54)*pulse*(.08+.18*softboxA);
 
         float subsurface=pow(max(0.0,dot(-n,key)),1.7)*(1.0-facing);
-        vec3 livingMembrane=vec3(.008,.022,.030)
-          +vec3(.080,.17,.20)*(.12*ndl+.21*sideLight+.55*fresnel)
-          +vec3(.58,.78,.80)*softboxA*.24
-          +vec3(.26,.46,.51)*softboxB*.16
-          +vec3(.075,.055,.085)*subsurface*.18;
+        vec3 livingMembrane=vec3(.006,.014,.018)
+          +vec3(.046,.095,.105)*(.10*ndl+.17*sideLight+.38*fresnel)
+          +vec3(.30,.38,.38)*softboxA*.12
+          +vec3(.14,.22,.24)*softboxB*.08
+          +vec3(.045,.038,.050)*subsurface*.10;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
         vec3 cartilage=vec3(.020,.012,.031)
@@ -1399,7 +1399,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.92),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(col*1.46),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1452,12 +1452,12 @@
         float vascular=max(vesselA,vesselB)*bodyMask;
         float plateField=.5+.5*sin(vUv.x*16.8+sin(vUv.y*11.8)*1.4);
         float plateCross=.5+.5*sin(vUv.y*15.2-vUv.x*6.4);
-        float plateMask=smoothstep(.56,.80,max(plateField,plateCross*.84))*bodyMask;
-        vec3 ivory=vec3(.58,.70,.74)+vec3(.34,.31,.24)*(.30*ndl+.18*sideLight);
-        ivory+=vec3(.20,.35,.38)*fresnel*.14;
-        col=mix(col,ivory,plateMask*.70);
-        col+=vec3(.10,.61,.82)*vascular*(.22+.30*uEnergy);
-        col+=vec3(1.00,.43,.09)*plateMask*sideSpec*.055;
+        float plateMask=smoothstep(.82,.97,max(plateField,plateCross*.84))*bodyMask;
+        vec3 ivory=vec3(.12,.155,.165)+vec3(.20,.21,.19)*(.22*ndl+.13*sideLight);
+        ivory+=vec3(.075,.105,.110)*fresnel*.06;
+        col=mix(col,ivory,plateMask*.13);
+        col+=vec3(.018,.080,.095)*vascular*(.035+.060*uEnergy);
+        col+=vec3(.18,.11,.065)*plateMask*sideSpec*.018;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1465,18 +1465,18 @@
         crack*=1.0-smoothstep(.31,.40,abs(q.y));
         col+=vec3(.13,.20,.20)*crack*front*.08;
 
-        vec2 lq=vec2(q.x,(q.y-.010)*1.08);
+        vec2 lq=vec2((q.x+.022)*1.48,(q.y-.022)*.90);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.082,.108,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.046,.079,lensD))*front;
-        float lensCore=(1.0-smoothstep(.018,.041,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.060,.086,lensD))*front*.10;
+        float lensGlass=(1.0-smoothstep(.036,.062,lensD))*front*.075;
+        float lensCore=(1.0-smoothstep(.014,.030,lensD))*front*.045;
         float lensRim=max(0.0,lensOuter-lensGlass);
-        vec3 lens=vec3(.006,.014,.017)
-          +vec3(.055,.105,.115)*fresnel
-          +vec3(.42,.48,.46)*keySpec*.20
-          +vec3(.025,.078,.087)*lensGlass;
-        lens=mix(lens,vec3(.006,.024,.029),lensCore*.68);
-        lens+=vec3(.31,.39,.38)*lensRim*.12;
+        vec3 lens=vec3(.005,.010,.012)
+          +vec3(.020,.038,.042)*fresnel
+          +vec3(.18,.20,.19)*keySpec*.06
+          +vec3(.010,.026,.029)*lensGlass;
+        lens=mix(lens,vec3(.004,.012,.014),lensCore*.35);
+        lens+=vec3(.13,.15,.15)*lensRim*.035;
         col=mix(col,lens,lensOuter*.96);
 
         float pulse=0.0;
@@ -1507,14 +1507,14 @@
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.06,.21,lensRadial);
         float electric=pow(.5+.5*sin(atan(vUv.y-.5,vUv.x-.5)*10.0+lensRadial*64.0-uTime*1.8),14.0)*lensInner;
-        vec3 optical=vec3(.012,.035,.043)+vec3(.040,.27,.34)*lensInner+vec3(.72,.84,.82)*keySpec*.17+vec3(.080,.20,.24)*fresnel*.15;
-        optical+=vec3(.12,.64,.82)*electric*(.18+.20*uEnergy);
+        vec3 optical=vec3(.007,.016,.019)+vec3(.012,.050,.060)*lensInner+vec3(.24,.28,.27)*keySpec*.055+vec3(.025,.055,.062)*fresnel*.055;
+        optical+=vec3(.025,.10,.12)*electric*(.035+.045*uEnergy);
         col=mix(col,optical,isLensMesh*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*3.42),clamp(alpha,.76,1.0));
+        ${outputName}=vec4(tone(col*1.62),clamp(alpha,.76,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
