@@ -300,7 +300,10 @@
       const lensR=Math.max(16,R*.115);
       const lensRx=lensR*.88,lensRy=lensR*.70;
       const lensCx=R*.12,lensCy=-R*.055;
-      const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
+      const lens=ctx.createRadialGradient(
+        lensCx-lensR*.25,lensCy-lensR*.28,1,
+        lensCx,lensCy,lensR
+      );
       lens.addColorStop(0,'rgba(226,234,232,.72)');
       lens.addColorStop(.12,'rgba(135,166,168,.82)');
       lens.addColorStop(.30,'rgba(55,111,120,.92)');
@@ -318,8 +321,11 @@
         const r0=lensR*.18,r1=lensR*(.52+.16*Math.sin(i*1.71+time*.0011));
         ctx.globalAlpha=.08+.08*(.5+.5*Math.sin(time*.0018+i));
         ctx.lineWidth=i%3===0?1.35:.8;
-        ctx.beginPath();ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0*.78);
-        ctx.quadraticCurveTo(Math.cos(a+.10)*r1*.60,Math.sin(a+.10)*r1*.47,Math.cos(a)*r1,Math.sin(a)*r1*.78);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(lensCx+Math.cos(a)*r0,lensCy+Math.sin(a)*r0*.78);
+        ctx.quadraticCurveTo(
+          lensCx+Math.cos(a+.10)*r1*.60,lensCy+Math.sin(a+.10)*r1*.47,
+          lensCx+Math.cos(a)*r1,lensCy+Math.sin(a)*r1*.78
+        );ctx.stroke();
       }
       ctx.restore();
       ctx.restore();
