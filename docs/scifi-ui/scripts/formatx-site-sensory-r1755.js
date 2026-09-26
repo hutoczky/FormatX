@@ -41,16 +41,11 @@ function commit(){
     state.energy=Math.min(state.energy,.20);
     state.press=0;
   }
-  const xPct=(50+state.x*(coarse.matches?20:30)).toFixed(2)+'%';
-  const yPct=(40-state.y*(coarse.matches?16:22)+state.scroll*2.2).toFixed(2)+'%';
-  const x2Pct=(58-state.x*(coarse.matches?12:18)).toFixed(2)+'%';
-  const y2Pct=(64+state.y*(coarse.matches?10:15)-state.scroll*1.4).toFixed(2)+'%';
-  const dx=(state.vx*(coarse.matches?2.0:3.4)).toFixed(2)+'px';
-  const dy=(state.vy*(coarse.matches?1.4:2.6)).toFixed(2)+'px';
-  setVar('--fx-sense-x',xPct);
-  setVar('--fx-sense-y',yPct);
-  setVar('--fx-sense-x2',x2Pct);
-  setVar('--fx-sense-y2',y2Pct);
+  /* R1755b: keep pointer/scroll reaction on compositor properties only.
+     Moving gradient focal points forces rasterization; translate the already
+     rasterized field instead and preserve the same spatial response. */
+  const dx=(state.x*(coarse.matches?4.5:9.0)+state.vx*(coarse.matches?1.0:1.8)).toFixed(2)+'px';
+  const dy=(-state.y*(coarse.matches?3.5:7.0)+state.scroll*(coarse.matches?1.5:3.0)+state.vy*.8).toFixed(2)+'px';
   setVar('--fx-sense-dx',dx);
   setVar('--fx-sense-dy',dy);
   setVar('--fx-sense-energy',clamp(state.energy,0,1).toFixed(3));
@@ -139,7 +134,7 @@ ensureStyle();
 ensureField();
 root.dataset.fxSiteSensoryR1755='ready';
 root.dataset.fxSiteSensorySchedulerR1755='single-coalesced-raf-zero-idle';
-root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl';
+root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only';
 root.dataset.fxSiteSensoryInputR1755='pointer-touch-scroll-wheel-key-focus-click-input-change-submit-orientation';
 
 addEventListener('pointermove',onPointerMove,{passive:true});
