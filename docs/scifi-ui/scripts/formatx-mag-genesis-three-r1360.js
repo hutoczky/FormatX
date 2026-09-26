@@ -971,7 +971,7 @@
       }
       shellGeo.computeVertexNormals();
       const shell=new T.Mesh(shellGeo,this.organicShellMaterial);
-      shell.scale.set(.78,.91,.68);
+      shell.scale.set(.62,1.04,.58);
       shell.position.set(-.055,.012,-.018);
       shell.userData.baseScale=shell.scale.clone();
       this.organicShell=shell;
@@ -987,18 +987,18 @@
         envMapIntensity:1.28,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.795,.928,.695);
+      this.organicMembrane.scale.set(.635,1.058,.595);
       this.organicMembrane.position.set(-.055,.012,-.002);
       this.organicMembrane.userData.baseScale=this.organicMembrane.scale.clone();
       this.organicGroup.add(this.organicMembrane);
 
       this.organicLobes=[];
-      const lobeGeo=new T.SphereGeometry(.108,12,8);
-      const count=innerWidth<900?4:6;
+      const lobeGeo=new T.SphereGeometry(.075,12,8);
+      const count=innerWidth<900?3:4;
       for(let i=0;i<count;i++){
         const phi=Math.acos(1-2*(i+.5)/count);
         const theta=Math.PI*(1+Math.sqrt(5))*i;
-        const rr=.80+(r()-.5)*.08;
+        const rr=.61+(r()-.5)*.055;
         const lobe=new T.Mesh(lobeGeo,this.organicLobeMaterial);
         lobe.position.set(
           Math.sin(phi)*Math.cos(theta)*rr,
@@ -1007,9 +1007,9 @@
         );
         const k=.78+r()*.38;
         lobe.scale.set(
-          k*(.72+r()*.20),
-          k*(1.02+r()*.22),
-          k*(.68+r()*.18)
+          k*(.55+r()*.14),
+          k*(.92+r()*.18),
+          k*(.50+r()*.12)
         );
         lobe.rotation.set(r()*2.4,r()*2.4,r()*2.4);
         lobe.userData.phase=r()*Math.PI*2;
@@ -1055,12 +1055,12 @@
         this.guardianParts.push(mesh);
         return mesh;
       };
-      addFacet('upperLeft',[-.36,.34,.02],[.30,.42,.24],[.05,.08,.30]);
-      addFacet('upperRight',[.38,.28,.04],[.33,.38,.26],[-.03,-.08,-.27]);
-      addFacet('lowerLeft',[-.31,-.33,.00],[.28,.36,.22],[-.04,.05,-.22]);
-      addFacet('lowerRight',[.34,-.38,.03],[.27,.34,.23],[.04,-.05,.25]);
-      addFacet('crown',[-.06,.69,-.03],[.24,.42,.19],[0,.08,.08]);
-      addFacet('root',[.03,-.70,-.02],[.22,.38,.18],[0,-.06,-.06],true);
+      addFacet('upperLeft',[-.20,.31,.01],[.15,.30,.13],[.05,.08,.24]);
+      addFacet('upperRight',[.22,.25,.02],[.16,.27,.14],[-.03,-.08,-.22]);
+      addFacet('lowerLeft',[-.17,-.30,.00],[.14,.26,.12],[-.04,.05,-.18]);
+      addFacet('lowerRight',[.19,-.34,.01],[.14,.25,.12],[.04,-.05,.20]);
+      addFacet('crown',[-.08,.62,-.02],[.12,.29,.105],[0,.08,.07]);
+      addFacet('root',[-.01,-.64,-.02],[.11,.27,.10],[0,-.06,-.05],true);
 
       const livingCrystalMembraneMaterial=new T.MeshPhysicalMaterial({
         color:0x7f9395,roughness:.24,metalness:0,
@@ -1077,12 +1077,12 @@
       livingCrystalMembraneShape.bezierCurveTo(-.06,.42,-.15,.18,0,0);
       const livingCrystalMembraneGeo=new T.ShapeGeometry(livingCrystalMembraneShape,12);
       const membraneDefs=[
-        [-.25,.60,-.02,-.54,.82,.50],
-        [ .23,.61,.00,.50,.80,.48],
-        [-.46,.16,-.07,-1.02,.72,.44],
-        [ .47,.13,-.06,.98,.74,.43],
-        [-.32,-.47,-.05,-2.30,.68,.41],
-        [ .30,-.49,-.04,2.26,.67,.40]
+        [-.18,.56,-.03,-.50,.58,.34],
+        [ .16,.57,-.01,.46,.56,.33],
+        [-.34,.13,-.08,-.96,.50,.30],
+        [ .35,.11,-.07,.92,.51,.29],
+        [-.23,-.44,-.06,-2.24,.46,.27],
+        [ .21,-.46,-.05,2.20,.45,.27]
       ];
       this.guardianMembranes=[];
       membraneDefs.forEach((d,index)=>{
@@ -1725,7 +1725,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx+.16*chestEmbed,ty+.045*chestEmbed,.42+.12*chestEmbed);
+      this.coreGroup.position.set(tx+.205*chestEmbed,ty+.055*chestEmbed,.40+.10*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
@@ -1755,11 +1755,11 @@
       const visible=grow;
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
-      this.organicGroup.scale.set(bodyScale*.84,bodyScale*.84,bodyScale*.84);
+      this.organicGroup.scale.set(bodyScale*.96,bodyScale*.96,bodyScale*.96);
 
-      this.organicShellMaterial.opacity=(.50+.08*maturity)*visible;
-      this.organicLobeMaterial.opacity=(.075+.040*maturity)*visible;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.075+.040*maturity)*visible;
+      this.organicShellMaterial.opacity=(.64+.08*maturity)*visible;
+      this.organicLobeMaterial.opacity=(.040+.025*maturity)*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.045+.025*maturity)*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=(.12+.12*maturity)*visible;
       this.organicHoodMaterial.opacity=0;
@@ -1792,9 +1792,9 @@
           if(base)membrane.scale.set(base.x*q,base.y*q,1);
         });
       }
-      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=(.50+.14*maturity)*visible;
-      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=(.07+.05*maturity)*visible;
-      if(this.guardianMembraneMaterial)this.guardianMembraneMaterial.opacity=(.072+.042*maturity)*visible;
+      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=(.30+.09*maturity)*visible;
+      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=(.035+.025*maturity)*visible;
+      if(this.guardianMembraneMaterial)this.guardianMembraneMaterial.opacity=(.040+.024*maturity)*visible;
       this.organicLobes.forEach((lobe,i)=>{
         const q=1+Math.sin(time*.00072+lobe.userData.phase)*.009*visible;
         const b=lobe.userData.baseScale;
