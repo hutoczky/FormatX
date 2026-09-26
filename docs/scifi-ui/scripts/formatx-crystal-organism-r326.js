@@ -133,6 +133,8 @@
   root.dataset.fxNativeMagMaterialR1727='compile-safe-facet-tones-neutral-subsurface-low-emission-studio-reflection';
   root.dataset.fxNativeMagVisualR1749='final-photographic-smoky-pearl-biocrystal-integrated-optic';
   root.dataset.fxNativeMagMaterialR1749='neutral-mineral-softbox-low-cyan-no-neon-rib-physical-smoked-glass';
+  root.dataset.fxNativeMagVisualR1755='final-neutral-photographic-biocrystal-low-chroma-integrated-membrane';
+  root.dataset.fxNativeMagMaterialR1755='smoky-pearl-ggx-neutral-softbox-restrained-vascular-optic';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -1056,7 +1058,7 @@
         mineral+=vec3(.52,.34,.22)*studioRibbonB*.052;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
-        mineral+=vec3(.100,.205,.235)*fresnel*.34;
+        mineral+=vec3(.095,.176,.194)*fresnel*.28;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1077,7 +1079,7 @@
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        mineral+=vec3(.024,.165,.190)*vascular*(.090+.170*uEnergy);
+        mineral+=vec3(.022,.135,.152)*vascular*(.075+.145*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
@@ -1102,7 +1104,7 @@
         mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
         mineral=mix(mineral,ivory,plateMask*.58);
         mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
-        mineral+=vec3(.050,.275,.325)*vascular*(.11+.19*uEnergy);
+        mineral+=vec3(.046,.220,.252)*vascular*(.095+.165*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
 
         vec2 q=vLocal.xy;
@@ -1143,7 +1145,7 @@
         mineral+=vec3(.003,.009,.011)*lensCore*lensDepth*.020;
         mineral=mix(mineral,vec3(.010,.013,.016),ribs*.18);
         mineral+=vec3(.080,.096,.102)*ribs*(.014+.044*keySoft+.038*sideSpec);
-        mineral+=vec3(.020,.115,.135)*ribs*lensOuter*(.035+.045*uEnergy);
+        mineral+=vec3(.018,.082,.094)*ribs*lensOuter*(.028+.036*uEnergy);
 
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
@@ -1155,11 +1157,11 @@
         mineral+=vec3(.58,.64,.62)*pulse*(.10+.24*softboxA);
 
         vec3 livingMembrane=vec3(.008,.022,.030);
-        livingMembrane+=vec3(.085,.175,.205)*(.12*ndl+.22*sideLight+.58*fresnel);
+        livingMembrane+=vec3(.090,.145,.158)*(.12*ndl+.22*sideLight+.52*fresnel);
         livingMembrane+=vec3(.66,.87,.88)*softboxA*.24;
         livingMembrane+=vec3(.32,.52,.57)*softboxB*.18;
-        livingMembrane+=vec3(.10,.52,.62)*edgeTransmission*.58;
-        livingMembrane+=vec3(.22,.075,.30)*subsurface*.34;
+        livingMembrane+=vec3(.085,.34,.39)*edgeTransmission*.42;
+        livingMembrane+=vec3(.085,.065,.096)*subsurface*.20;
         mineral=mix(mineral,livingMembrane,glassFinMask*.965);
 
         vec3 cartilage=vec3(.020,.012,.031);

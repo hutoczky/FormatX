@@ -236,8 +236,8 @@
       {
         const body=ctx.createRadialGradient(-R*.20,-R*.24,4,0,0,R*1.02);
         body.addColorStop(0,'rgba(220,226,224,.90)');
-        body.addColorStop(.18,'rgba(153,169,171,.96)');
-        body.addColorStop(.42,'rgba(73,91,98,.985)');
+        body.addColorStop(.18,'rgba(149,160,161,.96)');
+        body.addColorStop(.42,'rgba(70,82,86,.985)');
         body.addColorStop(.68,'rgba(29,38,47,.995)');
         body.addColorStop(1,'rgba(3,8,14,1)');
         ctx.fillStyle=body;
@@ -287,7 +287,7 @@
           ctx.closePath();ctx.fill();ctx.stroke();
         }
         ctx.restore();
-        ctx.strokeStyle='rgba(103,174,184,.34)';ctx.lineWidth=1.35;ctx.shadowColor='rgba(72,142,153,.16)';ctx.shadowBlur=2;
+        ctx.strokeStyle='rgba(108,156,162,.28)';ctx.lineWidth=1.35;ctx.shadowColor='rgba(72,142,153,.16)';ctx.shadowBlur=2;
         for(let i=0;i<14;i++){
           const a=i/14*TAU+.14;
           const bend=.16*Math.sin(i*1.37+time*.0008);
@@ -305,8 +305,8 @@
       const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
       lens.addColorStop(0,'rgba(226,234,232,.72)');
       lens.addColorStop(.12,'rgba(135,166,168,.82)');
-      lens.addColorStop(.30,'rgba(55,111,120,.92)');
-      lens.addColorStop(.54,'rgba(18,66,78,.985)');
+      lens.addColorStop(.30,'rgba(58,98,104,.92)');
+      lens.addColorStop(.54,'rgba(20,56,64,.985)');
       lens.addColorStop(.80,'rgba(5,31,39,1)');
       lens.addColorStop(1,'rgba(1,10,14,1)');
       ctx.fillStyle=lens;ctx.beginPath();ctx.ellipse(-lensR*.025,lensR*.015,lensRx,lensRy,-.08,0,TAU);ctx.fill();
@@ -427,13 +427,13 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-photographic-biocrystal-fallback-mobile-transparent-r1754'
+      quality:'hidpi-photographic-biocrystal-fallback-mobile-transparent-r1755'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1754-neutral-filmic-mag-intro-world-parity'
+    visualRevision:'r1755-final-neutral-photographic-mag-intro-world-parity'
   };
 })();
