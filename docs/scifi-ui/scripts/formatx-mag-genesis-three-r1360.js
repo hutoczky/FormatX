@@ -693,7 +693,7 @@
       const shellGlass=new T.MeshPhysicalMaterial({
         color:0x8fd6e2,metalness:0,roughness:.050,
         transparent:true,opacity:.085,depthWrite:false,
-        clearcoat:1,clearcoatRoughness:.020,
+        clearcoat:.48,clearcoatRoughness:.18,
         transmission:.24,thickness:.20,ior:1.41,
         attenuationColor:new T.Color(0x1a7590),attenuationDistance:2.1,
         envMapIntensity:1.62
@@ -759,12 +759,12 @@
 
       this.irisGroup=new T.Group();
       const socketBack=new T.Mesh(
-        new T.CircleGeometry(.258,72),
+        new T.CircleGeometry(.162,64),
         new T.MeshPhysicalMaterial({
-          color:0x071927,metalness:.01,roughness:.20,
-          clearcoat:.58,clearcoatRoughness:.12,
-          emissive:0x05283a,emissiveIntensity:.12,
-          specularIntensity:.82,specularColor:new T.Color(0xaeefff),
+          color:0x10191d,metalness:.005,roughness:.42,
+          clearcoat:.30,clearcoatRoughness:.28,
+          emissive:0x031116,emissiveIntensity:.025,
+          specularIntensity:.54,specularColor:new T.Color(0xb8c6c5),
           transparent:true,opacity:.98,side:T.DoubleSide
         })
       );
@@ -772,34 +772,34 @@
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
-        new T.TorusGeometry(.205,.025,18,112),
+        new T.TorusGeometry(.128,.014,14,80),
         new T.MeshPhysicalMaterial({
-          color:0xb9dfe6,metalness:.04,roughness:.14,
-          clearcoat:.78,clearcoatRoughness:.065,
-          emissive:0x0a6c89,emissiveIntensity:.22,
-          specularIntensity:.96,specularColor:new T.Color(0xffffff)
+          color:0x6c7978,metalness:.015,roughness:.34,
+          clearcoat:.36,clearcoatRoughness:.24,
+          emissive:0x04222a,emissiveIntensity:.035,
+          specularIntensity:.62,specularColor:new T.Color(0xd5ddda)
         })
       );
       socketBezel.position.z=.302;
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x0a4760,metalness:0,roughness:.052,
+        color:0x183138,metalness:0,roughness:.24,
         clearcoat:1,clearcoatRoughness:.020,
-        transmission:.34,thickness:.26,ior:1.46,
-        attenuationColor:new T.Color(0x0a5f79),attenuationDistance:.54,
-        emissive:0x0a83a8,emissiveIntensity:.42,
-        envMapIntensity:1.82,
+        transmission:.12,thickness:.12,ior:1.42,
+        attenuationColor:new T.Color(0x203b3e),attenuationDistance:.82,
+        emissive:0x063640,emissiveIntensity:.065,
+        envMapIntensity:1.08,
         transparent:true,opacity:.995
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.142,72,42),lensMat);
+      const lens=new T.Mesh(new T.SphereGeometry(.086,48,28),lensMat);
       lens.scale.set(1,1,.30);
       lens.position.z=.337;
       this.irisGroup.add(lens);
 
       const aperture=new T.Mesh(
-        new T.CircleGeometry(.027,48),
+        new T.CircleGeometry(.016,36),
         new T.MeshPhysicalMaterial({
           color:0x010305,metalness:.04,roughness:.10,
           clearcoat:.88,clearcoatRoughness:.06,side:T.DoubleSide
@@ -809,13 +809,13 @@
       this.irisGroup.add(aperture);
 
       const glassRing=new T.Mesh(
-        new T.TorusGeometry(.119,.0085,16,112),
+        new T.TorusGeometry(.073,.005,12,72),
         new T.MeshPhysicalMaterial({
-          color:0xe0b16a,metalness:.08,roughness:.11,
-          clearcoat:.92,clearcoatRoughness:.040,
-          emissive:0xc85d12,emissiveIntensity:.30,
-          specularIntensity:.94,specularColor:new T.Color(0xffecd0),
-          transparent:true,opacity:.48
+          color:0x756556,metalness:.025,roughness:.36,
+          clearcoat:.36,clearcoatRoughness:.24,
+          emissive:0x3a1b0d,emissiveIntensity:.035,
+          specularIntensity:.52,specularColor:new T.Color(0xd6c8ba),
+          transparent:true,opacity:.22
         })
       );
       glassRing.position.z=.376;
@@ -828,7 +828,7 @@
         transparent:true,opacity:.018,depthWrite:false,
         blending:T.NormalBlending
       }));
-      this.irisCorona.scale.set(.62,.62,1);
+      this.irisCorona.scale.set(.34,.34,1);
       this.irisCorona.position.z=.305;
       this.irisGroup.add(this.irisCorona);
       this.coreGroup.add(this.irisGroup);
@@ -837,14 +837,14 @@
         map:this.makeGlowTexture(),color:0x9fc8cc,
         transparent:true,opacity:.012,blending:T.NormalBlending,depthWrite:false
       }));
-      this.glowSprite.scale.set(.86,.86,1);
+      this.glowSprite.scale.set(.44,.44,1);
       this.glowSprite.position.z=.29;
       this.coreGroup.add(this.glowSprite);
 
       this.coreInner=new T.Mesh(
-        new T.IcosahedronGeometry(.105,2),
+        new T.IcosahedronGeometry(.060,2),
         new T.MeshBasicMaterial({
-          color:0xe8ffff,transparent:true,opacity:.34,
+          color:0xa9c0be,transparent:true,opacity:.12,
           depthWrite:false,blending:T.AdditiveBlending
         })
       );
@@ -1735,17 +1735,18 @@
       this.coreGroup.rotation.x=Math.sin(time*.00019)*.008-this.interactionY*.022;
 
       const irisAwake=smooth((t-.70)/.80)*coreLife;
+      const opticEmbed=1.0-.38*chestEmbed;
       const pulse=.988+.012*Math.sin(time*.0042);
       this.coreShell.material.opacity=.82*seedShellLife;
       this.coreGlass.material.opacity=.030*seedShellLife;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=coreLife>.005;
-      this.irisGroup.scale.setScalar((.78+irisAwake*.035)*pulse);
-      if(this.irisCorona)this.irisCorona.material.opacity=.016*coreLife+.026*irisAwake;
-      this.glowSprite.material.opacity=(.006*coreLife+.014*irisAwake)*pulse;
+      this.irisGroup.scale.setScalar((.64+irisAwake*.020)*pulse*opticEmbed);
+      if(this.irisCorona)this.irisCorona.material.opacity=(.007*coreLife+.010*irisAwake)*opticEmbed;
+      this.glowSprite.material.opacity=(.003*coreLife+.006*irisAwake)*pulse*opticEmbed;
       this.glowSprite.scale.setScalar(.66+irisAwake*.08+this.interactionImpulse*.025);
-      this.coreInner.material.opacity=.014*coreLife+.026*irisAwake;
-      this.coreLight.intensity=.20*coreLife+irisAwake*.38+this.interactionImpulse*.10;
+      this.coreInner.material.opacity=(.007*coreLife+.012*irisAwake)*opticEmbed;
+      this.coreLight.intensity=(.12*coreLife+irisAwake*.18)*opticEmbed+this.interactionImpulse*.055;
       if(this.coreLabel)this.coreLabel.material.opacity=0;
     }
 
