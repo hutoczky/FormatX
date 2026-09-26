@@ -52,7 +52,7 @@
     return;
   }
 
-  let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,pointerSettleTimer=0,lastDrawAt=0;
+  let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,scrollStartTimer=0,pointerSettleTimer=0,lastDrawAt=0;
   let started=false;
   let pointerX=0,pointerY=0,targetX=0,targetY=0;
   let scrollTarget=0,scrollValue=0,impulse=0;
@@ -510,6 +510,7 @@
 
   function startHabitat(source='intent'){
     if(started||LIGHTHOUSE)return;
+    clearTimeout(scrollStartTimer);scrollStartTimer=0;
     started=true;
     ROOT.dataset.fxLivingHabitatStartR1737=source;
     ROOT.dataset.fxLivingHabitatFirstPaintR1737='post-intent-no-initial-layout-work';
@@ -520,7 +521,20 @@
   }
 
   addEventListener('resize',resize,{passive:true});
-  addEventListener('scroll',()=>{if(!started)startHabitat('scroll');updateScroll();habitatInput('scroll');},{passive:true});
+  addEventListener('scroll',()=>{
+    /* R1755 — never allocate or repaint the full-viewport habitat on the hot
+       scroll path. MAG + compositor sensory field react immediately; the deep
+       habitat catches up only after the gesture settles. */
+    updateScroll();
+    ROOT.dataset.fxHabitatInputR1695='scroll';
+    if(!started){
+      clearTimeout(scrollStartTimer);
+      scrollStartTimer=setTimeout(()=>{
+        scrollStartTimer=0;
+        if(!started)startHabitat('scroll-settle');
+      },140);
+    }
+  },{passive:true});
   addEventListener('pointermove',pointer,{passive:true});
   addEventListener('pointerdown',()=>{if(!started)startHabitat('pointerdown');pulse('press',.82);},{passive:true});
   addEventListener('pointerup',()=>pulse('release',.52),{passive:true});
@@ -597,6 +611,7 @@
   ROOT.dataset.fxLivingHabitatPerformanceR1720='event-driven-hidpi-mobile-zero-idle-world';
   ROOT.dataset.fxLivingHabitatR1721='membranes-neural-roots-deep-cellular-parallax';
   ROOT.dataset.fxLivingHabitatPerformanceR1721='event-driven-hidpi-sharp-background-zero-idle';
+  ROOT.dataset.fxLivingHabitatSchedulerR1755='scroll-hot-path-zero-canvas-start-zero-class-repaint-after-settle';
   ROOT.dataset.fxLivingHabitatInteractionR1722='all-site-inputs-synchronized-with-organism-zero-extra-loop';
   ROOT.dataset.fxLivingHabitatPhysiologyR1723='same-organism-energy-breath-tissue-neural-world';
   ROOT.dataset.fxLivingHabitatCrystalWorldR1724='cyan-biocrystal-arches-spires-warm-studio-rim';
