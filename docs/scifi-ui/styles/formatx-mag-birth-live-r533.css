@@ -13,9 +13,9 @@ html[data-fx-mag-birth-live="active"] {
   --fxb-hole-a: 112px;
   --fxb-hole-b: 176px;
   --fxb-hole-c: 286px;
-  --fxb-cyan: #79eaff;
-  --fxb-violet: #8b68ff;
-  --fxb-gold: #ffd19a;
+  --fxb-cyan: #8fc8cf;
+  --fxb-violet: #697b82;
+  --fxb-gold: #c9a77f;
   position: fixed;
   inset: 0;
   z-index: 2147483000;
@@ -55,9 +55,10 @@ html[data-fx-mag-birth-live="active"] {
   z-index: -8;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 42%, rgba(80,218,255,.12), transparent 27%),
-    radial-gradient(circle at 50% 56%, rgba(117,76,255,.13), transparent 49%),
-    linear-gradient(180deg,#01030a 0%,#020611 48%,#050315 100%);
+    radial-gradient(circle at 46% 40%, rgba(105,170,180,.075), transparent 25%),
+    radial-gradient(circle at 72% 30%, rgba(188,139,87,.045), transparent 31%),
+    radial-gradient(circle at 50% 62%, rgba(68,92,103,.070), transparent 52%),
+    linear-gradient(180deg,rgba(2,6,9,.88) 0%,rgba(4,10,14,.91) 48%,rgba(2,5,8,.94) 100%);
   -webkit-mask-image: radial-gradient(circle at var(--fxb-x) var(--fxb-y),
     transparent 0 var(--fxb-hole-a),
     rgba(0,0,0,.28) var(--fxb-hole-b),
@@ -74,20 +75,60 @@ html[data-fx-mag-birth-live="active"] {
   z-index: -10;
   pointer-events: none;
   background:
-    radial-gradient(circle at var(--fxb-x) var(--fxb-y), rgba(94,226,255,.06), transparent 21%),
-    linear-gradient(180deg,rgba(1,4,11,.72),rgba(1,4,11,.82));
+    radial-gradient(circle at var(--fxb-x) var(--fxb-y), rgba(105,167,176,.045), transparent 23%),
+    radial-gradient(ellipse at 18% 68%,rgba(63,104,116,.050),transparent 34%),
+    radial-gradient(ellipse at 82% 35%,rgba(176,126,78,.035),transparent 29%),
+    linear-gradient(180deg,rgba(1,5,8,.54),rgba(2,7,10,.68));
+}
+/* R1756 — static cinematic habitat depth. These layers contain no animation
+   loop: they reveal a monumental biocrystal chamber and reflective floor while
+   the live habitat canvas remains visible underneath the intro. */
+.fxb-deep::before {
+  content:"";
+  position:absolute;
+  left:50%;
+  top:46%;
+  width:min(132vw,1680px);
+  height:min(126vh,1120px);
+  transform:translate(-50%,-50%) rotate(-6deg);
+  border:clamp(14px,2.1vw,34px) solid rgba(89,112,118,.065);
+  border-left-color:rgba(132,169,174,.105);
+  border-right-color:rgba(167,128,88,.060);
+  border-radius:50%;
+  box-shadow:
+    inset 0 0 0 1px rgba(190,217,217,.055),
+    inset 0 0 90px rgba(70,104,111,.045),
+    0 0 120px rgba(0,0,0,.46);
+  opacity:.88;
+}
+.fxb-deep::after {
+  content:"";
+  position:absolute;
+  left:-8%;
+  right:-8%;
+  bottom:-7%;
+  height:39%;
+  transform:perspective(700px) rotateX(63deg);
+  transform-origin:50% 100%;
+  background:
+    radial-gradient(ellipse at 50% 8%,rgba(122,164,167,.105),transparent 34%),
+    linear-gradient(90deg,transparent 5%,rgba(119,154,158,.035) 34%,rgba(181,137,91,.030) 68%,transparent 95%),
+    linear-gradient(180deg,rgba(27,47,52,.10),rgba(1,4,6,.70));
+  border-top:1px solid rgba(146,176,177,.085);
+  box-shadow:0 -18px 70px rgba(68,107,113,.040);
+  opacity:.92;
 }
 .fxb-stars {
   position: absolute;
   inset: -8%;
   z-index: -7;
-  opacity: .34;
+  opacity: .13;
   pointer-events: none;
   background-image:
     radial-gradient(circle at 8% 17%,rgba(255,255,255,.9) 0 .6px,transparent .9px),
-    radial-gradient(circle at 27% 71%,rgba(105,232,255,.75) 0 .7px,transparent 1px),
-    radial-gradient(circle at 70% 22%,rgba(255,211,149,.7) 0 .65px,transparent .95px),
-    radial-gradient(circle at 89% 64%,rgba(143,104,255,.8) 0 .75px,transparent 1.05px);
+    radial-gradient(circle at 27% 71%,rgba(139,184,190,.46) 0 .7px,transparent 1px),
+    radial-gradient(circle at 70% 22%,rgba(205,168,122,.38) 0 .65px,transparent .95px),
+    radial-gradient(circle at 89% 64%,rgba(121,144,151,.36) 0 .75px,transparent 1.05px);
   background-size: 137px 121px,193px 171px,229px 207px,281px 253px;
   transform:rotate(-6deg) scale(1.44);
   transition:transform 1.65s cubic-bezier(.16,.78,.18,1),opacity .9s ease,filter .9s ease;
@@ -115,7 +156,7 @@ html[data-fx-mag-birth-live="active"] {
   transform-style: preserve-3d;
   perspective: 1100px;
   opacity: .10;
-  filter: blur(9px) brightness(.72);
+  filter: blur(5px) brightness(.66) saturate(.72);
   pointer-events: none;
   transition:
     left 1.55s cubic-bezier(.16,.78,.18,1),
@@ -158,10 +199,10 @@ html[data-fx-mag-birth-live="active"] {
   inset: 2% 4%;
   border-radius: 50%;
   background:
-    radial-gradient(ellipse at 48% 46%,rgba(162,244,255,.12),transparent 25%),
-    radial-gradient(ellipse at 52% 56%,rgba(121,76,255,.12),transparent 48%);
-  filter: blur(20px);
-  opacity: .72;
+    radial-gradient(ellipse at 48% 46%,rgba(156,194,197,.070),transparent 25%),
+    radial-gradient(ellipse at 52% 56%,rgba(78,102,111,.065),transparent 48%);
+  filter: blur(24px);
+  opacity: .48;
   transform: translateZ(-90px) scale(.9);
   pointer-events: none;
 }
@@ -636,22 +677,22 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   border-radius: 48% 52% 47% 53% / 54% 46% 55% 45%;
   border: 1px solid rgba(164,244,255,.38);
   background:
-    radial-gradient(circle at 38% 32%,rgba(255,255,255,.24),transparent 9%),
-    radial-gradient(circle at 44% 46%,rgba(87,220,255,.14),transparent 38%),
-    radial-gradient(circle at 60% 58%,rgba(129,82,255,.18),transparent 50%),
-    rgba(3,18,31,.28);
+    radial-gradient(circle at 38% 32%,rgba(225,231,228,.13),transparent 9%),
+    radial-gradient(circle at 44% 46%,rgba(87,138,146,.075),transparent 38%),
+    radial-gradient(circle at 60% 58%,rgba(73,86,92,.085),transparent 50%),
+    rgba(4,12,16,.34);
   box-shadow:
-    inset 0 0 34px rgba(111,235,255,.15),
-    inset 0 0 80px rgba(118,73,255,.08),
-    0 0 28px rgba(93,231,255,.17),
-    0 0 110px rgba(109,89,255,.12);
+    inset 0 0 34px rgba(102,151,158,.080),
+    inset 0 0 80px rgba(68,83,91,.055),
+    0 0 28px rgba(92,142,149,.075),
+    0 0 110px rgba(112,86,60,.035);
   animation: fxb-embryo-membrane 1.6s ease-in-out infinite alternate;
 }
 .fxb-embryo-fluid {
   position: absolute;
   inset: 17%;
   border-radius: 50%;
-  background: conic-gradient(from 18deg,rgba(78,230,255,.12),rgba(145,88,255,.18),rgba(78,230,255,.12));
+  background: conic-gradient(from 18deg,rgba(88,144,151,.070),rgba(80,94,99,.085),rgba(88,144,151,.070));
   filter: blur(7px);
   animation: fxb-embryo-fluid 2.3s linear infinite;
 }
@@ -663,8 +704,8 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   aspect-ratio: 1;
   border-radius: 50%;
   transform: translate(-50%,-50%) translateZ(32px);
-  background: radial-gradient(circle at 36% 30%,#fff 0 7%,#bdf9ff 13%,#65e6fa 38%,#7e5eff 71%,rgba(91,56,197,.18) 100%);
-  box-shadow: 0 0 18px rgba(174,249,255,.72),0 0 62px rgba(92,225,255,.38),0 0 112px rgba(129,86,255,.24);
+  background: radial-gradient(circle at 36% 30%,#d8e2e0 0 5%,#7fa0a3 12%,#37606a 34%,#172b32 68%,rgba(5,14,18,.22) 100%);
+  box-shadow: 0 0 12px rgba(137,181,184,.28),0 0 42px rgba(76,132,140,.16),0 0 82px rgba(139,100,65,.055);
   animation: fxb-embryo-heart .74s cubic-bezier(.2,.72,.2,1) infinite alternate;
 }
 .fxb-embryo-filament {
@@ -686,9 +727,9 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   filter:brightness(.95) blur(.3px);
 }
 .fx-mag-birth-r533[data-phase="3"] .fxb-embryo {
-  opacity:.98;
-  transform:translate(-50%,-50%) scale(.94);
-  filter:brightness(1.30);
+  opacity:.82;
+  transform:translate(-50%,-50%) scale(.82);
+  filter:brightness(.92) saturate(.78);
 }
 .fx-mag-birth-r533[data-phase="4"] .fxb-embryo {
   opacity: 0;
