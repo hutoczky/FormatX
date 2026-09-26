@@ -20,6 +20,23 @@
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
   const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
   const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
+  /* R1753 — forced cinematic proof is a real intro path, not an audit path.
+     The R533/critical birth styles are normally deferred for first-paint cost,
+     but ?intro=1 / visualintro must own their geometry immediately so the
+     cinematic is visible deterministically on production as well as locally. */
+  if (FORCE || VISUAL_PROOF) {
+    for (const selector of [
+      'link[data-fx-mag-birth-live-r533]',
+      'link[data-fx-mag-birth-critical-r1572]'
+    ]) {
+      const style = document.querySelector(selector);
+      if (style instanceof HTMLLinkElement) {
+        style.media = 'all';
+        style.dataset.fxR1753ForcedIntroStyle = 'active';
+      }
+    }
+    ROOT.dataset.fxMagBirthForcedStyleR1753 = 'immediate';
+  }
   const LOW_POWER = MOBILE && CONSTRAINED;
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
