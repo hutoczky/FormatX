@@ -1300,15 +1300,15 @@
         col+=vec3(.068,.084,.091)*cortexRidge*.075;
         float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.35);
         float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1);
-        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
+        float plateMask=smoothstep(.67,.89,max(plateField,plateCross*.82))*bodyMask;
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.7)*bodyMask;
         float facetTone=.91+.13*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.23,.30,.32)+vec3(.36,.38,.35)*(.20*ndl+.15*sideLight+.18*softboxA);
+        vec3 ivory=vec3(.17,.22,.23)+vec3(.29,.31,.29)*(.18*ndl+.13*sideLight+.15*softboxA);
         ivory+=vec3(.48,.31,.20)*studioRibbonB*.045;
         col*=mix(1.0,facetTone,bodyMask*.40);
-        col=mix(col,ivory,plateMask*.56);
+        col=mix(col,ivory,plateMask*.42);
         col=mix(col,vec3(.004,.008,.014),livingSeam*.52);
-        col+=vec3(.055,.265,.315)*vascular*(.10+.18*uEnergy);
+        col+=vec3(.044,.225,.260)*vascular*(.085+.155*uEnergy);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1319,11 +1319,11 @@
         col=mix(col,vec3(.003,.008,.010),halo*.10);
         col+=vec3(.18,.30,.31)*fissure*.070;
 
-        vec2 lq=vec2((q.x+.012)*1.16,(q.y-.018)*.96);
+        vec2 lq=vec2((q.x+.018)*1.34,(q.y-.020)*.92);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.145,.205,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.092,.150,lensD))*front;
-        float lensCore=(1.0-smoothstep(.030,.067,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.126,.184,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.080,.132,lensD))*front;
+        float lensCore=(1.0-smoothstep(.024,.052,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensDepth=sat(1.0-lensD/.080);
@@ -1339,8 +1339,8 @@
         col=mix(col,vec3(.007,.013,.015),lensOuter*.30);
         col+=vec3(.36,.41,.40)*lensRim*(.052+.090*sideLight+.070*fresnel);
         col+=vec3(.040,.073,.078)*lensGlass*(.060+.100*softboxA+.065*sideSpec);
-        col+=vec3(.68,.72,.69)*lensHighlight*.17;
-        col+=vec3(.012,.040,.047)*lensCore*lensDepth*.036;
+        col+=vec3(.54,.58,.56)*lensHighlight*.090;
+        col+=vec3(.010,.030,.035)*lensCore*lensDepth*.024;
         col=mix(col,vec3(.006,.009,.010),ribs*.16);
         col+=vec3(.26,.28,.27)*ribs*(.020+.060*keySpec+.060*sideSpec);
 
