@@ -133,6 +133,9 @@
       document.documentElement.dataset.fxMagBirthMaterialR1749='restrained-transmission-low-emission-neutral-studio-physiology';
       document.documentElement.dataset.fxMagBirthVisualR1754='neutral-filmic-single-biocrystal-world-parity';
       document.documentElement.dataset.fxMagBirthMaterialR1754='smoky-pearl-low-chroma-bioglass-studio-reflection';
+      document.documentElement.dataset.fxMagBirthVisualR1755='photographic-living-biocrystal-dermal-depth-neutral-studio';
+      document.documentElement.dataset.fxMagBirthMaterialR1755='smoky-pearl-bioglass-restrained-cyan-warm-subsurface';
+      document.documentElement.dataset.fxMagBirthPerformanceR1755='adaptive-60hz-quality-first-no-second-render-loop';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,this.mobileProfile?0:1);
@@ -786,9 +789,9 @@
       const lensMat=new T.MeshPhysicalMaterial({
         color:0x0a4760,metalness:0,roughness:.052,
         clearcoat:1,clearcoatRoughness:.020,
-        transmission:.34,thickness:.26,ior:1.46,
+        transmission:.40,thickness:.28,ior:1.46,
         attenuationColor:new T.Color(0x0a5f79),attenuationDistance:.54,
-        emissive:0x0a83a8,emissiveIntensity:.42,
+        emissive:0x0a718e,emissiveIntensity:.30,
         envMapIntensity:1.82,
         transparent:true,opacity:.995
       });
@@ -918,12 +921,12 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x293236,roughness:.34,metalness:0,
-        clearcoat:.54,clearcoatRoughness:.16,
+        color:0x32383a,roughness:.30,metalness:0,
+        clearcoat:.62,clearcoatRoughness:.13,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0048,
         transparent:true,opacity:0,
-        emissive:0x02090d,emissiveIntensity:.026,
-        envMapIntensity:1.54,
+        emissive:0x02090d,emissiveIntensity:.018,
+        envMapIntensity:1.68,
         ior:1.39,specularIntensity:.88,specularColor:new T.Color(0xe8f6f7),
         sheen:.11,sheenColor:new T.Color(0x8aa6a8),sheenRoughness:.52,
         depthWrite:true
@@ -1023,10 +1026,10 @@
          faceted cortical lobes, translucent membranes and one energy organ.
          No animal head, paws, limbs or robotic armour. */
       this.guardianPlateMaterial=new T.MeshPhysicalMaterial({
-        color:0x646b6c,roughness:.32,metalness:0,
-        clearcoat:.56,clearcoatRoughness:.16,
-        emissive:0x031015,emissiveIntensity:.020,
-        envMapIntensity:1.52,
+        color:0x596164,roughness:.28,metalness:0,
+        clearcoat:.64,clearcoatRoughness:.13,
+        emissive:0x031015,emissiveIntensity:.012,
+        envMapIntensity:1.66,
         sheen:.11,sheenColor:new T.Color(0x9eb5b5),sheenRoughness:.51,
         specularIntensity:.92,specularColor:new T.Color(0xecf8f8),
         transparent:true,opacity:0,depthWrite:true,
@@ -1065,7 +1068,7 @@
       const livingCrystalMembraneMaterial=new T.MeshPhysicalMaterial({
         color:0x848e8d,roughness:.26,metalness:0,
         clearcoat:.60,clearcoatRoughness:.105,
-        transmission:.22,thickness:.075,ior:1.39,
+        transmission:.28,thickness:.082,ior:1.39,
         emissive:0x030e11,emissiveIntensity:.010,
         transparent:true,opacity:0,depthWrite:false,
         side:T.DoubleSide
