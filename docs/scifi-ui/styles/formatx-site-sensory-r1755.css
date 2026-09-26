@@ -107,4 +107,16 @@ html body.living-architecture :is(
     translate:none!important;
   }
 }
+
+/* R1755c — scroll is a frame-budget critical interaction. The MAG remains
+   reactive, but autonomous atmosphere motion yields until scrolling settles. */
+html[data-fx-scroll-pressure-r1755="true"] body.living-architecture::before,
+html[data-fx-scroll-pressure-r1755="true"] body.living-architecture::after{
+  animation-play-state:paused!important;
+}
+html[data-fx-scroll-pressure-r1755="true"] .fx-site-sensory-field-r1755{
+  transition:none!important;
+  opacity:.15;
+}
+
 /* production-r1755-single-sensory-compositor-layer-static-paint-transform-only-input */
