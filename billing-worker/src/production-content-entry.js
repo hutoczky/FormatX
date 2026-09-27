@@ -66,12 +66,12 @@ const DEFERRED_STYLE_PATHS = new Set([
 
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
-    marker: 'scheduler-to-loader-r1776-photoreal-visual-upgrade',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20260928-r1776-photoreal-visual-upgrade']],
+    marker: 'scheduler-to-loader-r1777-photographic-final-lighting',
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20260928-r1777-photographic-final-lighting']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
-    marker: 'intro-to-genesis-r1776-photoreal-visual-upgrade',
-    rewrites: [[/formatx-mag-genesis-three-r1360\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1360.js?v=20260928-r1776-photoreal-visual-upgrade']],
+    marker: 'intro-to-genesis-r1777-photographic-final-lighting',
+    rewrites: [[/formatx-mag-genesis-three-r1360\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1360.js?v=20260928-r1777-photographic-final-lighting']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
