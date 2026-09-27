@@ -1653,3 +1653,41 @@ body>.fx-mag-birth-r533 .fxb-biotic-field{opacity:.22!important;}
   }
 }
 /* production-r1775-photoreal-intro-core */
+
+
+/* R1776 — photographic crystal-depth pass.
+   No new animation loops: only compositing/lighting refinement. */
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space{
+  background:
+    radial-gradient(ellipse 34% 50% at 48% 39%,rgba(188,201,195,.024),transparent 64%),
+    radial-gradient(ellipse 46% 34% at 57% 66%,rgba(53,73,73,.026),transparent 72%),
+    radial-gradient(ellipse 66% 18% at 50% 94%,rgba(112,86,63,.022),transparent 80%),
+    linear-gradient(180deg,rgba(255,255,255,.002),rgba(0,0,0,.050))!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  filter:brightness(.995) contrast(1.145) saturate(.76) drop-shadow(0 28px 38px rgba(0,0,0,.37))!important;
+  -webkit-filter:brightness(.995) contrast(1.145) saturate(.76) drop-shadow(0 28px 38px rgba(0,0,0,.37))!important;
+}
+body>.fx-mag-birth-r533{
+  background:
+    radial-gradient(ellipse 25% 54% at 44% -7%,rgba(230,233,224,.048),transparent 74%),
+    radial-gradient(ellipse 30% 50% at 73% 20%,rgba(115,129,126,.026),transparent 76%),
+    radial-gradient(ellipse 48% 42% at 50% 48%,rgba(60,79,80,.040),transparent 73%),
+    radial-gradient(ellipse 92% 78% at 50% 51%,rgba(12,20,21,.22),rgba(1,3,4,.975) 84%),
+    #010304!important;
+}
+body>.fx-mag-birth-r533 .fxb-deep{opacity:.56!important;filter:saturate(.52) contrast(1.11)!important;}
+body>.fx-mag-birth-r533 .fxb-stars{opacity:.22!important;}
+body>.fx-mag-birth-r533 .fxb-genome-field{opacity:.075!important;filter:saturate(.46) contrast(1.04)!important;}
+body>.fx-mag-birth-r533 .fxb-biotic-field{opacity:.17!important;}
+body>.fx-mag-birth-r533 .fxb-particles{opacity:.48!important;}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.025) contrast(1.12) saturate(.80) drop-shadow(0 19px 27px rgba(0,0,0,.33))!important;
+    -webkit-filter:brightness(1.025) contrast(1.12) saturate(.80) drop-shadow(0 19px 27px rgba(0,0,0,.33))!important;
+  }
+}
+/* production-r1776-photographic-crystal-depth */
