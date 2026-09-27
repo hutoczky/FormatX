@@ -40,7 +40,7 @@ html body.living-architecture #hero .hero-copy > :is(
    canonical r283 desktop/no-preference/fine hero and hero-grid boxes here.
    Because this stylesheet link is unconditionally render-blocking, these final
    boxes exist before the separate media-qualified r283 asset settles. */
-@media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
   html body.living-architecture main#main-content section#hero.scene.hero {
     position: relative !important;
     box-sizing: border-box !important;
@@ -68,6 +68,11 @@ html body.living-architecture #hero .hero-copy > :is(
     overflow: visible !important;
   }
 }
+
+/* R1777 — width owns desktop hero geometry. Wide touch/hybrid devices must
+   not fall through to a mobile first frame merely because their primary
+   pointer reports coarse. */
+/* production-r1777-wide-touch-desktop-hero-geometry */
 
 /* R501: keep the settled copy box contract in the blocking layer. */
 @media (min-width: 901px) {
