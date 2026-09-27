@@ -141,17 +141,20 @@
       document.documentElement.dataset.fxMagBirthVisualR1776='cinematic-photographic-irregular-mineral-organism-deep-optic';
       document.documentElement.dataset.fxMagBirthMaterialR1776='roughness-textured-transmissive-biocrystal-low-emission-studio-depth';
       document.documentElement.dataset.fxMagBirthSilhouetteR1776='unified-asymmetric-overlapping-crystal-anatomy-no-round-pod';
+      document.documentElement.dataset.fxMagBirthVisualR1777='cinematic-black-mineral-bioglass-natural-softbox-depth';
+      document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
+      document.documentElement.dataset.fxMagBirthLightingR1777='directional-neutral-key-dark-fill-warm-floor-cyan-internal-caustic';
       document.documentElement.dataset.fxMagBirthLightingR1775='neutral-key-warm-bounce-cyan-physiology-filmic-highlight-rolloff';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,this.mobileProfile?0:1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.08;
+      this.renderer.toneMappingExposure=1.02;
 
       this.scene=new THREE.Scene();
       this.scene.background=this.mobileProfile?null:new THREE.Color(0x010405);
-      this.scene.fog=new THREE.FogExp2(0x030607,0.0096);
+      this.scene.fog=new THREE.FogExp2(0x020405,0.0087);
       this.studioEnvironment=this.makeStudioEnvironment();
       this.scene.environment=this.studioEnvironment;
 
@@ -245,30 +248,30 @@
     makeLights(){
       const T=this.THREE;
       // R1583 — softer photographic studio lighting plus procedural environment reflections.
-      this.scene.add(new T.HemisphereLight(0xd7ddd9,0x030506,0.72));
-      const key=new T.DirectionalLight(0xfffbf2,2.46);
+      this.scene.add(new T.HemisphereLight(0xd8ddd8,0x020304,0.50));
+      const key=new T.DirectionalLight(0xfffbf1,2.72);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
       this.keyLight=key;
-      const rim=new T.PointLight(0xc6d6d4,this.mobileProfile||this.lowPowerProfile?1.72:2.86,12,2);
+      const rim=new T.PointLight(0xb9ceca,this.mobileProfile||this.lowPowerProfile?1.42:2.36,12,2);
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
       this.rimLight=rim;
       if(!this.mobileProfile&&!this.lowPowerProfile){
-        const bioticFill=new T.PointLight(0x929095,1.68,10,2);
+        const bioticFill=new T.PointLight(0x7f8483,1.12,10,2);
         bioticFill.position.set(-2.7,-.9,2.8);
         this.scene.add(bioticFill);
-        const warmBounce=new T.PointLight(0xc9a681,.74,8,2);
+        const warmBounce=new T.PointLight(0xc49a72,.92,8,2);
         warmBounce.position.set(2.4,2.1,1.1);
         this.scene.add(warmBounce);
 
-        const softbox=new T.SpotLight(0xf0f1eb,3.62,15,Math.PI*.40,.96,1.45);
+        const softbox=new T.SpotLight(0xf5f3ea,4.05,15,Math.PI*.36,.97,1.55);
         softbox.position.set(-4.5,5.6,6.2);
         softbox.target.position.set(.25,.12,0);
         this.scene.add(softbox,softbox.target);
         this.softboxLight=softbox;
 
-        const edgeSoftbox=new T.SpotLight(0xb1bdbc,2.18,13,Math.PI*.42,.97,1.58);
+        const edgeSoftbox=new T.SpotLight(0x9fadaa,1.78,13,Math.PI*.40,.98,1.62);
         edgeSoftbox.position.set(4.8,1.5,4.1);
         edgeSoftbox.target.position.set(-.18,-.08,.1);
         this.scene.add(edgeSoftbox,edgeSoftbox.target);
@@ -298,15 +301,15 @@
       group.position.z=-3.65;
 
       const wallMat=new T.MeshPhysicalMaterial({
-        color:0x0b1420,metalness:.015,roughness:.54,
-        emissive:0x071321,emissiveIntensity:.13,
+        color:0x080c0d,metalness:.010,roughness:.62,
+        emissive:0x010304,emissiveIntensity:.025,
         clearcoat:.16,clearcoatRoughness:.46,
         sheen:.18,sheenColor:new T.Color(0x153f52),sheenRoughness:.60,
         side:T.BackSide
       });
       const panelMat=new T.MeshPhysicalMaterial({
-        color:0x213042,metalness:.005,roughness:.56,
-        emissive:0x0a1d2e,emissiveIntensity:.10,
+        color:0x151c1d,metalness:.004,roughness:.60,
+        emissive:0x020607,emissiveIntensity:.030,
         clearcoat:.14,clearcoatRoughness:.48,
         transparent:true,opacity:.24,
         sheen:.15,sheenColor:new T.Color(0x244d61),sheenRoughness:.58
@@ -692,22 +695,22 @@
     makeCore(){
       const T=this.THREE;
       const shellMat=new T.MeshPhysicalMaterial({
-        color:0x34484b,metalness:.006,roughness:.21,
-        emissive:0x021116,emissiveIntensity:.035,
-        clearcoat:.62,clearcoatRoughness:.12,
-        envMapIntensity:1.72,transparent:true,opacity:.985,
-        transmission:.12,thickness:.30,ior:1.43,
-        attenuationColor:new T.Color(0x31565b),attenuationDistance:1.55,
-        specularIntensity:.94,specularColor:new T.Color(0xf4fbfa),
-        sheen:.14,sheenColor:new T.Color(0x91a7a6),sheenRoughness:.48
+        color:0x303a3b,metalness:.004,roughness:.255,
+        emissive:0x010506,emissiveIntensity:.012,
+        clearcoat:.44,clearcoatRoughness:.18,
+        envMapIntensity:1.58,transparent:true,opacity:.985,
+        transmission:.18,thickness:.34,ior:1.44,
+        attenuationColor:new T.Color(0x2a4548),attenuationDistance:1.32,
+        specularIntensity:.92,specularColor:new T.Color(0xf1f5f1),
+        sheen:.085,sheenColor:new T.Color(0x929d99),sheenRoughness:.56
       });
       const shellGlass=new T.MeshPhysicalMaterial({
-        color:0xb3cccc,metalness:0,roughness:.075,
-        transparent:true,opacity:.18,depthWrite:false,
-        clearcoat:.78,clearcoatRoughness:.050,
-        transmission:.52,thickness:.26,ior:1.43,
-        attenuationColor:new T.Color(0x315d63),attenuationDistance:1.45,
-        envMapIntensity:1.44
+        color:0xc0cbc7,metalness:0,roughness:.095,
+        transparent:true,opacity:.145,depthWrite:false,
+        clearcoat:.62,clearcoatRoughness:.075,
+        transmission:.62,thickness:.31,ior:1.44,
+        attenuationColor:new T.Color(0x35575a),attenuationDistance:1.18,
+        envMapIntensity:1.36
       });
 
       const seedGeo=new T.IcosahedronGeometry(.84,this.deterministicFrame?3:2);
@@ -795,13 +798,13 @@
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x163c43,metalness:0,roughness:.072,
-        clearcoat:.86,clearcoatRoughness:.042,
-        transmission:.46,thickness:.31,ior:1.46,
-        attenuationColor:new T.Color(0x174c57),attenuationDistance:.62,
-        emissive:0x075260,emissiveIntensity:.16,
-        envMapIntensity:1.62,
-        transparent:true,opacity:.985
+        color:0x0e2428,metalness:0,roughness:.095,
+        clearcoat:.74,clearcoatRoughness:.065,
+        transmission:.56,thickness:.36,ior:1.46,
+        attenuationColor:new T.Color(0x143f45),attenuationDistance:.48,
+        emissive:0x04323a,emissiveIntensity:.075,
+        envMapIntensity:1.48,
+        transparent:true,opacity:.98
       });
       this.introLensMaterial=lensMat;
       const lens=new T.Mesh(new T.SphereGeometry(.128,64,36),lensMat);
