@@ -73,6 +73,7 @@ const SHOTS=[
       reducedMotion:'no-preference',
       locale:'hu-HU'
     });
+    await mobileContext.addInitScript(()=>{try{sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1');}catch(_){}});
     const page=await mobileContext.newPage();
     const errors=[];
     page.on('pageerror',e=>errors.push(String(e)));
@@ -83,6 +84,8 @@ const SHOTS=[
       const u=new URL(BASE);
       u.searchParams.set('mobileproof','r1500-preflight');
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
+      await page.waitForSelector('#hero .hero-space',{timeout:10000});
+      await page.locator('#hero .hero-space').tap({position:{x:12,y:12},timeout:10000});
       const ready=await pollPage(
         page,
         ()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'
@@ -154,13 +157,16 @@ const SHOTS=[
         reducedMotion:'no-preference',
         locale:'hu-HU'
       });
-      const page=await mobileContext.newPage();
+      await mobileContext.addInitScript(()=>{try{sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1');}catch(_){}});
+    const page=await mobileContext.newPage();
       const errors=[];
       page.on('pageerror',e=>errors.push(String(e)));
       page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());});
       const u=new URL(BASE);
       u.searchParams.set('mobileproof','r1500');
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
+      await page.waitForSelector('#hero .hero-space',{timeout:10000});
+      await page.locator('#hero .hero-space').tap({position:{x:12,y:12},timeout:10000});
       const mobileReady=await pollPage(
         page,
         ()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'
@@ -363,7 +369,8 @@ const SHOTS=[
           reducedMotion:'no-preference',
           locale:'hu-HU'
         });
-        const page=await mobileContext.newPage();
+        await mobileContext.addInitScript(()=>{try{sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1');}catch(_){}});
+    const page=await mobileContext.newPage();
         const errors=[];
         page.on('pageerror',e=>errors.push(String(e)));
         page.on('console',m=>{
@@ -372,6 +379,8 @@ const SHOTS=[
         const u=new URL(BASE);
         u.searchParams.set('mobileproof','r1500');
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
+        await page.waitForSelector('#hero .hero-space',{timeout:10000});
+        await page.locator('#hero .hero-space').tap({position:{x:12,y:12},timeout:10000});
         const mobileReady=await pollPage(
           page,
           ()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready'
