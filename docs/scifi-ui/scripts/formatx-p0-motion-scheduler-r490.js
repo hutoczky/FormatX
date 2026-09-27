@@ -27,11 +27,13 @@ root.dataset.fxP0MotionCacheR1725='motion-loader-r1725-photoreal-living-biocryst
 root.dataset.fxP0MotionCacheR1729='webdriver-validation-runs-real-r326-explicit-lighthouse-static-only';
 root.dataset.fxP0MotionCacheR1749='final-photoreal-mag-intro-material-parity';
 root.dataset.fxP0MotionCacheR1755='photoreal-living-60fps-site-sensory';
+root.dataset.fxP0MotionCacheR1770='fast-final-mag-handoff-post-lcp-idle-start';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260927-r1755-photoreal-living-60fps';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=6500;
+const AUTO_DELAY_MS=2200;
+const AUTO_IDLE_TIMEOUT_MS=700;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
@@ -80,17 +82,17 @@ function runLateAuto(){
     return;
   }
   if(document.visibilityState!=='visible'){
-    root.dataset.fxP0MotionSchedulerR490='waiting-visible-r493';
+    root.dataset.fxP0MotionSchedulerR490='waiting-visible-r1770';
     timer=setTimeout(runLateAuto,2000);
     return;
   }
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
-    root.dataset.fxP0MotionSchedulerR490='reduced-motion-static-r493';
+    root.dataset.fxP0MotionSchedulerR490='reduced-motion-static-r1770';
     return;
   }
-  const launch=()=>start('late-auto-r493');
+  const launch=()=>start('late-auto-r1770');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:2500});
+    idleId=requestIdleCallback(launch,{timeout:AUTO_IDLE_TIMEOUT_MS});
   }else{
     timer=setTimeout(launch,250);
   }
@@ -98,7 +100,8 @@ function runLateAuto(){
 
 function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    root.dataset.fxP0FirstPaintR490='committed-r493';
+    root.dataset.fxP0FirstPaintR490='committed-r1770';
+    root.dataset.fxP0AutoPolicyR1770=`delay-${AUTO_DELAY_MS}ms-idle-${AUTO_IDLE_TIMEOUT_MS}ms-post-lcp`;
     timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
   }));
 }
