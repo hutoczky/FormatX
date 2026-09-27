@@ -62,18 +62,18 @@ async function waitForProductShowcase(page) {
     if (showcase) window.scrollTo({ top: Math.max(0, showcase.offsetTop - 96), left: 0, behavior: 'auto' });
   });
   await page.waitForTimeout(120);
-  const showcaseImages = page.locator('#product-showcase .fx-product-showcase__visual > img');
+  const showcaseImages = page.locator('#product-showcase .fx-product-showcase__media > img');
   const imageCount = await showcaseImages.count();
   assert(imageCount >= 5, `product showcase image count ${imageCount}`);
   for (let index = 0; index < imageCount; index += 1) {
     await page.evaluate(i => {
-      const image = document.querySelectorAll('#product-showcase .fx-product-showcase__visual > img')[i];
+      const image = document.querySelectorAll('#product-showcase .fx-product-showcase__media > img')[i];
       if (image instanceof HTMLElement) image.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
     }, index);
     await page.waitForTimeout(40);
   }
   const imageHealth = await page.evaluate(async () => {
-    const images = Array.from(document.querySelectorAll('#product-showcase .fx-product-showcase__visual > img'));
+    const images = Array.from(document.querySelectorAll('#product-showcase .fx-product-showcase__media > img'));
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
     const waitForImage = image => new Promise(resolve => {
       if (image.complete) return resolve();
@@ -158,7 +158,7 @@ async function inspect(page) {
       const value = getComputedStyle(element).gridTemplateColumns.trim();
       return value && value !== 'none' ? value.split(/\s+/).length : 0;
     };
-    const images = Array.from(document.querySelectorAll('#product-showcase .fx-product-showcase__visual > img')).map(image => ({
+    const images = Array.from(document.querySelectorAll('#product-showcase .fx-product-showcase__media > img')).map(image => ({
       src: image.currentSrc || image.src,
       complete: image.complete,
       naturalWidth: image.naturalWidth,
