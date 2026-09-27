@@ -17,7 +17,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     window.__fxSoundEarlyTrace = [];
     (() => {
       let lastKey = '';
-      const scanMatchedRules = sound => {
+      const scanMatchedRules = (node, needle) => {
         const matched = [];
         const scan = (rules, href, inheritedMedia='all') => {
           if (!rules) return;
@@ -26,9 +26,9 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
               if (matchMedia(rule.conditionText).matches) scan(rule.cssRules, href, rule.conditionText);
               continue;
             }
-            if (!(rule instanceof CSSStyleRule) || !rule.selectorText?.includes('fx-three-sound')) continue;
+            if (!(rule instanceof CSSStyleRule) || !rule.selectorText?.includes(needle)) continue;
             let ok = false;
-            try { ok = sound.matches(rule.selectorText); } catch (_) {}
+            try { ok = node?.matches(rule.selectorText) || false; } catch (_) {}
             if (ok) matched.push({ href, media: inheritedMedia, selector: rule.selectorText, cssText: rule.style.cssText });
           }
         };
@@ -80,7 +80,8 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
                 style:{position:cc.position,width:cc.width,height:cc.height,top:cc.top,right:cc.right,bottom:cc.bottom,left:cc.left,transform:cc.transform}
               } : null,
               sheets:Array.from(document.styleSheets).map(sheet=>sheet.href||'inline'),
-              matchedRules:scanMatchedRules(sound)
+              matchedRules:scanMatchedRules(sound, 'fx-three-sound'),
+              matchedControlRules:scanMatchedRules(controls, 'fx-reference-controls-r204')
             });
           }
         }
