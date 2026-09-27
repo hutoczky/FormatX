@@ -10,7 +10,7 @@ root.dataset.fxSiteSensoryR1755='booting';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const coarse=matchMedia('(max-width:900px),(pointer:coarse)');
 const STYLE='/scifi-ui/styles/formatx-site-sensory-r1755.css?v=20260927-r1755-photoreal-60fps';
-let field=null,raf=0,actionTimer=0,scrollSettleTimer=0,lastX=innerWidth*.5,lastY=innerHeight*.38,lastScroll=scrollY||0;
+let field=null,raf=0,actionTimer=0,scrollSettleTimer=0,lastX=innerWidth*.5,lastY=innerHeight*.38,lastScroll=scrollY||0,activated=false,sectionObserver=null;
 const state={x:0,y:.12,vx:0,vy:0,energy:.18,press:0,scroll:0};
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
@@ -32,6 +32,7 @@ function ensureField(){
   return field;
 }
 function setVar(name,value){
+  if(!activated)return;
   const node=ensureField();
   if(node.style.getPropertyValue(name)!==value)node.style.setProperty(name,value);
 }
@@ -52,10 +53,11 @@ function commit(){
   setVar('--fx-sense-press',clamp(state.press,0,1).toFixed(3));
 }
 function queue(){
-  if(raf)return;
+  if(!activated||raf)return;
   raf=requestAnimationFrame(commit);
 }
 function point(clientX,clientY,strength=.22){
+  activate('pointer');
   const x=clamp((clientX/Math.max(1,innerWidth)-.5)*2,-1,1);
   const y=clamp(-((clientY/Math.max(1,innerHeight)-.5)*2),-1,1);
   const dx=clamp((clientX-lastX)/42,-1,1);
@@ -68,6 +70,7 @@ function point(clientX,clientY,strength=.22){
   queue();
 }
 function pulse(kind='action',energy=.68){
+  activate(kind);
   state.energy=Math.max(state.energy,energy);
   root.dataset.fxSensoryActionR1755='true';
   root.dataset.fxSensoryKindR1755=String(kind);
@@ -103,13 +106,11 @@ function onScroll(){
   state.scroll=clamp(current/range,0,1);
   state.vy=state.vy*.5+delta*.5;
   state.energy=Math.max(state.energy,.24+Math.abs(delta)*.18);
-  /* R1755c: the canonical MAG already consumes scroll as a physical stimulus.
-     Do not schedule a second visual frame here. Pause non-essential atmosphere
-     while scroll is hot, then restore it after the gesture settles. */
   if(root.dataset.fxScrollPressureR1755!=='true')root.dataset.fxScrollPressureR1755='true';
   clearTimeout(scrollSettleTimer);
   scrollSettleTimer=setTimeout(()=>{
     root.dataset.fxScrollPressureR1755='false';
+    activate('scroll-settle');
     state.energy=Math.max(.18,state.energy*.72);
     queue();
   },120);
@@ -131,6 +132,7 @@ function onSubmit(){semantic('submit',.92);}
 function onKey(event){if(!event.repeat)semantic('key',(event.key==='Enter'||event.key===' ') ? .62 : .42);}
 function onOrientation(event){
   if(reduced.matches)return;
+  activate('orientation');
   const gamma=Number(event.gamma),beta=Number(event.beta);
   if(!Number.isFinite(gamma)||!Number.isFinite(beta))return;
   state.x=clamp(gamma/45,-1,1)*.34;
@@ -139,12 +141,33 @@ function onOrientation(event){
   queue();
 }
 
-ensureStyle();
-ensureField();
-root.dataset.fxSiteSensoryR1755='ready';
-root.dataset.fxSiteSensorySchedulerR1755='single-coalesced-raf-zero-idle';
-root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only-scroll-atmosphere-shed';
-root.dataset.fxSiteSensoryInputR1755='pointer-touch-scroll-wheel-key-focus-click-input-change-submit-orientation';
+const sections=[...document.querySelectorAll('main > section[id],main section.scene[id]')];
+function installSectionObserver(){
+  if(sectionObserver||!('IntersectionObserver'in window)||!sections.length)return;
+  sectionObserver=new IntersectionObserver(entries=>{
+    const hit=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    const id=hit?.target?.id;
+    if(!id)return;
+    root.dataset.fxSensoryOrganR1755=id;
+    if(activated)semantic('section-'+id,.34);
+  },{rootMargin:'-24% 0px -56% 0px',threshold:[0,.2,.45,.7]});
+  sections.forEach(section=>sectionObserver.observe(section));
+}
+function activate(reason='intent'){
+  if(activated)return;
+  activated=true;
+  ensureStyle();
+  ensureField();
+  installSectionObserver();
+  root.dataset.fxSiteSensoryR1755='ready';
+  root.dataset.fxSiteSensoryActivationR1756=String(reason);
+  root.dataset.fxSiteSensorySchedulerR1755='lazy-intent-single-coalesced-raf-zero-idle';
+  root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only-scroll-atmosphere-shed';
+  root.dataset.fxSiteSensoryInputR1755='pointer-touch-scroll-wheel-key-focus-click-input-change-submit-orientation';
+}
+
+root.dataset.fxSiteSensoryR1755='armed-lazy-r1756';
+root.dataset.fxSiteSensorySchedulerR1755='zero-first-paint-lazy-intent';
 
 addEventListener('pointermove',onPointerMove,{passive:true});
 addEventListener('pointerdown',onPointerDown,{passive:true});
@@ -159,18 +182,7 @@ document.addEventListener('click',onClick,{passive:true});
 document.addEventListener('input',onInput,{passive:true});
 document.addEventListener('change',onChange,{passive:true});
 document.addEventListener('submit',onSubmit,{passive:true});
-reduced.addEventListener?.('change',()=>{state.energy=.14;state.press=0;queue();},{passive:true});
+reduced.addEventListener?.('change',()=>{state.energy=.14;state.press=0;if(activated)queue();},{passive:true});
 
-const sections=[...document.querySelectorAll('main > section[id],main section.scene[id]')];
-if('IntersectionObserver'in window&&sections.length){
-  const observer=new IntersectionObserver(entries=>{
-    const hit=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
-    const id=hit?.target?.id;
-    if(!id)return;
-    root.dataset.fxSensoryOrganR1755=id;
-    semantic('section-'+id,.34);
-  },{rootMargin:'-24% 0px -56% 0px',threshold:[0,.2,.45,.7]});
-  sections.forEach(section=>observer.observe(section));
-}
-queue();
+/* R1756: no field, stylesheet, observer or RAF is created before real intent. */
 }());
