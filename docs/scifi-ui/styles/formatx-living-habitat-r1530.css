@@ -1732,3 +1732,16 @@ body>.fx-mag-birth-r533 .fxb-particles{opacity:.40!important;}
   }
 }
 /* production-r1777-photographic-no-css-shadow */
+
+
+/* R1778 — phone capture correction.
+   Keep the mobile MAG darker and optically dense; no bloom/shadow pass. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(.94) contrast(1.18) saturate(.68)!important;
+    -webkit-filter:brightness(.94) contrast(1.18) saturate(.68)!important;
+    box-shadow:none!important;
+  }
+}
+/* production-r1778-mobile-monolith */

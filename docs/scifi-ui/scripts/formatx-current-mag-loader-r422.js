@@ -21,7 +21,7 @@ const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=2026
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260924-r1723-living-response';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1777-photographic-final-lighting';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1778-mobile-monolith';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
 // compatibility-contract: r484-bounded-surface-window
@@ -218,6 +218,7 @@ async function start(){
   root.dataset.fxCurrentMagVisualR1775='photoreal-mineral-bioglass-physical-depth';
   root.dataset.fxCurrentMagVisualR1776='cinematic-irregular-smoky-biocrystal-deep-optic';
   root.dataset.fxCurrentMagVisualR1777='photographic-black-mineral-bioglass-final-lighting';
+  root.dataset.fxCurrentMagVisualR1778='mobile-dark-single-monolith-smaller-optic';
   root.dataset.fxCurrentMagSchedulerR465=mobile?'direct-pause-flag-no-idle-redraw':'desktop-native-scheduler';
   root.dataset.fxCoreMobileIdlePolicyR426=mobile?'periodic-surface-bursts-between-zero-idle':'desktop-native-scheduler';
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
