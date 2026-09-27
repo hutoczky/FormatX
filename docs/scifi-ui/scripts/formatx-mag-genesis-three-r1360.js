@@ -136,16 +136,19 @@
       document.documentElement.dataset.fxMagBirthVisualR1755='photographic-living-biocrystal-dermal-depth-neutral-studio';
       document.documentElement.dataset.fxMagBirthMaterialR1755='smoky-pearl-bioglass-restrained-cyan-warm-subsurface';
       document.documentElement.dataset.fxMagBirthPerformanceR1755='adaptive-60hz-quality-first-no-second-render-loop';
+      document.documentElement.dataset.fxMagBirthVisualR1775='photoreal-mineral-bioglass-cinematic-continuity';
+      document.documentElement.dataset.fxMagBirthMaterialR1775='physical-smoky-biocrystal-absorption-neutral-softbox-low-emission';
+      document.documentElement.dataset.fxMagBirthLightingR1775='neutral-key-warm-bounce-cyan-physiology-filmic-highlight-rolloff';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
       this.renderer.setClearColor(0x020811,this.mobileProfile?0:1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.22;
+      this.renderer.toneMappingExposure=1.14;
 
       this.scene=new THREE.Scene();
-      this.scene.background=this.mobileProfile?null:new THREE.Color(0x020608);
-      this.scene.fog=new THREE.FogExp2(0x02080d,0.0115);
+      this.scene.background=this.mobileProfile?null:new THREE.Color(0x010405);
+      this.scene.fog=new THREE.FogExp2(0x030708,0.0102);
       this.studioEnvironment=this.makeStudioEnvironment();
       this.scene.environment=this.studioEnvironment;
 
@@ -686,20 +689,22 @@
     makeCore(){
       const T=this.THREE;
       const shellMat=new T.MeshPhysicalMaterial({
-        color:0x214b5d,metalness:.008,roughness:.15,
-        emissive:0x07364d,emissiveIntensity:.10,
-        clearcoat:.82,clearcoatRoughness:.065,
-        envMapIntensity:2.06,transparent:true,opacity:.99,
-        ior:1.42,specularIntensity:.98,specularColor:new T.Color(0xf1ffff),
-        sheen:.24,sheenColor:new T.Color(0x78dcf0),sheenRoughness:.34
+        color:0x34484b,metalness:.006,roughness:.21,
+        emissive:0x021116,emissiveIntensity:.035,
+        clearcoat:.62,clearcoatRoughness:.12,
+        envMapIntensity:1.72,transparent:true,opacity:.985,
+        transmission:.12,thickness:.30,ior:1.43,
+        attenuationColor:new T.Color(0x31565b),attenuationDistance:1.55,
+        specularIntensity:.94,specularColor:new T.Color(0xf4fbfa),
+        sheen:.14,sheenColor:new T.Color(0x91a7a6),sheenRoughness:.48
       });
       const shellGlass=new T.MeshPhysicalMaterial({
-        color:0x8fd6e2,metalness:0,roughness:.050,
-        transparent:true,opacity:.085,depthWrite:false,
-        clearcoat:1,clearcoatRoughness:.020,
-        transmission:.24,thickness:.20,ior:1.41,
-        attenuationColor:new T.Color(0x1a7590),attenuationDistance:2.1,
-        envMapIntensity:1.62
+        color:0xb3cccc,metalness:0,roughness:.075,
+        transparent:true,opacity:.18,depthWrite:false,
+        clearcoat:.78,clearcoatRoughness:.050,
+        transmission:.52,thickness:.26,ior:1.43,
+        attenuationColor:new T.Color(0x315d63),attenuationDistance:1.45,
+        envMapIntensity:1.44
       });
 
       const seedGeo=new T.IcosahedronGeometry(.84,this.deterministicFrame?3:2);
@@ -787,13 +792,13 @@
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x0a4760,metalness:0,roughness:.052,
-        clearcoat:1,clearcoatRoughness:.020,
-        transmission:.40,thickness:.28,ior:1.46,
-        attenuationColor:new T.Color(0x0a5f79),attenuationDistance:.54,
-        emissive:0x0a718e,emissiveIntensity:.30,
-        envMapIntensity:1.82,
-        transparent:true,opacity:.995
+        color:0x163c43,metalness:0,roughness:.072,
+        clearcoat:.86,clearcoatRoughness:.042,
+        transmission:.46,thickness:.31,ior:1.46,
+        attenuationColor:new T.Color(0x174c57),attenuationDistance:.62,
+        emissive:0x075260,emissiveIntensity:.16,
+        envMapIntensity:1.62,
+        transparent:true,opacity:.985
       });
       this.introLensMaterial=lensMat;
       const lens=new T.Mesh(new T.SphereGeometry(.142,72,42),lensMat);
@@ -921,14 +926,16 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x32383a,roughness:.30,metalness:0,
-        clearcoat:.62,clearcoatRoughness:.13,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0048,
+        color:0x3b4141,roughness:.34,metalness:0,
+        clearcoat:.42,clearcoatRoughness:.19,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0062,
         transparent:true,opacity:0,
-        emissive:0x02090d,emissiveIntensity:.018,
-        envMapIntensity:1.68,
-        ior:1.39,specularIntensity:.88,specularColor:new T.Color(0xe8f6f7),
-        sheen:.11,sheenColor:new T.Color(0x8aa6a8),sheenRoughness:.52,
+        transmission:.035,thickness:.16,ior:1.40,
+        attenuationColor:new T.Color(0x38494a),attenuationDistance:1.9,
+        emissive:0x010506,emissiveIntensity:.008,
+        envMapIntensity:1.46,
+        specularIntensity:.84,specularColor:new T.Color(0xe9f1ef),
+        sheen:.08,sheenColor:new T.Color(0x929f9d),sheenRoughness:.58,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -1026,12 +1033,12 @@
          faceted cortical lobes, translucent membranes and one energy organ.
          No animal head, paws, limbs or robotic armour. */
       this.guardianPlateMaterial=new T.MeshPhysicalMaterial({
-        color:0x596164,roughness:.28,metalness:0,
-        clearcoat:.64,clearcoatRoughness:.13,
-        emissive:0x031015,emissiveIntensity:.012,
-        envMapIntensity:1.66,
-        sheen:.11,sheenColor:new T.Color(0x9eb5b5),sheenRoughness:.51,
-        specularIntensity:.92,specularColor:new T.Color(0xecf8f8),
+        color:0x687170,roughness:.33,metalness:0,
+        clearcoat:.40,clearcoatRoughness:.20,
+        emissive:0x010607,emissiveIntensity:.006,
+        envMapIntensity:1.48,
+        sheen:.075,sheenColor:new T.Color(0xa8b4b1),sheenRoughness:.58,
+        specularIntensity:.88,specularColor:new T.Color(0xf0f7f5),
         transparent:true,opacity:0,depthWrite:true,
         flatShading:true
       });
@@ -1066,10 +1073,12 @@
       addFacet('root',[.03,-.70,-.02],[.22,.38,.18],[0,-.06,-.06],true);
 
       const livingCrystalMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x848e8d,roughness:.26,metalness:0,
-        clearcoat:.60,clearcoatRoughness:.105,
-        transmission:.28,thickness:.082,ior:1.39,
-        emissive:0x030e11,emissiveIntensity:.010,
+        color:0xa4b5b2,roughness:.20,metalness:0,
+        clearcoat:.48,clearcoatRoughness:.12,
+        transmission:.44,thickness:.10,ior:1.40,
+        attenuationColor:new T.Color(0x47676a),attenuationDistance:1.25,
+        emissive:0x010708,emissiveIntensity:.004,
+        envMapIntensity:1.34,
         transparent:true,opacity:0,depthWrite:false,
         side:T.DoubleSide
       });
@@ -1405,11 +1414,11 @@
       const mineralRoughness=this.makeMineralRoughnessTexture();
       this.mineralRoughnessTexture=mineralRoughness;
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x202b2e,metalness:.035,roughness:.17,
-        emissive:0x000101,emissiveIntensity:.001,
-        clearcoat:.84,clearcoatRoughness:.070,
-        envMapIntensity:2.05,flatShading:false,transparent:true,opacity:0,
-        ior:1.50,specularIntensity:.96,specularColor:new T.Color(0xc9d0cd)
+        color:0x283234,metalness:.12,roughness:.245,
+        emissive:0x000101,emissiveIntensity:.0005,
+        clearcoat:.36,clearcoatRoughness:.18,
+        envMapIntensity:1.56,flatShading:false,transparent:true,opacity:0,
+        ior:1.50,specularIntensity:.90,specularColor:new T.Color(0xd3dad7)
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
         color:0x2b3639,metalness:.16,roughness:.22,

@@ -136,6 +136,9 @@
   root.dataset.fxNativeMagVisualR1755='photographic-living-biocrystal-dermal-depth-microvascular-response';
   root.dataset.fxNativeMagMaterialR1755='smoky-pearl-bioglass-ggx-dermal-transmission-restrained-emission';
   root.dataset.fxNativeMagPerformanceR1755='single-webgl-60hz-quality-shed-before-cadence-scroll-compositor-settle-redraw';
+  root.dataset.fxNativeMagVisualR1775='photoreal-smoky-mineral-bioglass-physical-depth';
+  root.dataset.fxNativeMagMaterialR1775='neutral-ggx-dielectric-absorption-low-emission-cinematic-softbox';
+  root.dataset.fxNativeMagPerformanceR1775='same-single-webgl-pass-adaptive-60hz-budget';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -1045,7 +1048,7 @@
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.024,.030,.037),vec3(.188,.214,.221),lift)*facetTone;
+        vec3 mineral=mix(vec3(.018,.022,.026),vec3(.236,.252,.252),lift)*facetTone;
         mineral*=.955+.045*smokyDepth+.012*mineralGrain;
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
@@ -1080,7 +1083,7 @@
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        mineral+=vec3(.018,.110,.132)*vascular*(.070+.115*uEnergy);
+        mineral+=vec3(.020,.092,.106)*vascular*(.045+.075*uEnergy);
         mineral+=vec3(.045,.018,.026)*vascular*subsurface*(.020+.040*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
@@ -1099,12 +1102,12 @@
         plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
         float plateFacetTone=.90+.14*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.21,.25,.26)
+        vec3 ivory=vec3(.30,.33,.32)
           +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
           +vec3(.16,.25,.27)*fresnel*.18;
         ivory+=vec3(.54,.36,.24)*studioRibbonB*.050;
         mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
-        mineral=mix(mineral,ivory,plateMask*.58);
+        mineral=mix(mineral,ivory,plateMask*.66);
         mineral=mix(mineral,vec3(.004,.008,.014),livingSeam*.54);
         mineral+=vec3(.032,.190,.218)*vascular*(.080+.135*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
@@ -1162,7 +1165,7 @@
         livingMembrane+=vec3(.085,.175,.205)*(.12*ndl+.22*sideLight+.58*fresnel);
         livingMembrane+=vec3(.66,.87,.88)*softboxA*.24;
         livingMembrane+=vec3(.32,.52,.57)*softboxB*.18;
-        livingMembrane+=vec3(.10,.52,.62)*edgeTransmission*.58;
+        livingMembrane+=vec3(.12,.34,.38)*edgeTransmission*.48;
         livingMembrane+=vec3(.22,.075,.30)*subsurface*.34;
         mineral=mix(mineral,livingMembrane,glassFinMask*.965);
 
@@ -1193,8 +1196,8 @@
         physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
         physicalLens+=vec3(.050,.36,.48)*lensRing*(.10+.10*uEnergy);
         physicalLens+=vec3(.84,.98,1.00)*lensHot*(.18+.08*uEnergy);
-        physicalLens+=vec3(.12,.53,.64)*electric*(.25+.21*uEnergy);
-        physicalLens+=vec3(.92,.99,1.00)*coreFlash*.42;
+        physicalLens+=vec3(.10,.35,.40)*electric*(.18+.16*uEnergy);
+        physicalLens+=vec3(.92,.97,.96)*coreFlash*.26;
         physicalLens+=vec3(1.00,.45,.10)*lensRing*(.10+.10*studioRibbonB);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
@@ -1213,7 +1216,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.82),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(mineral*2.54),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1269,7 +1272,7 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.024,.030,.037),vec3(.182,.207,.214),lift);
+        vec3 col=mix(vec3(.019,.023,.027),vec3(.222,.238,.239),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
@@ -1293,7 +1296,7 @@
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0),22.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        col+=vec3(.024,.195,.232)*vascular*(.105+.195*uEnergy);
+        col+=vec3(.026,.125,.145)*vascular*(.070+.120*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.55+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.2)*bodyMask;
@@ -1305,10 +1308,10 @@
         float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.7)*bodyMask;
         float facetTone=.91+.13*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.23,.30,.32)+vec3(.36,.38,.35)*(.20*ndl+.15*sideLight+.18*softboxA);
+        vec3 ivory=vec3(.31,.35,.34)+vec3(.34,.36,.34)*(.20*ndl+.15*sideLight+.18*softboxA);
         ivory+=vec3(.48,.31,.20)*studioRibbonB*.045;
         col*=mix(1.0,facetTone,bodyMask*.40);
-        col=mix(col,ivory,plateMask*.56);
+        col=mix(col,ivory,plateMask*.64);
         col=mix(col,vec3(.004,.008,.014),livingSeam*.52);
         col+=vec3(.055,.265,.315)*vascular*(.10+.18*uEnergy);
 
@@ -1387,8 +1390,8 @@
           +vec3(.020,.19,.25)*lensInner*(.10+.10*uEnergy)
           +vec3(.060,.42,.54)*lensRing*(.12+.12*uEnergy)
           +vec3(.82,.98,1.00)*lensHot*(.24+.10*uEnergy)
-          +vec3(.16,.78,1.00)*electric*(.28+.26*uEnergy)
-          +vec3(.92,1.00,1.00)*coreFlash*.52;
+          +vec3(.14,.48,.57)*electric*(.20+.18*uEnergy)
+          +vec3(.92,.98,.97)*coreFlash*.32;
         col=mix(col,physicalLens,lensMeshMask*.997);
 
         float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -1401,7 +1404,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.92),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(col*2.66),clamp(outAlpha,.76,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.

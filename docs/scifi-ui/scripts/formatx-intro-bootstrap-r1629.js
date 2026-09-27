@@ -39,10 +39,11 @@ function b(){
   activateStyles();
   if(document.querySelector('script[data-fx-mag-birth-live-r533="true"]')){
     r.dataset.fxIntroBootstrapRescueR1755='owner-present';
+    r.dataset.fxIntroBootstrapVisualR1775='photoreal-intro-core';
     return;
   }
   const e=document.createElement('script');
-  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260927-r1758-no-text-lcp';
+  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1775-photoreal-intro-core';
   e.async=false;
   e.dataset.fxMagBirthLiveR533='true';
   e.dataset.fxIntroRescueR1755='true';
