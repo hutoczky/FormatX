@@ -1691,3 +1691,44 @@ body>.fx-mag-birth-r533 .fxb-particles{opacity:.48!important;}
   }
 }
 /* production-r1776-photographic-crystal-depth */
+
+
+/* R1777 — photographic final-lighting pass.
+   The WebGL shader owns shadow and material depth. Avoid CSS drop-shadow so
+   the hero stays inside the 60 Hz compositor budget. */
+html:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space{
+  background:
+    radial-gradient(ellipse 32% 54% at 43% 31%,rgba(223,226,216,.030),transparent 63%),
+    radial-gradient(ellipse 28% 46% at 74% 35%,rgba(128,139,135,.020),transparent 70%),
+    radial-gradient(ellipse 52% 34% at 53% 70%,rgba(47,64,63,.032),transparent 72%),
+    radial-gradient(ellipse 70% 18% at 50% 96%,rgba(126,91,61,.026),transparent 80%),
+    linear-gradient(180deg,rgba(255,255,255,.002),rgba(0,0,0,.064))!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  filter:brightness(1.01) contrast(1.16) saturate(.74)!important;
+  -webkit-filter:brightness(1.01) contrast(1.16) saturate(.74)!important;
+  box-shadow:none!important;
+}
+body>.fx-mag-birth-r533{
+  background:
+    radial-gradient(ellipse 24% 58% at 40% -9%,rgba(235,235,224,.052),transparent 73%),
+    radial-gradient(ellipse 30% 48% at 76% 20%,rgba(121,130,125,.025),transparent 75%),
+    radial-gradient(ellipse 48% 44% at 50% 49%,rgba(57,70,69,.035),transparent 73%),
+    radial-gradient(ellipse 94% 80% at 50% 51%,rgba(10,16,17,.20),rgba(1,3,4,.982) 84%),
+    #010304!important;
+}
+body>.fx-mag-birth-r533 .fxb-deep{opacity:.50!important;filter:saturate(.46) contrast(1.12)!important;}
+body>.fx-mag-birth-r533 .fxb-stars{opacity:.16!important;}
+body>.fx-mag-birth-r533 .fxb-genome-field{opacity:.058!important;filter:saturate(.40) contrast(1.05)!important;}
+body>.fx-mag-birth-r533 .fxb-biotic-field{opacity:.14!important;}
+body>.fx-mag-birth-r533 .fxb-particles{opacity:.40!important;}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.045) contrast(1.13) saturate(.80)!important;
+    -webkit-filter:brightness(1.045) contrast(1.13) saturate(.80)!important;
+  }
+}
+/* production-r1777-photographic-no-css-shadow */
