@@ -24,8 +24,8 @@
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
   if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
-  if (HEADLESS_SOFTWARE) ROOT.dataset.fxHeadlessIntroPolicyR1771 = 'automation-skip-real-users-unchanged';
   const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
+  if (HEADLESS_SOFTWARE) ROOT.dataset.fxHeadlessIntroPolicyR1771 = 'automation-skip-real-users-unchanged';
   const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE || HEADLESS_SOFTWARE;
   const VALIDATED_SKIP_MODE = AUTOMATION && PARAMS.get('r548') === 'mobile-skip';
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
