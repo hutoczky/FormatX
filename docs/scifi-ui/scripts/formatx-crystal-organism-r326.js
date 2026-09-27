@@ -146,6 +146,9 @@
   root.dataset.fxNativeMagVisualR1777='cinematic-black-mineral-bioglass-organism-broad-natural-facets';
   root.dataset.fxNativeMagMaterialR1777='neutral-dielectric-absorption-microfracture-softbox-physical-optic';
   root.dataset.fxNativeMagPerformanceR1777='single-pass-photographic-shader-no-css-shadow-60hz-budget';
+  root.dataset.fxNativeMagVisualR1778='mobile-single-monolith-smoky-biocrystal-no-petal-no-fin';
+  root.dataset.fxNativeMagMaterialR1778='dark-smoked-mineral-low-cyan-recessed-optic';
+  root.dataset.fxNativeMagMobileR1778='clean-monolith-smaller-optic-no-flower-silhouette';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -388,7 +391,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 32 : mobile ? 44 : constrained ? 54 : 72;
+      const sideCount = software ? 42 : mobile ? 56 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -396,17 +399,17 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.90,.060,.048,-.128,-.012,.090],
-        [.78,.230,.146,-.112,.004,.076],
-        [.61,.455,.292,-.078,.018,.060],
-        [.41,.690,.420,-.032,.034,.042],
-        [.19,.835,.505,.036,.042,.024],
-        [.00,.872,.526,.082,.030,.000],
-        [-.18,.808,.478,.066,.012,-.022],
-        [-.39,.650,.382,.016,-.006,-.040],
-        [-.59,.400,.250,-.050,-.016,-.056],
-        [-.76,.205,.132,-.102,-.020,-.070],
-        [-.90,.054,.045,-.132,-.018,-.084]
+        [.92,.050,.040,-.155,-.012,.086],
+        [.80,.185,.118,-.128,.004,.070],
+        [.64,.370,.236,-.092,.016,.054],
+        [.44,.565,.342,-.050,.028,.036],
+        [.22,.710,.420,.010,.034,.020],
+        [.00,.760,.448,.058,.024,.000],
+        [-.20,.702,.410,.050,.008,-.018],
+        [-.42,.555,.330,.008,-.008,-.036],
+        [-.63,.350,.220,-.060,-.018,-.052],
+        [-.80,.176,.110,-.112,-.020,-.066],
+        [-.92,.046,.038,-.150,-.016,-.082]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -431,10 +434,10 @@
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
           const irregular=
             1
-            +Math.sin(a*4.0+ringIndex*.43)*.034*mid
-            +Math.cos(a*6.0-ringIndex*.37)*.018*mid
-            +Math.sin(a*2.0+ringIndex*.61)*.014
-            +Math.cos(a*3.0-ringIndex*.29)*.010*mid;
+            +Math.sin(a*4.0+ringIndex*.43)*.020*mid
+            +Math.cos(a*6.0-ringIndex*.37)*.010*mid
+            +Math.sin(a*2.0+ringIndex*.61)*.007
+            +Math.cos(a*3.0-ringIndex*.29)*.006*mid;
           const cutFront=1-.075*Math.pow(Math.max(0,Math.cos(a-.48)),4.0);
           const cutRear=1-.048*Math.pow(Math.max(0,Math.cos(a+2.12)),5.0);
           const cutSide=1-.050*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
@@ -445,8 +448,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.162,.995,-.026],[.5,0]);
-      const bottom=bodyVertex([-.145,-.985,.018],[.5,1]);
+      const top=bodyVertex([-.205,1.035,-.030],[.5,0]);
+      const bottom=bodyVertex([-.170,-1.020,.016],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -739,23 +742,24 @@
 
     /* R1724 — unique FormatX crystal creature anatomy.
        Living cortical lobes and membranes replace animal limbs and robotic armour. */
-    appendEllipsoid([-.34,.34,.075],[.26,.38,.22],.74,mobile?6:8,mobile?10:14,.34);
-    appendEllipsoid([ .38,.26,.090],[.29,.34,.24],.70,mobile?6:8,mobile?10:14,-.28);
-    appendEllipsoid([-.30,-.30,.040],[.25,.33,.20],.78,mobile?6:8,mobile?10:14,-.22);
-    appendEllipsoid([ .32,-.36,.055],[.24,.31,.21],.76,mobile?6:8,mobile?10:14,.26);
+    /* R1778 — mobile hero is one readable mineral organism, not a flower.
+       Auxiliary lobes/fins are desktop-only; on phones the single hand-cut body
+       owns the silhouette and saves geometry/overdraw at the same time. */
+    if(!mobile&&!software){
+      appendEllipsoid([-.28,.30,.060],[.17,.26,.15],.74,8,14,.34);
+      appendEllipsoid([ .31,.22,.070],[.18,.24,.16],.70,8,14,-.28);
+      appendEllipsoid([-.25,-.27,.030],[.16,.22,.14],.78,8,14,-.22);
+      appendEllipsoid([ .27,-.31,.040],[.16,.21,.14],.76,8,14,.26);
 
-    /* Living crystalline membranes: a crown/facet silhouette that bends and
-       breathes instead of reading as horns, wings or metal fins. */
-    appendMembraneTri([-.22,.66,-.04],[-.50,1.06,-.10],[.02,.83,.06],4.34);
-    appendMembraneTri([ .18,.70,.02],[ .44,1.02,-.05],[.05,.86,.08],4.38);
-    appendMembraneTri([-.52,.22,-.10],[-.93,.46,-.18],[-.62,-.02,.02],4.46);
-    appendMembraneTri([ .56,.16,-.08],[ .96,.34,-.16],[ .62,-.08,.04],4.48);
-    appendMembraneTri([-.42,-.46,-.06],[-.68,-.88,-.12],[-.12,-.68,.02],4.52);
-    appendMembraneTri([ .38,-.48,-.05],[ .61,-.91,-.10],[ .10,-.72,.03],4.56);
+      appendMembraneTri([-.18,.66,-.04],[-.34,.94,-.08],[-.02,.80,.05],4.34);
+      appendMembraneTri([ .14,.69,.02],[ .31,.92,-.04],[ .04,.82,.07],4.38);
+      appendMembraneTri([-.42,.18,-.08],[-.68,.32,-.12],[-.50,-.01,.01],4.46);
+      appendMembraneTri([ .46,.13,-.07],[ .70,.25,-.11],[ .51,-.06,.03],4.48);
+    }
 
     if(!auditMode){
-      const centreX=-.034,centreY=.018;
-      const bezelInner=.142,bezelOuter=.206,bezelSteps=software?20:mobile?30:42,bezelZ=.637;
+      const centreX=-.060,centreY=.026;
+      const bezelInner=.102,bezelOuter=.154,bezelSteps=software?24:mobile?34:42,bezelZ=.637;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.050:.038)*Math.sin(angle*3.0+.34)
@@ -779,9 +783,9 @@
       }
 
       const lensCenter=[centreX,centreY,.648];
-      const lensRadiusX=.174;
-      const lensRadiusY=.144;
-      const lensDepth=.078;
+      const lensRadiusX=.128;
+      const lensRadiusY=.106;
+      const lensDepth=.066;
       const radialSteps=software?4:mobile?5:8;
       const angularSteps=software?20:mobile?30:42;
       function lensVertex(radial,angle){
@@ -978,9 +982,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.790':'.825'};
-        projected.x+=${mobile?'.006':'.052'};
-        projected.y+=${mobile?'.006':'.002'};
+        projected*= ${mobile?'.720':'.825'};
+        projected.x+=${mobile?'.010':'.052'};
+        projected.y+=${mobile?'.055':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
