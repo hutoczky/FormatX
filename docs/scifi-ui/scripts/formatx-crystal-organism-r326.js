@@ -152,6 +152,9 @@
   root.dataset.fxNativeMagVisualR1779='mobile-obsidian-bioglass-monolith-broad-facets-no-tendrils';
   root.dataset.fxNativeMagMaterialR1779='dark-studio-obsidian-broad-specular-low-emission-recessed-optic';
   root.dataset.fxNativeMagMobileR1779='zero-tendrils-zero-flower-low-overdraw-proof-target';
+  root.dataset.fxNativeMagVisualR1780='mobile-irregular-smoky-bioglass-rock-broad-facets-readable-optic';
+  root.dataset.fxNativeMagMaterialR1780='smoky-charcoal-mineral-neutral-softbox-warm-rim-subtle-cyan-core';
+  root.dataset.fxNativeMagMobileR1780='proof-calibrated-no-teardrop-no-petal-no-speckle';
   root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
   root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
@@ -399,7 +402,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 34 : mobile ? 38 : constrained ? 60 : 72;
+      const sideCount = software ? 28 : mobile ? 32 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -407,17 +410,17 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.90,.118,.090,-.132,-.012,.080],
-        [.78,.275,.190,-.112,.002,.066],
-        [.60,.455,.305,-.064,.020,.050],
-        [.39,.600,.410,-.005,.038,.034],
-        [.17,.690,.468,.070,.045,.018],
-        [-.04,.720,.490,.112,.032,.002],
-        [-.25,.660,.452,.082,.010,-.016],
-        [-.45,.545,.372,.025,-.012,-.034],
-        [-.63,.395,.270,-.045,-.024,-.050],
-        [-.78,.230,.158,-.108,-.026,-.064],
-        [-.89,.102,.070,-.148,-.020,-.078]
+        [.88,.185,.120,-.150,-.010,.080],
+        [.75,.340,.225,-.126,.004,.065],
+        [.58,.540,.355,-.078,.022,.049],
+        [.38,.700,.445,-.012,.040,.033],
+        [.17,.820,.500,.065,.050,.017],
+        [-.03,.845,.520,.126,.036,.001],
+        [-.23,.790,.474,.112,.012,-.016],
+        [-.43,.680,.402,.060,-.012,-.033],
+        [-.61,.525,.315,-.005,-.026,-.049],
+        [-.76,.350,.212,-.078,-.030,-.063],
+        [-.87,.190,.118,-.132,-.024,-.076]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -456,8 +459,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.155,.942,-.018],[.5,0]);
-      const bottom=bodyVertex([-.105,-.938,.010],[.5,1]);
+      const top=bodyVertex([-.190,.918,-.016],[.5,0]);
+      const bottom=bodyVertex([-.082,-.905,.008],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -876,7 +879,7 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.02) contrast(1.12) saturate(.78)'
+      ? 'brightness(1.08) contrast(1.10) saturate(.84)'
       : 'brightness(1.10) contrast(1.06) saturate(1.08)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
@@ -1425,15 +1428,17 @@
         float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.135+ndl*.43+sideLight*.29);
-        float facetTone=.72+.42*fract(vFacet*5.73+.23);
+        float lift=sat(.175+ndl*.46+sideLight*.32);
+        float facetTone=.80+.30*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
-        vec3 col=mix(vec3(.010,.014,.016),vec3(.150,.162,.155),lift)*facetTone;
-        col+=vec3(.78,.79,.73)*keySpec*.245;
-        col+=vec3(.34,.41,.40)*sideSpec*.175;
-        col+=vec3(.055,.102,.104)*fresnel*.25;
-        col+=vec3(.125,.075,.040)*warmPlane*.115;
-        col+=vec3(.012,.015,.017)*max(0.0,-n.y)*.44;
+        float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
+        vec3 col=mix(vec3(.018,.022,.023),vec3(.205,.214,.202),lift)*facetTone;
+        col+=vec3(.86,.85,.77)*keySpec*.285;
+        col+=vec3(.38,.47,.46)*sideSpec*.205;
+        col+=vec3(.065,.118,.118)*fresnel*.255;
+        col+=vec3(.155,.092,.050)*warmPlane*.125;
+        col+=vec3(.055,.090,.094)*coolPlane*.105;
+        col+=vec3(.013,.016,.017)*max(0.0,-n.y)*.24;
 
         float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
         float broadSide=max(0.0,dot(n,normalize(vec3(.74,.10,.66))));
@@ -1459,18 +1464,18 @@
         float lensInner=1.0-smoothstep(.05,.20,lensRadial);
         float lensRim=exp(-pow((lensRadial-.145)/.035,2.0));
         float lensHot=exp(-pow(lensRadial/.060,2.0));
-        vec3 optical=vec3(.003,.009,.011)
-          +vec3(.010,.040,.045)*lensInner
-          +vec3(.30,.34,.31)*keySpec*.095
-          +vec3(.024,.052,.055)*fresnel*.075
-          +vec3(.060,.115,.116)*lensRim*.055
-          +vec3(.60,.64,.58)*lensHot*.055;
+        vec3 optical=vec3(.004,.012,.014)
+          +vec3(.018,.075,.082)*lensInner
+          +vec3(.44,.48,.43)*keySpec*.130
+          +vec3(.032,.068,.071)*fresnel*.090
+          +vec3(.080,.155,.158)*lensRim*.075
+          +vec3(.76,.78,.69)*lensHot*.090;
         col=mix(col,optical,isLensMesh*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*2.82),clamp(alpha,.90,1.0));
+        ${outputName}=vec4(tone(col*3.04),clamp(alpha,.92,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1877,7 +1882,8 @@
          through the body, while the depth buffer still resolves the front shell. */
       if(mobile){
         gl.disable(gl.BLEND);
-        gl.disable(gl.CULL_FACE);
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
       }else{
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
