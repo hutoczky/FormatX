@@ -35,7 +35,6 @@ root.dataset.fxPerformancePolicyR1721='cortical-detail-hidpi-event-driven-world-
 root.dataset.fxPerformancePolicyR1722='studio-organism-hidpi-msaa-zero-blur-all-input-adaptive-60hz';
 root.dataset.fxPerformancePolicyR1723='canonical-organism-physiology-only-state-adaptive-60hz';
 root.dataset.fxPerformancePolicyR1724='procedural-guardian-one-webgl-draw-event-driven-world-adaptive-60hz';
-root.dataset.fxPerformancePolicyR1771='late-mobile-intro-prewarm-event-driven-r326-before-handoff';
 root.dataset.fxPerformancePolicyR1661='scroll-never-mounts-deferred-enhancements-click-keyboard-only';
 root.dataset.fxPerformancePolicyR1676='phase-gated-intro-lighter-mobile-geometry-preemptive-60fps-headroom';
 root.dataset.fxPerformancePolicyR1670='stable-60fps-headroom-no-fullscreen-blur-lower-start-resolution';
@@ -161,17 +160,13 @@ function activateMagRuntime(source='startup'){
 function onMagBirthWarmup(event){
   const source=String(event?.detail?.source||root.dataset.fxMagBirthCoreWarmupR618||'cinematic-warmup');
   const validationWarmup=/validated-skip|mobile-skip|automation|webdriver/i.test(source);
-  const lateMobileWarmup=/mobile-css-phase-3-r1771|timeline-(?:5[8-9]|[6-9][0-9]|100)/i.test(source);
-  if(mobile.matches && !validationWarmup && !lateMobileWarmup){
-    /* R1771: keep the first ~57% of the mobile cinematic exclusive, then allow
-       the event-driven R326 renderer to compile during the quieter late phase.
-       This preserves the intro budget while removing the post-handoff wait. */
-    root.dataset.fxIntroAwareMagR618='warmup-deferred-until-late-intro-'+source;
-    root.dataset.fxIntroAwareMagR1606='mobile-exclusive-early-intro-frame-budget';
+  if(mobile.matches && !validationWarmup){
+    /* R1606: do not compile/link the permanent R326 WebGL program while the
+       mobile intro is still animating. The intro owns the frame budget until
+       handoff; R326 starts from formatx:magbirthcomplete. */
+    root.dataset.fxIntroAwareMagR618='warmup-deferred-until-handoff-'+source;
+    root.dataset.fxIntroAwareMagR1606='mobile-exclusive-intro-frame-budget';
     return;
-  }
-  if(mobile.matches&&lateMobileWarmup){
-    root.dataset.fxIntroAwareMagR1771='late-intro-r326-prewarm-'+source;
   }
   root.dataset.fxIntroAwareMagR618='warmup-received-starting-'+source;
   activateMagRuntime('cinematic-warmup-'+source);
