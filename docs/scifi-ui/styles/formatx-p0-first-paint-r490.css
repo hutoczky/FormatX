@@ -115,7 +115,7 @@ html body.living-architecture .fx-feedback-honeypot {
 /* Narrow footer navigation must wrap inside its own content box. The R494
    overflow artifact showed three anonymous footer anchors extending to 463.5px
    in a 320px viewport. Fix the flex/grid sizing rather than clipping the page. */
-@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+@media (max-width: 900px), (pointer: coarse) and (max-width: 1100px), (max-aspect-ratio: 27/25) {
   html body.living-architecture footer.site-footer,
   html body.living-architecture footer.site-footer nav,
   html body.living-architecture footer.site-footer .footer-bottom {
