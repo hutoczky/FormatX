@@ -1546,7 +1546,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*2.72),clamp(alpha,.88,1.0));
+        ${outputName}=vec4(tone(col*2.82),clamp(alpha,.90,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
