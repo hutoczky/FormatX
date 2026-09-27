@@ -159,6 +159,7 @@
   root.dataset.fxNativeMagVisualR1782='mobile-smoky-bioglass-crystal-broad-facets-visible-recessed-optic';
   root.dataset.fxNativeMagMaterialR1782='charcoal-pearl-bioglass-neutral-key-warm-rim-subtle-cyan-optic';
   root.dataset.fxNativeMagMobileR1782='no-cull-no-speckle-clean-broad-facet-silhouette';
+  root.dataset.fxNativeMagRasterR1783='mobile-opaque-canvas-no-alpha-msaa-facet-seams';
   root.dataset.fxNativeMagProofR1782=mobileVisualProof?'normal-mobile-visual-path-with-lens-and-msaa':'not-mobile-proof';
   root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
   root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
@@ -890,7 +891,7 @@
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
-      alpha:true,
+      alpha:!mobile,
       /* R1626: mobile/coarse displays get temporal smoothness from native
          device density; MSAA costs frame budget twice (raster + resolve).
          Preserve desktop MSAA only where headroom is normally available. */
@@ -1597,7 +1598,8 @@
     gl.enable(gl.BLEND);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
-    gl.clearColor(0,0,0,0);
+    if(mobile) gl.clearColor(.002,.006,.008,1);
+    else gl.clearColor(0,0,0,0);
 
     const controller=new AbortController();
     const listen=(target,type,handler,options={})=>target.addEventListener(type,handler,{...options,signal:controller.signal});
