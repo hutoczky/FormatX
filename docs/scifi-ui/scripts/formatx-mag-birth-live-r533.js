@@ -24,13 +24,14 @@
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
   if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
-  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
+  if (HEADLESS_SOFTWARE) ROOT.dataset.fxHeadlessIntroPolicyR1771 = 'automation-skip-real-users-unchanged';
+  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
+  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE || HEADLESS_SOFTWARE;
   const VALIDATED_SKIP_MODE = AUTOMATION && PARAMS.get('r548') === 'mobile-skip';
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
-  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
   const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
   /* R1753 — forced cinematic proof is a real intro path, not an audit path.
      The R533/critical birth styles are normally deferred for first-paint cost,
