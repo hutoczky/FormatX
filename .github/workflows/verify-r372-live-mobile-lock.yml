@@ -65,9 +65,9 @@ jobs:
           grep -Fq 'FormatX r474' "$LIFE_CSS"
           grep -Fq 'softer mobile crystal glow' "$LIFE_CSS"
           grep -Fq 'opacity: 1 !important' "$LIFE_CSS"
-          grep -Fq 'brightness(1.12)' "$LIFE_CSS"
-          grep -Fq 'contrast(1.055)' "$LIFE_CSS"
-          grep -Fq 'saturate(1.12)' "$LIFE_CSS"
+          grep -Fq 'brightness(1.02)' "$LIFE_CSS"
+          grep -Fq 'contrast(1.12)' "$LIFE_CSS"
+          grep -Fq 'saturate(.78)' "$LIFE_CSS"
           grep -Fq 'blur(0)' "$LIFE_CSS"
           grep -Fq 'image-rendering: auto' "$LIFE_CSS"
           grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$LIFE_CSS"
@@ -110,9 +110,9 @@ jobs:
                 && grep -Fq 'formatx-current-mag-loader-r422.js?v=' "$MOTION_TMP" \
                 && grep -Fq 'FormatX r474' "$LIFE_CSS_TMP" \
                 && grep -Fq 'opacity: 1 !important' "$LIFE_CSS_TMP" \
-                && grep -Fq 'brightness(1.12)' "$LIFE_CSS_TMP" \
-                && grep -Fq 'contrast(1.055)' "$LIFE_CSS_TMP" \
-                && grep -Fq 'saturate(1.12)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'brightness(1.02)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'contrast(1.12)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'saturate(.78)' "$LIFE_CSS_TMP" \
                 && grep -Fq 'blur(0)' "$LIFE_CSS_TMP" \
                 && grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$LIFE_CSS_TMP" \
                 && ! grep -Fq 'fx-core-r468-compositor-breathe' "$LIFE_CSS_TMP"; then
