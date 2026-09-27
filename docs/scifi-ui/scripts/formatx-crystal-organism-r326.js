@@ -394,7 +394,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 18 : mobile ? 22 : constrained ? 60 : 72;
+      const sideCount = software ? 40 : mobile ? 48 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -402,18 +402,17 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.94,.052,.042,-.170,-.014,.084],
-        [.82,.160,.126,-.142,.002,.068],
-        [.66,.335,.258,-.092,.018,.052],
-        [.49,.505,.360,-.025,.034,.036],
-        [.30,.620,.430,.055,.043,.020],
-        [.09,.685,.468,.112,.032,.002],
-        [-.12,.645,.442,.094,.010,-.016],
-        [-.32,.555,.382,.045,-.010,-.033],
-        [-.52,.438,.300,-.020,-.022,-.049],
-        [-.70,.288,.195,-.090,-.026,-.063],
-        [-.85,.148,.100,-.142,-.022,-.075],
-        [-.94,.048,.038,-.176,-.016,-.084]
+        [.90,.118,.090,-.132,-.012,.080],
+        [.78,.275,.190,-.112,.002,.066],
+        [.60,.455,.305,-.064,.020,.050],
+        [.39,.600,.410,-.005,.038,.034],
+        [.17,.690,.468,.070,.045,.018],
+        [-.04,.720,.490,.112,.032,.002],
+        [-.25,.660,.452,.082,.010,-.016],
+        [-.45,.545,.372,.025,-.012,-.034],
+        [-.63,.395,.270,-.045,-.024,-.050],
+        [-.78,.230,.158,-.108,-.026,-.064],
+        [-.89,.102,.070,-.148,-.020,-.078]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -452,8 +451,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.235,.992,-.026],[.5,0]);
-      const bottom=bodyVertex([-.118,-1.008,.014],[.5,1]);
+      const top=bodyVertex([-.155,.942,-.018],[.5,0]);
+      const bottom=bodyVertex([-.105,-.938,.010],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -762,8 +761,8 @@
     }
 
     if(!auditMode){
-      const centreX=-.078,centreY=.030;
-      const bezelInner=.082,bezelOuter=.122,bezelSteps=software?20:mobile?28:42,bezelZ=.637;
+      const centreX=-.064,centreY=.024;
+      const bezelInner=.066,bezelOuter=.102,bezelSteps=software?20:mobile?30:42,bezelZ=.637;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.050:.038)*Math.sin(angle*3.0+.34)
@@ -787,9 +786,9 @@
       }
 
       const lensCenter=[centreX,centreY,.648];
-      const lensRadiusX=.098;
-      const lensRadiusY=.080;
-      const lensDepth=.052;
+      const lensRadiusX=.074;
+      const lensRadiusY=.060;
+      const lensDepth=.044;
       const radialSteps=software?4:mobile?5:8;
       const angularSteps=software?20:mobile?30:42;
       function lensVertex(radial,angle){
@@ -1349,11 +1348,11 @@
         col=mix(col,vec3(.003,.008,.010),halo*.10);
         col+=vec3(.18,.30,.31)*fissure*.070;
 
-        vec2 lq=vec2((q.x+.012)*1.16,(q.y-.018)*.96);
+        vec2 lq=vec2((q.x+.040)*1.18,(q.y-.018)*.98);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.145,.205,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.092,.150,lensD))*front;
-        float lensCore=(1.0-smoothstep(.030,.067,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.074,.108,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.044,.078,lensD))*front;
+        float lensCore=(1.0-smoothstep(.015,.034,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         float lensHighlight=exp(-pow((lq.x+.042)/.024,2.0)-pow((lq.y-.044)/.031,2.0))*lensGlass;
         float lensDepth=sat(1.0-lensD/.080);
@@ -1470,15 +1469,15 @@
         float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.105+ndl*.39+sideLight*.27);
-        float facetTone=.76+.30*fract(vFacet*5.73+.23);
+        float lift=sat(.135+ndl*.43+sideLight*.29);
+        float facetTone=.84+.22*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
-        vec3 col=mix(vec3(.010,.013,.015),vec3(.132,.144,.139),lift)*facetTone;
-        col+=vec3(.70,.72,.67)*keySpec*.205;
-        col+=vec3(.30,.37,.37)*sideSpec*.145;
-        col+=vec3(.052,.095,.098)*fresnel*.24;
-        col+=vec3(.105,.065,.036)*warmPlane*.095;
-        col+=vec3(.010,.013,.015)*max(0.0,-n.y)*.40;
+        vec3 col=mix(vec3(.014,.018,.020),vec3(.165,.176,.168),lift)*facetTone;
+        col+=vec3(.78,.79,.73)*keySpec*.245;
+        col+=vec3(.34,.41,.40)*sideSpec*.175;
+        col+=vec3(.055,.102,.104)*fresnel*.25;
+        col+=vec3(.125,.075,.040)*warmPlane*.115;
+        col+=vec3(.012,.015,.017)*max(0.0,-n.y)*.44;
 
         float vesselA=pow(.5+.5*sin(vLocal.y*17.0+vLocal.x*8.0+vLocal.z*5.0),14.0);
         float vesselB=pow(.5+.5*sin(vLocal.x*20.0-vLocal.y*6.0+vLocal.z*9.0),17.0);
@@ -1498,11 +1497,11 @@
         crack*=1.0-smoothstep(.31,.40,abs(q.y));
         col+=vec3(.13,.20,.20)*crack*front*.08;
 
-        vec2 lq=vec2(q.x,(q.y-.010)*1.08);
+        vec2 lq=vec2((q.x+.038)*1.18,(q.y-.012)*1.02);
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.082,.108,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.046,.079,lensD))*front;
-        float lensCore=(1.0-smoothstep(.018,.041,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.052,.076,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.030,.052,lensD))*front;
+        float lensCore=(1.0-smoothstep(.010,.024,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
         vec3 lens=vec3(.006,.014,.017)
           +vec3(.055,.105,.115)*fresnel
@@ -1954,7 +1953,12 @@
          through the body, while the depth buffer still resolves the front shell. */
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-      gl.disable(gl.CULL_FACE);
+      if(mobile){
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
+      }else{
+        gl.disable(gl.CULL_FACE);
+      }
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
