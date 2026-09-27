@@ -13,8 +13,8 @@
     opacity:1 !important;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
-    filter:brightness(1.08) contrast(1.10) saturate(.84) blur(0) !important;
-    -webkit-filter:brightness(1.08) contrast(1.10) saturate(.84) blur(0) !important;
+    filter:brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
+    -webkit-filter:brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
   }
 
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after {
@@ -168,8 +168,8 @@
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:1 !important;
-    filter:brightness(1.08) contrast(1.10) saturate(.84) blur(0) !important;
-    -webkit-filter:brightness(1.08) contrast(1.10) saturate(.84) blur(0) !important;
+    filter:brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
+    -webkit-filter:brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
   }
 
   html body.living-architecture .topbar > .brand {
@@ -202,3 +202,5 @@
 /* production-r1779-mobile-obsidian-filter */
 
 /* production-r1780-mobile-smoky-bioglass */
+
+/* production-r1782-mobile-smoky-bioglass-clean */
