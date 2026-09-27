@@ -58,62 +58,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const started = Date.now();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#hero-title');
-
-  const captureControlCascade = () => page.evaluate(() => {
-    const pick = selector => {
-      const el = document.querySelector(selector);
-      if (!(el instanceof Element)) return null;
-      const rect = el.getBoundingClientRect();
-      const style = getComputedStyle(el);
-      const matches = [];
-      const inspectRules = (rules, href, mediaPath='') => {
-        for (const rule of Array.from(rules || [])) {
-          if (rule instanceof CSSMediaRule) {
-            if (matchMedia(rule.conditionText).matches) inspectRules(rule.cssRules, href, mediaPath + '@media ' + rule.conditionText + ' ');
-            continue;
-          }
-          if (!(rule instanceof CSSStyleRule)) continue;
-          try {
-            if (!el.matches(rule.selectorText)) continue;
-          } catch (_) { continue; }
-          const css = rule.style.cssText || '';
-          if (!/(?:^|;)\s*(?:position|inset|top|right|bottom|left|display|width|min-width|max-width|height|min-height|max-height|margin|padding|transform|grid-template-columns)\s*:/i.test(css)) continue;
-          matches.push({ href, media: mediaPath.trim(), selector: rule.selectorText, css });
-        }
-      };
-      for (const sheet of Array.from(document.styleSheets)) {
-        let rules;
-        try { rules = sheet.cssRules; } catch (_) { continue; }
-        inspectRules(rules, sheet.href || 'inline');
-      }
-      return {
-        selector,
-        rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
-        computed:{
-          position:style.position,top:style.top,right:style.right,bottom:style.bottom,left:style.left,
-          width:style.width,height:style.height,display:style.display,transform:style.transform
-        },
-        matched:matches.slice(-40)
-      };
-    };
-    return {
-      at:performance.now(),
-      root:{
-        reference:document.documentElement.dataset.fxReferenceProductionR244 || '',
-        composition:document.documentElement.dataset.fxReferenceComposition || '',
-        prepaint:document.documentElement.dataset.fxReferencePrepaintR1620 || ''
-      },
-      sheets:Array.from(document.styleSheets).map(sheet => sheet.href || 'inline'),
-      controls:pick('#hero .fx-reference-controls-r204'),
-      sound:pick('#hero .fx-reference-controls-r204 .fx-three-sound'),
-      ask:pick('#hero .fx-reference-controls-r204 .fx-reference-ask')
-    };
-  });
-
-  const controlCascadeEarly = await captureControlCascade();
-  await page.waitForTimeout(550);
-  const controlCascadeSettled = await captureControlCascade();
-  await page.waitForTimeout(1950);
+  await page.waitForTimeout(2500);
 
   const interaction = await page.evaluate(async () => {
     const button = document.getElementById('menu-toggle');
@@ -213,8 +158,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     url,
     wall_clock_ms: Date.now() - started,
     metrics,
-    control_cascade_early: controlCascadeEarly,
-    control_cascade_settled: controlCascadeSettled,
     interaction_response_ms: interaction,
     scroll_sample: scrollSample,
     viewport_change: { before: beforeResize, after: afterResize },
