@@ -57,6 +57,28 @@ function testEnv(onAsset) {
 }
 
 describe('active production canonical gateway', () => {
+  it('preserves homepage live metadata while reserving navigation requests for the first frame', async () => {
+    const response = await canonicalWorker.fetch(new Request('https://formatxsuite.com/'), testEnv(), {});
+    const html = await response.text();
+    const template = html.match(/<template id="fx-metadata-runtime-r862">([\s\S]*?)<\/template>/);
+    expect(template).not.toBeNull();
+    const eager = html.replace(template[0], '');
+    for (const name of ['release-metadata', 'formatx-public-shell', 'formatx-content-standard', 'formatx-seo', 'formatx-content-finalizer', 'formatx-platform-surface-finalizer', 'formatx-organism-trust', 'formatx-organism-semantic-state']) {
+      expect(template[1]).toContain(`/scripts/${name}.js?`);
+      expect(eager).not.toContain(`/scripts/${name}.js?`);
+    }
+    expect(eager).toContain('formatx-content-standard.css?');
+    expect(template[1]).not.toContain('<link');
+  });
+
+  it('keeps metadata eager on utility pages without an intro lifecycle', async () => {
+    const response = await canonicalWorker.fetch(new Request('https://formatxsuite.com/scifi-ui/support.html'), testEnv(), {});
+    const html = await response.text();
+    expect(html).toContain('/scripts/release-metadata.js?');
+    expect(html).toContain('/scripts/formatx-content-standard.js?');
+    expect(html).not.toContain('fx-metadata-runtime-r862');
+  });
+
   it('serves the canonical apex root as a 200 without any Location header', async () => {
     let assetPath = '';
     const response = await canonicalWorker.fetch(

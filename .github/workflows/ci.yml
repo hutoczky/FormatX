@@ -54,7 +54,10 @@ jobs:
       - name: Start exact current production candidate Worker
         id: candidate
         shell: bash
-        env: { CI: '1' }
+        env:
+          CI: '1'
+          WRANGLER_LOG_PATH: ${{ runner.temp }}/formatx-wrangler-debug.log
+          WRANGLER_LOG_SANITIZE: 'true'
         run: |
           set -euo pipefail
           (
@@ -158,6 +161,7 @@ jobs:
             lighthouse-desktop-output.txt
             lighthouse-mobile-output.txt
             ${{ runner.temp }}/formatx-lighthouse-worker.log
+            ${{ runner.temp }}/formatx-wrangler-debug.log
             ${{ runner.temp }}/formatx-lighthouse-proxy.log
             ${{ runner.temp }}/formatx-lighthouse-headers.txt
             ${{ runner.temp }}/formatx-lighthouse-proxy-headers.txt

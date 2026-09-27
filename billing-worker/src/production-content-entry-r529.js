@@ -17,7 +17,7 @@ const P0_MOTION_SCHEDULER_URL='formatx-p0-motion-scheduler-r490.js?v=20260927-r8
 const MOTION_RUNTIME_RE=/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g;
 const MOTION_RUNTIME_URL='formatx-motion-runtime-loader-r239.js?v=20260906-r550-parallel-shader-under-intro';
 const CONTENT_RUNTIME_RE=/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g;
-const CONTENT_RUNTIME_URL='formatx-content-runtime-loader-r241.js?v=20260906-r538-no-manual-pause';
+const CONTENT_RUNTIME_URL='formatx-content-runtime-loader-r241.js?v=20260927-r862-post-paint-metadata';
 const CONTENT_STANDARD_RE=/formatx-content-standard\.css(?:\?v=[^"']+)?/g;
 const CONTENT_STANDARD_URL='formatx-content-standard.css?v=20260906-r538-mobile-touch-spacing';
 const DEFERRED_SCHEDULER_RE=/formatx-deferred-css-r487\.js\?v=[^"']+/g;

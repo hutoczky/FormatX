@@ -42,6 +42,27 @@
     document.head.appendChild(script);
   }
 
+  // R862: server-rendered homepage content is useful before live metadata
+  // reconciliation. Keep those requests out of the first-frame dependency
+  // chain, then start them automatically after the canonical release paints.
+  // This is independent of interaction, MAG readiness and optional enhancements.
+  const metadata = document.getElementById('fx-metadata-runtime-r862');
+  let metadataScheduled = false;
+  function startMetadata() {
+    if (metadataScheduled || !(metadata instanceof HTMLTemplateElement)) return;
+    if (root.dataset.fxPreloaderR531 !== 'done' && root.dataset.fxIntroCompletionR769 !== 'done') return;
+    metadataScheduled = true;
+    document.removeEventListener('formatx:preloadercomplete', startMetadata);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      Array.from(metadata.content.querySelectorAll('script[src]')).forEach(mount);
+      root.dataset.fxMetadataRuntimeR862 = 'requested-after-intro-paint';
+    }));
+  }
+  if (metadata instanceof HTMLTemplateElement) {
+    document.addEventListener('formatx:preloadercomplete', startMetadata);
+    startMetadata(); // Late adoption reads durable state, not a past event.
+  }
+
   function reservedInteraction(event) {
     if (root.dataset.fxOrganismThought === 'open') return true;
     const target = event?.target instanceof Element ? event.target : null;

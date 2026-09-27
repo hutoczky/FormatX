@@ -194,7 +194,7 @@ function scheduleMotionRuntime(html) {
 function cacheBustR502Runtime(html) {
   return String(html || '')
     .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260926-r858-adopt-critical-stylesheet')
-    .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260902-r497-no-late-layout')
+    .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260927-r862-post-paint-metadata')
     .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock')
     .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260903-r502-mobile-box-model')
     .replace(/platform-status\.js\?v=[^"']+/g, 'platform-status.js?v=20260902-r500-canonical-hero-state')

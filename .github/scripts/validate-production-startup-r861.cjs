@@ -25,6 +25,11 @@ const profiles = [
       const page = await context.newPage();
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
+      await page.addInitScript(() => {
+        document.addEventListener('formatx:preloadercomplete', () => {
+          window.__formatxObservedReleaseAt = performance.now();
+        }, { once: true });
+      });
       let failure;
       try {
         await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -34,13 +39,20 @@ const profiles = [
           return d.fxPreloaderR531 === 'done'
             && d.fxCrystalOrganismR326 === 'ready'
             && d.fxMagShapeSyncR476 === 'ready-r634'
-            && d.fxSoundNavigationOwnerR539 === 'ready-navigation';
+            && d.fxSoundNavigationOwnerR539 === 'ready-navigation'
+            && d.fxMetadataRuntimeR862 === 'requested-after-intro-paint'
+            && d.fxReleaseMetadata === 'ready-v6';
         }, null, { timeout: 20000 });
       } catch (error) { failure = error.message; }
       const state = await page.evaluate(() => {
         const d = document.documentElement.dataset;
         const canvas = document.querySelector('#hero .fx-crystal-organism-r326-canvas');
         const box = canvas?.getBoundingClientRect();
+        const metadata = ['release-metadata', 'formatx-public-shell', 'formatx-content-standard', 'formatx-seo', 'formatx-content-finalizer', 'formatx-platform-surface-finalizer', 'formatx-organism-trust', 'formatx-organism-semantic-state'].map(name => ({
+          name,
+          scripts: Array.from(document.scripts).filter(script => script.src.includes(`/${name}.js`)).length,
+          requests: performance.getEntriesByType('resource').filter(resource => resource.name.includes(`/${name}.js`)).map(resource => resource.startTime),
+        }));
         return {
           preloader: d.fxPreloaderR531, scheduler: d.fxP0MotionSchedulerR490,
           renderer: d.fxCoreRenderer, ready: d.fxCrystalOrganismR326,
@@ -48,6 +60,7 @@ const profiles = [
           canvases: document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
           stages: document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
           visible: Boolean(canvas && box.width > 0 && box.height > 0 && getComputedStyle(canvas).visibility === 'visible'),
+          releaseAt: window.__formatxObservedReleaseAt, metadata,
         };
       });
       const result = { name, sourceSha: process.env.AUDITED_SHA || null, url, ...state, errors, failure };
@@ -60,6 +73,12 @@ const profiles = [
       assert.equal(state.canvases, 1, `${name}: single canvas`);
       assert.equal(state.stages, 1, `${name}: single stage`);
       assert(state.visible, `${name}: MAG not visible`);
+      assert(Number.isFinite(state.releaseAt), `${name}: canonical release was not observed`);
+      for (const entry of state.metadata) {
+        assert.equal(entry.scripts, 1, `${name}: ${entry.name} must have one script owner`);
+        assert.equal(entry.requests.length, 1, `${name}: ${entry.name} must load exactly once`);
+        assert(entry.requests[0] >= state.releaseAt, `${name}: ${entry.name} competed with the intro`);
+      }
       assert.deepEqual(errors, [], `${name}: browser errors`);
     }
   } finally { await browser.close(); }

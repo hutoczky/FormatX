@@ -41,8 +41,8 @@ const LANGUAGE_ASSETS = [
   '<link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260731-language-unified-1">',
   '<script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260731-language-unified-1"></script>'
 ].join('\n');
-const CONTENT_ASSETS = [
-  '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260812-quality-r1">',
+const CONTENT_STYLE = '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260812-quality-r1">';
+const CONTENT_SCRIPTS = [
   '<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260807-full-release-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>',
@@ -52,6 +52,13 @@ const CONTENT_ASSETS = [
   '<script defer src="/scifi-ui/scripts/formatx-organism-trust.js?v=20260731-organism-trust-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-organism-semantic-state.js?v=20260731-organism-semantic-1"></script>'
 ].join('\n');
+const CONTENT_ASSETS = CONTENT_STYLE + '\n' + CONTENT_SCRIPTS;
+// The homepage already contains its canonical product copy, links and schema.
+// Live release/evidence reconciliation must not compete with its first frame.
+// The existing content loader mounts these automatically after intro release;
+// utility pages retain their eager runtime because they have no intro owner.
+const HOMEPAGE_CONTENT_ASSETS = CONTENT_STYLE + '\n'
+  + '<template id="fx-metadata-runtime-r862">\n' + CONTENT_SCRIPTS + '\n</template>';
 const FEEDBACK_ASSETS = [
   '<link rel="stylesheet" data-fx-feedback-style="true" href="/scifi-ui/styles/formatx-feedback.css?v=20260806-feedback-1">',
   '<script defer data-fx-feedback-script="true" src="/scifi-ui/scripts/formatx-feedback.js?v=20260806-feedback-1"></script>'
@@ -139,7 +146,7 @@ export default {
       html = html.replace('</head>', LANGUAGE_ASSETS + '\n</head>');
     }
     if (!html.includes('data-fx-content-standard-style') && !html.includes('formatx-content-standard.css')) {
-      html = html.replace('</head>', CONTENT_ASSETS + '\n</head>');
+      html = html.replace('</head>', (HOMEPAGE_PATHS.has(url.pathname) ? HOMEPAGE_CONTENT_ASSETS : CONTENT_ASSETS) + '\n</head>');
     } else if (!html.includes('formatx-public-shell.js')) {
       html = html.replace('</head>', '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>\n</head>');
     }
