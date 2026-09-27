@@ -2,8 +2,9 @@
   'use strict';
 
   const root = document.documentElement;
-  const mobile = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  const mobile = matchMedia('(max-width: 900px)').matches;
   const mode = mobile ? 'ready' : 'desktop';
+  root.dataset.fxReferenceModeClassifierR1770 = 'viewport-width-parity';
 
   root.dataset.fxReferenceProductionR244 = mode;
   root.dataset.fxReferenceComposition = mobile

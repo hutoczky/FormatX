@@ -607,10 +607,10 @@ html:root{
 }
 
 /* R1756 — canonical desktop MAG controls are part of first-paint geometry.
-   The later r337 optics stylesheet may restyle optics, but it must not move
+   The later r337 optics stylesheet may restyle optics, but runtime class timing must not move
    SOUND / ASK / PAUSE from a legacy top-right stack to the final bottom row. */
 @media (min-width:901px){
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204{
     position:absolute!important;
     top:auto!important;
     right:auto!important;
@@ -644,7 +644,7 @@ html:root{
     animation:none!important;
     transition:none!important;
   }
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 > :is(.fx-reference-rail,.fx-reference-rail-r264){
     display:contents!important;
     position:static!important;
     inset:auto!important;
@@ -660,9 +660,9 @@ html:root{
     transform:none!important;
     translate:none!important;
   }
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{
     position:relative!important;
     inset:auto!important;
     display:grid!important;
@@ -685,16 +685,16 @@ html:root{
     animation:none!important;
     transition:none!important;
   }
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound{
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound{
     grid-column:1!important;grid-row:1!important;
   }
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask{
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask{
     grid-column:2!important;grid-row:1!important;
   }
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{
     grid-column:3!important;grid-row:1!important;
   }
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask>span{
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask>span{
     position:absolute!important;
     top:59px!important;
     left:50%!important;
@@ -710,6 +710,9 @@ html:root{
     translate:none!important;
   }
 }
+/* R1770 — desktop control geometry is keyed to the parser-stable r204 class,
+   not the later r264 runtime class. This removes the 132px top-right transient. */
+/* production-r1770-desktop-control-zero-cls */
 /* production-r1756-scrollbar-control-geometry-lock */
 
 
