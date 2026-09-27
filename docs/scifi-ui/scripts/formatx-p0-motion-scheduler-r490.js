@@ -32,8 +32,9 @@ root.dataset.fxP0MotionCacheR1776='cinematic-irregular-crystal-photographic-dept
 root.dataset.fxP0MotionCacheR1777='photographic-final-lighting-black-mineral-bioglass';
 root.dataset.fxP0MotionCacheR1778='mobile-monolith-dark-mineral-corrected-fallback';
 root.dataset.fxP0MotionCacheR1779='mobile-obsidian-proof-broad-facet-zero-tendril';
+root.dataset.fxP0MotionCacheR1781='clean-photographic-facet-surface';
 root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1779-mobile-obsidian-proof';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1781-clean-photographic-facets';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
