@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 const STARTUP_REVISION = '20260927-r1755-photoreal-living-60fps';
-const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-4FLeb3SUuR6w3R+E74qEEDeMQ8NRSMkQHyRuONA0Auo='";
+const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-5scX+34qKiHU+94Z8156K8VHpLQrfTbofgIe/AT3iak='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
 const INLINE_CANONICAL_BOOT_HASH = "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
