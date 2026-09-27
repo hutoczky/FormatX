@@ -27,7 +27,8 @@ root.dataset.fxP0MotionCacheR1725='motion-loader-r1725-photoreal-living-biocryst
 root.dataset.fxP0MotionCacheR1729='webdriver-validation-runs-real-r326-explicit-lighthouse-static-only';
 root.dataset.fxP0MotionCacheR1749='final-photoreal-mag-intro-material-parity';
 root.dataset.fxP0MotionCacheR1755='photoreal-living-60fps-site-sensory';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260927-r1755-photoreal-living-60fps';
+root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260927-r1774-phase2-cache-prewarm';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
