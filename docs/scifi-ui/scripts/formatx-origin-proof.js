@@ -148,6 +148,9 @@
   let observer = null;
   let targetRetry = 0;
   let loaded = false;
+  let scrollHot = false;
+  let scrollSettleTimer = 0;
+  let pendingVisible = false;
 
   function inject() {
     if (loaded) return;
@@ -189,7 +192,13 @@
     }
 
     observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) inject();
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      if (scrollHot) {
+        pendingVisible = true;
+        root.dataset.fxProductShowcaseLoadState = 'armed-scroll-settle-r1777';
+        return;
+      }
+      inject();
     }, { rootMargin: '240px 0px', threshold: 0.01 });
     observer.observe(trigger);
     root.dataset.fxProductShowcaseLoadState = 'armed';
@@ -233,11 +242,24 @@
     ensureArmed();
   }
   ['pageshow', 'formatx:livingready', 'formatx:loop'].forEach(name => addEventListener(name, ensureArmed));
-  addEventListener('scroll', ensureArmed, { passive: true });
+  addEventListener('scroll', () => {
+    scrollHot = true;
+    clearTimeout(scrollSettleTimer);
+    scrollSettleTimer = setTimeout(() => {
+      scrollHot = false;
+      if (pendingVisible) {
+        pendingVisible = false;
+        inject();
+      } else {
+        ensureArmed();
+      }
+    }, 140);
+  }, { passive: true });
   addEventListener('hashchange', ensureArmed, { passive: true });
   addEventListener('pagehide', () => {
     if (observer) observer.disconnect();
     clearInterval(targetRetry);
+    clearTimeout(scrollSettleTimer);
   }, { once: true });
 }());
 
@@ -251,6 +273,9 @@
   let loaded = false;
   let observer = null;
   let retryTimer = 0;
+  let scrollHot = false;
+  let scrollSettleTimer = 0;
+  let pendingVisible = false;
 
   function launcherLabel() {
     return root.lang === 'en'
@@ -326,7 +351,13 @@
       return true;
     }
     observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) inject();
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      if (scrollHot) {
+        pendingVisible = true;
+        root.dataset.fxLiveOsLoadState = 'armed-scroll-settle-r1777';
+        return;
+      }
+      inject();
     }, { rootMargin: '520px 0px', threshold: 0.01 });
     observer.observe(trigger);
     root.dataset.fxLiveOsLoadState = 'armed';
@@ -372,8 +403,20 @@
   if (document.readyState === 'loading') addEventListener('DOMContentLoaded', ensureArmed, { once: true });
   else ensureArmed();
   ['pageshow', 'formatx:livingready', 'formatx:loop', 'formatx:productshowcaseready'].forEach(name => addEventListener(name, ensureArmed));
+  addEventListener('scroll', () => {
+    scrollHot = true;
+    clearTimeout(scrollSettleTimer);
+    scrollSettleTimer = setTimeout(() => {
+      scrollHot = false;
+      if (pendingVisible) {
+        pendingVisible = false;
+        inject();
+      }
+    }, 140);
+  }, { passive: true });
   addEventListener('pagehide', () => {
     if (observer) observer.disconnect();
     clearInterval(retryTimer);
+    clearTimeout(scrollSettleTimer);
   }, { once: true });
 }());
