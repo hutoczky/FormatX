@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const mobile = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  const mobile = matchMedia('(max-width: 900px), (pointer: coarse) and (max-width: 1100px)').matches;
   const mode = mobile ? 'ready' : 'desktop';
 
   root.dataset.fxReferenceProductionR244 = mode;
