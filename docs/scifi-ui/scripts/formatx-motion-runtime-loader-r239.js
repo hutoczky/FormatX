@@ -39,6 +39,7 @@ root.dataset.fxPerformancePolicyR1661='scroll-never-mounts-deferred-enhancements
 root.dataset.fxPerformancePolicyR1676='phase-gated-intro-lighter-mobile-geometry-preemptive-60fps-headroom';
 root.dataset.fxPerformancePolicyR1670='stable-60fps-headroom-no-fullscreen-blur-lower-start-resolution';
 root.dataset.fxPerformancePolicyR1672='photoreal-material-lighting-no-extra-geometry-adaptive-60fps';
+root.dataset.fxPerformancePolicyR1774='phase2-fetch-only-final-mag-prewarm-no-concurrent-webgl';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
@@ -161,11 +162,15 @@ function onMagBirthWarmup(event){
   const source=String(event?.detail?.source||root.dataset.fxMagBirthCoreWarmupR618||'cinematic-warmup');
   const validationWarmup=/validated-skip|mobile-skip|automation|webdriver/i.test(source);
   if(mobile.matches && !validationWarmup){
-    /* R1606: do not compile/link the permanent R326 WebGL program while the
-       mobile intro is still animating. The intro owns the frame budget until
-       handoff; R326 starts from formatx:magbirthcomplete. */
-    root.dataset.fxIntroAwareMagR618='warmup-deferred-until-handoff-'+source;
+    /* R1774: preserve the exclusive intro GPU budget, but use the existing
+       phase-2 warmup event (~3.15 s on the 10 s film) to fetch the permanent
+       MAG owners into HTTP cache. No script executes here, no WebGL context is
+       created, and no RAF loop starts. The actual R326 compile remains owned by
+       formatx:magbirthcomplete. */
+    warmCriticalOwners();
+    root.dataset.fxIntroAwareMagR618='assets-prewarmed-deferred-until-handoff-'+source;
     root.dataset.fxIntroAwareMagR1606='mobile-exclusive-intro-frame-budget';
+    root.dataset.fxFinalMagPrewarmR1774='phase2-fetch-only-no-webgl';
     return;
   }
   root.dataset.fxIntroAwareMagR618='warmup-received-starting-'+source;
