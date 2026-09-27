@@ -715,6 +715,121 @@ html:root{
    requiring it allowed the legacy top-right 132px controls to paint before the
    canonical bottom-center geometry, producing a measurable first-layout shift. */
 /* production-r1776-body-agnostic-desktop-control-first-paint */
+
+/* R1777 — absolute first-layout desktop owner.
+   R1776 removed the body-state dependency, but older render-blocking desktop
+   styles still have 5–6 :root levels and can win the !important cascade.
+   This rule deliberately outranks every retained legacy control owner so the
+   parser-visible controls are born in the exact final r244 geometry. */
+@media (min-width:901px){
+  html:root:root:root:root:root:root:root:root
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
+    position:absolute!important;
+    inset:auto auto 20px 50%!important;
+    z-index:12080!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,54px)!important;
+    grid-template-rows:76px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:190px!important;
+    min-width:190px!important;
+    max-width:190px!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    gap:0 14px!important;
+    overflow:visible!important;
+    isolation:isolate!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:none!important;
+    animation:none!important;
+    transition:none!important;
+    will-change:auto!important;
+  }
+
+  html:root:root:root:root:root:root:root:root
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    display:contents!important;
+    position:static!important;
+    inset:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    transform:none!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:none!important;
+    animation:none!important;
+    transition:none!important;
+    will-change:auto!important;
+  }
+
+  html:root:root:root:root:root:root:root:root
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound.fx-wda-sound-toggle.fx-control-owner-r264,
+  html:root:root:root:root:root:root:root:root
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html:root:root:root:root:root:root:root:root
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
+  html:root:root:root:root:root:root:root:root
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    flex:0 0 54px!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:none!important;
+    animation:none!important;
+    transition:none!important;
+    will-change:auto!important;
+    contain:layout paint!important;
+  }
+
+  html:root:root:root:root:root:root:root:root
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound{
+    grid-column:1!important;grid-row:1!important;
+  }
+  html:root:root:root:root:root:root:root:root
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask{
+    grid-column:2!important;grid-row:1!important;
+  }
+  html:root:root:root:root:root:root:root:root
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
+    grid-column:3!important;grid-row:1!important;
+  }
+}
+/* production-r1777-desktop-controls-cascade-final */
+
 /* production-r1756-scrollbar-control-geometry-lock */
 
 
