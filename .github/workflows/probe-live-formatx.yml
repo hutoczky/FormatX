@@ -6,8 +6,9 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
-      - 'docs/scifi-ui/styles/formatx-apex.css'
-      - 'docs/scifi-ui/scripts/formatx-apex.js'
+      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-site-sensory-r1755.js'
       - '.github/workflows/probe-live-formatx.yml'
 
 permissions:
@@ -33,19 +34,22 @@ jobs:
           for attempt in $(seq 1 48); do
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
             home_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/formatx-apex.css 'https://formatxsuite.com/scifi-ui/styles/formatx-apex.css'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260927-r1759-visible-through-intro'
             css_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/formatx-apex.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-apex.js'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/mag-birth.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260927-r1758-no-text-lcp'
             js_status=$?
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/site-sensory.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint'
+            sensory_status=$?
             if [ "$home_status" = '0' ] \
                && [ "$css_status" = '0' ] \
                && [ "$js_status" = '0' ] \
-               && grep -Fq 'formatx-apex.css?v=20260726-apex-2' live-probe/home.html \
-               && grep -Fq 'formatx-apex.js?v=20260726-apex-2' live-probe/home.html \
-               && grep -Fq 'FormatX APEX' live-probe/formatx-apex.css \
-               && grep -Fq 'createRenderer' live-probe/formatx-apex.js \
-               && grep -Fq 'formatx:loop' live-probe/formatx-apex.js \
-               && grep -Fq 'scene-loop-clone' live-probe/formatx-apex.css \
+               && [ "$sensory_status" = '0' ] \
+               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260927-r1759-visible-through-intro' live-probe/home.html \
+               && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260927-r1758-no-text-lcp' live-probe/home.html \
+               && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
+               && grep -Fq 'production-r1759-proxy-visible-through-intro-until-webgl' live-probe/p0.css \
+               && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
+               && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
                && ! grep -Eq 'formatx-igloo|reference-commerce|professional-sections|pricing-sync' live-probe/home.html; then
               found_new=1
               break
@@ -56,6 +60,7 @@ jobs:
             echo "home_curl_status=$home_status"
             echo "css_curl_status=$css_status"
             echo "js_curl_status=$js_status"
+            echo "sensory_curl_status=$sensory_status"
             echo "new_build=$found_new"
           } | tee live-probe/result.txt
           echo "new_build=$found_new" >> "$GITHUB_OUTPUT"
@@ -76,10 +81,10 @@ jobs:
         run: |
           if [ "$NEW_BUILD" = '1' ]; then
             state='success'
-            description='Live domain serves the looping FormatX APEX experience'
+            description='Live domain serves the current R1759/R1758 FormatX experience'
           else
             state='failure'
-            description='Live domain is still serving a previous website build'
+            description='Live domain is not yet serving the current R1759/R1758 build'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
