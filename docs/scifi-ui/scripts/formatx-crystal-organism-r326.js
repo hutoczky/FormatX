@@ -11,7 +11,8 @@
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const auditParams = new URLSearchParams(location.search);
   const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
-  const auditMode = !surfaceEnergyFunctionalCheck && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
+  const mobileVisualProof = auditParams.has('mobileproof');
+  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
@@ -158,6 +159,7 @@
   root.dataset.fxNativeMagVisualR1782='mobile-smoky-bioglass-crystal-broad-facets-visible-recessed-optic';
   root.dataset.fxNativeMagMaterialR1782='charcoal-pearl-bioglass-neutral-key-warm-rim-subtle-cyan-optic';
   root.dataset.fxNativeMagMobileR1782='no-cull-no-speckle-clean-broad-facet-silhouette';
+  root.dataset.fxNativeMagProofR1782=mobileVisualProof?'normal-mobile-visual-path-with-lens-and-msaa':'not-mobile-proof';
   root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
   root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
