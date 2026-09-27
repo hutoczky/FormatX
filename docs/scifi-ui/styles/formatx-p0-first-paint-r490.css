@@ -783,10 +783,39 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 @media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
     top:45%!important;
-    width:clamp(148px,43vw,206px)!important;
-    opacity:.94!important;
+    width:clamp(208px,60vw,260px)!important;
+    opacity:.97!important;
+    clip-path:polygon(50% 0,64% 7%,77% 5%,89% 16%,97% 30%,100% 45%,93% 59%,96% 72%,83% 84%,69% 88%,58% 100%,44% 94%,31% 98%,20% 87%,8% 80%,10% 64%,1% 51%,6% 37%,0 26%,14% 16%,25% 5%,39% 9%)!important;
+    background:
+      radial-gradient(circle at 50% 50%,rgba(4,14,22,.99) 0 12%,rgba(32,139,160,.74) 13%,rgba(6,24,33,.98) 21%,transparent 22%),
+      radial-gradient(ellipse at 42% 22%,rgba(249,255,255,.98),rgba(203,226,228,.84) 21%,transparent 47%),
+      linear-gradient(137deg,rgba(235,247,246,.90) 0 14%,rgba(117,151,158,.88) 15% 29%,rgba(215,234,234,.87) 30% 43%,rgba(55,82,92,.98) 44% 57%,rgba(178,207,211,.88) 58% 72%,rgba(86,112,121,.96) 73% 84%,rgba(24,39,48,.99) 85% 100%)!important;
+    box-shadow:
+      0 28px 68px rgba(0,0,0,.52),
+      0 0 54px rgba(81,202,220,.13),
+      inset 0 1px 0 rgba(255,255,255,.42)!important;
+  }
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
+    background:
+      linear-gradient(24deg,transparent 0 27%,rgba(238,250,250,.42) 28% 30%,transparent 31% 100%),
+      linear-gradient(72deg,transparent 0 39%,rgba(114,160,170,.22) 40% 42%,transparent 43% 100%),
+      linear-gradient(118deg,transparent 0 45%,rgba(10,36,45,.78) 46% 49%,transparent 50% 100%),
+      linear-gradient(161deg,transparent 0 57%,rgba(239,250,249,.28) 58% 60%,transparent 61% 100%),
+      radial-gradient(circle at 50% 50%,transparent 0 16%,rgba(111,220,231,.19) 17% 20%,transparent 21% 100%)!important;
+    opacity:.82!important;
+  }
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
+    inset:34%!important;
+    border:2px solid rgba(126,224,233,.38)!important;
+    background:
+      radial-gradient(circle at 43% 35%,rgba(169,245,247,.82),rgba(30,135,151,.40) 19%,rgba(4,18,27,.97) 55%,rgba(0,5,10,.99) 100%)!important;
+    box-shadow:
+      0 0 0 9px rgba(4,12,19,.78),
+      0 0 28px rgba(69,207,224,.22),
+      inset 0 0 20px rgba(116,235,241,.22)!important;
   }
 }
+/* production-r1769-mobile-proxy-final-mass-parity */
 @media(prefers-reduced-motion:reduce){
   .fx-mag-first-paint-r1756{transition:none!important}
 }
