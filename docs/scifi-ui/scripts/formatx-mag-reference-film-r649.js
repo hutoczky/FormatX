@@ -246,27 +246,27 @@
         const breathe=1+.008*Math.sin(time*.0024);
         ctx.scale(breathe,breathe);
         ctx.beginPath();
-        ctx.moveTo(-R*.84,R*.10);
-        ctx.bezierCurveTo(-R*.93,-R*.16,-R*.78,-R*.46,-R*.53,-R*.56);
-        ctx.lineTo(-R*.64,-R*.80);
-        ctx.lineTo(-R*.38,-R*.66);
-        ctx.lineTo(-R*.25,-R*.94);
-        ctx.lineTo(-R*.02,-R*.68);
-        ctx.bezierCurveTo(R*.14,-R*.73,R*.26,-R*.82,R*.42,-R*.74);
-        ctx.lineTo(R*.48,-R*1.02);
-        ctx.lineTo(R*.59,-R*.77);
-        ctx.lineTo(R*.72,-R*.96);
-        ctx.lineTo(R*.74,-R*.69);
-        ctx.bezierCurveTo(R*.90,-R*.64,R*1.06,-R*.56,R*1.08,-R*.43);
-        ctx.bezierCurveTo(R*1.00,-R*.32,R*.82,-R*.29,R*.66,-R*.26);
-        ctx.lineTo(R*.54,-R*.04);
-        ctx.bezierCurveTo(R*.47,R*.20,R*.53,R*.46,R*.40,R*.70);
-        ctx.lineTo(R*.25,R*.90);
-        ctx.lineTo(R*.14,R*.70);
-        ctx.bezierCurveTo(R*.02,R*.58,-R*.14,R*.56,-R*.27,R*.72);
-        ctx.lineTo(-R*.49,R*.88);
-        ctx.lineTo(-R*.52,R*.63);
-        ctx.bezierCurveTo(-R*.69,R*.50,-R*.82,R*.37,-R*.84,R*.10);
+        ctx.moveTo(-R*.88,R*.08);
+        ctx.bezierCurveTo(-R*.98,-R*.19,-R*.82,-R*.48,-R*.56,-R*.60);
+        ctx.lineTo(-R*.72,-R*.86);
+        ctx.lineTo(-R*.40,-R*.70);
+        ctx.lineTo(-R*.29,-R*1.03);
+        ctx.lineTo(-R*.04,-R*.71);
+        ctx.bezierCurveTo(R*.12,-R*.78,R*.29,-R*.88,R*.46,-R*.78);
+        ctx.lineTo(R*.52,-R*1.08);
+        ctx.lineTo(R*.63,-R*.80);
+        ctx.lineTo(R*.78,-R*1.00);
+        ctx.lineTo(R*.79,-R*.70);
+        ctx.bezierCurveTo(R*.96,-R*.66,R*1.08,-R*.55,R*1.04,-R*.39);
+        ctx.bezierCurveTo(R*.95,-R*.31,R*.79,-R*.28,R*.62,-R*.24);
+        ctx.lineTo(R*.50,R*.02);
+        ctx.bezierCurveTo(R*.44,R*.25,R*.52,R*.49,R*.36,R*.73);
+        ctx.lineTo(R*.20,R*.96);
+        ctx.lineTo(R*.08,R*.71);
+        ctx.bezierCurveTo(-R*.04,R*.62,-R*.18,R*.59,-R*.33,R*.77);
+        ctx.lineTo(-R*.55,R*.91);
+        ctx.lineTo(-R*.58,R*.62);
+        ctx.bezierCurveTo(-R*.74,R*.49,-R*.87,R*.34,-R*.88,R*.08);
         ctx.closePath();
         ctx.fill();
         ctx.save();ctx.globalCompositeOperation='screen';
@@ -300,20 +300,21 @@
           ctx.stroke();
         }
       }
-      const lensR=Math.max(30,R*.285);
-      const lensRx=lensR*.82,lensRy=lensR*.66;
-      const lens=ctx.createRadialGradient(-lensR*.25,-lensR*.28,1,0,0,lensR);
+      const lensR=Math.max(27,R*.245);
+      const lensRx=lensR*.88,lensRy=lensR*.62;
+      const lensOX=-lensR*.22,lensOY=lensR*.08;
+      const lens=ctx.createRadialGradient(lensOX-lensR*.22,lensOY-lensR*.25,1,lensOX,lensOY,lensR);
       lens.addColorStop(0,'rgba(232,236,232,.70)');
       lens.addColorStop(.12,'rgba(156,178,176,.80)');
       lens.addColorStop(.30,'rgba(73,112,116,.90)');
       lens.addColorStop(.54,'rgba(27,65,70,.985)');
       lens.addColorStop(.80,'rgba(8,28,32,1)');
       lens.addColorStop(1,'rgba(2,8,10,1)');
-      ctx.fillStyle=lens;ctx.beginPath();ctx.ellipse(-lensR*.025,lensR*.015,lensRx,lensRy,-.08,0,TAU);ctx.fill();
+      ctx.fillStyle=lens;ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx,lensRy,-.11,0,TAU);ctx.fill();
       ctx.strokeStyle='rgba(145,188,190,.24)';ctx.lineWidth=1.8;ctx.stroke();
       ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(76,158,169,.18)';ctx.shadowBlur=7;
-      ctx.fillStyle='rgba(65,139,151,.085)';ctx.beginPath();ctx.ellipse(-lensR*.018,lensR*.010,lensRx*.34,lensRy*.34,-.08,0,TAU);ctx.fill();ctx.restore();
-      ctx.fillStyle='rgba(2,18,23,.90)';ctx.beginPath();ctx.ellipse(-lensR*.010,lensR*.008,lensRx*.23,lensRy*.23,-.08,0,TAU);ctx.fill();
+      ctx.fillStyle='rgba(61,117,123,.060)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.34,lensRy*.34,-.11,0,TAU);ctx.fill();ctx.restore();
+      ctx.fillStyle='rgba(2,14,17,.92)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.22,lensRy*.22,-.11,0,TAU);ctx.fill();
       ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(118,181,188,.28)';ctx.lineCap='round';
       for(let i=0;i<14;i++){
         const a=i/14*TAU+Math.sin(time*.0009+i*.7)*.012;
@@ -427,13 +428,13 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-photographic-mineral-bioglass-fallback-r1775'
+      quality:'hidpi-photographic-irregular-mineral-bioglass-fallback-r1776'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1775-photoreal-mineral-bioglass-intro-world-parity'
+    visualRevision:'r1776-cinematic-irregular-mineral-bioglass-intro-world-parity'
   };
 })();
