@@ -108,7 +108,7 @@ const productionConfig = json('billing-worker/wrangler.jsonc');
 if ((homepage.match(/<h1\b/gi) || []).length !== 1) report('homepage: exactly one h1 is required');
 if (!homepage.includes('id="resources"')) report('homepage: release section missing');
 if (!homepage.includes('data-fx-sitewide-living-habitat-r1724="true"')) report('homepage: sitewide living habitat activation marker missing');
-if (!homepage.includes('formatx-living-habitat-r1530.css?v=20260928-r1775-photoreal-intro-core')) report('homepage: sitewide living habitat CSS cache identity missing');
+if (!homepage.includes('formatx-living-habitat-r1530.css?v=20260928-r1776-photoreal-visual-upgrade')) report('homepage: sitewide living habitat CSS cache identity missing');
 if (!homepage.includes('formatx-living-habitat-r1530.js?v=20260924-r1724-sitewide-living-world')) report('homepage: sitewide living habitat runtime cache identity missing');
 if (!livingHabitatCss.includes('production-r1724-sitewide-living-habitat')) report('living habitat: sitewide CSS owner missing');
 if (!livingHabitatCss.includes('production-r1724-zero-blend-sitewide-habitat') || !livingHabitatCss.includes('mix-blend-mode:normal!important')) report('living habitat: zero-blend compositor contract missing');
