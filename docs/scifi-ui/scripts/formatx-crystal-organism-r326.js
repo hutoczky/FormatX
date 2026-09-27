@@ -152,6 +152,8 @@
   root.dataset.fxNativeMagVisualR1779='mobile-obsidian-bioglass-monolith-broad-facets-no-tendrils';
   root.dataset.fxNativeMagMaterialR1779='dark-studio-obsidian-broad-specular-low-emission-recessed-optic';
   root.dataset.fxNativeMagMobileR1779='zero-tendrils-zero-flower-low-overdraw-proof-target';
+  root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
+  root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -366,7 +368,7 @@
         crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.68:(mobile?.80:.84);
+        const smoothWeight=software?.38:(mobile?.50:.84);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -394,7 +396,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 40 : mobile ? 48 : constrained ? 60 : 72;
+      const sideCount = software ? 34 : mobile ? 38 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -1470,9 +1472,9 @@
         float tendrilMask=isTendril*(1.0-vMorph);
 
         float lift=sat(.135+ndl*.43+sideLight*.29);
-        float facetTone=.84+.22*fract(vFacet*5.73+.23);
+        float facetTone=.72+.42*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
-        vec3 col=mix(vec3(.014,.018,.020),vec3(.165,.176,.168),lift)*facetTone;
+        vec3 col=mix(vec3(.010,.014,.016),vec3(.150,.162,.155),lift)*facetTone;
         col+=vec3(.78,.79,.73)*keySpec*.245;
         col+=vec3(.34,.41,.40)*sideSpec*.175;
         col+=vec3(.055,.102,.104)*fresnel*.25;
@@ -1684,7 +1686,7 @@
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
     let morph=0,targetMorph=0;
-    let rotationX=softwareRenderer?-.115:-.090,rotationY=softwareRenderer?-.385:-.235,rotationZ=.024;
+    let rotationX=softwareRenderer?-.125:(mobile?-.105:-.090),rotationY=softwareRenderer?-.56:(mobile?-.48:-.235),rotationZ=.018;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
@@ -1951,12 +1953,12 @@
       /* R1557 is a genuinely opaque closed mineral. No alpha blending and no
          back-face culling means bad mobile winding can never punch black holes
          through the body, while the depth buffer still resolves the front shell. */
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       if(mobile){
-        gl.enable(gl.CULL_FACE);
-        gl.cullFace(gl.BACK);
+        gl.disable(gl.BLEND);
+        gl.disable(gl.CULL_FACE);
       }else{
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
         gl.disable(gl.CULL_FACE);
       }
       gl.uniform1f(uniforms.uLayer,0);
