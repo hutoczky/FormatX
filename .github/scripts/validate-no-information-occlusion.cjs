@@ -186,7 +186,7 @@ async function scanInformation(page,label){
 
 async function runProfile(browser,profile){
   const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},isMobile:profile.mobile,hasTouch:profile.mobile,deviceScaleFactor:profile.mobile?2:1,colorScheme:'dark',reducedMotion:'no-preference'});
-  await context.addInitScript(()=>{try{localStorage.setItem('formatx:intro-seen-v1','1');}catch(_){}});
+  await context.addInitScript(()=>{try{localStorage.setItem('formatx:intro-seen-v1','1');sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1');}catch(_){}});
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
@@ -195,6 +195,10 @@ async function runProfile(browser,profile){
     await page.goto(BASE,{waitUntil:'domcontentloaded'});
     await page.waitForSelector('#hero',{timeout:10000});
     await page.waitForTimeout(1500);
+    if(profile.mobile){
+      const heroSpace=page.locator('#hero .hero-space').first();
+      await heroSpace.tap({position:{x:12,y:12},timeout:10000});
+    }
     await assertPure3d(page,profile);
     await assertHeaderAndHeroControls(page,profile);
     for(const selector of STOPS){
