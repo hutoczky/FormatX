@@ -19,7 +19,7 @@ function assert(value, message) {
 
 async function clearIntro(page) {
   await page.evaluate(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); sessionStorage.setItem('formatx:mag-birth-live-r533-seen', '1'); } catch (_) {}
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
     root.classList.remove('fx-intro-running', 'fx-intro-pending');
@@ -162,7 +162,7 @@ async function verifyViewport(browser, spec) {
     reducedMotion: 'reduce',
   });
   await context.addInitScript(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); sessionStorage.setItem('formatx:mag-birth-live-r533-seen', '1'); } catch (_) {}
   });
   const page = await context.newPage();
   const errors = [];
