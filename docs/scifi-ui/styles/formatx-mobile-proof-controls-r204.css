@@ -1,7 +1,7 @@
 /* FormatX r204 — authoritative mobile proof + control ownership.
    Scope: mobile only. The large MAG/WebGL renderer is intentionally untouched. */
 
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px) {
   #hero {
     position: relative !important;
   }
@@ -230,7 +230,7 @@
 
 /* r205 — screenshot-driven mobile control polish.
    Keep the r204 DOM owner, but reduce visual weight and restore the mini MAG identity. */
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px) {
   #hero .fx-reference-controls-r204 {
     top: 16px !important;
     right: 14px !important;
@@ -368,7 +368,7 @@
 /* r213 — mobile readable plane is always the topmost visual layer.
    Decorative WebGL/glow/atmosphere layers stay below; copy never inherits their
    brightness, opacity, filter or blend changes. */
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px) {
   html body.living-architecture .topbar,
   html body.living-architecture .skip-link,
   html body.living-architecture .fx-single-language-switch,
@@ -431,3 +431,10 @@
     isolation: isolate !important;
   }
 }
+
+
+/* R1772 — this legacy proof/control stylesheet owns narrow-screen geometry only.
+   Coarse pointer is not a viewport class: desktop touchscreens and CI can expose
+   pointer:coarse at 1440px. Let the modern P0 owner handle coarse input without
+   promoting the old 132px top-right SOUND geometry on wide layouts. */
+/* production-r1772-width-owned-legacy-mobile-controls */
