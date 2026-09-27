@@ -512,7 +512,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260927-r1755-photoreal-living-60fps';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260928-r1775-photoreal-intro-core';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -1095,6 +1095,7 @@
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-adaptive-cinematic':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthPerformanceR1727=CONSTRAINED?'constrained-reference-film-no-heavy-three-loop':'hardware-three-adaptive-quality';
     ROOT.dataset.fxMagBirthPerformanceR1729=SOFTWARE_SAFE?'software-safe-reference-film-phase-driven-raster':'hardware-three-adaptive-60hz';
+    ROOT.dataset.fxMagBirthVisualR1775='photoreal-intro-core-material-continuity';
     ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
