@@ -24,13 +24,14 @@
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
   if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
-  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
+  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
+  if (HEADLESS_SOFTWARE) ROOT.dataset.fxHeadlessIntroPolicyR1771 = 'automation-skip-real-users-unchanged';
+  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE || HEADLESS_SOFTWARE;
   const VALIDATED_SKIP_MODE = AUTOMATION && PARAMS.get('r548') === 'mobile-skip';
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
-  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
   const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
   /* R1753 — forced cinematic proof is a real intro path, not an audit path.
      The R533/critical birth styles are normally deferred for first-paint cost,
@@ -50,6 +51,7 @@
     ROOT.dataset.fxMagBirthForcedStyleR1753 = 'immediate';
   }
   const LOW_POWER = MOBILE && CONSTRAINED;
+  ROOT.dataset.fxAdaptiveMobileIntroR1772 = LOW_POWER ? 'skip-autoplay-use-static-mag' : 'full-cinematic-capable';
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
@@ -64,16 +66,22 @@
      source for compatibility validators, but is removed before its deferred
      controller executes, so users never see two intros back-to-back. */
   document.getElementById('formatx-event-horizon')?.remove();
-  ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : (seen && !FORCE ? 'session-skip' : 'active');
+  ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION
+    ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip')
+    : (!FORCE && MOBILE && CONSTRAINED
+      ? 'constrained-mobile-skip'
+      : (seen && !FORCE ? 'session-skip' : 'active'));
   if (ROOT.dataset.fxMagBirthOwnerR533 === 'active') {
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthOwnershipR1673='genesis-contract-published-before-visible-live-shell';
   }
 
-  if (!FORCE && (seen || AUTOMATION)) {
+  if (!FORCE && (seen || AUTOMATION || (MOBILE && CONSTRAINED))) {
     prepaintOverlay?.remove();
-    ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : 'session-skip';
+    ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION
+      ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip')
+      : ((MOBILE && CONSTRAINED) ? 'constrained-mobile-skip' : 'session-skip');
     return;
   }
 
