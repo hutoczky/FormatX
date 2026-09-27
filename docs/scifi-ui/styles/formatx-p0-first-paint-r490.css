@@ -954,3 +954,113 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 }
 /* production-r1763-mobile-first-paint-touch-target-lock */
+
+
+/* R1774 — desktop control geometry is authoritative before any runtime owner
+   mutation. This prevents the legacy 132px top-right state from ever painting
+   before the canonical 54px bottom-center control rail. */
+@media (min-width:901px){
+  html:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204{
+    position:absolute!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:20px!important;
+    left:50%!important;
+    z-index:12080!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,54px)!important;
+    grid-template-rows:76px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:190px!important;
+    min-width:190px!important;
+    max-width:190px!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    column-gap:14px!important;
+    row-gap:0!important;
+    overflow:visible!important;
+    isolation:isolate!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
+    translate:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    display:contents!important;
+    position:static!important;
+    inset:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-ask,
+  html:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-pause{
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    flex:0 0 54px!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 > .fx-three-sound{
+    grid-column:1!important;
+    grid-row:1!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-ask{
+    grid-column:2!important;
+    grid-row:1!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-pause{
+    grid-column:3!important;
+    grid-row:1!important;
+  }
+  html:root:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-ask>span{
+    position:absolute!important;
+    top:59px!important;
+    left:50%!important;
+    right:auto!important;
+    bottom:auto!important;
+    display:block!important;
+    width:max-content!important;
+    max-width:96px!important;
+    white-space:nowrap!important;
+    text-align:center!important;
+    pointer-events:none!important;
+    transform:translateX(-50%)!important;
+    translate:none!important;
+  }
+}
+/* production-r1774-desktop-control-zero-cls-owner */
