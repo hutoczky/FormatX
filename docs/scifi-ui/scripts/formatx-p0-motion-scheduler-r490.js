@@ -27,27 +27,74 @@ root.dataset.fxP0MotionCacheR1725='motion-loader-r1725-photoreal-living-biocryst
 root.dataset.fxP0MotionCacheR1729='webdriver-validation-runs-real-r326-explicit-lighthouse-static-only';
 root.dataset.fxP0MotionCacheR1749='final-photoreal-mag-intro-material-parity';
 root.dataset.fxP0MotionCacheR1755='photoreal-living-60fps-site-sensory';
+root.dataset.fxP0MotionCacheR1775='post-lcp-mobile-final-mag-network-warmup';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260927-r1755-photoreal-living-60fps';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
 const AUTO_DELAY_MS=6500;
+const FINAL_WARM_DELAY_MS=1800;
+const MOBILE_FINAL_WARM_ASSETS=[
+  ['script','/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260927-r1755-photoreal-living-60fps'],
+  ['script','/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260927-r1755-photoreal-living-60fps'],
+  ['style','/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner'],
+  ['style','/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity'],
+  ['style','/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner']
+];
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
 let idleId=0;
 let timer=0;
 let pendingCanonicalAsk=false;
+let warmTimer=0;
+let warmIdleId=0;
 
 function clearPending(){
   if(timer){clearTimeout(timer);timer=0;}
   if(idleId&&'cancelIdleCallback' in window){cancelIdleCallback(idleId);idleId=0;}
+}
+function clearWarmup(){
+  if(warmTimer){clearTimeout(warmTimer);warmTimer=0;}
+  if(warmIdleId&&'cancelIdleCallback' in window){cancelIdleCallback(warmIdleId);warmIdleId=0;}
+}
+function warmFinalAsset(href,as){
+  const absolute=new URL(href,document.baseURI).href;
+  const exists=Array.from(document.querySelectorAll('link[rel="preload"]')).some(link=>link.href===absolute&&link.as===as);
+  if(exists)return;
+  const preload=document.createElement('link');
+  preload.rel='preload';
+  preload.as=as;
+  preload.href=href;
+  preload.fetchPriority='low';
+  preload.dataset.fxPostLcpMagWarmR1775='true';
+  document.head.appendChild(preload);
+}
+function warmMobileFinalAssets(){
+  warmTimer=0;warmIdleId=0;
+  if(started||!matchMedia('(max-width:900px),(pointer:coarse)').matches)return;
+  MOBILE_FINAL_WARM_ASSETS.forEach(([as,href])=>warmFinalAsset(href,as));
+  root.dataset.fxPostLcpMagWarmR1775='cache-warm-requested';
+}
+function armFinalAssetWarmup(){
+  if(!matchMedia('(max-width:900px),(pointer:coarse)').matches)return;
+  const queueWarm=()=>{
+    warmTimer=setTimeout(()=>{
+      warmTimer=0;
+      if('requestIdleCallback' in window){
+        warmIdleId=requestIdleCallback(warmMobileFinalAssets,{timeout:650});
+      }else warmMobileFinalAssets();
+    },FINAL_WARM_DELAY_MS);
+  };
+  requestAnimationFrame(()=>requestAnimationFrame(queueWarm));
+  root.dataset.fxPostLcpMagWarmR1775='armed-after-first-paint';
 }
 
 function start(reason){
   if(started)return;
   started=true;
   clearPending();
+  clearWarmup();
   root.dataset.fxP0MotionSchedulerR490=`starting:${reason}`;
   if(document.querySelector('script[src*="formatx-motion-runtime-loader-r239.js"]')){
     root.dataset.fxP0MotionSchedulerR490='runtime-already-present';
@@ -112,6 +159,7 @@ function magBirthActive(){
 }
 
 function armStartup(){
+  armFinalAssetWarmup();
   if(AUDIT){
     root.dataset.fxP0MotionSchedulerR490='audit-static-r1728';
     return;
