@@ -13,7 +13,7 @@ const CANONICAL_CANDIDATE_ORIGIN='https://formatxsuite.com';
 const HOMEPAGE_PATHS=new Set(['/','/index.html','/scifi-ui','/scifi-ui/','/scifi-ui/index.html']);
 const P0_SCHEDULER_PATH='/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js';
 const P0_MOTION_SCHEDULER_RE=/formatx-p0-motion-scheduler-r490\.js\?v=[^"']+/g;
-const P0_MOTION_SCHEDULER_URL='formatx-p0-motion-scheduler-r490.js?v=20260906-r549-navigation-mag-under-intro';
+const P0_MOTION_SCHEDULER_URL='formatx-p0-motion-scheduler-r490.js?v=20260927-r861-canonical-release-adoption';
 const MOTION_RUNTIME_RE=/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g;
 const MOTION_RUNTIME_URL='formatx-motion-runtime-loader-r239.js?v=20260906-r550-parallel-shader-under-intro';
 const CONTENT_RUNTIME_RE=/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g;

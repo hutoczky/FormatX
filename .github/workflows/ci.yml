@@ -45,6 +45,10 @@ jobs:
         run: |
           npm install -g @lhci/cli@0.13.x
           npm ci --prefix billing-worker
+          npm install --prefix "$RUNNER_TEMP/formatx-browser" --no-audit --no-fund playwright@1.62.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
       - name: Validate individual-run Lighthouse checker
         run: node --test .github/scripts/summarize-p0-lighthouse.test.cjs
       - name: Start exact current production candidate Worker
@@ -92,6 +96,13 @@ jobs:
           done
           if [ "$proxy_ready" -ne 1 ]; then cat "$RUNNER_TEMP/formatx-lighthouse-proxy.log" || true; cat "$RUNNER_TEMP/formatx-lighthouse-proxy-headers.txt" || true; exit 1; fi
           echo 'Exact current production candidate + restart-tolerant canonical transport proxy ready on 127.0.0.1:8788/.'
+      - name: Verify automatic MAG and SOUND on the real production candidate
+        if: steps.candidate.outcome == 'success'
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:8788/
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-production-startup-r861.cjs
       - name: Run desktop Lighthouse CI on the real production candidate
         id: lighthouse_desktop
         if: steps.candidate.outcome == 'success'

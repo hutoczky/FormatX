@@ -27,7 +27,9 @@ let idleId=0;
 let timer=0;
 
 function isPreloaderComplete(){
-  return window.__formatxPreloaderComplete===true
+  return root.dataset.fxPreloaderR531==='done'
+    || root.dataset.fxIntroCompletionR769==='done'
+    || window.__formatxPreloaderComplete===true
     || root.dataset.formatxPreloader==='complete'
     || root.dataset.preloaderComplete==='true'
     || document.body?.dataset.preloaderComplete==='true'
@@ -122,6 +124,8 @@ function startPostIntroRuntime(){
   for(const type of ['pointerdown','touchstart','keydown','wheel'])addEventListener(type,onIntent,{once:true,passive:true});
 }
 if(!MOBILE){startCriticalMag();startShapeSync();}
+// R861: the canonical owner dispatches a non-bubbling document event. Read its
+// durable state for late adoption, and subscribe to the same target when early.
 if(isPreloaderComplete())queueMicrotask(startPostIntroRuntime);
-else addEventListener('formatx:preloadercomplete',startPostIntroRuntime,{once:true,passive:true});
+else document.addEventListener('formatx:preloadercomplete',startPostIntroRuntime,{once:true,passive:true});
 }());
