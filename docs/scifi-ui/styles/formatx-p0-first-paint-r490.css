@@ -731,7 +731,9 @@ html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-
   top:48%;
   width:clamp(286px,31vw,430px);
   aspect-ratio:1.08;
-  transform:translate(-50%,-50%);
+  transform:translate3d(-50%,-50%,0);
+  backface-visibility:hidden;
+  will-change:transform,opacity;
   pointer-events:none;
   opacity:.97;
   visibility:visible;
@@ -763,9 +765,12 @@ html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-
     radial-gradient(ellipse at 72% 74%,rgba(75,105,113,.44),transparent 54%),
     conic-gradient(from 18deg at 49% 48%,rgba(223,241,240,.93),rgba(92,125,133,.90) 12%,rgba(218,236,235,.86) 24%,rgba(52,78,88,.94) 37%,rgba(185,211,214,.88) 51%,rgba(80,110,118,.91) 64%,rgba(231,245,244,.84) 77%,rgba(46,67,77,.96) 89%,rgba(208,229,230,.90));
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.48),
-    inset 12px -16px 28px rgba(8,26,33,.26),
-    0 24px 62px rgba(0,0,0,.48);
+    inset 0 1px 0 rgba(255,255,255,.42),
+    inset 9px -12px 22px rgba(8,26,33,.22),
+    0 20px 46px rgba(0,0,0,.42);
+  transform:translateZ(0);
+  backface-visibility:hidden;
+  will-change:opacity;
   opacity:.98;
 }
 .fx-mag-first-paint-r1756::after{
@@ -777,10 +782,11 @@ html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-
     radial-gradient(circle at 50% 50%,rgba(74,211,224,.24),transparent 66%);
   box-shadow:
     0 0 0 7px rgba(4,12,19,.83),
-    0 0 0 9px rgba(119,216,225,.10),
-    0 0 25px rgba(64,201,217,.24),
-    inset -4px -5px 14px rgba(0,3,8,.74),
-    inset 2px 2px 11px rgba(139,237,240,.20);
+    0 0 20px rgba(64,201,217,.20),
+    inset -3px -4px 11px rgba(0,3,8,.72),
+    inset 2px 2px 9px rgba(139,237,240,.18);
+  transform:translateZ(0);
+  backface-visibility:hidden;
 }
 html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756,
 html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
@@ -829,6 +835,7 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 }
 /* production-r1769-mobile-proxy-final-mass-parity */
 /* production-r1772-biocrystal-veins-iris-tendrils-final-frame-parity */
+/* production-r1773-compositor-promoted-biocrystal-proxy */
 @media(prefers-reduced-motion:reduce){
   .fx-mag-first-paint-r1756{transition:none!important}
 }
