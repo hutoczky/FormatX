@@ -143,6 +143,9 @@
   root.dataset.fxNativeMagMaterialR1776='dark-dielectric-mineral-broad-facet-caustic-depth-low-emission';
   root.dataset.fxNativeMagSilhouetteR1776='sharper-asymmetric-hand-cut-living-crystal-no-egg-no-logo-diamond';
   root.dataset.fxNativeMagPerformanceR1776='geometry-and-shader-only-no-second-render-pass-60hz-budget';
+  root.dataset.fxNativeMagVisualR1777='cinematic-black-mineral-bioglass-organism-broad-natural-facets';
+  root.dataset.fxNativeMagMaterialR1777='neutral-dielectric-absorption-microfracture-softbox-physical-optic';
+  root.dataset.fxNativeMagPerformanceR1777='single-pass-photographic-shader-no-css-shadow-60hz-budget';
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
@@ -393,17 +396,17 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.88,.070,.060,-.090,-.008,.080],
-        [.76,.225,.150,-.075,.000,.068],
-        [.60,.430,.285,-.050,.010,.056],
-        [.40,.655,.405,-.018,.020,.040],
-        [.18,.810,.495,.028,.028,.022],
-        [.00,.855,.520,.055,.022,.000],
-        [-.18,.795,.485,.040,.012,-.020],
-        [-.40,.640,.392,.005,.002,-.038],
-        [-.60,.410,.260,-.040,-.004,-.052],
-        [-.76,.215,.140,-.075,-.008,-.064],
-        [-.88,.065,.055,-.095,-.010,-.076]
+        [.90,.060,.048,-.128,-.012,.090],
+        [.78,.230,.146,-.112,.004,.076],
+        [.61,.455,.292,-.078,.018,.060],
+        [.41,.690,.420,-.032,.034,.042],
+        [.19,.835,.505,.036,.042,.024],
+        [.00,.872,.526,.082,.030,.000],
+        [-.18,.808,.478,.066,.012,-.022],
+        [-.39,.650,.382,.016,-.006,-.040],
+        [-.59,.400,.250,-.050,-.016,-.056],
+        [-.76,.205,.132,-.102,-.020,-.070],
+        [-.90,.054,.045,-.132,-.018,-.084]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -428,9 +431,10 @@
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
           const irregular=
             1
-            +Math.sin(a*4.0+ringIndex*.43)*.028*mid
-            +Math.cos(a*6.0-ringIndex*.37)*.014*mid
-            +Math.sin(a*2.0+ringIndex*.61)*.010;
+            +Math.sin(a*4.0+ringIndex*.43)*.034*mid
+            +Math.cos(a*6.0-ringIndex*.37)*.018*mid
+            +Math.sin(a*2.0+ringIndex*.61)*.014
+            +Math.cos(a*3.0-ringIndex*.29)*.010*mid;
           const cutFront=1-.075*Math.pow(Math.max(0,Math.cos(a-.48)),4.0);
           const cutRear=1-.048*Math.pow(Math.max(0,Math.cos(a+2.12)),5.0);
           const cutSide=1-.050*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
@@ -441,8 +445,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.105,.980,-.015],[.5,0]);
-      const bottom=bodyVertex([-.115,-.965,.010],[.5,1]);
+      const top=bodyVertex([-.162,.995,-.026],[.5,0]);
+      const bottom=bodyVertex([-.145,-.985,.018],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -1054,10 +1058,13 @@
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
         float mineralGrainB=.5+.5*sin(vLocal.x*71.0-vLocal.y*53.0+vLocal.z*47.0);
+        float mineralGrainC=.5+.5*sin(vLocal.x*113.0+vLocal.y*97.0-vLocal.z*83.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
+        float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.018,.022,.026),vec3(.236,.252,.252),lift)*facetTone;
-        mineral*=.948+.046*smokyDepth+.010*mineralGrain+.006*mineralGrainB;
+        vec3 mineral=mix(vec3(.014,.018,.021),vec3(.268,.278,.274),lift)*facetTone;
+        mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
+        mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
         mineral+=vec3(.92,.90,.84)*keySpec*.074;
@@ -1066,11 +1073,11 @@
         mineral+=vec3(.52,.58,.59)*sideSpec*.096;
         mineral+=vec3(.69,.72,.69)*softboxA*.170;
         mineral+=vec3(.42,.47,.47)*softboxB*.110;
-        mineral+=vec3(.88,.91,.90)*studioRibbonA*.126;
-        mineral+=vec3(.52,.34,.22)*studioRibbonB*.052;
+        mineral+=vec3(.90,.92,.89)*studioRibbonA*.148;
+        mineral+=vec3(.48,.31,.19)*studioRibbonB*.062;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
-        mineral+=vec3(.100,.205,.235)*fresnel*.34;
+        mineral+=vec3(.090,.150,.164)*fresnel*.27;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1093,7 +1100,7 @@
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        mineral+=vec3(.020,.092,.106)*vascular*(.045+.075*uEnergy);
+        mineral+=vec3(.025,.078,.086)*vascular*(.034+.060*uEnergy);
         mineral+=vec3(.045,.018,.026)*vascular*subsurface*(.020+.040*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
@@ -1198,16 +1205,16 @@
         float electricBranch2=pow(.5+.5*sin(lensAngle*9.0-lensRadial*67.0+uTime*1.7),22.0)*lensInner;
         float electric=max(electricBranch,electricBranch2);
         float coreFlash=exp(-pow(lensRadial/.050,2.0))*(.62+.38*sin(uTime*4.0));
-        vec3 physicalLens=vec3(.008,.026,.034);
-        physicalLens+=vec3(.018,.090,.112)*(.24+.30*uEnergy);
+        vec3 physicalLens=vec3(.005,.014,.018);
+        physicalLens+=vec3(.018,.070,.078)*(.18+.22*uEnergy);
         physicalLens+=vec3(.94,.99,.96)*softboxA*.18;
         physicalLens+=vec3(.48,.58,.60)*sideSpec*.10;
         physicalLens+=vec3(.12,.28,.34)*fresnel*.18;
         physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
-        physicalLens+=vec3(.045,.22,.27)*lensRing*(.075+.070*uEnergy);
-        physicalLens+=vec3(.76,.88,.87)*lensHot*(.12+.055*uEnergy);
-        physicalLens+=vec3(.075,.24,.28)*electric*(.12+.11*uEnergy);
-        physicalLens+=vec3(.88,.92,.89)*coreFlash*.18;
+        physicalLens+=vec3(.038,.15,.17)*lensRing*(.060+.055*uEnergy);
+        physicalLens+=vec3(.72,.78,.74)*lensHot*(.090+.040*uEnergy);
+        physicalLens+=vec3(.060,.17,.19)*electric*(.085+.080*uEnergy);
+        physicalLens+=vec3(.84,.86,.81)*coreFlash*.125;
         physicalLens+=vec3(1.00,.45,.10)*lensRing*(.10+.10*studioRibbonB);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
