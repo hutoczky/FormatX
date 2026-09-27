@@ -160,6 +160,7 @@
   root.dataset.fxNativeMagMaterialR1782='charcoal-pearl-bioglass-neutral-key-warm-rim-subtle-cyan-optic';
   root.dataset.fxNativeMagMobileR1782='no-cull-no-speckle-clean-broad-facet-silhouette';
   root.dataset.fxNativeMagRasterR1783='mobile-opaque-canvas-no-alpha-msaa-facet-seams';
+  root.dataset.fxNativeMagRasterR1784='mobile-software-subpixel-face-overlap-no-triangle-cracks';
   root.dataset.fxNativeMagProofR1782=mobileVisualProof?'normal-mobile-visual-path-with-lens-and-msaa':'not-mobile-proof';
   root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
   root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
@@ -375,9 +376,27 @@
         crystalNormal = crystalNormal.map(value => -value);
       }
       const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+      const bodySeamOverlap=(software||mobile)&&facet<2.0?.0045:0;
+      const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
+        (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
+      ):null;
       vertices.forEach((item, index) => {
-        sphere.push(...item.sphere);
-        crystal.push(...item.crystal);
+        if(bodySeamOverlap){
+          const k=1+bodySeamOverlap;
+          sphere.push(
+            sphereCentre[0]+(item.sphere[0]-sphereCentre[0])*k,
+            sphereCentre[1]+(item.sphere[1]-sphereCentre[1])*k,
+            sphereCentre[2]+(item.sphere[2]-sphereCentre[2])*k
+          );
+          crystal.push(
+            centre[0]+(item.crystal[0]-centre[0])*k,
+            centre[1]+(item.crystal[1]-centre[1])*k,
+            centre[2]+(item.crystal[2]-centre[2])*k
+          );
+        }else{
+          sphere.push(...item.sphere);
+          crystal.push(...item.crystal);
+        }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
         const smoothWeight=software?.38:(mobile?.50:.84);
