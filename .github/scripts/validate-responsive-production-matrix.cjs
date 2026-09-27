@@ -134,7 +134,7 @@ async function waitForProductShowcase(page) {
 async function waitForFeedback(page) {
   await page.waitForSelector('#user-feedback [data-fx-feedback-form]', { timeout: 30000 });
   await page.locator('#user-feedback').scrollIntoViewIfNeeded();
-  await page.waitForFunction(() => document.documentElement.dataset.fxFeedbackState === 'ready', null, { timeout: 20000 });
+  await page.waitForFunction(() => ['ready','ready-visible'].includes(document.documentElement.dataset.fxFeedbackState || ''), null, { timeout: 20000 });
 }
 
 async function inspect(page) {
