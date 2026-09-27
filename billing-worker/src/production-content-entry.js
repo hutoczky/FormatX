@@ -8,6 +8,7 @@ import productionBase from './production-content-entry-r369-base.js';
    MAG renderer ownership and automatic lifecycle remain unchanged; the current
    product contract has no user-facing manual PAUSE control. */
 
+// production-r1775-photoreal-intro-core-edge-wire
 const STARTUP_REVISION = '20260928-r1775-photoreal-intro-core';
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-OgcFpfuQNqE7AoFawa+tO/hf5FHMkzv8QfClNcXNAnM='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
