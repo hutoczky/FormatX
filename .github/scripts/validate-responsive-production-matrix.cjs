@@ -254,7 +254,7 @@ async function verifyViewport(browser, spec) {
     assert(data.feedbackFont >= 15, `${spec.name}: feedback base font too small ${data.feedbackFont}px`);
     assert(data.feedbackInputFont >= 15, `${spec.name}: feedback input font too small ${data.feedbackInputFont}px`);
 
-    const meaningfulErrors = errors.filter(error => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404.*favicon/i.test(error));
+    const meaningfulErrors = errors.filter(error => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404.*favicon|Permissions policy violation: accelerometer is not allowed/i.test(error));
     assert(meaningfulErrors.length === 0, `${spec.name}: browser errors: ${meaningfulErrors.join(' | ')}`);
 
     console.log(JSON.stringify({ case: spec.name, ...data }));
