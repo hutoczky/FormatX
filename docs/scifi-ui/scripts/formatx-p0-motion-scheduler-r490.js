@@ -8,7 +8,8 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r1724';
+root.dataset.fxP0MotionSchedulerR490='armed-r1774';
+root.dataset.fxP0MotionPerformanceR1774='wheel-sensory-only-webgl-on-deliberate-intent-or-idle';
 root.dataset.fxP0MotionCacheR1703='motion-loader-r1703-sharp-photoreal-mobile';
 root.dataset.fxP0MotionCacheR1704='motion-loader-r1704-software-mobile-photoreal-lens';
 root.dataset.fxP0MotionCacheR1710='motion-loader-r1710-60fps-frame-budget';
@@ -137,9 +138,15 @@ function onIntent(event){
 /* Deliberately exclude pointermove and scroll. Those can be emitted during
    browser startup/restoration and were the source of R492's 0.5–1.0 s random
    WebGL boot. These events represent explicit user action instead. */
-for(const type of ['pointerdown','touchstart','keydown','wheel']){
+/* R1774 — wheel/scroll stay on the lightweight site-sensory compositor.
+   They are not allowed to bootstrap the full R326 WebGL stack. This prevents
+   scroll capture, automation screenshots and ordinary page travel from paying
+   the heavy renderer startup cost while preserving immediate pointer/touch/key
+   activation for deliberate MAG interaction. */
+for(const type of ['pointerdown','touchstart','keydown']){
   addEventListener(type,onIntent,{once:true,passive:true});
 }
+root.dataset.fxP0WheelPolicyR1774='sensory-only-no-webgl-bootstrap';
 
 if(document.readyState==='loading'){
   addEventListener('DOMContentLoaded',armStartup,{once:true,passive:true});
