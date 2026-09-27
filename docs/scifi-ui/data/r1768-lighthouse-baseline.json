@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "revision": "r1768-lighthouse-baseline",
+  "purpose": "Behavior-neutral Lighthouse baseline on master after R1767 production CSP parity and R1763 first-paint touch targets.",
+  "source_master": "11f4eb1046c1db41c1d24bcb00f48dc7f2f686ae",
+  "expected": "No runtime behavior change; trigger desktop/mobile Lighthouse on the current production-equivalent source."
+}
