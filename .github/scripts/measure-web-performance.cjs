@@ -14,6 +14,81 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
     window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
+    window.__fxSoundEarlyTrace = [];
+    (() => {
+      let lastKey = '';
+      const scanMatchedRules = (node, needle) => {
+        const matched = [];
+        const scan = (rules, href, inheritedMedia='all') => {
+          if (!rules) return;
+          for (const rule of rules) {
+            if (rule instanceof CSSMediaRule) {
+              if (matchMedia(rule.conditionText).matches) scan(rule.cssRules, href, rule.conditionText);
+              continue;
+            }
+            if (!(rule instanceof CSSStyleRule) || !rule.selectorText?.includes(needle)) continue;
+            let ok = false;
+            try { ok = node?.matches(rule.selectorText) || false; } catch (_) {}
+            if (ok) matched.push({ href, media: inheritedMedia, selector: rule.selectorText, cssText: rule.style.cssText });
+          }
+        };
+        for (const sheet of Array.from(document.styleSheets)) {
+          let rules;
+          try { rules = sheet.cssRules; } catch (_) { continue; }
+          scan(rules, sheet.href || 'inline');
+        }
+        return matched;
+      };
+      const sample = now => {
+        const sound = document.querySelector('#hero .fx-three-sound');
+        const controls = document.querySelector('#hero .fx-reference-controls-r204');
+        if (sound instanceof Element) {
+          const sr = sound.getBoundingClientRect();
+          const cr = controls instanceof Element ? controls.getBoundingClientRect() : null;
+          const cs = getComputedStyle(sound);
+          const cc = controls instanceof Element ? getComputedStyle(controls) : null;
+          const key = [
+            Math.round(sr.x*10)/10,Math.round(sr.y*10)/10,Math.round(sr.width*10)/10,Math.round(sr.height*10)/10,
+            cs.width,cs.height,cs.position,cs.display,
+            cr ? Math.round(cr.x*10)/10 : '',cr ? Math.round(cr.y*10)/10 : '',cr ? Math.round(cr.width*10)/10 : '',cr ? Math.round(cr.height*10)/10 : '',
+            cc?.position||'',cc?.width||'',cc?.height||''
+          ].join('|');
+          if (key !== lastKey) {
+            lastKey = key;
+            window.__fxSoundEarlyTrace.push({
+              at: performance.now(),
+              media: {
+                max900: matchMedia('(max-width:900px)').matches,
+                coarse: matchMedia('(pointer:coarse)').matches,
+                fine: matchMedia('(pointer:fine)').matches,
+                maxAspect: matchMedia('(max-aspect-ratio:27/25)').matches
+              },
+              root: {
+                reference: document.documentElement.dataset.fxReferenceProductionR244 || '',
+                composition: document.documentElement.dataset.fxReferenceComposition || '',
+                prepaint: document.documentElement.dataset.fxReferencePrepaintR1620 || ''
+              },
+              sound: {
+                rect:{x:sr.x,y:sr.y,width:sr.width,height:sr.height},
+                style:{
+                  width:cs.width,height:cs.height,minWidth:cs.minWidth,maxWidth:cs.maxWidth,minHeight:cs.minHeight,maxHeight:cs.maxHeight,
+                  position:cs.position,display:cs.display,top:cs.top,right:cs.right,bottom:cs.bottom,left:cs.left,transform:cs.transform,aspectRatio:cs.aspectRatio
+                }
+              },
+              controls: cr ? {
+                rect:{x:cr.x,y:cr.y,width:cr.width,height:cr.height},
+                style:{position:cc.position,width:cc.width,height:cc.height,top:cc.top,right:cc.right,bottom:cc.bottom,left:cc.left,transform:cc.transform}
+              } : null,
+              sheets:Array.from(document.styleSheets).map(sheet=>sheet.href||'inline'),
+              matchedRules:scanMatchedRules(sound, 'fx-three-sound'),
+              matchedControlRules:scanMatchedRules(controls, 'fx-reference-controls-r204')
+            });
+          }
+        }
+        if (now < 900) requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    })();
     try {
       new PerformanceObserver(list => {
         const entries = list.getEntries();
@@ -56,9 +131,94 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
 
   const page = await context.newPage();
   const started = Date.now();
+
+  const captureSoundDiagnostic = async label => page.evaluate(label => {
+    const sound = document.querySelector('#hero .fx-three-sound');
+    const controls = document.querySelector('#hero .fx-reference-controls-r204');
+    const root = document.documentElement;
+    const rect = node => {
+      if (!(node instanceof Element)) return null;
+      const r = node.getBoundingClientRect();
+      return { x:r.x, y:r.y, width:r.width, height:r.height, top:r.top, right:r.right, bottom:r.bottom, left:r.left };
+    };
+    const style = node => {
+      if (!(node instanceof Element)) return null;
+      const cs = getComputedStyle(node);
+      return {
+        position:cs.position, display:cs.display, visibility:cs.visibility, opacity:cs.opacity,
+        width:cs.width, minWidth:cs.minWidth, maxWidth:cs.maxWidth,
+        height:cs.height, minHeight:cs.minHeight, maxHeight:cs.maxHeight,
+        top:cs.top, right:cs.right, bottom:cs.bottom, left:cs.left,
+        transform:cs.transform, aspectRatio:cs.aspectRatio,
+        gridColumn:cs.gridColumn, gridRow:cs.gridRow
+      };
+    };
+    const media = {
+      max900:matchMedia('(max-width:900px)').matches,
+      coarse:matchMedia('(pointer:coarse)').matches,
+      fine:matchMedia('(pointer:fine)').matches,
+      maxAspect:matchMedia('(max-aspect-ratio:27/25)').matches,
+      desktopFine:matchMedia('(min-width:901px) and (pointer:fine)').matches,
+      desktop:matchMedia('(min-width:901px)').matches
+    };
+
+    const matchedRules = [];
+    const scanRules = (rules, href, inheritedMedia='all') => {
+      if (!rules) return;
+      for (const rule of rules) {
+        if (rule instanceof CSSMediaRule) {
+          if (matchMedia(rule.conditionText).matches) scanRules(rule.cssRules, href, rule.conditionText);
+          continue;
+        }
+        if (!(rule instanceof CSSStyleRule)) continue;
+        if (!rule.selectorText || !rule.selectorText.includes('fx-three-sound')) continue;
+        let matched=false;
+        try { matched=Boolean(sound && sound.matches(rule.selectorText)); } catch (_) {}
+        if (!matched) continue;
+        matchedRules.push({
+          href,
+          media:inheritedMedia,
+          selector:rule.selectorText,
+          cssText:rule.style.cssText
+        });
+      }
+    };
+
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules;
+      try { rules=sheet.cssRules; } catch (_) { continue; }
+      scanRules(rules, sheet.href || 'inline');
+    }
+
+    return {
+      label,
+      at:performance.now(),
+      viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},
+      media,
+      root:{
+        reference:root.dataset.fxReferenceProductionR244||'',
+        composition:root.dataset.fxReferenceComposition||'',
+        prepaint:root.dataset.fxReferencePrepaintR1620||'',
+        mobileLayout:root.dataset.fxMobileReferenceLayout||'',
+        mobileOwner:root.dataset.fxMobileLayoutOwner||'',
+        controlOwner:root.dataset.fxControlOwnerR268||''
+      },
+      sound:{rect:rect(sound),style:style(sound),className:sound?.className||''},
+      controls:{rect:rect(controls),style:style(controls),className:controls?.className||'',parent:controls?.parentElement?.className||''},
+      activeSheets:Array.from(document.styleSheets).map(sheet=>sheet.href||'inline').filter(Boolean),
+      matchedRules
+    };
+  }, label);
+
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#hero-title');
-  await page.waitForTimeout(2500);
+
+  const soundDiagnostics = [];
+  soundDiagnostics.push(await captureSoundDiagnostic('domcontentloaded'));
+  for (const [label,delay] of [['t+80',80],['t+180',100],['t+300',120],['t+450',150],['t+700',250],['t+1200',500],['t+2500',1300]]) {
+    await page.waitForTimeout(delay);
+    soundDiagnostics.push(await captureSoundDiagnostic(label));
+  }
 
   const interaction = await page.evaluate(async () => {
     const button = document.getElementById('menu-toggle');
@@ -139,6 +299,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       renderer: document.documentElement.dataset.fxRenderer || null,
       mobileCoreState: document.documentElement.dataset.fxMobileCore || null,
       contentVisible: Boolean(document.querySelector('#hero-title')?.getClientRects().length),
+      soundEarlyTrace: window.__fxSoundEarlyTrace || [],
       memory
     };
   });
@@ -162,6 +323,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     scroll_sample: scrollSample,
     viewport_change: { before: beforeResize, after: afterResize },
     background_restore_ms: backgroundRestoreMs,
+    sound_cls_diagnostic: soundDiagnostics,
     interpretation: 'Raw CI measurement only. Do not present as phone, customer or production performance without a matching environment record.'
   };
 
