@@ -27,10 +27,12 @@ root.dataset.fxP0MotionCacheR1725='motion-loader-r1725-photoreal-living-biocryst
 root.dataset.fxP0MotionCacheR1729='webdriver-validation-runs-real-r326-explicit-lighthouse-static-only';
 root.dataset.fxP0MotionCacheR1749='final-photoreal-mag-intro-material-parity';
 root.dataset.fxP0MotionCacheR1755='photoreal-living-60fps-site-sensory';
+root.dataset.fxP0MotionCacheR1770='mobile-intent-only-webgl-desktop-late-auto';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260927-r1755-photoreal-living-60fps';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
+const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const AUTO_DELAY_MS=6500;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
@@ -99,6 +101,11 @@ function runLateAuto(){
 function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     root.dataset.fxP0FirstPaintR490='committed-r493';
+    if(MOBILE.matches){
+      root.dataset.fxP0MotionSchedulerR490='mobile-intent-only-r1770';
+      root.dataset.fxP0MobileActivationR1770='static-proxy-until-trusted-intent';
+      return;
+    }
     timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
   }));
 }
