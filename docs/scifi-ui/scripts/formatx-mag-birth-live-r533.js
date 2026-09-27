@@ -54,7 +54,7 @@
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
   const EXIT_MS = 180;
-  const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
+  const CORE_WARMUP_PROGRESS = MOBILE ? .58 : .72;
   ROOT.dataset.fxMagBirthProductionPathR1674='absolute-scifi-ui-runtime-assets';
 
   let seen = false;
@@ -570,7 +570,7 @@
       percent.value=String(progressValue).padStart(3,'0');
       progress.value=progressValue;
       status.textContent=copy.statuses[statusIndex][1];
-      if(value===2)requestCoreWarmup('mobile-css-phase-2-r631');
+      if(value===3)requestCoreWarmup('mobile-css-phase-3-r1771');
       if(value===3){
         locateStage();
         try{
@@ -1094,6 +1094,7 @@
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-adaptive-cinematic':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthPerformanceR1727=CONSTRAINED?'constrained-reference-film-no-heavy-three-loop':'hardware-three-adaptive-quality';
+    ROOT.dataset.fxMagBirthWarmupR1771=MOBILE?'phase-3-57pct-late-r326-prewarm':'desktop-72pct-warmup';
     ROOT.dataset.fxMagBirthPerformanceR1729=SOFTWARE_SAFE?'software-safe-reference-film-phase-driven-raster':'hardware-three-adaptive-60hz';
     ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
