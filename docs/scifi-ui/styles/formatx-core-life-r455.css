@@ -25,9 +25,9 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
     opacity: 1 !important;
     image-rendering: auto !important;
     filter:
-      brightness(1.08) contrast(1.10) saturate(.84) blur(0) !important;
+      brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
     -webkit-filter:
-      brightness(1.08) contrast(1.10) saturate(.84) blur(0) !important;
+      brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
   }
 
   /* Keep the skip-navigation link fully accessible to keyboard users without
@@ -82,3 +82,5 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
 /* production-r1779-mobile-obsidian-filter */
 
 /* production-r1780-mobile-smoky-bioglass */
+
+/* production-r1782-mobile-smoky-bioglass-clean */
