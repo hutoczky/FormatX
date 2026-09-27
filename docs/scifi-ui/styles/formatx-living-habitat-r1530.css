@@ -1610,3 +1610,46 @@ body.living-architecture > .fx-living-habitat-r1530{
   display:none!important;
 }
 /* production-r1724-mobile-real-habitat-canvas */
+
+
+/* R1775 — photoreal intro/core finishing pass.
+   Static lighting only: preserves the single WebGL owner and 60 Hz budget. */
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture{
+  background:
+    radial-gradient(ellipse 36% 70% at 66% -10%,rgba(205,220,216,.050),transparent 72%),
+    radial-gradient(ellipse 28% 62% at 8% 44%,rgba(76,91,91,.044),transparent 74%),
+    radial-gradient(ellipse 24% 58% at 97% 66%,rgba(78,68,75,.032),transparent 76%),
+    radial-gradient(ellipse 72% 18% at 50% 104%,rgba(111,88,65,.026),transparent 82%),
+    linear-gradient(180deg,#010304 0%,#061012 40%,#020708 74%,#010304 100%)!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space{
+  background:
+    radial-gradient(ellipse 45% 58% at 51% 42%,rgba(164,183,179,.026),transparent 66%),
+    radial-gradient(ellipse 64% 18% at 50% 91%,rgba(102,83,66,.020),transparent 78%),
+    linear-gradient(180deg,rgba(255,255,255,.003),rgba(0,0,0,.035))!important;
+}
+html:root:root:root:root:root:root:root:root:root:root:root:root
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  filter:brightness(1.035) contrast(1.115) saturate(.80) drop-shadow(0 24px 34px rgba(0,0,0,.34))!important;
+  -webkit-filter:brightness(1.035) contrast(1.115) saturate(.80) drop-shadow(0 24px 34px rgba(0,0,0,.34))!important;
+}
+body>.fx-mag-birth-r533{
+  background:
+    radial-gradient(ellipse 30% 62% at 50% -8%,rgba(222,230,224,.060),transparent 74%),
+    radial-gradient(ellipse 44% 44% at 50% 45%,rgba(77,98,99,.050),transparent 72%),
+    radial-gradient(ellipse 88% 76% at 50% 50%,rgba(16,27,29,.20),rgba(1,4,5,.965) 82%),
+    #010304!important;
+}
+body>.fx-mag-birth-r533 .fxb-deep{filter:saturate(.60) contrast(1.09)!important;}
+body>.fx-mag-birth-r533 .fxb-genome-field{opacity:.10!important;filter:saturate(.54)!important;}
+body>.fx-mag-birth-r533 .fxb-biotic-field{opacity:.22!important;}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.06) contrast(1.10) saturate(.84) drop-shadow(0 17px 24px rgba(0,0,0,.30))!important;
+    -webkit-filter:brightness(1.06) contrast(1.10) saturate(.84) drop-shadow(0 17px 24px rgba(0,0,0,.30))!important;
+  }
+}
+/* production-r1775-photoreal-intro-core */
