@@ -6,6 +6,7 @@ r.dataset.fxReferencePrepaintR1620=m?'mobile-ready-first-byte':'desktop-first-by
 const f=p.get('intro')==='1'||p.get('visualintro')==='1';
 let s=false;try{s=sessionStorage.getItem('formatx:mag-birth-live-r533-seen')==='1'}catch(_){}
 const l=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||p.get('lighthouse')==='1',h=/HeadlessChrome/i.test(navigator.userAgent||''),a=navigator.webdriver===true||l||h;
+const c=m&&((navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4);
 if(l){
   const o=new MutationObserver(()=>{
     const e=document.querySelector('link[data-fx-critical-core-r227]');
@@ -14,7 +15,7 @@ if(l){
   o.observe(document.head,{childList:true});
   r.dataset.fxLighthouseCriticalCoreR1749='armed';
 }
-const v=f||(!s&&!a),o=v?(f?'forced-intro':'first-real-visit'):(a?'automation-skip':'session-skip');
+const v=f||(!s&&!a&&!c),o=v?(f?'forced-intro':'first-real-visit'):(a?'automation-skip':(c?'constrained-mobile-skip':'session-skip'));
 r.dataset.fxIntroPrepaintR1611=v?'show':'skip';
 r.dataset.fxIntroPrepaintOwnerR1611=o;
 r.dataset.fxMagBirthOwnerR533=v?'active':o;
@@ -42,7 +43,7 @@ function b(){
     return;
   }
   const e=document.createElement('script');
-  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260927-r1771-headless-safe';
+  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260927-r1772-adaptive-mobile';
   e.async=false;
   e.dataset.fxMagBirthLiveR533='true';
   e.dataset.fxIntroRescueR1755='true';
