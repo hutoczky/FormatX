@@ -263,6 +263,7 @@
   ROOT.dataset.fxMagBirthArtR1340 = 'thin-dna-cortical-ridges-dark-petals-radial-cyan-iris-segmented-tendrils-r1310-native-handoff';
   ROOT.dataset.fxMagBirthArtR1350 = 'thin-dna-broad-organic-lobes-dark-diamond-balanced-iris-strong-pullback-native-reference-handoff';
   ROOT.dataset.fxMagBirthArtR1360 = 'thin-dna-continuous-cortical-shell-dark-integrated-petals-balanced-iris-r1360-native-handoff';
+  ROOT.dataset.fxLegacyLcpBrandR1758 = 'retired-no-runtime-text-lcp-candidate';
   ROOT.dataset.fxMagBirthArtR1300 = 'video-locked-timeline-cell-lobe-dominance-fine-veins-dark-structured-tendrils';
   ROOT.dataset.fxIntroProofR1201 = 'r1200-intro-r1151-native-clean-proof';
   ROOT.dataset.fxFinalProofR1152 = 'r1140-intro-r1151-native-mag-clean-proof';
@@ -270,7 +271,6 @@
   ROOT.dataset.fxNativeMagProofR1101 = 'r1090-intro-r1100-real-armor-browser-proof';
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
   overlay.setAttribute('aria-label', copy.title);
-  const prepaintBrand = overlay.querySelector('.fxb-lcp-brand-r1603');
   let prepaintCanvas = overlay.querySelector('.fxb-particles');
   overlay.insertAdjacentHTML('beforeend', `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -368,14 +368,6 @@
     prepaintCanvas.className='fxb-particles';
     prepaintCanvas.setAttribute('aria-hidden','true');
     overlay.prepend(prepaintCanvas);
-  }
-
-  if (!(prepaintBrand instanceof HTMLElement)) {
-    const brand=document.createElement('div');
-    brand.className='fxb-lcp-brand-r1603';
-    brand.setAttribute('aria-hidden','true');
-    brand.textContent='FORMATX';
-    overlay.prepend(brand);
   }
 
   if (MOBILE && !HAS_VISUAL_FRAME) {
@@ -520,7 +512,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260926-r1754-final-photoreal-continuity';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260927-r1755-photoreal-living-60fps';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;

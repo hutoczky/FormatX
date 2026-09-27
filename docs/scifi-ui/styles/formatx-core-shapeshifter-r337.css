@@ -305,7 +305,9 @@ html:root:root:root:root:root:root body.living-architecture #hero :is(.hero-ring
   }
 
   html:root:root:root:root body.living-architecture #hero .hero-space {
-    min-height:620px!important;
+    height:clamp(520px,42vw,620px)!important;
+    min-height:clamp(520px,42vw,620px)!important;
+    max-height:620px!important;
     background:transparent!important;
     background-image:none!important;
     box-shadow:none!important;
@@ -319,6 +321,7 @@ html:root:root:root:root:root:root body.living-architecture #hero :is(.hero-ring
   }
 }
 /* production-r1440-clean-crystal-desktop-owner */
+/* production-r1756-first-paint-final-hero-space-geometry-parity */
 
 
 /* R1470 — obsidian crystal compositor owner.

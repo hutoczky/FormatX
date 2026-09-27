@@ -273,3 +273,20 @@ html[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
     mask-image:none!important;
   }
 /* production-r1745-mobile-hero-integrated-ten-second-intro */
+
+
+/* R1756 — zero-delay skip ownership.
+   The head bootstrap publishes this state before body parsing. Returning
+   visitors and automated/non-intro loads must never wait for DOMContentLoaded
+   behind a fixed black prepaint shell. */
+html[data-fx-intro-prepaint-r1611="skip"] #fx-mag-birth-prepaint-r1606{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* R1757: the static MAG proxy moved to the render-blocking P0 stylesheet.
+   Keep the full cinematic stylesheet focused on the real intro only. */
+/* production-r1757-mag-proxy-owned-by-p0 */
+
