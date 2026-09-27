@@ -1289,11 +1289,11 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.255+ndl*.345+sideLight*.265+fillLight*.185);
+        float lift=sat(.150+ndl*.260+sideLight*.205+fillLight*.120);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.019,.023,.027),vec3(.222,.238,.239),lift);
+        vec3 col=mix(vec3(.010,.014,.017),vec3(.115,.130,.132),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
@@ -1329,12 +1329,12 @@
         float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.7)*bodyMask;
         float facetTone=.91+.13*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.31,.35,.34)+vec3(.34,.36,.34)*(.20*ndl+.15*sideLight+.18*softboxA);
+        vec3 ivory=vec3(.095,.108,.106)+vec3(.16,.17,.16)*(.18*ndl+.13*sideLight+.15*softboxA);
         ivory+=vec3(.48,.31,.20)*studioRibbonB*.045;
         col*=mix(1.0,facetTone,bodyMask*.40);
-        col=mix(col,ivory,plateMask*.64);
+        col=mix(col,ivory,plateMask*.24);
         col=mix(col,vec3(.004,.008,.014),livingSeam*.52);
-        col+=vec3(.055,.265,.315)*vascular*(.10+.18*uEnergy);
+        col+=vec3(.028,.105,.118)*vascular*(.035+.060*uEnergy);
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1425,7 +1425,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.66),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(col*2.18),clamp(outAlpha,.82,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1466,8 +1466,8 @@
         float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
         float tendrilMask=isTendril*(1.0-vMorph);
 
-        float lift=sat(.25+ndl*.45+sideLight*.34);
-        vec3 col=mix(vec3(.016,.028,.046),vec3(.155,.215,.255),lift);
+        float lift=sat(.12+ndl*.30+sideLight*.22);
+        vec3 col=mix(vec3(.008,.012,.015),vec3(.080,.096,.100),lift);
         col+=vec3(.74,.77,.73)*keySpec*.16;
         col+=vec3(.36,.48,.51)*sideSpec*.13;
         col+=vec3(.050,.15,.19)*fresnel*.31;
@@ -1479,10 +1479,10 @@
         float plateField=.5+.5*sin(vUv.x*16.8+sin(vUv.y*11.8)*1.4);
         float plateCross=.5+.5*sin(vUv.y*15.2-vUv.x*6.4);
         float plateMask=smoothstep(.56,.80,max(plateField,plateCross*.84))*bodyMask;
-        vec3 ivory=vec3(.58,.70,.74)+vec3(.34,.31,.24)*(.30*ndl+.18*sideLight);
-        ivory+=vec3(.20,.35,.38)*fresnel*.14;
-        col=mix(col,ivory,plateMask*.70);
-        col+=vec3(.10,.61,.82)*vascular*(.22+.30*uEnergy);
+        vec3 ivory=vec3(.085,.100,.102)+vec3(.14,.13,.11)*(.24*ndl+.14*sideLight);
+        ivory+=vec3(.06,.09,.10)*fresnel*.10;
+        col=mix(col,ivory,plateMask*.18);
+        col+=vec3(.025,.095,.110)*vascular*(.035+.055*uEnergy);
         col+=vec3(1.00,.43,.09)*plateMask*sideSpec*.055;
 
         vec2 q=vLocal.xy;
@@ -1533,14 +1533,14 @@
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.06,.21,lensRadial);
         float electric=pow(.5+.5*sin(atan(vUv.y-.5,vUv.x-.5)*10.0+lensRadial*64.0-uTime*1.8),14.0)*lensInner;
-        vec3 optical=vec3(.012,.035,.043)+vec3(.040,.27,.34)*lensInner+vec3(.72,.84,.82)*keySpec*.17+vec3(.080,.20,.24)*fresnel*.15;
-        optical+=vec3(.12,.64,.82)*electric*(.18+.20*uEnergy);
+        vec3 optical=vec3(.006,.016,.020)+vec3(.022,.105,.120)*lensInner+vec3(.42,.48,.45)*keySpec*.12+vec3(.040,.095,.105)*fresnel*.10;
+        optical+=vec3(.055,.22,.26)*electric*(.08+.09*uEnergy);
         col=mix(col,optical,isLensMesh*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*3.42),clamp(alpha,.76,1.0));
+        ${outputName}=vec4(tone(col*2.22),clamp(alpha,.84,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
