@@ -52,6 +52,46 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     document.addEventListener('formatx:introcomplete', () => {
       window.__fxPerf.introComplete = performance.now();
     }, { once: true });
+
+    /* R1774 diagnostics: identify which post-first-paint root state repaints
+       the desktop LCP text. This is measurement-only and never mutates layout. */
+    window.__fxPerf.heroTimeline = [];
+    const captureHero = label => {
+      const el = document.querySelector('#hero .hero-lead');
+      if (!(el instanceof HTMLElement)) return;
+      const style = getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+      const root = document.documentElement;
+      window.__fxPerf.heroTimeline.push({
+        at: performance.now(),
+        label,
+        font: style.font,
+        fontSize: style.fontSize,
+        lineHeight: style.lineHeight,
+        color: style.color,
+        margin: style.margin,
+        width: rect.width,
+        height: rect.height,
+        x: rect.x,
+        y: rect.y,
+        premiumFinish: root.dataset.fxPremiumFinish || null,
+        referenceProduction: root.dataset.fxReferenceProductionR244 || null,
+        desktopApex: root.dataset.fxDesktopApexR181 || null,
+        motionRuntime: root.dataset.fxMotionRuntimeR239 || null,
+        introOwner: root.dataset.fxMagBirthOwnerR533 || null
+      });
+    };
+    const heroObserver = new MutationObserver(records => {
+      if (!records.some(record => record.target === document.documentElement)) return;
+      requestAnimationFrame(() => captureHero('root-attribute-change'));
+    });
+    heroObserver.observe(document.documentElement, { attributes: true });
+    document.addEventListener('DOMContentLoaded', () => {
+      captureHero('domcontentloaded');
+      for (const delay of [100, 300, 600, 1000, 1500, 2200]) {
+        setTimeout(() => captureHero('t+' + delay), delay);
+      }
+    }, { once: true });
   });
 
   const page = await context.newPage();
@@ -139,6 +179,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       renderer: document.documentElement.dataset.fxRenderer || null,
       mobileCoreState: document.documentElement.dataset.fxMobileCore || null,
       contentVisible: Boolean(document.querySelector('#hero-title')?.getClientRects().length),
+      heroTimeline: window.__fxPerf.heroTimeline || [],
       memory
     };
   });
