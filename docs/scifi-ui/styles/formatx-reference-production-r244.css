@@ -1108,42 +1108,59 @@
     visibility: hidden !important;
   }
 
-  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-controls-r204 {
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position: absolute !important;
-    inset: 18px 18px auto auto !important;
-    z-index: 10020 !important;
-    display: block !important;
-    width: 54px !important;
-    height: auto !important;
-    min-height: 0 !important;
+    inset: auto auto 20px 50% !important;
+    z-index: 12080 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3,54px) !important;
+    grid-template-rows: 76px !important;
+    align-items: start !important;
+    justify-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    width: 190px !important;
+    min-width: 190px !important;
+    max-width: calc(100% - 28px) !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
     margin: 0 !important;
     padding: 0 !important;
-    pointer-events: none !important;
-    transform: none !important;
-  }
-
-  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-rail {
-    position: relative !important;
-    inset: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 12px !important;
-    width: 54px !important;
-    min-width: 54px !important;
-    max-width: 54px !important;
-    height: auto !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    column-gap: 14px !important;
+    row-gap: 0 !important;
+    overflow: visible !important;
+    isolation: isolate !important;
     opacity: 1 !important;
     visibility: visible !important;
-    pointer-events: none !important;
-    transform: none !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+    animation: none !important;
+    transition: none !important;
   }
 
-  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero :is(.fx-reference-ask, .fx-reference-pause) {
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264) {
+    display: contents !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    pointer-events: none !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause {
     position: relative !important;
     inset: auto !important;
     flex: 0 0 54px !important;
@@ -1152,8 +1169,10 @@
     box-sizing: border-box !important;
     width: 54px !important;
     min-width: 54px !important;
+    max-width: 54px !important;
     height: 54px !important;
     min-height: 54px !important;
+    max-height: 54px !important;
     margin: 0 !important;
     padding: 0 !important;
     border: 1px solid rgba(137, 195, 221, .25) !important;
@@ -1165,7 +1184,13 @@
     visibility: visible !important;
     pointer-events: auto !important;
     transform: none !important;
+    translate: none !important;
+    animation: none !important;
+    transition: none !important;
   }
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound { grid-column:1 !important; grid-row:1 !important; }
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask { grid-column:2 !important; grid-row:1 !important; }
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause { grid-column:3 !important; grid-row:1 !important; }
 
   html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-ask i {
     width: 26px !important;
@@ -1175,7 +1200,7 @@
 
   html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-ask span {
     position: absolute !important;
-    top: 52px !important;
+    top: 59px !important;
     left: 50% !important;
     width: max-content !important;
     color: rgba(226, 235, 244, .84) !important;
@@ -1470,3 +1495,5 @@
   }
 }
 /* production-r1710-final-hero-geometry-lock */
+
+/* production-r1756-reference-controls-final-first-paint */
