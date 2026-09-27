@@ -1987,7 +1987,7 @@ html[data-fx-design-system="2"] .simulation-disclaimer {
   }
 }
 
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px), (pointer: coarse) and (max-width: 1100px) {
   body {
     padding-bottom: max(104px, calc(92px + env(safe-area-inset-bottom, 0px))) !important;
   }
@@ -2404,7 +2404,7 @@ html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
   }
 }
 
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px), (pointer: coarse) and (max-width: 1100px) {
   html[data-fx-safe-three-gate="ready-v1"] .fx-three-stage-shell,
   html[data-fx-safe-three-gate="ready-v2"] .fx-three-stage-shell,
   html[data-fx-three-host="ready"] .fx-three-stage-shell,
@@ -2853,7 +2853,7 @@ html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
 
 
 /* FormatX mobile quality hardening r7 */
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px), (pointer: coarse) and (max-width: 1100px) {
   .site-footer nav { gap: 8px 10px !important; }
   .site-footer nav a {
     display: inline-flex !important;
@@ -3366,7 +3366,7 @@ html[data-fx-three='error'] .fx-premium-core-status::before {
   }
 }
 
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px), (pointer: coarse) and (max-width: 1100px) {
   html[data-fx-premium-finish='ready-v1'] body.living-architecture #hero {
     padding-top: 84px !important;
   }
@@ -3425,7 +3425,7 @@ html[data-fx-three='error'] .fx-premium-core-status::before {
    These selectors intentionally outrank transitional r244/r207 ownership so
    first paint already has the final stable composition instead of reflowing
    through legacy intermediate states. Visual materials remain owned elsewhere. */
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px), (pointer: coarse) and (max-width: 1100px) {
   html:root:root,
   html:root:root body.living-architecture {
     max-width: 100% !important;
@@ -3623,7 +3623,7 @@ html[data-fx-three='error'] .fx-premium-core-status::before {
    r244's mode attribute is published by a deferred script. Without this neutral
    reservation, the header changed from fixed to in-flow after the first layout,
    moving the entire main surface by 70/76px and dominating CLS. */
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px), (pointer: coarse) and (max-width: 1100px) {
   html:root:root body.living-architecture .topbar {
     position: relative !important;
     inset: auto !important;
@@ -3791,7 +3791,7 @@ body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask spa
   }
 }
 
-@media (max-width:900px),(pointer:coarse){
+@media (max-width:900px),(pointer:coarse) and (max-width:1100px){
   body.living-architecture .topbar>.brand{
     box-sizing:border-box!important;min-width:0!important;max-width:118px!important;overflow:hidden!important;
   }
@@ -3817,7 +3817,7 @@ body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask spa
 /* r297 — render-blocking settled geometry. These selectors deliberately carry
    enough specificity to stay authoritative when the older r244 dataset owner
    becomes active after parsing. Runtime code owns semantics/events only. */
-@media (max-width:900px),(pointer:coarse){
+@media (max-width:900px),(pointer:coarse) and (max-width:1100px){
   html:root:root body.living-architecture .topbar{
     position:relative!important;inset:auto!important;display:block!important;box-sizing:border-box!important;
     width:100vw!important;min-width:100vw!important;max-width:100vw!important;height:70px!important;min-height:70px!important;

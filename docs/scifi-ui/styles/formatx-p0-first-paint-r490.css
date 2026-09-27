@@ -115,7 +115,7 @@ html body.living-architecture .fx-feedback-honeypot {
 /* Narrow footer navigation must wrap inside its own content box. The R494
    overflow artifact showed three anonymous footer anchors extending to 463.5px
    in a 320px viewport. Fix the flex/grid sizing rather than clipping the page. */
-@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+@media (max-width: 900px), (pointer: coarse) and (max-width: 1100px), (max-aspect-ratio: 27/25) {
   html body.living-architecture footer.site-footer,
   html body.living-architecture footer.site-footer nav,
   html body.living-architecture footer.site-footer .footer-bottom {
@@ -867,7 +867,7 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
    SOUND/ASK must never appear below WCAG's 44px floor while deferred quality
    styles and the canonical control owner settle. Manual PAUSE is retired and
    therefore cannot flash as a transient third mobile control. */
-@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+@media (max-width:900px),(pointer:coarse) and (max-width:1100px),(max-aspect-ratio:27/25){
   html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
     position:absolute!important;
     inset:auto auto 18px 50%!important;
@@ -954,3 +954,8 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 }
 /* production-r1763-mobile-first-paint-touch-target-lock */
+
+
+/* R1774 — desktop control first-paint ownership now lives in
+   formatx-desktop-first-paint-r328.css; no duplicate geometry owner here. */
+

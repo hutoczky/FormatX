@@ -6,7 +6,7 @@
   // Reconciliation stays event-driven and never erases an active owner's inline
   // control geometry, eliminating the r207 <-> r244 cascade ping-pong.
   const root = document.documentElement;
-  const mobile = () => matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  const mobile = () => matchMedia('(max-width: 900px), (pointer: coarse) and (max-width: 1100px)').matches;
   let queued = false;
   let bootObserver = null;
   let bootTimer = 0;

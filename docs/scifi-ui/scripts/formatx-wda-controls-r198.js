@@ -43,7 +43,7 @@
   let pendingToggleAfterLoad = false;
 
   const language = () => root.lang === 'en' ? 'en' : 'hu';
-  const mobileViewport = () => matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  const mobileViewport = () => matchMedia('(max-width: 900px), (pointer: coarse) and (max-width: 1100px)').matches;
 
   function pickButton() {
     const buttons = Array.from(document.querySelectorAll(SELECTOR)).filter(node => node instanceof HTMLButtonElement);
