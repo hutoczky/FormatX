@@ -40,10 +40,11 @@ function b(){
   if(document.querySelector('script[data-fx-mag-birth-live-r533="true"]')){
     r.dataset.fxIntroBootstrapRescueR1755='owner-present';
     r.dataset.fxIntroBootstrapVisualR1775='photoreal-intro-core';
+    r.dataset.fxIntroBootstrapVisualR1776='cinematic-irregular-crystal-depth';
     return;
   }
   const e=document.createElement('script');
-  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1775-photoreal-intro-core';
+  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade';
   e.async=false;
   e.dataset.fxMagBirthLiveR533='true';
   e.dataset.fxIntroRescueR1755='true';
