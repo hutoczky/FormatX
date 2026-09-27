@@ -42,7 +42,7 @@ function b(){
     return;
   }
   const e=document.createElement('script');
-  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260927-r1758-no-text-lcp';
+  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260927-r1771-headless-safe';
   e.async=false;
   e.dataset.fxMagBirthLiveR533='true';
   e.dataset.fxIntroRescueR1755='true';
