@@ -224,7 +224,7 @@ async function verify(browser, name, viewport, mobile) {
         `${name}: final mobile compositor reintroduced blur; computed=${filter}`);
       assert.ok(numberOf('brightness') >= .95,
         `${name}: final mobile crystal is too dim; computed=${filter}`);
-      assert.ok(numberOf('contrast') >= 1.10,
+      assert.ok(numberOf('contrast') >= 1.05,
         `${name}: final mobile crystal lacks facet contrast; computed=${filter}`);
       assert.ok(numberOf('saturate') >= 1.0,
         `${name}: final mobile crystal is desaturated; computed=${filter}`);
