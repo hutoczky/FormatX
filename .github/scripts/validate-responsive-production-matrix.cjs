@@ -72,10 +72,63 @@ async function waitForProductShowcase(page) {
     }, index);
     await page.waitForTimeout(40);
   }
-  await page.waitForFunction(() => {
+  const imageHealth = await page.evaluate(async () => {
     const images = Array.from(document.querySelectorAll('#product-showcase img'));
-    return images.length >= 5 && images.every(image => image.complete && image.naturalWidth > 0);
-  }, null, { timeout: 30000 });
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const waitForImage = image => new Promise(resolve => {
+      if (image.complete) return resolve();
+      const done = () => resolve();
+      image.addEventListener('load', done, { once: true });
+      image.addEventListener('error', done, { once: true });
+      setTimeout(done, 8000);
+    });
+
+    return Promise.all(images.map(async (image, index) => {
+      const original = image.currentSrc || image.src;
+      let http = { ok: false, status: 0, type: '', bytes: 0, error: '' };
+      try {
+        const response = await fetch(original, { cache: 'no-store', credentials: 'same-origin' });
+        const body = await response.arrayBuffer();
+        http = {
+          ok: response.ok,
+          status: response.status,
+          type: response.headers.get('content-type') || '',
+          bytes: body.byteLength,
+          error: '',
+        };
+      } catch (error) {
+        http.error = String(error);
+      }
+
+      for (let attempt = 0; attempt < 2 && !(image.complete && image.naturalWidth > 0); attempt += 1) {
+        try { await image.decode(); } catch (_) {}
+        if (image.complete && image.naturalWidth > 0) break;
+        if (attempt === 0) {
+          const retry = new URL(original, location.href);
+          retry.searchParams.set('formatx-matrix-retry', String(Date.now()) + '-' + String(index));
+          image.src = retry.href;
+          await Promise.race([waitForImage(image), sleep(8000)]);
+        }
+      }
+
+      return {
+        index,
+        src: image.currentSrc || image.src,
+        complete: image.complete,
+        naturalWidth: image.naturalWidth,
+        naturalHeight: image.naturalHeight,
+        http,
+      };
+    }));
+  });
+
+  assert(
+    imageHealth.length >= 5 && imageHealth.every(item =>
+      item.http.ok && item.http.status === 200 && item.http.bytes > 100 &&
+      item.complete && item.naturalWidth > 0 && item.naturalHeight > 0
+    ),
+    'product showcase live image verification failed ' + JSON.stringify(imageHealth)
+  );
 }
 
 async function waitForFeedback(page) {

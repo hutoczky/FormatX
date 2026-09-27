@@ -812,3 +812,96 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
    This removes the multi-second black MAG chamber on real first visits. */
 /* production-r1759-proxy-visible-through-intro-until-webgl */
 /* production-r1757-p0-mag-proxy-mobile-shell */
+
+
+/* R1763 — mobile first-paint control hit-target owner.
+   SOUND/ASK must never appear below WCAG's 44px floor while deferred quality
+   styles and the canonical control owner settle. Manual PAUSE is retired and
+   therefore cannot flash as a transient third mobile control. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
+    position:absolute!important;
+    inset:auto auto 18px 50%!important;
+    z-index:12080!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,50px)!important;
+    grid-template-rows:72px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:max-content!important;
+    min-width:0!important;
+    max-width:calc(100% - 24px)!important;
+    min-height:72px!important;
+    margin:0!important;
+    padding:0 6px 18px!important;
+    column-gap:14px!important;
+    overflow:visible!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    display:contents!important;
+    position:static!important;
+    inset:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    transform:none!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask{
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    flex:0 0 50px!important;
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
+    max-height:50px!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+    animation:none!important;
+    transition:none!important;
+    touch-action:manipulation!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound{
+    grid-column:1!important;
+    grid-row:1!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask{
+    grid-column:2!important;
+    grid-row:1!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    width:0!important;
+    min-width:0!important;
+    max-width:0!important;
+    height:0!important;
+    min-height:0!important;
+    max-height:0!important;
+  }
+}
+/* production-r1763-mobile-first-paint-touch-target-lock */
