@@ -193,6 +193,9 @@
   root.dataset.fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition';
   root.dataset.fxNativeMagMaterialR1795='charcoal-quartz-cool-edge-soft-transmission-warm-rim';
   root.dataset.fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding';
+  root.dataset.fxNativeMagVisualR1796='wide-irregular-cut-bioglass-no-teardrop-mobile';
+  root.dataset.fxNativeMagMaterialR1796='smoky-quartz-brighter-edge-gunmetal-optic-neutral-studio';
+  root.dataset.fxNativeMagMobileR1796='blunt-caps-wide-shoulders-irregular-crystal-not-leaf';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -464,18 +467,18 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.94,.180,.118,-.162,-.016,.090],
-        [.83,.315,.210,-.126,.008,.074],
-        [.68,.475,.315,-.082,.030,.058],
-        [.50,.610,.398,-.018,.052,.042],
-        [.30,.700,.448,.058,.060,.024],
-        [.08,.748,.478,.108,.044,.006],
-        [-.14,.704,.452,.092,.012,-.014],
-        [-.34,.608,.392,.046,-.012,-.034],
-        [-.54,.492,.318,-.016,-.032,-.052],
-        [-.72,.352,.226,-.082,-.036,-.068],
-        [-.86,.205,.132,-.134,-.026,-.082],
-        [-.94,.112,.072,-.164,-.016,-.092]
+        [.74,.340,.215,-.135,-.020,.092],
+        [.64,.505,.325,-.090,.015,.076],
+        [.52,.660,.410,-.030,.040,.060],
+        [.38,.760,.468,.040,.060,.044],
+        [.20,.825,.505,.102,.066,.026],
+        [.02,.842,.512,.145,.050,.008],
+        [-.16,.805,.482,.126,.012,-.012],
+        [-.31,.745,.445,.076,-.018,-.032],
+        [-.45,.650,.385,.015,-.040,-.050],
+        [-.58,.525,.312,-.060,-.042,-.066],
+        [-.68,.395,.232,-.120,-.030,-.080],
+        [-.75,.300,.172,-.152,-.018,-.094]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -504,18 +507,18 @@
             +Math.cos(a*6.0-ringIndex*.37)*.016*mid
             +Math.sin(a*2.0+ringIndex*.61)*.010
             +Math.cos(a*3.0-ringIndex*.29)*.008*mid;
-          const cutFront=1-.230*Math.pow(Math.max(0,Math.cos(a-.48)),4.0);
-          const cutRear=1-.155*Math.pow(Math.max(0,Math.cos(a+2.12)),5.0);
-          const cutSide=1-.180*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
-          const cutNotch=1-.130*Math.pow(Math.max(0,Math.cos(a+1.20)),8.0);
+          const cutFront=1-.265*Math.pow(Math.max(0,Math.cos(a-.48)),4.0);
+          const cutRear=1-.185*Math.pow(Math.max(0,Math.cos(a+2.12)),5.0);
+          const cutSide=1-.220*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
+          const cutNotch=1-.155*Math.pow(Math.max(0,Math.cos(a+1.20)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const x=ox+Math.cos(a)*rx*irregular*radialCut;
           const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.128,.972,-.018],[.5,0]);
-      const bottom=bodyVertex([-.104,-.970,.012],[.5,1]);
+      const top=bodyVertex([-.092,.805,-.020],[.5,0]);
+      const bottom=bodyVertex([-.060,-.808,.014],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
