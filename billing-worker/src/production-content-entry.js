@@ -84,7 +84,7 @@ const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/igloo-parity.js', {
     marker: 'igloo-to-site-stability-and-mobile-surface-r1724-living-habitat',
     rewrites: [
-      [/formatx-site-stability\.css\?v=[^"']+/g, 'formatx-site-stability.css?v=20260903-r502-mobile-box-model'],
+      [/formatx-site-stability\.css\?v=[^"']+/g, 'formatx-site-stability.css?v=20260928-r1797-canonical-sound-slot'],
       [/formatx-mobile-unified\.js\?v=[^"']+/g, 'formatx-mobile-unified.js?v=20260924-r1724-final-viewport-safe-living-habitat'],
     ],
   }],
