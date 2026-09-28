@@ -205,6 +205,9 @@
   root.dataset.fxNativeMagVisualR1799='angular-smoky-quartz-chunk-complete-optic-ring';
   root.dataset.fxNativeMagMaterialR1799='dark-bioglass-hard-facets-silver-gunmetal-teal-lens';
   root.dataset.fxNativeMagMobileR1799='low-side-count-macro-facets-no-blob-complete-optic';
+  root.dataset.fxNativeMagVisualR1800='clean-seamless-smoky-glass-facets-no-z-fighting';
+  root.dataset.fxNativeMagMaterialR1800='dark-charcoal-bioglass-clean-planes-silver-teal-optic';
+  root.dataset.fxNativeMagRasterR1800='zero-face-overlap-zero-stipple-seams-opaque-shell';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -417,7 +420,7 @@
         crystalNormal = crystalNormal.map(value => -value);
       }
       const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-      const bodySeamOverlap=(software||mobile)&&facet<2.0?.0110:0;
+      const bodySeamOverlap=0;
       const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
         (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
       ):null;
@@ -440,7 +443,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.12:(mobile?.18:.86);
+        const smoothWeight=software?.08:(mobile?.14:.86);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1494,23 +1497,23 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.090+ndl*.280+sideLight*.210);
-        float facetTone=.70+.42*fract(vFacet*5.73+.23);
+        float lift=sat(.070+ndl*.245+sideLight*.190);
+        float facetTone=.68+.44*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         float capShade=1.0-.13*smoothstep(.50,.96,vLocal.y);
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
-        float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
+        float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),24.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.006,.010,.013),vec3(.082,.096,.096),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.004,.007,.009),vec3(.060,.072,.073),lift)*facetTone*capShade*absorption;
         col*=.986+.028*grain;
-        col+=vec3(.82,.83,.76)*keySpec*.300;
-        col+=vec3(.34,.42,.41)*sideSpec*.285;
-        col+=vec3(.045,.115,.122)*fresnel*.300;
+        col+=vec3(.90,.90,.82)*keySpec*.330;
+        col+=vec3(.37,.46,.45)*sideSpec*.310;
+        col+=vec3(.050,.125,.132)*fresnel*.325;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
         col+=vec3(.110,.118,.113)*ndl*.100;
-        col+=vec3(.105,.130,.126)*fissure*.038;
+        col+=vec3(.085,.112,.110)*fissure*.024;
         col+=vec3(.018,.036,.039)*(1.0-facing)*.070;
         col+=vec3(.005,.008,.010)*max(0.0,-n.y)*.10;
 
