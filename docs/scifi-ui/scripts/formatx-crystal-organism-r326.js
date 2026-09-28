@@ -208,6 +208,9 @@
   root.dataset.fxNativeMagVisualR1800='balanced-asymmetric-smoky-bioglass-no-bite-silhouette';
   root.dataset.fxNativeMagMaterialR1800='deep-teal-quartz-integrated-medium-optic-neutral-studio';
   root.dataset.fxNativeMagMobileR1800='recentered-rings-no-side-bite-visible-optic-crystal-body';
+  root.dataset.fxNativeMagVisualR1801='continuous-shoulder-smoky-bioglass-no-waist-no-bite';
+  root.dataset.fxNativeMagMaterialR1801='deep-teal-quartz-continuous-volume-visible-optic';
+  root.dataset.fxNativeMagMobileR1801='continuous-midbody-radii-cut-plane-asymmetry-no-concave-waist';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -480,12 +483,12 @@
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
         [.72,.300,.190,-.105,-.030,.090],
-        [.58,.545,.345,-.060,.018,.072],
-        [.40,.790,.455,-.012,.052,.052],
-        [.20,.735,.500,.028,.075,.030],
-        [.00,.880,.525,.058,.052,.006],
-        [-.22,.770,.470,.042,.008,-.020],
-        [-.42,.705,.405,.006,-.032,-.042],
+        [.58,.525,.335,-.060,.018,.072],
+        [.40,.750,.450,-.012,.052,.052],
+        [.20,.835,.500,.028,.075,.030],
+        [.00,.865,.525,.058,.052,.006],
+        [-.22,.825,.480,.042,.008,-.020],
+        [-.42,.710,.410,.006,-.032,-.042],
         [-.60,.505,.300,-.050,-.044,-.066],
         [-.72,.310,.180,-.105,-.022,-.090]
       ];
