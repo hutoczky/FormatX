@@ -205,6 +205,9 @@
   root.dataset.fxNativeMagVisualR1799='front-three-quarter-wide-crystal-backface-clean';
   root.dataset.fxNativeMagRasterR1799='winding-safe-backface-cull-no-z-fighting-speckles';
   root.dataset.fxNativeMagMobileR1799='wide-crystal-view-no-teardrop-no-raster-dots';
+  root.dataset.fxNativeMagVisualR1800='watertight-faceted-bioglass-common-deformation-normal';
+  root.dataset.fxNativeMagRasterR1800='shared-radial-displacement-no-facet-cracks';
+  root.dataset.fxNativeMagMobileR1800='sharp-crystal-low-organic-warp-watertight-silhouette';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -1028,22 +1031,23 @@
            compatible but never replaces the body. Constant organic smoothing plus
            physiological deformation keeps the asymmetric silhouette alive. */
         float morph=0.0;
-        float organicBlend=.026;
+        float organicBlend=${mobile?'.008':'.026'};
         vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.31));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
+        vec3 deformNormal=normalize(aSphereNormal);
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
-        float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy);
+        float living=(cell*${mobile?'.0065':'.011'}+membrane*${mobile?'.0034':'.0065'})*(.42+.58*uEnergy);
         float bodyVertexMask=1.0-step(2.0,aFacet);
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
         float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
-        float cortex=(cortexA*.62+cortexB*.38)*.0135*cortexEnvelope;
-        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0021*cortexEnvelope;
+        float cortex=(cortexA*.62+cortexB*.38)*${mobile?'.0048':'.0135'}*cortexEnvelope;
+        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*${mobile?'.0008':'.0021'}*cortexEnvelope;
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
-        vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
+        vec3 local=(base+deformNormal*(living+cortex+microFold))*layerScale*heartbeat;
         float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
         float tendrilTip=tendrilVertex*smoothstep(.10,1.0,aUv.y);
         float tendrilWave=sin(uTime*(1.18+.16*fract(aFacet)) + aUv.y*9.4 + aFacet*2.7);
