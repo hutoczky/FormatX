@@ -10,6 +10,8 @@
   border-radius:clamp(24px,3vw,38px);
   overflow:hidden;
   isolation:isolate;
+  content-visibility:auto;
+  contain-intrinsic-size:auto 640px;
   background:
     radial-gradient(circle at 14% 12%,rgba(57,154,176,.12),transparent 32%),
     radial-gradient(circle at 88% 86%,rgba(102,82,166,.10),transparent 34%),
@@ -230,7 +232,7 @@
     0 25px 70px rgba(0,0,0,.28);
 }
 @media(max-width:900px){
-  .fx-speedtest{padding:20px 16px 22px;border-radius:24px}
+  .fx-speedtest{padding:20px 16px 22px;border-radius:24px;contain-intrinsic-size:auto 860px}
   .fx-speedtest__head{grid-template-columns:1fr}
   .fx-speedtest__edge{justify-items:start}
   .fx-speedtest__body{grid-template-columns:1fr;gap:26px}
