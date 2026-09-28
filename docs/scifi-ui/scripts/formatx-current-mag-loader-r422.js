@@ -222,6 +222,7 @@ async function start(){
   root.dataset.fxCurrentMagVisualR1778='mobile-dark-single-monolith-smaller-optic';
   root.dataset.fxCurrentMagVisualR1779='mobile-obsidian-proof-broad-facets-zero-tendrils';
   root.dataset.fxCurrentMagVisualR1781='clean-photographic-facets-no-surface-pattern-aliasing';
+  root.dataset.fxCurrentMagVisualR1799='angular-smoky-quartz-complete-optic-mobile';
   root.dataset.fxCurrentMagSchedulerR465=mobile?'direct-pause-flag-no-idle-redraw':'desktop-native-scheduler';
   root.dataset.fxCoreMobileIdlePolicyR426=mobile?'periodic-surface-bursts-between-zero-idle':'desktop-native-scheduler';
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
