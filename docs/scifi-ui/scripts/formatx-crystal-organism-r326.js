@@ -205,6 +205,9 @@
   root.dataset.fxNativeMagVisualR1799='polished-smoky-teal-crystal-clean-angular-silhouette';
   root.dataset.fxNativeMagMaterialR1799='deep-teal-bioglass-soft-facet-contrast-dark-gunmetal-optic';
   root.dataset.fxNativeMagMobileR1799='no-ring-shelves-clean-cut-contour-visible-facet-depth';
+  root.dataset.fxNativeMagVisualR1800='balanced-asymmetric-smoky-bioglass-no-bite-silhouette';
+  root.dataset.fxNativeMagMaterialR1800='deep-teal-quartz-integrated-medium-optic-neutral-studio';
+  root.dataset.fxNativeMagMobileR1800='recentered-rings-no-side-bite-visible-optic-crystal-body';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -476,15 +479,15 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.72,.300,.190,-.145,-.030,.090],
-        [.58,.545,.345,-.092,.018,.072],
-        [.40,.790,.455,-.018,.052,.052],
-        [.20,.735,.500,.085,.075,.030],
-        [.00,.880,.525,.155,.052,.006],
-        [-.22,.770,.470,.125,.008,-.020],
-        [-.42,.705,.405,.040,-.032,-.042],
-        [-.60,.505,.300,-.075,-.044,-.066],
-        [-.72,.310,.180,-.150,-.022,-.090]
+        [.72,.300,.190,-.105,-.030,.090],
+        [.58,.545,.345,-.060,.018,.072],
+        [.40,.790,.455,-.012,.052,.052],
+        [.20,.735,.500,.028,.075,.030],
+        [.00,.880,.525,.058,.052,.006],
+        [-.22,.770,.470,.042,.008,-.020],
+        [-.42,.705,.405,.006,-.032,-.042],
+        [-.60,.505,.300,-.050,-.044,-.066],
+        [-.72,.310,.180,-.105,-.022,-.090]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -833,8 +836,8 @@
     }
 
     if(!auditMode){
-      const centreX=-.036,centreY=.012;
-      const bezelInner=.088,bezelOuter=.132,bezelSteps=software?56:mobile?56:60,bezelZ=.637;
+      const centreX=-.028,centreY=.014;
+      const bezelInner=.102,bezelOuter=.154,bezelSteps=software?56:mobile?56:60,bezelZ=.637;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.020:.014)*Math.sin(angle*3.0+.34)
@@ -858,9 +861,9 @@
       }
 
       const lensCenter=[centreX,centreY,.648];
-      const lensRadiusX=.112;
-      const lensRadiusY=.090;
-      const lensDepth=.076;
+      const lensRadiusX=.128;
+      const lensRadiusY=.102;
+      const lensDepth=.082;
       const radialSteps=software?8:mobile?9:10;
       const angularSteps=software?56:mobile?56:60;
       function lensVertex(radial,angle){
