@@ -196,6 +196,9 @@
   root.dataset.fxNativeMagVisualR1796='wide-irregular-cut-bioglass-no-teardrop-mobile';
   root.dataset.fxNativeMagMaterialR1796='smoky-quartz-brighter-edge-gunmetal-optic-neutral-studio';
   root.dataset.fxNativeMagMobileR1796='blunt-caps-wide-shoulders-irregular-crystal-not-leaf';
+  root.dataset.fxNativeMagVisualR1797='twelve-major-cut-facets-smoky-bioglass-mobile';
+  root.dataset.fxNativeMagMaterialR1797='broad-cut-quartz-softbox-depth-integrated-optic';
+  root.dataset.fxNativeMagMobileR1797='crystal-silhouette-not-pebble-not-leaf-no-flower';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -431,7 +434,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.68:(mobile?.74:.86);
+        const smoothWeight=software?.62:(mobile?.68:.86);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -496,11 +499,14 @@
           uv
         };
       }
+      const macroCuts=[1.00,.935,1.055,.905,1.075,.955,1.035,.920,1.080,.945,1.020,.900];
       const rings=ringDefs.map((def,ringIndex)=>{
         const [y,rx,rz,ox,oz,phase]=def;
         return Array.from({length:sideCount},(_,sideIndex)=>{
           const a=sideIndex/sideCount*Math.PI*2+phase;
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
+          const macroIndex=Math.floor((sideIndex/sideCount)*macroCuts.length)%macroCuts.length;
+          const macroFacet=1+(macroCuts[macroIndex]-1)*(.58+.42*mid);
           const irregular=
             1
             +Math.sin(a*4.0+ringIndex*.43)*.034*mid
@@ -512,13 +518,13 @@
           const cutSide=1-.205*Math.pow(Math.max(0,Math.cos(a-2.42)),6.0);
           const cutNotch=1-.145*Math.pow(Math.max(0,Math.cos(a+1.12)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
-          const x=ox+Math.cos(a)*rx*irregular*radialCut;
-          const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
+          const x=ox+Math.cos(a)*rx*irregular*radialCut*macroFacet;
+          const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut*macroFacet;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.110,.905,-.020],[.5,0]);
-      const bottom=bodyVertex([-.080,-.905,.014],[.5,1]);
+      const top=bodyVertex([-.095,.875,-.024],[.5,0]);
+      const bottom=bodyVertex([-.065,-.875,.018],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
