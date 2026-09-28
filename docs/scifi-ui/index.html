@@ -136,6 +136,7 @@
   <script defer data-fx-reference-production-r244="true" src="./scripts/formatx-reference-production-r244.js?v=20260920-r643-hero-live-os-cta"></script>
   <script defer data-fx-control-owner-r268="true" src="./scripts/formatx-control-owner-r268.js?v=20260925-r1742-section-guard-release"></script>
   <link rel="stylesheet" data-fx-living-habitat-r1530="true" data-fx-r487-deferred-style="true" data-fx-r487-media="all" media="print" href="./styles/formatx-living-habitat-r1530.css?v=20260928-r1781-clean-photographic-facets">
+  <link rel="stylesheet" data-fx-net-speed-style-r1800="true" data-fx-r487-deferred-style="true" data-fx-r487-media="all" media="print" href="./styles/formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor">
 </head>
 <body id="top" class="living-architecture" data-fx-sitewide-living-habitat-r1724="true" data-fx-photoreal-r1693="procedural-interactive-living-crystal-organism-r1724" data-fx-photoreal-r1789="mobile-smoky-bioglass-refined-facets-small-optic" data-fx-photoreal-r1790="mobile-smoky-bioglass-visible-depth-neutral-studio" data-fx-photoreal-r1791="mobile-cut-smoky-bioglass-integrated-optic" data-fx-photoreal-r1792="mobile-smoky-bioglass-internal-depth-cut-crystal" data-fx-photoreal-r1793="mobile-visible-crystal-planes-smoky-quartz" data-fx-photoreal-r1794="mobile-smoky-quartz-visible-optic-warm-rim" data-fx-photoreal-r1795="mobile-smoky-bioglass-airy-transmission" data-fx-photoreal-r1775="physical-mineral-bioglass-intro-core" data-fx-photoreal-r1776="cinematic-irregular-crystal-deep-optic" data-fx-photoreal-r1777="photographic-black-mineral-bioglass-final-lighting" data-fx-photoreal-r1778="mobile-dark-single-monolith-smaller-optic" data-fx-photoreal-r1779="mobile-obsidian-broad-facet-zero-tendril-proof" data-fx-photoreal-r1781="clean-photographic-facets-no-surface-patterns" data-fx-photoreal-r1782="mobile-smoky-bioglass-clean-visible-optic">
   <section id="fx-mag-birth-prepaint-r1606" class="fx-mag-birth-prepaint-r1606" aria-hidden="true" inert>
@@ -279,6 +280,53 @@
       <div class="marquee" aria-hidden="true"><span>FORMATX / SENSE / PLAN / EXECUTE / VERIFY / FORMATX / SENSE / PLAN / EXECUTE / VERIFY / </span></div>
     </section>
 
+    <section id="network" class="scene fx-net-speed" data-fx-net-speed-r1800="true" data-fx-net-state="idle" aria-labelledby="network-title">
+      <header class="fx-net-head">
+        <div>
+          <p class="section-index" data-hu="05.5 — NETWORK SENSOR" data-en="05.5 — NETWORK SENSOR">05.5 — NETWORK SENSOR</p>
+          <h2 id="network-title"><span data-hu="Mérd meg a kapcsolatot." data-en="Measure the connection.">Mérd meg a kapcsolatot.</span> <em data-hu="Valós időben." data-en="In real time.">Valós időben.</em></h2>
+        </div>
+        <p data-hu="A FormatX NET ugyanarról a böngészőről méri a késést, jittert, letöltési és feltöltési sebességet a FormatX Cloudflare edge felé. A teszt csak akkor generál forgalmat, amikor elindítod." data-en="FormatX NET measures latency, jitter, download and upload throughput from this browser to the FormatX Cloudflare edge. It generates test traffic only when you start it.">A FormatX NET ugyanarról a böngészőről méri a késést, jittert, letöltési és feltöltési sebességet a FormatX Cloudflare edge felé. A teszt csak akkor generál forgalmat, amikor elindítod.</p>
+      </header>
+
+      <div class="fx-net-grid">
+        <article class="fx-net-console" aria-label="FormatX NET sebességmérő">
+          <div class="fx-net-dial" aria-hidden="true">
+            <div class="fx-net-readout"><output data-net-primary>0.0</output><span data-net-unit>Mbps</span></div>
+          </div>
+          <p class="fx-net-status" data-net-status role="status" aria-live="polite">A mérés csak gombnyomásra indul.</p>
+          <progress class="fx-net-progress" data-net-progress max="100" value="0">0%</progress>
+          <div class="fx-net-actions">
+            <button type="button" class="button button-solid" data-net-start data-hu="Mérés indítása" data-en="Start test">Mérés indítása</button>
+            <button type="button" class="button button-line" data-net-cancel hidden data-hu="Megszakítás" data-en="Cancel">Megszakítás</button>
+            <button type="button" class="button button-line" data-net-copy disabled data-hu="Eredmény másolása" data-en="Copy result">Eredmény másolása</button>
+          </div>
+        </article>
+
+        <div class="fx-net-metrics">
+          <article class="fx-net-metric"><span>PING / LATENCY</span><output data-net-ping>—</output><small data-hu="Késés a FormatX edge felé." data-en="Latency to the FormatX edge.">Késés a FormatX edge felé.</small></article>
+          <article class="fx-net-metric"><span>JITTER</span><output data-net-jitter>—</output><small data-hu="A késleltetés ingadozása." data-en="Variation in latency.">A késleltetés ingadozása.</small></article>
+          <article class="fx-net-metric"><span>DOWNLOAD</span><output data-net-download>—</output><small data-hu="Adaptív letöltési mérés, legfeljebb 8 MiB mintával." data-en="Adaptive download test using samples up to 8 MiB.">Adaptív letöltési mérés, legfeljebb 8 MiB mintával.</small></article>
+          <article class="fx-net-metric"><span>UPLOAD</span><output data-net-upload>—</output><small data-hu="Adaptív feltöltési mérés, legfeljebb 4 MiB mintával." data-en="Adaptive upload test using samples up to 4 MiB.">Adaptív feltöltési mérés, legfeljebb 4 MiB mintával.</small></article>
+
+          <div class="fx-net-summary">
+            <div>
+              <strong data-hu="Kapcsolatminőség" data-en="Connection quality">Kapcsolatminőség</strong>
+              <p data-hu="A 0–100 érték a ping, jitter, letöltés és feltöltés súlyozott FormatX-becslése. Nem internetszolgáltatói SLA és nem Ookla-minősítés." data-en="The 0–100 value is a FormatX weighted estimate based on ping, jitter, download and upload. It is not an ISP SLA or an Ookla rating.">A 0–100 érték a ping, jitter, letöltés és feltöltés súlyozott FormatX-becslése. Nem internetszolgáltatói SLA és nem Ookla-minősítés.</p>
+            </div>
+            <output class="fx-net-quality" data-net-quality>—</output>
+          </div>
+        </div>
+      </div>
+
+      <div class="fx-net-meta">
+        <span><b data-hu="Mérési edge:" data-en="Measurement edge:">Mérési edge:</b> <span data-net-edge>EDGE</span></span>
+        <span data-net-connection>Network Information API: —</span>
+        <span data-hu="Az eredmény eltérhet más mérőszerverek és szolgáltatók eredményétől." data-en="Results may differ from other test servers and providers.">Az eredmény eltérhet más mérőszerverek és szolgáltatók eredményétől.</span>
+        <a href="https://www.speedtest.net/" target="_blank" rel="noopener noreferrer" data-hu="Külső összehasonlítás: Speedtest.net ↗" data-en="External comparison: Speedtest.net ↗">Külső összehasonlítás: Speedtest.net ↗</a>
+      </div>
+    </section>
+
     <section id="resources" class="scene" data-organ="beacon" aria-labelledby="release-title">
       <div class="release-layout" data-reveal><div><p class="section-index">06 — RELEASE BEACON</p><h2 id="release-title" data-hu="A rendszer jelet ad, amikor készen áll." data-en="The system signals when it is ready.">A rendszer jelet ad, amikor készen áll.</h2><p data-hu="A hivatalos teljes kiadások és kiadási információk a FormatX hivatalos kiadási felületén jelennek meg. A külön Stable minősítéshez további közzétett bizonyíték szükséges." data-en="Official full releases and release information are published on the FormatX release page. The separate Stable designation requires additional published evidence.">A hivatalos teljes kiadások és kiadási információk a FormatX hivatalos kiadási felületén jelennek meg. A külön Stable minősítéshez további közzétett bizonyíték szükséges.</p></div><div class="release-card"><span data-hu="AKTUÁLIS KIADÁS" data-en="CURRENT RELEASE">AKTUÁLIS KIADÁS</span><strong id="release-name">FormatX Suite Pro</strong><small id="release-published">GitHub Releases</small><a id="release-page-link" class="button button-line" href="https://github.com/hutoczky/FormatX-Updates/releases" target="_blank" rel="noopener noreferrer" data-hu="Kiadási részletek" data-en="Release details">Kiadási részletek</a></div></div>
       <div class="particle-footer" aria-hidden="true"><canvas id="fx-particle-canvas"></canvas><span>FORMATX</span></div>
@@ -286,8 +334,9 @@
     </section>
   </main>
 
-  <footer class="site-footer"><div class="footer-brand"><a class="brand" href="#top"><img src="./assets/images/formatx-icon-80.webp" width="34" height="34" alt=""><span><strong>FORMATX</strong><small>LIVING SYSTEM</small></span></a><p data-hu="Ellenőrizhető technikusi platform formázáshoz, diagnosztikához, telepítéshez és karbantartáshoz." data-en="A verifiable technician platform for formatting, diagnostics, deployment and maintenance.">Ellenőrizhető technikusi platform formázáshoz, diagnosztikához, telepítéshez és karbantartáshoz.</p></div><nav><a href="#experience" data-hu="Idegrendszer" data-en="Nervous system">Idegrendszer</a><a href="#capabilities" data-hu="Szervek" data-en="Organs">Szervek</a><a href="#pricing" data-hu="Árak" data-en="Pricing">Árak</a><a href="./support.html" data-hu="Támogatás" data-en="Support">Támogatás</a></nav><nav><a href="./privacy.html" data-hu="Adatvédelem" data-en="Privacy">Adatvédelem</a><a href="./terms.html" data-hu="Feltételek" data-en="Terms">Feltételek</a><a href="https://github.com/hutoczky/FormatX" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/hutoczky/FormatX/issues" target="_blank" rel="noopener noreferrer" data-hu="Hibajegyek" data-en="Issues">Hibajegyek</a></nav><div class="footer-bottom"><span>© 2026 FormatX Project · FormatX Suite Pro</span><a href="#top" data-hu="Vissza a tetejére ↑" data-en="Back to top ↑">Vissza a tetejére ↑</a></div></footer>
+  <footer class="site-footer"><div class="footer-brand"><a class="brand" href="#top"><img src="./assets/images/formatx-icon-80.webp" width="34" height="34" alt=""><span><strong>FORMATX</strong><small>LIVING SYSTEM</small></span></a><p data-hu="Ellenőrizhető technikusi platform formázáshoz, diagnosztikához, telepítéshez és karbantartáshoz." data-en="A verifiable technician platform for formatting, diagnostics, deployment and maintenance.">Ellenőrizhető technikusi platform formázáshoz, diagnosztikához, telepítéshez és karbantartáshoz.</p></div><nav><a href="#experience" data-hu="Idegrendszer" data-en="Nervous system">Idegrendszer</a><a href="#capabilities" data-hu="Szervek" data-en="Organs">Szervek</a><a href="#pricing" data-hu="Árak" data-en="Pricing">Árak</a><a href="#network" data-hu="NET mérés" data-en="NET test">NET mérés</a><a href="./support.html" data-hu="Támogatás" data-en="Support">Támogatás</a></nav><nav><a href="./privacy.html" data-hu="Adatvédelem" data-en="Privacy">Adatvédelem</a><a href="./terms.html" data-hu="Feltételek" data-en="Terms">Feltételek</a><a href="https://github.com/hutoczky/FormatX" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/hutoczky/FormatX/issues" target="_blank" rel="noopener noreferrer" data-hu="Hibajegyek" data-en="Issues">Hibajegyek</a></nav><div class="footer-bottom"><span>© 2026 FormatX Project · FormatX Suite Pro</span><a href="#top" data-hu="Vissza a tetejére ↑" data-en="Back to top ↑">Vissza a tetejére ↑</a></div></footer>
   <script defer data-fx-intro-rescue-r1755="true" src="./scripts/formatx-intro-bootstrap-r1629.js?v=20260928-r1776-photoreal-visual-upgrade"></script>
   <script defer data-fx-site-sensory-r1755="true" src="./scripts/formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint"></script>
+  <script defer data-fx-net-speed-r1800="true" src="./scripts/formatx-net-speed-r1800.js?v=20260928-r1800-network-sensor"></script>
 </body>
 </html>
