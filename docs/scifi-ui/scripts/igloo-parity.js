@@ -26,7 +26,7 @@
   function ensureStabilityStyle() {
     ensureStyle(
       'data-fx-site-stability',
-      './styles/formatx-site-stability.css?v=20260807-audio-slot-2',
+      './styles/formatx-site-stability.css?v=20260928-r1797-canonical-sound-slot',
       'fxSiteStability',
       'FormatX stability stylesheet failed to load.'
     );
