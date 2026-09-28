@@ -43,9 +43,9 @@ jobs:
             js_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/site-sensory.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint'
             sensory_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/current-mag.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260928-r1800-mobile-seamless-smoky-glass'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/current-mag.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260928-r1801-mobile-continuous-crystal-shell'
             current_mag_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/crystal-organism.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1800-mobile-seamless-smoky-glass'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/crystal-organism.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1801-mobile-continuous-crystal-shell'
             renderer_status=$?
             if [ "$home_status" = '0' ] \
                && [ "$css_status" = '0' ] \
@@ -54,15 +54,15 @@ jobs:
                && [ "$current_mag_status" = '0' ] \
                && [ "$renderer_status" = '0' ] \
                && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260927-r1759-visible-through-intro' live-probe/home.html \
-               && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1800-mobile-seamless-smoky-glass' live-probe/home.html \
+               && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1801-mobile-continuous-crystal-shell' live-probe/home.html \
                && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
                && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
                && grep -Fq 'production-r1759-proxy-visible-through-intro-until-webgl' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
                && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
-               && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1800-mobile-seamless-smoky-glass' live-probe/current-mag.js \
-               && grep -Fq "fxNativeMagVisualR1800='clean-seamless-smoky-glass-facets-no-z-fighting'" live-probe/crystal-organism.js \
-               && grep -Fq "fxNativeMagRasterR1800='zero-face-overlap-zero-stipple-seams-opaque-shell'" live-probe/crystal-organism.js \
+               && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1801-mobile-continuous-crystal-shell' live-probe/current-mag.js \
+               && grep -Fq "fxNativeMagVisualR1801='continuous-crystal-shell-hard-shading-facets'" live-probe/crystal-organism.js \
+               && grep -Fq "fxNativeMagRasterR1801='zero-geometric-edge-tearing-zero-z-fight-overlap'" live-probe/crystal-organism.js \
                && ! grep -Eq 'formatx-igloo|reference-commerce|professional-sections|pricing-sync' live-probe/home.html; then
               found_new=1
               break
@@ -96,10 +96,10 @@ jobs:
         run: |
           if [ "$NEW_BUILD" = '1' ]; then
             state='success'
-            description='Live domain serves the current R1800 clean photographic MAG'
+            description='Live domain serves the current R1801 continuous crystal-shell MAG'
           else
             state='failure'
-            description='Live domain is not yet serving the current R1800 clean photographic MAG'
+            description='Live domain is not yet serving the current R1801 continuous crystal-shell MAG'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
