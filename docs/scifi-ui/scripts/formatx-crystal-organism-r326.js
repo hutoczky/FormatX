@@ -208,6 +208,9 @@
   root.dataset.fxNativeMagVisualR1800='clean-studio-smoky-quartz-no-zfight-speckle';
   root.dataset.fxNativeMagMaterialR1800='noise-restrained-bioglass-clean-facets-gunmetal-optic';
   root.dataset.fxNativeMagMobileR1800='less-depth-clean-software-facets-visible-glass';
+  root.dataset.fxNativeMagVisualR1801='broken-cut-smoky-quartz-no-continuous-dark-groove';
+  root.dataset.fxNativeMagMaterialR1801='clean-bioglass-edge-softbox-bright-gunmetal-optic';
+  root.dataset.fxNativeMagMobileR1801='ring-rotated-cuts-shallow-creases-readable-facets';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -519,10 +522,10 @@
             +Math.cos(a*6.0-ringIndex*.37)*.016*mid
             +Math.sin(a*2.0+ringIndex*.61)*.010
             +Math.cos(a*3.0-ringIndex*.29)*.008*mid;
-          const cutFront=1-.265*Math.pow(Math.max(0,Math.cos(a-.48)),4.0);
-          const cutRear=1-.185*Math.pow(Math.max(0,Math.cos(a+2.12)),5.0);
-          const cutSide=1-.220*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
-          const cutNotch=1-.155*Math.pow(Math.max(0,Math.cos(a+1.20)),8.0);
+          const cutFront=1-.170*Math.pow(Math.max(0,Math.cos(a-.48-ringIndex*.031)),4.0);
+          const cutRear=1-.125*Math.pow(Math.max(0,Math.cos(a+2.12+ringIndex*.022)),5.0);
+          const cutSide=1-.155*Math.pow(Math.max(0,Math.cos(a-2.48-ringIndex*.018)),6.0);
+          const cutNotch=1-.105*Math.pow(Math.max(0,Math.cos(a+1.20+ringIndex*.027)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const planeScale=
             1
@@ -1533,16 +1536,16 @@
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
         float glassHalo=pow(1.0-facing,1.35)*bodyMask;
         float frontDepth=smoothstep(-.18,.62,vLocal.z)*bodyMask;
-        col+=vec3(.052,.090,.092)*internalDepth*(.36+.48*lift);
-        col+=vec3(.040,.116,.120)*glassEdge*.395;
-        col+=vec3(.022,.060,.066)*glassHalo*.120;
+        col+=vec3(.056,.098,.102)*internalDepth*(.38+.50*lift);
+        col+=vec3(.048,.132,.138)*glassEdge*.440;
+        col+=vec3(.028,.072,.078)*glassHalo*.145;
         col+=vec3(.020,.040,.042)*frontDepth*.075;
 
-        vec3 bezel=vec3(.040,.050,.052)
-          +vec3(.205,.218,.204)*(.26*ndl+.22*sideLight)
-          +vec3(.62,.64,.57)*keySpec*.205
-          +vec3(.085,.142,.144)*fresnel*.22
-          +vec3(.060,.070,.068)*(.20+.18*facing);
+        vec3 bezel=vec3(.050,.061,.063)
+          +vec3(.228,.238,.222)*(.28*ndl+.23*sideLight)
+          +vec3(.68,.70,.62)*keySpec*.225
+          +vec3(.098,.158,.160)*fresnel*.245
+          +vec3(.072,.082,.078)*(.22+.18*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
