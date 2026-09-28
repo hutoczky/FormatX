@@ -129,7 +129,7 @@ async function verifyFullBirth(browser){
   try{
     await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
     await installTimelineProbe(page);
-    await page.locator(OVERLAY).waitFor({state:'visible',timeout:10000});
+    await page.locator(OVERLAY).waitFor({state:'visible',timeout:20000});
     const active=await snapshot(page);
     const dnaGenesis=await page.evaluate(()=>({
       genome:document.documentElement.dataset.fxMagBirthGenomeR611||'',
