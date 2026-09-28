@@ -833,6 +833,51 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
       inset 2px 2px 12px rgba(144,240,242,.22)!important;
   }
 }
+
+/* R1796 — first-frame proxy matches the current R1795 smoky-bioglass mass.
+   The old bright radial/conic proxy read as a white flower and caused a large
+   late visual delta when the real dark irregular WebGL organism took over.
+   This static compositor-only proxy is deliberately dark, asymmetric and
+   low-saturation so the handoff is visually continuous without adding JS work. */
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
+    top:44.5%!important;
+    width:clamp(202px,57vw,238px)!important;
+    aspect-ratio:.90!important;
+    opacity:.97!important;
+    background:
+      radial-gradient(ellipse 72% 62% at 49% 49%,rgba(36,99,106,.075),transparent 72%),
+      radial-gradient(ellipse 48% 38% at 54% 44%,rgba(177,221,220,.025),transparent 76%)!important;
+  }
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
+    inset:3% 8%!important;
+    clip-path:polygon(48% 0,64% 7%,78% 18%,91% 34%,96% 51%,87% 70%,73% 88%,54% 100%,34% 91%,18% 76%,5% 58%,10% 38%,24% 19%)!important;
+    background:
+      radial-gradient(ellipse at 34% 21%,rgba(207,232,229,.16),transparent 31%),
+      radial-gradient(ellipse at 70% 73%,rgba(22,42,45,.72),transparent 54%),
+      linear-gradient(142deg,rgba(103,128,128,.88) 0 13%,rgba(48,69,72,.96) 14% 31%,rgba(92,112,112,.88) 32% 45%,rgba(34,52,56,.98) 46% 64%,rgba(70,91,94,.92) 65% 80%,rgba(28,41,45,.99) 81% 100%),
+      radial-gradient(circle at 50% 50%,rgba(8,23,29,.95),rgba(3,11,16,.99) 67%)!important;
+    box-shadow:
+      inset 8px -14px 24px rgba(0,8,12,.52),
+      inset -7px 8px 18px rgba(144,191,191,.055),
+      0 24px 42px rgba(0,0,0,.48)!important;
+    opacity:.97!important;
+  }
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
+    inset:40.5% 39%!important;
+    border:1px solid rgba(95,164,170,.30)!important;
+    background:
+      radial-gradient(circle at 42% 34%,rgba(137,214,215,.62) 0 3%,rgba(37,117,126,.50) 7%,rgba(9,42,50,.76) 17%,rgba(2,12,18,.99) 46%,rgba(0,4,8,.99) 74%)!important;
+    box-shadow:
+      0 0 0 6px rgba(4,10,14,.90),
+      0 0 0 8px rgba(96,139,142,.12),
+      0 0 16px rgba(57,139,147,.12),
+      inset -3px -4px 10px rgba(0,2,5,.82),
+      inset 2px 2px 7px rgba(137,206,207,.12)!important;
+  }
+}
+/* production-r1796-smoky-bioglass-first-frame-parity */
+
 /* production-r1769-mobile-proxy-final-mass-parity */
 /* production-r1772-biocrystal-veins-iris-tendrils-final-frame-parity */
 /* production-r1773-compositor-promoted-biocrystal-proxy */
