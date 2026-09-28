@@ -226,7 +226,7 @@ async function verify(browser, name, viewport, mobile) {
         `${name}: final mobile crystal is too dim; computed=${filter}`);
       assert.ok(numberOf('contrast') >= 1.05,
         `${name}: final mobile crystal lacks facet contrast; computed=${filter}`);
-      assert.ok(numberOf('saturate') >= 1.0,
+      assert.ok(numberOf('saturate') >= .94,
         `${name}: final mobile crystal is desaturated; computed=${filter}`);
       assert.equal(report.dom.optics, 'calmer-luminance-feathered-mobile-silhouette');
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');

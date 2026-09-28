@@ -146,36 +146,34 @@ jobs:
           echo 'Exact source SHA marker never reached production; refusing stale live verification.' >&2
           exit 1
 
-      - name: Verify production serves R479 when deploying
+      - name: Verify production serves the current R1795 MAG while preserving R479 compatibility
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]')
         shell: bash
         run: |
           set -Eeuo pipefail
           origin='https://formatxsuite.com'
           for attempt in $(seq 1 36); do
-            echo "R479 live verification attempt $attempt/36"
+            echo "R1795 compatibility live verification attempt $attempt/36"
             tmp="$(mktemp -d)"
-            sync_code="$(curl -sS --max-time 30 -o "$tmp/sync.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?r479=${GITHUB_RUN_ID}_${attempt}" || true)"
-            css_code="$(curl -sS --max-time 30 -o "$tmp/sync.css" -w '%{http_code}' "$origin/scifi-ui/styles/formatx-mag-visual-sync-r476.css?r479=${GITHUB_RUN_ID}_${attempt}" || true)"
-            motion_code="$(curl -sS --max-time 30 -o "$tmp/motion.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?r479=${GITHUB_RUN_ID}_${attempt}" || true)"
-            marker_code="$(curl -sS --max-time 30 -o "$tmp/marker.json" -w '%{http_code}' "$origin/scifi-ui/data/r479-primary-mag-optics.json?r479=${GITHUB_RUN_ID}_${attempt}" || true)"
-            if [[ "$sync_code" == 200 && "$css_code" == 200 && "$motion_code" == 200 && "$marker_code" == 200 ]] \
-              && grep -Fq 'fxMiniMagLifeContractR479' "$tmp/sync.js" \
-              && grep -Fq 'r479-colour-depth-soft-living-primary' "$tmp/sync.js" \
-              && grep -Fq 'brightness(.72)' "$tmp/sync.css" \
-              && grep -Fq 'saturate(1.38)' "$tmp/sync.css" \
-              && grep -Fq 'fx-primary-mag-live-breath-r479' "$tmp/sync.css" \
-              && grep -Fq 'formatx-mag-shape-sync-r476.js?v=' "$tmp/motion.js" \
-              && grep -Fq '"revision": "R479"' "$tmp/marker.json"; then
-              echo 'PASS: production serves R479 living colour-depth MAG optics.'
+            motion_code="$(curl -sS --max-time 30 -o "$tmp/motion.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?r1796=${GITHUB_RUN_ID}_${attempt}" || true)"
+            current_code="$(curl -sS --max-time 30 -o "$tmp/current.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-current-mag-loader-r422.js?r1796=${GITHUB_RUN_ID}_${attempt}" || true)"
+            renderer_code="$(curl -sS --max-time 30 -o "$tmp/renderer.js" -w '%{http_code}' "$origin/scifi-ui/scripts/formatx-crystal-organism-r326.js?r1796=${GITHUB_RUN_ID}_${attempt}" || true)"
+            life_code="$(curl -sS --max-time 30 -o "$tmp/life.css" -w '%{http_code}' "$origin/scifi-ui/styles/formatx-core-life-r455.css?r1796=${GITHUB_RUN_ID}_${attempt}" || true)"
+            if [[ "$motion_code" == 200 && "$current_code" == 200 && "$renderer_code" == 200 && "$life_code" == 200 ]] \
+              && grep -Fq 'formatx-current-mag-loader-r422.js?v=20260928-r1795-mobile-smoky-bioglass-airy' "$tmp/motion.js" \
+              && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy' "$tmp/current.js" \
+              && grep -Fq "fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition'" "$tmp/renderer.js" \
+              && grep -Fq "saturate(.96)" "$tmp/renderer.js" \
+              && grep -Fq 'production-r1782-mobile-smoky-bioglass-clean' "$tmp/life.css"; then
+              echo 'PASS: production serves the current R1795 smoky-bioglass MAG and retains the R479 compatibility layer.'
               rm -rf "$tmp"
               exit 0
             fi
-            echo "codes: sync-js=$sync_code sync-css=$css_code motion=$motion_code marker=$marker_code"
+            echo "codes: motion=$motion_code current=$current_code renderer=$renderer_code life=$life_code"
             rm -rf "$tmp"
             sleep 10
           done
-          echo 'Production did not converge to R479 within the verification window.' >&2
+          echo 'Production did not converge to the current R1795 MAG delivery graph within the verification window.' >&2
           exit 1
 
       - name: Publish R479 source/live status

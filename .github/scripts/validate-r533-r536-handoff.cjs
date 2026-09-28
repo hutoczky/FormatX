@@ -129,8 +129,11 @@ async function verifyFullBirth(browser){
   try{
     await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
     await installTimelineProbe(page);
-    await page.locator(OVERLAY).waitFor({state:'visible',timeout:10000});
+    await page.waitForFunction(()=>document.documentElement.dataset.fxMagBirthLiveR533==='active',null,{timeout:25000});
+    await page.locator(OVERLAY).waitFor({state:'attached',timeout:25000});
     const active=await snapshot(page);
+    assert.equal(active.birth,'active','desktop-full: semantic R533 runtime did not become active');
+    assert.equal(active.overlayCount,1,'desktop-full: canonical R533 cinematic DOM missing');
     const dnaGenesis=await page.evaluate(()=>({
       genome:document.documentElement.dataset.fxMagBirthGenomeR611||'',
       helixCount:document.querySelectorAll('[data-fx-dna-3d-r611="true"]').length,

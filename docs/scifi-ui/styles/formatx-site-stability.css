@@ -108,9 +108,11 @@ html.fx-organism-core-active .fx-three-stage-shell {
   z-index: var(--fx-layer-floating) !important;
 }
 
-/* Dedicated audio slot: the lower-right area is occupied by the Live OS
-   launcher and the Organism thought trigger. Keep music in the upper-right. */
-.fx-three-sound {
+/* R1797 — legacy standalone audio slot only.
+   The canonical SOUND control is parser-owned inside #hero controls and must
+   never be pulled to the upper-right before r264 settles; doing so caused a
+   measurable first-paint CLS. */
+body > .fx-three-sound {
   top: 90px !important;
   right: 18px !important;
   bottom: auto !important;
@@ -272,7 +274,7 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
 
   /* Mobile clears the complete fixed header/control band before showing the
      audio button; Live OS and thought controls stay in the lower-right. */
-  .fx-three-sound {
+  body > .fx-three-sound {
     top: 138px !important;
     right: 10px !important;
     bottom: auto !important;
@@ -314,3 +316,5 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
 html.fx-continuous-scroll-mode {
   scroll-snap-type: none !important;
 }
+
+/* production-r1797-canonical-sound-never-enters-legacy-slot */

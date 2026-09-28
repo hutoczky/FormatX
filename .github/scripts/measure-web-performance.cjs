@@ -12,7 +12,10 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await context.addInitScript(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+    try {
+      localStorage.setItem('formatx:intro-seen-v1', '1');
+      sessionStorage.setItem('formatx:mag-birth-live-r533-seen', '1');
+    } catch (_) {}
     window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
     try {
       new PerformanceObserver(list => {

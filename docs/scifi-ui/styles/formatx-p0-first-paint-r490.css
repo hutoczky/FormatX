@@ -954,3 +954,78 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 }
 /* production-r1763-mobile-first-paint-touch-target-lock */
+
+
+/* R1796 — first-paint parity with the R1795 smoky-bioglass MAG.
+   Keep this layer compositor-static: no filter, blur, animation or extra
+   renderer. The proxy now uses the same dark mineral mass, restrained cyan
+   optic and warm rim language as the final WebGL organism, reducing the large
+   visual delta that previously dominated mobile Speed Index. */
+html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
+  width:clamp(250px,27vw,388px)!important;
+  aspect-ratio:.92!important;
+  opacity:.98!important;
+  background:
+    radial-gradient(ellipse 74% 62% at 51% 49%,rgba(25,58,65,.16),transparent 68%),
+    linear-gradient(116deg,transparent 0 66%,rgba(154,100,70,.055) 67% 71%,transparent 72% 100%)!important;
+  box-shadow:none!important;
+}
+html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
+  inset:6% 12% 5%!important;
+  clip-path:polygon(48% 0,61% 5%,74% 3%,83% 13%,94% 20%,91% 34%,100% 45%,92% 57%,94% 71%,82% 78%,75% 92%,61% 90%,49% 100%,38% 93%,24% 96%,18% 83%,7% 77%,10% 62%,2% 52%,8% 39%,4% 27%,17% 20%,24% 8%,37% 11%)!important;
+  background:
+    linear-gradient(28deg,transparent 0 29%,rgba(91,198,207,.16) 30% 30.7%,transparent 31.6% 100%),
+    linear-gradient(72deg,transparent 0 41%,rgba(198,219,216,.13) 42% 42.8%,transparent 43.7% 100%),
+    linear-gradient(148deg,transparent 0 58%,rgba(182,115,78,.11) 59% 60%,transparent 61% 100%),
+    radial-gradient(ellipse 38% 20% at 32% 18%,rgba(219,232,229,.34),rgba(115,139,142,.11) 47%,transparent 72%),
+    radial-gradient(ellipse 48% 34% at 72% 76%,rgba(25,46,51,.68),transparent 70%),
+    conic-gradient(from 17deg at 49% 48%,
+      #2b3537 0deg,#101719 36deg,#3d494b 72deg,#161f22 111deg,
+      #596264 146deg,#1b2528 184deg,#343f41 220deg,#0d1417 260deg,
+      #465154 302deg,#182124 335deg,#2b3537 360deg)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.13),
+    inset 10px -16px 28px rgba(0,4,7,.38),
+    0 24px 44px rgba(0,0,0,.30)!important;
+  opacity:1!important;
+}
+html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
+  inset:39% 40.5%!important;
+  border:1px solid rgba(101,169,175,.34)!important;
+  background:
+    radial-gradient(circle at 43% 36%,rgba(158,226,226,.72) 0 4%,rgba(52,152,163,.60) 8%,rgba(10,60,70,.66) 18%,rgba(3,14,20,.98) 42%,#02080d 72%)!important;
+  box-shadow:
+    0 0 0 6px rgba(7,12,15,.92),
+    0 0 0 8px rgba(118,135,133,.13),
+    0 0 17px rgba(58,160,171,.13),
+    inset -4px -5px 11px rgba(0,2,5,.78),
+    inset 2px 2px 8px rgba(137,209,211,.12)!important;
+}
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
+    top:44%!important;
+    width:clamp(218px,62vw,278px)!important;
+    aspect-ratio:.90!important;
+    opacity:.98!important;
+    background:
+      radial-gradient(ellipse 78% 64% at 51% 49%,rgba(24,58,64,.17),transparent 69%),
+      linear-gradient(118deg,transparent 0 67%,rgba(168,107,73,.065) 68% 72%,transparent 73% 100%)!important;
+  }
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
+    inset:5% 10% 4%!important;
+    background:
+      linear-gradient(27deg,transparent 0 30%,rgba(80,186,197,.18) 31% 31.7%,transparent 32.6% 100%),
+      linear-gradient(73deg,transparent 0 42%,rgba(198,219,216,.14) 43% 43.8%,transparent 44.7% 100%),
+      linear-gradient(150deg,transparent 0 59%,rgba(187,119,78,.12) 60% 61%,transparent 62% 100%),
+      radial-gradient(ellipse 40% 22% at 31% 18%,rgba(223,234,231,.37),rgba(113,139,142,.12) 46%,transparent 72%),
+      radial-gradient(ellipse 50% 35% at 73% 76%,rgba(23,45,50,.72),transparent 70%),
+      conic-gradient(from 16deg at 49% 48%,
+        #303b3d 0deg,#0e1517 37deg,#414d4f 75deg,#151d20 112deg,
+        #5e686a 147deg,#1a2427 185deg,#374244 222deg,#0c1315 262deg,
+        #4a5658 304deg,#172023 337deg,#303b3d 360deg)!important;
+  }
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
+    inset:40% 41.5%!important;
+  }
+}
+/* production-r1796-first-paint-smoky-bioglass-parity */
