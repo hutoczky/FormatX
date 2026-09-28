@@ -235,6 +235,9 @@
   root.dataset.fxNativeMagVisualR1809='balanced-square-irregular-smoked-bioglass-crystal';
   root.dataset.fxNativeMagGeometryR1809='flat-left-right-cuts-balanced-height-width-no-snout';
   root.dataset.fxNativeMagMobileR1809='irregular-crystal-not-arrow-not-fish-centered-optic';
+  root.dataset.fxNativeMagVisualR1810='faceted-smoked-bioglass-mineral-planes-mobile';
+  root.dataset.fxNativeMagGeometryR1810='stronger-irregular-cut-hybrid-hard-normal-no-pebble';
+  root.dataset.fxNativeMagMobileR1810='crystal-planes-not-rock-balanced-silhouette-visible-optic';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -470,7 +473,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.68:(mobile?.74:.84);
+        const smoothWeight=software?.54:(mobile?.62:.82);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -537,10 +540,10 @@
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
           const irregular=
             1
-            +Math.sin(a*3.0+ringIndex*.41+.48)*.085*mid
-            +Math.cos(a*5.0-ringIndex*.33+1.10)*.052*mid
-            +Math.sin(a*7.0+ringIndex*.57-.36)*.032*mid
-            +Math.cos(a*2.0-ringIndex*.27)*.024;
+            +Math.sin(a*3.0+ringIndex*.41+.48)*.110*mid
+            +Math.cos(a*5.0-ringIndex*.33+1.10)*.068*mid
+            +Math.sin(a*7.0+ringIndex*.57-.36)*.042*mid
+            +Math.cos(a*2.0-ringIndex*.27)*.030;
           const cutFront=1-.305*Math.pow(Math.max(0,Math.cos(a)),8.0);
           const cutRear=1-.225*Math.pow(Math.max(0,Math.cos(a-Math.PI)),7.0);
           const cutUpper=1-.145*Math.pow(Math.max(0,Math.cos(a-Math.PI*.52)),7.0);
@@ -1530,15 +1533,15 @@
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
         float lift=sat(.045+ndl*.190+sideLight*.145);
-        float facetTone=.97+.04*fract(vFacet*5.73+.23);
+        float facetTone=.86+.22*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         float capShade=1.0-.13*smoothstep(.50,.96,vLocal.y);
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),24.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0015,.003,.0045),vec3(.024,.034,.037),lift)*facetTone*capShade*absorption;
-        col*=.992+.016*grain;
+        vec3 col=mix(vec3(.0015,.003,.0045),vec3(.030,.042,.045),lift)*facetTone*capShade*absorption;
+        col*=.988+.024*grain;
         col+=vec3(.64,.66,.61)*keySpec*.145;
         col+=vec3(.23,.31,.32)*sideSpec*.165;
         col+=vec3(.060,.160,.170)*fresnel*.470;
@@ -1566,15 +1569,15 @@
         col+=vec3(.024,.072,.078)*fresnel*.160*bodyMask;
         float softboxBody=exp(-pow((vLocal.x+.20)/.42,2.0)-pow((vLocal.y-.24)/.58,2.0))*bodyMask;
         float sideBox=exp(-pow((vLocal.x-.48)/.26,2.0)-pow((vLocal.y+.02)/.68,2.0))*bodyMask;
-        col+=vec3(.28,.30,.28)*softboxBody*.135;
-        col+=vec3(.055,.120,.124)*sideBox*.115;
+        col+=vec3(.32,.34,.32)*softboxBody*.165;
+        col+=vec3(.060,.132,.136)*sideBox*.135;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
         float glassHalo=pow(1.0-facing,1.35)*bodyMask;
         float frontDepth=smoothstep(-.18,.62,vLocal.z)*bodyMask;
         col+=vec3(.030,.056,.060)*internalDepth*(.26+.36*lift);
-        col+=vec3(.060,.170,.178)*glassEdge*.470;
-        col+=vec3(.034,.102,.110)*glassHalo*.220;
+        col+=vec3(.066,.186,.194)*glassEdge*.520;
+        col+=vec3(.038,.114,.120)*glassHalo*.255;
         col+=vec3(.018,.040,.044)*frontDepth*.080;
 
         vec3 bezel=vec3(.060,.070,.072)
