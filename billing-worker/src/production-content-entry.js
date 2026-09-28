@@ -1,4 +1,5 @@
 import productionBase from './production-content-entry-r369-base.js';
+import { handleSpeedTestRequest } from './speedtest-api.js';
 
 /* FormatX R514 — preserve the proven R513 MAG runtime and R504/R506 first-paint
    contracts while removing the exact R513 Lighthouse first-divergence owner from
@@ -279,6 +280,10 @@ async function stabilizePublicResponse(request, url, response) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (isPublicRequest(url)) {
+      const speedTestResponse = await handleSpeedTestRequest(request, env);
+      if (speedTestResponse) return speedTestResponse;
+    }
     if (isSafeMethod(request) && isPublicRequest(url) && url.pathname === '/robots.txt') {
       return robotsResponse(request);
     }
