@@ -34,6 +34,7 @@ root.dataset.fxP0MotionCacheR1777='photographic-final-lighting-black-mineral-bio
 root.dataset.fxP0MotionCacheR1778='mobile-monolith-dark-mineral-corrected-fallback';
 root.dataset.fxP0MotionCacheR1779='mobile-obsidian-proof-broad-facet-zero-tendril';
 root.dataset.fxP0MotionCacheR1781='clean-photographic-facet-surface';
+root.dataset.fxP0MotionCacheR1799='mobile-angular-smoky-quartz-complete-optic';
 root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1799-mobile-angular-smoky-quartz';
 const PARAMS=new URLSearchParams(location.search);
