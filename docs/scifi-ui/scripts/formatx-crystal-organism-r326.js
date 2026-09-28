@@ -211,6 +211,9 @@
   root.dataset.fxNativeMagVisualR1801='continuous-crystal-shell-hard-shading-facets';
   root.dataset.fxNativeMagGeometryR1801='smooth-shared-deform-normal-hard-independent-shading-normal';
   root.dataset.fxNativeMagRasterR1801='zero-geometric-edge-tearing-zero-z-fight-overlap';
+  root.dataset.fxNativeMagVisualR1802='smooth-smoky-bioglass-crystal-no-lowpoly-snout';
+  root.dataset.fxNativeMagGeometryR1802='higher-mobile-topology-balanced-hybrid-normals-centered-irregular-shell';
+  root.dataset.fxNativeMagMobileR1802='soft-facets-centered-silhouette-premium-bioglass';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -446,7 +449,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.08:(mobile?.14:.86);
+        const smoothWeight=software?.52:(mobile?.60:.86);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -474,7 +477,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 14 : mobile ? 18 : constrained ? 60 : 72;
+      const sideCount = software ? 30 : mobile ? 38 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -482,15 +485,15 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.74,.380,.240,-.160,-.030,.100],
-        [.60,.580,.360,-.105,.020,.074],
-        [.42,.750,.470,-.020,.060,.048],
-        [.20,.840,.520,.090,.072,.024],
-        [-.02,.860,.530,.150,.050,.000],
-        [-.24,.780,.480,.105,.010,-.026],
-        [-.44,.660,.400,.030,-.030,-.050],
-        [-.62,.500,.300,-.070,-.050,-.076],
-        [-.76,.320,.190,-.120,-.040,-.102]
+        [.72,.360,.235,-.090,-.028,.096],
+        [.58,.555,.350,-.060,.016,.070],
+        [.40,.705,.445,-.012,.050,.044],
+        [.20,.790,.495,.038,.060,.022],
+        [-.02,.815,.505,.058,.044,.000],
+        [-.22,.760,.465,.034,.008,-.024],
+        [-.42,.655,.398,-.006,-.026,-.048],
+        [-.60,.505,.305,-.056,-.044,-.074],
+        [-.73,.345,.202,-.082,-.036,-.100]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -515,22 +518,22 @@
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
           const irregular=
             1
-            +Math.sin(a*3.0+ringIndex*.41+.48)*.110*mid
-            +Math.cos(a*5.0-ringIndex*.33+1.10)*.072*mid
-            +Math.sin(a*7.0+ringIndex*.57-.36)*.040*mid
-            +Math.cos(a*2.0-ringIndex*.27)*.030;
-          const cutFront=1-.285*Math.pow(Math.max(0,Math.cos(a-.38)),4.0);
-          const cutRear=1-.210*Math.pow(Math.max(0,Math.cos(a+2.06)),5.0);
-          const cutSide=1-.245*Math.pow(Math.max(0,Math.cos(a-2.36)),6.0);
-          const cutNotch=1-.175*Math.pow(Math.max(0,Math.cos(a+1.10)),8.0);
+            +Math.sin(a*3.0+ringIndex*.41+.48)*.060*mid
+            +Math.cos(a*5.0-ringIndex*.33+1.10)*.038*mid
+            +Math.sin(a*7.0+ringIndex*.57-.36)*.022*mid
+            +Math.cos(a*2.0-ringIndex*.27)*.016;
+          const cutFront=1-.205*Math.pow(Math.max(0,Math.cos(a-.38)),4.0);
+          const cutRear=1-.165*Math.pow(Math.max(0,Math.cos(a+2.06)),5.0);
+          const cutSide=1-.185*Math.pow(Math.max(0,Math.cos(a-2.36)),6.0);
+          const cutNotch=1-.125*Math.pow(Math.max(0,Math.cos(a+1.10)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const x=ox+Math.cos(a)*rx*irregular*radialCut;
           const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.072,.825,-.018],[.5,0]);
-      const bottom=bodyVertex([-.030,-.835,.018],[.5,1]);
+      const top=bodyVertex([-.052,.790,-.016],[.5,0]);
+      const bottom=bodyVertex([-.038,-.800,.016],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -1502,7 +1505,7 @@
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
         float lift=sat(.070+ndl*.245+sideLight*.190);
-        float facetTone=.68+.44*fract(vFacet*5.73+.23);
+        float facetTone=.88+.16*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         float capShade=1.0-.13*smoothstep(.50,.96,vLocal.y);
