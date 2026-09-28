@@ -208,6 +208,9 @@
   root.dataset.fxNativeMagVisualR1800='watertight-faceted-bioglass-common-deformation-normal';
   root.dataset.fxNativeMagRasterR1800='shared-radial-displacement-no-facet-cracks';
   root.dataset.fxNativeMagMobileR1800='sharp-crystal-low-organic-warp-watertight-silhouette';
+  root.dataset.fxNativeMagVisualR1801='watertight-deformation-double-sided-mobile-crystal';
+  root.dataset.fxNativeMagRasterR1801='shared-deform-normal-no-cull-visible-mobile-body';
+  root.dataset.fxNativeMagMobileR1801='visible-crystal-no-cull-no-facet-gap-deformation';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -1985,8 +1988,7 @@
          through the body, while the depth buffer still resolves the front shell. */
       if(mobile){
         gl.disable(gl.BLEND);
-        gl.enable(gl.CULL_FACE);
-        gl.cullFace(gl.BACK);
+        gl.disable(gl.CULL_FACE);
       }else{
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
