@@ -211,6 +211,9 @@
   root.dataset.fxNativeMagVisualR1801='watertight-deformation-double-sided-mobile-crystal';
   root.dataset.fxNativeMagRasterR1801='shared-deform-normal-no-cull-visible-mobile-body';
   root.dataset.fxNativeMagMobileR1801='visible-crystal-no-cull-no-facet-gap-deformation';
+  root.dataset.fxNativeMagVisualR1802='broad-polygon-cut-smoky-bioglass-flat-caps';
+  root.dataset.fxNativeMagMaterialR1802='watertight-faceted-quartz-studio-depth';
+  root.dataset.fxNativeMagMobileR1802='flat-top-bottom-broad-crystal-silhouette-no-egg';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -474,7 +477,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 42 : mobile ? 48 : constrained ? 60 : 72;
+      const sideCount = software ? 28 : mobile ? 32 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -539,8 +542,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.095,.875,-.024],[.5,0]);
-      const bottom=bodyVertex([-.065,-.875,.018],[.5,1]);
+      const top=bodyVertex([-.055,.880,-.018],[.5,0]);
+      const bottom=bodyVertex([.025,-.880,.020],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
