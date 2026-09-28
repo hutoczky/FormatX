@@ -1,4 +1,5 @@
 import canonicalProduction from './production-content-entry.js';
+import { handleSpeedTestRequest, isSpeedTestPath } from './speedtest-api.js';
 
 /* FormatX R529 — direct canonical production ownership + R527 FCP preservation
    + R528 living-core/mobile first-paint closeout.
@@ -124,8 +125,12 @@ function r529Headers(source) {
 
 export default {
   async fetch(request, env, ctx) {
-    const response = await canonicalProduction.fetch(request, env, ctx);
     const url = new URL(request.url);
+    if (PUBLIC_HOSTS.has(url.hostname) && isSpeedTestPath(url.pathname)) {
+      const speedResponse = await handleSpeedTestRequest(request, env);
+      if (speedResponse) return speedResponse;
+    }
+    const response = await canonicalProduction.fetch(request, env, ctx);
     if (!isSafeMethod(request) || !PUBLIC_HOSTS.has(url.hostname)) return response;
 
     const headers = r529Headers(response.headers);

@@ -1,0 +1,70 @@
+name: Validate FormatX speed test R1796
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-speedtest-launcher-r1796.js'
+      - 'docs/scifi-ui/scripts/formatx-speedtest-r1796.js'
+      - 'docs/scifi-ui/styles/formatx-speedtest-r1796.css'
+      - 'billing-worker/src/speedtest-api.js'
+      - 'billing-worker/src/production-content-entry-r529.js'
+      - '.github/scripts/validate-speedtest-r1796.cjs'
+      - '.github/workflows/validate-speedtest-r1796.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-speedtest-launcher-r1796.js'
+      - 'docs/scifi-ui/scripts/formatx-speedtest-r1796.js'
+      - 'docs/scifi-ui/styles/formatx-speedtest-r1796.css'
+      - 'billing-worker/src/speedtest-api.js'
+      - 'billing-worker/src/production-content-entry-r529.js'
+      - '.github/scripts/validate-speedtest-r1796.cjs'
+      - '.github/workflows/validate-speedtest-r1796.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  speedtest-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate speed test source contract
+        run: |
+          node .github/scripts/validate-speedtest-r1796.cjs
+          node --input-type=module --check < billing-worker/src/speedtest-api.js
+          node --check docs/scifi-ui/scripts/formatx-speedtest-launcher-r1796.js
+          node --input-type=module --check < docs/scifi-ui/scripts/formatx-speedtest-r1796.js
+      - name: Exercise speed test API responses
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { handleSpeedTestRequest } from './billing-worker/src/speedtest-api.js';
+
+          const ping = await handleSpeedTestRequest(new Request('https://formatxsuite.com/api/speedtest/ping'));
+          assert.equal(ping.status, 200);
+          assert.equal((await ping.json()).ok, true);
+
+          const download = await handleSpeedTestRequest(new Request('https://formatxsuite.com/api/speedtest/download?bytes=65536'));
+          assert.equal(download.status, 200);
+          assert.equal((await download.arrayBuffer()).byteLength, 65536);
+
+          const payload = new Uint8Array(1024);
+          const upload = await handleSpeedTestRequest(new Request('https://formatxsuite.com/api/speedtest/upload', { method: 'POST', body: payload }));
+          assert.equal(upload.status, 200);
+          assert.equal((await upload.json()).bytes, 1024);
+
+          const blocked = await handleSpeedTestRequest(new Request('https://formatxsuite.com/api/speedtest/ping', {
+            headers: { Origin: 'https://example.com', 'Sec-Fetch-Site': 'cross-site' }
+          }));
+          assert.equal(blocked.status, 403);
+          console.log('PASS: R1796 speed test API response behavior verified.');
+          NODE
