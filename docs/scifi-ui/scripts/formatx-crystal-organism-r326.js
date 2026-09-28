@@ -467,18 +467,18 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.88,.220,.145,-.150,-.018,.092],
-        [.76,.390,.255,-.108,.012,.076],
-        [.60,.555,.355,-.060,.036,.060],
-        [.43,.685,.430,.008,.058,.044],
-        [.24,.770,.480,.082,.065,.026],
-        [.04,.805,.500,.138,.050,.008],
-        [-.16,.760,.472,.120,.014,-.012],
-        [-.34,.680,.420,.070,-.016,-.032],
-        [-.52,.565,.350,.010,-.038,-.050],
-        [-.68,.430,.270,-.070,-.040,-.066],
-        [-.80,.285,.180,-.126,-.028,-.080],
-        [-.88,.185,.118,-.158,-.018,-.094]
+        [.74,.340,.215,-.135,-.020,.092],
+        [.64,.505,.325,-.090,.015,.076],
+        [.52,.660,.410,-.030,.040,.060],
+        [.38,.760,.468,.040,.060,.044],
+        [.20,.825,.505,.102,.066,.026],
+        [.02,.842,.512,.145,.050,.008],
+        [-.16,.805,.482,.126,.012,-.012],
+        [-.31,.745,.445,.076,-.018,-.032],
+        [-.45,.650,.385,.015,-.040,-.050],
+        [-.58,.525,.312,-.060,-.042,-.066],
+        [-.68,.395,.232,-.120,-.030,-.080],
+        [-.75,.300,.172,-.152,-.018,-.094]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -507,18 +507,18 @@
             +Math.cos(a*6.0-ringIndex*.37)*.016*mid
             +Math.sin(a*2.0+ringIndex*.61)*.010
             +Math.cos(a*3.0-ringIndex*.29)*.008*mid;
-          const cutFront=1-.250*Math.pow(Math.max(0,Math.cos(a-.42)),4.0);
-          const cutRear=1-.175*Math.pow(Math.max(0,Math.cos(a+2.02)),5.0);
-          const cutSide=1-.205*Math.pow(Math.max(0,Math.cos(a-2.42)),6.0);
-          const cutNotch=1-.145*Math.pow(Math.max(0,Math.cos(a+1.12)),8.0);
+          const cutFront=1-.265*Math.pow(Math.max(0,Math.cos(a-.42)),4.0);
+          const cutRear=1-.185*Math.pow(Math.max(0,Math.cos(a+2.02)),5.0);
+          const cutSide=1-.220*Math.pow(Math.max(0,Math.cos(a-2.42)),6.0);
+          const cutNotch=1-.155*Math.pow(Math.max(0,Math.cos(a+1.12)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const x=ox+Math.cos(a)*rx*irregular*radialCut;
           const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.110,.905,-.020],[.5,0]);
-      const bottom=bodyVertex([-.080,-.905,.014],[.5,1]);
+      const top=bodyVertex([-.092,.805,-.020],[.5,0]);
+      const bottom=bodyVertex([-.060,-.808,.014],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
