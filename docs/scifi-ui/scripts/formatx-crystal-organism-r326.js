@@ -208,6 +208,9 @@
   root.dataset.fxNativeMagVisualR1800='clean-seamless-smoky-glass-facets-no-z-fighting';
   root.dataset.fxNativeMagMaterialR1800='dark-charcoal-bioglass-clean-planes-silver-teal-optic';
   root.dataset.fxNativeMagRasterR1800='zero-face-overlap-zero-stipple-seams-opaque-shell';
+  root.dataset.fxNativeMagVisualR1801='continuous-crystal-shell-hard-shading-facets';
+  root.dataset.fxNativeMagGeometryR1801='smooth-shared-deform-normal-hard-independent-shading-normal';
+  root.dataset.fxNativeMagRasterR1801='zero-geometric-edge-tearing-zero-z-fight-overlap';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -1024,6 +1027,7 @@
         float organicBlend=.026;
         vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.31));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
+        vec3 deformNormal=normalize(aSphereNormal);
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
@@ -1036,7 +1040,7 @@
         float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0021*cortexEnvelope;
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
-        vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
+        vec3 local=(base+deformNormal*(living+cortex+microFold))*layerScale*heartbeat;
         float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
         float tendrilTip=tendrilVertex*smoothstep(.10,1.0,aUv.y);
         float tendrilWave=sin(uTime*(1.18+.16*fract(aFacet)) + aUv.y*9.4 + aFacet*2.7);
