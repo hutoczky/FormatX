@@ -190,6 +190,9 @@
   root.dataset.fxNativeMagVisualR1794='smoky-quartz-mineral-fractures-warm-rim-visible-optic';
   root.dataset.fxNativeMagMaterialR1794='charcoal-teal-quartz-gunmetal-bezel-subtle-fissure';
   root.dataset.fxNativeMagMobileR1794='premium-dark-crystal-visible-optic-no-flat-gray';
+  root.dataset.fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition';
+  root.dataset.fxNativeMagMaterialR1795='charcoal-quartz-cool-edge-soft-transmission-warm-rim';
+  root.dataset.fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -931,7 +934,7 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.00) contrast(1.16) saturate(.94)'
+      ? 'brightness(1.03) contrast(1.13) saturate(.96)'
       : 'brightness(1.10) contrast(1.06) saturate(1.08)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
@@ -1045,9 +1048,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.720':'.825'};
+        projected*= ${mobile?'.680':'.825'};
         projected.x+=${mobile?'.010':'.052'};
-        projected.y+=${mobile?'.055':'.002'};
+        projected.y+=${mobile?'.085':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1509,10 +1512,14 @@
         col+=vec3(.065,.105,.108)*pow(broadSide,1.28)*.090*bodyMask;
         col+=vec3(.090,.050,.029)*pow(broadWarm,1.28)*.032*bodyMask;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
-        float internalDepth=smoothstep(-.30,.56,vLocal.z)*(1.0-.42*fresnel)*bodyMask;
-        float glassEdge=pow(1.0-facing,2.4)*bodyMask;
-        col+=vec3(.042,.070,.071)*internalDepth*(.28+.40*lift);
-        col+=vec3(.030,.086,.090)*glassEdge*.285;
+        float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
+        float glassEdge=pow(1.0-facing,2.05)*bodyMask;
+        float glassHalo=pow(1.0-facing,1.35)*bodyMask;
+        float frontDepth=smoothstep(-.18,.62,vLocal.z)*bodyMask;
+        col+=vec3(.046,.078,.080)*internalDepth*(.32+.44*lift);
+        col+=vec3(.034,.098,.103)*glassEdge*.315;
+        col+=vec3(.022,.060,.066)*glassHalo*.120;
+        col+=vec3(.020,.040,.042)*frontDepth*.075;
 
         vec3 bezel=vec3(.040,.050,.052)
           +vec3(.205,.218,.204)*(.26*ndl+.22*sideLight)
