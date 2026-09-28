@@ -22,6 +22,8 @@ assert.ok(css.includes('.fx-speedtest-r1796')&&css.includes('.fx-speedtest-grid'
 assert.ok(api.includes('MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024'),'download safety cap missing');
 assert.ok(api.includes('MAX_UPLOAD_BYTES = 4 * 1024 * 1024'),'upload safety cap missing');
 assert.ok(api.includes('same_origin_required'),'same-origin abuse guard missing');
+assert.ok(api.includes('PUBLIC_API_RATE_LIMIT')&&api.includes("'speedtest:'"),'public speed test rate limit missing');
+assert.ok(api.includes("crypto.subtle.digest('SHA-256'"),'speed test limiter must hash the network identity');
 assert.ok(entry.includes('isSpeedTestPath(url.pathname)'),'production route missing');
 assert.ok(entry.indexOf('isSpeedTestPath(url.pathname)')<entry.indexOf('canonicalProduction.fetch'),'speed route must execute before canonical production');
 console.log('PASS: FormatX R1796 speed test launcher, lazy UI, same-origin edge API and transfer caps are source-valid.');
