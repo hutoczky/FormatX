@@ -50,10 +50,6 @@
 
   function onIntent(event) {
     if (reservedInteraction(event)) return;
-    const intentTarget = event?.target instanceof Element ? event.target : null;
-    if (intentTarget?.closest('[data-speed-start]')) {
-      root.dataset.fxSpeedtestRequestR1800 = 'start';
-    }
     if (event?.type === 'keydown' && (event.ctrlKey || event.metaKey) && String(event.key || '').toLowerCase() === 'k') {
       event.preventDefault();
       root.dataset.fxLiveOsOpenPendingR644 = 'true';
