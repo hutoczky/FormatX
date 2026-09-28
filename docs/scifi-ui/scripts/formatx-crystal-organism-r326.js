@@ -193,6 +193,12 @@
   root.dataset.fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition';
   root.dataset.fxNativeMagMaterialR1795='charcoal-quartz-cool-edge-soft-transmission-warm-rim';
   root.dataset.fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding';
+  root.dataset.fxNativeMagVisualR1796='smoky-teal-bioglass-balanced-color-depth-mobile';
+  root.dataset.fxNativeMagMaterialR1796='charcoal-quartz-teal-edge-warm-rim-neutral-studio';
+  root.dataset.fxNativeMagMobileR1796='canonical-saturation-visible-material-no-neon';
+  root.dataset.fxNativeMagVisualR1797='physical-mobile-smoky-bioglass-neutral-studio-optic';
+  root.dataset.fxNativeMagMaterialR1797='low-emission-smoked-quartz-softbox-warm-floor-deep-lens';
+  root.dataset.fxNativeMagMobileR1797='real-gpu-physical-path-restrained-energy-visible-depth';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -934,7 +940,7 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.03) contrast(1.13) saturate(.96)'
+      ? 'brightness(1.035) contrast(1.13) saturate(1.03)'
       : 'brightness(1.10) contrast(1.06) saturate(1.08)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
@@ -1355,13 +1361,14 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.105+ndl*.300+sideLight*.220+fillLight*.105);
+        float lift=sat(.125+ndl*.315+sideLight*.225+fillLight*.115);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
+        float mineralGrain=.5+.5*sin(vLocal.x*43.0+vLocal.y*37.0-vLocal.z*31.0);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.008,.011,.013),vec3(.105,.116,.114),lift);
-        col*=.956+.044*smoke;
-        col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
+        vec3 col=mix(vec3(.009,.013,.015),vec3(.125,.136,.131),lift);
+        col*=.958+.040*smoke+.012*mineralGrain;
+        col+=vec3(.011,.014,.015)*strata*(.15+.26*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
         col+=vec3(.94,.92,.86)*keySpec*.118;
         col+=vec3(.52,.59,.60)*sideSpec*.105;
@@ -1370,15 +1377,16 @@
         col+=vec3(.84,.88,.87)*studioRibbonA*.118;
         col+=vec3(.48,.32,.21)*studioRibbonB*.048;
         col+=vec3(.080,.096,.095)*horizonBand*.168;
-        col+=vec3(.094,.190,.218)*fresnel*.31;
+        col+=vec3(.055,.120,.132)*fresnel*.22;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
         col+=vec3(.012,.015,.016)*(.14+.22*fillLight+.08*max(0.0,-n.y));
         col+=vec3(.088,.096,.094)*pow(planeKey,.72)*.265;
         col+=vec3(.052,.045,.039)*pow(planeFill,.82)*.135;
-        float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
-        col+=vec3(.018,.040,.046)*edgeTransmission*.39;
+        float edgeTransmission=pow(1.0-facing,2.55)*(1.0-sat(ndl*.58));
+        col+=vec3(.022,.055,.060)*edgeTransmission*.46;
+        col+=vec3(.072,.040,.022)*max(0.0,-n.y)*(.035+.055*warmFacet);
         float facetTone=.94+.10*fract(vFacet*7.13+.19);
         float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
         float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
@@ -1420,16 +1428,16 @@
         float lensAngle=atan(lensVector.y,lensVector.x);
         float electric=pow(.5+.5*sin(lensAngle*12.0+lensRadial*72.0-uTime*2.0),16.0)*lensInner;
         float coreFlash=exp(-pow(lensRadial/.055,2.0))*(.66+.34*sin(uTime*3.8));
-        vec3 physicalLens=vec3(.010,.030,.038)
-          +vec3(.018,.095,.116)*(.28+.32*uEnergy)
-          +vec3(.94,1.00,.98)*softboxA*.24
-          +vec3(.48,.62,.66)*sideSpec*.14
-          +vec3(.12,.30,.36)*fresnel*.20
-          +vec3(.020,.19,.25)*lensInner*(.10+.10*uEnergy)
-          +vec3(.060,.42,.54)*lensRing*(.12+.12*uEnergy)
-          +vec3(.82,.98,1.00)*lensHot*(.24+.10*uEnergy)
-          +vec3(.14,.48,.57)*electric*(.20+.18*uEnergy)
-          +vec3(.92,.98,.97)*coreFlash*.32;
+        vec3 physicalLens=vec3(.006,.018,.022)
+          +vec3(.014,.060,.070)*(.20+.22*uEnergy)
+          +vec3(.82,.87,.82)*softboxA*.17
+          +vec3(.36,.45,.46)*sideSpec*.10
+          +vec3(.070,.16,.18)*fresnel*.14
+          +vec3(.014,.105,.125)*lensInner*(.065+.060*uEnergy)
+          +vec3(.030,.19,.22)*lensRing*(.060+.055*uEnergy)
+          +vec3(.64,.76,.70)*lensHot*(.115+.045*uEnergy)
+          +vec3(.050,.16,.18)*electric*(.070+.065*uEnergy)
+          +vec3(.74,.79,.74)*coreFlash*.14;
         col=mix(col,physicalLens,lensMeshMask*.997);
 
         float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -1442,7 +1450,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.36),clamp(outAlpha,.86,1.0));
+        ${outputName}=vec4(filmic(col*2.44),clamp(outAlpha,.88,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
