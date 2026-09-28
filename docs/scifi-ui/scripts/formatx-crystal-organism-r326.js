@@ -464,7 +464,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.86:(mobile?.88:.88);
+        const smoothWeight=software?.68:(mobile?.74:.84);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -492,7 +492,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 10 : mobile ? 14 : constrained ? 60 : 72;
+      const sideCount = software ? 12 : mobile ? 16 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -500,13 +500,13 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.61,.390,.255,-.060,-.024,.082],
-        [.43,.650,.420,-.035,.020,.054],
-        [.22,.800,.510,.010,.052,.026],
-        [-.02,.850,.535,.040,.040,.000],
-        [-.26,.780,.480,.016,.000,-.028],
-        [-.48,.610,.365,-.032,-.036,-.058],
-        [-.64,.365,.215,-.060,-.030,-.088]
+        [.56,.500,.300,-.100,-.030,.090],
+        [.40,.705,.430,-.060,.020,.060],
+        [.20,.860,.520,.005,.060,.030],
+        [-.01,.910,.555,.070,.045,.000],
+        [-.22,.842,.500,.038,.000,-.030],
+        [-.41,.705,.420,-.028,-.040,-.060],
+        [-.57,.480,.280,-.090,-.035,-.092]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -531,22 +531,22 @@
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
           const irregular=
             1
-            +Math.sin(a*3.0+ringIndex*.41+.48)*.068*mid
-            +Math.cos(a*5.0-ringIndex*.33+1.10)*.042*mid
-            +Math.sin(a*7.0+ringIndex*.57-.36)*.024*mid
-            +Math.cos(a*2.0-ringIndex*.27)*.018;
-          const cutFront=1-.205*Math.pow(Math.max(0,Math.cos(a-.38)),4.0);
-          const cutRear=1-.165*Math.pow(Math.max(0,Math.cos(a+2.06)),5.0);
-          const cutSide=1-.185*Math.pow(Math.max(0,Math.cos(a-2.36)),6.0);
-          const cutNotch=1-.125*Math.pow(Math.max(0,Math.cos(a+1.10)),8.0);
+            +Math.sin(a*3.0+ringIndex*.41+.48)*.085*mid
+            +Math.cos(a*5.0-ringIndex*.33+1.10)*.052*mid
+            +Math.sin(a*7.0+ringIndex*.57-.36)*.032*mid
+            +Math.cos(a*2.0-ringIndex*.27)*.024;
+          const cutFront=1-.245*Math.pow(Math.max(0,Math.cos(a-.38)),4.0);
+          const cutRear=1-.190*Math.pow(Math.max(0,Math.cos(a+2.06)),5.0);
+          const cutSide=1-.225*Math.pow(Math.max(0,Math.cos(a-2.36)),6.0);
+          const cutNotch=1-.155*Math.pow(Math.max(0,Math.cos(a+1.10)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const x=ox+Math.cos(a)*rx*irregular*radialCut;
           const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.030,.720,-.012],[.5,0]);
-      const bottom=bodyVertex([-.024,-.730,.012],[.5,1]);
+      const top=bodyVertex([-.075,.640,-.016],[.5,0]);
+      const bottom=bodyVertex([-.045,-.650,.014],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -856,7 +856,7 @@
 
     if(!auditMode){
       const centreX=-.018,centreY=.026;
-      const bezelInner=.118,bezelOuter=.162,bezelSteps=software?56:mobile?60:64,bezelZ=.620;
+      const bezelInner=.094,bezelOuter=.132,bezelSteps=software?56:mobile?60:64,bezelZ=.620;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.020:.014)*Math.sin(angle*3.0+.34)
@@ -880,8 +880,8 @@
       }
 
       const lensCenter=[centreX,centreY,.632];
-      const lensRadiusX=.142;
-      const lensRadiusY=.114;
+      const lensRadiusX=.110;
+      const lensRadiusY=.088;
       const lensDepth=.060;
       const radialSteps=software?8:mobile?9:10;
       const angularSteps=software?56:mobile?56:60;
