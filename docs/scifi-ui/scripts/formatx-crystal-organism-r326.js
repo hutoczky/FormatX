@@ -1102,8 +1102,6 @@
         float isLensMesh=step(6.0,vFacet);
         float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
         float tendrilMask=isTendril*(1.0-vMorph);
-        float armorMask=isArmor*(1.0-vMorph);
-        float lensMeshMask=isLensMesh*(1.0-vMorph);
         float glassFinMask=isGlassFin*(1.0-vMorph);
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
@@ -1472,6 +1470,8 @@
         float isLensMesh=step(6.0,vFacet);
         float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
         float tendrilMask=isTendril*(1.0-vMorph);
+        float armorMask=isArmor*(1.0-vMorph);
+        float lensMeshMask=isLensMesh*(1.0-vMorph);
 
         float lift=sat(.095+ndl*.285+sideLight*.195);
         float facetTone=.95+.065*fract(vFacet*5.73+.23);
