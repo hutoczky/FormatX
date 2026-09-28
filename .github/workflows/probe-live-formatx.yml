@@ -1,4 +1,4 @@
-name: Probe live FormatX APEX website
+name: Probe live FormatX production website
 
 on:
   workflow_dispatch:
@@ -12,6 +12,9 @@ on:
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/styles/formatx-living-habitat-r1530.css'
       - 'docs/scifi-ui/scripts/formatx-site-sensory-r1755.js'
+      - 'docs/scifi-ui/scripts/formatx-net-speed-r1800.js'
+      - 'docs/scifi-ui/styles/formatx-net-speed-r1800.css'
+      - 'billing-worker/src/production-content-entry.js'
       - '.github/workflows/probe-live-formatx.yml'
 
 permissions:
@@ -19,7 +22,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-live-apex-probe
+  group: formatx-live-production-probe
   cancel-in-progress: true
 
 jobs:
@@ -37,7 +40,7 @@ jobs:
           for attempt in $(seq 1 48); do
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
             home_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260927-r1759-visible-through-intro'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260927-r1773-compositor-biocrystal'
             css_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/mag-birth.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade'
             js_status=$?
@@ -47,22 +50,36 @@ jobs:
             current_mag_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/crystal-organism.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy'
             renderer_status=$?
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.css 'https://formatxsuite.com/scifi-ui/styles/formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor'
+            net_css_status=$?
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-net-speed-r1800.js?v=20260928-r1800-network-sensor'
+            net_js_status=$?
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net-ping.json "https://formatxsuite.com/api/net/ping?r=$GITHUB_SHA-$attempt"
+            net_ping_status=$?
             if [ "$home_status" = '0' ] \
                && [ "$css_status" = '0' ] \
                && [ "$js_status" = '0' ] \
                && [ "$sensory_status" = '0' ] \
                && [ "$current_mag_status" = '0' ] \
                && [ "$renderer_status" = '0' ] \
-               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260927-r1759-visible-through-intro' live-probe/home.html \
+               && [ "$net_css_status" = '0' ] \
+               && [ "$net_js_status" = '0' ] \
+               && [ "$net_ping_status" = '0' ] \
+               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260927-r1773-compositor-biocrystal' live-probe/home.html \
                && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/home.html \
                && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
                && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
-               && grep -Fq 'production-r1759-proxy-visible-through-intro-until-webgl' live-probe/p0.css \
+               && grep -Fq 'formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor' live-probe/home.html \
+               && grep -Fq 'formatx-net-speed-r1800.js?v=20260928-r1800-network-sensor' live-probe/home.html \
+               && grep -Fq 'production-r1773-compositor-promoted-biocrystal-proxy' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
                && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
                && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/current-mag.js \
                && grep -Fq "fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition'" live-probe/crystal-organism.js \
                && grep -Fq "fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding'" live-probe/crystal-organism.js \
+               && grep -Fq 'production-r1800-network-sensor-user-initiated-no-idle-traffic' live-probe/net.css \
+               && grep -Fq 'user-initiated-same-origin-no-idle-network' live-probe/net.js \
+               && grep -Eq '"ok"[[:space:]]*:[[:space:]]*true' live-probe/net-ping.json \
                && ! grep -Eq 'formatx-igloo|reference-commerce|professional-sections|pricing-sync' live-probe/home.html; then
               found_new=1
               break
@@ -76,6 +93,9 @@ jobs:
             echo "sensory_curl_status=$sensory_status"
             echo "current_mag_curl_status=$current_mag_status"
             echo "renderer_curl_status=$renderer_status"
+            echo "net_css_curl_status=$net_css_status"
+            echo "net_js_curl_status=$net_js_status"
+            echo "net_ping_curl_status=$net_ping_status"
             echo "new_build=$found_new"
           } | tee live-probe/result.txt
           echo "new_build=$found_new" >> "$GITHUB_OUTPUT"
@@ -84,7 +104,7 @@ jobs:
       - name: Upload live probe
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-live-apex-probe
+          name: formatx-live-production-probe
           path: live-probe
           retention-days: 3
 
@@ -96,13 +116,13 @@ jobs:
         run: |
           if [ "$NEW_BUILD" = '1' ]; then
             state='success'
-            description='Live domain serves the current R1795 clean photographic MAG'
+            description='Live domain serves R1795 MAG plus R1800 NET'
           else
             state='failure'
-            description='Live domain is not yet serving the current R1795 clean photographic MAG'
+            description='Live domain is not yet serving the current R1795/R1800 build'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX live APEX probe' \
+            -f context='FormatX live production probe' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
