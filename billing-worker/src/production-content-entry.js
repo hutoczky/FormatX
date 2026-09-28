@@ -51,6 +51,106 @@ const ROBOTS = [
   '',
 ].join('\n');
 
+const NET_SPEED_PREFIX = '/api/net/';
+const NET_SPEED_MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024;
+const NET_SPEED_MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+const NET_SPEED_MIN_DOWNLOAD_BYTES = 64 * 1024;
+const NET_SPEED_DEFAULT_DOWNLOAD_BYTES = 1024 * 1024;
+const NET_SPEED_CHUNK_BYTES = 64 * 1024;
+const NET_SPEED_PATTERN = (() => {
+  const chunk = new Uint8Array(NET_SPEED_CHUNK_BYTES);
+  let state = 0x6d2b79f5;
+  for (let i = 0; i < chunk.length; i += 1) {
+    state = Math.imul(state ^ (state >>> 15), 1 | state);
+    state ^= state + Math.imul(state ^ (state >>> 7), 61 | state);
+    chunk[i] = (state ^ (state >>> 14)) & 0xff;
+  }
+  return chunk;
+})();
+
+function netSpeedHeaders(extra = {}) {
+  const headers = new Headers({
+    'Cache-Control': 'no-store, no-cache, max-age=0, no-transform',
+    'Pragma': 'no-cache',
+    'X-Content-Type-Options': 'nosniff',
+    'Cross-Origin-Resource-Policy': 'same-origin',
+    'Timing-Allow-Origin': '*',
+    'X-Robots-Tag': 'noindex, nofollow',
+    'X-FormatX-Net-Speed': 'r1800-user-initiated-edge-path',
+    ...extra,
+  });
+  return headers;
+}
+function netSpeedJson(payload, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: netSpeedHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
+  });
+}
+function netSpeedMethodNotAllowed(allow) {
+  const headers = netSpeedHeaders({ 'Content-Type': 'application/json; charset=utf-8', Allow: allow });
+  return new Response(JSON.stringify({ ok: false, error: 'method_not_allowed' }), { status: 405, headers });
+}
+function parseNetSpeedBytes(value) {
+  const parsed = Number.parseInt(String(value || ''), 10);
+  if (!Number.isFinite(parsed)) return NET_SPEED_DEFAULT_DOWNLOAD_BYTES;
+  return Math.max(NET_SPEED_MIN_DOWNLOAD_BYTES, Math.min(NET_SPEED_MAX_DOWNLOAD_BYTES, parsed));
+}
+function netSpeedEdgeMeta(request) {
+  return {
+    edge: request.cf?.colo || 'EDGE',
+    protocol: request.cf?.httpProtocol || '',
+  };
+}
+function netSpeedDownload(request, url) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') return netSpeedMethodNotAllowed('GET, HEAD');
+  const bytes = parseNetSpeedBytes(url.searchParams.get('bytes'));
+  const headers = netSpeedHeaders({
+    'Content-Type': 'application/octet-stream',
+    'Content-Length': String(bytes),
+    'Content-Disposition': 'inline; filename="formatx-net-speed.bin"',
+  });
+  if (request.method === 'HEAD') return new Response(null, { status: 200, headers });
+  let sent = 0;
+  const stream = new ReadableStream({
+    pull(controller) {
+      if (sent >= bytes) {
+        controller.close();
+        return;
+      }
+      const remaining = bytes - sent;
+      const size = Math.min(NET_SPEED_PATTERN.byteLength, remaining);
+      controller.enqueue(size === NET_SPEED_PATTERN.byteLength ? NET_SPEED_PATTERN : NET_SPEED_PATTERN.slice(0, size));
+      sent += size;
+    },
+  });
+  return new Response(stream, { status: 200, headers });
+}
+async function netSpeedUpload(request) {
+  if (request.method !== 'POST') return netSpeedMethodNotAllowed('POST');
+  const announced = Number.parseInt(request.headers.get('content-length') || '0', 10);
+  if (Number.isFinite(announced) && announced > NET_SPEED_MAX_UPLOAD_BYTES) {
+    return netSpeedJson({ ok: false, error: 'payload_too_large', max_bytes: NET_SPEED_MAX_UPLOAD_BYTES }, 413);
+  }
+  const body = await request.arrayBuffer();
+  if (body.byteLength > NET_SPEED_MAX_UPLOAD_BYTES) {
+    return netSpeedJson({ ok: false, error: 'payload_too_large', max_bytes: NET_SPEED_MAX_UPLOAD_BYTES }, 413);
+  }
+  return netSpeedJson({ ok: true, bytes: body.byteLength, ...netSpeedEdgeMeta(request) });
+}
+async function handleNetSpeedRequest(request, url) {
+  if (!url.pathname.startsWith(NET_SPEED_PREFIX)) return null;
+  if (url.pathname === '/api/net/ping') {
+    if (request.method !== 'GET' && request.method !== 'HEAD') return netSpeedMethodNotAllowed('GET, HEAD');
+    const payload = { ok: true, now: Date.now(), ...netSpeedEdgeMeta(request) };
+    if (request.method === 'HEAD') return new Response(null, { status: 200, headers: netSpeedHeaders() });
+    return netSpeedJson(payload);
+  }
+  if (url.pathname === '/api/net/download') return netSpeedDownload(request, url);
+  if (url.pathname === '/api/net/upload') return netSpeedUpload(request);
+  return netSpeedJson({ ok: false, error: 'not_found' }, 404);
+}
+
 const DEFERRED_STYLE_PATHS = new Set([
   // R514: artifact-proven first-divergence owner; activate with the existing
   // R487 double-rAF scheduler after the first painted frame.
@@ -279,6 +379,8 @@ async function stabilizePublicResponse(request, url, response) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const netSpeedResponse = await handleNetSpeedRequest(request, url);
+    if (netSpeedResponse) return netSpeedResponse;
     if (isSafeMethod(request) && isPublicRequest(url) && url.pathname === '/robots.txt') {
       return robotsResponse(request);
     }
@@ -287,4 +389,4 @@ export default {
   },
 };
 
-// production-r1405-refined-irregular-crystal-deploy
+// production-r1800-network-sensor-speed-test-endpoints\n// production-r1405-refined-irregular-crystal-deploy
