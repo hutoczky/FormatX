@@ -220,6 +220,9 @@
   root.dataset.fxNativeMagVisualR1804='angular-outline-smooth-surface-smoky-bioglass';
   root.dataset.fxNativeMagGeometryR1804='lower-edge-count-high-normal-smoothing-crystal-outline';
   root.dataset.fxNativeMagMobileR1804='faceted-silhouette-smooth-photographic-shading-visible-optic';
+  root.dataset.fxNativeMagVisualR1805='macro-edge-smoked-bioglass-softbox-reflection';
+  root.dataset.fxNativeMagGeometryR1805='twelve-sixteen-edge-outline-high-smooth-normal-surface';
+  root.dataset.fxNativeMagMobileR1805='angular-crystal-outline-smoked-glass-not-stone';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -455,7 +458,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.78:(mobile?.80:.86);
+        const smoothWeight=software?.90:(mobile?.90:.88);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -483,7 +486,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 18 : mobile ? 24 : constrained ? 60 : 72;
+      const sideCount = software ? 12 : mobile ? 16 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -849,7 +852,7 @@
 
     if(!auditMode){
       const centreX=-.018,centreY=.026;
-      const bezelInner=.108,bezelOuter=.166,bezelSteps=software?56:mobile?60:64,bezelZ=.620;
+      const bezelInner=.118,bezelOuter=.162,bezelSteps=software?56:mobile?60:64,bezelZ=.620;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.020:.014)*Math.sin(angle*3.0+.34)
@@ -1510,19 +1513,19 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.070+ndl*.245+sideLight*.190);
-        float facetTone=.94+.08*fract(vFacet*5.73+.23);
+        float lift=sat(.045+ndl*.190+sideLight*.145);
+        float facetTone=.97+.04*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         float capShade=1.0-.13*smoothstep(.50,.96,vLocal.y);
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),24.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.004,.007,.009),vec3(.060,.072,.073),lift)*facetTone*capShade*absorption;
-        col*=.986+.028*grain;
-        col+=vec3(.82,.83,.77)*keySpec*.235;
-        col+=vec3(.34,.42,.42)*sideSpec*.245;
-        col+=vec3(.050,.125,.132)*fresnel*.325;
+        vec3 col=mix(vec3(.002,.004,.006),vec3(.038,.050,.052),lift)*facetTone*capShade*absorption;
+        col*=.990+.020*grain;
+        col+=vec3(.74,.76,.70)*keySpec*.190;
+        col+=vec3(.28,.36,.37)*sideSpec*.205;
+        col+=vec3(.055,.145,.154)*fresnel*.420;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
         col+=vec3(.110,.118,.113)*ndl*.100;
@@ -1535,12 +1538,16 @@
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
         float slabA=pow(max(0.0,dot(n,normalize(vec3(-.22,.46,.86)))),2.2);
         float slabB=pow(max(0.0,dot(n,normalize(vec3(.62,.08,.78)))),2.0);
-        col+=vec3(.34,.35,.32)*pow(broadKey,1.10)*.155*bodyMask;
-        col+=vec3(.085,.140,.142)*pow(broadSide,1.18)*.130*bodyMask;
-        col+=vec3(.115,.062,.030)*pow(broadWarm,1.20)*.050*bodyMask;
-        col+=vec3(.18,.19,.18)*slabA*.180*bodyMask;
-        col+=vec3(.052,.115,.120)*slabB*.145*bodyMask;
-        col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
+        col+=vec3(.25,.27,.26)*pow(broadKey,1.18)*.090*bodyMask;
+        col+=vec3(.060,.110,.114)*pow(broadSide,1.22)*.095*bodyMask;
+        col+=vec3(.095,.052,.028)*pow(broadWarm,1.24)*.040*bodyMask;
+        col+=vec3(.14,.16,.15)*slabA*.120*bodyMask;
+        col+=vec3(.045,.100,.106)*slabB*.110*bodyMask;
+        col+=vec3(.024,.072,.078)*fresnel*.160*bodyMask;
+        float softboxBody=exp(-pow((vLocal.x+.20)/.42,2.0)-pow((vLocal.y-.24)/.58,2.0))*bodyMask;
+        float sideBox=exp(-pow((vLocal.x-.48)/.26,2.0)-pow((vLocal.y+.02)/.68,2.0))*bodyMask;
+        col+=vec3(.28,.30,.28)*softboxBody*.135;
+        col+=vec3(.055,.120,.124)*sideBox*.115;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
         float glassHalo=pow(1.0-facing,1.35)*bodyMask;
