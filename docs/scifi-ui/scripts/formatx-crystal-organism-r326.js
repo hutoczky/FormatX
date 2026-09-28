@@ -199,6 +199,9 @@
   root.dataset.fxNativeMagVisualR1797='broad-cut-faceted-smoky-bioglass-mobile';
   root.dataset.fxNativeMagMaterialR1797='sector-cut-quartz-softbox-gunmetal-optic';
   root.dataset.fxNativeMagMobileR1797='swiftshader-broad-facets-no-blob-proof-target';
+  root.dataset.fxNativeMagVisualR1798='sharp-cut-smoky-bioglass-mobile-no-sphere-softening';
+  root.dataset.fxNativeMagMaterialR1798='broad-quartz-facets-softbox-edge-transmission';
+  root.dataset.fxNativeMagMobileR1798='reduced-sphere-blend-reduced-cortex-preserved-breath';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -434,7 +437,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.52:(mobile?.62:.84);
+        const smoothWeight=software?.34:(mobile?.46:.82);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -462,7 +465,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 28 : mobile ? 34 : constrained ? 52 : 72;
+      const sideCount = software ? 20 : mobile ? 26 : constrained ? 48 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -515,11 +518,11 @@
           const cutSide=1-.220*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
           const cutNotch=1-.155*Math.pow(Math.max(0,Math.cos(a+1.20)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
-          const sector=Math.floor(sideIndex/2);
+          const sector=sideIndex;
           const planeScale=
             1
-            +Math.sin(sector*1.87+ringIndex*.39)*.050
-            +Math.cos(sector*2.41-ringIndex*.27)*.024;
+            +Math.sin(sector*1.87+ringIndex*.39)*.082
+            +Math.cos(sector*2.41-ringIndex*.27)*.038;
           const x=ox+Math.cos(a)*rx*irregular*radialCut*planeScale;
           const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut*(2-planeScale);
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
@@ -1020,8 +1023,8 @@
            compatible but never replaces the body. Constant organic smoothing plus
            physiological deformation keeps the asymmetric silhouette alive. */
         float morph=0.0;
-        float organicBlend=.026;
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.31));
+        float organicBlend=${mobile?'.008':'.026'};
+        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,${mobile?'.10':'.31'}));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
@@ -1031,8 +1034,8 @@
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
         float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
-        float cortex=(cortexA*.62+cortexB*.38)*.0135*cortexEnvelope;
-        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0021*cortexEnvelope;
+        float cortex=(cortexA*.62+cortexB*.38)*${mobile?'.0048':'.0135'}*cortexEnvelope;
+        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*${mobile?'.0008':'.0021'}*cortexEnvelope;
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
         vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
