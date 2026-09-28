@@ -41,7 +41,7 @@ jobs:
             css_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/mag-birth.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade'
             js_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/site-sensory.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/site-sensory.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20260928-r1796-scroll-observer-settle'
             sensory_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/current-mag.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260928-r1796-hot-scroll-zero-dom-write'
             current_mag_status=$?
@@ -56,7 +56,7 @@ jobs:
                && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260927-r1759-visible-through-intro' live-probe/home.html \
                && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1796-hot-scroll-zero-dom-write' live-probe/home.html \
                && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
-               && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
+               && grep -Fq 'formatx-site-sensory-r1755.js?v=20260928-r1796-scroll-observer-settle' live-probe/home.html \
                && grep -Fq 'production-r1759-proxy-visible-through-intro-until-webgl' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
                && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
