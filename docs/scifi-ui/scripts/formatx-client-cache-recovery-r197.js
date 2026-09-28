@@ -11,7 +11,7 @@
     if (!document.querySelector('link[data-fx-wda-hardening-r198]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260928-r1796-r264-no-shift';
+      link.href = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260817-r198';
       link.dataset.fxWdaHardeningR198 = 'true';
       document.head.appendChild(link);
     }
