@@ -127,7 +127,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (PUBLIC_HOSTS.has(url.hostname) && isSpeedTestPath(url.pathname)) {
-      const speedResponse = await handleSpeedTestRequest(request);
+      const speedResponse = await handleSpeedTestRequest(request, env);
       if (speedResponse) return speedResponse;
     }
     const response = await canonicalProduction.fetch(request, env, ctx);
