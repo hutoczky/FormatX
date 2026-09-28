@@ -10,7 +10,7 @@ root.dataset.fxSiteSensoryR1755='booting';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const coarse=matchMedia('(max-width:900px),(pointer:coarse)');
 const STYLE='/scifi-ui/styles/formatx-site-sensory-r1755.css?v=20260927-r1755-photoreal-60fps';
-let field=null,raf=0,actionTimer=0,scrollSettleTimer=0,lastX=innerWidth*.5,lastY=innerHeight*.38,lastScroll=scrollY||0,activated=false,sectionObserver=null;
+let field=null,raf=0,actionTimer=0,scrollSettleTimer=0,lastX=innerWidth*.5,lastY=innerHeight*.38,lastScroll=scrollY||0,activated=false,sectionObserver=null,scrolling=false,pendingSectionId='';
 const state={x:0,y:.12,vx:0,vy:0,energy:.18,press:0,scroll:0};
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
@@ -108,9 +108,16 @@ function onScroll(){
   state.energy=Math.max(state.energy,.24+Math.abs(delta)*.18);
   if(root.dataset.fxScrollPressureR1755!=='true')root.dataset.fxScrollPressureR1755='true';
   clearTimeout(scrollSettleTimer);
+  scrolling=true;
   scrollSettleTimer=setTimeout(()=>{
+    scrolling=false;
     root.dataset.fxScrollPressureR1755='false';
     activate('scroll-settle');
+    if(pendingSectionId){
+      const id=pendingSectionId;pendingSectionId='';
+      root.dataset.fxSensoryOrganR1755=id;
+      semantic('section-'+id,.34);
+    }
     state.energy=Math.max(.18,state.energy*.72);
     queue();
   },120);
@@ -148,6 +155,10 @@ function installSectionObserver(){
     const hit=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
     const id=hit?.target?.id;
     if(!id)return;
+    if(scrolling||root.dataset.fxScrollPressureR1755==='true'){
+      pendingSectionId=id;
+      return;
+    }
     root.dataset.fxSensoryOrganR1755=id;
     if(activated)semantic('section-'+id,.34);
   },{rootMargin:'-24% 0px -56% 0px',threshold:[0,.2,.45,.7]});
@@ -162,6 +173,7 @@ function activate(reason='intent'){
   root.dataset.fxSiteSensoryR1755='ready';
   root.dataset.fxSiteSensoryActivationR1756=String(reason);
   root.dataset.fxSiteSensorySchedulerR1755='lazy-intent-single-coalesced-raf-zero-idle';
+  root.dataset.fxSiteSensoryScrollR1796='section-observer-deferred-until-settle';
   root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only-scroll-atmosphere-shed';
   root.dataset.fxSiteSensoryInputR1755='pointer-touch-scroll-wheel-key-focus-click-input-change-submit-orientation';
 }
