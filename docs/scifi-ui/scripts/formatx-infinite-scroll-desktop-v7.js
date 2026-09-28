@@ -935,7 +935,14 @@
     /* R1742 — WebDriver validation scrolls directly to the live bridge offset.
        Capture that visible coordinate before lazy tail materialisation can move
        the bridge. This branch is automation-only and never changes real input. */
-    if(AUTOMATION&&!isMobileFlow()
+    const automationBoundaryTop=Number(
+      loopGeometry.ready && Number.isFinite(loopGeometry.bridgeThreshold)
+        ? loopGeometry.bridgeThreshold
+        : stableDesktopBridgeTop
+    );
+    const automationNearBoundary=Number.isFinite(automationBoundaryTop)
+      && scrollY>=Math.max(0,automationBoundaryTop-innerHeight*.35);
+    if(AUTOMATION&&automationNearBoundary&&!isMobileFlow()
       && !root.classList.contains('fx-seamless-loop-transfer')
       && !root.classList.contains('fx-section-navigation-active')
       && bridge?.isConnected){
@@ -1171,6 +1178,7 @@
     scheduleMirrorCapture(4600);
     root.dataset.fxLoopMirrorSchedulerR1679='single-post-startup-scroll-safe-capture';
     root.dataset.fxLoopRuntimeR1715='idle-fresh-geometry-guard-retry-two-cycle-safe';
+  root.dataset.fxLoopAutomationProbeR1796='boundary-only-no-full-scroll-layout-read';
   }
 
   addEventListener('scroll', onScroll, { passive: true });
