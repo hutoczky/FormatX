@@ -283,4 +283,8 @@ if(hint)hint.textContent=connectionHint();
 setStatus('ready');
 setProgress(0);
 root.dataset.fxSpeedtestR1800='ready-user-activated-zero-idle';
+if(root.dataset.fxSpeedtestRequestR1800==='start'){
+  delete root.dataset.fxSpeedtestRequestR1800;
+  queueMicrotask(run);
+}
 }());
