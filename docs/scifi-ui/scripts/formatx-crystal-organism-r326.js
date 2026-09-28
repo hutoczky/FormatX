@@ -211,6 +211,9 @@
   root.dataset.fxNativeMagVisualR1801='continuous-shoulder-smoky-bioglass-no-waist-no-bite';
   root.dataset.fxNativeMagMaterialR1801='deep-teal-quartz-continuous-volume-visible-optic';
   root.dataset.fxNativeMagMobileR1801='continuous-midbody-radii-cut-plane-asymmetry-no-concave-waist';
+  root.dataset.fxNativeMagVisualR1802='smoked-glass-dark-centre-teal-edge-internal-caustic';
+  root.dataset.fxNativeMagMaterialR1802='low-diffuse-high-edge-reflection-deep-bioglass-optic';
+  root.dataset.fxNativeMagMobileR1802='geometry-locked-material-only-photoreal-glass-pass';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -1512,7 +1515,7 @@
         col*=.985+.030*grain;
         col+=vec3(.60,.62,.58)*keySpec*.180;
         col+=vec3(.255,.310,.308)*sideSpec*.205;
-        col+=vec3(.034,.102,.112)*fresnel*.245;
+        col+=vec3(.038,.128,.142)*fresnel*.320;
         col+=vec3(.155,.078,.036)*warmPlane*.060;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
         col+=vec3(.110,.118,.113)*ndl*.100;
@@ -1523,26 +1526,26 @@
         float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
         float broadSide=max(0.0,dot(n,normalize(vec3(.74,.10,.66))));
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
-        col+=vec3(.24,.25,.24)*pow(broadKey,1.22)*.108*bodyMask;
-        col+=vec3(.065,.105,.108)*pow(broadSide,1.28)*.090*bodyMask;
-        col+=vec3(.090,.050,.029)*pow(broadWarm,1.28)*.032*bodyMask;
+        col+=vec3(.22,.23,.22)*pow(broadKey,1.42)*.056*bodyMask;
+        col+=vec3(.055,.108,.116)*pow(broadSide,1.38)*.076*bodyMask;
+        col+=vec3(.100,.054,.030)*pow(broadWarm,1.34)*.042*bodyMask;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
         float glassHalo=pow(1.0-facing,1.35)*bodyMask;
         float frontDepth=smoothstep(-.18,.62,vLocal.z)*bodyMask;
         float caustic=pow(.5+.5*sin(vLocal.x*9.2-vLocal.y*7.4+vLocal.z*11.3),8.0)*bodyMask;
-        col+=vec3(.046,.078,.080)*internalDepth*(.32+.44*lift);
-        col+=vec3(.042,.118,.122)*glassEdge*.355;
-        col+=vec3(.026,.072,.078)*glassHalo*.150;
-        col+=vec3(.026,.050,.052)*frontDepth*.095;
-        col+=vec3(.030,.095,.102)*caustic*(.045+.075*lift);
+        col+=vec3(.040,.090,.096)*internalDepth*(.34+.48*lift);
+        col+=vec3(.055,.160,.170)*glassEdge*.420;
+        col+=vec3(.032,.092,.100)*glassHalo*.185;
+        col+=vec3(.020,.040,.043)*frontDepth*.070;
+        col+=vec3(.040,.128,.138)*caustic*(.060+.095*lift);
 
-        vec3 bezel=vec3(.022,.032,.035)
-          +vec3(.155,.176,.172)*(.25*ndl+.20*sideLight)
-          +vec3(.48,.52,.48)*keySpec*.155
-          +vec3(.060,.122,.128)*fresnel*.18
-          +vec3(.040,.050,.050)*(.18+.16*facing);
+        vec3 bezel=vec3(.014,.024,.028)
+          +vec3(.105,.138,.142)*(.22*ndl+.18*sideLight)
+          +vec3(.38,.44,.42)*keySpec*.130
+          +vec3(.052,.132,.142)*fresnel*.205
+          +vec3(.026,.038,.040)*(.16+.14*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
@@ -1566,13 +1569,13 @@
           +vec3(.58,.62,.56)*keySpec*.165
           +vec3(.038,.118,.122)*fresnel*.125
           +vec3(.060,.250,.260)*lensRim*.150
-          +vec3(.80,.93,.86)*lensHot*.220;
+          +vec3(.84,.96,.90)*lensHot*.260;
         col=mix(col,optical,lensMeshMask*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*3.72),clamp(alpha,.97,1.0));
+        ${outputName}=vec4(tone(col*3.92),clamp(alpha,.97,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
