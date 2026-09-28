@@ -196,6 +196,9 @@
   root.dataset.fxNativeMagVisualR1796='wide-irregular-cut-bioglass-no-teardrop-mobile';
   root.dataset.fxNativeMagMaterialR1796='smoky-quartz-brighter-edge-gunmetal-optic-neutral-studio';
   root.dataset.fxNativeMagMobileR1796='blunt-caps-wide-shoulders-irregular-crystal-not-leaf';
+  root.dataset.fxNativeMagVisualR1797='broad-cut-faceted-smoky-bioglass-mobile';
+  root.dataset.fxNativeMagMaterialR1797='sector-cut-quartz-softbox-gunmetal-optic';
+  root.dataset.fxNativeMagMobileR1797='swiftshader-broad-facets-no-blob-proof-target';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -431,7 +434,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.68:(mobile?.74:.86);
+        const smoothWeight=software?.52:(mobile?.62:.84);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -459,7 +462,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 42 : mobile ? 48 : constrained ? 60 : 72;
+      const sideCount = software ? 28 : mobile ? 34 : constrained ? 52 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -512,8 +515,13 @@
           const cutSide=1-.220*Math.pow(Math.max(0,Math.cos(a-2.48)),6.0);
           const cutNotch=1-.155*Math.pow(Math.max(0,Math.cos(a+1.20)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
-          const x=ox+Math.cos(a)*rx*irregular*radialCut;
-          const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
+          const sector=Math.floor(sideIndex/2);
+          const planeScale=
+            1
+            +Math.sin(sector*1.87+ringIndex*.39)*.050
+            +Math.cos(sector*2.41-ringIndex*.27)*.024;
+          const x=ox+Math.cos(a)*rx*irregular*radialCut*planeScale;
+          const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut*(2-planeScale);
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
