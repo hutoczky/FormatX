@@ -138,6 +138,7 @@
   root.dataset.fxNativeMagMaterialR1755='smoky-pearl-bioglass-ggx-dermal-transmission-restrained-emission';
   root.dataset.fxNativeMagPerformanceR1755='single-webgl-60hz-quality-shed-before-cadence-scroll-compositor-settle-redraw';
   root.dataset.fxNativeMagPerformanceR1796='hot-scroll-zero-raf-zero-dom-write-settle-single-render';
+  root.dataset.fxNativeMagScrollObserversR1796='section-state-deferred-until-scroll-settle';
   root.dataset.fxNativeMagVisualR1775='photoreal-smoky-mineral-bioglass-physical-depth';
   root.dataset.fxNativeMagMaterialR1775='neutral-ggx-dielectric-absorption-low-emission-cinematic-softbox';
   root.dataset.fxNativeMagPerformanceR1775='same-single-webgl-pass-adaptive-60hz-budget';
@@ -1723,7 +1724,7 @@
       : (mobile?.80:.22);
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
-    let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollSettleTimer=0,tapCandidate=null;
+    let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollSettleTimer=0,tapCandidate=null,scrolling=false,pendingOrgan='';
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
@@ -2191,12 +2192,23 @@
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
       targetRotationY+=velocity*.016;
       targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
+      scrolling=true;
       clearTimeout(scrollSettleTimer);
       scrollSettleTimer=setTimeout(()=>{
         scrollSettleTimer=0;
+        scrolling=false;
         root.dataset.fxCoreSiteProgress=targetSiteProgress.toFixed(3);
+        if(pendingOrgan){
+          const id=pendingOrgan;pendingOrgan='';
+          if(id!==activeOrgan){
+            activeOrgan=id;
+            root.dataset.fxCoreActiveOrgan=id;
+            cinematic.activeOrgan=id;
+            signalPhysiology(sectionPhysiology[id]||'attention','site-section-'+id,false,false);
+          }
+        }
         schedule(1);
-      },96);
+      },110);
     }
 
     function globalPoint(event){
@@ -2381,6 +2393,10 @@
       const candidate=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
       const id=candidate?.target?.id;
       if(!id||id===activeOrgan)return;
+      if(scrolling){
+        pendingOrgan=id;
+        return;
+      }
       activeOrgan=id;root.dataset.fxCoreActiveOrgan=id;cinematic.activeOrgan=id;
       signalPhysiology(sectionPhysiology[id]||'attention','site-section-'+id,false,false);
     },{rootMargin:'-22% 0px -54% 0px',threshold:[0,.15,.35,.6]});
