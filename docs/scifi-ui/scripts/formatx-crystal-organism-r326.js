@@ -1368,16 +1368,16 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.008,.011,.013),vec3(.105,.116,.114),lift);
+        vec3 col=mix(vec3(.006,.010,.012),vec3(.072,.084,.084),lift);
         col*=.956+.044*smoke;
         col+=vec3(.010,.013,.014)*strata*(.18+.30*lift);
         col-=vec3(.0033,.0045,.0049)*inclusion;
         col+=vec3(.94,.92,.86)*keySpec*.118;
         col+=vec3(.52,.59,.60)*sideSpec*.105;
-        col+=vec3(.72,.75,.72)*softboxA*.194;
-        col+=vec3(.44,.50,.51)*softboxB*.118;
-        col+=vec3(.84,.88,.87)*studioRibbonA*.118;
-        col+=vec3(.48,.32,.21)*studioRibbonB*.048;
+        col+=vec3(.76,.79,.75)*softboxA*.245;
+        col+=vec3(.46,.53,.53)*softboxB*.155;
+        col+=vec3(.90,.92,.87)*studioRibbonA*.165;
+        col+=vec3(.46,.30,.18)*studioRibbonB*.060;
         col+=vec3(.080,.096,.095)*horizonBand*.168;
         col+=vec3(.094,.190,.218)*fresnel*.31;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
@@ -1388,7 +1388,7 @@
         col+=vec3(.052,.045,.039)*pow(planeFill,.82)*.135;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         col+=vec3(.018,.040,.046)*edgeTransmission*.39;
-        float facetTone=.94+.10*fract(vFacet*7.13+.19);
+        float facetTone=.82+.30*fract(vFacet*7.13+.19);
         float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
         float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
         col*=mix(1.0,facetTone,bodyMask*.34);
@@ -1413,12 +1413,12 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.020,.012,.031)
-          +vec3(.090,.075,.12)*(.16*ndl+.22*sideLight)
-          +vec3(.32,.43,.46)*softboxA*.11
-          +vec3(.17,.30,.34)*sideSpec*.09
-          +vec3(.032,.18,.22)*fresnel*.26
-          +vec3(.11,.032,.15)*subsurface*.27;
+        vec3 cartilage=vec3(.030,.040,.042)
+          +vec3(.18,.19,.18)*(.20*ndl+.24*sideLight)
+          +vec3(.60,.63,.58)*softboxA*.18
+          +vec3(.25,.36,.37)*sideSpec*.12
+          +vec3(.055,.18,.20)*fresnel*.20
+          +vec3(.08,.045,.025)*subsurface*.08;
         col=mix(col,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
@@ -1429,16 +1429,16 @@
         float lensAngle=atan(lensVector.y,lensVector.x);
         float electric=pow(.5+.5*sin(lensAngle*12.0+lensRadial*72.0-uTime*2.0),16.0)*lensInner;
         float coreFlash=exp(-pow(lensRadial/.055,2.0))*(.66+.34*sin(uTime*3.8));
-        vec3 physicalLens=vec3(.010,.030,.038)
-          +vec3(.018,.095,.116)*(.28+.32*uEnergy)
-          +vec3(.94,1.00,.98)*softboxA*.24
-          +vec3(.48,.62,.66)*sideSpec*.14
-          +vec3(.12,.30,.36)*fresnel*.20
-          +vec3(.020,.19,.25)*lensInner*(.10+.10*uEnergy)
-          +vec3(.060,.42,.54)*lensRing*(.12+.12*uEnergy)
-          +vec3(.82,.98,1.00)*lensHot*(.24+.10*uEnergy)
-          +vec3(.14,.48,.57)*electric*(.20+.18*uEnergy)
-          +vec3(.92,.98,.97)*coreFlash*.32;
+        vec3 physicalLens=vec3(.008,.024,.030)
+          +vec3(.018,.080,.096)*(.22+.26*uEnergy)
+          +vec3(.96,1.00,.96)*softboxA*.20
+          +vec3(.44,.56,.58)*sideSpec*.12
+          +vec3(.080,.22,.25)*fresnel*.15
+          +vec3(.018,.15,.18)*lensInner*(.08+.08*uEnergy)
+          +vec3(.050,.28,.34)*lensRing*(.10+.09*uEnergy)
+          +vec3(.84,.94,.90)*lensHot*(.20+.08*uEnergy)
+          +vec3(.080,.28,.32)*electric*(.10+.10*uEnergy)
+          +vec3(.90,.95,.91)*coreFlash*.22;
         col=mix(col,physicalLens,lensMeshMask*.997);
 
         float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -1494,19 +1494,19 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.130+ndl*.335+sideLight*.235);
-        float facetTone=.82+.28*fract(vFacet*5.73+.23);
+        float lift=sat(.090+ndl*.280+sideLight*.210);
+        float facetTone=.70+.42*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         float capShade=1.0-.13*smoothstep(.50,.96,vLocal.y);
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.010,.015,.018),vec3(.140,.150,.143),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.006,.010,.013),vec3(.082,.096,.096),lift)*facetTone*capShade*absorption;
         col*=.986+.028*grain;
-        col+=vec3(.68,.69,.64)*keySpec*.225;
-        col+=vec3(.285,.350,.346)*sideSpec*.240;
-        col+=vec3(.040,.096,.102)*fresnel*.255;
+        col+=vec3(.82,.83,.76)*keySpec*.300;
+        col+=vec3(.34,.42,.41)*sideSpec*.285;
+        col+=vec3(.045,.115,.122)*fresnel*.300;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
         col+=vec3(.110,.118,.113)*ndl*.100;
@@ -1519,11 +1519,11 @@
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
         float slabA=pow(max(0.0,dot(n,normalize(vec3(-.22,.46,.86)))),2.2);
         float slabB=pow(max(0.0,dot(n,normalize(vec3(.62,.08,.78)))),2.0);
-        col+=vec3(.30,.31,.29)*pow(broadKey,1.16)*.125*bodyMask;
-        col+=vec3(.075,.122,.124)*pow(broadSide,1.22)*.108*bodyMask;
-        col+=vec3(.105,.058,.030)*pow(broadWarm,1.24)*.040*bodyMask;
-        col+=vec3(.115,.125,.120)*slabA*.120*bodyMask;
-        col+=vec3(.042,.090,.096)*slabB*.105*bodyMask;
+        col+=vec3(.34,.35,.32)*pow(broadKey,1.10)*.155*bodyMask;
+        col+=vec3(.085,.140,.142)*pow(broadSide,1.18)*.130*bodyMask;
+        col+=vec3(.115,.062,.030)*pow(broadWarm,1.20)*.050*bodyMask;
+        col+=vec3(.18,.19,.18)*slabA*.180*bodyMask;
+        col+=vec3(.052,.115,.120)*slabB*.145*bodyMask;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1534,11 +1534,11 @@
         col+=vec3(.030,.086,.092)*glassHalo*.185;
         col+=vec3(.030,.060,.062)*frontDepth*.120;
 
-        vec3 bezel=vec3(.095,.105,.104)
-          +vec3(.335,.345,.320)*(.32*ndl+.28*sideLight)
-          +vec3(.86,.85,.75)*keySpec*.320
-          +vec3(.125,.200,.200)*fresnel*.30
-          +vec3(.110,.120,.112)*(.26+.24*facing);
+        vec3 bezel=vec3(.060,.070,.072)
+          +vec3(.280,.292,.275)*(.30*ndl+.26*sideLight)
+          +vec3(.88,.87,.76)*keySpec*.300
+          +vec3(.100,.180,.182)*fresnel*.24
+          +vec3(.090,.100,.095)*(.22+.20*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
@@ -1557,18 +1557,18 @@
         float lensInner=1.0-smoothstep(.05,.20,lensRadial);
         float lensRim=exp(-pow((lensRadial-.145)/.035,2.0));
         float lensHot=exp(-pow(lensRadial/.060,2.0));
-        vec3 optical=vec3(.018,.050,.056)
-          +vec3(.060,.245,.252)*lensInner
-          +vec3(.70,.74,.67)*keySpec*.215
-          +vec3(.052,.150,.154)*fresnel*.155
-          +vec3(.082,.325,.330)*lensRim*.195
-          +vec3(.94,.99,.93)*lensHot*.285;
+        vec3 optical=vec3(.010,.030,.035)
+          +vec3(.040,.165,.174)*lensInner
+          +vec3(.74,.78,.70)*keySpec*.190
+          +vec3(.038,.110,.114)*fresnel*.125
+          +vec3(.060,.245,.252)*lensRim*.155
+          +vec3(.90,.96,.89)*lensHot*.235;
         col=mix(col,optical,lensMeshMask*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*3.72),clamp(alpha,.97,1.0));
+        ${outputName}=vec4(tone(col*3.42),clamp(alpha,.98,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
