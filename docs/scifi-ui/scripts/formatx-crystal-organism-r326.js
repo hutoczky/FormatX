@@ -196,6 +196,9 @@
   root.dataset.fxNativeMagVisualR1796='wide-irregular-cut-bioglass-no-teardrop-mobile';
   root.dataset.fxNativeMagMaterialR1796='smoky-quartz-brighter-edge-gunmetal-optic-neutral-studio';
   root.dataset.fxNativeMagMobileR1796='blunt-caps-wide-shoulders-irregular-crystal-not-leaf';
+  root.dataset.fxNativeMagVisualR1797='angled-smoky-bioglass-broad-cut-planes-visible-depth';
+  root.dataset.fxNativeMagMaterialR1797='dark-teal-quartz-soft-caustic-neutral-studio';
+  root.dataset.fxNativeMagMobileR1797='oblique-rest-pose-lower-smoothing-broad-facets-no-blob';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -431,7 +434,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.68:(mobile?.74:.86);
+        const smoothWeight=software?.52:(mobile?.60:.86);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -459,7 +462,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 42 : mobile ? 48 : constrained ? 60 : 72;
+      const sideCount = software ? 30 : mobile ? 34 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -1488,16 +1491,16 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.115+ndl*.310+sideLight*.215);
-        float facetTone=.89+.19*fract(vFacet*5.73+.23);
+        float lift=sat(.105+ndl*.300+sideLight*.210);
+        float facetTone=.80+.30*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         float capShade=1.0-.13*smoothstep(.50,.96,vLocal.y);
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.008,.012,.014),vec3(.118,.128,.123),lift)*facetTone*capShade*absorption;
-        col*=.986+.028*grain;
+        vec3 col=mix(vec3(.006,.011,.013),vec3(.092,.112,.110),lift)*facetTone*capShade*absorption;
+        col*=.985+.030*grain;
         col+=vec3(.60,.62,.58)*keySpec*.180;
         col+=vec3(.255,.310,.308)*sideSpec*.205;
         col+=vec3(.034,.082,.088)*fresnel*.215;
@@ -1519,10 +1522,12 @@
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
         float glassHalo=pow(1.0-facing,1.35)*bodyMask;
         float frontDepth=smoothstep(-.18,.62,vLocal.z)*bodyMask;
+        float caustic=pow(.5+.5*sin(vLocal.x*9.2-vLocal.y*7.4+vLocal.z*11.3),8.0)*bodyMask;
         col+=vec3(.046,.078,.080)*internalDepth*(.32+.44*lift);
         col+=vec3(.042,.118,.122)*glassEdge*.355;
         col+=vec3(.026,.072,.078)*glassHalo*.150;
         col+=vec3(.026,.050,.052)*frontDepth*.095;
+        col+=vec3(.030,.095,.102)*caustic*(.045+.075*lift);
 
         vec3 bezel=vec3(.052,.062,.064)
           +vec3(.235,.248,.232)*(.28*ndl+.24*sideLight)
@@ -1696,7 +1701,7 @@
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
     let morph=0,targetMorph=0;
-    let rotationX=softwareRenderer?-.155:(mobile?-.120:-.090),rotationY=softwareRenderer?-.48:(mobile?-.43:-.235),rotationZ=softwareRenderer?-.055:.018;
+    let rotationX=softwareRenderer?-.135:(mobile?-.105:-.090),rotationY=softwareRenderer?-.69:(mobile?-.64:-.235),rotationZ=softwareRenderer?-.030:(mobile?.028:.018);
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
