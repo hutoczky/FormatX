@@ -40,7 +40,7 @@ jobs:
           for attempt in $(seq 1 48); do
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
             home_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260928-r1803-final-frame-smoky-bioglass-proxy'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260928-r1805-control-and-final-frame-parity'
             css_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/mag-birth.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade'
             js_status=$?
@@ -65,13 +65,13 @@ jobs:
                && [ "$net_css_status" = '0' ] \
                && [ "$net_js_status" = '0' ] \
                && [ "$net_ping_status" = '0' ] \
-               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260928-r1803-final-frame-smoky-bioglass-proxy' live-probe/home.html \
+               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260928-r1805-control-and-final-frame-parity' live-probe/home.html \
                && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1804-mobile-final-frame-smoky-parity' live-probe/home.html \
                && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
                && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
                && grep -Fq 'formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor' live-probe/home.html \
                && grep -Fq 'formatx-net-speed-r1800.js?v=20260928-r1800-network-sensor' live-probe/home.html \
-               && grep -Fq 'production-r1803-first-paint-final-frame-smoky-bioglass-parity' live-probe/p0.css \
+               && grep -Fq 'production-r1805-desktop-control-owner-version-independent-lock' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
                && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
                && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1804-mobile-final-frame-smoky-parity' live-probe/current-mag.js \
