@@ -199,6 +199,9 @@
   root.dataset.fxNativeMagVisualR1797='twelve-major-cut-facets-smoky-bioglass-mobile';
   root.dataset.fxNativeMagMaterialR1797='broad-cut-quartz-softbox-depth-integrated-optic';
   root.dataset.fxNativeMagMobileR1797='crystal-silhouette-not-pebble-not-leaf-no-flower';
+  root.dataset.fxNativeMagVisualR1798='continuous-broad-cut-facets-balanced-crystal-silhouette';
+  root.dataset.fxNativeMagMaterialR1798='smoky-quartz-seamless-raster-softbox-optic';
+  root.dataset.fxNativeMagMobileR1798='no-raster-seams-no-right-bulge-crystal-not-pebble';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -470,18 +473,18 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.88,.220,.145,-.150,-.018,.092],
-        [.76,.390,.255,-.108,.012,.076],
-        [.60,.555,.355,-.060,.036,.060],
-        [.43,.685,.430,.008,.058,.044],
-        [.24,.770,.480,.082,.065,.026],
-        [.04,.805,.500,.138,.050,.008],
-        [-.16,.760,.472,.120,.014,-.012],
-        [-.34,.680,.420,.070,-.016,-.032],
-        [-.52,.565,.350,.010,-.038,-.050],
-        [-.68,.430,.270,-.070,-.040,-.066],
-        [-.80,.285,.180,-.126,-.028,-.080],
-        [-.88,.185,.118,-.158,-.018,-.094]
+        [.88,.220,.145,-.135,-.018,.092],
+        [.76,.390,.255,-.095,.012,.076],
+        [.60,.555,.355,-.055,.036,.060],
+        [.43,.685,.430,-.005,.058,.044],
+        [.24,.770,.480,.035,.065,.026],
+        [.04,.805,.500,.055,.050,.008],
+        [-.16,.760,.472,.045,.014,-.012],
+        [-.34,.680,.420,.018,-.016,-.032],
+        [-.52,.565,.350,-.020,-.038,-.050],
+        [-.68,.430,.270,-.065,-.040,-.066],
+        [-.80,.285,.180,-.105,-.028,-.080],
+        [-.88,.185,.118,-.135,-.018,-.094]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -505,8 +508,12 @@
         return Array.from({length:sideCount},(_,sideIndex)=>{
           const a=sideIndex/sideCount*Math.PI*2+phase;
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
-          const macroIndex=Math.floor((sideIndex/sideCount)*macroCuts.length)%macroCuts.length;
-          const macroFacet=1+(macroCuts[macroIndex]-1)*(.58+.42*mid);
+          const macroPos=(sideIndex/sideCount)*macroCuts.length;
+          const macroIndex=Math.floor(macroPos)%macroCuts.length;
+          const macroNext=(macroIndex+1)%macroCuts.length;
+          const macroMix=macroPos-Math.floor(macroPos);
+          const macroBase=macroCuts[macroIndex]+(macroCuts[macroNext]-macroCuts[macroIndex])*macroMix;
+          const macroFacet=1+(macroBase-1)*(.58+.42*mid);
           const irregular=
             1
             +Math.sin(a*4.0+ringIndex*.43)*.034*mid
