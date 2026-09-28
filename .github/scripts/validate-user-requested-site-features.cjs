@@ -36,6 +36,7 @@ const productionEntry = read('billing-worker/src/production-entry.js');
 const deployWorkflow = read('.github/workflows/deploy-formatx-custom-domain.yml');
 const speedPage = read('docs/scifi-ui/index.html');
 const speedUi = read('docs/scifi-ui/scripts/formatx-speedtest-r1800.js');
+const speedLoader = read('docs/scifi-ui/scripts/formatx-speedtest-loader-r1800.js');
 const speedStyle = read('docs/scifi-ui/styles/formatx-speedtest-r1800.css');
 const speedApi = read('billing-worker/src/speedtest-api.js');
 const productionContentEntry = read('billing-worker/src/production-content-entry.js');
@@ -138,8 +139,9 @@ assert.ok(mobileEntry.includes('mobile-core-engine-v3.js') && includesAll(morphE
 assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-interface.js', 'formatx-premium-finish.js']), 'critical production assets missing');
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 
-assert.ok(includesAll(speedPage, ['id="network-speed"', 'data-fx-speedtest', 'data-speed-download', 'data-speed-upload', 'formatx-speedtest-r1800.js', 'formatx-speedtest-r1800.css']), 'native website speed test surface missing');
+assert.ok(includesAll(speedPage, ['id="network-speed"', 'data-fx-speedtest', 'data-speed-download', 'data-speed-upload', 'formatx-speedtest-loader-r1800.js', 'formatx-speedtest-r1800.css']), 'native website speed test surface missing');
 assert.ok(includesAll(speedUi, ['/api/speedtest/ping', '/api/speedtest/download', '/api/speedtest/upload', 'navigator.connection', 'AbortController', 'formatx:speedtestcomplete']), 'adaptive speed test client contract missing');
+assert.ok(includesAll(speedLoader, ["[data-speed-start]", "fxSpeedtestRequestR1800='start'", "formatx-speedtest-r1800.js?v=20260928-r1800-click-only"]) && !speedLoader.includes("wheel") && !speedLoader.includes("touchmove"), 'click-only speed test loader contract missing');
 assert.ok(includesAll(speedStyle, ['production-r1800-native-edge-speedtest', '@media(max-width:900px)', 'prefers-reduced-motion']), 'responsive speed test visual contract missing');
 assert.ok(includesAll(speedApi, ['/api/speedtest/ping', '/api/speedtest/download', '/api/speedtest/upload', 'MAX_DOWNLOAD_BYTES', 'MAX_UPLOAD_BYTES', 'PUBLIC_API_RATE_LIMIT', 'same_origin_required']), 'bounded same-origin speed test API contract missing');
 assert.ok(includesAll(productionContentEntry, ["import { handleSpeedTestRequest } from './speedtest-api.js';", 'await handleSpeedTestRequest(request, env)']), 'production speed test routing missing');
