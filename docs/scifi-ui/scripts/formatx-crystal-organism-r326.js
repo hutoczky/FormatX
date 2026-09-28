@@ -202,6 +202,9 @@
   root.dataset.fxNativeMagVisualR1798='continuous-broad-cut-facets-balanced-crystal-silhouette';
   root.dataset.fxNativeMagMaterialR1798='smoky-quartz-seamless-raster-softbox-optic';
   root.dataset.fxNativeMagMobileR1798='no-raster-seams-no-right-bulge-crystal-not-pebble';
+  root.dataset.fxNativeMagVisualR1799='front-three-quarter-wide-crystal-backface-clean';
+  root.dataset.fxNativeMagRasterR1799='winding-safe-backface-cull-no-z-fighting-speckles';
+  root.dataset.fxNativeMagMobileR1799='wide-crystal-view-no-teardrop-no-raster-dots';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -1709,7 +1712,7 @@
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
     let morph=0,targetMorph=0;
-    let rotationX=softwareRenderer?-.155:(mobile?-.120:-.090),rotationY=softwareRenderer?-.48:(mobile?-.43:-.235),rotationZ=softwareRenderer?-.055:.018;
+    let rotationX=softwareRenderer?-.105:(mobile?-.105:-.090),rotationY=softwareRenderer?-.33:(mobile?-.36:-.235),rotationZ=softwareRenderer?.035:.018;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
@@ -1978,7 +1981,8 @@
          through the body, while the depth buffer still resolves the front shell. */
       if(mobile){
         gl.disable(gl.BLEND);
-        gl.disable(gl.CULL_FACE);
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
       }else{
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
