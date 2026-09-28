@@ -1,0 +1,74 @@
+name: Validate FormatX NET speed test R1800
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-net-speed-r1800.js'
+      - 'docs/scifi-ui/styles/formatx-net-speed-r1800.css'
+      - 'billing-worker/src/production-content-entry.js'
+      - '.github/scripts/validate-net-speed-r1800.mjs'
+      - '.github/scripts/validate-net-speed-browser-r1800.cjs'
+      - '.github/workflows/validate-net-speed-r1800.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-net-speed-r1800.js'
+      - 'docs/scifi-ui/styles/formatx-net-speed-r1800.css'
+      - 'billing-worker/src/production-content-entry.js'
+      - '.github/scripts/validate-net-speed-r1800.mjs'
+      - '.github/scripts/validate-net-speed-browser-r1800.cjs'
+      - '.github/workflows/validate-net-speed-r1800.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-net-speed-r1800-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Validate source and edge endpoints
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-net-speed-r1800.js
+          node --check billing-worker/src/production-content-entry.js
+          node .github/scripts/validate-net-speed-r1800.mjs
+
+      - name: Install Chromium
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-net-browser" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-net-browser/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start static site
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-net-http.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-net-http.log"
+          exit 1
+
+      - name: Validate user initiated browser flow
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-net-browser/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+        run: node .github/scripts/validate-net-speed-browser-r1800.cjs
