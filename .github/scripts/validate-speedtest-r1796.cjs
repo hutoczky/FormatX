@@ -18,7 +18,7 @@ assert.ok(launcher.includes('armed-zero-measurement-idle'),'zero-idle launcher m
 for(const token of ['/api/speedtest/ping','/api/speedtest/download','/api/speedtest/upload'])assert.ok(engine.includes(token),'speed engine missing '+token);
 for(const token of ['Ping','Jitter','Download','Upload','Mbps'])assert.ok(engine.includes(token),'speed UI metric missing '+token);
 assert.ok(engine.includes('Estimated data use')&&engine.includes('Becsült adatforgalom'),'data usage disclosure missing');
-assert.ok(css.includes('.fx-speedtest-grid')&&css.includes('dialog'),'speed test studio UI missing');
+assert.ok(css.includes('.fx-speedtest-r1796')&&css.includes('.fx-speedtest-grid')&&css.includes('.fx-speedtest-metric'),'speed test studio UI missing');
 assert.ok(api.includes('MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024'),'download safety cap missing');
 assert.ok(api.includes('MAX_UPLOAD_BYTES = 4 * 1024 * 1024'),'upload safety cap missing');
 assert.ok(api.includes('same_origin_required'),'same-origin abuse guard missing');
