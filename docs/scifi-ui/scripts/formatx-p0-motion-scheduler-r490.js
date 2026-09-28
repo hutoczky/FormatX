@@ -10,6 +10,7 @@ const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
 root.dataset.fxP0MotionSchedulerR490='armed-r1724';
 root.dataset.fxP0MotionCacheR1703='motion-loader-r1703-sharp-photoreal-mobile';
+root.dataset.fxP0MotionCacheR1789='mobile-bioglass-depth-proof-pass';
 root.dataset.fxP0MotionCacheR1704='motion-loader-r1704-software-mobile-photoreal-lens';
 root.dataset.fxP0MotionCacheR1710='motion-loader-r1710-60fps-frame-budget';
 root.dataset.fxP0MotionCacheR1711='motion-loader-r1711-single-living-organism';
@@ -34,7 +35,7 @@ root.dataset.fxP0MotionCacheR1778='mobile-monolith-dark-mineral-corrected-fallba
 root.dataset.fxP0MotionCacheR1779='mobile-obsidian-proof-broad-facet-zero-tendril';
 root.dataset.fxP0MotionCacheR1781='clean-photographic-facet-surface';
 root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1782-mobile-smoky-bioglass-clean';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1789-mobile-bioglass-depth';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
