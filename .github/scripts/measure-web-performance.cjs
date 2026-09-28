@@ -16,7 +16,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       localStorage.setItem('formatx:intro-seen-v1', '1');
       sessionStorage.setItem('formatx:mag-birth-live-r533-seen', '1');
     } catch (_) {}
-    document.documentElement.dataset.fxPerformanceMeasurementR1796='steady-state-current-r533-session';
     window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
     try {
       new PerformanceObserver(list => {
