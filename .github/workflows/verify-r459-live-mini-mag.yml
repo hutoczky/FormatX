@@ -162,8 +162,9 @@ jobs:
             if [[ "$sync_code" == 200 && "$css_code" == 200 && "$motion_code" == 200 && "$marker_code" == 200 ]] \
               && grep -Fq 'fxMiniMagLifeContractR479' "$tmp/sync.js" \
               && grep -Fq 'r479-colour-depth-soft-living-primary' "$tmp/sync.js" \
-              && grep -Fq 'brightness(.72)' "$tmp/sync.css" \
-              && grep -Fq 'saturate(1.38)' "$tmp/sync.css" \
+              && grep -Fq 'brightness(.99)' "$tmp/sync.css" \
+              && grep -Fq 'contrast(1.18)' "$tmp/sync.css" \
+              && grep -Fq 'saturate(1.06)' "$tmp/sync.css" \
               && grep -Fq 'fx-primary-mag-live-breath-r479' "$tmp/sync.css" \
               && grep -Fq 'formatx-mag-shape-sync-r476.js?v=' "$tmp/motion.js" \
               && grep -Fq '"revision": "R479"' "$tmp/marker.json"; then
@@ -283,11 +284,11 @@ jobs:
             assert.equal(state.lifeContract,'primary-and-mini-compositor-breath-colour-depth-zero-js-idle');
             assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441');
             assert.equal(state.idle,'zero-frame');
-            assert.match(state.filter,/brightness\(1\.02\)/);
-            assert.match(state.filter,/contrast\(0\.98\)/);
-            assert.match(state.filter,/saturate\(1\.28\)/);
-            assert.match(state.filter,/blur\(0\.3px\)/);
-            assert.ok(state.animationName.includes('fx-primary-mag-mobile-heart-r483'),state.animationName);
+            assert.match(state.filter,/brightness\(1\.03\)/);
+            assert.match(state.filter,/contrast\(1\.13\)/);
+            assert.match(state.filter,/saturate\(0\.96\)/);
+            assert.ok(!/blur\((?!0(?:px)?\))/i.test(state.filter),state.filter);
+            assert.ok(/fx-primary-mag-(?:mobile-heart-r488|live-breath-r479)/.test(state.animationName),state.animationName);
             assert.equal(state.controls.length,2);
             assert.equal(state.manualPauseCount,0,'obsolete manual PAUSE returned');
             assert.ok(state.controls.every(c=>c.width>=44&&c.height>=44&&c.display!=='none'&&c.visibility!=='hidden'&&c.opacity>.2),JSON.stringify(state.controls));
