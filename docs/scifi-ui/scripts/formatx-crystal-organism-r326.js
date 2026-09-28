@@ -238,6 +238,9 @@
   root.dataset.fxNativeMagVisualR1810='faceted-smoked-bioglass-mineral-planes-mobile';
   root.dataset.fxNativeMagGeometryR1810='stronger-irregular-cut-hybrid-hard-normal-no-pebble';
   root.dataset.fxNativeMagMobileR1810='crystal-planes-not-rock-balanced-silhouette-visible-optic';
+  root.dataset.fxNativeMagVisualR1811='polished-cut-gem-smoked-bioglass-mobile';
+  root.dataset.fxNativeMagGeometryR1811='chamfered-nine-ring-ten-twelve-side-polished-facets';
+  root.dataset.fxNativeMagMobileR1811='large-polished-crystal-planes-no-blob-no-pebble';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -473,7 +476,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.54:(mobile?.62:.82);
+        const smoothWeight=software?.28:(mobile?.38:.78);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -501,7 +504,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 14 : mobile ? 18 : constrained ? 60 : 72;
+      const sideCount = software ? 10 : mobile ? 12 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -509,13 +512,15 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.64,.420,.280,-.080,-.030,.090],
-        [.48,.660,.420,-.050,.018,.060],
-        [.27,.790,.500,.000,.052,.030],
-        [.03,.825,.530,.040,.040,.000],
-        [-.22,.785,.490,.022,.000,-.030],
-        [-.44,.650,.400,-.035,-.035,-.060],
-        [-.64,.405,.255,-.075,-.030,-.092]
+        [.68,.300,.195,-.060,-.026,.102],
+        [.56,.505,.325,-.072,.005,.082],
+        [.40,.690,.435,-.045,.034,.058],
+        [.22,.815,.505,.010,.054,.030],
+        [.02,.855,.530,.050,.042,.000],
+        [-.20,.805,.492,.038,.005,-.028],
+        [-.39,.685,.412,-.018,-.032,-.054],
+        [-.55,.500,.305,-.060,-.040,-.080],
+        [-.67,.285,.180,-.050,-.024,-.104]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -540,10 +545,10 @@
           const mid=Math.sin((ringIndex+1)/(ringDefs.length+1)*Math.PI);
           const irregular=
             1
-            +Math.sin(a*3.0+ringIndex*.41+.48)*.110*mid
-            +Math.cos(a*5.0-ringIndex*.33+1.10)*.068*mid
-            +Math.sin(a*7.0+ringIndex*.57-.36)*.042*mid
-            +Math.cos(a*2.0-ringIndex*.27)*.030;
+            +Math.sin(a*3.0+ringIndex*.41+.48)*.075*mid
+            +Math.cos(a*5.0-ringIndex*.33+1.10)*.046*mid
+            +Math.sin(a*7.0+ringIndex*.57-.36)*.026*mid
+            +Math.cos(a*2.0-ringIndex*.27)*.020;
           const cutFront=1-.305*Math.pow(Math.max(0,Math.cos(a)),8.0);
           const cutRear=1-.225*Math.pow(Math.max(0,Math.cos(a-Math.PI)),7.0);
           const cutUpper=1-.145*Math.pow(Math.max(0,Math.cos(a-Math.PI*.52)),7.0);
@@ -555,8 +560,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.060,.715,-.016],[.5,0]);
-      const bottom=bodyVertex([-.035,-.720,.014],[.5,1]);
+      const top=bodyVertex([-.055,.755,-.014],[.5,0]);
+      const bottom=bodyVertex([-.030,-.748,.012],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -1533,7 +1538,7 @@
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
         float lift=sat(.045+ndl*.190+sideLight*.145);
-        float facetTone=.86+.22*fract(vFacet*5.73+.23);
+        float facetTone=.78+.34*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         float capShade=1.0-.13*smoothstep(.50,.96,vLocal.y);
@@ -1569,8 +1574,8 @@
         col+=vec3(.024,.072,.078)*fresnel*.160*bodyMask;
         float softboxBody=exp(-pow((vLocal.x+.20)/.42,2.0)-pow((vLocal.y-.24)/.58,2.0))*bodyMask;
         float sideBox=exp(-pow((vLocal.x-.48)/.26,2.0)-pow((vLocal.y+.02)/.68,2.0))*bodyMask;
-        col+=vec3(.32,.34,.32)*softboxBody*.165;
-        col+=vec3(.060,.132,.136)*sideBox*.135;
+        col+=vec3(.38,.40,.37)*softboxBody*.210;
+        col+=vec3(.070,.148,.152)*sideBox*.160;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
         float glassHalo=pow(1.0-facing,1.35)*bodyMask;
