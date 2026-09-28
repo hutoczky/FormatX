@@ -2,6 +2,20 @@ name: FormatX mobile MAG visual proof
 # R1450 fast phone-only proof for the dark irregular shard hero.
 
 on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
+      - 'docs/scifi-ui/styles/formatx-core-life-r455.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-r416-stability.css'
+      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
+      - 'docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'
+      - 'docs/scifi-ui/styles/formatx-unified-background-r616.css'
+      - '.github/scripts/capture-mag-intro-r656.cjs'
+      - '.github/workflows/mobile-mag-visual-proof.yml'
   push:
     branches: [master]
     paths:
