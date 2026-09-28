@@ -167,6 +167,8 @@
   root.dataset.fxNativeMagMaterialR1786='near-black-dielectric-specular-facets-low-diffuse-high-depth';
   root.dataset.fxNativeMagVisualR1787='mobile-sculpted-smoky-crystal-smooth-facets-large-recessed-optic-transparent-habitat';
   root.dataset.fxNativeMagMobileR1787='transparent-stage-no-black-box-higher-facet-density-smooth-normals';
+  root.dataset.fxNativeMagVisualR1788='mobile-blunt-cut-black-bioglass-irregular-crystal-smooth-optic';
+  root.dataset.fxNativeMagMaterialR1788='controlled-softbox-highlight-deep-charcoal-glass-cyan-optical-depth';
   root.dataset.fxNativeMagProofR1782=mobileVisualProof?'normal-mobile-visual-path-with-lens-and-msaa':'not-mobile-proof';
   root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
   root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
@@ -491,8 +493,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.220,1.010,-.022],[.5,0]);
-      const bottom=bodyVertex([-.105,-.990,.010],[.5,1]);
+      const top=bodyVertex([-.178,.952,-.018],[.5,0]);
+      const bottom=bodyVertex([-.118,-.950,.010],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -801,8 +803,8 @@
     }
 
     if(!auditMode){
-      const centreX=-.040,centreY=.015;
-      const bezelInner=.112,bezelOuter=.168,bezelSteps=software?40:mobile?40:48,bezelZ=.637;
+      const centreX=-.036,centreY=.012;
+      const bezelInner=.108,bezelOuter=.158,bezelSteps=software?48:mobile?48:54,bezelZ=.637;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.020:.014)*Math.sin(angle*3.0+.34)
@@ -829,8 +831,8 @@
       const lensRadiusX=.148;
       const lensRadiusY=.118;
       const lensDepth=.076;
-      const radialSteps=software?6:mobile?7:9;
-      const angularSteps=software?40:mobile?42:50;
+      const radialSteps=software?7:mobile?8:10;
+      const angularSteps=software?48:mobile?48:56;
       function lensVertex(radial,angle){
         const edgeWarp=1+.050*Math.sin(angle*3.0+.42)+.026*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -1465,8 +1467,8 @@
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         vec3 col=mix(vec3(.003,.006,.008),vec3(.042,.052,.055),lift)*facetTone;
-        col+=vec3(.92,.92,.84)*keySpec*.680;
-        col+=vec3(.40,.54,.56)*sideSpec*.440;
+        col+=vec3(.84,.85,.80)*keySpec*.460;
+        col+=vec3(.36,.48,.50)*sideSpec*.360;
         col+=vec3(.030,.105,.125)*fresnel*.300;
         col+=vec3(.165,.088,.040)*warmPlane*.050;
         col+=vec3(.036,.090,.104)*coolPlane*.070;
@@ -1475,7 +1477,7 @@
         float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
         float broadSide=max(0.0,dot(n,normalize(vec3(.74,.10,.66))));
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
-        col+=vec3(.34,.35,.32)*pow(broadKey,1.35)*.100*bodyMask;
+        col+=vec3(.25,.27,.26)*pow(broadKey,1.45)*.070*bodyMask;
         col+=vec3(.070,.120,.128)*pow(broadSide,1.45)*.095*bodyMask;
         col+=vec3(.115,.060,.028)*pow(broadWarm,1.35)*.045*bodyMask;
         col+=vec3(.018,.055,.066)*fresnel*.135*bodyMask;
@@ -1498,10 +1500,10 @@
         float lensHot=exp(-pow(lensRadial/.060,2.0));
         vec3 optical=vec3(.001,.007,.011)
           +vec3(.015,.155,.205)*lensInner
-          +vec3(.62,.70,.66)*keySpec*.210
+          +vec3(.54,.62,.59)*keySpec*.160
           +vec3(.025,.115,.150)*fresnel*.130
           +vec3(.055,.340,.430)*lensRim*.165
-          +vec3(.78,1.00,.98)*lensHot*.300;
+          +vec3(.72,.96,.94)*lensHot*.245;
         col=mix(col,optical,isLensMesh*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
