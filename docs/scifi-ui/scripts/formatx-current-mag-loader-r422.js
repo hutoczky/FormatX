@@ -16,12 +16,12 @@ root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity';
-const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean';
+const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1789-mobile-bioglass-depth';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260924-r1723-living-response';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1782-mobile-smoky-bioglass-clean';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1789-mobile-bioglass-depth';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
 // compatibility-contract: r484-bounded-surface-window
@@ -216,6 +216,7 @@ async function start(){
   root.dataset.fxCurrentMagOpticsR1722='studio-organism-zero-blur-hidpi-all-input';
   root.dataset.fxCurrentMagIdentityR1723='canonical-organism-no-shape-toggle';
   root.dataset.fxCurrentMagVisualR1775='photoreal-mineral-bioglass-physical-depth';
+  root.dataset.fxCurrentMagVisualR1789='mobile-smoky-bioglass-refined-facets-small-optic';
   root.dataset.fxCurrentMagVisualR1776='cinematic-irregular-smoky-biocrystal-deep-optic';
   root.dataset.fxCurrentMagVisualR1777='photographic-black-mineral-bioglass-final-lighting';
   root.dataset.fxCurrentMagVisualR1778='mobile-dark-single-monolith-smaller-optic';
