@@ -56,18 +56,18 @@ jobs:
           node --check "$MINI"
           node .github/scripts/validate-living-core-r425-source.cjs
 
-          grep -Fq 'formatx-core-life-r455.css?v=20260924-r1722-zero-blur-hidpi' "$CURRENT"
+          grep -Fq 'formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean' "$CURRENT"
           grep -Fq "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'" "$CURRENT"
           grep -Fq 'formatx-current-mag-loader-r422.js?v=' "$MOTION"
-          grep -Fq 'formatx-core-life-r455.css?v=20260924-r1722-zero-blur-hidpi' "$MOTION"
+          grep -Fq 'formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean' "$MOTION"
           grep -Fq "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'" "$MOTION"
 
           grep -Fq 'FormatX r474' "$LIFE_CSS"
           grep -Fq 'softer mobile crystal glow' "$LIFE_CSS"
           grep -Fq 'opacity: 1 !important' "$LIFE_CSS"
-          grep -Fq 'brightness(1.12)' "$LIFE_CSS"
-          grep -Fq 'contrast(1.055)' "$LIFE_CSS"
-          grep -Fq 'saturate(1.12)' "$LIFE_CSS"
+          grep -Fq 'brightness(1.04)' "$LIFE_CSS"
+          grep -Fq 'contrast(1.12)' "$LIFE_CSS"
+          grep -Fq 'saturate(.88)' "$LIFE_CSS"
           grep -Fq 'blur(0)' "$LIFE_CSS"
           grep -Fq 'image-rendering: auto' "$LIFE_CSS"
           grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$LIFE_CSS"
@@ -106,13 +106,13 @@ jobs:
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${CURRENT_URL}?${suffix}" -o "$CURRENT_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${MOTION_URL}?${suffix}" -o "$MOTION_TMP" \
               && curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "${LIFE_CSS_URL}?${suffix}" -o "$LIFE_CSS_TMP"; then
-              if grep -Fq 'formatx-core-life-r455.css?v=20260924-r1722-zero-blur-hidpi' "$CURRENT_TMP" \
+              if grep -Fq 'formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean' "$CURRENT_TMP" \
                 && grep -Fq 'formatx-current-mag-loader-r422.js?v=' "$MOTION_TMP" \
                 && grep -Fq 'FormatX r474' "$LIFE_CSS_TMP" \
                 && grep -Fq 'opacity: 1 !important' "$LIFE_CSS_TMP" \
-                && grep -Fq 'brightness(1.12)' "$LIFE_CSS_TMP" \
-                && grep -Fq 'contrast(1.055)' "$LIFE_CSS_TMP" \
-                && grep -Fq 'saturate(1.12)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'brightness(1.04)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'contrast(1.12)' "$LIFE_CSS_TMP" \
+                && grep -Fq 'saturate(.88)' "$LIFE_CSS_TMP" \
                 && grep -Fq 'blur(0)' "$LIFE_CSS_TMP" \
                 && grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$LIFE_CSS_TMP" \
                 && ! grep -Fq 'fx-core-r468-compositor-breathe' "$LIFE_CSS_TMP"; then

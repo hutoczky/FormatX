@@ -82,7 +82,7 @@ jobs:
             if grep -Fq 'living-luminous-electric-crystal-r454' "$tmp/core.js" \
               && grep -Fq 'formatx-current-mag-loader-r422.js?v=' "$tmp/motion.js" \
               && grep -Fq "fxFinalVisualRevisionR474='softer-mobile-glow-feathered-facets'" "$tmp/motion.js" \
-              && grep -Fq 'formatx-core-life-r455.css?v=20260924-r1722-zero-blur-hidpi' "$tmp/loader.js" \
+              && grep -Fq 'formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean' "$tmp/loader.js" \
               && grep -Fq "fxCurrentMagOpticsR474=mobile?'softer-glow-feathered-facets-zero-idle':'desktop-optics-unchanged'" "$tmp/loader.js" \
               && grep -Fq "const VERSION='r465-uniform-solid-glass-soft-perimeter-low-bloom-mobile-optics'" "$tmp/solid.js" \
               && grep -Fq 'FormatX r474' "$tmp/life.css"; then
@@ -97,9 +97,9 @@ jobs:
           grep -Fq 'soft-perimeter-low-bloom-low-cost-shader' "$tmp/solid.js"
           grep -Fq 'softer mobile crystal glow' "$tmp/life.css"
           grep -Fq 'opacity: 1 !important' "$tmp/life.css"
-          grep -Fq 'brightness(1.12)' "$tmp/life.css"
-          grep -Fq 'contrast(1.055)' "$tmp/life.css"
-          grep -Fq 'saturate(1.12)' "$tmp/life.css"
+          grep -Fq 'brightness(1.04)' "$tmp/life.css"
+          grep -Fq 'contrast(1.12)' "$tmp/life.css"
+          grep -Fq 'saturate(.88)' "$tmp/life.css"
           grep -Fq 'blur(0)' "$tmp/life.css"
           grep -Fq 'image-rendering: auto' "$tmp/life.css"
           grep -Fq '.skip-link:not(:focus):not(:focus-visible)' "$tmp/life.css"
