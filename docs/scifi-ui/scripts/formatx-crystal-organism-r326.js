@@ -178,6 +178,9 @@
   root.dataset.fxNativeMagVisualR1790='mobile-smoky-glass-visible-depth-neutral-studio';
   root.dataset.fxNativeMagMaterialR1790='charcoal-bioglass-midtones-soft-reflection-deep-optic';
   root.dataset.fxNativeMagMobileR1790='proof-balanced-visible-material-no-neon-no-flower';
+  root.dataset.fxNativeMagVisualR1791='irregular-cut-smoky-bioglass-integrated-optic-bezel';
+  root.dataset.fxNativeMagMaterialR1791='charcoal-crystal-soft-facets-dark-metal-glass-optic';
+  root.dataset.fxNativeMagMobileR1791='no-blob-no-flower-visible-cut-planes-integrated-eye';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -413,7 +416,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.88:(mobile?.90:.86);
+        const smoothWeight=software?.84:(mobile?.86:.86);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -449,18 +452,18 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.94,.155,.102,-.175,-.010,.090],
-        [.82,.290,.192,-.150,.006,.074],
-        [.67,.425,.285,-.118,.022,.058],
-        [.49,.590,.385,-.060,.042,.042],
-        [.29,.700,.445,.020,.055,.024],
-        [.08,.735,.468,.092,.045,.006],
-        [-.14,.690,.432,.118,.020,-.014],
-        [-.35,.585,.365,.078,-.006,-.034],
-        [-.55,.455,.285,.010,-.026,-.052],
-        [-.72,.310,.195,-.075,-.030,-.068],
-        [-.86,.155,.098,-.145,-.024,-.082],
-        [-.94,.070,.048,-.178,-.016,-.092]
+        [.94,.180,.118,-.162,-.016,.090],
+        [.83,.315,.210,-.126,.008,.074],
+        [.68,.475,.315,-.082,.030,.058],
+        [.50,.610,.398,-.018,.052,.042],
+        [.30,.700,.448,.058,.060,.024],
+        [.08,.748,.478,.108,.044,.006],
+        [-.14,.704,.452,.092,.012,-.014],
+        [-.34,.608,.392,.046,-.012,-.034],
+        [-.54,.492,.318,-.016,-.032,-.052],
+        [-.72,.352,.226,-.082,-.036,-.068],
+        [-.86,.205,.132,-.134,-.026,-.082],
+        [-.94,.112,.072,-.164,-.016,-.092]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -499,8 +502,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.152,.970,-.016],[.5,0]);
-      const bottom=bodyVertex([-.118,-.950,.010],[.5,1]);
+      const top=bodyVertex([-.128,.972,-.018],[.5,0]);
+      const bottom=bodyVertex([-.104,-.970,.012],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -1099,6 +1102,8 @@
         float isLensMesh=step(6.0,vFacet);
         float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
         float tendrilMask=isTendril*(1.0-vMorph);
+        float armorMask=isArmor*(1.0-vMorph);
+        float lensMeshMask=isLensMesh*(1.0-vMorph);
         float glassFinMask=isGlassFin*(1.0-vMorph);
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
@@ -1494,6 +1499,12 @@
         col+=vec3(.090,.050,.029)*pow(broadWarm,1.28)*.032*bodyMask;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
 
+        vec3 bezel=vec3(.010,.015,.017)
+          +vec3(.105,.122,.118)*(.20*ndl+.16*sideLight)
+          +vec3(.38,.42,.39)*keySpec*.105
+          +vec3(.050,.090,.094)*fresnel*.14;
+        col=mix(col,bezel,armorMask*.985);
+
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
@@ -1516,7 +1527,7 @@
           +vec3(.018,.068,.078)*fresnel*.080
           +vec3(.034,.165,.188)*lensRim*.092
           +vec3(.58,.76,.72)*lensHot*.145;
-        col=mix(col,optical,isLensMesh*.997);
+        col=mix(col,optical,lensMeshMask*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
