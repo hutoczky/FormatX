@@ -45,14 +45,34 @@ function sameOriginBrowserRequest(request, url) {
   return true;
 }
 
+async function rateLimitKey(request) {
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const bytes = new TextEncoder().encode('formatx-speedtest|' + ip);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function applyRateLimit(request, env) {
+  const limiter = env?.PUBLIC_API_RATE_LIMIT;
+  if (!limiter || typeof limiter.limit !== 'function') return null;
+  const key = await rateLimitKey(request);
+  const result = await limiter.limit({ key: 'speedtest:' + key });
+  if (result?.success === false) {
+    return json({ ok: false, error: 'rate_limited' }, 429);
+  }
+  return null;
+}
+
 export function isSpeedTestPath(pathname) {
   return pathname === PING_PATH || pathname === DOWNLOAD_PATH || pathname === UPLOAD_PATH;
 }
 
-export async function handleSpeedTestRequest(request) {
+export async function handleSpeedTestRequest(request, env) {
   const url = new URL(request.url);
   if (!isSpeedTestPath(url.pathname)) return null;
   if (!sameOriginBrowserRequest(request, url)) return json({ ok: false, error: 'same_origin_required' }, 403);
+  const limited = await applyRateLimit(request, env);
+  if (limited) return limited;
 
   if (url.pathname === PING_PATH) {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
