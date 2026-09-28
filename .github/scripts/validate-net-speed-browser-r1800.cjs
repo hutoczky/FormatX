@@ -54,13 +54,13 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   await page.waitForSelector('[data-fx-net-speed-r1800="true"]',{state:'attached',timeout:15000});
 
   assert.equal(apiRequests,0,'NET test must not generate traffic before explicit user action');
-  assert.equal(await page.locator('[data-fx-net-speed-r1800]').getAttribute('data-fx-net-state'),'idle');
+  assert.equal(await page.locator('#network').getAttribute('data-fx-net-state'),'idle');
 
   await page.locator('#network').scrollIntoViewIfNeeded();
   await page.locator('[data-net-start]').click();
 
   await page.waitForFunction(()=>{
-    const el=document.querySelector('[data-fx-net-speed-r1800]');
+    const el=document.querySelector('#network');
     return el?.getAttribute('data-fx-net-state')==='complete';
   },null,{timeout:30000});
 
