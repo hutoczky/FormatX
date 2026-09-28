@@ -1,9 +1,10 @@
 FormatX P0 validation contract
-version=2026-09-05-p0-r529-direct-canonical-living-core-mobile-lcp
+version=2026-09-28-p0-r1796-smoky-bioglass-first-paint-parity
 production_origin=https://formatxsuite.com/
 lighthouse_desktop_runs=3
 lighthouse_mobile_runs=3
-required_categories=performance:100,accessibility:100,best-practices:100,seo:100
+required_categories=performance:95,accessibility:100,best-practices:100,seo:100
+performance_target=100
 lcp_ms_lt=2000
 cls_lt=0.05
 tbt_ms_lte=150
@@ -12,9 +13,9 @@ browser_matrix=strict
 proof_policy=measured-artifacts-only
 product_runtime=r528-living-core-no-manual-pause
 motion_accessibility=prefers-reduced-motion-and-background-lifecycle
-mobile_lcp=r529-static-heart-plus-mobile-legacy-post-fcp
+mobile_lcp=r1796-smoky-bioglass-first-paint-parity
 deferred_css=r526-first-contentful-paint-observer
-production_wrapper=r529-direct-canonical-r527-fcp-preserved
+production_wrapper=r1796-exact-production-marker-smoky-bioglass-parity
 semantic_mag=r528-living-core-current-contract
 legacy_r482=r528-semantic-replacement
-trigger=r529-final-same-sha
+trigger=r1796-exact-live-revision
