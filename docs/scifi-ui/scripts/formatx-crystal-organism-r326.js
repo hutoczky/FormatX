@@ -205,6 +205,9 @@
   root.dataset.fxNativeMagVisualR1799='seamless-faceted-smoky-quartz-mobile';
   root.dataset.fxNativeMagMaterialR1799='bright-bioglass-edge-softbox-neutral-quartz';
   root.dataset.fxNativeMagMobileR1799='periodic-radial-cut-no-seam-visible-glass-depth';
+  root.dataset.fxNativeMagVisualR1800='clean-studio-smoky-quartz-no-zfight-speckle';
+  root.dataset.fxNativeMagMaterialR1800='noise-restrained-bioglass-clean-facets-gunmetal-optic';
+  root.dataset.fxNativeMagMobileR1800='less-depth-clean-software-facets-visible-glass';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -440,7 +443,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.34:(mobile?.46:.82);
+        const smoothWeight=software?.38:(mobile?.50:.82);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -468,7 +471,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 20 : mobile ? 26 : constrained ? 48 : 72;
+      const sideCount = software ? 22 : mobile ? 28 : constrained ? 48 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -1505,20 +1508,18 @@
         float facetTone=.89+.19*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
-        float capShade=1.0-.13*smoothstep(.50,.96,vLocal.y);
+        float capShade=1.0-.08*smoothstep(.50,.96,vLocal.y);
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
-        float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
         vec3 col=mix(vec3(.009,.014,.016),vec3(.142,.151,.145),lift)*facetTone*capShade*absorption;
-        col*=.988+.022*grain;
-        col+=vec3(.68,.70,.65)*keySpec*.225;
+        col*=.996+.008*grain;
+        col+=vec3(.70,.72,.67)*keySpec*.235;
         col+=vec3(.285,.340,.336)*sideSpec*.225;
         col+=vec3(.040,.096,.102)*fresnel*.245;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
-        col+=vec3(.110,.118,.113)*ndl*.100;
-        col+=vec3(.105,.130,.126)*fissure*.038;
-        col+=vec3(.018,.036,.039)*(1.0-facing)*.070;
+        col+=vec3(.115,.123,.118)*ndl*.105;
+        col+=vec3(.020,.040,.043)*(1.0-facing)*.078;
         col+=vec3(.005,.008,.010)*max(0.0,-n.y)*.10;
 
         float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
@@ -1685,7 +1686,7 @@
     gl.useProgram(program);
     buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
     gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    gl.depthFunc(mobile?gl.LESS:gl.LEQUAL);
     gl.enable(gl.BLEND);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
