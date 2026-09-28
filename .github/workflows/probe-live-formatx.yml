@@ -43,9 +43,9 @@ jobs:
             js_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/site-sensory.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint'
             sensory_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/current-mag.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260928-r1782-mobile-smoky-bioglass-clean'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/current-mag.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260928-r1789-mobile-bioglass-depth'
             current_mag_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/crystal-organism.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1782-mobile-smoky-bioglass-clean'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/crystal-organism.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1789-mobile-bioglass-depth'
             renderer_status=$?
             if [ "$home_status" = '0' ] \
                && [ "$css_status" = '0' ] \
@@ -54,15 +54,15 @@ jobs:
                && [ "$current_mag_status" = '0' ] \
                && [ "$renderer_status" = '0' ] \
                && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260927-r1759-visible-through-intro' live-probe/home.html \
-               && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1782-mobile-smoky-bioglass-clean' live-probe/home.html \
+               && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1789-mobile-bioglass-depth' live-probe/home.html \
                && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
                && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
                && grep -Fq 'production-r1759-proxy-visible-through-intro-until-webgl' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
                && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
-               && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1782-mobile-smoky-bioglass-clean' live-probe/current-mag.js \
-               && grep -Fq "fxNativeMagVisualR1782='mobile-smoky-bioglass-crystal-broad-facets-visible-recessed-optic'" live-probe/crystal-organism.js \
-               && grep -Fq "fxNativeMagMobileR1782='no-cull-no-speckle-clean-broad-facet-silhouette'" live-probe/crystal-organism.js \
+               && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1789-mobile-bioglass-depth' live-probe/current-mag.js \
+               && grep -Fq "fxNativeMagVisualR1789='mobile-smoky-bioglass-refined-facets-blunt-crown'" live-probe/crystal-organism.js \
+               && grep -Fq "fxNativeMagMobileR1789='higher-topology-smooth-normal-small-optic-proof-pass'" live-probe/crystal-organism.js \
                && ! grep -Eq 'formatx-igloo|reference-commerce|professional-sections|pricing-sync' live-probe/home.html; then
               found_new=1
               break
@@ -96,10 +96,10 @@ jobs:
         run: |
           if [ "$NEW_BUILD" = '1' ]; then
             state='success'
-            description='Live domain serves the current R1782 clean photographic MAG'
+            description='Live domain serves the current R1789 clean photographic MAG'
           else
             state='failure'
-            description='Live domain is not yet serving the current R1782 clean photographic MAG'
+            description='Live domain is not yet serving the current R1789 clean photographic MAG'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
