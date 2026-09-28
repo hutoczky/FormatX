@@ -31,7 +31,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: formatx-mobile-mag-visual-proof
+  group: formatx-mobile-mag-visual-proof-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
