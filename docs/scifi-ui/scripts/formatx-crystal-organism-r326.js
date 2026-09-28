@@ -229,6 +229,9 @@
   root.dataset.fxNativeMagVisualR1807='front-facing-seven-zone-smoked-crystal';
   root.dataset.fxNativeMagGeometryR1807='seven-ring-macro-crystal-high-smooth-normal-front-presentation';
   root.dataset.fxNativeMagMobileR1807='centered-optic-no-snout-front-facing-photographic-crystal';
+  root.dataset.fxNativeMagVisualR1808='balanced-multifacet-smoked-bioglass-mobile';
+  root.dataset.fxNativeMagGeometryR1808='fourteen-eighteen-edge-irregular-cut-no-directional-snout';
+  root.dataset.fxNativeMagMobileR1808='balanced-angular-crystal-centered-optic-no-arrow-silhouette';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -492,7 +495,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 12 : mobile ? 16 : constrained ? 60 : 72;
+      const sideCount = software ? 14 : mobile ? 18 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -535,11 +538,12 @@
             +Math.cos(a*5.0-ringIndex*.33+1.10)*.052*mid
             +Math.sin(a*7.0+ringIndex*.57-.36)*.032*mid
             +Math.cos(a*2.0-ringIndex*.27)*.024;
-          const cutFront=1-.245*Math.pow(Math.max(0,Math.cos(a-.38)),4.0);
-          const cutRear=1-.190*Math.pow(Math.max(0,Math.cos(a+2.06)),5.0);
-          const cutSide=1-.225*Math.pow(Math.max(0,Math.cos(a-2.36)),6.0);
-          const cutNotch=1-.155*Math.pow(Math.max(0,Math.cos(a+1.10)),8.0);
-          const radialCut=cutFront*cutRear*cutSide*cutNotch;
+          const cutFront=1-.205*Math.pow(Math.max(0,Math.cos(a-.42)),4.0);
+          const cutRear=1-.180*Math.pow(Math.max(0,Math.cos(a+2.02)),5.0);
+          const cutSide=1-.195*Math.pow(Math.max(0,Math.cos(a-2.34)),6.0);
+          const cutNotch=1-.150*Math.pow(Math.max(0,Math.cos(a+1.08)),8.0);
+          const cutCounter=1-.135*Math.pow(Math.max(0,Math.cos(a-.96)),7.0);
+          const radialCut=cutFront*cutRear*cutSide*cutNotch*cutCounter;
           const x=ox+Math.cos(a)*rx*irregular*radialCut;
           const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.018)*radialCut;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
@@ -855,7 +859,7 @@
     }
 
     if(!auditMode){
-      const centreX=-.018,centreY=.026;
+      const centreX=-.006,centreY=.018;
       const bezelInner=.094,bezelOuter=.132,bezelSteps=software?56:mobile?60:64,bezelZ=.620;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
@@ -1065,7 +1069,7 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*.038*uLayer;
-        float yaw=${mobile?'.07':'.34'}+uRotation.y+uPointer.x*.16+uTime*.010;
+        float yaw=${mobile?'.025':'.34'}+uRotation.y+uPointer.x*.14+uTime*.008;
         float pitch=${mobile?'-.030':'-.058'}+uRotation.x-uPointer.y*.10+.008*sin(uTime*.19);
         float roll=${mobile?'-.018':'-.058'}+uRotation.z+uPointer.x*uPointer.y*.020+.005*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
