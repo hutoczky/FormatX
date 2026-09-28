@@ -72,3 +72,46 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/formatx-net-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
         run: node .github/scripts/validate-net-speed-browser-r1800.cjs
+
+
+  live-smoke:
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Verify live FormatX NET edge endpoints
+        env:
+          BASE: https://formatxsuite.com
+          WWW: https://www.formatxsuite.com
+        run: |
+          set -euo pipefail
+          tmp="$RUNNER_TEMP/formatx-net-live"
+          mkdir -p "$tmp"
+
+          ready=0
+          for attempt in $(seq 1 36); do
+            if curl -fsS --connect-timeout 5 --max-time 15 -H 'Cache-Control: no-cache' "$BASE/api/net/ping?r=$GITHUB_SHA-$attempt" -o "$tmp/ping.json"; then
+              if node -e "const f=require('fs');const j=JSON.parse(f.readFileSync(process.argv[1],'utf8'));if(j.ok!==true)process.exit(1)" "$tmp/ping.json"; then
+                ready=1
+                break
+              fi
+            fi
+            sleep 5
+          done
+          test "$ready" = "1"
+
+          curl -fsS --connect-timeout 5 --max-time 20 -H 'Cache-Control: no-cache' "$WWW/api/net/ping?r=$GITHUB_SHA-www" -o "$tmp/ping-www.json"
+          node -e "const f=require('fs');const j=JSON.parse(f.readFileSync(process.argv[1],'utf8'));if(j.ok!==true)process.exit(1)" "$tmp/ping-www.json"
+
+          download_bytes=131072
+          curl -fsS --connect-timeout 5 --max-time 25 -H 'Cache-Control: no-cache'             "$BASE/api/net/download?bytes=$download_bytes&r=$GITHUB_SHA"             -o "$tmp/download.bin"
+          actual_download="$(wc -c < "$tmp/download.bin" | tr -d ' ')"
+          test "$actual_download" = "$download_bytes"
+
+          upload_bytes=65536
+          head -c "$upload_bytes" /dev/zero > "$tmp/upload.bin"
+          curl -fsS --connect-timeout 5 --max-time 25             -X POST             -H 'Content-Type: application/octet-stream'             --data-binary @"$tmp/upload.bin"             "$BASE/api/net/upload?r=$GITHUB_SHA"             -o "$tmp/upload.json"
+          node -e "const f=require('fs');const j=JSON.parse(f.readFileSync(process.argv[1],'utf8'));if(j.ok!==true||j.bytes!==Number(process.argv[2]))process.exit(1)" "$tmp/upload.json" "$upload_bytes"
+
+          echo "Live FormatX NET endpoints: OK"
