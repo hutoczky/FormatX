@@ -10,6 +10,7 @@ const OUT = process.env.FORMATX_INTRO_EVIDENCE_DIR || 'artifacts/r533-r536-hando
 const CANVAS = '#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas';
 const STAGE = '#hero .hero-space > .fx-crystal-organism-r326-stage';
 const OVERLAY = '.fx-mag-birth-r533';
+const PREPAINT = '#fx-mag-birth-prepaint-r1606';
 
 fs.mkdirSync(OUT,{recursive:true});
 const writeJson=(name,value)=>fs.writeFileSync(path.join(OUT,name),JSON.stringify(value,null,2)+'\n');
@@ -129,7 +130,11 @@ async function verifyFullBirth(browser){
   try{
     await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
     await installTimelineProbe(page);
-    await page.locator(OVERLAY).waitFor({state:'visible',timeout:10000});
+    // R1796: the first-byte shell is the immediate visual contract. The R533
+    // runtime may attach later on a cold remote edge, but users must never wait
+    // on a black viewport while that script is fetched/parsed.
+    await page.locator(`${PREPAINT}, ${OVERLAY}`).first().waitFor({state:'visible',timeout:5000});
+    await page.locator(OVERLAY).waitFor({state:'visible',timeout:20000});
     const active=await snapshot(page);
     const dnaGenesis=await page.evaluate(()=>({
       genome:document.documentElement.dataset.fxMagBirthGenomeR611||'',
@@ -187,7 +192,7 @@ async function verifySkip(browser){
   try{
     await page.goto(url({intro:1,cinema:1,r548:'mobile-skip'}),{waitUntil:'commit',timeout:30000});
     const skip=page.locator(OVERLAY+' .fxb-skip');
-    await skip.waitFor({state:'visible',timeout:10000});
+    await skip.waitFor({state:'visible',timeout:20000});
     await installTimelineProbe(page);
     const box=await skip.boundingBox();
     assert.ok(box&&box.width>=44&&box.height>=44,`mobile-skip: skip hit target invalid ${JSON.stringify(box)}`);
