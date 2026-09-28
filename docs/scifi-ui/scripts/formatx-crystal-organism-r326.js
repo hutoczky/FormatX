@@ -165,6 +165,8 @@
   root.dataset.fxNativeMagMaterialR1785='dark-charcoal-glass-silver-softbox-warm-rim-cyan-depth';
   root.dataset.fxNativeMagVisualR1786='mobile-black-bioglass-narrow-softbox-cyan-optic-dynamic-three-quarter';
   root.dataset.fxNativeMagMaterialR1786='near-black-dielectric-specular-facets-low-diffuse-high-depth';
+  root.dataset.fxNativeMagVisualR1787='mobile-sculpted-smoky-crystal-smooth-facets-large-recessed-optic-transparent-habitat';
+  root.dataset.fxNativeMagMobileR1787='transparent-stage-no-black-box-higher-facet-density-smooth-normals';
   root.dataset.fxNativeMagProofR1782=mobileVisualProof?'normal-mobile-visual-path-with-lens-and-msaa':'not-mobile-proof';
   root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
   root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
@@ -403,7 +405,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.38:(mobile?.50:.84);
+        const smoothWeight=software?.72:(mobile?.76:.84);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -431,7 +433,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 20 : mobile ? 24 : constrained ? 60 : 72;
+      const sideCount = software ? 30 : mobile ? 36 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -439,16 +441,18 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.86,.235,.150,-.145,-.010,.080],
-        [.72,.420,.275,-.118,.006,.064],
-        [.54,.615,.390,-.070,.026,.048],
-        [.34,.755,.465,-.008,.046,.032],
-        [.12,.825,.505,.070,.052,.016],
-        [-.10,.790,.480,.112,.034,.000],
-        [-.30,.690,.420,.074,.008,-.018],
-        [-.49,.555,.340,.010,-.016,-.036],
-        [-.66,.405,.250,-.070,-.030,-.054],
-        [-.80,.245,.150,-.128,-.024,-.070]
+        [.94,.105,.075,-.185,-.012,.090],
+        [.82,.245,.165,-.160,.004,.074],
+        [.67,.425,.285,-.118,.022,.058],
+        [.49,.590,.385,-.060,.042,.042],
+        [.29,.700,.445,.020,.055,.024],
+        [.08,.735,.468,.092,.045,.006],
+        [-.14,.690,.432,.118,.020,-.014],
+        [-.35,.585,.365,.078,-.006,-.034],
+        [-.55,.455,.285,.010,-.026,-.052],
+        [-.72,.310,.195,-.075,-.030,-.068],
+        [-.86,.155,.098,-.145,-.024,-.082],
+        [-.94,.070,.048,-.178,-.016,-.092]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -487,8 +491,8 @@
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
-      const top=bodyVertex([-.182,.895,-.018],[.5,0]);
-      const bottom=bodyVertex([-.070,-.855,.008],[.5,1]);
+      const top=bodyVertex([-.220,1.010,-.022],[.5,0]);
+      const bottom=bodyVertex([-.105,-.990,.010],[.5,1]);
 
       /* R1590 — reproduce Three.js-style averaged vertex normals on the native
          hand-cut body. The geometry remains faceted, but polished reflections
@@ -797,8 +801,8 @@
     }
 
     if(!auditMode){
-      const centreX=-.050,centreY=.016;
-      const bezelInner=.086,bezelOuter=.126,bezelSteps=software?36:mobile?36:42,bezelZ=.637;
+      const centreX=-.040,centreY=.015;
+      const bezelInner=.112,bezelOuter=.168,bezelSteps=software?40:mobile?40:48,bezelZ=.637;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.020:.014)*Math.sin(angle*3.0+.34)
@@ -822,11 +826,11 @@
       }
 
       const lensCenter=[centreX,centreY,.648];
-      const lensRadiusX=.108;
-      const lensRadiusY=.086;
-      const lensDepth=.058;
-      const radialSteps=software?5:mobile?6:8;
-      const angularSteps=software?32:mobile?36:42;
+      const lensRadiusX=.148;
+      const lensRadiusY=.118;
+      const lensDepth=.076;
+      const radialSteps=software?6:mobile?7:9;
+      const angularSteps=software?40:mobile?42:50;
       function lensVertex(radial,angle){
         const edgeWarp=1+.050*Math.sin(angle*3.0+.42)+.026*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -907,14 +911,14 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(.98) contrast(1.20) saturate(.96)'
+      ? 'brightness(1.00) contrast(1.16) saturate(.94)'
       : 'brightness(1.10) contrast(1.06) saturate(1.08)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
     const options = {
-      alpha:!mobile,
+      alpha:true,
       /* R1626: mobile/coarse displays get temporal smoothness from native
          device density; MSAA costs frame budget twice (raster + resolve).
          Preserve desktop MSAA only where headroom is normally available. */
@@ -1621,8 +1625,7 @@
     gl.enable(gl.BLEND);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
-    if(mobile) gl.clearColor(.002,.006,.008,1);
-    else gl.clearColor(0,0,0,0);
+    gl.clearColor(0,0,0,0);
 
     const controller=new AbortController();
     const listen=(target,type,handler,options={})=>target.addEventListener(type,handler,{...options,signal:controller.signal});
