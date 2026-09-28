@@ -82,7 +82,7 @@ function apply(){
 
   const category=copy.querySelector('.fx-category-definition'),method=copy.querySelector('.fx-method-inline'),facts=copy.querySelector('.hero-facts');
   for(const el of [category,method,facts])imp(el,'display','none');
-  const actions=copy.querySelector('.hero-actions');if(actions instanceof HTMLElement){Array.from(actions.children).forEach((el,i)=>imp(el,'display',i<2?'inline-flex':'none'));}
+  const actions=copy.querySelector('.hero-actions');if(actions instanceof HTMLElement){Array.from(actions.children).forEach((el,i)=>imp(el,'display',(i<2||el.matches('[data-fx-speedtest-launcher]'))?'inline-flex':'none'));}
   const heading=hero.querySelector('.fx-reference-heading'),proof=hero.querySelector('.fx-reference-proof');for(const el of [heading,proof]){imp(el,'display','none');imp(el,'visibility','hidden');imp(el,'opacity','0');}
   ensureMeta(space);
   bindPointer(hero,space);
