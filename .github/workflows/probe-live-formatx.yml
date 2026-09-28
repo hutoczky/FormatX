@@ -37,7 +37,7 @@ jobs:
           for attempt in $(seq 1 48); do
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
             home_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260927-r1759-visible-through-intro'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260928-r1797-smoky-bioglass-first-paint'
             css_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/mag-birth.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade'
             js_status=$?
@@ -53,11 +53,11 @@ jobs:
                && [ "$sensory_status" = '0' ] \
                && [ "$current_mag_status" = '0' ] \
                && [ "$renderer_status" = '0' ] \
-               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260927-r1759-visible-through-intro' live-probe/home.html \
+               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260928-r1797-smoky-bioglass-first-paint' live-probe/home.html \
                && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/home.html \
                && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
                && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
-               && grep -Fq 'production-r1759-proxy-visible-through-intro-until-webgl' live-probe/p0.css \
+               && grep -Fq 'production-r1797-first-paint-smoky-bioglass-monolith-parity' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
                && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
                && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/current-mag.js \

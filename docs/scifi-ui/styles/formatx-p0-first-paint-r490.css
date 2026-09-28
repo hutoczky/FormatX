@@ -729,63 +729,67 @@ html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-
   z-index:12000!important;
   left:50%;
   top:48%;
-  width:clamp(286px,31vw,430px);
-  aspect-ratio:1.08;
+  width:clamp(220px,24vw,340px);
+  aspect-ratio:.82;
   transform:translate3d(-50%,-50%,0);
   backface-visibility:hidden;
-  will-change:transform,opacity;
   pointer-events:none;
-  opacity:.97;
-  visibility:visible;
+  opacity:.98;
   contain:strict;
   isolation:isolate;
   background:
-    linear-gradient(6deg,transparent 0 4%,rgba(62,193,215,.05) 5% 10%,transparent 11% 100%),
-    linear-gradient(-5deg,transparent 0 13%,rgba(87,218,231,.10) 14% 18%,transparent 19% 100%),
-    linear-gradient(2deg,transparent 0 79%,rgba(83,211,225,.08) 80% 86%,transparent 87% 100%),
-    radial-gradient(ellipse 72% 46% at 50% 50%,rgba(54,184,205,.07),transparent 72%);
+    radial-gradient(ellipse 54% 58% at 50% 50%,rgba(54,137,148,.045),transparent 72%),
+    radial-gradient(ellipse 42% 34% at 58% 28%,rgba(199,145,96,.018),transparent 76%);
 }
+/* R1797 — first-paint parity with the R1795 smoky-bioglass monolith.
+   This proxy is intentionally darker, narrower and optically quieter than the
+   retired bright petal placeholder, so the native WebGL handoff is a material
+   refinement rather than a large late visual replacement. */
 .fx-mag-first-paint-r1756::before,
 .fx-mag-first-paint-r1756::after{
   content:"";
   position:absolute;
-  inset:0;
   pointer-events:none;
 }
 .fx-mag-first-paint-r1756::before{
-  inset:7% 12%;
-  clip-path:polygon(49% 0,61% 5%,71% 3%,80% 10%,90% 14%,94% 25%,100% 34%,96% 46%,100% 57%,93% 68%,90% 79%,78% 83%,70% 94%,58% 92%,48% 100%,38% 94%,27% 97%,19% 87%,8% 82%,10% 69%,2% 58%,7% 47%,0 36%,9% 27%,12% 16%,25% 12%,35% 3%);
+  inset:3% 12% 2% 10%;
+  clip-path:polygon(
+    49% 0,63% 5%,75% 15%,83% 29%,88% 43%,84% 58%,
+    77% 72%,66% 87%,54% 100%,42% 94%,30% 84%,20% 70%,
+    13% 54%,15% 38%,21% 23%,32% 9%
+  );
   background:
-    linear-gradient(29deg,transparent 0 28%,rgba(76,218,232,.54) 29% 30.6%,transparent 31.5% 100%),
-    linear-gradient(67deg,transparent 0 39%,rgba(119,231,239,.31) 40% 41.2%,transparent 42% 100%),
-    linear-gradient(111deg,transparent 0 46%,rgba(44,188,211,.48) 47% 48.2%,transparent 49% 100%),
-    linear-gradient(151deg,transparent 0 56%,rgba(154,241,244,.28) 57% 58.4%,transparent 59.3% 100%),
-    radial-gradient(circle at 49% 50%,rgba(8,25,33,.92) 0 15%,rgba(47,180,199,.36) 16%,transparent 24%),
-    radial-gradient(ellipse at 34% 22%,rgba(251,255,255,.96),rgba(202,228,230,.77) 23%,transparent 49%),
-    radial-gradient(ellipse at 72% 74%,rgba(75,105,113,.44),transparent 54%),
-    conic-gradient(from 18deg at 49% 48%,rgba(223,241,240,.93),rgba(92,125,133,.90) 12%,rgba(218,236,235,.86) 24%,rgba(52,78,88,.94) 37%,rgba(185,211,214,.88) 51%,rgba(80,110,118,.91) 64%,rgba(231,245,244,.84) 77%,rgba(46,67,77,.96) 89%,rgba(208,229,230,.90));
+    linear-gradient(108deg,transparent 0 31%,rgba(100,197,205,.12) 32% 33%,transparent 34% 100%),
+    linear-gradient(34deg,transparent 0 54%,rgba(194,159,117,.065) 55% 56.2%,transparent 57% 100%),
+    linear-gradient(154deg,transparent 0 68%,rgba(89,177,188,.085) 69% 70%,transparent 71% 100%),
+    radial-gradient(ellipse 34% 20% at 34% 18%,rgba(219,234,232,.18),transparent 72%),
+    radial-gradient(ellipse 30% 42% at 72% 68%,rgba(38,92,98,.24),transparent 76%),
+    conic-gradient(from 196deg at 48% 43%,
+      #10191b 0 9%,#263538 10% 19%,#121c1e 20% 31%,#35484b 32% 42%,
+      #172426 43% 55%,#415256 56% 64%,#1a282a 65% 77%,#2d3f42 78% 88%,#0d1517 89% 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.42),
-    inset 9px -12px 22px rgba(8,26,33,.22),
-    0 20px 46px rgba(0,0,0,.42);
+    inset 7px 2px 17px rgba(194,222,220,.075),
+    inset -14px -16px 30px rgba(0,4,7,.48),
+    0 24px 52px rgba(0,0,0,.44);
   transform:translateZ(0);
   backface-visibility:hidden;
-  will-change:opacity;
-  opacity:.98;
+  opacity:.985;
 }
 .fx-mag-first-paint-r1756::after{
-  inset:36.2% 38%;
-  border-radius:50%;
-  border:1px solid rgba(128,225,233,.42);
+  left:44%;
+  top:45%;
+  width:15%;
+  aspect-ratio:1;
+  border-radius:46% 54% 52% 48%;
+  border:1px solid rgba(102,186,194,.32);
   background:
-    radial-gradient(circle at 44% 38%,rgba(180,249,249,.92) 0 4%,rgba(62,191,207,.72) 8%,rgba(12,71,86,.70) 18%,rgba(3,15,24,.98) 43%,rgba(0,5,10,.99) 72%),
-    radial-gradient(circle at 50% 50%,rgba(74,211,224,.24),transparent 66%);
+    radial-gradient(circle at 43% 36%,rgba(165,226,226,.36) 0 5%,rgba(49,128,139,.34) 11%,rgba(8,38,45,.92) 25%,rgba(2,12,17,.99) 58%,#010609 100%);
   box-shadow:
-    0 0 0 7px rgba(4,12,19,.83),
-    0 0 20px rgba(64,201,217,.20),
-    inset -3px -4px 11px rgba(0,3,8,.72),
-    inset 2px 2px 9px rgba(139,237,240,.18);
-  transform:translateZ(0);
+    0 0 0 5px rgba(5,12,16,.78),
+    0 0 14px rgba(64,169,181,.10),
+    inset -3px -4px 9px rgba(0,2,5,.82),
+    inset 2px 2px 7px rgba(122,202,206,.08);
+  transform:translate(-50%,-50%) translateZ(0);
   backface-visibility:hidden;
 }
 html:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756,
@@ -797,42 +801,48 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 @media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
     top:45%!important;
-    width:clamp(278px,78vw,328px)!important;
-    aspect-ratio:1.08!important;
-    opacity:.98!important;
+    width:clamp(154px,43vw,190px)!important;
+    aspect-ratio:.78!important;
+    opacity:.985!important;
     background:
-      linear-gradient(5deg,transparent 0 5%,rgba(66,202,220,.06) 6% 12%,transparent 13% 100%),
-      linear-gradient(-5deg,transparent 0 14%,rgba(90,226,236,.12) 15% 20%,transparent 21% 100%),
-      linear-gradient(2deg,transparent 0 78%,rgba(83,219,230,.09) 79% 87%,transparent 88% 100%),
-      radial-gradient(ellipse 76% 48% at 50% 50%,rgba(62,193,210,.08),transparent 73%)!important;
+      radial-gradient(ellipse 62% 62% at 50% 49%,rgba(49,128,138,.045),transparent 70%),
+      radial-gradient(ellipse 48% 31% at 62% 25%,rgba(188,132,88,.018),transparent 78%)!important;
   }
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
-    inset:7% 13%!important;
-    clip-path:polygon(49% 0,60% 4%,70% 2%,79% 9%,89% 13%,94% 24%,100% 34%,96% 45%,100% 57%,93% 68%,89% 79%,78% 84%,69% 94%,58% 92%,48% 100%,38% 94%,28% 98%,19% 87%,8% 82%,10% 69%,2% 58%,7% 47%,0 36%,9% 27%,12% 16%,25% 12%,35% 3%)!important;
+    inset:2% 8% 1% 7%!important;
+    clip-path:polygon(
+      50% 0,64% 6%,76% 17%,84% 31%,89% 46%,84% 61%,
+      76% 76%,65% 89%,53% 100%,41% 95%,29% 84%,18% 69%,
+      11% 53%,14% 37%,21% 21%,34% 8%
+    )!important;
     background:
-      linear-gradient(27deg,transparent 0 27%,rgba(75,224,236,.66) 28% 29.5%,transparent 30.5% 100%),
-      linear-gradient(67deg,transparent 0 38%,rgba(131,238,242,.38) 39% 40.5%,transparent 41.5% 100%),
-      linear-gradient(111deg,transparent 0 46%,rgba(49,198,218,.57) 47% 48.4%,transparent 49.4% 100%),
-      linear-gradient(153deg,transparent 0 56%,rgba(170,246,247,.34) 57% 58.4%,transparent 59.4% 100%),
-      radial-gradient(circle at 49% 50%,rgba(7,23,31,.94) 0 15%,rgba(50,187,205,.43) 16%,transparent 24%),
-      radial-gradient(ellipse at 34% 21%,rgba(251,255,255,.98),rgba(207,232,233,.83) 23%,transparent 49%),
-      radial-gradient(ellipse at 74% 76%,rgba(71,103,112,.48),transparent 55%),
-      conic-gradient(from 18deg at 49% 48%,rgba(231,246,245,.96),rgba(105,142,149,.91) 12%,rgba(224,240,239,.91) 24%,rgba(54,82,91,.96) 37%,rgba(194,218,220,.92) 51%,rgba(85,116,124,.93) 64%,rgba(236,248,247,.89) 77%,rgba(48,70,79,.97) 89%,rgba(215,234,234,.93))!important;
-    opacity:.99!important;
+      linear-gradient(109deg,transparent 0 32%,rgba(103,193,201,.14) 33% 34%,transparent 35% 100%),
+      linear-gradient(37deg,transparent 0 57%,rgba(193,145,102,.07) 58% 59%,transparent 60% 100%),
+      radial-gradient(ellipse 30% 17% at 34% 18%,rgba(214,229,227,.16),transparent 72%),
+      radial-gradient(ellipse 29% 42% at 72% 69%,rgba(34,82,89,.27),transparent 77%),
+      conic-gradient(from 198deg at 49% 43%,
+        #0c1517 0 9%,#29393c 10% 19%,#111b1d 20% 31%,#384a4d 32% 42%,
+        #152224 43% 55%,#46585a 56% 64%,#182629 65% 77%,#304245 78% 88%,#0a1214 89% 100%)!important;
+    box-shadow:
+      inset 6px 1px 15px rgba(187,218,216,.065),
+      inset -13px -17px 29px rgba(0,3,6,.52),
+      0 20px 42px rgba(0,0,0,.44)!important;
   }
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
-    inset:36.5% 38.5%!important;
-    border:2px solid rgba(134,228,235,.44)!important;
+    left:45%!important;
+    top:45%!important;
+    width:14%!important;
+    border-color:rgba(100,183,191,.30)!important;
     background:
-      radial-gradient(circle at 44% 37%,rgba(188,251,250,.95) 0 4%,rgba(70,201,214,.78) 8%,rgba(14,78,92,.72) 18%,rgba(3,16,25,.98) 44%,rgba(0,5,10,.99) 72%)!important;
+      radial-gradient(circle at 43% 36%,rgba(158,220,221,.34) 0 5%,rgba(43,118,129,.34) 11%,rgba(7,34,41,.94) 25%,rgba(1,10,15,.995) 59%,#010507 100%)!important;
     box-shadow:
-      0 0 0 7px rgba(4,12,19,.84),
-      0 0 0 9px rgba(126,221,228,.11),
-      0 0 28px rgba(70,210,223,.25),
-      inset -4px -5px 14px rgba(0,3,8,.76),
-      inset 2px 2px 12px rgba(144,240,242,.22)!important;
+      0 0 0 4px rgba(5,12,16,.82),
+      0 0 12px rgba(59,158,170,.09),
+      inset -3px -4px 9px rgba(0,2,5,.84),
+      inset 2px 2px 7px rgba(118,196,201,.075)!important;
   }
 }
+/* production-r1797-first-paint-smoky-bioglass-monolith-parity */
 /* production-r1769-mobile-proxy-final-mass-parity */
 /* production-r1772-biocrystal-veins-iris-tendrils-final-frame-parity */
 /* production-r1773-compositor-promoted-biocrystal-proxy */
@@ -842,23 +852,8 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 /* production-r1756-static-mag-first-paint */
 /* production-r1756-static-mag-high-specificity-visible-until-webgl */
 
-@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
-  html body.living-architecture .topbar > .header-actions,
-  html body.living-architecture > .fx-rail{
-    display:none!important;
-    visibility:hidden!important;
-    pointer-events:none!important;
-  }
-  html body.living-architecture .topbar #main-nav:not(.open),
-  html body.living-architecture #main-nav:not(.open){
-    display:none!important;
-    visibility:hidden!important;
-    pointer-events:none!important;
-  }
-}
 /* R1759 — the proxy stays visible while the transparent cinematic owns the
-   viewport. It retires only when the real R326 WebGL organism is authoritative.
-   This removes the multi-second black MAG chamber on real first visits. */
+   viewport. It retires only when the real R326 WebGL organism is authoritative. */
 /* production-r1759-proxy-visible-through-intro-until-webgl */
 /* production-r1757-p0-mag-proxy-mobile-shell */
 
